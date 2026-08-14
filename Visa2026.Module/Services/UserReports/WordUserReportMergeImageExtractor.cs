@@ -40,7 +40,7 @@ public static class WordUserReportMergeImageExtractor
 
     /// <summary>Builds photo buckets from application items when the bind model did not expose collection photos.</summary>
     public static IReadOnlyDictionary<string, IReadOnlyList<byte[]>> FromApplicationItems(
-        IEnumerable<ApplicationItem> applicationItems)
+        IEnumerable<ApplicationRosterMergeLine> applicationItems)
     {
         var rows = applicationItems
             .Where(i => i != null)
@@ -55,11 +55,11 @@ public static class WordUserReportMergeImageExtractor
     }
 
     /// <summary>
-    /// Prefer photos loaded from <see cref="ApplicationItem"/> when bind-model rows only carried empty <c>byte[]</c> placeholders.
+    /// Prefer photos loaded from <see cref="ApplicationRosterMergeLine"/> when bind-model rows only carried empty <c>byte[]</c> placeholders.
     /// </summary>
     public static IReadOnlyDictionary<string, IReadOnlyList<byte[]>> CoalesceWithApplicationItems(
         IReadOnlyDictionary<string, IReadOnlyList<byte[]>> fromBindData,
-        IEnumerable<ApplicationItem>? applicationItems)
+        IEnumerable<ApplicationRosterMergeLine>? applicationItems)
     {
         if (applicationItems == null)
             return fromBindData;

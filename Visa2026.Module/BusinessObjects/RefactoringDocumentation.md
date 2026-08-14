@@ -31,7 +31,7 @@ This interface defines the contract for any object that can be a parent to a per
 ```csharp
 public interface IPersonLinkParent
 {
-    Application Application { get; }
+    ApplicationProfileInstance ApplicationProfileInstance { get; }
     IList<Person> AvailablePeople { get; }
 }
 ```

@@ -4,7 +4,7 @@ namespace Visa2026.Module.BusinessObjects
     /// Legacy office codes. New applications do not seed a prep progress row —
     /// office is implied until the first explicit step.
     /// </summary>
-    public static class ApplicationProgressDefaults
+    public static class ApplicationProfileInstanceProgressDefaults
     {
         public const string InitialStateCode = "IS_BEING_PREPARED";
         public const string InitialLocationCode = "AT_OFFICE";

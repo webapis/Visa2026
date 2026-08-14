@@ -12,9 +12,12 @@ public static class PersonNestedCollectionLayout
     public const string CvAndPersonalFilesTab = "Documents";
     public const string CvAndPersonalFilesTabCaptionKey = "Person.Tab.CvAndPersonalFiles";
 
-    public const string ApplicationPeopleListView = "Person_ApplicationPeople_ListView";
+    public const string ApplicationProfileInstancesListView = "Person_ApplicationProfileInstances_ListView";
 
-    /// <summary>Legacy; replaced by <see cref="ApplicationPeopleListView"/> (slice 10 close-out).</summary>
+    /// <summary>Legacy nested list id; replaced by <see cref="ApplicationProfileInstancesListView"/>.</summary>
+    public const string ApplicationProfileInstancePeopleListView = ApplicationProfileInstancesListView;
+
+    /// <summary>Legacy; replaced by <see cref="ApplicationProfileInstancePeopleListView"/> (slice 10 close-out).</summary>
     public const string ApplicationItemsListView = "Person_ApplicationItems_ListView";
     public const string WorkPermitItemsListView = "Person_WorkPermitItems_ListView";
     public const string InvitationItemsListView = "Person_InvitationItems_ListView";
@@ -23,7 +26,7 @@ public static class PersonNestedCollectionLayout
 
     public static readonly string[] ReadOnlyNestedListViewIds =
     [
-        ApplicationPeopleListView,
+        ApplicationProfileInstancesListView,
         WorkPermitItemsListView,
         InvitationItemsListView,
         RejectionItemsListView,

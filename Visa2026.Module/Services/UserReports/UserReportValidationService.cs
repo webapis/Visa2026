@@ -45,7 +45,7 @@ namespace Visa2026.Module.Services.UserReports
 
             try
             {
-                // Word templates use {{ds.Property}} — "ds" is DocxTemplater's model name, not an Application member.
+                // Word templates use {{ds.Property}} — "ds" is DocxTemplater's model name, not an ApplicationProfileInstance member.
                 var propertyPath = UserReportPlaceholderAliasRegistry.ResolveCanonicalPropertyPath(
                     UserReportPlaceholderBindingHelper.StripFormatterSuffix(
                         StripDocxModelPrefix(cleanPlaceholder.Trim())));
@@ -66,12 +66,12 @@ namespace Visa2026.Module.Services.UserReports
                     return result;
                 }
 
-                // {{IMAGE:Person_Photo}} — injected after merge; property is on ApplicationItem.
+                // {{IMAGE:Person_Photo}} — injected after merge; property is on ApplicationRosterMergeLine.
                 if (UserReportPlaceholderBindingHelper.IsImageInjectorToken(cleanPlaceholder.Trim()))
                 {
                     var photoPath = UserReportPlaceholderAliasRegistry.ResolveCanonicalPropertyPath(
                         UserReportPlaceholderBindingHelper.StripFormatterSuffix(cleanPlaceholder.Trim()));
-                    var onItem = rootType == typeof(Application) ? typeof(ApplicationItem) : rootType;
+                    var onItem = rootType == typeof(ApplicationProfileInstance) ? typeof(ApplicationRosterMergeLine) : rootType;
                     var ok = PropertyExists(onItem, photoPath);
                     result.IsValid = ok;
                     result.ResolvedPath = photoPath;
@@ -81,7 +81,7 @@ namespace Visa2026.Module.Services.UserReports
                     return result;
                 }
 
-                // {{#ds.rows}} — list of ApplicationItem-shaped dictionaries (filled from Application.ApplicationItems at runtime)
+                // {{#ds.rows}} — list of ApplicationRosterMergeLine-shaped dictionaries (filled from Application.ApplicationItems at runtime)
                 if (result.IsCollection && string.Equals(propertyPath, "rows", StringComparison.OrdinalIgnoreCase))
                 {
                     bool ok = ValidateRowsCollection(rootType);
@@ -93,19 +93,19 @@ namespace Visa2026.Module.Services.UserReports
                     return result;
                 }
 
-                // {{#ds.ApplicationItems}} on Application root (photo roster, etc.)
+                // {{#ds.ApplicationItems}} on ApplicationProfileInstance root (photo roster, etc.)
                 if (result.IsCollection && string.Equals(propertyPath, "ApplicationItems", StringComparison.OrdinalIgnoreCase))
                 {
-                    var ok = rootType == typeof(Application);
+                    var ok = rootType == typeof(ApplicationProfileInstance);
                     result.IsValid = ok;
                     result.ResolvedPath = "ApplicationItems";
                     result.ExampleValue = ok ? "(one row per application item)" : string.Empty;
                     if (!ok)
-                        result.ErrorMessage = $"'ApplicationItems' loop requires root type {nameof(Application)}";
+                        result.ErrorMessage = $"'ApplicationItems' loop requires root type {nameof(ApplicationProfileInstance)}";
                     return result;
                 }
 
-                // {{ds.rows.Application_SponsorName}} — row fields live on ApplicationItem (Contract.docx user template)
+                // {{ds.rows.Application_SponsorName}} — row fields live on ApplicationRosterMergeLine (Contract.docx user template)
                 if (propertyPath.StartsWith("rows.", StringComparison.OrdinalIgnoreCase) && propertyPath.Length > 5)
                 {
                     var onItemPath = UserReportPlaceholderBindingHelper.StripFormatterSuffix(propertyPath.Substring(5));
@@ -117,54 +117,54 @@ namespace Visa2026.Module.Services.UserReports
                         return result;
                     }
 
-                    var ok = PropertyExists(typeof(ApplicationItem), onItemPath);
+                    var ok = PropertyExists(typeof(ApplicationRosterMergeLine), onItemPath);
                     result.IsValid = ok;
                     result.ResolvedPath = onItemPath;
                     if (ok)
-                        result.ExampleValue = GetExampleValue(typeof(ApplicationItem), onItemPath);
+                        result.ExampleValue = GetExampleValue(typeof(ApplicationRosterMergeLine), onItemPath);
                     else
-                        result.ErrorMessage = $"Property '{onItemPath}' not found on {nameof(ApplicationItem)}";
+                        result.ErrorMessage = $"Property '{onItemPath}' not found on {nameof(ApplicationRosterMergeLine)}";
                     return result;
                 }
 
-                // {{ds.ApplicationItems.Person_FullName}} — prefer {{.Person_FullName}} in Word; still validate on ApplicationItem.
+                // {{ds.ApplicationItems.Person_FullName}} — prefer {{.Person_FullName}} in Word; still validate on ApplicationRosterMergeLine.
                 if (propertyPath.StartsWith("ApplicationItems.", StringComparison.OrdinalIgnoreCase)
                     && propertyPath.Length > "ApplicationItems.".Length)
                 {
                     var onItemPath = UserReportPlaceholderBindingHelper.StripFormatterSuffix(
                         propertyPath.Substring("ApplicationItems.".Length));
-                    var ok = PropertyExists(typeof(ApplicationItem), onItemPath);
+                    var ok = PropertyExists(typeof(ApplicationRosterMergeLine), onItemPath);
                     result.IsValid = ok;
                     result.ResolvedPath = onItemPath;
                     if (ok)
-                        result.ExampleValue = GetExampleValue(typeof(ApplicationItem), onItemPath);
+                        result.ExampleValue = GetExampleValue(typeof(ApplicationRosterMergeLine), onItemPath);
                     else
-                        result.ErrorMessage = $"Property '{onItemPath}' not found on {nameof(ApplicationItem)}";
+                        result.ErrorMessage = $"Property '{onItemPath}' not found on {nameof(ApplicationRosterMergeLine)}";
                     return result;
                 }
 
-                // {{.Person_FullName}} inside {{#ds.ApplicationItems}} — row fields live on ApplicationItem (Application root).
-                if (result.IsRowProperty && rootType == typeof(Application))
+                // {{.Person_FullName}} inside {{#ds.ApplicationItems}} — row fields live on ApplicationRosterMergeLine (ApplicationProfileInstance root).
+                if (result.IsRowProperty && rootType == typeof(ApplicationProfileInstance))
                 {
-                    var ok = PropertyExists(typeof(ApplicationItem), propertyPath);
+                    var ok = PropertyExists(typeof(ApplicationRosterMergeLine), propertyPath);
                     result.IsValid = ok;
                     result.ResolvedPath = propertyPath;
                     if (ok)
-                        result.ExampleValue = GetExampleValue(typeof(ApplicationItem), propertyPath);
+                        result.ExampleValue = GetExampleValue(typeof(ApplicationRosterMergeLine), propertyPath);
                     else
-                        result.ErrorMessage = $"Property '{propertyPath}' not found on {nameof(ApplicationItem)}";
+                        result.ErrorMessage = $"Property '{propertyPath}' not found on {nameof(ApplicationRosterMergeLine)}";
                     return result;
                 }
 
                 var isValid = PropertyExists(rootType, propertyPath);
                 var resolvedOn = rootType;
 
-                if (!isValid && rootType == typeof(ApplicationItem)
+                if (!isValid && rootType == typeof(ApplicationRosterMergeLine)
                     && !propertyPath.StartsWith("rows.", StringComparison.OrdinalIgnoreCase)
-                    && PropertyExists(typeof(Application), propertyPath))
+                    && PropertyExists(typeof(ApplicationProfileInstance), propertyPath))
                 {
                     isValid = true;
-                    resolvedOn = typeof(Application);
+                    resolvedOn = typeof(ApplicationProfileInstance);
                 }
 
                 result.IsValid = isValid;
@@ -215,9 +215,9 @@ namespace Visa2026.Module.Services.UserReports
 
         private static bool ValidateRowsCollection(Type rootType)
         {
-            if (rootType == typeof(ApplicationItem))
+            if (rootType == typeof(ApplicationRosterMergeLine))
                 return true;
-            if (rootType == typeof(Application))
+            if (rootType == typeof(ApplicationProfileInstance))
                 return true; // runtime fills rows from ApplicationItems
             return false;
         }
@@ -226,10 +226,10 @@ namespace Visa2026.Module.Services.UserReports
         {
             return boType switch
             {
-                UserReportBoType.Application => typeof(Application),
-                UserReportBoType.ApplicationItem => typeof(ApplicationItem),
+                UserReportBoType.ApplicationProfileInstance => typeof(ApplicationProfileInstance),
+                UserReportBoType.ApplicationItem => typeof(ApplicationRosterMergeLine),
                 UserReportBoType.Person => typeof(Person),
-                _ => typeof(Application)
+                _ => typeof(ApplicationProfileInstance)
             };
         }
 

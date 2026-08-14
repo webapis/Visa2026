@@ -1,11 +1,11 @@
 -- Visa Extension Completed base.
--- One row per roster line (ApplicationPerson M2M + legacy ApplicationItem fallback) — PostgreSQL.
+-- One row per roster line (ApplicationProfileInstancePerson M2M + legacy ApplicationItem fallback) — PostgreSQL.
 DROP VIEW IF EXISTS vw_rd_application_via_ministry_visa_extension_completed_base CASCADE;
 CREATE VIEW vw_rd_application_via_ministry_visa_extension_completed_base AS
 WITH {{MINISTRY_ROSTER_CTE}}
 SELECT
     roster."LineId" AS "ID",
-    a."ID"                                                                  AS "ApplicationOid",
+    a."ID"                                                                  AS "ApplicationProfileInstanceOid",
     roster."LineId" AS "ApplicationItemOid",
     p."ID"                                                                  AS "PersonOid",
     latest_ap."StateID"                                                     AS "CurrentStateID",
@@ -24,7 +24,7 @@ SELECT
     COALESCE(pc."NameTm", '')                                               AS "ProjectNameTm",
     COALESCE(p."PersonRole", 0)                                             AS "PersonRoleCode",
     COALESCE(NULLIF(BTRIM(pos."NameTm"), ''), NULLIF(BTRIM(pos."Name"), ''), '') AS "PositionLabel",
-    COALESCE(NULLIF(BTRIM(at."NameTm"), ''), NULLIF(BTRIM(at."Name"), ''), '') AS "ApplicationTypeLabel",
+    COALESCE(NULLIF(BTRIM(apf."Name"), ''), '') AS "ApplicationTypeLabel",
     COALESCE(
         NULLIF(BTRIM(vp."NameTm"), ''),
         NULLIF(BTRIM(vp."Name"), ''),
@@ -62,12 +62,15 @@ SELECT
     COALESCE(NULLIF(BTRIM(vc."NameTm"), ''), NULLIF(BTRIM(vc."Name"), ''), '(No category)') AS "CategoryLabel",
     COALESCE(NULLIF(BTRIM(vt."NameTm"), ''), NULLIF(BTRIM(vt."Name"), ''), '(No type)') AS "TypeLabel"
 FROM ministry_roster_lines roster
-INNER JOIN "Applications" a
-    ON a."ID" = roster."ApplicationID" AND COALESCE(a."GCRecord", 0) = 0
-INNER JOIN "ApplicationTypes" at
-    ON at."ID" = a."ApplicationTypeID" AND COALESCE(at."GCRecord", 0) = 0
-   AND COALESCE(at."ApplicationProgressRoute", 0) = 0
-   AND at."Name" IN ('App_Visa_Ext','App_Visa_Ext_According_to_WP','App_Visa_Ext_FM','App_Visa_and_WP_Ext')
+INNER JOIN "ApplicationProfileInstances" a
+    ON a."ID" = roster."ApplicationProfileInstanceID" AND COALESCE(a."GCRecord", 0) = 0
+INNER JOIN "ApplicationProfiles" apf
+    ON apf."ID" = a."ApplicationProfileID" AND COALESCE(apf."GCRecord", 0) = 0
+   AND COALESCE(apf."ProgressRoute", 0) = 0
+   AND COALESCE(apf."ProduceVisa", FALSE) = TRUE
+   AND COALESCE(apf."RequirePersonVisa", FALSE) = TRUE
+   AND COALESCE(apf."ProduceInvitation", FALSE) = FALSE
+   AND COALESCE(apf."ActionFamily", 0) = 0
 LEFT JOIN "ProjectContracts" pc
     ON pc."ID" = a."ProjectContractID" AND COALESCE(pc."GCRecord", 0) = 0
 LEFT JOIN "People" p
@@ -77,8 +80,8 @@ LEFT JOIN "EmployeePositionHistories" eph
 LEFT JOIN "Positions" pos
     ON pos."ID" = eph."PositionID" AND COALESCE(pos."GCRecord", 0) = 0
 LEFT JOIN LATERAL (
-    SELECT ap."StateID" FROM "ApplicationProgresses" ap
-    WHERE ap."ApplicationID" = a."ID" AND COALESCE(ap."GCRecord", 0) = 0
+    SELECT ap."StateID" FROM "ApplicationProfileInstanceProgresses" ap
+    WHERE ap."ApplicationProfileInstanceID" = a."ID" AND COALESCE(ap."GCRecord", 0) = 0
     ORDER BY ap."Date" DESC NULLS LAST, ap."ID" DESC LIMIT 1
 ) latest_ap ON TRUE
 LEFT JOIN "ApplicationStates" ast
@@ -91,7 +94,7 @@ LEFT JOIN "Visas" v_on_ext
 LEFT JOIN LATERAL (
     SELECT v."ID", v."VisaNumber"
     FROM "Visas" v
-    WHERE (v."IssuingApplicationItemID" = roster."LineId" OR (v."IssuingApplicationID" = a."ID" AND roster."PassportID" IS NOT NULL AND v."PassportID" = roster."PassportID")) AND COALESCE(v."GCRecord", 0) = 0
+    WHERE (v."IssuingApplicationProfileInstanceID" = a."ID" AND roster."PassportID" IS NOT NULL AND v."PassportID" = roster."PassportID") AND COALESCE(v."GCRecord", 0) = 0
     ORDER BY v."IssueDate" DESC NULLS LAST, v."ID" DESC
     LIMIT 1
 ) issued ON TRUE

@@ -8,7 +8,7 @@ namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
 /// Non-persistent dialog payload for <see cref="Controllers.ApplicationItemPdfController"/> before a <see cref="PdfGenerationBatch"/> is queued.
-/// The <c>[DomainComponent]</c> attribute is still required by XAF for this pattern (XAF0016); it is unrelated to legacy XPO “Domain Components” composition.
+/// Legacy host uses <c>[DomainComponent]</c> + <see cref="NonPersistentBaseObject"/> (XAF0016). Do not copy this pattern for new types — see <c>visa2026-no-domain-components</c>.
 /// </summary>
 [DomainComponent]
 [DefaultClassOptions]

@@ -20,7 +20,7 @@ public class ApplicationImporter
     public async Task ListAllAsync()
     {
         Console.WriteLine($"=== GET all {Entity}s ===");
-        var items = await _api.GetAllAsync<Application>(Entity);
+        var items = await _api.GetAllAsync<ApplicationProfileInstance>(Entity);
         if (items.Count == 0)
         {
             Console.WriteLine("  (no records found)");
@@ -36,7 +36,7 @@ public class ApplicationImporter
     // ------------------------------------------------------------------
     // CREATE — single record
     // ------------------------------------------------------------------
-    public async Task<Application?> CreateOneAsync(
+    public async Task<ApplicationProfileInstance?> CreateOneAsync(
         DateTime appDate,
         ApplicationTypeCategory category,
         Guid applicationTypeId,
@@ -73,7 +73,7 @@ public class ApplicationImporter
 
         try
         {
-            var created = await _api.CreateAsync<Application>(Entity, payload);
+            var created = await _api.CreateAsync<ApplicationProfileInstance>(Entity, payload);
             Console.WriteLine($"  Created Application: {created?.ApplicationNumber} (ID: {created?.Id})");
             Console.WriteLine();
             return created;
@@ -88,7 +88,7 @@ public class ApplicationImporter
     // ------------------------------------------------------------------
     // CREATE — bulk import from a list
     // ------------------------------------------------------------------
-    public async Task BulkImportAsync(IEnumerable<Application> records, Guid defaultFilterId)
+    public async Task BulkImportAsync(IEnumerable<ApplicationProfileInstance> records, Guid defaultFilterId)
     {
         Console.WriteLine($"=== Bulk import {Entity}s ===");
         int success = 0, fail = 0;
@@ -120,7 +120,7 @@ public class ApplicationImporter
                     BorderZoneLocation = string.IsNullOrWhiteSpace(record.BorderZoneLocation) ? null : record.BorderZoneLocation.Trim(),
                 };
 
-                await _api.CreateAsync<Application>(Entity, payload);
+                await _api.CreateAsync<ApplicationProfileInstance>(Entity, payload);
                 Console.WriteLine($"  ✓ Imported Application");
                 success++;
             }
@@ -135,7 +135,7 @@ public class ApplicationImporter
     }
 
     // Exposed for testing
-    public static Guid ResolveFilterId(Application record, Guid defaultFilterId)
+    public static Guid ResolveFilterId(ApplicationProfileInstance record, Guid defaultFilterId)
     {
         // 1. Explicit on record
         if (record.ApplicationTypeFilter != null) return record.ApplicationTypeFilter.Id;
@@ -148,6 +148,6 @@ public class ApplicationImporter
     public async Task DeleteAsync(Guid id)
     {
         await _api.DeleteAsync(Entity, id);
-        Console.WriteLine($"  Deleted Application {id}\n");
+        Console.WriteLine($"  Deleted ApplicationProfileInstance {id}\n");
     }
 }

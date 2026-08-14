@@ -2,7 +2,7 @@ namespace Visa2026.DataImporter.Legacy.Visa2014;
 
 internal sealed record Visa2014ApplicationItemRawRow(
     Guid LegacyOid,
-    Guid LegacyApplicationOid,
+    Guid LegacyApplicationProfileInstanceOid,
     Guid? LegacyEmployeeOid,
     Guid? LegacyFamilyMemberOid,
     Guid? LegacyPassportOid,
@@ -85,7 +85,7 @@ internal static class Visa2014ApplicationItemTransform
     internal static string ExtractSql => $"""
         SELECT
             CAST(pia.Oid AS varchar(36)) AS Oid,
-            CAST(pia.Application AS varchar(36)) AS ApplicationOid,
+            CAST(pia.Application AS varchar(36)) AS ApplicationProfileInstanceOid,
             CAST(pia.Employee AS varchar(36)) AS EmployeeOid,
             CAST(pia.FamilyMember AS varchar(36)) AS FamilyMemberOid,
             CAST(pia.Passport AS varchar(36)) AS PassportOid,
@@ -217,13 +217,13 @@ internal static class Visa2014ApplicationItemTransform
             !Guid.TryParse(oidText?.Trim(), out var legacyOid))
             return false;
 
-        if (!row.TryGetValue("ApplicationOid", out var appText) ||
-            !Guid.TryParse(appText?.Trim(), out var legacyApplicationOid))
+        if (!row.TryGetValue("ApplicationProfileInstanceOid", out var appText) ||
+            !Guid.TryParse(appText?.Trim(), out var legacyApplicationProfileInstanceOid))
             return false;
 
         parsed = new Visa2014ApplicationItemRawRow(
             LegacyOid: legacyOid,
-            LegacyApplicationOid: legacyApplicationOid,
+            LegacyApplicationProfileInstanceOid: legacyApplicationProfileInstanceOid,
             LegacyEmployeeOid: TryParseNullableGuid(row.GetValueOrDefault("EmployeeOid")),
             LegacyFamilyMemberOid: TryParseNullableGuid(row.GetValueOrDefault("FamilyMemberOid")),
             LegacyPassportOid: TryParseNullableGuid(row.GetValueOrDefault("PassportOid")),
@@ -281,7 +281,7 @@ internal static class Visa2014ApplicationItemTransform
         dedupeSummary = [];
         var unmappedSet = new HashSet<string>(StringComparer.Ordinal);
         var working = rawRows.Select(r => new WorkingRow(r)).ToList();
-        ApplyApplicationPersonDedupe(working, dedupeSummary);
+        ApplyApplicationProfileInstancePersonDedupe(working, dedupeSummary);
 
         var importRows = new List<Dictionary<string, object?>>();
         foreach (var row in working)
@@ -332,7 +332,7 @@ internal static class Visa2014ApplicationItemTransform
         public string? DedupeGroupId { get; set; }
     }
 
-    private static void ApplyApplicationPersonDedupe(
+    private static void ApplyApplicationProfileInstancePersonDedupe(
         List<WorkingRow> rows,
         List<Dictionary<string, object?>> dedupeSummary)
     {
@@ -343,7 +343,7 @@ internal static class Visa2014ApplicationItemTransform
                 PersonOid = ResolvePersonOid(r.Raw),
             })
             .Where(x => x.PersonOid.HasValue)
-            .GroupBy(x => (x.Row.Raw.LegacyApplicationOid, x.PersonOid!.Value))
+            .GroupBy(x => (x.Row.Raw.LegacyApplicationProfileInstanceOid, x.PersonOid!.Value))
             .Where(g => g.Count() > 1);
 
         foreach (var group in groups)
@@ -353,7 +353,7 @@ internal static class Visa2014ApplicationItemTransform
                 .OrderBy(x => x.Row.Raw.LegacyOid)
                 .First();
 
-            var groupId = $"APP:{group.Key.LegacyApplicationOid:D}:PERSON:{group.Key.Item2:D}";
+            var groupId = $"APP:{group.Key.LegacyApplicationProfileInstanceOid:D}:PERSON:{group.Key.Item2:D}";
             foreach (var member in members)
             {
                 member.Row.DedupeGroupId = groupId;
@@ -365,7 +365,7 @@ internal static class Visa2014ApplicationItemTransform
             {
                 ["_dedupeGroupId"] = groupId,
                 ["key"] = "Application+Person",
-                ["normalizedValue"] = $"{group.Key.LegacyApplicationOid:D}|{group.Key.Item2:D}",
+                ["normalizedValue"] = $"{group.Key.LegacyApplicationProfileInstanceOid:D}|{group.Key.Item2:D}",
                 ["memberCount"] = members.Count,
                 ["canonical_legacyRowId"] = canonical.Row.Raw.LegacyOid,
                 ["canonicalRule"] = "lowest_legacy_oid",
@@ -407,7 +407,7 @@ internal static class Visa2014ApplicationItemTransform
             ["_legacy_CheckPointMgCode"] = raw.CheckPointMgCode,
             ["_legacy_CheckPointLabel"] = raw.CheckPointLabel,
             ["_legacy_PurposeOfTravelLabel"] = raw.PurposeOfTravelLabel,
-            ["Application"] = raw.LegacyApplicationOid.ToString("D"),
+            ["Application"] = raw.LegacyApplicationProfileInstanceOid.ToString("D"),
         };
 
         if (working.ImportAction == "dedupe_skip")

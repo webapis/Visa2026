@@ -18,11 +18,11 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         if (objectSpace == null)
             return OfficerShellCaseProgressResult.Failed("ObjectSpace is required.");
 
-        var application = objectSpace.GetObjectByKey<Application>(applicationId);
+        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
         if (application == null)
-            return OfficerShellCaseProgressResult.Failed("Application not found.");
+            return OfficerShellCaseProgressResult.Failed("ApplicationProfileInstance not found.");
 
-        var latest = ApplicationProgressHelper.GetLatest(application.ProgressHistory, objectSpace);
+        var latest = ApplicationProfileInstanceProgressHelper.GetLatest(application.ProgressHistory, objectSpace);
         if (latest == null)
             return OfficerShellCaseProgressResult.Failed("No progress history on this application.");
 
@@ -42,11 +42,11 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         if (content == null || content.Length == 0)
             return OfficerShellCaseProgressResult.Failed("The uploaded file is empty.");
 
-        var application = objectSpace.GetObjectByKey<Application>(applicationId);
+        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
         if (application == null)
-            return OfficerShellCaseProgressResult.Failed("Application not found.");
+            return OfficerShellCaseProgressResult.Failed("ApplicationProfileInstance not found.");
 
-        var latest = ApplicationProgressHelper.GetLatest(application.ProgressHistory, objectSpace);
+        var latest = ApplicationProfileInstanceProgressHelper.GetLatest(application.ProgressHistory, objectSpace);
         if (latest == null)
             return OfficerShellCaseProgressResult.Failed("No progress history on this application.");
 
@@ -78,38 +78,38 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         if (objectSpace == null)
             return OfficerShellCaseProgressResult.Failed("ObjectSpace is required.");
 
-        var application = objectSpace.GetObjectByKey<Application>(applicationId);
+        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
         if (application == null)
-            return OfficerShellCaseProgressResult.Failed("Application not found.");
+            return OfficerShellCaseProgressResult.Failed("ApplicationProfileInstance not found.");
 
-        if (!ApplicationProgressProfileResolver.TryValidateProjectContractOnApplication(application, objectSpace, out var contractError))
-            return OfficerShellCaseProgressResult.Failed(contractError ?? VisaUiMessages.Get("ApplicationProgress.ProjectContractRequired"));
+        if (!ApplicationProfileInstanceProgressProfileResolver.TryValidateProjectContractOnApplication(application, objectSpace, out var contractError))
+            return OfficerShellCaseProgressResult.Failed(contractError ?? VisaUiMessages.Get("ApplicationProfileInstanceProgress.ProjectContractRequired"));
 
-        var latest = ApplicationProgressHelper.GetLatest(application.ProgressHistory, objectSpace);
+        var latest = ApplicationProfileInstanceProgressHelper.GetLatest(application.ProgressHistory, objectSpace);
         if (latest != null && notesOnLatestStep != null)
             latest.Description = notesOnLatestStep.Trim();
 
-        var allowedCodes = ApplicationProgressTransitionHelper
+        var allowedCodes = ApplicationProfileInstanceProgressTransitionHelper
             .GetAllowedNextStateCodes(application, latest)
             .ToList();
 
         if (allowedCodes.Count == 0)
-            return OfficerShellCaseProgressResult.Failed(VisaUiMessages.Get("ApplicationProgress.CannotAdvanceFromTerminal"));
+            return OfficerShellCaseProgressResult.Failed(VisaUiMessages.Get("ApplicationProfileInstanceProgress.CannotAdvanceFromTerminal"));
 
         var chosenCode = string.IsNullOrWhiteSpace(stateCode)
             ? allowedCodes[0]
             : stateCode.Trim();
 
         if (!allowedCodes.Contains(chosenCode, StringComparer.OrdinalIgnoreCase))
-            return OfficerShellCaseProgressResult.Failed(VisaUiMessages.Get("ApplicationProgress.InvalidForRoute"));
+            return OfficerShellCaseProgressResult.Failed(VisaUiMessages.Get("ApplicationProfileInstanceProgress.InvalidForRoute"));
 
         var state = objectSpace.GetObjectsQuery<ApplicationState>()
             .FirstOrDefault(s => s.Code == chosenCode);
         if (state == null)
-            return OfficerShellCaseProgressResult.Failed(VisaUiMessages.Get("ApplicationProgress.InvalidForRoute"));
+            return OfficerShellCaseProgressResult.Failed(VisaUiMessages.Get("ApplicationProfileInstanceProgress.InvalidForRoute"));
 
-        var progress = objectSpace.CreateObject<ApplicationProgress>();
-        progress.Application = application;
+        var progress = objectSpace.CreateObject<ApplicationProfileInstanceProgress>();
+        progress.ApplicationProfileInstance = application;
         progress.Date = DateTime.Today;
         progress.State = state;
 
@@ -119,8 +119,8 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
             progress.ProcessNumber = application.ProcessNumber.Trim();
         }
 
-        if (!ApplicationProgressTransitionHelper.TryValidateProgressStep(progress, objectSpace, out var progressError))
-            return OfficerShellCaseProgressResult.Failed(progressError ?? VisaUiMessages.Get("ApplicationProgress.InvalidForRoute"));
+        if (!ApplicationProfileInstanceProgressTransitionHelper.TryValidateProgressStep(progress, objectSpace, out var progressError))
+            return OfficerShellCaseProgressResult.Failed(progressError ?? VisaUiMessages.Get("ApplicationProfileInstanceProgress.InvalidForRoute"));
 
         ApplicationLatestProgressSyncHelper.Sync(application, objectSpace);
         return OfficerShellCaseProgressResult.Succeeded(chosenCode);

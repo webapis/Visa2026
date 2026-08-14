@@ -49,7 +49,7 @@ public class WordReportGenerationBatch : BaseObject
     [MaxLength(1024)]
     public virtual string ErrorMessage { get; set; }
 
-    public virtual Guid? ApplicationID { get; set; }
+    public virtual Guid? ApplicationProfileInstanceID { get; set; }
 
     /// <summary>
     /// JSON array of catalog entry keys queued from the report package dialog.
@@ -60,7 +60,7 @@ public class WordReportGenerationBatch : BaseObject
     public virtual string SelectedReportKeysJson { get; set; }
 
     /// <summary>
-    /// JSON array of selected <see cref="ApplicationItem"/> ids when queued from the item ListView dialog.
+    /// JSON array of selected <see cref="ApplicationRosterMergeLine"/> ids when queued from the item ListView dialog.
     /// Null or empty means all active lines on the application (application-scoped batches).
     /// </summary>
     [Browsable(false)]
@@ -68,7 +68,7 @@ public class WordReportGenerationBatch : BaseObject
     public virtual string SelectedApplicationItemIdsJson { get; set; }
 
     [Browsable(false)]
-    public virtual Application Application { get; set; }
+    public virtual ApplicationProfileInstance ApplicationProfileInstance { get; set; }
 
     [ExpandObjectMembers(ExpandObjectMembers.Never)]
     public virtual FileData ZipFile { get; set; }

@@ -13,6 +13,7 @@ public sealed class ApplicationWorkspaceDetailViewUpdater : ModelNodesGeneratorU
             return;
 
         var detailView = (IModelDetailView)node;
+        detailView.Caption = "Case workspace";
         if (detailView.Items[nameof(ApplicationWorkspaceHost.WorkspaceUi)] != null)
             return;
 

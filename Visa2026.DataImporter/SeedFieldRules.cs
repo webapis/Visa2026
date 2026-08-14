@@ -50,7 +50,7 @@ internal static class SeedFieldRules
             ["Border Zone Location"] = "ShowBorderZoneLocation",
         };
 
-    /// <summary>Application yaml headers gated by ApplicationType Show*.</summary>
+    /// <summary>ApplicationProfileInstance yaml headers gated by ApplicationType Show*.</summary>
     private static readonly Dictionary<string, string> ApplicationHeaderToShowFlag =
         new(StringComparer.OrdinalIgnoreCase)
         {
@@ -85,7 +85,7 @@ internal static class SeedFieldRules
             ["BusinessTripAddress"] = "ShowBusinessTrips",
         };
 
-    /// <summary>Deprecated — not on Application BO / removed org FKs. Stripped from seed yaml.</summary>
+    /// <summary>Deprecated — not on ApplicationProfileInstance BO / removed org FKs. Stripped from seed yaml.</summary>
     private static readonly HashSet<string> ObsoleteHeaders = new(StringComparer.OrdinalIgnoreCase)
     {
         "Filter",
@@ -138,13 +138,13 @@ internal static class SeedFieldRules
 
     public static bool IsApplicationHeaderAllowed(string header, IReadOnlyDictionary<string, bool> flags)
     {
-        if (header.Equals("Application Number", StringComparison.OrdinalIgnoreCase)
+        if (header.Equals("ApplicationProfileInstance Number", StringComparison.OrdinalIgnoreCase)
             || header.Equals("Date", StringComparison.OrdinalIgnoreCase)
-            || header.Equals("Application Type", StringComparison.OrdinalIgnoreCase)
+            || header.Equals("ApplicationProfileInstance Type", StringComparison.OrdinalIgnoreCase)
             || header.Equals("Is Active", StringComparison.OrdinalIgnoreCase)
             || header.Equals("Prefix", StringComparison.OrdinalIgnoreCase)
             || header.Equals("Year", StringComparison.OrdinalIgnoreCase)
-            || header.Equals("Full Application Number", StringComparison.OrdinalIgnoreCase))
+            || header.Equals("Full ApplicationProfileInstance Number", StringComparison.OrdinalIgnoreCase))
             return true;
 
         if (ApplicationHeaderToShowFlag.TryGetValue(header, out string? flag))

@@ -4,6 +4,46 @@ Date format: `YYYY-MM-DD`
 
 ---
 
+## 2026-08-12 — F5 42703 CreationProgressRoute (NotMapped)
+
+**Cause:** Dashboard SQL coalesced `a."CreationProgressRoute"` but the property is `[NotMapped]` (no DB column).
+
+**Fix:** Use `apf."ProgressRoute"` only in via-ministry / direct-migration `.postgres.sql`.
+
+## 2026-08-12 — Remaining heal-path vw_rd_* off ApplicationType
+
+**Next after via-ministry:** invitation / WP progress / visa extension required / registration / to-be-checked / `vw_rd_application` / RosterSql registration CTEs now join `ApplicationProfiles`. Checkout narrowed to `Code = 'check_out'` (not all Registration family).
+
+**Files:** remaining `SqlViews/*.postgres.sql` that joined Types; `ReportDashboardPostgresRosterSql.cs`; `ReportDashboardPostgresViewsUpdater.cs` invitation/application inline SQL.
+
+## 2026-08-12 — Via-ministry dashboard SQL: ApplicationProfile not ApplicationType
+
+**Ask / crash:** Heal `42703 column at.ApplicationProfileInstanceProgressRoute does not exist`. User: do not drive dashboard off deprecated `ApplicationTypes`.
+
+**Fix:** Standalone via-ministry / direct-migration `.postgres.sql` + `vw_rd_visa_app_progress` + roster visa/WP CTEs join `ApplicationProfiles`. Filters: `ProgressRoute` / `CreationProgressRoute`, `ProduceInvitation`, `ProduceVisa`+`RequirePersonVisa`. Label alias `ApplicationTypeLabel` still filled from `apf.Name` for EF column name.
+
+**Files:** `SqlViews/vw_rd_application_via_ministry_*.postgres.sql`, `vw_rd_application_direct_migration_*.postgres.sql`, `vw_rd_visa_app_progress.postgres.sql`, `ReportDashboardPostgresRosterSql.cs`
+
+## 2026-08-12 — F5 42601 {{MINISTRY_ROSTER_CTE}} in heal
+
+**Symptom:** Startup `ReportDashboardPostgresViewsHealSql.ExecuteEmbeddedSql` — `syntax error at or near "{"` (POSITION 74) while recreating via-ministry standalone views.
+
+**Cause:** After ApplicationOid recreate triggered `NeedsViaMinistryStandaloneHeal`, heal loaded embedded `.postgres.sql` without expanding `{{MINISTRY_ROSTER_CTE}}` (ModuleUpdater uses `ReportDashboardSqlViewResource.Load`).
+
+**Fix:** Heal `ExecuteEmbeddedSql` calls `ReportDashboardSqlViewResource.Load`.
+
+**Files:** `ReportDashboardPostgresViewsHealSql.cs`
+
+## 2026-08-12 — F5 42703 ApplicationProfileInstanceOid on On Extension heal
+
+**Symptom:** Startup `ReportDashboardPostgresViewsHealSql.NeedsVisaAppProgressPrimaryCodeHeal` — `column o.ApplicationProfileInstanceOid does not exist` (local PG).
+
+**Cause:** Mechanical Application → ApplicationProfileInstance rename updated embedded `vw_rd_*` SQL and the heal probe, but ModuleInfo was already current so live views still aliased `ApplicationOid`. Wrapper heal skipped recreate because PassportNumber already existed.
+
+**Fix:** If the view has `ApplicationOid`, recreate from embedded SQL (DROP + CREATE). Probe `LatestPrimaryStateCode` only after `ApplicationProfileInstanceOid` exists. Same for via-ministry standalone and work-permit views.
+
+**Files:** `ReportDashboardPostgresViewsHealSql.cs`
+
 ## 2026-07-17 — Application Status: default Bar Chart + equal label/bar width
 
 **Change:** `DefaultChartViewFor(Application, _)` → `bar` (was pie). Bar row grid `140px 1fr 34px` → `1fr 1fr 48px` so label and bar track share width equally; label text `nowrap` + ellipsis with `title` for overflow.

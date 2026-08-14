@@ -64,8 +64,7 @@ namespace Visa2026.Module.BusinessObjects
             InvitationItems = new ObservableCollection<InvitationItem>();
             RejectionItems = new ObservableCollection<RejectionItem>();
             TravelHistories = new ObservableCollection<TravelHistory>();
-            ApplicationItems = new ObservableCollection<ApplicationItem>();
-            ApplicationPeople = new ObservableCollection<ApplicationPerson>();
+            ApplicationProfileInstances = new ObservableCollection<ApplicationProfileInstance>();
             WorkDuties = new ObservableCollection<WorkDuty>();
         }
 
@@ -567,13 +566,10 @@ namespace Visa2026.Module.BusinessObjects
         [Aggregated]
         public virtual IList<TravelHistory> TravelHistories { get; set; }
 
-        [InverseProperty(nameof(ApplicationItem.Person))]
-        [Browsable(false)]
-        public virtual IList<ApplicationItem> ApplicationItems { get; set; }
-
-        [InverseProperty(nameof(ApplicationPerson.Person))]
+        [InverseProperty(nameof(ApplicationProfileInstance.People))]
         [ModelDefault("AllowEdit", "False")]
-        public virtual IList<ApplicationPerson> ApplicationPeople { get; set; }
+        [VisibleInListView(false)]
+        public virtual IList<ApplicationProfileInstance> ApplicationProfileInstances { get; set; }
 
         public override void OnCreated()
         {

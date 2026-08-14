@@ -10,10 +10,10 @@
         Configuration stays editable until a linked application reaches lock state <strong>A</strong>.
     </div>
     <div class="ap-wizard__section">
-        <h3>Application name and description</h3>
+        <h3>ApplicationProfileInstance name and description</h3>
         <div class="ap-wizard__grid">
             <label class="ap-wizard__field ap-wizard__field--full">
-                <span>Application name</span>
+                <span>ApplicationProfileInstance name</span>
                 <input type="text" @bind="Profile.Name" disabled="@Disabled" />
             </label>
             <label class="ap-wizard__field ap-wizard__field--full">
@@ -34,21 +34,21 @@
         <h3>Directed to</h3>
         <div class="ap-wizard__choices">
             <label class="ap-wizard__choice">
-                <input type="radio" name="route" checked="@(Profile.ProgressRoute == ApplicationProgressRouteKind.ViaMinistries)"
+                <input type="radio" name="route" checked="@(Profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries)"
                        disabled="@Disabled"
-                       @onchange="@(() => Profile.ProgressRoute = ApplicationProgressRouteKind.ViaMinistries)" />
+                       @onchange="@(() => Profile.ProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries)" />
                 Via ministry
             </label>
             <label class="ap-wizard__choice">
-                <input type="radio" name="route" checked="@(Profile.ProgressRoute == ApplicationProgressRouteKind.DirectToMigrationService)"
+                <input type="radio" name="route" checked="@(Profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService)"
                        disabled="@Disabled"
-                       @onchange="@(() => Profile.ProgressRoute = ApplicationProgressRouteKind.DirectToMigrationService)" />
+                       @onchange="@(() => Profile.ProgressRoute = ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService)" />
                 Direct migration service
             </label>
         </div>
     </div>
     <div class="ap-wizard__section">
-        <h3>Application may be for</h3>
+        <h3>ApplicationProfileInstance may be for</h3>
         <div class="ap-wizard__choices">
             <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ForEmployee" disabled="@Disabled" /> Employee</label>
             <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ForFamilyMember" disabled="@Disabled" /> Family member</label>
@@ -56,7 +56,7 @@
         </div>
     </div>
     <div class="ap-wizard__section">
-        <h3>Application related to</h3>
+        <h3>ApplicationProfileInstance related to</h3>
         <div class="ap-wizard__choices">
             @foreach (var family in ActionFamilies)
             {
@@ -76,12 +76,12 @@
             <button type="button" class="ap-wizard__scope-card @(_scopeMode == ScopeMode.Always ? "is-active" : null)"
                     disabled="@Disabled" @onclick="SetAlwaysScope">
                 <h4>Always available</h4>
-                <p>Officers can pick this profile for any new Application matching audience and route.</p>
+                <p>Officers can pick this profile for any new ApplicationProfileInstance matching audience and route.</p>
             </button>
             <button type="button" class="ap-wizard__scope-card @(_scopeMode == ScopeMode.Scoped ? "is-active" : null)"
                     disabled="@Disabled" @onclick="SetScopedMode">
                 <h4>Scoped</h4>
-                <p>Limit picker visibility with optional XAF criteria on Application context.</p>
+                <p>Limit picker visibility with optional XAF criteria on ApplicationProfileInstance context.</p>
             </button>
         </div>
         @if (_scopeMode == ScopeMode.Scoped)

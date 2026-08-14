@@ -6,7 +6,7 @@ namespace Visa2026.Module.Services;
 
 /// <summary>
 /// Parses and formats comma-separated label lists stored on string properties
-/// (e.g. <see cref="BusinessObjects.ApplicationItem.BorderZoneLocation"/>).
+/// (e.g. <see cref="BusinessObjects.ApplicationRosterMergeLine.BorderZoneLocation"/>).
 /// </summary>
 public static class CommaSeparatedSelectionHelper
 {

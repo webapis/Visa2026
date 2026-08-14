@@ -3,13 +3,13 @@ using Xunit;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014.Tests;
 
-public class Visa2014ApplicationProgressTransformTests
+public class Visa2014ApplicationProfileInstanceProgressTransformTests
 {
     [Fact]
     public void SynthesizeSteps_LongProcessWithProcessDate_InsertsStartedThenApprovalsThenMigrationStart()
     {
-        var raw = new Visa2014ApplicationProgressRawRow(
-            LegacyApplicationOid: Guid.Parse("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"),
+        var raw = new Visa2014ApplicationProfileInstanceProgressRawRow(
+            LegacyApplicationProfileInstanceOid: Guid.Parse("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"),
             ManualApplicationNumber: "3717",
             ManualApplicationDate: new DateTime(2014, 6, 10),
             IsLongProcess: true,
@@ -32,7 +32,7 @@ public class Visa2014ApplicationProgressTransformTests
             Cancelled: false,
             Rejected: false);
 
-        var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(raw, ministryLegCount: 2);
+        var steps = Visa2014ApplicationProfileInstanceProgressTransform.SynthesizeSteps(raw, ministryLegCount: 2);
 
         Assert.Equal(4, steps.Count);
         Assert.Equal("1_REVIEW_STARTED", steps[0].StateCode);
@@ -50,8 +50,8 @@ public class Visa2014ApplicationProgressTransformTests
     [Fact]
     public void SynthesizeSteps_DirectMigrationWithProcessDate_InsertsStartedAndIssued()
     {
-        var raw = new Visa2014ApplicationProgressRawRow(
-            LegacyApplicationOid: Guid.NewGuid(),
+        var raw = new Visa2014ApplicationProfileInstanceProgressRawRow(
+            LegacyApplicationProfileInstanceOid: Guid.NewGuid(),
             ManualApplicationNumber: "100",
             ManualApplicationDate: new DateTime(2014, 6, 1),
             IsLongProcess: false,
@@ -74,7 +74,7 @@ public class Visa2014ApplicationProgressTransformTests
             Cancelled: false,
             Rejected: false);
 
-        var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(raw, ministryLegCount: 0);
+        var steps = Visa2014ApplicationProfileInstanceProgressTransform.SynthesizeSteps(raw, ministryLegCount: 0);
 
         Assert.Equal(2, steps.Count);
         Assert.Equal("PROCESS_STARTED", steps[0].StateCode);
@@ -92,7 +92,7 @@ public class Visa2014ApplicationProgressTransformTests
     {
         var raw = BuildRaw(processDate: new DateTime(2014, 6, 15), processNumber: null);
 
-        var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(raw, ministryLegCount: 0);
+        var steps = Visa2014ApplicationProfileInstanceProgressTransform.SynthesizeSteps(raw, ministryLegCount: 0);
 
         Assert.Equal(2, steps.Count);
         Assert.Equal("PROCESS_STARTED", steps[0].StateCode);
@@ -107,7 +107,7 @@ public class Visa2014ApplicationProgressTransformTests
     {
         var raw = BuildRaw(processDate: null, processNumber: "BELGI-1");
 
-        var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(raw, ministryLegCount: 0);
+        var steps = Visa2014ApplicationProfileInstanceProgressTransform.SynthesizeSteps(raw, ministryLegCount: 0);
 
         Assert.Single(steps);
         Assert.Equal("PROCESS_STARTED", steps[0].StateCode);
@@ -118,8 +118,8 @@ public class Visa2014ApplicationProgressTransformTests
     [Fact]
     public void SynthesizeSteps_MinistryCompleteWithoutProcessDate_InsertsOnlyMigrationStarted()
     {
-        var raw = new Visa2014ApplicationProgressRawRow(
-            LegacyApplicationOid: Guid.NewGuid(),
+        var raw = new Visa2014ApplicationProfileInstanceProgressRawRow(
+            LegacyApplicationProfileInstanceOid: Guid.NewGuid(),
             ManualApplicationNumber: "200",
             ManualApplicationDate: new DateTime(2014, 6, 1),
             IsLongProcess: true,
@@ -142,7 +142,7 @@ public class Visa2014ApplicationProgressTransformTests
             Cancelled: false,
             Rejected: false);
 
-        var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(raw, ministryLegCount: 2);
+        var steps = Visa2014ApplicationProfileInstanceProgressTransform.SynthesizeSteps(raw, ministryLegCount: 2);
 
         Assert.Equal(4, steps.Count);
         Assert.Equal("1_REVIEW_STARTED", steps[0].StateCode);
@@ -154,8 +154,8 @@ public class Visa2014ApplicationProgressTransformTests
     [Fact]
     public void SynthesizeSteps_OutOfOrderLegacyDates_KeepsMinistryApprovalsOrdered()
     {
-        var raw = new Visa2014ApplicationProgressRawRow(
-            LegacyApplicationOid: Guid.NewGuid(),
+        var raw = new Visa2014ApplicationProfileInstanceProgressRawRow(
+            LegacyApplicationProfileInstanceOid: Guid.NewGuid(),
             ManualApplicationNumber: "537",
             ManualApplicationDate: new DateTime(2026, 4, 1),
             IsLongProcess: true,
@@ -178,7 +178,7 @@ public class Visa2014ApplicationProgressTransformTests
             Cancelled: false,
             Rejected: false);
 
-        var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(raw, ministryLegCount: 3);
+        var steps = Visa2014ApplicationProfileInstanceProgressTransform.SynthesizeSteps(raw, ministryLegCount: 3);
 
         Assert.Equal(5, steps.Count);
         Assert.Equal("1_REVIEW_STARTED", steps[0].StateCode);
@@ -194,8 +194,8 @@ public class Visa2014ApplicationProgressTransformTests
     [Fact]
     public void SynthesizeSteps_MinistryRouteWithProcessNumber_MapsNumberToProcessingStart()
     {
-        var raw = new Visa2014ApplicationProgressRawRow(
-            LegacyApplicationOid: Guid.NewGuid(),
+        var raw = new Visa2014ApplicationProfileInstanceProgressRawRow(
+            LegacyApplicationProfileInstanceOid: Guid.NewGuid(),
             ManualApplicationNumber: "12/-7010",
             ManualApplicationDate: new DateTime(2015, 12, 23),
             IsLongProcess: true,
@@ -218,7 +218,7 @@ public class Visa2014ApplicationProgressTransformTests
             Cancelled: false,
             Rejected: false);
 
-        var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(raw, ministryLegCount: 1);
+        var steps = Visa2014ApplicationProfileInstanceProgressTransform.SynthesizeSteps(raw, ministryLegCount: 1);
 
         Assert.Equal(3, steps.Count);
         Assert.Equal("1_REVIEW_STARTED", steps[0].StateCode);
@@ -234,12 +234,12 @@ public class Visa2014ApplicationProgressTransformTests
     public void SynthesizeSteps_WithInvitationCompletion_AddsProcessIssued()
     {
         var raw = BuildRaw(processDate: new DateTime(2015, 12, 24), processNumber: "AS538188");
-        var completion = new Visa2014ApplicationProgressCompletionEvidence(
+        var completion = new Visa2014ApplicationProfileInstanceProgressCompletionEvidence(
             new DateTime(2016, 1, 14),
             "InvitationNumber",
             "01//77");
 
-        var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(raw, ministryLegCount: 1, completion);
+        var steps = Visa2014ApplicationProfileInstanceProgressTransform.SynthesizeSteps(raw, ministryLegCount: 1, completion);
 
         Assert.Equal(4, steps.Count);
         Assert.Equal("PROCESS_STARTED", steps[2].StateCode);
@@ -255,12 +255,12 @@ public class Visa2014ApplicationProgressTransformTests
     public void SynthesizeSteps_WithWorkPermitCompletionOnly_AddsStartedThenIssued()
     {
         var raw = BuildRaw(processDate: null, processNumber: null);
-        var completion = new Visa2014ApplicationProgressCompletionEvidence(
+        var completion = new Visa2014ApplicationProfileInstanceProgressCompletionEvidence(
             new DateTime(2014, 6, 20),
             "WorkPermitNumber",
             "WP-42");
 
-        var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(raw, ministryLegCount: 0, completion);
+        var steps = Visa2014ApplicationProfileInstanceProgressTransform.SynthesizeSteps(raw, ministryLegCount: 0, completion);
 
         Assert.Equal(2, steps.Count);
         Assert.Equal("PROCESS_STARTED", steps[0].StateCode);
@@ -274,12 +274,12 @@ public class Visa2014ApplicationProgressTransformTests
     public void SynthesizeSteps_WithVisaExtensionCompletion_AddsProcessIssued()
     {
         var raw = BuildRaw(processDate: null, processNumber: null);
-        var completion = new Visa2014ApplicationProgressCompletionEvidence(
+        var completion = new Visa2014ApplicationProfileInstanceProgressCompletionEvidence(
             new DateTime(2018, 5, 1),
             "VisaNumber",
             "V-EXT-1");
 
-        var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(raw, ministryLegCount: 0, completion);
+        var steps = Visa2014ApplicationProfileInstanceProgressTransform.SynthesizeSteps(raw, ministryLegCount: 0, completion);
 
         Assert.Contains(steps, s => s.StateCode == "PROCESS_STARTED");
         var issued = Assert.Single(steps, s => s.StateCode == "PROCESS_ISSUED");
@@ -291,12 +291,12 @@ public class Visa2014ApplicationProgressTransformTests
     public void SynthesizeSteps_CancelledWithCompletion_DoesNotAddProcessIssued()
     {
         var raw = BuildRaw(cancelled: true);
-        var completion = new Visa2014ApplicationProgressCompletionEvidence(
+        var completion = new Visa2014ApplicationProfileInstanceProgressCompletionEvidence(
             new DateTime(2016, 1, 14),
             "InvitationNumber",
             "01//77");
 
-        var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(raw, ministryLegCount: 0, completion);
+        var steps = Visa2014ApplicationProfileInstanceProgressTransform.SynthesizeSteps(raw, ministryLegCount: 0, completion);
 
         Assert.DoesNotContain(steps, s => s.StateCode == "PROCESS_ISSUED");
         Assert.Contains(steps, s => s.StateCode == "PROCESS_CANCELLED");
@@ -305,8 +305,8 @@ public class Visa2014ApplicationProgressTransformTests
     [Fact]
     public void SynthesizeSteps_LongProcess_MinisteriesDocumentNumberOnLeg2NotLeg1()
     {
-        var raw = new Visa2014ApplicationProgressRawRow(
-            LegacyApplicationOid: Guid.NewGuid(),
+        var raw = new Visa2014ApplicationProfileInstanceProgressRawRow(
+            LegacyApplicationProfileInstanceOid: Guid.NewGuid(),
             ManualApplicationNumber: "7/-1177",
             ManualApplicationDate: new DateTime(2026, 7, 13),
             IsLongProcess: true,
@@ -329,7 +329,7 @@ public class Visa2014ApplicationProgressTransformTests
             Cancelled: false,
             Rejected: false);
 
-        var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(raw, ministryLegCount: 2);
+        var steps = Visa2014ApplicationProfileInstanceProgressTransform.SynthesizeSteps(raw, ministryLegCount: 2);
 
         var leg1Approved = steps.Single(s => s.StateCode == "1_REVIEW_APPROVED");
         var leg2Approved = steps.Single(s => s.StateCode == "2_REVIEW_APPROVED");
@@ -341,8 +341,8 @@ public class Visa2014ApplicationProgressTransformTests
     [Fact]
     public void SynthesizeSteps_ThreeLegs_ConstructionDocOnLeg3()
     {
-        var raw = new Visa2014ApplicationProgressRawRow(
-            LegacyApplicationOid: Guid.NewGuid(),
+        var raw = new Visa2014ApplicationProfileInstanceProgressRawRow(
+            LegacyApplicationProfileInstanceOid: Guid.NewGuid(),
             ManualApplicationNumber: "537",
             ManualApplicationDate: new DateTime(2026, 4, 1),
             IsLongProcess: true,
@@ -365,7 +365,7 @@ public class Visa2014ApplicationProgressTransformTests
             Cancelled: false,
             Rejected: false);
 
-        var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(raw, ministryLegCount: 3);
+        var steps = Visa2014ApplicationProfileInstanceProgressTransform.SynthesizeSteps(raw, ministryLegCount: 3);
 
         Assert.Null(steps.Single(s => s.StateCode == "1_REVIEW_APPROVED").Description);
         Assert.Equal("MinisteriesDocumentNumber: 7/1730",
@@ -379,13 +379,13 @@ public class Visa2014ApplicationProgressTransformTests
     public void SynthesizeSteps_FullRejectionCoverage_AddsProcessRejected_WithoutLegacyFlag()
     {
         var raw = BuildRaw(processDate: new DateTime(2017, 3, 1));
-        var rejection = new Visa2014ApplicationProgressRejectionEvidence(
+        var rejection = new Visa2014ApplicationProfileInstanceProgressRejectionEvidence(
             ApplicationItemCount: 2,
             RejectionItemCount: 2,
             RejectionDate: new DateTime(2017, 3, 15),
             RejectionNumbers: "R-100");
 
-        var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(
+        var steps = Visa2014ApplicationProfileInstanceProgressTransform.SynthesizeSteps(
             raw, ministryLegCount: 0, completion: null, rejection: rejection);
 
         var rejected = Assert.Single(steps, s => s.StateCode == "PROCESS_REJECTED");
@@ -399,13 +399,13 @@ public class Visa2014ApplicationProgressTransformTests
     public void SynthesizeSteps_LegacyRejectedOrCoverage_PrefersRejectionDate()
     {
         var raw = BuildRaw(processDate: new DateTime(2017, 3, 1)) with { Rejected = true };
-        var rejection = new Visa2014ApplicationProgressRejectionEvidence(
+        var rejection = new Visa2014ApplicationProfileInstanceProgressRejectionEvidence(
             ApplicationItemCount: 1,
             RejectionItemCount: 1,
             RejectionDate: new DateTime(2017, 4, 1),
             RejectionNumbers: "178");
 
-        var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(
+        var steps = Visa2014ApplicationProfileInstanceProgressTransform.SynthesizeSteps(
             raw, ministryLegCount: 0, completion: null, rejection: rejection);
 
         var rejected = Assert.Single(steps, s => s.StateCode == "PROCESS_REJECTED");
@@ -418,23 +418,23 @@ public class Visa2014ApplicationProgressTransformTests
     public void SynthesizeSteps_PartialRejectionCoverage_DoesNotAddProcessRejected()
     {
         var raw = BuildRaw();
-        var rejection = new Visa2014ApplicationProgressRejectionEvidence(
+        var rejection = new Visa2014ApplicationProfileInstanceProgressRejectionEvidence(
             ApplicationItemCount: 4,
             RejectionItemCount: 1,
             RejectionDate: new DateTime(2017, 3, 15),
             RejectionNumbers: null);
 
-        var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(
+        var steps = Visa2014ApplicationProfileInstanceProgressTransform.SynthesizeSteps(
             raw, ministryLegCount: 0, completion: null, rejection: rejection);
 
         Assert.DoesNotContain(steps, s => s.StateCode == "PROCESS_REJECTED");
     }
-    private static Visa2014ApplicationProgressRawRow BuildRaw(
+    private static Visa2014ApplicationProfileInstanceProgressRawRow BuildRaw(
         DateTime? processDate = null,
         string? processNumber = null,
         bool cancelled = false) =>
         new(
-            LegacyApplicationOid: Guid.NewGuid(),
+            LegacyApplicationProfileInstanceOid: Guid.NewGuid(),
             ManualApplicationNumber: "100",
             ManualApplicationDate: new DateTime(2014, 6, 1),
             IsLongProcess: false,

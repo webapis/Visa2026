@@ -8,8 +8,8 @@ using DevExpress.Persistent.Base;
 namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
-/// Report Dashboard Application (direct migration) — Process Complete
-/// from <c>vw_rd_application_direct_migration_process_complete</c> (one row per ApplicationItem).
+/// Report Dashboard ApplicationProfileInstance (direct migration) — Process Complete
+/// from <c>vw_rd_application_direct_migration_process_complete</c> (one row per ApplicationRosterMergeLine).
 /// </summary>
 [DefaultClassOptions]
 [NavigationItem(false)]
@@ -25,18 +25,14 @@ public class VwRdApplicationDirectMigrationProcessComplete
     public virtual Guid ID { get; set; }
 
     [Browsable(false)]
-    public virtual Guid? ApplicationOid { get; set; }
+    public virtual Guid? ApplicationProfileInstanceOid { get; set; }
 
-    [ForeignKey(nameof(ApplicationOid))]
+    [ForeignKey(nameof(ApplicationProfileInstanceOid))]
     [ModelDefault("Caption", "App #")]
-    public virtual Application Application { get; set; }
+    public virtual ApplicationProfileInstance ApplicationProfileInstance { get; set; }
 
     [Browsable(false)]
     public virtual Guid? ApplicationItemOid { get; set; }
-
-    [ForeignKey(nameof(ApplicationItemOid))]
-    [Browsable(false)]
-    public virtual ApplicationItem ApplicationItem { get; set; }
 
     [Browsable(false)]
     public virtual Guid? PersonOid { get; set; }

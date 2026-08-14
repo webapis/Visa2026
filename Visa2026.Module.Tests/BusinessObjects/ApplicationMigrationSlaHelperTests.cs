@@ -9,14 +9,14 @@ public class ApplicationMigrationSlaHelperTests
     public void Resolve_ReturnsNone_WhenNotProcessStarted()
     {
         var app = BuildApplication(
-            ApplicationProgressStateCodes.Review1Started,
+            ApplicationProfileInstanceProgressStateCodes.Review1Started,
             WorkingDaysAgo(5),
             maxDays: 10,
             warningDays: 8);
 
         var sla = ApplicationMigrationSlaHelper.Resolve(app);
 
-        Assert.Equal(ApplicationProgressSlaStatus.None, sla.Status);
+        Assert.Equal(ApplicationProfileInstanceProgressSlaStatus.None, sla.Status);
         Assert.Null(sla.AppearanceStateCode);
     }
 
@@ -24,14 +24,14 @@ public class ApplicationMigrationSlaHelperTests
     public void Resolve_ReturnsOk_WhenWithinLimit()
     {
         var app = BuildApplication(
-            ApplicationProgressStateCodes.ProcessStarted,
+            ApplicationProfileInstanceProgressStateCodes.ProcessStarted,
             WorkingDaysAgo(3),
             maxDays: 10,
             warningDays: 8);
 
         var sla = ApplicationMigrationSlaHelper.Resolve(app);
 
-        Assert.Equal(ApplicationProgressSlaStatus.Ok, sla.Status);
+        Assert.Equal(ApplicationProfileInstanceProgressSlaStatus.Ok, sla.Status);
         Assert.Null(sla.AppearanceStateCode);
     }
 
@@ -39,36 +39,36 @@ public class ApplicationMigrationSlaHelperTests
     public void Resolve_ReturnsWarning_WhenPastWarningThreshold()
     {
         var app = BuildApplication(
-            ApplicationProgressStateCodes.ProcessStarted,
+            ApplicationProfileInstanceProgressStateCodes.ProcessStarted,
             WorkingDaysAgo(9),
             maxDays: 10,
             warningDays: 8);
 
         var sla = ApplicationMigrationSlaHelper.Resolve(app);
 
-        Assert.Equal(ApplicationProgressSlaStatus.Warning, sla.Status);
-        Assert.Equal(ApplicationProgressSlaCodes.Warning, sla.AppearanceStateCode);
+        Assert.Equal(ApplicationProfileInstanceProgressSlaStatus.Warning, sla.Status);
+        Assert.Equal(ApplicationProfileInstanceProgressSlaCodes.Warning, sla.AppearanceStateCode);
     }
 
     [Fact]
     public void Resolve_ReturnsOverdue_WhenPastMaxDays()
     {
         var app = BuildApplication(
-            ApplicationProgressStateCodes.ProcessStarted,
+            ApplicationProfileInstanceProgressStateCodes.ProcessStarted,
             WorkingDaysAgo(11),
             maxDays: 10,
             warningDays: 8);
 
         var sla = ApplicationMigrationSlaHelper.Resolve(app);
 
-        Assert.Equal(ApplicationProgressSlaStatus.Overdue, sla.Status);
-        Assert.Equal(ApplicationProgressSlaCodes.Overdue, sla.AppearanceStateCode);
+        Assert.Equal(ApplicationProfileInstanceProgressSlaStatus.Overdue, sla.Status);
+        Assert.Equal(ApplicationProfileInstanceProgressSlaCodes.Overdue, sla.AppearanceStateCode);
     }
 
     [Fact]
     public void Resolve_ReturnsNone_WhenProfileMissingMaxDays()
     {
-        var app = new Application
+        var app = new ApplicationProfileInstance
         {
             ApplicationType = new ApplicationType
             {
@@ -76,35 +76,35 @@ public class ApplicationMigrationSlaHelperTests
             },
             ProgressHistory =
             [
-                new ApplicationProgress
+                new ApplicationProfileInstanceProgress
                 {
                     Date = WorkingDaysAgo(5),
-                    State = new ApplicationState { Code = ApplicationProgressStateCodes.ProcessStarted },
+                    State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.ProcessStarted },
                 }
             ]
         };
 
         var sla = ApplicationMigrationSlaHelper.Resolve(app);
 
-        Assert.Equal(ApplicationProgressSlaStatus.None, sla.Status);
+        Assert.Equal(ApplicationProfileInstanceProgressSlaStatus.None, sla.Status);
     }
 
     [Fact]
     public void IsMigrationServiceProcessStartedStep_IsStateOnly()
     {
         Assert.True(ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(
-            ApplicationProgressStateCodes.ProcessStarted));
+            ApplicationProfileInstanceProgressStateCodes.ProcessStarted));
         Assert.False(ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(
-            ApplicationProgressStateCodes.IsBeingPrepared));
+            ApplicationProfileInstanceProgressStateCodes.IsBeingPrepared));
     }
 
-    private static Application BuildApplication(
+    private static ApplicationProfileInstance BuildApplication(
         string stateCode,
         DateTime progressDate,
         int maxDays,
         int warningDays)
     {
-        return new Application
+        return new ApplicationProfileInstance
         {
             ApplicationType = new ApplicationType
             {
@@ -118,7 +118,7 @@ public class ApplicationMigrationSlaHelperTests
             },
             ProgressHistory =
             [
-                new ApplicationProgress
+                new ApplicationProfileInstanceProgress
                 {
                     Date = progressDate,
                     State = new ApplicationState { Code = stateCode },

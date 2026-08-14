@@ -1,16 +1,16 @@
-# ApplicationProgress field map — layer 2 (synthetic / multi-row per legacy Application)
+# ApplicationProfileInstanceProgress field map — layer 2 (synthetic / multi-row per legacy ApplicationProfileInstance)
 # Layer 1: table-mappings.yaml (id: application-progress-synthetic)
 # Layer 3: ApplicationState + ApplicationLocation resolved by Code (target catalogs — no legacy lookup import)
 
 tableMappingId: application-progress-synthetic
 
 source:
-  table: Application
+  table: ApplicationProfileInstance
   schema: dbo
   mode: synthetic_progress_from_application_scalars
 
 target:
-  odataEntity: ApplicationProgress
+  odataEntity: ApplicationProfileInstanceProgress
 
 deduplication:
   enabled: true
@@ -18,8 +18,8 @@ deduplication:
     - _syntheticStepKey
   action: import_one_per_synthetic_step
   notes: |
-    _syntheticStepKey = {legacyApplicationOid}:{stepCode} e.g. {guid}:prepare | {guid}:ministry_forward
-    Re-import idempotent on synthetic step key + Application id-map.
+    _syntheticStepKey = {legacyApplicationProfileInstanceOid}:{stepCode} e.g. {guid}:prepare | {guid}:ministry_forward
+    Re-import idempotent on synthetic step key + ApplicationProfileInstance id-map.
 
 propertyGaps:
   legacyOnly:
@@ -46,7 +46,7 @@ propertyGaps:
     - column: ProcessNumber
       disposition: synthesize
       notes: |
-        Işlenmäge başlanan belgi — optional ApplicationProgress.ProcessNumber on started/issued.
+        Işlenmäge başlanan belgi — optional ApplicationProfileInstanceProgress.ProcessNumber on started/issued.
         Does not alone imply PROCESS_ISSUED. Ministry-routed PROCESS_ISSUED from
         ApplicationResult (Invitation), PersonInApplication.WorkPermit, or full extension
         subtype-7 coverage (Visa.ProcessNumber→PIA OR immediate next passport sibling after
@@ -74,7 +74,7 @@ propertyGaps:
   mismatches:
     - property: State
       legacyColumn: ApplicationState (computed enum)
-      notes: Do not map enum 1:1 — synthesize from date ladder per discovery/ApplicationProgress.yaml
+      notes: Do not map enum 1:1 — synthesize from date ladder per discovery/ApplicationProfileInstanceProgress.yaml
     - property: Location
       legacyColumn: null
       notes: Derived from step template + ProjectContract leg count
@@ -89,11 +89,11 @@ fields:
     notes: Dedupe / id-map key only — not OData property
 
   - source: Application.Oid
-    target: Application
+    target: ApplicationProfileInstance
     transform: fk_from_id_map
-    lookupEntity: Application
+    lookupEntity: ApplicationProfileInstance
     missingBehavior: skip_row
-    notes: Requires Application id-map; skip when parent header skipped (E:44/E:55)
+    notes: Requires ApplicationProfileInstance id-map; skip when parent header skipped (E:44/E:55)
 
   - source: synthesis.stateCode
     target: State
@@ -118,7 +118,7 @@ fields:
     target: Order
     transform: int
     missingBehavior: allow_null
-    notes: 1-based workflow sequence within parent Application; set during legacy synthesis
+    notes: 1-based workflow sequence within parent ApplicationProfileInstance; set during legacy synthesis
 
   - source: synthesis.processNumber
     target: ProcessNumber
@@ -138,20 +138,20 @@ import:
   skipWhenParentSkipped: true
 
 export:
-  sheetName: ApplicationProgress
+  sheetName: ApplicationProfileInstanceProgress
   includeAuditColumns: true
   auditColumns:
     - _legacyRowId
-    - _legacyApplicationOid
+    - _legacyApplicationProfileInstanceOid
     - _syntheticStepKey
     - _importAction
     - _processKind
     - _legacy_ProcessNumber
     - _legacy_MinisteriesDocumentNumber
   lastExportedAt: 2026-06-29T16:45:53Z
-  lastExportPath: Visa2026.DataImporter/legacy/visa2014/preview-export/ApplicationProgress-preview.calik-energi.xlsx
+  lastExportPath: Visa2026.DataImporter/legacy/visa2014/preview-export/ApplicationProfileInstanceProgress-preview.calik-energi.xlsx
 
 notes: |
-  Wave 5 progress-and-history. See discovery/ApplicationProgress.yaml synthesisStrategy.
+  Wave 5 progress-and-history. See discovery/ApplicationProfileInstanceProgress.yaml synthesisStrategy.
   Excel preview emits flattened rows (one sheet row per synthesized progress step).
-  OData POST after Application id-map exists. Transition validation TBD for historical rows.
+  OData POST after ApplicationProfileInstance id-map exists. Transition validation TBD for historical rows.

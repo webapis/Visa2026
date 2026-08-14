@@ -52,7 +52,7 @@ namespace Visa2026.E2E.Tests
                     if (AppContext.GetAction("Log In") != null)
                         return false;
 
-                    // Users role denies Application list nav; officers land on Report Dashboard.
+                    // Users role denies ApplicationProfileInstance list nav; officers land on Report Dashboard.
                     // Employees URL is the passport-journey entry and a reliable shell probe.
                     EasyTestBlazorNavigationHelper.GoToRelativeUrl(
                         AppContext, EasyTestHostEnvironment.BaseUrl, E2ETestLoginValues.EmployeesListViewPath);

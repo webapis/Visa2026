@@ -25,7 +25,7 @@
             }
             else
             {
-                <p class="ap-wizard__hint">No embedded legs — ministry depth may fall back to Application approval leg profile.</p>
+                <p class="ap-wizard__hint">No embedded legs — ministry depth may fall back to ApplicationProfileInstance approval leg profile.</p>
             }
         </div>
         @if (!Disabled)
@@ -43,7 +43,7 @@
         }
     </div>
 
-    @if (Profile.ProgressRoute == ApplicationProgressRouteKind.ViaMinistries)
+    @if (Profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries)
     {
         <div class="ap-wizard__section">
             <h3>States related to ministry</h3>

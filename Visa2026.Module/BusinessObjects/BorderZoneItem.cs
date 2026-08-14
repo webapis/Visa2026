@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel;
 using System.Linq;
@@ -31,7 +33,7 @@ namespace Visa2026.Module.BusinessObjects
                 {
                     person = value;
                     if (person != null)
-                        Passport = ApplicationPersonValidItems.ResolvePassport(person);
+                        Passport = ApplicationProfileInstancePersonValidItems.ResolvePassport(person);
                 }
             }
         }
@@ -55,5 +57,10 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("AllowEdit", "False")]
         public string DocumentCopiesListLink =>
             Visa2026.Module.Localization.VisaUiMessages.Get("BorderZoneDocumentCopies.List.ColumnLink");
+
+        /// <summary>Skip-navigation M2M with <see cref="ApplicationProfileInstance"/> (same pattern as Person). Not aggregated.</summary>
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInListView(false)]
+        public virtual IList<ApplicationProfileInstance> ApplicationProfileInstances { get; set; } = new ObservableCollection<ApplicationProfileInstance>();
     }
 }

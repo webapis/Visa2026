@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 
 namespace Visa2026.Module.Services.ApplicationWorkspace;
 
@@ -11,45 +12,64 @@ internal static class ApplicationWorkspaceTabBuilder
 {
     public static IReadOnlyList<ApplicationWorkspaceTab> Build(
         IObjectSpace objectSpace,
-        Application application,
+        ApplicationProfileInstance application,
         ApplicationProfile? profile)
     {
         var people = application.People?
-            .OrderBy(p => p.LinkedAt)
+            .Where(p => p != null)
+            .OrderBy(p => p!.LastName)
+            .ThenBy(p => p!.FirstName)
+            .Cast<Person>()
             .ToList() ?? [];
+
+        var linksByPerson = LoadLinksByPerson(objectSpace, application.ID);
 
         return
         [
             PersonTab(people),
-            PassportTab(profile, people, objectSpace),
-            VisaTab(profile, people, objectSpace),
-            EducationTab(profile, people, objectSpace),
-            AddressTab(profile, people, objectSpace),
-            WorkPermitTab(profile, people, objectSpace),
-            InvitationTab(profile, people, objectSpace),
-            BorderZoneTab(profile, people, objectSpace),
-            PositionTab(profile, people, objectSpace),
-            SalaryTab(profile, people, objectSpace),
-            MedicalTab(profile, people, objectSpace),
-            TravelTab(profile, people, objectSpace),
-            RejectionTab(profile, people, objectSpace),
+            PassportTab(application, people, objectSpace, linksByPerson),
+            VisaTab(application, people, objectSpace, linksByPerson),
+            EducationTab(application, people, objectSpace, linksByPerson),
+            AddressTab(application, people, objectSpace, linksByPerson),
+            WorkPermitTab(application, people, objectSpace, linksByPerson),
+            InvitationTab(application, people, objectSpace, linksByPerson),
+            BorderZoneTab(application, people, objectSpace, linksByPerson),
+            PositionTab(application, people, objectSpace, linksByPerson),
+            SalaryTab(application, people, objectSpace, linksByPerson),
+            MedicalTab(application, people, objectSpace, linksByPerson),
+            TravelTab(application, people, objectSpace, linksByPerson),
+            RejectionTab(application, people, objectSpace, linksByPerson),
         ];
     }
 
-    private static ApplicationWorkspaceTab PersonTab(IReadOnlyList<ApplicationPerson> people)
+    private static Dictionary<Guid, List<ApplicationProfileInstancePersonResolvedLink>> LoadLinksByPerson(
+        IObjectSpace objectSpace,
+        Guid applicationId)
     {
-        var rowList = people.Select(ap =>
+        if (objectSpace == null || applicationId == Guid.Empty)
+            return [];
+
+        return objectSpace.GetObjectsQuery<ApplicationProfileInstancePersonResolvedLink>()
+            .Where(l => l.ApplicationProfileInstanceId == applicationId)
+            .ToList()
+            .GroupBy(l => l.PersonId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+    }
+
+    private static ApplicationWorkspaceTab PersonTab(IReadOnlyList<Person> people)
+    {
+        var rowList = people.Select(person =>
         {
-            var person = ap.Person;
             return new[]
             {
                 person?.FullName ?? "—",
                 person?.PersonRole.ToString() ?? "—",
                 person?.PersonalNumber ?? "—",
-                "ApplicationPeople",
+                "ApplicationProfileInstancePeople",
             };
         }).ToList();
 
+        var personIds = people.Select(p => p.ID).ToList();
         return new ApplicationWorkspaceTab
         {
             Key = "person",
@@ -57,8 +77,8 @@ internal static class ApplicationWorkspaceTabBuilder
             Visible = true,
             Columns = ["Person", "Role", "Personal №", "Source"],
             Rows = rowList,
-            RowPersonIds = people.Select(ap => ap.PersonId).ToList(),
-            RowApplicationPersonIds = people.Select(ap => ap.ID).ToList(),
+            RowPersonIds = personIds,
+            RowApplicationProfileInstancePersonIds = personIds,
             EmptyMessage = rowList.Count == 0
                 ? "No people linked — use Link existing… below or Link person on the toolbar."
                 : null,
@@ -67,14 +87,15 @@ internal static class ApplicationWorkspaceTabBuilder
     }
 
     private static ApplicationWorkspaceTab PassportTab(
-        ApplicationProfile? profile,
-        IReadOnlyList<ApplicationPerson> people,
-        IObjectSpace objectSpace) =>
-        Tab("passport", "Passport", profile?.RequirePersonPassport ?? true,
+        ApplicationProfileInstance application,
+        IReadOnlyList<Person> people,
+        IObjectSpace objectSpace,
+        Dictionary<Guid, List<ApplicationProfileInstancePersonResolvedLink>> linksByPerson) =>
+        Tab("passport", "Passport", ApplicationWorkspaceLinkedRecordsCatalog.IsConfigured(application, ApplicationProfileInstancePersonLinkKind.Passport),
             ["Person", "Passport №", "Issued", "Expires"],
-            RowsForKind<Passport>(people, objectSpace, ApplicationPersonLinkKind.Passport, (ap, passport) =>
+            RowsForKind<Passport>(people, objectSpace, linksByPerson, ApplicationProfileInstancePersonLinkKind.Passport, (person, passport) =>
             [
-                PersonName(ap.Person),
+                PersonName(person),
                 passport.PassportNumber ?? "—",
                 Fmt(passport.IssueDate),
                 Fmt(passport.ExpirationDate),
@@ -82,14 +103,15 @@ internal static class ApplicationWorkspaceTabBuilder
             emptyMessage: "No valid passport linked.");
 
     private static ApplicationWorkspaceTab VisaTab(
-        ApplicationProfile? profile,
-        IReadOnlyList<ApplicationPerson> people,
-        IObjectSpace objectSpace) =>
-        Tab("visa", "Visa", profile?.RequirePersonVisa ?? false,
+        ApplicationProfileInstance application,
+        IReadOnlyList<Person> people,
+        IObjectSpace objectSpace,
+        Dictionary<Guid, List<ApplicationProfileInstancePersonResolvedLink>> linksByPerson) =>
+        Tab("visa", "Visa", ApplicationWorkspaceLinkedRecordsCatalog.IsConfigured(application, ApplicationProfileInstancePersonLinkKind.Visa),
             ["Person", "Visa №", "Type", "Valid to"],
-            RowsForKind<Visa>(people, objectSpace, ApplicationPersonLinkKind.Visa, (ap, visa) =>
+            RowsForKind<Visa>(people, objectSpace, linksByPerson, ApplicationProfileInstancePersonLinkKind.Visa, (person, visa) =>
             [
-                PersonName(ap.Person),
+                PersonName(person),
                 visa.VisaNumber ?? "—",
                 visa.VisaType?.LocalizedDisplayName ?? visa.VisaType?.NameTm ?? "—",
                 Fmt(visa.ExpirationDate),
@@ -97,14 +119,15 @@ internal static class ApplicationWorkspaceTabBuilder
             emptyMessage: "No valid visa linked.");
 
     private static ApplicationWorkspaceTab EducationTab(
-        ApplicationProfile? profile,
-        IReadOnlyList<ApplicationPerson> people,
-        IObjectSpace objectSpace) =>
-        Tab("education", "Education", profile?.RequirePersonEducation ?? false,
+        ApplicationProfileInstance application,
+        IReadOnlyList<Person> people,
+        IObjectSpace objectSpace,
+        Dictionary<Guid, List<ApplicationProfileInstancePersonResolvedLink>> linksByPerson) =>
+        Tab("education", "Education", ApplicationWorkspaceLinkedRecordsCatalog.IsConfigured(application, ApplicationProfileInstancePersonLinkKind.Education),
             ["Person", "Institution", "Level", "Year"],
-            RowsForKind<Education>(people, objectSpace, ApplicationPersonLinkKind.Education, (ap, edu) =>
+            RowsForKind<Education>(people, objectSpace, linksByPerson, ApplicationProfileInstancePersonLinkKind.Education, (person, edu) =>
             [
-                PersonName(ap.Person),
+                PersonName(person),
                 edu.EducationInstitution?.LocalizedDisplayName ?? edu.EducationInstitution?.NameTm ?? "—",
                 edu.EducationLevel?.LocalizedDisplayName ?? edu.EducationLevel?.NameTm ?? "—",
                 edu.GraduationYear ?? "—",
@@ -112,28 +135,30 @@ internal static class ApplicationWorkspaceTabBuilder
             emptyMessage: "No education record linked.");
 
     private static ApplicationWorkspaceTab AddressTab(
-        ApplicationProfile? profile,
-        IReadOnlyList<ApplicationPerson> people,
-        IObjectSpace objectSpace) =>
-        Tab("address", "Address", profile?.RequirePersonAddressOfResidence ?? false,
+        ApplicationProfileInstance application,
+        IReadOnlyList<Person> people,
+        IObjectSpace objectSpace,
+        Dictionary<Guid, List<ApplicationProfileInstancePersonResolvedLink>> linksByPerson) =>
+        Tab("address", "Address", ApplicationWorkspaceLinkedRecordsCatalog.IsConfigured(application, ApplicationProfileInstancePersonLinkKind.AddressOfResidence),
             ["Person", "City", "Address"],
-            RowsForKind<AddressOfResidence>(people, objectSpace, ApplicationPersonLinkKind.AddressOfResidence, (ap, addr) =>
+            RowsForKind<AddressOfResidence>(people, objectSpace, linksByPerson, ApplicationProfileInstancePersonLinkKind.AddressOfResidence, (person, addr) =>
             [
-                PersonName(ap.Person),
+                PersonName(person),
                 addr.City?.NameTm ?? "—",
                 addr.FullAddress ?? "—",
             ]),
             emptyMessage: "No address linked.");
 
     private static ApplicationWorkspaceTab WorkPermitTab(
-        ApplicationProfile? profile,
-        IReadOnlyList<ApplicationPerson> people,
-        IObjectSpace objectSpace) =>
-        Tab("wp", "Work permit", profile?.RequirePersonWorkPermitItem ?? false,
+        ApplicationProfileInstance application,
+        IReadOnlyList<Person> people,
+        IObjectSpace objectSpace,
+        Dictionary<Guid, List<ApplicationProfileInstancePersonResolvedLink>> linksByPerson) =>
+        Tab("wp", "Work permit", ApplicationWorkspaceLinkedRecordsCatalog.IsConfigured(application, ApplicationProfileInstancePersonLinkKind.WorkPermitItem),
             ["Person", "WP item", "Location", "Valid to"],
-            RowsForKind<WorkPermitItem>(people, objectSpace, ApplicationPersonLinkKind.WorkPermitItem, (ap, wp) =>
+            RowsForKind<WorkPermitItem>(people, objectSpace, linksByPerson, ApplicationProfileInstancePersonLinkKind.WorkPermitItem, (person, wp) =>
             [
-                PersonName(ap.Person),
+                PersonName(person),
                 wp.WorkPermitNumber ?? "—",
                 wp.WorkPermittedLocations ?? "—",
                 Fmt(wp.ExpirationDate),
@@ -141,84 +166,90 @@ internal static class ApplicationWorkspaceTabBuilder
             emptyMessage: "No work permit item linked.");
 
     private static ApplicationWorkspaceTab InvitationTab(
-        ApplicationProfile? profile,
-        IReadOnlyList<ApplicationPerson> people,
-        IObjectSpace objectSpace) =>
-        Tab("inv", "Invitation", profile?.RequirePersonInvitationItem ?? false,
+        ApplicationProfileInstance application,
+        IReadOnlyList<Person> people,
+        IObjectSpace objectSpace,
+        Dictionary<Guid, List<ApplicationProfileInstancePersonResolvedLink>> linksByPerson) =>
+        Tab("inv", "Invitation", ApplicationWorkspaceLinkedRecordsCatalog.IsConfigured(application, ApplicationProfileInstancePersonLinkKind.InvitationItem),
             ["Person", "Invitation item", "Status"],
-            RowsForKind<InvitationItem>(people, objectSpace, ApplicationPersonLinkKind.InvitationItem, (ap, inv) =>
+            RowsForKind<InvitationItem>(people, objectSpace, linksByPerson, ApplicationProfileInstancePersonLinkKind.InvitationItem, (person, inv) =>
             [
-                PersonName(ap.Person),
+                PersonName(person),
                 inv.Invitation?.InvitationNumber ?? inv.ID.ToString(),
                 inv.Invitation != null ? "Current" : "—",
             ]),
             emptyMessage: "No invitation item linked.");
 
     private static ApplicationWorkspaceTab BorderZoneTab(
-        ApplicationProfile? profile,
-        IReadOnlyList<ApplicationPerson> people,
-        IObjectSpace objectSpace) =>
-        Tab("bz", "Border zone", profile?.RequirePersonBorderZoneItem ?? false,
+        ApplicationProfileInstance application,
+        IReadOnlyList<Person> people,
+        IObjectSpace objectSpace,
+        Dictionary<Guid, List<ApplicationProfileInstancePersonResolvedLink>> linksByPerson) =>
+        Tab("bz", "Border zone", ApplicationWorkspaceLinkedRecordsCatalog.IsConfigured(application, ApplicationProfileInstancePersonLinkKind.BorderZoneItem),
             ["Person", "Border zone item", "Number"],
-            RowsForKind<BorderZoneItem>(people, objectSpace, ApplicationPersonLinkKind.BorderZoneItem, (ap, bz) =>
+            RowsForKind<BorderZoneItem>(people, objectSpace, linksByPerson, ApplicationProfileInstancePersonLinkKind.BorderZoneItem, (person, bz) =>
             [
-                PersonName(ap.Person),
+                PersonName(person),
                 bz.BorderZone?.BorderZoneNumber ?? bz.ID.ToString(),
                 bz.BorderZone?.BorderZoneNumber ?? "—",
             ]),
             emptyMessage: "No border zone item linked.");
 
     private static ApplicationWorkspaceTab PositionTab(
-        ApplicationProfile? profile,
-        IReadOnlyList<ApplicationPerson> people,
-        IObjectSpace objectSpace) =>
-        Tab("position", "Position", profile?.RequirePersonPosition ?? false,
+        ApplicationProfileInstance application,
+        IReadOnlyList<Person> people,
+        IObjectSpace objectSpace,
+        Dictionary<Guid, List<ApplicationProfileInstancePersonResolvedLink>> linksByPerson) =>
+        Tab("position", "Position", ApplicationWorkspaceLinkedRecordsCatalog.IsConfigured(application, ApplicationProfileInstancePersonLinkKind.Position),
             ["Person", "Position", "From"],
-            RowsForKind<EmployeePositionHistory>(people, objectSpace, ApplicationPersonLinkKind.Position, (ap, pos) =>
+            RowsForKind<EmployeePositionHistory>(people, objectSpace, linksByPerson, ApplicationProfileInstancePersonLinkKind.Position, (person, pos) =>
             [
-                PersonName(ap.Person),
+                PersonName(person),
                 pos.Position?.NameTm ?? "—",
                 Fmt(pos.StartDate),
             ]),
             emptyMessage: "No position linked.");
 
     private static ApplicationWorkspaceTab SalaryTab(
-        ApplicationProfile? profile,
-        IReadOnlyList<ApplicationPerson> people,
-        IObjectSpace objectSpace) =>
-        Tab("salary", "Salary", profile?.RequirePersonSalary ?? false,
+        ApplicationProfileInstance application,
+        IReadOnlyList<Person> people,
+        IObjectSpace objectSpace,
+        Dictionary<Guid, List<ApplicationProfileInstancePersonResolvedLink>> linksByPerson) =>
+        Tab("salary", "Salary", ApplicationWorkspaceLinkedRecordsCatalog.IsConfigured(application, ApplicationProfileInstancePersonLinkKind.Salary),
             ["Person", "Amount", "Currency"],
-            RowsForKind<EmployeeSalary>(people, objectSpace, ApplicationPersonLinkKind.Salary, (ap, sal) =>
+            RowsForKind<EmployeeSalary>(people, objectSpace, linksByPerson, ApplicationProfileInstancePersonLinkKind.Salary, (person, sal) =>
             [
-                PersonName(ap.Person),
+                PersonName(person),
                 sal.Amount ?? "—",
                 sal.Currency?.ToString() ?? "—",
             ]),
             emptyMessage: "No salary linked.");
 
     private static ApplicationWorkspaceTab MedicalTab(
-        ApplicationProfile? profile,
-        IReadOnlyList<ApplicationPerson> people,
-        IObjectSpace objectSpace) =>
-        Tab("medical", "Medical", profile?.RequirePersonMedical ?? false,
+        ApplicationProfileInstance application,
+        IReadOnlyList<Person> people,
+        IObjectSpace objectSpace,
+        Dictionary<Guid, List<ApplicationProfileInstancePersonResolvedLink>> linksByPerson) =>
+        Tab("medical", "Medical", ApplicationWorkspaceLinkedRecordsCatalog.IsConfigured(application, ApplicationProfileInstancePersonLinkKind.MedicalRecord),
             ["Person", "Record", "Valid to"],
-            RowsForKind<MedicalRecord>(people, objectSpace, ApplicationPersonLinkKind.MedicalRecord, (ap, med) =>
+            RowsForKind<MedicalRecord>(people, objectSpace, linksByPerson, ApplicationProfileInstancePersonLinkKind.MedicalRecord, (person, med) =>
             [
-                PersonName(ap.Person),
+                PersonName(person),
                 med.DocumentNumber ?? med.ID.ToString(),
                 Fmt(med.ExpirationDate),
             ]),
             emptyMessage: "No medical record linked.");
 
     private static ApplicationWorkspaceTab TravelTab(
-        ApplicationProfile? profile,
-        IReadOnlyList<ApplicationPerson> people,
-        IObjectSpace objectSpace) =>
-        Tab("travel", "Travel history", profile?.RequirePersonTravelHistory ?? false,
+        ApplicationProfileInstance application,
+        IReadOnlyList<Person> people,
+        IObjectSpace objectSpace,
+        Dictionary<Guid, List<ApplicationProfileInstancePersonResolvedLink>> linksByPerson) =>
+        Tab("travel", "Travel history", ApplicationWorkspaceLinkedRecordsCatalog.IsConfigured(application, ApplicationProfileInstancePersonLinkKind.TravelHistory),
             ["Person", "Kind", "Date", "Check point"],
-            RowsForKind<TravelHistory>(people, objectSpace, ApplicationPersonLinkKind.TravelHistory, (ap, th) =>
+            RowsForKind<TravelHistory>(people, objectSpace, linksByPerson, ApplicationProfileInstancePersonLinkKind.TravelHistory, (person, th) =>
             [
-                PersonName(ap.Person),
+                PersonName(person),
                 th.MovementType?.ToString() ?? th.TravelType?.ToString() ?? "—",
                 Fmt(th.TravelDate),
                 th.CheckPoint?.NameTm ?? th.City?.NameTm ?? "—",
@@ -226,29 +257,34 @@ internal static class ApplicationWorkspaceTabBuilder
             emptyMessage: "No travel history linked.");
 
     private static ApplicationWorkspaceTab RejectionTab(
-        ApplicationProfile? profile,
-        IReadOnlyList<ApplicationPerson> people,
-        IObjectSpace objectSpace) =>
-        Tab("rejection", "Rejection", profile?.RequirePersonRejectionItem ?? false,
+        ApplicationProfileInstance application,
+        IReadOnlyList<Person> people,
+        IObjectSpace objectSpace,
+        Dictionary<Guid, List<ApplicationProfileInstancePersonResolvedLink>> linksByPerson) =>
+        Tab("rejection", "Rejection", ApplicationWorkspaceLinkedRecordsCatalog.IsConfigured(application, ApplicationProfileInstancePersonLinkKind.RejectionItem),
             ["Person", "Rejection item", "Status"],
-            RowsForKind<RejectionItem>(people, objectSpace, ApplicationPersonLinkKind.RejectionItem, (ap, rej) =>
+            RowsForKind<RejectionItem>(people, objectSpace, linksByPerson, ApplicationProfileInstancePersonLinkKind.RejectionItem, (person, rej) =>
             [
-                PersonName(ap.Person),
+                PersonName(person),
                 rej.Rejection?.RejectedDocNumber ?? rej.ID.ToString(),
                 rej.Rejection != null ? "Current" : "—",
             ]),
             emptyMessage: "No rejection item linked.");
 
     private static IEnumerable<IReadOnlyList<string>> RowsForKind<T>(
-        IReadOnlyList<ApplicationPerson> people,
+        IReadOnlyList<Person> people,
         IObjectSpace objectSpace,
-        ApplicationPersonLinkKind kind,
-        Func<ApplicationPerson, T, IReadOnlyList<string>> map)
+        Dictionary<Guid, List<ApplicationProfileInstancePersonResolvedLink>> linksByPerson,
+        ApplicationProfileInstancePersonLinkKind kind,
+        Func<Person, T, IReadOnlyList<string>> map)
         where T : class
     {
-        foreach (var ap in people)
+        foreach (var person in people)
         {
-            var link = ap.ResolvedLinks?.FirstOrDefault(l => l.LinkKind == kind);
+            if (person == null || !linksByPerson.TryGetValue(person.ID, out var links))
+                continue;
+
+            var link = links.FirstOrDefault(l => l.LinkKind == kind);
             if (link?.LinkedObjectId is not Guid linkedId || linkedId == Guid.Empty)
                 continue;
 
@@ -256,7 +292,7 @@ internal static class ApplicationWorkspaceTabBuilder
             if (entity == null)
                 continue;
 
-            yield return map(ap, entity);
+            yield return map(person, entity);
         }
     }
 

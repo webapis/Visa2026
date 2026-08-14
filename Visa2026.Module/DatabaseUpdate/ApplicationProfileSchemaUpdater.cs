@@ -30,8 +30,15 @@ public sealed class ApplicationProfileSchemaUpdater : ModuleUpdater
     private void ApplySchemaSql()
     {
         if (DatabaseProviderDetector.IsPostgreSql(ObjectSpace))
+        {
             ExecuteNonQueryCommand(ApplicationProfileSchemaSql.EnsureSchemaPostgres, false);
+            foreach (var sql in ApplicationProfileSchemaSql.EnsureTemplateCatalogColumnsPostgresStatements)
+                ExecuteNonQueryCommand(sql, true);
+        }
         else
+        {
             ExecuteNonQueryCommand(ApplicationProfileSchemaSql.EnsureSchemaSqlServer, false);
+            ExecuteNonQueryCommand(ApplicationProfileSchemaSql.EnsureTemplateCatalogColumnsSqlServer, false);
+        }
     }
 }

@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
@@ -13,7 +14,11 @@ using Visa2026.Module;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.BusinessObjects.ApplicationWorkspace;
 using Visa2026.Module.Editors;
+using Visa2026.Module.Localization;
+using Visa2026.Module.Services.ApplicationPersonLink;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 using Visa2026.Module.Services.ApplicationWorkspace;
+using Visa2026.Module.Services.OfficerShell;
 using Visa2026.Module.Services.PreviewSlot;
 
 namespace Visa2026.Blazor.Server.Editors;
@@ -24,6 +29,8 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
     private XafApplication? _application;
     private IApplicationWorkspaceQueryService? _queryService;
     private IApplicationWorkspacePersonUiActions? _personUiActions;
+    private IOfficerShellCaseProgressService? _caseProgressService;
+    private IApplicationProfileInstancePersonLinkQueryService? _personLinkQueryService;
 
     public ApplicationWorkspacePropertyEditor(Type objectType, IModelMemberViewItem model)
         : base(objectType, model) { }
@@ -35,6 +42,8 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         _application = application;
         _queryService = application.ServiceProvider?.GetService<IApplicationWorkspaceQueryService>();
         _personUiActions = application.ServiceProvider?.GetService<IApplicationWorkspacePersonUiActions>();
+        _caseProgressService = application.ServiceProvider?.GetService<IOfficerShellCaseProgressService>();
+        _personLinkQueryService = application.ServiceProvider?.GetService<IApplicationProfileInstancePersonLinkQueryService>();
         if (_personUiActions != null)
             _personUiActions.WorkspaceChanged += OnWorkspaceChanged;
     }
@@ -50,14 +59,29 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         OpenDocumentCopiesRequested = EventCallback.Factory.Create(this, OpenDocumentCopiesAsync),
         NewApplicationFromProfileRequested = EventCallback.Factory.Create<Guid>(this, NewApplicationFromProfileAsync),
         OpenProfileConfigRequested = EventCallback.Factory.Create<Guid>(this, OpenProfileConfigAsync),
+        CaseTab = "overview",
+        CaseTabChanged = EventCallback.Factory.Create<string>(this, OnCaseTabChanged),
+        LinkedRecordTileClicked = EventCallback.Factory.Create<string>(this, OnLinkedRecordTileClicked),
+        IssuedHeaderNewRequested = EventCallback.Factory.Create<string>(this, OnIssuedHeaderNewRequested),
+        IssuedHeaderOpenRequested = EventCallback.Factory.Create<ApplicationWorkspaceIssuedHeaderOpenRequest>(this, OnIssuedHeaderOpenRequested),
+        BackToListRequested = EventCallback.Factory.Create(this, BackToListAsync),
+        OpenResminamalarRequested = EventCallback.Factory.Create(this, OpenResminamalarAsync),
+        OpenPersonDetailByIndexRequested = EventCallback.Factory.Create<int>(this, OpenPersonDetailByIndexAsync),
+        SaveProgressNotesRequested = EventCallback.Factory.Create<string>(this, SaveProgressNotesAsync),
+        UploadMinistryLetterRequested = EventCallback.Factory.Create<OfficerShellCaseProgressFileUpload>(this, UploadMinistryLetterAsync),
+        AdvanceProgressRequested = EventCallback.Factory.Create<OfficerShellCaseProgressAdvanceRequest>(this, AdvanceCaseProgressAsync),
+        PersonLinkSearchRequested = EventCallback.Factory.Create<string>(this, SearchPersonLinkCandidatesAsync),
+        LinkPersonFromPickerRequested = EventCallback.Factory.Create<Guid>(this, LinkPersonFromPickerAsync),
+        ClosePersonLinkPickerRequested = EventCallback.Factory.Create(this, ClosePersonLinkPickerAsync),
+        PersonLinkCandidates = Array.Empty<ApplicationProfileInstancePersonLinkCandidateRow>(),
     };
 
     protected override void OnCurrentObjectChanged()
     {
         base.OnCurrentObjectChanged();
-        ApplyApplicationIdFromContext();
+        ApplyApplicationProfileInstanceIdFromContext();
 
-        var applicationId = ResolveApplicationId();
+        var applicationId = ResolveApplicationProfileInstanceId();
         if (applicationId == Guid.Empty)
             return;
 
@@ -65,7 +89,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         if (model == null || model.IsLoading)
             return;
 
-        if (model.Snapshot == null || model.Snapshot.ApplicationId != applicationId)
+        if (model.Snapshot == null || model.Snapshot.ApplicationProfileInstanceId != applicationId)
             _ = LoadAsync();
     }
 
@@ -91,14 +115,14 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
 
         try
         {
-            var applicationId = ResolveApplicationId();
+            var applicationId = ResolveApplicationProfileInstanceId();
             if (_application == null || applicationId == Guid.Empty)
             {
-                model.Snapshot = new ApplicationWorkspaceSnapshot { ApplicationId = applicationId };
+                model.Snapshot = new ApplicationWorkspaceSnapshot { ApplicationProfileInstanceId = applicationId };
                 return;
             }
 
-            using var objectSpace = _application.CreateObjectSpace(typeof(Application));
+            using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
             var service = _queryService
                 ?? _application.ServiceProvider?.GetService<IApplicationWorkspaceQueryService>();
 
@@ -121,8 +145,9 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
 
     private void UpdateActionState(ApplicationWorkspaceModel model)
     {
-        var applicationId = ResolveApplicationId();
-        var canLink = applicationId != Guid.Empty && _application?.MainWindow != null;
+        var applicationId = ResolveApplicationProfileInstanceId();
+        var rosterLocked = model.Snapshot?.CaseChrome.ResolvedLinksLocked == true;
+        var canLink = applicationId != Guid.Empty && _application?.MainWindow != null && !rosterLocked;
         model.CanLinkPerson = canLink;
         model.CanUnlinkPerson = canLink;
 
@@ -132,25 +157,19 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
             && model.SelectedPersonRowIndex < personTab.RowPersonIds.Count;
         model.CanOpenDocumentCopies = personTab != null
             && model.SelectedPersonRowIndex >= 0
-            && model.SelectedPersonRowIndex < personTab.RowApplicationPersonIds.Count;
+            && model.SelectedPersonRowIndex < personTab.RowApplicationProfileInstancePersonIds.Count;
     }
 
-    private Task LinkPersonAsync()
+    private async Task LinkPersonAsync()
     {
-        if (_application?.MainWindow == null)
-            return Task.CompletedTask;
+        var model = ComponentModel;
+        if (model == null || ResolveApplicationProfileInstanceId() == Guid.Empty)
+            return;
 
-        var applicationId = ResolveApplicationId();
-        if (applicationId == Guid.Empty)
-            return Task.CompletedTask;
-
-        ApplicationWorkspacePersonLinkHelper.ShowLinkPersonPicker(
-            _application,
-            _application.MainWindow,
-            applicationId,
-            OnWorkspaceChanged);
-
-        return Task.CompletedTask;
+        model.ShowPersonLinkPicker = true;
+        model.PersonLinkStatusMessage = null;
+        model.PersonLinkStatusIsError = false;
+        await SearchPersonLinkCandidatesAsync(string.Empty);
     }
 
     private Task UnlinkPersonAsync()
@@ -158,7 +177,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         if (_application?.MainWindow == null)
             return Task.CompletedTask;
 
-        var applicationId = ResolveApplicationId();
+        var applicationId = ResolveApplicationProfileInstanceId();
         if (applicationId == Guid.Empty)
             return Task.CompletedTask;
 
@@ -213,23 +232,26 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         if (model == null || _application == null)
             return Task.CompletedTask;
 
+        var applicationId = ResolveApplicationProfileInstanceId();
         var personTab = model.Snapshot?.Tabs.FirstOrDefault(t => t.Key == "person");
-        if (personTab == null
-            || model.SelectedPersonRowIndex < 0
-            || model.SelectedPersonRowIndex >= personTab.RowApplicationPersonIds.Count)
-        {
+        if (personTab == null || personTab.RowApplicationProfileInstancePersonIds.Count == 0 || applicationId == Guid.Empty)
             return Task.CompletedTask;
-        }
 
-        var applicationPersonId = personTab.RowApplicationPersonIds[model.SelectedPersonRowIndex];
-        var applicationId = ResolveApplicationId();
-        if (applicationPersonId == Guid.Empty || applicationId == Guid.Empty)
-            return Task.CompletedTask;
+        IReadOnlyList<Guid> rowIds;
+        if (model.SelectedPersonRowIndex >= 0
+            && model.SelectedPersonRowIndex < personTab.RowApplicationProfileInstancePersonIds.Count)
+        {
+            rowIds = [personTab.RowApplicationProfileInstancePersonIds[model.SelectedPersonRowIndex]];
+        }
+        else
+        {
+            rowIds = personTab.RowApplicationProfileInstancePersonIds.Where(id => id != Guid.Empty).Distinct().ToList();
+        }
 
         ApplicationWorkspaceDocumentCopiesOpenHelper.TryOpen(
             _application,
             applicationId,
-            [applicationPersonId],
+            rowIds,
             VisaPreviewSlotViewHelper.ResolveOwnerViewId(View));
 
         return Task.CompletedTask;
@@ -243,7 +265,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         ApplicationWorkspaceProfileRailHelper.TryCreateNewApplicationFromProfile(
             _application,
             profileId,
-            ResolveApplicationId(),
+            ResolveApplicationProfileInstanceId(),
             _application.MainWindow,
             out _);
 
@@ -263,23 +285,311 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         return Task.CompletedTask;
     }
 
-    private void ApplyApplicationIdFromContext()
+    private Task OnCaseTabChanged(string tab)
     {
-        if (CurrentObject is not ApplicationWorkspaceHost host || host.ApplicationId != Guid.Empty)
+        if (ComponentModel != null)
+        {
+            ComponentModel.CaseTab = string.IsNullOrWhiteSpace(tab) ? "overview" : tab;
+            if (!string.Equals(ComponentModel.CaseTab, "people", StringComparison.OrdinalIgnoreCase))
+                ComponentModel.PeopleLinkedRecordFocusKey = null;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnLinkedRecordTileClicked(string tabKey)
+    {
+        if (ComponentModel == null)
+            return Task.CompletedTask;
+
+        ComponentModel.CaseTab = "people";
+        ComponentModel.PeopleLinkedRecordFocusKey = string.IsNullOrWhiteSpace(tabKey) ? null : tabKey.Trim();
+        return Task.CompletedTask;
+    }
+
+    private Task OnIssuedHeaderNewRequested(string key)
+    {
+        var applicationId = ResolveApplicationProfileInstanceId();
+        if (_application == null || applicationId == Guid.Empty)
+            return Task.CompletedTask;
+
+        ApplicationWorkspaceIssuedHeaderOpenHelper.TryCreate(
+            _application,
+            _application.MainWindow,
+            applicationId,
+            key);
+        return Task.CompletedTask;
+    }
+
+    private Task OnIssuedHeaderOpenRequested(ApplicationWorkspaceIssuedHeaderOpenRequest request)
+    {
+        if (_application == null || request == null || request.Id == Guid.Empty)
+            return Task.CompletedTask;
+
+        ApplicationWorkspaceIssuedHeaderOpenHelper.TryOpen(
+            _application,
+            _application.MainWindow,
+            request.Key,
+            request.Id);
+        return Task.CompletedTask;
+    }
+
+    private Task BackToListAsync()
+    {
+        View?.Close();
+        return Task.CompletedTask;
+    }
+
+    private Task OpenResminamalarAsync()
+    {
+        var applicationId = ResolveApplicationProfileInstanceId();
+        if (_application == null || applicationId == Guid.Empty)
+            return Task.CompletedTask;
+
+        ApplicationWorkspaceResminamalarOpenHelper.TryOpen(
+            _application,
+            applicationId,
+            VisaPreviewSlotViewHelper.ResolveOwnerViewId(View));
+
+        return Task.CompletedTask;
+    }
+
+    private async Task OpenPersonDetailByIndexAsync(int rowIndex)
+    {
+        var model = ComponentModel;
+        if (model == null)
+            return;
+
+        model.SelectedPersonRowIndex = rowIndex;
+        UpdateActionState(model);
+        await OpenPersonDetailAsync();
+    }
+
+    private async Task SaveProgressNotesAsync(string notes)
+    {
+        var model = ComponentModel;
+        var applicationId = ResolveApplicationProfileInstanceId();
+        if (model == null || _application == null || applicationId == Guid.Empty)
+            return;
+
+        try
+        {
+            using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
+            var service = _caseProgressService
+                ?? _application.ServiceProvider?.GetService<IOfficerShellCaseProgressService>()
+                ?? new OfficerShellCaseProgressService();
+
+            var result = service.SaveOfficerNotes(objectSpace, applicationId, notes);
+            if (!result.Success)
+            {
+                model.ProgressStatusMessage = result.ErrorMessage ?? "Could not save notes.";
+                model.ProgressStatusIsError = true;
+                return;
+            }
+
+            objectSpace.CommitChanges();
+            model.ProgressStatusMessage = "Notes saved.";
+            model.ProgressStatusIsError = false;
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            model.ProgressStatusMessage = ex.Message;
+            model.ProgressStatusIsError = true;
+        }
+    }
+
+    private async Task UploadMinistryLetterAsync(OfficerShellCaseProgressFileUpload upload)
+    {
+        var model = ComponentModel;
+        var applicationId = ResolveApplicationProfileInstanceId();
+        if (model == null || _application == null || applicationId == Guid.Empty)
+            return;
+
+        try
+        {
+            using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
+            var service = _caseProgressService
+                ?? _application.ServiceProvider?.GetService<IOfficerShellCaseProgressService>()
+                ?? new OfficerShellCaseProgressService();
+
+            var result = service.SetMinistryLetter(
+                objectSpace,
+                applicationId,
+                upload.FileName,
+                upload.Content);
+
+            if (!result.Success)
+            {
+                model.ProgressStatusMessage = result.ErrorMessage ?? "Could not upload ministry letter.";
+                model.ProgressStatusIsError = true;
+                return;
+            }
+
+            objectSpace.CommitChanges();
+            model.ProgressStatusMessage = "Ministry letter uploaded.";
+            model.ProgressStatusIsError = false;
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            model.ProgressStatusMessage = ex.Message;
+            model.ProgressStatusIsError = true;
+        }
+    }
+
+    private async Task AdvanceCaseProgressAsync(OfficerShellCaseProgressAdvanceRequest request)
+    {
+        var model = ComponentModel;
+        var applicationId = ResolveApplicationProfileInstanceId();
+        if (model == null || _application == null || applicationId == Guid.Empty)
+            return;
+
+        try
+        {
+            using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
+            var service = _caseProgressService
+                ?? _application.ServiceProvider?.GetService<IOfficerShellCaseProgressService>()
+                ?? new OfficerShellCaseProgressService();
+
+            var result = service.Advance(
+                objectSpace,
+                applicationId,
+                request.StateCode,
+                request.Notes);
+
+            if (!result.Success)
+            {
+                model.ProgressStatusMessage = result.ErrorMessage ?? "Could not advance progress.";
+                model.ProgressStatusIsError = true;
+                return;
+            }
+
+            objectSpace.CommitChanges();
+            model.ProgressStatusMessage = "Progress advanced.";
+            model.ProgressStatusIsError = false;
+            model.CaseTab = "progress";
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            model.ProgressStatusMessage = ex.Message;
+            model.ProgressStatusIsError = true;
+        }
+    }
+
+    private async Task SearchPersonLinkCandidatesAsync(string searchText)
+    {
+        var model = ComponentModel;
+        var applicationId = ResolveApplicationProfileInstanceId();
+        if (model == null || _application == null || applicationId == Guid.Empty)
+            return;
+
+        model.PersonLinkIsSearching = true;
+        try
+        {
+            using var objectSpace = _application.CreateObjectSpace(typeof(Person));
+            var service = _personLinkQueryService
+                ?? _application.ServiceProvider?.GetService<IApplicationProfileInstancePersonLinkQueryService>()
+                ?? new ApplicationProfileInstancePersonLinkQueryService();
+
+            model.PersonLinkCandidates = service.SearchCandidates(objectSpace, applicationId, searchText);
+        }
+        catch (Exception ex)
+        {
+            model.PersonLinkStatusMessage = ex.Message;
+            model.PersonLinkStatusIsError = true;
+            model.PersonLinkCandidates = Array.Empty<ApplicationProfileInstancePersonLinkCandidateRow>();
+        }
+        finally
+        {
+            model.PersonLinkIsSearching = false;
+        }
+    }
+
+    private async Task LinkPersonFromPickerAsync(Guid personId)
+    {
+        var model = ComponentModel;
+        var applicationId = ResolveApplicationProfileInstanceId();
+        if (model == null || _application == null || applicationId == Guid.Empty || personId == Guid.Empty)
+            return;
+
+        model.PersonLinkIsLinking = true;
+        try
+        {
+            using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
+            var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
+            var person = objectSpace.GetObjectByKey<Person>(personId);
+            if (application == null || person == null)
+            {
+                model.PersonLinkStatusMessage = "Person or application not found.";
+                model.PersonLinkStatusIsError = true;
+                return;
+            }
+
+            if (ApplicationProfileInstancePersonRosterLockHelper.AreResolvedLinksLocked(application))
+            {
+                model.PersonLinkStatusMessage = VisaUiMessages.Get("ApplicationProfileInstancePerson.RosterLockedWhenWorkflowTerminal");
+                model.PersonLinkStatusIsError = true;
+                return;
+            }
+
+            var linked = ApplicationProfileInstancePersonService.LinkPerson(objectSpace, application, person);
+            if (linked == null)
+            {
+                model.PersonLinkStatusMessage = "Could not link the selected person.";
+                model.PersonLinkStatusIsError = true;
+                return;
+            }
+
+            objectSpace.CommitChanges();
+            model.ShowPersonLinkPicker = false;
+            model.PersonLinkCandidates = Array.Empty<ApplicationProfileInstancePersonLinkCandidateRow>();
+            model.PersonLinkStatusMessage = $"{person.FullName} linked.";
+            model.PersonLinkStatusIsError = false;
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            model.PersonLinkStatusMessage = ex.Message;
+            model.PersonLinkStatusIsError = true;
+        }
+        finally
+        {
+            model.PersonLinkIsLinking = false;
+        }
+    }
+
+    private Task ClosePersonLinkPickerAsync()
+    {
+        var model = ComponentModel;
+        if (model == null)
+            return Task.CompletedTask;
+
+        model.ShowPersonLinkPicker = false;
+        model.PersonLinkCandidates = Array.Empty<ApplicationProfileInstancePersonLinkCandidateRow>();
+        model.PersonLinkStatusMessage = null;
+        model.PersonLinkStatusIsError = false;
+        return Task.CompletedTask;
+    }
+
+    private void ApplyApplicationProfileInstanceIdFromContext()
+    {
+        if (CurrentObject is not ApplicationWorkspaceHost host || host.ApplicationProfileInstanceId != Guid.Empty)
             return;
 
         var pending = _application != null
             ? ApplicationWorkspacePendingOpenGate.Get(_application)
             : Guid.Empty;
         if (pending != Guid.Empty)
-            host.ApplicationId = pending;
+            host.ApplicationProfileInstanceId = pending;
     }
 
-    private Guid ResolveApplicationId()
+    private Guid ResolveApplicationProfileInstanceId()
     {
-        ApplyApplicationIdFromContext();
-        if (CurrentObject is ApplicationWorkspaceHost host && host.ApplicationId != Guid.Empty)
-            return host.ApplicationId;
+        ApplyApplicationProfileInstanceIdFromContext();
+        if (CurrentObject is ApplicationWorkspaceHost host && host.ApplicationProfileInstanceId != Guid.Empty)
+            return host.ApplicationProfileInstanceId;
 
         return _application != null
             ? ApplicationWorkspacePendingOpenGate.Get(_application)

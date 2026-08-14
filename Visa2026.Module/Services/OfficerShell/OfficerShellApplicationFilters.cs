@@ -6,19 +6,19 @@ namespace Visa2026.Module.Services.OfficerShell;
 
 internal static class OfficerShellApplicationFilters
 {
-    public static readonly Expression<Func<Application, bool>> IsStaged = application =>
+    public static readonly Expression<Func<ApplicationProfileInstance, bool>> IsStaged = application =>
         string.IsNullOrEmpty(application.ProcessNumber)
         && (application.LatestPrimaryStateCode == null
             || application.LatestPrimaryStateCode == "OFFICE_PREPARATION"
             || application.LatestPrimaryStateCode == "DRAFT");
 
-    public static readonly Expression<Func<Application, bool>> IsInProcess = application =>
+    public static readonly Expression<Func<ApplicationProfileInstance, bool>> IsInProcess = application =>
         !string.IsNullOrEmpty(application.ProcessNumber)
         || (application.LatestPrimaryStateCode != null
             && application.LatestPrimaryStateCode != "OFFICE_PREPARATION"
             && application.LatestPrimaryStateCode != "DRAFT");
 
-    public static bool IsStagedApplication(Application? application) =>
+    public static bool IsStagedApplication(ApplicationProfileInstance? application) =>
         application != null && IsStagedState(application.ProcessNumber, application.LatestPrimaryStateCode);
 
     public static bool IsStagedState(string? processNumber, string? latestPrimaryStateCode) =>
@@ -30,7 +30,7 @@ internal static class OfficerShellApplicationFilters
     public static bool IsInProcessState(string? processNumber, string? latestPrimaryStateCode) =>
         !IsStagedState(processNumber, latestPrimaryStateCode);
 
-    public static bool IsReadyForStartProcess(Application? application) =>
+    public static bool IsReadyForStartProcess(ApplicationProfileInstance? application) =>
         application?.ApplicationProfile != null
         && Services.ApplicationPersonRoster.ApplicationRosterHelper.GetRosterPersonCountInMemory(application) > 0;
 }

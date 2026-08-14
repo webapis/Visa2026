@@ -5,7 +5,7 @@ namespace Visa2026.DataImporter.Legacy.Visa2014;
 /// work permit (PersonInApplication.WorkPermit), or full visa coverage on extension subtype 7 (ProcessNumber or next sibling after PIA.Visa).
 /// Mirrors Visa2026 Application.Invitations / WorkPermits / Visa.IssuingApplicationItem after import.
 /// </summary>
-internal sealed record Visa2014ApplicationProgressCompletionEvidence(
+internal sealed record Visa2014ApplicationProfileInstanceProgressCompletionEvidence(
     DateTime? CompletionDate,
     string SourceLabel,
     string? SourceValue)
@@ -17,13 +17,13 @@ internal sealed record Visa2014ApplicationProgressCompletionEvidence(
         date.HasValue && date.Value >= new DateTime(2000, 1, 1);
 }
 
-internal static class Visa2014ApplicationProgressCompletionIndex
+internal static class Visa2014ApplicationProfileInstanceProgressCompletionIndex
 {
     private static readonly DateTime LegacyDateThreshold = new(2000, 1, 1);
 
     internal const string InvitationWorkPermitLoadSql = """
         SELECT
-            CAST(a.Oid AS varchar(36)) AS ApplicationOid,
+            CAST(a.Oid AS varchar(36)) AS ApplicationProfileInstanceOid,
             CONVERT(varchar(10), inv.IssuedDate, 23) AS InvitationIssuedDate,
             inv.Number AS InvitationNumber,
             CONVERT(varchar(10), wp.IssuedDate, 23) AS WorkPermitIssuedDate,
@@ -72,7 +72,7 @@ internal static class Visa2014ApplicationProgressCompletionIndex
     /// </summary>
     internal const string VisaExtensionLoadSql = """
         SELECT
-            CAST(a.Oid AS varchar(36)) AS ApplicationOid,
+            CAST(a.Oid AS varchar(36)) AS ApplicationProfileInstanceOid,
             pia.ItemCount AS ApplicationItemCount,
             linked.VisaLinkedCount,
             CONVERT(varchar(10), sample.MaxVisaIssuedDate, 23) AS MaxVisaIssuedDate,
@@ -89,7 +89,7 @@ internal static class Visa2014ApplicationProgressCompletionIndex
         CROSS APPLY (
             SELECT COUNT_BIG(*) AS VisaLinkedCount
             FROM dbo.PersonInApplication pia2
-            WHERE pia2.Application = a.Oid
+            WHERE pia2.ApplicationProfileInstance = a.Oid
               AND pia2.GCRecord IS NULL
               AND (
                   EXISTS (
@@ -126,7 +126,7 @@ internal static class Visa2014ApplicationProgressCompletionIndex
                         SELECT v.VisaNumber, v.VisaIssuedDate, v.Oid
                         FROM dbo.PersonInApplication pia3
                         INNER JOIN dbo.Visa v ON v.ProcessNumber = pia3.Oid AND v.GCRecord IS NULL
-                        WHERE pia3.Application = a.Oid AND pia3.GCRecord IS NULL
+                        WHERE pia3.ApplicationProfileInstance = a.Oid AND pia3.GCRecord IS NULL
                         UNION ALL
                         SELECT nextv.VisaNumber, nextv.VisaIssuedDate, nextv.Oid
                         FROM dbo.PersonInApplication pia3b
@@ -135,7 +135,7 @@ internal static class Visa2014ApplicationProgressCompletionIndex
                             ON nextv.Passport = prev.Passport
                            AND nextv.GCRecord IS NULL
                            AND nextv.VisaIssuedDate > prev.VisaIssuedDate
-                        WHERE pia3b.Application = a.Oid
+                        WHERE pia3b.ApplicationProfileInstance = a.Oid
                           AND pia3b.GCRecord IS NULL
                           AND pia3b.Visa IS NOT NULL
                           AND NOT EXISTS (
@@ -152,7 +152,7 @@ internal static class Visa2014ApplicationProgressCompletionIndex
                 SELECT v.VisaIssuedDate
                 FROM dbo.PersonInApplication pia4
                 INNER JOIN dbo.Visa v ON v.ProcessNumber = pia4.Oid AND v.GCRecord IS NULL
-                WHERE pia4.Application = a.Oid AND pia4.GCRecord IS NULL
+                WHERE pia4.ApplicationProfileInstance = a.Oid AND pia4.GCRecord IS NULL
                 UNION ALL
                 SELECT nextv.VisaIssuedDate
                 FROM dbo.PersonInApplication pia4b
@@ -161,7 +161,7 @@ internal static class Visa2014ApplicationProgressCompletionIndex
                     ON nextv.Passport = prev.Passport
                    AND nextv.GCRecord IS NULL
                    AND nextv.VisaIssuedDate > prev.VisaIssuedDate
-                WHERE pia4b.Application = a.Oid
+                WHERE pia4b.ApplicationProfileInstance = a.Oid
                   AND pia4b.GCRecord IS NULL
                   AND pia4b.Visa IS NOT NULL
                   AND NOT EXISTS (
@@ -184,15 +184,15 @@ internal static class Visa2014ApplicationProgressCompletionIndex
     // Backward-compatible alias used by older call sites / docs.
     internal const string LoadSql = InvitationWorkPermitLoadSql;
 
-    public static IReadOnlyDictionary<Guid, Visa2014ApplicationProgressCompletionEvidence> Load(
+    public static IReadOnlyDictionary<Guid, Visa2014ApplicationProfileInstanceProgressCompletionEvidence> Load(
         string connectionString,
         bool verbose)
     {
-        var map = new Dictionary<Guid, Visa2014ApplicationProgressCompletionEvidence>();
+        var map = new Dictionary<Guid, Visa2014ApplicationProfileInstanceProgressCompletionEvidence>();
 
         foreach (var row in Visa2014SqlCmdReader.Query(connectionString, InvitationWorkPermitLoadSql, verbose))
         {
-            if (!TryParseApplicationOid(row, out var applicationOid))
+            if (!TryParseApplicationProfileInstanceOid(row, out var applicationOid))
                 continue;
 
             var evidence = BuildInvitationWorkPermitEvidence(row);
@@ -205,7 +205,7 @@ internal static class Visa2014ApplicationProgressCompletionIndex
 
         foreach (var row in Visa2014SqlCmdReader.Query(connectionString, VisaExtensionLoadSql, verbose))
         {
-            if (!TryParseApplicationOid(row, out var applicationOid))
+            if (!TryParseApplicationProfileInstanceOid(row, out var applicationOid))
                 continue;
             if (map.ContainsKey(applicationOid))
                 continue;
@@ -221,18 +221,18 @@ internal static class Visa2014ApplicationProgressCompletionIndex
         if (verbose)
         {
             Console.WriteLine(
-                $"INF ApplicationProgress completion index: {map.Count} legacy application(s) " +
+                $"INF ApplicationProfileInstanceProgress completion index: {map.Count} legacy application(s) " +
                 $"(invitation/work-permit={invitationWorkPermitCount}, visa-extension-added={visaExtensionAdded}).");
         }
 
         return map;
     }
 
-    internal static Visa2014ApplicationProgressCompletionEvidence BuildEvidence(
+    internal static Visa2014ApplicationProfileInstanceProgressCompletionEvidence BuildEvidence(
         IReadOnlyDictionary<string, string?> row) =>
         BuildInvitationWorkPermitEvidence(row);
 
-    internal static Visa2014ApplicationProgressCompletionEvidence BuildInvitationWorkPermitEvidence(
+    internal static Visa2014ApplicationProfileInstanceProgressCompletionEvidence BuildInvitationWorkPermitEvidence(
         IReadOnlyDictionary<string, string?> row)
     {
         var invitationDate = TryParseDate(row.GetValueOrDefault("InvitationIssuedDate"));
@@ -243,37 +243,37 @@ internal static class Visa2014ApplicationProgressCompletionIndex
         var hasInvitation = IsLegacyDateSet(invitationDate) || invitationNumber != null;
         var hasWorkPermit = IsLegacyDateSet(workPermitDate) || workPermitNumber != null;
         if (!hasInvitation && !hasWorkPermit)
-            return new Visa2014ApplicationProgressCompletionEvidence(null, "", null);
+            return new Visa2014ApplicationProfileInstanceProgressCompletionEvidence(null, "", null);
 
         var useInvitation = hasInvitation && (!hasWorkPermit || PreferInvitation(invitationDate, workPermitDate));
         if (useInvitation)
         {
-            return new Visa2014ApplicationProgressCompletionEvidence(
+            return new Visa2014ApplicationProfileInstanceProgressCompletionEvidence(
                 invitationDate ?? workPermitDate,
                 "InvitationNumber",
                 invitationNumber ?? workPermitNumber);
         }
 
-        return new Visa2014ApplicationProgressCompletionEvidence(
+        return new Visa2014ApplicationProfileInstanceProgressCompletionEvidence(
             workPermitDate ?? invitationDate,
             "WorkPermitNumber",
             workPermitNumber ?? invitationNumber);
     }
 
-    internal static Visa2014ApplicationProgressCompletionEvidence BuildVisaExtensionEvidence(
+    internal static Visa2014ApplicationProfileInstanceProgressCompletionEvidence BuildVisaExtensionEvidence(
         IReadOnlyDictionary<string, string?> row)
     {
         var itemCount = ParseCount(row.GetValueOrDefault("ApplicationItemCount"));
         var visaLinkedCount = ParseCount(row.GetValueOrDefault("VisaLinkedCount"));
         if (itemCount <= 0 || itemCount != visaLinkedCount)
-            return new Visa2014ApplicationProgressCompletionEvidence(null, "", null);
+            return new Visa2014ApplicationProfileInstanceProgressCompletionEvidence(null, "", null);
 
         var completionDate = TryParseDate(row.GetValueOrDefault("MaxVisaIssuedDate"));
         var visaNumber = NormalizeRef(row.GetValueOrDefault("SampleVisaNumber"));
         if (!IsLegacyDateSet(completionDate) && visaNumber == null)
-            return new Visa2014ApplicationProgressCompletionEvidence(null, "", null);
+            return new Visa2014ApplicationProfileInstanceProgressCompletionEvidence(null, "", null);
 
-        return new Visa2014ApplicationProgressCompletionEvidence(
+        return new Visa2014ApplicationProfileInstanceProgressCompletionEvidence(
             IsLegacyDateSet(completionDate) ? completionDate : null,
             "VisaNumber",
             visaNumber);
@@ -282,11 +282,11 @@ internal static class Visa2014ApplicationProgressCompletionIndex
     /// <summary>
     /// Merge helper for tests: invitation/work-permit wins over visa-extension for the same app.
     /// </summary>
-    internal static Dictionary<Guid, Visa2014ApplicationProgressCompletionEvidence> Merge(
-        IEnumerable<(Guid ApplicationOid, Visa2014ApplicationProgressCompletionEvidence Evidence)> invitationWorkPermit,
-        IEnumerable<(Guid ApplicationOid, Visa2014ApplicationProgressCompletionEvidence Evidence)> visaExtension)
+    internal static Dictionary<Guid, Visa2014ApplicationProfileInstanceProgressCompletionEvidence> Merge(
+        IEnumerable<(Guid ApplicationProfileInstanceOid, Visa2014ApplicationProfileInstanceProgressCompletionEvidence Evidence)> invitationWorkPermit,
+        IEnumerable<(Guid ApplicationProfileInstanceOid, Visa2014ApplicationProfileInstanceProgressCompletionEvidence Evidence)> visaExtension)
     {
-        var map = new Dictionary<Guid, Visa2014ApplicationProgressCompletionEvidence>();
+        var map = new Dictionary<Guid, Visa2014ApplicationProfileInstanceProgressCompletionEvidence>();
         foreach (var (oid, evidence) in invitationWorkPermit)
         {
             if (evidence.HasCompletion)
@@ -303,12 +303,12 @@ internal static class Visa2014ApplicationProgressCompletionIndex
         return map;
     }
 
-    private static bool TryParseApplicationOid(
+    private static bool TryParseApplicationProfileInstanceOid(
         IReadOnlyDictionary<string, string?> row,
         out Guid applicationOid)
     {
         applicationOid = default;
-        return row.TryGetValue("ApplicationOid", out var oidText)
+        return row.TryGetValue("ApplicationProfileInstanceOid", out var oidText)
             && Guid.TryParse(oidText?.Trim(), out applicationOid);
     }
 

@@ -27,7 +27,7 @@ internal sealed class ParallelPostStats
 /// Bounded parallel posting for large import waves. Each worker owns its own
 /// <see cref="Visa2014ObjectSpaceImportTarget"/> (ObjectSpace is not thread-safe).
 /// When <paramref name="partitionKeySelector"/> is set, rows with the same key always
-/// go to the same worker (required for ApplicationProgress → Application optimistic lock).
+/// go to the same worker (required for ApplicationProfileInstanceProgress → ApplicationProfileInstance optimistic lock).
 /// </summary>
 internal static class Visa2014ParallelImportPoster
 {

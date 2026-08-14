@@ -10,8 +10,8 @@ public static class ApplicationProfileApplicabilityHelper
 {
     public static bool IsProfileSelectable(
         ApplicationProfile profile,
-        Application? applicabilityProbe,
-        ApplicationProgressRouteKind? progressRouteFilter)
+        ApplicationProfileInstance? applicabilityProbe,
+        ApplicationProfileInstanceProgressRouteKind? progressRouteFilter)
     {
         if (profile == null || !profile.IsActive)
             return false;

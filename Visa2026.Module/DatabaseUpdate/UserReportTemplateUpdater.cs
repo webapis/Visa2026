@@ -99,7 +99,7 @@ namespace Visa2026.Module.DatabaseUpdate
                     wordExtractor,
                     wordValidator,
                     templateName: "Borcnama",
-                    description: "Seeded from Resources/Templates/Borcnama.docx; ApplicationItem template; visible for all application types.",
+                    description: "Seeded from Resources/Templates/Borcnama.docx; ApplicationRosterMergeLine template; visible for all application types.",
                     resourceName: "Visa2026.Module.Resources.Templates.Borcnama.docx",
                     boType: UserReportBoType.ApplicationItem,
                     applicableApplicationTypeNames: null,
@@ -108,12 +108,12 @@ namespace Visa2026.Module.DatabaseUpdate
                 .GetAwaiter()
                 .GetResult();
 
-            // Contract_uzt.docx — ApplicationItem + labor-style {{#ds.rows}}; visa/WP extension family application types.
+            // Contract_uzt.docx — ApplicationRosterMergeLine + labor-style {{#ds.rows}}; visa/WP extension family application types.
             EnsureTemplateExists(
                     wordExtractor,
                     wordValidator,
                     templateName: "Contract",
-                    description: "Seeded from embedded Resources/Templates/Contract_uzt.docx; ApplicationItem template; visible for App_Visa_and_WP_Ext, App_WP_Ext, and App_Visa_Ext_According_to_WP.",
+                    description: "Seeded from embedded Resources/Templates/Contract_uzt.docx; ApplicationRosterMergeLine template; visible for App_Visa_and_WP_Ext, App_WP_Ext, and App_Visa_Ext_According_to_WP.",
                     resourceName: "Visa2026.Module.Resources.Templates.Contract_uzt.docx",
                     boType: UserReportBoType.ApplicationItem,
                     applicableApplicationTypeNames: new[]
@@ -127,12 +127,12 @@ namespace Visa2026.Module.DatabaseUpdate
                 .GetAwaiter()
                 .GetResult();
 
-            // Invitation + work permit (App_Inv_And_WP) — ApplicationItem root, same rows merge as labor contract family.
+            // Invitation + work permit (App_Inv_And_WP) — ApplicationRosterMergeLine root, same rows merge as labor contract family.
             EnsureTemplateExists(
                     wordExtractor,
                     wordValidator,
                     templateName: "Contract Inv",
-                    description: "Seeded from embedded Resources/Templates/Contract_Inv.docx; ApplicationItem template; visible only for application type App_Inv_And_WP.",
+                    description: "Seeded from embedded Resources/Templates/Contract_Inv.docx; ApplicationRosterMergeLine template; visible only for application type App_Inv_And_WP.",
                     resourceName: "Visa2026.Module.Resources.Templates.Contract_Inv.docx",
                     boType: UserReportBoType.ApplicationItem,
                     applicableApplicationTypeNames: new[] { "App_Inv_And_WP" },
@@ -141,14 +141,14 @@ namespace Visa2026.Module.DatabaseUpdate
                 .GetAwaiter()
                 .GetResult();
 
-            // GT-15_Sazakow_uzt.docx — GT-15 Çalık branch → Migration letter (Application root).
+            // GT-15_Sazakow_uzt.docx — GT-15 Çalık branch → Migration letter (ApplicationProfileInstance root).
             EnsureTemplateExists(
                     wordExtractor,
                     wordValidator,
                     templateName: "GT-15_Sazakow_uzt",
                     description: "Seeded from Resources/Templates/GT-15_Sazakow_uzt.docx; Application-level; App_Visa_and_WP_Ext; Applicable Project Contracts where NameTm contains GT-15.",
                     resourceName: "Visa2026.Module.Resources.Templates.GT-15_Sazakow_uzt.docx",
-                    boType: UserReportBoType.Application,
+                    boType: UserReportBoType.ApplicationProfileInstance,
                     applicableApplicationTypeNames: new[] { "App_Visa_and_WP_Ext" },
                     visibilityCriteria: null,
                     sortOrder: 52,
@@ -163,7 +163,7 @@ namespace Visa2026.Module.DatabaseUpdate
                     templateName: "GT-15_Elyasow_uzt",
                     description: "Seeded from Resources/Templates/GT-15_Elyasow_uzt.docx; Application-level; App_Visa_and_WP_Ext; Applicable Project Contracts where NameTm contains GT-15.",
                     resourceName: "Visa2026.Module.Resources.Templates.GT-15_Elyasow_uzt.docx",
-                    boType: UserReportBoType.Application,
+                    boType: UserReportBoType.ApplicationProfileInstance,
                     applicableApplicationTypeNames: new[] { "App_Visa_and_WP_Ext" },
                     visibilityCriteria: null,
                     sortOrder: 53,
@@ -178,7 +178,7 @@ namespace Visa2026.Module.DatabaseUpdate
                     templateName: "GT-15_MINSTROY_uzt",
                     description: "Seeded from Resources/Templates/GT-15_MINSTROY_uzt.docx; Application-level; App_Visa_and_WP_Ext; Applicable Project Contracts where NameTm contains GT-15.",
                     resourceName: "Visa2026.Module.Resources.Templates.GT-15_MINSTROY_uzt.docx",
-                    boType: UserReportBoType.Application,
+                    boType: UserReportBoType.ApplicationProfileInstance,
                     applicableApplicationTypeNames: new[] { "App_Visa_and_WP_Ext" },
                     visibilityCriteria: null,
                     sortOrder: 54,
@@ -191,7 +191,7 @@ namespace Visa2026.Module.DatabaseUpdate
                     wordExtractor,
                     wordValidator,
                     templateName: "Sanaw",
-                    description: "Seeded from Resources/Templates/Sanaw_uzt.docx; ApplicationItem root with {{#ds.rows}}; visible only for application type App_Visa_and_WP_Ext.",
+                    description: "Seeded from Resources/Templates/Sanaw_uzt.docx; ApplicationRosterMergeLine root with {{#ds.rows}}; visible only for application type App_Visa_and_WP_Ext.",
                     resourceName: "Visa2026.Module.Resources.Templates.Sanaw_uzt.docx",
                     boType: UserReportBoType.ApplicationItem,
                     applicableApplicationTypeNames: new[] { "App_Visa_and_WP_Ext" },
@@ -207,19 +207,19 @@ namespace Visa2026.Module.DatabaseUpdate
                     templateName: "Hasaba almak hat",
                     description: "Seeded from Resources/Templates/hasaba_almak_hat.docx; Application-level; visible only for application type App_Reg_Check_In.",
                     resourceName: "Visa2026.Module.Resources.Templates.hasaba_almak_hat.docx",
-                    boType: UserReportBoType.Application,
+                    boType: UserReportBoType.ApplicationProfileInstance,
                     applicableApplicationTypeNames: new[] { "App_Reg_Check_In" },
                     visibilityCriteria: null,
                     sortOrder: 56)
                 .GetAwaiter()
                 .GetResult();
 
-            // Forma_16.docx — Daşary ýurt raýatlaryny bellige alyş namasy; ItemRows + page break per ApplicationItem.
+            // Forma_16.docx — Daşary ýurt raýatlaryny bellige alyş namasy; ItemRows + page break per ApplicationRosterMergeLine.
             EnsureTemplateExists(
                     wordExtractor,
                     wordValidator,
                     templateName: "Forma 16",
-                    description: "Seeded from Resources/Templates/Forma_16.docx; ApplicationItem root; Word layout ItemRows ({{#ds.rows}}); ApplicationTypeGroup Registration; {{IMAGE:Person_Photo}}.",
+                    description: "Seeded from Resources/Templates/Forma_16.docx; ApplicationRosterMergeLine root; Word layout ItemRows ({{#ds.rows}}); ApplicationTypeGroup Registration; {{IMAGE:Person_Photo}}.",
                     resourceName: "Visa2026.Module.Resources.Templates.Forma_16.docx",
                     boType: UserReportBoType.ApplicationItem,
                     applicableApplicationTypeNames: null,
@@ -236,7 +236,7 @@ namespace Visa2026.Module.DatabaseUpdate
                     templateName: "GT-15_Elyasow_ckl",
                     description: "Seeded from Resources/Templates/GT-15_Elyasow_ckl.docx; Application-level AppScalar; App_Inv_And_WP; GT-15 project contracts (NameTm contains GT-15); yellow-only dynamic fields per GT-15_Elyasow_ckl_map.md.",
                     resourceName: "Visa2026.Module.Resources.Templates.GT-15_Elyasow_ckl.docx",
-                    boType: UserReportBoType.Application,
+                    boType: UserReportBoType.ApplicationProfileInstance,
                     applicableApplicationTypeNames: new[] { "App_Inv_And_WP" },
                     visibilityCriteria: null,
                     sortOrder: 58,
@@ -251,7 +251,7 @@ namespace Visa2026.Module.DatabaseUpdate
                     templateName: "GT-15_Elyasow_ckl_only",
                     description: "Seeded from Resources/Templates/GT-15_Elyasow_ckl_only.docx; Application-level AppScalar; App_Inv only; GT-15 project contracts; çakylyk-only B2/G1 static per GT-15_Elyasow_ckl_only_map.md.",
                     resourceName: "Visa2026.Module.Resources.Templates.GT-15_Elyasow_ckl_only.docx",
-                    boType: UserReportBoType.Application,
+                    boType: UserReportBoType.ApplicationProfileInstance,
                     applicableApplicationTypeNames: new[] { "App_Inv" },
                     visibilityCriteria: null,
                     sortOrder: 60,
@@ -264,9 +264,9 @@ namespace Visa2026.Module.DatabaseUpdate
                     wordExtractor,
                     wordValidator,
                     templateName: "GT-15_Migrasiya_ckl_hat",
-                    description: "Seeded from Resources/Templates/GT-15_Migrasiya_ckl_hat.docx; Application AppScalar; App_Inv, App_Inv_And_WP; GT-15; static ministry signatory Ministr / A.Saparow; dynamic Urgency, TotalPersonCount*, VisaPeriod/Category per GT-15_Migrasiya_ckl_hat_map.md.",
+                    description: "Seeded from Resources/Templates/GT-15_Migrasiya_ckl_hat.docx; ApplicationProfileInstance AppScalar; App_Inv, App_Inv_And_WP; GT-15; static ministry signatory Ministr / A.Saparow; dynamic Urgency, TotalPersonCount*, VisaPeriod/Category per GT-15_Migrasiya_ckl_hat_map.md.",
                     resourceName: "Visa2026.Module.Resources.Templates.GT-15_Migrasiya_ckl_hat.docx",
-                    boType: UserReportBoType.Application,
+                    boType: UserReportBoType.ApplicationProfileInstance,
                     applicableApplicationTypeNames: new[] { "App_Inv", "App_Inv_And_WP" },
                     visibilityCriteria: null,
                     sortOrder: 65,
@@ -279,7 +279,7 @@ namespace Visa2026.Module.DatabaseUpdate
                     wordExtractor,
                     wordValidator,
                     templateName: "Sanaw_ckl",
-                    description: "Seeded from Resources/Templates/Sanaw_ckl.docx; ApplicationItem root; Word layout ItemRows ({{#ds.rows}}); App_Inv, App_Inv_And_WP; GT-15 project contracts (NameTm contains GT-15); signatory {{ds.Application_CompanyHead_*}} per map.",
+                    description: "Seeded from Resources/Templates/Sanaw_ckl.docx; ApplicationRosterMergeLine root; Word layout ItemRows ({{#ds.rows}}); App_Inv, App_Inv_And_WP; GT-15 project contracts (NameTm contains GT-15); signatory {{ds.Application_CompanyHead_*}} per map.",
                     resourceName: "Visa2026.Module.Resources.Templates.Sanaw_ckl.docx",
                     boType: UserReportBoType.ApplicationItem,
                     applicableApplicationTypeNames: new[] { "App_Inv", "App_Inv_And_WP" },
@@ -294,7 +294,7 @@ namespace Visa2026.Module.DatabaseUpdate
                     excelExtractor,
                     excelValidator,
                     templateName: "Gurlusyk",
-                    description: "Seeded from Resources/Templates/Excel/433_gurlusyk_uzt.xlsx; ApplicationItem list with {{#ds.rows}} / {{.…}} columns; App_WP_Ext, App_Visa_and_WP_Ext, App_Visa_Ext_According_to_WP.",
+                    description: "Seeded from Resources/Templates/Excel/433_gurlusyk_uzt.xlsx; ApplicationRosterMergeLine list with {{#ds.rows}} / {{.…}} columns; App_WP_Ext, App_Visa_and_WP_Ext, App_Visa_Ext_According_to_WP.",
                     resourceName: "Visa2026.Module.Resources.Templates.Excel.433_gurlusyk_uzt.xlsx",
                     boType: UserReportBoType.ApplicationItem,
                     excelMergeMode: ExcelMergeMode.ItemList,
@@ -309,12 +309,12 @@ namespace Visa2026.Module.DatabaseUpdate
                 .GetAwaiter()
                 .GetResult();
 
-            // sahsy_kagyz.docx — ŞAHSY KAGYZY per ApplicationItem; ItemRows + page break; App_Inv + App_Inv_And_WP per sahsy_kagyz_map.md.
+            // sahsy_kagyz.docx — ŞAHSY KAGYZY per ApplicationRosterMergeLine; ItemRows + page break; App_Inv + App_Inv_And_WP per sahsy_kagyz_map.md.
             EnsureTemplateExists(
                     wordExtractor,
                     wordValidator,
                     templateName: "Sahsy kagyz",
-                    description: "Seeded from Resources/Templates/sahsy_kagyz.docx; ApplicationItem root; Word layout ItemRows ({{#ds.rows}}); App_Inv, App_Inv_And_WP; {{IMAGE:Person_Photo}} per sahsy_kagyz_map.md.",
+                    description: "Seeded from Resources/Templates/sahsy_kagyz.docx; ApplicationRosterMergeLine root; Word layout ItemRows ({{#ds.rows}}); App_Inv, App_Inv_And_WP; {{IMAGE:Person_Photo}} per sahsy_kagyz_map.md.",
                     resourceName: "Visa2026.Module.Resources.Templates.sahsy_kagyz.docx",
                     boType: UserReportBoType.ApplicationItem,
                     applicableApplicationTypeNames: new[] { "App_Inv", "App_Inv_And_WP" },
@@ -330,7 +330,7 @@ namespace Visa2026.Module.DatabaseUpdate
                     templateName: "Wiza ýatyrmak hat",
                     description: "Seeded from Resources/Templates/wiza_yatyrylmak_hat.docx; Application-level AppScalar; App_Cancel_Visa only; CancelVisaCount per line CurrentVisa/NextVisa per wiza_yatyrylmak_hat_map.md.",
                     resourceName: "Visa2026.Module.Resources.Templates.wiza_yatyrylmak_hat.docx",
-                    boType: UserReportBoType.Application,
+                    boType: UserReportBoType.ApplicationProfileInstance,
                     applicableApplicationTypeNames: new[] { "App_Cancel_Visa" },
                     visibilityCriteria: null,
                     sortOrder: 68)
@@ -342,7 +342,7 @@ namespace Visa2026.Module.DatabaseUpdate
                     excelExtractor,
                     excelValidator,
                     templateName: "Wiza ýatyrmak sanaw",
-                    description: "Seeded from Resources/Templates/Excel/wiza_yatyrylmak_sanaw.xlsx; 12-column ApplicationItem list; ItemList merge; App_Cancel_Visa only; CancelVisa_*Block per wiza_yatyrylmak_sanaw_map.md.",
+                    description: "Seeded from Resources/Templates/Excel/wiza_yatyrylmak_sanaw.xlsx; 12-column ApplicationRosterMergeLine list; ItemList merge; App_Cancel_Visa only; CancelVisa_*Block per wiza_yatyrylmak_sanaw_map.md.",
                     resourceName: "Visa2026.Module.Resources.Templates.Excel.wiza_yatyrylmak_sanaw.xlsx",
                     boType: UserReportBoType.ApplicationItem,
                     excelMergeMode: ExcelMergeMode.ItemList,
@@ -357,7 +357,7 @@ namespace Visa2026.Module.DatabaseUpdate
                     excelExtractor,
                     excelValidator,
                     templateName: "Hasaba almak sanawy (Excel)",
-                    description: "Seeded from Resources/Templates/Excel/Sanaw_hasaba_alys.xlsx; 11-column ApplicationItem list; ItemList merge; ApplicationTypeGroup Registration; Registration_GelmeginMaksadyTm per Sanaw_hasaba_alys_map.md.",
+                    description: "Seeded from Resources/Templates/Excel/Sanaw_hasaba_alys.xlsx; 11-column ApplicationRosterMergeLine list; ItemList merge; ApplicationTypeGroup Registration; Registration_GelmeginMaksadyTm per Sanaw_hasaba_alys_map.md.",
                     resourceName: "Visa2026.Module.Resources.Templates.Excel.Sanaw_hasaba_alys.xlsx",
                     boType: UserReportBoType.ApplicationItem,
                     excelMergeMode: ExcelMergeMode.ItemList,
@@ -373,7 +373,7 @@ namespace Visa2026.Module.DatabaseUpdate
                     excelExtractor,
                     excelValidator,
                     templateName: "Gurlusyk ckl",
-                    description: "Seeded from Resources/Templates/Excel/433_gurlusyk_ckl.xlsx; ApplicationItem list with {{#ds.rows}} / {{.…}} columns; App_Inv_And_WP only; GT-15; Möhleti column uses Çakylyk + Application_VisaPeriod/Category; static footer Ministr / A.Saparow.",
+                    description: "Seeded from Resources/Templates/Excel/433_gurlusyk_ckl.xlsx; ApplicationRosterMergeLine list with {{#ds.rows}} / {{.…}} columns; App_Inv_And_WP only; GT-15; Möhleti column uses Çakylyk + Application_VisaPeriod/Category; static footer Ministr / A.Saparow.",
                     resourceName: "Visa2026.Module.Resources.Templates.Excel.433_gurlusyk_ckl.xlsx",
                     boType: UserReportBoType.ApplicationItem,
                     excelMergeMode: ExcelMergeMode.ItemList,
@@ -389,7 +389,7 @@ namespace Visa2026.Module.DatabaseUpdate
                     excelExtractor,
                     excelValidator,
                     templateName: "Sanaw_ckl (Excel)",
-                    description: "Seeded from Resources/Templates/Excel/Sanaw_ckl.xlsx; 14-column ApplicationItem list (cols B–N); ItemList merge; App_Inv, App_Inv_And_WP; GT-15; signatory {{ds.Application_CompanyHead_*}} per map.",
+                    description: "Seeded from Resources/Templates/Excel/Sanaw_ckl.xlsx; 14-column ApplicationRosterMergeLine list (cols B–N); ItemList merge; App_Inv, App_Inv_And_WP; GT-15; signatory {{ds.Application_CompanyHead_*}} per map.",
                     resourceName: "Visa2026.Module.Resources.Templates.Excel.Sanaw_ckl.xlsx",
                     boType: UserReportBoType.ApplicationItem,
                     excelMergeMode: ExcelMergeMode.ItemList,
@@ -421,7 +421,7 @@ namespace Visa2026.Module.DatabaseUpdate
                     excelExtractor,
                     excelValidator,
                     templateName: "433-ek sanawy",
-                    description: "Seeded from Resources/Templates/Excel/433-ek_uzt.xlsx; 15-column ApplicationItem list; App_WP_Ext, App_Visa_and_WP_Ext, App_Visa_Ext_According_to_WP.",
+                    description: "Seeded from Resources/Templates/Excel/433-ek_uzt.xlsx; 15-column ApplicationRosterMergeLine list; App_WP_Ext, App_Visa_and_WP_Ext, App_Visa_Ext_According_to_WP.",
                     resourceName: "Visa2026.Module.Resources.Templates.Excel.433-ek_uzt.xlsx",
                     boType: UserReportBoType.ApplicationItem,
                     excelMergeMode: ExcelMergeMode.ItemList,

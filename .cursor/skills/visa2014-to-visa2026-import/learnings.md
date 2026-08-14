@@ -1,3 +1,126 @@
+### 2026-08-13 — EmployeePositionHistory import .15 → local PG (single entity)
+
+- **Mode**: single-entity (`--import-visa2014 --entity EmployeePositionHistory --inprocess`)
+- **Source**: `10.100.128.15` / `VISA2015` (`calik-energi-local-pg`)
+- **Target**: local PostgreSQL `visa2026`
+- **Preflight**: `--entity EmployeePositionHistory` exit **0** (import=3090 skipped=0 unmapped=0)
+- **Outcome**: success — Prepared **3090** / Posted **3090** / Failed **0** / Skipped (no Person map) **0** / ActualPositions created **1383**
+- **Reconcile**: `"EmployeePositionHistories"` **3090** (all with `PersonID`); id-map **3090** keys (copied to source)
+- **Log**: `artifacts/headless-import/EmployeePositionHistory-20260813.log`
+- **Not run**: EmployeeSalary / AddressOfResidence / chain
+
+### 2026-08-13 — Education import .15 → local PG (single entity)
+
+- **Mode**: single-entity (`--import-visa2014 --entity Education --inprocess`)
+- **Source**: `10.100.128.15` / `VISA2015` (`calik-energi-local-pg`)
+- **Target**: local PostgreSQL `visa2026`
+- **Preflight**: `--entity Education` exit **0** (import=3211 skipped=0 unmapped=0)
+- **Outcome**: success — Prepared **3211** / Posted **3211** / Failed **0** / Skipped (no Person map) **0**
+- **Reconcile**: `"Educations"` **3211** (all with `PersonID`); id-map **3211** keys (copied to source `id-maps/calik-energi-local-pg/Education.json`)
+- **Catalogs**: EducationInstitutions 1528 / Specialties 1104 (prior gap seeds present; no new institution/specialty failures)
+- **Log**: `artifacts/headless-import/Education-20260813.log`
+- **Not run**: EducationDocument file wave / EPH / chain
+
+### 2026-08-13 — Visa import .15 → local PG (single entity)
+
+- **Mode**: single-entity (`--import-visa2014 --entity Visa --inprocess`)
+- **Source**: `10.100.128.15` / `VISA2015` (`calik-energi-local-pg`)
+- **Target**: local PostgreSQL `visa2026`
+- **Preflight**: `--entity Visa` exit **0** (import=6249 skipped=19 unmapped=8 blocking=0)
+- **Outcome**: success — Prepared **6249** / Posted **6224** / Failed **0** / Skipped (no Passport map) **25** / transform skipped **19** / Dedupe merged **6**
+- **Reconcile**: `"Visas"` **6224** (all with `PassportID`); id-map **6224** keys (copied to source `id-maps/calik-energi-local-pg/Visa.json`)
+- **Log**: `artifacts/headless-import/Visa-20260813.log`
+- **Not run**: VisaDocument file wave / issuing-application corrections / Education / chain
+
+### 2026-08-13 — Passport import .15 → local PG (single entity)
+
+- **Mode**: single-entity (`--import-visa2014 --entity Passport --inprocess`)
+- **Source**: `10.100.128.15` / `VISA2015` (`calik-energi-local-pg`)
+- **Target**: local PostgreSQL `visa2026`
+- **Preflight**: `--entity Passport` exit **0** (import=3689 skipped=79 unmapped=0)
+- **Outcome**: success — Prepared **3689** / Posted **3689** / Failed **0** / Skipped (no Person map) **0** / transform skipped **79** / Dedupe merged **2**
+- **Reconcile**: `"Passports"` **3689** (all with `PersonID`); id-map bin **3690** keys (copied to source `id-maps/calik-energi-local-pg/Passport.json`)
+- **Log**: `artifacts/headless-import/Passport-20260813.log`
+- **Not run**: PassportDocument file wave / Visa / chain
+
+### 2026-08-13 — Person import .15 → local PG (single entity)
+
+- **Mode**: single-entity (`--import-visa2014 --entity Person --inprocess`)
+- **Source**: `10.100.128.15` / `VISA2015` (`calik-energi-local-pg`)
+- **Target**: local PostgreSQL `visa2026` (localhost:5432)
+- **Preflight**: `--preflight-visa2014-lookups --entity Person` exit **0** (Person transform import=3339 skipped=0 unmapped=0)
+- **Outcome**: success — Prepared **3339** / Posted **3339** / Failed **0** / Skipped 0 / Dedupe merged **21**
+- **Reconcile**: `"People"` **3339** (`GCRecord=0`); employees (`PersonRole=0`) **3046**; id-map bin **3339** keys (copied to source `id-maps/calik-energi-local-pg/Person.json`)
+- **CLI**: `Visa2026.DataImporter.exe --import-visa2014 --entity Person --legacy-source calik-energi-local-pg --inprocess --target-connection <local PG> --no-wait --verbose`
+- **Log**: `artifacts/headless-import/Person-20260813.log`
+- **Noise**: headless Kestrel `:5002` JWT 500s (`IssuerSigningKey` missing) from browser batch polls — not import failures
+- **Not run**: Passport / file waves / `Run-HeadlessChain.ps1` (Person-only as requested)
+
+### 2026-08-13 — Stop import; drop local PG `visa2026` (empty start)
+
+- **Mode**: operator request — no import. Halted Wave 2b resume; no DataImporter was running.
+- **Action**: `DROP DATABASE visa2026` + `CREATE DATABASE visa2026` (UTF8, owner postgres) on localhost:5432. `public` table count **0**. Left `visa2026_easytest` alone. Demo/Prod on `.25` untouched.
+- **Id-maps**: reset `id-maps/calik-energi-local-pg` (source + bin) JSON files to `{}`.
+- **Next**: F5 `Visa2026 - PostgreSQL` — XAF creates schema + lookup seeds only. Do **not** run `Run-HeadlessChain.ps1`.
+
+### 2026-08-13 — Education lookup gaps (11) then resume
+
+- **Fail**: Education Posted 3200 / Failed **11** (`incomplete OData payload` institution/specialty). Chain halt.
+- **Gaps**: 9 institutions (e.g. `Cumhuriyet uniwersiteti`, `IRT Traınıng (PTY) LTD (hünär okuwy)`, `Orta bilim, hünär şahadatnamaly`) + 9 specialties. Exact NameTm in `artifacts/headless-import/_seed-edu-gaps-20260813.sql`.
+- **Seed**: INSERT PG `EducationInstitutions`/`Specialties` (IsDefault=FALSE); append calik-energi tenant JSON (no ConvertTo-Json); copy to embedded tenant json.
+- **Resume**: `-StartAt Education` — **STEP_OK posted 11** (3200 already in id-map). EPH running. Log: `chain-console-resume-education-20260813-124619.log`.
+
+### 2026-08-13 — Visa extract used Visa2026 table name against VISA2015
+
+- **Fail**: Visa wave `Invalid object name 'dbo.ApplicationProfileInstance'` (SQL Server / VISA2015). Mechanical rename of Application → ApplicationProfileInstance hit **legacy extract SQL**.
+- **Fix**: restore `dbo.Application` / `pia.Application` / `ar.Application` in 14 transform/index files. Keep result aliases `ApplicationProfileInstanceOid`.
+- **Resume**: `-StartAt Visa` — **Visa STEP_OK Posted 6223**. Education running. Console: `artifacts/headless-import/chain-console-resume-visa-20260813-123447.log`.
+
+### 2026-08-13 — Local PG wipe + Wave 2b reimport (ApplicationItem hard-remove)
+
+- **Why**: After Phase B, local `visa2026` still had 12295 ApplicationProfileInstances / 38096 progress rows but only **11** ApplicationProfileInstancePeople (ApplicationItems CASCADE left no roster backfill).
+- **Scripts**: dropped ApplicationItem from `Run-HeadlessChain.ps1` and `OnPrem-Sync.ps1`; retired `--correct-application-item-person-current` / `--correct-visa2014-issuing-application-item`; deleted `import/reimport/ApplicationItems.ps1`. Wipe SQL now truncates `ApplicationProfileInstances*` + People + ResolvedLinks (not the old Applications/ApplicationItems names). Chain `-SkipFileWaves` added (PS 5.1); `??` coalescing replaced so the chain parses on Windows PowerShell 5.1.
+- **Wipe**: `Wipe-LocalPostgresTransactional.sql` — People/Apps/roster/progress/Visas → 0. Id-maps `calik-energi-local-pg` reset to `{}` (source + bin).
+- **Fail 1**: `--inprocess` Person died immediately: `Cannot resolve scoped service INonSecuredObjectSpaceFactory from root provider.` Fix: `HeadlessMigrationHost` now `CreateScope()` like seed gates / batch workers.
+- **Retry**: `Run-HeadlessChain.ps1 -StartAt Person -LegacySource calik-energi-local-pg -SkipFileWaves` → local PG. **Person STEP_OK Posted 3339 Failed 0** (legacy 3339, dedupe merged 21). File waves skipped; Passport+ running. Console: `artifacts/headless-import/chain-console-wipe-reimport-20260813-123100.log`. Watch: `Watch-OnPremImportLive.ps1 -Profile Local`.
+- **Not in this run**: DocumentCopies file waves (resume later with `DocumentCopies.ps1`). On-prem Demo/Prod not wiped.
+
+### 2026-08-12 — Import entity hard break: Application → ApplicationProfileInstance
+
+- `--entity Application` rejected with clear error; use `--entity ApplicationProfileInstance` and id-map `ApplicationProfileInstance.json`.
+- Related: ApplicationProfileInstanceProgress / ApplicationProfileInstancePerson entity names.
+- Schema: Module cutover renames Applications* tables before import targets new OData entity.
+- Orchestrators updated: OnPrem-Sync, Run-HeadlessChain, reimport/Applications.ps1, ApplicationPeople.ps1.
+
+### 2026-08-12 — §13 Application → ApplicationProfileInstance cutover (parallel Wave 2b)
+
+- **Hard break**: import `--entity ApplicationProfileInstance`; id-map `ApplicationProfileInstance.json`.
+- **Schema**: new tables + same-Guid copy from `Applications*`, then drop old.
+- **Related renames**: Progress/Person/ResolvedLink/ApprovalLegSnapshot; child FKs; Visa.Issuing*.
+- **ApplicationItem**: not renamed — hard-remove path; FK to instance until dropped.
+- **Cross-skill**: visa2026-application-profile §13 / R0–R6.
+
+### 2026-08-12 — Wave 2b ApplicationPerson importer shipped
+
+- **Entity**: `--import-visa2014 --entity ApplicationPerson --inprocess` (headless ObjectSpace only).
+- **Source**: `dbo.PersonInApplication` → `ApplicationPerson` + immediate `ResolvedLinks` via `ApplicationPersonService.LinkPerson` / `RequirePerson*`.
+- **Id-map**: `PersonInApplication.Oid` → `ApplicationPeople.ID` (`ApplicationPerson.json`).
+- **Skip/dedupe**: same E:44/E:55 parent skips + Application+Person lowest-Oid as ApplicationItem.
+- **Lock**: `ApplicationPersonRosterLockHelper` bypasses process-complete lock when `MigrationImportContext.IsDataImport`.
+- **Chains**: `order.yaml`, `Run-HeadlessChain.ps1`, `OnPrem-Sync.ps1` insert ApplicationPerson before ApplicationItem; ApplicationItem marked dual-read bridge.
+- **Scripts**: `import/ApplicationPeople.ps1`, `reimport/ApplicationPeople.ps1`, `cleanup/ImportedApplicationPeople.postgres.sql`.
+- **Not done**: drop ApplicationItem wave; remap Visa.IssuingApplicationItem / InvitationItem / WorkPermitItem off ApplicationItem (option A).
+- **Verify**: dry-run then `-MaxRows 50` against local PG with Application+Person id-maps present.
+
+### 2026-08-12 — Locked: Application = profile instance; ApplicationPerson not ApplicationItem
+
+- **Import entity**: still `--entity Application` (persistence = profile **instance**); templates from Wave 0b/1/3 seed.
+- **People**: `ApplicationPerson` from legacy PersonInApplication — **no** `ApplicationItem` import.
+- **Auto-link**: immediate resolve on ApplicationPerson create (`RequirePerson*` + valid rules); person scalars must precede Application wave.
+- **Downstream**: WorkPermitItem / InvitationItem / Visa issuing attach to **Application + Person** only (no ApplicationItem bridge) — option **A**.
+- **Doc**: [APPLICATION_PROFILE_CATALOG_WAVE0.md](../../../docs/VISA2014_MIGRATION/APPLICATION_PROFILE_CATALOG_WAVE0.md) Wave 2b; IMPORT_PLAN wave 3 row updated.
+- **Next**: ApplicationPerson importer shipped; remap child FKs + remove ApplicationItem from chains still open.
+
 ### 2026-07-30 — File waves .15 → local PG (DocumentCopies.ps1)
 
 - **Phase**: file-wave (`DocumentCopies.ps1`, `calik-energi-local-pg` → PostgreSQL `visa2026`)
@@ -2054,3 +2177,10 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
   - **Invitation / FamilyProof after prior step**: `dotnet run --no-build` → `hostpolicy.dll` not found; `Visa2026.DataImporter.runtimeconfig.json` absent after each step. **Fix**: rebuild DataImporter before next step, or invoke `Visa2026.DataImporter.exe` directly for single wave.
   - **Full solution build** blocked when F5 **Visa2026.Blazor.Server** holds DLL locks — use DataImporter-only build or stop F5 first.
 - **Watch**: `Watch-OnPremImportLive.ps1 -Profile Local` reads `artifacts/local-pg-import/file-waves-status.json`.
+
+### 2026-08-11 — Application Profile patch skip analysis (Wave 0b, local PG)
+
+- **Symptom**: `--patch-visa2014-application-profile` skipped **5103** apps (`TYPE_ONLY_GAP` for registration types: `check_in`, `check_out`, `check_in_info_change`).
+- **Cause**: `NameLooksLikeContractVariant` treated Turkmen titles with descriptive parentheses (e.g. `Hasaba Almak (Daşary ýurtdan…)`) as contract-variant suffixes; type-only matcher excluded valid profiles.
+- **Fix**: `ApplicationProfileCatalogGrouping.NameLooksLikeContractVariant` — contract suffix = short inner text **without spaces**; patch `--skip-report` histogram in `Visa2014ApplicationProfilePatch.cs`.
+- **Verify**: Dry-run local `visa2026` → Skipped (no profile) **0**; Already correct **7520**; Patched **4754**. Doc: `docs/VISA2014_MIGRATION/analysis/APPLICATION_PROFILE_PATCH_SKIP_ANALYSIS.md`.

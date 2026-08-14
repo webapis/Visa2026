@@ -98,7 +98,7 @@ Do **not** use `reimport/` for staging or production cutover.
 | On-prem staging (wrapper) | `import/OnPrem-Staging.ps1` | Delegates to `OnPrem-Sync.ps1 -Profile Staging` |
 | Tenant catalog generation | `import/Invoke-TenantCatalogGeneration.ps1` | Wraps `--generate-visa2014-tenant-catalogs` |
 | **Lookup preflight** (before full Import) | `import/Preflight-LookupAudit.ps1` | `--preflight-visa2014-lookups`; also auto-run by `OnPrem-Sync.ps1` unless `-SkipLookupPreflight` |
-| ApplicationItem import only | `import/ApplicationItems.ps1` | Parents + id-maps must exist |
+| ApplicationPerson roster (Wave 2b) | `import/ApplicationPeople.ps1` | Application + Person id-maps; headless `--inprocess`; entity `ApplicationProfileInstancePerson` |
 | WorkPermit + WorkPermitItem import | `import/WorkPermits.ps1` | After Person/Passport/EPH id-maps |
 | Single entity (any BO) | *(no script)* | `dotnet run … --import-visa2014 --entity <BO>` |
 
@@ -106,9 +106,9 @@ Do **not** use `reimport/` for staging or production cutover.
 
 | Task | Script | Cleanup SQL |
 |------|--------|-------------|
-| **Full application domain reload** (ordered chain) | See [import-practices § Full application domain](../../.cursor/skills/visa2014-to-visa2026-import/import-practices.md) — `Applications.ps1` → `WorkPermits.ps1` → `Invitations.ps1` → `ApplicationItems.ps1` → `ApplicationProgress.ps1` | `ImportedApplications.sql` (+ purge stale WorkPermit/Invitation rows/id-maps if needed) |
+| **Full application domain reload** (ordered chain) | See [import-practices § Full application domain](../../.cursor/skills/visa2014-to-visa2026-import/import-practices.md) — `Applications.ps1` → `WorkPermits.ps1` → `Invitations.ps1` → `ApplicationPeople.ps1` → `ApplicationProgress.ps1` | `ImportedApplications.sql` (+ purge stale WorkPermit/Invitation rows/id-maps if needed) |
 | Application headers only | `reimport/Applications.ps1` | `cleanup/ImportedApplications.sql` |
-| ApplicationItem lines | `reimport/ApplicationItems.ps1` | `cleanup/ImportedApplicationItems.sql` |
+| ApplicationPerson lines (Wave 2b) | `reimport/ApplicationPeople.ps1` | `cleanup/ImportedApplicationPeople.postgres.sql` |
 | ApplicationProgress (synthetic steps) | `reimport/ApplicationProgress.ps1` | `cleanup/ImportedApplicationProgress.sql` |
 | WorkPermit + WorkPermitItem | `import/WorkPermits.ps1` | *(manual purge if Application scope was wiped)* |
 | Invitation + InvitationItem | `import/Invitations.ps1` | *(manual purge if Application scope was wiped)* |
@@ -116,8 +116,8 @@ Do **not** use `reimport/` for staging or production cutover.
 | **Ministrlik empty** (snapshots missing; progress already OK) | `patch/Application-ApprovalLegSnapshots.ps1` (EF) or `patch/Application-ApprovalLegSnapshots-Sql.ps1` (SQL — use when prod schema behind Module) | (in-place `ApprovalLegSnapshots` from profile — **no** progress delete) |
 | Progress steps out of workflow order (date vs leg sequence) | `patch/ApplicationProgress-Order.ps1` | (in-place `ProgressOrder` recompute) |
 | Person-domain children (after Person reimport) | `reimport/PersonDomainDownstream.ps1` | `cleanup/ImportedPersonDomainChildren.sql` |
-| Visa + WorkPermitItem `IsCancelled` backfill | `reimport/VisaWorkPermitCancellation.ps1` | `cleanup/ImportedVisaWorkPermitCancellationBackfill.sql` (+ `ApplicationItems.ps1` relink) |
-| InvitationItem `IsCancelled` backfill | `reimport/InvitationCancellation.ps1` | `cleanup/ImportedInvitationItemCancellationBackfill.sql` (+ `ApplicationItems.ps1` relink) |
+| Visa + WorkPermitItem `IsCancelled` backfill | `reimport/VisaWorkPermitCancellation.ps1` | `cleanup/ImportedVisaWorkPermitCancellationBackfill.sql` (roster Relinks via ResolvedLinks; ApplicationItem relink removed) |
+| InvitationItem `IsCancelled` backfill | `reimport/InvitationCancellation.ps1` | `cleanup/ImportedInvitationItemCancellationBackfill.sql` (ApplicationItem relink removed) |
 | Duplicate ApplicationItem per Person (on-prem prod data fix) | `Repair-DuplicateApplicationItems.ps1` | `cleanup/DuplicateApplicationItemsByPerson.sql` (preview `@Apply=0`, then `-Apply`) |
 | Duplicate AddressOfResidence per Person+site (on-prem prod data fix) | `Repair-DuplicateAddressOfResidence.ps1` | `cleanup/DuplicateAddressOfResidenceByPersonSite.sql` (preview `@Apply=0`, then `-Apply`) |
 | Duplicate ApplicationProgress per App+Order (on-prem prod data fix) | `Repair-DuplicateApplicationProgress.ps1` | `cleanup/DuplicateApplicationProgressByAppOrder.sql` (preview `@Apply=0`, then `-Apply`) |
@@ -150,6 +150,7 @@ Procedure: [import-practices.md § Partial reimport](../../.cursor/skills/visa20
 
 | Task | Generate | Deploy |
 |------|----------|--------|
+| **Application profile (Wave 0 proposal)** | `catalogs/generate/ApplicationProfileCatalog-CalikEnergi.ps1` | — (sign-off Excel → Wave 1 tenant JSON) |
 | Project contract | `catalogs/generate/ProjectContract-CalikEnergi.ps1` | `catalogs/deploy/ProjectContract-CalikEnergi.ps1` |
 | Approval leg profile | `catalogs/generate/ApprovalLegProfile.ps1` | — |
 | Education institution / specialty | `catalogs/generate/EducationLookup-CalikEnergi.ps1` | `catalogs/deploy/EducationLookup-CalikEnergi.ps1` |
@@ -209,8 +210,8 @@ C:\visa2026-sync-demo\tools\scripts\Run-OnPremSyncOnServer.ps1 -Profile Demo -Sk
 .\scripts\visa2014-migration\import\Invoke-TenantCatalogGeneration.ps1
 .\scripts\visa2014-migration\import\OnPrem-Sync.ps1 -Profile Staging -TargetConnection "Server=...;Database=...;"
 .\scripts\visa2014-migration\import\OnPrem-Sync.ps1 -Profile Production -IncludeFileWaves
-.\scripts\visa2014-migration\import\Run-HeadlessChain.ps1 -StartAt ApplicationItem
-.\scripts\visa2014-migration\reimport\ApplicationItems.ps1 -MaxRows 50
+.\scripts\visa2014-migration\import\Run-HeadlessChain.ps1 -StartAt ApplicationProfileInstancePerson
+.\scripts\visa2014-migration\import\ApplicationPeople.ps1 -MaxRows 50
 ```
 
 ---

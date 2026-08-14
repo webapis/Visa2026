@@ -47,7 +47,7 @@ internal static class Visa2014ApplicationMigrationServiceInferencePatch
         var userName = GetOptionValue(args, "--user") ?? "Admin";
         var password = GetOptionValue(args, "--password") ?? "";
         var applicationIdMapPath = GetOptionValue(args, "--application-id-map")
-            ?? source.IdMapPath(dataImporterRoot, "Application");
+            ?? source.IdMapPath(dataImporterRoot, "ApplicationProfileInstance");
 
         bool dryRun = HasArg(args, "--dry-run");
         bool noWait = HasArg(args, "--no-wait");
@@ -58,7 +58,7 @@ internal static class Visa2014ApplicationMigrationServiceInferencePatch
         Console.WriteLine($"INF Legacy source: {source.Id}");
         Console.WriteLine($"INF Inference rules: {rulesYamlPath}");
         Console.WriteLine($"INF Target API: {apiBaseUrl}");
-        Console.WriteLine($"INF Application id-map: {applicationIdMapPath}");
+        Console.WriteLine($"INF ApplicationProfileInstance id-map: {applicationIdMapPath}");
         if (dryRun)
             Console.WriteLine("INF Mode: dry-run (no PATCH)");
 
@@ -76,7 +76,7 @@ internal static class Visa2014ApplicationMigrationServiceInferencePatch
 
         if (!File.Exists(applicationIdMapPath))
         {
-            Console.Error.WriteLine($"ERR Application id-map not found: {applicationIdMapPath}");
+            Console.Error.WriteLine($"ERR ApplicationProfileInstance id-map not found: {applicationIdMapPath}");
             return 1;
         }
 
@@ -96,7 +96,7 @@ internal static class Visa2014ApplicationMigrationServiceInferencePatch
             Console.WriteLine($"INF Confidence {pair.Key}: {pair.Value}");
 
         var idMap = Visa2014IdMapHelper.Load(applicationIdMapPath);
-        Console.WriteLine($"INF Application id-map entries: {idMap.Count}");
+        Console.WriteLine($"INF ApplicationProfileInstance id-map entries: {idMap.Count}");
         Console.WriteLine($"INF Inference rows: {inferenceRows.Count}");
 
         var api = new ApiClient(apiBaseUrl, userName, password) { Verbose = verbose };
@@ -146,7 +146,7 @@ internal static class Visa2014ApplicationMigrationServiceInferencePatch
 
         foreach (var row in inferenceRows)
         {
-            if (row.GetValueOrDefault("_legacyApplicationOid") is not Guid legacyOid || legacyOid == Guid.Empty)
+            if (row.GetValueOrDefault("_legacyApplicationProfileInstanceOid") is not Guid legacyOid || legacyOid == Guid.Empty)
                 continue;
 
             var confidence = row.GetValueOrDefault("Confidence") as string ?? "none";
@@ -158,7 +158,7 @@ internal static class Visa2014ApplicationMigrationServiceInferencePatch
                 continue;
             }
 
-            if (!applicationIdMap.TryGetValue(legacyOid, out var targetApplicationId))
+            if (!applicationIdMap.TryGetValue(legacyOid, out var targetApplicationProfileInstanceId))
             {
                 skippedMap++;
                 continue;
@@ -169,8 +169,8 @@ internal static class Visa2014ApplicationMigrationServiceInferencePatch
             {
                 failed++;
                 var fullNumber = row.GetValueOrDefault("ManualApplicationNumber") as string ?? legacyOid.ToString();
-                errors.Add($"Application {fullNumber} ({targetApplicationId}): MigrationService not in OData — '{migrationServiceName}'");
-                Console.Error.WriteLine($"ERR Application {fullNumber}: MigrationService not found for '{migrationServiceName}'");
+                errors.Add($"ApplicationProfileInstance {fullNumber} ({targetApplicationProfileInstanceId}): MigrationService not in OData — '{migrationServiceName}'");
+                Console.Error.WriteLine($"ERR ApplicationProfileInstance {fullNumber}: MigrationService not found for '{migrationServiceName}'");
                 continue;
             }
 
@@ -183,13 +183,13 @@ internal static class Visa2014ApplicationMigrationServiceInferencePatch
                     patched++;
                     if (verbose)
                     {
-                        var fullNumber = row.GetValueOrDefault("ManualApplicationNumber") as string ?? targetApplicationId.ToString();
-                        Console.WriteLine($"  DRY PATCH Application {fullNumber} ({targetApplicationId}) MigrationService={migrationServiceName} [{confidence}]");
+                        var fullNumber = row.GetValueOrDefault("ManualApplicationNumber") as string ?? targetApplicationProfileInstanceId.ToString();
+                        Console.WriteLine($"  DRY PATCH ApplicationProfileInstance {fullNumber} ({targetApplicationProfileInstanceId}) MigrationService={migrationServiceName} [{confidence}]");
                     }
                     continue;
                 }
 
-                await api.UpdateAsync("Application", targetApplicationId, new Dictionary<string, object?>
+                await api.UpdateAsync("Application", targetApplicationProfileInstanceId, new Dictionary<string, object?>
                 {
                     ["MigrationService"] = new { ID = migrationServiceId },
                 });
@@ -198,8 +198,8 @@ internal static class Visa2014ApplicationMigrationServiceInferencePatch
             catch (Exception ex)
             {
                 failed++;
-                errors.Add($"{targetApplicationId}: {ex.Message}");
-                Console.Error.WriteLine($"ERR {targetApplicationId}: {ex.Message}");
+                errors.Add($"{targetApplicationProfileInstanceId}: {ex.Message}");
+                Console.Error.WriteLine($"ERR {targetApplicationProfileInstanceId}: {ex.Message}");
             }
         }
 

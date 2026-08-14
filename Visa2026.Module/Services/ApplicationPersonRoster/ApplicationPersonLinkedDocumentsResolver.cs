@@ -8,16 +8,17 @@ using Visa2026.Module.Services.ApplicationItemLinkedDocuments;
 namespace Visa2026.Module.Services.ApplicationPersonRoster;
 
 /// <summary>
-/// Document copies for <see cref="ApplicationPerson"/> roster lines via resolved links
-/// (successor to per-line <see cref="ApplicationItem"/> FK snapshots).
+/// Document copies for skip-navigation People via resolved links
+/// (successor to per-line <see cref="ApplicationRosterMergeLine"/> FK snapshots).
 /// </summary>
 public static class ApplicationPersonLinkedDocumentsResolver
 {
     public static ApplicationItemLinkedDocumentsSnapshot Resolve(
         IObjectSpace objectSpace,
-        ApplicationPerson applicationPerson)
+        ApplicationProfileInstance application,
+        Person person)
     {
-        if (objectSpace == null || applicationPerson == null)
+        if (objectSpace == null || application == null || person == null)
         {
             return new ApplicationItemLinkedDocumentsSnapshot
             {
@@ -26,19 +27,20 @@ public static class ApplicationPersonLinkedDocumentsResolver
             };
         }
 
-        var projection = ApplicationPersonPdfPackageLineHydrator.Hydrate(objectSpace, applicationPerson);
+        var projection = ApplicationProfileInstancePersonPdfPackageLineHydrator.Hydrate(objectSpace, application, person);
         var snapshot = ApplicationItemLinkedDocumentsResolver.ResolveProjection(
             objectSpace,
             projection,
-            applicationPerson.ID);
+            person.ID);
         return snapshot;
     }
 
     public static ApplicationItemLinkedDocumentsLineSnapshot ResolveLine(
         IObjectSpace objectSpace,
-        ApplicationPerson applicationPerson)
+        ApplicationProfileInstance application,
+        Person person)
     {
-        if (applicationPerson == null)
+        if (person == null)
         {
             return new ApplicationItemLinkedDocumentsLineSnapshot
             {
@@ -47,27 +49,29 @@ public static class ApplicationPersonLinkedDocumentsResolver
             };
         }
 
-        applicationPerson = objectSpace.GetObject(applicationPerson);
-        var snapshot = Resolve(objectSpace, applicationPerson);
+        person = objectSpace.GetObject(person);
+        application = objectSpace.GetObject(application);
+        var snapshot = Resolve(objectSpace, application, person);
         return new ApplicationItemLinkedDocumentsLineSnapshot
         {
-            ApplicationItemId = applicationPerson.ID,
-            LineLabel = applicationPerson.Person?.FullName ?? string.Empty,
+            ApplicationItemId = person.ID,
+            LineLabel = person.FullName ?? string.Empty,
             Groups = snapshot.Groups
         };
     }
 
     public static IReadOnlyList<ApplicationItemLinkedDocumentsLineSnapshot> ResolveMany(
         IObjectSpace objectSpace,
-        IEnumerable<ApplicationPerson> applicationPeople)
+        ApplicationProfileInstance application,
+        IEnumerable<Person> people)
     {
         ArgumentNullException.ThrowIfNull(objectSpace);
-        if (applicationPeople == null)
+        if (application == null || people == null)
             return Array.Empty<ApplicationItemLinkedDocumentsLineSnapshot>();
 
-        return applicationPeople
-            .Where(row => row != null)
-            .Select(row => ResolveLine(objectSpace, row))
+        return people
+            .Where(person => person != null)
+            .Select(person => ResolveLine(objectSpace, application, person!))
             .ToList();
     }
 }

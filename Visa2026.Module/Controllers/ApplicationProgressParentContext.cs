@@ -7,15 +7,15 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// Resolves the parent <see cref="Application"/> when working from an <see cref="ApplicationProgress"/> ListView.
+/// Resolves the parent <see cref="Application"/> when working from an <see cref="ApplicationProfileInstanceProgress"/> ListView.
 /// </summary>
-public static class ApplicationProgressParentContext
+public static class ApplicationProfileInstanceProgressParentContext
 {
     internal static bool TryGetApplication(
         Frame? frame,
         IObjectSpace objectSpace,
         View? view,
-        out Application? application)
+        out ApplicationProfileInstance? application)
     {
         application = null;
         if (objectSpace == null)
@@ -23,8 +23,8 @@ public static class ApplicationProgressParentContext
 
         if (frame is NestedFrame nestedFrame)
         {
-            var nestedApplication = nestedFrame.ViewItem?.CurrentObject as Application
-                ?? nestedFrame.ViewItem?.View?.CurrentObject as Application;
+            var nestedApplication = nestedFrame.ViewItem?.CurrentObject as ApplicationProfileInstance
+                ?? nestedFrame.ViewItem?.View?.CurrentObject as ApplicationProfileInstance;
             if (BringIntoObjectSpace(objectSpace, nestedApplication) is { } fromNested)
             {
                 application = fromNested;
@@ -34,7 +34,7 @@ public static class ApplicationProgressParentContext
 
         if (objectSpace.Owner is Link link
             && link.ListView?.CollectionSource is PropertyCollectionSource pcs
-            && BringIntoObjectSpace(objectSpace, pcs.MasterObject as Application) is { } fromLink)
+            && BringIntoObjectSpace(objectSpace, pcs.MasterObject as ApplicationProfileInstance) is { } fromLink)
         {
             application = fromLink;
             return true;
@@ -42,9 +42,9 @@ public static class ApplicationProgressParentContext
 
         if (view is ListView listView)
         {
-            var progress = listView.SelectedObjects?.OfType<ApplicationProgress>().FirstOrDefault()
-                ?? listView.CurrentObject as ApplicationProgress;
-            if (BringIntoObjectSpace(objectSpace, progress?.Application) is { } fromProgress)
+            var progress = listView.SelectedObjects?.OfType<ApplicationProfileInstanceProgress>().FirstOrDefault()
+                ?? listView.CurrentObject as ApplicationProfileInstanceProgress;
+            if (BringIntoObjectSpace(objectSpace, progress?.ApplicationProfileInstance) is { } fromProgress)
             {
                 application = fromProgress;
                 return true;
@@ -54,7 +54,7 @@ public static class ApplicationProgressParentContext
         return false;
     }
 
-    public static Guid GetApplicationId(Frame? frame, IObjectSpace objectSpace, View? view)
+    public static Guid GetApplicationProfileInstanceId(Frame? frame, IObjectSpace objectSpace, View? view)
     {
         if (!TryGetApplication(frame, objectSpace, view, out var application) || application == null)
             return Guid.Empty;
@@ -63,13 +63,13 @@ public static class ApplicationProgressParentContext
         return key is Guid guid ? guid : Guid.Empty;
     }
 
-    private static Application? BringIntoObjectSpace(IObjectSpace objectSpace, Application? source)
+    private static ApplicationProfileInstance? BringIntoObjectSpace(IObjectSpace objectSpace, ApplicationProfileInstance? source)
     {
         if (source == null)
             return null;
 
         return objectSpace.IsNewObject(source)
             ? source
-            : objectSpace.GetObjectByKey<Application>(source.ID);
+            : objectSpace.GetObjectByKey<ApplicationProfileInstance>(source.ID);
     }
 }

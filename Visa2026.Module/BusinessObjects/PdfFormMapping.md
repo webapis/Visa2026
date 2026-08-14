@@ -110,7 +110,7 @@ If a field in the generated PDF is empty or has an incorrect value:
 
 To configure mappings correctly, you need the exact XFA field names from the PDF template. Here are a few ways to find them:
 
-### Method 1: Application Logs (Recommended)
+### Method 1: ApplicationProfileInstance Logs (Recommended)
 The application logs all available field names when it attempts to fill a form.
 1.  Enable **Debug** logging in `appsettings.json`.
 2.  Trigger a PDF generation action in the application.

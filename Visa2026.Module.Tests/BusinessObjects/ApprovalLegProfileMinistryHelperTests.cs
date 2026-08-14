@@ -9,11 +9,11 @@ public sealed class ApprovalLegProfileMinistryHelperTests
     [Fact]
     public void GetMinistryShortNameForLeg_UsesSnapshotWhenPresent()
     {
-        var app = new Application
+        var app = new ApplicationProfileInstance
         {
             ApprovalLegSnapshots =
             [
-                new ApplicationApprovalLegSnapshot { Sequence = 1, MinistryShortName = "Energetika" }
+                new ApplicationProfileInstanceApprovalLegSnapshot { Sequence = 1, MinistryShortName = "Energetika" }
             ],
             ApprovalLegProfile = new ApprovalLegProfile
             {
@@ -34,9 +34,9 @@ public sealed class ApprovalLegProfileMinistryHelperTests
     [Fact]
     public void GetMinistryShortNameForLeg_FallsBackToLiveProfileWhenSnapshotMissing()
     {
-        var app = new Application
+        var app = new ApplicationProfileInstance
         {
-            ApprovalLegSnapshots = new ObservableCollection<ApplicationApprovalLegSnapshot>(),
+            ApprovalLegSnapshots = new ObservableCollection<ApplicationProfileInstanceApprovalLegSnapshot>(),
             ApprovalLegProfile = new ApprovalLegProfile
             {
                 MinistryLegs =
@@ -56,7 +56,7 @@ public sealed class ApprovalLegProfileMinistryHelperTests
     [Fact]
     public void GetMinistryShortNameForProgressStep_ApprovedState_UsesLegFromStateCode()
     {
-        var app = new Application
+        var app = new ApplicationProfileInstance
         {
             ApprovalLegProfile = new ApprovalLegProfile
             {
@@ -82,9 +82,9 @@ public sealed class ApprovalLegProfileMinistryHelperTests
     [Fact]
     public void GetMinistryShortNameForLeg_ReturnsNullWhenNoSnapshotOrProfile()
     {
-        var app = new Application
+        var app = new ApplicationProfileInstance
         {
-            ApprovalLegSnapshots = new ObservableCollection<ApplicationApprovalLegSnapshot>()
+            ApprovalLegSnapshots = new ObservableCollection<ApplicationProfileInstanceApprovalLegSnapshot>()
         };
 
         Assert.Null(ApprovalLegProfileMinistryHelper.GetMinistryShortNameForLeg(app, 1));

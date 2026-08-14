@@ -54,23 +54,23 @@ public sealed class ApplicationReportPackageListPropertyEditor : BlazorPropertyE
 
         ComponentModel.UiCultureName = ResolveUiCultureName();
 
-        if (CurrentObject is not ApplicationReportPackageListHost host || _application == null || host.ApplicationId == Guid.Empty)
+        if (CurrentObject is not ApplicationReportPackageListHost host || _application == null || host.ApplicationProfileInstanceId == Guid.Empty)
         {
-            ComponentModel.ApplicationId = Guid.Empty;
+            ComponentModel.ApplicationProfileInstanceId = Guid.Empty;
             ComponentModel.ApplicationNumber = string.Empty;
-            ComponentModel.PackageScope = WordReportPackageScope.Application;
+            ComponentModel.PackageScope = WordReportPackageScope.ApplicationProfileInstance;
             ComponentModel.ApplicationItemIds = Array.Empty<Guid>();
             ComponentModel.CatalogEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
             return;
         }
 
-        using var appObjectSpace = _application.CreateObjectSpace(typeof(Application));
-        var application = appObjectSpace.GetObjectByKey<Application>(host.ApplicationId);
+        using var appObjectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
+        var application = appObjectSpace.GetObjectByKey<ApplicationProfileInstance>(host.ApplicationProfileInstanceId);
         if (application == null)
         {
-            ComponentModel.ApplicationId = Guid.Empty;
+            ComponentModel.ApplicationProfileInstanceId = Guid.Empty;
             ComponentModel.ApplicationNumber = string.Empty;
-            ComponentModel.PackageScope = WordReportPackageScope.Application;
+            ComponentModel.PackageScope = WordReportPackageScope.ApplicationProfileInstance;
             ComponentModel.ApplicationItemIds = Array.Empty<Guid>();
             ComponentModel.CatalogEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
             return;
@@ -80,9 +80,9 @@ public sealed class ApplicationReportPackageListPropertyEditor : BlazorPropertyE
         var catalogService = _application.ServiceProvider.GetRequiredService<ApplicationWordReportPackageCatalogService>();
         var catalog = catalogService.Build(appObjectSpace, application, context);
 
-        ComponentModel.ApplicationId = host.ApplicationId;
+        ComponentModel.ApplicationProfileInstanceId = host.ApplicationProfileInstanceId;
         ComponentModel.ApplicationNumber = application.FullApplicationNumber ?? string.Empty;
-        ComponentModel.PackageScope = WordReportPackageScope.Application;
+        ComponentModel.PackageScope = WordReportPackageScope.ApplicationProfileInstance;
         ComponentModel.ApplicationItemIds = Array.Empty<Guid>();
         ComponentModel.CatalogEntries = catalog.Entries;
     }

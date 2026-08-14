@@ -18,18 +18,24 @@ public static class ApplicationTypeCapabilities
     /// <summary>
     /// Eligible parent type for <see cref="Visa.IssuingApplicationItem"/> (union of visa- and invitation-issuing).
     /// </summary>
-    public static bool CanBeIssuingApplicationForVisa(ApplicationType? applicationType) =>
+    public static bool CanBeIssuingApplicationProfileInstanceForVisa(ApplicationType? applicationType) =>
         CanIssueVisa(applicationType) || CanIssueInvitation(applicationType);
 
-    public static bool CanIssueVisa(Application? application) =>
+    public static bool CanIssueVisa(ApplicationProfileInstance? application) =>
         ApplicationProfileConfigurationResolver.CanIssueVisa(application);
 
-    public static bool CanIssueInvitation(Application? application) =>
+    public static bool CanIssueInvitation(ApplicationProfileInstance? application) =>
         ApplicationProfileConfigurationResolver.CanIssueInvitation(application);
 
-    public static bool CanIssueWorkPermit(Application? application) =>
+    public static bool CanIssueWorkPermit(ApplicationProfileInstance? application) =>
         ApplicationProfileConfigurationResolver.CanIssueWorkPermit(application);
 
-    public static bool CanBeIssuingApplicationForVisa(Application? application) =>
-        ApplicationProfileConfigurationResolver.CanBeIssuingApplicationForVisa(application);
+    public static bool CanIssueBorderZone(ApplicationProfileInstance? application) =>
+        ApplicationProfileConfigurationResolver.CanIssueBorderZone(application);
+
+    public static bool CanIssueRejection(ApplicationProfileInstance? application) =>
+        ApplicationProfileConfigurationResolver.CanIssueRejection(application);
+
+    public static bool CanBeIssuingApplicationProfileInstanceForVisa(ApplicationProfileInstance? application) =>
+        ApplicationProfileConfigurationResolver.CanBeIssuingApplicationProfileInstanceForVisa(application);
 }

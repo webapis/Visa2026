@@ -23,7 +23,7 @@ deduplication:
 
 propertyGaps:
   targetOnly:
-    - property: Application
+    - property: ApplicationProfileInstance
       disposition: omit_from_post
       notes: Optional link — pilot imports with Application=null
     - property: ShowOptionalFields

@@ -4,7 +4,7 @@ description: Registration update after employees moved to a new address
 dependsOn: RegInfoChangeVisa
 sync: false
 anchor:
-  entity: Application
+  entity: ApplicationProfileInstance
   key: FullApplicationNumber
   value: 11/-010
 data:
@@ -26,9 +26,9 @@ data:
     Start Date: 2026-11-01
     Expiration Date: 2027-11-01
   Applications:
-  - Application Number: 010
+  - ApplicationProfileInstance Number: 010
     Date: 2026-11-01
-    Application Type: App_Reg_Info_Change_Address
+    ApplicationProfileInstance Type: App_Reg_Info_Change_Address
     Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
   ApplicationItems:
   - Person: John Doe

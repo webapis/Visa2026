@@ -6,7 +6,7 @@ using Npgsql;
 namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
-/// Idempotent PostgreSQL views for Application workspace read models.
+/// Idempotent PostgreSQL views for ApplicationProfileInstance workspace read models.
 /// </summary>
 public static class ApplicationWorkspacePostgresViewsSql
 {
@@ -24,7 +24,25 @@ public static class ApplicationWorkspacePostgresViewsSql
 
         using var connection = new NpgsqlConnection(cleaned);
         connection.Open();
+
+        // Configure() runs before CheckCompatibility on a greenfield DB (drop+create visa2026).
+        // Skip until EF/XAF has created the skip-nav join; AddBuildStep heals views after that.
+        if (!RelationExists(connection, "ApplicationProfileInstancePeople")
+            || !RelationExists(connection, "People"))
+            return;
+
         ExecuteEmbedded(connection, PersonViewResource);
+    }
+
+    private static bool RelationExists(NpgsqlConnection connection, string tableName)
+    {
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            SELECT to_regclass(@qualified) IS NOT NULL;
+            """;
+        command.Parameters.AddWithValue("qualified", "public.\"" + tableName + "\"");
+        var result = command.ExecuteScalar();
+        return result is true || (result is bool b && b);
     }
 
     private static void ExecuteEmbedded(NpgsqlConnection connection, string resourceName)
@@ -41,6 +59,14 @@ public static class ApplicationWorkspacePostgresViewsSql
 
         using var command = connection.CreateCommand();
         command.CommandText = sql;
-        command.ExecuteNonQuery();
+        try
+        {
+            command.ExecuteNonQuery();
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException(
+                "Application workspace SQL heal failed for " + resourceName + ".", ex);
+        }
     }
 }

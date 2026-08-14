@@ -231,11 +231,11 @@ internal static class Visa2014VisaODataImporter
             && !string.IsNullOrWhiteSpace(processNumber))
             payload["ProcessNumber"] = processNumber.Trim();
 
-        if (row.GetValueOrDefault("LegacyPersonInApplicationOid") is Guid piaOid)
-            payload["LegacyPersonInApplicationOid"] = piaOid;
-        else if (row.GetValueOrDefault("LegacyPersonInApplicationOid") is string piaText
+        if (row.GetValueOrDefault("LegacyPersonInApplicationProfileInstanceOid") is Guid piaOid)
+            payload["LegacyPersonInApplicationProfileInstanceOid"] = piaOid;
+        else if (row.GetValueOrDefault("LegacyPersonInApplicationProfileInstanceOid") is string piaText
                  && Guid.TryParse(piaText.Trim(), out var parsedPia))
-            payload["LegacyPersonInApplicationOid"] = parsedPia;
+            payload["LegacyPersonInApplicationProfileInstanceOid"] = parsedPia;
 
         return payload;
     }

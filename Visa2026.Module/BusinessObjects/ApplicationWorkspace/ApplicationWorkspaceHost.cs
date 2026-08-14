@@ -9,17 +9,17 @@ using Visa2026.Module.Editors;
 namespace Visa2026.Module.BusinessObjects.ApplicationWorkspace;
 
 /// <summary>
-/// Non-persistent shell for the custom Application workspace DetailView (M2M prototype).
+/// Non-persistent shell for the custom ApplicationProfileInstance workspace DetailView (M2M prototype).
 /// </summary>
 [DomainComponent]
 [DefaultClassOptions]
 [NavigationItem(false)]
-[XafDisplayName("Application Workspace")]
+[XafDisplayName("Case workspace")]
 [ImageName("BO_List")]
 public class ApplicationWorkspaceHost : NonPersistentBaseObject
 {
     [Browsable(false)]
-    public Guid ApplicationId { get; set; }
+    public Guid ApplicationProfileInstanceId { get; set; }
 
     [VisibleInListView(false)]
     [VisibleInLookupListView(false)]

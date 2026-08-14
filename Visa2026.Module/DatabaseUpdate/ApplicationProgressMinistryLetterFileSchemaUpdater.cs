@@ -5,11 +5,11 @@ using DevExpress.ExpressApp.Updating;
 namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
-/// Adds <see cref="BusinessObjects.ApplicationProgress.MinistryLetterFile"/> before EF schema sync on existing databases.
+/// Adds <see cref="BusinessObjects.ApplicationProfileInstanceProgress.MinistryLetterFile"/> before EF schema sync on existing databases.
 /// </summary>
-public sealed class ApplicationProgressMinistryLetterFileSchemaUpdater : ModuleUpdater
+public sealed class ApplicationProfileInstanceProgressMinistryLetterFileSchemaUpdater : ModuleUpdater
 {
-    public ApplicationProgressMinistryLetterFileSchemaUpdater(IObjectSpace objectSpace, Version currentDBVersion)
+    public ApplicationProfileInstanceProgressMinistryLetterFileSchemaUpdater(IObjectSpace objectSpace, Version currentDBVersion)
         : base(objectSpace, currentDBVersion)
     {
     }
@@ -28,7 +28,7 @@ public sealed class ApplicationProgressMinistryLetterFileSchemaUpdater : ModuleU
 
     private void ApplySchemaSql()
     {
-        ExecuteNonQueryCommand(ApplicationProgressMinistryLetterFileSchemaSql.EnsureMinistryLetterFileIdColumnSql, false);
-        ExecuteNonQueryCommand(ApplicationProgressMinistryLetterFileSchemaSql.EnsureMinistryLetterFileFkSql, false);
+        ExecuteNonQueryCommand(ApplicationProfileInstanceProgressMinistryLetterFileSchemaSql.EnsureMinistryLetterFileIdColumnSql, false);
+        ExecuteNonQueryCommand(ApplicationProfileInstanceProgressMinistryLetterFileSchemaSql.EnsureMinistryLetterFileFkSql, false);
     }
 }

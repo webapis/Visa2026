@@ -40,25 +40,25 @@ public sealed class ReportDashboardModel : ComponentModelBase
         get => GetPropertyValue<int>() is > 0 and var m ? m : ReportDashboardCatalog.DefaultCategoryDateRangeMonths;
         set => SetPropertyValue(value);
     }
-    /// <summary>Passport-local Last N months (Application.ApplicationDate on ApplicationItem.CurrentPassport).</summary>
+    /// <summary>Passport-local Last N months (Application.ApplicationDate on ApplicationRosterMergeLine.CurrentPassport).</summary>
     public int PassportDateRangeMonths
     {
         get => GetPropertyValue<int>() is > 0 and var m ? m : ReportDashboardCatalog.DefaultCategoryDateRangeMonths;
         set => SetPropertyValue(value);
     }
-    /// <summary>Position History-local Last N months (Application.ApplicationDate on ApplicationItem.CurrentPositionHistory).</summary>
+    /// <summary>Position History-local Last N months (Application.ApplicationDate on ApplicationRosterMergeLine.CurrentPositionHistory).</summary>
     public int PositionHistoryDateRangeMonths
     {
         get => GetPropertyValue<int>() is > 0 and var m ? m : ReportDashboardCatalog.DefaultCategoryDateRangeMonths;
         set => SetPropertyValue(value);
     }
-    /// <summary>Address of Residence-local Last N months (Application.ApplicationDate on ApplicationItem.CurrentAddressOfResidence).</summary>
+    /// <summary>Address of Residence-local Last N months (Application.ApplicationDate on ApplicationRosterMergeLine.CurrentAddressOfResidence).</summary>
     public int AddressOfResidenceDateRangeMonths
     {
         get => GetPropertyValue<int>() is > 0 and var m ? m : ReportDashboardCatalog.DefaultCategoryDateRangeMonths;
         set => SetPropertyValue(value);
     }
-    /// <summary>Medical Records-local Last N months (Application.ApplicationDate on ApplicationItem.CurrentMedicalRecord).</summary>
+    /// <summary>Medical Records-local Last N months (Application.ApplicationDate on ApplicationRosterMergeLine.CurrentMedicalRecord).</summary>
     public int MedicalRecordDateRangeMonths
     {
         get => GetPropertyValue<int>() is > 0 and var m ? m : ReportDashboardCatalog.DefaultCategoryDateRangeMonths;

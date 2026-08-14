@@ -3,6 +3,8 @@
 @using Visa2026.Blazor.Server.Editors
 @using Visa2026.Blazor.Server.Localization
 @using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Services.ApplicationPersonRoster
+@using Visa2026.Module.BusinessObjects
 @using Visa2026.Module.BusinessObjects.OfficerShell
 @using Visa2026.Module.Services.ApplicationItemLinkedDocuments
 @using Visa2026.Module.Services.ApplicationPersonRoster
@@ -24,8 +26,7 @@
         <div class="dc-split">
             <div class="dc-list">
                 <ApplicationItemDocumentCopiesComponent ApplicationItemIds="_lineIds"
-                                                        LineScope="DocumentCopiesLineScope.ApplicationPerson"
-                                                        ApplicationId="ApplicationId"
+                                                        ApplicationProfileInstanceId="ApplicationProfileInstanceId"
                                                         MergedGroups="_mergedGroups"
                                                         UiCultureName="_uiCultureName"
                                                         UseInlinePreview="true"
@@ -37,7 +38,7 @@
 </div>
 
 @code {
-    [Parameter] public Guid ApplicationId { get; set; }
+    [Parameter] public Guid ApplicationProfileInstanceId { get; set; }
     [Parameter] public ApplicationWorkspaceSnapshot? Snapshot { get; set; }
 
     [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
@@ -58,7 +59,7 @@
     protected override void OnParametersSet()
     {
         var personTab = Snapshot?.Tabs.FirstOrDefault(t => t.Key == "person");
-        _lineIds = personTab?.RowApplicationPersonIds
+        _lineIds = personTab?.RowApplicationProfileInstancePersonIds
             .Where(id => id != Guid.Empty)
             .Distinct()
             .ToList() ?? [];
@@ -74,15 +75,21 @@
             return;
         }
 
-        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationPerson>();
-        var rows = _lineIds
-            .Select(id => objectSpace.GetObjectByKey<ApplicationPerson>(id))
-            .Where(row => row != null)
-            .Cast<ApplicationPerson>()
-            .ToList();
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        if (!ApplicationRosterHelper.TryLoadSharedApplicationPeople(
+                objectSpace,
+                _lineIds,
+                ApplicationProfileInstanceId,
+                out var application,
+                out var people)
+            || application == null)
+        {
+            _mergedGroups = Array.Empty<ApplicationItemLinkedDocumentMergedGroup>();
+            return;
+        }
 
-        _lineIds = rows.Select(row => row.ID).ToList();
-        var lines = ApplicationPersonLinkedDocumentsResolver.ResolveMany(objectSpace, rows);
+        _lineIds = people.Select(p => p.ID).ToList();
+        var lines = ApplicationPersonLinkedDocumentsResolver.ResolveMany(objectSpace, application, people);
         _mergedGroups = ApplicationItemLinkedDocumentsMerger.MergeBySlot(lines);
     }
 
@@ -99,9 +106,8 @@
 
         await PreviewSlotService.OpenDocumentCopiesAsync(new DocumentCopiesSlotRequest
         {
-            Scope = DocumentCopiesLineScope.ApplicationPerson,
-            ApplicationPersonIds = _lineIds,
-            ApplicationId = ApplicationId,
+            ApplicationProfileInstancePersonIds = _lineIds,
+            ApplicationProfileInstanceId = ApplicationProfileInstanceId,
             FocusSlotKey = request.SlotKey,
             FocusDisplayName = request.DisplayName,
             OpenPreviewOnly = true,

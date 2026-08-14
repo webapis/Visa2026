@@ -160,8 +160,8 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                if (Person == null || WorkPermit?.Application == null) return true;
-                return ApplicationRosterHelper.IsPersonOnApplication(WorkPermit.Application, Person);
+                if (Person == null || WorkPermit?.ApplicationProfileInstance == null) return true;
+                return ApplicationRosterHelper.IsPersonOnApplication(WorkPermit.ApplicationProfileInstance, Person);
             }
         }
 
@@ -231,13 +231,13 @@ namespace Visa2026.Module.BusinessObjects
 
         [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
         public string Company_Name =>
-            OrganizationReportHelper.GetCompanyProfile(OrganizationReportHelper.ResolveObjectSpace(ObjectSpaceHelper.Get(this), WorkPermit?.Application))?.Name ?? string.Empty;
+            OrganizationReportHelper.GetCompanyProfile(OrganizationReportHelper.ResolveObjectSpace(ObjectSpaceHelper.Get(this), WorkPermit?.ApplicationProfileInstance))?.Name ?? string.Empty;
 
         [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
-        public string CompanyHead_PositionTm => WorkPermit?.Application?.Application_CompanyHead_PositionTm ?? string.Empty;
+        public string CompanyHead_PositionTm => WorkPermit?.ApplicationProfileInstance?.Application_CompanyHead_PositionTm ?? string.Empty;
 
         [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
-        public string CompanyHead_FullName => WorkPermit?.Application?.Application_CompanyHead_FullName ?? string.Empty;
+        public string CompanyHead_FullName => WorkPermit?.ApplicationProfileInstance?.Application_CompanyHead_FullName ?? string.Empty;
         #endregion
 
         public override void OnCreated()
@@ -256,7 +256,7 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(false)]
         [VisibleInDetailView(true)]
         [Appearance("WorkPermitItem_IsCancelledVisible", Visibility = ViewItemVisibility.Hide,
-            Criteria = "Not ShowOptionalFields And WorkPermit Is Not Null And WorkPermit.Application Is Not Null And WorkPermit.Application.ApplicationType Is Not Null And Not WorkPermit.Application.ApplicationType.ShowWorkPermitItemIsCancelled",
+            Criteria = "Not ShowOptionalFields And WorkPermit Is Not Null And WorkPermit.ApplicationProfileInstance Is Not Null And WorkPermit.ApplicationProfileInstance.ApplicationType Is Not Null And Not WorkPermit.ApplicationProfileInstance.ApplicationType.ShowWorkPermitItemIsCancelled",
             Context = "DetailView",
             Priority = 50)]
         public virtual bool IsCancelled { get; set; }
@@ -285,5 +285,10 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("AllowEdit", "False")]
         public string DocumentCopiesListLink =>
             Visa2026.Module.Localization.VisaUiMessages.Get("WorkPermitDocumentCopies.List.ColumnLink");
+
+        /// <summary>Skip-navigation M2M with <see cref="ApplicationProfileInstance"/> (same pattern as Person). Not aggregated.</summary>
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInListView(false)]
+        public virtual IList<ApplicationProfileInstance> ApplicationProfileInstances { get; set; } = new ObservableCollection<ApplicationProfileInstance>();
     }
 }

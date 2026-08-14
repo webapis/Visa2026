@@ -8,7 +8,7 @@
     {
         <div class="os-loading" role="status">Loading case workspace…</div>
     }
-    else if (Snapshot.ApplicationId == Guid.Empty)
+    else if (Snapshot.ApplicationProfileInstanceId == Guid.Empty)
     {
         <div class="os-loading">No case selected.</div>
     }
@@ -21,7 +21,7 @@
                 <div class="cw-head__title-block">
                     <div class="cw-head__accent" style="background:@OfficerShellTemplateFamily.GetColor(chrome.TemplateFamilyKey)"></div>
                     <div>
-                        <h1>Application № @chrome.DisplayNumber</h1>
+                        <h1>ApplicationProfileInstance № @chrome.DisplayNumber</h1>
                         <p class="cw-head__sub">@chrome.TemplateFamilyLabel · Started @(string.IsNullOrWhiteSpace(chrome.StartedOn) ? "—" : chrome.StartedOn)</p>
                     </div>
                 </div>
@@ -31,7 +31,15 @@
                         <span class="cw-head-badge cw-head-badge--sla">📅 @slaDays days remaining</span>
                     }
                     <span class="cw-head-badge cw-head-badge--process">⚙ In process</span>
-                    <button type="button" class="os-btn os-btn--ghost cw-head__back" @onclick="BackToListAsync">← Back to list</button>
+                    @if (view.Chrome.ResolvedLinksLocked)
+                    {
+                        <span class="cw-head-badge cw-head-badge--locked" title="People and linked records cannot be changed">🔒 Links locked</span>
+                    }
+                    <button type="button"
+                            class="cw-head__close"
+                            aria-label="Close case workspace"
+                            title="Close"
+                            @onclick="BackToListAsync">×</button>
                 </div>
             </div>
             <div class="cw-head__people">
@@ -72,7 +80,7 @@
                         @RenderPeople(view)
                         break;
                     case "progress":
-                        <OfficerShellCaseProgressTab ApplicationId="Snapshot.ApplicationId"
+                        <OfficerShellCaseProgressTab ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId"
                                                      View="view"
                                                      StatusMessage="@ProgressStatusMessage"
                                                      IsStatusError="@ProgressStatusIsError"
@@ -81,10 +89,10 @@
                                                      AdvanceProgressRequested="@AdvanceProgressRequested" />
                         break;
                     case "documents":
-                        <OfficerShellCaseDocumentsTab ApplicationId="Snapshot.ApplicationId" Snapshot="Snapshot" />
+                        <OfficerShellCaseDocumentsTab ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId" Snapshot="Snapshot" />
                         break;
                     case "resminamalar":
-                        <OfficerShellCaseResminamalarTab ApplicationId="Snapshot.ApplicationId" />
+                        <OfficerShellCaseResminamalarTab ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId" />
                         break;
                     case "sla":
                         @RenderSla(view)
@@ -120,11 +128,15 @@
     [Parameter] public bool IsLoading { get; set; }
     [Parameter] public string ActiveTab { get; set; } = "overview";
     [Parameter] public int SelectedPersonRowIndex { get; set; } = -1;
+    [Parameter] public string? PeopleLinkedRecordFocusKey { get; set; }
     [Parameter] public bool CanLinkPerson { get; set; }
     [Parameter] public bool CanUnlinkPerson { get; set; }
     [Parameter] public bool CanOpenPersonDetail { get; set; }
     [Parameter] public bool CanOpenDocumentCopies { get; set; }
     [Parameter] public EventCallback<string> CaseTabChanged { get; set; }
+    [Parameter] public EventCallback<string> LinkedRecordTileClicked { get; set; }
+    [Parameter] public EventCallback<string> IssuedHeaderNewRequested { get; set; }
+    [Parameter] public EventCallback<ApplicationWorkspaceIssuedHeaderOpenRequest> IssuedHeaderOpenRequested { get; set; }
     [Parameter] public EventCallback BackToListRequested { get; set; }
     [Parameter] public EventCallback LinkPersonRequested { get; set; }
     [Parameter] public EventCallback UnlinkPersonRequested { get; set; }
@@ -139,7 +151,7 @@
     [Parameter] public EventCallback<OfficerShellCaseProgressFileUpload> UploadMinistryLetterRequested { get; set; }
     [Parameter] public EventCallback<OfficerShellCaseProgressAdvanceRequest> AdvanceProgressRequested { get; set; }
     [Parameter] public bool ShowPersonLinkPicker { get; set; }
-    [Parameter] public IReadOnlyList<ApplicationPersonLinkCandidateRow> PersonLinkCandidates { get; set; } = Array.Empty<ApplicationPersonLinkCandidateRow>();
+    [Parameter] public IReadOnlyList<ApplicationProfileInstancePersonLinkCandidateRow> PersonLinkCandidates { get; set; } = Array.Empty<ApplicationProfileInstancePersonLinkCandidateRow>();
     [Parameter] public bool PersonLinkIsSearching { get; set; }
     [Parameter] public bool PersonLinkIsLinking { get; set; }
     [Parameter] public string? PersonLinkStatusMessage { get; set; }
@@ -149,6 +161,55 @@
     [Parameter] public EventCallback ClosePersonLinkPickerRequested { get; set; }
 
     private static bool IsWideTab(string tab) => tab is "documents" or "resminamalar";
+
+    private string? _selectedIssuedKey;
+
+    private static string IssuedEmptyHint(ApplicationWorkspaceCaseView view, ApplicationWorkspaceCaseIssuedTile tile)
+    {
+        var number = view.Chrome.DisplayNumber;
+        if (string.IsNullOrWhiteSpace(number))
+            return tile.EmptyHint;
+
+        return tile.EmptyHint.Replace(
+            "this application.",
+            "Application № " + number + ".",
+            StringComparison.Ordinal);
+    }
+
+    private void SelectIssuedTile(string key)
+    {
+        _selectedIssuedKey = string.Equals(_selectedIssuedKey, key, StringComparison.OrdinalIgnoreCase)
+            ? null
+            : key;
+    }
+
+    private void IssueRecordQuickAction()
+    {
+        var tiles = Snapshot?.CaseView.IssuedRecordTiles;
+        if (tiles == null || tiles.Count == 0)
+            return;
+
+        var empty = tiles.FirstOrDefault(t => t.Count == 0);
+        _selectedIssuedKey = (empty ?? tiles[0]).Key;
+    }
+
+    private async Task NewIssuedHeaderAsync(string key)
+    {
+        if (IssuedHeaderNewRequested.HasDelegate)
+            await IssuedHeaderNewRequested.InvokeAsync(key);
+    }
+
+    private async Task OpenIssuedHeaderAsync(string key, Guid id)
+    {
+        if (!IssuedHeaderOpenRequested.HasDelegate || id == Guid.Empty)
+            return;
+
+        await IssuedHeaderOpenRequested.InvokeAsync(new ApplicationWorkspaceIssuedHeaderOpenRequest
+        {
+            Key = key,
+            Id = id,
+        });
+    }
 
     private RenderFragment RenderOverview(ApplicationWorkspaceCaseView view) => __builder =>
     {
@@ -167,7 +228,7 @@
                 </div>
             </section>
             <section class="cw-card">
-                <h2 class="cw-card__title">Application progress</h2>
+                <h2 class="cw-card__title">ApplicationProfileInstance progress</h2>
                 <div class="cw-prog-stepper">
                 @for (var i = 0; i < view.ProgressSteps.Count; i++)
                 {
@@ -196,18 +257,88 @@
             </section>
             <section class="cw-card">
                 <h2 class="cw-card__title">Linked records</h2>
-                <div class="cw-link-row">
-                    @foreach (var tile in view.LinkedRecordTiles)
-                    {
-                        <button type="button" class="cw-link-tile cw-link-tile--@tile.Tone" @onclick='() => SelectTab("people")'>
-                            <span class="cw-link-tile__icon">@tile.Glyph</span>
-                            <span class="cw-link-tile__label">@tile.Label</span>
-                            <strong class="cw-link-tile__count">@tile.Count</strong>
-                            <span class="cw-link-tile__chev">›</span>
-                        </button>
-                    }
-                </div>
+                @if (view.Chrome.ResolvedLinksLocked)
+                {
+                    <p class="cw-linked-lock">🔒 Process complete — linked people and records are locked on this case.</p>
+                }
+                @if (view.LinkedRecordTiles.Count == 0)
+                {
+                    <p class="cw-linked-empty">No linked person-related records yet. Link people on the <strong>People &amp; links</strong> tab — records auto-resolve from profile requirements.</p>
+                }
+                else
+                {
+                    <div class="cw-link-row">
+                        @foreach (var tile in view.LinkedRecordTiles)
+                        {
+                            <button type="button" class="cw-link-tile cw-link-tile--@tile.Tone" @onclick="() => OpenLinkedRecordTile(tile.TabKey)">
+                                <span class="cw-link-tile__icon">@tile.Glyph</span>
+                                <span class="cw-link-tile__label">@tile.Label</span>
+                                <strong class="cw-link-tile__count">@tile.Count</strong>
+                                <span class="cw-link-tile__chev">›</span>
+                            </button>
+                        }
+                    </div>
+                }
             </section>
+            @if (view.IssuedRecordTiles.Count > 0)
+            {
+                var selectedIssued = view.IssuedRecordTiles.FirstOrDefault(t =>
+                    string.Equals(t.Key, _selectedIssuedKey, StringComparison.OrdinalIgnoreCase));
+                <section class="cw-card">
+                    <h2 class="cw-card__title">Issued records</h2>
+                    <p class="cw-card__sub">Created by this application · visible when May produce is on</p>
+                    <div class="cw-issued-row">
+                        @foreach (var tile in view.IssuedRecordTiles)
+                        {
+                            var isSelected = string.Equals(tile.Key, _selectedIssuedKey, StringComparison.OrdinalIgnoreCase);
+                            <button type="button"
+                                    class="cw-link-tile cw-link-tile--@tile.Tone cw-issued-tile @(tile.Count == 0 ? "is-empty" : null) @(isSelected ? "is-selected" : null)"
+                                    @onclick="() => SelectIssuedTile(tile.Key)">
+                                <span class="cw-link-tile__icon">@tile.Glyph</span>
+                                <span class="cw-link-tile__label">@tile.Label</span>
+                                @if (tile.Count == 0)
+                                {
+                                    <span class="cw-issued-tile__add">@tile.AddCaption</span>
+                                }
+                                else
+                                {
+                                    <strong class="cw-link-tile__count">@tile.Count</strong>
+                                }
+                                <span class="cw-link-tile__chev">›</span>
+                            </button>
+                        }
+                    </div>
+                    @if (selectedIssued != null)
+                    {
+                        <div class="cw-issued-panel">
+                            <h3 class="cw-issued-panel__title">@selectedIssued.PanelTitle</h3>
+                            @if (selectedIssued.Count == 0)
+                            {
+                                <p class="cw-issued-panel__hint">@IssuedEmptyHint(view, selectedIssued)</p>
+                            }
+                            else
+                            {
+                                <ul class="cw-issued-list">
+                                    @foreach (var row in selectedIssued.Rows)
+                                    {
+                                        <li>
+                                            <button type="button"
+                                                    class="cw-issued-list__item"
+                                                    @onclick="() => OpenIssuedHeaderAsync(selectedIssued.Key, row.Id)">
+                                                <strong>@row.Title</strong>
+                                                <span>@row.Subtitle</span>
+                                            </button>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                            <div class="cw-issued-panel__actions">
+                                <button type="button" class="os-btn os-btn--primary" @onclick="() => NewIssuedHeaderAsync(selectedIssued.Key)">@selectedIssued.NewCaption</button>
+                            </div>
+                        </div>
+                    }
+                </section>
+            }
             <p class="cw-foot">Application Profile instance · Template: @(string.IsNullOrWhiteSpace(view.Chrome.ProfileTemplateName) ? Snapshot!.Profile.Title : view.Chrome.ProfileTemplateName)</p>
         </div>;
     };
@@ -216,6 +347,10 @@
     {
         <div class="ct-page">
             <h2 class="ct-page__title">People on this case</h2>
+            @if (view.Chrome.ResolvedLinksLocked)
+            {
+                <p class="cw-linked-lock" style="margin-bottom:12px">🔒 People and linked records are locked — this process is complete (issued, rejected, or cancelled).</p>
+            }
             <div class="os-toolbar" style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap">
                 <button type="button" class="os-btn os-btn--primary" disabled="@(!CanLinkPerson || ShowPersonLinkPicker)" @onclick="LinkPersonAsync">Link existing…</button>
                 <button type="button" class="os-btn" disabled="@(!CanUnlinkPerson)" @onclick="UnlinkPersonAsync">Unlink</button>
@@ -267,7 +402,9 @@
                         <div class="ct-rec-grid">
                             @foreach (var record in person.Records)
                             {
-                                <div class="ct-rec">
+                                var isFocused = !string.IsNullOrWhiteSpace(PeopleLinkedRecordFocusKey)
+                                    && string.Equals(record.Key, PeopleLinkedRecordFocusKey, StringComparison.OrdinalIgnoreCase);
+                                <div class="ct-rec @(isFocused ? "ct-rec--focus" : null)">
                                     <span class="ct-rec__icon">@record.Glyph</span>
                                     <span class="ct-rec__label">@record.Label</span>
                                     <strong class="ct-rec__count">@record.Count</strong>
@@ -386,6 +523,10 @@
                     <h4>Quick actions</h4>
                     <button type="button" class="cw-rail-btn" @onclick='() => SelectTab("documents")'>📂 Open document copies</button>
                     <button type="button" class="cw-rail-btn" @onclick='() => SelectTab("resminamalar")'>📦 Generate Resminamalar package</button>
+                    @if (view.IssuedRecordTiles.Count > 0)
+                    {
+                        <button type="button" class="cw-rail-btn" @onclick="IssueRecordQuickAction">＋ Issue record…</button>
+                    }
                     <button type="button" class="cw-rail-btn cw-rail-btn--primary" @onclick="AdvanceProgressAsync">▶ Advance progress</button>
                 </section>
                 <section class="cw-rail-block">
@@ -469,6 +610,14 @@
     {
         if (CaseTabChanged.HasDelegate)
             await CaseTabChanged.InvokeAsync(key);
+    }
+
+    private async Task OpenLinkedRecordTile(string tabKey)
+    {
+        if (LinkedRecordTileClicked.HasDelegate)
+            await LinkedRecordTileClicked.InvokeAsync(tabKey);
+        else
+            await SelectTab("people");
     }
 
     private Task BackToListAsync() => BackToListRequested.InvokeAsync();

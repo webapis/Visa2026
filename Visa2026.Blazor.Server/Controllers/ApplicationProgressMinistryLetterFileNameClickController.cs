@@ -12,16 +12,16 @@ namespace Visa2026.Blazor.Server.Controllers;
 /// <summary>
 /// Makes ministry letter file names clickable in progress history grids; opens the progress letters catalog slot.
 /// </summary>
-public sealed class ApplicationProgressMinistryLetterFileNameClickController : ViewController<ListView>
+public sealed class ApplicationProfileInstanceProgressMinistryLetterFileNameClickController : ViewController<ListView>
 {
     private Action<GridCustomizeElementEventArgs>? customizeElementHandler;
     private Action<GridCustomizeElementEventArgs>? previousCustomizeElement;
     private CancellationTokenSource? deferredApplyCts;
     private ListViewProcessCurrentObjectController? processCurrentObjectController;
 
-    public ApplicationProgressMinistryLetterFileNameClickController()
+    public ApplicationProfileInstanceProgressMinistryLetterFileNameClickController()
     {
-        TargetObjectType = typeof(ApplicationProgress);
+        TargetObjectType = typeof(ApplicationProfileInstanceProgress);
     }
 
     protected override void OnActivated()
@@ -98,16 +98,16 @@ public sealed class ApplicationProgressMinistryLetterFileNameClickController : V
         if (!IsMinistryLetterFileNameColumn(e.Column))
             return;
 
-        if (e.Grid.GetDataItem(e.VisibleIndex) is not ApplicationProgress progress)
+        if (e.Grid.GetDataItem(e.VisibleIndex) is not ApplicationProfileInstanceProgress progress)
             return;
 
         if (progress.MinistryLetterFile == null || string.IsNullOrWhiteSpace(progress.MinistryLetterFileName))
             return;
 
-        var applicationId = ApplicationProgressParentContext.GetApplicationId(Frame, ObjectSpace, View);
-        if (applicationId == Guid.Empty && progress.Application != null)
+        var applicationId = ApplicationProfileInstanceProgressParentContext.GetApplicationProfileInstanceId(Frame, ObjectSpace, View);
+        if (applicationId == Guid.Empty && progress.ApplicationProfileInstance != null)
         {
-            var key = ObjectSpace.GetKeyValue(progress.Application);
+            var key = ObjectSpace.GetKeyValue(progress.ApplicationProfileInstance);
             if (key is Guid guid)
                 applicationId = guid;
         }
@@ -130,13 +130,13 @@ public sealed class ApplicationProgressMinistryLetterFileNameClickController : V
         {
             return string.Equals(
                 dataColumn.FieldName,
-                nameof(ApplicationProgress.MinistryLetterFileName),
+                nameof(ApplicationProfileInstanceProgress.MinistryLetterFileName),
                 StringComparison.Ordinal);
         }
 
         return string.Equals(
             column.Name,
-            nameof(ApplicationProgress.MinistryLetterFileName),
+            nameof(ApplicationProfileInstanceProgress.MinistryLetterFileName),
             StringComparison.Ordinal);
     }
 

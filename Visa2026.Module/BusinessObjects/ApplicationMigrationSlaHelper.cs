@@ -6,12 +6,12 @@ namespace Visa2026.Module.BusinessObjects;
 
 public static class ApplicationMigrationSlaHelper
 {
-    public static ApplicationProgressSlaResult Resolve(Application? application, ApplicationProgress? latest = null)
+    public static ApplicationProfileInstanceProgressSlaResult Resolve(ApplicationProfileInstance? application, ApplicationProfileInstanceProgress? latest = null)
     {
         if (application?.ProgressHistory == null)
             return default;
 
-        latest ??= ApplicationProgressHelper.GetLatest(application.ProgressHistory);
+        latest ??= ApplicationProfileInstanceProgressHelper.GetLatest(application.ProgressHistory);
         if (latest?.State?.Code == null || latest.Date == default)
             return default;
 
@@ -25,7 +25,7 @@ public static class ApplicationMigrationSlaHelper
             var warningDays = migrationProfile.WarningDaysBeforeMax;
             var label = ResolveProfileDisplayLabel(migrationProfile);
             var status = ResolveStatus(workingDays, maxDays, warningDays);
-            return new ApplicationProgressSlaResult(status, workingDays, maxDays, warningDays, label);
+            return new ApplicationProfileInstanceProgressSlaResult(status, workingDays, maxDays, warningDays, label);
         }
 
         if (application.ApplicationProfile is { MigrationSlaDays: > 0 } applicationProfile)
@@ -34,15 +34,15 @@ public static class ApplicationMigrationSlaHelper
             var maxDays = applicationProfile.MigrationSlaDays;
             var label = VisaUiMessages.Get("ApplicationMigration.Sla.DefaultLabel");
             var status = ResolveStatus(workingDays, maxDays, warningDaysBeforeMax: null);
-            return new ApplicationProgressSlaResult(status, workingDays, maxDays, null, label);
+            return new ApplicationProfileInstanceProgressSlaResult(status, workingDays, maxDays, null, label);
         }
 
         return default;
     }
 
-    public static string FormatStatement(ApplicationProgressSlaResult sla)
+    public static string FormatStatement(ApplicationProfileInstanceProgressSlaResult sla)
     {
-        if (sla.Status == ApplicationProgressSlaStatus.None
+        if (sla.Status == ApplicationProfileInstanceProgressSlaStatus.None
             || sla.WorkingDaysInCurrentStep is not int days
             || sla.MaxDaysInReview is not int max)
             return string.Empty;
@@ -52,12 +52,12 @@ public static class ApplicationMigrationSlaHelper
             : sla.MinistryShortName!;
         return sla.Status switch
         {
-            ApplicationProgressSlaStatus.Overdue => VisaUiMessages.Format(
+            ApplicationProfileInstanceProgressSlaStatus.Overdue => VisaUiMessages.Format(
                 "ApplicationMigration.Sla.Overdue",
                 label,
                 days,
                 max),
-            ApplicationProgressSlaStatus.Warning => VisaUiMessages.Format(
+            ApplicationProfileInstanceProgressSlaStatus.Warning => VisaUiMessages.Format(
                 "ApplicationMigration.Sla.Warning",
                 label,
                 days,
@@ -95,25 +95,25 @@ public static class ApplicationMigrationSlaHelper
     }
 
     public static bool IsMigrationServiceProcessStartedStep(string? stateCode) =>
-        string.Equals(stateCode, ApplicationProgressStateCodes.ProcessStarted, StringComparison.OrdinalIgnoreCase);
+        string.Equals(stateCode, ApplicationProfileInstanceProgressStateCodes.ProcessStarted, StringComparison.OrdinalIgnoreCase);
 
     public static bool IsTerminalMigrationState(string? stateCode) =>
         stateCode != null
-        && (string.Equals(stateCode, ApplicationProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase)
-            || string.Equals(stateCode, ApplicationProgressStateCodes.ProcessRejected, StringComparison.OrdinalIgnoreCase)
-            || string.Equals(stateCode, ApplicationProgressStateCodes.ProcessCancelled, StringComparison.OrdinalIgnoreCase));
+        && (string.Equals(stateCode, ApplicationProfileInstanceProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(stateCode, ApplicationProfileInstanceProgressStateCodes.ProcessRejected, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(stateCode, ApplicationProfileInstanceProgressStateCodes.ProcessCancelled, StringComparison.OrdinalIgnoreCase));
 
-    private static ApplicationProgressSlaStatus ResolveStatus(
+    private static ApplicationProfileInstanceProgressSlaStatus ResolveStatus(
         int workingDays,
         int maxDays,
         int? warningDaysBeforeMax)
     {
         if (workingDays > maxDays)
-            return ApplicationProgressSlaStatus.Overdue;
+            return ApplicationProfileInstanceProgressSlaStatus.Overdue;
 
         if (warningDaysBeforeMax is > 0 && workingDays > warningDaysBeforeMax)
-            return ApplicationProgressSlaStatus.Warning;
+            return ApplicationProfileInstanceProgressSlaStatus.Warning;
 
-        return ApplicationProgressSlaStatus.Ok;
+        return ApplicationProfileInstanceProgressSlaStatus.Ok;
     }
 }

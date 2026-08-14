@@ -8,15 +8,15 @@ namespace Visa2026.Blazor.Server.Controllers;
 /// <summary>
 /// Applies workflow row background on <see cref="Application"/> ListViews when XAF conditional appearance is insufficient.
 /// </summary>
-public sealed class ApplicationProgressRowAppearanceController : ViewController<ListView>
+public sealed class ApplicationProfileInstanceProgressRowAppearanceController : ViewController<ListView>
 {
     private Action<GridCustomizeElementEventArgs>? customizeElementHandler;
     private Action<GridCustomizeElementEventArgs>? previousCustomizeElement;
     private ApplicationListViewPreloadController? preloadController;
 
-    public ApplicationProgressRowAppearanceController()
+    public ApplicationProfileInstanceProgressRowAppearanceController()
     {
-        TargetObjectType = typeof(Application);
+        TargetObjectType = typeof(ApplicationProfileInstance);
     }
 
     protected override void OnActivated()
@@ -62,7 +62,7 @@ public sealed class ApplicationProgressRowAppearanceController : ViewController<
 
         preloadController?.EnsureScrollAheadIfNeeded(e.Grid, e.VisibleIndex);
 
-        if (e.Grid.GetDataItem(e.VisibleIndex) is not Application application)
+        if (e.Grid.GetDataItem(e.VisibleIndex) is not ApplicationProfileInstance application)
             return;
 
         var rowCssClass = application.ListRowCssClass;

@@ -13,6 +13,9 @@ public sealed class ApplicationWorkspaceCaseView
     public IReadOnlyList<ApplicationWorkspaceCaseLinkedTile> LinkedRecordTiles { get; init; }
         = Array.Empty<ApplicationWorkspaceCaseLinkedTile>();
 
+    public IReadOnlyList<ApplicationWorkspaceCaseIssuedTile> IssuedRecordTiles { get; init; }
+        = Array.Empty<ApplicationWorkspaceCaseIssuedTile>();
+
     public IReadOnlyList<ApplicationWorkspaceCaseProgressStep> ProgressSteps { get; init; }
         = Array.Empty<ApplicationWorkspaceCaseProgressStep>();
 
@@ -52,6 +55,46 @@ public sealed class ApplicationWorkspaceCaseLinkedTile
     public string Tone { get; init; } = "blue";
 
     public string Glyph { get; init; } = "•";
+}
+
+public sealed class ApplicationWorkspaceCaseIssuedTile
+{
+    public string Key { get; init; } = string.Empty;
+
+    public string Label { get; init; } = string.Empty;
+
+    public int Count { get; init; }
+
+    public string Tone { get; init; } = "blue";
+
+    public string Glyph { get; init; } = "•";
+
+    public string AddCaption { get; init; } = string.Empty;
+
+    public string NewCaption { get; init; } = string.Empty;
+
+    public string PanelTitle { get; init; } = string.Empty;
+
+    public string EmptyHint { get; init; } = string.Empty;
+
+    public IReadOnlyList<ApplicationWorkspaceCaseIssuedRow> Rows { get; init; }
+        = Array.Empty<ApplicationWorkspaceCaseIssuedRow>();
+}
+
+public sealed class ApplicationWorkspaceCaseIssuedRow
+{
+    public Guid Id { get; init; }
+
+    public string Title { get; init; } = string.Empty;
+
+    public string Subtitle { get; init; } = string.Empty;
+}
+
+public sealed class ApplicationWorkspaceIssuedHeaderOpenRequest
+{
+    public string Key { get; init; } = string.Empty;
+
+    public Guid Id { get; init; }
 }
 
 public sealed class ApplicationWorkspaceCaseProgressStep
@@ -99,7 +142,7 @@ public sealed class ApplicationWorkspaceCasePerson
 
     public Guid PersonId { get; init; }
 
-    public Guid ApplicationPersonId { get; init; }
+    public Guid ApplicationProfileInstancePersonId { get; init; }
 
     public string Name { get; init; } = string.Empty;
 

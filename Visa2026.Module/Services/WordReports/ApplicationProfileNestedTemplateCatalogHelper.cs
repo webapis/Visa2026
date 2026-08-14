@@ -14,10 +14,10 @@ public static class ApplicationProfileNestedTemplateCatalogHelper
 {
     public const string EntryKeyPrefix = "profile:";
 
-    public static bool UsesProfileNestedCatalog(Application? application) =>
+    public static bool UsesProfileNestedCatalog(ApplicationProfileInstance? application) =>
         GetOrderedTemplates(application).Count > 0;
 
-    public static IReadOnlyList<ApplicationProfileTemplate> GetOrderedTemplates(Application? application)
+    public static IReadOnlyList<ApplicationProfileTemplate> GetOrderedTemplates(ApplicationProfileInstance? application)
     {
         if (application?.ApplicationProfile?.NestedTemplates == null)
             return Array.Empty<ApplicationProfileTemplate>();

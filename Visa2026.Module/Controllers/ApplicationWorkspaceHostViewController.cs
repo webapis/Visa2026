@@ -13,16 +13,16 @@ public sealed class ApplicationWorkspaceHostViewController : ViewController<Deta
     protected override void OnActivated()
     {
         base.OnActivated();
-        EnsureHostApplicationId();
+        EnsureHostApplicationProfileInstanceId();
     }
 
     protected override void OnViewControlsCreated()
     {
         base.OnViewControlsCreated();
-        EnsureHostApplicationId();
+        EnsureHostApplicationProfileInstanceId();
     }
 
-    private void EnsureHostApplicationId()
+    private void EnsureHostApplicationProfileInstanceId()
     {
         var applicationId = ApplicationWorkspacePendingOpenGate.Get(Application);
         if (applicationId == Guid.Empty)
@@ -39,7 +39,7 @@ public sealed class ApplicationWorkspaceHostViewController : ViewController<Deta
             View.CurrentObject = host;
         }
 
-        if (host.ApplicationId == Guid.Empty)
-            host.ApplicationId = applicationId;
+        if (host.ApplicationProfileInstanceId == Guid.Empty)
+            host.ApplicationProfileInstanceId = applicationId;
     }
 }

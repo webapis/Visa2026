@@ -22,7 +22,7 @@
 | Field | Value |
 |---|---|
 | Data Type | `Application` |
-| Registration Target | `typeof(Application)` |
+| Registration Target | `typeof(ApplicationProfileInstance)` |
 | Visibility Criteria | `[ApplicationType.Name] = 'App_Exit_Visa'` |
 | Background Rule | Letterhead — handled automatically by `AppBaseReport` |
 
@@ -105,7 +105,7 @@ Properties consumed by `AppGroupABaseReport` (Recipient, Urgency, Greeting, Desc
 ## ReportsUpdater.cs entry
 
 ```csharp
-AddPredefinedReport<AppExitVisaReport>("App Exit Visa Report", typeof(Application), isInplaceReport: true);
+AddPredefinedReport<AppExitVisaReport>("App Exit Visa Report", typeof(ApplicationProfileInstance), isInplaceReport: true);
 CreateReportVisibility("App Exit Visa Report", "[ApplicationType.Name] = 'App_Exit_Visa'");
 ```
 

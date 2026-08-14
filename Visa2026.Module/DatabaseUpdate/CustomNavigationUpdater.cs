@@ -52,7 +52,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 imageName: "BO_Person",
                 index: 2);
 
-            ConfigureApplicationProgressRouteNavigation(navigationItems, modelViews);
+            ConfigureApplicationProfileInstanceProgressRouteNavigation(navigationItems, modelViews);
             RemoveLegacyLookupOperationalNavigation(navigationItems);
             RemoveStaleInvitationBorderZoneNavigation(navigationItems);
             RemoveStaleApplicationProfileListNavigation(navigationItems);
@@ -137,73 +137,119 @@ namespace Visa2026.Module.DatabaseUpdate
                 legacyItem.Remove();
         }
 
-        private static void ConfigureApplicationProgressRouteNavigation(
+        private static void ConfigureApplicationProfileInstanceProgressRouteNavigation(
             IModelNavigationItems navigationItems,
             IModelViews modelViews)
         {
-            // Application and ApplicationItem use [NavigationItem(false)]; create the group explicitly
-            // (previously ApplicationItem anchored this folder).
+            // ApplicationProfileInstance and ApplicationRosterMergeLine use [NavigationItem(false)]; create the group explicitly
+            // (previously ApplicationRosterMergeLine anchored this folder).
             var applicationGroup = navigationItems["Application"]
                 ?? navigationItems.AddNode<IModelNavigationItem>("Application");
+            applicationGroup.Caption = ApplicationProfileInstanceProgressRouteNavigation.CaptionGroup;
             applicationGroup.ImageName ??= "BO_FileAttachment";
 
-            var viaMinistriesView = EnsureListView(
+            var stagedView = EnsureApplicationListView(
                 modelViews,
-                ApplicationProgressRouteNavigation.ListViewViaMinistries,
-                "Application_ListView",
-                ApplicationProgressRouteNavigation.CriteriaViaMinistries);
-            if (viaMinistriesView != null)
-            {
-                var viaItem = applicationGroup.Items[ApplicationProgressRouteNavigation.NavItemViaMinistries]
-                    ?? applicationGroup.Items.AddNode<IModelNavigationItem>(ApplicationProgressRouteNavigation.NavItemViaMinistries);
-                viaItem.View = viaMinistriesView;
-                viaItem.ImageName = "BO_Organization";
-            }
+                ApplicationProfileInstanceProgressRouteNavigation.ListViewStaged,
+                ApplicationProfileInstanceProgressRouteNavigation.CriteriaStaged,
+                ApplicationProfileInstanceProgressRouteNavigation.CaptionStaged);
+            EnsureApplicationListNavItem(
+                applicationGroup,
+                stagedView,
+                ApplicationProfileInstanceProgressRouteNavigation.NavItemStaged,
+                ApplicationProfileInstanceProgressRouteNavigation.CaptionStaged,
+                "BO_Task",
+                index: 0);
 
-            var directView = EnsureListView(
+            var inProcessView = EnsureApplicationListView(
                 modelViews,
-                ApplicationProgressRouteNavigation.ListViewDirectMigration,
-                "Application_ListView",
-                ApplicationProgressRouteNavigation.CriteriaDirectMigration);
-            if (modelViews[ApplicationProgressRouteNavigation.ListViewDirectMigration] is IModelListView directMigrationListView)
+                ApplicationProfileInstanceProgressRouteNavigation.ListViewInProcess,
+                ApplicationProfileInstanceProgressRouteNavigation.CriteriaInProcess,
+                ApplicationProfileInstanceProgressRouteNavigation.CaptionInProcess);
+            EnsureApplicationListNavItem(
+                applicationGroup,
+                inProcessView,
+                ApplicationProfileInstanceProgressRouteNavigation.NavItemInProcess,
+                ApplicationProfileInstanceProgressRouteNavigation.CaptionInProcess,
+                "BO_List",
+                index: 1);
+
+            var viaMinistriesView = EnsureApplicationListView(
+                modelViews,
+                ApplicationProfileInstanceProgressRouteNavigation.ListViewViaMinistries,
+                ApplicationProfileInstanceProgressRouteNavigation.CriteriaViaMinistries,
+                ApplicationProfileInstanceProgressRouteNavigation.CaptionViaMinistries);
+            EnsureApplicationListNavItem(
+                applicationGroup,
+                viaMinistriesView,
+                ApplicationProfileInstanceProgressRouteNavigation.NavItemViaMinistries,
+                ApplicationProfileInstanceProgressRouteNavigation.CaptionViaMinistries,
+                "BO_Organization",
+                index: 3);
+
+            var directView = EnsureApplicationListView(
+                modelViews,
+                ApplicationProfileInstanceProgressRouteNavigation.ListViewDirectMigration,
+                ApplicationProfileInstanceProgressRouteNavigation.CriteriaDirectMigration,
+                ApplicationProfileInstanceProgressRouteNavigation.CaptionDirectMigration);
+            if (modelViews[ApplicationProfileInstanceProgressRouteNavigation.ListViewDirectMigration] is IModelListView directMigrationListView)
             {
                 // Direct migration has no ministry approval SLA; hide both SLA deadline columns.
-                SetColumnVisibility(directMigrationListView, nameof(BusinessObjects.Application.ProgressSlaStatement), false);
-                SetColumnVisibility(directMigrationListView, nameof(BusinessObjects.Application.MigrationSlaStatement), false);
+                SetColumnVisibility(directMigrationListView, nameof(BusinessObjects.ApplicationProfileInstance.ProgressSlaStatement), false);
+                SetColumnVisibility(directMigrationListView, nameof(BusinessObjects.ApplicationProfileInstance.MigrationSlaStatement), false);
             }
-            if (directView != null)
-            {
-                var directItem = applicationGroup.Items[ApplicationProgressRouteNavigation.NavItemDirectMigration]
-                    ?? applicationGroup.Items.AddNode<IModelNavigationItem>(ApplicationProgressRouteNavigation.NavItemDirectMigration);
-                directItem.View = directView;
-                directItem.ImageName = "BO_Localization";
-            }
+            EnsureApplicationListNavItem(
+                applicationGroup,
+                directView,
+                ApplicationProfileInstanceProgressRouteNavigation.NavItemDirectMigration,
+                ApplicationProfileInstanceProgressRouteNavigation.CaptionDirectMigration,
+                "BO_Localization",
+                index: 4);
 
             RemoveApplicationItemRouteNavItems(applicationGroup);
             // Remove the node if another generator re-added it (Administrators ignore nav Deny).
             if (applicationGroup.Items["Application"] is IModelNavigationItem legacyApplicationItem)
                 legacyApplicationItem.Remove();
 
-            if (applicationGroup.Items["ApplicationItem"] is IModelNavigationItem legacyApplicationItemsItem)
+            if (applicationGroup.Items["ApplicationRosterMergeLine"] is IModelNavigationItem legacyApplicationItemsItem)
                 legacyApplicationItemsItem.Remove();
+        }
+
+        private static void EnsureApplicationListNavItem(
+            IModelNavigationItem applicationGroup,
+            IModelListView? view,
+            string navItemId,
+            string caption,
+            string imageName,
+            int index)
+        {
+            if (view == null)
+                return;
+
+            var navItem = applicationGroup.Items[navItemId]
+                ?? applicationGroup.Items.AddNode<IModelNavigationItem>(navItemId);
+            navItem.View = view;
+            navItem.Caption = caption;
+            navItem.ImageName = imageName;
+            navItem.Index = index;
         }
 
         private static void RemoveApplicationItemRouteNavItems(IModelNavigationItem applicationGroup)
         {
             foreach (var routeNavId in new[]
                      {
-                         ApplicationProgressRouteNavigation.NavItemViaMinistries,
-                         ApplicationProgressRouteNavigation.NavItemDirectMigration,
+                         ApplicationProfileInstanceProgressRouteNavigation.NavItemViaMinistries,
+                         ApplicationProfileInstanceProgressRouteNavigation.NavItemDirectMigration,
                      })
             {
                 if (applicationGroup.Items[routeNavId] is not IModelNavigationItem routeNavItem)
                     continue;
 
-                if (routeNavItem.Items[ApplicationProgressRouteNavigation.NavItemItemsViaMinistries]
+                if (routeNavItem.Items[ApplicationProfileInstanceProgressRouteNavigation.NavItemItemsViaMinistries]
                     is IModelNavigationItem viaItemsNav)
                     viaItemsNav.Remove();
 
-                if (routeNavItem.Items[ApplicationProgressRouteNavigation.NavItemItemsDirectMigration]
+                if (routeNavItem.Items[ApplicationProfileInstanceProgressRouteNavigation.NavItemItemsDirectMigration]
                     is IModelNavigationItem directItemsNav)
                     directItemsNav.Remove();
             }
@@ -225,6 +271,36 @@ namespace Visa2026.Module.DatabaseUpdate
             return view;
         }
 
+        private static IModelListView? EnsureApplicationListView(
+            IModelViews views,
+            string newViewId,
+            string criteria,
+            string? caption = null)
+        {
+            var sourceView = ResolveSourceApplicationListView(views);
+            var view = views[newViewId] as IModelListView;
+            if (view == null && sourceView != null)
+            {
+                view = views.AddNode<IModelListView>(newViewId);
+                view.ModelClass = sourceView.ModelClass;
+            }
+
+            if (view != null)
+            {
+                if (view.ModelClass == null && sourceView != null)
+                    view.ModelClass = sourceView.ModelClass;
+                view.Criteria = criteria;
+                if (!string.IsNullOrEmpty(caption))
+                    view.Caption = caption;
+            }
+
+            return view;
+        }
+
+        private static IModelListView? ResolveSourceApplicationListView(IModelViews views) =>
+            views[ApplicationProfileInstanceProgressRouteNavigation.SourceListView] as IModelListView
+            ?? views[ApplicationProfileInstanceProgressRouteNavigation.LegacySourceListView] as IModelListView;
+
         private static void SetColumnVisibility(IModelListView view, string propertyName, bool visible)
             => ModelListViewColumnVisibility.Set(view, propertyName, visible);
     }
@@ -234,6 +310,8 @@ namespace Visa2026.Module.DatabaseUpdate
         public override void UpdateNode(ModelNode node)
         {
             var modelViews = (IModelViews)node;
+            CloneApplicationRouteListViews(modelViews);
+
             var originalListView = modelViews["Person_ListView"] as IModelListView;
             if (originalListView == null) return;
 
@@ -328,22 +406,6 @@ namespace Visa2026.Module.DatabaseUpdate
                     existingVisitorListView.DetailView = visitorDetailViewForList;
             }
 
-            CloneApplicationListViewIfMissing(
-                modelViews,
-                ApplicationProgressRouteNavigation.ListViewViaMinistries,
-                ApplicationProgressRouteNavigation.CriteriaViaMinistries);
-            if (modelViews[ApplicationProgressRouteNavigation.ListViewViaMinistries] is IModelListView viaMinistriesListView)
-            {
-                SetColumnVisibility(viaMinistriesListView, nameof(BusinessObjects.Application.Urgency), true);
-                SetColumnVisibility(viaMinistriesListView, nameof(BusinessObjects.Application.ApprovalLegProfile), true);
-                SetColumnVisibility(viaMinistriesListView, nameof(BusinessObjects.Application.VisaPeriod), true);
-                SetColumnVisibility(viaMinistriesListView, nameof(BusinessObjects.Application.VisaType), true);
-            }
-            CloneApplicationListViewIfMissing(
-                modelViews,
-                ApplicationProgressRouteNavigation.ListViewDirectMigration,
-                ApplicationProgressRouteNavigation.CriteriaDirectMigration);
-
             HideCurrentRejectionItemColumn(modelViews, "Person_ListView_Employees");
             HideCurrentRejectionItemColumn(modelViews, "Person_ListView_FamilyMembers");
             HideCurrentRejectionItemColumn(modelViews, "Person_ListView_TemporaryVisitors");
@@ -358,23 +420,69 @@ namespace Visa2026.Module.DatabaseUpdate
                 SetColumnVisibility(listView, "CurrentRejectionItem", false);
         }
 
+        private static void CloneApplicationRouteListViews(IModelViews modelViews)
+        {
+            CloneApplicationListViewIfMissing(
+                modelViews,
+                ApplicationProfileInstanceProgressRouteNavigation.ListViewStaged,
+                ApplicationProfileInstanceProgressRouteNavigation.CriteriaStaged,
+                ApplicationProfileInstanceProgressRouteNavigation.CaptionStaged);
+            CloneApplicationListViewIfMissing(
+                modelViews,
+                ApplicationProfileInstanceProgressRouteNavigation.ListViewInProcess,
+                ApplicationProfileInstanceProgressRouteNavigation.CriteriaInProcess,
+                ApplicationProfileInstanceProgressRouteNavigation.CaptionInProcess);
+            CloneApplicationListViewIfMissing(
+                modelViews,
+                ApplicationProfileInstanceProgressRouteNavigation.ListViewViaMinistries,
+                ApplicationProfileInstanceProgressRouteNavigation.CriteriaViaMinistries,
+                ApplicationProfileInstanceProgressRouteNavigation.CaptionViaMinistries);
+            if (modelViews[ApplicationProfileInstanceProgressRouteNavigation.ListViewViaMinistries] is IModelListView viaMinistriesListView)
+            {
+                SetColumnVisibility(viaMinistriesListView, nameof(BusinessObjects.ApplicationProfileInstance.Urgency), true);
+                SetColumnVisibility(viaMinistriesListView, nameof(BusinessObjects.ApplicationProfileInstance.ApprovalLegProfile), true);
+                SetColumnVisibility(viaMinistriesListView, nameof(BusinessObjects.ApplicationProfileInstance.VisaPeriod), true);
+                SetColumnVisibility(viaMinistriesListView, nameof(BusinessObjects.ApplicationProfileInstance.VisaType), true);
+            }
+            CloneApplicationListViewIfMissing(
+                modelViews,
+                ApplicationProfileInstanceProgressRouteNavigation.ListViewDirectMigration,
+                ApplicationProfileInstanceProgressRouteNavigation.CriteriaDirectMigration,
+                ApplicationProfileInstanceProgressRouteNavigation.CaptionDirectMigration);
+        }
+
         private static void CloneApplicationListViewIfMissing(
             IModelViews modelViews,
             string targetViewId,
-            string criteria)
+            string criteria,
+            string? caption = null)
         {
-            if (modelViews[targetViewId] != null)
-                return;
+            var sourceView = ResolveSourceApplicationListView(modelViews);
+            if (modelViews[targetViewId] is not IModelListView targetView)
+            {
+                if (sourceView == null)
+                    return;
 
-            if (modelViews["Application_ListView"] is not IModelListView sourceView)
-                return;
+                targetView = modelViews.AddNode<IModelListView>(targetViewId);
+                targetView.Id = targetViewId;
+                targetView.ModelClass = sourceView.ModelClass;
+                CopyColumns(sourceView, targetView);
+            }
+            else if (targetView.ModelClass == null && sourceView != null)
+            {
+                targetView.ModelClass = sourceView.ModelClass;
+                if (targetView.Columns.Count == 0)
+                    CopyColumns(sourceView, targetView);
+            }
 
-            var targetView = modelViews.AddNode<IModelListView>(targetViewId);
-            targetView.Id = targetViewId;
-            targetView.ModelClass = sourceView.ModelClass;
             targetView.Criteria = criteria;
-            CopyColumns(sourceView, targetView);
+            if (!string.IsNullOrEmpty(caption))
+                targetView.Caption = caption;
         }
+
+        private static IModelListView? ResolveSourceApplicationListView(IModelViews views) =>
+            views[ApplicationProfileInstanceProgressRouteNavigation.SourceListView] as IModelListView
+            ?? views[ApplicationProfileInstanceProgressRouteNavigation.LegacySourceListView] as IModelListView;
 
         private static void CopyColumns(IModelListView source, IModelListView target)
         {

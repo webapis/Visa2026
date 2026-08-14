@@ -41,7 +41,7 @@ public static class ApplicationFilledFormPdfGenerator
         IObjectSpace objectSpace,
         IPdfFormFillerService pdfFillerService,
         string templatePath,
-        IReadOnlyList<ApplicationItem> items,
+        IReadOnlyList<ApplicationRosterMergeLine> items,
         out byte[]? content,
         out string fileName,
         out string contentType,
@@ -53,7 +53,7 @@ public static class ApplicationFilledFormPdfGenerator
         errorMessageKey = null;
 
         var validItems = items
-            .Where(item => item != null && item.Application != null)
+            .Where(item => item != null && item.ApplicationProfileInstance != null)
             .GroupBy(item => item.ID)
             .Select(group => group.First())
             .ToList();
@@ -65,14 +65,14 @@ public static class ApplicationFilledFormPdfGenerator
         }
 
         var mappings = PdfMappingHelper.GetMappings(objectSpace);
-        var filledPdfs = new List<(ApplicationItem Item, byte[] Content)>();
+        var filledPdfs = new List<(ApplicationRosterMergeLine Item, byte[] Content)>();
 
         try
         {
             foreach (var item in validItems)
             {
                 var data = new Dictionary<string, object>();
-                PdfMappingHelper.MapApplicationData(data, item.Application, item, objectSpace, null, mappings);
+                PdfMappingHelper.MapApplicationData(data, item.ApplicationProfileInstance, item, objectSpace, null, mappings);
 
                 using var memoryStream = new MemoryStream();
                 pdfFillerService.FillForm(templatePath, memoryStream, data);
@@ -98,7 +98,7 @@ public static class ApplicationFilledFormPdfGenerator
         }
     }
 
-    private static byte[] BuildZipArchive(IReadOnlyList<(ApplicationItem Item, byte[] Content)> filledPdfs)
+    private static byte[] BuildZipArchive(IReadOnlyList<(ApplicationRosterMergeLine Item, byte[] Content)> filledPdfs)
     {
         using var zipStream = new MemoryStream();
         using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Create, leaveOpen: true))
@@ -122,18 +122,18 @@ public static class ApplicationFilledFormPdfGenerator
         return zipStream.ToArray();
     }
 
-    private static string BuildFileName(ApplicationItem item)
+    private static string BuildFileName(ApplicationRosterMergeLine item)
     {
         var personName = item.Person != null
             ? $"{item.Person.FirstName}_{item.Person.LastName}"
             : "Application";
-        var applicationNumber = item.Application?.FullApplicationNumber ?? "form";
+        var applicationNumber = item.ApplicationProfileInstance?.FullApplicationNumber ?? "form";
         return ZipEntryFileNameSanitizer.Sanitize($"ApplicationForm_{applicationNumber}_{personName}.pdf");
     }
 
-    private static string BuildZipFileName(IReadOnlyList<ApplicationItem> items)
+    private static string BuildZipFileName(IReadOnlyList<ApplicationRosterMergeLine> items)
     {
-        var applicationNumber = items[0].Application?.FullApplicationNumber ?? "Application";
+        var applicationNumber = items[0].ApplicationProfileInstance?.FullApplicationNumber ?? "Application";
         return ZipEntryFileNameSanitizer.Sanitize(
             $"ApplicationForm_{applicationNumber}_{items.Count}items_{DateTime.Now:yyyyMMddHHmmss}.zip");
     }

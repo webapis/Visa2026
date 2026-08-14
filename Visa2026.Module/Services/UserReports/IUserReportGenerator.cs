@@ -14,14 +14,14 @@ namespace Visa2026.Module.Services.UserReports
         /// <param name="outputStream">Output stream for the generated document</param>
         Task GenerateAsync(
             UserReportTemplate template,
-            Application application,
+            ApplicationProfileInstance application,
             Stream outputStream,
-            IList<ApplicationItem>? applicationItems = null);
+            IList<ApplicationRosterMergeLine>? applicationItems = null);
 
-        /// <summary>Generate a Word document from a user-defined template for a specific ApplicationItem.</summary>
+        /// <summary>Generate a Word document from a user-defined template for a specific ApplicationRosterMergeLine.</summary>
         /// <param name="template">The user-defined template</param>
         /// <param name="applicationItem">The application item to fill data from</param>
         /// <param name="outputStream">Output stream for the generated document</param>
-        Task GenerateAsync(UserReportTemplate template, ApplicationItem applicationItem, Stream outputStream);
+        Task GenerateAsync(UserReportTemplate template, ApplicationRosterMergeLine applicationItem, Stream outputStream);
     }
 }

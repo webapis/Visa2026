@@ -72,7 +72,7 @@ export function renderCaseHeader(c) {
       <div class="cw-head__title-block">
         <div class="cw-head__accent"></div>
         <div>
-          <h1>Application № ${esc(c.number)}</h1>
+          <h1>ApplicationProfileInstance № ${esc(c.number)}</h1>
           <p class="cw-head__sub">${esc(tplLabel(c.tplKey))} · Started ${esc(c.started)}</p>
         </div>
       </div>
@@ -119,8 +119,63 @@ function linkedRecordTile(rec) {
   </button>`;
 }
 
-export function renderCaseOverview(c) {
+function issuedRecordsFor(c) {
+  if (c.tplKey === 'inv') {
+    return [
+      { key: 'invitation', icon: 'bi-envelope', tone: 'blue', label: 'Invitation', count: 0, add: '+ Add invitation', newLabel: 'New invitation', panel: 'Invitations produced by this case' },
+      { key: 'issuedVisa', icon: 'bi-credit-card-2-front', tone: 'teal', label: 'Issued visa', count: 0, add: '+ Add issued visa', newLabel: 'New issued visa', panel: 'Visas issued by this case' },
+    ];
+  }
+  if (c.tplKey === 'wp') {
+    return [
+      { key: 'workPermit', icon: 'bi-briefcase', tone: 'purple', label: 'Work permit', count: 0, add: '+ Add work permit', newLabel: 'New work permit', panel: 'Work permits produced by this case' },
+    ];
+  }
+  return [
+    { key: 'invitation', icon: 'bi-envelope', tone: 'blue', label: 'Invitation', count: 0, add: '+ Add invitation', newLabel: 'New invitation', panel: 'Invitations produced by this case' },
+    { key: 'workPermit', icon: 'bi-briefcase', tone: 'purple', label: 'Work permit', count: 1, add: '+ Add work permit', newLabel: 'New work permit', panel: 'Work permits produced by this case', rows: [{ title: 'WP-2026-0147-01', subtitle: '10 Aug 2026' }] },
+    { key: 'borderZone', icon: 'bi-signpost-2', tone: 'green', label: 'Border zone', count: 0, add: '+ Add border zone', newLabel: 'New border zone', panel: 'Border-zone permits produced by this case' },
+    { key: 'rejection', icon: 'bi-x-octagon', tone: 'orange', label: 'Rejection', count: 0, add: '+ Add rejection', newLabel: 'New rejection', panel: 'Rejections produced by this case' },
+  ];
+}
+
+function issuedRecordTile(rec, selectedKey) {
+  const selected = rec.key === selectedKey ? ' is-selected' : '';
+  const empty = rec.count === 0 ? ' is-empty' : '';
+  const body = rec.count === 0
+    ? `<span class="cw-issued-tile__add">${esc(rec.add)}</span>`
+    : `<strong class="cw-link-tile__count">${rec.count}</strong>`;
+  return `<button type="button" class="cw-link-tile cw-link-tile--${rec.tone} cw-issued-tile${empty}${selected}" data-issued-key="${esc(rec.key)}">
+    <span class="cw-link-tile__icon"><i class="bi ${rec.icon}"></i></span>
+    <span class="cw-link-tile__label">${esc(rec.label)}</span>
+    ${body}
+    <i class="bi bi-chevron-right cw-link-tile__chev"></i>
+  </button>`;
+}
+
+function issuedPanel(c, rec) {
+  const number = c.number || '';
+  const hint = rec.count === 0
+    ? `<p class="cw-issued-panel__hint">No ${esc(rec.label.toLowerCase())} yet. New ${esc(rec.label.toLowerCase())} will be linked to Application № ${esc(number)}.</p>`
+    : `<ul class="cw-issued-list">${(rec.rows || []).map(row =>
+        `<li><button type="button" class="cw-issued-list__item"><strong>${esc(row.title)}</strong><span>${esc(row.subtitle)}</span></button></li>`).join('')}</ul>`;
+  return `<div class="cw-issued-panel">
+    <h3 class="cw-issued-panel__title">${esc(rec.panel)}</h3>
+    ${hint}
+    <div class="cw-issued-panel__actions"><button type="button" class="os-btn os-btn--primary">${esc(rec.newLabel)}</button></div>
+  </div>`;
+}
+
+export function renderCaseOverview(c, issuedFocusKey) {
   const pIdx = progressIndex(c.step);
+  const issued = issuedRecordsFor(c);
+  const selected = issued.find(t => t.key === issuedFocusKey);
+  const issuedCard = issued.length === 0 ? '' : `<section class="cw-card">
+      <h2 class="cw-card__title">Issued records</h2>
+      <p class="cw-card__sub">Created by this application · visible when May produce is on</p>
+      <div class="cw-issued-row">${issued.map(t => issuedRecordTile(t, issuedFocusKey)).join('')}</div>
+      ${selected ? issuedPanel(c, selected) : ''}
+    </section>`;
   return `<div class="cw-overview">
     <section class="cw-card">
       <h2 class="cw-card__title">Case summary</h2>
@@ -133,13 +188,15 @@ export function renderCaseOverview(c) {
       </div>
     </section>
     <section class="cw-card">
-      <h2 class="cw-card__title">Application progress</h2>
+      <h2 class="cw-card__title">ApplicationProfileInstance progress</h2>
       ${renderProgressStepper(pIdx)}
     </section>
     <section class="cw-card">
       <h2 class="cw-card__title">Linked records</h2>
+      <p class="cw-card__sub">Existing person records linked to this case</p>
       <div class="cw-link-row">${LINKED_RECORDS.map(linkedRecordTile).join('')}</div>
     </section>
+    ${issuedCard}
     <p class="cw-foot">Application Profile instance · Template: ${esc(tplLabel(c.tplKey))}</p>
   </div>`;
 }
@@ -159,6 +216,7 @@ export function renderCaseRail(c, { full = false } = {}) {
     <h4>Quick actions</h4>
     <button type="button" class="cw-rail-btn" data-ws-tab="documents"><i class="bi bi-folder2-open"></i> Open document copies</button>
     <button type="button" class="cw-rail-btn" data-ws-tab="resminamalar"><i class="bi bi-file-earmark-zip"></i> Generate Resminamalar package</button>
+    <button type="button" class="cw-rail-btn" data-issued-key="invitation"><i class="bi bi-plus-lg"></i> Issue record…</button>
     <button type="button" class="cw-rail-btn cw-rail-btn--primary" data-ws-tab="progress"><i class="bi bi-play-fill"></i> Advance progress</button>
   </section>`;
   if (full) {

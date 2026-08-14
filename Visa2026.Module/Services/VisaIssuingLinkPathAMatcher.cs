@@ -8,14 +8,11 @@ using Visa2026.Module.Services.MigrationImport;
 namespace Visa2026.Module.Services;
 
 /// <summary>
-/// Path A (manual UI create): resolve <see cref="Visa.IssuingApplication"/> (and legacy
-/// <see cref="Visa.IssuingApplicationItem"/> when present) plus optional <see cref="Visa.InvitationItem"/>.
-/// Not used by legacy import (Path B).
+/// Path A (manual UI create): resolve <see cref="Visa.IssuingApplicationProfileInstance"/>
+/// plus optional <see cref="Visa.InvitationItem"/>. Not used by legacy import (Path B).
 /// </summary>
 public static class VisaIssuingLinkPathAMatcher
 {
-    private sealed record IssuingCandidate(Application Application, ApplicationItem? LegacyItem);
-
     /// <summary>
     /// Applies Path A defaults at most once while <paramref name="visa"/> is still a new object.
     /// Skips during <see cref="MigrationImportContext.IsDataImport"/>.
@@ -38,21 +35,19 @@ public static class VisaIssuingLinkPathAMatcher
 
         visa.PathAIssuingLinksApplied = true;
 
-        var candidate = FindIssuingApplicationCandidate(objectSpace, visa, person.ID);
-        if (candidate?.Application == null)
+        var candidate = FindIssuingApplicationProfileInstanceCandidate(objectSpace, visa, person.ID);
+        if (candidate == null)
             return;
 
-        visa.IssuingApplication = candidate.Application;
-        if (candidate.LegacyItem != null)
-            visa.IssuingApplicationItem = candidate.LegacyItem;
+        visa.IssuingApplicationProfileInstance = candidate;
 
-        if (!VisaIssuingApplicationHelper.CanIssueInvitationForVisa(visa))
+        if (!VisaIssuingApplicationProfileInstanceHelper.CanIssueInvitationForVisa(visa))
         {
             visa.InvitationItem = null;
             return;
         }
 
-        var invitationItem = FindInvitationItem(objectSpace, visa, person.ID, candidate.Application);
+        var invitationItem = FindInvitationItem(objectSpace, visa, person.ID, candidate);
         if (invitationItem == null)
             return;
 
@@ -61,62 +56,39 @@ public static class VisaIssuingLinkPathAMatcher
             invitationItem.SetItemStatusFlags(cancelled: false, changed: false, used: true);
     }
 
-    private static IssuingCandidate? FindIssuingApplicationCandidate(
+    private static ApplicationProfileInstance? FindIssuingApplicationProfileInstanceCandidate(
         IObjectSpace objectSpace,
         Visa visa,
         Guid personId)
     {
         var visaId = visa.ID;
         var issueDate = visa.IssueDate;
-        var cancelledCode = ApplicationProgressStateCodes.ProcessCancelled;
+        var cancelledCode = ApplicationProfileInstanceProgressStateCodes.ProcessCancelled;
 
-        var linkedApplicationIds = objectSpace.GetObjectsQuery<Visa>()
+        var linkedApplicationProfileInstanceIds = objectSpace.GetObjectsQuery<Visa>()
             .Where(v => v.ID != visaId)
             .AsEnumerable()
-            .Select(v => VisaIssuingApplicationHelper.GetEffectiveIssuingApplication(v)?.ID ?? Guid.Empty)
+            .Select(v => VisaIssuingApplicationProfileInstanceHelper.GetEffectiveIssuingApplicationProfileInstance(v)?.ID ?? Guid.Empty)
             .Where(id => id != Guid.Empty)
             .ToHashSet();
 
-        var m2mApplications = objectSpace.GetObjectsQuery<ApplicationPerson>()
-            .Where(ap => ap.PersonId == personId && ap.Application != null)
-            .Select(ap => ap.Application!)
+        var candidates = objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
+            .Where(a => a.People.Any(p => p.ID == personId))
             .AsEnumerable()
-            .Where(VisaIssuingApplicationHelper.IsEligibleIssuingApplication)
+            .Where(VisaIssuingApplicationProfileInstanceHelper.IsEligibleIssuingApplicationProfileInstance)
             .Where(app => app.LatestPrimaryStateCode == null
                 || app.LatestPrimaryStateCode != cancelledCode)
             .GroupBy(app => app.ID)
             .Select(g => g.First())
-            .ToList();
-
-        var m2mAppIds = m2mApplications.Select(a => a.ID).ToHashSet();
-
-        var legacyItems = objectSpace.GetObjectsQuery<ApplicationItem>()
-            .Where(ai => ai.Person != null && ai.Person.ID == personId)
-            .Where(ai => ai.Application != null)
-            .Where(ai => !ai.InvitationItemIsCancelled)
-            .Where(ai => !ai.VisaIsCancelled)
-            .Where(ai => !ai.IsCancelled)
-            .Where(ai => !ai.ApplicationItemsIsCancelled)
-            .Where(ai =>
-                ai.Application!.LatestPrimaryStateCode == null
-                || ai.Application.LatestPrimaryStateCode != cancelledCode)
-            .AsEnumerable()
-            .Where(ai => VisaIssuingApplicationHelper.IsEligibleIssuingApplication(ai.Application))
-            .Where(ai => !m2mAppIds.Contains(ai.Application!.ID))
-            .ToList();
-
-        var candidates = m2mApplications
-            .Select(app => new IssuingCandidate(app, null))
-            .Concat(legacyItems.Select(item => new IssuingCandidate(item.Application!, item)))
-            .Where(c => !linkedApplicationIds.Contains(c.Application.ID))
-            .OrderByDescending(c => c.Application.ApplicationDate)
-            .ThenByDescending(c => c.Application.ID)
+            .Where(app => !linkedApplicationProfileInstanceIds.Contains(app.ID))
+            .OrderByDescending(app => app.ApplicationDate)
+            .ThenByDescending(app => app.ID)
             .ToList();
 
         if (issueDate != default)
         {
             candidates = candidates
-                .Where(c => c.Application.ApplicationDate.Date < issueDate.Date)
+                .Where(app => app.ApplicationDate.Date < issueDate.Date)
                 .ToList();
         }
 
@@ -127,15 +99,15 @@ public static class VisaIssuingLinkPathAMatcher
         if (predecessor != null)
         {
             var viaPredecessor = candidates
-                .Where(c => ReferencesPredecessorVisa(objectSpace, c, personId, predecessor))
+                .Where(app => ReferencesPredecessorVisa(objectSpace, app, personId, predecessor))
                 .ToList();
             if (viaPredecessor.Count > 0)
                 return viaPredecessor[0];
         }
 
         var withUnusedInvitation = candidates
-            .Where(c => VisaIssuingApplicationHelper.CanIssueInvitationForApplication(c.Application)
-                && HasUnusedInvitationItem(objectSpace, c.Application, personId, visaId))
+            .Where(app => VisaIssuingApplicationProfileInstanceHelper.CanIssueInvitationForApplication(app)
+                && HasUnusedInvitationItem(objectSpace, app, personId, visaId))
             .ToList();
 
         if (withUnusedInvitation.Count > 0)
@@ -146,22 +118,16 @@ public static class VisaIssuingLinkPathAMatcher
 
     private static bool ReferencesPredecessorVisa(
         IObjectSpace objectSpace,
-        IssuingCandidate candidate,
+        ApplicationProfileInstance application,
         Guid personId,
         Visa predecessor)
     {
-        if (candidate.LegacyItem?.CurrentVisa != null
-            && candidate.LegacyItem.CurrentVisa.ID == predecessor.ID)
-        {
-            return true;
-        }
-
-        var applicationPerson = objectSpace.GetObjectsQuery<ApplicationPerson>()
-            .FirstOrDefault(ap => ap.ApplicationId == candidate.Application.ID && ap.PersonId == personId);
-
-        return applicationPerson?.ResolvedLinks?
-            .Any(link => link.LinkKind == ApplicationPersonLinkKind.Visa
-                && link.LinkedObjectId == predecessor.ID) == true;
+        return objectSpace.GetObjectsQuery<ApplicationProfileInstancePersonResolvedLink>()
+            .Any(link =>
+                link.ApplicationProfileInstanceId == application.ID
+                && link.PersonId == personId
+                && link.LinkKind == ApplicationProfileInstancePersonLinkKind.Visa
+                && link.LinkedObjectId == predecessor.ID);
     }
 
     /// <summary>
@@ -196,7 +162,7 @@ public static class VisaIssuingLinkPathAMatcher
 
     private static bool HasUnusedInvitationItem(
         IObjectSpace objectSpace,
-        Application application,
+        ApplicationProfileInstance application,
         Guid personId,
         Guid visaId)
     {
@@ -209,8 +175,8 @@ public static class VisaIssuingLinkPathAMatcher
         var query = objectSpace.GetObjectsQuery<InvitationItem>()
             .Where(ii => ii.Person != null && ii.Person.ID == personId)
             .Where(ii => ii.Invitation != null
-                && ii.Invitation.Application != null
-                && ii.Invitation.Application.ID == applicationId)
+                && ii.Invitation.ApplicationProfileInstance != null
+                && ii.Invitation.ApplicationProfileInstance.ID == applicationId)
             .Where(ii => !ii.IsCancelled && !ii.IsChanged && !ii.IsUsed);
 
         if (linkedInvitationIds.Count > 0)
@@ -223,7 +189,7 @@ public static class VisaIssuingLinkPathAMatcher
         IObjectSpace objectSpace,
         Visa visa,
         Guid personId,
-        Application? issuingApplication)
+        ApplicationProfileInstance? issuingApplication)
     {
         if (issuingApplication == null)
             return null;
@@ -241,7 +207,7 @@ public static class VisaIssuingLinkPathAMatcher
         var query = objectSpace.GetObjectsQuery<InvitationItem>()
             .Where(ii => ii.Person != null && ii.Person.ID == personId)
             .Where(ii => ii.Invitation != null)
-            .Where(ii => ii.Invitation.Application != null && ii.Invitation.Application.ID == applicationId)
+            .Where(ii => ii.Invitation.ApplicationProfileInstance != null && ii.Invitation.ApplicationProfileInstance.ID == applicationId)
             .Where(ii => !ii.IsCancelled && !ii.IsChanged && !ii.IsUsed);
 
         if (linkedInvitationIds.Count > 0)

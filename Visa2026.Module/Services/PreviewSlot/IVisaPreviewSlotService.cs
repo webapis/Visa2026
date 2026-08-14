@@ -19,9 +19,9 @@ public enum VisaPreviewSlotMode
 
 public sealed class ResminamalarSlotRequest
 {
-    public Guid ApplicationId { get; init; }
+    public Guid ApplicationProfileInstanceId { get; init; }
 
-    public WordReportPackageScope Scope { get; init; } = WordReportPackageScope.Application;
+    public WordReportPackageScope Scope { get; init; } = WordReportPackageScope.ApplicationProfileInstance;
 
     public IReadOnlyList<Guid> ApplicationItemIds { get; init; } = Array.Empty<Guid>();
 
@@ -75,23 +75,13 @@ public sealed class VisaPreviewSlotState
     public int Version { get; init; }
 }
 
-public enum DocumentCopiesLineScope
-{
-    ApplicationItem = 0,
-    ApplicationPerson = 1,
-}
-
 public sealed class DocumentCopiesSlotRequest
 {
-    public DocumentCopiesLineScope Scope { get; init; } = DocumentCopiesLineScope.ApplicationItem;
+    /// <summary>Person ids on this application (with <see cref="ApplicationProfileInstanceId"/>).</summary>
+    public IReadOnlyList<Guid> ApplicationProfileInstancePersonIds { get; init; } = Array.Empty<Guid>();
 
-    public IReadOnlyList<Guid> ApplicationItemIds { get; init; } = Array.Empty<Guid>();
-
-    /// <summary>Roster line ids when <see cref="Scope"/> is <see cref="DocumentCopiesLineScope.ApplicationPerson"/>.</summary>
-    public IReadOnlyList<Guid> ApplicationPersonIds { get; init; } = Array.Empty<Guid>();
-
-    /// <summary>Parent application for roster scope (application form PDF).</summary>
-    public Guid ApplicationId { get; init; }
+    /// <summary>Parent application for the roster lines (application form PDF).</summary>
+    public Guid ApplicationProfileInstanceId { get; init; }
 
     /// <summary>When set, the slot auto-opens preview for this document slot key.</summary>
     public string? FocusSlotKey { get; init; }
@@ -108,7 +98,7 @@ public sealed class DocumentCopiesSlotRequest
 
 public sealed class ProgressLettersSlotRequest
 {
-    public Guid ApplicationId { get; init; }
+    public Guid ApplicationProfileInstanceId { get; init; }
 
     /// <summary>When set, the catalog opens and previews this progress row if it has a ministry letter file.</summary>
     public Guid? FocusProgressId { get; init; }
@@ -157,7 +147,7 @@ public interface IVisaPreviewSlotService
 
 public sealed class ReportPackagePreviewRequest
 {
-    public required Guid ApplicationId { get; init; }
+    public required Guid ApplicationProfileInstanceId { get; init; }
 
     public required string EntryKey { get; init; }
 
@@ -178,7 +168,7 @@ public sealed class DocumentCopiesInlinePreviewRequest
 
 public sealed class ProgressLettersInlinePreviewRequest
 {
-    public Guid ApplicationId { get; init; }
+    public Guid ApplicationProfileInstanceId { get; init; }
 
     public Guid ProgressId { get; init; }
 

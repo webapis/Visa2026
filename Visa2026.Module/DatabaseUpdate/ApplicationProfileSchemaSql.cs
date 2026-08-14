@@ -6,7 +6,7 @@ namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
 /// Idempotent SQL for <see cref="BusinessObjects.ApplicationProfile"/> tables and
-/// <see cref="BusinessObjects.Application.ApplicationProfile"/> FK column.
+/// <see cref="BusinessObjects.ApplicationProfileInstance.ApplicationProfile"/> FK column.
 /// Host-start heal when ModuleUpdater is skipped (ModuleInfo already current).
 /// </summary>
 public static class ApplicationProfileSchemaSql
@@ -30,11 +30,12 @@ public static class ApplicationProfileSchemaSql
             "ProduceVisa" boolean NOT NULL DEFAULT false,
             "ProduceBorderZone" boolean NOT NULL DEFAULT false,
             "ProduceWorkLocation" boolean NOT NULL DEFAULT false,
+            "ProduceRejection" boolean NOT NULL DEFAULT false,
             "CancelInvitations" boolean NOT NULL DEFAULT false,
             "CancelWorkPermits" boolean NOT NULL DEFAULT false,
             "CancelVisas" boolean NOT NULL DEFAULT false,
             "CancelBorderZonePermits" boolean NOT NULL DEFAULT false,
-            "CancelApplications" boolean NOT NULL DEFAULT false,
+            "CancelApplicationProfileInstances" boolean NOT NULL DEFAULT false,
             "RequireVisaType" boolean NOT NULL DEFAULT false,
             "DefaultVisaTypeId" uuid NULL,
             "RequireVisaCategory" boolean NOT NULL DEFAULT false,
@@ -106,6 +107,9 @@ public static class ApplicationProfileSchemaSql
                 "ApplicationProfileId" uuid NOT NULL,
                 "TemplateName" character varying(255) NOT NULL DEFAULT '',
                 "TemplateKind" integer NOT NULL DEFAULT 0,
+                "CatalogScope" integer NOT NULL DEFAULT 0,
+                "DataScope" integer NOT NULL DEFAULT 1,
+                "CategoryKey" character varying(64) NULL,
                 "TemplateFileID" uuid NULL,
                 "SortOrder" integer NOT NULL DEFAULT 0,
                 CONSTRAINT "PK_ApplicationProfileTemplates" PRIMARY KEY ("ID"),
@@ -133,25 +137,25 @@ public static class ApplicationProfileSchemaSql
                 ON "ApplicationProfileProgressStateSettings" ("ApplicationProfileId", "Track", "StateCode");
           END IF;
 
-          IF to_regclass('public."Applications"') IS NULL THEN
+          IF to_regclass('public."ApplicationProfileInstances"') IS NULL THEN
             RETURN;
           END IF;
 
-          ALTER TABLE "Applications" ADD COLUMN IF NOT EXISTS "ApplicationProfileID" uuid NULL;
+          ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "ApplicationProfileID" uuid NULL;
 
           IF NOT EXISTS (
             SELECT 1 FROM pg_indexes
             WHERE schemaname = 'public'
               AND indexname = 'IX_Applications_ApplicationProfileID') THEN
             CREATE INDEX "IX_Applications_ApplicationProfileID"
-                ON "Applications" ("ApplicationProfileID");
+                ON "ApplicationProfileInstances" ("ApplicationProfileID");
           END IF;
 
           IF to_regclass('public."ApplicationProfiles"') IS NOT NULL
              AND NOT EXISTS (
                SELECT 1 FROM pg_constraint
                WHERE conname = 'FK_Applications_ApplicationProfiles_ApplicationProfileID') THEN
-            ALTER TABLE "Applications"
+            ALTER TABLE "ApplicationProfileInstances"
                 ADD CONSTRAINT "FK_Applications_ApplicationProfiles_ApplicationProfileID"
                 FOREIGN KEY ("ApplicationProfileID") REFERENCES "ApplicationProfiles" ("ID");
           END IF;
@@ -179,11 +183,12 @@ public static class ApplicationProfileSchemaSql
                 ProduceVisa bit NOT NULL CONSTRAINT DF_ApplicationProfiles_ProduceVisa DEFAULT (0),
                 ProduceBorderZone bit NOT NULL CONSTRAINT DF_ApplicationProfiles_ProduceBorderZone DEFAULT (0),
                 ProduceWorkLocation bit NOT NULL CONSTRAINT DF_ApplicationProfiles_ProduceWorkLocation DEFAULT (0),
+                ProduceRejection bit NOT NULL CONSTRAINT DF_ApplicationProfiles_ProduceRejection DEFAULT (0),
                 CancelInvitations bit NOT NULL CONSTRAINT DF_ApplicationProfiles_CancelInvitations DEFAULT (0),
                 CancelWorkPermits bit NOT NULL CONSTRAINT DF_ApplicationProfiles_CancelWorkPermits DEFAULT (0),
                 CancelVisas bit NOT NULL CONSTRAINT DF_ApplicationProfiles_CancelVisas DEFAULT (0),
                 CancelBorderZonePermits bit NOT NULL CONSTRAINT DF_ApplicationProfiles_CancelBorderZonePermits DEFAULT (0),
-                CancelApplications bit NOT NULL CONSTRAINT DF_ApplicationProfiles_CancelApplications DEFAULT (0),
+                CancelApplicationProfileInstances bit NOT NULL CONSTRAINT DF_ApplicationProfiles_CancelApplicationProfileInstances DEFAULT (0),
                 RequireVisaType bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireVisaType DEFAULT (0),
                 DefaultVisaTypeId uniqueidentifier NULL,
                 RequireVisaCategory bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireVisaCategory DEFAULT (0),
@@ -254,6 +259,9 @@ public static class ApplicationProfileSchemaSql
                 ApplicationProfileId uniqueidentifier NOT NULL,
                 TemplateName nvarchar(255) NOT NULL CONSTRAINT DF_ApplicationProfileTemplates_TemplateName DEFAULT (N''),
                 TemplateKind int NOT NULL CONSTRAINT DF_ApplicationProfileTemplates_TemplateKind DEFAULT (0),
+                CatalogScope int NOT NULL CONSTRAINT DF_ApplicationProfileTemplates_CatalogScope DEFAULT (0),
+                DataScope int NOT NULL CONSTRAINT DF_ApplicationProfileTemplates_DataScope DEFAULT (1),
+                CategoryKey nvarchar(64) NULL,
                 TemplateFileID uniqueidentifier NULL,
                 SortOrder int NOT NULL CONSTRAINT DF_ApplicationProfileTemplates_SortOrder DEFAULT (0),
                 CONSTRAINT FK_ApplicationProfileTemplates_ApplicationProfiles_ApplicationProfileId
@@ -280,29 +288,76 @@ public static class ApplicationProfileSchemaSql
                 ON dbo.ApplicationProfileProgressStateSettings (ApplicationProfileId, Track, StateCode);
         END;
 
-        IF OBJECT_ID(N'dbo.Applications', N'U') IS NULL
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NULL
             RETURN;
 
-        IF COL_LENGTH(N'dbo.Applications', N'ApplicationProfileID') IS NULL
-            ALTER TABLE dbo.Applications ADD ApplicationProfileID uniqueidentifier NULL;
+        IF COL_LENGTH(N'dbo.ApplicationProfileInstances', N'ApplicationProfileID') IS NULL
+            ALTER TABLE dbo.ApplicationProfileInstances ADD ApplicationProfileID uniqueidentifier NULL;
 
         IF NOT EXISTS (
             SELECT 1 FROM sys.indexes
             WHERE name = N'IX_Applications_ApplicationProfileID'
-              AND object_id = OBJECT_ID(N'dbo.Applications'))
-            CREATE INDEX IX_Applications_ApplicationProfileID ON dbo.Applications (ApplicationProfileID);
+              AND object_id = OBJECT_ID(N'dbo.ApplicationProfileInstances'))
+            CREATE INDEX IX_Applications_ApplicationProfileID ON dbo.ApplicationProfileInstances (ApplicationProfileID);
 
         IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
            AND NOT EXISTS (
                SELECT 1 FROM sys.foreign_keys
                WHERE name = N'FK_Applications_ApplicationProfiles_ApplicationProfileID')
-            ALTER TABLE dbo.Applications WITH CHECK ADD CONSTRAINT FK_Applications_ApplicationProfiles_ApplicationProfileID
+            ALTER TABLE dbo.ApplicationProfileInstances WITH CHECK ADD CONSTRAINT FK_Applications_ApplicationProfiles_ApplicationProfileID
                 FOREIGN KEY (ApplicationProfileID) REFERENCES dbo.ApplicationProfiles(ID);
+        """;
+
+    // Prefer ADD COLUMN IF NOT EXISTS (outside DO $$) so existing DBs get wizard CatalogScope/DataScope columns.
+    internal const string EnsureTemplateCatalogScopePostgres =
+        """ALTER TABLE "ApplicationProfileTemplates" ADD COLUMN IF NOT EXISTS "CatalogScope" integer NOT NULL DEFAULT 0;""";
+
+    internal const string EnsureTemplateDataScopePostgres =
+        """ALTER TABLE "ApplicationProfileTemplates" ADD COLUMN IF NOT EXISTS "DataScope" integer NOT NULL DEFAULT 1;""";
+
+    internal const string EnsureTemplateCategoryKeyPostgres =
+        """ALTER TABLE "ApplicationProfileTemplates" ADD COLUMN IF NOT EXISTS "CategoryKey" character varying(64) NULL;""";
+
+    internal const string EnsureProduceRejectionPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "ProduceRejection" boolean NOT NULL DEFAULT false;""";
+
+    internal static readonly string[] EnsureTemplateCatalogColumnsPostgresStatements =
+    [
+        EnsureTemplateCatalogScopePostgres,
+        EnsureTemplateDataScopePostgres,
+        EnsureTemplateCategoryKeyPostgres,
+        EnsureProduceRejectionPostgres,
+    ];
+
+    internal const string EnsureTemplateCatalogColumnsSqlServer = """
+        IF OBJECT_ID(N'dbo.ApplicationProfileTemplates', N'U') IS NULL
+            RETURN;
+
+        IF COL_LENGTH(N'dbo.ApplicationProfileTemplates', N'CatalogScope') IS NULL
+            ALTER TABLE dbo.ApplicationProfileTemplates ADD CatalogScope int NOT NULL
+                CONSTRAINT DF_ApplicationProfileTemplates_CatalogScope DEFAULT (0);
+
+        IF COL_LENGTH(N'dbo.ApplicationProfileTemplates', N'DataScope') IS NULL
+            ALTER TABLE dbo.ApplicationProfileTemplates ADD DataScope int NOT NULL
+                CONSTRAINT DF_ApplicationProfileTemplates_DataScope DEFAULT (1);
+
+        IF COL_LENGTH(N'dbo.ApplicationProfileTemplates', N'CategoryKey') IS NULL
+            ALTER TABLE dbo.ApplicationProfileTemplates ADD CategoryKey nvarchar(64) NULL;
+
+        IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfiles', N'ProduceRejection') IS NULL
+            ALTER TABLE dbo.ApplicationProfiles ADD ProduceRejection bit NOT NULL
+                CONSTRAINT DF_ApplicationProfiles_ProduceRejection DEFAULT (0);
         """;
 
     public static void ApplyIfMissing(string connectionString)
     {
         if (string.IsNullOrWhiteSpace(connectionString))
+            return;
+
+        // Greenfield: CREATE TABLE IF NOT EXISTS would poison an empty DB so EF EnsureCreated no-ops.
+        if (DatabaseProviderDetector.IsPostgreSql(connectionString)
+            && !PostgresRelationExists.All(connectionString, "People"))
             return;
 
         var cleaned = DatabaseProviderDetector.StripEfCoreProvider(connectionString);
@@ -311,12 +366,15 @@ public static class ApplicationProfileSchemaSql
             using var connection = new NpgsqlConnection(cleaned);
             connection.Open();
             Execute(connection, EnsureSchemaPostgres);
+            foreach (var sql in EnsureTemplateCatalogColumnsPostgresStatements)
+                Execute(connection, sql);
             return;
         }
 
         using var sqlConnection = new SqlConnection(cleaned);
         sqlConnection.Open();
         Execute(sqlConnection, EnsureSchemaSqlServer);
+        Execute(sqlConnection, EnsureTemplateCatalogColumnsSqlServer);
     }
 
     private static void Execute(System.Data.Common.DbConnection connection, string sql)

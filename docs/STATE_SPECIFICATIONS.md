@@ -63,7 +63,7 @@ After seeding the scenario, the dashboard count for this state must show ≥ 1.
 | Badge | Meaning |
 |---|---|
 | `BO` | Evaluated in C# via a `*StateEvaluator` class — one file per BO type, all states inside it |
-| `SQL` | Queried from a SQL Server view — one view per section, all states inside it |
+| `SQL` | Queried from a PostgreSQL view — one view per section, all states inside it |
 
 ---
 
@@ -85,8 +85,8 @@ After seeding the scenario, the dashboard count for this state must show ≥ 1.
 
 | Component | File | All states share it via |
 |---|---|---|
-| Status SQL view script | `Docs/SqlViews/View_[ProcessName]Status.sql` | One `CASE WHEN` branch per state |
-| Tracking SQL view script | `Docs/SqlViews/View_[ProcessName]Tracking.sql` | Joined to Status view |
+| Status SQL view script | `Visa2026.Module/SqlViews/View_[ProcessName]Status.postgres.sql` (create + heal, see [`SQL_VIEW_INTEGRATION.md`](../SQL_VIEW_INTEGRATION.md)) | One `CASE WHEN` branch per state |
+| Tracking SQL view script | `Visa2026.Module/SqlViews/View_[ProcessName]Tracking.postgres.sql` | Joined to Status view |
 | Status BO | `BusinessObjects/[ProcessName]Status.cs` | One class, `CurrentState` FK selects the state |
 | Tracking BO | `BusinessObjects/[ProcessName]Tracking.cs` | One class, history rows |
 | DbContext | `BusinessObjects/Visa2026DbContext.cs` | `DbSet<>` + `b.ToView(...)` — added once per section |

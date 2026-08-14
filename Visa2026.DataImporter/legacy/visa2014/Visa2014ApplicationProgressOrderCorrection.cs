@@ -7,13 +7,13 @@ using Bo = Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
-internal sealed class Visa2014ApplicationProgressOrderCorrectionResult
+internal sealed class Visa2014ApplicationProfileInstanceProgressOrderCorrectionResult
 {
     public int ApplicationsUpdated { get; init; }
     public int ProgressRowsUpdated { get; init; }
 }
 
-internal static class Visa2014ApplicationProgressOrderCorrection
+internal static class Visa2014ApplicationProfileInstanceProgressOrderCorrection
 {
     public static async Task<int> RunCommandAsync(IReadOnlyList<string> args, bool verbose)
     {
@@ -22,7 +22,7 @@ internal static class Visa2014ApplicationProgressOrderCorrection
             ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
             ?? "Host=localhost;Port=5432;Database=visa2026;Username=postgres;Password=Visa2026Local;Persist Security Info=True;EFCoreProvider=Postgres";
 
-        Console.WriteLine("=== VISA2014 ApplicationProgress workflow order correction");
+        Console.WriteLine("=== VISA2014 ApplicationProfileInstanceProgress workflow order correction");
         Console.WriteLine($"INF Target SQL: {MaskConnectionString(targetConnection)}");
         if (dryRun)
             Console.WriteLine("INF Mode: dry-run (no writes)");
@@ -54,20 +54,20 @@ internal static class Visa2014ApplicationProgressOrderCorrection
         }
     }
 
-    internal static Task<Visa2014ApplicationProgressOrderCorrectionResult> RunAsync(
+    internal static Task<Visa2014ApplicationProfileInstanceProgressOrderCorrectionResult> RunAsync(
         INonSecuredObjectSpaceFactory objectSpaceFactory,
         bool dryRun,
         bool verbose)
     {
-        using var objectSpace = objectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Bo.ApplicationProgress));
+        using var objectSpace = objectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Bo.ApplicationProfileInstanceProgress));
         MigrationImportContext.ApplyImportObjectSpaceHooks(objectSpace);
 
-        var progresses = objectSpace.GetObjectsQuery<Bo.ApplicationProgress>()
-            .Where(p => p.Application != null)
+        var progresses = objectSpace.GetObjectsQuery<Bo.ApplicationProfileInstanceProgress>()
+            .Where(p => p.ApplicationProfileInstance != null)
             .ToList();
 
         var groups = progresses
-            .GroupBy(p => p.Application!.ID)
+            .GroupBy(p => p.ApplicationProfileInstance!.ID)
             .ToList();
 
         var rowsUpdated = 0;
@@ -76,7 +76,7 @@ internal static class Visa2014ApplicationProgressOrderCorrection
         {
             var siblings = group.ToList();
             var before = siblings.ToDictionary(p => p.ID, p => p.Order);
-            ApplicationProgressOrderHelper.AssignTimelineOrders(siblings);
+            ApplicationProfileInstanceProgressOrderHelper.AssignTimelineOrders(siblings);
 
             var groupChanged = false;
             foreach (var progress in siblings)
@@ -101,7 +101,7 @@ internal static class Visa2014ApplicationProgressOrderCorrection
         if (!dryRun && rowsUpdated > 0)
             objectSpace.CommitChanges();
 
-        return Task.FromResult(new Visa2014ApplicationProgressOrderCorrectionResult
+        return Task.FromResult(new Visa2014ApplicationProfileInstanceProgressOrderCorrectionResult
         {
             ApplicationsUpdated = applicationsUpdated,
             ProgressRowsUpdated = rowsUpdated,

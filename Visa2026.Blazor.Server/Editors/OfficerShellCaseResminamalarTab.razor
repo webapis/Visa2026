@@ -27,7 +27,7 @@
     {
         <div class="ct-resmi-split">
             <div class="ct-resmi-main">
-                <ApplicationReportPackageComponent ApplicationId="_applicationId"
+                <ApplicationReportPackageComponent ApplicationProfileInstanceId="_applicationId"
                                                  PackageScope="_packageScope"
                                                  ApplicationItemIds="_applicationItemIds"
                                                  ApplicationNumber="_applicationNumber"
@@ -43,14 +43,14 @@
 </div>
 
 @code {
-    [Parameter] public Guid ApplicationId { get; set; }
+    [Parameter] public Guid ApplicationProfileInstanceId { get; set; }
 
     [Inject] private ApplicationWordReportPackageCatalogService CatalogService { get; set; } = null!;
     [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
     [Inject] private IVisaPreviewSlotService PreviewSlotService { get; set; } = null!;
 
     private Guid _applicationId;
-    private WordReportPackageScope _packageScope = WordReportPackageScope.Application;
+    private WordReportPackageScope _packageScope = WordReportPackageScope.ApplicationProfileInstance;
     private IReadOnlyList<Guid> _applicationItemIds = Array.Empty<Guid>();
     private string _applicationNumber = string.Empty;
     private IReadOnlyList<ApplicationWordReportPackageCatalogEntry> _catalogEntries =
@@ -69,7 +69,7 @@
 
     protected override void OnParametersSet()
     {
-        _applicationId = ApplicationId;
+        _applicationId = ApplicationProfileInstanceId;
         if (_applicationId == Guid.Empty)
         {
             _catalogEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
@@ -82,8 +82,8 @@
 
     private void ReloadCatalog()
     {
-        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<Application>();
-        var application = objectSpace.GetObjectByKey<Application>(_applicationId);
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(_applicationId);
         if (application == null)
         {
             _catalogEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
@@ -110,12 +110,12 @@
 
     private async Task HandleInlinePreviewAsync(ReportPackagePreviewRequest request)
     {
-        if (request.ApplicationId == Guid.Empty || string.IsNullOrWhiteSpace(request.EntryKey))
+        if (request.ApplicationProfileInstanceId == Guid.Empty || string.IsNullOrWhiteSpace(request.EntryKey))
             return;
 
         await PreviewSlotService.OpenResminamalarAsync(new ResminamalarSlotRequest
         {
-            ApplicationId = request.ApplicationId,
+            ApplicationProfileInstanceId = request.ApplicationProfileInstanceId,
             Scope = _packageScope,
             ApplicationItemIds = request.ApplicationItemIds ?? _applicationItemIds,
             FocusEntryKey = request.EntryKey,

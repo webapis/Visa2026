@@ -11,17 +11,17 @@ using Visa2026.Module.Services.PreviewSlot;
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// Opens the ministry letter copies catalog for the parent application from an <see cref="ApplicationProgress"/> ListView.
+/// Opens the ministry letter copies catalog for the parent application from an <see cref="ApplicationProfileInstanceProgress"/> ListView.
 /// </summary>
-public sealed class ApplicationProgressMinistryLettersController : ViewController<ListView>
+public sealed class ApplicationProfileInstanceProgressMinistryLettersController : ViewController<ListView>
 {
     private SimpleAction ministryLettersAction;
 
-    public ApplicationProgressMinistryLettersController()
+    public ApplicationProfileInstanceProgressMinistryLettersController()
     {
-        TargetObjectType = typeof(ApplicationProgress);
+        TargetObjectType = typeof(ApplicationProfileInstanceProgress);
 
-        ministryLettersAction = new SimpleAction(this, "ViewApplicationProgressMinistryLetters", "View");
+        ministryLettersAction = new SimpleAction(this, "ViewApplicationProfileInstanceProgressMinistryLetters", "View");
         ministryLettersAction.ImageName = "BO_FileAttachment";
         ministryLettersAction.SelectionDependencyType = SelectionDependencyType.Independent;
         ministryLettersAction.Execute += MinistryLettersAction_Execute;
@@ -30,7 +30,7 @@ public sealed class ApplicationProgressMinistryLettersController : ViewControlle
     protected override void OnActivated()
     {
         base.OnActivated();
-        ministryLettersAction.Caption = VisaUiMessages.Get("ApplicationProgress.MinistryLetters.Title");
+        ministryLettersAction.Caption = VisaUiMessages.Get("ApplicationProfileInstanceProgress.MinistryLetters.Title");
         UpdateActionState();
         View.CurrentObjectChanged += View_CurrentObjectChanged;
     }
@@ -45,17 +45,17 @@ public sealed class ApplicationProgressMinistryLettersController : ViewControlle
 
     private void UpdateActionState()
     {
-        var applicationId = ApplicationProgressParentContext.GetApplicationId(Frame, ObjectSpace, View);
+        var applicationId = ApplicationProfileInstanceProgressParentContext.GetApplicationProfileInstanceId(Frame, ObjectSpace, View);
         ministryLettersAction.Enabled["Application"] = applicationId != Guid.Empty;
     }
 
     private void MinistryLettersAction_Execute(object sender, SimpleActionExecuteEventArgs e)
     {
-        var applicationId = ApplicationProgressParentContext.GetApplicationId(Frame, ObjectSpace, View);
+        var applicationId = ApplicationProfileInstanceProgressParentContext.GetApplicationProfileInstanceId(Frame, ObjectSpace, View);
         if (applicationId == Guid.Empty)
         {
             Application.ShowViewStrategy.ShowMessage(
-                VisaUiMessages.Get("ApplicationProgress.MinistryLetters.NoApplication"),
+                VisaUiMessages.Get("ApplicationProfileInstanceProgress.MinistryLetters.NoApplication"),
                 InformationType.Warning);
             return;
         }
@@ -71,7 +71,7 @@ public sealed class ApplicationProgressMinistryLettersController : ViewControlle
 
         slotService.OpenProgressLettersAsync(new ProgressLettersSlotRequest
         {
-            ApplicationId = applicationId,
+            ApplicationProfileInstanceId = applicationId,
         }, VisaPreviewSlotViewHelper.ResolveOwnerViewId(View)).GetAwaiter().GetResult();
     }
 }

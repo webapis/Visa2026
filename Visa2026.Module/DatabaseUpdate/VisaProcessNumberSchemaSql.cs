@@ -2,12 +2,12 @@ namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
 /// Idempotent SQL for Visa.ProcessNumber (legacy ASNumber / Işlenen belgisi string)
-/// and Visa.LegacyPersonInApplicationOid (legacy ProcessNumber PIA FK Guid).
+/// and Visa.LegacyPersonInApplicationProfileInstanceOid (legacy ProcessNumber PIA FK Guid).
 /// </summary>
 public static class VisaProcessNumberSchemaSql
 {
     /// <summary>
-    /// If an earlier mistaken deploy created ProcessNumber as uuid, rename it to LegacyPersonInApplicationOid,
+    /// If an earlier mistaken deploy created ProcessNumber as uuid, rename it to LegacyPersonInApplicationProfileInstanceOid,
     /// then ensure string ProcessNumber + Guid lineage columns exist.
     /// No-ops when Visas table is not created yet (fresh EasyTest / BeforeUpdateSchema).
     /// </summary>
@@ -25,13 +25,13 @@ public static class VisaProcessNumberSchemaSql
           ) AND NOT EXISTS (
             SELECT 1 FROM information_schema.columns
             WHERE table_schema = 'public' AND table_name = 'Visas'
-              AND column_name = 'LegacyPersonInApplicationOid'
+              AND column_name = 'LegacyPersonInApplicationProfileInstanceOid'
           ) THEN
-            ALTER TABLE public."Visas" RENAME COLUMN "ProcessNumber" TO "LegacyPersonInApplicationOid";
+            ALTER TABLE public."Visas" RENAME COLUMN "ProcessNumber" TO "LegacyPersonInApplicationProfileInstanceOid";
           END IF;
 
           ALTER TABLE public."Visas" ADD COLUMN IF NOT EXISTS "ProcessNumber" character varying(100) NULL;
-          ALTER TABLE public."Visas" ADD COLUMN IF NOT EXISTS "LegacyPersonInApplicationOid" uuid NULL;
+          ALTER TABLE public."Visas" ADD COLUMN IF NOT EXISTS "LegacyPersonInApplicationProfileInstanceOid" uuid NULL;
         END
         $migrate$;
         """;
@@ -40,7 +40,7 @@ public static class VisaProcessNumberSchemaSql
         IF OBJECT_ID(N'dbo.Visas', N'U') IS NOT NULL
         BEGIN
             IF COL_LENGTH(N'dbo.Visas', N'ProcessNumber') IS NOT NULL
-               AND COL_LENGTH(N'dbo.Visas', N'LegacyPersonInApplicationOid') IS NULL
+               AND COL_LENGTH(N'dbo.Visas', N'LegacyPersonInApplicationProfileInstanceOid') IS NULL
                AND EXISTS (
                     SELECT 1 FROM sys.columns c
                     INNER JOIN sys.types t ON c.user_type_id = t.user_type_id
@@ -48,13 +48,13 @@ public static class VisaProcessNumberSchemaSql
                       AND c.name = N'ProcessNumber'
                       AND t.name = N'uniqueidentifier'
                )
-                EXEC sp_rename N'dbo.Visas.ProcessNumber', N'LegacyPersonInApplicationOid', N'COLUMN';
+                EXEC sp_rename N'dbo.Visas.ProcessNumber', N'LegacyPersonInApplicationProfileInstanceOid', N'COLUMN';
 
             IF COL_LENGTH(N'dbo.Visas', N'ProcessNumber') IS NULL
                 ALTER TABLE dbo.Visas ADD ProcessNumber nvarchar(100) NULL;
 
-            IF COL_LENGTH(N'dbo.Visas', N'LegacyPersonInApplicationOid') IS NULL
-                ALTER TABLE dbo.Visas ADD LegacyPersonInApplicationOid uniqueidentifier NULL;
+            IF COL_LENGTH(N'dbo.Visas', N'LegacyPersonInApplicationProfileInstanceOid') IS NULL
+                ALTER TABLE dbo.Visas ADD LegacyPersonInApplicationProfileInstanceOid uniqueidentifier NULL;
         END
         """;
 }

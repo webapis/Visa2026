@@ -4,12 +4,12 @@ using System.Threading.Tasks;
 
 namespace Visa2026.DataImporter;
 
-public class ApplicationProgressImporter
+public class ApplicationProfileInstanceProgressImporter
 {
     private readonly ApiClient _api;
-    private const string Entity = "ApplicationProgress";
+    private const string Entity = "ApplicationProfileInstanceProgress";
 
-    public ApplicationProgressImporter(ApiClient api)
+    public ApplicationProfileInstanceProgressImporter(ApiClient api)
     {
         _api = api;
     }
@@ -20,14 +20,14 @@ public class ApplicationProgressImporter
     public async Task ListAllAsync()
     {
         Console.WriteLine($"=== GET all {Entity} records ===");
-        var items = await _api.GetAllAsync<ApplicationProgress>(Entity);
+        var items = await _api.GetAllAsync<ApplicationProfileInstanceProgress>(Entity);
         if (items.Count == 0)
         {
             Console.WriteLine("  (no records found)");
         }
         foreach (var item in items)
         {
-            var appNum = item.Application?.ApplicationNumber ?? "No App";
+            var appNum = item.ApplicationProfileInstance?.ApplicationNumber ?? "No App";
             var state = item.State?.Name ?? "No State";
             Console.WriteLine($"  [{item.Id}] App: {appNum} -> {state} on {item.Date:g}");
         }
@@ -37,7 +37,7 @@ public class ApplicationProgressImporter
     // ------------------------------------------------------------------
     // CREATE — single record
     // ------------------------------------------------------------------
-    public async Task<ApplicationProgress?> CreateOneAsync(
+    public async Task<ApplicationProfileInstanceProgress?> CreateOneAsync(
         Guid applicationId,
         Guid stateId,
         DateTime date,
@@ -47,7 +47,7 @@ public class ApplicationProgressImporter
 
         var payload = new
         {
-            Application = new { ID = applicationId },
+            ApplicationProfileInstance = new { ID = applicationId },
             State = new { ID = stateId },
             Date = date,
             Description = description
@@ -55,13 +55,13 @@ public class ApplicationProgressImporter
 
         try
         {
-            var created = await _api.CreateAsync<ApplicationProgress>(Entity, payload);
-            Console.WriteLine($"  Created ApplicationProgress ID: {created?.Id}");
+            var created = await _api.CreateAsync<ApplicationProfileInstanceProgress>(Entity, payload);
+            Console.WriteLine($"  Created ApplicationProfileInstanceProgress ID: {created?.Id}");
             return created;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"  Error creating ApplicationProgress: {ex.Message}");
+            Console.WriteLine($"  Error creating ApplicationProfileInstanceProgress: {ex.Message}");
             return null;
         }
     }
@@ -69,7 +69,7 @@ public class ApplicationProgressImporter
     // ------------------------------------------------------------------
     // CREATE — bulk import from a list
     // ------------------------------------------------------------------
-    public async Task BulkImportAsync(IEnumerable<ApplicationProgress> records)
+    public async Task BulkImportAsync(IEnumerable<ApplicationProfileInstanceProgress> records)
     {
         Console.WriteLine($"=== Bulk import {Entity} records ===");
         int success = 0, fail = 0;
@@ -80,14 +80,14 @@ public class ApplicationProgressImporter
             {
                 var payload = new
                 {
-                    Application = record.Application != null ? new { ID = record.Application.Id } : null,
+                    ApplicationProfileInstance = record.ApplicationProfileInstance != null ? new { ID = record.ApplicationProfileInstance.Id } : null,
                     State = record.State != null ? new { ID = record.State.Id } : null,
                     Date = record.Date,
                     Description = record.Description
                 };
 
-                await _api.CreateAsync<ApplicationProgress>(Entity, payload);
-                Console.WriteLine($"  ✓ Imported progress for App: {record.Application?.ApplicationNumber ?? "Unknown"}");
+                await _api.CreateAsync<ApplicationProfileInstanceProgress>(Entity, payload);
+                Console.WriteLine($"  ✓ Imported progress for App: {record.ApplicationProfileInstance?.ApplicationNumber ?? "Unknown"}");
                 success++;
             }
             catch (Exception ex)
@@ -106,6 +106,6 @@ public class ApplicationProgressImporter
     public async Task DeleteAsync(Guid id)
     {
         await _api.DeleteAsync(Entity, id);
-        Console.WriteLine($"  Deleted ApplicationProgress {id}\n");
+        Console.WriteLine($"  Deleted ApplicationProfileInstanceProgress {id}\n");
     }
 }

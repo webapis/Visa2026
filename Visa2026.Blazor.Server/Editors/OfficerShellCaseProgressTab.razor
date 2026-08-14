@@ -13,7 +13,7 @@
     }
 
     <h2 class="ct-page__title">Progress</h2>
-    <p class="ct-page__sub">Application process for @view.Chrome.TemplateFamilyLabel · current step: @view.Chrome.CurrentStep</p>
+    <p class="ct-page__sub">ApplicationProfileInstance process for @view.Chrome.TemplateFamilyLabel · current step: @view.Chrome.CurrentStep</p>
     <div class="ct-prog-v-list">
         @foreach (var step in view.ProgressSteps)
         {
@@ -36,8 +36,8 @@
                         <div class="ct-prog-detail">
                             <div class="ct-prog-detail__grid">
                                 <div>
-                                    <label class="ct-label" for="officer-notes-@ApplicationId">Officer notes</label>
-                                    <textarea id="officer-notes-@ApplicationId"
+                                    <label class="ct-label" for="officer-notes-@ApplicationProfileInstanceId">Officer notes</label>
+                                    <textarea id="officer-notes-@ApplicationProfileInstanceId"
                                               class="ct-textarea"
                                               rows="3"
                                               placeholder="Add notes for the current progress step…"
@@ -76,8 +76,8 @@
                                 <div class="ct-prog-advance" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--os-line)">
                                     @if (step.AdvanceOptions.Count > 1)
                                     {
-                                        <label class="ct-label" for="advance-state-@ApplicationId">Next step</label>
-                                        <select id="advance-state-@ApplicationId" class="os-input" @bind="_selectedAdvanceStateCode" disabled="@_busy">
+                                        <label class="ct-label" for="advance-state-@ApplicationProfileInstanceId">Next step</label>
+                                        <select id="advance-state-@ApplicationProfileInstanceId" class="os-input" @bind="_selectedAdvanceStateCode" disabled="@_busy">
                                             @foreach (var option in step.AdvanceOptions)
                                             {
                                                 <option value="@option.StateCode">@option.Label</option>
@@ -106,7 +106,7 @@
 </div>
 
 @code {
-    [Parameter] public Guid ApplicationId { get; set; }
+    [Parameter] public Guid ApplicationProfileInstanceId { get; set; }
     [Parameter] public ApplicationWorkspaceCaseView View { get; set; } = new();
     [Parameter] public string? StatusMessage { get; set; }
     [Parameter] public bool IsStatusError { get; set; }
@@ -207,5 +207,5 @@
     }
 
     private string MinistryLetterUrl(Guid progressId) =>
-        $"/api/application-progress/applications/{ApplicationId:D}/progress/{progressId:D}/ministry-letter";
+        $"/api/application-progress/applications/{ApplicationProfileInstanceId:D}/progress/{progressId:D}/ministry-letter";
 }

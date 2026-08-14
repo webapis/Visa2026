@@ -23,13 +23,13 @@ We will leverage a combination of `SyncRule`, a dedicated `ProcessLog` business 
 
 *   **ProcessLog (Business Object)**:
     *   `TrackedObject (BaseObject)`: A reference to the business object being tracked (e.g., a Visa).
-    *   `ProcessStage (ProcessStage)`: A lookup to a predefined stage in the process (e.g., "Application Submitted", "Sent to Ministry", "Approved").
+    *   `ProcessStage (ProcessStage)`: A lookup to a predefined stage in the process (e.g., "ApplicationProfileInstance Submitted", "Sent to Ministry", "Approved").
     *   `Date (DateTime)`: Timestamp of the event.
     *   `User (ApplicationUser)`: The user who triggered the event (if applicable).
     *   `Description (String)`:  Optional details or comments related to the event.
     *   `AdditionalData (String)`:  Optional field to store serialized data relevant to the process stage.
 *   **ProcessStage (Business Object)**:
-    *   `Name (String)`:  The name of the stage (e.g., "Application Submitted").
+    *   `Name (String)`:  The name of the stage (e.g., "ApplicationProfileInstance Submitted").
     *   `Code (String)`:  A unique code for the stage (e.g., "APPLICATION_SUBMITTED").
     *   `Description (String)`: A description of the stage.
     *   `IsInitial (bool)`: Indicates if the stage is the initial stage of the process.
@@ -58,27 +58,27 @@ We will leverage a combination of `SyncRule`, a dedicated `ProcessLog` business 
 
 1.  **Tracked Object**: `Visa`
 2.  **Process Stages**:
-    *   `Application Submitted` (Code: `VISA_EXT_APP_SUBMITTED`)
+    *   `ApplicationProfileInstance Submitted` (Code: `VISA_EXT_APP_SUBMITTED`)
     *   `Sent to Ministry` (Code: `VISA_EXT_SENT_TO_MINISTRY`)
     *   `Returned from Ministry` (Code: `VISA_EXT_RETURNED_FROM_MINISTRY`)
     *   `Sent to Migration Service` (Code: `VISA_EXT_SENT_TO_MIGRATION`)
     *   `Process Started` (Code: `VISA_EXT_PROCESS_STARTED`)
     *   `Process Complete` (Code: `VISA_EXT_PROCESS_COMPLETE`)
 3.  **SyncRule Examples**:
-    *   **Rule 1**:  When an `Application` is created with `ApplicationType.Code = 'visa_extension'`, and linked to a Visa, create a `ProcessLog` entry for the `Visa` with `ProcessStage = 'Application Submitted'`.
+    *   **Rule 1**:  When an `Application` is created with `ApplicationType.Code = 'visa_extension'`, and linked to a Visa, create a `ProcessLog` entry for the `Visa` with `ProcessStage = 'ApplicationProfileInstance Submitted'`.
         *   Source Type: `Application`
         *   Trigger Type: `Save`
-        *   Variable: `@This` refers to the current object (Application).
+        *   Variable: `@This` refers to the current object (ApplicationProfileInstance).
         *    Source Criteria: `[ApplicationType.Code] = 'visa_extension'`
         *   Target Path: `Visas`
         *   Target Match Criteria: `` // empty
         *   Target Type: `Visa`
         *   Target Property: `` // N/A
         *   Target Value:  `` // N/A
-    *   **Rule 2**:  When an `ApplicationProgress` is created for an `Application` linked to a Visa, and `ApplicationProgress.State.Code = 'SENT_TO_MINISTRY'`, create a `ProcessLog` entry for the `Visa` with `ProcessStage = 'Sent to Ministry'`.
-        *   Source Type: `ApplicationProgress`
+    *   **Rule 2**:  When an `ApplicationProfileInstanceProgress` is created for an `Application` linked to a Visa, and `ApplicationProfileInstanceProgress.State.Code = 'SENT_TO_MINISTRY'`, create a `ProcessLog` entry for the `Visa` with `ProcessStage = 'Sent to Ministry'`.
+        *   Source Type: `ApplicationProfileInstanceProgress`
         *   Trigger Type: `Save`
-        *   Variable: `@This` refers to the current object (ApplicationProgress).
+        *   Variable: `@This` refers to the current object (ApplicationProfileInstanceProgress).
         *    Source Criteria: `[State.Code] = 'SENT_TO_MINISTRY'`
         *   Target Path: `Application.Visas`
         *   Target Match Criteria: `` // empty

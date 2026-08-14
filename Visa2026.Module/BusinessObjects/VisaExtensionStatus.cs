@@ -21,9 +21,9 @@ namespace Visa2026.Module.BusinessObjects
         [Browsable(false)]
         public virtual Guid ID { get; set; }
 
-        public virtual Guid? ApplicationID { get; set; }
-        [ForeignKey(nameof(ApplicationID))]
-        public virtual Application Application { get; set; }
+        public virtual Guid? ApplicationProfileInstanceID { get; set; }
+        [ForeignKey(nameof(ApplicationProfileInstanceID))]
+        public virtual ApplicationProfileInstance ApplicationProfileInstance { get; set; }
 
         public virtual Guid? ExpiringVisaID { get; set; }
         [ForeignKey(nameof(ExpiringVisaID))]

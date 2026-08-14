@@ -22,15 +22,15 @@ public class ApplicationProcessNumberHelperTests
     [Fact]
     public void ResolveFromHistory_PrefersProcessStartedProcessNumber()
     {
-        var started = new ApplicationProgress
+        var started = new ApplicationProfileInstanceProgress
         {
-            State = new ApplicationState { Code = ApplicationProgressStateCodes.ProcessStarted },
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.ProcessStarted },
             ProcessNumber = "AS1",
             Description = "ignored",
         };
-        var issued = new ApplicationProgress
+        var issued = new ApplicationProfileInstanceProgress
         {
-            State = new ApplicationState { Code = ApplicationProgressStateCodes.ProcessIssued },
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.ProcessIssued },
             ProcessNumber = "AS2",
         };
 
@@ -40,9 +40,9 @@ public class ApplicationProcessNumberHelperTests
     [Fact]
     public void ResolveFromHistory_FallsBackToProcessStartedDescription()
     {
-        var started = new ApplicationProgress
+        var started = new ApplicationProfileInstanceProgress
         {
-            State = new ApplicationState { Code = ApplicationProgressStateCodes.ProcessStarted },
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.ProcessStarted },
             Description = "AS538188",
         };
 

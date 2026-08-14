@@ -1,50 +1,47 @@
+@using System.Text.Json
 @using DevExpress.ExpressApp
+@using DevExpress.Persistent.BaseImpl.EF
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.JSInterop
+@using Visa2026.Blazor.Server.Services
 @using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Services.UserReports
+@using Visa2026.Module.Services.WordReports
+@implements IDisposable
+@inject UserReportTemplateStagingUiService TemplateStagingUiService
+@inject IJSRuntime JS
 
 <div class="ap-wizard__panel-head">
     <h2>Templates &amp; person data</h2>
-    <p>Nested report templates and required person-related data toggles.</p>
+    <p>Word/Excel files live on User Report Templates; manage and edit them here by scope — no context switch.</p>
 </div>
 <div class="ap-wizard__panel-body">
-    <div class="ap-wizard__section">
-        <h3>Application templates</h3>
-        <p class="ap-wizard__hint">Attach Word/Excel/PDF files here or on the standard Application Profile detail.</p>
+    @* —— Profile-specific —— *@
+    <div class="ap-wizard__section ap-wizard__section--scope">
+        <div class="ap-wizard__scope-head">
+            <h3>ApplicationProfileInstance templates</h3>
+            <span class="ap-wizard__badge ap-wizard__badge--profile">Profile-specific</span>
+        </div>
+        <p class="ap-wizard__hint">This profile only. Upload or link a file; Edit opens sandbox sync without leaving the wizard.</p>
         <div class="ap-wizard__list">
-            @if (Profile.NestedTemplates?.Count > 0)
+            @if (ProfileTemplates.Count > 0)
             {
-                @foreach (var template in Profile.NestedTemplates.OrderBy(t => t.SortOrder).ThenBy(t => t.TemplateName))
+                @foreach (var template in ProfileTemplates)
                 {
                     <div class="ap-wizard__list-row ap-wizard__list-row--template">
                         <span class="ap-wizard__list-ord">@template.SortOrder</span>
-                        @if (_editingTemplateId == template.ID)
-                        {
-                            <div class="ap-wizard__template-edit">
-                                <input type="text" @bind="_editName" disabled="@Disabled" placeholder="Template name" />
-                                <select @bind="_editKind" disabled="@Disabled">
-                                    @foreach (var kind in TemplateKinds)
-                                    {
-                                        <option value="@kind">@FormatKind(kind)</option>
-                                    }
-                                </select>
-                                <input type="number" min="0" @bind="_editSort" disabled="@Disabled" class="ap-wizard__sort-input" />
-                                <button type="button" class="ap-wizard__link" disabled="@Disabled" @onclick="() => SaveEdit(template)">Save</button>
-                                <button type="button" class="ap-wizard__link" @onclick="CancelEdit">Cancel</button>
-                            </div>
-                        }
-                        else
-                        {
-                            <span>
-                                <strong>@template.TemplateName</strong> · @FormatKind(template.TemplateKind)
-                                @if (template.TemplateFile != null)
-                                {
-                                    <span class="ap-wizard__tag ap-wizard__tag--ok">file attached</span>
-                                }
-                            </span>
-                        }
-                        @if (!Disabled && _editingTemplateId != template.ID)
+                        <span>
+                            <strong>@template.TemplateName</strong> · @FormatKind(template.TemplateKind)
+                            @if (HasFile(template))
+                            {
+                                <span class="ap-wizard__tag ap-wizard__tag--ok">file</span>
+                            }
+                            <span class="ap-wizard__tag">@FormatDataScope(template.DataScope)</span>
+                        </span>
+                        @if (!Disabled)
                         {
                             <div class="ap-wizard__row-actions">
-                                <button type="button" class="ap-wizard__link" @onclick="() => BeginEdit(template)">Edit</button>
+                                <button type="button" class="ap-wizard__link" @onclick="() => OpenEdit(template)">Edit</button>
                                 <button type="button" class="ap-wizard__link" @onclick="() => OnRemoveTemplate.InvokeAsync(template)">Remove</button>
                             </div>
                         }
@@ -53,14 +50,114 @@
             }
             else
             {
-                <p class="ap-wizard__hint">No nested templates yet.</p>
+                <p class="ap-wizard__hint">No profile-specific templates yet.</p>
             }
         </div>
         @if (!Disabled)
         {
-            <button type="button" class="ap-wizard__btn ap-wizard__btn--secondary ap-wizard__add-template" @onclick="OnAddTemplate">+ Add template</button>
+            <button type="button" class="ap-wizard__btn ap-wizard__btn--secondary ap-wizard__add-template" @onclick="OpenAdd">+ Add template</button>
         }
     </div>
+
+    @* —— Category —— *@
+    <div class="ap-wizard__section ap-wizard__section--scope">
+        <div class="ap-wizard__scope-head">
+            <h3>Issuance &amp; process families</h3>
+            <span class="ap-wizard__badge ap-wizard__badge--category">Category</span>
+        </div>
+        <p class="ap-wizard__hint">From User Report Templates limited by application type / type group. Include to attach to this profile.</p>
+        <div class="ap-wizard__cat-chips" role="group" aria-label="Category filter">
+            @foreach (var cat in ApplicationProfileWizardTemplateCatalog.CategoryChips)
+            {
+                <button type="button"
+                        class="ap-wizard__cat-chip @(_selectedCategories.Contains(cat.Key) ? "is-on" : null)"
+                        disabled="@Disabled"
+                        @onclick="() => ToggleCategory(cat.Key)">
+                    @cat.Label
+                </button>
+            }
+        </div>
+        <div class="ap-wizard__list">
+            @if (FilteredCategoryRows.Count == 0)
+            {
+                <p class="ap-wizard__hint">No category templates match the selected chips (or none have type/group applicability).</p>
+            }
+            else
+            {
+                @foreach (var row in FilteredCategoryRows)
+                {
+                    var included = IsIncluded(row.Name);
+                    <div class="ap-wizard__list-row ap-wizard__list-row--template">
+                        <span class="ap-wizard__list-ord">@row.SortOrder</span>
+                        <span>
+                            <strong>@row.Name</strong> · @FormatKind(row.Kind)
+                            @foreach (var key in row.CategoryKeys.Take(2))
+                            {
+                                <span class="ap-wizard__tag">@FormatCategoryChip(key)</span>
+                            }
+                            <span class="ap-wizard__tag">@FormatDataScope(row.DataScope)</span>
+                            <span class="ap-wizard__tag @(included ? "ap-wizard__tag--ok" : null)">@(included ? "included" : "not included")</span>
+                        </span>
+                        @if (!Disabled)
+                        {
+                            <div class="ap-wizard__row-actions">
+                                @if (included)
+                                {
+                                    <button type="button" class="ap-wizard__link" @onclick="() => OpenEditCatalog(row)">Edit</button>
+                                }
+                                <button type="button" class="ap-wizard__link" @onclick="() => ToggleIncludeCatalog(row)">
+                                    @(included ? "Exclude" : "Include")
+                                </button>
+                            </div>
+                        }
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    @* —— Global —— *@
+    <div class="ap-wizard__section ap-wizard__section--scope">
+        <div class="ap-wizard__scope-head">
+            <h3>Global catalog</h3>
+            <span class="ap-wizard__badge ap-wizard__badge--global">All profiles</span>
+        </div>
+        <p class="ap-wizard__hint">User Report Templates with no type/group filter — include or exclude for this profile.</p>
+        <div class="ap-wizard__list">
+            @if (_globalRows.Count == 0)
+            {
+                <p class="ap-wizard__hint">No global User Report Templates found.</p>
+            }
+            else
+            {
+                @foreach (var row in _globalRows)
+                {
+                    var included = IsIncluded(row.Name);
+                    <div class="ap-wizard__list-row ap-wizard__list-row--template">
+                        <span class="ap-wizard__list-ord">@row.SortOrder</span>
+                        <span>
+                            <strong>@row.Name</strong> · @FormatKind(row.Kind)
+                            <span class="ap-wizard__tag @(included ? "ap-wizard__tag--ok" : null)">@(included ? "included" : "not included")</span>
+                            <span class="ap-wizard__tag">@FormatDataScope(row.DataScope)</span>
+                        </span>
+                        @if (!Disabled)
+                        {
+                            <div class="ap-wizard__row-actions">
+                                @if (included)
+                                {
+                                    <button type="button" class="ap-wizard__link" @onclick="() => OpenEditCatalog(row)">Edit</button>
+                                }
+                                <button type="button" class="ap-wizard__link" @onclick="() => ToggleIncludeCatalog(row)">
+                                    @(included ? "Exclude" : "Include")
+                                </button>
+                            </div>
+                        }
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
     <div class="ap-wizard__section">
         <h3>Required person-related data</h3>
         <div class="ap-wizard__choices ap-wizard__choices--grid">
@@ -80,44 +177,859 @@
     </div>
 </div>
 
+@if (_showAddModal)
+{
+    <div class="ap-wizard-modal" role="dialog" aria-modal="true" aria-labelledby="ap-add-template-title">
+        <div class="ap-wizard-modal__backdrop" @onclick="CloseModals"></div>
+        <div class="ap-wizard-modal__card ap-wizard-modal__card--wide">
+            <header class="ap-wizard-modal__head">
+                <div>
+                    <h3 id="ap-add-template-title">Add template</h3>
+                    <p>Upload file and declare where merge data comes from.</p>
+                </div>
+                <button type="button" class="ap-wizard-modal__close" @onclick="CloseModals" aria-label="Close">×</button>
+            </header>
+            <div class="ap-wizard-modal__body">
+                <section class="ap-wizard-modal__block">
+                    <h4>1. Scope &amp; identity</h4>
+                    <div class="ap-wizard__scope-pills" role="radiogroup" aria-label="Template scope">
+                        <button type="button"
+                                class="ap-wizard__scope-pill @(_addScope == ApplicationProfileTemplateCatalogScope.ProfileSpecific ? "is-on" : null)"
+                                @onclick="() => _addScope = ApplicationProfileTemplateCatalogScope.ProfileSpecific">Profile-specific</button>
+                        <button type="button"
+                                class="ap-wizard__scope-pill @(_addScope == ApplicationProfileTemplateCatalogScope.Category ? "is-on" : null)"
+                                @onclick="() => _addScope = ApplicationProfileTemplateCatalogScope.Category">Category</button>
+                        <button type="button"
+                                class="ap-wizard__scope-pill @(_addScope == ApplicationProfileTemplateCatalogScope.Global ? "is-on" : null)"
+                                @onclick="() => _addScope = ApplicationProfileTemplateCatalogScope.Global">Global</button>
+                    </div>
+                    <div class="ap-wizard__grid ap-wizard__grid--add-identity">
+                        <label class="ap-wizard__field">
+                            <span>Name *</span>
+                            <input type="text" @bind="_addName" placeholder="e.g. Sanaw - ckd" />
+                        </label>
+                        <label class="ap-wizard__field">
+                            <span>Kind *</span>
+                            <select @bind="_addKind">
+                                <option value="@ApplicationProfileTemplateKind.Word">Word</option>
+                                <option value="@ApplicationProfileTemplateKind.Excel">Excel</option>
+                            </select>
+                        </label>
+                        <label class="ap-wizard__field ap-wizard__field--sort">
+                            <span>Sort *</span>
+                            <input type="number" min="0" @bind="_addSort" />
+                        </label>
+                    </div>
+                </section>
+
+                <section class="ap-wizard-modal__block">
+                    <h4>2. Upload</h4>
+                    @if (!string.IsNullOrEmpty(_addFileName))
+                    {
+                        <div class="ap-wizard-upload-chip">
+                            <span class="ap-wizard-upload-chip__text">
+                                <span class="ap-wizard-upload-chip__check" aria-hidden="true">✓</span>
+                                @_addFileName · @FormatBytes(_addFileBytes?.Length ?? 0) · uploaded
+                            </span>
+                            <label class="ap-wizard__link ap-wizard-upload-chip__replace">
+                                Replace
+                                <InputFile OnChange="OnAddFileSelected" accept=".docx,.xlsx" style="display:none" />
+                            </label>
+                        </div>
+                    }
+                    else
+                    {
+                        <label class="ap-wizard-dropzone">
+                            <InputFile OnChange="OnAddFileSelected" accept=".docx,.xlsx" />
+                            <span class="ap-wizard-dropzone__title">Drop .docx or .xlsx here</span>
+                            <span class="ap-wizard-dropzone__sub">or click to browse · Word (.docx) · Excel (.xlsx)</span>
+                        </label>
+                    }
+                </section>
+
+                <section class="ap-wizard-modal__block">
+                    <h4>3. Data for this template</h4>
+                    <p class="ap-wizard__hint">
+                        Application Profile defaults flow into ApplicationProfileInstance header fields. People data comes from M2M-linked persons on the Application.
+                    </p>
+                    <div class="ap-wizard-data-cards" role="radiogroup" aria-label="Data for this template">
+                        @foreach (var opt in _dataScopeOptions)
+                        {
+                            var selected = _addDataScope == opt.Scope;
+                            <button type="button"
+                                    class="ap-wizard-data-card @(selected ? "is-on" : null)"
+                                    @onclick="() => _addDataScope = opt.Scope">
+                                @if (selected)
+                                {
+                                    <span class="ap-wizard-data-card__check" aria-hidden="true">✓</span>
+                                }
+                                <span class="ap-wizard-data-card__icon @opt.IconClass" aria-hidden="true"></span>
+                                <strong>@opt.Title</strong>
+                                <span>@opt.Description</span>
+                            </button>
+                        }
+                    </div>
+                    <div class="ap-wizard-extract-block">
+                        <div class="ap-wizard-extract-block__label">After Extract (preview)</div>
+                        <div class="ap-wizard-extract">
+                            <span class="ap-wizard__tag">4 Application</span>
+                            <span class="ap-wizard__tag ap-wizard__tag--person">8 Person</span>
+                            <span class="ap-wizard__tag ap-wizard__tag--ok">Valid ✓</span>
+                            <span class="ap-wizard-extract__hint">Paths come from the Word file — you set intent, Extract discovers tokens.</span>
+                        </div>
+                    </div>
+                    @if (_addDataScope is ApplicationProfileTemplateDataScope.PeopleM2M or ApplicationProfileTemplateDataScope.Both)
+                    {
+                        <div class="ap-wizard-callout-warn">
+                            Person packs required on this profile: Passport, Education (match Require person toggles on step 4).
+                        </div>
+                    }
+                </section>
+            </div>
+            <footer class="ap-wizard-modal__foot">
+                <button type="button" class="ap-wizard__btn ap-wizard__btn--secondary" @onclick="CloseModals">Cancel</button>
+                <button type="button"
+                        class="ap-wizard__btn ap-wizard__btn--primary"
+                        disabled="@(string.IsNullOrWhiteSpace(_addName) || string.IsNullOrEmpty(_addFileName))"
+                        @onclick="() => SubmitAdd(requireFile: true)">Upload &amp; add to profile</button>
+            </footer>
+        </div>
+    </div>
+}
+
+@if (_showEditModal)
+{
+    <div class="ap-wizard-modal" role="dialog" aria-modal="true" aria-labelledby="ap-edit-template-title">
+        <div class="ap-wizard-modal__backdrop" @onclick="CloseModals"></div>
+        <div class="ap-wizard-modal__card ap-wizard-modal__card--edit">
+            <header class="ap-wizard-edit-head">
+                <div class="ap-wizard-edit-head__bar">
+                    <span class="ap-wizard-edit-head__doc-icon @(_editKind == ApplicationProfileTemplateKind.Excel ? "is-excel" : "is-word")" aria-hidden="true"></span>
+                    <h3 id="ap-edit-template-title">Edit @(_editKind == ApplicationProfileTemplateKind.Excel ? "Excel" : "Word") template</h3>
+                    <button type="button" class="ap-wizard-edit-head__close" @onclick="CloseModals" aria-label="Close">×</button>
+                </div>
+                <div class="ap-wizard-edit-head__sub">
+                    <p class="ap-wizard-modal__crumb">Configure profile › Templates &amp; person › @_editName</p>
+                    <p>File stored on User Report Template — edit without leaving the wizard.</p>
+                </div>
+            </header>
+            <div class="ap-wizard-modal__body ap-wizard-modal__body--split">
+                <div class="ap-wizard-preview ap-wizard-preview--letter">
+                    <div class="ap-wizard-preview__label">@DisplayEditFileName</div>
+                    <div class="ap-wizard-preview__page">
+                        <div class="ap-wizard-preview__watermark" aria-hidden="true">SAMPLE</div>
+                        <div class="ap-wizard-preview__seal" aria-hidden="true"></div>
+                        <p class="ap-wizard-preview__org">MINISTRY OF HOME AFFAIRS</p>
+                        <p class="ap-wizard-preview__ref">Ref: {{Application.Number}} · {{Today}}</p>
+                        @if (_editDataScope == ApplicationProfileTemplateDataScope.ApplicationHeader)
+                        {
+                            <p class="ap-wizard-preview__body">{{Application.FullApplicationNumber}}</p>
+                            <p class="ap-wizard-preview__body">{{Application.CompanyHead_FullName}}</p>
+                        }
+                        else
+                        {
+                            <p class="ap-wizard-preview__body">Dear {{Person.FullName}},</p>
+                            <p class="ap-wizard-preview__body">{{Person.AddressLine1}}</p>
+                            <p class="ap-wizard-preview__body">{{Person.AddressLine2}}</p>
+                            <p class="ap-wizard-preview__muted">{{#ds.rows}} … {{.Person_FullName}} … {{/ds.rows}}</p>
+                        }
+                        <p class="ap-wizard-preview__sign">{{Officer.FullName}} · {{Officer.Designation}}</p>
+                    </div>
+                    <div class="ap-wizard-preview__meta">
+                        <span class="ap-wizard-preview__kind-icon @(_editKind == ApplicationProfileTemplateKind.Excel ? "is-excel" : "is-word")" aria-hidden="true"></span>
+                        <span>@FormatKind(_editKind) · @_editFileSizeLabel · Valid</span>
+                        <span class="ap-wizard__tag ap-wizard__tag--ok">✓</span>
+                    </div>
+                </div>
+                <div class="ap-wizard-edit-side">
+                    <div class="ap-wizard-edit-action">
+                        <button type="button"
+                                class="ap-wizard__btn ap-wizard__btn--primary ap-wizard__btn--block ap-wizard__btn--office"
+                                disabled="@(_editBusy || Disabled || !_canStageTemplates)"
+                                @onclick="OpenInOfficeAsync">
+                            <span class="ap-wizard__btn-ico ap-wizard__btn-ico--word" aria-hidden="true"></span>
+                            Open in Microsoft @(_editKind == ApplicationProfileTemplateKind.Excel ? "Excel" : "Word")
+                        </button>
+                        <p class="ap-wizard-edit-action__hint">@( _canStageTemplates ? "Writes to local sandbox folder" : "Template staging disabled or no edit permission" )</p>
+                    </div>
+                    <div class="ap-wizard-edit-action">
+                        <button type="button"
+                                class="ap-wizard__btn ap-wizard__btn--secondary ap-wizard__btn--block ap-wizard__btn--sync"
+                                disabled="@(_editBusy || Disabled || !_canStageTemplates || _linkedUserReportTemplateId == Guid.Empty)"
+                                onclick="visaTemplateStagingLocal.syncFromFilePickerDirect()">
+                            <span class="ap-wizard__btn-ico ap-wizard__btn-ico--sync" aria-hidden="true"></span>
+                            Sync to database
+                        </button>
+                        <p class="ap-wizard-edit-action__hint">After Save &amp; Close in @(_editKind == ApplicationProfileTemplateKind.Excel ? "Excel" : "Word")</p>
+                    </div>
+                    <div class="ap-wizard-edit-links">
+                        <label class="ap-wizard__link ap-wizard__link--icon-replace">
+                            Replace file…
+                            <InputFile OnChange="OnEditFileSelected" accept=".docx,.xlsx" style="display:none" disabled="@(_editBusy || Disabled)" />
+                        </label>
+                        <button type="button" class="ap-wizard__link ap-wizard__link--icon-download" disabled="@(_editBusy || _linkedUserReportTemplateId == Guid.Empty)" @onclick="OpenInOfficeAsync">Download</button>
+                    </div>
+
+                    <dl class="ap-wizard-edit-meta">
+                        <div class="ap-wizard-edit-meta__row">
+                            <dt>Name</dt>
+                            <dd>
+                                <input type="text" @bind="_editName" disabled="@Disabled" />
+                            </dd>
+                        </div>
+                        <div class="ap-wizard-edit-meta__row">
+                            <dt>Kind</dt>
+                            <dd>
+                                <select @bind="_editKind" disabled="@Disabled">
+                                    <option value="@ApplicationProfileTemplateKind.Word">Word</option>
+                                    <option value="@ApplicationProfileTemplateKind.Excel">Excel</option>
+                                </select>
+                            </dd>
+                        </div>
+                        <div class="ap-wizard-edit-meta__row">
+                            <dt>Scope</dt>
+                            <dd>@FormatScope(_editScope)</dd>
+                        </div>
+                        <div class="ap-wizard-edit-meta__row">
+                            <dt>Sort</dt>
+                            <dd>
+                                <input type="number" min="0" @bind="_editSort" disabled="@Disabled" />
+                            </dd>
+                        </div>
+                        <div class="ap-wizard-edit-meta__row">
+                            <dt>Linked</dt>
+                            <dd>
+                                UserReportTemplate @_editName
+                                @if (_linkedUserReportTemplateId != Guid.Empty)
+                                {
+                                    <span class="ap-wizard-edit-meta__active">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="ap-wizard-edit-meta__missing">not linked yet</span>
+                                }
+                            </dd>
+                        </div>
+                    </dl>
+
+                    <div class="ap-wizard-edit-status">
+                        <span class="ap-wizard-edit-status__label">Status</span>
+                        <div class="ap-wizard-edit-pills">
+                            <span class="ap-wizard__tag ap-wizard__tag--pill-ok">Placeholders 12</span>
+                            <span class="ap-wizard__tag ap-wizard__tag--pill-info">Extracted</span>
+                            <span class="ap-wizard__tag ap-wizard__tag--pill-ok">Validated ✓</span>
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(_editStatus))
+                    {
+                        <div class="ap-wizard__status @(_editStatusIsError ? "is-error" : "is-ok")">@_editStatus</div>
+                    }
+                </div>
+            </div>
+            <footer class="ap-wizard-modal__foot ap-wizard-modal__foot--edit">
+                <button type="button" class="ap-wizard__btn ap-wizard__btn--ghost" @onclick="CloseModals">Cancel</button>
+                <div class="ap-wizard-modal__foot-actions">
+                    <button type="button" class="ap-wizard__btn ap-wizard__btn--secondary" @onclick="SaveEditMetadata" disabled="@Disabled">Save metadata</button>
+                    <button type="button" class="ap-wizard__btn ap-wizard__btn--primary" @onclick="SaveEditAndClose" disabled="@Disabled">Save &amp; close</button>
+                </div>
+            </footer>
+        </div>
+    </div>
+}
+
 @code {
+    private sealed class DataScopeOption
+    {
+        public required ApplicationProfileTemplateDataScope Scope { get; init; }
+        public required string Title { get; init; }
+        public required string Description { get; init; }
+        public required string IconClass { get; init; }
+    }
+
     [Parameter, EditorRequired] public ApplicationProfile Profile { get; set; } = null!;
     [Parameter] public bool Disabled { get; set; }
+    [Parameter] public IObjectSpace? ObjectSpace { get; set; }
     [Parameter] public EventCallback OnAddTemplate { get; set; }
     [Parameter] public EventCallback<ApplicationProfileTemplate> OnRemoveTemplate { get; set; }
+    [Parameter] public EventCallback<(string Name, ApplicationProfileTemplateKind Kind, int SortOrder, byte[]? FileBytes, string? FileName, ApplicationProfileTemplateCatalogScope CatalogScope, ApplicationProfileTemplateDataScope DataScope, string? CategoryKey)> OnCreateTemplate { get; set; }
 
-    private static readonly ApplicationProfileTemplateKind[] TemplateKinds =
+    private readonly HashSet<string> _selectedCategories = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ApplicationProfileWizardTemplateCatalog.CategoryRegistration,
+        ApplicationProfileWizardTemplateCatalog.CategoryBorderZone,
+    };
+
+    private IReadOnlyList<ApplicationProfileWizardTemplateCatalog.CatalogRow> _globalRows =
+        Array.Empty<ApplicationProfileWizardTemplateCatalog.CatalogRow>();
+    private IReadOnlyList<ApplicationProfileWizardTemplateCatalog.CatalogRow> _categoryRows =
+        Array.Empty<ApplicationProfileWizardTemplateCatalog.CatalogRow>();
+
+    private readonly DataScopeOption[] _dataScopeOptions =
     [
-        ApplicationProfileTemplateKind.Word,
-        ApplicationProfileTemplateKind.Excel,
-        ApplicationProfileTemplateKind.PdfForm,
+        new()
+        {
+            Scope = ApplicationProfileTemplateDataScope.ApplicationHeader,
+            Title = "ApplicationProfileInstance header",
+            Description = "Scalars from ApplicationProfileInstance (+ profile defaults). Family: AppScalar",
+            IconClass = "is-header",
+        },
+        new()
+        {
+            Scope = ApplicationProfileTemplateDataScope.PeopleM2M,
+            Title = "People on this application (M2M)",
+            Description = "Roster / rows from linked persons. Family: ItemRows",
+            IconClass = "is-people",
+        },
+        new()
+        {
+            Scope = ApplicationProfileTemplateDataScope.Both,
+            Title = "Both (header + roster)",
+            Description = "Header fields + person loops in one file. Family: ItemRows+AppScalar",
+            IconClass = "is-both",
+        },
     ];
 
-    private Guid? _editingTemplateId;
-    private string _editName = string.Empty;
-    private ApplicationProfileTemplateKind _editKind;
-    private int _editSort;
+    private bool _showAddModal;
+    private bool _showEditModal;
+    private ApplicationProfileTemplateCatalogScope _addScope = ApplicationProfileTemplateCatalogScope.ProfileSpecific;
+    private ApplicationProfileTemplateDataScope _addDataScope = ApplicationProfileTemplateDataScope.PeopleM2M;
+    private string _addName = string.Empty;
+    private ApplicationProfileTemplateKind _addKind = ApplicationProfileTemplateKind.Word;
+    private int _addSort = 1;
+    private string? _addFileName;
+    private byte[]? _addFileBytes;
 
-    private void BeginEdit(ApplicationProfileTemplate template)
+    private ApplicationProfileTemplate? _editEntity;
+    private string _editName = string.Empty;
+    private ApplicationProfileTemplateKind _editKind = ApplicationProfileTemplateKind.Word;
+    private int _editSort;
+    private ApplicationProfileTemplateCatalogScope _editScope = ApplicationProfileTemplateCatalogScope.ProfileSpecific;
+    private ApplicationProfileTemplateDataScope _editDataScope = ApplicationProfileTemplateDataScope.PeopleM2M;
+    private string _editFileLabel = "template.docx";
+    private string DisplayEditFileName =>
+        string.IsNullOrWhiteSpace(_editFileLabel)
+            ? (_editKind == ApplicationProfileTemplateKind.Excel ? $"{_editName}.xlsx" : $"{_editName}.docx")
+            : _editFileLabel;
+    private string _editFileSizeLabel = "—";
+    private string? _editStatus;
+    private bool _editStatusIsError;
+    private bool _editBusy;
+    private bool _canStageTemplates;
+    private Guid _linkedUserReportTemplateId;
+    private DotNetObjectReference<ApplicationProfileWizardStepTemplatesPerson>? _dotNetRef;
+
+    private static readonly JsonSerializerOptions SyncResultJsonOptions = new()
     {
-        _editingTemplateId = template.ID;
-        _editName = template.TemplateName;
+        PropertyNameCaseInsensitive = true,
+    };
+
+    protected override void OnParametersSet()
+    {
+        _canStageTemplates = TemplateStagingUiService.CanEditTemplates();
+        RefreshCatalog();
+    }
+
+    private void RefreshCatalog()
+    {
+        if (ObjectSpace == null)
+        {
+            _globalRows = Array.Empty<ApplicationProfileWizardTemplateCatalog.CatalogRow>();
+            _categoryRows = Array.Empty<ApplicationProfileWizardTemplateCatalog.CatalogRow>();
+            return;
+        }
+
+        try
+        {
+            var snap = ApplicationProfileWizardTemplateCatalog.Build(ObjectSpace);
+            _globalRows = snap.Global;
+            _categoryRows = snap.Category;
+        }
+        catch
+        {
+            _globalRows = Array.Empty<ApplicationProfileWizardTemplateCatalog.CatalogRow>();
+            _categoryRows = Array.Empty<ApplicationProfileWizardTemplateCatalog.CatalogRow>();
+        }
+    }
+
+    private IReadOnlyList<ApplicationProfileTemplate> ProfileTemplates =>
+        (Profile.NestedTemplates ?? Array.Empty<ApplicationProfileTemplate>())
+            .Where(t => t != null && t.CatalogScope == ApplicationProfileTemplateCatalogScope.ProfileSpecific)
+            .OrderBy(t => t.SortOrder)
+            .ThenBy(t => t.TemplateName)
+            .ToList();
+
+    private IReadOnlyList<ApplicationProfileWizardTemplateCatalog.CatalogRow> FilteredCategoryRows =>
+        _categoryRows
+            .Where(r => r.CategoryKeys.Any(k => _selectedCategories.Contains(k)))
+            .ToList();
+
+    private bool IsIncluded(string name) =>
+        Profile.NestedTemplates?.Any(t =>
+            string.Equals(t.TemplateName, name, StringComparison.OrdinalIgnoreCase)) == true;
+
+    private static bool HasFile(ApplicationProfileTemplate template) =>
+        template.TemplateFile is { Size: > 0 }
+        || (template.TemplateFile?.Content?.Length > 0);
+
+    private void OpenAdd()
+    {
+        _addName = string.Empty;
+        _addKind = ApplicationProfileTemplateKind.Word;
+        _addSort = (Profile.NestedTemplates?.Count ?? 0) + 1;
+        _addScope = ApplicationProfileTemplateCatalogScope.ProfileSpecific;
+        _addDataScope = ApplicationProfileTemplateDataScope.PeopleM2M;
+        ClearAddFile();
+        _showAddModal = true;
+        _showEditModal = false;
+    }
+
+    private void OpenEdit(ApplicationProfileTemplate template)
+    {
+        _editEntity = template;
+        _editName = template.TemplateName ?? string.Empty;
         _editKind = template.TemplateKind;
         _editSort = template.SortOrder;
+        _editScope = template.CatalogScope;
+        _editDataScope = template.DataScope;
+        _editStatus = null;
+        _editStatusIsError = false;
+        _linkedUserReportTemplateId = Guid.Empty;
+        RefreshEditFileLabels(template);
+        _showEditModal = true;
+        _showAddModal = false;
+        _ = EnsureStagingInteropAsync();
+        TryResolveLinkedTemplateId();
     }
 
-    private void SaveEdit(ApplicationProfileTemplate template)
+    private void OpenEditCatalog(ApplicationProfileWizardTemplateCatalog.CatalogRow row)
     {
-        template.TemplateName = _editName.Trim();
-        template.TemplateKind = _editKind;
-        template.SortOrder = _editSort;
-        CancelEdit();
+        var entity = Profile.NestedTemplates?.FirstOrDefault(t =>
+            string.Equals(t.TemplateName, row.Name, StringComparison.OrdinalIgnoreCase));
+        if (entity == null)
+            return;
+
+        OpenEdit(entity);
+        _editScope = entity.CatalogScope != default ? entity.CatalogScope : row.Scope;
+        _editDataScope = entity.DataScope;
+        if (!string.IsNullOrWhiteSpace(row.FileLabel))
+            _editFileLabel = row.FileLabel!;
+        if (row.FileSizeBytes > 0)
+            _editFileSizeLabel = FormatBytes(row.FileSizeBytes);
+        _linkedUserReportTemplateId = row.UserReportTemplateId;
     }
 
-    private void CancelEdit()
+    private void RefreshEditFileLabels(ApplicationProfileTemplate template)
     {
-        _editingTemplateId = null;
-        _editName = string.Empty;
+        var linked = ObjectSpace != null
+            ? ApplicationProfileTemplateUserReportBridge.TryFindByName(ObjectSpace, template.TemplateName)
+            : null;
+        if (linked != null && ApplicationProfileTemplateUserReportBridge.HasExportableContent(linked))
+        {
+            _editFileLabel = linked.TemplateFile?.FileName ?? $"{template.TemplateName}.docx";
+            _editFileSizeLabel = FormatBytes(linked.TemplateFile?.Size ?? linked.TemplateFile?.Content?.Length ?? 0);
+            return;
+        }
+
+        _editFileLabel = HasFile(template)
+            ? (template.TemplateFile?.FileName ?? $"{_editName}.docx")
+            : $"{_editName} (no file yet — upload or Replace)";
+        _editFileSizeLabel = HasFile(template)
+            ? FormatBytes(template.TemplateFile?.Size ?? template.TemplateFile?.Content?.Length ?? 0)
+            : "—";
+    }
+
+    private void TryResolveLinkedTemplateId()
+    {
+        if (ObjectSpace == null || string.IsNullOrWhiteSpace(_editName))
+            return;
+
+        var linked = ApplicationProfileTemplateUserReportBridge.TryFindByName(ObjectSpace, _editName);
+        _linkedUserReportTemplateId = linked?.ID ?? Guid.Empty;
+        if (linked != null && ApplicationProfileTemplateUserReportBridge.HasExportableContent(linked))
+        {
+            _editFileLabel = linked.TemplateFile?.FileName ?? _editFileLabel;
+            _editFileSizeLabel = FormatBytes(linked.TemplateFile?.Size ?? linked.TemplateFile?.Content?.Length ?? 0);
+        }
+    }
+
+    private async Task EnsureStagingInteropAsync()
+    {
+        if (!_canStageTemplates)
+            return;
+
+        try
+        {
+            _dotNetRef ??= DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("visaTemplateStagingLocal.initDotNetRef", _dotNetRef);
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+        catch (JSException)
+        {
+        }
+    }
+
+    private void CloseModals()
+    {
+        _showAddModal = false;
+        _showEditModal = false;
+        _editEntity = null;
+        _editStatus = null;
+        _editStatusIsError = false;
+        _linkedUserReportTemplateId = Guid.Empty;
+        _editBusy = false;
+    }
+
+    private void ToggleCategory(string key)
+    {
+        if (!_selectedCategories.Add(key))
+            _selectedCategories.Remove(key);
+    }
+
+    private async Task ToggleIncludeCatalog(ApplicationProfileWizardTemplateCatalog.CatalogRow row)
+    {
+        if (Disabled)
+            return;
+
+        if (IsIncluded(row.Name))
+        {
+            var existing = Profile.NestedTemplates?.FirstOrDefault(t =>
+                string.Equals(t.TemplateName, row.Name, StringComparison.OrdinalIgnoreCase));
+            if (existing != null)
+                await OnRemoveTemplate.InvokeAsync(existing);
+            return;
+        }
+
+        var categoryKey = row.CategoryKeys.FirstOrDefault(k => _selectedCategories.Contains(k))
+            ?? row.CategoryKeys.FirstOrDefault();
+
+        if (OnCreateTemplate.HasDelegate)
+        {
+            await OnCreateTemplate.InvokeAsync((
+                row.Name,
+                row.Kind,
+                row.SortOrder,
+                null,
+                null,
+                row.Scope,
+                row.DataScope,
+                categoryKey));
+        }
+        else
+        {
+            await OnAddTemplate.InvokeAsync();
+        }
+
+        var created = Profile.NestedTemplates?.FirstOrDefault(t =>
+            string.Equals(t.TemplateName, row.Name, StringComparison.OrdinalIgnoreCase));
+        if (created != null && ObjectSpace != null)
+        {
+            ApplicationProfileTemplateUserReportBridge.EnsureLinkedUserReportTemplate(
+                ObjectSpace,
+                created,
+                ApplicationProfileWizardTemplateCatalog.RootBoFromDataScope(created.DataScope));
+        }
+    }
+
+    private async Task OnAddFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file == null)
+            return;
+
+        await using var stream = file.OpenReadStream(maxAllowedSize: 20 * 1024 * 1024);
+        using var ms = new MemoryStream();
+        await stream.CopyToAsync(ms);
+        _addFileBytes = ms.ToArray();
+        _addFileName = file.Name;
+        if (string.IsNullOrWhiteSpace(_addName))
+            _addName = Path.GetFileNameWithoutExtension(file.Name);
+        if (file.Name.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
+            _addKind = ApplicationProfileTemplateKind.Excel;
+    }
+
+    private void ClearAddFile()
+    {
+        _addFileName = null;
+        _addFileBytes = null;
+    }
+
+    private async Task SubmitAdd(bool requireFile)
+    {
+        if (string.IsNullOrWhiteSpace(_addName))
+            return;
+        if (requireFile && (_addFileBytes == null || _addFileBytes.Length == 0))
+            return;
+
+        var categoryKey = _addScope == ApplicationProfileTemplateCatalogScope.Category
+            ? (_selectedCategories.FirstOrDefault()
+               ?? ApplicationProfileWizardTemplateCatalog.CategoryVisa)
+            : null;
+
+        if (OnCreateTemplate.HasDelegate)
+        {
+            await OnCreateTemplate.InvokeAsync((
+                _addName.Trim(),
+                _addKind,
+                _addSort,
+                requireFile ? _addFileBytes : null,
+                requireFile ? _addFileName : null,
+                _addScope,
+                _addDataScope,
+                categoryKey));
+        }
+        else
+        {
+            await OnAddTemplate.InvokeAsync();
+        }
+
+        var created = Profile.NestedTemplates?
+            .OrderByDescending(t => t.SortOrder)
+            .FirstOrDefault(t => string.Equals(t.TemplateName, _addName.Trim(), StringComparison.OrdinalIgnoreCase));
+        if (created != null && ObjectSpace != null)
+        {
+            var userTemplate = ApplicationProfileTemplateUserReportBridge.EnsureLinkedUserReportTemplate(
+                ObjectSpace,
+                created,
+                ApplicationProfileWizardTemplateCatalog.RootBoFromDataScope(_addDataScope));
+            if (requireFile && _addFileBytes is { Length: > 0 })
+            {
+                ApplicationProfileTemplateUserReportBridge.WriteMasterFile(
+                    ObjectSpace,
+                    userTemplate,
+                    _addFileBytes,
+                    _addFileName ?? created.TemplateName + (_addKind == ApplicationProfileTemplateKind.Excel ? ".xlsx" : ".docx"));
+            }
+        }
+
+        RefreshCatalog();
+        CloseModals();
+    }
+
+    private async Task OnEditFileSelected(InputFileChangeEventArgs e)
+    {
+        if (_editEntity == null || ObjectSpace is not { } os)
+        {
+            SetEditStatus("Include this template on the profile first, then Replace file.", isError: true);
+            return;
+        }
+
+        var file = e.File;
+        if (file == null)
+            return;
+
+        await using var stream = file.OpenReadStream(maxAllowedSize: 20 * 1024 * 1024);
+        using var ms = new MemoryStream();
+        await stream.CopyToAsync(ms);
+        var bytes = ms.ToArray();
+
+        _editEntity.TemplateFile ??= os.CreateObject<FileData>();
+        _editEntity.TemplateFile.FileName = file.Name;
+        _editEntity.TemplateFile.Content = bytes;
+
+        var userTemplate = ApplicationProfileTemplateUserReportBridge.EnsureLinkedUserReportTemplate(
+            os,
+            _editEntity,
+            ApplicationProfileWizardTemplateCatalog.RootBoFromDataScope(_editDataScope));
+        ApplicationProfileTemplateUserReportBridge.WriteMasterFile(os, userTemplate, bytes, file.Name);
+        _linkedUserReportTemplateId = userTemplate.ID;
+
+        _editFileLabel = file.Name;
+        _editFileSizeLabel = FormatBytes(bytes.Length);
+        SetEditStatus("File saved on profile nested row and User Report Template.", isError: false);
+    }
+
+    private void SaveEditMetadata()
+    {
+        if (_editEntity != null)
+        {
+            _editEntity.TemplateName = _editName.Trim();
+            _editEntity.TemplateKind = _editKind;
+            _editEntity.SortOrder = _editSort;
+            _editEntity.CatalogScope = _editScope;
+            _editEntity.DataScope = _editDataScope;
+            if (ObjectSpace != null)
+            {
+                ApplicationProfileTemplateUserReportBridge.EnsureLinkedUserReportTemplate(
+                    ObjectSpace,
+                    _editEntity,
+                    ApplicationProfileWizardTemplateCatalog.RootBoFromDataScope(_editDataScope));
+                TryResolveLinkedTemplateId();
+            }
+
+            SetEditStatus("Metadata saved on profile nested row (+ User Report Template link).", isError: false);
+        }
+        else
+        {
+            SetEditStatus("Include on the list to attach to this profile, then edit.", isError: true);
+        }
+    }
+
+    private void SaveEditAndClose()
+    {
+        SaveEditMetadata();
+        CloseModals();
+    }
+
+    private async Task OpenInOfficeAsync()
+    {
+        if (!_canStageTemplates)
+        {
+            SetEditStatus("Template staging is disabled or you lack User Report Template write access.", isError: true);
+            return;
+        }
+
+        if (_editEntity == null || ObjectSpace is not { } os)
+        {
+            SetEditStatus("Include this template on the profile first, then Open.", isError: true);
+            return;
+        }
+
+        _editBusy = true;
+        SetEditStatus(null, isError: false);
+        try
+        {
+            SaveEditMetadata();
+            var userTemplate = ApplicationProfileTemplateUserReportBridge.EnsureLinkedUserReportTemplate(
+                os,
+                _editEntity,
+                ApplicationProfileWizardTemplateCatalog.RootBoFromDataScope(_editDataScope));
+            _linkedUserReportTemplateId = userTemplate.ID;
+
+            if (!ApplicationProfileTemplateUserReportBridge.HasExportableContent(userTemplate))
+            {
+                SetEditStatus("No file content yet. Use Replace file… or Upload when adding the template.", isError: true);
+                return;
+            }
+
+            var outcome = await TemplateStagingUiService.ExportForEditAsync(userTemplate.ID);
+            if (!outcome.Success || outcome.Result?.FileContent == null || outcome.Result.FileContent.Length == 0)
+            {
+                SetEditStatus(outcome.ErrorMessage ?? "Export failed.", isError: true);
+                return;
+            }
+
+            await EnsureStagingInteropAsync();
+            var downloadResult = await JS.InvokeAsync<UserReportTemplateStagingDownloadJsResult>(
+                "visaTemplateStagingLocal.downloadTemplate",
+                new
+                {
+                    fileName = outcome.Result.DocumentFileName,
+                    templateId = userTemplate.ID.ToString(),
+                    displayName = outcome.Result.DisplayName,
+                    fileBase64 = Convert.ToBase64String(outcome.Result.FileContent),
+                    exportedAtUtc = DateTime.UtcNow.ToString("o"),
+                });
+
+            if (downloadResult == null || !downloadResult.Success)
+            {
+                SetEditStatus(downloadResult?.Error ?? "Browser download failed.", isError: true);
+                return;
+            }
+
+            _editFileLabel = outcome.Result.DocumentFileName;
+            _editFileSizeLabel = FormatBytes(outcome.Result.FileContent.Length);
+            SetEditStatus(
+                $"Downloaded {outcome.Result.DocumentFileName}. Edit in Office, Save, then Sync to database.",
+                isError: false);
+        }
+        catch (Exception ex)
+        {
+            SetEditStatus(ex.Message, isError: true);
+        }
+        finally
+        {
+            _editBusy = false;
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnSyncFromFilePickerStarted()
+    {
+        if (!_canStageTemplates)
+            return;
+
+        _editBusy = true;
+        SetEditStatus("Syncing… choose the edited file.", isError: false);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public async Task OnSyncFromFilePickerResult(string json)
+    {
+        try
+        {
+            if (!_canStageTemplates || string.IsNullOrWhiteSpace(json))
+                return;
+
+            var collect = JsonSerializer.Deserialize<UserReportTemplateStagingLocalCollectJsResult>(
+                json,
+                SyncResultJsonOptions);
+            if (collect == null)
+            {
+                SetEditStatus("Sync failed.", isError: true);
+                return;
+            }
+
+            if (collect.Cancelled)
+            {
+                SetEditStatus("Sync cancelled.", isError: false);
+                return;
+            }
+
+            var result = UserReportTemplateStagingUiService.MapCollectResult(collect);
+            if (result.ImportedCount == 0
+                && result.FailedCount == 0
+                && result.SkippedUnchangedCount > 0)
+            {
+                SetEditStatus("No local changes detected (file unchanged).", isError: true);
+                return;
+            }
+
+            var msg =
+                $"Imported {result.ImportedCount}, unchanged {result.SkippedUnchangedCount}, failed {result.FailedCount}.";
+            var firstFailure = result.Results.FirstOrDefault(r =>
+                r.Status == UserReportTemplateStagingImportStatus.Failed
+                && !string.IsNullOrWhiteSpace(r.ErrorMessage));
+            if (firstFailure?.ErrorMessage != null)
+                msg += " " + firstFailure.ErrorMessage;
+
+            SetEditStatus(msg, isError: result.FailedCount > 0);
+            if (_editEntity != null)
+                RefreshEditFileLabels(_editEntity);
+            TryResolveLinkedTemplateId();
+            RefreshCatalog();
+        }
+        finally
+        {
+            _editBusy = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    public void Dispose()
+    {
+        if (_dotNetRef != null)
+        {
+            try
+            {
+                _ = JS.InvokeVoidAsync("visaTemplateStagingLocal.disposeDotNetRef");
+            }
+            catch
+            {
+                // Best-effort on dispose.
+            }
+
+            _dotNetRef.Dispose();
+            _dotNetRef = null;
+        }
+    }
+
+    private void SetEditStatus(string? message, bool isError)
+    {
+        _editStatus = message;
+        _editStatusIsError = isError;
     }
 
     private static string FormatKind(ApplicationProfileTemplateKind kind) => kind switch
@@ -126,4 +1038,35 @@
         ApplicationProfileTemplateKind.PdfForm => "PDF form",
         _ => "Word",
     };
+
+    private static string FormatScope(ApplicationProfileTemplateCatalogScope scope) => scope switch
+    {
+        ApplicationProfileTemplateCatalogScope.Category => "Category",
+        ApplicationProfileTemplateCatalogScope.Global => "All profiles",
+        _ => "Profile-specific",
+    };
+
+    private static string FormatDataScope(ApplicationProfileTemplateDataScope scope) => scope switch
+    {
+        ApplicationProfileTemplateDataScope.ApplicationHeader => "ApplicationProfileInstance header",
+        ApplicationProfileTemplateDataScope.Both => "Header + M2M",
+        _ => "People (M2M)",
+    };
+
+    private static string FormatCategoryChip(string key) =>
+        ApplicationProfileWizardTemplateCatalog.CategoryChips
+            .FirstOrDefault(c => c.Key.Equals(key, StringComparison.OrdinalIgnoreCase))
+            .Label
+        ?? key;
+
+    private static string FormatBytes(long size)
+    {
+        if (size <= 0)
+            return "0 B";
+        if (size < 1024)
+            return $"{size} B";
+        if (size < 1024 * 1024)
+            return $"{size / 1024.0:0} KB";
+        return $"{size / (1024.0 * 1024.0):0.0} MB";
+    }
 }

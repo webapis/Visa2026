@@ -43,7 +43,7 @@ fields:
   - source: PersonInApplication.Cancelled
     target: IsCancelled
     transform: legacy_invitation_cancellation_index
-    join: PersonInInvitation matched to PersonInApplication on same Application + person
+    join: PersonInInvitation matched to PersonInApplication on same ApplicationProfileInstance + person
     missingBehavior: default_false
     notes: |
       Visa2014LegacyInvitationItemCancellationIndex — PersonInApplication.Cancelled on

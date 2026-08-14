@@ -4,7 +4,7 @@ description: Registration update after employees received new visas
 dependsOn: RegInfoChangePassport
 sync: false
 anchor:
-  entity: Application
+  entity: ApplicationProfileInstance
   key: FullApplicationNumber
   value: 10/-009
 data:
@@ -26,9 +26,9 @@ data:
     Issued Place: Aşgabat şäher howa menzilindäki MGP
     Passport Number: TR8877665
   Applications:
-  - Application Number: 009
+  - ApplicationProfileInstance Number: 009
     Date: 2026-10-15
-    Application Type: App_Reg_Info_Change_Visa
+    ApplicationProfileInstance Type: App_Reg_Info_Change_Visa
     Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
   ApplicationItems:
   - Person: John Doe

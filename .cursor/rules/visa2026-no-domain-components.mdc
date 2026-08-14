@@ -1,0 +1,25 @@
+---
+description: Ban Domain Components / [DomainComponent] — always apply
+alwaysApply: true
+---
+
+# Visa2026 — no Domain Components
+
+Do **not** use DevExpress **Domain Components** in this project.
+
+## Never do
+
+- Do **not** add `[DomainComponent]` to new or existing types.
+- Do **not** introduce legacy XPO Domain Components composition (interface-based DC modules, DC aggregators, etc.).
+- Do **not** convert persistent BOs (or hard-removed types like `ApplicationItem`) into Domain Components / `[DomainComponent]` “non-persistent BOs” as a workaround.
+- Do **not** “fix” missing `[NonPersistent]` / EF mapping by reaching for `[DomainComponent]`.
+
+## Do instead
+
+- **Persistent domain data:** EF Core `BaseObject` + `DbSet` / `Visa2026DbContext` mapping (Module).
+- **Merge / PDF / report projections:** plain POCOs or service DTOs (e.g. hydrate from `ApplicationProfileInstancePerson` + `ResolvedLink`) — not Domain Components.
+- **Dialog / shell hosts that today use `[DomainComponent]`:** leave existing hosts alone unless the task is explicitly to migrate them; for **new** hosts prefer patterns already used without adding Domain Components (Blazor editors, non-exported POCOs, or `NonPersistentBaseObject` **without** `[DomainComponent]` only if XAF accepts it for that case). Prefer not growing the DomainComponent host set.
+
+## Why
+
+Legacy Domain Components are deprecated for new XAF work. Visa2026 is EF Core + PostgreSQL; roster identity is `ApplicationProfileInstancePerson`, not ApplicationItem DomainComponent projections.

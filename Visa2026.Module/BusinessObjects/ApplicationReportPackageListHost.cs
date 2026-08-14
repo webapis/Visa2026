@@ -10,7 +10,7 @@ using Visa2026.Module.Editors;
 namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
-/// Non-persistent shell for the Templates report package dialog on an <see cref="Application"/>.
+/// Non-persistent shell for the Templates report package dialog on an <see cref="ApplicationProfileInstance"/>.
 /// </summary>
 [DomainComponent]
 [DefaultClassOptions]
@@ -19,7 +19,7 @@ namespace Visa2026.Module.BusinessObjects;
 public class ApplicationReportPackageListHost : NonPersistentBaseObject
 {
     [Browsable(false)]
-    public Guid ApplicationId { get; set; }
+    public Guid ApplicationProfileInstanceId { get; set; }
 
     [VisibleInListView(false)]
     [VisibleInLookupListView(false)]

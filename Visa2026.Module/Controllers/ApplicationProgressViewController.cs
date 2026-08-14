@@ -4,14 +4,15 @@ using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.Base;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// Validates <see cref="ApplicationProgress"/> rows on commit (including nested saves from <see cref="Application"/>).
+/// Validates <see cref="ApplicationProfileInstanceProgress"/> rows on commit (including nested saves from <see cref="Application"/>).
 /// </summary>
-public sealed class ApplicationProgressCommitValidationController : ViewController
+public sealed class ApplicationProfileInstanceProgressCommitValidationController : ViewController
 {
     protected override void OnActivated()
     {
@@ -27,7 +28,7 @@ public sealed class ApplicationProgressCommitValidationController : ViewControll
 
     private void ObjectSpace_Committing(object sender, CancelEventArgs e)
     {
-        if (!ApplicationProgressProfileResolver.TryValidateApplicationEditableWhenWorkflowTerminal(
+        if (!ApplicationProfileInstanceProgressProfileResolver.TryValidateApplicationEditableWhenWorkflowTerminal(
                 ObjectSpace, out var terminalLockError))
         {
             e.Cancel = true;
@@ -39,9 +40,21 @@ public sealed class ApplicationProgressCommitValidationController : ViewControll
             return;
         }
 
-        foreach (var application in ObjectSpace.GetObjectsToSave(false).OfType<BusinessObjects.Application>())
+        if (!ApplicationProfileInstancePersonRosterLockHelper.TryValidateRosterEditableWhenWorkflowTerminal(
+                ObjectSpace, out var rosterLockError))
         {
-            if (!ApplicationProgressProfileResolver.TryValidateApplicationUnchangedAfterProgress(
+            e.Cancel = true;
+            Application.ShowViewStrategy.ShowMessage(
+                rosterLockError ?? VisaUiMessages.Get("ApplicationProfileInstancePerson.RosterLockedWhenWorkflowTerminal"),
+                InformationType.Error,
+                5000,
+                InformationPosition.Top);
+            return;
+        }
+
+        foreach (var application in ObjectSpace.GetObjectsToSave(false).OfType<BusinessObjects.ApplicationProfileInstance>())
+        {
+            if (!ApplicationProfileInstanceProgressProfileResolver.TryValidateApplicationUnchangedAfterProgress(
                     application, ObjectSpace, out var lockError))
             {
                 e.Cancel = true;
@@ -53,27 +66,27 @@ public sealed class ApplicationProgressCommitValidationController : ViewControll
                 return;
             }
 
-            if (ApplicationProgressProfileResolver.TryValidateProjectContractOnApplication(
+            if (ApplicationProfileInstanceProgressProfileResolver.TryValidateProjectContractOnApplication(
                     application, ObjectSpace, out var applicationError))
                 continue;
 
             e.Cancel = true;
             Application.ShowViewStrategy.ShowMessage(
-                applicationError ?? VisaUiMessages.Get("ApplicationProgress.ProjectContractRequired"),
+                applicationError ?? VisaUiMessages.Get("ApplicationProfileInstanceProgress.ProjectContractRequired"),
                 InformationType.Error,
                 5000,
                 InformationPosition.Top);
             return;
         }
 
-        foreach (var progress in ObjectSpace.GetObjectsToSave(false).OfType<ApplicationProgress>())
+        foreach (var progress in ObjectSpace.GetObjectsToSave(false).OfType<ApplicationProfileInstanceProgress>())
         {
-            if (ApplicationProgressTransitionHelper.TryValidateProgressStep(progress, ObjectSpace, out var errorMessage))
+            if (ApplicationProfileInstanceProgressTransitionHelper.TryValidateProgressStep(progress, ObjectSpace, out var errorMessage))
                 continue;
 
             e.Cancel = true;
             Application.ShowViewStrategy.ShowMessage(
-                errorMessage ?? VisaUiMessages.Get("ApplicationProgress.InvalidForRoute"),
+                errorMessage ?? VisaUiMessages.Get("ApplicationProfileInstanceProgress.InvalidForRoute"),
                 InformationType.Error,
                 5000,
                 InformationPosition.Top);
@@ -83,9 +96,9 @@ public sealed class ApplicationProgressCommitValidationController : ViewControll
 }
 
 /// <summary>
-/// Suggests state defaults on the <see cref="ApplicationProgress"/> detail view.
+/// Suggests state defaults on the <see cref="ApplicationProfileInstanceProgress"/> detail view.
 /// </summary>
-public sealed class ApplicationProgressDetailViewController : ObjectViewController<DetailView, ApplicationProgress>
+public sealed class ApplicationProfileInstanceProgressDetailViewController : ObjectViewController<DetailView, ApplicationProfileInstanceProgress>
 {
     protected override void OnActivated()
     {
@@ -107,19 +120,19 @@ public sealed class ApplicationProgressDetailViewController : ObjectViewControll
 
     private void ObjectSpace_ObjectChanged(object sender, ObjectChangedEventArgs e)
     {
-        if (e.Object is not ApplicationProgress progress || !ReferenceEquals(progress, ViewCurrentObject))
+        if (e.Object is not ApplicationProfileInstanceProgress progress || !ReferenceEquals(progress, ViewCurrentObject))
             return;
 
-        if (e.PropertyName is nameof(ApplicationProgress.State) or nameof(ApplicationProgress.Application))
+        if (e.PropertyName is nameof(ApplicationProfileInstanceProgress.State) or nameof(ApplicationProfileInstanceProgress.ApplicationProfileInstance))
             ApplyDefaults(progress);
     }
 
-    private void ApplyDefaults(ApplicationProgress? progress)
+    private void ApplyDefaults(ApplicationProfileInstanceProgress? progress)
     {
         if (progress == null)
             return;
 
-        ApplicationProgressTransitionHelper.TryApplySuggestedNextStep(progress);
+        ApplicationProfileInstanceProgressTransitionHelper.TryApplySuggestedNextStep(progress);
         View.Refresh();
     }
 }

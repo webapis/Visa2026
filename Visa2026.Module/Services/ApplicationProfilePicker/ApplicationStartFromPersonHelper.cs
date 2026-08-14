@@ -32,7 +32,7 @@ public static class ApplicationStartFromPersonHelper
         var suggestedFamilyIds = GetSuggestedFamilyMemberIds(seed, profile);
 
         IQueryable<Person> query = objectSpace.GetObjectsQuery<Person>();
-        if (profile.ProgressRoute == ApplicationProgressRouteKind.ViaMinistries)
+        if (profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries)
         {
             var contractId = seed.ProjectContract?.ID;
             if (contractId == null || contractId == Guid.Empty)
@@ -81,7 +81,7 @@ public static class ApplicationStartFromPersonHelper
             return Blocked(errors, warnings, []);
         }
 
-        if (profile.ProgressRoute == ApplicationProgressRouteKind.ViaMinistries
+        if (profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries
             && (seedPerson.ProjectContract == null || seedPerson.ProjectContract.ID == Guid.Empty))
         {
             errors.Add(
@@ -98,7 +98,7 @@ public static class ApplicationStartFromPersonHelper
             }
         }
 
-        if (profile.ProgressRoute == ApplicationProgressRouteKind.ViaMinistries)
+        if (profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries)
         {
             var contractId = seedPerson.ProjectContract!.ID;
             foreach (var person in selectedPeople)
@@ -116,7 +116,7 @@ public static class ApplicationStartFromPersonHelper
             if (HasOpenApplication(objectSpace, person, profile))
             {
                 warnings.Add(
-                    $"{person.FullName} already has an open Application on profile {profile.Name}.");
+                    $"{person.FullName} already has an open ApplicationProfileInstance on profile {profile.Name}.");
             }
         }
 
@@ -136,13 +136,13 @@ public static class ApplicationStartFromPersonHelper
         };
     }
 
-    public static void LinkPeople(IObjectSpace objectSpace, Application application, IEnumerable<Person> people)
+    public static void LinkPeople(IObjectSpace objectSpace, ApplicationProfileInstance application, IEnumerable<Person> people)
     {
         if (objectSpace == null || application == null || people == null)
             return;
 
         foreach (var person in people)
-            ApplicationPersonService.LinkPerson(objectSpace, application, person);
+            ApplicationProfileInstancePersonService.LinkPerson(objectSpace, application, person);
     }
 
     public static bool HasOpenApplication(IObjectSpace objectSpace, Person person, ApplicationProfile profile)
@@ -153,22 +153,21 @@ public static class ApplicationStartFromPersonHelper
         var personId = person.ID;
         var profileId = profile.ID;
 
-        return objectSpace.GetObjectsQuery<ApplicationPerson>()
-            .Where(ap =>
-                ap.PersonId == personId
-                && ap.Application != null
-                && ap.Application.ApplicationProfile != null
-                && ap.Application.ApplicationProfile.ID == profileId)
+        return objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
+            .Where(a =>
+                a.People.Any(p => p.ID == personId)
+                && a.ApplicationProfile != null
+                && a.ApplicationProfile.ID == profileId)
             .AsEnumerable()
-            .Any(ap => !IsApplicationTerminal(ap.Application));
+            .Any(a => !IsApplicationTerminal(a));
     }
 
-    private static bool IsApplicationTerminal(Application? application)
+    private static bool IsApplicationTerminal(ApplicationProfileInstance? application)
     {
         var latest = application?.LatestProgress ?? application?.ProgressHistory?
             .OrderByDescending(p => p.Order)
             .FirstOrDefault();
-        return ApplicationProgressTransitionHelper.IsTerminalStateCode(latest?.State?.Code);
+        return ApplicationProfileInstanceProgressTransitionHelper.IsTerminalStateCode(latest?.State?.Code);
     }
 
     private static IReadOnlyList<string> FlagIncompletePeople(
@@ -187,19 +186,19 @@ public static class ApplicationStartFromPersonHelper
 
     private static bool IsPersonIncompleteForProfile(ApplicationProfile profile, Person person)
     {
-        if (profile.RequirePersonPassport && ApplicationPersonValidItems.ResolvePassport(person) == null)
+        if (profile.RequirePersonPassport && ApplicationProfileInstancePersonValidItems.ResolvePassport(person) == null)
             return true;
-        if (profile.RequirePersonVisa && ApplicationPersonValidItems.ResolveVisa(person) == null)
+        if (profile.RequirePersonVisa && ApplicationProfileInstancePersonValidItems.ResolveVisa(person) == null)
             return true;
-        if (profile.RequirePersonEducation && ApplicationPersonValidItems.ResolveEducation(person) == null)
+        if (profile.RequirePersonEducation && ApplicationProfileInstancePersonValidItems.ResolveEducation(person) == null)
             return true;
-        if (profile.RequirePersonAddressOfResidence && ApplicationPersonValidItems.ResolveAddress(person) == null)
+        if (profile.RequirePersonAddressOfResidence && ApplicationProfileInstancePersonValidItems.ResolveAddress(person) == null)
             return true;
-        if (profile.RequirePersonPosition && ApplicationPersonValidItems.ResolvePosition(person) == null)
+        if (profile.RequirePersonPosition && ApplicationProfileInstancePersonValidItems.ResolvePosition(person) == null)
             return true;
-        if (profile.RequirePersonSalary && ApplicationPersonValidItems.ResolveSalary(person) == null)
+        if (profile.RequirePersonSalary && ApplicationProfileInstancePersonValidItems.ResolveSalary(person) == null)
             return true;
-        if (profile.RequirePersonMedical && ApplicationPersonValidItems.ResolveMedical(person) == null)
+        if (profile.RequirePersonMedical && ApplicationProfileInstancePersonValidItems.ResolveMedical(person) == null)
             return true;
         return false;
     }

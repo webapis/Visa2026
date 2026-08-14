@@ -10,7 +10,7 @@
 #   - Do not discover a BO until all dependsOn are complete | blocked | skip.
 #   - Do not implement import code or run OData load until importConfirmed: true (Phase 1b sign-off).
 #   - Lookup review gate: personWaveComplete in lookup-comparisons/lookup-review-queue.yaml before Person importConfirmed.
-#   - Application importConfirmed requires applicationWaveComplete in the same queue.
+#   - ApplicationProfileInstance importConfirmed requires applicationWaveComplete in the same queue.
 #   - If a dependency is blocked, downstream BOs stay not_started unless waived in mapping.notes.
 #   - IMPORT CHAIN GATE: never start the next entities[] row until the previous import wave
 #     succeeds (process exit 0 AND FailedCount = 0). Children depend on parent id-maps /
@@ -55,6 +55,11 @@ tenantCatalogGeneration:
       dependsOn: []
       outputs:
         - Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/subcontractor.calik-energi.json
+    - id: application-profile-calik-energi
+      script: scripts/visa2014-migration/catalogs/generate/ApplicationProfileTenant-CalikEnergi.ps1
+      dependsOn: []
+      outputs:
+        - Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/application-profile.calik-energi.json
 
 entities:
   # --- person-domain (no upstream transactional deps) ---
@@ -198,7 +203,7 @@ entities:
       CLI: --import-visa2014-files --entity MedicalRecord --property MedicalRecordDocument.
 
   # --- application-domain ---
-  - targetODataEntity: Application
+  - targetODataEntity: ApplicationProfileInstance
     dependsOn:
       - Person
     importPhase: application-domain
@@ -219,7 +224,7 @@ entities:
 
   - targetODataEntity: WorkPermit
     dependsOn:
-      - Application
+      - ApplicationProfileInstance
     importPhase: application-domain
     discoveryDossier: docs/VISA2014_MIGRATION/discovery/WorkPermit.yaml
     discoveryStatus: in_progress
@@ -230,7 +235,7 @@ entities:
     importStatus: pending
     notes: |
       2026-07-03: Reordered before ApplicationItem. Legacy header synthesized from dbo.WorkPermitLetter (~398)
-      + 2 orphan dbo.WorkPermit rows without letter. Application FK optional on pilot.
+      + 2 orphan dbo.WorkPermit rows without letter. ApplicationProfileInstance FK optional on pilot.
       Transform + preview exporter in progress; Excel review before importConfirmed.
 
   - targetODataEntity: WorkPermitItem
@@ -253,7 +258,7 @@ entities:
 
   - targetODataEntity: Invitation
     dependsOn:
-      - Application
+      - ApplicationProfileInstance
     importPhase: permits-and-visas
     discoveryDossier: docs/VISA2014_MIGRATION/discovery/Invitation.yaml
     discoveryStatus: in_progress
@@ -267,7 +272,7 @@ entities:
       Result = 1 → Rejection wave (not Invitation). Number → InvitationNumber; IssuedDate → IssuedDate;
       DateOfExpire → ExpirationDate; VisaPeriod best-effort from span; VisaCategory default.
       13 duplicate InvitationNumber groups → oid-tail suffix.
-      Application FK optional via Application id-map.
+      ApplicationProfileInstance FK optional via ApplicationProfileInstance id-map.
 
   - targetODataEntity: InvitationItem
     dependsOn:
@@ -286,32 +291,46 @@ entities:
       2026-07-03 / 2026-07-22: PersonInInvitation under Result = 0 (~4984). Person ← COALESCE(Employee, FamilyMember).
       IsCancelled ← PIA.Cancelled on cancel-invitation apps (Result=1 is RejectionItem). id-map: PersonInInvitation.Oid.
 
-  - targetODataEntity: ApplicationItem
+  - targetODataEntity: ApplicationProfileInstancePerson
     dependsOn:
       - Person
-      - Application
+      - ApplicationProfileInstance
+    importPhase: application-domain
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/ApplicationProfileInstancePerson.yaml
+    discoveryStatus: complete
+    legacySource: calik-energi
+    importConfirmed: true
+    importConfirmedAt: 2026-08-12
+    importConfirmedBy: developer
+    importStatus: in_progress
+    notes: |
+      Wave 2b (2026-08-12): PersonInApplication → ApplicationProfileInstancePerson M2M (not ApplicationItem).
+      Headless --inprocess only. Immediate ResolvedLinks via LinkPerson + RequirePerson*.
+      Id-map: PersonInApplication.Oid → ApplicationProfileInstancePeople.ID. Dedupe Application+Person (lowest Oid).
+      Skip parent ApplicationType E:44/E:55. Prefer after person scalars so auto-link finds Passport/Visa/….
+
+  - targetODataEntity: ApplicationItem
+    status: retired  # Phase B hard-remove — fail-fast on --entity ApplicationItem
+    dependsOn:
+      - Person
+      - ApplicationProfileInstance
       - WorkPermitItem
     importPhase: application-domain
     discoveryDossier: docs/VISA2014_MIGRATION/discovery/ApplicationItem.yaml
     discoveryStatus: complete
     legacySource: calik-energi
-    importConfirmed: true
-    importConfirmedAt: 2026-06-30
-    importConfirmedBy: developer
-    importStatus: in_progress
+    importConfirmed: false
+    importConfirmedAt: null
+    importConfirmedBy: null
+    importStatus: retired
     notes: |
-      Discovery 2026-06-29: dbo.PersonInApplication — 21,794 active rows (40,414 total incl. soft-deleted).
-      Preview 21,588 import / 206 skipped (204 parent E:44/E:55, 2 dedupe_duplicate). OData importer shipped 2026-06-30.
-      CheckPoint via OData NameTm; BorderZoneLocation comma-separated string; PurposeOfTravel omitted (dropped from BO).
-      CurrentWorkPermitItem + WorkPermittedLocations require WorkPermitItem id-map (legacy WorkPermit.Oid 1:1).
-      Reimport ApplicationItems.ps1 after WorkPermitItem wave for full FK fidelity.
-      CurrentAddressOfResidence: legacy pia.AddressOfResidence FK, else pia.Address via AddressOfResidence id-map
-      (PIA inference + sponsor canonical key for family lines). See postImportCorrections for DB backfill only.
+      RETIRED Phase B hard-remove (2026-08-13): --entity ApplicationItem fail-fast.
+      Prefer ApplicationProfileInstancePerson M2M. Historical ApplicationItem Excel reimport deferred.
 
   # --- permits-and-visas (Rejection after ApplicationItem; Invitation/WorkPermit may already be earlier) ---
   - targetODataEntity: Rejection
     dependsOn:
-      - Application
+      - ApplicationProfileInstance
       - ApplicationItem
     importPhase: permits-and-visas
     discoveryDossier: docs/VISA2014_MIGRATION/discovery/Rejection.yaml
@@ -323,7 +342,7 @@ entities:
     importStatus: complete
     notes: |
       Discovery 2026-07-22: dbo.ApplicationResult WHERE Result = 1 (Rejection) — 207 headers (185 with items, 22 orphans).
-      Number → RejectedDocNumber; IssuedDate → Date; Application required. 2 duplicate Number groups → oid-tail suffix.
+      Number → RejectedDocNumber; IssuedDate → Date; ApplicationProfileInstance required. 2 duplicate Number groups → oid-tail suffix.
       Same legacy table as Invitation (Result = 0); separate id-map file.
       importConfirmed 2026-07-22 after Rejection-preview.calik-energi.xlsx review (207 import / 0 skipped).
       Local PG import 2026-07-22: Posted 207 / Failed 0; id-map id-maps/calik-energi-local-pg/Rejection.json.
@@ -349,11 +368,11 @@ entities:
       Local PG import 2026-07-22: Posted 254 / Failed 0; id-map id-maps/calik-energi-local-pg/RejectionItem.json.
 
   # --- progress-and-history ---
-  - targetODataEntity: ApplicationProgress
+  - targetODataEntity: ApplicationProfileInstanceProgress
     dependsOn:
-      - Application
+      - ApplicationProfileInstance
     importPhase: progress-and-history
-    discoveryDossier: docs/VISA2014_MIGRATION/discovery/ApplicationProgress.yaml
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/ApplicationProfileInstanceProgress.yaml
     discoveryStatus: complete
     legacySource: calik-energi
     importConfirmed: true
@@ -362,7 +381,7 @@ entities:
     importStatus: complete
     notes: |
       importConfirmed 2026-06-29 after preview review (32,177 synthesized rows / 108 parent skips).
-      Live OData 2026-06-30 calik-energi: seeds removed 8135; posted 0; failed 0; skipped (already imported) 32177; parent-skipped 108; prepared 32177; id-map 32177 at legacy/visa2014/id-maps/calik-energi/ApplicationProgress.json (idempotent re-run).
+      Live OData 2026-06-30 calik-energi: seeds removed 8135; posted 0; failed 0; skipped (already imported) 32177; parent-skipped 108; prepared 32177; id-map 32177 at legacy/visa2014/id-maps/calik-energi/ApplicationProfileInstanceProgress.json (idempotent re-run).
 
   # --- attachments (last) ---
   # File blobs / scan links — often separate pipeline; discover after owning BOs.
@@ -373,11 +392,11 @@ importPhases:
   - id: person-domain
     description: Person and person-scoped children
   - id: application-domain
-    description: Application header and items
+    description: ApplicationProfileInstance header and items
   - id: permits-and-visas
     description: Invitation, WorkPermit, Visa, BorderZone, Rejection
   - id: progress-and-history
-    description: ApplicationProgress and legacy state history
+    description: ApplicationProfileInstanceProgress and legacy state history
   - id: attachments
     description: File blobs and scan links
 
@@ -403,19 +422,11 @@ postImportCorrections:
       cliFlag: --correct-person-address-of-residence
       dependsOn:
         - AddressOfResidence
-        - ApplicationItem
+        - ApplicationProfileInstancePerson
       notes: |
         Greenfield: PIA inference runs inside --import-visa2014 --entity AddressOfResidence (no extra step).
-        This correction backfills Person rows + ApplicationItem.CurrentAddressOfResidence on DBs imported earlier.
-    - id: application-item-person-current
-      cliFlag: --correct-application-item-person-current
-      dependsOn:
-        - Education
-        - EmployeeSalary
-        - ApplicationItem
-      notes: |
-        Greenfield: CurrentEducation/CurrentSalary resolve at ApplicationItem OData import when Show* gates pass.
-        This correction backfills null FKs on DBs imported before that wiring shipped.
+        This correction backfills Person rows on DBs imported earlier.
+        ApplicationItem.CurrentAddressOfResidence backfill is retired (Phase B); roster links use ResolvedLinks.
     - id: visa-type
       cliFlag: --correct-visa-type
       dependsOn:
@@ -424,22 +435,15 @@ postImportCorrections:
       notes: |
         Rematches Visa.VisaType from transform: family-member persons → FM; else TypeOfVisaL:mgCode.
         Also repairs older imports that collapsed to default WP (LocalizationKey missing on DTOs).
-    - id: visa-issuing-application-item
-      cliFlag: --correct-visa2014-issuing-application-item
-      dependsOn:
-        - Visa
-        - ApplicationItem
-      notes: |
-        Greenfield: Visa import leaves IssuingApplicationItem null (wave before ApplicationItem).
-        Prefer Visa.ProcessNumber → PersonInApplication; else next passport sibling after previous visa
-        linked on an extension PIA (subtype 7). Runs after ApplicationItem id-map exists.
     - id: visa-invitation-item
       cliFlag: --correct-visa2014-invitation-item
       dependsOn:
         - Visa
-        - ApplicationItem
+        - ApplicationProfileInstance
         - InvitationItem
       notes: |
-        Path B hybrid: after IssuingApplicationItem is set, closest-match InvitationItem under that
+        Path B hybrid: after IssuingApplicationProfileInstance is set, closest-match InvitationItem under that
         application (same person, unused/not cancelled, IssuedDate before Visa.IssueDate).
         Sets InvitationItem.IsUsed. Skips when issuing type lacks CanIssueInvitation. Leave null on no match.
+        --correct-application-item-person-current and --correct-visa2014-issuing-application-item are retired
+        (Phase B ApplicationItem hard-remove).

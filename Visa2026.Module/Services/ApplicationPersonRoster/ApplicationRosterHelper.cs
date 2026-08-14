@@ -7,12 +7,11 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Module.Services.ApplicationPersonRoster;
 
 /// <summary>
-/// Application roster reads: prefer <see cref="ApplicationPerson"/> M2M; fall back to legacy
-/// <see cref="ApplicationItem"/> rows until import cutover and phase B schema removal.
+/// ApplicationProfileInstance roster reads via skip-navigation <see cref="ApplicationProfileInstance.People"/>.
 /// </summary>
 public static class ApplicationRosterHelper
 {
-    public static bool IsPersonOnApplication(Application? application, Person? person)
+    public static bool IsPersonOnApplication(ApplicationProfileInstance? application, Person? person)
     {
         if (application == null || person == null)
             return false;
@@ -21,42 +20,26 @@ public static class ApplicationRosterHelper
         if (personId == Guid.Empty)
             return false;
 
-        if (application.People?.Any(ap => ap?.Person?.ID == personId) == true)
-            return true;
-
-        return application.ApplicationItems?.Any(ai => ai?.Person?.ID == personId) == true;
+        return application.People?.Any(p => p != null && p.ID == personId) == true;
     }
 
-    public static IList<Person> GetRosterPeople(Application? application)
+    public static IList<Person> GetRosterPeople(ApplicationProfileInstance? application)
     {
         if (application == null)
             return Array.Empty<Person>();
 
-        var fromM2m = application.People?
-            .Select(ap => ap.Person)
-            .Where(p => p != null)
-            .Cast<Person>()
-            .ToList();
-        if (fromM2m is { Count: > 0 })
-            return fromM2m;
-
-        return application.ApplicationItems?
-            .Select(ai => ai.Person)
+        return application.People?
             .Where(p => p != null)
             .Cast<Person>()
             .ToList() ?? [];
     }
 
-    public static int GetRosterPersonCountInMemory(Application? application)
+    public static int GetRosterPersonCountInMemory(ApplicationProfileInstance? application)
     {
         if (application == null)
             return 0;
 
-        var m2mCount = application.People?.Count(ap => ap?.Person != null) ?? 0;
-        if (m2mCount > 0)
-            return m2mCount;
-
-        return application.ApplicationItems?.Count ?? 0;
+        return application.People?.Count(p => p != null) ?? 0;
     }
 
     public static int GetRosterPersonCount(IObjectSpace objectSpace, Guid applicationId)
@@ -64,20 +47,16 @@ public static class ApplicationRosterHelper
         if (objectSpace == null || applicationId == Guid.Empty)
             return 0;
 
-        var m2mCount = objectSpace.GetObjectsQuery<ApplicationPerson>()
-            .Count(ap => ap.ApplicationId == applicationId);
-        if (m2mCount > 0)
-            return m2mCount;
-
-        return objectSpace.GetObjectsQuery<ApplicationItem>()
-            .Count(i => i.Application != null && i.Application.ID == applicationId);
+        return objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
+            .Where(a => a.ID == applicationId)
+            .Select(a => a.People.Count)
+            .FirstOrDefault();
     }
 
     /// <summary>
-    /// Merge/PDF/report line shape: hydrated projections from M2M when present; otherwise legacy DB rows.
-    /// Projections are not persisted.
+    /// Merge/PDF/report line shape: hydrated non-persistent projections from skip-navigation People.
     /// </summary>
-    public static IList<ApplicationItem> GetMergeLineItems(IObjectSpace objectSpace, Application application)
+    public static IList<ApplicationRosterMergeLine> GetMergeLineItems(IObjectSpace objectSpace, ApplicationProfileInstance application)
     {
         ArgumentNullException.ThrowIfNull(objectSpace);
         if (application == null)
@@ -87,26 +66,19 @@ public static class ApplicationRosterHelper
         if (applicationId == Guid.Empty)
             return [];
 
-        var rosterRows = objectSpace.GetObjectsQuery<ApplicationPerson>()
-            .Where(ap => ap.ApplicationId == applicationId)
-            .OrderBy(ap => ap.Person!.LastName)
-            .ThenBy(ap => ap.Person!.FirstName)
-            .ToList();
+        var tracked = objectSpace.GetObject(application) ?? application;
+        var people = tracked.People?
+            .Where(p => p != null)
+            .OrderBy(p => p!.LastName)
+            .ThenBy(p => p!.FirstName)
+            .ToList() ?? [];
 
-        if (rosterRows.Count > 0)
-        {
-            return rosterRows
-                .Select(ap => ApplicationPersonPdfPackageLineHydrator.Hydrate(objectSpace, ap))
-                .ToList();
-        }
-
-        return objectSpace.GetObjectsQuery<ApplicationItem>()
-            .Where(i => i.Application != null && i.Application.ID == applicationId)
-            .OrderBy(i => i.ApplicationItemName)
+        return people
+            .Select(person => ApplicationProfileInstancePersonPdfPackageLineHydrator.Hydrate(objectSpace, tracked, person!))
             .ToList();
     }
 
-    public static IList<ApplicationItem> GetMergeLineItems(Application application)
+    public static IList<ApplicationRosterMergeLine> GetMergeLineItems(ApplicationProfileInstance application)
     {
         if (application == null)
             return [];
@@ -118,13 +90,79 @@ public static class ApplicationRosterHelper
         if (application.People is { Count: > 0 } people && objectSpace != null)
         {
             return people
-                .Where(ap => ap != null)
-                .Select(ap => ApplicationPersonPdfPackageLineHydrator.Hydrate(objectSpace, ap))
+                .Where(p => p != null)
+                .Select(p => ApplicationProfileInstancePersonPdfPackageLineHydrator.Hydrate(objectSpace, application, p!))
                 .ToList();
         }
 
-        return (application.ApplicationItems ?? Enumerable.Empty<ApplicationItem>())
-            .Where(i => i != null)
-            .ToList();
+        return [];
+    }
+
+    public static (ApplicationProfileInstance? Application, IList<Person> People) LoadApplicationPeople(
+        IObjectSpace objectSpace,
+        Guid applicationId,
+        IReadOnlyList<Guid>? personIds = null)
+    {
+        if (objectSpace == null || applicationId == Guid.Empty)
+            return (null, Array.Empty<Person>());
+
+        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
+        if (application == null)
+            return (null, Array.Empty<Person>());
+
+        var people = GetRosterPeople(application);
+        if (personIds is { Count: > 0 })
+        {
+            var set = personIds.Where(id => id != Guid.Empty).ToHashSet();
+            people = people.Where(p => set.Contains(p.ID)).ToList();
+        }
+
+        return (application, people);
+    }
+
+    public static bool TryLoadSharedApplicationPeople(
+        IObjectSpace objectSpace,
+        IReadOnlyList<Guid> personIds,
+        Guid applicationId,
+        out ApplicationProfileInstance? application,
+        out IList<Person> people)
+    {
+        application = null;
+        people = Array.Empty<Person>();
+        if (objectSpace == null || personIds == null || personIds.Count == 0)
+            return false;
+
+        var ids = personIds.Where(id => id != Guid.Empty).Distinct().ToList();
+        if (ids.Count == 0)
+            return false;
+
+        if (applicationId != Guid.Empty)
+        {
+            (application, people) = LoadApplicationPeople(objectSpace, applicationId, ids);
+            return application != null && people.Count == ids.Count;
+        }
+
+        HashSet<Guid>? intersection = null;
+        var loaded = new List<Person>();
+        foreach (var id in ids)
+        {
+            var person = objectSpace.GetObjectByKey<Person>(id);
+            if (person == null)
+                return false;
+
+            loaded.Add(person);
+            var appIds = person.ApplicationProfileInstances?
+                .Select(a => a.ID)
+                .Where(appId => appId != Guid.Empty)
+                .ToHashSet() ?? [];
+            intersection = intersection == null ? appIds : intersection.Intersect(appIds).ToHashSet();
+        }
+
+        if (intersection == null || intersection.Count != 1)
+            return false;
+
+        application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(intersection.First());
+        people = loaded;
+        return application != null;
     }
 }

@@ -215,7 +215,7 @@ public class PersonStateSnapshot : BaseObject
 ```
 
 - Added to `Visa2026EFCoreDbContext` as `DbSet<PersonStateSnapshot>`
-- EF Core migration generated; or added to `SqlViewsUpdater` as raw DDL
+- EF Core migration generated; or added to `ReportDashboardPostgresViewsUpdater` as raw PostgreSQL DDL
 - Not exposed in XAF navigation (internal system table)
 
 ---

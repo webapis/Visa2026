@@ -135,7 +135,7 @@ Status view: View_[ProcessName]Status
 ## SCENARIO 1 — Section Status BO already exists (most common, no new files)
 
 ### 1. Add CASE branch to the SQL view
-File: Docs/SqlViews/View_[ProcessName]Status.sql  +  apply via SQL migration
+File: Visa2026.Module/SqlViews/View_[ProcessName]Status.postgres.sql  +  create in ReportDashboardPostgresViewsUpdater and heal in ReportDashboardPostgresViewsHealSql
 - Add one `CASE WHEN [criteria] THEN [ApplicationState ID for CODE]` branch
 - Criteria must match STATE_SPECIFICATIONS.md exactly
 - Insert at the correct priority position within the CASE expression
@@ -154,8 +154,8 @@ File: Docs/STATE_SPECIFICATIONS.md
 ## SCENARIO 2 — First-time section setup (create components once, then follow Scenario 1)
 
 ### A. SQL view scripts
-Files: Docs/SqlViews/View_[ProcessName]Status.sql
-       Docs/SqlViews/View_[ProcessName]Tracking.sql
+Files: Visa2026.Module/SqlViews/View_[ProcessName]Status.postgres.sql
+       Visa2026.Module/SqlViews/View_[ProcessName]Tracking.postgres.sql
 - Status view: one row per person/application; `CurrentStateID` set by CASE expression
   Required columns: ID (Guid PK), PersonID, [document FK], CurrentStateID (FK → ApplicationState),
   ApplicationNumber, ApplicationDate, StatusDate, StatusDescription, DaysRemaining
@@ -331,7 +331,7 @@ File: Visa2026.Blazor.Server/Components/StateDashboardComponent.razor
 - Remove the `StateDef` row for `[CODE]` from `SectionDefs`
 
 ### If Source = SQL:
-File: Docs/SqlViews/View_[ProcessName]Status.sql  +  apply via SQL migration
+File: Visa2026.Module/SqlViews/View_[ProcessName]Status.postgres.sql  +  create in ReportDashboardPostgresViewsUpdater and heal in ReportDashboardPostgresViewsHealSql
 - Remove the `CASE WHEN ... THEN [ApplicationState ID for CODE]` branch
 - Verify remaining CASE branches and their priority are still correct
 

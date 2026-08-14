@@ -6,7 +6,7 @@ using Visa2026.Module.Services;
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// When a new <see cref="Visa"/> is created from an <see cref="ApplicationItem"/> DetailView lookup,
+/// When a new <see cref="Visa"/> is created from an <see cref="ApplicationRosterMergeLine"/> DetailView lookup,
 /// auto-link it to the item's current passport (or the person's current passport) to satisfy required FKs.
 /// </summary>
 public sealed class VisaDefaultsController : ObjectViewController<DetailView, Visa>
@@ -49,17 +49,7 @@ public sealed class VisaDefaultsController : ObjectViewController<DetailView, Vi
 
     private void ApplyDefaults(Visa visa, IObjectSpace objectSpace)
     {
-        if (ApplicationItemCreationContext.TryGetApplicationItem(Frame, objectSpace, out var appItem)
-            && appItem != null)
-        {
-            ApplicationItemVisaDefaults.TryApply(visa, appItem, objectSpace, Application);
-
-            if (visa.Passport != null)
-                ApplicationItemVisaDefaults.LockPassportEditor(View);
-        }
-
-        // Nested Passport → Visas create often links Passport after OnCreated (and may bypass the
-        // Passport setter via EF fixup). Re-run Path A once the DetailView has the linked Passport.
+        _ = objectSpace;
         VisaIssuingLinkPathAMatcher.TryApplyOnce(visa);
     }
 }

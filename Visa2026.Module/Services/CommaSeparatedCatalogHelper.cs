@@ -261,28 +261,16 @@ public static class CommaSeparatedCatalogHelper
 
     private static int CountBorderZoneUsage(IObjectSpace objectSpace, string label, CatalogUsageContext? usageContext) =>
         CountApplicationBorderZoneUsage(objectSpace, label, usageContext)
-        + CountApplicationItemBorderZoneUsage(objectSpace, label, usageContext)
         + CountVisaBorderZoneUsage(objectSpace, label, usageContext);
 
     private static int CountApplicationBorderZoneUsage(
         IObjectSpace objectSpace,
         string label,
         CatalogUsageContext? usageContext) =>
-        objectSpace.GetObjectsQuery<Application>()
+        objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
             .AsEnumerable()
             .Count(app => CommaSeparatedSelectionHelper.ContainsLabel(
                 GetApplicationBorderZoneStored(app, usageContext),
-                label,
-                CommaSeparatedSelectionHelper.NoneValue));
-
-    private static int CountApplicationItemBorderZoneUsage(
-        IObjectSpace objectSpace,
-        string label,
-        CatalogUsageContext? usageContext) =>
-        objectSpace.GetObjectsQuery<ApplicationItem>()
-            .AsEnumerable()
-            .Count(ai => CommaSeparatedSelectionHelper.ContainsLabel(
-                GetApplicationItemBorderZoneStored(ai, usageContext),
                 label,
                 CommaSeparatedSelectionHelper.NoneValue));
 
@@ -301,26 +289,14 @@ public static class CommaSeparatedCatalogHelper
         IObjectSpace objectSpace,
         string label,
         CatalogUsageContext? usageContext) =>
-        CountApplicationItemWorkPermittedLocationUsage(objectSpace, label, usageContext)
-        + objectSpace.GetObjectsQuery<WorkPermitItem>()
+        objectSpace.GetObjectsQuery<WorkPermitItem>()
             .AsEnumerable()
             .Count(wpi => CommaSeparatedSelectionHelper.ContainsLabel(
                 GetWorkPermitItemWorkPermittedLocationsStored(wpi, usageContext),
                 label,
                 string.Empty));
 
-    private static int CountApplicationItemWorkPermittedLocationUsage(
-        IObjectSpace objectSpace,
-        string label,
-        CatalogUsageContext? usageContext) =>
-        objectSpace.GetObjectsQuery<ApplicationItem>()
-            .AsEnumerable()
-            .Count(ai => CommaSeparatedSelectionHelper.ContainsLabel(
-                GetApplicationItemWorkPermittedLocationsStored(ai, usageContext),
-                label,
-                string.Empty));
-
-    private static string? GetApplicationBorderZoneStored(Application application, CatalogUsageContext? usageContext)
+    private static string? GetApplicationBorderZoneStored(ApplicationProfileInstance application, CatalogUsageContext? usageContext)
     {
         if (usageContext?.EditingObjectId != null
             && application.ID == usageContext.EditingObjectId
@@ -330,18 +306,6 @@ public static class CommaSeparatedCatalogHelper
         }
 
         return application.BorderZoneLocation;
-    }
-
-    private static string? GetApplicationItemBorderZoneStored(ApplicationItem item, CatalogUsageContext? usageContext)
-    {
-        if (usageContext?.EditingObjectId != null
-            && item.ID == usageContext.EditingObjectId
-            && usageContext.EditingEffectiveStored != null)
-        {
-            return usageContext.EditingEffectiveStored;
-        }
-
-        return item.BorderZoneLocation;
     }
 
     private static string? GetVisaBorderZoneStored(Visa visa, CatalogUsageContext? usageContext)
@@ -354,20 +318,6 @@ public static class CommaSeparatedCatalogHelper
         }
 
         return visa.BorderZoneLocation;
-    }
-
-    private static string? GetApplicationItemWorkPermittedLocationsStored(
-        ApplicationItem item,
-        CatalogUsageContext? usageContext)
-    {
-        if (usageContext?.EditingObjectId != null
-            && item.ID == usageContext.EditingObjectId
-            && usageContext.EditingEffectiveStored != null)
-        {
-            return usageContext.EditingEffectiveStored;
-        }
-
-        return item.WorkPermittedLocations;
     }
 
     private static string? GetWorkPermitItemWorkPermittedLocationsStored(
@@ -389,7 +339,7 @@ public static class CommaSeparatedCatalogHelper
         string label,
         CatalogUsageContext? usageContext)
     {
-        foreach (var application in objectSpace.GetObjectsQuery<Application>().ToList())
+        foreach (var application in objectSpace.GetObjectsQuery<ApplicationProfileInstance>().ToList())
         {
             var stored = GetApplicationBorderZoneStored(application, usageContext);
             if (!CommaSeparatedSelectionHelper.ContainsLabel(
@@ -405,26 +355,6 @@ public static class CommaSeparatedCatalogHelper
                     CommaSeparatedSelectionHelper.NoneValue)
                 .Where(z => !string.Equals(z, label, StringComparison.OrdinalIgnoreCase));
             application.BorderZoneLocation = CommaSeparatedSelectionHelper.FormatSelected(
-                parsed,
-                CommaSeparatedSelectionHelper.NoneValue);
-        }
-
-        foreach (var item in objectSpace.GetObjectsQuery<ApplicationItem>().ToList())
-        {
-            var stored = GetApplicationItemBorderZoneStored(item, usageContext);
-            if (!CommaSeparatedSelectionHelper.ContainsLabel(
-                    stored,
-                    label,
-                    CommaSeparatedSelectionHelper.NoneValue))
-            {
-                continue;
-            }
-
-            var parsed = CommaSeparatedSelectionHelper.ParseSelected(
-                    stored,
-                    CommaSeparatedSelectionHelper.NoneValue)
-                .Where(z => !string.Equals(z, label, StringComparison.OrdinalIgnoreCase));
-            item.BorderZoneLocation = CommaSeparatedSelectionHelper.FormatSelected(
                 parsed,
                 CommaSeparatedSelectionHelper.NoneValue);
         }
@@ -448,19 +378,6 @@ public static class CommaSeparatedCatalogHelper
         string label,
         CatalogUsageContext? usageContext)
     {
-        foreach (var item in objectSpace.GetObjectsQuery<ApplicationItem>().ToList())
-        {
-            var stored = GetApplicationItemWorkPermittedLocationsStored(item, usageContext);
-            if (!CommaSeparatedSelectionHelper.ContainsLabel(stored, label, string.Empty))
-            {
-                continue;
-            }
-
-            var parsed = CommaSeparatedSelectionHelper.ParseSelected(stored, string.Empty)
-                .Where(z => !string.Equals(z, label, StringComparison.OrdinalIgnoreCase));
-            item.WorkPermittedLocations = CommaSeparatedSelectionHelper.FormatSelected(parsed, string.Empty);
-        }
-
         foreach (var item in objectSpace.GetObjectsQuery<WorkPermitItem>().ToList())
         {
             var stored = GetWorkPermitItemWorkPermittedLocationsStored(item, usageContext);
@@ -477,7 +394,7 @@ public static class CommaSeparatedCatalogHelper
 
     private static void RenameBorderZoneOnAllItems(IObjectSpace objectSpace, string oldLabel, string newLabel)
     {
-        var applications = objectSpace.GetObjectsQuery<Application>()
+        var applications = objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
             .Where(app => app.BorderZoneLocation != null && app.BorderZoneLocation.Contains(oldLabel))
             .ToList();
 
@@ -493,27 +410,6 @@ public static class CommaSeparatedCatalogHelper
 
             application.BorderZoneLocation = CommaSeparatedSelectionHelper.ReplaceLabel(
                 application.BorderZoneLocation,
-                oldLabel,
-                newLabel,
-                CommaSeparatedSelectionHelper.NoneValue);
-        }
-
-        var applicationItems = objectSpace.GetObjectsQuery<ApplicationItem>()
-            .Where(ai => ai.BorderZoneLocation != null && ai.BorderZoneLocation.Contains(oldLabel))
-            .ToList();
-
-        foreach (var item in applicationItems)
-        {
-            if (!CommaSeparatedSelectionHelper.ContainsLabel(
-                    item.BorderZoneLocation,
-                    oldLabel,
-                    CommaSeparatedSelectionHelper.NoneValue))
-            {
-                continue;
-            }
-
-            item.BorderZoneLocation = CommaSeparatedSelectionHelper.ReplaceLabel(
-                item.BorderZoneLocation,
                 oldLabel,
                 newLabel,
                 CommaSeparatedSelectionHelper.NoneValue);
@@ -540,24 +436,6 @@ public static class CommaSeparatedCatalogHelper
 
     private static void RenameWorkPermittedLocationOnAllItems(IObjectSpace objectSpace, string oldLabel, string newLabel)
     {
-        var applicationItems = objectSpace.GetObjectsQuery<ApplicationItem>()
-            .Where(ai => ai.WorkPermittedLocations != null && ai.WorkPermittedLocations.Contains(oldLabel))
-            .ToList();
-
-        foreach (var item in applicationItems)
-        {
-            if (!CommaSeparatedSelectionHelper.ContainsLabel(item.WorkPermittedLocations, oldLabel, string.Empty))
-            {
-                continue;
-            }
-
-            item.WorkPermittedLocations = CommaSeparatedSelectionHelper.ReplaceLabel(
-                item.WorkPermittedLocations,
-                oldLabel,
-                newLabel,
-                string.Empty);
-        }
-
         var workPermitItems = objectSpace.GetObjectsQuery<WorkPermitItem>()
             .Where(wpi => wpi.WorkPermittedLocations != null && wpi.WorkPermittedLocations.Contains(oldLabel))
             .ToList();

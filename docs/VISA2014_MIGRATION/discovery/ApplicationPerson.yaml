@@ -1,0 +1,48 @@
+# Discovery dossier — ApplicationPerson (Wave 2b roster M2M)
+# dependsOn: Person, Application — both id-maps required; person scalars recommended for ResolvedLinks.
+
+targetODataEntity: ApplicationPerson
+discoveryStatus: complete
+
+importConfirmation:
+  importConfirmed: true
+  importConfirmedAt: 2026-08-12
+  importConfirmedBy: developer
+  reviewNotes: |
+    Wave 2b locked: PersonInApplication → ApplicationPerson (not ApplicationItem).
+    Immediate ResolvedLinks via ApplicationPersonService.LinkPerson + RequirePerson* gates.
+    Id-map key = PersonInApplication.Oid (same legacy keys as historic ApplicationItem map).
+
+legacy:
+  boClass: IPersonInApplication
+  tables:
+    - dbo.PersonInApplication
+  rowCount: 21794
+  primaryKey: Oid
+  softDeleteColumn: GCRecord
+
+visa2026:
+  boPath: Visa2026.Module/BusinessObjects/ApplicationPerson.cs
+  odataExposed: false
+  notes: Headless in-process only (--inprocess).
+
+mapping:
+  fieldMapFile: Visa2026.DataImporter/legacy/visa2014/field-maps/ApplicationPerson.yaml
+  tableMappingId: application-person-main
+  cardinality: one_legacy_row_per_application_person_after_dedupe
+  upsertKeys:
+    - Oid
+  notes: |
+    Person: ForEmployee → Employee; ForFamilyMember → FamilyMember.
+    Dedupe: Application+Person, canonical lowest PersonInApplication.Oid.
+    Skip parent ApplicationType E:44/E:55 (same as ApplicationItem).
+    Auto-link Passport/Visa/Education/… into ApplicationPersonResolvedLink on create.
+
+checklist:
+  target_bo_reviewed: true
+  legacy_bo_located: true
+  field_map_registered: true
+  inventary_updated: false
+  learnings_appended: true
+
+completedAt: 2026-08-12

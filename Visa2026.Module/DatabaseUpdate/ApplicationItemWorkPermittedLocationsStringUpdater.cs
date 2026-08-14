@@ -4,7 +4,7 @@ using DevExpress.ExpressApp.Updating;
 namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
-/// Ensures <see cref="BusinessObjects.ApplicationItem.WorkPermittedLocations"/> nvarchar column exists.
+/// Ensures <see cref="BusinessObjects.ApplicationRosterMergeLine.WorkPermittedLocations"/> nvarchar column exists.
 /// </summary>
 public sealed class ApplicationItemWorkPermittedLocationsStringUpdater : ModuleUpdater
 {

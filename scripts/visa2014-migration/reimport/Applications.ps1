@@ -22,7 +22,7 @@ $repoRoot = Get-Visa2026RepoRoot
 Set-Location $repoRoot
 
 $dataImporterRoot = Join-Path $repoRoot "Visa2026.DataImporter"
-$mapPath = Join-Path $dataImporterRoot "legacy/visa2014/id-maps/$LegacySource/Application.json"
+$mapPath = Join-Path $dataImporterRoot "legacy/visa2014/id-maps/$LegacySource/ApplicationProfileInstance.json"
 $logDir = Join-Path $dataImporterRoot "legacy/visa2014/import-logs"
 $sqlScript = Join-Path $PSScriptRoot "..\cleanup\ImportedApplications.sql"
 
@@ -61,7 +61,7 @@ $logFile = Join-Path $logDir "reimport-Application-$stamp.log"
 
 $importArgs = @(
     "run", "--project", "Visa2026.DataImporter", "-c", $Configuration, "--no-build", "--",
-    "--import-visa2014", "--inprocess", "--entity", "Application",
+    "--import-visa2014", "--inprocess", "--entity", "ApplicationProfileInstance",
     "--legacy-source", $LegacySource,
     "--id-map-output", $mapPath,
     "--target-connection", $TargetConnection,

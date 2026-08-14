@@ -17,7 +17,7 @@
 @using Visa2026.Module.Services.RuntimeLogging
 
 <div class="app-report-package app-item-doc-copies @(UseInlinePreview ? "app-report-package--inline-slot" : string.Empty)">
-    @if (ApplicationId != Guid.Empty && CatalogEntries.Count > 0)
+    @if (ApplicationProfileInstanceId != Guid.Empty && CatalogEntries.Count > 0)
     {
         <div class="app-item-doc-copies__top-actions app-report-package__top-selection">
             <DxButton Text="@Msg("ApplicationReportPackage.SelectAll")"
@@ -38,7 +38,7 @@
         </div>
     }
     <div class="app-item-doc-copies__body">
-        @if (ApplicationId == Guid.Empty || CatalogEntries.Count == 0)
+        @if (ApplicationProfileInstanceId == Guid.Empty || CatalogEntries.Count == 0)
         {
             <div class="app-item-doc-copies__empty" role="status">
                 <p>@Msg("ApplicationReportPackage.Empty")</p>
@@ -148,7 +148,7 @@
         }
     </div>
 
-    @if (ApplicationId != Guid.Empty && CatalogEntries.Count > 0)
+    @if (ApplicationProfileInstanceId != Guid.Empty && CatalogEntries.Count > 0)
     {
         <footer class="app-item-doc-copies__footer">
             <div class="app-item-doc-copies__package-bar">
@@ -228,8 +228,8 @@
 }
 
 @code {
-    [Parameter] public Guid ApplicationId { get; set; }
-    [Parameter] public WordReportPackageScope PackageScope { get; set; } = WordReportPackageScope.Application;
+    [Parameter] public Guid ApplicationProfileInstanceId { get; set; }
+    [Parameter] public WordReportPackageScope PackageScope { get; set; } = WordReportPackageScope.ApplicationProfileInstance;
     [Parameter] public IReadOnlyList<Guid> ApplicationItemIds { get; set; } = Array.Empty<Guid>();
     [Parameter] public string ApplicationNumber { get; set; } = string.Empty;
     [Parameter] public IReadOnlyList<ApplicationWordReportPackageCatalogEntry> CatalogEntries { get; set; } =
@@ -468,9 +468,9 @@
 
     private async Task OpenPlaceholderManualAsync()
     {
-        var rootBoType = PackageScope == WordReportPackageScope.ApplicationItem
+        var rootBoType = PackageScope == WordReportPackageScope.RosterPerson
             ? UserReportBoType.ApplicationItem
-            : UserReportBoType.Application;
+            : UserReportBoType.ApplicationProfileInstance;
 
         await PreviewSlotService.OpenPlaceholderManualAsync(
             new PlaceholderManualSlotRequest { FilterRootBoType = rootBoType });
@@ -715,7 +715,7 @@
 
     private async Task PreviewEntryAsync(ApplicationWordReportPackageCatalogEntry entry)
     {
-        if (ApplicationId == Guid.Empty || _previewBusy || _packageBusy)
+        if (ApplicationProfileInstanceId == Guid.Empty || _previewBusy || _packageBusy)
             return;
 
         if (!UseInlinePreview && _previewDialog == null)
@@ -733,7 +733,7 @@
             {
                 await OnInlinePreviewRequested.InvokeAsync(new ReportPackagePreviewRequest
                 {
-                    ApplicationId = ApplicationId,
+                    ApplicationProfileInstanceId = ApplicationProfileInstanceId,
                     EntryKey = entry.EntryKey,
                     DisplayName = entry.DisplayName,
                     ApplicationItemIds = ApplicationItemIds,
@@ -741,7 +741,7 @@
             }
             else if (_previewDialog != null)
             {
-                await _previewDialog.OpenAsync(ApplicationId, entry.EntryKey, entry.DisplayName, ApplicationItemIds);
+                await _previewDialog.OpenAsync(ApplicationProfileInstanceId, entry.EntryKey, entry.DisplayName, ApplicationItemIds);
             }
         }
         finally
@@ -754,7 +754,7 @@
 
     private async Task EnqueuePackageAsync()
     {
-        if (_packageBusy || ApplicationId == Guid.Empty || SelectedCount == 0)
+        if (_packageBusy || ApplicationProfileInstanceId == Guid.Empty || SelectedCount == 0)
             return;
 
         _packageBusy = true;
@@ -763,7 +763,7 @@
         try
         {
             var outcome = await PackageEnqueueService.EnqueuePackageAsync(
-                ApplicationId,
+                ApplicationProfileInstanceId,
                 _selectedKeys.ToList(),
                 ApplicationItemIds);
 

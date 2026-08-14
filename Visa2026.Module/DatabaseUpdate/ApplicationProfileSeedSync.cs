@@ -30,8 +30,15 @@ public static class ApplicationProfileSeedSync
             .OrderBy(t => t.Name)
             .ToList();
 
-        var profilesByCode = objectSpace.GetObjectsQuery<ApplicationProfile>()
-            .ToDictionary(p => p.Code, StringComparer.OrdinalIgnoreCase);
+        var allProfiles = objectSpace.GetObjectsQuery<ApplicationProfile>().ToList();
+        var profilesByCode = allProfiles
+            .GroupBy(p => p.Code, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(
+                g => g.Key,
+                g => g.FirstOrDefault(p => p.DefaultProjectContractId == null && !ApplicationProfileCatalogGroupKey.NameLooksLikeContractVariant(p.Name))
+                     ?? g.FirstOrDefault(p => p.DefaultProjectContractId == null)
+                     ?? g.First(),
+                StringComparer.OrdinalIgnoreCase);
 
         int created = 0, updated = 0;
         var typeToProfile = new Dictionary<ApplicationType, ApplicationProfile>(ReferenceEqualityComparer.Instance);
@@ -56,7 +63,7 @@ public static class ApplicationProfileSeedSync
         }
 
         int backfilled = 0;
-        foreach (var application in objectSpace.GetObjectsQuery<Application>()
+        foreach (var application in objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
                      .Where(a => a.ApplicationType != null))
         {
             if (!typeToProfile.TryGetValue(application.ApplicationType, out var profile))

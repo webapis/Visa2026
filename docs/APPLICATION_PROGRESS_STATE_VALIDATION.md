@@ -281,7 +281,7 @@ Officers never pick arbitrary state codes without validation — dropdown filter
 | Transition graph validation | **Not implemented** |
 | SLA / `MaxDaysInStep` config | **Not implemented** |
 | Follow-up notifications | **Planned** (`FollowUpState`) |
-| SQL views joining progress | **Partial** (`SqlViewsUpdater`, extension tracking views) |
+| SQL views joining progress | **Partial** (`ReportDashboardPostgresViewsUpdater`; extension tracking views have no PostgreSQL body — see [`DEPRECATED.md`](DEPRECATED.md)) |
 
 ---
 

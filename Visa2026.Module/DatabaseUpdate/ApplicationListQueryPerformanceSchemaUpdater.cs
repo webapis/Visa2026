@@ -5,7 +5,7 @@ using DevExpress.ExpressApp.Updating;
 namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
-/// ListView query indexes on Applications, ApplicationProgresses, and approval-leg snapshots.
+/// ListView query indexes on Applications, ApplicationProfileInstanceProgresses, and approval-leg snapshots.
 /// </summary>
 public sealed class ApplicationListQueryPerformanceSchemaUpdater : ModuleUpdater
 {

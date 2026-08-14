@@ -1,0 +1,36 @@
+# ApplicationProfileInstancePerson — Wave 2b thin roster from PersonInApplication
+targetODataEntity: ApplicationProfileInstancePerson
+legacyTable: dbo.PersonInApplication
+
+fields:
+  - source: PersonInApplication.Oid
+    target: _legacyRowId
+    notes: Id-map key (same as historic ApplicationItem map).
+
+  - source: PersonInApplication.Application
+    target: ApplicationProfileInstance
+    required: true
+    resolve: ApplicationProfileInstance id-map
+
+  - source: PersonInApplication.Employee / FamilyMember
+    target: Person
+    required: true
+    notes: |
+      ForEmployee → Employee; ForFamilyMember → FamilyMember.
+      Same derivation as ApplicationItem.
+
+  - source: Application.ApplicationDate
+    target: LinkedAt
+    notes: Prefer application date; else LinkPerson default (DateTime.Now).
+
+  - source: (derived)
+    target: ResolvedLinks
+    notes: Immediate ApplicationProfileInstancePersonResolver.RefreshResolvedLinks gated by profile RequirePerson*.
+
+skip:
+  - parent ApplicationType composites E:44 / E:55 (skip_row)
+  - dedupe_duplicate (Application+Person, keep lowest Oid)
+
+outOfScope:
+  - CurrentPassport / CurrentVisa scalars (live on ResolvedLinks, not ApplicationProfileInstancePerson columns)
+  - ApplicationItem cancel/issue flags (legacy ApplicationItem wave only)

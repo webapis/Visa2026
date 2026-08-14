@@ -16,7 +16,7 @@
       }
     },
     "Application": {
-      "caption": { "en-US": "Applications", "tr-TR": "Başvurular", "tk-TM": "Ýüztutmalar", "ru-RU": "Заявки" },
+      "caption": { "en-US": "ApplicationProfileInstances", "tr-TR": "Başvurular", "tk-TM": "Ýüztutmalar", "ru-RU": "Заявки" },
       "children": {
         "Application_ViaMinistries": {
           "caption": {
@@ -27,7 +27,7 @@
           },
           "children": {
             "ApplicationItem_ViaMinistries": {
-              "en-US": "Application items (ministry)",
+              "en-US": "ApplicationProfileInstance items (ministry)",
               "tr-TR": "Başvuru kalemleri (bakanlık)",
               "tk-TM": "Ýüztutmadaky raýatlar",
               "ru-RU": "Позиции (через министерства)"
@@ -43,7 +43,7 @@
           },
           "children": {
             "ApplicationItem_DirectMigration": {
-              "en-US": "Application items (migration)",
+              "en-US": "ApplicationProfileInstance items (migration)",
               "tr-TR": "Başvuru kalemleri (migrasyon)",
               "tk-TM": "Ýüztutmadaky raýatlar",
               "ru-RU": "Позиции (напрямую в миграцию)"
@@ -127,13 +127,13 @@
       "caption": { "en-US": "Application", "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
       "members": {
         "IsManualEntry": { "en-US": "Manual entry", "tr-TR": "Manuel Giriş", "tk-TM": "El bilen giriş", "ru-RU": "Ручной ввод" },
-        "ApplicationNumber": { "en-US": "Application number", "tr-TR": "Başvuru Numarası", "tk-TM": "Arza belgisi", "ru-RU": "Номер заявки" },
+        "ApplicationNumber": { "en-US": "ApplicationProfileInstance number", "tr-TR": "Başvuru Numarası", "tk-TM": "Arza belgisi", "ru-RU": "Номер заявки" },
         "FullApplicationNumber": { "en-US": "Full application number", "tr-TR": "Tam Başvuru No", "tk-TM": "Doly arza belgisi", "ru-RU": "Полный номер" },
-        "ApplicationDate": { "en-US": "Application date", "tr-TR": "Başvuru Tarihi", "tk-TM": "Arza senesi", "ru-RU": "Дата заявки" },
+        "ApplicationDate": { "en-US": "ApplicationProfileInstance date", "tr-TR": "Başvuru Tarihi", "tk-TM": "Arza senesi", "ru-RU": "Дата заявки" },
         "Category": { "en-US": "Category", "tr-TR": "Kategori", "tk-TM": "Kategoriýa", "ru-RU": "Категория" },
-        "ApplicationTypeFilter": { "en-US": "Application type filter", "tr-TR": "Başvuru Türü Filtresi", "tk-TM": "Arza görnüşi süzgüçi", "ru-RU": "Фильтр типа" },
-        "ApplicationType": { "en-US": "Application type", "tr-TR": "Başvuru Türü", "tk-TM": "Arza görnüşi", "ru-RU": "Тип заявки" },
-        "ApplicationReason": { "en-US": "Application reason", "tr-TR": "Başvuru Nedeni", "tk-TM": "Arza sebäbi", "ru-RU": "Причина" },
+        "ApplicationTypeFilter": { "en-US": "ApplicationProfileInstance type filter", "tr-TR": "Başvuru Türü Filtresi", "tk-TM": "Arza görnüşi süzgüçi", "ru-RU": "Фильтр типа" },
+        "ApplicationType": { "en-US": "ApplicationProfileInstance type", "tr-TR": "Başvuru Türü", "tk-TM": "Arza görnüşi", "ru-RU": "Тип заявки" },
+        "ApplicationReason": { "en-US": "ApplicationProfileInstance reason", "tr-TR": "Başvuru Nedeni", "tk-TM": "Arza sebäbi", "ru-RU": "Причина" },
         "ProjectContract": { "en-US": "Project contract", "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama şertnamasy", "ru-RU": "Контракт проекта" },
         "ApprovalLegProfile": { "en-US": "Approval leg profile", "tr-TR": "Onay bakanlık profili", "tk-TM": "Ministrlik ylalaşyk ädimleri", "ru-RU": "Профиль этапов министерств" },
         "MigrationService": { "en-US": "Migration service", "tr-TR": "Göç Dairesi", "tk-TM": "Migrasiýa gullugy", "ru-RU": "Миграционная служба" },
@@ -197,7 +197,7 @@
           "tk-TM": "Adam sany",
           "ru-RU": "Количество лиц"
         },
-        "ApplicationItems": { "en-US": "Application items", "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции" },
+        "ApplicationItems": { "en-US": "ApplicationProfileInstance items", "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции" },
         "Invitations": { "en-US": "Invitations", "tr-TR": "Davetler", "tk-TM": "Çakylyklar", "ru-RU": "Приглашения" },
         "Rejections": { "en-US": "Rejections", "tr-TR": "Retler", "tk-TM": "Retler", "ru-RU": "Отказы" },
         "WorkPermits": { "en-US": "Work permits", "tr-TR": "Çalışma İzinleri", "tk-TM": "Iş rugsatnamalary", "ru-RU": "РНТ" },
@@ -208,7 +208,7 @@
       }
     },
     "Visa2026.Module.BusinessObjects.ApplicationItem": {
-      "caption": { "en-US": "Application item", "tr-TR": "Başvuru Kalemi", "tk-TM": "Arza elementi", "ru-RU": "Позиция заявки" },
+      "caption": { "en-US": "ApplicationProfileInstance item", "tr-TR": "Başvuru Kalemi", "tk-TM": "Arza elementi", "ru-RU": "Позиция заявки" },
       "members": {
         "Person": { "en-US": "Person", "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" },
         "Application": { "en-US": "Application", "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
@@ -328,9 +328,9 @@
   },
   "views": {
     "Application_ListView": {
-      "caption": { "en-US": "Applications", "tr-TR": "Başvurular", "tk-TM": "Arzalar", "ru-RU": "Заявки" },
+      "caption": { "en-US": "ApplicationProfileInstances", "tr-TR": "Başvurular", "tk-TM": "Arzalar", "ru-RU": "Заявки" },
       "columns": {
-        "FullApplicationNumber": { "en-US": "Application number", "tr-TR": "Başvuru No", "tk-TM": "Ýüztutmanyň belgisi", "ru-RU": "Номер" },
+        "FullApplicationNumber": { "en-US": "ApplicationProfileInstance number", "tr-TR": "Başvuru No", "tk-TM": "Ýüztutmanyň belgisi", "ru-RU": "Номер" },
         "Year": { "en-US": "Year", "tr-TR": "Yıl", "tk-TM": "Ýyl", "ru-RU": "Год" },
         "Month": { "en-US": "Month", "tr-TR": "Ay", "tk-TM": "Aý", "ru-RU": "Месяц" },
         "ApplicationDate": { "en-US": "Date", "tr-TR": "Tarih", "tk-TM": "Ýüztutmanyň senesi", "ru-RU": "Дата" },
@@ -400,7 +400,7 @@
         "ru-RU": "Заявки через министерства"
       },
       "columns": {
-        "FullApplicationNumber": { "en-US": "Application number", "tr-TR": "Başvuru No", "tk-TM": "Ýüztutmanyň belgisi", "ru-RU": "Номер" },
+        "FullApplicationNumber": { "en-US": "ApplicationProfileInstance number", "tr-TR": "Başvuru No", "tk-TM": "Ýüztutmanyň belgisi", "ru-RU": "Номер" },
         "Year": { "en-US": "Year", "tr-TR": "Yıl", "tk-TM": "Ýyl", "ru-RU": "Год" },
         "Month": { "en-US": "Month", "tr-TR": "Ay", "tk-TM": "Aý", "ru-RU": "Месяц" },
         "ApplicationDate": { "en-US": "Date", "tr-TR": "Tarih", "tk-TM": "Ýüztutmanyň senesi", "ru-RU": "Дата" },
@@ -457,7 +457,7 @@
         "ru-RU": "Заявки напрямую в миграцию"
       },
       "columns": {
-        "FullApplicationNumber": { "en-US": "Application number", "tr-TR": "Başvuru No", "tk-TM": "Ýüztutmanyň belgisi", "ru-RU": "Номер" },
+        "FullApplicationNumber": { "en-US": "ApplicationProfileInstance number", "tr-TR": "Başvuru No", "tk-TM": "Ýüztutmanyň belgisi", "ru-RU": "Номер" },
         "Year": { "en-US": "Year", "tr-TR": "Yıl", "tk-TM": "Ýyl", "ru-RU": "Год" },
         "Month": { "en-US": "Month", "tr-TR": "Ay", "tk-TM": "Aý", "ru-RU": "Месяц" },
         "ApplicationDate": { "en-US": "Date", "tr-TR": "Tarih", "tk-TM": "Ýüztutmanyň senesi", "ru-RU": "Дата" },
@@ -504,7 +504,7 @@
     },
     "ApplicationItem_ListView_ViaMinistries": {
       "caption": {
-        "en-US": "Application items (ministry)",
+        "en-US": "ApplicationProfileInstance items (ministry)",
         "tr-TR": "Başvuru kalemleri (bakanlık süreci)",
         "tk-TM": "Ýüztutmadaky raýatlar",
         "ru-RU": "Позиции заявки (через министерства)"
@@ -512,7 +512,7 @@
     },
     "ApplicationItem_ListView_DirectMigration": {
       "caption": {
-        "en-US": "Application items (direct migration)",
+        "en-US": "ApplicationProfileInstance items (direct migration)",
         "tr-TR": "Başvuru kalemleri (doğrudan migrasyon)",
         "tk-TM": "Ýüztutmadaky raýatlar",
         "ru-RU": "Позиции заявки (напрямую в миграцию)"
@@ -539,7 +539,7 @@
         {
           "path": ["Tabs"],
           "groups": {
-            "ApplicationItems": { "en-US": "Application items", "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции" },
+            "ApplicationItems": { "en-US": "ApplicationProfileInstance items", "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции" },
             "Invitations": { "en-US": "Invitations", "tr-TR": "Davetler", "tk-TM": "Çakylyklar", "ru-RU": "Приглашения" },
             "Rejections": { "en-US": "Rejections", "tr-TR": "Retler", "tk-TM": "Retler", "ru-RU": "Отказы" },
             "WorkPermits": { "en-US": "Work permits", "tr-TR": "Çalışma İzinleri", "tk-TM": "Iş rugsatnamalary", "ru-RU": "РНТ" }
@@ -548,7 +548,7 @@
       ]
     },
     "ApplicationItem_ListView": {
-      "caption": { "en-US": "Application items", "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции заявки" },
+      "caption": { "en-US": "ApplicationProfileInstance items", "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции заявки" },
       "columns": {
         "ApplicationItemName": { "en-US": "Name", "tr-TR": "Ad", "tk-TM": "Ady", "ru-RU": "Наименование" },
         "Person": { "en-US": "Person", "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" },
@@ -558,7 +558,7 @@
       }
     },
     "ApplicationItem_DetailView": {
-      "caption": { "en-US": "Application item", "tr-TR": "Başvuru Kalemi", "tk-TM": "Arza elementi", "ru-RU": "Позиция" }
+      "caption": { "en-US": "ApplicationProfileInstance item", "tr-TR": "Başvuru Kalemi", "tk-TM": "Arza elementi", "ru-RU": "Позиция" }
     },
     "Person_ListView": {
       "caption": { "tr-TR": "Kişiler", "tk-TM": "Adamlar", "ru-RU": "Лица" },
@@ -675,10 +675,10 @@
         "MinistryLetterFileName": { "en-US": "File name", "tr-TR": "Dosya adı", "tk-TM": "Faýl ady", "ru-RU": "Имя файла" }
       }
     },
-    "ApplicationProgress_DetailView": {
+    "ApplicationProfileInstanceProgress_DetailView": {
       "caption": { "tr-TR": "Başvuru İlerlemesi", "tk-TM": "Arza ösüşi", "ru-RU": "Прогресс заявки" }
     },
-    "ApplicationProgress_ListView": {
+    "ApplicationProfileInstanceProgress_ListView": {
       "caption": { "tr-TR": "Başvuru İlerlemeleri", "tk-TM": "Arza ösüşleri", "ru-RU": "Прогресс заявок" },
       "columns": {
         "StatusListLabel": { "en-US": "Status", "tr-TR": "Durum", "tk-TM": "Ýagdaý", "ru-RU": "Состояние" },

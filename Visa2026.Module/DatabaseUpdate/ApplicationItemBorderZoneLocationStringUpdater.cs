@@ -5,7 +5,7 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
-/// Migrates <see cref="ApplicationItem"/> border zone from FK (<c>BorderZoneLocationID</c>) to comma-separated
+/// Migrates <see cref="ApplicationRosterMergeLine"/> border zone from FK (<c>BorderZoneLocationID</c>) to comma-separated
 /// <c>BorderZoneLocation</c> nvarchar, and seeds <see cref="BorderZoneName"/> catalog entries.
 /// </summary>
 public sealed class ApplicationItemBorderZoneLocationStringUpdater : ModuleUpdater

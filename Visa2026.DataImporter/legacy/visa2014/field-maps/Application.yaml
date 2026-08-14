@@ -1,15 +1,15 @@
-# Application field map — layer 2
+# ApplicationProfileInstance field map — layer 2
 # Layer 1: table-mappings.yaml (id: application-main)
 # Layer 3: lookup-translations.yaml (+ calik-energi overlay for ProjectContract)
 
 tableMappingId: application-main
 
 source:
-  table: Application
+  table: ApplicationProfileInstance
   schema: dbo
 
 target:
-  odataEntity: Application
+  odataEntity: ApplicationProfileInstance
 
 deduplication:
   enabled: true
@@ -42,7 +42,7 @@ propertyGaps:
   legacyOnly:
     - column: ForEmployee
       disposition: derive
-      notes: Input to ApplicationType composite transform — not persisted on Visa2026 Application
+      notes: Input to ApplicationType composite transform — not persisted on Visa2026 ApplicationProfileInstance
     - column: ForFamilyMember
       disposition: derive
       notes: Input to ApplicationType composite transform
@@ -75,10 +75,10 @@ propertyGaps:
       notes: TitleOfDepartmentForRegistration → MigrationService NameTm (approved lookup-comparisons/MigrationService.md)
     - column: AppliedMinistery
       disposition: defer
-      notes: Ministry metadata on ProjectContract legs — not Application FK in Visa2026
+      notes: Ministry metadata on ProjectContract legs — not ApplicationProfileInstance FK in Visa2026
     - column: ProcessDate
       disposition: defer
-      notes: ApplicationProgress wave
+      notes: ApplicationProfileInstanceProgress wave
     - column: ProcessNumber
       disposition: defer
     - column: DateForwardedToMonistery
@@ -129,7 +129,7 @@ propertyGaps:
       notes: VisaPeriod FK on border-zone apps — Visa2026 uses header VisaPeriod when ShowVisaPeriod
     - column: Cancelled
       disposition: defer
-      notes: May map to ApplicationProgress terminal state
+      notes: May map to ApplicationProfileInstanceProgress terminal state
     - column: Rejected
       disposition: defer
     - column: VisaExtended
@@ -196,7 +196,7 @@ propertyGaps:
       disposition: child_bo
     - property: ProgressHistory
       disposition: defer
-      notes: ApplicationProgressInitializer seeds IS_BEING_PREPARED; legacy state history separate wave
+      notes: ApplicationProfileInstanceProgressInitializer seeds IS_BEING_PREPARED; legacy state history separate wave
     - property: ApprovalLegSnapshots
       disposition: defer
     - property: CurrentState
@@ -239,6 +239,9 @@ propertyGaps:
     - property: ApplicationType
       legacyColumn: ApplicationTypeForEmployee / ApplicationTypeForFamilyMember
       notes: Composite transform — see lookup-translations ApplicationType catalog
+    - property: ApplicationProfile
+      legacyColumn: ApplicationTypeForEmployee / ApplicationTypeForFamilyMember
+      notes: Wave 2 — resolved from translated ApplicationType via ApplicationProfile.Code (tenant catalog); dual-read with ApplicationType on import
 
 fields:
   - source: Oid
@@ -417,7 +420,7 @@ import:
   rowFilterNote: Active applications only; soft-deleted legacy headers skipped
 
 export:
-  sheetName: Application
+  sheetName: ApplicationProfileInstance
   includeAuditColumns: true
   auditColumns:
     - _legacyRowId
@@ -431,5 +434,5 @@ export:
 
 notes: |
   Header-only scope. PersonInApplication → ApplicationItem (next discovery).
-  Ministry/process scalars → ApplicationProgress deferred entity.
+  Ministry/process scalars → ApplicationProfileInstanceProgress deferred entity.
   VisaType header inferred from ApplicationType (Visa2014ApplicationVisaTypeInference); no legacy FK.

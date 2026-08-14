@@ -139,7 +139,7 @@ public class Visa2014VisaInvitationItemLinkMatcherTests
             InvitationItemId = itemId,
             InvitationId = invitationId,
             PersonId = personId,
-            ApplicationId = applicationId,
+            ApplicationProfileInstanceId = applicationId,
             IssuedDate = issuedDate,
             ApplicationDate = applicationDate,
             IsCancelled = isCancelled,

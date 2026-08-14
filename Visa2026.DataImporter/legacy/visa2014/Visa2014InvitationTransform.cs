@@ -5,7 +5,7 @@ internal sealed record Visa2014InvitationRawRow(
     string? InvitationNumber,
     DateTime? IssuedDate,
     DateTime? DateOfExpire,
-    Guid? LegacyApplicationOid);
+    Guid? LegacyApplicationProfileInstanceOid);
 
 internal static class Visa2014InvitationTransform
 {
@@ -15,7 +15,7 @@ internal static class Visa2014InvitationTransform
             ar.Number AS InvitationNumber,
             CONVERT(varchar(10), ar.IssuedDate, 23) AS IssuedDate,
             CONVERT(varchar(10), ar.DateOfExpire, 23) AS DateOfExpire,
-            CAST(ar.Application AS varchar(36)) AS ApplicationOid
+            CAST(ar.Application AS varchar(36)) AS ApplicationProfileInstanceOid
         FROM dbo.ApplicationResult ar
         WHERE ar.GCRecord IS NULL
           AND ar.Result = 0
@@ -30,7 +30,7 @@ internal static class Visa2014InvitationTransform
     [
         "_legacyRowId", "_legacyTable", "_dedupeGroupId", "_importAction",
         "InvitationNumber", "IssuedDate", "ExpirationDate", "VisaPeriodKey",
-        "Application", "_legacy_ApplicationOid",
+        "Application", "_legacy_ApplicationProfileInstanceOid",
     ];
 
     public static Visa2014PersonImportBatch PrepareImportBatch(
@@ -80,7 +80,7 @@ internal static class Visa2014InvitationTransform
             InvitationNumber: row.GetValueOrDefault("InvitationNumber"),
             IssuedDate: issuedDate,
             DateOfExpire: dateOfExpire,
-            LegacyApplicationOid: TryParseGuid(row.GetValueOrDefault("ApplicationOid")));
+            LegacyApplicationProfileInstanceOid: TryParseGuid(row.GetValueOrDefault("ApplicationProfileInstanceOid")));
         return true;
     }
 
@@ -173,7 +173,7 @@ internal static class Visa2014InvitationTransform
             ["_legacyTable"] = "ApplicationResult",
             ["_dedupeGroupId"] = working.DedupeGroupId ?? "",
             ["_importAction"] = "import",
-            ["_legacy_ApplicationOid"] = raw.LegacyApplicationOid?.ToString("D"),
+            ["_legacy_ApplicationProfileInstanceOid"] = raw.LegacyApplicationProfileInstanceOid?.ToString("D"),
         };
 
         if (string.IsNullOrWhiteSpace(raw.InvitationNumber))
@@ -213,7 +213,7 @@ internal static class Visa2014InvitationTransform
         row["ExpirationDate"] = raw.DateOfExpire.Value.ToString("yyyy-MM-dd");
         // Best-effort VisaPeriod from invitation letter span until legacy VisaPeriod column is mapped.
         row["VisaPeriodKey"] = Visa2014ValidityDurationHelper.LocalizationKeyForDaySpan(closestDays);
-        row["Application"] = raw.LegacyApplicationOid?.ToString("D");
+        row["Application"] = raw.LegacyApplicationProfileInstanceOid?.ToString("D");
         return row;
     }
 

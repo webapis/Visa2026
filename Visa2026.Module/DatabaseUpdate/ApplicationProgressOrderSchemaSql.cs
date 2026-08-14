@@ -3,28 +3,28 @@ using Microsoft.Data.SqlClient;
 namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
-/// Idempotent SQL for <see cref="BusinessObjects.ApplicationProgress.Order"/> (<c>ProgressOrder</c> column).
+/// Idempotent SQL for <see cref="BusinessObjects.ApplicationProfileInstanceProgress.Order"/> (<c>ProgressOrder</c> column).
 /// </summary>
-public static class ApplicationProgressOrderSchemaSql
+public static class ApplicationProfileInstanceProgressOrderSchemaSql
 {
     internal const string EnsureProgressOrderColumnSql = """
-        IF OBJECT_ID(N'dbo.ApplicationProgresses', N'U') IS NULL
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstanceProgresses', N'U') IS NULL
             RETURN;
-        IF COL_LENGTH(N'dbo.ApplicationProgresses', N'ProgressOrder') IS NOT NULL
+        IF COL_LENGTH(N'dbo.ApplicationProfileInstanceProgresses', N'ProgressOrder') IS NOT NULL
             RETURN;
-        ALTER TABLE dbo.ApplicationProgresses ADD ProgressOrder int NOT NULL CONSTRAINT DF_ApplicationProgresses_ProgressOrder DEFAULT 0;
+        ALTER TABLE dbo.ApplicationProfileInstanceProgresses ADD ProgressOrder int NOT NULL CONSTRAINT DF_ApplicationProfileInstanceProgresses_ProgressOrder DEFAULT 0;
         """;
 
     internal const string BackfillProgressOrderSql = """
-        IF OBJECT_ID(N'dbo.ApplicationProgresses', N'U') IS NULL
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstanceProgresses', N'U') IS NULL
             RETURN;
-        IF COL_LENGTH(N'dbo.ApplicationProgresses', N'ProgressOrder') IS NULL
+        IF COL_LENGTH(N'dbo.ApplicationProfileInstanceProgresses', N'ProgressOrder') IS NULL
             RETURN;
         ;WITH ordered AS (
             SELECT
                 ap.ID,
                 ROW_NUMBER() OVER (
-                    PARTITION BY ap.ApplicationID
+                    PARTITION BY ap.ApplicationProfileInstanceID
                     ORDER BY
                         CASE
                             WHEN st.Code = N'IS_BEING_PREPARED' THEN 0
@@ -39,27 +39,27 @@ public static class ApplicationProgressOrderSchemaSql
                         END ASC,
                         ap.Date ASC,
                         ap.ID ASC) AS StepOrder
-            FROM dbo.ApplicationProgresses ap
+            FROM dbo.ApplicationProfileInstanceProgresses ap
             LEFT JOIN dbo.ApplicationStates st ON st.ID = ap.StateID
-            WHERE ap.ApplicationID IS NOT NULL
+            WHERE ap.ApplicationProfileInstanceID IS NOT NULL
         )
         UPDATE ap
         SET ProgressOrder = o.StepOrder
-        FROM dbo.ApplicationProgresses ap
+        FROM dbo.ApplicationProfileInstanceProgresses ap
         INNER JOIN ordered o ON ap.ID = o.ID
         WHERE ap.ProgressOrder = 0;
         """;
 
     internal const string RecomputeAllProgressOrderSql = """
-        IF OBJECT_ID(N'dbo.ApplicationProgresses', N'U') IS NULL
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstanceProgresses', N'U') IS NULL
             RETURN;
-        IF COL_LENGTH(N'dbo.ApplicationProgresses', N'ProgressOrder') IS NULL
+        IF COL_LENGTH(N'dbo.ApplicationProfileInstanceProgresses', N'ProgressOrder') IS NULL
             RETURN;
         ;WITH ordered AS (
             SELECT
                 ap.ID,
                 ROW_NUMBER() OVER (
-                    PARTITION BY ap.ApplicationID
+                    PARTITION BY ap.ApplicationProfileInstanceID
                     ORDER BY
                         CASE
                             WHEN st.Code = N'IS_BEING_PREPARED' THEN 0
@@ -74,13 +74,13 @@ public static class ApplicationProgressOrderSchemaSql
                         END ASC,
                         ap.Date ASC,
                         ap.ID ASC) AS StepOrder
-            FROM dbo.ApplicationProgresses ap
+            FROM dbo.ApplicationProfileInstanceProgresses ap
             LEFT JOIN dbo.ApplicationStates st ON st.ID = ap.StateID
-            WHERE ap.ApplicationID IS NOT NULL
+            WHERE ap.ApplicationProfileInstanceID IS NOT NULL
         )
         UPDATE ap
         SET ProgressOrder = o.StepOrder
-        FROM dbo.ApplicationProgresses ap
+        FROM dbo.ApplicationProfileInstanceProgresses ap
         INNER JOIN ordered o ON ap.ID = o.ID;
         """;
 

@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 using Visa2026.Module.Localization;
 using Visa2026.Module.Services;
 
@@ -19,7 +20,7 @@ namespace Visa2026.Module.Controllers
 
         public ApplicationPdfController()
         {
-            TargetObjectType = typeof(Application);
+            TargetObjectType = typeof(ApplicationProfileInstance);
             TargetViewType = ViewType.DetailView;
 
             downloadAllAction = new SimpleAction(this, "DownloadAllApplicationItemsAsPdf", "View");
@@ -31,8 +32,8 @@ namespace Visa2026.Module.Controllers
 
         private async void DownloadAllAction_Execute(object sender, SimpleActionExecuteEventArgs e)
         {
-            var application = (Application)e.CurrentObject;
-            if (application == null || !application.ApplicationItems.Any())
+            var application = (ApplicationProfileInstance)e.CurrentObject;
+            if (application == null || ApplicationRosterHelper.GetRosterPersonCountInMemory(application) == 0)
             {
                 Application.ShowViewStrategy.ShowMessage(VisaUiMessages.Get("ApplicationPdf.NoActiveItems"), InformationType.Warning);
                 return;
@@ -53,7 +54,7 @@ namespace Visa2026.Module.Controllers
             if (!File.Exists(templatePath))
             {
                 // Try embedded resource from the Module assembly
-                var asm = typeof(ApplicationItemPdfController).Assembly; // or typeof(SomeModuleType).Assembly
+                var asm = typeof(ApplicationPdfController).Assembly; // or typeof(SomeModuleType).Assembly
                 string resourceName = "Visa2026.Module.Resources.Visa_Application_TM_QR_08.pdf";
                 using var resStream = asm.GetManifestResourceStream(resourceName);
                 if (resStream == null) throw new UserFriendlyException(VisaUiMessages.Format("ApplicationPdf.TemplateNotFound", relativeTemplatePath));
@@ -70,7 +71,7 @@ namespace Visa2026.Module.Controllers
                 // Fetch dynamic mappings once for the batch
                 var mappings = PdfMappingHelper.GetMappings(View.ObjectSpace);
 
-                foreach (var item in application.ApplicationItems)
+                foreach (var item in ApplicationRosterHelper.GetMergeLineItems(View.ObjectSpace, application))
                 {
                     var data = new Dictionary<string, object>();
                     PdfMappingHelper.MapApplicationData(data, application, item, View.ObjectSpace, null, mappings);

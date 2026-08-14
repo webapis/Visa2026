@@ -42,9 +42,8 @@ public static class ApplicationWorkspaceDocumentCopiesOpenHelper
 
         slotService.OpenDocumentCopiesAsync(new DocumentCopiesSlotRequest
         {
-            Scope = DocumentCopiesLineScope.ApplicationPerson,
-            ApplicationId = applicationId,
-            ApplicationPersonIds = rowIds,
+            ApplicationProfileInstanceId = applicationId,
+            ApplicationProfileInstancePersonIds = rowIds,
         }, ownerViewId).GetAwaiter().GetResult();
 
         return true;

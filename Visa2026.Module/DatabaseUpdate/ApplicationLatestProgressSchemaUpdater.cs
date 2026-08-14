@@ -34,7 +34,7 @@ public sealed class ApplicationLatestProgressSchemaUpdater : ModuleUpdater
     {
         while (true)
         {
-            var applications = ObjectSpace.GetObjectsQuery<Application>()
+            var applications = ObjectSpace.GetObjectsQuery<ApplicationProfileInstance>()
                 .Where(application => application.LatestProgressId != null
                     && (application.LatestProgressDisplay == null || application.LatestProgressDisplay == string.Empty))
                 .Take(BackfillBatchSize)

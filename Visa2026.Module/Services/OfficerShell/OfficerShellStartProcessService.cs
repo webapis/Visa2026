@@ -26,9 +26,9 @@ public sealed class OfficerShellStartProcessService : IOfficerShellStartProcessS
             return OfficerShellStartProcessResult.Failed("Select at least one staged profile.");
 
         var applications = ids
-            .Select(id => objectSpace.GetObjectByKey<Application>(id))
+            .Select(id => objectSpace.GetObjectByKey<ApplicationProfileInstance>(id))
             .Where(app => app != null)
-            .Cast<Application>()
+            .Cast<ApplicationProfileInstance>()
             .ToList();
 
         if (applications.Count != ids.Count)
@@ -54,8 +54,8 @@ public sealed class OfficerShellStartProcessService : IOfficerShellStartProcessS
         foreach (var secondary in secondaries)
             MergeIntoPrimary(objectSpace, primary, secondary);
 
-        if (!ApplicationProgressProfileResolver.TryValidateProjectContractOnApplication(primary, objectSpace, out var contractError))
-            return OfficerShellStartProcessResult.Failed(contractError ?? VisaUiMessages.Get("ApplicationProgress.ProjectContractRequired"));
+        if (!ApplicationProfileInstanceProgressProfileResolver.TryValidateProjectContractOnApplication(primary, objectSpace, out var contractError))
+            return OfficerShellStartProcessResult.Failed(contractError ?? VisaUiMessages.Get("ApplicationProfileInstanceProgress.ProjectContractRequired"));
 
         var processNumber = OfficerShellProcessNumberAllocator.Allocate(objectSpace);
         primary.ProcessNumber = processNumber;
@@ -64,18 +64,18 @@ public sealed class OfficerShellStartProcessService : IOfficerShellStartProcessS
         if (progress == null)
             return OfficerShellStartProcessResult.Failed("Could not resolve the first progress step for this profile route.");
 
-        if (!ApplicationProgressTransitionHelper.TryValidateProgressStep(progress, objectSpace, out var progressError))
-            return OfficerShellStartProcessResult.Failed(progressError ?? VisaUiMessages.Get("ApplicationProgress.InvalidForRoute"));
+        if (!ApplicationProfileInstanceProgressTransitionHelper.TryValidateProgressStep(progress, objectSpace, out var progressError))
+            return OfficerShellStartProcessResult.Failed(progressError ?? VisaUiMessages.Get("ApplicationProfileInstanceProgress.InvalidForRoute"));
 
         ApplicationLatestProgressSyncHelper.Sync(primary, objectSpace);
 
         return OfficerShellStartProcessResult.Succeeded(primary.ID, processNumber, ordered.Count);
     }
 
-    private static void MergeIntoPrimary(IObjectSpace objectSpace, Application primary, Application secondary)
+    private static void MergeIntoPrimary(IObjectSpace objectSpace, ApplicationProfileInstance primary, ApplicationProfileInstance secondary)
     {
         foreach (var person in ApplicationRosterHelper.GetRosterPeople(secondary))
-            ApplicationPersonService.LinkPerson(objectSpace, primary, person);
+            ApplicationProfileInstancePersonService.LinkPerson(objectSpace, primary, person);
 
         if (primary.ProjectContract == null && secondary.ProjectContract != null)
             primary.ProjectContract = secondary.ProjectContract;
@@ -86,16 +86,16 @@ public sealed class OfficerShellStartProcessService : IOfficerShellStartProcessS
         objectSpace.Delete(secondary);
     }
 
-    private static ApplicationProgress? CreateFirstProgressStep(
+    private static ApplicationProfileInstanceProgress? CreateFirstProgressStep(
         IObjectSpace objectSpace,
-        Application application,
+        ApplicationProfileInstance application,
         string processNumber)
     {
-        var progress = objectSpace.CreateObject<ApplicationProgress>();
-        progress.Application = application;
+        var progress = objectSpace.CreateObject<ApplicationProfileInstanceProgress>();
+        progress.ApplicationProfileInstance = application;
         progress.Date = DateTime.Today;
 
-        ApplicationProgressTransitionHelper.TryApplySuggestedNextStep(progress);
+        ApplicationProfileInstanceProgressTransitionHelper.TryApplySuggestedNextStep(progress);
         if (progress.State == null)
         {
             var firstCode = ResolveFirstStateCode(application);
@@ -115,12 +115,12 @@ public sealed class OfficerShellStartProcessService : IOfficerShellStartProcessS
         return progress;
     }
 
-    private static string? ResolveFirstStateCode(Application application)
+    private static string? ResolveFirstStateCode(ApplicationProfileInstance application)
     {
-        var route = ApplicationProgressRouteHelper.GetTypePickerRouteFilter(application);
-        if (route == ApplicationProgressRouteKind.DirectToMigrationService)
-            return ApplicationProgressStateCodes.ProcessStarted;
+        var route = ApplicationProfileInstanceProgressRouteHelper.GetTypePickerRouteFilter(application);
+        if (route == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService)
+            return ApplicationProfileInstanceProgressStateCodes.ProcessStarted;
 
-        return ApplicationProgressLegCodes.ReviewStarted(1);
+        return ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1);
     }
 }

@@ -1,6 +1,6 @@
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
-internal static class Visa2014ApplicationProgressPreviewExporter
+internal static class Visa2014ApplicationProfileInstanceProgressPreviewExporter
 {
     public static Visa2014PreviewExportResult Export(
         string connectionString,
@@ -12,19 +12,19 @@ internal static class Visa2014ApplicationProgressPreviewExporter
     {
         Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(outputPath))!);
 
-        var batch = Visa2014ApplicationProgressTransform.PrepareImportBatch(
+        var batch = Visa2014ApplicationProfileInstanceProgressTransform.PrepareImportBatch(
             connectionString, lookupTranslationPaths, maxRows, verbose);
 
         var metaRows = new List<IReadOnlyDictionary<string, object?>>
         {
             Row("_key", "exportedAt", DateTime.UtcNow.ToString("O")),
-            Row("_key", "entity", "ApplicationProgress"),
+            Row("_key", "entity", "ApplicationProfileInstanceProgress"),
             Row("_key", "database", GetDatabaseName(connectionString)),
             Row("_key", "legacyApplicationCount", batch.LegacyRowCount),
             Row("_key", "importRowCount", batch.ImportRows.Count),
             Row("_key", "skippedParentCount", batch.Skipped.Count),
             Row("_key", "synthesisApproved", "2026-06-29"),
-            Row("_key", "fieldMap", "legacy/visa2014/field-maps/ApplicationProgress.yaml"),
+            Row("_key", "fieldMap", "legacy/visa2014/field-maps/ApplicationProfileInstanceProgress.yaml"),
         };
         if (!string.IsNullOrWhiteSpace(legacySourceId))
             metaRows.Add(Row("_key", "legacySource", legacySourceId));
@@ -33,8 +33,8 @@ internal static class Visa2014ApplicationProgressPreviewExporter
         [
             new Visa2014Worksheet
             {
-                Name = "ApplicationProgress",
-                Columns = Visa2014ApplicationProgressTransform.ApplicationProgressMainColumnOrder,
+                Name = "ApplicationProfileInstanceProgress",
+                Columns = Visa2014ApplicationProfileInstanceProgressTransform.ApplicationProfileInstanceProgressMainColumnOrder,
                 Rows = batch.ImportRows,
             },
             new Visa2014Worksheet
@@ -42,13 +42,13 @@ internal static class Visa2014ApplicationProgressPreviewExporter
                 Name = "_Skipped",
                 Columns = Visa2014PersonTransform.InferColumns(
                     batch.Skipped.ToList(),
-                    ["_legacyApplicationOid", "_reason", "_processKind", "_legacy_ManualApplicationNumber", "_legacy_ApplicationTypeComposite"]),
+                    ["_legacyApplicationProfileInstanceOid", "_reason", "_processKind", "_legacy_ManualApplicationNumber", "_legacy_ApplicationTypeComposite"]),
                 Rows = batch.Skipped.ToList(),
             },
             new Visa2014Worksheet
             {
                 Name = "_SynthesisSummary",
-                Columns = ["_legacyApplicationOid", "_processKind", "stepCount", "_legacy_ManualApplicationNumber", "_legacy_ApplicationTypeComposite"],
+                Columns = ["_legacyApplicationProfileInstanceOid", "_processKind", "stepCount", "_legacy_ManualApplicationNumber", "_legacy_ApplicationTypeComposite"],
                 Rows = batch.DedupeSummary.ToList(),
             },
             new Visa2014Worksheet { Name = "_Meta", Columns = ["_key", "value"], Rows = metaRows },

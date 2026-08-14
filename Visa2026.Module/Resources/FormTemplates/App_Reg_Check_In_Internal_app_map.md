@@ -60,16 +60,16 @@ this.Detail.HeightF = 492F;  // matches Group E base default
 |---|---|---|
 | `TotalPersonCount` | `Application` | ✅ |
 | `TotalPersonCountText` | `Application` | ✅ |
-| `FromCityName` | `Application → FromCity?.Name` | ✅ |
-| `FromRegionName` | `Application → FromCity?.Region?.Name` | ✅ |
-| `ToCityName` | `Application → ToCity?.Name` | ✅ |
-| `ToRegionName` | `Application → ToCity?.Region?.Name` | ✅ |
+| `FromCityName` | `ApplicationProfileInstance → FromCity?.Name` | ✅ |
+| `FromRegionName` | `ApplicationProfileInstance → FromCity?.Region?.Name` | ✅ |
+| `ToCityName` | `ApplicationProfileInstance → ToCity?.Name` | ✅ |
+| `ToRegionName` | `ApplicationProfileInstance → ToCity?.Region?.Name` | ✅ |
 
 ---
 
 ## ReportsUpdater.cs entry
 
 ```csharp
-AddPredefinedReport<AppRegCheckInInternalReport>("App Reg Check In Internal Report", typeof(Application), isInplaceReport: true);
+AddPredefinedReport<AppRegCheckInInternalReport>("App Reg Check In Internal Report", typeof(ApplicationProfileInstance), isInplaceReport: true);
 CreateReportVisibility("App Reg Check In Internal Report", "[ApplicationType.Name] = 'App_Reg_Check_In_Internal'");
 ```

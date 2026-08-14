@@ -72,8 +72,8 @@ Inherited from `AppGroupABaseReport` — **535F** (= attachments end 524F + 11F)
 |---|---|---|
 | `TotalPersonCount` | `Application` | ✅ |
 | `TotalPersonCountText` | `Application` | ✅ |
-| `VisaPeriod_NameTm` | `Application → VisaPeriod` | ✅ |
-| `VisaCategory_NameTm` | `Application → VisaCategory` | ✅ |
+| `VisaPeriod_NameTm` | `ApplicationProfileInstance → VisaPeriod` | ✅ |
+| `VisaCategory_NameTm` | `ApplicationProfileInstance → VisaCategory` | ✅ |
 
 ---
 
@@ -119,6 +119,6 @@ Salutation: **bold, centered, no underline** (Word standard; scan sample is unde
 ## ReportsUpdater.cs entry
 
 ```csharp
-AddPredefinedReport<AppInvAndWPReport>("App Inv And WP Report", typeof(Application), isInplaceReport: true);
+AddPredefinedReport<AppInvAndWPReport>("App Inv And WP Report", typeof(ApplicationProfileInstance), isInplaceReport: true);
 CreateReportVisibility("App Inv And WP Report", "[ApplicationType.Name] = 'App_Inv_And_WP'");
 ```

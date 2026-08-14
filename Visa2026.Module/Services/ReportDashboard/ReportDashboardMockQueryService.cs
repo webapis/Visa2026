@@ -149,7 +149,7 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
         // Include-archived toggle is for WP/Education/etc.
         if (includeArchivedPersons) { /* no-op */ }
         if (validVisaPersonsOnly) { /* no-op */ }
-        // Application completed/cancelled filters are real-view only (Hybrid).
+        // ApplicationProfileInstance completed/cancelled filters are real-view only (Hybrid).
         if (includeCompletedApplicationProcesses || includeCancelledApplicationProcesses) { /* no-op */ }
         var applyOneLastVisa = oneLastValidVisaPerPerson
             && category == ReportDashboardCategory.VisaExtension
@@ -159,7 +159,7 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
             && ReportDashboardCatalog.SubReportCountsValidWorkPermits(subReport);
         return (category, subReport) switch
         {
-            // Application (via ministry) — On Process / Completed by Invitation / Visa Extension / Other
+            // ApplicationProfileInstance (via ministry) — On Process / Completed by Invitation / Visa Extension / Other
             (ReportDashboardCategory.ApplicationViaMinistry, ReportDashboardCatalog.AppViaMinistryInvitationOnProcessKey) =>
                 Build(personType, category, subReport, AppViaMinistryInvitationOnProcessByProject(), projectKey,
                     subReportLabel: "Invitation on Process (P)"),
@@ -377,8 +377,8 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
         R("Serdar Geldiyew",     "Gurlusyk UZT",     "V-2025-0614", "Jun 14, 2026", "Extension Cancelled",    "st-expiring"),
     ];
 
-    // ===== Application (via ministry) =====================================
-    // Process segment = ApplicationProgress.StatusListLabel style
+    // ===== ApplicationProfileInstance (via ministry) =====================================
+    // Process segment = ApplicationProfileInstanceProgress.StatusListLabel style
     // (LookupCatalogStrings application-state + " - {ministry}" when applicable).
 
     private static List<ReportDashboardPreviewRow> AppViaMinistryInvitationOnProcessByProject() =>
@@ -500,7 +500,7 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
     ];
 
     /// <summary>
-    /// Direct migration On Process (A): one row per ApplicationItem; Status = App Type · StatusListLabel.
+    /// Direct migration On Process (A): one row per ApplicationRosterMergeLine; Status = App Type · StatusListLabel.
     /// </summary>
     private static List<ReportDashboardPreviewRow> AppDirectOnProcessByApplicationType() =>
     [
@@ -669,7 +669,7 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
         R("Kemal Aydin",         "Gaz Stansiasy",    "INV-2026-0110", "Nov 05, 2026", "1 year · köp gezeklik · BS-1", "st-cat-6"),
     ];
 
-    /// In process: invitation-issuing application created, invitation not issued yet; Status = Application Progress state.
+    /// In process: invitation-issuing application created, invitation not issued yet; Status = ApplicationProfileInstance Progress state.
     /// Invitation Process (P): Status = Project · ProcessState.
     private static List<ReportDashboardPreviewRow> InvitationInProcessByProject() =>
     [
@@ -767,7 +767,7 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
     ];
 
     /// Active Registered (V): Status = Period · Category · Type
-    /// (Period from Application; Category/Type from CurrentVisa).
+    /// (Period from ApplicationProfileInstance; Category/Type from CurrentVisa).
     private static List<ReportDashboardPreviewRow> RegistrationCheckInByPeriodCategoryType() =>
     [
         R("Mehmet Yilmaz",    "Gurlusyk UZT",     "V-2025-1012", "Oct 15, 2026", "6 months · Multiple entry · WP — Work visa", "st-cat-1"),

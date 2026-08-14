@@ -224,8 +224,8 @@ namespace Visa2026.Module.Services
         // This method is extracted from ApplicationItemPdfController to be reused.
         public static void MapApplicationData(
             Dictionary<string, object> data,
-            Application application,
-            ApplicationItem item,
+            ApplicationProfileInstance application,
+            ApplicationRosterMergeLine item,
             IObjectSpace objectSpace,
             ILogger logger = null,
             IList<PdfFormMappingDefinition> mappings = null,
@@ -318,12 +318,12 @@ namespace Visa2026.Module.Services
 
         /// <summary>
         /// PDF property/expression mappings are skipped unless the same <see cref="ApplicationType"/> flags and
-        /// linked objects that drive XAF <see cref="ApplicationItem"/> / <see cref="Application"/> visibility are satisfied
+        /// linked objects that drive XAF <see cref="ApplicationRosterMergeLine"/> / <see cref="Application"/> visibility are satisfied
         /// (and required navigations are non-null where the path reads through them).
         /// </summary>
         private static bool IsPdfMappingSourceAllowed(
-            Application application,
-            ApplicationItem item,
+            ApplicationProfileInstance application,
+            ApplicationRosterMergeLine item,
             PdfMappingMode mode,
             string propertyPath,
             string expression,
@@ -361,7 +361,7 @@ namespace Visa2026.Module.Services
         }
 
         /// <summary>
-        /// Registration/business-trip line fields were merged onto <see cref="ApplicationItem"/>; PDF mappings may
+        /// Registration/business-trip line fields were merged onto <see cref="ApplicationRosterMergeLine"/>; PDF mappings may
         /// still use <c>CurrentRegistration.*</c> or <c>CurrentBusinessTrip.*</c> from removed navigations.
         /// </summary>
         private static string RewriteLegacyApplicationItemPropertyPath(string path)
@@ -384,14 +384,14 @@ namespace Visa2026.Module.Services
                 !string.IsNullOrEmpty(source) && !string.IsNullOrEmpty(token) &&
                 Regex.IsMatch(source, @"\b" + Regex.Escape(token) + @"\b", RegexOptions.CultureInvariant);
 
-            private static bool AppSegment(Application application, string source, string segmentAfterApplicationDot)
+            private static bool AppSegment(ApplicationProfileInstance application, string source, string segmentAfterApplicationDot)
             {
                 if (application == null)
                     return false;
                 return source.IndexOf("Application." + segmentAfterApplicationDot, StringComparison.Ordinal) >= 0;
             }
 
-            public static bool IsAllowed(Application application, ApplicationItem item, string source)
+            public static bool IsAllowed(ApplicationProfileInstance application, ApplicationRosterMergeLine item, string source)
             {
                 if (application == null)
                     return false;
@@ -481,7 +481,7 @@ namespace Visa2026.Module.Services
                 if (item == null)
                     return false;
 
-                // --- ApplicationItem: employee-only fields (no ApplicationType flag; mirror ApplyCurrentFieldsFromSelectedPerson) ---
+                // --- ApplicationRosterMergeLine: employee-only fields (no ApplicationType flag; mirror ApplyCurrentFieldsFromSelectedPerson) ---
                 if (Token(source, "CurrentPositionHistory"))
                 {
                     if (item.Person?.IsEmployee != true)
@@ -494,7 +494,7 @@ namespace Visa2026.Module.Services
                         return false;
                 }
 
-                // PreviousVisa removed from ApplicationItem; token is not supported.
+                // PreviousVisa removed from ApplicationRosterMergeLine; token is not supported.
                 if (Token(source, "PreviousVisa"))
                     return false;
 
@@ -573,7 +573,7 @@ namespace Visa2026.Module.Services
                 if (Token(source, "CurrentPassport") && item.CurrentPassport == null)
                     return false;
 
-                // --- ApplicationItem status columns (mirror ApplicationItem Appearance) ---
+                // --- ApplicationRosterMergeLine status columns (mirror ApplicationRosterMergeLine Appearance) ---
                 if (Token(source, "InvitationItemIsIssued") && !TypeOk(x => x.ShowInvitationItemIsIssued))
                     return false;
                 if (Token(source, "WorkPermitItemIsIssued") && !TypeOk(x => x.ShowWorkPermitItemIsIssued))

@@ -48,7 +48,7 @@ public sealed class ApplicationWorkspaceMockQueryService : IApplicationWorkspace
 
         var snapshot = new ApplicationWorkspaceSnapshot
         {
-            ApplicationId = applicationId == Guid.Empty ? Guid.Parse("11111111-1111-1111-1111-111111111111") : applicationId,
+            ApplicationProfileInstanceId = applicationId == Guid.Empty ? Guid.Parse("11111111-1111-1111-1111-111111111111") : applicationId,
             Header = new ApplicationWorkspaceHeader
             {
                 ApplicationNumber = "2026-0147",
@@ -85,7 +85,7 @@ public sealed class ApplicationWorkspaceMockQueryService : IApplicationWorkspace
 
         return new ApplicationWorkspaceSnapshot
         {
-            ApplicationId = snapshot.ApplicationId,
+            ApplicationProfileInstanceId = snapshot.ApplicationProfileInstanceId,
             Header = snapshot.Header,
             ProgressHistory = snapshot.ProgressHistory,
             Profile = snapshot.Profile,

@@ -35,7 +35,7 @@ namespace Visa2026.Module.BusinessObjects
                 {
                     base.Person = value;
                     if (base.Person != null)
-                        Passport = ApplicationPersonValidItems.ResolvePassport(base.Person);
+                        Passport = ApplicationProfileInstancePersonValidItems.ResolvePassport(base.Person);
                 }
             }
         }
@@ -77,13 +77,7 @@ namespace Visa2026.Module.BusinessObjects
 
         private void MarkLinkedApplicationItemRejected()
         {
-            if (Person == null || Rejection?.Application?.ApplicationItems == null)
-                return;
-
-            var appItem = Rejection.Application.ApplicationItems
-                .FirstOrDefault(ai => ai.Person?.ID == Person.ID);
-            if (appItem != null)
-                appItem.RejectionIssued = true;
+            // ApplicationRosterMergeLine hard-removed; rejection linkage is via ResolvedLinks / M2M roster.
         }
 
         public virtual void OnDeleting()

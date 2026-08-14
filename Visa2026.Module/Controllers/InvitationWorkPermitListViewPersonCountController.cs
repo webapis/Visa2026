@@ -5,7 +5,7 @@ namespace Visa2026.Module.Controllers;
 
 /// <summary>
 /// Batch-loads <see cref="Invitation.TotalPersonCount"/> / <see cref="WorkPermit.TotalPersonCount"/>
-/// for root ListViews (same pattern as Application person count preload).
+/// for root ListViews (same pattern as ApplicationProfileInstance person count preload).
 /// </summary>
 public sealed class InvitationListViewPersonCountController : ViewController<ListView>
 {

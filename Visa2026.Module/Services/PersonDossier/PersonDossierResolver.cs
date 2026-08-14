@@ -473,18 +473,13 @@ public static class PersonDossierResolver
 
     private static PersonDossierSection BuildApplications(Person person)
     {
-        var apps = Safe(person.ApplicationPeople)
-            .Select(ap => ap.Application)
-            .Where(app => app != null)
-            .Cast<Application>()
-            .GroupBy(app => app.ID)
-            .Select(g => g.First())
+        var apps = Safe(person.ApplicationProfileInstances)
             .OrderByDescending(app => app.ApplicationDate)
             .Select(app => new PersonDossierRecord
             {
                 RecordKey = $"Application:{app.ID}",
                 SourceObjectId = app.ID,
-                SourceObjectType = typeof(Application),
+                SourceObjectType = typeof(ApplicationProfileInstance),
                 Cells =
                 [
                     app.FullApplicationNumber ?? app.ApplicationNumber ?? string.Empty,

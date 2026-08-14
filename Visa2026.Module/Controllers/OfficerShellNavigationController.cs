@@ -10,7 +10,7 @@ using Visa2026.Module.Services.OfficerShell;
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// Opens the officer shell DetailView when Application → Application Profiles is selected.
+/// Opens the officer shell DetailView only for leftover OfficerShell navigation items.
 /// </summary>
 public sealed class OfficerShellNavigationController : WindowController
 {
@@ -60,7 +60,6 @@ public sealed class OfficerShellNavigationController : WindowController
             return true;
         }
 
-        return string.Equals(item.Caption, "Application Profiles", StringComparison.OrdinalIgnoreCase)
-            && string.Equals(item.ParentItem?.Id, "Application", StringComparison.Ordinal);
+        return false;
     }
 }

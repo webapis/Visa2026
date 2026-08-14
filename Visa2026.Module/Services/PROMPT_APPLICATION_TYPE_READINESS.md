@@ -10,7 +10,7 @@
 | State | Picker | Meaning | Who moves it here |
 |-------|--------|---------|-------------------|
 | **Ready** ✓ | Selectable | Stakeholder **approved** — production use | Developer, after stakeholder sign-off |
-| **Pending** ◐ | Selectable | Developer **finished implementation**; awaiting stakeholder approval — **users can test** on real Application forms | Developer, when feature is ready for review |
+| **Pending** ◐ | Selectable | Developer **finished implementation**; awaiting stakeholder approval — **users can test** on real ApplicationProfileInstance forms | Developer, when feature is ready for review |
 | **Not ready** ✗ | Visible, **not** selectable | Implementation **not complete** | Default for all types not listed in Ready/Pending sets |
 
 **Not in database:** only `ApplicationType.SelectionCode` (ministry 3-digit code) is stored in SQL. Readiness is a temporary map for developers and stakeholders during rollout.
@@ -159,10 +159,10 @@ List all application types in ApplicationTypeDevelopmentReadiness with state Rea
 
 ## Manual check after deploy
 
-1. Open Application detail → **…** type code picker.
+1. Open ApplicationProfileInstance detail → **…** type code picker.
 2. **Ready** and **Pending** rows: ✓ / ◐, clickable.
 3. **Not ready**: ✗, muted, not clickable.
-4. Typing a **Not ready** 3-digit code shows a warning and does not set Application type.
+4. Typing a **Not ready** 3-digit code shows a warning and does not set ApplicationProfileInstance type.
 
 ---
 

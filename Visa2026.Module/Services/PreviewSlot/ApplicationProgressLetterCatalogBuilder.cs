@@ -4,25 +4,25 @@ using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.Services.PreviewSlot;
 
-public static class ApplicationProgressLetterCatalogBuilder
+public static class ApplicationProfileInstanceProgressLetterCatalogBuilder
 {
-    public static IReadOnlyList<ApplicationProgressLetterCatalogEntry> Build(
+    public static IReadOnlyList<ApplicationProfileInstanceProgressLetterCatalogEntry> Build(
         IObjectSpace objectSpace,
         Guid applicationId)
     {
         if (objectSpace == null || applicationId == Guid.Empty)
-            return Array.Empty<ApplicationProgressLetterCatalogEntry>();
+            return Array.Empty<ApplicationProfileInstanceProgressLetterCatalogEntry>();
 
-        return objectSpace.GetObjectsQuery<ApplicationProgress>()
-            .Include(p => p.Application)
+        return objectSpace.GetObjectsQuery<ApplicationProfileInstanceProgress>()
+            .Include(p => p.ApplicationProfileInstance)
             .Include(p => p.State)
             .Include(p => p.MinistryLetterFile)
-            .Where(p => p.Application != null && p.Application.ID == applicationId)
+            .Where(p => p.ApplicationProfileInstance != null && p.ApplicationProfileInstance.ID == applicationId)
             .Where(p => p.MinistryLetterFile != null && p.MinistryLetterFile.Size > 0)
             .OrderByDescending(p => p.Date)
             .ThenByDescending(p => p.ID)
             .ToList()
-            .Select(p => new ApplicationProgressLetterCatalogEntry
+            .Select(p => new ApplicationProfileInstanceProgressLetterCatalogEntry
             {
                 ProgressId = p.ID,
                 StatusLabel = p.StatusListLabel,

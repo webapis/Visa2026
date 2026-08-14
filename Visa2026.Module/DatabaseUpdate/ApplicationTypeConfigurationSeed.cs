@@ -56,7 +56,7 @@ internal static class ApplicationTypeConfigurationSeed
                 Category = ParseEnum<ApplicationTypeCategory>(r.Category, fallback: ApplicationTypeCategory.Both),
                 DurationInDays = r.DurationInDays,
 
-                ApplicationProgressRoute = ResolveApplicationProgressRoute(r, flags),
+                ApplicationProfileInstanceProgressRoute = ResolveApplicationProfileInstanceProgressRoute(r, flags),
                 MinistryReviewDepth = ResolveMinistryReviewDepth(r, flags),
                 MigrationSlaProfileCode = r.MigrationSlaProfileCode ?? "",
 
@@ -142,21 +142,21 @@ internal static class ApplicationTypeConfigurationSeed
         if (flags.TryGetValue(nameof(ApplicationTypeConfigurationRow.ShowApprovalLegProfile), out var explicitValue))
             return explicitValue;
 
-        var route = ResolveApplicationProgressRoute(row, flags);
+        var route = ResolveApplicationProfileInstanceProgressRoute(row, flags);
         return GetFlag(flags, nameof(ApplicationTypeConfigurationRow.ShowProjectContract))
-            && route == ApplicationProgressRouteKind.ViaMinistries;
+            && route == ApplicationProfileInstanceProgressRouteKind.ViaMinistries;
     }
 
     /// <summary>
     /// Explicit JSON wins; otherwise infer from legacy <c>ShowProjectContract</c> (UI flag used only as seed hint).
     /// </summary>
-    private static ApplicationProgressRouteKind ResolveApplicationProgressRoute(
+    private static ApplicationProfileInstanceProgressRouteKind ResolveApplicationProfileInstanceProgressRoute(
         ApplicationTypeConfigurationRowDto row,
         IReadOnlyDictionary<string, bool> flags)
     {
-        if (!string.IsNullOrWhiteSpace(row.ApplicationProgressRoute)
-            && Enum.TryParse<ApplicationProgressRouteKind>(
-                row.ApplicationProgressRoute,
+        if (!string.IsNullOrWhiteSpace(row.ApplicationProfileInstanceProgressRoute)
+            && Enum.TryParse<ApplicationProfileInstanceProgressRouteKind>(
+                row.ApplicationProfileInstanceProgressRoute,
                 ignoreCase: true,
                 out var explicitRoute))
         {
@@ -164,16 +164,16 @@ internal static class ApplicationTypeConfigurationSeed
         }
 
         return GetFlag(flags, nameof(ApplicationTypeConfigurationRow.ShowProjectContract))
-            ? ApplicationProgressRouteKind.ViaMinistries
-            : ApplicationProgressRouteKind.DirectToMigrationService;
+            ? ApplicationProfileInstanceProgressRouteKind.ViaMinistries
+            : ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService;
     }
 
     private static MinistryReviewDepth ResolveMinistryReviewDepth(
         ApplicationTypeConfigurationRowDto row,
         IReadOnlyDictionary<string, bool> flags)
     {
-        var route = ResolveApplicationProgressRoute(row, flags);
-        if (route == ApplicationProgressRouteKind.DirectToMigrationService)
+        var route = ResolveApplicationProfileInstanceProgressRoute(row, flags);
+        if (route == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService)
             return MinistryReviewDepth.None;
 
         if (!string.IsNullOrWhiteSpace(row.MinistryReviewDepth)
@@ -209,7 +209,7 @@ internal static class ApplicationTypeConfigurationSeed
         public string? LifecycleStage { get; set; }
         public string? Category { get; set; }
         public int DurationInDays { get; set; }
-        public string? ApplicationProgressRoute { get; set; }
+        public string? ApplicationProfileInstanceProgressRoute { get; set; }
         public string? MinistryReviewDepth { get; set; }
         public string? MigrationSlaProfileCode { get; set; }
         public Dictionary<string, bool>? Flags { get; set; }

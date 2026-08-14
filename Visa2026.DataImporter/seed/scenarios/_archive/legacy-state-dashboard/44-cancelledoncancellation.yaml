@@ -4,7 +4,7 @@ description: Visa cancellation in progress — tests V-5a state
 dependsOn: ''
 sync: false
 anchor:
-  entity: Application
+  entity: ApplicationProfileInstance
   key: FullApplicationNumber
   value: 4/-044
 data:
@@ -28,19 +28,19 @@ data:
     Expiration Date: 2026-08-01
     Passport Number: JP1234567
   Applications:
-  - Application Number: 044
+  - ApplicationProfileInstance Number: 044
     Date: 2026-04-15
     Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
     Project Contract: GT-15
     Filter: Visa
-    Application Type: App_Cancel_Visa
+    ApplicationProfileInstance Type: App_Cancel_Visa
     Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
   ApplicationItems:
   - Application: 4/-044
     Person: Hiroshi Tanaka
     Passport Number: JP1234567
     Visa Number: TM-2026-V-030
-  ApplicationProgresses:
+  ApplicationProfileInstanceProgresses:
   - Application: 4/-044
     State: PROCESS_STARTED
     Location: AT_MIGRATION_SERVICE

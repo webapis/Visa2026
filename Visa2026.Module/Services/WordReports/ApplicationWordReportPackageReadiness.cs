@@ -71,9 +71,9 @@ public static class ApplicationWordReportPackageReadinessEvaluator
 
     public static (ApplicationWordReportPackageReadinessLevel Level, string? MessageKey) EvaluateUserTemplate(
         IObjectSpace objectSpace,
-        Application application,
+        ApplicationProfileInstance application,
         UserReportTemplate template,
-        IList<ApplicationItem>? selectedItems = null)
+        IList<ApplicationRosterMergeLine>? selectedItems = null)
     {
         if (template.TemplateFile == null || template.TemplateFile.Size <= 0)
         {

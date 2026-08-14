@@ -6,8 +6,8 @@ namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
 /// Report Dashboard passport row from vw_rd_passport.
-/// One row per ApplicationItem with CurrentPassport set (loader keeps one last passport per person by IssueDate).
-/// ApplicationDate comes from the parent Application (dashboard date filter).
+/// One row per ApplicationRosterMergeLine with CurrentPassport set (loader keeps one last passport per person by IssueDate).
+/// ApplicationDate comes from the parent ApplicationProfileInstance (dashboard date filter).
 /// </summary>
 [Browsable(false)]
 public class VwRdPassport

@@ -415,14 +415,12 @@
 {
     <ApplicationItemDocumentCopiesPreviewDialog @ref="_previewDialog"
                                                 ApplicationItemIds="@ApplicationItemIds"
-                                                LineScope="@LineScope"
                                                 PackageOptions="@_packageOptions" />
 }
 
 @code {
     [Parameter] public IReadOnlyList<Guid> ApplicationItemIds { get; set; } = Array.Empty<Guid>();
-    [Parameter] public DocumentCopiesLineScope LineScope { get; set; } = DocumentCopiesLineScope.ApplicationItem;
-    [Parameter] public Guid ApplicationId { get; set; }
+    [Parameter] public Guid ApplicationProfileInstanceId { get; set; }
     [Parameter] public IReadOnlyList<ApplicationItemLinkedDocumentMergedGroup> MergedGroups { get; set; } = Array.Empty<ApplicationItemLinkedDocumentMergedGroup>();
     [Parameter] public EventCallback RefreshRequested { get; set; }
     [Parameter] public string UiCultureName { get; set; } = string.Empty;
@@ -459,7 +457,7 @@
 
     protected override void OnParametersSet()
     {
-        var selectionKey = $"{LineScope}:{ApplicationId:N}:{string.Join(",", ApplicationItemIds.OrderBy(id => id))}";
+        var selectionKey = $"{ApplicationProfileInstanceId:N}:{string.Join(",", ApplicationItemIds.OrderBy(id => id))}";
         if (!string.Equals(selectionKey, _catalogSelectionKey, StringComparison.Ordinal))
         {
             _catalogSelectionKey = selectionKey;
@@ -737,7 +735,6 @@
         try
         {
             if (!DocumentFileAccess.TryGetFilledApplicationFormPdf(
-                    LineScope,
                     ApplicationItemIds,
                     out var result,
                     out var errorMessageKey)
@@ -896,7 +893,7 @@
 
         try
         {
-            var outcome = await PackageEnqueueService.EnqueuePackageAsync(LineScope, ApplicationItemIds, _packageOptions);
+            var outcome = await PackageEnqueueService.EnqueuePackageAsync(ApplicationItemIds, _packageOptions);
             if (!outcome.Success)
             {
                 _packageStatusMessage = outcome.ErrorMessage

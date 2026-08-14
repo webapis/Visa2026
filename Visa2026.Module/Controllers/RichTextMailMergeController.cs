@@ -10,7 +10,7 @@ namespace Visa2026.Module.Controllers
 {
     // This controller ensures that when a new RichTextMailMergeData object is created
     // within the Application's "MailMergeTemplates" list, its DataType is automatically
-    // set to typeof(Application), enabling the Field List and Mail Merge features.
+    // set to typeof(ApplicationProfileInstance), enabling the Field List and Mail Merge features.
     public class ApplicationMailMergeTemplatesController : ViewController<ListView>
     {
         public ApplicationMailMergeTemplatesController()
@@ -48,8 +48,8 @@ namespace Visa2026.Module.Controllers
         {
             if (e.CreatedObject is RichTextMailMergeData mailMergeData)
             {
-                // Automatically set the DataType to Application so the Field List appears
-                mailMergeData.DataType = typeof(Application);
+                // Automatically set the DataType to ApplicationProfileInstance so the Field List appears
+                mailMergeData.DataType = typeof(ApplicationProfileInstance);
                 mailMergeData.Name = "New Template";
             }
         }

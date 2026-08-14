@@ -6,7 +6,7 @@ using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.DatabaseUpdate
 {
-    /// <summary>Moves PDF form mappings from legacy <see cref="Company"/> paths to Application <see cref="Application"/> report aliases.</summary>
+    /// <summary>Moves PDF form mappings from legacy <see cref="Company"/> paths to ApplicationProfileInstance <see cref="Application"/> report aliases.</summary>
     public class OrganizationPdfFormMappingUpdater : ModuleUpdater
     {
         public OrganizationPdfFormMappingUpdater(IObjectSpace objectSpace, Version currentDBVersion)

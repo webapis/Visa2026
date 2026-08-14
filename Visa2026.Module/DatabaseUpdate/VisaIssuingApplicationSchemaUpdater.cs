@@ -5,11 +5,11 @@ using DevExpress.ExpressApp.Updating;
 namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
-/// Ensures <see cref="BusinessObjects.Visa.IssuingApplication"/> column exists and is backfilled from legacy item FK.
+/// Ensures <see cref="BusinessObjects.Visa.IssuingApplicationProfileInstance"/> column exists and is backfilled from legacy item FK.
 /// </summary>
-public sealed class VisaIssuingApplicationSchemaUpdater : ModuleUpdater
+public sealed class VisaIssuingApplicationProfileInstanceSchemaUpdater : ModuleUpdater
 {
-    public VisaIssuingApplicationSchemaUpdater(IObjectSpace objectSpace, Version currentDBVersion)
+    public VisaIssuingApplicationProfileInstanceSchemaUpdater(IObjectSpace objectSpace, Version currentDBVersion)
         : base(objectSpace, currentDBVersion)
     {
     }
@@ -29,8 +29,8 @@ public sealed class VisaIssuingApplicationSchemaUpdater : ModuleUpdater
     private void ApplySchemaSql()
     {
         if (DatabaseProviderDetector.IsPostgreSql(ObjectSpace))
-            ExecuteNonQueryCommand(VisaIssuingApplicationSchemaSql.EnsureSchemaPostgres, false);
+            ExecuteNonQueryCommand(VisaIssuingApplicationProfileInstanceSchemaSql.EnsureSchemaPostgres, false);
         else
-            ExecuteNonQueryCommand(VisaIssuingApplicationSchemaSql.EnsureSchemaSqlServer, false);
+            ExecuteNonQueryCommand(VisaIssuingApplicationProfileInstanceSchemaSql.EnsureSchemaSqlServer, false);
     }
 }

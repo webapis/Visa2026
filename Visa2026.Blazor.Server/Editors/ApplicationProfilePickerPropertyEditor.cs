@@ -85,7 +85,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         {
             if (_application == null)
             {
-                model.StatusMessage = "Application host is not ready. Close and reopen the picker.";
+                model.StatusMessage = "ApplicationProfileInstance host is not ready. Close and reopen the picker.";
                 model.IsStatusError = true;
                 return;
             }
@@ -108,8 +108,8 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
             model.RouteHint = route.HasValue
                 ? $"Showing profiles for {ApplicationProfilePickerDisplayHelper.FormatProgressRoute(route.Value)}."
                 : IsPersonStartFlow
-                    ? "Pick a profile, then choose who joins this Application roster."
-                    : "Choose a profile — configuration applies live; per-Application values get defaults at create.";
+                    ? "Pick a profile, then choose who joins this ApplicationProfileInstance roster."
+                    : "Choose a profile — configuration applies live; per-ApplicationProfileInstance values get defaults at create.";
 
             if (seedPersonId is Guid personId && personId != Guid.Empty)
             {
@@ -169,7 +169,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         var seed = seedPersonId is Guid id ? objectSpace.GetObjectByKey<Person>(id) : null;
 
         if (profile != null && seed != null
-            && profile.ProgressRoute == ApplicationProgressRouteKind.ViaMinistries
+            && profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries
             && (seed.ProjectContract == null || seed.ProjectContract.ID == Guid.Empty))
         {
             model.StatusMessage =
@@ -264,7 +264,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         if (model == null || _application == null || !IsPersonStartFlow || model.Step != 2)
             return;
 
-        using var objectSpace = _application.CreateObjectSpace(typeof(Application));
+        using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
         var profile = objectSpace.GetObjectByKey<ApplicationProfile>(model.SelectedProfileId);
         if (profile == null)
             return;

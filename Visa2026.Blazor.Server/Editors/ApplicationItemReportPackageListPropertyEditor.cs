@@ -69,7 +69,7 @@ public sealed class ApplicationItemReportPackageListPropertyEditor : BlazorPrope
             return;
         }
 
-        using var itemObjectSpace = _application.CreateObjectSpace(typeof(ApplicationItem));
+        using var itemObjectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
         if (!ApplicationItemReportPackageValidation.TryResolveApplication(
                 itemObjectSpace,
                 itemIds,
@@ -84,18 +84,18 @@ public sealed class ApplicationItemReportPackageListPropertyEditor : BlazorPrope
         var catalogService = _application.ServiceProvider.GetRequiredService<ApplicationWordReportPackageCatalogService>();
         var catalog = catalogService.Build(itemObjectSpace, application!, context);
 
-        ComponentModel.ApplicationId = application!.ID;
+        ComponentModel.ApplicationProfileInstanceId = application!.ID;
         ComponentModel.ApplicationNumber = application.FullApplicationNumber ?? string.Empty;
-        ComponentModel.PackageScope = WordReportPackageScope.ApplicationItem;
+        ComponentModel.PackageScope = WordReportPackageScope.ApplicationRosterMergeLine;
         ComponentModel.ApplicationItemIds = itemIds;
         ComponentModel.CatalogEntries = catalog.Entries;
     }
 
     private void ResetComponentModel()
     {
-        ComponentModel.ApplicationId = Guid.Empty;
+        ComponentModel.ApplicationProfileInstanceId = Guid.Empty;
         ComponentModel.ApplicationNumber = string.Empty;
-        ComponentModel.PackageScope = WordReportPackageScope.ApplicationItem;
+        ComponentModel.PackageScope = WordReportPackageScope.ApplicationRosterMergeLine;
         ComponentModel.ApplicationItemIds = Array.Empty<Guid>();
         ComponentModel.CatalogEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
     }

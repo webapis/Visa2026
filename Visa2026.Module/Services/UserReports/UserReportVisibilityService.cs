@@ -5,6 +5,7 @@ using System.Linq;
 using DevExpress.Data.Filtering;
 using DevExpress.Data.Filtering.Helpers;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 
 namespace Visa2026.Module.Services.UserReports
 {
@@ -15,7 +16,7 @@ namespace Visa2026.Module.Services.UserReports
         /// Resminamalar visibility is the AND of optional filters: application types/groups, project contracts, visibility criteria.
         /// Empty link lists or empty criteria mean no filter on that axis.
         /// </summary>
-        public bool IsTemplateVisible(UserReportTemplate template, Application application)
+        public bool IsTemplateVisible(UserReportTemplate template, ApplicationProfileInstance application)
         {
             if (!template.IsActive)
                 return false;
@@ -30,7 +31,7 @@ namespace Visa2026.Module.Services.UserReports
         /// <see cref="UserReportTemplate.ApplicableGroupLinks"/> are empty, no application-type filter.
         /// Otherwise the application type must match a linked type or a member of a linked group (union).
         /// </summary>
-        private static bool IsApplicationTypeMatch(UserReportTemplate template, Application application)
+        private static bool IsApplicationTypeMatch(UserReportTemplate template, ApplicationProfileInstance application)
         {
             var typeLinks = template.ApplicableTypeLinks?
                 .Where(l => l.ApplicationTypeId != Guid.Empty || l.ApplicationType != null)
@@ -96,7 +97,7 @@ namespace Visa2026.Module.Services.UserReports
         /// When <see cref="UserReportTemplate.ApplicableProjectContractLinks"/> has rows, the application must have a matching
         /// <see cref="Application.ProjectContract"/>. Empty list means no project-contract filter.
         /// </summary>
-        private static bool IsProjectContractMatch(UserReportTemplate template, Application application)
+        private static bool IsProjectContractMatch(UserReportTemplate template, ApplicationProfileInstance application)
         {
             var contractLinks = template.ApplicableProjectContractLinks?
                 .Where(l => l.ProjectContractId != Guid.Empty || l.ProjectContract != null)
@@ -115,7 +116,7 @@ namespace Visa2026.Module.Services.UserReports
         }
 
         /// <summary>When <see cref="UserReportTemplate.VisibilityCriteria"/> is empty, no extra filter. Otherwise criteria must pass.</summary>
-        private static bool MatchesVisibilityCriteria(UserReportTemplate template, Application application)
+        private static bool MatchesVisibilityCriteria(UserReportTemplate template, ApplicationProfileInstance application)
         {
             if (string.IsNullOrWhiteSpace(template.VisibilityCriteria))
                 return true;
@@ -125,9 +126,9 @@ namespace Visa2026.Module.Services.UserReports
 
         /// <summary>
         /// Evaluates <see cref="UserReportTemplate.VisibilityCriteria"/> against the same type as the criteria editor
-        /// (<see cref="UserReportTemplate.CriteriaTargetType"/>): Application instance, or any matching child row.
+        /// (<see cref="UserReportTemplate.CriteriaTargetType"/>): ApplicationProfileInstance instance, or any matching child row.
         /// </summary>
-        private static bool EvaluateCriteriaForTemplate(UserReportTemplate template, Application application)
+        private static bool EvaluateCriteriaForTemplate(UserReportTemplate template, ApplicationProfileInstance application)
         {
             var criteriaString = template.VisibilityCriteria;
             if (string.IsNullOrEmpty(criteriaString) || application == null)
@@ -135,26 +136,19 @@ namespace Visa2026.Module.Services.UserReports
 
             return template.RootBoType switch
             {
-                UserReportBoType.Application => EvaluateCriteriaOnInstance(criteriaString, application),
+                UserReportBoType.ApplicationProfileInstance => EvaluateCriteriaOnInstance(criteriaString, application),
                 UserReportBoType.ApplicationItem => AnyChildMatches(
-                    application.ApplicationItems?.Where(i => i != null),
+                    ApplicationRosterHelper.GetMergeLineItems(application).Where(i => i != null),
                     criteriaString),
                 UserReportBoType.Person => AnyChildMatches(GetPersonsFromApplication(application), criteriaString),
                 _ => EvaluateCriteriaOnInstance(criteriaString, application)
             };
         }
 
-        private static IEnumerable<Person> GetPersonsFromApplication(Application application)
+        private static IEnumerable<Person> GetPersonsFromApplication(ApplicationProfileInstance application)
         {
-            var items = application.ApplicationItems?.Where(i => i != null);
-            if (items == null)
-                yield break;
-
-            foreach (var item in items)
-            {
-                if (item.Person != null)
-                    yield return item.Person;
-            }
+            foreach (var person in ApplicationRosterHelper.GetRosterPeople(application))
+                yield return person;
         }
 
         private static bool AnyChildMatches<T>(IEnumerable<T> rows, string criteriaString)

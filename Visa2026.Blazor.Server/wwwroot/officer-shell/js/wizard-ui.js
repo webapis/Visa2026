@@ -161,7 +161,7 @@ function step1Body() {
       </table>
     </div>
     <section class="wz-section">
-      <h3 class="wz-section__title">Application signatory</h3>
+      <h3 class="wz-section__title">ApplicationProfileInstance signatory</h3>
       <div class="wz-grid-2">
         <div class="wz-field"><label>Authorized signatory</label><select class="form-select"><option selected>Default company signatory</option></select></div>
         <div class="wz-field"><label>Visa representative</label><select class="form-select"><option>—</option></select></div>
@@ -231,7 +231,7 @@ function step3Body() {
     <p class="text-muted small mb-3">Manage application templates and select the person-related data your application will require.</p>
     <section class="wz-section border rounded p-3">
       <div class="d-flex justify-content-between align-items-center mb-2">
-        <h3 class="wz-section__title mb-0">Application templates</h3>
+        <h3 class="wz-section__title mb-0">ApplicationProfileInstance templates</h3>
         <button type="button" class="btn btn-sm btn-outline-primary">+ Add template</button>
       </div>
       <div class="table-responsive">

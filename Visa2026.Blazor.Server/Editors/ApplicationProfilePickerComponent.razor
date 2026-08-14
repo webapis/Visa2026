@@ -11,7 +11,7 @@
             <div>
                 <h1 class="ap-picker__title">Select people</h1>
                 <p class="ap-picker__sub">
-                    Seed person is pre-selected. Add family or colleagues on the same Application roster.
+                    Seed person is pre-selected. Add family or colleagues on the same ApplicationProfileInstance roster.
                 </p>
             </div>
         </header>
@@ -56,7 +56,7 @@
                 <input type="checkbox"
                        checked="@DuplicateWarningAcknowledged"
                        @onchange="OnDuplicateAckChanged" />
-                I understand — create Application even if open Applications exist on this profile.
+                I understand — create ApplicationProfileInstance even if open Applications exist on this profile.
             </label>
         }
 
@@ -74,9 +74,9 @@
     {
         <header class="ap-picker__header">
             <div>
-                <h1 class="ap-picker__title">@(IsPersonStartFlow ? "Start application" : "Choose Application Profile")</h1>
+                <h1 class="ap-picker__title">@(IsPersonStartFlow ? "Start process" : "Choose Application Profile")</h1>
                 <p class="ap-picker__sub">
-                    Sets a live configuration link and seeds per-Application defaults once. Profile cannot be changed after save.
+                    Sets a live configuration link and seeds per-ApplicationProfileInstance defaults once. Profile cannot be changed after save.
                 </p>
             </div>
         </header>

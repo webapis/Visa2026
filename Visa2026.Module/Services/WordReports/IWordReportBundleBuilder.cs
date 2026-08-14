@@ -16,7 +16,7 @@ public sealed class WordReportBundleResult
 public interface IWordReportBundleBuilder
 {
     Task<WordReportBundleResult> BuildZipAsync(
-        Application application,
+        ApplicationProfileInstance application,
         IObjectSpace objectSpace,
         Stream zipStream,
         IReadOnlySet<string>? selectedEntryKeys = null,

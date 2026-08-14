@@ -4,14 +4,14 @@ description: Business trip departure of employees from Aşgabat to Mary project 
 dependsOn: ChangePassport
 sync: false
 anchor:
-  entity: Application
+  entity: ApplicationProfileInstance
   key: FullApplicationNumber
   value: 3/-024
 data:
   Applications:
-  - Application Number: 024
+  - ApplicationProfileInstance Number: 024
     Date: 2027-03-01
-    Application Type: App_Business_Trip_Departure
+    ApplicationProfileInstance Type: App_Business_Trip_Departure
     Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
     To City: Mary şäheri
     Business Trip Start Date: 2027-03-01

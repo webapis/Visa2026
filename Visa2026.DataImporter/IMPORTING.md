@@ -140,12 +140,12 @@ Checks for import files in this priority order:
 
 Excel **`Company`** sheet upserts **`CompanyProfile`**. **`ApplicationNumbering`** sheet upserts **`ApplicationNumberingProfile`**. **`CompanyHead`** / **`Representative`** sheets upsert **`AuthorizedSignatory`** / **`AuthorizedRepresentative`** singletons.
 
-### Phase 5 — Create Application _(skipped if `data.yaml` or `data.xlsx` is present)_
+### Phase 5 — Create ApplicationProfileInstance _(skipped if `data.yaml` or `data.xlsx` is present)_
 
 Creates:
 1. `Application` — linked to ApplicationType and ApplicationTypeFilter (no org FKs)
-2. `ApplicationItem` — links Application to Person, Passport, PositionHistory, EmployeeContract
-3. `ApplicationProgress` — initial state and location entry
+2. `ApplicationItem` — links ApplicationProfileInstance to Person, Passport, PositionHistory, EmployeeContract
+3. `ApplicationProfileInstanceProgress` — initial state and location entry
 
 ### Phase 7 — Miscellaneous Records _(skipped if `data.yaml` or `data.xlsx` is present)_
 
@@ -205,7 +205,7 @@ When you change yaml for a scenario that was already imported, a normal re-run *
 
 #### Recommended: clear + re-import (`--clear-scenario`)
 
-Deletes rows described in that scenario’s yaml (children first, then application scope, then persons/passports, etc.), then runs a fresh POST import. No duplicate Application Items, no PATCH edge cases.
+Deletes rows described in that scenario’s yaml (children first, then application scope, then persons/passports, etc.), then runs a fresh POST import. No duplicate ApplicationProfileInstance Items, no PATCH edge cases.
 
 ```powershell
 dotnet run --project Visa2026.DataImporter -- --clear-scenario InvitationEmployee
@@ -350,18 +350,18 @@ Sheets are processed in dependency order. Each sheet maps rows to OData entity P
 | Sheet | Key Lookups |
 |-------|------------|
 | Applications | ProjectContract, ApplicationType, ApplicationTypeFilter, VisaCategory, MigrationService, Urgency, VisaPeriod, VisaType |
-| ApplicationItems | Application (by FullApplicationNumber), Person, Passport, Visa, PositionHistory, EmployeeContract, WorkPermitItem, InvitationItem, AddressOfResidence, MedicalRecord, Education; registration/travel columns when `ShowRegistrations` |
+| ApplicationItems | ApplicationProfileInstance (by FullApplicationNumber), Person, Passport, Visa, PositionHistory, EmployeeContract, WorkPermitItem, InvitationItem, AddressOfResidence, MedicalRecord, Education; registration/travel columns when `ShowRegistrations` |
 
 ### Documents
 
 | Sheet | Key Lookups | Notes |
 |-------|------------|-------|
-| Invitations | Application (by FullApplicationNumber), ValidityDuration | |
+| Invitations | ApplicationProfileInstance (by FullApplicationNumber), ValidityDuration | |
 | InvitationItems | Invitation (by InvitationNumber), Person, Passport | |
-| WorkPermits | Application (by FullApplicationNumber) | |
+| WorkPermits | ApplicationProfileInstance (by FullApplicationNumber) | |
 | WorkPermitItems | WorkPermit (by WorkPermitNumber), Person, Passport, PositionHistory | |
 | Visas | VisaType, VisaCategory, VisaIssuedPlace, Passport, ApplicationItem, InvitationItem | |
-| Rejections | Application (by FullApplicationNumber) | |
+| Rejections | ApplicationProfileInstance (by FullApplicationNumber) | |
 | RejectionItems | Rejection (by RejectedDocNumber), Person | |
 
 ---

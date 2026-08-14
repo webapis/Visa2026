@@ -21,25 +21,11 @@ internal static class ApplicationWorkspaceCaseBuilder
 
     private static readonly string[] LinkedTones = ["blue", "purple", "green", "orange", "teal"];
 
-    private static readonly (string Key, string Label, string Glyph)[] PersonRecordTypes =
-    [
-        ("passport", "Passport", "🛂"),
-        ("education", "Education", "🎓"),
-        ("position", "Position", "💼"),
-        ("address", "Address", "📍"),
-        ("travel", "Travel history", "✈"),
-        ("medical", "Medical", "🩺"),
-        ("wp", "Work permit", "📄"),
-        ("inv", "Invitation", "✉"),
-        ("salary", "Salary", "💰"),
-        ("bz", "Border zone", "🚧"),
-    ];
-
     public static ApplicationWorkspaceCaseView Build(
-        Application application,
+        ApplicationProfileInstance application,
         ApplicationProfile? profile,
         IReadOnlyList<ApplicationWorkspaceTab> tabs,
-        ApplicationProgressSlaResult sla,
+        ApplicationProfileInstanceProgressSlaResult sla,
         ApplicationWorkspaceCaseChrome chrome,
         IObjectSpace? objectSpace = null) =>
         BuildCore(application, profile, tabs, sla, chrome, objectSpace);
@@ -69,16 +55,18 @@ internal static class ApplicationWorkspaceCaseBuilder
     }
 
     private static ApplicationWorkspaceCaseView BuildCore(
-        Application? application,
+        ApplicationProfileInstance? application,
         ApplicationProfile? profile,
         IReadOnlyList<ApplicationWorkspaceTab> tabs,
-        ApplicationProgressSlaResult sla,
+        ApplicationProfileInstanceProgressSlaResult sla,
         ApplicationWorkspaceCaseChrome chrome,
         IObjectSpace? objectSpace)
     {
         var tabMap = tabs.ToDictionary(t => t.Key, StringComparer.OrdinalIgnoreCase);
-        var people = BuildPeople(tabMap, chrome.PeopleNames);
-        var linkedSummary = BuildLinkedSummary(people);
+        var rosterPeople = application?.People?.OrderBy(p => p.LastName).ThenBy(p => p.FirstName).ToList() ?? [];
+        var rosterLinks = application?.PersonResolvedLinks?.ToList() ?? [];
+        var people = BuildPeople(tabMap, chrome.PeopleNames, application, rosterPeople, rosterLinks);
+        var linkedSummary = BuildLinkedSummary(application, rosterLinks, people);
         var progressSteps = application != null
             ? BuildProgressSteps(application, chrome, sla, objectSpace)
             : BuildProgressStepsFromChrome(chrome);
@@ -92,7 +80,8 @@ internal static class ApplicationWorkspaceCaseBuilder
             SummaryTiles = application != null
                 ? BuildSummaryTiles(application, chrome)
                 : BuildSummaryTilesFromChrome(chrome),
-            LinkedRecordTiles = BuildLinkedTiles(tabs),
+            LinkedRecordTiles = BuildLinkedTiles(application, rosterLinks, tabs),
+            IssuedRecordTiles = BuildIssuedTiles(application, objectSpace),
             ProgressSteps = progressSteps,
             People = people,
             Activities = application != null
@@ -188,7 +177,7 @@ internal static class ApplicationWorkspaceCaseBuilder
             AlertMessage = "Ministry review deadline approaching. Due in 8 days on 22 Aug 2026. Ensure all reviews and required actions are completed on time.",
             Deadlines =
             [
-                new() { Step = "Application received", DueDate = chrome.StartedOn, DaysLeft = "—", Status = "completed" },
+                new() { Step = "ApplicationProfileInstance received", DueDate = chrome.StartedOn, DaysLeft = "—", Status = "completed" },
                 new() { Step = "Document check", DueDate = "14 Aug 2026", DaysLeft = "2", Status = "completed" },
                 new() { Step = "Ministry review", DueDate = "22 Aug 2026", DaysLeft = "8", Status = "inprogress", IsCurrent = true },
                 new() { Step = "Decision", DueDate = "05 Sep 2026", DaysLeft = "22", Status = "pending" },
@@ -198,7 +187,7 @@ internal static class ApplicationWorkspaceCaseBuilder
     }
 
     private static IReadOnlyList<ApplicationWorkspaceCaseSummaryTile> BuildSummaryTiles(
-        Application application,
+        ApplicationProfileInstance application,
         ApplicationWorkspaceCaseChrome chrome) =>
     [
         Tile("Visa type", FormatLookup(application.VisaType?.Code, application.VisaType?.NameTm), "blue", "🛂"),
@@ -222,7 +211,7 @@ internal static class ApplicationWorkspaceCaseBuilder
         : !string.IsNullOrWhiteSpace(name) ? name.Trim()
         : "—";
 
-    private static string ResolveEntryCheckpoint(Application application)
+    private static string ResolveEntryCheckpoint(ApplicationProfileInstance application)
     {
         var border = application.BorderZoneLocation_NameTm;
         if (string.IsNullOrWhiteSpace(border) || border == "Ýok")
@@ -234,39 +223,171 @@ internal static class ApplicationWorkspaceCaseBuilder
     }
 
     private static IReadOnlyList<ApplicationWorkspaceCaseLinkedTile> BuildLinkedTiles(
+        ApplicationProfileInstance? application,
+        IReadOnlyList<ApplicationProfileInstancePersonResolvedLink> rosterLinks,
         IReadOnlyList<ApplicationWorkspaceTab> tabs)
     {
-        var tiles = new List<ApplicationWorkspaceCaseLinkedTile>();
-        var toneIndex = 0;
+        if (application != null && rosterLinks.Count > 0)
+        {
+            var tiles = new List<ApplicationWorkspaceCaseLinkedTile>();
+            var toneIndex = 0;
+            foreach (var def in ApplicationWorkspaceLinkedRecordsCatalog.Definitions)
+            {
+                if (!ApplicationWorkspaceLinkedRecordsCatalog.IsConfigured(application, def.Kind))
+                    continue;
+
+                var count = ApplicationWorkspaceLinkedRecordsCatalog.CountResolved(rosterLinks, def.Kind);
+                if (count == 0)
+                    continue;
+
+                tiles.Add(new ApplicationWorkspaceCaseLinkedTile
+                {
+                    TabKey = def.TabKey,
+                    Label = def.Label,
+                    Count = count,
+                    Tone = LinkedTones[toneIndex % LinkedTones.Length],
+                    Glyph = def.Glyph,
+                });
+                toneIndex++;
+            }
+
+            return tiles;
+        }
+
+        var fallback = new List<ApplicationWorkspaceCaseLinkedTile>();
+        var fallbackTone = 0;
         foreach (var tab in tabs.Where(t => t.Visible && t.Key != "person" && t.Rows.Count > 0))
         {
-            tiles.Add(new ApplicationWorkspaceCaseLinkedTile
+            fallback.Add(new ApplicationWorkspaceCaseLinkedTile
             {
                 TabKey = tab.Key,
                 Label = tab.Label,
                 Count = tab.Rows.Count,
-                Tone = LinkedTones[toneIndex % LinkedTones.Length],
-                Glyph = GlyphForTab(tab.Key),
+                Tone = LinkedTones[fallbackTone % LinkedTones.Length],
+                Glyph = ApplicationWorkspaceLinkedRecordsCatalog.GlyphForTabKey(tab.Key),
             });
-            toneIndex++;
+            fallbackTone++;
+        }
+
+        return fallback;
+    }
+
+    private static IReadOnlyList<ApplicationWorkspaceCaseIssuedTile> BuildIssuedTiles(
+        ApplicationProfileInstance? application,
+        IObjectSpace? objectSpace)
+    {
+        if (application == null)
+            return Array.Empty<ApplicationWorkspaceCaseIssuedTile>();
+
+        var tiles = new List<ApplicationWorkspaceCaseIssuedTile>();
+        foreach (var def in ApplicationWorkspaceIssuedRecordsCatalog.Definitions)
+        {
+            if (!def.IsVisible(application))
+                continue;
+
+            var rows = LoadIssuedRows(application, objectSpace, def.Key);
+            tiles.Add(new ApplicationWorkspaceCaseIssuedTile
+            {
+                Key = def.Key,
+                Label = def.Label,
+                Count = rows.Count,
+                Tone = def.Tone,
+                Glyph = def.Glyph,
+                AddCaption = def.AddCaption,
+                NewCaption = def.NewCaption,
+                PanelTitle = def.PanelTitle,
+                EmptyHint = def.EmptyHint,
+                Rows = rows,
+            });
         }
 
         return tiles;
     }
 
-    private static string GlyphForTab(string key) => key switch
+    private static IReadOnlyList<ApplicationWorkspaceCaseIssuedRow> LoadIssuedRows(
+        ApplicationProfileInstance application,
+        IObjectSpace? objectSpace,
+        string key)
     {
-        "passport" => "🛂",
-        "visa" => "💳",
-        "education" => "🎓",
-        "position" => "💼",
-        "travel" => "✈",
-        _ => "📎",
-    };
+        switch (key)
+        {
+            case ApplicationWorkspaceIssuedRecordsCatalog.Invitation:
+                var invitations = objectSpace != null
+                    ? objectSpace.GetObjectsQuery<Invitation>()
+                        .Where(i => i.ApplicationProfileInstance != null
+                            && i.ApplicationProfileInstance.ID == application.ID)
+                        .ToList()
+                    : application.Invitations?.ToList() ?? [];
+                return invitations
+                    .OrderByDescending(i => i.IssuedDate)
+                    .Select(i => Row(i.ID, i.InvitationNumber, FormatIssuedDate(i.IssuedDate)))
+                    .ToList();
+            case ApplicationWorkspaceIssuedRecordsCatalog.WorkPermit:
+                var permits = objectSpace != null
+                    ? objectSpace.GetObjectsQuery<WorkPermit>()
+                        .Where(w => w.ApplicationProfileInstance != null
+                            && w.ApplicationProfileInstance.ID == application.ID)
+                        .ToList()
+                    : application.WorkPermits?.ToList() ?? [];
+                return permits
+                    .OrderByDescending(w => w.IssuedDate)
+                    .Select(w => Row(w.ID, w.WorkPermitNumber, FormatIssuedDate(w.IssuedDate)))
+                    .ToList();
+            case ApplicationWorkspaceIssuedRecordsCatalog.BorderZone:
+                var zones = objectSpace != null
+                    ? objectSpace.GetObjectsQuery<BorderZone>()
+                        .Where(z => z.ApplicationProfileInstance != null
+                            && z.ApplicationProfileInstance.ID == application.ID)
+                        .ToList()
+                    : application.BorderZones?.ToList() ?? [];
+                return zones
+                    .OrderByDescending(z => z.StartDate)
+                    .Select(z => Row(z.ID, z.BorderZoneNumber, FormatIssuedDate(z.StartDate)))
+                    .ToList();
+            case ApplicationWorkspaceIssuedRecordsCatalog.Rejection:
+                var rejections = objectSpace != null
+                    ? objectSpace.GetObjectsQuery<Rejection>()
+                        .Where(r => r.ApplicationProfileInstance != null
+                            && r.ApplicationProfileInstance.ID == application.ID)
+                        .ToList()
+                    : application.Rejections?.ToList() ?? [];
+                return rejections
+                    .OrderByDescending(r => r.Date)
+                    .Select(r => Row(r.ID, r.RejectedDocNumber, FormatIssuedDate(r.Date)))
+                    .ToList();
+            case ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa:
+                var visas = objectSpace != null
+                    ? objectSpace.GetObjectsQuery<Visa>()
+                        .Where(v => v.IssuingApplicationProfileInstance != null
+                            && v.IssuingApplicationProfileInstance.ID == application.ID)
+                        .ToList()
+                    : application.IssuedVisas?.ToList() ?? [];
+                return visas
+                    .OrderByDescending(v => v.IssueDate)
+                    .Select(v => Row(v.ID, v.VisaNumber, FormatIssuedDate(v.IssueDate)))
+                    .ToList();
+            default:
+                return Array.Empty<ApplicationWorkspaceCaseIssuedRow>();
+        }
+    }
+
+    private static ApplicationWorkspaceCaseIssuedRow Row(Guid id, string? title, string subtitle) =>
+        new()
+        {
+            Id = id,
+            Title = string.IsNullOrWhiteSpace(title) ? "—" : title.Trim(),
+            Subtitle = subtitle,
+        };
+
+    private static string FormatIssuedDate(DateTime date) =>
+        date == default ? string.Empty : date.ToString("dd MMM yyyy", CultureInfo.InvariantCulture);
 
     private static IReadOnlyList<ApplicationWorkspaceCasePerson> BuildPeople(
         IReadOnlyDictionary<string, ApplicationWorkspaceTab> tabs,
-        IReadOnlyList<string> peopleNames)
+        IReadOnlyList<string> peopleNames,
+        ApplicationProfileInstance? application,
+        IReadOnlyList<Person> rosterPeople,
+        IReadOnlyList<ApplicationProfileInstancePersonResolvedLink> rosterLinks)
     {
         if (!tabs.TryGetValue("person", out var personTab) || personTab.Rows.Count == 0)
             return Array.Empty<ApplicationWorkspaceCasePerson>();
@@ -281,14 +402,14 @@ internal static class ApplicationWorkspaceCaseBuilder
             {
                 Index = i,
                 PersonId = i < personTab.RowPersonIds.Count ? personTab.RowPersonIds[i] : Guid.Empty,
-                ApplicationPersonId = i < personTab.RowApplicationPersonIds.Count
-                    ? personTab.RowApplicationPersonIds[i]
+                ApplicationProfileInstancePersonId = i < personTab.RowApplicationProfileInstancePersonIds.Count
+                    ? personTab.RowApplicationProfileInstancePersonIds[i]
                     : Guid.Empty,
                 Name = name,
                 RoleLabel = FormatRoleLabel(role),
                 PassportNumber = FirstCellForPerson(tabs, "passport", name, 1),
                 VisaNumber = FirstCellForPerson(tabs, "visa", name, 1),
-                Records = BuildPersonRecords(tabs, name),
+                Records = BuildPersonRecords(application, rosterPeople, rosterLinks, tabs, name, i),
             });
         }
 
@@ -302,7 +423,7 @@ internal static class ApplicationWorkspaceCaseBuilder
                     Index = i,
                     Name = name,
                     RoleLabel = i == 0 ? "Primary applicant" : "Dependent",
-                    Records = BuildPersonRecords(tabs, name),
+                    Records = BuildPersonRecords(application, rosterPeople, rosterLinks, tabs, name, i),
                 });
             }
         }
@@ -338,23 +459,43 @@ internal static class ApplicationWorkspaceCaseBuilder
     }
 
     private static IReadOnlyList<ApplicationWorkspaceCasePersonRecord> BuildPersonRecords(
+        ApplicationProfileInstance? application,
+        IReadOnlyList<Person> rosterPeople,
+        IReadOnlyList<ApplicationProfileInstancePersonResolvedLink> rosterLinks,
         IReadOnlyDictionary<string, ApplicationWorkspaceTab> tabs,
-        string personName)
+        string personName,
+        int personIndex)
     {
         var records = new List<ApplicationWorkspaceCasePersonRecord>();
-        foreach (var (key, label, glyph) in PersonRecordTypes)
+        Person? rosterPerson = personIndex >= 0 && personIndex < rosterPeople.Count
+            ? rosterPeople[personIndex]
+            : rosterPeople.FirstOrDefault(p =>
+                string.Equals(p.FullName, personName, StringComparison.Ordinal));
+
+        foreach (var def in ApplicationWorkspaceLinkedRecordsCatalog.Definitions)
         {
-            if (!tabs.TryGetValue(key, out var tab) || !tab.Visible)
+            if (application != null && !ApplicationWorkspaceLinkedRecordsCatalog.IsConfigured(application, def.Kind))
                 continue;
 
-            var count = tab.Rows.Count(r => r.Count > 0 && string.Equals(r[0], personName, StringComparison.Ordinal));
+            if (application == null
+                && (!tabs.TryGetValue(def.TabKey, out var hiddenTab) || !hiddenTab.Visible))
+            {
+                continue;
+            }
+
+            var count = rosterPerson != null
+                ? ApplicationWorkspaceLinkedRecordsCatalog.CountResolvedForPerson(rosterLinks, rosterPerson.ID, def.Kind)
+                : tabs.TryGetValue(def.TabKey, out var tab)
+                    ? tab.Rows.Count(r => r.Count > 0 && string.Equals(r[0], personName, StringComparison.Ordinal))
+                    : 0;
+
             records.Add(new ApplicationWorkspaceCasePersonRecord
             {
-                Key = key,
-                Label = label,
+                Key = def.PersonRecordKey,
+                Label = def.Label,
                 Count = count,
                 State = count > 0 ? "valid" : "empty",
-                Glyph = glyph,
+                Glyph = def.Glyph,
             });
         }
 
@@ -377,36 +518,55 @@ internal static class ApplicationWorkspaceCaseBuilder
         };
     }
 
-    private static Dictionary<string, int> BuildLinkedSummary(IReadOnlyList<ApplicationWorkspaceCasePerson> people)
+    private static Dictionary<string, int> BuildLinkedSummary(
+        ApplicationProfileInstance? application,
+        IReadOnlyList<ApplicationProfileInstancePersonResolvedLink> rosterLinks,
+        IReadOnlyList<ApplicationWorkspaceCasePerson> people)
     {
-        var totals = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        if (application != null && rosterLinks.Count > 0)
+        {
+            var totals = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            foreach (var def in ApplicationWorkspaceLinkedRecordsCatalog.Definitions)
+            {
+                if (!ApplicationWorkspaceLinkedRecordsCatalog.IsConfigured(application, def.Kind))
+                    continue;
+
+                var count = ApplicationWorkspaceLinkedRecordsCatalog.CountResolved(rosterLinks, def.Kind);
+                if (count > 0)
+                    totals[def.Label] = count;
+            }
+
+            return totals;
+        }
+
+        var fallback = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         foreach (var person in people)
         {
             foreach (var record in person.Records.Where(r => r.State == "valid"))
             {
-                totals[record.Label] = totals.GetValueOrDefault(record.Label) + Math.Max(record.Count, 1);
+                fallback[record.Label] = fallback.GetValueOrDefault(record.Label) + Math.Max(record.Count, 1);
             }
         }
 
-        return totals;
+        return fallback;
     }
 
     private static IReadOnlyList<ApplicationWorkspaceCaseProgressStep> BuildProgressSteps(
-        Application application,
+        ApplicationProfileInstance application,
         ApplicationWorkspaceCaseChrome chrome,
-        ApplicationProgressSlaResult sla,
+        ApplicationProfileInstanceProgressSlaResult sla,
         IObjectSpace? objectSpace)
     {
         var currentIndex = ResolveProgressIndex(chrome.CurrentStep);
         var history = application.ProgressHistory?
             .OrderBy(p => p.Order)
             .ToList() ?? [];
-        var latest = ApplicationProgressHelper.GetLatest(application.ProgressHistory, objectSpace);
+        var latest = ApplicationProfileInstanceProgressHelper.GetLatest(application.ProgressHistory, objectSpace);
         var advanceOptions = BuildAdvanceOptions(application, latest, objectSpace);
         var canAdvance = advanceOptions.Count > 0;
         var advanceBlockedReason = canAdvance
             ? string.Empty
-            : (ApplicationProgressTransitionHelper.IsTerminalStateCode(latest?.State?.Code)
+            : (ApplicationProfileInstanceProgressTransitionHelper.IsTerminalStateCode(latest?.State?.Code)
                 ? "This application has reached a terminal progress state."
                 : "No further progress steps are available for this route.");
 
@@ -448,11 +608,11 @@ internal static class ApplicationWorkspaceCaseBuilder
     }
 
     private static IReadOnlyList<ApplicationWorkspaceCaseProgressAdvanceOption> BuildAdvanceOptions(
-        Application application,
-        ApplicationProgress? latest,
+        ApplicationProfileInstance application,
+        ApplicationProfileInstanceProgress? latest,
         IObjectSpace? objectSpace)
     {
-        var codes = ApplicationProgressTransitionHelper.GetAllowedNextStateCodes(application, latest);
+        var codes = ApplicationProfileInstanceProgressTransitionHelper.GetAllowedNextStateCodes(application, latest);
         if (codes.Count == 0)
             return Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>();
 
@@ -494,7 +654,7 @@ internal static class ApplicationWorkspaceCaseBuilder
     }
 
     private static IReadOnlyList<ApplicationWorkspaceCaseActivity> BuildActivities(
-        Application application,
+        ApplicationProfileInstance application,
         ApplicationWorkspaceCaseChrome chrome)
     {
         var items = new List<ApplicationWorkspaceCaseActivity>();
@@ -545,9 +705,9 @@ internal static class ApplicationWorkspaceCaseBuilder
     }
 
     private static ApplicationWorkspaceCaseSlaDashboard BuildSla(
-        Application application,
+        ApplicationProfileInstance application,
         ApplicationProfile? profile,
-        ApplicationProgressSlaResult sla,
+        ApplicationProfileInstanceProgressSlaResult sla,
         ApplicationWorkspaceCaseChrome chrome,
         IReadOnlyList<ApplicationWorkspaceCaseProgressStep> progressSteps)
     {
@@ -590,7 +750,7 @@ internal static class ApplicationWorkspaceCaseBuilder
     }
 
     private static IReadOnlyList<ApplicationWorkspaceCaseSlaDeadline> BuildDeadlines(
-        Application application,
+        ApplicationProfileInstance application,
         IReadOnlyList<ApplicationWorkspaceCaseProgressStep> progressSteps)
     {
         var history = application.ProgressHistory?

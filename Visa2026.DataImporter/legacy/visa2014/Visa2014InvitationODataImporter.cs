@@ -11,7 +11,7 @@ internal sealed class Visa2014InvitationImportResult
     public int SkippedCount { get; init; }
     public int DedupeMergedCount { get; init; }
     public int SkippedAlreadyImported { get; init; }
-    public int SkippedMissingApplicationIdMap { get; init; }
+    public int SkippedMissingApplicationProfileInstanceIdMap { get; init; }
     public int PostedCount { get; init; }
     public int FailedCount { get; init; }
     public string? IdMapPath { get; init; }
@@ -65,7 +65,7 @@ internal static class Visa2014InvitationODataImporter
         int posted = 0;
         int failed = 0;
         int skippedAlreadyImported = 0;
-        int skippedMissingApplicationIdMap = 0;
+        int skippedMissingApplicationProfileInstanceIdMap = 0;
 
         foreach (var row in batch.ImportRows)
         {
@@ -82,7 +82,7 @@ internal static class Visa2014InvitationODataImporter
             {
                 var payload = BuildPayload(row, applicationIdMap, objectSpaceFactory, out var missingApplication);
                 if (missingApplication)
-                    skippedMissingApplicationIdMap++;
+                    skippedMissingApplicationProfileInstanceIdMap++;
 
                 if (payload == null)
                 {
@@ -136,7 +136,7 @@ internal static class Visa2014InvitationODataImporter
             SkippedCount = batch.Skipped.Count,
             DedupeMergedCount = batch.DedupeMergedCount,
             SkippedAlreadyImported = skippedAlreadyImported,
-            SkippedMissingApplicationIdMap = skippedMissingApplicationIdMap,
+            SkippedMissingApplicationProfileInstanceIdMap = skippedMissingApplicationProfileInstanceIdMap,
             PostedCount = posted,
             FailedCount = failed,
             IdMapPath = idMapPath,
@@ -174,9 +174,9 @@ internal static class Visa2014InvitationODataImporter
             ["IsVisaStartAndEndDateDefined"] = false,
         };
 
-        if (TryResolveLegacyGuid(row, "Application", out var legacyApplicationOid))
+        if (TryResolveLegacyGuid(row, "Application", out var legacyApplicationProfileInstanceOid))
         {
-            if (applicationIdMap.TryGetValue(legacyApplicationOid, out var applicationId))
+            if (applicationIdMap.TryGetValue(legacyApplicationProfileInstanceOid, out var applicationId))
                 payload["Application"] = new Dictionary<string, object?> { ["ID"] = applicationId };
             else
                 missingApplication = true;

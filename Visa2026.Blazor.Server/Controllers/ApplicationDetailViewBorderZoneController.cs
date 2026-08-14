@@ -3,14 +3,14 @@ using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 using Visa2026.Blazor.Server.Editors;
-using ApplicationBO = Visa2026.Module.BusinessObjects.Application;
+using ApplicationBO = Visa2026.Module.BusinessObjects.ApplicationProfileInstance;
 
 namespace Visa2026.Blazor.Server.Controllers;
 
 /// <summary>
-/// Keeps a single Application.BorderZoneLocation editor on Application detail.
+/// Keeps a single Application.BorderZoneLocation editor on ApplicationProfileInstance detail.
 /// Hides duplicate editors left after the FK-to-string migration that otherwise
-/// appear below the Application Items list.
+/// appear below the ApplicationProfileInstance Items list.
 /// </summary>
 public sealed class ApplicationDetailViewBorderZoneController : ViewController<DetailView>
 {

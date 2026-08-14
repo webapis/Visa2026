@@ -81,7 +81,7 @@ public sealed class OfficerShellModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
-    public Guid CaseApplicationId
+    public Guid CaseApplicationProfileInstanceId
     {
         get => GetPropertyValue<Guid>();
         set => SetPropertyValue(value);
@@ -168,6 +168,12 @@ public sealed class OfficerShellModel : ComponentModelBase
     public int SelectedPersonRowIndex
     {
         get => GetPropertyValue<int>();
+        set => SetPropertyValue(value);
+    }
+
+    public string? PeopleLinkedRecordFocusKey
+    {
+        get => GetPropertyValue<string?>();
         set => SetPropertyValue(value);
     }
 
@@ -399,6 +405,24 @@ public sealed class OfficerShellModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    public EventCallback<string> LinkedRecordTileClicked
+    {
+        get => GetPropertyValue<EventCallback<string>>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback<string> IssuedHeaderNewRequested
+    {
+        get => GetPropertyValue<EventCallback<string>>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback<ApplicationWorkspaceIssuedHeaderOpenRequest> IssuedHeaderOpenRequested
+    {
+        get => GetPropertyValue<EventCallback<ApplicationWorkspaceIssuedHeaderOpenRequest>>();
+        set => SetPropertyValue(value);
+    }
+
     public EventCallback BackToInProcessRequested
     {
         get => GetPropertyValue<EventCallback>();
@@ -483,10 +507,10 @@ public sealed class OfficerShellModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
-    public IReadOnlyList<ApplicationPersonLinkCandidateRow> PersonLinkCandidates
+    public IReadOnlyList<ApplicationProfileInstancePersonLinkCandidateRow> PersonLinkCandidates
     {
-        get => GetPropertyValue<IReadOnlyList<ApplicationPersonLinkCandidateRow>>()
-            ?? Array.Empty<ApplicationPersonLinkCandidateRow>();
+        get => GetPropertyValue<IReadOnlyList<ApplicationProfileInstancePersonLinkCandidateRow>>()
+            ?? Array.Empty<ApplicationProfileInstancePersonLinkCandidateRow>();
         set => SetPropertyValue(value);
     }
 

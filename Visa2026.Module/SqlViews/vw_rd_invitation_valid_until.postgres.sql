@@ -43,8 +43,8 @@ INNER JOIN "Invitations" inv
     ON inv."ID" = ii."InvitationID" AND COALESCE(inv."GCRecord", 0) = 0
 INNER JOIN "People" p
     ON p."ID" = ii."PersonID" AND COALESCE(p."GCRecord", 0) = 0
-LEFT JOIN "Applications" a
-    ON a."ID" = inv."ApplicationID" AND COALESCE(a."GCRecord", 0) = 0
+LEFT JOIN "ApplicationProfileInstances" a
+    ON a."ID" = inv."ApplicationProfileInstanceID" AND COALESCE(a."GCRecord", 0) = 0
 LEFT JOIN "ProjectContracts" apc
     ON apc."ID" = a."ProjectContractID" AND COALESCE(apc."GCRecord", 0) = 0
 LEFT JOIN "ProjectContracts" pc

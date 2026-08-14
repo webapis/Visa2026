@@ -68,7 +68,7 @@ Read [`docs/BO_STATE_COLORS.md`](../../../docs/BO_STATE_COLORS.md) § **How BO s
 | **D** | Process history | `ApplicationProgress`, `ApplicationProgressHelper`, lookup catalogs |
 | **E** | Cross-BO linkage | `ApplicationItem.CurrentVisa`, `IssuingApplicationItem`, `Registration`, `RejectionItem`, `ApplicationType.Name` |
 | **F** | Current vs historical | `PersonCurrentItems.*` → `Archived` when not current |
-| **G** | SQL view read model | `SqlViewsUpdater`, `VisaExtensionStatus`, `WorkPermitExtensionStatus` |
+| **G** | SQL view read model | `ReportDashboardPostgresViewsUpdater` + `ReportDashboardPostgresViewsHealSql`, `VisaExtensionStatus` (`WorkPermitExtensionStatus` has no PostgreSQL body yet) |
 | **H** | Configuration | `ExtensionRequired`, `ExpirationWarningThreshold`, `ApplicationType.Show*` |
 
 **Multi-dimensional (BR-049):** one BO may have validity + process + flag states concurrently. Row color = one winning code; column accents = per dimension. Detail: [reference.md](./reference.md) § State determination matrix.
@@ -127,7 +127,7 @@ Implement / fix ListView row background?
    - **D** — seed `application-state.json` / `application-location.json`; progress row on save
    - **E** — evaluator joins `ApplicationItem`, `Registration`, `RejectionItem`, `ApplicationType`
    - **F** — use `PersonCurrentItems` in evaluator for `Archived` / current scope
-   - **G** — extend `SqlViewsUpdater` + read-only entity when cross-BO joins are heavy
+   - **G** — extend `ReportDashboardPostgresViewsUpdater` (+ heal) with a read-only entity when cross-BO joins are heavy
 6. **Expose for UI** (choose one pattern — prefer A as standard grows):
 
    | Pattern | Use when |

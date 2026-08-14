@@ -593,7 +593,7 @@ internal static class LookupCatalogEntitySync
         var id = contract.ID;
         int count = objectSpace.GetObjects(typeof(Person)).Cast<Person>()
             .Count(p => p.ProjectContract?.ID == id);
-        count += objectSpace.GetObjects(typeof(Application)).Cast<Application>()
+        count += objectSpace.GetObjects(typeof(ApplicationProfileInstance)).Cast<ApplicationProfileInstance>()
             .Count(a => a.ProjectContract?.ID == id);
         count += objectSpace.GetObjects(typeof(UserReportTemplateProjectContract))
             .Cast<UserReportTemplateProjectContract>()

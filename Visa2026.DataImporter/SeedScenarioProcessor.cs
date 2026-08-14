@@ -53,8 +53,8 @@ internal sealed class SeedScenarioProcessor
                 var row = rows[i];
                 string? appType = ResolveRowApplicationType(row, appTypesByRef, primaryAppType);
 
-                if (appType == null && sheetName.Equals("Applications", StringComparison.OrdinalIgnoreCase))
-                    appType = row.GetValueOrDefault("Application Type");
+                if (appType == null && sheetName.Equals("ApplicationProfileInstances", StringComparison.OrdinalIgnoreCase))
+                    appType = row.GetValueOrDefault("ApplicationProfileInstance Type");
 
                 if (appType != null)
                 {
@@ -62,7 +62,7 @@ internal sealed class SeedScenarioProcessor
                         ApplyRowColumns(sheetName, row, typeFlags, appType, result, removeDisallowed);
                     else
                         result.AddIssue(SeedIssueKind.Warning,
-                            $"Unknown Application Type '{appType}' — visibility not checked.");
+                            $"Unknown ApplicationProfileInstance Type '{appType}' — visibility not checked.");
                 }
                 else
                 {
@@ -96,7 +96,7 @@ internal sealed class SeedScenarioProcessor
                 continue;
             }
 
-            bool allowed = sheetName.Equals("Applications", StringComparison.OrdinalIgnoreCase)
+            bool allowed = sheetName.Equals("ApplicationProfileInstances", StringComparison.OrdinalIgnoreCase)
                 ? SeedFieldRules.IsApplicationHeaderAllowed(header, flags)
                 : sheetName.Equals("ApplicationItems", StringComparison.OrdinalIgnoreCase)
                     ? SeedFieldRules.IsApplicationItemHeaderAllowed(header, flags)
@@ -104,7 +104,7 @@ internal sealed class SeedScenarioProcessor
 
             if (!allowed)
             {
-                string? flagName = sheetName.Equals("Applications", StringComparison.OrdinalIgnoreCase)
+                string? flagName = sheetName.Equals("ApplicationProfileInstances", StringComparison.OrdinalIgnoreCase)
                     ? SeedFieldRules.GetApplicationHeaderFlagName(header)
                     : SeedFieldRules.GetApplicationItemHeaderFlagName(header);
 
@@ -137,16 +137,16 @@ internal sealed class SeedScenarioProcessor
     private static Dictionary<string, string> BuildApplicationTypeIndex(YamlScenario scenario)
     {
         var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        if (!scenario.Data!.TryGetValue("Applications", out var apps) || apps == null)
+        if (!scenario.Data!.TryGetValue("ApplicationProfileInstances", out var apps) || apps == null)
             return map;
 
         foreach (var row in apps)
         {
-            if (!row.TryGetValue("Application Type", out string? appType) || string.IsNullOrWhiteSpace(appType))
+            if (!row.TryGetValue("ApplicationProfileInstance Type", out string? appType) || string.IsNullOrWhiteSpace(appType))
                 continue;
 
             appType = appType.Trim();
-            if (row.TryGetValue("Application Number", out string? num) && !string.IsNullOrWhiteSpace(num))
+            if (row.TryGetValue("ApplicationProfileInstance Number", out string? num) && !string.IsNullOrWhiteSpace(num))
             {
                 string normalized = num.Trim().PadLeft(3, '0');
                 map[normalized] = appType;
@@ -163,8 +163,8 @@ internal sealed class SeedScenarioProcessor
         List<Dictionary<string, string>> rows,
         Dictionary<string, string> appTypesByRef)
     {
-        if (sheetName.Equals("Applications", StringComparison.OrdinalIgnoreCase))
-            return rows.FirstOrDefault()?.GetValueOrDefault("Application Type");
+        if (sheetName.Equals("ApplicationProfileInstances", StringComparison.OrdinalIgnoreCase))
+            return rows.FirstOrDefault()?.GetValueOrDefault("ApplicationProfileInstance Type");
 
         string? appRef = rows.Select(r => r.GetValueOrDefault("Application")).FirstOrDefault(v => !string.IsNullOrWhiteSpace(v));
         return ResolveRowApplicationType(

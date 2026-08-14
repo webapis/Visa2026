@@ -7,14 +7,14 @@ using Visa2026.Module.Services.ApplicationProfileWizard;
 namespace Visa2026.Module.Services.ApplicationWorkspace;
 
 /// <summary>
-/// Workspace profile-strip actions: Configure wizard / New Application from the linked profile.
+/// Workspace profile-strip actions: Configure wizard / New ApplicationProfileInstance from the linked profile.
 /// </summary>
 public static class ApplicationWorkspaceProfileRailHelper
 {
     public static bool TryCreateNewApplicationFromProfile(
         XafApplication application,
         Guid applicationProfileId,
-        Guid contextApplicationId,
+        Guid contextApplicationProfileInstanceId,
         Frame? sourceFrame,
         out string? errorMessage)
     {
@@ -26,14 +26,14 @@ public static class ApplicationWorkspaceProfileRailHelper
             return false;
         }
 
-        ApplicationProgressRouteKind? route = null;
-        if (contextApplicationId != Guid.Empty)
+        ApplicationProfileInstanceProgressRouteKind? route = null;
+        if (contextApplicationProfileInstanceId != Guid.Empty)
         {
-            using var contextSpace = application.CreateObjectSpace(typeof(Application));
-            var contextApp = contextSpace.GetObjectByKey<Application>(contextApplicationId);
+            using var contextSpace = application.CreateObjectSpace(typeof(ApplicationProfileInstance));
+            var contextApp = contextSpace.GetObjectByKey<ApplicationProfileInstance>(contextApplicationProfileInstanceId);
             route = contextApp?.CreationProgressRoute
                 ?? contextApp?.ApplicationProfile?.ProgressRoute
-                ?? contextApp?.ApplicationType?.ApplicationProgressRoute;
+                ?? contextApp?.ApplicationType?.ApplicationProfileInstanceProgressRoute;
         }
 
         ApplicationProfilePickerContextGate.Set(

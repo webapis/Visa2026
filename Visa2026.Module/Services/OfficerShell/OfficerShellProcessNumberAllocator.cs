@@ -19,7 +19,7 @@ public static class OfficerShellProcessNumberAllocator
         var year = (asOf ?? DateTime.Today).Year;
         var prefix = $"{year}-";
 
-        var maxSequence = objectSpace.GetObjectsQuery<Application>()
+        var maxSequence = objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
             .Where(a => a.ProcessNumber != null && a.ProcessNumber.StartsWith(prefix))
             .AsEnumerable()
             .Select(a => TryParseSequence(a.ProcessNumber, prefix))

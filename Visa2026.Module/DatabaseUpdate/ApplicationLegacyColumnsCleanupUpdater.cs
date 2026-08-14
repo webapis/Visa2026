@@ -17,15 +17,15 @@ public sealed class ApplicationLegacyColumnsCleanupUpdater : ModuleUpdater
     public override void UpdateDatabaseBeforeUpdateSchema()
     {
         base.UpdateDatabaseBeforeUpdateSchema();
-        DropColumnIfExists("Applications", "CurrentStateID");
-        DropColumnIfExists("Applications", "ExpirationDate");
+        DropColumnIfExists("ApplicationProfileInstances", "CurrentStateID");
+        DropColumnIfExists("ApplicationProfileInstances", "ExpirationDate");
     }
 
     public override void UpdateDatabaseAfterUpdateSchema()
     {
         base.UpdateDatabaseAfterUpdateSchema();
-        DropColumnIfExists("Applications", "CurrentStateID");
-        DropColumnIfExists("Applications", "ExpirationDate");
+        DropColumnIfExists("ApplicationProfileInstances", "CurrentStateID");
+        DropColumnIfExists("ApplicationProfileInstances", "ExpirationDate");
     }
 
     private void DropColumnIfExists(string tableName, string columnName)

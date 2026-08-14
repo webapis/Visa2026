@@ -4,14 +4,14 @@ description: Registration of employee internal departure from Mary welaýaty to 
 dependsOn: CheckInInternal
 sync: false
 anchor:
-  entity: Application
+  entity: ApplicationProfileInstance
   key: FullApplicationNumber
   value: 9/-006
 data:
   Applications:
-  - Application Number: 006
+  - ApplicationProfileInstance Number: 006
     Date: 2026-09-01
-    Application Type: App_Reg_Check_Out_Internal
+    ApplicationProfileInstance Type: App_Reg_Check_Out_Internal
     Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň müdirine
     From City: Mary şäheri
     To City: Aşgabat şäheri

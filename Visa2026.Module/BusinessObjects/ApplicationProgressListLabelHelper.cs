@@ -5,7 +5,7 @@ namespace Visa2026.Module.BusinessObjects;
 /// <summary>
 /// Progress history list labels: state text plus ministry short name when applicable.
 /// </summary>
-internal static class ApplicationProgressListLabelHelper
+internal static class ApplicationProfileInstanceProgressListLabelHelper
 {
     internal static string FormatStatusLabel(string? stateLabel, string? ministryShortName)
     {

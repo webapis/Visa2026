@@ -65,9 +65,7 @@ namespace Visa2026.Module
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.StateChangeLog));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.PdfBatchEnqueueOptions));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.PersonIncompleteMarkOptions));
-            AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ApplicationItemDocumentCopiesListHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ApplicationReportPackageListHost));
-            AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ApplicationItemReportPackageListHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.StateNotifications.BoStateNotificationInboxHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.Operations.ImportReimportHistoryHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ReportDashboard.ReportDashboardHost));
@@ -86,6 +84,7 @@ namespace Visa2026.Module
             // (Former SQL Server T-SQL ModuleUpdaters are not registered.)
             return new ModuleUpdater[]
             {
+                new DatabaseUpdate.ApplicationProfileInstanceCutoverSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.Updater(objectSpace, versionFromDB),
                 new DatabaseUpdate.TenantUserSeedUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.SyncRulesUpdater(objectSpace, versionFromDB),
@@ -103,15 +102,17 @@ namespace Visa2026.Module
                 new DatabaseUpdate.PersonIncompleteDataSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.PersonExportBatchSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.InvitationLegacyShapeSchemaUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.ApplicationProgressProcessNumberSchemaUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ApplicationProfileInstanceProgressProcessNumberSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationProfileSchemaUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.VisaIssuingApplicationSchemaUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.VisaIssuingApplicationProfileInstanceSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.VisaProcessNumberSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationTypeConfigurationUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationTypeGroupSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationTypeGroupSeedUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationMigrationSlaProfileTypeLinkUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationProfileSeedUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ApplicationProfileTenantCatalogSeedUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ApplicationProfileNestedTemplateTenantCatalogSeedUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApprovalLegProfileSeedUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ReportDashboardPostgresViewsUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ProjectContractApprovalLegProfileLinkUpdater(objectSpace, versionFromDB),
@@ -129,8 +130,9 @@ namespace Visa2026.Module
             updaters.Add(new LookupBaseDetailViewModelUpdater());
             updaters.Add(new ApplicationMigrationSlaProfileViewsUpdater());
             updaters.Add(new ApprovalLegProfileMinistryLegViewsUpdater());
-            updaters.Add(new ApplicationProgressHistoryViewsUpdater());
+            updaters.Add(new ApplicationProfileInstanceProgressHistoryViewsUpdater());
             updaters.Add(new PersonNestedListViewsUpdater());
+            updaters.Add(new ApplicationProfileInstanceChildNestedListViewsUpdater());
             updaters.Add(new ExpirationAlertRuleViewsUpdater());
             updaters.Add(new ListViewShowFindPanelModelUpdater());
             updaters.Add(new DatabaseUpdate.HistoryDashboardViewItemUpdater());

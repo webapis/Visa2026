@@ -39,7 +39,7 @@ $rows = @(
     @{ BO='MedicalRecord'; L='SELECT COUNT(*) FROM dbo.IPersonn_SpidKepilnama WHERE GCRecord IS NULL'; M='SELECT COUNT(*) FROM MedicalRecords'; N='' }
     @{ BO='Application'; L='SELECT COUNT(*) FROM dbo.Application WHERE GCRecord IS NULL'; M='SELECT COUNT(*) FROM Applications WHERE IsManualEntry = 1 AND (GCRecord IS NULL OR GCRecord = 0)'; N='manual-entry only' }
     @{ BO='ApplicationItem'; L='SELECT COUNT(*) FROM dbo.PersonInApplication WHERE GCRecord IS NULL'; M='SELECT COUNT(*) FROM ApplicationItems ai INNER JOIN Applications a ON ai.ApplicationID = a.ID WHERE a.IsManualEntry = 1 AND (a.GCRecord IS NULL OR a.GCRecord = 0) AND (ai.GCRecord IS NULL OR ai.GCRecord = 0)'; N='manual-entry items' }
-    @{ BO='ApplicationProgress'; L='SELECT COUNT(*) FROM dbo.Application WHERE GCRecord IS NULL'; M='SELECT COUNT(*) FROM ApplicationProgresses ap INNER JOIN Applications a ON ap.ApplicationID = a.ID WHERE a.IsManualEntry = 1 AND (a.GCRecord IS NULL OR a.GCRecord = 0) AND (ap.GCRecord IS NULL OR ap.GCRecord = 0)'; N='synthetic multi-step per app' }
+    @{ BO='ApplicationProfileInstanceProgress'; L='SELECT COUNT(*) FROM dbo.Application WHERE GCRecord IS NULL'; M='SELECT COUNT(*) FROM ApplicationProgresses ap INNER JOIN Applications a ON ap.ApplicationID = a.ID WHERE a.IsManualEntry = 1 AND (a.GCRecord IS NULL OR a.GCRecord = 0) AND (ap.GCRecord IS NULL OR ap.GCRecord = 0)'; N='synthetic multi-step per app' }
 )
 Write-Host "Legacy: $LegacyServer / $LegacyDatabase" -ForegroundColor Cyan
 Write-Host "Target: $TargetServer / $TargetDatabase" -ForegroundColor Cyan

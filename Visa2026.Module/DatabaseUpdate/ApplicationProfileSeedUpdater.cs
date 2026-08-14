@@ -6,7 +6,7 @@ namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
 /// Seeds <see cref="BusinessObjects.ApplicationProfile"/> rows from deprecated
-/// <see cref="BusinessObjects.ApplicationType"/> and backfills Application FKs.
+/// <see cref="BusinessObjects.ApplicationType"/> and backfills ApplicationProfileInstance FKs.
 /// Runs after type configuration and migration SLA profile links.
 /// </summary>
 public sealed class ApplicationProfileSeedUpdater : ModuleUpdater

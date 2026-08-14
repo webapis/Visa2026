@@ -37,7 +37,7 @@ namespace Visa2026.Module.Services.StateEvaluation.Evaluators
             }
 
             if (ExpirationEvaluationHelper.IsExtensionApplicationRequired(visa, ExpirationAlertBusinessObjectKeys.Visa, settings))
-                return Make("ExtensionApplicationRequired", StateSeverity.Warning, days, id, $"Visa: Extension Application Required ({days} days remaining)");
+                return Make("ExtensionApplicationRequired", StateSeverity.Warning, days, id, $"Visa: Extension ApplicationProfileInstance Required ({days} days remaining)");
 
             if (visa.IsExtended)
                 return Make("Extended", StateSeverity.Info, days, id, $"Visa: Extended — expiring in {days} days");

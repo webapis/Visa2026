@@ -1,5 +1,5 @@
 /*
-  Application workspace — custom DetailView shell (M2M prototype).
+  ApplicationProfileInstance workspace — custom DetailView shell (M2M prototype).
   Canonical: docs/prototypes/process-started-application-profile-workspace-mockup.png, docs/APPLICATION_PROFILE_PLAN.md §9–§10
 */
 
@@ -14,7 +14,12 @@
   --aw-sidebar: color-mix(in srgb, var(--aw-surface) 96%, var(--aw-text));
 
   color: var(--aw-text);
-  padding: 0 0 12px;
+.app-workspace--case {
+  padding: 0;
+}
+
+.app-workspace--case .officer-case-workspace {
+  min-height: calc(100vh - 160px);
 }
 
 .app-workspace__loading {

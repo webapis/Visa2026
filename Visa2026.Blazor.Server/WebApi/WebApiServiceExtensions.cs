@@ -121,6 +121,7 @@ public static class WebApiServiceExtensions
             options.BusinessObject<Visa2026.Module.BusinessObjects.VisaCategory>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.Country>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.ApplicationType>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.ApplicationProfile>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.ApplicationTypeFilter>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.ApplicationState>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.ApplicationLocation>();
@@ -147,9 +148,9 @@ public static class WebApiServiceExtensions
             options.BusinessObject<Visa2026.Module.BusinessObjects.VisaIssuedPlace>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.VisaPeriod>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.AddressOfResidence>();
-            options.BusinessObject<Visa2026.Module.BusinessObjects.Application>();
-            options.BusinessObject<Visa2026.Module.BusinessObjects.ApplicationItem>();
-            options.BusinessObject<Visa2026.Module.BusinessObjects.ApplicationProgress>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.ApplicationProfileInstance>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.ApplicationProfileInstancePersonResolvedLink>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.ApplicationProfileInstanceProgress>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.BusinessTripAddress>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.BusinessTripPurpose>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.City>();

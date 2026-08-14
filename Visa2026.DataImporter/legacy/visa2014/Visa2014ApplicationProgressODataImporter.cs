@@ -5,7 +5,7 @@ using Visa2026.DataImporter;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
-internal sealed class Visa2014ApplicationProgressImportResult
+internal sealed class Visa2014ApplicationProfileInstanceProgressImportResult
 {
     public int LegacyRowCount { get; init; }
     public int PreparedCount { get; init; }
@@ -21,9 +21,9 @@ internal sealed class Visa2014ApplicationProgressImportResult
     public IReadOnlyList<string> Errors { get; init; } = [];
 }
 
-internal static class Visa2014ApplicationProgressODataImporter
+internal static class Visa2014ApplicationProfileInstanceProgressODataImporter
 {
-    public static async Task<Visa2014ApplicationProgressImportResult> RunAsync(
+    public static async Task<Visa2014ApplicationProfileInstanceProgressImportResult> RunAsync(
         IVisa2014ImportTarget target,
         Visa2014ODataLookupResolver resolver,
         ApiClient? seedCleanupApi,
@@ -36,7 +36,7 @@ internal static class Visa2014ApplicationProgressODataImporter
         bool verbose,
         INonSecuredObjectSpaceFactory? objectSpaceFactory = null,
         string? targetConnectionForLegCounts = null,
-        // Retained for call-site compatibility; ApplicationProgress posts sequentially (flush per row).
+        // Retained for call-site compatibility; ApplicationProfileInstanceProgress posts sequentially (flush per row).
         int parallelism = 0,
         int batchSize = 50)
     {
@@ -44,35 +44,35 @@ internal static class Visa2014ApplicationProgressODataImporter
         _ = batchSize;
         var applicationIdMap = Visa2014IdMapHelper.Load(applicationIdMapPath);
         if (verbose)
-            Console.WriteLine($"INF Application id-map entries: {applicationIdMap.Count}");
+            Console.WriteLine($"INF ApplicationProfileInstance id-map entries: {applicationIdMap.Count}");
 
-        Console.WriteLine("INF ApplicationProgress import: resolving ministry leg counts...");
+        Console.WriteLine("INF ApplicationProfileInstanceProgress import: resolving ministry leg counts...");
         Console.Out.Flush();
         Visa2014SyncUpsertHelper.WriteSyncProgressFile(
-            progressIdMapOutputPath, "ApplicationProgress", 0, 0, 0, 0, 0, 0, phase: "resolve-legs");
+            progressIdMapOutputPath, "ApplicationProfileInstanceProgress", 0, 0, 0, 0, 0, 0, phase: "resolve-legs");
 
-        var ministryLegCountByLegacyApplicationOid = await ResolveMinistryLegCountMapAsync(
+        var ministryLegCountByLegacyApplicationProfileInstanceOid = await ResolveMinistryLegCountMapAsync(
             applicationIdMap, objectSpaceFactory, targetConnectionForLegCounts, verbose);
 
-        Console.WriteLine("INF ApplicationProgress import: preparing rows from legacy...");
+        Console.WriteLine("INF ApplicationProfileInstanceProgress import: preparing rows from legacy...");
         Console.Out.Flush();
         Visa2014SyncUpsertHelper.WriteSyncProgressFile(
-            progressIdMapOutputPath, "ApplicationProgress", 0, 0, 0, 0, 0, 0, phase: "prepare");
+            progressIdMapOutputPath, "ApplicationProfileInstanceProgress", 0, 0, 0, 0, 0, 0, phase: "prepare");
 
-        var batch = Visa2014ApplicationProgressTransform.PrepareImportBatch(
+        var batch = Visa2014ApplicationProfileInstanceProgressTransform.PrepareImportBatch(
             legacyConnectionString,
             lookupTranslationPaths,
             maxRows,
             verbose,
-            ministryLegCountByLegacyApplicationOid);
+            ministryLegCountByLegacyApplicationProfileInstanceOid);
 
         if (dryRun)
         {
             int missingApp = CountMissingApplicationMap(batch.ImportRows, applicationIdMap);
             Console.WriteLine(
                 $"DRY RUN: {batch.ImportRows.Count} row(s) ready to POST " +
-                $"({batch.Skipped.Count} parent-skipped, {missingApp} missing Application id-map).");
-            return new Visa2014ApplicationProgressImportResult
+                $"({batch.Skipped.Count} parent-skipped, {missingApp} missing ApplicationProfileInstance id-map).");
+            return new Visa2014ApplicationProfileInstanceProgressImportResult
             {
                 LegacyRowCount = batch.LegacyRowCount,
                 PreparedCount = batch.ImportRows.Count,
@@ -84,7 +84,7 @@ internal static class Visa2014ApplicationProgressODataImporter
         int seedsRemoved = 0;
         if (seedCleanupApi != null)
         {
-            var seedCleanup = await Visa2014ApplicationProgressSeedCleanup.RunAsync(
+            var seedCleanup = await Visa2014ApplicationProfileInstanceProgressSeedCleanup.RunAsync(
                 seedCleanupApi,
                 applicationIdMap.Values.ToHashSet(),
                 dryRun: false,
@@ -100,17 +100,17 @@ internal static class Visa2014ApplicationProgressODataImporter
 
         var progressIdMap = LoadOptionalProgressIdMap(progressIdMapOutputPath);
         if (verbose && progressIdMap.Count > 0)
-            Console.WriteLine($"INF Existing ApplicationProgress id-map entries: {progressIdMap.Count}");
+            Console.WriteLine($"INF Existing ApplicationProfileInstanceProgress id-map entries: {progressIdMap.Count}");
 
         var total = batch.ImportRows.Count;
-        // One progress row per CommitChanges: batching multiple steps for the same Application
+        // One progress row per CommitChanges: batching multiple steps for the same ApplicationProfileInstance
         // fights Application.LatestProgress optimistic lock (and hung Prod at posted~49 / batch-size 50).
         Console.WriteLine(
-            $"INF ApplicationProgress sequential post: {total} row(s) ({batch.LegacyRowCount} legacy apps; flush per row)");
+            $"INF ApplicationProfileInstanceProgress sequential post: {total} row(s) ({batch.LegacyRowCount} legacy apps; flush per row)");
         Console.Out.Flush();
         Visa2014SyncUpsertHelper.WriteSyncProgressFile(
             progressIdMapOutputPath,
-            "ApplicationProgress",
+            "ApplicationProfileInstanceProgress",
             processed: 0,
             total,
             updated: 0,
@@ -147,7 +147,7 @@ internal static class Visa2014ApplicationProgressODataImporter
                     errors.Add("row: missing _syntheticStepKey");
                     Visa2014SyncUpsertHelper.ReportImportLoopProgress(
                         progressIdMapOutputPath,
-                        "ApplicationProgress",
+                        "ApplicationProfileInstanceProgress",
                         processed,
                         total,
                         posted,
@@ -162,7 +162,7 @@ internal static class Visa2014ApplicationProgressODataImporter
                     processed++;
                     Visa2014SyncUpsertHelper.ReportImportLoopProgress(
                         progressIdMapOutputPath,
-                        "ApplicationProgress",
+                        "ApplicationProfileInstanceProgress",
                         processed,
                         total,
                         posted,
@@ -171,14 +171,14 @@ internal static class Visa2014ApplicationProgressODataImporter
                     continue;
                 }
 
-                if (!TryResolveLegacyApplicationOid(row, out var legacyApplicationOid))
+                if (!TryResolveLegacyApplicationProfileInstanceOid(row, out var legacyApplicationProfileInstanceOid))
                 {
                     failed++;
                     processed++;
-                    errors.Add($"{syntheticKey}: missing legacy Application Oid");
+                    errors.Add($"{syntheticKey}: missing legacy ApplicationProfileInstance Oid");
                     Visa2014SyncUpsertHelper.ReportImportLoopProgress(
                         progressIdMapOutputPath,
-                        "ApplicationProgress",
+                        "ApplicationProfileInstanceProgress",
                         processed,
                         total,
                         posted,
@@ -187,15 +187,15 @@ internal static class Visa2014ApplicationProgressODataImporter
                     continue;
                 }
 
-                if (!applicationIdMap.TryGetValue(legacyApplicationOid, out var applicationId))
+                if (!applicationIdMap.TryGetValue(legacyApplicationProfileInstanceOid, out var applicationId))
                 {
                     skippedMissing++;
                     processed++;
                     if (verbose)
-                        Console.WriteLine($"  SKIP {syntheticKey}: Application {legacyApplicationOid} not in id-map");
+                        Console.WriteLine($"  SKIP {syntheticKey}: ApplicationProfileInstance {legacyApplicationProfileInstanceOid} not in id-map");
                     Visa2014SyncUpsertHelper.ReportImportLoopProgress(
                         progressIdMapOutputPath,
-                        "ApplicationProgress",
+                        "ApplicationProfileInstanceProgress",
                         processed,
                         total,
                         posted,
@@ -218,7 +218,7 @@ internal static class Visa2014ApplicationProgressODataImporter
                             Console.Error.WriteLine($"ERR {gap}");
                         Visa2014SyncUpsertHelper.ReportImportLoopProgress(
                             progressIdMapOutputPath,
-                            "ApplicationProgress",
+                            "ApplicationProfileInstanceProgress",
                             processed,
                             total,
                             posted,
@@ -228,7 +228,7 @@ internal static class Visa2014ApplicationProgressODataImporter
                     }
 
                     var createdId = await postTarget.CreateAsync(
-                        typeof(Visa2026.Module.BusinessObjects.ApplicationProgress), payload);
+                        typeof(Visa2026.Module.BusinessObjects.ApplicationProfileInstanceProgress), payload);
                     if (!createdId.HasValue)
                     {
                         failed++;
@@ -236,7 +236,7 @@ internal static class Visa2014ApplicationProgressODataImporter
                         errors.Add($"{syntheticKey}: create returned null");
                         Visa2014SyncUpsertHelper.ReportImportLoopProgress(
                             progressIdMapOutputPath,
-                            "ApplicationProgress",
+                            "ApplicationProfileInstanceProgress",
                             processed,
                             total,
                             posted,
@@ -253,7 +253,7 @@ internal static class Visa2014ApplicationProgressODataImporter
                     posted++;
                     processed++;
                     if (verbose)
-                        Console.WriteLine($"  SAVE ApplicationProgress {createdId.Value} <- {syntheticKey}");
+                        Console.WriteLine($"  SAVE ApplicationProfileInstanceProgress {createdId.Value} <- {syntheticKey}");
                 }
                 catch (Exception ex)
                 {
@@ -265,7 +265,7 @@ internal static class Visa2014ApplicationProgressODataImporter
 
                 Visa2014SyncUpsertHelper.ReportImportLoopProgress(
                     progressIdMapOutputPath,
-                    "ApplicationProgress",
+                    "ApplicationProfileInstanceProgress",
                     processed,
                     total,
                     posted,
@@ -281,7 +281,7 @@ internal static class Visa2014ApplicationProgressODataImporter
 
         Visa2014SyncUpsertHelper.WriteSyncProgressFile(
             progressIdMapOutputPath,
-            "ApplicationProgress",
+            "ApplicationProfileInstanceProgress",
             processed,
             total,
             updated: 0,
@@ -303,7 +303,7 @@ internal static class Visa2014ApplicationProgressODataImporter
                     new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
         }
 
-        return new Visa2014ApplicationProgressImportResult
+        return new Visa2014ApplicationProfileInstanceProgressImportResult
         {
             LegacyRowCount = batch.LegacyRowCount,
             PreparedCount = batch.ImportRows.Count,
@@ -320,23 +320,23 @@ internal static class Visa2014ApplicationProgressODataImporter
     }
 
     /// <summary>Re-import synthesized progress for a subset of applications (after route correction).</summary>
-    internal static async Task<Visa2014ApplicationProgressImportResult> RegenerateForLegacyApplicationsAsync(
+    internal static async Task<Visa2014ApplicationProfileInstanceProgressImportResult> RegenerateForLegacyApplicationsAsync(
         IVisa2014ImportTarget target,
         Visa2014ODataLookupResolver resolver,
         string legacyConnectionString,
         IReadOnlyList<string> lookupTranslationPaths,
-        IReadOnlyDictionary<Guid, Guid> legacyApplicationIdToTargetId,
-        IReadOnlyDictionary<Guid, int> ministryLegCountByLegacyApplicationOid,
+        IReadOnlyDictionary<Guid, Guid> legacyApplicationProfileInstanceIdToTargetId,
+        IReadOnlyDictionary<Guid, int> ministryLegCountByLegacyApplicationProfileInstanceOid,
         bool dryRun,
         bool verbose)
     {
-        var targetIds = legacyApplicationIdToTargetId.Values.ToHashSet();
-        var batch = Visa2014ApplicationProgressTransform.PrepareImportBatch(
+        var targetIds = legacyApplicationProfileInstanceIdToTargetId.Values.ToHashSet();
+        var batch = Visa2014ApplicationProfileInstanceProgressTransform.PrepareImportBatch(
             legacyConnectionString,
             lookupTranslationPaths,
             maxRows: null,
             verbose,
-            ministryLegCountByLegacyApplicationOid);
+            ministryLegCountByLegacyApplicationProfileInstanceOid);
 
         var errors = new List<string>();
         var progressIdMap = new Dictionary<string, Guid>(StringComparer.Ordinal);
@@ -344,8 +344,8 @@ internal static class Visa2014ApplicationProgressODataImporter
 
         foreach (var row in batch.ImportRows)
         {
-            if (!TryResolveLegacyApplicationOid(row, out var legacyApplicationOid)
-                || !legacyApplicationIdToTargetId.TryGetValue(legacyApplicationOid, out var applicationId)
+            if (!TryResolveLegacyApplicationProfileInstanceOid(row, out var legacyApplicationProfileInstanceOid)
+                || !legacyApplicationProfileInstanceIdToTargetId.TryGetValue(legacyApplicationProfileInstanceOid, out var applicationId)
                 || !targetIds.Contains(applicationId))
             {
                 continue;
@@ -376,7 +376,7 @@ internal static class Visa2014ApplicationProgressODataImporter
                     continue;
                 }
 
-                var createdId = await target.CreateAsync(typeof(Visa2026.Module.BusinessObjects.ApplicationProgress), payload);
+                var createdId = await target.CreateAsync(typeof(Visa2026.Module.BusinessObjects.ApplicationProfileInstanceProgress), payload);
                 if (!createdId.HasValue)
                 {
                     failed++;
@@ -399,7 +399,7 @@ internal static class Visa2014ApplicationProgressODataImporter
         if (!dryRun)
             await target.FlushAsync();
 
-        return new Visa2014ApplicationProgressImportResult
+        return new Visa2014ApplicationProfileInstanceProgressImportResult
         {
             LegacyRowCount = batch.LegacyRowCount,
             PreparedCount = batch.ImportRows.Count,
@@ -418,25 +418,25 @@ internal static class Visa2014ApplicationProgressODataImporter
         int missing = 0;
         foreach (var row in importRows)
         {
-            if (!TryResolveLegacyApplicationOid(row, out var legacyApplicationOid))
+            if (!TryResolveLegacyApplicationProfileInstanceOid(row, out var legacyApplicationProfileInstanceOid))
             {
                 missing++;
                 continue;
             }
 
-            if (!applicationIdMap.ContainsKey(legacyApplicationOid))
+            if (!applicationIdMap.ContainsKey(legacyApplicationProfileInstanceOid))
                 missing++;
         }
 
         return missing;
     }
 
-    private static bool TryResolveLegacyApplicationOid(Dictionary<string, object?> row, out Guid legacyApplicationOid)
+    private static bool TryResolveLegacyApplicationProfileInstanceOid(Dictionary<string, object?> row, out Guid legacyApplicationProfileInstanceOid)
     {
-        legacyApplicationOid = Guid.Empty;
+        legacyApplicationProfileInstanceOid = Guid.Empty;
         var text = row.GetValueOrDefault("Application") as string
-            ?? row.GetValueOrDefault("_legacyApplicationOid") as string;
-        return !string.IsNullOrWhiteSpace(text) && Guid.TryParse(text, out legacyApplicationOid);
+            ?? row.GetValueOrDefault("_legacyApplicationProfileInstanceOid") as string;
+        return !string.IsNullOrWhiteSpace(text) && Guid.TryParse(text, out legacyApplicationProfileInstanceOid);
     }
 
     private static Dictionary<string, object?>? BuildPayload(

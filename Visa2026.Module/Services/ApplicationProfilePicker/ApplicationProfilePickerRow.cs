@@ -15,7 +15,7 @@ public sealed class ApplicationProfilePickerRow
 
     public ApplicationProfileActionFamily ActionFamily { get; init; }
 
-    public ApplicationProgressRouteKind ProgressRoute { get; init; }
+    public ApplicationProfileInstanceProgressRouteKind ProgressRoute { get; init; }
 
     public bool IsConfigLocked { get; init; }
 

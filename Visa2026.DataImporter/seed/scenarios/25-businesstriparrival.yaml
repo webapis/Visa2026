@@ -4,14 +4,14 @@ description: Business trip arrival of employees returning from Mary project site
 dependsOn: BusinessTripDeparture
 sync: false
 anchor:
-  entity: Application
+  entity: ApplicationProfileInstance
   key: FullApplicationNumber
   value: 3/-025
 data:
   Applications:
-  - Application Number: 025
+  - ApplicationProfileInstance Number: 025
     Date: 2027-03-05
-    Application Type: App_Business_Trip_Arrival
+    ApplicationProfileInstance Type: App_Business_Trip_Arrival
     Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
     From City: Mary şäheri
     Business Trip Start Date: 2027-03-01

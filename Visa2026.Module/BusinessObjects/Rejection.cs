@@ -28,7 +28,48 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         [RuleRequiredField]
-        public virtual Application Application { get; set; }
+        [ImmediatePostData]
+        [VisibleInListView(false)]
+        [DataSourceProperty(nameof(AvailableApplicationProfileInstances))]
+        [InverseProperty(nameof(ApplicationProfileInstance.Rejections))]
+        [ToolTip("Link this rejection to the application that produced it.")]
+        public virtual ApplicationProfileInstance ApplicationProfileInstance { get; set; }
+
+        /// <summary>Candidate applications whose profile may produce a rejection.</summary>
+        [NotMapped]
+        [Browsable(false)]
+        public IList<ApplicationProfileInstance> AvailableApplicationProfileInstances
+        {
+            get
+            {
+                var objectSpace = ObjectSpaceHelper.Get(this);
+                if (objectSpace == null)
+                    return new List<ApplicationProfileInstance>();
+
+                return objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
+                    .Where(a =>
+                        (a.ApplicationProfile != null && a.ApplicationProfile.ProduceRejection)
+                        || (a.ApplicationType != null && a.ApplicationType.ShowRejections))
+                    .OrderByDescending(a => a.ApplicationDate)
+                    .ThenBy(a => a.FullApplicationNumber)
+                    .ToList();
+            }
+        }
+
+        [RuleFromBoolProperty(
+            "Rejection_ApplicationTypeAllowed",
+            DefaultContexts.Save,
+            "ApplicationProfileInstance must be a type that can produce a rejection.")]
+        [Browsable(false)]
+        public bool IsApplicationTypeAllowed
+        {
+            get
+            {
+                if (ApplicationProfileInstance == null)
+                    return true;
+                return ApplicationTypeCapabilities.CanIssueRejection(ApplicationProfileInstance);
+            }
+        }
 
         [MaxLength(50)]
         public virtual string RejectedDocNumber { get; set; }
@@ -59,7 +100,7 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                return ApplicationRosterHelper.GetRosterPeople(Application);
+                return ApplicationRosterHelper.GetRosterPeople(ApplicationProfileInstance);
             }
         }
 

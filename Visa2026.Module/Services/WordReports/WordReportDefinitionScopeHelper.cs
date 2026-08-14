@@ -7,8 +7,8 @@ public static class WordReportDefinitionScopeHelper
     public static bool MatchesUserTemplateScope(UserReportBoType rootBoType, WordReportPackageScope scope) =>
         scope switch
         {
-            WordReportPackageScope.Application => rootBoType == UserReportBoType.Application,
-            WordReportPackageScope.ApplicationItem => rootBoType is UserReportBoType.ApplicationItem or UserReportBoType.Person,
+            WordReportPackageScope.ApplicationProfileInstance => rootBoType == UserReportBoType.ApplicationProfileInstance,
+            WordReportPackageScope.ApplicationRosterMergeLine => rootBoType is UserReportBoType.ApplicationItem or UserReportBoType.Person,
             _ => false
         };
 }

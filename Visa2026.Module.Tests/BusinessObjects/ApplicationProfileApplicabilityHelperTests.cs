@@ -9,7 +9,7 @@ public class ApplicationProfileApplicabilityHelperTests
     [Fact]
     public void IsProfileSelectable_RejectsInactiveProfiles()
     {
-        var profile = new ApplicationProfile { IsActive = false, ProgressRoute = ApplicationProgressRouteKind.ViaMinistries };
+        var profile = new ApplicationProfile { IsActive = false, ProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries };
 
         Assert.False(ApplicationProfileApplicabilityHelper.IsProfileSelectable(profile, null, null));
     }
@@ -20,18 +20,18 @@ public class ApplicationProfileApplicabilityHelperTests
         var profile = new ApplicationProfile
         {
             IsActive = true,
-            ProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
+            ProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
         };
 
         Assert.True(ApplicationProfileApplicabilityHelper.IsProfileSelectable(
             profile,
             null,
-            ApplicationProgressRouteKind.ViaMinistries));
+            ApplicationProfileInstanceProgressRouteKind.ViaMinistries));
 
         Assert.False(ApplicationProfileApplicabilityHelper.IsProfileSelectable(
             profile,
             null,
-            ApplicationProgressRouteKind.DirectToMigrationService));
+            ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService));
     }
 
     [Fact]

@@ -10,7 +10,7 @@ public sealed class ApplicationReportPackageModel : ComponentModelBase
 {
     public override Type ComponentType => typeof(ApplicationReportPackageComponent);
 
-    public Guid ApplicationId
+    public Guid ApplicationProfileInstanceId
     {
         get => GetPropertyValue<Guid>();
         set => SetPropertyValue(value);

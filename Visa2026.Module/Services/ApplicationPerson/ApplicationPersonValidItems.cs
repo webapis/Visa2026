@@ -5,8 +5,8 @@ using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.Services.ApplicationPersonRoster;
 
-/// <summary>Valid/active resolve rules for Application Person M2M (plan §10.2).</summary>
-public static class ApplicationPersonValidItems
+/// <summary>Valid/active resolve rules for ApplicationProfileInstance Person M2M (plan §10.2).</summary>
+public static class ApplicationProfileInstancePersonValidItems
 {
     public static Passport? ResolvePassport(Person? person)
     {
@@ -28,6 +28,9 @@ public static class ApplicationPersonValidItems
 
     public static EmployeePositionHistory? ResolvePosition(Person? person) =>
         PersonCurrentItems.GetCurrentPositionHistory(person);
+
+    public static WorkDuty? ResolveWorkDuty(Person? person) =>
+        PersonCurrentItems.GetCurrentWorkDuty(person);
 
     public static EmployeeSalary? ResolveSalary(Person? person) =>
         PersonCurrentItems.GetCurrentSalary(person);

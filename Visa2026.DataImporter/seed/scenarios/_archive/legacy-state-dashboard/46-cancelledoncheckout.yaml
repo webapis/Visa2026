@@ -4,7 +4,7 @@ description: Visa cancelled, check-out in progress — tests V-5c state
 dependsOn: ''
 sync: false
 anchor:
-  entity: Application
+  entity: ApplicationProfileInstance
   key: FullApplicationNumber
   value: 3/-046
 data:
@@ -29,19 +29,19 @@ data:
     Passport Number: BR5678901
     Is Cancelled: true
   Applications:
-  - Application Number: 046
+  - ApplicationProfileInstance Number: 046
     Date: 2026-03-01
     Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
     Project Contract: GT-15
     Filter: Visa
-    Application Type: App_Cancel_Visa
+    ApplicationProfileInstance Type: App_Cancel_Visa
     Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
-  - Application Number: 047
+  - ApplicationProfileInstance Number: 047
     Date: 2026-04-01
     Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
     Project Contract: GT-15
     Filter: Registration
-    Application Type: App_Reg_Check_Out
+    ApplicationProfileInstance Type: App_Reg_Check_Out
     Category: 2
     Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
   ApplicationItems:
@@ -50,7 +50,7 @@ data:
     Passport Number: BR5678901
     Visa Number: TM-2026-V-032
     Visa Changed: true
-  ApplicationProgresses:
+  ApplicationProfileInstanceProgresses:
   - Application: 3/-046
     State: PROCESS_STARTED
     Location: AT_MIGRATION_SERVICE

@@ -22,10 +22,10 @@ Key fields as implemented in `Visa.cs` (not exhaustive for derived/UI-only membe
 | `BorderZoneLocation` | `string` | Comma-separated border zone labels (`BorderZoneName` catalog). Required; defaults to **`Ýok`** when unset (no border zones). | `[RuleRequiredField]`; multi-select sentinel `Ýok`. |
 | `Passport` | `Passport` | Passport this visa is stamped on. | Required. |
 | **`AvailableIssuingApplicationItems`** | — | **Not mapped.** Filtered **`ApplicationItem`** list: same **`Person`** as **`Passport`**, parent **`ApplicationType.CanIssueVisa`**, not soft-deleted. Drives **`IssuingApplicationItem`** lookup (`[DataSourceProperty]`). |
-| **`IssuingApplicationItem`** | **`ApplicationItem`** | **The application line for the visa holder** under which this visa was issued. | **Optional** (gear). When set: same **`Person`** as **`Passport.Person`**, allowed **`ApplicationType.Name`**. UI caption: *Issuing Application Item*. |
+| **`IssuingApplicationItem`** | **`ApplicationItem`** | **The application line for the visa holder** under which this visa was issued. | **Optional** (gear). When set: same **`Person`** as **`Passport.Person`**, allowed **`ApplicationType.Name`**. UI caption: *Issuing ApplicationProfileInstance Item*. |
 | **`AvailableInvitationItems`** | — | **Not mapped.** **`InvitationItem`** rows for **`Passport.Person`**. Drives **`InvitationItem`** lookup. |
 | `InvitationItem` | `InvitationItem` | Linked invitation line item for the visa holder. | **Optional** (gear). Person must match **`Passport.Person`** when set. |
-| `AssociatedApplicationItems` | `IList<ApplicationItem>` | Application items that reference this visa as their **target / current** visa (`ApplicationItem.CurrentVisa`). Inverse of `CurrentVisa`. | Optional collection. **`[VisibleInDetailView(false)]`** — not shown on Visa Detail View; linkage kept for logic/reports. |
+| `AssociatedApplicationItems` | `IList<ApplicationItem>` | ApplicationProfileInstance items that reference this visa as their **target / current** visa (`ApplicationItem.CurrentVisa`). Inverse of `CurrentVisa`. | Optional collection. **`[VisibleInDetailView(false)]`** — not shown on Visa Detail View; linkage kept for logic/reports. |
 | `Images` | `IList<VisaImage>` | Scans of the visa. | Aggregated. |
 | `Documents` | `IList<VisaDocument>` | Related documents. | Aggregated. |
 | `Notes` | `string` | Free text. | Optional (gear). |
@@ -43,7 +43,7 @@ Key fields as implemented in `Visa.cs` (not exhaustive for derived/UI-only membe
 
 ---
 
-## 3. Application linkage (business rule)
+## 3. ApplicationProfileInstance linkage (business rule)
 
 | Concept | Meaning |
 |--------|---------|

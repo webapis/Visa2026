@@ -1,4 +1,4 @@
-﻿using DevExpress.Blazor;
+using DevExpress.Blazor;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor.Editors;
 using DevExpress.ExpressApp.Blazor.Editors.Models;
@@ -13,21 +13,21 @@ namespace Visa2026.Blazor.Server.Controllers;
 /// Progress history ListViews: fixed timeline sort, show all rows (no inner scroll), latest-step row highlight.
 /// Configures the XAF grid component model only (never the live DxGrid instance during render).
 /// </summary>
-public sealed class ApplicationProgressGridSortLockController : ViewController<ListView>
+public sealed class ApplicationProfileInstanceProgressGridSortLockController : ViewController<ListView>
 {
     private static readonly string[] TargetListViewIds =
     [
         "Application_ProgressHistory_ListView",
-        "ApplicationProgress_ListView",
+        "ApplicationProfileInstanceProgress_ListView",
     ];
 
     private Action<GridCustomizeElementEventArgs>? customizeElementHandler;
     private Action<GridCustomizeElementEventArgs>? previousCustomizeElement;
     private EventHandler? collectionChangedHandler;
 
-    public ApplicationProgressGridSortLockController()
+    public ApplicationProfileInstanceProgressGridSortLockController()
     {
-        TargetObjectType = typeof(ApplicationProgress);
+        TargetObjectType = typeof(ApplicationProfileInstanceProgress);
     }
 
     protected override void OnActivated()
@@ -90,7 +90,7 @@ public sealed class ApplicationProgressGridSortLockController : ViewController<L
 
     private void OnProgressHistoryCollectionChanged()
     {
-        if (View.CollectionSource is PropertyCollectionSource { MasterObject: Application application })
+        if (View.CollectionSource is PropertyCollectionSource { MasterObject: ApplicationProfileInstance application })
         {
             application = ObjectSpace.GetObject(application);
             ObjectSpace.SetModified(application);
@@ -123,7 +123,7 @@ public sealed class ApplicationProgressGridSortLockController : ViewController<L
         if (e.ElementType != GridElementType.DataRow || e.VisibleIndex < 0)
             return;
 
-        if (e.Grid.GetDataItem(e.VisibleIndex) is not ApplicationProgress progress
+        if (e.Grid.GetDataItem(e.VisibleIndex) is not ApplicationProfileInstanceProgress progress
             || !IsLatestProgress(progress))
             return;
 
@@ -140,9 +140,9 @@ public sealed class ApplicationProgressGridSortLockController : ViewController<L
             $"{appearance.RowCssClass} visa-progress-row visa-progress-history-latest");
     }
 
-    private bool IsLatestProgress(ApplicationProgress progress)
+    private bool IsLatestProgress(ApplicationProfileInstanceProgress progress)
     {
-        var latest = ApplicationProgressHelper.GetLatest(progress.Application?.ProgressHistory, ObjectSpace);
+        var latest = ApplicationProfileInstanceProgressHelper.GetLatest(progress.ApplicationProfileInstance?.ProgressHistory, ObjectSpace);
         if (latest == null)
             return false;
 
@@ -175,7 +175,7 @@ public sealed class ApplicationProgressGridSortLockController : ViewController<L
         }
 
         var orderColumn = columnModels.FirstOrDefault(column =>
-            string.Equals(column.FieldName, nameof(ApplicationProgress.Order), StringComparison.Ordinal));
+            string.Equals(column.FieldName, nameof(ApplicationProfileInstanceProgress.Order), StringComparison.Ordinal));
         if (orderColumn == null)
             return;
 

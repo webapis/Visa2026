@@ -4,7 +4,7 @@ using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module;
 
-/// <summary>Resolves Person detail view ids only when they exist in the merged Application Model.</summary>
+/// <summary>Resolves Person detail view ids only when they exist in the merged ApplicationProfileInstance Model.</summary>
 public static class PersonDetailViewModelHelper
 {
     public static string ResolveDetailViewId(XafApplication application, string? listViewId, Person person)

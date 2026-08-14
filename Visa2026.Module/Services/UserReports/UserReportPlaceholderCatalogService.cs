@@ -102,7 +102,7 @@ public sealed class UserReportPlaceholderCatalogService : IUserReportPlaceholder
     private static IReadOnlyList<UserReportBoType> ParseRootBoTypes(IReadOnlyList<string>? rootBoTypes)
     {
         if (rootBoTypes == null || rootBoTypes.Count == 0)
-            return [UserReportBoType.Application, UserReportBoType.ApplicationItem];
+            return [UserReportBoType.ApplicationProfileInstance, UserReportBoType.ApplicationItem];
 
         var list = new List<UserReportBoType>();
         foreach (var name in rootBoTypes)
@@ -111,7 +111,7 @@ public sealed class UserReportPlaceholderCatalogService : IUserReportPlaceholder
                 list.Add(parsed);
         }
 
-        return list.Count > 0 ? list : [UserReportBoType.Application, UserReportBoType.ApplicationItem];
+        return list.Count > 0 ? list : [UserReportBoType.ApplicationProfileInstance, UserReportBoType.ApplicationItem];
     }
 
     private static string GetLabel(IReadOnlyDictionary<string, string>? labels, string key)

@@ -38,7 +38,7 @@ Write-Host "=== Delete imported ApplicationProgress rows ===" -ForegroundColor C
 sqlcmd -S "(localdb)\mssqllocaldb" -d Visa2026 -i $sqlScript -W -b
 if ($LASTEXITCODE -ne 0) { throw "SQL cleanup failed (exit $LASTEXITCODE)" }
 
-$progressMap = Join-Path $mapRoot "ApplicationProgress.json"
+$progressMap = Join-Path $mapRoot "ApplicationProfileInstanceProgress.json"
 if (Test-Path $progressMap) {
     Remove-Item $progressMap -Force
     Write-Host "Removed id-map: $progressMap"
@@ -52,7 +52,7 @@ if ($DryRun) {
     Write-Host "DryRun: transform + payload check only." -ForegroundColor Yellow
     $dryArgs = @(
         "run", "--project", "Visa2026.DataImporter", "-c", $Configuration, "--no-build", "--",
-        "--import-visa2014", "--entity", "ApplicationProgress",
+        "--import-visa2014", "--entity", "ApplicationProfileInstanceProgress",
         "--legacy-source", $LegacySource,
         "--target-connection", $TargetConnection,
         "--dry-run", "--verbose"
@@ -70,12 +70,12 @@ Write-Host "Logging to $logFile"
 $importArgs = @(
     "run", "--project", "Visa2026.DataImporter", "-c", $Configuration, "--no-build", "--",
     "--import-visa2014", "--inprocess",
-    "--entity", "ApplicationProgress",
+    "--entity", "ApplicationProfileInstanceProgress",
     "--legacy-source", $LegacySource,
     "--target-connection", $TargetConnection,
     "--batch-size", $BatchSize,
     "--id-map-output", $progressMap,
-    "--application-id-map", (Join-Path $mapRoot "Application.json"),
+    "--application-id-map", (Join-Path $mapRoot "ApplicationProfileInstance.json"),
     "--verbose"
 )
 if ($MaxRows -gt 0) { $importArgs += @("--max-rows", $MaxRows) }

@@ -53,8 +53,8 @@ LEFT JOIN "VisaPeriods" vp
     ON vp."ID" = inv."VisaPeriodID" AND COALESCE(vp."GCRecord", 0) = 0
 LEFT JOIN "VisaCategories" vc
     ON vc."ID" = inv."VisaCategoryID" AND COALESCE(vc."GCRecord", 0) = 0
-LEFT JOIN "Applications" a
-    ON a."ID" = inv."ApplicationID" AND COALESCE(a."GCRecord", 0) = 0
+LEFT JOIN "ApplicationProfileInstances" a
+    ON a."ID" = inv."ApplicationProfileInstanceID" AND COALESCE(a."GCRecord", 0) = 0
 LEFT JOIN "VisaTypes" vt
     ON vt."ID" = a."VisaTypeID" AND COALESCE(vt."GCRecord", 0) = 0
 LEFT JOIN "ProjectContracts" apc

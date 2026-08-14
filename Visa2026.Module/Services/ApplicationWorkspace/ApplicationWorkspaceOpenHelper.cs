@@ -9,7 +9,7 @@ namespace Visa2026.Module.Services.ApplicationWorkspace;
 
 public static class ApplicationWorkspaceOpenHelper
 {
-    public static DetailView? CreateWorkspaceView(XafApplication application, IObjectSpace sourceObjectSpace, Application applicationBo)
+    public static DetailView? CreateWorkspaceView(XafApplication application, IObjectSpace sourceObjectSpace, ApplicationProfileInstance applicationBo)
     {
         if (application == null || sourceObjectSpace == null || applicationBo == null)
             return null;
@@ -27,14 +27,14 @@ public static class ApplicationWorkspaceOpenHelper
 
         var objectSpace = application.CreateObjectSpace(typeof(ApplicationWorkspaceHost));
         var host = objectSpace.CreateObject<ApplicationWorkspaceHost>();
-        host.ApplicationId = applicationId;
+        host.ApplicationProfileInstanceId = applicationId;
 
         var detailView = application.CreateDetailView(objectSpace, host);
         detailView.ViewEditMode = ViewEditMode.View;
         return detailView;
     }
 
-    private static Guid? ResolveId(IObjectSpace objectSpace, Application applicationBo)
+    private static Guid? ResolveId(IObjectSpace objectSpace, ApplicationProfileInstance applicationBo)
     {
         var key = objectSpace.GetKeyValue(applicationBo);
         return key switch

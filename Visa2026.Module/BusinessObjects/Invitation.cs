@@ -122,24 +122,25 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(false)]
         [VisibleInDetailView(true)]
         [VisibleInLookupListView(false)]
-        [DataSourceProperty(nameof(AvailableApplications))]
+        [DataSourceProperty(nameof(AvailableApplicationProfileInstances))]
         [ToolTip("Link this invitation to an application when one exists. Leave empty for standalone invitations.")]
-        public virtual Application Application { get; set; }
+        [InverseProperty(nameof(ApplicationProfileInstance.Invitations))]
+        public virtual ApplicationProfileInstance ApplicationProfileInstance { get; set; }
 
         /// <summary>
         /// Candidate applications for <see cref="Application"/> (types that may produce an invitation).
         /// </summary>
         [NotMapped]
         [Browsable(false)]
-        public IList<Application> AvailableApplications
+        public IList<ApplicationProfileInstance> AvailableApplicationProfileInstances
         {
             get
             {
                 var objectSpace = ObjectSpaceHelper.Get(this);
                 if (objectSpace == null)
-                    return new List<Application>();
+                    return new List<ApplicationProfileInstance>();
 
-                return objectSpace.GetObjectsQuery<Application>()
+                return objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
                     .Where(a =>
                         (a.ApplicationProfile != null && a.ApplicationProfile.ProduceInvitation)
                         || (a.ApplicationType != null && a.ApplicationType.CanIssueInvitation))
@@ -152,15 +153,15 @@ namespace Visa2026.Module.BusinessObjects
         [RuleFromBoolProperty(
             "Invitation_ApplicationTypeAllowed",
             DefaultContexts.Save,
-            "Application must be a type that can issue an invitation.")]
+            "ApplicationProfileInstance must be a type that can issue an invitation.")]
         [Browsable(false)]
         public bool IsApplicationTypeAllowed
         {
             get
             {
-                if (Application == null)
+                if (ApplicationProfileInstance == null)
                     return true;
-                return ApplicationTypeCapabilities.CanIssueInvitation(Application);
+                return ApplicationTypeCapabilities.CanIssueInvitation(ApplicationProfileInstance);
             }
         }
 
@@ -210,7 +211,7 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                var roster = ApplicationRosterHelper.GetRosterPeople(Application);
+                var roster = ApplicationRosterHelper.GetRosterPeople(ApplicationProfileInstance);
                 if (roster.Count > 0)
                     return roster;
 

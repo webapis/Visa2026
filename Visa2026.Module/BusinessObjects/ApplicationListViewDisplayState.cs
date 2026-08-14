@@ -16,13 +16,13 @@ internal readonly struct ApplicationListViewDisplayState
     public string ListRowAppearanceStateCode { get; init; }
     public string ListRowCssClass { get; init; }
 
-    public static ApplicationListViewDisplayState Resolve(Application application)
+    public static ApplicationListViewDisplayState Resolve(ApplicationProfileInstance application)
     {
         var latest = ApplicationLatestProgressSyncHelper.ResolveLatestForDisplay(application);
-        var progressSla = ApplicationProgressSlaHelper.Resolve(application, latest);
+        var progressSla = ApplicationProfileInstanceProgressSlaHelper.Resolve(application, latest);
         var migrationSla = ApplicationMigrationSlaHelper.Resolve(application, latest);
 
-        var primaryStateCode = ApplicationProgressPrimaryStateCodeResolver.ResolveFromLatest(latest) ?? string.Empty;
+        var primaryStateCode = ApplicationProfileInstanceProgressPrimaryStateCodeResolver.ResolveFromLatest(latest) ?? string.Empty;
         var progressSlaCode = progressSla.AppearanceStateCode ?? string.Empty;
         var migrationSlaCode = migrationSla.AppearanceStateCode ?? string.Empty;
         var slaAppearanceCode = !string.IsNullOrEmpty(progressSlaCode) ? progressSlaCode : migrationSlaCode;
@@ -32,10 +32,10 @@ internal readonly struct ApplicationListViewDisplayState
         return new ApplicationListViewDisplayState
         {
             PrimaryStateCode = primaryStateCode,
-            CurrentState = ApplicationProgressPrimaryStateCodeResolver.ResolveDisplayNameFromLatest(latest) ?? string.Empty,
+            CurrentState = ApplicationProfileInstanceProgressPrimaryStateCodeResolver.ResolveDisplayNameFromLatest(latest) ?? string.Empty,
             LatestProgressDate = latest?.Date,
             WorkingDaysInCurrentStep = progressSla.WorkingDaysInCurrentStep,
-            ProgressSlaStatement = ApplicationProgressSlaHelper.FormatStatement(progressSla),
+            ProgressSlaStatement = ApplicationProfileInstanceProgressSlaHelper.FormatStatement(progressSla),
             WorkingDaysInMigrationStep = migrationSla.WorkingDaysInCurrentStep,
             MigrationSlaStatement = ApplicationMigrationSlaHelper.FormatStatement(migrationSla),
             ProgressSlaAppearanceCode = slaAppearanceCode,

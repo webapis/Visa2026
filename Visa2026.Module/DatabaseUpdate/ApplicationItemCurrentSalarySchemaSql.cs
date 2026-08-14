@@ -4,7 +4,7 @@ namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
 /// Idempotent SQL for <see cref="BusinessObjects.ApplicationType.ShowCurrentSalary"/> and
-/// <see cref="BusinessObjects.ApplicationItem.CurrentSalary"/> schema columns.
+/// <see cref="BusinessObjects.ApplicationRosterMergeLine.CurrentSalary"/> schema columns.
 /// </summary>
 public static class ApplicationItemCurrentSalarySchemaSql
 {
@@ -26,7 +26,7 @@ public static class ApplicationItemCurrentSalarySchemaSql
         ALTER TABLE dbo.ApplicationItems ADD CurrentSalaryId uniqueidentifier NULL;
         """;
 
-    /// <summary>Application types that expose <c>ApplicationItem.CurrentSalary</c> per catalog.</summary>
+    /// <summary>ApplicationProfileInstance types that expose <c>ApplicationRosterMergeLine.CurrentSalary</c> per catalog.</summary>
     internal static readonly string[] ShowCurrentSalaryApplicationTypeNames =
     {
         "App_Inv_According_to_WP",

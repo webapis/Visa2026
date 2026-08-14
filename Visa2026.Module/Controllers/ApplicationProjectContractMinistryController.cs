@@ -14,13 +14,13 @@ namespace Visa2026.Module.Controllers;
 
 /// <summary>
 
-/// Snapshots ministry legs when <see cref="BusinessObjects.Application.ApprovalLegProfile"/> changes;
+/// Snapshots ministry legs when <see cref="BusinessObjects.ApplicationProfileInstance.ApprovalLegProfile"/> changes;
 
 /// locks header fields after progress.
 
 /// </summary>
 
-public sealed class ApplicationProjectContractMinistryController : ObjectViewController<DetailView, BusinessObjects.Application>
+public sealed class ApplicationProjectContractMinistryController : ObjectViewController<DetailView, BusinessObjects.ApplicationProfileInstance>
 
 {
 
@@ -60,13 +60,13 @@ public sealed class ApplicationProjectContractMinistryController : ObjectViewCon
 
     {
 
-        if (e.Object is ApplicationProgress progress
+        if (e.Object is ApplicationProfileInstanceProgress progress
 
-            && progress.Application != null
+            && progress.ApplicationProfileInstance != null
 
-            && ReferenceEquals(progress.Application, ViewCurrentObject)
+            && ReferenceEquals(progress.ApplicationProfileInstance, ViewCurrentObject)
 
-            && e.PropertyName is nameof(ApplicationProgress.State))
+            && e.PropertyName is nameof(ApplicationProfileInstanceProgress.State))
 
         {
 
@@ -78,13 +78,13 @@ public sealed class ApplicationProjectContractMinistryController : ObjectViewCon
 
 
 
-        if (e.Object is not BusinessObjects.Application application)
+        if (e.Object is not BusinessObjects.ApplicationProfileInstance application)
 
             return;
 
 
 
-        if (e.PropertyName == nameof(BusinessObjects.Application.ApprovalLegProfile))
+        if (e.PropertyName == nameof(BusinessObjects.ApplicationProfileInstance.ApprovalLegProfile))
 
         {
 
@@ -96,7 +96,7 @@ public sealed class ApplicationProjectContractMinistryController : ObjectViewCon
 
 
 
-        if (e.PropertyName == nameof(BusinessObjects.Application.ProjectContract))
+        if (e.PropertyName == nameof(BusinessObjects.ApplicationProfileInstance.ProjectContract))
 
             HandleProjectContractChanged(application, e.OldValue as ProjectContract, e.NewValue as ProjectContract);
 
@@ -106,7 +106,7 @@ public sealed class ApplicationProjectContractMinistryController : ObjectViewCon
 
     private void HandleApprovalLegProfileChanged(
 
-        BusinessObjects.Application application,
+        BusinessObjects.ApplicationProfileInstance application,
 
         ApprovalLegProfile? previousProfile,
 
@@ -120,7 +120,7 @@ public sealed class ApplicationProjectContractMinistryController : ObjectViewCon
 
 
 
-        if (ApplicationProgressProfileResolver.IsApplicationLockedAfterOfficePreparation(application, ObjectSpace))
+        if (ApplicationProfileInstanceProgressProfileResolver.IsApplicationLockedAfterOfficePreparation(application, ObjectSpace))
 
         {
 
@@ -154,7 +154,7 @@ public sealed class ApplicationProjectContractMinistryController : ObjectViewCon
 
 
 
-        if (!ApplicationProgressProfileResolver.HasAnyProgressHistory(application, ObjectSpace))
+        if (!ApplicationProfileInstanceProgressProfileResolver.HasAnyProgressHistory(application, ObjectSpace))
 
             return;
 
@@ -172,15 +172,15 @@ public sealed class ApplicationProjectContractMinistryController : ObjectViewCon
 
 
 
-        if (ApplicationProgressProfileResolver.WouldMinistryDepthChange(application, previousProfile, newProfile))
+        if (ApplicationProfileInstanceProgressProfileResolver.WouldMinistryDepthChange(application, previousProfile, newProfile))
 
         {
 
-            var previousLabel = ApplicationProgressProfileResolver.FormatMinistryLegCountLabel(
+            var previousLabel = ApplicationProfileInstanceProgressProfileResolver.FormatMinistryLegCountLabel(
 
                 ApprovalLegProfileMinistryHelper.GetLegCount(previousProfile));
 
-            var newLabel = ApplicationProgressProfileResolver.FormatMinistryLegCountLabel(
+            var newLabel = ApplicationProfileInstanceProgressProfileResolver.FormatMinistryLegCountLabel(
 
                 ApprovalLegProfileMinistryHelper.GetLegCount(newProfile));
 
@@ -208,7 +208,7 @@ public sealed class ApplicationProjectContractMinistryController : ObjectViewCon
 
     private void HandleProjectContractChanged(
 
-        BusinessObjects.Application application,
+        BusinessObjects.ApplicationProfileInstance application,
 
         ProjectContract? previousContract,
 
@@ -222,7 +222,7 @@ public sealed class ApplicationProjectContractMinistryController : ObjectViewCon
 
 
 
-        if (ApplicationProgressProfileResolver.IsApplicationLockedAfterOfficePreparation(application, ObjectSpace))
+        if (ApplicationProfileInstanceProgressProfileResolver.IsApplicationLockedAfterOfficePreparation(application, ObjectSpace))
 
         {
 
@@ -244,7 +244,7 @@ public sealed class ApplicationProjectContractMinistryController : ObjectViewCon
 
 
 
-        if (!ApplicationProgressProfileResolver.HasAnyProgressHistory(application, ObjectSpace))
+        if (!ApplicationProfileInstanceProgressProfileResolver.HasAnyProgressHistory(application, ObjectSpace))
 
             return;
 

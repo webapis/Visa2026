@@ -5,11 +5,11 @@ using DevExpress.ExpressApp.Updating;
 namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
-/// Removes <c>LocationID</c> from <c>ApplicationProgresses</c> (progress is state-only).
+/// Removes <c>LocationID</c> from <c>ApplicationProfileInstanceProgresses</c> (progress is state-only).
 /// </summary>
-public sealed class ApplicationProgressLocationDropSchemaUpdater : ModuleUpdater
+public sealed class ApplicationProfileInstanceProgressLocationDropSchemaUpdater : ModuleUpdater
 {
-    public ApplicationProgressLocationDropSchemaUpdater(IObjectSpace objectSpace, Version currentDBVersion)
+    public ApplicationProfileInstanceProgressLocationDropSchemaUpdater(IObjectSpace objectSpace, Version currentDBVersion)
         : base(objectSpace, currentDBVersion)
     {
     }
@@ -29,8 +29,8 @@ public sealed class ApplicationProgressLocationDropSchemaUpdater : ModuleUpdater
     private void ApplySchemaSql()
     {
         if (DatabaseProviderDetector.IsPostgreSql(ObjectSpace))
-            ExecuteNonQueryCommand(ApplicationProgressLocationDropSchemaSql.DropLocationFkAndColumnPostgres, false);
+            ExecuteNonQueryCommand(ApplicationProfileInstanceProgressLocationDropSchemaSql.DropLocationFkAndColumnPostgres, false);
         else
-            ExecuteNonQueryCommand(ApplicationProgressLocationDropSchemaSql.DropLocationFkAndColumnSqlServer, false);
+            ExecuteNonQueryCommand(ApplicationProfileInstanceProgressLocationDropSchemaSql.DropLocationFkAndColumnSqlServer, false);
     }
 }

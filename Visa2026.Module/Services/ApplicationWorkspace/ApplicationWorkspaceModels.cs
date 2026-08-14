@@ -11,7 +11,7 @@ public interface IApplicationWorkspaceQueryService
 
 public sealed class ApplicationWorkspaceSnapshot
 {
-    public Guid ApplicationId { get; init; }
+    public Guid ApplicationProfileInstanceId { get; init; }
 
     public ApplicationWorkspaceHeader Header { get; init; } = new();
 
@@ -59,6 +59,9 @@ public sealed class ApplicationWorkspaceCaseChrome
     public int? MergedFromCount { get; init; }
 
     public string ProfileTemplateName { get; init; } = string.Empty;
+
+    /// <summary>Person roster + resolved child links are immutable (workflow terminal).</summary>
+    public bool ResolvedLinksLocked { get; init; }
 }
 
 public sealed class ApplicationWorkspaceHeader
@@ -109,8 +112,8 @@ public sealed class ApplicationWorkspaceTab
     /// <summary>Parallel to <see cref="Rows"/> when tab rows map to domain ids (Person tab).</summary>
     public IReadOnlyList<Guid> RowPersonIds { get; init; } = Array.Empty<Guid>();
 
-    /// <summary>Parallel to <see cref="Rows"/> — <see cref="ApplicationPerson"/> roster line ids (Person tab).</summary>
-    public IReadOnlyList<Guid> RowApplicationPersonIds { get; init; } = Array.Empty<Guid>();
+    /// <summary>Parallel to <see cref="Rows"/> — Person ids on this instance (Person tab). Property name kept for callers.</summary>
+    public IReadOnlyList<Guid> RowApplicationProfileInstancePersonIds { get; init; } = Array.Empty<Guid>();
 
     public string? EmptyMessage { get; init; }
     public string? SqlViewHint { get; init; }

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -108,6 +110,11 @@ namespace Visa2026.Module.BusinessObjects
         {
             base.OnSaving();
         }
+
+        /// <summary>Skip-navigation M2M with <see cref="ApplicationProfileInstance"/> (same pattern as Person). Not aggregated.</summary>
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInListView(false)]
+        public virtual IList<ApplicationProfileInstance> ApplicationProfileInstances { get; set; } = new ObservableCollection<ApplicationProfileInstance>();
     }
 
     [DefaultClassOptions]

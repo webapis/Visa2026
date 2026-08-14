@@ -15,7 +15,7 @@ internal sealed class ApplicationTypeConfigurationRow
     public ApplicationTypeCategory Category { get; init; }
     public int DurationInDays { get; init; }
 
-    public ApplicationProgressRouteKind ApplicationProgressRoute { get; init; }
+    public ApplicationProfileInstanceProgressRouteKind ApplicationProfileInstanceProgressRoute { get; init; }
     public MinistryReviewDepth MinistryReviewDepth { get; init; }
     public string MigrationSlaProfileCode { get; init; } = "";
 

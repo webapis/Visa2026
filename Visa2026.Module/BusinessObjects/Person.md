@@ -135,10 +135,10 @@ Each person holds **identity** data, **project contract** scope, **document hist
 
 | Topic | Location |
 |-------|----------|
-| Application line items | [`ApplicationItem.md`](ApplicationItem.md) |
+| ApplicationProfileInstance line items | [`ApplicationItem.md`](ApplicationItem.md) |
 | Person document copies (planned preview slot) | [`docs/PERSON_DOCUMENT_COPIES.md`](../../docs/PERSON_DOCUMENT_COPIES.md) |
 | Nested collection tabs (editable vs issued) | [`docs/PERSON_DETAIL_NESTED_COLLECTION_TABS.md`](../../docs/PERSON_DETAIL_NESTED_COLLECTION_TABS.md) |
-| Application header | [`APPLICATION.md`](APPLICATION.md) |
+| ApplicationProfileInstance header | [`APPLICATION.md`](APPLICATION.md) |
 | Manual visa family lines | [`docs/VISA_FAMILY_MEMBERS_TEXT_EDITOR.md`](../../docs/VISA_FAMILY_MEMBERS_TEXT_EDITOR.md) |
 | Legacy removals (`Company` on person, etc.) | [`docs/DEPRECATED.md`](../../docs/DEPRECATED.md) |
 | Passport `PersonalNumber` | Prefer **`Person.PersonalNumber`** (passport field legacy) |

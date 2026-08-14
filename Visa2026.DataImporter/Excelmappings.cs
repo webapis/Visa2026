@@ -173,7 +173,7 @@ public static class ExcelMappings
     {
         SheetName = "ApplicationNumbering",
         EntityName = "ApplicationNumberingProfile",
-        DisplayName = "Application Numbering",
+        DisplayName = "ApplicationProfileInstance Numbering",
         SingletonUpsert = true,
         Columns = new()
         {
@@ -361,7 +361,7 @@ public static class ExcelMappings
                 new() { Header = "ReverseNameTm",  PayloadProperty = "ReverseNameTm", Kind = ColumnKind.Scalar },
             }
         },
-        new SheetMap { SheetName = "ApplicationLocation", EntityName = "ApplicationLocation", DisplayName = "Application Location",
+        new SheetMap { SheetName = "ApplicationLocation", EntityName = "ApplicationLocation", DisplayName = "ApplicationProfileInstance Location",
             Columns = new() {
                 new() { Header = "Name",         PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "NameTm",       PayloadProperty = "NameTm",      Kind = ColumnKind.Scalar },
@@ -407,7 +407,7 @@ public static class ExcelMappings
                 new() { Header = "IsDefault",    PayloadProperty = "IsDefault",   Kind = ColumnKind.Bool },
             }
         },
-        new SheetMap { SheetName = "ApplicationStates",EntityName = "ApplicationState", DisplayName = "Application State",
+        new SheetMap { SheetName = "ApplicationStates",EntityName = "ApplicationState", DisplayName = "ApplicationProfileInstance State",
             Columns = new() {
                 new() { Header = "Name",         PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "NameTm",       PayloadProperty = "NameTm",      Kind = ColumnKind.Scalar },
@@ -435,7 +435,7 @@ public static class ExcelMappings
             }
         },
 
-        new SheetMap { SheetName = "ApplicationTypeFilter", EntityName = "ApplicationTypeFilter", DisplayName = "Application Type Filter",
+        new SheetMap { SheetName = "ApplicationTypeFilter", EntityName = "ApplicationTypeFilter", DisplayName = "ApplicationProfileInstance Type Filter",
             Columns = new() {
                 new() { Header = "Name",      PayloadProperty = "Name",      Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "NameTm",    PayloadProperty = "NameTm",    Kind = ColumnKind.Scalar },
@@ -445,7 +445,7 @@ public static class ExcelMappings
                     ValueMap = new() { {"0","Employee"}, {"1","FamilyMember"}, {"2","Both"} } },
             }
         },
-        new SheetMap { SheetName = "ApplicationType",  EntityName = "ApplicationType",  DisplayName = "Application Type",
+        new SheetMap { SheetName = "ApplicationType",  EntityName = "ApplicationType",  DisplayName = "ApplicationProfileInstance Type",
             Columns = new() {
                 new() { Header = "Name",           PayloadProperty = "Name",           Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "NameTm",         PayloadProperty = "NameTm",         Kind = ColumnKind.Scalar },
@@ -712,21 +712,21 @@ public static class ExcelMappings
             }
         },
         // -------------------------------------------------------------------
-        // Application and ApplicationItem — depends on Company, ApplicationType,
+        // ApplicationProfileInstance and ApplicationItem — depends on Company, ApplicationType,
         // ApplicationTypeFilter, Urgency, VisaPeriod all being seeded first.
         // -------------------------------------------------------------------
-        new SheetMap { SheetName = "Applications", EntityName = "Application", DisplayName = "Application",
+        new SheetMap { SheetName = "ApplicationProfileInstances", EntityName = "Application", DisplayName = "Application",
             Columns = new() {
-                new() { Header = "Full Application Number", PayloadProperty = "", Kind = ColumnKind.StringValue },
-                new() { Header = "Application Number", PayloadProperty = "ApplicationNumber", Kind = ColumnKind.StringValue, Required = true },
+                new() { Header = "Full ApplicationProfileInstance Number", PayloadProperty = "", Kind = ColumnKind.StringValue },
+                new() { Header = "ApplicationProfileInstance Number", PayloadProperty = "ApplicationNumber", Kind = ColumnKind.StringValue, Required = true },
                 new() { Header = "Prefix",             PayloadProperty = "AppNumberPrefix",   Kind = ColumnKind.StringValue },
                 new() { Header = "Year",               PayloadProperty = "Year",              Kind = ColumnKind.Scalar },
                 new() { Header = "Date",               PayloadProperty = "ApplicationDate",   Kind = ColumnKind.Scalar, Required = true },
-                // Category is on ApplicationType only — do not POST on Application (OData 400 Incorrect body).
+                // Category is on ApplicationType only — do not POST on ApplicationProfileInstance (OData 400 Incorrect body).
                 new() { Header = "Category",           PayloadProperty = "",                  Kind = ColumnKind.StringValue },
                 new() { Header = "Project Contract",   PayloadProperty = "ProjectContract",   Kind = ColumnKind.LookupByName, LookupEntity = "ProjectContract" },
-                new() { Header = "Application Type",   PayloadProperty = "ApplicationType",   Kind = ColumnKind.LookupByName, LookupEntity = "ApplicationType" },
-                // Filter / ApplicationTypeFilter removed from Application BO — type is chosen via ApplicationType only.
+                new() { Header = "ApplicationProfileInstance Type",   PayloadProperty = "ApplicationType",   Kind = ColumnKind.LookupByName, LookupEntity = "ApplicationType" },
+                // Filter / ApplicationTypeFilter removed from ApplicationProfileInstance BO — type is chosen via ApplicationType only.
                 new() { Header = "Visa Category",      PayloadProperty = "VisaCategory",      Kind = ColumnKind.LookupByName, LookupEntity = "VisaCategory" },
                 new() { Header = "Migration Service",  PayloadProperty = "MigrationService",  Kind = ColumnKind.LookupByName, LookupEntity = "MigrationService" },
                 new() { Header = "Urgency",            PayloadProperty = "Urgency",           Kind = ColumnKind.LookupByName, LookupEntity = "Urgency" },
@@ -758,15 +758,15 @@ public static class ExcelMappings
                 new() { Header = "Visa Category",    PayloadProperty = "VisaCategory",        Kind = ColumnKind.LookupByName, LookupEntity = "VisaCategory" },
                 new() { Header = "Issued Place",     PayloadProperty = "VisaIssuedPlace",     Kind = ColumnKind.LookupByName, LookupEntity = "VisaIssuedPlace" },
                 new() { Header = "Passport Number",  PayloadProperty = "Passport",            Kind = ColumnKind.LookupByName, LookupEntity = "Passport", LookupFilterProperty = "PassportNumber" },
-                new() { Header = "Application Item", PayloadProperty = "IssuingApplicationItem", Kind = ColumnKind.LookupByName, LookupEntity = "ApplicationItem", LookupFilterProperty = "ApplicationItemName" },
+                new() { Header = "ApplicationProfileInstance Item", PayloadProperty = "IssuingApplicationItem", Kind = ColumnKind.LookupByName, LookupEntity = "ApplicationItem", LookupFilterProperty = "ApplicationItemName" },
                 new() { Header = "Invitation Item",  PayloadProperty = "InvitationItem",      Kind = ColumnKind.LookupByName, LookupEntity = "InvitationItem", LookupFilterProperty = "InvitationItemName" },
             }
         },
 
-        // ApplicationItem — depends on Application, Person, Passport, and optionally Visa.
+        // ApplicationItem — depends on ApplicationProfileInstance, Person, Passport, and optionally Visa.
         // Must come AFTER Visas so CurrentVisa lookups succeed.
         // Upsert in sync mode uses ApplicationItemName = "{Person} - {Application}" (see ExcelImporter).
-        new SheetMap { SheetName = "ApplicationItems", EntityName = "ApplicationItem", DisplayName = "Application Item",
+        new SheetMap { SheetName = "ApplicationItems", EntityName = "ApplicationItem", DisplayName = "ApplicationProfileInstance Item",
             Columns = new() {
                 new() { Header = "Application",        PayloadProperty = "Application",              Kind = ColumnKind.LookupByName,      LookupEntity = "Application",              LookupFilterProperty = "FullApplicationNumber", Required = true },
                 new() { Header = "Person",             PayloadProperty = "Person",                   Kind = ColumnKind.PersonLookupByName, Required = true },
@@ -893,8 +893,8 @@ public static class ExcelMappings
             }
         },
 
-        // ApplicationProgresses — depends on Application and ApplicationState lookups.
-        new SheetMap { SheetName = "ApplicationProgresses", EntityName = "ApplicationProgress", DisplayName = "Application Progress",
+        // ApplicationProfileInstanceProgresses — depends on ApplicationProfileInstance and ApplicationState lookups.
+        new SheetMap { SheetName = "ApplicationProfileInstanceProgresses", EntityName = "ApplicationProfileInstanceProgress", DisplayName = "ApplicationProfileInstance Progress",
             Columns = new() {
                 new() { Header = "Application", PayloadProperty = "Application", Kind = ColumnKind.LookupByName, LookupEntity = "Application", LookupFilterProperty = "FullApplicationNumber", Required = true },
                 new() { Header = "State",       PayloadProperty = "State",       Kind = ColumnKind.LookupByName, LookupEntity = "ApplicationState",    LookupFilterProperty = "Code", Required = true },

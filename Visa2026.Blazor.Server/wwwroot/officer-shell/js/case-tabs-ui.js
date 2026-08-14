@@ -161,7 +161,7 @@ function progressStepRow(step) {
 export function renderCaseProgressTab(c) {
   return `<div class="ct-page">
     <h2 class="ct-page__title">Progress</h2>
-    <p class="ct-page__sub">Application process for ${esc(tplLabel(c.tplKey))} · current step: ${esc(c.step)}</p>
+    <p class="ct-page__sub">ApplicationProfileInstance process for ${esc(tplLabel(c.tplKey))} · current step: ${esc(c.step)}</p>
     <div class="ct-prog-v-list">${PROGRESS_V_STEPS.map(progressStepRow).join('')}</div>
   </div>`;
 }
@@ -195,14 +195,14 @@ export function renderCaseProgressRail(c) {
     <ul class="cw-timeline">
       <li><strong>Moved to Ministry review</strong><span>11 Aug</span></li>
       <li><strong>Moved to Office preparation</strong><span>10 Aug</span></li>
-      <li><strong>Application submitted</strong><span>10 Aug</span></li>
+      <li><strong>ApplicationProfileInstance submitted</strong><span>10 Aug</span></li>
     </ul>
     <button type="button" class="cw-link-btn">View full history <i class="bi bi-chevron-right"></i></button>
   </section>`;
 }
 
 const RESMI_TEMPLATES = [
-  { group: 'Application scalar', items: [
+  { group: 'ApplicationProfileInstance scalar', items: [
     { id: 'r1', name: 'Arza haty / Cover Letter.docx', type: 'Word', nested: 'Application', readiness: 'ready', merge: 'ok', checked: true },
     { id: 'r2', name: 'Visa uzaltmak barada arza.docx', type: 'Word', nested: 'Application', readiness: 'warn', merge: '2 missing', checked: true },
     { id: 'r3', name: 'Giriş-çykyş seneleri / Travel dates.docx', type: 'Word', nested: 'Application', readiness: 'ready', merge: 'ok', checked: false },
@@ -286,7 +286,7 @@ export function renderCaseResminamalarTab(c) {
 }
 
 const SLA_DEADLINES = [
-  { step: 'Application received', due: '10 Aug 2026', days: '—', status: 'completed' },
+  { step: 'ApplicationProfileInstance received', due: '10 Aug 2026', days: '—', status: 'completed' },
   { step: 'Document check', due: '14 Aug 2026', days: '2', status: 'completed' },
   { step: 'Ministry review', due: '22 Aug 2026', days: '8', status: 'inprogress', bold: true },
   { step: 'Decision', due: '05 Sep 2026', days: '22', status: 'pending' },

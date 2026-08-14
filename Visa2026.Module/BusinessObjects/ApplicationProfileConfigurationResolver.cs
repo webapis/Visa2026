@@ -4,13 +4,13 @@ using System.Linq;
 namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
-/// Effective Application configuration: <see cref="Application.ApplicationProfile"/> first,
+/// Effective ApplicationProfileInstance configuration: <see cref="Application.ApplicationProfile"/> first,
 /// deprecated <see cref="Application.ApplicationType"/> fallback during dual-read (slice 6).
 /// Inverse of <see cref="DatabaseUpdate.ApplicationProfileFromApplicationTypeMapper"/> where mapped.
 /// </summary>
 public static class ApplicationProfileConfigurationResolver
 {
-    public static ApplicationProgressRouteKind? GetProgressRoute(Application? application)
+    public static ApplicationProfileInstanceProgressRouteKind? GetProgressRoute(ApplicationProfileInstance? application)
     {
         if (application == null)
             return null;
@@ -21,25 +21,31 @@ public static class ApplicationProfileConfigurationResolver
         if (application.ApplicationProfile != null)
             return application.ApplicationProfile.ProgressRoute;
 
-        return application.ApplicationType?.ApplicationProgressRoute;
+        return application.ApplicationType?.ApplicationProfileInstanceProgressRoute;
     }
 
-    public static bool HasConfiguration(Application? application) =>
+    public static bool HasConfiguration(ApplicationProfileInstance? application) =>
         application?.ApplicationProfile != null || application?.ApplicationType != null;
 
-    public static bool CanIssueVisa(Application? application) =>
+    public static bool CanIssueVisa(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.ProduceVisa, t => t.CanIssueVisa);
 
-    public static bool CanIssueInvitation(Application? application) =>
+    public static bool CanIssueInvitation(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.ProduceInvitation, t => t.CanIssueInvitation);
 
-    public static bool CanIssueWorkPermit(Application? application) =>
+    public static bool CanIssueWorkPermit(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.ProduceWorkPermit, t => t.CanIssueWorkPermit);
 
-    public static bool CanBeIssuingApplicationForVisa(Application? application) =>
+    public static bool CanIssueBorderZone(ApplicationProfileInstance? application) =>
+        Resolve(application, p => p.ProduceBorderZone, t => t.ShowBorderZoneLocation);
+
+    public static bool CanIssueRejection(ApplicationProfileInstance? application) =>
+        Resolve(application, p => p.ProduceRejection, t => t.ShowRejections);
+
+    public static bool CanBeIssuingApplicationProfileInstanceForVisa(ApplicationProfileInstance? application) =>
         CanIssueVisa(application) || CanIssueInvitation(application);
 
-    public static int GetMigrationSlaMaxDays(Application? application)
+    public static int GetMigrationSlaMaxDays(ApplicationProfileInstance? application)
     {
         if (application?.ApplicationProfile is { MigrationSlaDays: > 0 } profile)
             return profile.MigrationSlaDays;
@@ -50,70 +56,79 @@ public static class ApplicationProfileConfigurationResolver
         return 0;
     }
 
-    public static bool HasMigrationSlaConfigured(Application? application) =>
+    public static bool HasMigrationSlaConfigured(ApplicationProfileInstance? application) =>
         GetMigrationSlaMaxDays(application) > 0;
 
-    public static int GetEmbeddedProfileMinistryLegCount(Application? application) =>
+    public static int GetEmbeddedProfileMinistryLegCount(ApplicationProfileInstance? application) =>
         application?.ApplicationProfile?.ApprovalLegs?
             .Count(l => l.ApprovingMinistry != null) ?? 0;
 
-    // --- Application DetailView visibility (maps from profile Require* / ActionFamily) ---
+    // --- ApplicationProfileInstance DetailView visibility (maps from profile Require* / ActionFamily) ---
 
-    public static bool ShowVisaType(Application? application) =>
+    public static bool ShowVisaType(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequireVisaType, t => t.ShowVisaType);
 
-    public static bool ShowVisaCategory(Application? application) =>
+    public static bool ShowVisaCategory(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequireVisaCategory, t => t.ShowVisaCategory);
 
-    public static bool ShowVisaPeriod(Application? application) =>
+    public static bool ShowVisaPeriod(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequireVisaPeriod, t => t.ShowVisaPeriod);
 
-    public static bool ShowProjectContract(Application? application) =>
+    public static bool ShowProjectContract(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequireProject, t => t.ShowProjectContract);
 
-    public static bool ShowUrgency(Application? application) =>
+    public static bool ShowUrgency(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequireUrgency, t => t.ShowUrgency);
 
-    public static bool ShowBorderZoneLocation(Application? application) =>
+    public static bool ShowBorderZoneLocation(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequireBorderZone, t => t.ShowBorderZoneLocation);
 
-    public static bool ShowMovementPermitLocation(Application? application) =>
+    public static bool ShowMovementPermitLocation(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequireWorkPermitLocation, t => t.ShowMovementPermitLocation);
 
-    public static bool ShowWorkPermittedLocations(Application? application) =>
+    public static bool ShowWorkPermittedLocations(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequireWorkPermitLocation, t => t.ShowWorkPermittedLocations);
 
-    public static bool ShowFromCity(Application? application) =>
+    public static bool ShowFromCity(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequireRegionCity, t => t.ShowFromCity);
 
-    public static bool ShowToCity(Application? application) =>
+    public static bool ShowToCity(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequireRegionCity, t => t.ShowToCity);
 
-    public static bool ShowBusinessTrips(Application? application) =>
+    public static bool ShowBusinessTrips(ApplicationProfileInstance? application) =>
         Resolve(
             application,
             p => p.ActionFamily == ApplicationProfileActionFamily.BusinessTrip || p.RequireStartDate,
             t => t.ShowBusinessTrips);
 
-    public static bool ShowRegistrations(Application? application) =>
+    public static bool ShowRegistrations(ApplicationProfileInstance? application) =>
         Resolve(
             application,
             p => p.ActionFamily == ApplicationProfileActionFamily.Registration,
             t => t.ShowRegistrations);
 
-    public static bool ShowMigrationService(Application? application) =>
+    public static bool ShowMigrationService(ApplicationProfileInstance? application) =>
         !ShowRegistrations(application) && !ShowBusinessTrips(application);
 
-    public static bool ShowInvitations(Application? application) =>
+    public static bool ShowInvitations(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.ProduceInvitation, t => t.ShowInvitations || t.CanIssueInvitation);
 
-    public static bool ShowWorkPermits(Application? application) =>
+    public static bool ShowWorkPermits(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.ProduceWorkPermit, t => t.ShowWorkPermits || t.CanIssueWorkPermit);
 
-    public static bool ShowRejections(Application? application) =>
+    public static bool ShowBorderZones(ApplicationProfileInstance? application) =>
+        Resolve(application, p => p.ProduceBorderZone, t => t.ShowBorderZoneLocation);
+
+    public static bool ShowIssuedVisas(ApplicationProfileInstance? application) =>
+        CanBeIssuingApplicationProfileInstanceForVisa(application);
+
+    public static bool ShowRejections(ApplicationProfileInstance? application) =>
+        Resolve(application, p => p.ProduceRejection, t => t.ShowRejections);
+
+    public static bool RequirePersonRejectionItem(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequirePersonRejectionItem, t => t.ShowRejections);
 
-    public static bool ShowApplicationItems(Application? application)
+    public static bool ShowApplicationItems(ApplicationProfileInstance? application)
     {
         if (application?.ApplicationProfile is { } profile)
         {
@@ -135,9 +150,9 @@ public static class ApplicationProfileConfigurationResolver
         return application?.ApplicationType?.ShowApplicationItems == true;
     }
 
-    public static bool ShowApprovalLegProfile(Application? application)
+    public static bool ShowApprovalLegProfile(ApplicationProfileInstance? application)
     {
-        if (GetProgressRoute(application) != ApplicationProgressRouteKind.ViaMinistries)
+        if (GetProgressRoute(application) != ApplicationProfileInstanceProgressRouteKind.ViaMinistries)
             return false;
 
         if (application?.ApplicationProfile is { } profile)
@@ -154,76 +169,84 @@ public static class ApplicationProfileConfigurationResolver
         return application?.ApplicationType?.ShowApprovalLegProfile == true;
     }
 
-    // --- ApplicationItem visibility ---
+    // --- ApplicationRosterMergeLine visibility ---
 
-    public static bool ShowPreviousPassport(Application? application) =>
+    public static bool ShowPreviousPassport(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequirePersonPassport, t => t.ShowPreviousPassport);
 
-    public static bool ShowCurrentVisa(Application? application) =>
+    public static bool ShowCurrentVisa(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequirePersonVisa, t => t.ShowCurrentVisa);
 
-    public static bool ShowNextVisa(Application? application) =>
+    public static bool ShowNextVisa(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequirePersonVisa, t => t.ShowNextVisa);
 
-    public static bool ShowCurrentWorkPermitItem(Application? application) =>
+    public static bool ShowCurrentWorkPermitItem(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequirePersonWorkPermitItem, t => t.ShowCurrentWorkPermitItem);
 
-    public static bool ShowPreviousWorkPermitItem(Application? application) =>
+    public static bool ShowPreviousWorkPermitItem(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequirePersonWorkPermitItem, t => t.ShowPreviousWorkPermitItem);
 
-    public static bool ShowCurrentInvitationItem(Application? application) =>
+    public static bool ShowCurrentInvitationItem(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequirePersonInvitationItem, t => t.ShowCurrentInvitationItem);
 
-    public static bool ShowPreviousInvitationItem(Application? application) =>
+    public static bool ShowPreviousInvitationItem(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequirePersonInvitationItem, t => t.ShowPreviousInvitationItem);
 
-    public static bool ShowCurrentAddressOfResidence(Application? application) =>
+    public static bool ShowCurrentAddressOfResidence(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequirePersonAddressOfResidence, t => t.ShowCurrentAddressOfResidence);
 
-    public static bool ShowCurrentWorkDuty(Application? application) =>
+    public static bool ShowCurrentWorkDuty(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequirePersonPosition, t => t.ShowCurrentWorkDuty);
 
-    public static bool ShowCurrentSalary(Application? application) =>
+    public static bool ShowCurrentSalary(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequirePersonSalary, t => t.ShowCurrentSalary);
 
-    public static bool ShowCurrentMedicalRecord(Application? application) =>
+    public static bool ShowCurrentMedicalRecord(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequirePersonMedical, t => t.ShowCurrentMedicalRecord);
 
-    public static bool ShowCurrentEducation(Application? application) =>
+    public static bool ShowCurrentEducation(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequirePersonEducation, t => t.ShowCurrentEducation);
 
-    public static bool ShowInvitationItemIsCancelled(Application? application) =>
+    /// <summary>Profile-only (no Type Show*); gates BorderZoneItem auto-link.</summary>
+    public static bool RequirePersonBorderZoneItem(ApplicationProfileInstance? application) =>
+        Resolve(application, p => p.RequirePersonBorderZoneItem, _ => false);
+
+    /// <summary>Profile-only (no Type Show*); gates TravelHistory auto-link.</summary>
+    public static bool RequirePersonTravelHistory(ApplicationProfileInstance? application) =>
+        Resolve(application, p => p.RequirePersonTravelHistory, _ => false);
+
+    public static bool ShowInvitationItemIsCancelled(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.CancelInvitations, t => t.ShowInvitationItemIsCancelled);
 
-    public static bool ShowWorkPermitItemIsCancelled(Application? application) =>
+    public static bool ShowWorkPermitItemIsCancelled(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.CancelWorkPermits, t => t.ShowWorkPermitItemIsCancelled);
 
-    public static bool ShowVisaIsCancelled(Application? application) =>
+    public static bool ShowVisaIsCancelled(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.CancelVisas, t => t.ShowVisaIsCancelled);
 
-    public static bool ShowInvitationItemIsIssued(Application? application) =>
+    public static bool ShowInvitationItemIsIssued(ApplicationProfileInstance? application) =>
         ResolveTypeOnly(application, t => t.ShowInvitationItemIsIssued);
 
-    public static bool ShowWorkPermitItemIsIssued(Application? application) =>
+    public static bool ShowWorkPermitItemIsIssued(ApplicationProfileInstance? application) =>
         ResolveTypeOnly(application, t => t.ShowWorkPermitItemIsIssued);
 
-    public static bool ShowRejectionIssued(Application? application) =>
+    public static bool ShowRejectionIssued(ApplicationProfileInstance? application) =>
         ResolveTypeOnly(application, t => t.ShowRejectionIssued);
 
-    public static bool ShowVisaIssued(Application? application) =>
+    public static bool ShowVisaIssued(ApplicationProfileInstance? application) =>
         ResolveTypeOnly(application, t => t.ShowVisaIssued);
 
-    public static bool ShowInvitationItemIsChanged(Application? application) =>
+    public static bool ShowInvitationItemIsChanged(ApplicationProfileInstance? application) =>
         ResolveTypeOnly(application, t => t.ShowInvitationItemIsChanged);
 
-    public static bool ShowWorkPermitItemIsChanged(Application? application) =>
+    public static bool ShowWorkPermitItemIsChanged(ApplicationProfileInstance? application) =>
         ResolveTypeOnly(application, t => t.ShowWorkPermitItemIsChanged);
 
-    public static bool ShowVisaIsChanged(Application? application) =>
+    public static bool ShowVisaIsChanged(ApplicationProfileInstance? application) =>
         ResolveTypeOnly(application, t => t.ShowVisaIsChanged);
 
     private static bool Resolve(
-        Application? application,
+        ApplicationProfileInstance? application,
         Func<ApplicationProfile, bool> fromProfile,
         Func<ApplicationType, bool> fromType)
     {
@@ -236,6 +259,6 @@ public static class ApplicationProfileConfigurationResolver
         return false;
     }
 
-    private static bool ResolveTypeOnly(Application? application, Func<ApplicationType, bool> fromType) =>
+    private static bool ResolveTypeOnly(ApplicationProfileInstance? application, Func<ApplicationType, bool> fromType) =>
         application?.ApplicationType is { } type && fromType(type);
 }

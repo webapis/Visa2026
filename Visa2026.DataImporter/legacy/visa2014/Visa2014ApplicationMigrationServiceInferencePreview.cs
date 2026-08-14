@@ -6,7 +6,7 @@ internal static class Visa2014ApplicationMigrationServiceInferencePreview
 
     internal static readonly string[] MainColumnOrder =
     [
-        "ManualApplicationNumber", "_legacyApplicationOid", "_legacyPersonOid",
+        "ManualApplicationNumber", "_legacyApplicationProfileInstanceOid", "_legacyPersonOid",
         "ApplicationDate", "RegionMgCode", "RegionName", "CityMgCode", "CityName",
         "ProposedMigrationService", "Confidence", "Reason",
         "_usedExpiredAddressFallback", "_addressCount",
@@ -14,7 +14,7 @@ internal static class Visa2014ApplicationMigrationServiceInferencePreview
 
     private const string ApplicationsSql = $"""
         SELECT
-            CAST(a.Oid AS varchar(36)) AS LegacyApplicationOid,
+            CAST(a.Oid AS varchar(36)) AS LegacyApplicationProfileInstanceOid,
             r.ManualApplicationNumber,
             CONVERT(varchar(10), r.ManualApplicationDate, 23) AS ApplicationDate,
             CASE
@@ -198,7 +198,7 @@ internal static class Visa2014ApplicationMigrationServiceInferencePreview
         return new Dictionary<string, object?>(StringComparer.Ordinal)
         {
             ["ManualApplicationNumber"] = app.ManualApplicationNumber,
-            ["_legacyApplicationOid"] = app.LegacyApplicationOid,
+            ["_legacyApplicationProfileInstanceOid"] = app.LegacyApplicationProfileInstanceOid,
             ["_legacyPersonOid"] = app.LegacyPersonOid == Guid.Empty ? null : app.LegacyPersonOid,
             ["ApplicationDate"] = app.ApplicationDate?.ToString("yyyy-MM-dd"),
             ["RegionMgCode"] = regionMgCode,
@@ -336,7 +336,7 @@ internal static class Visa2014ApplicationMigrationServiceInferencePreview
         var apps = new List<ApplicationRow>();
         foreach (var row in rows)
         {
-            if (!Guid.TryParse(row.GetValueOrDefault("LegacyApplicationOid"), out var appOid))
+            if (!Guid.TryParse(row.GetValueOrDefault("LegacyApplicationProfileInstanceOid"), out var appOid))
                 continue;
 
             Guid.TryParse(row.GetValueOrDefault("LegacyPersonOid"), out var personOid);
@@ -374,7 +374,7 @@ internal static class Visa2014ApplicationMigrationServiceInferencePreview
     }
 
     private sealed record ApplicationRow(
-        Guid LegacyApplicationOid,
+        Guid LegacyApplicationProfileInstanceOid,
         string? ManualApplicationNumber,
         DateTime? ApplicationDate,
         Guid LegacyPersonOid);

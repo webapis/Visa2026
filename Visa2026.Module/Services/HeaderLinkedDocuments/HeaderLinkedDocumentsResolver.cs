@@ -191,7 +191,7 @@ public static class HeaderLinkedDocumentsResolver
             }
         }
 
-        return BuildApplicationSubtitle(workPermit.Application);
+        return BuildApplicationSubtitle(workPermit.ApplicationProfileInstance);
     }
 
     private static string? BuildInvitationSubtitle(IObjectSpace os, Invitation invitation, Guid? contextItemId)
@@ -208,7 +208,7 @@ public static class HeaderLinkedDocumentsResolver
             }
         }
 
-        return BuildApplicationSubtitle(invitation.Application);
+        return BuildApplicationSubtitle(invitation.ApplicationProfileInstance);
     }
 
     private static string? BuildRejectionSubtitle(IObjectSpace os, Rejection rejection, Guid? contextItemId)
@@ -226,7 +226,7 @@ public static class HeaderLinkedDocumentsResolver
             }
         }
 
-        return BuildApplicationSubtitle(rejection.Application);
+        return BuildApplicationSubtitle(rejection.ApplicationProfileInstance);
     }
 
     private static string? BuildBorderZoneSubtitle(IObjectSpace os, BorderZone borderZone, Guid? contextItemId)
@@ -243,10 +243,10 @@ public static class HeaderLinkedDocumentsResolver
             }
         }
 
-        return BuildApplicationSubtitle(borderZone.Application);
+        return BuildApplicationSubtitle(borderZone.ApplicationProfileInstance);
     }
 
-    private static string? BuildApplicationSubtitle(Application? application)
+    private static string? BuildApplicationSubtitle(ApplicationProfileInstance? application)
     {
         if (application == null)
             return null;
@@ -255,7 +255,7 @@ public static class HeaderLinkedDocumentsResolver
         if (string.IsNullOrWhiteSpace(number))
             return null;
 
-        return VisaUiMessages.Format("HeaderDocumentCopies.Subtitle.Application", number);
+        return VisaUiMessages.Format("HeaderDocumentCopies.Subtitle.ApplicationProfileInstance", number);
     }
 
     private static IReadOnlyList<HeaderLinkedDocumentRecord> LoadDocumentRecords<TDocument>(

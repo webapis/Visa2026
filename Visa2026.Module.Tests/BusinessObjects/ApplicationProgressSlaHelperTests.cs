@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Visa2026.Module.Tests.BusinessObjects;
 
-public class ApplicationProgressSlaHelperTests
+public class ApplicationProfileInstanceProgressSlaHelperTests
 {
     [Fact]
     public void Resolve_ReturnsNone_WhenLastLegApprovedAndMigrationNext()
@@ -17,9 +17,9 @@ public class ApplicationProgressSlaHelperTests
             warningDays: 8,
             legCount: 2);
 
-        var sla = ApplicationProgressSlaHelper.Resolve(app);
+        var sla = ApplicationProfileInstanceProgressSlaHelper.Resolve(app);
 
-        Assert.Equal(ApplicationProgressSlaStatus.None, sla.Status);
+        Assert.Equal(ApplicationProfileInstanceProgressSlaStatus.None, sla.Status);
         Assert.Null(sla.AppearanceStateCode);
     }
 
@@ -27,15 +27,15 @@ public class ApplicationProgressSlaHelperTests
     public void Resolve_ReturnsOk_WhenAwaitingFirstLegAfterOfficePreparation()
     {
         var app = BuildApplication(
-            ApplicationProgressStateCodes.IsBeingPrepared,
+            ApplicationProfileInstanceProgressStateCodes.IsBeingPrepared,
             WorkingDaysAgo(3),
             maxDays: 10,
             warningDays: 8,
             legCount: 1);
 
-        var sla = ApplicationProgressSlaHelper.Resolve(app);
+        var sla = ApplicationProfileInstanceProgressSlaHelper.Resolve(app);
 
-        Assert.Equal(ApplicationProgressSlaStatus.Ok, sla.Status);
+        Assert.Equal(ApplicationProfileInstanceProgressSlaStatus.Ok, sla.Status);
         Assert.Null(sla.AppearanceStateCode);
     }
 
@@ -43,42 +43,42 @@ public class ApplicationProgressSlaHelperTests
     public void Resolve_ReturnsWarning_WhenPastWarningThreshold()
     {
         var app = BuildApplication(
-            ApplicationProgressStateCodes.IsBeingPrepared,
+            ApplicationProfileInstanceProgressStateCodes.IsBeingPrepared,
             WorkingDaysAgo(9),
             maxDays: 10,
             warningDays: 8,
             legCount: 1);
 
-        var sla = ApplicationProgressSlaHelper.Resolve(app);
+        var sla = ApplicationProfileInstanceProgressSlaHelper.Resolve(app);
 
-        Assert.Equal(ApplicationProgressSlaStatus.Warning, sla.Status);
-        Assert.Equal(ApplicationProgressSlaCodes.Warning, sla.AppearanceStateCode);
+        Assert.Equal(ApplicationProfileInstanceProgressSlaStatus.Warning, sla.Status);
+        Assert.Equal(ApplicationProfileInstanceProgressSlaCodes.Warning, sla.AppearanceStateCode);
     }
 
     [Fact]
     public void Resolve_ReturnsOverdue_WhenPastMaxDays()
     {
         var app = BuildApplication(
-            ApplicationProgressStateCodes.IsBeingPrepared,
+            ApplicationProfileInstanceProgressStateCodes.IsBeingPrepared,
             WorkingDaysAgo(11),
             maxDays: 10,
             warningDays: 8,
             legCount: 1);
 
-        var sla = ApplicationProgressSlaHelper.Resolve(app);
+        var sla = ApplicationProfileInstanceProgressSlaHelper.Resolve(app);
 
-        Assert.Equal(ApplicationProgressSlaStatus.Overdue, sla.Status);
-        Assert.Equal(ApplicationProgressSlaCodes.Overdue, sla.AppearanceStateCode);
+        Assert.Equal(ApplicationProfileInstanceProgressSlaStatus.Overdue, sla.Status);
+        Assert.Equal(ApplicationProfileInstanceProgressSlaCodes.Overdue, sla.AppearanceStateCode);
     }
 
     [Fact]
     public void Resolve_UsesPreviousStepDate_ForLegacyReviewStartedRows()
     {
-        var app = new Application
+        var app = new ApplicationProfileInstance
         {
             ApplicationType = new ApplicationType
             {
-                ApplicationProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
+                ApplicationProfileInstanceProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
                 ShowApprovalLegProfile = true
             },
             ApprovalLegProfile = new ApprovalLegProfile
@@ -90,20 +90,20 @@ public class ApplicationProgressSlaHelperTests
             },
             ProgressHistory =
             [
-                new ApplicationProgress
+                new ApplicationProfileInstanceProgress
                 {
                     Date = WorkingDaysAgo(9),
-                    State = new ApplicationState { Code = ApplicationProgressStateCodes.IsBeingPrepared },
+                    State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.IsBeingPrepared },
                 },
-                new ApplicationProgress
+                new ApplicationProfileInstanceProgress
                 {
                     Date = DateTime.Today,
-                    State = new ApplicationState { Code = ApplicationProgressLegCodes.ReviewStarted(1) },
+                    State = new ApplicationState { Code = ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1) },
                 }
             ],
             ApprovalLegSnapshots =
             [
-                new ApplicationApprovalLegSnapshot
+                new ApplicationProfileInstanceApprovalLegSnapshot
                 {
                     Sequence = 1,
                     MinistryShortName = "Gurluşyk",
@@ -113,9 +113,9 @@ public class ApplicationProgressSlaHelperTests
             ]
         };
 
-        var sla = ApplicationProgressSlaHelper.Resolve(app);
+        var sla = ApplicationProfileInstanceProgressSlaHelper.Resolve(app);
 
-        Assert.Equal(ApplicationProgressSlaStatus.Warning, sla.Status);
+        Assert.Equal(ApplicationProfileInstanceProgressSlaStatus.Warning, sla.Status);
     }
 
     [Fact]
@@ -135,14 +135,14 @@ public class ApplicationProgressSlaHelperTests
     }
 
 
-    private static Application BuildImpliedOfficeApplication(
+    private static ApplicationProfileInstance BuildImpliedOfficeApplication(
         DateTime applicationDate,
         int maxDays,
         int warningDays,
         int legCount)
     {
         var app = BuildApplication(
-            ApplicationProgressStateCodes.IsBeingPrepared,
+            ApplicationProfileInstanceProgressStateCodes.IsBeingPrepared,
             applicationDate,
             maxDays,
             warningDays,
@@ -151,7 +151,7 @@ public class ApplicationProgressSlaHelperTests
         app.ProgressHistory = [];
         return app;
     }
-    private static Application BuildApplication(
+    private static ApplicationProfileInstance BuildApplication(
         string stateCode,
         DateTime progressDate,
         int maxDays,
@@ -159,7 +159,7 @@ public class ApplicationProgressSlaHelperTests
         int legCount)
     {
         var snapshots = Enumerable.Range(1, legCount)
-            .Select(sequence => new ApplicationApprovalLegSnapshot
+            .Select(sequence => new ApplicationProfileInstanceApprovalLegSnapshot
             {
                 Sequence = sequence,
                 MinistryShortName = $"Leg{sequence}",
@@ -168,11 +168,11 @@ public class ApplicationProgressSlaHelperTests
             })
             .ToList();
 
-        return new Application
+        return new ApplicationProfileInstance
         {
             ApplicationType = new ApplicationType
             {
-                ApplicationProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
+                ApplicationProfileInstanceProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
                 ShowApprovalLegProfile = true
             },
             ApprovalLegProfile = new ApprovalLegProfile
@@ -187,7 +187,7 @@ public class ApplicationProgressSlaHelperTests
             },
             ProgressHistory =
             [
-                new ApplicationProgress
+                new ApplicationProfileInstanceProgress
                 {
                     Date = progressDate,
                     State = new ApplicationState { Code = stateCode },

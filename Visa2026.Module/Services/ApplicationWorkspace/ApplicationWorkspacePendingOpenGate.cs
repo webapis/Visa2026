@@ -16,7 +16,7 @@ public static class ApplicationWorkspacePendingOpenGate
         if (application.ServiceProvider.GetService(typeof(IApplicationWorkspacePendingOpen))
             is IApplicationWorkspacePendingOpen pending)
         {
-            pending.ApplicationId = applicationId;
+            pending.ApplicationProfileInstanceId = applicationId;
         }
     }
 
@@ -28,7 +28,7 @@ public static class ApplicationWorkspacePendingOpenGate
         if (application.ServiceProvider.GetService(typeof(IApplicationWorkspacePendingOpen))
             is IApplicationWorkspacePendingOpen pending)
         {
-            return pending.ApplicationId;
+            return pending.ApplicationProfileInstanceId;
         }
 
         return Guid.Empty;

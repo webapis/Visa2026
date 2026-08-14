@@ -6,11 +6,11 @@ namespace Visa2026.Module.Tests.BusinessObjects;
 public class ApplicationWorkflowTerminalTests
 {
     [Theory]
-    [InlineData(ApplicationProgressStateCodes.ProcessCancelled, true)]
-    [InlineData(ApplicationProgressStateCodes.ProcessRejected, true)]
-    [InlineData(ApplicationProgressStateCodes.ProcessIssued, true)]
-    [InlineData(ApplicationProgressStateCodes.ProcessStarted, false)]
-    [InlineData(ApplicationProgressStateCodes.Review1Rejected, false)]
+    [InlineData(ApplicationProfileInstanceProgressStateCodes.ProcessCancelled, true)]
+    [InlineData(ApplicationProfileInstanceProgressStateCodes.ProcessRejected, true)]
+    [InlineData(ApplicationProfileInstanceProgressStateCodes.ProcessIssued, true)]
+    [InlineData(ApplicationProfileInstanceProgressStateCodes.ProcessStarted, false)]
+    [InlineData(ApplicationProfileInstanceProgressStateCodes.Review1Rejected, false)]
     public void WorkflowTerminalFlags_ReflectLatestProgressState(
         string stateCode,
         bool expectedTerminal)
@@ -18,28 +18,28 @@ public class ApplicationWorkflowTerminalTests
         var app = BuildApplication(stateCode);
 
         Assert.Equal(expectedTerminal, app.IsWorkflowTerminal);
-        Assert.Equal(expectedTerminal, ApplicationProgressProfileResolver.IsWorkflowTerminal(app));
+        Assert.Equal(expectedTerminal, ApplicationProfileInstanceProgressProfileResolver.IsWorkflowTerminal(app));
     }
 
     [Fact]
     public void IsProcessTerminalStateCode_MatchesProcessTerminalsOnly()
     {
-        Assert.True(ApplicationProgressProfileResolver.IsProcessTerminalStateCode(
-            ApplicationProgressStateCodes.ProcessCancelled));
-        Assert.True(ApplicationProgressProfileResolver.IsProcessTerminalStateCode(
-            ApplicationProgressStateCodes.ProcessRejected));
-        Assert.True(ApplicationProgressProfileResolver.IsProcessTerminalStateCode(
-            ApplicationProgressStateCodes.ProcessIssued));
-        Assert.False(ApplicationProgressProfileResolver.IsProcessTerminalStateCode(
-            ApplicationProgressStateCodes.Review1Rejected));
+        Assert.True(ApplicationProfileInstanceProgressProfileResolver.IsProcessTerminalStateCode(
+            ApplicationProfileInstanceProgressStateCodes.ProcessCancelled));
+        Assert.True(ApplicationProfileInstanceProgressProfileResolver.IsProcessTerminalStateCode(
+            ApplicationProfileInstanceProgressStateCodes.ProcessRejected));
+        Assert.True(ApplicationProfileInstanceProgressProfileResolver.IsProcessTerminalStateCode(
+            ApplicationProfileInstanceProgressStateCodes.ProcessIssued));
+        Assert.False(ApplicationProfileInstanceProgressProfileResolver.IsProcessTerminalStateCode(
+            ApplicationProfileInstanceProgressStateCodes.Review1Rejected));
     }
 
-    private static Application BuildApplication(string stateCode) =>
+    private static ApplicationProfileInstance BuildApplication(string stateCode) =>
         new()
         {
             ProgressHistory =
             [
-                new ApplicationProgress
+                new ApplicationProfileInstanceProgress
                 {
                     Date = new DateTime(2024, 6, 1),
                     State = new ApplicationState { Code = stateCode },

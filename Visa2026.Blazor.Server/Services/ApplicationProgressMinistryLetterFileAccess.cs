@@ -5,7 +5,7 @@ using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Blazor.Server.Services;
 
-public sealed class ApplicationProgressMinistryLetterFileResult
+public sealed class ApplicationProfileInstanceProgressMinistryLetterFileResult
 {
     public required byte[] Content { get; init; }
 
@@ -15,39 +15,39 @@ public sealed class ApplicationProgressMinistryLetterFileResult
 }
 
 /// <summary>
-/// Secure read access for <see cref="ApplicationProgress.MinistryLetterFile"/> on a parent <see cref="Application"/>.
+/// Secure read access for <see cref="ApplicationProfileInstanceProgress.MinistryLetterFile"/> on a parent <see cref="Application"/>.
 /// </summary>
-public sealed class ApplicationProgressMinistryLetterFileAccess
+public sealed class ApplicationProfileInstanceProgressMinistryLetterFileAccess
 {
     private readonly INonSecuredObjectSpaceFactory nonSecuredObjectSpaceFactory;
 
-    public ApplicationProgressMinistryLetterFileAccess(INonSecuredObjectSpaceFactory nonSecuredObjectSpaceFactory) =>
+    public ApplicationProfileInstanceProgressMinistryLetterFileAccess(INonSecuredObjectSpaceFactory nonSecuredObjectSpaceFactory) =>
         this.nonSecuredObjectSpaceFactory = nonSecuredObjectSpaceFactory;
 
     /// <summary>Loads the ministry letter file for a progress row without requiring the parent application ID (used by the global preview drawer).</summary>
-    public bool TryGetApplicationIdForProgress(Guid progressId, out Guid applicationId)
+    public bool TryGetApplicationProfileInstanceIdForProgress(Guid progressId, out Guid applicationId)
     {
         applicationId = Guid.Empty;
         if (progressId == Guid.Empty)
             return false;
 
-        using var objectSpace = nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProgress>();
-        applicationId = objectSpace.GetObjectsQuery<ApplicationProgress>()
-            .Where(p => p.ID == progressId && p.Application != null)
-            .Select(p => p.Application!.ID)
+        using var objectSpace = nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstanceProgress>();
+        applicationId = objectSpace.GetObjectsQuery<ApplicationProfileInstanceProgress>()
+            .Where(p => p.ID == progressId && p.ApplicationProfileInstance != null)
+            .Select(p => p.ApplicationProfileInstance!.ID)
             .FirstOrDefault();
 
         return applicationId != Guid.Empty;
     }
 
-    public bool TryGetFileByProgressId(Guid progressId, out ApplicationProgressMinistryLetterFileResult? result)
+    public bool TryGetFileByProgressId(Guid progressId, out ApplicationProfileInstanceProgressMinistryLetterFileResult? result)
     {
         result = null;
         if (progressId == Guid.Empty)
             return false;
 
-        using var objectSpace = nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProgress>();
-        var progress = objectSpace.GetObjectsQuery<ApplicationProgress>()
+        using var objectSpace = nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstanceProgress>();
+        var progress = objectSpace.GetObjectsQuery<ApplicationProfileInstanceProgress>()
             .Include(p => p.MinistryLetterFile)
             .FirstOrDefault(p => p.ID == progressId);
 
@@ -71,7 +71,7 @@ public sealed class ApplicationProgressMinistryLetterFileAccess
             return false;
 
         var fileName = string.IsNullOrWhiteSpace(file.FileName) ? "ministry-letter.pdf" : file.FileName;
-        result = new ApplicationProgressMinistryLetterFileResult
+        result = new ApplicationProfileInstanceProgressMinistryLetterFileResult
         {
             Content = content,
             FileName = fileName,
@@ -80,19 +80,19 @@ public sealed class ApplicationProgressMinistryLetterFileAccess
         return true;
     }
 
-    public bool TryGetFile(Guid applicationId, Guid progressId, out ApplicationProgressMinistryLetterFileResult? result)
+    public bool TryGetFile(Guid applicationId, Guid progressId, out ApplicationProfileInstanceProgressMinistryLetterFileResult? result)
     {
         result = null;
         if (applicationId == Guid.Empty || progressId == Guid.Empty)
             return false;
 
-        using var objectSpace = nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProgress>();
-        var progress = objectSpace.GetObjectsQuery<ApplicationProgress>()
-            .Include(p => p.Application)
+        using var objectSpace = nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstanceProgress>();
+        var progress = objectSpace.GetObjectsQuery<ApplicationProfileInstanceProgress>()
+            .Include(p => p.ApplicationProfileInstance)
             .Include(p => p.MinistryLetterFile)
             .FirstOrDefault(p => p.ID == progressId);
 
-        if (progress?.Application?.ID != applicationId)
+        if (progress?.ApplicationProfileInstance?.ID != applicationId)
             return false;
 
         var file = progress.MinistryLetterFile;
@@ -112,7 +112,7 @@ public sealed class ApplicationProgressMinistryLetterFileAccess
             return false;
 
         var fileName = string.IsNullOrWhiteSpace(file.FileName) ? "ministry-letter.pdf" : file.FileName;
-        result = new ApplicationProgressMinistryLetterFileResult
+        result = new ApplicationProfileInstanceProgressMinistryLetterFileResult
         {
             Content = content,
             FileName = fileName,

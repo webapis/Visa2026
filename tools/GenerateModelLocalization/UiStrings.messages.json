@@ -2213,6 +2213,12 @@
     "tk-TM": "Bu arza ýapyldy (berildi, ret edildi ýa-da ýatyryldy). Täzeden açmak üçin soňky ösüş ädimini üýtgediň.",
     "ru-RU": "Заявка закрыта (выдана, отклонена или отменена). Измените последний шаг прогресса, чтобы открыть снова."
   },
+  "ApplicationPerson.RosterLockedWhenWorkflowTerminal": {
+    "en": "People and linked records cannot be changed after the process is complete (issued, rejected, or cancelled). Edit the last progress step to reopen the case.",
+    "tr-TR": "Süreç tamamlandıktan sonra (verildi, reddedildi veya iptal edildi) kişiler ve bağlı kayıtlar değiştirilemez. Davayı yeniden açmak için son ilerleme adımını düzenleyin.",
+    "tk-TM": "Proses tamamlandan soň (berildi, ret edildi ýa-da ýatyryldy) adamlar we baglanan ýazgylar üýtgedilip bolmaýar. Arzany täzeden açmak üçin soňky ösüş ädimini üýtgediň.",
+    "ru-RU": "После завершения процесса (выдано, отклонено или отменено) нельзя менять людей и связанные записи. Измените последний шаг прогресса, чтобы снова открыть дело."
+  },
   "Application.ProjectContractLockedAfterProgress": {
     "en": "Project contract cannot change after ministry or migration steps were recorded.",
     "tr-TR": "Bakanlık veya göç adımları kaydedildikten sonra proje sözleşmesi değiştirilemez.",

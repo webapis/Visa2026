@@ -4,7 +4,7 @@ description: Visa extension process rejected by migration service — tests V-14
 dependsOn: VisaExtProcessCancelled
 sync: false
 anchor:
-  entity: Application
+  entity: ApplicationProfileInstance
   key: FullApplicationNumber
   value: 4/-035
 data:
@@ -28,12 +28,12 @@ data:
     Expiration Date: 2026-04-30
     Passport Number: UZ7777777
   Applications:
-  - Application Number: 035
+  - ApplicationProfileInstance Number: 035
     Date: 2026-04-01
     Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
     Project Contract: GT-15
     Filter: Visa
-    Application Type: App_Visa_Ext
+    ApplicationProfileInstance Type: App_Visa_Ext
     Urgency: Adaty tertipde !
     Visa Period: 3 (üç) aý
     Visa Category: Köp gezeklik
@@ -51,7 +51,7 @@ data:
   - Rejection Number: REJ-035
     Person: Rustam Nazarov
     Reason: Extension process rejected by migration service.
-  ApplicationProgresses:
+  ApplicationProfileInstanceProgresses:
   - Application: 4/-035
     State: PROCESS_REJECTED
     Location: AT_MIGRATION_SERVICE

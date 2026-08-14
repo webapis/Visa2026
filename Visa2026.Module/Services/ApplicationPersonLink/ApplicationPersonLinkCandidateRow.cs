@@ -2,7 +2,7 @@ using System;
 
 namespace Visa2026.Module.Services.ApplicationPersonLink;
 
-public sealed class ApplicationPersonLinkCandidateRow
+public sealed class ApplicationProfileInstancePersonLinkCandidateRow
 {
     public Guid PersonId { get; init; }
 

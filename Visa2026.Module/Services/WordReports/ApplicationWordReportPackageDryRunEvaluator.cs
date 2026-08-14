@@ -16,9 +16,9 @@ public static class ApplicationWordReportPackageDryRunEvaluator
 
     public static IReadOnlyList<ApplicationWordReportPackageReadinessHint> CollectUserTemplateHints(
         IObjectSpace objectSpace,
-        Application application,
+        ApplicationProfileInstance application,
         UserReportTemplate template,
-        IList<ApplicationItem>? selectedItems = null)
+        IList<ApplicationRosterMergeLine>? selectedItems = null)
     {
         if (objectSpace == null || application == null || template == null)
             return [];
@@ -73,7 +73,7 @@ public static class ApplicationWordReportPackageDryRunEvaluator
 
     private static void CollectRowFieldHints(
         List<ApplicationWordReportPackageReadinessHint> hints,
-        IList<ApplicationItem> items,
+        IList<ApplicationRosterMergeLine> items,
         UserReportPlaceholder placeholder)
     {
         var propertyPath = ResolveRowPropertyPath(placeholder);
@@ -102,7 +102,7 @@ public static class ApplicationWordReportPackageDryRunEvaluator
 
     private static void TryAddEmptyFieldHint(
         List<ApplicationWordReportPackageReadinessHint> hints,
-        Application application,
+        ApplicationProfileInstance application,
         string? propertyPath)
     {
         if (string.IsNullOrWhiteSpace(propertyPath) || IsPhotoProperty(propertyPath))
@@ -146,7 +146,7 @@ public static class ApplicationWordReportPackageDryRunEvaluator
     }
 
     private static bool IsApplicationScalarPlaceholder(UserReportPlaceholder placeholder, UserReportTemplate template) =>
-        template.RootBoType == UserReportBoType.Application
+        template.RootBoType == UserReportBoType.ApplicationProfileInstance
         && !IsRowPlaceholder(placeholder)
         && !string.IsNullOrWhiteSpace(placeholder.ResolvedPropertyPath);
 
@@ -184,7 +184,7 @@ public static class ApplicationWordReportPackageDryRunEvaluator
     private static bool IsPhotoProperty(string propertyPath) =>
         propertyPath.Contains("Photo", StringComparison.OrdinalIgnoreCase);
 
-    /// <summary><c>RowNo</c> / <c>RowNumber</c> are assigned at merge time, not ApplicationItem BO properties.</summary>
+    /// <summary><c>RowNo</c> / <c>RowNumber</c> are assigned at merge time, not ApplicationRosterMergeLine BO properties.</summary>
     private static bool IsSyntheticRowNumberProperty(string propertyPath) =>
         string.Equals(propertyPath, "RowNo", StringComparison.OrdinalIgnoreCase)
         || string.Equals(propertyPath, "RowNumber", StringComparison.OrdinalIgnoreCase);

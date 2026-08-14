@@ -3,10 +3,10 @@ using Microsoft.Data.SqlClient;
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
 /// <summary>
-/// Rebuilds Application legacy-to-target id-map using FullApplicationNumber + ApplicationDate + ApplicationType,
+/// Rebuilds ApplicationProfileInstance legacy-to-target id-map using FullApplicationNumber + ApplicationDate + ApplicationType,
 /// with greedy one-to-one assignment and ApplicationItem parent overlap for twin disambiguation.
 /// </summary>
-internal static class Visa2014ApplicationIdMapRebuild
+internal static class Visa2014ApplicationProfileInstanceIdMapRebuild
 {
     internal sealed class Result
     {
@@ -152,7 +152,7 @@ internal static class Visa2014ApplicationIdMapRebuild
             if (verbose)
             {
                 Console.WriteLine(
-                    $"INF Application id-map disambiguator: " +
+                    $"INF ApplicationProfileInstance id-map disambiguator: " +
                     $"{disambiguator._legacyPiasByApplication.Count} legacy app(s), " +
                     $"{disambiguator._piaToTargetItem.Count} item id-map entr(y/ies), " +
                     $"{disambiguator._targetItemToApplication.Count} target item parent(s)");
@@ -164,7 +164,7 @@ internal static class Visa2014ApplicationIdMapRebuild
         private void LoadLegacyPias(string legacyConnectionString)
         {
             const string sql = """
-                SELECT CAST(Oid AS varchar(36)) AS Oid, CAST(Application AS varchar(36)) AS ApplicationOid
+                SELECT CAST(Oid AS varchar(36)) AS Oid, CAST(ApplicationProfileInstance AS varchar(36)) AS ApplicationProfileInstanceOid
                 FROM dbo.PersonInApplication
                 WHERE GCRecord IS NULL
                 """;
@@ -172,13 +172,13 @@ internal static class Visa2014ApplicationIdMapRebuild
             foreach (var row in Visa2014SqlCmdReader.Query(legacyConnectionString, sql, verbose: false))
             {
                 if (!Guid.TryParse(row.GetValueOrDefault("Oid"), out var piaOid)
-                    || !Guid.TryParse(row.GetValueOrDefault("ApplicationOid"), out var legacyApplicationOid))
+                    || !Guid.TryParse(row.GetValueOrDefault("ApplicationProfileInstanceOid"), out var legacyApplicationProfileInstanceOid))
                     continue;
 
-                if (!_legacyPiasByApplication.TryGetValue(legacyApplicationOid, out var pias))
+                if (!_legacyPiasByApplication.TryGetValue(legacyApplicationProfileInstanceOid, out var pias))
                 {
                     pias = [];
-                    _legacyPiasByApplication[legacyApplicationOid] = pias;
+                    _legacyPiasByApplication[legacyApplicationProfileInstanceOid] = pias;
                 }
 
                 pias.Add(piaOid);
@@ -197,7 +197,7 @@ internal static class Visa2014ApplicationIdMapRebuild
                 var chunk = itemIds.Skip(offset).Take(chunkSize).ToList();
                 var paramNames = chunk.Select((_, i) => $"@p{i}").ToList();
                 var sql = $"""
-                    SELECT CAST(ID AS varchar(36)) AS ItemId, CAST(ApplicationID AS varchar(36)) AS ApplicationId
+                    SELECT CAST(ID AS varchar(36)) AS ItemId, CAST(ApplicationProfileInstanceID AS varchar(36)) AS ApplicationProfileInstanceId
                     FROM ApplicationItems
                     WHERE (GCRecord IS NULL OR GCRecord = 0)
                       AND ID IN ({string.Join(", ", paramNames)})
@@ -218,12 +218,12 @@ internal static class Visa2014ApplicationIdMapRebuild
             }
         }
 
-        public Guid? PickBestTarget(Guid legacyApplicationOid, IReadOnlyList<Guid> candidates)
+        public Guid? PickBestTarget(Guid legacyApplicationProfileInstanceOid, IReadOnlyList<Guid> candidates)
         {
             if (candidates.Count == 0)
                 return null;
 
-            if (!_legacyPiasByApplication.TryGetValue(legacyApplicationOid, out var pias) || pias.Count == 0)
+            if (!_legacyPiasByApplication.TryGetValue(legacyApplicationProfileInstanceOid, out var pias) || pias.Count == 0)
                 return null;
 
             var scores = new Dictionary<Guid, int>();
@@ -234,10 +234,10 @@ internal static class Visa2014ApplicationIdMapRebuild
             {
                 if (!_piaToTargetItem.TryGetValue(piaOid, out var targetItemId))
                     continue;
-                if (!_targetItemToApplication.TryGetValue(targetItemId, out var parentApplicationId))
+                if (!_targetItemToApplication.TryGetValue(targetItemId, out var parentApplicationProfileInstanceId))
                     continue;
-                if (scores.ContainsKey(parentApplicationId))
-                    scores[parentApplicationId]++;
+                if (scores.ContainsKey(parentApplicationProfileInstanceId))
+                    scores[parentApplicationProfileInstanceId]++;
             }
 
             var bestScore = scores.Values.Max();

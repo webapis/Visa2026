@@ -4,7 +4,7 @@ namespace Visa2026.Module.Services;
 
 /// <summary>
 /// Parses legacy VISA2014 <c>IRegistration_Data.ManualApplicationNumber</c> values into
-/// <see cref="BusinessObjects.Application"/> components while preserving the display string.
+/// <see cref="BusinessObjects.ApplicationProfileInstance"/> components while preserving the display string.
 /// </summary>
 public static partial class ApplicationManualNumberParser
 {

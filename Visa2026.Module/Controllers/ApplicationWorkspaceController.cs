@@ -7,7 +7,7 @@ using Visa2026.Module.Services.ApplicationWorkspace;
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// Opens the custom Application workspace from ListView or legacy DetailView.
+/// Opens the custom ApplicationProfileInstance workspace from ListView or legacy DetailView.
 /// </summary>
 public sealed class ApplicationWorkspaceController : ViewController
 {
@@ -15,7 +15,7 @@ public sealed class ApplicationWorkspaceController : ViewController
 
     public ApplicationWorkspaceController()
     {
-        TargetObjectType = typeof(Application);
+        TargetObjectType = typeof(ApplicationProfileInstance);
 
         openWorkspaceAction = new SimpleAction(this, "OpenApplicationWorkspace", "View");
         openWorkspaceAction.ImageName = "BO_List";
@@ -28,7 +28,7 @@ public sealed class ApplicationWorkspaceController : ViewController
         base.OnActivated();
         openWorkspaceAction.Caption = "Open workspace";
         openWorkspaceAction.ToolTip =
-            "Application workspace — roster, profile summary, and linked person data.";
+            "ApplicationProfileInstance workspace — roster, profile summary, and linked person data.";
         UpdateActionState();
         if (View != null)
             View.CurrentObjectChanged += View_CurrentObjectChanged;
@@ -55,12 +55,12 @@ public sealed class ApplicationWorkspaceController : ViewController
         openWorkspaceAction.Enabled["Application"] = app != null && !ObjectSpace.IsNewObject(app);
     }
 
-    private Application? ResolveApplication()
+    private ApplicationProfileInstance? ResolveApplication()
     {
-        if (View is DetailView && View.CurrentObject is Application detailApp)
+        if (View is DetailView && View.CurrentObject is ApplicationProfileInstance detailApp)
             return detailApp;
 
-        if (View is ListView listView && listView.CurrentObject is Application listApp)
+        if (View is ListView listView && listView.CurrentObject is ApplicationProfileInstance listApp)
             return listApp;
 
         return null;
@@ -72,7 +72,7 @@ public sealed class ApplicationWorkspaceController : ViewController
         if (app == null)
         {
             Application.ShowViewStrategy.ShowMessage(
-                "Select a saved Application first.",
+                "Select a saved ApplicationProfileInstance first.",
                 InformationType.Warning);
             return;
         }

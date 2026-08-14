@@ -20,7 +20,7 @@ public class ApplicationMigrationSlaProfileTypeLinkCatalogTests
         {
             Assert.False(
                 string.IsNullOrWhiteSpace(row.MigrationSlaProfileCode),
-                $"Application type '{row.Name}' is missing MigrationSlaProfileCode in ApplicationTypeConfigurationCatalog.json.");
+                $"ApplicationProfileInstance type '{row.Name}' is missing MigrationSlaProfileCode in ApplicationTypeConfigurationCatalog.json.");
         }
     }
 

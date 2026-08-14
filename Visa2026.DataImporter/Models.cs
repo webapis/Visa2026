@@ -200,7 +200,7 @@ public class ApplicationTypeFilter
     public ApplicationTypeCategory Category { get; set; }
 }
 
-public class Application
+public class ApplicationProfileInstance
 {
     [JsonPropertyName("ID")]
     public Guid Id { get; set; }
@@ -281,7 +281,7 @@ public class ApplicationItem
     public Guid Id { get; set; }
 
     [JsonPropertyName("Application")]
-    public Application? Application { get; set; }
+    public ApplicationProfileInstance? ApplicationProfileInstance { get; set; }
 
     [JsonPropertyName("Person")]
     public Person? Person { get; set; }
@@ -419,13 +419,13 @@ public class ApplicationState
     public bool IsDefault { get; set; }
 }
 
-public class ApplicationProgress
+public class ApplicationProfileInstanceProgress
 {
     [JsonPropertyName("ID")]
     public Guid Id { get; set; }
 
     [JsonPropertyName("Application")]
-    public Application? Application { get; set; }
+    public ApplicationProfileInstance? ApplicationProfileInstance { get; set; }
 
     [JsonPropertyName("State")]
     public ApplicationState? State { get; set; }
@@ -1231,6 +1231,32 @@ public class ApprovalLegProfile
     public bool IsDefault { get; set; }
 }
 
+public sealed class ODataEntityRef
+{
+    [JsonPropertyName("ID")]
+    public Guid Id { get; set; }
+}
+
+public class ApplicationProfile
+{
+    [JsonPropertyName("ID")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("Code")]
+    public string Code { get; set; } = "";
+
+    [JsonPropertyName("Name")]
+    public string Name { get; set; } = "";
+
+    [JsonPropertyName("IsActive")]
+    public bool IsActive { get; set; } = true;
+
+    [JsonPropertyName("DefaultProjectContract")]
+    public ODataEntityRef? DefaultProjectContract { get; set; }
+
+    public Guid? DefaultProjectContractId => DefaultProjectContract?.Id;
+}
+
 public class Invitation
 {
     [JsonPropertyName("ID")]
@@ -1261,7 +1287,7 @@ public class Invitation
     public DateTime? VisaEndDate { get; set; }
 
     [JsonPropertyName("Application")]
-    public Application? Application { get; set; }
+    public ApplicationProfileInstance? ApplicationProfileInstance { get; set; }
 
     [JsonPropertyName("InvitationItems")]
     public List<InvitationItem> InvitationItems { get; set; } = new();
@@ -1522,7 +1548,7 @@ public class WorkPermit
     public DateTime IssuedDate { get; set; }
 
     [JsonPropertyName("Application")]
-    public Application? Application { get; set; }
+    public ApplicationProfileInstance? ApplicationProfileInstance { get; set; }
 
     [JsonPropertyName("WorkPermitItems")]
     public List<WorkPermitItem> WorkPermitItems { get; set; } = new();
@@ -1620,7 +1646,7 @@ public class Rejection
     public Guid Id { get; set; }
 
     [JsonPropertyName("Application")]
-    public Application? Application { get; set; }
+    public ApplicationProfileInstance? ApplicationProfileInstance { get; set; }
 
     [JsonPropertyName("RejectedDocNumber")]
     public string RejectedDocNumber { get; set; } = "";

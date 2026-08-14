@@ -6,7 +6,7 @@
 .DESCRIPTION
   Runs Visa2026.DataImporter --import-visa2014 entity-by-entity per order.yaml.
   All scalar writes use --inprocess (headless XAF ObjectSpace).
-  Application / ApplicationItem / ApplicationProgress post sequentially
+  ApplicationProfileInstance / ApplicationProfileInstancePerson / ApplicationProfileInstanceProgress post sequentially
   (ParallelImportPoster / shared batch-size>1 hung Prod on LatestProgress commits).
   --parallelism is ignored for those waves; kept for CLI compatibility.
 
@@ -158,8 +158,8 @@ New-Item -ItemType Directory -Force -Path $mapRoot, $logRoot | Out-Null
 # Create missing stubs so greenfield Demo/Staging loads do not fail on Person.
 $idMapStubNames = @(
     'Person', 'Passport', 'Visa', 'Education', 'EmployeePositionHistory', 'EmployeeSalary',
-    'AddressOfResidence', 'Application', 'WorkPermit', 'WorkPermitItem', 'Invitation', 'InvitationItem',
-    'ApplicationItem', 'ApplicationProgress', 'MedicalRecord', 'MedicalRecordDocument',
+    'AddressOfResidence', 'ApplicationProfileInstance', 'WorkPermit', 'WorkPermitItem', 'Invitation', 'InvitationItem',
+    'ApplicationProfileInstancePerson', 'ApplicationProfileInstanceProgress', 'MedicalRecord', 'MedicalRecordDocument',
     'EducationDocument', 'PassportCopy', 'VisaDocument', 'FamilyProofDocument',
     'InvitationDocument', 'WorkPermitDocument'
 )
@@ -335,15 +335,15 @@ function Invoke-DataImporterCli {
 $scalarEntities = @{
     Person = $true; Passport = $true; Visa = $true; Education = $true
     EmployeePositionHistory = $true; EmployeeSalary = $true; AddressOfResidence = $true
-    Application = $true; WorkPermit = $true; WorkPermitItem = $true
+    ApplicationProfileInstance = $true; WorkPermit = $true; WorkPermitItem = $true
     Invitation = $true; InvitationItem = $true
-    ApplicationItem = $true; ApplicationProgress = $true
+    ApplicationProfileInstancePerson = $true; ApplicationProfileInstanceProgress = $true
 }
 
 $applicationDomainEntities = @{
-    Application = $true; WorkPermit = $true; WorkPermitItem = $true
+    ApplicationProfileInstance = $true; WorkPermit = $true; WorkPermitItem = $true
     Invitation = $true; InvitationItem = $true
-    ApplicationItem = $true; ApplicationProgress = $true
+    ApplicationProfileInstancePerson = $true; ApplicationProfileInstanceProgress = $true
 }
 $tenantCatalogGenerationDone = $false
 
@@ -358,9 +358,9 @@ function Invoke-PostImportCorrections {
         @{ Name = "PersonSubcontractor"; Wave = "post-PersonSubcontractor"; Flag = "--correct-person-subcontractor" },
         @{ Name = "PersonRelationship"; Wave = "post-PersonRelationship"; Flag = "--correct-person-relationship" },
         @{ Name = "PersonAddressPia"; Wave = "post-PersonAddressPia"; Flag = "--correct-person-address-of-residence" },
-        @{ Name = "ApplicationItemPersonCurrent"; Wave = "post-ApplicationItemPersonCurrent"; Flag = "--correct-application-item-person-current" },
         @{ Name = "VisaType"; Wave = "post-VisaType"; Flag = "--correct-visa-type" },
-        @{ Name = "VisaIssuingApplicationItem"; Wave = "post-VisaIssuingApplicationItem"; Flag = "--correct-visa2014-issuing-application-item" },
+        # ApplicationItemPersonCurrent and VisaIssuingApplicationItem corrections are retired with the
+        # Phase B ApplicationItem hard-remove; the importer flags now fail-fast.
         @{ Name = "VisaInvitationItem"; Wave = "post-VisaInvitationItem"; Flag = "--correct-visa2014-invitation-item" }
     )
 
@@ -459,7 +459,7 @@ function Invoke-ImportWave {
 
     Set-OnPremSyncRunWaveCompleted -Root $syncStatusRoot -WaveName $WaveName -ExitCode $exit -LogFile $logFile
 
-    if ($exit -eq 0 -and $Kind -eq 'Scalar' -and -not $DryRun -and -not $SkipMappingVerify -and ($WaveName -eq 'Application' -or $WaveName -eq 'ApplicationProgress')) {
+    if ($exit -eq 0 -and $Kind -eq 'Scalar' -and -not $DryRun -and -not $SkipMappingVerify -and ($WaveName -eq 'Application' -or $WaveName -eq 'ApplicationProfileInstanceProgress')) {
         Write-Host ">>> mappingVerify ($WaveName)" -ForegroundColor Green
         $verifyLog = Join-Path $logRoot "$logPrefix-$WaveName-mapping-verify-$stamp.log"
         $verifyArgs = @(
@@ -470,8 +470,8 @@ function Invoke-ImportWave {
             '--sample', '50',
             '--application-id-map', (Get-MapPath 'Application')
         )
-        if ($WaveName -eq 'ApplicationProgress') {
-            $verifyArgs += @('--progress-id-map', (Get-MapPath 'ApplicationProgress'))
+        if ($WaveName -eq 'ApplicationProfileInstanceProgress') {
+            $verifyArgs += @('--progress-id-map', (Get-MapPath 'ApplicationProfileInstanceProgress'))
         }
         # Target CS via env (same as import waves) — avoid mangled --target-connection
         $verifyExit = Invoke-DataImporterCli -CliArgs $verifyArgs -LogFile $verifyLog
@@ -562,10 +562,10 @@ $waves = @(
         )
     }
     @{
-        Name = "Application"; Kind = "Scalar"
+        Name = "ApplicationProfileInstance"; Kind = "Scalar"
         Args = @(
-            "--entity", "Application",
-            "--id-map-output", (Get-MapPath "Application"),
+            "--entity", "ApplicationProfileInstance",
+            "--id-map-output", (Get-MapPath "ApplicationProfileInstance"),
             "--person-id-map", (Get-MapPath "Person")
         )
     }
@@ -574,7 +574,7 @@ $waves = @(
         Args = @(
             "--entity", "WorkPermit",
             "--id-map-output", (Get-MapPath "WorkPermit"),
-            "--application-id-map", (Get-MapPath "Application")
+            "--application-id-map", (Get-MapPath "ApplicationProfileInstance")
         )
     }
     @{
@@ -593,7 +593,7 @@ $waves = @(
         Args = @(
             "--entity", "Invitation",
             "--id-map-output", (Get-MapPath "Invitation"),
-            "--application-id-map", (Get-MapPath "Application")
+            "--application-id-map", (Get-MapPath "ApplicationProfileInstance")
         )
     }
     @{
@@ -607,28 +607,22 @@ $waves = @(
         )
     }
     @{
-        Name = "ApplicationItem"; Kind = "Scalar"
+        Name = "ApplicationProfileInstancePerson"; Kind = "Scalar"
         Args = @(
-            "--entity", "ApplicationItem",
-            "--id-map-output", (Get-MapPath "ApplicationItem"),
+            "--entity", "ApplicationProfileInstancePerson",
+            "--id-map-output", (Get-MapPath "ApplicationProfileInstancePerson"),
             "--person-id-map", (Get-MapPath "Person"),
-            "--application-id-map", (Get-MapPath "Application"),
-            "--passport-id-map", (Get-MapPath "Passport"),
-            "--visa-id-map", (Get-MapPath "Visa"),
-            "--position-history-id-map", (Get-MapPath "EmployeePositionHistory"),
-            "--address-id-map", (Get-MapPath "AddressOfResidence"),
-            "--education-id-map", (Get-MapPath "Education"),
-            "--employee-salary-id-map", (Get-MapPath "EmployeeSalary"),
-            "--work-permit-item-id-map", (Get-MapPath "WorkPermitItem"),
-            "--invitation-item-id-map", (Get-MapPath "InvitationItem")
+            "--application-id-map", (Get-MapPath "ApplicationProfileInstance")
         )
     }
+    # ApplicationItem was hard-removed in Phase B; its wave is gone. The roster comes from
+    # ApplicationProfileInstancePerson above, which resolves person-current links itself.
     @{
-        Name = "ApplicationProgress"; Kind = "Scalar"
+        Name = "ApplicationProfileInstanceProgress"; Kind = "Scalar"
         Args = @(
-            "--entity", "ApplicationProgress",
-            "--id-map-output", (Get-MapPath "ApplicationProgress"),
-            "--application-id-map", (Get-MapPath "Application")
+            "--entity", "ApplicationProfileInstanceProgress",
+            "--id-map-output", (Get-MapPath "ApplicationProfileInstanceProgress"),
+            "--application-id-map", (Get-MapPath "ApplicationProfileInstance")
         )
     }
 )
@@ -660,9 +654,7 @@ $postWaves = @(
     'post-PersonSubcontractor',
     'post-PersonRelationship',
     'post-PersonAddressPia',
-    'post-ApplicationItemPersonCurrent',
     'post-VisaType',
-    'post-VisaIssuingApplicationItem',
     'post-VisaInvitationItem'
 )
 $activeWaves = @($waves | ForEach-Object { $_.Name }) + $postWaves

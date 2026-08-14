@@ -2,7 +2,7 @@ using System;
 
 namespace Visa2026.Module.BusinessObjects;
 
-/// <summary>Shared shape for Application (via ministry) Report Dashboard SQL view rows (ApplicationItem grain).</summary>
+/// <summary>Shared shape for ApplicationProfileInstance (via ministry) Report Dashboard SQL view rows (ApplicationRosterMergeLine grain).</summary>
 public interface IVwRdApplicationViaMinistryRow
 {
     Guid ID { get; set; }

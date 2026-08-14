@@ -452,7 +452,7 @@ dxd-license,
     flex: 0 0 auto;
 }
 
-/* Application Progress tab — latest history row emphasis */
+/* ApplicationProfileInstance Progress tab — latest history row emphasis */
 .visa-progress-history-latest > td:first-child {
     box-shadow: inset 3px 0 0 #2563eb;
 }
@@ -528,7 +528,7 @@ dxd-license,
 }
 
 /* Soft-deleted rows in DxGrid (including nested ListViews such as Person.FamilyMembers). */
-/* Application ListView — row tint from latest ApplicationProgress (see BoStateAppearanceColors). */
+/* ApplicationProfileInstance ListView — row tint from latest ApplicationProfileInstanceProgress (see BoStateAppearanceColors). */
 .visa-progress-row.visa-progress-row--state-IS_BEING_PREPARED { --dxbl-grid-row-bg: #fef9c3; }
 .visa-progress-row.visa-progress-row--state-IS_BEING_PREPARED > td { color: #854d0e; }
 .visa-progress-row.visa-progress-row--state-1_REVIEW_STARTED { --dxbl-grid-row-bg: #dbeafe; }

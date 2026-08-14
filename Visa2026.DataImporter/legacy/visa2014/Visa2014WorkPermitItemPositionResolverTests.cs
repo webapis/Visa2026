@@ -37,9 +37,9 @@ public class Visa2014WorkPermitItemPositionResolverTests
     }
 
     [Fact]
-    public void ApplicationIdentity_BuildGroupKey_IncludesDateAndType()
+    public void ApplicationProfileInstanceIdentity_BuildGroupKey_IncludesDateAndType()
     {
-        var key = Visa2014ApplicationTransform.BuildApplicationIdentityGroupKey(
+        var key = Visa2014ApplicationTransform.BuildApplicationProfileInstanceIdentityGroupKey(
             "6/-909",
             new DateTime(2026, 6, 26),
             "App_Visa_Ext");
@@ -47,7 +47,7 @@ public class Visa2014WorkPermitItemPositionResolverTests
     }
 
     [Fact]
-    public void ApplicationIdentity_FindTargetCollisions_DetectsMergedLegacyApps()
+    public void ApplicationProfileInstanceIdentity_FindTargetCollisions_DetectsMergedLegacyApps()
     {
         var legacyEmployee = Guid.Parse("27efff77-9b91-4037-8991-9928ff1aaaab");
         var legacyFamily = Guid.Parse("514e22b3-f11e-44ff-9a9a-000b215ca037");
@@ -67,12 +67,12 @@ public class Visa2014WorkPermitItemPositionResolverTests
                 "9/-3876", new DateTime(2014, 9, 15), "App_Visa_Ext_FM"),
         };
 
-        var collisions = Visa2014ApplicationTransform.FindApplicationIdMapCrossDateTargetCollisions(idMap, identities);
+        var collisions = Visa2014ApplicationTransform.FindApplicationProfileInstanceIdMapCrossDateTargetCollisions(idMap, identities);
         Assert.Single(collisions);
     }
 
     [Fact]
-    public void ApplicationIdentity_FindTargetCollisions_DetectsCrossDateMergedLegacyApps()
+    public void ApplicationProfileInstanceIdentity_FindTargetCollisions_DetectsCrossDateMergedLegacyApps()
     {
         var legacy2025 = Guid.Parse("f538cb62-e81e-40d2-877b-63ab60c22aac");
         var legacy2026 = Guid.Parse("f5616776-4536-4204-9bb5-00d39cd7135b");
@@ -92,12 +92,12 @@ public class Visa2014WorkPermitItemPositionResolverTests
                 "6/-909", new DateTime(2026, 6, 26), "App_Visa_Ext"),
         };
 
-        var collisions = Visa2014ApplicationTransform.FindApplicationIdMapCrossDateTargetCollisions(idMap, identities);
+        var collisions = Visa2014ApplicationTransform.FindApplicationProfileInstanceIdMapCrossDateTargetCollisions(idMap, identities);
         Assert.Single(collisions);
     }
 
     [Fact]
-    public void Audit_CalikEnergi_ApplicationIdMap_CrossDateCollisions()
+    public void Audit_CalikEnergi_ApplicationProfileInstanceIdMap_CrossDateCollisions()
     {
         var dataImporterRoot = Visa2014ContentRoot.FindDataImporterRoot();
         if (dataImporterRoot == null)
@@ -129,13 +129,13 @@ public class Visa2014WorkPermitItemPositionResolverTests
 
         var legacyConnection = "Server=localhost\\SQLEXPRESS;Database=VISA2015;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true";
         var map = Visa2014IdMapHelper.Load(mapPath);
-        var collisions = Visa2014ApplicationTransform.FindApplicationIdMapCrossDateCollisions(
+        var collisions = Visa2014ApplicationTransform.FindApplicationProfileInstanceIdMapCrossDateCollisions(
             map,
             legacyConnection,
             source.LookupTranslationPaths);
 
         var multiTargetGroups = map.GroupBy(kvp => kvp.Value).Count(g => g.Count() > 1);
-        Console.WriteLine($"INF Application id-map entries: {map.Count}");
+        Console.WriteLine($"INF ApplicationProfileInstance id-map entries: {map.Count}");
         Console.WriteLine($"INF Target IDs with 2+ legacy Oids: {multiTargetGroups}");
         Console.WriteLine($"INF Cross-date collisions: {collisions.Count}");
         foreach (var collision in collisions.Take(40))

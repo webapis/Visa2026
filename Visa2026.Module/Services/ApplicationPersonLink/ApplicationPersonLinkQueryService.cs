@@ -7,19 +7,19 @@ using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.Services.ApplicationPersonLink;
 
-public sealed class ApplicationPersonLinkQueryService : IApplicationPersonLinkQueryService
+public sealed class ApplicationProfileInstancePersonLinkQueryService : IApplicationProfileInstancePersonLinkQueryService
 {
-    public IReadOnlyList<ApplicationPersonLinkCandidateRow> SearchCandidates(
+    public IReadOnlyList<ApplicationProfileInstancePersonLinkCandidateRow> SearchCandidates(
         IObjectSpace objectSpace,
         Guid applicationId,
         string? searchText,
         int maxResults = 25)
     {
         if (objectSpace == null || applicationId == Guid.Empty || maxResults <= 0)
-            return Array.Empty<ApplicationPersonLinkCandidateRow>();
+            return Array.Empty<ApplicationProfileInstancePersonLinkCandidateRow>();
 
         var notLinked = CriteriaOperator.Parse(
-            "Not [ApplicationPeople][Application.ID = ?]",
+            "Not [ApplicationProfileInstances][ID = ?]",
             applicationId);
 
         var identity = PersonListViewFullTextSearchCriteriaBuilder.BuildPersonIdentityCriteria(searchText ?? string.Empty);
@@ -39,9 +39,9 @@ public sealed class ApplicationPersonLinkQueryService : IApplicationPersonLinkQu
             .ToList();
     }
 
-    private static ApplicationPersonLinkCandidateRow MapRow(Person person)
+    private static ApplicationProfileInstancePersonLinkCandidateRow MapRow(Person person)
     {
-        return new ApplicationPersonLinkCandidateRow
+        return new ApplicationProfileInstancePersonLinkCandidateRow
         {
             PersonId = person.ID,
             FullName = person.FullName,

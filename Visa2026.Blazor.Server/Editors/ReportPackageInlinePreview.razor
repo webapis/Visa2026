@@ -154,7 +154,7 @@
         try
         {
             var bundle = await PreviewFileAccess
-                .TryBuildPreviewBundleAsync(request.ApplicationId, request.EntryKey, request.ApplicationItemIds)
+                .TryBuildPreviewBundleAsync(request.ApplicationProfileInstanceId, request.EntryKey, request.ApplicationItemIds)
                 .ConfigureAwait(false);
 
             if (bundle == null || bundle.Originals.Count == 0)

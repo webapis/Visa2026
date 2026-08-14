@@ -1,0 +1,209 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using DevExpress.ExpressApp;
+using Microsoft.EntityFrameworkCore;
+using Visa2026.Module.BusinessObjects;
+
+namespace Visa2026.Module.Services.UserReports;
+
+/// <summary>
+/// Builds Category / Global lists for Application Profile wizard step 4 from live
+/// <see cref="UserReportTemplate"/> rows (no mock catalog).
+/// </summary>
+public static class ApplicationProfileWizardTemplateCatalog
+{
+    public const string CategoryInvitation = "Invitation";
+    public const string CategoryVisa = "Visa";
+    public const string CategoryWorkPermit = "WorkPermit";
+    public const string CategoryRegistration = "Registration";
+    public const string CategoryBorderZone = "BorderZone";
+
+    public static readonly (string Key, string Label)[] CategoryChips =
+    [
+        (CategoryInvitation, "Invitation"),
+        (CategoryVisa, "Visa"),
+        (CategoryWorkPermit, "Work permit"),
+        (CategoryRegistration, "Registration"),
+        (CategoryBorderZone, "Border zone"),
+    ];
+
+    public sealed class CatalogRow
+    {
+        public required Guid UserReportTemplateId { get; init; }
+        public required string Name { get; init; }
+        public required ApplicationProfileTemplateKind Kind { get; init; }
+        public required int SortOrder { get; init; }
+        public required ApplicationProfileTemplateCatalogScope Scope { get; init; }
+        public required ApplicationProfileTemplateDataScope DataScope { get; init; }
+        public required IReadOnlyList<string> CategoryKeys { get; init; }
+        public string? FileLabel { get; init; }
+        public long FileSizeBytes { get; init; }
+    }
+
+    public sealed class CatalogSnapshot
+    {
+        public required IReadOnlyList<CatalogRow> Global { get; init; }
+        public required IReadOnlyList<CatalogRow> Category { get; init; }
+    }
+
+    public static CatalogSnapshot Build(IObjectSpace objectSpace)
+    {
+        ArgumentNullException.ThrowIfNull(objectSpace);
+
+        var templates = objectSpace.GetObjectsQuery<UserReportTemplate>()
+            .Include(t => t.TemplateFile)
+            .Include(t => t.ApplicableTypeLinks)
+                .ThenInclude(l => l.ApplicationType)
+            .Include(t => t.ApplicableGroupLinks)
+                .ThenInclude(l => l.ApplicationTypeGroup)
+                    .ThenInclude(g => g.Members)
+                        .ThenInclude(m => m.ApplicationType)
+            .Where(t => t.IsActive)
+            .AsEnumerable()
+            .Where(t => t.GetEffectiveOutputFormat() is TemplateOutputFormat.Word or TemplateOutputFormat.Excel)
+            .ToList();
+
+        var global = new List<CatalogRow>();
+        var category = new List<CatalogRow>();
+
+        foreach (var template in templates)
+        {
+            var row = ToRow(template);
+            if (row.Scope == ApplicationProfileTemplateCatalogScope.Global)
+                global.Add(row);
+            else
+                category.Add(row);
+        }
+
+        return new CatalogSnapshot
+        {
+            Global = global
+                .OrderBy(r => r.SortOrder)
+                .ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
+                .ToList(),
+            Category = category
+                .OrderBy(r => r.SortOrder)
+                .ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
+                .ToList(),
+        };
+    }
+
+    public static ApplicationProfileTemplateDataScope DataScopeFromRootBo(UserReportBoType root) =>
+        root switch
+        {
+            UserReportBoType.ApplicationProfileInstance => ApplicationProfileTemplateDataScope.ApplicationHeader,
+            _ => ApplicationProfileTemplateDataScope.PeopleM2M,
+        };
+
+    public static UserReportBoType RootBoFromDataScope(ApplicationProfileTemplateDataScope dataScope) =>
+        dataScope switch
+        {
+            ApplicationProfileTemplateDataScope.ApplicationHeader => UserReportBoType.ApplicationProfileInstance,
+            _ => UserReportBoType.ApplicationItem,
+        };
+
+    private static CatalogRow ToRow(UserReportTemplate template)
+    {
+        var typeLinks = template.ApplicableTypeLinks?
+            .Where(l => l.ApplicationTypeId != Guid.Empty || l.ApplicationType != null)
+            .ToList() ?? [];
+        var groupLinks = template.ApplicableGroupLinks?
+            .Where(l => l.ApplicationTypeGroupId != Guid.Empty || l.ApplicationTypeGroup != null)
+            .ToList() ?? [];
+
+        var isGlobal = typeLinks.Count == 0 && groupLinks.Count == 0;
+        var categoryKeys = isGlobal
+            ? Array.Empty<string>()
+            : DeriveCategoryKeys(typeLinks, groupLinks);
+
+        var size = template.TemplateFile?.Size
+            ?? template.TemplateFile?.Content?.Length
+            ?? 0L;
+        var fileName = template.TemplateFile?.FileName;
+        var kind = template.GetEffectiveOutputFormat() == TemplateOutputFormat.Excel
+            ? ApplicationProfileTemplateKind.Excel
+            : ApplicationProfileTemplateKind.Word;
+
+        return new CatalogRow
+        {
+            UserReportTemplateId = template.ID,
+            Name = template.TemplateName?.Trim() ?? string.Empty,
+            Kind = kind,
+            SortOrder = template.SortOrder,
+            Scope = isGlobal
+                ? ApplicationProfileTemplateCatalogScope.Global
+                : ApplicationProfileTemplateCatalogScope.Category,
+            DataScope = DataScopeFromRootBo(template.RootBoType),
+            CategoryKeys = categoryKeys,
+            FileLabel = string.IsNullOrWhiteSpace(fileName) ? null : fileName,
+            FileSizeBytes = size,
+        };
+    }
+
+    private static IReadOnlyList<string> DeriveCategoryKeys(
+        IReadOnlyList<UserReportTemplateApplicationType> typeLinks,
+        IReadOnlyList<UserReportTemplateApplicationTypeGroup> groupLinks)
+    {
+        var keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var link in groupLinks)
+        {
+            AddKeysFromText(keys, link.ApplicationTypeGroup?.Name);
+            if (link.ApplicationTypeGroup?.Members == null)
+                continue;
+            foreach (var member in link.ApplicationTypeGroup.Members)
+                AddKeysFromApplicationType(keys, member?.ApplicationType);
+        }
+
+        foreach (var link in typeLinks)
+            AddKeysFromApplicationType(keys, link.ApplicationType);
+
+        if (keys.Count == 0)
+            keys.Add(CategoryVisa);
+
+        return keys
+            .OrderBy(k => Array.FindIndex(CategoryChips, c => c.Key.Equals(k, StringComparison.OrdinalIgnoreCase)))
+            .ThenBy(k => k, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    private static void AddKeysFromApplicationType(HashSet<string> keys, ApplicationType? type)
+    {
+        if (type == null)
+            return;
+
+        AddKeysFromText(keys, type.Name);
+
+        if (type.CanIssueInvitation || type.ShowInvitations)
+            keys.Add(CategoryInvitation);
+        if (type.CanIssueVisa || type.ShowVisas)
+            keys.Add(CategoryVisa);
+        if (type.CanIssueWorkPermit || type.ShowWorkPermits)
+            keys.Add(CategoryWorkPermit);
+        if (type.ShowRegistrations)
+            keys.Add(CategoryRegistration);
+        if (type.ShowBorderZoneLocation)
+            keys.Add(CategoryBorderZone);
+    }
+
+    private static void AddKeysFromText(HashSet<string> keys, string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return;
+
+        if (ContainsAny(text, "invit", "cagyr"))
+            keys.Add(CategoryInvitation);
+        if (ContainsAny(text, "visa", "wiza"))
+            keys.Add(CategoryVisa);
+        if (ContainsAny(text, "workpermit", "work permit", "is rugsady", "rugsat"))
+            keys.Add(CategoryWorkPermit);
+        if (ContainsAny(text, "registr", "hasaba", ApplicationTypeGroupNames.Registration))
+            keys.Add(CategoryRegistration);
+        if (ContainsAny(text, "border", "serhet", "zone"))
+            keys.Add(CategoryBorderZone);
+    }
+
+    private static bool ContainsAny(string haystack, params string[] needles) =>
+        needles.Any(n => haystack.Contains(n, StringComparison.OrdinalIgnoreCase));
+}

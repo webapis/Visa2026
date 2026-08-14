@@ -15,8 +15,8 @@ public static class ApplicationWorkspaceResminamalarOpenHelper
         if (application == null || applicationId == Guid.Empty)
             return false;
 
-        using var objectSpace = application.CreateObjectSpace(typeof(Application));
-        var applicationBo = objectSpace.GetObjectByKey<Application>(applicationId);
+        using var objectSpace = application.CreateObjectSpace(typeof(ApplicationProfileInstance));
+        var applicationBo = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
         if (applicationBo == null)
             return false;
 
@@ -42,8 +42,8 @@ public static class ApplicationWorkspaceResminamalarOpenHelper
 
         slotService.OpenResminamalarAsync(new ResminamalarSlotRequest
         {
-            ApplicationId = applicationId,
-            Scope = WordReportPackageScope.Application,
+            ApplicationProfileInstanceId = applicationId,
+            Scope = WordReportPackageScope.ApplicationProfileInstance,
             EmptyCatalogMessage = emptyMessage,
         }, ownerViewId).GetAwaiter().GetResult();
 

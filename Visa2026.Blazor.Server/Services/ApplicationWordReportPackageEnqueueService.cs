@@ -57,8 +57,8 @@ public sealed class ApplicationWordReportPackageFileAccess
         if (applicationId == Guid.Empty || string.IsNullOrWhiteSpace(entryKey))
             return null;
 
-        using var objectSpace = nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<Application>();
-        var application = objectSpace.GetObjectByKey<Application>(applicationId);
+        using var objectSpace = nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
         if (application == null)
             return null;
 
@@ -175,8 +175,8 @@ public sealed class ApplicationWordReportPackageEnqueueService
             });
         }
 
-        using var objectSpace = nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<Application>();
-        var application = objectSpace.GetObjectByKey<Application>(applicationId);
+        using var objectSpace = nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
         if (application == null)
         {
             return Task.FromResult(new ApplicationWordReportPackageEnqueueOutcome

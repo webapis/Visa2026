@@ -4,7 +4,7 @@
 
 <div class="ap-wizard__panel-head">
     <h2>Results &amp; fields</h2>
-    <p>What processing may produce or cancel, and which Application header fields are required.</p>
+    <p>What processing may produce or cancel, and which ApplicationProfileInstance header fields are required.</p>
 </div>
 <div class="ap-wizard__panel-body">
     <div class="ap-wizard__section">
@@ -14,6 +14,7 @@
             <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ProduceWorkPermit" disabled="@Disabled" /> Work permit</label>
             <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ProduceVisa" disabled="@Disabled" /> Visa</label>
             <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ProduceBorderZone" disabled="@Disabled" /> Border zone</label>
+            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ProduceRejection" disabled="@Disabled" /> Rejection</label>
             <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ProduceWorkLocation" disabled="@Disabled" /> Work location</label>
         </div>
     </div>
@@ -24,12 +25,12 @@
             <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.CancelWorkPermits" disabled="@Disabled" /> Work permit(s)</label>
             <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.CancelVisas" disabled="@Disabled" /> Visa(s)</label>
             <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.CancelBorderZonePermits" disabled="@Disabled" /> Border zone permit(s)</label>
-            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.CancelApplications" disabled="@Disabled" /> Application(s)</label>
+            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.CancelApplicationProfileInstances" disabled="@Disabled" /> Application(s)</label>
         </div>
     </div>
     <div class="ap-wizard__section">
-        <h3>Application properties required</h3>
-        <p class="ap-wizard__hint">Per-Application values get defaults at create when set below.</p>
+        <h3>ApplicationProfileInstance properties required</h3>
+        <p class="ap-wizard__hint">Per-ApplicationProfileInstance values get defaults at create when set below.</p>
         <table class="ap-wizard__table">
             <thead>
                 <tr>
@@ -158,8 +159,8 @@
         </table>
     </div>
     <div class="ap-wizard__section">
-        <h3>Application signatory</h3>
-        <p class="ap-wizard__hint">Defaults at Application create; officers may change per Application.</p>
+        <h3>ApplicationProfileInstance signatory</h3>
+        <p class="ap-wizard__hint">Defaults at ApplicationProfileInstance create; officers may change per Application.</p>
         <div class="ap-wizard__grid">
             <label class="ap-wizard__field">
                 <span>Authorized signatory</span>

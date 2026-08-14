@@ -3,7 +3,7 @@
 
 <div class="ap-wizard__panel-head">
     <h2>Review &amp; save</h2>
-    <p>Confirm before publishing. Applications reference this profile live; per-Application fields get defaults at create.</p>
+    <p>Confirm before publishing. Applications reference this profile live; per-ApplicationProfileInstance fields get defaults at create.</p>
 </div>
 <div class="ap-wizard__panel-body">
     <div class="ap-wizard__summary">
@@ -43,8 +43,8 @@
 @code {
     [Parameter, EditorRequired] public ApplicationProfile Profile { get; set; } = null!;
 
-    private static string FormatRoute(ApplicationProgressRouteKind route) =>
-        route == ApplicationProgressRouteKind.DirectToMigrationService ? "Direct migration" : "Via ministry";
+    private static string FormatRoute(ApplicationProfileInstanceProgressRouteKind route) =>
+        route == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService ? "Direct migration" : "Via ministry";
 
     private static string FormatAudience(ApplicationProfile profile)
     {
@@ -70,6 +70,7 @@
         if (p.ProduceWorkPermit) items.Add("work permit");
         if (p.ProduceVisa) items.Add("visa");
         if (p.ProduceBorderZone) items.Add("border zone");
+        if (p.ProduceRejection) items.Add("rejection");
         if (p.ProduceWorkLocation) items.Add("work location");
         return items.Count == 0 ? "—" : string.Join(", ", items);
     }

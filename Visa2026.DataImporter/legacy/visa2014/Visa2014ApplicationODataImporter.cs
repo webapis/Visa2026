@@ -55,9 +55,9 @@ internal static class Visa2014ApplicationODataImporter
         }
 
         var applicationIdMap = new ConcurrentDictionary<Guid, Guid>(
-            LoadOptionalApplicationIdMap(applicationIdMapOutputPath));
+            LoadOptionalApplicationProfileInstanceIdMap(applicationIdMapOutputPath));
         if (verbose && applicationIdMap.Count > 0)
-            Console.WriteLine($"INF Existing Application id-map entries: {applicationIdMap.Count}");
+            Console.WriteLine($"INF Existing ApplicationProfileInstance id-map entries: {applicationIdMap.Count}");
 
         var degree = parallelism > 0 ? parallelism : Visa2014ParallelImportPoster.DefaultDegree;
         var stats = await Visa2014ParallelImportPoster.PostAsync(
@@ -72,7 +72,7 @@ internal static class Visa2014ApplicationODataImporter
                 if (applicationIdMap.ContainsKey(legacyOid))
                 {
                     if (verbose)
-                        Console.WriteLine($"  SKIP {legacyOid}: already in Application id-map");
+                        Console.WriteLine($"  SKIP {legacyOid}: already in ApplicationProfileInstance id-map");
                     return new ParallelRowOutcome(ParallelRowKind.SkippedAlready);
                 }
 
@@ -88,13 +88,13 @@ internal static class Visa2014ApplicationODataImporter
                     }
 
                     var createdId = await workerTarget.CreateAsync(
-                        typeof(Visa2026.Module.BusinessObjects.Application), payload);
+                        typeof(Visa2026.Module.BusinessObjects.ApplicationProfileInstance), payload);
                     if (!createdId.HasValue)
                         return new ParallelRowOutcome(ParallelRowKind.Failed, $"{legacyOid}: create returned null");
 
                     applicationIdMap[legacyOid] = createdId.Value;
                     if (verbose)
-                        Console.WriteLine($"  SAVE Application {createdId.Value} <- legacy {legacyOid} ({row.GetValueOrDefault("FullApplicationNumber")})");
+                        Console.WriteLine($"  SAVE ApplicationProfileInstance {createdId.Value} <- legacy {legacyOid} ({row.GetValueOrDefault("FullApplicationNumber")})");
                     return new ParallelRowOutcome(ParallelRowKind.Posted);
                 }
                 catch (Exception ex)
@@ -157,6 +157,12 @@ internal static class Visa2014ApplicationODataImporter
             ["Month"] = month,
             ["ApplicationType"] = new { ID = applicationTypeId.Value },
         };
+
+        var applicationProfileId = resolver.ResolveApplicationProfile(
+            row.GetValueOrDefault("ApplicationType") as string,
+            row.GetValueOrDefault("ProjectContract") as string);
+        if (applicationProfileId.HasValue)
+            payload["ApplicationProfile"] = new { ID = applicationProfileId.Value };
 
         var applicationNumber = row.GetValueOrDefault("ApplicationNumber") as string;
         if (!string.IsNullOrWhiteSpace(applicationNumber))
@@ -271,7 +277,7 @@ internal static class Visa2014ApplicationODataImporter
         return gaps.Count > 0 ? string.Join("; ", gaps) : "lookup or required field";
     }
 
-    private static Dictionary<Guid, Guid> LoadOptionalApplicationIdMap(string? path)
+    private static Dictionary<Guid, Guid> LoadOptionalApplicationProfileInstanceIdMap(string? path)
     {
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
             return new Dictionary<Guid, Guid>();

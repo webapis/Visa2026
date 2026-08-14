@@ -47,21 +47,21 @@ internal static class UserReportPlaceholderBindingHelper
         if (string.IsNullOrWhiteSpace(propertyPath))
             return false;
 
-        var prop = typeof(BusinessObjects.ApplicationItem).GetProperty(
+        var prop = typeof(BusinessObjects.ApplicationRosterMergeLine).GetProperty(
             propertyPath,
             BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
         if (prop?.PropertyType == typeof(byte[]))
         {
-            declaringType = typeof(BusinessObjects.ApplicationItem);
+            declaringType = typeof(BusinessObjects.ApplicationRosterMergeLine);
             return true;
         }
 
-        prop = typeof(BusinessObjects.Application).GetProperty(
+        prop = typeof(BusinessObjects.ApplicationProfileInstance).GetProperty(
             propertyPath,
             BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
         if (prop?.PropertyType == typeof(byte[]))
         {
-            declaringType = typeof(BusinessObjects.Application);
+            declaringType = typeof(BusinessObjects.ApplicationProfileInstance);
             return true;
         }
 

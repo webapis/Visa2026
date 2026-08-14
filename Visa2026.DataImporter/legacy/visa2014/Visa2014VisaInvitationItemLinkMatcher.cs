@@ -12,7 +12,7 @@ internal sealed class Visa2014VisaInvitationItemLinkCandidate
     public Guid InvitationItemId { get; init; }
     public Guid InvitationId { get; init; }
     public Guid PersonId { get; init; }
-    public Guid ApplicationId { get; init; }
+    public Guid ApplicationProfileInstanceId { get; init; }
     public DateTime IssuedDate { get; init; }
     public DateTime ApplicationDate { get; init; }
     public bool IsCancelled { get; init; }
@@ -31,19 +31,19 @@ internal static class Visa2014VisaInvitationItemLinkMatcher
     /// </summary>
     public static Guid? SelectClosest(
         Guid personId,
-        Guid issuingApplicationId,
+        Guid issuingApplicationProfileInstanceId,
         DateTime visaIssueDate,
         IEnumerable<Visa2014VisaInvitationItemLinkCandidate> candidates,
         IReadOnlySet<Guid> invitationItemIdsLinkedToOtherVisas)
     {
-        if (personId == Guid.Empty || issuingApplicationId == Guid.Empty || candidates == null)
+        if (personId == Guid.Empty || issuingApplicationProfileInstanceId == Guid.Empty || candidates == null)
             return null;
 
         var linked = invitationItemIdsLinkedToOtherVisas ?? new HashSet<Guid>();
 
         var eligible = candidates
             .Where(c => c.PersonId == personId)
-            .Where(c => c.ApplicationId == issuingApplicationId)
+            .Where(c => c.ApplicationProfileInstanceId == issuingApplicationProfileInstanceId)
             .Where(c => !c.IsCancelled && !c.IsChanged && !c.IsUsed)
             .Where(c => !linked.Contains(c.InvitationItemId))
             .ToList();

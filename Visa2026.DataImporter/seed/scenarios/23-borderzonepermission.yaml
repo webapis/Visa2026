@@ -4,15 +4,15 @@ description: Border zone permission request for Kemal Arslan
 dependsOn: InvitationAndWorkPermit
 sync: false
 anchor:
-  entity: Application
+  entity: ApplicationProfileInstance
   key: FullApplicationNumber
   value: 8/-023
 data:
   Applications:
-  - Application Number: 023
+  - ApplicationProfileInstance Number: 023
     Date: 2026-08-01
     Project Contract: GT-15
-    Application Type: App_Border_Zone_Permission
+    ApplicationProfileInstance Type: App_Border_Zone_Permission
     Border Zone Location: Sarahs etrabyna
   ApplicationItems:
   - Application: 8/-023

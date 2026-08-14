@@ -10,7 +10,7 @@ export const TPL_KEYS = {
 
 export const MOCKUP_FILES = [
   { file: 'visa2026-custom-left-navigation-shell-mockup.png', title: 'Custom left navigation shell' },
-  { file: 'application-profiles-navigation-sidebar-mockup.png', title: 'Application profiles nav' },
+  { file: 'application-profiles-navigation-sidebar-mockup.png', title: 'ApplicationProfileInstance profiles nav' },
   { file: 'staged-application-profiles-workspace-mockup.png', title: 'Staged — grouped workspace' },
   { file: 'staged-profiles-listview-table-mockup.png', title: 'Staged — ListView' },
   { file: 'staged-profiles-grid-cards-mockup.png', title: 'Staged — Grid' },
@@ -18,6 +18,8 @@ export const MOCKUP_FILES = [
   { file: 'process-started-profiles-list-cards-mockup.png', title: 'In process — Grid' },
   { file: 'process-started-application-profile-workspace-mockup.png', title: 'Workspace — Overview' },
   { file: 'process-started-nav-overview.png', title: 'Workspace — Overview (alt)' },
+  { file: 'process-started-nav-overview-issued-records.png', title: 'Workspace — Issued records' },
+  { file: 'process-started-nav-overview-issued-records-add.png', title: 'Workspace — Add issued invitation' },
   { file: 'process-started-nav-people-links.png', title: 'Workspace — People & links' },
   { file: 'process-started-nav-progress.png', title: 'Workspace — Progress' },
   { file: 'process-started-nav-document-copies.png', title: 'Workspace — Document copies' },

@@ -6,7 +6,7 @@ namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
 /// Report Dashboard: Invitations In Process from vw_rd_invitation_in_process
-/// (one row per invitation-issuing Application without a linked Invitation;
+/// (one row per invitation-issuing ApplicationProfileInstance without a linked Invitation;
 /// excludes completed: Issued / Process Rejected / Cancelled / 1st|2nd Review Rejected).
 /// </summary>
 [Browsable(false)]

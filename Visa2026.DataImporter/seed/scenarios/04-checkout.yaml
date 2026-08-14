@@ -4,14 +4,14 @@ description: Registration of employee departure from Turkmenistan
 dependsOn: CheckIn
 sync: false
 anchor:
-  entity: Application
+  entity: ApplicationProfileInstance
   key: FullApplicationNumber
   value: 7/-004
 data:
   Applications:
-  - Application Number: 004
+  - ApplicationProfileInstance Number: 004
     Date: 2026-07-01
-    Application Type: App_Reg_Check_Out
+    ApplicationProfileInstance Type: App_Reg_Check_Out
     Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
   ApplicationItems:
   - Person: John Doe

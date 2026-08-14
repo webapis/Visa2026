@@ -3,6 +3,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
+using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.BusinessObjects.ApplicationProfileCatalog;
 using Visa2026.Module.DatabaseUpdate;
 using Visa2026.Module.Services.ApplicationProfileCatalog;
@@ -10,7 +11,7 @@ using Visa2026.Module.Services.ApplicationProfileCatalog;
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// Opens the Application Profile catalog DetailView when Configuration → Application Profile is selected.
+/// Opens the Application Profile catalog DetailView when Application Profiles → Application Profile Templates is selected.
 /// </summary>
 public sealed class ApplicationProfileCatalogNavigationController : WindowController
 {
@@ -52,8 +53,7 @@ public sealed class ApplicationProfileCatalogNavigationController : WindowContro
             return false;
 
         if (item.Id is ApplicationProfileCatalogModelUpdater.NavItemId
-            or "ApplicationProfileCatalogHost"
-            or "ApplicationProfile")
+            or "ApplicationProfileCatalogHost")
         {
             return true;
         }
@@ -64,7 +64,13 @@ public sealed class ApplicationProfileCatalogNavigationController : WindowContro
             return true;
         }
 
-        // Caption fallback when model diffs rename the node id.
+        if (string.Equals(item.Caption, ApplicationProfileInstanceProgressRouteNavigation.CaptionTemplates, StringComparison.OrdinalIgnoreCase)
+            && string.Equals(item.ParentItem?.Id, "Application", StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        // Leftover Configuration node from before the catalog moved into Application Profiles.
         if (string.Equals(item.Caption, "Application Profile", StringComparison.OrdinalIgnoreCase)
             && string.Equals(item.ParentItem?.Id, "Configuration", StringComparison.Ordinal))
         {

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -48,7 +50,7 @@ namespace Visa2026.Module.BusinessObjects
                 {
                     base.Person = value;
                     if (base.Person != null)
-                        Passport = ApplicationPersonValidItems.ResolvePassport(base.Person);
+                        Passport = ApplicationProfileInstancePersonValidItems.ResolvePassport(base.Person);
                 }
             }
         }
@@ -217,7 +219,7 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         /// <summary>
-        /// Application linked on the parent <see cref="Invitation"/> (if any). Read-only ListView/Detail convenience.
+        /// ApplicationProfileInstance linked on the parent <see cref="Invitation"/> (if any). Read-only ListView/Detail convenience.
         /// </summary>
         [NotMapped]
         [ExcludeFromOptionalDetailFields]
@@ -225,9 +227,9 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(true)]
         [VisibleInDetailView(true)]
         [VisibleInLookupListView(false)]
-        [XafDisplayName("Application")]
-        [ToolTip("Application linked on the parent invitation (Invitation.Application).")]
-        public Application Application => Invitation?.Application;
+        [XafDisplayName("Application Profile instance")]
+        [ToolTip("ApplicationProfileInstance linked on the parent invitation (Invitation.ApplicationProfileInstance).")]
+        public ApplicationProfileInstance ApplicationProfileInstance => Invitation?.ApplicationProfileInstance;
 
         /// <summary>
         /// Visa issued using this invitation line (<see cref="Visa.InvitationItem"/>). Typically 0–1 when used.
@@ -247,6 +249,11 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("InvitationItem_IssuedVisa_Critical", Priority = 300, AppearanceItemType = "ViewItem", TargetItems = "IssuedVisa",
             Criteria = "IssuedVisa is not null and IssuedVisa.StateSeverityLevel >= 3", Context = "ListView", BackColor = "LightCoral")]
         public virtual Visa IssuedVisa { get; set; }
+
+        /// <summary>Skip-navigation M2M with <see cref="ApplicationProfileInstance"/> (input linked items). Distinct from parent Invitation header FK.</summary>
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInListView(false)]
+        public virtual IList<ApplicationProfileInstance> ApplicationProfileInstances { get; set; } = new ObservableCollection<ApplicationProfileInstance>();
 
         /// <summary>ListView link column that opens header document copies in the preview slot.</summary>
         [NotMapped]

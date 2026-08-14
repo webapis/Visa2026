@@ -45,31 +45,34 @@ namespace Visa2026.Module.BusinessObjects
 
         /// <summary>
         /// Optional link to a visa application. When set, work permit items can be validated against that application's people.
-        /// Only applications whose type has <see cref="ApplicationType.CanIssueWorkPermit"/> are offered.
+        /// Only applications whose profile may produce a work permit (or type <see cref="ApplicationType.CanIssueWorkPermit"/>) are offered.
         /// </summary>
         [ImmediatePostData]
         [VisibleInListView(false)]
         [VisibleInDetailView(true)]
         [VisibleInLookupListView(false)]
-        [DataSourceProperty(nameof(AvailableApplications))]
+        [DataSourceProperty(nameof(AvailableApplicationProfileInstances))]
         [ToolTip("Link this work permit to an application when one exists. Leave empty for standalone work permits.")]
-        public virtual Application Application { get; set; }
+        [InverseProperty(nameof(ApplicationProfileInstance.WorkPermits))]
+        public virtual ApplicationProfileInstance ApplicationProfileInstance { get; set; }
 
         /// <summary>
         /// Candidate applications for <see cref="Application"/> (types that may produce a work permit).
         /// </summary>
         [NotMapped]
         [Browsable(false)]
-        public IList<Application> AvailableApplications
+        public IList<ApplicationProfileInstance> AvailableApplicationProfileInstances
         {
             get
             {
                 var objectSpace = ObjectSpaceHelper.Get(this);
                 if (objectSpace == null)
-                    return new List<Application>();
+                    return new List<ApplicationProfileInstance>();
 
-                return objectSpace.GetObjectsQuery<Application>()
-                    .Where(a => a.ApplicationType != null && a.ApplicationType.CanIssueWorkPermit)
+                return objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
+                    .Where(a =>
+                        (a.ApplicationProfile != null && a.ApplicationProfile.ProduceWorkPermit)
+                        || (a.ApplicationType != null && a.ApplicationType.CanIssueWorkPermit))
                     .OrderByDescending(a => a.ApplicationDate)
                     .ThenBy(a => a.FullApplicationNumber)
                     .ToList();
@@ -79,15 +82,15 @@ namespace Visa2026.Module.BusinessObjects
         [RuleFromBoolProperty(
             "WorkPermit_ApplicationTypeAllowed",
             DefaultContexts.Save,
-            "Application must be a type that can issue a work permit.")]
+            "ApplicationProfileInstance must be a type that can issue a work permit.")]
         [Browsable(false)]
         public bool IsApplicationTypeAllowed
         {
             get
             {
-                if (Application == null)
+                if (ApplicationProfileInstance == null)
                     return true;
-                return ApplicationTypeCapabilities.CanIssueWorkPermit(Application);
+                return ApplicationTypeCapabilities.CanIssueWorkPermit(ApplicationProfileInstance);
             }
         }
 
@@ -119,7 +122,7 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                var roster = ApplicationRosterHelper.GetRosterPeople(Application)
+                var roster = ApplicationRosterHelper.GetRosterPeople(ApplicationProfileInstance)
                     .Where(p => p.IsEmployee)
                     .ToList();
                 if (roster.Count > 0)

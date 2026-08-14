@@ -8,7 +8,7 @@ namespace Visa2026.Module.Services.OfficerShell;
 /// </summary>
 public static class OfficerShellPendingOpenGate
 {
-    public static void Set(XafApplication application, OfficerShellPage page, Guid caseApplicationId)
+    public static void Set(XafApplication application, OfficerShellPage page, Guid caseApplicationProfileInstanceId)
     {
         if (application?.ServiceProvider == null)
             return;
@@ -17,11 +17,11 @@ public static class OfficerShellPendingOpenGate
             is IOfficerShellPendingOpen pending)
         {
             pending.Page = page;
-            pending.CaseApplicationId = caseApplicationId;
+            pending.CaseApplicationProfileInstanceId = caseApplicationProfileInstanceId;
         }
     }
 
-    public static (OfficerShellPage Page, Guid CaseApplicationId) Get(XafApplication application)
+    public static (OfficerShellPage Page, Guid CaseApplicationProfileInstanceId) Get(XafApplication application)
     {
         if (application?.ServiceProvider == null)
             return (OfficerShellPage.Staged, Guid.Empty);
@@ -29,7 +29,7 @@ public static class OfficerShellPendingOpenGate
         if (application.ServiceProvider.GetService(typeof(IOfficerShellPendingOpen))
             is IOfficerShellPendingOpen pending)
         {
-            return (pending.Page, pending.CaseApplicationId);
+            return (pending.Page, pending.CaseApplicationProfileInstanceId);
         }
 
         return (OfficerShellPage.Staged, Guid.Empty);

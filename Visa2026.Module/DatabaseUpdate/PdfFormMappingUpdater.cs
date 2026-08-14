@@ -23,10 +23,10 @@ namespace Visa2026.Module.DatabaseUpdate
 
         private void SeedPdfFormMappings()
         {
-            // Application Level
+            // ApplicationProfileInstance Level
             CreateMappingIfNotExists("topmostSubform[0].Page1[0].L01[0]", "Application.ApplicationType.PdfForm_Code", "Visa operation type", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page1[0].L02[0]", "Application.Urgency.PdfForm_Code", "Urgency (Dropdown)", PdfMappingMode.Property);
-            CreateMappingIfNotExists("topmostSubform[0].Page2[0]._25[0]", "Application.VisaType.PdfForm_Code", "Visa Type (Application Level)", PdfMappingMode.Property);
+            CreateMappingIfNotExists("topmostSubform[0].Page2[0]._25[0]", "Application.VisaType.PdfForm_Code", "Visa Type (ApplicationProfileInstance Level)", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page2[0]._27[0]", "Application.VisaPeriod.PdfForm_Count", "Duration of stay (count)", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page2[0]._271[0]", "Application.VisaPeriod.PdfForm__Code", "Duration of stay (unit)", PdfMappingMode.Property);
 

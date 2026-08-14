@@ -4,9 +4,9 @@ using DevExpress.ExpressApp;
 
 namespace Visa2026.Module.Services.ApplicationPersonLink;
 
-public interface IApplicationPersonLinkQueryService
+public interface IApplicationProfileInstancePersonLinkQueryService
 {
-    IReadOnlyList<ApplicationPersonLinkCandidateRow> SearchCandidates(
+    IReadOnlyList<ApplicationProfileInstancePersonLinkCandidateRow> SearchCandidates(
         IObjectSpace objectSpace,
         Guid applicationId,
         string? searchText,

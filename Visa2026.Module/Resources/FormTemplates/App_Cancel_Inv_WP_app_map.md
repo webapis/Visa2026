@@ -68,6 +68,6 @@ this.Detail.HeightF = 492F;  // matches Group D base default
 ## ReportsUpdater.cs entry
 
 ```csharp
-AddPredefinedReport<AppCancelInvWPReport>("App Cancel Inv WP Report", typeof(Application), isInplaceReport: true);
+AddPredefinedReport<AppCancelInvWPReport>("App Cancel Inv WP Report", typeof(ApplicationProfileInstance), isInplaceReport: true);
 CreateReportVisibility("App Cancel Inv WP Report", "[ApplicationType.Name] = 'App_Cancel_Inv_WP'");
 ```

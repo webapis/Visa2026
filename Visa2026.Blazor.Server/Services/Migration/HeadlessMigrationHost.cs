@@ -16,13 +16,19 @@ namespace Visa2026.Blazor.Server.Services.Migration;
 public sealed class HeadlessMigrationHost : IDisposable
 {
     private readonly IHost _host;
+    private readonly IServiceScope _serviceScope;
     private readonly IDisposable _importScope;
 
     public INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; }
 
-    private HeadlessMigrationHost(IHost host, INonSecuredObjectSpaceFactory objectSpaceFactory, IDisposable importScope)
+    private HeadlessMigrationHost(
+        IHost host,
+        IServiceScope serviceScope,
+        INonSecuredObjectSpaceFactory objectSpaceFactory,
+        IDisposable importScope)
     {
         _host = host;
+        _serviceScope = serviceScope;
         ObjectSpaceFactory = objectSpaceFactory;
         _importScope = importScope;
     }
@@ -56,14 +62,18 @@ public sealed class HeadlessMigrationHost : IDisposable
         var host = hostBuilder.Build();
         host.Start();
 
-        var factory = host.Services.GetRequiredService<INonSecuredObjectSpaceFactory>();
+        // INonSecuredObjectSpaceFactory is scoped (same as seed gates / batch workers).
+        // Resolving it from the root provider throws: "Cannot resolve scoped service from root provider."
+        var serviceScope = host.Services.CreateScope();
+        var factory = serviceScope.ServiceProvider.GetRequiredService<INonSecuredObjectSpaceFactory>();
         var importScope = MigrationImportContext.BeginDataImportScope();
-        return new HeadlessMigrationHost(host, factory, importScope);
+        return new HeadlessMigrationHost(host, serviceScope, factory, importScope);
     }
 
     public void Dispose()
     {
         _importScope.Dispose();
+        _serviceScope.Dispose();
         _host.StopAsync().GetAwaiter().GetResult();
         _host.Dispose();
     }

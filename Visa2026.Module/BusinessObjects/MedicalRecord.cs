@@ -82,6 +82,11 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(false)]
         public virtual IList<MedicalRecordImage> Images { get; set; }
 
+        /// <summary>Skip-navigation M2M with <see cref="ApplicationProfileInstance"/> (same pattern as Education). Not aggregated.</summary>
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInListView(false)]
+        public virtual IList<ApplicationProfileInstance> ApplicationProfileInstances { get; set; } = new ObservableCollection<ApplicationProfileInstance>();
+
         #region IExpirationLogic
         [NotMapped]
         public int DaysRemaining => ExpirationLogicHelper.CalculateDaysRemaining(ExpirationDate);

@@ -98,7 +98,7 @@ namespace Visa2026.Module.BusinessObjects
     }
 
     /// <summary>Whether an <see cref="Application"/> uses ministry review before migration processing.</summary>
-    public enum ApplicationProgressRouteKind
+    public enum ApplicationProfileInstanceProgressRouteKind
     {
         /// <summary>Office preparation, then ministry review/approval, then migration service.</summary>
         ViaMinistries = 0,
@@ -107,7 +107,7 @@ namespace Visa2026.Module.BusinessObjects
         DirectToMigrationService = 1
     }
 
-    /// <summary>How many ministry review legs apply when <see cref="ApplicationProgressRouteKind.ViaMinistries"/>.</summary>
+    /// <summary>How many ministry review legs apply when <see cref="ApplicationProfileInstanceProgressRouteKind.ViaMinistries"/>.</summary>
     public enum MinistryReviewDepth
     {
         None = 0,
@@ -122,7 +122,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Application/Config")]
     [DefaultProperty(nameof(NameTm))]
-    [XafDisplayName("Application Type Filter (Deprecated)")]
+    [XafDisplayName("ApplicationProfileInstance Type Filter (Deprecated)")]
     public class ApplicationTypeFilter : LookupBase
     {
         public ApplicationTypeFilter()
@@ -148,7 +148,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Lookup/Application/Config")]
     [DefaultProperty(nameof(LocalizedDisplayName))]
     [ModelDefault("IsCloneable", "True")]
-    [XafDisplayName("Application Type (Deprecated)")]
+    [XafDisplayName("ApplicationProfileInstance Type (Deprecated)")]
     public class ApplicationType : LookupBase
     {
         public ApplicationType()
@@ -161,7 +161,7 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("AllowEdit", "False")]
         public virtual int PdfForm_Code { get; set; }
 
-        /// <summary>Ministry 3-digit quick-pick code for Application detail view (see docs/APPLICATION_BO_TYPE_SELECTION_REFACTOR.md).</summary>
+        /// <summary>Ministry 3-digit quick-pick code for ApplicationProfileInstance detail view (see docs/APPLICATION_BO_TYPE_SELECTION_REFACTOR.md).</summary>
         [MaxLength(3)]
         [RuleRegularExpression("ApplicationTypeSelectionCodeFormat", DefaultContexts.Save, @"^\d{3}$", CustomMessageTemplate = "Selection code must be exactly three digits (e.g. 701).")]
         public virtual string SelectionCode { get; set; }
@@ -171,8 +171,8 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual int DurationInDays { get; set; }
 
-        /// <summary>Workflow route for <see cref="ApplicationProgress"/> (ministry vs direct to migration).</summary>
-        public virtual ApplicationProgressRouteKind ApplicationProgressRoute { get; set; }
+        /// <summary>Workflow route for <see cref="ApplicationProfileInstanceProgress"/> (ministry vs direct to migration).</summary>
+        public virtual ApplicationProfileInstanceProgressRouteKind ApplicationProfileInstanceProgressRoute { get; set; }
 
         /// <summary>
         /// Default ministry legs when route is via ministries and neither contract nor approval-leg profile applies.
@@ -196,7 +196,7 @@ namespace Visa2026.Module.BusinessObjects
         [Browsable(false)]
         public virtual Guid? MigrationSlaProfileId { get; set; }
 
-        // --- These flags control the visibility of fields in the main Application Detail View ---
+        // --- These flags control the visibility of fields in the main ApplicationProfileInstance Detail View ---
         public virtual bool ShowProjectContract { get; set; }
         public virtual bool ShowApprovalLegProfile { get; set; }
         public virtual bool ShowVisaPeriod { get; set; }
@@ -232,7 +232,7 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("May issue work permit")]
         public virtual bool CanIssueWorkPermit { get; set; }
 
-        // --- These flags control the visibility of fields in the nested ApplicationItem Detail View ---
+        // --- These flags control the visibility of fields in the nested ApplicationRosterMergeLine Detail View ---
         public virtual bool ShowPreviousPassport { get; set; }
         public virtual bool ShowCurrentVisa { get; set; }
         public virtual bool ShowNextVisa { get; set; }
@@ -247,7 +247,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual bool ShowCurrentMedicalRecord { get; set; }
         public virtual bool ShowCurrentEducation { get; set; }
 
-        // --- These flags control the visibility of status columns in the ApplicationItem List View ---
+        // --- These flags control the visibility of status columns in the ApplicationRosterMergeLine List View ---
         public virtual bool ShowInvitationItemIsIssued { get; set; }
         public virtual bool ShowWorkPermitItemIsIssued { get; set; }
         public virtual bool ShowRejectionIssued { get; set; }
@@ -515,9 +515,9 @@ namespace Visa2026.Module.BusinessObjects
 
     /// <summary>
     /// Deprecated lookup catalog. Replaced by comma-separated <c>BorderZoneLocation</c> on
-    /// <see cref="Application"/>, <see cref="ApplicationItem"/>, and <see cref="Visa"/> backed by <see cref="BorderZoneName"/>.
+    /// <see cref="Application"/>, <see cref="ApplicationRosterMergeLine"/>, and <see cref="Visa"/> backed by <see cref="BorderZoneName"/>.
     /// </summary>
-    [Obsolete("Use BorderZoneName catalog with comma-separated BorderZoneLocation on Application, ApplicationItem, and Visa.")]
+    [Obsolete("Use BorderZoneName catalog with comma-separated BorderZoneLocation on ApplicationProfileInstance, ApplicationRosterMergeLine, and Visa.")]
     [DefaultClassOptions]
     [NavigationItem(false)]
     [GlobalLookupCatalog(GlobalLookupCatalogKind.BorderZoneLocation)]
@@ -529,7 +529,7 @@ namespace Visa2026.Module.BusinessObjects
 
     /// <summary>
     /// Short Turkmen labels for border zones selectable on <see cref="Application"/>,
-    /// <see cref="ApplicationItem"/>, and <see cref="Visa"/> (comma-joined).
+    /// <see cref="ApplicationRosterMergeLine"/>, and <see cref="Visa"/> (comma-joined).
     /// </summary>
     [DefaultClassOptions]
     [NavigationItem("Lookup/WorkPermit/Config")]

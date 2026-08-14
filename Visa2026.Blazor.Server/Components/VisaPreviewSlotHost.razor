@@ -55,7 +55,7 @@ else if (_state.Mode == VisaPreviewSlotMode.PlaceholderManual)
 @code {
     [Inject] private IVisaPreviewSlotService SlotService { get; set; } = null!;
     [Inject] private IJSRuntime JS { get; set; } = null!;
-    [Inject] private ApplicationProgressMinistryLetterFileAccess FileAccess { get; set; } = null!;
+    [Inject] private ApplicationProfileInstanceProgressMinistryLetterFileAccess FileAccess { get; set; } = null!;
     [Inject] private PersonDossierNavigationHelper DossierNavigation { get; set; } = null!;
 
     private VisaPreviewSlotState _state = new();
@@ -139,7 +139,7 @@ else if (_state.Mode == VisaPreviewSlotMode.PlaceholderManual)
             return Task.CompletedTask;
 
         if (!Enum.TryParse<WordReportPackageScope>(scopeText, ignoreCase: true, out var scope))
-            scope = WordReportPackageScope.Application;
+            scope = WordReportPackageScope.ApplicationProfileInstance;
 
         IReadOnlyList<Guid> itemIds = Array.Empty<Guid>();
         if (!string.IsNullOrWhiteSpace(itemIdsJson))
@@ -153,7 +153,7 @@ else if (_state.Mode == VisaPreviewSlotMode.PlaceholderManual)
 
         return SlotService.OpenResminamalarAsync(new ResminamalarSlotRequest
         {
-            ApplicationId = applicationId,
+            ApplicationProfileInstanceId = applicationId,
             Scope = scope,
             ApplicationItemIds = itemIds,
         });
@@ -162,8 +162,8 @@ else if (_state.Mode == VisaPreviewSlotMode.PlaceholderManual)
     [JSInvokable]
     public Task OpenProgressLettersFromJsAsync(string applicationIdText, string focusProgressIdText)
     {
-        var applicationId = Guid.TryParse(applicationIdText, out var parsedApplicationId)
-            ? parsedApplicationId
+        var applicationId = Guid.TryParse(applicationIdText, out var parsedApplicationProfileInstanceId)
+            ? parsedApplicationProfileInstanceId
             : Guid.Empty;
         Guid? focusProgressId = Guid.TryParse(focusProgressIdText, out var parsedFocusId) && parsedFocusId != Guid.Empty
             ? parsedFocusId
@@ -171,9 +171,9 @@ else if (_state.Mode == VisaPreviewSlotMode.PlaceholderManual)
 
         if (applicationId == Guid.Empty
             && focusProgressId is Guid progressId
-            && FileAccess.TryGetApplicationIdForProgress(progressId, out var resolvedApplicationId))
+            && FileAccess.TryGetApplicationProfileInstanceIdForProgress(progressId, out var resolvedApplicationProfileInstanceId))
         {
-            applicationId = resolvedApplicationId;
+            applicationId = resolvedApplicationProfileInstanceId;
         }
 
         if (applicationId == Guid.Empty)
@@ -181,7 +181,7 @@ else if (_state.Mode == VisaPreviewSlotMode.PlaceholderManual)
 
         return SlotService.OpenProgressLettersAsync(new ProgressLettersSlotRequest
         {
-            ApplicationId = applicationId,
+            ApplicationProfileInstanceId = applicationId,
             FocusProgressId = focusProgressId,
         });
     }

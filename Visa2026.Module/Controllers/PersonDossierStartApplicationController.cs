@@ -8,7 +8,7 @@ using Visa2026.Module.Services.PersonDossier;
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// Starts a new Application from Person Dossier (slice 11).
+/// Starts a new ApplicationProfileInstance from Person Dossier (slice 11).
 /// </summary>
 public sealed class PersonDossierStartApplicationController : ViewController<DetailView>
 {
@@ -20,7 +20,7 @@ public sealed class PersonDossierStartApplicationController : ViewController<Det
 
         _startApplicationAction = new SimpleAction(this, "PersonDossierStartApplication", "View")
         {
-            Caption = "Start application…",
+            Caption = "Start process…",
             ImageName = "Action_New",
             ToolTip = "Pick an Application Profile and link people to a new Application.",
         };

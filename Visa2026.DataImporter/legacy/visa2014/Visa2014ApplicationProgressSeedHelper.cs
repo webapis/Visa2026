@@ -3,14 +3,14 @@ using Visa2026.DataImporter;
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
 /// <summary>
-/// Detects <see cref="ApplicationProgressInitializer"/> seed rows vs synthesized migration steps.
+/// Detects <see cref="ApplicationProfileInstanceProgressInitializer"/> seed rows vs synthesized migration steps.
 /// </summary>
-internal static class Visa2014ApplicationProgressSeedHelper
+internal static class Visa2014ApplicationProfileInstanceProgressSeedHelper
 {
     public const string InitialStateCode = "IS_BEING_PREPARED";
     public const string PrepareStepCode = "prepare";
 
-    public static bool IsInitializerSeed(ApplicationProgress progress)
+    public static bool IsInitializerSeed(ApplicationProfileInstanceProgress progress)
     {
         if (progress.State == null)
             return false;

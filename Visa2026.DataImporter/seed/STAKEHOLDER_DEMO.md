@@ -6,7 +6,7 @@ Demonstrate how each **application type** looks in the UI and which **Word / Exc
 
 | Item | Count / note |
 |------|----------------|
-| Application types (Module) | 36 (`ApplicationTypeConfigurationSeed.Data.cs`) |
+| ApplicationProfileInstance types (Module) | 36 (`ApplicationTypeConfigurationSeed.Data.cs`) |
 | Active scenarios (index) | **Shared + 36 demo scenarios** (one per application type) |
 | Archived | `scenarios/_archive/legacy-state-dashboard/` — state bell / ministry duplicates |
 

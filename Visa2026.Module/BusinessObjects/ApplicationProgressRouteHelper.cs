@@ -9,12 +9,12 @@ namespace Visa2026.Module.BusinessObjects
     /// Allowed <see cref="ApplicationState"/> codes and suggested next steps
     /// for an <see cref="ApplicationType"/> progress route.
     /// </summary>
-    public static class ApplicationProgressRouteHelper
+    public static class ApplicationProfileInstanceProgressRouteHelper
     {
         public static MinistryReviewDepth NormalizeMinistryReviewDepth(
-            ApplicationProgressRouteKind route,
+            ApplicationProfileInstanceProgressRouteKind route,
             MinistryReviewDepth depth) =>
-            route == ApplicationProgressRouteKind.DirectToMigrationService
+            route == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService
                 ? MinistryReviewDepth.None
                 : depth == MinistryReviewDepth.None
                     ? MinistryReviewDepth.FirstMinistryOnly
@@ -22,48 +22,48 @@ namespace Visa2026.Module.BusinessObjects
 
         private static readonly string[] SharedStateCodes =
         [
-            ApplicationProgressStateCodes.ProcessStarted,
-            ApplicationProgressStateCodes.ProcessIssued,
-            ApplicationProgressStateCodes.ProcessRejected,
-            ApplicationProgressStateCodes.ProcessCancelled
+            ApplicationProfileInstanceProgressStateCodes.ProcessStarted,
+            ApplicationProfileInstanceProgressStateCodes.ProcessIssued,
+            ApplicationProfileInstanceProgressStateCodes.ProcessRejected,
+            ApplicationProfileInstanceProgressStateCodes.ProcessCancelled
         ];
 
-        public static IReadOnlyList<string> GetAllowedStateCodes(Application? application)
+        public static IReadOnlyList<string> GetAllowedStateCodes(ApplicationProfileInstance? application)
         {
             var route = GetTypePickerRouteFilter(application);
             if (!route.HasValue)
                 return GetAllStateCodes();
 
-            var legCount = ApplicationProgressProfileResolver.GetMinistryLegCount(application);
+            var legCount = ApplicationProfileInstanceProgressProfileResolver.GetMinistryLegCount(application);
             return GetAllowedStateCodes(route.Value, legCount);
         }
 
         public static IReadOnlyList<string> GetAllowedStateCodes(ApplicationType? applicationType) =>
             GetAllowedStateCodes(
-                applicationType?.ApplicationProgressRoute ?? ApplicationProgressRouteKind.ViaMinistries,
+                applicationType?.ApplicationProfileInstanceProgressRoute ?? ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
                 MapLegacyDepthToLegCount(applicationType?.MinistryReviewDepth ?? MinistryReviewDepth.FirstMinistryOnly));
 
         public static IReadOnlyList<string> GetAllowedStateCodes(
-            ApplicationProgressRouteKind route,
+            ApplicationProfileInstanceProgressRouteKind route,
             MinistryReviewDepth depth) =>
             GetAllowedStateCodes(route, MapLegacyDepthToLegCount(depth));
 
         public static IReadOnlyList<string> GetAllowedStateCodes(
-            ApplicationProgressRouteKind route,
+            ApplicationProfileInstanceProgressRouteKind route,
             int ministryLegCount)
         {
-            if (route == ApplicationProgressRouteKind.DirectToMigrationService)
+            if (route == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService)
                 return SharedStateCodes.ToArray();
 
-            var legCount = Math.Clamp(ministryLegCount, 1, ApplicationProgressLegCodes.MaxLegCount);
+            var legCount = Math.Clamp(ministryLegCount, 1, ApplicationProfileInstanceProgressLegCodes.MaxLegCount);
             // leg 1: started+approved+rejected (3); legs 2+: approved+rejected (2 each)
             var list = new List<string>(SharedStateCodes.Length + 3 + Math.Max(0, legCount - 1) * 2);
             list.AddRange(SharedStateCodes);
-            list.AddRange(ApplicationProgressLegCodes.GetReviewStateCodesUpToLegCount(legCount));
+            list.AddRange(ApplicationProfileInstanceProgressLegCodes.GetReviewStateCodesUpToLegCount(legCount));
             return list;
         }
 
-        public static bool IsStateCodeAllowed(Application? application, string? stateCode)
+        public static bool IsStateCodeAllowed(ApplicationProfileInstance? application, string? stateCode)
         {
             if (string.IsNullOrWhiteSpace(stateCode))
                 return false;
@@ -81,20 +81,20 @@ namespace Visa2026.Module.BusinessObjects
                 .Contains(stateCode.Trim(), StringComparer.OrdinalIgnoreCase);
         }
 
-        public static bool IsStateAllowed(Application? application, ApplicationState? state) =>
+        public static bool IsStateAllowed(ApplicationProfileInstance? application, ApplicationState? state) =>
             state != null && IsStateCodeAllowed(application, state.Code);
 
-        public static bool TryValidateProgressStep(ApplicationProgress? progress, out string? errorMessage)
+        public static bool TryValidateProgressStep(ApplicationProfileInstanceProgress? progress, out string? errorMessage)
         {
             errorMessage = null;
-            if (progress?.Application == null)
+            if (progress?.ApplicationProfileInstance == null)
                 return true;
 
-            var app = progress.Application;
+            var app = progress.ApplicationProfileInstance;
             if (progress.State != null && !IsStateAllowed(app, progress.State))
             {
                 errorMessage = VisaUiMessages.Format(
-                    "ApplicationProgress.StateNotAllowedForRoute",
+                    "ApplicationProfileInstanceProgress.StateNotAllowedForRoute",
                     progress.State.Code ?? progress.State.ToString(),
                     FormatProgressRouteLabel(GetTypePickerRouteFilter(app)));
                 return false;
@@ -106,37 +106,37 @@ namespace Visa2026.Module.BusinessObjects
         /// <summary>
         /// Suggested first explicit progress step while still at office (no progress, or legacy prep only).
         /// </summary>
-        public static string? GetSuggestedNextStateAfterOfficePreparation(Application? application)
+        public static string? GetSuggestedNextStateAfterOfficePreparation(ApplicationProfileInstance? application)
         {
             var route = GetTypePickerRouteFilter(application);
             if (!route.HasValue)
                 return null;
 
-            if (ApplicationProgressProfileResolver.RequiresApprovalLegProfile(application)
+            if (ApplicationProfileInstanceProgressProfileResolver.RequiresApprovalLegProfile(application)
                 && (application?.ApprovalLegProfile == null
                     || !ApprovalLegProfileMinistryHelper.HasConfiguredLegs(application.ApprovalLegProfile)))
                 return null;
 
-            if (ApplicationProgressProfileResolver.RequiresProjectContract(application)
+            if (ApplicationProfileInstanceProgressProfileResolver.RequiresProjectContract(application)
                 && application?.ProjectContract == null)
                 return null;
 
-            return route.Value == ApplicationProgressRouteKind.DirectToMigrationService
-                ? ApplicationProgressStateCodes.ProcessStarted
-                : ApplicationProgressLegCodes.ReviewStarted(1);
+            return route.Value == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService
+                ? ApplicationProfileInstanceProgressStateCodes.ProcessStarted
+                : ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1);
         }
 
         /// <summary>Legacy tuple API — LocationCode is ignored (progress is state-only).</summary>
         public static (string StateCode, string LocationCode)? GetSuggestedNextAfterOfficePreparation(
-            Application? application)
+            ApplicationProfileInstance? application)
         {
             var state = GetSuggestedNextStateAfterOfficePreparation(application);
             if (state == null)
                 return null;
 
-            var location = string.Equals(state, ApplicationProgressStateCodes.ProcessStarted, StringComparison.OrdinalIgnoreCase)
-                ? ApplicationProgressLocationCodes.AtMigrationService
-                : ApplicationProgressLegCodes.AtMinistry(1);
+            var location = string.Equals(state, ApplicationProfileInstanceProgressStateCodes.ProcessStarted, StringComparison.OrdinalIgnoreCase)
+                ? ApplicationProfileInstanceProgressLocationCodes.AtMigrationService
+                : ApplicationProfileInstanceProgressLegCodes.AtMinistry(1);
             return (state, location);
         }
 
@@ -144,33 +144,33 @@ namespace Visa2026.Module.BusinessObjects
             ApplicationType? applicationType) =>
             applicationType == null
                 ? null
-                : GetSuggestedNextAfterOfficePreparation(new Application { ApplicationType = applicationType });
+                : GetSuggestedNextAfterOfficePreparation(new ApplicationProfileInstance { ApplicationType = applicationType });
 
         private static IReadOnlyList<string> GetAllStateCodes() =>
             SharedStateCodes
-                .Concat(ApplicationProgressLegCodes.GetReviewStateCodesUpToLegCount(ApplicationProgressLegCodes.MaxLegCount))
+                .Concat(ApplicationProfileInstanceProgressLegCodes.GetReviewStateCodesUpToLegCount(ApplicationProfileInstanceProgressLegCodes.MaxLegCount))
                 .ToArray();
 
         private static int MapLegacyDepthToLegCount(MinistryReviewDepth depth) =>
             depth == MinistryReviewDepth.FirstAndSecondMinistry ? 2 : 1;
 
-        private static string FormatProgressRouteLabel(ApplicationProgressRouteKind? route) =>
-            route == ApplicationProgressRouteKind.DirectToMigrationService
-                ? VisaUiMessages.Get("ApplicationProgressRoute.DirectToMigrationService")
-                : route == ApplicationProgressRouteKind.ViaMinistries
-                    ? VisaUiMessages.Get("ApplicationProgressRoute.ViaMinistries")
-                    : VisaUiMessages.Get("ApplicationProgressRoute.Unknown");
+        private static string FormatProgressRouteLabel(ApplicationProfileInstanceProgressRouteKind? route) =>
+            route == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService
+                ? VisaUiMessages.Get("ApplicationProfileInstanceProgressRoute.DirectToMigrationService")
+                : route == ApplicationProfileInstanceProgressRouteKind.ViaMinistries
+                    ? VisaUiMessages.Get("ApplicationProfileInstanceProgressRoute.ViaMinistries")
+                    : VisaUiMessages.Get("ApplicationProfileInstanceProgressRoute.Unknown");
 
-        public static void TryApplySuggestedDefaultsAfterOfficePreparation(ApplicationProgress progress)
+        public static void TryApplySuggestedDefaultsAfterOfficePreparation(ApplicationProfileInstanceProgress progress)
         {
-            if (progress.Application == null || progress.State != null)
+            if (progress.ApplicationProfileInstance == null || progress.State != null)
                 return;
 
-            var objectSpace = ObjectSpaceHelper.Get(progress.Application) ?? ObjectSpaceHelper.Get(progress);
+            var objectSpace = ObjectSpaceHelper.Get(progress.ApplicationProfileInstance) ?? ObjectSpaceHelper.Get(progress);
             if (objectSpace == null)
                 return;
 
-            var siblings = progress.Application.ProgressHistory?
+            var siblings = progress.ApplicationProfileInstance.ProgressHistory?
                 .Where(p => p != progress && !objectSpace.IsObjectToDelete(p))
                 .ToList()
                 ?? [];
@@ -189,7 +189,7 @@ namespace Visa2026.Module.BusinessObjects
                 return;
             }
 
-            var suggested = GetSuggestedNextStateAfterOfficePreparation(progress.Application);
+            var suggested = GetSuggestedNextStateAfterOfficePreparation(progress.ApplicationProfileInstance);
             if (string.IsNullOrWhiteSpace(suggested))
                 return;
 
@@ -201,11 +201,11 @@ namespace Visa2026.Module.BusinessObjects
             progress.State = state;
         }
 
-        private static bool IsInitialOfficePreparation(ApplicationProgress progress) =>
+        private static bool IsInitialOfficePreparation(ApplicationProfileInstanceProgress progress) =>
             progress.State != null
-            && string.Equals(progress.State.Code, ApplicationProgressDefaults.InitialStateCode, StringComparison.OrdinalIgnoreCase);
+            && string.Equals(progress.State.Code, ApplicationProfileInstanceProgressDefaults.InitialStateCode, StringComparison.OrdinalIgnoreCase);
 
-        public static ApplicationProgressRouteKind? GetTypePickerRouteFilter(Application? application) =>
+        public static ApplicationProfileInstanceProgressRouteKind? GetTypePickerRouteFilter(ApplicationProfileInstance? application) =>
             ApplicationProfileConfigurationResolver.GetProgressRoute(application);
     }
 }

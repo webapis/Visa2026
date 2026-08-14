@@ -100,7 +100,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [Size(512)]
         [RuleRequiredField]
-        [ToolTip("Path to the target object or collection. E.g., 'WorkPermit.Application.ApplicationItems'")]
+        [ToolTip("Path to the target object or collection. E.g., 'WorkPermit.ApplicationProfileInstance.ApplicationItems'")]
         public virtual string TargetPath { get; set; }
 
         [Size(SizeAttribute.Unlimited)]

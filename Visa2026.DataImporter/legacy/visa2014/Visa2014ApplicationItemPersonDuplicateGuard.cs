@@ -4,22 +4,22 @@ namespace Visa2026.DataImporter.Legacy.Visa2014;
 
 /// <summary>
 /// Prevents sync from inserting a second <c>ApplicationItem</c> for the same
-/// (Application, Person) when the legacy Oid is missing from the id-map.
+/// (ApplicationProfileInstance, Person) when the legacy Oid is missing from the id-map.
 /// </summary>
 internal sealed class Visa2014ApplicationItemPersonDuplicateGuard
 {
     private const string CanonicalPairsSql = """
-        SELECT CAST(ApplicationID AS varchar(36)) AS ApplicationId,
+        SELECT CAST(ApplicationProfileInstanceID AS varchar(36)) AS ApplicationProfileInstanceId,
                CAST(PersonID AS varchar(36)) AS PersonId,
                CAST(MIN(ID) AS varchar(36)) AS ItemId
         FROM dbo.ApplicationItems
         WHERE (GCRecord IS NULL OR GCRecord = 0)
-          AND ApplicationID IS NOT NULL
+          AND ApplicationProfileInstanceID IS NOT NULL
           AND PersonID IS NOT NULL
-        GROUP BY ApplicationID, PersonID
+        GROUP BY ApplicationProfileInstanceID, PersonID
         """;
 
-    private readonly Dictionary<(Guid ApplicationId, Guid PersonId), Guid> _canonicalByPair = new();
+    private readonly Dictionary<(Guid ApplicationProfileInstanceId, Guid PersonId), Guid> _canonicalByPair = new();
 
     public int LoadedPairCount => _canonicalByPair.Count;
 
@@ -47,7 +47,7 @@ internal sealed class Visa2014ApplicationItemPersonDuplicateGuard
         }
 
         if (verbose)
-            Console.WriteLine($"INF ApplicationItem person-duplicate guard: {guard.LoadedPairCount} (Application, Person) pair(s)");
+            Console.WriteLine($"INF ApplicationItem person-duplicate guard: {guard.LoadedPairCount} (ApplicationProfileInstance, Person) pair(s)");
 
         return guard;
     }

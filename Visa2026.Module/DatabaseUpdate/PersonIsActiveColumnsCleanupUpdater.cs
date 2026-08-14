@@ -22,7 +22,7 @@ public sealed class PersonIsActiveColumnsCleanupUpdater : ModuleUpdater
         "TravelHistories",
         "InvitationItems",
         "RejectionItems",
-        "Applications",
+        "ApplicationProfileInstances",
         "Invitations",
         "BorderZones"
     };

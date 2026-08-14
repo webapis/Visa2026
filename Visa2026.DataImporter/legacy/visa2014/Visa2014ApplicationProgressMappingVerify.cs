@@ -10,11 +10,11 @@ using Visa2026.Module.Services.MigrationImport;
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
 /// <summary>
-/// Post-import mapping verify for ApplicationProgress (MAPPING_VERIFICATION.md).
-/// Expected values from <see cref="Visa2014ApplicationProgressTransform.PrepareImportBatch"/>;
-/// id-map keys are synthetic <c>{legacyApplicationOid}:{stepCode}</c>.
+/// Post-import mapping verify for ApplicationProfileInstanceProgress (MAPPING_VERIFICATION.md).
+/// Expected values from <see cref="Visa2014ApplicationProfileInstanceProgressTransform.PrepareImportBatch"/>;
+/// id-map keys are synthetic <c>{legacyApplicationProfileInstanceOid}:{stepCode}</c>.
 /// </summary>
-internal static class Visa2014ApplicationProgressMappingVerify
+internal static class Visa2014ApplicationProfileInstanceProgressMappingVerify
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -47,9 +47,9 @@ internal static class Visa2014ApplicationProgressMappingVerify
 
         var progressIdMapPath = GetOptionValue(args, "--progress-id-map")
             ?? GetOptionValue(args, "--application-progress-id-map")
-            ?? source.IdMapPath(dataImporterRoot, "ApplicationProgress");
+            ?? source.IdMapPath(dataImporterRoot, "ApplicationProfileInstanceProgress");
         var applicationIdMapPath = GetOptionValue(args, "--application-id-map")
-            ?? source.IdMapPath(dataImporterRoot, "Application");
+            ?? source.IdMapPath(dataImporterRoot, "ApplicationProfileInstance");
 
         var tierText = (GetOptionValue(args, "--tier") ?? "B").Trim().ToUpperInvariant();
         if (tierText is not ("A" or "B" or "C"))
@@ -78,26 +78,26 @@ internal static class Visa2014ApplicationProgressMappingVerify
             ?? Path.Combine(
                 Visa2014ContentRoot.LegacyRoot(dataImporterRoot),
                 "import-logs",
-                $"mapping-verify-ApplicationProgress-{source.Id}-{DateTime.UtcNow:yyyyMMdd-HHmmss}.json");
+                $"mapping-verify-ApplicationProfileInstanceProgress-{source.Id}-{DateTime.UtcNow:yyyyMMdd-HHmmss}.json");
 
-        Console.WriteLine("=== VISA2014 mapping verify (ApplicationProgress) ===");
+        Console.WriteLine("=== VISA2014 mapping verify (ApplicationProfileInstanceProgress) ===");
         Console.WriteLine($"INF Legacy source: {source.Id}");
         Console.WriteLine($"INF Target SQL: {MaskConnectionString(targetConnection)}");
         Console.WriteLine($"INF Progress id-map: {progressIdMapPath}");
-        Console.WriteLine($"INF Application id-map: {applicationIdMapPath}");
+        Console.WriteLine($"INF ApplicationProfileInstance id-map: {applicationIdMapPath}");
         Console.WriteLine($"INF Tier: {tierText} (histograms={(runTierA ? "yes" : "no")}, parity={(runParity ? (full ? "full" : $"sample {sample}") : "no")})");
         if (maxRows.HasValue)
-            Console.WriteLine($"INF Max legacy Application rows for synthesis: {maxRows.Value}");
+            Console.WriteLine($"INF Max legacy ApplicationProfileInstance rows for synthesis: {maxRows.Value}");
 
         if (!File.Exists(progressIdMapPath))
         {
-            Console.Error.WriteLine($"ERR ApplicationProgress id-map not found: {progressIdMapPath}");
+            Console.Error.WriteLine($"ERR ApplicationProfileInstanceProgress id-map not found: {progressIdMapPath}");
             return Task.FromResult(1);
         }
 
         if (!File.Exists(applicationIdMapPath))
         {
-            Console.Error.WriteLine($"ERR Application id-map not found: {applicationIdMapPath}");
+            Console.Error.WriteLine($"ERR ApplicationProfileInstance id-map not found: {applicationIdMapPath}");
             return Task.FromResult(1);
         }
 
@@ -124,18 +124,18 @@ internal static class Visa2014ApplicationProgressMappingVerify
 
             // Same ministry-leg resolution as import (ApprovalLegProfile snapshots on target Applications).
             var targetLegCounts = Visa2014ApplicationMinistryLegCountResolver.LoadFromObjectSpace(host.ObjectSpaceFactory);
-            var ministryLegCountByLegacyApplicationOid =
+            var ministryLegCountByLegacyApplicationProfileInstanceOid =
                 Visa2014ApplicationMinistryLegCountResolver.MapLegacyLegCounts(applicationIdMap, targetLegCounts);
             Console.WriteLine(
-                $"INF Ministry-leg counts resolved for {ministryLegCountByLegacyApplicationOid.Count} legacy application(s).");
+                $"INF Ministry-leg counts resolved for {ministryLegCountByLegacyApplicationProfileInstanceOid.Count} legacy application(s).");
 
-            Console.WriteLine("INF Building expected payloads via ApplicationProgress transform...");
-            var batch = Visa2014ApplicationProgressTransform.PrepareImportBatch(
+            Console.WriteLine("INF Building expected payloads via ApplicationProfileInstanceProgress transform...");
+            var batch = Visa2014ApplicationProfileInstanceProgressTransform.PrepareImportBatch(
                 source.ConnectionString,
                 source.LookupTranslationPaths,
                 maxRows: maxRows,
                 verbose: verbose,
-                ministryLegCountByLegacyApplicationOid: ministryLegCountByLegacyApplicationOid);
+                ministryLegCountByLegacyApplicationProfileInstanceOid: ministryLegCountByLegacyApplicationProfileInstanceOid);
 
             var fields = ProgressVerifyFields.All;
             var candidates = BuildCandidates(batch.ImportRows, batch.Skipped.Count, progressIdMap, applicationIdMap, fields);
@@ -145,7 +145,7 @@ internal static class Visa2014ApplicationProgressMappingVerify
             Console.WriteLine($"INF Mapped candidates: {candidates.Mapped.Count}");
             Console.WriteLine($"INF Missing id-map: {candidates.MissingIdMap}");
             Console.WriteLine($"INF Transform skips (parent/other): {candidates.SkippedTransform}");
-            Console.WriteLine($"INF Skipped (no Application id-map): {candidates.SkippedNoApplicationMap}");
+            Console.WriteLine($"INF Skipped (no ApplicationProfileInstance id-map): {candidates.SkippedNoApplicationMap}");
 
             report = RunVerify(
                 host.ObjectSpaceFactory,
@@ -224,13 +224,13 @@ internal static class Visa2014ApplicationProgressMappingVerify
             }
 
             var legacyAppText = row.GetValueOrDefault("Application") as string
-                ?? row.GetValueOrDefault("_legacyApplicationOid") as string;
+                ?? row.GetValueOrDefault("_legacyApplicationProfileInstanceOid") as string;
             var hasApplicationMap = Guid.TryParse(legacyAppText, out var legacyAppOid)
                 && applicationIdMap.ContainsKey(legacyAppOid);
 
             if (!progressIdMap.TryGetValue(syntheticKey, out var targetId))
             {
-                // Mirror import: no Application id-map → skip (not a mapping failure).
+                // Mirror import: no ApplicationProfileInstance id-map → skip (not a mapping failure).
                 if (!hasApplicationMap)
                     skippedNoApplicationMap++;
                 else
@@ -284,7 +284,7 @@ internal static class Visa2014ApplicationProgressMappingVerify
         string tierText,
         bool verbose)
     {
-        using var objectSpace = objectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Bo.ApplicationProgress));
+        using var objectSpace = objectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Bo.ApplicationProfileInstanceProgress));
         MigrationImportContext.ApplyImportObjectSpaceHooks(objectSpace);
 
         var rowsById = LoadProgressRows(objectSpace, candidates.Mapped.Select(c => c.TargetId));
@@ -357,7 +357,7 @@ internal static class Visa2014ApplicationProgressMappingVerify
                         TargetId = c.TargetId.ToString("D"),
                         Field = "(row)",
                         Expected = "(mapped)",
-                        Actual = "(missing target ApplicationProgress)",
+                        Actual = "(missing target ApplicationProfileInstanceProgress)",
                         Severity = "error",
                     });
                     continue;
@@ -414,7 +414,7 @@ internal static class Visa2014ApplicationProgressMappingVerify
 
         return new ProgressVerifyReport
         {
-            Entity = "ApplicationProgress",
+            Entity = "ApplicationProfileInstanceProgress",
             LegacySource = legacySourceId,
             Tier = tierText,
             Sampled = sampled,
@@ -438,8 +438,8 @@ internal static class Visa2014ApplicationProgressMappingVerify
         new()
         {
             Target = "Application",
-            LegacySource = "dbo.Application.Oid",
-            How = "FK via Application id-map",
+            LegacySource = "dbo.ApplicationProfileInstance.Oid",
+            How = "FK via ApplicationProfileInstance id-map",
         },
         new()
         {
@@ -479,18 +479,18 @@ internal static class Visa2014ApplicationProgressMappingVerify
         },
     ];
 
-    private static Dictionary<Guid, Bo.ApplicationProgress> LoadProgressRows(
+    private static Dictionary<Guid, Bo.ApplicationProfileInstanceProgress> LoadProgressRows(
         IObjectSpace objectSpace,
         IEnumerable<Guid> targetIds)
     {
         var ids = targetIds.Distinct().ToList();
-        var result = new Dictionary<Guid, Bo.ApplicationProgress>();
+        var result = new Dictionary<Guid, Bo.ApplicationProfileInstanceProgress>();
         const int chunkSize = 400;
         for (var i = 0; i < ids.Count; i += chunkSize)
         {
             var chunk = ids.Skip(i).Take(chunkSize).ToList();
             var chunkSet = chunk.ToHashSet();
-            var rows = objectSpace.GetObjectsQuery<Bo.ApplicationProgress>()
+            var rows = objectSpace.GetObjectsQuery<Bo.ApplicationProfileInstanceProgress>()
                 .Where(p => chunkSet.Contains(p.ID))
                 .ToList();
             foreach (var row in rows)
@@ -500,14 +500,14 @@ internal static class Visa2014ApplicationProgressMappingVerify
         return result;
     }
 
-    private static string? ReadActual(Bo.ApplicationProgress progress, VerifyFieldDef field) =>
+    private static string? ReadActual(Bo.ApplicationProfileInstanceProgress progress, VerifyFieldDef field) =>
         field.Name switch
         {
             "State" => progress.State?.Code?.Trim(),
             "Date" => progress.Date == default ? null : progress.Date.ToString("yyyy-MM-dd"),
             "Order" => progress.Order > 0 ? progress.Order.ToString() : null,
             "Description" => string.IsNullOrWhiteSpace(progress.Description) ? null : progress.Description.Trim(),
-            "Application" => progress.Application?.ID.ToString("D"),
+            "Application" => progress.ApplicationProfileInstance?.ID.ToString("D"),
             _ => null,
         };
 
@@ -572,7 +572,7 @@ internal static class Visa2014ApplicationProgressMappingVerify
         var sb = new StringBuilder(32_768);
         sb.AppendLine("<!DOCTYPE html>");
         sb.AppendLine("<html lang=\"en\"><head><meta charset=\"utf-8\"/>");
-        sb.AppendLine("<title>Mapping verify — ApplicationProgress</title>");
+        sb.AppendLine("<title>Mapping verify — ApplicationProfileInstanceProgress</title>");
         sb.AppendLine("<style>");
         sb.AppendLine("body{font-family:Segoe UI,system-ui,sans-serif;margin:24px;background:#f6f7f9;color:#1a1a1a}");
         sb.AppendLine(".badge{display:inline-block;padding:6px 14px;border-radius:6px;font-weight:700;color:#fff}");
@@ -583,7 +583,7 @@ internal static class Visa2014ApplicationProgressMappingVerify
         sb.AppendLine("th,td{border:1px solid #ddd;padding:6px 8px;text-align:left;font-size:13px}");
         sb.AppendLine("th{background:#eee}.ok{color:#1b7f3a}.bad{color:#b42318}");
         sb.AppendLine("</style></head><body>");
-        sb.AppendLine($"<h1>Mapping verify — ApplicationProgress</h1>");
+        sb.AppendLine($"<h1>Mapping verify — ApplicationProfileInstanceProgress</h1>");
         sb.AppendLine($"<div class=\"badge {(pass ? "pass" : "fail")}\">{(pass ? "PASS" : "FAIL")}</div>");
         sb.AppendLine($"<p>Source <code>{H(report.LegacySource)}</code> · Tier {H(report.Tier)} · Sampled {report.Sampled:N0}</p>");
         sb.AppendLine("<div class=\"cards\">");
@@ -595,7 +595,7 @@ internal static class Visa2014ApplicationProgressMappingVerify
         sb.AppendLine("</div>");
 
         sb.AppendLine("<section><h2>Property lineage</h2>");
-        sb.AppendLine("<p>Destination <code>ApplicationProgress</code> properties vs legacy <code>dbo.Application</code> (and related) sources. Most values are <strong>synthesized</strong>, not 1:1 columns.</p>");
+        sb.AppendLine("<p>Destination <code>ApplicationProfileInstanceProgress</code> properties vs legacy <code>dbo.ApplicationProfileInstance</code> (and related) sources. Most values are <strong>synthesized</strong>, not 1:1 columns.</p>");
         sb.AppendLine("<table><tr><th>Visa2026 property</th><th>Legacy source</th><th>How</th></tr>");
         foreach (var row in report.PropertyLineage)
         {

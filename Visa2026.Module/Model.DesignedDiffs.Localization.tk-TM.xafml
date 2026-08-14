@@ -1,5 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Application Title="Wiza dolandyryşy">
+<?xml version="1.0" encoding="utf-8"?>
+<ApplicationProfileInstance Title="Wiza dolandyryşy">
   <ActionDesign>
     <Actions>
       <Action Id="Save" Caption="Sakla" />
@@ -52,18 +52,22 @@
       <Action Id="ShowReportDesigner" Caption="Hasabat dizaýneri" />
       <Action Id="UserFeedbackMarkInProgress" Caption="Işlenilýär diýlip bellen" />
       <Action Id="UserFeedbackMarkFixed" Caption="Düzedildi diýlip bellen" />
+      <Action Id="StartStagedProcess" Caption="Prosesi başlat" />
     </Actions>
   </ActionDesign>
   <NavigationItems>
     <Items>
-      <Item Id="Application" Caption="Ýüztutmalar">
+      <Item Id="Application" Caption="Ýüztutma profilleri">
         <Items>
-          <Item Id="Application_DirectMigration" Caption="Ylalaşyk zerur bolmadyk ýüztutmalar">
+          <Item Id="Application_Staged" Caption="Taýýar profiller" />
+          <Item Id="Application_InProcess" Caption="Işlenilýär" />
+          <Item Id="ApplicationProfileCatalog" Caption="Ýüztutma profil şablonlary" />
+          <Item Id="Application_DirectMigration" Caption="Ýüztutma nusgalary (göni migrasiýa)">
             <Items>
               <Item Id="ApplicationItem_DirectMigration" Caption="Ýüztutmadaky raýatlar" />
             </Items>
           </Item>
-          <Item Id="Application_ViaMinistries" Caption="Ministrlikler bilen ylalaşylýan ýüztutmalar">
+          <Item Id="Application_ViaMinistries" Caption="Ýüztutma nusgalary (ministrlikler bilen)">
             <Items>
               <Item Id="ApplicationItem_ViaMinistries" Caption="Ýüztutmadaky raýatlar" />
             </Items>
@@ -264,10 +268,11 @@
         <Member Name="WorkingDaysInCurrentStep" Caption="Iş günleri" />
         <Member Name="WorkingDaysInMigrationStep" Caption="Migrasiýa iş günleri" />
         <Member Name="WorkPermits" Caption="Iş rugsatnamalary" />
+        <Member Name="BorderZones" Caption="Serhet zona rugsatnamalary" />
         <Member Name="Year" Caption="Ýyl" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationApprovalLegSnapshot" Caption="Tassyklama ministrlik suraty">
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationProfileInstanceApprovalLegSnapshot" Caption="Tassyklama ministrlik suraty">
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
@@ -377,7 +382,7 @@
         <Member Name="DeletedBy" Caption="Pozan" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationProgress" Caption="Arza ösüşi">
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationProfileInstanceProgress" Caption="Arza ösüşi">
       <OwnMembers>
         <Member Name="Application" Caption="Arza" />
         <Member Name="Date" Caption="Sene" />
@@ -393,7 +398,7 @@
         <Member Name="StatusListLabel" Caption="Ýagdaý" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationProgressRouteKind" Caption="Ösüş ugry">
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationProfileInstanceProgressRouteKind" Caption="Ösüş ugry">
       <OwnMembers>
         <Member Name="DirectToMigrationService" Caption="Migrasiýa gönümel" />
         <Member Name="ViaMinistries" Caption="Ministrlik arkaly" />
@@ -484,7 +489,7 @@
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationType" Caption="Arza görnüşi">
       <OwnMembers>
         <Member Name="Application" Caption="Arza" />
-        <Member Name="ApplicationProgressRoute" Caption="Ösüş ugry" />
+        <Member Name="ApplicationProfileInstanceProgressRoute" Caption="Ösüş ugry" />
         <Member Name="Category" Caption="Kategoriýa" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
@@ -2425,6 +2430,8 @@
         <ColumnInfo Id="Year" Caption="Ýyl" />
       </Columns>
     </ListView>
+    <ListView Id="Application_ListView_Staged" Caption="Taýýar profiller" />
+    <ListView Id="Application_ListView_InProcess" Caption="Işlenilýär" />
     <ListView Id="Application_ListView_DirectMigration" Caption="Ylalaşyk zerur bolmadyk ýüztutmalar">
       <Columns>
         <ColumnInfo Id="ApplicationDate" Caption="Ýüztutmanyň senesi" />
@@ -2471,8 +2478,8 @@
         <ColumnInfo Id="StatusListLabel" Caption="Ýagdaý" />
       </Columns>
     </ListView>
-    <DetailView Id="ApplicationApprovalLegSnapshot_DetailView" Caption="Tassyklama ministrlik suraty" />
-    <ListView Id="ApplicationApprovalLegSnapshot_ListView" Caption="Tassyklama ministrlik suratlary" />
+    <DetailView Id="ApplicationProfileInstanceApprovalLegSnapshot_DetailView" Caption="Tassyklama ministrlik suraty" />
+    <ListView Id="ApplicationProfileInstanceApprovalLegSnapshot_ListView" Caption="Tassyklama ministrlik suratlary" />
     <DetailView Id="ApplicationItem_DetailView" Caption="Arza elementi" />
     <ListView Id="ApplicationItem_ListView" Caption="Arza elementleri">
       <Columns>
@@ -2494,8 +2501,8 @@
     <ListView Id="ApplicationMigrationSlaProfile_ListView" Caption="Migrasiýa SLA profilleri" />
     <DetailView Id="ApplicationNumberingProfile_DetailView" Caption="Arza belgileme" />
     <ListView Id="ApplicationNumberingProfile_ListView" Caption="Arza belgileme" />
-    <DetailView Id="ApplicationProgress_DetailView" Caption="Arza ösüşi" />
-    <ListView Id="ApplicationProgress_ListView" Caption="Arza ösüşleri">
+    <DetailView Id="ApplicationProfileInstanceProgress_DetailView" Caption="Arza ösüşi" />
+    <ListView Id="ApplicationProfileInstanceProgress_ListView" Caption="Arza ösüşleri">
       <Columns>
         <ColumnInfo Id="Date" Caption="Sene" />
         <ColumnInfo Id="Description" Caption="Düşündiriş" />
@@ -3201,7 +3208,7 @@
         <LocalizationItem Name="Exit" Value="Çykyş" />
         <LocalizationItem Name="Stay" Value="Galyş" />
       </LocalizationGroup>
-      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ApplicationProgressRouteKind">
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ApplicationProfileInstanceProgressRouteKind">
         <LocalizationItem Name="DirectToMigrationService" Value="Migrasiýa gönümel" />
         <LocalizationItem Name="ViaMinistries" Value="Ministrlik arkaly" />
       </LocalizationGroup>
@@ -3295,4 +3302,4 @@
       <LocalizationItem Name="WorkPermittedCityLinks_Group" Value="Rugsat berlen şäher birlikleri" />
     </LocalizationGroup>
   </Localization>
-</Application>
+</ApplicationProfileInstance>

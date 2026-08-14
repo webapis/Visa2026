@@ -18,7 +18,7 @@ namespace Visa2026.Module.Services;
 
 /// <summary>
 /// Packs <c>*Document</c> / <see cref="FileData"/> attachments into a background ZIP alongside filled application PDFs.
-/// Passport copies: <see cref="ApplicationItem.CurrentPassport"/> / <see cref="ApplicationItem.PreviousPassport"/> only
+/// Passport copies: <see cref="ApplicationRosterMergeLine.CurrentPassport"/> / <see cref="ApplicationRosterMergeLine.PreviousPassport"/> only
 /// (line-frozen; not <see cref="Person.CurrentPassport"/>), from <see cref="Passport.Documents"/> (each row is a <see cref="PassportDocument"/> with <see cref="DocumentBase.File"/>).
 /// Other categories use the same pattern: only aggregated <c>*Document</c> rows with <see cref="DocumentBase.File"/>, not image editors.
 /// Rules: <c>docs/APPLICATION_DIPLOMA_PACKAGE_PLAN.md</c> (§1.3 eligibility, §4.4 naming, §4.5–§4.7 dedupe).
@@ -69,7 +69,7 @@ public static class ApplicationSupportingDocumentsPacker
         sb.AppendLine(VisaUiMessages.FormatForCulture(packagingCulture, "Pdf.Packaging.BatchId", batchId));
         if (applicationId.HasValue)
         {
-            sb.AppendLine(VisaUiMessages.FormatForCulture(packagingCulture, "Pdf.Packaging.ApplicationId", applicationId.Value));
+            sb.AppendLine(VisaUiMessages.FormatForCulture(packagingCulture, "Pdf.Packaging.ApplicationProfileInstanceId", applicationId.Value));
         }
 
         sb.AppendLine(VisaUiMessages.FormatForCulture(packagingCulture, "Pdf.Packaging.CompletedUtc", completedOnUtc.ToString("O", CultureInfo.InvariantCulture)));
@@ -182,7 +182,7 @@ public static class ApplicationSupportingDocumentsPacker
         ZipArchive archive,
         HashSet<string> reservedZipPaths,
         string? zipInnerRoot,
-        ApplicationItem item,
+        ApplicationRosterMergeLine item,
         int itemIndex1Based,
         List<MemoryStream>? diplomaPdfBuffersForMerge,
         List<MemoryStream>? currentPassportPdfMergeSlices,
@@ -292,7 +292,7 @@ public static class ApplicationSupportingDocumentsPacker
         ZipArchive archive,
         HashSet<string> reservedZipPaths,
         string? zipInnerRoot,
-        ApplicationItem item,
+        ApplicationRosterMergeLine item,
         string itemSlug,
         bool emitIndividualZipEntries,
         List<MemoryStream>? mergeOut,
@@ -631,7 +631,7 @@ public static class ApplicationSupportingDocumentsPacker
         ZipArchive archive,
         HashSet<string> reservedZipPaths,
         string? zipInnerRoot,
-        ApplicationItem item,
+        ApplicationRosterMergeLine item,
         string itemSlug,
         bool emitIndividualZipEntries,
         List<MemoryStream>? currentPassportPdfMergeSlices,
@@ -640,20 +640,20 @@ public static class ApplicationSupportingDocumentsPacker
         ILogger logger,
         CancellationToken cancellationToken)
     {
-        // Passport copies are line-scoped only: ApplicationItem.CurrentPassport / PreviousPassport.
+        // Passport copies are line-scoped only: ApplicationRosterMergeLine.CurrentPassport / PreviousPassport.
         // Do not fall back to Person.CurrentPassport — it can change after the application is filed.
         var cur = item.CurrentPassport;
         var prev = item.PreviousPassport;
         bool duplicate = cur != null && prev != null && cur.ID == prev.ID;
         if (duplicate)
             logger.LogWarning(
-                "ZIP packer: ApplicationItem {ItemId} has same Passport for Current and Previous; packing Current only.",
+                "ZIP packer: ApplicationRosterMergeLine {ItemId} has same Passport for Current and Previous; packing Current only.",
                 item.ID);
 
         if (cur == null && prev == null)
         {
             logger.LogInformation(
-                "ZIP packer: Passport section skipped for item folder {ItemSlug} (ApplicationItem {ItemId}): no CurrentPassport or PreviousPassport on the line.",
+                "ZIP packer: Passport section skipped for item folder {ItemSlug} (ApplicationRosterMergeLine {ItemId}): no CurrentPassport or PreviousPassport on the line.",
                 itemSlug,
                 item.ID);
             return;
@@ -786,7 +786,7 @@ public static class ApplicationSupportingDocumentsPacker
         ZipArchive archive,
         HashSet<string> reservedZipPaths,
         string? zipInnerRoot,
-        ApplicationItem item,
+        ApplicationRosterMergeLine item,
         string itemSlug,
         bool emitIndividualZipEntries,
         List<MemoryStream>? currentVisaPdfMergeSlices,
@@ -918,14 +918,14 @@ public static class ApplicationSupportingDocumentsPacker
         ZipArchive archive,
         HashSet<string> reservedZipPaths,
         string? zipInnerRoot,
-        ApplicationItem item,
+        ApplicationRosterMergeLine item,
         string itemSlug,
         string packagingCulture,
         List<string>? packagingNotes,
         ILogger logger,
         CancellationToken cancellationToken)
     {
-        // Line-scoped only: ApplicationItem.CurrentMedicalRecord — no PreviousMedicalRecord on the item.
+        // Line-scoped only: ApplicationRosterMergeLine.CurrentMedicalRecord — no PreviousMedicalRecord on the item.
         var mr = item.CurrentMedicalRecord;
         if (mr == null)
             return;
@@ -1001,14 +1001,14 @@ public static class ApplicationSupportingDocumentsPacker
         ZipArchive archive,
         HashSet<string> reservedZipPaths,
         string? zipInnerRoot,
-        ApplicationItem item,
+        ApplicationRosterMergeLine item,
         string itemSlug,
         string packagingCulture,
         List<string>? packagingNotes,
         ILogger logger,
         CancellationToken cancellationToken)
     {
-        // Line-scoped only: ApplicationItem.CurrentAddressOfResidence — no Previous on the item.
+        // Line-scoped only: ApplicationRosterMergeLine.CurrentAddressOfResidence — no Previous on the item.
         var addr = item.CurrentAddressOfResidence;
         if (addr == null)
             return;
@@ -1166,7 +1166,7 @@ public static class ApplicationSupportingDocumentsPacker
         ZipArchive archive,
         HashSet<string> reservedZipPaths,
         string? zipInnerRoot,
-        ApplicationItem item,
+        ApplicationRosterMergeLine item,
         string itemSlug,
         bool emitIndividualZipEntries,
         List<MemoryStream>? currentWorkPermitPdfMergeSlices,
@@ -1183,7 +1183,7 @@ public static class ApplicationSupportingDocumentsPacker
         bool duplicateWp = curWp != null && prevWp != null && curWp.ID == prevWp.ID;
         if (duplicateWp)
             logger.LogWarning(
-                "ZIP packer: ApplicationItem {ItemId} has same WorkPermit on Current and Previous work permit items; packing Current slot only.",
+                "ZIP packer: ApplicationRosterMergeLine {ItemId} has same WorkPermit on Current and Previous work permit items; packing Current slot only.",
                 item.ID);
 
         if (curWp != null)
@@ -1330,14 +1330,14 @@ public static class ApplicationSupportingDocumentsPacker
         ZipArchive archive,
         HashSet<string> reservedZipPaths,
         string? zipInnerRoot,
-        ApplicationItem item,
+        ApplicationRosterMergeLine item,
         string itemSlug,
         string packagingCulture,
         List<string>? packagingNotes,
         ILogger logger,
         CancellationToken cancellationToken)
     {
-        // Line-scoped: ApplicationItem.CurrentInvitationItem / PreviousInvitationItem (same pattern as passport/visa).
+        // Line-scoped: ApplicationRosterMergeLine.CurrentInvitationItem / PreviousInvitationItem (same pattern as passport/visa).
         var curItem = item.CurrentInvitationItem;
         var prevItem = item.PreviousInvitationItem;
         var curInv = curItem?.Invitation;
@@ -1347,14 +1347,14 @@ public static class ApplicationSupportingDocumentsPacker
         if (duplicateInvitation)
         {
             logger.LogWarning(
-                "ZIP packer: ApplicationItem {ItemId} has duplicate Current/Previous invitation selection; packing Current only.",
+                "ZIP packer: ApplicationRosterMergeLine {ItemId} has duplicate Current/Previous invitation selection; packing Current only.",
                 item.ID);
         }
 
         if (curInv == null && prevInv == null)
         {
             logger.LogInformation(
-                "ZIP packer: Invitation section skipped for item folder {ItemSlug} (ApplicationItem {ItemId}): no CurrentInvitationItem or PreviousInvitationItem on the line.",
+                "ZIP packer: Invitation section skipped for item folder {ItemSlug} (ApplicationRosterMergeLine {ItemId}): no CurrentInvitationItem or PreviousInvitationItem on the line.",
                 itemSlug,
                 item.ID);
             return;
@@ -1457,7 +1457,7 @@ public static class ApplicationSupportingDocumentsPacker
         ZipArchive archive,
         HashSet<string> reservedZipPaths,
         string? zipInnerRoot,
-        ApplicationItem item,
+        ApplicationRosterMergeLine item,
         string itemSlug,
         string packagingCulture,
         List<string>? packagingNotes,

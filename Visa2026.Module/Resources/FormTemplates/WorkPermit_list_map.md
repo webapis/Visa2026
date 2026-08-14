@@ -115,9 +115,9 @@ All `[NotMapped]` — none currently exist, all must be added.
 | `Visa_Number` | `Person?.CurrentVisa?.VisaNumber` | ❌ Add |
 | `Visa_StartDateText` | `$"{Person?.CurrentVisa?.StartDate:dd.MM.yyyy}"` | ❌ Add |
 | `Visa_ExpirationDateText` | `$"{Person?.CurrentVisa?.ExpirationDate:dd.MM.yyyy}"` | ❌ Add |
-| `Company_Name` | `WorkPermit?.Application?.Company?.Name` | ❌ Add |
-| `CompanyHead_PositionTm` | `WorkPermit?.Application?.CompanyHead?.Position?.NameTm` | ❌ Add |
-| `CompanyHead_FullName` | `WorkPermit?.Application?.CompanyHead?.FullName` | ❌ Add |
+| `Company_Name` | `WorkPermit?.ApplicationProfileInstance?.Company?.Name` | ❌ Add |
+| `CompanyHead_PositionTm` | `WorkPermit?.ApplicationProfileInstance?.CompanyHead?.Position?.NameTm` | ❌ Add |
+| `CompanyHead_FullName` | `WorkPermit?.ApplicationProfileInstance?.CompanyHead?.FullName` | ❌ Add |
 
 ---
 

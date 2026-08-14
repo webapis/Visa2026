@@ -4,7 +4,7 @@ namespace Visa2026.Module.Services.OfficerShell;
 
 public sealed class OfficerShellStagedRow
 {
-    public Guid ApplicationId { get; init; }
+    public Guid ApplicationProfileInstanceId { get; init; }
     public string PersonName { get; init; } = string.Empty;
     public string ProfileName { get; init; } = string.Empty;
     public string? ProfileCode { get; init; }

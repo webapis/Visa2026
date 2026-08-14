@@ -24,11 +24,11 @@ public class VwRdVisaOnExtension
     public virtual Guid ID { get; set; }
 
     [Browsable(false)]
-    public virtual Guid? ApplicationOid { get; set; }
+    public virtual Guid? ApplicationProfileInstanceOid { get; set; }
 
-    [ForeignKey(nameof(ApplicationOid))]
-    [ModelDefault("Caption", "Application #")]
-    public virtual Application Application { get; set; }
+    [ForeignKey(nameof(ApplicationProfileInstanceOid))]
+    [ModelDefault("Caption", "ApplicationProfileInstance #")]
+    public virtual ApplicationProfileInstance ApplicationProfileInstance { get; set; }
 
     [Browsable(false)]
     public virtual Guid? PersonOid { get; set; }

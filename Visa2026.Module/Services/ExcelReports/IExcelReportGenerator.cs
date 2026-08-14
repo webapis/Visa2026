@@ -13,10 +13,10 @@ public interface IExcelReportGenerator
     /// </param>
     Task GenerateAsync(
         UserReportTemplate template,
-        Application application,
+        ApplicationProfileInstance application,
         Stream outputStream,
-        IList<ApplicationItem>? applicationItems = null);
+        IList<ApplicationRosterMergeLine>? applicationItems = null);
 
     /// <summary>Single-item merge (v1.1).</summary>
-    Task GenerateAsync(UserReportTemplate template, ApplicationItem applicationItem, Stream outputStream);
+    Task GenerateAsync(UserReportTemplate template, ApplicationRosterMergeLine applicationItem, Stream outputStream);
 }

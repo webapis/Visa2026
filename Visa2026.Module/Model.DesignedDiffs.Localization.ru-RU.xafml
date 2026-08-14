@@ -1,5 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Application Title="Управление визами">
+<?xml version="1.0" encoding="utf-8"?>
+<ApplicationProfileInstance Title="Управление визами">
   <ActionDesign>
     <Actions>
       <Action Id="Save" Caption="Сохранить" />
@@ -52,18 +52,22 @@
       <Action Id="ShowReportDesigner" Caption="Конструктор отчётов" />
       <Action Id="UserFeedbackMarkInProgress" Caption="Отметить «в работе»" />
       <Action Id="UserFeedbackMarkFixed" Caption="Отметить исправленным" />
+      <Action Id="StartStagedProcess" Caption="Запустить процесс" />
     </Actions>
   </ActionDesign>
   <NavigationItems>
     <Items>
-      <Item Id="Application" Caption="Заявки">
+      <Item Id="Application" Caption="Профили заявок">
         <Items>
-          <Item Id="Application_DirectMigration" Caption="Заявки (напрямую в миграцию)">
+          <Item Id="Application_Staged" Caption="Подготовленные профили" />
+          <Item Id="Application_InProcess" Caption="В работе" />
+          <Item Id="ApplicationProfileCatalog" Caption="Шаблоны профилей заявок" />
+          <Item Id="Application_DirectMigration" Caption="Экземпляры профилей (напрямую в миграцию)">
             <Items>
               <Item Id="ApplicationItem_DirectMigration" Caption="Позиции (напрямую в миграцию)" />
             </Items>
           </Item>
-          <Item Id="Application_ViaMinistries" Caption="Заявки (через министерства)">
+          <Item Id="Application_ViaMinistries" Caption="Экземпляры профилей (через министерства)">
             <Items>
               <Item Id="ApplicationItem_ViaMinistries" Caption="Позиции (через министерства)" />
             </Items>
@@ -267,7 +271,7 @@
         <Member Name="Year" Caption="Год" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationApprovalLegSnapshot" Caption="Снимок этапа министерства">
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationProfileInstanceApprovalLegSnapshot" Caption="Снимок этапа министерства">
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
@@ -377,7 +381,7 @@
         <Member Name="DeletedBy" Caption="Удалил" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationProgress" Caption="Прогресс заявки">
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationProfileInstanceProgress" Caption="Прогресс заявки">
       <OwnMembers>
         <Member Name="Application" Caption="Заявка" />
         <Member Name="Date" Caption="Дата" />
@@ -393,7 +397,7 @@
         <Member Name="StatusListLabel" Caption="Состояние" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationProgressRouteKind" Caption="Маршрут прогресса">
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationProfileInstanceProgressRouteKind" Caption="Маршрут прогресса">
       <OwnMembers>
         <Member Name="DirectToMigrationService" Caption="Напрямую в миграцию" />
         <Member Name="ViaMinistries" Caption="Через министерства" />
@@ -484,7 +488,7 @@
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationType" Caption="Тип заявки">
       <OwnMembers>
         <Member Name="Application" Caption="Заявка" />
-        <Member Name="ApplicationProgressRoute" Caption="Маршрут прогресса" />
+        <Member Name="ApplicationProfileInstanceProgressRoute" Caption="Маршрут прогресса" />
         <Member Name="Category" Caption="Категория" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
@@ -2425,6 +2429,8 @@
         <ColumnInfo Id="Year" Caption="Год" />
       </Columns>
     </ListView>
+    <ListView Id="Application_ListView_Staged" Caption="Подготовленные профили" />
+    <ListView Id="Application_ListView_InProcess" Caption="В работе" />
     <ListView Id="Application_ListView_DirectMigration" Caption="Заявки напрямую в миграцию">
       <Columns>
         <ColumnInfo Id="ApplicationDate" Caption="Дата" />
@@ -2471,8 +2477,8 @@
         <ColumnInfo Id="StatusListLabel" Caption="Состояние" />
       </Columns>
     </ListView>
-    <DetailView Id="ApplicationApprovalLegSnapshot_DetailView" Caption="Снимок этапа министерства" />
-    <ListView Id="ApplicationApprovalLegSnapshot_ListView" Caption="Снимки этапов министерств" />
+    <DetailView Id="ApplicationProfileInstanceApprovalLegSnapshot_DetailView" Caption="Снимок этапа министерства" />
+    <ListView Id="ApplicationProfileInstanceApprovalLegSnapshot_ListView" Caption="Снимки этапов министерств" />
     <DetailView Id="ApplicationItem_DetailView" Caption="Позиция" />
     <ListView Id="ApplicationItem_ListView" Caption="Позиции заявки">
       <Columns>
@@ -2494,8 +2500,8 @@
     <ListView Id="ApplicationMigrationSlaProfile_ListView" Caption="Профили SLA миграции" />
     <DetailView Id="ApplicationNumberingProfile_DetailView" Caption="Нумерация заявок" />
     <ListView Id="ApplicationNumberingProfile_ListView" Caption="Нумерация заявок" />
-    <DetailView Id="ApplicationProgress_DetailView" Caption="Прогресс заявки" />
-    <ListView Id="ApplicationProgress_ListView" Caption="Прогресс заявок">
+    <DetailView Id="ApplicationProfileInstanceProgress_DetailView" Caption="Прогресс заявки" />
+    <ListView Id="ApplicationProfileInstanceProgress_ListView" Caption="Прогресс заявок">
       <Columns>
         <ColumnInfo Id="Date" Caption="Дата" />
         <ColumnInfo Id="Description" Caption="Описание" />
@@ -3201,7 +3207,7 @@
         <LocalizationItem Name="Exit" Value="Выезд" />
         <LocalizationItem Name="Stay" Value="Пребывание" />
       </LocalizationGroup>
-      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ApplicationProgressRouteKind">
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ApplicationProfileInstanceProgressRouteKind">
         <LocalizationItem Name="DirectToMigrationService" Value="Напрямую в миграцию" />
         <LocalizationItem Name="ViaMinistries" Value="Через министерства" />
       </LocalizationGroup>
@@ -3295,4 +3301,4 @@
       <LocalizationItem Name="WorkPermittedCityLinks_Group" Value="Разрешённые города" />
     </LocalizationGroup>
   </Localization>
-</Application>
+</ApplicationProfileInstance>

@@ -4,14 +4,14 @@ description: Extension of existing registration for employees staying in Turkmen
 dependsOn: CheckIn
 sync: false
 anchor:
-  entity: Application
+  entity: ApplicationProfileInstance
   key: FullApplicationNumber
   value: 10/-007
 data:
   Applications:
-  - Application Number: 007
+  - ApplicationProfileInstance Number: 007
     Date: 2026-10-01
-    Application Type: App_Reg_ext
+    ApplicationProfileInstance Type: App_Reg_ext
     Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
   ApplicationItems:
   - Person: John Doe

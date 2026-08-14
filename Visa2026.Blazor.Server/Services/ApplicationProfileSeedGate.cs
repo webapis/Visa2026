@@ -1,6 +1,7 @@
 using System;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Core;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Visa2026.Module.BusinessObjects;
@@ -20,6 +21,16 @@ internal static class ApplicationProfileSeedGate
 
         try
         {
+            var configuration = services.GetService<IConfiguration>();
+            var connectionString = configuration?.GetConnectionString("DefaultConnection")
+                ?? configuration?.GetConnectionString("ConnectionString");
+            if (!PostgresRelationExists.All(connectionString, "ApplicationTypes", "ApplicationProfiles"))
+            {
+                logger?.LogInformation(
+                    "ApplicationProfile seed skipped — ApplicationTypes schema not created yet (CheckCompatibility still pending).");
+                return;
+            }
+
             using var scope = services.CreateScope();
             var osFactory = scope.ServiceProvider.GetRequiredService<INonSecuredObjectSpaceFactory>();
             using var objectSpace = osFactory.CreateNonSecuredObjectSpace(typeof(ApplicationProfile));
@@ -27,7 +38,7 @@ internal static class ApplicationProfileSeedGate
             var result = ApplicationProfileSeedSync.Sync(objectSpace);
 
             logger?.LogInformation(
-                "Application profile seed sync: created={Created}, updated={Updated}, backfilled={Backfilled}.",
+                "ApplicationProfileInstance profile seed sync: created={Created}, updated={Updated}, backfilled={Backfilled}.",
                 result.ProfilesCreated,
                 result.ProfilesUpdated,
                 result.ApplicationsBackfilled);
@@ -35,14 +46,14 @@ internal static class ApplicationProfileSeedGate
             if (result.TypesWithoutProfile.Count > 0)
             {
                 logger?.LogWarning(
-                    "Application profile seed: {Count} application type(s) had no profile mapping during backfill: {Types}",
+                    "ApplicationProfileInstance profile seed: {Count} application type(s) had no profile mapping during backfill: {Types}",
                     result.TypesWithoutProfile.Count,
                     string.Join(", ", result.TypesWithoutProfile));
             }
         }
         catch (Exception ex)
         {
-            logger?.LogError(ex, "Application profile seed sync failed.");
+            logger?.LogError(ex, "ApplicationProfileInstance profile seed sync failed.");
             throw;
         }
     }

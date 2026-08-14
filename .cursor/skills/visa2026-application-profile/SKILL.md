@@ -132,7 +132,7 @@ See [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) for status. **Default nex
 4. ~~**Wizard UX**~~ — **Done**.
 5. ~~**Profile picker at create**~~ — **Done**.
 5b. ~~**Custom catalog home**~~ — **Done** (slice 8c; native List/Detail not officer UI).
-6. **Person M2M DetailView** — phase B close-out (`ApplicationItem` BO/schema removal after import). **Officer UI cutoff done** (slice 10g).
+6. **Person M2M DetailView** — skip-navigation `People` (no roster-line BO); F5 heal after Wave 2b (heal DROP CASCADE). `ApplicationItem` hard-remove already shipped.
 7. **Person/Dossier Start application** — plan §11 (**Done**).
 8. **Remove `Application.ApplicationType` FK** — after cutover + import.
 

@@ -21,12 +21,12 @@ public static class OfficerShellOpenHelper
         return detailView;
     }
 
-    public static DetailView? CreateShellView(XafApplication application, Guid caseApplicationId)
+    public static DetailView? CreateShellView(XafApplication application, Guid caseApplicationProfileInstanceId)
     {
-        if (application == null || caseApplicationId == Guid.Empty)
+        if (application == null || caseApplicationProfileInstanceId == Guid.Empty)
             return null;
 
-        OfficerShellPendingOpenGate.Set(application, OfficerShellPage.Case, caseApplicationId);
+        OfficerShellPendingOpenGate.Set(application, OfficerShellPage.Case, caseApplicationProfileInstanceId);
 
         var objectSpace = application.CreateObjectSpace(typeof(OfficerShellHost));
         var host = objectSpace.CreateObject<OfficerShellHost>();

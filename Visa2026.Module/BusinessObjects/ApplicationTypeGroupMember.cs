@@ -19,7 +19,7 @@ public class ApplicationTypeGroupMember : BaseObject
     public virtual ApplicationTypeGroup ApplicationTypeGroup { get; set; } = null!;
 
     [RuleRequiredField]
-    [XafDisplayName("Application Type")]
+    [XafDisplayName("ApplicationProfileInstance Type")]
     public virtual ApplicationType ApplicationType { get; set; } = null!;
 
     [Browsable(false)]

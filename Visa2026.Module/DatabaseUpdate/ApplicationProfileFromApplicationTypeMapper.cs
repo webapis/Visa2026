@@ -27,7 +27,7 @@ public static class ApplicationProfileFromApplicationTypeMapper
         profile.Description = string.IsNullOrWhiteSpace(type.NameTm) ? null : type.NameTm.Trim();
         profile.Code = ResolveProfileCode(type);
         profile.SelectionCode = string.IsNullOrWhiteSpace(type.SelectionCode) ? null : type.SelectionCode.Trim();
-        profile.ProgressRoute = type.ApplicationProgressRoute;
+        profile.ProgressRoute = type.ApplicationProfileInstanceProgressRoute;
         profile.ActionFamily = ResolveActionFamily(type);
         ApplyAudience(profile, type);
         ApplyProduceCancel(profile, type);
@@ -43,7 +43,7 @@ public static class ApplicationProfileFromApplicationTypeMapper
             return type.NameTm.Trim();
 
         if (string.IsNullOrWhiteSpace(type.Name))
-            return "Application profile";
+            return "ApplicationProfileInstance profile";
 
         return type.Name.Replace('_', ' ').Trim();
     }
@@ -95,12 +95,13 @@ public static class ApplicationProfileFromApplicationTypeMapper
         profile.ProduceVisa = type.CanIssueVisa;
         profile.ProduceBorderZone = type.ShowBorderZoneLocation;
         profile.ProduceWorkLocation = type.ShowMovementPermitLocation || type.ShowWorkPermittedLocations;
+        profile.ProduceRejection = type.ShowRejections;
 
         profile.CancelInvitations = type.ShowInvitationItemIsCancelled;
         profile.CancelWorkPermits = type.ShowWorkPermitItemIsCancelled;
         profile.CancelVisas = type.ShowVisaIsCancelled;
         profile.CancelBorderZonePermits = false;
-        profile.CancelApplications = false;
+        profile.CancelApplicationProfileInstances = false;
     }
 
     private static void ApplyPerApplicationRequirements(ApplicationProfile profile, ApplicationType type)
@@ -139,7 +140,7 @@ public static class ApplicationProfileFromApplicationTypeMapper
 
     private static void ApplySla(ApplicationProfile profile, ApplicationType type)
     {
-        profile.MinistrySlaDays = type.ApplicationProgressRoute == ApplicationProgressRouteKind.ViaMinistries
+        profile.MinistrySlaDays = type.ApplicationProfileInstanceProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries
             ? ResolveMinistrySlaDays(type.MinistryReviewDepth)
             : 14;
 

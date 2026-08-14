@@ -3,7 +3,7 @@ using Xunit;
 
 namespace Visa2026.Module.Tests.BusinessObjects;
 
-public class ApplicationProgressListLabelHelperTests
+public class ApplicationProfileInstanceProgressListLabelHelperTests
 {
     [Fact]
     public void FormatStatusLabel_MinistryStep_AppendsShortName()
@@ -37,7 +37,7 @@ public class ApplicationProgressListLabelHelperTests
 
     private static string InvokeFormatStatusLabel(string? stateLabel, string? ministryShortName)
     {
-        var method = typeof(ApplicationProgressListLabelHelper).GetMethod(
+        var method = typeof(ApplicationProfileInstanceProgressListLabelHelper).GetMethod(
             "FormatStatusLabel",
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
         Assert.NotNull(method);

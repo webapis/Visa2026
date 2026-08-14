@@ -7,7 +7,7 @@ using Visa2026.Module.Services.MigrationImport;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
-internal sealed class Visa2014ApplicationProgressMinistryLegCorrectionResult
+internal sealed class Visa2014ApplicationProfileInstanceProgressMinistryLegCorrectionResult
 {
     public int ApplicationsInScope { get; init; }
     public int SnapshotsBackfilled { get; init; }
@@ -17,7 +17,7 @@ internal sealed class Visa2014ApplicationProgressMinistryLegCorrectionResult
     public IReadOnlyList<string> Errors { get; init; } = [];
 }
 
-internal static class Visa2014ApplicationProgressMinistryLegCorrection
+internal static class Visa2014ApplicationProfileInstanceProgressMinistryLegCorrection
 {
     public static async Task<int> RunCommandAsync(IReadOnlyList<string> args, bool verbose)
     {
@@ -38,7 +38,7 @@ internal static class Visa2014ApplicationProgressMinistryLegCorrection
             ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
             ?? "Host=localhost;Port=5432;Database=visa2026;Username=postgres;Password=Visa2026Local;Persist Security Info=True;EFCoreProvider=Postgres";
 
-        Console.WriteLine("=== VISA2014 ApplicationProgress ministry-leg correction");
+        Console.WriteLine("=== VISA2014 ApplicationProfileInstanceProgress ministry-leg correction");
         Console.WriteLine($"INF Legacy source: {source.Id}");
         Console.WriteLine($"INF Target SQL: {MaskConnectionString(targetConnection)}");
         if (dryRun) Console.WriteLine("INF Mode: dry-run (no writes)");
@@ -58,8 +58,8 @@ internal static class Visa2014ApplicationProgressMinistryLegCorrection
             }
 
             var target = new Visa2014ObjectSpaceImportTarget(host.ObjectSpaceFactory, batchSize: 50);
-            var applicationIdMap = File.Exists(source.IdMapPath(dataImporterRoot, "Application"))
-                ? Visa2014IdMapHelper.Load(source.IdMapPath(dataImporterRoot, "Application"))
+            var applicationIdMap = File.Exists(source.IdMapPath(dataImporterRoot, "ApplicationProfileInstance"))
+                ? Visa2014IdMapHelper.Load(source.IdMapPath(dataImporterRoot, "ApplicationProfileInstance"))
                 : new Dictionary<Guid, Guid>();
 
             var result = await RunAsync(
@@ -69,7 +69,7 @@ internal static class Visa2014ApplicationProgressMinistryLegCorrection
                 source.ConnectionString,
                 source.LookupTranslationPaths,
                 applicationIdMap,
-                source.IdMapPath(dataImporterRoot, "ApplicationProgress"),
+                source.IdMapPath(dataImporterRoot, "ApplicationProfileInstanceProgress"),
                 dryRun,
                 verbose);
 
@@ -91,7 +91,7 @@ internal static class Visa2014ApplicationProgressMinistryLegCorrection
         finally { importScope?.Dispose(); host?.Dispose(); }
     }
 
-    internal static async Task<Visa2014ApplicationProgressMinistryLegCorrectionResult> RunAsync(
+    internal static async Task<Visa2014ApplicationProfileInstanceProgressMinistryLegCorrectionResult> RunAsync(
         INonSecuredObjectSpaceFactory objectSpaceFactory,
         IVisa2014ImportTarget target,
         Visa2014ODataLookupResolver resolver,
@@ -104,7 +104,7 @@ internal static class Visa2014ApplicationProgressMinistryLegCorrection
     {
         var errors = new List<string>();
         var targetLegCounts = Visa2014ApplicationMinistryLegCountResolver.LoadFromObjectSpace(objectSpaceFactory);
-        var targetAppIds = Visa2014ApplicationMinistryLegCountResolver.ResolveTargetApplicationIdsMissingMinistryProgress(
+        var targetAppIds = Visa2014ApplicationMinistryLegCountResolver.ResolveTargetApplicationProfileInstanceIdsMissingMinistryProgress(
             objectSpaceFactory, targetLegCounts);
         var legacyLegCounts = Visa2014ApplicationMinistryLegCountResolver.MapLegacyLegCounts(applicationIdMap, targetLegCounts);
 
@@ -121,10 +121,10 @@ internal static class Visa2014ApplicationProgressMinistryLegCorrection
         int progressDeleted = 0;
         if (targetAppIds.Count > 0)
         {
-            using var progressSpace = objectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Bo.ApplicationProgress));
+            using var progressSpace = objectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Bo.ApplicationProfileInstanceProgress));
             MigrationImportContext.ApplyImportObjectSpaceHooks(progressSpace);
-            var progresses = progressSpace.GetObjectsQuery<Bo.ApplicationProgress>()
-                .Where(p => p.Application != null && targetAppIds.Contains(p.Application.ID))
+            var progresses = progressSpace.GetObjectsQuery<Bo.ApplicationProfileInstanceProgress>()
+                .Where(p => p.ApplicationProfileInstance != null && targetAppIds.Contains(p.ApplicationProfileInstance.ID))
                 .ToList();
             progressDeleted = progresses.Count;
             if (!dryRun)
@@ -138,7 +138,7 @@ internal static class Visa2014ApplicationProgressMinistryLegCorrection
         if (!dryRun && !string.IsNullOrWhiteSpace(progressIdMapPath))
             PruneProgressIdMapForLegacyApplications(progressIdMapPath, legacyToTarget.Keys);
 
-        var regen = await Visa2014ApplicationProgressODataImporter.RegenerateForLegacyApplicationsAsync(
+        var regen = await Visa2014ApplicationProfileInstanceProgressODataImporter.RegenerateForLegacyApplicationsAsync(
             target,
             resolver,
             legacyConnectionString,
@@ -152,7 +152,7 @@ internal static class Visa2014ApplicationProgressMinistryLegCorrection
         if (!dryRun && regen.ProgressIdMapUpdates.Count > 0 && !string.IsNullOrWhiteSpace(progressIdMapPath))
             MergeProgressIdMap(progressIdMapPath, regen.ProgressIdMapUpdates);
 
-        return new Visa2014ApplicationProgressMinistryLegCorrectionResult
+        return new Visa2014ApplicationProfileInstanceProgressMinistryLegCorrectionResult
         {
             ApplicationsInScope = targetAppIds.Count,
             SnapshotsBackfilled = snapshotsBackfilled,
@@ -172,7 +172,7 @@ internal static class Visa2014ApplicationProgressMinistryLegCorrection
         if (targetAppIds.Count == 0)
             return 0;
 
-        using var objectSpace = objectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Bo.Application));
+        using var objectSpace = objectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Bo.ApplicationProfileInstance));
         MigrationImportContext.ApplyImportObjectSpaceHooks(objectSpace);
         var profileLegCounts = objectSpace.GetObjectsQuery<Bo.ApprovalLegProfileMinistryLeg>()
             .Where(l => l.ApprovingMinistry != null && l.ApprovalLegProfile != null)
@@ -180,7 +180,7 @@ internal static class Visa2014ApplicationProgressMinistryLegCorrection
             .GroupBy(l => l.ApprovalLegProfile!.ID)
             .ToDictionary(g => g.Key, g => g.Count());
 
-        var applications = objectSpace.GetObjectsQuery<Bo.Application>()
+        var applications = objectSpace.GetObjectsQuery<Bo.ApplicationProfileInstance>()
             .Where(a => targetAppIds.Contains(a.ID) && a.ApprovalLegProfile != null)
             .ToList();
 
@@ -209,14 +209,14 @@ internal static class Visa2014ApplicationProgressMinistryLegCorrection
         return backfilled;
     }
 
-    private static void PruneProgressIdMapForLegacyApplications(string path, IEnumerable<Guid> legacyApplicationOids)
+    private static void PruneProgressIdMapForLegacyApplications(string path, IEnumerable<Guid> legacyApplicationProfileInstanceOids)
     {
         if (!File.Exists(path))
             return;
 
         var existing = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(path))
             ?? new Dictionary<string, string>(StringComparer.Ordinal);
-        var prefixes = legacyApplicationOids
+        var prefixes = legacyApplicationProfileInstanceOids
             .Select(id => $"{id:D}:")
             .ToHashSet(StringComparer.Ordinal);
         var pruned = existing

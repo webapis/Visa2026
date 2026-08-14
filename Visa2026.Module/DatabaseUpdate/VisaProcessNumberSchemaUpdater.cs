@@ -5,7 +5,7 @@ using DevExpress.ExpressApp.Updating;
 namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
-/// Ensures Visa.ProcessNumber (ASNumber / Işlenen belgisi) and LegacyPersonInApplicationOid columns.
+/// Ensures Visa.ProcessNumber (ASNumber / Işlenen belgisi) and LegacyPersonInApplicationProfileInstanceOid columns.
 /// </summary>
 public sealed class VisaProcessNumberSchemaUpdater : ModuleUpdater
 {

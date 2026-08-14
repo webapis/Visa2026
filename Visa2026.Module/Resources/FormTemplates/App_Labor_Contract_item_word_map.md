@@ -13,7 +13,7 @@
 | **Template filename** | `App_Labor_Contract_Item.docx` |
 | **Embedded resource** | `Visa2026.Module.Resources.App_Labor_Contract_Item.docx` |
 | **Display name (Tm)** | `Zähmet şertnamasy — Şahsy` |
-| **Application type** | All (cross-cutting) — visible for any application with items |
+| **ApplicationProfileInstance type** | All (cross-cutting) — visible for any application with items |
 | **Reference scan** | `App_Labor_Contract_item.png` |
 
 ---

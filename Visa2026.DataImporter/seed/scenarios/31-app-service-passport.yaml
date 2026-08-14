@@ -4,7 +4,7 @@ description: Stakeholder demo — invitation for service passport (FM)
 dependsOn: Shared
 sync: false
 anchor:
-  entity: Application
+  entity: ApplicationProfileInstance
   key: FullApplicationNumber
   value: 4/-059
 data:
@@ -42,10 +42,10 @@ data:
     Start Date: 2026-05-01
     Expiration Date: 2027-05-01
   Applications:
-  - Application Number: 059
+  - ApplicationProfileInstance Number: 059
     Date: 2026-05-01
     Project Contract: GT-15
-    Application Type: App_Sevice_Passport
+    ApplicationProfileInstance Type: App_Sevice_Passport
     Urgency: Adaty tertipde !
     Visa Period: 1 (bir) aý
     Visa Type: BS1-İşerwürlik

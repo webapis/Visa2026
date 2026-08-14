@@ -25,6 +25,16 @@ Purpose: **dialog UX, scan preview, package enqueue, readiness, toast** — not 
 
 ## Entries
 
+### 2026-08-14 — Workspace Document copies passed renamed instance id
+
+- **Symptom**: Opening case workspace Document copies (or the preview-slot catalog) threw `InvalidOperationException`: `ApplicationItemDocumentCopiesComponent` has no property `ApplicationProfileInstanceId`.
+- **Try**: Parents (`OfficerShellCaseDocumentsTab`, `DocumentCopiesSlotPanel`) already pass `ApplicationProfileInstanceId` after the instance rename; the catalog component still declared `ApplicationId`.
+- **Test**: Stop F5, rebuild, open an in-process case → Document copies tab (and slot catalog) load without the parameter exception.
+- **Root cause**: Blazor parameter name mismatch after `Application` → `ApplicationProfileInstance`.
+- **Fix**: Rename `[Parameter] ApplicationId` → `ApplicationProfileInstanceId` on `ApplicationItemDocumentCopiesComponent`.
+- **Prevent**: When renaming instance id parameters, grep both the component `[Parameter]` and every caller attribute.
+- **Cross-skill**: visa2026-application-profile | document-copies
+
 ### 2026-06-06 — Inline footer batch progress removed (toast only)
 
 - **Symptom**: Dialog footer showed Completed / 100% / Download ZIP; polling unreliable; redundant with PDF toast.

@@ -4,7 +4,7 @@ description: Visa extension rejected by Ministry 1 — tests V-11a dashboard sta
 dependsOn: VisaExtMinistry1
 sync: false
 anchor:
-  entity: Application
+  entity: ApplicationProfileInstance
   key: FullApplicationNumber
   value: 4/-031
 data:
@@ -28,12 +28,12 @@ data:
     Expiration Date: 2026-04-30
     Passport Number: TR3333333
   Applications:
-  - Application Number: 031
+  - ApplicationProfileInstance Number: 031
     Date: 2026-04-12
     Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
     Project Contract: GT-15
     Filter: Visa
-    Application Type: App_Visa_Ext
+    ApplicationProfileInstance Type: App_Visa_Ext
     Urgency: Adaty tertipde !
     Visa Period: 3 (üç) aý
     Visa Category: Köp gezeklik
@@ -51,7 +51,7 @@ data:
   - Rejection Number: REJ-031
     Person: Mehmet Yilmaz
     Reason: Extension rejected at first ministry review.
-  ApplicationProgresses:
+  ApplicationProfileInstanceProgresses:
   - Application: 4/-031
     State: 1_REVIEW_REJECTED
     Location: AT_THE_MINISTERY_1

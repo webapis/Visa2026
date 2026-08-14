@@ -12,19 +12,19 @@ namespace Visa2026.Module.Model;
 /// <summary>
 /// Progress history list views: combined status column (state + ministry), date, description, letter file name.
 /// </summary>
-public sealed class ApplicationProgressHistoryViewsUpdater : ModelNodesGeneratorUpdater<ModelViewsNodesGenerator>
+public sealed class ApplicationProfileInstanceProgressHistoryViewsUpdater : ModelNodesGeneratorUpdater<ModelViewsNodesGenerator>
 {
     private const string NestedListViewId = "Application_ProgressHistory_ListView";
-    private const string StandaloneListViewId = "ApplicationProgress_ListView";
+    private const string StandaloneListViewId = "ApplicationProfileInstanceProgress_ListView";
 
     private static readonly string[] ColumnOrder =
     [
-        nameof(ApplicationProgress.Order),
-        nameof(ApplicationProgress.StatusListLabel),
-        nameof(ApplicationProgress.Date),
-        nameof(ApplicationProgress.ProcessNumber),
-        nameof(ApplicationProgress.Description),
-        nameof(ApplicationProgress.MinistryLetterFileName),
+        nameof(ApplicationProfileInstanceProgress.Order),
+        nameof(ApplicationProfileInstanceProgress.StatusListLabel),
+        nameof(ApplicationProfileInstanceProgress.Date),
+        nameof(ApplicationProfileInstanceProgress.ProcessNumber),
+        nameof(ApplicationProfileInstanceProgress.Description),
+        nameof(ApplicationProfileInstanceProgress.MinistryLetterFileName),
     ];
 
     public override void UpdateNode(ModelNode node)
@@ -55,7 +55,7 @@ public sealed class ApplicationProgressHistoryViewsUpdater : ModelNodesGenerator
 
     private static void EnsureTimelineSortOrder(IModelListView listView)
     {
-        EnsureSortProperty(listView, nameof(ApplicationProgress.Order), SortingDirection.Ascending);
+        EnsureSortProperty(listView, nameof(ApplicationProfileInstanceProgress.Order), SortingDirection.Ascending);
     }
 
     private static void EnsureSortProperty(
@@ -89,7 +89,7 @@ public sealed class ApplicationProgressHistoryViewsUpdater : ModelNodesGenerator
             var column = listView.Columns[name] ?? listView.Columns.AddNode<IModelColumn>(name);
             column.PropertyName = name;
             column.Index = i;
-            if (string.Equals(name, nameof(ApplicationProgress.Order), StringComparison.Ordinal))
+            if (string.Equals(name, nameof(ApplicationProfileInstanceProgress.Order), StringComparison.Ordinal))
             {
                 column.Width = 60;
                 column.SortIndex = -1;

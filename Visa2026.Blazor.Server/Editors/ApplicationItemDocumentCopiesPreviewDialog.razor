@@ -110,7 +110,6 @@
 
 @code {
     [Parameter] public IReadOnlyList<Guid> ApplicationItemIds { get; set; } = Array.Empty<Guid>();
-    [Parameter] public DocumentCopiesLineScope LineScope { get; set; } = DocumentCopiesLineScope.ApplicationItem;
 
     [Parameter] public ApplicationItemDocumentPackageOptions PackageOptions { get; set; } =
         ApplicationItemDocumentPackageOptions.CreateDefaults();
@@ -180,7 +179,7 @@
             slotLabel,
             () =>
             {
-                if (!FileAccess.TryGetMergedSlotPdf(LineScope, ApplicationItemIds, slotKey, out var result) || result == null)
+                if (!FileAccess.TryGetMergedSlotPdf(ApplicationItemIds, slotKey, out var result) || result == null)
                     return (null, null, PreviewError);
 
                 return (result.Content, result.FileName, null);
@@ -248,7 +247,7 @@
     private async Task DownloadBatchSummaryAsync()
     {
         if (!ApplicationItemDocumentBatchSummaryKindMapping.TryFromSlotKey(_activeSlotKey, PackageOptions, out var kind)
-            || !FileAccess.TryGetBatchSummaryPdf(LineScope, ApplicationItemIds, kind, PackageOptions, out var result)
+            || !FileAccess.TryGetBatchSummaryPdf(ApplicationItemIds, kind, PackageOptions, out var result)
             || result == null)
         {
             SetPreviewError(PreviewError);

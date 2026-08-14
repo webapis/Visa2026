@@ -4,7 +4,7 @@ description: Visa expiring soon with a cancellation application — tests V-02c 
 dependsOn: ''
 sync: false
 anchor:
-  entity: Application
+  entity: ApplicationProfileInstance
   key: FullApplicationNumber
   value: 4/-043
 data:
@@ -28,19 +28,19 @@ data:
     Expiration Date: 2026-05-20
     Passport Number: ES3456789
   Applications:
-  - Application Number: 043
+  - ApplicationProfileInstance Number: 043
     Date: 2026-04-10
     Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
     Project Contract: GT-15
     Filter: Visa
-    Application Type: App_Cancel_Visa_Ext
+    ApplicationProfileInstance Type: App_Cancel_Visa_Ext
     Urgency: Adaty tertipde !
   ApplicationItems:
   - Application: 4/-043
     Person: Marco Delgado
     Passport Number: ES3456789
     Visa Number: TM-2026-V-029
-  ApplicationProgresses:
+  ApplicationProfileInstanceProgresses:
   - Application: 4/-043
     State: PROCESS_STARTED
     Location: AT_MIGRATION_SERVICE

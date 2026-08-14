@@ -30,13 +30,13 @@ public sealed class ProjectContractApprovalProfileSchemaCleanupUpdater : ModuleU
     private void DropLegacyApprovalProfileArtifacts()
     {
         ExecuteNonQueryCommand(@"
-IF COL_LENGTH(N'dbo.Applications', N'ContractApprovalProfileId') IS NOT NULL
+IF COL_LENGTH(N'dbo.ApplicationProfileInstances', N'ContractApprovalProfileId') IS NOT NULL
 BEGIN
     IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = N'FK_Applications_ProjectContractApprovalProfiles_ContractApprovalProfileId')
-        ALTER TABLE dbo.Applications DROP CONSTRAINT FK_Applications_ProjectContractApprovalProfiles_ContractApprovalProfileId;
-    IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_Applications_ContractApprovalProfileId' AND object_id = OBJECT_ID(N'dbo.Applications'))
-        DROP INDEX IX_Applications_ContractApprovalProfileId ON dbo.Applications;
-    ALTER TABLE dbo.Applications DROP COLUMN ContractApprovalProfileId;
+        ALTER TABLE dbo.ApplicationProfileInstances DROP CONSTRAINT FK_Applications_ProjectContractApprovalProfiles_ContractApprovalProfileId;
+    IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_Applications_ContractApprovalProfileId' AND object_id = OBJECT_ID(N'dbo.ApplicationProfileInstances'))
+        DROP INDEX IX_Applications_ContractApprovalProfileId ON dbo.ApplicationProfileInstances;
+    ALTER TABLE dbo.ApplicationProfileInstances DROP COLUMN ContractApprovalProfileId;
 END
 
 IF OBJECT_ID(N'dbo.ProjectContractApprovalLegs', N'U') IS NOT NULL

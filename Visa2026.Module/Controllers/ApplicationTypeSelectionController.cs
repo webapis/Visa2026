@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
 using Visa2026.Module.Services;
-using AppBO = Visa2026.Module.BusinessObjects.Application;
+using AppBO = Visa2026.Module.BusinessObjects.ApplicationProfileInstance;
 using ApplicationTypeBO = Visa2026.Module.BusinessObjects.ApplicationType;
 namespace Visa2026.Module.Controllers;
 /// <summary>
@@ -169,7 +169,7 @@ public class ApplicationTypeSelectionController : ObjectViewController<DetailVie
 
             return;
         }
-        var routeFilter = ApplicationProgressRouteHelper.GetTypePickerRouteFilter(app);
+        var routeFilter = ApplicationProfileInstanceProgressRouteHelper.GetTypePickerRouteFilter(app);
         var typesWithCodes = ObjectSpace.GetObjectsQuery<ApplicationTypeBO>()
             .Count(t => t.SelectionCode != null && t.SelectionCode != "");
         var match = FindApplicationTypeByCode(code, routeFilter);
@@ -187,10 +187,10 @@ public class ApplicationTypeSelectionController : ObjectViewController<DetailVie
             return;
         }
         var wrongRoute = FindApplicationTypeByCode(code, progressRouteFilter: null);
-        if (wrongRoute != null && routeFilter.HasValue && wrongRoute.ApplicationProgressRoute != routeFilter.Value)
+        if (wrongRoute != null && routeFilter.HasValue && wrongRoute.ApplicationProfileInstanceProgressRoute != routeFilter.Value)
         {
             Log("ProcessQuickCodeChange",
-                $"code '{code}' exists but route {wrongRoute.ApplicationProgressRoute} != filter {routeFilter}");
+                $"code '{code}' exists but route {wrongRoute.ApplicationProfileInstanceProgressRoute} != filter {routeFilter}");
             ClearApplicationTypeSelection(app);
             SetQuickCodeWithoutResolve(app, code);
             ShowWrongProgressRouteMessage(code, wrongRoute, routeFilter.Value);
@@ -217,12 +217,12 @@ public class ApplicationTypeSelectionController : ObjectViewController<DetailVie
     }
     private ApplicationTypeBO? FindApplicationTypeByCode(
         string code,
-        ApplicationProgressRouteKind? progressRouteFilter = null)
+        ApplicationProfileInstanceProgressRouteKind? progressRouteFilter = null)
     {
         var query = ObjectSpace.GetObjectsQuery<ApplicationTypeBO>()
             .Where(t => t.SelectionCode == code);
         if (progressRouteFilter.HasValue)
-            query = query.Where(t => t.ApplicationProgressRoute == progressRouteFilter.Value);
+            query = query.Where(t => t.ApplicationProfileInstanceProgressRoute == progressRouteFilter.Value);
         return query.FirstOrDefault();
     }
 
@@ -312,14 +312,14 @@ public class ApplicationTypeSelectionController : ObjectViewController<DetailVie
     private void ShowWrongProgressRouteMessage(
         string code,
         ApplicationTypeBO type,
-        ApplicationProgressRouteKind expectedRoute)
+        ApplicationProfileInstanceProgressRouteKind expectedRoute)
     {
         var message = VisaUiMessages.Format(
             "ApplicationTypeQuickCode.WrongProgressRoute",
             code,
             LookupLocalization.GetDisplayName(type),
             FormatProgressRoute(expectedRoute),
-            FormatProgressRoute(type.ApplicationProgressRoute));
+            FormatProgressRoute(type.ApplicationProfileInstanceProgressRoute));
         Log("ShowWrongProgressRouteMessage", $"code='{code}', type={type.Name}");
         Application.ShowViewStrategy.ShowMessage(
             message,
@@ -328,10 +328,10 @@ public class ApplicationTypeSelectionController : ObjectViewController<DetailVie
             InformationPosition.Top);
     }
 
-    private static string FormatProgressRoute(ApplicationProgressRouteKind route) =>
-        route == ApplicationProgressRouteKind.DirectToMigrationService
-            ? VisaUiMessages.Get("ApplicationProgressRoute.DirectToMigrationService")
-            : VisaUiMessages.Get("ApplicationProgressRoute.ViaMinistries");
+    private static string FormatProgressRoute(ApplicationProfileInstanceProgressRouteKind route) =>
+        route == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService
+            ? VisaUiMessages.Get("ApplicationProfileInstanceProgressRoute.DirectToMigrationService")
+            : VisaUiMessages.Get("ApplicationProfileInstanceProgressRoute.ViaMinistries");
 
     private void ShowReadinessBlockedMessage(string code, string typeName, ApplicationTypeReadinessStatus status)
     {

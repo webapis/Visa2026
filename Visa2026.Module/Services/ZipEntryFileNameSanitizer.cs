@@ -11,7 +11,7 @@ public static class ZipEntryFileNameSanitizer
 {
     /// <summary>
     /// Builds a flat zip entry name from a report label (e.g. <c>GT-15_Elyasow_uzt.docx</c>).
-    /// Application number and date belong on the outer <c>Resminamalar_…_….zip</c> name only.
+    /// ApplicationProfileInstance number and date belong on the outer <c>Resminamalar_…_….zip</c> name only.
     /// </summary>
     public static string BuildReportEntryName(string reportLabel, string extension)
     {

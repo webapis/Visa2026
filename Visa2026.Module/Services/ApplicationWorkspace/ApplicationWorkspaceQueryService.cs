@@ -10,7 +10,7 @@ using Visa2026.Module.Services.OfficerShell;
 namespace Visa2026.Module.Services.ApplicationWorkspace;
 
 /// <summary>
-/// Loads Application workspace snapshot from live M2M data (slice 10b).
+/// Loads ApplicationProfileInstance workspace snapshot from live M2M data (slice 10b).
 /// </summary>
 public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQueryService
 {
@@ -19,20 +19,20 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
         if (objectSpace == null || applicationId == Guid.Empty)
             return Empty(applicationId);
 
-        ApplicationPersonService.RefreshApplication(objectSpace, applicationId);
+        ApplicationProfileInstancePersonService.RefreshApplication(objectSpace, applicationId);
 
-        var application = objectSpace.GetObjectByKey<Application>(applicationId);
+        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
         if (application == null)
             return Empty(applicationId);
 
         var profile = application.ApplicationProfile;
-        var sla = ApplicationProgressSlaHelper.Resolve(application, application.LatestProgress);
+        var sla = ApplicationProfileInstanceProgressSlaHelper.Resolve(application, application.LatestProgress);
         var tabs = ApplicationWorkspaceTabBuilder.Build(objectSpace, application, profile);
         var caseChrome = BuildCaseChrome(application, profile, sla);
 
         return new ApplicationWorkspaceSnapshot
         {
-            ApplicationId = applicationId,
+            ApplicationProfileInstanceId = applicationId,
             Header = BuildHeader(application, sla),
             ProgressHistory = BuildProgressHistory(application),
             Profile = BuildProfileSummary(profile),
@@ -46,9 +46,9 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
     }
 
     private static ApplicationWorkspaceCaseChrome BuildCaseChrome(
-        Application application,
+        ApplicationProfileInstance application,
         ApplicationProfile? profile,
-        ApplicationProgressSlaResult sla)
+        ApplicationProfileInstanceProgressSlaResult sla)
     {
         var processNumber = !string.IsNullOrWhiteSpace(application.ProcessNumber)
             ? application.ProcessNumber.Trim()
@@ -89,13 +89,14 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
             PeopleNames = people,
             MergedFromCount = people.Count > 1 ? people.Count : null,
             ProfileTemplateName = profile?.Name ?? string.Empty,
+            ResolvedLinksLocked = ApplicationProfileInstancePersonRosterLockHelper.AreResolvedLinksLocked(application),
         };
     }
 
     private static ApplicationWorkspaceSnapshot Empty(Guid applicationId) =>
-        new() { ApplicationId = applicationId, IsPrototypeMock = false };
+        new() { ApplicationProfileInstanceId = applicationId, IsPrototypeMock = false };
 
-    private static ApplicationWorkspaceHeader BuildHeader(Application application, ApplicationProgressSlaResult sla)
+    private static ApplicationWorkspaceHeader BuildHeader(ApplicationProfileInstance application, ApplicationProfileInstanceProgressSlaResult sla)
     {
         var urgency = application.Urgency?.LocalizedDisplayName
             ?? application.Urgency?.NameTm
@@ -117,7 +118,7 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
         };
     }
 
-    private static IReadOnlyList<ApplicationWorkspaceProgressRow> BuildProgressHistory(Application application) =>
+    private static IReadOnlyList<ApplicationWorkspaceProgressRow> BuildProgressHistory(ApplicationProfileInstance application) =>
         application.ProgressHistory?
             .OrderBy(p => p.Order)
             .Select(p => new ApplicationWorkspaceProgressRow
@@ -147,7 +148,7 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
         var chips = new List<string>
         {
             $"Related to: {FormatActionFamily(profile.ActionFamily)}",
-            profile.ProgressRoute == ApplicationProgressRouteKind.DirectToMigrationService
+            profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService
                 ? "Direct migration"
                 : "Via ministry",
             FormatAudience(profile),
@@ -212,6 +213,7 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
         if (profile.ProduceWorkPermit) items.Add("work permit");
         if (profile.ProduceVisa) items.Add("visa");
         if (profile.ProduceBorderZone) items.Add("border zone");
+        if (profile.ProduceRejection) items.Add("rejection");
         if (profile.ProduceWorkLocation) items.Add("work location");
         return string.Join(", ", items);
     }

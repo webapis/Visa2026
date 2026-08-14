@@ -3,7 +3,7 @@ DROP VIEW IF EXISTS vw_rd_visa_extension_result;
 CREATE VIEW vw_rd_visa_extension_result AS
 SELECT
     b."ID",
-    b."ApplicationOid",
+    b."ApplicationProfileInstanceOid",
     b."PersonOid",
     b."ExpiringVisaID",
     b."PassportID",

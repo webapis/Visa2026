@@ -6,71 +6,81 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Module.Services.ApplicationPersonRoster;
 
 /// <summary>
-/// Builds a detached <see cref="ApplicationItem"/> projection from an <see cref="ApplicationPerson"/> roster row
+/// Builds a detached <see cref="ApplicationRosterMergeLine"/> projection from an (instance, person) pair
 /// (resolved links only) for PDF mapping and <see cref="ApplicationSupportingDocumentsPacker"/> parity.
 /// Not persisted — do not call <see cref="IObjectSpace.CommitChanges"/> for the projection.
 /// </summary>
-public static class ApplicationPersonPdfPackageLineHydrator
+public static class ApplicationProfileInstancePersonPdfPackageLineHydrator
 {
-    public static ApplicationItem Hydrate(IObjectSpace objectSpace, ApplicationPerson applicationPerson)
+    public static ApplicationRosterMergeLine Hydrate(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance application,
+        Person person)
     {
         ArgumentNullException.ThrowIfNull(objectSpace);
-        if (applicationPerson == null)
-            throw new ArgumentNullException(nameof(applicationPerson));
+        if (application == null)
+            throw new ArgumentNullException(nameof(application));
+        if (person == null)
+            throw new ArgumentNullException(nameof(person));
 
-        applicationPerson = objectSpace.GetObject(applicationPerson);
-        var application = applicationPerson.Application != null
-            ? objectSpace.GetObject(applicationPerson.Application)
-            : null;
-        var person = applicationPerson.Person != null
-            ? objectSpace.GetObject(applicationPerson.Person)
-            : null;
+        var trackedApplication = objectSpace.GetObject(application) ?? application;
+        var trackedPerson = objectSpace.GetObject(person) ?? person;
 
-        var item = new ApplicationItem
+        var item = new ApplicationRosterMergeLine
         {
-            Application = application,
-            Person = person,
-            ApplicationItemName = person?.FullName ?? string.Empty,
+            ApplicationProfileInstance = trackedApplication,
+            Person = trackedPerson,
+            ApplicationItemName = trackedPerson?.FullName ?? string.Empty,
         };
+        if (trackedPerson != null && trackedPerson.ID != Guid.Empty)
+            item.ID = trackedPerson.ID;
 
-        foreach (var link in applicationPerson.ResolvedLinks?.ToList() ?? [])
+        var links = ApplicationProfileInstancePersonResolver.LoadLinks(
+            objectSpace,
+            trackedApplication.ID,
+            trackedPerson?.ID ?? Guid.Empty);
+
+        foreach (var link in links)
         {
             if (link?.LinkKind == null || link.LinkedObjectId is not Guid linkedId || linkedId == Guid.Empty)
                 continue;
 
             switch (link.LinkKind.Value)
             {
-                case ApplicationPersonLinkKind.Passport:
+                case ApplicationProfileInstancePersonLinkKind.Passport:
                     item.CurrentPassport = objectSpace.GetObjectByKey<Passport>(linkedId);
                     break;
-                case ApplicationPersonLinkKind.Visa:
+                case ApplicationProfileInstancePersonLinkKind.Visa:
                     item.CurrentVisa = objectSpace.GetObjectByKey<Visa>(linkedId);
                     break;
-                case ApplicationPersonLinkKind.Education:
+                case ApplicationProfileInstancePersonLinkKind.Education:
                     item.CurrentEducation = objectSpace.GetObjectByKey<Education>(linkedId);
                     break;
-                case ApplicationPersonLinkKind.AddressOfResidence:
+                case ApplicationProfileInstancePersonLinkKind.AddressOfResidence:
                     item.CurrentAddressOfResidence = objectSpace.GetObjectByKey<AddressOfResidence>(linkedId);
                     break;
-                case ApplicationPersonLinkKind.Position:
+                case ApplicationProfileInstancePersonLinkKind.Position:
                     item.CurrentPositionHistory = objectSpace.GetObjectByKey<EmployeePositionHistory>(linkedId);
                     break;
-                case ApplicationPersonLinkKind.Salary:
+                case ApplicationProfileInstancePersonLinkKind.WorkDuty:
+                    item.CurrentWorkDuty = objectSpace.GetObjectByKey<WorkDuty>(linkedId);
+                    break;
+                case ApplicationProfileInstancePersonLinkKind.Salary:
                     item.CurrentSalary = objectSpace.GetObjectByKey<EmployeeSalary>(linkedId);
                     break;
-                case ApplicationPersonLinkKind.MedicalRecord:
+                case ApplicationProfileInstancePersonLinkKind.MedicalRecord:
                     item.CurrentMedicalRecord = objectSpace.GetObjectByKey<MedicalRecord>(linkedId);
                     break;
-                case ApplicationPersonLinkKind.InvitationItem:
+                case ApplicationProfileInstancePersonLinkKind.InvitationItem:
                     item.CurrentInvitationItem = objectSpace.GetObjectByKey<InvitationItem>(linkedId);
                     break;
-                case ApplicationPersonLinkKind.WorkPermitItem:
+                case ApplicationProfileInstancePersonLinkKind.WorkPermitItem:
                     item.CurrentWorkPermitItem = objectSpace.GetObjectByKey<WorkPermitItem>(linkedId);
                     break;
-                case ApplicationPersonLinkKind.RejectionItem:
+                case ApplicationProfileInstancePersonLinkKind.RejectionItem:
                     break;
-                case ApplicationPersonLinkKind.BorderZoneItem:
-                case ApplicationPersonLinkKind.TravelHistory:
+                case ApplicationProfileInstancePersonLinkKind.BorderZoneItem:
+                case ApplicationProfileInstancePersonLinkKind.TravelHistory:
                     break;
             }
         }

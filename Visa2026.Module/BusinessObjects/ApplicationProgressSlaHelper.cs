@@ -4,14 +4,14 @@ using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.BusinessObjects;
 
-public static class ApplicationProgressSlaHelper
+public static class ApplicationProfileInstanceProgressSlaHelper
 {
-    public static ApplicationProgressSlaResult Resolve(Application? application, ApplicationProgress? latest = null)
+    public static ApplicationProfileInstanceProgressSlaResult Resolve(ApplicationProfileInstance? application, ApplicationProfileInstanceProgress? latest = null)
     {
         if (application == null)
             return default;
 
-        latest ??= ApplicationProgressHelper.GetLatest(application.ProgressHistory);
+        latest ??= ApplicationProfileInstanceProgressHelper.GetLatest(application.ProgressHistory);
 
         int leg;
         DateTime anchorDate;
@@ -25,7 +25,7 @@ public static class ApplicationProgressSlaHelper
             if (!TryResolvePendingMinistryLeg(application, latest, out leg, out anchorDate))
                 return default;
 
-            if (ApplicationProgressLegCodes.IsMinistryReviewStartedStateCode(latest.State.Code))
+            if (ApplicationProfileInstanceProgressLegCodes.IsMinistryReviewStartedStateCode(latest.State.Code))
             {
                 var previous = GetPreviousProgress(application, latest);
                 if (previous?.Date != default)
@@ -44,12 +44,12 @@ public static class ApplicationProgressSlaHelper
         var ministry = snapshot.MinistryShortName;
 
         var status = ResolveStatus(workingDays, maxDays, warningDays);
-        return new ApplicationProgressSlaResult(status, workingDays, maxDays, warningDays, ministry);
+        return new ApplicationProfileInstanceProgressSlaResult(status, workingDays, maxDays, warningDays, ministry);
     }
 
-    public static string FormatStatement(ApplicationProgressSlaResult sla)
+    public static string FormatStatement(ApplicationProfileInstanceProgressSlaResult sla)
     {
-        if (sla.Status == ApplicationProgressSlaStatus.None
+        if (sla.Status == ApplicationProfileInstanceProgressSlaStatus.None
             || sla.WorkingDaysInCurrentStep is not int days
             || sla.MaxDaysInReview is not int max)
             return string.Empty;
@@ -57,18 +57,18 @@ public static class ApplicationProgressSlaHelper
         var ministry = string.IsNullOrWhiteSpace(sla.MinistryShortName) ? "—" : sla.MinistryShortName!;
         return sla.Status switch
         {
-            ApplicationProgressSlaStatus.Overdue => VisaUiMessages.Format(
-                "ApplicationProgress.Sla.Overdue",
+            ApplicationProfileInstanceProgressSlaStatus.Overdue => VisaUiMessages.Format(
+                "ApplicationProfileInstanceProgress.Sla.Overdue",
                 ministry,
                 days,
                 max),
-            ApplicationProgressSlaStatus.Warning => VisaUiMessages.Format(
-                "ApplicationProgress.Sla.Warning",
+            ApplicationProfileInstanceProgressSlaStatus.Warning => VisaUiMessages.Format(
+                "ApplicationProfileInstanceProgress.Sla.Warning",
                 ministry,
                 days,
                 max),
             _ => VisaUiMessages.Format(
-                "ApplicationProgress.Sla.Ok",
+                "ApplicationProfileInstanceProgress.Sla.Ok",
                 ministry,
                 days,
                 max)
@@ -76,23 +76,23 @@ public static class ApplicationProgressSlaHelper
     }
 
     private static bool TryResolveImpliedOfficePendingLeg(
-        Application application,
+        ApplicationProfileInstance application,
         out int leg,
         out DateTime anchorDate)
     {
         leg = 0;
         anchorDate = default;
 
-        var route = ApplicationProgressRouteHelper.GetTypePickerRouteFilter(application);
-        if (route != ApplicationProgressRouteKind.ViaMinistries)
+        var route = ApplicationProfileInstanceProgressRouteHelper.GetTypePickerRouteFilter(application);
+        if (route != ApplicationProfileInstanceProgressRouteKind.ViaMinistries)
             return false;
 
-        if (ApplicationProgressProfileResolver.GetMinistryLegCount(application) <= 0)
+        if (ApplicationProfileInstanceProgressProfileResolver.GetMinistryLegCount(application) <= 0)
             return false;
 
         // Any explicit progress means we are past implied office.
         if (application.ProgressHistory?.Any(p =>
-                !string.Equals(p.State?.Code, ApplicationProgressStateCodes.IsBeingPrepared, StringComparison.OrdinalIgnoreCase)) == true)
+                !string.Equals(p.State?.Code, ApplicationProfileInstanceProgressStateCodes.IsBeingPrepared, StringComparison.OrdinalIgnoreCase)) == true)
             return false;
 
         leg = 1;
@@ -103,19 +103,19 @@ public static class ApplicationProgressSlaHelper
     }
 
     private static bool TryResolvePendingMinistryLeg(
-        Application application,
-        ApplicationProgress latest,
+        ApplicationProfileInstance application,
+        ApplicationProfileInstanceProgress latest,
         out int leg,
         out DateTime anchorDate)
     {
         leg = 0;
         anchorDate = default;
 
-        var route = ApplicationProgressRouteHelper.GetTypePickerRouteFilter(application);
-        if (route != ApplicationProgressRouteKind.ViaMinistries)
+        var route = ApplicationProfileInstanceProgressRouteHelper.GetTypePickerRouteFilter(application);
+        if (route != ApplicationProfileInstanceProgressRouteKind.ViaMinistries)
             return false;
 
-        var legCount = ApplicationProgressProfileResolver.GetMinistryLegCount(application);
+        var legCount = ApplicationProfileInstanceProgressProfileResolver.GetMinistryLegCount(application);
         if (legCount <= 0)
             return false;
 
@@ -123,11 +123,11 @@ public static class ApplicationProgressSlaHelper
         if (string.IsNullOrWhiteSpace(stateCode))
             return false;
 
-        if (ApplicationProgressTransitionHelper.IsTerminalStateCode(stateCode))
+        if (ApplicationProfileInstanceProgressTransitionHelper.IsTerminalStateCode(stateCode))
             return false;
 
-        if (ApplicationProgressLegCodes.IsMinistryReviewStartedStateCode(stateCode)
-            && ApplicationProgressLegCodes.TryParseMinistryLegFromStateCode(stateCode, out leg))
+        if (ApplicationProfileInstanceProgressLegCodes.IsMinistryReviewStartedStateCode(stateCode)
+            && ApplicationProfileInstanceProgressLegCodes.TryParseMinistryLegFromStateCode(stateCode, out leg))
         {
             anchorDate = latest.Date;
             return true;
@@ -141,7 +141,7 @@ public static class ApplicationProgressSlaHelper
         }
 
         if (stateCode.Trim().EndsWith("_REVIEW_APPROVED", StringComparison.OrdinalIgnoreCase)
-            && ApplicationProgressLegCodes.TryParseMinistryLegFromStateCode(stateCode, out var approvedLeg)
+            && ApplicationProfileInstanceProgressLegCodes.TryParseMinistryLegFromStateCode(stateCode, out var approvedLeg)
             && approvedLeg < legCount)
         {
             leg = approvedLeg + 1;
@@ -152,10 +152,10 @@ public static class ApplicationProgressSlaHelper
         return false;
     }
 
-    private static bool IsOfficePreparation(ApplicationProgress progress) =>
-        string.Equals(progress.State?.Code, ApplicationProgressStateCodes.IsBeingPrepared, StringComparison.OrdinalIgnoreCase);
+    private static bool IsOfficePreparation(ApplicationProfileInstanceProgress progress) =>
+        string.Equals(progress.State?.Code, ApplicationProfileInstanceProgressStateCodes.IsBeingPrepared, StringComparison.OrdinalIgnoreCase);
 
-    private static ApplicationProgress? GetPreviousProgress(Application application, ApplicationProgress current)
+    private static ApplicationProfileInstanceProgress? GetPreviousProgress(ApplicationProfileInstance application, ApplicationProfileInstanceProgress current)
     {
         var others = application.ProgressHistory?
             .Where(p => p != current)
@@ -164,22 +164,22 @@ public static class ApplicationProgressSlaHelper
             return null;
 
         return others
-            .Where(p => ApplicationProgressOrderHelper.CompareTimelineOrder(p, current) < 0)
-            .OrderByDescending(p => p, Comparer<ApplicationProgress>.Create(ApplicationProgressOrderHelper.CompareTimelineOrder))
+            .Where(p => ApplicationProfileInstanceProgressOrderHelper.CompareTimelineOrder(p, current) < 0)
+            .OrderByDescending(p => p, Comparer<ApplicationProfileInstanceProgress>.Create(ApplicationProfileInstanceProgressOrderHelper.CompareTimelineOrder))
             .FirstOrDefault();
     }
 
-    private static ApplicationProgressSlaStatus ResolveStatus(
+    private static ApplicationProfileInstanceProgressSlaStatus ResolveStatus(
         int workingDays,
         int maxDays,
         int? warningDaysBeforeMax)
     {
         if (workingDays > maxDays)
-            return ApplicationProgressSlaStatus.Overdue;
+            return ApplicationProfileInstanceProgressSlaStatus.Overdue;
 
         if (warningDaysBeforeMax is > 0 && workingDays > warningDaysBeforeMax)
-            return ApplicationProgressSlaStatus.Warning;
+            return ApplicationProfileInstanceProgressSlaStatus.Warning;
 
-        return ApplicationProgressSlaStatus.Ok;
+        return ApplicationProfileInstanceProgressSlaStatus.Ok;
     }
 }

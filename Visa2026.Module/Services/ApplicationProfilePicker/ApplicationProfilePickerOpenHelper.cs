@@ -41,13 +41,13 @@ public static class ApplicationProfilePickerOpenHelper
         }, sourceFrame);
     }
 
-    public static ApplicationProgressRouteKind? ResolveRouteFromListView(string? listViewId) =>
+    public static ApplicationProfileInstanceProgressRouteKind? ResolveRouteFromListView(string? listViewId) =>
         listViewId switch
         {
-            ApplicationProgressRouteNavigation.ListViewViaMinistries =>
-                ApplicationProgressRouteKind.ViaMinistries,
-            ApplicationProgressRouteNavigation.ListViewDirectMigration =>
-                ApplicationProgressRouteKind.DirectToMigrationService,
+            ApplicationProfileInstanceProgressRouteNavigation.ListViewViaMinistries =>
+                ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
+            ApplicationProfileInstanceProgressRouteNavigation.ListViewDirectMigration =>
+                ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService,
             _ => null,
         };
 }

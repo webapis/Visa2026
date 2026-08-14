@@ -9,20 +9,41 @@ using Visa2026.Module.Services;
 
 namespace Visa2026.Module.Services.ApplicationPersonRoster;
 
+public sealed class ApplicationItemPdfBatchEnqueueResult
+{
+    public Guid BatchId { get; init; }
+
+    public int ItemCount { get; init; }
+
+    public bool PassportZipWillSkip { get; init; }
+
+    public int ItemsMissingCurrentPassport { get; init; }
+}
+
 /// <summary>
-/// Queues a <see cref="PdfGenerationBatch"/> keyed by <see cref="ApplicationPerson"/> roster line ids.
+/// Queues a <see cref="PdfGenerationBatch"/> keyed by Person ids on one ApplicationProfileInstance.
 /// </summary>
-public sealed class ApplicationPersonPdfBatchEnqueueService
+public sealed class ApplicationProfileInstancePersonPdfBatchEnqueueService
 {
     private readonly INonSecuredObjectSpaceFactory nonSecuredObjectSpaceFactory;
 
-    public ApplicationPersonPdfBatchEnqueueService(INonSecuredObjectSpaceFactory nonSecuredObjectSpaceFactory)
+    public ApplicationProfileInstancePersonPdfBatchEnqueueService(INonSecuredObjectSpaceFactory nonSecuredObjectSpaceFactory)
     {
         this.nonSecuredObjectSpaceFactory = nonSecuredObjectSpaceFactory;
     }
 
     public bool TryEnqueuePackage(
-        IReadOnlyList<Guid> applicationPersonIds,
+        IReadOnlyList<Guid> personIds,
+        ApplicationItemDocumentPackageOptions packageOptions,
+        string requestedBy,
+        string requestedCulture,
+        out ApplicationItemPdfBatchEnqueueResult? result,
+        out string? errorMessageKey)
+        => TryEnqueuePackage(personIds, Guid.Empty, packageOptions, requestedBy, requestedCulture, out result, out errorMessageKey);
+
+    public bool TryEnqueuePackage(
+        IReadOnlyList<Guid> personIds,
+        Guid applicationProfileInstanceId,
         ApplicationItemDocumentPackageOptions packageOptions,
         string requestedBy,
         string requestedCulture,
@@ -33,7 +54,7 @@ public sealed class ApplicationPersonPdfBatchEnqueueService
         errorMessageKey = null;
         packageOptions ??= ApplicationItemDocumentPackageOptions.CreateDefaults();
 
-        if (applicationPersonIds == null || applicationPersonIds.Count == 0)
+        if (personIds == null || personIds.Count == 0)
         {
             errorMessageKey = "Pdf.SelectAtLeastOneItem";
             return false;
@@ -45,7 +66,7 @@ public sealed class ApplicationPersonPdfBatchEnqueueService
             return false;
         }
 
-        var rowIds = applicationPersonIds
+        var rowIds = personIds
             .Where(id => id != Guid.Empty)
             .Distinct()
             .ToList();
@@ -59,20 +80,26 @@ public sealed class ApplicationPersonPdfBatchEnqueueService
         var opts = new PdfBatchEnqueueOptions();
         packageOptions.ApplyTo(opts);
 
-        RefreshResolvedLinksAndCountMissingPassports(rowIds, opts.IncludePassportCopies, out var itemsMissingCurrentPassport);
+        RefreshResolvedLinksAndCountMissingPassports(
+            rowIds,
+            applicationProfileInstanceId,
+            opts.IncludePassportCopies,
+            out var itemsMissingCurrentPassport);
 
-        var keyType = typeof(ApplicationPerson);
-        var keyStrings = rowIds
-            .Select(id => Convert.ToString(id, CultureInfo.InvariantCulture))
-            .ToList();
+        var keyType = typeof(Person);
+        var payload = new PdfBatchRosterKeyPayload
+        {
+            ApplicationProfileInstanceId = applicationProfileInstanceId,
+            PersonIds = rowIds.Select(id => Convert.ToString(id, CultureInfo.InvariantCulture)!).ToList(),
+        };
 
         using var os = nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<PdfGenerationBatch>();
         var batch = os.CreateObject<PdfGenerationBatch>();
         batch.RequestedBy = requestedBy;
         batch.RequestedCulture = requestedCulture;
         batch.ItemKeyType = keyType.AssemblyQualifiedName ?? keyType.FullName ?? keyType.Name;
-        batch.ItemKeysJson = JsonSerializer.Serialize(keyStrings);
-        batch.TotalItems = keyStrings.Count;
+        batch.ItemKeysJson = JsonSerializer.Serialize(payload);
+        batch.TotalItems = rowIds.Count;
         batch.Status = PdfGenerationBatchStatus.Queued;
         opts.CopyTo(batch);
         os.CommitChanges();
@@ -80,7 +107,7 @@ public sealed class ApplicationPersonPdfBatchEnqueueService
         result = new ApplicationItemPdfBatchEnqueueResult
         {
             BatchId = (Guid)os.GetKeyValue(batch)!,
-            ItemCount = keyStrings.Count,
+            ItemCount = rowIds.Count,
             PassportZipWillSkip = opts.IncludePassportCopies && itemsMissingCurrentPassport > 0,
             ItemsMissingCurrentPassport = itemsMissingCurrentPassport
         };
@@ -89,32 +116,43 @@ public sealed class ApplicationPersonPdfBatchEnqueueService
     }
 
     private void RefreshResolvedLinksAndCountMissingPassports(
-        IReadOnlyList<Guid> rowIds,
+        IReadOnlyList<Guid> personIds,
+        Guid applicationProfileInstanceId,
         bool includePassportCopies,
         out int itemsMissingCurrentPassport)
     {
         itemsMissingCurrentPassport = 0;
-        using var os = nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationPerson>();
-        bool changed = false;
-
-        foreach (var rowId in rowIds)
+        using var os = nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        if (!ApplicationRosterHelper.TryLoadSharedApplicationPeople(
+                os,
+                personIds,
+                applicationProfileInstanceId,
+                out var application,
+                out var people)
+            || application == null)
         {
-            var row = os.GetObjectByKey<ApplicationPerson>(rowId);
-            if (row == null)
-                continue;
+            return;
+        }
 
-            ApplicationPersonResolver.RefreshResolvedLinks(os, row);
-            changed = true;
+        foreach (var person in people)
+        {
+            ApplicationProfileInstancePersonResolver.RefreshResolvedLinks(os, application, person);
 
             if (!includePassportCopies)
                 continue;
 
-            var projection = ApplicationPersonPdfPackageLineHydrator.Hydrate(os, row);
+            var projection = ApplicationProfileInstancePersonPdfPackageLineHydrator.Hydrate(os, application, person);
             if (projection.CurrentPassport == null)
                 itemsMissingCurrentPassport++;
         }
 
-        if (changed)
-            os.CommitChanges();
+        os.CommitChanges();
     }
+}
+
+public sealed class PdfBatchRosterKeyPayload
+{
+    public Guid ApplicationProfileInstanceId { get; set; }
+
+    public List<string> PersonIds { get; set; } = [];
 }

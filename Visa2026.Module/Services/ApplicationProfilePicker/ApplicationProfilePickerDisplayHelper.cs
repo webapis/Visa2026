@@ -14,8 +14,8 @@ public static class ApplicationProfilePickerDisplayHelper
             _ => family.ToString(),
         };
 
-    public static string FormatProgressRoute(ApplicationProgressRouteKind route) =>
-        route == ApplicationProgressRouteKind.DirectToMigrationService
+    public static string FormatProgressRoute(ApplicationProfileInstanceProgressRouteKind route) =>
+        route == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService
             ? "Direct migration"
             : "Via ministry";
 }

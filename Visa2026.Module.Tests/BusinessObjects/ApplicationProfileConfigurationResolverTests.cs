@@ -11,15 +11,15 @@ public class ApplicationProfileConfigurationResolverTests
     {
         var type = new ApplicationType
         {
-            ApplicationProgressRoute = ApplicationProgressRouteKind.DirectToMigrationService,
+            ApplicationProfileInstanceProgressRoute = ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService,
         };
         var profile = new ApplicationProfile
         {
-            ProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
+            ProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
         };
-        var app = new Application { ApplicationType = type, ApplicationProfile = profile };
+        var app = new ApplicationProfileInstance { ApplicationType = type, ApplicationProfile = profile };
 
-        Assert.Equal(ApplicationProgressRouteKind.ViaMinistries,
+        Assert.Equal(ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
             ApplicationProfileConfigurationResolver.GetProgressRoute(app));
     }
 
@@ -28,15 +28,15 @@ public class ApplicationProfileConfigurationResolverTests
     {
         var profile = new ApplicationProfile
         {
-            ProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
+            ProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
         };
-        var app = new Application
+        var app = new ApplicationProfileInstance
         {
             ApplicationProfile = profile,
-            CreationProgressRoute = ApplicationProgressRouteKind.DirectToMigrationService,
+            CreationProgressRoute = ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService,
         };
 
-        Assert.Equal(ApplicationProgressRouteKind.DirectToMigrationService,
+        Assert.Equal(ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService,
             ApplicationProfileConfigurationResolver.GetProgressRoute(app));
     }
 
@@ -45,7 +45,7 @@ public class ApplicationProfileConfigurationResolverTests
     {
         var profile = new ApplicationProfile { RequireVisaType = true };
         var type = new ApplicationType { ShowVisaType = false };
-        var app = new Application { ApplicationProfile = profile, ApplicationType = type };
+        var app = new ApplicationProfileInstance { ApplicationProfile = profile, ApplicationType = type };
 
         Assert.True(ApplicationProfileConfigurationResolver.ShowVisaType(app));
     }
@@ -54,7 +54,7 @@ public class ApplicationProfileConfigurationResolverTests
     public void ShowVisaType_FallsBackToTypeWhenProfileMissing()
     {
         var type = new ApplicationType { ShowVisaType = true };
-        var app = new Application { ApplicationType = type };
+        var app = new ApplicationProfileInstance { ApplicationType = type };
 
         Assert.True(ApplicationProfileConfigurationResolver.ShowVisaType(app));
     }
@@ -67,7 +67,7 @@ public class ApplicationProfileConfigurationResolverTests
             ActionFamily = ApplicationProfileActionFamily.Registration,
         };
         var type = new ApplicationType { ShowRegistrations = false };
-        var app = new Application { ApplicationProfile = profile, ApplicationType = type };
+        var app = new ApplicationProfileInstance { ApplicationProfile = profile, ApplicationType = type };
 
         Assert.True(ApplicationProfileConfigurationResolver.ShowRegistrations(app));
     }
@@ -80,7 +80,7 @@ public class ApplicationProfileConfigurationResolverTests
             MigrationSlaProfile = new ApplicationMigrationSlaProfile { MaxDaysInReview = 7 },
         };
         var profile = new ApplicationProfile { MigrationSlaDays = 21 };
-        var app = new Application { ApplicationProfile = profile, ApplicationType = type };
+        var app = new ApplicationProfileInstance { ApplicationProfile = profile, ApplicationType = type };
 
         Assert.Equal(21, ApplicationProfileConfigurationResolver.GetMigrationSlaMaxDays(app));
         Assert.True(ApplicationProfileConfigurationResolver.HasMigrationSlaConfigured(app));
@@ -91,7 +91,7 @@ public class ApplicationProfileConfigurationResolverTests
     {
         var profile = new ApplicationProfile { ProduceVisa = true };
         var type = new ApplicationType { CanIssueVisa = false };
-        var app = new Application { ApplicationProfile = profile, ApplicationType = type };
+        var app = new ApplicationProfileInstance { ApplicationProfile = profile, ApplicationType = type };
 
         Assert.True(ApplicationProfileConfigurationResolver.CanIssueVisa(app));
         Assert.True(ApplicationTypeCapabilities.CanIssueVisa(app));
@@ -101,19 +101,31 @@ public class ApplicationProfileConfigurationResolverTests
     public void CanIssueInvitation_FallsBackToTypeWhenProfileMissing()
     {
         var type = new ApplicationType { CanIssueInvitation = true };
-        var app = new Application { ApplicationType = type };
+        var app = new ApplicationProfileInstance { ApplicationType = type };
 
         Assert.True(ApplicationProfileConfigurationResolver.CanIssueInvitation(app));
     }
 
     [Fact]
-    public void CanBeIssuingApplicationForVisa_ProfileInvitationOnly()
+    public void CanBeIssuingApplicationProfileInstanceForVisa_ProfileInvitationOnly()
     {
         var profile = new ApplicationProfile { ProduceInvitation = true, ProduceVisa = false };
-        var app = new Application { ApplicationProfile = profile };
+        var app = new ApplicationProfileInstance { ApplicationProfile = profile };
 
-        Assert.True(ApplicationProfileConfigurationResolver.CanBeIssuingApplicationForVisa(app));
+        Assert.True(ApplicationProfileConfigurationResolver.CanBeIssuingApplicationProfileInstanceForVisa(app));
         Assert.False(ApplicationProfileConfigurationResolver.CanIssueVisa(app));
+        Assert.True(ApplicationProfileConfigurationResolver.ShowIssuedVisas(app));
+    }
+
+    [Fact]
+    public void ShowRejections_UsesProduceRejection_NotPersonRejectionItem()
+    {
+        var profile = new ApplicationProfile { ProduceRejection = true, RequirePersonRejectionItem = false };
+        var app = new ApplicationProfileInstance { ApplicationProfile = profile };
+
+        Assert.True(ApplicationProfileConfigurationResolver.ShowRejections(app));
+        Assert.False(ApplicationProfileConfigurationResolver.RequirePersonRejectionItem(app));
+        Assert.True(ApplicationProfileConfigurationResolver.CanIssueRejection(app));
     }
 
     [Fact]
@@ -121,24 +133,24 @@ public class ApplicationProfileConfigurationResolverTests
     {
         var profile = new ApplicationProfile
         {
-            ProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
+            ProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
             ApprovalLegs = new ObservableCollection<ApplicationProfileApprovalLeg>
             {
                 new() { Sequence = 1, ApprovingMinistry = new ApprovingMinistry() },
                 new() { Sequence = 2, ApprovingMinistry = new ApprovingMinistry() },
             },
         };
-        var app = new Application
+        var app = new ApplicationProfileInstance
         {
             ApplicationProfile = profile,
             ApplicationType = new ApplicationType
             {
-                ApplicationProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
+                ApplicationProfileInstanceProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
                 MinistryReviewDepth = MinistryReviewDepth.FirstMinistryOnly,
             },
         };
 
-        Assert.Equal(2, ApplicationProgressProfileResolver.GetMinistryLegCount(app));
+        Assert.Equal(2, ApplicationProfileInstanceProgressProfileResolver.GetMinistryLegCount(app));
     }
 
     [Fact]
@@ -146,15 +158,15 @@ public class ApplicationProfileConfigurationResolverTests
     {
         var profile = new ApplicationProfile
         {
-            ProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
+            ProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
             RequireProject = true,
         };
-        var app = new Application
+        var app = new ApplicationProfileInstance
         {
             ApplicationProfile = profile,
             ApplicationType = new ApplicationType { ShowProjectContract = false },
         };
 
-        Assert.True(ApplicationProgressProfileResolver.RequiresProjectContract(app));
+        Assert.True(ApplicationProfileInstanceProgressProfileResolver.RequiresProjectContract(app));
     }
 }

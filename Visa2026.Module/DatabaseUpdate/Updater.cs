@@ -285,10 +285,9 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         // FULL ACCESS — Core operational objects
         // =====================================================================
         userRole.AddTypePermissionsRecursively<Person>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
-        userRole.AddTypePermissionsRecursively<Application>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
-        userRole.AddTypePermissionsRecursively<ApplicationPerson>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
-        userRole.AddTypePermissionsRecursively<ApplicationPersonResolvedLink>(SecurityOperations.Read, SecurityPermissionState.Allow);
-        userRole.AddTypePermissionsRecursively<ApplicationItem>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<ApplicationProfileInstance>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<ApplicationProfileInstancePersonResolvedLink>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        // ApplicationItem / ApplicationProfileInstancePerson BOs removed — roster is skip-navigation People
         userRole.AddTypePermissionsRecursively<Passport>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Visa>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         // Report Dashboard host + all vw_rd_* views (also synced every startup via EnsureReportDashboardOfficerPermissions).
@@ -371,8 +370,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddTypePermissionsRecursively<ApplicationProfileProgressStateSetting>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApprovalLegProfileMinistryLeg>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ProjectContractApprovalLegProfile>(SecurityOperations.Read, SecurityPermissionState.Allow);
-        userRole.AddTypePermissionsRecursively<ApplicationApprovalLegSnapshot>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
-        // Application number generation reads prefix/format/seed on save; officers must not create or edit org settings.
+        userRole.AddTypePermissionsRecursively<ApplicationProfileInstanceApprovalLegSnapshot>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
+        // ApplicationProfileInstance number generation reads prefix/format/seed on save; officers must not create or edit org settings.
         userRole.AddTypePermissionsRecursively<ApplicationNumberingProfile>(SecurityOperations.Read, SecurityPermissionState.Allow);
         // Per-BO expiration alert thresholds — read at runtime; configuration UI is VisaOffice only.
         userRole.AddTypePermissionsRecursively<ExpirationAlertRule>(SecurityOperations.Read, SecurityPermissionState.Allow);
@@ -388,8 +387,11 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         // Everything not listed here is denied by default.
         // =====================================================================
 
-        // Application group — only list views, no Progress or BusinessTrip
+        // ApplicationProfileInstance group — only list views, no Progress or BusinessTrip
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application", SecurityPermissionState.Allow);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/Application_Staged", SecurityPermissionState.Allow);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/Application_InProcess", SecurityPermissionState.Allow);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/ApplicationProfileCatalog", SecurityPermissionState.Allow);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/Application_ViaMinistries", SecurityPermissionState.Allow);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/Application_DirectMigration", SecurityPermissionState.Allow);
         userRole.AddNavigationPermission(
@@ -400,15 +402,16 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             SecurityPermissionState.Allow);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/Application", SecurityPermissionState.Deny);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/ApplicationItem", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/OfficerShell", SecurityPermissionState.Deny);
 
-        // Explicitly DENY Application Progress, Business Trip and Pdf Generation Batch
-        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/ApplicationProgress", SecurityPermissionState.Deny);
+        // Explicitly DENY ApplicationProfileInstance Progress, Business Trip and Pdf Generation Batch
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/ApplicationProfileInstanceProgress", SecurityPermissionState.Deny);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/BusinessTrip", SecurityPermissionState.Deny);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/PdfGenerationBatch", SecurityPermissionState.Deny);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/WordReportGenerationBatch", SecurityPermissionState.Deny);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/PersonExportBatch", SecurityPermissionState.Deny);
 
-        // Rejection group (separate from Application)
+        // Rejection group (separate from ApplicationProfileInstance)
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Rejection", SecurityPermissionState.Allow);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Rejection/Items/Rejection", SecurityPermissionState.Allow);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Rejection/Items/RejectionItem", SecurityPermissionState.Allow);
@@ -550,7 +553,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureReadOnlyPermission<ApplicationNumberingProfile>(userRole);
     EnsureReadOnlyPermission<ExpirationAlertRule>(userRole);
 
-    // Application ListView process-tracking columns (status, approval/migration SLA).
+    // ApplicationProfileInstance ListView process-tracking columns (status, approval/migration SLA).
     EnsureApplicationProcessTrackingReadPermissions(userRole, officerCanWriteProgress: true);
 
     EnsureUserFeedbackOfficerPermissions(userRole);
@@ -611,6 +614,9 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
                 @"Application/NavigationItems/Items/ReportDashboard",
                 SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/Application_Staged", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/Application_InProcess", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/ApplicationProfileCatalog", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/Application_ViaMinistries", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/Application_DirectMigration", SecurityPermissionState.Allow);
             EnsureNavigationPermission(
@@ -623,7 +629,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
                 SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/Application", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/ApplicationItem", SecurityPermissionState.Deny);
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/ApplicationProgress", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/OfficerShell", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/ApplicationProfileInstanceProgress", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/BusinessTrip", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/PdfGenerationBatch", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/WordReportGenerationBatch", SecurityPermissionState.Deny);
@@ -691,8 +698,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
                 return;
 
             EnsureReadOnlyPermission<Person>(role);
-            EnsureReadOnlyPermission<Application>(role);
-            EnsureReadOnlyPermission<ApplicationItem>(role);
+            EnsureReadOnlyPermission<ApplicationProfileInstance>(role);
+            // ApplicationItem BO removed
             EnsureReadOnlyPermission<Passport>(role);
             EnsureReadOnlyPermission<Visa>(role);
             EnsureReadOnlyPermission<Education>(role);
@@ -771,7 +778,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         }
 
         /// <summary>
-        /// Grants types needed to display Application ListView process-tracking columns
+        /// Grants types needed to display ApplicationProfileInstance ListView process-tracking columns
         /// (Current status, Approval/Migration working days &amp; deadlines). No Configuration navigation.
         /// Shared by <c>Users</c> and <c>UsersReadOnly</c> (reader officers).
         /// </summary>
@@ -797,21 +804,20 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadOnlyPermission<ApplicationProfileApprovalLeg>(role);
             EnsureReadOnlyPermission<ApplicationProfileTemplate>(role);
             EnsureReadOnlyPermission<ApplicationProfileProgressStateSetting>(role);
-            EnsureReadOnlyPermission<ApplicationPerson>(role);
-            EnsureReadOnlyPermission<ApplicationPersonResolvedLink>(role);
+            EnsureReadOnlyPermission<ApplicationProfileInstancePersonResolvedLink>(role);
             EnsureReadOnlyPermission<ApprovalLegProfileMinistryLeg>(role);
             EnsureReadOnlyPermission<ProjectContractApprovalLegProfile>(role);
             EnsureReadOnlyPermission<ProjectContract>(role);
 
             if (officerCanWriteProgress)
             {
-                EnsureFullAccessRecursivePermission<ApplicationProgress>(role);
-                EnsureReadWriteCreatePermission<ApplicationApprovalLegSnapshot>(role);
+                EnsureFullAccessRecursivePermission<ApplicationProfileInstanceProgress>(role);
+                EnsureReadWriteCreatePermission<ApplicationProfileInstanceApprovalLegSnapshot>(role);
             }
             else
             {
-                EnsureReadOnlyPermission<ApplicationProgress>(role);
-                EnsureReadOnlyPermission<ApplicationApprovalLegSnapshot>(role);
+                EnsureReadOnlyPermission<ApplicationProfileInstanceProgress>(role);
+                EnsureReadOnlyPermission<ApplicationProfileInstanceApprovalLegSnapshot>(role);
             }
         }
 
@@ -1073,7 +1079,14 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/WorkPermit/Config", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Invitation", SecurityPermissionState.Deny);
 
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/ApplicationProfileCatalog", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/Application_Staged", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/Application_InProcess", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/Application_ViaMinistries", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/Application_DirectMigration", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/OfficerShell", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/ApplicationProfileCatalog", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Employees", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/FamilyMembers", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/TemporaryVisitors", SecurityPermissionState.Deny);
@@ -1141,7 +1154,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         }
 
         /// <summary>
-        /// Application runtime log, state-notification inbox, and Import reimport history —
+        /// ApplicationProfileInstance runtime log, state-notification inbox, and Import reimport history —
         /// super administrators only (<see cref="PermissionPolicyRole.IsAdministrative"/>).
         /// </summary>
         static void EnsureAdminOnlyOperationsDeny(PermissionPolicyRole role)

@@ -7,11 +7,11 @@ using Visa2026.Module.Services.MigrationImport;
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
 /// <summary>
-/// Backfills <see cref="Bo.ApplicationApprovalLegSnapshot"/> from <see cref="Bo.ApprovalLegProfile"/>
+/// Backfills <see cref="Bo.ApplicationProfileInstanceApprovalLegSnapshot"/> from <see cref="Bo.ApprovalLegProfile"/>
 /// for via-ministry applications with incomplete snapshots (empty Ministrlik on progress).
-/// Does <strong>not</strong> delete or regenerate <see cref="Bo.ApplicationProgress"/> rows.
+/// Does <strong>not</strong> delete or regenerate <see cref="Bo.ApplicationProfileInstanceProgress"/> rows.
 /// </summary>
-internal sealed class Visa2014ApplicationApprovalLegSnapshotBackfillResult
+internal sealed class Visa2014ApplicationProfileInstanceApprovalLegSnapshotBackfillResult
 {
     public int ApplicationsScanned { get; init; }
     public int ApplicationsNeedingBackfill { get; init; }
@@ -19,7 +19,7 @@ internal sealed class Visa2014ApplicationApprovalLegSnapshotBackfillResult
     public IReadOnlyList<string> Errors { get; init; } = [];
 }
 
-internal static class Visa2014ApplicationApprovalLegSnapshotBackfill
+internal static class Visa2014ApplicationProfileInstanceApprovalLegSnapshotBackfill
 {
     public static async Task<int> RunCommandAsync(IReadOnlyList<string> args, bool verbose)
     {
@@ -30,7 +30,7 @@ internal static class Visa2014ApplicationApprovalLegSnapshotBackfill
             ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
             ?? "Host=localhost;Port=5432;Database=visa2026;Username=postgres;Password=Visa2026Local;Persist Security Info=True;EFCoreProvider=Postgres";
 
-        Console.WriteLine("=== VISA2014 Application ApprovalLegSnapshot backfill (Ministrlik)");
+        Console.WriteLine("=== VISA2014 ApplicationProfileInstance ApprovalLegSnapshot backfill (Ministrlik)");
         Console.WriteLine($"INF Target SQL: {MaskConnectionString(targetConnection)}");
         if (dryRun) Console.WriteLine("INF Mode: dry-run (no writes)");
 
@@ -63,21 +63,21 @@ internal static class Visa2014ApplicationApprovalLegSnapshotBackfill
         }
     }
 
-    internal static Visa2014ApplicationApprovalLegSnapshotBackfillResult Run(
+    internal static Visa2014ApplicationProfileInstanceApprovalLegSnapshotBackfillResult Run(
         INonSecuredObjectSpaceFactory objectSpaceFactory,
         bool dryRun,
         bool verbose)
     {
         var errors = new List<string>();
-        using var objectSpace = objectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Bo.Application));
+        using var objectSpace = objectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Bo.ApplicationProfileInstance));
         MigrationImportContext.ApplyImportObjectSpaceHooks(objectSpace);
 
         var viaMinistryTypeIds = objectSpace.GetObjectsQuery<Bo.ApplicationType>()
-            .Where(t => t.ApplicationProgressRoute == Bo.ApplicationProgressRouteKind.ViaMinistries)
+            .Where(t => t.ApplicationProfileInstanceProgressRoute == Bo.ApplicationProfileInstanceProgressRouteKind.ViaMinistries)
             .Select(t => t.ID)
             .ToHashSet();
 
-        var applications = objectSpace.GetObjectsQuery<Bo.Application>()
+        var applications = objectSpace.GetObjectsQuery<Bo.ApplicationProfileInstance>()
             .Where(a => a.ApplicationType != null
                 && viaMinistryTypeIds.Contains(a.ApplicationType.ID)
                 && a.ApprovalLegProfile != null)
@@ -126,7 +126,7 @@ internal static class Visa2014ApplicationApprovalLegSnapshotBackfill
         if (!dryRun && backfilled > 0)
             objectSpace.CommitChanges();
 
-        return new Visa2014ApplicationApprovalLegSnapshotBackfillResult
+        return new Visa2014ApplicationProfileInstanceApprovalLegSnapshotBackfillResult
         {
             ApplicationsScanned = applications.Count,
             ApplicationsNeedingBackfill = needing,

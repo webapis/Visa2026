@@ -2,12 +2,12 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.Model.NodeGenerators;
 using DevExpress.ExpressApp.SystemModule;
-using Visa2026.Module.BusinessObjects.OfficerShell;
 
 namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
-/// Application navigation item for the officer shell (staged / in-process / templates).
+/// Strips the retired officer-shell navigation item. Staged / in-process / templates
+/// now live as native items under the Application Profiles folder.
 /// </summary>
 public sealed class OfficerShellModelUpdater : ModelNodesGeneratorUpdater<NavigationItemNodeGenerator>
 {
@@ -16,23 +16,14 @@ public sealed class OfficerShellModelUpdater : ModelNodesGeneratorUpdater<Naviga
     public override void UpdateNode(ModelNode node)
     {
         var rootNode = (IModelRootNavigationItems)node;
-        var navigationItems = rootNode.Items;
-        var views = rootNode.Application.Views;
-
-        if (views[OfficerShellViewIds.DetailView] is not IModelDetailView detailView)
+        var applicationNav = rootNode.Items["Application"];
+        if (applicationNav == null)
             return;
 
-        detailView.Caption = "Application Profiles";
+        if (applicationNav.Items[NavItemId] is IModelNavigationItem leftover)
+            leftover.Remove();
 
-        var applicationNav = navigationItems["Application"]
-            ?? navigationItems.AddNode<IModelNavigationItem>("Application");
-        applicationNav.Caption ??= "Application";
-
-        var navItem = applicationNav.Items[NavItemId]
-            ?? applicationNav.Items.AddNode<IModelNavigationItem>(NavItemId);
-        navItem.View = detailView;
-        navItem.Caption = "Application Profiles";
-        navItem.ImageName = "BO_List";
-        navItem.Index = 0;
+        if (applicationNav.Items["OfficerShellHost"] is IModelNavigationItem leftoverHost)
+            leftoverHost.Remove();
     }
 }

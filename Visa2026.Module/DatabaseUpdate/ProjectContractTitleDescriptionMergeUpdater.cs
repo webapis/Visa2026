@@ -149,7 +149,7 @@ public sealed class ProjectContractTitleDescriptionMergeUpdater : ModuleUpdater
         var id = contract.ID;
         int count = ObjectSpace.GetObjectsQuery<Person>()
             .Count(p => p.ProjectContract != null && p.ProjectContract.ID == id);
-        count += ObjectSpace.GetObjectsQuery<Application>()
+        count += ObjectSpace.GetObjectsQuery<ApplicationProfileInstance>()
             .Count(a => a.ProjectContract != null && a.ProjectContract.ID == id);
         count += ObjectSpace.GetObjectsQuery<UserReportTemplateProjectContract>()
             .Count(l => l.ProjectContractId == id);
@@ -163,7 +163,7 @@ public sealed class ProjectContractTitleDescriptionMergeUpdater : ModuleUpdater
                      .ToList())
             person.ProjectContract = to;
 
-        foreach (var application in ObjectSpace.GetObjectsQuery<Application>()
+        foreach (var application in ObjectSpace.GetObjectsQuery<ApplicationProfileInstance>()
                      .Where(a => a.ProjectContract != null && a.ProjectContract.ID == from.ID)
                      .ToList())
             application.ProjectContract = to;

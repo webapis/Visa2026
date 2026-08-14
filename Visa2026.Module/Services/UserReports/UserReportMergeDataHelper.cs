@@ -10,14 +10,14 @@ namespace Visa2026.Module.Services.UserReports;
 /// <summary>Shared data shaping for Word and Excel user report merge.</summary>
 public static class UserReportMergeDataHelper
 {
-    public static IList<ApplicationItem> GetActiveApplicationItems(Application application) =>
+    public static IList<ApplicationRosterMergeLine> GetActiveApplicationItems(ApplicationProfileInstance application) =>
         ApplicationRosterHelper.GetMergeLineItems(application);
 
     /// <summary>
-    /// Loads roster lines for merge: <see cref="ApplicationPerson"/> projections when present,
-    /// otherwise legacy <see cref="ApplicationItem"/> rows from the database.
+    /// Loads roster lines for merge from skip-navigation People + ResolvedLinks
+    /// into <see cref="ApplicationRosterMergeLine"/> projections.
     /// </summary>
-    public static IList<ApplicationItem> GetActiveApplicationItems(IObjectSpace objectSpace, Application application)
+    public static IList<ApplicationRosterMergeLine> GetActiveApplicationItems(IObjectSpace objectSpace, ApplicationProfileInstance application)
     {
         if (objectSpace == null)
             throw new ArgumentNullException(nameof(objectSpace));
@@ -27,7 +27,7 @@ public static class UserReportMergeDataHelper
         return ApplicationRosterHelper.GetMergeLineItems(objectSpace, application);
     }
 
-    public static Dictionary<string, object> BuildApplicationHeaderDictionary(Application application)
+    public static Dictionary<string, object> BuildApplicationHeaderDictionary(ApplicationProfileInstance application)
     {
         var data = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
         {
@@ -40,7 +40,7 @@ public static class UserReportMergeDataHelper
     }
 
     /// <summary>Row keys aligned with <c>Sanaw_ckl.docx</c> / <c>Sanaw_uzt.docx</c> (14-column sanawy).</summary>
-    public static Dictionary<string, object> BuildSanawyRowDictionary(ApplicationItem item, int rowNo) =>
+    public static Dictionary<string, object> BuildSanawyRowDictionary(ApplicationRosterMergeLine item, int rowNo) =>
         WithAliasKeys(new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
         {
             ["RowNo"] = rowNo,
@@ -68,8 +68,8 @@ public static class UserReportMergeDataHelper
         });
 
     public static List<Dictionary<string, object>> BuildSanawyStyleRows(
-        Application application,
-        IList<ApplicationItem>? applicationItems = null)
+        ApplicationProfileInstance application,
+        IList<ApplicationRosterMergeLine>? applicationItems = null)
     {
         var items = applicationItems != null && applicationItems.Count > 0
             ? applicationItems.Where(i => i != null).ToList()
@@ -133,8 +133,8 @@ public static class UserReportMergeDataHelper
                 && placeholderKey.Contains(propertyName, StringComparison.OrdinalIgnoreCase)));
 
     public static List<Dictionary<string, object>> BuildRegistrationForm16StyleRows(
-        Application application,
-        IList<ApplicationItem>? applicationItems = null)
+        ApplicationProfileInstance application,
+        IList<ApplicationRosterMergeLine>? applicationItems = null)
     {
         var items = applicationItems != null && applicationItems.Count > 0
             ? applicationItems.Where(i => i != null).ToList()
@@ -146,8 +146,8 @@ public static class UserReportMergeDataHelper
     }
 
     public static List<Dictionary<string, object>> BuildSahsyKagyzStyleRows(
-        Application application,
-        IList<ApplicationItem>? applicationItems = null)
+        ApplicationProfileInstance application,
+        IList<ApplicationRosterMergeLine>? applicationItems = null)
     {
         var items = applicationItems != null && applicationItems.Count > 0
             ? applicationItems.Where(i => i != null).ToList()
@@ -159,8 +159,8 @@ public static class UserReportMergeDataHelper
     }
 
     public static List<Dictionary<string, object>> BuildWizaYatyrylmakSanawStyleRows(
-        Application application,
-        IList<ApplicationItem>? applicationItems = null)
+        ApplicationProfileInstance application,
+        IList<ApplicationRosterMergeLine>? applicationItems = null)
     {
         var items = applicationItems != null && applicationItems.Count > 0
             ? applicationItems.Where(i => i != null).ToList()
@@ -172,7 +172,7 @@ public static class UserReportMergeDataHelper
     }
 
     /// <summary>Row keys for <c>Excel/wiza_yatyrylmak_sanaw.xlsx</c> (and Word if used): App_Cancel_Visa list; stacked CurrentVisa + NextVisa per row.</summary>
-    public static Dictionary<string, object> BuildWizaYatyrylmakSanawExcelRowDictionary(ApplicationItem item, int rowNumber)
+    public static Dictionary<string, object> BuildWizaYatyrylmakSanawExcelRowDictionary(ApplicationRosterMergeLine item, int rowNumber)
     {
         var row = new Dictionary<string, object>(BuildWizaYatyrylmakSanawRowDictionary(item, rowNumber), StringComparer.OrdinalIgnoreCase)
         {
@@ -182,7 +182,7 @@ public static class UserReportMergeDataHelper
     }
 
     /// <summary>Row keys for <c>wiza_yatyrylmak_sanaw</c> merge (Word <c>{{ds.rows.*}}</c> or Excel <c>{{.*}}</c>).</summary>
-    public static Dictionary<string, object> BuildWizaYatyrylmakSanawRowDictionary(ApplicationItem item, int rowNo) =>
+    public static Dictionary<string, object> BuildWizaYatyrylmakSanawRowDictionary(ApplicationRosterMergeLine item, int rowNo) =>
         WithAliasKeys(new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
         {
             ["RowNo"] = rowNo,
@@ -200,7 +200,7 @@ public static class UserReportMergeDataHelper
         });
 
     /// <summary>Row keys for <c>sahsy_kagyz.docx</c> (ŞAHSY KAGYZY, ItemRows + photo).</summary>
-    public static Dictionary<string, object> BuildSahsyKagyzRowDictionary(ApplicationItem item, int rowNumber) =>
+    public static Dictionary<string, object> BuildSahsyKagyzRowDictionary(ApplicationRosterMergeLine item, int rowNumber) =>
         WithAliasKeys(new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
         {
             ["RowNumber"] = rowNumber,
@@ -227,7 +227,7 @@ public static class UserReportMergeDataHelper
         });
 
     /// <summary>Row keys for <c>Forma_16.docx</c> (registration certificate, ItemRows).</summary>
-    public static Dictionary<string, object> BuildRegistrationForm16RowDictionary(ApplicationItem item, int rowNumber) =>
+    public static Dictionary<string, object> BuildRegistrationForm16RowDictionary(ApplicationRosterMergeLine item, int rowNumber) =>
         WithAliasKeys(new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
         {
             ["RowNumber"] = rowNumber,
@@ -310,7 +310,7 @@ public static class UserReportMergeDataHelper
 
     /// <summary>Row list for a single-line ItemRows template (Contract, Forma 16, sahsy_kagyz, etc.).</summary>
     public static List<Dictionary<string, object>> BuildSingleItemRowsForTemplate(
-        ApplicationItem item,
+        ApplicationRosterMergeLine item,
         UserReportTemplate template,
         int rowNo = 1)
     {
@@ -405,7 +405,7 @@ public static class UserReportMergeDataHelper
     /// Row keys for Excel list templates (<c>433_gurlusyk_uzt.xlsx</c>, <c>433-ek_uzt.xlsx</c>) and Word sanawy lists.
     /// Supports both <c>{{.Property}}</c> and <c>{{ds.rows.Property}}</c>.
     /// </summary>
-    public static Dictionary<string, object> BuildExcelItemListRowDictionary(ApplicationItem item, int rowNumber)
+    public static Dictionary<string, object> BuildExcelItemListRowDictionary(ApplicationRosterMergeLine item, int rowNumber)
     {
         var row = new Dictionary<string, object>(BuildSanawyRowDictionary(item, rowNumber), StringComparer.OrdinalIgnoreCase)
         {
@@ -438,7 +438,7 @@ public static class UserReportMergeDataHelper
     }
 
     /// <summary>Row keys aligned with labor-contract Word templates and Contract.docx.</summary>
-    public static Dictionary<string, object> BuildItemRowDictionary(ApplicationItem item, int rowNumber) =>
+    public static Dictionary<string, object> BuildItemRowDictionary(ApplicationRosterMergeLine item, int rowNumber) =>
         WithAliasKeys(new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
         {
             ["RowNumber"] = rowNumber,

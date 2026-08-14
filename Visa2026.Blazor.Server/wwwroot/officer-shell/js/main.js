@@ -29,6 +29,7 @@ import { getApplicationProfileNavItems, renderNavBadge } from './nav-ui.js';
 let route = parseRoute();
 let globalSearch = '';
 let tplRailSearch = '';
+let issuedFocusKey = null;
 
 function esc(s) {
   return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
@@ -102,7 +103,7 @@ function renderSidebar(compact) {
       { path: '#/people', icon: '👤', title: 'People' },
       { path: '#/organizations', icon: '🏢', title: 'Organizations' },
     ]},
-    { section: 'Application profiles', items: getApplicationProfileNavItems(s) },
+    { section: 'ApplicationProfileInstance profiles', items: getApplicationProfileNavItems(s) },
     { section: 'Projects and contracts', items: [{ path: '#/projects', icon: '💼', title: 'Projects / Contracts' }] },
     { section: 'Compliance and reports', items: [
       { path: '#/report-dashboard', icon: '📊', title: 'Report Dashboard' },
@@ -308,7 +309,7 @@ function renderCase() {
   let mainCls = '';
 
   if (tab === 'overview') {
-    main = renderCaseOverview(c);
+    main = renderCaseOverview(c, issuedFocusKey);
     rail = renderCaseRail(c, { full: true });
   } else if (tab === 'people') {
     main = renderCasePeopleTab(c);
@@ -329,7 +330,7 @@ function renderCase() {
     layoutCls = ' cw-layout--wide';
     mainCls = ' cw-main--full';
   } else {
-    main = renderCaseOverview(c);
+    main = renderCaseOverview(c, issuedFocusKey);
     rail = renderCaseRail(c, { full: true });
   }
 
@@ -451,6 +452,13 @@ function bindEvents() {
   });
   document.querySelectorAll('[data-ws-tab]').forEach(btn => {
     btn.addEventListener('click', () => navigate(`#/case/${route.id}/${btn.dataset.wsTab}`));
+  });
+  document.querySelectorAll('[data-issued-key]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.issuedKey;
+      issuedFocusKey = issuedFocusKey === key ? null : key;
+      setRoute(parseRoute());
+    });
   });
   document.querySelectorAll('[data-wizard-step]').forEach(btn => {
     btn.addEventListener('click', () => navigate(`#/templates/wizard/${btn.dataset.wizardStep}`));

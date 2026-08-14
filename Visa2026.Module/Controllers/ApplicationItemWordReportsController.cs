@@ -12,7 +12,7 @@ using Visa2026.Module.Services.WordReports;
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// Opens item-scoped Resminamalar for one or more selected <see cref="ApplicationItem"/> rows from ListView.
+/// Opens item-scoped Resminamalar for one or more selected <see cref="ApplicationRosterMergeLine"/> rows from ListView.
 /// </summary>
 public class ApplicationItemWordReportsController : ViewController<ListView>
 {
@@ -20,7 +20,7 @@ public class ApplicationItemWordReportsController : ViewController<ListView>
 
     public ApplicationItemWordReportsController()
     {
-        TargetObjectType = typeof(ApplicationItem);
+        TargetObjectType = typeof(Person);
         Active["Slice10CloseOut"] = false;
 
         resminamalarAction = new SimpleAction(this, "ViewApplicationItemWordReports", "View");
@@ -113,8 +113,8 @@ public class ApplicationItemWordReportsController : ViewController<ListView>
         var applicationId = (Guid)ObjectSpace.GetKeyValue(application!);
         slotService.OpenResminamalarAsync(new ResminamalarSlotRequest
         {
-            ApplicationId = applicationId,
-            Scope = WordReportPackageScope.ApplicationItem,
+            ApplicationProfileInstanceId = applicationId,
+            Scope = WordReportPackageScope.RosterPerson,
             ApplicationItemIds = itemIds,
             EmptyCatalogMessage = emptyMessage,
         }, VisaPreviewSlotViewHelper.ResolveOwnerViewId(View)).GetAwaiter().GetResult();
@@ -123,7 +123,7 @@ public class ApplicationItemWordReportsController : ViewController<ListView>
     private List<Guid> GetSelectedItemIds()
     {
         var selected = View.SelectedObjects?
-            .OfType<ApplicationItem>()
+            .OfType<Person>()
             .Where(item => item != null)
             .ToList();
 
@@ -136,7 +136,7 @@ public class ApplicationItemWordReportsController : ViewController<ListView>
                 .ToList();
         }
 
-        if (View.CurrentObject is ApplicationItem current)
+        if (View.CurrentObject is ApplicationRosterMergeLine current)
         {
             var id = (Guid)ObjectSpace.GetKeyValue(current);
             return id == Guid.Empty ? new List<Guid>() : new List<Guid> { id };

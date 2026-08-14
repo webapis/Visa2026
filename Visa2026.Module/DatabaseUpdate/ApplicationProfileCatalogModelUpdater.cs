@@ -2,12 +2,13 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.Model.NodeGenerators;
 using DevExpress.ExpressApp.SystemModule;
+using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.BusinessObjects.ApplicationProfileCatalog;
 
 namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
-/// Configuration navigation item for the Application Profile catalog DetailView.
+/// Application Profiles folder item for the Application Profile catalog DetailView.
 /// </summary>
 public sealed class ApplicationProfileCatalogModelUpdater : ModelNodesGeneratorUpdater<NavigationItemNodeGenerator>
 {
@@ -22,23 +23,27 @@ public sealed class ApplicationProfileCatalogModelUpdater : ModelNodesGeneratorU
         if (views[ApplicationProfileCatalogViewIds.DetailView] is not IModelDetailView detailView)
             return;
 
-        detailView.Caption = "Application Profile";
+        detailView.Caption = ApplicationProfileInstanceProgressRouteNavigation.CaptionTemplates;
 
-        var configuration = navigationItems["Configuration"]
-            ?? navigationItems.AddNode<IModelNavigationItem>("Configuration");
-        configuration.Caption ??= "Configuration";
+        if (navigationItems["Configuration"] is IModelNavigationItem configuration)
+        {
+            if (configuration.Items["ApplicationProfile"] is IModelNavigationItem legacyList)
+                legacyList.Remove();
+            if (configuration.Items["ApplicationProfileCatalogHost"] is IModelNavigationItem legacyHostList)
+                legacyHostList.Remove();
+            if (configuration.Items[NavItemId] is IModelNavigationItem legacyCatalog)
+                legacyCatalog.Remove();
+        }
 
-        // Strip native BO list / accidental host list entries under Configuration.
-        if (configuration.Items["ApplicationProfile"] is IModelNavigationItem legacyList)
-            legacyList.Remove();
-        if (configuration.Items["ApplicationProfileCatalogHost"] is IModelNavigationItem legacyHostList)
-            legacyHostList.Remove();
+        var applicationNav = navigationItems["Application"]
+            ?? navigationItems.AddNode<IModelNavigationItem>("Application");
+        applicationNav.Caption = ApplicationProfileInstanceProgressRouteNavigation.CaptionGroup;
 
-        var navItem = configuration.Items[NavItemId]
-            ?? configuration.Items.AddNode<IModelNavigationItem>(NavItemId);
+        var navItem = applicationNav.Items[NavItemId]
+            ?? applicationNav.Items.AddNode<IModelNavigationItem>(NavItemId);
         navItem.View = detailView;
-        navItem.Caption = "Application Profile";
+        navItem.Caption = ApplicationProfileInstanceProgressRouteNavigation.CaptionTemplates;
         navItem.ImageName = "BO_List";
-        navItem.Index = 0;
+        navItem.Index = 2;
     }
 }

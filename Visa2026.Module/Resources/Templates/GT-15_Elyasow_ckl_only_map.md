@@ -22,7 +22,7 @@
 | Display name (in app) | GT-15 Elyasow Çalık — çakylyk only (Turkmenenergo) |
 | **Validation root** (`UserReportBoType`) | **`Application`** |
 | **Template family** | **`AppScalar`** — one letter per application |
-| **Applicable application types** | **`App_Inv`** only (Application for Invitation) |
+| **Applicable application types** | **`App_Inv`** only (ApplicationProfileInstance for Invitation) |
 | Applicable project contracts | **`GT-15`** — `NameTm` contains `GT-15` |
 | Visibility criteria | `null` |
 | Sort order (seed) | `60` |

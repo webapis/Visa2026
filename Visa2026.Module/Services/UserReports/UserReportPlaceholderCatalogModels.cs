@@ -25,7 +25,7 @@ public sealed class UserReportPlaceholderCatalogEntryDto
     /// <summary><c>Header</c>, <c>Row</c>, or <c>Both</c>.</summary>
     public List<string> Scopes { get; set; } = [];
 
-    /// <summary><c>Application</c> and/or <c>ApplicationItem</c>.</summary>
+    /// <summary><c>Application</c> and/or <c>ApplicationRosterMergeLine</c>.</summary>
     public List<string> RootBoTypes { get; set; } = [];
 
     public string ExampleValue { get; set; } = string.Empty;

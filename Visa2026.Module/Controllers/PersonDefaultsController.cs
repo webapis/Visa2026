@@ -5,7 +5,7 @@ using Visa2026.Module.Services;
 namespace Visa2026.Module.Controllers
 {
     // This controller sets the default value for the Person.IsEmployee flag when a new Person
-    // is created from an ApplicationItem with a fixed category (Employee or FamilyMember).
+    // is created from an ApplicationRosterMergeLine with a fixed category (Employee or FamilyMember).
     public class PersonDefaultsController : ObjectViewController<DetailView, Person>
     {
         protected override void OnActivated()
@@ -17,13 +17,13 @@ namespace Visa2026.Module.Controllers
             {
                 // The context (the view that opened this one) is passed via the ObjectSpace.Owner.
                 // When creating a new object from a related property, the owner is a 'Link' object.
-                if (View.ObjectSpace.Owner is Link link && link.ListView.CollectionSource is PropertyCollectionSource propertyCollectionSource && propertyCollectionSource.MasterObject is ApplicationItem appItem)
+                if (View.ObjectSpace.Owner is Link link && link.ListView.CollectionSource is PropertyCollectionSource propertyCollectionSource && propertyCollectionSource.MasterObject is ApplicationRosterMergeLine appItem)
                 {
-                    // If we have the ApplicationItem and its parent Application, we can set the default.
-                    if (appItem.Application != null)
+                    // If we have the ApplicationRosterMergeLine and its parent Application, we can set the default.
+                    if (appItem.ApplicationProfileInstance != null)
                     {
                         var person = (Person)View.CurrentObject;
-                        var category = appItem.Application.ApplicationType?.Category;
+                        var category = appItem.ApplicationProfileInstance.ApplicationType?.Category;
 
                         if (category == ApplicationTypeCategory.Employee)
                         {

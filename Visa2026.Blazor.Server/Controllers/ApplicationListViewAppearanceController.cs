@@ -10,7 +10,7 @@ public sealed class ApplicationListViewAppearanceController : ViewController<Lis
 
     public ApplicationListViewAppearanceController()
     {
-        TargetObjectType = typeof(Application);
+        TargetObjectType = typeof(ApplicationProfileInstance);
     }
 
     protected override void OnActivated()

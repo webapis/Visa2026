@@ -20,7 +20,7 @@ public class ApplicationProfileLockHelperTests
     [Fact]
     public void IsApplicationAtOrPastLockStateA_UsesLatestPrimaryStateCode()
     {
-        var app = new Application { LatestPrimaryStateCode = "REVIEW_1_STARTED" };
+        var app = new ApplicationProfileInstance { LatestPrimaryStateCode = "REVIEW_1_STARTED" };
         Assert.True(ApplicationProfileLockHelper.IsApplicationAtOrPastLockStateA(app));
     }
 
@@ -28,12 +28,12 @@ public class ApplicationProfileLockHelperTests
     public void IsProfileConfigLocked_UsesLinkedApplicationsCollection()
     {
         var profile = new ApplicationProfile();
-        var app = new Application
+        var app = new ApplicationProfileInstance
         {
             ApplicationProfile = profile,
             LatestPrimaryStateCode = "PROCESS_STARTED",
         };
-        profile.Applications = [app];
+        profile.Instances = [app];
 
         Assert.True(ApplicationProfileLockHelper.IsProfileConfigLocked(profile));
     }

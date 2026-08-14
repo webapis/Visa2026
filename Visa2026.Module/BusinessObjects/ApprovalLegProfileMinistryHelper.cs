@@ -578,7 +578,7 @@ public static class ApprovalLegProfileMinistryHelper
     }
 
 
-    public static void ApplySnapshot(IObjectSpace objectSpace, Application application, ApprovalLegProfile? profile)
+    public static void ApplySnapshot(IObjectSpace objectSpace, ApplicationProfileInstance application, ApprovalLegProfile? profile)
     {
         if (application.ApprovalLegSnapshots == null)
             return;
@@ -593,8 +593,8 @@ public static class ApprovalLegProfileMinistryHelper
                      .Where(l => l.ApprovingMinistry != null)
                      .OrderBy(l => l.Sequence))
         {
-            var snapshot = objectSpace.CreateObject<ApplicationApprovalLegSnapshot>();
-            snapshot.Application = application;
+            var snapshot = objectSpace.CreateObject<ApplicationProfileInstanceApprovalLegSnapshot>();
+            snapshot.ApplicationProfileInstance = application;
             snapshot.Sequence = leg.Sequence;
             snapshot.ApprovingMinistryId = leg.ApprovingMinistry.ID;
             snapshot.MinistryShortName = leg.ApprovingMinistry.ShortNameTm ?? leg.ApprovingMinistry.NameTm ?? string.Empty;
@@ -613,12 +613,12 @@ public static class ApprovalLegProfileMinistryHelper
     /// Copies ministry short names from <see cref="Application.ApprovalLegProfile"/> when snapshots
     /// are missing or incomplete (imported apps, profile set outside the detail controller).
     /// </summary>
-    public static void EnsureSnapshots(IObjectSpace? objectSpace, Application? application)
+    public static void EnsureSnapshots(IObjectSpace? objectSpace, ApplicationProfileInstance? application)
     {
         if (objectSpace == null || application == null || application.ApprovalLegProfile == null)
             return;
 
-        if (!ApplicationProgressProfileResolver.RequiresApprovalLegProfile(application))
+        if (!ApplicationProfileInstanceProgressProfileResolver.RequiresApprovalLegProfile(application))
             return;
 
         var expectedLegs = GetLegCount(application.ApprovalLegProfile);
@@ -634,10 +634,10 @@ public static class ApprovalLegProfileMinistryHelper
     }
 
     public static bool IsProfileReferencedByApplications(ApprovalLegProfile profile, IObjectSpace objectSpace) =>
-        objectSpace.GetObjectsQuery<Application>()
+        objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
             .Any(a => a.ApprovalLegProfile != null && a.ApprovalLegProfile.ID == profile.ID);
 
-    public static string? GetMinistryShortNameForLeg(Application? application, int leg)
+    public static string? GetMinistryShortNameForLeg(ApplicationProfileInstance? application, int leg)
     {
         if (application == null || leg < 1)
             return null;
@@ -657,14 +657,14 @@ public static class ApprovalLegProfileMinistryHelper
     }
 
     public static string? GetMinistryShortNameForProgressStep(
-        Application? application,
+        ApplicationProfileInstance? application,
         string? stateCode,
         string? locationCode)
     {
-        if (ApplicationProgressLegCodes.TryParseMinistryLegFromLocationCode(locationCode, out var legFromLocation))
+        if (ApplicationProfileInstanceProgressLegCodes.TryParseMinistryLegFromLocationCode(locationCode, out var legFromLocation))
             return GetMinistryShortNameForLeg(application, legFromLocation);
 
-        if (ApplicationProgressLegCodes.TryParseMinistryLegFromStateCode(stateCode, out var legFromState))
+        if (ApplicationProfileInstanceProgressLegCodes.TryParseMinistryLegFromStateCode(stateCode, out var legFromState))
             return GetMinistryShortNameForLeg(application, legFromState);
 
         return null;

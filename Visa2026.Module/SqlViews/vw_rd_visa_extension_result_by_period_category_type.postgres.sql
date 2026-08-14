@@ -3,7 +3,7 @@ DROP VIEW IF EXISTS vw_rd_visa_extension_result_by_period_category_type;
 CREATE VIEW vw_rd_visa_extension_result_by_period_category_type AS
 SELECT
     b."ID",
-    b."ApplicationOid",
+    b."ApplicationProfileInstanceOid",
     b."PersonOid",
     b."ExpiringVisaID",
     b."PassportID",
@@ -29,8 +29,8 @@ SELECT
     ) AS "StatusLabel",
     b."IsArchived"
 FROM vw_rd_visa_app_progress b
-LEFT JOIN "Applications" a
-    ON a."ID" = b."ApplicationOid" AND COALESCE(a."GCRecord", 0) = 0
+LEFT JOIN "ApplicationProfileInstances" a
+    ON a."ID" = b."ApplicationProfileInstanceOid" AND COALESCE(a."GCRecord", 0) = 0
 LEFT JOIN "VisaPeriods" vp
     ON vp."ID" = a."VisaPeriodID" AND COALESCE(vp."GCRecord", 0) = 0
 LEFT JOIN "VisaCategories" vc

@@ -9,7 +9,7 @@ using Visa2026.Module.Services.MigrationImport;
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// Opens the Application workspace when an officer activates a row on Application ListViews
+/// Opens the ApplicationProfileInstance workspace when an officer activates a row on ApplicationProfileInstance ListViews
 /// (replaces legacy <c>Application_DetailView</c> as the default drill-in).
 /// </summary>
 public sealed class ApplicationListViewWorkspaceNavigationController : ViewController<ListView>
@@ -18,7 +18,7 @@ public sealed class ApplicationListViewWorkspaceNavigationController : ViewContr
 
     public ApplicationListViewWorkspaceNavigationController()
     {
-        TargetObjectType = typeof(Application);
+        TargetObjectType = typeof(ApplicationProfileInstance);
     }
 
     protected override void OnActivated()
@@ -42,7 +42,7 @@ public sealed class ApplicationListViewWorkspaceNavigationController : ViewContr
 
     private void OnCustomHandleProcessSelectedItem(object? sender, HandledEventArgs e)
     {
-        if (View.CurrentObject is not Application application)
+        if (View.CurrentObject is not ApplicationProfileInstance application)
             return;
 
         if (View.ObjectSpace.IsNewObject(application))

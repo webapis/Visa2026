@@ -24,7 +24,7 @@ public class InvitationImporter
         }
         foreach (var item in items)
         {
-            var appNum = item.Application?.ApplicationNumber ?? "No App";
+            var appNum = item.ApplicationProfileInstance?.ApplicationNumber ?? "No App";
             Console.WriteLine($"  [{item.Id}] Inv#: {item.InvitationNumber} (App: {appNum}) - Issued: {item.IssuedDate:d}");
         }
         Console.WriteLine();
@@ -82,7 +82,7 @@ public class InvitationImporter
                     ["IsVisaStartAndEndDateDefined"] = record.IsVisaStartAndEndDateDefined,
                     ["VisaStartDate"] = record.VisaStartDate,
                     ["VisaEndDate"] = record.VisaEndDate,
-                    ["Application"] = record.Application != null ? new { ID = record.Application.Id } : null,
+                    ["Application"] = record.ApplicationProfileInstance != null ? new { ID = record.ApplicationProfileInstance.Id } : null,
                     ["VisaCategory"] = record.VisaCategory != null ? new { ID = record.VisaCategory.Id } : null,
                     ["VisaPeriod"] = record.VisaPeriod != null ? new { ID = record.VisaPeriod.Id } : null,
                 };

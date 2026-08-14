@@ -6,7 +6,7 @@ namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
 /// Report Dashboard Visa State row from vw_rd_visa_state.
-/// Extension Started: valid last-visa on visa-extension ApplicationItem.
+/// Extension Started: valid last-visa on visa-extension ApplicationRosterMergeLine.
 /// </summary>
 [Browsable(false)]
 public class VwRdVisaState

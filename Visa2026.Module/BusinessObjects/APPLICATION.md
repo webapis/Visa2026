@@ -1,4 +1,4 @@
-# Business Object: Application
+# Business Object: ApplicationProfileInstance
 
 ## 1. Purpose
 
@@ -26,10 +26,10 @@ Individual people and their documents are modeled on [`ApplicationItem`](Applica
 | `FullApplicationNumber` | `string` | Display/reference number (e.g. `4/-001`). | Built from format tokens on save. Max 100. |
 | `Year` | `int` | From `ApplicationDate.Year`. | Read-only. |
 | `Month` | `int` | From `ApplicationDate.Month`. | Read-only. Used when format includes month scope. |
-| `ApplicationDate` | `DateTime` | Application date. | Required. Default `DateTime.Now` on create. |
+| `ApplicationDate` | `DateTime` | ApplicationProfileInstance date. | Required. Default `DateTime.Now` on create. |
 | `ApplicationTypeQuickCode` | `string` | `[NotMapped]` 3-digit ministry code UI. | Resolves to `ApplicationType` via `SelectionCode`. See **`docs/APPLICATION_BO_TYPE_SELECTION_REFACTOR.md`**. |
 | `ApplicationType` | `ApplicationType` | Procedure type (invitation, extension, registration, …). | Required. Read-only on detail after selection. `ImmediatePostData`. Drives all `Show*` flags. |
-| `CreationProgressRoute` | `ApplicationProgressRouteKind?` | Optional route when creating progress. | |
+| `CreationProgressRoute` | `ApplicationProfileInstanceProgressRouteKind?` | Optional route when creating progress. | |
 | `ProjectContract` | `ProjectContract` | Construction project / contract. | `ShowProjectContract` |
 | `Urgency` | `Urgency` | Processing priority. | `ShowUrgency` |
 | `VisaPeriod` | `VisaPeriod` | Requested visa duration. | `ShowVisaPeriod` |
@@ -61,13 +61,13 @@ Individual people and their documents are modeled on [`ApplicationItem`](Applica
 | `Invitations` | `Invitation` | Aggregated | `ShowInvitations` |
 | `Rejections` | `Rejection` | Aggregated | `ShowRejections` |
 | `WorkPermits` | `WorkPermit` | Aggregated | `ShowWorkPermits` |
-| `ProgressHistory` | `ApplicationProgress` | Aggregated | Always (progress workflow) |
+| `ProgressHistory` | `ApplicationProfileInstanceProgress` | Aggregated | Always (progress workflow) |
 
 **Not on `Application`:** `Registrations`, `BusinessTrips`, `Visas`. Registration travel/check-in data is on **`ApplicationItem`**. **`Visa`** records link via `ApplicationItem` / `IssuingApplicationItem` (see **`Visa.md`**).
 
 ---
 
-## 5. Application numbering
+## 5. ApplicationProfileInstance numbering
 
 On **first save** (`OnSaving`, new object):
 
@@ -84,7 +84,7 @@ Importer and child sheets should reference **`FullApplicationNumber`**, not lega
 
 ## 6. Business rules and logic
 
-### Application type selection
+### ApplicationProfileInstance type selection
 
 - Persisted type: **`ApplicationType`** only (category = `ApplicationType.Category`: Employee / FamilyMember / Both).
 - UI quick code: **`ApplicationTypeQuickCode`** → `ApplicationTypeSelectionController` resolves `SelectionCode`.
@@ -93,12 +93,12 @@ Importer and child sheets should reference **`FullApplicationNumber`**, not lega
 
 ### Initial progress
 
-[`ApplicationProgressInitializer`](ApplicationProgressInitializer.cs) adds the first `ApplicationProgress` row (`IS_BEING_PREPARED` @ `AT_OFFICE`, date = `ApplicationDate`) when the application is created, unless history already exists or `SuppressInitialProgress` is true (VISA2014 OData import).
+[`ApplicationProfileInstanceProgressInitializer`](ApplicationProfileInstanceProgressInitializer.cs) adds the first `ApplicationProfileInstanceProgress` row (`IS_BEING_PREPARED` @ `AT_OFFICE`, date = `ApplicationDate`) when the application is created, unless history already exists or `SuppressInitialProgress` is true (VISA2014 OData import).
 
 ### Progress / “current state”
 
 - **No** persisted `CurrentState` on `Application` (legacy column removed).
-- List row color and “current state” semantics come from **latest `ApplicationProgress`** in `ProgressHistory` — [`ApplicationProgressHelper`](ApplicationProgressHelper.cs), [`docs/APPLICATION_LISTVIEW_STATE_COLORS.md`](../../docs/APPLICATION_LISTVIEW_STATE_COLORS.md).
+- List row color and “current state” semantics come from **latest `ApplicationProfileInstanceProgress`** in `ProgressHistory` — [`ApplicationProfileInstanceProgressHelper`](ApplicationProfileInstanceProgressHelper.cs), [`docs/APPLICATION_LISTVIEW_STATE_COLORS.md`](../../docs/APPLICATION_LISTVIEW_STATE_COLORS.md).
 
 ### Visa issuance
 
@@ -122,7 +122,7 @@ Header fields and collections use `[Appearance]` with `ApplicationType.Show*`. N
 
 - **Navigation:** `NavigationItem(false)` — opened from application lists / workflows, not a top-level menu node.
 - **Default property:** `ApplicationNumber`.
-- **Detail:** Application type code + read-only type name; nested tabs/list for items, invitations, work permits, progress.
+- **Detail:** ApplicationProfileInstance type code + read-only type name; nested tabs/list for items, invitations, work permits, progress.
 - **`OnCreated`:** sets `ApplicationDate`, default lookups (urgency, visa type/category/period, default project contract), initial progress.
 
 ---
@@ -132,7 +132,7 @@ Header fields and collections use `[Appearance]` with `ApplicationType.Show*`. N
 | Topic | Location |
 |-------|----------|
 | Line items / registration on item | [`ApplicationItem.md`](ApplicationItem.md) |
-| Application type catalog | `DatabaseUpdate/LookupCatalogs/ApplicationTypeConfigurationCatalog.json` |
+| ApplicationProfileInstance type catalog | `DatabaseUpdate/LookupCatalogs/ApplicationTypeConfigurationCatalog.json` |
 | Number format tokens | [`Resources/AppNumberFormat.md`](../Resources/AppNumberFormat.md) |
 | Type quick code UI | [`docs/APPLICATION_BO_TYPE_SELECTION_REFACTOR.md`](../../docs/APPLICATION_BO_TYPE_SELECTION_REFACTOR.md) |
 | Legacy removals | [`docs/DEPRECATED.md`](../../docs/DEPRECATED.md) |

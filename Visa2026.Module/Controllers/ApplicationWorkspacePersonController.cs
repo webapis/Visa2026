@@ -8,7 +8,7 @@ using Visa2026.Module.Services.ApplicationWorkspace;
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// Link / unlink <see cref="Person"/> rows on the Application workspace host.
+/// Link / unlink <see cref="Person"/> rows on the ApplicationProfileInstance workspace host.
 /// </summary>
 public sealed class ApplicationWorkspacePersonController : ViewController<DetailView>
 {
@@ -23,7 +23,7 @@ public sealed class ApplicationWorkspacePersonController : ViewController<Detail
         {
             Caption = "Link person",
             ImageName = "Action_LinkUnlink_Link",
-            ToolTip = "Link an existing person to this Application roster.",
+            ToolTip = "Link an existing person to this ApplicationProfileInstance roster.",
             SelectionDependencyType = SelectionDependencyType.Independent,
         };
         _linkPersonAction.Execute += (_, _) => TriggerLinkPerson();
@@ -32,7 +32,7 @@ public sealed class ApplicationWorkspacePersonController : ViewController<Detail
         {
             Caption = "Unlink person",
             ImageName = "Action_LinkUnlink_Unlink",
-            ToolTip = "Remove a person from this Application roster.",
+            ToolTip = "Remove a person from this ApplicationProfileInstance roster.",
             SelectionDependencyType = SelectionDependencyType.Independent,
         };
         _unlinkPersonAction.Execute += (_, _) => TriggerUnlinkPerson();
@@ -58,7 +58,7 @@ public sealed class ApplicationWorkspacePersonController : ViewController<Detail
 
     public void TriggerLinkPerson()
     {
-        var applicationId = ResolveApplicationId();
+        var applicationId = ResolveApplicationProfileInstanceId();
         if (applicationId == Guid.Empty)
             return;
 
@@ -75,7 +75,7 @@ public sealed class ApplicationWorkspacePersonController : ViewController<Detail
 
     public void TriggerUnlinkPerson()
     {
-        var applicationId = ResolveApplicationId();
+        var applicationId = ResolveApplicationProfileInstanceId();
         if (applicationId == Guid.Empty)
             return;
 
@@ -122,16 +122,16 @@ public sealed class ApplicationWorkspacePersonController : ViewController<Detail
 
     private void UpdateActionState()
     {
-        var applicationId = ResolveApplicationId();
+        var applicationId = ResolveApplicationProfileInstanceId();
         var enabled = applicationId != Guid.Empty;
         _linkPersonAction.Enabled["Application"] = enabled;
         _unlinkPersonAction.Enabled["Application"] = enabled;
     }
 
-    private Guid ResolveApplicationId()
+    private Guid ResolveApplicationProfileInstanceId()
     {
-        if (View.CurrentObject is ApplicationWorkspaceHost host && host.ApplicationId != Guid.Empty)
-            return host.ApplicationId;
+        if (View.CurrentObject is ApplicationWorkspaceHost host && host.ApplicationProfileInstanceId != Guid.Empty)
+            return host.ApplicationProfileInstanceId;
 
         return ApplicationWorkspacePendingOpenGate.Get(Application);
     }

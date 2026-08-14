@@ -6,7 +6,7 @@ namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
 /// Drops <c>PurposeOfTravelID</c> from <c>ApplicationItems</c> and <c>TravelHistories</c>.
-/// Travel purpose on registration lines uses <see cref="BusinessObjects.ApplicationItem.CurrentPositionHistory"/>; notes use <c>TravelNotes</c> / <c>TravelHistory.Notes</c>.
+/// Travel purpose on registration lines uses <see cref="BusinessObjects.ApplicationRosterMergeLine.CurrentPositionHistory"/>; notes use <c>TravelNotes</c> / <c>TravelHistory.Notes</c>.
 /// </summary>
 public sealed class ApplicationItemPurposeOfTravelColumnsCleanupUpdater : ModuleUpdater
 {

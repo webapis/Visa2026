@@ -4,7 +4,7 @@ description: Visa transfer to new passport — process issued — part 1 of V-17
 dependsOn: VisaTransferRejected
 sync: false
 anchor:
-  entity: Application
+  entity: ApplicationProfileInstance
   key: FullApplicationNumber
   value: 3/-040
 data:
@@ -32,12 +32,12 @@ data:
     Expiration Date: 2026-08-15
     Passport Number: AE1234567
   Applications:
-  - Application Number: 040
+  - ApplicationProfileInstance Number: 040
     Date: 2026-03-20
     Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
     Project Contract: GT-15
     Filter: Visa
-    Application Type: App_Change_Passport
+    ApplicationProfileInstance Type: App_Change_Passport
     Urgency: Adaty tertipde !
   ApplicationItems:
   - Application: 3/-040
@@ -46,7 +46,7 @@ data:
     Visa Number: TM-2026-V-026
     Previous Passport: AE1234567
     Visa Issued: true
-  ApplicationProgresses:
+  ApplicationProfileInstanceProgresses:
   - Application: 3/-040
     State: PROCESS_ISSUED
     Location: AT_MIGRATION_SERVICE

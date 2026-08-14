@@ -7,7 +7,7 @@
 +
 +The State Change Tracking System is a generic, rule-based engine designed to log the lifecycle and state transitions of any business object in the application. Unlike the `SyncRule` engine which *updates* data, this engine *records* history.
 +
-+It allows administrators to define dynamic rules in the UI (e.g., "When an Application is Approved, log a 'Process Completed' entry for the associated Visa").
++It allows administrators to define dynamic rules in the UI (e.g., "When an ApplicationProfileInstance is Approved, log a 'Process Completed' entry for the associated Visa").
 +
 +## 2. Architecture
 +
@@ -26,7 +26,7 @@
 +| Property | Type | Description |
 +| :--- | :--- | :--- |
 +| **Name** | `String` | Unique name of the rule (e.g., "Log Visa Extension Start"). |
-+| **Source Type** | `Type` | The Business Object type that triggers the rule (e.g., `ApplicationProgress`). |
++| **Source Type** | `Type` | The Business Object type that triggers the rule (e.g., `ApplicationProfileInstanceProgress`). |
 +| **Trigger Type** | `Enum` | Events: `Save`, `Create`, `Update`, `Delete`, `PropertyChanged`. |
 +| **Source Property** | `String` | (Optional) specific property to watch (e.g., `State`). |
 +| **Source Criteria** | `Criteria` | (Optional) Logic to filter triggers (e.g., `[State] = 'Approved'`). |
@@ -84,16 +84,16 @@
 +## 6. Example Scenarios
 +
 +### Scenario A: Track Visa Extension Process
-+*Goal: When an Application is sent to the ministry, the Visa history should show "Extension Process Started".*
++*Goal: When an ApplicationProfileInstance is sent to the ministry, the Visa history should show "Extension Process Started".*
 +
 +*   **Rule Configuration**:
 +    *   **Name**: `Log Visa Extension Start`
 +    *   **Source Type**: `Application`
 +    *   **Trigger Type**: `PropertyChanged` (`CurrentState`)
 +    *   **Source Criteria**: `[CurrentState.Code] = 'SENT_TO_MINISTRY' And [ApplicationType.Code] = 'visa_extension'`
-+    *   **Target Path**: `Visas` (Collection on Application)
++    *   **Target Path**: `Visas` (Collection on ApplicationProfileInstance)
 +    *   **State**: `Extension Process Started`
-+    *   **Description**: `Application sent to ministry on @Source.ApplicationDate`
++    *   **Description**: `ApplicationProfileInstance sent to ministry on @Source.ApplicationDate`
 +
 +*   **Result (Log Entry)**:
 +    *   **Target**: Visa #1024

@@ -6,7 +6,7 @@ namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
 /// Resolves migration-service process number (Işlenmäge başlanan belgi) from progress history
-/// and formats Application lookup captions.
+/// and formats ApplicationProfileInstance lookup captions.
 /// </summary>
 public static class ApplicationProcessNumberHelper
 {
@@ -14,14 +14,14 @@ public static class ApplicationProcessNumberHelper
 
     /// <summary>
     /// Prefers <c>PROCESS_STARTED.ProcessNumber</c>, then legacy Description on that step,
-    /// then any other progress row with <see cref="ApplicationProgress.ProcessNumber"/>.
+    /// then any other progress row with <see cref="ApplicationProfileInstanceProgress.ProcessNumber"/>.
     /// </summary>
-    public static string? ResolveFromHistory(IEnumerable<ApplicationProgress>? history)
+    public static string? ResolveFromHistory(IEnumerable<ApplicationProfileInstanceProgress>? history)
     {
         if (history == null)
             return null;
 
-        ApplicationProgress? started = null;
+        ApplicationProfileInstanceProgress? started = null;
         string? anyProcessNumber = null;
 
         foreach (var progress in history)
@@ -31,7 +31,7 @@ public static class ApplicationProcessNumberHelper
 
             var code = progress.State?.Code;
             if (started == null
-                && string.Equals(code, ApplicationProgressStateCodes.ProcessStarted, StringComparison.OrdinalIgnoreCase))
+                && string.Equals(code, ApplicationProfileInstanceProgressStateCodes.ProcessStarted, StringComparison.OrdinalIgnoreCase))
             {
                 started = progress;
             }
@@ -69,7 +69,7 @@ public static class ApplicationProcessNumberHelper
         return appNo + CaptionSeparator + procNo;
     }
 
-    public static string FormatDisplayCaption(Application? application)
+    public static string FormatDisplayCaption(ApplicationProfileInstance? application)
     {
         if (application == null)
             return string.Empty;

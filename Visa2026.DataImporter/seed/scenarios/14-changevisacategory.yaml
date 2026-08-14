@@ -4,7 +4,7 @@ description: Change of visa category from multiple-entry to single-entry
 dependsOn: VisaExt
 sync: false
 anchor:
-  entity: Application
+  entity: ApplicationProfileInstance
   key: FullApplicationNumber
   value: 2/-014
 data:
@@ -26,9 +26,9 @@ data:
     Issued Place: Aşgabat şäher howa menzilindäki MGP
     Passport Number: TR8877665
   Applications:
-  - Application Number: 014
+  - ApplicationProfileInstance Number: 014
     Date: 2027-02-01
-    Application Type: App_Change_Visa_Category
+    ApplicationProfileInstance Type: App_Change_Visa_Category
     Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
     Urgency: Adaty tertipde !
   ApplicationItems:

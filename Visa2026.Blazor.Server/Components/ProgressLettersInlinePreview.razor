@@ -72,7 +72,7 @@
     [Parameter] public EventCallback PreviewClosed { get; set; }
     [Parameter] public string UiCultureName { get; set; } = string.Empty;
 
-    [Inject] private ApplicationProgressMinistryLetterFileAccess FileAccess { get; set; } = null!;
+    [Inject] private ApplicationProfileInstanceProgressMinistryLetterFileAccess FileAccess { get; set; } = null!;
     [Inject] private IFileDownloader FileDownloader { get; set; } = null!;
     [Inject] private IXafCultureInfoService CultureInfoService { get; set; } = null!;
     [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
@@ -102,14 +102,14 @@
             ? PreviewTitle
             : $"{PreviewTitle}: {_fileName}";
 
-    private string PreviewTitle => Msg("ApplicationProgress.MinistryLetterPreview.Title");
+    private string PreviewTitle => Msg("ApplicationProfileInstanceProgress.MinistryLetterPreview.Title");
     private string PreviewError => Msg("ApplicationItemDocumentCopies.Preview.Error");
     private string ActionClose => Msg("ApplicationItemDocumentCopies.Action.Close");
     private string ActionDownload => Msg("ApplicationItemDocumentCopies.Action.Download");
 
     public async Task OpenAsync(ProgressLettersInlinePreviewRequest request)
     {
-        if (request == null || request.ApplicationId == Guid.Empty || request.ProgressId == Guid.Empty)
+        if (request == null || request.ApplicationProfileInstanceId == Guid.Empty || request.ProgressId == Guid.Empty)
             return;
 
         _fileName = request.DisplayName;
@@ -125,7 +125,7 @@
 
         try
         {
-            if (!FileAccess.TryGetFile(request.ApplicationId, request.ProgressId, out var result) || result == null)
+            if (!FileAccess.TryGetFile(request.ApplicationProfileInstanceId, request.ProgressId, out var result) || result == null)
             {
                 SetPreviewError(PreviewError);
                 return;

@@ -59,7 +59,7 @@ A **state** is not always a single persisted property. Before assigning a color,
 
 **F. Current-item resolution** — `PersonCurrentItems` picks the effective child record (passport, visa, work permit, …) by date/ID rules. A BO instance is **`Archived`** when it is not the person's current item even if dates are still valid. Visas also use `VisaIsEffectiveOn` for as-of selection.
 
-**G. SQL views** — `SqlViewsUpdater` creates views mapped to read-only entities (e.g. `VisaExtensionStatus`). Used where joins are heavy; dashboard counts must match evaluator/list filters ([`STATE_SPECIFICATIONS.md`](STATE_SPECIFICATIONS.md)).
+**G. SQL views** — `ReportDashboardPostgresViewsUpdater` (+ `ReportDashboardPostgresRosterSql` bodies and the `ReportDashboardPostgresViewsHealSql` host-start heal) creates PostgreSQL views mapped to read-only entities (e.g. `VisaExtensionStatus`). Used where joins are heavy; dashboard counts must match evaluator/list filters ([`STATE_SPECIFICATIONS.md`](STATE_SPECIFICATIONS.md)). The former SQL Server `SqlViewsUpdater` is removed — `View_WorkPermitExtensionStatus` and the other tracking views have no PostgreSQL body yet ([`DEPRECATED.md`](DEPRECATED.md)).
 
 **H. Settings & type config** — not states themselves but change outcomes: `ExtensionRequired` branches `ExpiringSoonNotRequired`; `SystemSettings` drives warning windows; `ApplicationType` drives which application types participate in linkage rules.
 

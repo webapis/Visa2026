@@ -18,7 +18,7 @@ public sealed class OfficerShellStagedQueryService : IOfficerShellStagedQuerySer
         if (objectSpace == null)
             return Array.Empty<OfficerShellStagedRow>();
 
-        var apps = objectSpace.GetObjectsQuery<Application>()
+        var apps = objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
             .Where(OfficerShellApplicationFilters.IsStaged)
             .OrderByDescending(a => a.ApplicationDate)
             .ThenBy(a => a.FullApplicationNumber)
@@ -28,7 +28,7 @@ public sealed class OfficerShellStagedQueryService : IOfficerShellStagedQuerySer
         return apps.Select(MapRow).ToList();
     }
 
-    private static OfficerShellStagedRow MapRow(Application application)
+    private static OfficerShellStagedRow MapRow(ApplicationProfileInstance application)
     {
         var person = ApplicationRosterHelper.GetRosterPeople(application).FirstOrDefault();
         var personName = person?.FullName;
@@ -46,7 +46,7 @@ public sealed class OfficerShellStagedQueryService : IOfficerShellStagedQuerySer
 
         return new OfficerShellStagedRow
         {
-            ApplicationId = application.ID,
+            ApplicationProfileInstanceId = application.ID,
             PersonName = personName,
             ProfileName = profile?.Name ?? application.ApplicationType?.NameTm ?? "—",
             ProfileCode = profile?.Code ?? application.ApplicationType?.Code,

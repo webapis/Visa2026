@@ -27,7 +27,7 @@ public static class ApplicationProfilePickerCompletionHelper
         var context = ApplicationProfilePickerContextGate.Get(application);
         if (context?.SeedPersonId is Guid seedPersonId && seedPersonId != Guid.Empty)
         {
-            errorMessage = "Select people for this Application first.";
+            errorMessage = "Select people for this ApplicationProfileInstance first.";
             return false;
         }
 
@@ -63,7 +63,7 @@ public static class ApplicationProfilePickerCompletionHelper
             return false;
         }
 
-        using var validateSpace = application.CreateObjectSpace(typeof(Application));
+        using var validateSpace = application.CreateObjectSpace(typeof(ApplicationProfileInstance));
         var profile = validateSpace.GetObjectByKey<ApplicationProfile>(profileId);
         var seedPerson = validateSpace.GetObjectByKey<Person>(seedPersonId);
         if (profile == null || seedPerson == null)
@@ -105,7 +105,7 @@ public static class ApplicationProfilePickerCompletionHelper
                 ShowViewInCurrentWindow(application, dossierView);
             }
 
-            successMessage = $"Application {appNumber} created.{warningText}";
+            successMessage = $"ApplicationProfileInstance {appNumber} created.{warningText}";
             application.ShowViewStrategy.ShowMessage(
                 successMessage,
                 InformationType.Success,
@@ -129,7 +129,7 @@ public static class ApplicationProfilePickerCompletionHelper
 
         var context = ApplicationProfilePickerContextGate.Get(application);
 
-        var objectSpace = application.CreateObjectSpace(typeof(Application));
+        var objectSpace = application.CreateObjectSpace(typeof(ApplicationProfileInstance));
         var profile = objectSpace.GetObjectByKey<ApplicationProfile>(profileId);
         if (profile == null)
         {
@@ -142,11 +142,11 @@ public static class ApplicationProfilePickerCompletionHelper
                 null,
                 context?.CreationProgressRoute))
         {
-            errorMessage = "This Application Profile is not available for the current route or criteria.";
+            errorMessage = "This ApplicationProfileInstance Profile is not available for the current route or criteria.";
             return false;
         }
 
-        var app = objectSpace.CreateObject<Application>();
+        var app = objectSpace.CreateObject<ApplicationProfileInstance>();
         ApplicationProfilePickerApplyHelper.ApplyProfileToNewApplication(
             objectSpace,
             app,
@@ -166,7 +166,7 @@ public static class ApplicationProfilePickerCompletionHelper
         var workspaceView = ApplicationWorkspaceOpenHelper.CreateWorkspaceView(application, committedApp.ID);
         if (workspaceView == null)
         {
-            errorMessage = "Application was created but the workspace could not be opened.";
+            errorMessage = "ApplicationProfileInstance was created but the workspace could not be opened.";
             return false;
         }
 

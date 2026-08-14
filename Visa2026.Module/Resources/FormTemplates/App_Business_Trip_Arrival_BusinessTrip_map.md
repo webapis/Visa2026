@@ -140,5 +140,5 @@ All `[NotMapped]` unless noted.
 | `Visa_ExpirationDateText` | ✅ | `$"{CurrentVisa?.ExpirationDate:dd.MM.yyyy}"` |
 | `Address_FullAddress` | ✅ | `CurrentAddressOfResidence?.FullAddress` |
 | `BusinessTripAddress_FullAddress` | ✅ | `BusinessTripAddress?.FullAddress` |
-| `Application_CompanyHead_FullName` | ✅ | `Application?.CompanyHead?.FullName` |
-| `Application_CompanyHead_PositionTm` | ✅ | `Application?.CompanyHead?.Position?.NameTm` |
+| `Application_CompanyHead_FullName` | ✅ | `ApplicationProfileInstance?.CompanyHead?.FullName` |
+| `Application_CompanyHead_PositionTm` | ✅ | `ApplicationProfileInstance?.CompanyHead?.Position?.NameTm` |

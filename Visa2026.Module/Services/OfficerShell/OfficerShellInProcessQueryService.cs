@@ -18,7 +18,7 @@ public sealed class OfficerShellInProcessQueryService : IOfficerShellInProcessQu
         if (objectSpace == null)
             return Array.Empty<OfficerShellInProcessRow>();
 
-        var apps = objectSpace.GetObjectsQuery<Application>()
+        var apps = objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
             .Where(OfficerShellApplicationFilters.IsInProcess)
             .OrderByDescending(a => a.ApplicationDate)
             .ThenBy(a => a.FullApplicationNumber)
@@ -28,21 +28,21 @@ public sealed class OfficerShellInProcessQueryService : IOfficerShellInProcessQu
         return apps.Select(MapRow).ToList();
     }
 
-    private static OfficerShellInProcessRow MapRow(Application application)
+    private static OfficerShellInProcessRow MapRow(ApplicationProfileInstance application)
     {
         var person = ApplicationRosterHelper.GetRosterPeople(application).FirstOrDefault();
         var personName = person?.FullName;
         if (string.IsNullOrWhiteSpace(personName))
             personName = "—";
         var profile = application.ApplicationProfile;
-        var sla = ApplicationProgressSlaHelper.Resolve(application, application.LatestProgress);
+        var sla = ApplicationProfileInstanceProgressSlaHelper.Resolve(application, application.LatestProgress);
         var processNumber = !string.IsNullOrWhiteSpace(application.ProcessNumber)
             ? application.ProcessNumber
             : ApplicationProcessNumberHelper.ResolveFromHistory(application.ProgressHistory);
 
         return new OfficerShellInProcessRow
         {
-            ApplicationId = application.ID,
+            ApplicationProfileInstanceId = application.ID,
             ApplicationNumber = application.FullApplicationNumber
                 ?? application.ApplicationNumber
                 ?? "—",

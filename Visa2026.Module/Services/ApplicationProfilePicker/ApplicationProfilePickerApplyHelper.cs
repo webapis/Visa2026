@@ -10,9 +10,9 @@ public static class ApplicationProfilePickerApplyHelper
 {
     public static void ApplyProfileToNewApplication(
         IObjectSpace objectSpace,
-        Application application,
+        ApplicationProfileInstance application,
         ApplicationProfile profile,
-        ApplicationProgressRouteKind? creationProgressRoute = null)
+        ApplicationProfileInstanceProgressRouteKind? creationProgressRoute = null)
     {
         if (objectSpace == null || application == null || profile == null)
             return;

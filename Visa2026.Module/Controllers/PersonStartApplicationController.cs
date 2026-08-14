@@ -7,7 +7,7 @@ using Visa2026.Module.Services.ApplicationProfilePicker;
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// Starts a new Application from a Person DetailView (slice 11).
+/// Starts a new ApplicationProfileInstance from a Person DetailView (slice 11).
 /// </summary>
 public sealed class PersonStartApplicationController : ObjectViewController<DetailView, Person>
 {
@@ -17,9 +17,9 @@ public sealed class PersonStartApplicationController : ObjectViewController<Deta
     {
         _startApplicationAction = new SimpleAction(this, "PersonStartApplication", "View")
         {
-            Caption = "Start application…",
+            Caption = "Start process…",
             ImageName = "Action_New",
-            ToolTip = "Pick an Application Profile and link people to a new Application.",
+            ToolTip = "Pick an Application Profile and link people to a new profile instance.",
             SelectionDependencyType = SelectionDependencyType.RequireSingleObject,
         };
         _startApplicationAction.Execute += StartApplication_Execute;

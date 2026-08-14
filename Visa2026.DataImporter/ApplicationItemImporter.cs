@@ -25,7 +25,7 @@ public class ApplicationItemImporter : BaseImporter<ApplicationItem>
         }
         foreach (var item in items)
         {
-            var appNum = item.Application?.ApplicationNumber ?? "No App";
+            var appNum = item.ApplicationProfileInstance?.ApplicationNumber ?? "No App";
             var personName = item.CurrentPositionHistory?.Person?.FullName ?? "Unknown Person";
             Console.WriteLine($"  [{item.Id}] App: {appNum} | Person: {personName}");
         }
@@ -48,7 +48,7 @@ public class ApplicationItemImporter : BaseImporter<ApplicationItem>
         var payload = new
         {
             // Required link
-            Application = new { ID = applicationId },
+            ApplicationProfileInstance = new { ID = applicationId },
             Person = new { ID = personId },
             CurrentPassport = new { ID = currentPassportId },
 
@@ -85,7 +85,7 @@ public class ApplicationItemImporter : BaseImporter<ApplicationItem>
             {
                 var payload = new
                 {
-                    Application = record.Application != null ? new { ID = record.Application.Id } : null,
+                    ApplicationProfileInstance = record.ApplicationProfileInstance != null ? new { ID = record.ApplicationProfileInstance.Id } : null,
 
                     // Optional relations that exist on ApplicationItem
                     Person = record.Person != null ? new { ID = record.Person.Id } : null,
@@ -116,7 +116,7 @@ public class ApplicationItemImporter : BaseImporter<ApplicationItem>
                 };
 
                 await Api.CreateAsync<ApplicationItem>(EntityName, payload);
-                Console.WriteLine($"  ✓ Imported Item for App: {record.Application?.ApplicationNumber ?? "Unknown"}");
+                Console.WriteLine($"  ✓ Imported Item for App: {record.ApplicationProfileInstance?.ApplicationNumber ?? "Unknown"}");
                 success++;
             }
             catch (Exception ex)

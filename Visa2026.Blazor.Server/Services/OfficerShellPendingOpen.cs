@@ -6,5 +6,5 @@ namespace Visa2026.Blazor.Server.Services;
 public sealed class OfficerShellPendingOpen : IOfficerShellPendingOpen
 {
     public OfficerShellPage Page { get; set; } = OfficerShellPage.Staged;
-    public Guid CaseApplicationId { get; set; }
+    public Guid CaseApplicationProfileInstanceId { get; set; }
 }

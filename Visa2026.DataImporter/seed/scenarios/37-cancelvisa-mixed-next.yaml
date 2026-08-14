@@ -7,7 +7,7 @@ description: >-
 dependsOn: InvitationAndWorkPermit
 sync: false
 anchor:
-  entity: Application
+  entity: ApplicationProfileInstance
   key: FullApplicationNumber
   value: 12/-065
 data:
@@ -37,9 +37,9 @@ data:
     Issued Place: Aşgabat şäher howa menzilindäki MGP
     Passport Number: TR5548821
   Applications:
-  - Application Number: 065
+  - ApplicationProfileInstance Number: 065
     Date: 2026-12-15
-    Application Type: App_Cancel_Visa
+    ApplicationProfileInstance Type: App_Cancel_Visa
   ApplicationItems:
   - Application: 12/-065
     Person: John Doe

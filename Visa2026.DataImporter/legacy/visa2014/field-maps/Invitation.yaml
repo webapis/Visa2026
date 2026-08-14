@@ -75,7 +75,7 @@ fields:
     notes: Default VisaCategory until legacy category column is mapped (Netije not used)
 
   - source: ApplicationResult.Application
-    target: Application
+    target: ApplicationProfileInstance
     transform: fk_id_map
-    idMapEntity: Application
+    idMapEntity: ApplicationProfileInstance
     missingBehavior: allow_null

@@ -1,6 +1,6 @@
 order: 2
 name: InvitationAndWorkPermit
-description: Application for invitation and work permit of an expat employee
+description: ApplicationProfileInstance for invitation and work permit of an expat employee
 dependsOn: Shared
 sync: false
 anchor:
@@ -67,10 +67,10 @@ data:
     Start Date: 2026-04-02
     Expiration Date: 2027-04-02
   Applications:
-  - Application Number: 002
+  - ApplicationProfileInstance Number: 002
     Date: 2026-04-02
     Project Contract: GT-15
-    Application Type: App_Inv_And_WP
+    ApplicationProfileInstance Type: App_Inv_And_WP
     Urgency: Adaty tertipde !
     Visa Period: 6 (alty) aý
     Visa Category: Köp gezeklik

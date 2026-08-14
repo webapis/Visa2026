@@ -96,6 +96,6 @@ No new NotMapped properties needed — the DetailReportBand binds directly to `I
 ## ReportsUpdater.cs entry
 
 ```csharp
-AddPredefinedReport<AppChangeInvReport>("App Change Inv Report", typeof(Application), isInplaceReport: true);
+AddPredefinedReport<AppChangeInvReport>("App Change Inv Report", typeof(ApplicationProfileInstance), isInplaceReport: true);
 CreateReportVisibility("App Change Inv Report", "[ApplicationType.Name] = 'App_Change_Inv'");
 ```

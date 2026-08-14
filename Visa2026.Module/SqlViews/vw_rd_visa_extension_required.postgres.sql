@@ -59,22 +59,34 @@ WITH valid_visas AS (
       AND v."StartDate" IS NOT NULL
       AND (v."StartDate")::date > DATE '1900-01-01'
 ),
+visa_ext_roster AS (
+    SELECT
+        md5(concat(ap."ApplicationProfileInstanceId"::text, ap."PersonId"::text))::uuid AS "LineId",
+        a."ID" AS "ApplicationProfileInstanceID",
+        ap."PersonId" AS "PersonID",
+        rl_visa."LinkedObjectId" AS "ExpiringVisaID"
+    FROM "ApplicationProfileInstancePeople" ap
+    INNER JOIN "ApplicationProfileInstances" a
+        ON a."ID" = ap."ApplicationProfileInstanceId" AND COALESCE(a."GCRecord", 0) = 0
+    INNER JOIN "ApplicationProfiles" apf
+        ON apf."ID" = a."ApplicationProfileID" AND COALESCE(apf."GCRecord", 0) = 0
+    INNER JOIN "ApplicationProfileInstancePersonResolvedLinks" rl_visa
+        ON rl_visa."ApplicationProfileInstanceId" = ap."ApplicationProfileInstanceId" AND rl_visa."PersonId" = ap."PersonId"
+       AND rl_visa."LinkKind" = 1
+       AND rl_visa."LinkedObjectId" IS NOT NULL
+       AND COALESCE(rl_visa."GCRecord", 0) = 0
+    WHERE COALESCE(apf."ProduceVisa", FALSE) = TRUE
+      AND COALESCE(apf."RequirePersonVisa", FALSE) = TRUE
+      AND COALESCE(apf."ProduceInvitation", FALSE) = FALSE
+      AND COALESCE(apf."ActionFamily", 0) = 0
+),
 unfinished_extension_people AS (
-    SELECT DISTINCT ai."PersonID"
-    FROM "ApplicationItems" ai
-    INNER JOIN "Applications" a
-        ON a."ID" = ai."ApplicationID" AND COALESCE(a."GCRecord", 0) = 0
-    INNER JOIN "ApplicationTypes" at
-        ON at."ID" = a."ApplicationTypeID" AND COALESCE(at."GCRecord", 0) = 0
-    WHERE COALESCE(ai."GCRecord", 0) = 0
-      AND ai."CurrentVisaId" IS NOT NULL
-      AND ai."PersonID" IS NOT NULL
-      AND at."Name" IN (
-            'App_Visa_Ext',
-            'App_Visa_Ext_According_to_WP',
-            'App_Visa_Ext_FM',
-            'App_Visa_and_WP_Ext'
-        )
+    SELECT DISTINCT roster."PersonID"
+    FROM visa_ext_roster roster
+    INNER JOIN "ApplicationProfileInstances" a
+        ON a."ID" = roster."ApplicationProfileInstanceID" AND COALESCE(a."GCRecord", 0) = 0
+    WHERE roster."ExpiringVisaID" IS NOT NULL
+      AND roster."PersonID" IS NOT NULL
       AND (
           a."LatestPrimaryStateCode" IS NULL
           OR BTRIM(a."LatestPrimaryStateCode") = ''

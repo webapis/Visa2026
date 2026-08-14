@@ -44,7 +44,7 @@ internal static class Visa2014ApplicationApprovalLegProfilePatch
         var userName = GetOptionValue(args, "--user") ?? "Admin";
         var password = GetOptionValue(args, "--password") ?? "";
         var applicationIdMapPath = GetOptionValue(args, "--application-id-map")
-            ?? source.IdMapPath(dataImporterRoot, "Application");
+            ?? source.IdMapPath(dataImporterRoot, "ApplicationProfileInstance");
 
         bool dryRun = HasArg(args, "--dry-run");
         bool noWait = HasArg(args, "--no-wait");
@@ -53,7 +53,7 @@ internal static class Visa2014ApplicationApprovalLegProfilePatch
         Console.WriteLine("=== VISA2014 Application.ApprovalLegProfile PATCH");
         Console.WriteLine($"INF Legacy source: {source.Id}");
         Console.WriteLine($"INF Target API: {apiBaseUrl}");
-        Console.WriteLine($"INF Application id-map: {applicationIdMapPath}");
+        Console.WriteLine($"INF ApplicationProfileInstance id-map: {applicationIdMapPath}");
         if (dryRun)
             Console.WriteLine("INF Mode: dry-run (no PATCH)");
 
@@ -71,7 +71,7 @@ internal static class Visa2014ApplicationApprovalLegProfilePatch
 
         if (!File.Exists(applicationIdMapPath))
         {
-            Console.Error.WriteLine($"ERR Application id-map not found: {applicationIdMapPath}");
+            Console.Error.WriteLine($"ERR ApplicationProfileInstance id-map not found: {applicationIdMapPath}");
             return 1;
         }
 
@@ -82,7 +82,7 @@ internal static class Visa2014ApplicationApprovalLegProfilePatch
             verbose);
 
         var idMap = Visa2014IdMapHelper.Load(applicationIdMapPath);
-        Console.WriteLine($"INF Application id-map entries: {idMap.Count}");
+        Console.WriteLine($"INF ApplicationProfileInstance id-map entries: {idMap.Count}");
         Console.WriteLine($"INF Transform import rows: {batch.ImportRows.Count}");
 
         var api = new ApiClient(apiBaseUrl, userName, password) { Verbose = verbose };
@@ -151,7 +151,7 @@ internal static class Visa2014ApplicationApprovalLegProfilePatch
                 continue;
             }
 
-            if (!applicationIdMap.TryGetValue(legacyOid, out var targetApplicationId))
+            if (!applicationIdMap.TryGetValue(legacyOid, out var targetApplicationProfileInstanceId))
             {
                 skippedMap++;
                 continue;
@@ -162,8 +162,8 @@ internal static class Visa2014ApplicationApprovalLegProfilePatch
             {
                 failed++;
                 var fullNumber = row.GetValueOrDefault("FullApplicationNumber") as string ?? legacyOid.ToString();
-                errors.Add($"Application {fullNumber} ({targetApplicationId}): ApprovalLegProfile not in OData — '{profileCode}'");
-                Console.Error.WriteLine($"ERR Application {fullNumber}: ApprovalLegProfile not found for '{profileCode}'");
+                errors.Add($"ApplicationProfileInstance {fullNumber} ({targetApplicationProfileInstanceId}): ApprovalLegProfile not in OData — '{profileCode}'");
+                Console.Error.WriteLine($"ERR ApplicationProfileInstance {fullNumber}: ApprovalLegProfile not found for '{profileCode}'");
                 continue;
             }
 
@@ -176,13 +176,13 @@ internal static class Visa2014ApplicationApprovalLegProfilePatch
                     patched++;
                     if (verbose)
                     {
-                        var fullNumber = row.GetValueOrDefault("FullApplicationNumber") as string ?? targetApplicationId.ToString();
-                        Console.WriteLine($"  DRY PATCH Application {fullNumber} ({targetApplicationId}) ApprovalLegProfile={profileCode}");
+                        var fullNumber = row.GetValueOrDefault("FullApplicationNumber") as string ?? targetApplicationProfileInstanceId.ToString();
+                        Console.WriteLine($"  DRY PATCH ApplicationProfileInstance {fullNumber} ({targetApplicationProfileInstanceId}) ApprovalLegProfile={profileCode}");
                     }
                     continue;
                 }
 
-                await api.UpdateAsync("Application", targetApplicationId, new Dictionary<string, object?>
+                await api.UpdateAsync("Application", targetApplicationProfileInstanceId, new Dictionary<string, object?>
                 {
                     ["ApprovalLegProfile"] = new { ID = profileId.Value },
                 });
@@ -194,8 +194,8 @@ internal static class Visa2014ApplicationApprovalLegProfilePatch
             catch (Exception ex)
             {
                 failed++;
-                errors.Add($"{targetApplicationId}: {ex.Message}");
-                Console.Error.WriteLine($"ERR {targetApplicationId}: {ex.Message}");
+                errors.Add($"{targetApplicationProfileInstanceId}: {ex.Message}");
+                Console.Error.WriteLine($"ERR {targetApplicationProfileInstanceId}: {ex.Message}");
             }
         }
 

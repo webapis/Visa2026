@@ -6,7 +6,7 @@ namespace Visa2026.Module.Controllers;
 
 /// <summary>
 /// Disables Application Profile DetailView editing when <see cref="ApplicationProfile.IsConfigLocked"/>
-/// and refreshes after linked Application progress changes.
+/// and refreshes after linked ApplicationProfileInstance progress changes.
 /// </summary>
 public sealed class ApplicationProfileDetailViewController : ObjectViewController<DetailView, ApplicationProfile>
 {
@@ -29,10 +29,10 @@ public sealed class ApplicationProfileDetailViewController : ObjectViewControlle
 
     private void ObjectSpace_ObjectChanged(object? sender, ObjectChangedEventArgs e)
     {
-        if (e.Object is ApplicationProgress progress
-            && progress.Application?.ApplicationProfile != null
-            && ReferenceEquals(progress.Application.ApplicationProfile, ViewCurrentObject)
-            && e.PropertyName is nameof(ApplicationProgress.State))
+        if (e.Object is ApplicationProfileInstanceProgress progress
+            && progress.ApplicationProfileInstance?.ApplicationProfile != null
+            && ReferenceEquals(progress.ApplicationProfileInstance.ApplicationProfile, ViewCurrentObject)
+            && e.PropertyName is nameof(ApplicationProfileInstanceProgress.State))
         {
             UpdateEditState();
         }

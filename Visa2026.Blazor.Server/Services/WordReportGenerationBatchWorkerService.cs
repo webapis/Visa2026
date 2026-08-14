@@ -84,9 +84,9 @@ public sealed class WordReportGenerationBatchWorkerService : BackgroundService
             return;
 
         logger.LogInformation(
-            "Picked queued Resminamalar batch. BatchId={BatchId} ApplicationId={ApplicationId} RequestedBy={RequestedBy}",
+            "Picked queued Resminamalar batch. BatchId={BatchId} ApplicationProfileInstanceId={ApplicationProfileInstanceId} RequestedBy={RequestedBy}",
             os.GetKeyValue(batch),
-            batch.ApplicationID,
+            batch.ApplicationProfileInstanceID,
             batch.RequestedBy);
 
         batch.Status = WordReportGenerationBatchStatus.Running;
@@ -96,18 +96,18 @@ public sealed class WordReportGenerationBatchWorkerService : BackgroundService
 
         try
         {
-            if (!batch.ApplicationID.HasValue)
-                throw new InvalidOperationException("Resminamalar batch has no ApplicationID.");
+            if (!batch.ApplicationProfileInstanceID.HasValue)
+                throw new InvalidOperationException("Resminamalar batch has no ApplicationProfileInstanceID.");
 
-            var applicationId = batch.ApplicationID.Value;
-            var application = os.GetObjectsQuery<Application>()
+            var applicationId = batch.ApplicationProfileInstanceID.Value;
+            var application = os.GetObjectsQuery<ApplicationProfileInstance>()
                 .Include(a => a.ApplicationType)
                 .Include(a => a.ProjectContract)
-                .Include(a => a.ApplicationItems)
+                .Include(a => a.People)
                 .FirstOrDefault(a => a.ID == applicationId);
 
             if (application == null)
-                throw new InvalidOperationException($"Application {applicationId} was not found or is deleted.");
+                throw new InvalidOperationException($"ApplicationProfileInstance {applicationId} was not found or is deleted.");
 
             using var zipStream = new MemoryStream();
             var selectedEntryKeys = ApplicationWordReportPackageSelectionHelper.Deserialize(batch.SelectedReportKeysJson);

@@ -47,8 +47,8 @@ public class ApplicationMigrationSlaProfile : LookupBase
     [XafDisplayName("Warning (working days)")]
     public virtual int? WarningDaysBeforeMax { get; set; }
 
-    /// <summary>Application types that use this migration SLA tier (maintained via Link / Unlink).</summary>
-    [XafDisplayName("Application types")]
+    /// <summary>ApplicationProfileInstance types that use this migration SLA tier (maintained via Link / Unlink).</summary>
+    [XafDisplayName("ApplicationProfileInstance types")]
     [InverseProperty(nameof(ApplicationType.MigrationSlaProfile))]
     [VisibleInListView(false)]
     [ModelDefault("AllowNew", "False")]

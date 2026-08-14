@@ -126,14 +126,14 @@ internal static class Visa2014VisaInvitationItemCorrection
                 continue;
             }
 
-            var issuingItem = visa.IssuingApplicationItem;
-            if (issuingItem == null)
+            var issuingApplication = visa.IssuingApplicationProfileInstance;
+            if (issuingApplication == null)
             {
                 noIssuing++;
                 continue;
             }
 
-            var applicationType = issuingItem.Application?.ApplicationType;
+            var applicationType = issuingApplication.ApplicationType;
             if (!ApplicationTypeCapabilities.CanIssueInvitation(applicationType))
             {
                 notInvIssuing++;
@@ -141,7 +141,7 @@ internal static class Visa2014VisaInvitationItemCorrection
             }
 
             var person = visa.Passport?.Person;
-            var application = issuingItem.Application;
+            var application = issuingApplication;
             if (person == null || application == null)
             {
                 noPerson++;
@@ -150,7 +150,7 @@ internal static class Visa2014VisaInvitationItemCorrection
 
             if (visa.InvitationItem != null
                 && visa.InvitationItem.Person?.ID == person.ID
-                && visa.InvitationItem.Invitation?.Application?.ID == application.ID
+                && visa.InvitationItem.Invitation?.ApplicationProfileInstance?.ID == application.ID
                 && !visa.InvitationItem.IsCancelled
                 && !visa.InvitationItem.IsChanged)
             {
@@ -166,15 +166,15 @@ internal static class Visa2014VisaInvitationItemCorrection
                 .ToHashSet();
 
             var candidates = invitationItems
-                .Where(ii => ii.Person != null && ii.Invitation?.Application != null)
+                .Where(ii => ii.Person != null && ii.Invitation?.ApplicationProfileInstance != null)
                 .Select(ii => new Visa2014VisaInvitationItemLinkCandidate
                 {
                     InvitationItemId = ii.ID,
                     InvitationId = ii.Invitation!.ID,
                     PersonId = ii.Person!.ID,
-                    ApplicationId = ii.Invitation.Application!.ID,
+                    ApplicationProfileInstanceId = ii.Invitation.ApplicationProfileInstance!.ID,
                     IssuedDate = ii.Invitation.IssuedDate,
-                    ApplicationDate = ii.Invitation.Application.ApplicationDate,
+                    ApplicationDate = ii.Invitation.ApplicationProfileInstance.ApplicationDate,
                     IsCancelled = ii.IsCancelled,
                     IsChanged = ii.IsChanged,
                     IsUsed = ii.IsUsed,

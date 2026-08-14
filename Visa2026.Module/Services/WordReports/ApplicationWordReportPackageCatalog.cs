@@ -61,12 +61,12 @@ public sealed class ApplicationWordReportPackageCatalogService
         this.serviceProvider = serviceProvider;
     }
 
-    public ApplicationWordReportPackageCatalog Build(IObjectSpace objectSpace, Application application) =>
+    public ApplicationWordReportPackageCatalog Build(IObjectSpace objectSpace, ApplicationProfileInstance application) =>
         Build(objectSpace, application, WordReportGenerationContext.ForApplication());
 
     public ApplicationWordReportPackageCatalog Build(
         IObjectSpace objectSpace,
-        Application application,
+        ApplicationProfileInstance application,
         WordReportGenerationContext context)
     {
         if (objectSpace == null)
@@ -131,8 +131,8 @@ public sealed class ApplicationWordReportPackageCatalogService
 
     private IEnumerable<ApplicationWordReportPackageCatalogEntry> BuildProfileNestedEntries(
         IObjectSpace objectSpace,
-        Application application,
-        IList<ApplicationItem> selectedItems)
+        ApplicationProfileInstance application,
+        IList<ApplicationRosterMergeLine> selectedItems)
     {
         foreach (var profileTemplate in ApplicationProfileNestedTemplateCatalogHelper.GetOrderedTemplates(application))
         {
@@ -182,10 +182,10 @@ public sealed class ApplicationWordReportPackageCatalogService
     private static (ApplicationWordReportPackageReadinessLevel Level, string? MessageKey)
         EvaluateProfileTemplateReadiness(
             IObjectSpace objectSpace,
-            Application application,
+            ApplicationProfileInstance application,
             ApplicationProfileTemplate profileTemplate,
             UserReportTemplate? userTemplate,
-            IList<ApplicationItem> selectedItems)
+            IList<ApplicationRosterMergeLine> selectedItems)
     {
         if (userTemplate == null)
         {

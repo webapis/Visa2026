@@ -5,5 +5,5 @@ namespace Visa2026.Blazor.Server.Services;
 
 public sealed class ApplicationWorkspacePendingOpen : IApplicationWorkspacePendingOpen
 {
-    public Guid ApplicationId { get; set; }
+    public Guid ApplicationProfileInstanceId { get; set; }
 }

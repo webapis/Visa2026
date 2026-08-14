@@ -44,7 +44,7 @@ Default run imports `data.yaml` in Phase 4 (after phases 1–3). Use `--full` fo
 
 ### Phases 5–7 — Programmatic demo
 
-Only when **no** `data.yaml` / `data.xlsx` in full mode: creates sample Application, lodging, travel history, etc.
+Only when **no** `data.yaml` / `data.xlsx` in full mode: creates sample ApplicationProfileInstance, lodging, travel history, etc.
 
 ## 4. CLI
 

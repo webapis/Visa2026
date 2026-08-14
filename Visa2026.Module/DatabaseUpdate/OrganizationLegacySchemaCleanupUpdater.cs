@@ -144,9 +144,9 @@ ORDER BY r.ID DESC;';", false);
 
     private void DropLegacyOrganizationForeignKeys()
     {
-        DropColumnIfExists("Applications", "CompanyID");
-        DropColumnIfExists("Applications", "CompanyHeadID");
-        DropColumnIfExists("Applications", "RepresentativeID");
+        DropColumnIfExists("ApplicationProfileInstances", "CompanyID");
+        DropColumnIfExists("ApplicationProfileInstances", "CompanyHeadID");
+        DropColumnIfExists("ApplicationProfileInstances", "RepresentativeID");
         DropColumnIfExists("People", "CompanyID");
         DropColumnIfExists("People", "IsSubcontractorEmployee");
         DropColumnIfExists("ProjectContracts", "CompanyID");

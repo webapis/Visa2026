@@ -21,11 +21,11 @@
                 <div class="sw-group__body">
                     @foreach (var row in group.Rows)
                     {
-                        var selected = SelectedIds.Contains(row.ApplicationId);
+                        var selected = SelectedIds.Contains(row.ApplicationProfileInstanceId);
                         <div class="sw-row @(row.IsSelectable ? null : "sw-row--disabled")" @onclick="() => OnRowClick(row)">
                             <label class="sw-row__check" @onclick:stopPropagation="true">
                                 <input type="checkbox" checked="@selected" disabled="@(!row.IsSelectable)"
-                                       @onchange="() => ToggleRow(row.ApplicationId)" />
+                                       @onchange="() => ToggleRow(row.ApplicationProfileInstanceId)" />
                             </label>
                             <div class="sw-row__avatar" aria-hidden="true">@Initials(row.PersonName)</div>
                             <div class="sw-row__main">
@@ -58,7 +58,7 @@
 
     @if (SelectedIds.Count > 0)
     {
-        var incomplete = SelectedIds.Count(id => Rows.FirstOrDefault(r => r.ApplicationId == id) is { IsSelectable: false });
+        var incomplete = SelectedIds.Count(id => Rows.FirstOrDefault(r => r.ApplicationProfileInstanceId == id) is { IsSelectable: false });
         <div class="sw-selection-bar">
             <span>@SelectedIds.Count selected@if (incomplete > 0) { <strong class="sw-selection-bar__warn"> · @incomplete incomplete (cannot start)</strong> } else { <text> · ready to start</text> }</span>
         </div>
@@ -110,6 +110,6 @@
     {
         if (!row.IsSelectable)
             return Task.CompletedTask;
-        return ToggleRow(row.ApplicationId);
+        return ToggleRow(row.ApplicationProfileInstanceId);
     }
 }

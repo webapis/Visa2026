@@ -8,8 +8,8 @@ using DevExpress.Persistent.Base;
 namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
-/// Report Dashboard Application (via ministry) — Invitation on Process (V)
-/// from <c>vw_rd_application_via_ministry_invitation_on_process_by_period_category_type</c> (one row per ApplicationItem).
+/// Report Dashboard ApplicationProfileInstance (via ministry) — Invitation on Process (V)
+/// from <c>vw_rd_application_via_ministry_invitation_on_process_by_period_category_type</c> (one row per ApplicationRosterMergeLine).
 /// </summary>
 [DefaultClassOptions]
 [NavigationItem(false)]
@@ -25,18 +25,14 @@ public class VwRdApplicationViaMinistryInvitationOnProcessByPeriodCategoryType :
     public virtual Guid ID { get; set; }
 
     [Browsable(false)]
-    public virtual Guid? ApplicationOid { get; set; }
+    public virtual Guid? ApplicationProfileInstanceOid { get; set; }
 
-    [ForeignKey(nameof(ApplicationOid))]
+    [ForeignKey(nameof(ApplicationProfileInstanceOid))]
     [ModelDefault("Caption", "App #")]
-    public virtual Application Application { get; set; }
+    public virtual ApplicationProfileInstance ApplicationProfileInstance { get; set; }
 
     [Browsable(false)]
     public virtual Guid? ApplicationItemOid { get; set; }
-
-    [ForeignKey(nameof(ApplicationItemOid))]
-    [ModelDefault("Caption", "Application Item")]
-    public virtual ApplicationItem ApplicationItem { get; set; }
 
     [Browsable(false)]
     public virtual Guid? PersonOid { get; set; }

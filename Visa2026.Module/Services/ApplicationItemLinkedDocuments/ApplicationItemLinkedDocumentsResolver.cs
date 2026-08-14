@@ -11,43 +11,16 @@ using Visa2026.Module.Services.ApplicationPersonRoster;
 namespace Visa2026.Module.Services.ApplicationItemLinkedDocuments;
 
 /// <summary>
-/// Resolves line-scoped document copies for an <see cref="ApplicationItem"/> using the same FK rules as
+/// Resolves line-scoped document copies for an <see cref="ApplicationRosterMergeLine"/> using the same FK rules as
 /// <see cref="ApplicationSupportingDocumentsPacker"/> (no fallback to live <see cref="Person"/> collections).
+/// Roster callers hydrate the projection first — see <see cref="ApplicationPersonLinkedDocumentsResolver"/>.
 /// </summary>
 public static class ApplicationItemLinkedDocumentsResolver
 {
-    public static ApplicationItemLinkedDocumentsSnapshot Resolve(IObjectSpace objectSpace, ApplicationItem item)
-    {
-        ArgumentNullException.ThrowIfNull(objectSpace);
-        if (item == null)
-        {
-            return new ApplicationItemLinkedDocumentsSnapshot
-            {
-                ApplicationItemId = Guid.Empty,
-                Groups = Array.Empty<ApplicationItemLinkedDocumentGroup>()
-            };
-        }
-
-        var itemId = item.ID;
-        if (item.Person == null)
-        {
-            return new ApplicationItemLinkedDocumentsSnapshot
-            {
-                ApplicationItemId = itemId,
-                Groups = Array.Empty<ApplicationItemLinkedDocumentGroup>()
-            };
-        }
-
-        if (itemId != Guid.Empty && objectSpace.GetObjectByKey<ApplicationItem>(itemId) != null)
-            item = objectSpace.GetObject(item);
-
-        return ResolveProjection(objectSpace, item, itemId);
-    }
-
-    /// <summary>Resolve groups for a tracked or detached <see cref="ApplicationItem"/> projection (e.g. roster hydrator).</summary>
+    /// <summary>Resolve groups for a detached <see cref="ApplicationRosterMergeLine"/> projection (e.g. roster hydrator).</summary>
     public static ApplicationItemLinkedDocumentsSnapshot ResolveProjection(
         IObjectSpace objectSpace,
-        ApplicationItem item,
+        ApplicationRosterMergeLine item,
         Guid? lineIdOverride = null)
     {
         ArgumentNullException.ThrowIfNull(objectSpace);
@@ -60,7 +33,7 @@ public static class ApplicationItemLinkedDocumentsResolver
             };
         }
 
-        var application = item.Application != null ? objectSpace.GetObject(item.Application) : null;
+        var application = item.ApplicationProfileInstance != null ? objectSpace.GetObject(item.ApplicationProfileInstance) : null;
         var groups = new List<ApplicationItemLinkedDocumentGroup>();
 
         AddPassportGroups(objectSpace, item, application, groups);
@@ -79,35 +52,10 @@ public static class ApplicationItemLinkedDocumentsResolver
         };
     }
 
-    public static ApplicationItemLinkedDocumentsLineSnapshot ResolveLine(IObjectSpace objectSpace, ApplicationItem item)
-    {
-        var snapshot = Resolve(objectSpace, item);
-        return new ApplicationItemLinkedDocumentsLineSnapshot
-        {
-            ApplicationItemId = snapshot.ApplicationItemId,
-            LineLabel = item?.ApplicationItemName ?? string.Empty,
-            Groups = snapshot.Groups
-        };
-    }
-
-    public static IReadOnlyList<ApplicationItemLinkedDocumentsLineSnapshot> ResolveMany(
-        IObjectSpace objectSpace,
-        IEnumerable<ApplicationItem> items)
-    {
-        ArgumentNullException.ThrowIfNull(objectSpace);
-        if (items == null)
-            return Array.Empty<ApplicationItemLinkedDocumentsLineSnapshot>();
-
-        return items
-            .Where(item => item != null)
-            .Select(item => ResolveLine(objectSpace, item))
-            .ToList();
-    }
-
     private static void AddPassportGroups(
         IObjectSpace os,
-        ApplicationItem item,
-        Application? application,
+        ApplicationRosterMergeLine item,
+        ApplicationProfileInstance? application,
         List<ApplicationItemLinkedDocumentGroup> groups)
     {
         groups.Add(BuildPassportGroup(os, item.CurrentPassport, "Passport.Current"));
@@ -156,8 +104,8 @@ public static class ApplicationItemLinkedDocumentsResolver
 
     private static void AddVisaGroups(
         IObjectSpace os,
-        ApplicationItem item,
-        Application? application,
+        ApplicationRosterMergeLine item,
+        ApplicationProfileInstance? application,
         List<ApplicationItemLinkedDocumentGroup> groups)
     {
         if (ApplicationProfileConfigurationResolver.ShowCurrentVisa(application))
@@ -198,8 +146,8 @@ public static class ApplicationItemLinkedDocumentsResolver
 
     private static void AddWorkPermitGroups(
         IObjectSpace os,
-        ApplicationItem item,
-        Application? application,
+        ApplicationRosterMergeLine item,
+        ApplicationProfileInstance? application,
         List<ApplicationItemLinkedDocumentGroup> groups)
     {
         if (item.Person?.IsEmployee != true)
@@ -251,8 +199,8 @@ public static class ApplicationItemLinkedDocumentsResolver
 
     private static void AddEducationGroup(
         IObjectSpace os,
-        ApplicationItem item,
-        Application? application,
+        ApplicationRosterMergeLine item,
+        ApplicationProfileInstance? application,
         List<ApplicationItemLinkedDocumentGroup> groups)
     {
         if (!ApplicationProfileConfigurationResolver.ShowCurrentEducation(application))
@@ -289,8 +237,8 @@ public static class ApplicationItemLinkedDocumentsResolver
 
     private static void AddInvitationGroups(
         IObjectSpace os,
-        ApplicationItem item,
-        Application? application,
+        ApplicationRosterMergeLine item,
+        ApplicationProfileInstance? application,
         List<ApplicationItemLinkedDocumentGroup> groups)
     {
         if (ApplicationProfileConfigurationResolver.ShowCurrentInvitationItem(application))
@@ -336,8 +284,8 @@ public static class ApplicationItemLinkedDocumentsResolver
 
     private static void AddAddressGroup(
         IObjectSpace os,
-        ApplicationItem item,
-        Application? application,
+        ApplicationRosterMergeLine item,
+        ApplicationProfileInstance? application,
         List<ApplicationItemLinkedDocumentGroup> groups)
     {
         if (!ApplicationProfileConfigurationResolver.ShowCurrentAddressOfResidence(application))
@@ -384,8 +332,8 @@ public static class ApplicationItemLinkedDocumentsResolver
 
     private static void AddMedicalGroup(
         IObjectSpace os,
-        ApplicationItem item,
-        Application? application,
+        ApplicationRosterMergeLine item,
+        ApplicationProfileInstance? application,
         List<ApplicationItemLinkedDocumentGroup> groups)
     {
         if (!ApplicationProfileConfigurationResolver.ShowCurrentMedicalRecord(application))
@@ -418,7 +366,7 @@ public static class ApplicationItemLinkedDocumentsResolver
 
     private static void AddFamilyRelationshipGroup(
         IObjectSpace os,
-        ApplicationItem item,
+        ApplicationRosterMergeLine item,
         List<ApplicationItemLinkedDocumentGroup> groups)
     {
         if (item.Person?.PersonRole != PersonRecordRole.FamilyMember)
@@ -436,9 +384,9 @@ public static class ApplicationItemLinkedDocumentsResolver
         });
     }
 
-    private static bool IsRegistrationApplicationItem(ApplicationItem item) =>
-        item.Application != null
-        && ApplicationProfileConfigurationResolver.ShowRegistrations(item.Application);
+    private static bool IsRegistrationApplicationItem(ApplicationRosterMergeLine item) =>
+        item.ApplicationProfileInstance != null
+        && ApplicationProfileConfigurationResolver.ShowRegistrations(item.ApplicationProfileInstance);
 
     private static string? BuildEducationCaption(Education education)
     {

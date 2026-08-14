@@ -28,7 +28,7 @@ public sealed class VisaPreviewSlotCloseController : ViewController
         }
         catch (ObjectDisposedException)
         {
-            // Application scope may already be torn down during host shutdown.
+            // ApplicationProfileInstance scope may already be torn down during host shutdown.
         }
 
         base.OnDeactivated();

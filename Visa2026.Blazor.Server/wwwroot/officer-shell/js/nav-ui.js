@@ -1,4 +1,4 @@
-/** Sidebar nav badges + Application profiles nav items — PNG parity (P9). */
+/** Sidebar nav badges + ApplicationProfileInstance profiles nav items — PNG parity (P9). */
 
 /**
  * @param {ReturnType<typeof import('./mock-data.js').getStore>} store

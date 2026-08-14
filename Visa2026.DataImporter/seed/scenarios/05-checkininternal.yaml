@@ -4,7 +4,7 @@ description: Registration of employee internal arrival into Mary welaýaty from 
 dependsOn: CheckIn
 sync: false
 anchor:
-  entity: Application
+  entity: ApplicationProfileInstance
   key: FullApplicationNumber
   value: 8/-005
 data:
@@ -26,9 +26,9 @@ data:
     Start Date: 2026-08-01
     Expiration Date: 2027-08-01
   Applications:
-  - Application Number: 005
+  - ApplicationProfileInstance Number: 005
     Date: 2026-08-01
-    Application Type: App_Reg_Check_In_Internal
+    ApplicationProfileInstance Type: App_Reg_Check_In_Internal
     Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň müdirine
     From City: Aşgabat şäheri
     To City: Mary şäheri

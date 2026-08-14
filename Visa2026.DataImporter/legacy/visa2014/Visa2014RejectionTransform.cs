@@ -4,7 +4,7 @@ internal sealed record Visa2014RejectionRawRow(
     Guid LegacyOid,
     string? RejectedDocNumber,
     DateTime? IssuedDate,
-    Guid? LegacyApplicationOid);
+    Guid? LegacyApplicationProfileInstanceOid);
 
 internal static class Visa2014RejectionTransform
 {
@@ -13,7 +13,7 @@ internal static class Visa2014RejectionTransform
             CAST(ar.Oid AS varchar(36)) AS Oid,
             ar.Number AS RejectedDocNumber,
             CONVERT(varchar(10), ar.IssuedDate, 23) AS IssuedDate,
-            CAST(ar.Application AS varchar(36)) AS ApplicationOid
+            CAST(ar.Application AS varchar(36)) AS ApplicationProfileInstanceOid
         FROM dbo.ApplicationResult ar
         WHERE ar.GCRecord IS NULL
           AND ar.Result = 1
@@ -23,7 +23,7 @@ internal static class Visa2014RejectionTransform
     [
         "_legacyRowId", "_legacyTable", "_dedupeGroupId", "_importAction",
         "RejectedDocNumber", "Date", "Application", "Reason",
-        "_legacy_ApplicationOid",
+        "_legacy_ApplicationProfileInstanceOid",
     ];
 
     public static Visa2014PersonImportBatch PrepareImportBatch(
@@ -69,7 +69,7 @@ internal static class Visa2014RejectionTransform
             LegacyOid: legacyOid,
             RejectedDocNumber: row.GetValueOrDefault("RejectedDocNumber"),
             IssuedDate: issuedDate,
-            LegacyApplicationOid: TryParseGuid(row.GetValueOrDefault("ApplicationOid")));
+            LegacyApplicationProfileInstanceOid: TryParseGuid(row.GetValueOrDefault("ApplicationProfileInstanceOid")));
         return true;
     }
 
@@ -162,7 +162,7 @@ internal static class Visa2014RejectionTransform
             ["_legacyTable"] = "ApplicationResult",
             ["_dedupeGroupId"] = working.DedupeGroupId ?? "",
             ["_importAction"] = "import",
-            ["_legacy_ApplicationOid"] = raw.LegacyApplicationOid?.ToString("D"),
+            ["_legacy_ApplicationProfileInstanceOid"] = raw.LegacyApplicationProfileInstanceOid?.ToString("D"),
             ["Reason"] = null,
         };
 
@@ -184,7 +184,7 @@ internal static class Visa2014RejectionTransform
             return row;
         }
 
-        if (!raw.LegacyApplicationOid.HasValue)
+        if (!raw.LegacyApplicationProfileInstanceOid.HasValue)
         {
             skipReason = "required_null:Application";
             row["RejectedDocNumber"] = raw.RejectedDocNumber;
@@ -196,7 +196,7 @@ internal static class Visa2014RejectionTransform
         row["RejectedDocNumber"] = working.ResolvedRejectedDocNumber
             ?? NormalizeDocNumber(raw.RejectedDocNumber);
         row["Date"] = raw.IssuedDate.Value.ToString("yyyy-MM-dd");
-        row["Application"] = raw.LegacyApplicationOid.Value.ToString("D");
+        row["Application"] = raw.LegacyApplicationProfileInstanceOid.Value.ToString("D");
         return row;
     }
 

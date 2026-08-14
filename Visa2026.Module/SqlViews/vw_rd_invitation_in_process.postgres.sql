@@ -41,18 +41,18 @@ SELECT
     END                                                                     AS "StatusCssClass",
     COALESCE(ast."Code", '')                                                AS "ProgressStateCode",
     COALESCE(first_p."IsArchived", FALSE)                                   AS "IsArchived"
-FROM "Applications" a
-INNER JOIN "ApplicationTypes" at
-    ON at."ID" = a."ApplicationTypeID"
-   AND COALESCE(at."GCRecord", 0) = 0
-   AND COALESCE(at."CanIssueInvitation", FALSE) = TRUE
+FROM "ApplicationProfileInstances" a
+INNER JOIN "ApplicationProfiles" apf
+    ON apf."ID" = a."ApplicationProfileID"
+   AND COALESCE(apf."GCRecord", 0) = 0
+   AND COALESCE(apf."ProduceInvitation", FALSE) = TRUE
 LEFT JOIN "ProjectContracts" pc
     ON pc."ID" = a."ProjectContractID"
    AND COALESCE(pc."GCRecord", 0) = 0
 LEFT JOIN LATERAL (
     SELECT ap."StateID"
-    FROM "ApplicationProgresses" ap
-    WHERE ap."ApplicationID" = a."ID"
+    FROM "ApplicationProfileInstanceProgresses" ap
+    WHERE ap."ApplicationProfileInstanceID" = a."ID"
       AND COALESCE(ap."GCRecord", 0) = 0
     ORDER BY ap."Date" DESC NULLS LAST, ap."ID" DESC
     LIMIT 1
@@ -61,21 +61,20 @@ LEFT JOIN "ApplicationStates" ast
     ON ast."ID" = latest_ap."StateID"
    AND COALESCE(ast."GCRecord", 0) = 0
 LEFT JOIN LATERAL (
-    SELECT ai."PersonID"
-    FROM "ApplicationItems" ai
-    WHERE ai."ApplicationID" = a."ID"
-      AND COALESCE(ai."GCRecord", 0) = 0
-    ORDER BY ai."ID"
+    SELECT ap_row."PersonId"
+    FROM "ApplicationProfileInstancePeople" ap_row
+    WHERE ap_row."ApplicationProfileInstanceId" = a."ID"
+    ORDER BY ap_row."PersonId"
     LIMIT 1
-) first_ai ON TRUE
+) first_m2m ON TRUE
 LEFT JOIN "People" first_p
-    ON first_p."ID" = first_ai."PersonID"
+    ON first_p."ID" = first_m2m."PersonId"
    AND COALESCE(first_p."GCRecord", 0) = 0
 WHERE COALESCE(a."GCRecord", 0) = 0
   AND NOT EXISTS (
         SELECT 1
         FROM "Invitations" inv
-        WHERE inv."ApplicationID" = a."ID"
+        WHERE inv."ApplicationProfileInstanceID" = a."ID"
           AND COALESCE(inv."GCRecord", 0) = 0
     )
   AND (

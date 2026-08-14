@@ -1,6 +1,4 @@
 using System;
-using System.IO;
-using System.Reflection;
 using Npgsql;
 
 namespace Visa2026.Module.DatabaseUpdate;
@@ -9,8 +7,9 @@ namespace Visa2026.Module.DatabaseUpdate;
 /// Host-start heal for Report Dashboard PostgreSQL views when ModuleUpdater is skipped
 /// (ModuleInfo already current). Recreates missing base views (sentinel column) and
 /// missing wrapper views (relation existence). Also heals visa app-progress when
-/// ProgressStateCode still ignores Application.LatestPrimaryStateCode (terminal drift),
-/// and when PassportNumber is missing from Visa dashboard views.
+/// ProgressStateCode still ignores ApplicationProfileInstance.LatestPrimaryStateCode
+/// (terminal drift), when PassportNumber is missing from Visa dashboard views, and
+/// when live views still expose ApplicationOid after the profile-instance cutover.
 /// </summary>
 public static class ReportDashboardPostgresViewsHealSql
 {
@@ -111,6 +110,19 @@ public static class ReportDashboardPostgresViewsHealSql
         ("vw_rd_invitation_valid_until", "vw_rd_invitation_valid_until.postgres.sql"),
     };
 
+    /// <summary>
+    /// Roster-backed views the ApplicationItems drop (Phase B) cascaded away: heal when the relation
+    /// is missing so the dashboard survives a skipped ModuleUpdater.
+    /// </summary>
+    private static readonly (string ViewName, string ResourceLeaf)[] RosterCascadeViews =
+    {
+        ("vw_rd_visa_state", "vw_rd_visa_state.postgres.sql"),
+        ("vw_rd_registration", "vw_rd_registration.postgres.sql"),
+        ("vw_rd_application", "vw_rd_application.postgres.sql"),
+        ("vw_rd_to_be_checked_in", "vw_rd_to_be_checked_in.postgres.sql"),
+        ("vw_rd_to_be_checked_out", "vw_rd_to_be_checked_out.postgres.sql"),
+    };
+
     private static readonly string[] VisaAppProgressDependentViews =
     {
         "vw_rd_visa_app_progress.postgres.sql",
@@ -141,8 +153,9 @@ public static class ReportDashboardPostgresViewsHealSql
 
         // Empty / pre-schema DBs (EasyTest drop+create, --updateDatabase app build): views need base tables.
         if (!RelationExists(connection, "Visas")
-            || !RelationExists(connection, "Applications")
-            || !RelationExists(connection, "People"))
+            || !RelationExists(connection, "ApplicationProfileInstances")
+            || !RelationExists(connection, "People")
+            || !RelationExists(connection, "ApplicationProfileInstancePeople"))
             return;
 
         if (NeedsVisaAppProgressPrimaryCodeHeal(connection))
@@ -162,7 +175,8 @@ public static class ReportDashboardPostgresViewsHealSql
 
         foreach (var (viewName, sentinelColumn, resourceLeaf) in BaseViews)
         {
-            if (ColumnExists(connection, viewName, sentinelColumn))
+            if (ColumnExists(connection, viewName, sentinelColumn)
+                && !ViewHasLegacyApplicationOid(connection, viewName))
                 continue;
 
             ExecuteEmbeddedSql(connection, resourceLeaf);
@@ -170,7 +184,9 @@ public static class ReportDashboardPostgresViewsHealSql
 
         foreach (var (viewName, resourceLeaf) in WrapperViews)
         {
-            if (ViewExists(connection, viewName) && ColumnExists(connection, viewName, "PassportNumber"))
+            if (ViewExists(connection, viewName)
+                && ColumnExists(connection, viewName, "PassportNumber")
+                && !ViewHasLegacyApplicationOid(connection, viewName))
                 continue;
 
             ExecuteEmbeddedSql(connection, resourceLeaf);
@@ -196,6 +212,19 @@ public static class ReportDashboardPostgresViewsHealSql
         HealWorkPermitViewsIfNeeded(connection);
         HealInvitationViewsIfNeeded(connection);
         HealPersonSearchViewIfNeeded(connection);
+        HealRosterCascadeViewsIfNeeded(connection);
+    }
+
+    private static void HealRosterCascadeViewsIfNeeded(NpgsqlConnection connection)
+    {
+        foreach (var (viewName, resourceLeaf) in RosterCascadeViews)
+        {
+            if (ViewExists(connection, viewName)
+                && !ViewDefinitionContains(connection, viewName, "ApplicationItems"))
+                continue;
+
+            ExecuteEmbeddedSql(connection, resourceLeaf);
+        }
     }
 
     private static void HealInvitationViewsIfNeeded(NpgsqlConnection connection)
@@ -205,7 +234,8 @@ public static class ReportDashboardPostgresViewsHealSql
 
         foreach (var (viewName, resourceLeaf) in InvitationViews)
         {
-            if (ViewExists(connection, viewName))
+            if (ViewExists(connection, viewName)
+                && !ViewDefinitionContains(connection, viewName, "ApplicationItems"))
                 continue;
 
             ExecuteEmbeddedSql(connection, resourceLeaf);
@@ -216,7 +246,8 @@ public static class ReportDashboardPostgresViewsHealSql
     {
         foreach (var (viewName, resourceLeaf) in WorkPermitViews)
         {
-            if (ViewExists(connection, viewName))
+            if (ViewExists(connection, viewName)
+                && !ViewHasLegacyApplicationOid(connection, viewName))
                 continue;
 
             ExecuteEmbeddedSql(connection, resourceLeaf);
@@ -265,7 +296,8 @@ public static class ReportDashboardPostgresViewsHealSql
     {
         foreach (var (viewName, _) in StandaloneViews)
         {
-            if (!ViewExists(connection, viewName))
+            if (!ViewExists(connection, viewName)
+                || ViewHasLegacyApplicationOid(connection, viewName))
                 return true;
         }
 
@@ -290,23 +322,45 @@ public static class ReportDashboardPostgresViewsHealSql
     }
     /// <summary>
     /// True when On Extension still contains apps whose LatestPrimaryStateCode is terminal
-    /// (ProgressStateCode was taken from a lagging latest progress row).
+    /// (ProgressStateCode was taken from a lagging latest progress row), or when the live
+    /// view still exposes ApplicationOid after the profile-instance cutover.
     /// </summary>
     private static bool NeedsVisaAppProgressPrimaryCodeHeal(NpgsqlConnection connection)
     {
         if (!ViewExists(connection, "vw_rd_visa_on_extension"))
             return false;
 
+        if (ViewHasLegacyApplicationOid(connection, "vw_rd_visa_on_extension"))
+            return true;
+
+        if (!ViewHasApplicationProfileInstanceOid(connection, "vw_rd_visa_on_extension"))
+            return true;
+
         using var command = connection.CreateCommand();
         command.CommandText = """
             SELECT 1
             FROM vw_rd_visa_on_extension o
-            INNER JOIN "Applications" a ON a."ID" = o."ApplicationOid"
+            INNER JOIN "ApplicationProfileInstances" a ON a."ID" = o."ApplicationProfileInstanceOid"
             WHERE a."LatestPrimaryStateCode" IN ('PROCESS_ISSUED', 'PROCESS_CANCELLED', 'PROCESS_REJECTED')
                OR RIGHT(BTRIM(COALESCE(a."LatestPrimaryStateCode", '')), 16) = '_REVIEW_REJECTED'
             LIMIT 1;
             """;
         return command.ExecuteScalar() is not null;
+    }
+
+    /// <summary>
+    /// Live vw_rd_* still aliased a.ID as ApplicationOid (pre-cutover). Recreate from embedded SQL.
+    /// </summary>
+    private static bool ViewHasLegacyApplicationOid(NpgsqlConnection connection, string viewName)
+    {
+        return ColumnExists(connection, viewName, "ApplicationOid")
+            || ColumnExists(connection, viewName, "applicationoid");
+    }
+
+    private static bool ViewHasApplicationProfileInstanceOid(NpgsqlConnection connection, string viewName)
+    {
+        return ColumnExists(connection, viewName, "ApplicationProfileInstanceOid")
+            || ColumnExists(connection, viewName, "applicationprofileinstanceoid");
     }
 
     /// <summary>
@@ -336,13 +390,21 @@ public static class ReportDashboardPostgresViewsHealSql
 
     private static void ExecuteEmbeddedSql(NpgsqlConnection connection, string resourceLeaf)
     {
-        var sql = LoadEmbeddedSql(resourceLeaf);
+        var sql = ReportDashboardSqlViewResource.Load(resourceLeaf);
         if (string.IsNullOrWhiteSpace(sql))
             return;
 
         using var command = connection.CreateCommand();
         command.CommandText = sql;
-        command.ExecuteNonQuery();
+        try
+        {
+            command.ExecuteNonQuery();
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException(
+                "Report Dashboard SQL heal failed for " + resourceLeaf + ".", ex);
+        }
     }
 
     private static bool RelationExists(NpgsqlConnection connection, string tableName)
@@ -384,16 +446,18 @@ public static class ReportDashboardPostgresViewsHealSql
         return command.ExecuteScalar() is not null;
     }
 
-    private static string LoadEmbeddedSql(string resourceLeaf)
+    private static bool ViewDefinitionContains(NpgsqlConnection connection, string viewName, string needle)
     {
-        var assembly = typeof(ReportDashboardPostgresViewsHealSql).Assembly;
-        var resourceName = "Visa2026.Module.SqlViews." + resourceLeaf;
-        using var stream = assembly.GetManifestResourceStream(resourceName);
-        if (stream is null)
-            throw new InvalidOperationException(
-                "Missing embedded Report Dashboard SQL resource: " + resourceName);
+        if (!ViewExists(connection, viewName) || string.IsNullOrEmpty(needle))
+            return false;
 
-        using var reader = new StreamReader(stream);
-        return reader.ReadToEnd();
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            SELECT pg_get_viewdef(('public.' || quote_ident(@viewName))::regclass, true);
+            """;
+        command.Parameters.AddWithValue("viewName", viewName);
+        var def = command.ExecuteScalar() as string;
+        return !string.IsNullOrEmpty(def)
+            && def.Contains(needle, StringComparison.OrdinalIgnoreCase);
     }
 }

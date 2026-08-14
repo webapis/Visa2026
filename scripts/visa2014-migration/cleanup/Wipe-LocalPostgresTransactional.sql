@@ -1,13 +1,17 @@
 -- Local disposable PostgreSQL: wipe imported transactional BOs.
--- Keeps: lookup catalogs, ProjectContracts, ApprovalLegProfiles, PermissionPolicy*, ApplicationTypes, etc.
+-- Keeps: lookup catalogs, ProjectContracts, ApprovalLegProfiles, PermissionPolicy*, ApplicationProfiles, etc.
+-- Table names follow the ApplicationProfileInstance cutover; ApplicationProfileInstancePeople is a
+-- skip-navigation join (ApplicationProfileInstanceId + PersonId only, no roster-line ID). Truncate
+-- it together with ResolvedLinks, otherwise Wave 2b reimport sees stale membership.
 -- IMPORTANT: Do NOT truncate FileData (CASCADE would wipe UserReportTemplates / ProjectContractDocuments).
 -- After truncate, optionally: DELETE FROM "FileData" WHERE "ID" NOT IN (SELECT "TemplateFileID" FROM "UserReportTemplates" WHERE "TemplateFileID" IS NOT NULL);
 BEGIN;
 TRUNCATE TABLE
-  "ApplicationProgresses",
-  "ApplicationItems",
-  "ApplicationApprovalLegSnapshots",
-  "Applications",
+  "ApplicationProfileInstanceProgresses",
+  "ApplicationProfileInstancePersonResolvedLinks",
+  "ApplicationProfileInstancePeople",
+  "ApplicationProfileInstanceApprovalLegSnapshots",
+  "ApplicationProfileInstances",
   "WorkPermitItems",
   "WorkPermitLocations",
   "WorkPermitDocuments",

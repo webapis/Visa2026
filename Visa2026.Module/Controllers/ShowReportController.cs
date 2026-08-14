@@ -26,7 +26,7 @@ namespace Visa2026.Module.Controllers
     /// </para>
     /// <para>
     /// If the button vanishes after selection, check <see cref="ReportVisibility.VisibilityCriteria"/> against the
-    /// real <c>Application.ApplicationType.Name</c> for that <see cref="ApplicationItem"/> — e.g. a “Visa” application
+    /// real <c>Application.ApplicationType.Name</c> for that <see cref="ApplicationRosterMergeLine"/> — e.g. a “Visa” application
     /// will not match criteria written only for <c>App_Inv</c>, so every item report can become inactive at once.
     /// </para>
     /// <para>
@@ -201,11 +201,11 @@ namespace Visa2026.Module.Controllers
         {
             try
             {
-                if (obj is ApplicationItem ai)
+                if (obj is ApplicationRosterMergeLine ai)
                 {
-                    _ = ai.Application?.ApplicationType?.Name;
+                    _ = ai.ApplicationProfileInstance?.ApplicationType?.Name;
                 }
-                else if (obj is Application app)
+                else if (obj is ApplicationProfileInstance app)
                 {
                     _ = app.ApplicationType?.Name;
                 }

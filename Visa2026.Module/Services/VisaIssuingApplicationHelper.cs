@@ -5,18 +5,17 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Module.Services;
 
 /// <summary>
-/// Dual-read helpers for <see cref="Visa.IssuingApplication"/> (profile-first) vs legacy
-/// <see cref="Visa.IssuingApplicationItem"/>.
+/// Helpers for <see cref="Visa.IssuingApplicationProfileInstance"/>.
 /// </summary>
-public static class VisaIssuingApplicationHelper
+public static class VisaIssuingApplicationProfileInstanceHelper
 {
-    public static Application? GetEffectiveIssuingApplication(Visa? visa) =>
-        visa?.IssuingApplication ?? visa?.IssuingApplicationItem?.Application;
+    public static ApplicationProfileInstance? GetEffectiveIssuingApplicationProfileInstance(Visa? visa) =>
+        visa?.IssuingApplicationProfileInstance;
 
     public static bool CanIssueInvitationForVisa(Visa? visa) =>
-        CanIssueInvitationForApplication(GetEffectiveIssuingApplication(visa));
+        CanIssueInvitationForApplication(GetEffectiveIssuingApplicationProfileInstance(visa));
 
-    public static bool CanIssueInvitationForApplication(Application? application)
+    public static bool CanIssueInvitationForApplication(ApplicationProfileInstance? application)
     {
         if (application == null)
             return false;
@@ -27,7 +26,7 @@ public static class VisaIssuingApplicationHelper
         return ApplicationTypeCapabilities.CanIssueInvitation(application.ApplicationType);
     }
 
-    public static bool IsEligibleIssuingApplication(Application? application)
+    public static bool IsEligibleIssuingApplicationProfileInstance(ApplicationProfileInstance? application)
     {
         if (application == null)
             return false;

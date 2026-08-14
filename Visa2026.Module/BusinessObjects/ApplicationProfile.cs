@@ -43,12 +43,12 @@ public class ApplicationProfile : BaseObject
         ApprovalLegs = new ObservableCollection<ApplicationProfileApprovalLeg>();
         NestedTemplates = new ObservableCollection<ApplicationProfileTemplate>();
         ProgressStateSettings = new ObservableCollection<ApplicationProfileProgressStateSetting>();
-        Applications = new ObservableCollection<Application>();
+        Instances = new ObservableCollection<ApplicationProfileInstance>();
     }
 
     [RuleRequiredField]
     [MaxLength(200)]
-    [XafDisplayName("Application name")]
+    [XafDisplayName("ApplicationProfileInstance name")]
     public virtual string Name { get; set; } = string.Empty;
 
     [MaxLength(1000)]
@@ -72,8 +72,8 @@ public class ApplicationProfile : BaseObject
 
     [ImmediatePostData]
     [XafDisplayName("Directed to")]
-    public virtual ApplicationProgressRouteKind ProgressRoute { get; set; }
-        = ApplicationProgressRouteKind.ViaMinistries;
+    public virtual ApplicationProfileInstanceProgressRouteKind ProgressRoute { get; set; }
+        = ApplicationProfileInstanceProgressRouteKind.ViaMinistries;
 
     [XafDisplayName("For employee")]
     public virtual bool ForEmployee { get; set; } = true;
@@ -106,6 +106,9 @@ public class ApplicationProfile : BaseObject
     [XafDisplayName("May produce work location")]
     public virtual bool ProduceWorkLocation { get; set; }
 
+    [XafDisplayName("May produce rejection")]
+    public virtual bool ProduceRejection { get; set; }
+
     [XafDisplayName("May cancel invitation(s)")]
     public virtual bool CancelInvitations { get; set; }
 
@@ -119,7 +122,7 @@ public class ApplicationProfile : BaseObject
     public virtual bool CancelBorderZonePermits { get; set; }
 
     [XafDisplayName("May cancel application(s)")]
-    public virtual bool CancelApplications { get; set; }
+    public virtual bool CancelApplicationProfileInstances { get; set; }
 
     // --- Per-application field catalog: required + defaults ---
 
@@ -163,7 +166,7 @@ public class ApplicationProfile : BaseObject
     public virtual CheckPoint? DefaultEntryCheckPoint { get; set; }
     public virtual Guid? DefaultEntryCheckPointId { get; set; }
 
-    // --- Signatory defaults (per-Application values seeded at create) ---
+    // --- Signatory defaults (per-ApplicationProfileInstance values seeded at create) ---
 
     public virtual AuthorizedSignatory? DefaultAuthorizedSignatory { get; set; }
     public virtual Guid? DefaultAuthorizedSignatoryId { get; set; }
@@ -214,14 +217,14 @@ public class ApplicationProfile : BaseObject
     /// <summary>Freeform XAF criteria filtering when this profile appears in pickers.</summary>
     [FieldSize(FieldSizeAttribute.Unlimited)]
     [XafDisplayName("Applicability criteria")]
-    [ToolTip("Optional. When empty, profile is available subject to audience/route rules. Criteria target Application context.")]
+    [ToolTip("Optional. When empty, profile is available subject to audience/route rules. Criteria target ApplicationProfileInstance context.")]
     public virtual string? ApplicabilityCriteria { get; set; }
 
     public virtual bool IsActive { get; set; } = true;
 
-    [InverseProperty(nameof(Application.ApplicationProfile))]
+    [InverseProperty(nameof(ApplicationProfileInstance.ApplicationProfile))]
     [VisibleInDetailView(false)]
-    public virtual IList<Application> Applications { get; set; }
+    public virtual IList<ApplicationProfileInstance> Instances { get; set; }
 
     [NotMapped]
     [VisibleInDetailView(false)]
@@ -232,7 +235,7 @@ public class ApplicationProfile : BaseObject
             : $"{SelectionCode} · {Name}";
 
     /// <summary>
-    /// True when any linked Application has left office preparation / been submitted
+    /// True when any linked ApplicationProfileInstance has left office preparation / been submitted
     /// (lock state A). Used to make the profile wizard read-only.
     /// </summary>
     [NotMapped]
@@ -244,7 +247,7 @@ public class ApplicationProfile : BaseObject
     public override string ToString() => DisplayName;
 }
 
-/// <summary>Exclusive “Application related to” family on <see cref="ApplicationProfile"/>.</summary>
+/// <summary>Exclusive “ApplicationProfileInstance related to” family on <see cref="ApplicationProfile"/>.</summary>
 public enum ApplicationProfileActionFamily
 {
     Issuance = 0,
@@ -298,6 +301,21 @@ public class ApplicationProfileTemplate : BaseObject
     public virtual ApplicationProfileTemplateKind TemplateKind { get; set; }
         = ApplicationProfileTemplateKind.Word;
 
+    /// <summary>Where this nested row came from in the configuration wizard (profile upload vs catalog include).</summary>
+    [XafDisplayName("Catalog scope")]
+    public virtual ApplicationProfileTemplateCatalogScope CatalogScope { get; set; }
+        = ApplicationProfileTemplateCatalogScope.ProfileSpecific;
+
+    /// <summary>Declared merge data family (header / people M2M / both). Extract still discovers tokens.</summary>
+    [XafDisplayName("Data scope")]
+    public virtual ApplicationProfileTemplateDataScope DataScope { get; set; }
+        = ApplicationProfileTemplateDataScope.PeopleM2M;
+
+    /// <summary>When <see cref="CatalogScope"/> is Category — chip key (Invitation, Visa, …).</summary>
+    [MaxLength(64)]
+    [XafDisplayName("Category key")]
+    public virtual string? CategoryKey { get; set; }
+
     [Aggregated, ExpandObjectMembers(ExpandObjectMembers.Never)]
     [XafDisplayName("Template file")]
     public virtual FileData? TemplateFile { get; set; }
@@ -310,6 +328,22 @@ public enum ApplicationProfileTemplateKind
     Word = 0,
     Excel = 1,
     PdfForm = 2
+}
+
+/// <summary>Wizard catalog bucket for a nested <see cref="ApplicationProfileTemplate"/>.</summary>
+public enum ApplicationProfileTemplateCatalogScope
+{
+    ProfileSpecific = 0,
+    Category = 1,
+    Global = 2
+}
+
+/// <summary>Declared merge data source for a nested template (intent for officers / Extract).</summary>
+public enum ApplicationProfileTemplateDataScope
+{
+    ApplicationHeader = 0,
+    PeopleM2M = 1,
+    Both = 2
 }
 
 /// <summary>Ministry vs migration progress state track on <see cref="ApplicationProfile"/>.</summary>
@@ -355,7 +389,7 @@ public static class ApplicationProfileLockHelper
     [
         "OFFICE_PREPARATION",
         "DRAFT",
-        ApplicationProgressStateCodes.IsBeingPrepared,
+        ApplicationProfileInstanceProgressStateCodes.IsBeingPrepared,
     ];
 
     public static bool IsPrimaryStateAtOrPastLockStateA(string? stateCode)
@@ -366,7 +400,7 @@ public static class ApplicationProfileLockHelper
         return !UnlockedPrimaryStateCodes.Contains(stateCode.Trim(), StringComparer.OrdinalIgnoreCase);
     }
 
-    public static bool IsApplicationAtOrPastLockStateA(Application? application)
+    public static bool IsApplicationAtOrPastLockStateA(ApplicationProfileInstance? application)
     {
         if (application == null)
             return false;
@@ -388,7 +422,7 @@ public static class ApplicationProfileLockHelper
             if (profileId != Guid.Empty)
             {
                 // Client-evaluate state codes — IsPrimaryStateAtOrPastLockStateA is not EF-translatable.
-                var stateCodes = objectSpace.GetObjectsQuery<Application>()
+                var stateCodes = objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
                     .Where(a => a.ApplicationProfile != null && a.ApplicationProfile.ID == profileId)
                     .Select(a => a.LatestPrimaryStateCode)
                     .ToList();
@@ -397,7 +431,7 @@ public static class ApplicationProfileLockHelper
             }
         }
 
-        return profile.Applications?.Any(IsApplicationAtOrPastLockStateA) == true;
+        return profile.Instances?.Any(IsApplicationAtOrPastLockStateA) == true;
     }
 
     public static void EnsureConfigurationEditable(ApplicationProfile profile, IObjectSpace objectSpace)
@@ -474,11 +508,12 @@ public static class ApplicationProfileLockHelper
         || original.ProduceVisa != current.ProduceVisa
         || original.ProduceBorderZone != current.ProduceBorderZone
         || original.ProduceWorkLocation != current.ProduceWorkLocation
+        || original.ProduceRejection != current.ProduceRejection
         || original.CancelInvitations != current.CancelInvitations
         || original.CancelWorkPermits != current.CancelWorkPermits
         || original.CancelVisas != current.CancelVisas
         || original.CancelBorderZonePermits != current.CancelBorderZonePermits
-        || original.CancelApplications != current.CancelApplications
+        || original.CancelApplicationProfileInstances != current.CancelApplicationProfileInstances
         || original.RequireVisaType != current.RequireVisaType
         || original.DefaultVisaTypeId != current.DefaultVisaTypeId
         || original.RequireVisaCategory != current.RequireVisaCategory

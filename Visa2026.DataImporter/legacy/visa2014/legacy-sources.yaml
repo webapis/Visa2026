@@ -48,8 +48,9 @@ sources:
       OtherSite: preview-export/OtherSite-preview.calik-energi.xlsx
       PrivateHouse: preview-export/PrivateHouse-preview.calik-energi.xlsx
       Application: preview-export/Application-preview.calik-energi.xlsx
+      ApplicationProfileCatalog: preview-export/ApplicationProfileCatalog-proposal.calik-energi.xlsx
       ApplicationItem: preview-export/ApplicationItem-preview.calik-energi.xlsx
-      ApplicationProgress: preview-export/ApplicationProgress-preview.calik-energi.xlsx
+      ApplicationProfileInstanceProgress: preview-export/ApplicationProfileInstanceProgress-preview.calik-energi.xlsx
       ProjectContractMinistryLeg: preview-export/ProjectContractMinistryLeg-preview.calik-energi.xlsx
       ApplicationMigrationServiceInference: preview-export/ApplicationMigrationServiceInference-preview.calik-energi.xlsx
     idMapDir: id-maps/calik-energi
@@ -101,6 +102,8 @@ sources:
     lookupTranslations:
       - docs/VISA2014_MIGRATION/lookup-translations.yaml
       - docs/VISA2014_MIGRATION/lookup-translations.calik-energi.yaml
+    previewOutput:
+      ApplicationProfileCatalog: preview-export/ApplicationProfileCatalog-proposal.calik-energi.xlsx
     idMapDir: id-maps/calik-energi-local-pg
   - id: gap-insaat
     label: Gap İnşaat

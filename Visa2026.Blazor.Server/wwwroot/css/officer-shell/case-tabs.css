@@ -22,6 +22,9 @@
   border: 1px solid #eef2f6; border-radius: 8px; padding: 10px; background: #fbfcfe;
   display: grid; gap: 4px; font-size: 0.78rem;
 }
+.ct-rec--focus {
+  border-color: #93c5fd; background: #eff6ff; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+}
 .ct-rec__icon { color: var(--os-accent); font-size: 1rem; }
 .ct-rec__label { color: var(--os-muted); }
 .ct-rec__count { font-size: 1rem; }

@@ -35,14 +35,14 @@ public sealed class ApplicationWordReportEntryGenerator
 
     public Task<ApplicationWordReportGeneratedFile?> TryGenerateSingleAsync(
         IObjectSpace objectSpace,
-        Application application,
+        ApplicationProfileInstance application,
         string entryKey,
         CancellationToken cancellationToken = default) =>
         TryGenerateSingleAsync(objectSpace, application, entryKey, WordReportGenerationContext.ForApplication(), cancellationToken);
 
     public async Task<ApplicationWordReportGeneratedFile?> TryGenerateSingleAsync(
         IObjectSpace objectSpace,
-        Application application,
+        ApplicationProfileInstance application,
         string entryKey,
         WordReportGenerationContext context,
         CancellationToken cancellationToken = default)
@@ -85,14 +85,14 @@ public sealed class ApplicationWordReportEntryGenerator
 
     public Task<IReadOnlyList<(string FileName, MemoryStream Stream)>> GenerateManyAsync(
         IObjectSpace objectSpace,
-        Application application,
+        ApplicationProfileInstance application,
         IReadOnlySet<string>? selectedEntryKeys,
         CancellationToken cancellationToken = default) =>
         GenerateManyAsync(objectSpace, application, selectedEntryKeys, WordReportGenerationContext.ForApplication(), cancellationToken);
 
     public async Task<IReadOnlyList<(string FileName, MemoryStream Stream)>> GenerateManyAsync(
         IObjectSpace objectSpace,
-        Application application,
+        ApplicationProfileInstance application,
         IReadOnlySet<string>? selectedEntryKeys,
         WordReportGenerationContext context,
         CancellationToken cancellationToken = default)
@@ -127,7 +127,7 @@ public sealed class ApplicationWordReportEntryGenerator
 
     private async Task<List<(string FileName, MemoryStream Stream)>> GenerateEntryOutputsAsync(
         IObjectSpace objectSpace,
-        Application application,
+        ApplicationProfileInstance application,
         string entryKey,
         WordReportGenerationContext context,
         IReadOnlyList<ApplicationWordReportPackageCatalogEntry> catalogEntries,
@@ -157,7 +157,7 @@ public sealed class ApplicationWordReportEntryGenerator
 
     private async Task<List<(string FileName, MemoryStream Stream)>> GenerateProfileEntryOutputsAsync(
         IObjectSpace objectSpace,
-        Application application,
+        ApplicationProfileInstance application,
         Guid profileTemplateId,
         WordReportGenerationContext context,
         IReadOnlyList<ApplicationWordReportPackageCatalogEntry> catalogEntries,
@@ -192,7 +192,7 @@ public sealed class ApplicationWordReportEntryGenerator
 
     private async Task<List<(string FileName, MemoryStream Stream)>> GenerateUserEntryOutputsAsync(
         IObjectSpace objectSpace,
-        Application application,
+        ApplicationProfileInstance application,
         Guid templateId,
         WordReportGenerationContext context,
         IReadOnlyList<ApplicationWordReportPackageCatalogEntry> catalogEntries,
@@ -251,7 +251,7 @@ public sealed class ApplicationWordReportEntryGenerator
 
     private async Task<MemoryStream?> GenerateUserEntryAsync(
         IObjectSpace objectSpace,
-        Application application,
+        ApplicationProfileInstance application,
         UserReportTemplate template,
         WordReportGenerationContext context,
         CancellationToken cancellationToken)
@@ -293,7 +293,7 @@ public sealed class ApplicationWordReportEntryGenerator
 
     private async Task<MemoryStream?> GenerateUserEntryForItemAsync(
         UserReportTemplate template,
-        ApplicationItem applicationItem,
+        ApplicationRosterMergeLine applicationItem,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -319,12 +319,12 @@ public sealed class ApplicationWordReportEntryGenerator
     }
 
     private static bool UsesPerItemWordOutput(UserReportTemplate template, WordReportGenerationContext context) =>
-        context.Scope == WordReportPackageScope.ApplicationItem
+        context.Scope == WordReportPackageScope.ApplicationRosterMergeLine
         && template.GetEffectiveOutputFormat() == TemplateOutputFormat.Word
         && template.RootBoType is UserReportBoType.ApplicationItem or UserReportBoType.Person
         && !UserReportMergeDataHelper.UsesSingleDocumentItemList(template);
 
-    private static string BuildPerItemUserTemplateFileName(UserReportTemplate template, ApplicationItem item)
+    private static string BuildPerItemUserTemplateFileName(UserReportTemplate template, ApplicationRosterMergeLine item)
     {
         var extension = template.GetEffectiveOutputFormat() == TemplateOutputFormat.Excel ? ".xlsx" : ".docx";
         var personPart = $"{item.Person_LastName}_{item.Person_FirstName}".Trim('_');

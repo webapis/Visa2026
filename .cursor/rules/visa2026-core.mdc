@@ -31,3 +31,5 @@ dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest
 **Scope:** implement only what the user asked; no drive-by refactors. Match existing patterns; full detail in **`AGENTS.md`**.
 
 **Encoding:** all repo text is **UTF-8 (no BOM)** — never UTF-16. See **`visa2026-utf8-encoding`** rule (`CS1056 '\0'` = encoding, not syntax).
+
+**Domain Components:** do **not** use `[DomainComponent]` / legacy Domain Components — see `visa2026-no-domain-components`.

@@ -5,9 +5,9 @@ using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.Services.ApplicationPersonRoster;
 
-public static class ApplicationPersonService
+public static class ApplicationProfileInstancePersonService
 {
-    public static ApplicationPerson? LinkPerson(IObjectSpace objectSpace, Application application, Person person)
+    public static Person? LinkPerson(IObjectSpace objectSpace, ApplicationProfileInstance application, Person person)
     {
         if (objectSpace == null || application == null || person == null)
             return null;
@@ -20,37 +20,63 @@ public static class ApplicationPersonService
         if (applicationId == Guid.Empty)
             return null;
 
-        var existing = objectSpace.GetObjectsQuery<ApplicationPerson>()
-            .FirstOrDefault(ap => ap.ApplicationId == applicationId && ap.PersonId == personId);
-        if (existing != null)
+        if (ApplicationProfileInstancePersonRosterLockHelper.AreResolvedLinksLocked(application))
+            return null;
+
+        application.People ??= new System.Collections.ObjectModel.ObservableCollection<Person>();
+        var existing = application.People.FirstOrDefault(p => p != null && p.ID == personId);
+        if (existing == null)
         {
-            ApplicationPersonResolver.RefreshResolvedLinks(objectSpace, existing);
-            return existing;
+            var tracked = objectSpace.GetObject(person) ?? person;
+            application.People.Add(tracked);
+            existing = tracked;
         }
 
-        var link = objectSpace.CreateObject<ApplicationPerson>();
-        link.Application = application;
-        link.Person = person;
-        link.LinkedAt = DateTime.Now;
-        ApplicationPersonResolver.RefreshResolvedLinks(objectSpace, link);
-        return link;
+        ApplicationProfileInstancePersonResolver.RefreshResolvedLinks(objectSpace, application, existing);
+        return existing;
     }
 
-    public static void UnlinkPerson(IObjectSpace objectSpace, ApplicationPerson applicationPerson)
+    public static void UnlinkPerson(IObjectSpace objectSpace, ApplicationProfileInstance application, Person person)
     {
-        if (objectSpace == null || applicationPerson == null)
+        if (objectSpace == null || application == null || person == null)
             return;
 
-        objectSpace.Delete(applicationPerson);
+        if (ApplicationProfileInstancePersonRosterLockHelper.AreResolvedLinksLocked(application))
+            return;
+
+        var personId = person.ID;
+        var tracked = application.People?.FirstOrDefault(p => p != null && p.ID == personId);
+        if (tracked != null)
+            application.People!.Remove(tracked);
+
+        var applicationId = application.ID;
+        if (applicationId == Guid.Empty || personId == Guid.Empty)
+            return;
+
+        var links = objectSpace.GetObjectsQuery<ApplicationProfileInstancePersonResolvedLink>()
+            .Where(l => l.ApplicationProfileInstanceId == applicationId && l.PersonId == personId)
+            .ToList();
+        foreach (var link in links)
+        {
+            if (link.LinkKind is { } kind && link.LinkedObjectId is Guid linkedId && linkedId != Guid.Empty)
+                ApplicationProfileInstanceChildMembership.Remove(application, kind, linkedId);
+            objectSpace.Delete(link);
+        }
     }
 
-    public static void RefreshApplication(IObjectSpace objectSpace, Application? application)
+    public static void RefreshApplication(IObjectSpace objectSpace, ApplicationProfileInstance? application)
     {
         if (objectSpace == null || application == null || objectSpace.IsNewObject(application))
             return;
 
-        foreach (var row in application.People?.ToList() ?? [])
-            ApplicationPersonResolver.RefreshResolvedLinks(objectSpace, row);
+        if (ApplicationProfileInstancePersonRosterLockHelper.AreResolvedLinksLocked(application))
+            return;
+
+        foreach (var person in application.People?.ToList() ?? [])
+        {
+            if (person != null)
+                ApplicationProfileInstancePersonResolver.RefreshResolvedLinks(objectSpace, application, person);
+        }
     }
 
     public static void RefreshApplication(IObjectSpace objectSpace, Guid applicationId)
@@ -58,7 +84,7 @@ public static class ApplicationPersonService
         if (objectSpace == null || applicationId == Guid.Empty)
             return;
 
-        var application = objectSpace.GetObjectByKey<Application>(applicationId);
+        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
         RefreshApplication(objectSpace, application);
     }
 }

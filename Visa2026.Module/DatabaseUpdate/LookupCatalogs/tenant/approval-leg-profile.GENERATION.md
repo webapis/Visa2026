@@ -24,7 +24,7 @@ VISA2015 (per application, at import)
 Automatic (preferred — `order.yaml` **tenantCatalogGeneration**):
 
 ```powershell
-# Before application-domain import (also runs from Import-Visa2014OnPremStaging.ps1 / --import-visa2014 --entity Application)
+# Before application-domain import (also runs from Import-Visa2014OnPremStaging.ps1 / --import-visa2014 --entity ApplicationProfileInstance)
 dotnet run --project Visa2026.DataImporter -- --generate-visa2014-tenant-catalogs --legacy-source calik-energi
 
 # Or with DB update in one pass:

@@ -5,7 +5,7 @@ namespace Visa2026.Module.Services.OfficerShell;
 public sealed class OfficerShellStartProcessResult
 {
     public bool Success { get; init; }
-    public Guid ApplicationId { get; init; }
+    public Guid ApplicationProfileInstanceId { get; init; }
     public string? ProcessNumber { get; init; }
     public int MergedCount { get; init; }
     public string? ErrorMessage { get; init; }
@@ -14,7 +14,7 @@ public sealed class OfficerShellStartProcessResult
         new()
         {
             Success = true,
-            ApplicationId = applicationId,
+            ApplicationProfileInstanceId = applicationId,
             ProcessNumber = processNumber,
             MergedCount = mergedCount,
         };

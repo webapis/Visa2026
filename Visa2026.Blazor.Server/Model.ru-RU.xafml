@@ -1,5 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Application Title="Управление визами">
+<?xml version="1.0" encoding="utf-8"?>
+<ApplicationProfileInstance Title="Управление визами">
   <ActionDesign>
     <Actions>
       <Action Id="Cancel" Caption="Отмена" />
@@ -121,6 +121,7 @@
             <LayoutGroup Id="Invitations" Caption="Приглашения" />
             <LayoutGroup Id="Rejections" Caption="Отказы" />
             <LayoutGroup Id="WorkPermits" Caption="РНТ" />
+            <LayoutGroup Id="IssuedVisas" Caption="Выданные визы" />
           </TabbedGroup>
         </LayoutGroup>
       </Layout>
@@ -254,4 +255,4 @@
       </Item>
     </Items>
   </NavigationItems>
-</Application>
+</ApplicationProfileInstance>

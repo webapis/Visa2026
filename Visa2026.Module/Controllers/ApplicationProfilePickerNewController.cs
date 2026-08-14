@@ -7,13 +7,13 @@ using Visa2026.Module.Services.MigrationImport;
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// Replaces standard New on Application ListViews with the profile picker (slice 9).
+/// Replaces standard New on ApplicationProfileInstance ListViews with the profile picker (slice 9).
 /// </summary>
 public sealed class ApplicationProfilePickerNewController : ViewController<ListView>
 {
     public ApplicationProfilePickerNewController()
     {
-        TargetObjectType = typeof(Application);
+        TargetObjectType = typeof(ApplicationProfileInstance);
     }
 
     protected override void OnActivated()
