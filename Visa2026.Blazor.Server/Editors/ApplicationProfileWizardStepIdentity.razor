@@ -14,19 +14,19 @@
         <div class="ap-wizard__grid">
             <label class="ap-wizard__field ap-wizard__field--full">
                 <span>ApplicationProfileInstance name</span>
-                <input type="text" @bind="Profile.Name" disabled="@Disabled" />
+                <input type="text" @bind="Profile.Name" @bind:event="oninput" disabled="@Disabled" />
             </label>
             <label class="ap-wizard__field ap-wizard__field--full">
                 <span>Description</span>
-                <textarea @bind="Profile.Description" disabled="@Disabled"></textarea>
+                <textarea @bind="Profile.Description" @bind:event="oninput" disabled="@Disabled"></textarea>
             </label>
             <label class="ap-wizard__field">
                 <span>Code</span>
-                <input type="text" @bind="Profile.Code" disabled="@Disabled" />
+                <input type="text" @bind="Profile.Code" @bind:event="oninput" disabled="@Disabled" />
             </label>
             <label class="ap-wizard__field">
                 <span>Selection / quick code</span>
-                <input type="text" maxlength="3" @bind="Profile.SelectionCode" disabled="@Disabled" />
+                <input type="text" maxlength="3" @bind="Profile.SelectionCode" @bind:event="oninput" disabled="@Disabled" />
             </label>
         </div>
     </div>
@@ -36,16 +36,57 @@
             <label class="ap-wizard__choice">
                 <input type="radio" name="route" checked="@(Profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries)"
                        disabled="@Disabled"
-                       @onchange="@(() => Profile.ProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries)" />
+                       @onchange="@(() => SetRoute(ApplicationProfileInstanceProgressRouteKind.ViaMinistries))" />
                 Via ministry
             </label>
             <label class="ap-wizard__choice">
                 <input type="radio" name="route" checked="@(Profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService)"
                        disabled="@Disabled"
-                       @onchange="@(() => Profile.ProgressRoute = ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService)" />
+                       @onchange="@(() => SetRoute(ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService))" />
                 Direct migration service
             </label>
         </div>
+        @if (ShowApprovalLegs)
+        {
+            <h3 class="ap-wizard__subhead">Approval legs</h3>
+            <div class="ap-wizard__list">
+                @if (Profile.ApprovalLegs?.Count > 0)
+                {
+                    @foreach (var leg in Profile.ApprovalLegs.OrderBy(l => l.Sequence ?? 0))
+                    {
+                        <div class="ap-wizard__list-row">
+                            <span class="ap-wizard__list-ord">@(leg.Sequence ?? 0)</span>
+                            <span>@(leg.ApprovingMinistry?.NameTm ?? "—")</span>
+                            @if (!Disabled)
+                            {
+                                <button type="button" class="ap-wizard__link" @onclick="() => OnRemoveLeg.InvokeAsync(leg)">Remove</button>
+                            }
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="ap-wizard__hint">No embedded legs — ministry depth may fall back to ApplicationProfileInstance approval leg profile.</p>
+                }
+            </div>
+            @if (!Disabled)
+            {
+                <div class="ap-wizard__add-leg">
+                    <select @bind="_selectedMinistryId">
+                        <option value="@Guid.Empty">Add approval leg…</option>
+                        @foreach (var ministry in Ministries)
+                        {
+                            <option value="@ministry.ID">@(ministry.NameTm ?? ministry.Code)</option>
+                        }
+                    </select>
+                    <button type="button" class="ap-wizard__btn ap-wizard__btn--secondary" @onclick="AddSelectedLeg">Add</button>
+                </div>
+            }
+        }
+        else
+        {
+            <p class="ap-wizard__hint">Direct migration has no ministry approval legs.</p>
+        }
     </div>
     <div class="ap-wizard__section">
         <h3>ApplicationProfileInstance may be for</h3>
@@ -60,14 +101,42 @@
         <div class="ap-wizard__choices">
             @foreach (var family in ActionFamilies)
             {
+                var selected = family;
                 <label class="ap-wizard__choice">
-                    <input type="radio" name="actionFamily" checked="@(Profile.ActionFamily == family)"
+                    <input type="radio" name="actionFamily" checked="@(Profile.ActionFamily == selected)"
                            disabled="@Disabled"
-                           @onchange="@(() => Profile.ActionFamily = family)" />
-                    @FormatActionFamily(family)
+                           @onchange="@(() => SetActionFamily(selected))" />
+                    @FormatActionFamily(selected)
                 </label>
             }
         </div>
+        @if (ShowMayProduce)
+        {
+            <h3 class="ap-wizard__subhead">May produce</h3>
+            <div class="ap-wizard__choices">
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ProduceInvitation" disabled="@Disabled" /> Invitation</label>
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ProduceWorkPermit" disabled="@Disabled" /> Work permit</label>
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ProduceVisa" disabled="@Disabled" /> Visa</label>
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ProduceBorderZone" disabled="@Disabled" /> Border zone</label>
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ProduceRejection" disabled="@Disabled" /> Rejection</label>
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ProduceWorkLocation" disabled="@Disabled" /> Work location</label>
+            </div>
+        }
+        else if (ShowMayCancel)
+        {
+            <h3 class="ap-wizard__subhead">May cancel existing</h3>
+            <div class="ap-wizard__choices">
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.CancelInvitations" disabled="@Disabled" /> Invitation(s)</label>
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.CancelWorkPermits" disabled="@Disabled" /> Work permit(s)</label>
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.CancelVisas" disabled="@Disabled" /> Visa(s)</label>
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.CancelBorderZonePermits" disabled="@Disabled" /> Border zone permit(s)</label>
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.CancelApplicationProfileInstances" disabled="@Disabled" /> Application(s)</label>
+            </div>
+        }
+        else
+        {
+            <p class="ap-wizard__hint">Registration and business-trip profiles do not issue or cancel documents here.</p>
+        }
     </div>
     <div class="ap-wizard__section">
         <h3>Applicability scope (optional)</h3>
@@ -99,8 +168,13 @@
 
 @code {
     [Parameter, EditorRequired] public ApplicationProfile Profile { get; set; } = null!;
-
     [Parameter] public bool Disabled { get; set; }
+    [Parameter] public IReadOnlyList<ApprovingMinistry> Ministries { get; set; } = Array.Empty<ApprovingMinistry>();
+    [Parameter] public EventCallback<Guid> OnAddLeg { get; set; }
+    [Parameter] public EventCallback<ApplicationProfileApprovalLeg> OnRemoveLeg { get; set; }
+    [Parameter] public EventCallback ClearLegsRequested { get; set; }
+
+    private Guid _selectedMinistryId;
 
     private enum ScopeMode { Always, Scoped }
 
@@ -120,6 +194,64 @@
         ApplicationProfileActionFamily.Registration,
         ApplicationProfileActionFamily.BusinessTrip,
     ];
+
+    private bool ShowMayProduce => Profile.ActionFamily == ApplicationProfileActionFamily.Issuance;
+    private bool ShowMayCancel => Profile.ActionFamily == ApplicationProfileActionFamily.Cancellation;
+    private bool ShowApprovalLegs =>
+        Profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries;
+
+    private async Task SetRoute(ApplicationProfileInstanceProgressRouteKind route)
+    {
+        if (Disabled || Profile.ProgressRoute == route)
+            return;
+
+        Profile.ProgressRoute = route;
+        if (route != ApplicationProfileInstanceProgressRouteKind.ViaMinistries
+            && ClearLegsRequested.HasDelegate)
+        {
+            await ClearLegsRequested.InvokeAsync();
+        }
+    }
+
+    private async Task AddSelectedLeg()
+    {
+        if (Disabled || !ShowApprovalLegs || _selectedMinistryId == Guid.Empty)
+            return;
+
+        await OnAddLeg.InvokeAsync(_selectedMinistryId);
+        _selectedMinistryId = Guid.Empty;
+    }
+
+    private void SetActionFamily(ApplicationProfileActionFamily family)
+    {
+        if (Disabled || Profile.ActionFamily == family)
+            return;
+
+        Profile.ActionFamily = family;
+        if (family != ApplicationProfileActionFamily.Issuance)
+            ClearProduce();
+        if (family != ApplicationProfileActionFamily.Cancellation)
+            ClearCancel();
+    }
+
+    private void ClearProduce()
+    {
+        Profile.ProduceInvitation = false;
+        Profile.ProduceWorkPermit = false;
+        Profile.ProduceVisa = false;
+        Profile.ProduceBorderZone = false;
+        Profile.ProduceRejection = false;
+        Profile.ProduceWorkLocation = false;
+    }
+
+    private void ClearCancel()
+    {
+        Profile.CancelInvitations = false;
+        Profile.CancelWorkPermits = false;
+        Profile.CancelVisas = false;
+        Profile.CancelBorderZonePermits = false;
+        Profile.CancelApplicationProfileInstances = false;
+    }
 
     private void SetAlwaysScope()
     {

@@ -52,6 +52,23 @@ public class ApplicationProfileOfficerCatalogSelectorTests
         Assert.Same(shorter, selected);
     }
 
+    [Fact]
+    public void SelectDistinctTemplates_KeepsAllTypeOnlyRowsEvenWhenCodeMatches()
+    {
+        var seeded = NewProfile("visa_extension", "", "354 - seeded", contract: false);
+        var created = NewProfile("visa_extension", "", "Sample Visa Extension Profile", contract: false);
+
+        var selected = ApplicationProfileOfficerCatalogSelector
+            .SelectDistinctTemplates([seeded, created])
+            .Select(p => p.Name)
+            .OrderBy(n => n, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        Assert.Equal(2, selected.Count);
+        Assert.Contains("354 - seeded", selected);
+        Assert.Contains("Sample Visa Extension Profile", selected);
+    }
+
     private static ApplicationProfile NewProfile(string code, string selectionCode, string name, bool contract)
     {
         var profile = new ApplicationProfile

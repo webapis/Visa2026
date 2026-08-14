@@ -52,7 +52,11 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 
 ### Application Profile cutover (slices 1–9 shipped)
 
-**Not deprecated:** **`ApplicationProgress`** (workflow history), **`ApplicationState`** catalog, per-Application **`ProjectContract`** / **`ApprovalLegProfile`** choices, or per-Application field values on `Application`. Only **configuration** that used to live on `ApplicationType` (and type-driven item visibility) moves to **`ApplicationProfile`**.
+**Not deprecated:** append-only **`ApplicationProfileInstanceProgress`** history rows on the instance (dates, notes, ministry letter). **`ApplicationState`** catalog remains for storage/import.
+
+**Deprecated for officer workspace steps:** driving the Progress tab / Advance list from **`ApplicationProgress*` transition codes** (`1_REVIEW_STARTED`, …). Officer-facing steps come from the **Application Profile** template: **Approval legs** (nodes) + **Process & SLA** included states (Submitted / Approved / …). Storage may still write matching `ApplicationState.Code` values.
+
+Only **configuration** that used to live on `ApplicationType` (and type-driven item visibility) moves to **`ApplicationProfile`**.
 
 | Legacy configuration | Replacement on `ApplicationProfile` | Runtime reader |
 |----------------------|-----------------------------------|----------------|
@@ -180,9 +184,7 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 
 ## Change log
 
-| Date | Change |
-|------|--------|
-| 2026-08-13 | `ApplicationItem` Phase B hard-remove: BO/table/`IssuingApplicationItemID` gone. SQL Server view path (`SqlViewsUpdater` + plain `SqlViews/*.sql`) deleted; orphaned `View_*` extension/tracking views listed for port-or-retire. |
+| 2026-08-14 | Officer workspace Progress/Advance steps come from Application Profile Approval legs + Process & SLA; `1_REVIEW_STARTED` / ApplicationProgress transition graph is storage-only for that UI. |
 | 2026-08-07 | Application Profile cutover registry: type config seed/UX, group/template links, `ApplicationItem` / `IssuingApplicationItem` (slice 10 pending), progress **configuration** vs `ApplicationProgress` BO clarified. |
 | 2026-07-31 | Registration→TravelHistory auto-sync removed; `SourceApplicationItemID` cleared/dropped; manual TravelHistory CRUD only. |
 | 2026-05-26 | On-prem Windows/WSL scripts and docs moved under `scripts/legacy/` and `docs/legacy/`; Ubuntu path is canonical. |

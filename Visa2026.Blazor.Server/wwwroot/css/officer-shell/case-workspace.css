@@ -16,6 +16,9 @@
 }
 .cw-head-badge--sla { background: #ecfdf5; border-color: #86efac; color: #047857; }
 .cw-head-badge--process { background: #e8f1ff; border-color: #93c5fd; color: #1e40af; }
+.cw-head-badge--issued { background: #dcfce7; border-color: #86efac; color: #15803d; }
+.cw-head-badge--rejected { background: #fee2e2; border-color: #fca5a5; color: #b91c1c; }
+.cw-head-badge--cancelled { background: #fecaca; border-color: #f87171; color: #991b1b; }
 .cw-head-badge--hold { background: #f1f5f9; border-color: #cbd5e1; color: #475569; }
 .cw-head__close {
   border: none;
@@ -106,7 +109,7 @@
 .cw-sum-tile__value { font-size: 0.95rem; line-height: 1.25; }
 
 .cw-prog-stepper {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(8.25rem, 1fr)); gap: 8px;
 }
 @media (max-width: 800px) { .cw-prog-stepper { grid-template-columns: 1fr 1fr; } }
 .cw-prog-step { display: flex; flex-direction: column; gap: 8px; }
@@ -118,6 +121,9 @@
 }
 .cw-prog-step--done .cw-prog-step__dot { background: var(--os-ok); border-color: var(--os-ok); color: #fff; }
 .cw-prog-step--current .cw-prog-step__dot { background: var(--os-accent); border-color: var(--os-accent); color: #fff; }
+.cw-prog-step--tone-issued .cw-prog-step__dot { background: #15803d; border-color: #15803d; color: #fff; }
+.cw-prog-step--tone-rejected .cw-prog-step__dot { background: #b91c1c; border-color: #b91c1c; color: #fff; }
+.cw-prog-step--tone-cancelled .cw-prog-step__dot { background: #991b1b; border-color: #7f1d1d; color: #fff; }
 .cw-prog-step__line {
   flex: 1; height: 3px; margin: 0 4px; border-radius: 2px; background: #e2e8f0;
 }
@@ -128,8 +134,22 @@
   display: inline-block; font-size: 0.68rem; font-weight: 700; padding: 3px 8px; border-radius: 999px;
 }
 .cw-prog-step__badge--ok { background: var(--os-ok-soft); color: #047857; }
+.cw-prog-step__badge--issued { background: #dcfce7; color: #15803d; }
+.cw-prog-step__badge--rejected { background: #fee2e2; color: #b91c1c; }
+.cw-prog-step__badge--cancelled { background: #fecaca; color: #991b1b; }
 .cw-prog-step__badge--active { background: var(--os-accent-soft); color: #1e40af; }
 .cw-prog-step__badge--muted { background: #f1f5f9; color: #64748b; }
+.cw-prog-step__date { display: block; margin-top: 4px; font-size: 0.72rem; color: var(--os-muted); }
+.cw-prog-step__letter { display: block; margin-top: 4px; max-width: 100%; }
+.cw-prog-step__letter .ct-letter-preview {
+  font-size: 0.72rem;
+  font-weight: 600;
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 .cw-link-row {
   display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;

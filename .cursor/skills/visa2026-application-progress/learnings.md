@@ -6,6 +6,38 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 
 ## Entries
 
+### 2026-08-14 — Approval letters stay visible after the ministry step is done
+
+- Upload still attaches `MinistryLetterFile` to the decision row. Case workspace now lists that filename on completed ministry nodes (Progress + Overview) and opens the preview slot. Previously the name was only copied onto the current step.
+- Prevent: Do not treat letter preview as current-step-only UI.
+- Cross-skill: visa2026-application-profile | visa2026-preview-slot
+
+### 2026-08-14 — Workspace Progress letter preview uses preview slot, not download
+
+- Officer clicks the uploaded ministry letter on the case Progress tab → `#visa-preview-slot` `ProgressLetters` occupant (`OpenPreviewOnly` + `FocusProgressId`). File bytes still come from `ApplicationProfileInstanceProgressMinistryLetterFileAccess` / `ProgressLettersInlinePreview`.
+- Prevent: Do not open `target="_blank"` for workspace letter preview. ListView grid `.app-progress-letter-link` still opens the slot catalog.
+- Cross-skill: visa2026-preview-slot | visa2026-application-profile
+
+### 2026-08-14 — Officer workspace steps come from Application Profile, not 1_REVIEW_STARTED labels
+
+- Workspace Progress nodes and badges use Application Profile Approval legs + Process & SLA display names (Submitted / Approved). `ApplicationState` codes such as `1_REVIEW_STARTED` remain on history rows for storage/import only. Slot matching uses template display order (1..N), not snapshot Sequence vs parsed `N_REVIEW_*`.
+- Prevent: Do not build officer Advance options from ApplicationProgress transition lists when the instance has an Application Profile.
+- Cross-skill: visa2026-application-profile
+
+### 2026-08-14 — Workspace Advance ignored embedded profile legs
+
+- First Advance from implied office failed (often silently) when the instance used `ApplicationProfile.ApprovalLegs` instead of `ApprovalLegProfile`. `TryValidateApprovalLegProfileForProgress` required the lookup BO; ministry SLA required `MinistryReviewSlaSettings` even when the profile had `MinistrySlaDays`. Rail Advance with 2+ next steps was a tab switch only.
+- Validation now accepts embedded legs/snapshots; profile ministry SLA days satisfy the first `1_REVIEW_STARTED` check. New rows in `ProgressHistory` use latest existing history as previous when the current row is unsaved (same-day advance).
+- Prevent: Do not require `ApprovalLegProfile` when the live Application Profile already has approval legs.
+- Cross-skill: visa2026-application-profile
+
+### 2026-08-14 — Workspace Progress tab: implied office notes + real timeline
+
+- Empty `ProgressHistory` is implied office (no `IS_BEING_PREPARED` row). The case workspace Progress tab now lists that office step plus real history rows, not four PNG buckets. Officer notes at office persist on `ApplicationProfileInstance.OfficePreparationNotes` and copy onto the first explicit progress row on advance.
+- Schema: `OfficePreparationNotes` text/nvarchar(max) via host-start `ApplicationProfileSchemaSql` (`ADD COLUMN IF NOT EXISTS`).
+- Prevent: Do not seed a prepare row to make notes work.
+- Cross-skill: visa2026-application-profile
+
 ### 2026-07-25 — Hide Approval/Migration deadline on Direct migration ListView
 
 - **Request**: Hide **Approval deadline** (`ProgressSlaStatement`) and **Migration deadline** (`MigrationSlaStatement`) on `Application_ListView_DirectMigration` only.

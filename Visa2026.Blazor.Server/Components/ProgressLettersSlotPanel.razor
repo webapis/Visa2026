@@ -1,5 +1,6 @@
 @namespace Visa2026.Blazor.Server.Components
 @using DevExpress.ExpressApp
+@using Microsoft.JSInterop
 @using Visa2026.Blazor.Server.Localization
 @using Visa2026.Module.BusinessObjects
 @using Visa2026.Module.Localization
@@ -49,6 +50,7 @@
 
     [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
     [Inject] private IVisaPreviewSlotService SlotService { get; set; } = null!;
+    [Inject] private IJSRuntime JS { get; set; } = null!;
 
     private Guid _applicationId;
     private Guid? _focusProgressId;
@@ -56,7 +58,9 @@
         Array.Empty<ApplicationProfileInstanceProgressLetterCatalogEntry>();
     private string _uiCultureName = string.Empty;
     private bool _previewActive;
+    private bool _previewOnlyMode;
     private ProgressLettersInlinePreview? _inlinePreview;
+    private ProgressLettersInlinePreviewRequest? _pendingPreviewRequest;
     private string? _boundOccupantKey;
 
     private string Title => VisaUiMessages.Get("ApplicationProfileInstanceProgress.MinistryLetters.Title", _uiCultureName);
@@ -76,6 +80,8 @@
             _entries = Array.Empty<ApplicationProfileInstanceProgressLetterCatalogEntry>();
             _boundOccupantKey = null;
             _previewActive = false;
+            _previewOnlyMode = false;
+            _pendingPreviewRequest = null;
             return;
         }
 
@@ -83,14 +89,50 @@
         if (!string.Equals(_boundOccupantKey, occupantKey, StringComparison.Ordinal))
         {
             _boundOccupantKey = occupantKey;
-            _previewActive = false;
+            _previewOnlyMode = Request.OpenPreviewOnly;
+            if (_previewOnlyMode)
+            {
+                _previewActive = true;
+                _pendingPreviewRequest = BuildPreviewRequest(Request);
+            }
+            else
+            {
+                _previewActive = false;
+                _pendingPreviewRequest = null;
+            }
         }
 
         _applicationId = Request.ApplicationProfileInstanceId;
         _focusProgressId = Request.FocusProgressId is { } focus && focus != Guid.Empty
             ? focus
             : null;
-        ReloadCatalog();
+
+        if (!_previewOnlyMode)
+            ReloadCatalog();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_pendingPreviewRequest != null)
+        {
+            var request = _pendingPreviewRequest;
+            _pendingPreviewRequest = null;
+            await InvokeAsync(StateHasChanged);
+            await Task.Yield();
+
+            if (_inlinePreview != null)
+                await _inlinePreview.OpenAsync(request);
+            return;
+        }
+
+        if (_previewActive || _applicationId == Guid.Empty)
+            return;
+
+        try
+        {
+            await JS.InvokeVoidAsync("visaPreviewDrawer.scheduleSlotThemeSync");
+        }
+        catch (JSDisconnectedException) { }
     }
 
     private void ReloadCatalog()
@@ -117,6 +159,15 @@
 
     private async Task OnPreviewClosedAsync()
     {
+        if (_previewOnlyMode)
+        {
+            _previewOnlyMode = false;
+            _previewActive = false;
+            _focusProgressId = null;
+            await SlotService.CloseAsync();
+            return;
+        }
+
         _previewActive = false;
         _focusProgressId = null;
         await InvokeAsync(StateHasChanged);
@@ -124,11 +175,28 @@
 
     private async Task ClosePanelAsync()
     {
+        _previewOnlyMode = false;
         _previewActive = false;
         _focusProgressId = null;
+        _pendingPreviewRequest = null;
         if (CloseRequested.HasDelegate)
             await CloseRequested.InvokeAsync();
         else
             await SlotService.CloseAsync();
+    }
+
+    private static ProgressLettersInlinePreviewRequest? BuildPreviewRequest(ProgressLettersSlotRequest request)
+    {
+        if (request.FocusProgressId is not Guid progressId || progressId == Guid.Empty)
+            return null;
+
+        return new ProgressLettersInlinePreviewRequest
+        {
+            ApplicationProfileInstanceId = request.ApplicationProfileInstanceId,
+            ProgressId = progressId,
+            DisplayName = string.IsNullOrWhiteSpace(request.FocusDisplayName)
+                ? "Ministry letter"
+                : request.FocusDisplayName.Trim(),
+        };
     }
 }

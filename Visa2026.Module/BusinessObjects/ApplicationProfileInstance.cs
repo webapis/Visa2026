@@ -1017,6 +1017,17 @@ namespace Visa2026.Module.BusinessObjects
         [MaxLength(255)]
         public virtual string? LatestProgressDisplay { get; set; }
 
+        /// <summary>
+        /// Officer notes while history is empty (implied office). Copied onto the first
+        /// real progress row on advance, then cleared. Not shown on native DetailView.
+        /// </summary>
+        [Browsable(false)]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [FieldSize(FieldSizeAttribute.Unlimited)]
+        public virtual string? OfficePreparationNotes { get; set; }
+
         public override void OnCreated()
         {
             base.OnCreated();

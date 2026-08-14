@@ -25,7 +25,9 @@ public class ApplicationProfileCatalogPropertyEditor : BlazorPropertyEditorBase,
     private XafApplication? _application;
     private IApplicationProfileCatalogQueryService? _queryService;
     private IApplicationProfileOverviewQueryService? _overviewQueryService;
+    private IApplicationProfileCatalogReload? _reload;
     private IReadOnlyList<ApplicationProfileCatalogRow> _allRows = Array.Empty<ApplicationProfileCatalogRow>();
+    private bool _reloadHooked;
 
     public ApplicationProfileCatalogPropertyEditor(Type objectType, IModelMemberViewItem model)
         : base(objectType, model) { }
@@ -37,6 +39,38 @@ public class ApplicationProfileCatalogPropertyEditor : BlazorPropertyEditorBase,
         _application = application;
         _queryService = application.ServiceProvider?.GetService<IApplicationProfileCatalogQueryService>();
         _overviewQueryService = application.ServiceProvider?.GetService<IApplicationProfileOverviewQueryService>();
+        HookReload(application);
+    }
+
+    private void HookReload(XafApplication application)
+    {
+        if (_reloadHooked)
+            return;
+
+        _reload = application.ServiceProvider?.GetService<IApplicationProfileCatalogReload>();
+        if (_reload == null)
+            return;
+
+        _reload.Reloading += LoadAsync;
+        _reloadHooked = true;
+    }
+
+    public override void BreakLinksToControl(bool unwireEventsOnly)
+    {
+        if (!unwireEventsOnly)
+            UnhookReload();
+
+        base.BreakLinksToControl(unwireEventsOnly);
+    }
+
+    private void UnhookReload()
+    {
+        if (!_reloadHooked || _reload == null)
+            return;
+
+        _reload.Reloading -= LoadAsync;
+        _reloadHooked = false;
+        _reload = null;
     }
 
     protected override IComponentModel CreateComponentModel() => new ApplicationProfileCatalogModel
@@ -49,6 +83,7 @@ public class ApplicationProfileCatalogPropertyEditor : BlazorPropertyEditorBase,
         SearchTextChanged = EventCallback.Factory.Create<string>(this, OnSearchTextChanged),
         CloseProfileRequested = EventCallback.Factory.Create(this, CloseProfileAsync),
         OpenInstanceRequested = EventCallback.Factory.Create<Guid>(this, OpenLinkedInstanceAsync),
+        DeleteProfileRequested = EventCallback.Factory.Create<Guid>(this, DeleteProfileAsync),
     };
 
     protected override void OnCurrentObjectChanged()
@@ -170,7 +205,7 @@ public class ApplicationProfileCatalogPropertyEditor : BlazorPropertyEditorBase,
             return Task.CompletedTask;
 
         _application.ShowViewStrategy.ShowView(
-            new ShowViewParameters(wizardView) { TargetWindow = TargetWindow.Current },
+            new ShowViewParameters(wizardView) { TargetWindow = TargetWindow.NewWindow },
             new ShowViewSource(_application.MainWindow, null));
 
         return Task.CompletedTask;
@@ -198,10 +233,43 @@ public class ApplicationProfileCatalogPropertyEditor : BlazorPropertyEditorBase,
             return Task.CompletedTask;
 
         _application.ShowViewStrategy.ShowView(
-            new ShowViewParameters(wizardView) { TargetWindow = TargetWindow.Current },
+            new ShowViewParameters(wizardView) { TargetWindow = TargetWindow.NewWindow },
             new ShowViewSource(_application.MainWindow, null));
 
         return Task.CompletedTask;
+    }
+
+    private async Task DeleteProfileAsync(Guid profileId)
+    {
+        var model = ComponentModel;
+        if (model == null || _application == null || profileId == Guid.Empty)
+            return;
+
+        try
+        {
+            using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfile));
+            if (!ApplicationProfileUnlinkedDeleteHelper.TryDelete(objectSpace, profileId, out var error))
+            {
+                model.StatusMessage = error;
+                model.IsStatusError = true;
+                return;
+            }
+
+            if (model.SelectedProfileId == profileId)
+            {
+                model.SelectedProfileId = Guid.Empty;
+                model.OverviewSnapshot = null;
+            }
+
+            await LoadAsync();
+            model.StatusMessage = "Application Profile template deleted.";
+            model.IsStatusError = false;
+        }
+        catch (Exception ex)
+        {
+            model.StatusMessage = ex.Message;
+            model.IsStatusError = true;
+        }
     }
 
     private Task OpenLinkedInstanceAsync(Guid instanceId)

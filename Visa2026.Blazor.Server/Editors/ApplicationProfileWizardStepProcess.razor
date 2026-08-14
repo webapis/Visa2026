@@ -3,46 +3,9 @@
 
 <div class="ap-wizard__panel-head">
     <h2>Process &amp; SLA</h2>
-    <p>Approval legs and expected process duration. Progress states follow the standard route graph.</p>
+    <p>Progress states and expected process duration.</p>
 </div>
 <div class="ap-wizard__panel-body">
-    <div class="ap-wizard__section">
-        <h3>Approval legs</h3>
-        <div class="ap-wizard__list">
-            @if (Profile.ApprovalLegs?.Count > 0)
-            {
-                @foreach (var leg in Profile.ApprovalLegs.OrderBy(l => l.Sequence ?? 0))
-                {
-                    <div class="ap-wizard__list-row">
-                        <span class="ap-wizard__list-ord">@(leg.Sequence ?? 0)</span>
-                        <span>@(leg.ApprovingMinistry?.NameTm ?? leg.ApprovingMinistry?.Name ?? "—")</span>
-                        @if (!Disabled)
-                        {
-                            <button type="button" class="ap-wizard__link" @onclick="() => OnRemoveLeg.InvokeAsync(leg)">Remove</button>
-                        }
-                    </div>
-                }
-            }
-            else
-            {
-                <p class="ap-wizard__hint">No embedded legs — ministry depth may fall back to ApplicationProfileInstance approval leg profile.</p>
-            }
-        </div>
-        @if (!Disabled)
-        {
-            <div class="ap-wizard__add-leg">
-                <select @bind="_selectedMinistryId">
-                    <option value="@Guid.Empty">Add approval leg…</option>
-                    @foreach (var ministry in Ministries)
-                    {
-                        <option value="@ministry.ID">@(ministry.NameTm ?? ministry.Name)</option>
-                    }
-                </select>
-                <button type="button" class="ap-wizard__btn ap-wizard__btn--secondary" @onclick="AddSelectedLeg">Add</button>
-            </div>
-        }
-    </div>
-
     @if (Profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries)
     {
         <div class="ap-wizard__section">
@@ -60,10 +23,13 @@
     <div class="ap-wizard__section">
         <h3>Expected process duration (SLA)</h3>
         <div class="ap-wizard__grid">
-            <label class="ap-wizard__field">
-                <span>Ministry (days)</span>
-                <input type="number" min="0" @bind="Profile.MinistrySlaDays" disabled="@Disabled" />
-            </label>
+            @if (Profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries)
+            {
+                <label class="ap-wizard__field">
+                    <span>Ministry (days)</span>
+                    <input type="number" min="0" @bind="Profile.MinistrySlaDays" disabled="@Disabled" />
+                </label>
+            }
             <label class="ap-wizard__field">
                 <span>Migration (days)</span>
                 <input type="number" min="0" @bind="Profile.MigrationSlaDays" disabled="@Disabled" />
@@ -75,11 +41,6 @@
 @code {
     [Parameter, EditorRequired] public ApplicationProfile Profile { get; set; } = null!;
     [Parameter] public bool Disabled { get; set; }
-    [Parameter] public IReadOnlyList<ApprovingMinistry> Ministries { get; set; } = Array.Empty<ApprovingMinistry>();
-    [Parameter] public EventCallback<Guid> OnAddLeg { get; set; }
-    [Parameter] public EventCallback<ApplicationProfileApprovalLeg> OnRemoveLeg { get; set; }
-
-    private Guid _selectedMinistryId;
 
     private RenderFragment RenderStateTable(ApplicationProfileProgressStateTrack track) => builder =>
     {
@@ -134,13 +95,4 @@
 
     private static bool ParseChecked(ChangeEventArgs e) =>
         e.Value is bool b ? b : string.Equals(e.Value?.ToString(), "true", StringComparison.OrdinalIgnoreCase);
-
-    private async Task AddSelectedLeg()
-    {
-        if (_selectedMinistryId == Guid.Empty)
-            return;
-
-        await OnAddLeg.InvokeAsync(_selectedMinistryId);
-        _selectedMinistryId = Guid.Empty;
-    }
 }

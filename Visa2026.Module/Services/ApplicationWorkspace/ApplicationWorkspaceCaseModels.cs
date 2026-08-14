@@ -121,6 +121,12 @@ public sealed class ApplicationWorkspaceCaseProgressStep
 
     public bool ShowMinistryLetterUpload { get; init; }
 
+    /// <summary>
+    /// Visual tone for the stepper: pending, current, ok, issued, rejected, cancelled.
+    /// Terminal outcomes (issued / rejected / cancelled) win over slot current/done.
+    /// </summary>
+    public string OutcomeKind { get; init; } = "pending";
+
     public bool CanAdvance { get; init; }
 
     public string AdvanceBlockedReason { get; init; } = string.Empty;

@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.BaseImpl.EF;
+using Microsoft.EntityFrameworkCore;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
 using Visa2026.Module.Services;
@@ -23,10 +24,7 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
             return OfficerShellCaseProgressResult.Failed("ApplicationProfileInstance not found.");
 
         var latest = ApplicationProfileInstanceProgressHelper.GetLatest(application.ProgressHistory, objectSpace);
-        if (latest == null)
-            return OfficerShellCaseProgressResult.Failed("No progress history on this application.");
-
-        latest.Description = notes?.Trim() ?? string.Empty;
+        ApplicationProfileInstanceOfficeNotesHelper.Save(application, latest, notes);
         return OfficerShellCaseProgressResult.Succeeded();
     }
 
@@ -78,7 +76,7 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         if (objectSpace == null)
             return OfficerShellCaseProgressResult.Failed("ObjectSpace is required.");
 
-        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
+        var application = LoadApplicationForAdvance(objectSpace, applicationId);
         if (application == null)
             return OfficerShellCaseProgressResult.Failed("ApplicationProfileInstance not found.");
 
@@ -112,6 +110,9 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         progress.ApplicationProfileInstance = application;
         progress.Date = DateTime.Today;
         progress.State = state;
+        application.ProgressHistory ??= new System.Collections.ObjectModel.ObservableCollection<ApplicationProfileInstanceProgress>();
+        if (!application.ProgressHistory.Contains(progress))
+            application.ProgressHistory.Add(progress);
 
         if (ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(chosenCode)
             && !string.IsNullOrWhiteSpace(application.ProcessNumber))
@@ -122,7 +123,34 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         if (!ApplicationProfileInstanceProgressTransitionHelper.TryValidateProgressStep(progress, objectSpace, out var progressError))
             return OfficerShellCaseProgressResult.Failed(progressError ?? VisaUiMessages.Get("ApplicationProfileInstanceProgress.InvalidForRoute"));
 
+        if (latest == null)
+            ApplicationProfileInstanceOfficeNotesHelper.CopyOntoNewRow(application, progress, notesOnLatestStep);
+
         ApplicationLatestProgressSyncHelper.Sync(application, objectSpace);
         return OfficerShellCaseProgressResult.Succeeded(chosenCode);
+    }
+
+    private static ApplicationProfileInstance? LoadApplicationForAdvance(IObjectSpace objectSpace, Guid applicationId)
+    {
+        try
+        {
+            return objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
+                .Include(a => a.ApplicationProfile)
+                    .ThenInclude(p => p!.ApprovalLegs)
+                        .ThenInclude(l => l.ApprovingMinistry)
+                .Include(a => a.ApplicationProfile)
+                    .ThenInclude(p => p!.ProgressStateSettings)
+                .Include(a => a.ApprovalLegProfile)
+                    .ThenInclude(p => p!.MinistryLegs)
+                .Include(a => a.ApprovalLegSnapshots)
+                .Include(a => a.ProgressHistory)
+                    .ThenInclude(p => p.State)
+                .Include(a => a.ApplicationType)
+                .FirstOrDefault(a => a.ID == applicationId);
+        }
+        catch (Exception)
+        {
+            return objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
+        }
     }
 }

@@ -1,5 +1,7 @@
 @using System.Linq
 @using Microsoft.AspNetCore.Components.Forms
+@using Visa2026.Module.BusinessObjects.ApplicationWorkspace
+@using Visa2026.Module.BusinessObjects.OfficerShell
 @using Visa2026.Module.Services.ApplicationWorkspace
 
 <div class="ct-page">
@@ -8,19 +10,34 @@
         <div class="os-banner @(IsStatusError ? "os-banner--warn" : "os-banner--ok")" style="margin-bottom:12px">@StatusMessage</div>
     }
 
-    @{
-        var currentStep = view.ProgressSteps.FirstOrDefault(s => s.State == "current");
-    }
-
     <h2 class="ct-page__title">Progress</h2>
     <p class="ct-page__sub">ApplicationProfileInstance process for @view.Chrome.TemplateFamilyLabel · current step: @view.Chrome.CurrentStep</p>
     <div class="ct-prog-v-list">
         @foreach (var step in view.ProgressSteps)
         {
-            var badge = step.State == "done" ? "Completed" : step.State == "current" ? "In progress" : "Pending";
-            var badgeCls = step.State == "done" ? "ok" : step.State == "current" ? "active" : "muted";
-            var icon = step.State == "done" ? "✓" : step.State == "current" ? "✎" : "○";
-            <div class="ct-prog-v ct-prog-v--@step.State">
+            var badge = !string.IsNullOrWhiteSpace(step.CurrentStateLabel)
+                ? step.CurrentStateLabel
+                : step.State == "done" ? "Completed" : step.State == "current" ? "In progress" : "Pending";
+            var badgeCls = step.OutcomeKind switch
+            {
+                "issued" => "issued",
+                "rejected" => "rejected",
+                "cancelled" => "cancelled",
+                "current" => "active",
+                "pending" => "muted",
+                _ => "ok",
+            };
+            var letterName = step.MinistryLetterFileName;
+            var letterProgressId = step.ProgressId;
+            var icon = step.OutcomeKind switch
+            {
+                "rejected" => "✕",
+                "cancelled" => "–",
+                "issued" or "ok" => "✓",
+                "current" => "✎",
+                _ => "○",
+            };
+            <div class="ct-prog-v ct-prog-v--@step.State ct-prog-v--tone-@step.OutcomeKind">
                 <div class="ct-prog-v__rail">
                     <span class="ct-prog-v__date">@(string.IsNullOrWhiteSpace(step.Date) ? "—" : step.Date)</span>
                     <span class="ct-prog-v__dot">@icon</span>
@@ -31,6 +48,17 @@
                         <strong>@step.Label</strong>
                         <span class="cw-prog-step__badge cw-prog-step__badge--@badgeCls">@badge</span>
                     </div>
+                    @if (step.State != "current"
+                        && !string.IsNullOrWhiteSpace(letterName)
+                        && letterProgressId is Guid)
+                    {
+                        <p class="ct-prog-v__letter">
+                            <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
+                                                               ProgressId="letterProgressId"
+                                                               FileName="@letterName"
+                                                               OwnerViewId="@PreviewSlotOwnerViewId" />
+                        </p>
+                    }
                     @if (step.State == "current")
                     {
                         <div class="ct-prog-detail">
@@ -51,11 +79,13 @@
                                     @if (step.ShowMinistryLetterUpload)
                                     {
                                         <label class="ct-label" style="margin-top:10px">Ministry letter</label>
-                                        @if (!string.IsNullOrWhiteSpace(step.MinistryLetterFileName) && step.ProgressId is Guid progressId)
+                                        @if (!string.IsNullOrWhiteSpace(letterName) && letterProgressId is Guid)
                                         {
                                             <p class="ct-muted" style="margin:0 0 8px">
-                                                Current file:
-                                                <a href="@MinistryLetterUrl(progressId)" target="_blank" rel="noopener">@step.MinistryLetterFileName</a>
+                                                <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
+                                                                                   ProgressId="letterProgressId"
+                                                                                   FileName="@letterName"
+                                                                                   OwnerViewId="@PreviewSlotOwnerViewId" />
                                             </p>
                                         }
                                         <label class="ct-upload ct-upload--action">
@@ -113,6 +143,7 @@
     [Parameter] public EventCallback<string> SaveNotesRequested { get; set; }
     [Parameter] public EventCallback<OfficerShellCaseProgressFileUpload> UploadMinistryLetterRequested { get; set; }
     [Parameter] public EventCallback<OfficerShellCaseProgressAdvanceRequest> AdvanceProgressRequested { get; set; }
+    [Parameter] public string PreviewSlotOwnerViewId { get; set; } = OfficerShellViewIds.DetailView;
 
     private string _officerNotes = string.Empty;
     private string _selectedAdvanceStateCode = string.Empty;
@@ -187,7 +218,14 @@
 
     private async Task AdvanceAsync()
     {
-        if (_busy || string.IsNullOrWhiteSpace(_selectedAdvanceStateCode))
+        if (_busy)
+            return;
+
+        var current = View.ProgressSteps.FirstOrDefault(s => s.State == "current");
+        var code = _selectedAdvanceStateCode;
+        if (string.IsNullOrWhiteSpace(code))
+            code = current?.AdvanceOptions.FirstOrDefault()?.StateCode ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(code))
             return;
 
         _busy = true;
@@ -195,7 +233,7 @@
         {
             await AdvanceProgressRequested.InvokeAsync(new OfficerShellCaseProgressAdvanceRequest
             {
-                StateCode = _selectedAdvanceStateCode,
+                StateCode = code,
                 Notes = _officerNotes,
             });
             _notesDirty = false;
@@ -205,7 +243,4 @@
             _busy = false;
         }
     }
-
-    private string MinistryLetterUrl(Guid progressId) =>
-        $"/api/application-progress/applications/{ApplicationProfileInstanceId:D}/progress/{progressId:D}/ministry-letter";
 }

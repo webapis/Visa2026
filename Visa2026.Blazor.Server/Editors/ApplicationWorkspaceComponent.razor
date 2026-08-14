@@ -1,5 +1,6 @@
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Web
+@using Visa2026.Module.BusinessObjects.ApplicationWorkspace
 @using Visa2026.Module.Services.ApplicationPersonLink
 @using Visa2026.Module.Services.ApplicationWorkspace
 @using Visa2026.Module.Services.OfficerShell
@@ -39,7 +40,8 @@
                                         PersonLinkStatusIsError="@PersonLinkStatusIsError"
                                         PersonLinkSearchRequested="@PersonLinkSearchRequested"
                                         LinkPersonFromPickerRequested="@LinkPersonFromPickerRequested"
-                                        ClosePersonLinkPickerRequested="@ClosePersonLinkPickerRequested" />
+                                        ClosePersonLinkPickerRequested="@ClosePersonLinkPickerRequested"
+                                        PreviewSlotOwnerViewId="@ApplicationWorkspaceViewIds.DetailView" />
 </div>
 
 @code {

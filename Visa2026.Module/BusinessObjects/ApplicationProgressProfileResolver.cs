@@ -81,6 +81,36 @@ public static class ApplicationProfileInstanceProgressProfileResolver
 
 
 
+    public static bool HasConfiguredMinistryLegs(ApplicationProfileInstance? application)
+
+    {
+
+        if (application == null)
+
+            return false;
+
+
+
+        if (ApplicationProfileConfigurationResolver.GetEmbeddedProfileMinistryLegCount(application) > 0)
+
+            return true;
+
+
+
+        if (application.ApprovalLegSnapshots?.Any(s => !string.IsNullOrWhiteSpace(s.MinistryShortName)) == true)
+
+            return true;
+
+
+
+        return application.ApprovalLegProfile != null
+
+            && ApprovalLegProfileMinistryHelper.HasConfiguredLegs(application.ApprovalLegProfile);
+
+    }
+
+
+
     public static int GetMinistryLegCount(ApplicationProfileInstance? application)
 
     {
@@ -453,15 +483,15 @@ public static class ApplicationProfileInstanceProgressProfileResolver
 
 
 
+        if (HasConfiguredMinistryLegs(application))
+
+            return true;
+
+
+
         if (application.ApprovalLegProfile != null)
 
         {
-
-            if (ApprovalLegProfileMinistryHelper.HasConfiguredLegs(application.ApprovalLegProfile))
-
-                return true;
-
-
 
             if (!HasProgressBeyondOfficePreparation(application, objectSpace))
 
@@ -563,17 +593,9 @@ public static class ApplicationProfileInstanceProgressProfileResolver
 
 
 
-        if (application.ApprovalLegProfile != null
+        if (HasConfiguredMinistryLegs(application))
 
-            && TryValidateApprovalLegProfileOnApplication(application, objectSpace, out errorMessage))
-
-            return errorMessage == null;
-
-
-
-        if (application.ApprovalLegProfile != null)
-
-            return false;
+            return true;
 
 
 

@@ -6,9 +6,9 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Module.Services.ApplicationProfileCatalog;
 
 /// <summary>
-/// Officer Templates catalog / profile picker: one row per template family.
-/// Wave 0b import clones share <see cref="ApplicationProfile.Code"/> + SelectionCode and differ by
-/// <see cref="ApplicationProfile.DefaultProjectContract"/>; the rail truncates that suffix so they look like duplicates.
+/// Officer Templates catalog / profile picker: one row per template family for
+/// Wave 0b import clones (same Code + SelectionCode, differ by DefaultProjectContract).
+/// Type-only rows are all kept so an officer-created profile is not hidden behind a seed.
 /// </summary>
 public static class ApplicationProfileOfficerCatalogSelector
 {
@@ -20,12 +20,23 @@ public static class ApplicationProfileOfficerCatalogSelector
         return profiles
             .Where(p => p != null)
             .GroupBy(DedupeKey, StringComparer.OrdinalIgnoreCase)
-            .Select(g => g
-                .OrderByDescending(p => p.IsActive)
-                .ThenBy(IsContractBound)
-                .ThenBy(p => p.Name?.Length ?? int.MaxValue)
-                .ThenBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
-                .First());
+            .SelectMany(g =>
+            {
+                var items = g.ToList();
+                var typeOnly = items.Where(p => !IsContractBound(p)).ToList();
+                if (typeOnly.Count > 0)
+                {
+                    return typeOnly
+                        .OrderByDescending(p => p.IsActive)
+                        .ThenBy(p => p.Name, StringComparer.OrdinalIgnoreCase);
+                }
+
+                return items
+                    .OrderByDescending(p => p.IsActive)
+                    .ThenBy(p => p.Name?.Length ?? int.MaxValue)
+                    .ThenBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
+                    .Take(1);
+            });
     }
 
     public static bool IsContractBound(ApplicationProfile profile) =>

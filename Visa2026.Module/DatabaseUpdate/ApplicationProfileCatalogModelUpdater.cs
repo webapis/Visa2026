@@ -24,6 +24,7 @@ public sealed class ApplicationProfileCatalogModelUpdater : ModelNodesGeneratorU
             return;
 
         detailView.Caption = ApplicationProfileInstanceProgressRouteNavigation.CaptionTemplates;
+        detailView.SetValue("CustomCSSClassName", "ap-catalog-detail");
 
         if (navigationItems["Configuration"] is IModelNavigationItem configuration)
         {

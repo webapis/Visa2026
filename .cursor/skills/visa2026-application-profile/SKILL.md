@@ -145,9 +145,10 @@ When starting a slice, set its row to **In progress** in IMPLEMENTATION_PLAN; se
 | Entry point | Main area | `#visa-preview-slot` |
 |-------------|-----------|----------------------|
 | Case workspace tab → **Preview** | Catalog / list | **Viewer only** (`OpenPreviewOnly` + focus key) |
+| Case workspace Progress → ministry letter filename | Timeline (current file name) | **Viewer only** (`ProgressLettersSlotRequest.OpenPreviewOnly` + `FocusProgressId`) |
 | Rail / legacy DetailView action | — | Full catalog in slot |
 
-Resminamalar: `ResminamalarSlotRequest`. Document copies: `DocumentCopiesSlotRequest` (`FocusSlotKey`, `ApplicationPerson` roster scope). Shell behaviour: **visa2026-preview-slot**.
+Resminamalar: `ResminamalarSlotRequest`. Document copies: `DocumentCopiesSlotRequest` (`FocusSlotKey`, `ApplicationPerson` roster scope). Progress letters: `ProgressLettersSlotRequest` (`FocusProgressId`). Shell behaviour: **visa2026-preview-slot**.
 
 ---
 

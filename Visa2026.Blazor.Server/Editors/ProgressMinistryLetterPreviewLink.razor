@@ -1,0 +1,50 @@
+@using Visa2026.Module.BusinessObjects.OfficerShell
+@using Visa2026.Module.Services.PreviewSlot
+
+@if (CanPreview)
+{
+    <button type="button"
+            class="ct-letter-preview @CssClass"
+            title="@FileName"
+            @onclick="OpenAsync">
+        @VisibleText
+    </button>
+}
+
+@code {
+    [Parameter] public Guid ApplicationProfileInstanceId { get; set; }
+    [Parameter] public Guid? ProgressId { get; set; }
+    [Parameter] public string? FileName { get; set; }
+    [Parameter] public string OwnerViewId { get; set; } = OfficerShellViewIds.DetailView;
+    [Parameter] public string? CssClass { get; set; }
+    [Parameter] public string? LinkText { get; set; }
+
+    [Inject] private IVisaPreviewSlotService PreviewSlotService { get; set; } = null!;
+
+    private string VisibleText =>
+        string.IsNullOrWhiteSpace(LinkText) ? "View letter" : LinkText.Trim();
+
+    private bool CanPreview =>
+        ApplicationProfileInstanceId != Guid.Empty
+        && ProgressId is Guid id
+        && id != Guid.Empty
+        && !string.IsNullOrWhiteSpace(FileName);
+
+    private Task OpenAsync()
+    {
+        if (!CanPreview || ProgressId is not Guid progressId)
+            return Task.CompletedTask;
+
+        var ownerViewId = string.IsNullOrWhiteSpace(OwnerViewId)
+            ? OfficerShellViewIds.DetailView
+            : OwnerViewId;
+
+        return PreviewSlotService.OpenProgressLettersAsync(new ProgressLettersSlotRequest
+        {
+            ApplicationProfileInstanceId = ApplicationProfileInstanceId,
+            FocusProgressId = progressId,
+            FocusDisplayName = FileName,
+            OpenPreviewOnly = true,
+        }, ownerViewId);
+    }
+}

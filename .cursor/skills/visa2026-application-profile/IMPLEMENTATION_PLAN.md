@@ -20,10 +20,14 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | 5 | Seed profiles from `ApplicationType` catalog | **Done** | `ApplicationProfileSeedSync` + mapper + updater + startup gate |
 | 6 | Switch Appearance / progress to profile | **Done** | `ApplicationProfileConfigurationResolver`, `Cfg*` criteria, progress route/SLA |
 | 7 | Config lock enforcement on profile edit UI | **Done** | DetailView read-only, save guard, clone duplicate |
-| 8 | Configuration wizard UX | **Done** | 5-step Blazor wizard; **Configure profile** on Application Profiles |
+| 8 | Configuration wizard UX | **Done** | 6-step Blazor wizard; **Configure profile** on Application Profiles |
+| 8e | Wizard Company, Signatories | **Done** | Live read of Configuration singletons (not copied onto the profile); Edit in Configuration opens the real BOs |
+| 8f | Wizard Results default lookup dropdowns | **Done** | Catalog snapshots; default-value selects enabled only when Use is checked |
+| 8g | Wizard May produce / cancel with Related to | **Done** | Issuance → May produce; Cancellation → May cancel; moved off Results & fields |
+| 8h | Wizard Approval legs with Directed to | **Done** | Via ministry → legs on Identity; Direct migration hides and clears legs |
 | 8d | Wizard step 4 real template catalog + persist scope | **Done** | Live `UserReportTemplate` Category/Global; `CatalogScope`/`DataScope`/`CategoryKey` on nested template |
-| 8a | Application Profile overview (live) | **Done** | Live config/defaults/legs/templates + linked `ApplicationProfileInstance` rows; mock only if profile id unresolved |
-| 8c | Custom catalog home (replace native List/Detail UI) | **Done** | List first; row opens overview; **Back to list**; New/Configure → wizard |
+| 8a | Application Profile overview (live) | **Done** | Live config/defaults/legs/templates + linked `ApplicationProfileInstance` rows; overview shows wizard identity, company/signatories, required fields, process states, template scope; mock only if profile id unresolved |
+| 8c | Custom catalog home (replace native List/Detail UI) | **Done** | List first; row opens overview; **Back to list**; New/Configure → wizard (new tab); **Save profile** reloads catalog; **Delete** when Linked = 0; toolbar **Total: N**; table-body scroll, sticky header |
 | 9 | Profile picker at Application create | **Done** | Intercepts **New** on Application ListViews; Blazor picker UI |
 | 10 | Person M2M DetailView; hard-remove `ApplicationItem` | **In progress** | Skip-navigation `People` + child BO M2M (includes **MedicalRecord**, **WorkDuty**). Output headers Invitation / WorkPermit / BorderZone / Rejection / IssuedVisas are **1:N** (May produce), not skip-nav. Wizard **May produce** includes Rejection. Person issued tab **Applications (linked)** verified. Rebuild DataImporter + resume Wave 2b (`-StartAt ApplicationProfileInstancePerson`); then People-tab / copies / Resminamalar smoke. |
 | 10n | §10 auto-link gate + sticky ResolvedLinks | **Done** | `RequirePerson*` gate; sticky `LinkedObjectId`; toggle-off keeps existing; unit tests |
@@ -62,7 +66,7 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | B4 | Profile templates list/grid + detail | **Done** | PNG catalog, chips, pagination, rail overview drill-in |
 | B5 | Case workspace 6-tab shell | **Done** | PNG parity pass: overview, people matrix, progress, inline doc copies + Resminamalar, SLA |
 | B6 | Immersive tab-bar hide | **Done** | `OfficerShellImmersiveTabBarController` (`TabsModel.CssClass`) + CSS fallback |
-| B7 | Case progress tab wiring | **Done** | Notes + ministry letter + in-shell advance (`OfficerShellCaseProgressService`) |
+| B7 | Case progress tab wiring | **Done** | Template Approval legs + Process & SLA names; first history row fills first ministry as current (not `1_REVIEW_STARTED` Sequence match) |
 | B8 | Custom person link picker | **Done** | Inline picker on People tab (`IApplicationPersonLinkQueryService` + `OfficerShellPersonLinkPickerComponent`; officer shell only) |
 | B9 | Native Application Profiles navigation | **Done** | Folder caption; staged/in-process ListViews + Start process; templates in folder; drop custom sidebar |
 | R0 | Instance rename — spec freeze (§13) | **Done** | Plan locked; docs + slice tracker |
@@ -79,7 +83,7 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 
 **Delivered (2026-08-14):**
 
-- `ApplicationProfileOverviewQueryService` maps the selected `ApplicationProfile` (configuration, defaults, approval legs, person toggles, nested templates) without mock fillers.
+- `ApplicationProfileOverviewQueryService` maps the selected `ApplicationProfile` (identity, company/signatories, required fields + defaults, process states, approval legs, person toggles, nested templates with scope/data) without mock fillers.
 - Linked applications are real `ApplicationProfileInstance` rows (newest 25, full count in the heading). Click a number to open case workspace.
 - Prototype banner only when the profile id cannot be resolved (designer / missing object space).
 
@@ -123,7 +127,7 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 
 **Delivered:**
 
-- `ApplicationProfileCatalogHost` + Blazor catalog (search, badges, New / Configure / **list first**, row → overview, **Back to list**)
+- `ApplicationProfileCatalogHost` + Blazor catalog (search, **Total: N** via `Grid.TotalCount`, badges, New / Configure / **list first**, row → overview, **Back to list**)
 - Nav: `ApplicationProfileCatalogModelUpdater` + `ApplicationProfileCatalogNavigationController` (Configuration → catalog DetailView)
 - `[NavigationItem(false)]` on `ApplicationProfile`; strip stale list nav
 - ListView intercepts: row → overview; New → create + wizard
@@ -151,7 +155,7 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 
 ## Slice 8 — Configuration wizard UX (detail) — **Done**
 
-**Goal:** Officer configures an `ApplicationProfile` via a guided 5-step wizard instead of scattered nested tabs.
+**Goal:** Officer configures an `ApplicationProfile` via a guided wizard instead of scattered nested tabs.
 
 **Delivered:**
 
@@ -160,7 +164,10 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 - `ApplicationProfileWizardComponent.razor` + step partials + `application-profile-wizard.css`
 - **Configure profile** action on Application Profiles ListView (saved rows only)
 - Respects `ApplicationProfileLockHelper` — read-only banner + disabled save when locked
-- Steps: Identity · Results & fields · Process & SLA (embedded legs) · Templates & person · Review & save
+- Steps: Identity · **Company, Signatories** · Results & fields · Process & SLA (embedded legs) · Templates & person · Review & save
+- **May produce** / **May cancel** live under Identity **Related to** (`ActionFamily`): Issuance → produce; Cancellation → cancel
+- **Approval legs** live under Identity **Directed to**; visible only for Via ministry
+- Results default-value lookups load as ID/name snapshots (`ApplicationProfileWizardLookupData`); Default value is enabled only when Use is checked
 
 **Deferred (later slices):** template file upload in wizard (attach binary on standard profile detail nested templates ListView); progress resolver reading `ProgressStateSettings` (stored in wizard, wire in application-progress slice).
 

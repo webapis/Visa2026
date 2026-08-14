@@ -4,6 +4,142 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 
 ---
 
+### 2026-08-14 — Approval letter links hide raw filenames
+
+- Overview/Progress showed the uploaded file name (`AI-SDLC-…pdf`). Officers only need a link. The control now shows **View letter**; the real name stays on `title` (hover) and in the preview-slot header.
+- Verify: stop F5, rebuild, F5. Open 8/-005 Overview — ministry steps show “View letter”, not the file name. Click still opens the side preview.
+- Cross-skill: visa2026-preview-slot
+
+### 2026-08-14 — Issued / Rejected / Cancelled progress tones are not all green
+
+- Overview and Progress treated every finished node as `done` (green check). Migration **Rejected** looked the same as **Approved**.
+- Steps now carry `OutcomeKind` from the progress state code (`PROCESS_ISSUED` / `PROCESS_REJECTED` / `PROCESS_CANCELLED` / `*_REVIEW_REJECTED`). CSS uses `BO_STATE_COLORS.md` hex: issued forest green, rejected salmon, cancelled firebrick; approved stays mint. Header badge follows the terminal outcome instead of always “In process”.
+- Verify: stop F5, rebuild, F5. Open 8/-005 Overview — Approved ministries stay green; Migration Rejected is red with ✕; Issued cases use a darker green Issued badge.
+- Cross-skill: visa2026-bo-state-colors | visa2026-preview-slot
+
+### 2026-08-14 — Completed Progress steps keep ministry letter preview links
+
+- After Advance past a ministry (or when Migration is Issued), the Progress tab and Overview hid approval PDFs because `MinistryLetterFileName` was only filled for the **current** step, and completed nodes are collapsed.
+- Timeline now keeps the uploaded filename on done ministry legs. Progress and Overview show a clickable name that opens `#visa-preview-slot` (`OpenPreviewOnly`). Chrome current-step text uses the last done step when nothing is current (Issued, not Office preparation).
+- Verify: stop F5, rebuild, F5. Open 8/-006 Progress/Overview — each ministry with an uploaded letter shows its filename; click opens the side preview.
+- Cross-skill: visa2026-preview-slot
+
+### 2026-08-14 — Progress ministry letter filename opens side preview
+
+- Workspace Progress filename was a new-tab download. It now opens `#visa-preview-slot` with `ProgressLettersSlotRequest.OpenPreviewOnly` (viewer only, same as Resminamalar / Document copies from their tabs). Close preview closes the slot.
+- Prevent: Do not use `/api/application-progress/.../ministry-letter` as the officer preview path from the case workspace.
+- Cross-skill: visa2026-preview-slot
+
+### 2026-08-14 — Progress tab nodes follow the Application Profile template
+
+- After Advance from office, history showed Submitted (`1_REVIEW_STARTED` / "Sent for agreement") but Türkmenenergo stayed Pending, so the second Advance had no current ministry step. Slots were matched to `N_REVIEW_*` against snapshot/DB Sequence, not the template's approval-leg order. Labels came from `ApplicationState`, not Process & SLA (Submitted / Approved).
+- The case workspace line is now Office → profile **Approval legs** in display order → Migration. Template legs win over snapshots. First ministry-track history row fills the first leg as current with the Process & SLA name (Submitted). Advance options on that node are the next included template states (Approved, …).
+- Officer-facing steps do not use the ApplicationProgress transition list. History rows may still store `ApplicationState.Code` for import/list compatibility.
+- Verify: stop F5, rebuild, F5. Open 8/-004 after the office Advance. Türkmenenergo is current with Submitted + date; Next step offers Approved (and other included ministry states). Advance moves that ministry to Approved.
+
+### 2026-08-14 — Advance progress from office with embedded profile legs
+
+- Clicking Advance on 8/-004 (via-ministry template with three embedded approval legs, empty history) did nothing. Save notes worked. Validation still required the old `ApprovalLegProfile` lookup even when `ApplicationProfile.ApprovalLegs` were present, and the first `1_REVIEW_STARTED` row also required the tenant `MinistryReviewSlaSettings` singleton instead of profile `MinistrySlaDays`. The right-rail Advance with multiple next steps only switched to the Progress tab, so a second click on Progress was a no-op. Failures set a status message without reloading, so the banner often never appeared.
+- Advance now treats embedded profile legs / snapshots as configured ministries, accepts profile ministry SLA days, loads those collections before validate, and writes the new history row. Rail Advance on the Progress tab actually advances. Errors reload the workspace so the banner shows.
+- Verify: stop F5, rebuild, F5. Open 8/-004 (or any via-ministry instance at office). Next step Submitted → Advance. Office becomes completed; first ministry is current with state + date. If something is still blocked, a warning banner appears.
+
+### 2026-08-14 — Progress line shows predetermined approval legs + migration
+
+- Overview only showed Office preparation on a via-ministry instance (8/-004) because the timeline listed implied office plus real history rows — pending ministry legs were omitted.
+- The line is now Office preparation → one node per profile/snapshot approval leg → Migration service. Empty legs stay Pending (no date). When a progress row exists for that leg, the node turns current/done, shows the current state name, and the change date. Migration stays pending until `PROCESS_STARTED`. Process & SLA included states filter Advance options, not extra nodes.
+- Verify: stop F5, rebuild, F5. Open a via-ministry instance with three legs and empty history. Overview shows Office (in progress) plus three pending ministries plus pending Migration. After Advance to first ministry, that node is active with state + date; later legs stay pending.
+
+### 2026-08-14 — Workspace Progress tab uses real history + implied office
+
+- The Progress tab always drew four fake buckets (Office / Ministry / Migration / Complete) and mapped dates by index. Empty history looked like ministry review. Save notes failed with "No progress history". Rail Advance ignored the next-step dropdown.
+- Timeline is now implied **Office preparation** plus one step per real `ApplicationProfileInstanceProgress` row. Office notes persist on `OfficePreparationNotes` (host-start `ADD COLUMN IF NOT EXISTS`) and copy onto the first real row on advance. SLA uses ministry/migration helpers when those steps are current; otherwise profile `MinistrySlaDays` / `MigrationSlaDays`. Chrome current step is Office preparation when history is empty. Rail Advance with multiple next steps opens the Progress tab.
+- Verify: stop F5, rebuild, F5 (`FORCE_XAF_DB_UPDATE` not required). Open an instance with empty history (e.g. B/-002). Progress shows only Office preparation; Save notes works; SLA days come from the profile; Advance creates the first real step and Office becomes completed.
+
+### 2026-08-14 — Template overview shows wizard configuration
+
+- The read-only Application Profile Templates overview only listed produce/cancel, SLA days, a few lookup defaults, legs, and person chips. Wizard steps (selection code, applicability, Company/Signatories, required date/region fields, included progress states, template scope/data) were missing.
+- Overview now maps those fields from the live profile (eager-load nested collections) and Configuration singletons. Nested templates show Type, Scope, and Data.
+- Verify: stop F5, rebuild, F5. Templates → open a configured row. Overview matches Configure profile: identity, company/signatories, all Use fields, process states, templates.
+
+### 2026-08-14 — Save profile refreshes the Templates catalog
+
+- After **Save profile**, the Application Profile Templates table stayed stale in its MDI tab (wizard opened with `TargetWindow.Current` and replaced the catalog, or an already-open catalog did not reload).
+- Wizard save now calls `IApplicationProfileCatalogReload`. The catalog editor reloads rows. New / Configure open the wizard in a **new tab** so the list stays mounted and can refresh.
+- Verify: stop F5, rebuild, F5. Templates → New or Configure → change name → Save profile. The Templates tab Total and row list update without reopening.
+
+### 2026-08-14 — Wizard Save profile did not write to the database
+
+- **Save profile** showed "Profile saved." while `CommitChanges` was a no-op: Blazor `@bind` edits were not in XAF `ModifiedObjects`, so the ObjectSpace skipped SaveChanges. A reused session ObjectSpace from a previous profile could also load the wrong row. Nested templates were created with only the FK, so Review showed Templates: 0. Catalog collapse hid a new type-only row that reused a seed Code.
+- Save now `DetectChanges` + `SetModified` then commit, and surfaces unique-Code errors. Wizard binds the live profile from the PropertyEditor (not a second DI session). New nested rows are added to `NestedTemplates` / `ApprovalLegs`. Catalog lists every type-only profile even when Code matches a seed.
+- Verify: stop F5, rebuild, F5. New Application Profile → set a unique Code and name → Save profile. Close the wizard, reopen Application Profile Templates — the new row is there. Re-open Configure — name/code/templates match.
+
+### 2026-08-14 — Templates catalog scrolls inside the table border
+
+- Page scroll (outside the table) moved TEMPLATE/CODE headers with the rows. `height: 100%` on XAF layout groups never became a real height, so `.ap-catalog__table-wrap` grew with 33 rows and sticky `thead` had nothing to stick to (`overflow: hidden` on `.ap-catalog` was the sticky containing block).
+- Cap `.ap-catalog-detail` to `calc(100svh - 7.5rem)` (header + MDI tabs). Table wrap `flex: 1 1 0%`, `overflow: auto`, fallback `max-height: calc(100svh - 13.5rem)`. Sticky `thead` + `th`.
+- Verify: hard-refresh Application Profile Templates. Search / Total / New stay put. Scroll inside the table border; column headers stay. Page does not scroll.
+
+### 2026-08-14 — Templates catalog shows Total like Person ListView
+
+- Application Profile Templates is a custom Blazor catalog, not a DxGrid ListView, so `ListViewTotalCountController` never ran. Toolbar now shows `VisaUiMessages.Format("Grid.TotalCount", Rows.Count)` (`Total: N`) to the right of search, matching Employees. Count follows the search filter.
+- Verify: stop F5, rebuild, F5. Configuration → Application Profile Templates — toolbar shows Total next to search; typing in search updates the number to the visible row count.
+
+### 2026-08-14 — Unlinked templates can be deleted
+
+- Application Profile Templates had no delete action (catalog chrome hides native XAF Delete). Officers can delete a template when **Linked** is 0 (any `ApplicationProfileInstance` FK, not only staged/in-process). Linked rows stay undeletable. Confirm on the list row or overview, then reload.
+- Verify: stop F5, rebuild, F5. Templates with Linked 0 → Delete → Confirm. Templates with Linked ≥ 1 have no Delete.
+
+### 2026-08-14 — Approval legs sit under Directed to
+
+- Legs apply only when **Via ministry**. They now live on Identity & purpose under **Directed to**. **Direct migration** hides the list and deletes embedded legs. Process & SLA keeps ministry/migration states and SLA days.
+- Verify: stop F5, rebuild, F5. Identity → Via ministry shows Approval legs; Direct migration hides them. Process & SLA has no legs section.
+
+### 2026-08-14 — May produce / May cancel sit under Related to
+
+- Those sections belong with **ApplicationProfileInstance related to** (`ActionFamily`), not on Results & fields. **Issuance** shows May produce; **Cancellation** shows May cancel existing; Registration / Business trip show a hint only. Switching family clears the hidden flags.
+- Verify: stop F5, rebuild, F5. Identity & purpose → Issuance shows May produce; Cancellation shows May cancel; Results & fields is required properties only.
+
+### 2026-08-14 — Results default value is gated by Use
+
+- Use (`Require*`) is what shows the property on ApplicationProfileInstance. Default value (and Has default) are disabled unless Use is checked and the profile is editable. Catalog rows still load so the list is ready when Use is turned on.
+- Verify: stop F5, rebuild, F5. Configure profile → Results & fields — with Use off, lookup Default value is disabled; check Use → dropdown is selectable.
+
+### 2026-08-14 — Results default-value lookup dropdowns were empty
+
+- Default-value `<select>`s were `disabled` until **Has default** was checked, so officers only saw `—` and could not open the list. Catalogs were also loaded lazily from the profile ObjectSpace (`GetObjectsQuery` + `VisaTypes.Count == 0`).
+- Load catalogs in the PropertyEditor via a dedicated ObjectSpace (`GetObjects`) into ID + display-name snapshots (`ApplicationProfileWizardLookupItem`). Keep the dropdown enabled whenever the profile is editable; choosing a value sets the default FK via the profile ObjectSpace. **Has default** still clears or picks the first catalog row.
+- Region (city), business trip address, and work permit location stay Use-only (no `Default*` FKs on `ApplicationProfile`).
+- Verify: stop F5 (DLL lock), rebuild, F5. Configure profile → Results & fields → Visa type / category / period / migration service / project / urgency / entry check point Default value lists catalog rows. Pick one, Save profile.
+
+### 2026-08-14 — Results & fields no longer lists signatory / representative
+
+- Those belong on **Company, Signatories** (live Configuration). The Results step dropdowns duplicated them as profile defaults.
+- Verify: Configure profile → Results & fields has no Authorized signatory / Visa representative row or section.
+
+### 2026-08-14 — Company, Signatories is a live Configuration reference
+
+- The first wizard step bound `GetOrCreateInstance` in the **profile** ObjectSpace and saved those rows with **Save profile**. That looked like a copy: opening the wizard again did not prove a live link, and profile save could dirty/create org rows.
+- Step is now **read-only**. Values load via `TryGetInstance` in a **separate** ObjectSpace (`ApplicationProfileWizardOrganizationSnapshot`). **Edit in Configuration** opens the real Company / Signatory / Representative DetailView. **Refresh from Configuration** (and each step change) re-reads. **Save profile** no longer writes those BOs.
+- Verify: stop F5, rebuild. Configure profile → Company, Signatories is display-only. Change Configuration → Company, Refresh (or change step) → wizard shows the new name. Resminamalar still merges `OrganizationReportHelper.TryGetInstance`.
+
+### 2026-08-14 — Wizard step Company, Signatories is live tenant org
+
+- Officers asked to include Company / Authorized Signatory / Authorized Representative on Application Profile Template configuration. These stay **organization singletons** (Configuration nav); do not add FKs on `ApplicationProfile`.
+- New wizard step **Company, Signatories** (after Identity) edits `CompanyProfile.GetOrCreateInstance` / signatory / representative in the wizard ObjectSpace. **Save profile** commits them with the profile. Review shows the three names. Step 2 dropdowns remain instance-create defaults only.
+- Verify: stop F5, rebuild, Configure profile → step 2 shows company/signatory/rep fields; Save; Configuration → Company reflects the same values.
+
+### 2026-08-14 — Templates catalog: scroll only the table, not the page
+
+- `calc(100dvh - 10rem)` on `.ap-catalog` was taller than the XAF content pane (header + MDI tabs), so the **page** still scrolled and the table had no inner scrollbar.
+- Catalog host now uses the same fill chain as other host DetailViews (`ap-catalog-detail` + `xaf-fill-root` / `xaf-fill-available`). Overflow is hidden on the view/layout; only `.ap-catalog__table-wrap` scrolls. Overview scrolls inside `.ap-catalog__detail-page`.
+- Verify: stop F5, rebuild, F5. Application Profile Templates — window does not scroll; search + New stay put; rows scroll in the table.
+
+### 2026-08-14 — Templates catalog ListView scrolls inside the table
+
+- `overflow: auto` on `.ap-catalog__table-wrap` did nothing because the wrap had no height cap; the table grew and the XAF page scrolled.
+- List page now fills `calc(100dvh - 10rem)`; toolbar stays put; table wrap `flex: 1; min-height: 0; overflow: auto`; sticky `thead`. Overview is unconstrained.
+- Verify: hard-refresh Application Profile Templates. Search + New stay visible; rows scroll in the table; column headers stick. Overview + Back to list still work.
+
 ### 2026-08-14 — Templates catalog is list then overview (not split)
 
 - Officers asked for the same pattern as other ListViews: do not show the profile list and overview side by side. Catalog `LoadAsync` was auto-selecting the first profile, which always opened the split shell.

@@ -55,6 +55,48 @@ public class ApplicationProfileInstanceProgressProfileResolverTests
     }
 
     [Fact]
+    public void TryValidateApprovalLegProfileForProgress_AllowsFirstMinistryStepWhenEmbeddedProfileLegs()
+    {
+        var profile = new ApplicationProfile
+        {
+            ProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
+        };
+        profile.ApprovalLegs.Add(new ApplicationProfileApprovalLeg
+        {
+            Sequence = 1,
+            ApprovingMinistry = new ApprovingMinistry { ShortNameTm = "Turkmenenergo" },
+        });
+        var app = new ApplicationProfileInstance { ApplicationProfile = profile };
+        var progress = new ApplicationProfileInstanceProgress
+        {
+            ApplicationProfileInstance = app,
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1) },
+        };
+
+        Assert.True(ApplicationProfileInstanceProgressProfileResolver.TryValidateApprovalLegProfileForProgress(progress, null, out var message));
+        Assert.True(string.IsNullOrWhiteSpace(message));
+    }
+
+    [Fact]
+    public void GetSuggestedNextStateAfterOfficePreparation_UsesEmbeddedProfileLegs()
+    {
+        var profile = new ApplicationProfile
+        {
+            ProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
+        };
+        profile.ApprovalLegs.Add(new ApplicationProfileApprovalLeg
+        {
+            Sequence = 1,
+            ApprovingMinistry = new ApprovingMinistry { ShortNameTm = "Turkmenenergo" },
+        });
+        var app = new ApplicationProfileInstance { ApplicationProfile = profile };
+
+        Assert.Equal(
+            ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1),
+            ApplicationProfileInstanceProgressRouteHelper.GetSuggestedNextStateAfterOfficePreparation(app));
+    }
+
+    [Fact]
     public void WouldMinistryDepthChange_WhenProfileLegCountDiffers()
     {
         var type = new ApplicationType

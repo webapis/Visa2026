@@ -113,8 +113,7 @@ namespace Visa2026.Module.BusinessObjects
                 return null;
 
             if (ApplicationProfileInstanceProgressProfileResolver.RequiresApprovalLegProfile(application)
-                && (application?.ApprovalLegProfile == null
-                    || !ApprovalLegProfileMinistryHelper.HasConfiguredLegs(application.ApprovalLegProfile)))
+                && !ApplicationProfileInstanceProgressProfileResolver.HasConfiguredMinistryLegs(application))
                 return null;
 
             if (ApplicationProfileInstanceProgressProfileResolver.RequiresProjectContract(application)

@@ -1027,10 +1027,10 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadWriteCreatePermission<ProjectContract>(role);
             EnsureReadWriteCreatePermission<ApprovingMinistry>(role);
             EnsureReadWriteCreatePermission<ApprovalLegProfile>(role);
-            EnsureReadWriteCreatePermission<ApplicationProfile>(role);
-            EnsureReadWriteCreatePermission<ApplicationProfileApprovalLeg>(role);
-            EnsureReadWriteCreatePermission<ApplicationProfileTemplate>(role);
-            EnsureReadWriteCreatePermission<ApplicationProfileProgressStateSetting>(role);
+            EnsureFullAccessRecursivePermission<ApplicationProfile>(role);
+            EnsureFullAccessRecursivePermission<ApplicationProfileApprovalLeg>(role);
+            EnsureFullAccessRecursivePermission<ApplicationProfileTemplate>(role);
+            EnsureFullAccessRecursivePermission<ApplicationProfileProgressStateSetting>(role);
             EnsureReadWriteCreatePermission<FileData>(role);
             EnsureTypePermission<ReportDataV2>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
             EnsureTypePermission<ReportVisibility>(role, SecurityOperations.Read, SecurityPermissionState.Allow);

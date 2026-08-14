@@ -17,9 +17,29 @@ public sealed class ApplicationProfileCatalogLayoutUpdater
             return;
         }
 
-        var layoutItem = FindLayoutViewItem(node, nameof(ApplicationProfileCatalogHost.CatalogUi));
-        if (layoutItem != null)
-            layoutItem.ShowCaption = false;
+        detailView.SetValue("CustomCSSClassName", "ap-catalog-detail");
+
+        foreach (var element in EnumerateLayoutElements(node))
+        {
+            if (element is IModelLayoutGroup group)
+            {
+                group.RelativeSize = 100;
+                if (string.Equals(group.Id, "Main", StringComparison.Ordinal))
+                    group.SetValue("CustomCSSClassName", "xaf-fill-root");
+                else
+                {
+                    group.ShowCaption = false;
+                    group.SetValue("CustomCSSClassName", "xaf-fill-available");
+                }
+            }
+            else if (element is IModelLayoutViewItem layoutItem
+                     && layoutItem.ViewItem?.Id == nameof(ApplicationProfileCatalogHost.CatalogUi))
+            {
+                layoutItem.ShowCaption = false;
+                layoutItem.RelativeSize = 100;
+                layoutItem.SetValue("CustomCSSClassName", "xaf-fill-available");
+            }
+        }
     }
 
     private static IModelDetailView? FindDetailView(IModelNode? node)
@@ -35,24 +55,13 @@ public sealed class ApplicationProfileCatalogLayoutUpdater
         return null;
     }
 
-    private static IModelLayoutViewItem? FindLayoutViewItem(IModelNode? root, string viewItemId)
-    {
-        foreach (var item in EnumerateLayoutViewItems(root))
-        {
-            if (item.ViewItem?.Id == viewItemId)
-                return item;
-        }
-
-        return null;
-    }
-
-    private static IEnumerable<IModelLayoutViewItem> EnumerateLayoutViewItems(IModelNode? node)
+    private static IEnumerable<IModelViewLayoutElement> EnumerateLayoutElements(IModelNode? node)
     {
         if (node == null)
             yield break;
 
-        if (node is IModelLayoutViewItem layoutViewItem)
-            yield return layoutViewItem;
+        if (node is IModelViewLayoutElement layoutElement)
+            yield return layoutElement;
 
         if (node is not ModelNode modelNode || modelNode.Nodes == null)
             yield break;
@@ -62,7 +71,7 @@ public sealed class ApplicationProfileCatalogLayoutUpdater
             if (child == null)
                 continue;
 
-            foreach (var nested in EnumerateLayoutViewItems(child))
+            foreach (var nested in EnumerateLayoutElements(child))
                 yield return nested;
         }
     }

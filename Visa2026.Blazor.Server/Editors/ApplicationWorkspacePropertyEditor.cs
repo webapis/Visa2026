@@ -462,6 +462,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
             {
                 model.ProgressStatusMessage = result.ErrorMessage ?? "Could not advance progress.";
                 model.ProgressStatusIsError = true;
+                await LoadAsync();
                 return;
             }
 
@@ -475,6 +476,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         {
             model.ProgressStatusMessage = ex.Message;
             model.ProgressStatusIsError = true;
+            await LoadAsync();
         }
     }
 

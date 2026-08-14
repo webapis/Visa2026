@@ -28,6 +28,7 @@ public sealed class ApplicationProfileCatalogQueryService : IApplicationProfileC
             .ToDictionary(
                 g => g.Key,
                 g => new UsageCounts(
+                    g.Count(),
                     g.Count(a => OfficerShellApplicationFilters.IsStagedState(a.ProcessNumber, a.LatestPrimaryStateCode)),
                     g.Count(a => OfficerShellApplicationFilters.IsInProcessState(a.ProcessNumber, a.LatestPrimaryStateCode))));
 
@@ -48,7 +49,7 @@ public sealed class ApplicationProfileCatalogQueryService : IApplicationProfileC
                     ProgressRoute = p.ProgressRoute,
                     IsActive = p.IsActive,
                     IsConfigLocked = locked,
-                    LinkedApplicationCount = counts.Staged + counts.InProcess,
+                    LinkedApplicationCount = counts.Total,
                     StagedUses = counts.Staged,
                     InProcessUses = counts.InProcess,
                     TemplateFamilyKey = OfficerShellTemplateFamily.ResolveKey(p),
@@ -69,8 +70,8 @@ public sealed class ApplicationProfileCatalogQueryService : IApplicationProfileC
         return isLocked ? "locked" : "active";
     }
 
-    private sealed record UsageCounts(int Staged, int InProcess)
+    private sealed record UsageCounts(int Total, int Staged, int InProcess)
     {
-        public static readonly UsageCounts Empty = new(0, 0);
+        public static readonly UsageCounts Empty = new(0, 0, 0);
     }
 }

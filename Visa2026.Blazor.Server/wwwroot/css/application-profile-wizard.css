@@ -156,6 +156,7 @@
 .ap-wizard__section { margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px dashed #e3e9ef; }
 .ap-wizard__section:last-child { border-bottom: 0; margin-bottom: 0; }
 .ap-wizard__section h3 { margin: 0 0 8px; font-size: 0.95rem; }
+.ap-wizard__subhead { margin: 14px 0 8px; font-size: 0.9rem; font-weight: 600; }
 .ap-wizard__hint { margin: 0 0 10px; color: var(--ap-muted); font-size: 0.82rem; }
 .ap-wizard__callout {
     margin-bottom: 14px;
@@ -164,6 +165,54 @@
     background: #e8f0fa;
     border: 1px solid #c9d6e4;
     font-size: 0.86rem;
+}
+
+.ap-wizard__org-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 12px;
+}
+
+.ap-wizard__section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.ap-wizard__section-head h3 {
+    margin: 0;
+}
+
+.ap-wizard__readonly {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 16px;
+    margin: 0;
+}
+
+@media (max-width: 640px) {
+    .ap-wizard__readonly { grid-template-columns: 1fr; }
+}
+
+.ap-wizard__readonly--full {
+    grid-column: 1 / -1;
+}
+
+.ap-wizard__readonly dt {
+    font-size: 0.72rem;
+    font-weight: 650;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ap-muted);
+    margin: 0 0 2px;
+}
+
+.ap-wizard__readonly dd {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--ap-ink);
 }
 
 .ap-wizard__grid {

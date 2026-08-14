@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.BusinessObjects.ApplicationProfileWizard;
 using Visa2026.Module.Editors;
+using Visa2026.Module.Services.ApplicationProfileCatalog;
 using Visa2026.Module.Services.ApplicationProfileWizard;
 
 namespace Visa2026.Blazor.Server.Editors;
@@ -37,6 +38,10 @@ public class ApplicationProfileWizardPropertyEditor : BlazorPropertyEditorBase, 
         IsLoading = true,
         InitialLoadRequested = EventCallback.Factory.Create(this, LoadAsync),
         PublishRequested = EventCallback.Factory.Create(this, PublishAsync),
+        OpenCompanyRequested = EventCallback.Factory.Create(this, () => OpenOrganization(ApplicationProfileWizardOrganizationOpenHelper.Kind.Company)),
+        OpenSignatoryRequested = EventCallback.Factory.Create(this, () => OpenOrganization(ApplicationProfileWizardOrganizationOpenHelper.Kind.Signatory)),
+        OpenRepresentativeRequested = EventCallback.Factory.Create(this, () => OpenOrganization(ApplicationProfileWizardOrganizationOpenHelper.Kind.Representative)),
+        RefreshOrganizationRequested = EventCallback.Factory.Create(this, RefreshSupportingData),
     };
 
     protected override void OnCurrentObjectChanged()
@@ -66,8 +71,13 @@ public class ApplicationProfileWizardPropertyEditor : BlazorPropertyEditorBase, 
             if (profile != null && _session?.ObjectSpace != null)
                 ApplicationProfileProgressStateSeeder.EnsureDefaults(profile, _session.ObjectSpace);
 
+            model.ObjectSpace = _session?.ObjectSpace;
+            model.Profile = profile;
             model.IsReadOnly = profile != null
-                && ApplicationProfileLockHelper.IsProfileConfigLocked(profile, _session!.ObjectSpace);
+                && _session?.ObjectSpace != null
+                && ApplicationProfileLockHelper.IsProfileConfigLocked(profile, _session.ObjectSpace);
+
+            RefreshSupportingData();
         }
         finally
         {
@@ -75,24 +85,24 @@ public class ApplicationProfileWizardPropertyEditor : BlazorPropertyEditorBase, 
         }
     }
 
-    private async Task PublishAsync()
+    private Task PublishAsync()
     {
         var model = ComponentModel;
         if (model == null || _session?.ObjectSpace == null)
-            return;
+            return Task.CompletedTask;
 
-        var profile = _session.GetProfile();
+        var profile = model.Profile ?? _session.GetProfile();
         if (profile == null)
         {
             model.StatusMessage = "Application Profile not found.";
             model.IsStatusError = true;
-            return;
+            return Task.CompletedTask;
         }
 
         try
         {
-            ApplicationProfileLockHelper.EnsureConfigurationEditable(profile, _session.ObjectSpace);
-            _session.ObjectSpace.CommitChanges();
+            ApplicationProfileWizardPersistHelper.Save(_session.ObjectSpace, profile);
+            model.Profile = _session.GetProfile() ?? profile;
             model.StatusMessage = "Profile saved.";
             model.IsStatusError = false;
             model.IsReadOnly = ApplicationProfileLockHelper.IsProfileConfigLocked(profile, _session.ObjectSpace);
@@ -101,7 +111,22 @@ public class ApplicationProfileWizardPropertyEditor : BlazorPropertyEditorBase, 
         {
             model.StatusMessage = ex.Message;
             model.IsStatusError = true;
+            return Task.CompletedTask;
         }
+        catch (Exception ex)
+        {
+            model.StatusMessage = ApplicationProfileWizardPersistHelper.FormatCommitError(ex);
+            model.IsStatusError = true;
+            return Task.CompletedTask;
+        }
+
+        return RefreshCatalogAsync();
+    }
+
+    private Task RefreshCatalogAsync()
+    {
+        var reload = _application?.ServiceProvider?.GetService<IApplicationProfileCatalogReload>();
+        return reload?.RequestReloadAsync() ?? Task.CompletedTask;
     }
 
     private void ApplyProfileIdFromContext()
@@ -133,11 +158,58 @@ public class ApplicationProfileWizardPropertyEditor : BlazorPropertyEditorBase, 
             return;
 
         _session.Application = _application;
-        _session.ApplicationProfileId = profileId;
 
-        if (_session.ObjectSpace != null)
+        var canReuse = _session.ObjectSpace is { IsDisposed: false }
+            && _session.ApplicationProfileId == profileId
+            && (profileId == Guid.Empty || _session.GetProfile() != null);
+        if (canReuse)
+            return;
+
+        if (_session.ObjectSpace is { IsDisposed: false } previous)
+            previous.Dispose();
+
+        _session.ObjectSpace = null;
+        _session.ApplicationProfileId = profileId;
+        if (profileId == Guid.Empty)
             return;
 
         _session.ObjectSpace = _application.CreateObjectSpace(typeof(ApplicationProfile));
+    }
+
+    private void RefreshSupportingData()
+    {
+        RefreshOrganizationSnapshot();
+        RefreshLookupData();
+    }
+
+    private void RefreshOrganizationSnapshot()
+    {
+        var model = ComponentModel;
+        if (model == null || _application == null)
+            return;
+
+        using var objectSpace = _application.CreateObjectSpace(typeof(CompanyProfile));
+        model.OrganizationSnapshot = ApplicationProfileWizardOrganizationSnapshot.Load(objectSpace);
+    }
+
+    private void RefreshLookupData()
+    {
+        var model = ComponentModel;
+        if (model == null || _application == null)
+            return;
+
+        using var objectSpace = _application.CreateObjectSpace(typeof(VisaType));
+        model.Lookups = ApplicationProfileWizardLookupData.Load(objectSpace);
+    }
+
+    private void OpenOrganization(ApplicationProfileWizardOrganizationOpenHelper.Kind kind)
+    {
+        if (_application == null)
+            return;
+
+        ApplicationProfileWizardOrganizationOpenHelper.TryOpen(
+            _application,
+            kind,
+            RefreshOrganizationSnapshot);
     }
 }

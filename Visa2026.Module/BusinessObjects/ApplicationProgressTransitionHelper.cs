@@ -188,10 +188,9 @@ public static class ApplicationProfileInstanceProgressTransitionHelper
 
             if (progress.State?.Code != null
                 && string.Equals(progress.State.Code.Trim(), ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1), StringComparison.OrdinalIgnoreCase)
-                && objectSpace != null
                 && ApplicationProfileInstanceProgressRouteHelper.GetTypePickerRouteFilter(progress.ApplicationProfileInstance)
                     == ApplicationProfileInstanceProgressRouteKind.ViaMinistries
-                && !MinistryReviewSlaHelper.TryValidateConfigured(objectSpace, out _))
+                && IsMinistryReviewSlaMissing(progress.ApplicationProfileInstance, objectSpace))
             {
                 errorMessage = VisaUiMessages.Get("ApplicationProfileInstanceProgress.MinistryReviewSlaRequired");
                 return false;
@@ -226,9 +225,8 @@ public static class ApplicationProfileInstanceProgressTransitionHelper
                 && (string.Equals(progress.State.Code.Trim(), ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1), StringComparison.OrdinalIgnoreCase)
                     || (progress.State.Code.Trim().EndsWith("_REVIEW_APPROVED", StringComparison.OrdinalIgnoreCase)
                         && ApplicationProfileInstanceProgressLegCodes.TryParseMinistryLegFromStateCode(progress.State.Code, out _)))
-                && objectSpace != null
                 && route.Value == ApplicationProfileInstanceProgressRouteKind.ViaMinistries
-                && !MinistryReviewSlaHelper.TryValidateConfigured(objectSpace, out _))
+                && IsMinistryReviewSlaMissing(progress.ApplicationProfileInstance, objectSpace))
             {
                 errorMessage = VisaUiMessages.Get("ApplicationProfileInstanceProgress.MinistryReviewSlaRequired");
                 return false;
@@ -270,11 +268,29 @@ public static class ApplicationProfileInstanceProgressTransitionHelper
         if (others == null || others.Count == 0)
             return null;
 
+        var isNew = current.ID == Guid.Empty
+            || (objectSpace != null && objectSpace.IsNewObject(current));
+        if (isNew)
+            return ApplicationProfileInstanceProgressHelper.GetLatest(others, objectSpace);
+
         return others
             .Where(p => p.Date < current.Date || (p.Date == current.Date && p.ID != Guid.Empty && current.ID != Guid.Empty && p.ID < current.ID))
             .OrderByDescending(p => p.Date)
             .ThenByDescending(p => p.ID)
             .FirstOrDefault();
+    }
+
+    private static bool IsMinistryReviewSlaMissing(
+        ApplicationProfileInstance application,
+        IObjectSpace? objectSpace)
+    {
+        if (ApplicationProfileConfigurationResolver.HasMinistrySlaConfigured(application))
+            return false;
+
+        if (objectSpace == null)
+            return false;
+
+        return !MinistryReviewSlaHelper.TryValidateConfigured(objectSpace, out _);
     }
 
     private static bool IsLegacyOfficePreparation(string? stateCode) =>

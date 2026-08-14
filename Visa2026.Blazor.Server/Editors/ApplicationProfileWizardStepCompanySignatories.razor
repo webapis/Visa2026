@@ -1,0 +1,93 @@
+@using Visa2026.Module.Services.ApplicationProfileWizard
+
+<div class="ap-wizard__panel-head">
+    <h2>Company, Signatories</h2>
+    <p>Live Configuration records. Reports merge these rows; they are not copied onto this Application Profile.</p>
+</div>
+<div class="ap-wizard__panel-body">
+    <div class="ap-wizard__callout">
+        One <strong>Company</strong>, one <strong>Authorized Signatory</strong>, and one <strong>Authorized Representative</strong> for the whole tenant.
+        Changing them under Configuration (or <strong>Edit in Configuration</strong> below) updates every template on the next generate.
+    </div>
+
+    <div class="ap-wizard__org-toolbar">
+        <button type="button" class="ap-wizard__btn ap-wizard__btn--secondary" @onclick="RefreshRequested">Refresh from Configuration</button>
+    </div>
+
+    <div class="ap-wizard__section">
+        <div class="ap-wizard__section-head">
+            <h3>Company</h3>
+            <button type="button" class="ap-wizard__btn ap-wizard__btn--secondary" @onclick="OpenCompanyRequested">Edit in Configuration</button>
+        </div>
+        @if (!Snapshot.HasCompany)
+        {
+            <p class="ap-wizard__hint">No Company record yet. Use Edit in Configuration to create it.</p>
+        }
+        else
+        {
+            <dl class="ap-wizard__readonly">
+                <div><dt>Name</dt><dd>@OrDash(Snapshot.CompanyName)</dd></div>
+                <div><dt>Code</dt><dd>@OrDash(Snapshot.CompanyCode)</dd></div>
+                <div><dt>Phone</dt><dd>@OrDash(Snapshot.CompanyPhone)</dd></div>
+                <div class="ap-wizard__readonly--full"><dt>Address</dt><dd>@OrDash(Snapshot.CompanyAddress)</dd></div>
+                <div><dt>Email</dt><dd>@OrDash(Snapshot.CompanyEmail)</dd></div>
+                <div><dt>Tax information</dt><dd>@OrDash(Snapshot.CompanyTaxInformation)</dd></div>
+            </dl>
+        }
+    </div>
+
+    <div class="ap-wizard__section">
+        <div class="ap-wizard__section-head">
+            <h3>Authorized Signatory</h3>
+            <button type="button" class="ap-wizard__btn ap-wizard__btn--secondary" @onclick="OpenSignatoryRequested">Edit in Configuration</button>
+        </div>
+        @if (!Snapshot.HasSignatory)
+        {
+            <p class="ap-wizard__hint">No Authorized Signatory yet. Use Edit in Configuration to create it.</p>
+        }
+        else
+        {
+            <dl class="ap-wizard__readonly">
+                <div><dt>Full name</dt><dd>@OrDash(Snapshot.SignatoryFullName)</dd></div>
+                <div><dt>Position (Tm)</dt><dd>@OrDash(Snapshot.SignatoryPositionTitleTm)</dd></div>
+                <div><dt>Passport number</dt><dd>@OrDash(Snapshot.SignatoryPassportNumber)</dd></div>
+                <div><dt>Passport authority</dt><dd>@OrDash(Snapshot.SignatoryPassportAuthority)</dd></div>
+                <div><dt>Passport issue date</dt><dd>@OrDash(Snapshot.SignatoryPassportIssueDateText)</dd></div>
+            </dl>
+        }
+    </div>
+
+    <div class="ap-wizard__section">
+        <div class="ap-wizard__section-head">
+            <h3>Authorized Representative</h3>
+            <button type="button" class="ap-wizard__btn ap-wizard__btn--secondary" @onclick="OpenRepresentativeRequested">Edit in Configuration</button>
+        </div>
+        @if (!Snapshot.HasRepresentative)
+        {
+            <p class="ap-wizard__hint">No Authorized Representative yet. Use Edit in Configuration to create it.</p>
+        }
+        else
+        {
+            <dl class="ap-wizard__readonly">
+                <div><dt>Full name</dt><dd>@OrDash(Snapshot.RepresentativeFullName)</dd></div>
+                <div><dt>Position (Tm)</dt><dd>@OrDash(Snapshot.RepresentativePositionTitleTm)</dd></div>
+                <div><dt>Phone</dt><dd>@OrDash(Snapshot.RepresentativePhone)</dd></div>
+                <div><dt>Passport number</dt><dd>@OrDash(Snapshot.RepresentativePassportNumber)</dd></div>
+                <div><dt>Passport authority</dt><dd>@OrDash(Snapshot.RepresentativePassportAuthority)</dd></div>
+                <div><dt>Passport issue date</dt><dd>@OrDash(Snapshot.RepresentativePassportIssueDateText)</dd></div>
+            </dl>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public ApplicationProfileWizardOrganizationSnapshot Snapshot { get; set; } =
+        ApplicationProfileWizardOrganizationSnapshot.Empty;
+    [Parameter] public EventCallback OpenCompanyRequested { get; set; }
+    [Parameter] public EventCallback OpenSignatoryRequested { get; set; }
+    [Parameter] public EventCallback OpenRepresentativeRequested { get; set; }
+    [Parameter] public EventCallback RefreshRequested { get; set; }
+
+    private static string OrDash(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? "—" : value;
+}

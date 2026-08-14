@@ -102,6 +102,15 @@ public sealed class ProgressLettersSlotRequest
 
     /// <summary>When set, the catalog opens and previews this progress row if it has a ministry letter file.</summary>
     public Guid? FocusProgressId { get; init; }
+
+    /// <summary>Display name for <see cref="FocusProgressId"/> when <see cref="OpenPreviewOnly"/> is true.</summary>
+    public string? FocusDisplayName { get; init; }
+
+    /// <summary>
+    /// When true, the slot shows only the letter preview viewer (no catalog).
+    /// Used when the officer clicks a filename already shown in the case workspace Progress tab.
+    /// </summary>
+    public bool OpenPreviewOnly { get; init; }
 }
 
 public sealed class PersonDocumentCopiesSlotRequest

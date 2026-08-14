@@ -36,7 +36,8 @@ public class ApplicationProfileOverviewQueryServiceTests
 
         Assert.False(snapshot.IsPrototypeMock);
         Assert.Equal("Invitation employee", snapshot.Name);
-        Assert.Contains(snapshot.LiveConfigurationLines, l => l.Contains("Ministry SLA: 14"));
+        Assert.Equal(14, snapshot.MinistrySlaDays);
+        Assert.Equal(7, snapshot.MigrationSlaDays);
         Assert.Contains(snapshot.LiveConfigurationLines, l => l.Contains("invitation"));
         Assert.Contains(snapshot.LiveConfigurationLines, l => l.Contains("border zone permits"));
         Assert.Empty(snapshot.ApprovalLegs);
@@ -101,5 +102,82 @@ public class ApplicationProfileOverviewQueryServiceTests
         Assert.Equal(ApplicationProfileOverviewQueryService.LinkedApplicationsDisplayCap + 1, snapshot.LinkedApplicationCount);
         Assert.Equal(ApplicationProfileOverviewQueryService.LinkedApplicationsDisplayCap, snapshot.LinkedApplications.Count);
         Assert.Equal("N-25", snapshot.LinkedApplications[0].FullNumber);
+    }
+
+    [Fact]
+    public void MapFromProfile_IncludesRequiredFieldsWithoutDefaults()
+    {
+        var profile = new ApplicationProfile
+        {
+            Name = "Dates",
+            Code = "DATES",
+            SelectionCode = "101",
+            ApplicabilityCriteria = "ProjectContract.Code = 'P1'",
+            RequireStartDate = true,
+            RequireEndDate = true,
+            RequireRegionCity = true,
+        };
+
+        var snapshot = ApplicationProfileOverviewQueryService.MapFromProfile(profile, objectSpace: null);
+
+        Assert.Equal("101", snapshot.SelectionCode);
+        Assert.False(snapshot.IsAlwaysAvailable);
+        Assert.Equal("ProjectContract.Code = 'P1'", snapshot.ApplicabilityCriteria);
+        Assert.Contains(snapshot.PerApplicationDefaults, r => r.FieldLabel == "Start date" && r.Required);
+        Assert.Contains(snapshot.PerApplicationDefaults, r => r.FieldLabel == "End date" && r.Required);
+        Assert.Contains(snapshot.PerApplicationDefaults, r => r.FieldLabel == "Region (city)" && r.Required);
+    }
+
+    [Fact]
+    public void MapFromProfile_MapsIncludedProgressStatesAndTemplateScope()
+    {
+        var profile = new ApplicationProfile
+        {
+            Name = "Full",
+            Code = "FULL",
+            ProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
+            ProgressStateSettings = new ObservableCollection<ApplicationProfileProgressStateSetting>
+            {
+                new()
+                {
+                    Track = ApplicationProfileProgressStateTrack.Ministry,
+                    StateCode = "MINISTRY_POSTPONED",
+                    IsIncluded = true,
+                    IsSlaTracked = false,
+                },
+                new()
+                {
+                    Track = ApplicationProfileProgressStateTrack.Migration,
+                    StateCode = "MIGRATION_ON_PROCESS",
+                    IsIncluded = false,
+                    IsSlaTracked = true,
+                },
+            },
+            NestedTemplates = new ObservableCollection<ApplicationProfileTemplate>
+            {
+                new()
+                {
+                    TemplateName = "Sanaw",
+                    TemplateKind = ApplicationProfileTemplateKind.Excel,
+                    CatalogScope = ApplicationProfileTemplateCatalogScope.Category,
+                    DataScope = ApplicationProfileTemplateDataScope.Both,
+                    CategoryKey = "WorkPermit",
+                    SortOrder = 1,
+                },
+            },
+        };
+
+        var snapshot = ApplicationProfileOverviewQueryService.MapFromProfile(profile, objectSpace: null);
+
+        Assert.Single(snapshot.ProgressStates);
+        Assert.Equal("Ministry", snapshot.ProgressStates[0].TrackLabel);
+        Assert.Equal("Postponed", snapshot.ProgressStates[0].StateName);
+        Assert.False(snapshot.ProgressStates[0].IsSlaTracked);
+        Assert.Single(snapshot.NestedTemplates);
+        Assert.Equal("Sanaw", snapshot.NestedTemplates[0].Name);
+        Assert.Equal("Excel", snapshot.NestedTemplates[0].Kind);
+        Assert.Equal("Category", snapshot.NestedTemplates[0].Scope);
+        Assert.Equal("Header + M2M", snapshot.NestedTemplates[0].DataScope);
+        Assert.Equal("Work permit", snapshot.NestedTemplates[0].Category);
     }
 }

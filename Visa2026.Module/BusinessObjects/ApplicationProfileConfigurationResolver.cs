@@ -56,8 +56,19 @@ public static class ApplicationProfileConfigurationResolver
         return 0;
     }
 
+    public static int GetMinistrySlaMaxDays(ApplicationProfileInstance? application)
+    {
+        if (application?.ApplicationProfile is { MinistrySlaDays: > 0 } profile)
+            return profile.MinistrySlaDays;
+
+        return 0;
+    }
+
     public static bool HasMigrationSlaConfigured(ApplicationProfileInstance? application) =>
         GetMigrationSlaMaxDays(application) > 0;
+
+    public static bool HasMinistrySlaConfigured(ApplicationProfileInstance? application) =>
+        GetMinistrySlaMaxDays(application) > 0;
 
     public static int GetEmbeddedProfileMinistryLegCount(ApplicationProfileInstance? application) =>
         application?.ApplicationProfile?.ApprovalLegs?

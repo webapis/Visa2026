@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using DevExpress.ExpressApp;
+using Microsoft.EntityFrameworkCore;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.ApplicationPersonRoster;
 using Visa2026.Module.Services.OfficerShell;
@@ -21,14 +22,16 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
 
         ApplicationProfileInstancePersonService.RefreshApplication(objectSpace, applicationId);
 
-        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
+        var application = LoadInstance(objectSpace, applicationId);
         if (application == null)
             return Empty(applicationId);
 
         var profile = application.ApplicationProfile;
-        var sla = ApplicationProfileInstanceProgressSlaHelper.Resolve(application, application.LatestProgress);
+        var latest = ApplicationProfileInstanceProgressHelper.GetLatest(application.ProgressHistory, objectSpace);
+        var ministrySla = ApplicationProfileInstanceProgressSlaHelper.Resolve(application, latest);
+        var sla = ApplicationWorkspaceProgressTimeline.ResolveCurrentSla(application, profile, latest, ministrySla);
         var tabs = ApplicationWorkspaceTabBuilder.Build(objectSpace, application, profile);
-        var caseChrome = BuildCaseChrome(application, profile, sla);
+        var caseChrome = BuildCaseChrome(application, profile, sla, objectSpace);
 
         return new ApplicationWorkspaceSnapshot
         {
@@ -45,10 +48,36 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
         };
     }
 
+    private static ApplicationProfileInstance? LoadInstance(IObjectSpace objectSpace, Guid applicationId)
+    {
+        try
+        {
+            return objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
+                .Include(a => a.ProgressHistory)
+                    .ThenInclude(p => p.State)
+                .Include(a => a.ProgressHistory)
+                    .ThenInclude(p => p.MinistryLetterFile)
+                .Include(a => a.ApplicationProfile)
+                    .ThenInclude(p => p!.ApprovalLegs)
+                        .ThenInclude(l => l.ApprovingMinistry)
+                .Include(a => a.ApplicationProfile)
+                    .ThenInclude(p => p!.ProgressStateSettings)
+                .Include(a => a.ApprovalLegSnapshots)
+                .Include(a => a.LatestProgress)
+                    .ThenInclude(p => p!.State)
+                .FirstOrDefault(a => a.ID == applicationId);
+        }
+        catch (Exception)
+        {
+            return objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
+        }
+    }
+
     private static ApplicationWorkspaceCaseChrome BuildCaseChrome(
         ApplicationProfileInstance application,
         ApplicationProfile? profile,
-        ApplicationProfileInstanceProgressSlaResult sla)
+        ApplicationProfileInstanceProgressSlaResult sla,
+        IObjectSpace? objectSpace)
     {
         var processNumber = !string.IsNullOrWhiteSpace(application.ProcessNumber)
             ? application.ProcessNumber.Trim()
@@ -65,13 +94,11 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
             .Cast<string>()
             .ToList();
 
-        var currentStep = application.LatestProgress?.State?.LocalizedDisplayName
-            ?? application.LatestProgress?.State?.NameTm
-            ?? application.LatestPrimaryStateCode
-            ?? "Office preparation";
+        var progressSteps = ApplicationWorkspaceProgressTimeline.Build(application, profile, sla, objectSpace);
+        var currentStep = ApplicationWorkspaceProgressTimeline.FormatChromeCurrentStep(progressSteps);
 
         int? slaRemaining = sla.MaxDaysInReview is int maxDays && sla.WorkingDaysInCurrentStep is int elapsed
-            ? maxDays - elapsed
+            ? Math.Max(0, maxDays - elapsed)
             : null;
 
         return new ApplicationWorkspaceCaseChrome
@@ -123,7 +150,10 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
             .OrderBy(p => p.Order)
             .Select(p => new ApplicationWorkspaceProgressRow
             {
-                State = p.State?.LocalizedDisplayName ?? p.State?.NameTm ?? p.State?.Code ?? "—",
+                State = ApplicationWorkspaceProgressTimeline.FormatProfileStateLabel(p.State?.Code)
+                    is { Length: > 0 } label
+                    ? label
+                    : (p.State?.Code ?? "—"),
                 Date = p.Date == default
                     ? string.Empty
                     : p.Date.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture),

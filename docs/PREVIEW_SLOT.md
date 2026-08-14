@@ -10,7 +10,7 @@ Officer-facing **right-side panel** for inline catalogs and document preview. Re
 |--------|--------|
 | Resminamalar modal + separate file drawer | One resizable column beside main app |
 | Document copies modal | Same shell, shared catalog card UX |
-| Ministry letter filename → modal or split pane | `ProgressLetters` occupant in same slot |
+| Ministry letter filename → modal or split pane | `ProgressLetters` occupant in same slot (workspace Progress tab: viewer only) |
 
 **Design rule:** **one occupant at a time** — last `Open*` wins; `@key` on panel remounts local state (`_previewActive`, catalog selection).
 
@@ -33,10 +33,10 @@ Officer-facing **right-side panel** for inline catalogs and document preview. Re
 | `WorkPermitDocumentCopies` *(planned)* | ↑ shared or per-family | `OpenWorkPermitDocumentCopiesAsync` *(planned)* | ↑ |
 | `RejectionDocumentCopies` *(planned)* | ↑ | `OpenRejectionDocumentCopiesAsync` *(planned)* | ↑ |
 | `BorderZoneDocumentCopies` *(planned)* | ↑ | `OpenBorderZoneDocumentCopiesAsync` *(planned)* | ↑ — **`BorderZoneDocument` + `Documents` same release** (mirror Invitation/WorkPermit) |
-| `ProgressLetters` | `ProgressLettersSlotPanel` | `OpenProgressLettersAsync` | Application progress ministry letters (controller + catalog builder) |
+| `ProgressLetters` | `ProgressLettersSlotPanel` | `OpenProgressLettersAsync` | Application progress ministry letters. Case workspace Progress filename uses `OpenPreviewOnly` (viewer only). ListView toolbar / grid link still opens the slot catalog. |
 | `File` | `VisaFilePreviewDrawer` | `OpenFileAsync` / JS bridge | File preview sources registry |
 
-**Occupant keys:** `VisaPreviewSlotOccupantKeys` (e.g. `resminamalar:app:{id}`, `document-copies:items:{ids}`, `file:{source}:{id}`).
+**Occupant keys:** `VisaPreviewSlotOccupantKeys` (e.g. `resminamalar:app:{id}`, `document-copies:items:{ids}`, `progress-letters:app:{id}` or `…|preview:{progressId}` when `OpenPreviewOnly`, `file:{source}:{id}`).
 
 ## Catalog vs preview (exclusive mode)
 
@@ -46,6 +46,8 @@ Each feature panel uses **`--preview` CSS modifier** when a document is open:
 2. **Preview mode** — catalog hidden; **viewer uses full slot width** (no catalog `max-width`).
 
 Feature components set `UseInlinePreview="true"` and raise `OnInlinePreviewRequested` → panel sets `_previewActive` → `*InlinePreview` child.
+
+Case workspace **Progress** filename opens `ProgressLetters` with `OpenPreviewOnly` (no catalog in the slot). Same pattern as Resminamalar / Document copies from their workspace tabs.
 
 **Do not** reuse catalog card constraints on `.report-package-inline-preview` in `--preview` mode.
 

@@ -1,7 +1,10 @@
 #nullable enable
 using System;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor.Components.Models;
 using Microsoft.AspNetCore.Components;
+using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.ApplicationProfileWizard;
 
 namespace Visa2026.Blazor.Server.Editors;
 
@@ -42,6 +45,56 @@ public sealed class ApplicationProfileWizardModel : ComponentModelBase
     public EventCallback PublishRequested
     {
         get => GetPropertyValue<EventCallback>();
+        set => SetPropertyValue(value);
+    }
+
+    public ApplicationProfileWizardOrganizationSnapshot OrganizationSnapshot
+    {
+        get => GetPropertyValue<ApplicationProfileWizardOrganizationSnapshot>()
+            ?? ApplicationProfileWizardOrganizationSnapshot.Empty;
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback OpenCompanyRequested
+    {
+        get => GetPropertyValue<EventCallback>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback OpenSignatoryRequested
+    {
+        get => GetPropertyValue<EventCallback>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback OpenRepresentativeRequested
+    {
+        get => GetPropertyValue<EventCallback>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback RefreshOrganizationRequested
+    {
+        get => GetPropertyValue<EventCallback>();
+        set => SetPropertyValue(value);
+    }
+
+    public ApplicationProfileWizardLookupData Lookups
+    {
+        get => GetPropertyValue<ApplicationProfileWizardLookupData>()
+            ?? ApplicationProfileWizardLookupData.Empty;
+        set => SetPropertyValue(value);
+    }
+
+    public ApplicationProfile? Profile
+    {
+        get => GetPropertyValue<ApplicationProfile>();
+        set => SetPropertyValue(value);
+    }
+
+    public IObjectSpace? ObjectSpace
+    {
+        get => GetPropertyValue<IObjectSpace>();
         set => SetPropertyValue(value);
     }
 }

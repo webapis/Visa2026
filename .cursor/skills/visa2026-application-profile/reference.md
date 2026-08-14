@@ -44,7 +44,7 @@ Companion to [SKILL.md](./SKILL.md).
 | Case progress in-shell (B7) | `IOfficerShellCaseProgressService`, `OfficerShellCaseProgressTab.razor` |
 | Immersive tab-bar hide (B6) | `OfficerShellImmersiveTabBarController.cs`, `officer-shell-host.css` |
 | Person detail open (no dispose) | `PersonDetailOpenHelper.cs` |
-| Preview slot requests | `IVisaPreviewSlotService.cs` — `ResminamalarSlotRequest`, `DocumentCopiesSlotRequest` (`OpenPreviewOnly`, roster scope) |
+| Preview slot requests | `IVisaPreviewSlotService.cs` — `ResminamalarSlotRequest`, `DocumentCopiesSlotRequest`, `ProgressLettersSlotRequest` (`OpenPreviewOnly`, roster scope) |
 | Roster document copies merge | `ApplicationItemDocumentCopyPdfMerger.TryBuildMergedPdfForRoster` |
 | HTML prototype (parity) | `wwwroot/officer-shell/`, `parity/CHECKLIST.md` |
 

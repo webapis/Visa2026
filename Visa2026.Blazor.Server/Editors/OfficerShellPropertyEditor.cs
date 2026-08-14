@@ -594,6 +594,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
             {
                 model.ProgressStatusMessage = result.ErrorMessage ?? "Could not advance progress.";
                 model.ProgressStatusIsError = true;
+                await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId);
                 return;
             }
 
@@ -607,6 +608,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         {
             model.ProgressStatusMessage = ex.Message;
             model.ProgressStatusIsError = true;
+            await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId);
         }
     }
 

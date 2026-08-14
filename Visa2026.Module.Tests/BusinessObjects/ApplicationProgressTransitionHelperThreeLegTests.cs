@@ -64,6 +64,31 @@ public class ApplicationProfileInstanceProgressTransitionHelperThreeLegTests
             ApplicationProfileInstanceProgressLegCodes.ReviewStarted(2)));
     }
 
+    [Fact]
+    public void SameDayNextStep_UsesExistingHistoryWhenCurrentIsNew()
+    {
+        var app = BuildThreeLegApplication();
+        var existing = new ApplicationProfileInstanceProgress
+        {
+            ID = Guid.NewGuid(),
+            ApplicationProfileInstance = app,
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1) },
+            Date = DateTime.Today
+        };
+        app.ProgressHistory.Add(existing);
+
+        var current = new ApplicationProfileInstanceProgress
+        {
+            ApplicationProfileInstance = app,
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressLegCodes.ReviewApproved(1) },
+            Date = DateTime.Today
+        };
+        app.ProgressHistory.Add(current);
+
+        Assert.True(ApplicationProfileInstanceProgressTransitionHelper.TryValidateProgressStep(current, null, out var error));
+        Assert.True(string.IsNullOrWhiteSpace(error));
+    }
+
     private static bool IsAllowedFirst(ApplicationProfileInstance app, string toState)
     {
         app.ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>();

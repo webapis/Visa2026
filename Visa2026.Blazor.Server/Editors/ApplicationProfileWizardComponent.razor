@@ -1,7 +1,6 @@
 @using DevExpress.ExpressApp
 @using Visa2026.Module.BusinessObjects
 @using Visa2026.Module.Services.ApplicationProfileWizard
-@inject IApplicationProfileWizardSession Session
 
 <div class="ap-wizard">
     @if (IsLoading)
@@ -68,35 +67,45 @@
             <div class="ap-wizard__panel">
                 @if (_activeStep == 0)
                 {
-                    <ApplicationProfileWizardStepIdentity Profile="Profile" Disabled="IsReadOnly" />
-                }
-                else if (_activeStep == 1)
-                {
-                    <ApplicationProfileWizardStepResults Profile="Profile"
-                        Disabled="IsReadOnly"
-                        Lookups="_lookups"
-                        ObjectSpace="Session.ObjectSpace" />
-                }
-                else if (_activeStep == 2)
-                {
-                    <ApplicationProfileWizardStepProcess Profile="Profile"
+                    <ApplicationProfileWizardStepIdentity Profile="Profile"
                         Disabled="IsReadOnly"
                         Ministries="Ministries"
                         OnAddLeg="AddLegCallback"
-                        OnRemoveLeg="RemoveLegCallback" />
+                        OnRemoveLeg="RemoveLegCallback"
+                        ClearLegsRequested="ClearLegsCallback" />
+                }
+                else if (_activeStep == 1)
+                {
+                    <ApplicationProfileWizardStepCompanySignatories Snapshot="OrganizationSnapshot"
+                        OpenCompanyRequested="OpenCompanyRequested"
+                        OpenSignatoryRequested="OpenSignatoryRequested"
+                        OpenRepresentativeRequested="OpenRepresentativeRequested"
+                        RefreshRequested="RefreshOrganizationRequested" />
+                }
+                else if (_activeStep == 2)
+                {
+                    <ApplicationProfileWizardStepResults Profile="Profile"
+                        Disabled="IsReadOnly"
+                        Lookups="Lookups"
+                        ObjectSpace="ObjectSpace" />
                 }
                 else if (_activeStep == 3)
                 {
+                    <ApplicationProfileWizardStepProcess Profile="Profile" Disabled="IsReadOnly" />
+                }
+                else if (_activeStep == 4)
+                {
                     <ApplicationProfileWizardStepTemplatesPerson Profile="Profile"
                         Disabled="IsReadOnly"
-                        ObjectSpace="Session.ObjectSpace"
+                        ObjectSpace="ObjectSpace"
                         OnAddTemplate="AddTemplateCallback"
                         OnRemoveTemplate="RemoveTemplateCallback"
                         OnCreateTemplate="CreateTemplateCallback" />
                 }
                 else
                 {
-                    <ApplicationProfileWizardStepReview Profile="Profile" />
+                    <ApplicationProfileWizardStepReview Profile="Profile"
+                        Organization="OrganizationSnapshot" />
                 }
 
                 <div class="ap-wizard__foot">
@@ -122,25 +131,33 @@
 @code {
     private readonly (string Title, string Description)[] _steps =
     [
-        ("Identity & purpose", "Name, route, audience, action"),
-        ("Results & fields", "Issue / cancel + required properties"),
-        ("Process & SLA", "Legs and durations"),
+        ("Identity & purpose", "Name, route, legs, audience, issue / cancel"),
+        ("Company, Signatories", "Letterhead, signatory, representative"),
+        ("Results & fields", "Required instance properties"),
+        ("Process & SLA", "States and durations"),
         ("Templates & person", "Reports + person data"),
         ("Review & save", "Summary before publish"),
     ];
 
+    [Parameter] public ApplicationProfile? Profile { get; set; }
+    [Parameter] public IObjectSpace? ObjectSpace { get; set; }
     [Parameter] public bool IsLoading { get; set; }
     [Parameter] public bool IsReadOnly { get; set; }
     [Parameter] public string? StatusMessage { get; set; }
     [Parameter] public bool IsStatusError { get; set; }
     [Parameter] public EventCallback InitialLoadRequested { get; set; }
     [Parameter] public EventCallback PublishRequested { get; set; }
+    [Parameter] public ApplicationProfileWizardOrganizationSnapshot OrganizationSnapshot { get; set; } =
+        ApplicationProfileWizardOrganizationSnapshot.Empty;
+    [Parameter] public EventCallback OpenCompanyRequested { get; set; }
+    [Parameter] public EventCallback OpenSignatoryRequested { get; set; }
+    [Parameter] public EventCallback OpenRepresentativeRequested { get; set; }
+    [Parameter] public EventCallback RefreshOrganizationRequested { get; set; }
+    [Parameter] public ApplicationProfileWizardLookupData Lookups { get; set; } =
+        ApplicationProfileWizardLookupData.Empty;
 
     private int _activeStep;
     private IReadOnlyList<ApprovingMinistry> _ministries = Array.Empty<ApprovingMinistry>();
-    private ApplicationProfileWizardLookupData _lookups = new();
-
-    private ApplicationProfile? Profile => Session.GetProfile();
 
     private IReadOnlyList<ApprovingMinistry> Ministries => _ministries;
 
@@ -148,6 +165,8 @@
 
     private EventCallback<ApplicationProfileApprovalLeg> RemoveLegCallback =>
         EventCallback.Factory.Create<ApplicationProfileApprovalLeg>(this, RemoveLeg);
+
+    private EventCallback ClearLegsCallback => EventCallback.Factory.Create(this, ClearLegs);
 
     private EventCallback AddTemplateCallback => EventCallback.Factory.Create(this, AddTemplate);
 
@@ -165,25 +184,28 @@
 
     protected override void OnParametersSet()
     {
-        if (Profile == null || Session.ObjectSpace == null)
+        if (Profile == null || ObjectSpace == null)
             return;
 
-        ApplicationProfileProgressStateSeeder.EnsureDefaults(Profile, Session.ObjectSpace);
+        ApplicationProfileProgressStateSeeder.EnsureDefaults(Profile, ObjectSpace);
 
         if (_ministries.Count == 0)
         {
-            _ministries = Session.ObjectSpace.GetObjectsQuery<ApprovingMinistry>()
+            _ministries = ObjectSpace.GetObjectsQuery<ApprovingMinistry>()
                 .OrderBy(m => m.NameTm)
                 .ToList();
         }
-
-        if (_lookups.VisaTypes.Count == 0)
-            _lookups = ApplicationProfileWizardLookupData.Load(Session.ObjectSpace);
     }
 
-    private void GoToStep(int index) => _activeStep = Math.Clamp(index, 0, _steps.Length - 1);
-    private void NextStep() => GoToStep(_activeStep + 1);
-    private void PreviousStep() => GoToStep(_activeStep - 1);
+    private async Task GoToStep(int index)
+    {
+        _activeStep = Math.Clamp(index, 0, _steps.Length - 1);
+        if (RefreshOrganizationRequested.HasDelegate)
+            await RefreshOrganizationRequested.InvokeAsync();
+    }
+
+    private Task NextStep() => GoToStep(_activeStep + 1);
+    private Task PreviousStep() => GoToStep(_activeStep - 1);
 
     private async Task PublishAsync()
     {
@@ -193,7 +215,10 @@
 
     private void AddLeg(Guid ministryId)
     {
-        if (IsReadOnly || Profile == null || Session.ObjectSpace is not { } os || ministryId == Guid.Empty)
+        if (IsReadOnly || Profile == null || ObjectSpace is not { } os || ministryId == Guid.Empty)
+            return;
+
+        if (Profile.ProgressRoute != ApplicationProfileInstanceProgressRouteKind.ViaMinistries)
             return;
 
         var ministry = os.GetObjectByKey<ApprovingMinistry>(ministryId);
@@ -204,11 +229,22 @@
         leg.ApplicationProfile = Profile;
         leg.ApprovingMinistry = ministry;
         leg.Sequence = (Profile.ApprovalLegs?.Count ?? 0) + 1;
+        if (Profile.ApprovalLegs != null && !Profile.ApprovalLegs.Contains(leg))
+            Profile.ApprovalLegs.Add(leg);
+    }
+
+    private void ClearLegs()
+    {
+        if (IsReadOnly || Profile?.ApprovalLegs == null || ObjectSpace is not { } os)
+            return;
+
+        foreach (var leg in Profile.ApprovalLegs.ToList())
+            os.Delete(leg);
     }
 
     private void RemoveLeg(ApplicationProfileApprovalLeg leg)
     {
-        if (IsReadOnly || Session.ObjectSpace is not { } os || leg == null)
+        if (IsReadOnly || ObjectSpace is not { } os || leg == null)
             return;
 
         os.Delete(leg);
@@ -227,18 +263,20 @@
 
     private void AddTemplate()
     {
-        if (IsReadOnly || Profile == null || Session.ObjectSpace is not { } os)
+        if (IsReadOnly || Profile == null || ObjectSpace is not { } os)
             return;
 
         var template = os.CreateObject<ApplicationProfileTemplate>();
         template.ApplicationProfile = Profile;
         template.TemplateName = "New template";
         template.SortOrder = (Profile.NestedTemplates?.Count ?? 0) + 1;
+        if (Profile.NestedTemplates != null && !Profile.NestedTemplates.Contains(template))
+            Profile.NestedTemplates.Add(template);
     }
 
     private void CreateTemplate((string Name, ApplicationProfileTemplateKind Kind, int SortOrder, byte[]? FileBytes, string? FileName, ApplicationProfileTemplateCatalogScope CatalogScope, ApplicationProfileTemplateDataScope DataScope, string? CategoryKey) args)
     {
-        if (IsReadOnly || Profile == null || Session.ObjectSpace is not { } os)
+        if (IsReadOnly || Profile == null || ObjectSpace is not { } os)
             return;
 
         var name = args.Name?.Trim();
@@ -267,6 +305,8 @@
         template.CatalogScope = args.CatalogScope;
         template.DataScope = args.DataScope;
         template.CategoryKey = string.IsNullOrWhiteSpace(args.CategoryKey) ? null : args.CategoryKey.Trim();
+        if (Profile.NestedTemplates != null && !Profile.NestedTemplates.Contains(template))
+            Profile.NestedTemplates.Add(template);
         if (args.FileBytes is { Length: > 0 })
             AttachFile(os, template, args.FileBytes, args.FileName ?? $"{name}.docx");
     }
@@ -284,7 +324,7 @@
 
     private void RemoveTemplate(ApplicationProfileTemplate template)
     {
-        if (IsReadOnly || Session.ObjectSpace is not { } os || template == null)
+        if (IsReadOnly || ObjectSpace is not { } os || template == null)
             return;
 
         os.Delete(template);

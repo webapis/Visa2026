@@ -125,6 +125,20 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <DetailView Id="ApplicationProfileCatalogHost_DetailView" Caption="Application Profile Templates" AllowDelete="False" AllowNew="False" AllowEdit="True" CustomCSSClassName="ap-catalog-detail">
+      <Items>
+        <PropertyEditor Id="CatalogUi" PropertyName="CatalogUi" ShowCaption="False" />
+      </Items>
+      <Layout>
+        <LayoutGroup Id="Main" Direction="Vertical" RelativeSize="100" CustomCSSClassName="xaf-fill-root">
+          <LayoutGroup Id="SimpleEditors" ShowCaption="False" RelativeSize="100" CustomCSSClassName="xaf-fill-available">
+            <LayoutGroup Id="ApplicationProfileCatalogHost" ShowCaption="False" RelativeSize="100" CustomCSSClassName="xaf-fill-available">
+              <LayoutItem Id="CatalogUi" ViewItem="CatalogUi" ShowCaption="False" RelativeSize="100" Index="0" CustomCSSClassName="xaf-fill-available" />
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <DetailView Id="ReportDataV2_DetailView">
       <Layout>
         <LayoutGroup Id="Main">

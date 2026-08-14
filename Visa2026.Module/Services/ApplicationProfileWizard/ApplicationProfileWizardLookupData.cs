@@ -1,39 +1,74 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.Services.ApplicationProfileWizard;
 
-/// <summary>Lookup catalogs for wizard step 2 default-value editors.</summary>
+/// <summary>One catalog row for wizard default-value dropdowns (not a live ObjectSpace entity).</summary>
+public sealed class ApplicationProfileWizardLookupItem
+{
+    public Guid Id { get; init; }
+    public string DisplayName { get; init; } = string.Empty;
+}
+
+/// <summary>Lookup catalogs for wizard Results and fields default-value editors.</summary>
 public sealed class ApplicationProfileWizardLookupData
 {
-    public IReadOnlyList<VisaType> VisaTypes { get; init; } = [];
-    public IReadOnlyList<VisaCategory> VisaCategories { get; init; } = [];
-    public IReadOnlyList<VisaPeriod> VisaPeriods { get; init; } = [];
-    public IReadOnlyList<MigrationService> MigrationServices { get; init; } = [];
-    public IReadOnlyList<ProjectContract> ProjectContracts { get; init; } = [];
-    public IReadOnlyList<Urgency> Urgencies { get; init; } = [];
-    public IReadOnlyList<CheckPoint> CheckPoints { get; init; } = [];
-    public IReadOnlyList<AuthorizedSignatory> AuthorizedSignatories { get; init; } = [];
-    public IReadOnlyList<AuthorizedRepresentative> VisaRepresentatives { get; init; } = [];
+    public static ApplicationProfileWizardLookupData Empty { get; } = new();
+
+    public IReadOnlyList<ApplicationProfileWizardLookupItem> VisaTypes { get; init; } = [];
+    public IReadOnlyList<ApplicationProfileWizardLookupItem> VisaCategories { get; init; } = [];
+    public IReadOnlyList<ApplicationProfileWizardLookupItem> VisaPeriods { get; init; } = [];
+    public IReadOnlyList<ApplicationProfileWizardLookupItem> MigrationServices { get; init; } = [];
+    public IReadOnlyList<ApplicationProfileWizardLookupItem> ProjectContracts { get; init; } = [];
+    public IReadOnlyList<ApplicationProfileWizardLookupItem> Urgencies { get; init; } = [];
+    public IReadOnlyList<ApplicationProfileWizardLookupItem> CheckPoints { get; init; } = [];
 
     public static ApplicationProfileWizardLookupData Load(IObjectSpace objectSpace)
     {
         if (objectSpace == null)
-            return new ApplicationProfileWizardLookupData();
+            return Empty;
 
         return new ApplicationProfileWizardLookupData
         {
-            VisaTypes = objectSpace.GetObjectsQuery<VisaType>().OrderBy(x => x.NameTm).ToList(),
-            VisaCategories = objectSpace.GetObjectsQuery<VisaCategory>().OrderBy(x => x.NameTm).ToList(),
-            VisaPeriods = objectSpace.GetObjectsQuery<VisaPeriod>().OrderBy(x => x.NameTm).ToList(),
-            MigrationServices = objectSpace.GetObjectsQuery<MigrationService>().OrderBy(x => x.NameTm).ToList(),
-            ProjectContracts = objectSpace.GetObjectsQuery<ProjectContract>().OrderBy(x => x.NameTm).ToList(),
-            Urgencies = objectSpace.GetObjectsQuery<Urgency>().OrderBy(x => x.NameTm).ToList(),
-            CheckPoints = objectSpace.GetObjectsQuery<CheckPoint>().OrderBy(x => x.NameTm).ToList(),
-            AuthorizedSignatories = objectSpace.GetObjectsQuery<AuthorizedSignatory>().OrderBy(x => x.FullName).ToList(),
-            VisaRepresentatives = objectSpace.GetObjectsQuery<AuthorizedRepresentative>().OrderBy(x => x.FullName).ToList(),
+            VisaTypes = LoadItems<VisaType>(objectSpace),
+            VisaCategories = LoadItems<VisaCategory>(objectSpace),
+            VisaPeriods = LoadItems<VisaPeriod>(objectSpace),
+            MigrationServices = LoadItems<MigrationService>(objectSpace),
+            ProjectContracts = LoadItems<ProjectContract>(objectSpace),
+            Urgencies = LoadItems<Urgency>(objectSpace),
+            CheckPoints = LoadItems<CheckPoint>(objectSpace),
         };
+    }
+
+    private static IReadOnlyList<ApplicationProfileWizardLookupItem> LoadItems<T>(IObjectSpace objectSpace)
+        where T : LookupBase
+    {
+        return objectSpace.GetObjects(typeof(T))
+            .Cast<T>()
+            .Select(item => new ApplicationProfileWizardLookupItem
+            {
+                Id = item.ID,
+                DisplayName = FormatDisplayName(item)
+            })
+            .OrderBy(item => item.DisplayName, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+    }
+
+    private static string FormatDisplayName(LookupBase item)
+    {
+        var localized = LookupLocalization.GetDisplayName(item);
+        if (!string.IsNullOrWhiteSpace(localized))
+            return localized;
+        if (!string.IsNullOrWhiteSpace(item.NameTm))
+            return item.NameTm;
+#pragma warning disable CS0618
+        if (!string.IsNullOrWhiteSpace(item.Name))
+            return item.Name;
+#pragma warning restore CS0618
+        return string.IsNullOrWhiteSpace(item.Code) ? item.ID.ToString("D") : item.Code;
     }
 }

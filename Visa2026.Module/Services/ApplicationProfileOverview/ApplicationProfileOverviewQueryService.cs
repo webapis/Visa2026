@@ -2,8 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
+using Microsoft.EntityFrameworkCore;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.ApplicationProfilePicker;
+using Visa2026.Module.Services.ApplicationProfileWizard;
+using Visa2026.Module.Services.UserReports;
 
 namespace Visa2026.Module.Services.ApplicationProfileOverview;
 
@@ -20,12 +23,36 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
     {
         if (objectSpace != null && applicationProfileId != Guid.Empty)
         {
-            var profile = objectSpace.GetObjectByKey<ApplicationProfile>(applicationProfileId);
+            var profile = LoadProfile(objectSpace, applicationProfileId);
             if (profile != null)
                 return MapFromProfile(profile, objectSpace);
         }
 
         return BuildFallbackMock(applicationProfileId);
+    }
+
+    private static ApplicationProfile? LoadProfile(IObjectSpace objectSpace, Guid applicationProfileId)
+    {
+        try
+        {
+            return objectSpace.GetObjectsQuery<ApplicationProfile>()
+                .Include(p => p.ApprovalLegs)
+                    .ThenInclude(l => l.ApprovingMinistry)
+                .Include(p => p.NestedTemplates)
+                .Include(p => p.ProgressStateSettings)
+                .Include(p => p.DefaultVisaType)
+                .Include(p => p.DefaultVisaCategory)
+                .Include(p => p.DefaultVisaPeriod)
+                .Include(p => p.DefaultUrgency)
+                .Include(p => p.DefaultProjectContract)
+                .Include(p => p.DefaultMigrationService)
+                .Include(p => p.DefaultEntryCheckPoint)
+                .FirstOrDefault(p => p.ID == applicationProfileId);
+        }
+        catch (Exception)
+        {
+            return objectSpace.GetObjectByKey<ApplicationProfile>(applicationProfileId);
+        }
     }
 
     internal static ApplicationProfileOverviewSnapshot MapFromProfile(
@@ -57,25 +84,38 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
             .Select(t => new ApplicationProfileOverviewTemplateRow
             {
                 Name = string.IsNullOrWhiteSpace(t.TemplateName) ? "—" : t.TemplateName,
-                Kind = t.TemplateKind.ToString(),
+                Kind = FormatTemplateKind(t.TemplateKind),
+                Scope = FormatCatalogScope(t.CatalogScope),
+                DataScope = FormatDataScope(t.DataScope),
+                Category = FormatCategory(t.CategoryKey),
             })
             .ToList() ?? [];
 
         var (linkedRows, linkedCount) = LoadLinkedApplications(profile, objectSpace);
         var locked = ApplicationProfileLockHelper.IsProfileConfigLocked(profile, objectSpace);
+        var viaMinistry = profile.ProgressRoute
+            == ApplicationProfileInstanceProgressRouteKind.ViaMinistries;
 
         return new ApplicationProfileOverviewSnapshot
         {
             ApplicationProfileId = profile.ID,
             Name = profile.Name,
             Code = profile.Code,
+            SelectionCode = profile.SelectionCode,
             Description = profile.Description,
             ActionFamilyLabel = ApplicationProfilePickerDisplayHelper.FormatActionFamily(profile.ActionFamily),
             ProgressRouteLabel = ApplicationProfilePickerDisplayHelper.FormatProgressRoute(profile.ProgressRoute),
+            IsViaMinistry = viaMinistry,
+            IsAlwaysAvailable = string.IsNullOrWhiteSpace(profile.ApplicabilityCriteria),
+            ApplicabilityCriteria = profile.ApplicabilityCriteria,
             AudienceLabels = audience,
             IsConfigLocked = locked,
             IsActive = profile.IsActive,
             LiveConfigurationLines = BuildLiveConfigurationLines(profile),
+            Organization = ApplicationProfileWizardOrganizationSnapshot.Load(objectSpace),
+            MinistrySlaDays = profile.MinistrySlaDays,
+            MigrationSlaDays = profile.MigrationSlaDays,
+            ProgressStates = BuildProgressStates(profile, viaMinistry),
             PerApplicationDefaults = BuildDefaultRows(profile),
             ApprovalLegs = legs,
             PersonDataToggles = BuildPersonToggles(profile),
@@ -162,11 +202,7 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
         if (profile.CancelApplicationProfileInstances)
             cancel.Add("applications");
 
-        var lines = new List<string>
-        {
-            $"Ministry SLA: {profile.MinistrySlaDays} days",
-            $"Migration SLA: {profile.MigrationSlaDays} days",
-        };
+        var lines = new List<string>();
 
         if (produce.Count > 0)
             lines.Add("May produce: " + string.Join(", ", produce));
@@ -174,6 +210,36 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
             lines.Add("May cancel: " + string.Join(", ", cancel));
 
         return lines;
+    }
+
+    private static List<ApplicationProfileOverviewProgressStateRow> BuildProgressStates(
+        ApplicationProfile profile,
+        bool viaMinistry)
+    {
+        var settings = profile.ProgressStateSettings;
+        if (settings == null || settings.Count == 0)
+            return [];
+
+        var catalogOrder = ApplicationProfileProgressStateCatalog.All
+            .Select(r => r.StateCode)
+            .ToArray();
+
+        return settings
+            .Where(s => s.IsIncluded)
+            .Where(s => viaMinistry || s.Track == ApplicationProfileProgressStateTrack.Migration)
+            .OrderBy(s => s.Track)
+            .ThenBy(s => Array.FindIndex(
+                catalogOrder,
+                code => string.Equals(code, s.StateCode, StringComparison.OrdinalIgnoreCase)))
+            .Select(s => new ApplicationProfileOverviewProgressStateRow
+            {
+                TrackLabel = s.Track == ApplicationProfileProgressStateTrack.Ministry
+                    ? "Ministry"
+                    : "Migration",
+                StateName = ApplicationProfileProgressStateSeeder.GetDisplayName(s),
+                IsSlaTracked = s.IsSlaTracked,
+            })
+            .ToList();
     }
 
     private static List<ApplicationProfileOverviewDefaultRow> BuildDefaultRows(ApplicationProfile profile)
@@ -201,6 +267,12 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
         Add("Migration Service", LookupLabel(profile.DefaultMigrationService), profile.RequireMigrationService);
         Add("Border Zone", profile.DefaultBorderZoneLocation, profile.RequireBorderZone);
         Add("Entry Check Point", LookupLabel(profile.DefaultEntryCheckPoint), profile.RequireEntryCheckPoint);
+        Add("Start date", null, profile.RequireStartDate);
+        Add("End date", null, profile.RequireEndDate);
+        Add("Region (city)", null, profile.RequireRegionCity);
+        Add("Business trip address", null, profile.RequireBusinessTripAddress);
+        Add("Work permit location", null, profile.RequireWorkPermitLocation);
+        Add("Entry date", null, profile.RequireEntryDate);
 
         return rows;
     }
@@ -225,7 +297,7 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
         if (profile.RequirePersonPosition)
             toggles.Add("Position");
         if (profile.RequirePersonAddressOfResidence)
-            toggles.Add("Local address");
+            toggles.Add("Address of residence");
         if (profile.RequirePersonVisa)
             toggles.Add("Visa");
         if (profile.RequirePersonInvitationItem)
@@ -245,6 +317,37 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
         return toggles;
     }
 
+    private static string FormatTemplateKind(ApplicationProfileTemplateKind kind) => kind switch
+    {
+        ApplicationProfileTemplateKind.Excel => "Excel",
+        ApplicationProfileTemplateKind.PdfForm => "PDF form",
+        _ => "Word",
+    };
+
+    private static string FormatCatalogScope(ApplicationProfileTemplateCatalogScope scope) => scope switch
+    {
+        ApplicationProfileTemplateCatalogScope.Category => "Category",
+        ApplicationProfileTemplateCatalogScope.Global => "All profiles",
+        _ => "Profile-specific",
+    };
+
+    private static string FormatDataScope(ApplicationProfileTemplateDataScope scope) => scope switch
+    {
+        ApplicationProfileTemplateDataScope.ApplicationHeader => "ApplicationProfileInstance header",
+        ApplicationProfileTemplateDataScope.Both => "Header + M2M",
+        _ => "People (M2M)",
+    };
+
+    private static string? FormatCategory(string? key)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+            return null;
+
+        var chip = ApplicationProfileWizardTemplateCatalog.CategoryChips
+            .FirstOrDefault(c => c.Key.Equals(key, StringComparison.OrdinalIgnoreCase));
+        return string.IsNullOrWhiteSpace(chip.Label) ? key : chip.Label;
+    }
+
     private static ApplicationProfileOverviewSnapshot BuildFallbackMock(Guid applicationProfileId) =>
         new()
         {
@@ -253,16 +356,24 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
                 : applicationProfileId,
             Name = "Invitation + work permit (employee)",
             Code = "INV_WP_EMP",
+            SelectionCode = "101",
             Description = "Prototype profile — mock overview when profile id is not resolved.",
             ActionFamilyLabel = "Issuance",
             ProgressRouteLabel = "Via ministry",
+            IsViaMinistry = true,
+            IsAlwaysAvailable = true,
             AudienceLabels = ["Employee"],
             IsConfigLocked = false,
             LiveConfigurationLines =
             [
                 "May produce: invitation, work permit, visa",
-                "Ministry SLA: 14 days",
-                "Migration SLA: 14 days",
+            ],
+            MinistrySlaDays = 14,
+            MigrationSlaDays = 14,
+            ProgressStates =
+            [
+                new() { TrackLabel = "Ministry", StateName = "Office preparation", IsSlaTracked = true },
+                new() { TrackLabel = "Migration", StateName = "Submitted", IsSlaTracked = true },
             ],
             PerApplicationDefaults =
             [
@@ -278,8 +389,8 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
             PersonDataToggles = ["Passport", "Position", "Education"],
             NestedTemplates =
             [
-                new() { Name = "Invitation package", Kind = "Word" },
-                new() { Name = "Work permit forms", Kind = "PdfForm" },
+                new() { Name = "Invitation package", Kind = "Word", Scope = "Profile-specific", DataScope = "People (M2M)" },
+                new() { Name = "Work permit forms", Kind = "Excel", Scope = "Category", DataScope = "Header + M2M", Category = "Work permit" },
             ],
             LinkedApplications = [],
             LinkedApplicationCount = 0,

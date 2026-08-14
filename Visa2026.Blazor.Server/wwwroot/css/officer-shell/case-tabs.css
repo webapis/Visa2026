@@ -3,6 +3,21 @@
 .ct-page__title { margin: 0 0 6px; font-size: 1.05rem; }
 .ct-page__sub { margin: 0 0 14px; color: var(--os-muted); font-size: 0.86rem; }
 .ct-link { color: var(--os-accent); font-weight: 650; text-decoration: none; }
+button.ct-letter-preview {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: var(--os-accent, #0d6efd);
+  font-weight: 650;
+  cursor: pointer;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+}
+button.ct-letter-preview:hover { text-decoration: underline; }
+button.ct-letter-preview:disabled { cursor: default; opacity: 0.65; }
 .ct-btn-sm { padding: 5px 10px !important; font-size: 0.78rem !important; }
 .ct-muted { color: var(--os-muted); font-size: 0.82rem; }
 
@@ -52,10 +67,21 @@
 }
 .ct-prog-v--done .ct-prog-v__dot { background: #ecfdf5; border-color: #22c55e; color: #047857; }
 .ct-prog-v--current .ct-prog-v__dot { background: #e8f1ff; border-color: #3b82f6; color: #1e40af; }
+.ct-prog-v--tone-issued .ct-prog-v__dot { background: #dcfce7; border-color: #15803d; color: #15803d; }
+.ct-prog-v--tone-rejected .ct-prog-v__dot { background: #fee2e2; border-color: #b91c1c; color: #b91c1c; }
+.ct-prog-v--tone-cancelled .ct-prog-v__dot { background: #fecaca; border-color: #991b1b; color: #991b1b; }
 .ct-prog-v__line { flex: 1; width: 2px; background: #e2e8f0; min-height: 24px; margin: 4px 0; }
 .ct-prog-v:last-child .ct-prog-v__line { display: none; }
 .ct-prog-v__body { padding-bottom: 18px; }
 .ct-prog-v__head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.ct-prog-v__letter { margin: 0 0 8px; font-size: 0.82rem; }
+.ct-prog-v__letter .ct-letter-preview {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .ct-prog-detail {
   border: 1px solid #eef2f6; border-radius: 10px; padding: 12px; background: #fbfcfe;
 }

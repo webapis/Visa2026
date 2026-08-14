@@ -321,12 +321,16 @@ public static class ApplicationProfileSchemaSql
     internal const string EnsureProduceRejectionPostgres =
         """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "ProduceRejection" boolean NOT NULL DEFAULT false;""";
 
+    internal const string EnsureOfficePreparationNotesPostgres =
+        """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "OfficePreparationNotes" text NULL;""";
+
     internal static readonly string[] EnsureTemplateCatalogColumnsPostgresStatements =
     [
         EnsureTemplateCatalogScopePostgres,
         EnsureTemplateDataScopePostgres,
         EnsureTemplateCategoryKeyPostgres,
         EnsureProduceRejectionPostgres,
+        EnsureOfficePreparationNotesPostgres,
     ];
 
     internal const string EnsureTemplateCatalogColumnsSqlServer = """
@@ -348,6 +352,10 @@ public static class ApplicationProfileSchemaSql
            AND COL_LENGTH(N'dbo.ApplicationProfiles', N'ProduceRejection') IS NULL
             ALTER TABLE dbo.ApplicationProfiles ADD ProduceRejection bit NOT NULL
                 CONSTRAINT DF_ApplicationProfiles_ProduceRejection DEFAULT (0);
+
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfileInstances', N'OfficePreparationNotes') IS NULL
+            ALTER TABLE dbo.ApplicationProfileInstances ADD OfficePreparationNotes nvarchar(max) NULL;
         """;
 
     public static void ApplyIfMissing(string connectionString)

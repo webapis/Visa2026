@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using DevExpress.ExpressApp;
+using Visa2026.Module.Services.ApplicationProfileWizard;
 
 namespace Visa2026.Module.Services.ApplicationProfileOverview;
 
@@ -17,11 +18,19 @@ public sealed class ApplicationProfileOverviewSnapshot
 
     public string Code { get; init; } = string.Empty;
 
+    public string? SelectionCode { get; init; }
+
     public string? Description { get; init; }
 
     public string ActionFamilyLabel { get; init; } = string.Empty;
 
     public string ProgressRouteLabel { get; init; } = string.Empty;
+
+    public bool IsViaMinistry { get; init; } = true;
+
+    public bool IsAlwaysAvailable { get; init; } = true;
+
+    public string? ApplicabilityCriteria { get; init; }
 
     public IReadOnlyList<string> AudienceLabels { get; init; } = Array.Empty<string>();
 
@@ -30,6 +39,16 @@ public sealed class ApplicationProfileOverviewSnapshot
     public bool IsActive { get; init; } = true;
 
     public IReadOnlyList<string> LiveConfigurationLines { get; init; } = Array.Empty<string>();
+
+    public ApplicationProfileWizardOrganizationSnapshot Organization { get; init; }
+        = ApplicationProfileWizardOrganizationSnapshot.Empty;
+
+    public int MinistrySlaDays { get; init; }
+
+    public int MigrationSlaDays { get; init; }
+
+    public IReadOnlyList<ApplicationProfileOverviewProgressStateRow> ProgressStates { get; init; }
+        = Array.Empty<ApplicationProfileOverviewProgressStateRow>();
 
     public IReadOnlyList<ApplicationProfileOverviewDefaultRow> PerApplicationDefaults { get; init; }
         = Array.Empty<ApplicationProfileOverviewDefaultRow>();
@@ -66,11 +85,26 @@ public sealed class ApplicationProfileOverviewLegRow
     public string MinistryName { get; init; } = string.Empty;
 }
 
+public sealed class ApplicationProfileOverviewProgressStateRow
+{
+    public string TrackLabel { get; init; } = string.Empty;
+
+    public string StateName { get; init; } = string.Empty;
+
+    public bool IsSlaTracked { get; init; }
+}
+
 public sealed class ApplicationProfileOverviewTemplateRow
 {
     public string Name { get; init; } = string.Empty;
 
     public string Kind { get; init; } = string.Empty;
+
+    public string Scope { get; init; } = string.Empty;
+
+    public string DataScope { get; init; } = string.Empty;
+
+    public string? Category { get; init; }
 }
 
 public sealed class ApplicationProfileOverviewLinkedAppRow

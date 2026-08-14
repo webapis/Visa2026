@@ -23,6 +23,22 @@ Purpose: **shell, layout, occupants, catalog card UX, JS/CSS** — not Resminama
 
 ## Entries
 
+### 2026-08-14 — Done ministry steps expose letter preview links
+
+- Workspace Progress/Overview hid approval files once the step was no longer current. `ProgressLetters` preview still works; the timeline now keeps `MinistryLetterFileName` on done legs and the UI shows the filename on Progress + Overview.
+- Prevent: Do not clear letter metadata on `BuildFilledStep` when `slotState != current`.
+- Cross-skill: visa2026-application-profile | visa2026-application-progress
+
+### 2026-08-14 — Progress tab ministry letter opens side preview (OpenPreviewOnly)
+
+- **Symptom**: Case workspace Progress showed the uploaded approval PDF as an `<a target="_blank">` download. Officers could not preview it in `#visa-preview-slot`.
+- **Try**: Reuse existing `ProgressLetters` occupant (same as Document copies / Resminamalar workspace Preview).
+- **Test**: `dotnet build Visa2026.slnx -c Debug` (0 errors). Manual: stop F5, rebuild, F5. Open 8/-005 Progress → click the ministry letter filename → slot shows inline PDF; Close preview closes the slot (not a new browser tab).
+- **Root cause**: Workspace Progress never called `IVisaPreviewSlotService.OpenProgressLettersAsync`. `ProgressLettersSlotRequest` had no `OpenPreviewOnly`, so even a catalog open would not match the locked “tab owns list, slot is viewer” rule.
+- **Fix**: `OpenPreviewOnly` + `FocusDisplayName` on `ProgressLettersSlotRequest`; `ProgressLettersSlotPanel` skips catalog and opens `ProgressLettersInlinePreview`; Progress filename is a button that opens the slot with `FocusProgressId`. Owner view id from Application workspace / Officer shell hosts.
+- **Prevent**: Do not add a new occupant or `<a href="/api/.../ministry-letter">` for workspace preview. Do not use `.app-progress-letter-link` on the workspace button (that class is captured by `_Host.cshtml` for the XAF grid catalog path).
+- **Cross-skill**: preview-slot | visa2026-application-profile | visa2026-application-progress
+
 ### 2026-07-31 — Templates brand mark for report package slot
 
 - **Ask**: Dedicated Resminamalar/Templates brand; officer name Templates.

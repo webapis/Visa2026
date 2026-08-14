@@ -87,6 +87,24 @@ public class ApplicationProfileConfigurationResolverTests
     }
 
     [Fact]
+    public void GetMinistrySlaMaxDays_UsesProfileDays()
+    {
+        var profile = new ApplicationProfile { MinistrySlaDays = 14 };
+        var app = new ApplicationProfileInstance { ApplicationProfile = profile };
+
+        Assert.Equal(14, ApplicationProfileConfigurationResolver.GetMinistrySlaMaxDays(app));
+        Assert.True(ApplicationProfileConfigurationResolver.HasMinistrySlaConfigured(app));
+    }
+
+    [Fact]
+    public void GetMinistrySlaMaxDays_ZeroWhenNoProfile()
+    {
+        var app = new ApplicationProfileInstance();
+
+        Assert.Equal(0, ApplicationProfileConfigurationResolver.GetMinistrySlaMaxDays(app));
+    }
+
+    [Fact]
     public void CanIssueVisa_UsesProfileProduceFlag()
     {
         var profile = new ApplicationProfile { ProduceVisa = true };

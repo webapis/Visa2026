@@ -542,6 +542,9 @@ All files live in [`docs/prototypes/`](prototypes/) only (no subfolders).
 | `process-started-nav-overview-issued-records-add.png` | Overview — Add invitation empty state under Issued records |
 | `process-started-nav-people-links.png` | Workspace — People & links |
 | `process-started-nav-progress.png` | Workspace — Progress |
+| `process-started-nav-overview-approval-legs.png` | Overview stepper — office + 3 ministry legs + migration (mixed complete / current / pending) |
+| `process-started-nav-progress-approval-legs.png` | Progress tab — same mixed legs; current ministry expanded |
+| `process-started-nav-progress-migration-in-process.png` | Progress tab — all ministry legs approved; Migration On process |
 | `process-started-nav-document-copies.png` | Workspace — Document copies |
 | `process-started-nav-resminamalar.png` | Workspace — Resminamalar |
 | `process-started-nav-sla-deadlines.png` | Workspace — SLA & deadlines |

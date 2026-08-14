@@ -50,8 +50,18 @@ public static class VisaPreviewSlotOccupantKeys
     public static string ForProgressLetters(Guid applicationId) =>
         applicationId == Guid.Empty ? "progress-letters:empty" : $"progress-letters:app:{applicationId:N}";
 
-    public static string ForProgressLetters(ProgressLettersSlotRequest request) =>
-        ForProgressLetters(request?.ApplicationProfileInstanceId ?? Guid.Empty);
+    public static string ForProgressLetters(ProgressLettersSlotRequest request)
+    {
+        var baseKey = ForProgressLetters(request?.ApplicationProfileInstanceId ?? Guid.Empty);
+        if (request?.OpenPreviewOnly == true
+            && request.FocusProgressId is Guid focus
+            && focus != Guid.Empty)
+        {
+            return $"{baseKey}|preview:{focus:N}";
+        }
+
+        return baseKey;
+    }
 
     public static string ForPersonDocumentCopies(IReadOnlyList<Guid> personIds)
     {

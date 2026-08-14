@@ -1,7 +1,8 @@
+@using Visa2026.Module.Localization
 @using Visa2026.Module.Services.ApplicationProfileCatalog
 @using Visa2026.Module.Services.ApplicationProfileOverview
 
-<div class="ap-catalog">
+<div class="ap-catalog @(SelectedProfileId == Guid.Empty ? "ap-catalog--list" : "ap-catalog--detail")">
     @if (IsLoading)
     {
         <div class="ap-catalog__loading" role="status">Loading Application Profiles…</div>
@@ -17,12 +18,17 @@
         {
             <div class="ap-catalog__list-page">
                 <header class="ap-catalog__list-head">
-                    <div class="ap-catalog__search ap-catalog__search--toolbar">
-                        <span aria-hidden="true">⌕</span>
-                        <input type="search"
-                               placeholder="Search profiles…"
-                               value="@SearchText"
-                               @oninput="OnSearchInput" />
+                    <div class="ap-catalog__list-head-left">
+                        <div class="ap-catalog__search ap-catalog__search--toolbar">
+                            <span aria-hidden="true">⌕</span>
+                            <input type="search"
+                                   placeholder="Search profiles…"
+                                   value="@SearchText"
+                                   @oninput="OnSearchInput" />
+                        </div>
+                        <span class="ap-catalog__total" aria-live="polite">
+                            @VisaUiMessages.Format("Grid.TotalCount", Rows.Count)
+                        </span>
                     </div>
                     <button type="button" class="ap-catalog__new ap-catalog__new--toolbar" @onclick="NewProfileAsync">
                         New Application Profile
@@ -61,7 +67,34 @@
                                         <td>@row.ProgressRouteLabel</td>
                                         <td>@StatusLabel(row)</td>
                                         <td>@row.LinkedApplicationCount</td>
-                                        <td class="ap-catalog__chev" aria-hidden="true">›</td>
+                                        <td class="ap-catalog__actions" @onclick:stopPropagation="true">
+                                            @if (ApplicationProfileUnlinkedDeleteHelper.CanDelete(row.LinkedApplicationCount))
+                                            {
+                                                @if (_confirmDeleteId == row.ProfileId)
+                                                {
+                                                    <button type="button"
+                                                            class="ap-catalog__delete ap-catalog__delete--confirm"
+                                                            @onclick="() => ConfirmDeleteAsync(row.ProfileId)">
+                                                        Confirm delete
+                                                    </button>
+                                                    <button type="button"
+                                                            class="ap-catalog__delete-cancel"
+                                                            @onclick="CancelDelete">
+                                                        Cancel
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <button type="button"
+                                                            class="ap-catalog__delete"
+                                                            title="Delete this template"
+                                                            @onclick="() => AskDelete(row.ProfileId)">
+                                                        Delete
+                                                    </button>
+                                                }
+                                            }
+                                            <span class="ap-catalog__chev" aria-hidden="true">›</span>
+                                        </td>
                                     </tr>
                                 }
                             </tbody>
@@ -77,7 +110,8 @@
                                                      Snapshot="@OverviewSnapshot"
                                                      ConfigureRequested="@ConfigureRequested"
                                                      CloseRequested="@CloseProfileAsync"
-                                                     OpenInstanceRequested="@OpenInstanceRequested" />
+                                                     OpenInstanceRequested="@OpenInstanceRequested"
+                                                     DeleteProfileRequested="@DeleteProfileRequested" />
             </div>
         }
     }
@@ -99,7 +133,9 @@
     [Parameter] public EventCallback<string> SearchTextChanged { get; set; }
     [Parameter] public EventCallback CloseProfileRequested { get; set; }
     [Parameter] public EventCallback<Guid> OpenInstanceRequested { get; set; }
+    [Parameter] public EventCallback<Guid> DeleteProfileRequested { get; set; }
 
+    private Guid _confirmDeleteId;
     private bool _initialLoadStarted;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -128,5 +164,16 @@
         if (!row.IsActive)
             return "Inactive";
         return row.IsConfigLocked ? "Config locked" : "Active";
+    }
+
+    private void AskDelete(Guid profileId) => _confirmDeleteId = profileId;
+
+    private void CancelDelete() => _confirmDeleteId = Guid.Empty;
+
+    private async Task ConfirmDeleteAsync(Guid profileId)
+    {
+        _confirmDeleteId = Guid.Empty;
+        if (DeleteProfileRequested.HasDelegate)
+            await DeleteProfileRequested.InvokeAsync(profileId);
     }
 }

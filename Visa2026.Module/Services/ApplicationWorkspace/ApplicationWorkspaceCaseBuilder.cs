@@ -68,7 +68,7 @@ internal static class ApplicationWorkspaceCaseBuilder
         var people = BuildPeople(tabMap, chrome.PeopleNames, application, rosterPeople, rosterLinks);
         var linkedSummary = BuildLinkedSummary(application, rosterLinks, people);
         var progressSteps = application != null
-            ? BuildProgressSteps(application, chrome, sla, objectSpace)
+            ? ApplicationWorkspaceProgressTimeline.Build(application, profile, sla, objectSpace)
             : BuildProgressStepsFromChrome(chrome);
         var slaDashboard = application != null
             ? BuildSla(application, profile, sla, chrome, progressSteps)
@@ -120,6 +120,7 @@ internal static class ApplicationWorkspaceCaseBuilder
                 CurrentStateLabel = state == "current" ? chrome.CurrentStep : string.Empty,
                 SlaDaysRemaining = state == "current" ? chrome.SlaDaysRemaining : null,
                 SlaTargetDate = state == "current" ? "19 Aug 2026" : string.Empty,
+                OutcomeKind = state == "done" ? "ok" : state == "current" ? "current" : "pending",
             });
         }
 
@@ -551,98 +552,6 @@ internal static class ApplicationWorkspaceCaseBuilder
         return fallback;
     }
 
-    private static IReadOnlyList<ApplicationWorkspaceCaseProgressStep> BuildProgressSteps(
-        ApplicationProfileInstance application,
-        ApplicationWorkspaceCaseChrome chrome,
-        ApplicationProfileInstanceProgressSlaResult sla,
-        IObjectSpace? objectSpace)
-    {
-        var currentIndex = ResolveProgressIndex(chrome.CurrentStep);
-        var history = application.ProgressHistory?
-            .OrderBy(p => p.Order)
-            .ToList() ?? [];
-        var latest = ApplicationProfileInstanceProgressHelper.GetLatest(application.ProgressHistory, objectSpace);
-        var advanceOptions = BuildAdvanceOptions(application, latest, objectSpace);
-        var canAdvance = advanceOptions.Count > 0;
-        var advanceBlockedReason = canAdvance
-            ? string.Empty
-            : (ApplicationProfileInstanceProgressTransitionHelper.IsTerminalStateCode(latest?.State?.Code)
-                ? "This application has reached a terminal progress state."
-                : "No further progress steps are available for this route.");
-
-        var steps = new List<ApplicationWorkspaceCaseProgressStep>();
-        for (var i = 0; i < ProgressStepLabels.Length; i++)
-        {
-            var state = i < currentIndex ? "done" : i == currentIndex ? "current" : "pending";
-            var date = history.ElementAtOrDefault(i)?.Date.ToString("dd MMM yyyy", CultureInfo.InvariantCulture) ?? string.Empty;
-            int? daysLeft = null;
-            string slaTarget = string.Empty;
-            if (state == "current" && sla.MaxDaysInReview is int maxDays && sla.WorkingDaysInCurrentStep is int elapsed)
-            {
-                daysLeft = Math.Max(0, maxDays - elapsed);
-                slaTarget = application.LatestProgress?.Date != default
-                    ? application.LatestProgress.Date.AddDays(maxDays).ToString("dd MMM yyyy", CultureInfo.InvariantCulture)
-                    : string.Empty;
-            }
-
-            steps.Add(new ApplicationWorkspaceCaseProgressStep
-            {
-                Key = ProgressStepKeys[i],
-                Label = ProgressStepLabels[i],
-                Date = date,
-                State = state,
-                CurrentStateLabel = state == "current" ? chrome.CurrentStep : string.Empty,
-                SlaTargetDate = slaTarget,
-                SlaDaysRemaining = daysLeft,
-                ProgressId = state == "current" ? latest?.ID : null,
-                OfficerNotes = state == "current" ? latest?.Description ?? string.Empty : string.Empty,
-                MinistryLetterFileName = state == "current" ? latest?.MinistryLetterFileName ?? string.Empty : string.Empty,
-                ShowMinistryLetterUpload = state == "current" && latest?.IsMinistryDecisionStep == true,
-                CanAdvance = state == "current" && canAdvance,
-                AdvanceBlockedReason = state == "current" ? advanceBlockedReason : string.Empty,
-                AdvanceOptions = state == "current" ? advanceOptions : Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>(),
-            });
-        }
-
-        return steps;
-    }
-
-    private static IReadOnlyList<ApplicationWorkspaceCaseProgressAdvanceOption> BuildAdvanceOptions(
-        ApplicationProfileInstance application,
-        ApplicationProfileInstanceProgress? latest,
-        IObjectSpace? objectSpace)
-    {
-        var codes = ApplicationProfileInstanceProgressTransitionHelper.GetAllowedNextStateCodes(application, latest);
-        if (codes.Count == 0)
-            return Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>();
-
-        return codes
-            .Select(code => new ApplicationWorkspaceCaseProgressAdvanceOption
-            {
-                StateCode = code,
-                Label = ResolveStateLabel(objectSpace, code),
-            })
-            .ToList();
-    }
-
-    private static string ResolveStateLabel(IObjectSpace? objectSpace, string stateCode)
-    {
-        if (objectSpace != null)
-        {
-            var state = objectSpace.GetObjectsQuery<ApplicationState>()
-                .FirstOrDefault(s => s.Code == stateCode);
-            if (state != null)
-            {
-                return state.LocalizedDisplayName
-                    ?? state.NameTm
-                    ?? state.Code
-                    ?? stateCode;
-            }
-        }
-
-        return stateCode;
-    }
-
     private static int ResolveProgressIndex(string? stepLabel)
     {
         var step = stepLabel?.ToLowerInvariant() ?? string.Empty;
@@ -716,20 +625,17 @@ internal static class ApplicationWorkspaceCaseBuilder
             totalSla = sla.MaxDaysInReview ?? 0;
 
         var elapsed = sla.WorkingDaysInCurrentStep ?? 0;
-        if (application.ApplicationDate != default && totalSla > 0)
-        {
-            elapsed = Math.Max(elapsed, (int)(DateTime.Today - application.ApplicationDate.Date).TotalDays);
-        }
-
-        var remaining = chrome.SlaDaysRemaining;
+        var currentStep = progressSteps.FirstOrDefault(s => s.State == "current");
+        var remaining = currentStep?.SlaDaysRemaining ?? chrome.SlaDaysRemaining;
         if (totalSla > 0 && remaining == null)
             remaining = Math.Max(0, totalSla - elapsed);
 
-        var currentStep = progressSteps.FirstOrDefault(s => s.State == "current");
         var deadlines = BuildDeadlines(application, progressSteps);
 
-        var alert = currentStep?.SlaDaysRemaining is int stepDays && stepDays <= 10
-            ? $"Ministry review deadline approaching. Due in {stepDays} days on {currentStep.SlaTargetDate}. Ensure all reviews and required actions are completed on time."
+        var alert = currentStep?.SlaDaysRemaining is int stepDays
+            && stepDays <= 10
+            && !string.IsNullOrWhiteSpace(currentStep.SlaTargetDate)
+            ? $"{currentStep.Label} deadline approaching. Due in {stepDays} days on {currentStep.SlaTargetDate}."
             : string.Empty;
 
         return new ApplicationWorkspaceCaseSlaDashboard

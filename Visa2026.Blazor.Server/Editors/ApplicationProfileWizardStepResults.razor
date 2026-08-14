@@ -4,33 +4,12 @@
 
 <div class="ap-wizard__panel-head">
     <h2>Results &amp; fields</h2>
-    <p>What processing may produce or cancel, and which ApplicationProfileInstance header fields are required.</p>
+    <p>Which ApplicationProfileInstance header fields are required.</p>
 </div>
 <div class="ap-wizard__panel-body">
     <div class="ap-wizard__section">
-        <h3>May produce</h3>
-        <div class="ap-wizard__choices">
-            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ProduceInvitation" disabled="@Disabled" /> Invitation</label>
-            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ProduceWorkPermit" disabled="@Disabled" /> Work permit</label>
-            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ProduceVisa" disabled="@Disabled" /> Visa</label>
-            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ProduceBorderZone" disabled="@Disabled" /> Border zone</label>
-            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ProduceRejection" disabled="@Disabled" /> Rejection</label>
-            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ProduceWorkLocation" disabled="@Disabled" /> Work location</label>
-        </div>
-    </div>
-    <div class="ap-wizard__section">
-        <h3>May cancel existing</h3>
-        <div class="ap-wizard__choices">
-            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.CancelInvitations" disabled="@Disabled" /> Invitation(s)</label>
-            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.CancelWorkPermits" disabled="@Disabled" /> Work permit(s)</label>
-            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.CancelVisas" disabled="@Disabled" /> Visa(s)</label>
-            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.CancelBorderZonePermits" disabled="@Disabled" /> Border zone permit(s)</label>
-            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.CancelApplicationProfileInstances" disabled="@Disabled" /> Application(s)</label>
-        </div>
-    </div>
-    <div class="ap-wizard__section">
         <h3>ApplicationProfileInstance properties required</h3>
-        <p class="ap-wizard__hint">Per-ApplicationProfileInstance values get defaults at create when set below.</p>
+        <p class="ap-wizard__hint">Use makes the property visible on ApplicationProfileInstance. Defaults apply at create only when Use is on.</p>
         <table class="ap-wizard__table">
             <thead>
                 <tr>
@@ -45,50 +24,50 @@
                 <tr>
                     <td><input type="checkbox" @bind="Profile.RequireVisaType" disabled="@Disabled" /></td>
                     <td>Visa type</td><td><span class="ap-wizard__tag">lookup</span></td>
-                    <td><input type="checkbox" checked="@HasVisaTypeDefault" disabled="@Disabled" @onchange="ToggleVisaTypeDefault" /></td>
+                    <td><input type="checkbox" checked="@HasVisaTypeDefault" disabled="@(Disabled || !Profile.RequireVisaType)" @onchange="ToggleVisaTypeDefault" /></td>
                     <td>
-                        <select disabled="@(Disabled || !HasVisaTypeDefault)" value="@FormatGuid(Profile.DefaultVisaTypeId)" @onchange="OnVisaTypeChanged">
+                        <select disabled="@(Disabled || !Profile.RequireVisaType)" value="@FormatGuid(Profile.DefaultVisaTypeId)" @onchange="OnVisaTypeChanged">
                             <option value="">—</option>
-                            @foreach (var item in Lookups.VisaTypes) { <option value="@item.ID">@item.LocalizedDisplayName</option> }
+                            @foreach (var item in Lookups.VisaTypes) { <option value="@item.Id.ToString("D")">@item.DisplayName</option> }
                         </select>
                     </td>
                 </tr>
                 <tr>
                     <td><input type="checkbox" @bind="Profile.RequireVisaCategory" disabled="@Disabled" /></td>
                     <td>Visa category</td><td><span class="ap-wizard__tag">lookup</span></td>
-                    <td><input type="checkbox" checked="@HasVisaCategoryDefault" disabled="@Disabled" @onchange="ToggleVisaCategoryDefault" /></td>
+                    <td><input type="checkbox" checked="@HasVisaCategoryDefault" disabled="@(Disabled || !Profile.RequireVisaCategory)" @onchange="ToggleVisaCategoryDefault" /></td>
                     <td>
-                        <select disabled="@(Disabled || !HasVisaCategoryDefault)" value="@FormatGuid(Profile.DefaultVisaCategoryId)" @onchange="OnVisaCategoryChanged">
+                        <select disabled="@(Disabled || !Profile.RequireVisaCategory)" value="@FormatGuid(Profile.DefaultVisaCategoryId)" @onchange="OnVisaCategoryChanged">
                             <option value="">—</option>
-                            @foreach (var item in Lookups.VisaCategories) { <option value="@item.ID">@item.LocalizedDisplayName</option> }
+                            @foreach (var item in Lookups.VisaCategories) { <option value="@item.Id.ToString("D")">@item.DisplayName</option> }
                         </select>
                     </td>
                 </tr>
                 <tr>
                     <td><input type="checkbox" @bind="Profile.RequireVisaPeriod" disabled="@Disabled" /></td>
                     <td>Visa period</td><td><span class="ap-wizard__tag">lookup</span></td>
-                    <td><input type="checkbox" checked="@HasVisaPeriodDefault" disabled="@Disabled" @onchange="ToggleVisaPeriodDefault" /></td>
+                    <td><input type="checkbox" checked="@HasVisaPeriodDefault" disabled="@(Disabled || !Profile.RequireVisaPeriod)" @onchange="ToggleVisaPeriodDefault" /></td>
                     <td>
-                        <select disabled="@(Disabled || !HasVisaPeriodDefault)" value="@FormatGuid(Profile.DefaultVisaPeriodId)" @onchange="OnVisaPeriodChanged">
+                        <select disabled="@(Disabled || !Profile.RequireVisaPeriod)" value="@FormatGuid(Profile.DefaultVisaPeriodId)" @onchange="OnVisaPeriodChanged">
                             <option value="">—</option>
-                            @foreach (var item in Lookups.VisaPeriods) { <option value="@item.ID">@item.LocalizedDisplayName</option> }
+                            @foreach (var item in Lookups.VisaPeriods) { <option value="@item.Id.ToString("D")">@item.DisplayName</option> }
                         </select>
                     </td>
                 </tr>
                 <tr>
                     <td><input type="checkbox" @bind="Profile.RequireBorderZone" disabled="@Disabled" /></td>
                     <td>Border zone</td><td><span class="ap-wizard__tag">lookup</span></td>
-                    <td><input type="checkbox" checked="@HasBorderZoneDefault" disabled="@Disabled" @onchange="ToggleBorderZoneDefault" /></td>
-                    <td><input type="text" disabled="@(Disabled || !HasBorderZoneDefault)" @bind="Profile.DefaultBorderZoneLocation" /></td>
+                    <td><input type="checkbox" checked="@HasBorderZoneDefault" disabled="@(Disabled || !Profile.RequireBorderZone)" @onchange="ToggleBorderZoneDefault" /></td>
+                    <td><input type="text" disabled="@(Disabled || !Profile.RequireBorderZone)" @bind="Profile.DefaultBorderZoneLocation" /></td>
                 </tr>
                 <tr>
                     <td><input type="checkbox" @bind="Profile.RequireMigrationService" disabled="@Disabled" /></td>
                     <td>Migration service</td><td><span class="ap-wizard__tag">lookup</span></td>
-                    <td><input type="checkbox" checked="@HasMigrationServiceDefault" disabled="@Disabled" @onchange="ToggleMigrationServiceDefault" /></td>
+                    <td><input type="checkbox" checked="@HasMigrationServiceDefault" disabled="@(Disabled || !Profile.RequireMigrationService)" @onchange="ToggleMigrationServiceDefault" /></td>
                     <td>
-                        <select disabled="@(Disabled || !HasMigrationServiceDefault)" value="@FormatGuid(Profile.DefaultMigrationServiceId)" @onchange="OnMigrationServiceChanged">
+                        <select disabled="@(Disabled || !Profile.RequireMigrationService)" value="@FormatGuid(Profile.DefaultMigrationServiceId)" @onchange="OnMigrationServiceChanged">
                             <option value="">—</option>
-                            @foreach (var item in Lookups.MigrationServices) { <option value="@item.ID">@item.LocalizedDisplayName</option> }
+                            @foreach (var item in Lookups.MigrationServices) { <option value="@item.Id.ToString("D")">@item.DisplayName</option> }
                         </select>
                     </td>
                 </tr>
@@ -115,22 +94,22 @@
                 <tr>
                     <td><input type="checkbox" @bind="Profile.RequireProject" disabled="@Disabled" /></td>
                     <td>Project</td><td><span class="ap-wizard__tag">lookup</span></td>
-                    <td><input type="checkbox" checked="@HasProjectDefault" disabled="@Disabled" @onchange="ToggleProjectDefault" /></td>
+                    <td><input type="checkbox" checked="@HasProjectDefault" disabled="@(Disabled || !Profile.RequireProject)" @onchange="ToggleProjectDefault" /></td>
                     <td>
-                        <select disabled="@(Disabled || !HasProjectDefault)" value="@FormatGuid(Profile.DefaultProjectContractId)" @onchange="OnProjectChanged">
+                        <select disabled="@(Disabled || !Profile.RequireProject)" value="@FormatGuid(Profile.DefaultProjectContractId)" @onchange="OnProjectChanged">
                             <option value="">—</option>
-                            @foreach (var item in Lookups.ProjectContracts) { <option value="@item.ID">@item.NameTm</option> }
+                            @foreach (var item in Lookups.ProjectContracts) { <option value="@item.Id.ToString("D")">@item.DisplayName</option> }
                         </select>
                     </td>
                 </tr>
                 <tr>
                     <td><input type="checkbox" @bind="Profile.RequireUrgency" disabled="@Disabled" /></td>
                     <td>Urgency</td><td><span class="ap-wizard__tag">lookup</span></td>
-                    <td><input type="checkbox" checked="@HasUrgencyDefault" disabled="@Disabled" @onchange="ToggleUrgencyDefault" /></td>
+                    <td><input type="checkbox" checked="@HasUrgencyDefault" disabled="@(Disabled || !Profile.RequireUrgency)" @onchange="ToggleUrgencyDefault" /></td>
                     <td>
-                        <select disabled="@(Disabled || !HasUrgencyDefault)" value="@FormatGuid(Profile.DefaultUrgencyId)" @onchange="OnUrgencyChanged">
+                        <select disabled="@(Disabled || !Profile.RequireUrgency)" value="@FormatGuid(Profile.DefaultUrgencyId)" @onchange="OnUrgencyChanged">
                             <option value="">—</option>
-                            @foreach (var item in Lookups.Urgencies) { <option value="@item.ID">@item.LocalizedDisplayName</option> }
+                            @foreach (var item in Lookups.Urgencies) { <option value="@item.Id.ToString("D")">@item.DisplayName</option> }
                         </select>
                     </td>
                 </tr>
@@ -147,36 +126,16 @@
                 <tr>
                     <td><input type="checkbox" @bind="Profile.RequireEntryCheckPoint" disabled="@Disabled" /></td>
                     <td>Entry check point</td><td><span class="ap-wizard__tag">lookup</span></td>
-                    <td><input type="checkbox" checked="@HasCheckPointDefault" disabled="@Disabled" @onchange="ToggleCheckPointDefault" /></td>
+                    <td><input type="checkbox" checked="@HasCheckPointDefault" disabled="@(Disabled || !Profile.RequireEntryCheckPoint)" @onchange="ToggleCheckPointDefault" /></td>
                     <td>
-                        <select disabled="@(Disabled || !HasCheckPointDefault)" value="@FormatGuid(Profile.DefaultEntryCheckPointId)" @onchange="OnCheckPointChanged">
+                        <select disabled="@(Disabled || !Profile.RequireEntryCheckPoint)" value="@FormatGuid(Profile.DefaultEntryCheckPointId)" @onchange="OnCheckPointChanged">
                             <option value="">—</option>
-                            @foreach (var item in Lookups.CheckPoints) { <option value="@item.ID">@item.LocalizedDisplayName</option> }
+                            @foreach (var item in Lookups.CheckPoints) { <option value="@item.Id.ToString("D")">@item.DisplayName</option> }
                         </select>
                     </td>
                 </tr>
             </tbody>
         </table>
-    </div>
-    <div class="ap-wizard__section">
-        <h3>ApplicationProfileInstance signatory</h3>
-        <p class="ap-wizard__hint">Defaults at ApplicationProfileInstance create; officers may change per Application.</p>
-        <div class="ap-wizard__grid">
-            <label class="ap-wizard__field">
-                <span>Authorized signatory</span>
-                <select disabled="@Disabled" value="@FormatGuid(Profile.DefaultAuthorizedSignatoryId)" @onchange="OnSignatoryChanged">
-                    <option value="">—</option>
-                    @foreach (var item in Lookups.AuthorizedSignatories) { <option value="@item.ID">@item.FullName</option> }
-                </select>
-            </label>
-            <label class="ap-wizard__field">
-                <span>Visa representative</span>
-                <select disabled="@Disabled" value="@FormatGuid(Profile.DefaultVisaRepresentativeId)" @onchange="OnRepresentativeChanged">
-                    <option value="">—</option>
-                    @foreach (var item in Lookups.VisaRepresentatives) { <option value="@item.ID">@item.FullName</option> }
-                </select>
-            </label>
-        </div>
     </div>
 </div>
 
@@ -195,33 +154,118 @@
     private bool HasUrgencyDefault => Profile.DefaultUrgencyId.HasValue;
     private bool HasCheckPointDefault => Profile.DefaultEntryCheckPointId.HasValue;
 
-    private static string FormatGuid(Guid? id) => id.HasValue && id.Value != Guid.Empty ? id.Value.ToString() : string.Empty;
+    private static string FormatGuid(Guid? id) =>
+        id.HasValue && id.Value != Guid.Empty ? id.Value.ToString("D") : string.Empty;
 
     private static bool ParseChecked(ChangeEventArgs e) =>
         e.Value is bool b ? b : string.Equals(e.Value?.ToString(), "true", StringComparison.OrdinalIgnoreCase);
 
-    private void ToggleVisaTypeDefault(ChangeEventArgs e) { if (!ParseChecked(e)) Profile.DefaultVisaType = null; else if (Profile.DefaultVisaType == null && Lookups.VisaTypes.Count > 0) Profile.DefaultVisaType = Lookups.VisaTypes[0]; }
-    private void ToggleVisaCategoryDefault(ChangeEventArgs e) { if (!ParseChecked(e)) Profile.DefaultVisaCategory = null; else if (Profile.DefaultVisaCategory == null && Lookups.VisaCategories.Count > 0) Profile.DefaultVisaCategory = Lookups.VisaCategories[0]; }
-    private void ToggleVisaPeriodDefault(ChangeEventArgs e) { if (!ParseChecked(e)) Profile.DefaultVisaPeriod = null; else if (Profile.DefaultVisaPeriod == null && Lookups.VisaPeriods.Count > 0) Profile.DefaultVisaPeriod = Lookups.VisaPeriods[0]; }
-    private void ToggleBorderZoneDefault(ChangeEventArgs e) { if (!ParseChecked(e)) Profile.DefaultBorderZoneLocation = null; }
-    private void ToggleMigrationServiceDefault(ChangeEventArgs e) { if (!ParseChecked(e)) Profile.DefaultMigrationService = null; else if (Profile.DefaultMigrationService == null && Lookups.MigrationServices.Count > 0) Profile.DefaultMigrationService = Lookups.MigrationServices[0]; }
-    private void ToggleProjectDefault(ChangeEventArgs e) { if (!ParseChecked(e)) Profile.DefaultProjectContract = null; else if (Profile.DefaultProjectContract == null && Lookups.ProjectContracts.Count > 0) Profile.DefaultProjectContract = Lookups.ProjectContracts[0]; }
-    private void ToggleUrgencyDefault(ChangeEventArgs e) { if (!ParseChecked(e)) Profile.DefaultUrgency = null; else if (Profile.DefaultUrgency == null && Lookups.Urgencies.Count > 0) Profile.DefaultUrgency = Lookups.Urgencies[0]; }
-    private void ToggleCheckPointDefault(ChangeEventArgs e) { if (!ParseChecked(e)) Profile.DefaultEntryCheckPoint = null; else if (Profile.DefaultEntryCheckPoint == null && Lookups.CheckPoints.Count > 0) Profile.DefaultEntryCheckPoint = Lookups.CheckPoints[0]; }
-
-    private void OnVisaTypeChanged(ChangeEventArgs e) => Profile.DefaultVisaType = ResolveLookup<VisaType>(e);
-    private void OnVisaCategoryChanged(ChangeEventArgs e) => Profile.DefaultVisaCategory = ResolveLookup<VisaCategory>(e);
-    private void OnVisaPeriodChanged(ChangeEventArgs e) => Profile.DefaultVisaPeriod = ResolveLookup<VisaPeriod>(e);
-    private void OnMigrationServiceChanged(ChangeEventArgs e) => Profile.DefaultMigrationService = ResolveLookup<MigrationService>(e);
-    private void OnProjectChanged(ChangeEventArgs e) => Profile.DefaultProjectContract = ResolveLookup<ProjectContract>(e);
-    private void OnUrgencyChanged(ChangeEventArgs e) => Profile.DefaultUrgency = ResolveLookup<Urgency>(e);
-    private void OnCheckPointChanged(ChangeEventArgs e) => Profile.DefaultEntryCheckPoint = ResolveLookup<CheckPoint>(e);
-    private void OnSignatoryChanged(ChangeEventArgs e) => Profile.DefaultAuthorizedSignatory = ResolveLookup<AuthorizedSignatory>(e);
-    private void OnRepresentativeChanged(ChangeEventArgs e) => Profile.DefaultVisaRepresentative = ResolveLookup<AuthorizedRepresentative>(e);
-
-    private T? ResolveLookup<T>(ChangeEventArgs e) where T : class
+    private void ToggleVisaTypeDefault(ChangeEventArgs e)
     {
-        if (ObjectSpace == null || !Guid.TryParse(e.Value?.ToString(), out var id) || id == Guid.Empty)
+        if (Disabled || !Profile.RequireVisaType) return;
+        if (!ParseChecked(e)) Profile.DefaultVisaType = null;
+        else if (Profile.DefaultVisaType == null) Profile.DefaultVisaType = FirstLookup<VisaType>(Lookups.VisaTypes);
+    }
+
+    private void ToggleVisaCategoryDefault(ChangeEventArgs e)
+    {
+        if (Disabled || !Profile.RequireVisaCategory) return;
+        if (!ParseChecked(e)) Profile.DefaultVisaCategory = null;
+        else if (Profile.DefaultVisaCategory == null) Profile.DefaultVisaCategory = FirstLookup<VisaCategory>(Lookups.VisaCategories);
+    }
+
+    private void ToggleVisaPeriodDefault(ChangeEventArgs e)
+    {
+        if (Disabled || !Profile.RequireVisaPeriod) return;
+        if (!ParseChecked(e)) Profile.DefaultVisaPeriod = null;
+        else if (Profile.DefaultVisaPeriod == null) Profile.DefaultVisaPeriod = FirstLookup<VisaPeriod>(Lookups.VisaPeriods);
+    }
+
+    private void ToggleBorderZoneDefault(ChangeEventArgs e)
+    {
+        if (Disabled || !Profile.RequireBorderZone) return;
+        if (!ParseChecked(e)) Profile.DefaultBorderZoneLocation = null;
+    }
+
+    private void ToggleMigrationServiceDefault(ChangeEventArgs e)
+    {
+        if (Disabled || !Profile.RequireMigrationService) return;
+        if (!ParseChecked(e)) Profile.DefaultMigrationService = null;
+        else if (Profile.DefaultMigrationService == null) Profile.DefaultMigrationService = FirstLookup<MigrationService>(Lookups.MigrationServices);
+    }
+
+    private void ToggleProjectDefault(ChangeEventArgs e)
+    {
+        if (Disabled || !Profile.RequireProject) return;
+        if (!ParseChecked(e)) Profile.DefaultProjectContract = null;
+        else if (Profile.DefaultProjectContract == null) Profile.DefaultProjectContract = FirstLookup<ProjectContract>(Lookups.ProjectContracts);
+    }
+
+    private void ToggleUrgencyDefault(ChangeEventArgs e)
+    {
+        if (Disabled || !Profile.RequireUrgency) return;
+        if (!ParseChecked(e)) Profile.DefaultUrgency = null;
+        else if (Profile.DefaultUrgency == null) Profile.DefaultUrgency = FirstLookup<Urgency>(Lookups.Urgencies);
+    }
+
+    private void ToggleCheckPointDefault(ChangeEventArgs e)
+    {
+        if (Disabled || !Profile.RequireEntryCheckPoint) return;
+        if (!ParseChecked(e)) Profile.DefaultEntryCheckPoint = null;
+        else if (Profile.DefaultEntryCheckPoint == null) Profile.DefaultEntryCheckPoint = FirstLookup<CheckPoint>(Lookups.CheckPoints);
+    }
+
+    private void OnVisaTypeChanged(ChangeEventArgs e)
+    {
+        if (Disabled || !Profile.RequireVisaType) return;
+        Profile.DefaultVisaType = ResolveLookup<VisaType>(e);
+    }
+
+    private void OnVisaCategoryChanged(ChangeEventArgs e)
+    {
+        if (Disabled || !Profile.RequireVisaCategory) return;
+        Profile.DefaultVisaCategory = ResolveLookup<VisaCategory>(e);
+    }
+
+    private void OnVisaPeriodChanged(ChangeEventArgs e)
+    {
+        if (Disabled || !Profile.RequireVisaPeriod) return;
+        Profile.DefaultVisaPeriod = ResolveLookup<VisaPeriod>(e);
+    }
+
+    private void OnMigrationServiceChanged(ChangeEventArgs e)
+    {
+        if (Disabled || !Profile.RequireMigrationService) return;
+        Profile.DefaultMigrationService = ResolveLookup<MigrationService>(e);
+    }
+
+    private void OnProjectChanged(ChangeEventArgs e)
+    {
+        if (Disabled || !Profile.RequireProject) return;
+        Profile.DefaultProjectContract = ResolveLookup<ProjectContract>(e);
+    }
+
+    private void OnUrgencyChanged(ChangeEventArgs e)
+    {
+        if (Disabled || !Profile.RequireUrgency) return;
+        Profile.DefaultUrgency = ResolveLookup<Urgency>(e);
+    }
+
+    private void OnCheckPointChanged(ChangeEventArgs e)
+    {
+        if (Disabled || !Profile.RequireEntryCheckPoint) return;
+        Profile.DefaultEntryCheckPoint = ResolveLookup<CheckPoint>(e);
+    }
+
+    private T? FirstLookup<T>(IReadOnlyList<ApplicationProfileWizardLookupItem> items) where T : class =>
+        items.Count > 0 ? ResolveById<T>(items[0].Id) : null;
+
+    private T? ResolveLookup<T>(ChangeEventArgs e) where T : class =>
+        Guid.TryParse(e.Value?.ToString(), out var id) ? ResolveById<T>(id) : null;
+
+    private T? ResolveById<T>(Guid id) where T : class
+    {
+        if (ObjectSpace == null || id == Guid.Empty)
             return null;
 
         return ObjectSpace.GetObjectByKey<T>(id);

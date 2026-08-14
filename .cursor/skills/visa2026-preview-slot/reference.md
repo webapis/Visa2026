@@ -20,7 +20,8 @@ XAF Controller
 | `resminamalar:app:{applicationId}` | Application-scope Resminamalar |
 | `resminamalar:items:{appId}:{sortedItemIds}` | ApplicationItem ListView scope |
 | `document-copies:items:{sortedItemIds}` | Document copies |
-| `progress-letters:app:{appId}` or with focus id | Ministry letter catalog |
+| `progress-letters:app:{appId}` | Ministry letter catalog |
+| `progress-letters:app:{appId}` plus `preview:{progressId}` | Workspace Progress filename (`OpenPreviewOnly`) |
 | `file:{sourceType}:{objectId}` | Generic file preview |
 
 ## Panel state machine

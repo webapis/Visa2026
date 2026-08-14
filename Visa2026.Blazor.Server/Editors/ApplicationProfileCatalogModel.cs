@@ -102,4 +102,10 @@ public sealed class ApplicationProfileCatalogModel : ComponentModelBase
         get => GetPropertyValue<EventCallback<Guid>>();
         set => SetPropertyValue(value);
     }
+
+    public EventCallback<Guid> DeleteProfileRequested
+    {
+        get => GetPropertyValue<EventCallback<Guid>>();
+        set => SetPropertyValue(value);
+    }
 }
