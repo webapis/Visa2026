@@ -402,7 +402,7 @@ public static class ApplicationItemLinkedDocumentsResolver
         return $"{year} — {inst}";
     }
 
-    private static IReadOnlyList<ApplicationItemLinkedDocumentFile> LoadDocumentFiles<TDocument>(
+    internal static IReadOnlyList<ApplicationItemLinkedDocumentFile> LoadDocumentFiles<TDocument>(
         IObjectSpace os,
         System.Linq.Expressions.Expression<Func<TDocument, bool>> filter)
         where TDocument : DocumentBase
@@ -416,7 +416,7 @@ public static class ApplicationItemLinkedDocumentsResolver
             .ToList();
     }
 
-    private static ApplicationItemLinkedDocumentFile MapDocumentFile(DocumentBase doc)
+    internal static ApplicationItemLinkedDocumentFile MapDocumentFile(DocumentBase doc)
     {
         var file = doc.File;
         if (file == null)

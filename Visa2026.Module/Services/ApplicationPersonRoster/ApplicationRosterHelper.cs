@@ -120,6 +120,11 @@ public static class ApplicationRosterHelper
         return (application, people);
     }
 
+    /// <summary>
+    /// Loads people and their shared application. Pass <paramref name="applicationId"/>
+    /// when the case is known — required if a person is on more than one instance
+    /// (VISA2014 import). Empty id falls back to a single shared intersection.
+    /// </summary>
     public static bool TryLoadSharedApplicationPeople(
         IObjectSpace objectSpace,
         IReadOnlyList<Guid> personIds,

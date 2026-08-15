@@ -115,6 +115,7 @@ flowchart LR
 | Type required but Profile optional | Dual-read phase | Seed profiles; backfill FK; document in IMPLEMENTATION_PLAN |
 | Template list on Application | Nested `ApplicationProfileTemplate` | Read-only child list on Application detail |
 | Person tab missing | `RequirePerson*` toggles on profile | Person-config block; M2M slice |
+| Expired visa/passport/WP/invitation/border zone/medical auto-linked | `ApplicationProfileInstancePersonValidItems.CanLink*` | Officer §10.2 gate; import (`IsDataImport`) is exempt; sticky existing links stay |
 | Import sets Type only | VISA2014 mapper | Map Type → Profile FK in import wave |
 | Case tab Preview opens duplicate catalog in slot | `OpenPreviewOnly` on slot request | Tab owns catalog; slot viewer only — **preview-slot** |
 | Document copies preview fails on roster line | `TryBuildMergedPdfForRoster` | Roster IDs are `ApplicationPerson`, not `ApplicationItem` |
@@ -148,7 +149,7 @@ When starting a slice, set its row to **In progress** in IMPLEMENTATION_PLAN; se
 | Case workspace Progress → ministry letter filename | Timeline (current file name) | **Viewer only** (`ProgressLettersSlotRequest.OpenPreviewOnly` + `FocusProgressId`) |
 | Rail / legacy DetailView action | — | Full catalog in slot |
 
-Resminamalar: `ResminamalarSlotRequest`. Document copies: `DocumentCopiesSlotRequest` (`FocusSlotKey`, `ApplicationPerson` roster scope). Progress letters: `ProgressLettersSlotRequest` (`FocusProgressId`). Shell behaviour: **visa2026-preview-slot**.
+Resminamalar: `ResminamalarSlotRequest`. Document copies: `DocumentCopiesSlotRequest` (`FocusSlotKey`, `ApplicationPerson` roster scope; workspace Preview may pass one person). Progress letters: `ProgressLettersSlotRequest` (`FocusProgressId`). Shell behaviour: **visa2026-preview-slot**. Case workspace Document copies: header chips filter people; **By person** / **By type** catalog — **visa2026-document-copies**.
 
 ---
 

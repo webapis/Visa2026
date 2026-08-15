@@ -36,7 +36,8 @@ public sealed class ApplicationItemDocumentCopyPdfMerger
         string slotLabel,
         IReadOnlyList<ApplicationItemLinkedDocumentFileEntry> entries,
         out byte[]? content,
-        out string? fileName)
+        out string? fileName,
+        Guid applicationId = default)
     {
         content = null;
         fileName = null;
@@ -59,7 +60,7 @@ public sealed class ApplicationItemDocumentCopyPdfMerger
         if (!ApplicationRosterHelper.TryLoadSharedApplicationPeople(
                 objectSpace,
                 applicationPersonIds,
-                applicationId: Guid.Empty,
+                applicationId,
                 out var application,
                 out var people)
             || application == null)

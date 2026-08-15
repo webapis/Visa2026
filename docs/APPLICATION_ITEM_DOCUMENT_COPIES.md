@@ -197,6 +197,18 @@ This is the **improved export action** — same ZIP as v1 **Generate PDF**, with
 
 Default package options mirror `PdfBatchEnqueueOptions` / full supporting-document ZIP defaults (`ApplicationItemDocumentPackageOptions.CreateDefaults()`).
 
+### Case workspace (By person / By type)
+
+On the in-process case **Document copies** tab:
+
+- Header people chips **include or hide** roster people (default: all selected). Catalog, Preview, and **Download package** use the filtered `Person.ID` set.
+- A **By person / By type** switch sits next to the Document copies title (not in case chrome). **By person** is the default.
+- **By person:** one section per selected person. Rows are **linked records** (`ApplicationProfileInstancePersonResolvedLink`), labeled by identification number (`Passport X1453316`, `Visa A3303830`) — not ApplicationItem Current/Previous/Next slots. Row Preview opens that one record for that person.
+- **By type:** one section per document family (Passport, Education, Visa, …). Rows are Person | Record | Files | Status. Section **Preview** merges all Ready files of that family for the chip-selected people (`Family:{family}` → `TryGetMergedFamilyPdf`).
+- Only records that are actually linked appear. Unlinked kinds are omitted (no phantom “Current passport / Missing”).
+- **Preview** still opens `#visa-preview-slot` as **viewer only** (`OpenPreviewOnly`). Package download uses the current header filter (unchanged).
+- Application form stays a secondary section. Per-row checkboxes, person-section “preview all”, and a custom “Preview selected files” package are **out of scope**.
+
 ## Architecture
 
 ```mermaid

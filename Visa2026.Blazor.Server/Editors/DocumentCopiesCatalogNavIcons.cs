@@ -11,7 +11,11 @@ internal static class DocumentCopiesCatalogNavIcons
 
     public static string CssClass(string sectionId)
     {
-        var key = string.IsNullOrWhiteSpace(sectionId) ? "default" : sectionId.Trim().ToLowerInvariant();
+        var raw = string.IsNullOrWhiteSpace(sectionId) ? "default" : sectionId.Trim();
+        if (raw.StartsWith("person:", StringComparison.OrdinalIgnoreCase))
+            return "doc-copies-catalog__nav-icon--person";
+
+        var key = raw.ToLowerInvariant();
         return key switch
         {
             "passports" => "doc-copies-catalog__nav-icon--passports",
@@ -33,6 +37,8 @@ internal static class DocumentCopiesCatalogNavIcons
     public static string Svg(string sectionId)
     {
         var key = string.IsNullOrWhiteSpace(sectionId) ? string.Empty : sectionId.Trim();
+        if (key.StartsWith("person:", StringComparison.OrdinalIgnoreCase))
+            key = "PersonDocuments";
         return key switch
         {
             "Passports" => """<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="10" r="2.5"/><path d="M8 16.5h8"/></svg>""",

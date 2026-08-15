@@ -173,6 +173,18 @@ public sealed class DocumentCopiesInlinePreviewRequest
 
     public ApplicationItemDocumentPackageOptions PackageOptions { get; init; } =
         ApplicationItemDocumentPackageOptions.CreateDefaults();
+
+    /// <summary>
+    /// When set, preview/merge uses only these roster person ids.
+    /// Workspace person-grouped Preview passes the clicked person.
+    /// </summary>
+    public IReadOnlyList<Guid>? ApplicationProfileInstancePersonIds { get; init; }
+
+    /// <summary>
+    /// When set, preview merges every ready file of this family for the roster ids.
+    /// <see cref="SlotKey"/> is <c>Family:{family}</c>.
+    /// </summary>
+    public string? FamilyKey { get; init; }
 }
 
 public sealed class ProgressLettersInlinePreviewRequest

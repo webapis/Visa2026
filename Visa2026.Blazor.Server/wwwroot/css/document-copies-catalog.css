@@ -154,6 +154,11 @@
   color: var(--dcc-muted);
 }
 
+.doc-copies-catalog__col-person {
+  flex: 0 1 9.5rem;
+  min-width: 0;
+}
+
 .doc-copies-catalog__col-record {
   flex: 1 1 auto;
   min-width: 0;
@@ -356,6 +361,7 @@
 .doc-copies-catalog__nav-icon--linkeddocuments { background: #2563eb; }
 .doc-copies-catalog__nav-icon--applicationform { background: #0f766e; }
 .doc-copies-catalog__nav-icon--documents { background: #4f46e5; }
+.doc-copies-catalog__nav-icon--person { background: #7c3aed; }
 
 .doc-copies-catalog__section-head--nav .doc-copies-catalog__section-head-main {
   flex-direction: column;
@@ -367,6 +373,12 @@
   font-size: 13px;
   letter-spacing: 0.04em;
   color: var(--dcc-text);
+}
+
+.doc-copies-catalog__section-title--name {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 14px;
 }
 
 .doc-copies-catalog__section-head--nav .doc-copies-catalog__section-summary {

@@ -26,25 +26,25 @@ public static class ApplicationItemDocumentBatchSummaryKindMapping
         if (options.SupportingZipMergeOption == PdfSupportingZipMergeOption.IndividualFilesOnly)
             return false;
 
-        if (string.Equals(slotKey, "Passport.Current", StringComparison.Ordinal) && options.IncludePassportCopies)
+        if (slotKey.StartsWith("Passport.", StringComparison.Ordinal) && options.IncludePassportCopies)
         {
             kind = ApplicationItemDocumentBatchSummaryKind.CurrentPassports;
             return true;
         }
 
-        if (string.Equals(slotKey, "Visa.Current", StringComparison.Ordinal) && options.IncludeVisaCopies)
+        if (slotKey.StartsWith("Visa.", StringComparison.Ordinal) && options.IncludeVisaCopies)
         {
             kind = ApplicationItemDocumentBatchSummaryKind.CurrentVisas;
             return true;
         }
 
-        if (string.Equals(slotKey, "WorkPermit.Current", StringComparison.Ordinal) && options.IncludeWorkPermitCopies)
+        if (slotKey.StartsWith("WorkPermit.", StringComparison.Ordinal) && options.IncludeWorkPermitCopies)
         {
             kind = ApplicationItemDocumentBatchSummaryKind.CurrentWorkPermits;
             return true;
         }
 
-        if (string.Equals(slotKey, "Education.Current", StringComparison.Ordinal)
+        if (slotKey.StartsWith("Education.", StringComparison.Ordinal)
             && options.IncludeDiplomaFiles
             && options.DiplomaScope == PdfBatchDiplomaScope.AllEducations)
         {

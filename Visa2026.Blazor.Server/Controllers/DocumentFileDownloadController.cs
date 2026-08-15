@@ -15,24 +15,30 @@ public sealed class DocumentFileDownloadController : ControllerBase
         this.fileAccess = fileAccess;
 
     [HttpGet("application-items/merged")]
-    public IActionResult DownloadMergedSlot([FromQuery] string slotKey, [FromQuery] Guid[] itemIds)
+    public IActionResult DownloadMergedSlot(
+        [FromQuery] string slotKey,
+        [FromQuery] Guid[] itemIds,
+        [FromQuery] Guid applicationId = default)
     {
         if (string.IsNullOrWhiteSpace(slotKey) || itemIds == null || itemIds.Length == 0)
             return BadRequest();
 
-        if (!fileAccess.TryGetMergedSlotPdf(itemIds, slotKey, out var file) || file == null)
+        if (!fileAccess.TryGetMergedSlotPdf(itemIds, slotKey, out var file, applicationId) || file == null)
             return NotFound();
 
         return File(file.Content, file.ContentType, file.FileName);
     }
 
     [HttpGet("application-items/merged/inline")]
-    public IActionResult InlineMergedSlot([FromQuery] string slotKey, [FromQuery] Guid[] itemIds)
+    public IActionResult InlineMergedSlot(
+        [FromQuery] string slotKey,
+        [FromQuery] Guid[] itemIds,
+        [FromQuery] Guid applicationId = default)
     {
         if (string.IsNullOrWhiteSpace(slotKey) || itemIds == null || itemIds.Length == 0)
             return BadRequest();
 
-        if (!fileAccess.TryGetMergedSlotPdf(itemIds, slotKey, out var file) || file == null)
+        if (!fileAccess.TryGetMergedSlotPdf(itemIds, slotKey, out var file, applicationId) || file == null)
             return NotFound();
 
         Response.Headers.ContentDisposition = $"inline; filename=\"{SanitizeContentDispositionFileName(file.FileName)}\"";

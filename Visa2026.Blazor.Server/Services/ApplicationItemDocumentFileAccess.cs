@@ -96,7 +96,8 @@ public sealed class ApplicationItemDocumentFileAccess
     public bool TryGetMergedSlotPdf(
         IReadOnlyList<Guid> applicationPersonIds,
         string slotKey,
-        out ApplicationItemDocumentFileResult? result)
+        out ApplicationItemDocumentFileResult? result,
+        Guid applicationId = default)
     {
         result = null;
         if (applicationPersonIds == null || applicationPersonIds.Count == 0 || string.IsNullOrWhiteSpace(slotKey))
@@ -114,7 +115,7 @@ public sealed class ApplicationItemDocumentFileAccess
         if (!ApplicationRosterHelper.TryLoadSharedApplicationPeople(
                 objectSpace,
                 rowIds,
-                applicationId: Guid.Empty,
+                applicationId,
                 out var application,
                 out var people)
             || application == null
@@ -136,7 +137,72 @@ public sealed class ApplicationItemDocumentFileAccess
                 mergedGroup.SlotLabel,
                 mergedGroup.Files,
                 out var content,
-                out var fileName)
+                out var fileName,
+                application.ID)
+            || content == null
+            || content.Length == 0
+            || string.IsNullOrWhiteSpace(fileName))
+        {
+            return false;
+        }
+
+        result = new ApplicationItemDocumentFileResult
+        {
+            Content = content,
+            FileName = fileName,
+            ContentType = "application/pdf"
+        };
+        return true;
+    }
+
+    public bool TryGetMergedFamilyPdf(
+        IReadOnlyList<Guid> applicationPersonIds,
+        string familyKey,
+        out ApplicationItemDocumentFileResult? result,
+        Guid applicationId = default)
+    {
+        result = null;
+        if (applicationPersonIds == null
+            || applicationPersonIds.Count == 0
+            || string.IsNullOrWhiteSpace(familyKey))
+        {
+            return false;
+        }
+
+        var rowIds = applicationPersonIds
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .ToList();
+        if (rowIds.Count == 0)
+            return false;
+
+        using var objectSpace = nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        if (!ApplicationRosterHelper.TryLoadSharedApplicationPeople(
+                objectSpace,
+                rowIds,
+                applicationId,
+                out var application,
+                out var people)
+            || application == null
+            || people.Count != rowIds.Count)
+        {
+            return false;
+        }
+
+        var lines = ApplicationPersonLinkedDocumentsResolver.ResolveMany(objectSpace, application, people);
+        var files = ApplicationItemDocumentCopiesTypeCatalog.CollectFamilyFiles(lines, familyKey);
+        if (files.Count == 0)
+            return false;
+
+        var title = ApplicationItemDocumentCopiesTypeCatalog.FamilyTitle(familyKey);
+        if (!pdfMerger.TryBuildMergedPdfForRoster(
+                rowIds,
+                familyKey + ".",
+                title,
+                files,
+                out var content,
+                out var fileName,
+                application.ID)
             || content == null
             || content.Length == 0
             || string.IsNullOrWhiteSpace(fileName))
@@ -157,7 +223,8 @@ public sealed class ApplicationItemDocumentFileAccess
         IReadOnlyList<Guid> applicationPersonIds,
         ApplicationItemDocumentBatchSummaryKind kind,
         ApplicationItemDocumentPackageOptions packageOptions,
-        out ApplicationItemDocumentFileResult? result)
+        out ApplicationItemDocumentFileResult? result,
+        Guid applicationId = default)
     {
         result = null;
         if (!batchSummaryPdfBuilder.TryBuildForRoster(
@@ -165,7 +232,8 @@ public sealed class ApplicationItemDocumentFileAccess
                 kind,
                 packageOptions,
                 out var content,
-                out var fileName)
+                out var fileName,
+                applicationId)
             || content == null
             || content.Length == 0
             || string.IsNullOrWhiteSpace(fileName))
@@ -185,7 +253,8 @@ public sealed class ApplicationItemDocumentFileAccess
     public bool TryGetFilledApplicationFormPdf(
         IReadOnlyList<Guid> applicationPersonIds,
         out ApplicationItemDocumentFileResult? result,
-        out string? errorMessageKey)
+        out string? errorMessageKey,
+        Guid applicationId = default)
     {
         result = null;
         errorMessageKey = null;
@@ -230,7 +299,7 @@ public sealed class ApplicationItemDocumentFileAccess
             if (!ApplicationRosterHelper.TryLoadSharedApplicationPeople(
                     objectSpace,
                     rowIds,
-                    applicationId: Guid.Empty,
+                    applicationId,
                     out var application,
                     out var people)
                 || application == null)

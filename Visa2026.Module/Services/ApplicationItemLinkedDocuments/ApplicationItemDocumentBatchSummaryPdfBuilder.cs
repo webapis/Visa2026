@@ -36,7 +36,8 @@ public sealed class ApplicationItemDocumentBatchSummaryPdfBuilder
         ApplicationItemDocumentBatchSummaryKind kind,
         ApplicationItemDocumentPackageOptions packageOptions,
         out byte[]? content,
-        out string? fileName)
+        out string? fileName,
+        Guid applicationId = default)
     {
         content = null;
         fileName = ApplicationItemDocumentBatchSummaryKindMapping.GetDownloadFileName(kind);
@@ -67,7 +68,7 @@ public sealed class ApplicationItemDocumentBatchSummaryPdfBuilder
         if (!ApplicationRosterHelper.TryLoadSharedApplicationPeople(
                 objectSpace,
                 rowIds,
-                applicationId: Guid.Empty,
+                applicationId,
                 out var application,
                 out var people)
             || application == null
@@ -89,7 +90,8 @@ public sealed class ApplicationItemDocumentBatchSummaryPdfBuilder
                 mergedGroup.SlotLabel,
                 mergedGroup.Files,
                 out content,
-                out _)
+                out _,
+                application.ID)
             || content == null
             || content.Length == 0)
         {

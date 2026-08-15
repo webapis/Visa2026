@@ -322,7 +322,7 @@ public static partial class VisaUiMessageCatalog
         },
         ["ApplicationItemDocumentCopies.GenerateForm.PreviewTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "ApplicationProfileInstance form",
+            ["en-US"] = "Application form",
             ["tr-TR"] = "Başvuru formu",
             ["tk-TM"] = "Arza blanky",
             ["ru-RU"] = "Форма заявления",
@@ -347,6 +347,20 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Seçilen {0} başvuru kalemine ait taranmış dosyalar (PDF paketleme ile aynı kapsam).",
             ["tk-TM"] = "Saýlanan {0} arza elementi üçin skan faýllar (PDF gaplamak bilen birmeňzeş çäk).",
             ["ru-RU"] = "Скан-копии для {0} выбранных позиций (тот же охват, что и PDF-пакет).",
+        },
+        ["ApplicationItemDocumentCopies.List.SubtitlePeople"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Scanned files for {0} selected people (same scope as PDF packaging).",
+            ["tr-TR"] = "Seçilen {0} kişiye ait taranmış dosyalar (PDF paketleme ile aynı kapsam).",
+            ["tk-TM"] = "Saýlanan {0} adam üçin skan faýllar (PDF gaplamak bilen birmeňzeş çäk).",
+            ["ru-RU"] = "Скан-копии для {0} выбранных лиц (тот же охват, что и PDF-пакет).",
+        },
+        ["ApplicationItemDocumentCopies.Summary.PersonReady"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} of {1} ready",
+            ["tr-TR"] = "{0} / {1} hazır",
+            ["tk-TM"] = "{0} / {1} taýyn",
+            ["ru-RU"] = "{0} из {1} готово",
         },
         ["ApplicationItemDocumentCopies.Message.LinkMissing"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -427,7 +441,7 @@ public static partial class VisaUiMessageCatalog
         },
         ["ApplicationItemDocumentCopies.Package.Options.IncludeApplicationForm"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "ApplicationProfileInstance forms (PDF_Form)",
+            ["en-US"] = "Application forms (PDF_Form)",
             ["tr-TR"] = "Başvuru formları (PDF_Form)",
             ["tk-TM"] = "Arza blankalary (PDF_Form)",
             ["ru-RU"] = "Формы заявления (PDF_Form)",
@@ -644,7 +658,7 @@ public static partial class VisaUiMessageCatalog
         },
         ["ApplicationItemDocumentCopies.Slot.ApplicationForm"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "ApplicationProfileInstance form",
+            ["en-US"] = "Application form",
             ["tr-TR"] = "Başvuru formu",
             ["tk-TM"] = "Arza blanky",
             ["ru-RU"] = "Форма заявления",
@@ -753,6 +767,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "{1} başvuru satırından {0} tanesi",
             ["tk-TM"] = "{1} arza setirinden {0} sany",
             ["ru-RU"] = "{0} из {1} позиций заявления",
+        },
+        ["ApplicationItemDocumentCopies.Summary.ApplicationFormPeople"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} of {1} people",
+            ["tr-TR"] = "{0} / {1} kişi",
+            ["tk-TM"] = "{0} / {1} adam",
+            ["ru-RU"] = "{0} из {1} лиц",
         },
         ["ApplicationItemDocumentCopies.Summary.Files"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -2916,6 +2937,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Davet {0}",
             ["tk-TM"] = "Çakylyk {0}",
             ["ru-RU"] = "Приглашение {0}",
+        },
+        ["PersonDocumentCopies.Record.BorderZone"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Border zone {0}",
+            ["tr-TR"] = "Sınır bölgesi {0}",
+            ["tk-TM"] = "Serhet zolagy {0}",
+            ["ru-RU"] = "Приграничная зона {0}",
         },
         ["PersonDocumentCopies.Record.Lodging"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

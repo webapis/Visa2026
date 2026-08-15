@@ -1,5 +1,7 @@
+@using System.Collections.Generic
 @using System.Linq
 @using Visa2026.Module.BusinessObjects.OfficerShell
+@using Visa2026.Module.Services.ApplicationItemLinkedDocuments
 @using Visa2026.Module.Services.ApplicationWorkspace
 @using Visa2026.Module.Services.ApplicationPersonLink
 @using Visa2026.Module.Services.OfficerShell
@@ -63,12 +65,33 @@
                 </div>
             </div>
             <div class="cw-head__people">
-                @foreach (var (name, index) in chrome.PeopleNames.Select((n, i) => (n, i)))
+                @if (view.People.Count > 0)
                 {
-                    <span class="cw-person">
-                        <span class="cw-person__avatar" style="background:@PersonColor(index)">@Initials(name)</span>
-                        @name
-                    </span>
+                    @foreach (var person in view.People)
+                    {
+                        var selected = IsDocumentPersonSelected(person.PersonId);
+                        var personName = ApplicationItemDocumentCopiesPersonCatalog.DisplayPersonName(person.Name);
+                        <button type="button"
+                                class="cw-person @(selected ? "is-selected" : "is-muted")"
+                                aria-pressed="@selected"
+                                title="@(selected
+                                    ? "Hide this person in Document copies"
+                                    : "Show this person in Document copies")"
+                                @onclick="() => ToggleDocumentPersonFilter(person.PersonId)">
+                            <span class="cw-person__avatar" style="background:@PersonColor(person.Index)">@Initials(personName)</span>
+                            @personName
+                        </button>
+                    }
+                }
+                else
+                {
+                    @foreach (var (name, index) in chrome.PeopleNames.Select((n, i) => (n, i)))
+                    {
+                        <span class="cw-person">
+                            <span class="cw-person__avatar" style="background:@PersonColor(index)">@Initials(name)</span>
+                            @name
+                        </span>
+                    }
                 }
                 @if (chrome.MergedFromCount is int merged && merged > 1)
                 {
@@ -110,7 +133,10 @@
                                                      PreviewSlotOwnerViewId="@PreviewSlotOwnerViewId" />
                         break;
                     case "documents":
-                        <OfficerShellCaseDocumentsTab ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId" Snapshot="Snapshot" />
+                        <OfficerShellCaseDocumentsTab ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId"
+                                                     Snapshot="Snapshot"
+                                                     SelectedPersonIds="SelectedDocumentPersonIds"
+                                                     PreviewSlotOwnerViewId="@PreviewSlotOwnerViewId" />
                         break;
                     case "resminamalar":
                         <OfficerShellCaseResminamalarTab ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId" />
@@ -182,7 +208,51 @@
     [Parameter] public EventCallback ClosePersonLinkPickerRequested { get; set; }
     [Parameter] public string PreviewSlotOwnerViewId { get; set; } = OfficerShellViewIds.DetailView;
 
+    private readonly HashSet<Guid> _selectedDocumentPersonIds = [];
+    private string _documentPeopleRosterKey = string.Empty;
+
+    private IReadOnlyList<Guid> SelectedDocumentPersonIds =>
+        _selectedDocumentPersonIds.Count == 0
+            ? Array.Empty<Guid>()
+            : _selectedDocumentPersonIds.ToList();
+
     private static bool IsWideTab(string tab) => tab is "documents" or "resminamalar";
+
+    protected override void OnParametersSet()
+    {
+        SyncDocumentPeopleFilter(Snapshot?.CaseView);
+    }
+
+    private void SyncDocumentPeopleFilter(ApplicationWorkspaceCaseView? view)
+    {
+        var people = view?.People
+            .Where(person => person.PersonId != Guid.Empty)
+            .ToList() ?? [];
+        var key = string.Join(",", people.Select(person => person.PersonId).OrderBy(id => id));
+        if (!string.Equals(key, _documentPeopleRosterKey, StringComparison.Ordinal))
+        {
+            _documentPeopleRosterKey = key;
+            _selectedDocumentPersonIds.Clear();
+            foreach (var person in people)
+                _selectedDocumentPersonIds.Add(person.PersonId);
+            return;
+        }
+
+        var valid = people.Select(person => person.PersonId).ToHashSet();
+        _selectedDocumentPersonIds.RemoveWhere(id => !valid.Contains(id));
+    }
+
+    private bool IsDocumentPersonSelected(Guid personId) =>
+        personId != Guid.Empty && _selectedDocumentPersonIds.Contains(personId);
+
+    private void ToggleDocumentPersonFilter(Guid personId)
+    {
+        if (personId == Guid.Empty)
+            return;
+
+        if (!_selectedDocumentPersonIds.Remove(personId))
+            _selectedDocumentPersonIds.Add(personId);
+    }
 
     private string? _selectedIssuedKey;
 

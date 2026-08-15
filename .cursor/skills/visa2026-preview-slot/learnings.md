@@ -23,6 +23,24 @@ Purpose: **shell, layout, occupants, catalog card UX, JS/CSS** — not Resminama
 
 ## Entries
 
+### 2026-08-15 — Document copies By type Preview still uses OpenPreviewOnly
+
+- Workspace **By type** section Preview opens the existing Document copies occupant as **viewer only** (`FocusSlotKey` = `Family:{family}`, chip-selected person ids). `DocumentCopiesInlinePreview` parses the family key and calls `TryGetMergedFamilyPdf`.
+- Prevent: Do not add a second catalog in `#visa-preview-slot` for type Preview. Do not invent a new occupant.
+- Cross-skill: visa2026-document-copies
+
+### 2026-08-15 — Document copies Preview needs the case id
+
+- Workspace Preview is still `OpenPreviewOnly` in `#visa-preview-slot`. Merge must receive `ApplicationProfileInstanceId` from the occupant request; without it a person on several imported cases fails to load the PDF.
+- Prevent: Do not resolve the roster for workspace Preview with `applicationId: Guid.Empty`.
+- Cross-skill: visa2026-document-copies
+
+### 2026-08-15 — Document copies person Preview still uses OpenPreviewOnly
+
+- Workspace Document copies is now person-grouped. Row Preview still opens the existing Document copies occupant as **viewer only** (`FocusSlotKey` + `OpenPreviewOnly`). The request may carry one person id so the merge is not the whole roster.
+- Prevent: Do not add a new slot occupant or show the catalog again in `#visa-preview-slot` from the case tab.
+- Cross-skill: visa2026-document-copies | visa2026-application-profile
+
 ### 2026-08-14 — Done ministry steps expose letter preview links
 
 - Workspace Progress/Overview hid approval files once the step was no longer current. `ProgressLetters` preview still works; the timeline now keeps `MinistryLetterFileName` on done legs and the UI shows the filename on Progress + Overview.

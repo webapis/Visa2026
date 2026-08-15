@@ -27,12 +27,14 @@ public static class ApplicationPersonLinkedDocumentsResolver
             };
         }
 
-        var projection = ApplicationProfileInstancePersonPdfPackageLineHydrator.Hydrate(objectSpace, application, person);
-        var snapshot = ApplicationItemLinkedDocumentsResolver.ResolveProjection(
+        var links = ApplicationProfileInstancePersonResolver.LoadLinks(
             objectSpace,
-            projection,
+            application.ID,
             person.ID);
-        return snapshot;
+        return ApplicationItemLinkedDocumentsLinkedRecordResolver.Resolve(
+            objectSpace,
+            person,
+            links);
     }
 
     public static ApplicationItemLinkedDocumentsLineSnapshot ResolveLine(
@@ -55,7 +57,7 @@ public static class ApplicationPersonLinkedDocumentsResolver
         return new ApplicationItemLinkedDocumentsLineSnapshot
         {
             ApplicationItemId = person.ID,
-            LineLabel = person.FullName ?? string.Empty,
+            LineLabel = ApplicationItemDocumentCopiesPersonCatalog.DisplayPersonName(person.FullName),
             Groups = snapshot.Groups
         };
     }

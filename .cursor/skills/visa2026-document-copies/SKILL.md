@@ -79,6 +79,7 @@ disable-model-invocation: false
 | Where | Action |
 |-------|--------|
 | **`ApplicationItem`** ListView (multi-select) | **Document copies** (`ApplicationItemDocumentCopiesController`) |
+| Case workspace **Document copies** tab | **By person** / **By type** catalog of **linked records** (ID numbers); header chips filter roster; Preview → slot viewer only |
 
 Generate PDF / My PDF Jobs are **hidden** — document copies is the supported path.
 
@@ -108,7 +109,7 @@ Generate PDF / My PDF Jobs are **hidden** — document copies is the supported p
 | Symptom | First check |
 |---------|-------------|
 | Dialog empty / no slots | Selection count; resolver output; `ApplicationItemDocumentCopiesListPropertyEditor` refresh |
-| Preview fails for scan slot | `ApplicationItemDocumentFileAccess.TryGetMergedSlotPdf`; merger logs |
+| Preview fails for scan slot | `TryGetMergedSlotPdf` + case `ApplicationProfileInstanceId` (person on multiple imported apps) |
 | Application form download fails | Error in footer; then **pdf-form-mapping** if generation succeeds but fields wrong |
 | Gap confirm wrong | `ApplicationItemDocumentCopiesReadinessSummary` + current include flags only |
 | Package never completes | Worker log, `PdfBatchToastHost`, `/api/PdfBatches/my-latest` — **lifecycle-docker** |
