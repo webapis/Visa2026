@@ -306,6 +306,7 @@ entities:
     notes: |
       Wave 2b (2026-08-12): PersonInApplication → ApplicationProfileInstancePerson M2M (not ApplicationItem).
       Headless --inprocess only. Immediate ResolvedLinks via LinkPerson + RequirePerson*.
+      Officer §10.2 validity does not apply (IsDataImport); historical expired current rows still link.
       Id-map: PersonInApplication.Oid → ApplicationProfileInstancePeople.ID. Dedupe Application+Person (lowest Oid).
       Skip parent ApplicationType E:44/E:55. Prefer after person scalars so auto-link finds Passport/Visa/….
 

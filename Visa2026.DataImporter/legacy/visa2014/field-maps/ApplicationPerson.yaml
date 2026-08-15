@@ -25,7 +25,7 @@ fields:
 
   - source: (derived)
     target: ResolvedLinks
-    notes: Immediate ApplicationProfileInstancePersonResolver.RefreshResolvedLinks gated by profile RequirePerson*.
+    notes: Immediate RefreshResolvedLinks gated by profile RequirePerson*. §10.2 validity is officer-only; import (IsDataImport) links historical current rows including expired.
 
 skip:
   - parent ApplicationType composites E:44 / E:55 (skip_row)

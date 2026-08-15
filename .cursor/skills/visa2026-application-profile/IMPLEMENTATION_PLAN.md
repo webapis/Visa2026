@@ -39,6 +39,9 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | 10c | Workspace in-tab actions + person SQL view | **Done** | Link/Unlink/Open detail wired in component; `vw_application_workspace_person`; row selection on Person tab |
 | 10d | ListView row opens workspace (default drill-in) | **Done** | `ApplicationListViewWorkspaceNavigationController` — row activate → workspace instead of legacy DetailView |
 | 10e | Document copies on workspace (roster line) | **Done** | `ApplicationPerson` keyed catalog + ZIP/preview; `DocumentCopiesLineScope`; legacy `ApplicationItem` ListView path retained |
+| 10s | Workspace Document copies person filter + person catalog | **Done** | Header chips toggle roster; catalog grouped by person; Preview/package use filtered `Person.ID`s; slot stays viewer-only |
+| 10t | Document copies from linked records (ID labels) | **Done** | No Current/Previous/Next ApplicationItem slots; rows are ResolvedLinks labeled Passport/Visa/… number |
+| 10u | §10.2 valid/not-expired auto-link gate | **Done** | Officer-only: Passport/Visa/WP/Invitation/BorderZone/Medical must be valid not-expired. VISA2014 import (`IsDataImport`) uses PersonCurrentItems so historical expired rows still link |
 | 10f | Profiles rail actions wired | **Done** | Row → profile wizard; `+` → new Application from profile (inherits route from current Application) |
 | 10g | Officer UI cutoff (`ApplicationItem` nav/tab/actions) | **Done** | Nav child removed; Person `ApplicationPeople` tab; dossier M2M-only; ListView doc copies disabled |
 | 10h | Runtime roster reads → `ApplicationPeople` | **Done** | `ApplicationRosterHelper`; merge/Resminamalar hydration; header AvailablePeople; cancel counts |

@@ -123,6 +123,9 @@ public static class ApplicationProfileInstancePersonResolver
                 continue;
             if (entity is not BaseObject bo || bo.ID == Guid.Empty)
                 continue;
+            if (ApplicationProfileInstancePersonValidItems.EnforceOfficerLinkValidity
+                && !ApplicationProfileInstancePersonValidItems.CanLinkEntity(entity))
+                continue;
 
             missing.Add((kind, bo.ID));
             existingKinds.Add(kind);

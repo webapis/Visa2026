@@ -186,17 +186,19 @@ Keep **explicit** profile toggles for readiness + enabling person/roster `{{…}
 | BO | Include when |
 |----|----------------|
 | Passport | Not expired |
-| Visa | Not expired |
+| Visa | Started, not cancelled/changed, and not expired |
 | AddressOfResidence | Current (PersonCurrentItems-style) |
 | Education | Current |
 | EmployeePositionHistory (Position) | Current |
 | EmployeeSalary | Current |
-| MedicalRecord | Current |
-| InvitationItem | Current / active |
-| WorkPermitItem | Current / active |
-| BorderZoneItem | **Current / not cancelled** |
+| MedicalRecord | Not expired |
+| InvitationItem | Active (`!IsCancelled && !IsChanged && !IsUsed`) and parent Invitation not expired |
+| WorkPermitItem | Not cancelled and not expired |
+| BorderZoneItem | Not cancelled and parent BorderZone not expired |
 | RejectionItem | **Current / not cancelled** |
 | TravelHistory | **TBD** (recommend: current / latest relevant movements — confirm) |
+
+**Officer vs import:** §10.2 validity is for **manual officer** link/create (`ApplicationProfileInstancePersonValidItems.EnforceOfficerLinkValidity`). **VISA2014 import** (`MigrationImportContext.IsDataImport`) keeps historical current rows via `PersonCurrentItems` — expired/past related data still auto-links.
 
 ### 10.3 Person-config block → tabs / linked records
 
@@ -472,6 +474,9 @@ When any linked Application reaches lock state **A** (first progress beyond offi
 | Custom catalog home (replace native List/Detail officer UI) | Done |
 | Profile picker at Application create | Done |
 | Person M2M DetailView / hard-remove ApplicationItem | In progress (skip-navigation People + roster-line BO deleted; F5 heal pending) |
+| Workspace Document copies person filter + person catalog | Done (header chips; person-grouped catalog; slot viewer-only) |
+| Document copies from linked records (ID labels) | Done (ResolvedLinks; Passport/Visa numbers — not Current/Previous) |
+| §10.2 valid/not-expired auto-link gate | Done (officer-only; VISA2014 import keeps historical current rows) |
 | Overview Issued records (1:N Invitation / WorkPermit / BorderZone / Rejection / issued Visa) | Done (May produce tiles + New from Overview) |
 | Person/Dossier Start application | Done |
 | Remove `Application.ApplicationType` FK | Deferred (after import cutover) |

@@ -4,6 +4,33 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 
 ---
 
+### 2026-08-15 — Officer validity gate does not apply to VISA2014 import
+
+- §10.2 valid/not-expired auto-link is **officer-only** (`EnforceOfficerLinkValidity`). `MigrationImportContext.IsDataImport` (headless `--inprocess` / `X-Visa2014-DataImport`) uses `PersonCurrentItems` so expired historical passport/visa/WP/invitation/border-zone/medical still link on Wave 2b `LinkPerson`.
+- Verify: `CollectMissingAutoLinks_AllowsExpiredPassportDuringDataImport` + `ResolvePassport_UsesCurrentIncludingExpiredDuringDataImport`. Officer tests still reject expired candidates outside an import scope.
+- Prevent: Do not apply `CanLink*` during import. Do not use the officer gate as a reason to skip past related data in `Visa2014ApplicationProfileInstancePersonImporter`.
+- Cross-skill: visa2014-to-visa2026-import
+
+### 2026-08-15 — Only valid not-expired records auto-link on Person add
+
+- Linking a Person auto-resolves Passport, Visa, WorkPermitItem, InvitationItem, BorderZoneItem, and MedicalRecord only when the row is valid and not expired (`ApplicationProfileInstancePersonValidItems`). Visa also requires started + not cancelled/changed; invitation requires not cancelled/changed/used and a live parent; work permit / border zone require not cancelled (border zone parent not expired).
+- Resolve picks the latest **linkable** row, not PersonCurrentItems “current then null”. Existing sticky `LinkedObjectId` is not replaced. `PersonCurrentItems` is unchanged (reports/UI current record).
+- **Import exception:** VISA2014 `IsDataImport` skips this gate (see entry above).
+- Verify: `ApplicationProfileInstancePersonValidItemsTests` + resolver tests. Link a person who has only an expired passport — no Passport ResolvedLink is created. A person with an expired current passport and an older valid one links the older valid passport.
+- Prevent: Do not use `PersonCurrentItems.GetCurrent*` as the Application Profile **officer** link gate.
+
+### 2026-08-15 — Document copies follow People & links records
+
+- Workspace Document copies no longer uses ApplicationItem Current/Previous/Next slots. Each row is a sticky ResolvedLink, labeled by passport/visa/work-permit/invitation number (same records as People & links).
+- Verify: stop F5, rebuild, F5. Open 8/-007 — Andy’s copies should list Passport X1453316 and Visa A3303830, not “Current passport”.
+- Cross-skill: visa2026-document-copies
+
+### 2026-08-15 — Header people chips filter Document copies
+
+- Case workspace header chips (Andy / Katie) are toggles for the Document copies roster. Default all selected. Catalog is person-grouped; Preview stays `#visa-preview-slot` viewer-only (`OpenPreviewOnly`) with the clicked person or the current filter.
+- Verify: stop F5, rebuild, F5. Open a two-person in-process case → Document copies. Hide one chip; that person section disappears; Preview/package follow the remaining people.
+- Cross-skill: visa2026-document-copies | visa2026-preview-slot
+
 ### 2026-08-14 — Approval letter links hide raw filenames
 
 - Overview/Progress showed the uploaded file name (`AI-SDLC-…pdf`). Officers only need a link. The control now shows **View letter**; the real name stays on `title` (hover) and in the preview-slot header.
