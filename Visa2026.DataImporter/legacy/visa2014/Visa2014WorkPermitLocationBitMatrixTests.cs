@@ -16,7 +16,7 @@ public sealed class Visa2014WorkPermitLocationBitMatrixTests
     }
 
     [Fact]
-    public void BuildWorkPermittedLocations_UsesCatalogThenHeuristicAndCollectsUnmapped()
+    public void BuildWorkPermittedLocations_UsesCatalogThenHeuristicFallback()
     {
         var bitColumns = new[] { "MappedBit", "AsgabatSeheri", "UnknownBit", "OffBit" };
         var row = new Dictionary<string, string?>(StringComparer.Ordinal)
@@ -47,9 +47,28 @@ public sealed class Visa2014WorkPermitLocationBitMatrixTests
             catalogs,
             unmapped);
 
-        Assert.Equal("Catalog Label, Aşgabat şäheri", result);
-        Assert.Contains("WorkPermittedLocationName:UnknownBit", unmapped);
-        Assert.DoesNotContain(unmapped, u => u.Contains("OffBit", StringComparison.Ordinal));
+        // Catalog hit, city-suffix heuristic, then bare-column heuristic (not unmapped).
+        Assert.Equal("Catalog Label, Aşgabat şäheri, UnknownBit", result);
+        Assert.Empty(unmapped);
+    }
+
+    [Fact]
+    public void BuildWorkPermittedLocations_BlankColumnNameWithBitSet_CollectsUnmapped()
+    {
+        var row = new Dictionary<string, string?>(StringComparer.Ordinal)
+        {
+            ["   "] = "1",
+        };
+        var unmapped = new List<string>();
+
+        var result = Visa2014WorkPermitLocationBitMatrix.BuildWorkPermittedLocations(
+            row,
+            ["   "],
+            new Dictionary<string, Visa2014LookupCatalog>(StringComparer.Ordinal),
+            unmapped);
+
+        Assert.Equal("", result);
+        Assert.Contains("WorkPermittedLocationName:   ", unmapped);
     }
 
     [Fact]
