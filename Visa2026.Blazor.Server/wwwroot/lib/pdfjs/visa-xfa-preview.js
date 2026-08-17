@@ -25,6 +25,16 @@ const previewLinkService = {
     }
 };
 
+function unwrapDoc(doc) {
+    if (doc && typeof doc === "object") {
+        const url = doc.url || doc.Url;
+        if (typeof url === "string") {
+            return { source: url, photoDataUri: doc.photoDataUri || doc.PhotoDataUri || null };
+        }
+    }
+    return { source: doc, photoDataUri: null };
+}
+
 function toPdfSource(doc) {
     if (typeof doc === "string" && doc.length > 0) {
         return { url: doc.split("#")[0], enableXfa: true };
@@ -36,6 +46,18 @@ function toPdfSource(doc) {
         return { data: new Uint8Array(doc), enableXfa: true };
     }
     throw new Error("Application form preview needs a PDF blob URL");
+}
+
+function injectPhoto(pageDiv, photoDataUri) {
+    if (!pageDiv || !photoDataUri) {
+        return;
+    }
+    pageDiv.querySelectorAll(".visa-xfa-preview__photo").forEach((el) => el.remove());
+    const img = document.createElement("img");
+    img.className = "visa-xfa-preview__photo";
+    img.alt = "";
+    img.src = photoDataUri;
+    pageDiv.appendChild(img);
 }
 
 function xfaViewport(viewport) {
@@ -206,7 +228,8 @@ async function destroyHost(container) {
 }
 
 async function renderOne(container, doc, widthPx) {
-    const loadingTask = getDocument(toPdfSource(doc));
+    const unpacked = unwrapDoc(doc);
+    const loadingTask = getDocument(toPdfSource(unpacked.source));
     const pdf = await loadingTask.promise;
     const tasks = hosts.get(container)?.loadingTasks || [];
     tasks.push(loadingTask);
@@ -230,6 +253,9 @@ async function renderOne(container, doc, widthPx) {
             xfaDiv.className = "xfaLayer";
             pageDiv.appendChild(xfaDiv);
             renderXfaLayer(xfaDiv, viewport, xfaHtml, pdf.annotationStorage);
+            if (n === 1) {
+                injectPhoto(pageDiv, unpacked.photoDataUri);
+            }
             continue;
         }
 
@@ -246,6 +272,9 @@ async function renderOne(container, doc, widthPx) {
             renderParams.transform = [outputScale, 0, 0, outputScale, 0, 0];
         }
         await page.render(renderParams).promise;
+        if (n === 1) {
+            injectPhoto(pageDiv, unpacked.photoDataUri);
+        }
     }
 }
 

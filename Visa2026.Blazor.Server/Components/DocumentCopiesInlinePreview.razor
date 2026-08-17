@@ -101,6 +101,7 @@
     private ElementReference _xfaHost;
     private bool _useXfaViewer;
     private IReadOnlyList<byte[]>? _xfaDocuments;
+    private IReadOnlyList<string?>? _xfaPhotoDataUris;
     private readonly List<string> _xfaBlobUrls = new();
     private IJSObjectReference? _xfaJsModule;
     private bool _xfaRenderPending;
@@ -229,6 +230,7 @@
             _xfaDocuments = preview.XfaDocuments is { Count: > 0 }
                 ? preview.XfaDocuments
                 : new[] { preview.Content };
+            _xfaPhotoDataUris = preview.PhotoDataUris;
             _useXfaViewer = true;
             _xfaRenderPending = true;
         }
@@ -344,7 +346,7 @@
         _xfaRenderPending = false;
         try
         {
-            await RenderXfaDocumentsAsync(_xfaDocuments);
+            await RenderXfaDocumentsAsync(_xfaDocuments, _xfaPhotoDataUris);
             await ScheduleViewerLayoutSyncAsync();
         }
         catch (JSDisconnectedException)
@@ -357,26 +359,34 @@
         }
     }
 
-    private async Task RenderXfaDocumentsAsync(IReadOnlyList<byte[]> documents)
+    private async Task RenderXfaDocumentsAsync(IReadOnlyList<byte[]> documents, IReadOnlyList<string?>? photoDataUris)
     {
         await RevokeXfaBlobUrlsAsync();
-        foreach (var pdf in documents)
+        var previewDocs = new List<object>();
+        for (var i = 0; i < documents.Count; i++)
         {
+            var pdf = documents[i];
             if (pdf == null || pdf.Length == 0)
                 continue;
 
             var url = await JS.InvokeAsync<string>("visaDocumentCopyPreview.createPdfBlobUrl", pdf);
-            if (!string.IsNullOrWhiteSpace(url))
-                _xfaBlobUrls.Add(url);
+            if (string.IsNullOrWhiteSpace(url))
+                continue;
+
+            _xfaBlobUrls.Add(url);
+            previewDocs.Add(new XfaPreviewJsDocument
+            {
+                Url = url,
+                PhotoDataUri = photoDataUris != null && i < photoDataUris.Count ? photoDataUris[i] : null
+            });
         }
 
-        if (_xfaBlobUrls.Count == 0)
+        if (previewDocs.Count == 0)
             throw new InvalidOperationException("Application form preview has no PDF bytes.");
 
-        var urls = _xfaBlobUrls.ToArray();
         try
         {
-            _xfaJsModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "/lib/pdfjs/visa-xfa-preview.js?v=xfarect");
+            _xfaJsModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "/lib/pdfjs/visa-xfa-preview.js?v=xfaphoto2");
         }
         catch (JSDisconnectedException)
         {
@@ -389,11 +399,17 @@
 
         if (_xfaJsModule != null)
         {
-            await _xfaJsModule.InvokeVoidAsync("renderAll", _xfaHost, urls);
+            await _xfaJsModule.InvokeVoidAsync("renderAll", _xfaHost, previewDocs);
             return;
         }
 
-        await JS.InvokeVoidAsync("visaXfaPreview.renderAll", _xfaHost, urls);
+        await JS.InvokeVoidAsync("visaXfaPreview.renderAll", _xfaHost, previewDocs);
+    }
+
+    private sealed class XfaPreviewJsDocument
+    {
+        public string Url { get; set; } = string.Empty;
+        public string? PhotoDataUri { get; set; }
     }
 
     private async Task ScheduleViewerLayoutSyncAsync()
@@ -433,6 +449,7 @@
     {
         _xfaRenderPending = false;
         _xfaDocuments = null;
+        _xfaPhotoDataUris = null;
         if (_useXfaViewer)
         {
             try

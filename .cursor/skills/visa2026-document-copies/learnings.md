@@ -25,6 +25,26 @@ Purpose: **dialog UX, scan preview, package enqueue, readiness, toast** — not 
 
 ## Entries
 
+### 2026-08-17 — Application form Preview FOTO overlay missed the box (preview)
+
+- **Symptom**: Download opened in Foxit showed the person photo in FOTO; `#visa-preview-slot` showed a blank white rectangle. Same filled XFA (e.g. Serdar Nuri Küçükkaya / B/-009).
+- **Try**: Overlay already passed `Person.Photo` as a data URI. `findFotoHost` required a leaf whose `textContent` was exactly `FOTO`, then a parent ≥48×48 px. pdf.js XFA often draws that caption as SVG/grouped text, so the overlay never attached. Foxit paints `ImageField1`; pdf.js does not.
+- **Test**: Stop F5, rebuild, F5, Ctrl+F5 (`?v=xfaphoto2`). Document copies → Application form Preview: photo sits in the FOTO box; header Download still filled XFA for Foxit.
+- **Root cause**: Browser preview cannot rely on pdf.js to paint XFA images, nor on finding the FOTO caption in the HTML tree.
+- **Fix**: Pin `.visa-xfa-preview__photo` to template coordinates on `.visa-xfa-preview__page` (ImageField1 on A4, caption 5mm excluded). Cache-bust `visa-xfa-preview.js`.
+- **Prevent**: Do not search for `FOTO` text. Cache-bust after overlay/CSS edits. Leave ÇAP ET / QR to Foxit.
+- **Cross-skill**: visa2026-pdf-form-mapping | visa2026-preview-slot
+
+### 2026-08-17 — Application form Preview empty Person photo (preview)
+
+- **Symptom**: Şahsy kagyzy preview showed name/passport filled but the FOTO box empty.
+- **Try**: ImageField1 maps to Person.Photo and Spire assigns XfaImageField + XmlDatasets/XmlTemplate image XML in memory. SaveToFile drops those mutations (no XFAImages, datasets ImageField1 stays empty). pdf.js only paints `<value><image>` content.
+- **Test**: `PdfFormFillerImageFieldTests` (mapping + data URI). Stop F5, rebuild, F5, Ctrl+F5. On **B/-009** Document copies → Application form Preview — FOTO shows the person photo.
+- **Root cause**: Spire 12.x does not persist XFA image XML; pdf.js cannot invent the photo from an empty ImageField1.
+- **Fix**: Overlay `Person.Photo` as a data URI on the FOTO widget in `visa-xfa-preview.js`.
+- **Prevent**: Do not expect SaveToFile to keep XFA image datasets. Cache-bust `visa-xfa-preview.js` after overlay edits.
+- **Cross-skill**: visa2026-pdf-form-mapping | visa2026-preview-slot
+
 ### 2026-08-17 — Application form browser preview via pdf.js XFA (preview)
 
 - **Symptom**: Chrome/Edge iframe showed the XFA “Please wait / Adobe Reader” sheet (then a red preview error; then a black page with white labels). Download in Foxit/Adobe was the real Şahsy kagyzy.

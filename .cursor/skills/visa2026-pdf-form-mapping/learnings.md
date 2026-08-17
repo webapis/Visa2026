@@ -25,6 +25,26 @@ Purpose: **XFA fill, PdfFormMapping rules, template, gates, converters** — not
 
 ## Entries
 
+### 2026-08-17 — Foxit paints ImageField1; pdf.js preview does not (filler)
+
+- **Symptom**: Officers saw the photo in Foxit after Download, but browser Application form Preview left FOTO empty.
+- **Try**: Earlier stream dump missed object-stream XFA packets and concluded SaveToFile dropped the image. Foxit screenshots disprove that for the Download file. pdf.js `enableXfa` still leaves ImageField1 blank (`href` / `$content` empty).
+- **Test**: Download → Foxit shows FOTO. Preview uses Person.Photo overlay at template coordinates (document-copies `?v=xfaphoto2`).
+- **Root cause**: pdf.js XFA image widgets do not resolve the saved ImageField1 packet the way Adobe/Foxit do.
+- **Fix**: Keep Spire image XML patch for Foxit. Do not flatten XFA for Chrome. Preview overlay is required.
+- **Prevent**: Do not iframe XFA or Spire-flatten for photo preview. Do not treat a naive PDF stream scan as proof the image is absent.
+- **Cross-skill**: document-copies
+
+### 2026-08-17 — Spire SaveToFile drops XFA ImageField1 (filler)
+
+- **Symptom**: Application form Preview FOTO box empty even when Person.Photo exists and text fields fill.
+- **Try**: ImageField1 is XfaImageField; ImageValueBase64 + XmlDatasets + XmlTemplate `<image>` all set in memory. Saved PDF still has empty `<ImageField1/>` and no XFAImages.
+- **Test**: `FillForm_AssignsImageField1InMemory` (logs). Preview overlay covered in document-copies.
+- **Root cause**: Spire 12.x SaveToFile does not persist XFA image XML mutations.
+- **Fix**: Keep the in-memory XML patch; browser preview overlays Person.Photo (`PdfPersonPhotoDataUri`). Foxit Download still depends on ÇAP ET / Adobe image handling, not pdf.js.
+- **Prevent**: Do not treat datasets InnerText as saved just because the log line ran.
+- **Cross-skill**: document-copies
+
 ### 2026-08-17 — Application form Preview filled family only (mapping | filler)
 
 - **Symptom**: After the Application.* rewrite, Preview still downloaded an empty Şahsy kagyzy. Item 18 family text appeared; name/passport/company widgets stayed blank. Footer said the form was downloaded.

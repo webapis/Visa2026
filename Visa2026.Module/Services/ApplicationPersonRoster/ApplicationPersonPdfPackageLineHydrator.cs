@@ -25,6 +25,7 @@ public static class ApplicationProfileInstancePersonPdfPackageLineHydrator
 
         var trackedApplication = objectSpace.GetObject(application) ?? application;
         var trackedPerson = objectSpace.GetObject(person) ?? person;
+        _ = trackedPerson?.Photo;
 
         var item = new ApplicationRosterMergeLine
         {

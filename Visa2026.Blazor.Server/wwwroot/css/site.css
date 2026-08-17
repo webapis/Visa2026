@@ -2505,10 +2505,25 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
     overflow: hidden;
 }
 
+/* ImageField1 on Visa_Application_TM_QR_08.pdf page 1 (210.016 x 297.01 mm).
+   Caption "FOTO" is 5mm at the bottom of the field — overlay the image area only. */
+.visa-xfa-preview__photo {
+    position: absolute;
+    left: 77.562%;
+    top: 5.818%;
+    width: 15.517%;
+    height: 13.998%;
+    object-fit: contain;
+    object-position: top center;
+    pointer-events: none;
+    z-index: 5;
+}
+
 .visa-xfa-preview__page .xfaLayer {
     position: absolute;
     top: 0;
     left: 0;
+    z-index: 1;
     color: #111;
     background-color: #fff !important;
     color-scheme: light;

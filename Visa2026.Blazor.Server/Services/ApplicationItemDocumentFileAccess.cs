@@ -21,6 +21,9 @@ public sealed class ApplicationItemDocumentFileResult
 
     /// <summary>Filled XFA PDFs for pdf.js browser preview (Chrome cannot iframe XFA).</summary>
     public IReadOnlyList<byte[]>? XfaDocuments { get; init; }
+
+    /// <summary>Person.Photo data URIs aligned with <see cref="XfaDocuments"/> (Spire drops XFA images on save).</summary>
+    public IReadOnlyList<string?>? PhotoDataUris { get; init; }
 }
 
 public sealed class ApplicationItemDocumentFileAccess
@@ -434,6 +437,9 @@ public sealed class ApplicationItemDocumentFileAccess
             }
 
             var xfaBytes = filledPdfs.Select(item => item.Content).ToList();
+            var photoDataUris = filledPdfs
+                .Select(item => PdfPersonPhotoDataUri.FromBytes(item.Item?.Person?.Photo))
+                .ToList();
 
             byte[] downloadContent;
             string downloadFileName;
@@ -459,7 +465,8 @@ public sealed class ApplicationItemDocumentFileAccess
                     ? filledPdfs[0].FileName
                     : downloadFileName.Replace(".zip", ".pdf", StringComparison.OrdinalIgnoreCase),
                 ContentType = "application/pdf",
-                XfaDocuments = xfaBytes
+                XfaDocuments = xfaBytes,
+                PhotoDataUris = photoDataUris
             };
             download = new ApplicationItemDocumentFileResult
             {
