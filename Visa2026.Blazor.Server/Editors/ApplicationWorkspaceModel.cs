@@ -174,6 +174,12 @@ public sealed class ApplicationWorkspaceModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    public bool ShowProgressRevertToHere
+    {
+        get => GetPropertyValue<bool>();
+        set => SetPropertyValue(value);
+    }
+
     public EventCallback<string> SaveProgressNotesRequested
     {
         get => GetPropertyValue<EventCallback<string>>();
@@ -189,6 +195,12 @@ public sealed class ApplicationWorkspaceModel : ComponentModelBase
     public EventCallback<OfficerShellCaseProgressAdvanceRequest> AdvanceProgressRequested
     {
         get => GetPropertyValue<EventCallback<OfficerShellCaseProgressAdvanceRequest>>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback<OfficerShellCaseProgressRevertRequest> RevertProgressRequested
+    {
+        get => GetPropertyValue<EventCallback<OfficerShellCaseProgressRevertRequest>>();
         set => SetPropertyValue(value);
     }
 

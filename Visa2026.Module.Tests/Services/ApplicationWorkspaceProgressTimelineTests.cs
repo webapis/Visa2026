@@ -73,6 +73,9 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.Equal("pending", steps[3].State);
         Assert.Equal("pending", steps[4].State);
         Assert.True(steps[1].CanAdvance);
+        Assert.True(steps[1].CanRevert);
+        Assert.True(steps[0].CanRevertToHere);
+        Assert.False(steps[0].CanRevert);
         Assert.Contains(steps[1].AdvanceOptions, o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.Review1Approved);
     }
 
@@ -233,6 +236,10 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.Equal(thirdLetterId, steps[3].ProgressId);
         Assert.Equal("ok", steps[1].OutcomeKind);
         Assert.Equal("issued", steps[4].OutcomeKind);
+        Assert.True(steps[0].CanRevertToHere);
+        Assert.True(steps[1].CanRevertToHere);
+        Assert.True(steps[4].CanRevert);
+        Assert.False(steps[4].CanRevertToHere);
         Assert.Equal(
             "Migration service · Issued",
             ApplicationWorkspaceProgressTimeline.FormatChromeCurrentStep(steps));

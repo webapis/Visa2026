@@ -54,6 +54,7 @@ disable-model-invocation: false
 | Slot closes when nested ListView still active | `OwnerViewId` + `VisaPreviewSlotCloseController` | **This skill** |
 | Catalog empty / Check chips / ZIP fail | Feature domain | **resminamalar** / **document-copies** / **person-document-copies** |
 | Preview generates but wrong PDF bytes | Generator / merge path | **resminamalar** / **document-copies** / **pdf-form-mapping** |
+| Approval letter Preview shows Please wait / Adobe Reader | Uploaded file is XFA; `ProgressLettersInlinePreview` must use pdf.js (`PdfXfaDocument.ContainsXfa`), not iframe | **This skill** + application-progress |
 
 ---
 

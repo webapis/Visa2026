@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -71,7 +72,8 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         IObjectSpace objectSpace,
         Guid applicationId,
         string? stateCode,
-        string? notesOnLatestStep)
+        string? notesOnLatestStep,
+        DateTime? stepDate)
     {
         if (objectSpace == null)
             return OfficerShellCaseProgressResult.Failed("ObjectSpace is required.");
@@ -106,9 +108,15 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         if (state == null)
             return OfficerShellCaseProgressResult.Failed(VisaUiMessages.Get("ApplicationProfileInstanceProgress.InvalidForRoute"));
 
+        var date = stepDate is { } chosen && chosen != default
+            ? chosen.Date
+            : DateTime.Today;
+        if (date == default)
+            return OfficerShellCaseProgressResult.Failed("Date is required.");
+
         var progress = objectSpace.CreateObject<ApplicationProfileInstanceProgress>();
         progress.ApplicationProfileInstance = application;
-        progress.Date = DateTime.Today;
+        progress.Date = date;
         progress.State = state;
         application.ProgressHistory ??= new System.Collections.ObjectModel.ObservableCollection<ApplicationProfileInstanceProgress>();
         if (!application.ProgressHistory.Contains(progress))
@@ -130,6 +138,38 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         return OfficerShellCaseProgressResult.Succeeded(chosenCode);
     }
 
+    public OfficerShellCaseProgressResult Revert(
+        IObjectSpace objectSpace,
+        Guid applicationId,
+        string? stepKey)
+    {
+        if (objectSpace == null)
+            return OfficerShellCaseProgressResult.Failed("ObjectSpace is required.");
+
+        var application = LoadApplicationForAdvance(objectSpace, applicationId);
+        if (application == null)
+            return OfficerShellCaseProgressResult.Failed("ApplicationProfileInstance not found.");
+
+        var toDelete = ApplicationProfileInstanceProgressRevertHelper
+            .RowsToDelete(application.ProgressHistory, stepKey)
+            .ToList();
+        if (toDelete.Count == 0)
+            return OfficerShellCaseProgressResult.Failed("Nothing to revert on this application.");
+
+        foreach (var row in toDelete
+                     .OrderByDescending(p => p, Comparer<ApplicationProfileInstanceProgress>.Create(
+                         ApplicationProfileInstanceProgressOrderHelper.CompareSiblingOrder)))
+        {
+            if (row.MinistryLetterFile != null)
+                objectSpace.Delete(row.MinistryLetterFile);
+            objectSpace.Delete(row);
+            application.ProgressHistory?.Remove(row);
+        }
+
+        ApplicationLatestProgressSyncHelper.Sync(application, objectSpace);
+        return OfficerShellCaseProgressResult.Succeeded();
+    }
+
     private static ApplicationProfileInstance? LoadApplicationForAdvance(IObjectSpace objectSpace, Guid applicationId)
     {
         try
@@ -145,6 +185,8 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
                 .Include(a => a.ApprovalLegSnapshots)
                 .Include(a => a.ProgressHistory)
                     .ThenInclude(p => p.State)
+                .Include(a => a.ProgressHistory)
+                    .ThenInclude(p => p.MinistryLetterFile)
                 .Include(a => a.ApplicationType)
                 .FirstOrDefault(a => a.ID == applicationId);
         }

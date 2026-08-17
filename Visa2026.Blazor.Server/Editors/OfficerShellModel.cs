@@ -483,6 +483,12 @@ public sealed class OfficerShellModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    public EventCallback<OfficerShellCaseProgressRevertRequest> RevertProgressRequested
+    {
+        get => GetPropertyValue<EventCallback<OfficerShellCaseProgressRevertRequest>>();
+        set => SetPropertyValue(value);
+    }
+
     public string? ProgressStatusMessage
     {
         get => GetPropertyValue<string?>();
@@ -490,6 +496,12 @@ public sealed class OfficerShellModel : ComponentModelBase
     }
 
     public bool ProgressStatusIsError
+    {
+        get => GetPropertyValue<bool>();
+        set => SetPropertyValue(value);
+    }
+
+    public bool ShowProgressRevertToHere
     {
         get => GetPropertyValue<bool>();
         set => SetPropertyValue(value);

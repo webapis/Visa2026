@@ -123,13 +123,16 @@
                         @RenderPeople(view)
                         break;
                     case "progress":
-                        <OfficerShellCaseProgressTab ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId"
+                        <OfficerShellCaseProgressTab @ref="_progressTab"
+                                                     ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId"
                                                      View="view"
                                                      StatusMessage="@ProgressStatusMessage"
                                                      IsStatusError="@ProgressStatusIsError"
                                                      SaveNotesRequested="@SaveProgressNotesRequested"
                                                      UploadMinistryLetterRequested="@UploadMinistryLetterRequested"
                                                      AdvanceProgressRequested="@AdvanceProgressRequested"
+                                                     RevertProgressRequested="@RevertProgressRequested"
+                                                     ShowRevertToHere="@ShowRevertToHere"
                                                      PreviewSlotOwnerViewId="@PreviewSlotOwnerViewId" />
                         break;
                     case "documents":
@@ -171,6 +174,8 @@
     private static readonly string[] PersonColors =
         ["#7c3aed", "#0f9d58", "#ea580c", "#2563eb", "#db2777"];
 
+    private OfficerShellCaseProgressTab? _progressTab;
+
     [Parameter] public ApplicationWorkspaceSnapshot? Snapshot { get; set; }
     [Parameter] public bool IsLoading { get; set; }
     [Parameter] public string ActiveTab { get; set; } = "overview";
@@ -198,6 +203,8 @@
     [Parameter] public EventCallback<string> SaveProgressNotesRequested { get; set; }
     [Parameter] public EventCallback<OfficerShellCaseProgressFileUpload> UploadMinistryLetterRequested { get; set; }
     [Parameter] public EventCallback<OfficerShellCaseProgressAdvanceRequest> AdvanceProgressRequested { get; set; }
+    [Parameter] public EventCallback<OfficerShellCaseProgressRevertRequest> RevertProgressRequested { get; set; }
+    [Parameter] public bool ShowRevertToHere { get; set; }
     [Parameter] public bool ShowPersonLinkPicker { get; set; }
     [Parameter] public IReadOnlyList<ApplicationProfileInstancePersonLinkCandidateRow> PersonLinkCandidates { get; set; } = Array.Empty<ApplicationProfileInstancePersonLinkCandidateRow>();
     [Parameter] public bool PersonLinkIsSearching { get; set; }
@@ -736,6 +743,10 @@
                         <button type="button" class="cw-rail-btn" @onclick="IssueRecordQuickAction">＋ Issue record…</button>
                     }
                     <button type="button" class="cw-rail-btn cw-rail-btn--primary" @onclick="AdvanceProgressAsync">▶ Advance progress</button>
+                    @if (CanRevertFromRail)
+                    {
+                        <button type="button" class="cw-rail-btn" @onclick="RevertProgressAsync">◀ Revert progress</button>
+                    }
                 </section>
                 <section class="cw-rail-block">
                     <h4>Activity</h4>
@@ -785,6 +796,10 @@
                 </section>
                 <section class="cw-rail-block">
                     <button type="button" class="os-btn os-btn--primary" style="width:100%;margin-bottom:8px" @onclick="AdvanceProgressAsync">▶ Advance progress</button>
+                    @if (CanRevertFromRail)
+                    {
+                        <button type="button" class="os-btn os-btn--ghost" style="width:100%;margin-bottom:8px" @onclick="RevertProgressAsync">◀ Revert progress</button>
+                    }
                 </section>
                 <section class="cw-rail-block">
                     <h4>History</h4>
@@ -911,14 +926,32 @@
         if (current?.CanAdvance != true || current.AdvanceOptions.Count == 0)
             return SelectTab("progress");
 
-        if (current.AdvanceOptions.Count > 1
-            && !string.Equals(ActiveTab, "progress", StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(ActiveTab, "progress", StringComparison.OrdinalIgnoreCase))
             return SelectTab("progress");
 
         return AdvanceProgressRequested.InvokeAsync(new OfficerShellCaseProgressAdvanceRequest
         {
             StateCode = current.AdvanceOptions[0].StateCode,
             Notes = current.OfficerNotes ?? string.Empty,
+            Date = _progressTab?.AdvanceDate ?? DateTime.Today,
+        });
+    }
+
+    private bool CanRevertFromRail =>
+        Snapshot?.CaseView.ProgressSteps.Any(s => s.CanRevert) == true;
+
+    private Task RevertProgressAsync()
+    {
+        if (!CanRevertFromRail)
+            return SelectTab("progress");
+
+        if (!string.Equals(ActiveTab, "progress", StringComparison.OrdinalIgnoreCase))
+            return SelectTab("progress");
+
+        var last = Snapshot?.CaseView.ProgressSteps.FirstOrDefault(s => s.CanRevert);
+        return RevertProgressRequested.InvokeAsync(new OfficerShellCaseProgressRevertRequest
+        {
+            StepKey = last != null ? null : "office",
         });
     }
 

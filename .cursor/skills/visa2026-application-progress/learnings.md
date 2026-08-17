@@ -6,6 +6,41 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 
 ## Entries
 
+### 2026-08-17 — Next step dropdown previews the current ministry badge
+
+- Changing Next step to Disapproved left the Energetika badge and header on Approved (recorded state). For the current slot, the badge, header, and Current state now follow the selected Next step when that choice is a result of the same ministry/migration (not the following step).
+- Test: `ApplicationWorkspaceProgressAdvancePreviewTests`. Stop F5, rebuild, F5. On **8/-010** Progress → Energetika → Next step Disapproved — badge and “current step: Energetika · Disapproved” update before Advance.
+- Prevent: Do not keep CurrentStateLabel on the current node when the officer has picked a same-slot result. Do not retarget the badge when Next step is the following ministry.
+- Cross-skill: visa2026-application-profile
+
+### 2026-08-17 — Revert to here stays hidden until Revert progress
+
+- Revert to here on every completed node made a rare jump look like a daily action. **Revert progress** stays visible (current step + Progress rail). **Revert to here** appears only after a successful Revert, for this case visit. Advance, Back to list, or opening another case hides it again.
+- Verify: stop F5, rebuild, F5. On **8/-006** Progress — only Revert progress at first; after one revert, Revert to here on completed steps; Advance hides them again.
+- Prevent: Do not show Revert to here on first paint. First click of Revert progress must still delete the latest row.
+- Cross-skill: visa2026-application-profile
+
+### 2026-08-17 — Ministry letter Preview paints XFA via pdf.js
+
+- Officers often attach a filled Application form (XFA) as the approval letter. Slot iframe showed Please wait. Same pdf.js path as Document copies Application form Preview (`PdfXfaDocument.ContainsXfa`).
+- Test: `PdfXfaDocumentTests`. Stop F5, rebuild, F5, Ctrl+F5. Progress letter filename → slot shows the form; Download still XFA for Foxit.
+- Prevent: Do not iframe XFA letters. Scanned non-XFA PDFs keep the iframe.
+- Cross-skill: visa2026-preview-slot | visa2026-document-copies
+
+### 2026-08-17 — Workspace Advance records officer-entered step date
+
+- Advance always wrote `DateTime.Today`. Officers need the real ministry/migration date on each new `ApplicationProfileInstanceProgress` row. Progress tab Advance now has a Date field (default today); rail Advance from Overview opens Progress first so the date can be set. Still blocked if the date is before the previous row (`DateCannotBeBeforePrevious`).
+- Verify: stop F5, rebuild, F5. On **8/-009** Progress — set Date to a past day, Advance; timeline shows that date. Date before the previous step is rejected.
+- Prevent: Do not silently overwrite officer Date with today after the picker is set.
+- Cross-skill: visa2026-application-profile
+
+### 2026-08-17 — Workspace Progress can revert backward to office
+
+- Officers needed to undo a mistaken Advance (wrong step or wrong ministry letter). History stays append-only: revert **deletes** later rows, it does not rewrite them. **Revert progress** removes the latest row (repeatable through Issued/Rejected/Cancelled). **Revert to here** on a completed slot (including Office preparation) drops every row after that slot. Empty history is implied office again; People lock follows the new latest row. Nested ListView still allows delete-last only.
+- Test: `ApplicationProgressRevertHelperTests` + timeline CanRevert flags. Stop F5, rebuild, F5, Ctrl+F5. On **8/-009** Progress: Revert from Migration → previous ministry; Revert to here on Office → implied office; Advance still works.
+- Prevent: Do not insert compensating “reverted” rows. Do not iframe/flatten for this. Repeat Revert until office; do not skip-delete older rows except via Revert to here.
+- Cross-skill: visa2026-application-profile
+
 ### 2026-08-14 — Approval letters stay visible after the ministry step is done
 
 - Upload still attaches `MinistryLetterFile` to the decision row. Case workspace now lists that filename on completed ministry nodes (Progress + Overview) and opens the preview slot. Previously the name was only copied onto the current step.

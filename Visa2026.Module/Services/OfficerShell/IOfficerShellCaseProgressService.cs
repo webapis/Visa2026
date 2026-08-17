@@ -17,5 +17,11 @@ public interface IOfficerShellCaseProgressService
         IObjectSpace objectSpace,
         Guid applicationId,
         string? stateCode,
-        string? notesOnLatestStep);
+        string? notesOnLatestStep,
+        DateTime? stepDate);
+
+    OfficerShellCaseProgressResult Revert(
+        IObjectSpace objectSpace,
+        Guid applicationId,
+        string? stepKey);
 }

@@ -11,14 +11,18 @@
     }
 
     <h2 class="ct-page__title">Progress</h2>
-    <p class="ct-page__sub">ApplicationProfileInstance process for @view.Chrome.TemplateFamilyLabel · current step: @view.Chrome.CurrentStep</p>
+    <p class="ct-page__sub">ApplicationProfileInstance process for @view.Chrome.TemplateFamilyLabel · current step: @CurrentStepHeading</p>
     <div class="ct-prog-v-list">
         @foreach (var step in view.ProgressSteps)
         {
-            var badge = !string.IsNullOrWhiteSpace(step.CurrentStateLabel)
-                ? step.CurrentStateLabel
-                : step.State == "done" ? "Completed" : step.State == "current" ? "In progress" : "Pending";
-            var badgeCls = step.OutcomeKind switch
+            var preview = PreviewFor(step);
+            var badge = !string.IsNullOrWhiteSpace(preview.Label)
+                ? preview.Label
+                : !string.IsNullOrWhiteSpace(step.CurrentStateLabel)
+                    ? step.CurrentStateLabel
+                    : step.State == "done" ? "Completed" : step.State == "current" ? "In progress" : "Pending";
+            var tone = preview.Tone ?? step.OutcomeKind;
+            var badgeCls = tone switch
             {
                 "issued" => "issued",
                 "rejected" => "rejected",
@@ -29,7 +33,7 @@
             };
             var letterName = step.MinistryLetterFileName;
             var letterProgressId = step.ProgressId;
-            var icon = step.OutcomeKind switch
+            var icon = tone switch
             {
                 "rejected" => "✕",
                 "cancelled" => "–",
@@ -37,7 +41,7 @@
                 "current" => "✎",
                 _ => "○",
             };
-            <div class="ct-prog-v ct-prog-v--@step.State ct-prog-v--tone-@step.OutcomeKind">
+            <div class="ct-prog-v ct-prog-v--@step.State ct-prog-v--tone-@tone">
                 <div class="ct-prog-v__rail">
                     <span class="ct-prog-v__date">@(string.IsNullOrWhiteSpace(step.Date) ? "—" : step.Date)</span>
                     <span class="ct-prog-v__dot">@icon</span>
@@ -48,6 +52,17 @@
                         <strong>@step.Label</strong>
                         <span class="cw-prog-step__badge cw-prog-step__badge--@badgeCls">@badge</span>
                     </div>
+                    @if (step.State != "current" && ShowRevertToHere && step.CanRevertToHere)
+                    {
+                        <p style="margin:6px 0 0">
+                            <button type="button"
+                                    class="os-btn os-btn--ghost"
+                                    disabled="@_busy"
+                                    @onclick="() => RevertAsync(step)">
+                                ◀ Revert to here
+                            </button>
+                        </p>
+                    }
                     @if (step.State != "current"
                         && !string.IsNullOrWhiteSpace(letterName)
                         && letterProgressId is Guid)
@@ -95,7 +110,7 @@
                                     }
                                 </div>
                                 <dl class="ct-meta">
-                                    <div><dt>Current state</dt><dd><span class="os-status os-status--process">@step.CurrentStateLabel</span></dd></div>
+                                    <div><dt>Current state</dt><dd><span class="os-status os-status--process">@(string.IsNullOrWhiteSpace(preview.Label) ? step.CurrentStateLabel : preview.Label)</span></dd></div>
                                     <div><dt>Started on</dt><dd>@step.Date</dd></div>
                                     <div><dt>SLA target</dt><dd>@(string.IsNullOrWhiteSpace(step.SlaTargetDate) ? "—" : step.SlaTargetDate)</dd></div>
                                 </dl>
@@ -104,9 +119,16 @@
                             @if (step.CanAdvance)
                             {
                                 <div class="ct-prog-advance" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--os-line)">
+                                    <label class="ct-label" for="advance-date-@ApplicationProfileInstanceId">Date</label>
+                                    <input id="advance-date-@ApplicationProfileInstanceId"
+                                           type="date"
+                                           class="os-input"
+                                           @bind="_advanceDate"
+                                           @bind:format="yyyy-MM-dd"
+                                           disabled="@_busy" />
                                     @if (step.AdvanceOptions.Count > 1)
                                     {
-                                        <label class="ct-label" for="advance-state-@ApplicationProfileInstanceId">Next step</label>
+                                        <label class="ct-label" for="advance-state-@ApplicationProfileInstanceId" style="margin-top:10px">Next step</label>
                                         <select id="advance-state-@ApplicationProfileInstanceId" class="os-input" @bind="_selectedAdvanceStateCode" disabled="@_busy">
                                             @foreach (var option in step.AdvanceOptions)
                                             {
@@ -120,6 +142,27 @@
                                             disabled="@(_busy || string.IsNullOrWhiteSpace(_selectedAdvanceStateCode))"
                                             @onclick="AdvanceAsync">
                                         ▶ Advance progress
+                                    </button>
+                                    @if (step.CanRevert)
+                                    {
+                                        <button type="button"
+                                                class="os-btn os-btn--ghost"
+                                                style="margin-top:10px;margin-left:8px"
+                                                disabled="@_busy"
+                                                @onclick="() => RevertAsync(step)">
+                                            ◀ Revert progress
+                                        </button>
+                                    }
+                                </div>
+                            }
+                            else if (step.CanRevert)
+                            {
+                                <div class="ct-prog-advance" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--os-line)">
+                                    <button type="button"
+                                            class="os-btn os-btn--ghost"
+                                            disabled="@_busy"
+                                            @onclick="() => RevertAsync(step)">
+                                        ◀ Revert progress
                                     </button>
                                 </div>
                             }
@@ -143,12 +186,17 @@
     [Parameter] public EventCallback<string> SaveNotesRequested { get; set; }
     [Parameter] public EventCallback<OfficerShellCaseProgressFileUpload> UploadMinistryLetterRequested { get; set; }
     [Parameter] public EventCallback<OfficerShellCaseProgressAdvanceRequest> AdvanceProgressRequested { get; set; }
+    [Parameter] public EventCallback<OfficerShellCaseProgressRevertRequest> RevertProgressRequested { get; set; }
+    [Parameter] public bool ShowRevertToHere { get; set; }
     [Parameter] public string PreviewSlotOwnerViewId { get; set; } = OfficerShellViewIds.DetailView;
 
     private string _officerNotes = string.Empty;
     private string _selectedAdvanceStateCode = string.Empty;
+    private DateTime _advanceDate = DateTime.Today;
     private bool _busy;
     private bool _notesDirty;
+
+    internal DateTime AdvanceDate => _advanceDate == default ? DateTime.Today : _advanceDate.Date;
 
     private ApplicationWorkspaceCaseView view => View;
     private int MaxUploadMb => 10;
@@ -163,10 +211,43 @@
             _officerNotes = current.OfficerNotes ?? string.Empty;
 
         if (string.IsNullOrWhiteSpace(_selectedAdvanceStateCode)
-            && current.AdvanceOptions.Count > 0)
+            || current.AdvanceOptions.All(o => o.StateCode != _selectedAdvanceStateCode))
         {
-            _selectedAdvanceStateCode = current.AdvanceOptions[0].StateCode;
+            _selectedAdvanceStateCode = current.AdvanceOptions.FirstOrDefault()?.StateCode ?? string.Empty;
         }
+    }
+
+    private string CurrentStepHeading
+    {
+        get
+        {
+            var current = view.ProgressSteps.FirstOrDefault(s => s.State == "current");
+            if (current == null)
+                return view.Chrome.CurrentStep;
+
+            var preview = PreviewFor(current);
+            var result = !string.IsNullOrWhiteSpace(preview.Label)
+                ? preview.Label
+                : current.CurrentStateLabel;
+            if (string.Equals(current.Key, "office", StringComparison.OrdinalIgnoreCase)
+                || string.IsNullOrWhiteSpace(result))
+                return current.Label;
+
+            return $"{current.Label} · {result}";
+        }
+    }
+
+    private (string? Label, string? Tone) PreviewFor(ApplicationWorkspaceCaseProgressStep step)
+    {
+        if (step.State != "current" || step.AdvanceOptions.Count == 0)
+            return (null, null);
+
+        var option = step.AdvanceOptions.FirstOrDefault(o => o.StateCode == _selectedAdvanceStateCode)
+            ?? step.AdvanceOptions[0];
+        if (!ApplicationWorkspaceProgressAdvancePreview.IsResultForStep(step.Key, option.StateCode))
+            return (null, null);
+
+        return (option.Label, ApplicationWorkspaceProgressAdvancePreview.OutcomeKind(option.StateCode));
     }
 
     private void OnNotesInput(ChangeEventArgs e)
@@ -235,6 +316,27 @@
             {
                 StateCode = code,
                 Notes = _officerNotes,
+                Date = AdvanceDate,
+            });
+            _notesDirty = false;
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task RevertAsync(ApplicationWorkspaceCaseProgressStep step)
+    {
+        if (_busy)
+            return;
+
+        _busy = true;
+        try
+        {
+            await RevertProgressRequested.InvokeAsync(new OfficerShellCaseProgressRevertRequest
+            {
+                StepKey = step.CanRevertToHere && !step.CanRevert ? step.Key : null,
             });
             _notesDirty = false;
         }

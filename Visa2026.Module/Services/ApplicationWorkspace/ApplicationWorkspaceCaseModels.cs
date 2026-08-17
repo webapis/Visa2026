@@ -129,6 +129,12 @@ public sealed class ApplicationWorkspaceCaseProgressStep
 
     public bool CanAdvance { get; init; }
 
+    /// <summary>Undo the latest history row (this slot currently holds that row).</summary>
+    public bool CanRevert { get; init; }
+
+    /// <summary>Drop every history row after this slot, or all rows when this is office.</summary>
+    public bool CanRevertToHere { get; init; }
+
     public string AdvanceBlockedReason { get; init; } = string.Empty;
 
     public IReadOnlyList<ApplicationWorkspaceCaseProgressAdvanceOption> AdvanceOptions { get; init; }

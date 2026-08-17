@@ -1,6 +1,7 @@
 @namespace Visa2026.Blazor.Server.Components
 @using DevExpress.Blazor
 @using Microsoft.AspNetCore.Components
+@using System.Collections.Generic
 @using System.IO
 @using Microsoft.JSInterop
 @using DevExpress.ExpressApp.Blazor.Services
@@ -50,6 +51,15 @@
         {
             <div class="app-item-doc-copies-preview__state app-item-doc-copies-preview__state--error" role="alert">@_error</div>
         }
+        else if (_useXfaViewer)
+        {
+            <div class="app-item-doc-copies-preview__viewer-shell report-package-inline-preview__viewer-shell">
+                <div @ref="_xfaHost"
+                     class="app-item-doc-copies-preview__xfa-host"
+                     data-bs-theme="light"
+                     title="@_fileName"></div>
+            </div>
+        }
         else if (!string.IsNullOrWhiteSpace(_pdfBlobUrl))
         {
             <div class="app-item-doc-copies-preview__viewer-shell report-package-inline-preview__viewer-shell">
@@ -84,6 +94,12 @@
     private bool _loading;
     private string? _pdfBlobUrl;
     private string? _imageBlobUrl;
+    private bool _useXfaViewer;
+    private bool _xfaRenderPending;
+    private byte[]? _xfaDocument;
+    private readonly List<string> _xfaBlobUrls = new();
+    private ElementReference _xfaHost;
+    private IJSObjectReference? _xfaJsModule;
     private byte[]? _downloadContent;
     private string _downloadFileName = string.Empty;
     private string _previewLoadingLabel = string.Empty;
@@ -119,6 +135,7 @@
         _downloadContent = null;
         _downloadFileName = string.Empty;
 
+        await ClearXfaViewerAsync();
         await RevokeBlobUrlsAsync();
         await InvokeAsync(StateHasChanged);
         await Task.Yield();
@@ -141,6 +158,12 @@
                     "visaPreviewDrawer.createImageBlobUrl",
                     result.Content,
                     result.ContentType);
+            }
+            else if (PdfXfaDocument.ContainsXfa(result.Content))
+            {
+                _xfaDocument = result.Content;
+                _useXfaViewer = true;
+                _xfaRenderPending = true;
             }
             else
             {
@@ -180,6 +203,68 @@
 
     private async Task ClosePreviewAsync() => await CloseAsync();
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_xfaRenderPending || !_useXfaViewer || _loading || _xfaDocument == null || _xfaDocument.Length == 0)
+            return;
+
+        _xfaRenderPending = false;
+        try
+        {
+            await RenderXfaDocumentAsync(_xfaDocument);
+            await ScheduleViewerLayoutSyncAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+        catch (Exception ex)
+        {
+            SetPreviewError(PreviewError, ex);
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task RenderXfaDocumentAsync(byte[] pdf)
+    {
+        await RevokeXfaBlobUrlsAsync();
+        var url = await JS.InvokeAsync<string>("visaDocumentCopyPreview.createPdfBlobUrl", pdf);
+        if (string.IsNullOrWhiteSpace(url))
+            throw new InvalidOperationException("Approval letter preview has no PDF bytes.");
+
+        _xfaBlobUrls.Add(url);
+        var previewDocs = new List<object>
+        {
+            new XfaPreviewJsDocument { Url = url },
+        };
+
+        try
+        {
+            _xfaJsModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "/lib/pdfjs/visa-xfa-preview.js?v=xfaphoto2");
+        }
+        catch (JSDisconnectedException)
+        {
+            throw;
+        }
+        catch (JSException)
+        {
+            _xfaJsModule = null;
+        }
+
+        if (_xfaJsModule != null)
+        {
+            await _xfaJsModule.InvokeVoidAsync("renderAll", _xfaHost, previewDocs);
+            return;
+        }
+
+        await JS.InvokeVoidAsync("visaXfaPreview.renderAll", _xfaHost, previewDocs);
+    }
+
+    private sealed class XfaPreviewJsDocument
+    {
+        public string Url { get; set; } = string.Empty;
+        public string? PhotoDataUri { get; set; }
+    }
+
     private async Task DownloadPreviewPdfAsync()
     {
         if (_downloadContent == null || _downloadContent.Length == 0)
@@ -193,7 +278,7 @@
 
     private async Task ScheduleViewerLayoutSyncAsync()
     {
-        if (string.IsNullOrWhiteSpace(_pdfBlobUrl) && string.IsNullOrWhiteSpace(_imageBlobUrl))
+        if (string.IsNullOrWhiteSpace(_pdfBlobUrl) && string.IsNullOrWhiteSpace(_imageBlobUrl) && !_useXfaViewer)
             return;
 
         var generation = ++_layoutSyncGeneration;
@@ -217,7 +302,43 @@
         _previewLoadingLabel = string.Empty;
         _downloadContent = null;
         _downloadFileName = string.Empty;
+        await ClearXfaViewerAsync();
         await RevokeBlobUrlsAsync();
+    }
+
+    private async Task ClearXfaViewerAsync()
+    {
+        _xfaRenderPending = false;
+        _xfaDocument = null;
+        if (_useXfaViewer)
+        {
+            try
+            {
+                if (_xfaJsModule != null)
+                    await _xfaJsModule.InvokeVoidAsync("clear", _xfaHost);
+                else
+                    await JS.InvokeVoidAsync("visaXfaPreview.clear", _xfaHost);
+            }
+            catch (JSDisconnectedException) { }
+            catch (JSException) { }
+        }
+
+        _useXfaViewer = false;
+        await RevokeXfaBlobUrlsAsync();
+    }
+
+    private async Task RevokeXfaBlobUrlsAsync()
+    {
+        foreach (var url in _xfaBlobUrls)
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("visaDocumentCopyPreview.revokePdfBlobUrl", url);
+            }
+            catch (JSDisconnectedException) { }
+        }
+
+        _xfaBlobUrls.Clear();
     }
 
     private async Task RevokeBlobUrlsAsync()
@@ -245,5 +366,9 @@
         }
     }
 
-    public async ValueTask DisposeAsync() => await RevokeBlobUrlsAsync();
+    public async ValueTask DisposeAsync()
+    {
+        await ClearXfaViewerAsync();
+        await RevokeBlobUrlsAsync();
+    }
 }

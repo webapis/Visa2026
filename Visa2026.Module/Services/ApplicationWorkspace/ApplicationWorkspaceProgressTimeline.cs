@@ -52,7 +52,8 @@ internal static class ApplicationWorkspaceProgressTimeline
                 currentSla,
                 canAdvance,
                 advanceBlockedReason,
-                advanceOptions),
+                advanceOptions,
+                history),
         };
 
         foreach (var leg in legs)
@@ -70,7 +71,9 @@ internal static class ApplicationWorkspaceProgressTimeline
                 isCurrent && canAdvance,
                 isCurrent ? advanceBlockedReason : string.Empty,
                 isCurrent ? advanceOptions : Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>(),
-                letterRow));
+                letterRow,
+                history,
+                latest));
         }
 
         var migrationRow = LatestMigrationRow(history);
@@ -84,7 +87,10 @@ internal static class ApplicationWorkspaceProgressTimeline
             migrationCurrent ? currentSla : default,
             migrationCurrent && canAdvance,
             migrationCurrent ? advanceBlockedReason : string.Empty,
-            migrationCurrent ? advanceOptions : Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>()));
+            migrationCurrent ? advanceOptions : Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>(),
+            letterRow: null,
+            history,
+            latest));
 
         return steps;
     }
@@ -233,7 +239,8 @@ internal static class ApplicationWorkspaceProgressTimeline
         ApplicationProfileInstanceProgressSlaResult currentSla,
         bool canAdvance,
         string advanceBlockedReason,
-        IReadOnlyList<ApplicationWorkspaceCaseProgressAdvanceOption> advanceOptions)
+        IReadOnlyList<ApplicationWorkspaceCaseProgressAdvanceOption> advanceOptions,
+        IReadOnlyList<ApplicationProfileInstanceProgress> history)
     {
         var date = application.ApplicationDate == default
             ? string.Empty
@@ -250,6 +257,8 @@ internal static class ApplicationWorkspaceProgressTimeline
             SlaDaysRemaining = isCurrent ? DaysLeft(currentSla) : null,
             OfficerNotes = isCurrent ? application.OfficePreparationNotes ?? string.Empty : string.Empty,
             CanAdvance = isCurrent && canAdvance,
+            CanRevert = false,
+            CanRevertToHere = !isCurrent && history.Count > 0,
             AdvanceBlockedReason = isCurrent ? advanceBlockedReason : string.Empty,
             AdvanceOptions = isCurrent ? advanceOptions : Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>(),
             OutcomeKind = isCurrent ? "current" : "ok",
@@ -265,7 +274,9 @@ internal static class ApplicationWorkspaceProgressTimeline
         bool canAdvance,
         string advanceBlockedReason,
         IReadOnlyList<ApplicationWorkspaceCaseProgressAdvanceOption> advanceOptions,
-        ApplicationProfileInstanceProgress? letterRow = null)
+        ApplicationProfileInstanceProgress? letterRow,
+        IReadOnlyList<ApplicationProfileInstanceProgress> history,
+        ApplicationProfileInstanceProgress? latest)
     {
         var isCurrent = slotState == "current";
         var stateLabel = row == null
@@ -292,10 +303,24 @@ internal static class ApplicationWorkspaceProgressTimeline
             MinistryLetterFileName = letter?.MinistryLetterFileName ?? string.Empty,
             ShowMinistryLetterUpload = isCurrent && row?.IsMinistryDecisionStep == true,
             CanAdvance = isCurrent && canAdvance,
+            CanRevert = CanRevertLast(latest, key),
+            CanRevertToHere = slotState == "done"
+                && ApplicationProfileInstanceProgressRevertHelper.RowsToDelete(history, key).Count > 0,
             AdvanceBlockedReason = isCurrent ? advanceBlockedReason : string.Empty,
             AdvanceOptions = isCurrent ? advanceOptions : Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>(),
             OutcomeKind = ResolveOutcomeKind(slotState, row?.State?.Code),
         };
+    }
+
+    private static bool CanRevertLast(ApplicationProfileInstanceProgress? latest, string stepKey)
+    {
+        if (latest == null || string.IsNullOrWhiteSpace(stepKey))
+            return false;
+
+        return string.Equals(
+            ApplicationProfileInstanceProgressRevertHelper.SlotKeyFor(latest),
+            stepKey,
+            StringComparison.OrdinalIgnoreCase);
     }
 
     internal static string ResolveOutcomeKind(string slotState, string? stateCode)

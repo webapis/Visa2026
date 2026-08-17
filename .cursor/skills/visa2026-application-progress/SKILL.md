@@ -78,6 +78,7 @@ disable-model-invocation: false
 | Contract required / legs required message | `ApplicationProgressProfileResolver.TryValidate*` | `ProjectContract` + `MinistryLegs` |
 | Ministry column empty on progress | `ApprovalLegSnapshots` + `ApprovalLegProfileMinistryHelper.GetMinistryShortNameForProgressStep` (falls back to live profile legs) | Snapshot missing on import; heal via `EnsureSnapshots` on Application save |
 | Letter upload hidden when it should show | `IsMinistryDecisionStateCode` + `[Appearance]` on `MinistryLetterFile` | State code or criteria |
+| Approval letter Preview shows Please wait / Adobe Reader | File is filled XFA; `ProgressLettersInlinePreview` + `PdfXfaDocument.ContainsXfa` (pdf.js, not iframe) | Preview slot occupant |
 | Application list row color wrong | **`visa2026-bo-state-colors`** — `PrimaryStateCode`, `BoStateAppearanceColors` | Not transition helper |
 | Cannot edit contract legs | `ProjectContractMinistryController` — duplicate contract row instead | Structural immutability |
 | New ministry leg count (e.g. 4th) | Add catalog rows `4_REVIEW_*`, `AT_THE_MINISTERY_4`; bump manifest; extend loop in helpers (max `MaxLegCount`) | Catalog + helpers |

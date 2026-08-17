@@ -4,6 +4,34 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 
 ---
 
+### 2026-08-17 — Current-step badge follows Next step
+
+- Progress tab badge/header stayed on the recorded result (Approved) after the officer picked Disapproved in Next step. Same-slot preview now updates the current node before Advance.
+- Verify: stop F5, rebuild, F5. On **8/-010** Progress — Energetika Next step Disapproved updates the badge immediately.
+- Prevent: Do not bind the current-step badge only to `CurrentStateLabel` when a same-slot Next step is selected.
+- Cross-skill: visa2026-application-progress
+
+### 2026-08-17 — Revert to here is revealed after Revert progress
+
+- Workspace Progress showed Revert to here on every completed node. Officers only need that jump after they have already started correcting. **Revert progress** stays; **Revert to here** appears after a successful revert on this case and hides again after Advance or leaving the case.
+- Verify: stop F5, rebuild, F5. On **8/-006** Progress — Revert progress only; revert once → Revert to here; Advance → hidden.
+- Prevent: Do not treat the first Revert progress click as reveal-only.
+- Cross-skill: visa2026-application-progress
+
+### 2026-08-17 — Workspace Advance records officer-entered step date
+
+- Each Advance now takes a Date (default today) onto the new progress row. Overview rail Advance switches to the Progress tab so the officer can set it. Revert unchanged.
+- Verify: stop F5, rebuild, F5. On **8/-009** Progress — pick a date, Advance; the new node shows that date.
+- Prevent: Do not hard-code `DateTime.Today` in workspace Advance without using the request date.
+- Cross-skill: visa2026-application-progress
+
+### 2026-08-17 — Workspace Progress revert walks back to implied office
+
+- Advance is append-only; workspace had no backward path so a wrong step or letter stuck. Progress tab now has **Revert progress** (delete latest row) and **Revert to here** on completed slots, including Office preparation (clears all history). Flexible for now: terminal states can revert; People lock unlocks when Issued/Rejected/Cancelled is no longer latest.
+- Verify: `ApplicationProgressRevertHelperTests`. Stop F5, rebuild, F5. On **8/-009** Progress — revert one step, then Revert to here on Office preparation.
+- Prevent: Do not write `IS_BEING_PREPARED` rows to represent office after revert. Empty `ProgressHistory` remains implied office.
+- Cross-skill: visa2026-application-progress
+
 ### 2026-08-17 — People grid Unlink is per person, next to Relink
 
 - Toolbar **Unlink** opened a person picker. Officers need to unlink the row they are looking at. Each People-on-this-case row now has **Relink | Unlink | Open person detail**. Row Unlink calls `UnlinkPerson` for that `PersonId` and reloads. Disabled when `ResolvedLinksLocked`.

@@ -107,6 +107,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         SaveProgressNotesRequested = EventCallback.Factory.Create<string>(this, SaveProgressNotesAsync),
         UploadMinistryLetterRequested = EventCallback.Factory.Create<OfficerShellCaseProgressFileUpload>(this, UploadMinistryLetterAsync),
         AdvanceProgressRequested = EventCallback.Factory.Create<OfficerShellCaseProgressAdvanceRequest>(this, AdvanceCaseProgressAsync),
+        RevertProgressRequested = EventCallback.Factory.Create<OfficerShellCaseProgressRevertRequest>(this, RevertCaseProgressAsync),
         PersonLinkSearchRequested = EventCallback.Factory.Create<string>(this, SearchPersonLinkCandidatesAsync),
         LinkPersonFromPickerRequested = EventCallback.Factory.Create<Guid>(this, LinkPersonFromPickerAsync),
         ClosePersonLinkPickerRequested = EventCallback.Factory.Create(this, ClosePersonLinkPickerAsync),
@@ -130,6 +131,8 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
             return;
 
         model.CurrentPage = page;
+        if (model.CaseApplicationProfileInstanceId != caseId)
+            model.ShowProgressRevertToHere = false;
         model.CaseApplicationProfileInstanceId = caseId;
     }
 
@@ -272,6 +275,9 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         model.CurrentPage = page;
         model.StatusMessage = null;
 
+        if (page != OfficerShellPage.Case)
+            model.ShowProgressRevertToHere = false;
+
         if (page != OfficerShellPage.Templates)
             model.TemplatesDetailOpen = false;
 
@@ -289,6 +295,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         model.CurrentPage = OfficerShellPage.Case;
         model.CaseTab = "overview";
         model.PeopleLinkedRecordFocusKey = null;
+        model.ShowProgressRevertToHere = false;
         await LoadWorkspaceAsync(model, applicationId);
     }
 
@@ -351,6 +358,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         model.CaseTab = "overview";
         model.SelectedPersonRowIndex = -1;
         model.PeopleLinkedRecordFocusKey = null;
+        model.ShowProgressRevertToHere = false;
         await LoadAsync();
     }
 
@@ -621,7 +629,8 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
                 objectSpace,
                 model.CaseApplicationProfileInstanceId,
                 request.StateCode,
-                request.Notes);
+                request.Notes,
+                request.Date);
 
             if (!result.Success)
             {
@@ -633,6 +642,53 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
 
             objectSpace.CommitChanges();
             model.ProgressStatusMessage = "Progress advanced.";
+            model.ProgressStatusIsError = false;
+            model.ShowProgressRevertToHere = false;
+            model.CaseTab = "progress";
+            await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId);
+        }
+        catch (Exception ex)
+        {
+            model.ProgressStatusMessage = ex.Message;
+            model.ProgressStatusIsError = true;
+            await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId);
+        }
+    }
+
+    private async Task RevertCaseProgressAsync(OfficerShellCaseProgressRevertRequest request)
+    {
+        var model = ComponentModel;
+        if (model == null || _application == null || model.CaseApplicationProfileInstanceId == Guid.Empty)
+            return;
+
+        try
+        {
+            using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
+            var service = _caseProgressService
+                ?? _application.ServiceProvider?.GetService<IOfficerShellCaseProgressService>()
+                ?? new OfficerShellCaseProgressService();
+
+            var result = service.Revert(
+                objectSpace,
+                model.CaseApplicationProfileInstanceId,
+                request.StepKey);
+
+            if (!result.Success)
+            {
+                model.ProgressStatusMessage = result.ErrorMessage ?? "Could not revert progress.";
+                model.ProgressStatusIsError = true;
+                await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId);
+                return;
+            }
+
+            objectSpace.CommitChanges();
+            model.ShowProgressRevertToHere = true;
+            model.ProgressStatusMessage = string.Equals(
+                request.StepKey,
+                "office",
+                StringComparison.OrdinalIgnoreCase)
+                ? "Returned to office preparation."
+                : "Progress reverted.";
             model.ProgressStatusIsError = false;
             model.CaseTab = "progress";
             await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId);

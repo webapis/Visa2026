@@ -23,6 +23,14 @@ Purpose: **shell, layout, occupants, catalog card UX, JS/CSS** — not Resminama
 
 ## Entries
 
+### 2026-08-17 — Approval letter Preview uses pdf.js when the file is XFA
+
+- Workspace Progress letter click iframed the uploaded PDF. Chrome showed the XFA “Please wait / Adobe Reader” sheet (often a filled Application form saved as the ministry letter, with a Spire evaluation banner). Download still opened in Foxit.
+- **Fix**: `PdfXfaDocument.ContainsXfa` (`/XFA` marker). `ProgressLettersInlinePreview` renders those bytes with `visaXfaPreview` (same host as Document copies Application form). Scans and images stay iframe/img. Download is unchanged.
+- Test: `PdfXfaDocumentTests`. Stop F5, rebuild, F5, Ctrl+F5. On **B/-008** Progress → click the Energetika letter → Şahsy kagyzy in the slot, not Please wait.
+- Prevent: Do not iframe XFA ministry letters. Do not Spire-flatten for Chrome.
+- Cross-skill: visa2026-application-progress | visa2026-document-copies | visa2026-pdf-form-mapping
+
 ### 2026-08-17 — Application form occupant uses pdf.js, not the slot iframe
 
 - Document copies Application form Preview stays **OpenPreviewOnly** in `#visa-preview-slot`. Chrome cannot iframe XFA; the occupant renders pdf.js XFA HTML (`visaXfaPreview`) inside a host div. Slot theme sync still styles the chrome only — black paper was SVG `rect` fill, not `dxbl-theme`.
