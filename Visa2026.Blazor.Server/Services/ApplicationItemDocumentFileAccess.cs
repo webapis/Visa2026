@@ -18,6 +18,9 @@ public sealed class ApplicationItemDocumentFileResult
     public required string FileName { get; init; }
 
     public required string ContentType { get; init; }
+
+    /// <summary>Filled XFA PDFs for pdf.js browser preview (Chrome cannot iframe XFA).</summary>
+    public IReadOnlyList<byte[]>? XfaDocuments { get; init; }
 }
 
 public sealed class ApplicationItemDocumentFileAccess
@@ -333,6 +336,136 @@ public sealed class ApplicationItemDocumentFileAccess
                 Content = content,
                 FileName = fileName,
                 ContentType = contentType
+            };
+            return true;
+        }
+        finally
+        {
+            if (!string.IsNullOrWhiteSpace(temporaryTemplatePath))
+            {
+                try
+                {
+                    File.Delete(temporaryTemplatePath);
+                }
+                catch (IOException)
+                {
+                }
+                catch (UnauthorizedAccessException)
+                {
+                }
+            }
+        }
+    }
+
+    public bool TryGetFilledApplicationFormPreview(
+        IReadOnlyList<Guid> applicationPersonIds,
+        out ApplicationItemDocumentFileResult? preview,
+        out ApplicationItemDocumentFileResult? download,
+        out string? errorMessageKey,
+        Guid applicationId = default)
+    {
+        preview = null;
+        download = null;
+        errorMessageKey = null;
+
+        if (applicationPersonIds == null || applicationPersonIds.Count == 0)
+        {
+            errorMessageKey = "Pdf.SelectAtLeastOneItem";
+            return false;
+        }
+
+        var rowIds = applicationPersonIds
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .ToList();
+
+        if (rowIds.Count == 0)
+        {
+            errorMessageKey = "Pdf.SelectAtLeastOneItem";
+            return false;
+        }
+
+        var relativeTemplatePath = configuration["PdfSettings:TemplatePath"];
+        if (string.IsNullOrWhiteSpace(relativeTemplatePath))
+        {
+            errorMessageKey = "ApplicationPdf.TemplatePathNotConfigured";
+            return false;
+        }
+
+        string? temporaryTemplatePath = null;
+        try
+        {
+            var templatePath = ApplicationFilledFormPdfGenerator.ResolveTemplatePath(
+                relativeTemplatePath,
+                out temporaryTemplatePath);
+            if (string.IsNullOrWhiteSpace(templatePath))
+            {
+                errorMessageKey = "ApplicationPdf.TemplateNotFound";
+                return false;
+            }
+
+            using var objectSpace = nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+            if (!ApplicationRosterHelper.TryLoadSharedApplicationPeople(
+                    objectSpace,
+                    rowIds,
+                    applicationId,
+                    out var application,
+                    out var people)
+                || application == null)
+            {
+                errorMessageKey = "ApplicationItemDocumentCopies.Preview.Error";
+                return false;
+            }
+
+            var projections = people
+                .Select(person => ApplicationProfileInstancePersonPdfPackageLineHydrator.Hydrate(objectSpace, application, person))
+                .ToList();
+
+            if (!ApplicationFilledFormPdfGenerator.TryGenerateFilledPdfs(
+                    objectSpace,
+                    pdfFillerService,
+                    templatePath,
+                    projections,
+                    out var filledPdfs,
+                    out errorMessageKey)
+                || filledPdfs.Count == 0)
+            {
+                return false;
+            }
+
+            var xfaBytes = filledPdfs.Select(item => item.Content).ToList();
+
+            byte[] downloadContent;
+            string downloadFileName;
+            string downloadContentType;
+            if (filledPdfs.Count == 1)
+            {
+                downloadContent = filledPdfs[0].Content;
+                downloadFileName = filledPdfs[0].FileName;
+                downloadContentType = "application/pdf";
+            }
+            else
+            {
+                downloadContent = ApplicationFilledFormPdfGenerator.BuildZipArchive(filledPdfs);
+                downloadFileName = ApplicationFilledFormPdfGenerator.BuildZipFileName(
+                    filledPdfs.Select(item => item.Item).ToList());
+                downloadContentType = "application/zip";
+            }
+
+            preview = new ApplicationItemDocumentFileResult
+            {
+                Content = xfaBytes[0],
+                FileName = filledPdfs.Count == 1
+                    ? filledPdfs[0].FileName
+                    : downloadFileName.Replace(".zip", ".pdf", StringComparison.OrdinalIgnoreCase),
+                ContentType = "application/pdf",
+                XfaDocuments = xfaBytes
+            };
+            download = new ApplicationItemDocumentFileResult
+            {
+                Content = downloadContent,
+                FileName = downloadFileName,
+                ContentType = downloadContentType
             };
             return true;
         }

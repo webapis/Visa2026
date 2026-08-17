@@ -114,7 +114,57 @@ namespace Visa2026.Module.Services
                 })
                 .ToList();
 
-            return NormalizeFamilyMemberMappings(mappings);
+            return FinalizeMappings(mappings);
+        }
+
+        internal static IList<PdfFormMappingDefinition> FinalizeMappings(IList<PdfFormMappingDefinition> mappings)
+        {
+            var list = mappings?.ToList() ?? [];
+            EnsureCoreSeedMappings(list);
+            return NormalizeFamilyMemberMappings(list);
+        }
+
+        internal static void EnsureCoreSeedMappings(IList<PdfFormMappingDefinition> mappings)
+        {
+            foreach (var seed in PdfFormMappingSeedCatalog.Core)
+            {
+                var existing = mappings.FirstOrDefault(m => m.PdfFieldKey == seed.PdfFieldKey);
+                if (existing == null)
+                {
+                    var def = new PdfFormMappingDefinition
+                    {
+                        PdfFieldKey = seed.PdfFieldKey,
+                        Description = seed.Description,
+                        MappingMode = seed.Mode,
+                    };
+                    ApplySeedValue(def, seed);
+                    mappings.Add(def);
+                    continue;
+                }
+
+                existing.Description = seed.Description;
+                existing.MappingMode = seed.Mode;
+                existing.PropertyPath = null;
+                existing.Expression = null;
+                existing.ConstantValue = null;
+                ApplySeedValue(existing, seed);
+            }
+        }
+
+        private static void ApplySeedValue(PdfFormMappingDefinition def, PdfFormMappingSeedCatalog.Seed seed)
+        {
+            switch (seed.Mode)
+            {
+                case PdfMappingMode.Property:
+                    def.PropertyPath = seed.PropertyPath;
+                    break;
+                case PdfMappingMode.Expression:
+                    def.Expression = seed.ExpressionOrConstant;
+                    break;
+                case PdfMappingMode.Constant:
+                    def.ConstantValue = seed.ExpressionOrConstant;
+                    break;
+            }
         }
 
         /// <summary>
@@ -272,7 +322,9 @@ namespace Visa2026.Module.Services
                                 {
                                     if (!IsPdfMappingSourceAllowed(application, item, mapping.MappingMode, mapping.PropertyPath, mapping.Expression, logger, pdfVisibilityGateNotes, mapping))
                                         break;
-                                    var evaluator = new ExpressionEvaluator(TypeDescriptor.GetProperties(item), CriteriaOperator.Parse(mapping.Expression));
+                                    var expression = RewriteApplicationRoot(
+                                        RewriteLegacyApplicationItemPropertyPath(mapping.Expression));
+                                    var evaluator = new ExpressionEvaluator(TypeDescriptor.GetProperties(item), CriteriaOperator.Parse(expression));
                                     val = evaluator.Evaluate(item);
                                 }
                                 break;
@@ -302,18 +354,30 @@ namespace Visa2026.Module.Services
         {
             if (obj == null || string.IsNullOrEmpty(path)) return null;
 
-            path = RewriteLegacyApplicationItemPropertyPath(path);
+            path = RewriteApplicationRoot(RewriteLegacyApplicationItemPropertyPath(path));
 
             object current = obj;
             foreach (string part in path.Split('.'))
             {
                 if (current == null) return null;
                 Type type = current.GetType();
-                PropertyInfo info = type.GetProperty(part, BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
+                PropertyInfo info = FindInstanceProperty(type, part);
                 if (info == null) return null;
                 current = info.GetValue(current, null);
             }
             return current;
+        }
+
+        private static PropertyInfo FindInstanceProperty(Type type, string name)
+        {
+            for (var t = type; t != null && t != typeof(object); t = t.BaseType)
+            {
+                var declared = t.GetProperty(name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+                if (declared != null)
+                    return declared;
+            }
+
+            return type.GetProperty(name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
         }
 
         /// <summary>
@@ -376,6 +440,22 @@ namespace Visa2026.Module.Services
             }
 
             return path;
+        }
+
+        /// <summary>
+        /// PdfFormMapping still uses Application.* from the ApplicationItem era.
+        /// The merge-line navigation is ApplicationProfileInstance.
+        /// Do not apply this rewrite to visibility-gate source strings (they still match Application.*).
+        /// </summary>
+        private static string RewriteApplicationRoot(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path)
+                || !path.Contains("Application.", StringComparison.Ordinal))
+            {
+                return path;
+            }
+
+            return path.Replace("Application.", "ApplicationProfileInstance.", StringComparison.Ordinal);
         }
 
         private static class PdfMappingSourceGate

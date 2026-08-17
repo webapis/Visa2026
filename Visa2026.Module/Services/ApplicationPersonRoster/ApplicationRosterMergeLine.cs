@@ -140,6 +140,16 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        /// <summary>
+        /// PdfFormMapping rows still use Application.* (ApplicationItem-era). Same object as
+        /// <see cref="ApplicationProfileInstance"/>.
+        /// </summary>
+        [Browsable(false)]
+        [NotMapped]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        public ApplicationProfileInstance Application => ApplicationProfileInstance;
+
         [RuleRequiredField]
         [ImmediatePostData]
         [DataSourceProperty("AvailablePeople")]

@@ -54,6 +54,7 @@ disable-model-invocation: false
 | Preview row flash too fast | `MinimumPreviewProgressDuration` (1.5s); Resminamalar CSS classes | **This skill** |
 | Dialog missing scans but files exist in DB | `ApplicationItemLinkedDocumentsResolver` + eligibility (diploma plan §1.2–§1.3) | **This skill** |
 | Preview OK, ZIP missing slot | Package options flags vs `ApplicationItemDocumentCopiesPackageSlotRules` vs packer | **This skill** |
+| Application form Preview shows Chrome “Please wait” / Adobe Reader | Do not iframe XFA; use pdf.js `visaXfaPreview` (`enableXfa`). Download stays filled XFA. | **This skill** |
 | Application form downloads but **fields empty/wrong** | Mapping logs, `PdfFormMapping`, `PdfMappingSourceGate` | **pdf-form-mapping** |
 | `Invalid column name` on `PdfGenerationBatch` | Updaters, `FORCE_XAF_DB_UPDATE` | **lifecycle-docker** |
 | Resminamalar / Word ZIP issue | Not document copies | **resminamalar** |

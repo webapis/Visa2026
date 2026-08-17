@@ -5,6 +5,7 @@ using DevExpress.ExpressApp.Security;
 using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
 using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Sentry;
 using Visa2026.Blazor.Server.Services;
@@ -376,7 +377,12 @@ namespace Visa2026.Blazor.Server
             });
 
             VisaLocalization.UseVisaRequestLocalization(app);
-            app.UseStaticFiles();
+            var staticContentTypes = new FileExtensionContentTypeProvider();
+            staticContentTypes.Mappings[".mjs"] = "text/javascript";
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                ContentTypeProvider = staticContentTypes
+            });
             app.UseODataBatching();
             app.UseRouting();
             app.UseSentryTracing();

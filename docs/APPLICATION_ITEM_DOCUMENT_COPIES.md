@@ -158,7 +158,7 @@ Multi-select on **Application items** → **Document copies**. Scan slots appear
 
 ### Preview (inline slot or modal)
 
-**Preview** on a scan slot shows merged PDF in the global right-side preview slot (ListView) or in a resizable modal (legacy `ApplicationItemDocumentCopiesListHost` path). **Download** and **Batch summary** (multi-line) are in the preview header. The **Application form** row does not open preview — **Preview** generates and downloads the filled form immediately.
+**Preview** on a scan slot shows merged PDF in the global right-side preview slot (ListView) or in a resizable modal (legacy `ApplicationItemDocumentCopiesListHost` path). **Download** and **Batch summary** (multi-line) are in the preview header. **Application form** Preview on the case workspace (By person / By type) opens the same slot viewer; ListView catalog Preview also uses the slot when inline preview is on.
 
 ## User-facing behaviour
 
@@ -185,7 +185,7 @@ The action is enabled only when at least one line is selected. Content opens in 
 ### Inline preview
 
 - **Scan slots:** merged PDF in the preview slot iframe; header offers **Download** and **Batch summary** (when 2+ lines and merge options allow). Exclusive mode hides the slot list while previewing (same pattern as Resminamalar).
-- **Application form:** **Preview** on the main panel row shows generating progress, then triggers browser download (single PDF or `PDF_Form/` ZIP for multiple lines). A short notice may appear in the footer. Uses raw `FillForm` output per line — **no Spire merge** (see `ApplicationFilledFormPdfGenerator`). No preview popup.
+- **Application form:** **Preview** on a person row or the **Application form** type section opens `#visa-preview-slot` (same OpenPreviewOnly viewer as scans). Chrome/Edge cannot iframe XFA, so the slot renders the filled form with **pdf.js** (`enableXfa`, local `wwwroot/lib/pdfjs/`). Page paper is an SVG rect; dark fills are remapped to white for display. **Download** in the preview header still returns the filled XFA (or a ZIP of filled forms for several people). Legacy hosts without inline preview still download immediately.
 
 ### Download package (replaces Generate PDF accept)
 
@@ -203,11 +203,11 @@ On the in-process case **Document copies** tab:
 
 - Header people chips **include or hide** roster people (default: all selected). Catalog, Preview, and **Download package** use the filtered `Person.ID` set.
 - A **By person / By type** switch sits next to the Document copies title (not in case chrome). **By person** is the default.
-- **By person:** one section per selected person. Rows are **linked records** (`ApplicationProfileInstancePersonResolvedLink`), labeled by identification number (`Passport X1453316`, `Visa A3303830`) — not ApplicationItem Current/Previous/Next slots. Row Preview opens that one record for that person.
-- **By type:** one section per document family (Passport, Education, Visa, …). Rows are Person | Record | Files | Status. Section **Preview** merges all Ready files of that family for the chip-selected people (`Family:{family}` → `TryGetMergedFamilyPdf`).
+- **By person:** one section per selected person. Rows are **linked records** plus a generated **Application form** row. Row Preview opens that record (or that person's filled form) for that person.
+- **By type:** one section per document family (Passport, Education, Visa, …, **Application form** last). Rows are Person | Record | Files | Status. Section **Preview** merges all Ready files of that family for the chip-selected people (`Family:{family}` → `TryGetMergedFamilyPdf`). Application form Preview shows each filled XFA in the pdf.js viewer.
 - Only records that are actually linked appear. Unlinked kinds are omitted (no phantom “Current passport / Missing”).
 - **Preview** still opens `#visa-preview-slot` as **viewer only** (`OpenPreviewOnly`). Package download uses the current header filter (unchanged).
-- Application form stays a secondary section. Per-row checkboxes, person-section “preview all”, and a custom “Preview selected files” package are **out of scope**.
+- Per-row checkboxes, person-section “preview all”, and a custom “Preview selected files” package are **out of scope**.
 
 ## Architecture
 
@@ -313,9 +313,10 @@ Domain rules for **which links appear** follow the same eligibility ideas as the
 | `Services/DocumentCopyPreviewFormats.cs` | Content-type helpers for preview. |
 | `Services/PdfGenerationBatchWorkerService.cs` | Background ZIP build (unchanged; shared pipeline). |
 | `wwwroot/css/site.css` | `.app-item-doc-copies*` layout, modal fill, group spacing. |
+| `wwwroot/lib/pdfjs/` | Local pdf.js + `visa-xfa-preview.js` for Application form browser preview. |
 | `Startup.cs` | DI: `ApplicationItemDocumentCopyPdfMerger`, `ApplicationItemDocumentBatchSummaryPdfBuilder`, `ApplicationItemDocumentFileAccess`, `ApplicationItemDocumentPackageEnqueueService`, `ApplicationItemPdfBatchEnqueueService`. |
 
-Preview uses JS helper `visaDocumentCopyPreview.createPdfBlobUrl` for iframe blob URLs.
+Scan preview uses JS helper `visaDocumentCopyPreview.createPdfBlobUrl` for iframe blob URLs. Application form preview uses `visaXfaPreview.renderAll` (pdf.js XFA layer).
 
 ## Localization
 

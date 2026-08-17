@@ -43,6 +43,13 @@ public static class ApplicationItemDocumentCopiesPersonCatalog
         return (ready, total);
     }
 
+    public static (int ReadyCount, int TotalCount) CountReadySlotsIncludingApplicationForm(
+        ApplicationItemLinkedDocumentsLineSnapshot? line)
+    {
+        var (ready, total) = CountReadySlots(line);
+        return (ready + 1, total + 1);
+    }
+
     public static bool IsSlotReady(ApplicationItemLinkedDocumentGroup? group)
     {
         if (group == null || group.LinkMissing)

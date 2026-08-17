@@ -23,6 +23,12 @@ Purpose: **shell, layout, occupants, catalog card UX, JS/CSS** — not Resminama
 
 ## Entries
 
+### 2026-08-17 — Application form occupant uses pdf.js, not the slot iframe
+
+- Document copies Application form Preview stays **OpenPreviewOnly** in `#visa-preview-slot`. Chrome cannot iframe XFA; the occupant renders pdf.js XFA HTML (`visaXfaPreview`) inside a host div. Slot theme sync still styles the chrome only — black paper was SVG `rect` fill, not `dxbl-theme`.
+- Prevent: Do not iframe filled application forms. Do not assume slot dark-theme CSS is the paper color.
+- Cross-skill: visa2026-document-copies
+
 ### 2026-08-15 — Document copies By type Preview still uses OpenPreviewOnly
 
 - Workspace **By type** section Preview opens the existing Document copies occupant as **viewer only** (`FocusSlotKey` = `Family:{family}`, chip-selected person ids). `DocumentCopiesInlinePreview` parses the family key and calls `TryGetMergedFamilyPdf`.

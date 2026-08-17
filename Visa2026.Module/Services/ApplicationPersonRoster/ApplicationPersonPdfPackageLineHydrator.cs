@@ -28,6 +28,7 @@ public static class ApplicationProfileInstancePersonPdfPackageLineHydrator
 
         var item = new ApplicationRosterMergeLine
         {
+            SuppressPersonCurrentFieldSync = true,
             ApplicationProfileInstance = trackedApplication,
             Person = trackedPerson,
             ApplicationItemName = trackedPerson?.FullName ?? string.Empty,

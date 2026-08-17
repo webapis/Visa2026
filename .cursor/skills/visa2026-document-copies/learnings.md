@@ -25,6 +25,26 @@ Purpose: **dialog UX, scan preview, package enqueue, readiness, toast** — not 
 
 ## Entries
 
+### 2026-08-17 — Application form browser preview via pdf.js XFA (preview)
+
+- **Symptom**: Chrome/Edge iframe showed the XFA “Please wait / Adobe Reader” sheet (then a red preview error; then a black page with white labels). Download in Foxit/Adobe was the real Şahsy kagyzy.
+- **Try**: Spire ToPdfA / SaveAsImage still snapshots the placeholder. Iframe raw XFA cannot work. pdf.js `enableXfa` + `XfaLayer.render({ xfaHtml })` (not `xfa`). Pass blob URLs, not `byte[][]`. Serve `.mjs` as `text/javascript`. Page paper is an SVG `<rect fill>` — do not skip SVG when remapping dark fills.
+- **Test**: Stop F5, rebuild, F5, Ctrl+F5. On **B/-009** Document copies → Application form Preview: white paper, emblem, filled name/passport/company; header **Download** still filled XFA.
+- **Root cause**: PDFium cannot paint XFA. Flattening does not replace the placeholder content stream. pdf.js XFA rectangles use `style.fill` on SVG, not CSS `background-color`.
+- **Fix**: Local `wwwroot/lib/pdfjs/` + `visa-xfa-preview.js`; `DocumentCopiesInlinePreview` host div; `TryGetFilledApplicationFormPreview` returns filled XFA bytes (`XfaDocuments`); remap dark SVG rect fills to white after render. Removed `XfaPdfBrowserPreviewHelper`.
+- **Prevent**: Do not iframe XFA. Do not Spire-merge filled forms. Do not rasterize for Chrome. Do not skip SVG rects when fixing paper color. Cache-bust `visa-xfa-preview.js` after edits.
+- **Cross-skill**: visa2026-preview-slot | visa2026-pdf-form-mapping
+
+### 2026-08-17 — Application form Preview in By person / By type (preview | UX)
+
+- **Symptom**: Application form only lived in a bottom section and **Preview** downloaded the XFA instead of opening `#visa-preview-slot` like passport/visa rows.
+- **Try**: Add a generated Application form row under each person and an **Application form** type section (last). Preview uses existing `OpenPreviewOnly`. Rasterize filled XFA pages for the iframe; header **Download** still returns the filled XFA (or ZIP for several people).
+- **Test**: `ApplicationItemDocumentCopies*` tests (12 passed). `dotnet build` Blazor Debug. Stop F5, rebuild, F5. On **8/-009** Document copies: By person → Gabriel Application form Preview opens the side viewer; By type → Application form Preview opens selected people; Download from the preview header is the printable form.
+- **Root cause**: Form preview was a download-only path so Chrome would not show empty XFA. Catalog never treated the form as a person/type row.
+- **Fix**: `ApplicationItemDocumentCopiesTypeCatalog.ApplicationForm*` + person row; `DocumentCopiesInlinePreview` form branch; `XfaPdfBrowserPreviewHelper` static preview PDF (no `MergeFiles` on XFA).
+- **Prevent**: Do not iframe raw XFA. Do not Spire-merge filled application forms. Do not add a second catalog in the slot.
+- **Cross-skill**: visa2026-preview-slot | visa2026-pdf-form-mapping
+
 ### 2026-08-15 — Workspace Document copies By person / By type switcher
 
 - **Symptom**: Officers needed a type-first catalog (Passport / Education / Visa …) without losing the person-first view or changing package/chips.

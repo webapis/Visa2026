@@ -152,6 +152,9 @@ public class ApplicationItemDocumentCopiesTypeCatalogTests
         Assert.Equal("Visa", ApplicationItemDocumentCopiesTypeCatalog.FamilyKey("Visa.Current"));
         Assert.Equal("Education", ApplicationItemDocumentCopiesTypeCatalog.FamilyKey("Education"));
         Assert.Equal(
+            "ApplicationForm",
+            ApplicationItemDocumentCopiesTypeCatalog.FamilyKey("ApplicationForm"));
+        Assert.Equal(
             "AddressOfResidence",
             ApplicationItemDocumentCopiesTypeCatalog.FamilyKey("AddressOfResidence.Lodging.abc"));
         Assert.Null(ApplicationItemDocumentCopiesTypeCatalog.FamilyKey("Unknown.abc"));
@@ -193,7 +196,7 @@ public class ApplicationItemDocumentCopiesTypeCatalogTests
                 Group($"Visa.{Guid.NewGuid():N}", "Visa B222", hasFile: false)),
         ]);
 
-        Assert.Equal(new[] { "Passport", "Education", "Visa" }, sections.Select(s => s.FamilyKey));
+        Assert.Equal(new[] { "Passport", "Education", "Visa", "ApplicationForm" }, sections.Select(s => s.FamilyKey));
         Assert.Equal("Passport", sections[0].Title);
         Assert.Equal(2, sections[0].ReadyCount);
         Assert.Equal(2, sections[0].TotalCount);
@@ -203,6 +206,48 @@ public class ApplicationItemDocumentCopiesTypeCatalogTests
         Assert.Equal(2, sections[2].TotalCount);
         Assert.Equal("Andy Pramasta", sections[0].Rows[0].PersonName);
         Assert.Equal("K1450236", sections[0].Rows[0].RecordLabel);
+        Assert.Equal("ApplicationForm", sections[^1].FamilyKey);
+        Assert.Equal(2, sections[^1].ReadyCount);
+        Assert.Equal(2, sections[^1].TotalCount);
+        Assert.All(sections[^1].Rows, row => Assert.True(row.IsReady));
+    }
+
+    [Fact]
+    public void IsApplicationFormPreview_RecognizesSlotAndFamilyKeys()
+    {
+        Assert.True(ApplicationItemDocumentCopiesTypeCatalog.IsApplicationFormPreview("ApplicationForm"));
+        Assert.True(ApplicationItemDocumentCopiesTypeCatalog.IsApplicationFormPreview("Family:ApplicationForm"));
+        Assert.True(ApplicationItemDocumentCopiesTypeCatalog.IsApplicationFormPreview(
+            "Family:ApplicationForm",
+            "ApplicationForm"));
+        Assert.False(ApplicationItemDocumentCopiesTypeCatalog.IsApplicationFormPreview("Family:Passport"));
+        Assert.False(ApplicationItemDocumentCopiesTypeCatalog.IsApplicationFormPreview("Passport.abc"));
+    }
+
+    [Fact]
+    public void CountReadySlotsIncludingApplicationForm_AddsGeneratedForm()
+    {
+        var line = new ApplicationItemLinkedDocumentsLineSnapshot
+        {
+            ApplicationItemId = Guid.NewGuid(),
+            LineLabel = "Gabriel",
+            Groups =
+            [
+                new ApplicationItemLinkedDocumentGroup
+                {
+                    SlotKey = "Passport.Current",
+                    Files =
+                    [
+                        new ApplicationItemLinkedDocumentFile { HasContent = true, FileDataId = Guid.NewGuid() }
+                    ]
+                }
+            ]
+        };
+
+        var (ready, total) = ApplicationItemDocumentCopiesPersonCatalog.CountReadySlotsIncludingApplicationForm(line);
+
+        Assert.Equal(2, ready);
+        Assert.Equal(2, total);
     }
 
     [Fact]

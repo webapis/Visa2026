@@ -76,7 +76,7 @@ namespace Visa2026.Module.Services
 
                     foreach (var field in loFields)
                     {
-                        if (data.TryGetValue(field.Name, out object value) && value != null)
+                        if (PdfXfaFieldValueLookup.TryGetValue(data, field.Name, out object value) && value != null)
                         {
                             _logger.LogDebug("Filling field '{FieldName}' (type: {FieldType}).",
                                 field.Name, field.GetType().Name);

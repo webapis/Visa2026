@@ -152,7 +152,7 @@
                         var sectionId = ApplicationItemDocumentCopiesPersonCatalog.PersonSectionId(line.ApplicationItemId);
                         var personCollapsed = IsSectionCollapsed(sectionId);
                         var personGroups = ApplicationItemLinkedDocumentsMerger.MergeBySlot([line]);
-                        var (readyCount, totalCount) = ApplicationItemDocumentCopiesPersonCatalog.CountReadySlots(line);
+                        var (readyCount, totalCount) = ApplicationItemDocumentCopiesPersonCatalog.CountReadySlotsIncludingApplicationForm(line);
                         var personName = ApplicationItemDocumentCopiesPersonCatalog.DisplayPersonName(line.LineLabel);
 
                         <section class="doc-copies-catalog__section @(personCollapsed ? "doc-copies-catalog__section--collapsed" : null)"
@@ -185,94 +185,131 @@
 
                             @if (!personCollapsed)
                             {
-                                @if (personGroups.Count == 0)
-                                {
-                                    <p class="doc-copies-catalog__section-empty" role="status">@HintNoFiles</p>
-                                }
-                                else
-                                {
-                                    <div class="doc-copies-catalog__rows" role="table">
-                                        <div class="doc-copies-catalog__row doc-copies-catalog__row--head" role="row">
-                                            <div class="doc-copies-catalog__col-record" role="columnheader">@ColumnRecord</div>
+                                <div class="doc-copies-catalog__rows" role="table">
+                                    <div class="doc-copies-catalog__row doc-copies-catalog__row--head" role="row">
+                                        <div class="doc-copies-catalog__col-record" role="columnheader">@ColumnRecord</div>
+                                        <div class="doc-copies-catalog__row-meta">
+                                            <div class="doc-copies-catalog__col-files" role="columnheader">@ColumnFiles</div>
+                                            <div class="doc-copies-catalog__col-status" role="columnheader">@ColumnStatus</div>
+                                            <div class="doc-copies-catalog__col-action" role="columnheader" aria-hidden="true"></div>
+                                        </div>
+                                    </div>
+
+                                    @foreach (var group in personGroups)
+                                    {
+                                        var fileCount = group.Files.Count;
+                                        var hasFiles = fileCount > 0;
+                                        var previewKey = PersonPreviewKey(line.ApplicationItemId, group.SlotKey);
+                                        var rowLoading = IsPreviewLoading(previewKey);
+                                        var canPreview = hasFiles && !rowLoading;
+
+                                        <div class="@GetGroupRowCssClass(group, canPreview, rowLoading)"
+                                             role="row"
+                                             @onclick="@(() => OnPersonGroupRowClickAsync(line, group))">
+                                            <div class="doc-copies-catalog__col-record" role="cell">
+                                                <span class="doc-copies-catalog__record-label" title="@RecordLabel(group)">
+                                                    @RecordLabel(group)
+                                                </span>
+                                            </div>
                                             <div class="doc-copies-catalog__row-meta">
-                                                <div class="doc-copies-catalog__col-files" role="columnheader">@ColumnFiles</div>
-                                                <div class="doc-copies-catalog__col-status" role="columnheader">@ColumnStatus</div>
-                                                <div class="doc-copies-catalog__col-action" role="columnheader" aria-hidden="true"></div>
+                                                <div class="doc-copies-catalog__col-files" role="cell">
+                                                    @(hasFiles ? fileCount.ToString() : "—")
+                                                </div>
+                                                <div class="doc-copies-catalog__col-status" role="cell">
+                                                    <span class="@GetGroupStatusPillCss(group)">@GetGroupStatusLabel(group)</span>
+                                                </div>
+                                                <div class="doc-copies-catalog__col-action" role="cell" @onclick:stopPropagation="true">
+                                                    @if (canPreview)
+                                                    {
+                                                        <button type="button"
+                                                                class="doc-copies-catalog__preview-link"
+                                                                disabled="@IsAnyPreviewLoading"
+                                                                aria-label="@ActionPreview"
+                                                                @onclick="@(() => PreviewMergedAsync(group, line.ApplicationItemId, personName))">
+                                                            @ActionPreview
+                                                        </button>
+                                                    }
+                                                </div>
                                             </div>
                                         </div>
 
-                                        @foreach (var group in personGroups)
+                                        @if (rowLoading)
                                         {
-                                            var fileCount = group.Files.Count;
-                                            var hasFiles = fileCount > 0;
-                                            var previewKey = PersonPreviewKey(line.ApplicationItemId, group.SlotKey);
-                                            var rowLoading = IsPreviewLoading(previewKey);
-                                            var canPreview = hasFiles && !rowLoading;
-
-                                            <div class="@GetGroupRowCssClass(group, canPreview, rowLoading)"
-                                                 role="row"
-                                                 @onclick="@(() => OnPersonGroupRowClickAsync(line, group))">
-                                                <div class="doc-copies-catalog__col-record" role="cell">
-                                                    <span class="doc-copies-catalog__record-label" title="@RecordLabel(group)">
-                                                        @RecordLabel(group)
-                                                    </span>
-                                                </div>
-                                                <div class="doc-copies-catalog__row-meta">
-                                                    <div class="doc-copies-catalog__col-files" role="cell">
-                                                        @(hasFiles ? fileCount.ToString() : "—")
-                                                    </div>
-                                                    <div class="doc-copies-catalog__col-status" role="cell">
-                                                        <span class="@GetGroupStatusPillCss(group)">@GetGroupStatusLabel(group)</span>
-                                                    </div>
-                                                    <div class="doc-copies-catalog__col-action" role="cell" @onclick:stopPropagation="true">
-                                                        @if (canPreview)
-                                                        {
-                                                            <button type="button"
-                                                                    class="doc-copies-catalog__preview-link"
-                                                                    disabled="@IsAnyPreviewLoading"
-                                                                    aria-label="@ActionPreview"
-                                                                    @onclick="@(() => PreviewMergedAsync(group, line.ApplicationItemId, personName))">
-                                                                @ActionPreview
-                                                            </button>
-                                                        }
+                                            <div class="doc-copies-catalog__progress-row">
+                                                <div class="app-report-package__entry-progress" role="progressbar" aria-busy="true"
+                                                     aria-label="@FormatMsg("ApplicationReportPackage.Preview.Downloading", RecordLabel(group))">
+                                                    <div class="app-report-package__preview-progress-track">
+                                                        <div class="app-report-package__preview-progress-indeterminate"></div>
                                                     </div>
                                                 </div>
                                             </div>
+                                        }
 
-                                            @if (rowLoading)
+                                        @if (ShowDetails && (group.Files.Count > 0 || group.MissingLines.Count > 0))
+                                        {
+                                            @foreach (var entry in group.Files)
                                             {
-                                                <div class="doc-copies-catalog__progress-row">
-                                                    <div class="app-report-package__entry-progress" role="progressbar" aria-busy="true"
-                                                         aria-label="@FormatMsg("ApplicationReportPackage.Preview.Downloading", RecordLabel(group))">
-                                                        <div class="app-report-package__preview-progress-track">
-                                                            <div class="app-report-package__preview-progress-indeterminate"></div>
-                                                        </div>
-                                                    </div>
+                                                <div class="doc-copies-catalog__file-row">
+                                                    <span class="doc-copies-catalog__file-name" title="@entry.File.FileName">@entry.File.FileName</span>
+                                                    <span class="doc-copies-catalog__file-size">@FormatSize(entry.File.SizeBytes)</span>
                                                 </div>
                                             }
 
-                                            @if (ShowDetails && (group.Files.Count > 0 || group.MissingLines.Count > 0))
+                                            @foreach (var missing in group.MissingLines)
                                             {
-                                                @foreach (var entry in group.Files)
-                                                {
-                                                    <div class="doc-copies-catalog__file-row">
-                                                        <span class="doc-copies-catalog__file-name" title="@entry.File.FileName">@entry.File.FileName</span>
-                                                        <span class="doc-copies-catalog__file-size">@FormatSize(entry.File.SizeBytes)</span>
-                                                    </div>
-                                                }
-
-                                                @foreach (var missing in group.MissingLines)
-                                                {
-                                                    <div class="doc-copies-catalog__file-row">
-                                                        <span class="app-item-doc-copies__missing-line-reason">
-                                                            @(missing.LinkMissing ? DetailMissingLink : DetailMissingNoFiles)
-                                                        </span>
-                                                    </div>
-                                                }
+                                                <div class="doc-copies-catalog__file-row">
+                                                    <span class="app-item-doc-copies__missing-line-reason">
+                                                        @(missing.LinkMissing ? DetailMissingLink : DetailMissingNoFiles)
+                                                    </span>
+                                                </div>
                                             }
                                         }
+                                    }
+
+                                    @{
+                                        var formPreviewKey = PersonPreviewKey(
+                                            line.ApplicationItemId,
+                                            ApplicationItemDocumentCopiesTypeCatalog.ApplicationFormSlotKey);
+                                        var formLoading = IsPreviewLoading(formPreviewKey);
+                                    }
+                                    <div class="@GetFormRowCssClass(formLoading)"
+                                         role="row"
+                                         @onclick="@(() => OnPersonFormRowClickAsync(line, personName))">
+                                        <div class="doc-copies-catalog__col-record" role="cell">
+                                            <span class="doc-copies-catalog__record-label">@FormSlotLabel</span>
+                                        </div>
+                                        <div class="doc-copies-catalog__row-meta">
+                                            <div class="doc-copies-catalog__col-files" role="cell">—</div>
+                                            <div class="doc-copies-catalog__col-status" role="cell">
+                                                <span class="person-dossier__pill st-approved doc-copies-catalog__pill">@StatusReady</span>
+                                            </div>
+                                            <div class="doc-copies-catalog__col-action" role="cell" @onclick:stopPropagation="true">
+                                                @if (!formLoading)
+                                                {
+                                                    <button type="button"
+                                                            class="doc-copies-catalog__preview-link"
+                                                            disabled="@IsAnyPreviewLoading"
+                                                            aria-label="@ActionPreview"
+                                                            @onclick="@(() => PreviewApplicationFormForPersonAsync(line.ApplicationItemId, personName))">
+                                                        @ActionPreview
+                                                    </button>
+                                                }
+                                            </div>
+                                        </div>
                                     </div>
-                                }
+
+                                    @if (formLoading)
+                                    {
+                                        <div class="doc-copies-catalog__progress-row">
+                                            <div class="app-report-package__entry-progress" role="progressbar" aria-busy="true"
+                                                 aria-label="@FormatMsg("ApplicationReportPackage.Preview.Downloading", FormSlotLabel)">
+                                                <div class="app-report-package__preview-progress-track">
+                                                    <div class="app-report-package__preview-progress-indeterminate"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
                             }
                         </section>
                     }
@@ -411,6 +448,8 @@
                 </section>
                 }
 
+                @if (!GroupByPerson && !GroupByDocumentType)
+                {
                 <section class="doc-copies-catalog__section @(formCollapsed ? "doc-copies-catalog__section--collapsed" : null)"
                          aria-label="@FormSlotLabel">
                     <header class="doc-copies-catalog__section-head doc-copies-catalog__section-head--nav"
@@ -494,6 +533,7 @@
                     </div>
                     }
                 </section>
+                }
             </div>
         }
     </div>
@@ -960,6 +1000,16 @@
     private static string PersonPreviewKey(Guid personId, string slotKey) =>
         $"{personId:N}:{slotKey}";
 
+    private async Task OnPersonFormRowClickAsync(
+        ApplicationItemLinkedDocumentsLineSnapshot line,
+        string personName)
+    {
+        if (IsAnyPreviewLoading)
+            return;
+
+        await PreviewApplicationFormForPersonAsync(line.ApplicationItemId, personName);
+    }
+
     private async Task OnFormRowClickAsync()
     {
         if (IsAnyPreviewLoading)
@@ -1102,25 +1152,73 @@
         }
     }
 
-    private async Task PreviewApplicationFormAsync()
+    private async Task PreviewApplicationFormForPersonAsync(Guid personId, string personName)
     {
-        if (IsAnyPreviewLoading || ApplicationItemIds.Count == 0)
+        if (personId == Guid.Empty)
             return;
 
-        _previewLoadingKey = ApplicationFormPreviewKey;
-        _previewStatusMessage = FormatMsg("ApplicationReportPackage.Preview.Downloading", FormSlotLabel);
+        var displayName = string.IsNullOrWhiteSpace(personName)
+            ? FormSlotLabel
+            : $"{personName} — {FormSlotLabel}";
+        await OpenApplicationFormPreviewAsync(
+            PersonPreviewKey(personId, ApplicationItemDocumentCopiesTypeCatalog.ApplicationFormSlotKey),
+            displayName,
+            [personId]);
+    }
+
+    private async Task PreviewApplicationFormAsync()
+    {
+        await OpenApplicationFormPreviewAsync(
+            ApplicationFormPreviewKey,
+            FormSlotLabel,
+            ApplicationItemIds);
+    }
+
+    private async Task OpenApplicationFormPreviewAsync(
+        string loadingKey,
+        string displayName,
+        IReadOnlyList<Guid> personIds)
+    {
+        if (IsAnyPreviewLoading || personIds.Count == 0)
+            return;
+
+        if (UseInlinePreview && !OnInlinePreviewRequested.HasDelegate)
+            return;
+
+        _previewLoadingKey = loadingKey;
+        _previewStatusMessage = FormatMsg("ApplicationReportPackage.Preview.Downloading", displayName);
         ClearPackageStatus();
         await InvokeAsync(StateHasChanged);
         await Task.Yield();
         await Task.Delay(100);
 
         var progressStartedUtc = DateTime.UtcNow;
-        var downloadSucceeded = false;
+        var previewSucceeded = false;
 
         try
         {
+            if (UseInlinePreview)
+            {
+                var familyPreview = personIds.Count > 1;
+                await OnInlinePreviewRequested.InvokeAsync(new DocumentCopiesInlinePreviewRequest
+                {
+                    SlotKey = familyPreview
+                        ? ApplicationItemDocumentCopiesTypeCatalog.FamilyPreviewKey(
+                            ApplicationItemDocumentCopiesTypeCatalog.ApplicationFormFamily)
+                        : ApplicationItemDocumentCopiesTypeCatalog.ApplicationFormSlotKey,
+                    FamilyKey = familyPreview
+                        ? ApplicationItemDocumentCopiesTypeCatalog.ApplicationFormFamily
+                        : null,
+                    DisplayName = displayName,
+                    PackageOptions = _packageOptions,
+                    ApplicationProfileInstancePersonIds = personIds,
+                });
+                previewSucceeded = true;
+                return;
+            }
+
             if (!DocumentFileAccess.TryGetFilledApplicationFormPdf(
-                    ApplicationItemIds,
+                    personIds,
                     out var result,
                     out var errorMessageKey,
                     ApplicationProfileInstanceId)
@@ -1146,7 +1244,7 @@
                 ? Msg("ApplicationItemDocumentCopies.Preview.ApplicationFormZipDownloaded")
                 : Msg("ApplicationItemDocumentCopies.Preview.ApplicationFormDownloaded");
             _packageStatusIsError = false;
-            downloadSucceeded = true;
+            previewSucceeded = true;
         }
         catch (Exception ex)
         {
@@ -1159,7 +1257,7 @@
         }
         finally
         {
-            if (downloadSucceeded)
+            if (previewSucceeded)
                 await WaitRemainingPreviewProgressTimeAsync(progressStartedUtc);
 
             _previewLoadingKey = null;

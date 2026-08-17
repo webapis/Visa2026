@@ -64,8 +64,56 @@ public static class ApplicationFilledFormPdfGenerator
             return false;
         }
 
+        if (!TryGenerateFilledPdfs(
+                objectSpace,
+                pdfFillerService,
+                templatePath,
+                validItems,
+                out var filledPdfs,
+                out errorMessageKey)
+            || filledPdfs.Count == 0)
+        {
+            return false;
+        }
+
+        if (filledPdfs.Count == 1)
+        {
+            content = filledPdfs[0].Content;
+            fileName = filledPdfs[0].FileName;
+            return true;
+        }
+
+        content = BuildZipArchive(filledPdfs);
+        fileName = BuildZipFileName(validItems);
+        contentType = "application/zip";
+        return true;
+    }
+
+    public static bool TryGenerateFilledPdfs(
+        IObjectSpace objectSpace,
+        IPdfFormFillerService pdfFillerService,
+        string templatePath,
+        IReadOnlyList<ApplicationRosterMergeLine> items,
+        out IReadOnlyList<(ApplicationRosterMergeLine Item, byte[] Content, string FileName)> filledPdfs,
+        out string? errorMessageKey)
+    {
+        filledPdfs = Array.Empty<(ApplicationRosterMergeLine, byte[], string)>();
+        errorMessageKey = null;
+
+        var validItems = items
+            .Where(item => item != null && item.ApplicationProfileInstance != null)
+            .GroupBy(item => item.ID)
+            .Select(group => group.First())
+            .ToList();
+
+        if (validItems.Count < 1)
+        {
+            errorMessageKey = "Pdf.SelectAtLeastOneItem";
+            return false;
+        }
+
         var mappings = PdfMappingHelper.GetMappings(objectSpace);
-        var filledPdfs = new List<(ApplicationRosterMergeLine Item, byte[] Content)>();
+        var generated = new List<(ApplicationRosterMergeLine Item, byte[] Content, string FileName)>();
 
         try
         {
@@ -76,20 +124,11 @@ public static class ApplicationFilledFormPdfGenerator
 
                 using var memoryStream = new MemoryStream();
                 pdfFillerService.FillForm(templatePath, memoryStream, data);
-                filledPdfs.Add((item, memoryStream.ToArray()));
+                generated.Add((item, memoryStream.ToArray(), BuildFileName(item)));
             }
 
-            if (filledPdfs.Count == 1)
-            {
-                content = filledPdfs[0].Content;
-                fileName = BuildFileName(filledPdfs[0].Item);
-                return true;
-            }
-
-            content = BuildZipArchive(filledPdfs);
-            fileName = BuildZipFileName(validItems);
-            contentType = "application/zip";
-            return true;
+            filledPdfs = generated;
+            return generated.Count > 0;
         }
         catch (Exception)
         {
@@ -98,7 +137,8 @@ public static class ApplicationFilledFormPdfGenerator
         }
     }
 
-    private static byte[] BuildZipArchive(IReadOnlyList<(ApplicationRosterMergeLine Item, byte[] Content)> filledPdfs)
+    public static byte[] BuildZipArchive(
+        IReadOnlyList<(ApplicationRosterMergeLine Item, byte[] Content, string FileName)> filledPdfs)
     {
         using var zipStream = new MemoryStream();
         using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Create, leaveOpen: true))
@@ -106,7 +146,7 @@ public static class ApplicationFilledFormPdfGenerator
             var usedEntryPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             for (var index = 0; index < filledPdfs.Count; index++)
             {
-                var (item, pdfContent) = filledPdfs[index];
+                var (item, pdfContent, _) = filledPdfs[index];
                 var personName = item.Person != null
                     ? $"{item.Person.FirstName}_{item.Person.LastName}"
                     : "Unknown";
@@ -131,7 +171,7 @@ public static class ApplicationFilledFormPdfGenerator
         return ZipEntryFileNameSanitizer.Sanitize($"ApplicationForm_{applicationNumber}_{personName}.pdf");
     }
 
-    private static string BuildZipFileName(IReadOnlyList<ApplicationRosterMergeLine> items)
+    public static string BuildZipFileName(IReadOnlyList<ApplicationRosterMergeLine> items)
     {
         var applicationNumber = items[0].ApplicationProfileInstance?.FullApplicationNumber ?? "Application";
         return ZipEntryFileNameSanitizer.Sanitize(

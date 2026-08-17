@@ -12,6 +12,9 @@ public static class ApplicationItemDocumentCopiesTypeCatalog
 {
     public const string FamilyPreviewPrefix = "Family:";
 
+    public const string ApplicationFormFamily = "ApplicationForm";
+    public const string ApplicationFormSlotKey = "ApplicationForm";
+
     private static readonly string[] FamilyOrder =
     [
         "Passport",
@@ -24,6 +27,7 @@ public static class ApplicationItemDocumentCopiesTypeCatalog
         "Rejection",
         "BorderZone",
         "FamilyRelationship",
+        ApplicationFormFamily,
     ];
 
     public static string? FamilyKey(string? slotKey)
@@ -33,6 +37,9 @@ public static class ApplicationItemDocumentCopiesTypeCatalog
 
         if (FamilyOrder.Contains(slotKey, StringComparer.Ordinal))
             return slotKey;
+
+        if (string.Equals(slotKey, ApplicationFormSlotKey, StringComparison.Ordinal))
+            return ApplicationFormFamily;
 
         if (slotKey.StartsWith("AddressOfResidence.", StringComparison.Ordinal))
             return "AddressOfResidence";
@@ -57,6 +64,7 @@ public static class ApplicationItemDocumentCopiesTypeCatalog
         "Rejection" => "Rejection",
         "BorderZone" => "Border zone",
         "FamilyRelationship" => "Family relationship",
+        ApplicationFormFamily => "Application form",
         _ => familyKey,
     };
 
@@ -70,6 +78,7 @@ public static class ApplicationItemDocumentCopiesTypeCatalog
         "Rejection" => "Rejections",
         "MedicalRecord" => "MedicalRecords",
         "FamilyRelationship" => "FamilyRelationDocuments",
+        ApplicationFormFamily => "ApplicationForm",
         _ => "Documents",
     };
 
@@ -88,6 +97,20 @@ public static class ApplicationItemDocumentCopiesTypeCatalog
 
         familyKey = slotKey[FamilyPreviewPrefix.Length..].Trim();
         return familyKey.Length > 0;
+    }
+
+    public static bool IsApplicationFormPreview(string? slotKey, string? familyKey = null)
+    {
+        if (string.Equals(familyKey, ApplicationFormFamily, StringComparison.Ordinal))
+            return true;
+
+        if (TryParseFamilyPreviewKey(slotKey, out var parsed)
+            && string.Equals(parsed, ApplicationFormFamily, StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        return string.Equals(slotKey, ApplicationFormSlotKey, StringComparison.Ordinal);
     }
 
     public static string RecordCaption(string familyKey, string? slotLabel, string? sourceCaption)
@@ -145,8 +168,9 @@ public static class ApplicationItemDocumentCopiesTypeCatalog
             }
         }
 
-        return FamilyOrder
-            .Where(rowsByFamily.ContainsKey)
+        var sections = FamilyOrder
+            .Where(family => !string.Equals(family, ApplicationFormFamily, StringComparison.Ordinal)
+                && rowsByFamily.ContainsKey(family))
             .Select(family =>
             {
                 var rows = rowsByFamily[family];
@@ -161,6 +185,36 @@ public static class ApplicationItemDocumentCopiesTypeCatalog
                 };
             })
             .ToList();
+
+        sections.Add(BuildApplicationFormSection(lines));
+        return sections;
+    }
+
+    private static ApplicationItemDocumentCopiesTypeSection BuildApplicationFormSection(
+        IReadOnlyList<ApplicationItemLinkedDocumentsLineSnapshot> lines)
+    {
+        var rows = lines
+            .Where(line => line != null && line.ApplicationItemId != Guid.Empty)
+            .Select(line => new ApplicationItemDocumentCopiesTypeRow
+            {
+                PersonId = line.ApplicationItemId,
+                PersonName = ApplicationItemDocumentCopiesPersonCatalog.DisplayPersonName(line.LineLabel),
+                RecordLabel = FamilyTitle(ApplicationFormFamily),
+                SlotKey = ApplicationFormSlotKey,
+                FileCount = 0,
+                IsReady = true,
+            })
+            .ToList();
+
+        return new ApplicationItemDocumentCopiesTypeSection
+        {
+            FamilyKey = ApplicationFormFamily,
+            Title = FamilyTitle(ApplicationFormFamily),
+            NavIconKey = NavIconKey(ApplicationFormFamily),
+            Rows = rows,
+            ReadyCount = rows.Count,
+            TotalCount = rows.Count,
+        };
     }
 
     public static IReadOnlyList<ApplicationItemLinkedDocumentFileEntry> CollectFamilyFiles(
