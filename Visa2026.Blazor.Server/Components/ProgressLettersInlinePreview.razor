@@ -159,15 +159,13 @@
                     result.Content,
                     result.ContentType);
             }
-            else if (PdfXfaDocument.ContainsXfa(result.Content))
+            else
             {
+                // Chrome iframe shows the XFA "Please wait" sheet (and Spire evaluation
+                // text) when /XFA is compressed. pdf.js paints XFA; scans fall back to canvas.
                 _xfaDocument = result.Content;
                 _useXfaViewer = true;
                 _xfaRenderPending = true;
-            }
-            else
-            {
-                _pdfBlobUrl = await JS.InvokeAsync<string>("visaDocumentCopyPreview.createPdfBlobUrl", result.Content);
             }
         }
         catch (Exception ex)

@@ -33,7 +33,8 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         IObjectSpace objectSpace,
         Guid applicationId,
         string fileName,
-        byte[] content)
+        byte[] content,
+        Guid? progressId = null)
     {
         if (objectSpace == null)
             return OfficerShellCaseProgressResult.Failed("ObjectSpace is required.");
@@ -45,27 +46,13 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         if (application == null)
             return OfficerShellCaseProgressResult.Failed("ApplicationProfileInstance not found.");
 
-        var latest = ApplicationProfileInstanceProgressHelper.GetLatest(application.ProgressHistory, objectSpace);
-        if (latest == null)
+        var row = progressId is Guid id && id != Guid.Empty
+            ? application.ProgressHistory?.FirstOrDefault(p => p.ID == id)
+            : ApplicationProfileInstanceProgressHelper.GetLatest(application.ProgressHistory, objectSpace);
+        if (row == null)
             return OfficerShellCaseProgressResult.Failed("No progress history on this application.");
 
-        if (!latest.IsMinistryDecisionStep)
-            return OfficerShellCaseProgressResult.Failed("Ministry letter upload is only available on ministry decision steps.");
-
-        var maxBytes = latest.MaxDocumentSizeInMB * 1024L * 1024L;
-        if (content.LongLength > maxBytes)
-            return OfficerShellCaseProgressResult.Failed($"The ministry letter exceeds the maximum allowed size of {latest.MaxDocumentSizeInMB} MB.");
-
-        var file = latest.MinistryLetterFile ?? objectSpace.CreateObject<FileData>();
-        file.FileName = fileName;
-        file.Content = content;
-        file.Size = content.Length;
-
-        if (!DocumentFileUploadConstraints.TryValidate(file, out var validationError))
-            return OfficerShellCaseProgressResult.Failed(validationError ?? "The ministry letter file is not valid.");
-
-        latest.MinistryLetterFile = file;
-        return OfficerShellCaseProgressResult.Succeeded();
+        return AttachMinistryLetter(objectSpace, row, fileName, content);
     }
 
     public OfficerShellCaseProgressResult Advance(
@@ -73,7 +60,9 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         Guid applicationId,
         string? stateCode,
         string? notesOnLatestStep,
-        DateTime? stepDate)
+        DateTime? stepDate,
+        string? letterFileName = null,
+        byte[]? letterContent = null)
     {
         if (objectSpace == null)
             return OfficerShellCaseProgressResult.Failed("ObjectSpace is required.");
@@ -134,6 +123,13 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         if (latest == null)
             ApplicationProfileInstanceOfficeNotesHelper.CopyOntoNewRow(application, progress, notesOnLatestStep);
 
+        if (letterContent is { Length: > 0 } && progress.IsMinistryDecisionStep)
+        {
+            var letterResult = AttachMinistryLetter(objectSpace, progress, letterFileName ?? "ministry-letter.pdf", letterContent);
+            if (!letterResult.Success)
+                return letterResult;
+        }
+
         ApplicationLatestProgressSyncHelper.Sync(application, objectSpace);
         return OfficerShellCaseProgressResult.Succeeded(chosenCode);
     }
@@ -167,6 +163,31 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         }
 
         ApplicationLatestProgressSyncHelper.Sync(application, objectSpace);
+        return OfficerShellCaseProgressResult.Succeeded();
+    }
+
+    private static OfficerShellCaseProgressResult AttachMinistryLetter(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstanceProgress row,
+        string fileName,
+        byte[] content)
+    {
+        if (!row.IsMinistryDecisionStep)
+            return OfficerShellCaseProgressResult.Failed("Ministry letter upload is only available on ministry decision steps.");
+
+        var maxBytes = row.MaxDocumentSizeInMB * 1024L * 1024L;
+        if (content.LongLength > maxBytes)
+            return OfficerShellCaseProgressResult.Failed($"The ministry letter exceeds the maximum allowed size of {row.MaxDocumentSizeInMB} MB.");
+
+        var file = row.MinistryLetterFile ?? objectSpace.CreateObject<FileData>();
+        file.FileName = string.IsNullOrWhiteSpace(fileName) ? "ministry-letter.pdf" : fileName.Trim();
+        file.Content = content;
+        file.Size = content.Length;
+
+        if (!DocumentFileUploadConstraints.TryValidate(file, out var validationError))
+            return OfficerShellCaseProgressResult.Failed(validationError ?? "The ministry letter file is not valid.");
+
+        row.MinistryLetterFile = file;
         return OfficerShellCaseProgressResult.Succeeded();
     }
 

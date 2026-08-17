@@ -591,7 +591,8 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
                 objectSpace,
                 model.CaseApplicationProfileInstanceId,
                 upload.FileName,
-                upload.Content);
+                upload.Content,
+                upload.ProgressId);
 
             if (!result.Success)
             {
@@ -630,7 +631,9 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
                 model.CaseApplicationProfileInstanceId,
                 request.StateCode,
                 request.Notes,
-                request.Date);
+                request.Date,
+                request.LetterFileName,
+                request.LetterContent);
 
             if (!result.Success)
             {

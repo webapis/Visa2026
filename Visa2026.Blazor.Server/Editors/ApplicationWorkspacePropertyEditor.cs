@@ -444,7 +444,8 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
                 objectSpace,
                 applicationId,
                 upload.FileName,
-                upload.Content);
+                upload.Content,
+                upload.ProgressId);
 
             if (!result.Success)
             {
@@ -484,7 +485,9 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
                 applicationId,
                 request.StateCode,
                 request.Notes,
-                request.Date);
+                request.Date,
+                request.LetterFileName,
+                request.LetterContent);
 
             if (!result.Success)
             {

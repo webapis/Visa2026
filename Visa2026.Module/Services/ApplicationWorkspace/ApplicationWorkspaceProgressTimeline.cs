@@ -43,6 +43,8 @@ internal static class ApplicationWorkspaceProgressTimeline
         var latestOnMigration = IsCurrentMigration(latestCode, history);
         var legs = ResolveApprovalLegs(application, profile);
         var latestLeg = ResolveCurrentMinistrySlot(latestCode, legs.Count, latestOnMigration);
+        var awaitingMigration = !latestOnMigration
+            && IsLastMinistryApproved(latestCode, legs.Count);
 
         var steps = new List<ApplicationWorkspaceCaseProgressStep>
         {
@@ -77,7 +79,7 @@ internal static class ApplicationWorkspaceProgressTimeline
         }
 
         var migrationRow = LatestMigrationRow(history);
-        var migrationState = ResolveMigrationSlotState(latest == null, latestOnMigration, latestCode);
+        var migrationState = ResolveMigrationSlotState(latest == null, latestOnMigration, latestCode, awaitingMigration);
         var migrationCurrent = migrationState == "current";
         steps.Add(BuildFilledStep(
             MigrationKey,
@@ -214,7 +216,15 @@ internal static class ApplicationWorkspaceProgressTimeline
             return null;
 
         if (ApplicationProfileInstanceProgressLegCodes.TryParseMinistryLegFromStateCode(latestCode, out var parsed))
-            return Math.Clamp(parsed, 1, legCount);
+        {
+            parsed = Math.Clamp(parsed, 1, legCount);
+            if (IsMinistryApproved(latestCode) && parsed < legCount)
+                return parsed + 1;
+            if (IsMinistryApproved(latestCode) && parsed >= legCount)
+                return null;
+
+            return parsed;
+        }
 
         return IsMinistryTrackCode(latestCode) ? 1 : null;
     }
@@ -261,6 +271,9 @@ internal static class ApplicationWorkspaceProgressTimeline
             CanRevertToHere = !isCurrent && history.Count > 0,
             AdvanceBlockedReason = isCurrent ? advanceBlockedReason : string.Empty,
             AdvanceOptions = isCurrent ? advanceOptions : Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>(),
+            ResultOptions = isCurrent
+                ? ApplicationWorkspaceProgressAdvancePreview.ResultOptions(OfficeKey, advanceOptions)
+                : Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>(),
             OutcomeKind = isCurrent ? "current" : "ok",
         };
     }
@@ -287,6 +300,11 @@ internal static class ApplicationWorkspaceProgressTimeline
             ? letter.ID
             : (row != null && row.ID != Guid.Empty ? row.ID : (Guid?)null);
 
+        var resultOptions = isCurrent
+            ? ApplicationWorkspaceProgressAdvancePreview.ResultOptions(key, advanceOptions)
+            : Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>();
+        var decisionRow = row?.IsMinistryDecisionStep == true ? row : null;
+
         return new ApplicationWorkspaceCaseProgressStep
         {
             Key = key,
@@ -301,13 +319,18 @@ internal static class ApplicationWorkspaceProgressTimeline
             ProgressId = letterId,
             OfficerNotes = isCurrent ? row?.Description ?? string.Empty : string.Empty,
             MinistryLetterFileName = letter?.MinistryLetterFileName ?? string.Empty,
-            ShowMinistryLetterUpload = isCurrent && row?.IsMinistryDecisionStep == true,
+            ShowMinistryLetterUpload = decisionRow != null
+                || (isCurrent
+                    && key.StartsWith("leg-", StringComparison.OrdinalIgnoreCase)
+                    && resultOptions.Count > 0),
+            DecisionProgressId = decisionRow != null && decisionRow.ID != Guid.Empty ? decisionRow.ID : null,
             CanAdvance = isCurrent && canAdvance,
-            CanRevert = CanRevertLast(latest, key),
+            CanRevert = CanRevertLast(latest, key) || (isCurrent && latest != null),
             CanRevertToHere = slotState == "done"
                 && ApplicationProfileInstanceProgressRevertHelper.RowsToDelete(history, key).Count > 0,
             AdvanceBlockedReason = isCurrent ? advanceBlockedReason : string.Empty,
             AdvanceOptions = isCurrent ? advanceOptions : Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>(),
+            ResultOptions = resultOptions,
             OutcomeKind = ResolveOutcomeKind(slotState, row?.State?.Code),
         };
     }
@@ -372,9 +395,17 @@ internal static class ApplicationWorkspaceProgressTimeline
         return row == null ? "pending" : "done";
     }
 
-    private static string ResolveMigrationSlotState(bool atOffice, bool latestOnMigration, string? latestCode)
+    private static string ResolveMigrationSlotState(
+        bool atOffice,
+        bool latestOnMigration,
+        string? latestCode,
+        bool awaitingMigration)
     {
-        if (atOffice || !latestOnMigration)
+        if (atOffice)
+            return "pending";
+        if (awaitingMigration)
+            return "current";
+        if (!latestOnMigration)
             return "pending";
 
         if (string.Equals(latestCode, ApplicationProfileInstanceProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase)
@@ -384,6 +415,19 @@ internal static class ApplicationWorkspaceProgressTimeline
 
         return "current";
     }
+
+    private static bool IsLastMinistryApproved(string? latestCode, int legCount)
+    {
+        if (legCount <= 0 || !IsMinistryApproved(latestCode))
+            return false;
+
+        return ApplicationProfileInstanceProgressLegCodes.TryParseMinistryLegFromStateCode(latestCode, out var parsed)
+            && Math.Clamp(parsed, 1, ApplicationProfileInstanceProgressLegCodes.MaxLegCount) >= legCount;
+    }
+
+    private static bool IsMinistryApproved(string? stateCode) =>
+        !string.IsNullOrWhiteSpace(stateCode)
+        && stateCode.EndsWith("_REVIEW_APPROVED", StringComparison.OrdinalIgnoreCase);
 
     private static bool IsCurrentMigration(string? latestCode, IReadOnlyList<ApplicationProfileInstanceProgress> history)
     {

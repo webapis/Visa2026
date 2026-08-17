@@ -6,6 +6,30 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 
 ## Entries
 
+### 2026-08-17 — Ministry letter Preview still iframed compressed XFA
+
+- View letter on a filled Application form showed Please wait + Spire evaluation (Chrome PDF viewer). `/XFA` was only inside a Flate stream, so the occupant iframed the bytes.
+- Progress letter PDFs always go through pdf.js now; detection also inflates streams. Scans still canvas-render. Download unchanged.
+- Test: `PdfXfaDocumentTests`. Stop F5, rebuild, F5, Ctrl+F5. **B/-010** Progress → View letter.
+- Prevent: Do not iframe ministry-letter PDFs. Do not Spire-flatten for Chrome.
+- Cross-skill: visa2026-preview-slot | visa2026-document-copies
+
+### 2026-08-17 — Approval letter upload on the ministry Result step
+
+- After Result belonged to the current ministry, upload hid because that node often has no decision row yet (`ShowMinistryLetterUpload` required `IsMinistryDecisionStep` on latest). Officers need to attach the approval/disapproval letter on Energetika (and other ministries) before Advance.
+- Upload shows when the current ministry has a Result (Approved/Disapproved). The file is held until Advance and stored on the new decision row. Completed ministries with a decision row can still upload onto that row (`DecisionProgressId`).
+- Test: `Build_FirstLegApproved_NextMinistryIsCurrent` expects `ShowMinistryLetterUpload`. Stop F5, rebuild, F5. On **8/-010** Energetika — upload a letter, Advance Approved — letter sits on Energetika; View letter still works.
+- Prevent: Do not require a saved decision row before showing upload on a ministry Result step. Do not attach a pending letter to the previous ministry’s latest row.
+- Cross-skill: visa2026-application-profile | visa2026-preview-slot
+
+### 2026-08-17 — Progress Result belongs to the current node
+
+- **Next step** sat on Office / an approved ministry but the values were the following node (Submitted, or the next ministry’s Approved/Disapproved). Officers should set **this** step’s result.
+- **Result** dropdown = same-slot decisions only (Approved / Disapproved / Issued / Rejected). Office has no Result — Advance starts the first ministry as Submitted. After a ministry is Approved, that node is done and the next ministry (or Migration) becomes current. Started/Cancelled are not Result values.
+- Test: `ApplicationWorkspaceProgressAdvancePreviewTests` + `Build_FirstLegApproved_NextMinistryIsCurrent` + `Build_LastMinistryApproved_MigrationIsCurrent`. Stop F5, rebuild, F5. On **8/-010** Office — no Result dropdown; Advance → Türkmenenergo Submitted. On a ministry — Result Approved/Disapproved updates that ministry’s badge.
+- Prevent: Do not label a following ministry’s state as Next step on the current node. Do not keep current on an already-Approved ministry while the dropdown sets the next one.
+- Cross-skill: visa2026-application-profile
+
 ### 2026-08-17 — Next step dropdown previews the current ministry badge
 
 - Changing Next step to Disapproved left the Energetika badge and header on Approved (recorded state). For the current slot, the badge, header, and Current state now follow the selected Next step when that choice is a result of the same ministry/migration (not the following step).

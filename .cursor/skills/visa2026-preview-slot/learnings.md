@@ -23,6 +23,15 @@ Purpose: **shell, layout, occupants, catalog card UX, JS/CSS** — not Resminama
 
 ## Entries
 
+### 2026-08-17 — Ministry letter Preview never iframes the PDF
+
+- **Symptom**: Workspace Progress **View letter** on a filled Application form (`ApplicationForm_…pdf`) showed Chrome’s PDF toolbar and the XFA “Please wait / Adobe Reader” sheet plus Spire evaluation text.
+- **Root cause**: `ContainsXfa` looked for uncompressed `/XFA`. Spire-filled letters often keep that key in a Flate stream, so preview used an iframe. PDFium cannot paint XFA.
+- **Fix**: `ProgressLettersInlinePreview` always uses pdf.js (`visaXfaPreview`) for non-image letters (XFA layer, canvas fallback for scans). `PdfXfaDocument.ContainsXfa` also scans Flate streams and `xdp:xdp`.
+- Test: `PdfXfaDocumentTests`. Stop F5, rebuild, F5, Ctrl+F5. On **B/-010** Progress → View letter → Şahsy kagyzy in the slot, not Please wait. Download unchanged.
+- Prevent: Do not iframe ministry-letter PDFs. Do not Spire-flatten for Chrome.
+- Cross-skill: visa2026-application-progress | visa2026-document-copies
+
 ### 2026-08-17 — Approval letter Preview uses pdf.js when the file is XFA
 
 - Workspace Progress letter click iframed the uploaded PDF. Chrome showed the XFA “Please wait / Adobe Reader” sheet (often a filled Application form saved as the ministry letter, with a Spire evaluation banner). Download still opened in Foxit.

@@ -4,6 +4,20 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 
 ---
 
+### 2026-08-17 — Approval letter upload on current ministry Result
+
+- After Result belonged to the current ministry, that node often has no decision row yet so letter upload hid. Upload sits next to Result; the file is stored on Advance onto that ministry’s new decision row. Completed ministries can still add a letter on their decision row.
+- Verify: `Build_FirstLegApproved_NextMinistryIsCurrent`. Stop F5, rebuild, F5. On **8/-010** Energetika — upload a letter, Advance Approved; letter sits on Energetika.
+- Prevent: Do not require a saved decision row before showing upload. Do not attach a pending Energetika letter to the previous ministry’s latest row.
+- Cross-skill: visa2026-application-progress
+
+### 2026-08-17 — Progress Result is this step, not the next one
+
+- Workspace Progress **Next step** showed the following node’s state (Office → Submitted). Relabeled **Result**; after Approve the next ministry becomes current so Approved/Disapproved belong to that ministry.
+- Verify: stop F5, rebuild, F5. **8/-010** Office — Date + Advance only; first ministry becomes Submitted. Energetika current — Result Approved/Disapproved is Energetika.
+- Prevent: Do not put Türkmenenergo Submitted on the Office form.
+- Cross-skill: visa2026-application-progress
+
 ### 2026-08-17 — Current-step badge follows Next step
 
 - Progress tab badge/header stayed on the recorded result (Approved) after the officer picked Disapproved in Next step. Same-slot preview now updates the current node before Advance.

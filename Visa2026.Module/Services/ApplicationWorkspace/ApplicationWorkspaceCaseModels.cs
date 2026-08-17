@@ -121,6 +121,8 @@ public sealed class ApplicationWorkspaceCaseProgressStep
 
     public bool ShowMinistryLetterUpload { get; init; }
 
+    public Guid? DecisionProgressId { get; init; }
+
     /// <summary>
     /// Visual tone for the stepper: pending, current, ok, issued, rejected, cancelled.
     /// Terminal outcomes (issued / rejected / cancelled) win over slot current/done.
@@ -138,6 +140,10 @@ public sealed class ApplicationWorkspaceCaseProgressStep
     public string AdvanceBlockedReason { get; init; } = string.Empty;
 
     public IReadOnlyList<ApplicationWorkspaceCaseProgressAdvanceOption> AdvanceOptions { get; init; }
+        = Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>();
+
+    /// <summary>Approved / Disapproved / Issued / … for this node only — not the following ministry.</summary>
+    public IReadOnlyList<ApplicationWorkspaceCaseProgressAdvanceOption> ResultOptions { get; init; }
         = Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>();
 }
 

@@ -77,7 +77,7 @@ disable-model-invocation: false
 | Illegal next state on save | Trace `ApplicationProgressTransitionHelper.TryValidateProgressStep` | Leg count vs transition graph (leg1 STARTED only) |
 | Contract required / legs required message | `ApplicationProgressProfileResolver.TryValidate*` | `ProjectContract` + `MinistryLegs` |
 | Ministry column empty on progress | `ApprovalLegSnapshots` + `ApprovalLegProfileMinistryHelper.GetMinistryShortNameForProgressStep` (falls back to live profile legs) | Snapshot missing on import; heal via `EnsureSnapshots` on Application save |
-| Letter upload hidden when it should show | `IsMinistryDecisionStateCode` + `[Appearance]` on `MinistryLetterFile` | State code or criteria |
+| Letter upload hidden when it should show | Workspace: `ShowMinistryLetterUpload` on current `leg-*` Result step (row may not exist yet). DetailView: `IsMinistryDecisionStateCode` + `[Appearance]` | Timeline flag vs state criteria |
 | Approval letter Preview shows Please wait / Adobe Reader | File is filled XFA; `ProgressLettersInlinePreview` + `PdfXfaDocument.ContainsXfa` (pdf.js, not iframe) | Preview slot occupant |
 | Application list row color wrong | **`visa2026-bo-state-colors`** — `PrimaryStateCode`, `BoStateAppearanceColors` | Not transition helper |
 | Cannot edit contract legs | `ProjectContractMinistryController` — duplicate contract row instead | Structural immutability |
@@ -105,7 +105,7 @@ disable-model-invocation: false
 ### Ministry decision letter (scalar file)
 
 - Property: `ApplicationProgress.MinistryLetterFile` (`FileData`, `[FileAttachment]`).
-- Visible when `IsMinistryDecisionStep` (approved/rejected ministry states only).
+- Visible when `IsMinistryDecisionStep` (approved/rejected ministry states only). Workspace Progress shows upload on the current ministry Result step even before that row exists; the file is stored on Advance.
 - Validation: size via `SystemSettings.MaxDocumentSizeInMB`; content via `DocumentFileUploadConstraints`.
 - Schema: `ApplicationProgressMinistryLetterFileSchemaUpdater` + `ApplicationProgressMinistryLetterFileSchemaSql` (idempotent SQL before EF sync).
 

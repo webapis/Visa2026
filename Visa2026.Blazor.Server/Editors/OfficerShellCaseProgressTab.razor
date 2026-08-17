@@ -1,4 +1,5 @@
 @using System.Linq
+@using System.IO
 @using Microsoft.AspNetCore.Components.Forms
 @using Visa2026.Module.BusinessObjects.ApplicationWorkspace
 @using Visa2026.Module.BusinessObjects.OfficerShell
@@ -64,14 +65,23 @@
                         </p>
                     }
                     @if (step.State != "current"
-                        && !string.IsNullOrWhiteSpace(letterName)
-                        && letterProgressId is Guid)
+                        && (step.ShowMinistryLetterUpload || (!string.IsNullOrWhiteSpace(letterName) && letterProgressId is Guid)))
                     {
                         <p class="ct-prog-v__letter">
-                            <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
-                                                               ProgressId="letterProgressId"
-                                                               FileName="@letterName"
-                                                               OwnerViewId="@PreviewSlotOwnerViewId" />
+                            @if (!string.IsNullOrWhiteSpace(letterName) && letterProgressId is Guid)
+                            {
+                                <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
+                                                                   ProgressId="letterProgressId"
+                                                                   FileName="@letterName"
+                                                                   OwnerViewId="@PreviewSlotOwnerViewId" />
+                            }
+                            @if (step.ShowMinistryLetterUpload)
+                            {
+                                <label class="ct-upload ct-upload--action" style="margin-top:8px">
+                                    <InputFile OnChange="e => OnMinistryLetterSelected(e, step)" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp" disabled="@_busy" />
+                                    <span>☁ Upload file<br /><span>PDF or scan up to @MaxUploadMb MB</span></span>
+                                </label>
+                            }
                         </p>
                     }
                     @if (step.State == "current")
@@ -90,24 +100,6 @@
                                     <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
                                         <button type="button" class="os-btn" disabled="@(_busy || _notesDirty == false)" @onclick="SaveNotesAsync">Save notes</button>
                                     </div>
-
-                                    @if (step.ShowMinistryLetterUpload)
-                                    {
-                                        <label class="ct-label" style="margin-top:10px">Ministry letter</label>
-                                        @if (!string.IsNullOrWhiteSpace(letterName) && letterProgressId is Guid)
-                                        {
-                                            <p class="ct-muted" style="margin:0 0 8px">
-                                                <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
-                                                                                   ProgressId="letterProgressId"
-                                                                                   FileName="@letterName"
-                                                                                   OwnerViewId="@PreviewSlotOwnerViewId" />
-                                            </p>
-                                        }
-                                        <label class="ct-upload ct-upload--action">
-                                            <InputFile OnChange="OnMinistryLetterSelected" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp" disabled="@_busy" />
-                                            <span>☁ Upload file<br /><span>PDF or scan up to @MaxUploadMb MB</span></span>
-                                        </label>
-                                    }
                                 </div>
                                 <dl class="ct-meta">
                                     <div><dt>Current state</dt><dd><span class="os-status os-status--process">@(string.IsNullOrWhiteSpace(preview.Label) ? step.CurrentStateLabel : preview.Label)</span></dd></div>
@@ -126,15 +118,36 @@
                                            @bind="_advanceDate"
                                            @bind:format="yyyy-MM-dd"
                                            disabled="@_busy" />
-                                    @if (step.AdvanceOptions.Count > 1)
+                                    @if (step.ResultOptions.Count > 0)
                                     {
-                                        <label class="ct-label" for="advance-state-@ApplicationProfileInstanceId" style="margin-top:10px">Next step</label>
+                                        <label class="ct-label" for="advance-state-@ApplicationProfileInstanceId" style="margin-top:10px">Result</label>
                                         <select id="advance-state-@ApplicationProfileInstanceId" class="os-input" @bind="_selectedAdvanceStateCode" disabled="@_busy">
-                                            @foreach (var option in step.AdvanceOptions)
+                                            @foreach (var option in step.ResultOptions)
                                             {
                                                 <option value="@option.StateCode">@option.Label</option>
                                             }
                                         </select>
+                                    }
+                                    @if (step.ShowMinistryLetterUpload)
+                                    {
+                                        <label class="ct-label" style="margin-top:10px">Approval / disapproval letter</label>
+                                        @if (!string.IsNullOrWhiteSpace(letterName) && letterProgressId is Guid)
+                                        {
+                                            <p class="ct-muted" style="margin:0 0 8px">
+                                                <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
+                                                                                   ProgressId="letterProgressId"
+                                                                                   FileName="@letterName"
+                                                                                   OwnerViewId="@PreviewSlotOwnerViewId" />
+                                            </p>
+                                        }
+                                        else if (!string.IsNullOrWhiteSpace(_pendingLetterName))
+                                        {
+                                            <p class="ct-muted" style="margin:0 0 8px">@_pendingLetterName — stored when you Advance progress</p>
+                                        }
+                                        <label class="ct-upload ct-upload--action">
+                                            <InputFile OnChange="e => OnMinistryLetterSelected(e, step)" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp" disabled="@_busy" />
+                                            <span>☁ Upload file<br /><span>PDF or scan up to @MaxUploadMb MB</span></span>
+                                        </label>
                                     }
                                     <button type="button"
                                             class="os-btn os-btn--primary"
@@ -155,15 +168,39 @@
                                     }
                                 </div>
                             }
-                            else if (step.CanRevert)
+                            else if (step.ShowMinistryLetterUpload || step.CanRevert)
                             {
                                 <div class="ct-prog-advance" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--os-line)">
-                                    <button type="button"
-                                            class="os-btn os-btn--ghost"
-                                            disabled="@_busy"
-                                            @onclick="() => RevertAsync(step)">
-                                        ◀ Revert progress
-                                    </button>
+                                    @if (step.ShowMinistryLetterUpload)
+                                    {
+                                        <label class="ct-label">Approval / disapproval letter</label>
+                                        @if (!string.IsNullOrWhiteSpace(letterName) && letterProgressId is Guid)
+                                        {
+                                            <p class="ct-muted" style="margin:0 0 8px">
+                                                <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
+                                                                                   ProgressId="letterProgressId"
+                                                                                   FileName="@letterName"
+                                                                                   OwnerViewId="@PreviewSlotOwnerViewId" />
+                                            </p>
+                                        }
+                                        else if (!string.IsNullOrWhiteSpace(_pendingLetterName))
+                                        {
+                                            <p class="ct-muted" style="margin:0 0 8px">@_pendingLetterName</p>
+                                        }
+                                        <label class="ct-upload ct-upload--action" style="margin-bottom:10px">
+                                            <InputFile OnChange="e => OnMinistryLetterSelected(e, step)" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp" disabled="@_busy" />
+                                            <span>☁ Upload file<br /><span>PDF or scan up to @MaxUploadMb MB</span></span>
+                                        </label>
+                                    }
+                                    @if (step.CanRevert)
+                                    {
+                                        <button type="button"
+                                                class="os-btn os-btn--ghost"
+                                                disabled="@_busy"
+                                                @onclick="() => RevertAsync(step)">
+                                            ◀ Revert progress
+                                        </button>
+                                    }
                                 </div>
                             }
                             else if (!string.IsNullOrWhiteSpace(step.AdvanceBlockedReason))
@@ -195,8 +232,18 @@
     private DateTime _advanceDate = DateTime.Today;
     private bool _busy;
     private bool _notesDirty;
+    private string _pendingLetterStepKey = string.Empty;
+    private string _pendingLetterName = string.Empty;
+    private byte[]? _pendingLetterContent;
 
     internal DateTime AdvanceDate => _advanceDate == default ? DateTime.Today : _advanceDate.Date;
+
+    internal string SelectedAdvanceStateCode => _selectedAdvanceStateCode;
+
+    internal string? PendingLetterFileName =>
+        string.IsNullOrWhiteSpace(_pendingLetterName) ? null : _pendingLetterName;
+
+    internal byte[]? PendingLetterContent => _pendingLetterContent;
 
     private ApplicationWorkspaceCaseView view => View;
     private int MaxUploadMb => 10;
@@ -207,13 +254,23 @@
         if (current == null)
             return;
 
+        if (!string.Equals(_pendingLetterStepKey, current.Key, StringComparison.OrdinalIgnoreCase))
+        {
+            _pendingLetterStepKey = string.Empty;
+            _pendingLetterName = string.Empty;
+            _pendingLetterContent = null;
+        }
+
         if (!_notesDirty)
             _officerNotes = current.OfficerNotes ?? string.Empty;
 
         if (string.IsNullOrWhiteSpace(_selectedAdvanceStateCode)
-            || current.AdvanceOptions.All(o => o.StateCode != _selectedAdvanceStateCode))
+            || current.ResultOptions.All(o => o.StateCode != _selectedAdvanceStateCode))
         {
-            _selectedAdvanceStateCode = current.AdvanceOptions.FirstOrDefault()?.StateCode ?? string.Empty;
+            _selectedAdvanceStateCode = ApplicationWorkspaceProgressAdvancePreview.PreferredAdvanceCode(
+                current.Key,
+                current.AdvanceOptions,
+                _selectedAdvanceStateCode) ?? string.Empty;
         }
     }
 
@@ -239,12 +296,12 @@
 
     private (string? Label, string? Tone) PreviewFor(ApplicationWorkspaceCaseProgressStep step)
     {
-        if (step.State != "current" || step.AdvanceOptions.Count == 0)
+        if (step.State != "current")
             return (null, null);
 
-        var option = step.AdvanceOptions.FirstOrDefault(o => o.StateCode == _selectedAdvanceStateCode)
-            ?? step.AdvanceOptions[0];
-        if (!ApplicationWorkspaceProgressAdvancePreview.IsResultForStep(step.Key, option.StateCode))
+        var option = step.ResultOptions.FirstOrDefault(o => o.StateCode == _selectedAdvanceStateCode)
+            ?? step.ResultOptions.FirstOrDefault();
+        if (option == null || !ApplicationWorkspaceProgressAdvancePreview.IsResultForStep(step.Key, option.StateCode))
             return (null, null);
 
         return (option.Label, ApplicationWorkspaceProgressAdvancePreview.OutcomeKind(option.StateCode));
@@ -273,7 +330,7 @@
         }
     }
 
-    private async Task OnMinistryLetterSelected(InputFileChangeEventArgs e)
+    private async Task OnMinistryLetterSelected(InputFileChangeEventArgs e, ApplicationWorkspaceCaseProgressStep step)
     {
         var file = e.File;
         if (file == null || _busy)
@@ -285,11 +342,22 @@
             await using var stream = file.OpenReadStream(MaxUploadMb * 1024 * 1024);
             using var memory = new MemoryStream();
             await stream.CopyToAsync(memory);
-            await UploadMinistryLetterRequested.InvokeAsync(new OfficerShellCaseProgressFileUpload
+            var content = memory.ToArray();
+
+            if (step.DecisionProgressId is Guid decisionId && decisionId != Guid.Empty)
             {
-                FileName = file.Name,
-                Content = memory.ToArray(),
-            });
+                await UploadMinistryLetterRequested.InvokeAsync(new OfficerShellCaseProgressFileUpload
+                {
+                    FileName = file.Name,
+                    Content = content,
+                    ProgressId = decisionId,
+                });
+                return;
+            }
+
+            _pendingLetterStepKey = step.Key;
+            _pendingLetterName = file.Name;
+            _pendingLetterContent = content;
         }
         finally
         {
@@ -303,9 +371,10 @@
             return;
 
         var current = View.ProgressSteps.FirstOrDefault(s => s.State == "current");
-        var code = _selectedAdvanceStateCode;
-        if (string.IsNullOrWhiteSpace(code))
-            code = current?.AdvanceOptions.FirstOrDefault()?.StateCode ?? string.Empty;
+        var code = ApplicationWorkspaceProgressAdvancePreview.PreferredAdvanceCode(
+            current?.Key ?? string.Empty,
+            current?.AdvanceOptions ?? Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>(),
+            _selectedAdvanceStateCode);
         if (string.IsNullOrWhiteSpace(code))
             return;
 
@@ -317,6 +386,8 @@
                 StateCode = code,
                 Notes = _officerNotes,
                 Date = AdvanceDate,
+                LetterFileName = _pendingLetterName,
+                LetterContent = _pendingLetterContent,
             });
             _notesDirty = false;
         }

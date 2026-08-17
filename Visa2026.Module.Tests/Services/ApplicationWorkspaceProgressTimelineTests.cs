@@ -35,6 +35,8 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.Equal("pending", steps[4].State);
         Assert.True(string.IsNullOrEmpty(steps[1].Date));
         Assert.True(string.IsNullOrEmpty(steps[1].CurrentStateLabel));
+        Assert.Empty(steps[0].ResultOptions);
+        Assert.False(steps[0].ShowMinistryLetterUpload);
     }
 
     [Fact]
@@ -77,6 +79,67 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.True(steps[0].CanRevertToHere);
         Assert.False(steps[0].CanRevert);
         Assert.Contains(steps[1].AdvanceOptions, o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.Review1Approved);
+        Assert.Contains(steps[1].ResultOptions, o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.Review1Approved);
+        Assert.Contains(steps[1].ResultOptions, o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.Review1Rejected);
+        Assert.True(steps[1].ShowMinistryLetterUpload);
+    }
+
+    [Fact]
+    public void Build_FirstLegApproved_NextMinistryIsCurrent()
+    {
+        var profile = ThreeLegProfile();
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = profile,
+            ApplicationDate = DateTime.Today,
+            ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>(),
+        };
+        application.ProgressHistory.Add(ApprovedLeg(application, 1, null, Guid.NewGuid()));
+
+        var steps = ApplicationWorkspaceProgressTimeline.Build(application, profile, default, objectSpace: null);
+
+        Assert.Equal("done", steps[0].State);
+        Assert.Equal("done", steps[1].State);
+        Assert.Equal("Approved", steps[1].CurrentStateLabel);
+        Assert.Equal("current", steps[2].State);
+        Assert.Equal("Turkmenenergetika", steps[2].Label);
+        Assert.True(string.IsNullOrEmpty(steps[2].CurrentStateLabel));
+        Assert.Equal("pending", steps[3].State);
+        Assert.Equal("pending", steps[4].State);
+        Assert.Contains(steps[2].ResultOptions, o => o.StateCode == ApplicationProfileInstanceProgressLegCodes.ReviewApproved(2));
+        Assert.Contains(steps[2].ResultOptions, o => o.StateCode == ApplicationProfileInstanceProgressLegCodes.ReviewRejected(2));
+        Assert.DoesNotContain(steps[2].ResultOptions, o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.ProcessCancelled);
+        Assert.True(steps[1].ShowMinistryLetterUpload);
+        Assert.NotNull(steps[1].DecisionProgressId);
+        Assert.True(steps[2].ShowMinistryLetterUpload);
+        Assert.Null(steps[2].DecisionProgressId);
+        Assert.True(steps[2].CanRevert);
+    }
+
+    [Fact]
+    public void Build_LastMinistryApproved_MigrationIsCurrent()
+    {
+        var profile = ThreeLegProfile();
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = profile,
+            ApplicationDate = DateTime.Today,
+            ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>(),
+        };
+        application.ProgressHistory.Add(ApprovedLeg(application, 1, null, Guid.NewGuid()));
+        application.ProgressHistory.Add(ApprovedLeg(application, 2, null, Guid.NewGuid()));
+        application.ProgressHistory.Add(ApprovedLeg(application, 3, null, Guid.NewGuid()));
+
+        var steps = ApplicationWorkspaceProgressTimeline.Build(application, profile, default, objectSpace: null);
+
+        Assert.Equal("done", steps[1].State);
+        Assert.Equal("done", steps[2].State);
+        Assert.Equal("done", steps[3].State);
+        Assert.Equal("current", steps[4].State);
+        Assert.Empty(steps[4].ResultOptions);
+        Assert.False(steps[4].ShowMinistryLetterUpload);
+        Assert.True(steps[3].ShowMinistryLetterUpload);
+        Assert.Contains(steps[4].AdvanceOptions, o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.ProcessStarted);
     }
 
     [Fact]

@@ -11,14 +11,17 @@ public interface IOfficerShellCaseProgressService
         IObjectSpace objectSpace,
         Guid applicationId,
         string fileName,
-        byte[] content);
+        byte[] content,
+        Guid? progressId = null);
 
     OfficerShellCaseProgressResult Advance(
         IObjectSpace objectSpace,
         Guid applicationId,
         string? stateCode,
         string? notesOnLatestStep,
-        DateTime? stepDate);
+        DateTime? stepDate,
+        string? letterFileName = null,
+        byte[]? letterContent = null);
 
     OfficerShellCaseProgressResult Revert(
         IObjectSpace objectSpace,

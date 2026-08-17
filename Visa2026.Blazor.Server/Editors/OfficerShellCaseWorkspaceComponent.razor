@@ -931,9 +931,14 @@
 
         return AdvanceProgressRequested.InvokeAsync(new OfficerShellCaseProgressAdvanceRequest
         {
-            StateCode = current.AdvanceOptions[0].StateCode,
+            StateCode = ApplicationWorkspaceProgressAdvancePreview.PreferredAdvanceCode(
+                current.Key,
+                current.AdvanceOptions,
+                _progressTab?.SelectedAdvanceStateCode) ?? string.Empty,
             Notes = current.OfficerNotes ?? string.Empty,
             Date = _progressTab?.AdvanceDate ?? DateTime.Today,
+            LetterFileName = _progressTab?.PendingLetterFileName,
+            LetterContent = _progressTab?.PendingLetterContent,
         });
     }
 
