@@ -240,7 +240,7 @@ internal static class Visa2014ActualPositionReview
     }
 
     /// <summary>Heuristic hint only (not authoritative): flags strings that look like tasks/descriptions, not titles.</summary>
-    private static bool LooksLikeNonTitle(string name)
+    internal static bool LooksLikeNonTitle(string name)
     {
         var n = name?.Trim() ?? "";
         if (n.Length == 0 || n == DashName)
@@ -275,7 +275,7 @@ internal static class Visa2014ActualPositionReview
         return ids;
     }
 
-    private static List<string> ParseCsvLine(string line)
+    internal static List<string> ParseCsvLine(string line)
     {
         var fields = new List<string>();
         var sb = new StringBuilder();
@@ -303,7 +303,7 @@ internal static class Visa2014ActualPositionReview
         return fields;
     }
 
-    private static string Csv(string value)
+    internal static string Csv(string value)
     {
         var v = value ?? "";
         if (v.Contains('"') || v.Contains(',') || v.Contains('\n') || v.Contains('\r'))
