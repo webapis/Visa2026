@@ -92,6 +92,7 @@
                                                                 OpenResminamalarRequested="@OpenResminamalarRequested"
                                                                 SelectPersonRowRequested="@SelectPersonRowRequested"
                                                                 OpenPersonDetailByIndexRequested="@OpenPersonDetailByIndexRequested"
+                                                                RelinkPersonRequested="@RelinkPersonRequested"
                                                                 ProgressStatusMessage="@ProgressStatusMessage"
                                                                 ProgressStatusIsError="@ProgressStatusIsError"
                                                                 SaveProgressNotesRequested="@SaveProgressNotesRequested"
@@ -185,12 +186,13 @@
     [Parameter] public EventCallback<ApplicationWorkspaceIssuedHeaderOpenRequest> IssuedHeaderOpenRequested { get; set; }
     [Parameter] public EventCallback BackToInProcessRequested { get; set; }
     [Parameter] public EventCallback LinkPersonRequested { get; set; }
-    [Parameter] public EventCallback UnlinkPersonRequested { get; set; }
+    [Parameter] public EventCallback<Guid> UnlinkPersonRequested { get; set; }
     [Parameter] public EventCallback OpenPersonDetailRequested { get; set; }
     [Parameter] public EventCallback OpenDocumentCopiesRequested { get; set; }
     [Parameter] public EventCallback OpenResminamalarRequested { get; set; }
     [Parameter] public EventCallback<int> SelectPersonRowRequested { get; set; }
     [Parameter] public EventCallback<int> OpenPersonDetailByIndexRequested { get; set; }
+    [Parameter] public EventCallback<Guid> RelinkPersonRequested { get; set; }
     [Parameter] public string? ProgressStatusMessage { get; set; }
     [Parameter] public bool ProgressStatusIsError { get; set; }
     [Parameter] public EventCallback<string> SaveProgressNotesRequested { get; set; }

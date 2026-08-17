@@ -97,12 +97,13 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         IssuedHeaderOpenRequested = EventCallback.Factory.Create<ApplicationWorkspaceIssuedHeaderOpenRequest>(this, OnIssuedHeaderOpenRequested),
         BackToInProcessRequested = EventCallback.Factory.Create(this, BackToInProcessAsync),
         LinkPersonRequested = EventCallback.Factory.Create(this, LinkPersonAsync),
-        UnlinkPersonRequested = EventCallback.Factory.Create(this, UnlinkPersonAsync),
+        UnlinkPersonRequested = EventCallback.Factory.Create<Guid>(this, UnlinkPersonAsync),
         OpenPersonDetailRequested = EventCallback.Factory.Create(this, OpenPersonDetailAsync),
         OpenDocumentCopiesRequested = EventCallback.Factory.Create(this, OpenDocumentCopiesAsync),
         OpenResminamalarRequested = EventCallback.Factory.Create(this, OpenResminamalarAsync),
         SelectPersonRowRequested = EventCallback.Factory.Create<int>(this, SelectPersonRow),
         OpenPersonDetailByIndexRequested = EventCallback.Factory.Create<int>(this, OpenPersonDetailByIndexAsync),
+        RelinkPersonRequested = EventCallback.Factory.Create<Guid>(this, RelinkPersonAsync),
         SaveProgressNotesRequested = EventCallback.Factory.Create<string>(this, SaveProgressNotesAsync),
         UploadMinistryLetterRequested = EventCallback.Factory.Create<OfficerShellCaseProgressFileUpload>(this, UploadMinistryLetterAsync),
         AdvanceProgressRequested = EventCallback.Factory.Create<OfficerShellCaseProgressAdvanceRequest>(this, AdvanceCaseProgressAsync),
@@ -461,22 +462,28 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         return Task.CompletedTask;
     }
 
-    private Task UnlinkPersonAsync()
+    private async Task UnlinkPersonAsync(Guid personId)
     {
-        if (_application?.MainWindow == null)
-            return Task.CompletedTask;
-
         var model = ComponentModel;
-        if (model == null || model.CaseApplicationProfileInstanceId == Guid.Empty)
-            return Task.CompletedTask;
+        if (model == null
+            || _application == null
+            || model.CaseApplicationProfileInstanceId == Guid.Empty
+            || personId == Guid.Empty)
+        {
+            return;
+        }
 
-        ApplicationWorkspacePersonLinkHelper.ShowUnlinkPersonPicker(
-            _application,
-            _application.MainWindow,
-            model.CaseApplicationProfileInstanceId,
-            OnWorkspaceChanged);
+        using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
+        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(model.CaseApplicationProfileInstanceId);
+        var person = objectSpace.GetObjectByKey<Person>(personId);
+        if (application == null || person == null)
+            return;
 
-        return Task.CompletedTask;
+        ApplicationProfileInstancePersonService.UnlinkPerson(objectSpace, application, person);
+        if (objectSpace.IsModified)
+            objectSpace.CommitChanges();
+
+        await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId);
     }
 
     private void SelectPersonRow(int rowIndex)
@@ -498,6 +505,32 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         model.SelectedPersonRowIndex = rowIndex;
         UpdateCaseActionState(model);
         await OpenPersonDetailAsync();
+    }
+
+    private async Task RelinkPersonAsync(Guid personId)
+    {
+        var model = ComponentModel;
+        if (model == null
+            || _application == null
+            || model.CaseApplicationProfileInstanceId == Guid.Empty
+            || personId == Guid.Empty)
+        {
+            return;
+        }
+
+        using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
+        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(model.CaseApplicationProfileInstanceId);
+        var person = objectSpace.GetObjectByKey<Person>(personId);
+        if (application == null || person == null)
+            return;
+
+        if (!ApplicationProfileInstancePersonService.RelinkPerson(objectSpace, application, person))
+            return;
+
+        if (objectSpace.IsModified)
+            objectSpace.CommitChanges();
+
+        await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId);
     }
 
     private async Task SaveProgressNotesAsync(string notes)

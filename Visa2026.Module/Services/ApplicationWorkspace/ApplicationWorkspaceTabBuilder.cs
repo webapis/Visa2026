@@ -271,7 +271,11 @@ internal static class ApplicationWorkspaceTabBuilder
             ]),
             emptyMessage: "No rejection item linked.");
 
-    private static IEnumerable<IReadOnlyList<string>> RowsForKind<T>(
+    private readonly record struct KindRows(
+        IReadOnlyList<IReadOnlyList<string>> Rows,
+        IReadOnlyList<Guid> PersonIds);
+
+    private static KindRows RowsForKind<T>(
         IReadOnlyList<Person> people,
         IObjectSpace objectSpace,
         Dictionary<Guid, List<ApplicationProfileInstancePersonResolvedLink>> linksByPerson,
@@ -279,6 +283,8 @@ internal static class ApplicationWorkspaceTabBuilder
         Func<Person, T, IReadOnlyList<string>> map)
         where T : class
     {
+        var rows = new List<IReadOnlyList<string>>();
+        var personIds = new List<Guid>();
         foreach (var person in people)
         {
             if (person == null || !linksByPerson.TryGetValue(person.ID, out var links))
@@ -292,8 +298,11 @@ internal static class ApplicationWorkspaceTabBuilder
             if (entity == null)
                 continue;
 
-            yield return map(person, entity);
+            rows.Add(map(person, entity));
+            personIds.Add(person.ID);
         }
+
+        return new KindRows(rows, personIds);
     }
 
     private static ApplicationWorkspaceTab Tab(
@@ -301,19 +310,19 @@ internal static class ApplicationWorkspaceTabBuilder
         string label,
         bool visible,
         IReadOnlyList<string> columns,
-        IEnumerable<IReadOnlyList<string>> rows,
+        KindRows rows,
         string? emptyMessage = null,
         string? sqlViewHint = null)
     {
-        var rowList = rows.ToList();
         return new ApplicationWorkspaceTab
         {
             Key = key,
             Label = label,
             Visible = visible,
             Columns = columns,
-            Rows = rowList,
-            EmptyMessage = rowList.Count == 0 ? emptyMessage : null,
+            Rows = rows.Rows,
+            RowPersonIds = rows.PersonIds,
+            EmptyMessage = rows.Rows.Count == 0 ? emptyMessage : null,
             SqlViewHint = sqlViewHint,
         };
     }

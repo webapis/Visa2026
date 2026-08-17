@@ -66,9 +66,9 @@ public sealed class ApplicationWorkspaceModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
-    public EventCallback UnlinkPersonRequested
+    public EventCallback<Guid> UnlinkPersonRequested
     {
-        get => GetPropertyValue<EventCallback>();
+        get => GetPropertyValue<EventCallback<Guid>>();
         set => SetPropertyValue(value);
     }
 
@@ -153,6 +153,12 @@ public sealed class ApplicationWorkspaceModel : ComponentModelBase
     public EventCallback<int> OpenPersonDetailByIndexRequested
     {
         get => GetPropertyValue<EventCallback<int>>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback<Guid> RelinkPersonRequested
+    {
+        get => GetPropertyValue<EventCallback<Guid>>();
         set => SetPropertyValue(value);
     }
 

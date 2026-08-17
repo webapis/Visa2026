@@ -24,6 +24,7 @@
                                         UnlinkPersonRequested="@UnlinkPersonRequested"
                                         OpenPersonDetailRequested="@OpenPersonDetailRequested"
                                         OpenPersonDetailByIndexRequested="@OpenPersonDetailByIndexRequested"
+                                        RelinkPersonRequested="@RelinkPersonRequested"
                                         OpenDocumentCopiesRequested="@OpenDocumentCopiesRequested"
                                         OpenResminamalarRequested="@OpenResminamalarRequested"
                                         SelectPersonRowRequested="@SelectPersonRowRequested"
@@ -56,7 +57,7 @@
     [Parameter] public int SelectedPersonRowIndex { get; set; } = -1;
     [Parameter] public EventCallback InitialLoadRequested { get; set; }
     [Parameter] public EventCallback LinkPersonRequested { get; set; }
-    [Parameter] public EventCallback UnlinkPersonRequested { get; set; }
+    [Parameter] public EventCallback<Guid> UnlinkPersonRequested { get; set; }
     [Parameter] public EventCallback OpenPersonDetailRequested { get; set; }
     [Parameter] public EventCallback OpenDocumentCopiesRequested { get; set; }
     [Parameter] public EventCallback<int> SelectPersonRowRequested { get; set; }
@@ -69,6 +70,7 @@
     [Parameter] public EventCallback BackToListRequested { get; set; }
     [Parameter] public EventCallback OpenResminamalarRequested { get; set; }
     [Parameter] public EventCallback<int> OpenPersonDetailByIndexRequested { get; set; }
+    [Parameter] public EventCallback<Guid> RelinkPersonRequested { get; set; }
     [Parameter] public string? ProgressStatusMessage { get; set; }
     [Parameter] public bool ProgressStatusIsError { get; set; }
     [Parameter] public EventCallback<string> SaveProgressNotesRequested { get; set; }

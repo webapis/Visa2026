@@ -52,6 +52,7 @@ public class ApplicationWorkspaceLinkedRecordsCatalogTests
         Assert.Equal(1, ApplicationWorkspaceLinkedRecordsCatalog.CountResolved(links, ApplicationProfileInstancePersonLinkKind.Visa));
         Assert.Equal(0, ApplicationWorkspaceLinkedRecordsCatalog.CountResolved(links, ApplicationProfileInstancePersonLinkKind.Education));
         Assert.Equal(1, ApplicationWorkspaceLinkedRecordsCatalog.CountResolvedForPerson(links, personA, ApplicationProfileInstancePersonLinkKind.Passport));
+        Assert.Equal(0, ApplicationWorkspaceLinkedRecordsCatalog.CountResolvedForPerson(links, personA, ApplicationProfileInstancePersonLinkKind.Visa));
     }
 
     [Fact]

@@ -53,7 +53,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         IsLoading = true,
         InitialLoadRequested = EventCallback.Factory.Create(this, LoadAsync),
         LinkPersonRequested = EventCallback.Factory.Create(this, LinkPersonAsync),
-        UnlinkPersonRequested = EventCallback.Factory.Create(this, UnlinkPersonAsync),
+        UnlinkPersonRequested = EventCallback.Factory.Create<Guid>(this, UnlinkPersonAsync),
         OpenPersonDetailRequested = EventCallback.Factory.Create(this, OpenPersonDetailAsync),
         SelectPersonRowRequested = EventCallback.Factory.Create<int>(this, SelectPersonRow),
         OpenDocumentCopiesRequested = EventCallback.Factory.Create(this, OpenDocumentCopiesAsync),
@@ -67,6 +67,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         BackToListRequested = EventCallback.Factory.Create(this, BackToListAsync),
         OpenResminamalarRequested = EventCallback.Factory.Create(this, OpenResminamalarAsync),
         OpenPersonDetailByIndexRequested = EventCallback.Factory.Create<int>(this, OpenPersonDetailByIndexAsync),
+        RelinkPersonRequested = EventCallback.Factory.Create<Guid>(this, RelinkPersonAsync),
         SaveProgressNotesRequested = EventCallback.Factory.Create<string>(this, SaveProgressNotesAsync),
         UploadMinistryLetterRequested = EventCallback.Factory.Create<OfficerShellCaseProgressFileUpload>(this, UploadMinistryLetterAsync),
         AdvanceProgressRequested = EventCallback.Factory.Create<OfficerShellCaseProgressAdvanceRequest>(this, AdvanceCaseProgressAsync),
@@ -172,22 +173,23 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         await SearchPersonLinkCandidatesAsync(string.Empty);
     }
 
-    private Task UnlinkPersonAsync()
+    private async Task UnlinkPersonAsync(Guid personId)
     {
-        if (_application?.MainWindow == null)
-            return Task.CompletedTask;
-
         var applicationId = ResolveApplicationProfileInstanceId();
-        if (applicationId == Guid.Empty)
-            return Task.CompletedTask;
+        if (_application == null || applicationId == Guid.Empty || personId == Guid.Empty)
+            return;
 
-        ApplicationWorkspacePersonLinkHelper.ShowUnlinkPersonPicker(
-            _application,
-            _application.MainWindow,
-            applicationId,
-            OnWorkspaceChanged);
+        using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
+        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
+        var person = objectSpace.GetObjectByKey<Person>(personId);
+        if (application == null || person == null)
+            return;
 
-        return Task.CompletedTask;
+        ApplicationProfileInstancePersonService.UnlinkPerson(objectSpace, application, person);
+        if (objectSpace.IsModified)
+            objectSpace.CommitChanges();
+
+        await LoadAsync();
     }
 
     private void SelectPersonRow(int rowIndex)
@@ -363,6 +365,27 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         model.SelectedPersonRowIndex = rowIndex;
         UpdateActionState(model);
         await OpenPersonDetailAsync();
+    }
+
+    private async Task RelinkPersonAsync(Guid personId)
+    {
+        var applicationId = ResolveApplicationProfileInstanceId();
+        if (_application == null || applicationId == Guid.Empty || personId == Guid.Empty)
+            return;
+
+        using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
+        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
+        var person = objectSpace.GetObjectByKey<Person>(personId);
+        if (application == null || person == null)
+            return;
+
+        if (!ApplicationProfileInstancePersonService.RelinkPerson(objectSpace, application, person))
+            return;
+
+        if (objectSpace.IsModified)
+            objectSpace.CommitChanges();
+
+        await LoadAsync();
     }
 
     private async Task SaveProgressNotesAsync(string notes)

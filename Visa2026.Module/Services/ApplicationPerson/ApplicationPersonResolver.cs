@@ -134,6 +134,85 @@ public static class ApplicationProfileInstancePersonResolver
         return missing;
     }
 
+    public enum EnsureResolvedLinkDecision
+    {
+        None,
+        Create,
+        FillEmpty,
+    }
+
+    /// <summary>
+    /// After an officer creates a person-owned BO from People &amp; links, pin that
+    /// object onto the sticky ResolvedLink. Does not replace a non-empty LinkedObjectId.
+    /// </summary>
+    public static EnsureResolvedLinkDecision DecideEnsureResolvedLink(
+        IEnumerable<ApplicationProfileInstancePersonResolvedLink>? existingLinks,
+        ApplicationProfileInstancePersonLinkKind kind,
+        Guid linkedObjectId,
+        out ApplicationProfileInstancePersonResolvedLink? emptyRow)
+    {
+        emptyRow = null;
+        if (linkedObjectId == Guid.Empty)
+            return EnsureResolvedLinkDecision.None;
+
+        foreach (var link in existingLinks ?? [])
+        {
+            if (link?.LinkKind != kind)
+                continue;
+            if (link.LinkedObjectId == linkedObjectId)
+                return EnsureResolvedLinkDecision.None;
+            if (link.LinkedObjectId is Guid existingId && existingId != Guid.Empty)
+                return EnsureResolvedLinkDecision.None;
+
+            emptyRow = link;
+            return EnsureResolvedLinkDecision.FillEmpty;
+        }
+
+        return EnsureResolvedLinkDecision.Create;
+    }
+
+    public static void EnsureResolvedLink(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance application,
+        Person person,
+        ApplicationProfileInstancePersonLinkKind kind,
+        Guid linkedObjectId)
+    {
+        if (objectSpace == null || application == null || person == null || linkedObjectId == Guid.Empty)
+            return;
+
+        var trackedPerson = person.ID != Guid.Empty
+            ? objectSpace.GetObject(person) ?? person
+            : person;
+        var trackedApplication = application.ID != Guid.Empty
+            ? objectSpace.GetObject(application) ?? application
+            : application;
+        if (trackedPerson == null || trackedApplication == null)
+            return;
+        if (ApplicationProfileInstancePersonRosterLockHelper.AreResolvedLinksLocked(trackedApplication))
+            return;
+
+        var existing = LoadLinks(objectSpace, trackedApplication.ID, trackedPerson.ID);
+        var decision = DecideEnsureResolvedLink(existing, kind, linkedObjectId, out var emptyRow);
+        if (decision == EnsureResolvedLinkDecision.None)
+            return;
+
+        if (decision == EnsureResolvedLinkDecision.FillEmpty && emptyRow != null)
+        {
+            emptyRow.LinkedObjectId = linkedObjectId;
+            ApplicationProfileInstanceChildMembership.Add(objectSpace, trackedApplication, kind, linkedObjectId);
+            return;
+        }
+
+        var link = objectSpace.CreateObject<ApplicationProfileInstancePersonResolvedLink>();
+        link.ApplicationProfileInstance = trackedApplication;
+        link.Person = trackedPerson;
+        link.LinkKind = kind;
+        link.LinkedObjectId = linkedObjectId;
+        trackedApplication.PersonResolvedLinks?.Add(link);
+        ApplicationProfileInstanceChildMembership.Add(objectSpace, trackedApplication, kind, linkedObjectId);
+    }
+
     public static IReadOnlyList<(ApplicationProfileInstancePersonLinkKind Kind, object? Entity)> ResolveEntities(
         IObjectSpace objectSpace,
         Person person) =>

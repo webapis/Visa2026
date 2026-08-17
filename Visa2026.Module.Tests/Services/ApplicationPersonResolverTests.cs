@@ -143,4 +143,63 @@ public class ApplicationProfileInstancePersonResolverTests
 
         Assert.Empty(missing);
     }
+
+    [Fact]
+    public void DecideEnsureResolvedLink_CreatesWhenNone()
+    {
+        var newId = Guid.Parse("44444444-4444-4444-4444-444444444444");
+
+        var decision = ApplicationProfileInstancePersonResolver.DecideEnsureResolvedLink(
+            Array.Empty<ApplicationProfileInstancePersonResolvedLink>(),
+            ApplicationProfileInstancePersonLinkKind.Salary,
+            newId,
+            out var emptyRow);
+
+        Assert.Equal(ApplicationProfileInstancePersonResolver.EnsureResolvedLinkDecision.Create, decision);
+        Assert.Null(emptyRow);
+    }
+
+    [Fact]
+    public void DecideEnsureResolvedLink_FillsEmptyLinkedObjectId()
+    {
+        var newId = Guid.Parse("55555555-5555-5555-5555-555555555555");
+        var empty = new ApplicationProfileInstancePersonResolvedLink
+        {
+            LinkKind = ApplicationProfileInstancePersonLinkKind.MedicalRecord,
+            LinkedObjectId = null,
+        };
+
+        var decision = ApplicationProfileInstancePersonResolver.DecideEnsureResolvedLink(
+            new[] { empty },
+            ApplicationProfileInstancePersonLinkKind.MedicalRecord,
+            newId,
+            out var emptyRow);
+
+        Assert.Equal(ApplicationProfileInstancePersonResolver.EnsureResolvedLinkDecision.FillEmpty, decision);
+        Assert.Same(empty, emptyRow);
+    }
+
+    [Fact]
+    public void DecideEnsureResolvedLink_DoesNotReplaceStickyId()
+    {
+        var stickyId = Guid.Parse("66666666-6666-6666-6666-666666666666");
+        var newerId = Guid.Parse("77777777-7777-7777-7777-777777777777");
+        var existing = new[]
+        {
+            new ApplicationProfileInstancePersonResolvedLink
+            {
+                LinkKind = ApplicationProfileInstancePersonLinkKind.AddressOfResidence,
+                LinkedObjectId = stickyId,
+            },
+        };
+
+        var decision = ApplicationProfileInstancePersonResolver.DecideEnsureResolvedLink(
+            existing,
+            ApplicationProfileInstancePersonLinkKind.AddressOfResidence,
+            newerId,
+            out var emptyRow);
+
+        Assert.Equal(ApplicationProfileInstancePersonResolver.EnsureResolvedLinkDecision.None, decision);
+        Assert.Null(emptyRow);
+    }
 }

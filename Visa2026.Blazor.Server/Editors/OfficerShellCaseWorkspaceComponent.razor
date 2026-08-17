@@ -186,9 +186,10 @@
     [Parameter] public EventCallback<ApplicationWorkspaceIssuedHeaderOpenRequest> IssuedHeaderOpenRequested { get; set; }
     [Parameter] public EventCallback BackToListRequested { get; set; }
     [Parameter] public EventCallback LinkPersonRequested { get; set; }
-    [Parameter] public EventCallback UnlinkPersonRequested { get; set; }
+    [Parameter] public EventCallback<Guid> UnlinkPersonRequested { get; set; }
     [Parameter] public EventCallback OpenPersonDetailRequested { get; set; }
     [Parameter] public EventCallback<int> OpenPersonDetailByIndexRequested { get; set; }
+    [Parameter] public EventCallback<Guid> RelinkPersonRequested { get; set; }
     [Parameter] public EventCallback OpenDocumentCopiesRequested { get; set; }
     [Parameter] public EventCallback OpenResminamalarRequested { get; set; }
     [Parameter] public EventCallback<int> SelectPersonRowRequested { get; set; }
@@ -210,6 +211,9 @@
 
     private readonly HashSet<Guid> _selectedDocumentPersonIds = [];
     private string _documentPeopleRosterKey = string.Empty;
+    private string? _peopleRecordKey;
+    private int? _peopleRecordPersonIndex;
+    private string? _appliedPeopleFocusKey;
 
     private IReadOnlyList<Guid> SelectedDocumentPersonIds =>
         _selectedDocumentPersonIds.Count == 0
@@ -218,9 +222,28 @@
 
     private static bool IsWideTab(string tab) => tab is "documents" or "resminamalar";
 
+    private string? EffectivePeopleRecordKey =>
+        !string.IsNullOrWhiteSpace(_peopleRecordKey)
+            ? _peopleRecordKey
+            : PeopleLinkedRecordFocusKey;
+
     protected override void OnParametersSet()
     {
         SyncDocumentPeopleFilter(Snapshot?.CaseView);
+        SyncPeopleRecordFocus();
+    }
+
+    private void SyncPeopleRecordFocus()
+    {
+        var focus = string.IsNullOrWhiteSpace(PeopleLinkedRecordFocusKey)
+            ? null
+            : PeopleLinkedRecordFocusKey.Trim();
+        if (string.Equals(focus, _appliedPeopleFocusKey, StringComparison.OrdinalIgnoreCase))
+            return;
+
+        _appliedPeopleFocusKey = focus;
+        _peopleRecordKey = focus;
+        _peopleRecordPersonIndex = null;
     }
 
     private void SyncDocumentPeopleFilter(ApplicationWorkspaceCaseView? view)
@@ -392,7 +415,9 @@
                     <div class="cw-link-row">
                         @foreach (var tile in view.LinkedRecordTiles)
                         {
-                            <button type="button" class="cw-link-tile cw-link-tile--@tile.Tone" @onclick="() => OpenLinkedRecordTile(tile.TabKey)">
+                            <button type="button"
+                                    class="cw-link-tile cw-link-tile--@tile.Tone @(tile.Count == 0 ? "is-empty" : null)"
+                                    @onclick="() => OpenLinkedRecordTile(tile.TabKey)">
                                 <span class="cw-link-tile__icon">@tile.Glyph</span>
                                 <span class="cw-link-tile__label">@tile.Label</span>
                                 <strong class="cw-link-tile__count">@tile.Count</strong>
@@ -475,7 +500,6 @@
             }
             <div class="os-toolbar" style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap">
                 <button type="button" class="os-btn os-btn--primary" disabled="@(!CanLinkPerson || ShowPersonLinkPicker)" @onclick="LinkPersonAsync">Link existing…</button>
-                <button type="button" class="os-btn" disabled="@(!CanUnlinkPerson)" @onclick="UnlinkPersonAsync">Unlink</button>
             </div>
             <OfficerShellPersonLinkPickerComponent IsOpen="@ShowPersonLinkPicker"
                                                    Candidates="@PersonLinkCandidates"
@@ -495,7 +519,7 @@
                 <div class="os-panel" style="margin-bottom:16px">
                     <table class="os-table">
                         <thead>
-                            <tr><th>Person</th><th>Role</th><th>Passport</th><th>Visa</th><th></th></tr>
+                            <tr><th>Person</th><th>Role</th><th>Passport</th><th>Visa</th><th></th><th></th><th></th></tr>
                         </thead>
                         <tbody>
                             @foreach (var person in view.People)
@@ -505,6 +529,20 @@
                                     <td>@person.RoleLabel</td>
                                     <td><code>@person.PassportNumber</code></td>
                                     <td><code>@person.VisaNumber</code></td>
+                                    <td>
+                                        <button type="button"
+                                                class="os-btn os-btn--primary ct-btn-sm"
+                                                disabled="@(!CanLinkPerson || person.PersonId == Guid.Empty)"
+                                                @onclick:stopPropagation="true"
+                                                @onclick="() => RelinkPersonById(person.PersonId)">Relink</button>
+                                    </td>
+                                    <td>
+                                        <button type="button"
+                                                class="os-btn ct-btn-sm"
+                                                disabled="@(!CanUnlinkPerson || person.PersonId == Guid.Empty)"
+                                                @onclick:stopPropagation="true"
+                                                @onclick="() => UnlinkPersonById(person.PersonId)">Unlink</button>
+                                    </td>
                                     <td>
                                         <button type="button" class="os-btn os-btn--ghost ct-btn-sm" @onclick:stopPropagation="true" @onclick="() => OpenPersonByIndex(person.Index)">Open person detail</button>
                                     </td>
@@ -516,32 +554,80 @@
                 <h2 class="ct-page__title">Linked records by person</h2>
                 @foreach (var person in view.People)
                 {
-                    <details class="ct-person-panel" open>
-                        <summary class="ct-person-panel__head">
+                    <section class="ct-person-panel">
+                        <header class="ct-person-panel__head">
                             <span>👤 <strong>@person.Name</strong></span>
-                            <button type="button" class="os-btn os-btn--ghost ct-btn-sm" @onclick:stopPropagation="true" @onclick="() => OpenPersonByIndex(person.Index)">Open person detail</button>
-                        </summary>
-                        <div class="ct-rec-grid">
+                            <button type="button" class="os-btn os-btn--ghost ct-btn-sm" @onclick="() => OpenPersonByIndex(person.Index)">Open person detail</button>
+                        </header>
+                        <div class="cw-link-row ct-person-panel__tiles">
                             @foreach (var record in person.Records)
                             {
-                                var isFocused = !string.IsNullOrWhiteSpace(PeopleLinkedRecordFocusKey)
-                                    && string.Equals(record.Key, PeopleLinkedRecordFocusKey, StringComparison.OrdinalIgnoreCase);
-                                <div class="ct-rec @(isFocused ? "ct-rec--focus" : null)">
-                                    <span class="ct-rec__icon">@record.Glyph</span>
-                                    <span class="ct-rec__label">@record.Label</span>
-                                    <strong class="ct-rec__count">@record.Count</strong>
-                                    @if (record.State == "valid")
+                                var isSelected = IsPersonRecordSelected(person.Index, record.Key);
+                                <button type="button"
+                                        class="cw-link-tile cw-link-tile--@record.Tone @(record.Count == 0 ? "is-empty" : null) @(isSelected ? "is-selected" : null)"
+                                        @onclick="() => TogglePersonRecord(person.Index, record.Key)">
+                                    <span class="cw-link-tile__icon">@record.Glyph</span>
+                                    <span class="cw-link-tile__label">@record.Label</span>
+                                    <strong class="cw-link-tile__count">@record.Count</strong>
+                                    <span class="cw-link-tile__chev">›</span>
+                                </button>
+                            }
+                        </div>
+                        @if (IsPersonRecordSelected(person.Index, EffectivePeopleRecordKey))
+                        {
+                            var selected = person.Records.FirstOrDefault(r =>
+                                string.Equals(r.Key, EffectivePeopleRecordKey, StringComparison.OrdinalIgnoreCase));
+                            if (selected != null)
+                            {
+                                var tab = FindLinkedTab(selected.Key);
+                                var rows = PersonRecordRows(person, selected.Key);
+                                var columns = LinkedRecordColumns(tab);
+                                <div class="cw-issued-panel ct-person-panel__records">
+                                    <h3 class="cw-issued-panel__title">@selected.Label</h3>
+                                    @if (rows.Count == 0)
                                     {
-                                        <span class="ct-rec__status ct-rec__status--valid">✓ Valid</span>
+                                        <p class="cw-issued-panel__hint">@(tab?.EmptyMessage ?? $"No {selected.Label.ToLowerInvariant()} linked for {person.Name}.")</p>
                                     }
                                     else
                                     {
-                                        <span class="ct-rec__status ct-rec__status--muted">—</span>
+                                        <table class="os-table">
+                                            <thead>
+                                                <tr>
+                                                    @foreach (var column in columns)
+                                                    {
+                                                        <th>@column</th>
+                                                    }
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var row in rows)
+                                                {
+                                                    <tr>
+                                                        @foreach (var cell in LinkedRecordCells(tab, row))
+                                                        {
+                                                            <td>@cell</td>
+                                                        }
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    }
+                                    @if (view.Chrome.ResolvedLinksLocked)
+                                    {
+                                        <div class="cw-issued-panel__actions">
+                                            <p class="cw-issued-panel__hint">People and linked records are locked on this case.</p>
+                                        </div>
+                                    }
+                                    else if (IsIssuedPersonItem(selected.Key))
+                                    {
+                                        <div class="cw-issued-panel__actions">
+                                            <p class="cw-issued-panel__hint">Create this from Overview → Issued records, then it can link to this person.</p>
+                                        </div>
                                     }
                                 </div>
                             }
-                        </div>
-                    </details>
+                        }
+                    </section>
                 }
             }
         </div>;
@@ -735,6 +821,9 @@
             await CaseTabChanged.InvokeAsync(key);
     }
 
+    private static bool IsIssuedPersonItem(string? key) =>
+        key is "inv" or "wp" or "bz" or "rejection";
+
     private async Task OpenLinkedRecordTile(string tabKey)
     {
         if (LinkedRecordTileClicked.HasDelegate)
@@ -743,9 +832,78 @@
             await SelectTab("people");
     }
 
+    private bool IsPersonRecordSelected(int personIndex, string? recordKey)
+    {
+        if (string.IsNullOrWhiteSpace(recordKey) || string.IsNullOrWhiteSpace(EffectivePeopleRecordKey))
+            return false;
+        if (!string.Equals(recordKey, EffectivePeopleRecordKey, StringComparison.OrdinalIgnoreCase))
+            return false;
+        return _peopleRecordPersonIndex is not int scoped
+            || scoped == personIndex;
+    }
+
+    private void TogglePersonRecord(int personIndex, string recordKey)
+    {
+        if (IsPersonRecordSelected(personIndex, recordKey)
+            && _peopleRecordPersonIndex == personIndex)
+        {
+            _peopleRecordKey = null;
+            _peopleRecordPersonIndex = null;
+            return;
+        }
+
+        _peopleRecordKey = recordKey;
+        _peopleRecordPersonIndex = personIndex;
+    }
+
+    private ApplicationWorkspaceTab? FindLinkedTab(string? key)
+    {
+        if (string.IsNullOrWhiteSpace(key) || Snapshot?.Tabs == null)
+            return null;
+        return Snapshot.Tabs.FirstOrDefault(tab =>
+            string.Equals(tab.Key, key, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private IReadOnlyList<IReadOnlyList<string>> PersonRecordRows(
+        ApplicationWorkspaceCasePerson person,
+        string recordKey)
+    {
+        var tab = FindLinkedTab(recordKey);
+        if (tab == null || tab.Rows.Count == 0)
+            return Array.Empty<IReadOnlyList<string>>();
+
+        if (person.PersonId != Guid.Empty
+            && tab.RowPersonIds.Count == tab.Rows.Count)
+        {
+            return tab.Rows
+                .Where((_, index) => tab.RowPersonIds[index] == person.PersonId)
+                .ToList();
+        }
+
+        return tab.Rows
+            .Where(row => row.Count > 0
+                && string.Equals(row[0], person.Name, StringComparison.Ordinal))
+            .ToList();
+    }
+
+    private static IReadOnlyList<string> LinkedRecordColumns(ApplicationWorkspaceTab? tab)
+    {
+        if (tab == null || tab.Columns.Count == 0)
+            return Array.Empty<string>();
+        return tab.Columns[0] == "Person" ? tab.Columns.Skip(1).ToList() : tab.Columns;
+    }
+
+    private static IReadOnlyList<string> LinkedRecordCells(
+        ApplicationWorkspaceTab? tab,
+        IReadOnlyList<string> row)
+    {
+        if (tab != null && tab.Columns.Count > 0 && tab.Columns[0] == "Person" && row.Count > 1)
+            return row.Skip(1).ToList();
+        return row;
+    }
+
     private Task BackToListAsync() => BackToListRequested.InvokeAsync();
     private Task LinkPersonAsync() => LinkPersonRequested.InvokeAsync();
-    private Task UnlinkPersonAsync() => UnlinkPersonRequested.InvokeAsync();
     private Task AdvanceProgressAsync()
     {
         var current = Snapshot?.CaseView.ProgressSteps.FirstOrDefault(s => s.State == "current")
@@ -776,6 +934,20 @@
             await OpenPersonDetailByIndexRequested.InvokeAsync(rowIndex);
         else if (OpenPersonDetailRequested.HasDelegate)
             await OpenPersonDetailRequested.InvokeAsync();
+    }
+
+    private async Task RelinkPersonById(Guid personId)
+    {
+        if (personId == Guid.Empty || !RelinkPersonRequested.HasDelegate)
+            return;
+        await RelinkPersonRequested.InvokeAsync(personId);
+    }
+
+    private async Task UnlinkPersonById(Guid personId)
+    {
+        if (personId == Guid.Empty || !UnlinkPersonRequested.HasDelegate)
+            return;
+        await UnlinkPersonRequested.InvokeAsync(personId);
     }
 
     private static string PersonColor(int index) => PersonColors[index % PersonColors.Length];

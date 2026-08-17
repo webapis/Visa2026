@@ -174,15 +174,20 @@ button.cw-person:focus-visible {
 }
 
 .cw-link-row {
-  display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px;
 }
-@media (max-width: 900px) { .cw-link-row { grid-template-columns: repeat(2, 1fr); } }
 .cw-link-tile {
   border: 1px solid var(--os-line); border-radius: 10px; padding: 12px; background: #fff;
   display: grid; grid-template-columns: auto 1fr auto; grid-template-rows: auto auto; gap: 4px 8px;
   align-items: center; cursor: pointer; text-align: left;
 }
 .cw-link-tile:hover { border-color: #93c5fd; background: #f8fbff; }
+.cw-link-tile.is-empty { border-style: dashed; }
+.cw-link-tile.is-selected {
+  border-color: #93c5fd;
+  background: #f8fbff;
+  box-shadow: inset 3px 0 0 var(--os-accent);
+}
 .cw-link-tile__icon {
   grid-row: 1 / span 2; width: 36px; height: 36px; border-radius: 8px;
   display: grid; place-items: center; font-size: 1.1rem;

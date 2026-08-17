@@ -228,7 +228,7 @@ internal static class ApplicationWorkspaceCaseBuilder
         IReadOnlyList<ApplicationProfileInstancePersonResolvedLink> rosterLinks,
         IReadOnlyList<ApplicationWorkspaceTab> tabs)
     {
-        if (application != null && rosterLinks.Count > 0)
+        if (application != null)
         {
             var tiles = new List<ApplicationWorkspaceCaseLinkedTile>();
             var toneIndex = 0;
@@ -237,15 +237,11 @@ internal static class ApplicationWorkspaceCaseBuilder
                 if (!ApplicationWorkspaceLinkedRecordsCatalog.IsConfigured(application, def.Kind))
                     continue;
 
-                var count = ApplicationWorkspaceLinkedRecordsCatalog.CountResolved(rosterLinks, def.Kind);
-                if (count == 0)
-                    continue;
-
                 tiles.Add(new ApplicationWorkspaceCaseLinkedTile
                 {
                     TabKey = def.TabKey,
                     Label = def.Label,
-                    Count = count,
+                    Count = ApplicationWorkspaceLinkedRecordsCatalog.CountResolved(rosterLinks, def.Kind),
                     Tone = LinkedTones[toneIndex % LinkedTones.Length],
                     Glyph = def.Glyph,
                 });
@@ -257,7 +253,7 @@ internal static class ApplicationWorkspaceCaseBuilder
 
         var fallback = new List<ApplicationWorkspaceCaseLinkedTile>();
         var fallbackTone = 0;
-        foreach (var tab in tabs.Where(t => t.Visible && t.Key != "person" && t.Rows.Count > 0))
+        foreach (var tab in tabs.Where(t => t.Visible && t.Key != "person"))
         {
             fallback.Add(new ApplicationWorkspaceCaseLinkedTile
             {
@@ -472,6 +468,7 @@ internal static class ApplicationWorkspaceCaseBuilder
             ? rosterPeople[personIndex]
             : rosterPeople.FirstOrDefault(p =>
                 string.Equals(p.FullName, personName, StringComparison.Ordinal));
+        var toneIndex = 0;
 
         foreach (var def in ApplicationWorkspaceLinkedRecordsCatalog.Definitions)
         {
@@ -497,7 +494,9 @@ internal static class ApplicationWorkspaceCaseBuilder
                 Count = count,
                 State = count > 0 ? "valid" : "empty",
                 Glyph = def.Glyph,
+                Tone = LinkedTones[toneIndex % LinkedTones.Length],
             });
+            toneIndex++;
         }
 
         return records;

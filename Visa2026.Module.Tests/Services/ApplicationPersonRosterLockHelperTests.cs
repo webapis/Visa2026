@@ -67,4 +67,21 @@ public class ApplicationProfileInstancePersonRosterLockHelperTests
         };
         ApplicationProfileInstancePersonResolver.RefreshResolvedLinks(objectSpace: null!, app, new Person());
     }
+
+    [Fact]
+    public void RelinkPerson_NoOpWhenWorkflowTerminal()
+    {
+        var app = new ApplicationProfileInstance
+        {
+            ProgressHistory =
+            [
+                new ApplicationProfileInstanceProgress
+                {
+                    State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.ProcessCancelled },
+                },
+            ],
+        };
+
+        Assert.False(ApplicationProfileInstancePersonService.RelinkPerson(null!, app, new Person()));
+    }
 }

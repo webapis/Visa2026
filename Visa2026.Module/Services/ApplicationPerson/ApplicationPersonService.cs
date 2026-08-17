@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using DevExpress.ExpressApp;
+using DevExpress.Persistent.BaseImpl.EF;
 using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.Services.ApplicationPersonRoster;
@@ -34,6 +35,59 @@ public static class ApplicationProfileInstancePersonService
 
         ApplicationProfileInstancePersonResolver.RefreshResolvedLinks(objectSpace, application, existing);
         return existing;
+    }
+
+    /// <summary>
+    /// Pins newly added person-owned records onto this case without replacing sticky links.
+    /// Officers add missing data on Person detail, then Relink here.
+    /// </summary>
+    public static bool RelinkPerson(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance application,
+        Person person)
+    {
+        if (application == null || person == null)
+            return false;
+        if (ApplicationProfileInstancePersonRosterLockHelper.AreResolvedLinksLocked(application))
+            return false;
+        if (objectSpace == null)
+            return false;
+
+        var trackedPerson = person.ID != Guid.Empty
+            ? objectSpace.GetObject(person) ?? person
+            : person;
+        var trackedApplication = application.ID != Guid.Empty
+            ? objectSpace.GetObject(application) ?? application
+            : application;
+        if (trackedPerson == null || trackedApplication == null)
+            return false;
+        if (ApplicationProfileInstancePersonRosterLockHelper.AreResolvedLinksLocked(trackedApplication))
+            return false;
+
+        if (trackedPerson.ID != Guid.Empty && !objectSpace.IsNewObject(trackedPerson))
+            objectSpace.ReloadObject(trackedPerson);
+
+        ApplicationProfileInstancePersonResolver.RefreshResolvedLinks(
+            objectSpace,
+            trackedApplication,
+            trackedPerson);
+
+        foreach (var (kind, entity) in ApplicationProfileInstancePersonResolver.ResolveEntities(objectSpace, trackedPerson))
+        {
+            if (!ApplicationProfileInstancePersonResolver.IsAutoLinkEnabled(trackedApplication, kind))
+                continue;
+            if (entity is not BaseObject bo || bo.ID == Guid.Empty)
+                continue;
+
+            ApplicationProfileInstancePersonResolver.EnsureResolvedLink(
+                objectSpace,
+                trackedApplication,
+                trackedPerson,
+                kind,
+                bo.ID);
+        }
+
+        return true;
     }
 
     public static void UnlinkPerson(IObjectSpace objectSpace, ApplicationProfileInstance application, Person person)

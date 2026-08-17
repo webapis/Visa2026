@@ -4,6 +4,60 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 
 ---
 
+### 2026-08-17 — People grid Unlink is per person, next to Relink
+
+- Toolbar **Unlink** opened a person picker. Officers need to unlink the row they are looking at. Each People-on-this-case row now has **Relink | Unlink | Open person detail**. Row Unlink calls `UnlinkPerson` for that `PersonId` and reloads. Disabled when `ResolvedLinksLocked`.
+- Verify: stop F5, rebuild, F5. On **8/-009** with two people — Unlink on Karen removes only Karen; Gabriel stays. Issued cases keep Unlink disabled. Toolbar has **Link existing…** only.
+- Prevent: Do not put Unlink only in the toolbar. XAF `ShowUnlinkPersonPicker` remains for the native workspace action.
+- Cross-skill: —
+
+### 2026-08-15 — People grid Relink syncs missing person records
+
+- Officers add Salary/Visa/Medical on **Open person detail**. Those rows stay off the case until Relink. The People table now has a **Relink** column that calls `ApplicationProfileInstancePersonService.RelinkPerson` (`RefreshResolvedLinks` + `EnsureResolvedLink` for current candidates). Sticky `LinkedObjectId` is not replaced. Disabled when `ResolvedLinksLocked`.
+- Verify: `RelinkPerson_NoOpWhenWorkflowTerminal`. Stop F5, rebuild, F5. On **8/-009** add a salary on the person, return to People & links, click **Relink** — Salary tile becomes 1. Visa stays 0 if no started/valid visa exists. Issued cases keep Relink disabled.
+- Prevent: Do not add in-tab **New {type}** again. Relink is the sync action; Person detail is the create surface.
+- Cross-skill: —
+
+### 2026-08-15 — People & links does not add person-owned records
+
+- In-tab **New salary / New address / …** made the People panel a second create surface and still needed a post-save relink. Officers add missing person data from **Open person detail** instead.
+- Removed `ApplicationWorkspaceLinkedRecordOpenHelper` and the New button. Invitation / WP / border zone / rejection still hint Overview → Issued records. Process-complete lock hint stays.
+- Verify: stop F5, rebuild, F5. On **8/-009** People & links → Address / Salary / Medical — no **New** button. **Open person detail** remains on the person row and panel header.
+- Prevent: Do not add a second create button on People & links until create+relink is one explicit officer action.
+- Cross-skill: —
+
+### 2026-08-15 — New People & links BO must pin ResolvedLink by created ID
+
+- `RefreshResolvedLinks` after **New salary / New medical / …** often left the tile at 0. Resolve uses `PersonCurrentItems` / valid-item pickers on a new ObjectSpace, so the just-saved row is frequently not the candidate. `CollectMissingAutoLinks` also skips a kind if any ResolvedLink row already exists (even with empty `LinkedObjectId`).
+- Post-save now calls `EnsureResolvedLink` with the created `BaseObject.ID`. Creates a link when none; fills an empty `LinkedObjectId`; does **not** replace a sticky id (second Address stays off the case). `detailView.Closing` is a backup if Blazor modal `Committed` does not fire.
+- Verify: `DecideEnsureResolvedLink_*` tests. Stop F5, rebuild, F5. On **8/-009** (unlocked) People & links → Salary 0 → **New salary** → save → tile becomes 1 and the row appears. Same for Medical. New address on an already-linked Address must not replace the sticky address.
+- Prevent: Do not rely on `RefreshResolvedLinks` to attach a just-created person-owned BO. Always pass the created object id.
+- Cross-skill: —
+
+### 2026-08-15 — People & links can add missing person-owned records
+
+- Empty Salary/Medical (and other person-owned kinds) had no Add. Issued items (invitation/WP/border zone/rejection) still need a header from Overview.
+- `ApplicationWorkspaceLinkedRecordOpenHelper` opens a modal DetailView with Person (or Visa.Passport) set, then `RefreshResolvedLinks` after save. Hidden when `ResolvedLinksLocked`.
+- Verify: stop F5, rebuild, F5. On an **in-process** (not issued) case → People & links → Salary 0 → **New salary** → save → tile count becomes 1. On 8/-008 (locked) the button stays hidden.
+- Prevent: Do not create InvitationItem/WorkPermitItem from this panel without a parent header. Do not bypass the process-complete lock.
+- Cross-skill: —
+
+### 2026-08-15 — Overview linked-record tiles include empty required types
+
+- Overview hid Salary/Medical (and any other configured kind) when `CountResolved` was 0. People & links already listed every profile-enabled type, including 0.
+- `BuildLinkedTiles` now emits one tile per `IsConfigured` kind. Empty tiles use `is-empty` (dashed) and still open People & links for that type.
+- Verify: stop F5, rebuild, F5. Open 8/-008 Overview — Salary and Medical show as 0 next to Passport/Education/…. Click Medical → People tab with Medical selected.
+- Prevent: Do not filter Overview tiles with `count == 0`. Profile `RequirePerson*` / Show* is the visibility gate; zero means “required but not linked yet.”
+- Cross-skill: —
+
+### 2026-08-15 — People & links tiles match Overview linked-record cards
+
+- People tab used a different `ct-rec` grid (icon / label / count / Valid—) and tiles were not clickable. Officers could not see the actual passport/visa/… rows.
+- Tiles now use the same `cw-link-tile` cards as Overview (icon, label, count, chevron). Click opens that person's records from the workspace tab rows. Overview click still jumps to People and opens that type.
+- Verify: stop F5, rebuild, F5. Open 8/-008 People & links — cards match Overview. Click Passport under a person → table shows that person's passport. Overview Passport tile → People with Passport selected.
+- Prevent: Do not keep a second tile chrome on People. Display records in-tab; do not open a second catalog in `#visa-preview-slot`.
+- Cross-skill: visa2026-preview-slot
+
 ### 2026-08-15 — Officer validity gate does not apply to VISA2014 import
 
 - §10.2 valid/not-expired auto-link is **officer-only** (`EnforceOfficerLinkValidity`). `MigrationImportContext.IsDataImport` (headless `--inprocess` / `X-Visa2014-DataImport`) uses `PersonCurrentItems` so expired historical passport/visa/WP/invitation/border-zone/medical still link on Wave 2b `LinkPerson`.

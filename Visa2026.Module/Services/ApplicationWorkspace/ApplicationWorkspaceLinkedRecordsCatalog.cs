@@ -62,7 +62,7 @@ public static class ApplicationWorkspaceLinkedRecordsCatalog
         IEnumerable<ApplicationProfileInstancePersonResolvedLink> links,
         Guid personId,
         ApplicationProfileInstancePersonLinkKind kind) =>
-        links.Any(link => link.PersonId == personId && HasResolvedLink(link, kind)) ? 1 : 0;
+        links.Count(link => link.PersonId == personId && HasResolvedLink(link, kind));
 
     public static bool TryGet(ApplicationProfileInstancePersonLinkKind kind, out Definition definition)
     {

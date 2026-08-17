@@ -173,6 +173,8 @@ public sealed class ApplicationWorkspaceCasePersonRecord
     public string State { get; init; } = "empty";
 
     public string Glyph { get; init; } = "•";
+
+    public string Tone { get; init; } = "blue";
 }
 
 public sealed class ApplicationWorkspaceCaseActivity
