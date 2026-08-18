@@ -39,12 +39,36 @@ public class ApplicationProfileLockHelperTests
     }
 
     [Fact]
-    public void HasConfigurationScalarsChanged_DetectsActionFamilyChange()
+    public void HasConfigurationScalarsChanged_DetectsProduceVisaChange()
     {
-        var original = new ApplicationProfile { ActionFamily = ApplicationProfileActionFamily.Issuance };
-        var current = new ApplicationProfile { ActionFamily = ApplicationProfileActionFamily.Cancellation };
+        var original = new ApplicationProfile { ProduceVisa = true };
+        var current = new ApplicationProfile { ProduceVisa = false };
 
         Assert.True(ApplicationProfileLockHelper.HasConfigurationScalarsChanged(original, current));
+    }
+
+    [Fact]
+    public void AllowsNestedEditWhenConfigLocked_VersionsYes_TemplatesNo()
+    {
+        Assert.True(ApplicationProfileLockHelper.AllowsNestedEditWhenConfigLocked(new ApplicationProfileApprovalLegVersion()));
+        Assert.True(ApplicationProfileLockHelper.AllowsNestedEditWhenConfigLocked(new ApplicationProfileApprovalLeg()));
+        Assert.False(ApplicationProfileLockHelper.AllowsNestedEditWhenConfigLocked(new ApplicationProfileTemplate()));
+        Assert.False(ApplicationProfileLockHelper.AllowsNestedEditWhenConfigLocked(new ApplicationProfileProgressStateSetting()));
+    }
+
+    [Fact]
+    public void CanRemoveApprovalLegVersion_RequiresAnotherVersion()
+    {
+        var profile = new ApplicationProfile();
+        var v1 = new ApplicationProfileApprovalLegVersion { Name = "Version 1", ApplicationProfile = profile };
+        profile.ApprovalLegVersions.Add(v1);
+
+        Assert.False(ApplicationProfileLockHelper.CanRemoveApprovalLegVersion(profile, v1));
+
+        var v2 = new ApplicationProfileApprovalLegVersion { Name = "Version 2", ApplicationProfile = profile };
+        profile.ApprovalLegVersions.Add(v2);
+
+        Assert.True(ApplicationProfileLockHelper.CanRemoveApprovalLegVersion(profile, v1));
     }
 
     [Fact]

@@ -121,7 +121,7 @@ Keep **explicit** profile toggles for readiness + enabling person/roster `{{…}
 |-------|----------|
 | **Lock state (A)** | First progress beyond office preparation / **submitted** to ministry or migration (left-office / submitted) |
 | Trigger | Any linked Application’s current progress ≥ lock state A |
-| Effect | Block wizard/config edits to configuration-related fields (Related to, legs, states, produce/cancel, templates, person toggles, route, audience, identity) |
+| Effect | Block wizard/config edits to configuration-related fields (Related to, Directed to, produce/cancel, templates, person toggles, route, audience, identity). **Exception:** **approval-leg versions** may be added, duplicated, renamed, and edited while locked (instances keep a snapshot at create). Cannot remove the last version while locked. |
 | Per-Application values | Unaffected — officers still edit Visa Type, dates, signatories, etc. on each Application |
 | Profile FK on Application | Set **only at create** — never switch afterward (§18) |
 | New Applications on locked profile | **Yes** — still allowed (FK + defaults); profile config remains read-only |
@@ -475,6 +475,7 @@ When any linked Application reaches lock state **A** (first progress beyond offi
 | Wizard Process & SLA duration only | Done |
 | Profile-specific template applicability (contract / migration service) | Done |
 | Approval leg versions (per-profile copies + instance snapshot) | **Done** |
+| Locked profile: still edit approval-leg versions | **Done** |
 | Wizard Project contract on Identity (Via ministry) | Done |
 | Profile overview (live linked instances) | Done |
 | Custom catalog home (replace native List/Detail officer UI) | Done |

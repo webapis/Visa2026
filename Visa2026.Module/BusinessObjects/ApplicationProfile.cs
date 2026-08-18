@@ -521,7 +521,8 @@ public static class ApplicationProfileLockHelper
 
     public static void EnsureNestedConfigurationEditable(
         ApplicationProfile? parentProfile,
-        IObjectSpace objectSpace)
+        IObjectSpace objectSpace,
+        object? nested = null)
     {
         if (parentProfile == null || objectSpace == null)
             return;
@@ -529,7 +530,48 @@ public static class ApplicationProfileLockHelper
         if (!IsProfileConfigLocked(parentProfile, objectSpace))
             return;
 
+        if (AllowsNestedEditWhenConfigLocked(nested))
+            return;
+
         throw new UserFriendlyException(VisaUiMessages.Get("ApplicationProfile.ConfigLockedCannotEditNested"));
+    }
+
+    /// <summary>
+    /// Approval-leg versions are snapshotted onto instances at create, so they may change while the profile is config-locked.
+    /// Templates and other nested configuration stay blocked.
+    /// </summary>
+    public static bool AllowsNestedEditWhenConfigLocked(object? nested) =>
+        nested is ApplicationProfileApprovalLegVersion or ApplicationProfileApprovalLeg;
+
+    public static bool CanRemoveApprovalLegVersion(
+        ApplicationProfile? profile,
+        ApplicationProfileApprovalLegVersion? version)
+    {
+        if (profile == null || version == null)
+            return false;
+
+        return ApplicationProfileApprovalLegVersionHelper.GetOrderedVersions(profile)
+            .Count(v => !ReferenceEquals(v, version)) >= 1;
+    }
+
+    public static void EnsureCanRemoveApprovalLegVersion(
+        ApplicationProfile parentProfile,
+        ApplicationProfileApprovalLegVersion version,
+        IObjectSpace objectSpace)
+    {
+        if (parentProfile == null || version == null || objectSpace == null)
+            return;
+
+        if (!IsProfileConfigLocked(parentProfile, objectSpace))
+            return;
+
+        var remaining = ApplicationProfileApprovalLegVersionHelper.GetOrderedVersions(parentProfile)
+            .Count(v => !objectSpace.IsObjectToDelete(v));
+        if (remaining < 1)
+        {
+            throw new UserFriendlyException(
+                VisaUiMessages.Get("ApplicationProfile.ConfigLockedCannotRemoveLastApprovalLegVersion"));
+        }
     }
 
     public static ApplicationProfile? TryResolveOwningProfile(object? entity, IObjectSpace objectSpace)

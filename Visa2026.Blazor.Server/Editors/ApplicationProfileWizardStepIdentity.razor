@@ -38,6 +38,10 @@
         {
             <h3 class="ap-wizard__subhead">Approval leg versions</h3>
             <p class="ap-wizard__hint">This profile’s own copies. Officers pick one version when creating an application. Already-started applications keep a snapshot.</p>
+            @if (Disabled)
+            {
+                <p class="ap-wizard__hint">Config is locked. You can still add or edit versions; started applications keep their snapshot.</p>
+            }
             <div class="ap-wizard__versions">
                 @foreach (var version in OrderedVersions)
                 {
@@ -46,23 +50,22 @@
                         <div class="ap-wizard__version-head">
                             <label class="ap-wizard__version-select">
                                 <input type="radio" name="ap-leg-version" checked="@isActive"
-                                       disabled="@Disabled"
                                        @onchange="@(() => ActivateVersion(version))" />
                                 <span>Version @version.Sequence</span>
                             </label>
                             <input class="ap-wizard__version-name" type="text" @bind="version.Name" @bind:event="oninput"
-                                   disabled="@Disabled" placeholder="Version name" />
+                                   placeholder="Version name" />
                             @if (version.IsDefault)
                             {
                                 <span class="ap-wizard__pill ap-wizard__pill--on">Default</span>
                             }
-                            else if (!Disabled)
+                            else
                             {
                                 <button type="button" class="ap-wizard__link" @onclick="() => OnSetDefaultVersion.InvokeAsync(version)">Make default</button>
                             }
-                            @if (!Disabled)
+                            <button type="button" class="ap-wizard__link" @onclick="() => OnDuplicateVersion.InvokeAsync(version)">Duplicate</button>
+                            @if (CanRemoveVersion(version))
                             {
-                                <button type="button" class="ap-wizard__link" @onclick="() => OnDuplicateVersion.InvokeAsync(version)">Duplicate</button>
                                 <button type="button" class="ap-wizard__link" @onclick="() => OnRemoveVersion.InvokeAsync(version)">Remove</button>
                             }
                         </div>
@@ -79,10 +82,7 @@
                                         <div class="ap-wizard__list-row">
                                             <span class="ap-wizard__list-ord">@(leg.Sequence ?? 0)</span>
                                             <span>@(leg.ApprovingMinistry?.NameTm ?? "—")</span>
-                                            @if (!Disabled)
-                                            {
-                                                <button type="button" class="ap-wizard__link" @onclick="() => OnRemoveLeg.InvokeAsync(leg)">Remove</button>
-                                            }
+                                            <button type="button" class="ap-wizard__link" @onclick="() => OnRemoveLeg.InvokeAsync(leg)">Remove</button>
                                         </div>
                                     }
                                 }
@@ -91,19 +91,16 @@
                                     <p class="ap-wizard__hint">No ministries on this version yet.</p>
                                 }
                             </div>
-                            @if (!Disabled)
-                            {
-                                <div class="ap-wizard__add-leg">
-                                    <select @bind="_selectedMinistryId">
-                                        <option value="@Guid.Empty">Add approval leg…</option>
-                                        @foreach (var ministry in Ministries)
-                                        {
-                                            <option value="@ministry.ID">@(ministry.NameTm ?? ministry.Code)</option>
-                                        }
-                                    </select>
-                                    <button type="button" class="ap-wizard__btn ap-wizard__btn--secondary" @onclick="AddSelectedLeg">Add</button>
-                                </div>
-                            }
+                            <div class="ap-wizard__add-leg">
+                                <select @bind="_selectedMinistryId">
+                                    <option value="@Guid.Empty">Add approval leg…</option>
+                                    @foreach (var ministry in Ministries)
+                                    {
+                                        <option value="@ministry.ID">@(ministry.NameTm ?? ministry.Code)</option>
+                                    }
+                                </select>
+                                <button type="button" class="ap-wizard__btn ap-wizard__btn--secondary" @onclick="AddSelectedLeg">Add</button>
+                            </div>
                         }
                         else
                         {
@@ -112,10 +109,7 @@
                     </div>
                 }
             </div>
-            @if (!Disabled)
-            {
-                <button type="button" class="ap-wizard__btn ap-wizard__btn--secondary" @onclick="AddVersion">+ Add version</button>
-            }
+            <button type="button" class="ap-wizard__btn ap-wizard__btn--secondary" @onclick="AddVersion">+ Add version</button>
         }
         else
         {
@@ -258,6 +252,9 @@
     private bool ShowApprovalLegs =>
         Profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries;
 
+    private bool CanRemoveVersion(ApplicationProfileApprovalLegVersion version) =>
+        !Disabled || ApplicationProfileLockHelper.CanRemoveApprovalLegVersion(Profile, version);
+
     private async Task SetRoute(ApplicationProfileInstanceProgressRouteKind route)
     {
         if (Disabled || Profile.ProgressRoute == route)
@@ -279,7 +276,7 @@
 
     private async Task AddVersion()
     {
-        if (Disabled || !OnAddVersion.HasDelegate)
+        if (!OnAddVersion.HasDelegate)
             return;
 
         await OnAddVersion.InvokeAsync();
@@ -289,7 +286,7 @@
 
     private void ActivateVersion(ApplicationProfileApprovalLegVersion version)
     {
-        if (Disabled || version == null)
+        if (version == null)
             return;
 
         _activeVersionId = version.ID;
@@ -297,7 +294,7 @@
 
     private async Task AddSelectedLeg()
     {
-        if (Disabled || !ShowApprovalLegs || _selectedMinistryId == Guid.Empty || ActiveVersionId == Guid.Empty)
+        if (!ShowApprovalLegs || _selectedMinistryId == Guid.Empty || ActiveVersionId == Guid.Empty)
             return;
 
         await OnAddLeg.InvokeAsync((ActiveVersionId, _selectedMinistryId));

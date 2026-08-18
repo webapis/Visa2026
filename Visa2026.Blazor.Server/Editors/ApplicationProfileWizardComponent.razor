@@ -36,8 +36,9 @@
         @if (IsReadOnly)
         {
             <div class="ap-wizard__lock-banner">
-                This profile is <strong>read-only</strong> because a linked application has left office preparation.
-                Use <strong>Clone</strong> on the profile list to create an editable copy.
+                This profile is <strong>config-locked</strong> because a linked application has left office preparation.
+                <strong>Approval leg versions</strong> can still be added or edited — already-started applications keep their snapshot.
+                Other configuration stays locked. Use <strong>Clone</strong> on the profile list to copy the rest of the profile.
             </div>
         }
 
@@ -122,7 +123,7 @@
                         {
                             <button type="button" class="ap-wizard__btn ap-wizard__btn--primary" @onclick="NextStep">Continue →</button>
                         }
-                        else if (!IsReadOnly)
+                        else if (!IsReadOnly || CanSaveLockedVersions)
                         {
                             <button type="button" class="ap-wizard__btn ap-wizard__btn--primary" @onclick="PublishAsync">Save profile</button>
                         }
@@ -165,6 +166,10 @@
     private IReadOnlyList<ApprovingMinistry> _ministries = Array.Empty<ApprovingMinistry>();
 
     private IReadOnlyList<ApprovingMinistry> Ministries => _ministries;
+
+    private bool CanSaveLockedVersions =>
+        IsReadOnly
+        && Profile?.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries;
 
     private EventCallback AddVersionCallback => EventCallback.Factory.Create(this, AddVersion);
     private EventCallback<ApplicationProfileApprovalLegVersion> RemoveVersionCallback =>
@@ -224,7 +229,7 @@
 
     private void AddVersion()
     {
-        if (IsReadOnly || Profile == null || ObjectSpace is not { } os)
+        if (Profile == null || ObjectSpace is not { } os)
             return;
 
         if (Profile.ProgressRoute != ApplicationProfileInstanceProgressRouteKind.ViaMinistries)
@@ -246,7 +251,10 @@
 
     private void RemoveVersion(ApplicationProfileApprovalLegVersion version)
     {
-        if (IsReadOnly || ObjectSpace is not { } os || version == null)
+        if (ObjectSpace is not { } os || version == null)
+            return;
+
+        if (IsReadOnly && !ApplicationProfileLockHelper.CanRemoveApprovalLegVersion(Profile, version))
             return;
 
         os.Delete(version);
@@ -256,7 +264,7 @@
 
     private void DuplicateVersion(ApplicationProfileApprovalLegVersion source)
     {
-        if (IsReadOnly || Profile == null || ObjectSpace is not { } os || source == null)
+        if (Profile == null || ObjectSpace is not { } os || source == null)
             return;
 
         var copy = os.CreateObject<ApplicationProfileApprovalLegVersion>();
@@ -285,7 +293,7 @@
 
     private void SetDefaultVersion(ApplicationProfileApprovalLegVersion version)
     {
-        if (IsReadOnly || Profile == null || version == null)
+        if (Profile == null || version == null)
             return;
 
         ApplicationProfileApprovalLegVersionHelper.EnsureSingleDefault(Profile, version);
@@ -293,7 +301,7 @@
 
     private void AddLeg((Guid VersionId, Guid MinistryId) args)
     {
-        if (IsReadOnly || Profile == null || ObjectSpace is not { } os
+        if (Profile == null || ObjectSpace is not { } os
             || args.VersionId == Guid.Empty || args.MinistryId == Guid.Empty)
             return;
 
@@ -332,7 +340,7 @@
 
     private void RemoveLeg(ApplicationProfileApprovalLeg leg)
     {
-        if (IsReadOnly || ObjectSpace is not { } os || leg == null)
+        if (ObjectSpace is not { } os || leg == null)
             return;
 
         var version = leg.ApprovalLegVersion;

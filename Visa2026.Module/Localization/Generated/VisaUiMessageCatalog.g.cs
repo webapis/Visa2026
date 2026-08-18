@@ -931,10 +931,17 @@ public static partial class VisaUiMessageCatalog
         },
         ["ApplicationProfile.ConfigLockedCannotEditNested"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Approval legs and nested templates cannot be changed while this profile is locked.",
-            ["tr-TR"] = "Profil kilitliyken onay adımları ve iç şablonlar değiştirilemez.",
-            ["tk-TM"] = "Profil gulplanykça tassyklama ädimleri we iç şablonlary üýtgedip bolmaýar.",
-            ["ru-RU"] = "Пока профиль заблокирован, нельзя менять этапы согласования и вложенные шаблоны.",
+            ["en-US"] = "Nested templates cannot be changed while this profile is locked. Approval leg versions can still be edited.",
+            ["tr-TR"] = "Profil kilitliyken iç şablonlar değiştirilemez. Onay adımı sürümleri yine de düzenlenebilir.",
+            ["tk-TM"] = "Profil gulplanykça iç şablonlary üýtgedip bolmaýar. Tassyklama ädim wersiýalaryny henizem üýtgedip bolýar.",
+            ["ru-RU"] = "Пока профиль заблокирован, вложенные шаблоны менять нельзя. Версии этапов согласования можно редактировать.",
+        },
+        ["ApplicationProfile.ConfigLockedCannotRemoveLastApprovalLegVersion"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Keep at least one approval-leg version while this profile is config-locked. Duplicate a version instead of removing the last one.",
+            ["tr-TR"] = "Profil kilitliyken en az bir onay adımı sürümü kalmalıdır. Son sürümü silmek yerine kopyalayın.",
+            ["tk-TM"] = "Profil gulplanykça iň bolmanda bir tassyklama ädim wersiýasy galmaly. Soňkysyny pozmak ýerine göçüriň.",
+            ["ru-RU"] = "Пока профиль заблокирован, должна остаться хотя бы одна версия этапов. Скопируйте версию вместо удаления последней.",
         },
         ["ApplicationProfileInstanceProgress.ApprovalLegProfileRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

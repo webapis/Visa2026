@@ -4,6 +4,14 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 
 ---
 
+### 2026-08-18 — Locked profile still edits approval-leg versions
+
+- Config lock A still freezes Name, Directed to, May produce, templates, person toggles, and SLA. **Approval leg versions** stay editable (Add, Duplicate, rename, ministries, Default) because instances snapshot ministries at create. Cannot remove the last version while locked. Started cases are not restamped.
+- Slice: 8m **Done**. Plan §2.6 exception.
+- Verify: `ApplicationProfileLockHelperTests` (13 passed). Blazor Server build. Stop F5, rebuild, F5. Open a **Config locked** Via ministry profile → Identity → add/edit a version → Review → **Save profile**. Name / May produce stay disabled. In-process case ministries unchanged.
+- Prevent: Do not unlock the whole wizard. Do not restamp existing instance snapshots when a version changes. Do not allow deleting the last version on a locked profile.
+- Cross-skill: application-profile
+
 ### 2026-08-18 — Case summary: edit instance Use fields
 
 - Overview tiles show profile **Use** fields; **Edit** on the Case summary title opens the 3-column form; **Done** returns to tiles. Changes persist on the instance (`TryApply` + commit) and do **not** edit the Application Profile template. Later profile default changes still do not overwrite saved instance values. **Project** is editable here when `RequireProject` is on (accepted prototype; do not re-lock via `IsProjectContractLocked`). New instance column `EntryCheckPointID`. Officer shell must wire `HeaderFieldChanged` — the case tab UI is a no-op without it.

@@ -29,6 +29,7 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | 8j | Wizard Process & SLA is duration only | **Done** | Removed ministry/migration state Include/SLA-track tables; instance process is Directed to + legs |
 | 8k | Profile-specific template applicability | **Done** | Per-row Project contract (Via ministry) or Migration service (Direct) dropdown; instance catalog filters; Project back on Results |
 | 8l | Approval leg versions (per-profile copies + snapshot) | **Done** | Identity named versions; create picker required; instance snapshots; timeline reads snapshots |
+| 8m | Locked profile: still edit approval-leg versions | **Done** | Config lock A keeps other fields read-only; versions add/edit/duplicate/default allowed; cannot remove last version |
 | 8d | Wizard step 4 real template catalog + persist scope | **Done** | Live `UserReportTemplate` Category/Global; `CatalogScope`/`DataScope`/`CategoryKey` on nested template |
 | 8a | Application Profile overview (live) | **Done** | Live config/defaults/legs/templates + linked `ApplicationProfileInstance` rows; overview shows wizard identity, company/signatories, required fields, SLA days, template scope; mock only if profile id unresolved |
 | 8c | Custom catalog home (replace native List/Detail UI) | **Done** | List first; row opens overview; **Back to list**; New/Configure → wizard (new tab); **Save profile** reloads catalog; **Delete** when Linked = 0; toolbar **Total: N**; table-body scroll, sticky header |
@@ -173,7 +174,7 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 - `IApplicationProfileWizardSession` + `IApplicationProfileWizardPendingOpen` (Blazor DI)
 - `ApplicationProfileWizardComponent.razor` + step partials + `application-profile-wizard.css`
 - **Configure profile** action on Application Profiles ListView (saved rows only)
-- Respects `ApplicationProfileLockHelper` — read-only banner + disabled save when locked
+- Respects `ApplicationProfileLockHelper` — read-only banner for locked config; **approval-leg versions** stay editable; **Save profile** remains for version changes
 - Steps: Identity · **Company, Signatories** · Results & fields · Process & SLA (embedded legs) · Templates & person · Review & save
 - **May produce** / **May cancel** live under Identity **Related to** (`ActionFamily`): Issuance → produce; Cancellation → cancel
 - **Approval legs** live under Identity **Directed to** as named **versions**; visible only for Via ministry; instances snapshot the chosen version at create
@@ -208,6 +209,22 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 - Progress timeline reads **snapshots first**
 
 **Verify:** stop F5, rebuild, F5. Configure profile → Identity shows versions. New application → pick a version. Edit the profile version after create — in-process case ministries stay the same.
+
+---
+
+## Slice 8m — Locked profile still edits approval-leg versions — **Done**
+
+**Goal:** Config lock A does not freeze the version catalog. Instances already keep snapshots.
+
+**Delivered:**
+
+- Wizard Identity: versions stay editable (Add, Duplicate, rename, ministries, Default) when the rest of the profile is read-only
+- **Save profile** remains on Review when Via ministry + locked
+- Cannot **Remove** the last version while locked
+- Nested save guard still blocks templates / progress-state settings
+- Started cases are not restamped
+
+**Verify:** stop F5, rebuild, F5. Open a **Config locked** Via ministry profile → Identity → add or edit a version → Review → **Save profile**. Name / May produce stay disabled. Open an in-process case — ministries unchanged.
 
 ---
 

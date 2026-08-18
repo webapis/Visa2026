@@ -116,6 +116,8 @@ Merge rule: Application value if set; else profile default (plan §4).
 
 `ApplicationProfile.IsConfigLocked` — any linked Application locked.
 
+**Exception:** approval-leg versions may still be added/edited while locked (instances keep a snapshot). Nested templates stay blocked. Cannot remove the last version.
+
 ---
 
 ## Dual-read rules (current phase)
