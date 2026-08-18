@@ -119,7 +119,7 @@ internal static class Visa2014InvitationItemTransform
         };
     }
 
-    private static Dictionary<string, object?> BuildExportRow(
+    internal static Dictionary<string, object?> BuildExportRow(
         Visa2014InvitationItemRawRow raw,
         Visa2014LegacyInvitationItemCancellationIndex cancellationIndex,
         out string? skipReason)
