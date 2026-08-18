@@ -383,7 +383,7 @@ public class ApplicationWorkspaceProgressTimelineTests
     }
 
     [Fact]
-    public void Build_PrefersProfileLegsOverSnapshots()
+    public void Build_PrefersSnapshotsOverProfileVersions()
     {
         var profile = ThreeLegProfile();
         var application = new ApplicationProfileInstance
@@ -400,8 +400,9 @@ public class ApplicationWorkspaceProgressTimelineTests
 
         var steps = ApplicationWorkspaceProgressTimeline.Build(application, profile, default, objectSpace: null);
 
-        Assert.Equal("Turkmenenergo", steps[1].Label);
-        Assert.DoesNotContain(steps, s => s.Label.StartsWith("Snapshot", StringComparison.Ordinal));
+        Assert.Equal("Snapshot-A", steps[1].Label);
+        Assert.Equal("Snapshot-B", steps[2].Label);
+        Assert.DoesNotContain(steps, s => s.Label == "Turkmenenergo");
     }
 
     [Fact]

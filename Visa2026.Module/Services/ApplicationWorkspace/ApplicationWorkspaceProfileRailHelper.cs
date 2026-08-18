@@ -41,9 +41,34 @@ public static class ApplicationWorkspaceProfileRailHelper
             new ApplicationProfilePickerOpenContext { CreationProgressRoute = route },
             sourceFrame ?? application.MainWindow);
 
+        using var profileSpace = application.CreateObjectSpace(typeof(ApplicationProfile));
+        var versions = ApplicationProfileApprovalLegVersionHelper.GetOrderedVersions(
+            profileSpace.GetObjectByKey<ApplicationProfile>(applicationProfileId));
+        var versionId = versions.Count == 1 ? versions[0].ID : (Guid?)null;
+        var needsPicker = versions.Count > 1;
+        if (needsPicker)
+        {
+            var pickerView = ApplicationProfilePickerOpenHelper.CreatePickerView(
+                application,
+                new ApplicationProfilePickerOpenContext { CreationProgressRoute = route },
+                sourceFrame ?? application.MainWindow);
+            if (pickerView == null)
+            {
+                errorMessage = "Choose an approval-leg version from New application.";
+                return false;
+            }
+
+            var frame = sourceFrame ?? application.MainWindow;
+            application.ShowViewStrategy.ShowView(
+                new ShowViewParameters(pickerView) { TargetWindow = TargetWindow.Current },
+                new ShowViewSource(frame, null));
+            return true;
+        }
+
         if (ApplicationProfilePickerCompletionHelper.TryCreateApplication(
                 application,
                 applicationProfileId,
+                versionId,
                 out errorMessage))
         {
             return true;

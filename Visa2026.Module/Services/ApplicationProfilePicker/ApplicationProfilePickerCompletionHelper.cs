@@ -14,6 +14,13 @@ public static class ApplicationProfilePickerCompletionHelper
     public static bool TryCreateApplication(
         XafApplication application,
         Guid profileId,
+        out string? errorMessage) =>
+        TryCreateApplication(application, profileId, approvalLegVersionId: null, out errorMessage);
+
+    public static bool TryCreateApplication(
+        XafApplication application,
+        Guid profileId,
+        Guid? approvalLegVersionId,
         out string? errorMessage)
     {
         errorMessage = null;
@@ -31,13 +38,23 @@ public static class ApplicationProfilePickerCompletionHelper
             return false;
         }
 
-        return TryCreateApplicationCore(application, profileId, null, out errorMessage, out _);
+        return TryCreateApplicationCore(application, profileId, null, approvalLegVersionId, out errorMessage, out _);
     }
 
     public static bool TryCreateApplicationFromPersonStart(
         XafApplication application,
         Guid profileId,
         IReadOnlyList<Guid> personIds,
+        out string? errorMessage,
+        out string? successMessage) =>
+        TryCreateApplicationFromPersonStart(
+            application, profileId, personIds, approvalLegVersionId: null, out errorMessage, out successMessage);
+
+    public static bool TryCreateApplicationFromPersonStart(
+        XafApplication application,
+        Guid profileId,
+        IReadOnlyList<Guid> personIds,
+        Guid? approvalLegVersionId,
         out string? errorMessage,
         out string? successMessage)
     {
@@ -90,7 +107,7 @@ public static class ApplicationProfilePickerCompletionHelper
             return false;
         }
 
-        if (!TryCreateApplicationCore(application, profileId, selectedPeople, out errorMessage, out var appNumber))
+        if (!TryCreateApplicationCore(application, profileId, selectedPeople, approvalLegVersionId, out errorMessage, out var appNumber))
             return false;
 
         var warningText = validation.Warnings.Count > 0
@@ -121,6 +138,7 @@ public static class ApplicationProfilePickerCompletionHelper
         XafApplication application,
         Guid profileId,
         IReadOnlyList<Person>? peopleToLink,
+        Guid? approvalLegVersionId,
         out string? errorMessage,
         out string? applicationNumber)
     {
@@ -146,12 +164,23 @@ public static class ApplicationProfilePickerCompletionHelper
             return false;
         }
 
+        if (!ApplicationProfileApprovalLegVersionHelper.TryResolveVersionForCreate(
+                profile,
+                approvalLegVersionId,
+                out var version,
+                out errorMessage))
+        {
+            return false;
+        }
+
         var app = objectSpace.CreateObject<ApplicationProfileInstance>();
         ApplicationProfilePickerApplyHelper.ApplyProfileToNewApplication(
             objectSpace,
             app,
             profile,
             context?.CreationProgressRoute);
+
+        ApplicationProfileApprovalLegVersionHelper.ApplySnapshot(objectSpace, app, version);
 
         if (peopleToLink != null && peopleToLink.Count > 0)
             ApplicationStartFromPersonHelper.LinkPeople(objectSpace, app, peopleToLink);

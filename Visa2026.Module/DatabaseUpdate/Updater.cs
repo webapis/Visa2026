@@ -366,6 +366,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddTypePermissionsRecursively<ApprovalLegProfile>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApplicationProfile>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApplicationProfileApprovalLeg>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<ApplicationProfileApprovalLegVersion>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApplicationProfileTemplate>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApplicationProfileProgressStateSetting>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApprovalLegProfileMinistryLeg>(SecurityOperations.Read, SecurityPermissionState.Allow);
@@ -802,6 +803,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadOnlyPermission<ApprovalLegProfile>(role);
             EnsureReadOnlyPermission<ApplicationProfile>(role);
             EnsureReadOnlyPermission<ApplicationProfileApprovalLeg>(role);
+            EnsureReadOnlyPermission<ApplicationProfileApprovalLegVersion>(role);
             EnsureReadOnlyPermission<ApplicationProfileTemplate>(role);
             EnsureReadOnlyPermission<ApplicationProfileProgressStateSetting>(role);
             EnsureReadOnlyPermission<ApplicationProfileInstancePersonResolvedLink>(role);
@@ -1029,6 +1031,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadWriteCreatePermission<ApprovalLegProfile>(role);
             EnsureFullAccessRecursivePermission<ApplicationProfile>(role);
             EnsureFullAccessRecursivePermission<ApplicationProfileApprovalLeg>(role);
+            EnsureFullAccessRecursivePermission<ApplicationProfileApprovalLegVersion>(role);
             EnsureFullAccessRecursivePermission<ApplicationProfileTemplate>(role);
             EnsureFullAccessRecursivePermission<ApplicationProfileProgressStateSetting>(role);
             EnsureReadWriteCreatePermission<FileData>(role);

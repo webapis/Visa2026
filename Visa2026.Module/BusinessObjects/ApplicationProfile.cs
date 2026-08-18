@@ -41,6 +41,7 @@ public class ApplicationProfile : BaseObject
     public ApplicationProfile()
     {
         ApprovalLegs = new ObservableCollection<ApplicationProfileApprovalLeg>();
+        ApprovalLegVersions = new ObservableCollection<ApplicationProfileApprovalLegVersion>();
         NestedTemplates = new ObservableCollection<ApplicationProfileTemplate>();
         ProgressStateSettings = new ObservableCollection<ApplicationProfileProgressStateSetting>();
         Instances = new ObservableCollection<ApplicationProfileInstance>();
@@ -183,6 +184,11 @@ public class ApplicationProfile : BaseObject
     public virtual int MigrationSlaDays { get; set; } = 14;
 
     [Aggregated]
+    [InverseProperty(nameof(ApplicationProfileApprovalLegVersion.ApplicationProfile))]
+    [XafDisplayName("Approval leg versions")]
+    public virtual IList<ApplicationProfileApprovalLegVersion> ApprovalLegVersions { get; set; }
+
+    [Aggregated]
     [InverseProperty(nameof(ApplicationProfileApprovalLeg.ApplicationProfile))]
     [XafDisplayName("Approval legs")]
     public virtual IList<ApplicationProfileApprovalLeg> ApprovalLegs { get; set; }
@@ -256,7 +262,45 @@ public enum ApplicationProfileActionFamily
     BusinessTrip = 3
 }
 
-/// <summary>Ordered ministry approval leg embedded on <see cref="ApplicationProfile"/>.</summary>
+/// <summary>
+/// Named copy of a ministry list on one <see cref="ApplicationProfile"/> (not shared across profiles).
+/// Officers pick a version at instance create; the instance stores a ministry snapshot.
+/// </summary>
+[DefaultClassOptions]
+[NavigationItem(false)]
+[DefaultProperty(nameof(Name))]
+public class ApplicationProfileApprovalLegVersion : BaseObject
+{
+    public ApplicationProfileApprovalLegVersion()
+    {
+        Legs = new ObservableCollection<ApplicationProfileApprovalLeg>();
+    }
+
+    [Browsable(false)]
+    public virtual Guid ApplicationProfileId { get; set; }
+
+    [RuleRequiredField]
+    [ForeignKey(nameof(ApplicationProfileId))]
+    public virtual ApplicationProfile ApplicationProfile { get; set; } = null!;
+
+    [RuleRequiredField]
+    [MaxLength(200)]
+    [XafDisplayName("Version name")]
+    public virtual string Name { get; set; } = "Version 1";
+
+    [XafDisplayName("Default")]
+    public virtual bool IsDefault { get; set; }
+
+    [RuleRequiredField]
+    public virtual int? Sequence { get; set; } = 1;
+
+    [Aggregated]
+    [InverseProperty(nameof(ApplicationProfileApprovalLeg.ApprovalLegVersion))]
+    [XafDisplayName("Legs")]
+    public virtual IList<ApplicationProfileApprovalLeg> Legs { get; set; }
+}
+
+/// <summary>Ordered ministry approval leg nested on a per-profile <see cref="ApplicationProfileApprovalLegVersion"/>.</summary>
 [DefaultClassOptions]
 [NavigationItem(false)]
 [DefaultProperty(nameof(Sequence))]
@@ -268,6 +312,12 @@ public class ApplicationProfileApprovalLeg : BaseObject
     [RuleRequiredField]
     [ForeignKey(nameof(ApplicationProfileId))]
     public virtual ApplicationProfile ApplicationProfile { get; set; } = null!;
+
+    [Browsable(false)]
+    public virtual Guid? ApprovalLegVersionId { get; set; }
+
+    [ForeignKey(nameof(ApprovalLegVersionId))]
+    public virtual ApplicationProfileApprovalLegVersion? ApprovalLegVersion { get; set; }
 
     [RuleRequiredField]
     public virtual int? Sequence { get; set; }
@@ -321,6 +371,20 @@ public class ApplicationProfileTemplate : BaseObject
     public virtual FileData? TemplateFile { get; set; }
 
     public virtual int SortOrder { get; set; }
+
+    /// <summary>
+    /// Profile-specific only. When set, the template is visible on instances whose Project contract matches (Via ministry).
+    /// Empty means visible for every instance of this profile.
+    /// </summary>
+    public virtual ProjectContract? ApplicableProjectContract { get; set; }
+    public virtual Guid? ApplicableProjectContractId { get; set; }
+
+    /// <summary>
+    /// Profile-specific only. When set, the template is visible on instances whose Migration service matches (Direct migration).
+    /// Empty means visible for every instance of this profile.
+    /// </summary>
+    public virtual MigrationService? ApplicableMigrationService { get; set; }
+    public virtual Guid? ApplicableMigrationServiceId { get; set; }
 }
 
 public enum ApplicationProfileTemplateKind
@@ -354,8 +418,9 @@ public enum ApplicationProfileProgressStateTrack
 }
 
 /// <summary>
-/// Per-profile inclusion and SLA tracking for a progress state (wizard step 3).
-/// Runtime progress routing may read these in a later slice.
+/// Per-profile inclusion and SLA tracking for a progress state (legacy wizard checklist).
+/// Not used by instance progress. Instance steps follow Directed to, Approval legs, and the fixed transition graph.
+/// SLA days live on <see cref="ApplicationProfile.MinistrySlaDays"/> / <see cref="ApplicationProfile.MigrationSlaDays"/>.
 /// </summary>
 [DefaultClassOptions]
 [NavigationItem(false)]
@@ -473,8 +538,14 @@ public static class ApplicationProfileLockHelper
         {
             case ApplicationProfile profile:
                 return profile;
+            case ApplicationProfileApprovalLegVersion version:
+                return version.ApplicationProfile
+                    ?? (version.ApplicationProfileId != Guid.Empty
+                        ? objectSpace.GetObjectByKey<ApplicationProfile>(version.ApplicationProfileId)
+                        : null);
             case ApplicationProfileApprovalLeg leg:
                 return leg.ApplicationProfile
+                    ?? leg.ApprovalLegVersion?.ApplicationProfile
                     ?? (leg.ApplicationProfileId != Guid.Empty
                         ? objectSpace.GetObjectByKey<ApplicationProfile>(leg.ApplicationProfileId)
                         : null);

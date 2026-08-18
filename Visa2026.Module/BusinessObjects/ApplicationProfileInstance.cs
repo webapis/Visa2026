@@ -576,6 +576,16 @@ namespace Visa2026.Module.BusinessObjects
         [InverseProperty(nameof(ApplicationProfileInstanceApprovalLegSnapshot.ApplicationProfileInstance))]
         public virtual IList<ApplicationProfileInstanceApprovalLegSnapshot> ApprovalLegSnapshots { get; set; }
 
+        /// <summary>Name of the profile approval-leg version copied at create (snapshot; not live).</summary>
+        [MaxLength(200)]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        public virtual string? ApprovalLegVersionName { get; set; }
+
+        /// <summary>Id of the profile version chosen at create (audit only; timeline reads snapshots).</summary>
+        [Browsable(false)]
+        public virtual Guid? ApprovalLegVersionId { get; set; }
+
         [Appearance("UrgencyVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowUrgency", Context = "DetailView")]
         [VisibleInListView(false)]
         public virtual Urgency Urgency { get; set; }

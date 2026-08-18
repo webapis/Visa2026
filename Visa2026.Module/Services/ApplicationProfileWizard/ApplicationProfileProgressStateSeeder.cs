@@ -4,6 +4,7 @@ using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.Services.ApplicationProfileWizard;
 
+/// Retained for existing `ApplicationProfileProgressStateSetting` rows. The wizard no longer seeds or edits them.
 public static class ApplicationProfileProgressStateSeeder
 {
     public static void EnsureDefaults(ApplicationProfile profile, IObjectSpace objectSpace)

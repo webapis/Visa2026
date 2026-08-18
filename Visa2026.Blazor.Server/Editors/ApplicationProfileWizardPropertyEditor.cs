@@ -68,8 +68,6 @@ public class ApplicationProfileWizardPropertyEditor : BlazorPropertyEditorBase, 
             EnsureProfileObjectSpace(profileId);
 
             var profile = _session?.GetProfile();
-            if (profile != null && _session?.ObjectSpace != null)
-                ApplicationProfileProgressStateSeeder.EnsureDefaults(profile, _session.ObjectSpace);
 
             model.ObjectSpace = _session?.ObjectSpace;
             model.Profile = profile;

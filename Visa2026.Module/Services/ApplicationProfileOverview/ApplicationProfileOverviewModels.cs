@@ -56,6 +56,9 @@ public sealed class ApplicationProfileOverviewSnapshot
     public IReadOnlyList<ApplicationProfileOverviewLegRow> ApprovalLegs { get; init; }
         = Array.Empty<ApplicationProfileOverviewLegRow>();
 
+    public IReadOnlyList<ApplicationProfileOverviewVersionRow> ApprovalLegVersions { get; init; }
+        = Array.Empty<ApplicationProfileOverviewVersionRow>();
+
     public IReadOnlyList<string> PersonDataToggles { get; init; } = Array.Empty<string>();
 
     public IReadOnlyList<ApplicationProfileOverviewTemplateRow> NestedTemplates { get; init; }
@@ -76,6 +79,16 @@ public sealed class ApplicationProfileOverviewDefaultRow
     public string DefaultValue { get; init; } = string.Empty;
 
     public bool Required { get; init; }
+}
+
+public sealed class ApplicationProfileOverviewVersionRow
+{
+    public string Name { get; init; } = string.Empty;
+
+    public bool IsDefault { get; init; }
+
+    public IReadOnlyList<ApplicationProfileOverviewLegRow> Legs { get; init; }
+        = Array.Empty<ApplicationProfileOverviewLegRow>();
 }
 
 public sealed class ApplicationProfileOverviewLegRow

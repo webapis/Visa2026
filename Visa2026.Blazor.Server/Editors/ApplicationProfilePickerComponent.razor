@@ -135,12 +135,47 @@
                 }
             </ul>
 
+            var selectedRow = Rows.FirstOrDefault(r => r.ProfileId == SelectedProfileId);
+            @if (selectedRow?.MissingApprovalLegVersions == true)
+            {
+                <div class="ap-picker__hint">This profile has no approval-leg versions. Configure them on the profile before creating an application.</div>
+            }
+            else if (selectedRow?.RequiresApprovalLegVersion == true)
+            {
+                <h2 class="ap-picker__section-title">Approval legs *</h2>
+                <p class="ap-picker__hint">Choose which approval-leg version this application will follow. The ministries are copied onto the application (snapshot) and will not change if the profile version is edited later.</p>
+                <div class="ap-picker__versions">
+                    @foreach (var version in selectedRow.ApprovalLegVersions)
+                    {
+                        var versionSelected = version.VersionId == SelectedVersionId;
+                        <button type="button"
+                                class="ap-picker__version @(versionSelected ? "is-selected" : null)"
+                                @onclick="() => SelectVersion(version.VersionId)">
+                            <span class="ap-picker__version-title">
+                                @version.Name
+                                @if (version.IsDefault)
+                                {
+                                    <span class="ap-picker__badge ap-picker__badge--on">Default</span>
+                                }
+                            </span>
+                            <ol class="ap-picker__version-legs">
+                                @foreach (var ministry in version.MinistryNames)
+                                {
+                                    <li>@ministry</li>
+                                }
+                            </ol>
+                            <span class="ap-picker__meta">@version.MinistryNames.Count ministries</span>
+                        </button>
+                    }
+                </div>
+            }
+
             <div class="ap-picker__actions">
                 @if (IsPersonStartFlow)
                 {
                     <button type="button"
                             class="ap-picker__btn ap-picker__btn--primary"
-                            disabled="@(SelectedProfileId == Guid.Empty)"
+                            disabled="@(!CanUseSelectedProfile)"
                             @onclick="NextStepAsync">
                         Next: Select people
                     </button>
@@ -149,7 +184,7 @@
                 {
                     <button type="button"
                             class="ap-picker__btn ap-picker__btn--primary"
-                            disabled="@(SelectedProfileId == Guid.Empty)"
+                            disabled="@(!CanUseSelectedProfile)"
                             @onclick="UseProfileAsync">
                         Use profile (live link)
                     </button>
@@ -167,6 +202,7 @@
     [Parameter] public IReadOnlyList<ApplicationProfilePickerModel.PickerRowModel> Rows { get; set; } = Array.Empty<ApplicationProfilePickerModel.PickerRowModel>();
     [Parameter] public IReadOnlyList<ApplicationProfilePickerModel.PeopleRowModel> PeopleRows { get; set; } = Array.Empty<ApplicationProfilePickerModel.PeopleRowModel>();
     [Parameter] public Guid SelectedProfileId { get; set; }
+    [Parameter] public Guid SelectedVersionId { get; set; }
     [Parameter] public string? StatusMessage { get; set; }
     [Parameter] public bool IsStatusError { get; set; }
     [Parameter] public bool IsStatusWarning { get; set; }
@@ -179,6 +215,7 @@
     [Parameter] public EventCallback NextStepRequested { get; set; }
     [Parameter] public EventCallback BackStepRequested { get; set; }
     [Parameter] public EventCallback<Guid> SelectProfileRequested { get; set; }
+    [Parameter] public EventCallback<Guid> SelectVersionRequested { get; set; }
     [Parameter] public EventCallback<Guid> TogglePersonRequested { get; set; }
     [Parameter] public EventCallback<bool> DuplicateWarningAcknowledgedChanged { get; set; }
 
@@ -208,10 +245,34 @@
         }
     };
 
+    private bool CanUseSelectedProfile
+    {
+        get
+        {
+            if (SelectedProfileId == Guid.Empty)
+                return false;
+
+            var selected = Rows.FirstOrDefault(r => r.ProfileId == SelectedProfileId);
+            if (selected == null)
+                return false;
+            if (selected.MissingApprovalLegVersions)
+                return false;
+            if (selected.RequiresApprovalLegVersion && SelectedVersionId == Guid.Empty)
+                return false;
+            return true;
+        }
+    }
+
     private async Task SelectProfile(Guid profileId)
     {
         if (SelectProfileRequested.HasDelegate)
             await SelectProfileRequested.InvokeAsync(profileId);
+    }
+
+    private async Task SelectVersion(Guid versionId)
+    {
+        if (SelectVersionRequested.HasDelegate)
+            await SelectVersionRequested.InvokeAsync(versionId);
     }
 
     private async Task UseProfileAsync()

@@ -132,6 +132,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<ApplicationType> ApplicationTypes { get; set; }
         public DbSet<ApplicationProfile> ApplicationProfiles { get; set; }
         public DbSet<ApplicationProfileApprovalLeg> ApplicationProfileApprovalLegs { get; set; }
+        public DbSet<ApplicationProfileApprovalLegVersion> ApplicationProfileApprovalLegVersions { get; set; }
         public DbSet<ApplicationProfileTemplate> ApplicationProfileTemplates { get; set; }
         public DbSet<ApplicationProfileProgressStateSetting> ApplicationProfileProgressStateSettings { get; set; }
         public DbSet<ApplicationProfileInstancePersonResolvedLink> ApplicationProfileInstancePersonResolvedLinks { get; set; }
@@ -649,12 +650,27 @@ namespace Visa2026.Module.BusinessObjects
                     .HasDatabaseName("IX_ApplicationProfiles_SelectionCode");
             });
 
+            modelBuilder.Entity<ApplicationProfileApprovalLegVersion>(b =>
+            {
+                b.Property(v => v.Name).HasMaxLength(200);
+                b.HasOne(v => v.ApplicationProfile)
+                    .WithMany(p => p.ApprovalLegVersions)
+                    .HasForeignKey(v => v.ApplicationProfileId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                b.HasIndex(v => new { v.ApplicationProfileId, v.Sequence })
+                    .HasDatabaseName("IX_ApplicationProfileApprovalLegVersions_Profile_Sequence");
+            });
+
             modelBuilder.Entity<ApplicationProfileApprovalLeg>(b =>
             {
                 b.HasOne(l => l.ApplicationProfile)
                     .WithMany(p => p.ApprovalLegs)
                     .HasForeignKey(l => l.ApplicationProfileId)
                     .OnDelete(DeleteBehavior.Cascade);
+                b.HasOne(l => l.ApprovalLegVersion)
+                    .WithMany(v => v.Legs)
+                    .HasForeignKey(l => l.ApprovalLegVersionId)
+                    .OnDelete(DeleteBehavior.SetNull);
                 b.HasIndex(l => new { l.ApplicationProfileId, l.Sequence })
                     .HasDatabaseName("IX_ApplicationProfileApprovalLegs_Profile_Sequence");
             });
@@ -667,6 +683,14 @@ namespace Visa2026.Module.BusinessObjects
                     .WithMany(p => p.NestedTemplates)
                     .HasForeignKey(t => t.ApplicationProfileId)
                     .OnDelete(DeleteBehavior.Cascade);
+                b.HasOne(t => t.ApplicableProjectContract)
+                    .WithMany()
+                    .HasForeignKey(t => t.ApplicableProjectContractId)
+                    .OnDelete(DeleteBehavior.SetNull);
+                b.HasOne(t => t.ApplicableMigrationService)
+                    .WithMany()
+                    .HasForeignKey(t => t.ApplicableMigrationServiceId)
+                    .OnDelete(DeleteBehavior.SetNull);
             });
 
             modelBuilder.Entity<ApplicationProfileProgressStateSetting>(b =>

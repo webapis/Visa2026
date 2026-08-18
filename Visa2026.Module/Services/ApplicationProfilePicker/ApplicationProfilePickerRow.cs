@@ -27,6 +27,13 @@ public sealed class ApplicationProfilePickerRow
 
     public bool HasOpenApplicationForSeedPerson { get; init; }
 
+    public IReadOnlyList<ApplicationProfilePickerVersionOption> ApprovalLegVersions { get; init; }
+        = Array.Empty<ApplicationProfilePickerVersionOption>();
+
+    public bool RequiresApprovalLegVersion =>
+        ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries
+        && ApprovalLegVersions.Count > 0;
+
     public string MetaLine =>
         $"{Code} · Related to: {ApplicationProfilePickerDisplayHelper.FormatActionFamily(ActionFamily)} · "
         + ApplicationProfilePickerDisplayHelper.FormatProgressRoute(ProgressRoute);
@@ -44,4 +51,15 @@ public sealed class ApplicationProfilePickerRow
             return $"Used {UsedBySeedPersonCount}× · last {date}";
         }
     }
+}
+
+public sealed class ApplicationProfilePickerVersionOption
+{
+    public Guid VersionId { get; init; }
+
+    public string Name { get; init; } = string.Empty;
+
+    public bool IsDefault { get; init; }
+
+    public IReadOnlyList<string> MinistryNames { get; init; } = Array.Empty<string>();
 }

@@ -32,7 +32,7 @@ internal static class ApplicationWorkspaceProgressTimeline
             .ToList() ?? [];
         var latest = ApplicationProfileInstanceProgressHelper.GetLatest(application.ProgressHistory, objectSpace);
         var slotAnchor = SlotAnchorForCurrent(latest, history);
-        var advanceOptions = BuildAdvanceOptions(application, profile, latest, objectSpace);
+        var advanceOptions = BuildAdvanceOptions(application, latest, objectSpace);
         var canAdvance = advanceOptions.Count > 0;
         var advanceBlockedReason = canAdvance
             ? string.Empty
@@ -199,25 +199,7 @@ internal static class ApplicationWorkspaceProgressTimeline
             return [];
 
         var liveProfile = profile ?? application.ApplicationProfile;
-        var fromProfile = liveProfile?.ApprovalLegs?
-            .Where(l => l.ApprovingMinistry != null)
-            .OrderBy(l => l.Sequence ?? int.MaxValue)
-            .Select((l, i) => (
-                Sequence: i + 1,
-                Name: l.ApprovingMinistry!.ShortNameTm
-                    ?? l.ApprovingMinistry.NameTm
-                    ?? $"Ministry {i + 1}"))
-            .ToList() ?? [];
-        if (fromProfile.Count > 0)
-            return fromProfile;
-
-        return application.ApprovalLegSnapshots?
-            .Where(s => !string.IsNullOrWhiteSpace(s.MinistryShortName))
-            .OrderBy(s => s.Sequence ?? int.MaxValue)
-            .Select((s, i) => (
-                Sequence: i + 1,
-                Name: s.MinistryShortName.Trim()))
-            .ToList() ?? [];
+        return ApplicationProfileApprovalLegVersionHelper.ResolveLegsForInstance(application, liveProfile);
     }
 
     private static ApplicationProfileInstanceProgress? SlotAnchorForCurrent(
@@ -531,7 +513,6 @@ internal static class ApplicationWorkspaceProgressTimeline
 
     private static IReadOnlyList<ApplicationWorkspaceCaseProgressAdvanceOption> BuildAdvanceOptions(
         ApplicationProfileInstance application,
-        ApplicationProfile? profile,
         ApplicationProfileInstanceProgress? latest,
         IObjectSpace? objectSpace)
     {
@@ -540,32 +521,12 @@ internal static class ApplicationWorkspaceProgressTimeline
             return Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>();
 
         return codes
-            .Where(code => IsIncludedNextState(profile ?? application.ApplicationProfile, code))
             .Select(code => new ApplicationWorkspaceCaseProgressAdvanceOption
             {
                 StateCode = code,
                 Label = ResolveStateLabel(objectSpace, code),
             })
             .ToList();
-    }
-
-    private static bool IsIncludedNextState(ApplicationProfile? profile, string stateCode)
-    {
-        var settings = profile?.ProgressStateSettings;
-        if (settings == null || settings.Count == 0)
-            return true;
-
-        var catalogCode = MapToCatalogStateCode(stateCode);
-        if (string.IsNullOrEmpty(catalogCode))
-            return true;
-
-        var matches = settings
-            .Where(s => string.Equals(s.StateCode, catalogCode, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-        if (matches.Count == 0)
-            return true;
-
-        return matches.Any(s => s.IsIncluded);
     }
 
     private static string? MapToCatalogStateCode(string stateCode)

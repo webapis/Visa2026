@@ -45,6 +45,7 @@ disable-model-invocation: false
 | Staged queue | `staged-profiles-listview-table-mockup.png`, `staged-profiles-grid-cards-mockup.png` |
 | In process | `process-started-profiles-listview-table-mockup.png`, `process-started-application-profile-workspace-mockup.png`, `process-started-nav-*.png` |
 | Templates | `application-profile-templates-listview-mockup.png`, `application-profile-template-overview-mockup.png`, `application-profile-template-wizard*.png` |
+| Approval leg versions (2026-08-18) | `application-profile-wizard-approval-leg-versions-prototype.png`, `application-profile-instance-create-choose-approval-legs-prototype.png` |
 
 **Retired:** HTML/Excel/`images/` prototypes removed 2026-08-10 — see plan §9.
 
@@ -170,8 +171,8 @@ Use when user asks *how should I configure this profile?* — tailor to **Action
 
 | Route | Suggest |
 |-------|---------|
-| **Via ministries** | Embed **Approval legs** on profile OR default contract; require **Project contract** on Application; ministry SLA |
-| **Direct migration** | No ministry legs on profile; migration SLA; skip contract-for-ministry gate on Person start |
+| **Via ministries** | Embed named **approval-leg versions** on Identity; officers pick a version at create (snapshot); set **Project** on Results if instances need a contract; profile-specific templates can bind to a Project contract |
+| **Direct migration** | No ministry legs on profile; migration SLA; profile-specific templates can bind to a Migration service |
 
 ### Person-config toggles
 

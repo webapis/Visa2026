@@ -10,23 +10,11 @@
         Configuration stays editable until a linked application reaches lock state <strong>A</strong>.
     </div>
     <div class="ap-wizard__section">
-        <h3>ApplicationProfileInstance name and description</h3>
+        <h3>Name</h3>
         <div class="ap-wizard__grid">
             <label class="ap-wizard__field ap-wizard__field--full">
-                <span>ApplicationProfileInstance name</span>
+                <span>Application Profile name</span>
                 <input type="text" @bind="Profile.Name" @bind:event="oninput" disabled="@Disabled" />
-            </label>
-            <label class="ap-wizard__field ap-wizard__field--full">
-                <span>Description</span>
-                <textarea @bind="Profile.Description" @bind:event="oninput" disabled="@Disabled"></textarea>
-            </label>
-            <label class="ap-wizard__field">
-                <span>Code</span>
-                <input type="text" @bind="Profile.Code" @bind:event="oninput" disabled="@Disabled" />
-            </label>
-            <label class="ap-wizard__field">
-                <span>Selection / quick code</span>
-                <input type="text" maxlength="3" @bind="Profile.SelectionCode" @bind:event="oninput" disabled="@Disabled" />
             </label>
         </div>
     </div>
@@ -48,39 +36,85 @@
         </div>
         @if (ShowApprovalLegs)
         {
-            <h3 class="ap-wizard__subhead">Approval legs</h3>
-            <div class="ap-wizard__list">
-                @if (Profile.ApprovalLegs?.Count > 0)
+            <h3 class="ap-wizard__subhead">Approval leg versions</h3>
+            <p class="ap-wizard__hint">This profile’s own copies. Officers pick one version when creating an application. Already-started applications keep a snapshot.</p>
+            <div class="ap-wizard__versions">
+                @foreach (var version in OrderedVersions)
                 {
-                    @foreach (var leg in Profile.ApprovalLegs.OrderBy(l => l.Sequence ?? 0))
-                    {
-                        <div class="ap-wizard__list-row">
-                            <span class="ap-wizard__list-ord">@(leg.Sequence ?? 0)</span>
-                            <span>@(leg.ApprovingMinistry?.NameTm ?? "—")</span>
+                    var isActive = version.ID == ActiveVersionId;
+                    <div class="ap-wizard__version @(isActive ? "is-active" : null) @(version.IsDefault ? "is-default" : null)">
+                        <div class="ap-wizard__version-head">
+                            <label class="ap-wizard__version-select">
+                                <input type="radio" name="ap-leg-version" checked="@isActive"
+                                       disabled="@Disabled"
+                                       @onchange="@(() => ActivateVersion(version))" />
+                                <span>Version @version.Sequence</span>
+                            </label>
+                            <input class="ap-wizard__version-name" type="text" @bind="version.Name" @bind:event="oninput"
+                                   disabled="@Disabled" placeholder="Version name" />
+                            @if (version.IsDefault)
+                            {
+                                <span class="ap-wizard__pill ap-wizard__pill--on">Default</span>
+                            }
+                            else if (!Disabled)
+                            {
+                                <button type="button" class="ap-wizard__link" @onclick="() => OnSetDefaultVersion.InvokeAsync(version)">Make default</button>
+                            }
                             @if (!Disabled)
                             {
-                                <button type="button" class="ap-wizard__link" @onclick="() => OnRemoveLeg.InvokeAsync(leg)">Remove</button>
+                                <button type="button" class="ap-wizard__link" @onclick="() => OnDuplicateVersion.InvokeAsync(version)">Duplicate</button>
+                                <button type="button" class="ap-wizard__link" @onclick="() => OnRemoveVersion.InvokeAsync(version)">Remove</button>
                             }
                         </div>
-                    }
-                }
-                else
-                {
-                    <p class="ap-wizard__hint">No embedded legs — ministry depth may fall back to ApplicationProfileInstance approval leg profile.</p>
+                        @if (isActive)
+                        {
+                            <div class="ap-wizard__list">
+                                @{
+                                    var legs = (version.Legs ?? []).OrderBy(l => l.Sequence ?? 0).ToList();
+                                }
+                                @if (legs.Count > 0)
+                                {
+                                    @foreach (var leg in legs)
+                                    {
+                                        <div class="ap-wizard__list-row">
+                                            <span class="ap-wizard__list-ord">@(leg.Sequence ?? 0)</span>
+                                            <span>@(leg.ApprovingMinistry?.NameTm ?? "—")</span>
+                                            @if (!Disabled)
+                                            {
+                                                <button type="button" class="ap-wizard__link" @onclick="() => OnRemoveLeg.InvokeAsync(leg)">Remove</button>
+                                            }
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <p class="ap-wizard__hint">No ministries on this version yet.</p>
+                                }
+                            </div>
+                            @if (!Disabled)
+                            {
+                                <div class="ap-wizard__add-leg">
+                                    <select @bind="_selectedMinistryId">
+                                        <option value="@Guid.Empty">Add approval leg…</option>
+                                        @foreach (var ministry in Ministries)
+                                        {
+                                            <option value="@ministry.ID">@(ministry.NameTm ?? ministry.Code)</option>
+                                        }
+                                    </select>
+                                    <button type="button" class="ap-wizard__btn ap-wizard__btn--secondary" @onclick="AddSelectedLeg">Add</button>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p class="ap-wizard__hint">@PreviewLegs(version)</p>
+                        }
+                    </div>
                 }
             </div>
             @if (!Disabled)
             {
-                <div class="ap-wizard__add-leg">
-                    <select @bind="_selectedMinistryId">
-                        <option value="@Guid.Empty">Add approval leg…</option>
-                        @foreach (var ministry in Ministries)
-                        {
-                            <option value="@ministry.ID">@(ministry.NameTm ?? ministry.Code)</option>
-                        }
-                    </select>
-                    <button type="button" class="ap-wizard__btn ap-wizard__btn--secondary" @onclick="AddSelectedLeg">Add</button>
-                </div>
+                <button type="button" class="ap-wizard__btn ap-wizard__btn--secondary" @onclick="AddVersion">+ Add version</button>
             }
         }
         else
@@ -170,21 +204,45 @@
     [Parameter, EditorRequired] public ApplicationProfile Profile { get; set; } = null!;
     [Parameter] public bool Disabled { get; set; }
     [Parameter] public IReadOnlyList<ApprovingMinistry> Ministries { get; set; } = Array.Empty<ApprovingMinistry>();
-    [Parameter] public EventCallback<Guid> OnAddLeg { get; set; }
+    [Parameter] public EventCallback OnAddVersion { get; set; }
+    [Parameter] public EventCallback<ApplicationProfileApprovalLegVersion> OnRemoveVersion { get; set; }
+    [Parameter] public EventCallback<ApplicationProfileApprovalLegVersion> OnDuplicateVersion { get; set; }
+    [Parameter] public EventCallback<ApplicationProfileApprovalLegVersion> OnSetDefaultVersion { get; set; }
+    [Parameter] public EventCallback<(Guid VersionId, Guid MinistryId)> OnAddLeg { get; set; }
     [Parameter] public EventCallback<ApplicationProfileApprovalLeg> OnRemoveLeg { get; set; }
     [Parameter] public EventCallback ClearLegsRequested { get; set; }
 
     private Guid _selectedMinistryId;
+    private Guid _activeVersionId;
 
     private enum ScopeMode { Always, Scoped }
 
     private ScopeMode _scopeMode;
+
+    private IReadOnlyList<ApplicationProfileApprovalLegVersion> OrderedVersions =>
+        ApplicationProfileApprovalLegVersionHelper.GetOrderedVersions(Profile);
+
+    private Guid ActiveVersionId
+    {
+        get
+        {
+            if (_activeVersionId != Guid.Empty && OrderedVersions.Any(v => v.ID == _activeVersionId))
+                return _activeVersionId;
+
+            return ApplicationProfileApprovalLegVersionHelper.GetDefaultVersion(Profile)?.ID
+                ?? OrderedVersions.FirstOrDefault()?.ID
+                ?? Guid.Empty;
+        }
+    }
 
     protected override void OnParametersSet()
     {
         _scopeMode = string.IsNullOrWhiteSpace(Profile.ApplicabilityCriteria)
             ? ScopeMode.Always
             : ScopeMode.Scoped;
+
+        if (_activeVersionId == Guid.Empty)
+            _activeVersionId = ActiveVersionId;
     }
 
     private static readonly ApplicationProfileActionFamily[] ActionFamilies =
@@ -211,15 +269,53 @@
         {
             await ClearLegsRequested.InvokeAsync();
         }
+        else if (route == ApplicationProfileInstanceProgressRouteKind.ViaMinistries
+            && OrderedVersions.Count == 0
+            && OnAddVersion.HasDelegate)
+        {
+            await OnAddVersion.InvokeAsync();
+        }
+    }
+
+    private async Task AddVersion()
+    {
+        if (Disabled || !OnAddVersion.HasDelegate)
+            return;
+
+        await OnAddVersion.InvokeAsync();
+        _activeVersionId = ApplicationProfileApprovalLegVersionHelper.GetOrderedVersions(Profile)
+            .LastOrDefault()?.ID ?? Guid.Empty;
+    }
+
+    private void ActivateVersion(ApplicationProfileApprovalLegVersion version)
+    {
+        if (Disabled || version == null)
+            return;
+
+        _activeVersionId = version.ID;
     }
 
     private async Task AddSelectedLeg()
     {
-        if (Disabled || !ShowApprovalLegs || _selectedMinistryId == Guid.Empty)
+        if (Disabled || !ShowApprovalLegs || _selectedMinistryId == Guid.Empty || ActiveVersionId == Guid.Empty)
             return;
 
-        await OnAddLeg.InvokeAsync(_selectedMinistryId);
+        await OnAddLeg.InvokeAsync((ActiveVersionId, _selectedMinistryId));
         _selectedMinistryId = Guid.Empty;
+    }
+
+    private static string PreviewLegs(ApplicationProfileApprovalLegVersion version)
+    {
+        var names = ApplicationProfileApprovalLegVersionHelper.GetOrderedLegs(version)
+            .Select(l => l.ApprovingMinistry?.ShortNameTm ?? l.ApprovingMinistry?.NameTm)
+            .Where(n => !string.IsNullOrWhiteSpace(n))
+            .Take(3)
+            .ToList();
+        var count = ApplicationProfileApprovalLegVersionHelper.GetOrderedLegs(version).Count;
+        if (names.Count == 0)
+            return $"{count} ministries";
+
+        return $"{count} ministries · {string.Join(" · ", names)}";
     }
 
     private void SetActionFamily(ApplicationProfileActionFamily family)

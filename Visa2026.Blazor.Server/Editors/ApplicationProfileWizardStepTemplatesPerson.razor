@@ -5,6 +5,7 @@
 @using Microsoft.JSInterop
 @using Visa2026.Blazor.Server.Services
 @using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Services.ApplicationProfileWizard
 @using Visa2026.Module.Services.UserReports
 @using Visa2026.Module.Services.WordReports
 @implements IDisposable
@@ -22,7 +23,7 @@
             <h3>ApplicationProfileInstance templates</h3>
             <span class="ap-wizard__badge ap-wizard__badge--profile">Profile-specific</span>
         </div>
-        <p class="ap-wizard__hint">This profile only. Upload or link a file; Edit opens sandbox sync without leaving the wizard.</p>
+        <p class="ap-wizard__hint">This profile only. Assign a Project contract (Via ministry) or Migration service (Direct migration) so the file appears only on matching applications. Leave empty to show for all.</p>
         <div class="ap-wizard__list">
             @if (ProfileTemplates.Count > 0)
             {
@@ -38,6 +39,17 @@
                             }
                             <span class="ap-wizard__tag">@FormatDataScope(template.DataScope)</span>
                         </span>
+                        <select class="ap-wizard__apply-lookup"
+                                disabled="@Disabled"
+                                title="@ApplicabilityTitle"
+                                value="@FormatApplicabilityId(template, IsViaMinistry)"
+                                @onchange="e => OnTemplateApplicabilityChanged(template, e)">
+                            <option value="">@ApplicabilityEmptyLabel</option>
+                            @foreach (var item in ApplicabilityLookups)
+                            {
+                                <option value="@item.Id.ToString("D")">@item.DisplayName</option>
+                            }
+                        </select>
                         @if (!Disabled)
                         {
                             <div class="ap-wizard__row-actions">
@@ -449,6 +461,8 @@
     [Parameter, EditorRequired] public ApplicationProfile Profile { get; set; } = null!;
     [Parameter] public bool Disabled { get; set; }
     [Parameter] public IObjectSpace? ObjectSpace { get; set; }
+    [Parameter] public ApplicationProfileWizardLookupData Lookups { get; set; } =
+        ApplicationProfileWizardLookupData.Empty;
     [Parameter] public EventCallback OnAddTemplate { get; set; }
     [Parameter] public EventCallback<ApplicationProfileTemplate> OnRemoveTemplate { get; set; }
     [Parameter] public EventCallback<(string Name, ApplicationProfileTemplateKind Kind, int SortOrder, byte[]? FileBytes, string? FileName, ApplicationProfileTemplateCatalogScope CatalogScope, ApplicationProfileTemplateDataScope DataScope, string? CategoryKey)> OnCreateTemplate { get; set; }
@@ -557,6 +571,56 @@
             .OrderBy(t => t.SortOrder)
             .ThenBy(t => t.TemplateName)
             .ToList();
+
+    private bool IsViaMinistry =>
+        Profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries;
+
+    private string ApplicabilityTitle =>
+        IsViaMinistry ? "Project contract" : "Migration service";
+
+    private string ApplicabilityEmptyLabel =>
+        IsViaMinistry ? "All contracts" : "All migration services";
+
+    private IReadOnlyList<ApplicationProfileWizardLookupItem> ApplicabilityLookups =>
+        IsViaMinistry ? Lookups.ProjectContracts : Lookups.MigrationServices;
+
+    private static string FormatApplicabilityId(ApplicationProfileTemplate template, bool viaMinistry)
+    {
+        var id = viaMinistry
+            ? template.ApplicableProjectContractId ?? template.ApplicableProjectContract?.ID
+            : template.ApplicableMigrationServiceId ?? template.ApplicableMigrationService?.ID;
+        return id.HasValue && id.Value != Guid.Empty ? id.Value.ToString("D") : string.Empty;
+    }
+
+    private void OnTemplateApplicabilityChanged(ApplicationProfileTemplate template, ChangeEventArgs e)
+    {
+        if (Disabled)
+            return;
+
+        Guid.TryParse(e.Value?.ToString(), out var id);
+        if (id == Guid.Empty)
+        {
+            template.ApplicableProjectContract = null;
+            template.ApplicableProjectContractId = null;
+            template.ApplicableMigrationService = null;
+            template.ApplicableMigrationServiceId = null;
+            return;
+        }
+
+        if (IsViaMinistry)
+        {
+            template.ApplicableMigrationService = null;
+            template.ApplicableMigrationServiceId = null;
+            template.ApplicableProjectContract = ObjectSpace?.GetObjectByKey<ProjectContract>(id);
+            template.ApplicableProjectContractId = id;
+            return;
+        }
+
+        template.ApplicableProjectContract = null;
+        template.ApplicableProjectContractId = null;
+        template.ApplicableMigrationService = ObjectSpace?.GetObjectByKey<MigrationService>(id);
+        template.ApplicableMigrationServiceId = id;
+    }
 
     private IReadOnlyList<ApplicationProfileWizardTemplateCatalog.CatalogRow> FilteredCategoryRows =>
         _categoryRows

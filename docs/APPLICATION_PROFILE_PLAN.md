@@ -11,6 +11,7 @@
 | In process | `process-started-profiles-listview-table-mockup.png`, `process-started-profiles-list-cards-mockup.png`, `process-started-application-profile-workspace-mockup.png`, `process-started-nav-*.png` (5 workspace tabs) |
 | Profile templates | `application-profile-templates-listview-mockup.png`, `application-profile-templates-grid-mockup.png`, `application-profile-template-overview-mockup.png`, `application-profile-template-wizard-mockup.png` + `step2`–`step5` |
 | Wizard template scopes / upload / edit (2026-08-12) | `application-profile-wizard-templates-three-scopes-prototype.png`, `application-profile-wizard-template-initial-upload-prototype.png`, `application-profile-wizard-template-data-scope-prototype.png`, `application-profile-wizard-template-edit-*-prototype.png`, `application-profile-wizard-template-add-data-scope-prototype.png` |
+| Approval leg versions (2026-08-18, **proposed — not implemented**) | `application-profile-wizard-approval-leg-versions-prototype.png`, `application-profile-instance-create-choose-approval-legs-prototype.png` |
 
 Full inventory: **§9**. **Interactive HTML (planned):** [`APPLICATION_PROFILE_HTML_PROTOTYPE_PLAN.md`](APPLICATION_PROFILE_HTML_PROTOTYPE_PLAN.md).
 **Related today:** `ApplicationProfile` *(replacement)*, `ApplicationType` *(deprecated — dual-read)*, `Application`, `ApplicationItem` *(planned hard remove)*, `ApplicationProgress`, `Person` + related BOs, `ApprovalLegProfile`, `UserReportTemplate`, `ProjectContract`
@@ -42,8 +43,8 @@ Application-type behavior is **scattered** across `ApplicationType` `Show*` / `C
 |---|--------|----------|
 | 5 | Scope / applicability | **Freeform criteria** filters which profiles appear in the Application picker. |
 | 6 | “Related to” (action family) | **Exclusive radio:** Issuance \| Cancellation \| Registration \| Business trip. **Configuration-related** — drives tracking / property visibility. |
-| 7 | Approval legs | **Embedded** on the profile. Configuration-related (live). |
-| 8 | Process states | **Freely enable** ministry / migration state checklists. Configuration-related (live). |
+| 7 | Approval legs | **Named versions** nested on each profile (per-profile copies, not a shared catalog; not `ProjectContract`). Officer **must pick a version** at instance create. Instance **snapshots** ministries; later wizard edits do not change already-started cases. |
+| 8 | Process states | **Not officer-configured.** Instance steps follow **Directed to** + **Approval legs** + the fixed progress graph. Profile stores **SLA days** only. |
 | 9 | Templates | **Nest files** on the profile. Configuration-related; list **visible** on Application, **not** editable per Application. |
 | 10 | Person data (v1) | Four checkboxes: Passport, Education, Position, Local address. Configuration-related (live readiness / template packs). |
 | 11 | Who configures | **Selected officers**; **wizard** UX for v1. |
@@ -68,8 +69,8 @@ Stored only on `ApplicationProfile`. Application **reads** them via FK. Officers
 | Related to | Issuance · Cancellation · Registration · Business trip | No (controls tracking / visibility) |
 | Produce | Invitation · Work permit · Visa · Border zone · Work location | No |
 | Cancel existing | Invitation(s) · WP(s) · Visa(s) · Border zone · Application(s) | No |
-| Process | Approval legs · ministry/migration states · SLA days | No |
-| Templates | Name · Type · File | Yes (catalog list; not editable) |
+| Process | Approval legs (named versions on the profile; **snapshot** on the instance after create) · SLA days (ministry / migration, live) | No |
+| Templates | Name · Type · File. Profile-specific rows may bind to a Project contract (Via ministry) or Migration service (Direct); instance catalog filters by the instance lookup. Empty binding = all instances. | Yes (catalog list; not editable) |
 | Person requirements | Passport · Education · Position · Address | No (gates readiness / packs) |
 
 ### 2.3 Per-Application related (persistent on Application)
@@ -87,7 +88,7 @@ Stored on Application. Seeded from profile defaults at initial usage. Editable a
 | 7 | End Date | Date |
 | 8 | Region (City) | Lookup |
 | 9 | Business Trip Address | Lookup |
-| 10 | Project | Lookup · also workflow |
+| 10 | Project | Lookup · also workflow; filters profile-specific templates (Via ministry) |
 | 11 | Urgency | Lookup |
 | 12 | Work Permit Location | Lookup |
 | 13 | Entry Date | Date |
@@ -470,6 +471,10 @@ When any linked Application reaches lock state **A** (first progress beyond offi
 | Switch Appearance / progress to profile | Done |
 | Config lock enforcement on profile edit | Done |
 | Configuration wizard UX | Done |
+| Wizard Process & SLA duration only | Done |
+| Profile-specific template applicability (contract / migration service) | Done |
+| Approval leg versions (per-profile copies + instance snapshot) | **Done** |
+| Wizard Project contract on Identity (Via ministry) | Done |
 | Profile overview (live linked instances) | Done |
 | Custom catalog home (replace native List/Detail officer UI) | Done |
 | Profile picker at Application create | Done |
@@ -568,5 +573,7 @@ All files live in [`docs/prototypes/`](prototypes/) only (no subfolders).
 | `application-profile-wizard-template-edit-ui-prototype.png` | Step 4 — Edit template modal |
 | `application-profile-wizard-template-edit-scenario-prototype.png` | Step 4 — Edit Word/Excel scenario |
 | `application-profile-wizard-template-edit-word-prototype.png` | Step 4 — Edit Word template (detail) |
+| `application-profile-wizard-approval-leg-versions-prototype.png` | Identity — named **approval-leg versions** on this profile (own copies; Default + Duplicate / Remove / Add version) |
+| `application-profile-instance-create-choose-approval-legs-prototype.png` | New instance — **required** pick of a version; ministries snapshot onto the application |
 
 **Retired (do not link):** `application-profile-wizard.html`, `application-profile-usage.html`, `application-detail-m2m.html`, `application-profile-platform-prototype.html`, `images/ap-*.png`, `Application-profile-wizard-draft.xlsx`.

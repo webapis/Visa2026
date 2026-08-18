@@ -70,9 +70,15 @@ public static class ApplicationProfileConfigurationResolver
     public static bool HasMinistrySlaConfigured(ApplicationProfileInstance? application) =>
         GetMinistrySlaMaxDays(application) > 0;
 
-    public static int GetEmbeddedProfileMinistryLegCount(ApplicationProfileInstance? application) =>
-        application?.ApplicationProfile?.ApprovalLegs?
-            .Count(l => l.ApprovingMinistry != null) ?? 0;
+    public static int GetEmbeddedProfileMinistryLegCount(ApplicationProfileInstance? application)
+    {
+        var snapshotCount = application?.ApprovalLegSnapshots?
+            .Count(s => !string.IsNullOrWhiteSpace(s.MinistryShortName)) ?? 0;
+        if (snapshotCount > 0)
+            return snapshotCount;
+
+        return ApplicationProfileApprovalLegVersionHelper.GetConfiguredLegCount(application?.ApplicationProfile);
+    }
 
     // --- ApplicationProfileInstance DetailView visibility (maps from profile Require* / ActionFamily) ---
 
@@ -168,7 +174,8 @@ public static class ApplicationProfileConfigurationResolver
 
         if (application?.ApplicationProfile is { } profile)
         {
-            if (profile.ApprovalLegs?.Any(l => l.ApprovingMinistry != null) == true)
+            if (profile.ApprovalLegs?.Any(l => l.ApprovingMinistry != null) == true
+                || ApplicationProfileApprovalLegVersionHelper.GetConfiguredLegCount(profile) > 0)
                 return true;
 
             if (application.ApplicationType?.ShowApprovalLegProfile == true)

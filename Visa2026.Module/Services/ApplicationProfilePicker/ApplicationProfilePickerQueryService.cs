@@ -53,6 +53,19 @@ public sealed class ApplicationProfilePickerQueryService : IApplicationProfilePi
                     UsedBySeedPersonCount = usage?.Count ?? 0,
                     LastUsedBySeedPersonAt = usage?.LastUsedAt,
                     HasOpenApplicationForSeedPerson = usage?.HasOpen ?? false,
+                    ApprovalLegVersions = ApplicationProfileApprovalLegVersionHelper.GetOrderedVersions(p)
+                        .Select(v => new ApplicationProfilePickerVersionOption
+                        {
+                            VersionId = v.ID,
+                            Name = string.IsNullOrWhiteSpace(v.Name) ? $"Version {v.Sequence}" : v.Name,
+                            IsDefault = v.IsDefault,
+                            MinistryNames = ApplicationProfileApprovalLegVersionHelper.GetOrderedLegs(v)
+                                .Select(l => l.ApprovingMinistry!.NameTm
+                                    ?? l.ApprovingMinistry.ShortNameTm
+                                    ?? $"Ministry {l.Sequence}")
+                                .ToList(),
+                        })
+                        .ToList(),
                 };
             })
             .OrderByDescending(r => seedPersonId.HasValue ? r.LastUsedBySeedPersonAt ?? DateTime.MinValue : r.LastUsedAt ?? DateTime.MinValue)

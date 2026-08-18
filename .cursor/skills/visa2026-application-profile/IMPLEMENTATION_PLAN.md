@@ -25,8 +25,12 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | 8f | Wizard Results default lookup dropdowns | **Done** | Catalog snapshots; default-value selects enabled only when Use is checked |
 | 8g | Wizard May produce / cancel with Related to | **Done** | Issuance → May produce; Cancellation → May cancel; moved off Results & fields |
 | 8h | Wizard Approval legs with Directed to | **Done** | Via ministry → legs on Identity; Direct migration hides and clears legs |
+| 8i | Wizard Project contract with Directed to | **Done** | Via ministry → Project contract on Identity; gone from Results; instance copy is read-only |
+| 8j | Wizard Process & SLA is duration only | **Done** | Removed ministry/migration state Include/SLA-track tables; instance process is Directed to + legs |
+| 8k | Profile-specific template applicability | **Done** | Per-row Project contract (Via ministry) or Migration service (Direct) dropdown; instance catalog filters; Project back on Results |
+| 8l | Approval leg versions (per-profile copies + snapshot) | **Done** | Identity named versions; create picker required; instance snapshots; timeline reads snapshots |
 | 8d | Wizard step 4 real template catalog + persist scope | **Done** | Live `UserReportTemplate` Category/Global; `CatalogScope`/`DataScope`/`CategoryKey` on nested template |
-| 8a | Application Profile overview (live) | **Done** | Live config/defaults/legs/templates + linked `ApplicationProfileInstance` rows; overview shows wizard identity, company/signatories, required fields, process states, template scope; mock only if profile id unresolved |
+| 8a | Application Profile overview (live) | **Done** | Live config/defaults/legs/templates + linked `ApplicationProfileInstance` rows; overview shows wizard identity, company/signatories, required fields, SLA days, template scope; mock only if profile id unresolved |
 | 8c | Custom catalog home (replace native List/Detail UI) | **Done** | List first; row opens overview; **Back to list**; New/Configure → wizard (new tab); **Save profile** reloads catalog; **Delete** when Linked = 0; toolbar **Total: N**; table-body scroll, sticky header |
 | 9 | Profile picker at Application create | **Done** | Intercepts **New** on Application ListViews; Blazor picker UI |
 | 10 | Person M2M DetailView; hard-remove `ApplicationItem` | **In progress** | Skip-navigation `People` + child BO M2M (includes **MedicalRecord**, **WorkDuty**). Output headers Invitation / WorkPermit / BorderZone / Rejection / IssuedVisas are **1:N** (May produce), not skip-nav. Wizard **May produce** includes Rejection. Person issued tab **Applications (linked)** verified. Rebuild DataImporter + resume Wave 2b (`-StartAt ApplicationProfileInstancePerson`); then People-tab / copies / Resminamalar smoke. |
@@ -171,14 +175,38 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 - Respects `ApplicationProfileLockHelper` — read-only banner + disabled save when locked
 - Steps: Identity · **Company, Signatories** · Results & fields · Process & SLA (embedded legs) · Templates & person · Review & save
 - **May produce** / **May cancel** live under Identity **Related to** (`ActionFamily`): Issuance → produce; Cancellation → cancel
-- **Approval legs** live under Identity **Directed to**; visible only for Via ministry
+- **Approval legs** live under Identity **Directed to** as named **versions**; visible only for Via ministry; instances snapshot the chosen version at create
+- **Project contract** lives under Identity **Directed to**; visible + required only for Via ministry; Direct migration hides and clears it. Results & fields no longer lists Project. Instances copy the contract at create and cannot edit it.
+- Identity wizard edits **Name** only — Description, Code, and Selection/quick code stay on the BO (auto Code at create) and are not shown on that step
+- **Process & SLA** is Ministry/Migration **days** only. State Include/SLA-track checklists are not officer-configured and do not drive instance Advance.
+- **Project** is back on Results & fields (instance default). Profile-specific templates can bind to Project contract (Via ministry) or Migration service (Direct); Resminamalar catalog hides non-matching rows. Empty binding = all instances.
 - Results default-value lookups load as ID/name snapshots (`ApplicationProfileWizardLookupData`); Default value is enabled only when Use is checked
 
-**Deferred (later slices):** template file upload in wizard (attach binary on standard profile detail nested templates ListView); progress resolver reading `ProgressStateSettings` (stored in wizard, wire in application-progress slice).
+**Deferred (later slices):** template file upload in wizard (attach binary on standard profile detail nested templates ListView). `ApplicationProfileProgressStateSetting` table retained unused (do not wire as a process designer).
 
 **Slice 8b — Wizard prototype parity (2026-08-07):** Step 1 scope cards · Step 2 defaults/signatory table · Step 3 ministry/migration state checklists (`ApplicationProfileProgressStateSetting`) · Step 4 template add/edit/remove in wizard.
 
 **Verify:** Configuration → Application Profiles → select row → **Configure profile**; edit and **Save profile**; locked profile → read-only + **Clone** escape hatch.
+
+---
+
+## Slice 8l — Approval leg versions — **Done**
+
+**Goal:** One profile can have several named ministry lists. Officers pick a version at instance create. Already-started instances keep a snapshot.
+
+**Locked (2026-08-18):**
+
+1. **Reuse:** each profile keeps **its own copy** of each version (not a shared catalog; not `ProjectContract`).
+2. **After create:** instances **keep the ministries they started with**.
+
+**Delivered:**
+
+- `ApplicationProfileApprovalLegVersion` nested on the profile; existing legs backfill into Default **Version 1**
+- Wizard Identity: named versions (Default, Duplicate, Remove, Add version)
+- Create picker: required version cards; ministries copied to `ApplicationProfileInstanceApprovalLegSnapshot`
+- Progress timeline reads **snapshots first**
+
+**Verify:** stop F5, rebuild, F5. Configure profile → Identity shows versions. New application → pick a version. Edit the profile version after create — in-process case ministries stay the same.
 
 ---
 

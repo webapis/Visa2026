@@ -40,6 +40,7 @@ public class ApplicationProfileOverviewQueryServiceTests
         Assert.Equal(7, snapshot.MigrationSlaDays);
         Assert.Contains(snapshot.LiveConfigurationLines, l => l.Contains("invitation"));
         Assert.Contains(snapshot.LiveConfigurationLines, l => l.Contains("border zone permits"));
+        Assert.DoesNotContain(snapshot.LiveConfigurationLines, l => l.StartsWith("Project contract:", StringComparison.Ordinal));
         Assert.Empty(snapshot.ApprovalLegs);
         Assert.Empty(snapshot.NestedTemplates);
         Assert.Empty(snapshot.PersonDataToggles);
@@ -129,30 +130,13 @@ public class ApplicationProfileOverviewQueryServiceTests
     }
 
     [Fact]
-    public void MapFromProfile_MapsIncludedProgressStatesAndTemplateScope()
+    public void MapFromProfile_MapsTemplateScope()
     {
         var profile = new ApplicationProfile
         {
             Name = "Full",
             Code = "FULL",
             ProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
-            ProgressStateSettings = new ObservableCollection<ApplicationProfileProgressStateSetting>
-            {
-                new()
-                {
-                    Track = ApplicationProfileProgressStateTrack.Ministry,
-                    StateCode = "MINISTRY_POSTPONED",
-                    IsIncluded = true,
-                    IsSlaTracked = false,
-                },
-                new()
-                {
-                    Track = ApplicationProfileProgressStateTrack.Migration,
-                    StateCode = "MIGRATION_ON_PROCESS",
-                    IsIncluded = false,
-                    IsSlaTracked = true,
-                },
-            },
             NestedTemplates = new ObservableCollection<ApplicationProfileTemplate>
             {
                 new()
@@ -169,10 +153,7 @@ public class ApplicationProfileOverviewQueryServiceTests
 
         var snapshot = ApplicationProfileOverviewQueryService.MapFromProfile(profile, objectSpace: null);
 
-        Assert.Single(snapshot.ProgressStates);
-        Assert.Equal("Ministry", snapshot.ProgressStates[0].TrackLabel);
-        Assert.Equal("Postponed", snapshot.ProgressStates[0].StateName);
-        Assert.False(snapshot.ProgressStates[0].IsSlaTracked);
+        Assert.Empty(snapshot.ProgressStates);
         Assert.Single(snapshot.NestedTemplates);
         Assert.Equal("Sanaw", snapshot.NestedTemplates[0].Name);
         Assert.Equal("Excel", snapshot.NestedTemplates[0].Kind);

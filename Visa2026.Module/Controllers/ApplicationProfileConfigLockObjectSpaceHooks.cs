@@ -34,7 +34,8 @@ internal static class ApplicationProfileConfigLockObjectSpaceHooks
             case ApplicationProfile profile:
                 ApplicationProfileLockHelper.EnsureConfigurationEditable(profile, objectSpace);
                 break;
-            case ApplicationProfileApprovalLeg
+            case ApplicationProfileApprovalLegVersion
+                or ApplicationProfileApprovalLeg
                 or ApplicationProfileTemplate
                 or ApplicationProfileProgressStateSetting:
             {

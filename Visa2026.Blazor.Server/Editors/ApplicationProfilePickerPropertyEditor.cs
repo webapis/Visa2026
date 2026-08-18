@@ -46,6 +46,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         NextStepRequested = EventCallback.Factory.Create(this, NextStepAsync),
         BackStepRequested = EventCallback.Factory.Create(this, BackStepAsync),
         SelectProfileRequested = EventCallback.Factory.Create<Guid>(this, SelectProfile),
+        SelectVersionRequested = EventCallback.Factory.Create<Guid>(this, SelectVersion),
         TogglePersonRequested = EventCallback.Factory.Create<Guid>(this, TogglePerson),
         DuplicateWarningAcknowledgedChanged = EventCallback.Factory.Create<bool>(this, SetDuplicateAcknowledged),
     };
@@ -130,10 +131,23 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
                 SeedUsageLine = r.SeedUsageLine,
                 IsConfigLocked = r.IsConfigLocked,
                 HasOpenApplicationForSeedPerson = r.HasOpenApplicationForSeedPerson,
+                RequiresApprovalLegVersion = r.RequiresApprovalLegVersion,
+                MissingApprovalLegVersions = r.ProgressRoute
+                    == ApplicationProfileInstanceProgressRouteKind.ViaMinistries
+                    && r.ApprovalLegVersions.Count == 0,
+                ApprovalLegVersions = r.ApprovalLegVersions.Select(v => new ApplicationProfilePickerModel.VersionOptionModel
+                {
+                    VersionId = v.VersionId,
+                    Name = v.Name,
+                    IsDefault = v.IsDefault,
+                    MinistryNames = v.MinistryNames,
+                }).ToList(),
             }).ToList();
 
             if (model.SelectedProfileId == Guid.Empty && model.Rows.Count > 0)
                 model.SelectedProfileId = model.Rows[0].ProfileId;
+
+            EnsureSelectedVersion(model);
 
             if (model.Step == 2 && IsPersonStartFlow)
                 LoadPeopleStep(model, objectSpace);
@@ -299,6 +313,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
                     _application,
                     model.SelectedProfileId,
                     model.SelectedPersonIds.ToList(),
+                    model.SelectedVersionId == Guid.Empty ? null : model.SelectedVersionId,
                     out var errorMessage,
                     out var successMessage))
             {
@@ -317,6 +332,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         if (!ApplicationProfilePickerCompletionHelper.TryCreateApplication(
                 _application,
                 model.SelectedProfileId,
+                model.SelectedVersionId == Guid.Empty ? null : model.SelectedVersionId,
                 out var createError))
         {
             model.StatusMessage = createError;
@@ -338,5 +354,34 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         model.StatusMessage = null;
         model.IsStatusError = false;
         model.IsStatusWarning = false;
+        EnsureSelectedVersion(model);
+    }
+
+    private void SelectVersion(Guid versionId)
+    {
+        var model = ComponentModel;
+        if (model == null)
+            return;
+
+        model.SelectedVersionId = versionId;
+        model.StatusMessage = null;
+        model.IsStatusError = false;
+    }
+
+    private static void EnsureSelectedVersion(ApplicationProfilePickerModel model)
+    {
+        var selected = model.Rows.FirstOrDefault(r => r.ProfileId == model.SelectedProfileId);
+        if (selected == null || !selected.RequiresApprovalLegVersion)
+        {
+            model.SelectedVersionId = Guid.Empty;
+            return;
+        }
+
+        if (selected.ApprovalLegVersions.Any(v => v.VersionId == model.SelectedVersionId))
+            return;
+
+        var defaultVersion = selected.ApprovalLegVersions.FirstOrDefault(v => v.IsDefault)
+            ?? selected.ApprovalLegVersions.FirstOrDefault();
+        model.SelectedVersionId = defaultVersion?.VersionId ?? Guid.Empty;
     }
 }

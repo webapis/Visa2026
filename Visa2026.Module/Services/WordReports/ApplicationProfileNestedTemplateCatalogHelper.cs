@@ -24,9 +24,45 @@ public static class ApplicationProfileNestedTemplateCatalogHelper
 
         return application.ApplicationProfile.NestedTemplates
             .Where(t => t != null && t.TemplateKind != ApplicationProfileTemplateKind.PdfForm)
+            .Where(t => IsVisibleForInstance(t, application))
             .OrderBy(t => t.SortOrder)
             .ThenBy(t => t.TemplateName, StringComparer.OrdinalIgnoreCase)
             .ToList();
+    }
+
+    public static bool IsVisibleForInstance(
+        ApplicationProfileTemplate template,
+        ApplicationProfileInstance? application)
+    {
+        if (template == null)
+            return false;
+        if (template.CatalogScope != ApplicationProfileTemplateCatalogScope.ProfileSpecific)
+            return true;
+
+        var route = ApplicationProfileConfigurationResolver.GetProgressRoute(application);
+        if (route == ApplicationProfileInstanceProgressRouteKind.ViaMinistries)
+        {
+            var requiredId = template.ApplicableProjectContractId
+                ?? template.ApplicableProjectContract?.ID;
+            if (!requiredId.HasValue || requiredId.Value == Guid.Empty)
+                return true;
+
+            var instanceId = application?.ProjectContract?.ID;
+            return instanceId.HasValue && instanceId.Value == requiredId.Value;
+        }
+
+        if (route == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService)
+        {
+            var requiredId = template.ApplicableMigrationServiceId
+                ?? template.ApplicableMigrationService?.ID;
+            if (!requiredId.HasValue || requiredId.Value == Guid.Empty)
+                return true;
+
+            var instanceId = application?.MigrationService?.ID;
+            return instanceId.HasValue && instanceId.Value == requiredId.Value;
+        }
+
+        return true;
     }
 
     public static string BuildEntryKey(ApplicationProfileTemplate template) =>

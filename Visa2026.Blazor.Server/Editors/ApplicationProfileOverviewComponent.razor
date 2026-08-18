@@ -213,7 +213,7 @@
         <div class="ap-overview__grid">
             <section class="ap-overview__card">
                 <h2>Process &amp; SLA</h2>
-                <p class="ap-overview__hint">Included progress states and expected duration.</p>
+                <p class="ap-overview__hint">Expected duration. Instance steps follow Directed to and Approval legs.</p>
                 <ul class="ap-overview__list">
                     @if (Snapshot.IsViaMinistry)
                     {
@@ -221,37 +221,48 @@
                     }
                     <li>Migration SLA: @Snapshot.MigrationSlaDays days</li>
                 </ul>
-                @if (Snapshot.ProgressStates.Count == 0)
-                {
-                    <p class="ap-overview__empty">No included progress states on this profile.</p>
-                }
-                else
-                {
-                    <table class="ap-overview__table">
-                        <thead>
-                            <tr>
-                                <th>Track</th>
-                                <th>State</th>
-                                <th>SLA</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var state in Snapshot.ProgressStates)
-                            {
-                                <tr>
-                                    <td>@state.TrackLabel</td>
-                                    <td>@state.StateName</td>
-                                    <td>@(state.IsSlaTracked ? "Yes" : "—")</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                }
             </section>
 
             <section class="ap-overview__card">
                 <h2>Approval legs</h2>
-                @if (Snapshot.ApprovalLegs.Count == 0)
+                @if (Snapshot.ApprovalLegVersions.Count > 0)
+                {
+                    @foreach (var version in Snapshot.ApprovalLegVersions)
+                    {
+                        <h3 class="ap-overview__subhead">
+                            @version.Name
+                            @if (version.IsDefault)
+                            {
+                                <span class="ap-overview__pill">Default</span>
+                            }
+                        </h3>
+                        @if (version.Legs.Count == 0)
+                        {
+                            <p class="ap-overview__empty">No ministries on this version.</p>
+                        }
+                        else
+                        {
+                            <table class="ap-overview__table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Ministry</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var leg in version.Legs)
+                                    {
+                                        <tr>
+                                            <td>@leg.Sequence</td>
+                                            <td>@leg.MinistryName</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    }
+                }
+                else if (Snapshot.ApprovalLegs.Count == 0)
                 {
                     <p class="ap-overview__empty">No approval legs (direct migration, or none configured).</p>
                 }

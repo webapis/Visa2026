@@ -4,6 +4,61 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 
 ---
 
+### 2026-08-18 — Save profile: Column 'GCRecord' is null
+
+- Host-start created `ApplicationProfileApprovalLegVersions` with nullable `GCRecord` / `OptimisticLockField` (no default). Sibling profile tables use `NOT NULL DEFAULT 0`. XAF omits `GCRecord` on insert; Postgres stored NULL; RETURNING then threw **Column 'GCRecord' is null.** Heal: `NOT NULL DEFAULT 0` plus always-run ALTER. Backfill now uses `COALESCE(GCRecord,0)=0` (live rows are `0`, not NULL).
+- Slice: 8l bugfix
+- Verify: stop F5, rebuild, F5. Configure profile → Review & save → **Save profile**. Local `visa2026` already healed; host-start SQL covers other DBs.
+- Prevent: Do not create new XAF tables with `"GCRecord" integer NULL`. Match Application Profiles: `"GCRecord" integer NOT NULL DEFAULT 0`.
+- Cross-skill: application-profile
+
+### 2026-08-18 — Approval leg versions: per-profile copies + instance snapshot
+
+- One profile holds named approval-leg versions (own copies). Officers must pick a version at create. Ministries are copied onto `ApplicationProfileInstanceApprovalLegSnapshot`; later wizard edits do not change already-started cases. Existing profile legs backfill into Default **Version 1**. Progress timeline reads snapshots first.
+- Slice: 8l **Done**. Plan §2.1 #7 locked. Host-start SQL in `ApplicationProfileSchemaSql`.
+- Verify: unit tests `ApplicationProfileApprovalLegVersionHelperTests` + timeline snapshot preference. Stop F5, rebuild, F5. Configure profile → Identity versions. New application → pick a version. Edit ministries on the profile — in-process case keeps the snapshot.
+- Prevent: Do not share one version BO across profiles. Do not live-follow later ministry edits on started instances. Do not drive legs from `ProjectContract` for this slice.
+- Cross-skill: application-profile | application-progress
+
+### 2026-08-18 — Approval leg versions: per-profile copies + instance snapshot (prototype)
+
+- Officers do not want one profile per Project contract. One profile (e.g. Visa extension) holds **named approval-leg versions**; the officer **must pick a version** at instance create. **Reuse:** each profile keeps **its own copy** of a version (not a shared catalog; not `ProjectContract` / `ApprovalLegProfile`). **After create:** instances **snapshot** ministries; later wizard edits do not change already-started cases.
+- Slice: 8l **Pending** — mockups only. Plan §2.1 #7 remains **proposed** until the images are accepted. Do not implement BOs/wizard/picker yet. After implement, create must copy the chosen version onto `ApplicationProfileInstanceApprovalLegSnapshot`; in-process timeline must read snapshots, not live profile versions.
+- Verify: mockups in `docs/prototypes/application-profile-wizard-approval-leg-versions-prototype.png` and `application-profile-instance-create-choose-approval-legs-prototype.png`. Inventory in plan §9.
+- Prevent: Do not share one version BO across profiles. Do not live-follow later ministry edits on started instances. Do not drive legs from `ProjectContract` for this slice.
+- Cross-skill: application-profile | application-progress
+
+### 2026-08-18 — Profile-specific templates bind to contract or migration service
+
+- Profile-specific wizard rows have a dropdown: Project contract when Directed to is Via ministry, Migration service when Direct migration. Empty = visible on every instance. Resminamalar nested catalog filters by the instance lookup. Project is back on Results & fields (not Identity).
+- Slice: 8k
+- Verify: unit tests `ApplicationProfileNestedTemplateCatalogHelperTests`. Stop F5, rebuild, F5. Configure profile → Results has Project; Identity has no Project lookup; Templates profile-specific row shows the dropdown. Open an instance Resminamalar catalog — only matching (or unscoped) profile-specific files appear.
+- Prevent: Do not put Project back on Identity. Do not apply this filter to Category/Global includes.
+- Cross-skill: application-profile | visa2026-resminamalar
+
+### 2026-08-18 — Process & SLA is duration only
+
+- Removed ministry/migration Include and SLA-track tables from the wizard and profile overview. Instance steps follow Directed to + Approval legs + the fixed progress graph. SLA days remain live on the profile. Advance no longer filters by `ProgressStateSettings.IsIncluded`.
+- Slice: 8j
+- Verify: stop F5, rebuild, F5. Configure profile → Process & SLA shows Ministry/Migration days only. Overview Process card has no state table.
+- Prevent: Do not put those checklists back as a process designer. Do not wire `ApplicationProfileProgressStateSetting` into the transition helper.
+- Cross-skill: application-profile | application-progress
+
+### 2026-08-18 — Identity wizard hides Description, Code, SelectionCode
+
+- Identity & purpose only edits the profile **Name**. Description, Code, and Selection/quick code remain on `ApplicationProfile` (Code is still auto-assigned `NEW-…` at create) and still show on overview/review, but not on the wizard Identity form.
+- Verify: stop F5, rebuild, F5. Configure profile → Identity shows Name, Directed to, Project contract, legs — no Description/Code/quick code fields.
+- Prevent: Do not add those three fields back onto Identity for “completeness”; they add noise. Catalog uniqueness still uses Code.
+- Cross-skill: application-profile
+
+### 2026-08-18 — Project contract lives on Identity (Via ministry)
+
+- Project contract is profile configuration, not a Results instance field. Wizard Identity shows it only when Directed to = Via ministry; Direct migration hides and clears it. Save requires a contract for Via ministry. Instances still copy the default at create and cannot edit it.
+- Slice: 8i
+- Verify: unit tests `ApplicationProfileWizardPersistHelperTests` + `ApplicationProfileOverviewQueryServiceTests`. Stop F5, rebuild, F5. Configure profile → Identity Via ministry shows Project contract; Results & fields has no Project row; Save without a contract fails; Direct migration hides the lookup.
+- Prevent: Do not put Project back on Results Use/default table. Do not let officers change `ApplicationProfileInstance.ProjectContract`.
+- Cross-skill: application-profile
+
 ### 2026-08-18 — Submitted on Office bar after later Approvals
 
 - Overview stepper Office node now shows Submitted + date for the life of that row; ministries still show their latest result.

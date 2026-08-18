@@ -70,6 +70,10 @@
                     <ApplicationProfileWizardStepIdentity Profile="Profile"
                         Disabled="IsReadOnly"
                         Ministries="Ministries"
+                        OnAddVersion="AddVersionCallback"
+                        OnRemoveVersion="RemoveVersionCallback"
+                        OnDuplicateVersion="DuplicateVersionCallback"
+                        OnSetDefaultVersion="SetDefaultVersionCallback"
                         OnAddLeg="AddLegCallback"
                         OnRemoveLeg="RemoveLegCallback"
                         ClearLegsRequested="ClearLegsCallback" />
@@ -98,6 +102,7 @@
                     <ApplicationProfileWizardStepTemplatesPerson Profile="Profile"
                         Disabled="IsReadOnly"
                         ObjectSpace="ObjectSpace"
+                        Lookups="Lookups"
                         OnAddTemplate="AddTemplateCallback"
                         OnRemoveTemplate="RemoveTemplateCallback"
                         OnCreateTemplate="CreateTemplateCallback" />
@@ -131,10 +136,10 @@
 @code {
     private readonly (string Title, string Description)[] _steps =
     [
-        ("Identity & purpose", "Name, route, legs, audience, issue / cancel"),
+        ("Identity & purpose", "Name, route, legs, audience"),
         ("Company, Signatories", "Letterhead, signatory, representative"),
         ("Results & fields", "Required instance properties"),
-        ("Process & SLA", "States and durations"),
+        ("Process & SLA", "Ministry and migration duration"),
         ("Templates & person", "Reports + person data"),
         ("Review & save", "Summary before publish"),
     ];
@@ -161,11 +166,17 @@
 
     private IReadOnlyList<ApprovingMinistry> Ministries => _ministries;
 
-    private EventCallback<Guid> AddLegCallback => EventCallback.Factory.Create<Guid>(this, AddLeg);
-
+    private EventCallback AddVersionCallback => EventCallback.Factory.Create(this, AddVersion);
+    private EventCallback<ApplicationProfileApprovalLegVersion> RemoveVersionCallback =>
+        EventCallback.Factory.Create<ApplicationProfileApprovalLegVersion>(this, RemoveVersion);
+    private EventCallback<ApplicationProfileApprovalLegVersion> DuplicateVersionCallback =>
+        EventCallback.Factory.Create<ApplicationProfileApprovalLegVersion>(this, DuplicateVersion);
+    private EventCallback<ApplicationProfileApprovalLegVersion> SetDefaultVersionCallback =>
+        EventCallback.Factory.Create<ApplicationProfileApprovalLegVersion>(this, SetDefaultVersion);
+    private EventCallback<(Guid VersionId, Guid MinistryId)> AddLegCallback =>
+        EventCallback.Factory.Create<(Guid, Guid)>(this, AddLeg);
     private EventCallback<ApplicationProfileApprovalLeg> RemoveLegCallback =>
         EventCallback.Factory.Create<ApplicationProfileApprovalLeg>(this, RemoveLeg);
-
     private EventCallback ClearLegsCallback => EventCallback.Factory.Create(this, ClearLegs);
 
     private EventCallback AddTemplateCallback => EventCallback.Factory.Create(this, AddTemplate);
@@ -186,8 +197,6 @@
     {
         if (Profile == null || ObjectSpace == null)
             return;
-
-        ApplicationProfileProgressStateSeeder.EnsureDefaults(Profile, ObjectSpace);
 
         if (_ministries.Count == 0)
         {
@@ -213,32 +222,111 @@
             await PublishRequested.InvokeAsync();
     }
 
-    private void AddLeg(Guid ministryId)
+    private void AddVersion()
     {
-        if (IsReadOnly || Profile == null || ObjectSpace is not { } os || ministryId == Guid.Empty)
+        if (IsReadOnly || Profile == null || ObjectSpace is not { } os)
             return;
 
         if (Profile.ProgressRoute != ApplicationProfileInstanceProgressRouteKind.ViaMinistries)
             return;
 
-        var ministry = os.GetObjectByKey<ApprovingMinistry>(ministryId);
+        var version = os.CreateObject<ApplicationProfileApprovalLegVersion>();
+        version.ApplicationProfile = Profile;
+        version.Sequence = (Profile.ApprovalLegVersions?.Count ?? 0) + 1;
+        version.Name = version.Sequence == 1
+            ? ApplicationProfileApprovalLegVersionHelper.DefaultVersionName
+            : $"Version {version.Sequence}";
+        version.IsDefault = (Profile.ApprovalLegVersions?.Count ?? 0) == 0;
+        if (Profile.ApprovalLegVersions != null && !Profile.ApprovalLegVersions.Contains(version))
+            Profile.ApprovalLegVersions.Add(version);
+
+        ApplicationProfileApprovalLegVersionHelper.EnsureSingleDefault(Profile, version.IsDefault ? version : null);
+        ApplicationProfileApprovalLegVersionHelper.RenumberVersions(Profile);
+    }
+
+    private void RemoveVersion(ApplicationProfileApprovalLegVersion version)
+    {
+        if (IsReadOnly || ObjectSpace is not { } os || version == null)
+            return;
+
+        os.Delete(version);
+        ApplicationProfileApprovalLegVersionHelper.EnsureSingleDefault(Profile);
+        ApplicationProfileApprovalLegVersionHelper.RenumberVersions(Profile);
+    }
+
+    private void DuplicateVersion(ApplicationProfileApprovalLegVersion source)
+    {
+        if (IsReadOnly || Profile == null || ObjectSpace is not { } os || source == null)
+            return;
+
+        var copy = os.CreateObject<ApplicationProfileApprovalLegVersion>();
+        copy.ApplicationProfile = Profile;
+        copy.Name = string.IsNullOrWhiteSpace(source.Name) ? "Version copy" : $"{source.Name} copy";
+        copy.IsDefault = false;
+        copy.Sequence = (Profile.ApprovalLegVersions?.Count ?? 0) + 1;
+        if (Profile.ApprovalLegVersions != null && !Profile.ApprovalLegVersions.Contains(copy))
+            Profile.ApprovalLegVersions.Add(copy);
+
+        foreach (var leg in ApplicationProfileApprovalLegVersionHelper.GetOrderedLegs(source))
+        {
+            var cloned = os.CreateObject<ApplicationProfileApprovalLeg>();
+            cloned.ApplicationProfile = Profile;
+            cloned.ApprovalLegVersion = copy;
+            cloned.ApprovingMinistry = leg.ApprovingMinistry;
+            cloned.Sequence = (copy.Legs?.Count ?? 0) + 1;
+            if (copy.Legs != null && !copy.Legs.Contains(cloned))
+                copy.Legs.Add(cloned);
+            if (Profile.ApprovalLegs != null && !Profile.ApprovalLegs.Contains(cloned))
+                Profile.ApprovalLegs.Add(cloned);
+        }
+
+        ApplicationProfileApprovalLegVersionHelper.RenumberVersions(Profile);
+    }
+
+    private void SetDefaultVersion(ApplicationProfileApprovalLegVersion version)
+    {
+        if (IsReadOnly || Profile == null || version == null)
+            return;
+
+        ApplicationProfileApprovalLegVersionHelper.EnsureSingleDefault(Profile, version);
+    }
+
+    private void AddLeg((Guid VersionId, Guid MinistryId) args)
+    {
+        if (IsReadOnly || Profile == null || ObjectSpace is not { } os
+            || args.VersionId == Guid.Empty || args.MinistryId == Guid.Empty)
+            return;
+
+        if (Profile.ProgressRoute != ApplicationProfileInstanceProgressRouteKind.ViaMinistries)
+            return;
+
+        var version = ApplicationProfileApprovalLegVersionHelper.FindVersion(Profile, args.VersionId);
+        if (version == null)
+            return;
+
+        var ministry = os.GetObjectByKey<ApprovingMinistry>(args.MinistryId);
         if (ministry == null)
             return;
 
         var leg = os.CreateObject<ApplicationProfileApprovalLeg>();
         leg.ApplicationProfile = Profile;
+        leg.ApprovalLegVersion = version;
         leg.ApprovingMinistry = ministry;
-        leg.Sequence = (Profile.ApprovalLegs?.Count ?? 0) + 1;
+        leg.Sequence = (version.Legs?.Count ?? 0) + 1;
+        if (version.Legs != null && !version.Legs.Contains(leg))
+            version.Legs.Add(leg);
         if (Profile.ApprovalLegs != null && !Profile.ApprovalLegs.Contains(leg))
             Profile.ApprovalLegs.Add(leg);
     }
 
     private void ClearLegs()
     {
-        if (IsReadOnly || Profile?.ApprovalLegs == null || ObjectSpace is not { } os)
+        if (IsReadOnly || Profile == null || ObjectSpace is not { } os)
             return;
 
-        foreach (var leg in Profile.ApprovalLegs.ToList())
+        foreach (var version in (Profile.ApprovalLegVersions ?? []).ToList())
+            os.Delete(version);
+        foreach (var leg in (Profile.ApprovalLegs ?? []).ToList())
             os.Delete(leg);
     }
 
@@ -247,18 +335,10 @@
         if (IsReadOnly || ObjectSpace is not { } os || leg == null)
             return;
 
+        var version = leg.ApprovalLegVersion;
         os.Delete(leg);
-        RenumberLegs();
-    }
-
-    private void RenumberLegs()
-    {
-        if (Profile?.ApprovalLegs == null)
-            return;
-
-        var seq = 1;
-        foreach (var leg in Profile.ApprovalLegs.OrderBy(l => l.Sequence ?? 0))
-            leg.Sequence = seq++;
+        if (version != null)
+            ApplicationProfileApprovalLegVersionHelper.RenumberLegs(version);
     }
 
     private void AddTemplate()

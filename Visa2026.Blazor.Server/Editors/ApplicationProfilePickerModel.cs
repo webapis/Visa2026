@@ -58,6 +58,12 @@ public sealed class ApplicationProfilePickerModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    public Guid SelectedVersionId
+    {
+        get => GetPropertyValue<Guid>();
+        set => SetPropertyValue(value);
+    }
+
     public string? StatusMessage
     {
         get => GetPropertyValue<string?>();
@@ -130,6 +136,12 @@ public sealed class ApplicationProfilePickerModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    public EventCallback<Guid> SelectVersionRequested
+    {
+        get => GetPropertyValue<EventCallback<Guid>>();
+        set => SetPropertyValue(value);
+    }
+
     public EventCallback<bool> DuplicateWarningAcknowledgedChanged
     {
         get => GetPropertyValue<EventCallback<bool>>();
@@ -155,6 +167,24 @@ public sealed class ApplicationProfilePickerModel : ComponentModelBase
         public bool IsConfigLocked { get; init; }
 
         public bool HasOpenApplicationForSeedPerson { get; init; }
+
+        public bool RequiresApprovalLegVersion { get; init; }
+
+        public bool MissingApprovalLegVersions { get; init; }
+
+        public IReadOnlyList<VersionOptionModel> ApprovalLegVersions { get; init; }
+            = Array.Empty<VersionOptionModel>();
+    }
+
+    public sealed class VersionOptionModel
+    {
+        public Guid VersionId { get; init; }
+
+        public string Name { get; init; } = string.Empty;
+
+        public bool IsDefault { get; init; }
+
+        public IReadOnlyList<string> MinistryNames { get; init; } = Array.Empty<string>();
     }
 
     public sealed record PeopleRowModel

@@ -36,10 +36,12 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
         try
         {
             return objectSpace.GetObjectsQuery<ApplicationProfile>()
+                .Include(p => p.ApprovalLegVersions)
+                    .ThenInclude(v => v.Legs)
+                        .ThenInclude(l => l.ApprovingMinistry)
                 .Include(p => p.ApprovalLegs)
                     .ThenInclude(l => l.ApprovingMinistry)
                 .Include(p => p.NestedTemplates)
-                .Include(p => p.ProgressStateSettings)
                 .Include(p => p.DefaultVisaType)
                 .Include(p => p.DefaultVisaCategory)
                 .Include(p => p.DefaultVisaPeriod)
@@ -67,17 +69,37 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
         if (profile.ForTemporaryVisitor)
             audience.Add("Temporary visitor");
 
-        var legs = profile.ApprovalLegs?
-            .OrderBy(l => l.Sequence)
-            .Select(l => new ApplicationProfileOverviewLegRow
+        var versions = ApplicationProfileApprovalLegVersionHelper.GetOrderedVersions(profile)
+            .Select(v => new ApplicationProfileOverviewVersionRow
             {
-                Sequence = l.Sequence ?? 0,
-                MinistryName = l.ApprovingMinistry?.LocalizedDisplayName
-                    ?? l.ApprovingMinistry?.ShortNameTm
-                    ?? l.ApprovingMinistry?.NameTm
-                    ?? "—",
+                Name = string.IsNullOrWhiteSpace(v.Name) ? $"Version {v.Sequence}" : v.Name,
+                IsDefault = v.IsDefault,
+                Legs = ApplicationProfileApprovalLegVersionHelper.GetOrderedLegs(v)
+                    .Select((l, i) => new ApplicationProfileOverviewLegRow
+                    {
+                        Sequence = i + 1,
+                        MinistryName = l.ApprovingMinistry?.LocalizedDisplayName
+                            ?? l.ApprovingMinistry?.ShortNameTm
+                            ?? l.ApprovingMinistry?.NameTm
+                            ?? "—",
+                    })
+                    .ToList(),
             })
-            .ToList() ?? [];
+            .ToList();
+
+        var legs = versions.Count > 0
+            ? versions.FirstOrDefault(v => v.IsDefault)?.Legs ?? versions[0].Legs
+            : profile.ApprovalLegs?
+                .OrderBy(l => l.Sequence)
+                .Select(l => new ApplicationProfileOverviewLegRow
+                {
+                    Sequence = l.Sequence ?? 0,
+                    MinistryName = l.ApprovingMinistry?.LocalizedDisplayName
+                        ?? l.ApprovingMinistry?.ShortNameTm
+                        ?? l.ApprovingMinistry?.NameTm
+                        ?? "—",
+                })
+                .ToList() ?? [];
 
         var templates = profile.NestedTemplates?
             .OrderBy(t => t.SortOrder)
@@ -115,9 +137,10 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
             Organization = ApplicationProfileWizardOrganizationSnapshot.Load(objectSpace),
             MinistrySlaDays = profile.MinistrySlaDays,
             MigrationSlaDays = profile.MigrationSlaDays,
-            ProgressStates = BuildProgressStates(profile, viaMinistry),
+            ProgressStates = [],
             PerApplicationDefaults = BuildDefaultRows(profile),
             ApprovalLegs = legs,
+            ApprovalLegVersions = versions,
             PersonDataToggles = BuildPersonToggles(profile),
             NestedTemplates = templates,
             LinkedApplications = linkedRows,
@@ -210,36 +233,6 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
             lines.Add("May cancel: " + string.Join(", ", cancel));
 
         return lines;
-    }
-
-    private static List<ApplicationProfileOverviewProgressStateRow> BuildProgressStates(
-        ApplicationProfile profile,
-        bool viaMinistry)
-    {
-        var settings = profile.ProgressStateSettings;
-        if (settings == null || settings.Count == 0)
-            return [];
-
-        var catalogOrder = ApplicationProfileProgressStateCatalog.All
-            .Select(r => r.StateCode)
-            .ToArray();
-
-        return settings
-            .Where(s => s.IsIncluded)
-            .Where(s => viaMinistry || s.Track == ApplicationProfileProgressStateTrack.Migration)
-            .OrderBy(s => s.Track)
-            .ThenBy(s => Array.FindIndex(
-                catalogOrder,
-                code => string.Equals(code, s.StateCode, StringComparison.OrdinalIgnoreCase)))
-            .Select(s => new ApplicationProfileOverviewProgressStateRow
-            {
-                TrackLabel = s.Track == ApplicationProfileProgressStateTrack.Ministry
-                    ? "Ministry"
-                    : "Migration",
-                StateName = ApplicationProfileProgressStateSeeder.GetDisplayName(s),
-                IsSlaTracked = s.IsSlaTracked,
-            })
-            .ToList();
     }
 
     private static List<ApplicationProfileOverviewDefaultRow> BuildDefaultRows(ApplicationProfile profile)
@@ -370,16 +363,11 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
             ],
             MinistrySlaDays = 14,
             MigrationSlaDays = 14,
-            ProgressStates =
-            [
-                new() { TrackLabel = "Ministry", StateName = "Office preparation", IsSlaTracked = true },
-                new() { TrackLabel = "Migration", StateName = "Submitted", IsSlaTracked = true },
-            ],
+            ProgressStates = [],
             PerApplicationDefaults =
             [
                 new() { FieldLabel = "Visa Type", DefaultValue = "WP", Required = true },
                 new() { FieldLabel = "Visa Period", DefaultValue = "6 months", Required = true },
-                new() { FieldLabel = "Project Contract", DefaultValue = "Plant expansion", Required = true },
             ],
             ApprovalLegs =
             [

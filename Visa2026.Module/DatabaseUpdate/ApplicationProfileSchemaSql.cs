@@ -112,6 +112,8 @@ public static class ApplicationProfileSchemaSql
                 "CategoryKey" character varying(64) NULL,
                 "TemplateFileID" uuid NULL,
                 "SortOrder" integer NOT NULL DEFAULT 0,
+                "ApplicableProjectContractId" uuid NULL,
+                "ApplicableMigrationServiceId" uuid NULL,
                 CONSTRAINT "PK_ApplicationProfileTemplates" PRIMARY KEY ("ID"),
                 CONSTRAINT "FK_ApplicationProfileTemplates_ApplicationProfiles_ApplicationProfileId"
                     FOREIGN KEY ("ApplicationProfileId") REFERENCES "ApplicationProfiles" ("ID") ON DELETE CASCADE
@@ -264,6 +266,8 @@ public static class ApplicationProfileSchemaSql
                 CategoryKey nvarchar(64) NULL,
                 TemplateFileID uniqueidentifier NULL,
                 SortOrder int NOT NULL CONSTRAINT DF_ApplicationProfileTemplates_SortOrder DEFAULT (0),
+                ApplicableProjectContractId uniqueidentifier NULL,
+                ApplicableMigrationServiceId uniqueidentifier NULL,
                 CONSTRAINT FK_ApplicationProfileTemplates_ApplicationProfiles_ApplicationProfileId
                     FOREIGN KEY (ApplicationProfileId) REFERENCES dbo.ApplicationProfiles(ID) ON DELETE CASCADE
             );
@@ -324,6 +328,125 @@ public static class ApplicationProfileSchemaSql
     internal const string EnsureOfficePreparationNotesPostgres =
         """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "OfficePreparationNotes" text NULL;""";
 
+    internal const string EnsureTemplateApplicableProjectContractPostgres =
+        """ALTER TABLE "ApplicationProfileTemplates" ADD COLUMN IF NOT EXISTS "ApplicableProjectContractId" uuid NULL;""";
+
+    internal const string EnsureTemplateApplicableMigrationServicePostgres =
+        """ALTER TABLE "ApplicationProfileTemplates" ADD COLUMN IF NOT EXISTS "ApplicableMigrationServiceId" uuid NULL;""";
+
+    internal const string EnsureApprovalLegVersionsTablePostgres = """
+        CREATE TABLE IF NOT EXISTS "ApplicationProfileApprovalLegVersions" (
+            "ID" uuid NOT NULL,
+            "GCRecord" integer NOT NULL DEFAULT 0,
+            "OptimisticLockField" integer NOT NULL DEFAULT 0,
+            "ApplicationProfileId" uuid NOT NULL,
+            "Name" character varying(200) NOT NULL DEFAULT 'Version 1',
+            "IsDefault" boolean NOT NULL DEFAULT false,
+            "Sequence" integer NOT NULL DEFAULT 1,
+            CONSTRAINT "PK_ApplicationProfileApprovalLegVersions" PRIMARY KEY ("ID")
+        );
+        """;
+
+    /// <summary>
+    /// Existing DBs created the versions table with nullable <c>GCRecord</c>.
+    /// XAF deferred deletion maps that column as non-nullable <c>int</c>; INSERT omits it,
+    /// Postgres stores NULL, then RETURNING throws "Column 'GCRecord' is null."
+    /// Match sibling Application Profile tables: NOT NULL DEFAULT 0.
+    /// </summary>
+    internal const string HealApprovalLegVersionsGcRecordPostgres = """
+        DO $$
+        BEGIN
+          IF to_regclass('public."ApplicationProfileApprovalLegVersions"') IS NULL THEN
+            RETURN;
+          END IF;
+
+          UPDATE "ApplicationProfileApprovalLegVersions" SET "GCRecord" = 0 WHERE "GCRecord" IS NULL;
+          UPDATE "ApplicationProfileApprovalLegVersions" SET "OptimisticLockField" = 0 WHERE "OptimisticLockField" IS NULL;
+
+          ALTER TABLE "ApplicationProfileApprovalLegVersions" ALTER COLUMN "GCRecord" SET DEFAULT 0;
+          ALTER TABLE "ApplicationProfileApprovalLegVersions" ALTER COLUMN "OptimisticLockField" SET DEFAULT 0;
+          ALTER TABLE "ApplicationProfileApprovalLegVersions" ALTER COLUMN "GCRecord" SET NOT NULL;
+          ALTER TABLE "ApplicationProfileApprovalLegVersions" ALTER COLUMN "OptimisticLockField" SET NOT NULL;
+        END $$;
+        """;
+
+    internal const string EnsureApprovalLegVersionsFkPostgres = """
+        DO $$
+        BEGIN
+          IF to_regclass('public."ApplicationProfileApprovalLegVersions"') IS NULL
+             OR to_regclass('public."ApplicationProfiles"') IS NULL THEN
+            RETURN;
+          END IF;
+
+          IF NOT EXISTS (
+            SELECT 1 FROM pg_constraint
+            WHERE conname = 'FK_ApplicationProfileApprovalLegVersions_ApplicationProfiles_ApplicationProfileId') THEN
+            ALTER TABLE "ApplicationProfileApprovalLegVersions"
+              ADD CONSTRAINT "FK_ApplicationProfileApprovalLegVersions_ApplicationProfiles_ApplicationProfileId"
+              FOREIGN KEY ("ApplicationProfileId") REFERENCES "ApplicationProfiles" ("ID") ON DELETE CASCADE;
+          END IF;
+
+          IF NOT EXISTS (
+            SELECT 1 FROM pg_indexes
+            WHERE schemaname = 'public'
+              AND indexname = 'IX_ApplicationProfileApprovalLegVersions_Profile_Sequence') THEN
+            CREATE INDEX "IX_ApplicationProfileApprovalLegVersions_Profile_Sequence"
+              ON "ApplicationProfileApprovalLegVersions" ("ApplicationProfileId", "Sequence");
+          END IF;
+        END $$;
+        """;
+
+    internal const string EnsureApprovalLegVersionIdOnLegsPostgres =
+        """ALTER TABLE "ApplicationProfileApprovalLegs" ADD COLUMN IF NOT EXISTS "ApprovalLegVersionId" uuid NULL;""";
+
+    internal const string EnsureInstanceApprovalLegVersionNamePostgres =
+        """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "ApprovalLegVersionName" character varying(200) NULL;""";
+
+    internal const string EnsureInstanceApprovalLegVersionIdPostgres =
+        """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "ApprovalLegVersionId" uuid NULL;""";
+
+    internal const string BackfillApprovalLegVersionsPostgres = """
+        DO $$
+        BEGIN
+          IF to_regclass('public."ApplicationProfileApprovalLegVersions"') IS NULL
+             OR to_regclass('public."ApplicationProfileApprovalLegs"') IS NULL THEN
+            RETURN;
+          END IF;
+
+          INSERT INTO "ApplicationProfileApprovalLegVersions"
+            ("ID", "GCRecord", "OptimisticLockField", "ApplicationProfileId", "Name", "IsDefault", "Sequence")
+          SELECT gen_random_uuid(), 0, 0, p."ID", 'Version 1', true, 1
+          FROM "ApplicationProfiles" p
+          WHERE COALESCE(p."GCRecord", 0) = 0
+            AND EXISTS (
+              SELECT 1 FROM "ApplicationProfileApprovalLegs" l
+              WHERE l."ApplicationProfileId" = p."ID"
+                AND l."ApprovalLegVersionId" IS NULL
+                AND COALESCE(l."GCRecord", 0) = 0)
+            AND NOT EXISTS (
+              SELECT 1 FROM "ApplicationProfileApprovalLegVersions" v
+              WHERE v."ApplicationProfileId" = p."ID"
+                AND COALESCE(v."GCRecord", 0) = 0);
+
+          UPDATE "ApplicationProfileApprovalLegs" l
+          SET "ApprovalLegVersionId" = v."ID"
+          FROM "ApplicationProfileApprovalLegVersions" v
+          WHERE l."ApplicationProfileId" = v."ApplicationProfileId"
+            AND l."ApprovalLegVersionId" IS NULL
+            AND COALESCE(l."GCRecord", 0) = 0
+            AND COALESCE(v."GCRecord", 0) = 0
+            AND v."IsDefault" = true;
+
+          IF NOT EXISTS (
+            SELECT 1 FROM pg_constraint
+            WHERE conname = 'FK_ApplicationProfileApprovalLegs_Versions_ApprovalLegVersionId') THEN
+            ALTER TABLE "ApplicationProfileApprovalLegs"
+              ADD CONSTRAINT "FK_ApplicationProfileApprovalLegs_Versions_ApprovalLegVersionId"
+              FOREIGN KEY ("ApprovalLegVersionId") REFERENCES "ApplicationProfileApprovalLegVersions" ("ID") ON DELETE SET NULL;
+          END IF;
+        END $$;
+        """;
+
     internal static readonly string[] EnsureTemplateCatalogColumnsPostgresStatements =
     [
         EnsureTemplateCatalogScopePostgres,
@@ -331,6 +454,15 @@ public static class ApplicationProfileSchemaSql
         EnsureTemplateCategoryKeyPostgres,
         EnsureProduceRejectionPostgres,
         EnsureOfficePreparationNotesPostgres,
+        EnsureTemplateApplicableProjectContractPostgres,
+        EnsureTemplateApplicableMigrationServicePostgres,
+        EnsureApprovalLegVersionsTablePostgres,
+        HealApprovalLegVersionsGcRecordPostgres,
+        EnsureApprovalLegVersionsFkPostgres,
+        EnsureApprovalLegVersionIdOnLegsPostgres,
+        EnsureInstanceApprovalLegVersionNamePostgres,
+        EnsureInstanceApprovalLegVersionIdPostgres,
+        BackfillApprovalLegVersionsPostgres,
     ];
 
     internal const string EnsureTemplateCatalogColumnsSqlServer = """
@@ -347,6 +479,12 @@ public static class ApplicationProfileSchemaSql
 
         IF COL_LENGTH(N'dbo.ApplicationProfileTemplates', N'CategoryKey') IS NULL
             ALTER TABLE dbo.ApplicationProfileTemplates ADD CategoryKey nvarchar(64) NULL;
+
+        IF COL_LENGTH(N'dbo.ApplicationProfileTemplates', N'ApplicableProjectContractId') IS NULL
+            ALTER TABLE dbo.ApplicationProfileTemplates ADD ApplicableProjectContractId uniqueidentifier NULL;
+
+        IF COL_LENGTH(N'dbo.ApplicationProfileTemplates', N'ApplicableMigrationServiceId') IS NULL
+            ALTER TABLE dbo.ApplicationProfileTemplates ADD ApplicableMigrationServiceId uniqueidentifier NULL;
 
         IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
            AND COL_LENGTH(N'dbo.ApplicationProfiles', N'ProduceRejection') IS NULL
