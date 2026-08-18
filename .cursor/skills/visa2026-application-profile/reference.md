@@ -41,6 +41,7 @@ Companion to [SKILL.md](./SKILL.md).
 | Staged / in-process queues | `OfficerShellStagedQueryService`, `OfficerShellInProcessQueryService`, `OfficerShellStartProcessService` |
 | Case workspace tabs | `OfficerShellCaseWorkspaceComponent.razor`, `OfficerShellCase*Tab.razor` (overview, people, progress, documents, resminamalar, SLA) |
 | Case snapshot builder | `ApplicationWorkspaceCaseBuilder.cs`, `ApplicationWorkspaceCaseModels.cs` |
+| Case summary Use fields | `ApplicationWorkspaceCaseHeaderFieldsHelper.cs` (overview tiles + Edit/Done; persist on instance) |
 | Person link picker (B8) | `IApplicationPersonLinkQueryService`, `OfficerShellPersonLinkPickerComponent.razor` |
 | Case progress in-shell (B7) | `IOfficerShellCaseProgressService`, `OfficerShellCaseProgressTab.razor` |
 | Immersive tab-bar hide (B6) | `OfficerShellImmersiveTabBarController.cs`, `officer-shell-host.css` |

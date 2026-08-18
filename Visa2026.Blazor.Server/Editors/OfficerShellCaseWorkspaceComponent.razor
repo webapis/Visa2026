@@ -215,6 +215,9 @@
     [Parameter] public EventCallback<string> PersonLinkSearchRequested { get; set; }
     [Parameter] public EventCallback<Guid> LinkPersonFromPickerRequested { get; set; }
     [Parameter] public EventCallback ClosePersonLinkPickerRequested { get; set; }
+    [Parameter] public string? HeaderFieldStatusMessage { get; set; }
+    [Parameter] public bool HeaderFieldStatusIsError { get; set; }
+    [Parameter] public EventCallback<ApplicationWorkspaceCaseHeaderFieldUpdate> HeaderFieldChanged { get; set; }
     [Parameter] public string PreviewSlotOwnerViewId { get; set; } = OfficerShellViewIds.DetailView;
 
     private readonly HashSet<Guid> _selectedDocumentPersonIds = [];
@@ -222,6 +225,11 @@
     private string? _peopleRecordKey;
     private int? _peopleRecordPersonIndex;
     private string? _appliedPeopleFocusKey;
+    private bool _caseSummaryEditing;
+    private Guid _caseSummaryInstanceId;
+
+    private bool IsCaseSummaryEditing =>
+        _caseSummaryEditing && Snapshot?.CaseView.HeaderFields.Count > 0;
 
     private IReadOnlyList<Guid> SelectedDocumentPersonIds =>
         _selectedDocumentPersonIds.Count == 0
@@ -237,8 +245,45 @@
 
     protected override void OnParametersSet()
     {
+        var instanceId = Snapshot?.ApplicationProfileInstanceId ?? Guid.Empty;
+        if (instanceId != _caseSummaryInstanceId)
+        {
+            _caseSummaryInstanceId = instanceId;
+            _caseSummaryEditing = false;
+        }
+
         SyncDocumentPeopleFilter(Snapshot?.CaseView);
         SyncPeopleRecordFocus();
+    }
+
+    private void StartCaseSummaryEdit() => _caseSummaryEditing = true;
+
+    private void FinishCaseSummaryEdit() => _caseSummaryEditing = false;
+
+    private IEnumerable<ApplicationWorkspaceCaseSummaryTile> OverviewTiles(ApplicationWorkspaceCaseView view) =>
+        view.HeaderFields.Count > 0
+            ? view.HeaderFields.Select(ToSummaryTile)
+            : view.SummaryTiles;
+
+    private static ApplicationWorkspaceCaseSummaryTile ToSummaryTile(ApplicationWorkspaceCaseHeaderField field) =>
+        new()
+        {
+            Label = field.Label,
+            Value = field.DisplayValue,
+            Tone = field.Tone,
+            Glyph = field.Glyph,
+        };
+
+    private Task OnHeaderFieldChanged(string key, string? value)
+    {
+        if (!HeaderFieldChanged.HasDelegate || string.IsNullOrWhiteSpace(key))
+            return Task.CompletedTask;
+
+        return HeaderFieldChanged.InvokeAsync(new ApplicationWorkspaceCaseHeaderFieldUpdate
+        {
+            Key = key,
+            Value = value,
+        });
     }
 
     private void SyncPeopleRecordFocus()
@@ -338,17 +383,85 @@
     {
         <div class="cw-overview">
             <section class="cw-card">
-                <h2 class="cw-card__title">Case summary</h2>
-                <div class="cw-summary-grid">
-                    @foreach (var tile in view.SummaryTiles)
+                <div class="cw-card__title-row">
+                    <div>
+                        <h2 class="cw-card__title">Case summary</h2>
+                        <p class="cw-summary-sub">From Application Profile · Use fields only@(IsCaseSummaryEditing ? " · Saved on this case (defaults copied at create)" : null)</p>
+                    </div>
+                    @if (view.HeaderFields.Count > 0)
                     {
-                        <div class="cw-sum-tile cw-sum-tile--@tile.Tone">
-                            <span class="cw-sum-tile__icon">@tile.Glyph</span>
-                            <span class="cw-sum-tile__label">@tile.Label</span>
-                            <strong class="cw-sum-tile__value">@tile.Value</strong>
-                        </div>
+                        @if (IsCaseSummaryEditing)
+                        {
+                            <button type="button" class="cw-summary-mode-btn" @onclick="FinishCaseSummaryEdit">Done</button>
+                        }
+                        else
+                        {
+                            <button type="button" class="cw-summary-mode-btn" @onclick="StartCaseSummaryEdit">✎ Edit</button>
+                        }
                     }
                 </div>
+                @if (!string.IsNullOrWhiteSpace(HeaderFieldStatusMessage))
+                {
+                    <p class="cw-summary-status @(HeaderFieldStatusIsError ? "is-error" : null)">@HeaderFieldStatusMessage</p>
+                }
+                @if (view.HeaderFields.Count == 0 && view.SummaryTiles.Count == 0)
+                {
+                    <p class="cw-summary-empty">No ApplicationProfileInstance properties required on this profile.</p>
+                }
+                else if (IsCaseSummaryEditing && view.HeaderFields.Count > 0)
+                {
+                    <div class="cw-summary-form">
+                        @foreach (var field in view.HeaderFields)
+                        {
+                            <label class="cw-summary-field">
+                                <span class="cw-summary-field__label">@field.Label</span>
+                                @if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Date)
+                                {
+                                    <input type="date"
+                                           class="cw-summary-field__input"
+                                           value="@field.Value"
+                                           disabled="@field.ReadOnly"
+                                           @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())" />
+                                }
+                                else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Lookup)
+                                {
+                                    <select class="cw-summary-field__input"
+                                            value="@field.Value"
+                                            disabled="@field.ReadOnly"
+                                            @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())">
+                                        <option value="">— Select —</option>
+                                        @foreach (var option in field.Options)
+                                        {
+                                            <option value="@option.Id.ToString("D")">@option.DisplayName</option>
+                                        }
+                                    </select>
+                                }
+                                else
+                                {
+                                    <input type="text"
+                                           class="cw-summary-field__input"
+                                           value="@field.Value"
+                                           disabled="@field.ReadOnly"
+                                           @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())" />
+                                }
+                            </label>
+                        }
+                    </div>
+                    <p class="cw-summary-foot">Changing these does not change the Application Profile template.</p>
+                }
+                else
+                {
+                    <div class="cw-summary-grid">
+                        @foreach (var field in OverviewTiles(view))
+                        {
+                            <div class="cw-sum-tile cw-sum-tile--@field.Tone">
+                                <span class="cw-sum-tile__icon">@field.Glyph</span>
+                                <span class="cw-sum-tile__label">@field.Label</span>
+                                <strong class="cw-sum-tile__value">@field.Value</strong>
+                            </div>
+                        }
+                    </div>
+                }
             </section>
             <section class="cw-card">
                 <h2 class="cw-card__title">ApplicationProfileInstance progress</h2>

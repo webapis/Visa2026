@@ -109,6 +109,9 @@
                                                                 PersonLinkSearchRequested="@PersonLinkSearchRequested"
                                                                 LinkPersonFromPickerRequested="@LinkPersonFromPickerRequested"
                                                                 ClosePersonLinkPickerRequested="@ClosePersonLinkPickerRequested"
+                                                                HeaderFieldStatusMessage="@HeaderFieldStatusMessage"
+                                                                HeaderFieldStatusIsError="@HeaderFieldStatusIsError"
+                                                                HeaderFieldChanged="@HeaderFieldChanged"
                                                                 PreviewSlotOwnerViewId="@OfficerShellViewIds.DetailView" />
                             break;
                     }
@@ -211,6 +214,9 @@
     [Parameter] public EventCallback<string> PersonLinkSearchRequested { get; set; }
     [Parameter] public EventCallback<Guid> LinkPersonFromPickerRequested { get; set; }
     [Parameter] public EventCallback ClosePersonLinkPickerRequested { get; set; }
+    [Parameter] public string? HeaderFieldStatusMessage { get; set; }
+    [Parameter] public bool HeaderFieldStatusIsError { get; set; }
+    [Parameter] public EventCallback<ApplicationWorkspaceCaseHeaderFieldUpdate> HeaderFieldChanged { get; set; }
 
     private bool _initialLoadStarted;
     private bool ShowListSearch => CurrentPage is OfficerShellPage.Staged or OfficerShellPage.InProcess;

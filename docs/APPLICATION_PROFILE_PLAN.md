@@ -11,7 +11,8 @@
 | In process | `process-started-profiles-listview-table-mockup.png`, `process-started-profiles-list-cards-mockup.png`, `process-started-application-profile-workspace-mockup.png`, `process-started-nav-*.png` (5 workspace tabs) |
 | Profile templates | `application-profile-templates-listview-mockup.png`, `application-profile-templates-grid-mockup.png`, `application-profile-template-overview-mockup.png`, `application-profile-template-wizard-mockup.png` + `step2`–`step5` |
 | Wizard template scopes / upload / edit (2026-08-12) | `application-profile-wizard-templates-three-scopes-prototype.png`, `application-profile-wizard-template-initial-upload-prototype.png`, `application-profile-wizard-template-data-scope-prototype.png`, `application-profile-wizard-template-edit-*-prototype.png`, `application-profile-wizard-template-add-data-scope-prototype.png` |
-| Approval leg versions (2026-08-18, **proposed — not implemented**) | `application-profile-wizard-approval-leg-versions-prototype.png`, `application-profile-instance-create-choose-approval-legs-prototype.png` |
+| Approval leg versions (2026-08-18) | `application-profile-wizard-approval-leg-versions-prototype.png`, `application-profile-instance-create-choose-approval-legs-prototype.png` |
+| Case summary instance fields (2026-08-18) | `application-profile-instance-case-summary-overview-properties-prototype.png`, `application-profile-instance-case-summary-edit-properties-prototype.png` |
 
 Full inventory: **§9**. **Interactive HTML (planned):** [`APPLICATION_PROFILE_HTML_PROTOTYPE_PLAN.md`](APPLICATION_PROFILE_HTML_PROTOTYPE_PLAN.md).
 **Related today:** `ApplicationProfile` *(replacement)*, `ApplicationType` *(deprecated — dual-read)*, `Application`, `ApplicationItem` *(planned hard remove)*, `ApplicationProgress`, `Person` + related BOs, `ApprovalLegProfile`, `UserReportTemplate`, `ProjectContract`
@@ -478,6 +479,7 @@ When any linked Application reaches lock state **A** (first progress beyond offi
 | Profile overview (live linked instances) | Done |
 | Custom catalog home (replace native List/Detail officer UI) | Done |
 | Profile picker at Application create | Done |
+| Case summary instance Use fields (overview tiles + Edit/Done) | **Done** |
 | Person M2M DetailView / hard-remove ApplicationItem | In progress (skip-navigation People + roster-line BO deleted; F5 heal pending) |
 | Workspace Document copies person filter + person catalog | Done (header chips; person-grouped catalog; slot viewer-only) |
 | Document copies from linked records (ID labels) | Done (ResolvedLinks; Passport/Visa numbers — not Current/Previous) |
@@ -575,5 +577,7 @@ All files live in [`docs/prototypes/`](prototypes/) only (no subfolders).
 | `application-profile-wizard-template-edit-word-prototype.png` | Step 4 — Edit Word template (detail) |
 | `application-profile-wizard-approval-leg-versions-prototype.png` | Identity — named **approval-leg versions** on this profile (own copies; Default + Duplicate / Remove / Add version) |
 | `application-profile-instance-create-choose-approval-legs-prototype.png` | New instance — **required** pick of a version; ministries snapshot onto the application |
+| `application-profile-instance-case-summary-overview-properties-prototype.png` | Overview **Case summary** — read-only tiles for profile **Use** fields; **Edit** switches to form mode |
+| `application-profile-instance-case-summary-edit-properties-prototype.png` | Overview **Case summary** — edit mode (dropdowns/dates); **Done** returns to tiles |
 
 **Retired (do not link):** `application-profile-wizard.html`, `application-profile-usage.html`, `application-detail-m2m.html`, `application-profile-platform-prototype.html`, `images/ap-*.png`, `Application-profile-wizard-draft.xlsx`.

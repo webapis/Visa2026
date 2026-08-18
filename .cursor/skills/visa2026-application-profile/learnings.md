@@ -4,6 +4,22 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 
 ---
 
+### 2026-08-18 — Case summary: edit instance Use fields
+
+- Overview tiles show profile **Use** fields; **Edit** on the Case summary title opens the 3-column form; **Done** returns to tiles. Changes persist on the instance (`TryApply` + commit) and do **not** edit the Application Profile template. Later profile default changes still do not overwrite saved instance values. **Project** is editable here when `RequireProject` is on (accepted prototype; do not re-lock via `IsProjectContractLocked`). New instance column `EntryCheckPointID`. Officer shell must wire `HeaderFieldChanged` — the case tab UI is a no-op without it.
+- Slice: 10x **Done**
+- Verify: `dotnet test` filter `ApplicationWorkspaceCaseHeaderFieldsHelperTests` + `ShowEntryCheckPoint_UsesProfileRequireFlag` (4 passed). Blazor Server build. Stop F5, rebuild, F5. Open a case → Case summary tiles → **Edit** → change a Use field → **Done** → tiles show the new value. Template unchanged.
+- Prevent: Do not use a page-level Overview/Edit toggle. Do not live-follow later profile default changes onto existing cases. Do not skip `OfficerShellPropertyEditor.SaveHeaderFieldAsync`.
+- Cross-skill: application-profile
+
+### 2026-08-18 — Case summary instance fields (prototype)
+
+- Officers must change per-instance values copied from Application Profile **Use** fields. Default view is **overview tiles**; **Edit** on the card opens the form; **Done** returns to tiles. Same field set in both modes. Does not edit the template. Slice **10x Pending**.
+- Slice: 10x **Pending** — mockups only. Do not implement until both images are accepted.
+- Verify: `docs/prototypes/application-profile-instance-case-summary-overview-properties-prototype.png` and `application-profile-instance-case-summary-edit-properties-prototype.png`. Inventory in plan §9.
+- Prevent: Do not use a page-level Overview/Edit toggle. Do not live-follow later profile default changes onto existing cases.
+- Cross-skill: application-profile
+
 ### 2026-08-18 — Save profile: Column 'GCRecord' is null
 
 - Host-start created `ApplicationProfileApprovalLegVersions` with nullable `GCRecord` / `OptimisticLockField` (no default). Sibling profile tables use `NOT NULL DEFAULT 0`. XAF omits `GCRecord` on insert; Postgres stored NULL; RETURNING then threw **Column 'GCRecord' is null.** Heal: `NOT NULL DEFAULT 0` plus always-run ALTER. Backfill now uses `COALESCE(GCRecord,0)=0` (live rows are `0`, not NULL).

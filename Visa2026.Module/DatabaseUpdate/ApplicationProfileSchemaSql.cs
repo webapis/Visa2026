@@ -328,6 +328,9 @@ public static class ApplicationProfileSchemaSql
     internal const string EnsureOfficePreparationNotesPostgres =
         """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "OfficePreparationNotes" text NULL;""";
 
+    internal const string EnsureInstanceEntryCheckPointPostgres =
+        """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "EntryCheckPointID" uuid NULL;""";
+
     internal const string EnsureTemplateApplicableProjectContractPostgres =
         """ALTER TABLE "ApplicationProfileTemplates" ADD COLUMN IF NOT EXISTS "ApplicableProjectContractId" uuid NULL;""";
 
@@ -454,6 +457,7 @@ public static class ApplicationProfileSchemaSql
         EnsureTemplateCategoryKeyPostgres,
         EnsureProduceRejectionPostgres,
         EnsureOfficePreparationNotesPostgres,
+        EnsureInstanceEntryCheckPointPostgres,
         EnsureTemplateApplicableProjectContractPostgres,
         EnsureTemplateApplicableMigrationServicePostgres,
         EnsureApprovalLegVersionsTablePostgres,

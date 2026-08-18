@@ -74,12 +74,19 @@ internal static class ApplicationWorkspaceCaseBuilder
             ? BuildSla(application, profile, sla, chrome, progressSteps)
             : BuildSlaFromChrome(chrome, progressSteps);
 
+        var headerFields = application != null
+            ? ApplicationWorkspaceCaseHeaderFieldsHelper.Build(application, profile, objectSpace)
+            : Array.Empty<ApplicationWorkspaceCaseHeaderField>();
+
         return new ApplicationWorkspaceCaseView
         {
             Chrome = chrome,
-            SummaryTiles = application != null
-                ? BuildSummaryTiles(application, chrome)
-                : BuildSummaryTilesFromChrome(chrome),
+            HeaderFields = headerFields,
+            SummaryTiles = headerFields.Count > 0
+                ? headerFields.Select(field => Tile(field.Label, field.DisplayValue, field.Tone, field.Glyph)).ToList()
+                : application != null
+                    ? Array.Empty<ApplicationWorkspaceCaseSummaryTile>()
+                    : BuildSummaryTilesFromChrome(chrome),
             LinkedRecordTiles = BuildLinkedTiles(application, rosterLinks, tabs),
             IssuedRecordTiles = BuildIssuedTiles(application, objectSpace),
             ProgressSteps = progressSteps,
@@ -187,17 +194,6 @@ internal static class ApplicationWorkspaceCaseBuilder
         };
     }
 
-    private static IReadOnlyList<ApplicationWorkspaceCaseSummaryTile> BuildSummaryTiles(
-        ApplicationProfileInstance application,
-        ApplicationWorkspaceCaseChrome chrome) =>
-    [
-        Tile("Visa type", FormatLookup(application.VisaType?.Code, application.VisaType?.NameTm), "blue", "🛂"),
-        Tile("Category", FormatLookup(application.VisaCategory?.Code, application.VisaCategory?.NameTm), "purple", "◆"),
-        Tile("Period", FormatLookup(application.VisaPeriod?.Code, application.VisaPeriod?.NameTm), "green", "📅"),
-        Tile("Project / Contract", chrome.ProjectName, "orange", "💼"),
-        Tile("Entry checkpoint", ResolveEntryCheckpoint(application), "blue", "📍"),
-    ];
-
     private static ApplicationWorkspaceCaseSummaryTile Tile(string label, string value, string tone, string glyph) =>
         new()
         {
@@ -206,22 +202,6 @@ internal static class ApplicationWorkspaceCaseBuilder
             Tone = tone,
             Glyph = glyph,
         };
-
-    private static string FormatLookup(string? code, string? name) =>
-        !string.IsNullOrWhiteSpace(code) ? code.Trim()
-        : !string.IsNullOrWhiteSpace(name) ? name.Trim()
-        : "—";
-
-    private static string ResolveEntryCheckpoint(ApplicationProfileInstance application)
-    {
-        var border = application.BorderZoneLocation_NameTm;
-        if (string.IsNullOrWhiteSpace(border) || border == "Ýok")
-            return "—";
-
-        var first = border.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .FirstOrDefault();
-        return string.IsNullOrWhiteSpace(first) ? border : first;
-    }
 
     private static IReadOnlyList<ApplicationWorkspaceCaseLinkedTile> BuildLinkedTiles(
         ApplicationProfileInstance? application,

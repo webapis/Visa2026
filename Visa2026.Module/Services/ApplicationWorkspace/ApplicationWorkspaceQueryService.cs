@@ -67,6 +67,16 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
                 .Include(a => a.ApprovalLegSnapshots)
                 .Include(a => a.LatestProgress)
                     .ThenInclude(p => p!.State)
+                .Include(a => a.VisaType)
+                .Include(a => a.VisaCategory)
+                .Include(a => a.VisaPeriod)
+                .Include(a => a.ProjectContract)
+                .Include(a => a.Urgency)
+                .Include(a => a.MigrationService)
+                .Include(a => a.MovementPermitLocation)
+                .Include(a => a.FromCity)
+                .Include(a => a.ToCity)
+                .Include(a => a.EntryCheckPoint)
                 .FirstOrDefault(a => a.ID == applicationId);
         }
         catch (Exception)

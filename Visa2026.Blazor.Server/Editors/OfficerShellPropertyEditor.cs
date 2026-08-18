@@ -111,6 +111,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         PersonLinkSearchRequested = EventCallback.Factory.Create<string>(this, SearchPersonLinkCandidatesAsync),
         LinkPersonFromPickerRequested = EventCallback.Factory.Create<Guid>(this, LinkPersonFromPickerAsync),
         ClosePersonLinkPickerRequested = EventCallback.Factory.Create(this, ClosePersonLinkPickerAsync),
+        HeaderFieldChanged = EventCallback.Factory.Create<ApplicationWorkspaceCaseHeaderFieldUpdate>(this, SaveHeaderFieldAsync),
     };
 
     protected override void OnCurrentObjectChanged()
@@ -468,6 +469,35 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         model.PersonLinkStatusMessage = null;
         model.PersonLinkStatusIsError = false;
         return Task.CompletedTask;
+    }
+
+    private async Task SaveHeaderFieldAsync(ApplicationWorkspaceCaseHeaderFieldUpdate update)
+    {
+        var model = ComponentModel;
+        if (model == null || _application == null || update == null)
+            return;
+
+        if (model.CaseApplicationProfileInstanceId == Guid.Empty)
+            return;
+
+        using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
+        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(model.CaseApplicationProfileInstanceId);
+        if (application == null)
+            return;
+
+        if (!ApplicationWorkspaceCaseHeaderFieldsHelper.TryApply(application, objectSpace, update, out var error))
+        {
+            model.HeaderFieldStatusMessage = error;
+            model.HeaderFieldStatusIsError = true;
+            return;
+        }
+
+        if (objectSpace.IsModified)
+            objectSpace.CommitChanges();
+
+        model.HeaderFieldStatusMessage = null;
+        model.HeaderFieldStatusIsError = false;
+        await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId);
     }
 
     private async Task UnlinkPersonAsync(Guid personId)

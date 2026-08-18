@@ -10,6 +10,9 @@ public sealed class ApplicationWorkspaceCaseView
     public IReadOnlyList<ApplicationWorkspaceCaseSummaryTile> SummaryTiles { get; init; }
         = Array.Empty<ApplicationWorkspaceCaseSummaryTile>();
 
+    public IReadOnlyList<ApplicationWorkspaceCaseHeaderField> HeaderFields { get; init; }
+        = Array.Empty<ApplicationWorkspaceCaseHeaderField>();
+
     public IReadOnlyList<ApplicationWorkspaceCaseLinkedTile> LinkedRecordTiles { get; init; }
         = Array.Empty<ApplicationWorkspaceCaseLinkedTile>();
 
@@ -42,6 +45,51 @@ public sealed class ApplicationWorkspaceCaseSummaryTile
     public string Tone { get; init; } = "blue";
 
     public string Glyph { get; init; } = "•";
+}
+
+public enum ApplicationWorkspaceCaseHeaderFieldKind
+{
+    Lookup = 0,
+    Date = 1,
+    Text = 2
+}
+
+public sealed class ApplicationWorkspaceLookupOption
+{
+    public Guid Id { get; init; }
+
+    public string DisplayName { get; init; } = string.Empty;
+}
+
+public sealed class ApplicationWorkspaceCaseHeaderField
+{
+    public string Key { get; init; } = string.Empty;
+
+    public string Label { get; init; } = string.Empty;
+
+    public ApplicationWorkspaceCaseHeaderFieldKind Kind { get; init; }
+
+    public string Tone { get; init; } = "blue";
+
+    public string Glyph { get; init; } = "•";
+
+    public Guid? SelectedId { get; init; }
+
+    public string Value { get; init; } = string.Empty;
+
+    public string DisplayValue { get; init; } = "—";
+
+    public bool ReadOnly { get; init; }
+
+    public IReadOnlyList<ApplicationWorkspaceLookupOption> Options { get; init; }
+        = Array.Empty<ApplicationWorkspaceLookupOption>();
+}
+
+public sealed class ApplicationWorkspaceCaseHeaderFieldUpdate
+{
+    public string Key { get; init; } = string.Empty;
+
+    public string? Value { get; init; }
 }
 
 public sealed class ApplicationWorkspaceCaseLinkedTile

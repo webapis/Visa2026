@@ -435,6 +435,8 @@ namespace Visa2026.Module.BusinessObjects
                 ProjectContract = applicationProfile.DefaultProjectContract;
             if (applicationProfile.DefaultMigrationService != null)
                 MigrationService = applicationProfile.DefaultMigrationService;
+            if (applicationProfile.DefaultEntryCheckPoint != null)
+                EntryCheckPoint = applicationProfile.DefaultEntryCheckPoint;
             if (!string.IsNullOrWhiteSpace(applicationProfile.DefaultBorderZoneLocation))
                 BorderZoneLocation = applicationProfile.DefaultBorderZoneLocation;
         }
@@ -545,6 +547,10 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("VisaTypeVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowVisaType", Context = "DetailView")]
         [VisibleInListView(false)]
         public virtual VisaType VisaType { get; set; }
+
+        [Appearance("EntryCheckPointVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowEntryCheckPoint", Context = "DetailView")]
+        [VisibleInListView(false)]
+        public virtual CheckPoint? EntryCheckPoint { get; set; }
 
         [Browsable(false)]
         [VisibleInDetailView(false)]

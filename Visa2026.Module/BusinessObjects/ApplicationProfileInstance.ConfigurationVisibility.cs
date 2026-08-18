@@ -26,6 +26,11 @@ public partial class ApplicationProfileInstance
 
     [Browsable(false)]
     [NotMapped]
+    public bool CfgShowEntryCheckPoint =>
+        ApplicationProfileConfigurationResolver.ShowEntryCheckPoint(this);
+
+    [Browsable(false)]
+    [NotMapped]
     public bool CfgShowProjectContract =>
         ApplicationProfileConfigurationResolver.ShowProjectContract(this);
 

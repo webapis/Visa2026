@@ -85,6 +85,9 @@ public static class ApplicationProfileConfigurationResolver
     public static bool ShowVisaType(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequireVisaType, t => t.ShowVisaType);
 
+    public static bool ShowEntryCheckPoint(ApplicationProfileInstance? application) =>
+        Resolve(application, p => p.RequireEntryCheckPoint, t => false);
+
     public static bool ShowVisaCategory(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequireVisaCategory, t => t.ShowVisaCategory);
 

@@ -46,6 +46,7 @@ disable-model-invocation: false
 | In process | `process-started-profiles-listview-table-mockup.png`, `process-started-application-profile-workspace-mockup.png`, `process-started-nav-*.png` |
 | Templates | `application-profile-templates-listview-mockup.png`, `application-profile-template-overview-mockup.png`, `application-profile-template-wizard*.png` |
 | Approval leg versions (2026-08-18) | `application-profile-wizard-approval-leg-versions-prototype.png`, `application-profile-instance-create-choose-approval-legs-prototype.png` |
+| Case summary instance fields (2026-08-18) | `application-profile-instance-case-summary-overview-properties-prototype.png`, `application-profile-instance-case-summary-edit-properties-prototype.png` |
 
 **Retired:** HTML/Excel/`images/` prototypes removed 2026-08-10 — see plan §9.
 
@@ -121,6 +122,7 @@ flowchart LR
 | Case tab Preview opens duplicate catalog in slot | `OpenPreviewOnly` on slot request | Tab owns catalog; slot viewer only — **preview-slot** |
 | Document copies preview fails on roster line | `TryBuildMergedPdfForRoster` | Roster IDs are `ApplicationPerson`, not `ApplicationItem` |
 | Person detail crashes after Open from case | `PersonDetailOpenHelper` | Do not dispose ObjectSpace before `ShowView` |
+| Case summary tiles empty / Edit does not save | Profile `Require*` off; officer-shell `HeaderFieldChanged` | `ApplicationWorkspaceCaseHeaderFieldsHelper`; `OfficerShellPropertyEditor.SaveHeaderFieldAsync` |
 
 ---
 

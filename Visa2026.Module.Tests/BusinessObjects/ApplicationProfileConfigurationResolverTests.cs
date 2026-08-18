@@ -51,6 +51,15 @@ public class ApplicationProfileConfigurationResolverTests
     }
 
     [Fact]
+    public void ShowEntryCheckPoint_UsesProfileRequireFlag()
+    {
+        var profile = new ApplicationProfile { RequireEntryCheckPoint = true };
+        var app = new ApplicationProfileInstance { ApplicationProfile = profile };
+
+        Assert.True(ApplicationProfileConfigurationResolver.ShowEntryCheckPoint(app));
+    }
+
+    [Fact]
     public void ShowVisaType_FallsBackToTypeWhenProfileMissing()
     {
         var type = new ApplicationType { ShowVisaType = true };

@@ -75,6 +75,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         PersonLinkSearchRequested = EventCallback.Factory.Create<string>(this, SearchPersonLinkCandidatesAsync),
         LinkPersonFromPickerRequested = EventCallback.Factory.Create<Guid>(this, LinkPersonFromPickerAsync),
         ClosePersonLinkPickerRequested = EventCallback.Factory.Create(this, ClosePersonLinkPickerAsync),
+        HeaderFieldChanged = EventCallback.Factory.Create<ApplicationWorkspaceCaseHeaderFieldUpdate>(this, SaveHeaderFieldAsync),
         PersonLinkCandidates = Array.Empty<ApplicationProfileInstancePersonLinkCandidateRow>(),
     };
 
@@ -193,6 +194,36 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         if (objectSpace.IsModified)
             objectSpace.CommitChanges();
 
+        await LoadAsync();
+    }
+
+    private async Task SaveHeaderFieldAsync(ApplicationWorkspaceCaseHeaderFieldUpdate update)
+    {
+        var model = ComponentModel;
+        if (model == null || _application == null || update == null)
+            return;
+
+        var applicationId = ResolveApplicationProfileInstanceId();
+        if (applicationId == Guid.Empty)
+            return;
+
+        using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
+        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
+        if (application == null)
+            return;
+
+        if (!ApplicationWorkspaceCaseHeaderFieldsHelper.TryApply(application, objectSpace, update, out var error))
+        {
+            model.HeaderFieldStatusMessage = error;
+            model.HeaderFieldStatusIsError = true;
+            return;
+        }
+
+        if (objectSpace.IsModified)
+            objectSpace.CommitChanges();
+
+        model.HeaderFieldStatusMessage = null;
+        model.HeaderFieldStatusIsError = false;
         await LoadAsync();
     }
 
