@@ -77,4 +77,56 @@ public class ApplicationWorkspaceIssuedRecordsCatalogTests
         Assert.Equal(typeof(Visa), ApplicationWorkspaceIssuedRecordsCatalog.ResolveHeaderType(ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa));
         Assert.Null(ApplicationWorkspaceIssuedRecordsCatalog.ResolveHeaderType("inv"));
     }
+
+    [Fact]
+    public void Build_Activities_KeepSubmittedAfterLaterApprovals()
+    {
+        var profile = new ApplicationProfile
+        {
+            ProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
+        };
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = profile,
+            ApplicationDate = new DateTime(2024, 8, 17),
+            ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>(),
+        };
+        application.ProgressHistory.Add(new ApplicationProfileInstanceProgress
+        {
+            ID = Guid.NewGuid(),
+            ApplicationProfileInstance = application,
+            Order = 1,
+            Date = new DateTime(2024, 8, 18),
+            State = new ApplicationState
+            {
+                Code = ApplicationProfileInstanceProgressStateCodes.Review1Started,
+                NameTm = "Sent for agreement",
+            },
+        });
+        application.ProgressHistory.Add(new ApplicationProfileInstanceProgress
+        {
+            ID = Guid.NewGuid(),
+            ApplicationProfileInstance = application,
+            Order = 2,
+            Date = new DateTime(2024, 8, 19),
+            State = new ApplicationState
+            {
+                Code = ApplicationProfileInstanceProgressStateCodes.Review1Approved,
+                NameTm = "Closed agreement",
+            },
+        });
+
+        var view = ApplicationWorkspaceCaseBuilder.Build(
+            application,
+            profile,
+            Array.Empty<ApplicationWorkspaceTab>(),
+            default,
+            new ApplicationWorkspaceCaseChrome { StartedOn = "17 Aug 2024" });
+
+        Assert.Equal(2, view.Activities.Count);
+        Assert.Equal("Approved", view.Activities[0].Title);
+        Assert.Equal("19 Aug 2024", view.Activities[0].Subtitle);
+        Assert.Equal("Submitted", view.Activities[1].Title);
+        Assert.Equal("18 Aug 2024", view.Activities[1].Subtitle);
+    }
 }

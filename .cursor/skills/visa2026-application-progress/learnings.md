@@ -6,6 +6,65 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 
 ## Entries
 
+### 2026-08-18 — Submitted stays on the Office progress bar
+
+- After later Approvals, the bar only showed each ministry’s latest result, so Submitted disappeared (Activity still had it). Office now keeps **Submitted** + that row’s date once `1_REVIEW_STARTED` / `PROCESS_STARTED` exists. No extra timeline node.
+- Test: `Build_SubmittedThenApproved_OfficeKeepsSubmittedOnBar`. Stop F5, rebuild, F5. On **8/-010** Overview — Office preparation shows Submitted and date; Türkmenenergo stays Approved.
+- Prevent: Do not leave Office done with an empty badge after Submit. Do not add a separate Submitted step between Office and the first ministry.
+- Cross-skill: visa2026-application-profile
+
+### 2026-08-18 — Submitted stays in progress History
+
+- Submitted was stored as `1_REVIEW_STARTED` but Overview Activity used lookup NameTm (“Sent for agreement”) and only the last 3–4 rows, so it vanished after later Approvals.
+- Activity / History now use catalog labels (**Submitted**, **Approved**) and list every progress row. Progress tab shows the same log.
+- Test: `Build_Activities_KeepSubmittedAfterLaterApprovals`. Stop F5, rebuild, F5. After Submit then Approve — History still shows Submitted with its date.
+- Prevent: Do not label History from `ApplicationState.NameTm`. Do not `Take(3)` the progress log.
+- Cross-skill: visa2026-application-profile
+
+### 2026-08-18 — Office Result lists Submitted (leave-office)
+
+- Officers could not pick Submitted on Office; it was a hidden default Advance (`1_REVIEW_STARTED`). Option A: Office Result is Submitted (default) then Cancelled. Advance writes the first-ministry (or Migration `PROCESS_STARTED`) row with the officer Date. After Advance, current is that ministry · Submitted; Office is done without a “Completed” badge.
+- Test: `IsResultForStep_Submitted_IsTrueOnOfficeOnly` + `PreferredAdvanceCode_Office_UsesFirstMinistryStarted` + empty-history ResultOptions. Stop F5, rebuild, F5. On **8/-010** Office — Result Submitted, set Date, Advance → first ministry Submitted with that date.
+- Prevent: Do not add a separate Submitted timeline node. Do not put Submitted on a ministry Result. Do not write `IS_BEING_PREPARED`.
+- Cross-skill: visa2026-application-profile
+
+### 2026-08-18 — Office Cancelled officer-verified
+
+- Officer confirmed: after Advance with Result Cancelled on Office preparation, the Office node shows Cancelled (not Office preparation / In process).
+- Cross-skill: visa2026-application-profile
+
+### 2026-08-18 — Office Cancelled stays on Office after Advance
+
+- Result Cancelled on Office preparation wrote `PROCESS_CANCELLED` (History was correct) but the Office node always showed `OfficeLabel` / “In process”. `SlotAnchorForCurrent` has no previous row from implied office, so the cancelled overlay never ran (`BuildOfficeStep` had no latest overlay; chrome skipped office result labels).
+- Office now overlays the cancelled row (label, outcome, date, Revert). Chrome is `Office preparation · Cancelled`. Header Cancelled badge follows `OutcomeKind`.
+- Test: `Build_OfficeCancelled_ShowsCancelledOnOffice`. Stop F5, rebuild, F5. On **8/-010** after revert to office — Result Cancelled → Advance → Office badge Cancelled; ministries stay Pending; Revert still works.
+- Prevent: Do not keep Office `CurrentStateLabel` as the step name when latest is `PROCESS_CANCELLED`. Do not drop office result labels in `FormatChromeCurrentStep`.
+- Cross-skill: visa2026-application-profile
+
+### 2026-08-18 — Cancelled Result stays on the current ministry
+
+- Selecting Cancelled on Tarkusenergo (Submitted) left the badge on Submitted. After Advance, `PROCESS_CANCELLED` was treated as Migration (`SlotKeyFor` / ministry-catalog match) so the wrong node changed.
+- Cancelled is a Result of the current slot (preview + Advance). Timeline uses the previous row to keep Cancelled on that ministry, not Migration.
+- Test: `IsResultForStep_Cancelled_IsTrueOnCurrentSlot` + `Build_FirstLegStartedThenCancelled_KeepsCancelledOnThatMinistry` + `Build_FirstLegApprovedThenCancelled_KeepsCancelledOnNextMinistry`. Stop F5, rebuild, F5. On **8/-006** Tarkusenergo — Result Cancelled updates that badge; Advance Cancelled stays on Tarkusenergo.
+- Prevent: Do not map `PROCESS_CANCELLED` to Migration or always to leg 1. Do not preview the first Result option when Cancelled is selected.
+- Cross-skill: visa2026-application-profile
+
+### 2026-08-17 — Result includes Cancelled last on every current step
+
+- Officers needed **Cancelled** (`PROCESS_CANCELLED`) next to Approved / Disapproved (Unapproved). It was already a legal next state but hidden from Result.
+- Result lists same-slot decisions, then Cancelled last. Default Advance stays Approved (or Submitted on Office / Migration enter). Picking Cancelled writes that row.
+- Test: `PreferredAdvanceCode_Ministry_DefaultsToApprovedNotCancelled` + timeline ResultOptions last code. Stop F5, rebuild, F5. On **B/-008** Energetika Result — Approved, Unapproved, Cancelled.
+- Prevent: Do not default Advance to Cancelled when it is the last Result option. Do not put first-ministry Submitted on Office Result.
+- Cross-skill: visa2026-application-profile
+
+### 2026-08-17 — Letter upload only on the current ministry edit form
+
+- Completed ministries each showed a dashed Upload file box (Issued 8/-005). Officers only need that control on the step they are recording.
+- Upload stays on the current ministry Result form. Done nodes keep **View letter** only.
+- Test: `Build_FirstLegApproved_NextMinistryIsCurrent` — done leg `ShowMinistryLetterUpload` false; current true. Stop F5, rebuild, F5. On **8/-005** Progress — no upload on Approved ministries; View letter still opens the slot.
+- Prevent: Do not set `ShowMinistryLetterUpload` from `decisionRow != null` on done legs.
+- Cross-skill: visa2026-application-profile
+
 ### 2026-08-17 — Ministry letter Preview still iframed compressed XFA
 
 - View letter on a filled Application form showed Please wait + Spire evaluation (Chrome PDF viewer). `/XFA` was only inside a Flate stream, so the occupant iframed the bytes.

@@ -586,17 +586,20 @@ internal static class ApplicationWorkspaceCaseBuilder
 
         var history = application.ProgressHistory?
             .OrderByDescending(p => p.Order)
-            .Take(3)
+            .ThenByDescending(p => p.Date)
+            .ThenByDescending(p => p.ID)
             .ToList() ?? [];
 
         foreach (var row in history)
         {
+            var label = ApplicationWorkspaceProgressTimeline.FormatProfileStateLabel(row.State?.Code);
+            if (string.IsNullOrWhiteSpace(label))
+                label = row.State?.Code ?? "—";
+
             items.Add(new ApplicationWorkspaceCaseActivity
             {
-                Title = $"Progress: {row.State?.LocalizedDisplayName ?? row.State?.NameTm ?? row.State?.Code ?? "—"}",
-                Subtitle = row.Date == default
-                    ? string.Empty
-                    : row.Date.ToString("dd MMM yyyy HH:mm", CultureInfo.InvariantCulture),
+                Title = label,
+                Subtitle = FormatActivityDate(row.Date),
             });
         }
 
@@ -691,5 +694,15 @@ internal static class ApplicationWorkspaceCaseBuilder
         }
 
         return deadlines;
+    }
+
+    private static string FormatActivityDate(DateTime date)
+    {
+        if (date == default)
+            return string.Empty;
+
+        return date.TimeOfDay == TimeSpan.Zero
+            ? date.ToString("dd MMM yyyy", CultureInfo.InvariantCulture)
+            : date.ToString("dd MMM yyyy HH:mm", CultureInfo.InvariantCulture);
     }
 }

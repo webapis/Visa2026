@@ -31,6 +31,7 @@ internal static class ApplicationWorkspaceProgressTimeline
             .ThenBy(p => p.ID)
             .ToList() ?? [];
         var latest = ApplicationProfileInstanceProgressHelper.GetLatest(application.ProgressHistory, objectSpace);
+        var slotAnchor = SlotAnchorForCurrent(latest, history);
         var advanceOptions = BuildAdvanceOptions(application, profile, latest, objectSpace);
         var canAdvance = advanceOptions.Count > 0;
         var advanceBlockedReason = canAdvance
@@ -40,29 +41,35 @@ internal static class ApplicationWorkspaceProgressTimeline
                 : "No further progress steps are available for this route.");
         var currentSla = ResolveCurrentSla(application, profile, latest, ministrySla);
         var latestCode = latest?.State?.Code;
-        var latestOnMigration = IsCurrentMigration(latestCode, history);
+        var slotCode = slotAnchor?.State?.Code;
+        var latestOnMigration = IsCurrentMigration(slotCode, history);
         var legs = ResolveApprovalLegs(application, profile);
-        var latestLeg = ResolveCurrentMinistrySlot(latestCode, legs.Count, latestOnMigration);
+        var latestLeg = ResolveCurrentMinistrySlot(slotCode, legs.Count, latestOnMigration);
         var awaitingMigration = !latestOnMigration
-            && IsLastMinistryApproved(latestCode, legs.Count);
+            && IsLastMinistryApproved(slotCode, legs.Count);
+        var atOffice = slotAnchor == null;
+        var cancelledOnCurrent = IsProcessCancelled(latestCode);
 
         var steps = new List<ApplicationWorkspaceCaseProgressStep>
         {
             BuildOfficeStep(
                 application,
-                isCurrent: latest == null,
+                isCurrent: atOffice,
                 currentSla,
                 canAdvance,
                 advanceBlockedReason,
                 advanceOptions,
-                history),
+                history,
+                latest),
         };
 
         foreach (var leg in legs)
         {
             var row = LatestRowForLeg(history, leg.Sequence);
-            var slotState = ResolveLegSlotState(latest == null, latestOnMigration, latestLeg, leg.Sequence, row);
+            var slotState = ResolveLegSlotState(atOffice, latestOnMigration, latestLeg, leg.Sequence, row);
             var isCurrent = slotState == "current";
+            if (cancelledOnCurrent && isCurrent)
+                row = latest;
             var letterRow = FindLetterRow(history, leg.Sequence);
             steps.Add(BuildFilledStep(
                 $"leg-{leg.Sequence}",
@@ -79,8 +86,10 @@ internal static class ApplicationWorkspaceProgressTimeline
         }
 
         var migrationRow = LatestMigrationRow(history);
-        var migrationState = ResolveMigrationSlotState(latest == null, latestOnMigration, latestCode, awaitingMigration);
+        var migrationState = ResolveMigrationSlotState(atOffice, latestOnMigration, slotCode, awaitingMigration);
         var migrationCurrent = migrationState == "current";
+        if (cancelledOnCurrent && migrationCurrent)
+            migrationRow = latest;
         steps.Add(BuildFilledStep(
             MigrationKey,
             MigrationLabel,
@@ -111,7 +120,8 @@ internal static class ApplicationWorkspaceProgressTimeline
                 : $"{lastDone.Label} · {lastDone.CurrentStateLabel}";
         }
 
-        if (current.Key == OfficeKey || string.IsNullOrWhiteSpace(current.CurrentStateLabel))
+        if (string.IsNullOrWhiteSpace(current.CurrentStateLabel)
+            || string.Equals(current.CurrentStateLabel, current.Label, StringComparison.OrdinalIgnoreCase))
             return current.Label;
 
         return $"{current.Label} · {current.CurrentStateLabel}";
@@ -210,6 +220,27 @@ internal static class ApplicationWorkspaceProgressTimeline
             .ToList() ?? [];
     }
 
+    private static ApplicationProfileInstanceProgress? SlotAnchorForCurrent(
+        ApplicationProfileInstanceProgress? latest,
+        IReadOnlyList<ApplicationProfileInstanceProgress> history)
+    {
+        if (!IsProcessCancelled(latest?.State?.Code) || history.Count == 0)
+            return latest;
+
+        var index = history.ToList().FindIndex(p => ReferenceEquals(p, latest));
+        if (index < 0)
+            index = history.Count - 1;
+
+        return index > 0 ? history[index - 1] : null;
+    }
+
+    private static bool IsProcessCancelled(string? stateCode) =>
+        !string.IsNullOrWhiteSpace(stateCode)
+        && string.Equals(
+            stateCode.Trim(),
+            ApplicationProfileInstanceProgressStateCodes.ProcessCancelled,
+            StringComparison.OrdinalIgnoreCase);
+
     internal static int? ResolveCurrentMinistrySlot(string? latestCode, int legCount, bool latestOnMigration)
     {
         if (latestOnMigration || legCount <= 0 || string.IsNullOrWhiteSpace(latestCode))
@@ -237,6 +268,12 @@ internal static class ApplicationWorkspaceProgressTimeline
         if (ApplicationProfileInstanceProgressLegCodes.TryParseMinistryLegFromStateCode(stateCode, out _))
             return true;
 
+        if (string.Equals(stateCode, ApplicationProfileInstanceProgressStateCodes.ProcessCancelled, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(stateCode, ApplicationProfileInstanceProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(stateCode, ApplicationProfileInstanceProgressStateCodes.ProcessRejected, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(stateCode, ApplicationProfileInstanceProgressStateCodes.ProcessStarted, StringComparison.OrdinalIgnoreCase))
+            return false;
+
         var catalogCode = MapToCatalogStateCode(stateCode) ?? stateCode.Trim();
         return ApplicationProfileProgressStateCatalog.All.Any(r =>
             r.Track == ApplicationProfileProgressStateTrack.Ministry
@@ -250,11 +287,23 @@ internal static class ApplicationWorkspaceProgressTimeline
         bool canAdvance,
         string advanceBlockedReason,
         IReadOnlyList<ApplicationWorkspaceCaseProgressAdvanceOption> advanceOptions,
-        IReadOnlyList<ApplicationProfileInstanceProgress> history)
+        IReadOnlyList<ApplicationProfileInstanceProgress> history,
+        ApplicationProfileInstanceProgress? latest)
     {
-        var date = application.ApplicationDate == default
-            ? string.Empty
-            : application.ApplicationDate.ToString("dd MMM yyyy", CultureInfo.InvariantCulture);
+        var cancelled = isCurrent && IsProcessCancelled(latest?.State?.Code);
+        var submitted = cancelled ? null : FindSubmittedRow(history);
+        var date = cancelled && latest?.Date is { } cancelledDate && cancelledDate != default
+            ? FormatStepDate(cancelledDate)
+            : submitted?.Date is { } submittedDate && submittedDate != default
+                ? FormatStepDate(submittedDate)
+                : application.ApplicationDate == default
+                    ? string.Empty
+                    : FormatStepDate(application.ApplicationDate);
+        var stateLabel = cancelled
+            ? FormatProfileStateLabel(latest?.State?.Code)
+            : submitted != null
+                ? FormatProfileStateLabel(submitted.State?.Code)
+                : isCurrent ? OfficeLabel : string.Empty;
 
         return new ApplicationWorkspaceCaseProgressStep
         {
@@ -262,21 +311,29 @@ internal static class ApplicationWorkspaceProgressTimeline
             Label = OfficeLabel,
             Date = date,
             State = isCurrent ? "current" : "done",
-            CurrentStateLabel = isCurrent ? OfficeLabel : string.Empty,
+            CurrentStateLabel = stateLabel,
             SlaTargetDate = isCurrent ? FormatSlaTarget(application.ApplicationDate, currentSla) : string.Empty,
             SlaDaysRemaining = isCurrent ? DaysLeft(currentSla) : null,
             OfficerNotes = isCurrent ? application.OfficePreparationNotes ?? string.Empty : string.Empty,
             CanAdvance = isCurrent && canAdvance,
-            CanRevert = false,
+            CanRevert = cancelled,
             CanRevertToHere = !isCurrent && history.Count > 0,
             AdvanceBlockedReason = isCurrent ? advanceBlockedReason : string.Empty,
             AdvanceOptions = isCurrent ? advanceOptions : Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>(),
             ResultOptions = isCurrent
                 ? ApplicationWorkspaceProgressAdvancePreview.ResultOptions(OfficeKey, advanceOptions)
                 : Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>(),
-            OutcomeKind = isCurrent ? "current" : "ok",
+            OutcomeKind = cancelled ? "cancelled" : (isCurrent ? "current" : "ok"),
         };
     }
+
+    private static ApplicationProfileInstanceProgress? FindSubmittedRow(
+        IReadOnlyList<ApplicationProfileInstanceProgress> history) =>
+        history.FirstOrDefault(row =>
+            ApplicationWorkspaceProgressAdvancePreview.IsOfficeSubmitted("office", row.State?.Code));
+
+    private static string FormatStepDate(DateTime date) =>
+        date.ToString("dd MMM yyyy", CultureInfo.InvariantCulture);
 
     private static ApplicationWorkspaceCaseProgressStep BuildFilledStep(
         string key,
@@ -319,10 +376,9 @@ internal static class ApplicationWorkspaceProgressTimeline
             ProgressId = letterId,
             OfficerNotes = isCurrent ? row?.Description ?? string.Empty : string.Empty,
             MinistryLetterFileName = letter?.MinistryLetterFileName ?? string.Empty,
-            ShowMinistryLetterUpload = decisionRow != null
-                || (isCurrent
-                    && key.StartsWith("leg-", StringComparison.OrdinalIgnoreCase)
-                    && resultOptions.Count > 0),
+            ShowMinistryLetterUpload = isCurrent
+                && key.StartsWith("leg-", StringComparison.OrdinalIgnoreCase)
+                && resultOptions.Count > 0,
             DecisionProgressId = decisionRow != null && decisionRow.ID != Guid.Empty ? decisionRow.ID : null,
             CanAdvance = isCurrent && canAdvance,
             CanRevert = CanRevertLast(latest, key) || (isCurrent && latest != null),
@@ -338,6 +394,9 @@ internal static class ApplicationWorkspaceProgressTimeline
     private static bool CanRevertLast(ApplicationProfileInstanceProgress? latest, string stepKey)
     {
         if (latest == null || string.IsNullOrWhiteSpace(stepKey))
+            return false;
+
+        if (IsProcessCancelled(latest.State?.Code))
             return false;
 
         return string.Equals(

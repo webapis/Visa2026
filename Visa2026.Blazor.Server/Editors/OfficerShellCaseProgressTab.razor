@@ -1,3 +1,4 @@
+@using System.Collections.Generic
 @using System.Linq
 @using System.IO
 @using Microsoft.AspNetCore.Components.Forms
@@ -21,7 +22,11 @@
                 ? preview.Label
                 : !string.IsNullOrWhiteSpace(step.CurrentStateLabel)
                     ? step.CurrentStateLabel
-                    : step.State == "done" ? "Completed" : step.State == "current" ? "In progress" : "Pending";
+                    : step.State == "done" && !string.Equals(step.Key, "office", StringComparison.OrdinalIgnoreCase)
+                        ? "Completed"
+                        : step.State == "current" ? "In progress"
+                        : step.State == "pending" ? "Pending"
+                        : string.Empty;
             var tone = preview.Tone ?? step.OutcomeKind;
             var badgeCls = tone switch
             {
@@ -51,7 +56,10 @@
                 <div class="ct-prog-v__body">
                     <div class="ct-prog-v__head">
                         <strong>@step.Label</strong>
-                        <span class="cw-prog-step__badge cw-prog-step__badge--@badgeCls">@badge</span>
+                        @if (!string.IsNullOrWhiteSpace(badge))
+                        {
+                            <span class="cw-prog-step__badge cw-prog-step__badge--@badgeCls">@badge</span>
+                        }
                     </div>
                     @if (step.State != "current" && ShowRevertToHere && step.CanRevertToHere)
                     {
@@ -65,23 +73,14 @@
                         </p>
                     }
                     @if (step.State != "current"
-                        && (step.ShowMinistryLetterUpload || (!string.IsNullOrWhiteSpace(letterName) && letterProgressId is Guid)))
+                        && !string.IsNullOrWhiteSpace(letterName)
+                        && letterProgressId is Guid)
                     {
                         <p class="ct-prog-v__letter">
-                            @if (!string.IsNullOrWhiteSpace(letterName) && letterProgressId is Guid)
-                            {
-                                <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
-                                                                   ProgressId="letterProgressId"
-                                                                   FileName="@letterName"
-                                                                   OwnerViewId="@PreviewSlotOwnerViewId" />
-                            }
-                            @if (step.ShowMinistryLetterUpload)
-                            {
-                                <label class="ct-upload ct-upload--action" style="margin-top:8px">
-                                    <InputFile OnChange="e => OnMinistryLetterSelected(e, step)" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp" disabled="@_busy" />
-                                    <span>☁ Upload file<br /><span>PDF or scan up to @MaxUploadMb MB</span></span>
-                                </label>
-                            }
+                            <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
+                                                               ProgressId="letterProgressId"
+                                                               FileName="@letterName"
+                                                               OwnerViewId="@PreviewSlotOwnerViewId" />
                         </p>
                     }
                     @if (step.State == "current")
@@ -122,6 +121,10 @@
                                     {
                                         <label class="ct-label" for="advance-state-@ApplicationProfileInstanceId" style="margin-top:10px">Result</label>
                                         <select id="advance-state-@ApplicationProfileInstanceId" class="os-input" @bind="_selectedAdvanceStateCode" disabled="@_busy">
+                                            @if (step.ResultOptions.All(o => o.StateCode != _selectedAdvanceStateCode))
+                                            {
+                                                <option value="@_selectedAdvanceStateCode">—</option>
+                                            }
                                             @foreach (var option in step.ResultOptions)
                                             {
                                                 <option value="@option.StateCode">@option.Label</option>
@@ -168,9 +171,15 @@
                                     }
                                 </div>
                             }
-                            else if (step.ShowMinistryLetterUpload || step.CanRevert)
+                            else if (step.ShowMinistryLetterUpload
+                                || step.CanRevert
+                                || !string.IsNullOrWhiteSpace(step.AdvanceBlockedReason))
                             {
                                 <div class="ct-prog-advance" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--os-line)">
+                                    @if (!string.IsNullOrWhiteSpace(step.AdvanceBlockedReason))
+                                    {
+                                        <p class="ct-muted" style="margin:0 0 10px">@step.AdvanceBlockedReason</p>
+                                    }
                                     @if (step.ShowMinistryLetterUpload)
                                     {
                                         <label class="ct-label">Approval / disapproval letter</label>
@@ -203,21 +212,30 @@
                                     }
                                 </div>
                             }
-                            else if (!string.IsNullOrWhiteSpace(step.AdvanceBlockedReason))
-                            {
-                                <p class="ct-muted" style="margin-top:12px">@step.AdvanceBlockedReason</p>
-                            }
                         </div>
                     }
                 </div>
             </div>
         }
     </div>
+
+    @if (ProgressHistory.Count > 0)
+    {
+        <h3 class="ct-page__title" style="margin-top:24px">History</h3>
+        <ul class="cw-timeline">
+            @foreach (var row in ProgressHistory)
+            {
+                <li><strong>@row.State</strong><span>@row.Date</span></li>
+            }
+        </ul>
+    }
 </div>
 
 @code {
     [Parameter] public Guid ApplicationProfileInstanceId { get; set; }
     [Parameter] public ApplicationWorkspaceCaseView View { get; set; } = new();
+    [Parameter] public IReadOnlyList<ApplicationWorkspaceProgressRow> ProgressHistory { get; set; }
+        = Array.Empty<ApplicationWorkspaceProgressRow>();
     [Parameter] public string? StatusMessage { get; set; }
     [Parameter] public bool IsStatusError { get; set; }
     [Parameter] public EventCallback<string> SaveNotesRequested { get; set; }
@@ -286,8 +304,8 @@
             var result = !string.IsNullOrWhiteSpace(preview.Label)
                 ? preview.Label
                 : current.CurrentStateLabel;
-            if (string.Equals(current.Key, "office", StringComparison.OrdinalIgnoreCase)
-                || string.IsNullOrWhiteSpace(result))
+            if (string.IsNullOrWhiteSpace(result)
+                || string.Equals(result, current.Label, StringComparison.OrdinalIgnoreCase))
                 return current.Label;
 
             return $"{current.Label} · {result}";
@@ -299,9 +317,15 @@
         if (step.State != "current")
             return (null, null);
 
-        var option = step.ResultOptions.FirstOrDefault(o => o.StateCode == _selectedAdvanceStateCode)
-            ?? step.ResultOptions.FirstOrDefault();
-        if (option == null || !ApplicationWorkspaceProgressAdvancePreview.IsResultForStep(step.Key, option.StateCode))
+        var option = step.ResultOptions.FirstOrDefault(o => o.StateCode == _selectedAdvanceStateCode);
+        if (option == null)
+            return (null, null);
+
+        if (!ApplicationWorkspaceProgressAdvancePreview.IsResultForStep(step.Key, option.StateCode))
+            return (null, null);
+
+        // Submitted leaves office; the first ministry (or Migration) shows it after Advance.
+        if (ApplicationWorkspaceProgressAdvancePreview.IsOfficeSubmitted(step.Key, option.StateCode))
             return (null, null);
 
         return (option.Label, ApplicationWorkspaceProgressAdvancePreview.OutcomeKind(option.StateCode));

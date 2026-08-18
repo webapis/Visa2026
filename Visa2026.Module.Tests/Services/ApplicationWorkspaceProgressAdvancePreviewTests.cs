@@ -18,6 +18,37 @@ public class ApplicationWorkspaceProgressAdvancePreviewTests
     }
 
     [Fact]
+    public void IsResultForStep_Cancelled_IsTrueOnCurrentSlot()
+    {
+        Assert.True(ApplicationWorkspaceProgressAdvancePreview.IsResultForStep(
+            "office",
+            ApplicationProfileInstanceProgressStateCodes.ProcessCancelled));
+        Assert.True(ApplicationWorkspaceProgressAdvancePreview.IsResultForStep(
+            "leg-1",
+            ApplicationProfileInstanceProgressStateCodes.ProcessCancelled));
+        Assert.True(ApplicationWorkspaceProgressAdvancePreview.IsResultForStep(
+            "migration",
+            ApplicationProfileInstanceProgressStateCodes.ProcessCancelled));
+    }
+
+    [Fact]
+    public void IsResultForStep_Submitted_IsTrueOnOfficeOnly()
+    {
+        Assert.True(ApplicationWorkspaceProgressAdvancePreview.IsResultForStep(
+            "office",
+            ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1)));
+        Assert.True(ApplicationWorkspaceProgressAdvancePreview.IsResultForStep(
+            "office",
+            ApplicationProfileInstanceProgressStateCodes.ProcessStarted));
+        Assert.False(ApplicationWorkspaceProgressAdvancePreview.IsResultForStep(
+            "leg-1",
+            ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1)));
+        Assert.False(ApplicationWorkspaceProgressAdvancePreview.IsOfficeSubmitted(
+            "leg-1",
+            ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1)));
+    }
+
+    [Fact]
     public void IsResultForStep_NextMinistry_IsFalse()
     {
         Assert.False(ApplicationWorkspaceProgressAdvancePreview.IsResultForStep(
@@ -55,10 +86,61 @@ public class ApplicationWorkspaceProgressAdvancePreviewTests
             },
         };
 
-        Assert.Empty(ApplicationWorkspaceProgressAdvancePreview.ResultOptions("office", options));
+        var officeResults = ApplicationWorkspaceProgressAdvancePreview.ResultOptions("office", options);
+        Assert.Contains(
+            officeResults,
+            o => o.StateCode == ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1));
+        Assert.Equal(
+            ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1),
+            officeResults[0].StateCode);
+        Assert.Contains(
+            officeResults,
+            o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.ProcessCancelled);
+        Assert.Equal(
+            ApplicationProfileInstanceProgressStateCodes.ProcessCancelled,
+            officeResults[^1].StateCode);
+        Assert.DoesNotContain(
+            officeResults,
+            o => o.StateCode == ApplicationProfileInstanceProgressLegCodes.ReviewRejected(1));
         Assert.Equal(
             ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1),
             ApplicationWorkspaceProgressAdvancePreview.PreferredAdvanceCode("office", options, null));
+    }
+
+    [Fact]
+    public void PreferredAdvanceCode_Ministry_DefaultsToApprovedNotCancelled()
+    {
+        var options = new[]
+        {
+            new ApplicationWorkspaceCaseProgressAdvanceOption
+            {
+                StateCode = ApplicationProfileInstanceProgressLegCodes.ReviewApproved(2),
+                Label = "Approved",
+            },
+            new ApplicationWorkspaceCaseProgressAdvanceOption
+            {
+                StateCode = ApplicationProfileInstanceProgressLegCodes.ReviewRejected(2),
+                Label = "Disapproved",
+            },
+            new ApplicationWorkspaceCaseProgressAdvanceOption
+            {
+                StateCode = ApplicationProfileInstanceProgressStateCodes.ProcessCancelled,
+                Label = "Cancelled",
+            },
+        };
+
+        var results = ApplicationWorkspaceProgressAdvancePreview.ResultOptions("leg-2", options);
+        Assert.Equal(3, results.Count);
+        Assert.Equal(ApplicationProfileInstanceProgressStateCodes.ProcessCancelled, results[^1].StateCode);
+        Assert.Equal(
+            ApplicationProfileInstanceProgressLegCodes.ReviewApproved(2),
+            ApplicationWorkspaceProgressAdvancePreview.PreferredAdvanceCode("leg-2", options, null));
+        Assert.Equal(
+            ApplicationProfileInstanceProgressStateCodes.ProcessCancelled,
+            ApplicationWorkspaceProgressAdvancePreview.PreferredAdvanceCode(
+                "leg-2",
+                options,
+                ApplicationProfileInstanceProgressStateCodes.ProcessCancelled));
     }
 
     [Fact]

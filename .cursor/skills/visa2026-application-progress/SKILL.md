@@ -78,6 +78,8 @@ disable-model-invocation: false
 | Contract required / legs required message | `ApplicationProgressProfileResolver.TryValidate*` | `ProjectContract` + `MinistryLegs` |
 | Ministry column empty on progress | `ApprovalLegSnapshots` + `ApprovalLegProfileMinistryHelper.GetMinistryShortNameForProgressStep` (falls back to live profile legs) | Snapshot missing on import; heal via `EnsureSnapshots` on Application save |
 | Letter upload hidden when it should show | Workspace: `ShowMinistryLetterUpload` on current `leg-*` Result step (row may not exist yet). DetailView: `IsMinistryDecisionStateCode` + `[Appearance]` | Timeline flag vs state criteria |
+| Cancelled on Office stays “Office preparation” after Advance | History has `PROCESS_CANCELLED`; overlay on `BuildOfficeStep` + `FormatChromeCurrentStep` | Implied-office slot (no previous row) |
+| Office Result missing Submitted | `IsOfficeSubmitted` / Office `ResultOptions`; Advance still `1_REVIEW_STARTED` or `PROCESS_STARTED` | Leave-office Result, not a new timeline node |
 | Approval letter Preview shows Please wait / Adobe Reader | File is filled XFA; `ProgressLettersInlinePreview` + `PdfXfaDocument.ContainsXfa` (pdf.js, not iframe) | Preview slot occupant |
 | Application list row color wrong | **`visa2026-bo-state-colors`** — `PrimaryStateCode`, `BoStateAppearanceColors` | Not transition helper |
 | Cannot edit contract legs | `ProjectContractMinistryController` — duplicate contract row instead | Structural immutability |

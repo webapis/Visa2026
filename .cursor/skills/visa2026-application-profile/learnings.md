@@ -4,6 +4,60 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 
 ---
 
+### 2026-08-18 — Submitted on Office bar after later Approvals
+
+- Overview stepper Office node now shows Submitted + date for the life of that row; ministries still show their latest result.
+- Verify: stop F5, rebuild, F5. **8/-010** Overview — Office preparation Submitted; Türkmenenergo Approved.
+- Prevent: Do not rely on Activity alone for Submitted.
+- Cross-skill: visa2026-application-progress
+
+### 2026-08-18 — Submitted remains in History after later steps
+
+- Overview Activity and Progress History list every row with catalog names. Submitted keeps its date after Türkmenenergo is Approved.
+- Verify: stop F5, rebuild, F5. Submit then Approve — History shows Submitted and Approved.
+- Prevent: Do not cap History at 3 rows. Do not use “Sent for agreement” for Submitted.
+- Cross-skill: visa2026-application-progress
+
+### 2026-08-18 — Office Result includes Submitted
+
+- Office Result is now Submitted (default) + Cancelled. Advance records Submitted on the first ministry with the Date field. Office done is de-emphasized.
+- Verify: stop F5, rebuild, F5. **8/-010** Office Result Submitted → Advance — Türkmenenergo current · Submitted.
+- Prevent: Do not hide Submitted behind a blank Result on Office.
+- Cross-skill: visa2026-application-progress
+
+### 2026-08-18 — Office Cancelled officer-verified
+
+- Officer confirmed Office Result Cancelled → Advance shows Cancelled on the Office node.
+- Cross-skill: visa2026-application-progress
+
+### 2026-08-18 — Office Cancelled is shown on Office after Advance
+
+- History already stored Cancelled; Office badge/header stayed on Office preparation. Timeline now overlays Cancelled on the Office node (same pattern as ministries).
+- Verify: stop F5, rebuild, F5. **8/-010** Office Result Cancelled → Advance — Office shows Cancelled; ministries Pending; header Cancelled.
+- Prevent: Do not treat empty previous history as “no cancelled overlay” on implied office.
+- Cross-skill: visa2026-application-progress
+
+### 2026-08-18 — Cancelled Result belongs to this progress step
+
+- Selecting Cancelled no longer leaves Submitted / jumps to Migration. Badge follows Cancelled; Advance stores it on the ministry that was current.
+- Verify: stop F5, rebuild, F5. **8/-006** Tarkusenergo Result Cancelled — badge Cancelled; Advance keeps it on that node.
+- Prevent: Do not treat `PROCESS_CANCELLED` as a Migration-only slot.
+- Cross-skill: visa2026-application-progress
+
+### 2026-08-17 — Progress Result includes Cancelled last
+
+- Workspace Result on the current step now ends with **Cancelled**. Default remains Approved (Office Advance still starts the first ministry).
+- Verify: stop F5, rebuild, F5. **B/-008** Energetika Result — Approved, Unapproved, Cancelled.
+- Prevent: Do not auto-select Cancelled as the default Result.
+- Cross-skill: visa2026-application-progress
+
+### 2026-08-17 — Letter upload only on the current Progress edit form
+
+- Done ministries showed a dashed upload on every Approved node. Upload is only on the current ministry Result form; completed steps keep View letter.
+- Verify: stop F5, rebuild, F5. **8/-005** Progress — no upload boxes on Approved ministries.
+- Prevent: Do not show `InputFile` on `slotState != current`.
+- Cross-skill: visa2026-application-progress
+
 ### 2026-08-17 — Approval letter upload on current ministry Result
 
 - After Result belonged to the current ministry, that node often has no decision row yet so letter upload hid. Upload sits next to Result; the file is stored on Advance onto that ministry’s new decision row. Completed ministries can still add a letter on their decision row.

@@ -35,8 +35,64 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.Equal("pending", steps[4].State);
         Assert.True(string.IsNullOrEmpty(steps[1].Date));
         Assert.True(string.IsNullOrEmpty(steps[1].CurrentStateLabel));
-        Assert.Empty(steps[0].ResultOptions);
+        Assert.Contains(steps[0].ResultOptions, o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.Review1Started);
+        Assert.Equal(
+            ApplicationProfileInstanceProgressStateCodes.Review1Started,
+            steps[0].ResultOptions[0].StateCode);
+        Assert.Contains(steps[0].ResultOptions, o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.ProcessCancelled);
+        Assert.Equal(
+            ApplicationProfileInstanceProgressStateCodes.ProcessCancelled,
+            steps[0].ResultOptions[^1].StateCode);
+        Assert.DoesNotContain(
+            steps[0].ResultOptions,
+            o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.Review1Rejected);
         Assert.False(steps[0].ShowMinistryLetterUpload);
+        Assert.Equal(
+            ApplicationWorkspaceProgressTimeline.OfficeLabel,
+            ApplicationWorkspaceProgressTimeline.FormatChromeCurrentStep(steps));
+    }
+
+    [Fact]
+    public void Build_OfficeCancelled_ShowsCancelledOnOffice()
+    {
+        var profile = ThreeLegProfile();
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = profile,
+            ApplicationDate = new DateTime(2024, 8, 17),
+            ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>(),
+        };
+        application.ProgressHistory.Add(new ApplicationProfileInstanceProgress
+        {
+            ID = Guid.NewGuid(),
+            ApplicationProfileInstance = application,
+            Order = 1,
+            Date = new DateTime(2024, 8, 18),
+            State = new ApplicationState
+            {
+                Code = ApplicationProfileInstanceProgressStateCodes.ProcessCancelled,
+                NameTm = "Cancelled",
+            },
+        });
+
+        var steps = ApplicationWorkspaceProgressTimeline.Build(application, profile, default, objectSpace: null);
+
+        Assert.Equal("current", steps[0].State);
+        Assert.Equal("Cancelled", steps[0].CurrentStateLabel);
+        Assert.Equal("cancelled", steps[0].OutcomeKind);
+        Assert.Equal("18 Aug 2024", steps[0].Date);
+        Assert.False(steps[0].CanAdvance);
+        Assert.True(steps[0].CanRevert);
+        Assert.Contains("terminal", steps[0].AdvanceBlockedReason, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("pending", steps[1].State);
+        Assert.True(string.IsNullOrEmpty(steps[1].CurrentStateLabel));
+        Assert.False(steps[1].CanRevert);
+        Assert.Equal("pending", steps[4].State);
+        Assert.NotEqual("Cancelled", steps[4].CurrentStateLabel);
+        Assert.False(steps[4].CanRevert);
+        Assert.Equal(
+            "Office preparation · Cancelled",
+            ApplicationWorkspaceProgressTimeline.FormatChromeCurrentStep(steps));
     }
 
     [Fact]
@@ -66,11 +122,16 @@ public class ApplicationWorkspaceProgressTimelineTests
         var steps = ApplicationWorkspaceProgressTimeline.Build(application, profile, default, objectSpace: null);
 
         Assert.Equal("done", steps[0].State);
+        Assert.Equal("Submitted", steps[0].CurrentStateLabel);
+        Assert.Equal("14 Aug 2026", steps[0].Date);
         Assert.Equal("current", steps[1].State);
         Assert.Equal("Turkmenenergo", steps[1].Label);
         Assert.False(string.IsNullOrWhiteSpace(steps[1].CurrentStateLabel));
         Assert.Equal("14 Aug 2026", steps[1].Date);
         Assert.Equal("Submitted", steps[1].CurrentStateLabel);
+        Assert.Equal(
+            "Turkmenenergo · Submitted",
+            ApplicationWorkspaceProgressTimeline.FormatChromeCurrentStep(steps));
         Assert.Equal("pending", steps[2].State);
         Assert.Equal("pending", steps[3].State);
         Assert.Equal("pending", steps[4].State);
@@ -81,7 +142,141 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.Contains(steps[1].AdvanceOptions, o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.Review1Approved);
         Assert.Contains(steps[1].ResultOptions, o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.Review1Approved);
         Assert.Contains(steps[1].ResultOptions, o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.Review1Rejected);
+        Assert.Equal(
+            ApplicationProfileInstanceProgressStateCodes.ProcessCancelled,
+            steps[1].ResultOptions[^1].StateCode);
         Assert.True(steps[1].ShowMinistryLetterUpload);
+    }
+
+    [Fact]
+    public void Build_SubmittedThenApproved_OfficeKeepsSubmittedOnBar()
+    {
+        var profile = ThreeLegProfile();
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = profile,
+            ApplicationDate = new DateTime(2024, 8, 17),
+            ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>(),
+        };
+        application.ProgressHistory.Add(new ApplicationProfileInstanceProgress
+        {
+            ID = Guid.NewGuid(),
+            ApplicationProfileInstance = application,
+            Order = 1,
+            Date = new DateTime(2024, 8, 19),
+            State = new ApplicationState
+            {
+                Code = ApplicationProfileInstanceProgressStateCodes.Review1Started,
+                NameTm = "Sent for agreement",
+            },
+        });
+        var approved = ApprovedLeg(application, 1, null, Guid.NewGuid());
+        approved.Order = 2;
+        application.ProgressHistory.Add(approved);
+
+        var steps = ApplicationWorkspaceProgressTimeline.Build(application, profile, default, objectSpace: null);
+
+        Assert.Equal("done", steps[0].State);
+        Assert.Equal("Submitted", steps[0].CurrentStateLabel);
+        Assert.Equal("19 Aug 2024", steps[0].Date);
+        Assert.Equal("done", steps[1].State);
+        Assert.Equal("Approved", steps[1].CurrentStateLabel);
+        Assert.Equal("current", steps[2].State);
+    }
+
+    [Fact]
+    public void Build_FirstLegStartedThenCancelled_KeepsCancelledOnThatMinistry()
+    {
+        var profile = ThreeLegProfile();
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = profile,
+            ApplicationDate = DateTime.Today,
+            ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>(),
+        };
+        var started = new ApplicationProfileInstanceProgress
+        {
+            ID = Guid.NewGuid(),
+            ApplicationProfileInstance = application,
+            Order = 1,
+            Date = new DateTime(2024, 8, 14),
+            State = new ApplicationState
+            {
+                Code = ApplicationProfileInstanceProgressStateCodes.Review1Started,
+                NameTm = "Submitted",
+            },
+        };
+        var cancelled = new ApplicationProfileInstanceProgress
+        {
+            ID = Guid.NewGuid(),
+            ApplicationProfileInstance = application,
+            Order = 2,
+            Date = new DateTime(2024, 8, 17),
+            State = new ApplicationState
+            {
+                Code = ApplicationProfileInstanceProgressStateCodes.ProcessCancelled,
+                NameTm = "Cancelled",
+            },
+        };
+        application.ProgressHistory.Add(started);
+        application.ProgressHistory.Add(cancelled);
+
+        var steps = ApplicationWorkspaceProgressTimeline.Build(application, profile, default, objectSpace: null);
+
+        Assert.Equal("done", steps[0].State);
+        Assert.Equal("Submitted", steps[0].CurrentStateLabel);
+        Assert.Equal("14 Aug 2024", steps[0].Date);
+        Assert.Equal("current", steps[1].State);
+        Assert.Equal("Cancelled", steps[1].CurrentStateLabel);
+        Assert.Equal("cancelled", steps[1].OutcomeKind);
+        Assert.Equal("pending", steps[2].State);
+        Assert.True(string.IsNullOrEmpty(steps[2].CurrentStateLabel));
+        Assert.Equal("pending", steps[4].State);
+        Assert.NotEqual("Cancelled", steps[4].CurrentStateLabel);
+        Assert.False(steps[4].CanRevert);
+        Assert.True(steps[1].CanRevert);
+        Assert.Equal(
+            "Turkmenenergo · Cancelled",
+            ApplicationWorkspaceProgressTimeline.FormatChromeCurrentStep(steps));
+    }
+
+    [Fact]
+    public void Build_FirstLegApprovedThenCancelled_KeepsCancelledOnNextMinistry()
+    {
+        var profile = ThreeLegProfile();
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = profile,
+            ApplicationDate = DateTime.Today,
+            ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>(),
+        };
+        application.ProgressHistory.Add(ApprovedLeg(application, 1, null, Guid.NewGuid()));
+        application.ProgressHistory.Add(new ApplicationProfileInstanceProgress
+        {
+            ID = Guid.NewGuid(),
+            ApplicationProfileInstance = application,
+            Order = 2,
+            Date = DateTime.Today,
+            State = new ApplicationState
+            {
+                Code = ApplicationProfileInstanceProgressStateCodes.ProcessCancelled,
+                NameTm = "Cancelled",
+            },
+        });
+
+        var steps = ApplicationWorkspaceProgressTimeline.Build(application, profile, default, objectSpace: null);
+
+        Assert.Equal("done", steps[1].State);
+        Assert.Equal("Approved", steps[1].CurrentStateLabel);
+        Assert.Equal("current", steps[2].State);
+        Assert.Equal("Cancelled", steps[2].CurrentStateLabel);
+        Assert.Equal("cancelled", steps[2].OutcomeKind);
+        Assert.True(steps[2].CanRevert);
+        Assert.Equal("pending", steps[4].State);
+        Assert.False(steps[4].CanRevert);
+        Assert.Equal(
+            "Turkmenenergetika · Cancelled",
+            ApplicationWorkspaceProgressTimeline.FormatChromeCurrentStep(steps));
     }
 
     [Fact]
@@ -108,8 +303,10 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.Equal("pending", steps[4].State);
         Assert.Contains(steps[2].ResultOptions, o => o.StateCode == ApplicationProfileInstanceProgressLegCodes.ReviewApproved(2));
         Assert.Contains(steps[2].ResultOptions, o => o.StateCode == ApplicationProfileInstanceProgressLegCodes.ReviewRejected(2));
-        Assert.DoesNotContain(steps[2].ResultOptions, o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.ProcessCancelled);
-        Assert.True(steps[1].ShowMinistryLetterUpload);
+        Assert.Equal(
+            ApplicationProfileInstanceProgressStateCodes.ProcessCancelled,
+            steps[2].ResultOptions[^1].StateCode);
+        Assert.False(steps[1].ShowMinistryLetterUpload);
         Assert.NotNull(steps[1].DecisionProgressId);
         Assert.True(steps[2].ShowMinistryLetterUpload);
         Assert.Null(steps[2].DecisionProgressId);
@@ -136,9 +333,11 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.Equal("done", steps[2].State);
         Assert.Equal("done", steps[3].State);
         Assert.Equal("current", steps[4].State);
-        Assert.Empty(steps[4].ResultOptions);
+        Assert.Equal(
+            ApplicationProfileInstanceProgressStateCodes.ProcessCancelled,
+            steps[4].ResultOptions[^1].StateCode);
         Assert.False(steps[4].ShowMinistryLetterUpload);
-        Assert.True(steps[3].ShowMinistryLetterUpload);
+        Assert.False(steps[3].ShowMinistryLetterUpload);
         Assert.Contains(steps[4].AdvanceOptions, o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.ProcessStarted);
     }
 
