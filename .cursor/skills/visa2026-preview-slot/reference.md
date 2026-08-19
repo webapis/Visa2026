@@ -22,7 +22,9 @@ XAF Controller
 | `document-copies:items:{sortedItemIds}` | Document copies |
 | `progress-letters:app:{appId}` | Ministry letter catalog |
 | `progress-letters:app:{appId}` plus `preview:{progressId}` | Workspace Progress filename (`OpenPreviewOnly`) |
-| `file:{sourceType}:{objectId}` | Generic file preview |
+| `file:{sourceType}:{objectId}` | Generic file preview (`progress-letter`, `user-report-template`, `application-profile-template`) |
+
+Register new Word/Excel “look” previews as `IFilePreviewSource` + `OpenFileAsync`. Do not add a Resminamalar occupant from the Application Profile wizard (no live application to merge).
 
 ## Panel state machine
 

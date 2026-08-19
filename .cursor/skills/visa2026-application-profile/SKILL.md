@@ -62,6 +62,7 @@ disable-model-invocation: false
 | Resminamalar / nested Word–Excel on profile | [visa2026-resminamalar](../visa2026-resminamalar/SKILL.md) |
 | Document copies on roster (`ApplicationPerson` scope) | [visa2026-document-copies](../visa2026-document-copies/SKILL.md) |
 | Case tab catalog vs `#visa-preview-slot` preview-only | [visa2026-preview-slot](../visa2026-preview-slot/SKILL.md) |
+| Wizard Templates **Preview** (master Word/Excel look) | Same skill — `OpenFileAsync` File occupant, not Resminamalar merge |
 | Person dossier + Start application entry | [visa2026-person-dossier](../visa2026-person-dossier/SKILL.md) |
 | Schema deploy / `FORCE_XAF_DB_UPDATE` | [visa2026-lifecycle-docker](../visa2026-lifecycle-docker/SKILL.md) |
 | VISA2014 import / dual-read Type FK | [visa2014-to-visa2026-import](../visa2014-to-visa2026-import/SKILL.md) |
@@ -121,6 +122,7 @@ flowchart LR
 | Expired visa/passport/WP/invitation/border zone/medical auto-linked | `ApplicationProfileInstancePersonValidItems.CanLink*` | Officer §10.2 gate; import (`IsDataImport`) is exempt; sticky existing links stay |
 | Import sets Type only | VISA2014 mapper | Map Type → Profile FK in import wave |
 | Case tab Preview opens duplicate catalog in slot | `OpenPreviewOnly` on slot request | Tab owns catalog; slot viewer only — **preview-slot** |
+| Wizard Templates Preview should look filled | No live application in Configure | File occupant + office-to-PDF of the **master** (placeholders) |
 | Document copies preview fails on roster line | `TryBuildMergedPdfForRoster` | Roster IDs are `ApplicationPerson`, not `ApplicationItem` |
 | Person detail crashes after Open from case | `PersonDetailOpenHelper` | Do not dispose ObjectSpace before `ShowView` |
 | Case summary tiles empty / Edit does not save | Profile `Require*` off; officer-shell `HeaderFieldChanged` | `ApplicationWorkspaceCaseHeaderFieldsHelper`; `OfficerShellPropertyEditor.SaveHeaderFieldAsync` |
@@ -149,6 +151,7 @@ When starting a slice, set its row to **In progress** in IMPLEMENTATION_PLAN; se
 
 | Entry point | Main area | `#visa-preview-slot` |
 |-------------|-----------|----------------------|
+| Configure profile → Templates **Preview** | Wizard list / Edit modal | **File occupant** (`OpenFileAsync` master PDF) |
 | Case workspace tab → **Preview** | Catalog / list | **Viewer only** (`OpenPreviewOnly` + focus key) |
 | Case workspace Progress → ministry letter filename | Timeline (current file name) | **Viewer only** (`ProgressLettersSlotRequest.OpenPreviewOnly` + `FocusProgressId`) |
 | Rail / legacy DetailView action | — | Full catalog in slot |

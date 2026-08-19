@@ -34,9 +34,21 @@ Officer-facing **right-side panel** for inline catalogs and document preview. Re
 | `RejectionDocumentCopies` *(planned)* | ↑ | `OpenRejectionDocumentCopiesAsync` *(planned)* | ↑ |
 | `BorderZoneDocumentCopies` *(planned)* | ↑ | `OpenBorderZoneDocumentCopiesAsync` *(planned)* | ↑ — **`BorderZoneDocument` + `Documents` same release** (mirror Invitation/WorkPermit) |
 | `ProgressLetters` | `ProgressLettersSlotPanel` | `OpenProgressLettersAsync` | Application progress ministry letters. Case workspace Progress filename uses `OpenPreviewOnly` (viewer only). ListView toolbar / grid link still opens the slot catalog. |
-| `File` | `VisaFilePreviewDrawer` | `OpenFileAsync` / JS bridge | File preview sources registry |
+| `File` | `VisaFilePreviewDrawer` | `OpenFileAsync` / JS bridge | File preview sources registry (`progress-letter`, `user-report-template`, `application-profile-template`) |
 
 **Occupant keys:** `VisaPreviewSlotOccupantKeys` (e.g. `resminamalar:app:{id}`, `document-copies:items:{ids}`, `progress-letters:app:{id}` or `…|preview:{progressId}` when `OpenPreviewOnly`, `file:{source}:{id}`).
+
+## File preview sources (`IFilePreviewSource`)
+
+Reuse the **File** occupant — do not add a new `VisaPreviewSlotMode` for “look at a Word/Excel master”. Convert office bytes to PDF with `ApplicationWordReportOfficePreviewPdfConverter` so the drawer iframe can render.
+
+| `SourceType` | `objectId` | Used from |
+|--------------|------------|-----------|
+| `progress-letter` | `ApplicationProfileInstanceProgress.ID` | Workspace Progress letter |
+| `user-report-template` | `UserReportTemplate.ID` | Application Profile wizard Shared catalog Preview |
+| `application-profile-template` | `ApplicationProfileTemplate.ID` | Wizard Profile-specific Preview (wizard ObjectSpace first so unsaved uploads work) |
+
+Preview of a template master shows **placeholders**, not a merged Resminamalar package. That merge still requires a live `ApplicationProfileInstance`.
 
 ## Catalog vs preview (exclusive mode)
 
@@ -101,6 +113,7 @@ Officer caption for the report package occupant is **Templates** (not Document C
 | Slot panels | `ResminamalarSlotPanel.razor`, `DocumentCopiesSlotPanel.razor`, `ProgressLettersSlotPanel.razor` |
 | Inline previews | `ReportPackageInlinePreview.razor`, `DocumentCopiesInlinePreview.razor`, `ProgressLettersInlinePreview.razor` |
 | Close policy | `Visa2026.Blazor.Server/Controllers/VisaPreviewSlotCloseController.cs` |
+| File preview sources | `Visa2026.Blazor.Server/Services/*FilePreviewSource.cs`, `OfficeFilePreviewResultFactory.cs` |
 | Shell markup | `Visa2026.Blazor.Server/Pages/_Host.cshtml` (`#visa-preview-slot`, `visaPreviewDrawer.*` JS) |
 | Shell CSS | `Visa2026.Blazor.Server/wwwroot/css/site.css` (`.visa-preview-slot*`, `.resminamalar-slot-panel*`) |
 | Resminamalar catalog CSS | `Visa2026.Blazor.Server/wwwroot/css/resminamalar-catalog.css` |
@@ -111,6 +124,7 @@ Feature-specific catalog logic stays in feature components and Module services �
 
 ## Adding a new occupant (checklist)
 
+0. If the need is “show this stored Word/Excel/PDF”, register an `IFilePreviewSource` and call `OpenFileAsync` — do not add a mode.
 1. Add `VisaPreviewSlotMode` value + request DTO + `Open*Async` on `IVisaPreviewSlotService`.
 2. Add `VisaPreviewSlotOccupantKeys.For*` stable key; bump `Version` on open.
 3. Create `*SlotPanel.razor` (reuse `resminamalar-slot-panel` classes for catalog card).

@@ -253,6 +253,47 @@
 }
 
 .ap-wizard__list { border: 1px solid var(--ap-line); border-radius: 8px; overflow: hidden; }
+.ap-wizard__list--scroll {
+    max-height: min(22rem, 52vh);
+    overflow-y: auto;
+}
+.ap-wizard__shared-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 10px;
+}
+.ap-wizard__shared-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 180px;
+    border: 1px solid var(--ap-line);
+    background: #fff;
+    border-radius: 8px;
+    padding: 6px 10px;
+}
+.ap-wizard__shared-search-icon {
+    color: var(--ap-muted);
+    font-size: 0.95rem;
+    line-height: 1;
+}
+.ap-wizard__shared-search input {
+    border: 0;
+    outline: 0;
+    width: 100%;
+    font: inherit;
+    font-size: 0.85rem;
+    background: transparent;
+}
+.ap-wizard__shared-count {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--ap-muted);
+    white-space: nowrap;
+}
 .ap-wizard__list-row {
     display: grid;
     grid-template-columns: 36px 1fr auto;
@@ -455,7 +496,7 @@
     .ap-wizard__template-edit { grid-template-columns: 1fr 1fr; }
 }
 .ap-wizard__sort-input { max-width: 72px; }
-.ap-wizard__row-actions { display: flex; gap: 8px; }
+.ap-wizard__row-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
 .ap-wizard__add-template { margin-top: 10px; }
 /* —— Step 4: scoped catalogs + Add/Edit modals (2026-08-12 prototypes) —— */
 .ap-wizard__section--scope { padding-top: 4px; }

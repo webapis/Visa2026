@@ -19,6 +19,12 @@ public static class ApplicationProfileWizardTemplateCatalog
     public const string CategoryRegistration = "Registration";
     public const string CategoryBorderZone = "BorderZone";
 
+    /// <summary>
+    /// User Report Templates whose name contains this marker are contract-bound
+    /// letters officers upload under Profile-specific — not Shared Include.
+    /// </summary>
+    public const string ProfileSpecificUploadNameMarker = "GT-15";
+
     public static readonly (string Key, string Label)[] CategoryChips =
     [
         (CategoryInvitation, "Invitation"),
@@ -71,6 +77,8 @@ public static class ApplicationProfileWizardTemplateCatalog
         foreach (var template in templates)
         {
             var row = ToRow(template);
+            if (IsProfileSpecificUploadOnly(row.Name))
+                continue;
             if (row.Scope == ApplicationProfileTemplateCatalogScope.Global)
                 global.Add(row);
             else
@@ -95,9 +103,41 @@ public static class ApplicationProfileWizardTemplateCatalog
         IEnumerable<CatalogRow>? category) =>
         (global ?? Array.Empty<CatalogRow>())
             .Concat(category ?? Array.Empty<CatalogRow>())
+            .Where(r => !IsProfileSpecificUploadOnly(r.Name))
             .OrderBy(r => r.SortOrder)
             .ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
             .ToList();
+
+    public static bool IsProfileSpecificUploadOnly(string? templateName) =>
+        !string.IsNullOrWhiteSpace(templateName)
+        && templateName.Contains(ProfileSpecificUploadNameMarker, StringComparison.OrdinalIgnoreCase);
+
+    public static bool MatchesSharedSearch(CatalogRow row, string? query)
+    {
+        if (row == null)
+            return false;
+        if (string.IsNullOrWhiteSpace(query))
+            return true;
+
+        var q = query.Trim();
+        if (!string.IsNullOrEmpty(row.Name)
+            && row.Name.Contains(q, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        var kind = row.Kind == ApplicationProfileTemplateKind.Excel ? "Excel" : "Word";
+        if (kind.Contains(q, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        var data = row.DataScope switch
+        {
+            ApplicationProfileTemplateDataScope.ApplicationHeader => "header",
+            ApplicationProfileTemplateDataScope.Both => "header roster",
+            _ => "people m2m",
+        };
+        return data.Contains(q, StringComparison.OrdinalIgnoreCase);
+    }
 
     /// <summary>
     /// Families this profile is likely to Include: May produce flags, plus Registration related-to.

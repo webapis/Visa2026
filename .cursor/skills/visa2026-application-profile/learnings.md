@@ -4,6 +4,34 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 
 ---
 
+### 2026-08-19 — Wizard Preview links did not open the side panel
+
+- Preview on Templates & person used C# `OpenFileAsync` from the wizard editor. The File occupant is owned by `VisaPreviewSlotHost` (separate root in `_Host.cshtml`). Result: Preview links rendered, slot stayed closed. Preview now calls `visaPreviewDrawer.open` like other file links.
+- Verify: stop F5, rebuild, F5, **Ctrl+F5**. Click Preview on Borcnama — right panel PDF, not only the wizard.
+- Prevent: Do not `@inject IVisaPreviewSlotService` for File preview from the profile wizard.
+- Cross-skill: application-profile | visa2026-preview-slot
+
+### 2026-08-19 — Wizard template Preview is the stored master in the side panel
+
+- Preview on Profile-specific and Shared rows (and Edit → Preview actual layout) opens `#visa-preview-slot` File occupant. Word/Excel is converted to PDF so officers see page layout with placeholders. This is not Resminamalar merge (no application instance in Configure). Unsaved uploads use the wizard ObjectSpace. Preview stays available when the profile is config-locked.
+- Verify: stop F5, rebuild, F5. Templates & person → Preview Borcnama; slot PDF; leave Configure → slot closes.
+- Prevent: Do not invent a new slot mode. Do not merge against a live application from the wizard.
+- Cross-skill: application-profile | visa2026-preview-slot | visa2026-resminamalar
+
+### 2026-08-19 — Shared catalog search + inner scroll
+
+- Shared catalog has a search box (name, Word/Excel, People/header, included). The list scrolls inside the pane after **8** visible rows so person checkboxes stay reachable. Count shows filtered / total.
+- Verify: stop F5, rebuild, F5. Templates & person → type Borcnama in Shared search; list shrinks. With many rows, scroll inside Shared, not the whole wizard. `MatchesSharedSearch_FiltersByNameKindAndData`.
+- Prevent: Do not grow Shared to full page height. Do not add a second Suggested filter.
+- Cross-skill: application-profile
+
+### 2026-08-19 — GT-15 letters stay off Shared catalog
+
+- Names containing **GT-15** are contract-bound letters. Shared Include list skips them; officers upload via **+ Add template** on Profile-specific (and pick the Project contract). Already-included GT-15 nested rows still show in the Profile-specific list so they can be edited or removed. Seeded `UserReportTemplate` rows are not deleted.
+- Verify: stop F5, rebuild, F5. Shared catalog has no `GT-15_*`. Add those files under Profile-specific. `MergeShared_OmitsGt15ContractLetters`.
+- Prevent: Do not put GT-15 masters back on Shared Include. Do not deactivate the seed files unless asked — hide from this catalog only.
+- Cross-skill: application-profile | visa2026-user-report-templates
+
 ### 2026-08-19 — Officer template scopes are Profile-specific and Shared only
 
 - Templates & person shows two lists: **Profile-specific** (this profile, contract/migration filter) and **Shared** (Include/Exclude). No Category/Global labels, no suggestion chips, no family tags. Add/Edit Scope pills are the same two values. Shared Add writes Global (no type links). Promoting a profile-only file to Shared is Global + confirm; an already-typed master stays typed internally. Overview scope chip also says Shared.

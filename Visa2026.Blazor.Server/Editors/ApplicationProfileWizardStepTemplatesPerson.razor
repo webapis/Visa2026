@@ -15,6 +15,10 @@
 <div class="ap-wizard__panel-head">
     <h2>Templates &amp; person data</h2>
     <p>Word/Excel files live on User Report Templates. Profile-specific files belong to this profile; Shared files are included or excluded here.</p>
+    @if (!string.IsNullOrEmpty(_previewStatus))
+    {
+        <p class="ap-wizard__status is-error">@_previewStatus</p>
+    }
 </div>
 <div class="ap-wizard__panel-body">
     @* —— Profile-specific —— *@
@@ -23,7 +27,7 @@
             <h3>ApplicationProfileInstance templates</h3>
             <span class="ap-wizard__badge ap-wizard__badge--profile">Profile-specific</span>
         </div>
-        <p class="ap-wizard__hint">This profile only. Assign a Project contract (Via ministry) or Migration service (Direct migration) so the file appears only on matching applications. Leave empty to show for all.</p>
+        <p class="ap-wizard__hint">This profile only. Upload GT-15 contract letters here. Assign a Project contract (Via ministry) or Migration service (Direct migration) so the file appears only on matching applications. Leave empty to show for all. Preview shows the stored Word/Excel layout (placeholders), not a filled application.</p>
         <div class="ap-wizard__list">
             @if (ProfileTemplates.Count > 0)
             {
@@ -50,11 +54,18 @@
                                 <option value="@item.Id.ToString("D")">@item.DisplayName</option>
                             }
                         </select>
-                        @if (!Disabled)
+                        @if (CanPreviewProfileTemplate(template) || !Disabled)
                         {
                             <div class="ap-wizard__row-actions">
-                                <button type="button" class="ap-wizard__link" @onclick="() => OpenEdit(template)">Edit</button>
-                                <button type="button" class="ap-wizard__link" @onclick="() => OnRemoveTemplate.InvokeAsync(template)">Remove</button>
+                                @if (CanPreviewProfileTemplate(template))
+                                {
+                                    <button type="button" class="ap-wizard__link" @onclick="() => PreviewProfileTemplateAsync(template)">Preview</button>
+                                }
+                                @if (!Disabled)
+                                {
+                                    <button type="button" class="ap-wizard__link" @onclick="() => OpenEdit(template)">Edit</button>
+                                    <button type="button" class="ap-wizard__link" @onclick="() => OnRemoveTemplate.InvokeAsync(template)">Remove</button>
+                                }
                             </div>
                         }
                     </div>
@@ -77,15 +88,33 @@
             <h3>Shared catalog</h3>
             <span class="ap-wizard__badge ap-wizard__badge--global">Shared</span>
         </div>
-        <p class="ap-wizard__hint">Include or exclude a User Report Template for this profile.</p>
-        <div class="ap-wizard__list">
+        <p class="ap-wizard__hint">Include or exclude a User Report Template for this profile. Preview opens the master file layout in the side panel.</p>
+        @if (_sharedRows.Count > 0)
+        {
+            <div class="ap-wizard__shared-toolbar">
+                <label class="ap-wizard__shared-search">
+                    <span class="ap-wizard__shared-search-icon" aria-hidden="true">⌕</span>
+                    <input type="search"
+                           value="@_sharedSearch"
+                           @oninput="OnSharedSearchInput"
+                           placeholder="Search shared templates…"
+                           aria-label="Search shared templates" />
+                </label>
+                <span class="ap-wizard__shared-count">@FilteredSharedRows.Count / @_sharedRows.Count</span>
+            </div>
+        }
+        <div class="ap-wizard__list @(FilteredSharedRows.Count > SharedCatalogScrollAfterCount ? "ap-wizard__list--scroll" : null)">
             @if (_sharedRows.Count == 0)
             {
                 <p class="ap-wizard__hint">No shared User Report Templates found.</p>
             }
+            else if (FilteredSharedRows.Count == 0)
+            {
+                <p class="ap-wizard__hint">No templates match “@_sharedSearch”.</p>
+            }
             else
             {
-                @foreach (var row in _sharedRows)
+                @foreach (var row in FilteredSharedRows)
                 {
                     var included = IsIncluded(row.Name);
                     <div class="ap-wizard__list-row ap-wizard__list-row--shared">
@@ -95,16 +124,23 @@
                             <span class="ap-wizard__shared-meta">@FormatDataScope(row.DataScope)</span>
                         </span>
                         <span class="ap-wizard__tag @(included ? "ap-wizard__tag--ok" : null)">@(included ? "included" : "not included")</span>
-                        @if (!Disabled)
+                        @if (CanPreviewCatalogRow(row) || !Disabled)
                         {
                             <div class="ap-wizard__row-actions">
-                                @if (included)
+                                @if (CanPreviewCatalogRow(row))
                                 {
-                                    <button type="button" class="ap-wizard__link" @onclick="() => OpenEditCatalog(row)">Edit</button>
+                                    <button type="button" class="ap-wizard__link" @onclick="() => PreviewCatalogRowAsync(row)">Preview</button>
                                 }
-                                <button type="button" class="ap-wizard__link" @onclick="() => ToggleIncludeCatalog(row)">
-                                    @(included ? "Exclude" : "Include")
-                                </button>
+                                @if (!Disabled)
+                                {
+                                    @if (included)
+                                    {
+                                        <button type="button" class="ap-wizard__link" @onclick="() => OpenEditCatalog(row)">Edit</button>
+                                    }
+                                    <button type="button" class="ap-wizard__link" @onclick="() => ToggleIncludeCatalog(row)">
+                                        @(included ? "Exclude" : "Include")
+                                    </button>
+                                }
                             </div>
                         }
                     </div>
@@ -292,6 +328,13 @@
                         <span>@FormatKind(_editKind) · @_editFileSizeLabel · Valid</span>
                         <span class="ap-wizard__tag ap-wizard__tag--ok">✓</span>
                     </div>
+                    <button type="button"
+                            class="ap-wizard__btn ap-wizard__btn--secondary ap-wizard__btn--block"
+                            disabled="@(!CanPreviewEdit)"
+                            @onclick="PreviewEditAsync">
+                        Preview actual layout
+                    </button>
+                    <p class="ap-wizard-edit-action__hint">Opens the stored Word/Excel file as PDF in the side panel (placeholders visible).</p>
                 </div>
                 <div class="ap-wizard-edit-side">
                     <div class="ap-wizard-edit-action">
@@ -442,6 +485,7 @@
     [Parameter, EditorRequired] public ApplicationProfile Profile { get; set; } = null!;
     [Parameter] public bool Disabled { get; set; }
     [Parameter] public IObjectSpace? ObjectSpace { get; set; }
+    [Parameter] public string? OwnerViewId { get; set; }
     [Parameter] public ApplicationProfileWizardLookupData Lookups { get; set; } =
         ApplicationProfileWizardLookupData.Empty;
     [Parameter] public EventCallback OnAddTemplate { get; set; }
@@ -450,6 +494,8 @@
 
     private IReadOnlyList<ApplicationProfileWizardTemplateCatalog.CatalogRow> _sharedRows =
         Array.Empty<ApplicationProfileWizardTemplateCatalog.CatalogRow>();
+    private string _sharedSearch = string.Empty;
+    private const int SharedCatalogScrollAfterCount = 8;
 
     private readonly DataScopeOption[] _dataScopeOptions =
     [
@@ -478,6 +524,7 @@
 
     private bool _showAddModal;
     private bool _showEditModal;
+    private string? _previewStatus;
     private ApplicationProfileTemplateCatalogScope _addScope = ApplicationProfileTemplateCatalogScope.ProfileSpecific;
     private ApplicationProfileTemplateDataScope _addDataScope = ApplicationProfileTemplateDataScope.PeopleM2M;
     private string _addName = string.Empty;
@@ -538,9 +585,29 @@
         }
     }
 
+    private void OnSharedSearchInput(ChangeEventArgs e) =>
+        _sharedSearch = e.Value?.ToString() ?? string.Empty;
+
+    private IReadOnlyList<ApplicationProfileWizardTemplateCatalog.CatalogRow> FilteredSharedRows =>
+        _sharedRows
+            .Where(r => ApplicationProfileWizardTemplateCatalog.MatchesSharedSearch(r, _sharedSearch)
+                || IncludedSearchHit(r.Name, _sharedSearch))
+            .ToList();
+
+    private bool IncludedSearchHit(string name, string query)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+            return false;
+        var q = query.Trim();
+        var label = IsIncluded(name) ? "included" : "not included";
+        return label.Contains(q, StringComparison.OrdinalIgnoreCase);
+    }
+
     private IReadOnlyList<ApplicationProfileTemplate> ProfileTemplates =>
         (Profile.NestedTemplates ?? Array.Empty<ApplicationProfileTemplate>())
-            .Where(t => t != null && t.CatalogScope == ApplicationProfileTemplateCatalogScope.ProfileSpecific)
+            .Where(t => t != null
+                && (t.CatalogScope == ApplicationProfileTemplateCatalogScope.ProfileSpecific
+                    || ApplicationProfileWizardTemplateCatalog.IsProfileSpecificUploadOnly(t.TemplateName)))
             .OrderBy(t => t.SortOrder)
             .ThenBy(t => t.TemplateName)
             .ToList();
@@ -605,6 +672,68 @@
     private static bool HasFile(ApplicationProfileTemplate template) =>
         template.TemplateFile is { Size: > 0 }
         || (template.TemplateFile?.Content?.Length > 0);
+
+    private bool CanPreviewProfileTemplate(ApplicationProfileTemplate template)
+    {
+        if (HasFile(template))
+            return true;
+        if (ObjectSpace == null)
+            return false;
+        var linked = ApplicationProfileTemplateUserReportBridge.TryFindByName(ObjectSpace, template.TemplateName);
+        return linked != null && ApplicationProfileTemplateUserReportBridge.HasExportableContent(linked);
+    }
+
+    private static bool CanPreviewCatalogRow(ApplicationProfileWizardTemplateCatalog.CatalogRow row) =>
+        row.FileSizeBytes > 0;
+
+    private bool CanPreviewEdit =>
+        _linkedUserReportTemplateId != Guid.Empty
+        || (_editEntity != null && CanPreviewProfileTemplate(_editEntity));
+
+    private Task PreviewProfileTemplateAsync(ApplicationProfileTemplate template) =>
+        OpenTemplatePreviewAsync(ApplicationProfileTemplateFilePreviewSource.Key, template.ID);
+
+    private Task PreviewCatalogRowAsync(ApplicationProfileWizardTemplateCatalog.CatalogRow row) =>
+        OpenTemplatePreviewAsync(UserReportTemplateFilePreviewSource.Key, row.UserReportTemplateId);
+
+    private Task PreviewEditAsync()
+    {
+        if (_linkedUserReportTemplateId != Guid.Empty)
+            return OpenTemplatePreviewAsync(UserReportTemplateFilePreviewSource.Key, _linkedUserReportTemplateId);
+
+        if (_editEntity != null)
+            return PreviewProfileTemplateAsync(_editEntity);
+
+        _previewStatus = "No file to preview yet.";
+        return Task.CompletedTask;
+    }
+
+    private async Task OpenTemplatePreviewAsync(string sourceType, Guid objectId)
+    {
+        _previewStatus = null;
+        if (string.IsNullOrWhiteSpace(sourceType) || objectId == Guid.Empty)
+        {
+            _previewStatus = "No file to preview yet. Save the profile after upload, then Preview again.";
+            return;
+        }
+
+        try
+        {
+            await JS.InvokeVoidAsync(
+                "visaPreviewDrawerOpenFile",
+                sourceType,
+                objectId.ToString("D"),
+                OwnerViewId ?? string.Empty);
+        }
+        catch (JSDisconnectedException)
+        {
+            _previewStatus = "Preview panel is not connected. Refresh the page and try again.";
+        }
+        catch (Exception)
+        {
+            _previewStatus = "Preview panel did not open. Hard-refresh (Ctrl+F5) and try again.";
+        }
+    }
 
     private void OpenAdd()
     {

@@ -533,19 +533,25 @@
                 window.visaPreviewDrawer._hostRef = hostRef;
             };
 
+            window.visaPreviewDrawerOpenFile = function (sourceType, objectId, ownerViewId) {
+                window.visaPreviewDrawer.open(sourceType, objectId, null, ownerViewId);
+            };
+
             window.visaPreviewDrawer.unregisterHost = function () {
                 window.visaPreviewDrawer._hostRef = null;
             };
 
-            window.visaPreviewDrawer.open = function (sourceType, objectId, event) {
-                if (event) {
+            window.visaPreviewDrawer.open = function (sourceType, objectId, event, ownerViewId) {
+                if (event && typeof event.preventDefault === 'function') {
                     event.preventDefault();
                     event.stopPropagation();
                     event.stopImmediatePropagation();
+                } else if (typeof event === 'string' && !ownerViewId) {
+                    ownerViewId = event;
                 }
                 var ref = window.visaPreviewDrawer._hostRef;
                 if (ref) {
-                    ref.invokeMethodAsync("OpenFileFromJsAsync", sourceType, objectId);
+                    ref.invokeMethodAsync("OpenFileFromJsAsync", sourceType, objectId, ownerViewId || "");
                 }
             };
 

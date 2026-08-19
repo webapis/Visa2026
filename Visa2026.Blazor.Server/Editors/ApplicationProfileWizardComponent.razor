@@ -103,6 +103,7 @@
                     <ApplicationProfileWizardStepTemplatesPerson Profile="Profile"
                         Disabled="IsReadOnly"
                         ObjectSpace="ObjectSpace"
+                        OwnerViewId="OwnerViewId"
                         Lookups="Lookups"
                         OnAddTemplate="AddTemplateCallback"
                         OnRemoveTemplate="RemoveTemplateCallback"
@@ -147,6 +148,7 @@
 
     [Parameter] public ApplicationProfile? Profile { get; set; }
     [Parameter] public IObjectSpace? ObjectSpace { get; set; }
+    [Parameter] public string? OwnerViewId { get; set; }
     [Parameter] public bool IsLoading { get; set; }
     [Parameter] public bool IsReadOnly { get; set; }
     [Parameter] public string? StatusMessage { get; set; }

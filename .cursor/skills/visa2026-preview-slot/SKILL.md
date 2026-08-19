@@ -37,6 +37,7 @@ disable-model-invocation: false
 | Person dossier (main area; not a slot occupant) | [visa2026-person-dossier](../visa2026-person-dossier/SKILL.md) |
 | ApplicationProgress ministry letters domain | [visa2026-application-progress](../visa2026-application-progress/SKILL.md) |
 | User template merge / placeholders | [visa2026-user-report-templates](../visa2026-user-report-templates/SKILL.md) |
+| Application Profile wizard template Preview | [visa2026-application-profile](../visa2026-application-profile/SKILL.md) |
 | Docker / deploy | [visa2026-lifecycle-docker](../visa2026-lifecycle-docker/SKILL.md) |
 
 **Long reference:** [reference.md](./reference.md). **Experience log:** [learnings.md](./learnings.md). **Maturity:** [MATURITY.md](./MATURITY.md).
@@ -52,6 +53,7 @@ disable-model-invocation: false
 | Slot text invisible (dark theme) | `visaPreviewDrawer.syncSlotTheme()`; slot outside `<app>` | **This skill** |
 | Resize handle not draggable | Grid on `#visa-app-shell`, handle `z-index`, `--visa-preview-slot-width` | **This skill** |
 | Slot closes when nested ListView still active | `OwnerViewId` + `VisaPreviewSlotCloseController` | **This skill** |
+| Wizard Templates Preview should merge an application | Wizard has no instance; File occupant + PDF conversion of the master | **This skill** + **application-profile** |
 | Catalog empty / Check chips / ZIP fail | Feature domain | **resminamalar** / **document-copies** / **person-document-copies** |
 | Preview generates but wrong PDF bytes | Generator / merge path | **resminamalar** / **document-copies** / **pdf-form-mapping** |
 | Approval letter Preview shows Please wait / Adobe Reader | Uploaded file is XFA; `ProgressLettersInlinePreview` must use pdf.js (`PdfXfaDocument.ContainsXfa`), not iframe | **This skill** + application-progress |

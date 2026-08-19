@@ -55,6 +55,32 @@ public class ApplicationProfileWizardTemplateCatalogTests
         Assert.Equal(new[] { "Borcnama", "Forma 16" }, merged.Select(r => r.Name).ToArray());
     }
 
+    [Fact]
+    public void MergeShared_OmitsGt15ContractLetters()
+    {
+        var merged = ApplicationProfileWizardTemplateCatalog.MergeShared(
+            new[] { Row("Borcnama", Array.Empty<string>(), sort: 49) },
+            new[]
+            {
+                Row("GT-15_Elyasow_ckl", new[] { ApplicationProfileWizardTemplateCatalog.CategoryInvitation }, sort: 58),
+                Row("Forma 16", new[] { ApplicationProfileWizardTemplateCatalog.CategoryVisa }, sort: 50),
+            });
+
+        Assert.Equal(new[] { "Borcnama", "Forma 16" }, merged.Select(r => r.Name).ToArray());
+        Assert.True(ApplicationProfileWizardTemplateCatalog.IsProfileSpecificUploadOnly("GT-15_MINSTROY_uzt"));
+        Assert.False(ApplicationProfileWizardTemplateCatalog.IsProfileSpecificUploadOnly("Borcnama"));
+    }
+
+    [Fact]
+    public void MatchesSharedSearch_FiltersByNameKindAndData()
+    {
+        var row = Row("Borcnama", Array.Empty<string>());
+        Assert.True(ApplicationProfileWizardTemplateCatalog.MatchesSharedSearch(row, null));
+        Assert.True(ApplicationProfileWizardTemplateCatalog.MatchesSharedSearch(row, "borc"));
+        Assert.True(ApplicationProfileWizardTemplateCatalog.MatchesSharedSearch(row, "word"));
+        Assert.False(ApplicationProfileWizardTemplateCatalog.MatchesSharedSearch(row, "Forma"));
+    }
+
     private static ApplicationProfileWizardTemplateCatalog.CatalogRow Row(
         string name,
         IReadOnlyList<string> keys,

@@ -92,11 +92,7 @@ else if (_state.Mode == VisaPreviewSlotMode.PlaceholderManual)
     private void OnSlotStateChanged()
     {
         _state = SlotService.State;
-        _ = InvokeAsync(async () =>
-        {
-            await ApplyStateAsync();
-            StateHasChanged();
-        });
+        _ = InvokeAsync(StateHasChanged);
     }
 
     private async Task ApplyStateAsync()
@@ -111,9 +107,11 @@ else if (_state.Mode == VisaPreviewSlotMode.PlaceholderManual)
         if (_state.Mode == VisaPreviewSlotMode.File
             && !string.IsNullOrWhiteSpace(_state.FileSourceType)
             && _state.FileObjectId != Guid.Empty
-            && _state.Version != _lastFileOpenVersion
-            && _fileDrawer != null)
+            && _state.Version != _lastFileOpenVersion)
         {
+            if (_fileDrawer == null)
+                return;
+
             _lastFileOpenVersion = _state.Version;
             await _fileDrawer.OpenFilePreviewAsync(_state.FileSourceType, _state.FileObjectId);
         }
@@ -124,12 +122,12 @@ else if (_state.Mode == VisaPreviewSlotMode.PlaceholderManual)
         OpenFileFromJsAsync(sourceType, objectIdText);
 
     [JSInvokable]
-    public Task OpenFileFromJsAsync(string sourceType, string objectIdText)
+    public Task OpenFileFromJsAsync(string sourceType, string objectIdText, string? ownerViewId = null)
     {
         if (!Guid.TryParse(objectIdText, out var objectId) || objectId == Guid.Empty)
             return Task.CompletedTask;
 
-        return SlotService.OpenFileAsync(sourceType, objectId);
+        return SlotService.OpenFileAsync(sourceType, objectId, ownerViewId);
     }
 
     [JSInvokable]

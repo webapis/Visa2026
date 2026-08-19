@@ -13,6 +13,7 @@ using Visa2026.Module.BusinessObjects.ApplicationProfileWizard;
 using Visa2026.Module.Editors;
 using Visa2026.Module.Services.ApplicationProfileCatalog;
 using Visa2026.Module.Services.ApplicationProfileWizard;
+using Visa2026.Module.Services.PreviewSlot;
 
 namespace Visa2026.Blazor.Server.Editors;
 
@@ -71,6 +72,7 @@ public class ApplicationProfileWizardPropertyEditor : BlazorPropertyEditorBase, 
 
             model.ObjectSpace = _session?.ObjectSpace;
             model.Profile = profile;
+            model.OwnerViewId = VisaPreviewSlotViewHelper.ResolveOwnerViewId(View);
             model.IsReadOnly = profile != null
                 && _session?.ObjectSpace != null
                 && ApplicationProfileLockHelper.IsProfileConfigLocked(profile, _session.ObjectSpace);

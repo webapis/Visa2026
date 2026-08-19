@@ -23,6 +23,25 @@ Purpose: **shell, layout, occupants, catalog card UX, JS/CSS** — not Resminama
 
 ## Entries
 
+### 2026-08-19 — Wizard template Preview must use visaPreviewDrawer.open JS
+
+- **Symptom**: Configure profile Templates showed Preview links, but `#visa-preview-slot` never opened (wizard stayed full width).
+- **Root cause**: File occupant lives on the `VisaPreviewSlotHost` root in `_Host.cshtml`. Grid file links already call `window.visaPreviewDrawer.open` → host `OpenFileFromJsAsync`. Wizard called C# `IVisaPreviewSlotService.OpenFileAsync` on the XAF `App` circuit, so the host never received File mode.
+- **Fix**: Wizard Preview invokes `visaPreviewDrawer.open(sourceType, objectId, null, ownerViewId)`. Host `OpenFileFromJsAsync` accepts ownerViewId. File drawer load waits until `@ref` exists (OnAfterRender).
+- **Test**: Stop F5, rebuild, F5, Ctrl+F5. Templates & person → Preview Borcnama → right slot PDF with placeholders.
+- **Prevent**: Do not open the File occupant only via `@inject IVisaPreviewSlotService` from an XAF property editor.
+- **Cross-skill**: preview-slot | application-profile
+
+### 2026-08-19 — Application Profile wizard template Preview uses File occupant
+
+- **Symptom**: Officers needed to see the actual Word/Excel layout from Configure profile Templates & person, not a SAMPLE sketch.
+- **Try**: Reuse `#visa-preview-slot` File occupant (`OpenFileAsync`). Convert stored .docx/.xlsx to PDF with `ApplicationWordReportOfficePreviewPdfConverter`. Do not open Resminamalar (no live application to merge).
+- **Test**: `dotnet build Visa2026.slnx -c Debug`. Manual: stop F5, rebuild, F5. App_Inv_And_WP → Templates & person → Preview on Shared (e.g. Borcnama) and a Profile-specific file → slot shows layout PDF; Close X; leaving Configure closes the slot.
+- **Root cause**: Wizard is configuration, not merge.
+- **Fix**: `user-report-template` and `application-profile-template` `IFilePreviewSource`s; Preview links on both lists and Edit modal. Wizard ObjectSpace first so unsaved uploads still preview.
+- **Prevent**: Do not add a new `VisaPreviewSlotMode` for template look. Do not iframe .docx.
+- **Cross-skill**: preview-slot | application-profile | resminamalar
+
 ### 2026-08-17 — Ministry letter Preview never iframes the PDF
 
 - **Symptom**: Workspace Progress **View letter** on a filled Application form (`ApplicationForm_…pdf`) showed Chrome’s PDF toolbar and the XFA “Please wait / Adobe Reader” sheet plus Spire evaluation text.

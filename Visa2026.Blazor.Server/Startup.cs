@@ -291,6 +291,8 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<HeaderDocumentFileAccess>();
             services.AddScoped<ApplicationProfileInstanceProgressMinistryLetterFileAccess>();
             services.AddScoped<IFilePreviewSource, ApplicationProfileInstanceProgressLetterPreviewSource>();
+            services.AddScoped<IFilePreviewSource, UserReportTemplateFilePreviewSource>();
+            services.AddScoped<IFilePreviewSource, ApplicationProfileTemplateFilePreviewSource>();
             services.AddScoped<FilePreviewSourceRegistry>();
             services.AddScoped<Visa2026.Module.Services.PreviewSlot.IVisaPreviewSlotService, VisaPreviewSlotService>();
             services.AddScoped<ApplicationProfileInstancePersonPdfBatchEnqueueService>();

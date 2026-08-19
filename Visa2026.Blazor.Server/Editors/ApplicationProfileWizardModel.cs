@@ -97,4 +97,10 @@ public sealed class ApplicationProfileWizardModel : ComponentModelBase
         get => GetPropertyValue<IObjectSpace>();
         set => SetPropertyValue(value);
     }
+
+    public string? OwnerViewId
+    {
+        get => GetPropertyValue<string?>();
+        set => SetPropertyValue(value);
+    }
 }
