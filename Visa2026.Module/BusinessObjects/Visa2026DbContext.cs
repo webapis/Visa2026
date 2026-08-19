@@ -627,6 +627,16 @@ namespace Visa2026.Module.BusinessObjects
                     .HasForeignKey("ApplicationProfileID")
                     .IsRequired(false)
                     .OnDelete(DeleteBehavior.Restrict);
+                b.HasOne(a => a.Region)
+                    .WithMany()
+                    .HasForeignKey("RegionId")
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(a => a.City)
+                    .WithMany()
+                    .HasForeignKey("CityId")
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
                 b.Property(a => a.BorderZoneLocation).HasMaxLength(500);
                 b.HasIndex(a => new { a.AppNumberPrefix, a.ApplicationNumber, a.Year, a.Month })
                  .IsUnique()

@@ -46,6 +46,7 @@ public sealed class ApplicationProfileCatalogQueryService : IApplicationProfileC
                     Code = p.Code ?? string.Empty,
                     SelectionCode = p.SelectionCode,
                     ActionFamily = p.ActionFamily,
+                    RegistrationKind = p.RegistrationKind,
                     ProgressRoute = p.ProgressRoute,
                     IsActive = p.IsActive,
                     IsConfigLocked = locked,
@@ -54,7 +55,7 @@ public sealed class ApplicationProfileCatalogQueryService : IApplicationProfileC
                     InProcessUses = counts.InProcess,
                     TemplateFamilyKey = OfficerShellTemplateFamily.ResolveKey(p),
                     StatusKey = ResolveStatusKey(p.IsActive, locked),
-                    ActionFamilyLabel = ApplicationProfilePickerDisplayHelper.FormatActionFamily(p.ActionFamily),
+                    ActionFamilyLabel = ApplicationProfilePickerDisplayHelper.FormatRelatedTo(p),
                     ProgressRouteLabel = ApplicationProfilePickerDisplayHelper.FormatProgressRoute(p.ProgressRoute),
                 };
             })

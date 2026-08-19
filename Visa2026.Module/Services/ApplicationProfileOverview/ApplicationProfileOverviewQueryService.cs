@@ -49,6 +49,8 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
                 .Include(p => p.DefaultProjectContract)
                 .Include(p => p.DefaultMigrationService)
                 .Include(p => p.DefaultEntryCheckPoint)
+                .Include(p => p.DefaultRegion)
+                .Include(p => p.DefaultCity)
                 .FirstOrDefault(p => p.ID == applicationProfileId);
         }
         catch (Exception)
@@ -125,7 +127,7 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
             Code = profile.Code,
             SelectionCode = profile.SelectionCode,
             Description = profile.Description,
-            ActionFamilyLabel = ApplicationProfilePickerDisplayHelper.FormatActionFamily(profile.ActionFamily),
+            ActionFamilyLabel = ApplicationProfilePickerDisplayHelper.FormatRelatedTo(profile),
             ProgressRouteLabel = ApplicationProfilePickerDisplayHelper.FormatProgressRoute(profile.ProgressRoute),
             IsViaMinistry = viaMinistry,
             IsAlwaysAvailable = string.IsNullOrWhiteSpace(profile.ApplicabilityCriteria),
@@ -231,6 +233,12 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
             lines.Add("May produce: " + string.Join(", ", produce));
         if (cancel.Count > 0)
             lines.Add("May cancel: " + string.Join(", ", cancel));
+        if (profile.ActionFamily == ApplicationProfileActionFamily.Registration
+            && profile.RegistrationKind != ApplicationProfileRegistrationKind.None)
+        {
+            lines.Add("Registration is: "
+                + ApplicationProfilePickerDisplayHelper.FormatRegistrationKind(profile.RegistrationKind));
+        }
 
         return lines;
     }
@@ -262,7 +270,8 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
         Add("Entry Check Point", LookupLabel(profile.DefaultEntryCheckPoint), profile.RequireEntryCheckPoint);
         Add("Start date", null, profile.RequireStartDate);
         Add("End date", null, profile.RequireEndDate);
-        Add("Region (city)", null, profile.RequireRegionCity);
+        Add("Region", LookupLabel(profile.DefaultRegion), profile.RequireRegion);
+        Add("City", LookupLabel(profile.DefaultCity), profile.RequireCity);
         Add("Business trip address", null, profile.RequireBusinessTripAddress);
         Add("Work permit location", null, profile.RequireWorkPermitLocation);
         Add("Entry date", null, profile.RequireEntryDate);

@@ -48,6 +48,23 @@ public class ApplicationProfileLockHelperTests
     }
 
     [Fact]
+    public void HasConfigurationScalarsChanged_DetectsRegistrationKindChange()
+    {
+        var original = new ApplicationProfile
+        {
+            ActionFamily = ApplicationProfileActionFamily.Registration,
+            RegistrationKind = ApplicationProfileRegistrationKind.CheckIn,
+        };
+        var current = new ApplicationProfile
+        {
+            ActionFamily = ApplicationProfileActionFamily.Registration,
+            RegistrationKind = ApplicationProfileRegistrationKind.CheckOut,
+        };
+
+        Assert.True(ApplicationProfileLockHelper.HasConfigurationScalarsChanged(original, current));
+    }
+
+    [Fact]
     public void AllowsNestedEditWhenConfigLocked_VersionsYes_TemplatesNo()
     {
         Assert.True(ApplicationProfileLockHelper.AllowsNestedEditWhenConfigLocked(new ApplicationProfileApprovalLegVersion()));

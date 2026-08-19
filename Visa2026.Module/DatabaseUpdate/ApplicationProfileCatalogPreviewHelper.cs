@@ -139,6 +139,8 @@ public sealed class ApplicationProfileCatalogPreviewRow
 
     public ApplicationProfileActionFamily ActionFamily { get; init; }
 
+    public ApplicationProfileRegistrationKind RegistrationKind { get; init; }
+
     public bool ForEmployee { get; init; }
 
     public bool ForFamilyMember { get; init; }
@@ -204,6 +206,7 @@ public sealed class ApplicationProfileCatalogPreviewRow
             SelectionCode = profile.SelectionCode,
             ProgressRoute = profile.ProgressRoute,
             ActionFamily = profile.ActionFamily,
+            RegistrationKind = profile.RegistrationKind,
             ForEmployee = profile.ForEmployee,
             ForFamilyMember = profile.ForFamilyMember,
             ForTemporaryVisitor = profile.ForTemporaryVisitor,
@@ -254,6 +257,7 @@ public sealed class ApplicationProfileCatalogPreviewRow
             ["SelectionCode"] = SelectionCode ?? string.Empty,
             ["ProgressRoute"] = ProgressRoute.ToString(),
             ["ActionFamily"] = ActionFamily.ToString(),
+            ["RegistrationKind"] = RegistrationKind.ToString(),
             ["ForEmployee"] = ForEmployee,
             ["ForFamilyMember"] = ForFamilyMember,
             ["ForTemporaryVisitor"] = ForTemporaryVisitor,

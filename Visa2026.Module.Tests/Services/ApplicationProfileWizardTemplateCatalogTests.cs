@@ -1,4 +1,5 @@
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.ApplicationProfileWizard;
 using Visa2026.Module.Services.UserReports;
 using Xunit;
 
@@ -69,6 +70,46 @@ public class ApplicationProfileWizardTemplateCatalogTests
         Assert.Equal(new[] { "Borcnama", "Forma 16" }, merged.Select(r => r.Name).ToArray());
         Assert.True(ApplicationProfileWizardTemplateCatalog.IsProfileSpecificUploadOnly("GT-15_MINSTROY_uzt"));
         Assert.False(ApplicationProfileWizardTemplateCatalog.IsProfileSpecificUploadOnly("Borcnama"));
+    }
+
+    [Fact]
+    public void CitiesForRegion_UsesRegionIdAndNameTmFallback()
+    {
+        var ahalId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+        var regions = new[]
+        {
+            new ApplicationProfileWizardLookupItem
+            {
+                Id = ahalId,
+                DisplayName = "Ahal province",
+                RegionName = "Ahal welaýaty",
+            },
+        };
+        var cities = new[]
+        {
+            new ApplicationProfileWizardLookupItem
+            {
+                Id = Guid.NewGuid(),
+                DisplayName = "Gökdepe etraby",
+                RegionId = ahalId,
+            },
+            new ApplicationProfileWizardLookupItem
+            {
+                Id = Guid.NewGuid(),
+                DisplayName = "Akbudaý etraby",
+                RegionName = "Ahal welaýaty",
+            },
+            new ApplicationProfileWizardLookupItem
+            {
+                Id = Guid.NewGuid(),
+                DisplayName = "Garagum etraby",
+                RegionName = "Mary welaýaty",
+            },
+        };
+
+        var filtered = ApplicationProfileWizardLookupData.CitiesForRegion(cities, regions, ahalId);
+        Assert.Equal(2, filtered.Count);
+        Assert.DoesNotContain(filtered, c => c.DisplayName == "Garagum etraby");
     }
 
     [Fact]

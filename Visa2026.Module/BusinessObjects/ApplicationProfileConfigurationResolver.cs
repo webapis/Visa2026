@@ -115,6 +115,12 @@ public static class ApplicationProfileConfigurationResolver
     public static bool ShowToCity(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequireRegionCity, t => t.ShowToCity);
 
+    public static bool ShowRegion(ApplicationProfileInstance? application) =>
+        Resolve(application, p => p.RequireRegion, _ => false);
+
+    public static bool ShowCity(ApplicationProfileInstance? application) =>
+        Resolve(application, p => p.RequireCity, _ => false);
+
     public static bool ShowBusinessTrips(ApplicationProfileInstance? application) =>
         Resolve(
             application,

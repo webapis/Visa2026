@@ -6,6 +6,7 @@ using DevExpress.ExpressApp;
 using Microsoft.EntityFrameworkCore;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.ApplicationPersonRoster;
+using Visa2026.Module.Services.ApplicationProfilePicker;
 using Visa2026.Module.Services.OfficerShell;
 
 namespace Visa2026.Module.Services.ApplicationWorkspace;
@@ -76,6 +77,9 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
                 .Include(a => a.MovementPermitLocation)
                 .Include(a => a.FromCity)
                 .Include(a => a.ToCity)
+                .Include(a => a.Region)
+                .Include(a => a.City)
+                    .ThenInclude(c => c.Region)
                 .Include(a => a.EntryCheckPoint)
                 .FirstOrDefault(a => a.ID == applicationId);
         }
@@ -189,7 +193,7 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
 
         var chips = new List<string>
         {
-            $"Related to: {FormatActionFamily(profile.ActionFamily)}",
+            $"Related to: {ApplicationProfilePickerDisplayHelper.FormatRelatedTo(profile)}",
             profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService
                 ? "Direct migration"
                 : "Via ministry",
@@ -230,14 +234,6 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
         if (profile.RequirePersonRejectionItem) items.Add("RejectionItem");
         return items;
     }
-
-    private static string FormatActionFamily(ApplicationProfileActionFamily family) => family switch
-    {
-        ApplicationProfileActionFamily.Cancellation => "Cancellation",
-        ApplicationProfileActionFamily.Registration => "Registration",
-        ApplicationProfileActionFamily.BusinessTrip => "Business trip",
-        _ => "Issuance",
-    };
 
     private static string FormatAudience(ApplicationProfile profile)
     {

@@ -4,6 +4,140 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 
 ---
 
+### 2026-08-19 — Registration profiles always require Position
+
+- Officer rule: **Related to = Registration** → **Required person-related data → Position** on. Calik seeds: Check-in from abroad and Check-out from abroad were off; now on. Catalog apply, type mapper, and wizard (when switching to Registration) force `RequirePersonPosition`.
+- Verify: stop F5, rebuild, F5. Check-in from abroad and Check-out templates show Position checked.
+- Prevent: Do not leave Position off on future `App_Reg_*` seeds (internal, info-change, extension, internal check-out).
+- Cross-skill: application-profile
+
+### 2026-08-19 — App_Reg_Check_Out type-only seed
+
+- Twelfth Calik profile `App_Reg_Check_Out` / `check_out` (type Code `check_out` is shared with internal check-out). Name **Hasapdan Çykarmak (Daşary ýurda gitmegi)**. Direct migration. **Registration · Check out**. Audience Employee + Family + Temporary visitor. Migration **2** working days. Results: migration service; region/city off. Person: passport, education, **position**, address, visa, **travel history**. Nested templates not seeded. Skipped unseeded info-change visa/address and `App_Reg_ext` at officer request.
+- Verify: stop F5, rebuild, F5. Catalog shows check-out-abroad name. Related to Registration; **Check out**. Person Travel history on.
+- Prevent: Do not reuse `check_out` later for `App_Reg_Check_Out_Internal` — use a unique Code (e.g. `check_out_internal`). Do not set Check in. Do not produce documents. Keep dashboard `Code = 'check_out'` until views switch to `RegistrationKind`.
+- Cross-skill: application-profile, report-dashboard
+
+### 2026-08-19 — Info-change passport person includes Travel history
+
+- `App_Reg_Info_Change_Passport` **Required person-related data** now includes **Travel history** (`RequirePersonTravelHistory`). Wizard already had the checkbox; seed was off because type `ShowBusinessTrips` is false.
+- Verify: stop F5, rebuild, F5. Configure passport info-change → Templates & person → Travel history checked.
+- Prevent: Do not map travel history only from `ShowBusinessTrips` when officers require `TravelHistory` on registration info-change.
+- Cross-skill: application-profile
+
+### 2026-08-19 — Registration Info change option
+
+- `RegistrationKind.InfoChange` (enum 3). Wizard **Registration is** radios: Check in, Check out, **Info change**. Infer `App_Reg_Info_Change_*` before Check_In. `App_Reg_Info_Change_Passport` seed is InfoChange. Dashboard predicate `RegistrationInfoChangeProfilePredicate` ready; views not switched.
+- Verify: stop F5, rebuild, F5. Passport info-change profile → Registration is **Info change**. Review shows Registration · Info change.
+- Prevent: Do not infer Info_Change types as Check in. Do not leave info-change as None.
+- Cross-skill: application-profile, report-dashboard
+
+### 2026-08-19 — App_Reg_Info_Change_Passport type-only seed
+
+- Eleventh Calik profile `App_Reg_Info_Change_Passport` / `reg_info_change_passport` (type Code `check_in_info_change` is shared with visa/address info-change). Name **Hasaba alyş maglumatyň üýtgemegi (Pasport Çalışmagy)**. Direct migration. **Registration · Info change**. Audience Employee + Family + Temporary visitor. Migration **2** working days. Results: migration service; region/city off. Person: passport, education, position, address, visa, **travel history**. Nested templates not seeded.
+- Verify: stop F5, rebuild, F5. Catalog shows passport info-change name. Related to Registration; **Info change**. Person Passport + Travel history on.
+- Prevent: Do not reuse `check_in_info_change` as this profile Code. Do not set CheckIn/CheckOut. Do not produce documents.
+- Cross-skill: application-profile
+
+### 2026-08-19 — Wizard Region and City are separate lookups
+
+- Results & fields no longer has combined **Region (city)**. Separate **Region** (`RequireRegion` / `DefaultRegion`) and **City** (`RequireCity` / `DefaultCity`) map to `ApplicationProfileInstance.Region` and `.City`. City default list filters by selected region. `App_Reg_Check_In_Internal` seeds both Use flags. Host-start adds profile + instance columns; old `RequireRegionCity` copies into both flags when they are still false.
+- Verify: stop F5, rebuild, F5. Internal check-in Results shows Region and City rows, both Use on. Case summary shows Region and City.
+- Prevent: Do not keep a single Region (city) checkbox. Do not reuse FromCity/ToCity for this header pair. Load City.Region (or RegionID) when filtering City defaults — GetObjects without Include leaves Region null and the City list looks empty.
+- Cross-skill: application-profile
+
+### 2026-08-19 — App_Reg_Check_In_Internal type-only seed
+
+- Tenth Calik profile `App_Reg_Check_In_Internal` / `check_in_internal` (type Code `check_in` shared). Name **Hasaba Almak (Welaýatdan gelmegi sebäpli)**. Direct migration. **Registration · Check in**. Audience Employee + Family + Temporary visitor. Migration **2** working days. Results: migration service + **region/city** (from/to city). Person: passport, education, **position**, address, visa, **travel history**. Nested templates not seeded.
+- Verify: stop F5, rebuild, F5. Catalog shows internal check-in name. Registration is Check in; Results region/city on; person Travel history on.
+- Prevent: Do not reuse `check_in` or `check_in_from_abroad` as this Code. Do not set Check out.
+- Cross-skill: application-profile
+
+### 2026-08-19 — Wizard Registration Check in / Check out
+
+- `ApplicationProfile.RegistrationKind` (None / CheckIn / CheckOut). Wizard Identity shows **Registration is** radios when Related to = Registration. Leaving Registration clears the kind; entering Registration defaults Check in. `App_Reg_Check_In` seed is CheckIn. Dashboard: `RegistrationCheckInProfilePredicate` / `RegistrationCheckOutProfilePredicate` ready; views still use `ActionFamily` / `Code = check_out`.
+- Verify: stop F5, rebuild, F5. Configure Hasaba Almak (from abroad) → Related to Registration → Check in selected. Review shows Registration · Check in.
+- Prevent: Do not store Check in/out on Issuance/Cancellation. Do not rewire `vw_rd_to_be_checked_*` until officer confirms.
+- Cross-skill: application-profile, report-dashboard
+
+### 2026-08-19 — App_Reg_Check_In type-only seed
+
+- Ninth Calik profile `App_Reg_Check_In` / `check_in_from_abroad` (type Code `check_in` is shared with internal check-in). Name **Hasaba Almak (Daşary ýurtdan gelmegi sebäpli)**. Route **Direct to migration service**. Related to **Registration**. Audience **Employee + Family member + Temporary visitor**. No produce/cancel. Migration SLA **2 working days** (DurationInDays). Results: **Migration service** on; visa type/period/project off. Person: passport, education, **address**, **visa**, **travel history**. Nested templates not seeded.
+- Verify: stop F5, rebuild, F5. Catalog shows the check-in-from-abroad name. Related to Registration; Directed to Direct migration; person Visa + Address + Travel history.
+- Prevent: Do not reuse `check_in` as this profile Code. Do not set Issuance. Do not skip Family/visitor (Category Both).
+- Cross-skill: application-profile
+
+### 2026-08-19 — App_Cancel_Inv_WP type-only seed
+
+- Eighth Calik profile `App_Cancel_Inv_WP` / `cancel_invitation_wp` / Çakylyk we Iş Rugsatnamasyny Ýatyrmak. Route **Direct to migration service**. Migration SLA **3 working days**. Audience **Employee** only. Related to **Cancellation**. May cancel **Invitations + Work permits** (no produce). Person: passport, education, position, invitation item, **work permit item**. Nested templates not seeded.
+- Verify: stop F5, rebuild, F5. Catalog shows **Çakylyk we Iş Rugsatnamasyny Ýatyrmak**. Cancellation; May cancel Invitation + WP; person WP item on.
+- Prevent: Do not treat legacy flags as cancel-invitation-only (`ShowInvitationItemIsCancelled` is false on the type). Do not add Family/visitor audience. Do not use Via ministries.
+- Cross-skill: application-profile
+
+### 2026-08-19 — App_Cancel_Inv type-only seed
+
+- Seventh Calik profile `App_Cancel_Inv` / `cancel_invitation` / Çakylygy Ýatyrmak. Route **Direct to migration service**. Migration SLA **3 working days** (UP-TO-3-DAYS). Audience **Employee + Family member + Temporary visitor**. Related to **Cancellation**. May cancel **Invitations** only (no produce). Visa/project/urgency off. Person: passport, education, **position**, **invitation item**. Nested templates not seeded.
+- Verify: stop F5, rebuild, F5. Catalog shows **Çakylygy Ýatyrmak**. Directed to Direct migration; Related to Cancellation; May cancel Invitations; Migration 3 days.
+- Prevent: Do not use Issuance / Produce Invitation. Do not cancel WP or visa on this type.
+- Cross-skill: application-profile
+
+### 2026-08-19 — App_Change_Inv type-only seed
+
+- Sixth Calik profile `App_Change_Inv` / `change_invitation` / Çakylygy üýtgetmek. Route **Direct to migration service**. Migration SLA **2 working days**. Audience **Employee + Family member + Temporary visitor**. Related to **Issuance** (change, not cancel). May produce **Invitation** only. Visa type/period/category, project, urgency, and border zone **off**. Person: passport, education, **invitation item**. Nested templates not seeded.
+- Verify: stop F5, rebuild, F5. Catalog shows **Çakylygy üýtgetmek**. Directed to **Direct migration service**; Process & SLA **Migration 2 working days**.
+- Prevent: Do not use Via ministries for this type. Do not use ActionFamily Cancellation. Do not produce visa/WP.
+- Cross-skill: application-profile
+
+### 2026-08-19 — App_Inv_According_to_WP type-only seed
+
+- Fifth Calik profile `App_Inv_According_to_WP` / `get_invitation_according_to_wp`. Audience **Employee**. Invitation only (existing WP, not a new WP). Default visa **WP**, period **PerWorkPermit**. Person includes **work permit item**, plus passport/education/position/address/salary/medical.
+- Verify: stop F5, rebuild, F5. Catalog shows **İş Rugsatnama görä Çakylyk Almak**. Results WP / per work permit; person Work permit item checked.
+- Prevent: Do not produce a new work permit on this type. Do not reuse `get_invitation` as Code.
+- Cross-skill: application-profile
+
+### 2026-08-19 — App_Sevice_Passport type-only seed
+
+- Skipped `App_Inv_According_to_WP` for now. Fourth Calik profile `App_Sevice_Passport` / `get_invitation_service_passport` (keep type name spelling). Audience **Employee**. Invitation only. Default visa type **OF** (OF-Gulluk). Default period **Day10**. Person: passport, education, address; position, salary, medical off. Nested templates not seeded.
+- Verify: stop F5, rebuild, F5. Catalog shows **Gulluk Pasporty Üçin Çakylyk Almak**. Identity Employee; Results visa OF / 10 days.
+- Prevent: Do not reuse `get_invitation` as this profile Code. Do not rename the ApplicationType to fix Sevice.
+- Cross-skill: application-profile
+
+### 2026-08-19 — App_Inv default visa period 30 days
+
+- Default visa period **Day30** (30 gün).
+- Verify: stop F5, rebuild, F5. Configure Çakylyk Almak → Results period 30 days.
+- Prevent: Do not use Month6 on App_Inv.
+- Cross-skill: application-profile
+
+### 2026-08-19 — App_Inv default visa type BS1
+
+- Default visa type **BS1** (BS1-İşerwürlik).
+- Verify: stop F5, rebuild, F5. Configure Çakylyk Almak → Results default visa type BS-1.
+- Prevent: Do not use WP or FM on App_Inv.
+- Cross-skill: application-profile
+
+### 2026-08-19 — App_Inv audience is employee + temporary visitor
+
+- `App_Inv` / `get_invitation` / Çakylyk Almak: **Employee** and **Temporary visitor**, not family. May produce **Invitation** only (no work permit). Same SLA 4/30. No default visa type (not WP; visitor vs employee types differ). Person packs like Inv+WP minus WP location (passport, education, position, address, salary, medical).
+- Verify: stop F5, rebuild, F5. Catalog shows Çakylyk Almak. Identity: Employee + Temporary visitor; Family off. May produce Invitation only.
+- Prevent: Do not treat catalog Category Both as Family. Do not produce WP on App_Inv.
+- Cross-skill: application-profile
+
+### 2026-08-19 — App_Inv_FM visa type FM and person packs
+
+- Default visa type **FM** (FM-Maşgala). Person education, position, and salary **off**.
+- Verify: stop F5, rebuild, F5. Configure Çakylyk Almak FM → Results default visa type Family; person checkboxes Education/Position/Salary unchecked.
+- Prevent: Do not default FM invitation to WP.
+- Cross-skill: application-profile
+
+### 2026-08-19 — App_Inv_FM type-only seed
+
+- Second Calik profile `App_Inv_FM` / `get_invitation_fm` (type Code `get_invitation` is shared with App_Inv — profile Code is unique). Audience **Family member only**. May produce **Invitation** only. SLA 4 / 30. Visa type required with no default (not WP). Person: passport, education, address, medical; position and salary off.
+- Nested templates not seeded for this type (Borcnama is still Shared/global; Sahsy kagyz / Contract Inv stay App_Inv_And_WP).
+- Verify: stop F5, rebuild, F5. Catalog shows **Çakylyk Almak FM**. Configure → Identity audience Family member; Templates & person Shared includes are empty until officer Include.
+- Prevent: Do not reuse `get_invitation` as ApplicationProfile.Code. Do not copy Inv_And_WP WP produce/salary/position onto FM.
+- Cross-skill: application-profile
+
 ### 2026-08-19 — App_Inv_And_WP default Shared includes
 
 - Tenant nested JSON now seeds **Borcnama**, **Contract Inv**, and **Sahsy kagyz** on `App_Inv_And_WP` (`SignOff: approved`). Nested rows use Shared catalog scope (Global / Category), not Profile-specific, so Templates & person shows them as included in Shared.

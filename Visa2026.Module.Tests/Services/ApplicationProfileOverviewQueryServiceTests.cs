@@ -116,7 +116,8 @@ public class ApplicationProfileOverviewQueryServiceTests
             ApplicabilityCriteria = "ProjectContract.Code = 'P1'",
             RequireStartDate = true,
             RequireEndDate = true,
-            RequireRegionCity = true,
+            RequireRegion = true,
+            RequireCity = true,
         };
 
         var snapshot = ApplicationProfileOverviewQueryService.MapFromProfile(profile, objectSpace: null);
@@ -126,7 +127,8 @@ public class ApplicationProfileOverviewQueryServiceTests
         Assert.Equal("ProjectContract.Code = 'P1'", snapshot.ApplicabilityCriteria);
         Assert.Contains(snapshot.PerApplicationDefaults, r => r.FieldLabel == "Start date" && r.Required);
         Assert.Contains(snapshot.PerApplicationDefaults, r => r.FieldLabel == "End date" && r.Required);
-        Assert.Contains(snapshot.PerApplicationDefaults, r => r.FieldLabel == "Region (city)" && r.Required);
+        Assert.Contains(snapshot.PerApplicationDefaults, r => r.FieldLabel == "Region" && r.Required);
+        Assert.Contains(snapshot.PerApplicationDefaults, r => r.FieldLabel == "City" && r.Required);
     }
 
     [Fact]

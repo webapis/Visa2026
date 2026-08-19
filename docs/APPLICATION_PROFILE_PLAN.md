@@ -43,7 +43,7 @@ Application-type behavior is **scattered** across `ApplicationType` `Show*` / `C
 | # | Topic | Decision |
 |---|--------|----------|
 | 5 | Scope / applicability | **Freeform criteria** filters which profiles appear in the Application picker. |
-| 6 | “Related to” (action family) | **Exclusive radio:** Issuance \| Cancellation \| Registration \| Business trip. **Configuration-related** — drives tracking / property visibility. |
+| 6 | “Related to” (action family) | **Exclusive radio:** Issuance \| Cancellation \| Registration \| Business trip. When **Registration**, also **Check in**, **Check out**, or **Info change** (`RegistrationKind`) for Report Dashboard queries. **Configuration-related**. |
 | 7 | Approval legs | **Named versions** nested on each profile (per-profile copies, not a shared catalog; not `ProjectContract`). Officer **must pick a version** at instance create. Instance **snapshots** ministries; later wizard edits do not change already-started cases. |
 | 8 | Process states | **Not officer-configured.** Instance steps follow **Directed to** + **Approval legs** + the fixed progress graph. Profile stores **SLA days** only. |
 | 9 | Templates | **Nest files** on the profile. Configuration-related; list **visible** on Application, **not** editable per Application. |
@@ -67,7 +67,7 @@ Stored only on `ApplicationProfile`. Application **reads** them via FK. Officers
 | Identity | Application Name, Description, Code | Yes (read-only) |
 | Directed to | Via ministry · Direct migration | No (controls behavior) |
 | May be for | Employee · Family member · Temporary visitor | No |
-| Related to | Issuance · Cancellation · Registration · Business trip | No (controls tracking / visibility) |
+| Related to | Issuance · Cancellation · Registration (Check in \| Check out \| Info change) · Business trip | No (controls tracking / visibility / dashboard) |
 | Produce | Invitation · Work permit · Visa · Border zone · Work location | No |
 | Cancel existing | Invitation(s) · WP(s) · Visa(s) · Border zone · Application(s) | No |
 | Process | Approval legs (named versions on the profile; **snapshot** on the instance after create) · SLA days (ministry / migration, live) | No |
@@ -87,7 +87,8 @@ Stored on Application. Seeded from profile defaults at initial usage. Editable a
 | 5 | Migration Service | Lookup · also workflow |
 | 6 | Start Date | Date |
 | 7 | End Date | Date |
-| 8 | Region (City) | Lookup |
+| 8 | Region | Lookup · often paired with City |
+| 8b | City | Lookup · belongs to Region |
 | 9 | Business Trip Address | Lookup |
 | 10 | Project | Lookup · also workflow; filters profile-specific templates (Via ministry) |
 | 11 | Urgency | Lookup |
@@ -472,6 +473,7 @@ When any linked Application reaches lock state **A** (first progress beyond offi
 | Switch Appearance / progress to profile | Done |
 | Config lock enforcement on profile edit | Done |
 | Configuration wizard UX | Done |
+| Wizard Registration Check in / Check out | **Done** |
 | Wizard Process & SLA duration only | Done |
 | Profile-specific template applicability (contract / migration service) | Done |
 | Approval leg versions (per-profile copies + instance snapshot) | **Done** |

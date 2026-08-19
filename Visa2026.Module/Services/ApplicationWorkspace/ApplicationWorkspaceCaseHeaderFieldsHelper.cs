@@ -19,6 +19,8 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
     public const string EndDate = "EndDate";
     public const string FromCity = "FromCity";
     public const string ToCity = "ToCity";
+    public const string Region = "Region";
+    public const string City = "City";
     public const string Project = "Project";
     public const string Urgency = "Urgency";
     public const string WorkPermitLocation = "WorkPermitLocation";
@@ -84,6 +86,14 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             Visible(profile, p => p.RequireRegionCity, ApplicationProfileConfigurationResolver.ShowToCity, application),
             application.ToCity?.ID, LookupLabel(application.ToCity), catalogs.Cities, readOnly: false);
 
+        AddLookup(fields, Region, "Region", "purple", "📍",
+            Visible(profile, p => p.RequireRegion, ApplicationProfileConfigurationResolver.ShowRegion, application),
+            application.Region?.ID, LookupLabel(application.Region), catalogs.Regions, readOnly: false);
+
+        AddLookup(fields, City, "City", "purple", "📍",
+            Visible(profile, p => p.RequireCity, ApplicationProfileConfigurationResolver.ShowCity, application),
+            application.City?.ID, LookupLabel(application.City), catalogs.Cities, readOnly: false);
+
         AddLookup(fields, WorkPermitLocation, "Work permit location", "blue", "🏢",
             Visible(profile, p => p.RequireWorkPermitLocation, ApplicationProfileConfigurationResolver.ShowMovementPermitLocation, application),
             application.MovementPermitLocation?.ID, LookupLabel(application.MovementPermitLocation),
@@ -148,6 +158,24 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                 if (!Visible(profile, p => p.RequireRegionCity, ApplicationProfileConfigurationResolver.ShowToCity, application))
                     return Hidden(out error);
                 return SetLookup<City>(objectSpace, value, item => application.ToCity = item!, out error);
+            case Region:
+                if (!Visible(profile, p => p.RequireRegion, ApplicationProfileConfigurationResolver.ShowRegion, application))
+                    return Hidden(out error);
+                return SetLookup<Region>(objectSpace, value, item =>
+                {
+                    application.Region = item;
+                    if (application.City?.Region != null && item != null && application.City.Region.ID != item.ID)
+                        application.City = null;
+                }, out error);
+            case City:
+                if (!Visible(profile, p => p.RequireCity, ApplicationProfileConfigurationResolver.ShowCity, application))
+                    return Hidden(out error);
+                return SetLookup<City>(objectSpace, value, item =>
+                {
+                    application.City = item;
+                    if (item?.Region != null)
+                        application.Region = item.Region;
+                }, out error);
             case Project:
                 if (!Visible(profile, p => p.RequireProject, ApplicationProfileConfigurationResolver.ShowProjectContract, application))
                     return Hidden(out error);
@@ -353,6 +381,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         public IReadOnlyList<ApplicationWorkspaceLookupOption> ProjectContracts { get; init; } = [];
         public IReadOnlyList<ApplicationWorkspaceLookupOption> Urgencies { get; init; } = [];
         public IReadOnlyList<ApplicationWorkspaceLookupOption> Cities { get; init; } = [];
+        public IReadOnlyList<ApplicationWorkspaceLookupOption> Regions { get; init; } = [];
         public IReadOnlyList<ApplicationWorkspaceLookupOption> MovementPermitLocations { get; init; } = [];
         public IReadOnlyList<ApplicationWorkspaceLookupOption> CheckPoints { get; init; } = [];
         public IReadOnlyList<ApplicationWorkspaceLookupOption> BorderZones { get; init; } = [];
@@ -366,6 +395,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             ProjectContracts = LoadItems<ProjectContract>(objectSpace),
             Urgencies = LoadItems<Urgency>(objectSpace),
             Cities = LoadItems<City>(objectSpace),
+            Regions = LoadItems<Region>(objectSpace),
             MovementPermitLocations = LoadItems<MovementPermitLocation>(objectSpace),
             CheckPoints = LoadItems<CheckPoint>(objectSpace),
             BorderZones = LoadItems<BorderZoneName>(objectSpace),

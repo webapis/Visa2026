@@ -30,6 +30,8 @@ public sealed class ApplicationProfileTenantCatalogRow
 
     public string ActionFamily { get; set; } = nameof(ApplicationProfileActionFamily.Issuance);
 
+    public string RegistrationKind { get; set; } = nameof(ApplicationProfileRegistrationKind.None);
+
     public bool ForEmployee { get; set; }
 
     public bool ForFamilyMember { get; set; }
@@ -83,6 +85,14 @@ public sealed class ApplicationProfileTenantCatalogRow
     public bool RequireStartDate { get; set; }
 
     public bool RequireEndDate { get; set; }
+
+    public bool RequireRegion { get; set; }
+
+    public string? DefaultRegionLocalizationKey { get; set; }
+
+    public bool RequireCity { get; set; }
+
+    public string? DefaultCityLocalizationKey { get; set; }
 
     public bool RequireRegionCity { get; set; }
 
@@ -166,6 +176,7 @@ public sealed class ApplicationProfileTenantCatalogRow
             SelectionCode = profile.SelectionCode,
             ProgressRoute = profile.ProgressRoute.ToString(),
             ActionFamily = profile.ActionFamily.ToString(),
+            RegistrationKind = profile.RegistrationKind.ToString(),
             ForEmployee = profile.ForEmployee,
             ForFamilyMember = profile.ForFamilyMember,
             ForTemporaryVisitor = profile.ForTemporaryVisitor,
@@ -193,6 +204,10 @@ public sealed class ApplicationProfileTenantCatalogRow
             RequireMigrationService = profile.RequireMigrationService,
             RequireStartDate = profile.RequireStartDate,
             RequireEndDate = profile.RequireEndDate,
+            RequireRegion = profile.RequireRegion,
+            DefaultRegionLocalizationKey = NullIfEmpty(profile.DefaultRegion?.LocalizationKey),
+            RequireCity = profile.RequireCity,
+            DefaultCityLocalizationKey = NullIfEmpty(profile.DefaultCity?.LocalizationKey),
             RequireRegionCity = profile.RequireRegionCity,
             RequireBusinessTripAddress = profile.RequireBusinessTripAddress,
             RequireProject = profile.RequireProject,
@@ -236,6 +251,7 @@ public sealed class ApplicationProfileTenantCatalogRow
             SelectionCode = preview.SelectionCode,
             ProgressRoute = preview.ProgressRoute.ToString(),
             ActionFamily = preview.ActionFamily.ToString(),
+            RegistrationKind = preview.RegistrationKind.ToString(),
             ForEmployee = preview.ForEmployee,
             ForFamilyMember = preview.ForFamilyMember,
             ForTemporaryVisitor = preview.ForTemporaryVisitor,
@@ -394,6 +410,9 @@ internal static class ApplicationProfileTenantCatalogSync
 
         profile.ProgressRoute = ParseEnum(row.ProgressRoute, ApplicationProfileInstanceProgressRouteKind.ViaMinistries);
         profile.ActionFamily = ParseEnum(row.ActionFamily, ApplicationProfileActionFamily.Issuance);
+        profile.RegistrationKind = ApplicationProfileRegistrationKindHelper.Resolve(
+            profile.ActionFamily,
+            ParseEnum(row.RegistrationKind, ApplicationProfileRegistrationKind.None));
 
         profile.ForEmployee = row.ForEmployee;
         profile.ForFamilyMember = row.ForFamilyMember;
@@ -425,6 +444,10 @@ internal static class ApplicationProfileTenantCatalogSync
         profile.RequireMigrationService = row.RequireMigrationService;
         profile.RequireStartDate = row.RequireStartDate;
         profile.RequireEndDate = row.RequireEndDate;
+        profile.RequireRegion = row.RequireRegion || row.RequireRegionCity;
+        profile.DefaultRegion = ResolveLookup<Region>(objectSpace, row.DefaultRegionLocalizationKey);
+        profile.RequireCity = row.RequireCity || row.RequireRegionCity;
+        profile.DefaultCity = ResolveLookup<City>(objectSpace, row.DefaultCityLocalizationKey);
         profile.RequireRegionCity = row.RequireRegionCity;
         profile.RequireBusinessTripAddress = row.RequireBusinessTripAddress;
         profile.RequireProject = row.RequireProject;
@@ -447,6 +470,7 @@ internal static class ApplicationProfileTenantCatalogSync
         profile.RequirePersonMedical = row.RequirePersonMedical;
         profile.RequirePersonRejectionItem = row.RequirePersonRejectionItem;
         profile.RequirePersonTravelHistory = row.RequirePersonTravelHistory;
+        ApplicationProfileRegistrationKindHelper.ApplyRegistrationPersonDefaults(profile);
 
         profile.IsActive = row.IsActive;
     }

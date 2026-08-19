@@ -1,3 +1,4 @@
+@using System.Linq
 @using DevExpress.ExpressApp
 @using Visa2026.Module.BusinessObjects
 @using Visa2026.Module.Services.ApplicationProfileWizard
@@ -82,9 +83,26 @@
                     <td>—</td><td>—</td>
                 </tr>
                 <tr>
-                    <td><input type="checkbox" @bind="Profile.RequireRegionCity" disabled="@Disabled" /></td>
-                    <td>Region (city)</td><td><span class="ap-wizard__tag">lookup</span></td>
-                    <td>—</td><td>—</td>
+                    <td><input type="checkbox" @bind="Profile.RequireRegion" disabled="@Disabled" @bind:after="OnRegionUseChanged" /></td>
+                    <td>Region</td><td><span class="ap-wizard__tag">lookup</span></td>
+                    <td><input type="checkbox" checked="@HasRegionDefault" disabled="@(Disabled || !Profile.RequireRegion)" @onchange="ToggleRegionDefault" /></td>
+                    <td>
+                        <select disabled="@(Disabled || !Profile.RequireRegion)" value="@FormatGuid(Profile.DefaultRegionId)" @onchange="OnRegionChanged">
+                            <option value="">—</option>
+                            @foreach (var item in Lookups.Regions) { <option value="@item.Id.ToString("D")">@item.DisplayName</option> }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td><input type="checkbox" @bind="Profile.RequireCity" disabled="@Disabled" @bind:after="OnCityUseChanged" /></td>
+                    <td>City</td><td><span class="ap-wizard__tag">lookup</span></td>
+                    <td><input type="checkbox" checked="@HasCityDefault" disabled="@(Disabled || !Profile.RequireCity)" @onchange="ToggleCityDefault" /></td>
+                    <td>
+                        <select disabled="@(Disabled || !Profile.RequireCity)" value="@FormatGuid(Profile.DefaultCityId)" @onchange="OnCityChanged">
+                            <option value="">—</option>
+                            @foreach (var item in CityOptions) { <option value="@item.Id.ToString("D")">@item.DisplayName</option> }
+                        </select>
+                    </td>
                 </tr>
                 <tr>
                     <td><input type="checkbox" @bind="Profile.RequireBusinessTripAddress" disabled="@Disabled" /></td>
@@ -153,6 +171,18 @@
     private bool HasProjectDefault => Profile.DefaultProjectContractId.HasValue;
     private bool HasUrgencyDefault => Profile.DefaultUrgencyId.HasValue;
     private bool HasCheckPointDefault => Profile.DefaultEntryCheckPointId.HasValue;
+    private bool HasRegionDefault => Profile.DefaultRegionId.HasValue;
+    private bool HasCityDefault => Profile.DefaultCityId.HasValue;
+
+    private IEnumerable<ApplicationProfileWizardLookupItem> CityOptions
+    {
+        get
+        {
+            if (Profile.DefaultRegionId is Guid regionId && regionId != Guid.Empty)
+                return ApplicationProfileWizardLookupData.CitiesForRegion(Lookups.Cities, Lookups.Regions, regionId);
+            return Lookups.Cities;
+        }
+    }
 
     private static string FormatGuid(Guid? id) =>
         id.HasValue && id.Value != Guid.Empty ? id.Value.ToString("D") : string.Empty;
@@ -215,6 +245,39 @@
         else if (Profile.DefaultEntryCheckPoint == null) Profile.DefaultEntryCheckPoint = FirstLookup<CheckPoint>(Lookups.CheckPoints);
     }
 
+    private void ToggleRegionDefault(ChangeEventArgs e)
+    {
+        if (Disabled || !Profile.RequireRegion) return;
+        if (!ParseChecked(e))
+        {
+            Profile.DefaultRegion = null;
+            ClearCityIfRegionMismatch();
+        }
+        else if (Profile.DefaultRegion == null)
+            Profile.DefaultRegion = FirstLookup<Region>(Lookups.Regions);
+    }
+
+    private void ToggleCityDefault(ChangeEventArgs e)
+    {
+        if (Disabled || !Profile.RequireCity) return;
+        if (!ParseChecked(e)) Profile.DefaultCity = null;
+        else if (Profile.DefaultCity == null)
+            Profile.DefaultCity = FirstLookup<City>(CityOptions.ToList());
+    }
+
+    private void OnRegionUseChanged()
+    {
+        if (!Profile.RequireRegion)
+            Profile.DefaultRegion = null;
+        ClearCityIfRegionMismatch();
+    }
+
+    private void OnCityUseChanged()
+    {
+        if (!Profile.RequireCity)
+            Profile.DefaultCity = null;
+    }
+
     private void OnVisaTypeChanged(ChangeEventArgs e)
     {
         if (Disabled || !Profile.RequireVisaType) return;
@@ -255,6 +318,31 @@
     {
         if (Disabled || !Profile.RequireEntryCheckPoint) return;
         Profile.DefaultEntryCheckPoint = ResolveLookup<CheckPoint>(e);
+    }
+
+    private void OnRegionChanged(ChangeEventArgs e)
+    {
+        if (Disabled || !Profile.RequireRegion) return;
+        Profile.DefaultRegion = ResolveLookup<Region>(e);
+        ClearCityIfRegionMismatch();
+    }
+
+    private void OnCityChanged(ChangeEventArgs e)
+    {
+        if (Disabled || !Profile.RequireCity) return;
+        Profile.DefaultCity = ResolveLookup<City>(e);
+        if (Profile.DefaultCity?.Region != null)
+            Profile.DefaultRegion = Profile.DefaultCity.Region;
+    }
+
+    private void ClearCityIfRegionMismatch()
+    {
+        if (Profile.DefaultCity == null)
+            return;
+        if (Profile.DefaultRegionId is not Guid regionId || regionId == Guid.Empty)
+            return;
+        if (Profile.DefaultCity.Region?.ID != regionId)
+            Profile.DefaultCity = null;
     }
 
     private T? FirstLookup<T>(IReadOnlyList<ApplicationProfileWizardLookupItem> items) where T : class =>

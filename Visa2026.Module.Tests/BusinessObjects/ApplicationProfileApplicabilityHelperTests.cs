@@ -52,4 +52,73 @@ public class ApplicationProfileApplicabilityHelperTests
         Assert.Equal("Issuance", ApplicationProfilePickerDisplayHelper.FormatActionFamily(ApplicationProfileActionFamily.Issuance));
         Assert.Equal("Business trip", ApplicationProfilePickerDisplayHelper.FormatActionFamily(ApplicationProfileActionFamily.BusinessTrip));
     }
+
+    [Fact]
+    public void FormatRelatedTo_AppendsCheckInForRegistration()
+    {
+        var profile = new ApplicationProfile
+        {
+            ActionFamily = ApplicationProfileActionFamily.Registration,
+            RegistrationKind = ApplicationProfileRegistrationKind.CheckIn,
+        };
+
+        Assert.Equal("Registration · Check in", ApplicationProfilePickerDisplayHelper.FormatRelatedTo(profile));
+    }
+
+    [Fact]
+    public void FormatRelatedTo_AppendsInfoChangeForRegistration()
+    {
+        var profile = new ApplicationProfile
+        {
+            ActionFamily = ApplicationProfileActionFamily.Registration,
+            RegistrationKind = ApplicationProfileRegistrationKind.InfoChange,
+        };
+
+        Assert.Equal("Registration · Info change", ApplicationProfilePickerDisplayHelper.FormatRelatedTo(profile));
+    }
+
+    [Theory]
+    [InlineData("App_Reg_Check_In", ApplicationProfileRegistrationKind.CheckIn)]
+    [InlineData("App_Reg_Check_In_Internal", ApplicationProfileRegistrationKind.CheckIn)]
+    [InlineData("App_Reg_Check_Out", ApplicationProfileRegistrationKind.CheckOut)]
+    [InlineData("App_Reg_Check_Out_Internal", ApplicationProfileRegistrationKind.CheckOut)]
+    [InlineData("App_Reg_Info_Change_Passport", ApplicationProfileRegistrationKind.InfoChange)]
+    [InlineData("App_Reg_Info_Change_Visa", ApplicationProfileRegistrationKind.InfoChange)]
+    [InlineData("App_Reg_ext", ApplicationProfileRegistrationKind.None)]
+    public void InferRegistrationKind_FromTypeName(string typeName, ApplicationProfileRegistrationKind expected) =>
+        Assert.Equal(expected, ApplicationProfileRegistrationKindHelper.InferFromApplicationTypeName(typeName));
+
+    [Fact]
+    public void Resolve_ClearsKindWhenNotRegistration() =>
+        Assert.Equal(
+            ApplicationProfileRegistrationKind.None,
+            ApplicationProfileRegistrationKindHelper.Resolve(
+                ApplicationProfileActionFamily.Issuance,
+                ApplicationProfileRegistrationKind.CheckIn));
+
+    [Fact]
+    public void ApplyRegistrationPersonDefaults_TurnsPositionOn()
+    {
+        var profile = new ApplicationProfile
+        {
+            ActionFamily = ApplicationProfileActionFamily.Registration,
+            RequirePersonPosition = false,
+        };
+
+        ApplicationProfileRegistrationKindHelper.ApplyRegistrationPersonDefaults(profile);
+        Assert.True(profile.RequirePersonPosition);
+    }
+
+    [Fact]
+    public void ApplyRegistrationPersonDefaults_LeavesIssuanceAlone()
+    {
+        var profile = new ApplicationProfile
+        {
+            ActionFamily = ApplicationProfileActionFamily.Issuance,
+            RequirePersonPosition = false,
+        };
+
+        ApplicationProfileRegistrationKindHelper.ApplyRegistrationPersonDefaults(profile);
+        Assert.False(profile.RequirePersonPosition);
+    }
 }

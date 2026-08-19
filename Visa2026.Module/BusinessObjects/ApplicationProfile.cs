@@ -90,6 +90,15 @@ public class ApplicationProfile : BaseObject
     public virtual ApplicationProfileActionFamily ActionFamily { get; set; }
         = ApplicationProfileActionFamily.Issuance;
 
+    /// <summary>
+    /// When <see cref="ActionFamily"/> is Registration: Check in, Check out, or Info change.
+    /// Report Dashboard will filter registration queries on this value.
+    /// </summary>
+    [ImmediatePostData]
+    [XafDisplayName("Registration is")]
+    public virtual ApplicationProfileRegistrationKind RegistrationKind { get; set; }
+        = ApplicationProfileRegistrationKind.None;
+
     // --- Produce / cancel (configuration-related, live) ---
 
     [XafDisplayName("May produce invitation")]
@@ -149,7 +158,18 @@ public class ApplicationProfile : BaseObject
 
     public virtual bool RequireStartDate { get; set; }
     public virtual bool RequireEndDate { get; set; }
+
+    public virtual bool RequireRegion { get; set; }
+    public virtual Region? DefaultRegion { get; set; }
+    public virtual Guid? DefaultRegionId { get; set; }
+
+    public virtual bool RequireCity { get; set; }
+    public virtual City? DefaultCity { get; set; }
+    public virtual Guid? DefaultCityId { get; set; }
+
+    /// <summary>Legacy From city / To city visibility. Prefer <see cref="RequireRegion"/> and <see cref="RequireCity"/>.</summary>
     public virtual bool RequireRegionCity { get; set; }
+
     public virtual bool RequireBusinessTripAddress { get; set; }
 
     public virtual bool RequireProject { get; set; }
@@ -260,6 +280,18 @@ public enum ApplicationProfileActionFamily
     Cancellation = 1,
     Registration = 2,
     BusinessTrip = 3
+}
+
+/// <summary>
+/// Check in, check out, or info change when <see cref="ApplicationProfileActionFamily.Registration"/>.
+/// <see cref="None"/> for other families, or registration types that are not those three (e.g. extension).
+/// </summary>
+public enum ApplicationProfileRegistrationKind
+{
+    None = 0,
+    CheckIn = 1,
+    CheckOut = 2,
+    InfoChange = 3
 }
 
 /// <summary>
@@ -616,6 +648,7 @@ public static class ApplicationProfileLockHelper
         || original.ForFamilyMember != current.ForFamilyMember
         || original.ForTemporaryVisitor != current.ForTemporaryVisitor
         || original.ActionFamily != current.ActionFamily
+        || original.RegistrationKind != current.RegistrationKind
         || original.ProduceInvitation != current.ProduceInvitation
         || original.ProduceWorkPermit != current.ProduceWorkPermit
         || original.ProduceVisa != current.ProduceVisa
@@ -639,6 +672,10 @@ public static class ApplicationProfileLockHelper
         || original.DefaultMigrationServiceId != current.DefaultMigrationServiceId
         || original.RequireStartDate != current.RequireStartDate
         || original.RequireEndDate != current.RequireEndDate
+        || original.RequireRegion != current.RequireRegion
+        || original.DefaultRegionId != current.DefaultRegionId
+        || original.RequireCity != current.RequireCity
+        || original.DefaultCityId != current.DefaultCityId
         || original.RequireRegionCity != current.RequireRegionCity
         || original.RequireBusinessTripAddress != current.RequireBusinessTripAddress
         || original.RequireProject != current.RequireProject

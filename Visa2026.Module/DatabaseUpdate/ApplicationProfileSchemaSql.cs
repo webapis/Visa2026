@@ -25,6 +25,7 @@ public static class ApplicationProfileSchemaSql
             "ForFamilyMember" boolean NOT NULL DEFAULT false,
             "ForTemporaryVisitor" boolean NOT NULL DEFAULT false,
             "ActionFamily" integer NOT NULL DEFAULT 0,
+            "RegistrationKind" integer NOT NULL DEFAULT 0,
             "ProduceInvitation" boolean NOT NULL DEFAULT false,
             "ProduceWorkPermit" boolean NOT NULL DEFAULT false,
             "ProduceVisa" boolean NOT NULL DEFAULT false,
@@ -48,6 +49,10 @@ public static class ApplicationProfileSchemaSql
             "DefaultMigrationServiceId" uuid NULL,
             "RequireStartDate" boolean NOT NULL DEFAULT false,
             "RequireEndDate" boolean NOT NULL DEFAULT false,
+            "RequireRegion" boolean NOT NULL DEFAULT false,
+            "DefaultRegionId" uuid NULL,
+            "RequireCity" boolean NOT NULL DEFAULT false,
+            "DefaultCityId" uuid NULL,
             "RequireRegionCity" boolean NOT NULL DEFAULT false,
             "RequireBusinessTripAddress" boolean NOT NULL DEFAULT false,
             "RequireProject" boolean NOT NULL DEFAULT false,
@@ -180,6 +185,7 @@ public static class ApplicationProfileSchemaSql
                 ForFamilyMember bit NOT NULL CONSTRAINT DF_ApplicationProfiles_ForFamilyMember DEFAULT (0),
                 ForTemporaryVisitor bit NOT NULL CONSTRAINT DF_ApplicationProfiles_ForTemporaryVisitor DEFAULT (0),
                 ActionFamily int NOT NULL CONSTRAINT DF_ApplicationProfiles_ActionFamily DEFAULT (0),
+                RegistrationKind int NOT NULL CONSTRAINT DF_ApplicationProfiles_RegistrationKind DEFAULT (0),
                 ProduceInvitation bit NOT NULL CONSTRAINT DF_ApplicationProfiles_ProduceInvitation DEFAULT (0),
                 ProduceWorkPermit bit NOT NULL CONSTRAINT DF_ApplicationProfiles_ProduceWorkPermit DEFAULT (0),
                 ProduceVisa bit NOT NULL CONSTRAINT DF_ApplicationProfiles_ProduceVisa DEFAULT (0),
@@ -203,6 +209,10 @@ public static class ApplicationProfileSchemaSql
                 DefaultMigrationServiceId uniqueidentifier NULL,
                 RequireStartDate bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireStartDate DEFAULT (0),
                 RequireEndDate bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireEndDate DEFAULT (0),
+                RequireRegion bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireRegion DEFAULT (0),
+                DefaultRegionId uniqueidentifier NULL,
+                RequireCity bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireCity DEFAULT (0),
+                DefaultCityId uniqueidentifier NULL,
                 RequireRegionCity bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireRegionCity DEFAULT (0),
                 RequireBusinessTripAddress bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireBusinessTripAddress DEFAULT (0),
                 RequireProject bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireProject DEFAULT (0),
@@ -324,6 +334,35 @@ public static class ApplicationProfileSchemaSql
 
     internal const string EnsureProduceRejectionPostgres =
         """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "ProduceRejection" boolean NOT NULL DEFAULT false;""";
+
+    internal const string EnsureRegistrationKindPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "RegistrationKind" integer NOT NULL DEFAULT 0;""";
+
+    internal const string EnsureRequireRegionPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "RequireRegion" boolean NOT NULL DEFAULT false;""";
+
+    internal const string EnsureDefaultRegionIdPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "DefaultRegionId" uuid NULL;""";
+
+    internal const string EnsureRequireCityPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "RequireCity" boolean NOT NULL DEFAULT false;""";
+
+    internal const string EnsureDefaultCityIdPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "DefaultCityId" uuid NULL;""";
+
+    internal const string HealRequireRegionCitySplitPostgres = """
+        UPDATE "ApplicationProfiles"
+        SET "RequireRegion" = TRUE, "RequireCity" = TRUE
+        WHERE COALESCE("RequireRegionCity", FALSE) = TRUE
+          AND COALESCE("RequireRegion", FALSE) = FALSE
+          AND COALESCE("RequireCity", FALSE) = FALSE;
+        """;
+
+    internal const string EnsureInstanceRegionIdPostgres =
+        """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "RegionId" uuid NULL;""";
+
+    internal const string EnsureInstanceCityIdPostgres =
+        """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "CityId" uuid NULL;""";
 
     internal const string EnsureOfficePreparationNotesPostgres =
         """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "OfficePreparationNotes" text NULL;""";
@@ -456,6 +495,14 @@ public static class ApplicationProfileSchemaSql
         EnsureTemplateDataScopePostgres,
         EnsureTemplateCategoryKeyPostgres,
         EnsureProduceRejectionPostgres,
+        EnsureRegistrationKindPostgres,
+        EnsureRequireRegionPostgres,
+        EnsureDefaultRegionIdPostgres,
+        EnsureRequireCityPostgres,
+        EnsureDefaultCityIdPostgres,
+        HealRequireRegionCitySplitPostgres,
+        EnsureInstanceRegionIdPostgres,
+        EnsureInstanceCityIdPostgres,
         EnsureOfficePreparationNotesPostgres,
         EnsureInstanceEntryCheckPointPostgres,
         EnsureTemplateApplicableProjectContractPostgres,
@@ -494,6 +541,11 @@ public static class ApplicationProfileSchemaSql
            AND COL_LENGTH(N'dbo.ApplicationProfiles', N'ProduceRejection') IS NULL
             ALTER TABLE dbo.ApplicationProfiles ADD ProduceRejection bit NOT NULL
                 CONSTRAINT DF_ApplicationProfiles_ProduceRejection DEFAULT (0);
+
+        IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfiles', N'RegistrationKind') IS NULL
+            ALTER TABLE dbo.ApplicationProfiles ADD RegistrationKind int NOT NULL
+                CONSTRAINT DF_ApplicationProfiles_RegistrationKind DEFAULT (0);
 
         IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
            AND COL_LENGTH(N'dbo.ApplicationProfileInstances', N'OfficePreparationNotes') IS NULL

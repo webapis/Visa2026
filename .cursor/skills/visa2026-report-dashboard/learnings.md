@@ -4,6 +4,26 @@ Date format: `YYYY-MM-DD`
 
 ---
 
+## 2026-08-19 — RegistrationKind InfoChange (enum 3)
+
+**Ask:** Third Registration option **Info change** (passport/visa/address info-change profiles).
+
+**Now:** `RegistrationKind` 3 = InfoChange. Roster SQL has `RegistrationInfoChangeProfilePredicate`. Dashboard views **unchanged**.
+
+**Next:** When adding info-change dashboard reports, filter on this predicate.
+
+**Files:** `ReportDashboardPostgresRosterSql.cs`
+
+## 2026-08-19 — Profile RegistrationKind for future check-in/out views
+
+**Ask:** Application Profile wizard Registration = Check in or Check out. Use later for Report Dashboard check-in / check-out queries.
+
+**Now:** `ApplicationProfiles.RegistrationKind` (1 = CheckIn, 2 = CheckOut). Roster SQL has `RegistrationCheckInProfilePredicate` / `RegistrationCheckOutProfilePredicate`. Existing `vw_rd_to_be_checked_in` / `_out` and `CheckoutProfilePredicate` (`Code = 'check_out'`) **unchanged**.
+
+**Next:** When rewiring those views, filter instances by `apf.RegistrationKind` instead of type name / code lists.
+
+**Files:** `ApplicationProfile.cs`, `ReportDashboardPostgresRosterSql.cs`
+
 ## 2026-08-12 — F5 42703 CreationProgressRoute (NotMapped)
 
 **Cause:** Dashboard SQL coalesced `a."CreationProgressRoute"` but the property is `[NotMapped]` (no DB column).

@@ -29,10 +29,14 @@ public static class ApplicationProfileFromApplicationTypeMapper
         profile.SelectionCode = string.IsNullOrWhiteSpace(type.SelectionCode) ? null : type.SelectionCode.Trim();
         profile.ProgressRoute = type.ApplicationProfileInstanceProgressRoute;
         profile.ActionFamily = ResolveActionFamily(type);
+        profile.RegistrationKind = ApplicationProfileRegistrationKindHelper.ResolveFromTypeName(
+            profile.ActionFamily,
+            type.Name);
         ApplyAudience(profile, type);
         ApplyProduceCancel(profile, type);
         ApplyPerApplicationRequirements(profile, type);
         ApplyPersonToggles(profile, type);
+        ApplicationProfileRegistrationKindHelper.ApplyRegistrationPersonDefaults(profile);
         ApplySla(profile, type);
         profile.IsActive = true;
     }
@@ -114,6 +118,8 @@ public static class ApplicationProfileFromApplicationTypeMapper
         profile.RequireStartDate = type.ShowBusinessTrips;
         profile.RequireEndDate = type.ShowBusinessTrips;
         profile.RequireRegionCity = type.ShowFromCity || type.ShowToCity;
+        profile.RequireRegion = profile.RequireRegionCity;
+        profile.RequireCity = profile.RequireRegionCity;
         profile.RequireBusinessTripAddress = type.ShowBusinessTrips;
         profile.RequireProject = type.ShowProjectContract;
         profile.RequireUrgency = type.ShowUrgency;

@@ -170,7 +170,7 @@ Use when user asks *how should I configure this profile?* — tailor to **Action
 |--------|-------------|---------|
 | **Issuance** | New visa / permit / invitation | Enable matching **Produce** flags; person toggles for passport + position; via-ministry route if contract-driven |
 | **Cancellation** | Cancel existing documents | Enable **Cancel** flags for target doc types; fewer produce flags |
-| **Registration** | FM registration flows | **For family member**; suggest family on Person start (§11); registration-related person toggles |
+| **Registration** | Check-in / check-out / info change | Set **Check in**, **Check out**, or **Info change**; **Position** always on; **For family member** when FM |
 | **Business trip** | Short trip | **Business trip** family; region / trip address per-App fields; lighter person matrix |
 
 ### Route (Directed to)
@@ -183,7 +183,8 @@ Use when user asks *how should I configure this profile?* — tailor to **Action
 ### Person-config toggles
 
 - Always **Passport** for issuance unless exceptional legacy type.
-- Turn on **Education / Position / Address** when templates use those `{{…}}` packs or readiness checks need them.
+- **Registration** profiles always turn **Position** on.
+- Turn on **Education / Address** when templates use those `{{…}}` packs or readiness checks need them.
 - **TravelHistory** — M2M on Application (not profile scalar); toggle gates tab only.
 - Before publish: if nested template references a person pack, corresponding `RequirePerson*` should be on (plan §2.5 recommendation).
 

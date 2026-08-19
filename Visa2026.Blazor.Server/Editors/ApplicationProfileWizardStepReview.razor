@@ -1,4 +1,5 @@
 @using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Services.ApplicationProfilePicker
 @using Visa2026.Module.Services.ApplicationProfileWizard
 
 <div class="ap-wizard__panel-head">
@@ -12,7 +13,7 @@
             <ul>
                 <li>@Profile.Name</li>
                 <li>Code @Profile.Code @(string.IsNullOrWhiteSpace(Profile.SelectionCode) ? "" : $"· quick {Profile.SelectionCode}")</li>
-                <li>@FormatRoute(Profile.ProgressRoute) · @FormatAudience(Profile) · @FormatActionFamily(Profile.ActionFamily)</li>
+                <li>@FormatRoute(Profile.ProgressRoute) · @FormatAudience(Profile) · @FormatRelatedTo(Profile)</li>
                 @if (Profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries)
                 {
                     <li>Approval leg versions: @(Profile.ApprovalLegVersions?.Count ?? 0)</li>
@@ -24,6 +25,11 @@
                 else if (Profile.ActionFamily == ApplicationProfileActionFamily.Cancellation)
                 {
                     <li>Cancel: @FormatCancel(Profile)</li>
+                }
+                else if (Profile.ActionFamily == ApplicationProfileActionFamily.Registration
+                    && Profile.RegistrationKind != ApplicationProfileRegistrationKind.None)
+                {
+                    <li>Registration is: @FormatRegistrationKind(Profile.RegistrationKind)</li>
                 }
             </ul>
         </div>
@@ -77,13 +83,11 @@
         return parts.Count == 0 ? "—" : string.Join(", ", parts);
     }
 
-    private static string FormatActionFamily(ApplicationProfileActionFamily family) => family switch
-    {
-        ApplicationProfileActionFamily.Cancellation => "Cancellation",
-        ApplicationProfileActionFamily.Registration => "Registration",
-        ApplicationProfileActionFamily.BusinessTrip => "Business trip",
-        _ => "Issuance",
-    };
+    private static string FormatRelatedTo(ApplicationProfile profile) =>
+        ApplicationProfilePickerDisplayHelper.FormatRelatedTo(profile);
+
+    private static string FormatRegistrationKind(ApplicationProfileRegistrationKind kind) =>
+        ApplicationProfilePickerDisplayHelper.FormatRegistrationKind(kind);
 
     private static string FormatProduce(ApplicationProfile p)
     {
@@ -116,7 +120,8 @@
         if (p.RequireMigrationService) n++;
         if (p.RequireStartDate) n++;
         if (p.RequireEndDate) n++;
-        if (p.RequireRegionCity) n++;
+        if (p.RequireRegion) n++;
+        if (p.RequireCity) n++;
         if (p.RequireBusinessTripAddress) n++;
         if (p.RequireProject) n++;
         if (p.RequireUrgency) n++;

@@ -437,6 +437,10 @@ namespace Visa2026.Module.BusinessObjects
                 MigrationService = applicationProfile.DefaultMigrationService;
             if (applicationProfile.DefaultEntryCheckPoint != null)
                 EntryCheckPoint = applicationProfile.DefaultEntryCheckPoint;
+            if (applicationProfile.DefaultRegion != null)
+                Region = applicationProfile.DefaultRegion;
+            if (applicationProfile.DefaultCity != null)
+                City = applicationProfile.DefaultCity;
             if (!string.IsNullOrWhiteSpace(applicationProfile.DefaultBorderZoneLocation))
                 BorderZoneLocation = applicationProfile.DefaultBorderZoneLocation;
         }
@@ -735,6 +739,14 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("ToCityVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowToCity", Context = "DetailView")]
         [VisibleInListView(false)]
         public virtual City ToCity { get; set; }
+
+        [Appearance("RegionVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowRegion", Context = "DetailView")]
+        [VisibleInListView(false)]
+        public virtual Region Region { get; set; }
+
+        [Appearance("CityVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowCity", Context = "DetailView")]
+        [VisibleInListView(false)]
+        public virtual City City { get; set; }
 
         #region Person Count
 

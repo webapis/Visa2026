@@ -161,9 +161,37 @@
                 <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.CancelApplicationProfileInstances" disabled="@Disabled" /> Application(s)</label>
             </div>
         }
+        else if (ShowRegistrationKind)
+        {
+            <h3 class="ap-wizard__subhead">Registration is</h3>
+            <div class="ap-wizard__choices">
+                <label class="ap-wizard__choice">
+                    <input type="radio" name="registrationKind"
+                           checked="@(Profile.RegistrationKind == ApplicationProfileRegistrationKind.CheckIn)"
+                           disabled="@Disabled"
+                           @onchange="@(() => SetRegistrationKind(ApplicationProfileRegistrationKind.CheckIn))" />
+                    Check in
+                </label>
+                <label class="ap-wizard__choice">
+                    <input type="radio" name="registrationKind"
+                           checked="@(Profile.RegistrationKind == ApplicationProfileRegistrationKind.CheckOut)"
+                           disabled="@Disabled"
+                           @onchange="@(() => SetRegistrationKind(ApplicationProfileRegistrationKind.CheckOut))" />
+                    Check out
+                </label>
+                <label class="ap-wizard__choice">
+                    <input type="radio" name="registrationKind"
+                           checked="@(Profile.RegistrationKind == ApplicationProfileRegistrationKind.InfoChange)"
+                           disabled="@Disabled"
+                           @onchange="@(() => SetRegistrationKind(ApplicationProfileRegistrationKind.InfoChange))" />
+                    Info change
+                </label>
+            </div>
+            <p class="ap-wizard__hint">Used later for Report Dashboard check-in, check-out, and info-change queries.</p>
+        }
         else
         {
-            <p class="ap-wizard__hint">Registration and business-trip profiles do not issue or cancel documents here.</p>
+            <p class="ap-wizard__hint">Business-trip profiles do not issue or cancel documents here.</p>
         }
     </div>
     <div class="ap-wizard__section">
@@ -249,6 +277,7 @@
 
     private bool ShowMayProduce => Profile.ActionFamily == ApplicationProfileActionFamily.Issuance;
     private bool ShowMayCancel => Profile.ActionFamily == ApplicationProfileActionFamily.Cancellation;
+    private bool ShowRegistrationKind => Profile.ActionFamily == ApplicationProfileActionFamily.Registration;
     private bool ShowApprovalLegs =>
         Profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries;
 
@@ -325,6 +354,19 @@
             ClearProduce();
         if (family != ApplicationProfileActionFamily.Cancellation)
             ClearCancel();
+        if (family != ApplicationProfileActionFamily.Registration)
+            Profile.RegistrationKind = ApplicationProfileRegistrationKind.None;
+        else if (Profile.RegistrationKind == ApplicationProfileRegistrationKind.None)
+            Profile.RegistrationKind = ApplicationProfileRegistrationKind.CheckIn;
+        ApplicationProfileRegistrationKindHelper.ApplyRegistrationPersonDefaults(Profile);
+    }
+
+    private void SetRegistrationKind(ApplicationProfileRegistrationKind kind)
+    {
+        if (Disabled || Profile.ActionFamily != ApplicationProfileActionFamily.Registration)
+            return;
+
+        Profile.RegistrationKind = kind;
     }
 
     private void ClearProduce()

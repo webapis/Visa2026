@@ -15,6 +15,8 @@ public sealed class ApplicationProfilePickerRow
 
     public ApplicationProfileActionFamily ActionFamily { get; init; }
 
+    public ApplicationProfileRegistrationKind RegistrationKind { get; init; }
+
     public ApplicationProfileInstanceProgressRouteKind ProgressRoute { get; init; }
 
     public bool IsConfigLocked { get; init; }
@@ -35,7 +37,7 @@ public sealed class ApplicationProfilePickerRow
         && ApprovalLegVersions.Count > 0;
 
     public string MetaLine =>
-        $"{Code} · Related to: {ApplicationProfilePickerDisplayHelper.FormatActionFamily(ActionFamily)} · "
+        $"{Code} · Related to: {ApplicationProfilePickerDisplayHelper.FormatRelatedTo(ActionFamily, RegistrationKind)} · "
         + ApplicationProfilePickerDisplayHelper.FormatProgressRoute(ProgressRoute);
 
     public string SeedUsageLine

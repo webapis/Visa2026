@@ -13,6 +13,7 @@ public sealed class ApplicationProfileCatalogRow
     public string Code { get; init; } = string.Empty;
     public string? SelectionCode { get; init; }
     public ApplicationProfileActionFamily ActionFamily { get; init; }
+    public ApplicationProfileRegistrationKind RegistrationKind { get; init; }
     public ApplicationProfileInstanceProgressRouteKind ProgressRoute { get; init; }
     public bool IsActive { get; init; }
     public bool IsConfigLocked { get; init; }
@@ -43,7 +44,7 @@ public sealed class ApplicationProfileCatalogRow
             {
                 Code,
                 string.IsNullOrWhiteSpace(SelectionCode) ? null : SelectionCode,
-                ApplicationProfilePickerDisplayHelper.FormatActionFamily(ActionFamily),
+                ActionFamilyLabel,
                 ApplicationProfilePickerDisplayHelper.FormatProgressRoute(ProgressRoute),
             };
             return string.Join(" · ", parts.Where(p => !string.IsNullOrWhiteSpace(p)));
