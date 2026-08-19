@@ -398,9 +398,68 @@
                                 </select>
                             </dd>
                         </div>
-                        <div class="ap-wizard-edit-meta__row">
+                        <div class="ap-wizard-edit-meta__row ap-wizard-edit-meta__row--scope">
                             <dt>Scope</dt>
-                            <dd>@FormatScope(_editScope)</dd>
+                            <dd>
+                                <div class="ap-wizard__scope-pills ap-wizard__scope-pills--edit" role="radiogroup" aria-label="Template scope">
+                                    <button type="button"
+                                            class="ap-wizard__scope-pill @(_editScope == ApplicationProfileTemplateCatalogScope.ProfileSpecific ? "is-on" : null)"
+                                            disabled="@Disabled"
+                                            @onclick="() => SetEditScope(ApplicationProfileTemplateCatalogScope.ProfileSpecific)">Profile-specific</button>
+                                    <button type="button"
+                                            class="ap-wizard__scope-pill @(_editScope == ApplicationProfileTemplateCatalogScope.Category ? "is-on" : null)"
+                                            disabled="@Disabled"
+                                            @onclick="() => SetEditScope(ApplicationProfileTemplateCatalogScope.Category)">Category</button>
+                                    <button type="button"
+                                            class="ap-wizard__scope-pill @(_editScope == ApplicationProfileTemplateCatalogScope.Global ? "is-on" : null)"
+                                            disabled="@Disabled"
+                                            @onclick="() => SetEditScope(ApplicationProfileTemplateCatalogScope.Global)">Global</button>
+                                </div>
+                                @if (_editScope == ApplicationProfileTemplateCatalogScope.Category)
+                                {
+                                    <div class="ap-wizard__cat-chips ap-wizard__cat-chips--edit" role="group" aria-label="Categories">
+                                        @foreach (var cat in ApplicationProfileWizardTemplateCatalog.CategoryChips)
+                                        {
+                                            <button type="button"
+                                                    class="ap-wizard__cat-chip @(_editCategoryKeys.Contains(cat.Key) ? "is-on" : null)"
+                                                    disabled="@Disabled"
+                                                    @onclick="() => ToggleEditCategory(cat.Key)">
+                                                @cat.Label
+                                            </button>
+                                        }
+                                    </div>
+                                }
+                                @if (_editScope == ApplicationProfileTemplateCatalogScope.ProfileSpecific)
+                                {
+                                    <label class="ap-wizard__field ap-wizard__field--edit-apply">
+                                        <span>@ApplicabilityTitle</span>
+                                        <select disabled="@Disabled"
+                                                value="@_editApplicabilityId"
+                                                @onchange="OnEditApplicabilityChanged">
+                                            <option value="">@ApplicabilityEmptyLabel</option>
+                                            @foreach (var item in ApplicabilityLookups)
+                                            {
+                                                <option value="@item.Id.ToString("D")">@item.DisplayName</option>
+                                            }
+                                        </select>
+                                    </label>
+                                }
+                                @if (_editScope != _savedScope)
+                                {
+                                    <p class="ap-wizard-edit-scope-note @(_scopeNeedsConfirm ? "is-warn" : "is-info")">
+                                        @ApplicationProfileWizardTemplateScopeHelper.ConfirmMessage(_savedScope, _editScope)
+                                    </p>
+                                    @if (_scopeNeedsConfirm && !_scopeChangeConfirmed)
+                                    {
+                                        <button type="button"
+                                                class="ap-wizard__btn ap-wizard__btn--secondary ap-wizard__btn--scope-confirm"
+                                                disabled="@Disabled"
+                                                @onclick="ConfirmEditScopeChange">
+                                            Confirm scope change
+                                        </button>
+                                    }
+                                }
+                            </dd>
                         </div>
                         <div class="ap-wizard-edit-meta__row">
                             <dt>Sort</dt>
@@ -441,7 +500,7 @@
             <footer class="ap-wizard-modal__foot ap-wizard-modal__foot--edit">
                 <button type="button" class="ap-wizard__btn ap-wizard__btn--ghost" @onclick="CloseModals">Cancel</button>
                 <div class="ap-wizard-modal__foot-actions">
-                    <button type="button" class="ap-wizard__btn ap-wizard__btn--secondary" @onclick="SaveEditMetadata" disabled="@Disabled">Save metadata</button>
+                    <button type="button" class="ap-wizard__btn ap-wizard__btn--secondary" @onclick="OnSaveEditMetadataClick" disabled="@Disabled">Save metadata</button>
                     <button type="button" class="ap-wizard__btn ap-wizard__btn--primary" @onclick="SaveEditAndClose" disabled="@Disabled">Save &amp; close</button>
                 </div>
             </footer>
@@ -518,6 +577,10 @@
     private ApplicationProfileTemplateKind _editKind = ApplicationProfileTemplateKind.Word;
     private int _editSort;
     private ApplicationProfileTemplateCatalogScope _editScope = ApplicationProfileTemplateCatalogScope.ProfileSpecific;
+    private ApplicationProfileTemplateCatalogScope _savedScope = ApplicationProfileTemplateCatalogScope.ProfileSpecific;
+    private bool _scopeChangeConfirmed = true;
+    private readonly HashSet<string> _editCategoryKeys = new(StringComparer.OrdinalIgnoreCase);
+    private string _editApplicabilityId = string.Empty;
     private ApplicationProfileTemplateDataScope _editDataScope = ApplicationProfileTemplateDataScope.PeopleM2M;
     private string _editFileLabel = "template.docx";
     private string DisplayEditFileName =>
@@ -592,12 +655,15 @@
         return id.HasValue && id.Value != Guid.Empty ? id.Value.ToString("D") : string.Empty;
     }
 
-    private void OnTemplateApplicabilityChanged(ApplicationProfileTemplate template, ChangeEventArgs e)
+    private void OnTemplateApplicabilityChanged(ApplicationProfileTemplate template, ChangeEventArgs e) =>
+        ApplyTemplateApplicability(template, e.Value?.ToString());
+
+    private void ApplyTemplateApplicability(ApplicationProfileTemplate template, string? rawId)
     {
         if (Disabled)
             return;
 
-        Guid.TryParse(e.Value?.ToString(), out var id);
+        Guid.TryParse(rawId, out var id);
         if (id == Guid.Empty)
         {
             template.ApplicableProjectContract = null;
@@ -654,6 +720,12 @@
         _editKind = template.TemplateKind;
         _editSort = template.SortOrder;
         _editScope = template.CatalogScope;
+        _savedScope = _editScope;
+        _scopeChangeConfirmed = true;
+        _editCategoryKeys.Clear();
+        if (!string.IsNullOrWhiteSpace(template.CategoryKey))
+            _editCategoryKeys.Add(template.CategoryKey.Trim());
+        _editApplicabilityId = FormatApplicabilityId(template, IsViaMinistry);
         _editDataScope = template.DataScope;
         _editStatus = null;
         _editStatusIsError = false;
@@ -673,7 +745,15 @@
             return;
 
         OpenEdit(entity);
-        _editScope = entity.CatalogScope != default ? entity.CatalogScope : row.Scope;
+        _editScope = entity.CatalogScope == ApplicationProfileTemplateCatalogScope.ProfileSpecific
+            ? row.Scope
+            : entity.CatalogScope;
+        _savedScope = _editScope;
+        _editCategoryKeys.Clear();
+        foreach (var key in row.CategoryKeys)
+            _editCategoryKeys.Add(key);
+        if (!string.IsNullOrWhiteSpace(entity.CategoryKey))
+            _editCategoryKeys.Add(entity.CategoryKey);
         _editDataScope = entity.DataScope;
         if (!string.IsNullOrWhiteSpace(row.FileLabel))
             _editFileLabel = row.FileLabel!;
@@ -743,6 +823,10 @@
         _editStatusIsError = false;
         _linkedUserReportTemplateId = Guid.Empty;
         _editBusy = false;
+        _savedScope = ApplicationProfileTemplateCatalogScope.ProfileSpecific;
+        _scopeChangeConfirmed = true;
+        _editCategoryKeys.Clear();
+        _editApplicabilityId = string.Empty;
     }
 
     private void ToggleCategory(string key)
@@ -904,36 +988,112 @@
         SetEditStatus("File saved on profile nested row and User Report Template.", isError: false);
     }
 
-    private void SaveEditMetadata()
-    {
-        if (_editEntity != null)
-        {
-            _editEntity.TemplateName = _editName.Trim();
-            _editEntity.TemplateKind = _editKind;
-            _editEntity.SortOrder = _editSort;
-            _editEntity.CatalogScope = _editScope;
-            _editEntity.DataScope = _editDataScope;
-            if (ObjectSpace != null)
-            {
-                ApplicationProfileTemplateUserReportBridge.EnsureLinkedUserReportTemplate(
-                    ObjectSpace,
-                    _editEntity,
-                    ApplicationProfileWizardTemplateCatalog.RootBoFromDataScope(_editDataScope));
-                TryResolveLinkedTemplateId();
-            }
+    private bool _scopeNeedsConfirm =>
+        ApplicationProfileWizardTemplateScopeHelper.RequiresSharedVisibilityConfirm(_savedScope, _editScope);
 
-            SetEditStatus("Metadata saved on profile nested row (+ User Report Template link).", isError: false);
-        }
-        else
+    private void SetEditScope(ApplicationProfileTemplateCatalogScope scope)
+    {
+        if (Disabled)
+            return;
+
+        _editScope = scope;
+        _scopeChangeConfirmed = !_scopeNeedsConfirm;
+        _editStatus = null;
+        _editStatusIsError = false;
+    }
+
+    private void ConfirmEditScopeChange()
+    {
+        _scopeChangeConfirmed = true;
+        SetEditStatus("Scope change confirmed. Click Save metadata to apply.", isError: false);
+    }
+
+    private void ToggleEditCategory(string key)
+    {
+        if (Disabled)
+            return;
+        if (!_editCategoryKeys.Add(key))
+            _editCategoryKeys.Remove(key);
+    }
+
+    private void OnEditApplicabilityChanged(ChangeEventArgs e)
+    {
+        _editApplicabilityId = e.Value?.ToString() ?? string.Empty;
+        if (_editEntity != null)
+            ApplyEditApplicability(_editEntity);
+    }
+
+    private void ApplyEditApplicability(ApplicationProfileTemplate template) =>
+        ApplyTemplateApplicability(template, _editApplicabilityId);
+
+    private bool SaveEditMetadata()
+    {
+        if (_editEntity == null)
         {
             SetEditStatus("Include on the list to attach to this profile, then edit.", isError: true);
+            return false;
+        }
+
+        if (ObjectSpace is not { } os)
+        {
+            SetEditStatus("Cannot save — object space is not available.", isError: true);
+            return false;
+        }
+
+        if (_editScope == ApplicationProfileTemplateCatalogScope.Category && _editCategoryKeys.Count == 0)
+        {
+            SetEditStatus("Select at least one category.", isError: true);
+            return false;
+        }
+
+        if (_scopeNeedsConfirm && !_scopeChangeConfirmed)
+        {
+            SetEditStatus("Confirm the scope change before saving.", isError: true);
+            return false;
+        }
+
+        _editEntity.TemplateName = _editName.Trim();
+        _editEntity.TemplateKind = _editKind;
+        _editEntity.SortOrder = _editSort;
+        _editEntity.DataScope = _editDataScope;
+
+        try
+        {
+            var result = ApplicationProfileWizardTemplateScopeHelper.Apply(
+                os,
+                Profile,
+                _editEntity,
+                _savedScope,
+                _editScope,
+                _editCategoryKeys);
+
+            _editName = result.TemplateName;
+            _linkedUserReportTemplateId = result.LinkedUserReportTemplateId;
+            _savedScope = _editScope;
+            _scopeChangeConfirmed = true;
+
+            if (_editScope == ApplicationProfileTemplateCatalogScope.ProfileSpecific)
+                ApplyEditApplicability(_editEntity);
+            else
+                ApplyTemplateApplicability(_editEntity, string.Empty);
+
+            RefreshCatalog();
+            SetEditStatus(result.StatusMessage, isError: false);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            SetEditStatus(ex.Message, isError: true);
+            return false;
         }
     }
 
+    private void OnSaveEditMetadataClick() => SaveEditMetadata();
+
     private void SaveEditAndClose()
     {
-        SaveEditMetadata();
-        CloseModals();
+        if (SaveEditMetadata())
+            CloseModals();
     }
 
     private async Task OpenInOfficeAsync()
@@ -954,7 +1114,9 @@
         SetEditStatus(null, isError: false);
         try
         {
-            SaveEditMetadata();
+            if (!SaveEditMetadata())
+                return;
+
             var userTemplate = ApplicationProfileTemplateUserReportBridge.EnsureLinkedUserReportTemplate(
                 os,
                 _editEntity,
@@ -1101,13 +1263,6 @@
         ApplicationProfileTemplateKind.Excel => "Excel",
         ApplicationProfileTemplateKind.PdfForm => "PDF form",
         _ => "Word",
-    };
-
-    private static string FormatScope(ApplicationProfileTemplateCatalogScope scope) => scope switch
-    {
-        ApplicationProfileTemplateCatalogScope.Category => "Category",
-        ApplicationProfileTemplateCatalogScope.Global => "All profiles",
-        _ => "Profile-specific",
     };
 
     private static string FormatDataScope(ApplicationProfileTemplateDataScope scope) => scope switch

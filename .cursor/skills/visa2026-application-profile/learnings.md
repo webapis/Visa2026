@@ -4,6 +4,13 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 
 ---
 
+### 2026-08-19 — Edit template dialog can change Scope
+
+- Scope in **Edit Word/Excel template** uses the same pills as Add: Profile-specific, Category, Global. **Global/Category → this profile** copies the file onto a renamed nested row; the shared User Report Template is unchanged. **Promote to Global or Category** requires **Confirm scope change** then Save — Category writes shared type links. Profile-specific shows the contract / migration applicability dropdown.
+- Verify: stop F5, rebuild, F5. Include **Borcnama** → Edit → Profile-specific → Save metadata. Nested copy named `Borcnama (…profile…)`. Global Borcnama still in catalog, not included. Promote needs Confirm. `ApplicationProfileWizardTemplateScopeHelperTests` (4 passed).
+- Prevent: Do not rewrite Borcnama’s master type/group links when making a profile-only copy. Do not apply Global/Category visibility without confirm.
+- Cross-skill: application-profile | visa2026-resminamalar | visa2026-user-report-templates
+
 ### 2026-08-18 — App_Inv_And_WP Results defaults (officer)
 
 - Tenant JSON now sets default lookups: visa type **WP**, category **Multiple**, period **Month6**, urgency **NORM**. Seed sync resolves LocalizationKey onto `DefaultVisaType` / Category / Period / Urgency. Border zone, Project, work-permit location stay Use-on with no default.

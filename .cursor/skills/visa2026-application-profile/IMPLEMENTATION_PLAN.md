@@ -30,7 +30,7 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | 8k | Profile-specific template applicability | **Done** | Per-row Project contract (Via ministry) or Migration service (Direct) dropdown; instance catalog filters; Project back on Results |
 | 8l | Approval leg versions (per-profile copies + snapshot) | **Done** | Identity named versions; create picker required; instance snapshots; timeline reads snapshots |
 | 8m | Locked profile: still edit approval-leg versions | **Done** | Config lock A keeps other fields read-only; versions add/edit/duplicate/default allowed; cannot remove last version |
-| 8d | Wizard step 4 real template catalog + persist scope | **Done** | Live `UserReportTemplate` Category/Global; `CatalogScope`/`DataScope`/`CategoryKey` on nested template |
+| 8d | Wizard step 4 real template catalog + persist scope | **Done** | Live `UserReportTemplate` Category/Global; `CatalogScope`/`DataScope`/`CategoryKey` on nested template. Edit dialog can change Scope (clone to this profile; confirm shared Global/Category). |
 | 8a | Application Profile overview (live) | **Done** | Live config/defaults/legs/templates + linked `ApplicationProfileInstance` rows; overview shows wizard identity, company/signatories, required fields, SLA days, template scope; mock only if profile id unresolved |
 | 8c | Custom catalog home (replace native List/Detail UI) | **Done** | List first; row opens overview; **Back to list**; New/Configure → wizard (new tab); **Save profile** reloads catalog; **Delete** when Linked = 0; toolbar **Total: N**; table-body scroll, sticky header |
 | 9 | Profile picker at Application create | **Done** | Intercepts **New** on Application ListViews; Blazor picker UI |

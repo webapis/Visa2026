@@ -941,7 +941,44 @@
     background: #f8fafc;
     outline: none;
 }
-.ap-wizard-edit-meta__row input[type="number"] { max-width: 88px; }
+.ap-wizard-edit-meta__row--scope {
+    align-items: start;
+}
+.ap-wizard-edit-meta__row--scope dd {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.ap-wizard__scope-pills--edit {
+    margin: 0;
+}
+.ap-wizard__cat-chips--edit {
+    margin: 0;
+}
+.ap-wizard__field--edit-apply {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0;
+}
+.ap-wizard__field--edit-apply span {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 500;
+}
+.ap-wizard-edit-scope-note {
+    margin: 0;
+    font-size: 0.78rem;
+    line-height: 1.35;
+    font-weight: 500;
+}
+.ap-wizard-edit-scope-note.is-info { color: #0f766e; }
+.ap-wizard-edit-scope-note.is-warn { color: #b45309; }
+.ap-wizard__btn--scope-confirm {
+    align-self: flex-start;
+    padding: 4px 10px;
+    font-size: 0.78rem;
+}
 .ap-wizard-edit-meta__active {
     margin-left: 6px;
     color: #15803d;
