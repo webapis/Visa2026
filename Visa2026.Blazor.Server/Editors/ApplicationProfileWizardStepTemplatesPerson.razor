@@ -14,7 +14,7 @@
 
 <div class="ap-wizard__panel-head">
     <h2>Templates &amp; person data</h2>
-    <p>Word/Excel files live on User Report Templates; manage and edit them here by scope — no context switch.</p>
+    <p>Word/Excel files live on User Report Templates. Profile-specific files belong to this profile; Shared files are included or excluded here.</p>
 </div>
 <div class="ap-wizard__panel-body">
     @* —— Profile-specific —— *@
@@ -77,23 +77,15 @@
             <h3>Shared catalog</h3>
             <span class="ap-wizard__badge ap-wizard__badge--global">Shared</span>
         </div>
-        <p class="ap-wizard__hint">Include attaches a User Report Template to this profile. Family tags on the right describe the master file — they do not attach it. Suggested follows May produce (and Registration related-to).</p>
-        <div class="ap-wizard__shared-filter" role="radiogroup" aria-label="Shared catalog filter">
-            <button type="button"
-                    class="ap-wizard__cat-chip @(!_showAllShared ? "is-on" : null)"
-                    @onclick="() => _showAllShared = false">Suggested for this profile</button>
-            <button type="button"
-                    class="ap-wizard__cat-chip @(_showAllShared ? "is-on" : null)"
-                    @onclick="() => _showAllShared = true">All shared</button>
-        </div>
+        <p class="ap-wizard__hint">Include or exclude a User Report Template for this profile.</p>
         <div class="ap-wizard__list">
-            @if (VisibleSharedRows.Count == 0)
+            @if (_sharedRows.Count == 0)
             {
-                <p class="ap-wizard__hint">@( _sharedRows.Count == 0 ? "No shared User Report Templates found." : "No suggested templates for this profile. Choose All shared to browse the rest.")</p>
+                <p class="ap-wizard__hint">No shared User Report Templates found.</p>
             }
             else
             {
-                @foreach (var row in VisibleSharedRows)
+                @foreach (var row in _sharedRows)
                 {
                     var included = IsIncluded(row.Name);
                     <div class="ap-wizard__list-row ap-wizard__list-row--shared">
@@ -101,19 +93,6 @@
                         <span class="ap-wizard__shared-name">
                             <strong>@row.Name</strong> · @FormatKind(row.Kind)
                             <span class="ap-wizard__shared-meta">@FormatDataScope(row.DataScope)</span>
-                        </span>
-                        <span class="ap-wizard__shared-families" title="Families on this User Report Template">
-                            @if (row.CategoryKeys.Count == 0)
-                            {
-                                <span class="ap-wizard__tag ap-wizard__tag--global">All profiles</span>
-                            }
-                            else
-                            {
-                                @foreach (var key in row.CategoryKeys)
-                                {
-                                    <span class="ap-wizard__tag ap-wizard__tag--family">@FormatCategoryChip(key)</span>
-                                }
-                            }
                         </span>
                         <span class="ap-wizard__tag @(included ? "ap-wizard__tag--ok" : null)">@(included ? "included" : "not included")</span>
                         @if (!Disabled)
@@ -132,10 +111,6 @@
                 }
             }
         </div>
-        @if (!_showAllShared && HiddenSharedCount > 0)
-        {
-            <p class="ap-wizard__hint ap-wizard__hint--shared-more">@HiddenSharedCount more shared file@(HiddenSharedCount == 1 ? "" : "s") — All shared to show them.</p>
-        }
     </div>
 
     <div class="ap-wizard__section">
@@ -177,11 +152,8 @@
                                 class="ap-wizard__scope-pill @(_addScope == ApplicationProfileTemplateCatalogScope.ProfileSpecific ? "is-on" : null)"
                                 @onclick="() => _addScope = ApplicationProfileTemplateCatalogScope.ProfileSpecific">Profile-specific</button>
                         <button type="button"
-                                class="ap-wizard__scope-pill @(_addScope == ApplicationProfileTemplateCatalogScope.Category ? "is-on" : null)"
-                                @onclick="() => _addScope = ApplicationProfileTemplateCatalogScope.Category">Category</button>
-                        <button type="button"
-                                class="ap-wizard__scope-pill @(_addScope == ApplicationProfileTemplateCatalogScope.Global ? "is-on" : null)"
-                                @onclick="() => _addScope = ApplicationProfileTemplateCatalogScope.Global">Global</button>
+                                class="ap-wizard__scope-pill @(ApplicationProfileWizardTemplateScopeHelper.IsShared(_addScope) ? "is-on" : null)"
+                                @onclick="() => _addScope = ApplicationProfileTemplateCatalogScope.Global">Shared</button>
                     </div>
                     <div class="ap-wizard__grid ap-wizard__grid--add-identity">
                         <label class="ap-wizard__field">
@@ -375,28 +347,10 @@
                                             disabled="@Disabled"
                                             @onclick="() => SetEditScope(ApplicationProfileTemplateCatalogScope.ProfileSpecific)">Profile-specific</button>
                                     <button type="button"
-                                            class="ap-wizard__scope-pill @(_editScope == ApplicationProfileTemplateCatalogScope.Category ? "is-on" : null)"
+                                            class="ap-wizard__scope-pill @(ApplicationProfileWizardTemplateScopeHelper.IsShared(_editScope) ? "is-on" : null)"
                                             disabled="@Disabled"
-                                            @onclick="() => SetEditScope(ApplicationProfileTemplateCatalogScope.Category)">Category</button>
-                                    <button type="button"
-                                            class="ap-wizard__scope-pill @(_editScope == ApplicationProfileTemplateCatalogScope.Global ? "is-on" : null)"
-                                            disabled="@Disabled"
-                                            @onclick="() => SetEditScope(ApplicationProfileTemplateCatalogScope.Global)">Global</button>
+                                            @onclick="SetEditScopeShared">Shared</button>
                                 </div>
-                                @if (_editScope == ApplicationProfileTemplateCatalogScope.Category)
-                                {
-                                    <div class="ap-wizard__cat-chips ap-wizard__cat-chips--edit" role="group" aria-label="Categories">
-                                        @foreach (var cat in ApplicationProfileWizardTemplateCatalog.CategoryChips)
-                                        {
-                                            <button type="button"
-                                                    class="ap-wizard__cat-chip @(_editCategoryKeys.Contains(cat.Key) ? "is-on" : null)"
-                                                    disabled="@Disabled"
-                                                    @onclick="() => ToggleEditCategory(cat.Key)">
-                                                @cat.Label
-                                            </button>
-                                        }
-                                    </div>
-                                }
                                 @if (_editScope == ApplicationProfileTemplateCatalogScope.ProfileSpecific)
                                 {
                                     <label class="ap-wizard__field ap-wizard__field--edit-apply">
@@ -496,7 +450,6 @@
 
     private IReadOnlyList<ApplicationProfileWizardTemplateCatalog.CatalogRow> _sharedRows =
         Array.Empty<ApplicationProfileWizardTemplateCatalog.CatalogRow>();
-    private bool _showAllShared;
 
     private readonly DataScopeOption[] _dataScopeOptions =
     [
@@ -644,24 +597,6 @@
         template.ApplicableMigrationService = ObjectSpace?.GetObjectByKey<MigrationService>(id);
         template.ApplicableMigrationServiceId = id;
     }
-
-    private IReadOnlyList<ApplicationProfileWizardTemplateCatalog.CatalogRow> VisibleSharedRows
-    {
-        get
-        {
-            if (_showAllShared)
-                return _sharedRows;
-
-            var suggested = ApplicationProfileWizardTemplateCatalog.SuggestedCategoryKeys(Profile);
-            return _sharedRows
-                .Where(r =>
-                    IsIncluded(r.Name)
-                    || ApplicationProfileWizardTemplateCatalog.IsSuggestedForProfile(r, suggested))
-                .ToList();
-        }
-    }
-
-    private int HiddenSharedCount => Math.Max(0, _sharedRows.Count - VisibleSharedRows.Count);
 
     private bool IsIncluded(string name) =>
         Profile.NestedTemplates?.Any(t =>
@@ -813,9 +748,7 @@
             return;
         }
 
-        var suggested = ApplicationProfileWizardTemplateCatalog.SuggestedCategoryKeys(Profile);
-        var categoryKey = row.CategoryKeys.FirstOrDefault(k => suggested.Contains(k))
-            ?? row.CategoryKeys.FirstOrDefault();
+        var categoryKey = row.CategoryKeys.FirstOrDefault();
 
         if (OnCreateTemplate.HasDelegate)
         {
@@ -875,10 +808,7 @@
         if (requireFile && (_addFileBytes == null || _addFileBytes.Length == 0))
             return;
 
-        var categoryKey = _addScope == ApplicationProfileTemplateCatalogScope.Category
-            ? (ApplicationProfileWizardTemplateCatalog.SuggestedCategoryKeys(Profile).FirstOrDefault()
-               ?? ApplicationProfileWizardTemplateCatalog.CategoryVisa)
-            : null;
+        var categoryKey = (string?)null;
 
         if (OnCreateTemplate.HasDelegate)
         {
@@ -967,18 +897,13 @@
         _editStatusIsError = false;
     }
 
+    private void SetEditScopeShared() =>
+        SetEditScope(ApplicationProfileWizardTemplateScopeHelper.SharedTarget(_savedScope));
+
     private void ConfirmEditScopeChange()
     {
         _scopeChangeConfirmed = true;
         SetEditStatus("Scope change confirmed. Click Save metadata to apply.", isError: false);
-    }
-
-    private void ToggleEditCategory(string key)
-    {
-        if (Disabled)
-            return;
-        if (!_editCategoryKeys.Add(key))
-            _editCategoryKeys.Remove(key);
     }
 
     private void OnEditApplicabilityChanged(ChangeEventArgs e)
@@ -1236,12 +1161,6 @@
         ApplicationProfileTemplateDataScope.Both => "Header + M2M",
         _ => "People (M2M)",
     };
-
-    private static string FormatCategoryChip(string key) =>
-        ApplicationProfileWizardTemplateCatalog.CategoryChips
-            .FirstOrDefault(c => c.Key.Equals(key, StringComparison.OrdinalIgnoreCase))
-            .Label
-        ?? key;
 
     private static string FormatBytes(long size)
     {

@@ -157,7 +157,7 @@ public class ApplicationProfileOverviewQueryServiceTests
         Assert.Single(snapshot.NestedTemplates);
         Assert.Equal("Sanaw", snapshot.NestedTemplates[0].Name);
         Assert.Equal("Excel", snapshot.NestedTemplates[0].Kind);
-        Assert.Equal("Category", snapshot.NestedTemplates[0].Scope);
+        Assert.Equal("Shared", snapshot.NestedTemplates[0].Scope);
         Assert.Equal("Header + M2M", snapshot.NestedTemplates[0].DataScope);
         Assert.Equal("Work permit", snapshot.NestedTemplates[0].Category);
     }

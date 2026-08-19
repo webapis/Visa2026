@@ -319,8 +319,8 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
 
     private static string FormatCatalogScope(ApplicationProfileTemplateCatalogScope scope) => scope switch
     {
-        ApplicationProfileTemplateCatalogScope.Category => "Category",
-        ApplicationProfileTemplateCatalogScope.Global => "All profiles",
+        ApplicationProfileTemplateCatalogScope.Category => "Shared",
+        ApplicationProfileTemplateCatalogScope.Global => "Shared",
         _ => "Profile-specific",
     };
 
@@ -378,7 +378,7 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
             NestedTemplates =
             [
                 new() { Name = "Invitation package", Kind = "Word", Scope = "Profile-specific", DataScope = "People (M2M)" },
-                new() { Name = "Work permit forms", Kind = "Excel", Scope = "Category", DataScope = "Header + M2M", Category = "Work permit" },
+                new() { Name = "Work permit forms", Kind = "Excel", Scope = "Shared", DataScope = "Header + M2M", Category = "Work permit" },
             ],
             LinkedApplications = [],
             LinkedApplicationCount = 0,

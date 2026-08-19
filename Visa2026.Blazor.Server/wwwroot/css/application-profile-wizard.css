@@ -427,7 +427,7 @@
 
 .ap-wizard__list-row--template { grid-template-columns: 36px 1fr minmax(160px, 240px) auto; }
 .ap-wizard__list-row--shared {
-    grid-template-columns: 36px minmax(140px, 1.1fr) minmax(160px, 1.4fr) auto auto;
+    grid-template-columns: 36px 1fr auto auto;
 }
 .ap-wizard__shared-name {
     display: flex;
@@ -439,38 +439,6 @@
     font-size: 0.72rem;
     color: var(--ap-muted);
     font-weight: 500;
-}
-.ap-wizard__shared-families {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    justify-content: flex-end;
-    min-width: 0;
-}
-.ap-wizard__tag--family {
-    background: #eff6ff;
-    color: #1d4ed8;
-}
-.ap-wizard__tag--global {
-    background: #f8fafc;
-    color: #475569;
-    border: 1px solid #e2e8f0;
-}
-.ap-wizard__shared-filter {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin: 0 0 12px;
-}
-.ap-wizard__hint--shared-more { margin-top: 8px; }
-@media (max-width: 860px) {
-    .ap-wizard__list-row--shared {
-        grid-template-columns: 36px 1fr auto;
-    }
-    .ap-wizard__shared-families {
-        grid-column: 2 / -1;
-        justify-content: flex-start;
-    }
 }
 .ap-wizard__apply-lookup {
     width: 100%;

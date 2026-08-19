@@ -4,6 +4,13 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 
 ---
 
+### 2026-08-19 — Officer template scopes are Profile-specific and Shared only
+
+- Templates & person shows two lists: **Profile-specific** (this profile, contract/migration filter) and **Shared** (Include/Exclude). No Category/Global labels, no suggestion chips, no family tags. Add/Edit Scope pills are the same two values. Shared Add writes Global (no type links). Promoting a profile-only file to Shared is Global + confirm; an already-typed master stays typed internally. Overview scope chip also says Shared.
+- Verify: stop F5, rebuild, F5. Step 5 has two sections. Add template: Profile-specific | Shared. Shared list shows every master with Include. `ApplicationProfileWizardTemplateScopeHelperTests` + overview scope "Shared".
+- Prevent: Do not put Category/Global back on the officer pills. Do not reintroduce Suggested for this profile.
+- Cross-skill: application-profile | visa2026-resminamalar | visa2026-user-report-templates
+
 ### 2026-08-19 — Shared catalog replaces Category + Global lists
 
 - Wizard Templates & person now has one **Shared catalog** (typed User Report Templates + global masters). Include/Exclude attaches to this profile. Family tags sit on the **right** of each row (all families, not first two). Data scope is muted under the name. **Suggested for this profile** uses May produce + Registration related-to; Global (no type links) always appears; already-included rows stay visible. **All shared** shows the rest. Category/Global remain Edit Scope on the master, not a second attach list.

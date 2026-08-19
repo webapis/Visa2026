@@ -21,6 +21,19 @@ public static class ApplicationProfileWizardTemplateScopeHelper
         public Guid LinkedUserReportTemplateId { get; init; }
     }
 
+    public static bool IsShared(ApplicationProfileTemplateCatalogScope scope) =>
+        scope != ApplicationProfileTemplateCatalogScope.ProfileSpecific;
+
+    /// <summary>
+    /// Officer UI has Profile-specific vs Shared. Shared keeps an existing Category/Global
+    /// master; a profile-only file promoted to Shared becomes Global (no type links).
+    /// </summary>
+    public static ApplicationProfileTemplateCatalogScope SharedTarget(
+        ApplicationProfileTemplateCatalogScope saved) =>
+        saved == ApplicationProfileTemplateCatalogScope.ProfileSpecific
+            ? ApplicationProfileTemplateCatalogScope.Global
+            : saved;
+
     public static bool RequiresSharedVisibilityConfirm(
         ApplicationProfileTemplateCatalogScope from,
         ApplicationProfileTemplateCatalogScope to) =>
@@ -41,12 +54,7 @@ public static class ApplicationProfileWizardTemplateScopeHelper
             return "Creates a copy for this profile. The shared catalog file is unchanged.";
         }
 
-        if (to == ApplicationProfileTemplateCatalogScope.Global)
-        {
-            return "This file will appear in Global (all profiles). Confirm — every profile can include it.";
-        }
-
-        return "Affects every profile that uses this User Report Template. Category filters are shared.";
+        return "This file will be Shared. Other profiles can Include it.";
     }
 
     public static string BuildProfileCopyName(
@@ -148,9 +156,9 @@ public static class ApplicationProfileWizardTemplateScopeHelper
 
         var status = from == to
             ? "Metadata saved."
-            : to == ApplicationProfileTemplateCatalogScope.Global
-                ? "Scope set to Global (all profiles)."
-                : "Scope set to Category on the shared User Report Template.";
+            : to == ApplicationProfileTemplateCatalogScope.ProfileSpecific
+                ? "Copied for this profile. Shared catalog file is unchanged."
+                : "Scope set to Shared.";
 
         return new ApplyResult
         {

@@ -26,9 +26,20 @@ public class ApplicationProfileWizardTemplateScopeHelperTests
         Assert.True(ApplicationProfileWizardTemplateScopeHelper.RequiresSharedVisibilityConfirm(
             ApplicationProfileTemplateCatalogScope.Global,
             ApplicationProfileTemplateCatalogScope.Category));
-        Assert.True(ApplicationProfileWizardTemplateScopeHelper.RequiresSharedVisibilityConfirm(
-            ApplicationProfileTemplateCatalogScope.Category,
+        Assert.True(ApplicationProfileWizardTemplateScopeHelper.IsShared(
             ApplicationProfileTemplateCatalogScope.Global));
+        Assert.True(ApplicationProfileWizardTemplateScopeHelper.IsShared(
+            ApplicationProfileTemplateCatalogScope.Category));
+        Assert.False(ApplicationProfileWizardTemplateScopeHelper.IsShared(
+            ApplicationProfileTemplateCatalogScope.ProfileSpecific));
+        Assert.Equal(
+            ApplicationProfileTemplateCatalogScope.Global,
+            ApplicationProfileWizardTemplateScopeHelper.SharedTarget(
+                ApplicationProfileTemplateCatalogScope.ProfileSpecific));
+        Assert.Equal(
+            ApplicationProfileTemplateCatalogScope.Category,
+            ApplicationProfileWizardTemplateScopeHelper.SharedTarget(
+                ApplicationProfileTemplateCatalogScope.Category));
     }
 
     [Fact]
