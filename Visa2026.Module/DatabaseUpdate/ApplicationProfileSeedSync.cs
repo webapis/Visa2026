@@ -4,12 +4,15 @@ using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.Base;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.DatabaseUpdate.LookupCatalogs;
 
 namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
-/// Idempotent sync: one <see cref="ApplicationProfile"/> per <see cref="ApplicationType"/>,
-/// then backfill <see cref="Application.ApplicationProfile"/> from <see cref="Application.ApplicationType"/>.
+/// Idempotent sync: one <see cref="ApplicationProfile"/> per <see cref="ApplicationType"/>
+/// when no tenant application-profile JSON is present, then backfill instance FKs.
+/// Calik (and any pack with tenant JSON) owns the catalog — do not invent type-derived profiles.
+/// When tenant JSON is present, host start still upserts those catalog rows (ModuleUpdater may skip).
 /// </summary>
 public static class ApplicationProfileSeedSync
 {
@@ -19,12 +22,28 @@ public static class ApplicationProfileSeedSync
         public int ProfilesUpdated { get; init; }
         public int ApplicationsBackfilled { get; init; }
         public IReadOnlyList<string> TypesWithoutProfile { get; init; } = Array.Empty<string>();
+        public bool SkippedBecauseTenantCatalogPresent { get; init; }
     }
 
     public static Result Sync(IObjectSpace objectSpace)
     {
         if (objectSpace == null)
             throw new ArgumentNullException(nameof(objectSpace));
+
+        if (ApplicationProfileTenantCatalogLoader.Load() != null)
+        {
+            Tracing.Tracer.LogText(
+                "ApplicationProfileSeedSync: tenant application-profile JSON present; syncing catalog rows (not type-derived).");
+            var tenant = ApplicationProfileTenantCatalogSync.Sync(objectSpace);
+            ApplicationProfileNestedTemplateTenantCatalogSync.Sync(objectSpace);
+            objectSpace.CommitChanges();
+            return new Result
+            {
+                SkippedBecauseTenantCatalogPresent = true,
+                ProfilesCreated = tenant.Created,
+                ProfilesUpdated = tenant.Updated,
+            };
+        }
 
         var types = objectSpace.GetObjectsQuery<ApplicationType>()
             .OrderBy(t => t.Name)

@@ -66,9 +66,15 @@ public sealed class ApplicationProfileTenantCatalogRow
 
     public bool RequireVisaType { get; set; }
 
+    public string? DefaultVisaTypeLocalizationKey { get; set; }
+
     public bool RequireVisaCategory { get; set; }
 
+    public string? DefaultVisaCategoryLocalizationKey { get; set; }
+
     public bool RequireVisaPeriod { get; set; }
+
+    public string? DefaultVisaPeriodLocalizationKey { get; set; }
 
     public bool RequireBorderZone { get; set; }
 
@@ -85,6 +91,8 @@ public sealed class ApplicationProfileTenantCatalogRow
     public bool RequireProject { get; set; }
 
     public bool RequireUrgency { get; set; }
+
+    public string? DefaultUrgencyLocalizationKey { get; set; }
 
     public bool RequireWorkPermitLocation { get; set; }
 
@@ -176,8 +184,11 @@ public sealed class ApplicationProfileTenantCatalogRow
             MigrationSlaDays = profile.MigrationSlaDays,
             MigrationSlaProfileCode = migrationSlaProfileCode,
             RequireVisaType = profile.RequireVisaType,
+            DefaultVisaTypeLocalizationKey = NullIfEmpty(profile.DefaultVisaType?.LocalizationKey),
             RequireVisaCategory = profile.RequireVisaCategory,
+            DefaultVisaCategoryLocalizationKey = NullIfEmpty(profile.DefaultVisaCategory?.LocalizationKey),
             RequireVisaPeriod = profile.RequireVisaPeriod,
+            DefaultVisaPeriodLocalizationKey = NullIfEmpty(profile.DefaultVisaPeriod?.LocalizationKey),
             RequireBorderZone = profile.RequireBorderZone,
             RequireMigrationService = profile.RequireMigrationService,
             RequireStartDate = profile.RequireStartDate,
@@ -186,6 +197,7 @@ public sealed class ApplicationProfileTenantCatalogRow
             RequireBusinessTripAddress = profile.RequireBusinessTripAddress,
             RequireProject = profile.RequireProject,
             RequireUrgency = profile.RequireUrgency,
+            DefaultUrgencyLocalizationKey = NullIfEmpty(profile.DefaultUrgency?.LocalizationKey),
             RequireWorkPermitLocation = profile.RequireWorkPermitLocation,
             RequireEntryDate = profile.RequireEntryDate,
             RequireEntryCheckPoint = profile.RequireEntryCheckPoint,
@@ -250,6 +262,9 @@ public sealed class ApplicationProfileTenantCatalogRow
             DefaultProjectContractCode = preview.DefaultProjectContractCode,
             ProfileCatalogKey = preview.ProfileCatalogKey,
         };
+
+    private static string? NullIfEmpty(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 }
 
 internal static class ApplicationProfileTenantCatalogLoader
@@ -292,10 +307,12 @@ internal static class ApplicationProfileTenantCatalogLoader
 
 internal static class ApplicationProfileTenantCatalogSync
 {
-    public static void Sync(IObjectSpace objectSpace)
+    public readonly record struct Result(int Created, int Updated, int Skipped);
+
+    public static Result Sync(IObjectSpace objectSpace)
     {
         if (!TryLoadCatalogRows(objectSpace, out var rows))
-            return;
+            return default;
 
         var contracts = objectSpace.GetObjectsQuery<ProjectContract>().ToList();
         var existingProfiles = objectSpace.GetObjectsQuery<ApplicationProfile>().ToList();
@@ -323,14 +340,16 @@ internal static class ApplicationProfileTenantCatalogSync
                 updated++;
             }
 
-            ApplyRow(profile, row, contracts);
+            ApplyRow(objectSpace, profile, row, contracts);
         }
 
-        if (created > 0 || updated > 0)
+        if (created > 0 || updated > 0 || skipped > 0)
         {
             Tracing.Tracer.LogText(
                 $"ApplicationProfileTenantCatalogSync: created={created}, updated={updated}, skipped={skipped}.");
         }
+
+        return new Result(created, updated, skipped);
     }
 
     private static ApplicationProfile? FindExistingProfile(
@@ -363,6 +382,7 @@ internal static class ApplicationProfileTenantCatalogSync
     }
 
     private static void ApplyRow(
+        IObjectSpace objectSpace,
         ApplicationProfile profile,
         ApplicationProfileTenantCatalogRow row,
         IReadOnlyList<ProjectContract> contracts)
@@ -396,8 +416,11 @@ internal static class ApplicationProfileTenantCatalogSync
         profile.MigrationSlaDays = row.MigrationSlaDays > 0 ? row.MigrationSlaDays : 14;
 
         profile.RequireVisaType = row.RequireVisaType;
+        profile.DefaultVisaType = ResolveLookup<VisaType>(objectSpace, row.DefaultVisaTypeLocalizationKey);
         profile.RequireVisaCategory = row.RequireVisaCategory;
+        profile.DefaultVisaCategory = ResolveLookup<VisaCategory>(objectSpace, row.DefaultVisaCategoryLocalizationKey);
         profile.RequireVisaPeriod = row.RequireVisaPeriod;
+        profile.DefaultVisaPeriod = ResolveLookup<VisaPeriod>(objectSpace, row.DefaultVisaPeriodLocalizationKey);
         profile.RequireBorderZone = row.RequireBorderZone;
         profile.RequireMigrationService = row.RequireMigrationService;
         profile.RequireStartDate = row.RequireStartDate;
@@ -407,6 +430,7 @@ internal static class ApplicationProfileTenantCatalogSync
         profile.RequireProject = row.RequireProject;
         profile.DefaultProjectContract = ResolveProjectContract(contracts, row.DefaultProjectContractCode);
         profile.RequireUrgency = row.RequireUrgency;
+        profile.DefaultUrgency = ResolveLookup<Urgency>(objectSpace, row.DefaultUrgencyLocalizationKey);
         profile.RequireWorkPermitLocation = row.RequireWorkPermitLocation;
         profile.RequireEntryDate = row.RequireEntryDate;
         profile.RequireEntryCheckPoint = row.RequireEntryCheckPoint;
@@ -461,6 +485,18 @@ internal static class ApplicationProfileTenantCatalogSync
         var code = legacyCode.Trim();
         return title.StartsWith(code, StringComparison.OrdinalIgnoreCase)
                || KeysEqual(title, code);
+    }
+
+    private static TLookup? ResolveLookup<TLookup>(IObjectSpace objectSpace, string? localizationKey)
+        where TLookup : LookupBase
+    {
+        if (string.IsNullOrWhiteSpace(localizationKey))
+            return null;
+
+        var key = localizationKey.Trim();
+        return objectSpace.GetObjectsQuery<TLookup>()
+            .AsEnumerable()
+            .FirstOrDefault(item => KeysEqual(item.LocalizationKey, key) || KeysEqual(item.Code, key));
     }
 
     private static bool KeysEqual(string? left, string? right) =>

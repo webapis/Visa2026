@@ -11,6 +11,7 @@ namespace Visa2026.Blazor.Server.Services;
 
 /// <summary>
 /// Runs <see cref="ApplicationProfileSeedSync"/> after host DI is ready when ModuleUpdater was skipped.
+/// Tenant catalog JSON is applied here too (not only on DB version bump).
 /// </summary>
 internal static class ApplicationProfileSeedGate
 {
@@ -38,10 +39,11 @@ internal static class ApplicationProfileSeedGate
             var result = ApplicationProfileSeedSync.Sync(objectSpace);
 
             logger?.LogInformation(
-                "ApplicationProfileInstance profile seed sync: created={Created}, updated={Updated}, backfilled={Backfilled}.",
+                "ApplicationProfile seed sync: created={Created}, updated={Updated}, backfilled={Backfilled}, tenantCatalog={TenantCatalog}.",
                 result.ProfilesCreated,
                 result.ProfilesUpdated,
-                result.ApplicationsBackfilled);
+                result.ApplicationsBackfilled,
+                result.SkippedBecauseTenantCatalogPresent);
 
             if (result.TypesWithoutProfile.Count > 0)
             {

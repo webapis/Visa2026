@@ -4,6 +4,36 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 
 ---
 
+### 2026-08-18 — App_Inv_And_WP Results defaults (officer)
+
+- Tenant JSON now sets default lookups: visa type **WP**, category **Multiple**, period **Month6**, urgency **NORM**. Seed sync resolves LocalizationKey onto `DefaultVisaType` / Category / Period / Urgency. Border zone, Project, work-permit location stay Use-on with no default.
+- Verify: stop F5, rebuild, F5. Configure profile → Results & fields shows those four Has default values (WP — Work visa, Multiple entry, 6 months, Normal priority).
+- Prevent: Do not store GUIDs in tenant JSON; use LocalizationKey. Empty key clears the default on next F5.
+- Cross-skill: application-profile | visa2026-lookup-data
+
+### 2026-08-18 — App_Inv_And_WP type-only seed flags (officer)
+
+- One Calik profile `App_Inv_And_WP` / `get_invitation_wp`. Audience **Employee only**. May produce **Invitation + Work permit** only. SLA ministry **4** / migration **30**. No Description, SelectionCode, or MigrationSlaProfileCode in JSON. Person border-zone item and rejection item **off**.
+- Verify: stop F5, rebuild, F5. Overview/wizard matches those flags; Description and selection code cleared.
+- Prevent: Do not copy Wave 0b Both/visa/border/rejection produce flags onto this type-only template.
+- Cross-skill: application-profile
+
+### 2026-08-18 — Tenant profile JSON did not seed on F5 (ModuleUpdater skipped)
+
+- Symptom: Application Profiles catalog showed **No profiles match** after adding one `App_Inv_And_WP` row to `application-profile.calik-energi.json`. Local `"ApplicationProfiles"` count was 0.
+- Cause: `ApplicationProfileSeedGate` (every F5) called `ApplicationProfileSeedSync`, which returned immediately when tenant JSON was present so type-derived rows were not invented. Tenant catalog upsert lived only in `ApplicationProfileTenantCatalogSeedUpdater`, which XAF skips when the module version is already current.
+- Fix: when tenant JSON is present, `ApplicationProfileSeedSync` upserts tenant catalog rows (and nested templates) and commits. Empty `Rows` still creates nothing.
+- Verify: stop F5, rebuild, F5. Catalog should show **Çakylyk we Iş Rugsatnamasyny Almak** (`get_invitation_wp`). Log: `tenantCatalog=True`, `created=1`.
+- Prevent: Do not rely on ModuleUpdater / `FORCE_XAF_DB_UPDATE` for tenant application-profile JSON changes. Do not restore the 176 Wave 0b rows.
+- Cross-skill: application-profile | visa2026-lookup-data
+
+### 2026-08-18 — Tenant catalog JSON emptied (no 176 auto-seeded profiles)
+
+- Local `visa2026` has 0 Application Profiles / instances / nested templates. Tenant JSON `application-profile.calik-energi.json` and `application-profile-nested-templates.calik-energi.json` now have empty `Rows`. `ApplicationProfileSeedSync` skips type-derived profiles when tenant JSON is present, so F5 will not recreate 21 type-only rows.
+- Verify: stop F5, rebuild, F5. Application Profiles catalog is empty.
+- Prevent: Do not put the 176 Wave 0b rows back into tenant JSON for this Templates & person review. Add one profile at a time.
+- Cross-skill: application-profile | visa2026-lookup-data
+
 ### 2026-08-18 — Locked profile still edits approval-leg versions
 
 - Config lock A still freezes Name, Directed to, May produce, templates, person toggles, and SLA. **Approval leg versions** stay editable (Add, Duplicate, rename, ministries, Default) because instances snapshot ministries at create. Cannot remove the last version while locked. Started cases are not restamped.
