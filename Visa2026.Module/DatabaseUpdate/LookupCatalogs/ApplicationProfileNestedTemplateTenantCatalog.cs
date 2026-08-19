@@ -31,6 +31,13 @@ public sealed class ApplicationProfileNestedTemplateTenantCatalogRow
 
     public string RootBoType { get; set; } = string.Empty;
 
+    /// <summary>Shared include vs profile-only upload. Blank seeds as Global so Include rows stay off Profile-specific.</summary>
+    public string? CatalogScope { get; set; }
+
+    public string? DataScope { get; set; }
+
+    public string? CategoryKey { get; set; }
+
     public string? SignOff { get; set; }
 
     public static ApplicationProfileNestedTemplateTenantCatalogRow FromProposal(
@@ -45,6 +52,8 @@ public sealed class ApplicationProfileNestedTemplateTenantCatalogRow
             TemplateKind = proposal.TemplateKind.ToString(),
             SortOrder = proposal.SortOrder,
             RootBoType = proposal.RootBoType,
+            CatalogScope = nameof(ApplicationProfileTemplateCatalogScope.Global),
+            DataScope = nameof(ApplicationProfileTemplateDataScope.PeopleM2M),
             SignOff = string.Empty,
         };
 }
@@ -139,6 +148,11 @@ internal static class ApplicationProfileNestedTemplateTenantCatalogSync
                 template.TemplateName = row.TemplateName.Trim();
                 template.TemplateKind = ParseKind(row.TemplateKind);
                 template.SortOrder = row.SortOrder;
+                template.CatalogScope = ParseCatalogScope(row.CatalogScope);
+                template.DataScope = ParseDataScope(row.DataScope, row.RootBoType);
+                template.CategoryKey = string.IsNullOrWhiteSpace(row.CategoryKey)
+                    ? template.CategoryKey
+                    : row.CategoryKey.Trim();
             }
         }
 
@@ -177,4 +191,24 @@ internal static class ApplicationProfileNestedTemplateTenantCatalogSync
         Enum.TryParse<ApplicationProfileTemplateKind>(value, ignoreCase: true, out var kind)
             ? kind
             : ApplicationProfileTemplateKind.Word;
+
+    private static ApplicationProfileTemplateCatalogScope ParseCatalogScope(string? value)
+    {
+        if (Enum.TryParse<ApplicationProfileTemplateCatalogScope>(value, ignoreCase: true, out var scope))
+            return scope;
+
+        return ApplicationProfileTemplateCatalogScope.Global;
+    }
+
+    private static ApplicationProfileTemplateDataScope ParseDataScope(string? value, string? rootBoType)
+    {
+        if (Enum.TryParse<ApplicationProfileTemplateDataScope>(value, ignoreCase: true, out var scope))
+            return scope;
+
+        if (string.Equals(rootBoType, nameof(UserReportBoType.ApplicationProfileInstance), StringComparison.OrdinalIgnoreCase)
+            || string.Equals(rootBoType, "Application", StringComparison.OrdinalIgnoreCase))
+            return ApplicationProfileTemplateDataScope.ApplicationHeader;
+
+        return ApplicationProfileTemplateDataScope.PeopleM2M;
+    }
 }

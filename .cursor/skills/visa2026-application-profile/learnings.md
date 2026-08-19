@@ -4,6 +4,13 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 
 ---
 
+### 2026-08-19 — App_Inv_And_WP default Shared includes
+
+- Tenant nested JSON now seeds **Borcnama**, **Contract Inv**, and **Sahsy kagyz** on `App_Inv_And_WP` (`SignOff: approved`). Nested rows use Shared catalog scope (Global / Category), not Profile-specific, so Templates & person shows them as included in Shared.
+- Verify: stop F5, rebuild, F5. Configure App_Inv_And_WP → Templates & person → those three are **included**. Other Shared rows stay not included unless the officer already saved extras.
+- Prevent: Nested-template tenant rows need `SignOff: approved` or startup sync skips them. Do not seed as CatalogScope ProfileSpecific.
+- Cross-skill: application-profile | visa2026-user-report-templates
+
 ### 2026-08-19 — Wizard Preview links did not open the side panel
 
 - Preview on Templates & person used C# `OpenFileAsync` from the wizard editor. The File occupant is owned by `VisaPreviewSlotHost` (separate root in `_Host.cshtml`). Result: Preview links rendered, slot stayed closed. Preview now calls `visaPreviewDrawer.open` like other file links.

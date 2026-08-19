@@ -1,3 +1,46 @@
 {
-  "Rows": []
+  "Rows": [
+    {
+      "ProfileCatalogKey": "App_Inv_And_WP",
+      "ApplicationTypeName": "App_Inv_And_WP",
+      "ProfileCode": "get_invitation_wp",
+      "DefaultProjectContractCode": null,
+      "TemplateName": "Borcnama",
+      "TemplateKind": "Word",
+      "SortOrder": 49,
+      "RootBoType": "ApplicationItem",
+      "CatalogScope": "Global",
+      "DataScope": "PeopleM2M",
+      "CategoryKey": null,
+      "SignOff": "approved"
+    },
+    {
+      "ProfileCatalogKey": "App_Inv_And_WP",
+      "ApplicationTypeName": "App_Inv_And_WP",
+      "ProfileCode": "get_invitation_wp",
+      "DefaultProjectContractCode": null,
+      "TemplateName": "Contract Inv",
+      "TemplateKind": "Word",
+      "SortOrder": 51,
+      "RootBoType": "ApplicationItem",
+      "CatalogScope": "Category",
+      "DataScope": "PeopleM2M",
+      "CategoryKey": "Invitation",
+      "SignOff": "approved"
+    },
+    {
+      "ProfileCatalogKey": "App_Inv_And_WP",
+      "ApplicationTypeName": "App_Inv_And_WP",
+      "ProfileCode": "get_invitation_wp",
+      "DefaultProjectContractCode": null,
+      "TemplateName": "Sahsy kagyz",
+      "TemplateKind": "Word",
+      "SortOrder": 67,
+      "RootBoType": "ApplicationItem",
+      "CatalogScope": "Category",
+      "DataScope": "PeopleM2M",
+      "CategoryKey": "Invitation",
+      "SignOff": "approved"
+    }
+  ]
 }
