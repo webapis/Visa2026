@@ -45,6 +45,7 @@ public static class ApplicationProfileWizardTemplateCatalog
     {
         public required IReadOnlyList<CatalogRow> Global { get; init; }
         public required IReadOnlyList<CatalogRow> Category { get; init; }
+        public IReadOnlyList<CatalogRow> Shared => MergeShared(Global, Category);
     }
 
     public static CatalogSnapshot Build(IObjectSpace objectSpace)
@@ -87,6 +88,49 @@ public static class ApplicationProfileWizardTemplateCatalog
                 .ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
                 .ToList(),
         };
+    }
+
+    public static IReadOnlyList<CatalogRow> MergeShared(
+        IEnumerable<CatalogRow>? global,
+        IEnumerable<CatalogRow>? category) =>
+        (global ?? Array.Empty<CatalogRow>())
+            .Concat(category ?? Array.Empty<CatalogRow>())
+            .OrderBy(r => r.SortOrder)
+            .ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+    /// <summary>
+    /// Families this profile is likely to Include: May produce flags, plus Registration related-to.
+    /// Empty means there is no signal — callers should show the full shared catalog.
+    /// </summary>
+    public static IReadOnlyList<string> SuggestedCategoryKeys(ApplicationProfile? profile)
+    {
+        if (profile == null)
+            return Array.Empty<string>();
+
+        var keys = new List<string>();
+        if (profile.ProduceInvitation)
+            keys.Add(CategoryInvitation);
+        if (profile.ProduceVisa)
+            keys.Add(CategoryVisa);
+        if (profile.ProduceWorkPermit)
+            keys.Add(CategoryWorkPermit);
+        if (profile.ActionFamily == ApplicationProfileActionFamily.Registration)
+            keys.Add(CategoryRegistration);
+        if (profile.ProduceBorderZone)
+            keys.Add(CategoryBorderZone);
+        return keys;
+    }
+
+    public static bool IsSuggestedForProfile(CatalogRow row, IReadOnlyCollection<string>? suggestedKeys)
+    {
+        if (row == null)
+            return false;
+        if (row.CategoryKeys == null || row.CategoryKeys.Count == 0)
+            return true;
+        if (suggestedKeys == null || suggestedKeys.Count == 0)
+            return true;
+        return row.CategoryKeys.Any(k => suggestedKeys.Contains(k));
     }
 
     public static ApplicationProfileTemplateDataScope DataScopeFromRootBo(UserReportBoType root) =>

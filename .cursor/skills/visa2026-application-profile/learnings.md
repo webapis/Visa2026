@@ -4,6 +4,13 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 
 ---
 
+### 2026-08-19 — Shared catalog replaces Category + Global lists
+
+- Wizard Templates & person now has one **Shared catalog** (typed User Report Templates + global masters). Include/Exclude attaches to this profile. Family tags sit on the **right** of each row (all families, not first two). Data scope is muted under the name. **Suggested for this profile** uses May produce + Registration related-to; Global (no type links) always appears; already-included rows stay visible. **All shared** shows the rest. Category/Global remain Edit Scope on the master, not a second attach list.
+- Verify: stop F5, rebuild, F5. App_Inv_And_WP step 5: Borcnama + Invitation/WP-tagged files in Suggested; Registration-only hidden until All shared. Include still attaches. `ApplicationProfileWizardTemplateCatalogTests`.
+- Prevent: Do not bring back Issuance & process family chips as the attach UI. Do not treat family tags as Include.
+- Cross-skill: application-profile | visa2026-resminamalar | visa2026-user-report-templates
+
 ### 2026-08-19 — Edit template dialog can change Scope
 
 - Scope in **Edit Word/Excel template** uses the same pills as Add: Profile-specific, Category, Global. **Global/Category → this profile** copies the file onto a renamed nested row; the shared User Report Template is unchanged. **Promote to Global or Category** requires **Confirm scope change** then Save — Category writes shared type links. Profile-specific shows the contract / migration applicability dropdown.

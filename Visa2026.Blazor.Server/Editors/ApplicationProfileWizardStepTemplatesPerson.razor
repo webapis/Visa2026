@@ -71,45 +71,51 @@
         }
     </div>
 
-    @* —— Category —— *@
+    @* —— Shared catalog (typed + global masters) —— *@
     <div class="ap-wizard__section ap-wizard__section--scope">
         <div class="ap-wizard__scope-head">
-            <h3>Issuance &amp; process families</h3>
-            <span class="ap-wizard__badge ap-wizard__badge--category">Category</span>
+            <h3>Shared catalog</h3>
+            <span class="ap-wizard__badge ap-wizard__badge--global">Shared</span>
         </div>
-        <p class="ap-wizard__hint">From User Report Templates limited by application type / type group. Include to attach to this profile.</p>
-        <div class="ap-wizard__cat-chips" role="group" aria-label="Category filter">
-            @foreach (var cat in ApplicationProfileWizardTemplateCatalog.CategoryChips)
-            {
-                <button type="button"
-                        class="ap-wizard__cat-chip @(_selectedCategories.Contains(cat.Key) ? "is-on" : null)"
-                        disabled="@Disabled"
-                        @onclick="() => ToggleCategory(cat.Key)">
-                    @cat.Label
-                </button>
-            }
+        <p class="ap-wizard__hint">Include attaches a User Report Template to this profile. Family tags on the right describe the master file — they do not attach it. Suggested follows May produce (and Registration related-to).</p>
+        <div class="ap-wizard__shared-filter" role="radiogroup" aria-label="Shared catalog filter">
+            <button type="button"
+                    class="ap-wizard__cat-chip @(!_showAllShared ? "is-on" : null)"
+                    @onclick="() => _showAllShared = false">Suggested for this profile</button>
+            <button type="button"
+                    class="ap-wizard__cat-chip @(_showAllShared ? "is-on" : null)"
+                    @onclick="() => _showAllShared = true">All shared</button>
         </div>
         <div class="ap-wizard__list">
-            @if (FilteredCategoryRows.Count == 0)
+            @if (VisibleSharedRows.Count == 0)
             {
-                <p class="ap-wizard__hint">No category templates match the selected chips (or none have type/group applicability).</p>
+                <p class="ap-wizard__hint">@( _sharedRows.Count == 0 ? "No shared User Report Templates found." : "No suggested templates for this profile. Choose All shared to browse the rest.")</p>
             }
             else
             {
-                @foreach (var row in FilteredCategoryRows)
+                @foreach (var row in VisibleSharedRows)
                 {
                     var included = IsIncluded(row.Name);
-                    <div class="ap-wizard__list-row ap-wizard__list-row--template">
+                    <div class="ap-wizard__list-row ap-wizard__list-row--shared">
                         <span class="ap-wizard__list-ord">@row.SortOrder</span>
-                        <span>
+                        <span class="ap-wizard__shared-name">
                             <strong>@row.Name</strong> · @FormatKind(row.Kind)
-                            @foreach (var key in row.CategoryKeys.Take(2))
+                            <span class="ap-wizard__shared-meta">@FormatDataScope(row.DataScope)</span>
+                        </span>
+                        <span class="ap-wizard__shared-families" title="Families on this User Report Template">
+                            @if (row.CategoryKeys.Count == 0)
                             {
-                                <span class="ap-wizard__tag">@FormatCategoryChip(key)</span>
+                                <span class="ap-wizard__tag ap-wizard__tag--global">All profiles</span>
                             }
-                            <span class="ap-wizard__tag">@FormatDataScope(row.DataScope)</span>
-                            <span class="ap-wizard__tag @(included ? "ap-wizard__tag--ok" : null)">@(included ? "included" : "not included")</span>
+                            else
+                            {
+                                @foreach (var key in row.CategoryKeys)
+                                {
+                                    <span class="ap-wizard__tag ap-wizard__tag--family">@FormatCategoryChip(key)</span>
+                                }
+                            }
                         </span>
+                        <span class="ap-wizard__tag @(included ? "ap-wizard__tag--ok" : null)">@(included ? "included" : "not included")</span>
                         @if (!Disabled)
                         {
                             <div class="ap-wizard__row-actions">
@@ -126,48 +132,10 @@
                 }
             }
         </div>
-    </div>
-
-    @* —— Global —— *@
-    <div class="ap-wizard__section ap-wizard__section--scope">
-        <div class="ap-wizard__scope-head">
-            <h3>Global catalog</h3>
-            <span class="ap-wizard__badge ap-wizard__badge--global">All profiles</span>
-        </div>
-        <p class="ap-wizard__hint">User Report Templates with no type/group filter — include or exclude for this profile.</p>
-        <div class="ap-wizard__list">
-            @if (_globalRows.Count == 0)
-            {
-                <p class="ap-wizard__hint">No global User Report Templates found.</p>
-            }
-            else
-            {
-                @foreach (var row in _globalRows)
-                {
-                    var included = IsIncluded(row.Name);
-                    <div class="ap-wizard__list-row ap-wizard__list-row--template">
-                        <span class="ap-wizard__list-ord">@row.SortOrder</span>
-                        <span>
-                            <strong>@row.Name</strong> · @FormatKind(row.Kind)
-                            <span class="ap-wizard__tag @(included ? "ap-wizard__tag--ok" : null)">@(included ? "included" : "not included")</span>
-                            <span class="ap-wizard__tag">@FormatDataScope(row.DataScope)</span>
-                        </span>
-                        @if (!Disabled)
-                        {
-                            <div class="ap-wizard__row-actions">
-                                @if (included)
-                                {
-                                    <button type="button" class="ap-wizard__link" @onclick="() => OpenEditCatalog(row)">Edit</button>
-                                }
-                                <button type="button" class="ap-wizard__link" @onclick="() => ToggleIncludeCatalog(row)">
-                                    @(included ? "Exclude" : "Include")
-                                </button>
-                            </div>
-                        }
-                    </div>
-                }
-            }
-        </div>
+        @if (!_showAllShared && HiddenSharedCount > 0)
+        {
+            <p class="ap-wizard__hint ap-wizard__hint--shared-more">@HiddenSharedCount more shared file@(HiddenSharedCount == 1 ? "" : "s") — All shared to show them.</p>
+        }
     </div>
 
     <div class="ap-wizard__section">
@@ -526,16 +494,9 @@
     [Parameter] public EventCallback<ApplicationProfileTemplate> OnRemoveTemplate { get; set; }
     [Parameter] public EventCallback<(string Name, ApplicationProfileTemplateKind Kind, int SortOrder, byte[]? FileBytes, string? FileName, ApplicationProfileTemplateCatalogScope CatalogScope, ApplicationProfileTemplateDataScope DataScope, string? CategoryKey)> OnCreateTemplate { get; set; }
 
-    private readonly HashSet<string> _selectedCategories = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ApplicationProfileWizardTemplateCatalog.CategoryRegistration,
-        ApplicationProfileWizardTemplateCatalog.CategoryBorderZone,
-    };
-
-    private IReadOnlyList<ApplicationProfileWizardTemplateCatalog.CatalogRow> _globalRows =
+    private IReadOnlyList<ApplicationProfileWizardTemplateCatalog.CatalogRow> _sharedRows =
         Array.Empty<ApplicationProfileWizardTemplateCatalog.CatalogRow>();
-    private IReadOnlyList<ApplicationProfileWizardTemplateCatalog.CatalogRow> _categoryRows =
-        Array.Empty<ApplicationProfileWizardTemplateCatalog.CatalogRow>();
+    private bool _showAllShared;
 
     private readonly DataScopeOption[] _dataScopeOptions =
     [
@@ -610,21 +571,17 @@
     {
         if (ObjectSpace == null)
         {
-            _globalRows = Array.Empty<ApplicationProfileWizardTemplateCatalog.CatalogRow>();
-            _categoryRows = Array.Empty<ApplicationProfileWizardTemplateCatalog.CatalogRow>();
+            _sharedRows = Array.Empty<ApplicationProfileWizardTemplateCatalog.CatalogRow>();
             return;
         }
 
         try
         {
-            var snap = ApplicationProfileWizardTemplateCatalog.Build(ObjectSpace);
-            _globalRows = snap.Global;
-            _categoryRows = snap.Category;
+            _sharedRows = ApplicationProfileWizardTemplateCatalog.Build(ObjectSpace).Shared;
         }
         catch
         {
-            _globalRows = Array.Empty<ApplicationProfileWizardTemplateCatalog.CatalogRow>();
-            _categoryRows = Array.Empty<ApplicationProfileWizardTemplateCatalog.CatalogRow>();
+            _sharedRows = Array.Empty<ApplicationProfileWizardTemplateCatalog.CatalogRow>();
         }
     }
 
@@ -688,10 +645,23 @@
         template.ApplicableMigrationServiceId = id;
     }
 
-    private IReadOnlyList<ApplicationProfileWizardTemplateCatalog.CatalogRow> FilteredCategoryRows =>
-        _categoryRows
-            .Where(r => r.CategoryKeys.Any(k => _selectedCategories.Contains(k)))
-            .ToList();
+    private IReadOnlyList<ApplicationProfileWizardTemplateCatalog.CatalogRow> VisibleSharedRows
+    {
+        get
+        {
+            if (_showAllShared)
+                return _sharedRows;
+
+            var suggested = ApplicationProfileWizardTemplateCatalog.SuggestedCategoryKeys(Profile);
+            return _sharedRows
+                .Where(r =>
+                    IsIncluded(r.Name)
+                    || ApplicationProfileWizardTemplateCatalog.IsSuggestedForProfile(r, suggested))
+                .ToList();
+        }
+    }
+
+    private int HiddenSharedCount => Math.Max(0, _sharedRows.Count - VisibleSharedRows.Count);
 
     private bool IsIncluded(string name) =>
         Profile.NestedTemplates?.Any(t =>
@@ -829,12 +799,6 @@
         _editApplicabilityId = string.Empty;
     }
 
-    private void ToggleCategory(string key)
-    {
-        if (!_selectedCategories.Add(key))
-            _selectedCategories.Remove(key);
-    }
-
     private async Task ToggleIncludeCatalog(ApplicationProfileWizardTemplateCatalog.CatalogRow row)
     {
         if (Disabled)
@@ -849,7 +813,8 @@
             return;
         }
 
-        var categoryKey = row.CategoryKeys.FirstOrDefault(k => _selectedCategories.Contains(k))
+        var suggested = ApplicationProfileWizardTemplateCatalog.SuggestedCategoryKeys(Profile);
+        var categoryKey = row.CategoryKeys.FirstOrDefault(k => suggested.Contains(k))
             ?? row.CategoryKeys.FirstOrDefault();
 
         if (OnCreateTemplate.HasDelegate)
@@ -911,7 +876,7 @@
             return;
 
         var categoryKey = _addScope == ApplicationProfileTemplateCatalogScope.Category
-            ? (_selectedCategories.FirstOrDefault()
+            ? (ApplicationProfileWizardTemplateCatalog.SuggestedCategoryKeys(Profile).FirstOrDefault()
                ?? ApplicationProfileWizardTemplateCatalog.CategoryVisa)
             : null;
 
