@@ -55,6 +55,9 @@ public static class ApplicationProfileSchemaSql
             "DefaultCityId" uuid NULL,
             "RequireRegionCity" boolean NOT NULL DEFAULT false,
             "RequireBusinessTripAddress" boolean NOT NULL DEFAULT false,
+            "DefaultBusinessTripAddressId" uuid NULL,
+            "RequirePurpose" boolean NOT NULL DEFAULT false,
+            "DefaultPurpose" character varying(700) NULL,
             "RequireProject" boolean NOT NULL DEFAULT false,
             "DefaultProjectContractId" uuid NULL,
             "RequireUrgency" boolean NOT NULL DEFAULT false,
@@ -215,6 +218,9 @@ public static class ApplicationProfileSchemaSql
                 DefaultCityId uniqueidentifier NULL,
                 RequireRegionCity bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireRegionCity DEFAULT (0),
                 RequireBusinessTripAddress bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireBusinessTripAddress DEFAULT (0),
+                DefaultBusinessTripAddressId uniqueidentifier NULL,
+                RequirePurpose bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequirePurpose DEFAULT (0),
+                DefaultPurpose nvarchar(700) NULL,
                 RequireProject bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireProject DEFAULT (0),
                 DefaultProjectContractId uniqueidentifier NULL,
                 RequireUrgency bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireUrgency DEFAULT (0),
@@ -364,6 +370,21 @@ public static class ApplicationProfileSchemaSql
     internal const string EnsureInstanceCityIdPostgres =
         """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "CityId" uuid NULL;""";
 
+    internal const string EnsureDefaultBusinessTripAddressIdPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "DefaultBusinessTripAddressId" uuid NULL;""";
+
+    internal const string EnsureInstanceBusinessTripAddressIdPostgres =
+        """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "BusinessTripAddressId" uuid NULL;""";
+
+    internal const string EnsureRequirePurposePostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "RequirePurpose" boolean NOT NULL DEFAULT false;""";
+
+    internal const string EnsureDefaultPurposePostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "DefaultPurpose" character varying(700) NULL;""";
+
+    internal const string EnsureInstancePurposePostgres =
+        """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "Purpose" character varying(700) NULL;""";
+
     internal const string EnsureOfficePreparationNotesPostgres =
         """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "OfficePreparationNotes" text NULL;""";
 
@@ -503,6 +524,11 @@ public static class ApplicationProfileSchemaSql
         HealRequireRegionCitySplitPostgres,
         EnsureInstanceRegionIdPostgres,
         EnsureInstanceCityIdPostgres,
+        EnsureDefaultBusinessTripAddressIdPostgres,
+        EnsureInstanceBusinessTripAddressIdPostgres,
+        EnsureRequirePurposePostgres,
+        EnsureDefaultPurposePostgres,
+        EnsureInstancePurposePostgres,
         EnsureOfficePreparationNotesPostgres,
         EnsureInstanceEntryCheckPointPostgres,
         EnsureTemplateApplicableProjectContractPostgres,
@@ -550,6 +576,27 @@ public static class ApplicationProfileSchemaSql
         IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
            AND COL_LENGTH(N'dbo.ApplicationProfileInstances', N'OfficePreparationNotes') IS NULL
             ALTER TABLE dbo.ApplicationProfileInstances ADD OfficePreparationNotes nvarchar(max) NULL;
+
+        IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfiles', N'DefaultBusinessTripAddressId') IS NULL
+            ALTER TABLE dbo.ApplicationProfiles ADD DefaultBusinessTripAddressId uniqueidentifier NULL;
+
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfileInstances', N'BusinessTripAddressId') IS NULL
+            ALTER TABLE dbo.ApplicationProfileInstances ADD BusinessTripAddressId uniqueidentifier NULL;
+
+        IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfiles', N'RequirePurpose') IS NULL
+            ALTER TABLE dbo.ApplicationProfiles ADD RequirePurpose bit NOT NULL
+                CONSTRAINT DF_ApplicationProfiles_RequirePurpose DEFAULT (0);
+
+        IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfiles', N'DefaultPurpose') IS NULL
+            ALTER TABLE dbo.ApplicationProfiles ADD DefaultPurpose nvarchar(700) NULL;
+
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfileInstances', N'Purpose') IS NULL
+            ALTER TABLE dbo.ApplicationProfileInstances ADD Purpose nvarchar(700) NULL;
         """;
 
     public static void ApplyIfMissing(string connectionString)

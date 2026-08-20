@@ -51,6 +51,7 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
                 .Include(p => p.DefaultEntryCheckPoint)
                 .Include(p => p.DefaultRegion)
                 .Include(p => p.DefaultCity)
+                .Include(p => p.DefaultBusinessTripAddress)
                 .FirstOrDefault(p => p.ID == applicationProfileId);
         }
         catch (Exception)
@@ -272,7 +273,8 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
         Add("End date", null, profile.RequireEndDate);
         Add("Region", LookupLabel(profile.DefaultRegion), profile.RequireRegion);
         Add("City", LookupLabel(profile.DefaultCity), profile.RequireCity);
-        Add("Business trip address", null, profile.RequireBusinessTripAddress);
+        Add("Business trip address", FormatBusinessTripAddress(profile.DefaultBusinessTripAddress), profile.RequireBusinessTripAddress);
+        Add("Purpose", profile.DefaultPurpose, profile.RequirePurpose);
         Add("Work permit location", null, profile.RequireWorkPermitLocation);
         Add("Entry date", null, profile.RequireEntryDate);
 
@@ -287,6 +289,15 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
         if (!string.IsNullOrWhiteSpace(lookup.LocalizedDisplayName))
             return lookup.LocalizedDisplayName;
         return string.IsNullOrWhiteSpace(lookup.NameTm) ? null : lookup.NameTm;
+    }
+
+    private static string? FormatBusinessTripAddress(BusinessTripAddress? address)
+    {
+        if (address == null)
+            return null;
+        if (!string.IsNullOrWhiteSpace(address.FullAddress))
+            return address.FullAddress.Trim();
+        return LookupLabel(address.City);
     }
 
     private static List<string> BuildPersonToggles(ApplicationProfile profile)
@@ -314,7 +325,8 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
             toggles.Add("Medical");
         if (profile.RequirePersonRejectionItem)
             toggles.Add("Rejection item");
-        if (profile.RequirePersonTravelHistory)
+        if (profile.RequirePersonTravelHistory
+            && profile.ActionFamily != ApplicationProfileActionFamily.BusinessTrip)
             toggles.Add("Travel history");
         return toggles;
     }

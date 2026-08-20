@@ -25,7 +25,7 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | 8f | Wizard Results default lookup dropdowns | **Done** | Catalog snapshots; default-value selects enabled only when Use is checked |
 | 8g | Wizard May produce / cancel with Related to | **Done** | Issuance → May produce; Cancellation → May cancel; moved off Results & fields |
 | 8o | Wizard Region and City lookups | **Done** | Split Region (city); instance Region + City; defaults + case summary |
-| 8n | Wizard Registration Check in / Check out / Info change | **Done** | `RegistrationKind` on profile; Identity radios when Related to = Registration; dashboard SQL predicates ready, views not switched yet |
+| 8n | Wizard Registration Check in / Check out / Info change / Reg extension | **Done** | `RegistrationKind` on profile; Identity radios when Related to = Registration; dashboard SQL predicates ready, views not switched yet |
 | 8h | Wizard Approval legs with Directed to | **Done** | Via ministry → legs on Identity; Direct migration hides and clears legs |
 | 8i | Wizard Project contract with Directed to | **Done** | Via ministry → Project contract on Identity; gone from Results; instance copy is read-only |
 | 8j | Wizard Process & SLA is duration only | **Done** | Removed ministry/migration state Include/SLA-track tables; instance process is Directed to + legs |
@@ -179,7 +179,7 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 - Respects `ApplicationProfileLockHelper` — read-only banner for locked config; **approval-leg versions** stay editable; **Save profile** remains for version changes
 - Steps: Identity · **Company, Signatories** · Results & fields · Process & SLA (embedded legs) · Templates & person · Review & save
 - **May produce** / **May cancel** live under Identity **Related to** (`ActionFamily`): Issuance → produce; Cancellation → cancel
-- **Registration is** Check in / Check out / Info change (`RegistrationKind`) when Related to = Registration; cleared for other families
+- **Registration is** Check in / Check out / Info change / Reg extension (`RegistrationKind`) when Related to = Registration; cleared for other families
 - **Approval legs** live under Identity **Directed to** as named **versions**; visible only for Via ministry; instances snapshot the chosen version at create
 - **Project contract** lives under Identity **Directed to**; visible + required only for Via ministry; Direct migration hides and clears it. Results & fields no longer lists Project. Instances copy the contract at create and cannot edit it.
 - Identity wizard edits **Name** only — Description, Code, and Selection/quick code stay on the BO (auto Code at create) and are not shown on that step

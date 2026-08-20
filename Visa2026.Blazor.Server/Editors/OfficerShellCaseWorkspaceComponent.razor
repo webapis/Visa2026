@@ -423,6 +423,13 @@
                                            disabled="@field.ReadOnly"
                                            @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())" />
                                 }
+                                else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.CommaSeparatedMultiSelect)
+                                {
+                                    <BorderZoneLocationField Value="@field.Value"
+                                                             ReadOnly="@field.ReadOnly"
+                                                             CatalogItems="@field.MultiSelectOptions"
+                                                             ValueChanged="@(value => OnHeaderFieldChanged(field.Key, value))" />
+                                }
                                 else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Lookup)
                                 {
                                     <select class="cw-summary-field__input"
@@ -435,6 +442,14 @@
                                             <option value="@option.Id.ToString("D")">@option.DisplayName</option>
                                         }
                                     </select>
+                                }
+                                else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Text)
+                                {
+                                    <textarea class="cw-summary-field__input cw-summary-field__textarea"
+                                              maxlength="@ApplicationWorkspaceCaseHeaderFieldsHelper.PurposeMaxLength"
+                                              rows="4"
+                                              disabled="@field.ReadOnly"
+                                              @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())">@field.Value</textarea>
                                 }
                                 else
                                 {

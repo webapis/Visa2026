@@ -91,7 +91,7 @@ public class ApplicationProfile : BaseObject
         = ApplicationProfileActionFamily.Issuance;
 
     /// <summary>
-    /// When <see cref="ActionFamily"/> is Registration: Check in, Check out, or Info change.
+    /// When <see cref="ActionFamily"/> is Registration: Check in, Check out, Info change, or Reg extension.
     /// Report Dashboard will filter registration queries on this value.
     /// </summary>
     [ImmediatePostData]
@@ -171,6 +171,13 @@ public class ApplicationProfile : BaseObject
     public virtual bool RequireRegionCity { get; set; }
 
     public virtual bool RequireBusinessTripAddress { get; set; }
+    public virtual BusinessTripAddress? DefaultBusinessTripAddress { get; set; }
+    public virtual Guid? DefaultBusinessTripAddressId { get; set; }
+
+    public virtual bool RequirePurpose { get; set; }
+
+    [MaxLength(700)]
+    public virtual string? DefaultPurpose { get; set; }
 
     public virtual bool RequireProject { get; set; }
     public virtual ProjectContract? DefaultProjectContract { get; set; }
@@ -283,15 +290,16 @@ public enum ApplicationProfileActionFamily
 }
 
 /// <summary>
-/// Check in, check out, or info change when <see cref="ApplicationProfileActionFamily.Registration"/>.
-/// <see cref="None"/> for other families, or registration types that are not those three (e.g. extension).
+/// Check in, check out, info change, or reg extension when <see cref="ApplicationProfileActionFamily.Registration"/>.
+/// <see cref="None"/> for other families.
 /// </summary>
 public enum ApplicationProfileRegistrationKind
 {
     None = 0,
     CheckIn = 1,
     CheckOut = 2,
-    InfoChange = 3
+    InfoChange = 3,
+    Extension = 4
 }
 
 /// <summary>
@@ -678,6 +686,9 @@ public static class ApplicationProfileLockHelper
         || original.DefaultCityId != current.DefaultCityId
         || original.RequireRegionCity != current.RequireRegionCity
         || original.RequireBusinessTripAddress != current.RequireBusinessTripAddress
+        || original.DefaultBusinessTripAddressId != current.DefaultBusinessTripAddressId
+        || original.RequirePurpose != current.RequirePurpose
+        || !string.Equals(original.DefaultPurpose, current.DefaultPurpose, StringComparison.Ordinal)
         || original.RequireProject != current.RequireProject
         || original.DefaultProjectContractId != current.DefaultProjectContractId
         || original.RequireUrgency != current.RequireUrgency

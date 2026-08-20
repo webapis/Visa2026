@@ -43,7 +43,7 @@ Application-type behavior is **scattered** across `ApplicationType` `Show*` / `C
 | # | Topic | Decision |
 |---|--------|----------|
 | 5 | Scope / applicability | **Freeform criteria** filters which profiles appear in the Application picker. |
-| 6 | “Related to” (action family) | **Exclusive radio:** Issuance \| Cancellation \| Registration \| Business trip. When **Registration**, also **Check in**, **Check out**, or **Info change** (`RegistrationKind`) for Report Dashboard queries. **Configuration-related**. |
+| 6 | “Related to” (action family) | **Exclusive radio:** Issuance \| Cancellation \| Registration \| Business trip. When **Registration**, also **Check in**, **Check out**, **Info change**, or **Reg extension** (`RegistrationKind`) for Report Dashboard queries. **Configuration-related**. |
 | 7 | Approval legs | **Named versions** nested on each profile (per-profile copies, not a shared catalog; not `ProjectContract`). Officer **must pick a version** at instance create. Instance **snapshots** ministries; later wizard edits do not change already-started cases. |
 | 8 | Process states | **Not officer-configured.** Instance steps follow **Directed to** + **Approval legs** + the fixed progress graph. Profile stores **SLA days** only. |
 | 9 | Templates | **Nest files** on the profile. Configuration-related; list **visible** on Application, **not** editable per Application. |
@@ -67,7 +67,7 @@ Stored only on `ApplicationProfile`. Application **reads** them via FK. Officers
 | Identity | Application Name, Description, Code | Yes (read-only) |
 | Directed to | Via ministry · Direct migration | No (controls behavior) |
 | May be for | Employee · Family member · Temporary visitor | No |
-| Related to | Issuance · Cancellation · Registration (Check in \| Check out \| Info change) · Business trip | No (controls tracking / visibility / dashboard) |
+| Related to | Issuance · Cancellation · Registration (Check in \| Check out \| Info change \| Reg extension) · Business trip | No (controls tracking / visibility / dashboard) |
 | Produce | Invitation · Work permit · Visa · Border zone · Work location | No |
 | Cancel existing | Invitation(s) · WP(s) · Visa(s) · Border zone · Application(s) | No |
 | Process | Approval legs (named versions on the profile; **snapshot** on the instance after create) · SLA days (ministry / migration, live) | No |

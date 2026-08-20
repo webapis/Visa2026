@@ -186,8 +186,15 @@
                            @onchange="@(() => SetRegistrationKind(ApplicationProfileRegistrationKind.InfoChange))" />
                     Info change
                 </label>
+                <label class="ap-wizard__choice">
+                    <input type="radio" name="registrationKind"
+                           checked="@(Profile.RegistrationKind == ApplicationProfileRegistrationKind.Extension)"
+                           disabled="@Disabled"
+                           @onchange="@(() => SetRegistrationKind(ApplicationProfileRegistrationKind.Extension))" />
+                    Reg extension
+                </label>
             </div>
-            <p class="ap-wizard__hint">Used later for Report Dashboard check-in, check-out, and info-change queries.</p>
+            <p class="ap-wizard__hint">Used later for Report Dashboard registration queries (check-in, check-out, info change, reg extension).</p>
         }
         else
         {

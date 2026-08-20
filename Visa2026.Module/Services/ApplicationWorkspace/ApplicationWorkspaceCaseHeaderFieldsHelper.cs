@@ -21,6 +21,9 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
     public const string ToCity = "ToCity";
     public const string Region = "Region";
     public const string City = "City";
+    public const string BusinessTripAddress = "BusinessTripAddress";
+    public const string Purpose = "Purpose";
+    public const int PurposeMaxLength = 700;
     public const string Project = "Project";
     public const string Urgency = "Urgency";
     public const string WorkPermitLocation = "WorkPermitLocation";
@@ -64,11 +67,11 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             Visible(profile, p => p.RequireUrgency, ApplicationProfileConfigurationResolver.ShowUrgency, application),
             application.Urgency?.ID, LookupLabel(application.Urgency), catalogs.Urgencies, readOnly: false);
 
-        AddLookup(fields, BorderZone, "Border zone", "teal", "📍",
+        AddCommaSeparatedMultiSelect(fields, BorderZone, "Border zone", "teal", "📍",
             Visible(profile, p => p.RequireBorderZone, ApplicationProfileConfigurationResolver.ShowBorderZoneLocation, application),
-            MatchOptionId(application.BorderZoneLocation, catalogs.BorderZones),
-            DisplayOrDash(application.BorderZoneLocation_NameTm, application.BorderZoneLocation),
-            catalogs.BorderZones, readOnly: false);
+            application.BorderZoneLocation,
+            FormatBorderZoneDisplay(application.BorderZoneLocation_NameTm, application.BorderZoneLocation),
+            catalogs.BorderZoneNames, readOnly: false);
 
         AddDate(fields, EndDate, "End date", "green", "📅",
             Visible(profile, p => p.RequireEndDate, ApplicationProfileConfigurationResolver.ShowBusinessTrips, application),
@@ -93,6 +96,16 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         AddLookup(fields, City, "City", "purple", "📍",
             Visible(profile, p => p.RequireCity, ApplicationProfileConfigurationResolver.ShowCity, application),
             application.City?.ID, LookupLabel(application.City), catalogs.Cities, readOnly: false);
+
+        AddLookup(fields, BusinessTripAddress, "Business trip address", "purple", "📍",
+            Visible(profile, p => p.RequireBusinessTripAddress, ApplicationProfileConfigurationResolver.ShowBusinessTripAddress, application),
+            application.BusinessTripAddress?.ID,
+            FormatBusinessTripAddress(application.BusinessTripAddress),
+            catalogs.BusinessTripAddresses, readOnly: false);
+
+        AddText(fields, Purpose, "Purpose", "blue", "📝",
+            Visible(profile, p => p.RequirePurpose, ApplicationProfileConfigurationResolver.ShowPurpose, application),
+            application.Purpose);
 
         AddLookup(fields, WorkPermitLocation, "Work permit location", "blue", "🏢",
             Visible(profile, p => p.RequireWorkPermitLocation, ApplicationProfileConfigurationResolver.ShowMovementPermitLocation, application),
@@ -133,7 +146,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             case BorderZone:
                 if (!Visible(profile, p => p.RequireBorderZone, ApplicationProfileConfigurationResolver.ShowBorderZoneLocation, application))
                     return Hidden(out error);
-                return SetBorderZone(objectSpace, value, application, out error);
+                return SetBorderZone(value, application, out error);
             case EntryCheckPoint:
                 if (!Visible(profile, p => p.RequireEntryCheckPoint, ApplicationProfileConfigurationResolver.ShowEntryCheckPoint, application))
                     return Hidden(out error);
@@ -176,6 +189,14 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                     if (item?.Region != null)
                         application.Region = item.Region;
                 }, out error);
+            case BusinessTripAddress:
+                if (!Visible(profile, p => p.RequireBusinessTripAddress, ApplicationProfileConfigurationResolver.ShowBusinessTripAddress, application))
+                    return Hidden(out error);
+                return SetLookup<BusinessTripAddress>(objectSpace, value, item => application.BusinessTripAddress = item, out error);
+            case Purpose:
+                if (!Visible(profile, p => p.RequirePurpose, ApplicationProfileConfigurationResolver.ShowPurpose, application))
+                    return Hidden(out error);
+                return SetText(value, PurposeMaxLength, text => application.Purpose = text, out error);
             case Project:
                 if (!Visible(profile, p => p.RequireProject, ApplicationProfileConfigurationResolver.ShowProjectContract, application))
                     return Hidden(out error);
@@ -256,6 +277,61 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         });
     }
 
+    private static void AddText(
+        List<ApplicationWorkspaceCaseHeaderField> fields,
+        string key,
+        string label,
+        string tone,
+        string glyph,
+        bool visible,
+        string? text)
+    {
+        if (!visible)
+            return;
+
+        var value = text?.Trim() ?? string.Empty;
+        fields.Add(new ApplicationWorkspaceCaseHeaderField
+        {
+            Key = key,
+            Label = label,
+            Kind = ApplicationWorkspaceCaseHeaderFieldKind.Text,
+            Tone = tone,
+            Glyph = glyph,
+            Value = value,
+            DisplayValue = string.IsNullOrWhiteSpace(value) ? "—" : value,
+            ReadOnly = false,
+        });
+    }
+
+    private static void AddCommaSeparatedMultiSelect(
+        List<ApplicationWorkspaceCaseHeaderField> fields,
+        string key,
+        string label,
+        string tone,
+        string glyph,
+        bool visible,
+        string? storedValue,
+        string displayValue,
+        IReadOnlyList<string> catalogOptions,
+        bool readOnly)
+    {
+        if (!visible)
+            return;
+
+        fields.Add(new ApplicationWorkspaceCaseHeaderField
+        {
+            Key = key,
+            Label = label,
+            Kind = ApplicationWorkspaceCaseHeaderFieldKind.CommaSeparatedMultiSelect,
+            Tone = tone,
+            Glyph = glyph,
+            Value = storedValue?.Trim() ?? string.Empty,
+            DisplayValue = string.IsNullOrWhiteSpace(displayValue) ? "—" : displayValue,
+            MultiSelectOptions = catalogOptions,
+            ReadOnly = readOnly,
+        });
+    }
+
     private static bool SetLookup<T>(
         IObjectSpace objectSpace,
         string? value,
@@ -281,48 +357,31 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         return true;
     }
 
-    private static bool SetBorderZone(
-        IObjectSpace objectSpace,
-        string? value,
-        ApplicationProfileInstance application,
-        out string? error)
+    private static bool SetBorderZone(string? value, ApplicationProfileInstance application, out string? error)
     {
-        if (string.IsNullOrWhiteSpace(value) || !Guid.TryParse(value, out var id) || id == Guid.Empty)
+        error = null;
+        if (string.IsNullOrWhiteSpace(value))
         {
-            error = null;
             application.BorderZoneLocation = null;
             return true;
         }
 
-        var item = objectSpace.GetObjectByKey<BorderZoneName>(id);
-        if (item == null)
+        var trimmed = value.Trim();
+        if (trimmed.Length > 500)
         {
-            error = "The selected value is no longer available.";
+            error = "Border zone selection is too long.";
             return false;
         }
 
-        error = null;
-        application.BorderZoneLocation = LookupLabel(item);
+        application.BorderZoneLocation = trimmed;
         return true;
     }
 
-    private static Guid? MatchOptionId(string? stored, IReadOnlyList<ApplicationWorkspaceLookupOption> options)
+    private static string FormatBorderZoneDisplay(string? preferred, string? fallback)
     {
-        if (string.IsNullOrWhiteSpace(stored) || options.Count == 0)
-            return null;
-
-        var first = stored.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .FirstOrDefault() ?? stored.Trim();
-        var match = options.FirstOrDefault(option =>
-            string.Equals(option.DisplayName, first, StringComparison.CurrentCultureIgnoreCase));
-        return match?.Id;
-    }
-
-    private static string DisplayOrDash(string? preferred, string? fallback)
-    {
-        if (!string.IsNullOrWhiteSpace(preferred) && !string.Equals(preferred.Trim(), "Ýok", StringComparison.OrdinalIgnoreCase))
+        if (!string.IsNullOrWhiteSpace(preferred) && !BorderZoneSelectionHelper.IsNoneValue(preferred))
             return preferred.Trim();
-        if (!string.IsNullOrWhiteSpace(fallback) && !string.Equals(fallback.Trim(), "Ýok", StringComparison.OrdinalIgnoreCase))
+        if (!string.IsNullOrWhiteSpace(fallback) && !BorderZoneSelectionHelper.IsNoneValue(fallback))
             return fallback.Trim();
         return string.Empty;
     }
@@ -344,6 +403,26 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         }
 
         assign(date.Date);
+        return true;
+    }
+
+    private static bool SetText(string? value, int maxLength, Action<string?> assign, out string? error)
+    {
+        error = null;
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            assign(null);
+            return true;
+        }
+
+        var trimmed = value.Trim();
+        if (trimmed.Length > maxLength)
+        {
+            error = $"Text cannot exceed {maxLength} characters.";
+            return false;
+        }
+
+        assign(trimmed);
         return true;
     }
 
@@ -370,6 +449,15 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         return string.IsNullOrWhiteSpace(item.Code) ? string.Empty : item.Code;
     }
 
+    private static string FormatBusinessTripAddress(BusinessTripAddress? address)
+    {
+        if (address == null)
+            return string.Empty;
+        if (!string.IsNullOrWhiteSpace(address.FullAddress))
+            return address.FullAddress.Trim();
+        return LookupLabel(address.City);
+    }
+
     private sealed class Catalogs
     {
         public static Catalogs Empty { get; } = new();
@@ -382,9 +470,10 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         public IReadOnlyList<ApplicationWorkspaceLookupOption> Urgencies { get; init; } = [];
         public IReadOnlyList<ApplicationWorkspaceLookupOption> Cities { get; init; } = [];
         public IReadOnlyList<ApplicationWorkspaceLookupOption> Regions { get; init; } = [];
+        public IReadOnlyList<ApplicationWorkspaceLookupOption> BusinessTripAddresses { get; init; } = [];
         public IReadOnlyList<ApplicationWorkspaceLookupOption> MovementPermitLocations { get; init; } = [];
         public IReadOnlyList<ApplicationWorkspaceLookupOption> CheckPoints { get; init; } = [];
-        public IReadOnlyList<ApplicationWorkspaceLookupOption> BorderZones { get; init; } = [];
+        public IReadOnlyList<string> BorderZoneNames { get; init; } = [];
 
         public static Catalogs Load(IObjectSpace objectSpace) => new()
         {
@@ -396,9 +485,13 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             Urgencies = LoadItems<Urgency>(objectSpace),
             Cities = LoadItems<City>(objectSpace),
             Regions = LoadItems<Region>(objectSpace),
+            BusinessTripAddresses = LoadBusinessTripAddresses(objectSpace),
             MovementPermitLocations = LoadItems<MovementPermitLocation>(objectSpace),
             CheckPoints = LoadItems<CheckPoint>(objectSpace),
-            BorderZones = LoadItems<BorderZoneName>(objectSpace),
+            BorderZoneNames = CommaSeparatedCatalogHelper.LoadCatalogNames(
+                objectSpace,
+                typeof(BorderZoneName),
+                BorderZoneSelectionHelper.NoneValue),
         };
 
         private static IReadOnlyList<ApplicationWorkspaceLookupOption> LoadItems<T>(IObjectSpace objectSpace)
@@ -410,6 +503,20 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                 {
                     Id = item.ID,
                     DisplayName = LookupLabel(item),
+                })
+                .Where(item => !string.IsNullOrWhiteSpace(item.DisplayName))
+                .OrderBy(item => item.DisplayName, StringComparer.CurrentCultureIgnoreCase)
+                .ToList();
+        }
+
+        private static IReadOnlyList<ApplicationWorkspaceLookupOption> LoadBusinessTripAddresses(IObjectSpace objectSpace)
+        {
+            return objectSpace.GetObjects(typeof(BusinessTripAddress))
+                .Cast<BusinessTripAddress>()
+                .Select(item => new ApplicationWorkspaceLookupOption
+                {
+                    Id = item.ID,
+                    DisplayName = FormatBusinessTripAddress(item),
                 })
                 .Where(item => !string.IsNullOrWhiteSpace(item.DisplayName))
                 .OrderBy(item => item.DisplayName, StringComparer.CurrentCultureIgnoreCase)

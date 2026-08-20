@@ -55,6 +55,11 @@ internal static class ReportDashboardPostgresRosterSql
             COALESCE(apf.""ActionFamily"", 0) = 2
             AND COALESCE(apf.""RegistrationKind"", 0) = 3";
 
+    /// <summary>RegistrationKind Extension (enum value 4). Dashboard views not switched yet.</summary>
+    internal const string RegistrationExtensionProfilePredicate = @"
+            COALESCE(apf.""ActionFamily"", 0) = 2
+            AND COALESCE(apf.""RegistrationKind"", 0) = 4";
+
     /// <summary>Calik check-out profile code (App_Reg_Check_Out*). Prefer RegistrationKind when views are rewired.</summary>
     internal const string CheckoutProfilePredicate = @"
             apf.""Code"" = 'check_out'";

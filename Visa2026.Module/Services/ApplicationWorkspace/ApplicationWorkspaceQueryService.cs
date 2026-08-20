@@ -80,6 +80,8 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
                 .Include(a => a.Region)
                 .Include(a => a.City)
                     .ThenInclude(c => c.Region)
+                .Include(a => a.BusinessTripAddress)
+                    .ThenInclude(b => b.City)
                 .Include(a => a.EntryCheckPoint)
                 .FirstOrDefault(a => a.ID == applicationId);
         }
@@ -230,7 +232,9 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
         if (profile.RequirePersonSalary) items.Add("EmployeeSalary");
         if (profile.RequirePersonPosition) items.Add("EmployeePositionHistory");
         if (profile.RequirePersonMedical) items.Add("MedicalRecord");
-        if (profile.RequirePersonTravelHistory) items.Add("TravelHistory");
+        if (profile.RequirePersonTravelHistory
+            && profile.ActionFamily != ApplicationProfileActionFamily.BusinessTrip)
+            items.Add("TravelHistory");
         if (profile.RequirePersonRejectionItem) items.Add("RejectionItem");
         return items;
     }

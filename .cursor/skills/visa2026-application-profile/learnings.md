@@ -4,6 +4,181 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 
 ---
 
+### 2026-08-20 — App_Visa_Ext_FM type-only seed
+
+- Calik profile `App_Visa_Ext_FM` / `visa_ext_fm` (type Code `visa_extension` shared). Name **Wiza Möhletini Uzaltmak FM**. Route **Via ministries**. Related to **Issuance**. Audience **Family member** only. May produce **Visa** only. SLA ministry **4** / migration **30**. Results: visa type **FM**, project, urgency, border zone — no visa period/category. Person: passport, education, address, **visa**. Nested templates not seeded.
+- Verify: stop F5, rebuild, F5. Catalog shows **Wiza Möhletini Uzaltmak FM**. May produce Visa; Results FM; audience Family only.
+- Prevent: Do not reuse `visa_extension` / `visa_ext` as this profile Code. Do not add Employee audience. Do not produce border zone permit (RequireBorderZone is location only).
+- Cross-skill: application-profile
+
+### 2026-08-20 — App_Change_Passport type-only seed
+
+- Calik profile `App_Change_Passport` / `pasport_change` / **Wizany KP>Täze Pasporta Geçirmek**. Route **Direct to migration**. Related to **Issuance** (transfer visa to new passport). Audience **Employee + Family member**. May produce **Visa** only. Migration **10** working days (UP-TO-TWO-WEEKS). Results: urgency only. Person: passport, education, address, **visa**. Nested templates not seeded.
+- Verify: stop F5, rebuild, F5. Catalog shows **Wizany KP>Täze Pasporta Geçirmek**. Direct migration; May produce Visa; person Passport + Visa on.
+- Prevent: Do not use Via ministries / Project. Do not cancel visas. Do not confuse with registration `App_Reg_Info_Change_Passport`.
+- Cross-skill: application-profile
+
+### 2026-08-20 — App_Change_Visa_Category type-only seed
+
+- Calik profile `App_Change_Visa_Category` / `visa_category_change` / **Wiza Kategoriýasyny üýtgetmek**. Route **Direct to migration**. Related to **Issuance** (change, not cancel). Audience **Employee + Family member**. May produce **Visa** only. Migration **10** working days. Results: **visa category** (default Multiple) + urgency; no visa type/period, project, or border zone. Person: passport, education, address, **visa**. Nested templates not seeded. (Type catalog `ShowVisaCategory` is false; profile still Uses category so officers can pick the new category.)
+- Verify: stop F5, rebuild, F5. Catalog shows **Wiza Kategoriýasyny üýtgetmek**. Direct migration; May produce Visa; Results category + urgency; person Visa on.
+- Prevent: Do not use Via ministries / Project. Do not cancel visas. Do not add Temporary visitor unless officer asks.
+- Cross-skill: application-profile
+
+### 2026-08-20 — App_Exit_Visa type-only seed
+
+- Calik profile `App_Exit_Visa` / `visa_exit` / **Çykyş  Wiza Resmileşdirmek**. Route **Via ministries**. Related to **Issuance**. Audience **Employee + Family member** (Category Both). May produce **Visa** only. SLA ministry **4** / migration **30**. Results: visa type **EX**, period **Day10**, category **Single**, project, urgency. No border zone. Person: passport, education, address, **visa**, medical. Nested templates not seeded. (Type catalog has `ShowVisaType: false`; profile still Uses visa type with fixed EX default so issued exit visas get a type.)
+- Verify: stop F5, rebuild, F5. Catalog shows exit visa name. May produce Visa; Results EX / 10 days / Single; audience Employee + Family.
+- Prevent: Do not reuse WP as visa type. Do not add Temporary visitor unless officer asks. Do not require border zone.
+- Cross-skill: application-profile
+
+### 2026-08-20 — App_Visa_Ext type-only seed
+
+- Calik profile `App_Visa_Ext` / `visa_ext` (type Code `visa_extension` shared). Name **Wiza Möhletini Uzaltmak**. Route **Via ministries**. Related to **Issuance**. Audience **Employee** only. May produce **Visa** only. SLA ministry **4** / migration **30**. Results: visa type **WP**, period **Month6**, category **Multiple**, project, urgency, border zone. Person: passport, education, address, **visa**, medical (no WP item / salary / position — unlike According_to_WP). Nested templates not seeded.
+- Verify: stop F5, rebuild, F5. Catalog shows **Wiza Möhletini Uzaltmak**. May produce Visa; Results WP / 6 months; person Visa on, Work permit item off.
+- Prevent: Do not reuse `visa_extension` or `visa_ext_according_to_wp` as this profile Code. Do not require work permit item on this type.
+- Cross-skill: application-profile
+
+### 2026-08-20 — Restore App_Cancel_Visa_and_WP_Ext type-only seed
+
+- Restored Calik profile `App_Cancel_Visa_and_WP_Ext` / `cancel_visa_wp_ext` / **Wiza we Iş Rugsatnamany Uzaltmak Barada Ýüztutmany Ýatyrmak**. Direct migration. **Cancellation**. Audience **Employee** only. May cancel **Application(s)** (visa+WP extension request) — no produce. Migration **3** working days. Person: passport, education, position, **visa**, **work permit item**. Nested templates not seeded.
+- Verify: stop F5, rebuild, F5. Catalog shows the cancel visa+WP extension name. Related to Cancellation; May cancel Application(s); person Visa + WP item.
+- Prevent: Do not cancel Visas/Work permits documents on this type (that is `App_Cancel_Visa_and_WP`). Do not add Family/visitor. Do not use Via ministries.
+- Cross-skill: application-profile
+
+### 2026-08-20 — App_Border_Zone_Permission type-only seed
+
+- Calik profile `App_Border_Zone_Permission` / `get_border_zone` / **Serhet Ýaka Üçin Rugsatnama Almak**. Route **Via ministries**. Related to **Issuance**. Audience **Employee** only. May produce **Border zone** only. SLA ministry **14** / migration **10** (UP-TO-TWO-WEEKS). Results: border zone (comma-separated multi-select) + project. No visa type/period/category/urgency. Person: passport, education, **position**, address, **visa** (no border zone item — new permit is issued on this case). Nested templates not seeded.
+- Verify: stop F5, rebuild, F5. Catalog shows **Serhet Ýaka Üçin Rugsatnama Almak**. May produce Border zone; person Position on, Border zone item off.
+- Prevent: Do not produce visa/invitation/WP. Do not add Family/visitor audience. Pick approval-leg version at instance create (no per-project profile rows).
+- Cross-skill: application-profile
+
+### 2026-08-20 — Border zone uses Visa comma-separated multi-select
+
+- Case summary and wizard **Border zone** now use `BorderZoneLocation` (comma-separated `BorderZoneName` catalog), same as `Visa.BorderZoneLocation` — not a single-select Guid lookup. New `BorderZoneLocationField` wraps `CommaSeparatedMultiSelectComponent`. Wizard Results kind tag is **multi-select**.
+- Verify: stop F5, rebuild, F5. Case summary Edit on visa-extension profile shows multi-select popup (…); wizard default uses same control.
+- Prevent: Do not bind border zone to `BorderZoneName` FK or single `<select>`. Do not use deprecated `BorderZoneLocation` lookup BO.
+- Cross-skill: application-profile
+
+### 2026-08-20 — App_Visa_Ext_According_to_WP type-only seed
+
+- Calik profile `App_Visa_Ext_According_to_WP` / `visa_ext_according_to_wp` (type Code `visa_extension` shared with other visa-extension types). Name **Iş Rugsatnamasyna Görä Wizany Uzaltmak**. Route **Via ministries**. Related to **Issuance**. Audience **Employee** only. May produce **Visa** only (existing WP context). SLA ministry **4** / migration **30**. Results: visa type **WP**, period **PerWorkPermit**, category **Multiple**, project, urgency, border zone. Person: passport, education, position, address, **visa**, **work permit item**, salary, medical. Nested templates not seeded.
+- Verify: stop F5, rebuild, F5. Catalog shows **Iş Rugsatnamasyna Görä Wizany Uzaltmak**. May produce Visa; person Visa + Work permit item on; Results WP / per work permit.
+- Prevent: Do not reuse `visa_extension` as this profile Code. Do not produce invitation or new work permit. Do not add Family/visitor audience.
+- Cross-skill: application-profile
+
+### 2026-08-20 — Hide Travel history for BusinessTrip profiles (hard guard)
+
+- Business-trip templates could still show `Travel history` when existing DB rows had stale `RequirePersonTravelHistory=true`. Added hard guard: `ApplicationProfileConfigurationResolver.RequirePersonTravelHistory` returns false for `ActionFamily=BusinessTrip`.
+- Wizard Person step now hides that checkbox for BusinessTrip and auto-clears stale true values in `OnParametersSet`. Overview/linked-item derivations also ignore Travel history for BusinessTrip.
+- Verify: stop F5, rebuild, F5. Business-trip profile Overview chips and person requirements should not include Travel history.
+- Cross-skill: application-profile
+
+### 2026-08-20 — Business-trip profiles should not require Travel history
+
+- Removed mapper coupling `RequirePersonTravelHistory = type.ShowBusinessTrips`; business-trip profiles now default to **not requiring** `TravelHistory`.
+- Updated Calik business-trip seeds (`App_Business_Trip_Departure`, `App_Business_Trip_Arrival`) to `RequirePersonTravelHistory: false`.
+- Verify: stop F5, rebuild, F5. In Configure Application Profile, Business-trip person toggles should keep Travel history off unless officer explicitly enables it.
+- Cross-skill: application-profile
+
+### 2026-08-20 — App_Business_Trip_Arrival type-only seed
+
+- Added Calik profile `App_Business_Trip_Arrival` / `business_trip_arrival` / **Iş Saparyna Gelmek**. Mirrors departure business-trip requirements: migration service, start/end dates, region + city, business trip address, purpose; person passport/address/visa/travel history on.
+- Verify: stop F5, rebuild, F5. Templates list shows **Iş Saparyna Gelmek** and opening an arrival case shows the same business-trip case-summary fields.
+- Prevent: keep profile `Code` unique from departure (`business_trip_departure` vs `business_trip_arrival`) even though type `Code` is shared (`business_trip`).
+- Cross-skill: application-profile
+
+### 2026-08-20 — BusinessTripAddress table missing (no DbSet)
+
+- Case summary lookup queried `BusinessTripAddress` but the table was never created: BO existed without `DbSet`, so EF EnsureCreated skipped it on existing DBs. Added `DbSet` + entity mapping + host-start `BusinessTripLookupSchemaSql.ApplyIfMissing` (also `BusinessTripPurpose`).
+- Verify: stop F5, rebuild, F5. Open business-trip case — no 42P01. Admin can maintain Business trip address lookup rows.
+- Prevent: Any queried lookup BO needs `DbSet` in `Visa2026EFCoreDbContext` and schema heal when ModuleInfo is current.
+- Cross-skill: application-profile
+
+### 2026-08-20 — Purpose is a 700-char case-summary text field
+
+- Business-trip profiles need free-text **Purpose** (not the `BusinessTripPurpose` lookup). Added `RequirePurpose` / `DefaultPurpose` on profile and `Purpose` on instance (`MaxLength(700)`). Wizard Results row is **text** with textarea default. Case summary Edit uses textarea.
+- Verify: stop F5, rebuild, F5. Iş Saparyna Gitmek shows Purpose in summary + wizard. Values up to 700 chars save.
+- Prevent: Do not reuse `BusinessTripPurpose` lookup for this header field.
+- Cross-skill: application-profile
+
+### 2026-08-20 — Business trip address is a case-summary lookup
+
+- `RequireBusinessTripAddress` only toggled the wizard row; case summary did not show it and Results had no catalog dropdown. Instance now has `BusinessTripAddress` FK (`BusinessTripAddresses` lookup, `FullAddress`). Wizard Results has Use + default lookup. Case summary Edit is a lookup. Host-start adds `DefaultBusinessTripAddressId` / `BusinessTripAddressId`.
+- Verify: stop F5, rebuild, F5. Iş Saparyna Gitmek case summary shows **Business trip address**. Configure Results default list is `BusinessTripAddress` rows.
+- Prevent: Do not treat this as free text. Do not hide it when Use is on.
+- Cross-skill: application-profile
+
+### 2026-08-20 — App_Business_Trip_Departure type-only seed
+
+- Calik profile `App_Business_Trip_Departure` / `business_trip_departure` (type Code `business_trip` shared with arrival). Name **Iş Saparyna Gitmek**. Direct migration. **Business trip**. Audience **Employee** only. Migration **2** working days. Results: migration service; start/end dates; region + city (type `ShowToCity`); business trip address. No Urgency. Person: passport, address, visa, travel history (education/position off). Nested templates not seeded.
+- Verify: stop F5, rebuild, F5. Catalog shows departure name. Related to Business trip. Results start/end + region/city + trip address. Person Travel history on.
+- Prevent: Do not reuse `business_trip` as this profile Code. Do not produce or cancel documents.
+- Cross-skill: application-profile
+
+### 2026-08-20 — Remove App_Cancel_Visa_and_WP_Ext profile (for now)
+
+- Dropped Calik seed `App_Cancel_Visa_and_WP_Ext` / `cancel_visa_wp_ext` / **Wiza we Iş Rugsatnamany Uzaltmak Barada Ýüztutmany Ýatyrmak**. Application Type row stays in the type catalog. Tenant catalog sync does not delete existing DB rows — if the profile already synced, delete it from Application Profile Templates (Linked 0).
+- Verify: stop F5, rebuild, F5. New DBs have no this profile. Existing DB: Delete if still listed.
+- Prevent: Do not prune Application Type `App_Cancel_Visa_and_WP_Ext`.
+- Cross-skill: application-profile
+
+### 2026-08-20 — App_Cancel_BZ display name
+
+- Profile and type NameTm for `App_Cancel_BZ` is **Serhet Ýaka Rugsady Ýatyrmak** (was Serhet Ýaka Üçin Rugsatnamany Ýatyrmak). Also `ApplicationTypeLookupStrings.json` tk-TM.
+- Verify: stop F5, rebuild, F5. Catalog shows the shorter name.
+- Prevent: Do not keep the old Üçin Rugsatnamany wording on this type.
+- Cross-skill: application-profile, visa2026-lookup-data
+
+### 2026-08-20 — Remaining Cancellation type-only seeds
+
+- Seven Calik cancellation profiles (Direct migration, Migration **3** working days from UP-TO-3-DAYS, no produce, no Urgency). Nested templates not seeded. Keep type name spelling **`App_Cancell_WP`**. `App_Cancel_Visa_and_WP_Ext` was seeded then **removed for now**.
+  - `App_Cancel_BZ` / `cancel_borderzone` — Employee; cancel **Border zone**; person BZ item.
+  - `App_Cancel_App` / `cancel_application` — all three audiences; cancel **Application(s)**.
+  - `App_Cancel_Visa_and_WP_Ext` / `cancel_visa_wp_ext` — Employee; cancel **Application(s)** (extension request); person visa + WP.
+  - `App_Cancel_Visa_Ext` / `cancel_visa_ext` — all three; cancel **Application(s)** (visa-extension request); person visa.
+  - `App_Cancel_Visa` / `cancel_visa` — all three; cancel **Visas**; person visa.
+  - `App_Cancel_Visa_and_WP` / `cancel_visa_wp` — Employee; cancel **Visas + Work permits**; person visa + WP + address.
+  - `App_Cancell_WP` / `cancel_workpermit` — Employee; cancel **Work permits**; person WP item.
+- Verify: stop F5, rebuild, F5. Catalog shows all seven names. Related to Cancellation. May cancel matches the list above.
+- Prevent: Do not set CancelVisas on the *extension-application* cancel types. Do not reuse shared type Codes. Do not produce documents.
+- Cross-skill: application-profile
+
+### 2026-08-20 — App_Reg_Info_Change_Address type-only seed
+
+- Sixteenth Calik profile `App_Reg_Info_Change_Address` / `reg_info_change_address` (type Code `check_in_info_change` shared). Name **Hasaba alyş maglumatyň üýtgemegi (Salgy Çalyşmagy)**. Direct migration. **Registration · Info change**. Audience all three. Migration **2** working days. Results: migration service; region/city off; no Urgency. Person: passport, education, position, address, visa, travel history. Nested templates not seeded. Last remaining `App_Reg_*` type is now seeded.
+- Verify: stop F5, rebuild, F5. Catalog shows address info-change name. Related to Registration; **Info change**. Person Address of residence on. Overview has no Urgency.
+- Prevent: Do not reuse `check_in_info_change`, `reg_info_change_passport`, or `reg_info_change_visa` as this Code.
+- Cross-skill: application-profile
+
+### 2026-08-20 — App_Reg_Info_Change_Visa type-only seed
+
+- Fifteenth Calik profile `App_Reg_Info_Change_Visa` / `reg_info_change_visa` (type Code `check_in_info_change` shared). Name **Hasaba alyş maglumatyň üýtgemegi (Visa Çalyşmagy)**. Direct migration. **Registration · Info change**. Audience Employee + Family + Temporary visitor. Migration **2** working days. Results: migration service; region/city off; no Urgency. Person: passport, education, position, address, visa, travel history. Nested templates not seeded.
+- Verify: stop F5, rebuild, F5. Catalog shows visa info-change name. Related to Registration; **Info change**. Person Visa + Travel history on. Overview has no Urgency.
+- Prevent: Do not reuse `check_in_info_change` or `reg_info_change_passport` as this Code. Do not set Check in/out/extension.
+- Cross-skill: application-profile
+
+### 2026-08-20 — Registration profiles never use Urgency
+
+- Officer rule: **Related to = Registration** → **Urgency** off and no default. Overview was showing Normal priority because seeds kept `DefaultUrgencyLocalizationKey: NORM` while Use was false. Catalog apply, type mapper, wizard family switch, and Save now clear `RequireUrgency` / `DefaultUrgency`. Results hides the Urgency row for Registration.
+- Verify: stop F5, rebuild, F5. Hasaba alyşy uzaltmak overview has no Urgency row. Configure → Results has no Urgency.
+- Prevent: Do not seed NORM (or any default) on Registration. Do not show Urgency on Registration Results.
+- Cross-skill: application-profile
+
+### 2026-08-20 — App_Reg_ext includes Travel history
+
+- `App_Reg_ext` person toggles now include **Travel history** (`RequirePersonTravelHistory`). Type `ShowBusinessTrips` is false, so catalog must set this flag explicitly.
+- Verify: stop F5, rebuild, F5. Configure Hasaba alyşy uzaltmak → Templates & person → Travel history checked.
+- Prevent: Do not map travel history only from `ShowBusinessTrips` for registration extension.
+- Cross-skill: application-profile
+
+### 2026-08-20 — App_Reg_ext type-only seed + Reg extension RegistrationKind
+
+- `RegistrationKind.Extension` (enum 4). Wizard **Registration is** adds **Reg extension**. Infer `App_Reg_ext` / `Reg_ext` types. Fourteenth Calik profile `App_Reg_ext` / `reg_extension` (type Code `check_in_extention`). Name **Hasaba alyşy uzaltmak**. Direct migration. **Registration · Reg extension**. Audience all three. Migration **2** days. Results: migration service; region/city off. Person: passport, education, position, address, visa, **travel history**. Dashboard predicate `RegistrationExtensionProfilePredicate` ready; views not switched.
+- Verify: stop F5, rebuild, F5. Catalog shows reg extension name. Registration is **Reg extension**. Review shows Registration · Reg extension.
+- Prevent: Do not reuse `check_in_extention` as profile Code. Do not set Check in/out/info change.
+- Cross-skill: application-profile, report-dashboard
+
 ### 2026-08-19 — Registration profiles always require Position
 
 - Officer rule: **Related to = Registration** → **Required person-related data → Position** on. Calik seeds: Check-in from abroad and Check-out from abroad were off; now on. Catalog apply, type mapper, and wizard (when switching to Registration) force `RequirePersonPosition`.
@@ -18,11 +193,25 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 - Prevent: Do not reuse `check_out` later for `App_Reg_Check_Out_Internal` — use a unique Code (e.g. `check_out_internal`). Do not set Check in. Do not produce documents. Keep dashboard `Code = 'check_out'` until views switch to `RegistrationKind`.
 - Cross-skill: application-profile, report-dashboard
 
+### 2026-08-20 — App_Reg_Check_Out_Internal type-only seed
+
+- Thirteenth Calik profile `App_Reg_Check_Out_Internal` / `check_out_internal` (type Code `check_out` shared with abroad checkout). Name **Hasapdan Çykarmak (Başga welaýata gitmegi)**. Direct migration. **Registration · Check out**. Audience Employee + Family + Temporary visitor. Migration **2** working days. Results: migration service + **region/city** (type `ShowFromCity` / `ShowToCity`). Person: passport, education, position, address, visa, **travel history**. Nested templates not seeded.
+- Verify: stop F5, rebuild, F5. Catalog shows internal check-out name. Registration is Check out; Results region/city on; person Travel history on.
+- Prevent: Do not reuse `check_out` as this profile Code. Do not set Check in or Info change.
+- Cross-skill: application-profile
+
 ### 2026-08-19 — Info-change passport person includes Travel history
 
 - `App_Reg_Info_Change_Passport` **Required person-related data** now includes **Travel history** (`RequirePersonTravelHistory`). Wizard already had the checkbox; seed was off because type `ShowBusinessTrips` is false.
 - Verify: stop F5, rebuild, F5. Configure passport info-change → Templates & person → Travel history checked.
 - Prevent: Do not map travel history only from `ShowBusinessTrips` when officers require `TravelHistory` on registration info-change.
+- Cross-skill: application-profile
+
+### 2026-08-20 — App_Reg_Check_Out_Internal type-only seed
+
+- Twelfth Calik profile `App_Reg_Check_Out_Internal` / `check_out_internal` (type Code `check_out` shared with abroad checkout). Name **Hasapdan Çykarmak (Başga welaýata gitmegi)**. Direct migration. **Registration · Check out**. Audience Employee + Family + Temporary visitor. Migration **2** working days. Results: migration service + **region/city** (from/to city on type). Person: passport, education, position, address, visa, **travel history**. Nested templates not seeded.
+- Verify: stop F5, rebuild, F5. Catalog shows internal check-out name. Registration is Check out; Results region/city on; person Travel history on.
+- Prevent: Do not reuse `check_out` as this profile Code. Do not set Check in or Info change.
 - Cross-skill: application-profile
 
 ### 2026-08-19 — Registration Info change option

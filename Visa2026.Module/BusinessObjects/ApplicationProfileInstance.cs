@@ -441,6 +441,10 @@ namespace Visa2026.Module.BusinessObjects
                 Region = applicationProfile.DefaultRegion;
             if (applicationProfile.DefaultCity != null)
                 City = applicationProfile.DefaultCity;
+            if (applicationProfile.DefaultBusinessTripAddress != null)
+                BusinessTripAddress = applicationProfile.DefaultBusinessTripAddress;
+            if (!string.IsNullOrWhiteSpace(applicationProfile.DefaultPurpose))
+                Purpose = applicationProfile.DefaultPurpose.Trim();
             if (!string.IsNullOrWhiteSpace(applicationProfile.DefaultBorderZoneLocation))
                 BorderZoneLocation = applicationProfile.DefaultBorderZoneLocation;
         }
@@ -747,6 +751,17 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("CityVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowCity", Context = "DetailView")]
         [VisibleInListView(false)]
         public virtual City City { get; set; }
+
+        [Appearance("BusinessTripAddressVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowBusinessTripAddress", Context = "DetailView")]
+        [VisibleInListView(false)]
+        [XafDisplayName("Business trip address")]
+        public virtual BusinessTripAddress BusinessTripAddress { get; set; }
+
+        [Appearance("PurposeVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowPurpose", Context = "DetailView")]
+        [VisibleInListView(false)]
+        [XafDisplayName("Purpose")]
+        [MaxLength(700)]
+        public virtual string? Purpose { get; set; }
 
         #region Person Count
 

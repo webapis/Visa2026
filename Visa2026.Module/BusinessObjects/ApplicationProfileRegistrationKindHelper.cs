@@ -3,7 +3,7 @@ using System;
 namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
-/// Check in / check out / info change only apply when Related to is Registration.
+/// Check in / check out / info change / reg extension only apply when Related to is Registration.
 /// </summary>
 public static class ApplicationProfileRegistrationKindHelper
 {
@@ -38,6 +38,13 @@ public static class ApplicationProfileRegistrationKindHelper
             return ApplicationProfileRegistrationKind.InfoChange;
         }
 
+        if (applicationTypeName.Contains("Reg_ext", StringComparison.OrdinalIgnoreCase)
+            || applicationTypeName.Contains("RegExtension", StringComparison.OrdinalIgnoreCase)
+            || applicationTypeName.Contains("Reg_Extension", StringComparison.OrdinalIgnoreCase))
+        {
+            return ApplicationProfileRegistrationKind.Extension;
+        }
+
         if (applicationTypeName.Contains("Check_Out", StringComparison.OrdinalIgnoreCase)
             || applicationTypeName.Contains("CheckOut", StringComparison.OrdinalIgnoreCase))
         {
@@ -54,7 +61,7 @@ public static class ApplicationProfileRegistrationKindHelper
     }
 
     /// <summary>
-    /// Officer rule: Registration profiles always require Position (employee position history).
+    /// Officer rules for Registration: Position is always required; Urgency is never used.
     /// </summary>
     public static void ApplyRegistrationPersonDefaults(ApplicationProfile profile)
     {
@@ -62,5 +69,7 @@ public static class ApplicationProfileRegistrationKindHelper
             return;
 
         profile.RequirePersonPosition = true;
+        profile.RequireUrgency = false;
+        profile.DefaultUrgency = null;
     }
 }

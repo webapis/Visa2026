@@ -121,6 +121,7 @@ public static class ApplicationProfileFromApplicationTypeMapper
         profile.RequireRegion = profile.RequireRegionCity;
         profile.RequireCity = profile.RequireRegionCity;
         profile.RequireBusinessTripAddress = type.ShowBusinessTrips;
+        profile.RequirePurpose = type.ShowBusinessTrips;
         profile.RequireProject = type.ShowProjectContract;
         profile.RequireUrgency = type.ShowUrgency;
         profile.RequireWorkPermitLocation = type.ShowMovementPermitLocation || type.ShowWorkPermittedLocations;
@@ -141,7 +142,7 @@ public static class ApplicationProfileFromApplicationTypeMapper
         profile.RequirePersonSalary = type.ShowCurrentSalary;
         profile.RequirePersonMedical = type.ShowCurrentMedicalRecord;
         profile.RequirePersonRejectionItem = type.ShowRejections;
-        profile.RequirePersonTravelHistory = type.ShowBusinessTrips;
+        profile.RequirePersonTravelHistory = false;
     }
 
     private static void ApplySla(ApplicationProfile profile, ApplicationType type)

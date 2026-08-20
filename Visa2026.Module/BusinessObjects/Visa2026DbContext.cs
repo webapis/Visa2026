@@ -119,6 +119,8 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<CheckPoint> CheckPoints { get; set; }
         public DbSet<VisaIssuedPlace> VisaIssuedPlaces { get; set; }
         public DbSet<PurposeOfTravel> PurposeOfTravels { get; set; }
+        public DbSet<BusinessTripAddress> BusinessTripAddresses { get; set; }
+        public DbSet<BusinessTripPurpose> BusinessTripPurposes { get; set; }
         public DbSet<WorkPermit> WorkPermits { get; set; }
         public DbSet<WorkPermitDocument> WorkPermitDocuments { get; set; }
         public DbSet<WorkPermitImage> WorkPermitImages { get; set; }
@@ -637,6 +639,12 @@ namespace Visa2026.Module.BusinessObjects
                     .HasForeignKey("CityId")
                     .IsRequired(false)
                     .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(a => a.BusinessTripAddress)
+                    .WithMany()
+                    .HasForeignKey("BusinessTripAddressId")
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.Property(a => a.Purpose).HasMaxLength(700);
                 b.Property(a => a.BorderZoneLocation).HasMaxLength(500);
                 b.HasIndex(a => new { a.AppNumberPrefix, a.ApplicationNumber, a.Year, a.Month })
                  .IsUnique()
@@ -653,11 +661,35 @@ namespace Visa2026.Module.BusinessObjects
                 b.Property(p => p.Code).HasMaxLength(64);
                 b.Property(p => p.SelectionCode).HasMaxLength(3);
                 b.Property(p => p.DefaultBorderZoneLocation).HasMaxLength(500);
+                b.Property(p => p.DefaultPurpose).HasMaxLength(700);
+                b.HasOne(p => p.DefaultBusinessTripAddress)
+                    .WithMany()
+                    .HasForeignKey(p => p.DefaultBusinessTripAddressId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
                 b.HasIndex(p => p.Code)
                     .IsUnique()
                     .HasFilter(IndexFilter("[Code] IS NOT NULL AND [Code] <> '' AND [GCRecord] IS NULL"));
                 b.HasIndex(p => p.SelectionCode)
                     .HasDatabaseName("IX_ApplicationProfiles_SelectionCode");
+            });
+
+            modelBuilder.Entity<BusinessTripAddress>(b =>
+            {
+                b.ToTable("BusinessTripAddress");
+                b.Property(a => a.FullAddress).HasMaxLength(255);
+                b.HasOne(a => a.City)
+                    .WithMany()
+                    .HasForeignKey("CityID")
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<BusinessTripPurpose>(b =>
+            {
+                b.ToTable("BusinessTripPurpose");
+                b.Property(p => p.Name).HasMaxLength(200);
+                b.Property(p => p.Description).HasMaxLength(2000);
             });
 
             modelBuilder.Entity<ApplicationProfileApprovalLegVersion>(b =>

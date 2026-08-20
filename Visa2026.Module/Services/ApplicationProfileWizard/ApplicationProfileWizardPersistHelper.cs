@@ -15,6 +15,7 @@ public static class ApplicationProfileWizardPersistHelper
             throw new UserFriendlyException("The configuration session expired. Close this tab and open Configure again.");
 
         ApplicationProfileLockHelper.EnsureConfigurationEditable(profile, objectSpace);
+        ApplicationProfileRegistrationKindHelper.ApplyRegistrationPersonDefaults(profile);
 
         if (objectSpace is EFCoreObjectSpace { DbContext: { } dbContext })
             dbContext.ChangeTracker.DetectChanges();

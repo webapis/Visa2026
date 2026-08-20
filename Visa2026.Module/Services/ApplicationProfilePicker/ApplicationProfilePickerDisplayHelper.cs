@@ -20,6 +20,7 @@ public static class ApplicationProfilePickerDisplayHelper
             ApplicationProfileRegistrationKind.CheckIn => "Check in",
             ApplicationProfileRegistrationKind.CheckOut => "Check out",
             ApplicationProfileRegistrationKind.InfoChange => "Info change",
+            ApplicationProfileRegistrationKind.Extension => "Reg extension",
             _ => string.Empty,
         };
 

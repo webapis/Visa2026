@@ -58,7 +58,7 @@
         },
         {
             "Name": "App_Cancel_BZ",
-            "NameTm": "Serhet Ýaka Üçin Rugsatnamany Ýatyrmak",
+            "NameTm": "Serhet Ýaka Rugsady Ýatyrmak",
             "Code": "cancel_borderzone",
             "PdfForm_Code": 25,
             "LifecycleStage": "Exit",

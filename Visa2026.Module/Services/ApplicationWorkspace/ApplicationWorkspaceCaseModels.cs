@@ -51,7 +51,8 @@ public enum ApplicationWorkspaceCaseHeaderFieldKind
 {
     Lookup = 0,
     Date = 1,
-    Text = 2
+    Text = 2,
+    CommaSeparatedMultiSelect = 3,
 }
 
 public sealed class ApplicationWorkspaceLookupOption
@@ -83,6 +84,9 @@ public sealed class ApplicationWorkspaceCaseHeaderField
 
     public IReadOnlyList<ApplicationWorkspaceLookupOption> Options { get; init; }
         = Array.Empty<ApplicationWorkspaceLookupOption>();
+
+    /// <summary>Catalog labels for <see cref="CommaSeparatedMultiSelect"/> fields (e.g. border zone names).</summary>
+    public IReadOnlyList<string> MultiSelectOptions { get; init; } = Array.Empty<string>();
 }
 
 public sealed class ApplicationWorkspaceCaseHeaderFieldUpdate

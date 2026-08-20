@@ -77,6 +77,18 @@ public class ApplicationProfileApplicabilityHelperTests
         Assert.Equal("Registration · Info change", ApplicationProfilePickerDisplayHelper.FormatRelatedTo(profile));
     }
 
+    [Fact]
+    public void FormatRelatedTo_AppendsRegExtensionForRegistration()
+    {
+        var profile = new ApplicationProfile
+        {
+            ActionFamily = ApplicationProfileActionFamily.Registration,
+            RegistrationKind = ApplicationProfileRegistrationKind.Extension,
+        };
+
+        Assert.Equal("Registration · Reg extension", ApplicationProfilePickerDisplayHelper.FormatRelatedTo(profile));
+    }
+
     [Theory]
     [InlineData("App_Reg_Check_In", ApplicationProfileRegistrationKind.CheckIn)]
     [InlineData("App_Reg_Check_In_Internal", ApplicationProfileRegistrationKind.CheckIn)]
@@ -84,7 +96,7 @@ public class ApplicationProfileApplicabilityHelperTests
     [InlineData("App_Reg_Check_Out_Internal", ApplicationProfileRegistrationKind.CheckOut)]
     [InlineData("App_Reg_Info_Change_Passport", ApplicationProfileRegistrationKind.InfoChange)]
     [InlineData("App_Reg_Info_Change_Visa", ApplicationProfileRegistrationKind.InfoChange)]
-    [InlineData("App_Reg_ext", ApplicationProfileRegistrationKind.None)]
+    [InlineData("App_Reg_ext", ApplicationProfileRegistrationKind.Extension)]
     public void InferRegistrationKind_FromTypeName(string typeName, ApplicationProfileRegistrationKind expected) =>
         Assert.Equal(expected, ApplicationProfileRegistrationKindHelper.InferFromApplicationTypeName(typeName));
 
@@ -107,6 +119,22 @@ public class ApplicationProfileApplicabilityHelperTests
 
         ApplicationProfileRegistrationKindHelper.ApplyRegistrationPersonDefaults(profile);
         Assert.True(profile.RequirePersonPosition);
+        Assert.False(profile.RequireUrgency);
+        Assert.Null(profile.DefaultUrgency);
+    }
+
+    [Fact]
+    public void ApplyRegistrationPersonDefaults_ClearsUrgency()
+    {
+        var profile = new ApplicationProfile
+        {
+            ActionFamily = ApplicationProfileActionFamily.Registration,
+            RequireUrgency = true,
+        };
+
+        ApplicationProfileRegistrationKindHelper.ApplyRegistrationPersonDefaults(profile);
+        Assert.False(profile.RequireUrgency);
+        Assert.Null(profile.DefaultUrgency);
     }
 
     [Fact]

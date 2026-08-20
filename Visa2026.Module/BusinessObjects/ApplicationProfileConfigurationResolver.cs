@@ -121,6 +121,12 @@ public static class ApplicationProfileConfigurationResolver
     public static bool ShowCity(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequireCity, _ => false);
 
+    public static bool ShowBusinessTripAddress(ApplicationProfileInstance? application) =>
+        Resolve(application, p => p.RequireBusinessTripAddress, t => t.ShowBusinessTrips);
+
+    public static bool ShowPurpose(ApplicationProfileInstance? application) =>
+        Resolve(application, p => p.RequirePurpose, t => t.ShowBusinessTrips);
+
     public static bool ShowBusinessTrips(ApplicationProfileInstance? application) =>
         Resolve(
             application,
@@ -238,9 +244,14 @@ public static class ApplicationProfileConfigurationResolver
     public static bool RequirePersonBorderZoneItem(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequirePersonBorderZoneItem, _ => false);
 
-    /// <summary>Profile-only (no Type Show*); gates TravelHistory auto-link.</summary>
-    public static bool RequirePersonTravelHistory(ApplicationProfileInstance? application) =>
-        Resolve(application, p => p.RequirePersonTravelHistory, _ => false);
+    /// <summary>Profile-only (no Type Show*); gates TravelHistory auto-link. Business-trip profiles never require this.</summary>
+    public static bool RequirePersonTravelHistory(ApplicationProfileInstance? application)
+    {
+        if (application?.ApplicationProfile is { ActionFamily: ApplicationProfileActionFamily.BusinessTrip })
+            return false;
+
+        return Resolve(application, p => p.RequirePersonTravelHistory, _ => false);
+    }
 
     public static bool ShowInvitationItemIsCancelled(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.CancelInvitations, t => t.ShowInvitationItemIsCancelled);

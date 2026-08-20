@@ -4,6 +4,14 @@ Date format: `YYYY-MM-DD`
 
 ---
 
+## 2026-08-20 — RegistrationKind Extension (enum 4)
+
+**Ask:** `App_Reg_ext` seed with Registration is **Reg extension**.
+
+**Now:** `RegistrationKind` 4 = Extension. Roster SQL has `RegistrationExtensionProfilePredicate`. Dashboard views **unchanged**.
+
+**Files:** `ReportDashboardPostgresRosterSql.cs`
+
 ## 2026-08-19 — RegistrationKind InfoChange (enum 3)
 
 **Ask:** Third Registration option **Info change** (passport/visa/address info-change profiles).

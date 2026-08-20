@@ -163,7 +163,10 @@
             <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonSalary" disabled="@Disabled" /> Salary</label>
             <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonMedical" disabled="@Disabled" /> Medical</label>
             <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonRejectionItem" disabled="@Disabled" /> Rejection item</label>
-            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonTravelHistory" disabled="@Disabled" /> Travel history</label>
+            @if (!IsBusinessTripProfile)
+            {
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonTravelHistory" disabled="@Disabled" /> Travel history</label>
+            }
         </div>
     </div>
 </div>
@@ -563,9 +566,15 @@
 
     protected override void OnParametersSet()
     {
+        if (IsBusinessTripProfile && Profile.RequirePersonTravelHistory)
+            Profile.RequirePersonTravelHistory = false;
+
         _canStageTemplates = TemplateStagingUiService.CanEditTemplates();
         RefreshCatalog();
     }
+
+    private bool IsBusinessTripProfile =>
+        Profile.ActionFamily == ApplicationProfileActionFamily.BusinessTrip;
 
     private void RefreshCatalog()
     {

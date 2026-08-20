@@ -32,6 +32,7 @@ public sealed class ApplicationProfileWizardLookupData
     public IReadOnlyList<ApplicationProfileWizardLookupItem> CheckPoints { get; init; } = [];
     public IReadOnlyList<ApplicationProfileWizardLookupItem> Regions { get; init; } = [];
     public IReadOnlyList<ApplicationProfileWizardLookupItem> Cities { get; init; } = [];
+    public IReadOnlyList<ApplicationProfileWizardLookupItem> BusinessTripAddresses { get; init; } = [];
 
     public static ApplicationProfileWizardLookupData Load(IObjectSpace objectSpace)
     {
@@ -49,6 +50,7 @@ public sealed class ApplicationProfileWizardLookupData
             CheckPoints = LoadItems<CheckPoint>(objectSpace),
             Regions = LoadItems<Region>(objectSpace),
             Cities = LoadCities(objectSpace),
+            BusinessTripAddresses = LoadBusinessTripAddresses(objectSpace),
         };
     }
 
@@ -106,6 +108,21 @@ public sealed class ApplicationProfileWizardLookupData
                 DisplayName = FormatDisplayName(item),
                 RegionId = item.Region?.ID ?? ReadRegionForeignKey(objectSpace, item),
                 RegionName = item.Region?.NameTm ?? item.RegionName,
+            })
+            .OrderBy(item => item.DisplayName, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+    }
+
+    private static IReadOnlyList<ApplicationProfileWizardLookupItem> LoadBusinessTripAddresses(IObjectSpace objectSpace)
+    {
+        return objectSpace.GetObjects(typeof(BusinessTripAddress))
+            .Cast<BusinessTripAddress>()
+            .Select(item => new ApplicationProfileWizardLookupItem
+            {
+                Id = item.ID,
+                DisplayName = string.IsNullOrWhiteSpace(item.FullAddress)
+                    ? (item.City?.NameTm ?? item.ID.ToString("D"))
+                    : item.FullAddress.Trim(),
             })
             .OrderBy(item => item.DisplayName, StringComparer.CurrentCultureIgnoreCase)
             .ToList();

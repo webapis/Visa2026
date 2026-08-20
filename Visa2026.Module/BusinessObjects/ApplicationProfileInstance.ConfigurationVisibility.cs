@@ -81,6 +81,15 @@ public partial class ApplicationProfileInstance
 
     [Browsable(false)]
     [NotMapped]
+    public bool CfgShowBusinessTripAddress =>
+        ApplicationProfileConfigurationResolver.ShowBusinessTripAddress(this);
+
+    [Browsable(false)]
+    [NotMapped]
+    public bool CfgShowPurpose => ApplicationProfileConfigurationResolver.ShowPurpose(this);
+
+    [Browsable(false)]
+    [NotMapped]
     public bool CfgShowApplicationItems =>
         ApplicationProfileConfigurationResolver.ShowApplicationItems(this);
 

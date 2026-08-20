@@ -156,6 +156,19 @@ public class ApplicationProfileConfigurationResolverTests
     }
 
     [Fact]
+    public void RequirePersonTravelHistory_IsFalseForBusinessTripProfiles()
+    {
+        var profile = new ApplicationProfile
+        {
+            ActionFamily = ApplicationProfileActionFamily.BusinessTrip,
+            RequirePersonTravelHistory = true,
+        };
+        var app = new ApplicationProfileInstance { ApplicationProfile = profile };
+
+        Assert.False(ApplicationProfileConfigurationResolver.RequirePersonTravelHistory(app));
+    }
+
+    [Fact]
     public void GetMinistryLegCount_UsesEmbeddedProfileLegs()
     {
         var profile = new ApplicationProfile

@@ -1,6 +1,7 @@
 @using System.Linq
 @using DevExpress.ExpressApp
 @using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Services
 @using Visa2026.Module.Services.ApplicationProfileWizard
 
 <div class="ap-wizard__panel-head">
@@ -57,9 +58,14 @@
                 </tr>
                 <tr>
                     <td><input type="checkbox" @bind="Profile.RequireBorderZone" disabled="@Disabled" /></td>
-                    <td>Border zone</td><td><span class="ap-wizard__tag">lookup</span></td>
+                    <td>Border zone</td><td><span class="ap-wizard__tag">multi-select</span></td>
                     <td><input type="checkbox" checked="@HasBorderZoneDefault" disabled="@(Disabled || !Profile.RequireBorderZone)" @onchange="ToggleBorderZoneDefault" /></td>
-                    <td><input type="text" disabled="@(Disabled || !Profile.RequireBorderZone)" @bind="Profile.DefaultBorderZoneLocation" /></td>
+                    <td>
+                        <BorderZoneLocationField Value="@Profile.DefaultBorderZoneLocation"
+                                                 ReadOnly="@(Disabled || !Profile.RequireBorderZone || !HasBorderZoneDefault)"
+                                                 ObjectSpace="@ObjectSpace"
+                                                 ValueChanged="@OnBorderZoneDefaultChanged" />
+                    </td>
                 </tr>
                 <tr>
                     <td><input type="checkbox" @bind="Profile.RequireMigrationService" disabled="@Disabled" /></td>
@@ -107,7 +113,21 @@
                 <tr>
                     <td><input type="checkbox" @bind="Profile.RequireBusinessTripAddress" disabled="@Disabled" /></td>
                     <td>Business trip address</td><td><span class="ap-wizard__tag">lookup</span></td>
-                    <td>—</td><td>—</td>
+                    <td><input type="checkbox" checked="@HasBusinessTripAddressDefault" disabled="@(Disabled || !Profile.RequireBusinessTripAddress)" @onchange="ToggleBusinessTripAddressDefault" /></td>
+                    <td>
+                        <select disabled="@(Disabled || !Profile.RequireBusinessTripAddress)" value="@FormatGuid(Profile.DefaultBusinessTripAddressId)" @onchange="OnBusinessTripAddressChanged">
+                            <option value="">—</option>
+                            @foreach (var item in Lookups.BusinessTripAddresses) { <option value="@item.Id.ToString("D")">@item.DisplayName</option> }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td><input type="checkbox" @bind="Profile.RequirePurpose" disabled="@Disabled" @bind:after="OnPurposeUseChanged" /></td>
+                    <td>Purpose</td><td><span class="ap-wizard__tag">text</span></td>
+                    <td><input type="checkbox" checked="@HasPurposeDefault" disabled="@(Disabled || !Profile.RequirePurpose)" @onchange="TogglePurposeDefault" /></td>
+                    <td>
+                        <textarea class="ap-wizard__textarea" maxlength="700" rows="3" disabled="@(Disabled || !Profile.RequirePurpose)" @bind="Profile.DefaultPurpose"></textarea>
+                    </td>
                 </tr>
                 <tr>
                     <td><input type="checkbox" @bind="Profile.RequireProject" disabled="@Disabled" /></td>
@@ -120,17 +140,20 @@
                         </select>
                     </td>
                 </tr>
-                <tr>
-                    <td><input type="checkbox" @bind="Profile.RequireUrgency" disabled="@Disabled" /></td>
-                    <td>Urgency</td><td><span class="ap-wizard__tag">lookup</span></td>
-                    <td><input type="checkbox" checked="@HasUrgencyDefault" disabled="@(Disabled || !Profile.RequireUrgency)" @onchange="ToggleUrgencyDefault" /></td>
-                    <td>
-                        <select disabled="@(Disabled || !Profile.RequireUrgency)" value="@FormatGuid(Profile.DefaultUrgencyId)" @onchange="OnUrgencyChanged">
-                            <option value="">—</option>
-                            @foreach (var item in Lookups.Urgencies) { <option value="@item.Id.ToString("D")">@item.DisplayName</option> }
-                        </select>
-                    </td>
-                </tr>
+                @if (Profile.ActionFamily != ApplicationProfileActionFamily.Registration)
+                {
+                    <tr>
+                        <td><input type="checkbox" @bind="Profile.RequireUrgency" disabled="@Disabled" /></td>
+                        <td>Urgency</td><td><span class="ap-wizard__tag">lookup</span></td>
+                        <td><input type="checkbox" checked="@HasUrgencyDefault" disabled="@(Disabled || !Profile.RequireUrgency)" @onchange="ToggleUrgencyDefault" /></td>
+                        <td>
+                            <select disabled="@(Disabled || !Profile.RequireUrgency)" value="@FormatGuid(Profile.DefaultUrgencyId)" @onchange="OnUrgencyChanged">
+                                <option value="">—</option>
+                                @foreach (var item in Lookups.Urgencies) { <option value="@item.Id.ToString("D")">@item.DisplayName</option> }
+                            </select>
+                        </td>
+                    </tr>
+                }
                 <tr>
                     <td><input type="checkbox" @bind="Profile.RequireWorkPermitLocation" disabled="@Disabled" /></td>
                     <td>Work permit location</td><td><span class="ap-wizard__tag">lookup</span></td>
@@ -173,6 +196,8 @@
     private bool HasCheckPointDefault => Profile.DefaultEntryCheckPointId.HasValue;
     private bool HasRegionDefault => Profile.DefaultRegionId.HasValue;
     private bool HasCityDefault => Profile.DefaultCityId.HasValue;
+    private bool HasBusinessTripAddressDefault => Profile.DefaultBusinessTripAddressId.HasValue;
+    private bool HasPurposeDefault => !string.IsNullOrWhiteSpace(Profile.DefaultPurpose);
 
     private IEnumerable<ApplicationProfileWizardLookupItem> CityOptions
     {
@@ -215,6 +240,14 @@
     {
         if (Disabled || !Profile.RequireBorderZone) return;
         if (!ParseChecked(e)) Profile.DefaultBorderZoneLocation = null;
+        else if (string.IsNullOrWhiteSpace(Profile.DefaultBorderZoneLocation))
+            Profile.DefaultBorderZoneLocation = BorderZoneSelectionHelper.NoneValue;
+    }
+
+    private Task OnBorderZoneDefaultChanged(string? value)
+    {
+        Profile.DefaultBorderZoneLocation = value;
+        return Task.CompletedTask;
     }
 
     private void ToggleMigrationServiceDefault(ChangeEventArgs e)
@@ -263,6 +296,26 @@
         if (!ParseChecked(e)) Profile.DefaultCity = null;
         else if (Profile.DefaultCity == null)
             Profile.DefaultCity = FirstLookup<City>(CityOptions.ToList());
+    }
+
+    private void ToggleBusinessTripAddressDefault(ChangeEventArgs e)
+    {
+        if (Disabled || !Profile.RequireBusinessTripAddress) return;
+        if (!ParseChecked(e)) Profile.DefaultBusinessTripAddress = null;
+        else if (Profile.DefaultBusinessTripAddress == null)
+            Profile.DefaultBusinessTripAddress = FirstLookup<BusinessTripAddress>(Lookups.BusinessTripAddresses);
+    }
+
+    private void TogglePurposeDefault(ChangeEventArgs e)
+    {
+        if (Disabled || !Profile.RequirePurpose) return;
+        if (!ParseChecked(e)) Profile.DefaultPurpose = null;
+    }
+
+    private void OnPurposeUseChanged()
+    {
+        if (!Profile.RequirePurpose)
+            Profile.DefaultPurpose = null;
     }
 
     private void OnRegionUseChanged()
@@ -333,6 +386,12 @@
         Profile.DefaultCity = ResolveLookup<City>(e);
         if (Profile.DefaultCity?.Region != null)
             Profile.DefaultRegion = Profile.DefaultCity.Region;
+    }
+
+    private void OnBusinessTripAddressChanged(ChangeEventArgs e)
+    {
+        if (Disabled || !Profile.RequireBusinessTripAddress) return;
+        Profile.DefaultBusinessTripAddress = ResolveLookup<BusinessTripAddress>(e);
     }
 
     private void ClearCityIfRegionMismatch()

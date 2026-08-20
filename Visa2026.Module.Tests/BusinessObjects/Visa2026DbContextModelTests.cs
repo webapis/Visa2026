@@ -99,6 +99,15 @@ public class Visa2026DbContextModelTests
         var borderZoneItem = context.Model.FindEntityType(typeof(BorderZoneItem));
         Assert.NotNull(borderZoneItem);
         Assert.Equal("BorderZoneItems", borderZoneItem!.GetTableName());
+
+        var businessTripAddress = context.Model.FindEntityType(typeof(BusinessTripAddress));
+        Assert.NotNull(businessTripAddress);
+        Assert.Equal("BusinessTripAddress", businessTripAddress!.GetTableName());
+        Assert.NotNull(businessTripAddress.FindProperty("CityID"));
+
+        var businessTripPurpose = context.Model.FindEntityType(typeof(BusinessTripPurpose));
+        Assert.NotNull(businessTripPurpose);
+        Assert.Equal("BusinessTripPurpose", businessTripPurpose!.GetTableName());
     }
 
     private static void AssertHeaderOneToMany(

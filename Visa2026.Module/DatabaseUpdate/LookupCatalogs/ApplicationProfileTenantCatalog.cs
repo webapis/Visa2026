@@ -98,6 +98,10 @@ public sealed class ApplicationProfileTenantCatalogRow
 
     public bool RequireBusinessTripAddress { get; set; }
 
+    public bool RequirePurpose { get; set; }
+
+    public string? DefaultPurpose { get; set; }
+
     public bool RequireProject { get; set; }
 
     public bool RequireUrgency { get; set; }
@@ -210,6 +214,8 @@ public sealed class ApplicationProfileTenantCatalogRow
             DefaultCityLocalizationKey = NullIfEmpty(profile.DefaultCity?.LocalizationKey),
             RequireRegionCity = profile.RequireRegionCity,
             RequireBusinessTripAddress = profile.RequireBusinessTripAddress,
+            RequirePurpose = profile.RequirePurpose,
+            DefaultPurpose = NullIfEmpty(profile.DefaultPurpose),
             RequireProject = profile.RequireProject,
             RequireUrgency = profile.RequireUrgency,
             DefaultUrgencyLocalizationKey = NullIfEmpty(profile.DefaultUrgency?.LocalizationKey),
@@ -450,6 +456,8 @@ internal static class ApplicationProfileTenantCatalogSync
         profile.DefaultCity = ResolveLookup<City>(objectSpace, row.DefaultCityLocalizationKey);
         profile.RequireRegionCity = row.RequireRegionCity;
         profile.RequireBusinessTripAddress = row.RequireBusinessTripAddress;
+        profile.RequirePurpose = row.RequirePurpose;
+        profile.DefaultPurpose = string.IsNullOrWhiteSpace(row.DefaultPurpose) ? null : row.DefaultPurpose.Trim();
         profile.RequireProject = row.RequireProject;
         profile.DefaultProjectContract = ResolveProjectContract(contracts, row.DefaultProjectContractCode);
         profile.RequireUrgency = row.RequireUrgency;
@@ -469,7 +477,10 @@ internal static class ApplicationProfileTenantCatalogSync
         profile.RequirePersonSalary = row.RequirePersonSalary;
         profile.RequirePersonMedical = row.RequirePersonMedical;
         profile.RequirePersonRejectionItem = row.RequirePersonRejectionItem;
-        profile.RequirePersonTravelHistory = row.RequirePersonTravelHistory;
+        profile.RequirePersonTravelHistory =
+            profile.ActionFamily == ApplicationProfileActionFamily.BusinessTrip
+                ? false
+                : row.RequirePersonTravelHistory;
         ApplicationProfileRegistrationKindHelper.ApplyRegistrationPersonDefaults(profile);
 
         profile.IsActive = row.IsActive;
