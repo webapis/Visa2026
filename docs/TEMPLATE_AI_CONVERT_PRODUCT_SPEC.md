@@ -3,6 +3,7 @@
 > **Status:** Draft product spec (not implemented)  
 > **Audience:** Admin / officer on Application Profile Instance (primary) and profile Templates config (secondary)  
 > **Related:** [`APPLICATION_PROFILE_PLAN.md`](APPLICATION_PROFILE_PLAN.md) (wizard Step 4, instance workspace), [`TEMPLATE_STAGING_EDIT.md`](TEMPLATE_STAGING_EDIT.md), [`USER_TEMPLATE_AUTHOR_GUIDE.md`](USER_TEMPLATE_AUTHOR_GUIDE.md), skills `visa2026-application-profile` + `visa2026-user-report-templates`  
+> **Engineering (read before implementing):** [`TEMPLATE_AI_CONVERT_ENGINEERING_SPEC.md`](TEMPLATE_AI_CONVERT_ENGINEERING_SPEC.md) — Phase 0 service contracts for L7 / L8 / L10 / L11, locked decisions **E-D1**–**E-D8**, and slices **E0–E10**.  
 > **Non-goal:** Officer-facing placeholder mapping UI. Conversion is automatic; officer only confirms preview.  
 > **Non-goal (v1):** Persisting templates only on the Application Profile Instance.  
 > **Locked:** AI mapping data access = **this Application Profile Instance only** (plus upload extract and placeholder token vocabulary).  
@@ -141,7 +142,7 @@ The uploaded file is a **template candidate**. The system must decide whether it
 | Criterion | Pass when | Hard fail when |
 |-----------|-----------|----------------|
 | Format | `.docx` / `.xlsx` parseable OOXML | Corrupt / wrong type |
-| Instance overlap | Enough document literals match values from **this** instance snapshot (threshold TBD, e.g. ≥3 distinct field hits or ≥1 roster row pattern) | Almost no overlap with instance data |
+| Instance overlap | Enough document literals match values from **this** instance snapshot — **Pass** at ≥6 distinct header matches, or a roster loop plus ≥2; **Warn** at 3–5 (**E-D6**) | Fewer than 3 distinct header matches **and** no roster loop |
 | Library coverage | Matched spans resolve to tokens in the **target Application Profile placeholder set** (L10) | Matches only unknown concepts (gap-only; no in-set hits) |
 | Structure | Detectable header and/or people table consistent with chosen data scope | Empty body; image-only scan with no extractable text |
 | Already a template | Few/no raw `{{…}}` tokens, or officer confirms re-convert | Optional warn if file already heavily tokenized |
@@ -366,7 +367,7 @@ Profile-specific: visible on this profile’s nested templates immediately for R
 | P3 | Resminamalar / profile nested catalog can merge the new template for instances of that profile (existing pipeline). |
 | P4 | AI Convert always has a context instance; Preview mode A uses **that** instance’s data. |
 | P4a | AI mapping payload contains no other instances or unrelated BO data (L6). |
-| P5 | Preview is available in ≤ N seconds for typical docs (target: define N in implementation; e.g. 60s without AI, 120s with AI). |
+| P5 | Preview is available within **p95 20 s** without AI and **p95 90 s** with AI (provider timeout 60 s) — **E-D7**. |
 | P6 | Layout of letterhead/table structure is preserved enough that Preview is recognizable vs the upload. |
 
 ### 5.2 Quality (system)
@@ -407,7 +408,7 @@ Validate (and Extract) reuse existing `UserReportTemplate` rules. Officer still 
 | Class | Examples | Preview CTA |
 |-------|----------|-------------|
 | **Hard fail** | Unknown tokens, broken loop markers, unsupported IMAGE token, empty extract, corrupt OOXML | **Use template** disabled |
-| **Soft fail / warning** | Optional pack referenced but person toggle off; low-confidence leftover literals | **Use template** allowed only after checkbox “I understand warnings” **or** force **Needs help** (product pick one; recommend checkbox for soft only) |
+| **Soft fail / warning** | Optional pack referenced but person toggle off; low-confidence leftover literals | **Use template** allowed after checkbox “I understand warnings” (**E-D2** — locked; warnings only, never hard fail) |
 | **Fill preview fail** | Instance merge error while Extract/Validate OK | Stay on Preview with mode B; **Use template** still allowed if Validate OK |
 | **Config locked** | Profile templates read-only | **Use template** disabled; message points to lock policy |
 | **No instance context** | AI convert attempted without instance | Convert disabled; do not call AI |
@@ -470,9 +471,11 @@ Cursor AI is **not** the runtime.
 
 ## 9. Open decisions (narrow)
 
+**All product and engineering decisions are locked as of 2026-08-20.** Engineering decisions **E-D1**–**E-D8** live in [`TEMPLATE_AI_CONVERT_ENGINEERING_SPEC.md`](TEMPLATE_AI_CONVERT_ENGINEERING_SPEC.md) §6.1 and §8. Only outstanding input: the **golden set** (3 real Çalık Word letters + 3 Excel rosters with a matching instance) for Q5 / pilot exit.
+
 | # | Topic | Status |
 |---|--------|--------|
-| 1 | Soft warnings: checkbox vs block | Open — recommend checkbox on Preview |
+| 1 | Soft warnings: checkbox vs block | **Locked — E-D2:** checkbox on Preview for warnings only |
 | 2 | Default catalog target | **Locked — Profile-specific (B)**; Shared (C) opt-in |
 | 3 | Save on instance vs parent profile | **Locked — parent profile only** (instance = context) |
 | 3a | AI data access for mapping | **Locked — L6:** this Application Profile Instance (+ upload + token vocabulary) only |
@@ -483,8 +486,8 @@ Cursor AI is **not** the runtime.
 | 3f | AI vendor | **Locked — L11:** pluggable; no single-vendor lock-in |
 | 3g | Manual upload without AI | **Locked — L12:** always available; AI optional |
 | 4 | AI provider | **Locked — L11:** pluggable multi-vendor; which adapter to enable first is ops (staging first) |
-| 5 | Excel preview fidelity | Open — PDF conversion if available; else download + note |
-| 6 | Convert while config locked | Open — recommend Preview OK, Accept blocked |
+| 5 | Excel preview fidelity | **Locked — E-D3:** DevExpress Spreadsheet → PDF; download + note only on failure |
+| 6 | Convert while config locked | **Locked — E-D4:** already enforced in code — Preview OK, Approve blocked |
 
 ---
 

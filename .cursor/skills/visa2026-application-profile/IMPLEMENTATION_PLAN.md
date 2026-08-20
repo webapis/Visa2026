@@ -89,6 +89,19 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | R4 | Instance rename — drop old tables + delete old BOs | **Done** | |
 | R5 | Instance rename — officer copy purge | **Done** | Keep “Application Profile” for templates |
 | R6 | Instance rename — Demo/local verify + learnings | **Done** | Solution Debug 0 errors; 209 Module.Tests passed; Demo F5/import still operator-run |
+| E0 | Template AI convert — decisions locked | **Done** | `E-D1`–`E-D8` locked 2026-08-20 in [`TEMPLATE_AI_CONVERT_ENGINEERING_SPEC.md`](../../../docs/TEMPLATE_AI_CONVERT_ENGINEERING_SPEC.md) §6.1 + §8. Golden set (3 Word + 3 Excel Çalık docs) still outstanding — gates Q5 / pilot exit only |
+| E1 | Profile-scoped placeholder set (`IApplicationProfilePlaceholderSetService`) | **Pending** | **Blocked on slice 10 heal.** Needs `PackKey` added to `Resources/UserReportPlaceholderCatalog.json` + `UserReportPlaceholderCatalogEntry`; closes L10 / Q1 / Q13 |
+| E2 | Instance value map (`IApplicationProfileInstanceValueMapService`) | **Pending** | Wraps `UserReportMergeDataHelper` + `ApplicationRosterHelper`; invariant casefold, Turkmen/Turkish diacritic folding, date/identifier normalization, min-length ambiguity rejection |
+| E3 | Token writer + diff gate + residual value scan | **Pending** | OpenXml run splitting (Word) / ClosedXML value-only (Excel); gate fails convert on any non-token delta (Q10); residual scan for Q4 |
+| E4 | `TemplateConversionDraft` BO + EF + permissions + expiry sweep | **Pending** | **Adds a table — do not interleave with Wave 2b heal.** 24 h retention; commit via `ApplicationProfileTemplateUserReportBridge` |
+| E5 | Candidate check — suitability score + highlight regions | **Pending** | Thresholds per `E-D6`, config-bound |
+| E6 | Ephemeral extract/validate + warning severity tier | **Pending** | Wraps existing stream extractors/validators; adds `Error`/`Warning` split (`E-D2`) |
+| E7 | Convert modal shell + deterministic path end to end | **Pending** | Upload → Candidate check → Converting → Preview → Done; commit to parent profile (B default / C gated) |
+| E8 | AI provider abstraction + `None` adapter + plan sanitizer | **Pending** | `ITemplateConvertAiProvider`; `E-D1` keeps matching local; Q7 / Q13 / Q14 tests |
+| E9 | Preview chat panel (mapping-only, reject out-of-scope) | **Pending** | Runs against `None` adapter first; Q11 / Q12 |
+| E10 | First real AI adapter + per-slot flag + Demo pilot | **Pending** | Only slice that needs a vendor; Demo slot first |
+
+**Template AI convert sequencing:** E1–E10 start **after** slice 10 (Person M2M / Wave 2b F5 heal) lands. E0–E9 need no AI vendor. Canonical docs: [`TEMPLATE_AI_CONVERT_PRODUCT_SPEC.md`](../../../docs/TEMPLATE_AI_CONVERT_PRODUCT_SPEC.md) (officer UX, L1–L12) · [`TEMPLATE_AI_CONVERT_ENGINEERING_SPEC.md`](../../../docs/TEMPLATE_AI_CONVERT_ENGINEERING_SPEC.md) (contracts, E-D1–E-D8).
 
 ---
 
@@ -423,7 +436,7 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 |----|--------|--------|
 | A | Unlock profile when no apps ≥ lock A | Open — recommend auto-unlock |
 | B | Required-to-save vs visible | Open |
-| C | Placeholder derive vs constrain | Open |
+| C | Placeholder derive vs constrain | **Closed for template AI convert** (`E-D5` — constrain; E1 is the single token source). Still open for other placeholder surfaces |
 | D | Temporary visitor v1 | Open |
 | E | TravelHistory valid rows | Open — current/latest vs broader |
 | F | Re-sync Excel draft in repo | Open — attach updated workbook |

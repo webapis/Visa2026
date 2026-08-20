@@ -134,7 +134,7 @@ Keep **explicit** profile toggles for readiness + enabling person/roster `{{…}
 |---|--------|------|
 | A | Unlock / admin override | Recommend auto-unlock when no apps at/above lock state A. |
 | B | Required-to-save vs visible | Undecided. Recommendation: visible = template ∪ workflow; required = separate flag. |
-| C | Derive vs constrain catalog | Undecided. Recommendation: hybrid extract + hard-block unknown placeholders. |
+| C | Derive vs constrain catalog | **Closed for template AI convert** ([`TEMPLATE_AI_CONVERT_ENGINEERING_SPEC.md`](TEMPLATE_AI_CONVERT_ENGINEERING_SPEC.md) `E-D5`): **constrain** — profile-scoped allowed set; unknown names never become mergeable tokens. Still undecided for other placeholder surfaces. |
 | D | Temporary visitor | Real for v1? |
 | E | Field placement | Largely settled: 14 props on Application (§10.4). Any remaining former ApplicationItem-only fields? |
 | F | SLA integers vs tiers | Raw days on profile? |
