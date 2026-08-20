@@ -138,12 +138,12 @@
             var selectedRow = Rows.FirstOrDefault(r => r.ProfileId == SelectedProfileId);
             @if (selectedRow?.MissingApprovalLegVersions == true)
             {
-                <div class="ap-picker__hint">This profile has no approval-leg versions. Configure them on the profile before creating an application.</div>
+                <div class="ap-picker__hint">No shared approval-leg versions in Configuration. Add Approval leg profiles before creating an application.</div>
             }
             else if (selectedRow?.RequiresApprovalLegVersion == true)
             {
                 <h2 class="ap-picker__section-title">Approval legs *</h2>
-                <p class="ap-picker__hint">Choose which approval-leg version this application will follow. The ministries are copied onto the application (snapshot) and will not change if the profile version is edited later.</p>
+                <p class="ap-picker__hint">Choose which shared approval-leg version this application will follow. Ministries are snapshotted onto the application and will not change if Configuration is edited later.</p>
                 <div class="ap-picker__versions">
                     @foreach (var version in selectedRow.ApprovalLegVersions)
                     {

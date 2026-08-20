@@ -4,6 +4,24 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 
 ---
 
+### 2026-08-20 — Phase B: instance approval-leg snapshot backfill (shared catalog)
+
+- Imported via-ministry applications keep their inferred `ApprovalLegProfile` (do not restamp to the template Default). Empty FK uses `ApplicationProfile.DefaultApprovalLegProfile`. F5/deploy runs `ApplicationProfileInstanceApprovalLegBackfill` after Default seed; CLI remains `--backfill-application-approval-leg-snapshots`. Also stamps `ApprovalLegVersionName`. Does not rewrite progress rows. Query **Includes** instance/default `ApprovalLegProfile` + `MinistryLegs` + snapshots so an unloaded nav is not treated as “FK empty”.
+- Verify: stop F5, rebuild, F5. Open an imported App_Inv that was AH in VISA2015 — snapshot/Ministrlik is AH, not TE-EN. Empty-snapshot via-ministry cases pick up legs. Optional: `dotnet run --project Visa2026.DataImporter -- --backfill-application-approval-leg-snapshots --dry-run`.
+- Prevent: Do not overwrite a set instance `ApprovalLegProfile` with the profile Default. Do not delete progress to heal Ministrlik. Do not query instances without Include on approval-leg navigations when deciding assign vs keep. Do not filter EF queries on `CreationProgressRoute` — it is `[NotMapped]` (create-time only); use profile/type `ProgressRoute` in SQL. Commit catalog before instance heal; heal in a **fresh** ObjectSpace. Bulk heal must **not** soft-delete/recreate snapshots (`ApplySharedSnapshot`) — that causes OptimisticLockField / “changed by another user” with no other user; only **insert** when snapshot count is 0. SeedGate must not fail host start if heal fails (CLI remains).
+- Cross-skill: application-profile, visa2014-to-visa2026-import
+### 2026-08-20 — Shared ApprovalLegProfile catalog (not per-profile copies)
+
+- Via-ministry templates now reuse Configuration **Approval leg profiles** (like Company / Signatory). Each profile stores only `DefaultApprovalLegProfile`. Wizard Identity lists the shared catalog + **Edit in Configuration**. Create picker snapshots the chosen shared chain. Phase A seed sets Defaults and **deletes nested** `ApplicationProfileApprovalLegVersion` copies. Plan §2.1 #7 locked to this redesign (revises slice 8l).
+- Verify: stop F5, rebuild, F5. Configure profile → Identity shows TE-EN / TG / … with a Default radio. Edit in Configuration opens the shared list. New application → pick a shared version. Nested Add version / Duplicate is gone.
+- Prevent: Do not copy ministry chains onto each Application Profile. Do not treat `ProjectContract.ApprovalLegProfile` as the officer catalog. Do not overwrite a set instance `ApprovalLegProfile` with the template Default.
+- Cross-skill: application-profile, visa2014-to-visa2026-import
+### 2026-08-20 — Phase A: seed Approval leg versions from VISA2015 frequency
+
+- Via-ministry Calik profiles get a **Default** shared `ApprovalLegProfile` from legacy frequency (`ApplicationType` × `ApprovalLegProfileCode`). Exporter reuses `Visa2014ApplicationApprovalLegProfileInference` + lookup-translations. **Retargeted the same day:** seed no longer copies legs onto each profile (see Shared ApprovalLegProfile catalog entry). Fallback **TE-EN** when a type has no legacy apps. Matrix: `docs/VISA2014_MIGRATION/lookup-comparisons/ApplicationProfileApprovalLegVersions.calik-energi.md`. Deploy/host-start: `ApplicationProfileApprovalLegVersionTenantCatalogSync`.
+- Verify: stop F5, rebuild, F5. Configure profile → Identity → Approval leg versions (e.g. App_Inv has TE-EN Default plus TG/NG/AH…). Regenerate: `ApplicationProfileApprovalLegVersions-CalikEnergi.ps1` (needs `VISA2014_SQL_PASSWORD`, defaults to `.15`).
+- Prevent: Do not put approval legs on nested Word/Excel templates. Do not invent a second inference algorithm. Phase B (instance snapshot backfill) is separate.
+- Cross-skill: application-profile, visa2014-to-visa2026-import
 ### 2026-08-20 — Work permit location uses Border zone comma-separated multi-select
 
 - Case summary and wizard **Work permit location** now use the same `CommaSeparatedMultiSelectComponent` as Border zone (`BorderZoneLocationField` with `WorkPermittedLocationMultiSelect` alias / `WorkPermittedLocationName` catalog). Instance storage is comma-separated `Application.MovementPermitLocation` text (not `MovementPermitLocation` FK). Profile default is `DefaultWorkPermitLocation`. Wizard Results kind tag is **multi-select**.

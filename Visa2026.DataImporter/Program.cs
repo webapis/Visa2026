@@ -159,6 +159,7 @@ static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
         "--export-visa2014-application-profile-tenant-json",
         "--export-visa2014-application-profile-nested-template-preview",
         "--export-visa2014-application-profile-nested-template-tenant-json",
+        "--export-visa2014-application-profile-approval-leg-version-matrix",
         "--expand-visa2014-id-map",
         "--rebuild-visa2014-id-maps",
         "--import-visa2014-files",
@@ -296,6 +297,8 @@ static void PrintHelp()
     Console.WriteLine("  --export-visa2014-application-profile-nested-template-preview  Wave 3: target DB → nested-template Excel proposal.");
     Console.WriteLine("      Options: --target-connection conn [--output path.xlsx]");
     Console.WriteLine("  --export-visa2014-application-profile-nested-template-tenant-json  Wave 3: target DB → nested-template tenant JSON.");
+    Console.WriteLine("  --export-visa2014-application-profile-approval-leg-version-matrix  Phase A: VISA2015 → approval-leg version frequency + seed JSON.");
+    Console.WriteLine("      Options: [--legacy-source calik-energi] [--output path.json] [--matrix-report path.md] [--max-rows N]");
     Console.WriteLine("      Options: --target-connection conn [--output path.json]");
     Console.WriteLine("      Options: [--legacy-source calik-energi|calik-energi-onprem-staging] [--connection conn] [--force]");
     Console.WriteLine("  --import-visa2014           Legacy SQL → Visa2026 headless ObjectSpace (requires --inprocess).");
@@ -334,7 +337,7 @@ static void PrintHelp()
     Console.WriteLine("  --patch-visa2014-application-profile-nested-templates  PATCH ApplicationProfile.NestedTemplates from tenant JSON (Wave 3; --target-connection, --dry-run)");
     Console.WriteLine("  --correct-visa-application-types  Retype App_Visa_Ext→708, FM via-ministry + progress regen (--legacy-source, --dry-run)");
     Console.WriteLine("  --correct-application-progress-ministry-legs  Regenerate progress for via-ministry apps missing ministry legs (profile/snapshot leg count; --legacy-source, --dry-run)");
-    Console.WriteLine("  --backfill-application-approval-leg-snapshots  Fill ApprovalLegSnapshots from ApprovalLegProfile (Ministrlik; no progress delete; --target-connection, --dry-run)");
+    Console.WriteLine("  --backfill-application-approval-leg-snapshots  Fill instance snapshots + version name from ApprovalLegProfile / profile Default (Ministrlik; no progress delete; --target-connection, --dry-run)");
     Console.WriteLine("  --correct-application-progress-order  Recompute ApplicationProfileInstanceProgress.Order from workflow sequence (all apps; --target-connection, --dry-run)");
     Console.WriteLine("  --correct-person-subcontractor  Patch Person.Subcontractor from legacy IDNumber / Tasaron (--legacy-source, --dry-run)");
     Console.WriteLine("  --correct-person-relationship  Patch Person.Relationship from legacy FamilyMemberRelation (--legacy-source, --dry-run)");
@@ -551,6 +554,16 @@ if (HasArg(args, "--export-visa2014-application-profile-nested-template-tenant-j
     Log.Phase("VISA2014 ApplicationProfile nested templates tenant JSON (Wave 3)");
     bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
     int exitCode = Visa2014ApplicationProfileNestedTemplateExportCommand.RunTenantJson(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
+if (HasArg(args, "--export-visa2014-application-profile-approval-leg-version-matrix"))
+{
+    Log.Phase("VISA2014 ApplicationProfile approval-leg version matrix (Phase A)");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = Visa2014ApplicationProfileApprovalLegVersionMatrixCommand.Run(args, isVerbose);
     Log.Close();
     Environment.ExitCode = exitCode;
     return;

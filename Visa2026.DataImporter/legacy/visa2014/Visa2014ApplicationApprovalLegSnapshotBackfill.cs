@@ -7,8 +7,8 @@ using Visa2026.Module.Services.MigrationImport;
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
 /// <summary>
-/// Backfills <see cref="Bo.ApplicationProfileInstanceApprovalLegSnapshot"/> from <see cref="Bo.ApprovalLegProfile"/>
-/// for via-ministry applications with incomplete snapshots (empty Ministrlik on progress).
+/// Backfills instance approval-leg snapshots and version names from the shared
+/// <see cref="Bo.ApprovalLegProfile"/> (instance FK, else template Default).
 /// Does <strong>not</strong> delete or regenerate <see cref="Bo.ApplicationProfileInstanceProgress"/> rows.
 /// </summary>
 internal sealed class Visa2014ApplicationProfileInstanceApprovalLegSnapshotBackfillResult
@@ -44,7 +44,7 @@ internal static class Visa2014ApplicationProfileInstanceApprovalLegSnapshotBackf
             var result = Run(host.ObjectSpaceFactory, dryRun, verbose);
 
             Console.WriteLine($"INF Applications scanned: {result.ApplicationsScanned}");
-            Console.WriteLine($"INF Applications needing backfill: {result.ApplicationsNeedingBackfill}");
+            Console.WriteLine($"INF Applications needing heal: {result.ApplicationsNeedingBackfill}");
             Console.WriteLine($"INF Snapshots backfilled: {result.SnapshotsBackfilled}");
             foreach (var error in result.Errors.Take(20))
                 Console.Error.WriteLine($"ERR {error}");
@@ -72,65 +72,30 @@ internal static class Visa2014ApplicationProfileInstanceApprovalLegSnapshotBackf
         using var objectSpace = objectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Bo.ApplicationProfileInstance));
         MigrationImportContext.ApplyImportObjectSpaceHooks(objectSpace);
 
-        var viaMinistryTypeIds = objectSpace.GetObjectsQuery<Bo.ApplicationType>()
-            .Where(t => t.ApplicationProfileInstanceProgressRoute == Bo.ApplicationProfileInstanceProgressRouteKind.ViaMinistries)
-            .Select(t => t.ID)
-            .ToHashSet();
-
-        var applications = objectSpace.GetObjectsQuery<Bo.ApplicationProfileInstance>()
-            .Where(a => a.ApplicationType != null
-                && viaMinistryTypeIds.Contains(a.ApplicationType.ID)
-                && a.ApprovalLegProfile != null)
-            .ToList();
-
-        var needing = 0;
-        var backfilled = 0;
-
-        foreach (var application in applications)
+        Bo.ApplicationProfileInstanceApprovalLegBackfill.Result healed;
+        try
         {
-            try
-            {
-                var expectedLegs = Bo.ApprovalLegProfileMinistryHelper.GetLegCount(application.ApprovalLegProfile);
-                if (expectedLegs <= 0)
-                    continue;
-
-                var snapshotLegs = application.ApprovalLegSnapshots?
-                    .Count(s => !string.IsNullOrWhiteSpace(s.MinistryShortName)) ?? 0;
-                if (snapshotLegs == expectedLegs)
-                    continue;
-
-                needing++;
-                if (verbose)
-                {
-                    Console.WriteLine(
-                        $"  SNAPSHOT {application.FullApplicationNumber ?? application.ID.ToString()} " +
-                        $"legs {snapshotLegs} -> {expectedLegs} " +
-                        $"(profile {application.ApprovalLegProfile?.Code ?? "?"})");
-                }
-
-                if (dryRun)
-                    continue;
-
-                Bo.ApprovalLegProfileMinistryHelper.ApplySnapshot(
-                    objectSpace,
-                    application,
-                    application.ApprovalLegProfile);
-                backfilled++;
-            }
-            catch (Exception ex)
-            {
-                errors.Add($"{application.FullApplicationNumber ?? application.ID.ToString()}: {ex.Message}");
-            }
+            healed = Bo.ApplicationProfileInstanceApprovalLegBackfill.Sync(objectSpace, apply: !dryRun);
+            if (!dryRun && (healed.ProfilesAssigned + healed.NamesStamped + healed.SnapshotsFilled) > 0)
+                objectSpace.CommitChanges();
+        }
+        catch (Exception ex)
+        {
+            errors.Add(ex.Message);
+            healed = default;
         }
 
-        if (!dryRun && backfilled > 0)
-            objectSpace.CommitChanges();
+        if (verbose)
+        {
+            Console.WriteLine(
+                $"  ASSIGNED {healed.ProfilesAssigned}  NAMES {healed.NamesStamped}  SNAPSHOTS {healed.SnapshotsFilled}");
+        }
 
         return new Visa2014ApplicationProfileInstanceApprovalLegSnapshotBackfillResult
         {
-            ApplicationsScanned = applications.Count,
-            ApplicationsNeedingBackfill = needing,
-            SnapshotsBackfilled = backfilled,
+            ApplicationsScanned = healed.Scanned,
+            ApplicationsNeedingBackfill = healed.ProfilesAssigned + healed.NamesStamped + healed.SnapshotsFilled,
+            SnapshotsBackfilled = dryRun ? 0 : healed.SnapshotsFilled,
             Errors = errors,
         };
     }

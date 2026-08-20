@@ -316,14 +316,25 @@
 .ap-wizard__add-leg { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
 .ap-wizard__add-leg select { flex: 1; min-width: 200px; }
 
-.ap-wizard__versions { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+.ap-wizard__versions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 12px;
+    max-height: min(16.5rem, 36vh);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: 2px 6px 2px 2px;
+}
 .ap-wizard__version {
     border: 1px solid var(--ap-line);
     border-radius: 10px;
     padding: 10px 12px;
     background: #fff;
 }
-.ap-wizard__version.is-active {
+.ap-wizard__version.is-active,
+.ap-wizard__version.is-default {
     border-color: #8fc9b2;
     background: #f4faf7;
 }

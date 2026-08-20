@@ -36,12 +36,16 @@ public static class ApplicationProfileSeedSync
                 "ApplicationProfileSeedSync: tenant application-profile JSON present; syncing catalog rows (not type-derived).");
             var tenant = ApplicationProfileTenantCatalogSync.Sync(objectSpace);
             ApplicationProfileNestedTemplateTenantCatalogSync.Sync(objectSpace);
+            ApplicationProfileApprovalLegVersionTenantCatalogSync.Sync(objectSpace);
+            // Commit catalog only here. Phase B instance heal runs in a fresh ObjectSpace
+            // from ApplicationProfileSeedGate (soft-delete recreate tripped OptimisticLockField).
             objectSpace.CommitChanges();
             return new Result
             {
                 SkippedBecauseTenantCatalogPresent = true,
                 ProfilesCreated = tenant.Created,
                 ProfilesUpdated = tenant.Updated,
+                ApplicationsBackfilled = 0,
             };
         }
 
@@ -99,6 +103,10 @@ public static class ApplicationProfileSeedSync
         }
 
         objectSpace.CommitChanges();
+
+        var instanceLegs = ApplicationProfileInstanceApprovalLegBackfill.Sync(objectSpace);
+        if (instanceLegs.ProfilesAssigned + instanceLegs.NamesStamped + instanceLegs.SnapshotsFilled > 0)
+            objectSpace.CommitChanges();
 
         if (created > 0 || updated > 0 || backfilled > 0)
         {

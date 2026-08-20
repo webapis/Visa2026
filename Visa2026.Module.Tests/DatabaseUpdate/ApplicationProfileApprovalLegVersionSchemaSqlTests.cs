@@ -61,4 +61,16 @@ public class ApplicationProfileApprovalLegVersionSchemaSqlTests
             ApplicationProfileSchemaSql.EnsureDefaultWorkPermitLocationPostgres,
             StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void HostStart_AddsDefaultApprovalLegProfileForeignKey()
+    {
+        Assert.Contains(
+            ApplicationProfileSchemaSql.EnsureDefaultApprovalLegProfilePostgres,
+            ApplicationProfileSchemaSql.EnsureTemplateCatalogColumnsPostgresStatements);
+        Assert.Contains(
+            "DefaultApprovalLegProfileId",
+            ApplicationProfileSchemaSql.EnsureDefaultApprovalLegProfilePostgres,
+            StringComparison.Ordinal);
+    }
 }

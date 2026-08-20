@@ -54,19 +54,7 @@ public sealed class ApplicationProfilePickerQueryService : IApplicationProfilePi
                     UsedBySeedPersonCount = usage?.Count ?? 0,
                     LastUsedBySeedPersonAt = usage?.LastUsedAt,
                     HasOpenApplicationForSeedPerson = usage?.HasOpen ?? false,
-                    ApprovalLegVersions = ApplicationProfileApprovalLegVersionHelper.GetOrderedVersions(p)
-                        .Select(v => new ApplicationProfilePickerVersionOption
-                        {
-                            VersionId = v.ID,
-                            Name = string.IsNullOrWhiteSpace(v.Name) ? $"Version {v.Sequence}" : v.Name,
-                            IsDefault = v.IsDefault,
-                            MinistryNames = ApplicationProfileApprovalLegVersionHelper.GetOrderedLegs(v)
-                                .Select(l => l.ApprovingMinistry!.NameTm
-                                    ?? l.ApprovingMinistry.ShortNameTm
-                                    ?? $"Ministry {l.Sequence}")
-                                .ToList(),
-                        })
-                        .ToList(),
+                    ApprovalLegVersions = BuildVersionOptions(objectSpace, p),
                 };
             })
             .OrderByDescending(r => seedPersonId.HasValue ? r.LastUsedBySeedPersonAt ?? DateTime.MinValue : r.LastUsedAt ?? DateTime.MinValue)
@@ -107,6 +95,44 @@ public sealed class ApplicationProfilePickerQueryService : IApplicationProfilePi
             .OrderByDescending(p => p.Order)
             .FirstOrDefault();
         return ApplicationProfileInstanceProgressTransitionHelper.IsTerminalStateCode(latest?.State?.Code);
+    }
+
+    private static IReadOnlyList<ApplicationProfilePickerVersionOption> BuildVersionOptions(
+        IObjectSpace objectSpace,
+        ApplicationProfile profile)
+    {
+        var shared = ApplicationProfileApprovalLegVersionHelper.GetSharedActiveProfiles(objectSpace);
+        if (shared.Count > 0)
+        {
+            var defaultId = profile.DefaultApprovalLegProfileId;
+            return shared.Select(p => new ApplicationProfilePickerVersionOption
+            {
+                VersionId = p.ID,
+                Name = string.IsNullOrWhiteSpace(p.NameTm) ? (p.Code ?? p.ID.ToString()) : p.NameTm!,
+                IsDefault = defaultId.HasValue && defaultId.Value == p.ID,
+                MinistryNames = (p.MinistryLegs ?? Enumerable.Empty<ApprovalLegProfileMinistryLeg>())
+                    .Where(l => l.ApprovingMinistry != null)
+                    .OrderBy(l => l.Sequence ?? int.MaxValue)
+                    .Select(l => l.ApprovingMinistry!.NameTm
+                        ?? l.ApprovingMinistry.ShortNameTm
+                        ?? $"Ministry {l.Sequence}")
+                    .ToList(),
+            }).ToList();
+        }
+
+        return ApplicationProfileApprovalLegVersionHelper.GetOrderedVersions(profile)
+            .Select(v => new ApplicationProfilePickerVersionOption
+            {
+                VersionId = v.ID,
+                Name = string.IsNullOrWhiteSpace(v.Name) ? $"Version {v.Sequence}" : v.Name,
+                IsDefault = v.IsDefault,
+                MinistryNames = ApplicationProfileApprovalLegVersionHelper.GetOrderedLegs(v)
+                    .Select(l => l.ApprovingMinistry!.NameTm
+                        ?? l.ApprovingMinistry.ShortNameTm
+                        ?? $"Ministry {l.Sequence}")
+                    .ToList(),
+            })
+            .ToList();
     }
 
     private sealed class SeedProfileUsage

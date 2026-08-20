@@ -2,16 +2,36 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
+using Microsoft.EntityFrameworkCore;
 
 namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
-/// Per-profile named approval-leg versions and instance ministry snapshots (slice 8l).
-/// Versions are not shared across profiles. After create, instances keep a snapshot.
+/// Approval-leg versions for via-ministry profiles.
+/// Shared source of truth: tenant <see cref="ApprovalLegProfile"/> (Configuration).
+/// Per profile: optional <see cref="ApplicationProfile.DefaultApprovalLegProfile"/>.
+/// At create, ministries are snapshotted onto the instance.
+/// Nested <see cref="ApplicationProfileApprovalLegVersion"/> copies are legacy (slice 8l) and no longer seeded.
 /// </summary>
 public static class ApplicationProfileApprovalLegVersionHelper
 {
     public const string DefaultVersionName = "Version 1";
+
+    public static IReadOnlyList<ApprovalLegProfile> GetSharedActiveProfiles(IObjectSpace? objectSpace)
+    {
+        if (objectSpace == null)
+            return [];
+
+        return objectSpace.GetObjectsQuery<ApprovalLegProfile>()
+            .Include(p => p.MinistryLegs)
+                .ThenInclude(l => l.ApprovingMinistry)
+            .Where(p => p.IsActive)
+            .AsEnumerable()
+            .Where(p => ApprovalLegProfileMinistryHelper.GetLegCount(p) > 0)
+            .OrderBy(p => p.Code, StringComparer.OrdinalIgnoreCase)
+            .ThenBy(p => p.NameTm, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
 
     public static IReadOnlyList<ApplicationProfileApprovalLegVersion> GetOrderedVersions(ApplicationProfile? profile)
     {
@@ -50,8 +70,8 @@ public static class ApplicationProfileApprovalLegVersionHelper
     }
 
     /// <summary>
-    /// Template legs for fallback when an instance has no snapshot yet (tests / pre-cutover rows).
-    /// Prefers the default version; otherwise orphan <see cref="ApplicationProfile.ApprovalLegs"/>.
+    /// Legacy nested template legs when an instance has no snapshot and no shared default.
+    /// Prefer <see cref="ResolveLegsForInstance"/> / <see cref="GetConfiguredLegCount"/> for the shared catalog.
     /// </summary>
     public static IReadOnlyList<ApplicationProfileApprovalLeg> GetTemplateLegs(ApplicationProfile? profile)
     {
@@ -71,6 +91,11 @@ public static class ApplicationProfileApprovalLegVersionHelper
 
     public static int GetConfiguredLegCount(ApplicationProfile? profile)
     {
+        var sharedDefault = profile?.DefaultApprovalLegProfile;
+        var fromShared = ApprovalLegProfileMinistryHelper.GetLegCount(sharedDefault);
+        if (fromShared > 0)
+            return fromShared;
+
         var fromVersions = GetOrderedVersions(profile)
             .SelectMany(GetOrderedLegs)
             .Count();
@@ -80,10 +105,75 @@ public static class ApplicationProfileApprovalLegVersionHelper
         return profile?.ApprovalLegs?.Count(l => l.ApprovingMinistry != null) ?? 0;
     }
 
-    public static bool RequiresVersionPick(ApplicationProfile? profile) =>
+    public static bool RequiresVersionPick(ApplicationProfile? profile, IObjectSpace? objectSpace = null) =>
         profile != null
         && profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries
-        && GetOrderedVersions(profile).Count > 0;
+        && (GetSharedActiveProfiles(objectSpace).Count > 0 || GetOrderedVersions(profile).Count > 0);
+
+    /// <summary>Resolve shared <see cref="ApprovalLegProfile"/> for instance create (preferred path).</summary>
+    public static bool TryResolveSharedProfileForCreate(
+        ApplicationProfile profile,
+        Guid? requestedApprovalLegProfileId,
+        IObjectSpace objectSpace,
+        out ApprovalLegProfile? sharedProfile,
+        out string? errorMessage)
+    {
+        sharedProfile = null;
+        errorMessage = null;
+
+        if (profile.ProgressRoute != ApplicationProfileInstanceProgressRouteKind.ViaMinistries)
+            return true;
+
+        var shared = GetSharedActiveProfiles(objectSpace);
+        var nested = GetOrderedVersions(profile);
+
+        if (shared.Count == 0 && nested.Count == 0)
+        {
+            if (GetConfiguredLegCount(profile) > 0)
+            {
+                errorMessage = "This profile still has unversioned approval legs. Open Configure profile, save, and try again.";
+                return false;
+            }
+
+            errorMessage = "No shared approval-leg versions in Configuration. Add Approval leg profiles before creating an application.";
+            return false;
+        }
+
+        if (requestedApprovalLegProfileId is Guid id && id != Guid.Empty)
+        {
+            sharedProfile = shared.FirstOrDefault(p => p.ID == id)
+                ?? objectSpace.GetObjectByKey<ApprovalLegProfile>(id);
+            if (sharedProfile == null || !sharedProfile.IsActive)
+            {
+                errorMessage = "Select a valid approval-leg version for this application.";
+                return false;
+            }
+
+            return true;
+        }
+
+        if (profile.DefaultApprovalLegProfile != null
+            && shared.Any(p => p.ID == profile.DefaultApprovalLegProfile.ID))
+        {
+            sharedProfile = profile.DefaultApprovalLegProfile;
+            return true;
+        }
+
+        if (shared.Count == 1)
+        {
+            sharedProfile = shared[0];
+            return true;
+        }
+
+        if (shared.Count == 0 && nested.Count > 0)
+        {
+            // Caller falls back to nested TryResolveVersionForCreate.
+            return true;
+        }
+
+        errorMessage = "Choose which approval-leg version this application will follow.";
+        return false;
+    }
 
     public static bool TryResolveVersionForCreate(
         ApplicationProfile profile,
@@ -100,14 +190,8 @@ public static class ApplicationProfileApprovalLegVersionHelper
         var versions = GetOrderedVersions(profile);
         if (versions.Count == 0)
         {
-            if (GetConfiguredLegCount(profile) > 0)
-            {
-                errorMessage = "This profile still has unversioned approval legs. Open Configure profile, save, and try again.";
-                return false;
-            }
-
-            errorMessage = "This profile has no approval-leg versions. Configure them before creating an application.";
-            return false;
+            // Shared catalog path — nested versions optional
+            return true;
         }
 
         if (requestedVersionId is Guid id && id != Guid.Empty)
@@ -130,6 +214,25 @@ public static class ApplicationProfileApprovalLegVersionHelper
 
         errorMessage = "Choose which approval-leg version this application will follow.";
         return false;
+    }
+
+    public static void ApplySharedSnapshot(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance application,
+        ApprovalLegProfile? sharedProfile)
+    {
+        if (objectSpace == null || application == null)
+            return;
+
+        application.ApprovalLegProfile = sharedProfile == null
+            ? null
+            : objectSpace.GetObject(sharedProfile);
+        application.ApprovalLegVersionId = null;
+        application.ApprovalLegVersionName = sharedProfile == null
+            ? null
+            : (sharedProfile.NameTm ?? sharedProfile.Code);
+
+        ApprovalLegProfileMinistryHelper.ApplySnapshot(objectSpace, application, application.ApprovalLegProfile);
     }
 
     public static void ApplySnapshot(
@@ -191,6 +294,22 @@ public static class ApplicationProfileApprovalLegVersionHelper
             return fromSnapshot;
 
         var liveProfile = profile ?? application.ApplicationProfile;
+        var shared = application.ApprovalLegProfile ?? liveProfile?.DefaultApprovalLegProfile;
+        if (shared?.MinistryLegs != null)
+        {
+            var fromShared = shared.MinistryLegs
+                .Where(l => l.ApprovingMinistry != null)
+                .OrderBy(l => l.Sequence ?? int.MaxValue)
+                .Select((l, i) => (
+                    Sequence: i + 1,
+                    Name: l.ApprovingMinistry!.ShortNameTm
+                        ?? l.ApprovingMinistry.NameTm
+                        ?? $"Ministry {i + 1}"))
+                .ToList();
+            if (fromShared.Count > 0)
+                return fromShared;
+        }
+
         return GetTemplateLegs(liveProfile)
             .Select((l, i) => (
                 Sequence: i + 1,

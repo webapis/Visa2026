@@ -10,6 +10,7 @@ Companion to [SKILL.md](./SKILL.md).
 |------|------|
 | Profile BO + children | `Visa2026.Module/BusinessObjects/ApplicationProfile.cs` (`ApprovalLegVersions`) |
 | Approval-leg version helper | `Visa2026.Module/Services/ApplicationProfile/ApplicationProfileApprovalLegVersionHelper.cs` |
+| Approval-leg version tenant seed (Calik Phase A) + instance backfill (Phase B) | `LookupCatalogs/tenant/application-profile-approval-leg-versions.calik-energi.json` + `ApplicationProfileApprovalLegVersionTenantCatalogSync` · `ApplicationProfileInstanceApprovalLegBackfill` · regenerate `scripts/visa2014-migration/catalogs/generate/ApplicationProfileApprovalLegVersions-CalikEnergi.ps1` · CLI `--backfill-application-approval-leg-snapshots` |
 | Workspace host BO | `Visa2026.Module/BusinessObjects/ApplicationWorkspace/ApplicationWorkspaceHost.cs` |
 | Workspace query service | `ApplicationWorkspaceQueryService.cs` (live; mock retained for fallback) |
 | Workspace open helper | `ApplicationWorkspaceOpenHelper.cs` |
@@ -78,7 +79,7 @@ Companion to [SKILL.md](./SKILL.md).
 
 ### Configuration-related (live) — on `ApplicationProfile`
 
-Identity (Name, Description, Code, SelectionCode) · Route (`ProgressRoute`) · Audience (`ForEmployee`, `ForFamilyMember`, `ForTemporaryVisitor`) · `ActionFamily` · Produce/Cancel booleans · `ApprovalLegVersions` (per-profile copies; instance snapshots ministries at create) · SLA days · `NestedTemplates` (profile-specific may set `ApplicableProjectContract` / `ApplicableMigrationService`) · `RequirePerson*` toggles · `ApplicabilityCriteria` · `Require*` + `Default*` for catalog fields
+Identity (Name, Description, Code, SelectionCode) · Route (`ProgressRoute`) · Audience (`ForEmployee`, `ForFamilyMember`, `ForTemporaryVisitor`) · `ActionFamily` · Produce/Cancel booleans · `DefaultApprovalLegProfile` (shared `ApprovalLegProfile` catalog; instance snapshots ministries at create) · SLA days · `NestedTemplates` (profile-specific may set `ApplicableProjectContract` / `ApplicableMigrationService`) · `RequirePerson*` toggles · `ApplicabilityCriteria` · `Require*` + `Default*` for catalog fields
 
 ### Per-Application (persistent) — on `Application`
 
@@ -116,7 +117,7 @@ Merge rule: Application value if set; else profile default (plan §4).
 
 `ApplicationProfile.IsConfigLocked` — any linked Application locked.
 
-**Exception:** approval-leg versions may still be added/edited while locked (instances keep a snapshot). Nested templates stay blocked. Cannot remove the last version.
+**Exception:** this template's **Default** shared approval-leg version may still change while locked (instances keep a snapshot). Edit chains under Configuration. Nested templates stay blocked.
 
 ---
 
@@ -141,8 +142,8 @@ Merge rule: Application value if set; else profile default (plan §4).
 | `staged-profiles-*.png` | 10+ | Staged profile queue (list/grid, Start process) |
 | `process-started-profiles-*.png`, `process-started-application-profile-workspace-mockup.png`, `process-started-nav-*.png` | 10 / B5 | In-process case workspace (officer shell 6 tabs) |
 | `visa2026-custom-left-navigation-shell-mockup.png` | B0–B3 | Blazor officer shell replaces native XAF left nav + immersive chrome |
-| `application-profile-wizard-approval-leg-versions-prototype.png` | 8l | Identity: named per-profile approval-leg versions (own copies) |
-| `application-profile-instance-create-choose-approval-legs-prototype.png` | 8l | Create: required version pick; snapshot ministries onto the instance |
+| `application-profile-wizard-approval-leg-versions-prototype.png` | 8l | Identity: shared approval-leg versions + Default for this template |
+| `application-profile-instance-create-choose-approval-legs-prototype.png` | 8l | Create: required shared version pick; snapshot ministries onto the instance |
 
 **Retired:** `application-profile-wizard.html`, `application-profile-usage.html`, `application-detail-m2m.html`, `images/ap-*.png`, Excel draft (removed 2026-08-10).
 

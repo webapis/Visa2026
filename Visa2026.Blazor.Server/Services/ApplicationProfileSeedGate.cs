@@ -12,6 +12,7 @@ namespace Visa2026.Blazor.Server.Services;
 /// <summary>
 /// Runs <see cref="ApplicationProfileSeedSync"/> after host DI is ready when ModuleUpdater was skipped.
 /// Tenant catalog JSON is applied here too (not only on DB version bump).
+/// Phase B approval-leg instance heal uses a separate ObjectSpace and never blocks startup.
 /// </summary>
 internal static class ApplicationProfileSeedGate
 {
@@ -52,11 +53,39 @@ internal static class ApplicationProfileSeedGate
                     result.TypesWithoutProfile.Count,
                     string.Join(", ", result.TypesWithoutProfile));
             }
+
+            // Fresh OS: catalog ObjectSpace still tracks profiles/versions from the sync above.
+            RunApprovalLegInstanceHeal(osFactory, logger);
         }
         catch (Exception ex)
         {
             logger?.LogError(ex, "ApplicationProfileInstance profile seed sync failed.");
             throw;
+        }
+    }
+
+    private static void RunApprovalLegInstanceHeal(
+        INonSecuredObjectSpaceFactory osFactory,
+        ILogger? logger)
+    {
+        try
+        {
+            using var healSpace = osFactory.CreateNonSecuredObjectSpace(typeof(ApplicationProfileInstance));
+            var heal = ApplicationProfileInstanceApprovalLegBackfill.Sync(healSpace);
+            logger?.LogInformation(
+                "ApplicationProfile approval-leg instance heal: scanned={Scanned}, assigned={Assigned}, names={Names}, snapshots={Snapshots}.",
+                heal.Scanned,
+                heal.ProfilesAssigned,
+                heal.NamesStamped,
+                heal.SnapshotsFilled);
+        }
+        catch (Exception ex)
+        {
+            // Do not block F5 / host start — officer can run CLI backfill.
+            logger?.LogError(
+                ex,
+                "ApplicationProfile approval-leg instance heal failed. App will start. "
+                + "Optional: dotnet run --project Visa2026.DataImporter -- --backfill-application-approval-leg-snapshots");
         }
     }
 }

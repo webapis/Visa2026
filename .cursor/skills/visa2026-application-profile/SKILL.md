@@ -89,7 +89,7 @@ disable-model-invocation: false
 1. **Live FK** — `Application.ApplicationProfile` points at shared config. **No** full profile clone on Application.
 2. **Two field classes** — **Configuration-related** (live from profile; not edited on Application) vs **per-Application** (persistent values; defaults copied once at create).
 3. **Immutable profile pick** — FK set **only at create** (or Person/Dossier start flow). Never switch profile on existing Application.
-4. **Config lock A** — When any linked Application leaves office prep (`OFFICE_PREPARATION` / `DRAFT` excluded), profile **configuration** becomes read-only **except approval-leg versions** (snapshotted on instances). New Applications may still pick locked profile. Per-Application fields stay editable.
+4. **Config lock A** — When any linked Application leaves office prep (`OFFICE_PREPARATION` / `DRAFT` excluded), profile **configuration** becomes read-only **except this template's Default approval-leg version** (chains live in Configuration; instances keep a snapshot). New Applications may still pick locked profile. Per-Application fields stay editable.
 5. **ApplicationType deprecated** — Dual-read during migration. Do **not** add new Type capability flags; converge on profile.
 6. **ApplicationItem retiring** — Target is Person M2M + auto-resolve children; until then do not expand ApplicationItem-only features.
 
@@ -113,7 +113,7 @@ flowchart LR
 | Defaults not applied on create | `Application.ApplyDefaultsForApplicationProfile` | Profile default FKs; ImmediatePostData |
 | Officer can change profile on detail | `[Appearance]` read-only on DetailView | Enforce create-only in controller |
 | Config still editable after submit | `ApplicationProfile.IsConfigLocked` + wizard | `ApplicationProfileLockHelper`, `LatestPrimaryStateCode` |
-| Locked profile cannot add/edit approval-leg versions | Versions are a lock carve-out (snapshots) | Wizard Identity versions section; `AllowsNestedEditWhenConfigLocked`; last version cannot be removed |
+| Locked profile cannot change Default approval legs | Default is a lock carve-out (snapshots) | Wizard Identity shared list + **Default**; `HasConfigurationScalarsChanged` ignores `DefaultApprovalLegProfileId`; **Edit in Configuration** |
 | Visibility still follows ApplicationType | grep `Show*` / `ApplicationType` in Appearance | Slice 2: profile-driven rules |
 | Progress route ignores profile | `ApplicationType.ApplicationProgressRoute` still used | Wire `ApplicationProfile.ProgressRoute` in resolver |
 | Type required but Profile optional | Dual-read phase | Seed profiles; backfill FK; document in IMPLEMENTATION_PLAN |
@@ -177,7 +177,7 @@ Use when user asks *how should I configure this profile?* — tailor to **Action
 
 | Route | Suggest |
 |-------|---------|
-| **Via ministries** | Embed named **approval-leg versions** on Identity; officers pick a version at create (snapshot); set **Project** on Results if instances need a contract; profile-specific templates can bind to a Project contract |
+| **Via ministries** | Set **Default** shared approval-leg version on Identity (edit chains in Configuration); officers pick a version at create (snapshot); set **Project** on Results if instances need a contract; profile-specific templates can bind to a Project contract |
 | **Direct migration** | No ministry legs on profile; migration SLA; profile-specific templates can bind to a Migration service |
 
 ### Person-config toggles

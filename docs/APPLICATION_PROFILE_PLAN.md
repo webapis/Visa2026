@@ -44,7 +44,7 @@ Application-type behavior is **scattered** across `ApplicationType` `Show*` / `C
 |---|--------|----------|
 | 5 | Scope / applicability | **Freeform criteria** filters which profiles appear in the Application picker. |
 | 6 | “Related to” (action family) | **Exclusive radio:** Issuance \| Cancellation \| Registration \| Business trip. When **Registration**, also **Check in**, **Check out**, **Info change**, or **Reg extension** (`RegistrationKind`) for Report Dashboard queries. **Configuration-related**. |
-| 7 | Approval legs | **Named versions** nested on each profile (per-profile copies, not a shared catalog; not `ProjectContract`). Officer **must pick a version** at instance create. Instance **snapshots** ministries; later wizard edits do not change already-started cases. |
+| 7 | Approval legs | **Shared** tenant catalog: `ApprovalLegProfile` (Configuration), like Company / Signatory. Each via-ministry profile stores only **`DefaultApprovalLegProfile`**. Officer **must pick a shared version** at instance create. Instance **snapshots** ministries; later Configuration or default edits do not change already-started cases. Do **not** copy chains onto each profile. |
 | 8 | Process states | **Not officer-configured.** Instance steps follow **Directed to** + **Approval legs** + the fixed progress graph. Profile stores **SLA days** only. |
 | 9 | Templates | **Nest files** on the profile. Configuration-related; list **visible** on Application, **not** editable per Application. |
 | 10 | Person data (v1) | Four checkboxes: Passport, Education, Position, Local address. Configuration-related (live readiness / template packs). |
@@ -70,7 +70,7 @@ Stored only on `ApplicationProfile`. Application **reads** them via FK. Officers
 | Related to | Issuance · Cancellation · Registration (Check in \| Check out \| Info change \| Reg extension) · Business trip | No (controls tracking / visibility / dashboard) |
 | Produce | Invitation · Work permit · Visa · Border zone · Work location | No |
 | Cancel existing | Invitation(s) · WP(s) · Visa(s) · Border zone · Application(s) | No |
-| Process | Approval legs (named versions on the profile; **snapshot** on the instance after create) · SLA days (ministry / migration, live) | No |
+| Process | Approval legs (**shared** `ApprovalLegProfile` catalog; profile holds **Default** only; **snapshot** on the instance after create) · SLA days (ministry / migration, live) | No |
 | Templates | Name · Type · File. Profile-specific rows may bind to a Project contract (Via ministry) or Migration service (Direct); instance catalog filters by the instance lookup. Empty binding = all instances. | Yes (catalog list; not editable) |
 | Person requirements | Passport · Education · Position · Address | No (gates readiness / packs) |
 
@@ -476,8 +476,8 @@ When any linked Application reaches lock state **A** (first progress beyond offi
 | Wizard Registration Check in / Check out | **Done** |
 | Wizard Process & SLA duration only | Done |
 | Profile-specific template applicability (contract / migration service) | Done |
-| Approval leg versions (per-profile copies + instance snapshot) | **Done** |
-| Locked profile: still edit approval-leg versions | **Done** |
+| Approval leg versions (shared catalog + instance snapshot) | **Done** (Phase B 2026-08-20: imported instances keep inferred chain; snapshots + version name backfill) |
+| Locked profile: still set Default approval legs | **Done** |
 | Wizard Project contract on Identity (Via ministry) | Done |
 | Profile overview (live linked instances) | Done |
 | Custom catalog home (replace native List/Detail officer UI) | Done |

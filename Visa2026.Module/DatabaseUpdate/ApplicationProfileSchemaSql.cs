@@ -470,6 +470,9 @@ public static class ApplicationProfileSchemaSql
     internal const string EnsureInstanceApprovalLegVersionIdPostgres =
         """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "ApprovalLegVersionId" uuid NULL;""";
 
+
+    internal const string EnsureDefaultApprovalLegProfilePostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "DefaultApprovalLegProfileId" uuid NULL;""";
     internal const string EnsureDefaultWorkPermitLocationPostgres =
         """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "DefaultWorkPermitLocation" character varying(500) NULL;""";
 
@@ -619,6 +622,7 @@ public static class ApplicationProfileSchemaSql
         EnsureInstanceApprovalLegVersionIdPostgres,
         BackfillApprovalLegVersionsPostgres,
         EnsureDefaultWorkPermitLocationPostgres,
+        EnsureDefaultApprovalLegProfilePostgres,
         ConvertInstanceMovementPermitLocationToStringPostgres,
     ];
 

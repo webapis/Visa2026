@@ -153,6 +153,7 @@ Procedure: [import-practices.md § Partial reimport](../../.cursor/skills/visa20
 | **Application profile (Wave 0 proposal)** | `catalogs/generate/ApplicationProfileCatalog-CalikEnergi.ps1` | — (sign-off Excel → Wave 1 tenant JSON) |
 | Project contract | `catalogs/generate/ProjectContract-CalikEnergi.ps1` | `catalogs/deploy/ProjectContract-CalikEnergi.ps1` |
 | Approval leg profile | `catalogs/generate/ApprovalLegProfile.ps1` | — |
+| Approval leg versions (per Application Profile) | `catalogs/generate/ApplicationProfileApprovalLegVersions-CalikEnergi.ps1` | deploy / host-start sync |
 | Education institution / specialty | `catalogs/generate/EducationLookup-CalikEnergi.ps1` | `catalogs/deploy/EducationLookup-CalikEnergi.ps1` |
 | Position / department | `catalogs/generate/PositionDepartmentLookup-CalikEnergi.ps1` | `catalogs/deploy/PositionDepartmentLookup-CalikEnergi.ps1` |
 | Lodging | `catalogs/generate/Lodging-CalikEnergi.ps1` (+ Hotel/Hospital/OtherSite variants) | `catalogs/deploy/LodgingLookup-CalikEnergi.ps1` |

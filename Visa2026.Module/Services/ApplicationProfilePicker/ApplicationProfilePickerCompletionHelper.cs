@@ -164,13 +164,52 @@ public static class ApplicationProfilePickerCompletionHelper
             return false;
         }
 
-        if (!ApplicationProfileApprovalLegVersionHelper.TryResolveVersionForCreate(
+        if (!ApplicationProfileApprovalLegVersionHelper.TryResolveSharedProfileForCreate(
                 profile,
                 approvalLegVersionId,
-                out var version,
+                objectSpace,
+                out var sharedProfile,
                 out errorMessage))
         {
             return false;
+        }
+
+        // Legacy nested versions if the shared catalog is empty
+        if (sharedProfile == null
+            && profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries
+            && ApplicationProfileApprovalLegVersionHelper.GetOrderedVersions(profile).Count > 0)
+        {
+            if (!ApplicationProfileApprovalLegVersionHelper.TryResolveVersionForCreate(
+                    profile,
+                    approvalLegVersionId,
+                    out var nestedVersion,
+                    out errorMessage))
+            {
+                return false;
+            }
+
+            var nestedApp = objectSpace.CreateObject<ApplicationProfileInstance>();
+            ApplicationProfilePickerApplyHelper.ApplyProfileToNewApplication(
+                objectSpace,
+                nestedApp,
+                profile,
+                context?.CreationProgressRoute);
+            ApplicationProfileApprovalLegVersionHelper.ApplySnapshot(objectSpace, nestedApp, nestedVersion);
+            if (peopleToLink != null && peopleToLink.Count > 0)
+                ApplicationStartFromPersonHelper.LinkPeople(objectSpace, nestedApp, peopleToLink);
+            objectSpace.CommitChanges();
+            applicationNumber = nestedApp.FullApplicationNumber ?? nestedApp.ApplicationNumber ?? nestedApp.ID.ToString();
+            if (context?.StayOnSourceAfterCreate == true)
+                return true;
+            var nestedCommitted = objectSpace.GetObject(nestedApp);
+            var nestedWorkspace = ApplicationWorkspaceOpenHelper.CreateWorkspaceView(application, nestedCommitted.ID);
+            if (nestedWorkspace == null)
+            {
+                errorMessage = "ApplicationProfileInstance was created but the workspace could not be opened.";
+                return false;
+            }
+            ShowViewInCurrentWindow(application, nestedWorkspace);
+            return true;
         }
 
         var app = objectSpace.CreateObject<ApplicationProfileInstance>();
@@ -180,7 +219,7 @@ public static class ApplicationProfilePickerCompletionHelper
             profile,
             context?.CreationProgressRoute);
 
-        ApplicationProfileApprovalLegVersionHelper.ApplySnapshot(objectSpace, app, version);
+        ApplicationProfileApprovalLegVersionHelper.ApplySharedSnapshot(objectSpace, app, sharedProfile);
 
         if (peopleToLink != null && peopleToLink.Count > 0)
             ApplicationStartFromPersonHelper.LinkPeople(objectSpace, app, peopleToLink);

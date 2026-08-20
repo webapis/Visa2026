@@ -581,7 +581,7 @@ public static class ApprovalLegProfileMinistryHelper
     public static void ApplySnapshot(IObjectSpace objectSpace, ApplicationProfileInstance application, ApprovalLegProfile? profile)
     {
         if (application.ApprovalLegSnapshots == null)
-            return;
+            application.ApprovalLegSnapshots = new System.Collections.ObjectModel.ObservableCollection<ApplicationProfileInstanceApprovalLegSnapshot>();
 
         foreach (var existing in application.ApprovalLegSnapshots.ToList())
             objectSpace.Delete(existing);

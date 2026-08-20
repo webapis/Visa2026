@@ -1,3 +1,10 @@
+### 2026-08-20 — Phase B: ApplicationProfileInstance approval-leg snapshots from shared catalog
+
+- **Mode**: host-start / F5 (`ApplicationProfileInstanceApprovalLegBackfill` after Default seed) + existing `--backfill-application-approval-leg-snapshots`
+- **Rule**: keep inferred instance `ApprovalLegProfile`; Default only when FK is empty; stamp `ApprovalLegVersionName`; fill missing snapshots. No progress delete.
+- **CLI**: `dotnet run --project Visa2026.DataImporter -- --backfill-application-approval-leg-snapshots --target-connection "<pg>" --dry-run`
+- Cross-skill: application-profile
+
 ### 2026-08-15 — InvitationDocument file wave .15 → local PG
 
 - **Mode**: file-wave (`--import-visa2014-files --entity Invitation --property InvitationDocument --inprocess`)

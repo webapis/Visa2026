@@ -1,0 +1,396 @@
+{
+  "rows": [
+    {
+      "ApplicationTypeName": "App_Additional_WP_location",
+      "ProfileCode": "change_workpermit",
+      "ProfileName": "I\u015F Rugsatnama go\u015Fma\u00E7a  barjak \u00FDeri",
+      "SignOff": "approved",
+      "Versions": [
+        {
+          "Name": "T\u00FCrkmenenergo-Energetika",
+          "ApprovalLegProfileCode": "TE-EN",
+          "IsDefault": true,
+          "Sequence": 1,
+          "SourceAppCount": 280
+        }
+      ]
+    },
+    {
+      "ApplicationTypeName": "App_Border_Zone_Permission",
+      "ProfileCode": "get_border_zone",
+      "ProfileName": "Serhet \u00DDaka \u00DC\u00E7in Rugsatnama Almak",
+      "SignOff": "approved",
+      "Versions": [
+        {
+          "Name": "T\u00FCrkmenenergo-Energetika",
+          "ApprovalLegProfileCode": "TE-EN",
+          "IsDefault": true,
+          "Sequence": 1,
+          "SourceAppCount": 108
+        },
+        {
+          "Name": "T\u00FCrkmenenergo-Energetika-Gurlu\u015Fyk",
+          "ApprovalLegProfileCode": "TE-EN-GU",
+          "IsDefault": false,
+          "Sequence": 2,
+          "SourceAppCount": 2
+        },
+        {
+          "Name": "T\u00FCrkmengaz",
+          "ApprovalLegProfileCode": "TG",
+          "IsDefault": false,
+          "Sequence": 3,
+          "SourceAppCount": 1
+        }
+      ]
+    },
+    {
+      "ApplicationTypeName": "App_Exit_Visa",
+      "ProfileCode": "visa_exit",
+      "ProfileName": "\u00C7yky\u015F  Wiza Resmile\u015Fdirmek",
+      "SignOff": "approved",
+      "Versions": [
+        {
+          "Name": "T\u00FCrkmenenergo-Energetika",
+          "ApprovalLegProfileCode": "TE-EN",
+          "IsDefault": true,
+          "Sequence": 1,
+          "SourceAppCount": 0
+        }
+      ]
+    },
+    {
+      "ApplicationTypeName": "App_Inv",
+      "ProfileCode": "get_invitation",
+      "ProfileName": "\u00C7akylyk Almak",
+      "SignOff": "approved",
+      "Versions": [
+        {
+          "Name": "T\u00FCrkmenenergo-Energetika",
+          "ApprovalLegProfileCode": "TE-EN",
+          "IsDefault": true,
+          "Sequence": 1,
+          "SourceAppCount": 1570
+        },
+        {
+          "Name": "T\u00FCrkmengaz",
+          "ApprovalLegProfileCode": "TG",
+          "IsDefault": false,
+          "Sequence": 2,
+          "SourceAppCount": 70
+        },
+        {
+          "Name": "TNGIZ",
+          "ApprovalLegProfileCode": "NG",
+          "IsDefault": false,
+          "Sequence": 3,
+          "SourceAppCount": 55
+        },
+        {
+          "Name": "A\u015Fgabat h\u00E4kimlik",
+          "ApprovalLegProfileCode": "AH",
+          "IsDefault": false,
+          "Sequence": 4,
+          "SourceAppCount": 54
+        },
+        {
+          "Name": "T\u00FCrkmenhimi\u00FDa",
+          "ApprovalLegProfileCode": "TH",
+          "IsDefault": false,
+          "Sequence": 5,
+          "SourceAppCount": 17
+        },
+        {
+          "Name": "T\u00FCrkmenenergo-Energetika-Gurlu\u015Fyk",
+          "ApprovalLegProfileCode": "TE-EN-GU",
+          "IsDefault": false,
+          "Sequence": 6,
+          "SourceAppCount": 15
+        },
+        {
+          "Name": "TNGIZ-Gurlu\u015Fyk",
+          "ApprovalLegProfileCode": "NG-GU",
+          "IsDefault": false,
+          "Sequence": 7,
+          "SourceAppCount": 13
+        },
+        {
+          "Name": "T\u00FCrkmengaz-Gurlu\u015Fyk",
+          "ApprovalLegProfileCode": "TG-GU",
+          "IsDefault": false,
+          "Sequence": 8,
+          "SourceAppCount": 1
+        },
+        {
+          "Name": "T\u00FCrkmenhimi\u00FDa-Gurlu\u015Fyk",
+          "ApprovalLegProfileCode": "TH-GU",
+          "IsDefault": false,
+          "Sequence": 9,
+          "SourceAppCount": 1
+        }
+      ]
+    },
+    {
+      "ApplicationTypeName": "App_Inv_According_to_WP",
+      "ProfileCode": "get_invitation_according_to_wp",
+      "ProfileName": "\u0130\u015F Rugsatnama g\u00F6r\u00E4 \u00C7akylyk Almak",
+      "SignOff": "approved",
+      "Versions": [
+        {
+          "Name": "T\u00FCrkmenenergo-Energetika",
+          "ApprovalLegProfileCode": "TE-EN",
+          "IsDefault": true,
+          "Sequence": 1,
+          "SourceAppCount": 49
+        },
+        {
+          "Name": "A\u015Fgabat h\u00E4kimlik",
+          "ApprovalLegProfileCode": "AH",
+          "IsDefault": false,
+          "Sequence": 2,
+          "SourceAppCount": 12
+        }
+      ]
+    },
+    {
+      "ApplicationTypeName": "App_Inv_And_WP",
+      "ProfileCode": "get_invitation_wp",
+      "ProfileName": "\u00C7akylyk we I\u015F Rugsatnamasyny Almak",
+      "SignOff": "approved",
+      "Versions": [
+        {
+          "Name": "T\u00FCrkmenenergo-Energetika",
+          "ApprovalLegProfileCode": "TE-EN",
+          "IsDefault": true,
+          "Sequence": 1,
+          "SourceAppCount": 824
+        },
+        {
+          "Name": "A\u015Fgabat h\u00E4kimlik",
+          "ApprovalLegProfileCode": "AH",
+          "IsDefault": false,
+          "Sequence": 2,
+          "SourceAppCount": 162
+        },
+        {
+          "Name": "T\u00FCrkmenenergo-Energetika-Gurlu\u015Fyk",
+          "ApprovalLegProfileCode": "TE-EN-GU",
+          "IsDefault": false,
+          "Sequence": 3,
+          "SourceAppCount": 146
+        },
+        {
+          "Name": "T\u00FCrkmengaz",
+          "ApprovalLegProfileCode": "TG",
+          "IsDefault": false,
+          "Sequence": 4,
+          "SourceAppCount": 15
+        },
+        {
+          "Name": "TNGIZ",
+          "ApprovalLegProfileCode": "NG",
+          "IsDefault": false,
+          "Sequence": 5,
+          "SourceAppCount": 13
+        },
+        {
+          "Name": "T\u00FCrkmengaz-Gurlu\u015Fyk",
+          "ApprovalLegProfileCode": "TG-GU",
+          "IsDefault": false,
+          "Sequence": 6,
+          "SourceAppCount": 11
+        },
+        {
+          "Name": "TNGIZ-Gurlu\u015Fyk",
+          "ApprovalLegProfileCode": "NG-GU",
+          "IsDefault": false,
+          "Sequence": 7,
+          "SourceAppCount": 6
+        },
+        {
+          "Name": "T\u00FCrkmenhimi\u00FDa",
+          "ApprovalLegProfileCode": "TH",
+          "IsDefault": false,
+          "Sequence": 8,
+          "SourceAppCount": 4
+        }
+      ]
+    },
+    {
+      "ApplicationTypeName": "App_Inv_FM",
+      "ProfileCode": "get_invitation_fm",
+      "ProfileName": "\u00C7akylyk Almak FM",
+      "SignOff": "approved",
+      "Versions": [
+        {
+          "Name": "T\u00FCrkmenenergo-Energetika",
+          "ApprovalLegProfileCode": "TE-EN",
+          "IsDefault": true,
+          "Sequence": 1,
+          "SourceAppCount": 228
+        }
+      ]
+    },
+    {
+      "ApplicationTypeName": "App_Sevice_Passport",
+      "ProfileCode": "get_invitation_service_passport",
+      "ProfileName": "Gulluk Pasporty \u00DC\u00E7in \u00C7akylyk Almak",
+      "SignOff": "approved",
+      "Versions": [
+        {
+          "Name": "T\u00FCrkmenenergo-Energetika",
+          "ApprovalLegProfileCode": "TE-EN",
+          "IsDefault": true,
+          "Sequence": 1,
+          "SourceAppCount": 39
+        },
+        {
+          "Name": "T\u00FCrkmengaz",
+          "ApprovalLegProfileCode": "TG",
+          "IsDefault": false,
+          "Sequence": 2,
+          "SourceAppCount": 1
+        }
+      ]
+    },
+    {
+      "ApplicationTypeName": "App_Visa_Ext",
+      "ProfileCode": "visa_ext",
+      "ProfileName": "Wiza M\u00F6hletini Uzaltmak",
+      "SignOff": "approved",
+      "Versions": [
+        {
+          "Name": "T\u00FCrkmenenergo-Energetika",
+          "ApprovalLegProfileCode": "TE-EN",
+          "IsDefault": true,
+          "Sequence": 1,
+          "SourceAppCount": 0
+        }
+      ]
+    },
+    {
+      "ApplicationTypeName": "App_Visa_Ext_According_to_WP",
+      "ProfileCode": "visa_ext_according_to_wp",
+      "ProfileName": "I\u015F Rugsatnamasyna G\u00F6r\u00E4 Wizany Uzaltmak",
+      "SignOff": "approved",
+      "Versions": [
+        {
+          "Name": "T\u00FCrkmenenergo-Energetika",
+          "ApprovalLegProfileCode": "TE-EN",
+          "IsDefault": true,
+          "Sequence": 1,
+          "SourceAppCount": 0
+        }
+      ]
+    },
+    {
+      "ApplicationTypeName": "App_Visa_Ext_FM",
+      "ProfileCode": "visa_ext_fm",
+      "ProfileName": "Wiza M\u00F6hletini Uzaltmak FM",
+      "SignOff": "approved",
+      "Versions": [
+        {
+          "Name": "T\u00FCrkmenenergo-Energetika",
+          "ApprovalLegProfileCode": "TE-EN",
+          "IsDefault": true,
+          "Sequence": 1,
+          "SourceAppCount": 332
+        }
+      ]
+    },
+    {
+      "ApplicationTypeName": "App_Visa_For_New_Born_FM",
+      "ProfileCode": "visa_for_new_born_fm",
+      "ProfileName": "T\u00E4ze dogulan \u00E7aga wiza resmile\u015Fdirmek FM",
+      "SignOff": "approved",
+      "Versions": [
+        {
+          "Name": "T\u00FCrkmenenergo-Energetika",
+          "ApprovalLegProfileCode": "TE-EN",
+          "IsDefault": true,
+          "Sequence": 1,
+          "SourceAppCount": 0
+        }
+      ]
+    },
+    {
+      "ApplicationTypeName": "App_Visa_and_WP_Ext",
+      "ProfileCode": "extend_visa_wp",
+      "ProfileName": "Wiza we I\u015F Rugsatnamasyny Uzaltmak",
+      "SignOff": "approved",
+      "Versions": [
+        {
+          "Name": "T\u00FCrkmenenergo-Energetika",
+          "ApprovalLegProfileCode": "TE-EN",
+          "IsDefault": true,
+          "Sequence": 1,
+          "SourceAppCount": 529
+        },
+        {
+          "Name": "A\u015Fgabat h\u00E4kimlik",
+          "ApprovalLegProfileCode": "AH",
+          "IsDefault": false,
+          "Sequence": 2,
+          "SourceAppCount": 119
+        },
+        {
+          "Name": "T\u00FCrkmenenergo-Energetika-Gurlu\u015Fyk",
+          "ApprovalLegProfileCode": "TE-EN-GU",
+          "IsDefault": false,
+          "Sequence": 3,
+          "SourceAppCount": 76
+        },
+        {
+          "Name": "T\u00FCrkmengaz-Gurlu\u015Fyk",
+          "ApprovalLegProfileCode": "TG-GU",
+          "IsDefault": false,
+          "Sequence": 4,
+          "SourceAppCount": 16
+        },
+        {
+          "Name": "TNGIZ",
+          "ApprovalLegProfileCode": "NG",
+          "IsDefault": false,
+          "Sequence": 5,
+          "SourceAppCount": 13
+        },
+        {
+          "Name": "TNGIZ-Gurlu\u015Fyk",
+          "ApprovalLegProfileCode": "NG-GU",
+          "IsDefault": false,
+          "Sequence": 6,
+          "SourceAppCount": 6
+        },
+        {
+          "Name": "T\u00FCrkmengaz",
+          "ApprovalLegProfileCode": "TG",
+          "IsDefault": false,
+          "Sequence": 7,
+          "SourceAppCount": 4
+        },
+        {
+          "Name": "T\u00FCrkmenhimi\u00FDa",
+          "ApprovalLegProfileCode": "TH",
+          "IsDefault": false,
+          "Sequence": 8,
+          "SourceAppCount": 4
+        }
+      ]
+    },
+    {
+      "ApplicationTypeName": "App_WP_Ext",
+      "ProfileCode": "workpermit_extension",
+      "ProfileName": "I\u015F Rugsatnamasyny Uzaltmak",
+      "SignOff": "approved",
+      "Versions": [
+        {
+          "Name": "T\u00FCrkmenenergo-Energetika",
+          "ApprovalLegProfileCode": "TE-EN",
+          "IsDefault": true,
+          "Sequence": 1,
+          "SourceAppCount": 0
+        }
+      ]
+    }
+  ]
+}

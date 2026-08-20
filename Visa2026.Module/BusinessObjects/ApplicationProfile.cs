@@ -190,6 +190,13 @@ public class ApplicationProfile : BaseObject
     public virtual bool RequireWorkPermitLocation { get; set; }
     [MaxLength(500)]
     public virtual string? DefaultWorkPermitLocation { get; set; }
+    /// <summary>
+    /// Preferred shared <see cref="ApprovalLegProfile"/> when creating instances from this via-ministry profile.
+    /// Chains themselves are tenant-shared (Configuration); not copied onto the profile.
+    /// </summary>
+    [XafDisplayName("Default approval legs")]
+    public virtual ApprovalLegProfile? DefaultApprovalLegProfile { get; set; }
+    public virtual Guid? DefaultApprovalLegProfileId { get; set; }
     public virtual bool RequireEntryDate { get; set; }
 
     public virtual bool RequireEntryCheckPoint { get; set; }
@@ -579,8 +586,10 @@ public static class ApplicationProfileLockHelper
     }
 
     /// <summary>
-    /// Approval-leg versions are snapshotted onto instances at create, so they may change while the profile is config-locked.
-    /// Templates and other nested configuration stay blocked.
+    /// Shared approval-leg chains live on <see cref="ApprovalLegProfile"/> (Configuration).
+    /// Per-profile <see cref="ApplicationProfile.DefaultApprovalLegProfile"/> is not a locked scalar
+    /// (see <see cref="HasConfigurationScalarsChanged"/>). Legacy nested version rows may still
+    /// change while locked because instances keep a snapshot. Templates stay blocked.
     /// </summary>
     public static bool AllowsNestedEditWhenConfigLocked(object? nested) =>
         nested is ApplicationProfileApprovalLegVersion or ApplicationProfileApprovalLeg;
@@ -648,6 +657,11 @@ public static class ApplicationProfileLockHelper
         }
     }
 
+    /// <summary>
+    /// Locked-profile scalar compare. Intentionally omits
+    /// <see cref="ApplicationProfile.DefaultApprovalLegProfileId"/> so officers can still set
+    /// this template's Default while config-locked (shared chains live in Configuration).
+    /// </summary>
     internal static bool HasConfigurationScalarsChanged(ApplicationProfile original, ApplicationProfile current) =>
         !string.Equals(original.Name, current.Name, StringComparison.Ordinal)
         || !string.Equals(original.Description, current.Description, StringComparison.Ordinal)

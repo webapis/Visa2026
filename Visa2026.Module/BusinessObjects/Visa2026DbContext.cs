@@ -663,6 +663,7 @@ namespace Visa2026.Module.BusinessObjects
                 b.Property(p => p.SelectionCode).HasMaxLength(3);
                 b.Property(p => p.DefaultBorderZoneLocation).HasMaxLength(500);
                 b.Property(p => p.DefaultWorkPermitLocation).HasMaxLength(500);
+                b.HasOne(p => p.DefaultApprovalLegProfile).WithMany().HasForeignKey(p => p.DefaultApprovalLegProfileId).OnDelete(DeleteBehavior.SetNull);
                 b.Property(p => p.DefaultPurpose).HasMaxLength(700);
                 b.HasOne(p => p.DefaultBusinessTripAddress)
                     .WithMany()

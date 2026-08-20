@@ -1,3 +1,4 @@
+using System;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Controllers;
 using Xunit;
@@ -62,6 +63,15 @@ public class ApplicationProfileLockHelperTests
         };
 
         Assert.True(ApplicationProfileLockHelper.HasConfigurationScalarsChanged(original, current));
+    }
+
+    [Fact]
+    public void HasConfigurationScalarsChanged_IgnoresDefaultApprovalLegProfile()
+    {
+        var original = new ApplicationProfile { DefaultApprovalLegProfileId = Guid.NewGuid() };
+        var current = new ApplicationProfile { DefaultApprovalLegProfileId = Guid.NewGuid() };
+
+        Assert.False(ApplicationProfileLockHelper.HasConfigurationScalarsChanged(original, current));
     }
 
     [Fact]

@@ -30,8 +30,8 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | 8i | Wizard Project contract with Directed to | **Done** | Via ministry → Project contract on Identity; gone from Results; instance copy is read-only |
 | 8j | Wizard Process & SLA is duration only | **Done** | Removed ministry/migration state Include/SLA-track tables; instance process is Directed to + legs |
 | 8k | Profile-specific template applicability | **Done** | Per-row Project contract (Via ministry) or Migration service (Direct) dropdown; instance catalog filters; Project back on Results |
-| 8l | Approval leg versions (per-profile copies + snapshot) | **Done** | Identity named versions; create picker required; instance snapshots; timeline reads snapshots |
-| 8m | Locked profile: still edit approval-leg versions | **Done** | Config lock A keeps other fields read-only; versions add/edit/duplicate/default allowed; cannot remove last version |
+| 8l | Approval leg versions (shared catalog + snapshot) | **Done** | Shared `ApprovalLegProfile`; profile Default only; create picker snapshots. **Phase A seed:** Calik Defaults from VISA2015. **Phase B:** instance FK / Default → snapshots + version name |
+| 8m | Locked profile: still set Default approval legs | **Done** | Config lock A keeps other fields read-only; **Default** for this template stays editable; chains edited in Configuration; cannot change Name / May produce |
 | 8d | Wizard step 4 real template catalog + persist scope | **Done** | Two officer scopes: Profile-specific and Shared. Shared Include/Exclude; GT-15 names excluded from Shared (upload under Profile-specific). **Preview** uses `#visa-preview-slot` File occupant (master PDF, placeholders). Internal Category/Global type-links unchanged. |
 | 8a | Application Profile overview (live) | **Done** | Live config/defaults/legs/templates + linked `ApplicationProfileInstance` rows; overview shows wizard identity, company/signatories, required fields, SLA days, template scope; mock only if profile id unresolved |
 | 8c | Custom catalog home (replace native List/Detail UI) | **Done** | List first; row opens overview; **Back to list**; New/Configure → wizard (new tab); **Save profile** reloads catalog; **Delete** when Linked = 0; toolbar **Total: N**; table-body scroll, sticky header |
@@ -197,37 +197,39 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 
 ## Slice 8l — Approval leg versions — **Done**
 
-**Goal:** One profile can have several named ministry lists. Officers pick a version at instance create. Already-started instances keep a snapshot.
+**Goal:** Officers pick a ministry chain at instance create. Already-started instances keep a snapshot.
 
-**Locked (2026-08-18):**
+**Locked (2026-08-20 redesign):**
 
-1. **Reuse:** each profile keeps **its own copy** of each version (not a shared catalog; not `ProjectContract`).
-2. **After create:** instances **keep the ministries they started with**.
+1. **Reuse:** tenant-shared `ApprovalLegProfile` (Configuration), like Company / Signatory — **not** per-profile copies.
+2. **Per profile:** `DefaultApprovalLegProfile` only (which shared version is pre-selected at create).
+3. **After create:** instances **keep the ministries they started with**.
 
 **Delivered:**
 
-- `ApplicationProfileApprovalLegVersion` nested on the profile; existing legs backfill into Default **Version 1**
-- Wizard Identity: named versions (Default, Duplicate, Remove, Add version)
-- Create picker: required version cards; ministries copied to `ApplicationProfileInstanceApprovalLegSnapshot`
+- Wizard Identity: shared list + **Edit in Configuration** / Refresh; radio **Default for this template**
+- Create picker: required shared version cards; ministries copied to `ApplicationProfileInstanceApprovalLegSnapshot`
 - Progress timeline reads **snapshots first**
+- Calik seed sets Defaults from VISA2015 frequency and **clears nested** `ApplicationProfileApprovalLegVersion` copies
+- **Phase B:** imported via-ministry instances keep their inferred `ApprovalLegProfile`; empty FK uses template Default; missing snapshots + `ApprovalLegVersionName` are filled on F5 (`ApplicationProfileInstanceApprovalLegBackfill`) and `--backfill-application-approval-leg-snapshots`
 
-**Verify:** stop F5, rebuild, F5. Configure profile → Identity shows versions. New application → pick a version. Edit the profile version after create — in-process case ministries stay the same.
+**Verify:** stop F5, rebuild, F5. Configure profile → Identity shows shared versions. New application → pick a version. Open an imported via-ministry case — Ministrlik / snapshot legs match the instance chain (not necessarily the template Default).
 
 ---
 
-## Slice 8m — Locked profile still edits approval-leg versions — **Done**
+## Slice 8m — Locked profile still sets Default approval legs — **Done**
 
-**Goal:** Config lock A does not freeze the version catalog. Instances already keep snapshots.
+**Goal:** Config lock A does not freeze this template's Default. Chains are edited in Configuration. Instances already keep snapshots.
 
 **Delivered:**
 
-- Wizard Identity: versions stay editable (Add, Duplicate, rename, ministries, Default) when the rest of the profile is read-only
+- Wizard Identity: **Default** radio stays enabled when the rest of the profile is read-only
 - **Save profile** remains on Review when Via ministry + locked
-- Cannot **Remove** the last version while locked
+- **Edit in Configuration** / Refresh stay available
 - Nested save guard still blocks templates / progress-state settings
 - Started cases are not restamped
 
-**Verify:** stop F5, rebuild, F5. Open a **Config locked** Via ministry profile → Identity → add or edit a version → Review → **Save profile**. Name / May produce stay disabled. Open an in-process case — ministries unchanged.
+**Verify:** stop F5, rebuild, F5. Open a **Config locked** Via ministry profile → Identity → change Default → Review → **Save profile**. Name / May produce stay disabled. Open an in-process case — ministries unchanged.
 
 ---
 

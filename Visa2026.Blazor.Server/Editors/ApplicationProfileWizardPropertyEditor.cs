@@ -43,6 +43,8 @@ public class ApplicationProfileWizardPropertyEditor : BlazorPropertyEditorBase, 
         OpenSignatoryRequested = EventCallback.Factory.Create(this, () => OpenOrganization(ApplicationProfileWizardOrganizationOpenHelper.Kind.Signatory)),
         OpenRepresentativeRequested = EventCallback.Factory.Create(this, () => OpenOrganization(ApplicationProfileWizardOrganizationOpenHelper.Kind.Representative)),
         RefreshOrganizationRequested = EventCallback.Factory.Create(this, RefreshSupportingData),
+        OpenSharedApprovalLegCatalogRequested = EventCallback.Factory.Create(this, OpenSharedApprovalLegCatalog),
+        RefreshSharedApprovalLegsRequested = EventCallback.Factory.Create(this, RefreshSupportingData),
     };
 
     protected override void OnCurrentObjectChanged()
@@ -176,10 +178,40 @@ public class ApplicationProfileWizardPropertyEditor : BlazorPropertyEditorBase, 
         _session.ObjectSpace = _application.CreateObjectSpace(typeof(ApplicationProfile));
     }
 
+    private void OpenSharedApprovalLegCatalog()
+    {
+        if (_application == null)
+            return;
+
+        ApplicationProfileWizardApprovalLegCatalogOpenHelper.TryOpen(
+            _application,
+            onClosed: RefreshSupportingData);
+    }
+
     private void RefreshSupportingData()
     {
+        ReloadSharedApprovalLegs();
         RefreshOrganizationSnapshot();
         RefreshLookupData();
+    }
+
+    private void ReloadSharedApprovalLegs()
+    {
+        var os = _session?.ObjectSpace;
+        if (os is not { IsDisposed: false })
+            return;
+
+        foreach (var shared in os.GetObjectsQuery<ApprovalLegProfile>().ToList())
+        {
+            try
+            {
+                os.ReloadObject(shared);
+            }
+            catch
+            {
+                // Deleted in Configuration while this wizard session is open.
+            }
+        }
     }
 
     private void RefreshOrganizationSnapshot()

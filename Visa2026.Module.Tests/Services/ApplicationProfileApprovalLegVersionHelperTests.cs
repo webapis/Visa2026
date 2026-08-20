@@ -24,7 +24,7 @@ public class ApplicationProfileApprovalLegVersionHelperTests
     }
 
     [Fact]
-    public void TryResolveVersionForCreate_ViaMinistry_RequiresNamedVersion()
+    public void TryResolveVersionForCreate_ViaMinistry_EmptyNested_AllowsSharedCatalogPath()
     {
         var profile = new ApplicationProfile
         {
@@ -32,10 +32,11 @@ public class ApplicationProfileApprovalLegVersionHelperTests
         };
 
         var ok = ApplicationProfileApprovalLegVersionHelper.TryResolveVersionForCreate(
-            profile, null, out _, out var error);
+            profile, null, out var version, out var error);
 
-        Assert.False(ok);
-        Assert.Contains("no approval-leg versions", error, StringComparison.OrdinalIgnoreCase);
+        Assert.True(ok);
+        Assert.Null(version);
+        Assert.Null(error);
     }
 
     [Fact]
@@ -86,6 +87,52 @@ public class ApplicationProfileApprovalLegVersionHelperTests
         var legs = ApplicationProfileApprovalLegVersionHelper.ResolveLegsForInstance(application, profile);
 
         Assert.Equal(["Snap-A", "Snap-B"], legs.Select(l => l.Name).ToArray());
+    }
+
+    [Fact]
+    public void GetConfiguredLegCount_PrefersSharedDefault()
+    {
+        var shared = new ApprovalLegProfile { Code = "TE-EN" };
+        shared.MinistryLegs.Add(new ApprovalLegProfileMinistryLeg
+        {
+            Sequence = 1,
+            ApprovingMinistry = new ApprovingMinistry { ShortNameTm = "TE" },
+        });
+        shared.MinistryLegs.Add(new ApprovalLegProfileMinistryLeg
+        {
+            Sequence = 2,
+            ApprovingMinistry = new ApprovingMinistry { ShortNameTm = "EN" },
+        });
+
+        var profile = new ApplicationProfile
+        {
+            ProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
+            DefaultApprovalLegProfile = shared,
+        };
+
+        Assert.Equal(2, ApplicationProfileApprovalLegVersionHelper.GetConfiguredLegCount(profile));
+    }
+
+    [Fact]
+    public void ResolveLegsForInstance_UsesSharedDefaultWhenNoSnapshot()
+    {
+        var shared = new ApprovalLegProfile { Code = "TE-EN" };
+        shared.MinistryLegs.Add(new ApprovalLegProfileMinistryLeg
+        {
+            Sequence = 1,
+            ApprovingMinistry = new ApprovingMinistry { ShortNameTm = "TE", NameTm = "Türkmenenergo" },
+        });
+
+        var profile = new ApplicationProfile
+        {
+            ProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
+            DefaultApprovalLegProfile = shared,
+        };
+        var application = new ApplicationProfileInstance { ApplicationProfile = profile };
+
+        var legs = ApplicationProfileApprovalLegVersionHelper.ResolveLegsForInstance(application, profile);
+
+        Assert.Equal(["TE"], legs.Select(l => l.Name).ToArray());
     }
 
     [Fact]

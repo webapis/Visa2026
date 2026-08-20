@@ -37,7 +37,7 @@
         {
             <div class="ap-wizard__lock-banner">
                 This profile is <strong>config-locked</strong> because a linked application has left office preparation.
-                <strong>Approval leg versions</strong> can still be added or edited — already-started applications keep their snapshot.
+                Edit shared <strong>approval leg versions</strong> under Configuration; set this template's <strong>Default</strong> here. Already-started applications keep their snapshot.
                 Other configuration stays locked. Use <strong>Clone</strong> on the profile list to copy the rest of the profile.
             </div>
         }
@@ -70,13 +70,9 @@
                 {
                     <ApplicationProfileWizardStepIdentity Profile="Profile"
                         Disabled="IsReadOnly"
-                        Ministries="Ministries"
-                        OnAddVersion="AddVersionCallback"
-                        OnRemoveVersion="RemoveVersionCallback"
-                        OnDuplicateVersion="DuplicateVersionCallback"
-                        OnSetDefaultVersion="SetDefaultVersionCallback"
-                        OnAddLeg="AddLegCallback"
-                        OnRemoveLeg="RemoveLegCallback"
+                        SharedApprovalLegProfiles="SharedApprovalLegProfiles"
+                        OpenSharedCatalogRequested="OpenSharedCatalogCallback"
+                        RefreshSharedRequested="RefreshSharedCallback"
                         ClearLegsRequested="ClearLegsCallback" />
                 }
                 else if (_activeStep == 1)
@@ -161,29 +157,22 @@
     [Parameter] public EventCallback OpenSignatoryRequested { get; set; }
     [Parameter] public EventCallback OpenRepresentativeRequested { get; set; }
     [Parameter] public EventCallback RefreshOrganizationRequested { get; set; }
+    [Parameter] public EventCallback OpenSharedApprovalLegCatalogRequested { get; set; }
+    [Parameter] public EventCallback RefreshSharedApprovalLegsRequested { get; set; }
     [Parameter] public ApplicationProfileWizardLookupData Lookups { get; set; } =
         ApplicationProfileWizardLookupData.Empty;
 
     private int _activeStep;
-    private IReadOnlyList<ApprovingMinistry> _ministries = Array.Empty<ApprovingMinistry>();
+    private IReadOnlyList<ApprovalLegProfile> _sharedApprovalLegs = Array.Empty<ApprovalLegProfile>();
 
-    private IReadOnlyList<ApprovingMinistry> Ministries => _ministries;
+    private IReadOnlyList<ApprovalLegProfile> SharedApprovalLegProfiles => _sharedApprovalLegs;
 
     private bool CanSaveLockedVersions =>
         IsReadOnly
         && Profile?.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries;
 
-    private EventCallback AddVersionCallback => EventCallback.Factory.Create(this, AddVersion);
-    private EventCallback<ApplicationProfileApprovalLegVersion> RemoveVersionCallback =>
-        EventCallback.Factory.Create<ApplicationProfileApprovalLegVersion>(this, RemoveVersion);
-    private EventCallback<ApplicationProfileApprovalLegVersion> DuplicateVersionCallback =>
-        EventCallback.Factory.Create<ApplicationProfileApprovalLegVersion>(this, DuplicateVersion);
-    private EventCallback<ApplicationProfileApprovalLegVersion> SetDefaultVersionCallback =>
-        EventCallback.Factory.Create<ApplicationProfileApprovalLegVersion>(this, SetDefaultVersion);
-    private EventCallback<(Guid VersionId, Guid MinistryId)> AddLegCallback =>
-        EventCallback.Factory.Create<(Guid, Guid)>(this, AddLeg);
-    private EventCallback<ApplicationProfileApprovalLeg> RemoveLegCallback =>
-        EventCallback.Factory.Create<ApplicationProfileApprovalLeg>(this, RemoveLeg);
+    private EventCallback OpenSharedCatalogCallback => OpenSharedApprovalLegCatalogRequested;
+    private EventCallback RefreshSharedCallback => RefreshSharedApprovalLegsRequested;
     private EventCallback ClearLegsCallback => EventCallback.Factory.Create(this, ClearLegs);
 
     private EventCallback AddTemplateCallback => EventCallback.Factory.Create(this, AddTemplate);
@@ -202,15 +191,10 @@
 
     protected override void OnParametersSet()
     {
-        if (Profile == null || ObjectSpace == null)
+        if (ObjectSpace == null)
             return;
 
-        if (_ministries.Count == 0)
-        {
-            _ministries = ObjectSpace.GetObjectsQuery<ApprovingMinistry>()
-                .OrderBy(m => m.NameTm)
-                .ToList();
-        }
+        _sharedApprovalLegs = ApplicationProfileApprovalLegVersionHelper.GetSharedActiveProfiles(ObjectSpace);
     }
 
     private async Task GoToStep(int index)
@@ -229,126 +213,17 @@
             await PublishRequested.InvokeAsync();
     }
 
-    private void AddVersion()
-    {
-        if (Profile == null || ObjectSpace is not { } os)
-            return;
-
-        if (Profile.ProgressRoute != ApplicationProfileInstanceProgressRouteKind.ViaMinistries)
-            return;
-
-        var version = os.CreateObject<ApplicationProfileApprovalLegVersion>();
-        version.ApplicationProfile = Profile;
-        version.Sequence = (Profile.ApprovalLegVersions?.Count ?? 0) + 1;
-        version.Name = version.Sequence == 1
-            ? ApplicationProfileApprovalLegVersionHelper.DefaultVersionName
-            : $"Version {version.Sequence}";
-        version.IsDefault = (Profile.ApprovalLegVersions?.Count ?? 0) == 0;
-        if (Profile.ApprovalLegVersions != null && !Profile.ApprovalLegVersions.Contains(version))
-            Profile.ApprovalLegVersions.Add(version);
-
-        ApplicationProfileApprovalLegVersionHelper.EnsureSingleDefault(Profile, version.IsDefault ? version : null);
-        ApplicationProfileApprovalLegVersionHelper.RenumberVersions(Profile);
-    }
-
-    private void RemoveVersion(ApplicationProfileApprovalLegVersion version)
-    {
-        if (ObjectSpace is not { } os || version == null)
-            return;
-
-        if (IsReadOnly && !ApplicationProfileLockHelper.CanRemoveApprovalLegVersion(Profile, version))
-            return;
-
-        os.Delete(version);
-        ApplicationProfileApprovalLegVersionHelper.EnsureSingleDefault(Profile);
-        ApplicationProfileApprovalLegVersionHelper.RenumberVersions(Profile);
-    }
-
-    private void DuplicateVersion(ApplicationProfileApprovalLegVersion source)
-    {
-        if (Profile == null || ObjectSpace is not { } os || source == null)
-            return;
-
-        var copy = os.CreateObject<ApplicationProfileApprovalLegVersion>();
-        copy.ApplicationProfile = Profile;
-        copy.Name = string.IsNullOrWhiteSpace(source.Name) ? "Version copy" : $"{source.Name} copy";
-        copy.IsDefault = false;
-        copy.Sequence = (Profile.ApprovalLegVersions?.Count ?? 0) + 1;
-        if (Profile.ApprovalLegVersions != null && !Profile.ApprovalLegVersions.Contains(copy))
-            Profile.ApprovalLegVersions.Add(copy);
-
-        foreach (var leg in ApplicationProfileApprovalLegVersionHelper.GetOrderedLegs(source))
-        {
-            var cloned = os.CreateObject<ApplicationProfileApprovalLeg>();
-            cloned.ApplicationProfile = Profile;
-            cloned.ApprovalLegVersion = copy;
-            cloned.ApprovingMinistry = leg.ApprovingMinistry;
-            cloned.Sequence = (copy.Legs?.Count ?? 0) + 1;
-            if (copy.Legs != null && !copy.Legs.Contains(cloned))
-                copy.Legs.Add(cloned);
-            if (Profile.ApprovalLegs != null && !Profile.ApprovalLegs.Contains(cloned))
-                Profile.ApprovalLegs.Add(cloned);
-        }
-
-        ApplicationProfileApprovalLegVersionHelper.RenumberVersions(Profile);
-    }
-
-    private void SetDefaultVersion(ApplicationProfileApprovalLegVersion version)
-    {
-        if (Profile == null || version == null)
-            return;
-
-        ApplicationProfileApprovalLegVersionHelper.EnsureSingleDefault(Profile, version);
-    }
-
-    private void AddLeg((Guid VersionId, Guid MinistryId) args)
-    {
-        if (Profile == null || ObjectSpace is not { } os
-            || args.VersionId == Guid.Empty || args.MinistryId == Guid.Empty)
-            return;
-
-        if (Profile.ProgressRoute != ApplicationProfileInstanceProgressRouteKind.ViaMinistries)
-            return;
-
-        var version = ApplicationProfileApprovalLegVersionHelper.FindVersion(Profile, args.VersionId);
-        if (version == null)
-            return;
-
-        var ministry = os.GetObjectByKey<ApprovingMinistry>(args.MinistryId);
-        if (ministry == null)
-            return;
-
-        var leg = os.CreateObject<ApplicationProfileApprovalLeg>();
-        leg.ApplicationProfile = Profile;
-        leg.ApprovalLegVersion = version;
-        leg.ApprovingMinistry = ministry;
-        leg.Sequence = (version.Legs?.Count ?? 0) + 1;
-        if (version.Legs != null && !version.Legs.Contains(leg))
-            version.Legs.Add(leg);
-        if (Profile.ApprovalLegs != null && !Profile.ApprovalLegs.Contains(leg))
-            Profile.ApprovalLegs.Add(leg);
-    }
-
     private void ClearLegs()
     {
         if (IsReadOnly || Profile == null || ObjectSpace is not { } os)
             return;
 
+        Profile.DefaultApprovalLegProfile = null;
+        Profile.DefaultApprovalLegProfileId = null;
         foreach (var version in (Profile.ApprovalLegVersions ?? []).ToList())
             os.Delete(version);
         foreach (var leg in (Profile.ApprovalLegs ?? []).ToList())
             os.Delete(leg);
-    }
-
-    private void RemoveLeg(ApplicationProfileApprovalLeg leg)
-    {
-        if (ObjectSpace is not { } os || leg == null)
-            return;
-
-        var version = leg.ApprovalLegVersion;
-        os.Delete(leg);
-        if (version != null)
-            ApplicationProfileApprovalLegVersionHelper.RenumberLegs(version);
     }
 
     private void AddTemplate()
