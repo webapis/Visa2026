@@ -74,6 +74,23 @@ public class ApplicationWorkspaceCaseHeaderFieldsHelperTests
     }
 
     [Fact]
+    public void Build_IncludesWorkPermitLocationAsCommaSeparatedMultiSelectWhenRequired()
+    {
+        var profile = new ApplicationProfile { RequireWorkPermitLocation = true };
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = profile,
+            MovementPermitLocation = "Ashgabat, Mary",
+        };
+
+        var fields = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(application, profile, null);
+
+        var field = Assert.Single(fields, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.WorkPermitLocation);
+        Assert.Equal(ApplicationWorkspaceCaseHeaderFieldKind.CommaSeparatedMultiSelect, field.Kind);
+        Assert.Equal("Ashgabat, Mary", field.Value);
+    }
+
+    [Fact]
     public void Build_EmptyWhenProfileHasNoUseFields()
     {
         var profile = new ApplicationProfile();

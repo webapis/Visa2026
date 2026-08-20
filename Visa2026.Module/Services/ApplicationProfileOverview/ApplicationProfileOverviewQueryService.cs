@@ -275,7 +275,7 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
         Add("City", LookupLabel(profile.DefaultCity), profile.RequireCity);
         Add("Business trip address", FormatBusinessTripAddress(profile.DefaultBusinessTripAddress), profile.RequireBusinessTripAddress);
         Add("Purpose", profile.DefaultPurpose, profile.RequirePurpose);
-        Add("Work permit location", null, profile.RequireWorkPermitLocation);
+        Add("Work permit location", profile.DefaultWorkPermitLocation, profile.RequireWorkPermitLocation);
         Add("Entry date", null, profile.RequireEntryDate);
 
         return rows;

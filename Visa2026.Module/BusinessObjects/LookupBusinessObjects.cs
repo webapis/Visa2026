@@ -505,7 +505,7 @@ namespace Visa2026.Module.BusinessObjects
     }
 
     [DefaultClassOptions]
-    [NavigationItem("Lookup/WorkPermit/Config")]
+    [NavigationItem(false)]
     [DefaultProperty(nameof(NameTm))]
     public class MovementPermitLocation : LookupBase
     {
@@ -539,7 +539,8 @@ namespace Visa2026.Module.BusinessObjects
     }
 
     /// <summary>
-    /// Short Turkmen labels for work-permitted locations on <see cref="WorkPermitItem"/> (comma-joined on the item).
+    /// Short Turkmen labels for work-permitted locations on <see cref="WorkPermitItem"/>
+    /// and <see cref="ApplicationProfileInstance.MovementPermitLocation"/> (comma-joined).
     /// </summary>
     [DefaultClassOptions]
     [NavigationItem("Lookup/WorkPermit/Config")]

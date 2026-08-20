@@ -188,6 +188,8 @@ public class ApplicationProfile : BaseObject
     public virtual Guid? DefaultUrgencyId { get; set; }
 
     public virtual bool RequireWorkPermitLocation { get; set; }
+    [MaxLength(500)]
+    public virtual string? DefaultWorkPermitLocation { get; set; }
     public virtual bool RequireEntryDate { get; set; }
 
     public virtual bool RequireEntryCheckPoint { get; set; }
@@ -694,6 +696,7 @@ public static class ApplicationProfileLockHelper
         || original.RequireUrgency != current.RequireUrgency
         || original.DefaultUrgencyId != current.DefaultUrgencyId
         || original.RequireWorkPermitLocation != current.RequireWorkPermitLocation
+        || !string.Equals(original.DefaultWorkPermitLocation, current.DefaultWorkPermitLocation, StringComparison.Ordinal)
         || original.RequireEntryDate != current.RequireEntryDate
         || original.RequireEntryCheckPoint != current.RequireEntryCheckPoint
         || original.DefaultEntryCheckPointId != current.DefaultEntryCheckPointId

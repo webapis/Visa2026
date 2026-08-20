@@ -42,4 +42,23 @@ public class ApplicationProfileApprovalLegVersionSchemaSqlTests
         Assert.Contains("COALESCE(p.\"GCRecord\", 0) = 0", ApplicationProfileSchemaSql.BackfillApprovalLegVersionsPostgres, StringComparison.Ordinal);
         Assert.DoesNotContain("p.\"GCRecord\" IS NULL", ApplicationProfileSchemaSql.BackfillApprovalLegVersionsPostgres, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void HostStart_ConvertsMovementPermitLocationFkToString()
+    {
+        Assert.Contains(
+            ApplicationProfileSchemaSql.EnsureDefaultWorkPermitLocationPostgres,
+            ApplicationProfileSchemaSql.EnsureTemplateCatalogColumnsPostgresStatements);
+        Assert.Contains(
+            ApplicationProfileSchemaSql.ConvertInstanceMovementPermitLocationToStringPostgres,
+            ApplicationProfileSchemaSql.EnsureTemplateCatalogColumnsPostgresStatements);
+        Assert.Contains(
+            "ADD COLUMN IF NOT EXISTS \"MovementPermitLocation\" character varying(500)",
+            ApplicationProfileSchemaSql.ConvertInstanceMovementPermitLocationToStringPostgres,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "DefaultWorkPermitLocation",
+            ApplicationProfileSchemaSql.EnsureDefaultWorkPermitLocationPostgres,
+            StringComparison.Ordinal);
+    }
 }

@@ -25,35 +25,36 @@
                                     AllowManageCatalog="@(!ReadOnly)"
                                     StatusMessage="@_statusMessage"
                                     StatusIsError="@_statusIsError"
-                                    PopupTitle="@_ui.PopupTitle"
-                                    PopupButtonTitle="@_ui.PopupButtonTitle"
-                                    AddPlaceholder="@_ui.AddPlaceholder"
-                                    AddButtonText="@_ui.AddButtonText"
-                                    OkText="@_ui.OkText"
-                                    CancelText="@_ui.CancelText"
-                                    SelectedCountFormat="@_ui.SelectedCountFormat"
-                                    EditButtonText="@_ui.EditButtonText"
-                                    DeleteButtonText="@_ui.DeleteButtonText"
-                                    EditPopupTitle="@_ui.EditPopupTitle"
-                                    SaveEditText="@_ui.SaveEditText"
-                                    DeleteConfirmTitle="@_ui.DeleteConfirmTitle"
-                                    DeleteConfirmFormat="@_ui.DeleteConfirmFormat"
-                                    EmptyListMessage="@_ui.EmptyListMessage"
-                                    ManageCatalogButtonText="@_ui.ManageCatalogButtonText"
-                                    DoneManageCatalogButtonText="@_ui.DoneManageCatalogButtonText" />
+                                    PopupTitle="@Ui.PopupTitle"
+                                    PopupButtonTitle="@Ui.PopupButtonTitle"
+                                    AddPlaceholder="@Ui.AddPlaceholder"
+                                    AddButtonText="@Ui.AddButtonText"
+                                    OkText="@Ui.OkText"
+                                    CancelText="@Ui.CancelText"
+                                    SelectedCountFormat="@Ui.SelectedCountFormat"
+                                    EditButtonText="@Ui.EditButtonText"
+                                    DeleteButtonText="@Ui.DeleteButtonText"
+                                    EditPopupTitle="@Ui.EditPopupTitle"
+                                    SaveEditText="@Ui.SaveEditText"
+                                    DeleteConfirmTitle="@Ui.DeleteConfirmTitle"
+                                    DeleteConfirmFormat="@Ui.DeleteConfirmFormat"
+                                    EmptyListMessage="@Ui.EmptyListMessage"
+                                    ManageCatalogButtonText="@Ui.ManageCatalogButtonText"
+                                    DoneManageCatalogButtonText="@Ui.DoneManageCatalogButtonText" />
 
 @code {
-    private static readonly CommaSeparatedMultiSelectAttribute Settings =
-        CommaSeparatedMultiSelectDefaults.ForEditorAlias(CommaSeparatedMultiSelectEditorAliases.BorderZone);
-
+    [Parameter] public string EditorAlias { get; set; } = CommaSeparatedMultiSelectEditorAliases.BorderZone;
     [Parameter] public string? Value { get; set; }
     [Parameter] public bool ReadOnly { get; set; }
     [Parameter] public IObjectSpace? ObjectSpace { get; set; }
     [Parameter] public IEnumerable<string>? CatalogItems { get; set; }
     [Parameter] public EventCallback<string?> ValueChanged { get; set; }
 
-    private readonly CommaSeparatedMultiSelectLocalization.UiTexts _ui =
-        CommaSeparatedMultiSelectLocalization.Resolve(CommaSeparatedMultiSelectEditorAliases.BorderZone);
+    private CommaSeparatedMultiSelectAttribute Settings =>
+        CommaSeparatedMultiSelectDefaults.ForEditorAlias(EditorAlias);
+
+    private CommaSeparatedMultiSelectLocalization.UiTexts Ui =>
+        CommaSeparatedMultiSelectLocalization.Resolve(EditorAlias);
 
     private IObjectSpace? _ownedObjectSpace;
     private string _displayText = string.Empty;
@@ -79,7 +80,7 @@
         if (ObjectSpace != null || _ownedObjectSpace != null)
             return;
 
-        _ownedObjectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace(typeof(BorderZoneName));
+        _ownedObjectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace(Settings.CatalogEntityType);
     }
 
     private void SyncFromValue()
@@ -107,7 +108,7 @@
 
         return CommaSeparatedCatalogHelper.LoadCatalogNames(
                 objectSpace,
-                typeof(BorderZoneName),
+                Settings.CatalogEntityType,
                 Settings.NoneValue)
             .ToList();
     }
@@ -164,7 +165,7 @@
 
         CommaSeparatedCatalogHelper.TryAddCatalogEntry(
             objectSpace,
-            typeof(BorderZoneName),
+            Settings.CatalogEntityType,
             name,
             commitChanges: false);
 
@@ -183,7 +184,7 @@
 
         var result = CommaSeparatedCatalogHelper.TryRenameCatalogEntry(
             objectSpace,
-            typeof(BorderZoneName),
+            Settings.CatalogEntityType,
             request.OldName,
             request.NewName,
             Settings.NoneValue,
@@ -204,7 +205,7 @@
 
         var formatted = CommaSeparatedSelectionHelper.FormatSelected(_selectedItems, Settings.NoneValue);
         _displayText = FormatDisplay(formatted);
-        RefreshCatalogAfterDraftChange(successMessage: _ui.RenameSuccessFormat);
+        RefreshCatalogAfterDraftChange(successMessage: Ui.RenameSuccessFormat);
         return ValueChanged.InvokeAsync(formatted);
     }
 
@@ -216,7 +217,7 @@
 
         var result = CommaSeparatedCatalogHelper.TryDeleteCatalogEntry(
             objectSpace,
-            typeof(BorderZoneName),
+            Settings.CatalogEntityType,
             name,
             Settings.NoneValue,
             commitChanges: false);
@@ -233,8 +234,8 @@
         var formatted = CommaSeparatedSelectionHelper.FormatSelected(_selectedItems, Settings.NoneValue);
         _displayText = FormatDisplay(formatted);
         var successMessage = result.UsageCount > 0
-            ? string.Format(_ui.DeleteSuccessFormat, result.UsageCount)
-            : _ui.DeleteSuccessUnusedFormat;
+            ? string.Format(Ui.DeleteSuccessFormat, result.UsageCount)
+            : Ui.DeleteSuccessUnusedFormat;
         RefreshCatalogAfterDraftChange(successMessage: successMessage, excludeName: name.Trim());
         return ValueChanged.InvokeAsync(formatted);
     }
@@ -262,7 +263,7 @@
             objectSpace.CommitChanges();
     }
 
-    private static string FormatDisplay(string? stored) =>
+    private string FormatDisplay(string? stored) =>
         CommaSeparatedSelectionHelper.FormatSelected(
             CommaSeparatedSelectionHelper.ParseSelected(stored, Settings.NoneValue),
             Settings.NoneValue);

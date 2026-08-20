@@ -7,6 +7,8 @@ Custom Blazor property editor for **short label lists** stored as a single comma
 | Business object | Property | Catalog (lookup table) | Editor alias | Default when empty |
 |-----------------|----------|------------------------|--------------|-------------------|
 | `Application` | `BorderZoneLocation` | `BorderZoneName` | `BorderZoneMultiSelect` | `Ýok` (via `CommaSeparatedSelectionHelper.NoneValue`) |
+| `Application` | `MovementPermitLocation` | `WorkPermittedLocationName` | `WorkPermittedLocationMultiSelect` | empty string |
+| `ApplicationProfile` | `DefaultWorkPermitLocation` | `WorkPermittedLocationName` | wizard / case-summary field | empty string |
 | `ApplicationItem` | `BorderZoneLocation` | `BorderZoneName` | `BorderZoneMultiSelect` | `Ýok` |
 | `Visa` | `BorderZoneLocation` | `BorderZoneName` | `BorderZoneMultiSelect` | empty string (defaults to `Ýok` on create/save via `BorderZoneSelectionHelper`) |
 | `WorkPermitItem` | `WorkPermittedLocations` | `WorkPermittedLocationName` | `WorkPermittedLocationMultiSelect` | empty string |
@@ -14,8 +16,8 @@ Custom Blazor property editor for **short label lists** stored as a single comma
 
 Configuration is on the property via `[CommaSeparatedMultiSelect(...)]` and `[EditorAlias(...)]` in:
 
-- `Visa2026.Module/BusinessObjects/Application.cs`
-- `Visa2026.Module/BusinessObjects/ApplicationItem.cs`
+- `Visa2026.Module/BusinessObjects/ApplicationProfileInstance.cs`
+- `Visa2026.Module/BusinessObjects/ApplicationProfile.cs` (`DefaultWorkPermitLocation`)
 - `Visa2026.Module/BusinessObjects/Visa.cs`
 - `Visa2026.Module/BusinessObjects/WorkPermitItem.cs`
 
@@ -39,16 +41,18 @@ flowchart TB
     WPL[WorkPermittedLocationName]
   end
   subgraph data [Per record]
-    APP[Application.BorderZoneLocation]
-    AI[ApplicationItem.BorderZoneLocation]
-    V[Visa.BorderZoneLocation]
-    WPI[WorkPermitItem.WorkPermittedLocations]
+  APP[Application.BorderZoneLocation]
+  APPWP[Application.MovementPermitLocation]
+  AI[ApplicationItem.BorderZoneLocation]
+  V[Visa.BorderZoneLocation]
+  WPI[WorkPermitItem.WorkPermittedLocations]
   end
   C --> PE
   PE --> CAT
   CAT --> BZN
   CAT --> WPL
   PE --> APP
+  PE --> APPWP
   PE --> AI
   PE --> V
   PE --> WPI
@@ -134,6 +138,8 @@ Module updaters are registered in `Visa2026.Module/Module.cs`.
 ## Database
 
 - `Application.BorderZoneLocation` — `nvarchar(500)`
+- `Application.MovementPermitLocation` — `nvarchar(500)` (was FK `MovementPermitLocationID`; host-start heal in `ApplicationProfileSchemaSql`)
+- `ApplicationProfiles.DefaultWorkPermitLocation` — `nvarchar(500)`
 - `ApplicationItem.BorderZoneLocation` — `nvarchar(500)`
 - `Visa.BorderZoneLocation` — `nvarchar(500)`
 - `WorkPermitItem.WorkPermittedLocations` — `nvarchar(500)`

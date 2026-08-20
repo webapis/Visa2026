@@ -529,7 +529,8 @@ namespace Visa2026.Module.Services
 
                 if (AppSegment(application, source, "MovementPermitLocation"))
                 {
-                    if (!TypeOk(x => x.ShowMovementPermitLocation) || application.MovementPermitLocation == null)
+                    if (!TypeOk(x => x.ShowMovementPermitLocation)
+                        || string.IsNullOrWhiteSpace(application.MovementPermitLocation))
                         return false;
                 }
 

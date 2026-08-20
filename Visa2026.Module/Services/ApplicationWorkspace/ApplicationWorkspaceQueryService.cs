@@ -74,7 +74,6 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
                 .Include(a => a.ProjectContract)
                 .Include(a => a.Urgency)
                 .Include(a => a.MigrationService)
-                .Include(a => a.MovementPermitLocation)
                 .Include(a => a.FromCity)
                 .Include(a => a.ToCity)
                 .Include(a => a.Region)

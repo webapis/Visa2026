@@ -5,6 +5,7 @@
 @using Visa2026.Module.Services.ApplicationWorkspace
 @using Visa2026.Module.Services.ApplicationPersonLink
 @using Visa2026.Module.Services.OfficerShell
+@using Visa2026.Module.Editors
 
 <div class="officer-case-workspace">
     @if (IsLoading || Snapshot == null)
@@ -274,6 +275,11 @@
             Glyph = field.Glyph,
         };
 
+    private static string EditorAliasFor(string? fieldKey) =>
+        string.Equals(fieldKey, ApplicationWorkspaceCaseHeaderFieldsHelper.WorkPermitLocation, StringComparison.Ordinal)
+            ? CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation
+            : CommaSeparatedMultiSelectEditorAliases.BorderZone;
+
     private Task OnHeaderFieldChanged(string key, string? value)
     {
         if (!HeaderFieldChanged.HasDelegate || string.IsNullOrWhiteSpace(key))
@@ -426,6 +432,7 @@
                                 else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.CommaSeparatedMultiSelect)
                                 {
                                     <BorderZoneLocationField Value="@field.Value"
+                                                             EditorAlias="@EditorAliasFor(field.Key)"
                                                              ReadOnly="@field.ReadOnly"
                                                              CatalogItems="@field.MultiSelectOptions"
                                                              ValueChanged="@(value => OnHeaderFieldChanged(field.Key, value))" />

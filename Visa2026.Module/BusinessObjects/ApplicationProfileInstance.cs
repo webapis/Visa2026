@@ -447,6 +447,8 @@ namespace Visa2026.Module.BusinessObjects
                 Purpose = applicationProfile.DefaultPurpose.Trim();
             if (!string.IsNullOrWhiteSpace(applicationProfile.DefaultBorderZoneLocation))
                 BorderZoneLocation = applicationProfile.DefaultBorderZoneLocation;
+            if (applicationProfile.DefaultWorkPermitLocation != null)
+                MovementPermitLocation = applicationProfile.DefaultWorkPermitLocation;
         }
 
         private void ApplyDefaultsForApplicationType()
@@ -712,11 +714,17 @@ namespace Visa2026.Module.BusinessObjects
 
         [Appearance("MovementPermitLocationVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowMovementPermitLocation", Context = "DetailView")]
         [VisibleInListView(false)]
-        public virtual MovementPermitLocation MovementPermitLocation { get; set; }
+        [XafDisplayName("Work permit location")]
+        [MaxLength(500)]
+        [EditorAlias(CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation)]
+        [CommaSeparatedMultiSelect(
+            CatalogEntityType = typeof(WorkPermittedLocationName),
+            NoneValue = "")]
+        public virtual string MovementPermitLocation { get; set; }
 
-        [XafDisplayName("Movement Permit Location (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        [NotMapped]
-        public string MovementPermitLocation_NameTm => MovementPermitLocation?.NameTm;
+        [Browsable(false)]
+        [XafDisplayName("Work permit location (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string MovementPermitLocation_NameTm => MovementPermitLocation?.Trim() ?? string.Empty;
 
         [Appearance("BorderZoneLocationVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide,
             Criteria = "ApplicationType is null or !ApplicationType.ShowBorderZoneLocation", Context = "DetailView,ListView")]

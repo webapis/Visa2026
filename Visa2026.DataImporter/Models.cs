@@ -263,7 +263,7 @@ public class ApplicationProfileInstance
     public City? ToCity { get; set; }
 
     [JsonPropertyName("MovementPermitLocation")]
-    public MovementPermitLocation? MovementPermitLocation { get; set; }
+    public string? MovementPermitLocation { get; set; }
 
     [JsonPropertyName("BorderZoneLocation")]
     public string? BorderZoneLocation { get; set; }

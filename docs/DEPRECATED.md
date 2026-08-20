@@ -81,7 +81,7 @@ Only **configuration** that used to live on `ApplicationType` (and type-driven i
 | **ApplicationLocation** | Active (seeded) | — | `LookupCatalogs/application-location.json` | Catalog retained; **no longer** used on `ApplicationProgress` (progress is state-only). Layer B strings in `LookupCatalogStrings.json`. |
 | **OrganizationType** | Removed | — (obsolete lookup; unused by `Application` / `ApplicationType`) | Table/FK dropped by `OrganizationTypeSchemaCleanupUpdater` | Formerly under Lookup/Organization; leftover DetailView layout nodes removed. |
 | **BorderZoneLocation** | Deprecated | Comma-separated **`BorderZoneName`** on `Application`, `ApplicationItem`, and `Visa` | BO + table retained (hidden nav); **no** JSON catalog | Migrated by `ApplicationBorderZoneLocationStringUpdater` + earlier item/visa updaters. See [`docs/COMMA_SEPARATED_MULTI_SELECT.md`](COMMA_SEPARATED_MULTI_SELECT.md). Do not confuse with **ApplicationLocation**. |
-| **MovementPermitLocation** | Retained (UI catalog) | Per-deployment rows in lookup UI | Table retained; excluded from manifest | See [`docs/LOOKUP_SEEDING.md`](LOOKUP_SEEDING.md). |
+| **MovementPermitLocation** | Deprecated | Comma-separated **`WorkPermittedLocationName`** on `Application.MovementPermitLocation` (same catalog as `WorkPermitItem.WorkPermittedLocations`) | BO + table retained (hidden nav); **no** JSON catalog | Host-start heal `ApplicationProfileSchemaSql.ConvertInstanceMovementPermitLocationToStringPostgres`. See [`docs/COMMA_SEPARATED_MULTI_SELECT.md`](COMMA_SEPARATED_MULTI_SELECT.md). |
 
 ---
 

@@ -4,6 +4,41 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 
 ---
 
+### 2026-08-20 — Work permit location uses Border zone comma-separated multi-select
+
+- Case summary and wizard **Work permit location** now use the same `CommaSeparatedMultiSelectComponent` as Border zone (`BorderZoneLocationField` with `WorkPermittedLocationMultiSelect` alias / `WorkPermittedLocationName` catalog). Instance storage is comma-separated `Application.MovementPermitLocation` text (not `MovementPermitLocation` FK). Profile default is `DefaultWorkPermitLocation`. Wizard Results kind tag is **multi-select**.
+- Verify: stop F5, rebuild, F5. Configure profile → Results & fields → Work permit location shows the … popup (not a dropdown). Case summary Edit on a WP-location profile uses the same control.
+- Prevent: Do not bind work permit location to `MovementPermitLocation` FK or single `<select>`. Do not reuse Border zone `Ýok` none-value on this field (empty string).
+- Cross-skill: application-profile
+
+### 2026-08-20 — App_Additional_WP_location type-only seed
+
+- Calik profile `App_Additional_WP_location` / `change_workpermit` / **Iş Rugsatnama goşmaça  barjak ýeri**. Route **Via ministries**. Related to **Issuance**. Audience **Employee** only. May produce **Work permit + Work location**. SLA ministry **4** / migration **30**. Results: project + **work permit location** — no visa type/period/category/urgency/border zone. Person: passport, education, **work permit item**, salary — no position, address, visa, or medical. Nested templates not seeded. Last remaining Application Type in the Calik catalog.
+- Verify: stop F5, rebuild, F5. Catalog shows additional WP location name. May produce Work permit + work location; Results work permit location on; person WP item + salary on, Visa off.
+- Prevent: Do not seed per-project Wave 0b rows. Do not require border zone or urgency. Do not turn on person Visa (type `ShowCurrentVisa` is false).
+- Cross-skill: application-profile
+
+### 2026-08-20 — App_WP_Ext type-only seed
+
+- Calik profile `App_WP_Ext` / `workpermit_extension` / **Iş Rugsatnamasyny Uzaltmak**. Route **Via ministries**. Related to **Issuance**. Audience **Employee** only. May produce **Work permit** only. SLA ministry **4** / migration **30**. Results: project, border zone, **work permit location** — no visa type/period/category/urgency. Person: passport, education, position, address, **visa**, **work permit item**, salary, medical. Nested templates not seeded.
+- Verify: stop F5, rebuild, F5. Catalog shows **Iş Rugsatnamasyny Uzaltmak**. May produce Work permit only; Results work permit location on; person Visa + WP item on.
+- Prevent: Do not produce visa or invitation. Do not require urgency on this type.
+- Cross-skill: application-profile
+
+### 2026-08-20 — App_Visa_and_WP_Ext type-only seed
+
+- Calik profile `App_Visa_and_WP_Ext` / `extend_visa_wp` / **Wiza we Iş Rugsatnamasyny Uzaltmak**. Route **Via ministries**. Related to **Issuance**. Audience **Employee** only. May produce **Visa + Work permit**. SLA ministry **4** / migration **30**. Results: visa type **WP**, period **Month6**, category **Multiple**, project, urgency, border zone, **work permit location**. Person: passport, education, position, address, **visa**, **work permit item**, salary, medical. Nested templates not seeded.
+- Verify: stop F5, rebuild, F5. Catalog shows combined extension name. May produce Visa + WP; Results work permit location on; person Visa + WP item on.
+- Prevent: Do not produce invitation. Do not treat border zone as produce (location field only). Do not add Family/visitor.
+- Cross-skill: application-profile
+
+### 2026-08-20 — App_Visa_For_New_Born_FM type-only seed
+
+- Calik profile `App_Visa_For_New_Born_FM` / `visa_for_new_born_fm` (type Code `visa_extension` shared). Name **Täze dogulan çaga wiza resmileşdirmek FM**. Route **Via ministries**. Related to **Issuance**. Audience **Family member** only. May produce **Visa** only. SLA ministry **4** / migration **30**. Results: visa type **FM**, project, urgency, border zone. Person: passport, education, address — **no current visa** (newborn). Nested templates not seeded.
+- Verify: stop F5, rebuild, F5. Catalog shows newborn FM name. May produce Visa; Results FM; person Visa off.
+- Prevent: Do not reuse `visa_extension` / `visa_ext_fm` as Code. Do not require person Visa on newborn cases.
+- Cross-skill: application-profile
+
 ### 2026-08-20 — App_Visa_Ext_FM type-only seed
 
 - Calik profile `App_Visa_Ext_FM` / `visa_ext_fm` (type Code `visa_extension` shared). Name **Wiza Möhletini Uzaltmak FM**. Route **Via ministries**. Related to **Issuance**. Audience **Family member** only. May produce **Visa** only. SLA ministry **4** / migration **30**. Results: visa type **FM**, project, urgency, border zone — no visa period/category. Person: passport, education, address, **visa**. Nested templates not seeded.

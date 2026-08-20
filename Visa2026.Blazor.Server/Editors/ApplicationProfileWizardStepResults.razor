@@ -1,6 +1,7 @@
 @using System.Linq
 @using DevExpress.ExpressApp
 @using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Editors
 @using Visa2026.Module.Services
 @using Visa2026.Module.Services.ApplicationProfileWizard
 
@@ -155,9 +156,16 @@
                     </tr>
                 }
                 <tr>
-                    <td><input type="checkbox" @bind="Profile.RequireWorkPermitLocation" disabled="@Disabled" /></td>
-                    <td>Work permit location</td><td><span class="ap-wizard__tag">lookup</span></td>
-                    <td>—</td><td>—</td>
+                    <td><input type="checkbox" @bind="Profile.RequireWorkPermitLocation" disabled="@Disabled" @bind:after="OnWorkPermitLocationUseChanged" /></td>
+                    <td>Work permit location</td><td><span class="ap-wizard__tag">multi-select</span></td>
+                    <td><input type="checkbox" checked="@HasWorkPermitLocationDefault" disabled="@(Disabled || !Profile.RequireWorkPermitLocation)" @onchange="ToggleWorkPermitLocationDefault" /></td>
+                    <td>
+                        <BorderZoneLocationField Value="@Profile.DefaultWorkPermitLocation"
+                                                 EditorAlias="@CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation"
+                                                 ReadOnly="@(Disabled || !Profile.RequireWorkPermitLocation || !HasWorkPermitLocationDefault)"
+                                                 ObjectSpace="@ObjectSpace"
+                                                 ValueChanged="@OnWorkPermitLocationDefaultChanged" />
+                    </td>
                 </tr>
                 <tr>
                     <td><input type="checkbox" @bind="Profile.RequireEntryDate" disabled="@Disabled" /></td>
@@ -198,6 +206,7 @@
     private bool HasCityDefault => Profile.DefaultCityId.HasValue;
     private bool HasBusinessTripAddressDefault => Profile.DefaultBusinessTripAddressId.HasValue;
     private bool HasPurposeDefault => !string.IsNullOrWhiteSpace(Profile.DefaultPurpose);
+    private bool HasWorkPermitLocationDefault => Profile.DefaultWorkPermitLocation != null;
 
     private IEnumerable<ApplicationProfileWizardLookupItem> CityOptions
     {
@@ -312,10 +321,30 @@
         if (!ParseChecked(e)) Profile.DefaultPurpose = null;
     }
 
+    private void ToggleWorkPermitLocationDefault(ChangeEventArgs e)
+    {
+        if (Disabled || !Profile.RequireWorkPermitLocation) return;
+        if (!ParseChecked(e)) Profile.DefaultWorkPermitLocation = null;
+        else if (Profile.DefaultWorkPermitLocation == null)
+            Profile.DefaultWorkPermitLocation = string.Empty;
+    }
+
+    private Task OnWorkPermitLocationDefaultChanged(string? value)
+    {
+        Profile.DefaultWorkPermitLocation = value;
+        return Task.CompletedTask;
+    }
+
     private void OnPurposeUseChanged()
     {
         if (!Profile.RequirePurpose)
             Profile.DefaultPurpose = null;
+    }
+
+    private void OnWorkPermitLocationUseChanged()
+    {
+        if (!Profile.RequireWorkPermitLocation)
+            Profile.DefaultWorkPermitLocation = null;
     }
 
     private void OnRegionUseChanged()

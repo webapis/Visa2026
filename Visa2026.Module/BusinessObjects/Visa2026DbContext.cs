@@ -646,6 +646,7 @@ namespace Visa2026.Module.BusinessObjects
                     .OnDelete(DeleteBehavior.NoAction);
                 b.Property(a => a.Purpose).HasMaxLength(700);
                 b.Property(a => a.BorderZoneLocation).HasMaxLength(500);
+                b.Property(a => a.MovementPermitLocation).HasMaxLength(500);
                 b.HasIndex(a => new { a.AppNumberPrefix, a.ApplicationNumber, a.Year, a.Month })
                  .IsUnique()
                  .HasFilter(IndexFilter("[IsManualEntry] = 0 AND [GCRecord] IS NULL"));
@@ -661,6 +662,7 @@ namespace Visa2026.Module.BusinessObjects
                 b.Property(p => p.Code).HasMaxLength(64);
                 b.Property(p => p.SelectionCode).HasMaxLength(3);
                 b.Property(p => p.DefaultBorderZoneLocation).HasMaxLength(500);
+                b.Property(p => p.DefaultWorkPermitLocation).HasMaxLength(500);
                 b.Property(p => p.DefaultPurpose).HasMaxLength(700);
                 b.HasOne(p => p.DefaultBusinessTripAddress)
                     .WithMany()

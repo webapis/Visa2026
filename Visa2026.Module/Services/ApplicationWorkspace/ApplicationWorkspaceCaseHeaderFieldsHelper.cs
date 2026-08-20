@@ -107,10 +107,11 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             Visible(profile, p => p.RequirePurpose, ApplicationProfileConfigurationResolver.ShowPurpose, application),
             application.Purpose);
 
-        AddLookup(fields, WorkPermitLocation, "Work permit location", "blue", "🏢",
+        AddCommaSeparatedMultiSelect(fields, WorkPermitLocation, "Work permit location", "blue", "🏢",
             Visible(profile, p => p.RequireWorkPermitLocation, ApplicationProfileConfigurationResolver.ShowMovementPermitLocation, application),
-            application.MovementPermitLocation?.ID, LookupLabel(application.MovementPermitLocation),
-            catalogs.MovementPermitLocations, readOnly: false);
+            application.MovementPermitLocation,
+            application.MovementPermitLocation_NameTm,
+            catalogs.WorkPermittedLocationNames, readOnly: false);
 
         return fields;
     }
@@ -208,7 +209,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             case WorkPermitLocation:
                 if (!Visible(profile, p => p.RequireWorkPermitLocation, ApplicationProfileConfigurationResolver.ShowMovementPermitLocation, application))
                     return Hidden(out error);
-                return SetLookup<MovementPermitLocation>(objectSpace, value, item => application.MovementPermitLocation = item!, out error);
+                return SetWorkPermitLocation(value, application, out error);
             default:
                 error = "That field cannot be edited here.";
                 return false;
@@ -377,6 +378,26 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         return true;
     }
 
+    private static bool SetWorkPermitLocation(string? value, ApplicationProfileInstance application, out string? error)
+    {
+        error = null;
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            application.MovementPermitLocation = null;
+            return true;
+        }
+
+        var trimmed = value.Trim();
+        if (trimmed.Length > 500)
+        {
+            error = "Work permit location selection is too long.";
+            return false;
+        }
+
+        application.MovementPermitLocation = trimmed;
+        return true;
+    }
+
     private static string FormatBorderZoneDisplay(string? preferred, string? fallback)
     {
         if (!string.IsNullOrWhiteSpace(preferred) && !BorderZoneSelectionHelper.IsNoneValue(preferred))
@@ -471,9 +492,9 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         public IReadOnlyList<ApplicationWorkspaceLookupOption> Cities { get; init; } = [];
         public IReadOnlyList<ApplicationWorkspaceLookupOption> Regions { get; init; } = [];
         public IReadOnlyList<ApplicationWorkspaceLookupOption> BusinessTripAddresses { get; init; } = [];
-        public IReadOnlyList<ApplicationWorkspaceLookupOption> MovementPermitLocations { get; init; } = [];
         public IReadOnlyList<ApplicationWorkspaceLookupOption> CheckPoints { get; init; } = [];
         public IReadOnlyList<string> BorderZoneNames { get; init; } = [];
+        public IReadOnlyList<string> WorkPermittedLocationNames { get; init; } = [];
 
         public static Catalogs Load(IObjectSpace objectSpace) => new()
         {
@@ -486,12 +507,15 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             Cities = LoadItems<City>(objectSpace),
             Regions = LoadItems<Region>(objectSpace),
             BusinessTripAddresses = LoadBusinessTripAddresses(objectSpace),
-            MovementPermitLocations = LoadItems<MovementPermitLocation>(objectSpace),
             CheckPoints = LoadItems<CheckPoint>(objectSpace),
             BorderZoneNames = CommaSeparatedCatalogHelper.LoadCatalogNames(
                 objectSpace,
                 typeof(BorderZoneName),
                 BorderZoneSelectionHelper.NoneValue),
+            WorkPermittedLocationNames = CommaSeparatedCatalogHelper.LoadCatalogNames(
+                objectSpace,
+                typeof(WorkPermittedLocationName),
+                string.Empty),
         };
 
         private static IReadOnlyList<ApplicationWorkspaceLookupOption> LoadItems<T>(IObjectSpace objectSpace)

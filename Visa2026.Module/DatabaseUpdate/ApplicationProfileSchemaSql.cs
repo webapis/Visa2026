@@ -63,6 +63,7 @@ public static class ApplicationProfileSchemaSql
             "RequireUrgency" boolean NOT NULL DEFAULT false,
             "DefaultUrgencyId" uuid NULL,
             "RequireWorkPermitLocation" boolean NOT NULL DEFAULT false,
+            "DefaultWorkPermitLocation" character varying(500) NULL,
             "RequireEntryDate" boolean NOT NULL DEFAULT false,
             "RequireEntryCheckPoint" boolean NOT NULL DEFAULT false,
             "DefaultEntryCheckPointId" uuid NULL,
@@ -226,6 +227,7 @@ public static class ApplicationProfileSchemaSql
                 RequireUrgency bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireUrgency DEFAULT (0),
                 DefaultUrgencyId uniqueidentifier NULL,
                 RequireWorkPermitLocation bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireWorkPermitLocation DEFAULT (0),
+                DefaultWorkPermitLocation nvarchar(500) NULL,
                 RequireEntryDate bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireEntryDate DEFAULT (0),
                 RequireEntryCheckPoint bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireEntryCheckPoint DEFAULT (0),
                 DefaultEntryCheckPointId uniqueidentifier NULL,
@@ -468,6 +470,82 @@ public static class ApplicationProfileSchemaSql
     internal const string EnsureInstanceApprovalLegVersionIdPostgres =
         """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "ApprovalLegVersionId" uuid NULL;""";
 
+    internal const string EnsureDefaultWorkPermitLocationPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "DefaultWorkPermitLocation" character varying(500) NULL;""";
+
+    /// <summary>
+    /// Converts instance work-permit location from FK (<c>MovementPermitLocationID</c>) to
+    /// comma-separated <c>MovementPermitLocation</c> text using <c>WorkPermittedLocationName</c>.
+    /// </summary>
+    internal const string ConvertInstanceMovementPermitLocationToStringPostgres = """
+        DO $$
+        DECLARE
+          fk_col text;
+          rec record;
+        BEGIN
+          IF to_regclass('public."ApplicationProfileInstances"') IS NULL THEN
+            RETURN;
+          END IF;
+
+          IF EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_schema = 'public'
+              AND table_name = 'ApplicationProfileInstances'
+              AND column_name = 'MovementPermitLocationID'
+              AND data_type = 'uuid') THEN
+            fk_col := 'MovementPermitLocationID';
+          ELSIF EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_schema = 'public'
+              AND table_name = 'ApplicationProfileInstances'
+              AND column_name = 'MovementPermitLocationId'
+              AND data_type = 'uuid') THEN
+            fk_col := 'MovementPermitLocationId';
+          ELSIF EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_schema = 'public'
+              AND table_name = 'ApplicationProfileInstances'
+              AND column_name = 'MovementPermitLocation'
+              AND udt_name = 'uuid') THEN
+            ALTER TABLE "ApplicationProfileInstances" RENAME COLUMN "MovementPermitLocation" TO "MovementPermitLocationID";
+            fk_col := 'MovementPermitLocationID';
+          END IF;
+
+          ALTER TABLE "ApplicationProfileInstances"
+            ADD COLUMN IF NOT EXISTS "MovementPermitLocation" character varying(500) NULL;
+
+          IF fk_col IS NOT NULL AND to_regclass('public."MovementPermitLocations"') IS NOT NULL THEN
+            EXECUTE format(
+              'UPDATE "ApplicationProfileInstances" a
+               SET "MovementPermitLocation" = COALESCE(NULLIF(BTRIM(m."NameTm"), ''''), a."MovementPermitLocation")
+               FROM "MovementPermitLocations" m
+               WHERE m."ID" = a.%I
+                 AND (a."MovementPermitLocation" IS NULL OR BTRIM(a."MovementPermitLocation") = '''')',
+              fk_col);
+
+            FOR rec IN
+              SELECT c.conname
+              FROM pg_constraint c
+              JOIN pg_class t ON t.oid = c.conrelid
+              JOIN pg_namespace n ON n.oid = t.relnamespace
+              JOIN pg_attribute a ON a.attrelid = t.oid AND a.attnum = ANY (c.conkey)
+              WHERE n.nspname = 'public'
+                AND t.relname = 'ApplicationProfileInstances'
+                AND a.attname = fk_col
+                AND c.contype = 'f'
+            LOOP
+              EXECUTE format(
+                'ALTER TABLE "ApplicationProfileInstances" DROP CONSTRAINT IF EXISTS %I',
+                rec.conname);
+            END LOOP;
+
+            EXECUTE format(
+              'ALTER TABLE "ApplicationProfileInstances" DROP COLUMN IF EXISTS %I CASCADE',
+              fk_col);
+          END IF;
+        END $$;
+        """;
+
     internal const string BackfillApprovalLegVersionsPostgres = """
         DO $$
         BEGIN
@@ -540,6 +618,8 @@ public static class ApplicationProfileSchemaSql
         EnsureInstanceApprovalLegVersionNamePostgres,
         EnsureInstanceApprovalLegVersionIdPostgres,
         BackfillApprovalLegVersionsPostgres,
+        EnsureDefaultWorkPermitLocationPostgres,
+        ConvertInstanceMovementPermitLocationToStringPostgres,
     ];
 
     internal const string EnsureTemplateCatalogColumnsSqlServer = """

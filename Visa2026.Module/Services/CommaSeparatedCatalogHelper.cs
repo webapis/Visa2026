@@ -294,6 +294,18 @@ public static class CommaSeparatedCatalogHelper
             .Count(wpi => CommaSeparatedSelectionHelper.ContainsLabel(
                 GetWorkPermitItemWorkPermittedLocationsStored(wpi, usageContext),
                 label,
+                string.Empty))
+        + objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
+            .AsEnumerable()
+            .Count(app => CommaSeparatedSelectionHelper.ContainsLabel(
+                GetApplicationWorkPermitLocationStored(app, usageContext),
+                label,
+                string.Empty))
+        + objectSpace.GetObjectsQuery<ApplicationProfile>()
+            .AsEnumerable()
+            .Count(profile => CommaSeparatedSelectionHelper.ContainsLabel(
+                profile.DefaultWorkPermitLocation,
+                label,
                 string.Empty));
 
     private static string? GetApplicationBorderZoneStored(ApplicationProfileInstance application, CatalogUsageContext? usageContext)
@@ -332,6 +344,20 @@ public static class CommaSeparatedCatalogHelper
         }
 
         return item.WorkPermittedLocations;
+    }
+
+    private static string? GetApplicationWorkPermitLocationStored(
+        ApplicationProfileInstance application,
+        CatalogUsageContext? usageContext)
+    {
+        if (usageContext?.EditingObjectId != null
+            && application.ID == usageContext.EditingObjectId
+            && usageContext.EditingEffectiveStored != null)
+        {
+            return usageContext.EditingEffectiveStored;
+        }
+
+        return application.MovementPermitLocation;
     }
 
     private static void StripBorderZoneLabelFromAllItems(
@@ -389,6 +415,27 @@ public static class CommaSeparatedCatalogHelper
             var parsed = CommaSeparatedSelectionHelper.ParseSelected(stored, string.Empty)
                 .Where(z => !string.Equals(z, label, StringComparison.OrdinalIgnoreCase));
             item.WorkPermittedLocations = CommaSeparatedSelectionHelper.FormatSelected(parsed, string.Empty);
+        }
+
+        foreach (var application in objectSpace.GetObjectsQuery<ApplicationProfileInstance>().ToList())
+        {
+            var stored = GetApplicationWorkPermitLocationStored(application, usageContext);
+            if (!CommaSeparatedSelectionHelper.ContainsLabel(stored, label, string.Empty))
+                continue;
+
+            var parsed = CommaSeparatedSelectionHelper.ParseSelected(stored, string.Empty)
+                .Where(z => !string.Equals(z, label, StringComparison.OrdinalIgnoreCase));
+            application.MovementPermitLocation = CommaSeparatedSelectionHelper.FormatSelected(parsed, string.Empty);
+        }
+
+        foreach (var profile in objectSpace.GetObjectsQuery<ApplicationProfile>().ToList())
+        {
+            if (!CommaSeparatedSelectionHelper.ContainsLabel(profile.DefaultWorkPermitLocation, label, string.Empty))
+                continue;
+
+            var parsed = CommaSeparatedSelectionHelper.ParseSelected(profile.DefaultWorkPermitLocation, string.Empty)
+                .Where(z => !string.Equals(z, label, StringComparison.OrdinalIgnoreCase));
+            profile.DefaultWorkPermitLocation = CommaSeparatedSelectionHelper.FormatSelected(parsed, string.Empty);
         }
     }
 
@@ -449,6 +496,38 @@ public static class CommaSeparatedCatalogHelper
 
             item.WorkPermittedLocations = CommaSeparatedSelectionHelper.ReplaceLabel(
                 item.WorkPermittedLocations,
+                oldLabel,
+                newLabel,
+                string.Empty);
+        }
+
+        var applications = objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
+            .Where(app => app.MovementPermitLocation != null && app.MovementPermitLocation.Contains(oldLabel))
+            .ToList();
+
+        foreach (var application in applications)
+        {
+            if (!CommaSeparatedSelectionHelper.ContainsLabel(application.MovementPermitLocation, oldLabel, string.Empty))
+                continue;
+
+            application.MovementPermitLocation = CommaSeparatedSelectionHelper.ReplaceLabel(
+                application.MovementPermitLocation,
+                oldLabel,
+                newLabel,
+                string.Empty);
+        }
+
+        var profiles = objectSpace.GetObjectsQuery<ApplicationProfile>()
+            .Where(profile => profile.DefaultWorkPermitLocation != null && profile.DefaultWorkPermitLocation.Contains(oldLabel))
+            .ToList();
+
+        foreach (var profile in profiles)
+        {
+            if (!CommaSeparatedSelectionHelper.ContainsLabel(profile.DefaultWorkPermitLocation, oldLabel, string.Empty))
+                continue;
+
+            profile.DefaultWorkPermitLocation = CommaSeparatedSelectionHelper.ReplaceLabel(
+                profile.DefaultWorkPermitLocation,
                 oldLabel,
                 newLabel,
                 string.Empty);

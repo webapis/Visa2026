@@ -191,7 +191,10 @@ internal static class Visa2014ApplicationODataImporter
         TryAddOptionalFk(payload, row, "ProjectContract", resolver.ResolveProjectContract);
         TryAddOptionalFk(payload, row, "ApprovalLegProfile", resolver.ResolveApprovalLegProfile);
         TryAddOptionalFk(payload, row, "ToCity", value => resolver.ResolveCity(value));
-        TryAddOptionalFk(payload, row, "MovementPermitLocation", resolver.ResolveMovementPermitLocation);
+
+        var movementPermitLabels = row.GetValueOrDefault("MovementPermitLocation") as string;
+        if (!string.IsNullOrWhiteSpace(movementPermitLabels))
+            payload["MovementPermitLocation"] = movementPermitLabels.Trim();
 
         var borderZoneLabels = row.GetValueOrDefault("BorderZoneLocation") as string;
         if (!string.IsNullOrWhiteSpace(borderZoneLabels))
