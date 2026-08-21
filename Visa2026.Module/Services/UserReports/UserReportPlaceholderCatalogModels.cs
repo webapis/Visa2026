@@ -9,6 +9,34 @@ public enum UserReportPlaceholderScope
     Both = 2,
 }
 
+/// <summary>
+/// Which record a placeholder needs before it can be filled. Declared explicitly per catalog entry
+/// because the canonical path is not a reliable signal: <c>Contract_StartDateText</c> reads
+/// <c>CurrentVisa.ExpirationDate</c>, and <c>Passport_PersonalNumber</c> falls back to
+/// <c>Person.PersonalNumber</c>, so prefix matching would gate both wrongly.
+/// </summary>
+public enum UserReportPlaceholderPack
+{
+    /// <summary>Unrecognised <c>packKey</c>. Excluded from profile-scoped sets — never silently allowed.</summary>
+    Unknown = 0,
+
+    /// <summary>Application, company, signatory, and Person master data. Always available.</summary>
+    Core = 1,
+
+    PersonPassport = 2,
+    PersonVisa = 3,
+    PersonEducation = 4,
+    PersonAddressOfResidence = 5,
+    PersonPosition = 6,
+    PersonSalary = 7,
+    PersonMedical = 8,
+    PersonInvitationItem = 9,
+    PersonWorkPermitItem = 10,
+    PersonBorderZoneItem = 11,
+    PersonRejectionItem = 12,
+    PersonTravelHistory = 13,
+}
+
 public sealed class UserReportPlaceholderCatalogFile
 {
     public int Version { get; set; } = 1;
@@ -33,6 +61,9 @@ public sealed class UserReportPlaceholderCatalogEntryDto
     public Dictionary<string, string> Labels { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
     public bool IsImage { get; set; }
+
+    /// <summary>Name of a <see cref="UserReportPlaceholderPack"/> member. Required for profile-scoped sets.</summary>
+    public string PackKey { get; set; } = string.Empty;
 }
 
 public sealed class UserReportPlaceholderCatalogEntry
@@ -56,6 +87,8 @@ public sealed class UserReportPlaceholderCatalogEntry
     public required string LabelTr { get; init; }
 
     public bool IsImage { get; init; }
+
+    public UserReportPlaceholderPack Pack { get; init; } = UserReportPlaceholderPack.Unknown;
 
     public string GetLabel(string? cultureName)
     {

@@ -92,7 +92,7 @@ export function renderTemplateListRow(t) {
 
 /** @param {object} opts — visible, paginationHtml, globalSearch, viewToggleHtml, chipsHtml */
 export function renderTemplateCatalog(opts) {
-  const { visible, globalSearch, viewToggleHtml, chipsHtml, paginationHtml } = opts;
+  const { visible, globalSearch, viewToggleHtml, chipsHtml, paginationHtml, headActionsHtml } = opts;
   const rows = visible.map(renderTemplateListRow).join('');
   const cards = visible.map(renderTemplateGridCard).join('');
   const list = `<div class="os-panel"><table class="os-table"><thead><tr>
@@ -104,7 +104,8 @@ export function renderTemplateCatalog(opts) {
   return `<div class="os-page-head">
     <div><h1>Profile templates</h1>
     <p>Configure reusable templates officers clone to stage application profiles.</p></div>
-    <button type="button" class="os-btn os-btn--success" id="btn-new-template">+ New template</button>
+    <div class="os-page-head__actions">${headActionsHtml ?? ''}
+      <button type="button" class="os-btn os-btn--success" id="btn-new-template">+ New template</button></div>
   </div>
   <div class="os-toolbar">
     <div class="tc-toolbar-search"><i class="bi bi-search"></i>

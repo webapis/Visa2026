@@ -12,7 +12,9 @@
 @using Visa2026.Module.Services.PreviewSlot
 @using Visa2026.Module.Services.WordReports
 @using Visa2026.Module.Services.UserReports
+@using Visa2026.Module.Services.TemplateConvert
 @using Visa2026.Module.BusinessObjects
+@using Microsoft.Extensions.Options
 @using System.Text.Json
 @using Visa2026.Module.Services.RuntimeLogging
 
@@ -35,6 +37,19 @@
                       SizeMode="SizeMode.Small"
                       CssClass="app-item-doc-copies__action-btn"
                       Click="@OpenPlaceholderManualAsync" />
+            @if (ShowConvertEntry)
+            {
+                <DxButton Text="Convert existing document"
+                          RenderStyle="ButtonRenderStyle.Link"
+                          SizeMode="SizeMode.Small"
+                          CssClass="app-item-doc-copies__action-btn"
+                          Click="@(() => OpenConvertAsync(manual: false))" />
+                <DxButton Text="Add prepared template"
+                          RenderStyle="ButtonRenderStyle.Link"
+                          SizeMode="SizeMode.Small"
+                          CssClass="app-item-doc-copies__action-btn"
+                          Click="@(() => OpenConvertAsync(manual: true))" />
+            }
         </div>
     }
     <div class="app-item-doc-copies__body">
@@ -227,6 +242,11 @@
     <ApplicationReportPackagePreviewDialog @ref="_previewDialog" />
 }
 
+@if (ShowConvertEntry)
+{
+    <TemplateConvertDialog @ref="_convertDialog" OnTemplateSaved="OnConvertSavedAsync" />
+}
+
 @code {
     [Parameter] public Guid ApplicationProfileInstanceId { get; set; }
     [Parameter] public WordReportPackageScope PackageScope { get; set; } = WordReportPackageScope.ApplicationProfileInstance;
@@ -247,8 +267,11 @@
     [Inject] private IJSRuntime JS { get; set; } = null!;
     [Inject] private IApplicationErrorReporter ErrorReporter { get; set; } = null!;
     [Inject] private IVisaPreviewSlotService PreviewSlotService { get; set; } = null!;
+    [Inject] private IOptions<TemplateAiConvertOptions> ConvertOptions { get; set; } = null!;
 
     private ApplicationReportPackagePreviewDialog? _previewDialog;
+    private TemplateConvertDialog? _convertDialog;
+    private bool _canConvertTemplates;
     private DotNetObjectReference<ApplicationReportPackageComponent>? _dotNetRef;
 
     private readonly HashSet<string> _selectedKeys = new(StringComparer.Ordinal);
@@ -391,6 +414,7 @@
     protected override void OnParametersSet()
     {
         _canEditUserTemplates = TemplateStagingUiService.CanEditTemplates();
+        _canConvertTemplates = TemplateConvertAccess.CanConvertTemplates();
 
         var currentKeys = CatalogEntries
             .Select(entry => entry.EntryKey)
@@ -407,6 +431,25 @@
             _selectedKeys.Add(key);
 
         _selectionInitialized = currentKeys.Count > 0;
+    }
+
+    /// <summary>
+    /// Product decision L13 keeps the instance-side entry opt-in. Until the per-user switch has a home
+    /// it is a deployment flag, and it always sits behind the template-authoring permission.
+    /// </summary>
+    private bool ShowConvertEntry =>
+        ConvertOptions.Value.Enabled
+        && ConvertOptions.Value.ShowInstanceEntry
+        && _canConvertTemplates
+        && ApplicationProfileInstanceId != Guid.Empty;
+
+    private Task OpenConvertAsync(bool manual) =>
+        _convertDialog?.OpenAsync(ApplicationProfileInstanceId, ApplicationNumber, manual) ?? Task.CompletedTask;
+
+    private async Task OnConvertSavedAsync()
+    {
+        if (RefreshRequested.HasDelegate)
+            await RefreshRequested.InvokeAsync();
     }
 
     private string EffectiveUiCulture =>

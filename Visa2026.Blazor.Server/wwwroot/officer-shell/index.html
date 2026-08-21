@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="styles/template-catalog.css" />
   <link rel="stylesheet" href="styles/pagination.css" />
   <link rel="stylesheet" href="styles/staged-workspace.css" />
+  <link rel="stylesheet" href="styles/template-convert.css" />
 </head>
 <body>
   <div class="os-app">
@@ -24,11 +25,13 @@
       <header class="os-topbar">
         <div class="os-topbar__crumb" id="os-breadcrumb"></div>
         <div class="os-topbar__grow"></div>
+        <div id="os-topbar-tools"></div>
         <span style="font-size:0.78rem;color:var(--os-muted)">Prototype · mock data</span>
       </header>
       <main class="os-content" id="os-content"></main>
     </div>
   </div>
+  <div id="os-modal"></div>
   <script type="module" src="js/main.js"></script>
 </body>
 </html>

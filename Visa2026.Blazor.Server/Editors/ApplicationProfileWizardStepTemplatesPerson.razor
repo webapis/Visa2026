@@ -2,14 +2,17 @@
 @using DevExpress.ExpressApp
 @using DevExpress.Persistent.BaseImpl.EF
 @using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.Extensions.Options
 @using Microsoft.JSInterop
 @using Visa2026.Blazor.Server.Services
 @using Visa2026.Module.BusinessObjects
 @using Visa2026.Module.Services.ApplicationProfileWizard
+@using Visa2026.Module.Services.TemplateConvert
 @using Visa2026.Module.Services.UserReports
 @using Visa2026.Module.Services.WordReports
 @implements IDisposable
 @inject UserReportTemplateStagingUiService TemplateStagingUiService
+@inject IOptions<TemplateAiConvertOptions> ConvertOptions
 @inject IJSRuntime JS
 
 <div class="ap-wizard__panel-head">
@@ -52,8 +55,8 @@
                             @foreach (var item in ApplicabilityLookups)
                             {
                                 <option value="@item.Id.ToString("D")">@item.DisplayName</option>
-                            }
-                        </select>
+                                    }
+                                </select>
                         @if (CanPreviewProfileTemplate(template) || !Disabled)
                         {
                             <div class="ap-wizard__row-actions">
@@ -64,7 +67,7 @@
                                 @if (!Disabled)
                                 {
                                     <button type="button" class="ap-wizard__link" @onclick="() => OpenEdit(template)">Edit</button>
-                                    <button type="button" class="ap-wizard__link" @onclick="() => OnRemoveTemplate.InvokeAsync(template)">Remove</button>
+                                <button type="button" class="ap-wizard__link" @onclick="() => OnRemoveTemplate.InvokeAsync(template)">Remove</button>
                                 }
                             </div>
                         }
@@ -79,6 +82,12 @@
         @if (!Disabled)
         {
             <button type="button" class="ap-wizard__btn ap-wizard__btn--secondary ap-wizard__add-template" @onclick="OpenAdd">+ Add template</button>
+            @if (ShowConvertEntry)
+            {
+                <button type="button" class="ap-wizard__btn ap-wizard__btn--secondary ap-wizard__add-template"
+                        title="Upload a filled Word or Excel file and turn it into a template"
+                        @onclick="OpenConvertAsync">Convert existing document</button>
+            }
         }
     </div>
 
@@ -165,7 +174,7 @@
             <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonRejectionItem" disabled="@Disabled" /> Rejection item</label>
             @if (!IsBusinessTripProfile)
             {
-                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonTravelHistory" disabled="@Disabled" /> Travel history</label>
+            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonTravelHistory" disabled="@Disabled" /> Travel history</label>
             }
         </div>
     </div>
@@ -476,6 +485,8 @@
     </div>
 }
 
+<TemplateConvertDialog @ref="_convertDialog" OnTemplateSaved="OnConvertSaved" />
+
 @code {
     private sealed class DataScopeOption
     {
@@ -556,6 +567,8 @@
     private bool _editStatusIsError;
     private bool _editBusy;
     private bool _canStageTemplates;
+    private bool _canConvertTemplates;
+    private TemplateConvertDialog? _convertDialog;
     private Guid _linkedUserReportTemplateId;
     private DotNetObjectReference<ApplicationProfileWizardStepTemplatesPerson>? _dotNetRef;
 
@@ -570,7 +583,29 @@
             Profile.RequirePersonTravelHistory = false;
 
         _canStageTemplates = TemplateStagingUiService.CanEditTemplates();
+        _canConvertTemplates = TemplateConvertAccess.CanConvertTemplates();
         RefreshCatalog();
+    }
+
+    /// <summary>
+    /// Wizard side is not behind the L13 per-user switch: whoever edits a profile is already authoring templates.
+    /// Only the master flag and the template-authoring permission apply.
+    /// </summary>
+    private bool ShowConvertEntry =>
+        ConvertOptions.Value.Enabled && _canConvertTemplates && ObjectSpace != null;
+
+    private async Task OpenConvertAsync()
+    {
+        if (!ShowConvertEntry || _convertDialog == null || ObjectSpace == null)
+            return;
+
+        await _convertDialog.OpenForProfileAsync(Profile, ObjectSpace);
+    }
+
+    private void OnConvertSaved()
+    {
+        RefreshCatalog();
+        StateHasChanged();
     }
 
     private bool IsBusinessTripProfile =>

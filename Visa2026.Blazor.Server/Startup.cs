@@ -37,6 +37,7 @@ using Visa2026.Module.Services.RuntimeLogging;
 using Visa2026.Module.DatabaseUpdate;
 using Visa2026.Module.Services.ImportHistory;
 using Visa2026.Module.Services.ReportDashboard;
+using Visa2026.Module.Services.TemplateConvert;
 using Visa2026.Blazor.Server.Services.ImportHistory;
 
 namespace Visa2026.Blazor.Server
@@ -235,6 +236,7 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<IExcelReportGenerator, ExcelReportGenerator>();
             services.AddSingleton<IUserReportPlaceholderCatalogService, UserReportPlaceholderCatalogService>();
         services.AddUserReportTemplateStaging(Configuration);
+            services.AddTemplateConvert(Configuration);
             services.AddHostedService<TempFileCleanupService>();
             services.AddHostedService<PdfGenerationBatchWorkerService>();
             services.AddHostedService<WordReportGenerationBatchWorkerService>();

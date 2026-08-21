@@ -1,0 +1,152 @@
+@namespace Visa2026.Blazor.Server.Editors
+@using Visa2026.Module.Services.TemplateConvert
+
+@* Read-only document projection with candidate highlights drawn on top. *@
+
+@if (!Outline.IsReadable)
+{
+    <p class="tac-note tac-note--fail">This file could not be read. It may be password protected or saved in an older format.</p>
+}
+else if (Outline.Format == TemplateSourceFormat.Docx)
+{
+    <div class="tac-doc">
+        @foreach (var paragraph in Outline.Paragraphs)
+        {
+            @if (paragraph.Text.Length == 0)
+            {
+                <p class="tac-doc__row">&nbsp;</p>
+            }
+            else
+            {
+                <p class="tac-doc__row">
+                    @foreach (var segment in Segments(paragraph))
+                    {
+                        @if (segment.Kind == null)
+                        {
+                            @segment.Text
+                        }
+                        else
+                        {
+                            <span class="tac-hl @(segment.Kind == HighlightKind.Match ? "tac-hl--match" : "tac-hl--gap")"
+                                  title="@segment.Token">@segment.Text</span>
+                        }
+                    }
+                </p>
+            }
+        }
+    </div>
+}
+else
+{
+    @foreach (var sheet in Outline.Sheets)
+    {
+        var rows = VisibleRows(sheet);
+        var columns = VisibleColumns(sheet);
+        <div>
+            <span class="tac-sheet__tab">@sheet.Name</span>
+            <table class="tac-sheet__grid">
+                <thead>
+                    <tr>
+                        <th class="tac-sheet__rownum"></th>
+                        @foreach (var column in columns)
+                        {
+                            <th>@ColumnLetter(column)</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in rows)
+                    {
+                        <tr>
+                            <td class="tac-sheet__rownum">@row</td>
+                            @foreach (var column in columns)
+                            {
+                                var cell = Cell(sheet, row, column);
+                                var kind = cell == null ? null : KindFor(sheet.Name, cell.CellReference);
+                                <td class="@CellCssClass(kind)">@cell?.Text</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            @if (sheet.Cells.Count > 0 && rows.Count < sheet.Cells.Max(c => c.RowNumber))
+            {
+                <p class="tac-note">Showing the first @rows.Count rows.</p>
+            }
+        </div>
+    }
+}
+
+@code {
+    private const int MaxRows = 40;
+    private const int MaxColumns = 12;
+
+    [Parameter, EditorRequired] public TemplateDocumentOutline Outline { get; set; } = null!;
+    [Parameter] public IReadOnlyList<HighlightRegion> Highlights { get; set; } = Array.Empty<HighlightRegion>();
+
+    private IEnumerable<(string Text, HighlightKind? Kind, string? Token)> Segments(TemplateOutlineParagraph paragraph)
+    {
+        var text = paragraph.Text;
+        var spans = Highlights
+            .Where(h => h.Region is DocumentRegion.WordSpan span
+                        && span.ParagraphAddress == paragraph.Address
+                        && span.Start >= 0
+                        && span.Start + span.Length <= text.Length)
+            .Select(h => (Span: (DocumentRegion.WordSpan)h.Region, h.Kind, h.Token))
+            .OrderBy(x => x.Span.Start)
+            .ToList();
+
+        var position = 0;
+        foreach (var (span, kind, token) in spans)
+        {
+            if (span.Start < position)
+                continue;
+
+            if (span.Start > position)
+                yield return (text[position..span.Start], null, null);
+
+            yield return (text.Substring(span.Start, span.Length), kind, token);
+            position = span.Start + span.Length;
+        }
+
+        if (position < text.Length)
+            yield return (text[position..], null, null);
+    }
+
+    private static IReadOnlyList<int> VisibleRows(TemplateOutlineSheet sheet) =>
+        sheet.Cells.Select(c => c.RowNumber).Distinct().OrderBy(r => r).Take(MaxRows).ToList();
+
+    private static IReadOnlyList<int> VisibleColumns(TemplateOutlineSheet sheet) =>
+        sheet.Cells.Select(c => c.ColumnNumber).Distinct().OrderBy(c => c).Take(MaxColumns).ToList();
+
+    private static TemplateOutlineCell? Cell(TemplateOutlineSheet sheet, int row, int column) =>
+        sheet.Cells.FirstOrDefault(c => c.RowNumber == row && c.ColumnNumber == column);
+
+    private HighlightKind? KindFor(string sheetName, string cellReference) =>
+        Highlights
+            .Where(h => h.Region is DocumentRegion.ExcelCell cell
+                        && string.Equals(cell.SheetName, sheetName, StringComparison.OrdinalIgnoreCase)
+                        && string.Equals(cell.CellReference, cellReference, StringComparison.OrdinalIgnoreCase))
+            .Select(h => (HighlightKind?)h.Kind)
+            .FirstOrDefault();
+
+    private static string CellCssClass(HighlightKind? kind) => kind switch
+    {
+        HighlightKind.Match => "tac-cell--match",
+        HighlightKind.Gap => "tac-cell--gap",
+        _ => string.Empty,
+    };
+
+    private static string ColumnLetter(int column)
+    {
+        var letters = string.Empty;
+        while (column > 0)
+        {
+            var remainder = (column - 1) % 26;
+            letters = (char)('A' + remainder) + letters;
+            column = (column - 1) / 26;
+        }
+
+        return letters;
+    }
+}

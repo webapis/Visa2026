@@ -93,11 +93,39 @@ Sign-off: **Layout** | **Copy** | **Colors/states** | **Date** | **Notes**
 
 
 
+## Template AI convert (slice E7a)
+
+PNGs live in [`docs/prototypes/`](../../../../docs/prototypes/), not in `assets/png/`. Convert opens as a **modal**, so the route below only decides the page behind it.
+
+| PNG                                       | Route                            | L   | C   | Col | Status | Notes                                                        |
+| ----------------------------------------- | -------------------------------- | --- | --- | --- | ------ | ------------------------------------------------------------ |
+| `template-ai-convert-01-upload.png`       | `#/templates?convert=upload`     | ☐   | ☐   | ☐   | ✅      | PNG draws a 2-step stepper; built with the spec §4 five stages |
+| `template-ai-convert-02-candidate-check.png` | `#/templates?convert=candidate` | ☐   | ☐   | ☐   | ✅      | Suitability, chips, criteria, legend; no zoom toolbar yet     |
+| `template-ai-convert-05-converting.png`   | `#/templates?convert=converting` | ☐   | ☐   | ☐   | ✅      | 4 steps, auto-advance ~550 ms                                  |
+| `template-ai-convert-03-preview-chat.png` | `#/templates?convert=preview`    | ☐   | ☐   | ☐   | ✅      | Filled / Placeholders / Highlights tabs + mapping chat         |
+| `template-ai-convert-04-done.png`         | `#/templates?convert=done`       | ☐   | ☐   | ☐   | ✅      | Summary table + manual-add note                                |
+| `template-ai-convert-13-excel-roster.png` | `#/templates?convert=roster`     | ☐   | ☐   | ☐   | 🟡     | Sheet grid + row loop chips; no column headers styling pass    |
+| `template-ai-convert-12-needs-help-gaps.png` | `#/templates?convert=help`    | ☐   | ☐   | ☐   | 🟡     | Gap list + Back; packet export is an alert stub                |
+| `template-ai-convert-14-shared-confirm.png` | `#/templates?convert=confirm`  | ☐   | ☐   | ☐   | ✅      | One dialog covers Shared **and** remaining gaps                |
+| `template-ai-convert-06-candidate-fail.png` | `#/templates?convert=fail`     | ☐   | ☐   | ☐   | ✅      | HR-memo fixture; Convert disabled with reason hint             |
+| `template-ai-convert-07-candidate-warn.png` | `#/templates?convert=warn`     | ☐   | ☐   | ☐   | ✅      | Hand-tokenized draft; **Continue with warnings** gates Convert |
+| `template-ai-convert-10-validate-fail.png` | `#/templates?convert=validate-fail` | ☐ | ☐ | ☐ | ✅      | Error rail replaces chat; broken tokens marked inline          |
+| `template-ai-convert-11-config-locked.png` | `#/templates?convert=locked`    | ☐   | ☐   | ☐   | ✅      | Badge + banner; `?locked=1` locks any stage                    |
+| `template-ai-convert-16-fill-preview-fallback.png` | `#/templates?convert=fill-error` | ☐ | ☐ | ☐ | ✅   | Tab marked *(error)*, token fallback, Approve still allowed    |
+| `template-ai-convert-08-manual-add-ai-off.png` | `#/templates?convert=manual` · `?ai=off` | ☐ | ☐ | ☐ | ✅ | L12 manual mode; AI-off disables Convert with an `AI off` badge |
+| `template-ai-convert-09-chat-reject-rewrite.png` | `#/templates?convert=preview` | ☐ | ☐ | ☐ | ✅   | Behavior inside V4: ask for a font change, get the refusal bubble |
+| `template-ai-convert-15-wizard-instance-picker.png` | `#/templates?convert=upload` | ☐ | ☐ | ☐ | ✅  | Behavior inside V1: instance select when `source = catalog`    |
+
+Flow reference: [`docs/TEMPLATE_AI_CONVERT_UI_FLOW.md`](../../../../docs/TEMPLATE_AI_CONVERT_UI_FLOW.md) (views V0–V11 and every transition).
+
+Guard regression for the edge states: `node parity/smoke-edge.mjs` from the `officer-shell` folder — it renders V8–V11 headlessly and asserts each disabled button and acknowledge gate.
+
 ## Gate checks
 
 - [x] Primary flows work without console errors
 - [x] List ↔ Grid ↔ Grouped toggle on staged; List ↔ Grid on in-process / templates
 - [x] Start process banner when selection blocked
 - [x] Wizard `#/templates/wizard/{0-4}`
+- [x] Convert modal reachable from the templates catalog, and from a case only while the topbar **Template convert editor** switch is on (L13)
 
 **H7 deferred:** Person DetailView staging — no PNG in set.

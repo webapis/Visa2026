@@ -79,10 +79,25 @@ public sealed class UserReportPlaceholderCatalogService : IUserReportPlaceholder
                 LabelRu = GetLabel(dto.Labels, "ru-RU"),
                 LabelTr = GetLabel(dto.Labels, "tr-TR"),
                 IsImage = dto.IsImage,
+                Pack = ParsePack(dto.PackKey),
             });
         }
 
         return list;
+    }
+
+    /// <summary>
+    /// An unrecognised or missing <c>packKey</c> stays <see cref="UserReportPlaceholderPack.Unknown"/> so a typo
+    /// excludes the token from profile-scoped sets rather than leaking it into every profile.
+    /// </summary>
+    private static UserReportPlaceholderPack ParsePack(string? packKey)
+    {
+        if (string.IsNullOrWhiteSpace(packKey))
+            return UserReportPlaceholderPack.Unknown;
+
+        return Enum.TryParse<UserReportPlaceholderPack>(packKey.Trim(), ignoreCase: true, out var parsed)
+            ? parsed
+            : UserReportPlaceholderPack.Unknown;
     }
 
     private static UserReportPlaceholderScope ParseScope(IReadOnlyList<string>? scopes)

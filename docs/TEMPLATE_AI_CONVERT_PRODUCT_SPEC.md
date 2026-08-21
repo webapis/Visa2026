@@ -133,6 +133,22 @@ Cursor / IDE agents remain **developer** tools only — not a runtime provider.
 
 Manual path does **not** require Candidate check highlights or chat. Same Extract/Validate and L10 token rules on save.
 
+### L13 — Convert editor switch on the instance (locked 2026-08-21)
+
+Template authoring inside a live case is a minority activity, so the instance entry point is **opt-in**.
+
+| Rule | Decision |
+|------|----------|
+| Default | **Off.** No Convert entry appears in the case workspace. |
+| Scope | **Per user**, as a UI preference — not per profile, not per case. Turning it on once keeps it on across cases. |
+| Visibility of the switch | Only for officers holding the template-authoring permission (§8). Others never see the switch or the entry. |
+| Relationship to the AI flag | **Independent.** The switch reveals the entry; whether that entry offers AI Convert or only **Add prepared template** still follows L12. |
+| Profile-side entry | **Unaffected.** The Application Profile template catalog and wizard Step 4 always show Convert (subject to L12 and the config lock). |
+| Config lock | Unchanged — the switch never bypasses §3 *Config lock*. |
+| **Where the switch is stored** | **Open (2026-08-21).** It must persist per user across cases, so component state is not enough. Candidates: **(a)** an `ApplicationUser` column following the `PreferredThemeCaption` / `PreferredCulture` pattern (`UserThemeController` + `UserThemeHelper`) — consistent, but a schema change, so it queues behind the slice 10 heal like E4; **(b)** an XAF per-user `ModelDifference` value (already wired in `Module.cs`) — no schema change, available immediately. Until this is decided, E7b ships both entry buttons behind a hardcoded-off flag plus the §8 template-authoring permission. |
+
+**Why:** casework and template authoring are different jobs. Hiding the authoring entry keeps the case workspace clean for the majority of officers, without moving the primary mapping context (L1: the instance) somewhere else.
+
 ### L7 — Candidate suitability and highlight
 
 The uploaded file is a **template candidate**. The system must decide whether it is convertible and show **where** library placeholders will replace text.
@@ -212,9 +228,16 @@ flowchart LR
 
 | Where | Priority | Behavior |
 |-------|----------|----------|
-| **Application Profile Instance** case workspace (e.g. Templates / Resminamalar-adjacent action) | **Primary for AI Convert** | AI Convert uses **only this** instance as mapping data. Catalog target defaults to **Profile-specific** on the parent profile. Preview merges against this instance. **Add prepared template** also available here (L12). |
+| **Application Profile Instance** case workspace (e.g. Templates / Resminamalar-adjacent action) | **Primary for AI Convert** | AI Convert uses **only this** instance as mapping data. Catalog target defaults to **Profile-specific** on the parent profile. Preview merges against this instance. **Add prepared template** also available here (L12). **Hidden unless the officer turns on the convert editor — see L13.** |
 | Application Profile wizard → **Templates** (Step 4) | Always | **Add prepared template** always available (L12). AI Convert **requires** a concrete instance; without instance or AI, only manual Add / Include / staging. Same save rules (B default / C opt-in). |
 | Profile-specific / Shared lists | Always | Manual Add/Include without AI. AI Convert only with instance context + provider enabled. |
+
+**Where these live in real code (locked 2026-08-21, for E7b):**
+
+| Entry | Host | Note |
+|-------|------|------|
+| Profile side | **`ApplicationProfileWizardStepTemplatesPerson.razor`**, beside the existing **`+ Add template`** button | The mock's "Profile templates" page head has no real counterpart — the navigation item of that name renders `ApplicationProfileCatalogComponent`, which lists **Application Profiles**, not templates. The wizard Templates step is the real template list. |
+| Instance side | **`ApplicationReportPackageComponent.razor`**, in the existing top action row (`Select all` / `Clear selection` / `Placeholder manual`) | **Not** in either host wrapper. That one component is rendered by both `ResminamalarSlotPanel.razor` (the DetailView drawer) and `OfficerShellCaseResminamalarTab.razor`; putting the button in a wrapper would hide the feature from whichever path the officer happens to use. The prototype's banner-style bar was a review affordance, not the target chrome. |
 
 ### Config lock
 
@@ -229,6 +252,10 @@ flowchart LR
 ## 4. Screens
 
 Five stages in one modal / wizard flow, plus a **chat panel** on Preview for mapping adjustments (L9). Officer never sees a placeholder **mapping grid**. Highlights show *what* will change; chat refines mapping only (L8).
+
+**Interaction detail:** which control leads to which view — including guards, the discard prompt, and the confirm dialog — lives in [`TEMPLATE_AI_CONVERT_UI_FLOW.md`](TEMPLATE_AI_CONVERT_UI_FLOW.md). This section stays the *purpose* of each screen; that doc is the wiring.
+
+**Host (locked 2026-08-21):** a **self-contained modal**, not an occupant of the global `#visa-preview-slot`. Convert is authoring, not preview, and it must not contend with the slot's exclusive-mode rules while an officer has Resminamalar or Document copies open. The modal owns its own document viewport. Revisit only if the Preview stage needs slot-grade zoom/resize.
 
 ### 4.1 Upload
 
@@ -413,6 +440,7 @@ Validate (and Extract) reuse existing `UserReportTemplate` rules. Officer still 
 | **Config locked** | Profile templates read-only | **Use template** disabled; message points to lock policy |
 | **No instance context** | AI convert attempted without instance | Convert disabled; do not call AI |
 | **Candidate unsuitable** | L7 Hard Fail (no overlap, unreadable, etc.) | Stay on Candidate check; Convert disabled |
+| **Candidate soft warn** | L7 Warn band (3–5 matches, already tokenized, ambiguous spans) | Convert allowed after checkbox “Continue with warnings” — a run spends an AI call, so the officer confirms before paying for it (PNG 07) |
 
 ### 6.2 Officer experience (hard fail)
 

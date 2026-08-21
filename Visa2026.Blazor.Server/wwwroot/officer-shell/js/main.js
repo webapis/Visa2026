@@ -25,7 +25,18 @@ import {
 import { paginateSlice, renderPaginationBar } from './pagination-ui.js';
 import { renderStagedGroupedWorkspace } from './staged-workspace-ui.js';
 import { getApplicationProfileNavItems, renderNavBadge } from './nav-ui.js';
+import {
+  renderConvertModal, renderConvertEntryButton, renderConvertEditorSwitch,
+} from './template-convert-ui.js';
+import {
+  CONVERT_STAGES, getConvertState, isConvertEditorEnabled, setConvertEditorEnabled,
+  openConvert, closeConvert, setConvertField, pickConvertFile,
+  advanceConverting, sendConvertChat, approveConvert,
+  needsDiscardConfirm, setConfirm, approvalConfirmLines, abortConverting, openHelp, closeHelp,
+  setConfigLocked, isConvertAiEnabled, setConvertAiEnabled, addManualTemplate,
+} from './template-convert-data.js';
 
+let convertDeepLink = null;
 let route = parseRoute();
 let globalSearch = '';
 let tplRailSearch = '';
@@ -60,6 +71,13 @@ function parseRoute() {
   const [pathPart, queryPart] = raw.split('?');
   const query = new URLSearchParams(queryPart || '');
   const parts = pathPart.split('/').filter(Boolean);
+  // `?convert=<stage>` deep-links a convert stage so PNG parity can be reviewed without clicking through;
+  // `?editor=1` flips the L13 switch the same way, for reviewing the case-workspace entry.
+  convertDeepLink = query.get('convert');
+  if (query.get('editor') === '1') setConvertEditorEnabled(true);
+  if (query.get('locked') === '1') setConfigLocked(true);
+  // `?ai=off` mimics the per-slot provider flag (spec §7); it is deployment config, so there is no switch.
+  if (query.get('ai')) setConvertAiEnabled(query.get('ai') !== 'off');
   if (parts.length === 0) return { name: 'staged', grouped: query.get('group') === 'template' };
   if (parts[0] === 'staged') return { name: 'staged', grouped: query.get('group') === 'template' };
   if (parts[0] === 'case' && parts[1]) return { name: 'case', id: parts[1], tab: parts[2] || 'overview' };
@@ -322,7 +340,7 @@ function renderCase() {
     layoutCls = ' cw-layout--docs';
     mainCls = ' cw-main--wide';
   } else if (tab === 'resminamalar') {
-    main = renderCaseResminamalarTab(c);
+    main = convertEntryBar() + renderCaseResminamalarTab(c);
     layoutCls = ' cw-layout--docs';
     mainCls = ' cw-main--wide';
   } else if (tab === 'sla') {
@@ -342,12 +360,25 @@ function renderCase() {
     </div>`;
 }
 
+/** L13: the case-workspace entry is opt-in; the profile template catalog always shows Convert. */
+function convertEntryBar() {
+  if (!isConvertEditorEnabled()) return '';
+  const aiOff = !isConvertAiEnabled();
+  return `<div class="tac-entry">
+    <div><strong>Template convert editor</strong>
+      <p>${aiOff
+        ? 'AI conversion is not enabled here — upload a prepared template, or author one with desktop staging.'
+        : 'Turn a completed letter or spreadsheet from this case into a reusable profile template.'}</p></div>
+    ${renderConvertEntryButton({ source: 'instance' })}</div>`;
+}
+
 function renderTemplates() {
   const s = getStore();
   const filtered = filterTemplates(s.templates, s);
   const pg = paginateSlice(filtered, s.pagination.templates);
   if (pg.page !== s.pagination.templates.page) s.pagination.templates.page = pg.page;
   return renderTemplateCatalog({
+    headActionsHtml: renderConvertEntryButton({ source: 'catalog', compact: true }),
     visible: pg.pageItems,
     paginationHtml: renderPaginationBar('templates', pg),
     globalSearch,
@@ -535,6 +566,204 @@ function bindEvents() {
       setRoute(parseRoute());
     });
   });
+  document.querySelectorAll('[data-tac-open]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      openConvert({ source: btn.dataset.tacOpen, instanceId: null, mode: btn.dataset.tacMode || 'convert' });
+      renderModal();
+    });
+  });
+  document.getElementById('tac-editor-switch')?.addEventListener('change', e => {
+    setConvertEditorEnabled(e.target.checked);
+    setRoute(parseRoute());
+  });
+}
+
+/** Deep-link name → which fixture and which stage it lands on. */
+const CONVERT_LINKS = {
+  roster: { file: 'roster', stage: 'candidate' },
+  fail: { file: 'memo', stage: 'candidate' },
+  warn: { file: 'draft', stage: 'candidate' },
+  'validate-fail': { file: 'draft', stage: 'preview', previewTab: 'tokens' },
+  locked: { file: 'letter', stage: 'preview', locked: true },
+  confirm: { file: 'letter', stage: 'preview' },
+  'fill-error': { file: 'letter', stage: 'preview', fillError: true },
+  manual: { file: null, stage: 'upload', mode: 'manual' },
+};
+
+function applyConvertDeepLink() {
+  if (!convertDeepLink) return;
+  const state = getConvertState();
+  if (state.open) return;
+  const link = CONVERT_LINKS[convertDeepLink] ?? { file: 'letter', stage: convertDeepLink };
+  openConvert({ source: route.name === 'case' ? 'instance' : 'catalog', mode: link.mode || 'convert' });
+  if (link.file) pickConvertFile(link.file);
+  if (link.locked) setConfigLocked(true);
+  if (link.fillError) setConvertField('fillPreviewFailed', true);
+  const stage = link.stage;
+  if (CONVERT_STAGES.includes(stage)) setConvertField('stage', stage);
+  if (link.previewTab) setConvertField('previewTab', link.previewTab);
+  if (stage === 'converting') { setConvertField('progress', 50); setConvertField('stepIndex', 2); }
+  if (stage === 'done') approveConvert();
+  if (convertDeepLink === 'confirm') {
+    setConvertField('catalogTarget', 'shared');
+    setConfirm({
+      key: 'approve',
+      title: 'Save this template?',
+      lines: approvalConfirmLines(),
+      okLabel: 'Save template',
+      cancelLabel: 'Cancel',
+    });
+  }
+}
+
+/** Modal-only re-render: page listeners stay bound because the page DOM is untouched. */
+function renderModal() {
+  document.getElementById('os-modal').innerHTML = renderConvertModal();
+  bindConvertEvents();
+}
+
+function tickConverting() {
+  if (getConvertState().stage !== 'converting') return;
+  const finished = advanceConverting();
+  renderModal();
+  if (!finished) setTimeout(tickConverting, 550);
+}
+
+/** Single close path (flow doc §2): everything between Upload and Done asks before discarding. */
+function requestCloseConvert() {
+  if (needsDiscardConfirm()) {
+    setConfirm({
+      key: 'discard',
+      title: 'Discard this conversion?',
+      lines: ['The uploaded file, the highlights, and any mapping chat are lost.'],
+      okLabel: 'Discard',
+      cancelLabel: 'Keep working',
+    });
+  } else {
+    closeConvert();
+  }
+  renderModal();
+}
+
+function resolveConfirm(accepted) {
+  const key = getConvertState().confirm?.key;
+  setConfirm(null);
+  if (accepted && key === 'discard') closeConvert();
+  if (accepted && key === 'approve') approveConvert();
+  renderModal();
+}
+
+function bindConvertEvents() {
+  const root = document.getElementById('os-modal');
+  if (!root.firstChild) return;
+  const state = getConvertState();
+
+  root.querySelectorAll('[data-tac-confirm]').forEach(btn => {
+    btn.addEventListener('click', () => resolveConfirm(btn.dataset.tacConfirm === 'ok'));
+  });
+  root.querySelectorAll('[data-tac-close]').forEach(btn => {
+    btn.addEventListener('click', requestCloseConvert);
+  });
+  root.querySelector('[data-tac-backdrop]')?.addEventListener('mousedown', e => {
+    if (e.target === e.currentTarget && !state.confirm) requestCloseConvert();
+  });
+
+  root.querySelectorAll('[data-tac-field]').forEach(el => {
+    const field = el.dataset.tacField;
+    const event = el.tagName === 'INPUT' && el.type !== 'radio' ? 'input' : 'change';
+    el.addEventListener(event, () => {
+      setConvertField(field, el.type === 'checkbox' ? el.checked : el.value);
+      if (event === 'change') renderModal();
+      else {
+        const analyze = root.querySelector('#tac-analyze');
+        if (analyze) analyze.disabled = !state.templateName.trim() || !state.fileId;
+      }
+    });
+  });
+
+  root.querySelectorAll('[data-tac-file]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.tacFile;
+      if (id) pickConvertFile(id);
+      else setConvertField('fileId', null);
+      renderModal();
+    });
+  });
+
+  root.querySelector('#tac-analyze')?.addEventListener('click', () => {
+    setConvertField('stage', 'candidate');
+    renderModal();
+  });
+  root.querySelector('#tac-try-another')?.addEventListener('click', () => {
+    setConvertField('stage', 'upload');
+    renderModal();
+  });
+  root.querySelector('#tac-needs-help')?.addEventListener('click', () => { openHelp(); renderModal(); });
+  root.querySelector('#tac-help-back')?.addEventListener('click', () => { closeHelp(); renderModal(); });
+  root.querySelector('#tac-help-download')?.addEventListener('click', () => {
+    alert('Gap packet exported as JSON + Markdown for developer handoff — mock only.');
+  });
+  root.querySelector('#tac-abort')?.addEventListener('click', () => { abortConverting(); renderModal(); });
+  root.querySelector('#tac-convert')?.addEventListener('click', () => {
+    setConvertField('stage', 'converting');
+    setConvertField('progress', 0);
+    setConvertField('stepIndex', 0);
+    renderModal();
+    setTimeout(tickConverting, 400);
+  });
+  root.querySelector('#tac-convert-again')?.addEventListener('click', () => {
+    setConvertField('stage', 'candidate');
+    renderModal();
+  });
+  root.querySelectorAll('[data-tac-preview-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      setConvertField('previewTab', btn.dataset.tacPreviewTab);
+      renderModal();
+    });
+  });
+  root.querySelector('#tac-ack')?.addEventListener('change', e => {
+    setConvertField('acknowledgedWarnings', e.target.checked);
+    renderModal();
+  });
+  root.querySelector('#tac-ack-candidate')?.addEventListener('change', e => {
+    setConvertField('acknowledgedCandidate', e.target.checked);
+    renderModal();
+  });
+  root.querySelector('#tac-add-manual')?.addEventListener('click', () => {
+    addManualTemplate();
+    renderModal();
+  });
+  root.querySelector('#tac-approve')?.addEventListener('click', () => {
+    const lines = approvalConfirmLines();
+    if (lines.length) {
+      setConfirm({ key: 'approve', title: 'Save this template?', lines, okLabel: 'Save template', cancelLabel: 'Cancel' });
+    } else {
+      approveConvert();
+    }
+    renderModal();
+  });
+
+  const chatInput = root.querySelector('#tac-chat-input');
+  const send = () => {
+    if (!chatInput.value.trim()) return;
+    sendConvertChat(chatInput.value);
+    renderModal();
+    document.getElementById('tac-chat-input')?.focus();
+  };
+  root.querySelector('#tac-chat-send')?.addEventListener('click', send);
+  chatInput?.addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+
+  root.querySelector('#tac-open-catalog')?.addEventListener('click', () => {
+    closeConvert();
+    navigate('#/templates');
+  });
+  root.querySelector('#tac-staging')?.addEventListener('click', () => {
+    alert('Desktop staging link opened — mock only.');
+  });
+  root.querySelector('#tac-convert-another')?.addEventListener('click', () => {
+    openConvert({ source: state.source, instanceId: state.instanceId });
+    renderModal();
+  });
 }
 
 function resetPaginationForRoute() {
@@ -553,9 +782,20 @@ function render() {
   document.querySelector('.os-app').classList.toggle('os-app--wizard', isWizard);
   document.getElementById('os-sidebar').innerHTML = renderSidebar(isWizard);
   document.getElementById('os-breadcrumb').innerHTML = breadcrumbs();
+  document.getElementById('os-topbar-tools').innerHTML = renderConvertEditorSwitch(isConvertEditorEnabled());
   document.getElementById('os-content').innerHTML = renderContent();
+  applyConvertDeepLink();
+  renderModal();
   bindEvents();
 }
+
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  const state = getConvertState();
+  if (!state.open) return;
+  if (state.confirm) { setConfirm(null); renderModal(); return; }
+  requestCloseConvert();
+});
 
 window.addEventListener('hashchange', () => setRoute(parseRoute()));
 if (!location.hash) location.hash = '#/staged';
