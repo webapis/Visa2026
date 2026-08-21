@@ -29,8 +29,6 @@ public static class ApplicationProfilePickerApplyHelper
         // Dual-write Type FK for legacy SQL/report paths until slice 13b drops the column.
         if (matchingType != null)
             application.ApplicationType = matchingType;
-
-        objectSpace.SetModified(application);
     }
 
     public static ApplicationType? FindMatchingApplicationType(IObjectSpace objectSpace, ApplicationProfile profile)

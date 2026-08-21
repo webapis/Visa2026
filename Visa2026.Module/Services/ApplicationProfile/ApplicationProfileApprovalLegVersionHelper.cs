@@ -124,6 +124,21 @@ public static class ApplicationProfileApprovalLegVersionHelper
         if (profile.ProgressRoute != ApplicationProfileInstanceProgressRouteKind.ViaMinistries)
             return true;
 
+        // Prefer a single keyed load for the write ObjectSpace — do not pull the entire
+        // shared catalog (MinistryLegs) into the commit graph.
+        if (requestedApprovalLegProfileId is Guid requestedId && requestedId != Guid.Empty)
+        {
+            sharedProfile = LoadSharedProfileWithLegs(objectSpace, requestedId);
+            if (sharedProfile == null || !sharedProfile.IsActive
+                || ApprovalLegProfileMinistryHelper.GetLegCount(sharedProfile) <= 0)
+            {
+                errorMessage = "Select a valid approval-leg version for this application.";
+                return false;
+            }
+
+            return true;
+        }
+
         var shared = GetSharedActiveProfiles(objectSpace);
         var nested = GetOrderedVersions(profile);
 
@@ -139,29 +154,17 @@ public static class ApplicationProfileApprovalLegVersionHelper
             return false;
         }
 
-        if (requestedApprovalLegProfileId is Guid id && id != Guid.Empty)
+        if (profile.DefaultApprovalLegProfileId is Guid defaultId && defaultId != Guid.Empty)
         {
-            sharedProfile = shared.FirstOrDefault(p => p.ID == id)
-                ?? objectSpace.GetObjectByKey<ApprovalLegProfile>(id);
-            if (sharedProfile == null || !sharedProfile.IsActive)
-            {
-                errorMessage = "Select a valid approval-leg version for this application.";
-                return false;
-            }
-
-            return true;
-        }
-
-        if (profile.DefaultApprovalLegProfile != null
-            && shared.Any(p => p.ID == profile.DefaultApprovalLegProfile.ID))
-        {
-            sharedProfile = profile.DefaultApprovalLegProfile;
-            return true;
+            sharedProfile = LoadSharedProfileWithLegs(objectSpace, defaultId)
+                ?? shared.FirstOrDefault(p => p.ID == defaultId);
+            if (sharedProfile != null)
+                return true;
         }
 
         if (shared.Count == 1)
         {
-            sharedProfile = shared[0];
+            sharedProfile = LoadSharedProfileWithLegs(objectSpace, shared[0].ID) ?? shared[0];
             return true;
         }
 
@@ -173,6 +176,17 @@ public static class ApplicationProfileApprovalLegVersionHelper
 
         errorMessage = "Choose which approval-leg version this application will follow.";
         return false;
+    }
+
+    public static ApprovalLegProfile? LoadSharedProfileWithLegs(IObjectSpace objectSpace, Guid approvalLegProfileId)
+    {
+        if (objectSpace == null || approvalLegProfileId == Guid.Empty)
+            return null;
+
+        return objectSpace.GetObjectsQuery<ApprovalLegProfile>()
+            .Include(p => p.MinistryLegs)
+                .ThenInclude(l => l.ApprovingMinistry)
+            .FirstOrDefault(p => p.ID == approvalLegProfileId);
     }
 
     public static bool TryResolveVersionForCreate(
@@ -247,7 +261,16 @@ public static class ApplicationProfileApprovalLegVersionHelper
             application.ApprovalLegSnapshots = new System.Collections.ObjectModel.ObservableCollection<ApplicationProfileInstanceApprovalLegSnapshot>();
 
         foreach (var existing in application.ApprovalLegSnapshots.ToList())
+        {
+            application.ApprovalLegSnapshots.Remove(existing);
+            if (objectSpace.IsNewObject(existing))
+            {
+                objectSpace.RemoveFromModifiedObjects(existing);
+                continue;
+            }
+
             objectSpace.Delete(existing);
+        }
 
         application.ApprovalLegVersionId = version?.ID;
         application.ApprovalLegVersionName = version?.Name;

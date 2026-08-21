@@ -584,7 +584,17 @@ public static class ApprovalLegProfileMinistryHelper
             application.ApprovalLegSnapshots = new System.Collections.ObjectModel.ObservableCollection<ApplicationProfileInstanceApprovalLegSnapshot>();
 
         foreach (var existing in application.ApprovalLegSnapshots.ToList())
+        {
+            application.ApprovalLegSnapshots.Remove(existing);
+            if (objectSpace.IsNewObject(existing))
+            {
+                // Never persisted — discard without soft-delete UPDATE (OptimisticLockField).
+                objectSpace.RemoveFromModifiedObjects(existing);
+                continue;
+            }
+
             objectSpace.Delete(existing);
+        }
 
         if (profile?.MinistryLegs == null)
             return;
@@ -619,6 +629,12 @@ public static class ApprovalLegProfileMinistryHelper
             return;
 
         if (!ApplicationProfileInstanceProgressProfileResolver.RequiresApprovalLegProfile(application))
+            return;
+
+        // New create already snapshotted (picker ApplySharedSnapshot). Do not soft-delete /
+        // recreate Added snapshot rows — that yields OptimisticLockField "changed by another user".
+        if (objectSpace.IsNewObject(application)
+            && (application.ApprovalLegSnapshots?.Count ?? 0) > 0)
             return;
 
         var expectedLegs = GetLegCount(application.ApprovalLegProfile);

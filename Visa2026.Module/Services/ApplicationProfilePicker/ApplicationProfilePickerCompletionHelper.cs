@@ -197,7 +197,8 @@ public static class ApplicationProfilePickerCompletionHelper
             ApplicationProfileApprovalLegVersionHelper.ApplySnapshot(objectSpace, nestedApp, nestedVersion);
             if (peopleToLink != null && peopleToLink.Count > 0)
                 ApplicationStartFromPersonHelper.LinkPeople(objectSpace, nestedApp, peopleToLink);
-            objectSpace.CommitChanges();
+            if (!TryCommitNewApplication(objectSpace, out errorMessage))
+                return false;
             applicationNumber = nestedApp.FullApplicationNumber ?? nestedApp.ApplicationNumber ?? nestedApp.ID.ToString();
             if (context?.StayOnSourceAfterCreate == true)
                 return true;
@@ -224,7 +225,9 @@ public static class ApplicationProfilePickerCompletionHelper
         if (peopleToLink != null && peopleToLink.Count > 0)
             ApplicationStartFromPersonHelper.LinkPeople(objectSpace, app, peopleToLink);
 
-        objectSpace.CommitChanges();
+        if (!TryCommitNewApplication(objectSpace, out errorMessage))
+            return false;
+
         applicationNumber = app.FullApplicationNumber ?? app.ApplicationNumber ?? app.ID.ToString();
 
         if (context?.StayOnSourceAfterCreate == true)
@@ -241,6 +244,31 @@ public static class ApplicationProfilePickerCompletionHelper
         ShowViewInCurrentWindow(application, workspaceView);
 
         return true;
+    }
+
+    private static bool TryCommitNewApplication(IObjectSpace objectSpace, out string? errorMessage)
+    {
+        errorMessage = null;
+        try
+        {
+            objectSpace.CommitChanges();
+            return true;
+        }
+        catch (UserFriendlyException ex)
+        {
+            errorMessage = ex.Message;
+            return false;
+        }
+        catch (Exception ex) when (
+            ex is Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException
+            || ex.InnerException is Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException
+            || (ex.Message?.Contains("changed by another user", StringComparison.OrdinalIgnoreCase) ?? false))
+        {
+            errorMessage =
+                "Could not save the new application (optimistic lock conflict). "
+                + "Close this picker, open New again, and retry.";
+            return false;
+        }
     }
 
     private static void ShowViewInCurrentWindow(XafApplication application, View view)
