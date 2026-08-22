@@ -84,7 +84,7 @@ internal static class Visa2014WorkPermitTransform
         return true;
     }
 
-    private static Visa2014PersonImportBatch TransformRows(
+    internal static Visa2014PersonImportBatch TransformRows(
         IReadOnlyList<Visa2014WorkPermitRawRow> rawRows,
         out List<Dictionary<string, object?>> skipped,
         out List<Dictionary<string, object?>> dedupeSummary)
