@@ -9,6 +9,9 @@ internal sealed class Visa2014LegacyDocumentCancellationIndex
     private readonly HashSet<Guid> _cancelledVisaOids = [];
     private readonly HashSet<Guid> _cancelledWorkPermitOids = [];
 
+    /// <summary>Empty index for unit tests / dry transforms with no cancellation evidence.</summary>
+    internal static Visa2014LegacyDocumentCancellationIndex Empty { get; } = new();
+
     internal const string EvidenceExtractSql = """
         SELECT
             CAST(pia.Visa AS varchar(36)) AS VisaOid,
