@@ -197,18 +197,24 @@ internal static class Visa2014ApplicationItemTransform
         var currentWorkPermitByPerson = Visa2014PersonCurrentFieldInference.BuildCurrentWorkPermitByPerson(
             connectionString,
             verbose);
-        var context = new ApplicationItemTransformContext(
-            visibility,
-            currentEducationByPerson,
-            currentWorkPermitByPerson);
-
+        var context = CreateTransformContext(visibility, currentEducationByPerson, currentWorkPermitByPerson);
         return TransformRows(rawRows, catalogs, context, out var skipped, out var unmappedDistinct, out var dedupeSummary);
     }
 
-    private sealed record ApplicationItemTransformContext(
+    internal sealed record ApplicationItemTransformContext(
         ApplicationTypeVisibilityCatalog Visibility,
         IReadOnlyDictionary<Guid, Guid> CurrentEducationByPerson,
         IReadOnlyDictionary<Guid, Guid> CurrentWorkPermitByPerson);
+
+    /// <summary>Test / dry-run helper — empty person-current maps when inference indexes are unavailable.</summary>
+    internal static ApplicationItemTransformContext CreateTransformContext(
+        ApplicationTypeVisibilityCatalog? visibility = null,
+        IReadOnlyDictionary<Guid, Guid>? currentEducationByPerson = null,
+        IReadOnlyDictionary<Guid, Guid>? currentWorkPermitByPerson = null) =>
+        new(
+            visibility ?? ApplicationTypeVisibilityCatalog.Load(),
+            currentEducationByPerson ?? new Dictionary<Guid, Guid>(),
+            currentWorkPermitByPerson ?? new Dictionary<Guid, Guid>());
 
     internal static bool TryParseRawRow(IReadOnlyDictionary<string, string?> row, out Visa2014ApplicationItemRawRow parsed)
     {
@@ -269,7 +275,7 @@ internal static class Visa2014ApplicationItemTransform
         return true;
     }
 
-    private static Visa2014PersonImportBatch TransformRows(
+    internal static Visa2014PersonImportBatch TransformRows(
         IReadOnlyList<Visa2014ApplicationItemRawRow> rawRows,
         IReadOnlyDictionary<string, Visa2014LookupCatalog> catalogs,
         ApplicationItemTransformContext context,
@@ -665,7 +671,7 @@ internal static class Visa2014ApplicationItemTransform
         row["BusinessTripCity"] = null;
     }
 
-    private static string BuildBorderZoneLocation(
+    internal static string BuildBorderZoneLocation(
         IReadOnlyDictionary<string, Visa2014LookupCatalog> catalogs,
         Visa2014ApplicationItemRawRow raw)
     {
