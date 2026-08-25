@@ -154,24 +154,27 @@ public sealed class Visa2014EducationTransformTests
     }
 
     [Fact]
-    public void BuildExportRow_UnmappedCountryWithSkipPolicy_Skips()
+    public void BuildExportRow_UnmappedCountryWithSkipPolicy_AllowsNullAndRecordsUnmapped()
     {
+        // LookupTranslator returns true for skip_row unmapped (null target + reason).
         var export = Visa2014EducationTransform.BuildExportRow(
             Raw(countryMg: "ZZZ"),
             Catalogs(),
             out var skipReason,
             out var unmapped);
 
-        Assert.Equal("unmapped_lookup:Country:ZZZ", skipReason);
+        Assert.Null(skipReason);
+        Assert.Null(export["EducationCountry"]);
         Assert.Contains(unmapped, u => u.Contains("Country", StringComparison.Ordinal));
     }
 
     [Fact]
-    public void TransformRows_PartitionsSkippedLookupFailures()
+    public void TransformRows_PartitionsRequiredNullFailures_AndTracksUnmappedLookups()
     {
         var batch = Visa2014EducationTransform.TransformRows(
             [
                 Raw(),
+                Raw(specialty: " "),
                 Raw(specialty: "UnknownSpec"),
             ],
             Catalogs(),
@@ -179,10 +182,13 @@ public sealed class Visa2014EducationTransformTests
             out var unmappedDistinct,
             out _);
 
-        Assert.Single(batch.ImportRows);
+        Assert.Equal(2, batch.ImportRows.Count);
         Assert.Single(skipped);
-        Assert.Equal("unmapped_lookup:Specialty:UnknownSpec", skipped[0]["_skipReason"]);
+        Assert.Equal("required_null:Specialty", skipped[0]["_skipReason"]);
+        Assert.Contains(
+            batch.ImportRows,
+            r => r["Specialty"] is null && Equals(r["_legacy_EducationLevelComposite"], "Bachelor:1"));
         Assert.NotEmpty(unmappedDistinct);
-        Assert.Equal(2, batch.LegacyRowCount);
+        Assert.Equal(3, batch.LegacyRowCount);
     }
 }

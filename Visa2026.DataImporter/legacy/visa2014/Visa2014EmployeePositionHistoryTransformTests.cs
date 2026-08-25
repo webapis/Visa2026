@@ -156,10 +156,28 @@ public sealed class Visa2014EmployeePositionHistoryTransformTests
     }
 
     [Fact]
-    public void TransformRows_UnmappedPosition_Skips()
+    public void TransformRows_UnmappedPositionWithSkipPolicy_ImportsNullPosition()
     {
+        // skip_row unmapped → TryTranslate succeeds with null target; row is not skipped.
         var batch = Visa2014EmployeePositionHistoryTransform.TransformRows(
             [Raw(OlderOid, new DateTime(2020, 1, 1), title: "UnknownRole")],
+            Catalogs(),
+            forPermitSupplement: false,
+            out var skipped,
+            out var unmappedDistinct,
+            out _);
+
+        Assert.Empty(skipped);
+        Assert.Single(batch.ImportRows);
+        Assert.Null(batch.ImportRows[0]["Position"]);
+        Assert.NotEmpty(unmappedDistinct);
+    }
+
+    [Fact]
+    public void TransformRows_BlankPosition_SkipsAsRequiredNull()
+    {
+        var batch = Visa2014EmployeePositionHistoryTransform.TransformRows(
+            [Raw(OlderOid, new DateTime(2020, 1, 1), title: "  ")],
             Catalogs(),
             forPermitSupplement: false,
             out var skipped,
@@ -168,6 +186,6 @@ public sealed class Visa2014EmployeePositionHistoryTransformTests
 
         Assert.Empty(batch.ImportRows);
         Assert.Single(skipped);
-        Assert.Equal("unmapped_lookup:Position:UnknownRole", skipped[0]["_skipReason"]);
+        Assert.Equal("required_null:Position", skipped[0]["_skipReason"]);
     }
 }
