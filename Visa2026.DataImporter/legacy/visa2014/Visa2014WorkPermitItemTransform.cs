@@ -105,7 +105,7 @@ internal static class Visa2014WorkPermitItemTransform
     private static Guid? TryParseGuid(string? text) =>
         Guid.TryParse(text?.Trim(), out var oid) ? oid : null;
 
-    private static Visa2014PersonImportBatch TransformRows(
+    internal static Visa2014PersonImportBatch TransformRows(
         IReadOnlyList<Visa2014WorkPermitItemRawRow> rawRows,
         IReadOnlyDictionary<string, Visa2014LookupCatalog> catalogs,
         IReadOnlyList<string> bitColumnNames,
@@ -159,7 +159,7 @@ internal static class Visa2014WorkPermitItemTransform
         };
     }
 
-    private static Dictionary<string, object?> BuildExportRow(
+    internal static Dictionary<string, object?> BuildExportRow(
         Visa2014WorkPermitItemRawRow raw,
         IReadOnlyDictionary<string, Visa2014LookupCatalog> catalogs,
         IReadOnlyList<string> bitColumnNames,

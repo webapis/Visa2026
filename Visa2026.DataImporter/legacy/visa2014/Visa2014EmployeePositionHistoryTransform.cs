@@ -147,7 +147,7 @@ internal static class Visa2014EmployeePositionHistoryTransform
         return true;
     }
 
-    private static Visa2014PersonImportBatch TransformRows(
+    internal static Visa2014PersonImportBatch TransformRows(
         IReadOnlyList<Visa2014EmployeePositionHistoryRawRow> rawRows,
         IReadOnlyDictionary<string, Visa2014LookupCatalog> catalogs,
         bool forPermitSupplement,
@@ -250,7 +250,7 @@ internal static class Visa2014EmployeePositionHistoryTransform
         return current;
     }
 
-    private static Dictionary<string, object?> BuildExportRow(
+    internal static Dictionary<string, object?> BuildExportRow(
         Visa2014EmployeePositionHistoryRawRow raw,
         IReadOnlyDictionary<string, Visa2014LookupCatalog> catalogs,
         IReadOnlyDictionary<Guid, DateTime?> endDates,
