@@ -9,6 +9,29 @@ internal sealed class Visa2014LegacyDocumentCancellationIndex
     private readonly HashSet<Guid> _cancelledVisaOids = [];
     private readonly HashSet<Guid> _cancelledWorkPermitOids = [];
 
+    /// <summary>Empty index for unit tests / dry transforms with no cancellation evidence.</summary>
+    internal static Visa2014LegacyDocumentCancellationIndex Empty { get; } = new();
+
+    /// <summary>Seeds cancelled work-permit OIDs for unit tests.</summary>
+    internal static Visa2014LegacyDocumentCancellationIndex FromWorkPermitOidsForTests(
+        IEnumerable<Guid> legacyWorkPermitOids)
+    {
+        var index = new Visa2014LegacyDocumentCancellationIndex();
+        foreach (var oid in legacyWorkPermitOids)
+            index._cancelledWorkPermitOids.Add(oid);
+        return index;
+    }
+
+    /// <summary>Seeds cancelled visa OIDs for unit tests.</summary>
+    internal static Visa2014LegacyDocumentCancellationIndex FromVisaOidsForTests(
+        IEnumerable<Guid> legacyVisaOids)
+    {
+        var index = new Visa2014LegacyDocumentCancellationIndex();
+        foreach (var oid in legacyVisaOids)
+            index._cancelledVisaOids.Add(oid);
+        return index;
+    }
+
     internal const string EvidenceExtractSql = """
         SELECT
             CAST(pia.Visa AS varchar(36)) AS VisaOid,
@@ -71,7 +94,7 @@ internal sealed class Visa2014LegacyDocumentCancellationIndex
 
     public bool IsWorkPermitCancelled(Guid legacyWorkPermitOid) => _cancelledWorkPermitOids.Contains(legacyWorkPermitOid);
 
-    private void ApplyEvidenceRow(
+    internal void ApplyEvidenceRow(
         IReadOnlyDictionary<string, string?> row,
         IReadOnlyDictionary<string, Visa2014LookupCatalog> catalogs,
         ApplicationTypeVisibilityCatalog visibility)
