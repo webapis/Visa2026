@@ -121,12 +121,20 @@
             </div>
         </header>
 
-        <div class="cw-layout @(IsWideTab(ActiveTab) ? "cw-layout--wide" : null)">
+        @if (_tabSwitching)
+        {
+            <div class="cw-tab-progress" role="progressbar" aria-busy="true" aria-label="@TabSwitchStatus">
+                <div class="cw-tab-progress__bar"></div>
+            </div>
+        }
+
+        <div class="cw-layout @(IsWideTab(DisplayedTab) ? "cw-layout--wide" : null)">
             <nav class="cw-nav" aria-label="Case sections">
                 @foreach (var tab in CaseTabs)
                 {
                     <button type="button"
-                            class="cw-nav__item @(ActiveTab == tab.Key ? "is-active" : null)"
+                            class="cw-nav__item @(DisplayedTab == tab.Key ? "is-active" : null)"
+                            disabled="@_tabSwitching"
                             @onclick="() => SelectTab(tab.Key)">
                         <span aria-hidden="true">@tab.Glyph</span>
                         <span>@tab.Label</span>
@@ -134,45 +142,63 @@
                 }
             </nav>
 
-            <div class="cw-main @(IsWideTab(ActiveTab) ? "cw-main--full" : null)">
-                @switch (ActiveTab)
+            <div class="cw-main @(IsWideTab(DisplayedTab) ? "cw-main--full" : null) @(_tabSwitching ? "cw-main--switching" : null)">
+                @if (_tabSwitching)
                 {
-                    case "overview":
-                        @RenderOverview(view)
-                        break;
-                    case "people":
-                        @RenderPeople(view)
-                        break;
-                    case "progress":
-                        <OfficerShellCaseProgressTab @ref="_progressTab"
-                                                     ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId"
-                                                     View="view"
-                                                     ProgressHistory="Snapshot.ProgressHistory"
-                                                     StatusMessage="@ProgressStatusMessage"
-                                                     IsStatusError="@ProgressStatusIsError"
-                                                     SaveNotesRequested="@SaveProgressNotesRequested"
-                                                     UploadMinistryLetterRequested="@UploadMinistryLetterRequested"
-                                                     AdvanceProgressRequested="@AdvanceProgressRequested"
-                                                     RevertProgressRequested="@RevertProgressRequested"
-                                                     ShowRevertToHere="@ShowRevertToHere"
-                                                     PreviewSlotOwnerViewId="@PreviewSlotOwnerViewId" />
-                        break;
-                    case "documents":
-                        <OfficerShellCaseDocumentsTab ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId"
-                                                     Snapshot="Snapshot"
-                                                     SelectedPersonIds="SelectedDocumentPersonIds"
-                                                     PreviewSlotOwnerViewId="@PreviewSlotOwnerViewId" />
-                        break;
-                    case "resminamalar":
-                        <OfficerShellCaseResminamalarTab ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId" />
-                        break;
-                    case "sla":
-                        @RenderSla(view)
-                        break;
+                    <div class="cw-tab-loading" role="status" aria-live="polite" aria-busy="true">
+                        <div class="cw-tab-loading__panel">
+                            <div class="cw-tab-loading__label">@TabSwitchStatus</div>
+                            <div class="cw-tab-loading__track"
+                                 role="progressbar"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100"
+                                 aria-label="@TabSwitchStatus">
+                                <div class="cw-tab-loading__fill cw-tab-loading__fill--indeterminate"></div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                @if (_tabContentReady)
+                {
+                    @switch (ActiveTab)
+                    {
+                        case "overview":
+                            @RenderOverview(view)
+                            break;
+                        case "people":
+                            @RenderPeople(view)
+                            break;
+                        case "progress":
+                            <OfficerShellCaseProgressTab @ref="_progressTab"
+                                                         ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId"
+                                                         View="view"
+                                                         ProgressHistory="Snapshot.ProgressHistory"
+                                                         StatusMessage="@ProgressStatusMessage"
+                                                         IsStatusError="@ProgressStatusIsError"
+                                                         SaveNotesRequested="@SaveProgressNotesRequested"
+                                                         UploadMinistryLetterRequested="@UploadMinistryLetterRequested"
+                                                         AdvanceProgressRequested="@AdvanceProgressRequested"
+                                                         RevertProgressRequested="@RevertProgressRequested"
+                                                         ShowRevertToHere="@ShowRevertToHere"
+                                                         PreviewSlotOwnerViewId="@PreviewSlotOwnerViewId" />
+                            break;
+                        case "documents":
+                            <OfficerShellCaseDocumentsTab ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId"
+                                                         Snapshot="Snapshot"
+                                                         SelectedPersonIds="SelectedDocumentPersonIds"
+                                                         PreviewSlotOwnerViewId="@PreviewSlotOwnerViewId" />
+                            break;
+                        case "resminamalar":
+                            <OfficerShellCaseResminamalarTab ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId" />
+                            break;
+                        case "sla":
+                            @RenderSla(view)
+                            break;
+                    }
                 }
             </div>
 
-            @if (!IsWideTab(ActiveTab))
+            @if (!IsWideTab(DisplayedTab))
             {
                 <aside class="cw-rail">
                     @RenderRail(view)
@@ -197,6 +223,28 @@
         ["#7c3aed", "#0f9d58", "#ea580c", "#2563eb", "#db2777"];
 
     private OfficerShellCaseProgressTab? _progressTab;
+    private string? _pendingTab;
+    private bool _tabSwitching;
+    private bool _tabContentReady = true;
+
+    private string DisplayedTab =>
+        string.IsNullOrWhiteSpace(_pendingTab) ? ActiveTab : _pendingTab;
+
+    private string PendingTabLabel
+    {
+        get
+        {
+            foreach (var tab in CaseTabs)
+            {
+                if (string.Equals(tab.Key, DisplayedTab, StringComparison.OrdinalIgnoreCase))
+                    return tab.Label;
+            }
+
+            return "section";
+        }
+    }
+
+    private string TabSwitchStatus => $"Opening {PendingTabLabel}…";
 
     [Parameter] public ApplicationWorkspaceSnapshot? Snapshot { get; set; }
     [Parameter] public bool IsLoading { get; set; }
@@ -331,6 +379,16 @@
 
         SyncDocumentPeopleFilter(Snapshot?.CaseView);
         SyncPeopleRecordFocus();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_tabSwitching || !_tabContentReady)
+            return;
+
+        _tabSwitching = false;
+        _pendingTab = null;
+        await InvokeAsync(StateHasChanged);
     }
 
     private void StartCaseSummaryEdit()
@@ -1440,8 +1498,31 @@
 
     private async Task SelectTab(string key)
     {
-        if (CaseTabChanged.HasDelegate)
-            await CaseTabChanged.InvokeAsync(key);
+        if (string.IsNullOrWhiteSpace(key) || _tabSwitching)
+            return;
+        if (string.Equals(key, ActiveTab, StringComparison.OrdinalIgnoreCase) && _tabContentReady)
+            return;
+
+        await PaintTabSwitchAsync(key);
+        try
+        {
+            if (CaseTabChanged.HasDelegate)
+                await CaseTabChanged.InvokeAsync(key);
+        }
+        finally
+        {
+            _tabContentReady = true;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task PaintTabSwitchAsync(string key)
+    {
+        _pendingTab = key;
+        _tabSwitching = true;
+        _tabContentReady = false;
+        await InvokeAsync(StateHasChanged);
+        await Task.Delay(16);
     }
 
     private static bool IsIssuedPersonItem(string? key) =>
@@ -1449,10 +1530,22 @@
 
     private async Task OpenLinkedRecordTile(string tabKey)
     {
-        if (LinkedRecordTileClicked.HasDelegate)
-            await LinkedRecordTileClicked.InvokeAsync(tabKey);
-        else
-            await SelectTab("people");
+        if (_tabSwitching)
+            return;
+
+        await PaintTabSwitchAsync("people");
+        try
+        {
+            if (LinkedRecordTileClicked.HasDelegate)
+                await LinkedRecordTileClicked.InvokeAsync(tabKey);
+            else if (CaseTabChanged.HasDelegate)
+                await CaseTabChanged.InvokeAsync("people");
+        }
+        finally
+        {
+            _tabContentReady = true;
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     private bool IsPersonRecordSelected(int personIndex, string? recordKey)

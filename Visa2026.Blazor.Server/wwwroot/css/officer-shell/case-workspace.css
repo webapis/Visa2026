@@ -92,11 +92,14 @@ button.cw-person:focus-visible {
   background: var(--os-accent-soft); color: #1e40af; font-weight: 700;
   box-shadow: inset 3px 0 0 var(--os-accent);
 }
-.cw-nav__item:hover:not(.is-active) { background: #f8fafc; }
+.cw-nav__item:hover:not(.is-active):not(:disabled) { background: #f8fafc; }
+.cw-nav__item:disabled { cursor: wait; }
+.cw-nav__item:disabled.is-active { opacity: 1; }
 
 .cw-main {
   background: var(--os-panel); border: 1px solid var(--os-line); border-radius: var(--os-radius);
   padding: 16px 18px; box-shadow: var(--os-shadow); min-height: 420px;
+  position: relative;
 }
 .cw-rail {
   display: flex; flex-direction: column; gap: 12px;
@@ -480,4 +483,70 @@ button.cw-person:focus-visible {
   background: #edf6ff; border: 1px solid #c5dff8; font-size: 0.76rem; color: #1e3a5f; line-height: 1.45;
 }
 .dc-preview__note .bi-lock-fill { color: var(--os-accent); flex-shrink: 0; margin-top: 2px; }
+
+/* Tab switch feedback — same pattern as Report Dashboard (top-pinned indeterminate bar). */
+.cw-tab-progress {
+  position: sticky;
+  top: 0;
+  z-index: 8;
+  height: 3px;
+  margin: 0 0 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #dbeafe;
+}
+.cw-tab-progress__bar {
+  height: 100%;
+  width: 40%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--os-accent), #60a5fa);
+  animation: cw-tab-progress-slide 1.15s ease-in-out infinite;
+}
+@keyframes cw-tab-progress-slide {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(280%); }
+}
+
+.cw-main--switching { min-height: 280px; }
+
+.cw-tab-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 16px 24px;
+  background: rgba(248, 250, 252, 0.78);
+  backdrop-filter: blur(1px);
+}
+.cw-tab-loading__panel {
+  width: min(360px, 88%);
+  padding: 18px 20px 16px;
+  border-radius: 10px;
+  background: var(--os-panel, #fff);
+  border: 1px solid var(--os-line, #e2e8f0);
+  box-shadow: var(--os-shadow);
+}
+.cw-tab-loading__label {
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: var(--os-ink, #0f172a);
+  margin-bottom: 10px;
+}
+.cw-tab-loading__track {
+  height: 8px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  overflow: hidden;
+}
+.cw-tab-loading__fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--os-accent), #60a5fa);
+}
+.cw-tab-loading__fill--indeterminate {
+  width: 42%;
+  animation: cw-tab-progress-slide 1.15s ease-in-out infinite;
+}
 

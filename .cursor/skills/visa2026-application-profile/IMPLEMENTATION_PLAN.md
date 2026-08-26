@@ -79,7 +79,7 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | B2 | Start process domain merge | **Done** | Merge staged rows, `YYYY-NNNN` process number, first progress step |
 | B3 | Immersive shell chrome | **Done** | Custom left rail retired; native accordion is the nav. `:has(.officer-shell-host)` hide unused unless leftover shell opens |
 | B4 | Profile templates list/grid + detail | **Done** | PNG catalog, chips, pagination, rail overview drill-in |
-| B5 | Case workspace 6-tab shell | **Done** | PNG parity pass: overview, people matrix, progress, inline doc copies + Resminamalar, SLA |
+| B5 | Case workspace 6-tab shell | **Done** | PNG parity pass: overview, people matrix, progress, inline doc copies + Resminamalar, SLA. Tab switch shows top + panel progress bar (same pattern as Report Dashboard) |
 | B6 | Immersive tab-bar hide | **Done** | `OfficerShellImmersiveTabBarController` (`TabsModel.CssClass`) + CSS fallback |
 | B7 | Case progress tab wiring | **Done** | Template Approval legs + Process & SLA names; first history row fills first ministry as current (not `1_REVIEW_STARTED` Sequence match) |
 | B8 | Custom person link picker | **Done** | Inline picker on People tab (`IApplicationPersonLinkQueryService` + `OfficerShellPersonLinkPickerComponent`; officer shell only) |

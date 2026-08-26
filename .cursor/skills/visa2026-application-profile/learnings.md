@@ -1,3 +1,11 @@
+### 2026-08-26 — Case workspace tab-switch progress bar
+
+- **Need**: Left case nav (Overview / People / Progress / Document copies / Resminamalar / SLA) gave no feedback while the next panel rendered.
+- **Fix**: Same UX as Report Dashboard — sticky indeterminate bar + top-pinned overlay. Paint that first (`Task.Delay(16)`), then mount the next tab. Nav highlights the pending item immediately.
+- **Test**: Blazor Debug. Officer: Ctrl+F5, open a case, click Resminamalar then Overview.
+- **Prevent**: Do not mount Document copies / Resminamalar in the same render as the first overlay paint, or the bar never appears until the heavy tab is done.
+- **Cross-skill**: application-profile
+
 ### 2026-08-26 — Faster Application Profile Instance open from ListView
 
 - **Need**: Clicking a row on Application Profile Instances (via ministry / direct) stayed on “Loading case workspace…” for a long time.
