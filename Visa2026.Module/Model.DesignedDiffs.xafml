@@ -38,8 +38,8 @@
       </Item>
       <Item Id="Application" Caption="Application Profiles">
         <Items>
-          <Item Id="Application_Staged" Caption="Staged profiles" ViewId="Application_ListView_Staged" />
-          <Item Id="Application_InProcess" Caption="In process" ViewId="Application_ListView_InProcess" />
+          <Item Id="Application_Staged" Caption="Staged profiles" ViewId="Application_ListView_Staged" Visible="False" />
+          <Item Id="Application_InProcess" Caption="In process" ViewId="Application_ListView_InProcess" Visible="False" />
           <Item Id="ApplicationProfileCatalog" Caption="Application Profile Templates" />
           <Item Id="Application_ViaMinistries" Caption="Application Profile Instances (via ministry)" ViewId="Application_ListView_ViaMinistries" />
           <Item Id="Application_DirectMigration" Caption="Application Profile Instances (direct migration)" ViewId="Application_ListView_DirectMigration" />

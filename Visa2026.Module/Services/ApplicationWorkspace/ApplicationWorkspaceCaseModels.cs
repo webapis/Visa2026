@@ -10,7 +10,7 @@ public sealed class ApplicationWorkspaceCaseView
     public IReadOnlyList<ApplicationWorkspaceCaseSummaryTile> SummaryTiles { get; init; }
         = Array.Empty<ApplicationWorkspaceCaseSummaryTile>();
 
-    public IReadOnlyList<ApplicationWorkspaceCaseHeaderField> HeaderFields { get; init; }
+    public IReadOnlyList<ApplicationWorkspaceCaseHeaderField> HeaderFields { get; set; }
         = Array.Empty<ApplicationWorkspaceCaseHeaderField>();
 
     public IReadOnlyList<ApplicationWorkspaceCaseLinkedTile> LinkedRecordTiles { get; init; }

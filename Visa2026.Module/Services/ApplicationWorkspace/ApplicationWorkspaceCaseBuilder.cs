@@ -300,11 +300,10 @@ internal static class ApplicationWorkspaceCaseBuilder
                     () => objectSpace!.GetObjectsQuery<InvitationDocument>()
                         .Where(d => d.Invitation != null
                             && d.Invitation.ApplicationProfileInstance != null
-                            && d.Invitation.ApplicationProfileInstance.ID == application.ID)
-                        .Select(d => new { HeaderId = d.Invitation.ID, File = d.File })
-                        .ToList()
-                        .Where(x => x.File != null && x.File.Size > 0)
-                        .Select(x => x.HeaderId),
+                            && d.Invitation.ApplicationProfileInstance.ID == application.ID
+                            && d.File != null)
+                        .Select(d => d.Invitation.ID)
+                        .ToList(),
                     invitations.SelectMany(i => i.Documents ?? Array.Empty<InvitationDocument>()));
                 return invitations
                     .OrderByDescending(i => i.IssuedDate)
@@ -322,11 +321,10 @@ internal static class ApplicationWorkspaceCaseBuilder
                     () => objectSpace!.GetObjectsQuery<WorkPermitDocument>()
                         .Where(d => d.WorkPermit != null
                             && d.WorkPermit.ApplicationProfileInstance != null
-                            && d.WorkPermit.ApplicationProfileInstance.ID == application.ID)
-                        .Select(d => new { HeaderId = d.WorkPermit.ID, File = d.File })
-                        .ToList()
-                        .Where(x => x.File != null && x.File.Size > 0)
-                        .Select(x => x.HeaderId),
+                            && d.WorkPermit.ApplicationProfileInstance.ID == application.ID
+                            && d.File != null)
+                        .Select(d => d.WorkPermit.ID)
+                        .ToList(),
                     permits.SelectMany(w => w.Documents ?? Array.Empty<WorkPermitDocument>()));
                 return permits
                     .OrderByDescending(w => w.IssuedDate)
@@ -344,11 +342,10 @@ internal static class ApplicationWorkspaceCaseBuilder
                     () => objectSpace!.GetObjectsQuery<BorderZoneDocument>()
                         .Where(d => d.BorderZone != null
                             && d.BorderZone.ApplicationProfileInstance != null
-                            && d.BorderZone.ApplicationProfileInstance.ID == application.ID)
-                        .Select(d => new { HeaderId = d.BorderZone.ID, File = d.File })
-                        .ToList()
-                        .Where(x => x.File != null && x.File.Size > 0)
-                        .Select(x => x.HeaderId),
+                            && d.BorderZone.ApplicationProfileInstance.ID == application.ID
+                            && d.File != null)
+                        .Select(d => d.BorderZone.ID)
+                        .ToList(),
                     zones.SelectMany(z => z.Documents ?? Array.Empty<BorderZoneDocument>()));
                 return zones
                     .OrderByDescending(z => z.StartDate)
@@ -366,11 +363,10 @@ internal static class ApplicationWorkspaceCaseBuilder
                     () => objectSpace!.GetObjectsQuery<RejectionDocument>()
                         .Where(d => d.Rejection != null
                             && d.Rejection.ApplicationProfileInstance != null
-                            && d.Rejection.ApplicationProfileInstance.ID == application.ID)
-                        .Select(d => new { HeaderId = d.Rejection.ID, File = d.File })
-                        .ToList()
-                        .Where(x => x.File != null && x.File.Size > 0)
-                        .Select(x => x.HeaderId),
+                            && d.Rejection.ApplicationProfileInstance.ID == application.ID
+                            && d.File != null)
+                        .Select(d => d.Rejection.ID)
+                        .ToList(),
                     rejections.SelectMany(r => r.Documents ?? Array.Empty<RejectionDocument>()));
                 return rejections
                     .OrderByDescending(r => r.Date)
@@ -388,11 +384,10 @@ internal static class ApplicationWorkspaceCaseBuilder
                     () => objectSpace!.GetObjectsQuery<VisaDocument>()
                         .Where(d => d.Visa != null
                             && d.Visa.IssuingApplicationProfileInstance != null
-                            && d.Visa.IssuingApplicationProfileInstance.ID == application.ID)
-                        .Select(d => new { HeaderId = d.Visa.ID, File = d.File })
-                        .ToList()
-                        .Where(x => x.File != null && x.File.Size > 0)
-                        .Select(x => x.HeaderId),
+                            && d.Visa.IssuingApplicationProfileInstance.ID == application.ID
+                            && d.File != null)
+                        .Select(d => d.Visa.ID)
+                        .ToList(),
                     visas.SelectMany(v => v.Documents ?? Array.Empty<VisaDocument>()));
                 return visas
                     .OrderByDescending(v => v.IssueDate)

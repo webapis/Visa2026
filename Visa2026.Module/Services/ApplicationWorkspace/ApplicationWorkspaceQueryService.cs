@@ -21,8 +21,8 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
         if (objectSpace == null || applicationId == Guid.Empty)
             return Empty(applicationId);
 
-        ApplicationProfileInstancePersonService.RefreshApplication(objectSpace, applicationId);
-
+        // Open is read-only. Auto-heal of resolved links runs on Link person, not on every open
+        // (RefreshApplication walks every person collection and was discarded without CommitChanges).
         var application = LoadInstance(objectSpace, applicationId);
         if (application == null)
             return Empty(applicationId);
@@ -56,8 +56,8 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
             return objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
                 .Include(a => a.ProgressHistory)
                     .ThenInclude(p => p.State)
-                .Include(a => a.ProgressHistory)
-                    .ThenInclude(p => p.MinistryLetterFile)
+                .Include(a => a.People)
+                .Include(a => a.PersonResolvedLinks)
                 .Include(a => a.ApplicationProfile)
                     .ThenInclude(p => p!.ApprovalLegs)
                         .ThenInclude(l => l.ApprovingMinistry)

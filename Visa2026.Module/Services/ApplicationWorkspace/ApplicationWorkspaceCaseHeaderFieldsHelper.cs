@@ -32,11 +32,15 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
     public static IReadOnlyList<ApplicationWorkspaceCaseHeaderField> Build(
         ApplicationProfileInstance application,
         ApplicationProfile? profile,
-        IObjectSpace? objectSpace)
+        IObjectSpace? objectSpace,
+        bool loadLookupCatalogs = false)
     {
         ArgumentNullException.ThrowIfNull(application);
 
-        var catalogs = objectSpace == null ? Catalogs.Empty : Catalogs.Load(objectSpace);
+        // Lookup catalogs (cities, contracts, …) are only needed for Edit dropdowns.
+        var catalogs = loadLookupCatalogs && objectSpace != null
+            ? Catalogs.Load(objectSpace)
+            : Catalogs.Empty;
         var fields = new List<ApplicationWorkspaceCaseHeaderField>();
 
         AddLookup(fields, VisaType, "Visa type", "blue", "🛂",

@@ -74,7 +74,7 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | H5 | HTML template wizard (5 steps) | **Done** | `#/templates/wizard/{0-4}` → Publish |
 | H6 | HTML PNG gallery + README + parity checklist | **Done** | `parity/CHECKLIST.md` — sign-off pending |
 | H7 | HTML Person DetailView staging | **Deferred** | Post–v1; People nav = stub only |
-| B0 | Blazor officer shell — layout + nav + live queues | **Done** | Native XAF **Application Profiles** folder (staged / in-process / templates / via / direct). Custom left rail removed 2026-08-13 |
+| B0 | Blazor officer shell — layout + nav + live queues | **Done** | Native XAF **Application Profiles** folder (templates / via / direct). **Staged profiles** and **In process** hidden from left nav. Custom left rail removed 2026-08-13 |
 | B1 | Blazor shell PNG parity polish | **Done** | Chips, legend, pagination, grouped staged, rich grid, toolbar search |
 | B2 | Start process domain merge | **Done** | Merge staged rows, `YYYY-NNNN` process number, first progress step |
 | B3 | Immersive shell chrome | **Done** | Custom left rail retired; native accordion is the nav. `:has(.officer-shell-host)` hide unused unless leftover shell opens |
@@ -397,6 +397,8 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 - **New** → profile picker → workspace (slice 9); **row open** → workspace (10d); **Open workspace** toolbar action remains for legacy DetailView tabs.
 
 **Verify:** Applications (via ministry) → double-click row → workspace opens with live data.
+
+**Open speed (2026-08-26):** Row click still opens the case workspace (not native DetailView). First paint no longer heals person links or loads all lookup catalogs (cities/contracts). Catalogs load when the officer taps **Edit** on case summary. Linked records batch-load; issued “has copy” does not materialize `File.Size`.
 
 ---
 

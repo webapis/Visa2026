@@ -1,3 +1,19 @@
+### 2026-08-26 — Faster Application Profile Instance open from ListView
+
+- **Need**: Clicking a row on Application Profile Instances (via ministry / direct) stayed on “Loading case workspace…” for a long time.
+- **Fix**: Workspace `Load` is read-only — do not `RefreshApplication` (heal was thrown away without commit). Do not load cities/contracts/etc. until **Edit** on case summary. Batch linked-record queries. Do not materialize `File.Size` for issued-copy chips.
+- **Test**: Module + Blazor Debug succeeded. Header-field tests still pass. Officer: stop F5, rebuild, open a via-ministry instance from the list.
+- **Prevent**: Do not call `Catalogs.Load` on every workspace open. Do not `ThenInclude` ministry letter `FileData` (blobs). Auto-heal stays on Link person.
+- **Cross-skill**: application-profile
+
+### 2026-08-26 — Hide Staged profiles and In process from left nav
+
+- **Need**: Officers should not see **Staged profiles** or **In process** under Application Profiles.
+- **Fix**: `Visible="False"` on those nav items in `Model.DesignedDiffs.xafml`. `CustomNavigationUpdater` no longer re-adds them; it hides them if present. ListViews remain for other use.
+- **Test**: Restart / Ctrl+F5. Application Profiles shows Templates, via ministry, and direct migration only.
+- **Prevent**: Do not call `EnsureApplicationListNavItem` for `Application_Staged` / `Application_InProcess`.
+- **Cross-skill**: application-profile
+
 ### 2026-08-26 — Field cues on all issued BOs from Application Profile Instance
 
 - **Need**: Highlighting was missing on Invitation/Rejection compose and on native New DetailViews for issued headers and items.

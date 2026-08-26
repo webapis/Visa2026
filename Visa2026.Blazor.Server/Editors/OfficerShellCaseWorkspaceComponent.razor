@@ -333,7 +333,41 @@
         SyncPeopleRecordFocus();
     }
 
-    private void StartCaseSummaryEdit() => _caseSummaryEditing = true;
+    private void StartCaseSummaryEdit()
+    {
+        EnsureHeaderLookupCatalogs();
+        _caseSummaryEditing = true;
+    }
+
+    private void EnsureHeaderLookupCatalogs()
+    {
+        var view = Snapshot?.CaseView;
+        if (view == null || view.HeaderFields.Count == 0)
+            return;
+
+        var needsCatalogs = view.HeaderFields.Any(field =>
+            field.Kind is ApplicationWorkspaceCaseHeaderFieldKind.Lookup
+                or ApplicationWorkspaceCaseHeaderFieldKind.CommaSeparatedMultiSelect
+            && field.Options.Count == 0
+            && field.MultiSelectOptions.Count == 0);
+        if (!needsCatalogs)
+            return;
+
+        var applicationId = Snapshot!.ApplicationProfileInstanceId;
+        if (applicationId == Guid.Empty)
+            return;
+
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
+        if (application == null)
+            return;
+
+        view.HeaderFields = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(
+            application,
+            application.ApplicationProfile,
+            objectSpace,
+            loadLookupCatalogs: true);
+    }
 
     private void FinishCaseSummaryEdit() => _caseSummaryEditing = false;
 

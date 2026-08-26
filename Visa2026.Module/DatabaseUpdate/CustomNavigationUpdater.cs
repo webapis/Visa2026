@@ -148,31 +148,23 @@ namespace Visa2026.Module.DatabaseUpdate
             applicationGroup.Caption = ApplicationProfileInstanceProgressRouteNavigation.CaptionGroup;
             applicationGroup.ImageName ??= "BO_FileAttachment";
 
-            var stagedView = EnsureApplicationListView(
+            EnsureApplicationListView(
                 modelViews,
                 ApplicationProfileInstanceProgressRouteNavigation.ListViewStaged,
                 ApplicationProfileInstanceProgressRouteNavigation.CriteriaStaged,
                 ApplicationProfileInstanceProgressRouteNavigation.CaptionStaged);
-            EnsureApplicationListNavItem(
+            HideApplicationListNavItem(
                 applicationGroup,
-                stagedView,
-                ApplicationProfileInstanceProgressRouteNavigation.NavItemStaged,
-                ApplicationProfileInstanceProgressRouteNavigation.CaptionStaged,
-                "BO_Task",
-                index: 0);
+                ApplicationProfileInstanceProgressRouteNavigation.NavItemStaged);
 
-            var inProcessView = EnsureApplicationListView(
+            EnsureApplicationListView(
                 modelViews,
                 ApplicationProfileInstanceProgressRouteNavigation.ListViewInProcess,
                 ApplicationProfileInstanceProgressRouteNavigation.CriteriaInProcess,
                 ApplicationProfileInstanceProgressRouteNavigation.CaptionInProcess);
-            EnsureApplicationListNavItem(
+            HideApplicationListNavItem(
                 applicationGroup,
-                inProcessView,
-                ApplicationProfileInstanceProgressRouteNavigation.NavItemInProcess,
-                ApplicationProfileInstanceProgressRouteNavigation.CaptionInProcess,
-                "BO_List",
-                index: 1);
+                ApplicationProfileInstanceProgressRouteNavigation.NavItemInProcess);
 
             var viaMinistriesView = EnsureApplicationListView(
                 modelViews,
@@ -232,6 +224,12 @@ namespace Visa2026.Module.DatabaseUpdate
             navItem.Caption = caption;
             navItem.ImageName = imageName;
             navItem.Index = index;
+        }
+
+        private static void HideApplicationListNavItem(IModelNavigationItem applicationGroup, string navItemId)
+        {
+            if (applicationGroup.Items[navItemId] is IModelNavigationItem navItem)
+                navItem.Visible = false;
         }
 
         private static void RemoveApplicationItemRouteNavItems(IModelNavigationItem applicationGroup)
