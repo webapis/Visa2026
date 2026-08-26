@@ -19,6 +19,7 @@ using Visa2026.Module.Services.ApplicationPersonLink;
 using Visa2026.Module.Services.ApplicationPersonRoster;
 using Visa2026.Module.Services.ApplicationWorkspace;
 using Visa2026.Module.Services.OfficerShell;
+using Visa2026.Blazor.Server.Services;
 using Visa2026.Module.Services.PreviewSlot;
 
 namespace Visa2026.Blazor.Server.Editors;
@@ -344,31 +345,51 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         return Task.CompletedTask;
     }
 
-    private Task OnIssuedHeaderNewRequested(string key)
+    private async Task OnIssuedHeaderNewRequested(string key)
     {
         var applicationId = ResolveApplicationProfileInstanceId();
         if (_application == null || applicationId == Guid.Empty)
-            return Task.CompletedTask;
+            return;
+
+        if (IssueIssuedHeaderComposeService.TryResolveKind(key, out _))
+        {
+            await IssueIssuedHeaderPreviewSlotOpenHelper.TryOpenComposeAsync(
+                _application,
+                applicationId,
+                key,
+                View?.Id);
+            return;
+        }
 
         ApplicationWorkspaceIssuedHeaderOpenHelper.TryCreate(
             _application,
             _application.MainWindow,
             applicationId,
             key);
-        return Task.CompletedTask;
     }
 
-    private Task OnIssuedHeaderOpenRequested(ApplicationWorkspaceIssuedHeaderOpenRequest request)
+    private async Task OnIssuedHeaderOpenRequested(ApplicationWorkspaceIssuedHeaderOpenRequest request)
     {
         if (_application == null || request == null || request.Id == Guid.Empty)
-            return Task.CompletedTask;
+            return;
+
+        var applicationId = ResolveApplicationProfileInstanceId();
+        if (IssueIssuedHeaderComposeService.TryResolveKind(request.Key, out _) && applicationId != Guid.Empty)
+        {
+            await IssueIssuedHeaderPreviewSlotOpenHelper.TryOpenAsync(
+                _application,
+                applicationId,
+                request.Key,
+                request.Id,
+                View?.Id);
+            return;
+        }
 
         ApplicationWorkspaceIssuedHeaderOpenHelper.TryOpen(
             _application,
             _application.MainWindow,
             request.Key,
             request.Id);
-        return Task.CompletedTask;
     }
 
     private Task BackToListAsync()

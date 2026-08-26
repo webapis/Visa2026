@@ -79,10 +79,25 @@ public readonly record struct ApplicationProfileCatalogGroupKey(
         IEnumerable<ApplicationProfile> profiles,
         string profileCode,
         Guid? resolvedContractId,
-        string? legacyContractCode) =>
-        profiles.FirstOrDefault(p =>
-            string.Equals(p.Code, profileCode.Trim(), StringComparison.OrdinalIgnoreCase)
+        string? legacyContractCode)
+    {
+        var code = profileCode.Trim();
+        var list = profiles as IList<ApplicationProfile> ?? profiles.ToList();
+        var exact = list.FirstOrDefault(p =>
+            string.Equals(p.Code, code, StringComparison.OrdinalIgnoreCase)
             && ProfileMatchesLegacyContract(p, resolvedContractId, legacyContractCode));
+        if (exact != null)
+            return exact;
+
+        // Type-only tenant catalogs (no Wave 0b contract clones): bind the shared type profile
+        // when a legacy via-ministry row has a ProjectContract but no matching variant exists.
+        if (string.IsNullOrWhiteSpace(legacyContractCode))
+            return null;
+
+        return list.FirstOrDefault(p =>
+            string.Equals(p.Code, code, StringComparison.OrdinalIgnoreCase)
+            && ProfileMatchesLegacyContract(p, resolvedContractId: null, legacyContractCode: null));
+    }
 
     private static bool ProjectContractTitleMatches(string? nameTm, string legacyCode)
     {

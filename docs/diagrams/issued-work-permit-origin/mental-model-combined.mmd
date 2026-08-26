@@ -1,0 +1,25 @@
+flowchart TB
+    subgraph direct ["Work permit profile (ProduceWorkPermit)"]
+        API1["Application Profile Instance"]
+        WP1["WorkPermit"]
+        WPI1["WorkPermitItem lines"]
+        API1 -->|"New work permit"| WP1
+        WP1 -->|"ApplicationProfileInstance"| API1
+        WP1 --> WPI1
+    end
+
+    subgraph dual ["Invitation + work permit profile (e.g. App_Inv_And_WP)"]
+        API2["Application Profile Instance"]
+        INV["Invitation"]
+        II["InvitationItem lines"]
+        WP2["WorkPermit"]
+        WPI2["WorkPermitItem lines"]
+
+        API2 -->|"New invitation"| INV
+        INV -->|"ApplicationProfileInstance"| API2
+        INV --> II
+
+        API2 -->|"New work permit"| WP2
+        WP2 -->|"ApplicationProfileInstance"| API2
+        WP2 --> WPI2
+    end

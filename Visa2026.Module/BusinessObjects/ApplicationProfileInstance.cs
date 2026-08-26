@@ -302,7 +302,10 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInDetailView(false)]
         [VisibleInListView(true)]
         [NotMapped]
-        public string LatestProgressState => ListViewDisplay.CurrentState;
+        public string LatestProgressState =>
+            !string.IsNullOrWhiteSpace(LatestProgressDisplay)
+                ? LatestProgressDisplay!
+                : ListViewDisplay.CurrentState;
 
         /// <summary>Date from the latest <see cref="ApplicationProfileInstanceProgress"/> row.</summary>
         [XafDisplayName("Latest progress date")]
@@ -373,6 +376,8 @@ namespace Visa2026.Module.BusinessObjects
         /// </summary>
         [ImmediatePostData]
         [DataSourceCriteria("!IsNullOrEmpty(SelectionCode)")]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
         [Appearance("ApplicationTypeReadOnlyOnDetail", Enabled = false, Context = "DetailView")]
         [Appearance(
             "HideApplicationTypeWhenProfileSet",

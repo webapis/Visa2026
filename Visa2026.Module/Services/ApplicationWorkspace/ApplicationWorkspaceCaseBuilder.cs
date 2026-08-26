@@ -295,9 +295,20 @@ internal static class ApplicationWorkspaceCaseBuilder
                             && i.ApplicationProfileInstance.ID == application.ID)
                         .ToList()
                     : application.Invitations?.ToList() ?? [];
+                var invitationCopyIds = HeaderIdsWithCopies(
+                    objectSpace,
+                    () => objectSpace!.GetObjectsQuery<InvitationDocument>()
+                        .Where(d => d.Invitation != null
+                            && d.Invitation.ApplicationProfileInstance != null
+                            && d.Invitation.ApplicationProfileInstance.ID == application.ID)
+                        .Select(d => new { HeaderId = d.Invitation.ID, File = d.File })
+                        .ToList()
+                        .Where(x => x.File != null && x.File.Size > 0)
+                        .Select(x => x.HeaderId),
+                    invitations.SelectMany(i => i.Documents ?? Array.Empty<InvitationDocument>()));
                 return invitations
                     .OrderByDescending(i => i.IssuedDate)
-                    .Select(i => Row(i.ID, i.InvitationNumber, FormatIssuedDate(i.IssuedDate)))
+                    .Select(i => Row(i.ID, i.InvitationNumber, FormatIssuedDate(i.IssuedDate), invitationCopyIds.Contains(i.ID)))
                     .ToList();
             case ApplicationWorkspaceIssuedRecordsCatalog.WorkPermit:
                 var permits = objectSpace != null
@@ -306,9 +317,20 @@ internal static class ApplicationWorkspaceCaseBuilder
                             && w.ApplicationProfileInstance.ID == application.ID)
                         .ToList()
                     : application.WorkPermits?.ToList() ?? [];
+                var permitCopyIds = HeaderIdsWithCopies(
+                    objectSpace,
+                    () => objectSpace!.GetObjectsQuery<WorkPermitDocument>()
+                        .Where(d => d.WorkPermit != null
+                            && d.WorkPermit.ApplicationProfileInstance != null
+                            && d.WorkPermit.ApplicationProfileInstance.ID == application.ID)
+                        .Select(d => new { HeaderId = d.WorkPermit.ID, File = d.File })
+                        .ToList()
+                        .Where(x => x.File != null && x.File.Size > 0)
+                        .Select(x => x.HeaderId),
+                    permits.SelectMany(w => w.Documents ?? Array.Empty<WorkPermitDocument>()));
                 return permits
                     .OrderByDescending(w => w.IssuedDate)
-                    .Select(w => Row(w.ID, w.WorkPermitNumber, FormatIssuedDate(w.IssuedDate)))
+                    .Select(w => Row(w.ID, w.WorkPermitNumber, FormatIssuedDate(w.IssuedDate), permitCopyIds.Contains(w.ID)))
                     .ToList();
             case ApplicationWorkspaceIssuedRecordsCatalog.BorderZone:
                 var zones = objectSpace != null
@@ -317,9 +339,20 @@ internal static class ApplicationWorkspaceCaseBuilder
                             && z.ApplicationProfileInstance.ID == application.ID)
                         .ToList()
                     : application.BorderZones?.ToList() ?? [];
+                var zoneCopyIds = HeaderIdsWithCopies(
+                    objectSpace,
+                    () => objectSpace!.GetObjectsQuery<BorderZoneDocument>()
+                        .Where(d => d.BorderZone != null
+                            && d.BorderZone.ApplicationProfileInstance != null
+                            && d.BorderZone.ApplicationProfileInstance.ID == application.ID)
+                        .Select(d => new { HeaderId = d.BorderZone.ID, File = d.File })
+                        .ToList()
+                        .Where(x => x.File != null && x.File.Size > 0)
+                        .Select(x => x.HeaderId),
+                    zones.SelectMany(z => z.Documents ?? Array.Empty<BorderZoneDocument>()));
                 return zones
                     .OrderByDescending(z => z.StartDate)
-                    .Select(z => Row(z.ID, z.BorderZoneNumber, FormatIssuedDate(z.StartDate)))
+                    .Select(z => Row(z.ID, z.BorderZoneNumber, FormatIssuedDate(z.StartDate), zoneCopyIds.Contains(z.ID)))
                     .ToList();
             case ApplicationWorkspaceIssuedRecordsCatalog.Rejection:
                 var rejections = objectSpace != null
@@ -328,9 +361,20 @@ internal static class ApplicationWorkspaceCaseBuilder
                             && r.ApplicationProfileInstance.ID == application.ID)
                         .ToList()
                     : application.Rejections?.ToList() ?? [];
+                var rejectionCopyIds = HeaderIdsWithCopies(
+                    objectSpace,
+                    () => objectSpace!.GetObjectsQuery<RejectionDocument>()
+                        .Where(d => d.Rejection != null
+                            && d.Rejection.ApplicationProfileInstance != null
+                            && d.Rejection.ApplicationProfileInstance.ID == application.ID)
+                        .Select(d => new { HeaderId = d.Rejection.ID, File = d.File })
+                        .ToList()
+                        .Where(x => x.File != null && x.File.Size > 0)
+                        .Select(x => x.HeaderId),
+                    rejections.SelectMany(r => r.Documents ?? Array.Empty<RejectionDocument>()));
                 return rejections
                     .OrderByDescending(r => r.Date)
-                    .Select(r => Row(r.ID, r.RejectedDocNumber, FormatIssuedDate(r.Date)))
+                    .Select(r => Row(r.ID, r.RejectedDocNumber, FormatIssuedDate(r.Date), rejectionCopyIds.Contains(r.ID)))
                     .ToList();
             case ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa:
                 var visas = objectSpace != null
@@ -348,13 +392,36 @@ internal static class ApplicationWorkspaceCaseBuilder
         }
     }
 
-    private static ApplicationWorkspaceCaseIssuedRow Row(Guid id, string? title, string subtitle) =>
+    private static ApplicationWorkspaceCaseIssuedRow Row(Guid id, string? title, string subtitle, bool hasCopy = false) =>
         new()
         {
             Id = id,
             Title = string.IsNullOrWhiteSpace(title) ? "—" : title.Trim(),
             Subtitle = subtitle,
+            HasCopy = hasCopy,
         };
+
+    private static HashSet<Guid> HeaderIdsWithCopies(
+        IObjectSpace? objectSpace,
+        Func<IEnumerable<Guid>> queryWhenObjectSpace,
+        IEnumerable<DocumentBase> fallbackDocuments)
+    {
+        if (objectSpace != null)
+            return queryWhenObjectSpace().ToHashSet();
+
+        return fallbackDocuments
+            .Where(d => d?.File != null && d.File.Size > 0)
+            .Select(d => d switch
+            {
+                InvitationDocument inv => inv.Invitation?.ID ?? Guid.Empty,
+                WorkPermitDocument wp => wp.WorkPermit?.ID ?? Guid.Empty,
+                RejectionDocument rj => rj.Rejection?.ID ?? Guid.Empty,
+                BorderZoneDocument bz => bz.BorderZone?.ID ?? Guid.Empty,
+                _ => Guid.Empty,
+            })
+            .Where(id => id != Guid.Empty)
+            .ToHashSet();
+    }
 
     private static string FormatIssuedDate(DateTime date) =>
         date == default ? string.Empty : date.ToString("dd MMM yyyy", CultureInfo.InvariantCulture);

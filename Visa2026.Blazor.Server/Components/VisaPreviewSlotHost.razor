@@ -51,6 +51,12 @@ else if (_state.Mode == VisaPreviewSlotMode.PlaceholderManual)
                                 Request="_state.PlaceholderManual"
                                 CloseRequested="CloseFromPanelAsync" />
 }
+else if (_state.Mode == VisaPreviewSlotMode.IssueIssuedHeader && _state.IssueIssuedHeader != null)
+{
+    <IssueIssuedHeaderSlotPanel @key="@($"{_state.OccupantKey}|{_state.Version}")"
+                                Request="_state.IssueIssuedHeader"
+                                CloseRequested="CloseFromPanelAsync" />
+}
 
 @code {
     [Inject] private IVisaPreviewSlotService SlotService { get; set; } = null!;
@@ -243,7 +249,56 @@ else if (_state.Mode == VisaPreviewSlotMode.PlaceholderManual)
     }
 
     [JSInvokable]
+    public Task OpenHeaderDocumentCopiesPreviewFromJsAsync(string familyText, string parentIdText, string? ownerViewId = null)
+    {
+        if (!Enum.TryParse<HeaderDocumentCopiesFamily>(familyText, ignoreCase: true, out var family))
+            return Task.CompletedTask;
+
+        if (!Guid.TryParse(parentIdText, out var parentId) || parentId == Guid.Empty)
+            return Task.CompletedTask;
+
+        return SlotService.OpenHeaderDocumentCopiesAsync(new HeaderDocumentCopiesSlotRequest
+        {
+            Family = family,
+            ParentId = parentId,
+            OpenPreviewOnly = true,
+        }, ownerViewId);
+    }
+
+    [JSInvokable]
     public void MarkHeaderDocumentCopiesLinkClickPending() => HeaderDocumentCopiesLinkClickGate.MarkPending();
+
+    [JSInvokable]
+    public Task OpenIssueIssuedHeaderFromJsAsync(
+        string applicationIdText,
+        string kindText,
+        string catalogKey,
+        string? ownerViewId = null,
+        string? existingHeaderIdText = null)
+    {
+        if (!Guid.TryParse(applicationIdText, out var applicationId) || applicationId == Guid.Empty)
+            return Task.CompletedTask;
+
+        if (!Enum.TryParse<IssueIssuedHeaderKind>(kindText, ignoreCase: true, out var kind))
+        {
+            if (!IssueIssuedHeaderComposeService.TryResolveKind(catalogKey, out kind))
+                return Task.CompletedTask;
+        }
+
+        Guid? existingHeaderId = Guid.TryParse(existingHeaderIdText, out var existing) && existing != Guid.Empty
+            ? existing
+            : null;
+
+        return SlotService.OpenIssueIssuedHeaderAsync(new IssueIssuedHeaderSlotRequest
+        {
+            ApplicationProfileInstanceId = applicationId,
+            Kind = kind,
+            CatalogKey = string.IsNullOrWhiteSpace(catalogKey)
+                ? IssueIssuedHeaderComposeService.CatalogKeyFor(kind)
+                : catalogKey.Trim(),
+            ExistingHeaderId = existingHeaderId,
+        }, ownerViewId);
+    }
 
     [JSInvokable]
     public Task CloseFromJsAsync() => SlotService.CloseAsync();

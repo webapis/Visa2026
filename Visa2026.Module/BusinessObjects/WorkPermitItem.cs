@@ -31,6 +31,10 @@ namespace Visa2026.Module.BusinessObjects
         Criteria = "StateSeverityLevel = 2", Context = "ListView", BackColor = "LightSalmon")]
     [Appearance("WPStateCritical", Priority = 300, AppearanceItemType = "ViewItem", TargetItems = "*",
         Criteria = "StateSeverityLevel >= 3", Context = "ListView", BackColor = "LightCoral")]
+    [Appearance("WorkPermitItem_InputApplicationProfileInstancesHiddenWhenIssued", Priority = 50,
+        AppearanceItemType = "ViewItem", TargetItems = "ApplicationProfileInstances",
+        Criteria = "ApplicationProfileInstance is not null", Context = "DetailView",
+        Visibility = ViewItemVisibility.Hide)]
     [SupportsOptionalDetailFields]
     public class WorkPermitItem : BaseObject, IExpirationLogic, IOptionalDetailFields
     {
@@ -286,9 +290,22 @@ namespace Visa2026.Module.BusinessObjects
         public string DocumentCopiesListLink =>
             Visa2026.Module.Localization.VisaUiMessages.Get("WorkPermitDocumentCopies.List.ColumnLink");
 
-        /// <summary>Skip-navigation M2M with <see cref="ApplicationProfileInstance"/> (same pattern as Person). Not aggregated.</summary>
+        /// <summary>Skip-navigation M2M with <see cref="ApplicationProfileInstance"/> (input linked items). Distinct from parent <see cref="WorkPermit.ApplicationProfileInstance"/> issued-from FK.</summary>
         [ModelDefault("AllowEdit", "False")]
         [VisibleInListView(false)]
         public virtual IList<ApplicationProfileInstance> ApplicationProfileInstances { get; set; } = new ObservableCollection<ApplicationProfileInstance>();
+
+        /// <summary>
+        /// ApplicationProfileInstance linked on the parent <see cref="WorkPermit"/> (if any). Read-only ListView/Detail convenience.
+        /// </summary>
+        [NotMapped]
+        [ExcludeFromOptionalDetailFields]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInListView(true)]
+        [VisibleInDetailView(true)]
+        [VisibleInLookupListView(false)]
+        [XafDisplayName("Application Profile instance")]
+        [ToolTip("Issuing profile instance from the parent work permit header (WorkPermit.ApplicationProfileInstance).")]
+        public ApplicationProfileInstance ApplicationProfileInstance => WorkPermit?.ApplicationProfileInstance;
     }
 }

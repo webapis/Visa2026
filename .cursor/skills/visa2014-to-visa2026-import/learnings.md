@@ -1,3 +1,149 @@
+### 2026-08-22 — Invitation issuing origin (instance-side create + roster output lines)
+
+- **Officer**: issued invitation origin = `Invitation.ApplicationProfileInstance` (1:N from instance `Invitations`); not root Invitation list **New**. `InvitationItem` rows on the letter are output lines (one per roster person), not input M2M links.
+- **Import**: existing `Invitation.yaml` → `ApplicationProfileInstance`; `Visa2014InvitationODataImporter` backfills like WorkPermit. Import does not run roster helper (`MigrationImportContext`).
+- **Order**: import ApplicationProfileInstance waves before Invitation if issuing FK should populate.
+
+
+### 2026-08-22 — Visa IssuingApplicationProfileInstance (Path B + officer instance-only create)
+
+- **Officer**: issued visa origin = `Visa.IssuingApplicationProfileInstance` (1:N from instance `IssuedVisas`); not Passport nested New; not input M2M `ApplicationProfileInstances`.
+- **Import**: `--entity Visa --inprocess` posts `IssuingApplicationProfileInstance` when Application id-map resolves; re-run backfills existing Visa id-map rows. Post-pass: `--correct-visa2014-issuing-application-profile-instance` (alias `--correct-visa2014-issuing-application-item`).
+- **Order**: import ApplicationProfileInstance waves before Visa if issuing FK should populate; InvitationItem correction still after issuing FK.
+
+
+### 2026-08-22 — Person-related item links respect Application Profile RequirePerson*
+
+- **Rule**: link Passport/Visa/WorkPermitItem/InvitationItem/… onto ApplicationProfileInstance only when the instance’s Application Profile has the matching **Required person-related data** checkbox on.
+- **Prevent**: do not run blanket existing-item M2M for kinds the profile has off (e.g. App_Visa_and_WP_Ext → no WorkPermitItem / InvitationItem auto-link).
+
+
+### 2026-08-22 — Hard-delete all ApplicationProfileInstances (local PG restart)
+
+- **Phase**: cleanup
+- **Target**: local PostgreSQL `visa2026` only
+- **Action**: NULL header FKs on WorkPermit/Invitation/Rejection/BorderZone/Visa issuing/WordReport batches, then `DELETE FROM "ApplicationProfileInstances"` (**3754** rows); children/M2M/progress CASCADE
+- **Preserved**: WorkPermit headers **410**, Invitation headers **2917** (unlinked); Person and other master data untouched
+- **Id-maps cleared** (`calik-energi-local-pg`): ApplicationProfileInstance / Progress / Person → `{}` (bak copies retained)
+- **Next**: reimport one ApplicationType at a time per instruction
+
+
+### 2026-08-22 — App_Visa_and_WP_Ext full wave .15 → local PG
+
+- **Phase**: import
+- **Mode**: type-filtered ApplicationProfileInstance → progress → ApplicationProfileInstancePerson → WP/Inv header + existing-item links
+- **Outcome**: success (all exit **0**)
+- **Environment**: local PostgreSQL `visa2026` / `calik-energi-local-pg`
+- **Apps**: Posted **767** / Failed **0**; id-map **2979→3746**; PG apps **768** (incl. 1 seed)
+- **Progress**: Posted **3741** / Failed **0** / already **14562** / no app map **17894**
+- **People**: Posted **2482** / Failed **0** / already **5469** / missing id-map **14398**
+- **WorkPermit headers**: Application FK patched **+133** (total with app **360**); App_Visa_and_WP_Ext: **104** apps / **133** WP headers
+- **Invitation headers**: patched **0** (type does not issue invitations)
+- **Existing items**: WorkPermitItem ResolvedLink/M2M **2477**; InvitationItem **0**
+- **Logs**: `import-App_Visa_and_WP_Ext-*`, `import-ApplicationProgress-App_Visa_and_WP_Ext-*`, `import-ApplicationPerson-App_Visa_and_WP_Ext-*`, `*-VisaWPExt-*`
+
+
+### 2026-08-22 — Newly issued WP/Inv vs existing item M2M (App_Inv_And_WP)
+
+- **Phase**: correction / link
+- **Decision**:
+  - **Newly issued** `WorkPermit` / `Invitation` headers → `ApplicationProfileInstance` FK
+    - WP: `WorkPermit.ProcessNumber` → `PersonInApplication` → `Application` (majority per letter)
+    - Inv: `ApplicationResult.Application` (unchanged)
+  - **Existing** on PIA → `WorkPermitItem` / `InvitationItem` only via ResolvedLink + M2M (`ApplicationProfileInstance.WorkPermitItems` / `InvitationItems`)
+    - WP: `PersonInApplication.WorkPermit`
+    - Inv: `InvitationToBeCancelled` → `PersonInInvitation` (Employee/FamilyMember match)
+  - No `CurrentWorkPermitItem` / `CurrentInvitationItem` for Application Profile Instance import path
+- **Code**: `Visa2014WorkPermitTransform`/`ODataImporter` Application FK + backfill; `--correct-visa2014-existing-item-links`
+- **WorkPermit header re-run** (`--entity WorkPermit --inprocess`): Posted **1** / already **408** / **Application FK patched 227**; exit **0**
+- **Local PG App_Inv_And_WP**: apps **1183**; with Invitation **939**; with WorkPermit **197** (227 WP headers); **183** WP headers still null FK (apps not in id-map yet)
+- **Existing-item correction**: PIA scope **3915**; linked **0** — distinct apps with existing WP/Inv (**1551**) are **not** in current ApplicationProfileInstance id-map (Inv/Inv_And_WP waves); will apply when those types are imported
+- **Logs**: `import-WorkPermit-link-20260822-083642.log`, `correct-existing-item-links-20260822-083722.log`
+
+
+### 2026-08-21 — Invitation ApplicationProfileInstance FK backfill (App_Inv + Inv_And_WP)
+
+- **Phase**: correction / link
+- **Mode**: `--import-visa2014 --entity Invitation --inprocess` (re-run with app id-map present)
+- **Outcome**: success exit **0**
+- **Cause**: invitations imported earlier with empty Application id-map; payload also used obsolete `Application` key (BO is `ApplicationProfileInstance`) → all FKs null
+- **Fix**: payload key `ApplicationProfileInstance`; on already-imported rows, patch FK when app now in id-map
+- **Counts**: Posted **11** / Failed **0** / already **2905** / **Application FK patched 2572**; PG with_app linked for imported apps
+- **Log**: `import-Invitation-link-20260821-172602.log`
+
+### 2026-08-21 — App_Inv full wave (apps + progress + people) .15 → local PG
+
+- **Phase**: import
+- **Mode**: type-filtered ApplicationProfileInstance → progress → ApplicationProfileInstancePerson
+- **Outcome**: success (all exit **0**)
+- **Environment**: local PostgreSQL `visa2026` / `calik-energi-local-pg`
+- **Apps**: Posted **1798** / Failed **0**; id-map **1181→2979** (kept prior App_Inv_And_WP)
+- **Profile patch**: Already correct **2979** (import-time type-only fallback set `get_invitation`)
+- **Progress**: Posted **8750** / Failed **0** / already **5812** / no app map **21693**
+- **People**: Posted **3212** / Failed **0** / already **2257** / missing id-map **16878**
+- **Logs**: `import-App_Inv-*`, `import-ApplicationProgress-App_Inv-*`, `import-ApplicationPerson-App_Inv-*`
+
+### 2026-08-21 — ApplicationProfileInstancePerson roster for App_Inv_And_WP id-map .15 → local PG
+
+- **Phase**: import
+- **Mode**: single-entity (`--entity ApplicationProfileInstancePerson --inprocess`, Wave 2b)
+- **Outcome**: success exit **0**
+- **Environment**: local PostgreSQL `visa2026`
+- **Source**: `10.100.128.15` / `VISA2015` (`calik-energi-local-pg`)
+- **Scope**: apps in ApplicationProfileInstance id-map (**1181**) + Person id-map (**3339**)
+- **Counts**: prepared **22347** → Posted **2257** / Failed **0** / missing id-map **20090** / already **0**; transform skipped **208**
+- **Resolved links**: `"ApplicationProfileInstancePersonResolvedLinks"` **9035** (Passport/Visa/Education/… auto-link under RequirePerson*)
+- **Note**: UI “People locked” on issued cases is expected; import uses `MigrationImportContext.IsDataImport` so LinkPerson still runs
+- **Id-map**: `ApplicationProfileInstancePerson.json` **2257**
+- **Log**: `legacy/visa2014/import-logs/import-ApplicationPerson-20260821-165552.log`
+
+### 2026-08-21 — ApplicationProfileInstanceProgress FK rename broke parent link
+
+- **Symptom**: ListView all **At office**, Progress date empty after progress import (5812 posted).
+- **Cause**: headless payload still used `Application` (old name); BO property is `ApplicationProfileInstance` → **5812 rows with NULL FK**. Status falls back to implied `IS_BEING_PREPARED` (“At office”).
+- **Fix**: payload key `ApplicationProfileInstance`; delete null-FK orphans; clear progress id-map; reimport → **1181** apps linked, LatestPrimaryStateCode histogram: PROCESS_ISSUED 936 / CANCELLED 156 / REJECTED 59 / STARTED 30.
+- **ListView**: prefer `LatestProgressDisplay` for Status; backfill `LatestProgressId`; `OnSaved` re-Sync so pointer is set after insert.
+- **Legacy match**: legacy has no progress table — synthesis from Application scalars; after fix, latest Visa2026 state tracks that synthesis (not literal legacy UI helper 1:1).
+- **Log**: `import-ApplicationProgress-relink-20260821-164108.log`
+
+### 2026-08-21 — ApplicationProfileInstanceProgress for App_Inv_And_WP id-map .15 → local PG
+
+- **Phase**: import
+- **Mode**: single-entity (`--import-visa2014 --entity ApplicationProfileInstanceProgress --inprocess`)
+- **Outcome**: success exit **0**
+- **Environment**: local PostgreSQL `visa2026`
+- **Source**: `10.100.128.15` / `VISA2015` (`calik-energi-local-pg`)
+- **Scope**: apps in `ApplicationProfileInstance.json` only (**1181** App_Inv_And_WP)
+- **Counts**: legacy apps **12594** → prepared steps **36437** → Posted **5812** / Failed **0** / no app map **30625** / already **0**; parent-skipped **165**
+- **Pre-fix**: completion-index VisaExtension SQL used `PersonInApplication.ApplicationProfileInstance` (Visa2026 name) — legacy column is **`Application`** → `Invalid column name`; restored `pia*.Application`
+- **Id-map**: `ApplicationProfileInstanceProgress.json`
+- **Log**: `legacy/visa2014/import-logs/import-ApplicationProgress-20260821-163326.log`
+
+### 2026-08-21 — ApplicationProfileInstance App_Inv_And_WP type-filtered import .15 → local PG
+
+- **Phase**: import
+- **Mode**: single-entity (`--import-visa2014 --entity ApplicationProfileInstance --inprocess`)
+- **Outcome**: success exit **0**
+- **Environment**: local PostgreSQL `visa2026`
+- **Source**: `10.100.128.15` / `VISA2015` (`calik-energi-local-pg`)
+- **Filter**: `--application-type App_Inv_And_WP` (new CLI; filter after transform by Visa2026 `ApplicationType.Name`)
+- **Counts**: legacy SQL **12594** → prepared type match **1181** → Posted **1181** / Failed **0** / Already imported **0**; transform skipped **170** (all types)
+- **Id-map**: `id-maps/calik-energi-local-pg/ApplicationProfileInstance.json` **1181** entries
+- **CLI**: `--application-type App_Inv_And_WP --skip-tenant-catalog-generation --batch-size 50 --no-wait`
+- **Log**: `legacy/visa2014/import-logs/import-App_Inv_And_WP-20260821-161243.log`
+- **Follow-up**: roster (`ApplicationProfileInstancePerson`) + progress; optional `--backfill-application-approval-leg-snapshots` if Ministrlik empty
+- **Profile FK gap (same day)**: import left `ApplicationProfile` null — type-only tenant JSON (36 rows, `DefaultProjectContract` null) vs via-ministry legacy contracts. Fixed resolver fallback + Wave 2 patch **1181/1181** → `get_invitation_wp`.
+
+### 2026-08-21 — Wave 2 ApplicationProfile patch after type-only catalog fallback
+
+- **Phase**: correction
+- **Mode**: `--patch-visa2014-application-profile`
+- **Outcome**: success — Patched **1181** / Failed **0** / Skipped **0**
+- **Cause**: tenant `application-profile.calik-energi.json` is type-only (do not restore Wave 0b 176); import resolver required contract-variant match → silent omit of FK
+- **Fix**: `ApplicationProfileCatalogGroupKey.FindProfile` + DTO `FindProfileId` fall back to type-only profile when contract variant missing
+- **Histogram**: `get_invitation_wp`: 1181
+- **Log**: `legacy/visa2014/import-logs/AppProfile-patch-apply.log`
+
 ### 2026-08-20 — Phase B: ApplicationProfileInstance approval-leg snapshots from shared catalog
 
 - **Mode**: host-start / F5 (`ApplicationProfileInstanceApprovalLegBackfill` after Default seed) + existing `--backfill-application-approval-leg-snapshots`

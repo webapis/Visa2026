@@ -2,12 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.HeaderLinkedDocuments;
 
 namespace Visa2026.Module.Services.ApplicationWorkspace;
 
 /// <summary>
-/// Output headers this case may produce (1:N). Visibility follows profile May produce
+/// Output headers this case may produce (1:N). Visibility follows profile **May produce**
 /// (<see cref="ApplicationProfileConfigurationResolver.ShowInvitations"/> and siblings).
+/// Issued visa tile uses <see cref="ApplicationProfileConfigurationResolver.CanIssueVisa"/> (<c>ProduceVisa</c>) only —
+/// not invitation; visa after invitation uses <see cref="InvitationItem"/> **Issue visa**.
 /// Distinct from <see cref="ApplicationWorkspaceLinkedRecordsCatalog"/> (existing person records).
 /// </summary>
 public static class ApplicationWorkspaceIssuedRecordsCatalog
@@ -79,4 +82,34 @@ public static class ApplicationWorkspaceIssuedRecordsCatalog
         IssuedVisa => typeof(Visa),
         _ => null,
     };
+
+    public static bool TryGetDocumentCopiesFamily(string key, out HeaderDocumentCopiesFamily family)
+    {
+        family = default;
+        if (string.Equals(key, Invitation, StringComparison.OrdinalIgnoreCase))
+        {
+            family = HeaderDocumentCopiesFamily.Invitation;
+            return true;
+        }
+
+        if (string.Equals(key, WorkPermit, StringComparison.OrdinalIgnoreCase))
+        {
+            family = HeaderDocumentCopiesFamily.WorkPermit;
+            return true;
+        }
+
+        if (string.Equals(key, Rejection, StringComparison.OrdinalIgnoreCase))
+        {
+            family = HeaderDocumentCopiesFamily.Rejection;
+            return true;
+        }
+
+        if (string.Equals(key, BorderZone, StringComparison.OrdinalIgnoreCase))
+        {
+            family = HeaderDocumentCopiesFamily.BorderZone;
+            return true;
+        }
+
+        return false;
+    }
 }

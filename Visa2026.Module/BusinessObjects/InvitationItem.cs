@@ -26,6 +26,10 @@ namespace Visa2026.Module.BusinessObjects
         "Only one of Cancelled, Changed, or Used can be set on an invitation item.")]
     [Appearance("InvitationItem_CancelledRow", Priority = 310, AppearanceItemType = "ViewItem", TargetItems = "*",
         Criteria = "IsCancelled = true", Context = "ListView", BackColor = "LightCoral", FontColor = "Firebrick")]
+    [Appearance("InvitationItem_InputApplicationProfileInstancesHiddenWhenIssued", Priority = 50,
+        AppearanceItemType = "ViewItem", TargetItems = "ApplicationProfileInstances",
+        Criteria = "ApplicationProfileInstance is not null", Context = "DetailView",
+        Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide)]
     [SupportsOptionalDetailFields]
     public class InvitationItem : PersonLinkedItemBase<InvitationItem, Invitation>, IOptionalDetailFields
     {
@@ -228,20 +232,20 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInDetailView(true)]
         [VisibleInLookupListView(false)]
         [XafDisplayName("Application Profile instance")]
-        [ToolTip("ApplicationProfileInstance linked on the parent invitation (Invitation.ApplicationProfileInstance).")]
+        [ToolTip("Issuing profile instance from the parent invitation header (Invitation.ApplicationProfileInstance).")]
         public ApplicationProfileInstance ApplicationProfileInstance => Invitation?.ApplicationProfileInstance;
 
         /// <summary>
-        /// Visa issued using this invitation line (<see cref="Visa.InvitationItem"/>). Typically 0–1 when used.
+        /// Visa issued using this invitation line (<see cref="Visa.IssuingInvitationItem"/>). Typically 0–1 when used.
         /// Read-only; cell tint on ListView follows visa <see cref="Visa.StateSeverityLevel"/>.
         /// </summary>
         [ExcludeFromOptionalDetailFields]
-        [InverseProperty(nameof(Visa.InvitationItem))]
+        [InverseProperty(nameof(Visa.IssuingInvitationItem))]
         [ModelDefault("AllowEdit", "False")]
         [VisibleInListView(true)]
         [VisibleInLookupListView(false)]
         [XafDisplayName("Issued Visa")]
-        [ToolTip("Visa issued using this invitation item (Visa.InvitationItem).")]
+        [ToolTip("Visa issued using this invitation item (Visa.IssuingInvitationItem).")]
         [Appearance("InvitationItem_IssuedVisa_Info", Priority = 100, AppearanceItemType = "ViewItem", TargetItems = "IssuedVisa",
             Criteria = "IssuedVisa is not null and IssuedVisa.StateSeverityLevel = 1", Context = "ListView", BackColor = "LightSkyBlue")]
         [Appearance("InvitationItem_IssuedVisa_Warning", Priority = 200, AppearanceItemType = "ViewItem", TargetItems = "IssuedVisa",
@@ -250,7 +254,7 @@ namespace Visa2026.Module.BusinessObjects
             Criteria = "IssuedVisa is not null and IssuedVisa.StateSeverityLevel >= 3", Context = "ListView", BackColor = "LightCoral")]
         public virtual Visa IssuedVisa { get; set; }
 
-        /// <summary>Skip-navigation M2M with <see cref="ApplicationProfileInstance"/> (input linked items). Distinct from parent Invitation header FK.</summary>
+        /// <summary>Skip-navigation M2M with <see cref="ApplicationProfileInstance"/> (input linked items). Distinct from parent <see cref="Invitation.ApplicationProfileInstance"/> issued-from FK.</summary>
         [ModelDefault("AllowEdit", "False")]
         [VisibleInListView(false)]
         public virtual IList<ApplicationProfileInstance> ApplicationProfileInstances { get; set; } = new ObservableCollection<ApplicationProfileInstance>();

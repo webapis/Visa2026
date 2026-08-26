@@ -21,6 +21,7 @@ using Visa2026.Module.Services.ApplicationPersonLink;
 using Visa2026.Module.Services.ApplicationPersonRoster;
 using Visa2026.Module.Localization;
 using Visa2026.Module.Services.OfficerShell;
+using Visa2026.Blazor.Server.Services;
 using Visa2026.Module.Services.PreviewSlot;
 
 namespace Visa2026.Blazor.Server.Editors;
@@ -38,6 +39,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
     private IOfficerShellStartProcessService? _startProcessService;
     private IOfficerShellCaseProgressService? _caseProgressService;
     private IApplicationProfileInstancePersonLinkQueryService? _personLinkQueryService;
+    private IApplicationWorkspacePersonUiActions? _personUiActions;
     private IReadOnlyList<ApplicationProfileCatalogRow> _allCatalogRows = Array.Empty<ApplicationProfileCatalogRow>();
 
     public OfficerShellPropertyEditor(Type objectType, IModelMemberViewItem model)
@@ -58,6 +60,9 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         _startProcessService = sp?.GetService<IOfficerShellStartProcessService>();
         _caseProgressService = sp?.GetService<IOfficerShellCaseProgressService>();
         _personLinkQueryService = sp?.GetService<IApplicationProfileInstancePersonLinkQueryService>();
+        _personUiActions = sp?.GetService<IApplicationWorkspacePersonUiActions>();
+        if (_personUiActions != null)
+            _personUiActions.WorkspaceChanged += OnWorkspaceChanged;
     }
 
     protected override IComponentModel CreateComponentModel() => new OfficerShellModel
@@ -322,31 +327,53 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         return Task.CompletedTask;
     }
 
-    private Task OnIssuedHeaderNewRequested(string key)
+    private async Task OnIssuedHeaderNewRequested(string key)
     {
         var model = ComponentModel;
         if (model == null || _application == null || model.CaseApplicationProfileInstanceId == Guid.Empty)
-            return Task.CompletedTask;
+            return;
+
+        if (IssueIssuedHeaderComposeService.TryResolveKind(key, out _))
+        {
+            await IssueIssuedHeaderPreviewSlotOpenHelper.TryOpenComposeAsync(
+                _application,
+                model.CaseApplicationProfileInstanceId,
+                key,
+                View?.Id);
+            return;
+        }
 
         ApplicationWorkspaceIssuedHeaderOpenHelper.TryCreate(
             _application,
             _application.MainWindow,
             model.CaseApplicationProfileInstanceId,
             key);
-        return Task.CompletedTask;
     }
 
-    private Task OnIssuedHeaderOpenRequested(ApplicationWorkspaceIssuedHeaderOpenRequest request)
+    private async Task OnIssuedHeaderOpenRequested(ApplicationWorkspaceIssuedHeaderOpenRequest request)
     {
         if (_application == null || request == null || request.Id == Guid.Empty)
-            return Task.CompletedTask;
+            return;
+
+        var model = ComponentModel;
+        if (model != null
+            && IssueIssuedHeaderComposeService.TryResolveKind(request.Key, out _)
+            && model.CaseApplicationProfileInstanceId != Guid.Empty)
+        {
+            await IssueIssuedHeaderPreviewSlotOpenHelper.TryOpenAsync(
+                _application,
+                model.CaseApplicationProfileInstanceId,
+                request.Key,
+                request.Id,
+                View?.Id);
+            return;
+        }
 
         ApplicationWorkspaceIssuedHeaderOpenHelper.TryOpen(
             _application,
             _application.MainWindow,
             request.Key,
             request.Id);
-        return Task.CompletedTask;
     }
 
     private async Task BackToInProcessAsync()

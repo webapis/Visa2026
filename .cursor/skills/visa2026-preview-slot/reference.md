@@ -13,7 +13,9 @@ XAF Controller
   → *SlotPanel (catalog) or *InlinePreview (exclusive preview)
 ```
 
-## Occupant keys (`VisaPreviewSlotOccupantKeys`)
+## Occupant keys (VisaPreviewSlotOccupantKeys)
+
+Also: `issue-issued-header:{catalogKey}:{appId:N}` via `ForIssueIssuedHeader` (compose New invitation / work permit / rejection / border zone).
 
 | Pattern | When |
 |---------|------|
@@ -23,6 +25,7 @@ XAF Controller
 | `progress-letters:app:{appId}` | Ministry letter catalog |
 | `progress-letters:app:{appId}` plus `preview:{progressId}` | Workspace Progress filename (`OpenPreviewOnly`) |
 | `file:{sourceType}:{objectId}` | Generic file preview (`progress-letter`, `user-report-template`, `application-profile-template`) |
+| `issue-issued-header:{catalogKey}:{appId}` | New invitation / WP / rejection / border zone compose (ForIssueIssuedHeader) |
 
 Register new Word/Excel “look” previews as `IFilePreviewSource` + `OpenFileAsync`. Do not add a Resminamalar occupant from the Application Profile wizard (no live application to merge).
 

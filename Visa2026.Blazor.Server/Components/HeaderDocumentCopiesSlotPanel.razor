@@ -2,6 +2,8 @@
 @using DevExpress.ExpressApp
 @using DevExpress.ExpressApp.Blazor.Services
 @using Microsoft.Extensions.DependencyInjection
+@using Microsoft.JSInterop
+@using System.Linq
 @using Visa2026.Blazor.Server.Editors
 @using Visa2026.Blazor.Server.Localization
 @using Visa2026.Module.BusinessObjects
@@ -43,11 +45,30 @@
         }
         else
         {
-            <HeaderDocumentCopiesInlinePreview @ref="_inlinePreview"
-                                               Family="_family"
-                                               ParentId="_parentId"
-                                               UiCultureName="_uiCultureName"
-                                               PreviewClosed="OnPreviewClosedAsync" />
+            @if (_previewOnlyEmpty)
+            {
+                <div class="report-package-inline-preview app-item-doc-copies-preview">
+                    <div class="report-package-inline-preview__header app-item-doc-copies-preview__header">
+                        <h3 class="app-item-doc-copies-preview__title">@Title</h3>
+                        <div class="app-item-doc-copies-preview__header-actions">
+                            <button type="button"
+                                    class="visa-preview-drawer__btn visa-preview-drawer__btn--close"
+                                    @onclick="ClosePanelAsync">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                    <p class="app-item-doc-copies-preview__state" style="padding:1rem">No copy attached yet. Open the record to upload a scan or PDF.</p>
+                </div>
+            }
+            else
+            {
+                <HeaderDocumentCopiesInlinePreview @ref="_inlinePreview"
+                                                   Family="_family"
+                                                   ParentId="_parentId"
+                                                   UiCultureName="_uiCultureName"
+                                                   PreviewClosed="OnPreviewClosedAsync" />
+            }
         }
     </div>
 </div>
@@ -58,13 +79,17 @@
 
     [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
     [Inject] private IVisaPreviewSlotService SlotService { get; set; } = null!;
+    [Inject] private IJSRuntime JS { get; set; } = null!;
 
     private HeaderDocumentCopiesFamily _family;
     private Guid _parentId;
     private HeaderLinkedDocumentsSnapshot _snapshot = new();
     private string _uiCultureName = string.Empty;
     private bool _previewActive;
+    private bool _previewOnlyMode;
+    private bool _previewOnlyEmpty;
     private HeaderDocumentCopiesInlinePreview? _inlinePreview;
+    private HeaderDocumentCopiesInlinePreviewRequest? _pendingPreviewRequest;
     private EventCallback _refreshRequested;
     private string? _boundBindingKey;
 
@@ -86,6 +111,9 @@
             _snapshot = new HeaderLinkedDocumentsSnapshot();
             _boundBindingKey = null;
             _previewActive = false;
+            _previewOnlyMode = false;
+            _previewOnlyEmpty = false;
+            _pendingPreviewRequest = null;
             return;
         }
 
@@ -93,12 +121,31 @@
         if (!string.Equals(_boundBindingKey, bindingKey, StringComparison.Ordinal))
         {
             _boundBindingKey = bindingKey;
+            _previewOnlyMode = Request.OpenPreviewOnly;
             _previewActive = false;
+            _previewOnlyEmpty = false;
+            _pendingPreviewRequest = null;
         }
 
         _family = Request.Family;
         _parentId = Request.ParentId;
         ReloadSnapshot();
+
+        if (_previewOnlyMode && _pendingPreviewRequest == null && !_previewActive)
+        {
+            var preview = BuildPreviewRequest(Request, _snapshot);
+            if (preview != null)
+            {
+                _previewActive = true;
+                _previewOnlyEmpty = false;
+                _pendingPreviewRequest = preview;
+            }
+            else
+            {
+                _previewActive = true;
+                _previewOnlyEmpty = true;
+            }
+        }
     }
 
     private static string BuildBindingKey(HeaderDocumentCopiesSlotRequest request)
@@ -151,6 +198,57 @@
         return InvokeAsync(StateHasChanged);
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_pendingPreviewRequest != null)
+        {
+            var request = _pendingPreviewRequest;
+            _pendingPreviewRequest = null;
+            await InvokeAsync(StateHasChanged);
+            await Task.Yield();
+
+            if (_inlinePreview != null)
+                await _inlinePreview.OpenAsync(request);
+            return;
+        }
+
+        if (_previewActive)
+            return;
+
+        try
+        {
+            await JS.InvokeVoidAsync("visaPreviewDrawer.scheduleSlotThemeSync");
+        }
+        catch (JSDisconnectedException) { }
+    }
+
+    private static HeaderDocumentCopiesInlinePreviewRequest? BuildPreviewRequest(
+        HeaderDocumentCopiesSlotRequest request,
+        HeaderLinkedDocumentsSnapshot snapshot)
+    {
+        HeaderLinkedDocumentRecord? record = null;
+        if (!string.IsNullOrWhiteSpace(request.FocusRecordKey))
+            record = snapshot.FindRecord(request.FocusRecordKey.Trim());
+
+        record ??= snapshot.Records?.FirstOrDefault(r =>
+            r.Files != null && r.Files.Any(f => f.FileDataId != Guid.Empty));
+
+        if (record == null || string.IsNullOrWhiteSpace(record.RecordKey))
+            return null;
+
+        var display = !string.IsNullOrWhiteSpace(request.FocusDisplayName)
+            ? request.FocusDisplayName.Trim()
+            : record.RecordLabel;
+
+        return new HeaderDocumentCopiesInlinePreviewRequest
+        {
+            Family = request.Family,
+            ParentId = request.ParentId,
+            RecordKey = record.RecordKey,
+            DisplayName = string.IsNullOrWhiteSpace(display) ? "Document copy" : display,
+        };
+    }
+
     private async Task HandleInlinePreviewAsync(HeaderDocumentCopiesInlinePreviewRequest request)
     {
         _previewActive = true;
@@ -163,13 +261,25 @@
 
     private async Task OnPreviewClosedAsync()
     {
+        if (_previewOnlyMode)
+        {
+            _previewOnlyMode = false;
+            _previewActive = false;
+            _previewOnlyEmpty = false;
+            await SlotService.CloseAsync();
+            return;
+        }
+
         _previewActive = false;
         await InvokeAsync(StateHasChanged);
     }
 
     private async Task ClosePanelAsync()
     {
+        _previewOnlyMode = false;
         _previewActive = false;
+        _previewOnlyEmpty = false;
+        _pendingPreviewRequest = null;
         if (CloseRequested.HasDelegate)
             await CloseRequested.InvokeAsync();
         else

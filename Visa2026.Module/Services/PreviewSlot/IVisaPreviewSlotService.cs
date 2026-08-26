@@ -15,6 +15,7 @@ public enum VisaPreviewSlotMode
     PersonDocumentCopies = 5,
     HeaderDocumentCopies = 6,
     PlaceholderManual = 7,
+    IssueIssuedHeader = 8,
 }
 
 public sealed class ResminamalarSlotRequest
@@ -72,6 +73,8 @@ public sealed class VisaPreviewSlotState
 
     public PlaceholderManualSlotRequest? PlaceholderManual { get; init; }
 
+    public IssueIssuedHeaderSlotRequest? IssueIssuedHeader { get; init; }
+
     public int Version { get; init; }
 }
 
@@ -125,6 +128,18 @@ public sealed class HeaderDocumentCopiesSlotRequest
     public Guid ParentId { get; init; }
 
     public Guid? ContextItemId { get; init; }
+
+    /// <summary>When set, the slot auto-opens preview for this header document record key.</summary>
+    public string? FocusRecordKey { get; init; }
+
+    /// <summary>Display name for <see cref="FocusRecordKey"/> when <see cref="OpenPreviewOnly"/> is true.</summary>
+    public string? FocusDisplayName { get; init; }
+
+    /// <summary>
+    /// When true, the slot shows only the document preview viewer (no catalog).
+    /// Used when the officer clicks Preview on an issued-header row in the case workspace.
+    /// </summary>
+    public bool OpenPreviewOnly { get; init; }
 }
 
 /// <summary>
@@ -148,6 +163,8 @@ public interface IVisaPreviewSlotService
     Task OpenHeaderDocumentCopiesAsync(HeaderDocumentCopiesSlotRequest request, string? ownerViewId = null);
 
     Task OpenPlaceholderManualAsync(PlaceholderManualSlotRequest? request = null, string? ownerViewId = null);
+
+    Task OpenIssueIssuedHeaderAsync(IssueIssuedHeaderSlotRequest request, string? ownerViewId = null);
 
     Task OpenFileAsync(string sourceType, Guid objectId, string? ownerViewId = null);
 

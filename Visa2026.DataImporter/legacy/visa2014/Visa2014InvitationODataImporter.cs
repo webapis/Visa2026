@@ -1,6 +1,7 @@
 using System.Text.Json;
 using DevExpress.ExpressApp;
 using Visa2026.DataImporter;
+using Bo = Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
@@ -12,6 +13,7 @@ internal sealed class Visa2014InvitationImportResult
     public int DedupeMergedCount { get; init; }
     public int SkippedAlreadyImported { get; init; }
     public int SkippedMissingApplicationProfileInstanceIdMap { get; init; }
+    public int PatchedApplicationProfileInstanceCount { get; init; }
     public int PostedCount { get; init; }
     public int FailedCount { get; init; }
     public string? IdMapPath { get; init; }
@@ -66,15 +68,33 @@ internal static class Visa2014InvitationODataImporter
         int failed = 0;
         int skippedAlreadyImported = 0;
         int skippedMissingApplicationProfileInstanceIdMap = 0;
+        int patchedApplication = 0;
+        var pendingBackfill = 0;
+
+        using var backfillSpace = objectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Bo.Invitation));
 
         foreach (var row in batch.ImportRows)
         {
             var legacyOid = (Guid)row["_legacyRowId"]!;
-            if (invitationIdMap.ContainsKey(legacyOid))
+            if (invitationIdMap.TryGetValue(legacyOid, out var existingInvitationId))
             {
                 skippedAlreadyImported++;
-                if (verbose)
-                    Console.WriteLine($"  SKIP {legacyOid}: already in Invitation id-map");
+                if (TryBackfillApplicationProfileInstance(
+                        backfillSpace,
+                        row,
+                        existingInvitationId,
+                        applicationIdMap,
+                        verbose))
+                {
+                    patchedApplication++;
+                    pendingBackfill++;
+                    if (pendingBackfill >= 50)
+                    {
+                        backfillSpace.CommitChanges();
+                        pendingBackfill = 0;
+                    }
+                }
+
                 continue;
             }
 
@@ -91,7 +111,7 @@ internal static class Visa2014InvitationODataImporter
                     continue;
                 }
 
-                var createdId = await target.CreateAsync(typeof(Visa2026.Module.BusinessObjects.Invitation), payload);
+                var createdId = await target.CreateAsync(typeof(Bo.Invitation), payload);
                 if (!createdId.HasValue)
                 {
                     failed++;
@@ -102,7 +122,7 @@ internal static class Visa2014InvitationODataImporter
                 invitationIdMap[legacyOid] = createdId.Value;
                 posted++;
                 if (posted % 250 == 0)
-                    Console.WriteLine($"INF Progress: {posted} posted, {failed} failed...");
+                    Console.WriteLine($"INF Progress: {posted} posted, {failed} failed, {patchedApplication} Application FK patched...");
                 if (verbose)
                     Console.WriteLine($"  SAVE Invitation {createdId.Value} <- legacy {legacyOid} ({row["InvitationNumber"]})");
             }
@@ -113,6 +133,9 @@ internal static class Visa2014InvitationODataImporter
                 Console.Error.WriteLine($"ERR {legacyOid}: {ex.Message}");
             }
         }
+
+        if (pendingBackfill > 0)
+            backfillSpace.CommitChanges();
 
         await target.FlushAsync();
 
@@ -137,11 +160,41 @@ internal static class Visa2014InvitationODataImporter
             DedupeMergedCount = batch.DedupeMergedCount,
             SkippedAlreadyImported = skippedAlreadyImported,
             SkippedMissingApplicationProfileInstanceIdMap = skippedMissingApplicationProfileInstanceIdMap,
+            PatchedApplicationProfileInstanceCount = patchedApplication,
             PostedCount = posted,
             FailedCount = failed,
             IdMapPath = idMapPath,
             Errors = errors,
         };
+    }
+
+    private static bool TryBackfillApplicationProfileInstance(
+        IObjectSpace objectSpace,
+        Dictionary<string, object?> row,
+        Guid invitationId,
+        IReadOnlyDictionary<Guid, Guid> applicationIdMap,
+        bool verbose)
+    {
+        if (!TryResolveLegacyGuid(row, "Application", out var legacyApplicationOid))
+            return false;
+        if (!applicationIdMap.TryGetValue(legacyApplicationOid, out var applicationId))
+            return false;
+
+        var invitation = objectSpace.GetObjectByKey<Bo.Invitation>(invitationId);
+        if (invitation == null)
+            return false;
+        if (invitation.ApplicationProfileInstance != null
+            && invitation.ApplicationProfileInstance.ID == applicationId)
+            return false;
+
+        var application = objectSpace.GetObjectByKey<Bo.ApplicationProfileInstance>(applicationId);
+        if (application == null)
+            return false;
+
+        invitation.ApplicationProfileInstance = application;
+        if (verbose)
+            Console.WriteLine($"  PATCH Invitation {invitationId} ApplicationProfileInstance={applicationId}");
+        return true;
     }
 
     private static Dictionary<string, object?>? BuildPayload(
@@ -177,7 +230,7 @@ internal static class Visa2014InvitationODataImporter
         if (TryResolveLegacyGuid(row, "Application", out var legacyApplicationProfileInstanceOid))
         {
             if (applicationIdMap.TryGetValue(legacyApplicationProfileInstanceOid, out var applicationId))
-                payload["Application"] = new Dictionary<string, object?> { ["ID"] = applicationId };
+                payload["ApplicationProfileInstance"] = new Dictionary<string, object?> { ["ID"] = applicationId };
             else
                 missingApplication = true;
         }

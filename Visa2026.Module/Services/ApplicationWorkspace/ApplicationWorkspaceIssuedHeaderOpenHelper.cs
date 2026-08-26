@@ -2,6 +2,8 @@ using System;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services;
+using Visa2026.Module.Services.PreviewSlot;
 
 namespace Visa2026.Module.Services.ApplicationWorkspace;
 
@@ -22,6 +24,16 @@ public static class ApplicationWorkspaceIssuedHeaderOpenHelper
             || !ApplicationWorkspaceIssuedRecordsCatalog.TryGet(key, out _))
         {
             return false;
+        }
+
+        // Invitation / WorkPermit / Rejection / BorderZone: compose in #visa-preview-slot (never modal DetailView).
+        if (IssueIssuedHeaderComposeService.TryResolveKind(key, out _))
+        {
+            return ApplicationWorkspaceIssueIssuedHeaderOpenHelper.TryOpenCompose(
+                application,
+                applicationProfileInstanceId,
+                key,
+                ownerViewId: null);
         }
 
         var headerType = ApplicationWorkspaceIssuedRecordsCatalog.ResolveHeaderType(key);
@@ -64,6 +76,10 @@ public static class ApplicationWorkspaceIssuedHeaderOpenHelper
         if (application == null || headerId == Guid.Empty)
             return false;
 
+        // Issued headers Inv/WP/RJ/BZ open in preview-slot (Blazor), not modal DetailView.
+        if (IssueIssuedHeaderComposeService.TryResolveKind(key, out _))
+            return false;
+
         var headerType = ApplicationWorkspaceIssuedRecordsCatalog.ResolveHeaderType(key);
         if (headerType == null)
             return false;
@@ -88,9 +104,11 @@ public static class ApplicationWorkspaceIssuedHeaderOpenHelper
         {
             case Invitation invitation:
                 invitation.ApplicationProfileInstance = instance;
+                InvitationIssuedRosterItemsHelper.EnsureRosterInvitationItems(invitation);
                 return true;
             case WorkPermit workPermit:
                 workPermit.ApplicationProfileInstance = instance;
+                WorkPermitIssuedRosterItemsHelper.EnsureRosterWorkPermitItems(workPermit);
                 return true;
             case BorderZone borderZone:
                 borderZone.ApplicationProfileInstance = instance;
@@ -100,6 +118,7 @@ public static class ApplicationWorkspaceIssuedHeaderOpenHelper
                 return true;
             case Visa visa when string.Equals(key, ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, StringComparison.OrdinalIgnoreCase):
                 visa.IssuingApplicationProfileInstance = instance;
+                VisaIssuingLinkPathAMatcher.TryApplyOnce(visa);
                 return true;
             default:
                 return false;

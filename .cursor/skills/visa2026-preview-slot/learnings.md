@@ -2,7 +2,7 @@
 
 Purpose: **shell, layout, occupants, catalog card UX, JS/CSS** — not Resminamalar merge or document-copy scan rules.
 
-**Read before every preview-slot task:** skim **## Entries** (newest first).  
+**Read before every preview-slot task:** skim **## Entries** (newest first).
 **Maturity:** [MATURITY.md](./MATURITY.md).
 
 **After a verified fix:** append one entry. **Do not** edit or delete prior entries.
@@ -22,6 +22,83 @@ Purpose: **shell, layout, occupants, catalog card UX, JS/CSS** — not Resminama
 ---
 
 ## Entries
+
+### 2026-08-25 — Issued invitation row Preview opens copy in slot
+
+- **Need**: Officers preview the uploaded invitation scan from Issued records without opening compose.
+- **Fix**: Each Inv/WP/RJ/BZ issued row has **Preview**. Opens `HeaderDocumentCopies` with `OpenPreviewOnly` (same viewer as header copies). Disabled until a copy exists. Upload/remove on compose refreshes `HasCopy`.
+- **Test**: Stop F5, rebuild, Ctrl+F5. Upload copy on 30 → list **Preview** enabled → click shows PDF in right slot. 31 without copy stays disabled.
+- **Prevent**: Do not open compose on Preview; keep number-click for edit. Do not add a new slot mode.
+- **Cross-skill**: preview-slot | application-profile | invitation-work-permit-document-copies
+
+### 2026-08-25 — Upload invitation copy from compose slot
+
+- **Need**: Officers attach a scan/PDF of the invitation from the compose panel, not only XAF Documents tab.
+- **Fix**: `Invitation copy` card with Upload / Remove. Stores `InvitationDocument` + `FileData` (same as header document copies). Edit saves immediately; New invitation attaches on Create. PDF/PNG/JPEG/TIFF/GIF/BMP up to 5 MB.
+- **Test**: Stop F5, rebuild, Ctrl+F5. Edit 30 → Upload copy → file listed. Remove works. New invitation: pick file then Create.
+- **Prevent**: Do not invent a second file store — use `Invitation.Documents`.
+- **Cross-skill**: preview-slot | application-profile | invitation-work-permit-document-copies
+### 2026-08-25 — Available-on-case card: no dashed border
+
+- **Symptom**: Officer disliked the dashed border around **Available on this case**.
+- **Fix**: Removed `border-style: dashed`; section uses the same solid card border as Header / People on letter.
+- **Test**: Ctrl+F5 on invitation edit — Available card is solid, not dashed.
+- **Cross-skill**: preview-slot
+### 2026-08-25 — Split assigned vs available invitation people
+
+- **Symptom**: Unassigned people in the same table as the letter made the invitation look incomplete.
+- **Fix**: Invitation compose uses two cards — **People on letter** (assigned, Remove) then dashed **Available on this case** (Add). Matches stacked Header → letter → add → actions layout. Occupied-on-other stay hidden.
+- **Test**: Stop F5, rebuild, Ctrl+F5. Open 30 → Andy in letter; Ali in Available with Add. Add moves them up; Save persists.
+- **Prevent**: Do not mix Include=false rows into the letter table.
+- **Cross-skill**: preview-slot | application-profile
+### 2026-08-25 — Unassigned people stay visible on invitation edit
+
+- **Symptom**: Third roster person (not on 30 or 31) was hidden on edit; officers could not add them to either letter.
+- **Fix**: Edit lists people on this letter **plus** people not yet on any invitation. People already on another letter stay hidden.
+- **Test**: Stop F5, rebuild, Ctrl+F5. Open 30 or 31 → unassigned person appears unchecked; check + Save adds them.
+- **Prevent**: Do not filter edit to ExistingLineId-only.
+- **Cross-skill**: preview-slot | application-profile
+### 2026-08-25 — Invitation compose hides people on another letter
+
+- **Symptom**: Edit invitation 31 still listed Andy as "On invitation 30" — full roster on every letter was confusing.
+- **Fix**: `LoadDraft` omits people already on another invitation. `LoadExistingDraft` lists only people on that letter. New invitation shows remaining (unassigned) people only.
+- **Test**: Stop F5, rebuild, Ctrl+F5. Open 31 → only that letter's people. Open New invitation → only people not yet on a letter.
+- **Prevent**: Do not show locked "On invitation N" rows; hide occupied people instead.
+- **Cross-skill**: preview-slot | application-profile
+### 2026-08-25 — Delete issued invitation from Application Profile Instance
+
+- **Symptom**: Officers could create/edit invitations on the case but not delete them from Issued records.
+- **Fix**: List-row **Delete** + slot **Delete** (edit mode). `IssueIssuedHeaderComposeService.Delete` removes unused invitation (items, documents, images). Refuses if any line has `IsUsed` or `IssuedVisa`. Workspace refresh; closes slot if that header is open. Same list action for WP/RJ/BZ. Issued visa still has no delete.
+- **Test**: Stop F5, rebuild, Ctrl+F5. Overview → Invitation → Delete → confirm → row gone. Invitation with a visa → error. Slot edit Delete same.
+- **Prevent**: Do not fall back to XAF modal delete for compose kinds; keep the visa-consumption guard.
+- **Cross-skill**: preview-slot | application-profile
+### 2026-08-25 — Invitation 005 list click still opened XAF modal
+
+- **Symptom**: After compose wiring, screenshot still showed Invitation DetailView modal for **005**.
+- **Root cause**: List-row **Open** used `TryOpen` → modal. New used EventCallback/JS that could no-op when hostRef null but return success. User often clicks existing **005**, not only New.
+- **Fix**: Case workspace opens Inv/WP/RJ/BZ via `OpenIssuedHeaderInSlotAsync` (JS + DI) for **New and Open**; `TryOpen` refuses those kinds; `ExistingHeaderId` loads success view in slot.
+- **Test**: Stop F5, rebuild, Ctrl+F5. Click **New invitation** OR list **005** → right slot, never center modal.
+- **Cross-skill**: preview-slot | application-profile
+
+
+### 2026-08-25 — New invitation opened XAF modal instead of IssueIssuedHeader slot
+
+- **Symptom**: Case workspace **New invitation** still showed Invitation DetailView modal.
+- **Root cause**: (1) Compose open via App-circuit `IVisaPreviewSlotService` may not reach `#visa-preview-slot` host; (2) failed/missed compose fell back to `TryCreate` modal.
+- **Fix**: Open via `visaPreviewDrawer.openIssueIssuedHeader` → host `OpenIssueIssuedHeaderFromJsAsync`; PropertyEditors use `IssueIssuedHeaderPreviewSlotOpenHelper`; `TryCreate` redirects Inv/WP/RJ/BZ to compose (no modal). Issued visa stays modal.
+- **Test**: Stop F5, rebuild, F5, Ctrl+F5 → New invitation → right slot compose (not center modal).
+- **Prevent**: Do not fall back to modal DetailView for issued-header compose kinds.
+- **Cross-skill**: preview-slot | application-profile
+
+
+### 2026-08-25 — IssueIssuedHeader occupant (compose New invitation/WP/RJ/BZ)
+
+- **Symptom**: Issued-header create used modal DetailView; prototypes required `#visa-preview-slot` compose.
+- **Fix**: New mode `IssueIssuedHeader`, `IssueIssuedHeaderSlotPanel`, CSS `issue-issued-header-slot.css`, `OpenIssueIssuedHeaderAsync` / `ForIssueIssuedHeader` key. Host branch + Version remount.
+- **Wiring**: OfficerShell / ApplicationWorkspace New buttons → `TryOpenCompose` (fallback modal for issued visa).
+- **Prevent**: Do not add four separate slot modes for Inv/WP/RJ/BZ — one parameterized occupant.
+- **Cross-skill**: preview-slot | application-profile
+
 
 ### 2026-08-19 — Wizard template Preview must use visaPreviewDrawer.open JS
 
@@ -162,3 +239,46 @@ Purpose: **shell, layout, occupants, catalog card UX, JS/CSS** — not Resminama
 - **Fix**: `DocumentCopies.svg` (XAF ImageName), `document-copies-clip.svg` + `document-copies-brand.css`, `DocumentCopiesBrandMark`; wired toolbar actions (Person/Header/AppItem), ListView Copies pills, dossier button, slot titles.
 - **Prevent**: Do not reuse `BO_FileAttachment` for document-copies entry points; use `DocumentCopies` / `.doc-copies-brand*`.
 - **Cross-skill**: person-document-copies | document-copies | invitation-work-permit-document-copies | preview-slot | person-dossier
+## 2026-08-25 — Invitation per person (compose)
+
+- New invitation compose defaults **CreateSeparatePerPerson**; people already on another invitation from the case are unchecked with status `On invitation N`.
+- When the toggle is on and 2+ people are selected, `CreateSeparateInvitations` creates one header each (numeric base increments: 006→006,007; else suffix `-1`,`-2`), single commit.
+- Officers can still turn the toggle off to put multiple people on one letter.
+## 2026-08-25 — Shared vs separate invitation (both modes)
+
+- Default letter mode is **single invitation for all selected**; separate-per-person is opt-in radio.
+- First invitation on a case pre-checks all ready people; later New invitations pre-check only people not yet on a letter, but **Select all ready** / re-check includes them on a shared letter.
+## 2026-08-25 — One invitation per person per application
+
+- Domain rule: a Person may have at most one issued invitation letter within the same `ApplicationProfileInstance` (shared multi-person letter OR separate letters — not both for the same person).
+- Compose locks people already on a letter; Create/Update reject duplicates via `FindPeopleAlreadyOnInvitation`.
+
+## 2026-08-25 — No letter-mode radios
+
+- Removed Single/Separate invitation radios. Create always puts checked people on one letter; issue another invitation later for remaining unlocked people (one person per application still enforced).
+## 2026-08-25 — Issued-header list switch left stale preview
+
+- Symptom: open invitation 005 then 006 — slot kept 005.
+- Cause: `openIssueIssuedHeader` returned true before `invokeMethodAsync` finished; CaseWorkspace skipped DI fallback. Panel could keep prior draft.
+- Fix: await JS promise; always DI `OpenIssueIssuedHeaderAsync` then JS; Host `@key` includes OccupantKey; panel reloads when ExistingHeaderId changes; capture row id in list click.
+
+## 2026-08-25 — People on letter stayed on prior invitation
+
+- Symptom: switching 005→006 updated header fields but People checkboxes/status stayed on 005.
+- Fix: exclude current invitation from occupancy map when loading edit draft; rebuild person line objects; `@key` people table/rows/checkboxes on OccupantKey + include/status.
+
+## 2026-08-25 — Expiry save pulled person from another invitation
+
+- Symptom: changing invitation 010 expiry then Save added a person who belonged on 009.
+- Cause: Update always synced InvitationItems from Include flags (stale after switch); occupancy/dup checks used lazy navigations.
+- Fix: UpdateInvitation skips people sync when selected ids match persisted ids; occupancy + dup use `GetObjectsQuery<InvitationItem>`.
+
+## 2026-08-25 — SyncPeopleOnSave for header-only invitation edits
+
+- Comparing selected vs persisted people still failed in practice (stale Include).
+- Panel now sets `draft.SyncPeopleOnSave` only when the people fingerprint changes; `UpdateInvitation` skips InvitationItems entirely when false (expiry/date-only Save).
+
+## 2026-08-25 — Expiry save added people: Invitation.OnSaving
+
+- Root cause: `Invitation.OnSaving` called `EnsureRosterInvitationItems`, which added every roster person not already on THAT letter. Saving 010 expiry therefore attached the person from 009.
+- Fix: removed OnSaving auto-fill; helper used only at create and skips people already on another invitation of the same application.

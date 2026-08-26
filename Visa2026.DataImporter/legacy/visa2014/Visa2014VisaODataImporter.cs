@@ -1,5 +1,7 @@
 using System.Text.Json;
+using DevExpress.ExpressApp;
 using Visa2026.DataImporter;
+using Bo = Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
@@ -11,6 +13,8 @@ internal sealed class Visa2014VisaImportResult
     public int DedupeMergedCount { get; init; }
     public int SkippedNoPassportMap { get; init; }
     public int SkippedAlreadyImported { get; init; }
+    public int SkippedMissingApplicationProfileInstanceIdMap { get; init; }
+    public int PatchedIssuingApplicationProfileInstanceCount { get; init; }
     public int PostedCount { get; init; }
     public int FailedCount { get; init; }
     public string? IdMapPath { get; init; }
@@ -24,6 +28,8 @@ internal static class Visa2014VisaODataImporter
         Visa2014ODataLookupResolver resolver,
         string legacyConnectionString,
         IReadOnlyList<string> lookupTranslationPaths,
+        IReadOnlyDictionary<Guid, Guid> applicationIdMap,
+        INonSecuredObjectSpaceFactory? objectSpaceFactory,
         string passportIdMapPath,
         string? visaIdMapOutputPath,
         int? maxRows,
@@ -69,13 +75,28 @@ internal static class Visa2014VisaODataImporter
         int failed = 0;
         int skippedNoPassport = 0;
         int skippedAlreadyImported = 0;
+        int skippedMissingApplicationProfileInstanceIdMap = 0;
+        int patchedIssuingApplication = 0;
+
+        using var backfillSpace = objectSpaceFactory?.CreateNonSecuredObjectSpace(typeof(Bo.Visa));
 
         foreach (var row in batch.ImportRows)
         {
             var legacyOid = (Guid)row["_legacyRowId"]!;
-            if (visaIdMap.ContainsKey(legacyOid))
+            if (visaIdMap.TryGetValue(legacyOid, out var existingVisaId))
             {
                 skippedAlreadyImported++;
+                if (backfillSpace != null
+                    && TryBackfillIssuingApplicationProfileInstance(
+                        backfillSpace,
+                        row,
+                        existingVisaId,
+                        applicationIdMap,
+                        verbose))
+                {
+                    patchedIssuingApplication++;
+                }
+
                 if (verbose)
                     Console.WriteLine($"  SKIP {legacyOid}: already in Visa id-map");
                 continue;
@@ -98,7 +119,10 @@ internal static class Visa2014VisaODataImporter
 
             try
             {
-                var payload = BuildPayload(row, resolver, passportId);
+                var payload = BuildPayload(row, resolver, passportId, applicationIdMap, out var missingApplication);
+                if (missingApplication)
+                    skippedMissingApplicationProfileInstanceIdMap++;
+
                 if (payload == null)
                 {
                     failed++;
@@ -106,7 +130,7 @@ internal static class Visa2014VisaODataImporter
                     continue;
                 }
 
-                var createdId = await target.CreateAsync(typeof(Visa2026.Module.BusinessObjects.Visa), payload);
+                var createdId = await target.CreateAsync(typeof(Bo.Visa), payload);
                 if (!createdId.HasValue)
                 {
                     failed++;
@@ -128,6 +152,9 @@ internal static class Visa2014VisaODataImporter
                 Console.Error.WriteLine($"ERR {legacyOid}: {ex.Message}");
             }
         }
+
+        if (backfillSpace != null && patchedIssuingApplication > 0)
+            backfillSpace.CommitChanges();
 
         await target.FlushAsync();
 
@@ -152,11 +179,42 @@ internal static class Visa2014VisaODataImporter
             DedupeMergedCount = batch.DedupeMergedCount,
             SkippedNoPassportMap = skippedNoPassport,
             SkippedAlreadyImported = skippedAlreadyImported,
+            SkippedMissingApplicationProfileInstanceIdMap = skippedMissingApplicationProfileInstanceIdMap,
+            PatchedIssuingApplicationProfileInstanceCount = patchedIssuingApplication,
             PostedCount = posted,
             FailedCount = failed,
             IdMapPath = idMapPath,
             Errors = errors,
         };
+    }
+
+    private static bool TryBackfillIssuingApplicationProfileInstance(
+        IObjectSpace objectSpace,
+        Dictionary<string, object?> row,
+        Guid visaId,
+        IReadOnlyDictionary<Guid, Guid> applicationIdMap,
+        bool verbose)
+    {
+        if (!TryResolveLegacyGuid(row, "Application", out var legacyApplicationOid))
+            return false;
+        if (!applicationIdMap.TryGetValue(legacyApplicationOid, out var applicationId))
+            return false;
+
+        var visa = objectSpace.GetObjectByKey<Bo.Visa>(visaId);
+        if (visa == null)
+            return false;
+        if (visa.IssuingApplicationProfileInstance != null
+            && visa.IssuingApplicationProfileInstance.ID == applicationId)
+            return false;
+
+        var application = objectSpace.GetObjectByKey<Bo.ApplicationProfileInstance>(applicationId);
+        if (application == null)
+            return false;
+
+        visa.IssuingApplicationProfileInstance = application;
+        if (verbose)
+            Console.WriteLine($"  PATCH Visa {visaId} IssuingApplicationProfileInstance={applicationId}");
+        return true;
     }
 
     private static int CountMissingPassportMap(
@@ -190,8 +248,11 @@ internal static class Visa2014VisaODataImporter
     private static Dictionary<string, object?>? BuildPayload(
         Dictionary<string, object?> row,
         Visa2014ODataLookupResolver resolver,
-        Guid passportId)
+        Guid passportId,
+        IReadOnlyDictionary<Guid, Guid> applicationIdMap,
+        out bool missingApplication)
     {
+        missingApplication = false;
         if (row["VisaNumber"] is not string visaNumber || string.IsNullOrWhiteSpace(visaNumber))
             return null;
         if (row["IssueDate"] is not DateTime issueDate ||
@@ -220,7 +281,6 @@ internal static class Visa2014VisaODataImporter
             ["IsCancelled"] = row.GetValueOrDefault("IsCancelled") is bool cancelled && cancelled,
             ["IsChanged"] = row.GetValueOrDefault("IsChanged") is bool changed && changed,
             ["IsExtended"] = row.GetValueOrDefault("IsExtended") is bool extended && extended,
-            // ShowOptionalFields is [NotMapped] on Visa — POSTing it yields OData 400 "Incorrect body."
             ["Passport"] = new { ID = passportId },
             ["VisaType"] = new { ID = visaTypeId.Value },
             ["VisaCategory"] = new { ID = visaCategoryId.Value },
@@ -237,7 +297,22 @@ internal static class Visa2014VisaODataImporter
                  && Guid.TryParse(piaText.Trim(), out var parsedPia))
             payload["LegacyPersonInApplicationProfileInstanceOid"] = parsedPia;
 
+        if (TryResolveLegacyGuid(row, "Application", out var legacyApplicationProfileInstanceOid))
+        {
+            if (applicationIdMap.TryGetValue(legacyApplicationProfileInstanceOid, out var applicationId))
+                payload["IssuingApplicationProfileInstance"] = new Dictionary<string, object?> { ["ID"] = applicationId };
+            else
+                missingApplication = true;
+        }
+
         return payload;
+    }
+
+    private static bool TryResolveLegacyGuid(Dictionary<string, object?> row, string field, out Guid legacyOid)
+    {
+        legacyOid = Guid.Empty;
+        var text = row.GetValueOrDefault(field) as string;
+        return !string.IsNullOrWhiteSpace(text) && Guid.TryParse(text, out legacyOid);
     }
 
     private static Dictionary<Guid, Guid> LoadOptionalVisaIdMap(string? path)

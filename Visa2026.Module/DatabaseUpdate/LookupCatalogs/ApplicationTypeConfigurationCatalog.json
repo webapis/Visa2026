@@ -1762,7 +1762,7 @@
                 "ShowBusinessTrips": false,
                 "ShowPreviousPassport": false,
                 "ShowCurrentVisa": true,
-                "ShowCurrentWorkPermitItem": true,
+                "ShowCurrentWorkPermitItem": false,
                 "ShowCurrentInvitationItem": false,
                 "ShowCurrentAddressOfResidence": true,
                 "ShowCurrentEmployeeContract": true,

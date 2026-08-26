@@ -1,8 +1,157 @@
+### 2026-08-25 — Issued-row Preview for invitation copy
+
+- **Need**: Preview the invitation file from Issued records list, not only from compose.
+- **Shipped**: **Preview** on issued Inv/WP/RJ/BZ rows → header-copies occupant `OpenPreviewOnly`. `HasCopy` from `InvitationDocument` (and siblings).
+- **Test**: Upload copy on 30 → Preview on that row shows the file in the slot.
+- **Cross-skill**: preview-slot | application-profile
+
+### 2026-08-25 — Invitation copy upload on compose panel
+
+- **Need**: Upload invitation file copy from the case-workspace compose slot.
+- **Shipped**: `IssueIssuedHeaderComposeService.AddDocument` / `RemoveDocument` → `InvitationDocument`. UI card **Invitation copy** (Upload + list + Remove).
+- **Test**: Edit invitation → Upload copy → listed. Same pattern for WP/RJ/BZ copies on their compose panels.
+- **Cross-skill**: preview-slot | application-profile
+
+### 2026-08-25 — Invitation people: letter vs available lists
+
+- **Need**: Assigned and unassigned people must not share one table (looks like an incomplete letter).
+- **Shipped**: Primary **People on letter** card; secondary dashed **Available on this case** below (Add / Add all ready). Same slot card stack as Header.
+- **Test**: Edit 30 — letter people only in the first card; unassigned Ali in Available.
+- **Cross-skill**: preview-slot | application-profile### 2026-08-25 — Unassigned roster person can join either invitation
+
+- **Need**: Person not yet on any invitation must be selectable on edit of 30 or 31.
+- **Shipped**: Edit people list = this letter + unassigned. Occupied-on-other stay hidden.
+- **Test**: Open invitation 30 or 31 → third person listed Ready/unchecked → check → Save.
+- **Cross-skill**: preview-slot | application-profile### 2026-08-25 — Invitation person list is per letter
+
+- **Need**: A person on one invitation must not appear on another invitation's compose list.
+- **Shipped**: Edit shows only people on that invitation. New invitation shows only people not yet on a letter. Occupied "On invitation N" rows are hidden, not locked.
+- **Test**: Invitation 31 no longer lists people from 30. New invitation lists remaining roster only.
+- **Cross-skill**: preview-slot | application-profile### 2026-08-25 — Delete Invitation from Application Profile Instance
+
+- **Need**: Officers must be able to delete an unused invitation produced by the case (Issued records), not only create/edit in the slot.
+- **Shipped**: `IssueIssuedHeaderComposeService.Delete` + Issued records **Delete** + slot **Delete** (edit). Guard: refuse if any `InvitationItem` is used / has `IssuedVisa`. Refreshes list; closes open compose slot.
+- **Test**: Delete unused invitation from Overview list → gone. Invitation that issued a visa → error shown.
+- **Cross-skill**: preview-slot | application-profile### 2026-08-25 — Issued-header slot edit mode (Invitation fields)
+
+- **Need**: Opening existing invitation showed only summary (number + people); officers must correct header mistakes in-slot.
+- **Shipped**: `LoadExistingDraft` / `Update` hydrate editable form (number, issued/expiration, category, period, visa window dates) + people; Save stays on form; Issue visa on lines; unused invitation lines can be removed when unchecked.
+- **Test**: Click invitation **005** → Edit invitation form → change field → Save → "Saved."
+- **Cross-skill**: preview-slot | application-profile
+### 2026-08-25 — Issue issued-header preview-slot compose (Inv/WP/RJ/BZ)
+
+- **Shipped**: `VisaPreviewSlotMode.IssueIssuedHeader` + `IssueIssuedHeaderSlotPanel` + `IssueIssuedHeaderComposeService`. Workspace **New invitation / work permit / rejection / border zone** opens the slot (not modal DetailView). **New issued visa** still modal.
+- **Compose**: header fields + roster people checkboxes; Create validates passport readiness; stamps `*.ApplicationProfileInstance` and selected line BOs only (issued output, not input M2M).
+- **After create**: stay in slot; `IApplicationWorkspacePersonUiActions.NotifyWorkspaceChanged` refreshes Issued records; invitation lines offer **Issue visa**.
+- **Open path**: `ApplicationWorkspaceIssueIssuedHeaderOpenHelper.TryOpenCompose` → `OpenIssueIssuedHeaderAsync` (same GetService pattern as document copies).
+- **Build**: `dotnet build Visa2026.Blazor.Server -c Debug` green.
+- **Cross-skill**: preview-slot | application-profile
+### 2026-08-25 — IssuingInvitationItemID missing until rename runs
+
+- **Symptom**: `42703: column v.IssuingInvitationItemID does not exist` on Passport.Visas lazy load / case workspace.
+- **Cause**: DB still had `Visas."InvitationItemID"`; ModuleUpdater rename had not applied (or failed silently with `throwException: false`).
+- **Fix**: rename column on Postgres; harden `VisaIssuingInvitationItemSchemaSql` (pg_catalog + both-columns merge) and fail loudly on SQL errors.
+### 2026-08-25 — Visa.IssuingInvitationItem rename + issued-vs-input diagram
+
+- **Rename**: `Visa.InvitationItem` → `Visa.IssuingInvitationItem`; FK column `InvitationItemID` → `IssuingInvitationItemID` (`VisaIssuingInvitationItemSchemaUpdater`). Inverse stays `InvitationItem.IssuedVisa`. Caption **Issuing invitation item**.
+- **Rule**: Only **issued** lines (`Invitation.ApplicationProfileInstance` → `InvitationItems`) may be visa source. Input M2M `ApplicationProfileInstance.InvitationItems` is for cancel/change — not `IssuingInvitationItem`.
+- **Diagram**: `docs/diagrams/issued-visa-origin/invitation-item-issued-vs-input.mmd` (+ sync in `APPLICATION_PROFILE_ISSUED_VISA_ORIGIN.md`).
+- **Also**: Path A / Issue visa / Path B correction / OData field map / Excel Visas sheet / cleanup SQL.
+
+### 2026-08-22 — Issued records: Issued visa tile follows ProduceVisa only
+
+- **Rule**: Overview / DetailView **Issued records → Issued visa** tile and **Issued visas** tab visibility = **May produce → Visa** (`ShowIssuedVisas` → `CanIssueVisa` / `ProduceVisa`), same as Invitation / Work permit tiles follow their May produce flags.
+- **Not** shown when only **May produce → Invitation** is on (`App_Inv`, `App_Inv_And_WP`). Visa after invitation: **InvitationItem → Issue visa** (same FKs; see issued-visa-origin doc).
+- **Fix**: `ShowIssuedVisas` no longer uses `CanBeIssuingApplicationProfileInstanceForVisa` (which ORs invitation). Stamping eligibility unchanged on `CanBeIssuingApplicationProfileInstanceForVisa`.
+
+
+### 2026-08-22 — Issued work permit origin (Module shipped)
+
+- **Officer UI**: New issued work permits from Application Profile Instance → **Issued records → New work permit** (or nested **Work permits**). `WorkPermit.ApplicationProfileInstance` required on save; read-only **Issuing profile instance** on detail.
+- **Blocked**: root **Work Permit** list **New** (`WorkPermitStandaloneCreateBlockController`).
+- **Output lines**: `WorkPermitIssuedRosterItemsHelper` ensures one `WorkPermitItem` per roster **employee** when issuing from instance (not import). Copies `MovementPermitLocation` from instance when set.
+- **UI**: Hide `WorkPermitItem.ApplicationProfileInstances` M2M when parent header has issuing FK. Model.xafml: `ApplicationProfileInstance` on work permit detail (replaces stale `Application`).
+- **Single-use**: one work permit header per issuing instance.
+- **Doc/diagrams**: [`docs/APPLICATION_PROFILE_ISSUED_WORK_PERMIT_ORIGIN.md`](../../../docs/APPLICATION_PROFILE_ISSUED_WORK_PERMIT_ORIGIN.md)
+
+
+### 2026-08-22 — Issued visa origin diagram (canonical doc)
+
+- **Doc**: [`docs/APPLICATION_PROFILE_ISSUED_VISA_ORIGIN.md`](../../../docs/APPLICATION_PROFILE_ISSUED_VISA_ORIGIN.md) — Mermaid (extension vs invitation profile), officer entry points, validation table, **YAML machine spec** for agents/import.
+- **Diagrams**: Mermaid only — `.mmd` under `docs/diagrams/issued-visa-origin/` (embedded in canonical doc).
+- Linked from `APPLICATION_PROFILE_PLAN.md` §10.1 row 11 and `reference.md`.
+
+
+### 2026-08-22 — Invitation-item-centric visa create (Issue visa action)
+
+- **Officer UI**: **Issue visa** on unused `InvitationItem` (ListView + DetailView) opens new `Visa` with `IssuingApplicationProfileInstance` from parent invitation + pre-selected `IssuingInvitationItem` + passport. Still blocks Passport nested New.
+- **Multi-person invitation cases**: `Visa_IssuingApplicationProfileInstanceSingleUse` skipped when `IssuingInvitationItem` set or profile `ProduceInvitation` — uniqueness is per invitation line (`Visa_IssuingInvitationItemSingleUse`).
+
+
+### 2026-08-22 — Issued invitation origin: instance-side create + roster output lines
+
+- **Officer UI**: New issued invitations from Application Profile Instance → **Issued records → New invitation** (or nested **Invitations**). `Invitation.ApplicationProfileInstance` required on save; read-only **Issuing profile instance** on detail.
+- **Blocked**: root **Invitation** list **New** (`InvitationStandaloneCreateBlockController`).
+- **Output lines**: `InvitationIssuedRosterItemsHelper` ensures one `InvitationItem` per roster person when issuing from instance (not import). `IsUsed` remains **visa consumption only** (`Visa.IssuingInvitationItem`).
+- **UI**: Hide `InvitationItem.ApplicationProfileInstances` M2M when parent header has issuing FK. Model.xafml: `ApplicationProfileInstance` on invitation detail (replaces stale `Application`).
+- **Single-use**: one invitation header per issuing instance (validation rule).
+
+
+### 2026-08-22 — Issued visa origin: instance-side create only + IssuingApplicationProfileInstance
+
+- **Officer UI**: New issued visas must use Application Profile Instance → **Issued records → New issued visa** (or nested **Issued visas** on instance DetailView). `Visa.IssuingApplicationProfileInstance` set at create; save blocked when null on new officer visa.
+- **Blocked**: nested **New** on `Passport.Visas` (`PassportVisasNestedCreateBlockController`).
+- **Path A**: no longer guesses issuing instance from passport roster; only optional `InvitationItem` when `IssuingApplicationProfileInstance` already set.
+- **UI**: Visa detail shows **Issuing profile instance** (read-only); hides input M2M `ApplicationProfileInstances` when issued FK set.
+- **Import Path B**: `Visa2014VisaIssuingApplicationProfileInstanceIndex` (PIA index → Application) on `--entity Visa`; OData `IssuingApplicationProfileInstance`; re-import backfill; `--correct-visa2014-issuing-application-profile-instance`.
+- **E2E note**: `PersonOfficerJourneyTests` still uses Passport→Visas New — update to instance path or master-data exception when touching E2E.
+
+
+### 2026-08-22 — Locked reminder: person-related links only when RequirePerson* checked
+
+- **Rule** (officer + import): Required person-related data (Passport, Visa, WorkPermitItem, InvitationItem, …) auto-link onto an **ApplicationProfileInstance** only when the related **Application Profile** has that `RequirePerson*` checkbox on.
+- **Code**: `ApplicationProfileInstancePersonResolver.IsAutoLinkEnabled` → `ApplicationProfileConfigurationResolver` / profile `RequirePerson*`. Toggle-off keeps sticky existing links; no new auto-links.
+- **Import**: do not mass-link WorkPermitItem/InvitationItem (or other kinds) for a type whose profile has the flag off (e.g. App_Visa_and_WP_Ext Work permit item). Prefer `EnsureResolvedLink` only when the profile requires that kind, or explicit officer/legacy evidence that matches a checked RequirePerson*.
+- **Cross-skill**: visa2014-to-visa2026-import (`--correct-visa2014-existing-item-links` must respect profile gates)
+
+
+### 2026-08-22 — App_Visa_and_WP_Ext: Work permit item off required person data
+
+- **Profile**: `Wiza we Iş Rugsatnamasyny Uzaltmak` (`App_Visa_and_WP_Ext` / `extend_visa_wp`)
+- **Change**: `RequirePersonWorkPermitItem` **false** (was true). **May produce** WorkPermit + Visa unchanged (`ProduceWorkPermit`/`ProduceVisa` true; Invitation false).
+- **Also**: ApplicationType catalog `ShowCurrentWorkPermitItem` **false** so dual-read does not re-show the checkbox.
+- **Files**: `application-profile.calik-energi.json`, `ApplicationTypeConfigurationCatalog.json`; local PG rows patched.
+- **Verify**: reopen Application Profile wizard step Templates & person → Work permit item unchecked; May produce still Work permit + Visa.
+- **Note**: UI “Work permit item” is `WorkPermitItem` / `RequirePerson*`, not header `WorkPermit` (outcome).
+
+
 # Application Profile — learnings (append-only)
 
 Read **before** Application Profile work; **append** after verified fixes and slice completions. Promotion rules: [MATURITY.md](./MATURITY.md).
 
 ---
+
+### 2026-08-21 — Import ApplicationProfile FK with type-only tenant catalog
+
+- Symptom: after `--import-visa2014` App_Inv_And_WP, ListView **Application Profile** empty; Approval leg profile filled.
+- Cause: tenant JSON is **36 type-only** profiles (`DefaultProjectContract` null; do not restore Wave 0b 176). Import/`FindProfile` required contract-variant match → FK omitted.
+- Fix: `ApplicationProfileCatalogGroupKey.FindProfile` (+ importer DTO `FindProfileId`) falls back to type-only profile when variant missing. Wave 2 `--patch-visa2014-application-profile` patched **1181** → `get_invitation_wp`.
+- Prevent: Do not re-add Wave 0b contract clones just to make import set the FK; keep type-only + fallback.
+- Cross-skill: visa2014-to-visa2026-import
+
+### 2026-08-21 — Show Application Profile name on case workspace DetailView
+
+- ListView already showed `ApplicationProfile.Name`; workspace only buried it as footer "Template: …". Surface the same name under the case title and in Case summary subtitle; footer label is **Application Profile:** (not nested Word/Excel template).
+- Verify: F5 → open a via-ministry case → header shows Turkmen profile name under №; Case summary line starts with Application Profile: ….
+- Prevent: Do not confuse `ProfileTemplateName` chrome field with nested `ApplicationProfileTemplate` rows — it is the live profile `Name`.
+- Cross-skill: -
+
+### 2026-08-21 — Hide deprecated Type column on instance ListViews
+
+- **Type** on Applications via ministry / direct / staged / in-process is deprecated `ApplicationType` (dual-read FK). Officers already see **Application Profile**. Hide via `VisibleInListView(false)`, Blazor `Model.xafml` column removal, and `ApplicationProfileInstanceHideDeprecatedTypeColumnUpdater` (Index=-1). Do not drop the FK yet (slice 13).
+- Verify: stop F5, rebuild, F5 — Applications via ministry grid has no Type column; Application Profile remains.
+- Prevent: Do not re-add `ApplicationType` ColumnInfo to Application_* ListViews in `Model.xafml`.
+- Cross-skill: -
 
 ### 2026-08-21 — Use profile (live link): OptimisticLockField on create
 

@@ -1,5 +1,7 @@
 using System.Text.Json;
+using DevExpress.ExpressApp;
 using Visa2026.DataImporter;
+using Bo = Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
@@ -10,6 +12,8 @@ internal sealed class Visa2014WorkPermitImportResult
     public int SkippedCount { get; init; }
     public int DedupeMergedCount { get; init; }
     public int SkippedAlreadyImported { get; init; }
+    public int SkippedMissingApplicationProfileInstanceIdMap { get; init; }
+    public int PatchedApplicationProfileInstanceCount { get; init; }
     public int PostedCount { get; init; }
     public int FailedCount { get; init; }
     public string? IdMapPath { get; init; }
@@ -22,6 +26,8 @@ internal static class Visa2014WorkPermitODataImporter
         IVisa2014ImportTarget target,
         string legacyConnectionString,
         IReadOnlyList<string> lookupTranslationPaths,
+        IReadOnlyDictionary<Guid, Guid> applicationIdMap,
+        INonSecuredObjectSpaceFactory? objectSpaceFactory,
         string? workPermitIdMapOutputPath,
         int? maxRows,
         bool dryRun,
@@ -55,21 +61,44 @@ internal static class Visa2014WorkPermitODataImporter
         int posted = 0;
         int failed = 0;
         int skippedAlreadyImported = 0;
+        int skippedMissingApplicationProfileInstanceIdMap = 0;
+        int patchedApplication = 0;
+        var pendingBackfill = 0;
+
+        using var backfillSpace = objectSpaceFactory?.CreateNonSecuredObjectSpace(typeof(Bo.WorkPermit));
 
         foreach (var row in batch.ImportRows)
         {
             var legacyOid = (Guid)row["_legacyRowId"]!;
-            if (workPermitIdMap.ContainsKey(legacyOid))
+            if (workPermitIdMap.TryGetValue(legacyOid, out var existingWorkPermitId))
             {
                 skippedAlreadyImported++;
-                if (verbose)
-                    Console.WriteLine($"  SKIP {legacyOid}: already in WorkPermit id-map");
+                if (backfillSpace != null
+                    && TryBackfillApplicationProfileInstance(
+                        backfillSpace,
+                        row,
+                        existingWorkPermitId,
+                        applicationIdMap,
+                        verbose))
+                {
+                    patchedApplication++;
+                    pendingBackfill++;
+                    if (pendingBackfill >= 50)
+                    {
+                        backfillSpace.CommitChanges();
+                        pendingBackfill = 0;
+                    }
+                }
+
                 continue;
             }
 
             try
             {
-                var payload = BuildPayload(row);
+                var payload = BuildPayload(row, applicationIdMap, out var missingApplication);
+                if (missingApplication)
+                    skippedMissingApplicationProfileInstanceIdMap++;
+
                 if (payload == null)
                 {
                     failed++;
@@ -77,7 +106,7 @@ internal static class Visa2014WorkPermitODataImporter
                     continue;
                 }
 
-                var createdId = await target.CreateAsync(typeof(Visa2026.Module.BusinessObjects.WorkPermit), payload);
+                var createdId = await target.CreateAsync(typeof(Bo.WorkPermit), payload);
                 if (!createdId.HasValue)
                 {
                     failed++;
@@ -88,7 +117,7 @@ internal static class Visa2014WorkPermitODataImporter
                 workPermitIdMap[legacyOid] = createdId.Value;
                 posted++;
                 if (posted % 250 == 0)
-                    Console.WriteLine($"INF Progress: {posted} posted, {failed} failed...");
+                    Console.WriteLine($"INF Progress: {posted} posted, {failed} failed, {patchedApplication} Application FK patched...");
                 if (verbose)
                     Console.WriteLine($"  SAVE WorkPermit {createdId.Value} <- legacy {legacyOid} ({row["WorkPermitNumber"]})");
             }
@@ -99,6 +128,9 @@ internal static class Visa2014WorkPermitODataImporter
                 Console.Error.WriteLine($"ERR {legacyOid}: {ex.Message}");
             }
         }
+
+        if (backfillSpace != null && pendingBackfill > 0)
+            backfillSpace.CommitChanges();
 
         await target.FlushAsync();
 
@@ -122,6 +154,8 @@ internal static class Visa2014WorkPermitODataImporter
             SkippedCount = batch.Skipped.Count,
             DedupeMergedCount = batch.DedupeMergedCount,
             SkippedAlreadyImported = skippedAlreadyImported,
+            SkippedMissingApplicationProfileInstanceIdMap = skippedMissingApplicationProfileInstanceIdMap,
+            PatchedApplicationProfileInstanceCount = patchedApplication,
             PostedCount = posted,
             FailedCount = failed,
             IdMapPath = idMapPath,
@@ -129,18 +163,68 @@ internal static class Visa2014WorkPermitODataImporter
         };
     }
 
-    private static Dictionary<string, object?>? BuildPayload(Dictionary<string, object?> row)
+    private static bool TryBackfillApplicationProfileInstance(
+        IObjectSpace objectSpace,
+        Dictionary<string, object?> row,
+        Guid workPermitId,
+        IReadOnlyDictionary<Guid, Guid> applicationIdMap,
+        bool verbose)
     {
+        if (!TryResolveLegacyGuid(row, "Application", out var legacyApplicationOid))
+            return false;
+        if (!applicationIdMap.TryGetValue(legacyApplicationOid, out var applicationId))
+            return false;
+
+        var workPermit = objectSpace.GetObjectByKey<Bo.WorkPermit>(workPermitId);
+        if (workPermit == null)
+            return false;
+        if (workPermit.ApplicationProfileInstance != null
+            && workPermit.ApplicationProfileInstance.ID == applicationId)
+            return false;
+
+        var application = objectSpace.GetObjectByKey<Bo.ApplicationProfileInstance>(applicationId);
+        if (application == null)
+            return false;
+
+        workPermit.ApplicationProfileInstance = application;
+        if (verbose)
+            Console.WriteLine($"  PATCH WorkPermit {workPermitId} ApplicationProfileInstance={applicationId}");
+        return true;
+    }
+
+    private static Dictionary<string, object?>? BuildPayload(
+        Dictionary<string, object?> row,
+        IReadOnlyDictionary<Guid, Guid> applicationIdMap,
+        out bool missingApplication)
+    {
+        missingApplication = false;
         if (row["WorkPermitNumber"] is not string workPermitNumber || string.IsNullOrWhiteSpace(workPermitNumber))
             return null;
         if (!TryParseDate(row.GetValueOrDefault("IssuedDate") as string, out var issuedDate))
             return null;
 
-        return new Dictionary<string, object?>(StringComparer.Ordinal)
+        var payload = new Dictionary<string, object?>(StringComparer.Ordinal)
         {
             ["WorkPermitNumber"] = workPermitNumber.Trim(),
             ["IssuedDate"] = DateTime.SpecifyKind(issuedDate, DateTimeKind.Utc),
         };
+
+        if (TryResolveLegacyGuid(row, "Application", out var legacyApplicationProfileInstanceOid))
+        {
+            if (applicationIdMap.TryGetValue(legacyApplicationProfileInstanceOid, out var applicationId))
+                payload["ApplicationProfileInstance"] = new Dictionary<string, object?> { ["ID"] = applicationId };
+            else
+                missingApplication = true;
+        }
+
+        return payload;
+    }
+
+    private static bool TryResolveLegacyGuid(Dictionary<string, object?> row, string field, out Guid legacyOid)
+    {
+        legacyOid = Guid.Empty;
+        var text = row.GetValueOrDefault(field) as string;
+        return !string.IsNullOrWhiteSpace(text) && Guid.TryParse(text, out legacyOid);
     }
 
     private static bool TryParseDate(string? text, out DateTime date) =>

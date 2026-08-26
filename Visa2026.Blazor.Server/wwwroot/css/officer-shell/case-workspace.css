@@ -8,6 +8,7 @@
 .cw-head__title-block { display: flex; gap: 12px; align-items: flex-start; }
 .cw-head__accent { width: 4px; border-radius: 4px; background: #f59e0b; align-self: stretch; min-height: 48px; }
 .cw-head h1 { margin: 0; font-size: 1.4rem; letter-spacing: -0.02em; }
+.cw-head__profile { margin: 6px 0 0; font-size: 1rem; font-weight: 650; color: var(--os-text, #0f172a); line-height: 1.35; }
 .cw-head__sub { margin: 4px 0 0; color: var(--os-muted); font-size: 0.88rem; }
 .cw-head__badges { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .cw-head-badge {
@@ -266,15 +267,32 @@ button.cw-person:focus-visible {
   list-style: none; margin: 0 0 12px; padding: 0;
   border: 1px solid var(--os-line); border-radius: 8px; background: #fff; overflow: hidden;
 }
-.cw-issued-list__item {
-  width: 100%; border: 0; background: transparent; text-align: left; cursor: pointer;
-  display: flex; justify-content: space-between; gap: 12px; align-items: baseline;
-  padding: 10px 12px; border-bottom: 1px solid #eef2f6; font-size: 0.86rem;
+.cw-issued-list__row {
+  display: flex; align-items: stretch; border-bottom: 1px solid #eef2f6;
 }
-.cw-issued-list li:last-child .cw-issued-list__item { border-bottom: 0; }
+.cw-issued-list li:last-child { border-bottom: 0; }
+.cw-issued-list__item {
+  flex: 1 1 auto; min-width: 0; border: 0; background: transparent; text-align: left; cursor: pointer;
+  display: flex; justify-content: space-between; gap: 12px; align-items: baseline;
+  padding: 10px 12px; font-size: 0.86rem;
+}
 .cw-issued-list__item:hover { background: #f8fbff; }
 .cw-issued-list__item strong { font-weight: 650; }
 .cw-issued-list__item span { color: var(--os-muted); font-size: 0.78rem; }
+.cw-issued-list__preview {
+  flex: 0 0 auto; border: 0; background: transparent; color: var(--os-accent, #2563eb);
+  font-size: 0.78rem; font-weight: 650; padding: 10px 12px; cursor: pointer;
+}
+.cw-issued-list__preview:hover:not(:disabled) { background: #eff6ff; text-decoration: underline; }
+.cw-issued-list__preview:disabled { color: #94a3b8; cursor: not-allowed; }
+.cw-issued-list__delete {
+  flex: 0 0 auto; border: 0; background: transparent; color: #b91c1c;
+  font-size: 0.78rem; font-weight: 650; padding: 10px 12px; cursor: pointer;
+}
+.cw-issued-list__delete:hover { background: #fef2f2; }
+.cw-issued-panel__error {
+  margin: 0 0 10px; font-size: 0.82rem; color: #b91c1c; line-height: 1.45;
+}
 .cw-head-badge--locked { background: #fff7ed; color: #9a3412; border: 1px solid #fed7aa; }
 
 .cw-checklist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }

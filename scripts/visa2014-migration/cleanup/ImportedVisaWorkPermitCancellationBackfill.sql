@@ -13,8 +13,8 @@ BEGIN
     UPDATE ApplicationItems SET CurrentWorkPermitItemID = NULL WHERE CurrentWorkPermitItemID IS NOT NULL;
 END
 
-IF OBJECT_ID('dbo.Visas', 'U') IS NOT NULL AND COL_LENGTH('dbo.Visas', 'InvitationItemID') IS NOT NULL
-    UPDATE Visas SET InvitationItemID = NULL WHERE InvitationItemID IS NOT NULL;
+IF OBJECT_ID('dbo.Visas', 'U') IS NOT NULL AND COL_LENGTH('dbo.Visas', 'IssuingInvitationItemID') IS NOT NULL
+    UPDATE Visas SET IssuingInvitationItemID = NULL WHERE IssuingInvitationItemID IS NOT NULL;
 
 IF OBJECT_ID('dbo.VisaDocument', 'U') IS NOT NULL
     DELETE vd FROM VisaDocument vd INNER JOIN Visas v ON vd.VisaID = v.ID;

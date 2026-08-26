@@ -209,10 +209,16 @@ internal static class Visa2014ApplicationTransform
         string connectionString,
         IReadOnlyList<string> lookupTranslationPaths,
         int? maxRows,
-        bool verbose)
+        bool verbose,
+        string? applicationTypeName = null)
     {
         var catalogs = Visa2014LookupTranslator.Load(lookupTranslationPaths);
-        var sql = maxRows is > 0
+        var filterType = string.IsNullOrWhiteSpace(applicationTypeName)
+            ? null
+            : applicationTypeName.Trim();
+
+        // TOP before transform is only safe when not filtering by ApplicationType.Name.
+        var sql = maxRows is > 0 && filterType == null
             ? $"SELECT TOP ({maxRows.Value}) * FROM ({ExtractSql}) AS q"
             : ExtractSql;
 
@@ -232,7 +238,33 @@ internal static class Visa2014ApplicationTransform
 
         var batch = TransformRows(rawRows, catalogs, out _, out _, out _);
         EnrichMigrationServiceInference(connectionString, batch.ImportRows, verbose);
-        return batch;
+
+        if (filterType == null)
+            return batch;
+
+        var matched = batch.ImportRows
+            .Where(r => string.Equals(
+                r.GetValueOrDefault("ApplicationType") as string,
+                filterType,
+                StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        var matchCount = matched.Count;
+        if (maxRows is > 0 && matched.Count > maxRows.Value)
+            matched = matched.Take(maxRows.Value).ToList();
+
+        Console.WriteLine(
+            $"INF ApplicationType filter '{filterType}': {matchCount} prepared match(es); posting {matched.Count}" +
+            (maxRows is > 0 ? $" (max-rows={maxRows.Value})" : "") + ".");
+
+        return new Visa2014PersonImportBatch
+        {
+            ImportRows = matched,
+            Skipped = batch.Skipped,
+            UnmappedLookups = batch.UnmappedLookups,
+            DedupeSummary = batch.DedupeSummary,
+            LegacyRowCount = batch.LegacyRowCount,
+            DedupeMergedCount = batch.DedupeMergedCount,
+        };
     }
 
     internal static bool TryParseRawRow(IReadOnlyDictionary<string, string?> row, out Visa2014ApplicationRawRow parsed)

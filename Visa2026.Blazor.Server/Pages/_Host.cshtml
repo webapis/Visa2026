@@ -38,6 +38,7 @@
     <link href="css/application-profile-overview.css" asp-append-version="true" rel="stylesheet" />
     <link href="css/application-profile-catalog.css" asp-append-version="true" rel="stylesheet" />
     <link href="css/document-copies-catalog.css" asp-append-version="true" rel="stylesheet" />
+    <link href="css/issue-issued-header-slot.css" asp-append-version="true" rel="stylesheet" />
     <link href="css/document-copies-brand.css" asp-append-version="true" rel="stylesheet" />
     <link href="lib/pdfjs/xfa_layer_builder.css" asp-append-version="true" rel="stylesheet" />
     <link href="css/resminamalar-catalog.css" asp-append-version="true" rel="stylesheet" />
@@ -882,6 +883,39 @@
                         parentId || "",
                         contextItemId || "");
                 }
+            };
+
+            window.visaPreviewDrawer.openHeaderDocumentCopiesPreview = function (family, parentId, ownerViewId) {
+                var ref = window.visaPreviewDrawer._hostRef;
+                if (!ref) {
+                    console.warn("visaPreviewDrawer: host not registered; cannot open header copy preview");
+                    return Promise.resolve();
+                }
+                return ref.invokeMethodAsync(
+                    "OpenHeaderDocumentCopiesPreviewFromJsAsync",
+                    family || "",
+                    parentId || "",
+                    ownerViewId || "");
+            };
+
+            window.visaPreviewDrawer.openIssueIssuedHeader = function (applicationId, kind, catalogKey, ownerViewId, existingHeaderId) {
+                var ref = window.visaPreviewDrawer._hostRef;
+                if (!ref) {
+                    console.warn("visaPreviewDrawer: host not registered; cannot open IssueIssuedHeader");
+                    return Promise.resolve(false);
+                }
+                return ref.invokeMethodAsync(
+                    "OpenIssueIssuedHeaderFromJsAsync",
+                    applicationId || "",
+                    kind || "",
+                    catalogKey || "",
+                    ownerViewId || "",
+                    existingHeaderId || "")
+                    .then(function () { return true; })
+                    .catch(function (err) {
+                        console.warn("visaPreviewDrawer: openIssueIssuedHeader failed", err);
+                        return false;
+                    });
             };
 
             window.visaPreviewDrawer.syncInlinePreviewHeight = function () {

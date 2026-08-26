@@ -29,12 +29,10 @@ Officer-facing **right-side panel** for inline catalogs and document preview. Re
 | `Resminamalar` | `ResminamalarSlotPanel` | `OpenResminamalarAsync` | [`APPLICATION_REPORT_PACKAGE.md`](APPLICATION_REPORT_PACKAGE.md) |
 | `DocumentCopies` | `DocumentCopiesSlotPanel` | `OpenDocumentCopiesAsync` | [`APPLICATION_ITEM_DOCUMENT_COPIES.md`](APPLICATION_ITEM_DOCUMENT_COPIES.md) |
 | `PersonDocumentCopies` | `PersonDocumentCopiesSlotPanel` | `OpenPersonDocumentCopiesAsync` | [`PERSON_DOCUMENT_COPIES.md`](PERSON_DOCUMENT_COPIES.md) |
-| `InvitationDocumentCopies` *(planned)* | `HeaderDocumentCopiesSlotPanel` *(planned)* | `OpenInvitationDocumentCopiesAsync` *(planned)* | [`INVITATION_WORK_PERMIT_DOCUMENT_COPIES.md`](INVITATION_WORK_PERMIT_DOCUMENT_COPIES.md) |
-| `WorkPermitDocumentCopies` *(planned)* | ↑ shared or per-family | `OpenWorkPermitDocumentCopiesAsync` *(planned)* | ↑ |
-| `RejectionDocumentCopies` *(planned)* | ↑ | `OpenRejectionDocumentCopiesAsync` *(planned)* | ↑ |
-| `BorderZoneDocumentCopies` *(planned)* | ↑ | `OpenBorderZoneDocumentCopiesAsync` *(planned)* | ↑ — **`BorderZoneDocument` + `Documents` same release** (mirror Invitation/WorkPermit) |
+| `HeaderDocumentCopies` | `HeaderDocumentCopiesSlotPanel` | `OpenHeaderDocumentCopiesAsync` | Invitation / WP / Rejection / BorderZone document copies. Case workspace issued-row **Preview** opens this occupant with `OpenPreviewOnly`. |
 | `ProgressLetters` | `ProgressLettersSlotPanel` | `OpenProgressLettersAsync` | Application progress ministry letters. Case workspace Progress filename uses `OpenPreviewOnly` (viewer only). ListView toolbar / grid link still opens the slot catalog. |
 | `File` | `VisaFilePreviewDrawer` | `OpenFileAsync` / JS bridge | File preview sources registry (`progress-letter`, `user-report-template`, `application-profile-template`) |
+| `IssueIssuedHeader` | `IssueIssuedHeaderSlotPanel` | `OpenIssueIssuedHeaderAsync` | Case workspace **New invitation / work permit / rejection / border zone** compose ([prototypes](prototypes/issue-issued-header-slot-README.md)). Officers upload the letter copy (`InvitationDocument` / matching header `Documents`) from the compose panel. Issued visa still modal. |
 
 **Occupant keys:** `VisaPreviewSlotOccupantKeys` (e.g. `resminamalar:app:{id}`, `document-copies:items:{ids}`, `progress-letters:app:{id}` or `…|preview:{progressId}` when `OpenPreviewOnly`, `file:{source}:{id}`).
 
@@ -110,7 +108,7 @@ Officer caption for the report package occupant is **Templates** (not Document C
 | Service + state | `Visa2026.Module/Services/PreviewSlot/` (`IVisaPreviewSlotService`, requests, `VisaPreviewSlotOccupantKeys`) |
 | Host impl | `Visa2026.Blazor.Server/Services/VisaPreviewSlotService.cs` |
 | Blazor host | `Visa2026.Blazor.Server/Components/VisaPreviewSlotHost.razor` |
-| Slot panels | `ResminamalarSlotPanel.razor`, `DocumentCopiesSlotPanel.razor`, `ProgressLettersSlotPanel.razor` |
+| Slot panels | `ResminamalarSlotPanel.razor`, `DocumentCopiesSlotPanel.razor`, `ProgressLettersSlotPanel.razor`, `IssueIssuedHeaderSlotPanel.razor` |
 | Inline previews | `ReportPackageInlinePreview.razor`, `DocumentCopiesInlinePreview.razor`, `ProgressLettersInlinePreview.razor` |
 | Close policy | `Visa2026.Blazor.Server/Controllers/VisaPreviewSlotCloseController.cs` |
 | File preview sources | `Visa2026.Blazor.Server/Services/*FilePreviewSource.cs`, `OfficeFilePreviewResultFactory.cs` |
@@ -118,6 +116,7 @@ Officer caption for the report package occupant is **Templates** (not Document C
 | Shell CSS | `Visa2026.Blazor.Server/wwwroot/css/site.css` (`.visa-preview-slot*`, `.resminamalar-slot-panel*`) |
 | Resminamalar catalog CSS | `Visa2026.Blazor.Server/wwwroot/css/resminamalar-catalog.css` |
 | Document-copies catalog CSS | `Visa2026.Blazor.Server/wwwroot/css/document-copies-catalog.css` |
+| Issue issued-header compose CSS | `Visa2026.Blazor.Server/wwwroot/css/issue-issued-header-slot.css` |
 | Wiring | `Startup.cs` — register `IVisaPreviewSlotService` |
 
 Feature-specific catalog logic stays in feature components and Module services — see domain docs above.

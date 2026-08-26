@@ -68,13 +68,27 @@ internal static class Visa2014ApplicationProfileResolver
 
         var contract = ResolveProjectContractDto(contracts, groupKey.ProjectContractCode);
         var contractId = contract?.Id;
+        var code = profileCode.Trim();
 
         foreach (var profile in profiles)
         {
-            if (!string.Equals(profile.Code, profileCode.Trim(), StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(profile.Code, code, StringComparison.OrdinalIgnoreCase))
                 continue;
 
             if (ProfileDtoMatchesLegacyContract(profile, contracts, contractId, groupKey.ProjectContractCode))
+                return profile.Id;
+        }
+
+        // Type-only tenant catalogs: fall back to the shared type profile (no DefaultProjectContract).
+        if (string.IsNullOrWhiteSpace(groupKey.ProjectContractCode))
+            return null;
+
+        foreach (var profile in profiles)
+        {
+            if (!string.Equals(profile.Code, code, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            if (ProfileDtoMatchesLegacyContract(profile, contracts, resolvedContractId: null, legacyContractCode: null))
                 return profile.Id;
         }
 

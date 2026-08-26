@@ -31,6 +31,10 @@ Companion to [SKILL.md](./SKILL.md).
 | Officer manual | `user-manual/docs/en/guides/applications/application-profiles.md`, `administration/configuration/application-profiles.md` |
 | Registry | `docs/DEPRECATED.md` |
 | Plan | `docs/APPLICATION_PROFILE_PLAN.md` |
+| Issued visa origin (diagram + YAML) | `docs/APPLICATION_PROFILE_ISSUED_VISA_ORIGIN.md` |
+| Issued visa origin Mermaid | `docs/diagrams/issued-visa-origin/*.mmd` |
+| Issued work permit origin (diagram + YAML) | `docs/APPLICATION_PROFILE_ISSUED_WORK_PERMIT_ORIGIN.md` |
+| Issued work permit origin Mermaid | `docs/diagrams/issued-work-permit-origin/*.mmd` |
 
 ### Officer shell (Blazor B0–B8)
 

@@ -1946,7 +1946,7 @@
       "RequirePersonAddressOfResidence": true,
       "RequirePersonVisa": true,
       "RequirePersonInvitationItem": false,
-      "RequirePersonWorkPermitItem": true,
+      "RequirePersonWorkPermitItem": false,
       "RequirePersonBorderZoneItem": false,
       "RequirePersonSalary": true,
       "RequirePersonMedical": true,

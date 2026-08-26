@@ -105,6 +105,7 @@ namespace Visa2026.Module
                 new DatabaseUpdate.ApplicationProfileInstanceProgressProcessNumberSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationProfileSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.VisaIssuingApplicationProfileInstanceSchemaUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.VisaIssuingInvitationItemSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.VisaProcessNumberSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationTypeConfigurationUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationTypeGroupSchemaUpdater(objectSpace, versionFromDB),
@@ -134,6 +135,7 @@ namespace Visa2026.Module
             updaters.Add(new ApplicationProfileInstanceProgressHistoryViewsUpdater());
             updaters.Add(new PersonNestedListViewsUpdater());
             updaters.Add(new ApplicationProfileInstanceChildNestedListViewsUpdater());
+            updaters.Add(new ApplicationProfileInstanceHideDeprecatedTypeColumnUpdater());
             updaters.Add(new ExpirationAlertRuleViewsUpdater());
             updaters.Add(new ListViewShowFindPanelModelUpdater());
             updaters.Add(new DatabaseUpdate.HistoryDashboardViewItemUpdater());

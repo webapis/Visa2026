@@ -304,7 +304,7 @@ static void PrintHelp()
     Console.WriteLine("  --import-visa2014           Legacy SQL → Visa2026 headless ObjectSpace (requires --inprocess).");
     Console.WriteLine("      --entity Person|Passport|Visa|Education|EmployeePositionHistory|EmployeeSalary|AddressOfResidence|Application|ApplicationProfileInstancePerson|ApplicationItem|ApplicationProfileInstanceProgress|WorkPermit|WorkPermitItem|Invitation|InvitationItem|Rejection|RejectionItem");
     Console.WriteLine("      Options: --entity Person|Passport|... [--legacy-source calik-energi] [--inprocess] [--target-connection conn]");
-    Console.WriteLine("                [--max-rows N] [--dry-run] [--batch-size N] [--parallelism N] [--id-map-output path.json] [--no-wait]");
+    Console.WriteLine("                [--max-rows N] [--application-type App_Inv] [--dry-run] [--batch-size N] [--parallelism N] [--id-map-output path.json] [--no-wait]");
     Console.WriteLine("                --parallelism: worker count for Application/ApplicationItem/ApplicationProfileInstanceProgress (default 4; headless only)");
     Console.WriteLine("                [--supplement-permit-positions]  EmployeePositionHistory: import soft-deleted WH referenced by WorkPermit");
     Console.WriteLine("                [--supplement-permit-persons]  Person: import soft-deleted Person referenced by active WorkPermit (IsArchived)");
@@ -821,11 +821,12 @@ if (HasArg(args, "--correct-visa-type"))
     return;
 }
 
-if (HasArg(args, "--correct-visa2014-issuing-application-item"))
+if (HasArg(args, "--correct-visa2014-issuing-application-item")
+    || HasArg(args, "--correct-visa2014-issuing-application-profile-instance"))
 {
-    Log.Phase("VISA2014 Visa IssuingApplicationItem correction");
+    Log.Phase("VISA2014 Visa IssuingApplicationProfileInstance correction");
     bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
-    int exitCode = await Visa2014VisaIssuingApplicationItemCorrection.RunCommandAsync(args, isVerbose);
+    int exitCode = await Visa2014VisaIssuingApplicationProfileInstanceCorrection.RunCommandAsync(args, isVerbose);
     Log.Close();
     Environment.ExitCode = exitCode;
     return;
@@ -836,6 +837,16 @@ if (HasArg(args, "--correct-visa2014-invitation-item"))
     Log.Phase("VISA2014 Visa InvitationItem correction (Path B)");
     bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
     int exitCode = await Visa2014VisaInvitationItemCorrection.RunCommandAsync(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
+if (HasArg(args, "--correct-visa2014-existing-item-links"))
+{
+    Log.Phase("VISA2014 existing WorkPermitItem/InvitationItem → ApplicationProfileInstance M2M");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = await Visa2014ExistingItemLinkCorrection.RunCommandAsync(args, isVerbose);
     Log.Close();
     Environment.ExitCode = exitCode;
     return;

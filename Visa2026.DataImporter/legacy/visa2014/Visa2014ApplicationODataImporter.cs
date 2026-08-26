@@ -32,13 +32,15 @@ internal static class Visa2014ApplicationODataImporter
         bool verbose,
         INonSecuredObjectSpaceFactory? objectSpaceFactory = null,
         int parallelism = 0,
-        int batchSize = 50)
+        int batchSize = 50,
+        string? applicationTypeName = null)
     {
         var batch = Visa2014ApplicationTransform.PrepareImportBatch(
             legacyConnectionString,
             lookupTranslationPaths,
             maxRows,
-            verbose);
+            verbose,
+            applicationTypeName);
 
         if (dryRun)
         {

@@ -1,6 +1,7 @@
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.SystemModule;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services;
 
 namespace Visa2026.Module.Controllers;
 
@@ -42,9 +43,11 @@ public sealed class IssuedHeaderNestedCreateController : ViewController<ListView
         {
             case Invitation invitation:
                 invitation.ApplicationProfileInstance ??= instance;
+                InvitationIssuedRosterItemsHelper.EnsureRosterInvitationItems(invitation);
                 break;
             case WorkPermit workPermit:
                 workPermit.ApplicationProfileInstance ??= instance;
+                WorkPermitIssuedRosterItemsHelper.EnsureRosterWorkPermitItems(workPermit);
                 break;
             case BorderZone borderZone:
                 borderZone.ApplicationProfileInstance ??= instance;
@@ -54,6 +57,7 @@ public sealed class IssuedHeaderNestedCreateController : ViewController<ListView
                 break;
             case Visa visa:
                 visa.IssuingApplicationProfileInstance ??= instance;
+                VisaIssuingLinkPathAMatcher.TryApplyOnce(visa);
                 break;
         }
     }

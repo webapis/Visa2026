@@ -19,13 +19,20 @@ public static class ApplicationLatestProgressSyncHelper
         if (application.LatestProgress != null && application.LatestProgressId == application.LatestProgress.ID)
             return application.LatestProgress;
 
-        if (application.LatestProgressId != null && application.ProgressHistory != null)
+        if (application.LatestProgressId != null)
         {
-            foreach (var progress in application.ProgressHistory)
+            if (application.ProgressHistory != null)
             {
-                if (progress.ID == application.LatestProgressId)
-                    return progress;
+                foreach (var progress in application.ProgressHistory)
+                {
+                    if (progress.ID == application.LatestProgressId)
+                        return progress;
+                }
             }
+
+            var objectSpace = ObjectSpaceHelper.Get(application);
+            if (objectSpace != null)
+                return objectSpace.GetObjectByKey<ApplicationProfileInstanceProgress>(application.LatestProgressId.Value);
         }
 
         return ApplicationProfileInstanceProgressHelper.GetLatest(application.ProgressHistory);

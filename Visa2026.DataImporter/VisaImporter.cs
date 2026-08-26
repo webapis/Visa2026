@@ -68,7 +68,7 @@ using System.Threading.Tasks;
 
             // Optional Relationships
             IssuingApplicationItem = issuingApplicationItemId.HasValue ? new { ID = issuingApplicationItemId.Value } : null,
-            InvitationItem = invitationItemId.HasValue ? new { ID = invitationItemId.Value } : null,
+            IssuingInvitationItem = invitationItemId.HasValue ? new { ID = invitationItemId.Value } : null,
 
             BorderZoneLocation = string.IsNullOrWhiteSpace(borderZoneLocation) ? null : borderZoneLocation.Trim()
         };
@@ -112,7 +112,7 @@ using System.Threading.Tasks;
                     VisaIssuedPlace = record.VisaIssuedPlace != null ? new { ID = record.VisaIssuedPlace.Id } : null,
                     Passport = record.Passport != null ? new { ID = record.Passport.Id } : null,
                     IssuingApplicationItem = record.IssuingApplicationItem != null ? new { ID = record.IssuingApplicationItem.Id } : null,
-                    InvitationItem = record.InvitationItem != null ? new { ID = record.InvitationItem.Id } : null
+                    IssuingInvitationItem = record.IssuingInvitationItem != null ? new { ID = record.IssuingInvitationItem.Id } : null
                 };
 
                 await Api.CreateAsync<Visa>(Entity, payload);

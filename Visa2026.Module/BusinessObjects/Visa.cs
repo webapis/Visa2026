@@ -32,6 +32,10 @@ namespace Visa2026.Module.BusinessObjects
         Criteria = "StateSeverityLevel = 2", Context = "ListView", BackColor = "LightSalmon")]
     [Appearance("VisaStateCritical", Priority = 300, AppearanceItemType = "ViewItem", TargetItems = "*",
         Criteria = "StateSeverityLevel >= 3", Context = "ListView", BackColor = "LightCoral")]
+    [Appearance("Visa_InputApplicationProfileInstancesHiddenWhenIssued", Priority = 50,
+        AppearanceItemType = "ViewItem", TargetItems = "ApplicationProfileInstances",
+        Criteria = "IssuingApplicationProfileInstance is not null", Context = "DetailView",
+        Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide)]
     [SupportsOptionalDetailFields]
     public class Visa : BaseObject, IExpirationLogic, IOptionalDetailFields
     {
@@ -181,15 +185,16 @@ namespace Visa2026.Module.BusinessObjects
 
         /// <summary>
         /// Optional; always visible; read-only (Path A / Path B set on create or import).
+        /// Issued invitation line consumed for this visa (not input M2M linked items).
         /// Inverse: <see cref="InvitationItem.IssuedVisa"/>.
         /// </summary>
         [ExcludeFromOptionalDetailFields]
         [ModelDefault("AllowEdit", "False")]
-        [DataSourceProperty(nameof(AvailableInvitationItems))]
+        [DataSourceProperty(nameof(AvailableIssuingInvitationItems))]
         [VisibleInListView(false)]
         [VisibleInDetailView(true)]
-        [XafDisplayName("Invitation Item")]
-        public virtual InvitationItem InvitationItem { get; set; }
+        [XafDisplayName("Issuing invitation item")]
+        public virtual InvitationItem IssuingInvitationItem { get; set; }
 
         [RuleRequiredField]
         [ImmediatePostData]
@@ -201,7 +206,6 @@ namespace Visa2026.Module.BusinessObjects
                 if (passport == value)
                     return;
                 passport = value;
-                VisaIssuingLinkPathAMatcher.TryApplyOnce(this);
             }
         }
 
@@ -209,7 +213,7 @@ namespace Visa2026.Module.BusinessObjects
 
         /// <summary>
         /// Parent application that issued this visa.
-        /// Set by Path A matcher or import backfill; read-only on detail.
+        /// Set at create from Application Profile Instance Issued records or import Path B; read-only on detail.
         /// </summary>
         [ExcludeFromOptionalDetailFields]
         [ModelDefault("AllowEdit", "False")]
@@ -218,6 +222,7 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(false)]
         [VisibleInDetailView(true)]
         [XafDisplayName("Issuing profile instance")]
+        [ToolTip("Application Profile Instance that produced this visa. Set when created from Issued records on that case.")]
         public virtual ApplicationProfileInstance IssuingApplicationProfileInstance { get; set; }
 
         /// <summary>Prevents Path A matcher from running more than once on a new Visa instance.</summary>
@@ -251,7 +256,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [NotMapped]
         [Browsable(false)]
-        public IList<InvitationItem> AvailableInvitationItems
+        public IList<InvitationItem> AvailableIssuingInvitationItems
         {
             get
             {
@@ -298,10 +303,16 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                if (InvitationItem == null || Passport?.Person == null) return true;
-                return InvitationItem.Person != null && InvitationItem.Person.ID == Passport.Person.ID;
+                if (IssuingInvitationItem == null || Passport?.Person == null) return true;
+                return IssuingInvitationItem.Person != null && IssuingInvitationItem.Person.ID == Passport.Person.ID;
             }
         }
+
+        [RuleFromBoolProperty("Visa_IssuingApplicationProfileInstanceRequired", DefaultContexts.Save,
+            "Create the visa from Application Profile Instance → Issued records (New issued visa), not from Passport.")]
+        [Browsable(false)]
+        public bool IsIssuingApplicationProfileInstanceRequired =>
+            VisaIssuingOriginPolicy.HasRequiredIssuingApplicationProfileInstance(this);
 
         [RuleFromBoolProperty("Visa_IssuingApplicationProfileInstanceSingleUse", DefaultContexts.Save, "This issuing application is already linked to another visa.")]
         [Browsable(false)]
@@ -311,6 +322,14 @@ namespace Visa2026.Module.BusinessObjects
             {
                 if (IssuingApplicationProfileInstance == null)
                     return true;
+
+                // Invitation-based cases: one visa per IssuingInvitationItem, not one visa per instance.
+                if (IssuingInvitationItem != null
+                    || VisaIssuingApplicationProfileInstanceHelper.CanIssueInvitationForApplication(
+                        IssuingApplicationProfileInstance))
+                {
+                    return true;
+                }
 
                 var objectSpace = ObjectSpaceHelper.Get(this);
                 if (objectSpace == null)
@@ -325,21 +344,21 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-        [RuleFromBoolProperty("Visa_InvitationItemSingleUse", DefaultContexts.Save, "This Invitation Item is already linked to another visa.")]
+        [RuleFromBoolProperty("Visa_IssuingInvitationItemSingleUse", DefaultContexts.Save, "This issuing invitation item is already linked to another visa.")]
         [Browsable(false)]
-        public bool IsInvitationItemSingleUse
+        public bool IsIssuingInvitationItemSingleUse
         {
             get
             {
-                if (InvitationItem == null) return true;
+                if (IssuingInvitationItem == null) return true;
                 var objectSpace = ObjectSpaceHelper.Get(this);
                 if (objectSpace == null) return true;
-                var itemId = InvitationItem.ID;
+                var itemId = IssuingInvitationItem.ID;
                 var currentId = ID;
                 return !objectSpace.GetObjectsQuery<Visa>()
                     .Any(v => v.ID != currentId
-                        && v.InvitationItem != null
-                        && v.InvitationItem.ID == itemId);
+                        && v.IssuingInvitationItem != null
+                        && v.IssuingInvitationItem.ID == itemId);
             }
         }
 
@@ -353,15 +372,15 @@ namespace Visa2026.Module.BusinessObjects
                     return true;
 
                 var issuingApplication = VisaIssuingApplicationProfileInstanceHelper.GetEffectiveIssuingApplicationProfileInstance(this);
-                if (issuingApplication == null && InvitationItem == null)
+                if (issuingApplication == null && IssuingInvitationItem == null)
                     return true;
 
-                if (InvitationItem?.Invitation != null)
+                if (IssuingInvitationItem?.Invitation != null)
                 {
-                    if (!(IssueDate.Date > InvitationItem.Invitation.IssuedDate.Date))
+                    if (!(IssueDate.Date > IssuingInvitationItem.Invitation.IssuedDate.Date))
                         return false;
                     if (issuingApplication != null
-                        && !(InvitationItem.Invitation.IssuedDate.Date > issuingApplication.ApplicationDate.Date))
+                        && !(IssuingInvitationItem.Invitation.IssuedDate.Date > issuingApplication.ApplicationDate.Date))
                         return false;
                     return true;
                 }
@@ -373,13 +392,13 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-        [RuleFromBoolProperty("Visa_InvitationOnlyWhenCanIssueInvitation", DefaultContexts.Save, "Invitation Item can only be set when the issuing application type can issue an invitation.")]
+        [RuleFromBoolProperty("Visa_InvitationOnlyWhenCanIssueInvitation", DefaultContexts.Save, "Issuing invitation item can only be set when the issuing application type can issue an invitation.")]
         [Browsable(false)]
         public bool IsInvitationLinkConsistent
         {
             get
             {
-                if (InvitationItem == null)
+                if (IssuingInvitationItem == null)
                     return true;
 
                 var issuingApplication = VisaIssuingApplicationProfileInstanceHelper.GetEffectiveIssuingApplicationProfileInstance(this);
@@ -484,7 +503,8 @@ namespace Visa2026.Module.BusinessObjects
                 VisaIssuedPlace = objectSpace.GetObjectsQuery<VisaIssuedPlace>().FirstOrDefault(vip => vip.IsDefault);
             }
 
-            VisaIssuingLinkPathAMatcher.TryApplyOnce(this);
+            if (IssuingApplicationProfileInstance != null)
+                VisaIssuingLinkPathAMatcher.TryApplyOnce(this);
         }
     }
 }

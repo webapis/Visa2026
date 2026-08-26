@@ -58,6 +58,10 @@ public sealed class ApplicationWorkspaceCaseChrome
 
     public int? MergedFromCount { get; init; }
 
+    /// <summary>
+    /// Live <see cref="BusinessObjects.ApplicationProfile.Name"/> for this case
+    /// (same value as the Application Profile ListView column). Not a nested Word/Excel template name.
+    /// </summary>
     public string ProfileTemplateName { get; init; } = string.Empty;
 
     /// <summary>Person roster + resolved child links are immutable (workflow terminal).</summary>

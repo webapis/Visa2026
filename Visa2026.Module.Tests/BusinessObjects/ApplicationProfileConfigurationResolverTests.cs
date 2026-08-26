@@ -141,7 +141,7 @@ public class ApplicationProfileConfigurationResolverTests
 
         Assert.True(ApplicationProfileConfigurationResolver.CanBeIssuingApplicationProfileInstanceForVisa(app));
         Assert.False(ApplicationProfileConfigurationResolver.CanIssueVisa(app));
-        Assert.True(ApplicationProfileConfigurationResolver.ShowIssuedVisas(app));
+        Assert.False(ApplicationProfileConfigurationResolver.ShowIssuedVisas(app));
     }
 
     [Fact]

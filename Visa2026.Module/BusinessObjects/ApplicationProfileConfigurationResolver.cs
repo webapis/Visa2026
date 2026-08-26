@@ -152,7 +152,7 @@ public static class ApplicationProfileConfigurationResolver
         Resolve(application, p => p.ProduceBorderZone, t => t.ShowBorderZoneLocation);
 
     public static bool ShowIssuedVisas(ApplicationProfileInstance? application) =>
-        CanBeIssuingApplicationProfileInstanceForVisa(application);
+        CanIssueVisa(application);
 
     public static bool ShowRejections(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.ProduceRejection, t => t.ShowRejections);

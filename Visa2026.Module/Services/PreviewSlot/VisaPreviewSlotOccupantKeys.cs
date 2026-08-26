@@ -96,11 +96,34 @@ public static class VisaPreviewSlotOccupantKeys
             _ => "header-document-copies:unknown",
         };
 
-        return $"{prefix}:{request.ParentId:N}";
+        var key = $"{prefix}:{request.ParentId:N}";
+        if (request.OpenPreviewOnly)
+        {
+            var focus = string.IsNullOrWhiteSpace(request.FocusRecordKey)
+                ? "first"
+                : request.FocusRecordKey.Trim();
+            return $"{key}|preview:{focus}";
+        }
+
+        return key;
     }
 
     public static string ForPlaceholderManual(UserReportBoType? filterRootBoType) =>
         filterRootBoType is UserReportBoType root
             ? $"placeholder-manual:root:{root}"
             : "placeholder-manual:all";
+
+    public static string ForIssueIssuedHeader(IssueIssuedHeaderSlotRequest request)
+    {
+        if (request == null || request.ApplicationProfileInstanceId == Guid.Empty)
+            return "issue-issued-header:empty";
+
+        var kind = string.IsNullOrWhiteSpace(request.CatalogKey)
+            ? request.Kind.ToString().ToLowerInvariant()
+            : request.CatalogKey.Trim().ToLowerInvariant();
+        var baseKey = $"issue-issued-header:{kind}:{request.ApplicationProfileInstanceId:N}";
+        if (request.ExistingHeaderId is Guid existing && existing != Guid.Empty)
+            return $"{baseKey}|header:{existing:N}";
+        return baseKey;
+    }
 }

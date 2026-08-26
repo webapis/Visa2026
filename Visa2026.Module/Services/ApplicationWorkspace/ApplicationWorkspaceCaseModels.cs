@@ -140,6 +140,9 @@ public sealed class ApplicationWorkspaceCaseIssuedRow
     public string Title { get; init; } = string.Empty;
 
     public string Subtitle { get; init; } = string.Empty;
+
+    /// <summary>True when this header has at least one uploaded scan/PDF copy.</summary>
+    public bool HasCopy { get; init; }
 }
 
 public sealed class ApplicationWorkspaceIssuedHeaderOpenRequest

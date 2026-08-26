@@ -73,6 +73,7 @@ export function renderCaseHeader(c) {
         <div class="cw-head__accent"></div>
         <div>
           <h1>ApplicationProfileInstance № ${esc(c.number)}</h1>
+          ${c.profileName ? `<p class="cw-head__profile">${esc(c.profileName)}</p>` : ''}
           <p class="cw-head__sub">${esc(tplLabel(c.tplKey))} · Started ${esc(c.started)}</p>
         </div>
       </div>
@@ -197,7 +198,7 @@ export function renderCaseOverview(c, issuedFocusKey) {
       <div class="cw-link-row">${LINKED_RECORDS.map(linkedRecordTile).join('')}</div>
     </section>
     ${issuedCard}
-    <p class="cw-foot">Application Profile instance · Template: ${esc(tplLabel(c.tplKey))}</p>
+    <p class="cw-foot">Application Profile: ${esc(c.profileName || tplLabel(c.tplKey))}</p>
   </div>`;
 }
 

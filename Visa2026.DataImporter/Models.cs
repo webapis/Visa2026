@@ -1346,8 +1346,8 @@ public class Visa
     [JsonPropertyName("BorderZoneLocation")]
     public string? BorderZoneLocation { get; set; }
 
-    [JsonPropertyName("InvitationItem")]
-    public InvitationItem? InvitationItem { get; set; }
+    [JsonPropertyName("IssuingInvitationItem")]
+    public InvitationItem? IssuingInvitationItem { get; set; }
 
     [JsonPropertyName("Passport")]
     public Passport? Passport { get; set; }

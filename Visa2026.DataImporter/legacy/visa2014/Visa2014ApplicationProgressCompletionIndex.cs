@@ -89,7 +89,7 @@ internal static class Visa2014ApplicationProfileInstanceProgressCompletionIndex
         CROSS APPLY (
             SELECT COUNT_BIG(*) AS VisaLinkedCount
             FROM dbo.PersonInApplication pia2
-            WHERE pia2.ApplicationProfileInstance = a.Oid
+            WHERE pia2.Application = a.Oid
               AND pia2.GCRecord IS NULL
               AND (
                   EXISTS (
@@ -126,7 +126,7 @@ internal static class Visa2014ApplicationProfileInstanceProgressCompletionIndex
                         SELECT v.VisaNumber, v.VisaIssuedDate, v.Oid
                         FROM dbo.PersonInApplication pia3
                         INNER JOIN dbo.Visa v ON v.ProcessNumber = pia3.Oid AND v.GCRecord IS NULL
-                        WHERE pia3.ApplicationProfileInstance = a.Oid AND pia3.GCRecord IS NULL
+                        WHERE pia3.Application = a.Oid AND pia3.GCRecord IS NULL
                         UNION ALL
                         SELECT nextv.VisaNumber, nextv.VisaIssuedDate, nextv.Oid
                         FROM dbo.PersonInApplication pia3b
@@ -135,7 +135,7 @@ internal static class Visa2014ApplicationProfileInstanceProgressCompletionIndex
                             ON nextv.Passport = prev.Passport
                            AND nextv.GCRecord IS NULL
                            AND nextv.VisaIssuedDate > prev.VisaIssuedDate
-                        WHERE pia3b.ApplicationProfileInstance = a.Oid
+                        WHERE pia3b.Application = a.Oid
                           AND pia3b.GCRecord IS NULL
                           AND pia3b.Visa IS NOT NULL
                           AND NOT EXISTS (
@@ -152,7 +152,7 @@ internal static class Visa2014ApplicationProfileInstanceProgressCompletionIndex
                 SELECT v.VisaIssuedDate
                 FROM dbo.PersonInApplication pia4
                 INNER JOIN dbo.Visa v ON v.ProcessNumber = pia4.Oid AND v.GCRecord IS NULL
-                WHERE pia4.ApplicationProfileInstance = a.Oid AND pia4.GCRecord IS NULL
+                WHERE pia4.Application = a.Oid AND pia4.GCRecord IS NULL
                 UNION ALL
                 SELECT nextv.VisaIssuedDate
                 FROM dbo.PersonInApplication pia4b
@@ -161,7 +161,7 @@ internal static class Visa2014ApplicationProfileInstanceProgressCompletionIndex
                     ON nextv.Passport = prev.Passport
                    AND nextv.GCRecord IS NULL
                    AND nextv.VisaIssuedDate > prev.VisaIssuedDate
-                WHERE pia4b.ApplicationProfileInstance = a.Oid
+                WHERE pia4b.Application = a.Oid
                   AND pia4b.GCRecord IS NULL
                   AND pia4b.Visa IS NOT NULL
                   AND NOT EXISTS (

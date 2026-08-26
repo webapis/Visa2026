@@ -7600,6 +7600,55 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Saýlanan setiriň doly Arza ýazgysyny aç",
             ["ru-RU"] = "Открыть полную запись заявки для выбранной строки",
         },
+        ["InvitationItem.IssueVisa.ToolTip"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Create a new visa for this person using this invitation line and its issuing application case",
+            ["tr-TR"] = "Bu davet satırı ve bağlı başvuru dosyası ile bu kişi için yeni vize oluştur",
+            ["tk-TM"] = "Bu çakylyk setiri we baglanyşykly arza faýly bilen bu adam üçin täze wiza döret",
+            ["ru-RU"] = "Создать новую визу для этого лица по этой строке приглашения и связанному делу заявки",
+        },
+        ["InvitationItem.IssueVisa.NotAvailable"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Cannot issue a visa from this invitation item.",
+            ["tr-TR"] = "Bu davet kaleminden vize düzenlenemez.",
+            ["tk-TM"] = "Bu çakylyk elementinden wiza berilip bolmaýar.",
+            ["ru-RU"] = "Нельзя оформить визу по этой позиции приглашения.",
+        },
+        ["InvitationItem.IssueVisa.ItemUsedOrClosed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "This invitation line is cancelled, changed, or already used.",
+            ["tr-TR"] = "Bu davet kalemi iptal edilmiş, değiştirilmiş veya zaten kullanılmış.",
+            ["tk-TM"] = "Bu çakylyk setiri ýatyrylan, üýtgedilen ýa-da eýýäm ulanylan.",
+            ["ru-RU"] = "Эта строка приглашения отменена, изменена или уже использована.",
+        },
+        ["InvitationItem.IssueVisa.VisaAlreadyIssued"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "A visa is already linked to this invitation line.",
+            ["tr-TR"] = "Bu davet kalemine zaten bir vize bağlı.",
+            ["tk-TM"] = "Bu çakylyk elementine eýýäm wiza baglanyşdyrylan.",
+            ["ru-RU"] = "К этой строке приглашения уже привязана виза.",
+        },
+        ["InvitationItem.IssueVisa.NoIssuingInstance"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "The parent invitation has no issuing Application Profile Instance.",
+            ["tr-TR"] = "Üst davetin düzenleyen Başvuru Profili örneği yok.",
+            ["tk-TM"] = "Esasy çakylygyň berijisi Başvuru Profili nusgasy ýok.",
+            ["ru-RU"] = "У родительского приглашения нет выдавшего экземпляра профиля заявки.",
+        },
+        ["InvitationItem.IssueVisa.IneligibleInstance"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "The issuing application case cannot produce visas from invitations.",
+            ["tr-TR"] = "Düzenleyen başvuru dosyası davetten vize üretemez.",
+            ["tk-TM"] = "Berijisi arza faýly çakylykdan wiza berip bilmeýär.",
+            ["ru-RU"] = "Выдавшее дело заявки не может оформить визу по приглашению.",
+        },
+        ["InvitationItem.IssueVisa.NoPassport"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "This invitation line has no person or passport.",
+            ["tr-TR"] = "Bu davet kalemine kişi veya pasaport bağlı değil.",
+            ["tk-TM"] = "Bu çakylyk setirinde adam ýa-da pasport ýok.",
+            ["ru-RU"] = "У этой строки приглашения нет лица или паспорта.",
+        },
         ["Word.Toast.Close"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Close",

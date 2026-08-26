@@ -4,17 +4,36 @@ internal sealed record Visa2014WorkPermitRawRow(
     Guid LegacyOid,
     string? WorkPermitNumber,
     DateTime? IssuedDate,
-    string SourceTable);
+    string SourceTable,
+    Guid? LegacyApplicationProfileInstanceOid);
 
 internal static class Visa2014WorkPermitTransform
 {
+    /// <summary>
+    /// Newly issued headers: Application via WorkPermit.ProcessNumber → PersonInApplication → Application
+    /// (majority Application per letter). Existing PIA.WorkPermit is NOT used for header FK.
+    /// </summary>
     internal const string ExtractSql = """
         SELECT
             CAST(wpl.Oid AS varchar(36)) AS Oid,
             wpl.Number AS WorkPermitNumber,
             CONVERT(varchar(10), wpl.Date, 23) AS IssuedDate,
-            'WorkPermitLetter' AS SourceTable
+            'WorkPermitLetter' AS SourceTable,
+            CAST(app.ApplicationOid AS varchar(36)) AS ApplicationProfileInstanceOid
         FROM dbo.WorkPermitLetter wpl
+        OUTER APPLY (
+            SELECT TOP 1 pia.Application AS ApplicationOid
+            FROM dbo.WorkPermit wp
+            INNER JOIN dbo.PersonInApplication pia
+                ON pia.Oid = wp.ProcessNumber
+               AND pia.GCRecord IS NULL
+            WHERE wp.WorkPermitLetter = wpl.Oid
+              AND wp.GCRecord IS NULL
+              AND wp.ProcessNumber IS NOT NULL
+              AND pia.Application IS NOT NULL
+            GROUP BY pia.Application
+            ORDER BY COUNT(*) DESC, pia.Application
+        ) app
         WHERE wpl.GCRecord IS NULL
 
         UNION ALL
@@ -23,8 +42,12 @@ internal static class Visa2014WorkPermitTransform
             CAST(wp.Oid AS varchar(36)) AS Oid,
             wp.AppruvalNumber AS WorkPermitNumber,
             CONVERT(varchar(10), wp.StartDateOfWorkPermit, 23) AS IssuedDate,
-            'WorkPermit' AS SourceTable
+            'WorkPermit' AS SourceTable,
+            CAST(pia.Application AS varchar(36)) AS ApplicationProfileInstanceOid
         FROM dbo.WorkPermit wp
+        LEFT JOIN dbo.PersonInApplication pia
+            ON pia.Oid = wp.ProcessNumber
+           AND pia.GCRecord IS NULL
         WHERE wp.GCRecord IS NULL
           AND wp.WorkPermitLetter IS NULL
         """;
@@ -32,8 +55,8 @@ internal static class Visa2014WorkPermitTransform
     internal static readonly string[] WorkPermitMainColumnOrder =
     [
         "_legacyRowId", "_legacyTable", "_dedupeGroupId", "_importAction",
-        "WorkPermitNumber", "IssuedDate",
-        "_legacy_SourceTable",
+        "WorkPermitNumber", "IssuedDate", "Application",
+        "_legacy_SourceTable", "_legacy_ApplicationProfileInstanceOid",
     ];
 
     public static Visa2014PersonImportBatch PrepareImportBatch(
@@ -76,11 +99,16 @@ internal static class Visa2014WorkPermitTransform
             ? issued
             : null;
 
+        Guid? applicationOid = null;
+        if (Guid.TryParse(row.GetValueOrDefault("ApplicationProfileInstanceOid")?.Trim(), out var appOid))
+            applicationOid = appOid;
+
         parsed = new Visa2014WorkPermitRawRow(
             LegacyOid: legacyOid,
             WorkPermitNumber: row.GetValueOrDefault("WorkPermitNumber"),
             IssuedDate: issuedDate,
-            SourceTable: sourceTable.Trim());
+            SourceTable: sourceTable.Trim(),
+            LegacyApplicationProfileInstanceOid: applicationOid);
         return true;
     }
 
@@ -174,6 +202,7 @@ internal static class Visa2014WorkPermitTransform
             ["_dedupeGroupId"] = working.DedupeGroupId ?? "",
             ["_importAction"] = "import",
             ["_legacy_SourceTable"] = raw.SourceTable,
+            ["_legacy_ApplicationProfileInstanceOid"] = raw.LegacyApplicationProfileInstanceOid?.ToString("D"),
         };
 
         if (string.IsNullOrWhiteSpace(raw.WorkPermitNumber))
@@ -181,6 +210,7 @@ internal static class Visa2014WorkPermitTransform
             skipReason = "required_null:WorkPermitNumber";
             row["WorkPermitNumber"] = null;
             row["IssuedDate"] = null;
+            row["Application"] = null;
             return row;
         }
 
@@ -189,6 +219,7 @@ internal static class Visa2014WorkPermitTransform
             skipReason = "required_null:IssuedDate";
             row["WorkPermitNumber"] = raw.WorkPermitNumber;
             row["IssuedDate"] = null;
+            row["Application"] = null;
             return row;
         }
 
@@ -196,6 +227,7 @@ internal static class Visa2014WorkPermitTransform
             ?? NormalizeWorkPermitNumber(raw.WorkPermitNumber);
         row["WorkPermitNumber"] = workPermitNumber;
         row["IssuedDate"] = raw.IssuedDate.Value.ToString("yyyy-MM-dd");
+        row["Application"] = raw.LegacyApplicationProfileInstanceOid?.ToString("D");
         return row;
     }
 

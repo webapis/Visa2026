@@ -454,7 +454,7 @@ internal static class Visa2014ApplicationProfileInstanceProgressODataImporter
 
         var payload = new Dictionary<string, object?>(StringComparer.Ordinal)
         {
-            ["Application"] = new { ID = applicationId },
+            ["ApplicationProfileInstance"] = new { ID = applicationId },
             ["State"] = new { ID = stateId.Value },
             // Unspecified for PG timestamp without time zone (Utc Kind fails without legacy switch).
             ["Date"] = DateTime.SpecifyKind(date, DateTimeKind.Unspecified),

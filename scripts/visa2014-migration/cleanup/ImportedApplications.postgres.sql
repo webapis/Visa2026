@@ -31,11 +31,11 @@ BEGIN
     WHERE ai."ApplicationID" = a.id;
 
     UPDATE "Visas" v
-    SET "InvitationItemID" = NULL
+    SET "IssuingInvitationItemID" = NULL
     FROM "InvitationItems" ii
     INNER JOIN "Invitations" i ON i."ID" = ii."InvitationID"
     INNER JOIN app_ids a ON i."ApplicationID" = a.id
-    WHERE v."InvitationItemID" = ii."ID";
+    WHERE v."IssuingInvitationItemID" = ii."ID";
 
     DELETE FROM "TravelHistories" th
     USING "ApplicationItems" ai, app_ids a

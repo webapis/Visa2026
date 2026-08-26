@@ -892,10 +892,10 @@ namespace Visa2026.Module.BusinessObjects
                     .IsRequired(false);
                 b.HasIndex("IssuingApplicationProfileInstanceID")
                     .HasDatabaseName("IX_Visas_IssuingApplicationProfileInstanceID");
-                // Single-use by validation (Visa_InvitationItemSingleUse).
-                b.HasOne(v => v.InvitationItem)
+                // Single-use by validation (Visa_IssuingInvitationItemSingleUse).
+                b.HasOne(v => v.IssuingInvitationItem)
                     .WithOne(ii => ii.IssuedVisa)
-                    .HasForeignKey<Visa>("InvitationItemID")
+                    .HasForeignKey<Visa>("IssuingInvitationItemID")
                     .OnDelete(DeleteBehavior.NoAction)
                     .IsRequired(false);
                 b.Metadata.UseSqlOutputClause(false);
