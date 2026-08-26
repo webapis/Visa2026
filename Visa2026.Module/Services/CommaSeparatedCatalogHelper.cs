@@ -261,7 +261,19 @@ public static class CommaSeparatedCatalogHelper
 
     private static int CountBorderZoneUsage(IObjectSpace objectSpace, string label, CatalogUsageContext? usageContext) =>
         CountApplicationBorderZoneUsage(objectSpace, label, usageContext)
-        + CountVisaBorderZoneUsage(objectSpace, label, usageContext);
+        + CountVisaBorderZoneUsage(objectSpace, label, usageContext)
+        + CountInvitationBorderZoneUsage(objectSpace, label, usageContext);
+
+    private static int CountInvitationBorderZoneUsage(
+        IObjectSpace objectSpace,
+        string label,
+        CatalogUsageContext? usageContext) =>
+        objectSpace.GetObjectsQuery<Invitation>()
+            .AsEnumerable()
+            .Count(i => CommaSeparatedSelectionHelper.ContainsLabel(
+                GetInvitationBorderZoneStored(i, usageContext),
+                label,
+                CommaSeparatedSelectionHelper.NoneValue));
 
     private static int CountApplicationBorderZoneUsage(
         IObjectSpace objectSpace,
@@ -332,6 +344,18 @@ public static class CommaSeparatedCatalogHelper
         return visa.BorderZoneLocation;
     }
 
+    private static string? GetInvitationBorderZoneStored(Invitation invitation, CatalogUsageContext? usageContext)
+    {
+        if (usageContext?.EditingObjectId != null
+            && invitation.ID == usageContext.EditingObjectId
+            && usageContext.EditingEffectiveStored != null)
+        {
+            return usageContext.EditingEffectiveStored;
+        }
+
+        return invitation.BorderZoneLocation;
+    }
+
     private static string? GetWorkPermitItemWorkPermittedLocationsStored(
         WorkPermitItem item,
         CatalogUsageContext? usageContext)
@@ -396,6 +420,26 @@ public static class CommaSeparatedCatalogHelper
             var parsed = CommaSeparatedSelectionHelper.ParseSelected(stored, string.Empty)
                 .Where(z => !string.Equals(z, label, StringComparison.OrdinalIgnoreCase));
             visa.BorderZoneLocation = CommaSeparatedSelectionHelper.FormatSelected(parsed, string.Empty);
+        }
+
+        foreach (var invitation in objectSpace.GetObjectsQuery<Invitation>().ToList())
+        {
+            var stored = GetInvitationBorderZoneStored(invitation, usageContext);
+            if (!CommaSeparatedSelectionHelper.ContainsLabel(
+                    stored,
+                    label,
+                    CommaSeparatedSelectionHelper.NoneValue))
+            {
+                continue;
+            }
+
+            var parsed = CommaSeparatedSelectionHelper.ParseSelected(
+                    stored,
+                    CommaSeparatedSelectionHelper.NoneValue)
+                .Where(z => !string.Equals(z, label, StringComparison.OrdinalIgnoreCase));
+            invitation.BorderZoneLocation = CommaSeparatedSelectionHelper.FormatSelected(
+                parsed,
+                CommaSeparatedSelectionHelper.NoneValue);
         }
     }
 
@@ -478,6 +522,27 @@ public static class CommaSeparatedCatalogHelper
                 oldLabel,
                 newLabel,
                 string.Empty);
+        }
+
+        var invitations = objectSpace.GetObjectsQuery<Invitation>()
+            .Where(i => i.BorderZoneLocation != null && i.BorderZoneLocation.Contains(oldLabel))
+            .ToList();
+
+        foreach (var invitation in invitations)
+        {
+            if (!CommaSeparatedSelectionHelper.ContainsLabel(
+                    invitation.BorderZoneLocation,
+                    oldLabel,
+                    CommaSeparatedSelectionHelper.NoneValue))
+            {
+                continue;
+            }
+
+            invitation.BorderZoneLocation = CommaSeparatedSelectionHelper.ReplaceLabel(
+                invitation.BorderZoneLocation,
+                oldLabel,
+                newLabel,
+                CommaSeparatedSelectionHelper.NoneValue);
         }
     }
 

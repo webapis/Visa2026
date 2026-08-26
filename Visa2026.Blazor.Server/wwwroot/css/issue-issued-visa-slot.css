@@ -1,0 +1,178 @@
+/* Path A issued-visa compose occupant — reuses issued-header tokens */
+
+.issue-issued-visa-slot-panel.resminamalar-slot-panel {
+  --issue-issued-pad-x: 1.25rem;
+  --issue-issued-pad-y: 1rem;
+}
+
+.issue-issued-visa-slot {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  padding: var(--issue-issued-pad-y) var(--issue-issued-pad-x) 1.25rem;
+  width: 100%;
+  max-width: 42rem;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.issue-issued-visa-slot__banner {
+  margin: 0;
+  padding: 0.7rem 0.85rem;
+  border-radius: 0.45rem;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.issue-issued-visa-slot__banner--info {
+  background: color-mix(in srgb, var(--bs-primary, #0d6efd) 12%, transparent);
+  color: color-mix(in srgb, var(--bs-primary, #0d6efd) 55%, #212529);
+}
+
+.issue-issued-visa-slot__banner--warn {
+  background: color-mix(in srgb, #f0ad4e 22%, transparent);
+  color: #7a4b00;
+}
+
+.issue-issued-visa-slot__banner--success {
+  background: color-mix(in srgb, #28a745 16%, transparent);
+  color: #146c2e;
+}
+
+.issue-issued-visa-slot__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.issue-issued-visa-slot__group-title {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--bs-secondary-color, #6c757d);
+}
+
+.issue-issued-visa-slot__card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem 1rem;
+  border: 1px solid var(--bs-border-color, #e5e7eb);
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--bs-body-bg, #fff) 92%, var(--bs-tertiary-bg, #f8f9fa));
+}
+
+.issue-issued-visa-slot__card--issued {
+  background: color-mix(in srgb, var(--bs-tertiary-bg, #f8f9fa) 88%, #fff);
+}
+
+.issue-issued-visa-slot__card--off {
+  opacity: 0.72;
+}
+
+.issue-issued-visa-slot__card-head {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.issue-issued-visa-slot__avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #0b4a7a;
+  background: color-mix(in srgb, var(--bs-primary, #0d6efd) 16%, #fff);
+  flex-shrink: 0;
+}
+
+.issue-issued-visa-slot__person {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 0.92rem;
+  font-weight: 650;
+}
+
+.issue-issued-visa-slot__card-head input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.issue-issued-visa-slot__note {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--bs-secondary-color, #6c757d);
+}
+
+.issue-issued-visa-slot__readonly-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem 1rem;
+  font-size: 0.8rem;
+}
+
+.issue-issued-visa-slot__readonly-grid dt {
+  margin: 0;
+  color: var(--bs-secondary-color, #6c757d);
+  font-weight: 600;
+}
+
+.issue-issued-visa-slot__readonly-grid dd {
+  margin: 0;
+  font-weight: 500;
+}
+
+.issue-issued-visa-slot__omit {
+  margin: 0.15rem 0 0;
+  font-size: 0.8rem;
+  color: var(--bs-secondary-color, #6c757d);
+  line-height: 1.45;
+}
+
+.issue-issued-visa-slot__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  padding: 0.75rem 0 0.15rem;
+  background: linear-gradient(to bottom, transparent, var(--bs-body-bg, #fff) 28%);
+}
+
+.issue-issued-visa-slot__copy-list {
+  margin: 0 0 0.55rem;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.issue-issued-visa-slot__copy-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.82rem;
+}
+
+@media (max-width: 640px) {
+  .issue-issued-visa-slot-panel.resminamalar-slot-panel {
+    --issue-issued-pad-x: 0.85rem;
+    --issue-issued-pad-y: 0.85rem;
+  }
+
+  .issue-issued-visa-slot__readonly-grid {
+    grid-template-columns: 1fr;
+  }
+}

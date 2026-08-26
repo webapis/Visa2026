@@ -1,3 +1,151 @@
+### 2026-08-26 — Field cues on all issued BOs from Application Profile Instance
+
+- **Need**: Highlighting was missing on Invitation/Rejection compose and on native New DetailViews for issued headers and items.
+- **Shipped**: Same orange / blue / green on all issued compose kinds. Native new DetailView cues for Invitation, InvitationItem, WorkPermit, WorkPermitItem, BorderZone, BorderZoneItem, Rejection, RejectionItem, Visa.
+- **Test**: Blazor Debug succeeded. Officer: Ctrl+F5.
+- **Prevent**: InvitationItem / RejectionItem / BorderZoneItem on compose are roster tables, not extra item fields.
+- **Cross-skill**: application-profile | preview-slot
+
+### 2026-08-26 — Compose field border cues (visa / WP / border zone)
+
+- **Need**: Empty vs default vs confirmed fields looked the same on issued compose.
+- **Shipped**: Orange empty required; blue system defaults; green after officer leaves the field. Passport/computed expiration are sourced. Legend on visa, work permit, and border zone compose.
+- **Test**: Blazor Debug succeeded. Officer: Ctrl+F5 on New issued visa, New work permit, New border zone.
+- **Prevent**: Invitation/rejection people tables stay un-cued. Do not paint read-only passport as “please edit” blue.
+- **Cross-skill**: application-profile | preview-slot
+
+### 2026-08-26 — Work permit compose person cards (implemented)
+
+- **Need**: Officers set `WorkPermitItem` fields (item number, AS, position, Start/End, locations), not only checkboxes.
+- **Shipped**: WP kind in `IssueIssuedHeaderSlotPanel` uses visa-style cards. Dates copy from last valid work permit. One letter per case; employees only. `EnsureRosterWorkPermitItems` skips when lines already exist.
+- **Test**: `IssueIssuedHeaderWorkPermitComposeTests` + Module/Blazor Debug. Officer: stop F5, Ctrl+F5, + Add work permit on a visa+WP case.
+- **Prevent**: Do not put AS on the WorkPermit header. Do not copy Start/End from current visa. Do not auto-add omitted employees on save.
+- **Cross-skill**: application-profile | preview-slot
+
+### 2026-08-26 — Work permit compose person-card prototypes (not implemented)
+
+- **Need**: Issued work permit cannot be checkbox-only; each `WorkPermitItem` needs officer fields (item number, AS, position, Start/End, locations).
+- **Shipped (prototype only)**: `docs/prototypes/issue-work-permit-slot-01` … `04` + README. One letter per case; employees only; Start/End from last valid work permit.
+- **Test**: Officer review of PNGs. Do not implement until accepted.
+- **Prevent**: Do not put AS number on the WorkPermit header. Do not list non-employees. Do not copy Start/End from current visa.
+- **Cross-skill**: application-profile | preview-slot
+
+### 2026-08-26 — Issued visa compose for visa-only profiles (roster)
+
+- **Need**: Extension / direct (**May produce Visa**, not Invitation) uses the same `#visa-preview-slot` as invitation Path A — people from the case roster, one visa per unused person, `IssuingInvitationItem` null. Linked Visas M2M is not a source.
+- **Shipped**: `CanOpenInSlot` = `ShowIssuedVisas` only. `UsesInvitationSource` keeps Path A invitation lines. Roster LoadDraft/Create; `Visa_IssuingApplicationProfileInstanceSingleUse` is one visa per person on the case. Slice **10q-iv**.
+- **Test**: `IssueIssuedVisaComposeServiceTests` 4 passed. Module + Blazor Debug 0 errors. Officer: stop F5, rebuild, Ctrl+F5. Visa-only case → **+ Add issued visa** → **People on this case**; Create; already-issued card locked. Invitation+visa case unchanged.
+- **Prevent**: Do not open XAF visa modal when `CanOpenInSlot`. Do not call this officer path Path B. Do not use skip-nav `Visas` as a compose source. Do not keep one-visa-per-case uniqueness.
+- **Cross-skill**: application-profile | preview-slot
+
+### 2026-08-26 — Instance-source visa mermaid (roster vs linked)
+
+- **Need**: Same issued-vs-input picture as invitation items, for profiles that produce Visa without Invitation.
+- **Shipped**: `docs/diagrams/issued-visa-origin/instance-roster-issued-vs-input.mmd` synced in `APPLICATION_PROFILE_ISSUED_VISA_ORIGIN.md`. Roster people stamp origin; linked Visas M2M and WorkPermit are not visa sources; `IssuingInvitationItem` is null.
+- **Test**: Open the `.mmd` in preview; compare to invitation-item-issued-vs-input.mmd.
+- **Prevent**: Do not call this officer path “Path B” — that name is import backfill.
+- **Cross-skill**: application-profile
+
+### 2026-08-26 — Direct/extension issued-visa slot prototypes (not implemented)
+
+- **Need**: Same preview-slot compose when the profile produces **Visa but not Invitation** (roster people; `IssuingInvitationItem` null). Work permit stays a sibling issued tile.
+- **Shipped (prototype only)**: `docs/prototypes/issue-issued-visa-instance-slot-01` … `04` + README. Path A invitation compose unchanged.
+- **Test**: Officer review of PNGs. Do not implement until accepted.
+- **Cross-skill**: application-profile | preview-slot
+
+### 2026-08-26 — New issued visa hid the third invitation person (no scroll)
+
+- **Symptom**: Three people on the invitation; New issued visa showed two cards and no scrollbar.
+- **Fix**: Compose catalog scrolls (`overflow-y: auto` on `issue-issued-header-slot-panel`). Third person is below the first two visa cards.
+- **Test**: Ctrl+F5, New issued visa → scroll past Serdar to Ali.
+- **Prevent**: Do not assume one/two person cards fit the slot height.
+- **Cross-skill**: application-profile | preview-slot
+
+### 2026-08-26 — Visa Delete must not Clear skip-nav collections
+
+- **Symptom**: Delete a0001 showed `'ObservableCollection<T>.Clear' is not supported` (XAF `Reset` / items removed).
+- **Fix**: Unlink `Visa.ApplicationProfileInstances` with `Remove` per item. Do not `Clear()` XAF `ObservableCollection` navigations.
+- **Test**: Module Debug build. Officer: rebuild, Ctrl+F5, Delete a0001 → confirm → row gone, no red error.
+- **Prevent**: XAF collections need `Remove`, not `Clear`.
+- **Cross-skill**: application-profile | preview-slot
+
+### 2026-08-26 — Delete issued visa from Application Profile Instance
+
+- **Need**: Officers remove newly issued visas from the case, like invitation rows.
+- **Fix**: **Delete** next to Preview under **Visas issued by this case**. Unwinds the invitation line (`IsUsed` false) so a new visa can be issued. Copies/images go with the visa.
+- **Test**: Compose Delete guard unit test + Blazor Debug build. Officer: Ctrl+F5, Delete a0001/a0002, confirm, list updates.
+- **Prevent**: Invitation Delete stays blocked while a visa still exists on a line — delete the visa first.
+- **Cross-skill**: application-profile | preview-slot
+
+### 2026-08-26 — Issued visa list Preview in the slot
+
+- **Need**: Preview visa copies from **Visas issued by this case**, like invitation rows.
+- **Fix**: Workspace **Preview** on each visa row. Disabled until `VisaDocument` exists. Opens header-copies occupant (`HeaderDocumentCopiesFamily.Visa`, `OpenPreviewOnly`). No Delete on visas.
+- **Test**: Catalog HasCopy unit tests passed. Officer: Ctrl+F5. Upload copy on a0002 → Preview enabled → PDF in right slot. Row title still opens compose.
+- **Prevent**: Do not hide visa Preview behind invitation/WP delete capability.
+- **Cross-skill**: application-profile | preview-slot
+
+### 2026-08-26 — Visa compose: issued place + visa copy upload
+
+- **Need**: Path A compose was missing `VisaIssuedPlace` and could not attach a visa scan on create.
+- **Fix**: Per-person **Visa issued place** lookup (defaults to catalog IsDefault). **Visa copy** upload on each card: pending until Create, immediate on edit. Stores `VisaDocument` like invitation copies.
+- **Test**: Debug Blazor build succeeded. Officer: + Add issued visa → pick issued place, Upload copy, Create. Edit a0002 → place shown; Upload copy lists on the card.
+- **Prevent**: Do not silently stamp only the default issued place; officers must see and can change it. Do not invent a second file store — use `Visa.Documents`.
+- **Cross-skill**: application-profile | preview-slot
+
+### 2026-08-26 — Visa edit Save disabled until dirty
+
+- **Need**: Edit issued visa Save should stay disabled until a field changes, like XAF DetailView.
+- **Fix**: Same fingerprint as invitation compose (`CanSaveVisa` / `IsDirty`). Recapture after load and successful Save.
+- **Test**: Open a0002 — Save grey. Change visa number or date — Save blue. Save — grey again.
+- **Cross-skill**: application-profile | preview-slot
+
+### 2026-08-26 — Click issued visa row to edit in the slot
+
+- **Symptom**: **Visas issued by this case** row opened XAF Visa / a0002 modal.
+- **Fix**: Row click opens Path A compose occupant with `ExistingVisaId`. Editable compose fields + Save. `TryOpen` refuses Path A so the modal cannot return. Direct/extension visa stays modal.
+- **Test**: Debug Blazor build succeeded. Officer: Ctrl+F5, click a0002 → custom edit, Save, list caption updates.
+- **Prevent**: Issued visa rows must go through `TryOpenIssuedVisaInSlotAsync(id)` / `ExistingVisaId`, not `IssuedHeaderOpenHelper.TryOpen`.
+- **Cross-skill**: application-profile | preview-slot
+
+### 2026-08-26 — Compose Border zone is the Visa popup, not a checkbox grid
+
+- **Symptom**: Officers rejected the inline border-zone checkbox wrap on invitation Header and visa person cards. Visa DetailView uses summary + … popup.
+- **Fix**: Wired `BorderZoneLocationField` into both compose panels. Domain defaulting (`Invitation.BorderZoneLocation` → visa) unchanged.
+- **Test**: Debug build succeeded. Officer: stop F5, Ctrl+F5. Click … on compose → same “Border zones” popup as Visa.
+- **Prevent**: New compose fields that exist on a BO with `[EditorAlias(BorderZoneMultiSelect)]` must use `BorderZoneLocationField`, not a custom checkbox list.
+- **Cross-skill**: application-profile | preview-slot
+
+### 2026-08-26 — Invitation and Path A visa share BorderZoneLocation
+
+- **Need**: Same Visa border-zone multi-select on Invitation; new visas default from the invitation.
+- **Shipped**: `Invitation.BorderZoneLocation` (catalog `BorderZoneName`, default `Ýok`). Invitation compose Header checkboxes; visa compose per-person checkboxes prefilled invitation → case → Ýok. Schema heal `Invitations.BorderZoneLocation`.
+- **Test**: `BorderZoneSelectionHelperTests` passed. Officer: stop F5, rebuild, Ctrl+F5. Set border zone on invitation → + Add issued visa → person card shows those zones.
+- **Prevent**: Do not invent a second border-zone store on Invitation.
+- **Cross-skill**: application-profile | preview-slot
+
+### 2026-08-26 — Path A issued-visa preview-slot compose (shipped)
+
+- **Need**: **+ Add issued visa** compose in `#visa-preview-slot` per accepted prototypes 01–04.
+- **Shipped**: `IssueIssuedVisaComposeService` (issued invitation lines only; one visa per unused line; unique numbers; chronology). Slot panel groups cards by invitation; used lines show Visa issued; Create blocked when none unused; stay in slot after create and refresh Issued visa count. Direct/extension (`ProduceVisa` without invitation) stays modal.
+- **Test**: `dotnet build Visa2026.slnx -c Debug`; unit test `CanOpenInSlot` requires both produce flags. Officer smoke: invitation case → + Add issued visa → fill numbers → Create visas.
+- **Prevent**: Do not restore Issue visa on invitation compose.
+- **Cross-skill**: application-profile | preview-slot
+
+### 2026-08-26 — Issued-visa Path A preview-slot prototypes (before implement)
+
+- **Need**: Officer compose for **+ Add issued visa** in `#visa-preview-slot`, per issued-vs-input invitation-item diagram.
+- **Shipped (prototype only)**: `docs/prototypes/issue-issued-visa-slot-01` … `04` + README. One visa per person with an issued invitation line; per-person visa fields; grouped by letter; no Issue visa shortcut on invitation compose.
+- **Test**: Officer review of PNGs. Do not implement until accepted.
+- **Cross-skill**: application-profile | preview-slot
+
+### 2026-08-26 — Invitation profiles also produce visa; service-passport does not produce invitation
+
+- **Need**: Issued visas tile on invitation-producing Application Profiles; service-passport cases must not produce invitations.
+- **Shipped**: Calik tenant seed `application-profile.calik-energi.json`: `ProduceVisa=true` on `get_invitation`, `get_invitation_wp`, `get_invitation_fm`, `get_invitation_according_to_wp`, `change_invitation`. `get_invitation_service_passport` `ProduceInvitation=false` (visa stays off).
+- **Test**: Restart app so `ApplicationProfileSeedSync` overwrites catalog rows. Invitation case Overview shows Invitation + Issued visa tiles. Service-passport case hides Invitation tile.
+- **Cross-skill**: application-profile | lookup-data
+
 ### 2026-08-25 — Issued-row Preview for invitation copy
 
 - **Need**: Preview the invitation file from Issued records list, not only from compose.

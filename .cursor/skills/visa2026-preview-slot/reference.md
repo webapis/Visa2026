@@ -16,6 +16,8 @@ XAF Controller
 ## Occupant keys (VisaPreviewSlotOccupantKeys)
 
 Also: `issue-issued-header:{catalogKey}:{appId:N}` via `ForIssueIssuedHeader` (compose New invitation / work permit / rejection / border zone).
+Also: `issue-issued-visa:{appId:N}` via `ForIssueIssuedVisa` (New issued visa — invitation lines or case roster).
+Also: `visa-document-copies:visa:{visaId:N}` via `ForHeaderDocumentCopies` (issued-row **Preview** of visa copies).
 
 | Pattern | When |
 |---------|------|
@@ -26,6 +28,7 @@ Also: `issue-issued-header:{catalogKey}:{appId:N}` via `ForIssueIssuedHeader` (c
 | `progress-letters:app:{appId}` plus `preview:{progressId}` | Workspace Progress filename (`OpenPreviewOnly`) |
 | `file:{sourceType}:{objectId}` | Generic file preview (`progress-letter`, `user-report-template`, `application-profile-template`) |
 | `issue-issued-header:{catalogKey}:{appId}` | New invitation / WP / rejection / border zone compose (ForIssueIssuedHeader) |
+| `issue-issued-visa:{appId}` | New issued visa compose (ForIssueIssuedVisa) |
 
 Register new Word/Excel “look” previews as `IFilePreviewSource` + `OpenFileAsync`. Do not add a Resminamalar occupant from the Application Profile wizard (no live application to merge).
 
@@ -81,6 +84,8 @@ Defined on `.resminamalar-slot-panel`:
 | `syncSlotTheme()` | Copy theme vars into slot |
 | `syncInlinePreviewHeight()` | PDF iframe height after resize |
 | `registerHost` / `unregisterHost` | `VisaPreviewSlotHost` JS interop |
+| `openIssueIssuedHeader` | Issue invitation / WP / rejection / border zone compose |
+| `openIssueIssuedVisa` | Path A New issued visa compose, or edit when `existingVisaId` is passed |
 
 Hard-refresh required after JS/CSS changes (Ctrl+F5).
 

@@ -6,4 +6,5 @@ public enum HeaderDocumentCopiesFamily
     Invitation = 1,
     Rejection = 2,
     BorderZone = 3,
+    Visa = 4,
 }

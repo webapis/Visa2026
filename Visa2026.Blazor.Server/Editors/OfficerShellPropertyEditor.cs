@@ -343,6 +343,15 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
             return;
         }
 
+        if (string.Equals(key, ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, StringComparison.OrdinalIgnoreCase)
+            && await IssueIssuedVisaPreviewSlotOpenHelper.TryOpenComposeAsync(
+                _application,
+                model.CaseApplicationProfileInstanceId,
+                View?.Id))
+        {
+            return;
+        }
+
         ApplicationWorkspaceIssuedHeaderOpenHelper.TryCreate(
             _application,
             _application.MainWindow,
@@ -366,6 +375,18 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
                 request.Key,
                 request.Id,
                 View?.Id);
+            return;
+        }
+
+        if (model != null
+            && string.Equals(request.Key, ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, StringComparison.OrdinalIgnoreCase)
+            && model.CaseApplicationProfileInstanceId != Guid.Empty
+            && await IssueIssuedVisaPreviewSlotOpenHelper.TryOpenComposeAsync(
+                _application,
+                model.CaseApplicationProfileInstanceId,
+                View?.Id,
+                request.Id))
+        {
             return;
         }
 

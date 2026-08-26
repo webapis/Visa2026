@@ -206,6 +206,10 @@ button.cw-person:focus-visible {
 .cw-issued-list__row {
   display: flex; align-items: stretch; border-bottom: 1px solid #eef2f6;
 }
+.cw-issued-list__row.is-selected {
+  background: var(--os-accent-soft);
+  box-shadow: inset 3px 0 0 var(--os-accent);
+}
 .cw-issued-list li:last-child { border-bottom: 0; }
 .cw-issued-list__item {
   flex: 1 1 auto; min-width: 0; border: 0; background: transparent; text-align: left; cursor: pointer;
@@ -213,6 +217,18 @@ button.cw-person:focus-visible {
   padding: 10px 12px; font-size: 0.86rem;
 }
 .cw-issued-list__item:hover { background: #f8fbff; }
+.cw-issued-list__row.is-selected .cw-issued-list__item,
+.cw-issued-list__row.is-selected .cw-issued-list__preview:not(:disabled) {
+  background: transparent;
+}
+.cw-issued-list__row.is-selected .cw-issued-list__item:hover,
+.cw-issued-list__row.is-selected .cw-issued-list__preview:hover:not(:disabled) {
+  background: #dbeafe;
+}
+.cw-issued-list__row.is-selected .cw-issued-list__item strong {
+  color: #1e40af;
+  font-weight: 750;
+}
 .cw-issued-list__item strong { font-weight: 650; }
 .cw-issued-list__item span { color: var(--os-muted); font-size: 0.78rem; }
 .cw-issued-list__preview {

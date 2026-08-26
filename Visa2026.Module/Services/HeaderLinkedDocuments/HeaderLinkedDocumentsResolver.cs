@@ -37,6 +37,7 @@ public static class HeaderLinkedDocumentsResolver
             HeaderDocumentCopiesFamily.Invitation => ResolveInvitation(objectSpace, parentId, contextItemId),
             HeaderDocumentCopiesFamily.Rejection => ResolveRejection(objectSpace, parentId, contextItemId),
             HeaderDocumentCopiesFamily.BorderZone => ResolveBorderZone(objectSpace, parentId, contextItemId),
+            HeaderDocumentCopiesFamily.Visa => ResolveVisa(objectSpace, parentId, contextItemId),
             _ => throw new ArgumentOutOfRangeException(nameof(family), family, null),
         };
     }
@@ -177,6 +178,39 @@ public static class HeaderLinkedDocumentsResolver
         };
     }
 
+    private static HeaderLinkedDocumentsSnapshot ResolveVisa(
+        IObjectSpace os,
+        Guid parentId,
+        Guid? contextItemId)
+    {
+        var visa = os.GetObjectByKey<Visa>(parentId);
+        if (visa == null)
+        {
+            return new HeaderLinkedDocumentsSnapshot
+            {
+                Family = HeaderDocumentCopiesFamily.Visa,
+                ParentId = parentId,
+                ContextItemId = contextItemId,
+            };
+        }
+
+        visa = os.GetObject(visa);
+
+        return new HeaderLinkedDocumentsSnapshot
+        {
+            Family = HeaderDocumentCopiesFamily.Visa,
+            ParentId = visa.ID,
+            ContextItemId = contextItemId,
+            HeaderTitle = visa.VisaNumber ?? string.Empty,
+            Subtitle = BuildVisaSubtitle(visa),
+            ShowSharedScansHint = false,
+            Records = LoadDocumentRecords<VisaDocument>(
+                os,
+                d => d.Visa.ID == visa.ID,
+                doc => $"VisaDocument:{doc.ID:N}"),
+        };
+    }
+
     private static string? BuildWorkPermitSubtitle(IObjectSpace os, WorkPermit workPermit, Guid? contextItemId)
     {
         if (contextItemId is Guid itemId && itemId != Guid.Empty)
@@ -244,6 +278,15 @@ public static class HeaderLinkedDocumentsResolver
         }
 
         return BuildApplicationSubtitle(borderZone.ApplicationProfileInstance);
+    }
+
+    private static string? BuildVisaSubtitle(Visa visa)
+    {
+        var personName = visa.Passport?.Person?.FullName;
+        if (!string.IsNullOrWhiteSpace(personName))
+            return personName.Trim();
+
+        return BuildApplicationSubtitle(visa.IssuingApplicationProfileInstance);
     }
 
     private static string? BuildApplicationSubtitle(ApplicationProfileInstance? application)

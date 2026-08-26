@@ -361,6 +361,15 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
             return;
         }
 
+        if (string.Equals(key, ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, StringComparison.OrdinalIgnoreCase)
+            && await IssueIssuedVisaPreviewSlotOpenHelper.TryOpenComposeAsync(
+                _application,
+                applicationId,
+                View?.Id))
+        {
+            return;
+        }
+
         ApplicationWorkspaceIssuedHeaderOpenHelper.TryCreate(
             _application,
             _application.MainWindow,
@@ -382,6 +391,17 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
                 request.Key,
                 request.Id,
                 View?.Id);
+            return;
+        }
+
+        if (string.Equals(request.Key, ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, StringComparison.OrdinalIgnoreCase)
+            && applicationId != Guid.Empty
+            && await IssueIssuedVisaPreviewSlotOpenHelper.TryOpenComposeAsync(
+                _application,
+                applicationId,
+                View?.Id,
+                request.Id))
+        {
             return;
         }
 

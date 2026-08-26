@@ -105,6 +105,27 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Expiration Date")]
         public virtual DateTime? ExpirationDate { get; set; }
 
+        /// <summary>
+        /// Same comma-separated <see cref="BorderZoneName"/> catalog as <see cref="Visa.BorderZoneLocation"/>.
+        /// Copied onto Path A visas when the officer creates them from this invitation.
+        /// </summary>
+        [MaxLength(500)]
+        [RuleRequiredField]
+        [VisibleInListView(false)]
+        [EditorAlias(CommaSeparatedMultiSelectEditorAliases.BorderZone)]
+        [CommaSeparatedMultiSelect(
+            CatalogEntityType = typeof(BorderZoneName),
+            NoneValue = CommaSeparatedSelectionHelper.NoneValue)]
+        [XafDisplayName("Border zone")]
+        public virtual string BorderZoneLocation { get; set; }
+
+        [Browsable(false)]
+        [XafDisplayName("Border Zone Location (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string BorderZoneLocation_NameTm =>
+            BorderZoneSelectionHelper.IsNoneValue(BorderZoneLocation)
+                ? BorderZoneSelectionHelper.NoneValue
+                : BorderZoneLocation?.Trim() ?? BorderZoneSelectionHelper.NoneValue;
+
         [NotMapped]
         [ImmediatePostData]
         [Index(-1000)]
@@ -278,10 +299,20 @@ namespace Visa2026.Module.BusinessObjects
             {
                 IssuedDate = DateTime.Today;
             }
+
+            if (string.IsNullOrWhiteSpace(BorderZoneLocation)
+                && ApplicationProfileInstance != null
+                && !string.IsNullOrWhiteSpace(ApplicationProfileInstance.BorderZoneLocation))
+            {
+                BorderZoneLocation = ApplicationProfileInstance.BorderZoneLocation;
+            }
+
+            BorderZoneSelectionHelper.ApplyDefaultIfEmpty(this);
         }
 
         public override void OnSaving()
         {
+            BorderZoneSelectionHelper.ApplyDefaultIfEmpty(this);
             // Do not auto-add roster people here. One application may issue several invitations
             // (one person per letter or a shared letter). Filling the whole roster on every save
             // pulled people from invitation 009 onto 010 when only expiry changed.

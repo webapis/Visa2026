@@ -1,7 +1,10 @@
 using System;
 using System.Collections.ObjectModel;
+using DevExpress.Persistent.BaseImpl.EF;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.ApplicationWorkspace;
+using Visa2026.Module.Services.HeaderLinkedDocuments;
+using Visa2026.Module.Services.PreviewSlot;
 using Xunit;
 
 namespace Visa2026.Module.Tests.Services;
@@ -76,6 +79,70 @@ public class ApplicationWorkspaceIssuedRecordsCatalogTests
         Assert.Equal(typeof(Rejection), ApplicationWorkspaceIssuedRecordsCatalog.ResolveHeaderType(ApplicationWorkspaceIssuedRecordsCatalog.Rejection));
         Assert.Equal(typeof(Visa), ApplicationWorkspaceIssuedRecordsCatalog.ResolveHeaderType(ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa));
         Assert.Null(ApplicationWorkspaceIssuedRecordsCatalog.ResolveHeaderType("inv"));
+    }
+
+    [Fact]
+    public void TryGetDocumentCopiesFamily_MapsIssuedVisaToVisaCopies()
+    {
+        Assert.True(ApplicationWorkspaceIssuedRecordsCatalog.TryGetDocumentCopiesFamily(
+            ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa,
+            out var family));
+        Assert.Equal(HeaderDocumentCopiesFamily.Visa, family);
+
+        var visaId = Guid.Parse("11111111-2222-3333-4444-555555555555");
+        Assert.Equal(
+            $"visa-document-copies:visa:{visaId:N}|preview:first",
+            VisaPreviewSlotOccupantKeys.ForHeaderDocumentCopies(new HeaderDocumentCopiesSlotRequest
+            {
+                Family = HeaderDocumentCopiesFamily.Visa,
+                ParentId = visaId,
+                OpenPreviewOnly = true,
+            }));
+    }
+
+    [Fact]
+    public void BuildIssuedTiles_IssuedVisaHasCopy_WhenVisaDocumentHasFile()
+    {
+        var visaWithCopy = new Visa
+        {
+            ID = Guid.NewGuid(),
+            VisaNumber = "a0002",
+            IssueDate = new DateTime(2023, 8, 25),
+            Documents = new ObservableCollection<VisaDocument>(),
+        };
+        visaWithCopy.Documents.Add(new VisaDocument
+        {
+            Visa = visaWithCopy,
+            File = new FileData { Content = [1, 2, 3], Size = 3, FileName = "visa.pdf" },
+        });
+        var visaWithoutCopy = new Visa
+        {
+            ID = Guid.NewGuid(),
+            VisaNumber = "a0001",
+            IssueDate = new DateTime(2023, 8, 24),
+        };
+
+        var app = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile
+            {
+                ProduceInvitation = true,
+                ProduceVisa = true,
+            },
+            IssuedVisas = new ObservableCollection<Visa> { visaWithCopy, visaWithoutCopy },
+        };
+
+        var view = ApplicationWorkspaceCaseBuilder.Build(
+            app,
+            app.ApplicationProfile,
+            Array.Empty<ApplicationWorkspaceTab>(),
+            default,
+            new ApplicationWorkspaceCaseChrome());
+
+        var tile = Assert.Single(view.IssuedRecordTiles, t => t.Key == ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa);
+        Assert.Equal(2, tile.Count);
+        Assert.True(Assert.Single(tile.Rows, r => r.Title == "a0002").HasCopy);
+        Assert.False(Assert.Single(tile.Rows, r => r.Title == "a0001").HasCopy);
     }
 
     [Fact]

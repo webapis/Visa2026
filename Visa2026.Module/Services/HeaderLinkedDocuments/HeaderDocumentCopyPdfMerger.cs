@@ -88,6 +88,7 @@ public sealed class HeaderDocumentCopyPdfMerger
             HeaderDocumentCopiesFamily.Invitation => nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<Invitation>(),
             HeaderDocumentCopiesFamily.Rejection => nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<Rejection>(),
             HeaderDocumentCopiesFamily.BorderZone => nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<BorderZone>(),
+            HeaderDocumentCopiesFamily.Visa => nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<Visa>(),
             _ => null,
         };
 

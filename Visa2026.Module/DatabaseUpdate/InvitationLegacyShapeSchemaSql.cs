@@ -25,6 +25,9 @@ public static class InvitationLegacyShapeSchemaSql
         IF COL_LENGTH(N'dbo.Invitations', N'VisaPeriodID') IS NULL
             ALTER TABLE dbo.Invitations ADD VisaPeriodID uniqueidentifier NULL;
 
+        IF COL_LENGTH(N'dbo.Invitations', N'BorderZoneLocation') IS NULL
+            ALTER TABLE dbo.Invitations ADD BorderZoneLocation nvarchar(500) NULL;
+
         IF COL_LENGTH(N'dbo.Invitations', N'VisaCategoryID') IS NOT NULL
            AND OBJECT_ID(N'dbo.VisaCategories', N'U') IS NOT NULL
            AND NOT EXISTS (
@@ -100,6 +103,9 @@ public static class InvitationLegacyShapeSchemaSql
     internal const string EnsureVisaPeriodIdPostgres =
         """ALTER TABLE "Invitations" ADD COLUMN IF NOT EXISTS "VisaPeriodID" uuid NULL;""";
 
+    internal const string EnsureBorderZoneLocationPostgres =
+        """ALTER TABLE "Invitations" ADD COLUMN IF NOT EXISTS "BorderZoneLocation" character varying(500) NULL;""";
+
     internal const string DropValidityDurationPostgres =
         """ALTER TABLE "Invitations" DROP COLUMN IF EXISTS "ValidityDurationID";""";
 
@@ -110,5 +116,34 @@ public static class InvitationLegacyShapeSchemaSql
         EnsureVisaEndDatePostgres,
         EnsureVisaCategoryIdPostgres,
         EnsureVisaPeriodIdPostgres,
+        EnsureBorderZoneLocationPostgres,
     ];
+
+    /// <summary>Host-start heal when ModuleUpdater is skipped (ModuleInfo already current).</summary>
+    public static void ApplyIfMissing(string connectionString)
+    {
+        if (string.IsNullOrWhiteSpace(connectionString))
+            return;
+
+        var cleaned = DatabaseProviderDetector.StripEfCoreProvider(connectionString);
+        if (DatabaseProviderDetector.IsPostgreSql(connectionString))
+        {
+            using var connection = new Npgsql.NpgsqlConnection(cleaned);
+            connection.Open();
+            foreach (var sql in EnsureColumnsPostgresStatements)
+            {
+                using var command = connection.CreateCommand();
+                command.CommandText = sql;
+                command.ExecuteNonQuery();
+            }
+
+            return;
+        }
+
+        using var sqlConnection = new Microsoft.Data.SqlClient.SqlConnection(cleaned);
+        sqlConnection.Open();
+        using var sqlCommand = sqlConnection.CreateCommand();
+        sqlCommand.CommandText = EnsureColumnsSqlServer;
+        sqlCommand.ExecuteNonQuery();
+    }
 }

@@ -14,6 +14,13 @@
   padding: 0;
 }
 
+.issue-issued-header-slot-panel .resminamalar-slot-panel__catalog {
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
 .issue-issued-header-slot {
   display: flex;
   flex-direction: column;
@@ -79,6 +86,10 @@
   grid-column: 1 / -1;
 }
 
+.issue-issued-header-slot__field .cs-multi-select-inline {
+  width: 100%;
+}
+
 .issue-issued-header-slot__input,
 .issue-issued-header-slot__textarea {
   font: inherit;
@@ -100,6 +111,116 @@
   outline: 0;
   border-color: color-mix(in srgb, var(--bs-primary, #0d6efd) 65%, #ced4da);
   box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--bs-primary, #0d6efd) 18%, transparent);
+}
+
+.issue-issued-header-slot__cue-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.85rem;
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--bs-secondary-color, #6c757d);
+}
+
+.issue-issued-header-slot__cue-swatch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.issue-issued-header-slot__cue-swatch::before {
+  content: "";
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 0.15rem;
+  border: 2px solid currentColor;
+  box-sizing: border-box;
+}
+
+.issue-issued-header-slot__cue-swatch--needs { color: #c05612; }
+.issue-issued-header-slot__cue-swatch--needs::before { border-color: #e67a22; background: color-mix(in srgb, #e67a22 18%, transparent); }
+.issue-issued-header-slot__cue-swatch--default { color: #2b4c7e; }
+.issue-issued-header-slot__cue-swatch--default::before { border-color: #2b6cb0; background: color-mix(in srgb, #2b6cb0 16%, transparent); }
+.issue-issued-header-slot__cue-swatch--confirmed { color: #1e7a34; }
+.issue-issued-header-slot__cue-swatch--confirmed::before { border-color: #2f9e44; background: color-mix(in srgb, #2f9e44 16%, transparent); }
+
+.issue-issued-header-slot__field--needs { --issue-cue: #e67a22; --issue-cue-ring: color-mix(in srgb, #e67a22 28%, transparent); }
+.issue-issued-header-slot__field--default { --issue-cue: #2b6cb0; --issue-cue-ring: color-mix(in srgb, #2b6cb0 22%, transparent); }
+.issue-issued-header-slot__field--confirmed { --issue-cue: #2f9e44; --issue-cue-ring: color-mix(in srgb, #2f9e44 22%, transparent); }
+.issue-issued-header-slot__field--sourced { --issue-cue: color-mix(in srgb, #2f9e44 62%, #6c757d); --issue-cue-ring: transparent; }
+
+.issue-issued-header-slot__field--needs .issue-issued-header-slot__input,
+.issue-issued-header-slot__field--default .issue-issued-header-slot__input,
+.issue-issued-header-slot__field--confirmed .issue-issued-header-slot__input,
+.issue-issued-header-slot__field--sourced .issue-issued-header-slot__input,
+.issue-issued-header-slot__field--needs .issue-issued-header-slot__textarea,
+.issue-issued-header-slot__field--default .issue-issued-header-slot__textarea,
+.issue-issued-header-slot__field--confirmed .issue-issued-header-slot__textarea {
+  border-color: var(--issue-cue);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--issue-cue) 22%, transparent);
+}
+
+.issue-issued-header-slot__field--needs .issue-issued-header-slot__input:focus,
+.issue-issued-header-slot__field--default .issue-issued-header-slot__input:focus,
+.issue-issued-header-slot__field--confirmed .issue-issued-header-slot__input:focus,
+.issue-issued-header-slot__field--needs .issue-issued-header-slot__textarea:focus,
+.issue-issued-header-slot__field--default .issue-issued-header-slot__textarea:focus,
+.issue-issued-header-slot__field--confirmed .issue-issued-header-slot__textarea:focus {
+  border-color: var(--issue-cue);
+  box-shadow: 0 0 0 0.2rem var(--issue-cue-ring);
+}
+
+.issue-issued-header-slot__field--needs .cs-multi-select-inline,
+.issue-issued-header-slot__field--default .cs-multi-select-inline,
+.issue-issued-header-slot__field--confirmed .cs-multi-select-inline,
+.issue-issued-header-slot__field--sourced .cs-multi-select-inline {
+  --dxbl-text-edit-border-color: var(--issue-cue);
+}
+
+.issue-issued-header-slot__field--needs .cs-multi-select-inline .dxbl-text-edit,
+.issue-issued-header-slot__field--default .cs-multi-select-inline .dxbl-text-edit,
+.issue-issued-header-slot__field--confirmed .cs-multi-select-inline .dxbl-text-edit,
+.issue-issued-header-slot__field--sourced .cs-multi-select-inline .dxbl-text-edit {
+  border-color: var(--issue-cue) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--issue-cue) 22%, transparent);
+}
+
+.issue-issued-header-slot__field--sourced .issue-issued-header-slot__input:disabled {
+  opacity: 1;
+  background: color-mix(in srgb, var(--bs-tertiary-bg, #f8f9fa) 70%, var(--bs-body-bg, #fff));
+}
+
+.visa-issued-new-cues .visa-field-cue--needs,
+.visa-issued-new-cues .visa-field-cue--default,
+.visa-issued-new-cues .visa-field-cue--confirmed,
+.visa-issued-new-cues .visa-field-cue--sourced {
+  --issue-cue: #ced4da;
+  --issue-cue-ring: transparent;
+}
+
+.visa-issued-new-cues .visa-field-cue--needs { --issue-cue: #e67a22; --issue-cue-ring: color-mix(in srgb, #e67a22 28%, transparent); }
+.visa-issued-new-cues .visa-field-cue--default { --issue-cue: #2b6cb0; --issue-cue-ring: color-mix(in srgb, #2b6cb0 22%, transparent); }
+.visa-issued-new-cues .visa-field-cue--confirmed { --issue-cue: #2f9e44; --issue-cue-ring: color-mix(in srgb, #2f9e44 22%, transparent); }
+.visa-issued-new-cues .visa-field-cue--sourced { --issue-cue: color-mix(in srgb, #2f9e44 62%, #6c757d); }
+
+.visa-issued-new-cues .visa-field-cue--needs .dxbl-text-edit,
+.visa-issued-new-cues .visa-field-cue--default .dxbl-text-edit,
+.visa-issued-new-cues .visa-field-cue--confirmed .dxbl-text-edit,
+.visa-issued-new-cues .visa-field-cue--sourced .dxbl-text-edit,
+.visa-issued-new-cues .visa-field-cue--needs .dxbl-date-edit,
+.visa-issued-new-cues .visa-field-cue--default .dxbl-date-edit,
+.visa-issued-new-cues .visa-field-cue--confirmed .dxbl-date-edit,
+.visa-issued-new-cues .visa-field-cue--sourced .dxbl-date-edit,
+.visa-issued-new-cues .visa-field-cue--needs textarea,
+.visa-issued-new-cues .visa-field-cue--default textarea,
+.visa-issued-new-cues .visa-field-cue--confirmed textarea,
+.visa-issued-new-cues .visa-field-cue--needs select,
+.visa-issued-new-cues .visa-field-cue--default select,
+.visa-issued-new-cues .visa-field-cue--confirmed select {
+  --dxbl-text-edit-border-color: var(--issue-cue);
+  border-color: var(--issue-cue) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--issue-cue) 22%, transparent);
 }
 
 .issue-issued-header-slot__textarea {

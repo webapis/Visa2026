@@ -29,10 +29,11 @@ Officer-facing **right-side panel** for inline catalogs and document preview. Re
 | `Resminamalar` | `ResminamalarSlotPanel` | `OpenResminamalarAsync` | [`APPLICATION_REPORT_PACKAGE.md`](APPLICATION_REPORT_PACKAGE.md) |
 | `DocumentCopies` | `DocumentCopiesSlotPanel` | `OpenDocumentCopiesAsync` | [`APPLICATION_ITEM_DOCUMENT_COPIES.md`](APPLICATION_ITEM_DOCUMENT_COPIES.md) |
 | `PersonDocumentCopies` | `PersonDocumentCopiesSlotPanel` | `OpenPersonDocumentCopiesAsync` | [`PERSON_DOCUMENT_COPIES.md`](PERSON_DOCUMENT_COPIES.md) |
-| `HeaderDocumentCopies` | `HeaderDocumentCopiesSlotPanel` | `OpenHeaderDocumentCopiesAsync` | Invitation / WP / Rejection / BorderZone document copies. Case workspace issued-row **Preview** opens this occupant with `OpenPreviewOnly`. |
+| `HeaderDocumentCopies` | `HeaderDocumentCopiesSlotPanel` | `OpenHeaderDocumentCopiesAsync` | Invitation / WP / Rejection / BorderZone / **Visa** document copies. Case workspace issued-row **Preview** (including **Visas issued by this case**) opens this occupant with `OpenPreviewOnly`. |
 | `ProgressLetters` | `ProgressLettersSlotPanel` | `OpenProgressLettersAsync` | Application progress ministry letters. Case workspace Progress filename uses `OpenPreviewOnly` (viewer only). ListView toolbar / grid link still opens the slot catalog. |
 | `File` | `VisaFilePreviewDrawer` | `OpenFileAsync` / JS bridge | File preview sources registry (`progress-letter`, `user-report-template`, `application-profile-template`) |
-| `IssueIssuedHeader` | `IssueIssuedHeaderSlotPanel` | `OpenIssueIssuedHeaderAsync` | Case workspace **New invitation / work permit / rejection / border zone** compose ([prototypes](prototypes/issue-issued-header-slot-README.md)). Officers upload the letter copy (`InvitationDocument` / matching header `Documents`) from the compose panel. Issued visa still modal. |
+| `IssueIssuedHeader` | `IssueIssuedHeaderSlotPanel` | `OpenIssueIssuedHeaderAsync` | Case workspace **New invitation / work permit / rejection / border zone** compose ([prototypes](prototypes/issue-issued-header-slot-README.md)). Officers upload the letter copy (`InvitationDocument` / matching header `Documents`) from the compose panel. |
+| `IssueIssuedVisa` | `IssueIssuedVisaSlotPanel` | `OpenIssueIssuedVisaAsync` | **+ Add issued visa** compose and **row click** edit. Invitation+visa: one visa per unused issued invitation line ([prototypes](prototypes/issue-issued-visa-slot-README.md)). Visa without invitation: one visa per unused roster person ([prototypes](prototypes/issue-issued-visa-instance-slot-README.md)). |
 
 **Occupant keys:** `VisaPreviewSlotOccupantKeys` (e.g. `resminamalar:app:{id}`, `document-copies:items:{ids}`, `progress-letters:app:{id}` or `…|preview:{progressId}` when `OpenPreviewOnly`, `file:{source}:{id}`).
 
@@ -116,7 +117,8 @@ Officer caption for the report package occupant is **Templates** (not Document C
 | Shell CSS | `Visa2026.Blazor.Server/wwwroot/css/site.css` (`.visa-preview-slot*`, `.resminamalar-slot-panel*`) |
 | Resminamalar catalog CSS | `Visa2026.Blazor.Server/wwwroot/css/resminamalar-catalog.css` |
 | Document-copies catalog CSS | `Visa2026.Blazor.Server/wwwroot/css/document-copies-catalog.css` |
-| Issue issued-header compose CSS | `Visa2026.Blazor.Server/wwwroot/css/issue-issued-header-slot.css` |
+| Issue issued-header compose CSS | `Visa2026.Blazor.Server/wwwroot/css/issue-issued-header-slot.css` (catalog `overflow-y: auto` — long invitation / visa person cards; field border cues: orange empty required, blue defaults, green confirmed) |
+| Issue issued-visa compose CSS | `Visa2026.Blazor.Server/wwwroot/css/issue-issued-visa-slot.css` |
 | Wiring | `Startup.cs` — register `IVisaPreviewSlotService` |
 
 Feature-specific catalog logic stays in feature components and Module services — see domain docs above.

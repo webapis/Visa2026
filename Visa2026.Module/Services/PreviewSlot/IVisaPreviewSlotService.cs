@@ -16,6 +16,7 @@ public enum VisaPreviewSlotMode
     HeaderDocumentCopies = 6,
     PlaceholderManual = 7,
     IssueIssuedHeader = 8,
+    IssueIssuedVisa = 9,
 }
 
 public sealed class ResminamalarSlotRequest
@@ -74,6 +75,8 @@ public sealed class VisaPreviewSlotState
     public PlaceholderManualSlotRequest? PlaceholderManual { get; init; }
 
     public IssueIssuedHeaderSlotRequest? IssueIssuedHeader { get; init; }
+
+    public IssueIssuedVisaSlotRequest? IssueIssuedVisa { get; init; }
 
     public int Version { get; init; }
 }
@@ -165,6 +168,8 @@ public interface IVisaPreviewSlotService
     Task OpenPlaceholderManualAsync(PlaceholderManualSlotRequest? request = null, string? ownerViewId = null);
 
     Task OpenIssueIssuedHeaderAsync(IssueIssuedHeaderSlotRequest request, string? ownerViewId = null);
+
+    Task OpenIssueIssuedVisaAsync(IssueIssuedVisaSlotRequest request, string? ownerViewId = null);
 
     Task OpenFileAsync(string sourceType, Guid objectId, string? ownerViewId = null);
 

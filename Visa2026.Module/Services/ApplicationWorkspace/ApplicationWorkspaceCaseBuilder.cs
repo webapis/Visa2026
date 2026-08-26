@@ -383,9 +383,20 @@ internal static class ApplicationWorkspaceCaseBuilder
                             && v.IssuingApplicationProfileInstance.ID == application.ID)
                         .ToList()
                     : application.IssuedVisas?.ToList() ?? [];
+                var visaCopyIds = HeaderIdsWithCopies(
+                    objectSpace,
+                    () => objectSpace!.GetObjectsQuery<VisaDocument>()
+                        .Where(d => d.Visa != null
+                            && d.Visa.IssuingApplicationProfileInstance != null
+                            && d.Visa.IssuingApplicationProfileInstance.ID == application.ID)
+                        .Select(d => new { HeaderId = d.Visa.ID, File = d.File })
+                        .ToList()
+                        .Where(x => x.File != null && x.File.Size > 0)
+                        .Select(x => x.HeaderId),
+                    visas.SelectMany(v => v.Documents ?? Array.Empty<VisaDocument>()));
                 return visas
                     .OrderByDescending(v => v.IssueDate)
-                    .Select(v => Row(v.ID, v.VisaNumber, FormatIssuedDate(v.IssueDate)))
+                    .Select(v => Row(v.ID, v.VisaNumber, FormatIssuedDate(v.IssueDate), visaCopyIds.Contains(v.ID)))
                     .ToList();
             default:
                 return Array.Empty<ApplicationWorkspaceCaseIssuedRow>();
@@ -417,6 +428,7 @@ internal static class ApplicationWorkspaceCaseBuilder
                 WorkPermitDocument wp => wp.WorkPermit?.ID ?? Guid.Empty,
                 RejectionDocument rj => rj.Rejection?.ID ?? Guid.Empty,
                 BorderZoneDocument bz => bz.BorderZone?.ID ?? Guid.Empty,
+                VisaDocument visa => visa.Visa?.ID ?? Guid.Empty,
                 _ => Guid.Empty,
             })
             .Where(id => id != Guid.Empty)

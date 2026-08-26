@@ -160,6 +160,8 @@ namespace Visa2026.Blazor.Server
                         VisaIssuingApplicationProfileInstanceSchemaSql.ApplyIfMissing(connectionString);
                         ApplicationItemsDropSchemaSql.ApplyIfMissing(connectionString);
                         ApplicationWorkspacePostgresViewsSql.ApplyIfMissing(connectionString);
+                        PersonIncompleteDataSchemaSql.ApplyIfMissing(connectionString);
+                        InvitationLegacyShapeSchemaSql.ApplyIfMissing(connectionString);
                         ReportDashboardPostgresViewsHealSql.ApplyIfMissing(connectionString);
                     }
                 });
@@ -334,6 +336,7 @@ namespace Visa2026.Blazor.Server
                 ApplicationItemsDropSchemaSql.ApplyIfMissing(connectionString);
                 ApplicationWorkspacePostgresViewsSql.ApplyIfMissing(connectionString);
                 PersonIncompleteDataSchemaSql.ApplyIfMissing(connectionString);
+                InvitationLegacyShapeSchemaSql.ApplyIfMissing(connectionString);
                 PersonExportBatchSchemaSql.ApplyIfMissing(connectionString);
                 ReportDashboardPostgresViewsHealSql.ApplyIfMissing(connectionString);
             }

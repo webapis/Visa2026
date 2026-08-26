@@ -148,7 +148,7 @@ Keep **explicit** profile toggles for readiness + enabling person/roster `{{…}
 
 ## 10. Application DetailView redesign — retire ApplicationItem
 
-**Status:** Decisions locked (§10.1 + §10.1a naming) · UX prototypes · People M2M shipped · §10 auto-link + sticky + Linked records tiles + process-complete lock shipped (10n–10p) · Overview **Issued records** 1:N create (10q)
+**Status:** Decisions locked (§10.1 + §10.1a naming) · UX prototypes · People M2M shipped · §10 auto-link + sticky + Linked records tiles + process-complete lock shipped (10n–10p) · Overview **Issued records** 1:N create (10q) · Issued visa compose roster source (10q-iv)
 **Prototype:** [`docs/prototypes/process-started-application-profile-workspace-mockup.png`](prototypes/process-started-application-profile-workspace-mockup.png) (+ `process-started-nav-*.png` workspace tabs). Staged queue: `staged-profiles-*.png`.
 
 ### 10.1a Naming (product vs persistence)

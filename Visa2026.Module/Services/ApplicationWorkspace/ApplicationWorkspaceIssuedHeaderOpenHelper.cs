@@ -36,6 +36,16 @@ public static class ApplicationWorkspaceIssuedHeaderOpenHelper
                 ownerViewId: null);
         }
 
+        // Issued visa: compose in the slot (invitation lines or case roster).
+        if (string.Equals(key, ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, StringComparison.OrdinalIgnoreCase)
+            && ApplicationWorkspaceIssueIssuedVisaOpenHelper.TryOpenCompose(
+                application,
+                applicationProfileInstanceId,
+                ownerViewId: null))
+        {
+            return true;
+        }
+
         var headerType = ApplicationWorkspaceIssuedRecordsCatalog.ResolveHeaderType(key);
         if (headerType == null)
             return false;
@@ -87,6 +97,15 @@ public static class ApplicationWorkspaceIssuedHeaderOpenHelper
         var objectSpace = application.CreateObjectSpace(headerType);
         var header = objectSpace.GetObjectByKey(headerType, headerId);
         if (header == null)
+        {
+            objectSpace.Dispose();
+            return false;
+        }
+
+        // Issued visa: Blazor opens the compose slot (invitation or roster source).
+        if (header is Visa visa
+            && string.Equals(key, ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, StringComparison.OrdinalIgnoreCase)
+            && IssueIssuedVisaComposeService.CanOpenInSlot(visa.IssuingApplicationProfileInstance))
         {
             objectSpace.Dispose();
             return false;

@@ -21,6 +21,9 @@ public static class WorkPermitIssuedRosterItemsHelper
         if (MigrationImportContext.IsDataImport)
             return;
 
+        if (workPermit.WorkPermitItems != null && workPermit.WorkPermitItems.Count > 0)
+            return;
+
         var objectSpace = ObjectSpaceHelper.Get(workPermit);
         if (objectSpace == null)
             return;

@@ -57,6 +57,12 @@ else if (_state.Mode == VisaPreviewSlotMode.IssueIssuedHeader && _state.IssueIss
                                 Request="_state.IssueIssuedHeader"
                                 CloseRequested="CloseFromPanelAsync" />
 }
+else if (_state.Mode == VisaPreviewSlotMode.IssueIssuedVisa && _state.IssueIssuedVisa != null)
+{
+    <IssueIssuedVisaSlotPanel @key="@($"{_state.OccupantKey}|{_state.Version}")"
+                              Request="_state.IssueIssuedVisa"
+                              CloseRequested="CloseFromPanelAsync" />
+}
 
 @code {
     [Inject] private IVisaPreviewSlotService SlotService { get; set; } = null!;
@@ -297,6 +303,26 @@ else if (_state.Mode == VisaPreviewSlotMode.IssueIssuedHeader && _state.IssueIss
                 ? IssueIssuedHeaderComposeService.CatalogKeyFor(kind)
                 : catalogKey.Trim(),
             ExistingHeaderId = existingHeaderId,
+        }, ownerViewId);
+    }
+
+    [JSInvokable]
+    public Task OpenIssueIssuedVisaFromJsAsync(
+        string applicationIdText,
+        string? ownerViewId = null,
+        string? existingVisaIdText = null)
+    {
+        if (!Guid.TryParse(applicationIdText, out var applicationId) || applicationId == Guid.Empty)
+            return Task.CompletedTask;
+
+        Guid? existingVisaId = Guid.TryParse(existingVisaIdText, out var visaId) && visaId != Guid.Empty
+            ? visaId
+            : null;
+
+        return SlotService.OpenIssueIssuedVisaAsync(new IssueIssuedVisaSlotRequest
+        {
+            ApplicationProfileInstanceId = applicationId,
+            ExistingVisaId = existingVisaId,
         }, ownerViewId);
     }
 

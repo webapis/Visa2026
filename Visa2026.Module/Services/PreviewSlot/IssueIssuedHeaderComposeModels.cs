@@ -58,6 +58,22 @@ public sealed class IssueIssuedHeaderPersonLineDraft
 
     /// <summary>Line already on the letter and locked (e.g. visa issued) — cannot uncheck/remove.</summary>
     public bool IncludeLocked { get; set; }
+
+    public string ItemNumber { get; set; } = string.Empty;
+
+    public string ASNumber { get; set; } = string.Empty;
+
+    public Guid? PositionId { get; set; }
+
+    public List<IssueIssuedHeaderLookupOption> Positions { get; set; } = new();
+
+    public DateTime? ItemStartDate { get; set; }
+
+    public DateTime? ItemExpirationDate { get; set; }
+
+    public string WorkPermittedLocations { get; set; } = string.Empty;
+
+    public string DatePrefillNote { get; set; } = string.Empty;
 }
 
 public sealed class IssueIssuedHeaderComposeDraft
@@ -79,6 +95,8 @@ public sealed class IssueIssuedHeaderComposeDraft
     public Guid? VisaCategoryId { get; set; }
 
     public Guid? VisaPeriodId { get; set; }
+
+    public string BorderZoneLocation { get; set; } = string.Empty;
 
     public Guid? ValidityDurationId { get; set; }
 
@@ -103,6 +121,9 @@ public sealed class IssueIssuedHeaderComposeDraft
 
     public IReadOnlyList<IssueIssuedHeaderLookupOption> VisaPeriods { get; init; } =
         Array.Empty<IssueIssuedHeaderLookupOption>();
+
+    public IReadOnlyList<string> BorderZoneNames { get; init; } =
+        Array.Empty<string>();
 
     public IReadOnlyList<IssueIssuedHeaderLookupOption> ValidityDurations { get; init; } =
         Array.Empty<IssueIssuedHeaderLookupOption>();
@@ -148,4 +169,16 @@ public sealed class IssueIssuedHeaderCreatedLine
     public string PassportNumber { get; set; } = string.Empty;
 
     public bool CanIssueVisa { get; init; }
+
+    public string ItemNumber { get; init; } = string.Empty;
+
+    public string ASNumber { get; init; } = string.Empty;
+
+    public string PositionCaption { get; init; } = string.Empty;
+
+    public DateTime? StartDate { get; init; }
+
+    public DateTime? ExpirationDate { get; init; }
+
+    public string LocationsCaption { get; init; } = string.Empty;
 }

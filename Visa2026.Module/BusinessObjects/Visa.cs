@@ -314,7 +314,7 @@ namespace Visa2026.Module.BusinessObjects
         public bool IsIssuingApplicationProfileInstanceRequired =>
             VisaIssuingOriginPolicy.HasRequiredIssuingApplicationProfileInstance(this);
 
-        [RuleFromBoolProperty("Visa_IssuingApplicationProfileInstanceSingleUse", DefaultContexts.Save, "This issuing application is already linked to another visa.")]
+        [RuleFromBoolProperty("Visa_IssuingApplicationProfileInstanceSingleUse", DefaultContexts.Save, "This person already has a visa issued by this application.")]
         [Browsable(false)]
         public bool IsIssuingApplicationProfileInstanceSingleUse
         {
@@ -323,13 +323,17 @@ namespace Visa2026.Module.BusinessObjects
                 if (IssuingApplicationProfileInstance == null)
                     return true;
 
-                // Invitation-based cases: one visa per IssuingInvitationItem, not one visa per instance.
+                // Invitation-based cases: one visa per IssuingInvitationItem, not one visa per person.
                 if (IssuingInvitationItem != null
                     || VisaIssuingApplicationProfileInstanceHelper.CanIssueInvitationForApplication(
                         IssuingApplicationProfileInstance))
                 {
                     return true;
                 }
+
+                var personId = Passport?.Person?.ID ?? Guid.Empty;
+                if (personId == Guid.Empty)
+                    return true;
 
                 var objectSpace = ObjectSpaceHelper.Get(this);
                 if (objectSpace == null)
@@ -340,7 +344,10 @@ namespace Visa2026.Module.BusinessObjects
                 return !objectSpace.GetObjectsQuery<Visa>()
                     .Any(v => v.ID != currentId
                         && v.IssuingApplicationProfileInstance != null
-                        && v.IssuingApplicationProfileInstance.ID == appId);
+                        && v.IssuingApplicationProfileInstance.ID == appId
+                        && v.Passport != null
+                        && v.Passport.Person != null
+                        && v.Passport.Person.ID == personId);
             }
         }
 

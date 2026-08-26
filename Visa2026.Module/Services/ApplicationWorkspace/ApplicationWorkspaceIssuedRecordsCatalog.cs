@@ -110,6 +110,12 @@ public static class ApplicationWorkspaceIssuedRecordsCatalog
             return true;
         }
 
+        if (string.Equals(key, IssuedVisa, StringComparison.OrdinalIgnoreCase))
+        {
+            family = HeaderDocumentCopiesFamily.Visa;
+            return true;
+        }
+
         return false;
     }
 }

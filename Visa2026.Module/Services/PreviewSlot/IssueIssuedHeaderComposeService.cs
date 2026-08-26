@@ -541,8 +541,10 @@ public static class IssueIssuedHeaderComposeService
             ? LoadInvitationOccupancyMap(objectSpace, applicationId, excludeInvitationIdFromOccupancy)
             : new Dictionary<Guid, string>();
 
+        var defaultWpLocations = instance.MovementPermitLocation?.Trim() ?? string.Empty;
         var people = ApplicationRosterHelper.GetRosterPeople(instance)
             .Where(p => p != null)
+            .Where(p => kind != IssueIssuedHeaderKind.WorkPermit || p!.IsEmployee)
             .OrderBy(p => p!.LastName)
             .ThenBy(p => p!.FirstName)
             .Select(p =>
@@ -550,12 +552,10 @@ public static class IssueIssuedHeaderComposeService
                 var passport = ApplicationProfileInstancePersonValidItems.ResolvePassport(p);
                 var ready = passport != null;
                 var onOther = onOtherInvitation.TryGetValue(p!.ID, out var otherNumber);
-                // Rule: one person → at most one invitation letter per ApplicationProfileInstance.
-                // Shared letter (many people) and separate letters are both OK; never a second letter for the same person.
                 var include = kind switch
                 {
                     IssueIssuedHeaderKind.Invitation => ready && !onOther,
-                    IssueIssuedHeaderKind.WorkPermit => p.IsEmployee,
+                    IssueIssuedHeaderKind.WorkPermit => p.IsEmployee && ready,
                     _ => true,
                 };
                 var status = !ready
@@ -563,7 +563,7 @@ public static class IssueIssuedHeaderComposeService
                     : onOther
                         ? (string.IsNullOrWhiteSpace(otherNumber) ? "Already on an invitation" : $"On invitation {otherNumber}")
                         : "Ready";
-                return new IssueIssuedHeaderPersonLineDraft
+                var line = new IssueIssuedHeaderPersonLineDraft
                 {
                     PersonId = p.ID,
                     PersonName = p.FullName?.Trim() ?? p.ToString() ?? string.Empty,
@@ -576,16 +576,12 @@ public static class IssueIssuedHeaderComposeService
                     StatusCaption = status,
                     IsEmployee = p.IsEmployee,
                 };
+                if (kind == IssueIssuedHeaderKind.WorkPermit)
+                    ApplyWorkPermitCardDefaults(p, line, defaultWpLocations);
+                return line;
             })
-            // One person → one invitation: do not list people already on another letter.
             .Where(line => kind != IssueIssuedHeaderKind.Invitation || !line.IncludeLocked)
             .ToList();
-
-        if (kind == IssueIssuedHeaderKind.WorkPermit)
-        {
-            foreach (var line in people.Where(l => !l.IsEmployee))
-                line.Include = false;
-        }
 
         var visaCategories = kind == IssueIssuedHeaderKind.Invitation
             ? objectSpace.GetObjectsQuery<VisaCategory>()
@@ -619,6 +615,16 @@ public static class IssueIssuedHeaderComposeService
                 ?? validityDurations.FirstOrDefault()?.Id
             : null;
 
+        var borderZoneNames = kind == IssueIssuedHeaderKind.Invitation
+            ? CommaSeparatedCatalogHelper.LoadCatalogNames(
+                objectSpace,
+                typeof(BorderZoneName),
+                CommaSeparatedSelectionHelper.NoneValue)
+            : Array.Empty<string>();
+        var defaultBorderZone = kind == IssueIssuedHeaderKind.Invitation
+            ? BorderZoneSelectionHelper.ResolveForIssuedVisa(null, instance)
+            : string.Empty;
+
         return new IssueIssuedHeaderComposeDraft
         {
             Kind = kind,
@@ -639,9 +645,11 @@ public static class IssueIssuedHeaderComposeService
             ExpirationDate = kind == IssueIssuedHeaderKind.Invitation ? DateTime.Today.AddMonths(6) : null,
             VisaCategoryId = defaultCategoryId,
             VisaPeriodId = defaultPeriodId,
+            BorderZoneLocation = defaultBorderZone,
             ValidityDurationId = defaultDurationId,
             VisaCategories = visaCategories,
             VisaPeriods = visaPeriods,
+            BorderZoneNames = borderZoneNames,
             ValidityDurations = validityDurations,
             People = people,
         };
@@ -662,7 +670,9 @@ public static class IssueIssuedHeaderComposeService
 
         var selected = draft.Kind == IssueIssuedHeaderKind.Invitation
             ? SanitizeInvitationPersonSelection(draft)
-            : draft.People.Where(p => p.Include).ToList();
+            : draft.Kind == IssueIssuedHeaderKind.WorkPermit
+                ? draft.People.Where(p => p.Include && p.IsEmployee).ToList()
+                : draft.People.Where(p => p.Include).ToList();
         if (selected.Count == 0)
         {
             return new IssueIssuedHeaderCreateResult
@@ -706,6 +716,31 @@ public static class IssueIssuedHeaderComposeService
                 Succeeded = false,
                 ErrorMessage = "Application profile instance was not found.",
             };
+        }
+
+        if (draft.Kind == IssueIssuedHeaderKind.WorkPermit)
+        {
+            var already = objectSpace.GetObjectsQuery<WorkPermit>()
+                .Any(w => w.ApplicationProfileInstance != null
+                    && w.ApplicationProfileInstance.ID == instance.ID);
+            if (already)
+            {
+                return new IssueIssuedHeaderCreateResult
+                {
+                    Succeeded = false,
+                    ErrorMessage = "This case already has a work permit.",
+                };
+            }
+
+            var wpError = ValidateWorkPermitCards(selected);
+            if (wpError != null)
+            {
+                return new IssueIssuedHeaderCreateResult
+                {
+                    Succeeded = false,
+                    ErrorMessage = wpError,
+                };
+            }
         }
 
         if (draft.Kind == IssueIssuedHeaderKind.Invitation)
@@ -883,6 +918,11 @@ public static class IssueIssuedHeaderComposeService
         if (draft.VisaPeriodId is Guid periodId && periodId != Guid.Empty)
             invitation.VisaPeriod = objectSpace.GetObjectByKey<VisaPeriod>(periodId);
 
+        invitation.BorderZoneLocation = string.IsNullOrWhiteSpace(draft.BorderZoneLocation)
+            ? BorderZoneSelectionHelper.ResolveForIssuedVisa(null, instance)
+            : draft.BorderZoneLocation.Trim();
+        BorderZoneSelectionHelper.ApplyDefaultIfEmpty(invitation);
+
         invitation.IsVisaStartAndEndDateDefined = draft.IsVisaStartAndEndDateDefined;
         invitation.VisaStartDate = draft.IsVisaStartAndEndDateDefined ? draft.VisaStartDate?.Date : null;
         invitation.VisaEndDate = draft.IsVisaStartAndEndDateDefined ? draft.VisaEndDate?.Date : null;
@@ -958,11 +998,7 @@ public static class IssueIssuedHeaderComposeService
             var item = objectSpace.CreateObject<WorkPermitItem>();
             item.WorkPermit = workPermit;
             item.Person = person;
-            item.Passport = row.PassportId is Guid pid
-                ? objectSpace.GetObjectByKey<Passport>(pid)
-                : ApplicationProfileInstancePersonValidItems.ResolvePassport(person);
-            item.CurrentPositionHistory = PersonCurrentItems.GetCurrentPositionHistory(person);
-            item.WorkPermittedLocations = defaultLocations;
+            ApplyWorkPermitItemFields(objectSpace, item, row, defaultLocations);
             workPermit.WorkPermitItems.Add(item);
         }
 
@@ -973,13 +1009,7 @@ public static class IssueIssuedHeaderComposeService
             Succeeded = true,
             HeaderId = workPermit.ID,
             HeaderCaption = workPermit.WorkPermitNumber,
-            Lines = workPermit.WorkPermitItems.Select(i => new IssueIssuedHeaderCreatedLine
-            {
-                LineId = i.ID,
-                PersonId = i.Person?.ID ?? Guid.Empty,
-                PersonName = i.Person?.FullName?.Trim() ?? string.Empty,
-                PassportNumber = i.Passport?.PassportNumber?.Trim() ?? string.Empty,
-            }).ToList(),
+            Lines = workPermit.WorkPermitItems.Select(ToWorkPermitCreatedLine).ToList(),
         };
     }
 
@@ -1109,6 +1139,9 @@ public static class IssueIssuedHeaderComposeService
                 draft.ExpirationDate = invitation.ExpirationDate?.Date;
                 draft.VisaCategoryId = invitation.VisaCategory?.ID;
                 draft.VisaPeriodId = invitation.VisaPeriod?.ID;
+                draft.BorderZoneLocation = string.IsNullOrWhiteSpace(invitation.BorderZoneLocation)
+                    ? BorderZoneSelectionHelper.NoneValue
+                    : invitation.BorderZoneLocation.Trim();
                 draft.IsVisaStartAndEndDateDefined = invitation.IsVisaStartAndEndDateDefined;
                 draft.VisaStartDate = invitation.VisaStartDate?.Date;
                 draft.VisaEndDate = invitation.VisaEndDate?.Date;
@@ -1200,12 +1233,7 @@ public static class IssueIssuedHeaderComposeService
                     person.ExistingLineId = item.ID;
                     person.IncludeLocked = true;
                     person.StatusCaption = "On this work permit";
-                    if (item.Passport != null)
-                    {
-                        person.PassportId = item.Passport.ID;
-                        person.PassportNumber = item.Passport.PassportNumber?.Trim() ?? person.PassportNumber;
-                        person.IsReady = true;
-                    }
+                    BindWorkPermitItemToCard(item, person);
                 }
 
                 BindDocuments(objectSpace, draft, kind, headerId);
@@ -1299,7 +1327,9 @@ public static class IssueIssuedHeaderComposeService
         var syncPeople = draft.SyncPeopleOnSave;
         var selected = draft.Kind == IssueIssuedHeaderKind.Invitation
             ? SanitizeInvitationPersonSelection(draft)
-            : draft.People.Where(p => p.Include).ToList();
+            : draft.Kind == IssueIssuedHeaderKind.WorkPermit
+                ? draft.People.Where(p => p.Include && p.IsEmployee).ToList()
+                : draft.People.Where(p => p.Include).ToList();
 
         if (syncPeople || draft.Kind != IssueIssuedHeaderKind.Invitation)
         {
@@ -1320,6 +1350,19 @@ public static class IssueIssuedHeaderComposeService
                     Succeeded = false,
                     ErrorMessage = $"Cannot save — {notReady.Count} selected person(s) have no passport.",
                 };
+            }
+
+            if (draft.Kind == IssueIssuedHeaderKind.WorkPermit)
+            {
+                var wpError = ValidateWorkPermitCards(selected);
+                if (wpError != null)
+                {
+                    return new IssueIssuedHeaderCreateResult
+                    {
+                        Succeeded = false,
+                        ErrorMessage = wpError,
+                    };
+                }
             }
         }
 
@@ -1369,6 +1412,10 @@ public static class IssueIssuedHeaderComposeService
         invitation.VisaPeriod = draft.VisaPeriodId is Guid periodId && periodId != Guid.Empty
             ? objectSpace.GetObjectByKey<VisaPeriod>(periodId)
             : null;
+        invitation.BorderZoneLocation = string.IsNullOrWhiteSpace(draft.BorderZoneLocation)
+            ? BorderZoneSelectionHelper.NoneValue
+            : draft.BorderZoneLocation.Trim();
+        BorderZoneSelectionHelper.ApplyDefaultIfEmpty(invitation);
         invitation.IsVisaStartAndEndDateDefined = draft.IsVisaStartAndEndDateDefined;
         invitation.VisaStartDate = draft.IsVisaStartAndEndDateDefined ? draft.VisaStartDate?.Date : null;
         invitation.VisaEndDate = draft.IsVisaStartAndEndDateDefined ? draft.VisaEndDate?.Date : null;
@@ -1475,22 +1522,20 @@ public static class IssueIssuedHeaderComposeService
         var defaultLocations = workPermit.ApplicationProfileInstance?.MovementPermitLocation?.Trim() ?? string.Empty;
         foreach (var row in selected)
         {
-            if (workPermit.WorkPermitItems.Any(i => i.Person != null && i.Person.ID == row.PersonId))
-                continue;
-
             var person = objectSpace.GetObjectByKey<Person>(row.PersonId);
             if (person == null || !person.IsEmployee)
                 continue;
 
-            var item = objectSpace.CreateObject<WorkPermitItem>();
-            item.WorkPermit = workPermit;
-            item.Person = person;
-            item.Passport = row.PassportId is Guid pid
-                ? objectSpace.GetObjectByKey<Passport>(pid)
-                : ApplicationProfileInstancePersonValidItems.ResolvePassport(person);
-            item.CurrentPositionHistory = PersonCurrentItems.GetCurrentPositionHistory(person);
-            item.WorkPermittedLocations = defaultLocations;
-            workPermit.WorkPermitItems.Add(item);
+            var item = workPermit.WorkPermitItems.FirstOrDefault(i => i.Person != null && i.Person.ID == row.PersonId);
+            if (item == null)
+            {
+                item = objectSpace.CreateObject<WorkPermitItem>();
+                item.WorkPermit = workPermit;
+                item.Person = person;
+                workPermit.WorkPermitItems.Add(item);
+            }
+
+            ApplyWorkPermitItemFields(objectSpace, item, row, defaultLocations);
         }
 
         objectSpace.CommitChanges();
@@ -1500,13 +1545,7 @@ public static class IssueIssuedHeaderComposeService
             Succeeded = true,
             HeaderId = workPermit.ID,
             HeaderCaption = workPermit.WorkPermitNumber,
-            Lines = workPermit.WorkPermitItems.Select(i => new IssueIssuedHeaderCreatedLine
-            {
-                LineId = i.ID,
-                PersonId = i.Person?.ID ?? Guid.Empty,
-                PersonName = i.Person?.FullName?.Trim() ?? string.Empty,
-                PassportNumber = i.Passport?.PassportNumber?.Trim() ?? string.Empty,
-            }).ToList(),
+            Lines = workPermit.WorkPermitItems.Select(ToWorkPermitCreatedLine).ToList(),
         };
     }
 
@@ -1726,4 +1765,189 @@ public static class IssueIssuedHeaderComposeService
                 return null;
         }
     }
+
+    public static bool TryCopyDatesFromLastWorkPermit(WorkPermitItem? last, DateTime today, out DateTime start, out DateTime end)
+    {
+        start = default;
+        end = default;
+        if (last == null || last.StartDate == default || last.ExpirationDate == default)
+            return false;
+        if (last.ExpirationDate.Date < today.Date)
+            return false;
+
+        start = last.StartDate.Date;
+        end = last.ExpirationDate.Date;
+        return true;
+    }
+
+    public static bool IsWorkPermitCardComplete(IssueIssuedHeaderPersonLineDraft row)
+    {
+        if (row == null)
+            return false;
+        if (string.IsNullOrWhiteSpace(row.ItemNumber) || string.IsNullOrWhiteSpace(row.ASNumber))
+            return false;
+        if (row.PositionId is not Guid posId || posId == Guid.Empty)
+            return false;
+        if (row.PassportId is null || row.PassportId == Guid.Empty)
+            return false;
+        if (row.ItemStartDate is not DateTime start || start == default)
+            return false;
+        if (row.ItemExpirationDate is not DateTime end || end.Date <= start.Date)
+            return false;
+        return !string.IsNullOrWhiteSpace(row.WorkPermittedLocations);
+    }
+
+    private static string? ValidateWorkPermitCards(List<IssueIssuedHeaderPersonLineDraft> selected)
+    {
+        foreach (var row in selected)
+        {
+            if (string.IsNullOrWhiteSpace(row.ItemNumber))
+                return $"{row.PersonName}: item work-permit number is required.";
+            if (string.IsNullOrWhiteSpace(row.ASNumber))
+                return $"{row.PersonName}: AS number is required.";
+            if (row.PositionId is not Guid posId || posId == Guid.Empty)
+                return $"{row.PersonName}: position is required.";
+            if (row.PassportId is null || row.PassportId == Guid.Empty)
+                return $"{row.PersonName}: passport is required.";
+            if (row.ItemStartDate is not DateTime start || start == default)
+                return $"{row.PersonName}: start date is required.";
+            if (row.ItemExpirationDate is not DateTime end || end.Date <= start.Date)
+                return $"{row.PersonName}: end date must be later than start date.";
+            if (string.IsNullOrWhiteSpace(row.WorkPermittedLocations))
+                return $"{row.PersonName}: work-permitted locations are required.";
+        }
+
+        return null;
+    }
+
+    private static void ApplyWorkPermitCardDefaults(
+        Person person,
+        IssueIssuedHeaderPersonLineDraft line,
+        string defaultLocations)
+    {
+        var currentPosition = PersonCurrentItems.GetCurrentPositionHistory(person);
+        line.Positions = LoadPositionOptions(person);
+        line.PositionId = currentPosition?.ID;
+        if (line.PassportId is null || line.PassportId == Guid.Empty)
+        {
+            line.IsReady = false;
+            line.StatusCaption = "Missing passport";
+            line.Include = false;
+        }
+        else if (currentPosition == null)
+        {
+            line.IsReady = false;
+            line.StatusCaption = "No position";
+            line.Include = false;
+        }
+        else
+        {
+            line.IsReady = true;
+            line.StatusCaption = "Ready";
+            line.Include = true;
+        }
+
+        var last = PersonCurrentItems.GetCurrentWorkPermitItem(person);
+        if (TryCopyDatesFromLastWorkPermit(last, DateTime.Today, out var start, out var end))
+        {
+            line.ItemStartDate = start;
+            line.ItemExpirationDate = end;
+            var number = last?.WorkPermitNumber?.Trim();
+            line.DatePrefillNote = string.IsNullOrWhiteSpace(number)
+                ? "Start and End copied from last work permit (still valid)."
+                : $"Start and End copied from last work permit {number} (still valid).";
+        }
+        else if (last != null && last.ExpirationDate != default)
+        {
+            var number = last.WorkPermitNumber?.Trim();
+            line.DatePrefillNote = string.IsNullOrWhiteSpace(number)
+                ? $"Last work permit expired {last.ExpirationDate:dd MMM yyyy} — enter Start and End."
+                : $"Last work permit {number} expired {last.ExpirationDate:dd MMM yyyy} — enter Start and End.";
+        }
+        else
+        {
+            line.DatePrefillNote = "No previous work permit — enter Start and End.";
+        }
+
+        line.WorkPermittedLocations = defaultLocations;
+    }
+
+    private static void BindWorkPermitItemToCard(WorkPermitItem item, IssueIssuedHeaderPersonLineDraft person)
+    {
+        if (item.Passport != null)
+        {
+            person.PassportId = item.Passport.ID;
+            person.PassportNumber = item.Passport.PassportNumber?.Trim() ?? person.PassportNumber;
+            person.IsReady = true;
+        }
+
+        person.ItemNumber = item.WorkPermitNumber?.Trim() ?? string.Empty;
+        person.ASNumber = item.ASNumber?.Trim() ?? string.Empty;
+        person.PositionId = item.CurrentPositionHistory?.ID;
+        if (item.Person != null)
+            person.Positions = LoadPositionOptions(item.Person);
+        person.ItemStartDate = item.StartDate == default ? null : item.StartDate.Date;
+        person.ItemExpirationDate = item.ExpirationDate == default ? null : item.ExpirationDate.Date;
+        person.WorkPermittedLocations = item.WorkPermittedLocations?.Trim() ?? string.Empty;
+        person.DatePrefillNote = string.Empty;
+        if (person.PositionId is null || person.PositionId == Guid.Empty || person.PassportId is null)
+        {
+            person.IsReady = false;
+            person.StatusCaption = person.PassportId is null ? "Missing passport" : "No position";
+        }
+    }
+
+    private static List<IssueIssuedHeaderLookupOption> LoadPositionOptions(Person person)
+    {
+        return (person.PositionHistory ?? Array.Empty<EmployeePositionHistory>())
+            .Where(h => h != null)
+            .OrderByDescending(h => h.StartDate)
+            .ThenByDescending(h => h.ID)
+            .Select(h => new IssueIssuedHeaderLookupOption
+            {
+                Id = h.ID,
+                Caption = string.IsNullOrWhiteSpace(h.Position?.NameTm)
+                    ? (h.Title?.Trim() ?? h.ID.ToString("N")[..8])
+                    : h.Position!.NameTm,
+            })
+            .ToList();
+    }
+
+    private static void ApplyWorkPermitItemFields(
+        IObjectSpace objectSpace,
+        WorkPermitItem item,
+        IssueIssuedHeaderPersonLineDraft row,
+        string defaultLocations)
+    {
+        item.WorkPermitNumber = row.ItemNumber.Trim();
+        item.ASNumber = row.ASNumber.Trim();
+        item.Passport = row.PassportId is Guid pid
+            ? objectSpace.GetObjectByKey<Passport>(pid)
+            : ApplicationProfileInstancePersonValidItems.ResolvePassport(item.Person);
+        item.CurrentPositionHistory = row.PositionId is Guid posId
+            ? objectSpace.GetObjectByKey<EmployeePositionHistory>(posId)
+            : PersonCurrentItems.GetCurrentPositionHistory(item.Person);
+        item.StartDate = row.ItemStartDate?.Date ?? default;
+        item.ExpirationDate = row.ItemExpirationDate?.Date ?? default;
+        item.WorkPermittedLocations = string.IsNullOrWhiteSpace(row.WorkPermittedLocations)
+            ? defaultLocations
+            : row.WorkPermittedLocations.Trim();
+    }
+
+    private static IssueIssuedHeaderCreatedLine ToWorkPermitCreatedLine(WorkPermitItem item) =>
+        new()
+        {
+            LineId = item.ID,
+            PersonId = item.Person?.ID ?? Guid.Empty,
+            PersonName = item.Person?.FullName?.Trim() ?? string.Empty,
+            PassportNumber = item.Passport?.PassportNumber?.Trim() ?? string.Empty,
+            ItemNumber = item.WorkPermitNumber?.Trim() ?? string.Empty,
+            ASNumber = item.ASNumber?.Trim() ?? string.Empty,
+            PositionCaption = item.CurrentPositionHistory?.Position?.NameTm
+                ?? item.CurrentPositionHistory?.Title
+                ?? string.Empty,
+            StartDate = item.StartDate == default ? null : item.StartDate.Date,
+            ExpirationDate = item.ExpirationDate == default ? null : item.ExpirationDate.Date,
+            LocationsCaption = item.WorkPermittedLocations?.Trim() ?? string.Empty,
+        };
 }

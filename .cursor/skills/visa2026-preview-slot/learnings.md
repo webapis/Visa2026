@@ -23,6 +23,118 @@ Purpose: **shell, layout, occupants, catalog card UX, JS/CSS** — not Resminama
 
 ## Entries
 
+### 2026-08-26 — Field cues on all issued BOs from Application Profile Instance
+
+- **Need**: Orange/blue/green was only on visa/WP/border-zone compose. Invitation, rejection, and native XAF New DetailViews for issued BOs had no cues.
+- **Fix**: Compose cues on Invitation + Rejection headers too. Native new DetailViews for Invitation, InvitationItem, WorkPermit, WorkPermitItem, BorderZone, BorderZoneItem, Rejection, RejectionItem, Visa use `issued-field-cue.js`.
+- **Test**: Blazor Debug succeeded. Officer: Ctrl+F5. New invitation / rejection / visa / WP / border zone in the slot; native New DetailView for those types also shows borders.
+- **Prevent**: Do not leave `UseFieldCues` limited to WP/BZ. Nested item tables on compose have no extra property fields — cues are on the header (and WP person cards).
+- **Cross-skill**: preview-slot | application-profile
+
+### 2026-08-26 — Compose field border cues (visa / WP / border zone)
+
+- **Need**: Officers could not see which compose fields were empty vs system-default vs already confirmed.
+- **Fix**: Orange empty required, blue defaults to review, green after blur/change. Passport and computed expiration use sourced (not an edit target). CSS on `.issue-issued-header-slot__field--*`. Invitation/rejection tables unchanged.
+- **Test**: Blazor Debug succeeded. Officer: Ctrl+F5, New issued visa / work permit / border zone — empty fields orange, defaults blue, Tab/blur turns filled fields green.
+- **Prevent**: Do not use named C# args (`required: true`) in Razor `class=""` — Razor treats `required` as HTML. Nested `"` in `@onfocusout` breaks attributes; use single-quoted handlers.
+- **Cross-skill**: preview-slot | application-profile
+
+### 2026-08-26 — Work permit compose person cards in header slot
+
+- **Need**: Same `#visa-preview-slot` occupant as invitation, but WP people need item fields.
+- **Fix**: `IssueIssuedHeaderKind.WorkPermit` renders per-employee cards (visa card CSS). Invitation/rejection/border zone keep tables.
+- **Test**: Blazor Debug 0 errors. Officer: Ctrl+F5, New work permit — cards, not checkbox grid.
+- **Prevent**: Do not mix WP item fields into invitation people tables.
+- **Cross-skill**: preview-slot | application-profile
+
+### 2026-08-26 — Work permit compose person-card prototypes (not implemented)
+
+- **Need**: Same slot as header compose, but WP people need visa-style cards instead of an include table.
+- **Shipped (prototype only)**: `issue-work-permit-slot-01` … `04` + README. Implement later in `IssueIssuedHeaderSlotPanel` / compose service when officer accepts.
+- **Test**: Officer review. Do not code until accepted.
+- **Prevent**: Do not mix WP item fields into invitation/rejection/border-zone tables.
+- **Cross-skill**: preview-slot | application-profile
+
+### 2026-08-26 — Issued visa compose for visa-only profiles (roster)
+
+- **Need**: Visa without invitation opened XAF modal; prototypes want the same slot as Path A with roster cards under **People on this case**.
+- **Fix**: `IssueIssuedVisa` occupant for both families. `CanOpenInSlot` = ProduceVisa. Roster copy/banners in `IssueIssuedVisaSlotPanel`.
+- **Test**: Occupant-key + `CanOpenInSlot` / `UsesInvitationSource` unit tests passed. Blazor Debug 0 errors. Officer: stop F5, Ctrl+F5, visa-only **+ Add issued visa**.
+- **Prevent**: Do not require ProduceInvitation to open the visa occupant.
+- **Cross-skill**: preview-slot | application-profile
+
+### 2026-08-26 — New issued visa compose clipped the third person
+
+- **Symptom**: Invitation 0010 has three people; New issued visa showed Andy and Serdar only. No scrollbar.
+- **Root cause**: `.resminamalar-slot-panel__catalog` is `overflow: hidden`. Two tall visa cards filled the slot; Ali’s card was below the fold.
+- **Fix**: `.issue-issued-header-slot-panel .resminamalar-slot-panel__catalog { overflow-y: auto }`. Sticky Create/Cancel stay at the bottom of the scroller.
+- **Test**: Officer: Ctrl+F5 (CSS cache). New issued visa on 87-007 → scroll to Ali Enes Yetkin.
+- **Prevent**: Compose occupants that reuse the Resminamalar catalog shell must override catalog overflow; document-copies scrolls inside `__body`, not the catalog wrapper.
+- **Cross-skill**: preview-slot | application-profile
+
+### 2026-08-26 — Visa Delete Clear throws on skip-nav collection
+
+- **Symptom**: Case-list Delete showed ObservableCollection.Clear / NotifyCollectionChanged Reset error; visa stayed.
+- **Fix**: `IssueIssuedVisaComposeService.Delete` unlinks input M2M with `Remove`, not `Clear`.
+- **Test**: Module Debug build. Officer: rebuild, Ctrl+F5, Delete a0001.
+- **Prevent**: Never `Clear()` XAF `ObservableCollection` navigations.
+- **Cross-skill**: preview-slot | application-profile
+
+### 2026-08-26 — Delete issued visa from the case list
+
+- **Need**: Officers delete Path A visas created under **Visas issued by this case**, same as invitation Delete.
+- **Fix**: **Delete** on each visa row. Confirm, then `IssueIssuedVisaComposeService.Delete` removes copies/images, clears `InvitationItem.IsUsed` / `IssuingInvitationItem`, and deletes the visa. Closes compose or copy preview if that visa is open. Refuses if the visa is skip-nav linked on another application.
+- **Test**: `Delete_RejectsMissingArguments` passed. Blazor Debug build succeeded. Officer: stop F5, Ctrl+F5. Delete a0002 → confirm → row gone; invitation line unused again; invitation Delete still blocked until its visas are gone.
+- **Prevent**: Do not delete the invitation when deleting a visa. Always clear `IsUsed` or the line stays locked.
+- **Cross-skill**: preview-slot | application-profile
+
+### 2026-08-26 — Issued visa row Preview opens copy in slot
+
+- **Need**: Officers preview the visa scan from **Visas issued by this case** without opening compose, same as invitation **Preview**.
+- **Fix**: Issued visa rows show **Preview** (not Delete). `HasCopy` from `VisaDocument`. Click opens `HeaderDocumentCopies` family `Visa` with `OpenPreviewOnly`. Number-click still edits in compose.
+- **Test**: Unit tests `TryGetDocumentCopiesFamily_MapsIssuedVisaToVisaCopies` and `BuildIssuedTiles_IssuedVisaHasCopy_WhenVisaDocumentHasFile` passed. Blazor Debug build succeeded. Officer: stop F5, Ctrl+F5. a0002 with copy → Preview shows PDF in the slot; a0001 without copy stays disabled; invitation Preview unchanged.
+- **Prevent**: Do not gate visa Preview on `canDeleteIssued` (that is Inv/WP/RJ/BZ only). Do not add a new slot mode.
+- **Cross-skill**: preview-slot | application-profile | invitation-work-permit-document-copies
+
+### 2026-08-26 — Issued visa row opens compose slot, not XAF
+
+- **Symptom**: Clicking a visa under **Visas issued by this case** opened the native XAF Visa DetailView.
+- **Fix**: Same intercept as invitation rows. Path A opens `IssueIssuedVisa` slot in **edit** (`ExistingVisaId`). Save updates the visa. Direct/extension profiles still use the modal.
+- **Test**: Occupant-key unit test passed. `dotnet build Visa2026.Blazor.Server -c Debug` succeeded. Officer: stop F5, Ctrl+F5. Click a0002 → slot **Visa a0002** with compose fields + Save, not the XAF modal.
+- **Prevent**: Do not call `ApplicationWorkspaceIssuedHeaderOpenHelper.TryOpen` for Path A issued visas.
+- **Cross-skill**: preview-slot | application-profile
+
+### 2026-08-26 — Border zone compose uses Visa popup editor
+
+- **Symptom**: Invitation and Path A visa compose showed an inline checkbox wrap of zone names, not the Visa DetailView control (summary + … → “Border zones” popup).
+- **Fix**: Replaced the grids with `BorderZoneLocationField` (`CommaSeparatedMultiSelectComponent`) on `IssueIssuedHeaderSlotPanel` and `IssueIssuedVisaSlotPanel`.
+- **Test**: `dotnet build Visa2026.slnx -c Debug` succeeded. Officer: stop F5, rebuild, Ctrl+F5. Invitation Header Border zone looks like Visa (Ýok + …). Same control on each visa person card; OK persists; Create stamps `Visa.BorderZoneLocation`.
+- **Prevent**: Do not draw catalog checkboxes in compose — reuse the Visa editor wrapper.
+- **Cross-skill**: preview-slot | application-profile
+
+### 2026-08-26 — Border zone on invitation and issued-visa compose
+
+- **Need**: Officers set border zone on the invitation letter and see it defaulted on Path A visa cards.
+- **Shipped**: Invitation compose Header **Border zone** checkboxes; visa person cards same catalog. Prefill invitation then case.
+- **Test**: Stop F5, rebuild, Ctrl+F5. New invitation → pick zones → Save. + Add issued visa → cards show those zones; Create stamps `Visa.BorderZoneLocation`.
+- **Cross-skill**: preview-slot | application-profile
+
+### 2026-08-26 — Path A issued-visa compose occupant
+
+- **Need**: Officer **+ Add issued visa** in `#visa-preview-slot` (prototypes 01–04), not an XAF modal.
+- **Shipped**: `VisaPreviewSlotMode.IssueIssuedVisa` + `IssueIssuedVisaSlotPanel` + `IssueIssuedVisaComposeService`. Occupant key `issue-issued-visa:{appId}`. Open from workspace / property editors when ProduceVisa and ProduceInvitation. Direct/extension visa stays modal.
+- **Test**: `dotnet build Visa2026.slnx -c Debug`; `IssueIssuedVisaComposeServiceTests.CanOpenInSlot_*` passed. Officer: stop F5, rebuild, Ctrl+F5. Invitation+WP case → + Add issued visa → cards under invitation letters → Create visas.
+- **Prevent**: Do not put Issue visa back on invitation compose. Do not use input M2M InvitationItems as visa source.
+- **Cross-skill**: preview-slot | application-profile
+
+### 2026-08-26 — Issued-visa compose occupant prototypes (not implemented)
+
+- **Need**: Path A **New issued visa** in `#visa-preview-slot` (same host as invitation compose).
+- **Shipped (prototype only)**: `docs/prototypes/issue-issued-visa-slot-*.png`. New occupant planned; invitation compose stays without Issue visa shortcut.
+- **Test**: Review PNGs before adding a slot mode.
+- **Prevent**: Do not open XAF visa modal from **+ Add issued visa** once this occupant ships.
+- **Cross-skill**: preview-slot | application-profile
+
 ### 2026-08-25 — Issued invitation row Preview opens copy in slot
 
 - **Need**: Officers preview the uploaded invitation scan from Issued records without opening compose.

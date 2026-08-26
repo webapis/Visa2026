@@ -7,7 +7,8 @@ namespace Visa2026.Module.Services.ApplicationWorkspace;
 
 /// <summary>
 /// Opens the Issue issued-header preview-slot compose UI from case workspace New buttons
-/// (Invitation / WorkPermit / Rejection / BorderZone). Issued visa still uses modal <see cref="ApplicationWorkspaceIssuedHeaderOpenHelper.TryCreate"/>.
+/// (Invitation / WorkPermit / Rejection / BorderZone). Path A issued visa uses
+/// <see cref="ApplicationWorkspaceIssueIssuedVisaOpenHelper.TryOpenCompose"/>.
 /// </summary>
 public static class ApplicationWorkspaceIssueIssuedHeaderOpenHelper
 {

@@ -28,4 +28,29 @@ public static class BorderZoneSelectionHelper
             visa.BorderZoneLocation = NoneValue;
         }
     }
+
+    public static void ApplyDefaultIfEmpty(Invitation? invitation)
+    {
+        if (invitation == null)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(invitation.BorderZoneLocation))
+        {
+            invitation.BorderZoneLocation = NoneValue;
+        }
+    }
+
+    /// <summary>
+    /// Invitation value first (same as visa category/period), then the case, then <see cref="NoneValue"/>.
+    /// </summary>
+    public static string ResolveForIssuedVisa(Invitation? invitation, ApplicationProfileInstance? instance)
+    {
+        if (!string.IsNullOrWhiteSpace(invitation?.BorderZoneLocation))
+            return invitation.BorderZoneLocation.Trim();
+        if (!string.IsNullOrWhiteSpace(instance?.BorderZoneLocation))
+            return instance.BorderZoneLocation.Trim();
+        return NoneValue;
+    }
 }

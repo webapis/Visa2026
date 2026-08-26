@@ -12,6 +12,7 @@
 @using Visa2026.Module.Services.PreviewSlot
 @using Visa2026.Module.Services.HeaderLinkedDocuments
 @using Visa2026.Blazor.Server.Services
+@implements IDisposable
 @inject IJSRuntime JS
 @inject IVisaPreviewSlotService PreviewSlotService
 @inject INonSecuredObjectSpaceFactory ObjectSpaceFactory
@@ -263,6 +264,62 @@
             ? _peopleRecordKey
             : PeopleLinkedRecordFocusKey;
 
+    protected override void OnInitialized()
+    {
+        PreviewSlotService.StateChanged += OnPreviewSlotStateChanged;
+    }
+
+    public void Dispose()
+    {
+        PreviewSlotService.StateChanged -= OnPreviewSlotStateChanged;
+    }
+
+    private void OnPreviewSlotStateChanged() => _ = InvokeAsync(StateHasChanged);
+
+    private bool IsIssuedRowOpen(string catalogKey, Guid rowId)
+    {
+        if (rowId == Guid.Empty || Snapshot == null)
+            return false;
+
+        var state = PreviewSlotService.State;
+        var instanceId = Snapshot.ApplicationProfileInstanceId;
+
+        if (state.Mode == VisaPreviewSlotMode.IssueIssuedHeader)
+        {
+            var request = state.IssueIssuedHeader;
+            if (request == null
+                || request.ApplicationProfileInstanceId != instanceId
+                || request.ExistingHeaderId != rowId)
+            {
+                return false;
+            }
+
+            return IssueIssuedHeaderComposeService.TryResolveKind(catalogKey, out var kind)
+                && request.Kind == kind;
+        }
+
+        if (state.Mode == VisaPreviewSlotMode.HeaderDocumentCopies)
+        {
+            var copies = state.HeaderDocumentCopies;
+            if (copies == null || copies.ParentId != rowId)
+                return false;
+
+            return ApplicationWorkspaceIssuedRecordsCatalog.TryGetDocumentCopiesFamily(catalogKey, out var family)
+                && copies.Family == family;
+        }
+
+        if (state.Mode == VisaPreviewSlotMode.IssueIssuedVisa)
+        {
+            var visaRequest = state.IssueIssuedVisa;
+            return visaRequest != null
+                && visaRequest.ApplicationProfileInstanceId == instanceId
+                && visaRequest.ExistingVisaId == rowId
+                && string.Equals(catalogKey, ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, StringComparison.OrdinalIgnoreCase);
+        }
+
+        return false;
+    }
+
     protected override void OnParametersSet()
     {
         var instanceId = Snapshot?.ApplicationProfileInstanceId ?? Guid.Empty;
@@ -399,6 +456,12 @@
             return;
         }
 
+        if (string.Equals(key, ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, StringComparison.OrdinalIgnoreCase)
+            && await TryOpenIssuedVisaInSlotAsync())
+        {
+            return;
+        }
+
         if (IssuedHeaderNewRequested.HasDelegate)
             await IssuedHeaderNewRequested.InvokeAsync(key);
     }
@@ -411,6 +474,12 @@
         if (IssueIssuedHeaderComposeService.TryResolveKind(key, out _))
         {
             await OpenIssuedHeaderInSlotAsync(key, id);
+            return;
+        }
+
+        if (string.Equals(key, ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, StringComparison.OrdinalIgnoreCase)
+            && await TryOpenIssuedVisaInSlotAsync(id))
+        {
             return;
         }
 
@@ -466,6 +535,48 @@
         }
     }
 
+    private async Task<bool> TryOpenIssuedVisaInSlotAsync(Guid? existingVisaId = null)
+    {
+        if (Snapshot == null || Snapshot.ApplicationProfileInstanceId == Guid.Empty)
+            return false;
+
+        var tiles = Snapshot.CaseView?.IssuedRecordTiles;
+        if (tiles == null || tiles.Count == 0)
+            return false;
+
+        var invitationVisible = tiles.Any(t => string.Equals(t.Key, ApplicationWorkspaceIssuedRecordsCatalog.Invitation, StringComparison.OrdinalIgnoreCase));
+        var visaVisible = tiles.Any(t => string.Equals(t.Key, ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, StringComparison.OrdinalIgnoreCase));
+        if (!invitationVisible || !visaVisible)
+            return false;
+
+        var appId = Snapshot.ApplicationProfileInstanceId;
+        Guid? visaId = existingVisaId is Guid id && id != Guid.Empty ? id : null;
+        var request = new IssueIssuedVisaSlotRequest
+        {
+            ApplicationProfileInstanceId = appId,
+            ExistingVisaId = visaId,
+        };
+
+        await PreviewSlotService.OpenIssueIssuedVisaAsync(request, PreviewSlotOwnerViewId);
+
+        try
+        {
+            await JS.InvokeAsync<bool>(
+                "visaPreviewDrawer.openIssueIssuedVisa",
+                appId.ToString("D"),
+                PreviewSlotOwnerViewId ?? string.Empty,
+                visaId is Guid v ? v.ToString("D") : string.Empty);
+        }
+        catch (JSException)
+        {
+        }
+        catch (InvalidOperationException)
+        {
+        }
+
+        return true;
+    }
+
     private async Task PreviewIssuedHeaderCopyAsync(string catalogKey, Guid headerId)
     {
         if (headerId == Guid.Empty)
@@ -503,6 +614,11 @@
         _issuedDeleteError = null;
         if (Snapshot == null || headerId == Guid.Empty)
             return;
+        if (string.Equals(catalogKey, ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, StringComparison.OrdinalIgnoreCase))
+        {
+            await DeleteIssuedVisaAsync(headerId, caption);
+            return;
+        }
         if (!IssueIssuedHeaderComposeService.TryResolveKind(catalogKey, out var kind))
             return;
 
@@ -539,6 +655,80 @@
 
         await CloseIssuedHeaderPreviewIfOpenAsync(kind, headerId);
         WorkspaceActions.NotifyWorkspaceChanged();
+    }
+
+    private async Task DeleteIssuedVisaAsync(Guid visaId, string caption)
+    {
+        _issuedDeleteError = null;
+        if (Snapshot == null || visaId == Guid.Empty)
+            return;
+
+        var label = string.IsNullOrWhiteSpace(caption) ? "visa" : $"visa {caption}";
+        bool confirmed;
+        try
+        {
+            confirmed = await JS.InvokeAsync<bool>("confirm", $"Delete {label}? This cannot be undone.");
+        }
+        catch (JSException)
+        {
+            return;
+        }
+        catch (InvalidOperationException)
+        {
+            return;
+        }
+
+        if (!confirmed)
+            return;
+
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        var result = IssueIssuedVisaComposeService.Delete(
+            objectSpace,
+            Snapshot.ApplicationProfileInstanceId,
+            visaId);
+        if (!result.Succeeded)
+        {
+            _issuedDeleteError = result.ErrorMessage;
+            return;
+        }
+
+        await CloseIssuedVisaSurfacesIfOpenAsync(visaId);
+        WorkspaceActions.NotifyWorkspaceChanged();
+    }
+
+    private async Task CloseIssuedVisaSurfacesIfOpenAsync(Guid visaId)
+    {
+        if (Snapshot == null || visaId == Guid.Empty)
+            return;
+
+        var state = PreviewSlotService.State;
+        var close = false;
+        if (state.Mode == VisaPreviewSlotMode.IssueIssuedVisa
+            && state.IssueIssuedVisa?.ExistingVisaId == visaId)
+        {
+            close = true;
+        }
+        else if (state.Mode == VisaPreviewSlotMode.HeaderDocumentCopies
+            && state.HeaderDocumentCopies?.Family == HeaderDocumentCopiesFamily.Visa
+            && state.HeaderDocumentCopies.ParentId == visaId)
+        {
+            close = true;
+        }
+
+        if (!close)
+            return;
+
+        await PreviewSlotService.CloseAsync();
+        try
+        {
+            await JS.InvokeVoidAsync("visaPreviewDrawer.close");
+        }
+        catch (JSException)
+        {
+        }
+        catch (InvalidOperationException)
+        {
+        }
     }
 
     private async Task CloseIssuedHeaderPreviewIfOpenAsync(IssueIssuedHeaderKind kind, Guid headerId)
@@ -827,14 +1017,21 @@
                                         var issuedCatalogKey = selectedIssued.Key;
                                         var issuedTitle = row.Title;
                                         var canDeleteIssued = IssueIssuedHeaderComposeService.TryResolveKind(issuedCatalogKey, out _);
-                                        <li class="cw-issued-list__row">
+                                        var isIssuedVisa = string.Equals(
+                                            issuedCatalogKey,
+                                            ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa,
+                                            StringComparison.OrdinalIgnoreCase);
+                                        var canPreviewIssued = canDeleteIssued || isIssuedVisa;
+                                        var issuedRowOpen = IsIssuedRowOpen(issuedCatalogKey, issuedRowId);
+                                        <li class="cw-issued-list__row @(issuedRowOpen ? "is-selected" : null)">
                                             <button type="button"
                                                     class="cw-issued-list__item"
+                                                    aria-current="@(issuedRowOpen ? "true" : null)"
                                                     @onclick="() => OpenIssuedHeaderAsync(issuedCatalogKey, issuedRowId)">
                                                 <strong>@issuedTitle</strong>
                                                 <span>@row.Subtitle</span>
                                             </button>
-                                            @if (canDeleteIssued)
+                                            @if (canPreviewIssued)
                                             {
                                                 <button type="button"
                                                         class="cw-issued-list__preview"
@@ -844,6 +1041,9 @@
                                                         @onclick:stopPropagation="true">
                                                     Preview
                                                 </button>
+                                            }
+                                            @if (canDeleteIssued || isIssuedVisa)
+                                            {
                                                 <button type="button"
                                                         class="cw-issued-list__delete"
                                                         title="Delete"

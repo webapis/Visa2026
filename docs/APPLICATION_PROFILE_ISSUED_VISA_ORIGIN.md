@@ -137,6 +137,52 @@ flowchart TB
 
 Source: [`invitation-item-issued-vs-input.mmd`](./diagrams/issued-visa-origin/invitation-item-issued-vs-input.mmd)
 
+### Roster vs linked Visa (extension / direct source)
+
+Only **people on this case** (`ApplicationProfileInstancePerson`) may receive a new issued visa. Input/linked M2M `ApplicationProfileInstance.Visas` is for cancel/change / prior-visa workflows — not issuing. A **Work permit** tile (when May produce WP) is a sibling issued output, not a visa source and not a card group. `IssuingInvitationItem` stays **null**.
+
+```mermaid
+flowchart TB
+    subgraph instance ["Application Profile Instance"]
+        API["Application Profile Instance"]
+        PEOPLE["People on this case\n(ApplicationProfileInstancePerson)"]
+        API --> PEOPLE
+    end
+
+    subgraph issued ["1. Issued output — May produce Visa"]
+        V["Visa"]
+        API -->|"New issued visa\n(extension / direct)"| V
+        V -->|"IssuingApplicationProfileInstance"| API
+        PEOPLE -->|"one visa per unused person"| V
+        V -->|"Passport"| PEOPLE
+        V -->|"IssuingInvitationItem"| NIL["null"]
+    end
+
+    subgraph sibling ["May produce Work permit — sibling tile"]
+        WP["WorkPermit header"]
+        API -->|"New work permit"| WP
+        WP -->|"ApplicationProfileInstance"| API
+    end
+
+    subgraph input ["2. Input / linked — existing person data"]
+        VM2M["Visas M2M\n(ApplicationProfileInstance.Visas)"]
+        API -.->|"skip-nav link"| VM2M
+        VM2M -->|"example consumers"| CC["Cancel / change /\nprior-visa workflows"]
+    end
+
+    VM2M -.->|"NOT a visa source"| X["✗ linked visas do not stamp origin"]
+    WP -.->|"NOT a visa source"| X
+```
+
+Source: [`instance-roster-issued-vs-input.mmd`](./diagrams/issued-visa-origin/instance-roster-issued-vs-input.mmd)
+
+**Officer entry points (extension / direct profile):**
+
+| Entry | When to use |
+|-------|-------------|
+| Instance → **Issued records → New issued visa** | Profile **May produce → Visa** and **not** Invitation; one card per unused roster person |
+| Work permit compose | Independent sibling when **May produce → Work permit**; does not feed visa cards |
+
 **Officer entry points (invitation profile):**
 
 | Entry | When to use |
@@ -156,7 +202,7 @@ Agents, migration, and validation logic should treat this block as the source of
 # docs/APPLICATION_PROFILE_ISSUED_VISA_ORIGIN.md — issued visa origin
 issued_visa_origin:
   version: 1
-  updated: 2026-08-25
+  updated: 2026-08-26
 
   diagram_sources:
     directory: docs/diagrams/issued-visa-origin/
@@ -164,6 +210,7 @@ issued_visa_origin:
     extension_profile: docs/diagrams/issued-visa-origin/extension-profile.mmd
     invitation_profile: docs/diagrams/issued-visa-origin/invitation-profile.mmd
     invitation_item_issued_vs_input: docs/diagrams/issued-visa-origin/invitation-item-issued-vs-input.mmd
+    instance_roster_issued_vs_input: docs/diagrams/issued-visa-origin/instance-roster-issued-vs-input.mmd
     canonical_doc: docs/APPLICATION_PROFILE_ISSUED_VISA_ORIGIN.md
 
   authoritative:
@@ -196,7 +243,7 @@ issued_visa_origin:
       produce_invitation: false
       produce_visa: true
       invitation_item: null
-      instance_single_visa: true  # one extension visa per case when IssuingInvitationItem is null
+      instance_single_visa: false  # one visa per unused roster person when IssuingInvitationItem is null (officer prototypes 2026-08-26)
       example_profile_codes:
         - visa_ext
         - extend_visa_wp
@@ -255,7 +302,7 @@ issued_visa_origin:
 | Rule | Extension profile | Invitation profile |
 |------|-------------------|-------------------|
 | `Visa_IssuingApplicationProfileInstanceRequired` | Yes | Yes |
-| `Visa_IssuingApplicationProfileInstanceSingleUse` | One visa per case (no `IssuingInvitationItem`) | Skipped when `IssuingInvitationItem` set or `ProduceInvitation` |
+| `Visa_IssuingApplicationProfileInstanceSingleUse` | One visa per person on the case (no `IssuingInvitationItem`) | Skipped when `IssuingInvitationItem` set or `ProduceInvitation` |
 | `Visa_IssuingInvitationItemSingleUse` | N/A | One visa per line |
 | `Visa_InvitationOnlyWhenCanIssueInvitation` | N/A | `IssuingInvitationItem` only when profile can issue invitation |
 | `Visa_IssuingChronologyValid` | Issue date after instance date | Also after invitation issued date |
@@ -273,6 +320,7 @@ issued_visa_origin:
 | Block Passport nested New | `Visa2026.Module/Controllers/PassportVisasNestedCreateBlockController.cs` |
 | Instance nested New | `Visa2026.Module/Controllers/IssuedHeaderNestedCreateController.cs` |
 | Workspace create | `Visa2026.Module/Services/ApplicationWorkspace/ApplicationWorkspaceIssuedHeaderOpenHelper.cs` |
+| Issued visa compose | `Visa2026.Module/Services/PreviewSlot/IssueIssuedVisaComposeService.cs` |
 | Import Path B | `Visa2026.DataImporter/legacy/visa2014/Visa2014VisaIssuingApplicationProfileInstanceIndex.cs` |
 
 ---

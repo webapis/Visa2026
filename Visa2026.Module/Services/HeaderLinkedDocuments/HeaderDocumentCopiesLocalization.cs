@@ -11,6 +11,7 @@ public static class HeaderDocumentCopiesLocalization
             HeaderDocumentCopiesFamily.Invitation => "InvitationDocumentCopies.Title",
             HeaderDocumentCopiesFamily.Rejection => "RejectionDocumentCopies.Title",
             HeaderDocumentCopiesFamily.BorderZone => "BorderZoneDocumentCopies.Title",
+            HeaderDocumentCopiesFamily.Visa => "Visa.Tab.DocumentCopies",
             _ => "HeaderDocumentCopies.Title",
         };
 

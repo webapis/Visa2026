@@ -44,6 +44,8 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | 10w | People & links Relink / Unlink columns | **Done** | Per-person **Relink** and **Unlink** next to Open person detail; Relink pins missing ResolvedLinks; Unlink removes that person + links; both disabled when process-complete locked; toolbar Unlink removed |
 | 10p | Process-complete lock on resolved links | **Done** | `PROCESS_ISSUED` / `REJECTED` / `CANCELLED`; roster + ResolvedLinks immutable; UI lock badge |
 | 10q | Overview Issued records (1:N headers) | **Done** | May produce tiles + inline Add/New; `IssuedHeaderNestedCreateController` still sets FK on native nested New |
+| 10q-iv | Issued visa compose — roster source (extension/direct) | **Done** | Same `#visa-preview-slot` as Path A; people from case roster; `IssuingInvitationItem` null; one visa per person |
+| 10q-cue | Issued compose field border cues | **Done** | Orange empty required; blue system defaults; green after blur. Visa + Invitation + WP + Rejection + Border zone compose, plus new native DetailViews for those BOs and items |
 | 10a | Application workspace UX shell (mock) | **Done** | `ApplicationWorkspaceHost`, Blazor component, Open workspace action |
 | 10b | Wire real M2M + SQL views + resolver | **Done** | `ApplicationPerson` M2M, `ApplicationWorkspaceQueryService`, link/unlink toolbar; SQL views deferred (C# tab builder) |
 | 10c | Workspace in-tab actions + person SQL view | **Done** | Link/Unlink/Open detail wired in component; `vw_application_workspace_person`; row selection on Person tab |

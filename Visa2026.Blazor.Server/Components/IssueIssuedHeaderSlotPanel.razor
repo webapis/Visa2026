@@ -3,8 +3,10 @@
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.JSInterop
 @using System.IO
+@using Visa2026.Blazor.Server.Editors
 @using Visa2026.Blazor.Server.Services
 @using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Editors
 @using Visa2026.Module.Services
 @using Visa2026.Module.Services.ApplicationWorkspace
 @using Visa2026.Module.Services.PreviewSlot
@@ -47,9 +49,18 @@
                         @(_draft.IsEditMode ? $"Saved {_result.HeaderCaption}" : $"Created {_result.HeaderCaption}")
                     </p>
                     <p class="issue-issued-header-slot__muted">
-                        @(_draft.IsEditMode
-                            ? $"{_result.Lines.Count} person(s) on the letter."
-                            : $"{_result.Lines.Count} person(s) across created invitation(s).")
+                        @if (_draft.Kind == IssueIssuedHeaderKind.WorkPermit)
+                        {
+                            @($"{_result.Lines.Count} employee(s) on this letter.")
+                        }
+                        else if (_draft.IsEditMode)
+                        {
+                            @($"{_result.Lines.Count} person(s) on the letter.")
+                        }
+                        else
+                        {
+                            @($"{_result.Lines.Count} person(s) across created invitation(s).")
+                        }
                     </p>
 
                     <table class="issue-issued-header-slot__table">
@@ -92,26 +103,49 @@
             }
             else
             {
+                @if (_draft.Kind == IssueIssuedHeaderKind.WorkPermit && !_draft.IsEditMode)
+                {
+                    <p class="issue-issued-visa-slot__banner issue-issued-visa-slot__banner--info">
+                        One work permit letter for this case. Employees only. Linked work-permit items are not a source.
+                    </p>
+                }
+                @if (UseFieldCues)
+                {
+                    <IssueComposeFieldCueLegend />
+                }
                 <section class="issue-issued-header-slot__section">
                     <h3 class="issue-issued-header-slot__section-title">Header</h3>
                     <div class="issue-issued-header-slot__grid">
-                        <label class="issue-issued-header-slot__field">
+                        <label class="issue-issued-header-slot__field @(HeaderCueClass("header:number", true, IssueComposeFieldCue.HasText(_draft.HeaderNumber)))">
                             <span>@NumberLabel</span>
-                            <input class="issue-issued-header-slot__input" @bind="_draft.HeaderNumber" />
+                            <input class="issue-issued-header-slot__input"
+                                   @bind="_draft.HeaderNumber"
+                                   @onfocusout='() => ReviewField("header:number")' />
                         </label>
-                        <label class="issue-issued-header-slot__field">
+                        <label class="issue-issued-header-slot__field @(HeaderCueClass("header:date", true, IssueComposeFieldCue.HasDate(_primaryDate)))">
                             <span>@PrimaryDateLabel</span>
-                            <input class="issue-issued-header-slot__input" type="date" @bind="_primaryDate" @bind:format="yyyy-MM-dd" />
+                            <input class="issue-issued-header-slot__input"
+                                   type="date"
+                                   @bind="_primaryDate"
+                                   @bind:format="yyyy-MM-dd"
+                                   @onfocusout='() => ReviewField("header:date")' />
                         </label>
                         @if (_draft.Kind == IssueIssuedHeaderKind.Invitation)
                         {
-                            <label class="issue-issued-header-slot__field">
+                            <label class="issue-issued-header-slot__field @(HeaderCueClass("header:expiration", true, IssueComposeFieldCue.HasDate(_expirationDate)))">
                                 <span>Expiration</span>
-                                <input class="issue-issued-header-slot__input" type="date" @bind="_expirationDate" @bind:format="yyyy-MM-dd" />
+                                <input class="issue-issued-header-slot__input"
+                                       type="date"
+                                       @bind="_expirationDate"
+                                       @bind:format="yyyy-MM-dd"
+                                       @onfocusout='() => ReviewField("header:expiration")' />
                             </label>
-                            <label class="issue-issued-header-slot__field">
+                            <label class="issue-issued-header-slot__field @(HeaderCueClass("header:category", true, IssueComposeFieldCue.HasText(_visaCategoryIdText)))">
                                 <span>Visa category</span>
-                                <select class="issue-issued-header-slot__input" @bind="_visaCategoryIdText">
+                                <select class="issue-issued-header-slot__input"
+                                        @bind="_visaCategoryIdText"
+                                        @bind:after='() => ReviewField("header:category")'
+                                        @onfocusout='() => ReviewField("header:category")'>
                                     <option value="">—</option>
                                     @foreach (var opt in _draft.VisaCategories)
                                     {
@@ -119,9 +153,12 @@
                                     }
                                 </select>
                             </label>
-                            <label class="issue-issued-header-slot__field">
+                            <label class="issue-issued-header-slot__field @(HeaderCueClass("header:period", true, IssueComposeFieldCue.HasText(_visaPeriodIdText)))">
                                 <span>Visa period</span>
-                                <select class="issue-issued-header-slot__input" @bind="_visaPeriodIdText">
+                                <select class="issue-issued-header-slot__input"
+                                        @bind="_visaPeriodIdText"
+                                        @bind:after='() => ReviewField("header:period")'
+                                        @onfocusout='() => ReviewField("header:period")'>
                                     <option value="">—</option>
                                     @foreach (var opt in _draft.VisaPeriods)
                                     {
@@ -129,34 +166,53 @@
                                     }
                                 </select>
                             </label>
+                            <div class="issue-issued-header-slot__field issue-issued-header-slot__field--wide @(HeaderCueClass("header:borderZone", true, IssueComposeFieldCue.HasText(_draft.BorderZoneLocation)))">
+                                <span>Border zone</span>
+                                <BorderZoneLocationField Value="@_draft.BorderZoneLocation"
+                                                         ValueChanged="OnInvitationBorderZoneChanged" />
+                            </div>
                             <label class="issue-issued-header-slot__field issue-issued-header-slot__field--wide issue-issued-header-slot__check-field">
                                 <input type="checkbox" @bind="_visaWindowDefined" />
                                 <span>Visa start and end date defined</span>
                             </label>
                             @if (_visaWindowDefined)
                             {
-                                <label class="issue-issued-header-slot__field">
+                                <label class="issue-issued-header-slot__field @(HeaderCueClass("header:visaStart", true, IssueComposeFieldCue.HasDate(_visaStartDate)))">
                                     <span>Visa start date</span>
-                                    <input class="issue-issued-header-slot__input" type="date" @bind="_visaStartDate" @bind:format="yyyy-MM-dd" />
+                                    <input class="issue-issued-header-slot__input"
+                                           type="date"
+                                           @bind="_visaStartDate"
+                                           @bind:format="yyyy-MM-dd"
+                                           @onfocusout='() => ReviewField("header:visaStart")' />
                                 </label>
-                                <label class="issue-issued-header-slot__field">
+                                <label class="issue-issued-header-slot__field @(HeaderCueClass("header:visaEnd", true, IssueComposeFieldCue.HasDate(_visaEndDate)))">
                                     <span>Visa end date</span>
-                                    <input class="issue-issued-header-slot__input" type="date" @bind="_visaEndDate" @bind:format="yyyy-MM-dd" />
+                                    <input class="issue-issued-header-slot__input"
+                                           type="date"
+                                           @bind="_visaEndDate"
+                                           @bind:format="yyyy-MM-dd"
+                                           @onfocusout='() => ReviewField("header:visaEnd")' />
                                 </label>
                             }
                         }
                         @if (_draft.Kind == IssueIssuedHeaderKind.Rejection)
                         {
-                            <label class="issue-issued-header-slot__field issue-issued-header-slot__field--wide">
+                            <label class="issue-issued-header-slot__field issue-issued-header-slot__field--wide @(HeaderCueClass("header:reason", true, IssueComposeFieldCue.HasText(_draft.Reason)))">
                                 <span>Reason</span>
-                                <textarea class="issue-issued-header-slot__input issue-issued-header-slot__textarea" @bind="_draft.Reason" rows="3"></textarea>
+                                <textarea class="issue-issued-header-slot__input issue-issued-header-slot__textarea"
+                                          @bind="_draft.Reason"
+                                          @onfocusout='() => ReviewField("header:reason")'
+                                          rows="3"></textarea>
                             </label>
                         }
                         @if (_draft.Kind == IssueIssuedHeaderKind.BorderZone)
                         {
-                            <label class="issue-issued-header-slot__field">
+                            <label class="issue-issued-header-slot__field @(HeaderCueClass("header:duration", true, IssueComposeFieldCue.HasText(_validityDurationIdText)))">
                                 <span>Validity duration</span>
-                                <select class="issue-issued-header-slot__input" @bind="_validityDurationIdText">
+                                <select class="issue-issued-header-slot__input"
+                                        @bind="_validityDurationIdText"
+                                        @bind:after='() => ReviewField("header:duration")'
+                                        @onfocusout='() => ReviewField("header:duration")'>
                                     <option value="">—</option>
                                     @foreach (var opt in _draft.ValidityDurations)
                                     {
@@ -166,7 +222,7 @@
                             </label>
                             @if (_draft.ExpirationDate is DateTime exp)
                             {
-                                <label class="issue-issued-header-slot__field">
+                                <label class="issue-issued-header-slot__field @(HeaderCueClass("header:expiration", false, true, true))">
                                     <span>Expiration (computed)</span>
                                     <input class="issue-issued-header-slot__input" type="date" value="@exp.ToString("yyyy-MM-dd")" disabled />
                                 </label>
@@ -267,6 +323,110 @@
                         </section>
                     }
                 }
+                else if (_draft.Kind == IssueIssuedHeaderKind.WorkPermit)
+                {
+                    <section class="issue-issued-header-slot__section">
+                        <div class="issue-issued-header-slot__section-head">
+                            <h3 class="issue-issued-header-slot__section-title">People on this work permit</h3>
+                            <span class="issue-issued-header-slot__muted">@SelectedReadyCount ready of @SelectedCount selected</span>
+                        </div>
+                        <div class="issue-issued-header-slot__people-actions">
+                            <button type="button" class="issue-issued-header-slot__link-btn" @onclick="SelectAllReady">Select all ready</button>
+                            <button type="button" class="issue-issued-header-slot__link-btn" @onclick="SelectNone">Select none</button>
+                        </div>
+                        @if (_draft.People.Count == 0)
+                        {
+                            <p class="issue-issued-header-slot__muted">No employees on this case.</p>
+                        }
+                        else
+                        {
+                            @foreach (var person in _draft.People)
+                            {
+                                var cardClass = !person.Include
+                                    ? "issue-issued-visa-slot__card issue-issued-visa-slot__card--off"
+                                    : "issue-issued-visa-slot__card";
+                                <article class="@cardClass" @key="@($"{_boundOccupantKey}:wp:{person.PersonId:N}")">
+                                    <div class="issue-issued-visa-slot__card-head">
+                                        <input type="checkbox"
+                                               disabled="@person.IncludeLocked"
+                                               checked="@person.Include"
+                                               @onchange="e => ToggleInclude(person, e)" />
+                                        <span class="issue-issued-visa-slot__avatar">@Initials(person.PersonName)</span>
+                                        <span class="issue-issued-visa-slot__person">@person.PersonName</span>
+                                        @if (!person.IsReady)
+                                        {
+                                            <span class="issue-issued-header-slot__status issue-issued-header-slot__status--warn">@person.StatusCaption</span>
+                                        }
+                                        else if (person.Include && !_draft.IsEditMode && !person.IncludeLocked)
+                                        {
+                                            <button type="button" class="issue-issued-header-slot__link-btn" @onclick="() => SetInclude(person, false)">Remove</button>
+                                        }
+                                    </div>
+                                    @if (person.Include)
+                                    {
+                                        <div class="issue-issued-header-slot__grid">
+                                            <label class="issue-issued-header-slot__field @(WpCueClass(person, "itemNumber", true, IssueComposeFieldCue.HasText(person.ItemNumber)))">
+                                                <span>Item work-permit number *</span>
+                                                <input class="issue-issued-header-slot__input"
+                                                       @bind="person.ItemNumber"
+                                                       @onfocusout='() => ReviewWpField(person, "itemNumber")' />
+                                            </label>
+                                            <label class="issue-issued-header-slot__field @(WpCueClass(person, "asNumber", true, IssueComposeFieldCue.HasText(person.ASNumber)))">
+                                                <span>AS number *</span>
+                                                <input class="issue-issued-header-slot__input"
+                                                       @bind="person.ASNumber"
+                                                       @onfocusout='() => ReviewWpField(person, "asNumber")' />
+                                            </label>
+                                            <label class="issue-issued-header-slot__field @(WpCueClass(person, "position", true, IssueComposeFieldCue.HasId(person.PositionId)))">
+                                                <span>Position *</span>
+                                                <select class="issue-issued-header-slot__input"
+                                                        value="@GuidText(person.PositionId)"
+                                                        @onchange='e => SetWpGuidAndReview(person, v => person.PositionId = v, e.Value, "position")'
+                                                        @onfocusout='() => ReviewWpField(person, "position")'>
+                                                    <option value="">—</option>
+                                                    @foreach (var opt in person.Positions)
+                                                    {
+                                                        <option value="@opt.Id.ToString("N")">@opt.Caption</option>
+                                                    }
+                                                </select>
+                                            </label>
+                                            <label class="issue-issued-header-slot__field @(WpCueClass(person, "passport", false, IssueComposeFieldCue.HasText(person.PassportNumber), true))">
+                                                <span>Passport number</span>
+                                                <input class="issue-issued-header-slot__input" value="@person.PassportNumber" disabled />
+                                            </label>
+                                            <label class="issue-issued-header-slot__field @(WpCueClass(person, "start", true, IssueComposeFieldCue.HasDate(person.ItemStartDate)))">
+                                                <span>Start *</span>
+                                                <input class="issue-issued-header-slot__input"
+                                                       type="date"
+                                                       @bind="person.ItemStartDate"
+                                                       @bind:format="yyyy-MM-dd"
+                                                       @onfocusout='() => ReviewWpField(person, "start")' />
+                                            </label>
+                                            <label class="issue-issued-header-slot__field @(WpCueClass(person, "end", true, IssueComposeFieldCue.HasDate(person.ItemExpirationDate)))">
+                                                <span>End *</span>
+                                                <input class="issue-issued-header-slot__input"
+                                                       type="date"
+                                                       @bind="person.ItemExpirationDate"
+                                                       @bind:format="yyyy-MM-dd"
+                                                       @onfocusout='() => ReviewWpField(person, "end")' />
+                                            </label>
+                                            <div class="issue-issued-header-slot__field issue-issued-header-slot__field--wide @(WpCueClass(person, "locations", true, IssueComposeFieldCue.HasText(person.WorkPermittedLocations)))">
+                                                <span>Work permitted locations *</span>
+                                                <BorderZoneLocationField EditorAlias="@CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation"
+                                                                         Value="@person.WorkPermittedLocations"
+                                                                         ValueChanged="@(value => OnWorkPermitLocationsChanged(person, value))" />
+                                            </div>
+                                        </div>
+                                        @if (!string.IsNullOrWhiteSpace(person.DatePrefillNote))
+                                        {
+                                            <p class="issue-issued-visa-slot__note">@person.DatePrefillNote</p>
+                                        }
+                                    }
+                                </article>
+                            }
+                        }
+                    </section>
+                }
                 else
                 {
                 <section class="issue-issued-header-slot__section">
@@ -296,8 +456,7 @@
                             <tbody>
                                 @foreach (var person in _draft.People)
                                 {
-                                    var disabled = (_draft.Kind == IssueIssuedHeaderKind.WorkPermit && !person.IsEmployee)
-                                        || person.IncludeLocked;
+                                    var disabled = person.IncludeLocked;
                                     <tr @key="@($"{_boundOccupantKey}:{person.PersonId:N}:{person.Include}:{person.StatusCaption}")"
                                         class="@(person.IsReady ? null : "issue-issued-header-slot__row--warn") @(disabled && !person.Include ? "issue-issued-header-slot__row--disabled" : null)">
                                         <td>
@@ -309,10 +468,6 @@
                                         </td>
                                         <td>
                                             @person.PersonName
-                                            @if (_draft.Kind == IssueIssuedHeaderKind.WorkPermit && !person.IsEmployee)
-                                            {
-                                                <span class="issue-issued-header-slot__muted"> (not employee)</span>
-                                            }
                                         </td>
                                         <td>@(string.IsNullOrWhiteSpace(person.PassportNumber) ? "—" : person.PassportNumber)</td>
                                         <td>
@@ -454,6 +609,8 @@
     private bool _peopleDirty;
     private string? _pendingCopyName;
     private byte[]? _pendingCopyBytes;
+    private readonly HashSet<string> _reviewedFields = new(StringComparer.Ordinal);
+    private readonly HashSet<string> _defaultFields = new(StringComparer.Ordinal);
 
     private const int MaxCopyUploadMb = 5;
 
@@ -532,7 +689,12 @@
             || TryParseGuid(_validityDurationIdText) != null)
         && (_draft.Kind != IssueIssuedHeaderKind.Invitation
             || !_visaWindowDefined
-            || (_visaStartDate.HasValue && _visaEndDate.HasValue));
+            || (_visaStartDate.HasValue && _visaEndDate.HasValue))
+        && (_draft.Kind != IssueIssuedHeaderKind.WorkPermit || WorkPermitCardsComplete);
+
+    private bool WorkPermitCardsComplete =>
+        _draft != null
+        && _draft.People.Where(p => p.Include).All(IssueIssuedHeaderComposeService.IsWorkPermitCardComplete);
 
     /// <summary>
     /// Edit: Save only when modified (XAF ObjectSpace.IsModified style).
@@ -619,6 +781,7 @@
         }
 
         ApplyDraftToBoundFields();
+        CaptureFieldCues();
         CapturePristine();
     }
 
@@ -735,6 +898,18 @@
         _draft.VisaEndDate = _visaWindowDefined ? _visaEndDate?.Date : null;
     }
 
+    private Task OnInvitationBorderZoneChanged(string? value)
+    {
+        if (_draft == null)
+            return Task.CompletedTask;
+
+        _draft.BorderZoneLocation = value ?? string.Empty;
+        _actionError = null;
+        _saveMessage = null;
+        ReviewField("header:borderZone");
+        return Task.CompletedTask;
+    }
+
     private void CapturePristine()
     {
         if (_draft == null)
@@ -770,7 +945,28 @@
             _visaWindowDefined ? "1" : "0",
             _visaStartDate?.ToString("yyyy-MM-dd") ?? string.Empty,
             _visaEndDate?.ToString("yyyy-MM-dd") ?? string.Empty,
-            included);
+            _draft.BorderZoneLocation?.Trim() ?? string.Empty,
+            included,
+            WorkPermitFingerprint());
+    }
+
+    private string WorkPermitFingerprint()
+    {
+        if (_draft?.Kind != IssueIssuedHeaderKind.WorkPermit)
+            return string.Empty;
+
+        return string.Join(";",
+            _draft.People
+                .Where(p => p.Include)
+                .OrderBy(p => p.PersonId)
+                .Select(p => string.Join(",",
+                    p.PersonId.ToString("N"),
+                    p.ItemNumber?.Trim() ?? string.Empty,
+                    p.ASNumber?.Trim() ?? string.Empty,
+                    p.PositionId?.ToString("N") ?? string.Empty,
+                    p.ItemStartDate?.ToString("yyyy-MM-dd") ?? string.Empty,
+                    p.ItemExpirationDate?.ToString("yyyy-MM-dd") ?? string.Empty,
+                    p.WorkPermittedLocations?.Trim() ?? string.Empty)));
     }
 
     private static Guid? TryParseGuid(string? text)
@@ -780,6 +976,125 @@
         if (Guid.TryParseExact(text.Trim(), "N", out var id) || Guid.TryParse(text.Trim(), out id))
             return id == Guid.Empty ? null : id;
         return null;
+    }
+
+    private static Guid? ParseGuid(object? value) => TryParseGuid(value?.ToString());
+
+    private static string GuidText(Guid? id) =>
+        id is Guid g && g != Guid.Empty ? g.ToString("N") : string.Empty;
+
+    private static string Initials(string name)
+    {
+        var parts = (name ?? string.Empty).Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 0)
+            return "?";
+        if (parts.Length == 1)
+            return parts[0].Length >= 2 ? parts[0][..2].ToUpperInvariant() : parts[0].ToUpperInvariant();
+        return $"{char.ToUpperInvariant(parts[0][0])}{char.ToUpperInvariant(parts[^1][0])}";
+    }
+
+    private void OnWorkPermitLocationsChanged(IssueIssuedHeaderPersonLineDraft person, string? value)
+    {
+        person.WorkPermittedLocations = value?.Trim() ?? string.Empty;
+        _peopleDirty = true;
+        _actionError = null;
+        _saveMessage = null;
+        ReviewWpField(person, "locations");
+    }
+
+    private bool UseFieldCues => _draft != null;
+
+    private static string WpCueKey(IssueIssuedHeaderPersonLineDraft person, string field) =>
+        $"{person.PersonId:N}:{field}";
+
+    private string HeaderCueClass(string key, bool required, bool hasValue, bool sourced = false) =>
+        UseFieldCues
+            ? IssueComposeFieldCue.FieldClass(
+                required,
+                hasValue,
+                isDefault: _defaultFields.Contains(key),
+                reviewed: _reviewedFields.Contains(key),
+                sourced)
+            : string.Empty;
+
+    private string WpCueClass(
+        IssueIssuedHeaderPersonLineDraft person,
+        string field,
+        bool required,
+        bool hasValue,
+        bool sourced = false) =>
+        HeaderCueClass(WpCueKey(person, field), required, hasValue, sourced);
+
+    private void ReviewField(string key)
+    {
+        if (!UseFieldCues || string.IsNullOrEmpty(key))
+            return;
+        _reviewedFields.Add(key);
+    }
+
+    private void ReviewWpField(IssueIssuedHeaderPersonLineDraft person, string field) =>
+        ReviewField(WpCueKey(person, field));
+
+    private void SetWpGuidAndReview(
+        IssueIssuedHeaderPersonLineDraft person,
+        Action<Guid?> setter,
+        object? raw,
+        string field)
+    {
+        setter(ParseGuid(raw));
+        ReviewWpField(person, field);
+    }
+
+    private void CaptureFieldCues()
+    {
+        _reviewedFields.Clear();
+        _defaultFields.Clear();
+        if (_draft == null || !UseFieldCues)
+            return;
+
+        if (IssueComposeFieldCue.HasText(_draft.HeaderNumber))
+            _defaultFields.Add("header:number");
+        if (IssueComposeFieldCue.HasDate(_primaryDate))
+            _defaultFields.Add("header:date");
+        if (IssueComposeFieldCue.HasText(_validityDurationIdText))
+            _defaultFields.Add("header:duration");
+        if (IssueComposeFieldCue.HasDate(_expirationDate))
+            _defaultFields.Add("header:expiration");
+        if (IssueComposeFieldCue.HasText(_visaCategoryIdText))
+            _defaultFields.Add("header:category");
+        if (IssueComposeFieldCue.HasText(_visaPeriodIdText))
+            _defaultFields.Add("header:period");
+        if (IssueComposeFieldCue.HasText(_draft.BorderZoneLocation))
+            _defaultFields.Add("header:borderZone");
+        if (IssueComposeFieldCue.HasDate(_visaStartDate))
+            _defaultFields.Add("header:visaStart");
+        if (IssueComposeFieldCue.HasDate(_visaEndDate))
+            _defaultFields.Add("header:visaEnd");
+        if (IssueComposeFieldCue.HasText(_draft.Reason))
+            _defaultFields.Add("header:reason");
+
+        foreach (var person in _draft.People)
+        {
+            if (IssueComposeFieldCue.HasText(person.ItemNumber))
+                _defaultFields.Add(WpCueKey(person, "itemNumber"));
+            if (IssueComposeFieldCue.HasText(person.ASNumber))
+                _defaultFields.Add(WpCueKey(person, "asNumber"));
+            if (IssueComposeFieldCue.HasId(person.PositionId))
+                _defaultFields.Add(WpCueKey(person, "position"));
+            if (IssueComposeFieldCue.HasDate(person.ItemStartDate))
+                _defaultFields.Add(WpCueKey(person, "start"));
+            if (IssueComposeFieldCue.HasDate(person.ItemExpirationDate))
+                _defaultFields.Add(WpCueKey(person, "end"));
+            if (IssueComposeFieldCue.HasText(person.WorkPermittedLocations))
+                _defaultFields.Add(WpCueKey(person, "locations"));
+        }
+
+        if (_draft.IsEditMode)
+        {
+            foreach (var key in _defaultFields)
+                _reviewedFields.Add(key);
+            _defaultFields.Clear();
+        }
     }
 
     private async Task SaveAsync()

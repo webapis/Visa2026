@@ -788,6 +788,7 @@ namespace Visa2026.Module.BusinessObjects
                     .HasForeignKey("ApplicationProfileInstanceID")
                     .IsRequired(false)
                     .OnDelete(DeleteBehavior.NoAction);
+                b.Property(x => x.BorderZoneLocation).HasMaxLength(500);
             });
 
             modelBuilder.Entity<WorkPermit>(b =>
