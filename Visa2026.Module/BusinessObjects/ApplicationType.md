@@ -61,7 +61,6 @@ This object inherits from the `LookupBase` class, which provides the standard `N
 
 ## 5. Relationships to Other Objects
 
-- **`ApplicationMigrationSlaProfile`**: Optional SLA tier for migration-service processing (`MigrationSlaProfile` / `MigrationSlaProfileId`).
 - **`ApplicationReason`**: Nested reasons collection (legacy / import; hidden from ApplicationProfileInstance Type detail).
 
 ---

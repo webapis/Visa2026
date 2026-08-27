@@ -20,7 +20,9 @@ public class ApplicationWorkspaceCaseHeaderFieldsHelperTests
 
         var fields = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(application, profile, null);
 
-        Assert.Equal(3, fields.Count);
+        Assert.Equal(5, fields.Count);
+        Assert.Contains(fields, field => field.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.InstanceNumber);
+        Assert.Contains(fields, field => field.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.InstanceDate);
         Assert.Contains(fields, field => field.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.VisaType);
         Assert.Contains(fields, field => field.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.VisaPeriod);
         Assert.Contains(fields, field => field.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.Project);
@@ -36,7 +38,9 @@ public class ApplicationWorkspaceCaseHeaderFieldsHelperTests
         var fields = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(application, profile, null);
 
         Assert.Contains(fields, field => field.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.BusinessTripAddress);
-        Assert.Equal(ApplicationWorkspaceCaseHeaderFieldKind.Lookup, fields.Single().Kind);
+        Assert.Equal(
+            ApplicationWorkspaceCaseHeaderFieldKind.Lookup,
+            Assert.Single(fields, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.BusinessTripAddress).Kind);
     }
 
     [Fact]
@@ -91,14 +95,25 @@ public class ApplicationWorkspaceCaseHeaderFieldsHelperTests
     }
 
     [Fact]
-    public void Build_EmptyWhenProfileHasNoUseFields()
+    public void Build_AlwaysIncludesApplicationNumberAndDate()
     {
         var profile = new ApplicationProfile();
-        var application = new ApplicationProfileInstance { ApplicationProfile = profile };
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = profile,
+            FullApplicationNumber = "8/-007",
+            ApplicationDate = new DateTime(2024, 8, 25),
+        };
 
         var fields = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(application, profile, null);
 
-        Assert.Empty(fields);
+        Assert.Equal(2, fields.Count);
+        var number = Assert.Single(fields, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.InstanceNumber);
+        Assert.Equal(ApplicationWorkspaceCaseHeaderFieldKind.ShortText, number.Kind);
+        Assert.Equal("8/-007", number.DisplayValue);
+        var date = Assert.Single(fields, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.InstanceDate);
+        Assert.Equal(ApplicationWorkspaceCaseHeaderFieldKind.Date, date.Kind);
+        Assert.Equal("25.08.2024", date.DisplayValue);
     }
 
     [Fact]
@@ -107,9 +122,40 @@ public class ApplicationWorkspaceCaseHeaderFieldsHelperTests
         var profile = new ApplicationProfile { RequireVisaType = true };
         var application = new ApplicationProfileInstance { ApplicationProfile = profile };
 
-        var field = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(application, profile, null).Single();
+        var field = Assert.Single(
+            ApplicationWorkspaceCaseHeaderFieldsHelper.Build(application, profile, null),
+            item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.VisaType);
 
         Assert.Equal("—", field.DisplayValue);
         Assert.Equal(ApplicationWorkspaceCaseHeaderFieldKind.Lookup, field.Kind);
+    }
+
+    [Fact]
+    public void TrySetInstanceNumber_ParsesFullNumberAndMarksManualEntry()
+    {
+        var application = new ApplicationProfileInstance();
+
+        var ok = ApplicationWorkspaceCaseHeaderFieldsHelper.TrySetInstanceNumber(application, "8/-007", out var error);
+
+        Assert.True(ok);
+        Assert.Null(error);
+        Assert.Equal("8/-007", application.FullApplicationNumber);
+        Assert.Equal("8", application.AppNumberPrefix);
+        Assert.Equal("007", application.ApplicationNumber);
+        Assert.True(application.IsManualEntry);
+    }
+
+    [Fact]
+    public void TrySetInstanceDate_SetsDateYearAndMonth()
+    {
+        var application = new ApplicationProfileInstance();
+
+        var ok = ApplicationWorkspaceCaseHeaderFieldsHelper.TrySetInstanceDate(application, "2024-08-25", out var error);
+
+        Assert.True(ok);
+        Assert.Null(error);
+        Assert.Equal(new DateTime(2024, 8, 25), application.ApplicationDate);
+        Assert.Equal(2024, application.Year);
+        Assert.Equal(8, application.Month);
     }
 }

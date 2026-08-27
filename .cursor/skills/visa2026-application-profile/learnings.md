@@ -1,3 +1,43 @@
+### 2026-08-27 — pasport_change Last 2 is flag-only (do not block create)
+
+- **Need**: Passport-change expects two booklets, but officers still create when only one is on the person.
+- **Fix**: Keep existing incomplete **warning** (`ApplicationStartFromPersonHelper`); workspace tile `1/2`. No create/link block.
+- **Test**: Already covered by Last-N shortfall tests (flag, not block). Officer: `pasport_change` + person with one passport — create proceeds; tile dashed `1/2`.
+- **Prevent**: Do not add a hard gate that requires two passports before create.
+- **Cross-skill**: application-profile
+
+### 2026-08-27 — Calik Last-N catalog seeds (1 or 2 valid Inv/WP/Visa)
+
+- **Need**: Person may have **1 or 2** valid invitation items, work permits, or visas on cancel templates — Last 2 is the cap, not a hard requirement. Passport Last 2 only on `pasport_change` (old + new). `reg_info_change_passport` stays Last 1.
+- **Fix**: `application-profile.calik-energi.json`: `cancel_invitation` invitation 2; `cancel_visa_wp` visa 2 + WP 2; `cancel_workpermit` WP 2. Existing `pasport_change` passport 2 / visa 1 and `cancel_invitation_wp` invitation 2 + WP 2 unchanged. `ApplicationProfileCalikPersonLastCountSeeds` so Wave 1 export keeps the same overlay.
+- **Test**: `ApplicationProfileCalikPersonLastCountSeedsTests` (6). Officer: stop F5, rebuild, Ctrl+F5. Open those profiles in the wizard — Last 2 on the seeded types; link a person with one valid WP on cancel work permit — tile `1/2`, create still allowed.
+- **Prevent**: Do not set Last 2 on `reg_info_change_passport`. Do not block create when actual &lt; Last 2. Do not raise visa Last 2 on `pasport_change`.
+- **Cross-skill**: application-profile | visa2026-lookup-data
+
+### 2026-08-27 — Visa / invitation / work permit stay validity-gated for auto-link
+
+- **Need**: Last-N must still only link **valid** `Visa`, `InvitationItem`, and `WorkPermitItem`. Passport expiration skip does **not** apply to these three.
+- **Fix**: Keep §10.2 `CanLink*` gates: visa started + not cancelled/changed + not expired; invitation not cancelled/changed/used + parent not expired; work permit not cancelled/changed + not expired. Last N is among those valid rows only. Expired/used/cancelled are skipped; remaining valid rows still link.
+- **Test**: `ResolveVisas_TakesLastTwoValidSkipsExpiredAndCancelled`, `ResolveInvitationItems_TakesLastTwoValidSkipsExpiredAndUsed`, `ResolveWorkPermitItems_TakesLastTwoValidSkipsExpired`, `CollectMissingAutoLinks_LinksValidVisaInvitationAndWorkPermitOnly`. Filter `ApplicationProfileInstancePerson` — 42 passed.
+- **Prevent**: Do not skip expiration for visa / invitation / work permit. Do not treat cancelled, changed, or used invitation as linkable. Passport expiration skip stays passport-only.
+- **Cross-skill**: application-profile
+
+### 2026-08-27 — Person Last-N auto-link (Passport / Visa / Invitation / WP / Border zone)
+
+- **Need**: Templates such as `pasport_change` and `cancel_invitation_wp` must auto-link more than the latest row. Valid invitations on one person can be 1, 2, 3+; remaining usually max 3. Expired previous passport is OK. Missing expected rows are flagged, not blocked. Last-N control only beside Passport / Visa / Invitation / Work permit / Border zone.
+- **Fix**: `Person*LastCount` 1–3 on `ApplicationProfile`. ResolvedLinks unique index is `(Instance, Person, Kind, LinkedObjectId)`. Resolver Take(N) without replacing sticky IDs. Passport `CanLinkPassport` ignores expiration. Merge hydrator fills Current + Previous. Workspace tiles show `count/expected` and dash when short. Seeds: `pasport_change` Last 2 passports; `cancel_invitation_wp` Last 2 invitation + Last 2 WP.
+- **Test**: `ApplicationProfileInstancePersonResolverTests` + `ApplicationProfileInstancePersonValidItemsTests`. `dotnet test` filter `ApplicationProfileInstancePerson`. Officer: stop F5, rebuild, Ctrl+F5. Configure `pasport_change` — Passport Last 2; link a person with an expired previous booklet — both passports on People & links; missing invitation on cancel invitation+WP is dashed `1/2`.
+- **Prevent**: Do not restore unique `(Instance, Person, Kind)` only. Do not put Last-N next to Education / Position / Address / Salary / Medical. Do not block create when Last-N is short.
+- **Cross-skill**: application-profile | visa2026-application-progress
+
+### 2026-08-27 — Hide template-owned Configuration nav
+
+- **Need**: Officers still opened native XAF lists for Approval Leg Profile, Approving ministries, Company, Authorized Signatory, and Authorized Representative even though those catalogs are edited from Application Profile.
+- **Fix**: `[NavigationItem(false)]` on the five BOs. `CustomNavigationUpdater.HideTemplateOwnedConfigurationNavigation` + `Model.DesignedDiffs.xafml` `Visible="False"`. Tables and type permissions unchanged; slot/wizard still persist them.
+- **Test**: Module Debug. Officer: stop F5, rebuild, Ctrl+F5. Configuration no longer lists those five. Numbering, project contracts, expiry alerts, upload limits stay. Edit in Configuration still opens the approval-leg slot.
+- **Prevent**: Do not drop the BOs. Do not re-add `[NavigationItem("Configuration")]` for them.
+- **Cross-skill**: application-profile | visa2026-security-access | visa2026-user-manual
+
 ### 2026-08-27 — Remove Duplicate from approval-leg slot
 
 - **Need**: Officers do not want a Duplicate button on catalog cards or the in-use editor.

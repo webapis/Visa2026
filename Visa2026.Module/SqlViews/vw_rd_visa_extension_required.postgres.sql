@@ -53,7 +53,16 @@ WITH valid_visas AS (
     LEFT JOIN "People" sp ON sp."ID" = p."SponsoringEmployeeID" AND COALESCE(sp."GCRecord", 0) = 0
     LEFT JOIN "ProjectContracts" spc ON spc."ID" = sp."ProjectContractID" AND COALESCE(spc."GCRecord", 0) = 0
     WHERE COALESCE(v."GCRecord", 0) = 0
-      AND COALESCE(v."IsCancelled", FALSE) = FALSE
+      AND NOT EXISTS (
+      SELECT 1
+      FROM "ApplicationProfileInstanceVisas" j
+      INNER JOIN "ApplicationProfileInstances" api ON api."ID" = j."ApplicationProfileInstanceId"
+      INNER JOIN "ApplicationProfiles" ap ON ap."ID" = api."ApplicationProfileID"
+      WHERE j."VisaId" = v."ID"
+        AND COALESCE(api."GCRecord", 0) = 0
+        AND COALESCE(ap."GCRecord", 0) = 0
+        AND ap."ActionFamily" = 1
+        AND BTRIM(COALESCE(api."LatestPrimaryStateCode", '')) = 'PROCESS_ISSUED')
       AND v."ExpirationDate" IS NOT NULL
       AND (v."ExpirationDate")::date >= CURRENT_DATE
       AND v."StartDate" IS NOT NULL

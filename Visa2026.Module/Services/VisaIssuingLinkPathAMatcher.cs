@@ -52,8 +52,6 @@ public static class VisaIssuingLinkPathAMatcher
             return;
 
         visa.IssuingInvitationItem = invitationItem;
-        if (!invitationItem.IsUsed)
-            invitationItem.SetItemStatusFlags(cancelled: false, changed: false, used: true);
     }
 
     private static InvitationItem? FindIssuingInvitationItem(

@@ -11,8 +11,7 @@ public class ApplicationMigrationSlaHelperTests
         var app = BuildApplication(
             ApplicationProfileInstanceProgressStateCodes.Review1Started,
             WorkingDaysAgo(5),
-            maxDays: 10,
-            warningDays: 8);
+            maxDays: 10);
 
         var sla = ApplicationMigrationSlaHelper.Resolve(app);
 
@@ -26,8 +25,7 @@ public class ApplicationMigrationSlaHelperTests
         var app = BuildApplication(
             ApplicationProfileInstanceProgressStateCodes.ProcessStarted,
             WorkingDaysAgo(3),
-            maxDays: 10,
-            warningDays: 8);
+            maxDays: 10);
 
         var sla = ApplicationMigrationSlaHelper.Resolve(app);
 
@@ -36,28 +34,12 @@ public class ApplicationMigrationSlaHelperTests
     }
 
     [Fact]
-    public void Resolve_ReturnsWarning_WhenPastWarningThreshold()
-    {
-        var app = BuildApplication(
-            ApplicationProfileInstanceProgressStateCodes.ProcessStarted,
-            WorkingDaysAgo(9),
-            maxDays: 10,
-            warningDays: 8);
-
-        var sla = ApplicationMigrationSlaHelper.Resolve(app);
-
-        Assert.Equal(ApplicationProfileInstanceProgressSlaStatus.Warning, sla.Status);
-        Assert.Equal(ApplicationProfileInstanceProgressSlaCodes.Warning, sla.AppearanceStateCode);
-    }
-
-    [Fact]
     public void Resolve_ReturnsOverdue_WhenPastMaxDays()
     {
         var app = BuildApplication(
             ApplicationProfileInstanceProgressStateCodes.ProcessStarted,
             WorkingDaysAgo(11),
-            maxDays: 10,
-            warningDays: 8);
+            maxDays: 10);
 
         var sla = ApplicationMigrationSlaHelper.Resolve(app);
 
@@ -70,10 +52,7 @@ public class ApplicationMigrationSlaHelperTests
     {
         var app = new ApplicationProfileInstance
         {
-            ApplicationType = new ApplicationType
-            {
-                MigrationSlaProfile = new ApplicationMigrationSlaProfile()
-            },
+            ApplicationProfile = new ApplicationProfile { MigrationSlaDays = 0 },
             ProgressHistory =
             [
                 new ApplicationProfileInstanceProgress
@@ -101,21 +80,11 @@ public class ApplicationMigrationSlaHelperTests
     private static ApplicationProfileInstance BuildApplication(
         string stateCode,
         DateTime progressDate,
-        int maxDays,
-        int warningDays)
+        int maxDays)
     {
         return new ApplicationProfileInstance
         {
-            ApplicationType = new ApplicationType
-            {
-                MigrationSlaProfile = new ApplicationMigrationSlaProfile
-                {
-                    Code = "UP-TO-TWO-WEEKS",
-                    NameTm = "2 hepdä çenli",
-                    MaxDaysInReview = maxDays,
-                    WarningDaysBeforeMax = warningDays
-                }
-            },
+            ApplicationProfile = new ApplicationProfile { MigrationSlaDays = maxDays },
             ProgressHistory =
             [
                 new ApplicationProfileInstanceProgress

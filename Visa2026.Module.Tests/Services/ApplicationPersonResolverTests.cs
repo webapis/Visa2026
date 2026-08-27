@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.ApplicationPersonRoster;
 using Xunit;
@@ -116,6 +117,96 @@ public class ApplicationProfileInstancePersonResolverTests
         Assert.Single(missing);
         Assert.Equal(ApplicationProfileInstancePersonLinkKind.Passport, missing[0].Kind);
         Assert.Equal(passportId, missing[0].LinkedObjectId);
+    }
+
+    [Fact]
+    public void PersonLastCount_ClampZeroAndAboveMax()
+    {
+        Assert.Equal(1, ApplicationProfilePersonLastCount.Clamp(0));
+        Assert.Equal(1, ApplicationProfilePersonLastCount.Clamp(-4));
+        Assert.Equal(3, ApplicationProfilePersonLastCount.Clamp(9));
+        Assert.Equal(2, ApplicationProfilePersonLastCount.Clamp(2));
+    }
+
+    [Fact]
+    public void CollectMissingAutoLinks_AddsSecondPassportWhenLastCountIsTwo()
+    {
+        var stickyId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+        var secondId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+        var app = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile
+            {
+                RequirePersonPassport = true,
+                PersonPassportLastCount = 2,
+            },
+        };
+        var existing = new List<ApplicationProfileInstancePersonResolvedLink>
+        {
+            new() { LinkKind = ApplicationProfileInstancePersonLinkKind.Passport, LinkedObjectId = stickyId },
+        };
+        var candidates = new List<(ApplicationProfileInstancePersonLinkKind, object?)>
+        {
+            (ApplicationProfileInstancePersonLinkKind.Passport, new Passport { ID = stickyId }),
+            (ApplicationProfileInstancePersonLinkKind.Passport, new Passport { ID = secondId }),
+        };
+
+        var missing = ApplicationProfileInstancePersonResolver.CollectMissingAutoLinks(app, existing, candidates);
+
+        Assert.Single(missing);
+        Assert.Equal(secondId, missing[0].LinkedObjectId);
+    }
+
+    [Fact]
+    public void CollectMissingAutoLinks_LinksWhatExistsWhenLastCountIsShort()
+    {
+        var onlyId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+        var app = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile
+            {
+                RequirePersonPassport = true,
+                PersonPassportLastCount = 2,
+            },
+        };
+        var candidates = new List<(ApplicationProfileInstancePersonLinkKind, object?)>
+        {
+            (ApplicationProfileInstancePersonLinkKind.Passport, new Passport { ID = onlyId }),
+        };
+
+        var missing = ApplicationProfileInstancePersonResolver.CollectMissingAutoLinks(
+            app,
+            Array.Empty<ApplicationProfileInstancePersonResolvedLink>(),
+            candidates);
+
+        Assert.Single(missing);
+        Assert.Equal(onlyId, missing[0].LinkedObjectId);
+        Assert.True(ApplicationProfilePersonLastCount.For(app, ApplicationProfileInstancePersonLinkKind.Passport) > missing.Count);
+    }
+
+    [Fact]
+    public void DecideEnsureResolvedLink_CreatesSecondWhenLastCountIsTwo()
+    {
+        var stickyId = Guid.Parse("66666666-6666-6666-6666-666666666666");
+        var newerId = Guid.Parse("77777777-7777-7777-7777-777777777777");
+        var existing = new[]
+        {
+            new ApplicationProfileInstancePersonResolvedLink
+            {
+                LinkKind = ApplicationProfileInstancePersonLinkKind.Passport,
+                LinkedObjectId = stickyId,
+            },
+        };
+
+        var decision = ApplicationProfileInstancePersonResolver.DecideEnsureResolvedLink(
+            existing,
+            ApplicationProfileInstancePersonLinkKind.Passport,
+            newerId,
+            lastCount: 2,
+            out var emptyRow);
+
+        Assert.Equal(ApplicationProfileInstancePersonResolver.EnsureResolvedLinkDecision.Create, decision);
+        Assert.Null(emptyRow);
     }
 
     [Fact]

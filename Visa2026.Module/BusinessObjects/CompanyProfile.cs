@@ -13,7 +13,7 @@ namespace Visa2026.Module.BusinessObjects
 {
     [UserDocumentation("administration/configuration/organization", Category = "Administration")]
     [DefaultClassOptions]
-    [NavigationItem("Configuration")]
+    [NavigationItem(false)]
     [DisplayName("Company")]
     [ImageName("BO_Organization")]
     public class CompanyProfile : BaseObject

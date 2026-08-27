@@ -37,6 +37,11 @@ public static class ApplicationProfileSchemaSql
             "CancelVisas" boolean NOT NULL DEFAULT false,
             "CancelBorderZonePermits" boolean NOT NULL DEFAULT false,
             "CancelApplicationProfileInstances" boolean NOT NULL DEFAULT false,
+            "ChangeInvitations" boolean NOT NULL DEFAULT false,
+            "ChangeWorkPermits" boolean NOT NULL DEFAULT false,
+            "ChangeVisas" boolean NOT NULL DEFAULT false,
+            "ChangeBorderZonePermits" boolean NOT NULL DEFAULT false,
+            "ChangeApplicationProfileInstances" boolean NOT NULL DEFAULT false,
             "RequireVisaType" boolean NOT NULL DEFAULT false,
             "DefaultVisaTypeId" uuid NULL,
             "RequireVisaCategory" boolean NOT NULL DEFAULT false,
@@ -83,6 +88,11 @@ public static class ApplicationProfileSchemaSql
             "RequirePersonMedical" boolean NOT NULL DEFAULT false,
             "RequirePersonRejectionItem" boolean NOT NULL DEFAULT false,
             "RequirePersonTravelHistory" boolean NOT NULL DEFAULT false,
+            "PersonPassportLastCount" integer NOT NULL DEFAULT 1,
+            "PersonVisaLastCount" integer NOT NULL DEFAULT 1,
+            "PersonInvitationItemLastCount" integer NOT NULL DEFAULT 1,
+            "PersonWorkPermitItemLastCount" integer NOT NULL DEFAULT 1,
+            "PersonBorderZoneItemLastCount" integer NOT NULL DEFAULT 1,
             "ApplicabilityCriteria" text NULL,
             "IsActive" boolean NOT NULL DEFAULT true,
             CONSTRAINT "PK_ApplicationProfiles" PRIMARY KEY ("ID")
@@ -247,6 +257,11 @@ public static class ApplicationProfileSchemaSql
                 RequirePersonMedical bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequirePersonMedical DEFAULT (0),
                 RequirePersonRejectionItem bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequirePersonRejectionItem DEFAULT (0),
                 RequirePersonTravelHistory bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequirePersonTravelHistory DEFAULT (0),
+                PersonPassportLastCount int NOT NULL CONSTRAINT DF_ApplicationProfiles_PersonPassportLastCount DEFAULT (1),
+                PersonVisaLastCount int NOT NULL CONSTRAINT DF_ApplicationProfiles_PersonVisaLastCount DEFAULT (1),
+                PersonInvitationItemLastCount int NOT NULL CONSTRAINT DF_ApplicationProfiles_PersonInvitationItemLastCount DEFAULT (1),
+                PersonWorkPermitItemLastCount int NOT NULL CONSTRAINT DF_ApplicationProfiles_PersonWorkPermitItemLastCount DEFAULT (1),
+                PersonBorderZoneItemLastCount int NOT NULL CONSTRAINT DF_ApplicationProfiles_PersonBorderZoneItemLastCount DEFAULT (1),
                 ApplicabilityCriteria nvarchar(max) NULL,
                 IsActive bit NOT NULL CONSTRAINT DF_ApplicationProfiles_IsActive DEFAULT (1)
             );
@@ -342,6 +357,21 @@ public static class ApplicationProfileSchemaSql
 
     internal const string EnsureProduceRejectionPostgres =
         """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "ProduceRejection" boolean NOT NULL DEFAULT false;""";
+
+    internal const string EnsureChangeInvitationsPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "ChangeInvitations" boolean NOT NULL DEFAULT false;""";
+
+    internal const string EnsureChangeWorkPermitsPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "ChangeWorkPermits" boolean NOT NULL DEFAULT false;""";
+
+    internal const string EnsureChangeVisasPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "ChangeVisas" boolean NOT NULL DEFAULT false;""";
+
+    internal const string EnsureChangeBorderZonePermitsPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "ChangeBorderZonePermits" boolean NOT NULL DEFAULT false;""";
+
+    internal const string EnsureChangeApplicationProfileInstancesPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "ChangeApplicationProfileInstances" boolean NOT NULL DEFAULT false;""";
 
     internal const string EnsureRegistrationKindPostgres =
         """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "RegistrationKind" integer NOT NULL DEFAULT 0;""";
@@ -473,6 +503,21 @@ public static class ApplicationProfileSchemaSql
 
     internal const string EnsureDefaultApprovalLegProfilePostgres =
         """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "DefaultApprovalLegProfileId" uuid NULL;""";
+
+    internal const string EnsurePersonPassportLastCountPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "PersonPassportLastCount" integer NOT NULL DEFAULT 1;""";
+
+    internal const string EnsurePersonVisaLastCountPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "PersonVisaLastCount" integer NOT NULL DEFAULT 1;""";
+
+    internal const string EnsurePersonInvitationItemLastCountPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "PersonInvitationItemLastCount" integer NOT NULL DEFAULT 1;""";
+
+    internal const string EnsurePersonWorkPermitItemLastCountPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "PersonWorkPermitItemLastCount" integer NOT NULL DEFAULT 1;""";
+
+    internal const string EnsurePersonBorderZoneItemLastCountPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "PersonBorderZoneItemLastCount" integer NOT NULL DEFAULT 1;""";
     internal const string EnsureDefaultWorkPermitLocationPostgres =
         """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "DefaultWorkPermitLocation" character varying(500) NULL;""";
 
@@ -597,6 +642,11 @@ public static class ApplicationProfileSchemaSql
         EnsureTemplateDataScopePostgres,
         EnsureTemplateCategoryKeyPostgres,
         EnsureProduceRejectionPostgres,
+        EnsureChangeInvitationsPostgres,
+        EnsureChangeWorkPermitsPostgres,
+        EnsureChangeVisasPostgres,
+        EnsureChangeBorderZonePermitsPostgres,
+        EnsureChangeApplicationProfileInstancesPostgres,
         EnsureRegistrationKindPostgres,
         EnsureRequireRegionPostgres,
         EnsureDefaultRegionIdPostgres,
@@ -623,6 +673,11 @@ public static class ApplicationProfileSchemaSql
         BackfillApprovalLegVersionsPostgres,
         EnsureDefaultWorkPermitLocationPostgres,
         EnsureDefaultApprovalLegProfilePostgres,
+        EnsurePersonPassportLastCountPostgres,
+        EnsurePersonVisaLastCountPostgres,
+        EnsurePersonInvitationItemLastCountPostgres,
+        EnsurePersonWorkPermitItemLastCountPostgres,
+        EnsurePersonBorderZoneItemLastCountPostgres,
         ConvertInstanceMovementPermitLocationToStringPostgres,
     ];
 
@@ -681,6 +736,31 @@ public static class ApplicationProfileSchemaSql
         IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
            AND COL_LENGTH(N'dbo.ApplicationProfileInstances', N'Purpose') IS NULL
             ALTER TABLE dbo.ApplicationProfileInstances ADD Purpose nvarchar(700) NULL;
+
+        IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfiles', N'PersonPassportLastCount') IS NULL
+            ALTER TABLE dbo.ApplicationProfiles ADD PersonPassportLastCount int NOT NULL
+                CONSTRAINT DF_ApplicationProfiles_PersonPassportLastCount DEFAULT (1);
+
+        IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfiles', N'PersonVisaLastCount') IS NULL
+            ALTER TABLE dbo.ApplicationProfiles ADD PersonVisaLastCount int NOT NULL
+                CONSTRAINT DF_ApplicationProfiles_PersonVisaLastCount DEFAULT (1);
+
+        IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfiles', N'PersonInvitationItemLastCount') IS NULL
+            ALTER TABLE dbo.ApplicationProfiles ADD PersonInvitationItemLastCount int NOT NULL
+                CONSTRAINT DF_ApplicationProfiles_PersonInvitationItemLastCount DEFAULT (1);
+
+        IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfiles', N'PersonWorkPermitItemLastCount') IS NULL
+            ALTER TABLE dbo.ApplicationProfiles ADD PersonWorkPermitItemLastCount int NOT NULL
+                CONSTRAINT DF_ApplicationProfiles_PersonWorkPermitItemLastCount DEFAULT (1);
+
+        IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfiles', N'PersonBorderZoneItemLastCount') IS NULL
+            ALTER TABLE dbo.ApplicationProfiles ADD PersonBorderZoneItemLastCount int NOT NULL
+                CONSTRAINT DF_ApplicationProfiles_PersonBorderZoneItemLastCount DEFAULT (1);
         """;
 
     public static void ApplyIfMissing(string connectionString)

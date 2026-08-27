@@ -235,7 +235,23 @@
 }
 
 .ap-wizard__choices { display: flex; flex-wrap: wrap; gap: 8px; }
-.ap-wizard__choices--grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
+.ap-wizard__choices--grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px; }
+.ap-wizard__choice-cluster {
+    display: flex;
+    align-items: stretch;
+    gap: 6px;
+    min-width: 0;
+}
+.ap-wizard__choice-cluster .ap-wizard__choice { flex: 1 1 auto; }
+.ap-wizard__last-n {
+    flex: 0 0 auto;
+    border: 1px solid var(--ap-line);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font: inherit;
+    font-size: 0.8rem;
+    background: #fff;
+}
 .ap-wizard__choice {
     display: inline-flex;
     align-items: center;

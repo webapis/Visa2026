@@ -520,8 +520,6 @@ public static class IssueIssuedVisaComposeService
                 if (copyError != null)
                     return new IssueIssuedVisaCreateResult { Succeeded = false, ErrorMessage = copyError };
 
-                item.SetItemStatusFlags(cancelled: false, changed: false, used: true);
-
                 var periodCaption = row.VisaPeriodId is Guid periodId
                     ? objectSpace.GetObjectByKey<VisaPeriod>(periodId)?.NameTm
                     : item.Invitation.VisaPeriod?.NameTm;
@@ -1050,8 +1048,6 @@ public static class IssueIssuedVisaComposeService
 
             var invitationItem = visa.IssuingInvitationItem;
             visa.IssuingInvitationItem = null;
-            if (invitationItem != null)
-                invitationItem.SetItemStatusFlags(cancelled: false, changed: false, used: false);
 
             var inputLinks = visa.ApplicationProfileInstances;
             if (inputLinks != null && inputLinks.Count > 0)

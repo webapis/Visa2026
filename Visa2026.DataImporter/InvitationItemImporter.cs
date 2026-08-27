@@ -40,8 +40,7 @@ public class InvitationItemImporter
     public async Task<InvitationItem?> CreateOneAsync(
         Guid invitationId,
         Guid personId,
-        Guid passportId,
-        bool isUsed = false)
+        Guid passportId)
     {
         Console.WriteLine($"=== POST {Entity} ===");
 
@@ -50,9 +49,6 @@ public class InvitationItemImporter
             Invitation = new { ID = invitationId },
             Person = new { ID = personId },
             Passport = new { ID = passportId },
-            IsUsed = isUsed,
-            IsCancelled = false,
-            IsChanged = false
         };
 
         try
@@ -84,10 +80,7 @@ public class InvitationItemImporter
                 {
                     Invitation = record.Invitation != null ? new { ID = record.Invitation.Id } : null,
                     Person = record.Person != null ? new { ID = record.Person.Id } : null,
-                    Passport = record.Passport != null ? new { ID = record.Passport.Id } : null,
-                    IsUsed = record.IsUsed,
-                    IsCancelled = record.IsCancelled,
-                    IsChanged = record.IsChanged
+                    Passport = record.Passport != null ? new { ID = record.Passport.Id } : null
                 };
 
                 await _api.CreateAsync<InvitationItem>(Entity, payload);

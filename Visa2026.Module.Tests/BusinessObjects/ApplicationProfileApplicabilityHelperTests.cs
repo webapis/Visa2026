@@ -50,6 +50,7 @@ public class ApplicationProfileApplicabilityHelperTests
     public void FormatActionFamily_ReturnsReadableLabels()
     {
         Assert.Equal("Issuance", ApplicationProfilePickerDisplayHelper.FormatActionFamily(ApplicationProfileActionFamily.Issuance));
+        Assert.Equal("Change", ApplicationProfilePickerDisplayHelper.FormatActionFamily(ApplicationProfileActionFamily.Change));
         Assert.Equal("Business trip", ApplicationProfilePickerDisplayHelper.FormatActionFamily(ApplicationProfileActionFamily.BusinessTrip));
     }
 

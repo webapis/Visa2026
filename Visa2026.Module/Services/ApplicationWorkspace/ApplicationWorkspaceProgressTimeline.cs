@@ -580,6 +580,7 @@ internal static class ApplicationWorkspaceProgressTimeline
         if (anchor == default || sla.MaxDaysInReview is not int maxDays || maxDays <= 0)
             return string.Empty;
 
-        return anchor.Date.AddDays(maxDays).ToString("dd MMM yyyy", CultureInfo.InvariantCulture);
+        return WorkingDaysHelper.AddWorkingDaysInclusive(anchor, maxDays)
+            .ToString("dd MMM yyyy", CultureInfo.InvariantCulture);
     }
 }

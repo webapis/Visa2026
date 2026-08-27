@@ -346,7 +346,7 @@ export function renderCaseSlaTab(c) {
     </div>
     <div class="ct-sla-lower">
       <div class="ct-sla-table-wrap">
-        <h3>Deadlines</h3>
+        <h3>SLA by step</h3>
         <table class="os-table"><thead><tr><th>Step</th><th>Due date</th><th>Days left</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>
       </div>
       <div class="ct-sla-aside">

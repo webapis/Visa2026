@@ -225,7 +225,16 @@ LEFT JOIN ""People"" sp
 LEFT JOIN ""ProjectContracts"" spc
     ON spc.""ID"" = sp.""ProjectContractID"" AND COALESCE(spc.""GCRecord"", 0) = 0
 WHERE COALESCE(wpi.""GCRecord"", 0) = 0
-  AND COALESCE(wpi.""IsCancelled"", FALSE) = FALSE
+  AND NOT EXISTS (
+      SELECT 1
+      FROM ""ApplicationProfileInstanceWorkPermitItems"" j
+      INNER JOIN ""ApplicationProfileInstances"" api ON api.""ID"" = j.""ApplicationProfileInstanceId""
+      INNER JOIN ""ApplicationProfiles"" ap ON ap.""ID"" = api.""ApplicationProfileID""
+      WHERE j.""WorkPermitItemId"" = wpi.""ID""
+        AND COALESCE(api.""GCRecord"", 0) = 0
+        AND COALESCE(ap.""GCRecord"", 0) = 0
+        AND ap.""ActionFamily"" = 1
+        AND BTRIM(COALESCE(api.""LatestPrimaryStateCode"", '')) = 'PROCESS_ISSUED')
   AND wpi.""PersonID"" IS NOT NULL
   AND wpi.""ExpirationDate"" IS NOT NULL
   AND (wpi.""ExpirationDate"")::date >= CURRENT_DATE;
@@ -273,7 +282,16 @@ LEFT JOIN ""People"" sp
 LEFT JOIN ""ProjectContracts"" spc
     ON spc.""ID"" = sp.""ProjectContractID"" AND COALESCE(spc.""GCRecord"", 0) = 0
 WHERE COALESCE(wpi.""GCRecord"", 0) = 0
-  AND COALESCE(wpi.""IsCancelled"", FALSE) = FALSE
+  AND NOT EXISTS (
+      SELECT 1
+      FROM ""ApplicationProfileInstanceWorkPermitItems"" j
+      INNER JOIN ""ApplicationProfileInstances"" api ON api.""ID"" = j.""ApplicationProfileInstanceId""
+      INNER JOIN ""ApplicationProfiles"" ap ON ap.""ID"" = api.""ApplicationProfileID""
+      WHERE j.""WorkPermitItemId"" = wpi.""ID""
+        AND COALESCE(api.""GCRecord"", 0) = 0
+        AND COALESCE(ap.""GCRecord"", 0) = 0
+        AND ap.""ActionFamily"" = 1
+        AND BTRIM(COALESCE(api.""LatestPrimaryStateCode"", '')) = 'PROCESS_ISSUED')
   AND wpi.""PersonID"" IS NOT NULL
   AND wpi.""ExpirationDate"" IS NOT NULL
   AND (wpi.""ExpirationDate"")::date >= CURRENT_DATE;
@@ -355,9 +373,20 @@ LEFT JOIN ""People"" sp
 LEFT JOIN ""ProjectContracts"" spc
     ON spc.""ID"" = sp.""ProjectContractID"" AND COALESCE(spc.""GCRecord"", 0) = 0
 WHERE COALESCE(ii.""GCRecord"", 0) = 0
-  AND COALESCE(ii.""IsUsed"", FALSE) = FALSE
-  AND COALESCE(ii.""IsCancelled"", FALSE) = FALSE
-  AND COALESCE(ii.""IsChanged"", FALSE) = FALSE
+  AND NOT EXISTS (
+      SELECT 1 FROM ""Visas"" vis
+      WHERE vis.""IssuingInvitationItemID"" = ii.""ID""
+        AND COALESCE(vis.""GCRecord"", 0) = 0)
+  AND NOT EXISTS (
+      SELECT 1
+      FROM ""ApplicationProfileInstanceInvitationItems"" j
+      INNER JOIN ""ApplicationProfileInstances"" api ON api.""ID"" = j.""ApplicationProfileInstanceId""
+      INNER JOIN ""ApplicationProfiles"" ap ON ap.""ID"" = api.""ApplicationProfileID""
+      WHERE j.""InvitationItemId"" = ii.""ID""
+        AND COALESCE(api.""GCRecord"", 0) = 0
+        AND COALESCE(ap.""GCRecord"", 0) = 0
+        AND ap.""ActionFamily"" IN (1, 4)
+        AND BTRIM(COALESCE(api.""LatestPrimaryStateCode"", '')) = 'PROCESS_ISSUED')
   AND ii.""PersonID"" IS NOT NULL
   AND inv.""ExpirationDate"" IS NOT NULL
   AND (inv.""ExpirationDate"")::date >= CURRENT_DATE;
@@ -706,7 +735,10 @@ LEFT JOIN ""People"" sp
 LEFT JOIN ""ProjectContracts"" spc
     ON spc.""ID"" = sp.""ProjectContractID"" AND COALESCE(spc.""GCRecord"", 0) = 0
 WHERE COALESCE(ii.""GCRecord"", 0) = 0
-  AND COALESCE(ii.""IsUsed"", FALSE) = TRUE
+  AND EXISTS (
+      SELECT 1 FROM ""Visas"" vis
+      WHERE vis.""IssuingInvitationItemID"" = ii.""ID""
+        AND COALESCE(vis.""GCRecord"", 0) = 0)
   AND ii.""PersonID"" IS NOT NULL;
 ", true);
     }
@@ -769,9 +801,20 @@ LEFT JOIN ""People"" sp
 LEFT JOIN ""ProjectContracts"" spc
     ON spc.""ID"" = sp.""ProjectContractID"" AND COALESCE(spc.""GCRecord"", 0) = 0
 WHERE COALESCE(ii.""GCRecord"", 0) = 0
-  AND COALESCE(ii.""IsUsed"", FALSE) = FALSE
-  AND COALESCE(ii.""IsCancelled"", FALSE) = FALSE
-  AND COALESCE(ii.""IsChanged"", FALSE) = FALSE
+  AND NOT EXISTS (
+      SELECT 1 FROM ""Visas"" vis
+      WHERE vis.""IssuingInvitationItemID"" = ii.""ID""
+        AND COALESCE(vis.""GCRecord"", 0) = 0)
+  AND NOT EXISTS (
+      SELECT 1
+      FROM ""ApplicationProfileInstanceInvitationItems"" j
+      INNER JOIN ""ApplicationProfileInstances"" api ON api.""ID"" = j.""ApplicationProfileInstanceId""
+      INNER JOIN ""ApplicationProfiles"" ap ON ap.""ID"" = api.""ApplicationProfileID""
+      WHERE j.""InvitationItemId"" = ii.""ID""
+        AND COALESCE(api.""GCRecord"", 0) = 0
+        AND COALESCE(ap.""GCRecord"", 0) = 0
+        AND ap.""ActionFamily"" IN (1, 4)
+        AND BTRIM(COALESCE(api.""LatestPrimaryStateCode"", '')) = 'PROCESS_ISSUED')
   AND ii.""PersonID"" IS NOT NULL
   AND inv.""ExpirationDate"" IS NOT NULL
   AND (inv.""ExpirationDate"")::date >= CURRENT_DATE;
@@ -879,7 +922,16 @@ LEFT JOIN ""ProjectContracts"" spc
     ON spc.""ID"" = sp.""ProjectContractID""
    AND COALESCE(spc.""GCRecord"", 0) = 0
 WHERE COALESCE(v.""GCRecord"", 0) = 0
-  AND COALESCE(v.""IsCancelled"", FALSE) = FALSE
+  AND NOT EXISTS (
+      SELECT 1
+      FROM ""ApplicationProfileInstanceVisas"" j
+      INNER JOIN ""ApplicationProfileInstances"" api ON api.""ID"" = j.""ApplicationProfileInstanceId""
+      INNER JOIN ""ApplicationProfiles"" ap ON ap.""ID"" = api.""ApplicationProfileID""
+      WHERE j.""VisaId"" = v.""ID""
+        AND COALESCE(api.""GCRecord"", 0) = 0
+        AND COALESCE(ap.""GCRecord"", 0) = 0
+        AND ap.""ActionFamily"" = 1
+        AND BTRIM(COALESCE(api.""LatestPrimaryStateCode"", '')) = 'PROCESS_ISSUED')
   AND v.""ExpirationDate"" IS NOT NULL
   AND (v.""ExpirationDate"")::date >= CURRENT_DATE;
 ", true);
@@ -932,7 +984,16 @@ LEFT JOIN ""ProjectContracts"" spc
     ON spc.""ID"" = sp.""ProjectContractID""
    AND COALESCE(spc.""GCRecord"", 0) = 0
 WHERE COALESCE(v.""GCRecord"", 0) = 0
-  AND COALESCE(v.""IsCancelled"", FALSE) = FALSE
+  AND NOT EXISTS (
+      SELECT 1
+      FROM ""ApplicationProfileInstanceVisas"" j
+      INNER JOIN ""ApplicationProfileInstances"" api ON api.""ID"" = j.""ApplicationProfileInstanceId""
+      INNER JOIN ""ApplicationProfiles"" ap ON ap.""ID"" = api.""ApplicationProfileID""
+      WHERE j.""VisaId"" = v.""ID""
+        AND COALESCE(api.""GCRecord"", 0) = 0
+        AND COALESCE(ap.""GCRecord"", 0) = 0
+        AND ap.""ActionFamily"" = 1
+        AND BTRIM(COALESCE(api.""LatestPrimaryStateCode"", '')) = 'PROCESS_ISSUED')
   AND v.""ExpirationDate"" IS NOT NULL
   AND (v.""ExpirationDate"")::date >= CURRENT_DATE;
 ", true);
@@ -1030,7 +1091,16 @@ FROM (
         ON spc.""ID"" = sp.""ProjectContractID""
        AND COALESCE(spc.""GCRecord"", 0) = 0
     WHERE COALESCE(v.""GCRecord"", 0) = 0
-      AND COALESCE(v.""IsCancelled"", FALSE) = FALSE
+      AND NOT EXISTS (
+      SELECT 1
+      FROM ""ApplicationProfileInstanceVisas"" j
+      INNER JOIN ""ApplicationProfileInstances"" api ON api.""ID"" = j.""ApplicationProfileInstanceId""
+      INNER JOIN ""ApplicationProfiles"" ap ON ap.""ID"" = api.""ApplicationProfileID""
+      WHERE j.""VisaId"" = v.""ID""
+        AND COALESCE(api.""GCRecord"", 0) = 0
+        AND COALESCE(ap.""GCRecord"", 0) = 0
+        AND ap.""ActionFamily"" = 1
+        AND BTRIM(COALESCE(api.""LatestPrimaryStateCode"", '')) = 'PROCESS_ISSUED')
       AND v.""ExpirationDate"" IS NOT NULL
       AND (v.""ExpirationDate"")::date >= CURRENT_DATE
       AND v.""StartDate"" IS NOT NULL
@@ -1133,7 +1203,16 @@ FROM (
         ON spc.""ID"" = sp.""ProjectContractID""
        AND COALESCE(spc.""GCRecord"", 0) = 0
     WHERE COALESCE(v.""GCRecord"", 0) = 0
-      AND COALESCE(v.""IsCancelled"", FALSE) = FALSE
+      AND NOT EXISTS (
+      SELECT 1
+      FROM ""ApplicationProfileInstanceVisas"" j
+      INNER JOIN ""ApplicationProfileInstances"" api ON api.""ID"" = j.""ApplicationProfileInstanceId""
+      INNER JOIN ""ApplicationProfiles"" ap ON ap.""ID"" = api.""ApplicationProfileID""
+      WHERE j.""VisaId"" = v.""ID""
+        AND COALESCE(api.""GCRecord"", 0) = 0
+        AND COALESCE(ap.""GCRecord"", 0) = 0
+        AND ap.""ActionFamily"" = 1
+        AND BTRIM(COALESCE(api.""LatestPrimaryStateCode"", '')) = 'PROCESS_ISSUED')
       AND v.""ExpirationDate"" IS NOT NULL
       AND (v.""ExpirationDate"")::date >= CURRENT_DATE
 ) x;
@@ -1197,7 +1276,16 @@ WITH valid_visas AS (
     LEFT JOIN ""People"" sp ON sp.""ID"" = p.""SponsoringEmployeeID"" AND COALESCE(sp.""GCRecord"", 0) = 0
     LEFT JOIN ""ProjectContracts"" spc ON spc.""ID"" = sp.""ProjectContractID"" AND COALESCE(spc.""GCRecord"", 0) = 0
     WHERE COALESCE(v.""GCRecord"", 0) = 0
-      AND COALESCE(v.""IsCancelled"", FALSE) = FALSE
+      AND NOT EXISTS (
+      SELECT 1
+      FROM ""ApplicationProfileInstanceVisas"" j
+      INNER JOIN ""ApplicationProfileInstances"" api ON api.""ID"" = j.""ApplicationProfileInstanceId""
+      INNER JOIN ""ApplicationProfiles"" ap ON ap.""ID"" = api.""ApplicationProfileID""
+      WHERE j.""VisaId"" = v.""ID""
+        AND COALESCE(api.""GCRecord"", 0) = 0
+        AND COALESCE(ap.""GCRecord"", 0) = 0
+        AND ap.""ActionFamily"" = 1
+        AND BTRIM(COALESCE(api.""LatestPrimaryStateCode"", '')) = 'PROCESS_ISSUED')
       AND v.""ExpirationDate"" IS NOT NULL
       AND (v.""ExpirationDate"")::date >= CURRENT_DATE
       AND v.""StartDate"" IS NOT NULL

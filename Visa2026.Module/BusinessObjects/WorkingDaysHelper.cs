@@ -28,4 +28,35 @@ public static class WorkingDaysHelper
 
         return count;
     }
+
+    /// <summary>
+    /// Date of the Nth working day starting at <paramref name="startDate"/> as day 1
+    /// (the start date counts when it is a working day).
+    /// </summary>
+    public static DateTime AddWorkingDaysInclusive(DateTime startDate, int workingDays)
+    {
+        if (workingDays <= 0)
+            return startDate.Date;
+
+        var day = startDate.Date;
+        var counted = 0;
+        while (counted < workingDays)
+        {
+            if (IsWorkingDay(day))
+                counted++;
+            if (counted >= workingDays)
+                return day;
+            day = day.AddDays(1);
+        }
+
+        return day;
+    }
+
+    public static DateTime NextWorkingDay(DateTime date)
+    {
+        var day = date.Date.AddDays(1);
+        while (!IsWorkingDay(day))
+            day = day.AddDays(1);
+        return day;
+    }
 }

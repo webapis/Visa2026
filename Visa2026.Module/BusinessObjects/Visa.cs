@@ -453,15 +453,22 @@ namespace Visa2026.Module.BusinessObjects
         public VisaValidityState State =>
             VisaValidityStateHelper.Resolve(this, ObjectSpaceHelper.Get(this));
 
-        /// <summary>Optional; editable on detail view (gear or when true).</summary>
-        [VisibleInListView(false)]
-        [VisibleInDetailView(true)]
-        public virtual bool IsCancelled { get; set; }
+        /// <summary>
+        /// Derived from linked completed Cancellation instances. Not stored.
+        /// Officer auto-link requires this false (visa must still be valid: started, not cancelled/changed, not expired).
+        /// </summary>
+        [NotMapped]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInDetailView(false)]
+        [ExcludeFromOptionalDetailFields]
+        public bool IsCancelled => IssuedDocumentLifecycle.IsCancelled(this);
 
-        /// <summary>Optional; editable on detail view (gear or when true).</summary>
-        [VisibleInListView(false)]
-        [VisibleInDetailView(true)]
-        public virtual bool IsChanged { get; set; }
+        /// <summary>Derived from linked completed Change instances. Not stored.</summary>
+        [NotMapped]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInDetailView(false)]
+        [ExcludeFromOptionalDetailFields]
+        public bool IsChanged => IssuedDocumentLifecycle.IsChanged(this);
 
         /// <summary>Optional; editable on detail view (gear or when true).</summary>
         [VisibleInListView(false)]

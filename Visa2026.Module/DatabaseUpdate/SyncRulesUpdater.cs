@@ -22,34 +22,8 @@ namespace Visa2026.Module.DatabaseUpdate
             foreach (var obsolete in ObsoleteApplicationItemRuleNames)
                 DeleteRuleByName(obsolete);
 
-            // Mark InvitationItem as Used when a Visa is saved.
-            CreateOrResetRule(
-                name: "Mark InvitationItem as Used",
-                sourceType: typeof(Visa),
-                sourceProperty: null,
-                sourceValue: null,
-                trigger: SyncTriggerType.Save,
-                targetPath: "Invitation.InvitationItems",
-                targetMatchCriteria: "[Person.ID] = '@Source.Passport.Person.ID'",
-                targetType: typeof(InvitationItem),
-                targetProperty: "IsUsed",
-                targetValue: "true",
-                sourceCriteria: null
-            );
-
-            CreateOrResetRule(
-                name: "Revert InvitationItem IsUsed on Delete",
-                sourceType: typeof(Visa),
-                sourceProperty: null,
-                sourceValue: null,
-                trigger: SyncTriggerType.Delete,
-                targetPath: "Invitation.InvitationItems",
-                targetMatchCriteria: "[Person.ID] = '@Source.Passport.Person.ID'",
-                targetType: typeof(InvitationItem),
-                targetProperty: "IsUsed",
-                targetValue: "false",
-                sourceCriteria: "[Invitation] Is Not Null"
-            );
+            DeleteRuleByName("Mark InvitationItem as Used");
+            DeleteRuleByName("Revert InvitationItem IsUsed on Delete");
 
             CreateOrResetRule(
                 name: "Clear InvitationItem on ApplicationProfileInstance Change",

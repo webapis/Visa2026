@@ -110,12 +110,13 @@ namespace Visa2026.Module
                 new DatabaseUpdate.ApplicationTypeConfigurationUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationTypeGroupSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationTypeGroupSeedUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.ApplicationMigrationSlaProfileTypeLinkUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ApplicationMigrationSlaProfileDropSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationProfileSeedUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationProfileTenantCatalogSeedUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationProfileNestedTemplateTenantCatalogSeedUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApprovalLegProfileSeedUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationProfileApprovalLegVersionTenantCatalogSeedUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.IssuedDocumentStatusColumnsCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ReportDashboardPostgresViewsUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ProjectContractApprovalLegProfileLinkUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.VisaFamilyManualFromFamilyMembersMigrationUpdater(objectSpace, versionFromDB)
@@ -130,7 +131,6 @@ namespace Visa2026.Module
             updaters.Add(new LookupLocalizationModelUpdater());
             updaters.Add(new LookupLocalizationLookupListViewUpdater());
             updaters.Add(new LookupBaseDetailViewModelUpdater());
-            updaters.Add(new ApplicationMigrationSlaProfileViewsUpdater());
             updaters.Add(new ApprovalLegProfileMinistryLegViewsUpdater());
             updaters.Add(new ApplicationProfileInstanceProgressHistoryViewsUpdater());
             updaters.Add(new PersonNestedListViewsUpdater());

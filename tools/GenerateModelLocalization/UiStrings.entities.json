@@ -282,40 +282,6 @@
         }
       }
     },
-    "ApplicationMigrationSlaProfile": {
-      "caption": {
-        "en-US": "Migration SLA profile",
-        "tr-TR": "Göç SLA profili",
-        "tk-TM": "Migrasiýa SLA profili",
-        "ru-RU": "Профиль SLA миграции"
-      },
-      "listCaption": {
-        "en-US": "Migration SLA profiles",
-        "tr-TR": "Göç SLA profilleri",
-        "tk-TM": "Migrasiýa SLA profilleri",
-        "ru-RU": "Профили SLA миграции"
-      },
-      "members": {
-        "MaxDaysInReview": {
-          "en-US": "Max working days",
-          "tr-TR": "Azami iş günleri",
-          "tk-TM": "Maks. iş günleri",
-          "ru-RU": "Макс. рабочих дней"
-        },
-        "WarningDaysBeforeMax": {
-          "en-US": "Warning (working days)",
-          "tr-TR": "Uyarı (iş günleri)",
-          "tk-TM": "Duýduryş (iş günleri)",
-          "ru-RU": "Предупреждение (рабочие дни)"
-        },
-        "ApplicationTypes": {
-          "en-US": "Application types",
-          "tr-TR": "Başvuru türleri",
-          "tk-TM": "Arza görnüşleri",
-          "ru-RU": "Типы заявок"
-        }
-      }
-    },
     "ApprovingMinistry": {
       "caption": { "en-US": "Approving ministry", "tr-TR": "Onaylayan Bakanlık", "tk-TM": "Tassyklýan ministrlik", "ru-RU": "Согласующее министерство" },
       "listCaption": { "en-US": "Approving ministries", "tr-TR": "Onaylayan Bakanlıklar", "tk-TM": "Tassyklýan ministrlikler", "ru-RU": "Согласующие министерства" },

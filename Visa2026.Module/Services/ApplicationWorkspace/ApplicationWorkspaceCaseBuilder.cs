@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 
 namespace Visa2026.Module.Services.ApplicationWorkspace;
 
@@ -71,8 +72,9 @@ internal static class ApplicationWorkspaceCaseBuilder
             ? ApplicationWorkspaceProgressTimeline.Build(application, profile, sla, objectSpace)
             : BuildProgressStepsFromChrome(chrome);
         var slaDashboard = application != null
-            ? BuildSla(application, profile, sla, chrome, progressSteps)
+            ? ApplicationWorkspaceSlaDashboardBuilder.Build(application, profile, sla, chrome, progressSteps)
             : BuildSlaFromChrome(chrome, progressSteps);
+        var syncedChrome = ApplicationWorkspaceSlaDashboardBuilder.WithHeaderRemaining(chrome, slaDashboard);
 
         var headerFields = application != null
             ? ApplicationWorkspaceCaseHeaderFieldsHelper.Build(application, profile, objectSpace)
@@ -80,14 +82,14 @@ internal static class ApplicationWorkspaceCaseBuilder
 
         return new ApplicationWorkspaceCaseView
         {
-            Chrome = chrome,
+            Chrome = syncedChrome,
             HeaderFields = headerFields,
             SummaryTiles = headerFields.Count > 0
                 ? headerFields.Select(field => Tile(field.Label, field.DisplayValue, field.Tone, field.Glyph)).ToList()
                 : application != null
                     ? Array.Empty<ApplicationWorkspaceCaseSummaryTile>()
                     : BuildSummaryTilesFromChrome(chrome),
-            LinkedRecordTiles = BuildLinkedTiles(application, rosterLinks, tabs),
+            LinkedRecordTiles = BuildLinkedTiles(application, rosterLinks, tabs, rosterPeople.Count),
             IssuedRecordTiles = BuildIssuedTiles(application, objectSpace),
             ProgressSteps = progressSteps,
             People = people,
@@ -172,11 +174,15 @@ internal static class ApplicationWorkspaceCaseBuilder
         var current = progressSteps.FirstOrDefault(s => s.State == "current");
         return new ApplicationWorkspaceCaseSlaDashboard
         {
+            IsTerminal = false,
+            ProcessOutcome = "inprocess",
+            CaseStatus = remaining <= 10 ? "Due soon" : "On track",
             CaseDaysRemaining = remaining,
             TotalSlaDays = 45,
             ElapsedDays = 33,
-            CurrentStepDaysRemaining = current?.SlaDaysRemaining ?? 8,
+            CurrentStepDaysRemaining = current?.SlaDaysRemaining ?? remaining,
             CurrentStepDueDate = current?.SlaTargetDate ?? "22 Aug 2026",
+            CurrentStepLabel = current?.Label ?? "Current step",
             StartedOn = chrome.StartedOn,
             MinistryDueDate = "22 Aug 2026",
             ExpectedCompletionDate = "15 Sep 2026",
@@ -206,22 +212,30 @@ internal static class ApplicationWorkspaceCaseBuilder
     private static IReadOnlyList<ApplicationWorkspaceCaseLinkedTile> BuildLinkedTiles(
         ApplicationProfileInstance? application,
         IReadOnlyList<ApplicationProfileInstancePersonResolvedLink> rosterLinks,
-        IReadOnlyList<ApplicationWorkspaceTab> tabs)
+        IReadOnlyList<ApplicationWorkspaceTab> tabs,
+        int personCount)
     {
         if (application != null)
         {
             var tiles = new List<ApplicationWorkspaceCaseLinkedTile>();
             var toneIndex = 0;
+            var people = Math.Max(personCount, 1);
             foreach (var def in ApplicationWorkspaceLinkedRecordsCatalog.Definitions)
             {
                 if (!ApplicationWorkspaceLinkedRecordsCatalog.IsConfigured(application, def.Kind))
                     continue;
 
+                var perPerson = Math.Max(
+                    ApplicationProfilePersonLastCount.For(application, def.Kind),
+                    1);
+                var expected = perPerson * people;
+                var count = ApplicationWorkspaceLinkedRecordsCatalog.CountResolved(rosterLinks, def.Kind);
                 tiles.Add(new ApplicationWorkspaceCaseLinkedTile
                 {
                     TabKey = def.TabKey,
                     Label = def.Label,
-                    Count = ApplicationWorkspaceLinkedRecordsCatalog.CountResolved(rosterLinks, def.Kind),
+                    Count = count,
+                    ExpectedCount = expected,
                     Tone = LinkedTones[toneIndex % LinkedTones.Length],
                     Glyph = def.Glyph,
                 });
@@ -535,6 +549,9 @@ internal static class ApplicationWorkspaceCaseBuilder
                 continue;
             }
 
+            var expected = Math.Max(
+                ApplicationProfilePersonLastCount.For(application, def.Kind),
+                1);
             var count = rosterPerson != null
                 ? ApplicationWorkspaceLinkedRecordsCatalog.CountResolvedForPerson(rosterLinks, rosterPerson.ID, def.Kind)
                 : tabs.TryGetValue(def.TabKey, out var tab)
@@ -546,7 +563,8 @@ internal static class ApplicationWorkspaceCaseBuilder
                 Key = def.PersonRecordKey,
                 Label = def.Label,
                 Count = count,
-                State = count > 0 ? "valid" : "empty",
+                ExpectedCount = expected,
+                State = count >= expected ? "valid" : "empty",
                 Glyph = def.Glyph,
                 Tone = LinkedTones[toneIndex % LinkedTones.Length],
             });
@@ -667,87 +685,6 @@ internal static class ApplicationWorkspaceCaseBuilder
         }
 
         return items;
-    }
-
-    private static ApplicationWorkspaceCaseSlaDashboard BuildSla(
-        ApplicationProfileInstance application,
-        ApplicationProfile? profile,
-        ApplicationProfileInstanceProgressSlaResult sla,
-        ApplicationWorkspaceCaseChrome chrome,
-        IReadOnlyList<ApplicationWorkspaceCaseProgressStep> progressSteps)
-    {
-        var totalSla = ApplicationProfileConfigurationResolver.GetMigrationSlaMaxDays(application);
-        if (totalSla <= 0)
-            totalSla = sla.MaxDaysInReview ?? 0;
-
-        var elapsed = sla.WorkingDaysInCurrentStep ?? 0;
-        var currentStep = progressSteps.FirstOrDefault(s => s.State == "current");
-        var remaining = currentStep?.SlaDaysRemaining ?? chrome.SlaDaysRemaining;
-        if (totalSla > 0 && remaining == null)
-            remaining = Math.Max(0, totalSla - elapsed);
-
-        var deadlines = BuildDeadlines(application, progressSteps);
-
-        var alert = currentStep?.SlaDaysRemaining is int stepDays
-            && stepDays <= 10
-            && !string.IsNullOrWhiteSpace(currentStep.SlaTargetDate)
-            ? $"{currentStep.Label} deadline approaching. Due in {stepDays} days on {currentStep.SlaTargetDate}."
-            : string.Empty;
-
-        return new ApplicationWorkspaceCaseSlaDashboard
-        {
-            CaseDaysRemaining = remaining,
-            TotalSlaDays = totalSla,
-            ElapsedDays = elapsed,
-            CurrentStepDaysRemaining = currentStep?.SlaDaysRemaining,
-            CurrentStepDueDate = currentStep?.SlaTargetDate ?? string.Empty,
-            StartedOn = chrome.StartedOn,
-            MinistryDueDate = currentStep?.SlaTargetDate ?? string.Empty,
-            ExpectedCompletionDate = deadlines.LastOrDefault()?.DueDate ?? string.Empty,
-            MigrationSlaLabel = totalSla > 0 ? $"{totalSla} days" : "—",
-            ProfileSlaSource = profile?.Name ?? "Profile template",
-            AlertMessage = alert,
-            Deadlines = deadlines,
-        };
-    }
-
-    private static IReadOnlyList<ApplicationWorkspaceCaseSlaDeadline> BuildDeadlines(
-        ApplicationProfileInstance application,
-        IReadOnlyList<ApplicationWorkspaceCaseProgressStep> progressSteps)
-    {
-        var history = application.ProgressHistory?
-            .OrderBy(p => p.Order)
-            .ToList() ?? [];
-
-        var deadlines = new List<ApplicationWorkspaceCaseSlaDeadline>();
-        for (var i = 0; i < progressSteps.Count; i++)
-        {
-            var step = progressSteps[i];
-            var historyRow = history.ElementAtOrDefault(i);
-            var due = historyRow?.Date != default
-                ? historyRow.Date.ToString("dd MMM yyyy", CultureInfo.InvariantCulture)
-                : step.SlaTargetDate;
-
-            var status = step.State switch
-            {
-                "done" => "completed",
-                "current" => "inprogress",
-                _ => "pending",
-            };
-
-            deadlines.Add(new ApplicationWorkspaceCaseSlaDeadline
-            {
-                Step = step.Label,
-                DueDate = due,
-                DaysLeft = status == "completed"
-                    ? "—"
-                    : step.SlaDaysRemaining?.ToString(CultureInfo.InvariantCulture) ?? "—",
-                Status = status,
-                IsCurrent = step.State == "current",
-            });
-        }
-
-        return deadlines;
     }
 
     private static string FormatActivityDate(DateTime date)

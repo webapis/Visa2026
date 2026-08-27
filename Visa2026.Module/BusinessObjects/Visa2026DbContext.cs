@@ -100,7 +100,6 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<ProjectContractImage> ProjectContractImages { get; set; }
         public DbSet<ProjectContractDocument> ProjectContractDocuments { get; set; }
         public DbSet<ApprovingMinistry> ApprovingMinistries { get; set; }
-        public DbSet<ApplicationMigrationSlaProfile> ApplicationMigrationSlaProfiles { get; set; }
         public DbSet<ApprovalLegProfile> ApprovalLegProfiles { get; set; }
         public DbSet<ApprovalLegProfileMinistryLeg> ApprovalLegProfileMinistryLegs { get; set; }
         public DbSet<ProjectContractApprovalLegProfile> ProjectContractApprovalLegProfiles { get; set; }
@@ -828,9 +827,9 @@ namespace Visa2026.Module.BusinessObjects
                     .WithMany()
                     .HasForeignKey(l => l.PersonId)
                     .OnDelete(DeleteBehavior.Restrict);
-                b.HasIndex(l => new { l.ApplicationProfileInstanceId, l.PersonId, l.LinkKind })
+                b.HasIndex(l => new { l.ApplicationProfileInstanceId, l.PersonId, l.LinkKind, l.LinkedObjectId })
                     .IsUnique()
-                    .HasDatabaseName("IX_ApplicationProfileInstancePersonResolvedLinks_Instance_Person_Kind");
+                    .HasDatabaseName("IX_ApplicationProfileInstancePersonResolvedLinks_Instance_Person_Kind_Object");
             });
 
             modelBuilder.Entity<ApplicationProfileInstanceProgress>(b => {
@@ -848,10 +847,6 @@ namespace Visa2026.Module.BusinessObjects
                 b.HasIndex(t => t.SelectionCode)
                     .IsUnique()
                     .HasFilter(IndexFilter("[SelectionCode] IS NOT NULL AND [SelectionCode] <> ''"));
-                b.HasOne(t => t.MigrationSlaProfile)
-                    .WithMany(p => p.ApplicationTypes)
-                    .HasForeignKey(t => t.MigrationSlaProfileId)
-                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<ProjectContract>(b =>

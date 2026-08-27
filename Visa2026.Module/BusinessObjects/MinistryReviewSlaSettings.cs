@@ -12,9 +12,10 @@ namespace Visa2026.Module.BusinessObjects;
 /// Tenant singleton: working-day SLA for ministry review legs (elapsed from prior step until <c>{n}_REVIEW_APPROVED</c>).
 /// Copied to <see cref="ApplicationProfileInstanceApprovalLegSnapshot"/> when an application selects an
 /// <see cref="ApprovalLegProfile"/>.
+/// Hidden from Configuration — officers set days on <see cref="ApplicationProfile.MinistrySlaDays"/>.
 /// </summary>
 [DefaultClassOptions]
-[NavigationItem("Configuration")]
+[NavigationItem(false)]
 [DisplayName("Ministry review SLA")]
 [RuleCriteria(
     "MinistryReviewSlaSettingsWarningBeforeMax",

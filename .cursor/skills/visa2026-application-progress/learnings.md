@@ -6,6 +6,13 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 
 ## Entries
 
+### 2026-08-27 — Application number and date stay editable after office prep
+
+- Case workspace officers must change instance `FullApplicationNumber` / `ApplicationDate` on in-process cases. Header lock no longer includes numbering or date (`LockedApplicationHeaderTargetItems` is type / approval legs / project only). Terminal workflow still blocks all instance saves.
+- Test: `ApplicationLockedHeaderScalarsDiffer_IgnoresApplicationNumberAndDateChange`.
+- Prevent: Do not put `ApplicationNumber` / `ApplicationDate` back on the office-prep lock. Keep `ProjectContract` / `ApplicationType` locked.
+- Cross-skill: visa2026-application-profile
+
 ### 2026-08-18 — Submitted stays on the Office progress bar
 
 - After later Approvals, the bar only showed each ministry’s latest result, so Submitted disappeared (Activity still had it). Office now keeps **Submitted** + that row’s date once `1_REVIEW_STARTED` / `PROCESS_STARTED` exists. No extra timeline node.

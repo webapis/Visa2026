@@ -186,9 +186,15 @@ public static class ApplicationStartFromPersonHelper
 
     private static bool IsPersonIncompleteForProfile(ApplicationProfile profile, Person person)
     {
-        if (profile.RequirePersonPassport && ApplicationProfileInstancePersonValidItems.ResolvePassport(person) == null)
+        if (MissingCount(
+                profile.RequirePersonPassport,
+                profile.PersonPassportLastCount,
+                ApplicationProfileInstancePersonValidItems.ResolvePassports(person, profile.PersonPassportLastCount).Count))
             return true;
-        if (profile.RequirePersonVisa && ApplicationProfileInstancePersonValidItems.ResolveVisa(person) == null)
+        if (MissingCount(
+                profile.RequirePersonVisa,
+                profile.PersonVisaLastCount,
+                ApplicationProfileInstancePersonValidItems.ResolveVisas(person, profile.PersonVisaLastCount).Count))
             return true;
         if (profile.RequirePersonEducation && ApplicationProfileInstancePersonValidItems.ResolveEducation(person) == null)
             return true;
@@ -200,7 +206,24 @@ public static class ApplicationStartFromPersonHelper
             return true;
         if (profile.RequirePersonMedical && ApplicationProfileInstancePersonValidItems.ResolveMedical(person) == null)
             return true;
+        if (MissingCount(
+                profile.RequirePersonInvitationItem,
+                profile.PersonInvitationItemLastCount,
+                ApplicationProfileInstancePersonValidItems.ResolveInvitationItems(person, profile.PersonInvitationItemLastCount).Count))
+            return true;
+        if (MissingCount(
+                profile.RequirePersonWorkPermitItem,
+                profile.PersonWorkPermitItemLastCount,
+                ApplicationProfileInstancePersonValidItems.ResolveWorkPermitItems(person, profile.PersonWorkPermitItemLastCount).Count))
+            return true;
         return false;
+    }
+
+    private static bool MissingCount(bool required, int lastCount, int actual)
+    {
+        if (!required)
+            return false;
+        return actual < ApplicationProfilePersonLastCount.Clamp(lastCount);
     }
 
     private static bool MatchesAudience(ApplicationProfile profile, Person person) =>

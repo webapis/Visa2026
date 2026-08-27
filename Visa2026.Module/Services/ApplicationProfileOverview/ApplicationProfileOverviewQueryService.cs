@@ -279,12 +279,26 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
         if (profile.CancelApplicationProfileInstances)
             cancel.Add("applications");
 
+        var change = new List<string>();
+        if (profile.ChangeInvitations)
+            change.Add("invitations");
+        if (profile.ChangeWorkPermits)
+            change.Add("work permits");
+        if (profile.ChangeVisas)
+            change.Add("visas");
+        if (profile.ChangeBorderZonePermits)
+            change.Add("border zone permits");
+        if (profile.ChangeApplicationProfileInstances)
+            change.Add("applications");
+
         var lines = new List<string>();
 
         if (produce.Count > 0)
             lines.Add("May produce: " + string.Join(", ", produce));
         if (cancel.Count > 0)
             lines.Add("May cancel: " + string.Join(", ", cancel));
+        if (change.Count > 0)
+            lines.Add("May change: " + string.Join(", ", change));
         if (profile.ActionFamily == ApplicationProfileActionFamily.Registration
             && profile.RegistrationKind != ApplicationProfileRegistrationKind.None)
         {
@@ -355,7 +369,7 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
     {
         var toggles = new List<string>();
         if (profile.RequirePersonPassport)
-            toggles.Add("Passport");
+            toggles.Add(FormatPersonToggle("Passport", profile.PersonPassportLastCount));
         if (profile.RequirePersonEducation)
             toggles.Add("Education");
         if (profile.RequirePersonPosition)
@@ -363,13 +377,13 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
         if (profile.RequirePersonAddressOfResidence)
             toggles.Add("Address of residence");
         if (profile.RequirePersonVisa)
-            toggles.Add("Visa");
+            toggles.Add(FormatPersonToggle("Visa", profile.PersonVisaLastCount));
         if (profile.RequirePersonInvitationItem)
-            toggles.Add("Invitation item");
+            toggles.Add(FormatPersonToggle("Invitation item", profile.PersonInvitationItemLastCount));
         if (profile.RequirePersonWorkPermitItem)
-            toggles.Add("Work permit item");
+            toggles.Add(FormatPersonToggle("Work permit item", profile.PersonWorkPermitItemLastCount));
         if (profile.RequirePersonBorderZoneItem)
-            toggles.Add("Border zone item");
+            toggles.Add(FormatPersonToggle("Border zone item", profile.PersonBorderZoneItemLastCount));
         if (profile.RequirePersonSalary)
             toggles.Add("Salary");
         if (profile.RequirePersonMedical)
@@ -380,6 +394,12 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
             && profile.ActionFamily != ApplicationProfileActionFamily.BusinessTrip)
             toggles.Add("Travel history");
         return toggles;
+    }
+
+    private static string FormatPersonToggle(string label, int lastCount)
+    {
+        var n = lastCount < 1 ? 1 : lastCount;
+        return n > 1 ? $"{label} (Last {n})" : label;
     }
 
     private static string FormatTemplateKind(ApplicationProfileTemplateKind kind) => kind switch

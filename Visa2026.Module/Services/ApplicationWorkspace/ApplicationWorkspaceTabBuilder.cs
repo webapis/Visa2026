@@ -380,15 +380,17 @@ internal static class ApplicationWorkspaceTabBuilder
             if (person == null || !linksByPerson.TryGetValue(person.ID, out var links))
                 continue;
 
-            var link = links.FirstOrDefault(l => l.LinkKind == kind);
-            if (link?.LinkedObjectId is not Guid linkedId || linkedId == Guid.Empty)
-                continue;
+            foreach (var link in links.Where(l => l.LinkKind == kind))
+            {
+                if (link?.LinkedObjectId is not Guid linkedId || linkedId == Guid.Empty)
+                    continue;
 
-            if (!linkedEntities.TryGetValue((kind, linkedId), out var entityObj) || entityObj is not T entity)
-                continue;
+                if (!linkedEntities.TryGetValue((kind, linkedId), out var entityObj) || entityObj is not T entity)
+                    continue;
 
-            rows.Add(map(person, entity));
-            personIds.Add(person.ID);
+                rows.Add(map(person, entity));
+                personIds.Add(person.ID);
+            }
         }
 
         return new KindRows(rows, personIds);

@@ -172,7 +172,7 @@ Keep **explicit** profile toggles for readiness + enabling person/roster `{{…}
 |---|--------|----------|
 | 1 | ApplicationItem | **Hard remove** (no migrate-in-place dual model). |
 | 2 | Roster | Application has **many People** via **EF skip-navigation M2M**. Person-related child BOs (Passport, Visa, Education, AddressOfResidence, EmployeePositionHistory, EmployeeSalary, MedicalRecord, WorkDuty, InvitationItem, WorkPermitItem, BorderZoneItem, TravelHistory) have the **same skip-nav M2M** (`ApplicationProfileInstances` on the child; hidden collections on the instance). Join tables are composite PK only — **no XAF join BO**, no `[Aggregated]`. Sticky history also stays on `ApplicationProfileInstancePersonResolvedLink`; LinkPerson dual-writes M2M membership. **Output headers** Invitation / WorkPermit / BorderZone / Rejection / IssuedVisas are **1:N** (instance has many; child FK) — not skip-nav. Visibility on the instance is **May produce**. |
-| 3 | Link on Person add | When a `Person` is linked, **auto-resolve and link** related M2M rows for that person — **only** types with profile **`RequirePerson*` checked**, and **only active / valid** rows (§10.2). |
+| 3 | Link on Person add | When a `Person` is linked, **auto-resolve and link** related M2M rows for that person — **only** types with profile **`RequirePerson*` checked**. Dated document types (Passport, Visa, Invitation item, Work permit item, Border zone item) take the profile **Last 1–3** (default 1). Other types stay **one current** row. Validity: §10.2. Missing expected rows are **flagged**, not blocked. |
 | 4 | Sticky links (history) | Keep the **originally linked** child instances. Do **not** silently swap to a newer passport/visa on reopen. Person **unlink** removes that person’s auto-linked child links on the instance. |
 | 5 | Manual child links | Officers **only link/unlink `Person`**. Child BOs are **never** manually linked or unlinked — always auto-resolved (when toggles allow). |
 | 6 | SQL presentation | **One wide roster SQL view** — **one row per linked Person** with joined columns from auto-linked children. |
@@ -189,16 +189,16 @@ Keep **explicit** profile toggles for readiness + enabling person/roster `{{…}
 
 | BO | Include when |
 |----|----------------|
-| Passport | Not expired |
-| Visa | Started, not cancelled/changed, and not expired |
+| Passport | **Expiration is not checked.** Last N by `IssueDate` (expired previous booklet is OK). |
+| Visa | Started, not cancelled/changed, and not expired. Last N when the profile Last-count is &gt; 1. |
 | AddressOfResidence | Current (PersonCurrentItems-style) |
 | Education | Current |
 | EmployeePositionHistory (Position) | Current |
 | EmployeeSalary | Current |
 | MedicalRecord | Not expired |
-| InvitationItem | Active (`!IsCancelled && !IsChanged && !IsUsed`) and parent Invitation not expired. Flags are **derived**: cancelled/changed = skip-nav link on a **PROCESS_ISSUED** Cancellation/Change instance; used = issuing visa. |
-| WorkPermitItem | Not cancelled/changed and not expired (same derived rules) |
-| BorderZoneItem | Not cancelled/changed and parent BorderZone not expired |
+| InvitationItem | Active (`!IsCancelled && !IsChanged && !IsUsed`) and parent Invitation not expired. Last N when the profile Last-count is &gt; 1. Flags are **derived**: cancelled/changed = skip-nav link on a **PROCESS_ISSUED** Cancellation/Change instance; used = issuing visa. |
+| WorkPermitItem | Not cancelled/changed and not expired (same derived rules). Last N when the profile Last-count is &gt; 1. |
+| BorderZoneItem | Not cancelled/changed and parent BorderZone not expired. Last N when the profile Last-count is &gt; 1. |
 | RejectionItem | **Current / not cancelled** |
 | TravelHistory | **TBD** (recommend: current / latest relevant movements — confirm) |
 
@@ -206,7 +206,7 @@ Keep **explicit** profile toggles for readiness + enabling person/roster `{{…}
 
 ### 10.3 Person-config block → tabs / linked records
 
-Profile toggles (configuration-related, live) control which person-data tabs and **Linked records** tiles apply, and which types auto-link when People are linked. Wizard step 4 **Required person-related data** maps to `RequirePerson*` on `ApplicationProfile`.
+Profile toggles (configuration-related, live) control which person-data tabs and **Linked records** tiles apply, and which types auto-link when People are linked. Wizard step 4 **Required person-related data** maps to `RequirePerson*` on `ApplicationProfile`. **Last 1 / Last 2 / Last 3** sits only next to Passport, Visa, Invitation item, Work permit item, and Border zone item (cap 3). Education / Position / Address / Salary / Medical / Rejection / Travel stay one current row. Calik seed: `pasport_change` Last 2 passports (Visa 1); `cancel_invitation` Last 2 invitations; `cancel_invitation_wp` Last 2 invitations + Last 2 work permits; `cancel_visa_wp` Last 2 visas + Last 2 work permits; `cancel_workpermit` Last 2 work permits. Invitation/WP/visa Last 2 means up to 2 valid rows. Shortfall (including `pasport_change` with only one passport) is flagged; create is not blocked.
 
 Expected members: Passport · Education · Position · Address of residence · Visa · Invitation item · Work permit item · Border zone item · Salary · Medical · Rejection item · Travel history · …
 
@@ -488,7 +488,8 @@ When any linked Application reaches lock state **A** (first progress beyond offi
 | Person M2M DetailView / hard-remove ApplicationItem | In progress (skip-navigation People + roster-line BO deleted; F5 heal pending) |
 | Workspace Document copies person filter + person catalog | Done (header chips; person-grouped catalog; slot viewer-only) |
 | Document copies from linked records (ID labels) | Done (ResolvedLinks; Passport/Visa numbers — not Current/Previous) |
-| §10.2 valid/not-expired auto-link gate | Done (officer-only; VISA2014 import keeps historical current rows) |
+| §10.2 valid/not-expired auto-link gate | Done (officer-only except **Passport expiration is not checked**; VISA2014 import keeps historical current rows) |
+| Person Last-N auto-link (Passport / Visa / Invitation / WP / Border zone) | **Done** (Last 1–3; flag missing; Calik: `pasport_change` Last 2 passports; `cancel_invitation` / `cancel_invitation_wp` / `cancel_visa_wp` / `cancel_workpermit` Last 2 on the cancel target types) |
 | Overview Issued records (1:N Invitation / WorkPermit / BorderZone / Rejection / issued Visa) | Done (May produce tiles + New from Overview) |
 | Person/Dossier Start application | Done |
 | Remove `Application.ApplicationType` FK | Deferred (after import cutover) |

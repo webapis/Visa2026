@@ -937,6 +937,15 @@
                                         }
                                     </select>
                                 }
+                                else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.ShortText)
+                                {
+                                    <input type="text"
+                                           class="cw-summary-field__input"
+                                           value="@field.Value"
+                                           maxlength="@(field.MaxLength ?? ApplicationWorkspaceCaseHeaderFieldsHelper.InstanceNumberMaxLength)"
+                                           disabled="@field.ReadOnly"
+                                           @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())" />
+                                }
                                 else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Text)
                                 {
                                     <textarea class="cw-summary-field__input cw-summary-field__textarea"
@@ -1053,11 +1062,11 @@
                         @foreach (var tile in view.LinkedRecordTiles)
                         {
                             <button type="button"
-                                    class="cw-link-tile cw-link-tile--@tile.Tone @(tile.Count == 0 ? "is-empty" : null)"
+                                    class="cw-link-tile cw-link-tile--@tile.Tone @(tile.Count < Math.Max(tile.ExpectedCount, 1) ? "is-empty" : null)"
                                     @onclick="() => OpenLinkedRecordTile(tile.TabKey)">
                                 <span class="cw-link-tile__icon">@tile.Glyph</span>
                                 <span class="cw-link-tile__label">@tile.Label</span>
-                                <strong class="cw-link-tile__count">@tile.Count</strong>
+                                <strong class="cw-link-tile__count">@FormatLinkedCount(tile.Count, tile.ExpectedCount)</strong>
                                 <span class="cw-link-tile__chev">›</span>
                             </button>
                         }
@@ -1237,11 +1246,11 @@
                             {
                                 var isSelected = IsPersonRecordSelected(person.Index, record.Key);
                                 <button type="button"
-                                        class="cw-link-tile cw-link-tile--@record.Tone @(record.Count == 0 ? "is-empty" : null) @(isSelected ? "is-selected" : null)"
+                                        class="cw-link-tile cw-link-tile--@record.Tone @(record.Count < Math.Max(record.ExpectedCount, 1) ? "is-empty" : null) @(isSelected ? "is-selected" : null)"
                                         @onclick="() => TogglePersonRecord(person.Index, record.Key)">
                                     <span class="cw-link-tile__icon">@record.Glyph</span>
                                     <span class="cw-link-tile__label">@record.Label</span>
-                                    <strong class="cw-link-tile__count">@record.Count</strong>
+                                    <strong class="cw-link-tile__count">@FormatLinkedCount(record.Count, record.ExpectedCount)</strong>
                                     <span class="cw-link-tile__chev">›</span>
                                 </button>
                             }
@@ -1309,54 +1318,96 @@
     private RenderFragment RenderSla(ApplicationWorkspaceCaseView view) => __builder =>
     {
         var sla = view.Sla;
-        var casePct = sla.TotalSlaDays > 0
-            ? Math.Clamp((int)Math.Round(100.0 * sla.ElapsedDays / sla.TotalSlaDays), 5, 95)
-            : 73;
-        var stepPct = sla.CurrentStepDaysRemaining is int stepRem && sla.TotalSlaDays > 0
-            ? Math.Clamp(100 - stepRem * 10, 10, 90)
-            : 20;
-        <div class="ct-page">
-            <h2 class="ct-page__title">SLA dashboard</h2>
+        var complete = sla.IsTerminal;
+        var caseRemaining = sla.CaseDaysRemaining;
+        var stepRemaining = sla.CurrentStepDaysRemaining;
+        var casePct = complete ? 100 : SlaRemainingPercent(caseRemaining, sla.TotalSlaDays);
+        var stepPct = complete ? 100 : SlaRemainingPercent(stepRemaining, Math.Max(stepRemaining ?? 0, 14));
+        var stepTitle = string.IsNullOrWhiteSpace(sla.CurrentStepLabel) ? "Current step" : sla.CurrentStepLabel;
+        var stepDue = SlaDisplayDate(sla.CurrentStepDueDate);
+        var started = SlaDisplayDate(sla.StartedOn);
+        var ministryDue = SlaDisplayDate(sla.MinistryDueDate);
+        var expected = SlaDisplayDate(sla.ExpectedCompletionDate);
+        var migrationDays = sla.MigrationSlaLabel.Split(' ').FirstOrDefault() ?? "—";
+        var caseStatusClass = complete ? "ct-sla-tone ct-sla-tone--ok" : SlaToneClass(caseRemaining);
+        var stepStatusClass = complete ? "ct-sla-tone ct-sla-tone--ok" : SlaToneClass(stepRemaining);
+        var caseRingClass = complete ? "ct-sla-ring--ok ct-sla-ring--done" : SlaRingTone(caseRemaining);
+        var stepRingClass = complete ? "ct-sla-ring--ok ct-sla-ring--done" : SlaRingTone(stepRemaining);
+        var caseValue = complete ? "Done" : (caseRemaining?.ToString() ?? "—");
+        var stepValue = complete ? "Done" : (stepRemaining?.ToString() ?? "—");
+        var caption = complete ? "complete" : "days left";
+        var caseLabel = complete ? sla.CaseStatus : SlaToneLabel(caseRemaining);
+        var stepStatusText = complete ? sla.CaseStatus : SlaToneLabel(stepRemaining);
+        var stepHint = complete ? "No open deadline" : (stepDue == "—" ? "No due date yet" : "Due " + stepDue);
+        var midTitle = complete ? "Completed" : "Current due";
+        var midDate = complete ? expected : ministryDue;
+        var endTitle = complete ? "Finished" : "Expected completion";
+        <div class="ct-page ct-sla">
+            <header class="ct-sla-head">
+                <h2 class="ct-page__title">SLA &amp; deadlines</h2>
+                <p class="ct-page__sub">Working days against the profile template. Dates in UTC+5 (Ashgabat).</p>
+            </header>
             <div class="ct-sla-metrics">
-                <div class="ct-sla-metric">
-                    <h3>Overall case SLA</h3>
+                <article class="ct-sla-metric">
+                    <h3>Overall case</h3>
                     <div class="ct-sla-metric__body">
-                        <div class="ct-sla-ring ct-sla-ring--lg" style="--ct-pct:@(100 - casePct)%">
-                            <strong>@(sla.CaseDaysRemaining?.ToString() ?? "—")</strong><span>days remaining</span>
+                        <div class="ct-sla-gauge">
+                            <div class="ct-sla-ring ct-sla-ring--lg @caseRingClass" style="--ct-pct:@casePct%" role="img" aria-label="@caseLabel">
+                                <strong>@caseValue</strong>
+                            </div>
+                            <span class="ct-sla-gauge__caption">@caption</span>
                         </div>
-                        <div>
-                            <p class="ct-muted">Total SLA <strong>@sla.TotalSlaDays days</strong></p>
-                            <p class="ct-muted">Elapsed <strong>@sla.ElapsedDays days</strong></p>
-                            <p class="ct-on-track"><span></span> On track</p>
-                        </div>
+                        <dl class="ct-sla-stats">
+                            <div><dt>Total SLA</dt><dd>@sla.TotalSlaDays days</dd></div>
+                            <div><dt>Elapsed</dt><dd>@sla.ElapsedDays days</dd></div>
+                            <div><dt>Status</dt><dd class="@caseStatusClass">@caseLabel</dd></div>
+                        </dl>
                     </div>
-                </div>
-                <div class="ct-sla-metric">
-                    <h3>Current step</h3>
-                    <p class="ct-muted">Ministry review deadline · Due @sla.MinistryDueDate</p>
+                </article>
+                <article class="ct-sla-metric">
+                    <h3>@stepTitle</h3>
+                    <p class="ct-sla-metric__hint">@stepHint</p>
                     <div class="ct-sla-metric__body">
-                        <div class="ct-sla-ring" style="--ct-pct:@(100 - stepPct)%">
-                            <strong>@(sla.CurrentStepDaysRemaining?.ToString() ?? "—")</strong><span>days remaining</span>
+                        <div class="ct-sla-gauge">
+                            <div class="ct-sla-ring @stepRingClass" style="--ct-pct:@stepPct%" role="img" aria-label="@stepStatusText">
+                                <strong>@stepValue</strong>
+                            </div>
+                            <span class="ct-sla-gauge__caption">@caption</span>
                         </div>
-                        <p class="ct-on-track"><span></span> On track</p>
+                        <dl class="ct-sla-stats">
+                            <div><dt>Status</dt><dd class="@stepStatusClass">@stepStatusText</dd></div>
+                        </dl>
                     </div>
-                </div>
-                <div class="ct-sla-metric">
-                    <h3>Migration SLA</h3>
-                    <p class="ct-sla-metric__big">@sla.MigrationSlaLabel.Split(' ').FirstOrDefault() <span>days</span></p>
-                    <p class="ct-muted">Total configured on profile</p>
-                </div>
+                </article>
+                <article class="ct-sla-metric">
+                    <h3>Profile SLA</h3>
+                    <p class="ct-sla-metric__hint">Configured on template</p>
+                    <div class="ct-sla-metric__body ct-sla-metric__body--stack">
+                        <p class="ct-sla-metric__big">@migrationDays <span>days</span></p>
+                        <p class="ct-muted">@(string.IsNullOrWhiteSpace(sla.ProfileSlaSource) ? "Profile template" : sla.ProfileSlaSource)</p>
+                    </div>
+                </article>
             </div>
-            <div class="ct-sla-timeline">
-                <div class="ct-sla-timeline__node"><span>🚩</span><strong>Started</strong><span>@sla.StartedOn</span></div>
-                <div class="ct-sla-timeline__line"></div>
-                <div class="ct-sla-timeline__node"><span>🏛</span><strong>Ministry due</strong><span>@sla.MinistryDueDate</span></div>
-                <div class="ct-sla-timeline__line"></div>
-                <div class="ct-sla-timeline__node"><span>🏁</span><strong>Expected completion</strong><span>@sla.ExpectedCompletionDate</span></div>
+            <div class="ct-sla-timeline" aria-label="Case timeline">
+                <div class="ct-sla-timeline__node">
+                    <span class="ct-sla-timeline__dot" aria-hidden="true"></span>
+                    <strong>Started</strong>
+                    <span>@started</span>
+                </div>
+                <div class="ct-sla-timeline__node">
+                    <span class="ct-sla-timeline__dot @(complete ? "ct-sla-timeline__dot--muted" : null)" aria-hidden="true"></span>
+                    <strong>@midTitle</strong>
+                    <span>@midDate</span>
+                </div>
+                <div class="ct-sla-timeline__node">
+                    <span class="ct-sla-timeline__dot ct-sla-timeline__dot--muted" aria-hidden="true"></span>
+                    <strong>@endTitle</strong>
+                    <span>@expected</span>
+                </div>
             </div>
             <div class="ct-sla-lower">
                 <div class="ct-sla-table-wrap">
-                    <h3>Deadlines</h3>
+                    <h3>SLA by step</h3>
                     <table class="os-table">
                         <thead><tr><th>Step</th><th>Due date</th><th>Days left</th><th>Status</th></tr></thead>
                         <tbody>
@@ -1364,8 +1415,8 @@
                             {
                                 <tr class="@(row.IsCurrent ? "ct-sla-row--current" : null)">
                                     <td>@if (row.IsCurrent) { <strong>@row.Step</strong> } else { @row.Step }</td>
-                                    <td>@row.DueDate</td>
-                                    <td class="@(row.Status == "inprogress" ? "ct-sla-days--ok" : null)">@row.DaysLeft</td>
+                                    <td>@SlaDisplayDate(row.DueDate)</td>
+                                    <td class="@(row.Status is "inprogress" or "overdue" ? (row.Status == "overdue" ? "ct-sla-days--due" : "ct-sla-days--ok") : null)">@SlaDisplayDate(row.DaysLeft)</td>
                                     <td><span class="os-status os-status--@SlaStatusClass(row.Status)">@SlaStatusLabel(row.Status)</span></td>
                                 </tr>
                             }
@@ -1375,16 +1426,20 @@
                 <div class="ct-sla-aside">
                     @if (!string.IsNullOrWhiteSpace(sla.AlertMessage))
                     {
-                        <div class="ct-sla-alert">⚠ <div><strong>Ministry review deadline approaching</strong><p>@sla.AlertMessage</p></div></div>
+                        <div class="ct-sla-alert" role="status">
+                            <div>
+                                <strong>Deadline approaching</strong>
+                                <p>@sla.AlertMessage</p>
+                            </div>
+                        </div>
                     }
-                    <div class="cw-rail-block" style="box-shadow:none;margin:0">
-                        <h4>SLA source (Profile template)</h4>
-                        <button type="button" class="cw-link-btn">MigrationSlaDays from template</button>
-                        <p class="ct-muted" style="margin:8px 0 0">Total SLA (days): <strong>@sla.TotalSlaDays</strong></p>
+                    <div class="ct-sla-source">
+                        <h4>SLA source</h4>
+                        <p>@(string.IsNullOrWhiteSpace(sla.ProfileSlaSource) ? "Profile template" : sla.ProfileSlaSource)</p>
+                        <p class="ct-muted">Migration SLA <strong>@sla.TotalSlaDays days</strong></p>
                     </div>
                 </div>
             </div>
-            <p class="ct-sla-foot">All dates are displayed in system time zone (UTC+5:00) Ashgabat.</p>
         </div>;
     };
 
@@ -1447,11 +1502,18 @@
             case "progress":
                 var current = view.ProgressSteps.FirstOrDefault(s => s.State == "current");
                 var daysLeft = current?.SlaDaysRemaining;
-                var ringPct = daysLeft is int d ? Math.Clamp(100 - d * 8, 10, 90) : 0;
+                var railComplete = view.Sla.IsTerminal;
+                var ringPct = railComplete ? 100 : SlaRemainingPercent(daysLeft, Math.Max(daysLeft ?? 0, 14));
+                var railRingClass = railComplete ? "ct-sla-ring--ok ct-sla-ring--done" : SlaRingTone(daysLeft);
+                var railValue = railComplete ? "Done" : (daysLeft?.ToString() ?? "—");
+                var railCaption = railComplete ? "complete" : "days left";
                 <section class="cw-rail-block">
                     <h4>SLA for current step</h4>
-                    <div class="ct-sla-ring" style="--ct-pct:@ringPct%">
-                        <strong>@(daysLeft?.ToString() ?? "—")</strong><span>days left</span>
+                    <div class="ct-sla-gauge">
+                        <div class="ct-sla-ring @railRingClass" style="--ct-pct:@ringPct%" role="img" aria-label="@railCaption">
+                            <strong>@railValue</strong>
+                        </div>
+                        <span class="ct-sla-gauge__caption">@railCaption</span>
                     </div>
                     @if (current != null)
                     {
@@ -1486,6 +1548,7 @@
     {
         "completed" => "ready",
         "inprogress" => "process",
+        "overdue" => "hold",
         _ => "hold",
     };
 
@@ -1493,7 +1556,44 @@
     {
         "completed" => "Completed",
         "inprogress" => "In progress",
+        "overdue" => "Overdue",
         _ => "Pending",
+    };
+
+    private static int SlaRemainingPercent(int? remaining, int total)
+    {
+        if (total <= 0)
+            return remaining is > 0 ? 40 : 0;
+        var days = Math.Max(remaining ?? 0, 0);
+        return Math.Clamp((int)Math.Round(100.0 * days / total), 0, 100);
+    }
+
+    private static string SlaDisplayDate(string? value) =>
+        string.IsNullOrWhiteSpace(value) || value == "—" ? "—" : value.Trim();
+
+    private static string SlaRingTone(int? daysRemaining) => daysRemaining switch
+    {
+        null => "",
+        <= 1 => "ct-sla-ring--due",
+        <= 10 => "ct-sla-ring--warn",
+        _ => "ct-sla-ring--ok",
+    };
+
+    private static string SlaToneClass(int? daysRemaining) => daysRemaining switch
+    {
+        null => "ct-sla-tone",
+        <= 1 => "ct-sla-tone ct-sla-tone--due",
+        <= 10 => "ct-sla-tone ct-sla-tone--warn",
+        _ => "ct-sla-tone ct-sla-tone--ok",
+    };
+
+    private static string SlaToneLabel(int? daysRemaining) => daysRemaining switch
+    {
+        null => "—",
+        <= 0 => "Due",
+        1 => "Due tomorrow",
+        <= 10 => "Due soon",
+        _ => "On track",
     };
 
     private async Task SelectTab(string key)
@@ -1688,6 +1788,9 @@
             return;
         await UnlinkPersonRequested.InvokeAsync(personId);
     }
+
+    private static string FormatLinkedCount(int count, int expected) =>
+        expected > 1 ? $"{count}/{expected}" : count.ToString();
 
     private static string PersonColor(int index) => PersonColors[index % PersonColors.Length];
 

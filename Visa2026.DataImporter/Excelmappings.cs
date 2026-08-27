@@ -839,9 +839,6 @@ public static class ExcelMappings
                 new() { Header = "Invitation Number", PayloadProperty = "Invitation",       Kind = ColumnKind.LookupByName, LookupEntity = "Invitation", LookupFilterProperty = "InvitationNumber", Required = true },
                 new() { Header = "Person",            PayloadProperty = "Person",           Kind = ColumnKind.PersonLookupByName, Required = true },
                 new() { Header = "Passport Number",   PayloadProperty = "Passport",         Kind = ColumnKind.LookupByName, LookupEntity = "Passport",   LookupFilterProperty = "PassportNumber", Required = true },
-                new() { Header = "Is Used",           PayloadProperty = "IsUsed",           Kind = ColumnKind.Bool },
-                new() { Header = "Is Cancelled",      PayloadProperty = "IsCancelled",      Kind = ColumnKind.Bool },
-                new() { Header = "Is Changed",        PayloadProperty = "IsChanged",        Kind = ColumnKind.Bool },
             }
         },
         new SheetMap { SheetName = "WorkPermits", EntityName = "WorkPermit", DisplayName = "Work Permit",
@@ -852,7 +849,6 @@ public static class ExcelMappings
                 // OData payload must send IssuedDate, not StartDate.
                 new() { Header = "Start Date",         PayloadProperty = "IssuedDate",       Kind = ColumnKind.Scalar,      Required = true },
                 new() { Header = "Application",        PayloadProperty = "Application",      Kind = ColumnKind.LookupByName, LookupEntity = "Application", LookupFilterProperty = "FullApplicationNumber" },
-                new() { Header = "Is Cancelled",       PayloadProperty = "IsCancelled",      Kind = ColumnKind.Bool },
             }
         },
         new SheetMap { SheetName = "WorkPermitItems", EntityName = "WorkPermitItem", DisplayName = "Work Permit Item",
@@ -870,9 +866,6 @@ public static class ExcelMappings
                 new() { Header = "Start Date",         PayloadProperty = "StartDate",        Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "Expiration Date",    PayloadProperty = "ExpirationDate",   Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "AS Number",          PayloadProperty = "ASNumber",         Kind = ColumnKind.StringValue },
-                new() { Header = "Is Cancelled",       PayloadProperty = "IsCancelled",      Kind = ColumnKind.Bool },
-                new() { Header = "Is Changed",         PayloadProperty = "IsChanged",        Kind = ColumnKind.Bool },
-                new() { Header = "Is Extended",        PayloadProperty = "IsExtended",       Kind = ColumnKind.Bool },
                 new() { Header = "Work Permitted Locations", PayloadProperty = "WorkPermittedLocations", Kind = ColumnKind.Scalar },
             }
         },

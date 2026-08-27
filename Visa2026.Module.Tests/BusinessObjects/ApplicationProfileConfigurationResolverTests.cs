@@ -82,17 +82,22 @@ public class ApplicationProfileConfigurationResolverTests
     }
 
     [Fact]
-    public void HasMigrationSlaConfigured_UsesProfileDaysBeforeTypeProfile()
+    public void HasMigrationSlaConfigured_UsesProfileDays()
     {
-        var type = new ApplicationType
-        {
-            MigrationSlaProfile = new ApplicationMigrationSlaProfile { MaxDaysInReview = 7 },
-        };
         var profile = new ApplicationProfile { MigrationSlaDays = 21 };
-        var app = new ApplicationProfileInstance { ApplicationProfile = profile, ApplicationType = type };
+        var app = new ApplicationProfileInstance { ApplicationProfile = profile };
 
         Assert.Equal(21, ApplicationProfileConfigurationResolver.GetMigrationSlaMaxDays(app));
         Assert.True(ApplicationProfileConfigurationResolver.HasMigrationSlaConfigured(app));
+    }
+
+    [Fact]
+    public void HasMigrationSlaConfigured_ZeroWhenNoProfileDays()
+    {
+        var app = new ApplicationProfileInstance { ApplicationType = new ApplicationType() };
+
+        Assert.Equal(0, ApplicationProfileConfigurationResolver.GetMigrationSlaMaxDays(app));
+        Assert.False(ApplicationProfileConfigurationResolver.HasMigrationSlaConfigured(app));
     }
 
     [Fact]

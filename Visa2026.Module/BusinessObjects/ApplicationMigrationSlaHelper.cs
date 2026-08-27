@@ -18,16 +18,6 @@ public static class ApplicationMigrationSlaHelper
         if (!IsMigrationServiceProcessStartedStep(latest.State.Code))
             return default;
 
-        if (application.ApplicationType?.MigrationSlaProfile is { MaxDaysInReview: > 0 } migrationProfile)
-        {
-            var workingDays = WorkingDaysHelper.CountWorkingDaysInclusive(latest.Date, DateTime.Today);
-            var maxDays = migrationProfile.MaxDaysInReview.Value;
-            var warningDays = migrationProfile.WarningDaysBeforeMax;
-            var label = ResolveProfileDisplayLabel(migrationProfile);
-            var status = ResolveStatus(workingDays, maxDays, warningDays);
-            return new ApplicationProfileInstanceProgressSlaResult(status, workingDays, maxDays, warningDays, label);
-        }
-
         if (application.ApplicationProfile is { MigrationSlaDays: > 0 } applicationProfile)
         {
             var workingDays = WorkingDaysHelper.CountWorkingDaysInclusive(latest.Date, DateTime.Today);
@@ -68,30 +58,6 @@ public static class ApplicationMigrationSlaHelper
                 days,
                 max)
         };
-    }
-
-    /// <summary>UI label for the migration SLA tier; follows current UI culture (not report <see cref="LookupBase.NameTm"/>).</summary>
-    public static string ResolveProfileDisplayLabel(ApplicationMigrationSlaProfile? profile)
-    {
-        if (profile == null)
-            return VisaUiMessages.Get("ApplicationMigration.Sla.DefaultLabel");
-
-        var code = profile.Code?.Trim();
-        if (!string.IsNullOrEmpty(code))
-        {
-            var key = "ApplicationMigration.Sla.Profile." + code;
-            var localized = VisaUiMessages.Get(key);
-            if (!string.Equals(localized, key, StringComparison.Ordinal))
-                return localized;
-        }
-
-        if (!string.IsNullOrWhiteSpace(profile.NameTm))
-            return profile.NameTm.Trim();
-
-        if (!string.IsNullOrWhiteSpace(code))
-            return code;
-
-        return VisaUiMessages.Get("ApplicationMigration.Sla.DefaultLabel");
     }
 
     public static bool IsMigrationServiceProcessStartedStep(string? stateCode) =>

@@ -107,7 +107,6 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 |------|--------|
 | `UserReportPlaceholder` | Read, Write, Create, Delete (extract placeholders) |
 | `ApplicationProfile`, `ApplicationProfileApprovalLeg`, `ApplicationProfileTemplate`, `ApplicationProfileProgressStateSetting` | Full (Templates catalog: create, edit, **delete when unlinked**) |
-| `ApplicationMigrationSlaProfile` | Full (migration SLA tiers + link application types) |
 | `SystemSettings` | Full (singleton upload size limits) |
 | `ExpirationAlertRule` | Read + Write (edit warn/extension day counts; rows seeded) |
 
@@ -116,14 +115,14 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 | Type | Notes |
 |------|-------|
 | `ReportDataV2`, `ReportVisibility`, `PdfFormMapping` | |
-| `ApplicationType` | Link popup on migration SLA profile detail |
+| `ApplicationType` | Read for remaining Configuration link popups |
 | `ApplicationTypeGroup`, `ApplicationTypeGroupMember` | Report template group picker / membership (read) |
 
 ### Navigation (allow)
 
 | Area |
 |------|
-| **Configuration** — company, signatory, representative, numbering, project contracts, ministries, migration SLA profiles, document expiration alerts, upload limits |
+| **Configuration** — company, signatory, representative, numbering, project contracts, ministries, document expiration alerts, upload limits (ministry review SLA catalog hidden; type permissions retained) |
 | **Reports** — `UserReportTemplate` |
 
 ---
@@ -160,7 +159,6 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 | Type |
 |---|
 | `ApplicationTypeFilter`, `ApplicationType`, `ApplicationState`, `ApplicationLocation` |
-| `ApplicationMigrationSlaProfile` | Read only (Migration deadline column via `ApplicationType.MigrationSlaProfile`; no Configuration nav) — also via `EnsureApplicationProcessTrackingReadPermissions` |
 | `CheckPoint`, `Country`, `Department`, `EducationLevel`, `Gender`, `MaritalStatus` |
 | `MigrationService`, `PassportType`, `Position`, `PurposeOfTravel` |
 | `Region`, `Relationship`, `Urgency`, `ValidityDuration` |
@@ -183,7 +181,7 @@ Shared helper `EnsureApplicationProcessTrackingReadPermissions` — required for
 
 | Column / data | Types |
 |---|---|
-| Migration deadline / working days | `ApplicationMigrationSlaProfile` (via `ApplicationType`) |
+| Migration deadline / working days | `ApplicationProfile.MigrationSlaDays` |
 | Approval deadline / working days | `ApplicationApprovalLegSnapshot`, `ApprovingMinistry`, `ApprovalLegProfile` (+ legs) |
 | Current status | `ApplicationProgress`, `ApplicationState`, `ApplicationLocation`, `MigrationService` |
 | Project/Contract | `ProjectContract`, `ProjectContractApprovalLegProfile` |

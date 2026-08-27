@@ -84,7 +84,7 @@ Companion to [SKILL.md](./SKILL.md).
 
 ### Configuration-related (live) — on `ApplicationProfile`
 
-Identity (Name, Description, Code, SelectionCode) · Route (`ProgressRoute`) · Audience (`ForEmployee`, `ForFamilyMember`, `ForTemporaryVisitor`) · `ActionFamily` · Produce/Cancel booleans · `DefaultApprovalLegProfile` (shared `ApprovalLegProfile` catalog; instance snapshots ministries at create) · SLA days · `NestedTemplates` (profile-specific may set `ApplicableProjectContract` / `ApplicableMigrationService`) · `RequirePerson*` toggles · `ApplicabilityCriteria` · `Require*` + `Default*` for catalog fields
+Identity (Name, Description, Code, SelectionCode) · Route (`ProgressRoute`) · Audience (`ForEmployee`, `ForFamilyMember`, `ForTemporaryVisitor`) · `ActionFamily` · Produce/Cancel booleans · `DefaultApprovalLegProfile` (shared `ApprovalLegProfile` catalog; instance snapshots ministries at create) · SLA days · `NestedTemplates` (profile-specific may set `ApplicableProjectContract` / `ApplicableMigrationService`) · `RequirePerson*` toggles + `Person*LastCount` (1–3) for Passport/Visa/Invitation/WP/Border zone · `ApplicabilityCriteria` · `Require*` + `Default*` for catalog fields
 
 ### Per-Application (persistent) — on `Application`
 

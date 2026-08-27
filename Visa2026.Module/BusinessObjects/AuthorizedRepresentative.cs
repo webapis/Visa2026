@@ -12,7 +12,7 @@ using Visa2026.Module.Services;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Configuration")]
+    [NavigationItem(false)]
     [DisplayName("Authorized Representative")]
     [DefaultProperty(nameof(FullName))]
     [ImageName("BO_Contact")]

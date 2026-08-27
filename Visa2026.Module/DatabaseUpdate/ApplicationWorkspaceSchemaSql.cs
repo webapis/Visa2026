@@ -46,8 +46,8 @@ public static class ApplicationWorkspaceSchemaSql
                 CONSTRAINT "FK_ApplicationProfileInstancePersonResolvedLinks_People_PersonId"
                     FOREIGN KEY ("PersonId") REFERENCES "People" ("ID") ON DELETE RESTRICT
             );
-            CREATE UNIQUE INDEX "IX_ApplicationProfileInstancePersonResolvedLinks_Instance_Person_Kind"
-                ON "ApplicationProfileInstancePersonResolvedLinks" ("ApplicationProfileInstanceId", "PersonId", "LinkKind");
+            CREATE UNIQUE INDEX "IX_ApplicationProfileInstancePersonResolvedLinks_Instance_Person_Kind_Object"
+                ON "ApplicationProfileInstancePersonResolvedLinks" ("ApplicationProfileInstanceId", "PersonId", "LinkKind", "LinkedObjectId");
           END IF;
         END $$;
         """;
@@ -87,9 +87,27 @@ public static class ApplicationWorkspaceSchemaSql
                 CONSTRAINT FK_ApplicationProfileInstancePersonResolvedLinks_People_PersonId
                     FOREIGN KEY (PersonId) REFERENCES dbo.People(ID)
             );
-            CREATE UNIQUE INDEX IX_ApplicationProfileInstancePersonResolvedLinks_Instance_Person_Kind
-                ON dbo.ApplicationProfileInstancePersonResolvedLinks (ApplicationProfileInstanceId, PersonId, LinkKind);
+            CREATE UNIQUE INDEX IX_ApplicationProfileInstancePersonResolvedLinks_Instance_Person_Kind_Object
+                ON dbo.ApplicationProfileInstancePersonResolvedLinks (ApplicationProfileInstanceId, PersonId, LinkKind, LinkedObjectId);
         END;
+        """;
+
+    /// <summary>
+    /// Allow more than one ResolvedLink of the same kind per person (Last 2/3 passports, invitations).
+    /// </summary>
+    internal const string HealResolvedLinksUniqueIndexPostgres = """
+        DO $$
+        BEGIN
+          IF to_regclass('public."ApplicationProfileInstancePersonResolvedLinks"') IS NULL THEN
+            RETURN;
+          END IF;
+
+          DROP INDEX IF EXISTS "IX_ApplicationProfileInstancePersonResolvedLinks_Instance_Person_Kind";
+
+          CREATE UNIQUE INDEX IF NOT EXISTS "IX_ApplicationProfileInstancePersonResolvedLinks_Instance_Person_Kind_Object"
+            ON "ApplicationProfileInstancePersonResolvedLinks"
+            ("ApplicationProfileInstanceId", "PersonId", "LinkKind", "LinkedObjectId");
+        END $$;
         """;
 
     public static void ApplyIfMissing(string connectionString)
@@ -103,6 +121,7 @@ public static class ApplicationWorkspaceSchemaSql
             using var connection = new NpgsqlConnection(cleaned);
             connection.Open();
             Execute(connection, EnsureSchemaPostgres);
+            Execute(connection, HealResolvedLinksUniqueIndexPostgres);
             return;
         }
 

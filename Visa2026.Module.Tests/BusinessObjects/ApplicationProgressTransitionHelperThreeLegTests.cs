@@ -129,7 +129,6 @@ public class ApplicationProfileInstanceProgressTransitionHelperThreeLegTests
         {
             ApplicationProfileInstanceProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
             ShowApprovalLegProfile = true,
-            MigrationSlaProfile = new ApplicationMigrationSlaProfile { MaxDaysInReview = 10 }
         };
         var profile = new ApprovalLegProfile
         {
@@ -144,6 +143,11 @@ public class ApplicationProfileInstanceProgressTransitionHelperThreeLegTests
         return new ApplicationProfileInstance
         {
             ApplicationType = type,
+            ApplicationProfile = new ApplicationProfile
+            {
+                MigrationSlaDays = 10,
+                ProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
+            },
             ApprovalLegProfile = profile,
             ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>()
         };

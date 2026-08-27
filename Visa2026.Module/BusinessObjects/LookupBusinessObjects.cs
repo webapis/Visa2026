@@ -185,17 +185,6 @@ namespace Visa2026.Module.BusinessObjects
             Context = "DetailView")]
         public virtual MinistryReviewDepth MinistryReviewDepth { get; set; }
 
-        /// <summary>Migration-service SLA tier for <c>PROCESS_STARTED</c> @ <c>AT_MIGRATION_SERVICE</c>.</summary>
-        [Browsable(false)]
-        [VisibleInDetailView(false)]
-        [VisibleInListView(false)]
-        [VisibleInLookupListView(false)]
-        [InverseProperty(nameof(ApplicationMigrationSlaProfile.ApplicationTypes))]
-        public virtual ApplicationMigrationSlaProfile MigrationSlaProfile { get; set; }
-
-        [Browsable(false)]
-        public virtual Guid? MigrationSlaProfileId { get; set; }
-
         // --- These flags control the visibility of fields in the main ApplicationProfileInstance Detail View ---
         public virtual bool ShowProjectContract { get; set; }
         public virtual bool ShowApprovalLegProfile { get; set; }

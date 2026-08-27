@@ -132,9 +132,10 @@ public static class ApplicationProfileInstancePeopleSkipNavSchemaSql
                 REFERENCES "People" ("ID") ON DELETE RESTRICT;
             END IF;
 
-            CREATE UNIQUE INDEX IF NOT EXISTS "IX_ApplicationProfileInstancePersonResolvedLinks_Instance_Person_Kind"
+            DROP INDEX IF EXISTS "IX_ApplicationProfileInstancePersonResolvedLinks_Instance_Person_Kind";
+            CREATE UNIQUE INDEX IF NOT EXISTS "IX_ApplicationProfileInstancePersonResolvedLinks_Instance_Person_Kind_Object"
               ON "ApplicationProfileInstancePersonResolvedLinks"
-              ("ApplicationProfileInstanceId", "PersonId", "LinkKind");
+              ("ApplicationProfileInstanceId", "PersonId", "LinkKind", "LinkedObjectId");
           END IF;
 
           IF to_regclass('public."ApplicationProfileInstancePeople"') IS NOT NULL THEN

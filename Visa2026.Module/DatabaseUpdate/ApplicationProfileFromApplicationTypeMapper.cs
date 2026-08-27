@@ -64,6 +64,13 @@ public static class ApplicationProfileFromApplicationTypeMapper
             return ApplicationProfileActionFamily.Cancellation;
         }
 
+        if (type.ShowVisaIsChanged
+            || type.ShowInvitationItemIsChanged
+            || type.ShowWorkPermitItemIsChanged)
+        {
+            return ApplicationProfileActionFamily.Change;
+        }
+
         if (type.ShowBusinessTrips)
             return ApplicationProfileActionFamily.BusinessTrip;
 
@@ -106,6 +113,12 @@ public static class ApplicationProfileFromApplicationTypeMapper
         profile.CancelVisas = type.ShowVisaIsCancelled;
         profile.CancelBorderZonePermits = false;
         profile.CancelApplicationProfileInstances = false;
+
+        profile.ChangeInvitations = type.ShowInvitationItemIsChanged;
+        profile.ChangeWorkPermits = type.ShowWorkPermitItemIsChanged;
+        profile.ChangeVisas = type.ShowVisaIsChanged;
+        profile.ChangeBorderZonePermits = false;
+        profile.ChangeApplicationProfileInstances = false;
     }
 
     private static void ApplyPerApplicationRequirements(ApplicationProfile profile, ApplicationType type)
@@ -151,9 +164,7 @@ public static class ApplicationProfileFromApplicationTypeMapper
             ? ResolveMinistrySlaDays(type.MinistryReviewDepth)
             : 14;
 
-        profile.MigrationSlaDays = type.MigrationSlaProfile?.MaxDaysInReview is > 0 and var maxDays
-            ? maxDays
-            : 14;
+        profile.MigrationSlaDays = 14;
     }
 
     private static int ResolveMinistrySlaDays(MinistryReviewDepth depth) =>

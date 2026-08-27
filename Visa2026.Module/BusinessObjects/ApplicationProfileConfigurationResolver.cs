@@ -50,9 +50,6 @@ public static class ApplicationProfileConfigurationResolver
         if (application?.ApplicationProfile is { MigrationSlaDays: > 0 } profile)
             return profile.MigrationSlaDays;
 
-        if (application?.ApplicationType?.MigrationSlaProfile?.MaxDaysInReview is > 0 and var maxDays)
-            return maxDays;
-
         return 0;
     }
 

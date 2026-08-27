@@ -4,8 +4,8 @@ slug: administration/configuration/sla
 locale: tr
 tier: 8
 guideStatus: draft
-bo: ApplicationMigrationSlaProfile
-navPath: Configuration
+bo: ApplicationProfile
+navPath: Application Profiles
 roles: [Administrator, VisaOffice]
 prerequisiteSlugs:
   - administration/configuration/overview
@@ -15,11 +15,6 @@ verified: false
 
 # SLA ayarları
 
-| Menü | Kapsam |
-|------|--------|
-| **Ministry review SLA** | Tekil — bakanlık bacakları (çalışma günü) |
-| **Application Migration Sla Profile** | Göç hizmeti SLA — **Application types** ile bağlayın |
-
-**Warning** günleri **Max working days**'den küçük olmalı.
+Çalışma günü SLA, **Configuration** menüsünde değil, her **Application Profile** üzerinde **Process & SLA** adımında ayarlanır (**Ministry SLA days** / **Migration SLA days**).
 
 [İlerleme takibi](../../applications/progress.md) · [Genel bakış](overview.md)

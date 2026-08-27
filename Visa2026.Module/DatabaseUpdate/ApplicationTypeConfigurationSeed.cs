@@ -58,7 +58,6 @@ internal static class ApplicationTypeConfigurationSeed
 
                 ApplicationProfileInstanceProgressRoute = ResolveApplicationProfileInstanceProgressRoute(r, flags),
                 MinistryReviewDepth = ResolveMinistryReviewDepth(r, flags),
-                MigrationSlaProfileCode = r.MigrationSlaProfileCode ?? "",
 
                 ShowProjectContract = GetFlag(flags, nameof(ApplicationTypeConfigurationRow.ShowProjectContract)),
                 ShowApprovalLegProfile = ResolveShowApprovalLegProfile(r, flags),
@@ -211,7 +210,6 @@ internal static class ApplicationTypeConfigurationSeed
         public int DurationInDays { get; set; }
         public string? ApplicationProfileInstanceProgressRoute { get; set; }
         public string? MinistryReviewDepth { get; set; }
-        public string? MigrationSlaProfileCode { get; set; }
         public Dictionary<string, bool>? Flags { get; set; }
     }
 }

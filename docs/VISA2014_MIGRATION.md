@@ -23,7 +23,7 @@ Plan for importing production data from the legacy **VISA2014** application into
 
 | Topic | Note |
 |-------|------|
-| **`ApplicationMigrationSlaProfile`** | Visa2026 tenant lookup for **workflow SLA** — unrelated to VISA2014 data import. |
+| **`ApplicationMigrationSlaProfile`** | Removed — migration SLA days live on **`ApplicationProfile.MigrationSlaDays`**. Unrelated to VISA2014 import. |
 | **Editing VISA2014** | Legacy repo is read-only; **`VISA2015`** is read-only SQL — no writes to either. |
 | **VISA2014 repo as schema authority** | **`VISA2015`** is source of truth; repo is supplementary context only. |
 | **Cloning VISA2014 into Visa2026 git** | Keep repositories sibling folders under `Documents\GitHub`. |

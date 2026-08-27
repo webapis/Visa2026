@@ -9,6 +9,7 @@ public static class ApplicationProfilePickerDisplayHelper
         {
             ApplicationProfileActionFamily.Issuance => "Issuance",
             ApplicationProfileActionFamily.Cancellation => "Cancellation",
+            ApplicationProfileActionFamily.Change => "Change",
             ApplicationProfileActionFamily.Registration => "Registration",
             ApplicationProfileActionFamily.BusinessTrip => "Business trip",
             _ => family.ToString(),

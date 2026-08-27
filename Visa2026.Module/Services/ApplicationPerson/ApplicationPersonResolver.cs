@@ -36,7 +36,7 @@ public static class ApplicationProfileInstancePersonResolver
 
         var existing = LoadLinks(objectSpace, trackedApplication.ID, trackedPerson.ID);
         ApplicationProfileInstanceChildMembership.SyncFromResolvedLinks(objectSpace, trackedApplication, existing);
-        var candidates = ResolveEntities(objectSpace, trackedPerson);
+        var candidates = ResolveEntities(objectSpace, trackedPerson, trackedApplication);
         foreach (var (kind, linkedObjectId) in CollectMissingAutoLinks(trackedApplication, existing, candidates))
         {
             var link = objectSpace.CreateObject<ApplicationProfileInstancePersonResolvedLink>();
@@ -99,26 +99,34 @@ public static class ApplicationProfileInstancePersonResolver
         };
 
     /// <summary>
-    /// Returns kinds that should be created: required by profile, not already sticky-linked,
-    /// and a valid candidate entity exists. Never replaces an existing LinkedObjectId.
+    /// Returns kinds that should be created: required by profile, under Last-N for that kind,
+    /// not already sticky-linked to that object, and a valid candidate exists.
+    /// Never replaces an existing LinkedObjectId.
     /// </summary>
     public static IReadOnlyList<(ApplicationProfileInstancePersonLinkKind Kind, Guid LinkedObjectId)> CollectMissingAutoLinks(
         ApplicationProfileInstance? application,
         IEnumerable<ApplicationProfileInstancePersonResolvedLink> existingLinks,
         IEnumerable<(ApplicationProfileInstancePersonLinkKind Kind, object? Entity)> candidates)
     {
-        var existingKinds = new HashSet<ApplicationProfileInstancePersonLinkKind>();
+        var existingIdsByKind = new Dictionary<ApplicationProfileInstancePersonLinkKind, HashSet<Guid>>();
         foreach (var link in existingLinks ?? [])
         {
-            if (link?.LinkKind is { } kind)
-                existingKinds.Add(kind);
+            if (link?.LinkKind is not { } kind)
+                continue;
+            if (!existingIdsByKind.TryGetValue(kind, out var ids))
+            {
+                ids = [];
+                existingIdsByKind[kind] = ids;
+            }
+
+            if (link.LinkedObjectId is Guid existingId && existingId != Guid.Empty)
+                ids.Add(existingId);
         }
 
         var missing = new List<(ApplicationProfileInstancePersonLinkKind Kind, Guid LinkedObjectId)>();
+        var addedByKind = new Dictionary<ApplicationProfileInstancePersonLinkKind, int>();
         foreach (var (kind, entity) in candidates ?? [])
         {
-            if (existingKinds.Contains(kind))
-                continue;
             if (!IsAutoLinkEnabled(application, kind))
                 continue;
             if (entity is not BaseObject bo || bo.ID == Guid.Empty)
@@ -127,8 +135,26 @@ public static class ApplicationProfileInstancePersonResolver
                 && !ApplicationProfileInstancePersonValidItems.CanLinkEntity(entity))
                 continue;
 
+            if (!existingIdsByKind.TryGetValue(kind, out var existingIds))
+            {
+                existingIds = [];
+                existingIdsByKind[kind] = existingIds;
+            }
+
+            if (existingIds.Contains(bo.ID))
+                continue;
+
+            var lastCount = ApplicationProfilePersonLastCount.For(application, kind);
+            if (lastCount <= 0)
+                continue;
+
+            var already = existingIds.Count + addedByKind.GetValueOrDefault(kind);
+            if (already >= lastCount)
+                continue;
+
             missing.Add((kind, bo.ID));
-            existingKinds.Add(kind);
+            addedByKind[kind] = addedByKind.GetValueOrDefault(kind) + 1;
+            existingIds.Add(bo.ID);
         }
 
         return missing;
@@ -149,12 +175,22 @@ public static class ApplicationProfileInstancePersonResolver
         IEnumerable<ApplicationProfileInstancePersonResolvedLink>? existingLinks,
         ApplicationProfileInstancePersonLinkKind kind,
         Guid linkedObjectId,
+        out ApplicationProfileInstancePersonResolvedLink? emptyRow) =>
+        DecideEnsureResolvedLink(existingLinks, kind, linkedObjectId, lastCount: 1, out emptyRow);
+
+    public static EnsureResolvedLinkDecision DecideEnsureResolvedLink(
+        IEnumerable<ApplicationProfileInstancePersonResolvedLink>? existingLinks,
+        ApplicationProfileInstancePersonLinkKind kind,
+        Guid linkedObjectId,
+        int lastCount,
         out ApplicationProfileInstancePersonResolvedLink? emptyRow)
     {
         emptyRow = null;
         if (linkedObjectId == Guid.Empty)
             return EnsureResolvedLinkDecision.None;
 
+        lastCount = ApplicationProfilePersonLastCount.Clamp(lastCount);
+        var nonEmpty = 0;
         foreach (var link in existingLinks ?? [])
         {
             if (link?.LinkKind != kind)
@@ -162,11 +198,17 @@ public static class ApplicationProfileInstancePersonResolver
             if (link.LinkedObjectId == linkedObjectId)
                 return EnsureResolvedLinkDecision.None;
             if (link.LinkedObjectId is Guid existingId && existingId != Guid.Empty)
-                return EnsureResolvedLinkDecision.None;
+            {
+                nonEmpty++;
+                continue;
+            }
 
             emptyRow = link;
             return EnsureResolvedLinkDecision.FillEmpty;
         }
+
+        if (nonEmpty >= lastCount)
+            return EnsureResolvedLinkDecision.None;
 
         return EnsureResolvedLinkDecision.Create;
     }
@@ -193,7 +235,11 @@ public static class ApplicationProfileInstancePersonResolver
             return;
 
         var existing = LoadLinks(objectSpace, trackedApplication.ID, trackedPerson.ID);
-        var decision = DecideEnsureResolvedLink(existing, kind, linkedObjectId, out var emptyRow);
+        var lastCount = ApplicationProfilePersonLastCount.For(trackedApplication, kind);
+        if (lastCount <= 0)
+            return;
+
+        var decision = DecideEnsureResolvedLink(existing, kind, linkedObjectId, lastCount, out var emptyRow);
         if (decision == EnsureResolvedLinkDecision.None)
             return;
 
@@ -215,20 +261,47 @@ public static class ApplicationProfileInstancePersonResolver
 
     public static IReadOnlyList<(ApplicationProfileInstancePersonLinkKind Kind, object? Entity)> ResolveEntities(
         IObjectSpace objectSpace,
-        Person person) =>
-    [
-        (ApplicationProfileInstancePersonLinkKind.Passport, ApplicationProfileInstancePersonValidItems.ResolvePassport(person)),
-        (ApplicationProfileInstancePersonLinkKind.Visa, ApplicationProfileInstancePersonValidItems.ResolveVisa(person)),
-        (ApplicationProfileInstancePersonLinkKind.Education, ApplicationProfileInstancePersonValidItems.ResolveEducation(person)),
-        (ApplicationProfileInstancePersonLinkKind.AddressOfResidence, ApplicationProfileInstancePersonValidItems.ResolveAddress(person)),
-        (ApplicationProfileInstancePersonLinkKind.Position, ApplicationProfileInstancePersonValidItems.ResolvePosition(person)),
-        (ApplicationProfileInstancePersonLinkKind.WorkDuty, ApplicationProfileInstancePersonValidItems.ResolveWorkDuty(person)),
-        (ApplicationProfileInstancePersonLinkKind.Salary, ApplicationProfileInstancePersonValidItems.ResolveSalary(person)),
-        (ApplicationProfileInstancePersonLinkKind.MedicalRecord, ApplicationProfileInstancePersonValidItems.ResolveMedical(person)),
-        (ApplicationProfileInstancePersonLinkKind.InvitationItem, ApplicationProfileInstancePersonValidItems.ResolveInvitationItem(person)),
-        (ApplicationProfileInstancePersonLinkKind.WorkPermitItem, ApplicationProfileInstancePersonValidItems.ResolveWorkPermitItem(person)),
-        (ApplicationProfileInstancePersonLinkKind.BorderZoneItem, ApplicationProfileInstancePersonValidItems.ResolveBorderZoneItem(objectSpace, person)),
-        (ApplicationProfileInstancePersonLinkKind.RejectionItem, ApplicationProfileInstancePersonValidItems.ResolveRejectionItem(person)),
-        (ApplicationProfileInstancePersonLinkKind.TravelHistory, ApplicationProfileInstancePersonValidItems.ResolveTravelHistory(person)),
-    ];
+        Person person,
+        ApplicationProfileInstance? application = null)
+    {
+        var rows = new List<(ApplicationProfileInstancePersonLinkKind Kind, object? Entity)>();
+        AddRange(rows, ApplicationProfileInstancePersonLinkKind.Passport,
+            ApplicationProfileInstancePersonValidItems.ResolvePassports(
+                person, ApplicationProfilePersonLastCount.For(application, ApplicationProfileInstancePersonLinkKind.Passport)));
+        AddRange(rows, ApplicationProfileInstancePersonLinkKind.Visa,
+            ApplicationProfileInstancePersonValidItems.ResolveVisas(
+                person, ApplicationProfilePersonLastCount.For(application, ApplicationProfileInstancePersonLinkKind.Visa)));
+        rows.Add((ApplicationProfileInstancePersonLinkKind.Education, ApplicationProfileInstancePersonValidItems.ResolveEducation(person)));
+        rows.Add((ApplicationProfileInstancePersonLinkKind.AddressOfResidence, ApplicationProfileInstancePersonValidItems.ResolveAddress(person)));
+        rows.Add((ApplicationProfileInstancePersonLinkKind.Position, ApplicationProfileInstancePersonValidItems.ResolvePosition(person)));
+        rows.Add((ApplicationProfileInstancePersonLinkKind.WorkDuty, ApplicationProfileInstancePersonValidItems.ResolveWorkDuty(person)));
+        rows.Add((ApplicationProfileInstancePersonLinkKind.Salary, ApplicationProfileInstancePersonValidItems.ResolveSalary(person)));
+        rows.Add((ApplicationProfileInstancePersonLinkKind.MedicalRecord, ApplicationProfileInstancePersonValidItems.ResolveMedical(person)));
+        AddRange(rows, ApplicationProfileInstancePersonLinkKind.InvitationItem,
+            ApplicationProfileInstancePersonValidItems.ResolveInvitationItems(
+                person, ApplicationProfilePersonLastCount.For(application, ApplicationProfileInstancePersonLinkKind.InvitationItem)));
+        AddRange(rows, ApplicationProfileInstancePersonLinkKind.WorkPermitItem,
+            ApplicationProfileInstancePersonValidItems.ResolveWorkPermitItems(
+                person, ApplicationProfilePersonLastCount.For(application, ApplicationProfileInstancePersonLinkKind.WorkPermitItem)));
+        AddRange(rows, ApplicationProfileInstancePersonLinkKind.BorderZoneItem,
+            ApplicationProfileInstancePersonValidItems.ResolveBorderZoneItems(
+                objectSpace,
+                person,
+                ApplicationProfilePersonLastCount.For(application, ApplicationProfileInstancePersonLinkKind.BorderZoneItem)));
+        rows.Add((ApplicationProfileInstancePersonLinkKind.RejectionItem, ApplicationProfileInstancePersonValidItems.ResolveRejectionItem(person)));
+        rows.Add((ApplicationProfileInstancePersonLinkKind.TravelHistory, ApplicationProfileInstancePersonValidItems.ResolveTravelHistory(person)));
+        return rows;
+    }
+
+    private static void AddRange<T>(
+        List<(ApplicationProfileInstancePersonLinkKind Kind, object? Entity)> rows,
+        ApplicationProfileInstancePersonLinkKind kind,
+        IEnumerable<T> entities)
+    {
+        foreach (var entity in entities ?? [])
+        {
+            if (entity != null)
+                rows.Add((kind, entity));
+        }
+    }
 }

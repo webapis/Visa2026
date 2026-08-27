@@ -53,6 +53,7 @@ public enum ApplicationWorkspaceCaseHeaderFieldKind
     Date = 1,
     Text = 2,
     CommaSeparatedMultiSelect = 3,
+    ShortText = 4,
 }
 
 public sealed class ApplicationWorkspaceLookupOption
@@ -82,6 +83,8 @@ public sealed class ApplicationWorkspaceCaseHeaderField
 
     public bool ReadOnly { get; init; }
 
+    public int? MaxLength { get; init; }
+
     public IReadOnlyList<ApplicationWorkspaceLookupOption> Options { get; init; }
         = Array.Empty<ApplicationWorkspaceLookupOption>();
 
@@ -103,6 +106,8 @@ public sealed class ApplicationWorkspaceCaseLinkedTile
     public string Label { get; init; } = string.Empty;
 
     public int Count { get; init; }
+
+    public int ExpectedCount { get; init; }
 
     public string Tone { get; init; } = "blue";
 
@@ -237,6 +242,8 @@ public sealed class ApplicationWorkspaceCasePersonRecord
 
     public int Count { get; init; }
 
+    public int ExpectedCount { get; init; }
+
     public string State { get; init; } = "empty";
 
     public string Glyph { get; init; } = "•";
@@ -264,6 +271,13 @@ public sealed class ApplicationWorkspaceCasePeopleSummary
 
 public sealed class ApplicationWorkspaceCaseSlaDashboard
 {
+    /// <summary>Issued / rejected / cancelled — hide remaining clocks.</summary>
+    public bool IsTerminal { get; init; }
+
+    public string ProcessOutcome { get; init; } = string.Empty;
+
+    public string CaseStatus { get; init; } = string.Empty;
+
     public int? CaseDaysRemaining { get; init; }
 
     public int TotalSlaDays { get; init; }
@@ -273,6 +287,8 @@ public sealed class ApplicationWorkspaceCaseSlaDashboard
     public int? CurrentStepDaysRemaining { get; init; }
 
     public string CurrentStepDueDate { get; init; } = string.Empty;
+
+    public string CurrentStepLabel { get; init; } = string.Empty;
 
     public string StartedOn { get; init; } = string.Empty;
 
@@ -297,6 +313,8 @@ public sealed class ApplicationWorkspaceCaseSlaDeadline
     public string DueDate { get; init; } = string.Empty;
 
     public string DaysLeft { get; init; } = string.Empty;
+
+    public int? DaysLeftNumber { get; init; }
 
     public string Status { get; init; } = "pending";
 

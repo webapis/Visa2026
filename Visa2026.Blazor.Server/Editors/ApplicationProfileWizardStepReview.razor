@@ -26,6 +26,10 @@
                 {
                     <li>Cancel: @FormatCancel(Profile)</li>
                 }
+                else if (Profile.ActionFamily == ApplicationProfileActionFamily.Change)
+                {
+                    <li>Change: @FormatChange(Profile)</li>
+                }
                 else if (Profile.ActionFamily == ApplicationProfileActionFamily.Registration
                     && Profile.RegistrationKind != ApplicationProfileRegistrationKind.None)
                 {
@@ -107,6 +111,17 @@
         if (p.CancelInvitations) items.Add("invitation");
         if (p.CancelWorkPermits) items.Add("work permit");
         if (p.CancelVisas) items.Add("visa");
+        return items.Count == 0 ? "—" : string.Join(", ", items);
+    }
+
+    private static string FormatChange(ApplicationProfile p)
+    {
+        var items = new List<string>();
+        if (p.ChangeInvitations) items.Add("invitation");
+        if (p.ChangeWorkPermits) items.Add("work permit");
+        if (p.ChangeVisas) items.Add("visa");
+        if (p.ChangeBorderZonePermits) items.Add("border zone");
+        if (p.ChangeApplicationProfileInstances) items.Add("application");
         return items.Count == 0 ? "—" : string.Join(", ", items);
     }
 

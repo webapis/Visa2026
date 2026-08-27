@@ -116,9 +116,10 @@ public static class ApplicationProfileCatalogPreviewHelper
         catalogRow = ApplicationProfileTenantCatalogRow.FromProfile(
             profile,
             applicationTypeName!.Trim(),
-            configRow.MigrationSlaProfileCode ?? string.Empty,
+            string.Empty,
             contractForRow,
             groupKey.Granularity);
+        ApplicationProfileCalikPersonLastCountSeeds.Apply(catalogRow);
         return true;
     }
 }
@@ -168,6 +169,16 @@ public sealed class ApplicationProfileCatalogPreviewRow
     public bool CancelBorderZonePermits { get; init; }
 
     public bool CancelApplicationProfileInstances { get; init; }
+
+    public bool ChangeInvitations { get; init; }
+
+    public bool ChangeWorkPermits { get; init; }
+
+    public bool ChangeVisas { get; init; }
+
+    public bool ChangeBorderZonePermits { get; init; }
+
+    public bool ChangeApplicationProfileInstances { get; init; }
 
     public int MinistrySlaDays { get; init; }
 
@@ -221,9 +232,14 @@ public sealed class ApplicationProfileCatalogPreviewRow
             CancelVisas = profile.CancelVisas,
             CancelBorderZonePermits = profile.CancelBorderZonePermits,
             CancelApplicationProfileInstances = profile.CancelApplicationProfileInstances,
+            ChangeInvitations = profile.ChangeInvitations,
+            ChangeWorkPermits = profile.ChangeWorkPermits,
+            ChangeVisas = profile.ChangeVisas,
+            ChangeBorderZonePermits = profile.ChangeBorderZonePermits,
+            ChangeApplicationProfileInstances = profile.ChangeApplicationProfileInstances,
             MinistrySlaDays = profile.MinistrySlaDays,
             MigrationSlaDays = profile.MigrationSlaDays,
-            MigrationSlaProfileCode = configRow.MigrationSlaProfileCode ?? string.Empty,
+            MigrationSlaProfileCode = string.Empty,
             RequirePersonPassport = profile.RequirePersonPassport,
             RequirePersonEducation = profile.RequirePersonEducation,
             RequirePersonPosition = profile.RequirePersonPosition,

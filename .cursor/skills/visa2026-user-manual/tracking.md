@@ -127,7 +127,7 @@ Sync checkboxes with [USER_MANUAL_IMPLEMENTATION_PLAN.md §11](../../../docs/USE
 | 28 | 8 | `administration/configuration/overview` | Configuration overview | — | — | read | `person-officer-journey` | Eleven Configuration menu items | legacy fan-out | **Draft** | 2 |
 | 29 | 8 | `administration/configuration/organization` | Organization settings | CompanyProfile | — | update | `person-officer-journey` | Four singletons | legacy fan-out | **Draft** | 2 |
 | 30 | 8 | `administration/configuration/contracts-and-approvals` | Contracts and approvals | ProjectContract | — | update | `person-officer-journey` | Ministries + legs + contracts | legacy fan-out | **Draft** | 2 |
-| 31 | 8 | `administration/configuration/sla` | SLA settings | ApplicationMigrationSlaProfile | — | update | `person-officer-journey` | Migration profile + ministry singleton | legacy fan-out | **Draft** | 2 |
+| 31 | 8 | `administration/configuration/sla` | SLA settings | ApplicationProfile | — | update | `person-officer-journey` | Profile Process & SLA days | legacy fan-out | **Draft** | 2 |
 | 32 | 8 | `administration/configuration/alerts-and-upload-limits` | Alerts and upload limits | ExpirationAlertRule | — | update | `person-officer-journey` | Expiry rules + upload MB caps | legacy fan-out | **Draft** | 2 |
 | 33 | 8 | `administration/configuration/application-profiles` | Configure application profiles | ApplicationProfile | — | update | — | Configure profile wizard; VisaOffice | **none (preview)** | **Draft** | 2 |
 

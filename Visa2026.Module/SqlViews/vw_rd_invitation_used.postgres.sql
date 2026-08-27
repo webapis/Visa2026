@@ -45,5 +45,8 @@ LEFT JOIN "People" sp
 LEFT JOIN "ProjectContracts" spc
     ON spc."ID" = sp."ProjectContractID" AND COALESCE(spc."GCRecord", 0) = 0
 WHERE COALESCE(ii."GCRecord", 0) = 0
-  AND COALESCE(ii."IsUsed", FALSE) = TRUE
+  AND EXISTS (
+      SELECT 1 FROM "Visas" vis
+      WHERE vis."IssuingInvitationItemID" = ii."ID"
+        AND COALESCE(vis."GCRecord", 0) = 0)
   AND ii."PersonID" IS NOT NULL;

@@ -28,13 +28,13 @@ public static class ApplicationProfileInstanceProgressProfileResolver
 
     /// Header members locked after approval leaves office preparation. Workflow fields (visa, travel,
 
-    /// locations, child collections) and optional detail fields remain editable for later process steps.
+    /// locations, child collections), application number, and application date remain editable.
 
     /// </summary>
 
     public const string LockedApplicationHeaderTargetItems =
 
-        "IsManualEntry;ApplicationNumber;AppNumberPrefix;FullApplicationNumber;ApplicationDate;ApplicationTypeQuickCode;ApprovalLegProfile;ProjectContract";
+        "ApplicationTypeQuickCode;ApprovalLegProfile;ProjectContract";
 
     /// <summary>
     /// Detail members read-only when <see cref="Application.IsWorkflowTerminal"/> is true.
@@ -815,17 +815,7 @@ public static class ApplicationProfileInstanceProgressProfileResolver
 
     private static bool ApplicationLockedHeaderScalarsDiffer(ApplicationProfileInstance original, ApplicationProfileInstance current) =>
 
-        original.IsManualEntry != current.IsManualEntry
-
-        || !string.Equals(original.ApplicationNumber, current.ApplicationNumber, StringComparison.Ordinal)
-
-        || !string.Equals(original.AppNumberPrefix, current.AppNumberPrefix, StringComparison.Ordinal)
-
-        || !string.Equals(original.FullApplicationNumber, current.FullApplicationNumber, StringComparison.Ordinal)
-
-        || original.ApplicationDate != current.ApplicationDate
-
-        || original.ApplicationType?.ID != current.ApplicationType?.ID
+        original.ApplicationType?.ID != current.ApplicationType?.ID
 
         || original.ApprovalLegProfile?.ID != current.ApprovalLegProfile?.ID
 

@@ -40,7 +40,8 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 | **ApplicationType** | Deprecated | **`ApplicationProfile`** (live FK on `Application`; see [`docs/APPLICATION_PROFILE_PLAN.md`](APPLICATION_PROFILE_PLAN.md)) | Table retained during dual-read; do not add new `Show*` / capability flags | UI caption **Application Type (Deprecated)**; XML docs + tooltip. No `[Obsolete]` (dual-read CS0618). All `Show*` / `CanIssue*` / route / SLA / leg-depth members are **configuration** — read via `ApplicationProfileConfigurationResolver` (profile-first, type fallback). See **Application Profile cutover** below. |
 | **ApplicationTypeFilter** | Deprecated | **`ApplicationProfile`** applicability + `ApplicationProfile.SelectionCode` | Table retained; **not** in `LookupCatalogs/manifest.json` | UI caption **Application Type Filter (Deprecated)**. Still exposed read-only in security/Web API for existing FKs. See [`docs/APPLICATION_BO_TYPE_SELECTION_REFACTOR.md`](APPLICATION_BO_TYPE_SELECTION_REFACTOR.md). |
 | **ApplicationTypeGroup** / **ApplicationTypeGroupMember** | Deprecated | **`ApplicationProfile.ApplicabilityCriteria`** (+ audience flags) | Tables retained | Seeded **Registration** group still drives Resminamalar type links until slice 12. Do not add new groups for officer configuration. |
-| **ApplicationMigrationSlaProfile** (as **type** configuration) | Deprecated | **`ApplicationProfile.MigrationSlaDays`** | Table retained; `ApplicationTypes.MigrationSlaProfileID` retained | Lookup UI may remain for legacy rows. New SLA config belongs on the profile, not on `ApplicationType.MigrationSlaProfile`. |
+| **ApplicationMigrationSlaProfile** | Removed | **`ApplicationProfile.MigrationSlaDays`** | Dropped by `ApplicationMigrationSlaProfileDropSchemaUpdater` (`ApplicationMigrationSlaProfiles` + `ApplicationTypes.MigrationSlaProfileID`) | Officer catalog removed. Runtime SLA reads profile days only. |
+| **MinistryReviewSlaSettings** | Deprecated (officer UI) | **`ApplicationProfile.MinistrySlaDays`** | Table retained (snapshot fallback) | Hidden from Configuration nav. Singleton still copied to instance snapshots when legs have no per-leg max. |
 | **ApplicationReason** (child of **ApplicationType**) | Retained (legacy) | Per-Application reason not in v1 profile model; field unused on `Application` | Table retained | `Application.ApplicationReason` commented out; `ShowApplicationReason` on type is legacy. |
 | **UserReportTemplateApplicationType** | Deprecated | **`ApplicationProfileTemplate`** + profile nested templates (slice 12) | Join table retained | Resminamalar still unions type links with group links until template slice ships. |
 | **UserReportTemplateApplicationTypeGroup** | Deprecated | **`ApplicationProfileTemplate`** + `ApplicabilityCriteria` (slice 12) | Join table retained | Same as type link row. |
@@ -62,7 +63,7 @@ Only **configuration** that used to live on `ApplicationType` (and type-driven i
 |----------------------|-----------------------------------|----------------|
 | `ApplicationProgressRoute` | `ProgressRoute` | `ApplicationProfileConfigurationResolver.GetProgressRoute` · `ApplicationProgressRouteHelper` |
 | `MinistryReviewDepth` | `ApprovalLegs` (`ApplicationProfileApprovalLeg`) | `ApplicationProgressProfileResolver.GetMinistryLegCount` (embedded legs first) |
-| `MigrationSlaProfile` | `MigrationSlaDays` | `ApplicationProfileConfigurationResolver` / progress SLA helpers |
+| `MigrationSlaProfile` (type lookup) | `MigrationSlaDays` | `ApplicationProfileConfigurationResolver` / `ApplicationMigrationSlaHelper` (profile days only) |
 | `Show*` / `CanIssue*` (Application + ApplicationItem visibility) | `ActionFamily`, produce/cancel, `Require*`, `RequirePerson*` | `Application.Cfg*` · `ApplicationProfileConfigurationResolver` |
 | Type nested templates / group applicability | `NestedTemplates` · `ApplicabilityCriteria` | Slice 12 (Resminamalar) pending |
 | `ApplicationType` C# / JSON seed as officer config | Profile wizard + `ApplicationProfileSeedSync` | Deploy seed only; officers use **Application Profiles** nav |
@@ -96,7 +97,7 @@ Only **configuration** that used to live on `ApplicationType` (and type-driven i
 | **Application** | `ApplyDefaultsForApplicationType()` | Deprecated | **`ApplyDefaultsForApplicationProfile()`** | Method on BO; dual-read may still set Type FK on create |
 | **ApplicationType** | `Show*` / `CanIssue*` (all capability and visibility flags) | Deprecated | Matching **`ApplicationProfile`** scalars (`Require*`, `Produce*`, `Cancel*`, `RequirePerson*`, …) | Columns retained on `ApplicationTypes`; do not add new flags |
 | **ApplicationType** | `ApplicationProgressRoute`, `MinistryReviewDepth` | Deprecated | **`ProgressRoute`**, **`ApprovalLegs`** | Columns retained |
-| **ApplicationType** | `MigrationSlaProfile` | Deprecated | **`MigrationSlaDays`** | FK retained |
+| **ApplicationType** | `MigrationSlaProfile` | Removed | **`ApplicationProfile.MigrationSlaDays`** | Dropped by `ApplicationMigrationSlaProfileDropSchemaUpdater` |
 | **Visa** | `IssuingApplicationItem` | Deprecated (slice 10i) | **`Visa.IssuingApplication`** → parent `Application` | FK retained for import; UI hidden when `IssuingApplication` set; backfill on deploy |
 | **Application** | `ApplicationItems` collection | Deprecated (slice 10) | **`People` M2M** + auto-resolved child links | Collection retained until hard-remove |
 | **ProjectContract** | `Description`, `Images`, `Documents` | Retained (legacy) | `Name` / `NameTm` / `Code` on contract; Word static text for letters | Columns retained; UI hidden |
@@ -106,9 +107,13 @@ Only **configuration** that used to live on `ApplicationType` (and type-driven i
 | **Person** | `IsSubcontractorEmployee` | Removed | `Subcontractor` (caption **Company (Subcontractor)**) on employee DetailView without a flag | Dropped by `OrganizationLegacySchemaCleanupUpdater` |
 | **Passport** | `PersonalNumber` | Retained (legacy) | `Person.PersonalNumber` | Column retained; hidden in UI |
 | **Application** | `IsCancelled`, `IsRejected`, `LatestIsCancelled`, `LatestIsRejected` | Removed | `ApplicationProgress` terminal states (`PROCESS_CANCELLED`, `PROCESS_REJECTED`); `CurrentState` on list/detail | Dropped by `ApplicationLatestTerminalFlagsColumnsCleanupUpdater` |
-| **Invitation** | `IsCancelled`, `IsChanged` | Removed | `InvitationItem.IsCancelled`, `InvitationItem.IsChanged`, `InvitationItem.IsUsed` | Dropped by `InvitationHeaderStatusColumnsCleanupUpdater` |
+| **Invitation** | `IsCancelled`, `IsChanged` | Removed | Derived on **InvitationItem** from completed Cancellation/Change instances | Dropped by `InvitationHeaderStatusColumnsCleanupUpdater` |
+| **InvitationItem** | stored `IsCancelled`, `IsChanged`, `IsUsed` | Removed | `[NotMapped]` getters via `IssuedDocumentLifecycle` (PROCESS_ISSUED Cancellation/Change skip-nav; used = issuing visa) | Dropped by `IssuedDocumentStatusColumnsCleanupUpdater` |
+| **Visa** | stored `IsCancelled`, `IsChanged` | Removed | Same derived lifecycle (`Passport.IsCancelled` **kept**) | Dropped by `IssuedDocumentStatusColumnsCleanupUpdater` |
+| **WorkPermitItem** | stored `IsCancelled` | Removed | Same derived lifecycle. `IsChanged`/`IsExtended` already dropped | Dropped by `IssuedDocumentStatusColumnsCleanupUpdater` |
+| **BorderZone** / **BorderZoneItem** | stored `IsCancelled` | Removed | Header cancelled iff any item is cancelled | Dropped by `IssuedDocumentStatusColumnsCleanupUpdater` |
 | **Invitation** | `StartDate` (property name), `ValidityDuration` | Renamed / removed | `IssuedDate` (same DB column `StartDate`); `VisaPeriod` + `VisaCategory`; `ExpirationDate` stored directly | `InvitationLegacyShapeSchemaUpdater` drops `ValidityDurationID` |
-| **WorkPermitItem** | `IsChanged`, `IsExtended` | Removed | `ApplicationItem.WorkPermitItemIsChanged` (change workflow); `IsCancelled` only on item | Dropped by `WorkPermitItemStatusColumnsCleanupUpdater` |
+| **WorkPermitItem** | `IsChanged`, `IsExtended` | Removed | Change family on Application Profile; item `IsCancelled` now also derived | Dropped by `WorkPermitItemStatusColumnsCleanupUpdater` |
 | **WorkPermit** | `IsApplicationNotRequired`, `IsCancelled` | Removed | Optional `Application` via gear toggle (same as `Invitation`) | Dropped by `WorkPermitApplicationNotRequiredColumnCleanupUpdater` |
 | **Visa** | `HasInvitation`, `HistoricalImport` | Removed | Optional `InvitationItem` / `IssuingApplicationItem` via gear toggle | Dropped by `VisaVisibilityToggleColumnsCleanupUpdater` |
 | **ApplicationItem** | `PurposeOfTravel` | Removed | `CurrentPositionHistory` (registration travel purpose / Forma 16) | `PurposeOfTravelID` dropped by `ApplicationItemPurposeOfTravelColumnsCleanupUpdater` |
@@ -134,9 +139,13 @@ Only **configuration** that used to live on `ApplicationType` (and type-driven i
 | `Applications.Company` / `CompanyHead` / `Representative` FK columns | `OrganizationLegacySchemaCleanupUpdater` | Singletons + `[NotMapped]` report aliases on `Application` |
 | `People.Company`, `ProjectContracts.Company`, `Lodgings.Company` FK columns | `OrganizationLegacySchemaCleanupUpdater` | Single-tenant org; `CompanyProfile` for letterhead |
 | `tenant/company.json` lookup catalog | Phase 5 manifest rename | `tenant/company-profile.json` → `CompanyProfile` |
-| `Invitations.IsCancelled`, `Invitations.IsChanged` | `InvitationHeaderStatusColumnsCleanupUpdater` | `InvitationItems` status flags only |
+| `Invitations.IsCancelled`, `Invitations.IsChanged` | `InvitationHeaderStatusColumnsCleanupUpdater` | Derived item lifecycle (`IssuedDocumentLifecycle`) |
+| `InvitationItems.IsCancelled`, `InvitationItems.IsChanged`, `InvitationItems.IsUsed` | `IssuedDocumentStatusColumnsCleanupUpdater` | Completed Cancellation/Change instance M2M; used = `Visas.IssuingInvitationItemID` |
+| `Visas.IsCancelled`, `Visas.IsChanged` | `IssuedDocumentStatusColumnsCleanupUpdater` | Same; keep `Visas.IsExtended` and `Passports.IsCancelled` |
+| `WorkPermitItems.IsCancelled` | `IssuedDocumentStatusColumnsCleanupUpdater` | Same derived lifecycle |
+| `BorderZones.IsCancelled`, `BorderZoneItems.IsCancelled` | `IssuedDocumentStatusColumnsCleanupUpdater` | Same; header from any item |
 | `Invitations.ValidityDurationID` | `InvitationLegacyShapeSchemaUpdater` | `VisaPeriod` + editable `ExpirationDate` |
-| `WorkPermitItems.IsChanged`, `WorkPermitItems.IsExtended` | `WorkPermitItemStatusColumnsCleanupUpdater` | `ApplicationItem.WorkPermitItemIsChanged`; item `IsCancelled` only |
+| `WorkPermitItems.IsChanged`, `WorkPermitItems.IsExtended` | `WorkPermitItemStatusColumnsCleanupUpdater` | Change family + derived item `IsCancelled` |
 | `WorkPermits.IsApplicationNotRequired`, `WorkPermits.IsCancelled` | `WorkPermitApplicationNotRequiredColumnCleanupUpdater` | Optional `WorkPermits.Application` + gear on detail view |
 | `Visas.HasInvitation`, `Visas.HistoricalImport` | `VisaVisibilityToggleColumnsCleanupUpdater` | Optional `IssuingApplicationItem` / `InvitationItem` + gear on detail view |
 | `TravelHistories.SourceApplicationItemID` | `TravelHistorySourceApplicationItemCleanupUpdater` | Manual `TravelHistory` CRUD; registration apps no longer auto-link |

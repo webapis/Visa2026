@@ -425,6 +425,36 @@ public class ApplicationProfileInstanceProgressProfileResolverTests
         Assert.True(InvokeApplicationLockedHeaderScalarsDiffer(original, current));
     }
 
+    [Fact]
+    public void ApplicationLockedHeaderScalarsDiffer_IgnoresApplicationNumberAndDateChange()
+    {
+        var type = new ApplicationType
+        {
+            ApplicationProfileInstanceProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
+            ShowProjectContract = true
+        };
+        var original = new ApplicationProfileInstance
+        {
+            ApplicationType = type,
+            ApplicationNumber = "007",
+            AppNumberPrefix = "8",
+            FullApplicationNumber = "8/-007",
+            ApplicationDate = new DateTime(2024, 8, 25),
+            IsManualEntry = false,
+        };
+        var current = new ApplicationProfileInstance
+        {
+            ApplicationType = type,
+            ApplicationNumber = "008",
+            AppNumberPrefix = "8",
+            FullApplicationNumber = "8/-008",
+            ApplicationDate = new DateTime(2024, 9, 1),
+            IsManualEntry = true,
+        };
+
+        Assert.False(InvokeApplicationLockedHeaderScalarsDiffer(original, current));
+    }
+
     private static bool InvokeApplicationLockedHeaderScalarsDiffer(ApplicationProfileInstance original, ApplicationProfileInstance current)
     {
         var method = typeof(ApplicationProfileInstanceProgressProfileResolver).GetMethod(

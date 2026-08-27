@@ -38,13 +38,13 @@ public class ApprovalLegProfileMinistryLeg : BaseObject
     [Browsable(false)]
     public virtual Guid ApprovingMinistryId { get; set; }
 
-    /// <summary>Legacy per-leg SLA — use <see cref="MinistryReviewSlaSettings"/> (Configuration).</summary>
-    [Obsolete("Ministry review SLA is configured globally on MinistryReviewSlaSettings. Retained for DB/import compatibility.")]
+    /// <summary>Legacy per-leg SLA — use <see cref="ApplicationProfile.MinistrySlaDays"/> (profile Process &amp; SLA).</summary>
+    [Obsolete("Ministry review SLA is configured on ApplicationProfile.MinistrySlaDays. Retained for DB/import compatibility.")]
     [Browsable(false)]
     public virtual int? MaxDaysInReview { get; set; }
 
-    /// <summary>Legacy per-leg SLA — use <see cref="MinistryReviewSlaSettings"/> (Configuration).</summary>
-    [Obsolete("Ministry review SLA is configured globally on MinistryReviewSlaSettings. Retained for DB/import compatibility.")]
+    /// <summary>Legacy per-leg SLA — use <see cref="ApplicationProfile.MinistrySlaDays"/> (profile Process &amp; SLA).</summary>
+    [Obsolete("Ministry review SLA is configured on ApplicationProfile.MinistrySlaDays. Retained for DB/import compatibility.")]
     [Browsable(false)]
     public virtual int? WarningDaysBeforeMax { get; set; }
 

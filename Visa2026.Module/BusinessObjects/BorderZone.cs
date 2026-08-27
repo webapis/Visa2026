@@ -12,6 +12,7 @@ using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.DC;
+using Visa2026.Module.Services;
 using Visa2026.Module.Services.ApplicationPersonRoster;
 
 namespace Visa2026.Module.BusinessObjects
@@ -94,7 +95,10 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
         
-        public virtual bool IsCancelled { get; set; }
+        [NotMapped]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInDetailView(false)]
+        public bool IsCancelled => IssuedDocumentLifecycle.IsCancelled(this);
         
         [Aggregated]
         [InverseProperty(nameof(BorderZoneItem.BorderZone))]

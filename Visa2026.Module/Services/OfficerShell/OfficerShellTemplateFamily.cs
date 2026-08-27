@@ -38,6 +38,7 @@ public static class OfficerShellTemplateFamily
             ApplicationProfileActionFamily.Registration => Registration,
             ApplicationProfileActionFamily.BusinessTrip => WorkPermit,
             ApplicationProfileActionFamily.Cancellation => Invitation,
+            ApplicationProfileActionFamily.Change => Invitation,
             _ => Invitation,
         };
     }

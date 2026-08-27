@@ -20,7 +20,7 @@ internal sealed class Visa2014VisaInvitationItemCorrectionResult
 }
 
 /// <summary>
-/// Path B post-pass: set Visa.IssuingInvitationItem (and IsUsed) after IssuingApplicationItem correction.
+/// Path B post-pass: set Visa.IssuingInvitationItem after IssuingApplicationItem correction.
 /// Target-side closest-match only; does not call Path A.
 /// </summary>
 internal static class Visa2014VisaInvitationItemCorrection
@@ -154,8 +154,6 @@ internal static class Visa2014VisaInvitationItemCorrection
                 && !visa.IssuingInvitationItem.IsCancelled
                 && !visa.IssuingInvitationItem.IsChanged)
             {
-                if (!dryRun && !visa.IssuingInvitationItem.IsUsed)
-                    visa.IssuingInvitationItem.IsUsed = true;
                 alreadyCorrect++;
                 continue;
             }
@@ -209,8 +207,6 @@ internal static class Visa2014VisaInvitationItemCorrection
             }
 
             visa.IssuingInvitationItem = match;
-            if (!match.IsUsed)
-                match.IsUsed = true;
 
             if (!linkedInvitationIds.TryGetValue(match.ID, out var visaSet))
             {

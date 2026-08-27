@@ -115,13 +115,14 @@ Controllers: [`ApplicationProjectContractMinistryController`](../Visa2026.Module
 
 ### 3.4 Application header lock after office preparation
 
-Once approval has **left office preparation** — any `ApplicationProgress` row that is **not** `IS_BEING_PREPARED @ AT_OFFICE` (`ApplicationProgressProfileResolver.HasProgressBeyondOfficePreparation`) — core **application identity** fields are read-only in the UI and on save. Workflow fields and child data filled **later in the process** stay editable.
+Once approval has **left office preparation** — any `ApplicationProgress` row that is **not** `IS_BEING_PREPARED @ AT_OFFICE` (`ApplicationProgressProfileResolver.HasProgressBeyondOfficePreparation`) — **profile / contract identity** fields are read-only in the UI and on save. Application number, application date, workflow fields, and child data filled **later in the process** stay editable.
 
 | Locked (UI + commit) | Still editable |
 |----------------------|----------------|
-| `IsManualEntry`, `ApplicationNumber`, `AppNumberPrefix`, `FullApplicationNumber`, `ApplicationDate` | Visa / urgency / migration lookups (`VisaPeriod`, `VisaCategory`, `VisaType`, `MigrationService`, `Urgency`, …) |
-| `ApplicationTypeQuickCode` / `ApplicationType` | Business trip and location fields (`BusinessTrip*`, `BorderZoneLocation`, `MovementPermitLocation`, `FromCity`, `ToCity`, …) |
-| `ProjectContract` (also reverted on change in [`ApplicationProjectContractMinistryController`](../Visa2026.Module/Controllers/ApplicationProjectContractMinistryController.cs)) | Child tabs: `ApplicationItems`, `Invitations`, `Rejections`, `WorkPermits` |
+| `ApplicationTypeQuickCode` / `ApplicationType` | `IsManualEntry`, `ApplicationNumber`, `AppNumberPrefix`, `FullApplicationNumber`, `ApplicationDate` (case workspace **Case summary → Edit**) |
+| `ApprovalLegProfile` | Visa / urgency / migration lookups (`VisaPeriod`, `VisaCategory`, `VisaType`, `MigrationService`, `Urgency`, …) |
+| `ProjectContract` (also reverted on change in [`ApplicationProjectContractMinistryController`](../Visa2026.Module/Controllers/ApplicationProjectContractMinistryController.cs)) | Business trip and location fields (`BusinessTrip*`, `BorderZoneLocation`, `MovementPermitLocation`, `FromCity`, `ToCity`, …) |
+| | Child tabs: `Invitations`, `Rejections`, `WorkPermits` |
 | | `ProgressHistory` (officers keep appending rows) |
 | | `ApplicationItem` lines — including gear-hidden optional fields (`RegistrationDate`, `TravelType`, …); see [`OPTIONAL_DETAIL_FIELDS.md`](OPTIONAL_DETAIL_FIELDS.md) |
 

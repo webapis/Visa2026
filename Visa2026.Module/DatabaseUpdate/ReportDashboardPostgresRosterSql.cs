@@ -160,7 +160,16 @@ SELECT
     latest_ap.""Date"" AS ""StatusDate"",
     latest_ap.""Description"" AS ""StatusDescription"",
     CASE
-        WHEN COALESCE(v.""IsCancelled"", FALSE) THEN 0
+        WHEN EXISTS (
+          SELECT 1
+          FROM ""ApplicationProfileInstanceVisas"" j
+          INNER JOIN ""ApplicationProfileInstances"" api ON api.""ID"" = j.""ApplicationProfileInstanceId""
+          INNER JOIN ""ApplicationProfiles"" ap ON ap.""ID"" = api.""ApplicationProfileID""
+          WHERE j.""VisaId"" = v.""ID""
+            AND COALESCE(api.""GCRecord"", 0) = 0
+            AND COALESCE(ap.""GCRecord"", 0) = 0
+            AND ap.""ActionFamily"" = 1
+            AND BTRIM(COALESCE(api.""LatestPrimaryStateCode"", '')) = 'PROCESS_ISSUED') THEN 0
         WHEN v.""ExpirationDate"" IS NULL THEN 0
         WHEN (v.""ExpirationDate""::date - CURRENT_DATE) < 0 THEN 0
         ELSE (v.""ExpirationDate""::date - CURRENT_DATE)
@@ -239,7 +248,16 @@ SELECT
       ELSE                                                                   'st-pending'
     END                                                                             AS ""ProgressStateCssClass"",
     CASE
-        WHEN COALESCE(v.""IsCancelled"", FALSE) THEN 0
+        WHEN EXISTS (
+          SELECT 1
+          FROM ""ApplicationProfileInstanceVisas"" j
+          INNER JOIN ""ApplicationProfileInstances"" api ON api.""ID"" = j.""ApplicationProfileInstanceId""
+          INNER JOIN ""ApplicationProfiles"" ap ON ap.""ID"" = api.""ApplicationProfileID""
+          WHERE j.""VisaId"" = v.""ID""
+            AND COALESCE(api.""GCRecord"", 0) = 0
+            AND COALESCE(ap.""GCRecord"", 0) = 0
+            AND ap.""ActionFamily"" = 1
+            AND BTRIM(COALESCE(api.""LatestPrimaryStateCode"", '')) = 'PROCESS_ISSUED') THEN 0
         WHEN v.""ExpirationDate"" IS NULL THEN 0
         WHEN (v.""ExpirationDate""::date - CURRENT_DATE) < 0 THEN 0
         ELSE (v.""ExpirationDate""::date - CURRENT_DATE)
@@ -363,7 +381,16 @@ WITH ranked_visas AS (
         ON pp.""ID"" = v.""PassportID""
        AND COALESCE(pp.""GCRecord"", 0) = 0
     WHERE COALESCE(v.""GCRecord"", 0) = 0
-      AND COALESCE(v.""IsCancelled"", FALSE) = FALSE
+      AND NOT EXISTS (
+      SELECT 1
+      FROM ""ApplicationProfileInstanceVisas"" j
+      INNER JOIN ""ApplicationProfileInstances"" api ON api.""ID"" = j.""ApplicationProfileInstanceId""
+      INNER JOIN ""ApplicationProfiles"" ap ON ap.""ID"" = api.""ApplicationProfileID""
+      WHERE j.""VisaId"" = v.""ID""
+        AND COALESCE(api.""GCRecord"", 0) = 0
+        AND COALESCE(ap.""GCRecord"", 0) = 0
+        AND ap.""ActionFamily"" = 1
+        AND BTRIM(COALESCE(api.""LatestPrimaryStateCode"", '')) = 'PROCESS_ISSUED')
       AND v.""StartDate"" IS NOT NULL
       AND (v.""StartDate"")::date > DATE '1900-01-01'
       AND (v.""StartDate"")::date <= CURRENT_DATE

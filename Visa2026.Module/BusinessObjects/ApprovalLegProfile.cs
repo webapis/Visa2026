@@ -18,7 +18,7 @@ namespace Visa2026.Module.BusinessObjects;
 /// </summary>
 [DefaultClassOptions]
 [DefaultProperty(nameof(MinistriesLabel))]
-[NavigationItem("Configuration")]
+[NavigationItem(false)]
 [Appearance(
     "ApprovalLegProfile_HideCatalogScalars",
     AppearanceItemType = "ViewItem",

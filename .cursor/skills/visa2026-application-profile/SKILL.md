@@ -120,7 +120,8 @@ flowchart LR
 | Type required but Profile optional | Dual-read phase | Seed profiles; backfill FK; document in IMPLEMENTATION_PLAN |
 | Template list on Application | Nested `ApplicationProfileTemplate` | Read-only child list on Application detail |
 | Person tab missing | `RequirePerson*` toggles on profile | Person-config block; M2M slice |
-| Expired visa/passport/WP/invitation/border zone/medical auto-linked | `ApplicationProfileInstancePersonValidItems.CanLink*` | Officer §10.2 gate; import (`IsDataImport`) is exempt; sticky existing links stay |
+| Expired visa/WP/invitation/border zone/medical auto-linked | `ApplicationProfileInstancePersonValidItems.CanLink*` | Officer §10.2 gate; import (`IsDataImport`) is exempt; sticky existing links stay. **Passport expiration is not checked.** |
+| Template needs last 2 passports / last 2–3 invitations | Wizard **Last 1–3** next to Passport / Visa / Invitation / WP / Border zone | `Person*LastCount`; resolver Take(N); unique index includes `LinkedObjectId` |
 | Import sets Type only | VISA2014 mapper | Map Type → Profile FK in import wave |
 | Case tab Preview opens duplicate catalog in slot | `OpenPreviewOnly` on slot request | Tab owns catalog; slot viewer only — **preview-slot** |
 | Wizard Templates Preview should look filled | No live application in Configure | File occupant + office-to-PDF of the **master** (placeholders) |
@@ -185,7 +186,8 @@ Use when user asks *how should I configure this profile?* — tailor to **Action
 
 ### Person-config toggles
 
-- Always **Passport** for issuance unless exceptional legacy type.
+- Always **Passport** for issuance unless exceptional legacy type. Use **Last 2** on **passport-change** (`pasport_change`) only — old + new booklet (expired previous is OK). If only one passport exists, **flag** (`1/2`); **do not block create**. Registration passport-info-change stays Last 1.
+- **Invitation / work permit / visa Last 2** means **up to 2 valid rows** (person may have 1 or 2). Missing expected rows are flagged; create is not blocked. Calik: `cancel_invitation` invitation Last 2; `cancel_invitation_wp` invitation + WP Last 2; `cancel_visa_wp` visa + WP Last 2; `cancel_workpermit` WP Last 2.
 - **Registration** profiles always turn **Position** on and never use **Urgency**.
 - Turn on **Education / Address** when templates use those `{{…}}` packs or readiness checks need them.
 - **TravelHistory** — M2M on Application (not profile scalar); toggle gates tab only.

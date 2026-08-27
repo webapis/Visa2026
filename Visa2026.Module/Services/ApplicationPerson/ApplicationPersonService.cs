@@ -72,7 +72,7 @@ public static class ApplicationProfileInstancePersonService
             trackedApplication,
             trackedPerson);
 
-        foreach (var (kind, entity) in ApplicationProfileInstancePersonResolver.ResolveEntities(objectSpace, trackedPerson))
+        foreach (var (kind, entity) in ApplicationProfileInstancePersonResolver.ResolveEntities(objectSpace, trackedPerson, trackedApplication))
         {
             if (!ApplicationProfileInstancePersonResolver.IsAutoLinkEnabled(trackedApplication, kind))
                 continue;

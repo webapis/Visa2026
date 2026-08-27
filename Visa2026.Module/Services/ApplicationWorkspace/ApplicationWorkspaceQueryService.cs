@@ -33,6 +33,7 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
         var sla = ApplicationWorkspaceProgressTimeline.ResolveCurrentSla(application, profile, latest, ministrySla);
         var tabs = ApplicationWorkspaceTabBuilder.Build(objectSpace, application, profile);
         var caseChrome = BuildCaseChrome(application, profile, sla, objectSpace);
+        var caseView = ApplicationWorkspaceCaseBuilder.Build(application, profile, tabs, sla, caseChrome, objectSpace);
 
         return new ApplicationWorkspaceSnapshot
         {
@@ -43,8 +44,8 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
             ProfileRail = Array.Empty<ApplicationWorkspaceProfileRailItem>(),
             LinkContextItems = BuildLinkContext(profile),
             Tabs = tabs,
-            CaseChrome = caseChrome,
-            CaseView = ApplicationWorkspaceCaseBuilder.Build(application, profile, tabs, sla, caseChrome, objectSpace),
+            CaseChrome = caseView.Chrome,
+            CaseView = caseView,
             IsPrototypeMock = false,
         };
     }
@@ -100,9 +101,11 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
             ? application.ProcessNumber.Trim()
             : ApplicationProcessNumberHelper.ResolveFromHistory(application.ProgressHistory) ?? string.Empty;
 
-        var displayNumber = !string.IsNullOrWhiteSpace(processNumber)
-            ? processNumber
-            : application.FullApplicationNumber ?? application.ApplicationNumber ?? string.Empty;
+        var displayNumber = !string.IsNullOrWhiteSpace(application.FullApplicationNumber)
+            ? application.FullApplicationNumber.Trim()
+            : !string.IsNullOrWhiteSpace(application.ApplicationNumber)
+                ? application.ApplicationNumber.Trim()
+                : processNumber;
 
         var familyKey = OfficerShellTemplateFamily.ResolveKey(application);
         var people = ApplicationRosterHelper.GetRosterPeople(application)

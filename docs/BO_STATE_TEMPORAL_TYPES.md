@@ -144,7 +144,8 @@ See also: [`ApplicationProgress.md`](../Visa2026.Module/BusinessObjects/Applicat
 
 | Source | Examples |
 |--------|----------|
-| Persisted flags | `Visa.IsCancelled`, `InvitationItem.IsUsed`, `WorkPermitItem.IsChanged` |
+| Persisted flags | `Passport.IsCancelled`, `Visa.IsExtended`, `Visa.ExtensionRequired` |
+| Derived document lifecycle | `Visa.IsCancelled` / `IsChanged`, `InvitationItem.IsUsed` — completed Cancellation/Change instances and issuing-visa links (`IssuedDocumentLifecycle`) |
 | Catalog codes alone | `ApplicationState`, `ApplicationLocation` **labels** (the code is stored; elapsed time is a separate concern) |
 | Cross-BO linkage | `ExtensionInProgress`, `OnExtension`, rejection evidence |
 | Current vs historical | `Archived` via `PersonCurrentItems` |

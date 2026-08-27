@@ -134,6 +134,21 @@ public class ApplicationProfile : BaseObject
     [XafDisplayName("May cancel application(s)")]
     public virtual bool CancelApplicationProfileInstances { get; set; }
 
+    [XafDisplayName("May change invitation(s)")]
+    public virtual bool ChangeInvitations { get; set; }
+
+    [XafDisplayName("May change work permit(s)")]
+    public virtual bool ChangeWorkPermits { get; set; }
+
+    [XafDisplayName("May change visa(s)")]
+    public virtual bool ChangeVisas { get; set; }
+
+    [XafDisplayName("May change border zone permit(s)")]
+    public virtual bool ChangeBorderZonePermits { get; set; }
+
+    [XafDisplayName("May change application(s)")]
+    public virtual bool ChangeApplicationProfileInstances { get; set; }
+
     // --- Per-application field catalog: required + defaults ---
 
     public virtual bool RequireVisaType { get; set; }
@@ -244,6 +259,21 @@ public class ApplicationProfile : BaseObject
     public virtual bool RequirePersonRejectionItem { get; set; }
     public virtual bool RequirePersonTravelHistory { get; set; }
 
+    /// <summary>Latest passports to auto-link (1–3). Used only when <see cref="RequirePersonPassport"/> is on. Expiration is not checked.</summary>
+    public virtual int PersonPassportLastCount { get; set; } = 1;
+
+    /// <summary>Latest valid visas to auto-link (1–3). Used only when <see cref="RequirePersonVisa"/> is on.</summary>
+    public virtual int PersonVisaLastCount { get; set; } = 1;
+
+    /// <summary>Latest valid invitation items to auto-link (1–3). Used only when <see cref="RequirePersonInvitationItem"/> is on.</summary>
+    public virtual int PersonInvitationItemLastCount { get; set; } = 1;
+
+    /// <summary>Latest valid work-permit items to auto-link (1–3). Used only when <see cref="RequirePersonWorkPermitItem"/> is on.</summary>
+    public virtual int PersonWorkPermitItemLastCount { get; set; } = 1;
+
+    /// <summary>Latest valid border-zone items to auto-link (1–3). Used only when <see cref="RequirePersonBorderZoneItem"/> is on.</summary>
+    public virtual int PersonBorderZoneItemLastCount { get; set; } = 1;
+
     // --- Templates ---
 
     [Aggregated]
@@ -295,7 +325,8 @@ public enum ApplicationProfileActionFamily
     Issuance = 0,
     Cancellation = 1,
     Registration = 2,
-    BusinessTrip = 3
+    BusinessTrip = 3,
+    Change = 4
 }
 
 /// <summary>
@@ -684,6 +715,11 @@ public static class ApplicationProfileLockHelper
         || original.CancelVisas != current.CancelVisas
         || original.CancelBorderZonePermits != current.CancelBorderZonePermits
         || original.CancelApplicationProfileInstances != current.CancelApplicationProfileInstances
+        || original.ChangeInvitations != current.ChangeInvitations
+        || original.ChangeWorkPermits != current.ChangeWorkPermits
+        || original.ChangeVisas != current.ChangeVisas
+        || original.ChangeBorderZonePermits != current.ChangeBorderZonePermits
+        || original.ChangeApplicationProfileInstances != current.ChangeApplicationProfileInstances
         || original.RequireVisaType != current.RequireVisaType
         || original.DefaultVisaTypeId != current.DefaultVisaTypeId
         || original.RequireVisaCategory != current.RequireVisaCategory
@@ -730,5 +766,10 @@ public static class ApplicationProfileLockHelper
         || original.RequirePersonMedical != current.RequirePersonMedical
         || original.RequirePersonRejectionItem != current.RequirePersonRejectionItem
         || original.RequirePersonTravelHistory != current.RequirePersonTravelHistory
+        || original.PersonPassportLastCount != current.PersonPassportLastCount
+        || original.PersonVisaLastCount != current.PersonVisaLastCount
+        || original.PersonInvitationItemLastCount != current.PersonInvitationItemLastCount
+        || original.PersonWorkPermitItemLastCount != current.PersonWorkPermitItemLastCount
+        || original.PersonBorderZoneItemLastCount != current.PersonBorderZoneItemLastCount
         || !string.Equals(original.ApplicabilityCriteria, current.ApplicabilityCriteria, StringComparison.Ordinal);
 }

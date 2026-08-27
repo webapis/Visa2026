@@ -6,6 +6,7 @@ using DevExpress.ExpressApp;
 using DevExpress.Persistent.Base;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.DatabaseUpdate;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 
 namespace Visa2026.Module.DatabaseUpdate.LookupCatalogs;
 
@@ -59,6 +60,16 @@ public sealed class ApplicationProfileTenantCatalogRow
     public bool CancelBorderZonePermits { get; set; }
 
     public bool CancelApplicationProfileInstances { get; set; }
+
+    public bool ChangeInvitations { get; set; }
+
+    public bool ChangeWorkPermits { get; set; }
+
+    public bool ChangeVisas { get; set; }
+
+    public bool ChangeBorderZonePermits { get; set; }
+
+    public bool ChangeApplicationProfileInstances { get; set; }
 
     public int MinistrySlaDays { get; set; }
 
@@ -138,6 +149,16 @@ public sealed class ApplicationProfileTenantCatalogRow
 
     public bool RequirePersonTravelHistory { get; set; }
 
+    public int PersonPassportLastCount { get; set; } = 1;
+
+    public int PersonVisaLastCount { get; set; } = 1;
+
+    public int PersonInvitationItemLastCount { get; set; } = 1;
+
+    public int PersonWorkPermitItemLastCount { get; set; } = 1;
+
+    public int PersonBorderZoneItemLastCount { get; set; } = 1;
+
     public bool IsActive { get; set; } = true;
 
     public string? SignOff { get; set; }
@@ -195,6 +216,11 @@ public sealed class ApplicationProfileTenantCatalogRow
             CancelVisas = profile.CancelVisas,
             CancelBorderZonePermits = profile.CancelBorderZonePermits,
             CancelApplicationProfileInstances = profile.CancelApplicationProfileInstances,
+            ChangeInvitations = profile.ChangeInvitations,
+            ChangeWorkPermits = profile.ChangeWorkPermits,
+            ChangeVisas = profile.ChangeVisas,
+            ChangeBorderZonePermits = profile.ChangeBorderZonePermits,
+            ChangeApplicationProfileInstances = profile.ChangeApplicationProfileInstances,
             MinistrySlaDays = profile.MinistrySlaDays,
             MigrationSlaDays = profile.MigrationSlaDays,
             MigrationSlaProfileCode = migrationSlaProfileCode,
@@ -234,6 +260,11 @@ public sealed class ApplicationProfileTenantCatalogRow
             RequirePersonMedical = profile.RequirePersonMedical,
             RequirePersonRejectionItem = profile.RequirePersonRejectionItem,
             RequirePersonTravelHistory = profile.RequirePersonTravelHistory,
+            PersonPassportLastCount = profile.PersonPassportLastCount,
+            PersonVisaLastCount = profile.PersonVisaLastCount,
+            PersonInvitationItemLastCount = profile.PersonInvitationItemLastCount,
+            PersonWorkPermitItemLastCount = profile.PersonWorkPermitItemLastCount,
+            PersonBorderZoneItemLastCount = profile.PersonBorderZoneItemLastCount,
             IsActive = profile.IsActive,
             SignOff = string.Empty,
             DefaultProjectContractCode = string.IsNullOrWhiteSpace(projectContractCode)
@@ -272,6 +303,11 @@ public sealed class ApplicationProfileTenantCatalogRow
             CancelVisas = preview.CancelVisas,
             CancelBorderZonePermits = preview.CancelBorderZonePermits,
             CancelApplicationProfileInstances = preview.CancelApplicationProfileInstances,
+            ChangeInvitations = preview.ChangeInvitations,
+            ChangeWorkPermits = preview.ChangeWorkPermits,
+            ChangeVisas = preview.ChangeVisas,
+            ChangeBorderZonePermits = preview.ChangeBorderZonePermits,
+            ChangeApplicationProfileInstances = preview.ChangeApplicationProfileInstances,
             MinistrySlaDays = preview.MinistrySlaDays,
             MigrationSlaDays = preview.MigrationSlaDays,
             MigrationSlaProfileCode = preview.MigrationSlaProfileCode,
@@ -437,6 +473,12 @@ internal static class ApplicationProfileTenantCatalogSync
         profile.CancelBorderZonePermits = row.CancelBorderZonePermits;
         profile.CancelApplicationProfileInstances = row.CancelApplicationProfileInstances;
 
+        profile.ChangeInvitations = row.ChangeInvitations;
+        profile.ChangeWorkPermits = row.ChangeWorkPermits;
+        profile.ChangeVisas = row.ChangeVisas;
+        profile.ChangeBorderZonePermits = row.ChangeBorderZonePermits;
+        profile.ChangeApplicationProfileInstances = row.ChangeApplicationProfileInstances;
+
         profile.MinistrySlaDays = row.MinistrySlaDays > 0 ? row.MinistrySlaDays : 14;
         profile.MigrationSlaDays = row.MigrationSlaDays > 0 ? row.MigrationSlaDays : 14;
 
@@ -481,6 +523,11 @@ internal static class ApplicationProfileTenantCatalogSync
             profile.ActionFamily == ApplicationProfileActionFamily.BusinessTrip
                 ? false
                 : row.RequirePersonTravelHistory;
+        profile.PersonPassportLastCount = ApplicationProfilePersonLastCount.Clamp(row.PersonPassportLastCount);
+        profile.PersonVisaLastCount = ApplicationProfilePersonLastCount.Clamp(row.PersonVisaLastCount);
+        profile.PersonInvitationItemLastCount = ApplicationProfilePersonLastCount.Clamp(row.PersonInvitationItemLastCount);
+        profile.PersonWorkPermitItemLastCount = ApplicationProfilePersonLastCount.Clamp(row.PersonWorkPermitItemLastCount);
+        profile.PersonBorderZoneItemLastCount = ApplicationProfilePersonLastCount.Clamp(row.PersonBorderZoneItemLastCount);
         ApplicationProfileRegistrationKindHelper.ApplyRegistrationPersonDefaults(profile);
 
         profile.IsActive = row.IsActive;

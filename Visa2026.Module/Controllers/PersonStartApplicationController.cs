@@ -22,6 +22,8 @@ public sealed class PersonStartApplicationController : ObjectViewController<Deta
             ToolTip = "Pick an Application Profile and link people to a new profile instance.",
             SelectionDependencyType = SelectionDependencyType.RequireSingleObject,
         };
+        // Officers start cases from Application Profile Instances, not Person DetailView.
+        _startApplicationAction.Active["PersonDetail"] = false;
         _startApplicationAction.Execute += StartApplication_Execute;
     }
 

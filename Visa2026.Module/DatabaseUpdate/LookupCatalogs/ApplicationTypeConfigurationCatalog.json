@@ -53,8 +53,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": false,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-TWO-WEEKS"
+            }
         },
         {
             "Name": "App_Cancel_BZ",
@@ -107,8 +106,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": false,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-3-DAYS"
+            }
         },
         {
             "Name": "App_Cancel_App",
@@ -161,8 +159,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": false,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-3-DAYS"
+            }
         },
         {
             "Name": "App_Cancel_Visa_and_WP_Ext",
@@ -215,8 +212,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": false,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-3-DAYS"
+            }
         },
         {
             "Name": "App_Cancel_Visa_Ext",
@@ -269,8 +265,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": false,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-3-DAYS"
+            }
         },
         {
             "Name": "App_Inv",
@@ -323,8 +318,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": true,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-ONE-MONTH"
+            }
         },
         {
             "Name": "App_Inv_FM",
@@ -377,8 +371,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": true,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-ONE-MONTH"
+            }
         },
         {
             "Name": "App_Sevice_Passport",
@@ -431,8 +424,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": true,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-ONE-MONTH"
+            }
         },
         {
             "Name": "App_Inv_According_to_WP",
@@ -486,8 +478,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": true,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-ONE-MONTH"
+            }
         },
         {
             "Name": "App_Change_Inv",
@@ -540,8 +531,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": false,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-ONE-MONTH"
+            }
         },
         {
             "Name": "App_Cancel_Inv",
@@ -594,8 +584,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": false,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-3-DAYS"
+            }
         },
         {
             "Name": "App_Inv_And_WP",
@@ -651,8 +640,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": true,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-ONE-MONTH"
+            }
         },
         {
             "Name": "App_Cancel_Inv_WP",
@@ -705,8 +693,7 @@
                 "ShowPreviousWorkPermitItem": true,
                 "ShowVisaType": false,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-3-DAYS"
+            }
         },
         {
             "Name": "App_Reg_Check_In",
@@ -759,8 +746,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": false,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-TWO-WEEKS"
+            }
         },
         {
             "Name": "App_Reg_Check_In_Internal",
@@ -813,8 +799,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": false,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-TWO-WEEKS"
+            }
         },
         {
             "Name": "App_Reg_Info_Change_Passport",
@@ -867,8 +852,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": false,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-TWO-WEEKS"
+            }
         },
         {
             "Name": "App_Reg_Info_Change_Visa",
@@ -921,8 +905,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": false,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-TWO-WEEKS"
+            }
         },
         {
             "Name": "App_Reg_Info_Change_Address",
@@ -975,8 +958,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": false,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-TWO-WEEKS"
+            }
         },
         {
             "Name": "App_Reg_ext",
@@ -1029,8 +1011,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": false,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-TWO-WEEKS"
+            }
         },
         {
             "Name": "App_Reg_Check_Out",
@@ -1083,8 +1064,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": false,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-TWO-WEEKS"
+            }
         },
         {
             "Name": "App_Reg_Check_Out_Internal",
@@ -1137,8 +1117,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": false,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-TWO-WEEKS"
+            }
         },
         {
             "Name": "App_Business_Trip_Departure",
@@ -1191,8 +1170,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": false,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-TWO-WEEKS"
+            }
         },
         {
             "Name": "App_Business_Trip_Arrival",
@@ -1245,8 +1223,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": false,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-TWO-WEEKS"
+            }
         },
         {
             "Name": "App_Cancel_Visa",
@@ -1299,8 +1276,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": false,
                 "ShowNextVisa": true
-            },
-            "MigrationSlaProfileCode": "UP-TO-3-DAYS"
+            }
         },
         {
             "Name": "App_Visa_Ext_According_to_WP",
@@ -1354,8 +1330,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": true,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-ONE-MONTH"
+            }
         },
         {
             "Name": "App_Visa_Ext",
@@ -1408,8 +1383,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": true,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-ONE-MONTH"
+            }
         },
         {
             "Name": "App_Exit_Visa",
@@ -1462,8 +1436,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": false,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-ONE-MONTH"
+            }
         },
         {
             "Name": "App_Change_Visa_Category",
@@ -1516,8 +1489,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": false,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-ONE-MONTH"
+            }
         },
         {
             "Name": "App_Change_Passport",
@@ -1570,8 +1542,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": false,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-TWO-WEEKS"
+            }
         },
         {
             "Name": "App_Visa_Ext_FM",
@@ -1624,8 +1595,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": true,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-ONE-MONTH"
+            }
         },
         {
             "Name": "App_Visa_For_New_Born_FM",
@@ -1678,8 +1648,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": false,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-ONE-MONTH"
+            }
         },
         {
             "Name": "App_Cancel_Visa_and_WP",
@@ -1732,8 +1701,7 @@
                 "ShowPreviousWorkPermitItem": true,
                 "ShowVisaType": false,
                 "ShowNextVisa": true
-            },
-            "MigrationSlaProfileCode": "UP-TO-3-DAYS"
+            }
         },
         {
             "Name": "App_Visa_and_WP_Ext",
@@ -1789,8 +1757,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": true,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-ONE-MONTH"
+            }
         },
         {
             "Name": "App_WP_Ext",
@@ -1845,8 +1812,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": false,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-ONE-MONTH"
+            }
         },
         {
             "Name": "App_Cancell_WP",
@@ -1899,8 +1865,7 @@
                 "ShowPreviousWorkPermitItem": true,
                 "ShowVisaType": false,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-3-DAYS"
+            }
         },
         {
             "Name": "App_Additional_WP_location",
@@ -1954,8 +1919,7 @@
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": false,
                 "ShowNextVisa": false
-            },
-            "MigrationSlaProfileCode": "UP-TO-ONE-MONTH"
+            }
         }
     ]
 }

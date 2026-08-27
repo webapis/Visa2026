@@ -278,8 +278,6 @@ internal static class Visa2014VisaODataImporter
             ["ExpirationDate"] = DateTime.SpecifyKind(expirationDate, DateTimeKind.Utc),
             ["BorderZoneLocation"] = borderZone.Trim(),
             ["ExtensionRequired"] = row.GetValueOrDefault("ExtensionRequired") is bool ext && ext,
-            ["IsCancelled"] = row.GetValueOrDefault("IsCancelled") is bool cancelled && cancelled,
-            ["IsChanged"] = row.GetValueOrDefault("IsChanged") is bool changed && changed,
             ["IsExtended"] = row.GetValueOrDefault("IsExtended") is bool extended && extended,
             ["Passport"] = new { ID = passportId },
             ["VisaType"] = new { ID = visaTypeId.Value },

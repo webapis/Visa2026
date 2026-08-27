@@ -255,7 +255,7 @@ namespace Visa2026.Module.BusinessObjects
         public void WarmListViewDisplayCache()
         {
             // Always recompute: the grid may have evaluated NotMapped SLA fields before
-            // ApplicationListViewPreloadController included MigrationSlaProfile / LatestProgress.
+            // ApplicationListViewPreloadController included ApplicationProfile / LatestProgress.
             var state = ApplicationListViewDisplayState.Resolve(this);
             listViewDisplayState = state;
             listRowCssClass = state.ListRowCssClass;

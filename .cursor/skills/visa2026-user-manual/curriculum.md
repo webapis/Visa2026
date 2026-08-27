@@ -179,7 +179,7 @@ Publish in **order** column. **Phase 2** = orders **1–20** (through `applicati
 | 28 | 8 | `administration/configuration/overview` | Configuration overview | — | — | 19, 23 |
 | 29 | 8 | `administration/configuration/organization` | Organization settings | CompanyProfile | — | 28 |
 | 30 | 8 | `administration/configuration/contracts-and-approvals` | Contracts and approvals | ProjectContract | — | 28, 17 |
-| 31 | 8 | `administration/configuration/sla` | SLA settings | ApplicationMigrationSlaProfile | — | 28, 19 |
+| 31 | 8 | `administration/configuration/sla` | SLA settings | ApplicationProfile | — | 28, 19 |
 | 32 | 8 | `administration/configuration/alerts-and-upload-limits` | Alerts and upload limits | ExpirationAlertRule | — | 28 |
 
 \*Person\* = officer must understand nested master data on the person before adding lines (orders 5–14), not necessarily every guide `published`.
@@ -238,8 +238,8 @@ Officers **select and generate**; underlying BOs are not edited in the dialog.
 
 | Area | Configuration menu items | Guide |
 |------|--------------------------|-------|
-| Organization singletons | Company, Application Numbering, Authorized Signatory, Authorized Representative | `administration/configuration/organization` |
-| Contracts & ministry routes | Project contracts, Approving ministries, Approval Leg Profile | `administration/configuration/contracts-and-approvals` |
+| Organization singletons | Application Numbering (Configuration). Company, Authorized Signatory, Authorized Representative are edited from Application Profile. | `administration/configuration/organization` |
+| Contracts & ministry routes | Project contracts (Configuration). Approving ministries and Approval Leg Profile are edited from Application Profile (slot / wizard). | `administration/configuration/contracts-and-approvals` |
 | SLA | Application Migration Sla Profile, Ministry review SLA | `administration/configuration/sla` |
 | Alerts & limits | Document expiration alerts, Upload limits | `administration/configuration/alerts-and-upload-limits` |
 

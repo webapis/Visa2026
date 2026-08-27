@@ -66,9 +66,20 @@ LEFT JOIN "People" sp
 LEFT JOIN "ProjectContracts" spc
     ON spc."ID" = sp."ProjectContractID" AND COALESCE(spc."GCRecord", 0) = 0
 WHERE COALESCE(ii."GCRecord", 0) = 0
-  AND COALESCE(ii."IsUsed", FALSE) = FALSE
-  AND COALESCE(ii."IsCancelled", FALSE) = FALSE
-  AND COALESCE(ii."IsChanged", FALSE) = FALSE
+  AND NOT EXISTS (
+      SELECT 1 FROM "Visas" vis
+      WHERE vis."IssuingInvitationItemID" = ii."ID"
+        AND COALESCE(vis."GCRecord", 0) = 0)
+  AND NOT EXISTS (
+      SELECT 1
+      FROM "ApplicationProfileInstanceInvitationItems" j
+      INNER JOIN "ApplicationProfileInstances" api ON api."ID" = j."ApplicationProfileInstanceId"
+      INNER JOIN "ApplicationProfiles" ap ON ap."ID" = api."ApplicationProfileID"
+      WHERE j."InvitationItemId" = ii."ID"
+        AND COALESCE(api."GCRecord", 0) = 0
+        AND COALESCE(ap."GCRecord", 0) = 0
+        AND ap."ActionFamily" IN (1, 4)
+        AND BTRIM(COALESCE(api."LatestPrimaryStateCode", '')) = 'PROCESS_ISSUED')
   AND ii."PersonID" IS NOT NULL
   AND inv."ExpirationDate" IS NOT NULL
   AND (inv."ExpirationDate")::date >= CURRENT_DATE;

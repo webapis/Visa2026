@@ -56,6 +56,7 @@ namespace Visa2026.Module.DatabaseUpdate
             RemoveLegacyLookupOperationalNavigation(navigationItems);
             RemoveStaleInvitationBorderZoneNavigation(navigationItems);
             RemoveStaleApplicationProfileListNavigation(navigationItems);
+            HideTemplateOwnedConfigurationNavigation(navigationItems);
         }
 
         /// <summary>
@@ -68,6 +69,29 @@ namespace Visa2026.Module.DatabaseUpdate
 
             if (configurationGroup.Items["ApplicationProfile"] is IModelNavigationItem legacyProfileList)
                 legacyProfileList.Remove();
+        }
+
+        /// <summary>
+        /// Shared catalogs are edited from Application Profile (wizard / slot). Hide leftover Configuration nav.
+        /// Ministry SLA days also live on the profile; keep the singleton for snapshot fallback.
+        /// </summary>
+        private static void HideTemplateOwnedConfigurationNavigation(IModelNavigationItems navigationItems)
+        {
+            if (navigationItems["Configuration"] is not IModelNavigationItem configurationGroup)
+                return;
+
+            HideNavItemIfPresent(configurationGroup, "MinistryReviewSlaSettings");
+            HideNavItemIfPresent(configurationGroup, "ApprovalLegProfile");
+            HideNavItemIfPresent(configurationGroup, "ApprovingMinistry");
+            HideNavItemIfPresent(configurationGroup, "AuthorizedSignatory");
+            HideNavItemIfPresent(configurationGroup, "AuthorizedRepresentative");
+            HideNavItemIfPresent(configurationGroup, "CompanyProfile");
+        }
+
+        private static void HideNavItemIfPresent(IModelNavigationItem parentGroup, string itemId)
+        {
+            if (parentGroup.Items[itemId] is IModelNavigationItem item)
+                item.Visible = false;
         }
 
         private static void EnsureTopLevelPersonNavigation(

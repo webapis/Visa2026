@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
@@ -8,10 +9,10 @@ namespace Visa2026.Module.Services.ApplicationPersonRoster;
 
 /// <summary>
 /// Valid/active resolve rules for ApplicationProfileInstance Person M2M (plan §10.2).
-/// Officer link/create: only valid, not-expired Passport, Visa, WorkPermitItem,
-/// InvitationItem, BorderZoneItem, and MedicalRecord rows may be auto-linked.
+/// Officer link/create: Visa, WorkPermitItem, InvitationItem, BorderZoneItem, and MedicalRecord
+/// must be valid/not-expired. Passport expiration is not checked (previous expired booklet is OK).
 /// VISA2014 import (<see cref="MigrationImportContext.IsDataImport"/>) uses PersonCurrentItems
-/// so historical expired rows still link.
+/// so historical expired rows still link when Last-N is 1.
 /// </summary>
 public static class ApplicationProfileInstancePersonValidItems
 {
@@ -32,8 +33,11 @@ public static class ApplicationProfileInstancePersonValidItems
         _ => true,
     };
 
-    public static bool CanLinkPassport(Passport? passport, DateTime? asOf = null) =>
-        passport != null && !IsExpiredAsOf(passport.ExpirationDate, asOf);
+    public static bool CanLinkPassport(Passport? passport, DateTime? asOf = null)
+    {
+        _ = asOf;
+        return passport != null;
+    }
 
     public static bool CanLinkVisa(Visa? visa, DateTime? asOf = null)
     {
@@ -62,7 +66,7 @@ public static class ApplicationProfileInstancePersonValidItems
 
     public static bool CanLinkWorkPermitItem(WorkPermitItem? item, DateTime? asOf = null)
     {
-        if (item == null || item.IsCancelled)
+        if (item == null || item.IsCancelled || item.IsChanged)
             return false;
 
         return !IsExpiredAsOf(item.ExpirationDate, asOf);
@@ -70,32 +74,63 @@ public static class ApplicationProfileInstancePersonValidItems
 
     public static bool CanLinkBorderZoneItem(BorderZoneItem? item, DateTime? asOf = null)
     {
-        if (item == null || item.IsCancelled || item.BorderZone == null)
+        if (item == null || item.IsCancelled || item.IsChanged || item.BorderZone == null)
             return false;
 
         return !IsExpiredAsOf(item.BorderZone.ExpirationDate, asOf);
     }
 
     public static Passport? ResolvePassport(Person? person, DateTime? asOf = null) =>
-        EnforceOfficerLinkValidity
-            ? person?.Passports?
-                .Where(p => CanLinkPassport(p, asOf))
-                .OrderByDescending(p => p.IssueDate ?? DateTime.MinValue)
-                .ThenByDescending(p => p.ID)
-                .FirstOrDefault()
-            : PersonCurrentItems.GetCurrentPassport(person);
+        ResolvePassports(person, 1, asOf).FirstOrDefault();
+
+    public static IReadOnlyList<Passport> ResolvePassports(Person? person, int lastCount, DateTime? asOf = null)
+    {
+        lastCount = ApplicationProfilePersonLastCount.Clamp(lastCount);
+        if (person?.Passports == null)
+            return [];
+
+        if (!EnforceOfficerLinkValidity && lastCount == 1)
+        {
+            var current = PersonCurrentItems.GetCurrentPassport(person);
+            return current == null ? [] : [current];
+        }
+
+        return person.Passports
+            .Where(p => CanLinkPassport(p, asOf))
+            .OrderByDescending(p => p.IssueDate ?? DateTime.MinValue)
+            .ThenByDescending(p => p.ID)
+            .Take(lastCount)
+            .ToList();
+    }
 
     public static Visa? ResolveVisa(Person? person, DateTime? asOf = null) =>
-        EnforceOfficerLinkValidity
-            ? person?.Passports?
-                .Where(p => p != null)
-                .SelectMany(p => p.Visas ?? Array.Empty<Visa>())
-                .Where(v => CanLinkVisa(v, asOf))
-                .OrderByDescending(v => v.StartDate)
-                .ThenByDescending(v => v.IssueDate)
-                .ThenByDescending(v => v.ID)
-                .FirstOrDefault()
-            : PersonCurrentItems.GetCurrentVisa(person, asOf ?? DateTime.Today);
+        ResolveVisas(person, 1, asOf).FirstOrDefault();
+
+    public static IReadOnlyList<Visa> ResolveVisas(Person? person, int lastCount, DateTime? asOf = null)
+    {
+        lastCount = ApplicationProfilePersonLastCount.Clamp(lastCount);
+        if (person?.Passports == null)
+            return [];
+
+        if (!EnforceOfficerLinkValidity && lastCount == 1)
+        {
+            var current = PersonCurrentItems.GetCurrentVisa(person, asOf ?? DateTime.Today);
+            return current == null ? [] : [current];
+        }
+
+        IEnumerable<Visa> query = person.Passports
+            .Where(p => p != null)
+            .SelectMany(p => p.Visas ?? Array.Empty<Visa>());
+        if (EnforceOfficerLinkValidity)
+            query = query.Where(v => CanLinkVisa(v, asOf));
+
+        return query
+            .OrderByDescending(v => v.StartDate)
+            .ThenByDescending(v => v.IssueDate)
+            .ThenByDescending(v => v.ID)
+            .Take(lastCount)
+            .ToList();
+    }
 
     public static Education? ResolveEducation(Person? person) =>
         PersonCurrentItems.GetCurrentEducation(person);
@@ -122,44 +157,90 @@ public static class ApplicationProfileInstancePersonValidItems
             : PersonCurrentItems.GetCurrentMedicalRecord(person);
 
     public static InvitationItem? ResolveInvitationItem(Person? person, DateTime? asOf = null) =>
-        EnforceOfficerLinkValidity
-            ? person?.InvitationItems?
-                .Where(i => CanLinkInvitationItem(i, asOf))
-                .OrderByDescending(i => i.Invitation?.IssuedDate ?? default)
-                .ThenByDescending(i => i.ID)
-                .FirstOrDefault()
-            : PersonCurrentItems.GetCurrentInvitationItem(person);
+        ResolveInvitationItems(person, 1, asOf).FirstOrDefault();
+
+    public static IReadOnlyList<InvitationItem> ResolveInvitationItems(Person? person, int lastCount, DateTime? asOf = null)
+    {
+        lastCount = ApplicationProfilePersonLastCount.Clamp(lastCount);
+        if (person?.InvitationItems == null)
+            return [];
+
+        if (!EnforceOfficerLinkValidity && lastCount == 1)
+        {
+            var current = PersonCurrentItems.GetCurrentInvitationItem(person);
+            return current == null ? [] : [current];
+        }
+
+        IEnumerable<InvitationItem> query = person.InvitationItems.Where(i => i != null);
+        if (EnforceOfficerLinkValidity)
+            query = query.Where(i => CanLinkInvitationItem(i, asOf));
+
+        return query
+            .OrderByDescending(i => i.Invitation?.IssuedDate ?? default)
+            .ThenByDescending(i => i.ID)
+            .Take(lastCount)
+            .ToList();
+    }
 
     public static WorkPermitItem? ResolveWorkPermitItem(Person? person, DateTime? asOf = null) =>
-        EnforceOfficerLinkValidity
-            ? person?.WorkPermitItems?
-                .Where(w => CanLinkWorkPermitItem(w, asOf))
-                .OrderByDescending(w => w.StartDate)
-                .ThenByDescending(w => w.ID)
-                .FirstOrDefault()
-            : PersonCurrentItems.GetCurrentWorkPermitItem(person);
+        ResolveWorkPermitItems(person, 1, asOf).FirstOrDefault();
+
+    public static IReadOnlyList<WorkPermitItem> ResolveWorkPermitItems(Person? person, int lastCount, DateTime? asOf = null)
+    {
+        lastCount = ApplicationProfilePersonLastCount.Clamp(lastCount);
+        if (person?.WorkPermitItems == null)
+            return [];
+
+        if (!EnforceOfficerLinkValidity && lastCount == 1)
+        {
+            var current = PersonCurrentItems.GetCurrentWorkPermitItem(person);
+            return current == null ? [] : [current];
+        }
+
+        IEnumerable<WorkPermitItem> query = person.WorkPermitItems.Where(w => w != null);
+        if (EnforceOfficerLinkValidity)
+            query = query.Where(w => CanLinkWorkPermitItem(w, asOf));
+
+        return query
+            .OrderByDescending(w => w.StartDate)
+            .ThenByDescending(w => w.ID)
+            .Take(lastCount)
+            .ToList();
+    }
 
     public static RejectionItem? ResolveRejectionItem(Person? person) =>
         PersonCurrentItems.GetCurrentRejectionItem(person);
 
-    public static BorderZoneItem? ResolveBorderZoneItem(IObjectSpace objectSpace, Person? person, DateTime? asOf = null)
+    public static BorderZoneItem? ResolveBorderZoneItem(IObjectSpace objectSpace, Person? person, DateTime? asOf = null) =>
+        ResolveBorderZoneItems(objectSpace, person, 1, asOf).FirstOrDefault();
+
+    public static IReadOnlyList<BorderZoneItem> ResolveBorderZoneItems(
+        IObjectSpace objectSpace,
+        Person? person,
+        int lastCount,
+        DateTime? asOf = null)
     {
+        lastCount = ApplicationProfilePersonLastCount.Clamp(lastCount);
         if (objectSpace == null || person == null || person.ID == Guid.Empty)
-            return null;
+            return [];
+
+        var rows = objectSpace.GetObjectsQuery<BorderZoneItem>()
+            .Where(b => b.Person != null && b.Person.ID == person.ID)
+            .OrderByDescending(b => b.ID)
+            .ToList();
 
         if (!EnforceOfficerLinkValidity)
         {
-            return objectSpace.GetObjectsQuery<BorderZoneItem>()
-                .Where(b => b.Person != null && b.Person.ID == person.ID && !b.IsCancelled)
-                .OrderByDescending(b => b.ID)
-                .FirstOrDefault();
+            return rows
+                .Where(b => !b.IsCancelled)
+                .Take(lastCount)
+                .ToList();
         }
 
-        return objectSpace.GetObjectsQuery<BorderZoneItem>()
-            .Where(b => b.Person != null && b.Person.ID == person.ID)
-            .OrderByDescending(b => b.ID)
-            .ToList()
-            .FirstOrDefault(b => CanLinkBorderZoneItem(b, asOf));
+        return rows
+            .Where(b => CanLinkBorderZoneItem(b, asOf))
+            .Take(lastCount)
+            .ToList();
     }
 
     public static TravelHistory? ResolveTravelHistory(Person? person)

@@ -40,6 +40,11 @@
       <Item Id="Configuration">
         <Items>
           <Item Id="MinistryReviewSlaSettings" Visible="False" />
+          <Item Id="ApprovalLegProfile" Visible="False" />
+          <Item Id="ApprovingMinistry" Visible="False" />
+          <Item Id="AuthorizedSignatory" Visible="False" />
+          <Item Id="AuthorizedRepresentative" Visible="False" />
+          <Item Id="CompanyProfile" Visible="False" />
         </Items>
       </Item>
     <Item Id="Application" Caption="ApplicationProfileInstances"><Items><Item Id="Application_DirectMigration" Caption="Applications (direct migration)"><Items><Item Id="ApplicationItem_DirectMigration" Caption="ApplicationProfileInstance items (migration)" /></Items></Item><Item Id="Application_ViaMinistries" Caption="Applications (via ministry)"><Items><Item Id="ApplicationItem_ViaMinistries" Caption="ApplicationProfileInstance items (ministry)" /></Items></Item></Items></Item></Items>

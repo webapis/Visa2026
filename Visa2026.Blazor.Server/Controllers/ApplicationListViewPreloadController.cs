@@ -127,7 +127,7 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
 
         if (syncRowCount > 0 && View != null)
         {
-            // Grid may have bound empty NotMapped SLA values before MigrationSlaProfile was included.
+            // Grid may have bound empty NotMapped SLA values before ApplicationProfile was included.
             // Force rebind so Migration deadline / working days pick up the warmed cache.
             suppressCollectionReloadPreload = true;
             try
@@ -179,7 +179,8 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
             .Where(application => batchIds.Contains(application.ID))
             .Include(application => application.LatestProgress!).ThenInclude(progress => progress.State)
             .Include(application => application.LatestProgress!).ThenInclude(progress => progress.State)
-            .Include(application => application.ApplicationType!).ThenInclude(applicationType => applicationType.MigrationSlaProfile)
+            .Include(application => application.ApplicationProfile)
+            .Include(application => application.ApplicationType!)
             .Include(application => application.ApprovalLegProfile!)
                 .ThenInclude(profile => profile.MinistryLegs)
                 .ThenInclude(leg => leg.ApprovingMinistry)

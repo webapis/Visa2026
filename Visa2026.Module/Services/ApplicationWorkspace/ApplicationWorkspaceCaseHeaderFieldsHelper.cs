@@ -28,6 +28,9 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
     public const string Urgency = "Urgency";
     public const string WorkPermitLocation = "WorkPermitLocation";
     public const string EntryCheckPoint = "EntryCheckPoint";
+    public const string InstanceNumber = "InstanceNumber";
+    public const string InstanceDate = "InstanceDate";
+    public const int InstanceNumberMaxLength = 100;
 
     public static IReadOnlyList<ApplicationWorkspaceCaseHeaderField> Build(
         ApplicationProfileInstance application,
@@ -42,6 +45,15 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             ? Catalogs.Load(objectSpace)
             : Catalogs.Empty;
         var fields = new List<ApplicationWorkspaceCaseHeaderField>();
+
+        AddShortText(fields, InstanceNumber, "Application number", "blue", "№",
+            visible: true,
+            FormatInstanceNumber(application),
+            InstanceNumberMaxLength);
+
+        AddDate(fields, InstanceDate, "Application date", "green", "📅",
+            visible: true,
+            application.ApplicationDate == default ? null : application.ApplicationDate);
 
         AddLookup(fields, VisaType, "Visa type", "blue", "🛂",
             Visible(profile, p => p.RequireVisaType, ApplicationProfileConfigurationResolver.ShowVisaType, application),
@@ -136,6 +148,10 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
 
         switch (key)
         {
+            case InstanceNumber:
+                return TrySetInstanceNumber(application, value, out error);
+            case InstanceDate:
+                return TrySetInstanceDate(application, value, out error);
             case VisaType:
                 if (!Visible(profile, p => p.RequireVisaType, ApplicationProfileConfigurationResolver.ShowVisaType, application))
                     return Hidden(out error);
@@ -308,6 +324,34 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         });
     }
 
+    private static void AddShortText(
+        List<ApplicationWorkspaceCaseHeaderField> fields,
+        string key,
+        string label,
+        string tone,
+        string glyph,
+        bool visible,
+        string? text,
+        int maxLength)
+    {
+        if (!visible)
+            return;
+
+        var value = text?.Trim() ?? string.Empty;
+        fields.Add(new ApplicationWorkspaceCaseHeaderField
+        {
+            Key = key,
+            Label = label,
+            Kind = ApplicationWorkspaceCaseHeaderFieldKind.ShortText,
+            Tone = tone,
+            Glyph = glyph,
+            Value = value,
+            DisplayValue = string.IsNullOrWhiteSpace(value) ? "—" : value,
+            ReadOnly = false,
+            MaxLength = maxLength,
+        });
+    }
+
     private static void AddCommaSeparatedMultiSelect(
         List<ApplicationWorkspaceCaseHeaderField> fields,
         string key,
@@ -449,6 +493,88 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
 
         assign(trimmed);
         return true;
+    }
+
+    internal static bool TrySetInstanceNumber(ApplicationProfileInstance application, string? value, out string? error)
+    {
+        error = null;
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            error = "Enter an application number.";
+            return false;
+        }
+
+        var trimmed = value.Trim();
+        if (trimmed.Length > InstanceNumberMaxLength)
+        {
+            error = $"Application number cannot exceed {InstanceNumberMaxLength} characters.";
+            return false;
+        }
+
+        ApplicationManualNumberParser.Parse(trimmed, out var full, out var prefix, out var number);
+        application.FullApplicationNumber = full;
+        if (!string.IsNullOrEmpty(prefix))
+            application.AppNumberPrefix = prefix;
+        if (!string.IsNullOrEmpty(number))
+        {
+            if (number.Length > 50)
+            {
+                error = "Application number sequence cannot exceed 50 characters.";
+                return false;
+            }
+
+            application.ApplicationNumber = number;
+        }
+        else
+        {
+            if (full.Length > 50)
+            {
+                error = "Application number cannot exceed 50 characters.";
+                return false;
+            }
+
+            application.ApplicationNumber = full;
+        }
+
+        application.IsManualEntry = true;
+        return true;
+    }
+
+    internal static bool TrySetInstanceDate(ApplicationProfileInstance application, string? value, out string? error)
+    {
+        error = null;
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            error = "Enter an application date.";
+            return false;
+        }
+
+        if (!SetDate(value, date =>
+            {
+                if (date == null)
+                    return;
+                application.ApplicationDate = date.Value;
+                application.Year = date.Value.Year;
+                application.Month = date.Value.Month;
+            }, out error))
+            return false;
+
+        if (application.ApplicationDate == default)
+        {
+            error = "Enter an application date.";
+            return false;
+        }
+
+        return true;
+    }
+
+    private static string FormatInstanceNumber(ApplicationProfileInstance application)
+    {
+        if (!string.IsNullOrWhiteSpace(application.FullApplicationNumber))
+            return application.FullApplicationNumber.Trim();
+        if (!string.IsNullOrWhiteSpace(application.ApplicationNumber))
+            return application.ApplicationNumber.Trim();
+        return string.Empty;
     }
 
     private static bool Hidden(out string? error)

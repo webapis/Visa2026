@@ -1,5 +1,5 @@
 {
-  "version": 41,
+  "version": 42,
   "catalogs": [
     {
       "id": "position",
@@ -78,14 +78,6 @@
       "entity": "ApprovingMinistry",
       "file": "approving-ministry.json",
       "matchKey": "ShortNameTm",
-      "syncMode": "OverwriteScalars",
-      "optional": true
-    },
-    {
-      "id": "application-migration-sla-profile",
-      "entity": "ApplicationMigrationSlaProfile",
-      "file": "application-migration-sla-profile.json",
-      "matchKey": "CodeOrName",
       "syncMode": "OverwriteScalars",
       "optional": true
     },
