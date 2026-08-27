@@ -159,6 +159,7 @@ namespace Visa2026.Blazor.Server
                         ApplicationProfileInstanceChildSkipNavSchemaSql.ApplyIfMissing(connectionString);
                         VisaIssuingApplicationProfileInstanceSchemaSql.ApplyIfMissing(connectionString);
                         ApplicationItemsDropSchemaSql.ApplyIfMissing(connectionString);
+                        ApplicationMigrationSlaProfileDropSchemaSql.ApplyIfMissing(connectionString);
                         ApplicationWorkspacePostgresViewsSql.ApplyIfMissing(connectionString);
                         PersonIncompleteDataSchemaSql.ApplyIfMissing(connectionString);
                         InvitationLegacyShapeSchemaSql.ApplyIfMissing(connectionString);
@@ -300,6 +301,7 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<IFilePreviewSource, ApplicationProfileTemplateFilePreviewSource>();
             services.AddScoped<FilePreviewSourceRegistry>();
             services.AddScoped<Visa2026.Module.Services.PreviewSlot.IVisaPreviewSlotService, VisaPreviewSlotService>();
+            services.AddScoped<Visa2026.Module.Services.PreviewSlot.IApprovalLegCatalogChangeNotifier, Visa2026.Module.Services.PreviewSlot.ApprovalLegCatalogChangeNotifier>();
             services.AddScoped<ApplicationProfileInstancePersonPdfBatchEnqueueService>();
             services.AddScoped<ApplicationItemDocumentPackageEnqueueService>();
             services.AddScoped<ApplicationWordReportPackageCatalogService>();
@@ -334,6 +336,7 @@ namespace Visa2026.Blazor.Server
                 ApplicationProfileInstanceChildSkipNavSchemaSql.ApplyIfMissing(connectionString);
                 VisaIssuingApplicationProfileInstanceSchemaSql.ApplyIfMissing(connectionString);
                 ApplicationItemsDropSchemaSql.ApplyIfMissing(connectionString);
+                ApplicationMigrationSlaProfileDropSchemaSql.ApplyIfMissing(connectionString);
                 ApplicationWorkspacePostgresViewsSql.ApplyIfMissing(connectionString);
                 PersonIncompleteDataSchemaSql.ApplyIfMissing(connectionString);
                 InvitationLegacyShapeSchemaSql.ApplyIfMissing(connectionString);

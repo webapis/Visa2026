@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ApplicationProfileInstance Title="Wiza dolandyryşy">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Application Title="Wiza dolandyryşy">
   <ActionDesign>
     <Actions>
       <Action Id="Cancel" Caption="Ýatyr" />
@@ -121,7 +121,6 @@
             <LayoutGroup Id="Invitations" Caption="Çakylyklar" />
             <LayoutGroup Id="Rejections" Caption="Retler" />
             <LayoutGroup Id="WorkPermits" Caption="Iş rugsatnamalary" />
-            <LayoutGroup Id="IssuedVisas" Caption="Berlen wizalar" />
           </TabbedGroup>
         </LayoutGroup>
       </Layout>
@@ -255,4 +254,4 @@
       </Item>
     </Items>
   </NavigationItems>
-</ApplicationProfileInstance>
+</Application>

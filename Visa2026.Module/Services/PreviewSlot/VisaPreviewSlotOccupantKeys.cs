@@ -138,4 +138,6 @@ public static class VisaPreviewSlotOccupantKeys
             return $"{baseKey}|visa:{visaId:N}";
         return baseKey;
     }
+
+    public static string ForApprovalLegCatalog() => "approval-leg-catalog:tenant";
 }

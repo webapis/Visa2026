@@ -143,6 +143,20 @@ public sealed class VisaPreviewSlotService : IVisaPreviewSlotService
         return Task.CompletedTask;
     }
 
+    public Task OpenApprovalLegCatalogAsync(ApprovalLegCatalogSlotRequest? request = null, string? ownerViewId = null)
+    {
+        _state = new VisaPreviewSlotState
+        {
+            Mode = VisaPreviewSlotMode.ApprovalLegCatalog,
+            OccupantKey = VisaPreviewSlotOccupantKeys.ForApprovalLegCatalog(),
+            OwnerViewId = NormalizeOwnerViewId(ownerViewId),
+            ApprovalLegCatalog = request ?? new ApprovalLegCatalogSlotRequest(),
+            Version = _state.Version + 1,
+        };
+        StateChanged?.Invoke();
+        return Task.CompletedTask;
+    }
+
     public Task OpenFileAsync(string sourceType, Guid objectId, string? ownerViewId = null)
     {
         if (string.IsNullOrWhiteSpace(sourceType) || objectId == Guid.Empty)

@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ApplicationProfileInstance Title="Vize Yönetimi">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Application Title="Vize Yönetimi">
   <ActionDesign>
     <Actions>
       <Action Id="Cancel" Caption="İptal" />
@@ -121,8 +121,6 @@
             <LayoutGroup Id="Invitations" Caption="Davetler" />
             <LayoutGroup Id="Rejections" Caption="Retler" />
             <LayoutGroup Id="WorkPermits" Caption="Çalışma İzinleri" />
-            <LayoutGroup Id="BorderZones" Caption="Sınır bölgesi izinleri" />
-            <LayoutGroup Id="IssuedVisas" Caption="Düzenlenen vizeler" />
           </TabbedGroup>
         </LayoutGroup>
       </Layout>
@@ -256,4 +254,4 @@
       </Item>
     </Items>
   </NavigationItems>
-</ApplicationProfileInstance>
+</Application>

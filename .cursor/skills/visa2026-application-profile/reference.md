@@ -26,6 +26,7 @@ Companion to [SKILL.md](./SKILL.md).
 | Profile schema heal | `DatabaseUpdate/ApplicationProfileSchemaSql.cs` |
 | Lock helper | `ApplicationProfileLockHelper` in `ApplicationProfile.cs` |
 | Wizard UX | `ApplicationProfileWizard*`, `ApplicationProfileWizardComponent.razor` |
+| Approval-leg slot catalog | `ApprovalLegProfileSlotEditor`, `ApprovalLegProfileSlotPanel.razor`, `OpenApprovalLegCatalogAsync` |
 | Profile overview (live) | `ApplicationProfileOverviewQueryService`, `ApplicationProfileOverviewComponent.razor` |
 | Profile picker at create | `ApplicationProfilePicker*`, `ApplicationProfilePickerNewController` |
 | Officer manual | `user-manual/docs/en/guides/applications/application-profiles.md`, `administration/configuration/application-profiles.md` |
@@ -46,7 +47,7 @@ Companion to [SKILL.md](./SKILL.md).
 | Staged / in-process queues | `OfficerShellStagedQueryService`, `OfficerShellInProcessQueryService`, `OfficerShellStartProcessService` |
 | Case workspace tabs | `OfficerShellCaseWorkspaceComponent.razor`, `OfficerShellCase*Tab.razor` (overview, people, progress, documents, resminamalar, SLA) |
 | Case snapshot builder | `ApplicationWorkspaceCaseBuilder.cs`, `ApplicationWorkspaceCaseModels.cs` |
-| Case summary Use fields | `ApplicationWorkspaceCaseHeaderFieldsHelper.cs` (overview tiles + Edit/Done; persist on instance) |
+| Case summary Use fields | `ApplicationWorkspaceCaseHeaderFieldsHelper.cs` (application number/date always + Use-field tiles; Edit/Done persist on instance) |
 | Person link picker (B8) | `IApplicationPersonLinkQueryService`, `OfficerShellPersonLinkPickerComponent.razor` |
 | Case progress in-shell (B7) | `IOfficerShellCaseProgressService`, `OfficerShellCaseProgressTab.razor` |
 | Immersive tab-bar hide (B6) | `OfficerShellImmersiveTabBarController.cs`, `officer-shell-host.css` |

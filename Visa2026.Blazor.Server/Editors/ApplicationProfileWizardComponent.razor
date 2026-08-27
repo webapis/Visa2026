@@ -71,6 +71,7 @@
                     <ApplicationProfileWizardStepIdentity Profile="Profile"
                         Disabled="IsReadOnly"
                         SharedApprovalLegProfiles="SharedApprovalLegProfiles"
+                        SharedApprovalLegsRevision="SharedApprovalLegsRevision"
                         OpenSharedCatalogRequested="OpenSharedCatalogCallback"
                         RefreshSharedRequested="RefreshSharedCallback"
                         ClearLegsRequested="ClearLegsCallback" />
@@ -159,6 +160,7 @@
     [Parameter] public EventCallback RefreshOrganizationRequested { get; set; }
     [Parameter] public EventCallback OpenSharedApprovalLegCatalogRequested { get; set; }
     [Parameter] public EventCallback RefreshSharedApprovalLegsRequested { get; set; }
+    [Parameter] public int SharedApprovalLegsRevision { get; set; }
     [Parameter] public ApplicationProfileWizardLookupData Lookups { get; set; } =
         ApplicationProfileWizardLookupData.Empty;
 

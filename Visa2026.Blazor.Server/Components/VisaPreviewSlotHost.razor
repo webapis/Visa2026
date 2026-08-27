@@ -63,6 +63,12 @@ else if (_state.Mode == VisaPreviewSlotMode.IssueIssuedVisa && _state.IssueIssue
                               Request="_state.IssueIssuedVisa"
                               CloseRequested="CloseFromPanelAsync" />
 }
+else if (_state.Mode == VisaPreviewSlotMode.ApprovalLegCatalog)
+{
+    <ApprovalLegProfileSlotPanel @key="@($"{_state.OccupantKey}|{_state.Version}")"
+                                 Request="_state.ApprovalLegCatalog"
+                                 CloseRequested="CloseFromPanelAsync" />
+}
 
 @code {
     [Inject] private IVisaPreviewSlotService SlotService { get; set; } = null!;

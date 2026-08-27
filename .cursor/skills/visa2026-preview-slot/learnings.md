@@ -23,6 +23,46 @@ Purpose: **shell, layout, occupants, catalog card UX, JS/CSS** — not Resminama
 
 ## Entries
 
+### 2026-08-27 — Remove Duplicate from approval-leg occupant
+
+- **Need**: Duplicate on in-use catalog rows and the locked editor footer is not wanted.
+- **Fix**: Open only on cards; in-use footer is Save. Hint text no longer mentions Duplicate.
+- **Test**: Ctrl+F5 catalog used row and Open used chain.
+- **Prevent**: Do not re-add Duplicate on this occupant.
+- **Cross-skill**: preview-slot | application-profile
+
+### 2026-08-27 — Approval-leg slot side gutters
+
+- **Need**: Catalog and editor sat too close to the left and right edges of `#visa-preview-slot`.
+- **Fix**: `--approval-leg-pad-x: clamp(1.85rem, 5vw, 3rem)` on header, list, editor scroll, footer, and hints. Zero out shared `.resminamalar-slot-panel__catalog` horizontal padding so it does not fight the occupant gutters.
+- **Test**: Ctrl+F5 catalog and unused editor — content inset from both sides.
+- **Prevent**: Do not rely on `--resminamalar-slot-inset-x` for this occupant; it is too tight on a wide slot.
+- **Cross-skill**: preview-slot | application-profile
+
+### 2026-08-27 — New ministry in approval-leg occupant
+
+- **Need**: Chain editor could only pick existing ministries.
+- **Fix**: Inline **+ New ministry** in `ApprovalLegProfileSlotPanel` (not a second occupant).
+- **Test**: Ctrl+F5 unused chain editor → New ministry form → Create ministry adds a leg.
+- **Prevent**: Do not open XAF lookup UI from this occupant.
+- **Cross-skill**: preview-slot | application-profile
+
+### 2026-08-27 — Approval-leg slot catalog padding
+
+- **Need**: Occupant catalog/editor looked tight vs other slot panels.
+- **Fix**: `approval-leg-slot.css` — catalog list scroll + hint pinned; editor sections + sticky footer; switch for Active.
+- **Test**: Ctrl+F5 on Edit in Configuration catalog and Open editor.
+- **Prevent**: Do not put editor actions in the scrolling form body.
+- **Cross-skill**: preview-slot | application-profile
+
+### 2026-08-27 — Approval-leg catalog occupant
+
+- **Need**: Wizard **Edit in Configuration** must use `#visa-preview-slot`, not an XAF modal.
+- **Fix**: `VisaPreviewSlotMode.ApprovalLegCatalog`, `OpenApprovalLegCatalogAsync`, occupant key `approval-leg-catalog:tenant`, `ApprovalLegProfileSlotPanel` + `approval-leg-slot.css`.
+- **Test**: Blazor Debug succeeded. Officer: Ctrl+F5, Configure profile → Edit in Configuration → slot catalog; X closes occupant; leaving the wizard view auto-closes (owner view id).
+- **Prevent**: Do not add a File occupant for this — it is catalog CRUD, not a stored document.
+- **Cross-skill**: preview-slot | application-profile
+
 ### 2026-08-26 — Field cues on all issued BOs from Application Profile Instance
 
 - **Need**: Orange/blue/green was only on visa/WP/border-zone compose. Invitation, rejection, and native XAF New DetailViews for issued BOs had no cues.

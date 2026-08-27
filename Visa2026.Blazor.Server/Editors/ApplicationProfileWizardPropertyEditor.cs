@@ -185,7 +185,8 @@ public class ApplicationProfileWizardPropertyEditor : BlazorPropertyEditorBase, 
 
         ApplicationProfileWizardApprovalLegCatalogOpenHelper.TryOpen(
             _application,
-            onClosed: RefreshSupportingData);
+            onChanged: RefreshSupportingData,
+            ownerViewId: VisaPreviewSlotViewHelper.ResolveOwnerViewId(View));
     }
 
     private void RefreshSupportingData()
@@ -193,6 +194,9 @@ public class ApplicationProfileWizardPropertyEditor : BlazorPropertyEditorBase, 
         ReloadSharedApprovalLegs();
         RefreshOrganizationSnapshot();
         RefreshLookupData();
+        var model = ComponentModel;
+        if (model != null)
+            model.SharedApprovalLegsRevision++;
     }
 
     private void ReloadSharedApprovalLegs()

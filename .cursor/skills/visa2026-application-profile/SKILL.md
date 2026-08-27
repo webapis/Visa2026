@@ -46,6 +46,7 @@ disable-model-invocation: false
 | In process | `process-started-profiles-listview-table-mockup.png`, `process-started-application-profile-workspace-mockup.png`, `process-started-nav-*.png` |
 | Templates | `application-profile-templates-listview-mockup.png`, `application-profile-template-overview-mockup.png`, `application-profile-template-wizard*.png` |
 | Approval leg versions (2026-08-18) | `application-profile-wizard-approval-leg-versions-prototype.png`, `application-profile-instance-create-choose-approval-legs-prototype.png` |
+| Approval leg slot CRUD (2026-08-27) | `approval-leg-profile-slot-01-catalog.png` … `-05-new.png` |
 | Case summary instance fields (2026-08-18) | `application-profile-instance-case-summary-overview-properties-prototype.png`, `application-profile-instance-case-summary-edit-properties-prototype.png` |
 
 **Retired:** HTML/Excel/`images/` prototypes removed 2026-08-10 — see plan §9.
@@ -125,7 +126,7 @@ flowchart LR
 | Wizard Templates Preview should look filled | No live application in Configure | File occupant + office-to-PDF of the **master** (placeholders) |
 | Document copies preview fails on roster line | `TryBuildMergedPdfForRoster` | Roster IDs are `ApplicationPerson`, not `ApplicationItem` |
 | Person detail crashes after Open from case | `PersonDetailOpenHelper` | Do not dispose ObjectSpace before `ShowView` |
-| Case summary tiles empty / Edit does not save | Profile `Require*` off; officer-shell `HeaderFieldChanged` | `ApplicationWorkspaceCaseHeaderFieldsHelper`; `OfficerShellPropertyEditor.SaveHeaderFieldAsync` |
+| Case summary tiles empty / Edit does not save | Profile `Require*` off (number/date are always shown); officer-shell `HeaderFieldChanged`; post-prep lock on type/contract only | `ApplicationWorkspaceCaseHeaderFieldsHelper`; `OfficerShellPropertyEditor.SaveHeaderFieldAsync` |
 
 ---
 
@@ -153,6 +154,7 @@ When starting a slice, set its row to **In progress** in IMPLEMENTATION_PLAN; se
 |-------------|-----------|----------------------|
 | Configure profile → Templates **Preview** | Wizard list / Edit modal | **File occupant** (`OpenFileAsync` master PDF) |
 | Case workspace tab → **Preview** | Catalog / list | **Viewer only** (`OpenPreviewOnly` + focus key) |
+| Configure profile → Identity **Edit in Configuration** | Wizard stays | **Approval-leg catalog** (`OpenApprovalLegCatalogAsync`) |
 | Case workspace Progress → ministry letter filename | Timeline (current file name) | **Viewer only** (`ProgressLettersSlotRequest.OpenPreviewOnly` + `FocusProgressId`) |
 | Rail / legacy DetailView action | — | Full catalog in slot |
 
@@ -169,7 +171,8 @@ Use when user asks *how should I configure this profile?* — tailor to **Action
 | Family | Typical use | Suggest |
 |--------|-------------|---------|
 | **Issuance** | New visa / permit / invitation | Enable matching **Produce** flags; person toggles for passport + position; via-ministry route if contract-driven |
-| **Cancellation** | Cancel existing documents | Enable **Cancel** flags for target doc types; fewer produce flags |
+| **Cancellation** | Cancel existing documents | Enable **Cancel** flags for target doc types; fewer produce flags. Document is cancelled only after the instance reaches **PROCESS_ISSUED** |
+| **Change** | Change existing documents | Enable **Change** flags for target doc types. Document is changed only after **PROCESS_ISSUED**; cancelled wins over changed |
 | **Registration** | Check-in / check-out / info change / reg extension | Set **Check in**, **Check out**, **Info change**, or **Reg extension**; **Position** always on; **Urgency** never used; **For family member** when FM |
 | **Business trip** | Short trip | **Business trip** family; region / trip address per-App fields; lighter person matrix |
 
@@ -228,7 +231,7 @@ Use when user asks *how should I configure this profile?* — tailor to **Action
 
 ### Officer UX: suggest profile for scenario
 
-1. Ask: issuance vs cancel vs registration vs trip; employee vs FM; ministry vs direct.
+1. Ask: issuance vs cancel vs change vs registration vs trip; employee vs FM; ministry vs direct.
 2. Filter active profiles by audience + applicability criteria.
 3. Annotate: used before, open app warn, config locked badge (plan §11).
 

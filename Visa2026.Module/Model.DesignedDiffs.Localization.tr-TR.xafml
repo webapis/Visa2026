@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ApplicationProfileInstance Title="Vize Yönetimi">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Application Title="Vize Yönetimi">
   <ActionDesign>
     <Actions>
       <Action Id="Save" Caption="Kaydet" />
@@ -52,22 +52,18 @@
       <Action Id="ShowReportDesigner" Caption="Rapor Tasarımcısı" />
       <Action Id="UserFeedbackMarkInProgress" Caption="Devam ediyor olarak işaretle" />
       <Action Id="UserFeedbackMarkFixed" Caption="Düzeltildi olarak işaretle" />
-      <Action Id="StartStagedProcess" Caption="Süreci başlat" />
     </Actions>
   </ActionDesign>
   <NavigationItems>
     <Items>
-      <Item Id="Application" Caption="Başvuru Profilleri">
+      <Item Id="Application" Caption="Başvurular">
         <Items>
-          <Item Id="Application_Staged" Caption="Hazır profiller" />
-          <Item Id="Application_InProcess" Caption="İşlemde" />
-          <Item Id="ApplicationProfileCatalog" Caption="Başvuru profil şablonları" />
-          <Item Id="Application_DirectMigration" Caption="Başvuru örnekleri (doğrudan migrasyon)">
+          <Item Id="Application_DirectMigration" Caption="Başvurular (doğrudan migrasyon)">
             <Items>
               <Item Id="ApplicationItem_DirectMigration" Caption="Başvuru kalemleri (migrasyon)" />
             </Items>
           </Item>
-          <Item Id="Application_ViaMinistries" Caption="Başvuru örnekleri (bakanlık süreci)">
+          <Item Id="Application_ViaMinistries" Caption="Başvurular (bakanlık süreci)">
             <Items>
               <Item Id="ApplicationItem_ViaMinistries" Caption="Başvuru kalemleri (bakanlık)" />
             </Items>
@@ -268,11 +264,10 @@
         <Member Name="WorkingDaysInCurrentStep" Caption="İş günleri" />
         <Member Name="WorkingDaysInMigrationStep" Caption="Migrasyon iş günleri" />
         <Member Name="WorkPermits" Caption="Çalışma İzinleri" />
-        <Member Name="BorderZones" Caption="Sınır bölgesi izinleri" />
         <Member Name="Year" Caption="Yıl" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationProfileInstanceApprovalLegSnapshot" Caption="Onay bakanlık anlık görüntüsü">
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationApprovalLegSnapshot" Caption="Onay bakanlık anlık görüntüsü">
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
@@ -363,15 +358,6 @@
         <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationMigrationSlaProfile" Caption="Göç SLA profili">
-      <OwnMembers>
-        <Member Name="ApplicationTypes" Caption="Başvuru türleri" />
-        <Member Name="DateDeleted" Caption="Silinme Tarihi" />
-        <Member Name="DeletedBy" Caption="Silen" />
-        <Member Name="MaxDaysInReview" Caption="Azami iş günleri" />
-        <Member Name="WarningDaysBeforeMax" Caption="Uyarı (iş günleri)" />
-      </OwnMembers>
-    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationNumberingProfile" Caption="Başvuru Numaralandırma">
       <OwnMembers>
         <Member Name="ApplicationNumberPadding" Caption="Başvuru No Uzunluğu" />
@@ -382,7 +368,7 @@
         <Member Name="DeletedBy" Caption="Silen" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationProfileInstanceProgress" Caption="Başvuru İlerlemesi">
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationProgress" Caption="Başvuru İlerlemesi">
       <OwnMembers>
         <Member Name="Application" Caption="Başvuru" />
         <Member Name="Date" Caption="Tarih" />
@@ -398,7 +384,7 @@
         <Member Name="StatusListLabel" Caption="Durum" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationProfileInstanceProgressRouteKind" Caption="İlerleme süreci">
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationProgressRouteKind" Caption="İlerleme süreci">
       <OwnMembers>
         <Member Name="DirectToMigrationService" Caption="Doğrudan migrasyon" />
         <Member Name="ViaMinistries" Caption="Bakanlık süreci" />
@@ -489,7 +475,7 @@
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationType" Caption="Başvuru Türü">
       <OwnMembers>
         <Member Name="Application" Caption="Başvuru" />
-        <Member Name="ApplicationProfileInstanceProgressRoute" Caption="İlerleme süreci" />
+        <Member Name="ApplicationProgressRoute" Caption="İlerleme süreci" />
         <Member Name="Category" Caption="Kategori" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
@@ -2430,8 +2416,6 @@
         <ColumnInfo Id="Year" Caption="Yıl" />
       </Columns>
     </ListView>
-    <ListView Id="Application_ListView_Staged" Caption="Hazır profiller" />
-    <ListView Id="Application_ListView_InProcess" Caption="İşlemde" />
     <ListView Id="Application_ListView_DirectMigration" Caption="Doğrudan migrasyon başvuruları">
       <Columns>
         <ColumnInfo Id="ApplicationDate" Caption="Tarih" />
@@ -2478,8 +2462,8 @@
         <ColumnInfo Id="StatusListLabel" Caption="Durum" />
       </Columns>
     </ListView>
-    <DetailView Id="ApplicationProfileInstanceApprovalLegSnapshot_DetailView" Caption="Onay bakanlık anlık görüntüsü" />
-    <ListView Id="ApplicationProfileInstanceApprovalLegSnapshot_ListView" Caption="Onay bakanlık anlık görüntüleri" />
+    <DetailView Id="ApplicationApprovalLegSnapshot_DetailView" Caption="Onay bakanlık anlık görüntüsü" />
+    <ListView Id="ApplicationApprovalLegSnapshot_ListView" Caption="Onay bakanlık anlık görüntüleri" />
     <DetailView Id="ApplicationItem_DetailView" Caption="Başvuru Kalemi" />
     <ListView Id="ApplicationItem_ListView" Caption="Başvuru Kalemleri">
       <Columns>
@@ -2497,8 +2481,6 @@
     <DetailView Id="ApplicationItemReportPackageListHost_DetailView" Caption="Şablonlar" />
     <DetailView Id="ApplicationLocation_DetailView" Caption="Başvuru Yeri" />
     <ListView Id="ApplicationLocation_ListView" Caption="Başvuru Yerleri" />
-    <DetailView Id="ApplicationMigrationSlaProfile_DetailView" Caption="Göç SLA profili" />
-    <ListView Id="ApplicationMigrationSlaProfile_ListView" Caption="Göç SLA profilleri" />
     <DetailView Id="ApplicationNumberingProfile_DetailView" Caption="Başvuru Numaralandırma" />
     <ListView Id="ApplicationNumberingProfile_ListView" Caption="Başvuru Numaralandırma" />
     <DetailView Id="ApplicationProfileInstanceProgress_DetailView" Caption="Başvuru İlerlemesi" />
@@ -2510,6 +2492,8 @@
         <ColumnInfo Id="StatusListLabel" Caption="Durum" />
       </Columns>
     </ListView>
+    <DetailView Id="ApplicationProgress_DetailView" Caption="Başvuru İlerlemesi" />
+    <ListView Id="ApplicationProgress_ListView" Caption="Başvuru İlerlemeleri" />
     <DetailView Id="ApplicationReason_DetailView" Caption="Başvuru Nedeni" />
     <ListView Id="ApplicationReason_ListView" Caption="Başvuru Nedenleri" />
     <DetailView Id="ApplicationReportPackageListHost_DetailView" Caption="Şablonlar" />
@@ -3208,7 +3192,7 @@
         <LocalizationItem Name="Exit" Value="Çıkış" />
         <LocalizationItem Name="Stay" Value="Kalış" />
       </LocalizationGroup>
-      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ApplicationProfileInstanceProgressRouteKind">
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ApplicationProgressRouteKind">
         <LocalizationItem Name="DirectToMigrationService" Value="Doğrudan migrasyon" />
         <LocalizationItem Name="ViaMinistries" Value="Bakanlık süreci" />
       </LocalizationGroup>
@@ -3302,4 +3286,4 @@
       <LocalizationItem Name="WorkPermittedCityLinks_Group" Value="İzin Verilen Şehir Birimleri" />
     </LocalizationGroup>
   </Localization>
-</ApplicationProfileInstance>
+</Application>

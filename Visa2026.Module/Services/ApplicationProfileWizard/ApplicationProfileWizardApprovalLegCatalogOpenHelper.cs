@@ -1,37 +1,39 @@
 using System;
+using System.Threading.Tasks;
 using DevExpress.ExpressApp;
-using Visa2026.Module.BusinessObjects;
+using Microsoft.Extensions.DependencyInjection;
+using Visa2026.Module.Services.PreviewSlot;
 
 namespace Visa2026.Module.Services.ApplicationProfileWizard;
 
 /// <summary>
-/// Opens the shared Approval leg profile catalog (Configuration) from the Application Profile wizard.
+/// Opens the shared Approval leg profile catalog in <c>#visa-preview-slot</c> from the Application Profile wizard.
 /// </summary>
 public static class ApplicationProfileWizardApprovalLegCatalogOpenHelper
 {
-    public static bool TryOpen(XafApplication application, Action? onClosed = null)
+    public static bool TryOpen(XafApplication application, Action? onChanged = null, string? ownerViewId = null)
     {
         if (application == null)
             return false;
 
-        var objectSpace = application.CreateObjectSpace(typeof(ApprovalLegProfile));
-        var listView = application.CreateListView(objectSpace, typeof(ApprovalLegProfile), true);
+        var slotService = application.ServiceProvider?.GetService<IVisaPreviewSlotService>();
+        if (slotService == null)
+            return false;
 
-        if (onClosed != null)
+        if (onChanged != null)
         {
-            EventHandler? committed = null;
-            committed = (_, _) =>
+            var notifier = application.ServiceProvider.GetService<IApprovalLegCatalogChangeNotifier>();
+            if (notifier != null)
             {
-                objectSpace.Committed -= committed;
-                onClosed();
-            };
-            objectSpace.Committed += committed;
-            listView.Closed += (_, _) => onClosed();
+                notifier.Changed -= onChanged;
+                notifier.Changed += onChanged;
+            }
         }
 
-        application.ShowViewStrategy.ShowView(
-            new ShowViewParameters(listView) { TargetWindow = TargetWindow.NewModalWindow },
-            new ShowViewSource(application.MainWindow, null));
+        _ = OpenAsync(slotService, ownerViewId);
         return true;
     }
+
+    private static Task OpenAsync(IVisaPreviewSlotService slotService, string? ownerViewId) =>
+        slotService.OpenApprovalLegCatalogAsync(new ApprovalLegCatalogSlotRequest(), ownerViewId);
 }

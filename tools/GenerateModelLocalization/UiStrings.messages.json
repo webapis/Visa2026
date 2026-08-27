@@ -2339,18 +2339,6 @@
     "tk-TM": "Bu arza görnüşinde migrasiýa SLA profili ýok (ýa-da iň ýokary iş günleri bellenmedi). Migrasiýa gullugyna geçmezden öň arza görnüşine profil belläň.",
     "ru-RU": "У типа заявки не задан профиль SLA миграционной службы (или не указано макс. число рабочих дней). Назначьте профиль типу заявки перед переводом в миграционную службу."
   },
-  "ApplicationType.MigrationSlaProfileMissingWarning": {
-    "en": "No migration SLA profile is assigned. Officers cannot advance applications of this type to migration service until a profile with max working days is set.",
-    "tr-TR": "Migrasyon SLA profili atanmamış. Azami iş günü olan bir profil tanımlanana kadar bu tür başvurular migrasyon servisine ilerletilemez.",
-    "tk-TM": "Migrasiýa SLA profili bellenmedi. Iň ýokary iş günleri bar profil bellänçä bu görnüşli arzalar migrasiýa gullugyna geçirilip bilmez.",
-    "ru-RU": "Профиль SLA миграционной службы не назначен. Заявки этого типа нельзя переводить в миграционную службу, пока не задан профиль с макс. числом рабочих дней."
-  },
-  "ApplicationMigrationSlaProfile.DeleteBlocked": {
-    "en": "This migration SLA profile is used by one or more application types and cannot be deleted.",
-    "tr-TR": "Bu migrasyon SLA profili bir veya daha fazla başvuru türü tarafından kullanılıyor; silinemez.",
-    "tk-TM": "Bu migrasiýa SLA profili bir ýa-da has köp arza görnüşinde ulanylýar; pozup bolmaýar.",
-    "ru-RU": "Этот профиль SLA миграционной службы используется одним или несколькими типами заявок и не может быть удалён."
-  },
   "ExpirationAlertRule.ConfigurationOnly": {
     "en": "Only configured document expiration rules can be edited here.",
     "tr-TR": "Burada yalnızca yapılandırılmış belge sona erme kuralları düzenlenebilir.",
@@ -2416,6 +2404,324 @@
     "tr-TR": "Bu onay bakanlık profili başvurularda kullanılıyor. Bakanlık adımlarını değiştirmek için kopyalayın.",
     "tk-TM": "Bu ministrlik ylalaşyk ädimleri profili arzalarda ulanylýar. Ministrlik ädimlerini üýtgetmek üçin göçürip alň.",
     "ru-RU": "Этот профиль этапов уже используется заявками. Скопируйте его, чтобы изменить этапы министерств."
+  },
+  "ApprovalLegProfile.Slot.Title": {
+    "en": "Approval leg profiles",
+    "tr-TR": "Onay bakanlık profilleri",
+    "tk-TM": "Ministrlik ylalaşyk ädimleri",
+    "ru-RU": "Профили этапов министерств"
+  },
+  "ApprovalLegProfile.Slot.Subtitle": {
+    "en": "Shared ministry chains · tenant catalog",
+    "tr-TR": "Paylaşılan bakanlık zincirleri · kiracı kataloğu",
+    "tk-TM": "Paýlaşylan ministrlik zynjyrlary · kärendeçi katalog",
+    "ru-RU": "Общие цепочки министерств · каталог арендатора"
+  },
+  "ApprovalLegProfile.Slot.SearchPlaceholder": {
+    "en": "Search chains…",
+    "tr-TR": "Zincir ara…",
+    "tk-TM": "Zynjyr gözle…",
+    "ru-RU": "Искать цепочки…"
+  },
+  "ApprovalLegProfile.Slot.New": {
+    "en": "+ New",
+    "tr-TR": "+ Yeni",
+    "tk-TM": "+ Täze",
+    "ru-RU": "+ Создать"
+  },
+  "ApprovalLegProfile.Slot.Open": {
+    "en": "Open",
+    "tr-TR": "Aç",
+    "tk-TM": "Aç",
+    "ru-RU": "Открыть"
+  },
+  "ApprovalLegProfile.Slot.Duplicate": {
+    "en": "Duplicate",
+    "tr-TR": "Kopyala",
+    "tk-TM": "Göçür",
+    "ru-RU": "Дублировать"
+  },
+  "ApprovalLegProfile.Slot.Active": {
+    "en": "Active",
+    "tr-TR": "Aktif",
+    "tk-TM": "Aktiw",
+    "ru-RU": "Активен"
+  },
+  "ApprovalLegProfile.Slot.Inactive": {
+    "en": "Inactive",
+    "tr-TR": "Pasif",
+    "tk-TM": "Aktiw däl",
+    "ru-RU": "Неактивен"
+  },
+  "ApprovalLegProfile.Slot.UsedBy": {
+    "en": "Used by {0} applications",
+    "tr-TR": "{0} başvuruda kullanılıyor",
+    "tk-TM": "{0} arzada ulanylýar",
+    "ru-RU": "Используется в {0} заявках"
+  },
+  "ApprovalLegProfile.Slot.CatalogHint": {
+    "en": "Open edits the shared chain. Default for this template stays on the wizard radios.",
+    "tr-TR": "Aç, paylaşılan zinciri düzenler. Bu şablonun varsayılanı sihirbaz radyolarında kalır.",
+    "tk-TM": "Aç paýlaşylan zynjyry redaktirleýär. Bu şablonyň deslapky belligi jadygöý radio-larynda galýar.",
+    "ru-RU": "Открыть правит общую цепочку. Значение по умолчанию для шаблона остаётся на радиокнопках мастера."
+  },
+  "ApprovalLegProfile.Slot.EmptyTitle": {
+    "en": "No approval-leg profiles yet",
+    "tr-TR": "Henüz onay bakanlık profili yok",
+    "tk-TM": "Ministrlik ylalaşyk ädimleri entek ýok",
+    "ru-RU": "Профилей этапов пока нет"
+  },
+  "ApprovalLegProfile.Slot.EmptyBody": {
+    "en": "Create the first shared ministry chain. Officers pick it as Default on the wizard after Refresh.",
+    "tr-TR": "İlk paylaşılan bakanlık zincirini oluşturun. Memurlar yenilemeden sonra sihirbazda Varsayılan olarak seçer.",
+    "tk-TM": "Ilkinji paýlaşylan ministrlik zynjyryny dörediň. Işgärler täzelemekden soň jadygöýde deslapky hökmünde saýlaýar.",
+    "ru-RU": "Создайте первую общую цепочку министерств. Сотрудники выберут её как значение по умолчанию в мастере после обновления."
+  },
+  "ApprovalLegProfile.Slot.EmptyFooter": {
+    "en": "Default for this template stays on the wizard radios after the first chain exists.",
+    "tr-TR": "İlk zincir oluşunca bu şablonun varsayılanı sihirbaz radyolarında kalır.",
+    "tk-TM": "Ilkinji zynjyr döredilenden soň bu şablonyň deslapkysy jadygöý radio-larynda galýar.",
+    "ru-RU": "После появления первой цепочки значение по умолчанию для шаблона остаётся на радиокнопках мастера."
+  },
+  "ApprovalLegProfile.Slot.NewTitle": {
+    "en": "New approval-leg profile",
+    "tr-TR": "Yeni onay bakanlık profili",
+    "tk-TM": "Täze ministrlik ylalaşyk ädimleri",
+    "ru-RU": "Новый профиль этапов"
+  },
+  "ApprovalLegProfile.Slot.NewHint": {
+    "en": "Create adds a shared catalog chain. Then Refresh on the wizard to set Default.",
+    "tr-TR": "Oluştur paylaşılan bir zincir ekler. Varsayılanı ayarlamak için sihirbazda Yenile’ye basın.",
+    "tk-TM": "Döret paýlaşylan katalog zynjyryny goşýar. Deslapkyny sazlamak üçin jadygöýde Täzele.",
+    "ru-RU": "Создать добавляет общую цепочку. Затем обновите мастер, чтобы задать значение по умолчанию."
+  },
+  "ApprovalLegProfile.Slot.EditTitle": {
+    "en": "Edit approval-leg profile",
+    "tr-TR": "Onay bakanlık profilini düzenle",
+    "tk-TM": "Ministrlik ylalaşyk ädimlerini redaktirle",
+    "ru-RU": "Изменить профиль этапов"
+  },
+  "ApprovalLegProfile.Slot.BackCatalog": {
+    "en": "Catalog",
+    "tr-TR": "Katalog",
+    "tk-TM": "Katalog",
+    "ru-RU": "Каталог"
+  },
+  "ApprovalLegProfile.Slot.Code": {
+    "en": "Code",
+    "tr-TR": "Kod",
+    "tk-TM": "Kod",
+    "ru-RU": "Код"
+  },
+  "ApprovalLegProfile.Slot.CodePlaceholder": {
+    "en": "TE-EN",
+    "tr-TR": "TE-EN",
+    "tk-TM": "TE-EN",
+    "ru-RU": "TE-EN"
+  },
+  "ApprovalLegProfile.Slot.Ministries": {
+    "en": "Ministries ({0})",
+    "tr-TR": "Bakanlıklar ({0})",
+    "tk-TM": "Ministrlikler ({0})",
+    "ru-RU": "Министерства ({0})"
+  },
+  "ApprovalLegProfile.Slot.NoMinistries": {
+    "en": "No ministries yet. Add at least one.",
+    "tr-TR": "Henüz bakanlık yok. En az bir tane ekleyin.",
+    "tk-TM": "Ministrlik entek ýok. Azyndan birini goşuň.",
+    "ru-RU": "Министерств пока нет. Добавьте хотя бы одно."
+  },
+  "ApprovalLegProfile.Slot.AddMinistry": {
+    "en": "Add ministry",
+    "tr-TR": "Bakanlık ekle",
+    "tk-TM": "Ministrlik goş",
+    "ru-RU": "Добавить министерство"
+  },
+  "ApprovalLegProfile.Slot.SelectMinistry": {
+    "en": "Select ministry…",
+    "tr-TR": "Bakanlık seçin…",
+    "tk-TM": "Ministrlik saýlaň…",
+    "ru-RU": "Выберите министерство…"
+  },
+  "ApprovalLegProfile.Slot.Add": {
+    "en": "Add",
+    "tr-TR": "Ekle",
+    "tk-TM": "Goş",
+    "ru-RU": "Добавить"
+  },
+  "ApprovalLegProfile.Slot.Remove": {
+    "en": "Remove",
+    "tr-TR": "Kaldır",
+    "tk-TM": "Aýyr",
+    "ru-RU": "Удалить"
+  },
+  "ApprovalLegProfile.Slot.MoveUp": {
+    "en": "Up",
+    "tr-TR": "Yukarı",
+    "tk-TM": "Ýokary",
+    "ru-RU": "Вверх"
+  },
+  "ApprovalLegProfile.Slot.MoveDown": {
+    "en": "Down",
+    "tr-TR": "Aşağı",
+    "tk-TM": "Aşak",
+    "ru-RU": "Вниз"
+  },
+  "ApprovalLegProfile.Slot.Cancel": {
+    "en": "Cancel",
+    "tr-TR": "İptal",
+    "tk-TM": "Ýatyr",
+    "ru-RU": "Отмена"
+  },
+  "ApprovalLegProfile.Slot.Create": {
+    "en": "Create",
+    "tr-TR": "Oluştur",
+    "tk-TM": "Döret",
+    "ru-RU": "Создать"
+  },
+  "ApprovalLegProfile.Slot.Save": {
+    "en": "Save",
+    "tr-TR": "Kaydet",
+    "tk-TM": "Ýazdyr",
+    "ru-RU": "Сохранить"
+  },
+  "ApprovalLegProfile.Slot.Delete": {
+    "en": "Delete",
+    "tr-TR": "Sil",
+    "tk-TM": "Poz",
+    "ru-RU": "Удалить"
+  },
+  "ApprovalLegProfile.Slot.LockedHint": {
+    "en": "This chain is used by applications. Ministry order is locked.",
+    "tr-TR": "Bu zincir başvurularda kullanılıyor. Bakanlık sırası kilitli.",
+    "tk-TM": "Bu zynjyr arzalarda ulanylýar. Ministrlik tertibi gulply.",
+    "ru-RU": "Эта цепочка используется заявками. Порядок министерств заблокирован."
+  },
+  "ApprovalLegProfile.Slot.UnusedHint": {
+    "en": "Not used by applications yet. Ministry order can be changed.",
+    "tr-TR": "Henüz başvurularda kullanılmıyor. Bakanlık sırası değiştirilebilir.",
+    "tk-TM": "Entak arzalarda ulanylmaýar. Ministrlik tertibini üýtgedip bolýar.",
+    "ru-RU": "Пока не используется заявками. Порядок министерств можно менять."
+  },
+  "ApprovalLegProfile.Slot.ConfirmDelete": {
+    "en": "Delete this unused chain?",
+    "tr-TR": "Bu kullanılmayan zincir silinsin mi?",
+    "tk-TM": "Bu ulanylmaýan zynjyr pozulsynmy?",
+    "ru-RU": "Удалить эту неиспользуемую цепочку?"
+  },
+  "ApprovalLegProfile.Slot.CodeRequired": {
+    "en": "Enter a code or add ministries so a code can be generated.",
+    "tr-TR": "Bir kod girin veya kod üretmek için bakanlık ekleyin.",
+    "tk-TM": "Kod giriziň ýa-da kod döretmek üçin ministrlik goşuň.",
+    "ru-RU": "Введите код или добавьте министерства, чтобы сформировать код."
+  },
+  "ApprovalLegProfile.Slot.CodeTaken": {
+    "en": "That code is already used by another chain.",
+    "tr-TR": "Bu kod başka bir zincirde kullanılıyor.",
+    "tk-TM": "Bu kod başga zynjyrda ulanylýar.",
+    "ru-RU": "Этот код уже используется другой цепочкой."
+  },
+  "ApprovalLegProfile.Slot.DuplicateMinistry": {
+    "en": "That ministry is already on this chain.",
+    "tr-TR": "Bu bakanlık zaten bu zincirde.",
+    "tk-TM": "Bu ministrlik eýýäm bu zynjyrda.",
+    "ru-RU": "Это министерство уже есть в цепочке."
+  },
+  "ApprovalLegProfile.Slot.MinistryMissing": {
+    "en": "A selected ministry is no longer available.",
+    "tr-TR": "Seçilen bakanlık artık yok.",
+    "tk-TM": "Saýlanan ministrlik indi ýok.",
+    "ru-RU": "Выбранное министерство больше недоступно."
+  },
+  "ApprovalLegProfile.Slot.NotFound": {
+    "en": "That approval-leg profile was not found.",
+    "tr-TR": "Onay bakanlık profili bulunamadı.",
+    "tk-TM": "Ministrlik ylalaşyk ädimleri tapylmady.",
+    "ru-RU": "Профиль этапов не найден."
+  },
+  "ApprovalLegProfile.Slot.SaveFailed": {
+    "en": "Could not save the approval-leg profile.",
+    "tr-TR": "Onay bakanlık profili kaydedilemedi.",
+    "tk-TM": "Ministrlik ylalaşyk ädimleri ýazdyrylmady.",
+    "ru-RU": "Не удалось сохранить профиль этапов."
+  },
+  "ApprovalLegProfile.Slot.DeleteInUseBlocked": {
+    "en": "This chain is used by applications. It cannot be deleted.",
+    "tr-TR": "Bu zincir başvurularda kullanılıyor. Silinemez.",
+    "tk-TM": "Bu zynjyr arzalarda ulanylýar. Ony pozup bolmaýar.",
+    "ru-RU": "Эта цепочка используется заявками. Её нельзя удалить."
+  },
+  "ApprovalLegProfile.Slot.SaveHint": {
+    "en": "Save updates the shared catalog. Wizard Default radios are unchanged until Refresh.",
+    "tr-TR": "Kaydet paylaşılan kataloğu günceller. Sihirbaz Varsayılan radyoları Yenile’ye kadar değişmez.",
+    "tk-TM": "Ýazdyr paýlaşylan katalogy täzeleýär. Jadygöý deslapky radio-lary Täzeleýänçä üýtgemeýär.",
+    "ru-RU": "Сохранить обновляет общий каталог. Радиокнопки Default мастера не меняются до обновления."
+  },
+  "ApprovalLegProfile.Slot.NewMinistry": {
+    "en": "+ New ministry",
+    "tr-TR": "+ Yeni bakanlık",
+    "tk-TM": "+ Täze ministrlik",
+    "ru-RU": "+ Новое министерство"
+  },
+  "ApprovalLegProfile.Slot.NewMinistryHint": {
+    "en": "Creates a shared ministry, then adds it to this chain.",
+    "tr-TR": "Paylaşılan bir bakanlık oluşturur ve bu zincire ekler.",
+    "tk-TM": "Paýlaşylan ministrlik döredýär we bu zynjyra goşýar.",
+    "ru-RU": "Создаёт общее министерство и добавляет его в эту цепочку."
+  },
+  "ApprovalLegProfile.Slot.NewMinistryShortName": {
+    "en": "Short name",
+    "tr-TR": "Kısa ad",
+    "tk-TM": "Gysga ady",
+    "ru-RU": "Краткое имя"
+  },
+  "ApprovalLegProfile.Slot.NewMinistryOfficialName": {
+    "en": "Official name",
+    "tr-TR": "Resmi ad",
+    "tk-TM": "Resmi ady",
+    "ru-RU": "Официальное имя"
+  },
+  "ApprovalLegProfile.Slot.NewMinistryShortPlaceholder": {
+    "en": "Türkmengaz",
+    "tr-TR": "Türkmengaz",
+    "tk-TM": "Türkmengaz",
+    "ru-RU": "Türkmengaz"
+  },
+  "ApprovalLegProfile.Slot.NewMinistryOfficialPlaceholder": {
+    "en": "\"Türkmengaz\" döwlet konserni",
+    "tr-TR": "\"Türkmengaz\" döwlet konserni",
+    "tk-TM": "\"Türkmengaz\" döwlet konserni",
+    "ru-RU": "\"Türkmengaz\" döwlet konserni"
+  },
+  "ApprovalLegProfile.Slot.CreateMinistry": {
+    "en": "Create ministry",
+    "tr-TR": "Bakanlık oluştur",
+    "tk-TM": "Ministrlik döret",
+    "ru-RU": "Создать министерство"
+  },
+  "ApprovalLegProfile.Slot.ShortNameRequired": {
+    "en": "Enter a short name.",
+    "tr-TR": "Kısa ad girin.",
+    "tk-TM": "Gysga ad giriziň.",
+    "ru-RU": "Введите краткое имя."
+  },
+  "ApprovalLegProfile.Slot.OfficialNameRequired": {
+    "en": "Enter the official name.",
+    "tr-TR": "Resmi adı girin.",
+    "tk-TM": "Resmi ady giriziň.",
+    "ru-RU": "Введите официальное имя."
+  },
+  "ApprovalLegProfile.Slot.MinistryNameTaken": {
+    "en": "That short name is already used. Pick it from the list.",
+    "tr-TR": "Bu kısa ad zaten kullanılıyor. Listeden seçin.",
+    "tk-TM": "Bu gysga ad eýýäm ulanylýar. Sanawdan saýlaň.",
+    "ru-RU": "Это краткое имя уже используется. Выберите его в списке."
+  },
+  "ApprovalLegProfile.Slot.CreateMinistryFailed": {
+    "en": "Could not create the ministry.",
+    "tr-TR": "Bakanlık oluşturulamadı.",
+    "tk-TM": "Ministrlik döredilmedi.",
+    "ru-RU": "Не удалось создать министерство."
   },
   "ApplicationProgressProfile.MinistryDepth.Many": {
     "en": "{0} ministries",

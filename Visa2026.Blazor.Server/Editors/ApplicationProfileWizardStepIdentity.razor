@@ -129,6 +129,17 @@
                 <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.CancelApplicationProfileInstances" disabled="@Disabled" /> Application(s)</label>
             </div>
         }
+        else if (ShowMayChange)
+        {
+            <h3 class="ap-wizard__subhead">May change existing</h3>
+            <div class="ap-wizard__choices">
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ChangeInvitations" disabled="@Disabled" /> Invitation(s)</label>
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ChangeWorkPermits" disabled="@Disabled" /> Work permit(s)</label>
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ChangeVisas" disabled="@Disabled" /> Visa(s)</label>
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ChangeBorderZonePermits" disabled="@Disabled" /> Border zone permit(s)</label>
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ChangeApplicationProfileInstances" disabled="@Disabled" /> Application(s)</label>
+            </div>
+        }
         else if (ShowRegistrationKind)
         {
             <h3 class="ap-wizard__subhead">Registration is</h3>
@@ -166,7 +177,7 @@
         }
         else
         {
-            <p class="ap-wizard__hint">Business-trip profiles do not issue or cancel documents here.</p>
+            <p class="ap-wizard__hint">Business-trip profiles do not issue, cancel, or change documents here.</p>
         }
     </div>
     <div class="ap-wizard__section">
@@ -201,6 +212,7 @@
     [Parameter, EditorRequired] public ApplicationProfile Profile { get; set; } = null!;
     [Parameter] public bool Disabled { get; set; }
     [Parameter] public IReadOnlyList<ApprovalLegProfile> SharedApprovalLegProfiles { get; set; } = Array.Empty<ApprovalLegProfile>();
+    [Parameter] public int SharedApprovalLegsRevision { get; set; }
     [Parameter] public EventCallback OpenSharedCatalogRequested { get; set; }
     [Parameter] public EventCallback RefreshSharedRequested { get; set; }
     [Parameter] public EventCallback ClearLegsRequested { get; set; }
@@ -220,12 +232,14 @@
     [
         ApplicationProfileActionFamily.Issuance,
         ApplicationProfileActionFamily.Cancellation,
+        ApplicationProfileActionFamily.Change,
         ApplicationProfileActionFamily.Registration,
         ApplicationProfileActionFamily.BusinessTrip,
     ];
 
     private bool ShowMayProduce => Profile.ActionFamily == ApplicationProfileActionFamily.Issuance;
     private bool ShowMayCancel => Profile.ActionFamily == ApplicationProfileActionFamily.Cancellation;
+    private bool ShowMayChange => Profile.ActionFamily == ApplicationProfileActionFamily.Change;
     private bool ShowRegistrationKind => Profile.ActionFamily == ApplicationProfileActionFamily.Registration;
     private bool ShowApprovalLegs =>
         Profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries;
@@ -282,6 +296,8 @@
             ClearProduce();
         if (family != ApplicationProfileActionFamily.Cancellation)
             ClearCancel();
+        if (family != ApplicationProfileActionFamily.Change)
+            ClearChange();
         if (family != ApplicationProfileActionFamily.Registration)
             Profile.RegistrationKind = ApplicationProfileRegistrationKind.None;
         else if (Profile.RegistrationKind == ApplicationProfileRegistrationKind.None)
@@ -316,6 +332,15 @@
         Profile.CancelApplicationProfileInstances = false;
     }
 
+    private void ClearChange()
+    {
+        Profile.ChangeInvitations = false;
+        Profile.ChangeWorkPermits = false;
+        Profile.ChangeVisas = false;
+        Profile.ChangeBorderZonePermits = false;
+        Profile.ChangeApplicationProfileInstances = false;
+    }
+
     private void SetAlwaysScope()
     {
         _scopeMode = ScopeMode.Always;
@@ -327,6 +352,7 @@
     private static string FormatActionFamily(ApplicationProfileActionFamily family) => family switch
     {
         ApplicationProfileActionFamily.Cancellation => "Cancellation",
+        ApplicationProfileActionFamily.Change => "Change",
         ApplicationProfileActionFamily.Registration => "Registration",
         ApplicationProfileActionFamily.BusinessTrip => "Business trip",
         _ => "Issuance",

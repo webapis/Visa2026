@@ -17,6 +17,7 @@ public enum VisaPreviewSlotMode
     PlaceholderManual = 7,
     IssueIssuedHeader = 8,
     IssueIssuedVisa = 9,
+    ApprovalLegCatalog = 10,
 }
 
 public sealed class ResminamalarSlotRequest
@@ -78,7 +79,13 @@ public sealed class VisaPreviewSlotState
 
     public IssueIssuedVisaSlotRequest? IssueIssuedVisa { get; init; }
 
+    public ApprovalLegCatalogSlotRequest? ApprovalLegCatalog { get; init; }
+
     public int Version { get; init; }
+}
+
+public sealed class ApprovalLegCatalogSlotRequest
+{
 }
 
 public sealed class DocumentCopiesSlotRequest
@@ -170,6 +177,8 @@ public interface IVisaPreviewSlotService
     Task OpenIssueIssuedHeaderAsync(IssueIssuedHeaderSlotRequest request, string? ownerViewId = null);
 
     Task OpenIssueIssuedVisaAsync(IssueIssuedVisaSlotRequest request, string? ownerViewId = null);
+
+    Task OpenApprovalLegCatalogAsync(ApprovalLegCatalogSlotRequest? request = null, string? ownerViewId = null);
 
     Task OpenFileAsync(string sourceType, Guid objectId, string? ownerViewId = null);
 

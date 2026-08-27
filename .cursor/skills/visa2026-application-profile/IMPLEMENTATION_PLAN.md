@@ -23,7 +23,7 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | 8 | Configuration wizard UX | **Done** | 6-step Blazor wizard; **Configure profile** on Application Profiles |
 | 8e | Wizard Company, Signatories | **Done** | Live read of Configuration singletons (not copied onto the profile); Edit in Configuration opens the real BOs |
 | 8f | Wizard Results default lookup dropdowns | **Done** | Catalog snapshots; default-value selects enabled only when Use is checked |
-| 8g | Wizard May produce / cancel with Related to | **Done** | Issuance → May produce; Cancellation → May cancel; moved off Results & fields |
+| 8g | Wizard May produce / cancel / change with Related to | **Done** | Issuance → May produce; Cancellation → May cancel; Change → May change; moved off Results & fields |
 | 8o | Wizard Region and City lookups | **Done** | Split Region (city); instance Region + City; defaults + case summary |
 | 8n | Wizard Registration Check in / Check out / Info change / Reg extension | **Done** | `RegistrationKind` on profile; Identity radios when Related to = Registration; dashboard SQL predicates ready, views not switched yet |
 | 8h | Wizard Approval legs with Directed to | **Done** | Via ministry → legs on Identity; Direct migration hides and clears legs |
@@ -32,6 +32,7 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | 8k | Profile-specific template applicability | **Done** | Per-row Project contract (Via ministry) or Migration service (Direct) dropdown; instance catalog filters; Project back on Results |
 | 8l | Approval leg versions (shared catalog + snapshot) | **Done** | Shared `ApprovalLegProfile`; profile Default only; create picker snapshots. **Phase A seed:** Calik Defaults from VISA2015. **Phase B:** instance FK / Default → snapshots + version name |
 | 8m | Locked profile: still set Default approval legs | **Done** | Config lock A keeps other fields read-only; **Default** for this template stays editable; chains edited in Configuration; cannot change Name / May produce |
+| 8p | Approval-leg catalog in preview slot | **Done** | Wizard **Edit in Configuration** opens `#visa-preview-slot` catalog CRUD (no XAF ListView). Default stays on wizard radios. **+ New ministry** creates `ApprovingMinistry` in the slot. No Duplicate. |
 | 8d | Wizard step 4 real template catalog + persist scope | **Done** | Two officer scopes: Profile-specific and Shared. Shared Include/Exclude; GT-15 names excluded from Shared (upload under Profile-specific). **Preview** uses `#visa-preview-slot` File occupant (master PDF, placeholders). Internal Category/Global type-links unchanged. |
 | 8a | Application Profile overview (live) | **Done** | Live config/defaults/legs/templates + linked `ApplicationProfileInstance` rows; overview shows wizard identity, company/signatories, required fields, SLA days, template scope; mock only if profile id unresolved |
 | 8c | Custom catalog home (replace native List/Detail UI) | **Done** | List first; row opens overview; **Back to list**; New/Configure → wizard (new tab); **Save profile** reloads catalog; **Delete** when Linked = 0; toolbar **Total: N**; table-body scroll, sticky header |
@@ -39,7 +40,7 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | 10 | Person M2M DetailView; hard-remove `ApplicationItem` | **In progress** | Skip-navigation `People` + child BO M2M (includes **MedicalRecord**, **WorkDuty**). Output headers Invitation / WorkPermit / BorderZone / Rejection / IssuedVisas are **1:N** (May produce), not skip-nav. Wizard **May produce** includes Rejection. Person issued tab **Applications (linked)** verified. Rebuild DataImporter + resume Wave 2b (`-StartAt ApplicationProfileInstancePerson`); then People-tab / copies / Resminamalar smoke. |
 | 10n | §10 auto-link gate + sticky ResolvedLinks | **Done** | `RequirePerson*` gate; sticky `LinkedObjectId`; toggle-off keeps existing; unit tests |
 | 10o | Workspace Linked records tiles from ResolvedLinks | **Done** | Catalog + overview tiles; People tab uses same `cw-link-tile` cards; click shows that person's records; gated by person-config |
-| 10x | Case summary: edit instance Use fields | **Done** | Overview tiles + **Edit**; form + **Done**. Same Use fields. Persist on change; does not edit the profile template. Project is editable here (accepted prototype; do not re-lock via `IsProjectContractLocked`). Host-start adds `EntryCheckPointID`. |
+| 10x | Case summary: edit instance Use fields | **Done** | Overview tiles + **Edit**; form + **Done**. Application number + date always shown (not profile-gated). Same Use fields. Persist on change; does not edit the profile template. Project is editable here (accepted prototype; do not re-lock via `IsProjectContractLocked`). Host-start adds `EntryCheckPointID`. |
 | 10v | People & links New missing person-owned BO | **Deferred** | In-tab **New {type}** removed — officers add person-owned data from **Open person detail**. Issued items stay on Overview → Issued records. `EnsureResolvedLink` kept for Relink. |
 | 10w | People & links Relink / Unlink columns | **Done** | Per-person **Relink** and **Unlink** next to Open person detail; Relink pins missing ResolvedLinks; Unlink removes that person + links; both disabled when process-complete locked; toolbar Unlink removed |
 | 10p | Process-complete lock on resolved links | **Done** | `PROCESS_ISSUED` / `REJECTED` / `CANCELLED`; roster + ResolvedLinks immutable; UI lock badge |
@@ -195,7 +196,7 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 - **Configure profile** action on Application Profiles ListView (saved rows only)
 - Respects `ApplicationProfileLockHelper` — read-only banner for locked config; **approval-leg versions** stay editable; **Save profile** remains for version changes
 - Steps: Identity · **Company, Signatories** · Results & fields · Process & SLA (embedded legs) · Templates & person · Review & save
-- **May produce** / **May cancel** live under Identity **Related to** (`ActionFamily`): Issuance → produce; Cancellation → cancel
+- **May produce** / **May cancel** / **May change** live under Identity **Related to** (`ActionFamily`): Issuance → produce; Cancellation → cancel; Change → change
 - **Registration is** Check in / Check out / Info change / Reg extension (`RegistrationKind`) when Related to = Registration; cleared for other families
 - **Approval legs** live under Identity **Directed to** as named **versions**; visible only for Via ministry; instances snapshot the chosen version at create
 - **Project contract** lives under Identity **Directed to**; visible + required only for Via ministry; Direct migration hides and clears it. Results & fields no longer lists Project. Instances copy the contract at create and cannot edit it.
@@ -250,6 +251,22 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 
 ---
 
+## Slice 8p — Approval-leg catalog in preview slot — **Done**
+
+**Goal:** **Edit in Configuration** on wizard Identity opens the shared `ApprovalLegProfile` catalog in `#visa-preview-slot` (prototypes 01–05). No XAF ListView / DetailView / OK-Cancel lookup.
+
+**Delivered:**
+
+- Catalog (search, **+ New**, **Open**)
+- Empty catalog and New form (Cancel / Create)
+- Unused chain: edit ministries, Save / Delete; **+ New ministry** creates `ApprovingMinistry` in the slot (Short name + Official name) then appends it to the chain
+- In-use chain: ministries locked; Code / Active still saveable
+- Slot does **not** set Default — wizard radios + Refresh remain
+
+**Verify:** stop F5, rebuild, Ctrl+F5. Configure a via-ministry profile → Identity → **Edit in Configuration**. Slot catalog; Open a used chain → ministries locked, Code/Active still saveable; **+ New** → Create; Refresh radios; Default unchanged unless officer picks it.
+
+---
+
 ## Slice 9 — Profile picker at Application create (detail) — **Done**
 
 **Goal:** New Application starts with profile selection (live FK + defaults), not a blank form.
@@ -286,7 +303,7 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 
 **Delivered (2026-08-07):**
 
-- **Start application…** on Person DetailView and Person Dossier toolbar
+- **Start application…** on Person Dossier toolbar. Person DetailView **Start process…** is hidden (officers start from Application Profile Instances).
 - Extended profile picker: 2-step flow (profile → multi-select people) when `SeedPersonId` is set
 - `ApplicationStartFromPersonHelper` — candidates, validation (via-ministry ProjectContract gate, audience, duplicate-open warn, incomplete flag)
 - MRU profile sort + per-person usage badges in picker

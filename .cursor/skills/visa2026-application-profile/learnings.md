@@ -1,3 +1,147 @@
+### 2026-08-27 — Remove Duplicate from approval-leg slot
+
+- **Need**: Officers do not want a Duplicate button on catalog cards or the in-use editor.
+- **Fix**: Removed catalog and footer Duplicate. In-use chains stay locked (Code/Active still saveable). New chains use **+ New**. Locked hint no longer mentions Duplicate.
+- **Test**: Blazor Debug. Officer: Ctrl+F5 catalog — used rows have Open only; Open used chain — Save, no Duplicate.
+- **Prevent**: Do not re-add Duplicate on this occupant.
+- **Cross-skill**: application-profile | visa2026-preview-slot
+
+### 2026-08-27 — Approval-leg slot left/right gutters
+
+- **Need**: Catalog cards and the editor ran too close to the slot edges.
+- **Fix**: Wider `--approval-leg-pad-x` (clamp 1.85–3rem) shared by header, body, footer.
+- **Test**: Ctrl+F5 Edit in Configuration catalog + Open unused.
+- **Prevent**: Do not drop occupant pad-x back to 1.35rem.
+- **Cross-skill**: application-profile | visa2026-preview-slot
+
+### 2026-08-27 — Create ApprovingMinistry from approval-leg slot
+
+- **Need**: Dropdown only listed existing ministries; officers could not add a missing `ApprovingMinistry` without leaving the slot.
+- **Fix**: **+ New ministry** inline form (Short name + Official name). `TryCreateMinistry` persists tenant lookup, blocks duplicate short names, then appends the new ministry to the current chain. No XAF DetailView. Seed JSON unchanged.
+- **Test**: `ApprovalLegProfileSlotEditorTests` (normalize + duplicate short name). Blazor Debug. Officer: Edit in Configuration → Open unused → **+ New ministry** → Create ministry → row appears; Save chain. Repeat with an existing short name → error to pick from the list.
+- **Prevent**: Do not open Configuration `ApprovingMinistry` ListView. Do not type-create from the dropdown. Do not prune officer-created ministries from catalog sync.
+- **Cross-skill**: application-profile | visa2026-preview-slot | visa2026-lookup-data
+
+### 2026-08-27 — Approval-leg slot identity row and catalog title
+
+- **Need**: After the first spacing pass, catalog titles still split code from ministries, Code sat in an empty-looking section, unused Save had no Cancel, and the editor lacked the prototype footer hint.
+- **Fix**: Catalog title is `Code · ministries`. Code + Active sit on one identity row. Unused footer is Delete | Cancel + Save. `SaveHint` under the editor footer when not New.
+- **Test**: Blazor Debug succeeded. Officer: stop F5, rebuild, Ctrl+F5. Edit in Configuration — search stays short, cards have room; Open unused — Code not full-width, sticky footer.
+- **Prevent**: Do not stretch Code across the slot. Do not leave Save/Delete in the scrolling form body.
+- **Cross-skill**: application-profile | visa2026-preview-slot
+
+### 2026-08-27 — Approval-leg slot catalog spacing and sections
+
+- **Need**: Catalog cards and the edit form looked cramped (tight padding, full-width Code, actions floating in empty space).
+- **Fix**: Card padding/gaps, code vs ministry caption, used-row accent. Editor in sections with a sticky footer (Delete left, Save right). Code field capped; Active is a switch. Unused chains get a green hint.
+- **Test**: Blazor Debug. Officer: Ctrl+F5, Edit in Configuration — catalog cards have room; Open unused — sections + footer stay put while ministries scroll.
+- **Prevent**: Do not stretch Code across the full slot. Keep Save/Delete in the footer, not mid-panel.
+- **Cross-skill**: application-profile | visa2026-preview-slot
+
+### 2026-08-27 — Approval-leg catalog in preview slot (no XAF popup)
+
+- **Need**: **Edit in Configuration** opened native XAF `ApprovalLegProfile` ListView; officers could not Open a chain to edit ministries.
+- **Fix**: `VisaPreviewSlotMode.ApprovalLegCatalog` occupant. Catalog / empty / New / Open (locked vs unused) / Duplicate / Delete. Slot does not set Default. Wizard radios refresh via `IApprovalLegCatalogChangeNotifier`.
+- **Test**: `ApprovalLegProfileSlotEditorTests` (5). Blazor Debug succeeded. Officer: stop F5, rebuild, Ctrl+F5. Via-ministry Configure profile → Identity → **Edit in Configuration** → slot catalog, not XAF OK/Cancel. Open a used chain → ministries locked + Duplicate. **+ New** → Create → radios update; Default unchanged until officer picks it.
+- **Prevent**: Do not reopen XAF ListView from the wizard. Do not set Default in the slot. Do not add namespace `Visa2026.Module.Services.ApplicationProfile` (collides with the BO type).
+- **Cross-skill**: application-profile | visa2026-preview-slot
+
+### 2026-08-27 — Approval-leg slot prototypes: empty catalog and New
+
+- **Need**: Officers asked for empty catalog and **+ New** screens after 01–03 (populated catalog, locked edit, unused edit).
+- **Fix**: Added `docs/prototypes/approval-leg-profile-slot-04-empty.png` (no chains; wizard hint to add first) and `-05-new.png` (blank Code placeholder, 0 ministries, Cancel / Create). README + plan §9 + skill group list.
+- **Test**: Visual review of 04/05 against 01 chrome. Code field on 05 is placeholder only, not a filled value.
+- **Prevent**: Do not implement the Blazor occupant until officer says 01–05 are enough. Slot still does not set Default. Do not reopen XAF ListView for Edit in Configuration.
+- **Cross-skill**: application-profile | visa2026-preview-slot
+
+### 2026-08-27 — Remove Application Migration Sla Profile
+
+- **Need**: Officers asked to remove the unused Configuration catalog; days already live on Application Profile.
+- **Fix**: Runtime SLA reads `ApplicationProfile.MigrationSlaDays` only. Dropped BO, `ApplicationTypes.MigrationSlaProfileID`, tenant JSON, type-link updater. `ApplicationMigrationSlaProfileDropSchemaUpdater` backfills zero profile days then `DROP TABLE`. Ministry review SLA singleton stays (hidden).
+- **Test**: `dotnet test` filter `Sla|Migration`. Officer: stop F5, rebuild, Ctrl+F5. Configuration has no Application Migration Sla Profile. Open a profile → Process & SLA still has migration days. Case workspace SLA still uses those days.
+- **Prevent**: Do not re-add `ApplicationMigrationSlaProfile` or `[NavigationItem("Configuration")]` for it. Do not read SLA from `ApplicationType`. Keep `MinistryReviewSlaSettings` until asked to drop it.
+- **Cross-skill**: application-profile | visa2026-lookup-data | visa2026-application-progress
+
+### 2026-08-27 — Hide Configuration SLA catalogs from nav
+
+- **Need**: Officers should not edit **Application Migration Sla Profile** or **Ministry review SLA** in Configuration; days live on Application Profile.
+- **Fix**: `[NavigationItem(false)]` on both BOs. `CustomNavigationUpdater` hides leftover nodes. `Model.DesignedDiffs.xafml` `Visible="False"`. Tables kept for dual-read / snapshot fallback.
+- **Test**: Rebuild + restart. Configuration no longer lists those two. Approval leg profile, contracts, company remain.
+- **Prevent**: Do not drop `MinistryReviewSlaSettings`. Do not re-add `[NavigationItem("Configuration")]` for it. Migration SLA catalog was later **removed** (see 2026-08-27 drop entry).
+- **Cross-skill**: application-profile | visa2026-lookup-data
+
+### 2026-08-27 — SLA table heading is SLA by step
+
+- **Need**: Table titled Deadlines listed progress steps; officers read it as the case deadline, which is the 30-day SLA cards.
+- **Fix**: Heading **SLA by step**. Model property `Deadlines` unchanged.
+- **Test**: Officer: Ctrl+F5 on SLA & deadlines. Table title is SLA by step.
+- **Prevent**: Do not retitle that table Deadlines or Progressline.
+- **Cross-skill**: application-profile
+
+### 2026-08-27 — SLA tab in sync with deadline states
+
+- **Need**: Header remaining, overall ring, current-step ring, timeline, and deadlines table disagreed (e.g. Issued case still showed a countdown; table “due dates” were history event dates; 30 − 1 ≠ 3).
+- **Fix**: One `ApplicationWorkspaceSlaDashboardBuilder`. Header remaining = current deadline days left. Overall remaining = migration SLA from start minus elapsed working days. Table due dates = working-day SLA targets. Issued/rejected/cancelled: remaining clocks off, status Complete/Issued, all rows Completed.
+- **Test**: `ApplicationWorkspaceSlaDashboardTests` + `WorkingDaysHelperTests` + progress timeline tests passed. Blazor Debug succeeded. Officer: stop F5, rebuild, Ctrl+F5. Open issued № 8/-12568 → SLA: rings say Done, no header “days remaining”, table all Completed. Open an in-process case: header number matches the highlighted table row.
+- **Prevent**: Do not mix current-step ministry remaining into the overall 30-day card. Do not use progress history `Date` as the deadline due date. Do not show a remaining clock after Issued.
+- **Cross-skill**: application-profile | visa2026-application-progress
+
+### 2026-08-27 — SLA & deadlines tab: ring overlap and dashboard polish
+
+- **Need**: On SLA & deadlines, “days left” overlapped the donut number. The tab looked like a prototype (always “On track”, dummy button, “Ministry review” even when the current step was office prep).
+- **Fix**: Number only inside the ring; caption **days left** sits under the gauge. Status tone from remaining days (Due / Due tomorrow / Due soon / On track). Current-step card uses the live step label. Timeline, deadlines table, alert, and SLA source. Drop the fake control. CSS: overflow-hidden ring, caption outside `.ct-sla-ring`.
+- **Test**: Blazor Debug succeeded. Officer: stop F5 if running, rebuild, Ctrl+F5. Open a via-ministry case → **SLA & deadlines**. Circles show only the number; “days left” below, no overlap. Current-step title is the real step (e.g. Office preparation), not always Ministry review. Progress tab rail uses the same gauge.
+- **Prevent**: Do not put a `<span>` inside `.ct-sla-ring`. Do not hardcode “Ministry review deadline” or “On track”. Do not restore the dummy “MigrationSlaDays from template” button.
+- **Cross-skill**: application-profile
+
+### 2026-08-27 — Wiza Kategoriýasyny üýtgetmek seed is Change family
+
+- **Need**: Same rule as Çakylygy üýtgetmek / passport-change for **Wiza Kategoriýasyny üýtgetmek** (`App_Change_Visa_Category` / `visa_category_change`).
+- **Fix**: Tenant catalog: `ActionFamily` **Change**. May produce Visa unchanged. **May change** Visa on so Identity is not empty.
+- **Test**: Rebuild + restart so tenant catalog seed updater runs. Open that profile → Related to **Change**; May produce Visa; May change Visa.
+- **Prevent**: Do not clear ProduceVisa. Do not add May change Invitation on this profile.
+- **Cross-skill**: application-profile | visa2026-lookup-data
+
+### 2026-08-27 — Wizany KP>Täze Pasporta Geçirmek seed is Change family
+
+- **Need**: Same rule as Çakylygy üýtgetmek for **Wizany KP>Täze Pasporta Geçirmek** (`App_Change_Passport` / `pasport_change`).
+- **Fix**: Tenant catalog: `ActionFamily` **Change**. May produce Visa unchanged. **May change** Visa on so Identity is not empty.
+- **Test**: Rebuild + restart so tenant catalog seed updater runs. Open that profile → Related to **Change**; May produce Visa; May change Visa.
+- **Prevent**: Do not clear ProduceVisa. Do not add May change Invitation on this profile.
+- **Cross-skill**: application-profile | visa2026-lookup-data
+
+### 2026-08-27 — Çakylygy üýtgetmek seed is Change family
+
+- **Need**: Profile **Çakylygy üýtgetmek** (`App_Change_Inv` / `change_invitation`) still seeded as Related to **Issuance**.
+- **Fix**: Tenant catalog `application-profile.calik-energi.json`: `ActionFamily` **Change**. May produce Invitation + Visa unchanged. **May change** Invitation + Visa on so Identity is not empty when Related to is Change.
+- **Test**: Rebuild + restart so tenant catalog seed updater runs. Open Configure profile for Çakylygy üýtgetmek → Related to **Change**; May produce still Invitation + Visa in seed; wizard shows May change Invitation + Visa.
+- **Prevent**: Do not set this profile back to Issuance. Do not clear ProduceInvitation/ProduceVisa.
+- **Cross-skill**: application-profile | visa2026-lookup-data
+
+### 2026-08-27 — Derived cancel/change/used; Change family; drop stored flags
+
+- **Need**: Officers confirmed (1) a document is cancelled only after the Cancellation instance finishes (`PROCESS_ISSUED`, not mere presence and not `IsWorkflowTerminal`); (2) drop stored `InvitationItem.IsUsed` — used = issuing visa; (3) add **Change** family beside Issuance / Cancellation / Registration / Business trip; (4) drop the columns in a deploy updater now; (5) leave `Passport.IsCancelled`.
+- **Fix**: `ApplicationProfileActionFamily.Change = 4` + May change flags + wizard Identity radios. `IssuedDocumentLifecycle` + `[NotMapped]` getters. Cancelled wins over changed. `IssuedDocumentStatusColumnsCleanupUpdater` (Postgres) drops views then columns; Report Dashboard views recreate with skip-nav `EXISTS`. OData no longer posts the dropped fields. `Passport.IsCancelled` unchanged.
+- **Test**: Module + Tests + DataImporter Debug succeeded. `IssuedDocumentLifecycleTests` + valid-item tests (37) passed. Officer: stop F5, rebuild, Ctrl+F5. Identity & purpose → Change shows **May change existing**. A cancellation case still in office prep does **not** mark the document cancelled; after **PROCESS_ISSUED** it does.
+- **Prevent**: Do not store IsCancelled/IsChanged/IsUsed on InvitationItem, Visa, WorkPermitItem, BorderZone. Do not treat in-process or rejected/cancelled **process** as document cancelled. Do not drop `Passports.IsCancelled`. Historical VISA2014 cancelled docs stay active until skip-nav M2M links to completed Cancellation/Change instances exist (no import linker in this slice).
+- **Cross-skill**: application-profile | visa2014-to-visa2026-import | visa2026-report-dashboard
+
+### 2026-08-27 — Edit Application number and date on case workspace
+
+- **Need**: Officers must change Application number (`№ 8/-007`) and date (`Started 25 Aug 2024`) on the case workspace. Those values live on the instance, not the profile, and were not in Case summary.
+- **Fix**: Case summary always shows Application number + Application date (not `Require*` gated). **Edit** saves `FullApplicationNumber` (parsed into prefix/sequence, `IsManualEntry`) and `ApplicationDate` (Year/Month). Header `№` uses the full application number. Post–office-prep lock no longer blocks number/date.
+- **Test**: `ApplicationWorkspaceCaseHeaderFieldsHelperTests` + `ApplicationLockedHeaderScalarsDiffer_IgnoresApplicationNumberAndDateChange`. Officer: stop F5, rebuild, Ctrl+F5. Open a case → Case summary **Edit** → change number/date → **Done**. Header `№` and Started line update.
+- **Prevent**: Do not hide number/date behind profile Use flags. Do not treat ProcessNumber as the application number in the header. Do not re-add number/date to `LockedApplicationHeaderTargetItems`.
+- **Cross-skill**: application-profile | visa2026-application-progress
+
+### 2026-08-26 — Hide Start process on Person DetailView
+
+- **Need**: Officers should not start a case from Employee / Person DetailView (`+ Start process…`).
+- **Fix**: `PersonStartApplicationController` action `Active["PersonDetail"] = false`. Dossier Start process is unchanged.
+- **Test**: Restart / Ctrl+F5. Open an employee — toolbar has no Start process. Dossier still has it.
+- **Prevent**: Do not re-activate `PersonStartApplication` on Person DetailView without officer ask.
+- **Cross-skill**: application-profile
+
 ### 2026-08-26 — Case workspace tab-switch progress bar
 
 - **Need**: Left case nav (Overview / People / Progress / Document copies / Resminamalar / SLA) gave no feedback while the next panel rendered.

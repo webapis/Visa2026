@@ -12,6 +12,7 @@
 | Profile templates | `application-profile-templates-listview-mockup.png`, `application-profile-templates-grid-mockup.png`, `application-profile-template-overview-mockup.png`, `application-profile-template-wizard-mockup.png` + `step2`–`step5` |
 | Wizard template scopes / upload / edit (2026-08-12) | `application-profile-wizard-templates-three-scopes-prototype.png`, `application-profile-wizard-template-initial-upload-prototype.png`, `application-profile-wizard-template-data-scope-prototype.png`, `application-profile-wizard-template-edit-*-prototype.png`, `application-profile-wizard-template-add-data-scope-prototype.png` |
 | Approval leg versions (2026-08-18) | `application-profile-wizard-approval-leg-versions-prototype.png`, `application-profile-instance-create-choose-approval-legs-prototype.png` |
+| Approval leg slot CRUD (2026-08-27) | `approval-leg-profile-slot-01-catalog.png` … `-05-new.png` — [README](prototypes/approval-leg-profile-slot-README.md) |
 | Case summary instance fields (2026-08-18) | `application-profile-instance-case-summary-overview-properties-prototype.png`, `application-profile-instance-case-summary-edit-properties-prototype.png` |
 
 Full inventory: **§9**. **Interactive HTML (planned):** [`APPLICATION_PROFILE_HTML_PROTOTYPE_PLAN.md`](APPLICATION_PROFILE_HTML_PROTOTYPE_PLAN.md).
@@ -43,7 +44,7 @@ Application-type behavior is **scattered** across `ApplicationType` `Show*` / `C
 | # | Topic | Decision |
 |---|--------|----------|
 | 5 | Scope / applicability | **Freeform criteria** filters which profiles appear in the Application picker. |
-| 6 | “Related to” (action family) | **Exclusive radio:** Issuance \| Cancellation \| Registration \| Business trip. When **Registration**, also **Check in**, **Check out**, **Info change**, or **Reg extension** (`RegistrationKind`) for Report Dashboard queries. **Configuration-related**. |
+| 6 | “Related to” (action family) | **Exclusive radio:** Issuance \| Cancellation \| Change \| Registration \| Business trip. When **Registration**, also **Check in**, **Check out**, **Info change**, or **Reg extension** (`RegistrationKind`) for Report Dashboard queries. **Configuration-related**. |
 | 7 | Approval legs | **Shared** tenant catalog: `ApprovalLegProfile` (Configuration), like Company / Signatory. Each via-ministry profile stores only **`DefaultApprovalLegProfile`**. Officer **must pick a shared version** at instance create. Instance **snapshots** ministries; later Configuration or default edits do not change already-started cases. Do **not** copy chains onto each profile. |
 | 8 | Process states | **Not officer-configured.** Instance steps follow **Directed to** + **Approval legs** + the fixed progress graph. Profile stores **SLA days** only. |
 | 9 | Templates | **Nest files** on the profile. Configuration-related; list **visible** on Application, **not** editable per Application. |
@@ -67,7 +68,7 @@ Stored only on `ApplicationProfile`. Application **reads** them via FK. Officers
 | Identity | Application Name, Description, Code | Yes (read-only) |
 | Directed to | Via ministry · Direct migration | No (controls behavior) |
 | May be for | Employee · Family member · Temporary visitor | No |
-| Related to | Issuance · Cancellation · Registration (Check in \| Check out \| Info change \| Reg extension) · Business trip | No (controls tracking / visibility / dashboard) |
+| Related to | Issuance · Cancellation · Change · Registration (Check in \| Check out \| Info change \| Reg extension) · Business trip | No (controls tracking / visibility / dashboard) |
 | Produce | Invitation · Work permit · Visa · Border zone · Work location | No |
 | Cancel existing | Invitation(s) · WP(s) · Visa(s) · Border zone · Application(s) | No |
 | Process | Approval legs (**shared** `ApprovalLegProfile` catalog; profile holds **Default** only; **snapshot** on the instance after create) · SLA days (ministry / migration, live) | No |
@@ -195,9 +196,9 @@ Keep **explicit** profile toggles for readiness + enabling person/roster `{{…}
 | EmployeePositionHistory (Position) | Current |
 | EmployeeSalary | Current |
 | MedicalRecord | Not expired |
-| InvitationItem | Active (`!IsCancelled && !IsChanged && !IsUsed`) and parent Invitation not expired |
-| WorkPermitItem | Not cancelled and not expired |
-| BorderZoneItem | Not cancelled and parent BorderZone not expired |
+| InvitationItem | Active (`!IsCancelled && !IsChanged && !IsUsed`) and parent Invitation not expired. Flags are **derived**: cancelled/changed = skip-nav link on a **PROCESS_ISSUED** Cancellation/Change instance; used = issuing visa. |
+| WorkPermitItem | Not cancelled/changed and not expired (same derived rules) |
+| BorderZoneItem | Not cancelled/changed and parent BorderZone not expired |
 | RejectionItem | **Current / not cancelled** |
 | TravelHistory | **TBD** (recommend: current / latest relevant movements — confirm) |
 
@@ -478,6 +479,7 @@ When any linked Application reaches lock state **A** (first progress beyond offi
 | Profile-specific template applicability (contract / migration service) | Done |
 | Approval leg versions (shared catalog + instance snapshot) | **Done** (Phase B 2026-08-20: imported instances keep inferred chain; snapshots + version name backfill) |
 | Locked profile: still set Default approval legs | **Done** |
+| Approval-leg catalog in preview slot | **Done** |
 | Wizard Project contract on Identity (Via ministry) | Done |
 | Profile overview (live linked instances) | Done |
 | Custom catalog home (replace native List/Detail officer UI) | Done |
@@ -510,7 +512,7 @@ When any linked Application reaches lock state **A** (first progress beyond offi
 | Import | Hard break: `--entity ApplicationProfileInstance` |
 | Officer UI | “Application Profile instance” / process number only — no residual case “Application” |
 
-**Do not rename:** `ApplicationProfile*`, `ApplicationType*`, `ApplicationState` / `ApplicationLocation`, `ApplicationUser*`, `ApplicationRuntimeLog*`, `ApplicationNumberingProfile`, `ApplicationMigrationSlaProfile`, DevExpress `XafApplication`.
+**Do not rename:** `ApplicationProfile*`, `ApplicationType*`, `ApplicationState` / `ApplicationLocation`, `ApplicationUser*`, `ApplicationRuntimeLog*`, `ApplicationNumberingProfile`, DevExpress `XafApplication`.
 
 ### 13.2 Rename map
 
@@ -580,6 +582,11 @@ All files live in [`docs/prototypes/`](prototypes/) only (no subfolders).
 | `application-profile-wizard-template-edit-word-prototype.png` | Step 4 — Edit Word template (detail) |
 | `application-profile-wizard-approval-leg-versions-prototype.png` | Identity — named **approval-leg versions** on this profile (own copies; Default + Duplicate / Remove / Add version) |
 | `application-profile-instance-create-choose-approval-legs-prototype.png` | New instance — **required** pick of a version; ministries snapshot onto the application |
+| `approval-leg-profile-slot-01-catalog.png` | Wizard **Edit in Configuration** → custom slot catalog (no XAF popup) |
+| `approval-leg-profile-slot-02-edit-locked.png` | Slot Open on in-use chain — ministries locked, Duplicate |
+| `approval-leg-profile-slot-03-edit.png` | Slot Open on unused chain — edit ministries, Save / Delete |
+| `approval-leg-profile-slot-04-empty.png` | Empty shared catalog + wizard hint to add the first chain |
+| `approval-leg-profile-slot-05-new.png` | Slot **+ New** — blank Code, empty ministries, Cancel / Create |
 | `application-profile-instance-case-summary-overview-properties-prototype.png` | Overview **Case summary** — read-only tiles for profile **Use** fields; **Edit** switches to form mode |
 | `application-profile-instance-case-summary-edit-properties-prototype.png` | Overview **Case summary** — edit mode (dropdowns/dates); **Done** returns to tiles |
 

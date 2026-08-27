@@ -34,6 +34,7 @@ Officer-facing **right-side panel** for inline catalogs and document preview. Re
 | `File` | `VisaFilePreviewDrawer` | `OpenFileAsync` / JS bridge | File preview sources registry (`progress-letter`, `user-report-template`, `application-profile-template`) |
 | `IssueIssuedHeader` | `IssueIssuedHeaderSlotPanel` | `OpenIssueIssuedHeaderAsync` | Case workspace **New invitation / work permit / rejection / border zone** compose ([prototypes](prototypes/issue-issued-header-slot-README.md)). Officers upload the letter copy (`InvitationDocument` / matching header `Documents`) from the compose panel. |
 | `IssueIssuedVisa` | `IssueIssuedVisaSlotPanel` | `OpenIssueIssuedVisaAsync` | **+ Add issued visa** compose and **row click** edit. Invitation+visa: one visa per unused issued invitation line ([prototypes](prototypes/issue-issued-visa-slot-README.md)). Visa without invitation: one visa per unused roster person ([prototypes](prototypes/issue-issued-visa-instance-slot-README.md)). |
+| `ApprovalLegCatalog` | `ApprovalLegProfileSlotPanel` | `OpenApprovalLegCatalogAsync` | Wizard Identity **Edit in Configuration** — shared `ApprovalLegProfile` catalog CRUD ([prototypes](prototypes/approval-leg-profile-slot-README.md)). Slot does not set Default. |
 
 **Occupant keys:** `VisaPreviewSlotOccupantKeys` (e.g. `resminamalar:app:{id}`, `document-copies:items:{ids}`, `progress-letters:app:{id}` or `…|preview:{progressId}` when `OpenPreviewOnly`, `file:{source}:{id}`).
 
@@ -109,7 +110,7 @@ Officer caption for the report package occupant is **Templates** (not Document C
 | Service + state | `Visa2026.Module/Services/PreviewSlot/` (`IVisaPreviewSlotService`, requests, `VisaPreviewSlotOccupantKeys`) |
 | Host impl | `Visa2026.Blazor.Server/Services/VisaPreviewSlotService.cs` |
 | Blazor host | `Visa2026.Blazor.Server/Components/VisaPreviewSlotHost.razor` |
-| Slot panels | `ResminamalarSlotPanel.razor`, `DocumentCopiesSlotPanel.razor`, `ProgressLettersSlotPanel.razor`, `IssueIssuedHeaderSlotPanel.razor` |
+| Slot panels | `ResminamalarSlotPanel.razor`, `DocumentCopiesSlotPanel.razor`, `ProgressLettersSlotPanel.razor`, `IssueIssuedHeaderSlotPanel.razor`, `ApprovalLegProfileSlotPanel.razor` |
 | Inline previews | `ReportPackageInlinePreview.razor`, `DocumentCopiesInlinePreview.razor`, `ProgressLettersInlinePreview.razor` |
 | Close policy | `Visa2026.Blazor.Server/Controllers/VisaPreviewSlotCloseController.cs` |
 | File preview sources | `Visa2026.Blazor.Server/Services/*FilePreviewSource.cs`, `OfficeFilePreviewResultFactory.cs` |
@@ -119,6 +120,7 @@ Officer caption for the report package occupant is **Templates** (not Document C
 | Document-copies catalog CSS | `Visa2026.Blazor.Server/wwwroot/css/document-copies-catalog.css` |
 | Issue issued-header compose CSS | `Visa2026.Blazor.Server/wwwroot/css/issue-issued-header-slot.css` (catalog `overflow-y: auto` — long invitation / visa person cards; field border cues: orange empty required, blue defaults, green confirmed) |
 | Issue issued-visa compose CSS | `Visa2026.Blazor.Server/wwwroot/css/issue-issued-visa-slot.css` |
+| Approval-leg catalog CSS | `Visa2026.Blazor.Server/wwwroot/css/approval-leg-slot.css` |
 | Wiring | `Startup.cs` — register `IVisaPreviewSlotService` |
 
 Feature-specific catalog logic stays in feature components and Module services — see domain docs above.
