@@ -183,7 +183,7 @@ internal static class Visa2014HotelTransform
         }
     }
 
-    private static Visa2014PersonImportBatch TransformRows(
+    internal static Visa2014PersonImportBatch TransformRows(
         IReadOnlyList<Visa2014LodgingSourceRow> sourceRows,
         IReadOnlyDictionary<string, Visa2014LookupCatalog> catalogs,
         out List<Dictionary<string, object?>> skipped,
