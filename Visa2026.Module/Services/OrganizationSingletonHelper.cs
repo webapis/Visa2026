@@ -18,6 +18,21 @@ public static class OrganizationSingletonHelper
         Func<IReadOnlyList<T>, T>? tieBreaker = null) where T : class
     {
         var all = objectSpace.GetObjectsQuery<T>().ToList();
+        return TryGetFromCandidates(all, keySelector, tieBreaker, warnOnDuplicates: true);
+    }
+
+    /// <summary>
+    /// Pure resolution over an in-memory candidate list (ObjectSpace-free for unit tests).
+    /// </summary>
+    public static T? TryGetFromCandidates<T>(
+        IReadOnlyList<T> all,
+        Func<T, string?> keySelector,
+        Func<IReadOnlyList<T>, T>? tieBreaker = null,
+        bool warnOnDuplicates = false) where T : class
+    {
+        ArgumentNullException.ThrowIfNull(all);
+        ArgumentNullException.ThrowIfNull(keySelector);
+
         var populated = all.Where(x => !string.IsNullOrWhiteSpace(keySelector(x))).ToList();
 
         if (populated.Count == 1)
@@ -27,9 +42,13 @@ public static class OrganizationSingletonHelper
         {
             var chosen = tieBreaker?.Invoke(populated)
                 ?? populated.OrderBy(keySelector, StringComparer.OrdinalIgnoreCase).First();
-            Tracing.Tracer.LogWarning(
-                $"OrganizationSingletonHelper: multiple {typeof(T).Name} rows ({populated.Count}); "
-                + $"using '{keySelector(chosen)}'. Run DB update to prune duplicates.");
+            if (warnOnDuplicates)
+            {
+                Tracing.Tracer.LogWarning(
+                    $"OrganizationSingletonHelper: multiple {typeof(T).Name} rows ({populated.Count}); "
+                    + $"using '{keySelector(chosen)}'. Run DB update to prune duplicates.");
+            }
+
             return chosen;
         }
 
@@ -46,11 +65,7 @@ public static class OrganizationSingletonHelper
         if (all.Count <= 1)
             return 0;
 
-        var populated = all.Where(x => !string.IsNullOrWhiteSpace(keySelector(x))).ToList();
-        T keeper = chooseKeeper?.Invoke(populated.Count > 0 ? populated : all)
-            ?? (populated.Count > 0
-                ? populated.OrderBy(keySelector, StringComparer.OrdinalIgnoreCase).First()
-                : all[0]);
+        var keeper = ChooseKeeper(all, keySelector, chooseKeeper);
 
         int removed = 0;
         foreach (var row in all)
@@ -62,5 +77,23 @@ public static class OrganizationSingletonHelper
         }
 
         return removed;
+    }
+
+    /// <summary>Pure keeper selection used by <see cref="CollapseToSingleRow{T}"/>.</summary>
+    public static T ChooseKeeper<T>(
+        IReadOnlyList<T> all,
+        Func<T, string?> keySelector,
+        Func<IReadOnlyList<T>, T>? chooseKeeper = null) where T : class
+    {
+        ArgumentNullException.ThrowIfNull(all);
+        ArgumentNullException.ThrowIfNull(keySelector);
+        if (all.Count == 0)
+            throw new ArgumentException("Cannot choose a keeper from an empty list.", nameof(all));
+
+        var populated = all.Where(x => !string.IsNullOrWhiteSpace(keySelector(x))).ToList();
+        return chooseKeeper?.Invoke(populated.Count > 0 ? populated : all)
+            ?? (populated.Count > 0
+                ? populated.OrderBy(keySelector, StringComparer.OrdinalIgnoreCase).First()
+                : all[0]);
     }
 }

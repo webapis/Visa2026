@@ -145,7 +145,7 @@ internal static class Visa2014ApplicationProgressTransform
         return true;
     }
 
-    private static Visa2014PersonImportBatch TransformRows(
+    internal static Visa2014PersonImportBatch TransformRows(
         IReadOnlyList<Visa2014ApplicationProgressRawRow> rawRows,
         IReadOnlyDictionary<Guid, int>? ministryLegCountByLegacyApplicationOid,
         IReadOnlyDictionary<Guid, Visa2014ApplicationProgressCompletionEvidence>? completionByLegacyApplicationOid,

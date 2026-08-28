@@ -148,7 +148,7 @@ public sealed class PersonExportPacker
         [typeof(Visa)] = "PersonDocumentCopies.Section.Visas"
     };
 
-    private static string BuildEntryName(
+    internal static string BuildEntryName(
         PersonLinkedDocumentSection section,
         PersonLinkedDocumentRecord record,
         string? mergedFileName,
@@ -184,7 +184,7 @@ public sealed class PersonExportPacker
         }
     }
 
-    private static string BuildNotes(IReadOnlyList<string> gaps, string? cultureName)
+    internal static string BuildNotes(IReadOnlyList<string> gaps, string? cultureName)
     {
         var text = new StringBuilder();
         text.AppendLine(VisaUiMessages.Get("PersonDossier.Export.Notes.Title", cultureName));

@@ -14,6 +14,24 @@ public static class ApplicationTypeSelectionCodeHelper
     {
         ArgumentNullException.ThrowIfNull(objectSpace);
 
+        var usedCodes = objectSpace.GetObjectsQuery<ApplicationType>()
+            .Where(t => t.SelectionCode != null && t.SelectionCode != "")
+            .Select(t => t.SelectionCode!)
+            .AsEnumerable();
+
+        return SuggestNextSelectionCode(sourceSelectionCode, usedCodes);
+    }
+
+    /// <summary>
+    /// Pure variant for tests and callers that already materialised selection codes.
+    /// Picks the highest free 3-digit code in the same hundreds group as <paramref name="sourceSelectionCode"/>.
+    /// </summary>
+    public static string? SuggestNextSelectionCode(
+        string? sourceSelectionCode,
+        IEnumerable<string> existingSelectionCodes)
+    {
+        ArgumentNullException.ThrowIfNull(existingSelectionCodes);
+
         if (string.IsNullOrWhiteSpace(sourceSelectionCode)
             || sourceSelectionCode.Length != 3
             || !int.TryParse(sourceSelectionCode, out var sourceCode))
@@ -25,10 +43,7 @@ public static class ApplicationTypeSelectionCodeHelper
         if (group is < 1 or > 8)
             return null;
 
-        var usedCodes = objectSpace.GetObjectsQuery<ApplicationType>()
-            .Where(t => t.SelectionCode != null && t.SelectionCode != "")
-            .Select(t => t.SelectionCode!)
-            .AsEnumerable()
+        var usedCodes = existingSelectionCodes
             .Where(code => code.Length == 3
                            && int.TryParse(code, out var parsed)
                            && parsed / 100 == group)
