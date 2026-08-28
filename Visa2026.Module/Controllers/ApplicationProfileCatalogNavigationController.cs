@@ -11,7 +11,7 @@ using Visa2026.Module.Services.ApplicationProfileCatalog;
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// Opens the Application Profile catalog DetailView when Application Profiles → Application Profile Templates is selected.
+/// Opens the Application Profile catalog DetailView when Configuration → Application Profile Templates is selected.
 /// </summary>
 public sealed class ApplicationProfileCatalogNavigationController : WindowController
 {
@@ -65,12 +65,12 @@ public sealed class ApplicationProfileCatalogNavigationController : WindowContro
         }
 
         if (string.Equals(item.Caption, ApplicationProfileInstanceProgressRouteNavigation.CaptionTemplates, StringComparison.OrdinalIgnoreCase)
-            && string.Equals(item.ParentItem?.Id, "Application", StringComparison.Ordinal))
+            && item.ParentItem?.Id is "Configuration" or "Application")
         {
             return true;
         }
 
-        // Leftover Configuration node from before the catalog moved into Application Profiles.
+        // Leftover Configuration node caption from before the catalog host.
         if (string.Equals(item.Caption, "Application Profile", StringComparison.OrdinalIgnoreCase)
             && string.Equals(item.ParentItem?.Id, "Configuration", StringComparison.Ordinal))
         {

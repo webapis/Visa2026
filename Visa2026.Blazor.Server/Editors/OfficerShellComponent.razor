@@ -16,7 +16,7 @@
                 {
                     <div class="os-toolbar-search">
                         <span aria-hidden="true">⌕</span>
-                        <input type="search" placeholder="Search…" value="@SearchText" @oninput="OnSearchInput" />
+                        <input type="search" placeholder="Search name, passport, number…" value="@SearchText" @oninput="OnSearchInput" />
                     </div>
                 }
                 @if (CurrentPage == OfficerShellPage.Staged)
@@ -227,20 +227,14 @@
     {
         if (string.IsNullOrWhiteSpace(SearchText))
             return StagedRows;
-        return StagedRows.Where(r =>
-            (r.PersonName?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ?? false)
-            || (r.ProfileName?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ?? false)
-            || (r.ProjectName?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ?? false));
+        return StagedRows.Where(r => OfficerShellApplicationSearch.Matches(SearchText, r.SearchHaystack));
     }
 
     private IEnumerable<OfficerShellInProcessRow> InProcessSearchFiltered()
     {
         if (string.IsNullOrWhiteSpace(SearchText))
             return InProcessRows;
-        return InProcessRows.Where(r =>
-            (r.ApplicationNumber?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ?? false)
-            || (r.PersonName?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ?? false)
-            || (r.ProfileName?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ?? false));
+        return InProcessRows.Where(r => OfficerShellApplicationSearch.Matches(SearchText, r.SearchHaystack));
     }
 
     private IReadOnlyList<OfficerShellStagedRow> FilteredStagedRows => ApplyStagedFilters().ToList();

@@ -13,6 +13,7 @@ public sealed class OfficerShellStagedRow
     public string Readiness { get; init; } = "ready";
     public bool IsSelectable { get; init; } = true;
     public string? MissingSummary { get; init; }
+    public string SearchHaystack { get; init; } = string.Empty;
     public string TemplateFamilyKey { get; init; } = OfficerShellTemplateFamily.Invitation;
     public Guid? ProfileId { get; init; }
 }

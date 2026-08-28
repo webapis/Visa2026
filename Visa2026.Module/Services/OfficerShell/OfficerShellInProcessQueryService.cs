@@ -62,6 +62,15 @@ public sealed class OfficerShellInProcessQueryService : IOfficerShellInProcessQu
                 ? maxDays - elapsed
                 : null,
             Status = "process",
+            SearchHaystack = OfficerShellApplicationSearch.BuildHaystack(
+                application,
+                application.FullApplicationNumber,
+                application.ApplicationNumber,
+                processNumber,
+                personName,
+                profile?.Name,
+                application.ApplicationType?.NameTm,
+                application.ProjectContract?.Name),
             TemplateFamilyKey = OfficerShellTemplateFamily.ResolveKey(application),
         };
     }

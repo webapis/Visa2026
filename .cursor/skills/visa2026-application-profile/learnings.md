@@ -1,3 +1,19 @@
+### 2026-08-28 — Application Profile Templates lives under Configuration
+
+- **Need**: Officers wanted **Application Profile Templates** in the Configuration accordion, not under Application Profile Instances.
+- **Fix**: `ApplicationProfileCatalogModelUpdater` creates the catalog nav item under Configuration (index 0) and removes the leftover under Application. Users / VisaOffice navigation permissions Allow `Configuration/Items/ApplicationProfileCatalog` and Deny the old Application path. Click still opens the catalog host.
+- **Test**: Officer: stop F5, rebuild, Ctrl+F5. Accordion **Configuration** shows **Application Profile Templates** at the top. Application Profile Instances folder has via-ministry and direct-migration only. Opening Templates still shows the catalog.
+- **Prevent**: Do not leave an Allow on `Application/Items/ApplicationProfileCatalog`. Do not Deny the whole Configuration folder for UsersReadOnly (that would hide Templates).
+- **Cross-skill**: application-profile | visa2026-security-access
+
+### 2026-08-28 — Application Profile Instance search by person name and passport
+
+- **Need**: Officers could not find an instance by passport number or a linked person's first/last name. Native ListView DxGrid only searches visible columns; officer-shell queues only matched the first person's FullName (plus profile/project/number).
+- **Fix**: Native `ApplicationProfileInstance` FullTextSearch ORs linked `[People]` first/middle/last name and passport numbers (person booklets or instance-linked passports). Blazor DxGrid SearchBox routes through that FullTextSearch (same bridge as Person). Staged / in-process queues token-AND match a haystack of all linked people names, passports, application number, process number, profile, and project.
+- **Test**: `BuildLinkedPeopleIdentityCriteria_UsesPeopleFirstAndLastName`; `BuildLinkedPeoplePassportCriteria_UsesPeopleAndInstancePassports`; `OfficerShellApplicationSearch_MatchesFirstLastAndPassportTokens`. Officer: stop F5, rebuild, Ctrl+F5. Staged or in-process Search: type a last name, then a passport number — matching cases stay. Native Application Profile Instance ListView Search box does the same.
+- **Prevent**: Do not rely on DxGrid column search for People/Passports (`VisibleInListView(false)`). Do not search only the first roster person's FullName.
+- **Cross-skill**: application-profile
+
 ### 2026-08-28 — Progress Advance errors use red banner and field borders
 
 - **Need**: Advance without required values showed a muted peach toast; Process number (and other required Advance inputs) kept a normal gray border, so officers could miss what to fill.

@@ -8,7 +8,7 @@ using Visa2026.Module.BusinessObjects.ApplicationProfileCatalog;
 namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
-/// Application Profiles folder item for the Application Profile catalog DetailView.
+/// Configuration folder item for the Application Profile catalog DetailView.
 /// </summary>
 public sealed class ApplicationProfileCatalogModelUpdater : ModelNodesGeneratorUpdater<NavigationItemNodeGenerator>
 {
@@ -26,25 +26,25 @@ public sealed class ApplicationProfileCatalogModelUpdater : ModelNodesGeneratorU
         detailView.Caption = ApplicationProfileInstanceProgressRouteNavigation.CaptionTemplates;
         detailView.SetValue("CustomCSSClassName", "ap-catalog-detail");
 
-        if (navigationItems["Configuration"] is IModelNavigationItem configuration)
+        if (navigationItems["Application"] is IModelNavigationItem applicationNav)
         {
-            if (configuration.Items["ApplicationProfile"] is IModelNavigationItem legacyList)
-                legacyList.Remove();
-            if (configuration.Items["ApplicationProfileCatalogHost"] is IModelNavigationItem legacyHostList)
-                legacyHostList.Remove();
-            if (configuration.Items[NavItemId] is IModelNavigationItem legacyCatalog)
-                legacyCatalog.Remove();
+            if (applicationNav.Items[NavItemId] is IModelNavigationItem leftoverUnderApplication)
+                leftoverUnderApplication.Remove();
         }
 
-        var applicationNav = navigationItems["Application"]
-            ?? navigationItems.AddNode<IModelNavigationItem>("Application");
-        applicationNav.Caption = ApplicationProfileInstanceProgressRouteNavigation.CaptionGroup;
+        if (navigationItems["Configuration"] is not IModelNavigationItem configuration)
+            configuration = navigationItems.AddNode<IModelNavigationItem>("Configuration");
 
-        var navItem = applicationNav.Items[NavItemId]
-            ?? applicationNav.Items.AddNode<IModelNavigationItem>(NavItemId);
+        if (configuration.Items["ApplicationProfile"] is IModelNavigationItem legacyList)
+            legacyList.Remove();
+        if (configuration.Items["ApplicationProfileCatalogHost"] is IModelNavigationItem legacyHostList)
+            legacyHostList.Remove();
+
+        var navItem = configuration.Items[NavItemId]
+            ?? configuration.Items.AddNode<IModelNavigationItem>(NavItemId);
         navItem.View = detailView;
         navItem.Caption = ApplicationProfileInstanceProgressRouteNavigation.CaptionTemplates;
         navItem.ImageName = "BO_List";
-        navItem.Index = 2;
+        navItem.Index = 0;
     }
 }

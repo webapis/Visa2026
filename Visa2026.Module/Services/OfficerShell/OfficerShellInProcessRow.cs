@@ -15,5 +15,6 @@ public sealed class OfficerShellInProcessRow
     public string CurrentStep { get; init; } = string.Empty;
     public int? SlaDaysRemaining { get; init; }
     public string Status { get; init; } = "process";
+    public string SearchHaystack { get; init; } = string.Empty;
     public string TemplateFamilyKey { get; init; } = OfficerShellTemplateFamily.Invitation;
 }

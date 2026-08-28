@@ -59,6 +59,12 @@ public sealed class OfficerShellStagedQueryService : IOfficerShellStagedQuerySer
             Readiness = readiness,
             IsSelectable = readiness == "ready",
             MissingSummary = missing.Count == 0 ? null : string.Join(", ", missing),
+            SearchHaystack = OfficerShellApplicationSearch.BuildHaystack(
+                application,
+                personName,
+                profile?.Name,
+                application.ApplicationType?.NameTm,
+                application.ProjectContract?.Name),
         };
     }
 }

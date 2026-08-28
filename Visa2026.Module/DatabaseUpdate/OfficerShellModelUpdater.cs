@@ -6,8 +6,8 @@ using DevExpress.ExpressApp.SystemModule;
 namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
-/// Strips the retired officer-shell navigation item. Staged / in-process / templates
-/// now live as native items under the Application Profiles folder.
+/// Strips the retired officer-shell navigation item. Staged / in-process
+/// live as native items under the Application Profiles folder.
 /// </summary>
 public sealed class OfficerShellModelUpdater : ModelNodesGeneratorUpdater<NavigationItemNodeGenerator>
 {
