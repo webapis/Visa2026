@@ -30,14 +30,14 @@ public static class InvitationIssuedRosterItemsHelper
             return;
 
         var appId = instance.ID;
-        var alreadyOnThisApp = objectSpace.GetObjectsQuery<InvitationItem>()
-            .Where(ii =>
-                ii.Person != null
-                && !ii.IsCancelled
-                && ii.Invitation != null
-                && ii.Invitation.ID != invitation.ID
-                && ii.Invitation.ApplicationProfileInstance != null
-                && ii.Invitation.ApplicationProfileInstance.ID == appId)
+        var alreadyOnThisApp = IssuedDocumentLifecycle.WhereInvitationItemNotCancelled(
+            objectSpace.GetObjectsQuery<InvitationItem>()
+                .Where(ii =>
+                    ii.Person != null
+                    && ii.Invitation != null
+                    && ii.Invitation.ID != invitation.ID
+                    && ii.Invitation.ApplicationProfileInstance != null
+                    && ii.Invitation.ApplicationProfileInstance.ID == appId))
             .Select(ii => ii.Person!.ID)
             .ToHashSet();
 

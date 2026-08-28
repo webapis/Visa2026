@@ -665,6 +665,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
             return;
 
         model.PersonLinkIsLinking = true;
+        await Task.Delay(16);
         try
         {
             using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
@@ -680,6 +681,13 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
             if (ApplicationProfileInstancePersonRosterLockHelper.AreResolvedLinksLocked(application))
             {
                 model.PersonLinkStatusMessage = VisaUiMessages.Get("ApplicationProfileInstancePerson.RosterLockedWhenWorkflowTerminal");
+                model.PersonLinkStatusIsError = true;
+                return;
+            }
+
+            if (ApplicationProfileInstancePersonLinkPassportGate.TryGetBlockReason(person, out var passportBlock))
+            {
+                model.PersonLinkStatusMessage = passportBlock;
                 model.PersonLinkStatusIsError = true;
                 return;
             }

@@ -73,11 +73,14 @@ public static class VisaIssuingLinkPathAMatcher
             .Select(v => v.IssuingInvitationItem!.ID)
             .ToList();
 
-        var query = objectSpace.GetObjectsQuery<InvitationItem>()
-            .Where(ii => ii.Person != null && ii.Person.ID == personId)
-            .Where(ii => ii.Invitation != null)
-            .Where(ii => ii.Invitation.ApplicationProfileInstance != null && ii.Invitation.ApplicationProfileInstance.ID == applicationId)
-            .Where(ii => !ii.IsCancelled && !ii.IsChanged && !ii.IsUsed);
+        var query = IssuedDocumentLifecycle.WhereInvitationItemNotUsed(
+            IssuedDocumentLifecycle.WhereInvitationItemNotChanged(
+                IssuedDocumentLifecycle.WhereInvitationItemNotCancelled(
+                    objectSpace.GetObjectsQuery<InvitationItem>()
+                        .Where(ii => ii.Person != null && ii.Person.ID == personId)
+                        .Where(ii => ii.Invitation != null)
+                        .Where(ii => ii.Invitation.ApplicationProfileInstance != null
+                            && ii.Invitation.ApplicationProfileInstance.ID == applicationId))));
 
         if (linkedInvitationIds.Count > 0)
             query = query.Where(ii => !linkedInvitationIds.Contains(ii.ID));

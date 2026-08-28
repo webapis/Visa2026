@@ -57,9 +57,10 @@ public static class IssueIssuedVisaComposeService
         var invitationIds = invitations.Select(i => i.ID).ToList();
         var items = invitationIds.Count == 0
             ? new List<InvitationItem>()
-            : objectSpace.GetObjectsQuery<InvitationItem>()
-                .Where(ii => ii.Invitation != null && invitationIds.Contains(ii.Invitation.ID))
-                .Where(ii => !ii.IsCancelled && !ii.IsChanged)
+            : IssuedDocumentLifecycle.WhereInvitationItemNotChanged(
+                IssuedDocumentLifecycle.WhereInvitationItemNotCancelled(
+                    objectSpace.GetObjectsQuery<InvitationItem>()
+                        .Where(ii => ii.Invitation != null && invitationIds.Contains(ii.Invitation.ID))))
                 .ToList();
 
         var itemIds = items.Select(ii => ii.ID).ToList();

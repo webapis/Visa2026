@@ -14,7 +14,7 @@
         <div class="ap-wizard__grid">
             <label class="ap-wizard__field ap-wizard__field--full">
                 <span>Application Profile name</span>
-                <input type="text" @bind="Profile.Name" @bind:event="oninput" disabled="@Disabled" />
+                <input type="text" @bind="Profile.Name" @bind:event="oninput" @bind:after="NotifyNameChanged" disabled="@Disabled" />
             </label>
         </div>
     </div>
@@ -180,29 +180,6 @@
             <p class="ap-wizard__hint">Business-trip profiles do not issue, cancel, or change documents here.</p>
         }
     </div>
-    <div class="ap-wizard__section">
-        <h3>Applicability scope (optional)</h3>
-        <p class="ap-wizard__hint">A profile can be general, or narrowed with XAF criteria (e.g. project contract).</p>
-        <div class="ap-wizard__scope">
-            <button type="button" class="ap-wizard__scope-card @(_scopeMode == ScopeMode.Always ? "is-active" : null)"
-                    disabled="@Disabled" @onclick="SetAlwaysScope">
-                <h4>Always available</h4>
-                <p>Officers can pick this profile for any new ApplicationProfileInstance matching audience and route.</p>
-            </button>
-            <button type="button" class="ap-wizard__scope-card @(_scopeMode == ScopeMode.Scoped ? "is-active" : null)"
-                    disabled="@Disabled" @onclick="SetScopedMode">
-                <h4>Scoped</h4>
-                <p>Limit picker visibility with optional XAF criteria on ApplicationProfileInstance context.</p>
-            </button>
-        </div>
-        @if (_scopeMode == ScopeMode.Scoped)
-        {
-            <label class="ap-wizard__field ap-wizard__field--full">
-                <span>Applicability criteria</span>
-                <textarea @bind="Profile.ApplicabilityCriteria" disabled="@Disabled" placeholder="Optional XAF criteria"></textarea>
-            </label>
-        }
-    </div>
     <label class="ap-wizard__choice">
         <input type="checkbox" @bind="Profile.IsActive" disabled="@Disabled" /> Active (available in pickers)
     </label>
@@ -216,17 +193,7 @@
     [Parameter] public EventCallback OpenSharedCatalogRequested { get; set; }
     [Parameter] public EventCallback RefreshSharedRequested { get; set; }
     [Parameter] public EventCallback ClearLegsRequested { get; set; }
-
-    private enum ScopeMode { Always, Scoped }
-
-    private ScopeMode _scopeMode;
-
-    protected override void OnParametersSet()
-    {
-        _scopeMode = string.IsNullOrWhiteSpace(Profile.ApplicabilityCriteria)
-            ? ScopeMode.Always
-            : ScopeMode.Scoped;
-    }
+    [Parameter] public EventCallback NameChanged { get; set; }
 
     private static readonly ApplicationProfileActionFamily[] ActionFamilies =
     [
@@ -243,6 +210,8 @@
     private bool ShowRegistrationKind => Profile.ActionFamily == ApplicationProfileActionFamily.Registration;
     private bool ShowApprovalLegs =>
         Profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries;
+
+    private Task NotifyNameChanged() => NameChanged.InvokeAsync();
 
     private async Task SetRoute(ApplicationProfileInstanceProgressRouteKind route)
     {
@@ -340,14 +309,6 @@
         Profile.ChangeBorderZonePermits = false;
         Profile.ChangeApplicationProfileInstances = false;
     }
-
-    private void SetAlwaysScope()
-    {
-        _scopeMode = ScopeMode.Always;
-        Profile.ApplicabilityCriteria = null;
-    }
-
-    private void SetScopedMode() => _scopeMode = ScopeMode.Scoped;
 
     private static string FormatActionFamily(ApplicationProfileActionFamily family) => family switch
     {

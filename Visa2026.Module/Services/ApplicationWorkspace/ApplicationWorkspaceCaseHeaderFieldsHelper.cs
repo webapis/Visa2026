@@ -5,6 +5,7 @@ using System.Linq;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
+using Visa2026.Module.Services;
 
 namespace Visa2026.Module.Services.ApplicationWorkspace;
 
@@ -45,89 +46,114 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             ? Catalogs.Load(objectSpace)
             : Catalogs.Empty;
         var fields = new List<ApplicationWorkspaceCaseHeaderField>();
+        var instanceNumber = FormatInstanceNumber(application);
+        var instanceDate = application.ApplicationDate == default ? (DateTime?)null : application.ApplicationDate;
 
         AddShortText(fields, InstanceNumber, "Application number", "blue", "№",
             visible: true,
-            FormatInstanceNumber(application),
-            InstanceNumberMaxLength);
+            instanceNumber,
+            InstanceNumberMaxLength,
+            ApplicationWorkspaceCaseSummaryFill.Resolve(
+                string.IsNullOrWhiteSpace(instanceNumber),
+                !application.IsManualEntry));
 
         AddDate(fields, InstanceDate, "Application date", "green", "📅",
             visible: true,
-            application.ApplicationDate == default ? null : application.ApplicationDate);
+            instanceDate,
+            ApplicationWorkspaceCaseSummaryFill.Resolve(
+                instanceDate == null,
+                !application.IsManualEntry));
 
         AddLookup(fields, VisaType, "Visa type", "blue", "🛂",
             Visible(profile, p => p.RequireVisaType, ApplicationProfileConfigurationResolver.ShowVisaType, application),
-            application.VisaType?.ID, LookupLabel(application.VisaType), catalogs.VisaTypes, readOnly: false);
+            application.VisaType?.ID, LookupLabel(application.VisaType), catalogs.VisaTypes, readOnly: false,
+            LookupFill(application.VisaType?.ID, DefaultId(profile?.DefaultVisaType?.ID, profile?.DefaultVisaTypeId)));
 
         AddLookup(fields, VisaCategory, "Category", "purple", "◆",
             Visible(profile, p => p.RequireVisaCategory, ApplicationProfileConfigurationResolver.ShowVisaCategory, application),
-            application.VisaCategory?.ID, LookupLabel(application.VisaCategory), catalogs.VisaCategories, readOnly: false);
+            application.VisaCategory?.ID, LookupLabel(application.VisaCategory), catalogs.VisaCategories, readOnly: false,
+            LookupFill(application.VisaCategory?.ID, DefaultId(profile?.DefaultVisaCategory?.ID, profile?.DefaultVisaCategoryId)));
 
         AddLookup(fields, VisaPeriod, "Period", "green", "📅",
             Visible(profile, p => p.RequireVisaPeriod, ApplicationProfileConfigurationResolver.ShowVisaPeriod, application),
-            application.VisaPeriod?.ID, LookupLabel(application.VisaPeriod), catalogs.VisaPeriods, readOnly: false);
+            application.VisaPeriod?.ID, LookupLabel(application.VisaPeriod), catalogs.VisaPeriods, readOnly: false,
+            LookupFill(application.VisaPeriod?.ID, DefaultId(profile?.DefaultVisaPeriod?.ID, profile?.DefaultVisaPeriodId)));
 
         AddLookup(fields, Project, "Project", "orange", "💼",
             Visible(profile, p => p.RequireProject, ApplicationProfileConfigurationResolver.ShowProjectContract, application),
-            application.ProjectContract?.ID, LookupLabel(application.ProjectContract), catalogs.ProjectContracts, readOnly: false);
+            application.ProjectContract?.ID, LookupLabel(application.ProjectContract), catalogs.ProjectContracts, readOnly: false,
+            LookupFill(application.ProjectContract?.ID, DefaultId(profile?.DefaultProjectContract?.ID, profile?.DefaultProjectContractId)));
 
         AddDate(fields, StartDate, "Start date", "green", "📅",
             Visible(profile, p => p.RequireStartDate, ApplicationProfileConfigurationResolver.ShowBusinessTrips, application),
-            application.BusinessTripStartDate);
+            application.BusinessTripStartDate,
+            DateFill(application.BusinessTripStartDate, defaultDate: null));
 
         AddLookup(fields, EntryCheckPoint, "Entry check point", "blue", "📍",
             Visible(profile, p => p.RequireEntryCheckPoint, ApplicationProfileConfigurationResolver.ShowEntryCheckPoint, application),
-            application.EntryCheckPoint?.ID, LookupLabel(application.EntryCheckPoint), catalogs.CheckPoints, readOnly: false);
+            application.EntryCheckPoint?.ID, LookupLabel(application.EntryCheckPoint), catalogs.CheckPoints, readOnly: false,
+            LookupFill(application.EntryCheckPoint?.ID, DefaultId(profile?.DefaultEntryCheckPoint?.ID, profile?.DefaultEntryCheckPointId)));
 
         AddLookup(fields, Urgency, "Urgency", "orange", "⚡",
             Visible(profile, p => p.RequireUrgency, ApplicationProfileConfigurationResolver.ShowUrgency, application),
-            application.Urgency?.ID, LookupLabel(application.Urgency), catalogs.Urgencies, readOnly: false);
+            application.Urgency?.ID, LookupLabel(application.Urgency), catalogs.Urgencies, readOnly: false,
+            LookupFill(application.Urgency?.ID, DefaultId(profile?.DefaultUrgency?.ID, profile?.DefaultUrgencyId)));
 
         AddCommaSeparatedMultiSelect(fields, BorderZone, "Border zone", "teal", "📍",
             Visible(profile, p => p.RequireBorderZone, ApplicationProfileConfigurationResolver.ShowBorderZoneLocation, application),
             application.BorderZoneLocation,
             FormatBorderZoneDisplay(application.BorderZoneLocation_NameTm, application.BorderZoneLocation),
-            catalogs.BorderZoneNames, readOnly: false);
+            catalogs.BorderZoneNames, readOnly: false,
+            MultiSelectFill(application.BorderZoneLocation, profile?.DefaultBorderZoneLocation));
 
         AddDate(fields, EndDate, "End date", "green", "📅",
             Visible(profile, p => p.RequireEndDate, ApplicationProfileConfigurationResolver.ShowBusinessTrips, application),
-            application.BusinessTripEndDate);
+            application.BusinessTripEndDate,
+            DateFill(application.BusinessTripEndDate, defaultDate: null));
 
         AddLookup(fields, MigrationService, "Migration service", "teal", "🏛",
             Visible(profile, p => p.RequireMigrationService, ApplicationProfileConfigurationResolver.ShowMigrationService, application),
-            application.MigrationService?.ID, LookupLabel(application.MigrationService), catalogs.MigrationServices, readOnly: false);
+            application.MigrationService?.ID, LookupLabel(application.MigrationService), catalogs.MigrationServices, readOnly: false,
+            LookupFill(application.MigrationService?.ID, DefaultId(profile?.DefaultMigrationService?.ID, profile?.DefaultMigrationServiceId)));
 
         AddLookup(fields, FromCity, "From city", "purple", "📍",
             Visible(profile, p => p.RequireRegionCity, ApplicationProfileConfigurationResolver.ShowFromCity, application),
-            application.FromCity?.ID, LookupLabel(application.FromCity), catalogs.Cities, readOnly: false);
+            application.FromCity?.ID, LookupLabel(application.FromCity), catalogs.Cities, readOnly: false,
+            LookupFill(application.FromCity?.ID, defaultId: null));
 
         AddLookup(fields, ToCity, "To city", "purple", "📍",
             Visible(profile, p => p.RequireRegionCity, ApplicationProfileConfigurationResolver.ShowToCity, application),
-            application.ToCity?.ID, LookupLabel(application.ToCity), catalogs.Cities, readOnly: false);
+            application.ToCity?.ID, LookupLabel(application.ToCity), catalogs.Cities, readOnly: false,
+            LookupFill(application.ToCity?.ID, defaultId: null));
 
         AddLookup(fields, Region, "Region", "purple", "📍",
             Visible(profile, p => p.RequireRegion, ApplicationProfileConfigurationResolver.ShowRegion, application),
-            application.Region?.ID, LookupLabel(application.Region), catalogs.Regions, readOnly: false);
+            application.Region?.ID, LookupLabel(application.Region), catalogs.Regions, readOnly: false,
+            LookupFill(application.Region?.ID, DefaultId(profile?.DefaultRegion?.ID, profile?.DefaultRegionId)));
 
         AddLookup(fields, City, "City", "purple", "📍",
             Visible(profile, p => p.RequireCity, ApplicationProfileConfigurationResolver.ShowCity, application),
-            application.City?.ID, LookupLabel(application.City), catalogs.Cities, readOnly: false);
+            application.City?.ID, LookupLabel(application.City), catalogs.Cities, readOnly: false,
+            LookupFill(application.City?.ID, DefaultId(profile?.DefaultCity?.ID, profile?.DefaultCityId)));
 
         AddLookup(fields, BusinessTripAddress, "Business trip address", "purple", "📍",
             Visible(profile, p => p.RequireBusinessTripAddress, ApplicationProfileConfigurationResolver.ShowBusinessTripAddress, application),
             application.BusinessTripAddress?.ID,
             FormatBusinessTripAddress(application.BusinessTripAddress),
-            catalogs.BusinessTripAddresses, readOnly: false);
+            catalogs.BusinessTripAddresses, readOnly: false,
+            LookupFill(application.BusinessTripAddress?.ID, DefaultId(profile?.DefaultBusinessTripAddress?.ID, profile?.DefaultBusinessTripAddressId)));
 
         AddText(fields, Purpose, "Purpose", "blue", "📝",
             Visible(profile, p => p.RequirePurpose, ApplicationProfileConfigurationResolver.ShowPurpose, application),
-            application.Purpose);
+            application.Purpose,
+            TextFill(application.Purpose, profile?.DefaultPurpose));
 
         AddCommaSeparatedMultiSelect(fields, WorkPermitLocation, "Work permit location", "blue", "🏢",
             Visible(profile, p => p.RequireWorkPermitLocation, ApplicationProfileConfigurationResolver.ShowMovementPermitLocation, application),
             application.MovementPermitLocation,
             application.MovementPermitLocation_NameTm,
-            catalogs.WorkPermittedLocationNames, readOnly: false);
+            catalogs.WorkPermittedLocationNames, readOnly: false,
+            MultiSelectFill(application.MovementPermitLocation, profile?.DefaultWorkPermitLocation));
 
         return fields;
     }
@@ -253,7 +279,8 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         Guid? selectedId,
         string displayValue,
         IReadOnlyList<ApplicationWorkspaceLookupOption> options,
-        bool readOnly)
+        bool readOnly,
+        ApplicationWorkspaceCaseSummaryFillState fillState)
     {
         if (!visible)
             return;
@@ -270,6 +297,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             DisplayValue = string.IsNullOrWhiteSpace(displayValue) ? "—" : displayValue,
             Options = options,
             ReadOnly = readOnly,
+            FillState = fillState,
         });
     }
 
@@ -280,7 +308,8 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         string tone,
         string glyph,
         bool visible,
-        DateTime? date)
+        DateTime? date,
+        ApplicationWorkspaceCaseSummaryFillState fillState)
     {
         if (!visible)
             return;
@@ -295,6 +324,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             Value = date.HasValue ? date.Value.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) : string.Empty,
             DisplayValue = date.HasValue ? date.Value.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture) : "—",
             ReadOnly = false,
+            FillState = fillState,
         });
     }
 
@@ -305,7 +335,8 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         string tone,
         string glyph,
         bool visible,
-        string? text)
+        string? text,
+        ApplicationWorkspaceCaseSummaryFillState fillState)
     {
         if (!visible)
             return;
@@ -321,6 +352,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             Value = value,
             DisplayValue = string.IsNullOrWhiteSpace(value) ? "—" : value,
             ReadOnly = false,
+            FillState = fillState,
         });
     }
 
@@ -332,7 +364,8 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         string glyph,
         bool visible,
         string? text,
-        int maxLength)
+        int maxLength,
+        ApplicationWorkspaceCaseSummaryFillState fillState)
     {
         if (!visible)
             return;
@@ -349,6 +382,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             DisplayValue = string.IsNullOrWhiteSpace(value) ? "—" : value,
             ReadOnly = false,
             MaxLength = maxLength,
+            FillState = fillState,
         });
     }
 
@@ -362,7 +396,8 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         string? storedValue,
         string displayValue,
         IReadOnlyList<string> catalogOptions,
-        bool readOnly)
+        bool readOnly,
+        ApplicationWorkspaceCaseSummaryFillState fillState)
     {
         if (!visible)
             return;
@@ -378,6 +413,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             DisplayValue = string.IsNullOrWhiteSpace(displayValue) ? "—" : displayValue,
             MultiSelectOptions = catalogOptions,
             ReadOnly = readOnly,
+            FillState = fillState,
         });
     }
 
@@ -565,6 +601,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             return false;
         }
 
+        application.IsManualEntry = true;
         return true;
     }
 
@@ -575,6 +612,68 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         if (!string.IsNullOrWhiteSpace(application.ApplicationNumber))
             return application.ApplicationNumber.Trim();
         return string.Empty;
+    }
+
+    private static ApplicationWorkspaceCaseSummaryFillState LookupFill(Guid? selectedId, Guid? defaultId)
+    {
+        var empty = selectedId == null || selectedId == Guid.Empty;
+        var matches = !empty
+            && defaultId is Guid id
+            && id != Guid.Empty
+            && selectedId == id;
+        return ApplicationWorkspaceCaseSummaryFill.Resolve(empty, matches);
+    }
+
+    private static ApplicationWorkspaceCaseSummaryFillState DateFill(DateTime? date, DateTime? defaultDate)
+    {
+        var empty = date == null || date.Value == default;
+        var matches = !empty
+            && defaultDate is DateTime expected
+            && expected != default
+            && date.Value.Date == expected.Date;
+        return ApplicationWorkspaceCaseSummaryFill.Resolve(empty, matches);
+    }
+
+    private static ApplicationWorkspaceCaseSummaryFillState TextFill(string? value, string? defaultValue)
+    {
+        var trimmed = value?.Trim() ?? string.Empty;
+        var defaultTrimmed = defaultValue?.Trim() ?? string.Empty;
+        return ApplicationWorkspaceCaseSummaryFill.Resolve(
+            string.IsNullOrWhiteSpace(trimmed),
+            !string.IsNullOrWhiteSpace(defaultTrimmed)
+                && string.Equals(trimmed, defaultTrimmed, StringComparison.Ordinal));
+    }
+
+    private static ApplicationWorkspaceCaseSummaryFillState MultiSelectFill(string? stored, string? defaultStored)
+    {
+        var selected = NormalizeMultiSelect(stored);
+        var defaults = NormalizeMultiSelect(defaultStored);
+        return ApplicationWorkspaceCaseSummaryFill.Resolve(
+            selected.Count == 0,
+            selected.Count > 0
+                && defaults.Count == selected.Count
+                && selected.SequenceEqual(defaults, StringComparer.OrdinalIgnoreCase));
+    }
+
+    private static IReadOnlyList<string> NormalizeMultiSelect(string? stored)
+    {
+        if (string.IsNullOrWhiteSpace(stored) || CommaSeparatedSelectionHelper.IsNoneValue(stored))
+            return [];
+
+        return CommaSeparatedSelectionHelper.ParseSelected(stored)
+            .Select(item => item.Trim())
+            .Where(item => item.Length > 0)
+            .OrderBy(item => item, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    private static Guid? DefaultId(Guid? navigationId, Guid? foreignKey)
+    {
+        if (navigationId is Guid id && id != Guid.Empty)
+            return id;
+        if (foreignKey is Guid fk && fk != Guid.Empty)
+            return fk;
+        return null;
     }
 
     private static bool Hidden(out string? error)

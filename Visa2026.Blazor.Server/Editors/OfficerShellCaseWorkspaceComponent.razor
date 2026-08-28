@@ -226,6 +226,7 @@
     private string? _pendingTab;
     private bool _tabSwitching;
     private bool _tabContentReady = true;
+    private Guid _relinkingPersonId;
 
     private string DisplayedTab =>
         string.IsNullOrWhiteSpace(_pendingTab) ? ActiveTab : _pendingTab;
@@ -379,6 +380,11 @@
 
         SyncDocumentPeopleFilter(Snapshot?.CaseView);
         SyncPeopleRecordFocus();
+
+        // Save reloads CaseView without dropdown catalogs. Reload them while Edit is open
+        // so Visa type / Project / etc. keep a matching <option> and stay visible.
+        if (_caseSummaryEditing)
+            EnsureHeaderLookupCatalogs();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -441,7 +447,11 @@
             Value = field.DisplayValue,
             Tone = field.Tone,
             Glyph = field.Glyph,
+            FillState = field.FillState,
         };
+
+    private static string FillCss(ApplicationWorkspaceCaseSummaryFillState state) =>
+        ApplicationWorkspaceCaseSummaryFill.CssToken(state);
 
     private static string EditorAliasFor(string? fieldKey) =>
         string.Equals(fieldKey, ApplicationWorkspaceCaseHeaderFieldsHelper.WorkPermitLocation, StringComparison.Ordinal)
@@ -906,7 +916,7 @@
                     <div class="cw-summary-form">
                         @foreach (var field in view.HeaderFields)
                         {
-                            <label class="cw-summary-field">
+                            <label class="cw-summary-field cw-summary-field--fill-@FillCss(field.FillState)">
                                 <span class="cw-summary-field__label">@field.Label</span>
                                 @if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Date)
                                 {
@@ -933,7 +943,8 @@
                                         <option value="">— Select —</option>
                                         @foreach (var option in field.Options)
                                         {
-                                            <option value="@option.Id.ToString("D")">@option.DisplayName</option>
+                                            var optionId = option.Id.ToString("D");
+                                            <option value="@optionId" selected="@(string.Equals(field.Value, optionId, StringComparison.OrdinalIgnoreCase))">@option.DisplayName</option>
                                         }
                                     </select>
                                 }
@@ -972,7 +983,7 @@
                     <div class="cw-summary-grid">
                         @foreach (var field in OverviewTiles(view))
                         {
-                            <div class="cw-sum-tile cw-sum-tile--@field.Tone">
+                            <div class="cw-sum-tile cw-sum-tile--@field.Tone cw-sum-tile--fill-@FillCss(field.FillState)">
                                 <span class="cw-sum-tile__icon">@field.Glyph</span>
                                 <span class="cw-sum-tile__label">@field.Label</span>
                                 <strong class="cw-sum-tile__value">@field.Value</strong>
@@ -1181,7 +1192,7 @@
                 <p class="cw-linked-lock" style="margin-bottom:12px">🔒 People and linked records are locked — this process is complete (issued, rejected, or cancelled).</p>
             }
             <div class="os-toolbar" style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap">
-                <button type="button" class="os-btn os-btn--primary" disabled="@(!CanLinkPerson || ShowPersonLinkPicker)" @onclick="LinkPersonAsync">Link existing…</button>
+                <button type="button" class="os-btn os-btn--primary" disabled="@(!CanLinkPerson || ShowPersonLinkPicker || IsRelinking)" @onclick="LinkPersonAsync">Link existing…</button>
             </div>
             <OfficerShellPersonLinkPickerComponent IsOpen="@ShowPersonLinkPicker"
                                                    Candidates="@PersonLinkCandidates"
@@ -1214,14 +1225,16 @@
                                     <td>
                                         <button type="button"
                                                 class="os-btn os-btn--primary ct-btn-sm"
-                                                disabled="@(!CanLinkPerson || person.PersonId == Guid.Empty)"
+                                                disabled="@(!CanLinkPerson || person.PersonId == Guid.Empty || IsRelinking)"
                                                 @onclick:stopPropagation="true"
-                                                @onclick="() => RelinkPersonById(person.PersonId)">Relink</button>
+                                                @onclick="() => RelinkPersonById(person.PersonId)">
+                                            @(person.PersonId == _relinkingPersonId ? "Relinking…" : "Relink")
+                                        </button>
                                     </td>
                                     <td>
                                         <button type="button"
                                                 class="os-btn ct-btn-sm"
-                                                disabled="@(!CanUnlinkPerson || person.PersonId == Guid.Empty)"
+                                                disabled="@(!CanUnlinkPerson || person.PersonId == Guid.Empty || IsRelinking)"
                                                 @onclick:stopPropagation="true"
                                                 @onclick="() => UnlinkPersonById(person.PersonId)">Unlink</button>
                                     </td>
@@ -1775,11 +1788,24 @@
             await OpenPersonDetailRequested.InvokeAsync();
     }
 
+    private bool IsRelinking => _relinkingPersonId != Guid.Empty;
+
     private async Task RelinkPersonById(Guid personId)
     {
-        if (personId == Guid.Empty || !RelinkPersonRequested.HasDelegate)
+        if (personId == Guid.Empty || !RelinkPersonRequested.HasDelegate || IsRelinking)
             return;
-        await RelinkPersonRequested.InvokeAsync(personId);
+
+        _relinkingPersonId = personId;
+        await InvokeAsync(StateHasChanged);
+        await Task.Delay(16);
+        try
+        {
+            await RelinkPersonRequested.InvokeAsync(personId);
+        }
+        finally
+        {
+            _relinkingPersonId = Guid.Empty;
+        }
     }
 
     private async Task UnlinkPersonById(Guid personId)

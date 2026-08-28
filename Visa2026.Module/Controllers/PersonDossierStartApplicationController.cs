@@ -8,7 +8,8 @@ using Visa2026.Module.Services.PersonDossier;
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// Starts a new ApplicationProfileInstance from Person Dossier (slice 11).
+/// Starts a new ApplicationProfileInstance from Person Dossier.
+/// Retired: officers create instances only from Application Profile Instances lists.
 /// </summary>
 public sealed class PersonDossierStartApplicationController : ViewController<DetailView>
 {
@@ -25,6 +26,8 @@ public sealed class PersonDossierStartApplicationController : ViewController<Det
             ToolTip = "Pick an Application Profile and link people to a new Application.",
         };
         _startApplicationAction.Execute += StartApplication_Execute;
+        // Officers create Application Profile Instances only from Application Profile Instances lists.
+        _startApplicationAction.Active["Dossier"] = false;
     }
 
     protected override void OnActivated()

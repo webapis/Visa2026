@@ -47,7 +47,7 @@ Companion to [SKILL.md](./SKILL.md).
 | Staged / in-process queues | `OfficerShellStagedQueryService`, `OfficerShellInProcessQueryService`, `OfficerShellStartProcessService` |
 | Case workspace tabs | `OfficerShellCaseWorkspaceComponent.razor`, `OfficerShellCase*Tab.razor` (overview, people, progress, documents, resminamalar, SLA) |
 | Case snapshot builder | `ApplicationWorkspaceCaseBuilder.cs`, `ApplicationWorkspaceCaseModels.cs` |
-| Case summary Use fields | `ApplicationWorkspaceCaseHeaderFieldsHelper.cs` (application number/date always + Use-field tiles; Edit/Done persist on instance) |
+| Case summary Use fields | `ApplicationWorkspaceCaseHeaderFieldsHelper.cs` (application number/date always + Use-field tiles; Edit/Done persist on instance; fill-state empty/default/officer) |
 | Person link picker (B8) | `IApplicationPersonLinkQueryService`, `OfficerShellPersonLinkPickerComponent.razor` |
 | Case progress in-shell (B7) | `IOfficerShellCaseProgressService`, `OfficerShellCaseProgressTab.razor` |
 | Immersive tab-bar hide (B6) | `OfficerShellImmersiveTabBarController.cs`, `officer-shell-host.css` |
@@ -84,7 +84,7 @@ Companion to [SKILL.md](./SKILL.md).
 
 ### Configuration-related (live) — on `ApplicationProfile`
 
-Identity (Name, Description, Code, SelectionCode) · Route (`ProgressRoute`) · Audience (`ForEmployee`, `ForFamilyMember`, `ForTemporaryVisitor`) · `ActionFamily` · Produce/Cancel booleans · `DefaultApprovalLegProfile` (shared `ApprovalLegProfile` catalog; instance snapshots ministries at create) · SLA days · `NestedTemplates` (profile-specific may set `ApplicableProjectContract` / `ApplicableMigrationService`) · `RequirePerson*` toggles + `Person*LastCount` (1–3) for Passport/Visa/Invitation/WP/Border zone · `ApplicabilityCriteria` · `Require*` + `Default*` for catalog fields
+Identity (Name, Description, Code, SelectionCode) · Route (`ProgressRoute`) · Audience (`ForEmployee`, `ForFamilyMember`, `ForTemporaryVisitor`) · `ActionFamily` · Produce/Cancel booleans · `DefaultApprovalLegProfile` (shared `ApprovalLegProfile` catalog; instance snapshots ministries at create) · SLA days · `NestedTemplates` (profile-specific may set `ApplicableProjectContract` / `ApplicableMigrationService`) · `RequirePerson*` toggles + `Person*LastCount` (1–3) for Passport/Visa/Invitation/WP/Border zone · `Require*` + `Default*` for catalog fields. `ApplicabilityCriteria` is unused in the wizard (empty = always pickable).
 
 ### Per-Application (persistent) — on `Application`
 

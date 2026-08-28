@@ -1,5 +1,6 @@
 using System.Linq;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services;
 using Visa2026.Module.Services.ApplicationWorkspace;
 using Xunit;
 
@@ -128,6 +129,148 @@ public class ApplicationWorkspaceCaseHeaderFieldsHelperTests
 
         Assert.Equal("—", field.DisplayValue);
         Assert.Equal(ApplicationWorkspaceCaseHeaderFieldKind.Lookup, field.Kind);
+        Assert.Equal(ApplicationWorkspaceCaseSummaryFillState.Empty, field.FillState);
+    }
+
+    [Fact]
+    public void Build_FillState_EmptyDash_DefaultMatch_OfficerOverride()
+    {
+        var defaultId = Guid.NewGuid();
+        var otherId = Guid.NewGuid();
+        var profile = new ApplicationProfile
+        {
+            RequireVisaType = true,
+            DefaultVisaTypeId = defaultId,
+        };
+
+        var empty = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(
+            new ApplicationProfileInstance { ApplicationProfile = profile },
+            profile,
+            null);
+        Assert.Equal(
+            ApplicationWorkspaceCaseSummaryFillState.Empty,
+            Assert.Single(empty, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.VisaType).FillState);
+
+        var matched = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(
+            new ApplicationProfileInstance
+            {
+                ApplicationProfile = profile,
+                VisaType = new VisaType { ID = defaultId, NameTm = "WV" },
+            },
+            profile,
+            null);
+        Assert.Equal(
+            ApplicationWorkspaceCaseSummaryFillState.Default,
+            Assert.Single(matched, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.VisaType).FillState);
+
+        var officer = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(
+            new ApplicationProfileInstance
+            {
+                ApplicationProfile = profile,
+                VisaType = new VisaType { ID = otherId, NameTm = "FM" },
+            },
+            profile,
+            null);
+        Assert.Equal(
+            ApplicationWorkspaceCaseSummaryFillState.Officer,
+            Assert.Single(officer, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.VisaType).FillState);
+    }
+
+    [Fact]
+    public void Build_FillState_ApplicationNumberAndDateUseManualEntry()
+    {
+        var profile = new ApplicationProfile();
+        var auto = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(
+            new ApplicationProfileInstance
+            {
+                ApplicationProfile = profile,
+                FullApplicationNumber = "8/-013",
+                ApplicationDate = new DateTime(2026, 8, 27),
+            },
+            profile,
+            null);
+        Assert.Equal(
+            ApplicationWorkspaceCaseSummaryFillState.Default,
+            Assert.Single(auto, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.InstanceNumber).FillState);
+        Assert.Equal(
+            ApplicationWorkspaceCaseSummaryFillState.Default,
+            Assert.Single(auto, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.InstanceDate).FillState);
+
+        var manual = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(
+            new ApplicationProfileInstance
+            {
+                ApplicationProfile = profile,
+                FullApplicationNumber = "8/-013",
+                ApplicationDate = new DateTime(2026, 8, 27),
+                IsManualEntry = true,
+            },
+            profile,
+            null);
+        Assert.Equal(
+            ApplicationWorkspaceCaseSummaryFillState.Officer,
+            Assert.Single(manual, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.InstanceNumber).FillState);
+        Assert.Equal(
+            ApplicationWorkspaceCaseSummaryFillState.Officer,
+            Assert.Single(manual, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.InstanceDate).FillState);
+    }
+
+    [Fact]
+    public void Build_FillState_MultiSelectIgnoresOrderAndNoneValue()
+    {
+        var profile = new ApplicationProfile
+        {
+            RequireBorderZone = true,
+            DefaultBorderZoneLocation = "Zone B, Zone A",
+        };
+
+        var none = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(
+            new ApplicationProfileInstance
+            {
+                ApplicationProfile = profile,
+                BorderZoneLocation = CommaSeparatedSelectionHelper.NoneValue,
+            },
+            profile,
+            null);
+        Assert.Equal(
+            ApplicationWorkspaceCaseSummaryFillState.Empty,
+            Assert.Single(none, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.BorderZone).FillState);
+
+        var matched = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(
+            new ApplicationProfileInstance
+            {
+                ApplicationProfile = profile,
+                BorderZoneLocation = "Zone A, Zone B",
+            },
+            profile,
+            null);
+        Assert.Equal(
+            ApplicationWorkspaceCaseSummaryFillState.Default,
+            Assert.Single(matched, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.BorderZone).FillState);
+    }
+
+    [Fact]
+    public void Build_FillState_StartDateWithoutProfileDefaultIsOfficerWhenSet()
+    {
+        var profile = new ApplicationProfile { RequireStartDate = true };
+        var empty = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(
+            new ApplicationProfileInstance { ApplicationProfile = profile },
+            profile,
+            null);
+        Assert.Equal(
+            ApplicationWorkspaceCaseSummaryFillState.Empty,
+            Assert.Single(empty, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.StartDate).FillState);
+
+        var filled = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(
+            new ApplicationProfileInstance
+            {
+                ApplicationProfile = profile,
+                BusinessTripStartDate = new DateTime(2026, 9, 1),
+            },
+            profile,
+            null);
+        Assert.Equal(
+            ApplicationWorkspaceCaseSummaryFillState.Officer,
+            Assert.Single(filled, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.StartDate).FillState);
     }
 
     [Fact]
@@ -157,5 +300,6 @@ public class ApplicationWorkspaceCaseHeaderFieldsHelperTests
         Assert.Equal(new DateTime(2024, 8, 25), application.ApplicationDate);
         Assert.Equal(2024, application.Year);
         Assert.Equal(8, application.Month);
+        Assert.True(application.IsManualEntry);
     }
 }

@@ -16,6 +16,7 @@
         <header class="ap-wizard__header">
             <div>
                 <h1 class="ap-wizard__title">Application Profile</h1>
+                <p class="ap-wizard__profile-name" title="@ProfileNameDisplay">@ProfileNameDisplay</p>
                 <p class="ap-wizard__sub">
                     Configure what applications using this profile need — live FK; per-ApplicationProfileInstance values get defaults at create.
                 </p>
@@ -74,7 +75,8 @@
                         SharedApprovalLegsRevision="SharedApprovalLegsRevision"
                         OpenSharedCatalogRequested="OpenSharedCatalogCallback"
                         RefreshSharedRequested="RefreshSharedCallback"
-                        ClearLegsRequested="ClearLegsCallback" />
+                        ClearLegsRequested="ClearLegsCallback"
+                        NameChanged="RefreshProfileName" />
                 }
                 else if (_activeStep == 1)
                 {
@@ -176,6 +178,11 @@
     private EventCallback OpenSharedCatalogCallback => OpenSharedApprovalLegCatalogRequested;
     private EventCallback RefreshSharedCallback => RefreshSharedApprovalLegsRequested;
     private EventCallback ClearLegsCallback => EventCallback.Factory.Create(this, ClearLegs);
+
+    private string ProfileNameDisplay =>
+        string.IsNullOrWhiteSpace(Profile?.Name) ? "Unnamed profile" : Profile.Name.Trim();
+
+    private void RefreshProfileName() => StateHasChanged();
 
     private EventCallback AddTemplateCallback => EventCallback.Factory.Create(this, AddTemplate);
 

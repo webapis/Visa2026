@@ -2,14 +2,14 @@
 name: visa2026-application-profile
 description: >-
   Sole Agent skill for Visa2026 Application Profile: live FK configuration model,
-  wizard UX, profile picker at create, ApplicationType deprecation/cutover, seeding,
-  Appearance/progress wiring, Person M2M DetailView (retire ApplicationItem),
-  Person/Dossier start-application, config lock state A, officer configuration
-  suggestions, and Blazor officer shell (staged/in-process queues, case workspace
-  tabs, preview-slot catalog routing). Use for ApplicationProfile BO, profile defaults,
-  dual-read with ApplicationType, prototypes in docs/prototypes/, or
-  APPLICATION_PROFILE_PLAN work. Always read learnings.md first; append after verified
-  changes; update IMPLEMENTATION_PLAN.md.
+  wizard UX, profile picker at create (via-ministry Approval-legs step), ApplicationType
+  deprecation/cutover, seeding, Appearance/progress wiring, Person M2M DetailView
+  (retire ApplicationItem), config lock state A, officer configuration suggestions,
+  and Blazor officer shell (staged/in-process queues, case workspace tabs, preview-slot
+  catalog routing). Instances are created only from Application Profile Instances lists —
+  not Person or Dossier. Use for ApplicationProfile BO, profile defaults, dual-read with
+  ApplicationType, prototypes in docs/prototypes/, or APPLICATION_PROFILE_PLAN work.
+  Always read learnings.md first; append after verified changes; update IMPLEMENTATION_PLAN.md.
 disable-model-invocation: false
 ---
 
@@ -64,7 +64,7 @@ disable-model-invocation: false
 | Document copies on roster (`ApplicationPerson` scope) | [visa2026-document-copies](../visa2026-document-copies/SKILL.md) |
 | Case tab catalog vs `#visa-preview-slot` preview-only | [visa2026-preview-slot](../visa2026-preview-slot/SKILL.md) |
 | Wizard Templates **Preview** (master Word/Excel look) | Same skill — `OpenFileAsync` File occupant, not Resminamalar merge |
-| Person dossier + Start application entry | [visa2026-person-dossier](../visa2026-person-dossier/SKILL.md) |
+| Person dossier (read-only 360; no Start application) | [visa2026-person-dossier](../visa2026-person-dossier/SKILL.md) |
 | Schema deploy / `FORCE_XAF_DB_UPDATE` | [visa2026-lifecycle-docker](../visa2026-lifecycle-docker/SKILL.md) |
 | VISA2014 import / dual-read Type FK | [visa2014-to-visa2026-import](../visa2014-to-visa2026-import/SKILL.md) |
 
@@ -89,7 +89,7 @@ disable-model-invocation: false
 
 1. **Live FK** — `Application.ApplicationProfile` points at shared config. **No** full profile clone on Application.
 2. **Two field classes** — **Configuration-related** (live from profile; not edited on Application) vs **per-Application** (persistent values; defaults copied once at create).
-3. **Immutable profile pick** — FK set **only at create** (or Person/Dossier start flow). Never switch profile on existing Application.
+3. **Immutable profile pick** — FK set **only at create** from Application Profile Instances lists. Never switch profile on existing Application. Do not add Person/Dossier Start application.
 4. **Config lock A** — When any linked Application leaves office prep (`OFFICE_PREPARATION` / `DRAFT` excluded), profile **configuration** becomes read-only **except this template's Default approval-leg version** (chains live in Configuration; instances keep a snapshot). New Applications may still pick locked profile. Per-Application fields stay editable.
 5. **ApplicationType deprecated** — Dual-read during migration. Do **not** add new Type capability flags; converge on profile.
 6. **ApplicationItem retiring** — Target is Person M2M + auto-resolve children; until then do not expand ApplicationItem-only features.
@@ -110,7 +110,8 @@ flowchart LR
 
 | Symptom | First step | Likely fix area |
 |---------|------------|-----------------|
-| Profile picker empty / wrong rows | `ApplicabilityCriteria`, `IsActive`, audience flags | Profile list controller / criteria |
+| Start process on Person or Dossier | Hidden by design — create only from Application Profile Instances | Do not re-enable `PersonStartApplication` / `PersonDossierStartApplication` |
+| Profile picker empty / wrong rows | `IsActive`, audience flags | Profile list controller / criteria |
 | Defaults not applied on create | `Application.ApplyDefaultsForApplicationProfile` | Profile default FKs; ImmediatePostData |
 | Officer can change profile on detail | `[Appearance]` read-only on DetailView | Enforce create-only in controller |
 | Config still editable after submit | `ApplicationProfile.IsConfigLocked` + wizard | `ApplicationProfileLockHelper`, `LatestPrimaryStateCode` |
@@ -119,7 +120,8 @@ flowchart LR
 | Progress route ignores profile | `ApplicationType.ApplicationProgressRoute` still used | Wire `ApplicationProfile.ProgressRoute` in resolver |
 | Type required but Profile optional | Dual-read phase | Seed profiles; backfill FK; document in IMPLEMENTATION_PLAN |
 | Template list on Application | Nested `ApplicationProfileTemplate` | Read-only child list on Application detail |
-| Person tab missing | `RequirePerson*` toggles on profile | Person-config block; M2M slice |
+| Link on People & links feels frozen | Yield `Task.Delay(16)` then overlay **Linking {name}…** | `OfficerShellPersonLinkPickerComponent`; Last-N resolver is sync |
+| Link enabled for person with no / expired / cancelled passport | Picker row `CanLink` + `BlockReason`; `ApplicationProfileInstancePersonLinkPassportGate` | Disable **Link**; show reason on the row |
 | Expired visa/WP/invitation/border zone/medical auto-linked | `ApplicationProfileInstancePersonValidItems.CanLink*` | Officer §10.2 gate; import (`IsDataImport`) is exempt; sticky existing links stay. **Passport expiration is not checked.** |
 | Template needs last 2 passports / last 2–3 invitations | Wizard **Last 1–3** next to Passport / Visa / Invitation / WP / Border zone | `Person*LastCount`; resolver Take(N); unique index includes `LinkedObjectId` |
 | Import sets Type only | VISA2014 mapper | Map Type → Profile FK in import wave |
@@ -142,7 +144,7 @@ See [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) for status. **Default nex
 5. ~~**Profile picker at create**~~ — **Done**.
 5b. ~~**Custom catalog home**~~ — **Done** (slice 8c; native List/Detail not officer UI).
 6. **Person M2M DetailView** — skip-navigation `People` (no roster-line BO); F5 heal after Wave 2b (heal DROP CASCADE). `ApplicationItem` hard-remove already shipped.
-7. **Person/Dossier Start application** — plan §11 (**Done**).
+7. **Person/Dossier Start application** — **removed**; create only from Application Profile Instances picker.
 8. **Remove `Application.ApplicationType` FK** — after cutover + import.
 
 **Blazor officer shell (B0–B8):** tracked in [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) — staged/in-process queues, templates catalog, 6-tab case workspace, immersive chrome, progress tab, person link picker, preview-slot routing for Resminamalar + Document copies.

@@ -1,3 +1,4 @@
+@using System.Linq
 @using Visa2026.Blazor.Server.Editors
 
 <div class="ap-picker">
@@ -5,68 +6,60 @@
     {
         <div class="ap-picker__loading" role="status">Loading Application Profiles…</div>
     }
-    else if (IsPersonStartFlow && Step == 2)
+    else if (Step == 2)
     {
         <header class="ap-picker__header">
             <div>
-                <h1 class="ap-picker__title">Select people</h1>
+                <h1 class="ap-picker__title">Choose Approval legs</h1>
+                <p class="ap-picker__profile-name" title="@SelectedProfileName">@SelectedProfileName</p>
                 <p class="ap-picker__sub">
-                    Seed person is pre-selected. Add family or colleagues on the same ApplicationProfileInstance roster.
+                    Choose which shared approval-leg version this application will follow. Ministries are snapshotted onto the application and will not change if Configuration is edited later.
                 </p>
             </div>
         </header>
 
-        @if (!string.IsNullOrWhiteSpace(SeedPersonLabel))
-        {
-            <div class="ap-picker__hint">Starting for <strong>@SeedPersonLabel</strong></div>
-        }
-
         @RenderStatus()
 
-        <ul class="ap-picker__list ap-picker__people" role="list">
-            @foreach (var row in PeopleRows)
-            {
-                <li class="ap-picker__item ap-picker__people-item @(row.IsSelected ? "is-selected" : null)">
-                    <label class="ap-picker__people-label">
-                        <input type="checkbox"
-                               checked="@row.IsSelected"
-                               @onchange="() => TogglePerson(row.PersonId)" />
-                        <span>
-                            <strong>@row.FullName</strong>
-                            <span class="ap-picker__meta">@row.RoleLabel · @row.PersonalNumber</span>
-                        </span>
-                    </label>
-                    <div class="ap-picker__badges">
-                        @if (row.IsSeedPerson)
-                        {
-                            <span class="ap-picker__badge">Seed</span>
-                        }
-                        @if (row.IsSuggestedFamily)
-                        {
-                            <span class="ap-picker__badge ap-picker__badge--muted">Suggested family</span>
-                        }
-                    </div>
-                </li>
-            }
-        </ul>
-
-        @if (HasDuplicateWarning)
+        @if (SelectedRow?.MissingApprovalLegVersions == true)
         {
-            <label class="ap-picker__warn-ack">
-                <input type="checkbox"
-                       checked="@DuplicateWarningAcknowledged"
-                       @onchange="OnDuplicateAckChanged" />
-                I understand — create ApplicationProfileInstance even if open Applications exist on this profile.
-            </label>
+            <div class="ap-picker__hint">No shared approval-leg versions in Configuration. Add Approval leg profiles before creating an application.</div>
+        }
+        else if (SelectedRow != null)
+        {
+            <h2 class="ap-picker__section-title">Approval legs *</h2>
+            <div class="ap-picker__versions">
+                @foreach (var version in SelectedRow.ApprovalLegVersions)
+                {
+                    var versionSelected = version.VersionId == SelectedVersionId;
+                    <button type="button"
+                            class="ap-picker__version @(versionSelected ? "is-selected" : null)"
+                            @onclick="() => SelectVersion(version.VersionId)">
+                        <span class="ap-picker__version-title">
+                            @version.Name
+                            @if (version.IsDefault)
+                            {
+                                <span class="ap-picker__badge ap-picker__badge--on">Default</span>
+                            }
+                        </span>
+                        <ol class="ap-picker__version-legs">
+                            @foreach (var ministry in version.MinistryNames)
+                            {
+                                <li>@ministry</li>
+                            }
+                        </ol>
+                        <span class="ap-picker__meta">@version.MinistryNames.Count ministries</span>
+                    </button>
+                }
+            </div>
         }
 
         <div class="ap-picker__actions">
             <button type="button" class="ap-picker__btn" @onclick="BackStepAsync">Back</button>
             <button type="button"
                     class="ap-picker__btn ap-picker__btn--primary"
-                    disabled="@(!CanCreateFromPeople)"
+                    disabled="@(!CanCreateOnLegsStep)"
                     @onclick="UseProfileAsync">
-                Create application
+                Use profile (live link)
             </button>
         </div>
     }
@@ -74,7 +67,7 @@
     {
         <header class="ap-picker__header">
             <div>
-                <h1 class="ap-picker__title">@(IsPersonStartFlow ? "Start process" : "Choose Application Profile")</h1>
+                <h1 class="ap-picker__title">Choose Application Profile</h1>
                 <p class="ap-picker__sub">
                     Sets a live configuration link and seeds per-ApplicationProfileInstance defaults once. Profile cannot be changed after save.
                 </p>
@@ -84,11 +77,6 @@
         @if (!string.IsNullOrWhiteSpace(RouteHint))
         {
             <div class="ap-picker__hint">@RouteHint</div>
-        }
-
-        @if (IsPersonStartFlow && !string.IsNullOrWhiteSpace(SeedPersonLabel))
-        {
-            <div class="ap-picker__hint">Person: <strong>@SeedPersonLabel</strong> — profiles sorted by most recent use for this person.</div>
         }
 
         @RenderStatus()
@@ -112,16 +100,8 @@
                         <div class="ap-picker__item-main">
                             <strong>@row.Name</strong>
                             <div class="ap-picker__meta">@row.MetaLine</div>
-                            @if (IsPersonStartFlow && !string.IsNullOrWhiteSpace(row.SeedUsageLine))
-                            {
-                                <div class="ap-picker__meta ap-picker__meta--usage">@row.SeedUsageLine</div>
-                            }
                         </div>
                         <div class="ap-picker__badges">
-                            @if (row.HasOpenApplicationForSeedPerson)
-                            {
-                                <span class="ap-picker__badge ap-picker__badge--warn">Open app</span>
-                            }
                             @if (row.IsConfigLocked)
                             {
                                 <span class="ap-picker__badge ap-picker__badge--muted">Config locked</span>
@@ -135,56 +115,26 @@
                 }
             </ul>
 
-            var selectedRow = Rows.FirstOrDefault(r => r.ProfileId == SelectedProfileId);
-            @if (selectedRow?.MissingApprovalLegVersions == true)
+            @if (SelectedRow?.MissingApprovalLegVersions == true)
             {
                 <div class="ap-picker__hint">No shared approval-leg versions in Configuration. Add Approval leg profiles before creating an application.</div>
             }
-            else if (selectedRow?.RequiresApprovalLegVersion == true)
-            {
-                <h2 class="ap-picker__section-title">Approval legs *</h2>
-                <p class="ap-picker__hint">Choose which shared approval-leg version this application will follow. Ministries are snapshotted onto the application and will not change if Configuration is edited later.</p>
-                <div class="ap-picker__versions">
-                    @foreach (var version in selectedRow.ApprovalLegVersions)
-                    {
-                        var versionSelected = version.VersionId == SelectedVersionId;
-                        <button type="button"
-                                class="ap-picker__version @(versionSelected ? "is-selected" : null)"
-                                @onclick="() => SelectVersion(version.VersionId)">
-                            <span class="ap-picker__version-title">
-                                @version.Name
-                                @if (version.IsDefault)
-                                {
-                                    <span class="ap-picker__badge ap-picker__badge--on">Default</span>
-                                }
-                            </span>
-                            <ol class="ap-picker__version-legs">
-                                @foreach (var ministry in version.MinistryNames)
-                                {
-                                    <li>@ministry</li>
-                                }
-                            </ol>
-                            <span class="ap-picker__meta">@version.MinistryNames.Count ministries</span>
-                        </button>
-                    }
-                </div>
-            }
 
             <div class="ap-picker__actions">
-                @if (IsPersonStartFlow)
+                @if (SelectedRow?.RequiresApprovalLegVersion == true)
                 {
                     <button type="button"
                             class="ap-picker__btn ap-picker__btn--primary"
-                            disabled="@(!CanUseSelectedProfile)"
+                            disabled="@(!CanContinueToLegs)"
                             @onclick="NextStepAsync">
-                        Next: Select people
+                        Continue →
                     </button>
                 }
                 else
                 {
                     <button type="button"
                             class="ap-picker__btn ap-picker__btn--primary"
-                            disabled="@(!CanUseSelectedProfile)"
+                            disabled="@(SelectedProfileId == Guid.Empty)"
                             @onclick="UseProfileAsync">
                         Use profile (live link)
                     </button>
@@ -196,19 +146,13 @@
 
 @code {
     [Parameter] public bool IsLoading { get; set; }
-    [Parameter] public bool IsPersonStartFlow { get; set; }
     [Parameter] public int Step { get; set; } = 1;
-    [Parameter] public string? SeedPersonLabel { get; set; }
     [Parameter] public IReadOnlyList<ApplicationProfilePickerModel.PickerRowModel> Rows { get; set; } = Array.Empty<ApplicationProfilePickerModel.PickerRowModel>();
-    [Parameter] public IReadOnlyList<ApplicationProfilePickerModel.PeopleRowModel> PeopleRows { get; set; } = Array.Empty<ApplicationProfilePickerModel.PeopleRowModel>();
     [Parameter] public Guid SelectedProfileId { get; set; }
     [Parameter] public Guid SelectedVersionId { get; set; }
     [Parameter] public string? StatusMessage { get; set; }
     [Parameter] public bool IsStatusError { get; set; }
     [Parameter] public bool IsStatusWarning { get; set; }
-    [Parameter] public bool DuplicateWarningAcknowledged { get; set; }
-    [Parameter] public bool HasDuplicateWarning { get; set; }
-    [Parameter] public bool CanCreateFromPeople { get; set; }
     [Parameter] public string? RouteHint { get; set; }
     [Parameter] public EventCallback InitialLoadRequested { get; set; }
     [Parameter] public EventCallback UseProfileRequested { get; set; }
@@ -216,10 +160,24 @@
     [Parameter] public EventCallback BackStepRequested { get; set; }
     [Parameter] public EventCallback<Guid> SelectProfileRequested { get; set; }
     [Parameter] public EventCallback<Guid> SelectVersionRequested { get; set; }
-    [Parameter] public EventCallback<Guid> TogglePersonRequested { get; set; }
-    [Parameter] public EventCallback<bool> DuplicateWarningAcknowledgedChanged { get; set; }
 
     private bool _initialLoadStarted;
+
+    private ApplicationProfilePickerModel.PickerRowModel? SelectedRow =>
+        Rows.FirstOrDefault(r => r.ProfileId == SelectedProfileId);
+
+    private string SelectedProfileName =>
+        string.IsNullOrWhiteSpace(SelectedRow?.Name) ? "Unnamed profile" : SelectedRow.Name;
+
+    private bool CanContinueToLegs =>
+        SelectedRow != null
+        && SelectedRow.RequiresApprovalLegVersion
+        && !SelectedRow.MissingApprovalLegVersions;
+
+    private bool CanCreateOnLegsStep =>
+        SelectedRow != null
+        && !SelectedRow.MissingApprovalLegVersions
+        && SelectedVersionId != Guid.Empty;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -230,12 +188,6 @@
         await InitialLoadRequested.InvokeAsync();
     }
 
-    private async Task OnDuplicateAckChanged(ChangeEventArgs e)
-    {
-        if (DuplicateWarningAcknowledgedChanged.HasDelegate && e.Value is bool value)
-            await DuplicateWarningAcknowledgedChanged.InvokeAsync(value);
-    }
-
     private RenderFragment RenderStatus() => __builder =>
     {
         if (!string.IsNullOrWhiteSpace(StatusMessage))
@@ -244,24 +196,6 @@
             <div class="ap-picker__status @css" role="status">@StatusMessage</div>
         }
     };
-
-    private bool CanUseSelectedProfile
-    {
-        get
-        {
-            if (SelectedProfileId == Guid.Empty)
-                return false;
-
-            var selected = Rows.FirstOrDefault(r => r.ProfileId == SelectedProfileId);
-            if (selected == null)
-                return false;
-            if (selected.MissingApprovalLegVersions)
-                return false;
-            if (selected.RequiresApprovalLegVersion && SelectedVersionId == Guid.Empty)
-                return false;
-            return true;
-        }
-    }
 
     private async Task SelectProfile(Guid profileId)
     {
@@ -291,11 +225,5 @@
     {
         if (BackStepRequested.HasDelegate)
             await BackStepRequested.InvokeAsync();
-    }
-
-    private async Task TogglePerson(Guid personId)
-    {
-        if (TogglePersonRequested.HasDelegate)
-            await TogglePersonRequested.InvokeAsync(personId);
     }
 }

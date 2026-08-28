@@ -4,6 +4,16 @@ Date format: `YYYY-MM-DD`
 
 ---
 
+## 2026-08-27 — Valid-visa person filter cannot use Visa.IsCancelled in EF
+
+**Cause:** Opening Report Dashboard (`validVisaPersonsOnly`) queried `db.Visas.Where(v => !v.IsCancelled)`. `Visa.IsCancelled` is `[NotMapped]` (skip-nav Cancellation instance at PROCESS_ISSUED). EF cannot translate it.
+
+**Fix:** `IssuedDocumentLifecycle.WhereVisaNotCancelled` (EXISTS on skip-nav + `LatestPrimaryStateCode`). Same helpers for invitation/work-permit dashboard legacy loaders.
+
+**Prevent:** Do not use `IsCancelled` / `IsChanged` / `IsUsed` inside `IQueryable` / `db.Visas.Where`. Filter in memory after `AsEnumerable`, or use the `Where*NotCancelled` helpers.
+
+**Files:** `IssuedDocumentLifecycle.cs`, `ReportDashboardQueryService.cs`
+
 ## 2026-08-20 — RegistrationKind Extension (enum 4)
 
 **Ask:** `App_Reg_ext` seed with Registration is **Reg extension**.

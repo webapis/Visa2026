@@ -264,32 +264,26 @@ flowchart TB
 
 ---
 
-## 11. Start Application from Person / Dossier (proposed)
+## 11. Start Application from Person / Dossier — **removed**
 
-**Status:** Suggestion for UX — not implemented · complements manual Application create + profile pick
+**Status:** Officers create Application Profile Instances **only** from Application Profile Instances lists (**New** → Choose Application Profile). Person DetailView and Person Dossier do **not** start instances.
 
-### Problem
-
-Creating an Application only from the Application side (pick profile → add people) is slow when the officer is already on a **Person** or **Dossier**. Officers also need to see **which Application Profiles were already used** for that person (renewals, follow-ups, avoid duplicate open apps).
-
-### Suggestion (recommended)
-
-Keep **one** create pipeline (same as today planned): set `Application.ApplicationProfile` FK → seed per-Application defaults → link Person → auto-resolve children. Add **extra entry points** that pre-select the person and profile.
+### Create picker (locked)
 
 | Entry | Officer action | Result |
 |-------|----------------|--------|
-| Person DetailView | **Start application…** | Profile picker → **multi-select People** (seed Person pre-selected) → create Application with all selected linked |
-| Person Dossier | **Start application…** (header or Applications section) | Same; multi-select People |
-| Application Profiles rail / list | **New Application from profile** | Create Application with profile set; officer adds people (multi-select or later on Application) |
-| Application create (blank) | Pick profile then add people | Existing plan |
+| Person DetailView | *(no Start application)* | Create from **Application Profile Instances** lists only |
+| Person Dossier | *(no Start application)* | Same; dossier stays read-only 360 |
+| Application Profile Instances list | **New** → Choose Application Profile | Via ministry: **step 1 profile**, **step 2 Approval legs** (always, even if one version; Default pre-selected). Direct migration: profile then create. Officer adds people on the case. |
 
 ```mermaid
 flowchart LR
-  P[Person / Dossier] -->|Start application| Pick[Filtered Application Profile picker]
-  Rail[Profiles rail] -->|New from profile| Pick
-  Pick --> App[Create Application + live profile FK]
-  App --> Link[Link Person + auto-resolve M2M]
-  Link --> Track[Profile usage visible on Person]
+  List[Application Profile Instances New]
+  List --> Pick[Step 1 Choose profile]
+  Pick -->|Via ministry| Legs[Step 2 Choose Approval legs]
+  Pick -->|Direct migration| App[Create instance + live FK]
+  Legs --> App
+  App --> Case[Officer adds people on the case]
 ```
 
 ### Track Application Profiles used for a Person
@@ -304,50 +298,14 @@ flowchart LR
 
 Avoid a separate `PersonApplicationProfileUsage` table unless you need to record “officer considered profile X but cancelled before save.”
 
-### Picker UX (from Person / Dossier)
+### Retired Person / Dossier start dialog (do not re-enable)
 
-1. Show Application Profiles matching **applicability criteria** + audience (Employee / FM / visitor vs person role).
-2. Annotate each row: **Used before** (count / last date) · **Has open Application** · lock badge if profile config locked.
-3. Confirm → create Application → link **all selected People** → auto-resolve each → open Application DetailView.
+Historical locked Qs for the removed Person/Dossier picker (kept so they are not rebuilt):
 
-### Why this improves UX
-
-- Starts where officers already work (Person / Dossier).
-- Same binding rules (live profile FK, defaults, auto-resolve) — no parallel create path.
-- Profile history is free from M2M + FK — supports renewals and duplicate awareness.
-
-### Open questions (§11)
-
-**Locked (Person / Dossier start dialog):**
-
-| # | Topic | Decision |
+| # | Topic | Decision (retired) |
 |---|--------|----------|
-| 1 | Multi-select People | Yes — seed Person pre-selected; officer may add more for the same Application / profile. |
-| 2 | Candidate mix | **Mix**, with route rule: profiles **via ministry** → candidates restricted to **same ProjectContract** as seed (or app context); profiles **direct migration** → **no** same-ProjectContract requirement (broader search). Family / other filters may still apply as UX aids. |
-| 3 | Family suggest | Auto-**suggest** FamilyMembers of an Employee seed **only** when Application Profile **Related to = Registration**; suggestions remain optional (officer can deselect). |
-| 4 | Audience mismatch | **Allow** selecting People who don’t match profile “may be for”; **validate on confirm** (errors if incompatible). |
-| 5 | Duplicate open Application | **Warn** if any selected Person already has an open Application on that profile; officer may continue. |
-| 6 | Profile picker sort | **Most recently used** for the **seed** Person first. |
-| 7 | After create from Dossier | **Stay on Dossier** with a link to the new Application. |
-| 8 | Missing required person data | **Create anyway** and **flag** Persons who lack required valid data (e.g. passport when profile requires it) — do not block create. |
-| 9 | “Open” Application (warn) | Any Application that is **not** in a **terminal** state — treat **issued** and **cancelled** (and other workflow terminals) as closed; everything else is open for the duplicate-profile warn. |
-| 10 | Via ministry + no ProjectContract | If seed Person has **no** ProjectContract and profile is **via ministry** → **block** start (cannot proceed until ProjectContract is set / resolvable). |
-| 11 | Dossier Applications section | **Yes** — remodel to Application↔Person M2M + profile name when ApplicationItem is removed. |
-
-**Still open (narrow):** none for §11 — remaining plan opens are outside this flow (TravelHistory validity, Excel sync, unlock policy, etc.).
-
-```mermaid
-flowchart LR
-  Seed[Person / Dossier Start application]
-  Seed --> Prof[Pick profile MRU for seed]
-  Prof --> Gate{Via ministry and seed has ProjectContract?}
-  Gate -->|no PC| Block[Block]
-  Gate -->|ok or direct migration| People[Multi-select People]
-  People -->|Related to Registration| Fam[Suggest FamilyMembers]
-  People --> Warn[Warn if open app same profile]
-  Warn --> App[Create + flag incomplete People]
-  App --> Dossier[Stay on Dossier + link]
-```
+| 1 | Multi-select People | Was seed Person + more; people are now linked on the case after create. |
+| 2–11 | Candidate mix, family suggest, audience, duplicate warn, MRU, stay on Dossier, flag incomplete, open-app warn, via-ministry ProjectContract gate, dossier Applications section | Do not restore as a create path. Dossier Applications section remains a read-only list. |
 
 ---
 
@@ -485,13 +443,14 @@ When any linked Application reaches lock state **A** (first progress beyond offi
 | Custom catalog home (replace native List/Detail officer UI) | Done |
 | Profile picker at Application create | Done |
 | Case summary instance Use fields (overview tiles + Edit/Done) | **Done** |
+| Case summary fill-state (empty / default / officer) | **Done** |
 | Person M2M DetailView / hard-remove ApplicationItem | In progress (skip-navigation People + roster-line BO deleted; F5 heal pending) |
 | Workspace Document copies person filter + person catalog | Done (header chips; person-grouped catalog; slot viewer-only) |
 | Document copies from linked records (ID labels) | Done (ResolvedLinks; Passport/Visa numbers — not Current/Previous) |
 | §10.2 valid/not-expired auto-link gate | Done (officer-only except **Passport expiration is not checked**; VISA2014 import keeps historical current rows) |
 | Person Last-N auto-link (Passport / Visa / Invitation / WP / Border zone) | **Done** (Last 1–3; flag missing; Calik: `pasport_change` Last 2 passports; `cancel_invitation` / `cancel_invitation_wp` / `cancel_visa_wp` / `cancel_workpermit` Last 2 on the cancel target types) |
 | Overview Issued records (1:N Invitation / WorkPermit / BorderZone / Rejection / issued Visa) | Done (May produce tiles + New from Overview) |
-| Person/Dossier Start application | Done |
+| Person/Dossier Start application | **Removed** (create only from Application Profile Instances picker; via-ministry = profile then Approval legs) |
 | Remove `Application.ApplicationType` FK | Deferred (after import cutover) |
 | **§13 Instance rename** (`Application` → `ApplicationProfileInstance`) | Done (R0–R6; Demo F5/import operator-run) |
 

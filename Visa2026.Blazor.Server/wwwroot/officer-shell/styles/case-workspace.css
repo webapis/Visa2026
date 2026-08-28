@@ -104,6 +104,18 @@ button.cw-person:focus-visible {
   border: 1px solid #eef2f6; border-radius: 10px; padding: 12px; background: #fff;
   display: flex; flex-direction: column; gap: 6px; min-height: 88px;
 }
+.cw-sum-tile--fill-empty {
+  border-color: #dc2626;
+  background: #fef2f2;
+}
+.cw-sum-tile--fill-default {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+.cw-sum-tile--fill-officer {
+  border-color: #059669;
+  background: #ecfdf5;
+}
 .cw-sum-tile__icon {
   width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; font-size: 1rem;
 }

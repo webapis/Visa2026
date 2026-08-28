@@ -15,4 +15,8 @@ public sealed class ApplicationProfileInstancePersonLinkCandidateRow
     public string PassportNumber { get; init; } = string.Empty;
 
     public bool HasPhoto { get; init; }
+
+    public bool CanLink { get; init; } = true;
+
+    public string? BlockReason { get; init; }
 }

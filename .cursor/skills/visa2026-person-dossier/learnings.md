@@ -101,3 +101,10 @@ Newest entries at the **bottom**. Read before dossier work; append after verifie
 
 - **Request**: Side gutters like Word workspace, without rigid A4 / table scroll.
 - **Fix**: `.person-dossier__screen-stage` + `.person-dossier__screen-column` (`max-width: 1120px`, `padding: clamp(20px, 5vw, 72px)` gutters); Paper stays `210mm`.
+
+### 2026-08-27 — No Start application from dossier
+
+- **Ask**: Remove Person / Dossier Application Profile Instance create. Instances come only from Application Profile Instances lists (via-ministry picker includes Approval legs).
+- **Fix**: `PersonDossierStartApplicationController` action stays `Active["Dossier"] = false`. Do not add a new create entry on dossier.
+- **Prevent**: Do not re-enable **Start process…** on dossier or Person DetailView.
+- **Cross-skill**: person-dossier | application-profile

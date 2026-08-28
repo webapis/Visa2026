@@ -16,39 +16,15 @@ public sealed class ApplicationProfilePickerModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
-    public bool IsPersonStartFlow
-    {
-        get => GetPropertyValue<bool>();
-        set => SetPropertyValue(value);
-    }
-
     public int Step
     {
         get => GetPropertyValue<int>();
         set => SetPropertyValue(value);
     }
 
-    public string? SeedPersonLabel
-    {
-        get => GetPropertyValue<string?>();
-        set => SetPropertyValue(value);
-    }
-
     public IReadOnlyList<PickerRowModel> Rows
     {
         get => GetPropertyValue<IReadOnlyList<PickerRowModel>>() ?? Array.Empty<PickerRowModel>();
-        set => SetPropertyValue(value);
-    }
-
-    public IReadOnlyList<PeopleRowModel> PeopleRows
-    {
-        get => GetPropertyValue<IReadOnlyList<PeopleRowModel>>() ?? Array.Empty<PeopleRowModel>();
-        set => SetPropertyValue(value);
-    }
-
-    public HashSet<Guid> SelectedPersonIds
-    {
-        get => GetPropertyValue<HashSet<Guid>>() ?? new HashSet<Guid>();
         set => SetPropertyValue(value);
     }
 
@@ -77,24 +53,6 @@ public sealed class ApplicationProfilePickerModel : ComponentModelBase
     }
 
     public bool IsStatusWarning
-    {
-        get => GetPropertyValue<bool>();
-        set => SetPropertyValue(value);
-    }
-
-    public bool DuplicateWarningAcknowledged
-    {
-        get => GetPropertyValue<bool>();
-        set => SetPropertyValue(value);
-    }
-
-    public bool HasDuplicateWarning
-    {
-        get => GetPropertyValue<bool>();
-        set => SetPropertyValue(value);
-    }
-
-    public bool CanCreateFromPeople
     {
         get => GetPropertyValue<bool>();
         set => SetPropertyValue(value);
@@ -142,18 +100,6 @@ public sealed class ApplicationProfilePickerModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
-    public EventCallback<bool> DuplicateWarningAcknowledgedChanged
-    {
-        get => GetPropertyValue<EventCallback<bool>>();
-        set => SetPropertyValue(value);
-    }
-
-    public EventCallback<Guid> TogglePersonRequested
-    {
-        get => GetPropertyValue<EventCallback<Guid>>();
-        set => SetPropertyValue(value);
-    }
-
     public sealed class PickerRowModel
     {
         public Guid ProfileId { get; init; }
@@ -185,22 +131,5 @@ public sealed class ApplicationProfilePickerModel : ComponentModelBase
         public bool IsDefault { get; init; }
 
         public IReadOnlyList<string> MinistryNames { get; init; } = Array.Empty<string>();
-    }
-
-    public sealed record PeopleRowModel
-    {
-        public Guid PersonId { get; init; }
-
-        public string FullName { get; init; } = string.Empty;
-
-        public string RoleLabel { get; init; } = string.Empty;
-
-        public string PersonalNumber { get; init; } = string.Empty;
-
-        public bool IsSeedPerson { get; init; }
-
-        public bool IsSuggestedFamily { get; init; }
-
-        public bool IsSelected { get; init; }
     }
 }

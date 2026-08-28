@@ -27,7 +27,7 @@ Copy into chat with `@visa2026-application-profile` (or `@.cursor/skills/visa202
 
 ## Person / Dossier entry
 
-- Add Start application from Person DetailView and Dossier (plan §11) with multi-select People and MRU profile sort.
+- Do **not** add Start application from Person DetailView or Dossier. Create Application Profile Instances only from Application Profile Instances lists (via ministry: profile → Approval legs).
 
 ## Dual-read / deprecation
 

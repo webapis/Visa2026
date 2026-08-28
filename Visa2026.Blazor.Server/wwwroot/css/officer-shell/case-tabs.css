@@ -318,6 +318,7 @@ button.ct-letter-preview:disabled { cursor: default; opacity: 0.65; }
 
 /* B8 — inline person link picker */
 .os-person-link-picker {
+  position: relative;
   border: 1px solid var(--os-line);
   border-radius: var(--os-radius);
   background: #f8fafc;
@@ -389,4 +390,75 @@ button.ct-letter-preview:disabled { cursor: default; opacity: 0.65; }
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.os-person-link-picker__link { flex-shrink: 0; }
+.os-person-link-picker__block {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.78rem;
+  font-weight: 650;
+  color: #b45309;
+}
+.os-person-link-picker__item.is-blocked {
+  background: #fffbeb;
+}
+.os-person-link-picker__link { flex-shrink: 0; min-width: 6.25rem; }
+.os-person-link-picker__link.is-busy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.os-person-link-picker__item.is-linking { background: #eff6ff; }
+.os-person-link-picker__spin {
+  width: 0.85rem;
+  height: 0.85rem;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: os-person-link-spin 0.7s linear infinite;
+}
+.os-person-link-picker__busy {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(248, 250, 252, 0.82);
+  backdrop-filter: blur(1px);
+  border-radius: inherit;
+}
+.os-person-link-picker__busy-panel {
+  width: min(360px, 92%);
+  padding: 16px 18px 14px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid var(--os-line);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+.os-person-link-picker__busy-label {
+  margin: 0 0 10px;
+  font-size: 0.88rem;
+  font-weight: 650;
+  color: var(--os-ink, #0f172a);
+}
+.os-person-link-picker__busy-track {
+  height: 8px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  overflow: hidden;
+}
+.os-person-link-picker__busy-fill {
+  height: 100%;
+  width: 42%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--os-accent), #60a5fa);
+  animation: os-person-link-progress 1.15s ease-in-out infinite;
+}
+@keyframes os-person-link-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes os-person-link-progress {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(280%); }
+}

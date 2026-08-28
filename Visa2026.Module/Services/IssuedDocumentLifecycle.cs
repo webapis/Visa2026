@@ -81,4 +81,54 @@ public static class IssuedDocumentLifecycle
             ApplicationProfileInstanceProgressStateCodes.ProcessIssued,
             StringComparison.OrdinalIgnoreCase);
     }
+
+    /// <summary>
+    /// EF-translatable: skip-nav Cancellation instance at PROCESS_ISSUED.
+    /// Do not use <see cref="IsCancelled(Visa)"/> inside <c>IQueryable</c> — it is [NotMapped].
+    /// </summary>
+    public static IQueryable<Visa> WhereVisaNotCancelled(IQueryable<Visa> query)
+    {
+        var family = ApplicationProfileActionFamily.Cancellation;
+        var issued = ApplicationProfileInstanceProgressStateCodes.ProcessIssued;
+        return query.Where(v => !v.ApplicationProfileInstances.Any(a =>
+            a.ApplicationProfile != null
+            && a.ApplicationProfile.ActionFamily == family
+            && a.LatestPrimaryStateCode == issued));
+    }
+
+    public static IQueryable<InvitationItem> WhereInvitationItemNotCancelled(IQueryable<InvitationItem> query)
+    {
+        var family = ApplicationProfileActionFamily.Cancellation;
+        var issued = ApplicationProfileInstanceProgressStateCodes.ProcessIssued;
+        return query.Where(i => !i.ApplicationProfileInstances.Any(a =>
+            a.ApplicationProfile != null
+            && a.ApplicationProfile.ActionFamily == family
+            && a.LatestPrimaryStateCode == issued));
+    }
+
+    public static IQueryable<InvitationItem> WhereInvitationItemNotChanged(IQueryable<InvitationItem> query)
+    {
+        var family = ApplicationProfileActionFamily.Change;
+        var issued = ApplicationProfileInstanceProgressStateCodes.ProcessIssued;
+        return query.Where(i => !i.ApplicationProfileInstances.Any(a =>
+            a.ApplicationProfile != null
+            && a.ApplicationProfile.ActionFamily == family
+            && a.LatestPrimaryStateCode == issued));
+    }
+
+    public static IQueryable<InvitationItem> WhereInvitationItemNotUsed(IQueryable<InvitationItem> query) =>
+        query.Where(i => i.IssuedVisa == null);
+
+    public static IQueryable<InvitationItem> WhereInvitationItemUsed(IQueryable<InvitationItem> query) =>
+        query.Where(i => i.IssuedVisa != null);
+
+    public static IQueryable<WorkPermitItem> WhereWorkPermitItemNotCancelled(IQueryable<WorkPermitItem> query)
+    {
+        var family = ApplicationProfileActionFamily.Cancellation;
+        var issued = ApplicationProfileInstanceProgressStateCodes.ProcessIssued;
+        return query.Where(w => !w.ApplicationProfileInstances.Any(a =>
+            a.ApplicationProfile != null
+            && a.ApplicationProfile.ActionFamily == family
+            && a.LatestPrimaryStateCode == issued));
+    }
 }

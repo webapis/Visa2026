@@ -25,6 +25,9 @@ public static class ApplicationProfilePickerOpenHelper
         return detailView;
     }
 
+    /// <summary>
+    /// Retired Person/Dossier start path. Officers create instances only from Application Profile Instances lists.
+    /// </summary>
     public static DetailView? CreatePersonStartPickerView(
         XafApplication application,
         Guid personId,

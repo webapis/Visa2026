@@ -36,6 +36,32 @@ public sealed class ApplicationWorkspaceCaseView
     public ApplicationWorkspaceCaseSlaDashboard Sla { get; init; } = new();
 }
 
+public enum ApplicationWorkspaceCaseSummaryFillState
+{
+    Empty = 0,
+    Default = 1,
+    Officer = 2,
+}
+
+public static class ApplicationWorkspaceCaseSummaryFill
+{
+    public static string CssToken(ApplicationWorkspaceCaseSummaryFillState state) => state switch
+    {
+        ApplicationWorkspaceCaseSummaryFillState.Empty => "empty",
+        ApplicationWorkspaceCaseSummaryFillState.Default => "default",
+        _ => "officer",
+    };
+
+    public static ApplicationWorkspaceCaseSummaryFillState Resolve(bool isEmpty, bool matchesDefault)
+    {
+        if (isEmpty)
+            return ApplicationWorkspaceCaseSummaryFillState.Empty;
+        return matchesDefault
+            ? ApplicationWorkspaceCaseSummaryFillState.Default
+            : ApplicationWorkspaceCaseSummaryFillState.Officer;
+    }
+}
+
 public sealed class ApplicationWorkspaceCaseSummaryTile
 {
     public string Label { get; init; } = string.Empty;
@@ -45,6 +71,8 @@ public sealed class ApplicationWorkspaceCaseSummaryTile
     public string Tone { get; init; } = "blue";
 
     public string Glyph { get; init; } = "•";
+
+    public ApplicationWorkspaceCaseSummaryFillState FillState { get; init; }
 }
 
 public enum ApplicationWorkspaceCaseHeaderFieldKind
@@ -90,6 +118,8 @@ public sealed class ApplicationWorkspaceCaseHeaderField
 
     /// <summary>Catalog labels for <see cref="CommaSeparatedMultiSelect"/> fields (e.g. border zone names).</summary>
     public IReadOnlyList<string> MultiSelectOptions { get; init; } = Array.Empty<string>();
+
+    public ApplicationWorkspaceCaseSummaryFillState FillState { get; init; }
 }
 
 public sealed class ApplicationWorkspaceCaseHeaderFieldUpdate

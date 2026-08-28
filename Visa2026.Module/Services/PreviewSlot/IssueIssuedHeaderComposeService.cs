@@ -800,12 +800,12 @@ public static class IssueIssuedHeaderComposeService
         if (objectSpace == null || invitationId == Guid.Empty)
             return new HashSet<Guid>();
 
-        return objectSpace.GetObjectsQuery<InvitationItem>()
-            .Where(ii =>
-                ii.Invitation != null
-                && ii.Invitation.ID == invitationId
-                && ii.Person != null
-                && !ii.IsCancelled)
+        return IssuedDocumentLifecycle.WhereInvitationItemNotCancelled(
+            objectSpace.GetObjectsQuery<InvitationItem>()
+                .Where(ii =>
+                    ii.Invitation != null
+                    && ii.Invitation.ID == invitationId
+                    && ii.Person != null))
             .Select(ii => ii.Person!.ID)
             .ToHashSet();
     }
@@ -833,12 +833,12 @@ public static class IssueIssuedHeaderComposeService
         var invitationIds = invitationNumbers.Select(x => x.ID).ToHashSet();
         var numberByInvitation = invitationNumbers.ToDictionary(x => x.ID, x => x.Number.Trim());
 
-        return objectSpace.GetObjectsQuery<InvitationItem>()
-            .Where(ii =>
-                ii.Person != null
-                && !ii.IsCancelled
-                && ii.Invitation != null
-                && invitationIds.Contains(ii.Invitation.ID))
+        return IssuedDocumentLifecycle.WhereInvitationItemNotCancelled(
+            objectSpace.GetObjectsQuery<InvitationItem>()
+                .Where(ii =>
+                    ii.Person != null
+                    && ii.Invitation != null
+                    && invitationIds.Contains(ii.Invitation.ID)))
             .Select(ii => new { PersonId = ii.Person!.ID, InvitationId = ii.Invitation!.ID })
             .AsEnumerable()
             .GroupBy(x => x.PersonId)
@@ -870,13 +870,13 @@ public static class IssueIssuedHeaderComposeService
         if (invitationIds.Count == 0)
             return new List<(string, string)>();
 
-        return objectSpace.GetObjectsQuery<InvitationItem>()
-            .Where(ii =>
-                ii.Person != null
-                && !ii.IsCancelled
-                && ii.Invitation != null
-                && invitationIds.Contains(ii.Invitation.ID)
-                && wanted.Contains(ii.Person.ID))
+        return IssuedDocumentLifecycle.WhereInvitationItemNotCancelled(
+            objectSpace.GetObjectsQuery<InvitationItem>()
+                .Where(ii =>
+                    ii.Person != null
+                    && ii.Invitation != null
+                    && invitationIds.Contains(ii.Invitation.ID)
+                    && wanted.Contains(ii.Person.ID)))
             .Select(ii => new
             {
                 PersonName = ii.Person!.FullName ?? string.Empty,

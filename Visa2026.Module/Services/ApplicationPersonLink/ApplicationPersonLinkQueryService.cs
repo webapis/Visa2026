@@ -41,6 +41,7 @@ public sealed class ApplicationProfileInstancePersonLinkQueryService : IApplicat
 
     private static ApplicationProfileInstancePersonLinkCandidateRow MapRow(Person person)
     {
+        var canLink = !ApplicationProfileInstancePersonLinkPassportGate.TryGetBlockReason(person, out var blockReason);
         return new ApplicationProfileInstancePersonLinkCandidateRow
         {
             PersonId = person.ID,
@@ -49,6 +50,8 @@ public sealed class ApplicationProfileInstancePersonLinkQueryService : IApplicat
             RoleLabel = person.PersonRole.ToString(),
             PassportNumber = ResolvePassportNumber(person),
             HasPhoto = person.Photo is { Length: > 0 },
+            CanLink = canLink,
+            BlockReason = canLink ? null : blockReason,
         };
     }
 

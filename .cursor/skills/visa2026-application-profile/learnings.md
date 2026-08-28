@@ -1,3 +1,75 @@
+### 2026-08-28 — Case summary Edit: Border zone save hid other dropdowns
+
+- **Need**: Setting Border zone (or any Use field) made Visa type, Category, Period, Project, Urgency look empty until **Done**. Number/date and Border zone text stayed visible.
+- **Fix**: Save rebuilds `CaseView` without lookup catalogs (`loadLookupCatalogs` defaults false). `<select>` then has a Guid value and only “— Select —”. While Edit is open, `OnParametersSet` calls `EnsureHeaderLookupCatalogs` after each snapshot reload.
+- **Test**: Officer: stop F5, rebuild, Ctrl+F5. Case summary **Edit** → set Border zone. Visa type / Category / Period / Project / Urgency still show their labels. **Done** tiles unchanged.
+- **Prevent**: Do not skip catalog reload after `SaveHeaderFieldAsync` / `LoadWorkspaceAsync` while Edit is still open.
+- **Cross-skill**: application-profile
+
+### 2026-08-28 — Case summary Edit select text was invisible
+
+- **Need**: After picking Project (and on other lookups), the selected label vanished until **Done**. Tiles were fine.
+- **Fix**: Do not paint fill-state background on native `<select>` (Edge/Windows hides the closed-list text). Tint the field wrapper; keep the control white with a colored border and explicit ink color.
+- **Test**: Officer: stop F5, rebuild, Ctrl+F5. Case summary **Edit** → choose a Project. The contract name stays visible in the dropdown. Visa type / Category / Period still show their labels. **Done** still shows the green Project tile.
+- **Prevent**: Do not set `background` on `.cw-summary-field__input` when it is a `<select>`.
+- **Cross-skill**: application-profile
+
+### 2026-08-28 — Case summary empty / default / officer fill colors
+
+- **Need**: Officers should see which Case summary fields still need a value, which still use the profile default, and which they already changed.
+- **Fix**: Tiles and Edit controls: **red** empty/`—`; **blue** matches live profile default (application number/date blue until `IsManualEntry`); **green** officer value. Border plus light tint. Changing a lookup back to the profile default returns blue. Editing number or date sets `IsManualEntry` so both header scalars go green.
+- **Test**: `ApplicationWorkspaceCaseHeaderFieldsHelperTests` fill-state facts. Officer: stop F5, rebuild, Ctrl+F5. Open a case — empty Project/Border zone red; Visa type copied from profile blue; Edit a field then Done — that tile green.
+- **Prevent**: Do not use `[NotMapped]` flags inside EF for this. Do not color Linked/Issued tiles with the same fill-state. Compare lookups to live profile `Default*` (not a create-time snapshot).
+- **Cross-skill**: application-profile
+
+### 2026-08-27 — Report Dashboard EF must not query Visa.IsCancelled
+
+- **Need**: Dashboard crashed: `Translation of member 'IsCancelled' on entity type 'Visa' failed` (`LoadValidVisaPersonIds`).
+- **Fix:** `IssuedDocumentLifecycle.WhereVisaNotCancelled` uses skip-nav Cancellation + `PROCESS_ISSUED`. Invitation/WP dashboard IQueryable filters use the same pattern.
+- **Test:** Officer: stop F5, rebuild, Ctrl+F5. Open Report Dashboard (valid-visa persons on). No InvalidOperationException.
+- **Prevent:** Do not put `[NotMapped]` `IsCancelled`/`IsChanged`/`IsUsed` in LINQ that EF sends to SQL.
+- **Cross-skill:** application-profile | visa2026-report-dashboard
+
+### 2026-08-27 — Link existing person requires a usable passport
+
+- **Need**: Officers must not add a person with no passport, or only cancelled/expired/incomplete passports.
+- **Fix**: `ApplicationProfileInstancePersonLinkPassportGate` on picker rows. **Link** disabled; row shows **No passport**, **Passport is cancelled**, **Passport is expired**, or **No valid passport**. Server refuses the same check. A valid current booklet still allows link when an older one is expired (Last-N can attach both after).
+- **Test**: `ApplicationProfileInstancePersonLinkPassportGateTests`. Officer: stop F5, rebuild, Ctrl+F5. People & links → Link existing → person with no passport: Link greyed, reason on the row. Person with a live passport: Link works.
+- **Prevent**: Do not hide the person from search (show why). Do not treat expired previous + valid current as blocked. Do not change `CanLinkPassport` (auto-link still ignores passport expiration).
+- **Cross-skill**: application-profile
+
+### 2026-08-27 — People & links Link shows progress while resolver runs
+
+- **Need**: Linking a person takes a few seconds (Last-N auto-link). Officers saw no feedback after **Link**.
+- **Fix**: Picker yields `Task.Delay(16)` so Blazor paints, then overlay **Linking {name}…** plus spinner on the clicked button. Other Link/Search/Cancel disabled. Relink uses **Relinking…** the same way.
+- **Test**: Officer: stop F5, rebuild, Ctrl+F5. Case → People & links → Link existing → **Link**. Overlay appears immediately and stays until the person is on the roster.
+- **Prevent**: Do not run `LinkPerson` before a yield — Blazor Server will not paint the busy state. Do not leave Link clickable while linking (double-submit).
+- **Cross-skill**: application-profile
+
+### 2026-08-27 — Create instances only from picker; via-ministry always opens Approval legs
+
+- **Need**: One create place (Application Profile Instances **New**). Via-ministry must show Approval legs even when there is only one version so the snapshot is explicit. Person / Dossier must not create instances.
+- **Fix**: Picker step 1 = profiles. Via ministry → **Continue** → step 2 **Choose Approval legs** (profile name in header, Default pre-selected). Direct migration stays **Use profile** on step 1. `UseProfileAsync` refuses to create a via-ministry instance until step 2. Person and Dossier **Start process…** stay hidden.
+- **Test**: Officer: stop F5, rebuild, Ctrl+F5. Applications via ministry → New → pick a one-version profile → Continue → legs screen → Use profile. Direct migration: one step. Person DetailView and Dossier have no Start process.
+- **Prevent**: Do not skip step 2 when there is a single approval-leg version. Do not re-enable Person/Dossier Start application.
+- **Cross-skill**: application-profile | visa2026-person-dossier
+
+### 2026-08-27 — Wizard header shows Application Profile name on every step
+
+- **Need**: Officers lose track of which template they are editing after leaving Identity.
+- **Fix**: Wizard chrome shows `Profile.Name` under **Application Profile** on all six steps. Identity name input updates the header live. Empty name shows **Unnamed profile**.
+- **Test**: Officer: stop F5, rebuild, Ctrl+F5. Configure a named profile → Continue through Company / Results / Process / Templates / Review — name stays at the top. Change the name on Identity — header updates before Continue.
+- **Prevent**: Do not hide the Identity name field (that is still the editor). Do not put a second name editor on later steps.
+- **Cross-skill**: application-profile
+
+### 2026-08-27 — Remove wizard Applicability scope section
+
+- **Need**: Officers have no use for XAF applicability criteria on Application Profile templates.
+- **Fix**: Removed Identity **Applicability scope (optional)** (Always available / Scoped + criteria). Overview no longer lists applicability. Nested-template project/migration applicability dropdowns stay. `ApplicabilityCriteria` column kept; empty means always pickable.
+- **Test**: Blazor Debug. Officer: stop F5, rebuild, Ctrl+F5. Configure profile → Identity — no scope cards; Active checkbox remains. Templates step still has project/migration applicability.
+- **Prevent**: Do not drop `ApplicabilityCriteria` schema. Do not remove template `ApplicableProjectContract` / `ApplicableMigrationService`.
+- **Cross-skill**: application-profile
+
 ### 2026-08-27 — pasport_change Last 2 is flag-only (do not block create)
 
 - **Need**: Passport-change expects two booklets, but officers still create when only one is on the person.

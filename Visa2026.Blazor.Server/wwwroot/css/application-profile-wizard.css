@@ -27,6 +27,16 @@
 }
 
 .ap-wizard__title { margin: 0 0 4px; font-size: 1.45rem; font-weight: 650; }
+.ap-wizard__profile-name {
+    margin: 0 0 6px;
+    font-size: 1.12rem;
+    font-weight: 650;
+    color: var(--ap-accent-deep);
+    max-width: 52rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 .ap-wizard__sub { margin: 0; color: var(--ap-muted); font-size: 0.92rem; max-width: 52ch; }
 
 .ap-wizard__pills { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-start; }
@@ -468,30 +478,6 @@
     color: var(--ap-accent-deep);
     margin-left: 6px;
 }
-
-.ap-wizard__scope {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 12px;
-}
-@media (max-width: 640px) { .ap-wizard__scope { grid-template-columns: 1fr; } }
-.ap-wizard__scope-card {
-    text-align: left;
-    border: 1px solid var(--ap-line);
-    border-radius: 8px;
-    padding: 12px 14px;
-    background: #fbfcfd;
-    cursor: pointer;
-    font: inherit;
-}
-.ap-wizard__scope-card h4 { margin: 0 0 6px; font-size: 0.9rem; }
-.ap-wizard__scope-card p { margin: 0; font-size: 0.82rem; color: var(--ap-muted); }
-.ap-wizard__scope-card.is-active {
-    border-color: #8fc9b2;
-    background: var(--ap-accent-soft);
-}
-.ap-wizard__scope-card:disabled { cursor: not-allowed; opacity: 0.7; }
 
 .ap-wizard__list-row--template { grid-template-columns: 36px 1fr minmax(160px, 240px) auto; }
 .ap-wizard__list-row--shared {

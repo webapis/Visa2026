@@ -36,11 +36,12 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | 8d | Wizard step 4 real template catalog + persist scope | **Done** | Two officer scopes: Profile-specific and Shared. Shared Include/Exclude; GT-15 names excluded from Shared (upload under Profile-specific). **Preview** uses `#visa-preview-slot` File occupant (master PDF, placeholders). Internal Category/Global type-links unchanged. |
 | 8a | Application Profile overview (live) | **Done** | Live config/defaults/legs/templates + linked `ApplicationProfileInstance` rows; overview shows wizard identity, company/signatories, required fields, SLA days, template scope; mock only if profile id unresolved |
 | 8c | Custom catalog home (replace native List/Detail UI) | **Done** | List first; row opens overview; **Back to list**; New/Configure → wizard (new tab); **Save profile** reloads catalog; **Delete** when Linked = 0; toolbar **Total: N**; table-body scroll, sticky header |
-| 9 | Profile picker at Application create | **Done** | Intercepts **New** on Application ListViews; Blazor picker UI |
+| 9 | Profile picker at Application create | **Done** | **New** on Application Profile Instances lists only. Via ministry: profile then Approval legs (always, even if one version). Direct: one step. |
 | 10 | Person M2M DetailView; hard-remove `ApplicationItem` | **In progress** | Skip-navigation `People` + child BO M2M (includes **MedicalRecord**, **WorkDuty**). Output headers Invitation / WorkPermit / BorderZone / Rejection / IssuedVisas are **1:N** (May produce), not skip-nav. Wizard **May produce** includes Rejection. Person issued tab **Applications (linked)** verified. Rebuild DataImporter + resume Wave 2b (`-StartAt ApplicationProfileInstancePerson`); then People-tab / copies / Resminamalar smoke. |
 | 10n | §10 auto-link gate + sticky ResolvedLinks | **Done** | `RequirePerson*` gate; sticky `LinkedObjectId`; toggle-off keeps existing; unit tests |
 | 10o | Workspace Linked records tiles from ResolvedLinks | **Done** | Catalog + overview tiles; People tab uses same `cw-link-tile` cards; click shows that person's records; gated by person-config |
 | 10x | Case summary: edit instance Use fields | **Done** | Overview tiles + **Edit**; form + **Done**. Application number + date always shown (not profile-gated). Same Use fields. Persist on change; does not edit the profile template. Project is editable here (accepted prototype; do not re-lock via `IsProjectContractLocked`). Host-start adds `EntryCheckPointID`. |
+| 10x-fill | Case summary fill-state colors | **Done** | Empty/`—` red; still matches profile default (or auto number/date) blue; officer-changed green. Tiles + Edit form; border + light tint. |
 | 10v | People & links New missing person-owned BO | **Deferred** | In-tab **New {type}** removed — officers add person-owned data from **Open person detail**. Issued items stay on Overview → Issued records. `EnsureResolvedLink` kept for Relink. |
 | 10w | People & links Relink / Unlink columns | **Done** | Per-person **Relink** and **Unlink** next to Open person detail; Relink pins missing ResolvedLinks; Unlink removes that person + links; both disabled when process-complete locked; toolbar Unlink removed |
 | 10p | Process-complete lock on resolved links | **Done** | `PROCESS_ISSUED` / `REJECTED` / `CANCELLED`; roster + ResolvedLinks immutable; UI lock badge |
@@ -64,7 +65,7 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | 10k | Report Dashboard child-link C# filters + `vw_rd_application` | **Done** | Education/Address/Position/Medical Last-N via resolved links + legacy fallback; `vw_rd_application` first person from M2M |
 | 10l | Report Dashboard visa extension / work permit SQL | **Done** | `View_VisaExtensionStatus`, `vw_rd_visa_app_progress`, `vw_rd_work_permit_app_progress`, `vw_rd_visa_state`, extension-required CTE; invitation first-person M2M |
 | 10m | Report Dashboard ministry + direct-migration SQL | **Done** | `ministry_roster_lines` CTE in 8 embedded views; `ReportDashboardSqlViewResource` placeholder; legacy EF loaders dual-read |
-| 11 | Person / Dossier **Start application** | **Done** | 2-step picker from Person + Dossier; M2M link; dossier Applications section |
+| 11 | Person / Dossier **Start application** | **Removed** | Officers create instances only from Application Profile Instances (picker). Dossier/Person Start process hidden. |
 | 12 | Resminamalar / merge reads profile nested templates | **Done** | Profile nested catalog + `profile:` entry keys; merge via matching `UserReportTemplate` name |
 | 13a | Profile-first runtime + cutover prep | **Done** | Capability resolver; nav route criteria; profile-or-type validation; hide Type when profile set |
 | 13b | Remove `Application.ApplicationType` FK (schema) | **Deferred** | After import cutover; Report Dashboard SQL, sync rules, PDF mapping remain on Type |
@@ -201,14 +202,14 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 - **Registration is** Check in / Check out / Info change / Reg extension (`RegistrationKind`) when Related to = Registration; cleared for other families
 - **Approval legs** live under Identity **Directed to** as named **versions**; visible only for Via ministry; instances snapshot the chosen version at create
 - **Project contract** lives under Identity **Directed to**; visible + required only for Via ministry; Direct migration hides and clears it. Results & fields no longer lists Project. Instances copy the contract at create and cannot edit it.
-- Identity wizard edits **Name** only — Description, Code, and Selection/quick code stay on the BO (auto Code at create) and are not shown on that step
+- Identity wizard edits **Name** only — Description, Code, and Selection/quick code stay on the BO (auto Code at create) and are not shown on that step. The **name stays in the wizard header** on every step.
 - **Process & SLA** is Ministry/Migration **days** only. State Include/SLA-track checklists are not officer-configured and do not drive instance Advance.
 - **Project** is back on Results & fields (instance default). Profile-specific templates can bind to Project contract (Via ministry) or Migration service (Direct); Resminamalar catalog hides non-matching rows. Empty binding = all instances.
 - Results default-value lookups load as ID/name snapshots (`ApplicationProfileWizardLookupData`); Default value is enabled only when Use is checked
 
 **Deferred (later slices):** template file upload in wizard (attach binary on standard profile detail nested templates ListView). `ApplicationProfileProgressStateSetting` table retained unused (do not wire as a process designer).
 
-**Slice 8b — Wizard prototype parity (2026-08-07):** Step 1 scope cards · Step 2 defaults/signatory table · Step 3 ministry/migration state checklists (`ApplicationProfileProgressStateSetting`) · Step 4 template add/edit/remove in wizard.
+**Slice 8b — Wizard prototype parity (2026-08-07):** Step 2 defaults/signatory table · Step 3 ministry/migration state checklists (`ApplicationProfileProgressStateSetting`) · Step 4 template add/edit/remove in wizard. **Identity XAF applicability scope cards removed (2026-08-27)** — picker uses audience/route/`IsActive` only.
 
 **Verify:** Configuration → Application Profiles → select row → **Configure profile**; edit and **Save profile**; locked profile → read-only + **Clone** escape hatch.
 
@@ -278,9 +279,10 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 - `IApplicationProfilePickerQueryService` — active profiles, route filter, MRU sort, applicability criteria
 - `ApplicationProfilePickerNewController` — intercepts **New** on Application ListViews (skipped during data import)
 - **Use profile (live link)** creates Application, sets `ApplicationProfile` + dual-read `ApplicationType`, applies defaults, opens DetailView
+- Via ministry: **Continue →** then **Choose Approval legs** (always, even when there is one version; Default pre-selected). Direct migration: **Use profile** on step 1.
 - Locked profiles remain selectable (config lock badge only)
 
-**Verify:** Applications list → **New** → picker → select profile → **Use profile** → DetailView with profile read-only and defaults filled.
+**Verify:** Applications via ministry → **New** → pick profile → **Continue** → Approval legs (profile name in header) → **Use profile**. Direct migration: pick → **Use profile**.
 
 **Next:** Slice 13b — drop `Applications.ApplicationTypeID` after import cutover (Report Dashboard, sync rules, PDF mapping).
 
@@ -300,20 +302,13 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 
 ---
 
-## Slice 11 — Person / Dossier Start application (detail)
+## Slice 11 — Person / Dossier Start application (removed)
 
-**Delivered (2026-08-07):**
+**2026-08-27:** Officers create Application Profile Instances **only** from Application Profile Instances lists (Choose Application Profile picker). Person DetailView and Person Dossier **Start process…** are hidden.
 
-- **Start application…** on Person Dossier toolbar. Person DetailView **Start process…** is hidden (officers start from Application Profile Instances).
-- Extended profile picker: 2-step flow (profile → multi-select people) when `SeedPersonId` is set
-- `ApplicationStartFromPersonHelper` — candidates, validation (via-ministry ProjectContract gate, audience, duplicate-open warn, incomplete flag)
-- MRU profile sort + per-person usage badges in picker
-- Create links people via `ApplicationPersonService`; Person start opens Application DetailView; Dossier start returns to dossier + toast
-- Dossier **Applications** section uses `ApplicationPeople` M2M (legacy `ApplicationItem` fallback removed in slice 10g)
+Via-ministry picker is **two steps**: profile → Approval legs (always shown, even when there is one version). Direct migration stays one step. People are linked later on the case.
 
-**Verify:** Person → **Start application…** → profile → people → create. Dossier → same → stays on dossier with success toast.
-
-**Next:** Slice 10 close-out phase B — BO/schema removal (or 13b after import).
+`ApplicationStartFromPersonHelper` remains for roster linking after create.
 
 ---
 

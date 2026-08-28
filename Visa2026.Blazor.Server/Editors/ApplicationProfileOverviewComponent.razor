@@ -102,11 +102,6 @@
                 <h2>Identity &amp; purpose</h2>
                 <p class="ap-overview__hint">Who this profile is for and how applications are directed.</p>
                 <ul class="ap-overview__list">
-                    <li>Applicability: @(Snapshot.IsAlwaysAvailable ? "Always available" : "Scoped")</li>
-                    @if (!Snapshot.IsAlwaysAvailable && !string.IsNullOrWhiteSpace(Snapshot.ApplicabilityCriteria))
-                    {
-                        <li>Criteria: @Snapshot.ApplicabilityCriteria</li>
-                    }
                     @foreach (var line in Snapshot.LiveConfigurationLines)
                     {
                         <li>@line</li>

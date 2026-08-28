@@ -8,6 +8,7 @@ using DevExpress.ExpressApp.EFCore;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
 using Visa2026.Module.Services.ApplicationPersonRoster;
+using Visa2026.Module.Services;
 
 namespace Visa2026.Module.Services.ReportDashboard;
 
@@ -1672,9 +1673,11 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         string? excelHint, bool excelConfigured, DateTime cutoff)
     {
         var today = DateTime.Today;
-        var query = FilterInvitationItems(objectSpace, role, projectKey, cutoff)
-            .Where(i => !i.IsUsed && !i.IsCancelled && !i.IsChanged
-                        && i.Invitation != null
+        var query = IssuedDocumentLifecycle.WhereInvitationItemNotUsed(
+            IssuedDocumentLifecycle.WhereInvitationItemNotChanged(
+                IssuedDocumentLifecycle.WhereInvitationItemNotCancelled(
+                    FilterInvitationItems(objectSpace, role, projectKey, cutoff))))
+            .Where(i => i.Invitation != null
                         && i.Invitation.ExpirationDate != null
                         && i.Invitation.ExpirationDate >= today);
 
@@ -1785,9 +1788,11 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         string? excelHint, bool excelConfigured, DateTime cutoff)
     {
         var today = DateTime.Today;
-        var query = FilterInvitationItems(objectSpace, role, projectKey, cutoff)
-            .Where(i => !i.IsUsed && !i.IsCancelled && !i.IsChanged
-                        && i.Invitation != null
+        var query = IssuedDocumentLifecycle.WhereInvitationItemNotUsed(
+            IssuedDocumentLifecycle.WhereInvitationItemNotChanged(
+                IssuedDocumentLifecycle.WhereInvitationItemNotCancelled(
+                    FilterInvitationItems(objectSpace, role, projectKey, cutoff))))
+            .Where(i => i.Invitation != null
                         && i.Invitation.ExpirationDate != null
                         && i.Invitation.ExpirationDate >= today);
 
@@ -2021,20 +2026,19 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         InvitationItemBucket bucket)
     {
         var today = DateTime.Today;
-        var query = FilterInvitationItems(objectSpace, role, projectKey, cutoff)
-            .Where(i => !i.IsCancelled && !i.IsChanged);
+        var query = IssuedDocumentLifecycle.WhereInvitationItemNotChanged(
+            IssuedDocumentLifecycle.WhereInvitationItemNotCancelled(
+                FilterInvitationItems(objectSpace, role, projectKey, cutoff)));
 
         query = bucket switch
         {
-            InvitationItemBucket.Used => query.Where(i => i.IsUsed),
-            InvitationItemBucket.Expired => query.Where(i =>
-                !i.IsUsed
-                && i.Invitation != null
+            InvitationItemBucket.Used => IssuedDocumentLifecycle.WhereInvitationItemUsed(query),
+            InvitationItemBucket.Expired => IssuedDocumentLifecycle.WhereInvitationItemNotUsed(query).Where(i =>
+                i.Invitation != null
                 && i.Invitation.ExpirationDate != null
                 && i.Invitation.ExpirationDate < today),
-            _ => query.Where(i =>
-                !i.IsUsed
-                && i.Invitation != null
+            _ => IssuedDocumentLifecycle.WhereInvitationItemNotUsed(query).Where(i =>
+                i.Invitation != null
                 && i.Invitation.ExpirationDate != null
                 && i.Invitation.ExpirationDate >= today),
         };
@@ -4185,12 +4189,12 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         HashSet<Guid>? validVisaPersonIds)
     {
         var today = DateTime.Today;
-        var query = objectSpace.GetObjectsQuery<WorkPermitItem>()
-            .Where(w => w.Person != null
-                && (role == null || w.Person.PersonRole == role)
-                && !w.IsCancelled
-                && w.ExpirationDate != default
-                && w.ExpirationDate.Date >= today);
+        var query = IssuedDocumentLifecycle.WhereWorkPermitItemNotCancelled(
+            objectSpace.GetObjectsQuery<WorkPermitItem>()
+                .Where(w => w.Person != null
+                    && (role == null || w.Person.PersonRole == role)
+                    && w.ExpirationDate != default
+                    && w.ExpirationDate.Date >= today));
 
         if (!includeArchivedPersons)
             query = query.Where(w => !w.Person!.IsArchived);
@@ -5103,10 +5107,8 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
     private static HashSet<Guid> LoadValidVisaPersonIds(Visa2026EFCoreDbContext db)
     {
         var today = DateTime.Today;
-        return db.Visas
-            .AsNoTracking()
-            .Where(v => !v.IsCancelled
-                && v.ExpirationDate >= today
+        return IssuedDocumentLifecycle.WhereVisaNotCancelled(db.Visas.AsNoTracking())
+            .Where(v => v.ExpirationDate >= today
                 && v.Passport != null
                 && v.Passport.Person != null)
             .Select(v => v.Passport!.Person!.ID)

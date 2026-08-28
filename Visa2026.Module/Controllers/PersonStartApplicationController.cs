@@ -7,7 +7,8 @@ using Visa2026.Module.Services.ApplicationProfilePicker;
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// Starts a new ApplicationProfileInstance from a Person DetailView (slice 11).
+/// Starts a new ApplicationProfileInstance from a Person DetailView.
+/// Retired: officers create instances only from Application Profile Instances lists.
 /// </summary>
 public sealed class PersonStartApplicationController : ObjectViewController<DetailView, Person>
 {
@@ -22,7 +23,7 @@ public sealed class PersonStartApplicationController : ObjectViewController<Deta
             ToolTip = "Pick an Application Profile and link people to a new profile instance.",
             SelectionDependencyType = SelectionDependencyType.RequireSingleObject,
         };
-        // Officers start cases from Application Profile Instances, not Person DetailView.
+        // Officers create Application Profile Instances only from Application Profile Instances lists.
         _startApplicationAction.Active["PersonDetail"] = false;
         _startApplicationAction.Execute += StartApplication_Execute;
     }
