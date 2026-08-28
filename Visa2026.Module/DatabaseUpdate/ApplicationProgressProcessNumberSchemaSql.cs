@@ -25,6 +25,28 @@ public static class ApplicationProfileInstanceProgressProcessNumberSchemaSql
 
           ALTER TABLE "ApplicationProfileInstanceProgresses" ADD COLUMN IF NOT EXISTS "ProcessNumber" character varying(100) NULL;
           ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "ProcessNumber" character varying(100) NULL;
+          ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "HasLeftStagedQueue" boolean NOT NULL DEFAULT false;
+
+          UPDATE "ApplicationProfileInstances"
+          SET "HasLeftStagedQueue" = true
+          WHERE COALESCE("HasLeftStagedQueue", false) = false
+            AND (
+              ("ProcessNumber" IS NOT NULL AND TRIM("ProcessNumber") <> '')
+              OR (
+                "LatestPrimaryStateCode" IS NOT NULL
+                AND TRIM("LatestPrimaryStateCode") <> ''
+                AND "LatestPrimaryStateCode" NOT IN ('OFFICE_PREPARATION', 'DRAFT')
+              )
+            );
+
+          IF NOT EXISTS (
+            SELECT 1 FROM pg_indexes
+            WHERE schemaname = 'public'
+              AND indexname = 'IX_ApplicationProfileInstances_ProcessNumber') THEN
+            CREATE UNIQUE INDEX "IX_ApplicationProfileInstances_ProcessNumber"
+              ON "ApplicationProfileInstances" ("ProcessNumber")
+              WHERE "ProcessNumber" IS NOT NULL AND TRIM("ProcessNumber") <> '' AND "GCRecord" IS NULL;
+          END IF;
         END $$;
         """;
 
@@ -36,6 +58,34 @@ public static class ApplicationProfileInstanceProgressProcessNumberSchemaSql
         IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
            AND COL_LENGTH(N'dbo.ApplicationProfileInstances', N'ProcessNumber') IS NULL
             ALTER TABLE dbo.ApplicationProfileInstances ADD ProcessNumber nvarchar(100) NULL;
+
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfileInstances', N'HasLeftStagedQueue') IS NULL
+            ALTER TABLE dbo.ApplicationProfileInstances ADD HasLeftStagedQueue bit NOT NULL
+                CONSTRAINT DF_ApplicationProfileInstances_HasLeftStagedQueue DEFAULT (0);
+
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfileInstances', N'HasLeftStagedQueue') IS NOT NULL
+            UPDATE dbo.ApplicationProfileInstances
+            SET HasLeftStagedQueue = 1
+            WHERE ISNULL(HasLeftStagedQueue, 0) = 0
+              AND (
+                (ProcessNumber IS NOT NULL AND LTRIM(RTRIM(ProcessNumber)) <> N'')
+                OR (
+                  LatestPrimaryStateCode IS NOT NULL
+                  AND LTRIM(RTRIM(LatestPrimaryStateCode)) <> N''
+                  AND LatestPrimaryStateCode NOT IN (N'OFFICE_PREPARATION', N'DRAFT')
+                )
+              );
+
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
+           AND NOT EXISTS (
+             SELECT 1 FROM sys.indexes
+             WHERE name = N'IX_ApplicationProfileInstances_ProcessNumber'
+               AND object_id = OBJECT_ID(N'dbo.ApplicationProfileInstances'))
+            CREATE UNIQUE INDEX IX_ApplicationProfileInstances_ProcessNumber
+              ON dbo.ApplicationProfileInstances (ProcessNumber)
+              WHERE ProcessNumber IS NOT NULL AND ProcessNumber <> N'' AND GCRecord IS NULL;
         """;
 
     /// <summary>

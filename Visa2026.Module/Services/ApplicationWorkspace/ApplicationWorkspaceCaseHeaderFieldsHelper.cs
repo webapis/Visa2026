@@ -31,13 +31,15 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
     public const string EntryCheckPoint = "EntryCheckPoint";
     public const string InstanceNumber = "InstanceNumber";
     public const string InstanceDate = "InstanceDate";
+    public const string ProcessNumber = "ProcessNumber";
     public const int InstanceNumberMaxLength = 100;
 
-    /// <summary>Case summary right-frame fields: number, date, urgency (when shown).</summary>
+    /// <summary>Case summary right-frame fields: number, date, process number, urgency (when shown).</summary>
     public static readonly string[] IdentityFieldKeys =
     [
         InstanceNumber,
         InstanceDate,
+        ProcessNumber,
         Urgency,
     ];
 
@@ -45,6 +47,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         !string.IsNullOrEmpty(key)
         && (string.Equals(key, InstanceNumber, StringComparison.Ordinal)
             || string.Equals(key, InstanceDate, StringComparison.Ordinal)
+            || string.Equals(key, ProcessNumber, StringComparison.Ordinal)
             || string.Equals(key, Urgency, StringComparison.Ordinal));
 
     public static IReadOnlyList<ApplicationWorkspaceCaseHeaderField> Build(
@@ -77,6 +80,13 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             ApplicationWorkspaceCaseSummaryFill.Resolve(
                 instanceDate == null,
                 !application.IsManualEntry));
+
+        var processNumber = application.ProcessNumber?.Trim() ?? string.Empty;
+        AddShortText(fields, ProcessNumber, "Process number", "teal", "№",
+            ApplicationProfileConfigurationResolver.ShowProcessNumber(application),
+            processNumber,
+            ApplicationProcessNumberHelper.MaxLength,
+            ProcessNumberFill(application, processNumber));
 
         AddLookup(fields, VisaType, "Visa type", "blue", "🛂",
             Visible(profile, p => p.RequireVisaType, ApplicationProfileConfigurationResolver.ShowVisaType, application),
@@ -196,6 +206,15 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                 return TrySetInstanceNumber(application, value, out error);
             case InstanceDate:
                 return TrySetInstanceDate(application, value, out error);
+            case ProcessNumber:
+                if (!ApplicationProfileConfigurationResolver.ShowProcessNumber(application))
+                    return Hidden(out error);
+                return ApplicationProcessNumberHelper.TryAssign(
+                    objectSpace,
+                    application,
+                    value,
+                    requireWhenVisible: ApplicationProcessNumberHelper.HasProcessStartedStep(application),
+                    out error);
             case VisaType:
                 if (!Visible(profile, p => p.RequireVisaType, ApplicationProfileConfigurationResolver.ShowVisaType, application))
                     return Hidden(out error);
@@ -525,6 +544,18 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         }
 
         return MultiSelectFill(stored, defaultStored);
+    }
+
+    private static ApplicationWorkspaceCaseSummaryFillState ProcessNumberFill(
+        ApplicationProfileInstance application,
+        string processNumber)
+    {
+        if (!string.IsNullOrWhiteSpace(processNumber))
+            return ApplicationWorkspaceCaseSummaryFillState.Officer;
+
+        return ApplicationProcessNumberHelper.HasProcessStartedStep(application)
+            ? ApplicationWorkspaceCaseSummaryFillState.Empty
+            : ApplicationWorkspaceCaseSummaryFillState.Default;
     }
 
     private static bool SetDate(string? value, Action<DateTime?> assign, out string? error)

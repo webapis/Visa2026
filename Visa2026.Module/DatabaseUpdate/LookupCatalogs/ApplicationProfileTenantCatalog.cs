@@ -122,6 +122,8 @@ public sealed class ApplicationProfileTenantCatalogRow
 
     public bool RequireWorkPermitLocation { get; set; }
 
+    public bool RequireProcessNumber { get; set; }
+
     public bool RequireEntryDate { get; set; }
 
     public bool RequireEntryCheckPoint { get; set; }
@@ -247,6 +249,7 @@ public sealed class ApplicationProfileTenantCatalogRow
             RequireUrgency = profile.RequireUrgency,
             DefaultUrgencyLocalizationKey = NullIfEmpty(profile.DefaultUrgency?.LocalizationKey),
             RequireWorkPermitLocation = profile.RequireWorkPermitLocation,
+            RequireProcessNumber = profile.RequireProcessNumber,
             RequireEntryDate = profile.RequireEntryDate,
             RequireEntryCheckPoint = profile.RequireEntryCheckPoint,
             RequirePersonPassport = profile.RequirePersonPassport,
@@ -510,6 +513,8 @@ internal static class ApplicationProfileTenantCatalogSync
         profile.DefaultUrgency = ResolveLookup<Urgency>(objectSpace, row.DefaultUrgencyLocalizationKey);
         profile.RequireWorkPermitLocation = ApplicationProfileConfigurationResolver.RequireWorkPermitLocationWhenProducingWorkPermit(
             profile.ProduceWorkPermit, row.RequireWorkPermitLocation);
+        profile.RequireProcessNumber = ApplicationProfileConfigurationResolver.RequireProcessNumberWhenProducingIssuedDocuments(
+            profile.ProduceInvitation, profile.ProduceWorkPermit, profile.ProduceVisa, row.RequireProcessNumber);
         profile.RequireEntryDate = row.RequireEntryDate;
         profile.RequireEntryCheckPoint = row.RequireEntryCheckPoint;
 

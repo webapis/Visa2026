@@ -20,7 +20,7 @@ public sealed class ApplicationProfileCatalogQueryService : IApplicationProfileC
             .Select(a => new
             {
                 ProfileId = a.ApplicationProfile!.ID,
-                a.ProcessNumber,
+                a.HasLeftStagedQueue,
                 a.LatestPrimaryStateCode,
             })
             .AsEnumerable()
@@ -29,8 +29,8 @@ public sealed class ApplicationProfileCatalogQueryService : IApplicationProfileC
                 g => g.Key,
                 g => new UsageCounts(
                     g.Count(),
-                    g.Count(a => OfficerShellApplicationFilters.IsStagedState(a.ProcessNumber, a.LatestPrimaryStateCode)),
-                    g.Count(a => OfficerShellApplicationFilters.IsInProcessState(a.ProcessNumber, a.LatestPrimaryStateCode))));
+                    g.Count(a => OfficerShellApplicationFilters.IsStagedState(a.HasLeftStagedQueue, a.LatestPrimaryStateCode)),
+                    g.Count(a => OfficerShellApplicationFilters.IsInProcessState(a.HasLeftStagedQueue, a.LatestPrimaryStateCode))));
 
         return ApplicationProfileOfficerCatalogSelector
             .SelectDistinctTemplates(objectSpace.GetObjectsQuery<ApplicationProfile>().AsEnumerable())

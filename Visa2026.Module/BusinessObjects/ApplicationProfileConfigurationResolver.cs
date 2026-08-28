@@ -133,6 +133,30 @@ public static class ApplicationProfileConfigurationResolver
     public static bool ShowWorkPermittedLocations(ApplicationProfileInstance? application) =>
         ShowMovementPermitLocation(application);
 
+    /// <summary>
+    /// Process number is required at Submitted when the profile may produce Visa, Work permit,
+    /// or Invitation. Other templates may opt in via <paramref name="requireProcessNumber"/>.
+    /// </summary>
+    public static bool RequireProcessNumberWhenProducingIssuedDocuments(
+        bool produceInvitation,
+        bool produceWorkPermit,
+        bool produceVisa,
+        bool requireProcessNumber) =>
+        requireProcessNumber || produceInvitation || produceWorkPermit || produceVisa;
+
+    public static bool ProcessNumberUseLocked(
+        bool produceInvitation,
+        bool produceWorkPermit,
+        bool produceVisa) =>
+        produceInvitation || produceWorkPermit || produceVisa;
+
+    public static bool ShowProcessNumber(ApplicationProfileInstance? application) =>
+        Resolve(
+            application,
+            p => RequireProcessNumberWhenProducingIssuedDocuments(
+                p.ProduceInvitation, p.ProduceWorkPermit, p.ProduceVisa, p.RequireProcessNumber),
+            t => t.CanIssueInvitation || t.CanIssueWorkPermit || t.CanIssueVisa);
+
     public static bool ShowFromCity(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequireRegionCity, t => t.ShowFromCity);
 

@@ -43,6 +43,7 @@ public sealed class ApplicationWorkspaceMockQueryService : IApplicationWorkspace
             SlaDaysRemaining = 12,
             PeopleNames = ["Maksat Orazow", "Döwran Ataýew", "Aýgul Berdiýewa"],
             MergedFromCount = 3,
+            ShowProcessNumber = true,
             ProfileTemplateName = "Visa extension",
         };
 

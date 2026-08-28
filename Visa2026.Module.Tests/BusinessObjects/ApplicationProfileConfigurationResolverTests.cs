@@ -259,4 +259,41 @@ public class ApplicationProfileConfigurationResolverTests
         Assert.True(ApplicationProfileConfigurationResolver.ShowWorkPermittedLocations(app));
         Assert.True(ApplicationProfileConfigurationResolver.CanIssueWorkPermit(app));
     }
+
+    [Fact]
+    public void RequireProcessNumberWhenProducingIssuedDocuments_ForcesTrue()
+    {
+        Assert.True(ApplicationProfileConfigurationResolver.RequireProcessNumberWhenProducingIssuedDocuments(
+            produceInvitation: true, produceWorkPermit: false, produceVisa: false, requireProcessNumber: false));
+        Assert.True(ApplicationProfileConfigurationResolver.RequireProcessNumberWhenProducingIssuedDocuments(
+            produceInvitation: false, produceWorkPermit: true, produceVisa: false, requireProcessNumber: false));
+        Assert.True(ApplicationProfileConfigurationResolver.RequireProcessNumberWhenProducingIssuedDocuments(
+            produceInvitation: false, produceWorkPermit: false, produceVisa: true, requireProcessNumber: false));
+        Assert.False(ApplicationProfileConfigurationResolver.RequireProcessNumberWhenProducingIssuedDocuments(
+            produceInvitation: false, produceWorkPermit: false, produceVisa: false, requireProcessNumber: false));
+        Assert.True(ApplicationProfileConfigurationResolver.RequireProcessNumberWhenProducingIssuedDocuments(
+            produceInvitation: false, produceWorkPermit: false, produceVisa: false, requireProcessNumber: true));
+    }
+
+    [Fact]
+    public void ShowProcessNumber_ProduceVisaShowsFieldEvenWhenRequireFlagOff()
+    {
+        var profile = new ApplicationProfile { ProduceVisa = true, RequireProcessNumber = false };
+        var app = new ApplicationProfileInstance { ApplicationProfile = profile };
+
+        Assert.True(ApplicationProfileConfigurationResolver.ShowProcessNumber(app));
+        Assert.True(ApplicationProfileConfigurationResolver.ProcessNumberUseLocked(
+            profile.ProduceInvitation, profile.ProduceWorkPermit, profile.ProduceVisa));
+    }
+
+    [Fact]
+    public void ShowProcessNumber_OtherTemplatesCanOptIn()
+    {
+        var profile = new ApplicationProfile { ProduceBorderZone = true, RequireProcessNumber = true };
+        var app = new ApplicationProfileInstance { ApplicationProfile = profile };
+
+        Assert.True(ApplicationProfileConfigurationResolver.ShowProcessNumber(app));
+        Assert.False(ApplicationProfileConfigurationResolver.ProcessNumberUseLocked(
+            profile.ProduceInvitation, profile.ProduceWorkPermit, profile.ProduceVisa));
+    }
 }

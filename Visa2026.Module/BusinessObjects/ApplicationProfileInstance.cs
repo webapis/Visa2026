@@ -141,14 +141,23 @@ namespace Visa2026.Module.BusinessObjects
 
         /// <summary>
         /// Denormalized migration-service process number from <c>PROCESS_STARTED</c>
-        /// (see <see cref="ApplicationProcessNumberHelper"/>).
+        /// (see <see cref="ApplicationProcessNumberHelper"/>). Editable after Submitted without revert.
         /// </summary>
         [XafDisplayName("Process number")]
-        [ModelDefault("AllowEdit", "False")]
         [MaxLength(100)]
         [VisibleInDetailView(false)]
         [VisibleInListView(true)]
         public virtual string? ProcessNumber { get; set; }
+
+        /// <summary>
+        /// Set by Start process (merge/ready). Distinguishes staged office prep from an in-process
+        /// case that has not yet received a migration-service process number.
+        /// </summary>
+        [Browsable(false)]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        public virtual bool HasLeftStagedQueue { get; set; }
 
         /// <summary>
         /// Lookup / object caption: application number, plus process number when present

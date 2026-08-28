@@ -26,7 +26,7 @@ public sealed class ApplicationStagedStartProcessController : ViewController<Lis
         _startProcessAction = new SimpleAction(this, "StartStagedProcess", PredefinedCategory.View)
         {
             Caption = "Start process",
-            ToolTip = "Assign a process number to the selected staged profiles and open the case workspace.",
+            ToolTip = "Merge selected staged profiles and open the case workspace. Process number is entered when submitting to Migration Service.",
             ImageName = "Action_Grant",
             SelectionDependencyType = SelectionDependencyType.RequireMultipleObjects,
         };
@@ -57,8 +57,8 @@ public sealed class ApplicationStagedStartProcessController : ViewController<Lis
         ObjectSpace.CommitChanges();
 
         var message = result.MergedCount > 1
-            ? $"Started process {result.ProcessNumber} — merged {result.MergedCount} profiles."
-            : $"Started process {result.ProcessNumber}.";
+            ? $"Started process — merged {result.MergedCount} profiles."
+            : "Started process.";
         Application.ShowViewStrategy.ShowMessage(message, InformationType.Success);
 
         var workspaceView = ApplicationWorkspaceOpenHelper.CreateWorkspaceView(

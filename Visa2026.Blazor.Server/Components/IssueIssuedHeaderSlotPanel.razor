@@ -372,9 +372,10 @@
                                                        @onfocusout='() => ReviewWpField(person, "itemNumber")' />
                                             </label>
                                             <label class="issue-issued-header-slot__field @(WpCueClass(person, "asNumber", true, IssueComposeFieldCue.HasText(person.ASNumber)))">
-                                                <span>AS number *</span>
+                                                <span>@(person.AsNumberReadOnly ? "Process number *" : "AS number *")</span>
                                                 <input class="issue-issued-header-slot__input"
                                                        @bind="person.ASNumber"
+                                                       disabled="@person.AsNumberReadOnly"
                                                        @onfocusout='() => ReviewWpField(person, "asNumber")' />
                                             </label>
                                             <label class="issue-issued-header-slot__field @(WpCueClass(person, "position", true, IssueComposeFieldCue.HasId(person.PositionId)))">

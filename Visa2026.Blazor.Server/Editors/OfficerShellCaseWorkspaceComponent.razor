@@ -1036,7 +1036,7 @@
                         }
                         @if (identityFields.Count > 0)
                         {
-                            <aside class="cw-summary-identity" aria-label="Application number, date, and urgency">
+                            <aside class="cw-summary-identity" aria-label="Application number, date, process number, and urgency">
                                 <div class="cw-summary-form cw-summary-form--stack">
                                     @foreach (var field in identityFields)
                                     {
@@ -1067,7 +1067,7 @@
                         }
                         @if (identityTiles.Count > 0)
                         {
-                            <aside class="cw-summary-identity" aria-label="Application number, date, and urgency">
+                            <aside class="cw-summary-identity" aria-label="Application number, date, process number, and urgency">
                                 <div class="cw-summary-grid cw-summary-grid--stack">
                                     @foreach (var field in identityTiles)
                                     {
@@ -1830,6 +1830,9 @@
         if (!string.Equals(ActiveTab, "progress", StringComparison.OrdinalIgnoreCase))
             return SelectTab("progress");
 
+        if (_progressTab != null)
+            return _progressTab.AdvanceFromRailAsync();
+
         return AdvanceProgressRequested.InvokeAsync(new OfficerShellCaseProgressAdvanceRequest
         {
             StateCode = ApplicationWorkspaceProgressAdvancePreview.PreferredAdvanceCode(
@@ -1840,6 +1843,7 @@
             Date = _progressTab?.AdvanceDate ?? DateTime.Today,
             LetterFileName = _progressTab?.PendingLetterFileName,
             LetterContent = _progressTab?.PendingLetterContent,
+            ProcessNumber = _progressTab?.ProcessNumberOnAdvance,
         });
     }
 

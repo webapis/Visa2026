@@ -10,12 +10,11 @@ public sealed class OfficerShellStartProcessResult
     public int MergedCount { get; init; }
     public string? ErrorMessage { get; init; }
 
-    public static OfficerShellStartProcessResult Succeeded(Guid applicationId, string processNumber, int mergedCount) =>
+    public static OfficerShellStartProcessResult Succeeded(Guid applicationId, int mergedCount) =>
         new()
         {
             Success = true,
             ApplicationProfileInstanceId = applicationId,
-            ProcessNumber = processNumber,
             MergedCount = mergedCount,
         };
 

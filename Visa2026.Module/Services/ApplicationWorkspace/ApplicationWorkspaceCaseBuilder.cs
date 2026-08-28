@@ -48,6 +48,7 @@ internal static class ApplicationWorkspaceCaseBuilder
                 SlaDaysRemaining = chrome.SlaDaysRemaining,
                 PeopleNames = chrome.PeopleNames,
                 MergedFromCount = chrome.MergedFromCount,
+                ShowProcessNumber = chrome.ShowProcessNumber,
                 ProfileTemplateName = snapshot.Profile.Title,
             };
         }

@@ -6,6 +6,18 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 
 ## Entries
 
+### 2026-08-28 — Progress Advance errors use red banner and field borders
+
+- Failed Advance on the case Progress tab uses a red error banner (not peach `--warn`) and the same red border on empty required fields (Process number, Result, Date). Duplicate process number also rings the input. Do not restyle all shell `--warn` banners.
+- Prevent: Do not leave Process number unhighlighted when the toast says it is required.
+- Cross-skill: visa2026-application-profile
+
+### 2026-08-28 — Direct Start process does not write Submitted / process number
+
+- Start process is merge/ready only. Direct-to-migration stays at office until Advance to `PROCESS_STARTED` with the officer-typed Migration Service number. Staged vs in-process uses `HasLeftStagedQueue`, not empty `ProcessNumber`.
+- Prevent: Do not allocate `YYYY-NNNN` into `ProcessNumber`. Do not skip the process-number field when Result is Submitted on Migration.
+- Cross-skill: visa2026-application-profile
+
 ### 2026-08-27 — Application number and date stay editable after office prep
 
 - Case workspace officers must change instance `FullApplicationNumber` / `ApplicationDate` on in-process cases. Header lock no longer includes numbering or date (`LockedApplicationHeaderTargetItems` is type / approval legs / project only). Terminal workflow still blocks all instance saves.

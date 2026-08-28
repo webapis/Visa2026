@@ -58,6 +58,8 @@ public sealed class ApplicationWorkspaceCaseChrome
 
     public int? MergedFromCount { get; init; }
 
+    public bool ShowProcessNumber { get; init; }
+
     /// <summary>
     /// Live <see cref="BusinessObjects.ApplicationProfile.Name"/> for this case
     /// (same value as the Application Profile ListView column). Not a nested Word/Excel template name.

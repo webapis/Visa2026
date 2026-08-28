@@ -21,7 +21,8 @@ public interface IOfficerShellCaseProgressService
         string? notesOnLatestStep,
         DateTime? stepDate,
         string? letterFileName = null,
-        byte[]? letterContent = null);
+        byte[]? letterContent = null,
+        string? processNumber = null);
 
     OfficerShellCaseProgressResult Revert(
         IObjectSpace objectSpace,

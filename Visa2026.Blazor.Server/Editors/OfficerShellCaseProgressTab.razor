@@ -2,14 +2,17 @@
 @using System.Linq
 @using System.IO
 @using Microsoft.AspNetCore.Components.Forms
+@using Visa2026.Module.BusinessObjects
 @using Visa2026.Module.BusinessObjects.ApplicationWorkspace
 @using Visa2026.Module.BusinessObjects.OfficerShell
 @using Visa2026.Module.Services.ApplicationWorkspace
 
 <div class="ct-page">
-    @if (!string.IsNullOrWhiteSpace(StatusMessage))
+    @if (!string.IsNullOrWhiteSpace(DisplayStatusMessage))
     {
-        <div class="os-banner @(IsStatusError ? "os-banner--warn" : "os-banner--ok")" style="margin-bottom:12px">@StatusMessage</div>
+        <div class="os-banner @(DisplayStatusIsError ? "os-banner--error" : "os-banner--ok")"
+             style="margin-bottom:12px"
+             role="@(DisplayStatusIsError ? "alert" : "status")">@DisplayStatusMessage</div>
     }
 
     <h2 class="ct-page__title">Progress</h2>
@@ -111,17 +114,24 @@
                             @if (step.CanAdvance)
                             {
                                 <div class="ct-prog-advance" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--os-line)">
-                                    <label class="ct-label" for="advance-date-@ApplicationProfileInstanceId">Date</label>
+                                    <label class="ct-label @(IsDateInvalid ? "ct-label--error" : null)" for="advance-date-@ApplicationProfileInstanceId">Date</label>
                                     <input id="advance-date-@ApplicationProfileInstanceId"
+                                           @ref="_advanceDateInput"
                                            type="date"
-                                           class="os-input"
+                                           class="os-input @(IsDateInvalid ? "is-invalid" : null)"
+                                           aria-invalid="@IsDateInvalid"
                                            @bind="_advanceDate"
                                            @bind:format="yyyy-MM-dd"
                                            disabled="@_busy" />
                                     @if (step.ResultOptions.Count > 0)
                                     {
-                                        <label class="ct-label" for="advance-state-@ApplicationProfileInstanceId" style="margin-top:10px">Result</label>
-                                        <select id="advance-state-@ApplicationProfileInstanceId" class="os-input" @bind="_selectedAdvanceStateCode" disabled="@_busy">
+                                        <label class="ct-label @(IsResultInvalid ? "ct-label--error" : null)" for="advance-state-@ApplicationProfileInstanceId" style="margin-top:10px">Result</label>
+                                        <select id="advance-state-@ApplicationProfileInstanceId"
+                                                @ref="_advanceResultInput"
+                                                class="os-input @(IsResultInvalid ? "is-invalid" : null)"
+                                                aria-invalid="@IsResultInvalid"
+                                                @bind="_selectedAdvanceStateCode"
+                                                disabled="@_busy">
                                             @if (step.ResultOptions.All(o => o.StateCode != _selectedAdvanceStateCode))
                                             {
                                                 <option value="@_selectedAdvanceStateCode">—</option>
@@ -131,6 +141,20 @@
                                                 <option value="@option.StateCode">@option.Label</option>
                                             }
                                         </select>
+                                    }
+                                    @if (ShowProcessNumberOnAdvance)
+                                    {
+                                        <label class="ct-label @(IsProcessNumberInvalid ? "ct-label--error" : null)" for="advance-process-number-@ApplicationProfileInstanceId" style="margin-top:10px">Process number</label>
+                                        <input id="advance-process-number-@ApplicationProfileInstanceId"
+                                               @ref="_advanceProcessNumberInput"
+                                               type="text"
+                                               class="os-input @(IsProcessNumberInvalid ? "is-invalid" : null)"
+                                               aria-invalid="@IsProcessNumberInvalid"
+                                               maxlength="@ApplicationProcessNumberHelper.MaxLength"
+                                               @bind="_processNumber"
+                                               @bind:event="oninput"
+                                               disabled="@_busy"
+                                               placeholder="Migration Service number" />
                                     }
                                     @if (step.ShowMinistryLetterUpload)
                                     {
@@ -248,16 +272,70 @@
 
     private string _officerNotes = string.Empty;
     private string _selectedAdvanceStateCode = string.Empty;
+    private string _processNumber = string.Empty;
     private DateTime _advanceDate = DateTime.Today;
     private bool _busy;
     private bool _notesDirty;
     private string _pendingLetterStepKey = string.Empty;
     private string _pendingLetterName = string.Empty;
     private byte[]? _pendingLetterContent;
+    private string? _localAdvanceError;
+    private bool _advanceFieldErrors;
+    private bool _wasStatusError;
+    private bool _focusInvalidAdvanceField;
+    private ElementReference _advanceDateInput;
+    private ElementReference _advanceResultInput;
+    private ElementReference _advanceProcessNumberInput;
 
     internal DateTime AdvanceDate => _advanceDate == default ? DateTime.Today : _advanceDate.Date;
 
     internal string SelectedAdvanceStateCode => _selectedAdvanceStateCode;
+
+    internal string ProcessNumberOnAdvance => _processNumber;
+
+    private bool ShowProcessNumberOnAdvance =>
+        view.Chrome.ShowProcessNumber
+        && ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(_selectedAdvanceStateCode);
+
+    private string? DisplayStatusMessage =>
+        !string.IsNullOrWhiteSpace(_localAdvanceError) ? _localAdvanceError : StatusMessage;
+
+    private bool DisplayStatusIsError =>
+        !string.IsNullOrWhiteSpace(_localAdvanceError) || IsStatusError;
+
+    private bool IsAdvanceFieldErrorMode => _advanceFieldErrors || IsStatusError;
+
+    private bool IsDateInvalid => IsAdvanceFieldErrorMode && _advanceDate == default;
+
+    private bool IsResultInvalid
+    {
+        get
+        {
+            if (!IsAdvanceFieldErrorMode)
+                return false;
+
+            var current = View.ProgressSteps.FirstOrDefault(s => s.State == "current");
+            return current != null
+                && current.ResultOptions.Count > 0
+                && string.IsNullOrWhiteSpace(_selectedAdvanceStateCode);
+        }
+    }
+
+    private bool IsProcessNumberInvalid
+    {
+        get
+        {
+            if (!IsAdvanceFieldErrorMode || !ShowProcessNumberOnAdvance)
+                return false;
+
+            if (string.IsNullOrWhiteSpace(_processNumber))
+                return true;
+
+            return IsStatusError
+                && !string.IsNullOrWhiteSpace(StatusMessage)
+                && StatusMessage.Contains("Process number", StringComparison.OrdinalIgnoreCase);
+        }
+    }
 
     internal string? PendingLetterFileName =>
         string.IsNullOrWhiteSpace(_pendingLetterName) ? null : _pendingLetterName;
@@ -269,6 +347,21 @@
 
     protected override void OnParametersSet()
     {
+        if (IsStatusError)
+        {
+            if (!_wasStatusError)
+                _focusInvalidAdvanceField = true;
+            _advanceFieldErrors = true;
+            _localAdvanceError = null;
+        }
+        else if (string.Equals(StatusMessage, "Progress advanced.", StringComparison.Ordinal))
+        {
+            _advanceFieldErrors = false;
+            _localAdvanceError = null;
+        }
+
+        _wasStatusError = IsStatusError;
+
         var current = View.ProgressSteps.FirstOrDefault(s => s.State == "current");
         if (current == null)
             return;
@@ -282,6 +375,9 @@
 
         if (!_notesDirty)
             _officerNotes = current.OfficerNotes ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(_processNumber) && !string.IsNullOrWhiteSpace(view.Chrome.ProcessNumber))
+            _processNumber = view.Chrome.ProcessNumber;
 
         if (string.IsNullOrWhiteSpace(_selectedAdvanceStateCode)
             || current.ResultOptions.All(o => o.StateCode != _selectedAdvanceStateCode))
@@ -368,6 +464,8 @@
         }
     }
 
+    internal Task AdvanceFromRailAsync() => AdvanceAsync();
+
     private async Task AdvanceAsync()
     {
         if (_busy)
@@ -381,6 +479,15 @@
         if (string.IsNullOrWhiteSpace(code))
             return;
 
+        _localAdvanceError = null;
+        if (!TryValidateAdvance(code, out var validationError))
+        {
+            _advanceFieldErrors = true;
+            _localAdvanceError = validationError;
+            _focusInvalidAdvanceField = true;
+            return;
+        }
+
         _busy = true;
         try
         {
@@ -391,6 +498,7 @@
                 Date = AdvanceDate,
                 LetterFileName = _pendingLetterName,
                 LetterContent = _pendingLetterContent,
+                ProcessNumber = _processNumber,
             });
             _notesDirty = false;
         }
@@ -398,6 +506,60 @@
         {
             _busy = false;
         }
+    }
+
+    private bool TryValidateAdvance(string code, out string? error)
+    {
+        if (_advanceDate == default)
+        {
+            error = "Date is required.";
+            return false;
+        }
+
+        var current = View.ProgressSteps.FirstOrDefault(s => s.State == "current");
+        if (current != null
+            && current.ResultOptions.Count > 0
+            && string.IsNullOrWhiteSpace(_selectedAdvanceStateCode))
+        {
+            error = "Result is required to advance progress.";
+            return false;
+        }
+
+        var requireProcessNumber = view.Chrome.ShowProcessNumber
+            && ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(code);
+        if (requireProcessNumber && string.IsNullOrWhiteSpace(_processNumber))
+        {
+            error = "Process number is required when submitting to Migration Service.";
+            return false;
+        }
+
+        error = null;
+        return true;
+    }
+
+    private async Task FocusFirstInvalidAdvanceFieldAsync()
+    {
+        try
+        {
+            if (IsDateInvalid)
+                await _advanceDateInput.FocusAsync();
+            else if (IsResultInvalid)
+                await _advanceResultInput.FocusAsync();
+            else if (IsProcessNumberInvalid)
+                await _advanceProcessNumberInput.FocusAsync();
+        }
+        catch (InvalidOperationException)
+        {
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_focusInvalidAdvanceField)
+            return;
+
+        _focusInvalidAdvanceField = false;
+        await FocusFirstInvalidAdvanceFieldAsync();
     }
 
     private async Task RevertAsync(ApplicationWorkspaceCaseProgressStep step)

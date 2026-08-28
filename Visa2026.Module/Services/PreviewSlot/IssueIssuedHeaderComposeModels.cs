@@ -63,6 +63,8 @@ public sealed class IssueIssuedHeaderPersonLineDraft
 
     public string ASNumber { get; set; } = string.Empty;
 
+    public bool AsNumberReadOnly { get; set; }
+
     public Guid? PositionId { get; set; }
 
     public List<IssueIssuedHeaderLookupOption> Positions { get; set; } = new();

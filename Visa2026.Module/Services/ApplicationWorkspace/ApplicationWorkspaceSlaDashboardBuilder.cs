@@ -100,6 +100,7 @@ internal static class ApplicationWorkspaceSlaDashboardBuilder
             SlaDaysRemaining = sla.IsTerminal ? null : sla.CurrentStepDaysRemaining,
             PeopleNames = chrome.PeopleNames,
             MergedFromCount = chrome.MergedFromCount,
+            ShowProcessNumber = chrome.ShowProcessNumber,
             ProfileTemplateName = chrome.ProfileTemplateName,
             ResolvedLinksLocked = chrome.ResolvedLinksLocked,
         };

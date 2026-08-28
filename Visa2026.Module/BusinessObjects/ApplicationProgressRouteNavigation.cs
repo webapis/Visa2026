@@ -60,11 +60,11 @@ namespace Visa2026.Module.BusinessObjects
 
         /// <summary>No process number yet (officer shell staged queue).</summary>
         public const string CriteriaStaged =
-            "(ProcessNumber is null Or ProcessNumber = '') And (LatestPrimaryStateCode is null Or LatestPrimaryStateCode = 'OFFICE_PREPARATION' Or LatestPrimaryStateCode = 'DRAFT')";
+            "HasLeftStagedQueue = False And (LatestPrimaryStateCode is null Or LatestPrimaryStateCode = 'OFFICE_PREPARATION' Or LatestPrimaryStateCode = 'DRAFT')";
 
-        /// <summary>Numbered / started cases (officer shell in-process queue).</summary>
+        /// <summary>Started cases (officer shell in-process queue), including those waiting for a process number.</summary>
         public const string CriteriaInProcess =
-            "Not ((ProcessNumber is null Or ProcessNumber = '') And (LatestPrimaryStateCode is null Or LatestPrimaryStateCode = 'OFFICE_PREPARATION' Or LatestPrimaryStateCode = 'DRAFT'))";
+            "Not (HasLeftStagedQueue = False And (LatestPrimaryStateCode is null Or LatestPrimaryStateCode = 'OFFICE_PREPARATION' Or LatestPrimaryStateCode = 'DRAFT'))";
 
         public const string CriteriaItemsViaMinistries =
             "ApplicationProfileInstance is not null And ("

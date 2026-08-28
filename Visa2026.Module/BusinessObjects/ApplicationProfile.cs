@@ -205,6 +205,13 @@ public class ApplicationProfile : BaseObject
     public virtual bool RequireWorkPermitLocation { get; set; }
     [MaxLength(500)]
     public virtual string? DefaultWorkPermitLocation { get; set; }
+
+    /// <summary>
+    /// Show Process number on the instance (Case summary / Progress). Forced on when the
+    /// template may produce Visa, Work permit, or Invitation; other templates may opt in.
+    /// </summary>
+    [XafDisplayName("Process number")]
+    public virtual bool RequireProcessNumber { get; set; }
     /// <summary>
     /// Preferred shared <see cref="ApprovalLegProfile"/> when creating instances from this via-ministry profile.
     /// Chains themselves are tenant-shared (Configuration); not copied onto the profile.
@@ -747,6 +754,7 @@ public static class ApplicationProfileLockHelper
         || original.DefaultUrgencyId != current.DefaultUrgencyId
         || original.RequireWorkPermitLocation != current.RequireWorkPermitLocation
         || !string.Equals(original.DefaultWorkPermitLocation, current.DefaultWorkPermitLocation, StringComparison.Ordinal)
+        || original.RequireProcessNumber != current.RequireProcessNumber
         || original.RequireEntryDate != current.RequireEntryDate
         || original.RequireEntryCheckPoint != current.RequireEntryCheckPoint
         || original.DefaultEntryCheckPointId != current.DefaultEntryCheckPointId

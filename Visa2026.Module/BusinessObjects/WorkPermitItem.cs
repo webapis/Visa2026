@@ -144,6 +144,8 @@ namespace Visa2026.Module.BusinessObjects
         public bool ShowOptionalFields { get; set; }
 
         [RuleRequiredField]
+        [Appearance("WorkPermitItem_ASNumberReadOnlyFromInstance", Enabled = false, Context = "DetailView",
+            Criteria = "WorkPermit is not null And WorkPermit.ApplicationProfileInstance is not null And WorkPermit.ApplicationProfileInstance.ProcessNumber is not null And WorkPermit.ApplicationProfileInstance.ProcessNumber != ''")]
         public virtual string ASNumber { get; set; }
 
         public virtual WorkPermit WorkPermit { get; set; }

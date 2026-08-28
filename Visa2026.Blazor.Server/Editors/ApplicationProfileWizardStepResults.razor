@@ -143,18 +143,26 @@
                 </tr>
                 @if (Profile.ActionFamily != ApplicationProfileActionFamily.Registration)
                 {
-                    <tr>
-                        <td><input type="checkbox" @bind="Profile.RequireUrgency" disabled="@Disabled" /></td>
-                        <td>Urgency</td><td><span class="ap-wizard__tag">lookup</span></td>
-                        <td><input type="checkbox" checked="@HasUrgencyDefault" disabled="@(Disabled || !Profile.RequireUrgency)" @onchange="ToggleUrgencyDefault" /></td>
-                        <td>
-                            <select disabled="@(Disabled || !Profile.RequireUrgency)" value="@FormatGuid(Profile.DefaultUrgencyId)" @onchange="OnUrgencyChanged">
-                                <option value="">—</option>
-                                @foreach (var item in Lookups.Urgencies) { <option value="@item.Id.ToString("D")">@item.DisplayName</option> }
-                            </select>
-                        </td>
-                    </tr>
+                <tr>
+                    <td><input type="checkbox" @bind="Profile.RequireUrgency" disabled="@Disabled" /></td>
+                    <td>Urgency</td><td><span class="ap-wizard__tag">lookup</span></td>
+                    <td><input type="checkbox" checked="@HasUrgencyDefault" disabled="@(Disabled || !Profile.RequireUrgency)" @onchange="ToggleUrgencyDefault" /></td>
+                    <td>
+                        <select disabled="@(Disabled || !Profile.RequireUrgency)" value="@FormatGuid(Profile.DefaultUrgencyId)" @onchange="OnUrgencyChanged">
+                            <option value="">—</option>
+                            @foreach (var item in Lookups.Urgencies) { <option value="@item.Id.ToString("D")">@item.DisplayName</option> }
+                        </select>
+                    </td>
+                </tr>
                 }
+                <tr>
+                    <td><input type="checkbox"
+                               @bind="Profile.RequireProcessNumber"
+                               disabled="@(Disabled || ApplicationProfileConfigurationResolver.ProcessNumberUseLocked(Profile.ProduceInvitation, Profile.ProduceWorkPermit, Profile.ProduceVisa))" /></td>
+                    <td>Process number</td><td><span class="ap-wizard__tag">text</span></td>
+                    <td></td>
+                    <td class="ap-wizard__hint">Entered when submitting to Migration Service. Unique across instances.</td>
+                </tr>
                 <tr>
                     <td><input type="checkbox" @bind="Profile.RequireWorkPermitLocation" disabled="@(Disabled || Profile.ProduceWorkPermit)" @bind:after="OnWorkPermitLocationUseChanged" /></td>
                     <td>Work permit location</td><td><span class="ap-wizard__tag">multi-select</span></td>
@@ -206,6 +214,10 @@
         if (ApplicationProfileConfigurationResolver.RequireWorkPermitLocationWhenProducingWorkPermit(
             Profile.ProduceWorkPermit, Profile.RequireWorkPermitLocation))
             Profile.RequireWorkPermitLocation = true;
+
+        if (ApplicationProfileConfigurationResolver.RequireProcessNumberWhenProducingIssuedDocuments(
+            Profile.ProduceInvitation, Profile.ProduceWorkPermit, Profile.ProduceVisa, Profile.RequireProcessNumber))
+            Profile.RequireProcessNumber = true;
 
         if (Profile.RequireBorderZone && string.IsNullOrWhiteSpace(Profile.DefaultBorderZoneLocation))
             Profile.DefaultBorderZoneLocation = BorderZoneSelectionHelper.NoneValue;

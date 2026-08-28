@@ -559,7 +559,8 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
                 request.Notes,
                 request.Date,
                 request.LetterFileName,
-                request.LetterContent);
+                request.LetterContent,
+                request.ProcessNumber);
 
             if (!result.Success)
             {

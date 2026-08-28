@@ -1,3 +1,19 @@
+### 2026-08-28 — Progress Advance errors use red banner and field borders
+
+- **Need**: Advance without required values showed a muted peach toast; Process number (and other required Advance inputs) kept a normal gray border, so officers could miss what to fill.
+- **Fix**: Progress Advance failures use `os-banner--error` (same red as Case summary empty: `#dc2626` / `#fef2f2`, thick left bar). Empty required Advance fields get `is-invalid` (Process number when shown, Result if none selected, Date if cleared). Duplicate process-number server errors also ring Process number. Highlights drop as the officer types; banner stays until the next successful Advance. Rail Advance uses the same tab validation. Softer `os-banner--warn` (e.g. staged “rows not ready”) is unchanged.
+- **Test**: Officer: stop F5, rebuild, Ctrl+F5. Progress → Result Submitted, leave Process number empty, Advance. Banner is red; Process number border is red. Type a number — that border clears. Advance with a real unique number still succeeds.
+- **Prevent**: Do not restyle all `os-banner--warn` to red. Do not paint `background` on `<select>.os-input.is-invalid` (Edge hides the closed-list label). Do not skip highlighting when Advance is clicked from the right rail.
+- **Cross-skill**: application-profile | application-progress
+
+### 2026-08-28 — Process number is migration-service tracking, not Start-process YYYY-NNNN
+
+- **Need**: Officers type the Migration Service process number when advancing to Submitted (`PROCESS_STARTED`). It is unique, searchable, editable after submit without Revert, and copied read-only onto issued Visa / Work permit. Visibility is a wizard Use flag, forced on when May produce Visa, Work permit, or Invitation.
+- **Fix**: `RequireProcessNumber` on the profile; `HasLeftStagedQueue` so Start process can merge without writing Submitted or allocating `YYYY-NNNN`. Progress Advance requires the number when the profile shows it. Case summary identity frame edits it (unique). Issued visa `ProcessNumber` and work-permit `ASNumber` copy from the instance and are read-only. Invitation letters use the instance number (no extra Invitation column).
+- **Test**: `RequireProcessNumberWhenProducingIssuedDocuments_*`; `Build_FillState_ProcessNumberEmptyIsBlueUntilSubmitted`; `TryAssign_RejectsEmptyAfterProcessStarted`; `ApplyToVisa_CopiesInstanceProcessNumber`. Officer: stop F5, rebuild, Ctrl+F5. Start process on a direct-migration case — still office, no fake number. Progress Result Submitted — type process number, Advance. ListView search by that number. Case summary Edit can fix a typo. Issued visa/WP show the same number locked.
+- **Prevent**: Do not allocate `YYYY-NNNN` into `ProcessNumber`. Do not treat empty Process number as staged after Start process (`HasLeftStagedQueue`). Do not allow duplicate process numbers. Do not let officers edit the copied number on the issued document.
+- **Cross-skill**: application-profile | application-progress
+
 ### 2026-08-28 — Border zone defaults to Ýok
 
 - **Need**: Invitation/Visa Case summary Border zone should show **Ýok**, not empty/`—`. Ýok is the catalog none sentinel (same as visa/invitation).

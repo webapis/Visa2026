@@ -69,6 +69,7 @@ public static class ApplicationProfileSchemaSql
             "DefaultUrgencyId" uuid NULL,
             "RequireWorkPermitLocation" boolean NOT NULL DEFAULT false,
             "DefaultWorkPermitLocation" character varying(500) NULL,
+            "RequireProcessNumber" boolean NOT NULL DEFAULT false,
             "RequireEntryDate" boolean NOT NULL DEFAULT false,
             "RequireEntryCheckPoint" boolean NOT NULL DEFAULT false,
             "DefaultEntryCheckPointId" uuid NULL,
@@ -237,6 +238,7 @@ public static class ApplicationProfileSchemaSql
                 RequireUrgency bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireUrgency DEFAULT (0),
                 DefaultUrgencyId uniqueidentifier NULL,
                 RequireWorkPermitLocation bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireWorkPermitLocation DEFAULT (0),
+                RequireProcessNumber bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireProcessNumber DEFAULT (0),
                 DefaultWorkPermitLocation nvarchar(500) NULL,
                 RequireEntryDate bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireEntryDate DEFAULT (0),
                 RequireEntryCheckPoint bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireEntryCheckPoint DEFAULT (0),
@@ -521,6 +523,9 @@ public static class ApplicationProfileSchemaSql
     internal const string EnsureDefaultWorkPermitLocationPostgres =
         """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "DefaultWorkPermitLocation" character varying(500) NULL;""";
 
+    internal const string EnsureRequireProcessNumberPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "RequireProcessNumber" boolean NOT NULL DEFAULT false;""";
+
     /// <summary>
     /// Converts instance work-permit location from FK (<c>MovementPermitLocationID</c>) to
     /// comma-separated <c>MovementPermitLocation</c> text using <c>WorkPermittedLocationName</c>.
@@ -672,6 +677,7 @@ public static class ApplicationProfileSchemaSql
         EnsureInstanceApprovalLegVersionIdPostgres,
         BackfillApprovalLegVersionsPostgres,
         EnsureDefaultWorkPermitLocationPostgres,
+        EnsureRequireProcessNumberPostgres,
         EnsureDefaultApprovalLegProfilePostgres,
         EnsurePersonPassportLastCountPostgres,
         EnsurePersonVisaLastCountPostgres,
@@ -761,6 +767,11 @@ public static class ApplicationProfileSchemaSql
            AND COL_LENGTH(N'dbo.ApplicationProfiles', N'PersonBorderZoneItemLastCount') IS NULL
             ALTER TABLE dbo.ApplicationProfiles ADD PersonBorderZoneItemLastCount int NOT NULL
                 CONSTRAINT DF_ApplicationProfiles_PersonBorderZoneItemLastCount DEFAULT (1);
+
+        IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfiles', N'RequireProcessNumber') IS NULL
+            ALTER TABLE dbo.ApplicationProfiles ADD RequireProcessNumber bit NOT NULL
+                CONSTRAINT DF_ApplicationProfiles_RequireProcessNumber DEFAULT (0);
         """;
 
     public static void ApplyIfMissing(string connectionString)

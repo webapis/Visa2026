@@ -345,6 +345,9 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
         Add("Work permit location", profile.DefaultWorkPermitLocation,
             ApplicationProfileConfigurationResolver.RequireWorkPermitLocationWhenProducingWorkPermit(
                 profile.ProduceWorkPermit, profile.RequireWorkPermitLocation));
+        Add("Process number", null,
+            ApplicationProfileConfigurationResolver.RequireProcessNumberWhenProducingIssuedDocuments(
+                profile.ProduceInvitation, profile.ProduceWorkPermit, profile.ProduceVisa, profile.RequireProcessNumber));
         Add("Entry date", null, profile.RequireEntryDate);
 
         return rows;

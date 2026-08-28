@@ -9,7 +9,8 @@ using Visa2026.Module.Services.ApplicationPersonRoster;
 namespace Visa2026.Module.Services.OfficerShell;
 
 /// <summary>
-/// Merges selected staged applications into one numbered in-process case and appends the first progress step.
+/// Merges selected staged applications into one in-process case.
+/// Direct-to-migration stays at office until the officer Advances with a Migration Service process number.
 /// </summary>
 public sealed class OfficerShellStartProcessService : IOfficerShellStartProcessService
 {
@@ -37,7 +38,7 @@ public sealed class OfficerShellStartProcessService : IOfficerShellStartProcessS
         foreach (var application in applications)
         {
             if (!OfficerShellApplicationFilters.IsStagedApplication(application))
-                return OfficerShellStartProcessResult.Failed("Only staged profiles (before process number) can be started.");
+                return OfficerShellStartProcessResult.Failed("Only staged profiles can be started.");
 
             if (!OfficerShellApplicationFilters.IsReadyForStartProcess(application))
                 return OfficerShellStartProcessResult.Failed("Complete profile and person links on every selected row before starting process.");
@@ -57,19 +58,22 @@ public sealed class OfficerShellStartProcessService : IOfficerShellStartProcessS
         if (!ApplicationProfileInstanceProgressProfileResolver.TryValidateProjectContractOnApplication(primary, objectSpace, out var contractError))
             return OfficerShellStartProcessResult.Failed(contractError ?? VisaUiMessages.Get("ApplicationProfileInstanceProgress.ProjectContractRequired"));
 
-        var processNumber = OfficerShellProcessNumberAllocator.Allocate(objectSpace);
-        primary.ProcessNumber = processNumber;
+        primary.HasLeftStagedQueue = true;
 
-        var progress = CreateFirstProgressStep(objectSpace, primary, processNumber);
-        if (progress == null)
-            return OfficerShellStartProcessResult.Failed("Could not resolve the first progress step for this profile route.");
+        var route = ApplicationProfileInstanceProgressRouteHelper.GetTypePickerRouteFilter(primary);
+        if (route != ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService)
+        {
+            var progress = CreateFirstProgressStep(objectSpace, primary);
+            if (progress == null)
+                return OfficerShellStartProcessResult.Failed("Could not resolve the first progress step for this profile route.");
 
-        if (!ApplicationProfileInstanceProgressTransitionHelper.TryValidateProgressStep(progress, objectSpace, out var progressError))
-            return OfficerShellStartProcessResult.Failed(progressError ?? VisaUiMessages.Get("ApplicationProfileInstanceProgress.InvalidForRoute"));
+            if (!ApplicationProfileInstanceProgressTransitionHelper.TryValidateProgressStep(progress, objectSpace, out var progressError))
+                return OfficerShellStartProcessResult.Failed(progressError ?? VisaUiMessages.Get("ApplicationProfileInstanceProgress.InvalidForRoute"));
+        }
 
         ApplicationLatestProgressSyncHelper.Sync(primary, objectSpace);
 
-        return OfficerShellStartProcessResult.Succeeded(primary.ID, processNumber, ordered.Count);
+        return OfficerShellStartProcessResult.Succeeded(primary.ID, ordered.Count);
     }
 
     private static void MergeIntoPrimary(IObjectSpace objectSpace, ApplicationProfileInstance primary, ApplicationProfileInstance secondary)
@@ -88,8 +92,7 @@ public sealed class OfficerShellStartProcessService : IOfficerShellStartProcessS
 
     private static ApplicationProfileInstanceProgress? CreateFirstProgressStep(
         IObjectSpace objectSpace,
-        ApplicationProfileInstance application,
-        string processNumber)
+        ApplicationProfileInstance application)
     {
         var progress = objectSpace.CreateObject<ApplicationProfileInstanceProgress>();
         progress.ApplicationProfileInstance = application;
@@ -108,9 +111,6 @@ public sealed class OfficerShellStartProcessService : IOfficerShellStartProcessS
 
         if (progress.State == null)
             return null;
-
-        if (ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(progress.State.Code))
-            progress.ProcessNumber = processNumber;
 
         return progress;
     }

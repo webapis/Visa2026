@@ -144,6 +144,8 @@ public static class ApplicationProfileFromApplicationTypeMapper
         profile.RequireWorkPermitLocation = ApplicationProfileConfigurationResolver.RequireWorkPermitLocationWhenProducingWorkPermit(
             profile.ProduceWorkPermit,
             type.ShowMovementPermitLocation || type.ShowWorkPermittedLocations);
+        profile.RequireProcessNumber = ApplicationProfileConfigurationResolver.RequireProcessNumberWhenProducingIssuedDocuments(
+            profile.ProduceInvitation, profile.ProduceWorkPermit, profile.ProduceVisa, requireProcessNumber: false);
         profile.RequireEntryDate = false;
         profile.RequireEntryCheckPoint = false;
     }

@@ -125,11 +125,14 @@ public class ApplicationWorkspaceCaseHeaderFieldsHelperTests
             {
                 ApplicationWorkspaceCaseHeaderFieldsHelper.InstanceNumber,
                 ApplicationWorkspaceCaseHeaderFieldsHelper.InstanceDate,
+                ApplicationWorkspaceCaseHeaderFieldsHelper.ProcessNumber,
                 ApplicationWorkspaceCaseHeaderFieldsHelper.Urgency,
             },
             ApplicationWorkspaceCaseHeaderFieldsHelper.IdentityFieldKeys);
         Assert.True(ApplicationWorkspaceCaseHeaderFieldsHelper.IsIdentityField(
             ApplicationWorkspaceCaseHeaderFieldsHelper.InstanceNumber));
+        Assert.True(ApplicationWorkspaceCaseHeaderFieldsHelper.IsIdentityField(
+            ApplicationWorkspaceCaseHeaderFieldsHelper.ProcessNumber));
         Assert.True(ApplicationWorkspaceCaseHeaderFieldsHelper.IsIdentityField(
             ApplicationWorkspaceCaseHeaderFieldsHelper.Urgency));
         Assert.False(ApplicationWorkspaceCaseHeaderFieldsHelper.IsIdentityField(
@@ -355,5 +358,30 @@ public class ApplicationWorkspaceCaseHeaderFieldsHelperTests
         Assert.Equal(2024, application.Year);
         Assert.Equal(8, application.Month);
         Assert.True(application.IsManualEntry);
+    }
+
+    [Fact]
+    public void Build_FillState_ProcessNumberEmptyIsBlueUntilSubmitted()
+    {
+        var profile = new ApplicationProfile { ProduceVisa = true };
+        var before = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(
+            new ApplicationProfileInstance { ApplicationProfile = profile },
+            profile,
+            null);
+        var beforeField = Assert.Single(before, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.ProcessNumber);
+        Assert.Equal(ApplicationWorkspaceCaseSummaryFillState.Default, beforeField.FillState);
+        Assert.Equal("—", beforeField.DisplayValue);
+
+        var after = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(
+            new ApplicationProfileInstance
+            {
+                ApplicationProfile = profile,
+                ProcessNumber = "AS538188",
+            },
+            profile,
+            null);
+        var afterField = Assert.Single(after, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.ProcessNumber);
+        Assert.Equal(ApplicationWorkspaceCaseSummaryFillState.Officer, afterField.FillState);
+        Assert.Equal("AS538188", afterField.DisplayValue);
     }
 }

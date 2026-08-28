@@ -649,6 +649,10 @@ namespace Visa2026.Module.BusinessObjects
                 b.HasIndex(a => new { a.AppNumberPrefix, a.ApplicationNumber, a.Year, a.Month })
                  .IsUnique()
                  .HasFilter(IndexFilter("[IsManualEntry] = 0 AND [GCRecord] IS NULL"));
+                b.HasIndex(a => a.ProcessNumber)
+                 .IsUnique()
+                 .HasDatabaseName("IX_ApplicationProfileInstances_ProcessNumber")
+                 .HasFilter(IndexFilter("[ProcessNumber] IS NOT NULL AND [ProcessNumber] <> '' AND [GCRecord] IS NULL"));
                 b.HasIndex("ApplicationTypeID")
                  .HasDatabaseName("IX_Applications_ApplicationTypeID_List");
                 b.HasIndex("ApplicationProfileID")

@@ -7,28 +7,28 @@ namespace Visa2026.Module.Services.OfficerShell;
 internal static class OfficerShellApplicationFilters
 {
     public static readonly Expression<Func<ApplicationProfileInstance, bool>> IsStaged = application =>
-        string.IsNullOrEmpty(application.ProcessNumber)
+        !application.HasLeftStagedQueue
         && (application.LatestPrimaryStateCode == null
             || application.LatestPrimaryStateCode == "OFFICE_PREPARATION"
             || application.LatestPrimaryStateCode == "DRAFT");
 
     public static readonly Expression<Func<ApplicationProfileInstance, bool>> IsInProcess = application =>
-        !string.IsNullOrEmpty(application.ProcessNumber)
+        application.HasLeftStagedQueue
         || (application.LatestPrimaryStateCode != null
             && application.LatestPrimaryStateCode != "OFFICE_PREPARATION"
             && application.LatestPrimaryStateCode != "DRAFT");
 
     public static bool IsStagedApplication(ApplicationProfileInstance? application) =>
-        application != null && IsStagedState(application.ProcessNumber, application.LatestPrimaryStateCode);
+        application != null && IsStagedState(application.HasLeftStagedQueue, application.LatestPrimaryStateCode);
 
-    public static bool IsStagedState(string? processNumber, string? latestPrimaryStateCode) =>
-        string.IsNullOrEmpty(processNumber)
+    public static bool IsStagedState(bool hasLeftStagedQueue, string? latestPrimaryStateCode) =>
+        !hasLeftStagedQueue
         && (latestPrimaryStateCode == null
             || latestPrimaryStateCode == "OFFICE_PREPARATION"
             || latestPrimaryStateCode == "DRAFT");
 
-    public static bool IsInProcessState(string? processNumber, string? latestPrimaryStateCode) =>
-        !IsStagedState(processNumber, latestPrimaryStateCode);
+    public static bool IsInProcessState(bool hasLeftStagedQueue, string? latestPrimaryStateCode) =>
+        !IsStagedState(hasLeftStagedQueue, latestPrimaryStateCode);
 
     public static bool IsReadyForStartProcess(ApplicationProfileInstance? application) =>
         application?.ApplicationProfile != null

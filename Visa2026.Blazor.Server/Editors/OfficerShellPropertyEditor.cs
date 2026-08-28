@@ -719,7 +719,8 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
                 request.Notes,
                 request.Date,
                 request.LetterFileName,
-                request.LetterContent);
+                request.LetterContent,
+                request.ProcessNumber);
 
             if (!result.Success)
             {
@@ -887,8 +888,8 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
             objectSpace.CommitChanges();
 
             model.StatusMessage = result.MergedCount > 1
-                ? $"Started process {result.ProcessNumber} — merged {result.MergedCount} profiles."
-                : $"Started process {result.ProcessNumber}.";
+                ? $"Started process — merged {result.MergedCount} profiles."
+                : "Started process.";
             model.IsStatusError = false;
 
             await LoadAsync();

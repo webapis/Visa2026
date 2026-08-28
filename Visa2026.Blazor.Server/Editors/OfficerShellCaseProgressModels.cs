@@ -11,6 +11,8 @@ public sealed class OfficerShellCaseProgressAdvanceRequest
     public string? LetterFileName { get; init; }
 
     public byte[]? LetterContent { get; init; }
+
+    public string? ProcessNumber { get; init; }
 }
 
 public sealed class OfficerShellCaseProgressRevertRequest

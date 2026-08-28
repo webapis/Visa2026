@@ -84,18 +84,20 @@ namespace Visa2026.Module.BusinessObjects
 
         /// <summary>
         /// Officer-entered process document number from the visa stamp (legacy <c>ASNumber</c> / Işlenen belgisi),
-        /// e.g. <c>C00138718</c>. Distinct from <see cref="Application.ProcessNumber"/> and from
-        /// <see cref="LegacyPersonInApplicationProfileInstanceOid"/> (legacy PIA FK also named ProcessNumber in VISA2014).
+        /// e.g. <c>C00138718</c>. Copied from <see cref="ApplicationProfileInstance.ProcessNumber"/> when issuing.
+        /// Distinct from <see cref="LegacyPersonInApplicationProfileInstanceOid"/> (legacy PIA FK also named ProcessNumber in VISA2014).
         /// </summary>
         [Index(0)]
         [RuleRequiredField]
         [XafDisplayName("Process number")]
-        [ToolTip("Işlenen belgisi — typed from the visa image stamp (legacy ASNumber).")]
+        [ToolTip("Işlenen belgisi — copied from the Application Profile Instance when issued.")]
         [MaxLength(100)]
         [ExcludeFromOptionalDetailFields]
         [VisibleInListView(true)]
         [VisibleInLookupListView(false)]
         [ModelDefault("CustomCSSClassName", "e2e-visa-process-number")]
+        [Appearance("Visa_ProcessNumberReadOnlyFromInstance", Enabled = false, Context = "DetailView",
+            Criteria = "IssuingApplicationProfileInstance is not null And IssuingApplicationProfileInstance.ProcessNumber is not null And IssuingApplicationProfileInstance.ProcessNumber != ''")]
         public virtual string ProcessNumber { get; set; }
 
         /// <summary>

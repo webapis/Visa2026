@@ -89,7 +89,8 @@ public static class ApplicationLatestProgressSyncHelper
         if (objectSpace != null && history != null)
             history = history.Where(p => !objectSpace.IsObjectToDelete(p));
 
-        application.ProcessNumber = ApplicationProcessNumberHelper.ResolveFromHistory(history);
+        application.ProcessNumber = ApplicationProcessNumberHelper.ResolveFromHistory(history)
+            ?? application.ProcessNumber;
     }
 
     /// <summary>

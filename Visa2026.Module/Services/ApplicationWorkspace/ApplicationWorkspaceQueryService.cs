@@ -135,6 +135,7 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
             SlaDaysRemaining = slaRemaining,
             PeopleNames = people,
             MergedFromCount = people.Count > 1 ? people.Count : null,
+            ShowProcessNumber = ApplicationProfileConfigurationResolver.ShowProcessNumber(application),
             ProfileTemplateName = profile?.Name ?? string.Empty,
             ResolvedLinksLocked = ApplicationProfileInstancePersonRosterLockHelper.AreResolvedLinksLocked(application),
         };

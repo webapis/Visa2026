@@ -62,7 +62,8 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         string? notesOnLatestStep,
         DateTime? stepDate,
         string? letterFileName = null,
-        byte[]? letterContent = null)
+        byte[]? letterContent = null,
+        string? processNumber = null)
     {
         if (objectSpace == null)
             return OfficerShellCaseProgressResult.Failed("ObjectSpace is required.");
@@ -102,6 +103,26 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
             : DateTime.Today;
         if (date == default)
             return OfficerShellCaseProgressResult.Failed("Date is required.");
+
+        var requireProcessNumber = ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(chosenCode)
+            && ApplicationProfileConfigurationResolver.ShowProcessNumber(application);
+        if (requireProcessNumber)
+        {
+            var assigned = !string.IsNullOrWhiteSpace(processNumber)
+                ? processNumber
+                : application.ProcessNumber;
+            if (!ApplicationProcessNumberHelper.TryAssign(
+                    objectSpace,
+                    application,
+                    assigned,
+                    requireWhenVisible: true,
+                    out var processNumberError)
+                || string.IsNullOrWhiteSpace(application.ProcessNumber))
+            {
+                return OfficerShellCaseProgressResult.Failed(
+                    processNumberError ?? "Process number is required when submitting to Migration Service.");
+            }
+        }
 
         var progress = objectSpace.CreateObject<ApplicationProfileInstanceProgress>();
         progress.ApplicationProfileInstance = application;

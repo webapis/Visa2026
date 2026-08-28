@@ -108,6 +108,16 @@ button.ct-letter-preview:disabled { cursor: default; opacity: 0.65; }
   width: 100%; border: 1px solid var(--os-line); border-radius: 8px; padding: 8px 10px;
   font-size: 0.84rem; background: #fff;
 }
+.ct-prog-advance .ct-label--error { color: #dc2626; }
+.ct-prog-advance .os-input.is-invalid {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px color-mix(in srgb, #dc2626 22%, transparent);
+  background: #fef2f2;
+}
+.ct-prog-advance select.os-input.is-invalid {
+  background: #fff;
+  color: #0f172a;
+}
 .ct-upload .bi { font-size: 1.4rem; display: block; margin-bottom: 4px; }
 .ct-meta { margin: 0; font-size: 0.82rem; }
 .ct-meta div { display: grid; grid-template-columns: 100px 1fr; gap: 8px; padding: 6px 0; border-bottom: 1px solid #f1f5f9; }

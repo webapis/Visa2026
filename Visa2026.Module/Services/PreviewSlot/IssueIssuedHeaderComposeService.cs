@@ -577,7 +577,7 @@ public static class IssueIssuedHeaderComposeService
                     IsEmployee = p.IsEmployee,
                 };
                 if (kind == IssueIssuedHeaderKind.WorkPermit)
-                    ApplyWorkPermitCardDefaults(p, line, defaultWpLocations);
+                    ApplyWorkPermitCardDefaults(p, line, defaultWpLocations, instance);
                 return line;
             })
             .Where(line => kind != IssueIssuedHeaderKind.Invitation || !line.IncludeLocked)
@@ -715,6 +715,16 @@ public static class IssueIssuedHeaderComposeService
             {
                 Succeeded = false,
                 ErrorMessage = "Application profile instance was not found.",
+            };
+        }
+
+        if ((draft.Kind == IssueIssuedHeaderKind.Invitation || draft.Kind == IssueIssuedHeaderKind.WorkPermit)
+            && !ApplicationProcessNumberHelper.TryRequireForIssued(instance, out var processNumberError))
+        {
+            return new IssueIssuedHeaderCreateResult
+            {
+                Succeeded = false,
+                ErrorMessage = processNumberError,
             };
         }
 
@@ -1234,6 +1244,8 @@ public static class IssueIssuedHeaderComposeService
                     person.IncludeLocked = true;
                     person.StatusCaption = "On this work permit";
                     BindWorkPermitItemToCard(item, person);
+                    var instance = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
+                    ApplyInstanceProcessNumberToWorkPermitCard(person, instance);
                 }
 
                 BindDocuments(objectSpace, draft, kind, headerId);
@@ -1823,7 +1835,8 @@ public static class IssueIssuedHeaderComposeService
     private static void ApplyWorkPermitCardDefaults(
         Person person,
         IssueIssuedHeaderPersonLineDraft line,
-        string defaultLocations)
+        string defaultLocations,
+        ApplicationProfileInstance instance)
     {
         var currentPosition = PersonCurrentItems.GetCurrentPositionHistory(person);
         line.Positions = LoadPositionOptions(person);
@@ -1870,6 +1883,19 @@ public static class IssueIssuedHeaderComposeService
         }
 
         line.WorkPermittedLocations = defaultLocations;
+        ApplyInstanceProcessNumberToWorkPermitCard(line, instance);
+    }
+
+    private static void ApplyInstanceProcessNumberToWorkPermitCard(
+        IssueIssuedHeaderPersonLineDraft line,
+        ApplicationProfileInstance? instance)
+    {
+        var copied = ApplicationProcessNumberHelper.CopyForIssuedDocument(instance);
+        if (string.IsNullOrWhiteSpace(copied))
+            return;
+
+        line.ASNumber = copied;
+        line.AsNumberReadOnly = true;
     }
 
     private static void BindWorkPermitItemToCard(WorkPermitItem item, IssueIssuedHeaderPersonLineDraft person)

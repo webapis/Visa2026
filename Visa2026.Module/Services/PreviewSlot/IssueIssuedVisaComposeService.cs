@@ -401,6 +401,15 @@ public static class IssueIssuedVisaComposeService
                 };
             }
 
+            if (!ApplicationProcessNumberHelper.TryRequireForIssued(instance, out var processNumberError))
+            {
+                return new IssueIssuedVisaCreateResult
+                {
+                    Succeeded = false,
+                    ErrorMessage = processNumberError,
+                };
+            }
+
             return UsesInvitationSource(instance)
                 ? CreateFromInvitationLines(objectSpace, instance, draft)
                 : CreateFromRoster(objectSpace, instance, draft);
@@ -489,7 +498,7 @@ public static class IssueIssuedVisaComposeService
                 visa.Passport = passport;
                 visa.PathAIssuingLinksApplied = true;
                 visa.VisaNumber = row.VisaNumber.Trim();
-                visa.ProcessNumber = visa.VisaNumber;
+                ApplicationProcessNumberHelper.ApplyToVisa(visa, instance);
                 visa.VisaType = row.VisaTypeId is Guid typeId
                     ? objectSpace.GetObjectByKey<VisaType>(typeId)
                     : instance.VisaType;
@@ -624,7 +633,7 @@ public static class IssueIssuedVisaComposeService
             visa.Passport = passport;
             visa.PathAIssuingLinksApplied = true;
             visa.VisaNumber = row.VisaNumber.Trim();
-            visa.ProcessNumber = visa.VisaNumber;
+            ApplicationProcessNumberHelper.ApplyToVisa(visa, instance);
             visa.VisaType = row.VisaTypeId is Guid typeId
                 ? objectSpace.GetObjectByKey<VisaType>(typeId)
                 : instance.VisaType;
@@ -724,7 +733,10 @@ public static class IssueIssuedVisaComposeService
 
             var previousNumber = visa.VisaNumber?.Trim() ?? string.Empty;
             visa.VisaNumber = row.VisaNumber.Trim();
-            if (string.IsNullOrWhiteSpace(visa.ProcessNumber)
+            var copied = ApplicationProcessNumberHelper.CopyForIssuedDocument(instance);
+            if (!string.IsNullOrWhiteSpace(copied))
+                visa.ProcessNumber = copied;
+            else if (string.IsNullOrWhiteSpace(visa.ProcessNumber)
                 || string.Equals(visa.ProcessNumber.Trim(), previousNumber, StringComparison.OrdinalIgnoreCase))
             {
                 visa.ProcessNumber = visa.VisaNumber;
