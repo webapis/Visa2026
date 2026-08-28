@@ -118,7 +118,7 @@ internal static class Visa2014AddressOfResidenceIdMapAliasAppender
         return added;
     }
 
-    private static int RegisterIfMissing(IDictionary<Guid, Guid> addressIdMap, Guid legacyKey, Guid targetId)
+    internal static int RegisterIfMissing(IDictionary<Guid, Guid> addressIdMap, Guid legacyKey, Guid targetId)
     {
         if (addressIdMap.ContainsKey(legacyKey))
             return 0;

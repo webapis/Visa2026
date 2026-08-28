@@ -55,7 +55,11 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const sha = context.sha;
+            // PR merge commits use a different SHA than the PR head; wait on the head commit
+            // so we observe the same Build & unit tests run that gated this PR.
+            const sha = context.eventName === 'pull_request'
+              ? context.payload.pull_request.head.sha
+              : context.sha;
             const workflowName = 'Build & unit tests';
             const eventName = context.eventName;
             const deadline = Date.now() + 30 * 60 * 1000;
