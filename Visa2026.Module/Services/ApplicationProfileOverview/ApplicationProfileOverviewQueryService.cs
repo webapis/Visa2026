@@ -332,7 +332,9 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
         Add("Urgency", LookupLabel(profile.DefaultUrgency), profile.RequireUrgency);
         Add("Project Contract", LookupLabel(profile.DefaultProjectContract), profile.RequireProject);
         Add("Migration Service", LookupLabel(profile.DefaultMigrationService), profile.RequireMigrationService);
-        Add("Border Zone", profile.DefaultBorderZoneLocation, profile.RequireBorderZone);
+        Add("Border Zone", profile.DefaultBorderZoneLocation,
+            ApplicationProfileConfigurationResolver.RequireBorderZoneWhenProducingInvitationOrVisa(
+                profile.ProduceInvitation, profile.ProduceVisa, profile.RequireBorderZone));
         Add("Entry Check Point", LookupLabel(profile.DefaultEntryCheckPoint), profile.RequireEntryCheckPoint);
         Add("Start date", null, profile.RequireStartDate);
         Add("End date", null, profile.RequireEndDate);
@@ -340,7 +342,9 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
         Add("City", LookupLabel(profile.DefaultCity), profile.RequireCity);
         Add("Business trip address", FormatBusinessTripAddress(profile.DefaultBusinessTripAddress), profile.RequireBusinessTripAddress);
         Add("Purpose", profile.DefaultPurpose, profile.RequirePurpose);
-        Add("Work permit location", profile.DefaultWorkPermitLocation, profile.RequireWorkPermitLocation);
+        Add("Work permit location", profile.DefaultWorkPermitLocation,
+            ApplicationProfileConfigurationResolver.RequireWorkPermitLocationWhenProducingWorkPermit(
+                profile.ProduceWorkPermit, profile.RequireWorkPermitLocation));
         Add("Entry date", null, profile.RequireEntryDate);
 
         return rows;

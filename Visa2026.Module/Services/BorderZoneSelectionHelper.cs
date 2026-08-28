@@ -53,4 +53,16 @@ public static class BorderZoneSelectionHelper
             return instance.BorderZoneLocation.Trim();
         return NoneValue;
     }
+
+    public static void ApplyDefaultIfEmpty(ApplicationProfileInstance? instance)
+    {
+        if (instance == null)
+            return;
+
+        if (string.IsNullOrWhiteSpace(instance.BorderZoneLocation))
+            instance.BorderZoneLocation = NoneValue;
+    }
+
+    public static string CoalesceToNone(string? stored) =>
+        string.IsNullOrWhiteSpace(stored) ? NoneValue : stored.Trim();
 }

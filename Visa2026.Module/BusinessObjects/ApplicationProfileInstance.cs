@@ -450,8 +450,19 @@ namespace Visa2026.Module.BusinessObjects
                 BusinessTripAddress = applicationProfile.DefaultBusinessTripAddress;
             if (!string.IsNullOrWhiteSpace(applicationProfile.DefaultPurpose))
                 Purpose = applicationProfile.DefaultPurpose.Trim();
-            if (!string.IsNullOrWhiteSpace(applicationProfile.DefaultBorderZoneLocation))
+            if (ApplicationProfileConfigurationResolver.RequireBorderZoneWhenProducingInvitationOrVisa(
+                applicationProfile.ProduceInvitation,
+                applicationProfile.ProduceVisa,
+                applicationProfile.RequireBorderZone))
+            {
+                BorderZoneLocation = string.IsNullOrWhiteSpace(applicationProfile.DefaultBorderZoneLocation)
+                    ? BorderZoneSelectionHelper.NoneValue
+                    : applicationProfile.DefaultBorderZoneLocation;
+            }
+            else if (!string.IsNullOrWhiteSpace(applicationProfile.DefaultBorderZoneLocation))
+            {
                 BorderZoneLocation = applicationProfile.DefaultBorderZoneLocation;
+            }
             if (applicationProfile.DefaultWorkPermitLocation != null)
                 MovementPermitLocation = applicationProfile.DefaultWorkPermitLocation;
         }
@@ -1087,7 +1098,8 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnCreated()
         {
             base.OnCreated();
-            if (ObjectSpaceHelper.Get(this) != null && BorderZoneSelectionHelper.IsNoneValue(BorderZoneLocation))
+            if (ObjectSpaceHelper.Get(this) != null
+                && string.IsNullOrWhiteSpace(BorderZoneLocation))
             {
                 BorderZoneLocation = DefaultBorderZoneLocationNameTm;
             }
@@ -1109,6 +1121,9 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnSaving()
         {
             base.OnSaving();
+            if (ApplicationProfileConfigurationResolver.ShowBorderZoneLocation(this))
+                BorderZoneSelectionHelper.ApplyDefaultIfEmpty(this);
+
             if (ObjectSpaceHelper.Get(this) != null && ObjectSpaceHelper.Get(this).IsNewObject(this))
             {
                 Year = ApplicationDate.Year;

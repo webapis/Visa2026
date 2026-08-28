@@ -17,17 +17,17 @@
     <div class="ct-prog-v-list">
         @foreach (var step in view.ProgressSteps)
         {
-            var preview = PreviewFor(step);
-            var badge = !string.IsNullOrWhiteSpace(preview.Label)
-                ? preview.Label
-                : !string.IsNullOrWhiteSpace(step.CurrentStateLabel)
-                    ? step.CurrentStateLabel
-                    : step.State == "done" && !string.Equals(step.Key, "office", StringComparison.OrdinalIgnoreCase)
-                        ? "Completed"
-                        : step.State == "current" ? "In progress"
-                        : step.State == "pending" ? "Pending"
-                        : string.Empty;
-            var tone = preview.Tone ?? step.OutcomeKind;
+            // Result dropdown is unsaved until Advance. Keep the current node blue + pen
+            // (same as Office preparation), not Issued/Approved green tick.
+            var isCurrent = string.Equals(step.State, "current", StringComparison.OrdinalIgnoreCase);
+            var badge = !string.IsNullOrWhiteSpace(step.CurrentStateLabel)
+                ? step.CurrentStateLabel
+                : step.State == "done" && !string.Equals(step.Key, "office", StringComparison.OrdinalIgnoreCase)
+                    ? "Completed"
+                    : isCurrent ? "In progress"
+                    : step.State == "pending" ? "Pending"
+                    : string.Empty;
+            var tone = isCurrent ? "current" : step.OutcomeKind;
             var badgeCls = tone switch
             {
                 "issued" => "issued",
@@ -39,14 +39,15 @@
             };
             var letterName = step.MinistryLetterFileName;
             var letterProgressId = step.ProgressId;
-            var icon = tone switch
-            {
-                "rejected" => "✕",
-                "cancelled" => "–",
-                "issued" or "ok" => "✓",
-                "current" => "✎",
-                _ => "○",
-            };
+            var icon = isCurrent
+                ? "✎"
+                : tone switch
+                {
+                    "rejected" => "✕",
+                    "cancelled" => "–",
+                    "issued" or "ok" => "✓",
+                    _ => "○",
+                };
             <div class="ct-prog-v ct-prog-v--@step.State ct-prog-v--tone-@tone">
                 <div class="ct-prog-v__rail">
                     <span class="ct-prog-v__date">@(string.IsNullOrWhiteSpace(step.Date) ? "—" : step.Date)</span>
@@ -101,7 +102,7 @@
                                     </div>
                                 </div>
                                 <dl class="ct-meta">
-                                    <div><dt>Current state</dt><dd><span class="os-status os-status--process">@(string.IsNullOrWhiteSpace(preview.Label) ? step.CurrentStateLabel : preview.Label)</span></dd></div>
+                                    <div><dt>Current state</dt><dd><span class="os-status os-status--process">@(string.IsNullOrWhiteSpace(step.CurrentStateLabel) ? step.Label : step.CurrentStateLabel)</span></dd></div>
                                     <div><dt>Started on</dt><dd>@step.Date</dd></div>
                                     <div><dt>SLA target</dt><dd>@(string.IsNullOrWhiteSpace(step.SlaTargetDate) ? "—" : step.SlaTargetDate)</dd></div>
                                 </dl>
@@ -300,35 +301,13 @@
             if (current == null)
                 return view.Chrome.CurrentStep;
 
-            var preview = PreviewFor(current);
-            var result = !string.IsNullOrWhiteSpace(preview.Label)
-                ? preview.Label
-                : current.CurrentStateLabel;
+            var result = current.CurrentStateLabel;
             if (string.IsNullOrWhiteSpace(result)
                 || string.Equals(result, current.Label, StringComparison.OrdinalIgnoreCase))
                 return current.Label;
 
             return $"{current.Label} · {result}";
         }
-    }
-
-    private (string? Label, string? Tone) PreviewFor(ApplicationWorkspaceCaseProgressStep step)
-    {
-        if (step.State != "current")
-            return (null, null);
-
-        var option = step.ResultOptions.FirstOrDefault(o => o.StateCode == _selectedAdvanceStateCode);
-        if (option == null)
-            return (null, null);
-
-        if (!ApplicationWorkspaceProgressAdvancePreview.IsResultForStep(step.Key, option.StateCode))
-            return (null, null);
-
-        // Submitted leaves office; the first ministry (or Migration) shows it after Advance.
-        if (ApplicationWorkspaceProgressAdvancePreview.IsOfficeSubmitted(step.Key, option.StateCode))
-            return (null, null);
-
-        return (option.Label, ApplicationWorkspaceProgressAdvancePreview.OutcomeKind(option.StateCode));
     }
 
     private void OnNotesInput(ChangeEventArgs e)

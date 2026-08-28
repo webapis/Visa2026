@@ -214,4 +214,49 @@ public class ApplicationProfileConfigurationResolverTests
 
         Assert.True(ApplicationProfileInstanceProgressProfileResolver.RequiresProjectContract(app));
     }
+
+    [Fact]
+    public void RequireBorderZoneWhenProducingInvitationOrVisa_InvitationOrVisaForcesTrue()
+    {
+        Assert.True(ApplicationProfileConfigurationResolver.RequireBorderZoneWhenProducingInvitationOrVisa(
+            produceInvitation: true, produceVisa: false, requireBorderZone: false));
+        Assert.True(ApplicationProfileConfigurationResolver.RequireBorderZoneWhenProducingInvitationOrVisa(
+            produceInvitation: false, produceVisa: true, requireBorderZone: false));
+        Assert.False(ApplicationProfileConfigurationResolver.RequireBorderZoneWhenProducingInvitationOrVisa(
+            produceInvitation: false, produceVisa: false, requireBorderZone: false));
+        Assert.True(ApplicationProfileConfigurationResolver.RequireBorderZoneWhenProducingInvitationOrVisa(
+            produceInvitation: false, produceVisa: false, requireBorderZone: true));
+    }
+
+    [Fact]
+    public void ShowBorderZoneLocation_ProduceVisaShowsFieldEvenWhenRequireFlagOff()
+    {
+        var profile = new ApplicationProfile { ProduceVisa = true, RequireBorderZone = false };
+        var app = new ApplicationProfileInstance { ApplicationProfile = profile };
+
+        Assert.True(ApplicationProfileConfigurationResolver.ShowBorderZoneLocation(app));
+        Assert.False(ApplicationProfileConfigurationResolver.CanIssueBorderZone(app));
+    }
+
+    [Fact]
+    public void RequireWorkPermitLocationWhenProducingWorkPermit_ForcesTrue()
+    {
+        Assert.True(ApplicationProfileConfigurationResolver.RequireWorkPermitLocationWhenProducingWorkPermit(
+            produceWorkPermit: true, requireWorkPermitLocation: false));
+        Assert.False(ApplicationProfileConfigurationResolver.RequireWorkPermitLocationWhenProducingWorkPermit(
+            produceWorkPermit: false, requireWorkPermitLocation: false));
+        Assert.True(ApplicationProfileConfigurationResolver.RequireWorkPermitLocationWhenProducingWorkPermit(
+            produceWorkPermit: false, requireWorkPermitLocation: true));
+    }
+
+    [Fact]
+    public void ShowMovementPermitLocation_ProduceWorkPermitShowsFieldEvenWhenRequireFlagOff()
+    {
+        var profile = new ApplicationProfile { ProduceWorkPermit = true, RequireWorkPermitLocation = false };
+        var app = new ApplicationProfileInstance { ApplicationProfile = profile };
+
+        Assert.True(ApplicationProfileConfigurationResolver.ShowMovementPermitLocation(app));
+        Assert.True(ApplicationProfileConfigurationResolver.ShowWorkPermittedLocations(app));
+        Assert.True(ApplicationProfileConfigurationResolver.CanIssueWorkPermit(app));
+    }
 }

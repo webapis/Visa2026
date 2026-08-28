@@ -29,4 +29,24 @@ public class BorderZoneSelectionHelperTests
         stored = CommaSeparatedSelectionHelper.ToggleLabel(stored, "Mary", false);
         Assert.Equal(CommaSeparatedSelectionHelper.NoneValue, stored);
     }
+
+    [Fact]
+    public void ApplyDefaultIfEmpty_InstanceSetsYok()
+    {
+        var instance = new ApplicationProfileInstance { BorderZoneLocation = null };
+        BorderZoneSelectionHelper.ApplyDefaultIfEmpty(instance);
+        Assert.Equal(BorderZoneSelectionHelper.NoneValue, instance.BorderZoneLocation);
+
+        instance.BorderZoneLocation = "Ahal";
+        BorderZoneSelectionHelper.ApplyDefaultIfEmpty(instance);
+        Assert.Equal("Ahal", instance.BorderZoneLocation);
+    }
+
+    [Fact]
+    public void CoalesceToNone_EmptyIsYok()
+    {
+        Assert.Equal(BorderZoneSelectionHelper.NoneValue, BorderZoneSelectionHelper.CoalesceToNone(null));
+        Assert.Equal(BorderZoneSelectionHelper.NoneValue, BorderZoneSelectionHelper.CoalesceToNone("  "));
+        Assert.Equal("Ahal", BorderZoneSelectionHelper.CoalesceToNone("Ahal"));
+    }
 }

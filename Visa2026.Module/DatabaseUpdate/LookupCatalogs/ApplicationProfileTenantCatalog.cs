@@ -6,6 +6,7 @@ using DevExpress.ExpressApp;
 using DevExpress.Persistent.Base;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.DatabaseUpdate;
+using Visa2026.Module.Services;
 using Visa2026.Module.Services.ApplicationPersonRoster;
 
 namespace Visa2026.Module.DatabaseUpdate.LookupCatalogs;
@@ -488,7 +489,10 @@ internal static class ApplicationProfileTenantCatalogSync
         profile.DefaultVisaCategory = ResolveLookup<VisaCategory>(objectSpace, row.DefaultVisaCategoryLocalizationKey);
         profile.RequireVisaPeriod = row.RequireVisaPeriod;
         profile.DefaultVisaPeriod = ResolveLookup<VisaPeriod>(objectSpace, row.DefaultVisaPeriodLocalizationKey);
-        profile.RequireBorderZone = row.RequireBorderZone;
+        profile.RequireBorderZone = ApplicationProfileConfigurationResolver.RequireBorderZoneWhenProducingInvitationOrVisa(
+            profile.ProduceInvitation, profile.ProduceVisa, row.RequireBorderZone);
+        if (profile.RequireBorderZone && string.IsNullOrWhiteSpace(profile.DefaultBorderZoneLocation))
+            profile.DefaultBorderZoneLocation = BorderZoneSelectionHelper.NoneValue;
         profile.RequireMigrationService = row.RequireMigrationService;
         profile.RequireStartDate = row.RequireStartDate;
         profile.RequireEndDate = row.RequireEndDate;
@@ -504,7 +508,8 @@ internal static class ApplicationProfileTenantCatalogSync
         profile.DefaultProjectContract = ResolveProjectContract(contracts, row.DefaultProjectContractCode);
         profile.RequireUrgency = row.RequireUrgency;
         profile.DefaultUrgency = ResolveLookup<Urgency>(objectSpace, row.DefaultUrgencyLocalizationKey);
-        profile.RequireWorkPermitLocation = row.RequireWorkPermitLocation;
+        profile.RequireWorkPermitLocation = ApplicationProfileConfigurationResolver.RequireWorkPermitLocationWhenProducingWorkPermit(
+            profile.ProduceWorkPermit, row.RequireWorkPermitLocation);
         profile.RequireEntryDate = row.RequireEntryDate;
         profile.RequireEntryCheckPoint = row.RequireEntryCheckPoint;
 

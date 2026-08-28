@@ -64,6 +64,8 @@ public static class ApplicationWorkspaceCaseSummaryFill
 
 public sealed class ApplicationWorkspaceCaseSummaryTile
 {
+    public string Key { get; init; } = string.Empty;
+
     public string Label { get; init; } = string.Empty;
 
     public string Value { get; init; } = string.Empty;

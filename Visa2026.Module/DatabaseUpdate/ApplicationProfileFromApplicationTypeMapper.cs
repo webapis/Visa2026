@@ -1,5 +1,6 @@
 using System;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services;
 
 namespace Visa2026.Module.DatabaseUpdate;
 
@@ -126,7 +127,10 @@ public static class ApplicationProfileFromApplicationTypeMapper
         profile.RequireVisaType = type.ShowVisaType;
         profile.RequireVisaCategory = type.ShowVisaCategory;
         profile.RequireVisaPeriod = type.ShowVisaPeriod;
-        profile.RequireBorderZone = type.ShowBorderZoneLocation;
+        profile.RequireBorderZone = ApplicationProfileConfigurationResolver.RequireBorderZoneWhenProducingInvitationOrVisa(
+            profile.ProduceInvitation, profile.ProduceVisa, type.ShowBorderZoneLocation);
+        if (profile.RequireBorderZone && string.IsNullOrWhiteSpace(profile.DefaultBorderZoneLocation))
+            profile.DefaultBorderZoneLocation = BorderZoneSelectionHelper.NoneValue;
         profile.RequireMigrationService = type.ShowMigrationService;
         profile.RequireStartDate = type.ShowBusinessTrips;
         profile.RequireEndDate = type.ShowBusinessTrips;
@@ -137,7 +141,9 @@ public static class ApplicationProfileFromApplicationTypeMapper
         profile.RequirePurpose = type.ShowBusinessTrips;
         profile.RequireProject = type.ShowProjectContract;
         profile.RequireUrgency = type.ShowUrgency;
-        profile.RequireWorkPermitLocation = type.ShowMovementPermitLocation || type.ShowWorkPermittedLocations;
+        profile.RequireWorkPermitLocation = ApplicationProfileConfigurationResolver.RequireWorkPermitLocationWhenProducingWorkPermit(
+            profile.ProduceWorkPermit,
+            type.ShowMovementPermitLocation || type.ShowWorkPermittedLocations);
         profile.RequireEntryDate = false;
         profile.RequireEntryCheckPoint = false;
     }

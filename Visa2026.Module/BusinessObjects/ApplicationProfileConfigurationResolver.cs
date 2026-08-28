@@ -97,14 +97,41 @@ public static class ApplicationProfileConfigurationResolver
     public static bool ShowUrgency(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequireUrgency, t => t.ShowUrgency);
 
+    /// <summary>
+    /// Instance Border zone (location) is required when the profile may produce invitation or visa.
+    /// Distinct from <see cref="ApplicationProfile.ProduceBorderZone"/> (border-zone permit output).
+    /// </summary>
+    public static bool RequireBorderZoneWhenProducingInvitationOrVisa(
+        bool produceInvitation,
+        bool produceVisa,
+        bool requireBorderZone) =>
+        requireBorderZone || produceInvitation || produceVisa;
+
     public static bool ShowBorderZoneLocation(ApplicationProfileInstance? application) =>
-        Resolve(application, p => p.RequireBorderZone, t => t.ShowBorderZoneLocation);
+        Resolve(
+            application,
+            p => RequireBorderZoneWhenProducingInvitationOrVisa(
+                p.ProduceInvitation, p.ProduceVisa, p.RequireBorderZone),
+            t => t.ShowBorderZoneLocation || t.CanIssueInvitation || t.CanIssueVisa);
+
+    /// <summary>
+    /// Instance work-permit location is required when the profile may produce a work permit.
+    /// Distinct from <see cref="ApplicationProfile.ProduceWorkLocation"/> (work-location output).
+    /// </summary>
+    public static bool RequireWorkPermitLocationWhenProducingWorkPermit(
+        bool produceWorkPermit,
+        bool requireWorkPermitLocation) =>
+        requireWorkPermitLocation || produceWorkPermit;
 
     public static bool ShowMovementPermitLocation(ApplicationProfileInstance? application) =>
-        Resolve(application, p => p.RequireWorkPermitLocation, t => t.ShowMovementPermitLocation);
+        Resolve(
+            application,
+            p => RequireWorkPermitLocationWhenProducingWorkPermit(
+                p.ProduceWorkPermit, p.RequireWorkPermitLocation),
+            t => t.ShowMovementPermitLocation || t.ShowWorkPermittedLocations || t.CanIssueWorkPermit);
 
     public static bool ShowWorkPermittedLocations(ApplicationProfileInstance? application) =>
-        Resolve(application, p => p.RequireWorkPermitLocation, t => t.ShowWorkPermittedLocations);
+        ShowMovementPermitLocation(application);
 
     public static bool ShowFromCity(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequireRegionCity, t => t.ShowFromCity);

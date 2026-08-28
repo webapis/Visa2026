@@ -118,6 +118,26 @@ public class ApplicationWorkspaceCaseHeaderFieldsHelperTests
     }
 
     [Fact]
+    public void IsIdentityField_NumberDateAndUrgency()
+    {
+        Assert.Equal(
+            new[]
+            {
+                ApplicationWorkspaceCaseHeaderFieldsHelper.InstanceNumber,
+                ApplicationWorkspaceCaseHeaderFieldsHelper.InstanceDate,
+                ApplicationWorkspaceCaseHeaderFieldsHelper.Urgency,
+            },
+            ApplicationWorkspaceCaseHeaderFieldsHelper.IdentityFieldKeys);
+        Assert.True(ApplicationWorkspaceCaseHeaderFieldsHelper.IsIdentityField(
+            ApplicationWorkspaceCaseHeaderFieldsHelper.InstanceNumber));
+        Assert.True(ApplicationWorkspaceCaseHeaderFieldsHelper.IsIdentityField(
+            ApplicationWorkspaceCaseHeaderFieldsHelper.Urgency));
+        Assert.False(ApplicationWorkspaceCaseHeaderFieldsHelper.IsIdentityField(
+            ApplicationWorkspaceCaseHeaderFieldsHelper.VisaType));
+        Assert.False(ApplicationWorkspaceCaseHeaderFieldsHelper.IsIdentityField(null));
+    }
+
+    [Fact]
     public void Build_ShowsEmptyDisplayAsDash()
     {
         var profile = new ApplicationProfile { RequireVisaType = true };
@@ -246,6 +266,40 @@ public class ApplicationWorkspaceCaseHeaderFieldsHelperTests
         Assert.Equal(
             ApplicationWorkspaceCaseSummaryFillState.Default,
             Assert.Single(matched, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.BorderZone).FillState);
+    }
+
+    [Fact]
+    public void Build_FillState_BorderZoneYokIsDefaultValue()
+    {
+        var profile = new ApplicationProfile
+        {
+            RequireBorderZone = true,
+            DefaultBorderZoneLocation = BorderZoneSelectionHelper.NoneValue,
+        };
+
+        var yok = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(
+            new ApplicationProfileInstance
+            {
+                ApplicationProfile = profile,
+                BorderZoneLocation = BorderZoneSelectionHelper.NoneValue,
+            },
+            profile,
+            null);
+        var yokField = Assert.Single(yok, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.BorderZone);
+        Assert.Equal(ApplicationWorkspaceCaseSummaryFillState.Default, yokField.FillState);
+        Assert.Equal(BorderZoneSelectionHelper.NoneValue, yokField.DisplayValue);
+
+        var empty = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(
+            new ApplicationProfileInstance
+            {
+                ApplicationProfile = profile,
+                BorderZoneLocation = null,
+            },
+            profile,
+            null);
+        var emptyField = Assert.Single(empty, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.BorderZone);
+        Assert.Equal(ApplicationWorkspaceCaseSummaryFillState.Default, emptyField.FillState);
+        Assert.Equal(BorderZoneSelectionHelper.NoneValue, emptyField.DisplayValue);
     }
 
     [Fact]

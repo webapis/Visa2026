@@ -121,13 +121,6 @@
             </div>
         </header>
 
-        @if (_tabSwitching)
-        {
-            <div class="cw-tab-progress" role="progressbar" aria-busy="true" aria-label="@TabSwitchStatus">
-                <div class="cw-tab-progress__bar"></div>
-            </div>
-        }
-
         <div class="cw-layout @(IsWideTab(DisplayedTab) ? "cw-layout--wide" : null)">
             <nav class="cw-nav" aria-label="Case sections">
                 @foreach (var tab in CaseTabs)
@@ -443,12 +436,55 @@
     private static ApplicationWorkspaceCaseSummaryTile ToSummaryTile(ApplicationWorkspaceCaseHeaderField field) =>
         new()
         {
+            Key = field.Key,
             Label = field.Label,
             Value = field.DisplayValue,
             Tone = field.Tone,
             Glyph = field.Glyph,
             FillState = field.FillState,
         };
+
+    private static List<ApplicationWorkspaceCaseHeaderField> IdentityHeaderFields(
+        IEnumerable<ApplicationWorkspaceCaseHeaderField> fields)
+    {
+        var map = fields
+            .Where(field => !string.IsNullOrEmpty(field.Key))
+            .GroupBy(field => field.Key, StringComparer.Ordinal)
+            .ToDictionary(group => group.Key, group => group.First(), StringComparer.Ordinal);
+        var result = new List<ApplicationWorkspaceCaseHeaderField>(ApplicationWorkspaceCaseHeaderFieldsHelper.IdentityFieldKeys.Length);
+        foreach (var key in ApplicationWorkspaceCaseHeaderFieldsHelper.IdentityFieldKeys)
+        {
+            if (map.TryGetValue(key, out var field))
+                result.Add(field);
+        }
+
+        return result;
+    }
+
+    private static List<ApplicationWorkspaceCaseHeaderField> MainHeaderFields(
+        IEnumerable<ApplicationWorkspaceCaseHeaderField> fields) =>
+        fields.Where(field => !ApplicationWorkspaceCaseHeaderFieldsHelper.IsIdentityField(field.Key)).ToList();
+
+    private static List<ApplicationWorkspaceCaseSummaryTile> IdentityTiles(
+        IEnumerable<ApplicationWorkspaceCaseSummaryTile> tiles)
+    {
+        var map = tiles
+            .Where(tile => !string.IsNullOrEmpty(tile.Key))
+            .GroupBy(tile => tile.Key, StringComparer.Ordinal)
+            .ToDictionary(group => group.Key, group => group.First(), StringComparer.Ordinal);
+        var result = new List<ApplicationWorkspaceCaseSummaryTile>(ApplicationWorkspaceCaseHeaderFieldsHelper.IdentityFieldKeys.Length);
+        foreach (var key in ApplicationWorkspaceCaseHeaderFieldsHelper.IdentityFieldKeys)
+        {
+            if (map.TryGetValue(key, out var tile))
+                result.Add(tile);
+        }
+
+        return result;
+    }
+
+    private static List<ApplicationWorkspaceCaseSummaryTile> MainTiles(
+        IEnumerable<ApplicationWorkspaceCaseSummaryTile> tiles) =>
+        tiles.Where(tile => !ApplicationWorkspaceCaseHeaderFieldsHelper.IsIdentityField(tile.Key)).ToList();
 
     private static string FillCss(ApplicationWorkspaceCaseSummaryFillState state) =>
         ApplicationWorkspaceCaseSummaryFill.CssToken(state);
@@ -870,6 +906,77 @@
         _ => "record",
     };
 
+    private RenderFragment RenderSummaryTile(ApplicationWorkspaceCaseSummaryTile field) => __builder =>
+    {
+        <div class="cw-sum-tile cw-sum-tile--@field.Tone cw-sum-tile--fill-@FillCss(field.FillState)">
+            <span class="cw-sum-tile__icon">@field.Glyph</span>
+            <span class="cw-sum-tile__label">@field.Label</span>
+            <strong class="cw-sum-tile__value">@field.Value</strong>
+        </div>
+    };
+
+    private RenderFragment RenderSummaryField(ApplicationWorkspaceCaseHeaderField field) => __builder =>
+    {
+        <label class="cw-summary-field cw-summary-field--fill-@FillCss(field.FillState)">
+            <span class="cw-summary-field__label">@field.Label</span>
+            @if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Date)
+            {
+                <input type="date"
+                       class="cw-summary-field__input"
+                       value="@field.Value"
+                       disabled="@field.ReadOnly"
+                       @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())" />
+            }
+            else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.CommaSeparatedMultiSelect)
+            {
+                <BorderZoneLocationField Value="@field.Value"
+                                         EditorAlias="@EditorAliasFor(field.Key)"
+                                         ReadOnly="@field.ReadOnly"
+                                         CatalogItems="@field.MultiSelectOptions"
+                                         ValueChanged="@(value => OnHeaderFieldChanged(field.Key, value))" />
+            }
+            else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Lookup)
+            {
+                <select class="cw-summary-field__input"
+                        value="@field.Value"
+                        disabled="@field.ReadOnly"
+                        @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())">
+                    <option value="">— Select —</option>
+                    @foreach (var option in field.Options)
+                    {
+                        var optionId = option.Id.ToString("D");
+                        <option value="@optionId" selected="@(string.Equals(field.Value, optionId, StringComparison.OrdinalIgnoreCase))">@option.DisplayName</option>
+                    }
+                </select>
+            }
+            else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.ShortText)
+            {
+                <input type="text"
+                       class="cw-summary-field__input"
+                       value="@field.Value"
+                       maxlength="@(field.MaxLength ?? ApplicationWorkspaceCaseHeaderFieldsHelper.InstanceNumberMaxLength)"
+                       disabled="@field.ReadOnly"
+                       @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())" />
+            }
+            else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Text)
+            {
+                <textarea class="cw-summary-field__input cw-summary-field__textarea"
+                          maxlength="@ApplicationWorkspaceCaseHeaderFieldsHelper.PurposeMaxLength"
+                          rows="4"
+                          disabled="@field.ReadOnly"
+                          @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())">@field.Value</textarea>
+            }
+            else
+            {
+                <input type="text"
+                       class="cw-summary-field__input"
+                       value="@field.Value"
+                       disabled="@field.ReadOnly"
+                       @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())" />
+            }
+        </label>
+    };
+
     private RenderFragment RenderOverview(ApplicationWorkspaceCaseView view) => __builder =>
     {
         <div class="cw-overview">
@@ -913,81 +1020,61 @@
                 }
                 else if (IsCaseSummaryEditing && view.HeaderFields.Count > 0)
                 {
-                    <div class="cw-summary-form">
-                        @foreach (var field in view.HeaderFields)
+                    var identityFields = IdentityHeaderFields(view.HeaderFields);
+                    var mainFields = MainHeaderFields(view.HeaderFields);
+                    <div class="cw-summary-body @(mainFields.Count == 0 ? "cw-summary-body--identity-only" : null)">
+                        @if (mainFields.Count > 0)
                         {
-                            <label class="cw-summary-field cw-summary-field--fill-@FillCss(field.FillState)">
-                                <span class="cw-summary-field__label">@field.Label</span>
-                                @if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Date)
-                                {
-                                    <input type="date"
-                                           class="cw-summary-field__input"
-                                           value="@field.Value"
-                                           disabled="@field.ReadOnly"
-                                           @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())" />
-                                }
-                                else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.CommaSeparatedMultiSelect)
-                                {
-                                    <BorderZoneLocationField Value="@field.Value"
-                                                             EditorAlias="@EditorAliasFor(field.Key)"
-                                                             ReadOnly="@field.ReadOnly"
-                                                             CatalogItems="@field.MultiSelectOptions"
-                                                             ValueChanged="@(value => OnHeaderFieldChanged(field.Key, value))" />
-                                }
-                                else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Lookup)
-                                {
-                                    <select class="cw-summary-field__input"
-                                            value="@field.Value"
-                                            disabled="@field.ReadOnly"
-                                            @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())">
-                                        <option value="">— Select —</option>
-                                        @foreach (var option in field.Options)
-                                        {
-                                            var optionId = option.Id.ToString("D");
-                                            <option value="@optionId" selected="@(string.Equals(field.Value, optionId, StringComparison.OrdinalIgnoreCase))">@option.DisplayName</option>
-                                        }
-                                    </select>
-                                }
-                                else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.ShortText)
-                                {
-                                    <input type="text"
-                                           class="cw-summary-field__input"
-                                           value="@field.Value"
-                                           maxlength="@(field.MaxLength ?? ApplicationWorkspaceCaseHeaderFieldsHelper.InstanceNumberMaxLength)"
-                                           disabled="@field.ReadOnly"
-                                           @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())" />
-                                }
-                                else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Text)
-                                {
-                                    <textarea class="cw-summary-field__input cw-summary-field__textarea"
-                                              maxlength="@ApplicationWorkspaceCaseHeaderFieldsHelper.PurposeMaxLength"
-                                              rows="4"
-                                              disabled="@field.ReadOnly"
-                                              @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())">@field.Value</textarea>
-                                }
-                                else
-                                {
-                                    <input type="text"
-                                           class="cw-summary-field__input"
-                                           value="@field.Value"
-                                           disabled="@field.ReadOnly"
-                                           @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())" />
-                                }
-                            </label>
+                            <div class="cw-summary-main">
+                                <div class="cw-summary-form">
+                                    @foreach (var field in mainFields)
+                                    {
+                                        @RenderSummaryField(field)
+                                    }
+                                </div>
+                            </div>
+                        }
+                        @if (identityFields.Count > 0)
+                        {
+                            <aside class="cw-summary-identity" aria-label="Application number, date, and urgency">
+                                <div class="cw-summary-form cw-summary-form--stack">
+                                    @foreach (var field in identityFields)
+                                    {
+                                        @RenderSummaryField(field)
+                                    }
+                                </div>
+                            </aside>
                         }
                     </div>
                     <p class="cw-summary-foot">Changing these does not change the Application Profile template.</p>
                 }
                 else
                 {
-                    <div class="cw-summary-grid">
-                        @foreach (var field in OverviewTiles(view))
+                    var tiles = OverviewTiles(view).ToList();
+                    var identityTiles = IdentityTiles(tiles);
+                    var mainTiles = MainTiles(tiles);
+                    <div class="cw-summary-body @(mainTiles.Count == 0 ? "cw-summary-body--identity-only" : null)">
+                        @if (mainTiles.Count > 0)
                         {
-                            <div class="cw-sum-tile cw-sum-tile--@field.Tone cw-sum-tile--fill-@FillCss(field.FillState)">
-                                <span class="cw-sum-tile__icon">@field.Glyph</span>
-                                <span class="cw-sum-tile__label">@field.Label</span>
-                                <strong class="cw-sum-tile__value">@field.Value</strong>
+                            <div class="cw-summary-main">
+                                <div class="cw-summary-grid">
+                                    @foreach (var field in mainTiles)
+                                    {
+                                        @RenderSummaryTile(field)
+                                    }
+                                </div>
                             </div>
+                        }
+                        @if (identityTiles.Count > 0)
+                        {
+                            <aside class="cw-summary-identity" aria-label="Application number, date, and urgency">
+                                <div class="cw-summary-grid cw-summary-grid--stack">
+                                    @foreach (var field in identityTiles)
+                                    {
+                                        @RenderSummaryTile(field)
+                                    }
+                                </div>
+                            </aside>
                         }
                     </div>
                 }

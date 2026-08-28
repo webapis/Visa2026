@@ -1,3 +1,51 @@
+### 2026-08-28 — Border zone defaults to Ýok
+
+- **Need**: Invitation/Visa Case summary Border zone should show **Ýok**, not empty/`—`. Ýok is the catalog none sentinel (same as visa/invitation).
+- **Fix**: Profile seed/mapper set `DefaultBorderZoneLocation` to `CommaSeparatedSelectionHelper.NoneValue` when RequireBorderZone and default empty. Instance `ApplyDefaults` / `OnCreated` / `OnSaving` use `ApplyDefaultIfEmpty`. `FormatBorderZoneDisplay` returns Ýok. `BorderZoneFill`: empty or Ýok vs empty or Ýok default = Default (blue); Ýok vs a real zone default stays Empty (red). Wizard Results forces the Use default to Ýok.
+- **Test**: `Build_FillState_BorderZoneYokIsDefaultValue`; `ApplyDefaultIfEmpty_InstanceSetsYok`; existing `Build_FillState_MultiSelectIgnoresOrderAndNoneValue` still Empty for Ýok vs `"Zone B, Zone A"`. Officer: stop F5, rebuild, Ctrl+F5 so catalog sync writes the profile default. Open an inv/visa case — Border zone tile shows **Ýok** (blue if still default).
+- **Prevent**: Do not skip Ýok in display as if it were blank. Do not treat Ýok as Empty fill when the profile default is also empty/Ýok. Do not set `ProduceBorderZone` or flip type `ShowBorderZoneLocation` for this.
+- **Cross-skill**: application-profile
+
+### 2026-08-28 — Work permit templates require Work permit location
+
+- **Need**: When May produce **Work permit** is on, **Work permit location** (instance Use field / Case summary) must be visible. Same pattern as Border zone for Invitation/Visa. Not **May produce Work location** (`ProduceWorkLocation`).
+- **Fix**: `RequireWorkPermitLocationWhenProducingWorkPermit` on seed apply, type mapper, `ShowMovementPermitLocation` / `ShowWorkPermittedLocations`, Case summary tiles, overview. Wizard Results checks and locks the Use box when ProduceWorkPermit is on. Calik JSON already had Require true on all four WP templates (`get_invitation_wp`, `extend_visa_wp`, `workpermit_extension`, `change_workpermit`).
+- **Test**: `ApplicationProfileConfigurationResolverTests` WP location facts. Officer: stop F5, rebuild, Ctrl+F5. Open a WP-producing case — Work permit location tile is on Case summary. Configure wizard: Use is checked and cannot be cleared while May produce Work permit is on.
+- **Prevent**: Do not leave RequireWorkPermitLocation off when ProduceWorkPermit is on. Do not set ProduceWorkLocation for this (that is a different May produce output).
+- **Cross-skill**: application-profile | visa2026-lookup-data
+
+### 2026-08-28 — Invitation/Visa templates require Border zone on the instance
+
+- **Need**: Any Application Profile that may produce Invitation or Visa must show **Border zone** under ApplicationProfileInstance properties required (Case summary location, not border-zone permit).
+- **Fix**: Calik catalog `application-profile.calik-energi.json`: `change_invitation`, `visa_exit`, `visa_category_change`, `pasport_change` now `RequireBorderZone: true`. Seed apply and dual-read mapper use `RequireBorderZoneWhenProducingInvitationOrVisa`. Runtime `ShowBorderZoneLocation` follows the same rule. Did **not** set `ProduceBorderZone` or ApplicationType `ShowBorderZoneLocation` (that flag still means permit output on type fallback).
+- **Test**: `ApplicationProfileConfigurationResolverTests` force/visibility facts. Officer: stop F5, rebuild, Ctrl+F5 so catalog sync runs. Open Configure on Çakylygy üýtgetmek / Çykyş wiza / category change / passport change — Border zone is checked. Case summary shows the Border zone tile.
+- **Prevent**: Do not leave RequireBorderZone off when ProduceInvitation or ProduceVisa is on. Do not flip type `ShowBorderZoneLocation` to turn on the instance field (that would look like May produce border zone).
+- **Cross-skill**: application-profile | visa2026-lookup-data
+
+### 2026-08-28 — Current progress node stays blue pen until Advance
+
+- **Need**: Picking Result **Issued** on Migration service painted the last node green with a tick before Advance. Office preparation (unsaved Submitted) correctly stayed blue with a pen.
+- **Fix**: Timeline icon/tone/badge use saved `step.State` / `OutcomeKind` only. Current node is always blue + ✎. Result dropdown is the unsaved next action. After Advance, Issued becomes a saved `done` node (green tick).
+- **Test**: Officer: stop F5, rebuild, Ctrl+F5. Progress → last step, Result Issued, do **not** Advance. Node stays blue pen. Previous saved steps stay green ticks. After Advance, last node may turn green tick.
+- **Prevent**: Do not preview `_selectedAdvanceStateCode` OutcomeKind onto the current timeline node.
+- **Cross-skill**: application-profile | application-progress
+
+### 2026-08-28 — Case summary identity frame (number, date, urgency)
+
+- **Need**: Application number, Application date, and Urgency should sit together on the **right** of Case summary, in their own frame — not mixed into the Use-field grid.
+- **Fix**: Overview tiles and Edit form: left = remaining Use fields; right aside = number, date, then urgency (when the profile shows it). Fill-state colors unchanged.
+- **Test**: Officer: stop F5, rebuild, Ctrl+F5. Open a case Overview. Those three are stacked in a right panel; Visa type / Category / Period / Project stay on the left. Edit uses the same split. If the profile hides Urgency, the frame still has number and date.
+- **Prevent**: Do not put InstanceNumber / InstanceDate / Urgency back into the main `.cw-summary-grid`. Use `IsIdentityField` / `IdentityFieldKeys`.
+- **Cross-skill**: application-profile
+
+### 2026-08-28 — Case workspace section switch showed two progress bars
+
+- **Need**: Switching Overview / People / Progress (and other case sections) showed a thin top line *and* the center overlay. Officers want one indicator.
+- **Fix**: Removed `.cw-tab-progress` (the 3px bar under the case header). Kept `.cw-tab-loading` overlay in `.cw-main`. Left `@keyframes cw-tab-progress-slide` for the overlay fill.
+- **Test**: Officer: stop F5, rebuild, Ctrl+F5. Open a case → click Progress, then Overview. Only the center “Opening …” panel should appear — no blue line under the title.
+- **Prevent**: Do not add a second sticky/top progress bar next to `.cw-tab-loading`. Report Dashboard’s top-pinned bar is a different surface.
+- **Cross-skill**: application-profile
+
 ### 2026-08-28 — Case summary Edit: Border zone save hid other dropdowns
 
 - **Need**: Setting Border zone (or any Use field) made Visa type, Category, Period, Project, Urgency look empty until **Done**. Number/date and Border zone text stayed visible.

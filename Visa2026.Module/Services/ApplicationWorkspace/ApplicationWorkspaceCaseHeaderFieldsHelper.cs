@@ -33,6 +33,20 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
     public const string InstanceDate = "InstanceDate";
     public const int InstanceNumberMaxLength = 100;
 
+    /// <summary>Case summary right-frame fields: number, date, urgency (when shown).</summary>
+    public static readonly string[] IdentityFieldKeys =
+    [
+        InstanceNumber,
+        InstanceDate,
+        Urgency,
+    ];
+
+    public static bool IsIdentityField(string? key) =>
+        !string.IsNullOrEmpty(key)
+        && (string.Equals(key, InstanceNumber, StringComparison.Ordinal)
+            || string.Equals(key, InstanceDate, StringComparison.Ordinal)
+            || string.Equals(key, Urgency, StringComparison.Ordinal));
+
     public static IReadOnlyList<ApplicationWorkspaceCaseHeaderField> Build(
         ApplicationProfileInstance application,
         ApplicationProfile? profile,
@@ -100,11 +114,13 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             LookupFill(application.Urgency?.ID, DefaultId(profile?.DefaultUrgency?.ID, profile?.DefaultUrgencyId)));
 
         AddCommaSeparatedMultiSelect(fields, BorderZone, "Border zone", "teal", "📍",
-            Visible(profile, p => p.RequireBorderZone, ApplicationProfileConfigurationResolver.ShowBorderZoneLocation, application),
+            Visible(profile, p => ApplicationProfileConfigurationResolver.RequireBorderZoneWhenProducingInvitationOrVisa(
+                    p.ProduceInvitation, p.ProduceVisa, p.RequireBorderZone),
+                ApplicationProfileConfigurationResolver.ShowBorderZoneLocation, application),
             application.BorderZoneLocation,
             FormatBorderZoneDisplay(application.BorderZoneLocation_NameTm, application.BorderZoneLocation),
             catalogs.BorderZoneNames, readOnly: false,
-            MultiSelectFill(application.BorderZoneLocation, profile?.DefaultBorderZoneLocation));
+            BorderZoneFill(application.BorderZoneLocation, profile?.DefaultBorderZoneLocation));
 
         AddDate(fields, EndDate, "End date", "green", "📅",
             Visible(profile, p => p.RequireEndDate, ApplicationProfileConfigurationResolver.ShowBusinessTrips, application),
@@ -149,7 +165,9 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             TextFill(application.Purpose, profile?.DefaultPurpose));
 
         AddCommaSeparatedMultiSelect(fields, WorkPermitLocation, "Work permit location", "blue", "🏢",
-            Visible(profile, p => p.RequireWorkPermitLocation, ApplicationProfileConfigurationResolver.ShowMovementPermitLocation, application),
+            Visible(profile, p => ApplicationProfileConfigurationResolver.RequireWorkPermitLocationWhenProducingWorkPermit(
+                    p.ProduceWorkPermit, p.RequireWorkPermitLocation),
+                ApplicationProfileConfigurationResolver.ShowMovementPermitLocation, application),
             application.MovementPermitLocation,
             application.MovementPermitLocation_NameTm,
             catalogs.WorkPermittedLocationNames, readOnly: false,
@@ -191,7 +209,9 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                     return Hidden(out error);
                 return SetLookup<VisaPeriod>(objectSpace, value, item => application.VisaPeriod = item!, out error);
             case BorderZone:
-                if (!Visible(profile, p => p.RequireBorderZone, ApplicationProfileConfigurationResolver.ShowBorderZoneLocation, application))
+                if (!Visible(profile, p => ApplicationProfileConfigurationResolver.RequireBorderZoneWhenProducingInvitationOrVisa(
+                        p.ProduceInvitation, p.ProduceVisa, p.RequireBorderZone),
+                    ApplicationProfileConfigurationResolver.ShowBorderZoneLocation, application))
                     return Hidden(out error);
                 return SetBorderZone(value, application, out error);
             case EntryCheckPoint:
@@ -253,7 +273,9 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                     return Hidden(out error);
                 return SetLookup<Urgency>(objectSpace, value, item => application.Urgency = item!, out error);
             case WorkPermitLocation:
-                if (!Visible(profile, p => p.RequireWorkPermitLocation, ApplicationProfileConfigurationResolver.ShowMovementPermitLocation, application))
+                if (!Visible(profile, p => ApplicationProfileConfigurationResolver.RequireWorkPermitLocationWhenProducingWorkPermit(
+                        p.ProduceWorkPermit, p.RequireWorkPermitLocation),
+                    ApplicationProfileConfigurationResolver.ShowMovementPermitLocation, application))
                     return Hidden(out error);
                 return SetWorkPermitLocation(value, application, out error);
             default:
@@ -488,7 +510,21 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             return preferred.Trim();
         if (!string.IsNullOrWhiteSpace(fallback) && !BorderZoneSelectionHelper.IsNoneValue(fallback))
             return fallback.Trim();
-        return string.Empty;
+        return BorderZoneSelectionHelper.NoneValue;
+    }
+
+    private static ApplicationWorkspaceCaseSummaryFillState BorderZoneFill(string? stored, string? defaultStored)
+    {
+        var storedNone = string.IsNullOrWhiteSpace(stored) || BorderZoneSelectionHelper.IsNoneValue(stored);
+        var defaultNone = string.IsNullOrWhiteSpace(defaultStored) || BorderZoneSelectionHelper.IsNoneValue(defaultStored);
+        if (storedNone)
+        {
+            return defaultNone
+                ? ApplicationWorkspaceCaseSummaryFillState.Default
+                : ApplicationWorkspaceCaseSummaryFillState.Empty;
+        }
+
+        return MultiSelectFill(stored, defaultStored);
     }
 
     private static bool SetDate(string? value, Action<DateTime?> assign, out string? error)

@@ -85,7 +85,7 @@ internal static class ApplicationWorkspaceCaseBuilder
             Chrome = syncedChrome,
             HeaderFields = headerFields,
             SummaryTiles = headerFields.Count > 0
-                ? headerFields.Select(field => Tile(field.Label, field.DisplayValue, field.Tone, field.Glyph, field.FillState)).ToList()
+                ? headerFields.Select(field => Tile(field.Label, field.DisplayValue, field.Tone, field.Glyph, field.FillState, field.Key)).ToList()
                 : application != null
                     ? Array.Empty<ApplicationWorkspaceCaseSummaryTile>()
                     : BuildSummaryTilesFromChrome(chrome),
@@ -205,9 +205,11 @@ internal static class ApplicationWorkspaceCaseBuilder
         string value,
         string tone,
         string glyph,
-        ApplicationWorkspaceCaseSummaryFillState fillState = ApplicationWorkspaceCaseSummaryFillState.Default) =>
+        ApplicationWorkspaceCaseSummaryFillState fillState = ApplicationWorkspaceCaseSummaryFillState.Default,
+        string key = "") =>
         new()
         {
+            Key = key,
             Label = label,
             Value = string.IsNullOrWhiteSpace(value) ? "—" : value,
             Tone = tone,
