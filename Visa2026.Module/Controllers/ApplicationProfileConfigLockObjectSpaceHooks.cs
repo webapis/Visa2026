@@ -6,6 +6,7 @@ namespace Visa2026.Module.Controllers;
 /// <summary>
 /// Blocks configuration edits on locked <see cref="ApplicationProfile"/> rows and nested templates.
 /// Approval-leg versions and legs may still change (instances keep a snapshot).
+/// New nested templates may be added while locked; existing template rows stay blocked.
 /// </summary>
 internal static class ApplicationProfileConfigLockObjectSpaceHooks
 {

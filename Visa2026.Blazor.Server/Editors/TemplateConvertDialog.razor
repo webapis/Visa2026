@@ -18,10 +18,6 @@
                 <div>
                     <h2 id="tac-title">
                         @(_manual ? "Add prepared template" : "Convert document to template")
-                        @if (_configLocked)
-                        {
-                            <span class="tac-lock-badge">Config locked</span>
-                        }
                     </h2>
                     <p>@_profileName@(string.IsNullOrEmpty(_caseNumber) ? string.Empty : " · case " + _caseNumber)</p>
                 </div>
@@ -42,16 +38,6 @@
             }
 
             <div class="tac-modal__body">
-                @if (_configLocked)
-                {
-                    <div class="tac-banner tac-banner--lock">
-                        <div>
-                            <strong>This profile is configuration locked</strong>
-                            <span>Cases are already running on it, so templates cannot be added. You can still check a document and see what would be mapped.</span>
-                        </div>
-                    </div>
-                }
-
                 @if (_stage == Stage.Upload)
                 {
                     <div class="tac-form">
@@ -415,8 +401,6 @@
     private Guid _profileId;
     private string _profileName = string.Empty;
     private string _caseNumber = string.Empty;
-    private bool _configLocked;
-
     private byte[]? _fileBytes;
     private string _fileName = string.Empty;
     private string _templateName = string.Empty;
@@ -463,7 +447,6 @@
             {
                 _profileId = profile.ID;
                 _profileName = profile.Name ?? string.Empty;
-                _configLocked = ApplicationProfileLockHelper.IsProfileConfigLocked(profile, objectSpace);
             }
         }
 
@@ -487,7 +470,6 @@
         _hostProfile = profile;
         _profileId = profile.ID;
         _profileName = profile.Name ?? string.Empty;
-        _configLocked = ApplicationProfileLockHelper.IsProfileConfigLocked(profile, objectSpace);
         _instanceOptions = manual ? Array.Empty<InstanceOption>() : LoadInstanceOptions(profile, objectSpace);
 
         _open = true;
@@ -543,7 +525,6 @@
         _chatInput = string.Empty;
         _chatBusy = false;
         _currentPlan = null;
-        _configLocked = false;
     }
 
     private Task RequestCloseAsync()
@@ -710,12 +691,11 @@
 
     private bool CanApprove =>
         !_busy
-        && !_configLocked
         && _outcome is { HasErrors: false }
         && (!_outcome.HasWarnings || _acknowledgedWarnings);
 
     private bool CanAddManual =>
-        !_busy && !_configLocked && _fileBytes is { Length: > 0 } && !string.IsNullOrWhiteSpace(_templateName);
+        !_busy && _fileBytes is { Length: > 0 } && !string.IsNullOrWhiteSpace(_templateName);
 
     private Task ApproveAsync() => SaveAsync(_outcome?.Content, converted: true);
 
@@ -807,7 +787,6 @@
         var caseNumber = _caseNumber;
         var profileId = _profileId;
         var profileName = _profileName;
-        var locked = _configLocked;
         var hostObjectSpace = _hostObjectSpace;
         var hostProfile = _hostProfile;
         var instanceOptions = _instanceOptions;
@@ -821,7 +800,6 @@
         _caseNumber = caseNumber;
         _profileId = profileId;
         _profileName = profileName;
-        _configLocked = locked;
         _hostObjectSpace = hostObjectSpace;
         _hostProfile = hostProfile;
         _instanceOptions = instanceOptions;

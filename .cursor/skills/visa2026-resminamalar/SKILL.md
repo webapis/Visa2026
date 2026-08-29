@@ -42,6 +42,7 @@ disable-model-invocation: false
 | Document copies (PDF ZIP, scan preview) | [`.cursor/skills/visa2026-document-copies/SKILL.md`](../visa2026-document-copies/SKILL.md) |
 | Person document copies (planned — master Person catalog) | [`.cursor/skills/visa2026-person-document-copies/SKILL.md`](../visa2026-person-document-copies/SKILL.md) · [`docs/PERSON_DOCUMENT_COPIES.md`](../../../docs/PERSON_DOCUMENT_COPIES.md) |
 | Global preview slot shell (layout, occupants, catalog card CSS) | [`.cursor/skills/visa2026-preview-slot/SKILL.md`](../visa2026-preview-slot/SKILL.md) |
+| Create template from scan (Word/Excel from scanned images) | [`.cursor/skills/visa2026-template-scan/SKILL.md`](../visa2026-template-scan/SKILL.md) |
 | XFA visa application form mapping | [`.cursor/skills/visa2026-pdf-form-mapping/SKILL.md`](../visa2026-pdf-form-mapping/SKILL.md) |
 | Legacy code-backed Word / XtraReports (removed) | [`.cursor/skills/visa2026-word-reports/SKILL.md`](../visa2026-word-reports/SKILL.md) — **deprecated** |
 

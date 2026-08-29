@@ -480,6 +480,10 @@
 }
 
 .ap-wizard__list-row--template { grid-template-columns: 36px 1fr minmax(160px, 240px) auto; }
+.ap-wizard__list-row--focus {
+    background: #ecfdf5;
+    box-shadow: inset 3px 0 0 #0d9488;
+}
 .ap-wizard__list-row--shared {
     grid-template-columns: 36px 1fr auto auto;
 }

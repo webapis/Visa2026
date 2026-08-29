@@ -28,3 +28,4 @@ Shared promotion rules: [docs/DEPLOYMENT_LIFECYCLE_EXPERIENCE.md](../../../docs/
 | Resminamalar readiness, ZIP, template visibility | **visa2026-resminamalar** |
 | Scan slots, PDF package, application form download | **visa2026-document-copies** |
 | Ministry letter file on progress row | **visa2026-application-progress** |
+| Create from scan wizard / yellow / draft Docx | **visa2026-template-scan** |

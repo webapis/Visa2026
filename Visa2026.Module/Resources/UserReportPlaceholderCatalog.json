@@ -2,6 +2,7 @@
   "version": 1,
   "entries": [
     { "shortCode": "AFNUM", "packKey": "Core", "canonicalPath": "FullApplicationNumber", "scopes": ["Header"], "rootBoTypes": ["Application"], "exampleValue": "TRM-2026-120", "labels": { "en": "Full application number", "tk-TM": "Doly arza belgisi", "ru-RU": "Полный номер заявки", "tr-TR": "Tam başvuru numarası" } },
+    { "shortCode": "Urgency_NameTm", "packKey": "Core", "canonicalPath": "Urgency_NameTm", "scopes": ["Header"], "rootBoTypes": ["Application"], "exampleValue": "Adaty tertipde !", "labels": { "en": "Urgency (Turkmen)", "tk-TM": "Gyssaglylyk", "ru-RU": "Срочность", "tr-TR": "Aciliyet" } },
     { "shortCode": "ADAT", "packKey": "Core", "canonicalPath": "ApplicationDateText", "scopes": ["Header"], "rootBoTypes": ["Application"], "exampleValue": "20.01.2026", "labels": { "en": "ApplicationProfileInstance date", "tk-TM": "Arza senesi", "ru-RU": "Дата заявки", "tr-TR": "Başvuru tarihi" } },
     { "shortCode": "ACODE", "packKey": "Core", "canonicalPath": "Company_Code", "scopes": ["Header"], "rootBoTypes": ["Application"], "exampleValue": "CLK", "labels": { "en": "Company code", "tk-TM": "Kärhana kody", "ru-RU": "Код компании", "tr-TR": "Şirket kodu" } },
     { "shortCode": "ACNAM", "packKey": "Core", "canonicalPath": "Application_Company_Name", "scopes": ["Header"], "rootBoTypes": ["Application"], "exampleValue": "Çalık Enerji …", "labels": { "en": "Company name", "tk-TM": "Kärhana ady", "ru-RU": "Название компании", "tr-TR": "Şirket adı" } },

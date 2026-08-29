@@ -2353,3 +2353,69 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 - **Wizard routing**: use `#/templates/wizard/{0-4}` (query string in hash unreliable).
 - **Next**: Officer walkthrough + parity checkboxes; then Blazor lift (`OfficerShellLayout.razor`) when product locks template → staged → in-process pivot.
 - **Cross-skill**: —
+
+### 2026-08-29 — Template Scan Analyze: DeploymentNotFound on gpt-4o-mini
+
+- Symptom: Analyze scan shows "Analysis failed" (generic catch) after PNG upload; case field showed literal `_applicationNumber`.
+- Cause: `TemplateAiScan:AzureOpenAI:Deployment` was `gpt-4o-mini`, but that deployment is **gone** on `visa2026-openai` (HTTP 404 DeploymentNotFound). Convert already uses working `gpt-4.1-mini` (vision OK). Separate bug: Resminamalar passed `ApplicationNumber="_applicationNumber"` (literal string) instead of `@(_applicationNumber)`.
+- Fix: Point Scan Deployment at `gpt-4.1-mini`; surface `ex.Message` in the dialog; fall back to deterministic field plan when the AI provider throws (Convert parity); fix ApplicationNumber bindings in officer shell + Resminamalar slot.
+- Verify: stop F5, rebuild, F5 — Analyze on Turkmen letter PNG should reach Field Review (vision via gpt-4.1-mini). Case hint shows the real application number.
+- Prevent: Before changing Scan deployment names, probe `POST .../deployments/{name}/chat/completions` with the Scan API key. Prefer the same deployment Convert already uses on this resource.
+- Cross-skill: -
+
+### 2026-08-29 — Scan draft must keep letter layout (not Label: token list)
+
+- Symptom: Analyze mapped fields, but Preview/Resminamalar merge showed a flat `Company name: …` catalog — original Turkmen letter structure (header, addressee, body, signature) was lost.
+- Cause: Azure `ProposeDocxLayoutAsync` was a stub returning empty blocks; `ScanDocxLayoutService` fell back to `DeterministicScanDocxLayoutPlanner`, which emitted `Kind=field` as `Label: {{token}}` lines.
+- Fix: Implement vision layout reconstruction (paragraphs with embedded tokens + align); pass page PNGs/OCR/value hints into `ScanDocxLayoutRequest`; builder renders `paragraph`/`blank` with alignment; OCR fallback replaces value hints when AI is off.
+- Verify: stop F5, rebuild, F5 — same PNG → Continue → Preview should show letter prose with `{{ds.*}}` inside sentences, not a field catalog. Unit: 45 TemplateScan green.
+- Prevent: Do not ship empty AI layout stubs that silently fall back to flat lists for vision scans.
+- Cross-skill: visa2026-resminamalar (merge preview of scan-authored templates)
+
+### 2026-08-29 — Scan layout: no leftover-token dump at footer
+
+- Symptom: Letter body preserved, but Preview/merge ended with a stack of bare `{{ds.*}}` / filled values (ACODE, ADAT, AFNUM, …) under the signature.
+- Cause: ParseLayout (and OCR deterministic path) appended every mapped token that was not embedded — intended as a safety net, ruined letter layout.
+- Fix: Remove end-of-document token dumps; strengthen vision layout prompt to place every mappedFields token in-context; warn in Generate when a Review token was not placed.
+- Verify: Regenerate same PNG — footer should be position + name only (as on scan), not a token/value list. Unplaced tokens appear as Preview warnings.
+- Prevent: Never append unused merge tokens as extra paragraphs to satisfy Emit-all.
+- Cross-skill: -
+
+### 2026-08-29 — Scan: yellow-highlight-only placeholders
+
+- Rule: Officers mark replaceable values with yellow highlighter. Vision maps **only** yellow spans to the placeholder library. No yellow → Fail. Yellow but nothing maps → Fail. Gaps on some yellows → Warn. Non-highlighted text stays literal. Scan is always filled-sample + case hints; Blank form removed. Placeholder set for scan is **Both** (full Word library for the profile). Catalog adds `Urgency_NameTm` (`Adaty tertipde!`).
+- Verify: Upload yellow-marked PNG → Analyze reaches Review with only highlighted fields. Unmarked PNG → Scan fail. Regenerate draft embeds only those tokens.
+- Prevent: Do not fall back to OCR catalog matching when vision fails (invents non-yellow fields). Do not dump unused tokens at footer.
+- Cross-skill: visa2026-user-report-templates (catalog)
+
+### 2026-08-29 — Placeholder Manual missing tokens (Application rootBoType alias)
+
+- Symptom: Case Resminamalar → Placeholder manual listed only a subset; many header/person tokens missing. Scan gaps for AFNUM/ADAT/etc. looked like “library missing” even though JSON had them.
+- Cause: Catalog JSON uses `rootBoTypes: ["Application", …]`. Enum has `ApplicationProfileInstance`, not `Application`. For dual lists, `"Application"` failed parse and only `ApplicationItem` remained → case filter (`ApplicationProfileInstance`) dropped those rows.
+- Fix: Map `"Application"` → `ApplicationProfileInstance` in `ParseRootBoTypes`. Also local yellow split/match for compound highlights + stronger field-plan prompt.
+- Verify: Rebuild, F5, Placeholder manual from case Resminamalar — AFNUM, ADAT, ACNAM, TPCTX, PFN, Urgency_NameTm visible. Re-Analyze yellow scan should map number/date/count/period.
+- Prevent: Do not filter Manual by root BO without aliasing legacy `"Application"`. Prefer writing `ApplicationProfileInstance` in new catalog rows.
+- Cross-skill: visa2026-user-report-templates | visa2026-resminamalar
+
+### 2026-08-29 — Scan draft: keep alignment / two-column / bold-italic
+
+- Need: Officers want the Word template from scan to match letter layout (№/date left + addressee right; justified body; italic urgency; bold split signature) — not a left-stacked paragraph list.
+- Fix: `ScanDocxBlock` gains `twoColumn`, `RightText`, `RightAlign`, `Style`, `RightStyle`. `ScanDraftDocxBuilder` renders borderless two-cell tables + italic/bold runs. Azure layout prompt/schema/ParseLayout require twoColumn + justify/italic/bold from the vision scan.
+- Verify: stop F5, rebuild, F5 — Create from scan on the yellow Turkmen letter → Generate → Preview: addressee opposite header, body justify, urgency italic, signature title|name side-by-side. Unit: `Build_twoColumn_and_styles_match_letter_layout`, `ProposeDocxLayout_parses_twoColumn_and_styles`.
+- Prevent: Do not model side-by-side bands as two sequential left paragraphs. Do not claim pixel-perfect fonts/margins — Edit template in Word remains for polish.
+- Cross-skill: visa2026-resminamalar
+### 2026-08-29 — Scan layout still left-stacked vs original letter
+
+- Symptom: After twoColumn prompt work, officer Preview still looked like a left text stack; merge PDF closer but not matching original (header opposite addressee, italic urgency, bold split signature).
+- Cause: (1) Vision often still emitted sequential left paragraphs; (2) Scan Preview used TemplateConvertOutlineView which flattens table cells into a line list — hides real Word alignment.
+- Fix: ScanLetterLayoutNormalizer rebuilds ministry-letter structure (twoColumn header/signature, italic urgency, justify body) after AI/OCR layout; Preview shows DOCX→PDF iframe so officers see page layout.
+- Verify: stop F5, rebuild, F5 — same yellow letter → Generate → Preview should show PDF with №/date left and addressee right; signature title|name side-by-side. Unit: ScanLetterLayoutNormalizerTests.
+- Prevent: Do not judge scan draft layout from outline text alone. Prefer PDF preview for alignment QA.
+- Cross-skill: visa2026-resminamalar
+### 2026-08-29 — Scan wizard Preview is outline only (no preview-slot PDF)
+
+- Need: Officers do not want the Resminamalar/template PDF preview viewer embedded inside Create template from scan.
+- Fix: TemplateScanPreviewView uses TemplateConvertOutlineView again (placeholder placement). Page layout is checked after save via catalog Preview / Edit template. DOCX layout normalizer still builds alignment in the file.
+- Verify: Generate → Preview shows text outline + placeholder list, not a PDF iframe. Catalog Preview still opens #visa-preview-slot.
+- Prevent: Do not inject ApplicationWordReportOfficePreviewPdfConverter into the scan wizard.
+- Cross-skill: visa2026-preview-slot | visa2026-resminamalar

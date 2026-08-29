@@ -122,11 +122,27 @@ public sealed class UserReportPlaceholderCatalogService : IUserReportPlaceholder
         var list = new List<UserReportBoType>();
         foreach (var name in rootBoTypes)
         {
-            if (Enum.TryParse<UserReportBoType>(name, ignoreCase: true, out var parsed))
+            if (string.IsNullOrWhiteSpace(name))
+                continue;
+
+            // Catalog JSON historically used "Application" for the case/header root.
+            if (string.Equals(name.Trim(), "Application", StringComparison.OrdinalIgnoreCase))
+            {
+                if (!list.Contains(UserReportBoType.ApplicationProfileInstance))
+                    list.Add(UserReportBoType.ApplicationProfileInstance);
+                continue;
+            }
+
+            if (Enum.TryParse(name.Trim(), ignoreCase: true, out UserReportBoType parsed)
+                && !list.Contains(parsed))
+            {
                 list.Add(parsed);
+            }
         }
 
-        return list.Count > 0 ? list : [UserReportBoType.ApplicationProfileInstance, UserReportBoType.ApplicationItem];
+        return list.Count > 0
+            ? list
+            : [UserReportBoType.ApplicationProfileInstance, UserReportBoType.ApplicationItem];
     }
 
     private static string GetLabel(IReadOnlyDictionary<string, string>? labels, string key)

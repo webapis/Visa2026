@@ -250,7 +250,7 @@
 
     private void CreateTemplate((string Name, ApplicationProfileTemplateKind Kind, int SortOrder, byte[]? FileBytes, string? FileName, ApplicationProfileTemplateCatalogScope CatalogScope, ApplicationProfileTemplateDataScope DataScope, string? CategoryKey) args)
     {
-        if (IsReadOnly || Profile == null || ObjectSpace is not { } os)
+        if (Profile == null || ObjectSpace is not { } os)
             return;
 
         var name = args.Name?.Trim();
@@ -261,6 +261,9 @@
             .FirstOrDefault(t => string.Equals(t.TemplateName, name, StringComparison.OrdinalIgnoreCase));
         if (existing != null)
         {
+            if (IsReadOnly)
+                return;
+
             existing.TemplateKind = args.Kind;
             existing.SortOrder = args.SortOrder;
             existing.CatalogScope = args.CatalogScope;

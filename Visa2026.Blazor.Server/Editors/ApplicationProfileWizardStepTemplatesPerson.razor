@@ -8,11 +8,14 @@
 @using Visa2026.Module.BusinessObjects
 @using Visa2026.Module.Services.ApplicationProfileWizard
 @using Visa2026.Module.Services.TemplateConvert
+@using Visa2026.Module.Services.TemplateScan
 @using Visa2026.Module.Services.UserReports
 @using Visa2026.Module.Services.WordReports
 @implements IDisposable
 @inject UserReportTemplateStagingUiService TemplateStagingUiService
 @inject IOptions<TemplateAiConvertOptions> ConvertOptions
+@inject IOptions<TemplateAiScanOptions> ScanOptions
+@inject ITemplateScanAiProvider ScanAiProvider
 @inject IJSRuntime JS
 
 <div class="ap-wizard__panel-head">
@@ -36,7 +39,7 @@
             {
                 @foreach (var template in ProfileTemplates)
                 {
-                    <div class="ap-wizard__list-row ap-wizard__list-row--template">
+                    <div class="ap-wizard__list-row ap-wizard__list-row--template @(IsHighlightedTemplate(template) ? "ap-wizard__list-row--focus" : string.Empty)">
                         <span class="ap-wizard__list-ord">@template.SortOrder</span>
                         <span>
                             <strong>@template.TemplateName</strong> · @FormatKind(template.TemplateKind)
@@ -79,7 +82,7 @@
                 <p class="ap-wizard__hint">No profile-specific templates yet.</p>
             }
         </div>
-        @if (!Disabled)
+        @if (!Disabled || AllowTemplateAdd)
         {
             <button type="button" class="ap-wizard__btn ap-wizard__btn--secondary ap-wizard__add-template" @onclick="OpenAdd">+ Add template</button>
             @if (ShowConvertEntry)
@@ -87,6 +90,18 @@
                 <button type="button" class="ap-wizard__btn ap-wizard__btn--secondary ap-wizard__add-template"
                         title="Upload a filled Word or Excel file and turn it into a template"
                         @onclick="OpenConvertAsync">Convert existing document</button>
+            }
+            @if (ShowScanEntryVisible)
+            {
+                <button type="button" class="ap-wizard__btn ap-wizard__btn--secondary ap-wizard__add-template"
+                        title="@ScanEntryTitle"
+                        @onclick="OpenScanAsync">
+                    Create from scan
+                    @if (!ShowScanEntryEnabled)
+                    {
+                        <span class="tas-badge-off">AI off</span>
+                    }
+                </button>
             }
         }
     </div>
@@ -537,6 +552,10 @@
 }
 
 <TemplateConvertDialog @ref="_convertDialog" OnTemplateSaved="OnConvertSaved" />
+<TemplateScanDialog @ref="_scanDialog"
+                    OnAddPreparedTemplate="OpenConvertManualAsync"
+                    OnTemplateSaved="OnScanSaved"
+                    OnFocusSavedTemplate="OnScanFocusTemplate" />
 
 @code {
     private sealed class DataScopeOption
@@ -549,6 +568,8 @@
 
     [Parameter, EditorRequired] public ApplicationProfile Profile { get; set; } = null!;
     [Parameter] public bool Disabled { get; set; }
+    /// <summary>When the profile is config-locked, officers may still add new templates (not edit/remove).</summary>
+    [Parameter] public bool AllowTemplateAdd { get; set; } = true;
     [Parameter] public IObjectSpace? ObjectSpace { get; set; }
     [Parameter] public string? OwnerViewId { get; set; }
     [Parameter] public ApplicationProfileWizardLookupData Lookups { get; set; } =
@@ -619,7 +640,10 @@
     private bool _editBusy;
     private bool _canStageTemplates;
     private bool _canConvertTemplates;
+    private bool _canScanTemplates;
     private TemplateConvertDialog? _convertDialog;
+    private TemplateScanDialog? _scanDialog;
+    private string? _highlightTemplateName;
     private Guid _linkedUserReportTemplateId;
     private DotNetObjectReference<ApplicationProfileWizardStepTemplatesPerson>? _dotNetRef;
 
@@ -635,6 +659,7 @@
 
         _canStageTemplates = TemplateStagingUiService.CanEditTemplates();
         _canConvertTemplates = TemplateConvertAccess.CanConvertTemplates();
+        _canScanTemplates = TemplateScanAccess.CanCreateFromScan();
         RefreshCatalog();
     }
 
@@ -644,6 +669,34 @@
     /// </summary>
     private bool ShowConvertEntry =>
         ConvertOptions.Value.Enabled && _canConvertTemplates && ObjectSpace != null;
+
+    /// <summary>Master flag on — button visible even when vision provider is off (prototype V12).</summary>
+    private bool ShowScanEntryVisible =>
+        ScanOptions.Value.Enabled && _canScanTemplates && ObjectSpace != null;
+
+    private bool ShowScanEntryEnabled =>
+        ShowScanEntryVisible && ScanAiProvider.IsEnabled;
+
+    private string ScanEntryTitle =>
+        ShowScanEntryEnabled
+            ? "Upload a scan or photo and detect merge placeholders"
+            : "Enable a Template AI Scan vision provider in configuration";
+
+    private async Task OpenScanAsync()
+    {
+        if (!ShowScanEntryVisible || _scanDialog == null || ObjectSpace == null)
+            return;
+
+        await _scanDialog.OpenForProfileAsync(Profile, ObjectSpace);
+    }
+
+    private async Task OpenConvertManualAsync()
+    {
+        if (!ShowConvertEntry || _convertDialog == null || ObjectSpace == null)
+            return;
+
+        await _convertDialog.OpenForProfileAsync(Profile, ObjectSpace, manual: true);
+    }
 
     private async Task OpenConvertAsync()
     {
@@ -658,6 +711,23 @@
         RefreshCatalog();
         StateHasChanged();
     }
+
+    private void OnScanSaved()
+    {
+        RefreshCatalog();
+        StateHasChanged();
+    }
+
+    private void OnScanFocusTemplate(string templateName)
+    {
+        _highlightTemplateName = templateName?.Trim();
+        RefreshCatalog();
+        StateHasChanged();
+    }
+
+    private bool IsHighlightedTemplate(ApplicationProfileTemplate template) =>
+        !string.IsNullOrWhiteSpace(_highlightTemplateName)
+        && string.Equals(template.TemplateName, _highlightTemplateName, StringComparison.OrdinalIgnoreCase);
 
     private bool IsBusinessTripProfile =>
         Profile.ActionFamily == ApplicationProfileActionFamily.BusinessTrip;

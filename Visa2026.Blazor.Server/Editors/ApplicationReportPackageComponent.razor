@@ -13,6 +13,7 @@
 @using Visa2026.Module.Services.WordReports
 @using Visa2026.Module.Services.UserReports
 @using Visa2026.Module.Services.TemplateConvert
+@using Visa2026.Module.Services.TemplateScan
 @using Visa2026.Module.BusinessObjects
 @using Microsoft.Extensions.Options
 @using System.Text.Json
@@ -37,6 +38,15 @@
                       SizeMode="SizeMode.Small"
                       CssClass="app-item-doc-copies__action-btn"
                       Click="@OpenPlaceholderManualAsync" />
+            @if (ShowScanEntryVisible)
+            {
+                <DxButton Text="Create from scan"
+                          RenderStyle="ButtonRenderStyle.Link"
+                          SizeMode="SizeMode.Small"
+                          CssClass="app-item-doc-copies__action-btn"
+                          title="@ScanEntryTitle"
+                          Click="@OpenScanAsync" />
+            }
             @if (ShowConvertEntry)
             {
                 <DxButton Text="Convert existing document"
@@ -247,6 +257,11 @@
     <TemplateConvertDialog @ref="_convertDialog" OnTemplateSaved="OnConvertSavedAsync" />
 }
 
+@if (ShowScanEntryVisible)
+{
+    <TemplateScanDialog @ref="_scanDialog" OnTemplateSaved="OnScanSavedAsync" />
+}
+
 @code {
     [Parameter] public Guid ApplicationProfileInstanceId { get; set; }
     [Parameter] public WordReportPackageScope PackageScope { get; set; } = WordReportPackageScope.ApplicationProfileInstance;
@@ -268,10 +283,14 @@
     [Inject] private IApplicationErrorReporter ErrorReporter { get; set; } = null!;
     [Inject] private IVisaPreviewSlotService PreviewSlotService { get; set; } = null!;
     [Inject] private IOptions<TemplateAiConvertOptions> ConvertOptions { get; set; } = null!;
+    [Inject] private IOptions<TemplateAiScanOptions> ScanOptions { get; set; } = null!;
+    [Inject] private ITemplateScanAiProvider ScanAiProvider { get; set; } = null!;
 
     private ApplicationReportPackagePreviewDialog? _previewDialog;
     private TemplateConvertDialog? _convertDialog;
+    private TemplateScanDialog? _scanDialog;
     private bool _canConvertTemplates;
+    private bool _canScanTemplates;
     private DotNetObjectReference<ApplicationReportPackageComponent>? _dotNetRef;
 
     private readonly HashSet<string> _selectedKeys = new(StringComparer.Ordinal);
@@ -415,6 +434,7 @@
     {
         _canEditUserTemplates = TemplateStagingUiService.CanEditTemplates();
         _canConvertTemplates = TemplateConvertAccess.CanConvertTemplates();
+        _canScanTemplates = TemplateScanAccess.CanCreateFromScan();
 
         var currentKeys = CatalogEntries
             .Select(entry => entry.EntryKey)
@@ -443,14 +463,37 @@
         && _canConvertTemplates
         && ApplicationProfileInstanceId != Guid.Empty;
 
+    private bool ShowScanEntryVisible =>
+        ScanOptions.Value.Enabled
+        && ScanOptions.Value.ShowInstanceEntry
+        && _canScanTemplates
+        && ApplicationProfileInstanceId != Guid.Empty;
+
+    private bool ScanEntryEnabled => ScanAiProvider.IsEnabled;
+
+    private string ScanEntryTitle =>
+        ScanEntryEnabled
+            ? "Upload a scan or photo and detect merge placeholders"
+            : "Enable TemplateAiScan with a vision provider (Azure OpenAI) in configuration";
+
     private Task OpenConvertAsync(bool manual) =>
         _convertDialog?.OpenAsync(ApplicationProfileInstanceId, ApplicationNumber, manual) ?? Task.CompletedTask;
+
+    private Task OpenScanAsync()
+    {
+        if (!ShowScanEntryVisible || _scanDialog == null)
+            return Task.CompletedTask;
+
+        return _scanDialog.OpenAsync(ApplicationProfileInstanceId, ApplicationNumber);
+    }
 
     private async Task OnConvertSavedAsync()
     {
         if (RefreshRequested.HasDelegate)
             await RefreshRequested.InvokeAsync();
     }
+
+    private Task OnScanSavedAsync() => OnConvertSavedAsync();
 
     private string EffectiveUiCulture =>
         VisaUiCultureResolver.Resolve(CultureInfoService, HttpContextAccessor.HttpContext, UiCultureName);

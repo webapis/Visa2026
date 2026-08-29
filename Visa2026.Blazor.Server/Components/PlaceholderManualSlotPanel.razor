@@ -54,7 +54,9 @@
                     @foreach (var entry in FilteredEntries)
                     {
                         var usageScope = entry.Scope == UserReportPlaceholderScope.Both
-                            ? UserReportPlaceholderScope.Row
+                            ? (Request?.FilterRootBoType == UserReportBoType.ApplicationItem
+                                ? UserReportPlaceholderScope.Row
+                                : UserReportPlaceholderScope.Header)
                             : entry.Scope;
                         var wordToken = entry.BuildWordToken(usageScope);
                         var excelToken = entry.BuildExcelToken(usageScope);

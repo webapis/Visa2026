@@ -1,0 +1,83 @@
+@namespace Visa2026.Blazor.Server.Editors
+@using Visa2026.Module.Services.TemplateConvert
+@using Visa2026.Module.Services.TemplateScan
+
+<div class="tas-split tas-split--preview">
+    <div class="tas-split__scan">
+        <div class="tas-filebar">
+            <strong>@TemplateName</strong>
+            <span class="tas-pill">@Outcome.EmittedTokens.Count placeholders</span>
+        </div>
+        <div class="tas-viewport">
+            <TemplateConvertOutlineView Outline="Outcome.Outline" />
+        </div>
+        <div class="tas-inline-note">
+            <strong>Draft template, not a filled document.</strong>
+            <span>Shows placeholder placement in the letter text. After save, use catalog <strong>Preview</strong> or <strong>Edit template</strong> for page layout.</span>
+        </div>
+    </div>
+    <aside class="tas-rail @(Outcome.HasErrors ? "tas-rail--errors" : string.Empty)">
+        @if (Outcome.HasErrors)
+        {
+            <h4>Blocking problems</h4>
+            <ul class="tas-issues">
+                @foreach (var error in Outcome.Errors)
+                {
+                    <li class="tas-issue tas-issue--fail">@error</li>
+                }
+            </ul>
+        }
+
+        @if (Outcome.HasWarnings)
+        {
+            <h4>Warnings</h4>
+            <ul class="tas-issues">
+                @foreach (var warning in Outcome.Warnings)
+                {
+                    <li class="tas-issue tas-issue--warn">@warning</li>
+                }
+            </ul>
+        }
+
+        <h4>Placeholders</h4>
+        <ul class="tas-token-list">
+            @foreach (var token in Outcome.Validation.Tokens)
+            {
+                <li><code>@token</code></li>
+            }
+        </ul>
+
+        @if (Outcome.Gaps.Count > 0)
+        {
+            <h4>Scan gaps (@Outcome.Gaps.Count)</h4>
+            <ul class="tas-issues">
+                @foreach (var gap in Outcome.Gaps.Take(6))
+                {
+                    <li class="tas-issue tas-issue--warn">@gap.LabelText</li>
+                }
+            </ul>
+        }
+
+        @if (Outcome.HasWarnings && !Outcome.HasErrors && ShowWarningAcknowledgement)
+        {
+            <label class="tas-ack">
+                <input type="checkbox" checked="@WarningAcknowledged" @onchange="OnAckChanged" />
+                <span><strong>I understand the warnings</strong> and want to save this template.</span>
+            </label>
+        }
+    </aside>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public TemplateScanOutcome Outcome { get; set; } = null!;
+    [Parameter] public string TemplateName { get; set; } = string.Empty;
+    [Parameter] public bool ShowWarningAcknowledgement { get; set; }
+    [Parameter] public bool WarningAcknowledged { get; set; }
+    [Parameter] public EventCallback<bool> WarningAcknowledgedChanged { get; set; }
+
+    private async Task OnAckChanged(ChangeEventArgs e)
+    {
+        var value = (bool?)e.Value == true;
+        await WarningAcknowledgedChanged.InvokeAsync(value);
+    }
+}

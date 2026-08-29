@@ -75,7 +75,7 @@ public class ApplicationProfileLockHelperTests
     }
 
     [Fact]
-    public void AllowsNestedEditWhenConfigLocked_VersionsYes_TemplatesNo()
+    public void AllowsNestedEditWhenConfigLocked_VersionsYes_ExistingTemplateNo()
     {
         Assert.True(ApplicationProfileLockHelper.AllowsNestedEditWhenConfigLocked(new ApplicationProfileApprovalLegVersion()));
         Assert.True(ApplicationProfileLockHelper.AllowsNestedEditWhenConfigLocked(new ApplicationProfileApprovalLeg()));

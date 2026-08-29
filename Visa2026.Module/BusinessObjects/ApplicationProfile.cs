@@ -617,7 +617,7 @@ public static class ApplicationProfileLockHelper
         if (!IsProfileConfigLocked(parentProfile, objectSpace))
             return;
 
-        if (AllowsNestedEditWhenConfigLocked(nested))
+        if (AllowsNestedEditWhenConfigLocked(nested, objectSpace))
             return;
 
         throw new UserFriendlyException(VisaUiMessages.Get("ApplicationProfile.ConfigLockedCannotEditNested"));
@@ -627,10 +627,17 @@ public static class ApplicationProfileLockHelper
     /// Shared approval-leg chains live on <see cref="ApprovalLegProfile"/> (Configuration).
     /// Per-profile <see cref="ApplicationProfile.DefaultApprovalLegProfile"/> is not a locked scalar
     /// (see <see cref="HasConfigurationScalarsChanged"/>). Legacy nested version rows may still
-    /// change while locked because instances keep a snapshot. Templates stay blocked.
+    /// change while locked because instances keep a snapshot. New nested templates may be added;
+    /// existing template rows stay blocked (see <see cref="EnsureNestedConfigurationEditable"/>).
     /// </summary>
-    public static bool AllowsNestedEditWhenConfigLocked(object? nested) =>
-        nested is ApplicationProfileApprovalLegVersion or ApplicationProfileApprovalLeg;
+    public static bool AllowsNestedEditWhenConfigLocked(object? nested, IObjectSpace? objectSpace = null) =>
+        nested switch
+        {
+            ApplicationProfileApprovalLegVersion or ApplicationProfileApprovalLeg => true,
+            ApplicationProfileTemplate template
+                when objectSpace != null && objectSpace.IsNewObject(template) => true,
+            _ => false,
+        };
 
     public static bool CanRemoveApprovalLegVersion(
         ApplicationProfile? profile,

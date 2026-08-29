@@ -405,39 +405,17 @@ public sealed class TemplateConvertOrchestrator : ITemplateConvertOrchestrator
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("A template name is required.", nameof(request));
 
-        var objectSpace = request.ObjectSpace;
-        var profile = request.Profile;
-        var extension = request.TemplateKind == ApplicationProfileTemplateKind.Excel ? ".xlsx" : ".docx";
-        var fileName = string.IsNullOrWhiteSpace(request.FileName) ? name + extension : request.FileName;
-
-        var template = profile.NestedTemplates?
-            .FirstOrDefault(t => string.Equals(t.TemplateName, name, StringComparison.OrdinalIgnoreCase));
-
-        if (template == null)
+        return ApplicationProfileTemplateSaveHelper.Save(new ApplicationProfileTemplateSaveRequest
         {
-            template = objectSpace.CreateObject<ApplicationProfileTemplate>();
-            template.ApplicationProfile = profile;
-            template.TemplateName = name;
-            template.SortOrder = (profile.NestedTemplates?.Count ?? 0) + 1;
-            if (profile.NestedTemplates != null && !profile.NestedTemplates.Contains(template))
-                profile.NestedTemplates.Add(template);
-        }
-
-        template.TemplateKind = request.TemplateKind;
-        template.CatalogScope = request.CatalogScope;
-        template.DataScope = request.DataScope;
-        template.TemplateFile ??= objectSpace.CreateObject<DevExpress.Persistent.BaseImpl.EF.FileData>();
-        template.TemplateFile.FileName = fileName;
-        template.TemplateFile.Content = request.Content;
-
-        var userTemplate = ApplicationProfileTemplateUserReportBridge.EnsureLinkedUserReportTemplate(
-            objectSpace,
-            template,
-            ApplicationProfileWizardTemplateCatalog.RootBoFromDataScope(request.DataScope));
-
-        ApplicationProfileTemplateUserReportBridge.WriteMasterFile(objectSpace, userTemplate, request.Content, fileName);
-
-        return template;
+            ObjectSpace = request.ObjectSpace,
+            Profile = request.Profile,
+            TemplateName = request.TemplateName,
+            TemplateKind = request.TemplateKind,
+            DataScope = request.DataScope,
+            CatalogScope = request.CatalogScope,
+            Content = request.Content,
+            FileName = request.FileName,
+        });
     }
 
     private static IReadOnlyList<ResidualValueProbe> BuildProbes(

@@ -1,0 +1,264 @@
+@namespace Visa2026.Blazor.Server.Editors
+@using Visa2026.Module.Services.TemplateConvert
+@using Visa2026.Module.Services.TemplateScan
+
+<div class="tas-split">
+    <div class="tas-split__scan">
+        <div class="tas-filebar">
+            <strong>@FileName</strong>
+            @if (Pages.Count > 1)
+            {
+                <span class="tas-pill">@Pages.Count pages</span>
+            }
+        </div>
+
+        @if (Pages.Count > 1)
+        {
+            <div class="tas-scan-toolbar">
+                <button type="button" class="tas-btn tas-btn--ghost" disabled="@(ActivePageIndex <= 0)" @onclick="PreviousPage">← Prev</button>
+                <span>Page @(ActivePageIndex + 1) of @Pages.Count</span>
+                <button type="button" class="tas-btn tas-btn--ghost" disabled="@(ActivePageIndex >= Pages.Count - 1)" @onclick="NextPage">Next →</button>
+            </div>
+        }
+
+        <div class="tas-scan-viewport">
+            <div class="tas-scan-stage">
+                @if (ShowImage)
+                {
+                    <img src="@PageDataUrl" alt="Scan page @(ActivePageIndex + 1)" class="tas-scan-img" />
+                    <div class="tas-scan-overlays">
+                        @foreach (var field in FieldsOnActivePage)
+                        {
+                            <div class="@BoxCss(field)"
+                                 style="@BoxStyle(field.Box)"
+                                 title="@FieldTooltip(field)"
+                                 @onmouseenter="() => SetHover(field.FieldId)"
+                                 @onmouseleave="ClearHover">
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="tas-scan-placeholder">
+                        PDF page @(ActivePageIndex + 1) — layout preview uses detected field boxes until full rasterization ships.
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="tas-chips" style="margin-top:0.55rem">
+            <span class="tas-chip tas-chip--ok">@MappedCount mapped</span>
+            @if (GapCount > 0)
+            {
+                <span class="tas-chip tas-chip--warn">@GapCount gaps</span>
+            }
+            @if (LowConfidenceCount > 0)
+            {
+                <span class="tas-chip tas-chip--warn">@LowConfidenceCount low confidence</span>
+            }
+        </div>
+    </div>
+
+    <aside class="tas-rail">
+        <div class="tas-suit @SuitabilityCssClass">@SuitabilityLabel</div>
+
+        <h4>Detected fields</h4>
+        <table class="tas-field-table">
+            <thead>
+                <tr>
+                    <th>Label</th>
+                    <th>Token</th>
+                    <th>Conf.</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in FieldRows)
+                {
+                    <tr class="@RowCss(row)"
+                        @onmouseenter="() => SetHover(row.FieldId)"
+                        @onmouseleave="ClearHover">
+                        <td>@row.LabelText</td>
+                        <td>
+                            @if (!string.IsNullOrWhiteSpace(row.ProposedToken))
+                            {
+                                <code>@TemplateTokenSyntax.Wrap(row.ProposedToken)</code>
+                            }
+                            else
+                            {
+                                <span class="tas-conf tas-conf--gap">Gap</span>
+                            }
+                        </td>
+                        <td><span class="@ConfidenceCss(row)">@ConfidenceLabel(row)</span></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        @if (Gaps.Count > 0)
+        {
+            <h4>Unmapped</h4>
+            <ul class="tas-issues">
+                @foreach (var gap in Gaps.Take(8))
+                {
+                    <li class="tas-issue tas-issue--fail">@gap.LabelText</li>
+                }
+            </ul>
+        }
+    </aside>
+</div>
+
+@code {
+    private sealed record FieldRow(string FieldId, string LabelText, string? ProposedToken, ScanFieldConfidence Confidence, bool IsGap);
+
+    [Parameter, EditorRequired] public ScanFieldPlan FieldPlan { get; set; } = null!;
+    [Parameter, EditorRequired] public IReadOnlyList<ScanPageImage> Pages { get; set; } = Array.Empty<ScanPageImage>();
+    [Parameter] public string FileName { get; set; } = string.Empty;
+    [Parameter] public ScanSuitabilityVerdict SuitabilityVerdict { get; set; } = ScanSuitabilityVerdict.Pass;
+    [Parameter] public int ActivePageIndex { get; set; }
+    [Parameter] public EventCallback<int> ActivePageIndexChanged { get; set; }
+    [Parameter] public string? HoveredFieldId { get; set; }
+    [Parameter] public EventCallback<string?> HoveredFieldIdChanged { get; set; }
+
+    private ScanPageImage? ActivePage =>
+        ActivePageIndex >= 0 && ActivePageIndex < Pages.Count ? Pages[ActivePageIndex] : null;
+
+    private bool ShowImage =>
+        ActivePage is { PngBytes.Length: > 200, WidthPx: > 8, HeightPx: > 8 };
+
+    private string PageDataUrl =>
+        ActivePage == null ? string.Empty : $"data:image/png;base64,{Convert.ToBase64String(ActivePage.PngBytes)}";
+
+    private IEnumerable<ScanDetectedField> FieldsOnActivePage
+    {
+        get
+        {
+            var pageIndex = ActivePage?.PageIndex ?? ActivePageIndex;
+            return FieldPlan.Fields.Where(f => f.PageIndex == pageIndex);
+        }
+    }
+
+    private IReadOnlyList<FieldRow> FieldRows
+    {
+        get
+        {
+            var mapped = FieldPlan.Fields
+                .OrderByDescending(static f => f.Confidence)
+                .ThenBy(static f => f.LabelText, StringComparer.OrdinalIgnoreCase)
+                .Select(f => new FieldRow(f.FieldId, f.LabelText, f.ProposedToken, f.Confidence, IsGap: false));
+            var gaps = FieldPlan.Gaps
+                .Select(g => new FieldRow(g.FieldId, g.LabelText, g.SuggestedPropertyName, ScanFieldConfidence.Low, IsGap: true));
+            return mapped.Concat(gaps).ToList();
+        }
+    }
+
+    private IReadOnlyList<ScanGap> Gaps => FieldPlan.Gaps;
+
+    private int MappedCount => FieldPlan.Fields.Count(static f => !string.IsNullOrWhiteSpace(f.ProposedToken));
+    private int GapCount => FieldPlan.Gaps.Count;
+    private int LowConfidenceCount => FieldPlan.Fields.Count(static f => f.Confidence == ScanFieldConfidence.Low);
+
+    private string SuitabilityLabel => SuitabilityVerdict switch
+    {
+        ScanSuitabilityVerdict.Warn => "Review recommended",
+        ScanSuitabilityVerdict.Fail => "Cannot continue",
+        _ => "Scan acceptable",
+    };
+
+    private string SuitabilityCssClass => SuitabilityVerdict switch
+    {
+        ScanSuitabilityVerdict.Warn => "tas-suit--warn",
+        ScanSuitabilityVerdict.Fail => "tas-suit--fail",
+        _ => "tas-suit--pass",
+    };
+
+    private async Task SetHover(string fieldId)
+    {
+        HoveredFieldId = fieldId;
+        await HoveredFieldIdChanged.InvokeAsync(fieldId);
+    }
+
+    private async Task ClearHover()
+    {
+        HoveredFieldId = null;
+        await HoveredFieldIdChanged.InvokeAsync(null);
+    }
+
+    private async Task PreviousPage()
+    {
+        if (ActivePageIndex <= 0)
+            return;
+
+        ActivePageIndex--;
+        await ActivePageIndexChanged.InvokeAsync(ActivePageIndex);
+    }
+
+    private async Task NextPage()
+    {
+        if (ActivePageIndex >= Pages.Count - 1)
+            return;
+
+        ActivePageIndex++;
+        await ActivePageIndexChanged.InvokeAsync(ActivePageIndex);
+    }
+
+    private string RowCss(FieldRow row)
+    {
+        var parts = new List<string>();
+        if (string.Equals(HoveredFieldId, row.FieldId, StringComparison.Ordinal))
+            parts.Add("is-hovered");
+        if (row.IsGap)
+            parts.Add("is-gap");
+        return string.Join(' ', parts);
+    }
+
+    private string BoxCss(ScanDetectedField field)
+    {
+        var cls = "tas-scan-box";
+        cls += field.Confidence switch
+        {
+            ScanFieldConfidence.Low => " tas-scan-box--low",
+            ScanFieldConfidence.Medium => " tas-scan-box--medium",
+            _ => string.Empty,
+        };
+        if (string.IsNullOrWhiteSpace(field.ProposedToken))
+            cls += " tas-scan-box--gap";
+        if (string.Equals(HoveredFieldId, field.FieldId, StringComparison.Ordinal))
+            cls += " is-hovered";
+        return cls;
+    }
+
+    private static string BoxStyle(ScanBoundingBox box)
+    {
+        var b = box.Clamp();
+        var left = b.Left * 100;
+        var top = b.Top * 100;
+        var width = (b.Right - b.Left) * 100;
+        var height = (b.Bottom - b.Top) * 100;
+        return FormattableString.Invariant(
+            $"left:{left:0.##}%;top:{top:0.##}%;width:{width:0.##}%;height:{height:0.##}%;");
+    }
+
+    private static string FieldTooltip(ScanDetectedField field) =>
+        string.IsNullOrWhiteSpace(field.ProposedToken)
+            ? field.LabelText
+            : $"{field.LabelText} → {TemplateTokenSyntax.Wrap(field.ProposedToken)}";
+
+    private static string ConfidenceCss(FieldRow row) => row.IsGap
+        ? "tas-conf tas-conf--gap"
+        : row.Confidence switch
+        {
+            ScanFieldConfidence.High => "tas-conf tas-conf--high",
+            ScanFieldConfidence.Medium => "tas-conf tas-conf--medium",
+            _ => "tas-conf tas-conf--low",
+        };
+
+    private static string ConfidenceLabel(FieldRow row) => row.IsGap
+        ? "Gap"
+        : row.Confidence switch
+        {
+            ScanFieldConfidence.High => "High",
+            ScanFieldConfidence.Medium => "Med",
+            _ => "Low",
+        };
+}
