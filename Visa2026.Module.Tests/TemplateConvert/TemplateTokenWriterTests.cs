@@ -1,4 +1,7 @@
+using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
+using ClosedXML.Excel;
 using Visa2026.Module.Services.TemplateConvert;
 using Xunit;
 
@@ -270,5 +273,102 @@ public class TemplateTokenWriterTests
         Assert.Empty(result.Skipped);
         Assert.Equal("{{#ds.rows}}", TemplateConvertFixtures.GetCellText(result.Content, "Sanaw", "E2"));
         Assert.Equal("{{/ds.rows}}", TemplateConvertFixtures.GetCellText(result.Content, "Sanaw", "E3"));
+    }
+    
+    [Fact]
+    public void Word_yellow_highlight_is_cleared_when_token_is_written()
+    {
+        using var stream = new MemoryStream();
+        using (var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document))
+        {
+            var main = document.AddMainDocumentPart();
+            main.Document = new Document(new Body(
+                new Paragraph(
+                    new Run(new Text("Prefix ")),
+                    new Run(
+                        new RunProperties(new Highlight { Val = HighlightColorValues.Yellow }),
+                        new Text("8/-015")),
+                    new Run(new Text(" suffix")))));
+            main.Document.Save();
+        }
+
+        var source = stream.ToArray();
+        Assert.Contains(
+            TemplateConvertFixtures.GetRuns(source, "body/0"),
+            r => r.RunProperties?.Highlight != null);
+
+        var result = _writer.Apply(new TemplateTokenWriteRequest
+        {
+            SourceContent = source,
+            Format = TemplateSourceFormat.Docx,
+            Substitutions = new[]
+            {
+                new TokenSubstitution(new DocumentRegion.WordSpan("body/0", 7, 6), "ds.AFNUM"),
+            },
+        });
+
+        Assert.Empty(result.Skipped);
+        Assert.Equal("Prefix {{ds.AFNUM}} suffix", TemplateConvertFixtures.GetParagraphText(result.Content, "body/0"));
+        Assert.DoesNotContain(
+            TemplateConvertFixtures.GetRuns(result.Content, "body/0"),
+            r => r.RunProperties?.Highlight != null);
+    }
+
+    [Fact]
+    public void Excel_yellow_fill_is_cleared_when_token_is_written()
+    {
+        using var stream = new MemoryStream();
+        using (var workbook = new XLWorkbook())
+        {
+            var sheet = workbook.AddWorksheet("Sanaw");
+            sheet.Cell("A1").Value = "8/-015";
+            sheet.Cell("A1").Style.Fill.BackgroundColor = XLColor.Yellow;
+            workbook.SaveAs(stream);
+        }
+
+        var result = _writer.Apply(new TemplateTokenWriteRequest
+        {
+            SourceContent = stream.ToArray(),
+            Format = TemplateSourceFormat.Xlsx,
+            Substitutions = new[]
+            {
+                new TokenSubstitution(new DocumentRegion.ExcelCell("Sanaw", "A1"), "ds.AFNUM"),
+            },
+        });
+
+        Assert.Empty(result.Skipped);
+        Assert.Equal("{{ds.AFNUM}}", TemplateConvertFixtures.GetCellText(result.Content, "Sanaw", "A1"));
+
+        using var verify = new MemoryStream(result.Content, writable: false);
+        using var wb = new XLWorkbook(verify);
+        Assert.Equal(XLFillPatternValues.None, wb.Worksheet("Sanaw").Cell("A1").Style.Fill.PatternType);
+    }
+
+    [Fact]
+    public void StripAllYellowMarkup_clears_unmapped_leftover_highlights()
+    {
+        using var stream = new MemoryStream();
+        using (var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document))
+        {
+            var main = document.AddMainDocumentPart();
+            main.Document = new Document(new Body(
+                new Paragraph(
+                    new Run(new Text("Prefix ")),
+                    new Run(
+                        new RunProperties(new Highlight { Val = HighlightColorValues.Yellow }),
+                        new Text("{{ds.VCAT}}")),
+                    new Run(new Text(" middle ")),
+                    new Run(
+                        new RunProperties(new Highlight { Val = HighlightColorValues.Yellow }),
+                        new Text("6 (alty)")),
+                    new Run(new Text(" end")))));
+            main.Document.Save();
+        }
+
+        var cleaned = WordTemplateTokenWriter.StripAllYellowMarkup(stream.ToArray());
+        Assert.DoesNotContain(
+            TemplateConvertFixtures.GetRuns(cleaned, "body/0"),
+            r => r.RunProperties?.Highlight != null);
+        Assert.Contains("6 (alty)", TemplateConvertFixtures.GetParagraphText(cleaned, "body/0"), StringComparison.Ordinal);
     }
 }

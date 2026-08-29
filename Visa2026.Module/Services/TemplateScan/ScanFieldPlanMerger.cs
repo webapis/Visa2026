@@ -81,7 +81,8 @@ public sealed class ScanFieldPlanMerger : IScanFieldPlanMerger
             draft.Box,
             draft.PageIndex,
             allowed,
-            usedCodes);
+            usedCodes,
+            draft.SourceRegion);
 
         foreach (var r in resolved)
             fields.Add(ToField(r, hintTokens));
@@ -158,6 +159,7 @@ public sealed class ScanFieldPlanMerger : IScanFieldPlanMerger
             ProposedToken = draft.ProposedToken!.Trim(),
             Confidence = confidence,
             Scope = draft.Scope,
+            SourceRegion = draft.SourceRegion,
         };
     }
 }

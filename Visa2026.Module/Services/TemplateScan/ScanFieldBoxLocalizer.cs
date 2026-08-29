@@ -13,6 +13,9 @@ namespace Visa2026.Module.Services.TemplateScan;
 /// </summary>
 public static class ScanFieldBoxLocalizer
 {
+    /// <summary>Minimum match score to snap a field onto a yellow blob (else keep AI box).</summary>
+    private const double MinAcceptScore = 1.4;
+
     public static ScanFieldPlan Apply(ScanFieldPlan plan, IReadOnlyList<ScanPageImage> pages)
     {
         ArgumentNullException.ThrowIfNull(plan);
@@ -67,9 +70,7 @@ public static class ScanFieldBoxLocalizer
         if (orderedYellows.Count == 0)
             return fields.ToList();
 
-        // Match each field to the best yellow using the (possibly shifted) AI box as a soft prior.
-        // Do NOT zip by document order alone — that parks tokens on ghost blobs between paragraphs.
-        var assignments = new Dictionary<int, List<ScanDetectedField>>(); // yellow index -> fields
+        var assignments = new Dictionary<int, List<ScanDetectedField>>();
         var usedFields = new HashSet<string>(StringComparer.Ordinal);
 
         var pairs = new List<(double Score, int FieldIndex, int YellowIndex)>();
@@ -81,8 +82,9 @@ public static class ScanFieldBoxLocalizer
 
         foreach (var pair in pairs.OrderByDescending(static p => p.Score))
         {
-            if (pair.Score < 0.02)
+            if (pair.Score < MinAcceptScore)
                 break;
+
             var field = fields[pair.FieldIndex];
             if (!usedFields.Add(field.FieldId))
                 continue;
@@ -93,14 +95,14 @@ public static class ScanFieldBoxLocalizer
                 assignments[pair.YellowIndex] = list;
             }
 
-            // Prefer one field per yellow; allow sharing when AI boxes clearly sit on the same blob.
-            if (list.Count > 0 && pair.Score < 0.12 && !BoxesOverlapHorizontally(field.Box, list[0].Box))
+            if (list.Count > 0 && !CanShareYellow(list[0], field))
                 continue;
 
             list.Add(field);
         }
 
-        // Leftover fields: place on nearest unused yellow, else subdivide the nearest occupied yellow.
+        // Leftovers: prefer a strong AI↔yellow score; else zip remaining fields to unused
+        // highlighter spans by reading order (filters already removed letter fragments).
         foreach (var field in fields.OrderBy(DocumentOrder))
         {
             if (usedFields.Contains(field.FieldId))
@@ -112,24 +114,40 @@ public static class ScanFieldBoxLocalizer
                 .OrderByDescending(static t => t.Score)
                 .ToList();
 
-            if (unused.Count > 0 && unused[0].Score > -0.5)
+            if (unused.Count > 0 && unused[0].Score >= MinAcceptScore)
             {
                 assignments[unused[0].Index] = new List<ScanDetectedField> { field };
                 usedFields.Add(field.FieldId);
+            }
+        }
+
+        var leftoverFields = fields
+            .Where(f => !usedFields.Contains(f.FieldId))
+            .OrderBy(DocumentOrder)
+            .ToList();
+        var leftoverYellows = Enumerable.Range(0, orderedYellows.Count)
+            .Where(i => !assignments.ContainsKey(i))
+            .OrderBy(i => orderedYellows[i].Top)
+            .ThenBy(i => orderedYellows[i].Left)
+            .ToList();
+
+        var zip = Math.Min(leftoverFields.Count, leftoverYellows.Count);
+        for (var i = 0; i < zip; i++)
+        {
+            assignments[leftoverYellows[i]] = new List<ScanDetectedField> { leftoverFields[i] };
+            usedFields.Add(leftoverFields[i].FieldId);
+        }
+
+        // Extra leftover fields that share a compound yellow with an already-assigned sibling.
+        foreach (var field in fields.Where(f => !usedFields.Contains(f.FieldId)).OrderBy(DocumentOrder))
+        {
+            var shareYi = assignments
+                .Where(kv => kv.Value.Any(existing => CanShareYellow(existing, field)))
+                .Select(static kv => (int?)kv.Key)
+                .FirstOrDefault();
+            if (shareYi is null)
                 continue;
-            }
-
-            var nearest = Enumerable.Range(0, orderedYellows.Count)
-                .Select(i => (Index: i, Score: Score(field.Box, orderedYellows[i])))
-                .OrderByDescending(static t => t.Score)
-                .First();
-            if (!assignments.TryGetValue(nearest.Index, out var share))
-            {
-                share = new List<ScanDetectedField>();
-                assignments[nearest.Index] = share;
-            }
-
-            share.Add(field);
+            assignments[shareYi.Value].Add(field);
             usedFields.Add(field.FieldId);
         }
 
@@ -148,7 +166,6 @@ public static class ScanFieldBoxLocalizer
                 continue;
             }
 
-            // Multiple tokens on one yellow blob: subdivide (vertical for tall header bands, else horizontal).
             var width = Math.Max(1e-6, box.Right - box.Left);
             var height = Math.Max(1e-6, box.Bottom - box.Top);
             var vertical = height >= width * 1.15 && ordered.Count <= 3;
@@ -172,28 +189,46 @@ public static class ScanFieldBoxLocalizer
             }
         }
 
-        // Preserve any field we somehow missed (should not happen).
         foreach (var field in fields)
         {
             if (result.All(r => !string.Equals(r.FieldId, field.FieldId, StringComparison.Ordinal)))
-                result.Add(field);
+                result.Add(field); // keep original AI box
         }
 
         return result;
     }
 
-    /// <summary>AFNUM+ADAT often share one tall yellow; single-token fields keep the full box.</summary>
-    private static ScanBoundingBox SplitTallBoxForSingle(ScanDetectedField field, ScanBoundingBox box)
+    private static bool CanShareYellow(ScanDetectedField a, ScanDetectedField b)
+    {
+        var ca = ShortCode(a);
+        var cb = ShortCode(b);
+        if (ca.Length == 0 || cb.Length == 0)
+            return false;
+
+        static bool Pair(string x, string y, string p, string q) =>
+            (x == p && y == q) || (x == q && y == p);
+
+        return Pair(ca, cb, "AFNUM", "ADAT")
+               || Pair(ca, cb, "TPCNT", "TPCTX")
+               || Pair(ca, cb, "VPER", "VCAT");
+    }
+
+    private static string ShortCode(ScanDetectedField field)
     {
         if (!TemplateTokenSyntax.TryGetShortCode(field.ProposedToken ?? string.Empty, out var code))
-            return box;
+            return string.Empty;
+        return code.ToUpperInvariant();
+    }
 
+    private static ScanBoundingBox SplitTallBoxForSingle(ScanDetectedField field, ScanBoundingBox box)
+    {
+        var code = ShortCode(field);
         var height = box.Bottom - box.Top;
         var width = box.Right - box.Left;
         if (height < width * 1.2)
             return box;
 
-        return code.ToUpperInvariant() switch
+        return code switch
         {
             "AFNUM" => new ScanBoundingBox(box.Left, box.Top, box.Right, box.Top + height * 0.5),
             "ADAT" => new ScanBoundingBox(box.Left, box.Top + height * 0.5, box.Right, box.Bottom),
@@ -208,13 +243,12 @@ public static class ScanFieldBoxLocalizer
         var iou = IoU(ai, yellow);
         var hOverlap = HorizontalOverlapRatio(ai, yellow);
         var dx = Math.Abs(MidX(ai) - MidX(yellow));
-        // Vision boxes are often shifted UP into whitespace. Prefer yellow ink that shares
-        // the column (horizontal) and sits at/below the AI box — not ghost blobs at the AI Y.
         var belowBias = MidY(yellow) >= MidY(ai) - 0.01
             ? MidY(yellow) * 0.9
             : -0.35;
         var area = Math.Max(0, (yellow.Right - yellow.Left) * (yellow.Bottom - yellow.Top));
-        var areaBoost = Math.Min(1.2, area * 60.0); // prefer real highlighter spans over speckles
+        var areaBoost = Math.Min(1.2, area * 60.0);
+        // Tiny fragments (de/sa/sany) get almost no areaBoost and rarely clear MinAcceptScore.
         return iou * 3.0 + hOverlap * 3.0 - dx * 2.0 + belowBias + areaBoost;
     }
 
@@ -230,42 +264,23 @@ public static class ScanFieldBoxLocalizer
         return (right - left) / denom;
     }
 
-    private static bool BoxesOverlapHorizontally(ScanBoundingBox a, ScanBoundingBox b) =>
-        HorizontalOverlapRatio(a, b) >= 0.15;
-
-    private static double CenterDistance(ScanBoundingBox a, ScanBoundingBox b)
-    {
-        var dx = MidX(a) - MidX(b);
-        var dy = MidY(a) - MidY(b);
-        return Math.Sqrt(dx * dx + dy * dy);
-    }
-
     private static double MidX(ScanBoundingBox b) => (b.Clamp().Left + b.Clamp().Right) * 0.5;
     private static double MidY(ScanBoundingBox b) => (b.Clamp().Top + b.Clamp().Bottom) * 0.5;
 
     private static int DocumentOrder(ScanDetectedField field)
     {
-        if (TemplateTokenSyntax.TryGetShortCode(field.ProposedToken ?? string.Empty, out var code))
+        var code = ShortCode(field);
+        return code switch
         {
-            return code.ToUpperInvariant() switch
-            {
-                "AFNUM" => 10,
-                "ADAT" => 20,
-                "URGENCY_NAMETM" => 30,
-                "TPCNT" => 40,
-                "TPCTX" => 50,
-                "VPER" => 60,
-                "VCAT" => 70,
-                _ => 500,
-            };
-        }
-
-        var label = field.LabelText ?? string.Empty;
-        if (label.Contains('№') || label.Contains('/'))
-            return 10;
-        if (label.Contains("tertipde", StringComparison.OrdinalIgnoreCase))
-            return 30;
-        return 400;
+            "AFNUM" => 10,
+            "ADAT" => 20,
+            "URGENCY_NAMETM" => 30,
+            "TPCNT" => 40,
+            "TPCTX" => 50,
+            "VPER" => 60,
+            "VCAT" => 70,
+            _ => 400,
+        };
     }
 
     private static ScanDetectedField WithBox(ScanDetectedField field, ScanBoundingBox box) =>
@@ -278,6 +293,7 @@ public static class ScanFieldBoxLocalizer
             ProposedToken = field.ProposedToken,
             Confidence = field.Confidence,
             Scope = field.Scope,
+            SourceRegion = field.SourceRegion,
         };
 
     private static double IoU(ScanBoundingBox a, ScanBoundingBox b)
@@ -354,7 +370,6 @@ public static class ScanYellowRegionDetector
             var height = work.Height;
             var mask = new bool[width * height];
 
-            // Dense enough sample for thin highlighter strokes (avoid step-grid ghost islands).
             var step = Math.Max(1, Math.Min(width, height) / 700);
             for (var y = 0; y < height; y += step)
             {
@@ -365,7 +380,8 @@ public static class ScanYellowRegionDetector
                 }
             }
 
-            var dilateRadius = Math.Max(1, step);
+            // Small dilate only — larger radius merges text-edge noise into fake blobs.
+            var dilateRadius = Math.Max(1, Math.Min(2, step));
             mask = Dilate(mask, width, height, radius: dilateRadius);
 
             var boxes = ConnectedComponents(mask, width, height, MinBlobFor(step));
@@ -373,7 +389,7 @@ public static class ScanYellowRegionDetector
             foreach (var b in boxes)
             {
                 var density = YellowDensity(work, b, step);
-                if (density < 0.12)
+                if (density < 0.22)
                     continue;
 
                 var nb = new ScanBoundingBox(
@@ -383,8 +399,8 @@ public static class ScanYellowRegionDetector
                     b.Bottom / (double)height).Clamp();
                 var nw = nb.Right - nb.Left;
                 var nh = nb.Bottom - nb.Top;
-                // Reject speckles / dilated noise islands (ghost boxes between paragraphs).
-                if (nw * nh < 0.0008 || nw < 0.012 || nh < 0.006)
+                // Real highlighter spans are word-sized; reject letter fragments (de / sa / sany).
+                if (nw * nh < 0.0030 || nw < 0.04 || nh < 0.009)
                     continue;
 
                 result.Add(nb);
@@ -419,33 +435,36 @@ public static class ScanYellowRegionDetector
         return total == 0 ? 0 : yellow / (double)total;
     }
 
-    private static int MinBlobFor(int step) => Math.Max(10, 36 / Math.Max(1, step * step));
+    private static int MinBlobFor(int step) => Math.Max(14, 48 / Math.Max(1, step * step));
 
     internal static bool IsHighlighterYellow(Color c)
     {
         if (c.A < 180)
             return false;
 
-        // Reject near-white / paper.
-        if (c.R > 248 && c.G > 248 && c.B > 230)
+        // Paper / near-white.
+        if (c.R > 248 && c.G > 248 && c.B > 220)
             return false;
 
-        // RGB gate: warm yellow / lime highlighter (incl. pale #FFF59D).
-        if (c.R >= 165 && c.G >= 145 && c.B <= 210
-            && (c.R - c.B) >= 28 && (c.G - c.B) >= 18
-            && (c.R + c.G) > c.B * 2 + 40)
+        // Too dark = ink / anti-aliased text edges, not highlighter.
+        if (c.R < 185 || c.G < 165)
+            return false;
+
+        var chroma = (c.R + c.G) / 2.0 - c.B;
+        if (chroma < 40)
+            return false;
+
+        // Strong warm yellow / lime marker (incl. pale #FFF59D).
+        if (c.B <= 200 && (c.R - c.B) >= 35 && (c.G - c.B) >= 22)
             return true;
 
-        // HSV: hue ~35–75°, decent saturation, not too dark.
         var max = Math.Max(c.R, Math.Max(c.G, c.B));
         var min = Math.Min(c.R, Math.Min(c.G, c.B));
-        if (max < 140)
-            return false;
         var delta = max - min;
-        if (delta < 25)
+        if (delta < 35)
             return false;
         var sat = delta / (double)max;
-        if (sat < 0.12)
+        if (sat < 0.18)
             return false;
 
         double hue;
@@ -458,7 +477,7 @@ public static class ScanYellowRegionDetector
         if (hue < 0)
             hue += 360;
 
-        return hue is >= 32 and <= 78;
+        return hue is >= 35 and <= 75;
     }
 
     private static bool[] Dilate(bool[] mask, int width, int height, int radius)
@@ -548,7 +567,7 @@ public static class ScanYellowRegionDetector
             }
         }
 
-        return MergeNearby(boxes, gap: 6);
+        return MergeNearby(boxes, gap: 8);
     }
 
     private static List<(int Left, int Top, int Right, int Bottom)> MergeNearby(
@@ -592,7 +611,6 @@ public static class ScanYellowRegionDetector
         (int Left, int Top, int Right, int Bottom) b,
         int gap)
     {
-        // Same line only — never glue a ghost above the paragraph to body yellow below.
         var aHeight = Math.Max(1, a.Bottom - a.Top);
         var bHeight = Math.Max(1, b.Bottom - b.Top);
         var aMid = (a.Top + a.Bottom) / 2.0;

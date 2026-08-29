@@ -6,6 +6,10 @@ public enum ScanSourceKind
 {
     Image,
     Pdf,
+    /// <summary>Yellow-marked Word (.docx) — OpenXML highlight/shading, no vision.</summary>
+    Word,
+    /// <summary>Yellow-marked Excel (.xlsx) — yellow cell fills, no vision.</summary>
+    Excel,
 }
 
 public enum ScanSuitabilityVerdict
@@ -53,6 +57,12 @@ public sealed class ScanNormalizedInput
     public required long OriginalByteLength { get; init; }
 
     public required string FileName { get; init; }
+
+    /// <summary>Original .docx/.xlsx bytes when <see cref="SourceKind"/> is Word or Excel.</summary>
+    public byte[]? OfficePackageBytes { get; init; }
+
+    public bool IsOfficeSource =>
+        SourceKind is ScanSourceKind.Word or ScanSourceKind.Excel;
 }
 
 public sealed class ScanPageImage

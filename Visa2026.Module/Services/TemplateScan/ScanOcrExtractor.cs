@@ -1,7 +1,10 @@
 #nullable enable
 
+using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Packaging;
 using Spire.Pdf;
 using Spire.Pdf.Texts;
+using Visa2026.Module.Services.TemplateConvert;
 
 namespace Visa2026.Module.Services.TemplateScan;
 
@@ -11,8 +14,8 @@ public interface IScanOcrExtractor
 }
 
 /// <summary>
-/// Local OCR for S1: PDF embedded text via Spire.
-/// Raster images intentionally return no lines — vision (S2) reads PNG page bytes.
+/// Local text extract: PDF via Spire; Word/Excel via OpenXML/ClosedXML.
+/// Raster images intentionally return no lines — vision reads PNG page bytes.
 /// </summary>
 public sealed class ScanOcrExtractor : IScanOcrExtractor
 {
@@ -23,8 +26,62 @@ public sealed class ScanOcrExtractor : IScanOcrExtractor
         return request.Input.SourceKind switch
         {
             ScanSourceKind.Pdf => ExtractFromPdf(request),
+            ScanSourceKind.Word => ExtractFromWord(request.OriginalContent),
+            ScanSourceKind.Excel => ExtractFromExcel(request.OriginalContent),
             ScanSourceKind.Image => EmptyResult(),
             _ => EmptyResult(),
+        };
+    }
+
+    private static ScanOcrResult ExtractFromWord(byte[] bytes)
+    {
+        using var stream = new MemoryStream(bytes, writable: false);
+        using var document = WordprocessingDocument.Open(stream, false);
+        var lines = new List<ScanOcrLine>();
+        var totalChars = 0;
+        foreach (var addressed in WordTemplateAddressing.EnumerateParagraphs(document))
+        {
+            var text = WordTemplateAddressing.GetParagraphText(addressed.Paragraph)?.Trim();
+            if (string.IsNullOrWhiteSpace(text))
+                continue;
+            totalChars += text.Length;
+            lines.Add(new ScanOcrLine { PageIndex = 0, Text = text, Confidence = 1.0 });
+        }
+
+        return new ScanOcrResult
+        {
+            Lines = lines,
+            TextConfidence = lines.Count == 0 ? 0 : 1.0,
+        };
+    }
+
+    private static ScanOcrResult ExtractFromExcel(byte[] bytes)
+    {
+        using var stream = new MemoryStream(bytes, writable: false);
+        using var workbook = new XLWorkbook(stream);
+        var lines = new List<ScanOcrLine>();
+        foreach (var sheet in workbook.Worksheets)
+        {
+            foreach (var cell in sheet.CellsUsed())
+            {
+                var text = cell.GetFormattedString()?.Trim();
+                if (string.IsNullOrWhiteSpace(text))
+                    text = cell.GetString()?.Trim();
+                if (string.IsNullOrWhiteSpace(text))
+                    continue;
+                lines.Add(new ScanOcrLine
+                {
+                    PageIndex = 0,
+                    Text = $"{sheet.Name}!{cell.Address}: {text}",
+                    Confidence = 1.0,
+                });
+            }
+        }
+
+        return new ScanOcrResult
+        {
+            Lines = lines,
+            TextConfidence = lines.Count == 0 ? 0 : 1.0,
         };
     }
 

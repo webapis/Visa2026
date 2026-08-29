@@ -61,7 +61,7 @@ disable-model-invocation: false
 | `ApplicationType` JSON seed, lookup catalogs | [visa2026-lookup-data](../visa2026-lookup-data/SKILL.md) |
 | Field visibility / `[Appearance]` on Application today | grep `ApplicationType.Show*` — migrate to profile in slice 2 |
 | Resminamalar / nested Word–Excel on profile | [visa2026-resminamalar](../visa2026-resminamalar/SKILL.md) |
-| **Create template from scan** (Word/Excel from scanned images) | [visa2026-template-scan](../visa2026-template-scan/SKILL.md) |
+| **Create from yellow marks** (yellow-marked Word/Excel) | [visa2026-template-scan](../visa2026-template-scan/SKILL.md) |
 | Document copies on roster (`ApplicationPerson` scope) | [visa2026-document-copies](../visa2026-document-copies/SKILL.md) |
 | Case tab catalog vs `#visa-preview-slot` preview-only | [visa2026-preview-slot](../visa2026-preview-slot/SKILL.md) |
 | Wizard Templates **Preview** (master Word/Excel look) | Same skill — `OpenFileAsync` File occupant, not Resminamalar merge |
@@ -80,7 +80,7 @@ disable-model-invocation: false
 | Config lock state A (`ApplicationProfileLockHelper`) | ListView row colors → **bo-state-colors** |
 | Wizard + profile picker UX | PDF XFA mapping → **pdf-form-mapping** |
 | Seed / cutover from `ApplicationType` | New `ApplicationType` `Show*` flags (forbidden) |
-| Blazor officer shell + case workspace (B0–B8) | Preview slot shell CSS/resize → **preview-slot**; **Create from scan** → **visa2026-template-scan** |
+| Blazor officer shell + case workspace (B0–B8) | Preview slot shell CSS/resize → **preview-slot**; **Create from yellow marks** → **visa2026-template-scan** |
 | Switch Appearance / progress reads to profile | ApplicationProgress transition graph edits (unless profile-driven route) |
 | Person M2M + hard-remove `ApplicationItem` (phase B) | User manual prose unless officer-facing rule changes |
 

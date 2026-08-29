@@ -46,14 +46,14 @@ Full set: **01–12** (happy path + edges).
 
 ## 1. Goal
 
-Officer uploads a **scan, photo, or PDF** of a ministry form (blank or filled). The system uses **vision + OCR** to detect layout and labels, proposes **library placeholders** for data fields, asks **clarification questions** when ambiguous, generates a **draft Word** (v1) template, runs **Extract/Validate**, and lets the officer **Approve** after preview.
+Officer uploads a **yellow-marked Word or Excel** file. Yellow marks are read from OpenXML (no vision). The system proposes **library placeholders**, optionally asks **clarification**, **writes tokens into a copy** of the upload (layout preserved), runs **Extract/Validate**, and lets the officer **Approve** after preview. **PNG/JPG/PDF are not accepted.**
 
 Save target is always the **parent Application Profile** template catalog — same as Convert and manual Add.
 
 | In scope (v1) | Out of scope (v1) |
 |---------------|-------------------|
-| Separate **Create from scan** entry (wizard + optional case workspace) | Merging this flow into Convert |
-| PNG / JPG / PDF (multi-page) upload | Video, handwritten-only forms with no print structure |
+| Separate **Create from yellow marks** entry (wizard + optional case workspace) | Merging this flow into Convert |
+| Yellow-marked Word (`.docx`) / Excel (`.xlsx`) only | PNG / JPG / PDF (retired); video; handwritten-only |
 | Vision layout + label detection | Pixel-perfect scan reproduction |
 | Proposed `{{ds.…}}` from **profile-scoped** placeholder set | Full system placeholder library |
 | Clarification Q&A before generate | Open-ended “redesign this letter” chat |
@@ -70,9 +70,9 @@ Save target is always the **parent Application Profile** template catalog — sa
 
 | # | Topic | Decision |
 |---|--------|----------|
-| **S1** | **Feature identity** | **Create from scan** is a **separate** product, modal, and orchestrator entry — not a mode inside Convert. |
+| **S1** | **Feature identity** | **Create from yellow marks** (formerly Create from scan) is a **separate** product, modal, and orchestrator entry — not a mode inside Convert. |
 | **S2** | **Input** | Image (PNG/JPG) or PDF. Max size follows staging limits (50 MB cap; warn above 20 MB). |
-| **S3** | **Output format (v1)** | **Word `.docx` only.** Simplified layout (tables, paragraphs, placeholders). Excel deferred. |
+| **S3** | **Output format** | Tokenized **copy of uploaded** `.docx` / `.xlsx` (layout preserved). Image/PDF path **retired**. |
 | **S4** | **Save target** | Parent **Application Profile** catalog (`ApplicationProfileTemplate` + bridged `UserReportTemplate`). Profile-specific default; Shared opt-in with confirm (same B/C as Convert). |
 | **S5** | **Instance context** | **Optional.** Blank forms: no instance required. Filled scans: officer **may** pick **this case** to boost value→token matching (similar data to Convert L6, never mandatory). |
 | **S6** | **Placeholder vocabulary** | Same as Convert **L10**: only tokens allowed for the **target profile** + chosen **data scope** + enabled person packs. |
@@ -98,8 +98,8 @@ Save target is always the **parent Application Profile** template catalog — sa
 
 | Location | Control | Visibility |
 |----------|---------|------------|
-| Profile wizard — Templates step | **Create from scan** (beside Convert / Add template) | Template-authoring permission + `TemplateAiScan:Enabled` |
-| Case workspace — Resminamalar action row | **Create from scan** | Same permission + optional per-user **scan editor** switch (mirror L13 pattern; default **off** on case) |
+| Profile wizard — Templates step | **Create from yellow marks** (beside Convert / Add template) | Template-authoring permission + `TemplateAiScan:Enabled` |
+| Case workspace — Resminamalar action row | **Create from yellow marks** | Same permission + optional per-user **scan editor** switch (mirror L13 pattern; default **off** on case) |
 | — | **Convert existing document** | Unchanged — filled Word/Excel only |
 | — | **Add prepared template** | Always available (L12) |
 

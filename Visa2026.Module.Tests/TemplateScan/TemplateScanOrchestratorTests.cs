@@ -228,66 +228,67 @@ public class ScanDraftDocxBuilderTests
 public class TemplateScanOrchestratorTests
 {
     [Fact]
-    public async Task GenerateAsync_produces_validated_draft()
+    public async Task GenerateAsync_yellow_word_writes_tokens_into_copy()
     {
         var set = new ApplicationProfilePlaceholderSetService(new UserReportPlaceholderCatalogService()).GetSet(
             new ApplicationProfilePlaceholderSetQuery
             {
                 Profile = new ApplicationProfile(),
-                DataScope = ApplicationProfileTemplateDataScope.ApplicationHeader,
+                DataScope = ApplicationProfileTemplateDataScope.Both,
                 TemplateKind = ApplicationProfileTemplateKind.Word,
             });
 
+        var bytes = ScanOfficeYellowExtractorTests.CreateWordFixture("№ 4/-434");
+        var yellows = new ScanOfficeYellowExtractor().Extract(bytes, ScanSourceKind.Word);
+        Assert.NotEmpty(yellows);
+
+        var proposal = ScanOfficeFieldPlanBuilder.Build(yellows, set);
         var plan = new ScanFieldPlanMerger().Merge(new ScanFieldPlanMergeRequest
         {
             PlaceholderSet = set,
-            ScanKind = ScanKind.BlankForm,
-            Proposal = new ScanFieldPlanProposal
-            {
-                Fields =
-                [
-                    new ScanDetectedFieldDraft
-                    {
-                        FieldId = "f1",
-                        PageIndex = 0,
-                        LabelText = "Application number",
-                        ProposedToken = "{{ds.AFNUM}}",
-                        Confidence = ScanFieldConfidence.High,
-                        Scope = ScanFieldScope.Header,
-                        Box = ScanBoundingBox.FullPage,
-                    },
-                ],
-                Source = "test",
-            },
+            ScanKind = ScanKind.FilledSample,
+            Proposal = proposal,
         });
+
+        Assert.True(plan.HasMappedFields);
 
         var orchestrator = CreateOrchestrator();
         var outcome = await orchestrator.GenerateAsync(new TemplateScanAnalysis
         {
             NormalizedInput = new ScanNormalizedInput
             {
-                SourceKind = ScanSourceKind.Image,
+                SourceKind = ScanSourceKind.Word,
                 Pages = Array.Empty<ScanPageImage>(),
-                OriginalByteLength = 0,
-                FileName = "scan.png",
+                OriginalByteLength = bytes.LongLength,
+                FileName = "marked.docx",
+                OfficePackageBytes = bytes,
             },
             Suitability = new ScanSuitabilityReport
             {
                 Verdict = ScanSuitabilityVerdict.Pass,
-                TextConfidence = 0.9,
+                TextConfidence = 1.0,
                 Issues = Array.Empty<ScanSuitabilityIssue>(),
             },
             FieldPlan = plan,
             PlaceholderSet = set,
             Playbook = new ScanAuthoringPlaybookService().GetPlaybook(),
-            TemplateName = "Scan template",
-            DataScope = ApplicationProfileTemplateDataScope.ApplicationHeader,
+            TemplateName = "Yellow marks template",
+            DataScope = ApplicationProfileTemplateDataScope.Both,
         });
 
         Assert.NotEmpty(outcome.Content);
+        Assert.Equal(ApplicationProfileTemplateKind.Word, outcome.TemplateKind);
         Assert.True(outcome.Outline.IsReadable);
-        Assert.False(outcome.HasErrors);
+        Assert.True(!outcome.HasErrors, string.Join(" | ", outcome.Errors));
         Assert.Contains(outcome.EmittedTokens, t => t.Contains("AFNUM", StringComparison.OrdinalIgnoreCase));
+
+        using (var check = new MemoryStream(outcome.Content, writable: false))
+        using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(check, false))
+        {
+            Assert.DoesNotContain(
+                doc.MainDocumentPart!.Document.Body!.Descendants<DocumentFormat.OpenXml.Wordprocessing.Highlight>(),
+                h => h.Val?.Value == DocumentFormat.OpenXml.Wordprocessing.HighlightColorValues.Yellow);
+        }
     }
 
     [Fact]
@@ -322,7 +323,9 @@ public class TemplateScanOrchestratorTests
             new ScanDocxLayoutService(new NoneTemplateScanAiProvider()),
             new ScanDraftDocxBuilder(),
             validation,
-            new TemplateDocumentOutlineReader());
+            new TemplateDocumentOutlineReader(),
+            new TemplateTokenWriter(),
+            new TemplateConversionDiffGate());
     }
 
     private sealed class PermissiveValidator : IUserReportValidationService, IExcelReportValidationService

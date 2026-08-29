@@ -23,7 +23,13 @@
 
         <div class="tas-scan-viewport">
             <div class="tas-scan-stage">
-                @if (ShowImage)
+                @if (IsOfficeSource)
+                {
+                    <div class="tas-scan-placeholder">
+                        Yellow-marked <strong>@(OfficeKindLabel)</strong> — review mapped tokens in the list. Layout stays in the original file; Generate writes placeholders into a copy.
+                    </div>
+                }
+                else if (ShowImage)
                 {
                     <img src="@PageDataUrl" alt="Scan page @(ActivePageIndex + 1)" class="tas-scan-img" />
                     <div class="tas-scan-overlays">
@@ -119,6 +125,10 @@
     [Parameter] public EventCallback<int> ActivePageIndexChanged { get; set; }
     [Parameter] public string? HoveredFieldId { get; set; }
     [Parameter] public EventCallback<string?> HoveredFieldIdChanged { get; set; }
+    [Parameter] public bool IsOfficeSource { get; set; }
+
+    private string OfficeKindLabel =>
+        FileName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase) ? "Excel" : "Word";
 
     private ScanPageImage? ActivePage =>
         ActivePageIndex >= 0 && ActivePageIndex < Pages.Count ? Pages[ActivePageIndex] : null;
@@ -162,7 +172,7 @@
     {
         ScanSuitabilityVerdict.Warn => "Review recommended",
         ScanSuitabilityVerdict.Fail => "Cannot continue",
-        _ => "Scan acceptable",
+        _ => "Marks acceptable",
     };
 
     private string SuitabilityCssClass => SuitabilityVerdict switch

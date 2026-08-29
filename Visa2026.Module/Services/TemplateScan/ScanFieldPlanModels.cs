@@ -80,6 +80,9 @@ public sealed class ScanDetectedFieldDraft
     public ScanFieldConfidence Confidence { get; init; } = ScanFieldConfidence.Medium;
 
     public ScanFieldScope Scope { get; init; } = ScanFieldScope.Header;
+
+    /// <summary>OpenXML address for Office yellow path (token writer).</summary>
+    public DocumentRegion? SourceRegion { get; init; }
 }
 
 public sealed class ScanStaticRegionDraft
@@ -152,6 +155,9 @@ public sealed class ScanDetectedField
     public required ScanFieldConfidence Confidence { get; init; }
 
     public required ScanFieldScope Scope { get; init; }
+
+    /// <summary>OpenXML address for Office yellow path (token writer).</summary>
+    public DocumentRegion? SourceRegion { get; init; }
 }
 
 public sealed class ScanStaticRegion

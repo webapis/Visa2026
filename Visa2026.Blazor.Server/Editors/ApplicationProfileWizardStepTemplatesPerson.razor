@@ -96,11 +96,7 @@
                 <button type="button" class="ap-wizard__btn ap-wizard__btn--secondary ap-wizard__add-template"
                         title="@ScanEntryTitle"
                         @onclick="OpenScanAsync">
-                    Create from scan
-                    @if (!ShowScanEntryEnabled)
-                    {
-                        <span class="tas-badge-off">AI off</span>
-                    }
+                    Create from yellow marks
                 </button>
             }
         }
@@ -674,13 +670,10 @@
     private bool ShowScanEntryVisible =>
         ScanOptions.Value.Enabled && _canScanTemplates && ObjectSpace != null;
 
-    private bool ShowScanEntryEnabled =>
-        ShowScanEntryVisible && ScanAiProvider.IsEnabled;
+    private bool ShowScanEntryEnabled => ShowScanEntryVisible;
 
     private string ScanEntryTitle =>
-        ShowScanEntryEnabled
-            ? "Upload a scan or photo and detect merge placeholders"
-            : "Enable a Template AI Scan vision provider in configuration";
+        "Upload a yellow-marked Word (.docx) or Excel (.xlsx) and turn highlights into placeholders";
 
     private async Task OpenScanAsync()
     {

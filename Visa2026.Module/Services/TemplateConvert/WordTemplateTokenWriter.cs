@@ -8,11 +8,45 @@ namespace Visa2026.Module.Services.TemplateConvert;
 
 /// <summary>
 /// Writes placeholder tokens into an existing <c>.docx</c> without touching anything else.
-/// The token is inserted into the first <c>w:t</c> the span touches, so it inherits that run's
-/// formatting and no run is ever created, merged, or removed.
+/// The token is inserted into the first <c>w:t</c> the span touches (inherits non-highlight formatting).
+/// Yellow highlighter / yellow shading on touched runs is cleared so placeholders are not marked.
 /// </summary>
 internal static class WordTemplateTokenWriter
 {
+    /// <summary>
+    /// Removes all Word highlighter / yellowish shading marks from the package.
+    /// Used after Create-from-yellow-marks so leftover unmapped yellow ink does not stay in the template.
+    /// </summary>
+    public static byte[] StripAllYellowMarkup(byte[] sourceContent)
+    {
+        using var buffer = new MemoryStream();
+        buffer.Write(sourceContent, 0, sourceContent.Length);
+        buffer.Position = 0;
+
+        using (var document = WordprocessingDocument.Open(buffer, true))
+        {
+            foreach (var run in document.MainDocumentPart?.Document.Descendants<Run>() ?? Enumerable.Empty<Run>())
+                ClearHighlightMark(run);
+
+            foreach (var header in document.MainDocumentPart?.HeaderParts ?? Enumerable.Empty<HeaderPart>())
+            {
+                foreach (var run in header.Header.Descendants<Run>())
+                    ClearHighlightMark(run);
+            }
+
+            foreach (var footer in document.MainDocumentPart?.FooterParts ?? Enumerable.Empty<FooterPart>())
+            {
+                foreach (var run in footer.Footer.Descendants<Run>())
+                    ClearHighlightMark(run);
+            }
+
+            document.MainDocumentPart?.Document.Save();
+            document.Save();
+        }
+
+        return buffer.ToArray();
+    }
+
     public static TokenWriteResult Write(
         byte[] sourceContent,
         IReadOnlyList<TokenSubstitution> substitutions,
@@ -133,6 +167,7 @@ internal static class WordTemplateTokenWriter
         var end = start + length;
         var position = 0;
         var tokenWritten = false;
+        var touchedRuns = new HashSet<Run>();
 
         foreach (var text in textNodes)
         {
@@ -151,9 +186,48 @@ internal static class WordTemplateTokenWriter
 
             var updated = segment[..removeStart] + replacement + segment[removeEnd..];
             SetText(text, updated);
+
+            var run = text.Ancestors<Run>().FirstOrDefault();
+            if (run != null)
+                touchedRuns.Add(run);
         }
 
+        foreach (var run in touchedRuns)
+            ClearHighlightMark(run);
+
         return tokenWritten;
+    }
+
+    /// <summary>Strips Word highlighter / yellow shading from a run after token substitution.</summary>
+    internal static void ClearHighlightMark(Run run)
+    {
+        var props = run.RunProperties;
+        if (props == null)
+            return;
+
+        props.Highlight?.Remove();
+
+        var shading = props.Shading;
+        if (shading?.Fill?.Value is { Length: > 0 } fill && IsYellowishFill(fill))
+            shading.Remove();
+
+        if (props.ChildElements.Count == 0)
+            props.Remove();
+    }
+
+    private static bool IsYellowishFill(string hex)
+    {
+        hex = hex.Trim().TrimStart('#');
+        if (hex.Length == 8)
+            hex = hex[^6..];
+        if (hex.Length != 6)
+            return false;
+        if (!int.TryParse(hex[0..2], System.Globalization.NumberStyles.HexNumber, null, out var r)
+            || !int.TryParse(hex[2..4], System.Globalization.NumberStyles.HexNumber, null, out var g)
+            || !int.TryParse(hex[4..6], System.Globalization.NumberStyles.HexNumber, null, out var b))
+            return false;
+
+        return r >= 180 && g >= 160 && ((r + g) / 2.0 - b) >= 35 && b <= 210;
     }
 
     private static void PrependText(Paragraph paragraph, string value)

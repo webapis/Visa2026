@@ -1,43 +1,32 @@
-# Create template from scan — user prompts
+# Create from yellow marks — user prompts
 
 Copy-paste in Cursor chat (prefix `@visa2026-template-scan` if supported).
 
 ## Screenshot pack (preferred)
 
-Paste screenshots and say e.g.:
-
-- Here is Create from scan step-by-step (Upload → Done). Original scan is the last image. Improve from this.
-- Review + Preview + catalog merge Preview vs original — layout still wrong.
-- Full pack: Upload, Review, Generate, Preview, Done, catalog Preview, original scan.
-
-Agent should compare, fix if needed, and **append learnings.md**.
+- Here is Create from yellow marks step-by-step (Upload → Done). Original .docx is attached. Improve from this.
+- Review + Preview + catalog merge Preview vs original yellow Word — tokens wrong.
+- Full pack: Upload, Review, Generate, Preview, Done, catalog Preview, original .xlsx.
 
 ## Bugs
 
-- Create from scan Analyze failed on this PNG — show the real error and fix Azure deployment / key.
-- Yellow highlights mapped wrong / missing ADAT next to application number.
-- Draft is a flat Label: token list instead of the Turkmen letter.
-- Header puts the date on the right; addressee should be opposite №/date.
-- Duplicate gap for a compound yellow string that was already split into tokens.
-- Urgency `Adaty tertipde!` should use `Urgency_NameTm`.
+- Yellow highlight in Word not detected / wrong token.
+- Generate failed / diff gate on this yellow-marked .docx.
+- Compound yellow string should split AFNUM/ADAT (or TPCNT/TPCTX).
+- PNG upload still accepted — should be rejected as retired.
 
 ## Product / UX
 
-- Wizard Preview must stay outline-only — do not embed the template preview-slot PDF viewer.
-- Keep letter alignment (two-column header/signature, justify body, italic urgency).
-- Only yellow-highlighted values become placeholders.
-
-## Excel from scan
-
-- Generate an Excel merge template from this scanned table/list document.
-- Excel-from-scan should keep grid structure and row placeholders, not a flat token list.
-- Yellow cells on this spreadsheet photo should map to Excel library tokens.
+- Label must be **Create from yellow marks** (not “Create from scan”).
+- Wizard Preview outline-only — no PDF slot.
+- Only `.docx` / `.xlsx` with yellow marks; Convert stays separate (value-match).
 
 ## Config
 
-- Point TemplateAiScan Azure deployment at the same vision model Convert uses.
-- Profile is locked — confirm we can still add a **new** template from scan.
+- TemplateAiScan Enabled shows the entry; Analyze does not need vision AI.
+- Clarification chat still needs an AI provider when used.
+- Profile locked — confirm we can still add a **new** template from yellow marks.
 
-## Triage
+## Classification
 
-- Is this Create from scan, Convert existing document, Resminamalar merge, or preview-slot CSS?
+- Is this Create from yellow marks, Convert existing document, Resminamalar merge, or preview-slot CSS?

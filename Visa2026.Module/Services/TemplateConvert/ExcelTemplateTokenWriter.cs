@@ -5,11 +5,47 @@ using ClosedXML.Excel;
 namespace Visa2026.Module.Services.TemplateConvert;
 
 /// <summary>
-/// Writes placeholder tokens into an existing <c>.xlsx</c>. Cell values only — never number formats,
-/// styles, widths, merges, or formulas.
+/// Writes placeholder tokens into an existing <c>.xlsx</c>. Replaces cell values and clears yellow
+/// fill on written cells; never changes number formats, widths, merges, or formulas.
 /// </summary>
 internal static class ExcelTemplateTokenWriter
 {
+    /// <summary>
+    /// Clears solid yellow (and yellowish) cell fills from the workbook after Create-from-yellow-marks.
+    /// </summary>
+    public static byte[] StripAllYellowFills(byte[] sourceContent)
+    {
+        using var input = new MemoryStream(sourceContent, writable: false);
+        using var workbook = new XLWorkbook(input);
+
+        foreach (var sheet in workbook.Worksheets)
+        {
+            foreach (var cell in sheet.CellsUsed())
+            {
+                if (cell.Style.Fill.PatternType == XLFillPatternValues.None)
+                    continue;
+
+                try
+                {
+                    var color = cell.Style.Fill.BackgroundColor;
+                    if (color.ColorType != XLColorType.Color)
+                        continue;
+
+                    var c = color.Color;
+                    if (c.R >= 180 && c.G >= 160 && ((c.R + c.G) / 2.0 - c.B) >= 35 && c.B <= 210)
+                        cell.Style.Fill.PatternType = XLFillPatternValues.None;
+                }
+                catch
+                {
+                }
+            }
+        }
+
+        using var output = new MemoryStream();
+        workbook.SaveAs(output);
+        return output.ToArray();
+    }
+
     public static TokenWriteResult Write(
         byte[] sourceContent,
         IReadOnlyList<TokenSubstitution> substitutions,
@@ -105,6 +141,7 @@ internal static class ExcelTemplateTokenWriter
         }
 
         cell.Value = value;
+        cell.Style.Fill.PatternType = XLFillPatternValues.None;
         return true;
     }
 }

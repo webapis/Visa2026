@@ -19,7 +19,7 @@
              role="dialog" aria-modal="true" aria-labelledby="tas-title" @onclick:stopPropagation="true">
             <header class="tas-modal__head">
                 <div>
-                    <h2 id="tas-title">Create template from scan</h2>
+                    <h2 id="tas-title">Create template from yellow marks</h2>
                     <p>@_profileName@(string.IsNullOrEmpty(_caseNumber) ? string.Empty : " · case " + _caseNumber)</p>
                 </div>
                 <button type="button" class="tas-icon-btn" aria-label="Close" @onclick="RequestCloseAsync">&#10005;</button>
@@ -40,14 +40,6 @@
                 {
                     <div class="tas-banner tas-banner--lock">
                         Profile locked — you can add <strong>new</strong> templates only. Existing template edits stay blocked.
-                    </div>
-                }
-
-                @if (!_aiEnabled)
-                {
-                    <div class="tas-banner tas-banner--info">
-                        Vision AI is off (<strong>@Options.Value.Provider</strong>). Enable <code>TemplateAiScan</code> with a vision provider to analyze scans.
-                        Use <strong>Add prepared template</strong> or <strong>Convert existing document</strong> instead.
                     </div>
                 }
 
@@ -79,7 +71,7 @@
                             <select id="tas-data-scope" class="tas-input" disabled>
                                 <option selected>Full library (header + people) for this profile</option>
                             </select>
-                            <small>Vision may map yellow highlights to any Word placeholder enabled for this profile.</small>
+                            <small>Yellow highlights map to Word placeholders enabled for this profile.</small>
                         </div>
 
                         <div class="tas-field">
@@ -117,23 +109,23 @@
                         </div>
 
                         <div class="tas-field">
-                            <label class="tas-field__label" for="tas-file">Scan file <em>*</em></label>
+                            <label class="tas-field__label" for="tas-file">Yellow-marked Word or Excel <em>*</em></label>
                             <label class="tas-drop @(_fileBytes is { Length: > 0 } ? "is-picked" : string.Empty)">
-                                <InputFile id="tas-file" OnChange="OnFileSelectedAsync" accept=".png,.jpg,.jpeg,.pdf" />
+                                <InputFile id="tas-file" OnChange="OnFileSelectedAsync" accept=".docx,.xlsx" />
                                 @if (_fileBytes is { Length: > 0 })
                                 {
                                     <strong>@_fileName</strong>
-                                    <small>@($"{_fileBytes.Length / 1024:N0} KB") · PNG, JPG, or PDF</small>
+                                    <small>@($"{_fileBytes.Length / 1024:N0} KB") · Word or Excel with yellow marks</small>
                                 }
                                 else
                                 {
-                                    <strong>Drop PNG, JPG, or PDF here</strong>
-                                    <small>or click to browse — ministry scans and phone photos supported</small>
+                                    <strong>Drop yellow-marked Word or Excel here</strong>
+                                    <small>or click to browse — .docx / .xlsx only (Text Highlight Color or yellow cell fill)</small>
                                 }
                             </label>
                         </div>
 
-                        @if (_pdfPageCount > 1)
+                        @if (false && _pdfPageCount > 1)
                         {
                             <div class="tas-field">
                                 <span class="tas-field__label">PDF pages (@_pdfPageCount total · pick up to @Options.Value.MaxPdfPages)</span>
@@ -183,6 +175,7 @@
                                                  Pages="ingest.Input.Pages"
                                                  FileName="@_fileName"
                                                  SuitabilityVerdict="ingest.Suitability.Verdict"
+                                                 IsOfficeSource="ingest.Input.IsOfficeSource"
                                                  @bind-ActivePageIndex="_reviewPageIndex"
                                                  @bind-HoveredFieldId="_hoveredFieldId" />
 
@@ -211,8 +204,8 @@
                 else if (_stage == Stage.Generating)
                 {
                     <div class="tas-generating">
-                        <h3>Building draft Word template…</h3>
-                        <p>Turning the reviewed field plan into a merge template and running Extract/Validate.</p>
+                        <h3>Building draft template…</h3>
+                        <p>@(IsOfficeUpload ? "Writing library tokens into your yellow-marked Word/Excel file…" : "Turning the reviewed field plan into a merge template…") Extract/Validate runs next.</p>
                         <div class="tas-progress"><div class="tas-progress__bar tas-progress__bar--indeterminate"></div></div>
                     </div>
                 }
@@ -290,21 +283,21 @@
                 @if (_stage == Stage.Upload)
                 {
                     <button type="button" class="tas-btn tas-btn--ghost" @onclick="RequestCloseAsync">Cancel</button>
-                    <button type="button" class="tas-btn tas-btn--primary" disabled="@(!CanAnalyze)" @onclick="AnalyzeAsync">Analyze scan</button>
+                    <button type="button" class="tas-btn tas-btn--primary" disabled="@(!CanAnalyze)" @onclick="AnalyzeAsync">Analyze file</button>
                 }
                 else if (_stage == Stage.ScanFail)
                 {
                     <button type="button" class="tas-btn tas-btn--ghost" @onclick="RequestCloseAsync">Cancel</button>
-                    <button type="button" class="tas-btn tas-btn--primary" @onclick="BackToUpload">Upload different scan</button>
+                    <button type="button" class="tas-btn tas-btn--primary" @onclick="BackToUpload">Upload different file</button>
                 }
                 else if (_stage == Stage.FieldReview)
                 {
-                    <button type="button" class="tas-btn tas-btn--ghost" @onclick="BackToUpload">Upload different scan</button>
+                    <button type="button" class="tas-btn tas-btn--ghost" @onclick="BackToUpload">Upload different file</button>
                     @if (ShowNeedsHelpEntry)
                     {
                         <button type="button" class="tas-btn tas-btn--ghost" @onclick="OpenHelp">Needs help</button>
                     }
-                    <button type="button" class="tas-btn tas-btn--secondary" disabled="@(_busy || !_aiEnabled)" @onclick="OpenClarification">Ask for clarification</button>
+                    <button type="button" class="tas-btn tas-btn--secondary" disabled="@(_busy || !_aiEnabled)" @onclick="OpenClarification" title="@(!_aiEnabled ? "Clarification chat needs a TemplateAiScan AI provider" : null)">Ask for clarification</button>
                     <button type="button" class="tas-btn tas-btn--primary" disabled="@(!CanContinue)" @onclick="GenerateAsync">Continue</button>
                 }
                 else if (_stage == Stage.Clarification)
@@ -334,7 +327,7 @@
                 }
                 else if (_stage == Stage.Done)
                 {
-                    <button type="button" class="tas-btn tas-btn--ghost" @onclick="ScanAnother">Scan another</button>
+                    <button type="button" class="tas-btn tas-btn--ghost" @onclick="ScanAnother">Mark another file</button>
                     <button type="button" class="tas-btn tas-btn--primary" @onclick="CloseAsync">Close</button>
                 }
             </footer>
@@ -640,9 +633,9 @@
         _selectedPdfPages.Clear();
 
         var extension = Path.GetExtension(file.Name).ToLowerInvariant();
-        if (extension is not (".png" or ".jpg" or ".jpeg" or ".pdf"))
+        if (extension is not (".docx" or ".xlsx"))
         {
-            _message = "Only PNG, JPG, and PDF scans are supported.";
+            _message = "Only Word (.docx) and Excel (.xlsx) with yellow highlights are supported. PNG/JPG/PDF uploads are retired.";
             _messageIsError = true;
             return;
         }
@@ -686,14 +679,16 @@
         }
     }
 
+    private bool IsOfficeUpload =>
+        Path.GetExtension(_fileName).ToLowerInvariant() is ".docx" or ".xlsx";
+
     private bool CanAnalyze =>
         !_busy
-        && _aiEnabled
+        && IsOfficeUpload
         && _fileBytes is { Length: > 0 }
         && !string.IsNullOrWhiteSpace(_templateName)
         && _profileId != Guid.Empty
-        && _selectedInstanceId != Guid.Empty
-        && PdfSelectionValid;
+        && _selectedInstanceId != Guid.Empty;
 
     private bool PdfSelectionValid =>
         _pdfPageCount <= 1
@@ -753,11 +748,14 @@
                 SelectedPages = selectedPages,
             });
 
+            var templateKind = Path.GetExtension(_fileName).Equals(".xlsx", StringComparison.OrdinalIgnoreCase)
+                ? ApplicationProfileTemplateKind.Excel
+                : ApplicationProfileTemplateKind.Word;
             _placeholderSet = PlaceholderSets.GetSet(new ApplicationProfilePlaceholderSetQuery
             {
                 Profile = profile,
                 DataScope = ApplicationProfileTemplateDataScope.Both,
-                TemplateKind = ApplicationProfileTemplateKind.Word,
+                TemplateKind = templateKind,
             });
 
             var valueHints = BuildValueHints(_placeholderSet, objectSpace);
@@ -1108,6 +1106,7 @@
                 return;
             }
 
+            var ext = _outcome.SourceFormat == TemplateSourceFormat.Xlsx ? ".xlsx" : ".docx";
             Orchestrator.Save(new TemplateScanSaveRequest
             {
                 ObjectSpace = objectSpace,
@@ -1116,7 +1115,8 @@
                 DataScope = ApplicationProfileTemplateDataScope.Both,
                 CatalogScope = _catalogScope,
                 Content = _outcome.Content,
-                FileName = _templateName.Trim() + ".docx",
+                FileName = _templateName.Trim() + ext,
+                TemplateKind = _outcome.TemplateKind,
             });
 
             if (_source == EntrySource.Instance)

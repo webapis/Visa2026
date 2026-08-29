@@ -1,168 +1,108 @@
 ---
 name: visa2026-template-scan
 description: >-
-  Improve Create template from scan (Word and Excel) from scanned document images. Officers submit
-  screenshots per wizard step (Upload, Review, Generate, Preview, Done) plus optional catalog merge
-  Preview and the original scan; the agent compares expected vs actual, fixes TemplateScan, and
-  appends learnings so the next run is better. Use when user pastes scan-wizard screenshots, Create
-  from scan bugs, Analyze failed, yellow mapping, letter/Excel layout, TemplateAiScan config. Not
-  Convert (TEMPLATE_AI_CONVERT), Resminamalar ZIP, or #visa-preview-slot inside the wizard. Always
-  read learnings.md first; append after verified fixes. User prompts: prompts.md.
+  Improve Create from yellow marks (Word/Excel): yellow-highlighted .docx/.xlsx → library
+  placeholders → Approve. Officers submit wizard screenshots; agent compares, fixes TemplateScan,
+  appends learnings. Not Convert (value-match), not PNG/JPG/PDF (retired), not Resminamalar ZIP,
+  not #visa-preview-slot inside the wizard. Read learnings.md first; append after verified fixes.
+  User prompts: prompts.md.
 disable-model-invocation: false
 ---
 
-# Visa2026 — Create template from scan
+# Visa2026 — Create from yellow marks
 
-**Mission:** Improve generation of **Word and Excel** merge templates from **scanned images** of ministry documents (filled sample + yellow highlighter → library placeholders → officer Approve).
+**Mission:** Generate **Word and Excel** merge templates from **yellow-marked `.docx` / `.xlsx`** (OpenXML highlight / yellow cell fill → library placeholders → officer Approve). **PNG/JPG/PDF uploads are retired.**
 
+**Officer label:** **Create from yellow marks** (not “Create from scan”).  
 **User prompts:** [prompts.md](./prompts.md) (`@visa2026-template-scan`).
 
+## Screenshot feedback loop
 
-## Screenshot feedback loop (primary improvement path)
+Officers submit **wizard step screenshots** + optional **catalog Preview** + the **original yellow-marked Office file**. Treat as a regression pack; append learnings after every run.
 
-Officers improve this skill by submitting **screenshots of each Create-from-scan step** (and often the **original scan** + **catalog Preview** after save). The agent must treat that pack as a regression case.
+| Step | Judge |
+|------|--------|
+| **1 Upload** | `.docx`/`.xlsx` only; yellow requirements; case hints |
+| **2 Review** | Mapped tokens vs yellow only; no bogus gaps |
+| **3 Generate** | Token writer on **copy**; **strip all yellow** markup; diff gate |
+| **4 Preview** | Outline only (no PDF slot) |
+| **5 Done** | Saved; correct TemplateKind |
+| **Catalog Preview** | Real page/sheet; **no yellow highlighter** left on filled text |
 
-| Step screenshot | What to judge |
-|-----------------|---------------|
-| **1 Upload** | Filled sample, yellow requirements, case hints, file accepted |
-| **2 Review** | Scan acceptable / Fail; mapped tokens vs yellow only; no bogus gaps; boxes OK |
-| **3 Generate** | Completes without silent flat-list fallback |
-| **4 Preview** | Outline shows tokens in letter/table context (not PDF slot); placeholder list |
-| **5 Done** | Saved; placeholder count; Next points to catalog / Edit template |
-| **Catalog Preview** (after Approve) | Real page/sheet layout vs original scan |
-| **Original scan** | Ground truth for yellow regions + alignment |
+## Agent workflow
 
-**Agent when screenshots arrive:**
-
-1. Read [learnings.md](./learnings.md) + Scenarios first.
-2. Compare screenshots to locked rules and prior learnings (expected vs actual per step).
-3. Fix the smallest TemplateScan change that addresses the gap.
-4. Add/adjust tests when logic changed.
-5. **Append** [learnings.md](./learnings.md) (Need / Symptom / Cause / Fix / Verify / Prevent) — even if the run was mostly good (record what worked).
-6. Promote repeated issues into **Scenarios**.
-
-Do **not** skip learnings after a screenshot review. Experience compounds only when logged.
-
-## Agent workflow (every task — mandatory)
-
-1. **Read** [learnings.md](./learnings.md) (**## Entries**, newest first) and **Scenarios** below.
-2. **Classify** — scan wizard / yellow gate / Word or Excel draft layout / Azure scan (**this skill**) vs Convert (**docs/TEMPLATE_AI_CONVERT_***) vs catalog ZIP (**[resminamalar](../visa2026-resminamalar/SKILL.md)**) vs preview-slot shell (**[preview-slot](../visa2026-preview-slot/SKILL.md)**) vs placeholder seeds (**[user-report-templates](../visa2026-user-report-templates/SKILL.md)**).
-3. **Re-read locked product rules** in [`docs/TEMPLATE_AI_SCAN_PRODUCT_SPEC.md`](../../../docs/TEMPLATE_AI_SCAN_PRODUCT_SPEC.md) + yellow-highlight rules in learnings.
-4. **Implement** in **Visa2026.Module/Services/TemplateScan/** (logic) and **Visa2026.Blazor.Server/Editors/TemplateScan*** (thin UI). Excel drafts reuse user-report Excel merge conventions.
-5. **Verify** — `dotnet test Visa2026.Module.Tests --filter FullyQualifiedName~TemplateScan`; officer path: Analyze → Review → Generate → Approve → catalog Preview.
-6. **Record** — append [learnings.md](./learnings.md) after **verified** work ([MATURITY.md](./MATURITY.md)).
-7. **Promote** — same root cause twice → **Scenarios** row; thrice → tighten this file or [reference.md](./reference.md).
+1. Read [learnings.md](./learnings.md) (newest first) + Scenarios.
+2. Classify vs Convert / Resminamalar / preview-slot / user-report-templates.
+3. Re-read [`docs/TEMPLATE_AI_SCAN_PRODUCT_SPEC.md`](../../../docs/TEMPLATE_AI_SCAN_PRODUCT_SPEC.md).
+4. Implement in `Visa2026.Module/Services/TemplateScan/` + thin Blazor `TemplateScan*`.
+5. Verify: `dotnet test … --filter FullyQualifiedName~TemplateScan`.
+6. Append learnings; promote repeated issues to Scenarios.
 
 ## Canonical docs
 
 | Doc | Topic |
 |-----|--------|
-| [`docs/TEMPLATE_AI_SCAN_PRODUCT_SPEC.md`](../../../docs/TEMPLATE_AI_SCAN_PRODUCT_SPEC.md) | Product locks (separate from Convert) |
-| [`docs/TEMPLATE_AI_SCAN_UI_FLOW.md`](../../../docs/TEMPLATE_AI_SCAN_UI_FLOW.md) | Wizard views / transitions |
-| [`docs/TEMPLATE_AI_SCAN_ENGINEERING_SPEC.md`](../../../docs/TEMPLATE_AI_SCAN_ENGINEERING_SPEC.md) | Contracts, SD-D*, slices S* |
+| [`docs/TEMPLATE_AI_SCAN_PRODUCT_SPEC.md`](../../../docs/TEMPLATE_AI_SCAN_PRODUCT_SPEC.md) | Product locks |
+| [`docs/TEMPLATE_AI_SCAN_UI_FLOW.md`](../../../docs/TEMPLATE_AI_SCAN_UI_FLOW.md) | Wizard flow |
+| [`docs/TEMPLATE_AI_SCAN_ENGINEERING_SPEC.md`](../../../docs/TEMPLATE_AI_SCAN_ENGINEERING_SPEC.md) | Contracts |
 
-**Related skills (do not duplicate):**
-
-| Topic | Skill |
-|-------|--------|
-| Profile lock, case workspace, ApplicationProfileTemplate host | [visa2026-application-profile](../visa2026-application-profile/SKILL.md) |
-| Catalog Preview / ZIP / Edit template after save | [visa2026-resminamalar](../visa2026-resminamalar/SKILL.md) |
-| `#visa-preview-slot` shell (not inside scan wizard) | [visa2026-preview-slot](../visa2026-preview-slot/SKILL.md) |
-| Placeholder catalog, Extract/Validate, Word/Excel seeds | [visa2026-user-report-templates](../visa2026-user-report-templates/SKILL.md) |
-| Convert filled Word/Excel → template | docs `TEMPLATE_AI_CONVERT_*` (not this skill) |
-
-**Long reference:** [reference.md](./reference.md). **Experience:** [learnings.md](./learnings.md). **Maturity:** [MATURITY.md](./MATURITY.md).
-
----
+**Related:** [application-profile](../visa2026-application-profile/SKILL.md) · [resminamalar](../visa2026-resminamalar/SKILL.md) · [preview-slot](../visa2026-preview-slot/SKILL.md) · [user-report-templates](../visa2026-user-report-templates/SKILL.md) · Convert specs (value-match, not yellow).
 
 ## Output maturity
 
-| Format | Status | Focus |
-|--------|--------|--------|
-| **Word `.docx`** | Shipped path | Letter layout (twoColumn, justify, italic/bold), yellow→tokens, Approve |
-| **Excel `.xlsx`** | Improvement target under this skill | Table/grid from scan, row loops, Excel merge tokens; align with user-report-templates Excel families |
+| Format | Status |
+|--------|--------|
+| **Word `.docx`** | Shipped — yellow → tokens on copy → strip all yellow markup |
+| **Excel `.xlsx`** | Shipped foundation — yellow fill → tokens → strip yellowish fills |
 
-Product spec historically locked **Word-only for v1** (`S3`); **Excel-from-scan is in skill scope** for design and implementation as the next generation path — update the product/engineering specs when Excel ships.
-
----
-
-## Scenarios (check first)
+## Scenarios
 
 | Symptom | First step | Owner |
 |---------|------------|--------|
-| Analyze failed / DeploymentNotFound | `TemplateAiScan:AzureOpenAI:Deployment` (prefer same as Convert, e.g. `gpt-4.1-mini`); surface `ex.Message` | **This skill** |
-| Flat `Label: {{token}}` draft | Layout AI + `ScanLetterLayoutNormalizer`; never leftover-token footer dump | **This skill** |
-| Yellow values unmapped / duplicate compound gap | `ScanYellowHighlightTokenResolver` + merger; library token exists? | **This skill** + user-report-templates |
-| Placeholder Manual missing AFNUM/ADAT/… | `rootBoTypes` `"Application"` → `ApplicationProfileInstance` alias | user-report-templates |
-| Header has date on right, addressee missing | Normalizer: left = AFNUM+ADAT; right = addressee; OCR inject | **This skill** |
-| PDF viewer inside scan wizard Preview | Must stay **outline-only** (`TemplateConvertOutlineView`) | **This skill** |
-| Excel draft from scan missing / wrong grid | Excel builder + scan table detection (this skill); merge modes → user-report-templates | **This skill** |
-| Config lock blocks new template | Lock allows **new** templates only; banner expected | application-profile |
-| Wrong placeholders invented | Yellow-only + allowedTokens; no OCR invent on vision fail | **This skill** |
-| Teal Review boxes not on yellow text | ScanFieldBoxLocalizer / yellow region detect | **This skill** |
-
----
+| PNG/JPG/PDF rejected | Expected — use yellow-marked Word/Excel | **This skill** |
+| Yellow not detected | Word Text Highlight Color / Excel solid yellow fill | **This skill** |
+| Wrong tokens / compound split | `ScanYellowHighlightTokenResolver` + catalog ShortCodes | **This skill** + user-report-templates |
+| Clarification chat disabled | Needs `TemplateAiScan` AI provider (optional); Analyze does not | **This skill** |
+| Config lock | May add **new** templates | application-profile |
+| Diff gate fail on Generate | Span addresses; fingerprints **ignore** yellow strip | **This skill** + Convert writer |
+| Yellow remains after Approve / catalog Preview | `StripAllYellowMarkup` / `StripAllYellowFills` after write; re-Approve old templates | **This skill** |
 
 ## Scope
 
-| In scope | Out of scope |
-|----------|----------------|
-| Improving **Word and Excel** templates from scanned images | Convert existing document modal |
-| `TemplateScanDialog` wizard (Upload → Done) | Pixel-perfect letterhead / stamps |
-| Yellow-highlight field plan + gate | Embedding `#visa-preview-slot` PDF in wizard |
-| Draft `.docx` layout (twoColumn, styles, normalizer) | Resminamalar ZIP / batch worker |
-| Draft `.xlsx` layout (tables, row loops, Excel tokens) — build/improve here | Open-ended restyle / translate letter |
-| Azure / None scan AI providers (`TemplateAiScan`) | Authoring seed `.docx`/`.xlsx` under Resources/Templates (user-report-templates) |
-| Clarification chat (mapping only) | |
-| Save → `ApplicationProfileTemplate` | |
+| In | Out |
+|----|-----|
+| Yellow-marked `.docx` / `.xlsx` | PNG / JPG / PDF (retired) |
+| OpenXML yellow → tokens → Approve | Convert value-match modal |
+| Wizard outline Preview | `#visa-preview-slot` inside wizard |
+| | Resminamalar ZIP |
 
----
+## Locked rules
 
-## Locked product rules (do not regress)
+1. Separate from Convert (yellow marks ≠ instance value match).
+2. Yellow only → placeholders; library tokens only.
+3. Preserve source Office layout (token writer on copy).
+4. **Yellow is scan markup only** — after Generate, strip **all** highlighter/yellow fill from the saved copy (not only substituted runs). Unmapped leftovers (e.g. `6 (alty)` when only VCAT mapped) must not survive catalog Preview.
+5. Officer Approve required.
+6. Wizard Preview = outline only.
+7. Config lock allows **new** templates.
 
-1. **Separate from Convert** — own modal, orchestrator, options section.
-2. **Yellow highlighter only** — map only yellow spans; no yellow → Fail; unmapped yellow → Fail/Warn; non-yellow stays literal.
-3. **Filled sample + case hints** — value hints from case; tokens from profile-allowed library (`DataScope.Both` for Word; Excel scope per template kind).
-4. **Library tokens only** — never invent ShortCodes; gaps → Needs help.
-5. **Preserve scan structure** — Word: letter layout (header №+date left / addressee right; justify body; italic urgency; bold split signature). Excel: table/grid structure from the scan, not a flat token dump.
-6. **Officer Approve required** — no silent catalog publish.
-7. **Wizard Preview = outline** — page/sheet layout via catalog Preview / Edit template after save.
-8. **Config lock** — may add **new** templates; existing row edits stay blocked.
-
----
-
-## Pipeline (mental model)
+## Pipeline
 
 ```text
-Upload PNG/PDF → Ingest/OCR → Suitability
-  → Vision field plan (yellow) → Merge/split compounds → Yellow gate
-  → Officer Review / Clarification
-  → Vision layout → Normalizer/builder
-       → Word: ScanDraftDocxBuilder (+ letter normalizer)
-       → Excel: ScanDraftXlsxBuilder (target) + Excel merge conventions
-  → Extract/Validate → Outline Preview → Approve → ApplicationProfileTemplate
+Upload .docx/.xlsx → Ingest → ScanOfficeYellowExtractor → Merge/split → Yellow gate
+  → Review / optional Clarification
+  → ITemplateTokenWriter → StripAllYellow* → diff gate → Extract/Validate → Outline → Approve
 ```
-
----
 
 ## Triage
 
 | Layer | Look at |
 |-------|---------|
-| UI wizard | `Visa2026.Blazor.Server/Editors/TemplateScan*.razor` |
-| Orchestration | `TemplateScanOrchestrator`, `ScanFieldPlanService`, `ScanDocxLayoutService` |
-| Yellow / tokens | `ScanYellowHighlight*`, `ScanFieldPlanMerger`, catalog ShortCodes |
-| Word bytes | `ScanDraftDocxBuilder`, `ScanLetterLayoutNormalizer` |
-| Excel bytes | Scan Xlsx builder (when present); user-report Excel merge modes |
-| Azure | `Adapters/AzureOpenAiTemplateScanAiProvider`, `appsettings` `TemplateAiScan` |
+| UI | `TemplateScanDialog.razor`, wizard / Resminamalar entry **Create from yellow marks** |
+| Yellow | `ScanOfficeYellowExtractor`, `ScanYellowHighlight*` |
+| Generate | `TemplateScanOrchestrator` Office path, `ITemplateTokenWriter`, `StripAllYellowMarkup` / `StripAllYellowFills` |
 | Tests | `Visa2026.Module.Tests/TemplateScan/` |
 
 ```powershell
 dotnet test Visa2026.Module.Tests/Visa2026.Module.Tests.csproj -c Debug --filter "FullyQualifiedName~TemplateScan"
 ```
-
----
-
-## Chat openers
-
-See [prompts.md](./prompts.md).

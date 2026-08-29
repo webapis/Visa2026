@@ -31,9 +31,12 @@ public sealed class ScanInputNormalizer : IScanInputNormalizer
 
         return extension switch
         {
-            ".png" or ".jpg" or ".jpeg" => NormalizeImage(request, extension),
-            ".pdf" => NormalizePdf(request),
-            _ => throw new NotSupportedException($"Unsupported scan format '{extension}'. Use PNG, JPG, or PDF."),
+            ".docx" => NormalizeOffice(request, ScanSourceKind.Word),
+            ".xlsx" => NormalizeOffice(request, ScanSourceKind.Excel),
+            ".png" or ".jpg" or ".jpeg" or ".pdf" => throw new NotSupportedException(
+                "PNG, JPG, and PDF uploads are retired. Use a yellow-marked Word (.docx) or Excel (.xlsx) file."),
+            _ => throw new NotSupportedException(
+                $"Unsupported format '{extension}'. Use Word (.docx) or Excel (.xlsx) with yellow highlights."),
         };
     }
 
@@ -64,6 +67,27 @@ public sealed class ScanInputNormalizer : IScanInputNormalizer
         };
     }
 
+
+    private static ScanNormalizedInput NormalizeOffice(ScanNormalizeRequest request, ScanSourceKind kind)
+    {
+        return new ScanNormalizedInput
+        {
+            SourceKind = kind,
+            Pages =
+            [
+                new ScanPageImage
+                {
+                    PageIndex = 0,
+                    PngBytes = ScanRasterPlaceholder.OneByOneWhitePng,
+                    WidthPx = 800,
+                    HeightPx = 1100,
+                },
+            ],
+            OriginalByteLength = request.Content.LongLength,
+            FileName = request.FileName,
+            OfficePackageBytes = request.Content,
+        };
+    }
     private ScanNormalizedInput NormalizePdf(ScanNormalizeRequest request)
     {
         using var document = new PdfDocument();

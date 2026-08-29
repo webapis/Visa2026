@@ -45,17 +45,21 @@ public sealed class ScanSuitabilityEvaluator : IScanSuitabilityEvaluator
             });
         }
 
-        foreach (var page in request.Input.Pages)
+        var isOffice = request.Input.IsOfficeSource;
+        if (!isOffice)
         {
-            var minDimension = Math.Min(page.WidthPx, page.HeightPx);
-            if (minDimension < suitability.MinPageDimensionPx)
+            foreach (var page in request.Input.Pages)
             {
-                issues.Add(new ScanSuitabilityIssue
+                var minDimension = Math.Min(page.WidthPx, page.HeightPx);
+                if (minDimension < suitability.MinPageDimensionPx)
                 {
-                    Code = ScanSuitabilityIssueCode.ResolutionTooLow,
-                    Message = $"Page {page.PageIndex + 1} resolution ({page.WidthPx}×{page.HeightPx}) is too low for reliable field detection.",
-                    PageIndex = page.PageIndex,
-                });
+                    issues.Add(new ScanSuitabilityIssue
+                    {
+                        Code = ScanSuitabilityIssueCode.ResolutionTooLow,
+                        Message = $"Page {page.PageIndex + 1} resolution ({page.WidthPx}×{page.HeightPx}) is too low for reliable field detection.",
+                        PageIndex = page.PageIndex,
+                    });
+                }
             }
         }
 
@@ -66,12 +70,15 @@ public sealed class ScanSuitabilityEvaluator : IScanSuitabilityEvaluator
         if (request.Ocr.Lines.Count == 0)
         {
             // Raster uploads have no local OCR by design (ScanOcrExtractor); Azure vision reads the PNG in S2.
+            // Office yellow path still needs extractable text (empty Word/Excel fails here).
             if (!imageDefersTextToVision)
             {
                 issues.Add(new ScanSuitabilityIssue
                 {
                     Code = ScanSuitabilityIssueCode.NoTextDetected,
-                    Message = "No extractable text was found in the PDF. Use a searchable PDF or upload a PNG/JPG scan.",
+                    Message = isOffice
+                        ? "No extractable text was found in the Word/Excel file."
+                        : "No extractable text was found in the PDF. Use a searchable PDF or upload a PNG/JPG scan.",
                 });
             }
         }

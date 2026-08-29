@@ -4,6 +4,52 @@ Append-only. Newest first under **## Entries**.
 
 ## Entries
 
+### 2026-08-29 — Verified: Sazakow_5 catalog Preview clean (full yellow strip)
+
+- Steps attached: Upload / Review (6 mapped) / Preview (`{{ds.*}}`, no yellow) / Done / catalog Preview of filled letter
+- Symptom: Prior run left yellow on `6 (alty)`; this re-Approve of yellow-marked Word shows **no yellow** in Resminamalar catalog Preview.
+- Fix: Confirmed `StripAllYellowMarkup` path after Generate (no further code).
+- Verify: Officer screenshots — placeholders in wizard Preview; filled catalog letter without highlighter.
+- Prevent: Re-Approve templates created before full-strip; do not treat wizard outline Preview as proof of catalog formatting.
+- Cross-skill: resminamalar | preview-slot
+### 2026-08-29 — Leftover yellow after partial map (e.g. 6 (alty))
+
+- Symptom: Catalog Preview still showed yellow on `6 (alty)` while most mapped marks were gone.
+- Cause: Token writer only cleared highlight on runs that received a placeholder. Unmapped yellow leftovers stayed.
+- Fix: After Create-from-yellow-marks Generate, strip all yellow highlighter/shading (Word) and yellowish fills (Excel).
+- Verify: Unit `StripAllYellowMarkup_clears_unmapped_leftover_highlights`; officer re-Approve → no yellow in catalog Preview.
+- Prevent: Yellow is scan markup only; never leave it in the saved template.
+- Cross-skill: TemplateConvert token writer | resminamalar
+### 2026-08-29 — Strip yellow after placeholder write
+
+- Symptom: Wizard Preview looked clean (`{{ds.*}}`); Resminamalar catalog Preview still showed yellow on filled values for a template created from yellow marks.
+- Cause: Token writer replaced text but left Word `w:highlight` / Excel yellow fill on those runs/cells; merge Preview then painted instance values on yellow-marked spans.
+- Fix: `WordTemplateTokenWriter.TryReplaceSpan` clears highlighter (+ yellowish shading) on touched runs; `ExcelTemplateTokenWriter.TryWriteCell` sets fill pattern to None after writing the token. Diff gate fingerprints ignore yellow so Generate still passes.
+- Verify: Unit `Word_yellow_highlight_is_cleared_when_token_is_written`, `Excel_yellow_fill_is_cleared_when_token_is_written`, `GenerateAsync_yellow_word_writes_tokens_into_copy` (no yellow Highlight left). Officer: re-run Create from yellow marks → Approve → catalog Preview without yellow.
+- Prevent: Do not leave highlighter on substituted spans; templates must not carry officer mark-up into merge output.
+- Cross-skill: TemplateConvert token writer | resminamalar
+### 2026-08-29 — Office-only + rename to Create from yellow marks
+
+- Need: Focus on Word/Excel yellow marks; PNG/JPG/PDF less efficient and confusing next to Convert.
+- Fix: Upload accepts `.docx`/`.xlsx` only (image/PDF throw retired). Field plan + Generate are Office yellow / token-writer only. Officer label **Create from yellow marks**. Entry no longer requires vision AI. Skill/specs updated.
+- Verify: TemplateScan tests; UI shows new label; PNG upload rejected with retired message.
+- Prevent: Do not reintroduce scan/photo as primary path without product unlock; keep Convert separate (value-match).
+- Cross-skill: application-profile | resminamalar
+### 2026-08-29 — Yellow-marked Word/Excel as Create-from-scan input
+
+- Need: Officers often have editable .docx/.xlsx with yellow marks; interpreting OpenXML is easier than OCR/vision boxes.
+- Fix: Upload accepts .docx/.xlsx; `ScanOfficeYellowExtractor` + office field plan (no vision); Generate uses `ITemplateTokenWriter` + diff gate on a **copy** of the source (layout preserved). Image/PDF path unchanged. Convert stays separate (instance value-match).
+- Verify: Unit `ScanOfficeYellowExtractorTests`; officer: yellow Word → Analyze → Review tokens → Generate → Approve (.docx copy with `{{…}}`).
+- Prevent: Do not route yellow Office files through Convert L7; do not rebuild letter layout when source is already OOXML.
+- Cross-skill: TemplateConvert token writer | user-report-templates
+### 2026-08-29 — Stray boxes on de/sa/sany; Urgency yellow missing (v4)
+
+- Symptom: After v3, body yellows mostly OK; Review still showed teal on non-yellow fragments (`de`, `sa`, `sany`); `Adaty tertipde!` yellow had no overlay.
+- Cause: Warm anti-aliased text edges passed as highlighter; weak leftover assignment forced fields onto those tiny blobs instead of real urgency yellow.
+- Fix: Stricter chroma/size/density for yellow blobs; share yellow only for AFNUM+ADAT / TPCNT+TPCTX / VPER+VCAT; require MinAcceptScore — else keep AI box (do not park on fragments).
+- Verify: Unit `Detect_rejects_small_warm_text_fragments`, `Apply_does_not_park_urgency_on_text_fragment`. Officer: re-Analyze → urgency boxed; no boxes on plain words.
+- Prevent: Never force every field onto some yellow blob when the best score is weak.
+- Cross-skill: -
 ### 2026-08-29 — Ghost teal boxes between paragraphs (v3)
 
 - Symptom: Review shows correct tokens; urgency/header often OK; body has teal boxes floating in whitespace above yellow ink (`6 (alty) aý` missed); extra ghost boxes between paragraphs.

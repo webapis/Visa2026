@@ -6,18 +6,19 @@ namespace Visa2026.Module.Tests.TemplateScan;
 public class ScanIngestServiceTests
 {
     [Fact]
-    public void Ingest_LowResolutionPng_FailsSuitability()
+    public void Ingest_YellowWord_PassesSuitabilityWithPlaybook()
     {
         var (_, _, ingest, _) = ScanTestServiceFactory.Create();
-        var png = ScanTestImageFactory.CreatePngWithDimensions(50, 50);
+        var bytes = ScanOfficeYellowExtractorTests.CreateWordFixture("№ 4/-434");
 
         var result = ingest.Ingest(new ScanNormalizeRequest
         {
-            Content = png,
-            FileName = "small.png",
+            Content = bytes,
+            FileName = "marked.docx",
         });
 
-        Assert.Equal(ScanSuitabilityVerdict.Fail, result.Suitability.Verdict);
+        Assert.True(result.Suitability.CanContinue);
+        Assert.Equal(ScanSourceKind.Word, result.Input.SourceKind);
         Assert.False(string.IsNullOrWhiteSpace(result.Playbook.Fingerprint));
     }
 }

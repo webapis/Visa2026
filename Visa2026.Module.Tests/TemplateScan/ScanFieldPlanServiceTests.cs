@@ -12,52 +12,43 @@ namespace Visa2026.Module.Tests.TemplateScan;
 public class ScanFieldPlanServiceTests
 {
     [Fact]
-    public async Task BuildAsync_NoneProvider_ReturnsEmptyWithoutYellowVision()
+    public async Task BuildAsync_YellowWord_MapsWithoutVision()
     {
         var (_, _, ingest, fieldPlan) = ScanTestServiceFactory.Create();
         var set = new ApplicationProfilePlaceholderSetService(new UserReportPlaceholderCatalogService()).GetSet(
             new ApplicationProfilePlaceholderSetQuery
             {
                 Profile = new ApplicationProfile(),
-                DataScope = ApplicationProfileTemplateDataScope.ApplicationHeader,
+                DataScope = ApplicationProfileTemplateDataScope.Both,
                 TemplateKind = ApplicationProfileTemplateKind.Word,
             });
 
         var ingested = ingest.Ingest(new ScanNormalizeRequest
         {
-            Content = ScanTestImageFactory.CreatePdf(1),
-            FileName = "form.pdf",
+            Content = ScanOfficeYellowExtractorTests.CreateWordFixture("№ 4/-434", "Adaty tertipde!"),
+            FileName = "letter.docx",
         });
-
-        var ingestWithOcr = new ScanIngestResult
-        {
-            Input = ingested.Input,
-            Ocr = new ScanOcrResult
-            {
-                Lines = [new ScanOcrLine { PageIndex = 0, Text = "Full application number", Confidence = 0.9 }],
-                TextConfidence = 0.9,
-            },
-            Suitability = ingested.Suitability,
-            Playbook = ingested.Playbook,
-        };
 
         var plan = await fieldPlan.BuildAsync(new ScanFieldPlanBuildRequest
         {
-            Ingest = ingestWithOcr,
+            Ingest = ingested,
             PlaceholderSet = set,
+            ScanKind = ScanKind.FilledSample,
         });
 
-        Assert.Equal("None", plan.Source);
-        Assert.Empty(plan.Fields);
+        Assert.Equal("office-yellow", plan.Source);
+        Assert.Contains(plan.Fields, f => f.ProposedToken != null
+            && TemplateTokenSyntax.TryGetShortCode(f.ProposedToken, out var c)
+            && c.Equals("AFNUM", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]
-    public async Task BuildAsync_ProviderThrow_DoesNotInventOcrFields()
+    public async Task BuildAsync_NonOffice_Throws()
     {
-        var (_, _, ingest, _) = ScanTestServiceFactory.Create();
         var fieldPlan = new ScanFieldPlanService(
-            new ThrowingScanAiProvider(),
+            new NoneTemplateScanAiProvider(),
             new ScanFieldPlanMerger(),
+            new ScanOfficeYellowExtractor(),
             Options.Create(new TemplateAiScanOptions()));
 
         var set = new ApplicationProfilePlaceholderSetService(new UserReportPlaceholderCatalogService()).GetSet(
@@ -68,53 +59,34 @@ public class ScanFieldPlanServiceTests
                 TemplateKind = ApplicationProfileTemplateKind.Word,
             });
 
-        var ingested = ingest.Ingest(new ScanNormalizeRequest
+        var ingest = new ScanIngestResult
         {
-            Content = ScanTestImageFactory.CreatePdf(1),
-            FileName = "form.pdf",
-        });
-
-        var ingestWithOcr = new ScanIngestResult
-        {
-            Input = ingested.Input,
-            Ocr = new ScanOcrResult
+            Input = new ScanNormalizedInput
             {
-                Lines = [new ScanOcrLine { PageIndex = 0, Text = "Full application number", Confidence = 0.9 }],
-                TextConfidence = 0.9,
+                SourceKind = ScanSourceKind.Image,
+                Pages = Array.Empty<ScanPageImage>(),
+                OriginalByteLength = 10,
+                FileName = "x.png",
             },
-            Suitability = ingested.Suitability,
-            Playbook = ingested.Playbook,
+            Ocr = new ScanOcrResult { Lines = Array.Empty<ScanOcrLine>(), TextConfidence = 0 },
+            Suitability = new ScanSuitabilityReport
+            {
+                Verdict = ScanSuitabilityVerdict.Pass,
+                TextConfidence = 1,
+                Issues = Array.Empty<ScanSuitabilityIssue>(),
+            },
+            Playbook = new ScanAuthoringPlaybook
+            {
+                Markdown = "x",
+                Fingerprint = "x",
+                VersionLabel = "x",
+            },
         };
 
-        var plan = await fieldPlan.BuildAsync(new ScanFieldPlanBuildRequest
+        await Assert.ThrowsAsync<InvalidOperationException>(() => fieldPlan.BuildAsync(new ScanFieldPlanBuildRequest
         {
-            Ingest = ingestWithOcr,
+            Ingest = ingest,
             PlaceholderSet = set,
-        });
-
-        Assert.Equal("none", plan.Source);
-        Assert.Equal(0, plan.YellowHighlightCount);
-        Assert.Empty(plan.Fields);
-    }
-
-    private sealed class ThrowingScanAiProvider : ITemplateScanAiProvider
-    {
-        public string Key => "throw";
-        public bool IsEnabled => true;
-
-        public Task<ScanFieldPlanProposal> ProposeFieldPlanAsync(
-            ScanFieldPlanRequest request,
-            CancellationToken cancellationToken = default) =>
-            throw new InvalidOperationException("Azure OpenAI HTTP 404: DeploymentNotFound");
-
-        public Task<ScanClarificationResult> ClarifyAsync(
-            ScanClarificationRequest request,
-            CancellationToken cancellationToken = default) =>
-            throw new NotSupportedException();
-
-        public Task<ScanDocxLayoutProposal> ProposeDocxLayoutAsync(
-            ScanDocxLayoutRequest request,
-            CancellationToken cancellationToken = default) =>
-            throw new NotSupportedException();
+        }));
     }
 }

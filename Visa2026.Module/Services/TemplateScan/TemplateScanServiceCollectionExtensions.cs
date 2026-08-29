@@ -17,6 +17,7 @@ public static class TemplateScanServiceCollectionExtensions
         services.AddSingleton<IScanSuitabilityEvaluator, ScanSuitabilityEvaluator>();
         services.AddSingleton<IScanIngestService, ScanIngestService>();
         services.AddSingleton<IScanFieldPlanMerger, ScanFieldPlanMerger>();
+        services.AddSingleton<IScanOfficeYellowExtractor, ScanOfficeYellowExtractor>();
         services.AddSingleton<IScanFieldPlanService, ScanFieldPlanService>();
         services.AddSingleton<ITemplateScanClarificationService, TemplateScanClarificationService>();
         services.AddSingleton<IScanGapPacketExporter, ScanGapPacketExporter>();

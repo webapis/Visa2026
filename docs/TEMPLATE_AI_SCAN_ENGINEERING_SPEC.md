@@ -41,7 +41,7 @@ Convert solves **reverse mapping** on structured Word/Excel. Scan solves **visio
 
 **Namespace for new code:** `Visa2026.Module.Services.TemplateScan`.
 
-**Do not reuse:** `ITemplateConvertOrchestrator`, `ITemplateTokenWriter`, `ITemplateCandidateAnalyzer` — wrong input shape (no pre-existing OOXML body).
+**Reuse for Office yellow path:** `ITemplateTokenWriter` + `ITemplateConversionDiffGate` (substitute yellow spans in existing OOXML). **Do not reuse:** `ITemplateConvertOrchestrator`, `ITemplateCandidateAnalyzer` (value-match highlights ≠ yellow highlighter). Image/PDF path still uses `ScanDraftDocxBuilder` (new docx).
 
 ---
 
@@ -97,7 +97,7 @@ public sealed class ScanPageImage
     public required int HeightPx { get; init; }
 }
 
-public enum ScanSourceKind { Image, Pdf }
+public enum ScanSourceKind { Image, Pdf, Word, Excel }
 ```
 
 **v1 implementation notes:**
@@ -106,6 +106,7 @@ public enum ScanSourceKind { Image, Pdf }
 |--------|----------|
 | PNG/JPG | Pass through or re-encode to PNG for vision API |
 | PDF | Render pages to PNG — **Spire.PDF** (already in Module) or **DevExpress PdfDocumentProcessor** spike in S2; cap pages per **SD-D3** |
+| Word `.docx` / Excel `.xlsx` | **Office yellow path:** `ScanOfficeYellowExtractor` → field plan (no vision); Generate uses `ITemplateTokenWriter` on a **copy** of the upload (layout preserved). Do **not** merge with Convert value-matching. |
 
 ### 2.3 `IScanSuitabilityEvaluator` (scoped)
 

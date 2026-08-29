@@ -61,6 +61,10 @@ public sealed class TemplateScanOutcome
 
     public required IReadOnlyList<string> EmittedTokens { get; init; }
 
+    public ApplicationProfileTemplateKind TemplateKind { get; init; } = ApplicationProfileTemplateKind.Word;
+
+    public TemplateSourceFormat SourceFormat { get; init; } = TemplateSourceFormat.Docx;
+
     public bool HasErrors => Errors.Count > 0;
 
     public bool HasWarnings => Warnings.Count > 0;
@@ -83,4 +87,6 @@ public sealed class TemplateScanSaveRequest
     public required byte[] Content { get; init; }
 
     public required string FileName { get; init; }
+
+    public ApplicationProfileTemplateKind TemplateKind { get; init; } = ApplicationProfileTemplateKind.Word;
 }

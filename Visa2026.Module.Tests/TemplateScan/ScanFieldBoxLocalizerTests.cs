@@ -38,11 +38,9 @@ public class ScanFieldBoxLocalizerTests
         using (var g = Graphics.FromImage(bmp))
         {
             g.Clear(Color.White);
-            // Pale sticky-note yellow (high B) that old gate rejected.
             using var pale = new SolidBrush(Color.FromArgb(255, 255, 245, 157));
             g.FillRectangle(pale, 40, 180, 100, 22);
 
-            // Sparse warm speckles in the paragraph gap (ghost-blob trap).
             using var speck = new SolidBrush(Color.FromArgb(255, 240, 220, 140));
             for (var i = 0; i < 8; i++)
                 g.FillRectangle(speck, 50 + i * 18, 110, 3, 3);
@@ -57,6 +55,91 @@ public class ScanFieldBoxLocalizerTests
     }
 
     [Fact]
+    public void Detect_rejects_small_warm_text_fragments()
+    {
+        using var bmp = new Bitmap(400, 400);
+        using (var g = Graphics.FromImage(bmp))
+        {
+            g.Clear(Color.White);
+            using var yellow = new SolidBrush(Color.FromArgb(255, 255, 235, 40));
+            g.FillRectangle(yellow, 40, 80, 110, 22); // real urgency-sized highlight
+
+            // Warm fragments like anti-aliased "de" / "sa" / "sany"
+            using var frag = new SolidBrush(Color.FromArgb(255, 220, 200, 90));
+            g.FillRectangle(frag, 60, 160, 10, 8);
+            g.FillRectangle(frag, 140, 165, 12, 8);
+            g.FillRectangle(frag, 220, 200, 22, 9);
+        }
+
+        using var ms = new MemoryStream();
+        bmp.Save(ms, ImageFormat.Png);
+        var boxes = ScanYellowRegionDetector.Detect(ms.ToArray());
+        Assert.Single(boxes);
+        Assert.True(boxes[0].Top < 0.35);
+    }
+
+    [Fact]
+    public void Apply_does_not_park_urgency_on_text_fragment()
+    {
+        using var bmp = new Bitmap(400, 400);
+        using (var g = Graphics.FromImage(bmp))
+        {
+            g.Clear(Color.White);
+            using var yellow = new SolidBrush(Color.FromArgb(255, 255, 235, 40));
+            g.FillRectangle(yellow, 30, 90, 120, 22);  // urgency
+            g.FillRectangle(yellow, 40, 260, 130, 24); // body
+            using var frag = new SolidBrush(Color.FromArgb(255, 230, 210, 100));
+            g.FillRectangle(frag, 180, 150, 14, 9);
+        }
+
+        using var ms = new MemoryStream();
+        bmp.Save(ms, ImageFormat.Png);
+
+        var plan = new ScanFieldPlan
+        {
+            PlaceholderSet = PlaceholderSet(),
+            ScanKind = ScanKind.FilledSample,
+            Fields =
+            [
+                new ScanDetectedField
+                {
+                    FieldId = "u",
+                    PageIndex = 0,
+                    LabelText = "Adaty tertipde!",
+                    ProposedToken = "{{ds.Urgency_NameTm}}",
+                    Confidence = ScanFieldConfidence.High,
+                    Scope = ScanFieldScope.Header,
+                    Box = new ScanBoundingBox(0.05, 0.2, 0.4, 0.28),
+                },
+                new ScanDetectedField
+                {
+                    FieldId = "t",
+                    PageIndex = 0,
+                    LabelText = "18",
+                    ProposedToken = "{{ds.TPCNT}}",
+                    Confidence = ScanFieldConfidence.High,
+                    Scope = ScanFieldScope.Header,
+                    Box = new ScanBoundingBox(0.08, 0.35, 0.35, 0.42),
+                },
+            ],
+            StaticRegions = Array.Empty<ScanStaticRegion>(),
+            Gaps = Array.Empty<ScanGap>(),
+            PendingQuestions = Array.Empty<ScanClarificationPrompt>(),
+            Source = "test",
+            YellowHighlightCount = 2,
+        };
+
+        var localized = ScanFieldBoxLocalizer.Apply(
+            plan,
+            [new ScanPageImage { PageIndex = 0, PngBytes = ms.ToArray(), WidthPx = 400, HeightPx = 400 }]);
+
+        var urgency = Assert.Single(localized.Fields, f => f.FieldId == "u");
+        Assert.True(urgency.Box.Top < 0.35, $"urgency parked wrong: {urgency.Box}");
+        Assert.True(urgency.Box.Bottom < 0.4, $"urgency too tall/low: {urgency.Box}");
+        Assert.True(urgency.Box.Right - urgency.Box.Left > 0.15, "urgency should use real yellow width");
+    }
+
+    [Fact]
     public void Apply_snaps_upward_shifted_ai_boxes_onto_body_yellow()
     {
         using var bmp = new Bitmap(400, 400);
@@ -64,10 +147,8 @@ public class ScanFieldBoxLocalizerTests
         {
             g.Clear(Color.White);
             using var yellow = new SolidBrush(Color.FromArgb(255, 255, 235, 40));
-            // Real body yellows
-            g.FillRectangle(yellow, 40, 260, 120, 24); // ~ TPCNT region
-            g.FillRectangle(yellow, 200, 260, 90, 24); // ~ VPER region
-            // Speckle noise where AI wrongly puts boxes
+            g.FillRectangle(yellow, 40, 260, 120, 24);
+            g.FillRectangle(yellow, 200, 260, 90, 24);
             using var speck = new SolidBrush(Color.FromArgb(255, 235, 210, 120));
             for (var i = 0; i < 6; i++)
                 g.FillRectangle(speck, 50 + i * 20, 160, 4, 4);
@@ -75,12 +156,10 @@ public class ScanFieldBoxLocalizerTests
 
         using var ms = new MemoryStream();
         bmp.Save(ms, ImageFormat.Png);
-        var png = ms.ToArray();
 
-        var set = PlaceholderSet();
         var plan = new ScanFieldPlan
         {
-            PlaceholderSet = set,
+            PlaceholderSet = PlaceholderSet(),
             ScanKind = ScanKind.FilledSample,
             Fields =
             [
@@ -92,7 +171,6 @@ public class ScanFieldBoxLocalizerTests
                     ProposedToken = "{{ds.TPCNT}}",
                     Confidence = ScanFieldConfidence.High,
                     Scope = ScanFieldScope.Header,
-                    // Shifted UP into the gap (classic vision error).
                     Box = new ScanBoundingBox(0.08, 0.35, 0.35, 0.42),
                 },
                 new ScanDetectedField
@@ -115,7 +193,7 @@ public class ScanFieldBoxLocalizerTests
 
         var localized = ScanFieldBoxLocalizer.Apply(
             plan,
-            [new ScanPageImage { PageIndex = 0, PngBytes = png, WidthPx = 400, HeightPx = 400 }]);
+            [new ScanPageImage { PageIndex = 0, PngBytes = ms.ToArray(), WidthPx = 400, HeightPx = 400 }]);
 
         Assert.All(localized.Fields, f =>
         {
@@ -138,7 +216,6 @@ public class ScanFieldBoxLocalizerTests
 
         using var ms = new MemoryStream();
         bmp.Save(ms, ImageFormat.Png);
-        var png = ms.ToArray();
 
         var plan = new ScanFieldPlan
         {
@@ -176,7 +253,7 @@ public class ScanFieldBoxLocalizerTests
 
         var localized = ScanFieldBoxLocalizer.Apply(
             plan,
-            [new ScanPageImage { PageIndex = 0, PngBytes = png, WidthPx = 300, HeightPx = 300 }]);
+            [new ScanPageImage { PageIndex = 0, PngBytes = ms.ToArray(), WidthPx = 300, HeightPx = 300 }]);
 
         Assert.All(localized.Fields, f =>
         {

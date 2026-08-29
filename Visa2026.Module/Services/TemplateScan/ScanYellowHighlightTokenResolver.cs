@@ -41,7 +41,8 @@ public static class ScanYellowHighlightTokenResolver
         ScanBoundingBox box,
         int pageIndex,
         ApplicationProfilePlaceholderSet placeholderSet,
-        HashSet<string> usedShortCodes)
+        HashSet<string> usedShortCodes,
+        DocumentRegion? sourceRegion = null)
     {
         ArgumentNullException.ThrowIfNull(placeholderSet);
         ArgumentNullException.ThrowIfNull(usedShortCodes);
@@ -72,10 +73,31 @@ public static class ScanYellowHighlightTokenResolver
                 Confidence = ScanFieldConfidence.High,
                 Scope = entry.Scope == UserReportPlaceholderScope.Row ? ScanFieldScope.Row : ScanFieldScope.Header,
                 Box = SliceBox(box, text.Length, index, length),
+                SourceRegion = SliceRegion(sourceRegion, text.Length, index, length),
             });
         }
 
         return drafts;
+    }
+
+    private static DocumentRegion? SliceRegion(DocumentRegion? parent, int textLength, int index, int length)
+    {
+        if (parent is null || textLength <= 0 || length <= 0)
+            return parent;
+
+        if (parent is DocumentRegion.WordSpan span)
+        {
+            // index/length are relative to trimmed yellow text; parent span may include leading spaces.
+            // Best-effort: offset within the yellow mark's paragraph span.
+            var start = span.Start + Math.Clamp(index, 0, Math.Max(0, span.Length - 1));
+            var len = Math.Min(length, Math.Max(0, span.Start + span.Length - start));
+            if (len <= 0)
+                return span;
+            return new DocumentRegion.WordSpan(span.ParagraphAddress, start, len);
+        }
+
+        // Excel cells are atomic — compound splits share the same cell (last write wins unless split earlier).
+        return parent;
     }
 
     /// <summary>

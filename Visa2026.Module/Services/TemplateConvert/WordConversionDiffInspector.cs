@@ -158,8 +158,8 @@ internal static class WordConversionDiffInspector
 
     private static void CompareRunFormatting(string address, Paragraph original, Paragraph converted, List<string> violations)
     {
-        var left = original.Elements<Run>().Select(static r => r.RunProperties?.OuterXml ?? string.Empty).ToList();
-        var right = converted.Elements<Run>().Select(static r => r.RunProperties?.OuterXml ?? string.Empty).ToList();
+        var left = original.Elements<Run>().Select(static r => FingerprintRunFormatting(r)).ToList();
+        var right = converted.Elements<Run>().Select(static r => FingerprintRunFormatting(r)).ToList();
 
         if (left.Count != right.Count)
         {
@@ -174,6 +174,21 @@ internal static class WordConversionDiffInspector
         var rightParagraphMark = converted.ParagraphProperties?.OuterXml ?? string.Empty;
         if (!string.Equals(leftParagraphMark, rightParagraphMark, StringComparison.Ordinal))
             violations.Add($"Paragraph formatting changed at '{address}'.");
+    }
+
+    /// <summary>
+    /// Ignores yellow highlighter / yellowish shading so Create-from-yellow-marks can strip marks
+    /// after token write without failing the Convert/Scan shared diff gate.
+    /// </summary>
+    private static string FingerprintRunFormatting(Run run)
+    {
+        var props = run.RunProperties;
+        if (props == null)
+            return string.Empty;
+
+        var ghost = new Run((RunProperties)props.CloneNode(deep: true));
+        WordTemplateTokenWriter.ClearHighlightMark(ghost);
+        return ghost.RunProperties?.OuterXml ?? string.Empty;
     }
 }
 
