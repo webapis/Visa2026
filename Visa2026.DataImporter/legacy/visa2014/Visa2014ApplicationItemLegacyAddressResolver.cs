@@ -210,7 +210,9 @@ internal static class Visa2014ApplicationItemLegacyAddressResolver
     }
 
     private static Guid? ResolveLinePersonLegacyOid(Visa2014ApplicationItemRawRow raw) =>
-        raw.ForEmployee ? raw.LegacyEmployeeOid
-        : raw.ForFamilyMember ? raw.LegacyFamilyMemberOid
-        : null;
+        Visa2014ApplicationItemPersonOidResolver.Resolve(
+            raw.ForEmployee,
+            raw.ForFamilyMember,
+            raw.LegacyEmployeeOid,
+            raw.LegacyFamilyMemberOid);
 }

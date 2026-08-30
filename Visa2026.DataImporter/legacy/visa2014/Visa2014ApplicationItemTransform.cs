@@ -508,9 +508,11 @@ internal static class Visa2014ApplicationItemTransform
     }
 
     private static Guid? ResolvePersonOid(Visa2014ApplicationItemRawRow raw) =>
-        raw.ForEmployee ? raw.LegacyEmployeeOid
-        : raw.ForFamilyMember ? raw.LegacyFamilyMemberOid
-        : null;
+        Visa2014ApplicationItemPersonOidResolver.Resolve(
+            raw.ForEmployee,
+            raw.ForFamilyMember,
+            raw.LegacyEmployeeOid,
+            raw.LegacyFamilyMemberOid);
 
     private static void DeriveRegistrationTravelTypes(string? applicationTypeName, Dictionary<string, object?> row)
     {
