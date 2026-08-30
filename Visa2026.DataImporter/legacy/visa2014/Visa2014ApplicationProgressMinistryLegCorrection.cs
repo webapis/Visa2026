@@ -1,4 +1,3 @@
-using System.Text.Json;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Core;
 using Visa2026.Blazor.Server.Services.Migration;
@@ -136,7 +135,7 @@ internal static class Visa2014ApplicationProgressMinistryLegCorrection
         }
 
         if (!dryRun && !string.IsNullOrWhiteSpace(progressIdMapPath))
-            PruneProgressIdMapForLegacyApplications(progressIdMapPath, legacyToTarget.Keys);
+            Visa2014ProgressIdMapFileHelper.PruneFileForLegacyApplications(progressIdMapPath, legacyToTarget.Keys);
 
         var regen = await Visa2014ApplicationProgressODataImporter.RegenerateForLegacyApplicationsAsync(
             target,
@@ -150,7 +149,7 @@ internal static class Visa2014ApplicationProgressMinistryLegCorrection
 
         errors.AddRange(regen.Errors);
         if (!dryRun && regen.ProgressIdMapUpdates.Count > 0 && !string.IsNullOrWhiteSpace(progressIdMapPath))
-            MergeProgressIdMap(progressIdMapPath, regen.ProgressIdMapUpdates);
+            Visa2014ProgressIdMapFileHelper.MergeFileUpdates(progressIdMapPath, regen.ProgressIdMapUpdates);
 
         return new Visa2014ApplicationProgressMinistryLegCorrectionResult
         {
@@ -207,33 +206,6 @@ internal static class Visa2014ApplicationProgressMinistryLegCorrection
             objectSpace.CommitChanges();
 
         return backfilled;
-    }
-
-    private static void PruneProgressIdMapForLegacyApplications(string path, IEnumerable<Guid> legacyApplicationOids)
-    {
-        if (!File.Exists(path))
-            return;
-
-        var existing = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(path))
-            ?? new Dictionary<string, string>(StringComparer.Ordinal);
-        var prefixes = legacyApplicationOids
-            .Select(id => $"{id:D}:")
-            .ToHashSet(StringComparer.Ordinal);
-        var pruned = existing
-            .Where(kv => !prefixes.Any(p => kv.Key.StartsWith(p, StringComparison.Ordinal)))
-            .ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.Ordinal);
-        File.WriteAllText(path, JsonSerializer.Serialize(pruned, new JsonSerializerOptions { WriteIndented = true }));
-    }
-
-    private static void MergeProgressIdMap(string path, IReadOnlyDictionary<string, Guid> updates)
-    {
-        var existing = File.Exists(path)
-            ? JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(path)) ?? new Dictionary<string, string>(StringComparer.Ordinal)
-            : new Dictionary<string, string>(StringComparer.Ordinal);
-        foreach (var (key, value) in updates)
-            existing[key] = value.ToString();
-        Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(path))!);
-        File.WriteAllText(path, JsonSerializer.Serialize(existing, new JsonSerializerOptions { WriteIndented = true }));
     }
 
     private static string MaskConnectionString(string connectionString)

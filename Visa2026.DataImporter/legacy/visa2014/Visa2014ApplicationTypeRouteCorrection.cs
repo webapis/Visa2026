@@ -1,4 +1,3 @@
-using System.Text.Json;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Core;
 using Visa2026.Blazor.Server.Services.Migration;
@@ -206,7 +205,7 @@ internal static class Visa2014ApplicationTypeRouteCorrection
             progressFailed = regen.FailedCount;
             errors.AddRange(regen.Errors);
             if (!dryRun && regen.ProgressIdMapUpdates.Count > 0 && !string.IsNullOrWhiteSpace(progressIdMapPath))
-                MergeProgressIdMap(progressIdMapPath, regen.ProgressIdMapUpdates);
+                Visa2014ProgressIdMapFileHelper.MergeFileUpdates(progressIdMapPath, regen.ProgressIdMapUpdates);
         }
 
         return new Visa2014ApplicationTypeRouteCorrectionResult
@@ -255,16 +254,6 @@ internal static class Visa2014ApplicationTypeRouteCorrection
         if (dominantProfileId != Guid.Empty)
             return objectSpace.GetObjectByKey<Bo.ApprovalLegProfile>(dominantProfileId);
         return allowed.FirstOrDefault();
-    }
-
-    private static void MergeProgressIdMap(string path, IReadOnlyDictionary<string, Guid> updates)
-    {
-        var existing = File.Exists(path)
-            ? JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(path)) ?? new Dictionary<string, string>(StringComparer.Ordinal)
-            : new Dictionary<string, string>(StringComparer.Ordinal);
-        foreach (var (key, value) in updates) existing[key] = value.ToString();
-        Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(path))!);
-        File.WriteAllText(path, JsonSerializer.Serialize(existing, new JsonSerializerOptions { WriteIndented = true }));
     }
 
     private static string MaskConnectionString(string connectionString)

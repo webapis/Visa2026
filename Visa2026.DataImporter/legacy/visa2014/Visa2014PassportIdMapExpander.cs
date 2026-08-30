@@ -26,20 +26,7 @@ internal static class Visa2014PassportIdMapExpander
             maxRows: null,
             verbose);
 
-        int addedFromDedupe = 0;
-        foreach (var (mergedLegacyOid, canonicalLegacyOid) in dedupeAliases)
-        {
-            var canonicalKey = canonicalLegacyOid.ToString();
-            if (!idMap.TryGetValue(canonicalKey, out var targetId))
-                continue;
-
-            var mergedKey = mergedLegacyOid.ToString();
-            if (idMap.ContainsKey(mergedKey))
-                continue;
-
-            idMap[mergedKey] = targetId;
-            addedFromDedupe++;
-        }
+        int addedFromDedupe = Visa2014PassportIdMapAliasApplier.ApplyDedupeAliases(idMap, dedupeAliases);
 
         await File.WriteAllTextAsync(
             idMapPath,

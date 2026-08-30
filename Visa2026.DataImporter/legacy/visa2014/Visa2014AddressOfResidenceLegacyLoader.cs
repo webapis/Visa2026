@@ -132,8 +132,14 @@ internal static class Visa2014AddressOfResidenceLegacyLoader
         return Visa2014AddressOfResidenceTransform.TryParseRawRow(rows[0], out row);
     }
 
-    private static Guid? ResolvePersonLegacyOid(Visa2014ApplicationItemRawRow raw) =>
-        raw.ForEmployee ? raw.LegacyEmployeeOid
-        : raw.ForFamilyMember ? raw.LegacyFamilyMemberOid
-        : null;
+    /// <summary>
+    /// Employee PIA → <see cref="Visa2014ApplicationItemRawRow.LegacyEmployeeOid"/>;
+    /// family PIA → <see cref="Visa2014ApplicationItemRawRow.LegacyFamilyMemberOid"/>; else null.
+    /// </summary>
+    internal static Guid? ResolvePersonLegacyOid(Visa2014ApplicationItemRawRow raw) =>
+        Visa2014ApplicationItemPersonOidResolver.Resolve(
+            raw.ForEmployee,
+            raw.ForFamilyMember,
+            raw.LegacyEmployeeOid,
+            raw.LegacyFamilyMemberOid);
 }
