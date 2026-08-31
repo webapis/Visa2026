@@ -9,21 +9,18 @@ public interface IScanFieldPlanService
 
 public sealed class ScanFieldPlanService : IScanFieldPlanService
 {
-    private readonly ITemplateScanAiProvider _provider;
     private readonly IScanFieldPlanMerger _merger;
     private readonly IScanOfficeYellowExtractor _officeYellow;
-    private readonly TemplateAiScanOptions _options;
+    private readonly IScanAmbiguousYellowRefinementService _refinement;
 
     public ScanFieldPlanService(
-        ITemplateScanAiProvider provider,
         IScanFieldPlanMerger merger,
         IScanOfficeYellowExtractor officeYellow,
-        Microsoft.Extensions.Options.IOptions<TemplateAiScanOptions> options)
+        IScanAmbiguousYellowRefinementService refinement)
     {
-        _provider = provider;
         _merger = merger;
         _officeYellow = officeYellow;
-        _options = options?.Value ?? new TemplateAiScanOptions();
+        _refinement = refinement;
     }
 
     public async Task<ScanFieldPlan> BuildAsync(ScanFieldPlanBuildRequest request, CancellationToken cancellationToken = default)
@@ -37,13 +34,14 @@ public sealed class ScanFieldPlanService : IScanFieldPlanService
                 "Create from yellow marks accepts only Word (.docx) or Excel (.xlsx) with yellow highlights.");
         }
 
-        // Provider retained for clarification chat only; field plan is OpenXML yellow (no vision).
-        _ = _provider;
-        _ = cancellationToken;
-        _ = _options;
-
         var yellows = _officeYellow.Extract(officeBytes, request.Ingest.Input.SourceKind);
-        var proposal = ScanOfficeFieldPlanBuilder.Build(yellows, request.PlaceholderSet);
+        var proposal = ScanOfficeFieldPlanBuilder.Build(
+            yellows,
+            request.PlaceholderSet,
+            officeBytes,
+            request.Ingest.Input.SourceKind);
+
+        proposal = await _refinement.RefineAsync(proposal, request, cancellationToken).ConfigureAwait(false);
 
         return _merger.Merge(new ScanFieldPlanMergeRequest
         {

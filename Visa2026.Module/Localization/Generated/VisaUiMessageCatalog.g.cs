@@ -1426,6 +1426,34 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Öňünden görmek",
             ["ru-RU"] = "Просмотр",
         },
+        ["ApplicationReportPackage.DownloadTemplate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Download",
+            ["tr-TR"] = "İndir",
+            ["tk-TM"] = "Göçür",
+            ["ru-RU"] = "Скачать",
+        },
+        ["ApplicationReportPackage.DownloadTemplate.Tooltip"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Download the saved Word or Excel template file (placeholders, not filled case data).",
+            ["tr-TR"] = "Kayıtlı Word veya Excel şablon dosyasını indirir (yer tutucular; doldurulmuş başvuru verisi değil).",
+            ["tk-TM"] = "Ýazdyrylan Word ýa-da Excel şablon faýlyny göçürýär (ýer tutujylar; doldurylan arza maglumaty däl).",
+            ["ru-RU"] = "Скачать сохранённый файл шаблона Word или Excel (плейсхолдеры, не заполненные данные заявки).",
+        },
+        ["ApplicationReportPackage.DownloadTemplate.Failed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Could not download the template file.",
+            ["tr-TR"] = "Şablon dosyası indirilemedi.",
+            ["tk-TM"] = "Şablon faýly göçürilmedi.",
+            ["ru-RU"] = "Не удалось скачать файл шаблона.",
+        },
+        ["ApplicationReportPackage.DownloadTemplate.Downloaded"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Downloaded template \"{0}\" ({1}).",
+            ["tr-TR"] = "Şablon \"{0}\" indirildi ({1}).",
+            ["tk-TM"] = "Şablon \"{0}\" göçürildi ({1}).",
+            ["ru-RU"] = "Шаблон «{0}» скачан ({1}).",
+        },
         ["ApplicationReportPackage.Preview.Converting"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Preparing PDF preview for {0}…",

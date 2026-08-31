@@ -61,6 +61,7 @@ disable-model-invocation: false
 | Extract security error from Edit template | `UserReportPlaceholder` permissions, non-secured OS in controller | **This skill** / security-access |
 | Preview OK, ZIP wrong or empty | Compare `SelectedReportKeysJson`, `SelectedApplicationItemIdsJson` | **This skill** |
 | **Sanaw** preview fails; `RowNo` empty hint | `UsesSingleDocumentItemList` / `BuildSanawyStyleRows` — not labor-contract per-item path | **This skill** + user-report-templates |
+| Excel catalog Preview is a **blank PDF**; Word Preview OK; title is `report_….docx` | Nested catalog keys are `profile:{id}` not `user:{id}` — `ResolveDownloadFileName` fell back to `.docx` so Word PDF ran on Excel bytes | **This skill** |
 | `Invalid column name` on batch table | `BatchWorkerSchemaGate`, updaters, `FORCE_XAF_DB_UPDATE` | **lifecycle-docker** |
 | **Edit template** does nothing / export failed | `TemplateEditStaging:Enabled`, HTTPS (prod), folder chosen | **This skill** — [`TEMPLATE_STAGING_EDIT.md`](../../../docs/TEMPLATE_STAGING_EDIT.md) |
 | **Sync to database** — file locked / 0 imported | Close Word/Excel; hash unchanged skips import | **This skill** |
@@ -120,6 +121,7 @@ Controllers: `WordReportsController`, `ApplicationItemWordReportsController`.
 | `Invalid column name` on batch | `BatchWorkerSchemaGate`, `WordReportGenerationBatchSelected*Updater`, or `FORCE_XAF_DB_UPDATE`. |
 | Staging export/import / Sync button | [`TEMPLATE_STAGING_EDIT.md`](../../../docs/TEMPLATE_STAGING_EDIT.md); `TemplateEditStaging` config; `UserReportTemplateStagingUiService` |
 | Word/Excel won't open from Edit template | Run `Set-Visa2026TemplateEditOfficeTrust.ps1`; use **Copy path**; open from `Documents\Visa2026Templates` |
+| Excel Preview blank; pane title `report_….docx` | Filename fallback used Word converter on `.xlsx` bytes — match catalog by `UserReportTemplateId`; ZIP sniff `xl/` vs `word/` |
 
 *(Extend this table when a learnings entry is promoted — see [MATURITY.md](./MATURITY.md).)*
 

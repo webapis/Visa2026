@@ -255,6 +255,31 @@ public class TemplateTokenWriterTests
     }
 
     [Fact]
+    public void Excel_loop_open_prepends_when_cell_already_has_row_token()
+    {
+        var source = TemplateConvertFixtures.CreateExcelRoster();
+        var withRnum = ExcelTemplateTokenWriter.Write(
+            source,
+            new[] { new TokenSubstitution(new DocumentRegion.ExcelCell("Sanaw", "A2"), ".RNUM") },
+            Array.Empty<LoopMarker>()).Content;
+
+        var result = ExcelTemplateTokenWriter.Write(
+            withRnum,
+            Array.Empty<TokenSubstitution>(),
+            new[]
+            {
+                new LoopMarker(
+                    new DocumentRegion.ExcelCell("Sanaw", "A2"),
+                    new DocumentRegion.ExcelCell("Sanaw", "A3"),
+                    "ds.rows"),
+            });
+
+        Assert.Contains(result.AppliedLoops, static l => l.CollectionToken == "ds.rows");
+        Assert.Equal("{{#ds.rows}}{{.RNUM}}", TemplateConvertFixtures.GetCellText(result.Content, "Sanaw", "A2"));
+        Assert.Equal("{{/ds.rows}}", TemplateConvertFixtures.GetCellText(result.Content, "Sanaw", "A3"));
+    }
+
+    [Fact]
     public void Excel_loop_markers_use_generator_syntax()
     {
         var result = _writer.Apply(new TemplateTokenWriteRequest
@@ -370,5 +395,64 @@ public class TemplateTokenWriterTests
             TemplateConvertFixtures.GetRuns(cleaned, "body/0"),
             r => r.RunProperties?.Highlight != null);
         Assert.Contains("6 (alty)", TemplateConvertFixtures.GetParagraphText(cleaned, "body/0"), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void StripAllYellowFills_clears_unmapped_rgb_leftover()
+    {
+        using var stream = new MemoryStream();
+        using (var workbook = new XLWorkbook())
+        {
+            var sheet = workbook.AddWorksheet("Sanaw");
+            sheet.Cell("A5").Value = "{{.PLN}}";
+            sheet.Cell("G5").Value = "U12345678";
+            sheet.Cell("G5").Style.Fill.BackgroundColor = XLColor.Yellow;
+            workbook.SaveAs(stream);
+        }
+
+        var cleaned = ExcelTemplateTokenWriter.StripAllYellowFills(stream.ToArray());
+        using var verify = new MemoryStream(cleaned, writable: false);
+        using var wb = new XLWorkbook(verify);
+        Assert.Equal(XLFillPatternValues.None, wb.Worksheet("Sanaw").Cell("G5").Style.Fill.PatternType);
+        Assert.Equal("U12345678", wb.Worksheet("Sanaw").Cell("G5").GetString());
+    }
+
+    [Fact]
+    public void StripAllYellowFills_clears_indexed_yellow()
+    {
+        using var stream = new MemoryStream();
+        using (var workbook = new XLWorkbook())
+        {
+            var sheet = workbook.AddWorksheet("Sanaw");
+            sheet.Cell("G5").Value = "U12345678";
+            sheet.Cell("G5").Style.Fill.BackgroundColor = XLColor.FromIndex(13);
+            workbook.SaveAs(stream);
+        }
+
+        var cleaned = ExcelTemplateTokenWriter.StripAllYellowFills(stream.ToArray());
+        using var verify = new MemoryStream(cleaned, writable: false);
+        using var wb = new XLWorkbook(verify);
+        Assert.Equal(XLFillPatternValues.None, wb.Worksheet("Sanaw").Cell("G5").Style.Fill.PatternType);
+    }
+
+    [Fact]
+    public void StripAllYellowFills_clears_merged_non_anchor_yellow()
+    {
+        using var stream = new MemoryStream();
+        using (var workbook = new XLWorkbook())
+        {
+            var sheet = workbook.AddWorksheet("Sanaw");
+            sheet.Range("J5:K5").Merge();
+            sheet.Range("J5:K5").Style.Fill.BackgroundColor = XLColor.Yellow;
+            sheet.Cell("J5").Value = "elektrik-elektronika";
+            workbook.SaveAs(stream);
+        }
+
+        var cleaned = ExcelTemplateTokenWriter.StripAllYellowFills(stream.ToArray());
+        using var verify = new MemoryStream(cleaned, writable: false);
+        using var wb = new XLWorkbook(verify);
+        var worksheet = wb.Worksheet("Sanaw");
+        Assert.Equal(XLFillPatternValues.None, worksheet.Cell("J5").Style.Fill.PatternType);
+        Assert.Equal(XLFillPatternValues.None, worksheet.Cell("K5").Style.Fill.PatternType);
     }
 }

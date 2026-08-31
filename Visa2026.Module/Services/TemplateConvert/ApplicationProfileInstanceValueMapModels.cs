@@ -61,6 +61,13 @@ public sealed class ApplicationProfileInstanceValueMapRequest
     /// <c>UserReportMergeDataHelper.GetActiveApplicationItems</c>, which needs a persisted instance.
     /// </summary>
     public IReadOnlyList<ApplicationRosterMergeLine>? Rows { get; init; }
+
+    /// <summary>
+    /// When true, literals shared by multiple tokens (e.g. <c>TUR</c> on PNAT/PCBC/PFAC) stay in
+    /// <see cref="ApplicationProfileInstanceValueMap.Candidates"/> for local disambiguation (yellow-mark scan).
+    /// Convert keeps the default false so ambiguous literals are rejected.
+    /// </summary>
+    public bool RetainAmbiguousLiterals { get; init; }
 }
 
 public sealed class ApplicationProfileInstanceValueMap

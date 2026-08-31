@@ -52,6 +52,51 @@ public class ScanFieldPlanMergerTests
     }
 
     [Fact]
+    public void Merge_KeepsValueHintRowDob_insteadOfRegexAdat()
+    {
+        var set = new ApplicationProfilePlaceholderSetService(new UserReportPlaceholderCatalogService()).GetSet(
+            new ApplicationProfilePlaceholderSetQuery
+            {
+                Profile = new ApplicationProfile(),
+                DataScope = ApplicationProfileTemplateDataScope.Both,
+                TemplateKind = ApplicationProfileTemplateKind.Excel,
+            });
+
+        var merger = new ScanFieldPlanMerger();
+        var plan = merger.Merge(new ScanFieldPlanMergeRequest
+        {
+            PlaceholderSet = set,
+            ScanKind = ScanKind.FilledSample,
+            Proposal = new ScanFieldPlanProposal
+            {
+                Fields =
+                [
+                    new ScanDetectedFieldDraft
+                    {
+                        FieldId = "dob",
+                        Box = ScanBoundingBox.FullPage,
+                        PageIndex = 0,
+                        LabelText = "16.05.1980",
+                        ProposedToken = "{{.PDBT}}",
+                        Confidence = ScanFieldConfidence.High,
+                        Scope = ScanFieldScope.Row,
+                        Alternatives =
+                        [
+                            new ScanTokenAlternative("{{.PDBT}}", "PDBT", 92, "Column header"),
+                        ],
+                    },
+                ],
+                Source = "test",
+            },
+        });
+
+        Assert.Single(plan.Fields);
+        Assert.Contains("PDBT", plan.Fields[0].ProposedToken!, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("ADAT", plan.Fields[0].ProposedToken!, StringComparison.OrdinalIgnoreCase);
+        Assert.Empty(plan.Gaps);
+    }
+
+    [Fact]
     public void Merge_AllowsKnownToken()
     {
         var set = FullSet();

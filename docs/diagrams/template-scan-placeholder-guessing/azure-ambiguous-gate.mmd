@@ -1,0 +1,17 @@
+flowchart TD
+    D["Draft after local rules"] --> G1{ProposedToken null?}
+    G1 -->|Yes| AI["Escalate to Azure"]
+    G1 -->|No| G2{Confidence Low?}
+    G2 -->|Yes| AI
+    G2 -->|No| G3{"Top score < 80%?"}
+    G3 -->|Yes| AI
+    G3 -->|No| G4{"Gap to 2nd candidate < 15%?"}
+    G4 -->|Yes| AI
+    G4 -->|No| OK["Keep local guess"]
+
+    AI --> AZ["Azure receives:<br/>yellow text, column header,<br/>placeholder manual, local candidates"]
+    AZ --> OUT["Returns ranked tokens<br/>compound allowed"]
+    OUT --> OK
+
+    note2["Azure never receives<br/>case people or DB values"]
+    AZ --- note2

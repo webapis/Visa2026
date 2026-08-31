@@ -1,5 +1,6 @@
 #nullable enable
 
+using System.Globalization;
 using DrawingColor = System.Drawing.Color;
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Packaging;
@@ -143,26 +144,31 @@ public sealed class ScanOfficeYellowExtractor : IScanOfficeYellowExtractor
         using var workbook = new XLWorkbook(stream);
         var results = new List<ScanOfficeYellowSpan>();
 
-        foreach (var sheet in workbook.Worksheets)
+        var sheet = workbook.Worksheets.FirstOrDefault();
+        if (sheet == null)
+            return results;
+
+        foreach (var cell in sheet.CellsUsed())
         {
-            foreach (var cell in sheet.CellsUsed())
+            if (!IsYellowCell(cell))
+                continue;
+
+            var text = string.Empty;
+            if (cell.DataType == XLDataType.DateTime && cell.TryGetValue(out DateTime dateTime) && dateTime.Year > 1)
+                text = dateTime.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture);
+            if (text.Length == 0)
+                text = cell.GetFormattedString()?.Trim() ?? string.Empty;
+            if (text.Length == 0)
+                text = cell.GetString()?.Trim() ?? string.Empty;
+            if (text.Length == 0)
+                continue;
+
+            results.Add(new ScanOfficeYellowSpan
             {
-                if (!IsYellowCell(cell))
-                    continue;
-
-                var text = cell.GetFormattedString()?.Trim() ?? string.Empty;
-                if (text.Length == 0)
-                    text = cell.GetString()?.Trim() ?? string.Empty;
-                if (text.Length == 0)
-                    continue;
-
-                results.Add(new ScanOfficeYellowSpan
-                {
-                    Text = text,
-                    Region = new DocumentRegion.ExcelCell(sheet.Name, cell.Address.ToString()),
-                    PageIndex = 0,
-                });
-            }
+                Text = text,
+                Region = new DocumentRegion.ExcelCell(sheet.Name, cell.Address.ToStringRelative()),
+                PageIndex = 0,
+            });
         }
 
         return results;

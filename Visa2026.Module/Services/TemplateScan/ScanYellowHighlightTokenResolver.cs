@@ -55,11 +55,15 @@ public static class ScanYellowHighlightTokenResolver
         var candidates = ExtractCandidates(text).ToList();
         foreach (var (snippet, code, index, length) in candidates)
         {
-            if (string.IsNullOrWhiteSpace(snippet) || !placeholderSet.Contains(code) || !usedShortCodes.Add(code))
+            if (string.IsNullOrWhiteSpace(snippet) || !placeholderSet.Contains(code))
                 continue;
 
             var entry = placeholderSet.Allowed.First(e =>
                 string.Equals(e.ShortCode, code, StringComparison.OrdinalIgnoreCase));
+
+            var isRow = entry.Scope == UserReportPlaceholderScope.Row;
+            if (!isRow && !usedShortCodes.Add(code))
+                continue;
 
             drafts.Add(new ScanDetectedFieldDraft
             {

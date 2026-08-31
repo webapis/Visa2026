@@ -88,11 +88,34 @@
                         <td>
                             @if (!string.IsNullOrWhiteSpace(row.ProposedToken))
                             {
-                                <code>@TemplateTokenSyntax.Wrap(row.ProposedToken)</code>
+                                <code>@DisplayToken(row.ProposedToken)</code>
+                                @if (row.Alternatives.Count > 1)
+                                {
+                                    <div class="tas-alt-list">
+                                        @foreach (var alt in row.Alternatives.Take(4))
+                                        {
+                                            <small class="tas-alt-item">
+                                                @alt.ScorePercent% <code>@DisplayToken(alt.Token)</code>
+                                                <span class="tas-alt-reason">@alt.Reason</span>
+                                            </small>
+                                        }
+                                    </div>
+                                }
                             }
                             else
                             {
                                 <span class="tas-conf tas-conf--gap">Gap</span>
+                                @if (row.Alternatives.Count > 0)
+                                {
+                                    <div class="tas-alt-list">
+                                        @foreach (var alt in row.Alternatives.Take(4))
+                                        {
+                                            <small class="tas-alt-item">
+                                                @alt.ScorePercent% <code>@DisplayToken(alt.Token)</code>
+                                            </small>
+                                        }
+                                    </div>
+                                }
                             }
                         </td>
                         <td><span class="@ConfidenceCss(row)">@ConfidenceLabel(row)</span></td>
@@ -115,7 +138,13 @@
 </div>
 
 @code {
-    private sealed record FieldRow(string FieldId, string LabelText, string? ProposedToken, ScanFieldConfidence Confidence, bool IsGap);
+    private sealed record FieldRow(
+        string FieldId,
+        string LabelText,
+        string? ProposedToken,
+        ScanFieldConfidence Confidence,
+        bool IsGap,
+        IReadOnlyList<ScanTokenAlternative> Alternatives);
 
     [Parameter, EditorRequired] public ScanFieldPlan FieldPlan { get; set; } = null!;
     [Parameter, EditorRequired] public IReadOnlyList<ScanPageImage> Pages { get; set; } = Array.Empty<ScanPageImage>();
@@ -155,9 +184,21 @@
             var mapped = FieldPlan.Fields
                 .OrderByDescending(static f => f.Confidence)
                 .ThenBy(static f => f.LabelText, StringComparer.OrdinalIgnoreCase)
-                .Select(f => new FieldRow(f.FieldId, f.LabelText, f.ProposedToken, f.Confidence, IsGap: false));
+                .Select(f => new FieldRow(
+                    f.FieldId,
+                    f.LabelText,
+                    f.ProposedToken,
+                    f.Confidence,
+                    IsGap: false,
+                    f.Alternatives));
             var gaps = FieldPlan.Gaps
-                .Select(g => new FieldRow(g.FieldId, g.LabelText, g.SuggestedPropertyName, ScanFieldConfidence.Low, IsGap: true));
+                .Select(g => new FieldRow(
+                    g.FieldId,
+                    g.LabelText,
+                    g.SuggestedPropertyName,
+                    ScanFieldConfidence.Low,
+                    IsGap: true,
+                    Array.Empty<ScanTokenAlternative>()));
             return mapped.Concat(gaps).ToList();
         }
     }
@@ -253,6 +294,13 @@
         string.IsNullOrWhiteSpace(field.ProposedToken)
             ? field.LabelText
             : $"{field.LabelText} → {TemplateTokenSyntax.Wrap(field.ProposedToken)}";
+
+    private static string DisplayToken(string? token) =>
+        string.IsNullOrWhiteSpace(token)
+            ? string.Empty
+            : token.Contains("{{", StringComparison.Ordinal)
+                ? token
+                : TemplateTokenSyntax.Wrap(token);
 
     private static string ConfidenceCss(FieldRow row) => row.IsGap
         ? "tas-conf tas-conf--gap"

@@ -83,6 +83,11 @@ public sealed class ScanDetectedFieldDraft
 
     /// <summary>OpenXML address for Office yellow path (token writer).</summary>
     public DocumentRegion? SourceRegion { get; init; }
+
+    public IReadOnlyList<ScanTokenAlternative> Alternatives { get; init; } = Array.Empty<ScanTokenAlternative>();
+
+    /// <summary>Excel column header above the yellow cell (manual inference context).</summary>
+    public string? ColumnHeader { get; init; }
 }
 
 public sealed class ScanStaticRegionDraft
@@ -158,6 +163,8 @@ public sealed class ScanDetectedField
 
     /// <summary>OpenXML address for Office yellow path (token writer).</summary>
     public DocumentRegion? SourceRegion { get; init; }
+
+    public IReadOnlyList<ScanTokenAlternative> Alternatives { get; init; } = Array.Empty<ScanTokenAlternative>();
 }
 
 public sealed class ScanStaticRegion
@@ -182,6 +189,9 @@ public sealed class ScanFieldPlanBuildRequest
     public ScanKind ScanKind { get; init; } = ScanKind.BlankForm;
 
     public IReadOnlyList<ScanValueHint> ValueHints { get; init; } = Array.Empty<ScanValueHint>();
+
+    /// <summary>Case instance values for matching yellow cell text (same map as Convert).</summary>
+    public IReadOnlyList<ValueCandidate> ValueCandidates { get; init; } = Array.Empty<ValueCandidate>();
 }
 
 public sealed class ScanFieldPlanMergeRequest

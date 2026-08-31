@@ -52,4 +52,24 @@ public sealed class NoneTemplateScanAiProvider : ITemplateScanAiProvider
 
         return Task.FromResult(DeterministicScanDocxLayoutPlanner.Build(request));
     }
+
+    public Task<ScanAmbiguousYellowRefinementResult> RefineAmbiguousYellowMarksAsync(
+        ScanAmbiguousYellowRefinementRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return Task.FromResult(new ScanAmbiguousYellowRefinementResult
+        {
+            Marks = request.Marks.Select(static m => new ScanAmbiguousYellowMarkResult
+            {
+                FieldId = m.FieldId,
+                ProposedToken = m.LocalProposedToken,
+                Confidence = ScanFieldConfidence.Medium,
+                Candidates = m.LocalCandidates,
+            }).ToList(),
+            Source = ProviderKey,
+        });
+    }
 }

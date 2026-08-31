@@ -1,0 +1,9 @@
+flowchart LR
+    W["Yellow paragraph text"] --> R["Regex patterns"]
+    R --> R1["App number AFNUM"]
+    R --> R2["Date ADAT"]
+    R --> R3["Visa period / count / category"]
+    R --> R4["Urgency phrase"]
+    R --> U{Matched?}
+    U -->|Yes| T["One or more drafts<br/>compound splits"]
+    U -->|No| G["Gap draft<br/>ProposedToken = null"]

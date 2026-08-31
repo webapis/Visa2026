@@ -75,7 +75,14 @@ public sealed class ScanFieldPlanMerger : IScanFieldPlanMerger
         List<ScanDetectedField> fields,
         List<ScanGap> gaps)
     {
-        // Prefer local split so "№ … + date" and count/period compounds become separate tokens.
+        // Excel inference / single-token drafts — do not re-run regex (dates become ADAT).
+        if (ShouldKeepDraftToken(draft, allowed, usedCodes))
+        {
+            fields.Add(ToField(draft, hintTokens));
+            return;
+        }
+
+        // Compound yellow text — split number+date, count+period, etc.
         var resolved = ScanYellowHighlightTokenResolver.ResolveFromYellowText(
             draft.LabelText,
             draft.Box,
@@ -110,6 +117,27 @@ public sealed class ScanFieldPlanMerger : IScanFieldPlanMerger
             usedCodes,
             fields,
             gaps);
+    }
+
+    private static bool ShouldKeepDraftToken(
+        ScanDetectedFieldDraft draft,
+        ApplicationProfilePlaceholderSet allowed,
+        HashSet<string> usedCodes)
+    {
+        if (string.IsNullOrWhiteSpace(draft.ProposedToken))
+            return false;
+
+        var token = draft.ProposedToken.Trim();
+        var secondBrace = token.IndexOf("{{", 2, StringComparison.Ordinal);
+        if (secondBrace >= 0)
+            return true;
+
+        if (draft.Alternatives.Any(static a =>
+                a.Reason.Contains("Column", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(a.ShortCode, "COMPOUND", StringComparison.OrdinalIgnoreCase)))
+            return true;
+
+        return false;
     }
 
     private static void AbsorbUnmappedLabel(
@@ -160,6 +188,7 @@ public sealed class ScanFieldPlanMerger : IScanFieldPlanMerger
             Confidence = confidence,
             Scope = draft.Scope,
             SourceRegion = draft.SourceRegion,
+            Alternatives = draft.Alternatives,
         };
     }
 }

@@ -64,7 +64,9 @@ public sealed class ApplicationProfileInstanceValueMapService : IApplicationProf
             }
         }
 
-        var candidates = RejectAmbiguous(draft, rejected);
+        var candidates = request.RetainAmbiguousLiterals
+            ? draft
+            : RejectAmbiguous(draft, rejected);
 
         return new ApplicationProfileInstanceValueMap
         {

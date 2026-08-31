@@ -221,8 +221,7 @@ public sealed class ApplicationWordReportEntryGenerator
                 && !visibilityService.IsTemplateVisible(template, application)))
             return new List<(string, MemoryStream)>();
 
-        var entryKey = ApplicationWordReportPackageCatalogService.BuildUserEntryKey(template);
-        var defaultFileName = ResolveDownloadFileName(entryKey, catalogEntries);
+        var defaultFileName = ResolveDownloadFileName(template, catalogEntries);
 
         if (!UsesPerItemWordOutput(template, context))
         {
@@ -335,31 +334,46 @@ public sealed class ApplicationWordReportEntryGenerator
         return ZipEntryFileNameSanitizer.BuildReportEntryName(label, extension);
     }
 
-    private static string ResolveDownloadFileName(
-        string entryKey,
+    /// <summary>
+    /// Nested profile catalogs use <c>profile:{id}</c> keys, not <c>user:{id}</c>. Matching only the
+    /// user key made Excel merges download as <c>report_yyyyMMdd.docx</c>, so Preview ran Word PDF
+    /// on spreadsheet bytes and showed a blank page.
+    /// </summary>
+    internal static string ResolveDownloadFileName(
+        UserReportTemplate template,
         IReadOnlyList<ApplicationWordReportPackageCatalogEntry> catalogEntries)
     {
+        ArgumentNullException.ThrowIfNull(template);
+
+        var extension = template.GetEffectiveOutputFormat() == TemplateOutputFormat.Excel
+            ? ".xlsx"
+            : ".docx";
+
+        catalogEntries ??= Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+
         var catalogEntry = catalogEntries.FirstOrDefault(entry =>
-            string.Equals(entry.EntryKey, entryKey, StringComparison.Ordinal));
+                template.ID != Guid.Empty && entry.UserReportTemplateId == template.ID)
+            ?? catalogEntries.FirstOrDefault(entry =>
+                string.Equals(
+                    entry.EntryKey,
+                    ApplicationWordReportPackageCatalogService.BuildUserEntryKey(template),
+                    StringComparison.Ordinal));
 
         if (catalogEntry?.OutputFileName is { Length: > 0 } outputFileName)
-            return outputFileName;
-
-        if (catalogEntry?.Kind == ApplicationWordReportPackageEntryKind.UserExcel)
         {
+            if (outputFileName.EndsWith(extension, StringComparison.OrdinalIgnoreCase))
+                return outputFileName;
+
             return ZipEntryFileNameSanitizer.BuildReportEntryName(
-                catalogEntry.DisplayName,
-                ".xlsx");
+                Path.GetFileNameWithoutExtension(outputFileName),
+                extension);
         }
 
-        if (catalogEntry != null)
-        {
-            return ZipEntryFileNameSanitizer.BuildReportEntryName(
-                catalogEntry.DisplayName,
-                ".docx");
-        }
+        var displayName = catalogEntry?.DisplayName;
+        if (string.IsNullOrWhiteSpace(displayName))
+            displayName = template.TemplateName;
 
-        return $"report_{DateTime.Now:yyyyMMdd}.docx";
+        return ZipEntryFileNameSanitizer.BuildReportEntryName(displayName, extension);
     }
 
     private static string GetContentType(string fileName)

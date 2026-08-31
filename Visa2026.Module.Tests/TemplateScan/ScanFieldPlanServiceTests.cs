@@ -46,10 +46,11 @@ public class ScanFieldPlanServiceTests
     public async Task BuildAsync_NonOffice_Throws()
     {
         var fieldPlan = new ScanFieldPlanService(
-            new NoneTemplateScanAiProvider(),
             new ScanFieldPlanMerger(),
             new ScanOfficeYellowExtractor(),
-            Options.Create(new TemplateAiScanOptions()));
+            new ScanAmbiguousYellowRefinementService(
+                new NoneTemplateScanAiProvider(),
+                Options.Create(new TemplateAiScanOptions())));
 
         var set = new ApplicationProfilePlaceholderSetService(new UserReportPlaceholderCatalogService()).GetSet(
             new ApplicationProfilePlaceholderSetQuery

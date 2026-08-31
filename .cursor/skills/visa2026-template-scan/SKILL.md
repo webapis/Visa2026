@@ -62,8 +62,11 @@ Officers submit **wizard step screenshots** + optional **catalog Preview** + the
 | PNG/JPG/PDF rejected | Expected — use yellow-marked Word/Excel | **This skill** |
 | Yellow not detected | Word Text Highlight Color / Excel solid yellow fill | **This skill** |
 | Wrong tokens / compound split | `ScanYellowHighlightTokenResolver` + catalog ShortCodes | **This skill** + user-report-templates |
+| Excel roster gaps (names, TUR, …) | Column header + manual inference (`ScanExcelYellowResolver`); not case value match | **This skill** |
+| Review shows `{{ds.PLN}}` / Approve blocks `not found on ApplicationProfileInstance` | Yellow sample row above row 5 was treated as header — Analyze again after restart | **This skill** |
 | Clarification chat disabled | Needs `TemplateAiScan` AI provider (optional); Analyze does not | **This skill** |
 | Config lock | May add **new** templates | application-profile |
+| Excel catalog Preview blank; pane titled `report_….docx` | Nested Resminamalar keys — Excel bytes converted as Word PDF | **resminamalar** |
 | Diff gate fail on Generate | Span addresses; fingerprints **ignore** yellow strip | **This skill** + Convert writer |
 | Yellow remains after Approve / catalog Preview | `StripAllYellowMarkup` / `StripAllYellowFills` after write; re-Approve old templates | **This skill** |
 

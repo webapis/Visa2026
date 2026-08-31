@@ -114,6 +114,38 @@ public sealed class AzureOpenAiTemplateScanAiProvider : ITemplateScanAiProvider
         return DeterministicScanDocxLayoutPlanner.Build(request);
     }
 
+    public async Task<ScanAmbiguousYellowRefinementResult> RefineAmbiguousYellowMarksAsync(
+        ScanAmbiguousYellowRefinementRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        if (!IsEnabled || request.Marks.Count == 0)
+            return PassthroughAmbiguousYellow(request);
+
+        try
+        {
+            var userText = BuildAmbiguousYellowUserPayload(request);
+            var json = await CompleteJsonAsync(
+                    AmbiguousYellowSystemPrompt,
+                    [new { type = "text", text = userText }],
+                    cancellationToken)
+                .ConfigureAwait(false);
+
+            var parsed = ParseAmbiguousYellow(json, request);
+            if (parsed != null && parsed.Marks.Count > 0)
+                return parsed;
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException
+            and not OutOfMemoryException
+            and not StackOverflowException)
+        {
+            // Fall through — keep local rules result.
+        }
+
+        return PassthroughAmbiguousYellow(request);
+    }
+
     private object[] BuildLayoutUserContent(ScanDocxLayoutRequest request)
     {
         var allowedTokens = request.FieldPlan.Fields
@@ -635,6 +667,221 @@ public sealed class AzureOpenAiTemplateScanAiProvider : ITemplateScanAiProvider
         6. Reading order top-to-bottom.
         7. Reply with JSON only matching the schema in the user message.
         """;
+
+    private const string AmbiguousYellowSystemPrompt =
+        """
+        You map YELLOW-HIGHLIGHTED SAMPLE LITERALS in Word/Excel templates to allowed merge placeholders.
+        CRITICAL:
+        - Yellow text is FICTITIOUS SAMPLE DATA for template authoring (e.g. "Erol", "Hilmi"). NEVER match against a live case database or officer roster.
+        - Compare yellow text to placeholder manual labels, exampleValue shapes, and Excel column headers only.
+        - exampleValue in the manual shows the KIND of value (date, country code, name), not a person to look up.
+        MERGE TOOL RULES:
+        - Word header scalars: {{ds.ShortCode}}; roster row inside loops: {{.ShortCode}}.
+        - Excel sanaw tables: row {{.ShortCode}}; footer/header scalars {{ds.ShortCode}}; loop marker {{#ds.rows}}.
+        - One yellow cell may need MULTIPLE tokens separated by ", " or "/" (preserve separators in proposedToken).
+        - Tokens must pass Extract/Validate for UserReportGenerator / ExcelReportGenerator.
+        TASK:
+        1. For each mark, rank allowed tokens with scorePercent 0-100 and brief reason.
+        2. proposedToken = best match (compound allowed). Use only allowedTokens short codes.
+        3. Prefer columnHeader when present (Excel). Use localCandidates as hints, you may override.
+        4. confidence: High (>=80), Medium (55-79), Low (<55).
+        5. Reply JSON only per user schema.
+        """;
+
+    private static ScanAmbiguousYellowRefinementResult PassthroughAmbiguousYellow(ScanAmbiguousYellowRefinementRequest request)
+    {
+        return new ScanAmbiguousYellowRefinementResult
+        {
+            Marks = request.Marks.Select(static m => new ScanAmbiguousYellowMarkResult
+            {
+                FieldId = m.FieldId,
+                ProposedToken = m.LocalProposedToken,
+                Confidence = ScanFieldConfidence.Medium,
+                Candidates = m.LocalCandidates,
+            }).ToList(),
+            Source = "local",
+        };
+    }
+
+    private string BuildAmbiguousYellowUserPayload(ScanAmbiguousYellowRefinementRequest request)
+    {
+        var allowed = request.PlaceholderSet.Allowed
+            .Select(e => new
+            {
+                e.ShortCode,
+                tokenHeader = e.BuildWordToken(UserReportPlaceholderScope.Header),
+                tokenRow = e.BuildWordToken(UserReportPlaceholderScope.Row),
+                e.LabelEn,
+                labelTk = e.LabelTk,
+                labelTr = e.LabelTr,
+                example = e.ExampleValue,
+                path = e.CanonicalPath,
+                scope = e.Scope.ToString(),
+            });
+
+        var payload = new
+        {
+            sourceKind = request.SourceKind.ToString(),
+            playbookFingerprint = request.Playbook.Fingerprint,
+            placeholderSetFingerprint = request.PlaceholderSet.Fingerprint,
+            allowedTokens = allowed,
+            marks = request.Marks.Select(m => new
+            {
+                m.FieldId,
+                yellowText = m.YellowText,
+                m.ColumnHeader,
+                scope = m.Scope.ToString(),
+                localProposedToken = m.LocalProposedToken,
+                localCandidates = m.LocalCandidates.Select(c => new
+                {
+                    c.ShortCode,
+                    c.Token,
+                    c.ScorePercent,
+                    c.Reason,
+                }),
+            }),
+            schema = """
+                {"marks":[{"fieldId":"id","proposedToken":"{{.PLN}} or compound cell template","confidence":"High|Medium|Low","candidates":[{"shortCode":"PLN","token":"{{.PLN}}","scorePercent":92,"reason":"column Familiýasy"}]}],"rationale":"..."}
+                """,
+        };
+
+        return Truncate(JsonSerializer.Serialize(payload, JsonOptions), _options.MaxPromptCharacters);
+    }
+
+    private ScanAmbiguousYellowRefinementResult? ParseAmbiguousYellow(
+        string json,
+        ScanAmbiguousYellowRefinementRequest request)
+    {
+        var dto = JsonSerializer.Deserialize<AmbiguousYellowDto>(ExtractJsonObject(json), JsonOptions);
+        if (dto?.Marks == null || dto.Marks.Count == 0)
+            return null;
+
+        var allowed = request.PlaceholderSet.Allowed
+            .Select(static e => e.ShortCode)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        var results = new List<ScanAmbiguousYellowMarkResult>();
+        foreach (var mark in dto.Marks)
+        {
+            if (string.IsNullOrWhiteSpace(mark.FieldId))
+                continue;
+
+            var candidates = (mark.Candidates ?? [])
+                .Where(c => !string.IsNullOrWhiteSpace(c.ShortCode) && allowed.Contains(c.ShortCode!))
+                .Select(c => new ScanTokenAlternative(
+                    ResolveToken(c.Token, c.ShortCode!, request.PlaceholderSet, mark.Scope),
+                    c.ShortCode!,
+                    Math.Clamp(c.ScorePercent ?? 0, 0, 100),
+                    c.Reason ?? "AI rank"))
+                .Where(c => !string.IsNullOrWhiteSpace(c.Token))
+                .OrderByDescending(static c => c.ScorePercent)
+                .ToList();
+
+            var token = string.IsNullOrWhiteSpace(mark.ProposedToken)
+                ? candidates.FirstOrDefault()?.Token
+                : mark.ProposedToken.Trim();
+
+            token = SanitizeAiToken(token, request.PlaceholderSet);
+            if (token == null && candidates.Count > 0)
+                token = candidates[0].Token;
+
+            ScanFieldConfidence confidence = ScanFieldConfidence.Medium;
+            if (!string.IsNullOrWhiteSpace(mark.Confidence)
+                && Enum.TryParse(mark.Confidence, true, out ScanFieldConfidence parsed))
+                confidence = parsed;
+
+            results.Add(new ScanAmbiguousYellowMarkResult
+            {
+                FieldId = mark.FieldId,
+                ProposedToken = token,
+                Confidence = confidence,
+                Candidates = candidates,
+            });
+        }
+
+        return new ScanAmbiguousYellowRefinementResult
+        {
+            Marks = results,
+            Rationale = dto.Rationale,
+            Source = ProviderKey,
+        };
+    }
+
+    private static string ResolveToken(
+        string? token,
+        string shortCode,
+        ApplicationProfilePlaceholderSet placeholderSet,
+        string? scopeHint)
+    {
+        if (!string.IsNullOrWhiteSpace(token))
+            return token.Trim();
+
+        if (!placeholderSet.Contains(shortCode))
+            return string.Empty;
+
+        var entry = placeholderSet.Allowed.First(e =>
+            string.Equals(e.ShortCode, shortCode, StringComparison.OrdinalIgnoreCase));
+
+        var usage = entry.Scope == UserReportPlaceholderScope.Row
+            || string.Equals(scopeHint, "Row", StringComparison.OrdinalIgnoreCase)
+            ? UserReportPlaceholderScope.Row
+            : UserReportPlaceholderScope.Header;
+
+        return entry.BuildWordToken(usage);
+    }
+
+    private static string? SanitizeAiToken(string? token, ApplicationProfilePlaceholderSet placeholderSet)
+    {
+        if (string.IsNullOrWhiteSpace(token))
+            return null;
+
+        var trimmed = token.Trim();
+        if (trimmed.Contains("{{", StringComparison.Ordinal))
+            return trimmed;
+
+        if (!TemplateTokenSyntax.TryGetShortCode(trimmed, out var code)
+            || !placeholderSet.Contains(code))
+            return null;
+
+        var entry = placeholderSet.Allowed.First(e =>
+            string.Equals(e.ShortCode, code, StringComparison.OrdinalIgnoreCase));
+        return entry.BuildWordToken(
+            entry.Scope == UserReportPlaceholderScope.Row
+                ? UserReportPlaceholderScope.Row
+                : UserReportPlaceholderScope.Header);
+    }
+
+    private sealed class AmbiguousYellowDto
+    {
+        public List<AmbiguousYellowMarkDto>? Marks { get; set; }
+
+        public string? Rationale { get; set; }
+    }
+
+    private sealed class AmbiguousYellowMarkDto
+    {
+        public string? FieldId { get; set; }
+
+        public string? ProposedToken { get; set; }
+
+        public string? Confidence { get; set; }
+
+        public string? Scope { get; set; }
+
+        public List<AmbiguousYellowCandidateDto>? Candidates { get; set; }
+    }
+
+    private sealed class AmbiguousYellowCandidateDto
+    {
+        public string? ShortCode { get; set; }
+
+        public string? Token { get; set; }
+
+        public int? ScorePercent { get; set; }
+
+        public string? Reason { get; set; }
+    }
+
     private const string FieldPlanSystemPrompt =
         """
         You detect YELLOW HIGHLIGHTER spans on scanned ministry letters and map only those spans to allowed merge placeholders.

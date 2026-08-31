@@ -29,6 +29,17 @@ public sealed class TemplateAiScanOptions
 
     public bool RedactIdentifiersInExtract { get; set; } = true;
 
+    public bool RefineAmbiguousYellowWithAi { get; set; } = true;
+
+    /// <summary>Local rules below this score may escalate to Azure (default 80).</summary>
+    public int AmbiguousYellowMinConfidencePercent { get; set; } = 80;
+
+    /// <summary>When top two local candidates are within this gap, escalate to Azure (default 15).</summary>
+    public int AmbiguousYellowScoreGapPercent { get; set; } = 15;
+
+    /// <summary>Max yellow marks sent per Azure refinement call.</summary>
+    public int AmbiguousYellowMaxMarksPerCall { get; set; } = 24;
+
     public TemplateAiScanAzureOpenAiOptions AzureOpenAI { get; set; } = new();
 
     public ScanSuitabilityOptions Suitability { get; set; } = new();

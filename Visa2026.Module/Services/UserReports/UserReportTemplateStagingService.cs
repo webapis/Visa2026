@@ -62,6 +62,40 @@ public sealed class UserReportTemplateStagingService : IUserReportTemplateStagin
         };
     }
 
+    public Task<UserReportTemplateStagingExportResult?> TryReadTemplateFileAsync(
+        Guid templateId,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (templateId == Guid.Empty)
+            return Task.FromResult<UserReportTemplateStagingExportResult?>(null);
+
+        using var objectSpace = _objectSpaceFactory.CreateNonSecuredObjectSpace<UserReportTemplate>();
+        var template = LoadTemplate(objectSpace, templateId);
+        if (template == null)
+            return Task.FromResult<UserReportTemplateStagingExportResult?>(null);
+
+        var content = ReadFileContent(objectSpace, template.TemplateFile);
+        if (content == null || content.Length == 0)
+            return Task.FromResult<UserReportTemplateStagingExportResult?>(null);
+
+        var outputFormat = template.GetEffectiveOutputFormat();
+        var documentFileName =
+            UserReportTemplateStagingPathHelper.SanitizeTemplateName(template.TemplateName)
+            + UserReportTemplateStagingPathHelper.GetExtension(outputFormat);
+
+        return Task.FromResult<UserReportTemplateStagingExportResult?>(new UserReportTemplateStagingExportResult
+        {
+            TemplateId = templateId,
+            DisplayName = template.TemplateName,
+            DocumentFileName = documentFileName,
+            SourceContentHashSha256 = ComputeSha256Hex(content),
+            OutputFormat = outputFormat,
+            FileContent = content,
+        });
+    }
+
     public Task<UserReportTemplateStagingImportResult> ImportFromUploadAsync(
         Guid templateId,
         byte[] content,

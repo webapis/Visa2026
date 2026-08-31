@@ -196,5 +196,20 @@ public class TemplateScanClarificationServiceTests
             ScanDocxLayoutRequest request,
             CancellationToken cancellationToken = default) =>
             Task.FromResult(new ScanDocxLayoutProposal { Blocks = Array.Empty<ScanDocxBlock>() });
+
+        public Task<ScanAmbiguousYellowRefinementResult> RefineAmbiguousYellowMarksAsync(
+            ScanAmbiguousYellowRefinementRequest request,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult(new ScanAmbiguousYellowRefinementResult
+            {
+                Marks = request.Marks.Select(static m => new ScanAmbiguousYellowMarkResult
+                {
+                    FieldId = m.FieldId,
+                    ProposedToken = m.LocalProposedToken,
+                    Confidence = ScanFieldConfidence.Medium,
+                    Candidates = m.LocalCandidates,
+                }).ToList(),
+                Source = Key,
+            });
     }
 }

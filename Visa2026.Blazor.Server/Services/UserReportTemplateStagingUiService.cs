@@ -48,6 +48,28 @@ public sealed class UserReportTemplateStagingUiService
         }
     }
 
+    /// <summary>Browser download of the stored template (.docx/.xlsx) — no staging Write gate.</summary>
+    public async Task<UserReportTemplateStagingUiExportOutcome> DownloadTemplateAsync(Guid templateId)
+    {
+        try
+        {
+            var result = await _stagingService
+                .TryReadTemplateFileAsync(templateId)
+                .ConfigureAwait(false);
+            if (result == null || result.FileContent == null || result.FileContent.Length == 0)
+            {
+                return UserReportTemplateStagingUiExportOutcome.Fail(
+                    "Template file has no content.");
+            }
+
+            return UserReportTemplateStagingUiExportOutcome.Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return UserReportTemplateStagingUiExportOutcome.Fail(ex.Message);
+        }
+    }
+
     public static UserReportTemplateStagingImportAllResult MapCollectResult(
         UserReportTemplateStagingLocalCollectJsResult collect) =>
         new()

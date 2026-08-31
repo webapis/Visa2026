@@ -252,6 +252,7 @@
   padding: 2rem;
   text-align: center;
   font-size: 0.82rem;
+  line-height: 1.45;
   color: var(--os-muted, #64748b);
   background: #fff;
 }

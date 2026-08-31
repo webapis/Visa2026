@@ -109,7 +109,7 @@
                                                       SizeMode="SizeMode.Small"
                                                       CssClass="app-item-doc-copies__action-btn"
                                                       title="@Msg("ApplicationReportPackage.EditTemplate.Tooltip")"
-                                                      Enabled="@(!_packageBusy && !_previewBusy && !_refreshBusy && !_syncBusy && _editTemplateId == null)"
+                                                      Enabled="@(!_packageBusy && !_previewBusy && !_refreshBusy && !_syncBusy && _editTemplateId == null && _downloadTemplateId == null)"
                                                       Click="@(() => EditTemplateAsync(entry))" />
                                             @if (IsDownloadedForEdit(entry))
                                             {
@@ -117,6 +117,16 @@
                                                     @Msg("ApplicationReportPackage.EditTemplate.OnDownloaded")
                                                 </span>
                                             }
+                                        }
+                                        @if (CanDownloadTemplate(entry))
+                                        {
+                                            <DxButton Text="@Msg("ApplicationReportPackage.DownloadTemplate")"
+                                                      RenderStyle="ButtonRenderStyle.Link"
+                                                      SizeMode="SizeMode.Small"
+                                                      CssClass="app-item-doc-copies__action-btn"
+                                                      title="@Msg("ApplicationReportPackage.DownloadTemplate.Tooltip")"
+                                                      Enabled="@(!_packageBusy && !_previewBusy && !_refreshBusy && !_syncBusy && _editTemplateId == null && _downloadTemplateId == null)"
+                                                      Click="@(() => DownloadTemplateAsync(entry))" />
                                         }
                                         <DxButton Text="@Msg("ApplicationReportPackage.Preview")"
                                                   RenderStyle="ButtonRenderStyle.Link"
@@ -277,6 +287,7 @@
 
     [Inject] private ApplicationWordReportPackageEnqueueService PackageEnqueueService { get; set; } = null!;
     [Inject] private UserReportTemplateStagingUiService TemplateStagingUiService { get; set; } = null!;
+    [Inject] private IFileDownloader FileDownloader { get; set; } = null!;
     [Inject] private IXafCultureInfoService CultureInfoService { get; set; } = null!;
     [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
     [Inject] private IJSRuntime JS { get; set; } = null!;
@@ -307,6 +318,7 @@
     private bool _refreshBusy;
     private bool _syncBusy;
     private Guid? _editTemplateId;
+    private Guid? _downloadTemplateId;
     private readonly HashSet<Guid> _downloadedTemplateIds = new();
     private bool ShowDetails;
 
@@ -584,9 +596,75 @@
         && entry.UserReportTemplateId is Guid templateId
         && templateId != Guid.Empty;
 
+    private bool CanDownloadTemplate(ApplicationWordReportPackageCatalogEntry entry) =>
+        entry.UserReportTemplateId is Guid templateId
+        && templateId != Guid.Empty;
+
     private bool IsDownloadedForEdit(ApplicationWordReportPackageCatalogEntry entry) =>
         entry.UserReportTemplateId is Guid templateId
         && _downloadedTemplateIds.Contains(templateId);
+
+    private async Task DownloadTemplateAsync(ApplicationWordReportPackageCatalogEntry entry)
+    {
+        if (entry.UserReportTemplateId is not Guid templateId
+            || templateId == Guid.Empty
+            || _downloadTemplateId.HasValue
+            || _editTemplateId.HasValue
+            || _packageBusy
+            || _previewBusy
+            || _refreshBusy)
+        {
+            return;
+        }
+
+        ClearStatusMessages();
+        _downloadTemplateId = templateId;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            var outcome = await TemplateStagingUiService.DownloadTemplateAsync(templateId);
+            if (!outcome.Success || outcome.Result == null
+                || outcome.Result.FileContent == null
+                || outcome.Result.FileContent.Length == 0)
+            {
+                _packageStatusMessage = outcome.ErrorMessage
+                    ?? Msg("ApplicationReportPackage.DownloadTemplate.Failed");
+                _packageStatusIsError = true;
+                return;
+            }
+
+            var fileName = string.IsNullOrWhiteSpace(outcome.Result.DocumentFileName)
+                ? entry.DisplayName
+                : outcome.Result.DocumentFileName;
+            var contentType = outcome.Result.OutputFormat == TemplateOutputFormat.Excel
+                ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                : "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
+            using var stream = new MemoryStream(outcome.Result.FileContent, writable: false);
+            await FileDownloader.DownloadAsync(fileName, stream, contentType);
+
+            _packageStatusMessage = FormatMsg(
+                "ApplicationReportPackage.DownloadTemplate.Downloaded",
+                outcome.Result.DisplayName,
+                fileName);
+            _packageStatusIsError = false;
+        }
+        catch (Exception ex)
+        {
+            _packageStatusMessage = Msg("ApplicationReportPackage.DownloadTemplate.Failed");
+            _packageStatusIsError = true;
+            ErrorReporter.ReportReportPackageError(
+                "Resminamalar template download failed.",
+                ApplicationRuntimeLogCategories.ReportPackageComponent,
+                ex);
+        }
+        finally
+        {
+            _downloadTemplateId = null;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
 
     private async Task EditTemplateAsync(ApplicationWordReportPackageCatalogEntry entry)
     {
@@ -594,6 +672,7 @@
             || entry.UserReportTemplateId is not Guid templateId
             || templateId == Guid.Empty
             || _editTemplateId.HasValue
+            || _downloadTemplateId.HasValue
             || _packageBusy
             || _previewBusy
             || _refreshBusy)

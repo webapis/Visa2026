@@ -135,7 +135,6 @@ internal static class TemplateRosterLoopPlanner
         // {{/ds.rows}} row when it sits below. Place the close on the next physical row.
         var templateRow = firstRowCells.Min(static p => p.Row);
         var endRow = templateRow + 1;
-        var markerColumn = parsed.Max(static p => p.Column) + 1;
 
         var occupied = substitutions
             .Select(static s => s.Region as DocumentRegion.ExcelCell)
@@ -143,29 +142,147 @@ internal static class TemplateRosterLoopPlanner
             .Select(static c => Key(c!))
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        for (var attempt = 0; attempt < 26; attempt++)
+        if (!TryPlaceExcelLoopMarker(sheetGroup.Key, templateRow, endRow, occupied, workbook: null, out loop))
+            return false;
+
+        return true;
+    }
+
+    private static bool TryPlaceExcelLoopMarker(
+        string sheetName,
+        int templateRow,
+        int endRow,
+        HashSet<string> occupied,
+        XLWorkbook? workbook,
+        out LoopMarker loop)
+    {
+        loop = null!;
+
+        // Seeded sanaw (Sanaw_ckl_map.md §6): {{#ds.rows}} in column A on the template data row.
+        // Yellow № often maps {{.RNUM}} into A — still use A; writer prepends the loop open.
+        if (TryPlaceExcelLoopAtColumn(
+                sheetName, templateRow, endRow, column: 1, allowOccupiedStart: true, occupied, workbook, out loop))
+            return true;
+
+        // A unusable (merged/formula): prepend onto the leftmost occupied data column on the row.
+        for (var column = 2; column <= 26; column++)
         {
-            var column = markerColumn + attempt;
-            if (column > 100)
-                return false;
-
-            var startRef = XLHelper.GetColumnLetterFromNumber(column) + templateRow;
-            var endRef = XLHelper.GetColumnLetterFromNumber(column) + endRow;
-            var startCell = new DocumentRegion.ExcelCell(sheetGroup.Key, startRef);
-            var endCell = new DocumentRegion.ExcelCell(sheetGroup.Key, endRef);
-
-            if (occupied.Contains(Key(startCell)) || occupied.Contains(Key(endCell)))
+            var startKey = Key(new DocumentRegion.ExcelCell(
+                sheetName,
+                XLHelper.GetColumnLetterFromNumber(column) + templateRow));
+            if (!occupied.Contains(startKey))
                 continue;
 
-            loop = new LoopMarker(startCell, endCell, RowsCollectionToken);
-            return true;
+            if (TryPlaceExcelLoopAtColumn(
+                    sheetName, templateRow, endRow, column, allowOccupiedStart: true, occupied, workbook, out loop))
+                return true;
+        }
+
+        // Last resort: empty unmerged column (avoid far-right T when A–N are full of tokens).
+        for (var column = 2; column <= 26; column++)
+        {
+            if (TryPlaceExcelLoopAtColumn(
+                    sheetName, templateRow, endRow, column, allowOccupiedStart: false, occupied, workbook, out loop))
+                return true;
         }
 
         return false;
     }
 
-    private static string Key(DocumentRegion.ExcelCell cell) =>
-        $"{cell.SheetName}!{cell.CellReference}";
+    private static bool TryPlaceExcelLoopAtColumn(
+        string sheetName,
+        int templateRow,
+        int endRow,
+        int column,
+        bool allowOccupiedStart,
+        HashSet<string> occupied,
+        XLWorkbook? workbook,
+        out LoopMarker loop)
+    {
+        loop = null!;
+
+        var startRef = XLHelper.GetColumnLetterFromNumber(column) + templateRow;
+        var startCell = new DocumentRegion.ExcelCell(sheetName, startRef);
+        if (!CanWriteLoopCell(workbook, sheetName, startRef))
+            return false;
+
+        if (!allowOccupiedStart && occupied.Contains(Key(startCell)))
+            return false;
+
+        if (!TryResolveLoopEndCell(
+                sheetName,
+                endRow,
+                preferredColumn: column,
+                occupied,
+                workbook,
+                out var endCell))
+            return false;
+
+        loop = new LoopMarker(startCell, endCell, RowsCollectionToken);
+        return true;
+    }
+
+    private static bool TryResolveLoopEndCell(
+        string sheetName,
+        int endRow,
+        int preferredColumn,
+        HashSet<string> occupied,
+        XLWorkbook? workbook,
+        out DocumentRegion.ExcelCell endCell)
+    {
+        endCell = null!;
+
+        var columns = new List<int> { preferredColumn };
+        for (var column = 1; column <= 26; column++)
+        {
+            if (column != preferredColumn)
+                columns.Add(column);
+        }
+
+        foreach (var column in columns)
+        {
+            var endRef = XLHelper.GetColumnLetterFromNumber(column) + endRow;
+            var candidate = new DocumentRegion.ExcelCell(sheetName, endRef);
+            if (occupied.Contains(Key(candidate)))
+                continue;
+            if (!CanWriteLoopCell(workbook, sheetName, endRef))
+                continue;
+
+            endCell = candidate;
+            return true;
+        }
+
+        // Close marker is optional for ExcelReportGenerator — keep preferred cell; writer no-ops if busy.
+        var fallbackRef = XLHelper.GetColumnLetterFromNumber(preferredColumn) + endRow;
+        endCell = new DocumentRegion.ExcelCell(sheetName, fallbackRef);
+        return workbook == null || CanWriteLoopCell(workbook, sheetName, fallbackRef);
+    }
+
+    private static bool CanWriteLoopCell(XLWorkbook? workbook, string sheetName, string cellReference)
+    {
+        if (workbook == null)
+            return true;
+
+        var worksheet = workbook.Worksheets
+            .FirstOrDefault(w => string.Equals(w.Name, sheetName, StringComparison.OrdinalIgnoreCase));
+        if (worksheet == null)
+            return false;
+
+        IXLCell cell;
+        try
+        {
+            cell = worksheet.Cell(cellReference);
+        }
+        catch (ArgumentException)
+        {
+            return false;
+        }
+
+        if (!string.IsNullOrEmpty(cell.FormulaA1))
+            return false;
+
+        return !cell.IsMerged();
+    }
 
     internal static bool TryParseCellReference(string reference, out int column, out int row)
     {
@@ -173,6 +290,8 @@ internal static class TemplateRosterLoopPlanner
         row = 0;
         if (string.IsNullOrWhiteSpace(reference))
             return false;
+
+        reference = reference.Replace("$", string.Empty, StringComparison.Ordinal);
 
         var i = 0;
         while (i < reference.Length && char.IsLetter(reference[i]))
@@ -194,5 +313,87 @@ internal static class TemplateRosterLoopPlanner
         {
             return false;
         }
+    }
+
+    /// <summary>
+    /// Create-from-yellow-marks Excel path: row tokens are already mapped — add ItemList loop markers
+    /// so <see cref="ExcelReports.ExcelReportGenerator"/> can merge in Resminamalar preview.
+    /// Pass <paramref name="workbookContent"/> so placement skips merged / formula cells.
+    /// </summary>
+    internal static IReadOnlyList<LoopMarker> PlanExcelLoopsFromSubstitutions(
+        IReadOnlyList<TokenSubstitution> substitutions,
+        byte[]? workbookContent = null)
+    {
+        ArgumentNullException.ThrowIfNull(substitutions);
+
+        var excelRowSubs = substitutions
+            .Select(s => (Sub: s, Cell: s.Region as DocumentRegion.ExcelCell))
+            .Where(x => x.Cell != null && IsRowScopedSubstitutionToken(x.Sub.Token))
+            .Select(x => (x.Sub, Cell: x.Cell!))
+            .ToList();
+
+        if (excelRowSubs.Count == 0)
+            return Array.Empty<LoopMarker>();
+
+        var sheetGroup = excelRowSubs
+            .GroupBy(x => x.Cell.SheetName, StringComparer.OrdinalIgnoreCase)
+            .First();
+
+        var parsed = new List<(DocumentRegion.ExcelCell Cell, int Column, int Row)>();
+        foreach (var item in sheetGroup)
+        {
+            if (!TryParseCellReference(item.Cell.CellReference, out var column, out var row))
+                continue;
+
+            parsed.Add((item.Cell, column, row));
+        }
+
+        if (parsed.Count == 0)
+            return Array.Empty<LoopMarker>();
+
+        var templateRow = parsed.Min(static p => p.Row);
+        var endRow = templateRow + 1;
+
+        var occupied = substitutions
+            .Select(static s => s.Region as DocumentRegion.ExcelCell)
+            .Where(static c => c != null)
+            .Select(static c => Key(c!))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        XLWorkbook? workbook = null;
+        try
+        {
+            if (workbookContent is { Length: > 0 })
+            {
+                using var input = new MemoryStream(workbookContent, writable: false);
+                workbook = new XLWorkbook(input);
+            }
+
+            if (!TryPlaceExcelLoopMarker(
+                    sheetGroup.Key,
+                    templateRow,
+                    endRow,
+                    occupied,
+                    workbook,
+                    out var loop))
+                return Array.Empty<LoopMarker>();
+
+            return [loop];
+        }
+        finally
+        {
+            workbook?.Dispose();
+        }
+    }
+
+    private static string Key(DocumentRegion.ExcelCell cell) =>
+        $"{cell.SheetName}!{cell.CellReference}";
+
+    private static bool IsRowScopedSubstitutionToken(string token)
+    {
+        if (string.IsNullOrWhiteSpace(token))
+            return false;
+
+        return !token.Contains("ds.", StringComparison.OrdinalIgnoreCase);
     }
 }

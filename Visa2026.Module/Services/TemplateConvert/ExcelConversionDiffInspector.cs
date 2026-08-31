@@ -27,6 +27,7 @@ internal static class ExcelConversionDiffInspector
         }
 
         var expectations = ExcelTextExpectation.Build(request);
+        var loopColumnsBySheet = BuildLoopMarkerColumns(request);
 
         foreach (var sheetName in originalSheets)
         {
@@ -34,8 +35,39 @@ internal static class ExcelConversionDiffInspector
             var right = converted.Worksheet(sheetName);
 
             CompareMergedRanges(sheetName, left, right, violations);
-            CompareColumnWidths(sheetName, left, right, violations);
+            loopColumnsBySheet.TryGetValue(sheetName, out var loopColumns);
+            CompareColumnWidths(sheetName, left, right, violations, loopColumns);
             CompareCells(sheetName, left, right, expectations, violations);
+        }
+    }
+
+    private static Dictionary<string, HashSet<int>> BuildLoopMarkerColumns(TemplateDiffGateRequest request)
+    {
+        var map = new Dictionary<string, HashSet<int>>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var loop in request.Loops)
+        {
+            AddLoopColumn(map, loop.Start);
+            AddLoopColumn(map, loop.End);
+        }
+
+        return map;
+
+        static void AddLoopColumn(Dictionary<string, HashSet<int>> columnsBySheet, DocumentRegion region)
+        {
+            if (region is not DocumentRegion.ExcelCell cell)
+                return;
+
+            if (!TemplateRosterLoopPlanner.TryParseCellReference(cell.CellReference, out var column, out _))
+                return;
+
+            if (!columnsBySheet.TryGetValue(cell.SheetName, out var set))
+            {
+                set = new HashSet<int>();
+                columnsBySheet[cell.SheetName] = set;
+            }
+
+            set.Add(column);
         }
     }
 
@@ -48,13 +80,25 @@ internal static class ExcelConversionDiffInspector
             violations.Add($"Merged ranges changed on sheet '{sheetName}'.");
     }
 
-    private static void CompareColumnWidths(string sheetName, IXLWorksheet left, IXLWorksheet right, List<string> violations)
+    private static void CompareColumnWidths(
+        string sheetName,
+        IXLWorksheet left,
+        IXLWorksheet right,
+        List<string> violations,
+        HashSet<int>? loopMarkerColumns = null)
     {
         var leftWidths = left.ColumnsUsed().ToDictionary(static c => c.ColumnNumber(), static c => Math.Round(c.Width, 3));
         var rightWidths = right.ColumnsUsed().ToDictionary(static c => c.ColumnNumber(), static c => Math.Round(c.Width, 3));
 
         foreach (var column in leftWidths.Keys.Union(rightWidths.Keys))
         {
+            if (loopMarkerColumns != null
+                && loopMarkerColumns.Contains(column)
+                && !leftWidths.ContainsKey(column))
+            {
+                continue;
+            }
+
             leftWidths.TryGetValue(column, out var leftWidth);
             rightWidths.TryGetValue(column, out var rightWidth);
             if (Math.Abs(leftWidth - rightWidth) > 0.001)
@@ -127,10 +171,28 @@ internal sealed class ExcelTextExpectation
         foreach (var loop in request.Loops)
         {
             if (loop.Start is DocumentRegion.ExcelCell start)
-                replacements[Key(start)] = TemplateTokenSyntax.LoopOpen(loop.CollectionToken);
+            {
+                var open = TemplateTokenSyntax.LoopOpen(loop.CollectionToken);
+                var startKey = Key(start);
+                // Same cell as a row token (e.g. A5 {{#ds.rows}}{{.RNUM}}) — writer prepends.
+                if (replacements.TryGetValue(startKey, out var existing)
+                    && !existing.Contains(open, StringComparison.Ordinal))
+                    replacements[startKey] = open + existing;
+                else if (!replacements.ContainsKey(startKey))
+                    replacements[startKey] = open;
+            }
 
             if (loop.End is DocumentRegion.ExcelCell end)
-                replacements[Key(end)] = TemplateTokenSyntax.LoopClose(loop.CollectionToken);
+            {
+                var close = TemplateTokenSyntax.LoopClose(loop.CollectionToken);
+                var endKey = Key(end);
+                if (replacements.TryGetValue(endKey, out var existing)
+                    && existing.Contains(close, StringComparison.Ordinal))
+                    continue;
+
+                if (!replacements.ContainsKey(endKey))
+                    replacements[endKey] = close;
+            }
         }
 
         return new ExcelTextExpectation(replacements);

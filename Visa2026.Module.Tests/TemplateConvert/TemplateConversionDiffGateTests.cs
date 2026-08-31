@@ -182,4 +182,44 @@ public class TemplateConversionDiffGateTests
         Assert.False(verdict.Passed);
         Assert.Contains(verdict.Violations, v => v.Contains("A1", StringComparison.Ordinal));
     }
+
+    [Fact]
+    public void Excel_loop_open_prepended_onto_row_token_passes()
+    {
+        var original = TemplateConvertFixtures.CreateExcelSheet(
+            "Sanaw",
+            ("A5", "1"),
+            ("B5", "Erol"));
+
+        var result = _writer.Apply(new TemplateTokenWriteRequest
+        {
+            SourceContent = original,
+            Format = TemplateSourceFormat.Xlsx,
+            Substitutions = new[]
+            {
+                new TokenSubstitution(new DocumentRegion.ExcelCell("Sanaw", "A5"), ".RNUM"),
+                new TokenSubstitution(new DocumentRegion.ExcelCell("Sanaw", "B5"), ".PLN"),
+            },
+            Loops = new[]
+            {
+                new LoopMarker(
+                    new DocumentRegion.ExcelCell("Sanaw", "A5"),
+                    new DocumentRegion.ExcelCell("Sanaw", "A6"),
+                    "ds.rows"),
+            },
+        });
+
+        Assert.Equal("{{#ds.rows}}{{.RNUM}}", TemplateConvertFixtures.GetCellText(result.Content, "Sanaw", "A5"));
+
+        var verdict = _gate.Verify(new TemplateDiffGateRequest
+        {
+            OriginalContent = original,
+            ConvertedContent = result.Content,
+            Format = TemplateSourceFormat.Xlsx,
+            Substitutions = result.AppliedSubstitutions,
+            Loops = result.AppliedLoops,
+        });
+
+        Assert.True(verdict.Passed, string.Join(" | ", verdict.Violations));
+    }
 }

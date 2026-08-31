@@ -1,3 +1,4 @@
+using ClosedXML.Excel;
 using Visa2026.Module.Services.TemplateConvert;
 using Xunit;
 
@@ -112,8 +113,8 @@ public class TemplateRosterLoopPlannerTests
         var start = Assert.IsType<DocumentRegion.ExcelCell>(loop.Start);
         var end = Assert.IsType<DocumentRegion.ExcelCell>(loop.End);
         Assert.Equal("Sanaw", start.SheetName);
-        Assert.Equal("C2", start.CellReference);
-        Assert.Equal("C3", end.CellReference);
+        Assert.Equal("A2", start.CellReference);
+        Assert.Equal("A3", end.CellReference);
         Assert.Equal("{{#ds.rows}}", TemplateTokenSyntax.LoopOpen(loop.CollectionToken));
         Assert.Equal("{{/ds.rows}}", TemplateTokenSyntax.LoopClose(loop.CollectionToken));
     }
@@ -187,9 +188,66 @@ public class TemplateRosterLoopPlannerTests
         });
 
         Assert.Empty(excelResult.Skipped);
-        Assert.Equal("{{.PFN}}", TemplateConvertFixtures.GetCellText(excelResult.Content, "Sanaw", "A2"));
-        Assert.Equal("{{#ds.rows}}", TemplateConvertFixtures.GetCellText(excelResult.Content, "Sanaw", "B2"));
+        Assert.Equal("{{#ds.rows}}{{.PFN}}", TemplateConvertFixtures.GetCellText(excelResult.Content, "Sanaw", "A2"));
         Assert.Equal("{{/ds.rows}}", TemplateConvertFixtures.GetCellText(excelResult.Content, "Sanaw", "B3"));
         Assert.Equal("Person Two", TemplateConvertFixtures.GetCellText(excelResult.Content, "Sanaw", "A3"));
+    }
+
+    [Fact]
+    public void PlanExcelLoopsFromSubstitutions_places_rows_loop_for_scan_row_tokens()
+    {
+        var subs = new List<TokenSubstitution>
+        {
+            new(new DocumentRegion.ExcelCell("Sanaw", "B5"), "{{.PLN}}"),
+            new(new DocumentRegion.ExcelCell("Sanaw", "C5"), "{{.PFNM}}"),
+        };
+
+        var loops = TemplateRosterLoopPlanner.PlanExcelLoopsFromSubstitutions(subs);
+        var loop = Assert.Single(loops);
+        Assert.Equal("A5", ((DocumentRegion.ExcelCell)loop.Start).CellReference);
+        Assert.Equal("A6", ((DocumentRegion.ExcelCell)loop.End).CellReference);
+        Assert.Equal("{{#ds.rows}}", TemplateTokenSyntax.LoopOpen(loop.CollectionToken));
+    }
+
+    [Fact]
+    public void PlanExcelLoopsFromSubstitutions_keeps_loop_on_A_when_RNUM_occupies_A()
+    {
+        var subs = new List<TokenSubstitution>
+        {
+            new(new DocumentRegion.ExcelCell("Sanaw", "A5"), "{{.RNUM}}"),
+            new(new DocumentRegion.ExcelCell("Sanaw", "B5"), "{{.PLN}}"),
+            new(new DocumentRegion.ExcelCell("Sanaw", "C5"), "{{.PFNM}}"),
+        };
+
+        var loops = TemplateRosterLoopPlanner.PlanExcelLoopsFromSubstitutions(subs);
+        var loop = Assert.Single(loops);
+        Assert.Equal("A5", ((DocumentRegion.ExcelCell)loop.Start).CellReference);
+        Assert.Equal("A6", ((DocumentRegion.ExcelCell)loop.End).CellReference);
+    }
+
+    [Fact]
+    public void PlanExcelLoopsFromSubstitutions_skips_merged_cells_when_workbook_provided()
+    {
+        using var workbook = new XLWorkbook();
+        var sheet = workbook.Worksheets.Add("Sanaw");
+        sheet.Cell("A5").Value = "x";
+        sheet.Range("A5:A6").Merge();
+        sheet.Range("J5:K5").Merge();
+        sheet.Cell("J5").Value = "position";
+        using var ms = new MemoryStream();
+        workbook.SaveAs(ms);
+        var bytes = ms.ToArray();
+
+        var subs = new List<TokenSubstitution>
+        {
+            new(new DocumentRegion.ExcelCell("Sanaw", "B5"), "{{.PLN}}"),
+            new(new DocumentRegion.ExcelCell("Sanaw", "J5"), "{{.POSN}}"),
+        };
+
+        var loops = TemplateRosterLoopPlanner.PlanExcelLoopsFromSubstitutions(subs, bytes);
+        var loop = Assert.Single(loops);
+        // Column A merged → prepend onto leftmost occupied data column (B).
+        Assert.Equal("B5", ((DocumentRegion.ExcelCell)loop.Start).CellReference);
+        Assert.Equal("B6", ((DocumentRegion.ExcelCell)loop.End).CellReference);
     }
 }

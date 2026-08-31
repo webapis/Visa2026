@@ -1,0 +1,38 @@
+flowchart TB
+    subgraph Entry["Officer: Analyze"]
+        A["Upload .docx / .xlsx<br/>yellow highlights only"]
+        B["Application Profile<br/>→ allowed placeholder set"]
+        C["Case picker<br/>workspace context only"]
+    end
+
+    A --> D["ScanIngestService<br/>normalize Office bytes"]
+    B --> E["ScanFieldPlanService.BuildAsync"]
+    C -.->|"NOT used for matching"| E
+    D --> E
+
+    E --> F["ScanOfficeYellowExtractor<br/>read yellow spans from OpenXML"]
+
+    F --> G{Source kind?}
+
+    G -->|Excel .xlsx| H["ScanExcelYellowResolver<br/>rules-first inference"]
+    G -->|Word .docx| I["ScanYellowHighlightTokenResolver<br/>regex + compound split"]
+
+    H --> J["ScanFieldPlanProposal<br/>drafts + ranked alternatives"]
+    I --> J
+
+    J --> K["ScanAmbiguousYellowRefinementService"]
+
+    K --> L{"Ambiguous marks?<br/>ScanAmbiguousYellowGate"}
+    L -->|No| M["Keep local proposal"]
+    L -->|Yes| N{"Azure enabled?<br/>RefineAmbiguousYellowWithAi"}
+    N -->|No| M
+    N -->|Yes| O["Azure OpenAI<br/>text-only JSON"]
+    O --> P["Merge AI tokens + scores<br/>into ambiguous drafts only"]
+    P --> M
+
+    M --> Q["ScanFieldPlanMerger"]
+    Q --> R["Validate tokens vs allowed set<br/>dedupe header codes<br/>emit gaps for unmapped"]
+    R --> S["Review UI<br/>mapped tokens + % alternatives"]
+
+    style C fill:#f9f,stroke:#999,stroke-dasharray: 5 5
+    style O fill:#e8f4ff,stroke:#036

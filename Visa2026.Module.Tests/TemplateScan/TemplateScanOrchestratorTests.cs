@@ -6,6 +6,7 @@ using Visa2026.Module.Services.ExcelReports;
 using Visa2026.Module.Services.TemplateConvert;
 using Visa2026.Module.Services.TemplateScan;
 using Visa2026.Module.Services.UserReports;
+using Visa2026.Module.Tests.TemplateConvert;
 using Xunit;
 
 namespace Visa2026.Module.Tests.TemplateScan;
@@ -242,7 +243,7 @@ public class TemplateScanOrchestratorTests
         var yellows = new ScanOfficeYellowExtractor().Extract(bytes, ScanSourceKind.Word);
         Assert.NotEmpty(yellows);
 
-        var proposal = ScanOfficeFieldPlanBuilder.Build(yellows, set);
+        var proposal = ScanOfficeFieldPlanBuilder.Build(yellows, set, bytes, ScanSourceKind.Word);
         var plan = new ScanFieldPlanMerger().Merge(new ScanFieldPlanMergeRequest
         {
             PlaceholderSet = set,
@@ -289,6 +290,138 @@ public class TemplateScanOrchestratorTests
                 doc.MainDocumentPart!.Document.Body!.Descendants<DocumentFormat.OpenXml.Wordprocessing.Highlight>(),
                 h => h.Val?.Value == DocumentFormat.OpenXml.Wordprocessing.HighlightColorValues.Yellow);
         }
+    }
+
+    [Fact]
+    public async Task GenerateAsync_yellow_excel_writes_rows_loop_marker()
+    {
+        var set = new ApplicationProfilePlaceholderSetService(new UserReportPlaceholderCatalogService()).GetSet(
+            new ApplicationProfilePlaceholderSetQuery
+            {
+                Profile = new ApplicationProfile
+                {
+                    RequirePersonPassport = true,
+                    RequirePersonEducation = true,
+                    RequirePersonPosition = true,
+                    RequirePersonAddressOfResidence = true,
+                },
+                DataScope = ApplicationProfileTemplateDataScope.Both,
+                TemplateKind = ApplicationProfileTemplateKind.Excel,
+            });
+
+        using var ms = new MemoryStream();
+        using (var wb = new ClosedXML.Excel.XLWorkbook())
+        {
+            var ws = wb.AddWorksheet("Sanaw");
+            ws.Cell("B4").Value = "Familiýasy";
+            ws.Cell("C4").Value = "Ady";
+            void Yellow(int col, string value)
+            {
+                var cell = ws.Cell(5, col);
+                cell.Value = value;
+                cell.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.Yellow;
+            }
+
+            Yellow(2, "Erol");
+            Yellow(3, "Hilmi");
+            wb.SaveAs(ms);
+        }
+
+        var bytes = ms.ToArray();
+        var yellows = new ScanOfficeYellowExtractor().Extract(bytes, ScanSourceKind.Excel);
+        var proposal = ScanOfficeFieldPlanBuilder.Build(yellows, set, bytes, ScanSourceKind.Excel);
+        var plan = new ScanFieldPlanMerger().Merge(new ScanFieldPlanMergeRequest
+        {
+            PlaceholderSet = set,
+            ScanKind = ScanKind.FilledSample,
+            Proposal = proposal,
+        });
+
+        var orchestrator = CreateOrchestrator();
+        var outcome = await orchestrator.GenerateAsync(new TemplateScanAnalysis
+        {
+            NormalizedInput = new ScanNormalizedInput
+            {
+                SourceKind = ScanSourceKind.Excel,
+                Pages = Array.Empty<ScanPageImage>(),
+                OriginalByteLength = bytes.LongLength,
+                FileName = "sanaw.xlsx",
+                OfficePackageBytes = bytes,
+            },
+            Suitability = new ScanSuitabilityReport
+            {
+                Verdict = ScanSuitabilityVerdict.Pass,
+                TextConfidence = 1.0,
+                Issues = Array.Empty<ScanSuitabilityIssue>(),
+            },
+            FieldPlan = plan,
+            PlaceholderSet = set,
+            Playbook = new ScanAuthoringPlaybookService().GetPlaybook(),
+            TemplateName = "Sanaw scan",
+            DataScope = ApplicationProfileTemplateDataScope.Both,
+        });
+
+        Assert.True(!outcome.HasErrors, string.Join(" | ", outcome.Errors));
+        Assert.Equal("{{#ds.rows}}", TemplateConvertFixtures.GetCellText(outcome.Content, "Sanaw", "A5"));
+        Assert.Equal("{{/ds.rows}}", TemplateConvertFixtures.GetCellText(outcome.Content, "Sanaw", "A6"));
+
+        using (var verify = new MemoryStream(outcome.Content, writable: false))
+        using (var wb = new ClosedXML.Excel.XLWorkbook(verify))
+        {
+            foreach (var cell in wb.Worksheet("Sanaw").CellsUsed(ClosedXML.Excel.XLCellsUsedOptions.All))
+            {
+                Assert.True(
+                    cell.Style.Fill.PatternType is ClosedXML.Excel.XLFillPatternValues.None
+                        or ClosedXML.Excel.XLFillPatternValues.Gray125,
+                    $"Yellow fill left on {cell.Address} after Generate.");
+            }
+        }
+    }
+
+    [Fact]
+    public void GenerateAsync_yellow_excel_builds_row_loop_from_field_plan()
+    {
+        var set = new ApplicationProfilePlaceholderSetService(new UserReportPlaceholderCatalogService()).GetSet(
+            new ApplicationProfilePlaceholderSetQuery
+            {
+                Profile = new ApplicationProfile(),
+                DataScope = ApplicationProfileTemplateDataScope.Both,
+                TemplateKind = ApplicationProfileTemplateKind.Excel,
+            });
+
+        using var ms = new MemoryStream();
+        using (var wb = new ClosedXML.Excel.XLWorkbook())
+        {
+            var ws = wb.AddWorksheet("Sanaw");
+            ws.Cell("B4").Value = "Familiýasy";
+            ws.Cell("C4").Value = "Ady";
+            ws.Cell("B5").Value = "Erol";
+            ws.Cell("B5").Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.Yellow;
+            ws.Cell("C5").Value = "Hilmi";
+            ws.Cell("C5").Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.Yellow;
+            wb.SaveAs(ms);
+        }
+
+        var bytes = ms.ToArray();
+        var yellows = new ScanOfficeYellowExtractor().Extract(bytes, ScanSourceKind.Excel);
+        var proposal = ScanOfficeFieldPlanBuilder.Build(yellows, set, bytes, ScanSourceKind.Excel);
+        var plan = new ScanFieldPlanMerger().Merge(new ScanFieldPlanMergeRequest
+        {
+            PlaceholderSet = set,
+            ScanKind = ScanKind.FilledSample,
+            Proposal = proposal,
+        });
+
+        Assert.True(plan.Fields.Count >= 2, "Expected mapped row fields on the first sheet.");
+        Assert.All(plan.Fields, f => Assert.IsType<DocumentRegion.ExcelCell>(f.SourceRegion));
+
+        var subs = plan.Fields
+            .Where(f => !string.IsNullOrWhiteSpace(f.ProposedToken) && f.SourceRegion != null)
+            .Select(f => new TokenSubstitution(f.SourceRegion!, f.ProposedToken!.Trim()))
+            .ToList();
+
+        var loops = TemplateRosterLoopPlanner.PlanExcelLoopsFromSubstitutions(subs);
+        Assert.NotEmpty(loops);
     }
 
     [Fact]

@@ -1259,6 +1259,30 @@
     "tk-TM": "Öňünden görmek",
     "ru-RU": "Просмотр"
   },
+  "ApplicationReportPackage.DownloadTemplate": {
+    "en": "Download",
+    "tr-TR": "İndir",
+    "tk-TM": "Göçür",
+    "ru-RU": "Скачать"
+  },
+  "ApplicationReportPackage.DownloadTemplate.Tooltip": {
+    "en": "Download the saved Word or Excel template file (placeholders, not filled case data).",
+    "tr-TR": "Kayıtlı Word veya Excel şablon dosyasını indirir (yer tutucular; doldurulmuş başvuru verisi değil).",
+    "tk-TM": "Ýazdyrylan Word ýa-da Excel şablon faýlyny göçürýär (ýer tutujylar; doldurylan arza maglumaty däl).",
+    "ru-RU": "Скачать сохранённый файл шаблона Word или Excel (плейсхолдеры, не заполненные данные заявки)."
+  },
+  "ApplicationReportPackage.DownloadTemplate.Failed": {
+    "en": "Could not download the template file.",
+    "tr-TR": "Şablon dosyası indirilemedi.",
+    "tk-TM": "Şablon faýly göçürilmedi.",
+    "ru-RU": "Не удалось скачать файл шаблона."
+  },
+  "ApplicationReportPackage.DownloadTemplate.Downloaded": {
+    "en": "Downloaded template \"{0}\" ({1}).",
+    "tr-TR": "Şablon \"{0}\" indirildi ({1}).",
+    "tk-TM": "Şablon \"{0}\" göçürildi ({1}).",
+    "ru-RU": "Шаблон «{0}» скачан ({1})."
+  },
   "ApplicationReportPackage.EditTemplate": {
     "en": "Edit template",
     "tr-TR": "Şablonu düzenle",

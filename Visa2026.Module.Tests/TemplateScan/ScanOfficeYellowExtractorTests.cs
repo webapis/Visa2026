@@ -92,6 +92,29 @@ public class ScanOfficeYellowExtractorTests
         Assert.Contains(spans, s => s.Region is DocumentRegion.ExcelCell);
     }
 
+    [Fact]
+    public void Extract_Excel_ignores_yellow_cells_on_sheets_after_the_first()
+    {
+        using var ms = new MemoryStream();
+        using (var wb = new XLWorkbook())
+        {
+            var first = wb.AddWorksheet("Sanaw");
+            first.Cell("B5").Value = "Erol";
+            first.Cell("B5").Style.Fill.BackgroundColor = XLColor.Yellow;
+
+            var second = wb.AddWorksheet("Archive");
+            second.Cell("A1").Value = "ignored";
+            second.Cell("A1").Style.Fill.BackgroundColor = XLColor.Yellow;
+
+            wb.SaveAs(ms);
+        }
+
+        var spans = new ScanOfficeYellowExtractor().Extract(ms.ToArray(), ScanSourceKind.Excel);
+        Assert.Single(spans);
+        Assert.Equal("Erol", spans[0].Text);
+        Assert.Equal("Sanaw", ((DocumentRegion.ExcelCell)spans[0].Region).SheetName);
+    }
+
     public static byte[] CreateWordFixture(params string[] yellowPhrases)
     {
         using var stream = new MemoryStream();

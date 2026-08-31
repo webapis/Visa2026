@@ -77,9 +77,15 @@ public sealed class TemplateScanOrchestrator : ITemplateScanOrchestrator
         {
             if (string.IsNullOrWhiteSpace(field.ProposedToken) || field.SourceRegion is null)
                 continue;
-            if (!TemplateTokenSyntax.TryGetShortCode(field.ProposedToken, out _))
+            if (format == TemplateSourceFormat.Xlsx
+                && field.SourceRegion is DocumentRegion.ExcelCell excelCell
+                && !ScanExcelWorkbookPolicy.IsOnFirstWorksheet(package, excelCell.SheetName))
                 continue;
-            substitutions.Add(new TokenSubstitution(field.SourceRegion, field.ProposedToken.Trim()));
+            var trimmed = field.ProposedToken.Trim();
+            if (!trimmed.Contains("{{", StringComparison.Ordinal)
+                && !TemplateTokenSyntax.TryGetShortCode(trimmed, out _))
+                continue;
+            substitutions.Add(new TokenSubstitution(field.SourceRegion, trimmed));
         }
 
         if (substitutions.Count == 0)
@@ -87,7 +93,7 @@ public sealed class TemplateScanOrchestrator : ITemplateScanOrchestrator
             return new TemplateScanOutcome
             {
                 Content = package,
-                Outline = _outlines.Read(package, format),
+                Outline = ScanExcelWorkbookPolicy.LimitOutlineToFirstSheet(_outlines.Read(package, format)),
                 Validation = await _validation
                     .ExtractAndValidateAsync(package, format, analysis.PlaceholderSet, cancellationToken)
                     .ConfigureAwait(false),
@@ -118,11 +124,16 @@ public sealed class TemplateScanOrchestrator : ITemplateScanOrchestrator
             return s;
         }).ToList();
 
+        var loops = format == TemplateSourceFormat.Xlsx
+            ? TemplateRosterLoopPlanner.PlanExcelLoopsFromSubstitutions(bareSubs, package)
+            : Array.Empty<LoopMarker>();
+
         var write = _tokenWriter.Apply(new TemplateTokenWriteRequest
         {
             SourceContent = package,
             Format = format,
             Substitutions = bareSubs,
+            Loops = loops,
         });
 
         // Yellow is scan markup only — strip every remaining mark so unmapped leftovers
@@ -175,7 +186,7 @@ public sealed class TemplateScanOrchestrator : ITemplateScanOrchestrator
         return new TemplateScanOutcome
         {
             Content = cleanedContent,
-            Outline = _outlines.Read(cleanedContent, format),
+            Outline = ScanExcelWorkbookPolicy.LimitOutlineToFirstSheet(_outlines.Read(cleanedContent, format)),
             Validation = validation,
             Errors = errors,
             Warnings = warnings,
@@ -190,12 +201,12 @@ public sealed class TemplateScanOrchestrator : ITemplateScanOrchestrator
 
     private static string UnwrapOrBare(string token)
     {
-        if (TemplateTokenSyntax.TryGetShortCode(token, out var code))
-        {
-            // Prefer full path if token was {{ds.CODE}} — Convert Wrap expects path like ds.CODE or just what?
-            // Read TemplateTokenSyntax
+        if (token.Contains("{{", StringComparison.Ordinal))
+            return token.Trim();
+
+        if (TemplateTokenSyntax.TryGetShortCode(token, out _))
             return token.Trim().Trim('{', '}').Trim();
-        }
+
         return token;
     }
 

@@ -25,6 +25,36 @@ Purpose: **catalog, seed gate, batch worker, preview, permissions, dialog UX** �
 
 ## Entries
 
+### 2026-08-31 — Excel catalog Preview ran Word PDF (`report_….docx`) (Application)
+
+- **Symptom**: Scan-saved Excel READY with people; catalog Preview is a white PDF titled `report_20230321.docx`; same-case Word Preview fills.
+- **Try**: Extra col A / print-area PDF tweaks; officer screenshots of wizard + catalog.
+- **Test**: `ApplicationWordReportEntryGeneratorTests` (nested `profile:` catalog → `.xlsx`); `ApplicationWordReportOfficePreviewPdfConverterTests` (xlsx bytes named `.docx` still Spreadsheet PDF).
+- **Root cause**: `ResolveDownloadFileName` matched only `user:{id}`. Profile-nested catalog keys are `profile:{id}`, so lookup missed and fell back to `report_yyyyMMdd.docx`. Converter chose Word from the extension.
+- **Fix**: Match catalog by `UserReportTemplateId` (and keep `user:` key); always use `GetEffectiveOutputFormat()` for `.xlsx`/`.docx`. Converter sniffs ZIP `xl/` vs `word/` before the filename.
+- **Prevent**: Never infer Office PDF path from filename alone; never require `user:` keys on nested profile catalogs.
+- **Cross-skill**: template-scan
+
+### 2026-08-31 — Excel Preview PDF blank while Word Preview fills (Application)
+
+- **Symptom**: Scan-saved Excel READY; catalog Preview is a white page; same case Word sanaw Preview shows people.
+- **Try**: Extra empty column A so `{{#ds.rows}}` validates; Download Excel vs Preview PDF.
+- **Test**: Diff gate prepend test; Module compile with `ExportToPdf(stream, PdfExportOptions, sheetName)`.
+- **Root cause**: Stale worksheet print area (empty col A) exported as first PDF page; Word uses RichEdit so it is unaffected.
+- **Fix**: `ClearPrintRange` + used-range print + fit-to-width + export named first sheet only.
+- **Prevent**: Do not `ExportToPdf(stream)` on a workbook that still has Print_Area from the officer sample.
+- **Cross-skill**: template-scan
+
+### 2026-08-31 — Catalog Download template + Excel ds.rows vs merged cells (Application)
+
+- **Symptom**: Yellow-mark Excel `Sanaw_clk_05` saved READY; Generate warned `Skipped ds.rows` on merged `J5:K5`; catalog Preview failed; officers asked to download saved templates from Resminamalar.
+- **Try**: Align loop with `Sanaw_ckl_map.md` (col A); add per-row Download.
+- **Test**: `TemplateRosterLoopPlannerTests` merge skip → C5; Module/Blazor build; officer: Download gets `.xlsx`; re-Approve after rebuild → Preview with `#ds.rows` in A (or next unmerged free col).
+- **Root cause**: Loop write landed on/near merge `J5:K5` (non-anchor skip); no catalog action for raw template file (only Edit under gear + filled ZIP).
+- **Fix**: Planner skips merged/formula cells when workbook bytes passed; catalog **Download** via `TryReadTemplateFileAsync` + `IFileDownloader` (always visible, not gear).
+- **Prevent**: Always pass scan source workbook into `PlanExcelLoopsFromSubstitutions`; never place `{{#ds.rows}}` inside merges.
+- **Cross-skill**: resminamalar | template-scan | user-report-templates
+
 ### 2026-07-31 — Officer caption Templates + dedicated brand mark
 
 - **Ask**: Dedicated brand like Document Copies; rename Resminamalar to Templates (catalog shows template previews).

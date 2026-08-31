@@ -9,6 +9,7 @@
 @using Visa2026.Module.Services.TemplateConvert
 @using Visa2026.Module.Services.TemplateScan
 @using Visa2026.Module.Services
+@using Visa2026.Module.Services.UserReports
 
 @* Officer-facing scan-to-template modal (S3). Interaction contract: docs/TEMPLATE_AI_SCAN_UI_FLOW.md. *@
 
@@ -67,11 +68,20 @@
                         </div>
 
                         <div class="tas-field">
-                            <label class="tas-field__label" for="tas-data-scope">Placeholder library</label>
-                            <select id="tas-data-scope" class="tas-input" disabled>
-                                <option selected>Full library (header + people) for this profile</option>
+                            <label class="tas-field__label" for="tas-data-scope">Data <em>*</em></label>
+                            <select id="tas-data-scope" class="tas-input" value="@_dataScope"
+                                    @onchange="OnDataScopeChanged">
+                                <option value="@ApplicationProfileTemplateDataScope.ApplicationHeader">Case header — one document per case</option>
+                                <option value="@ApplicationProfileTemplateDataScope.PeopleM2M">People — one row or document per person</option>
+                                <option value="@ApplicationProfileTemplateDataScope.Both">Both</option>
                             </select>
-                            <small>Yellow highlights map to Word placeholders enabled for this profile.</small>
+                            <small>Same as Add prepared template. Sanaw / person lists need <strong>People</strong> or <strong>Both</strong> so row tokens and <code>{{#ds.rows}}</code> are available.</small>
+                            @if (IsExcelUpload && _dataScope == ApplicationProfileTemplateDataScope.ApplicationHeader)
+                            {
+                                <p class="tas-banner tas-banner--warn" style="margin:0.5rem 0 0">
+                                    This Excel file looks like a person list. Choose <strong>People</strong> or <strong>Both</strong> before Analyze — Case header will skip row tokens and leave gaps.
+                                </p>
+                            }
                         </div>
 
                         <div class="tas-field">
@@ -83,16 +93,16 @@
                         </div>
 
                         <div class="tas-field">
-                            <span class="tas-field__label">Case for value hints <em>*</em></span>
+                            <span class="tas-field__label">Case <em>*</em></span>
                             @if (_source == EntrySource.Instance)
                             {
                                 <input class="tas-input" value="@CaseHintLabel" readonly />
-                                <small>This case is used for masked value hints during field detection.</small>
+                                <small>Workspace context only — yellow cells use sample data, not this case's people.</small>
                             }
                             else if (_instanceOptions.Count == 0)
                             {
                                 <p class="tas-banner tas-banner--fail" style="margin:0">
-                                    No cases on this profile yet. Add a case first — scan always needs sample values.
+                                    No cases on this profile yet. Add a case first to open the template wizard.
                                 </p>
                             }
                             else
@@ -104,7 +114,7 @@
                                         <option value="@option.Id">@option.Label</option>
                                     }
                                 </select>
-                                <small>Value hints are masked before any cloud vision call.</small>
+                                <small>Placeholder guesses come from column headers and the manual — not from roster values on this case.</small>
                             }
                         </div>
 
@@ -256,7 +266,7 @@
                         </div>
                         <aside class="tas-done__note">
                             <h4>Next</h4>
-                            <p>Select it in the catalog to generate, or open it with <strong>Edit template</strong> to adjust wording in Word.</p>
+                            <p>Select it in the catalog to generate, or open it with <strong>Edit template</strong> to adjust wording in Word or Excel.</p>
                         </aside>
                     </div>
                 }
@@ -375,6 +385,7 @@
     [Inject] private IFileDownloader FileDownloader { get; set; } = null!;
     [Inject] private IOptions<TemplateAiScanOptions> Options { get; set; } = null!;
     [Inject] private IApplicationErrorReporter ErrorReporter { get; set; } = null!;
+    [Inject] private IUserReportTemplateMaintenanceService UserReportMaintenance { get; set; } = null!;
 
     private bool _open;
     private EntrySource _source = EntrySource.Profile;
@@ -515,7 +526,7 @@
         _fileName = string.Empty;
         _templateName = string.Empty;
         _catalogScope = ApplicationProfileTemplateCatalogScope.ProfileSpecific;
-        _dataScope = ApplicationProfileTemplateDataScope.ApplicationHeader;
+        _dataScope = ApplicationProfileTemplateDataScope.Both;
         _scanKind = ScanKind.FilledSample;
         _pdfPageCount = 0;
         _selectedPdfPages.Clear();
@@ -663,6 +674,11 @@
         if (string.IsNullOrWhiteSpace(_templateName))
             _templateName = Path.GetFileNameWithoutExtension(file.Name);
 
+        // Sanaw Excel yellow marks are person rows — Case header hides PLN/RNUM/ds.rows and creates gaps.
+        if (extension == ".xlsx"
+            && _dataScope == ApplicationProfileTemplateDataScope.ApplicationHeader)
+            _dataScope = ApplicationProfileTemplateDataScope.Both;
+
         if (extension == ".pdf")
         {
             try
@@ -681,6 +697,9 @@
 
     private bool IsOfficeUpload =>
         Path.GetExtension(_fileName).ToLowerInvariant() is ".docx" or ".xlsx";
+
+    private bool IsExcelUpload =>
+        Path.GetExtension(_fileName).Equals(".xlsx", StringComparison.OrdinalIgnoreCase);
 
     private bool CanAnalyze =>
         !_busy
@@ -754,12 +773,9 @@
             _placeholderSet = PlaceholderSets.GetSet(new ApplicationProfilePlaceholderSetQuery
             {
                 Profile = profile,
-                DataScope = ApplicationProfileTemplateDataScope.Both,
+                DataScope = _dataScope,
                 TemplateKind = templateKind,
             });
-
-            var valueHints = BuildValueHints(_placeholderSet, objectSpace);
-            _valueHints = valueHints;
 
             if (!ingest.Suitability.CanContinue)
             {
@@ -768,12 +784,14 @@
                 return;
             }
 
+            _valueHints = Array.Empty<ScanValueHint>();
+
             var fieldPlan = await FieldPlanService.BuildAsync(new ScanFieldPlanBuildRequest
             {
                 Ingest = ingest,
                 PlaceholderSet = _placeholderSet,
                 ScanKind = _scanKind,
-                ValueHints = valueHints,
+                ValueHints = Array.Empty<ScanValueHint>(),
             }).ConfigureAwait(false);
 
             var gatedSuitability = ScanYellowHighlightGate.Apply(
@@ -863,7 +881,8 @@
         {
             Instance = instance,
             PlaceholderSet = placeholderSet,
-            DataScope = ApplicationProfileTemplateDataScope.Both,
+            DataScope = _dataScope,
+            RetainAmbiguousLiterals = true,
         });
 
         return map.Candidates
@@ -1037,7 +1056,7 @@
             PlaceholderSet = _placeholderSet,
             Playbook = _ingest.Playbook,
             TemplateName = _templateName,
-            DataScope = ApplicationProfileTemplateDataScope.Both,
+            DataScope = _dataScope,
             ScanKind = _scanKind,
             OcrLines = _ingest.Ocr.Lines,
             ValueHints = _valueHints ?? Array.Empty<ScanValueHint>(),
@@ -1112,7 +1131,7 @@
                 ObjectSpace = objectSpace,
                 Profile = profile,
                 TemplateName = _templateName.Trim(),
-                DataScope = ApplicationProfileTemplateDataScope.Both,
+                DataScope = _dataScope,
                 CatalogScope = _catalogScope,
                 Content = _outcome.Content,
                 FileName = _templateName.Trim() + ext,
@@ -1121,6 +1140,12 @@
 
             if (_source == EntrySource.Instance)
                 objectSpace.CommitChanges();
+
+            var userTemplate = ApplicationProfileTemplateUserReportBridge.TryFindByName(
+                objectSpace,
+                _templateName.Trim());
+            if (userTemplate != null)
+                await UserReportMaintenance.ExtractAndValidatePlaceholdersAsync(userTemplate.ID);
 
             _savedTemplateName = _templateName.Trim();
             _stage = Stage.Done;
@@ -1180,7 +1205,7 @@
             ScanFileName = _fileName,
             ProfileName = _profileName,
             CatalogScope = _catalogScope,
-            DataScope = ApplicationProfileTemplateDataScope.Both,
+            DataScope = _dataScope,
         };
     }
 
