@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.EFCore;
 using Microsoft.EntityFrameworkCore;
 using Visa2026.Module.BusinessObjects;
 
@@ -14,20 +15,193 @@ public static class ApplicationProfileNestedTemplateCatalogHelper
 {
     public const string EntryKeyPrefix = "profile:";
 
-    public static bool UsesProfileNestedCatalog(ApplicationProfileInstance? application) =>
-        GetOrderedTemplates(application).Count > 0;
+    public static bool UsesProfileNestedCatalog(
+        ApplicationProfileInstance? application,
+        IObjectSpace? objectSpace = null) =>
+        HasAnyMergeNestedTemplate(application, objectSpace);
 
-    public static IReadOnlyList<ApplicationProfileTemplate> GetOrderedTemplates(ApplicationProfileInstance? application)
+    /// <summary>
+    /// True when the profile has Word/Excel nested rows, including Recycle Bin.
+    /// Keeps Resminamalar on the nested catalog (does not fall back to seeded library rows)
+    /// after every officer template has been recycled.
+    /// </summary>
+    public static bool HasAnyMergeNestedTemplate(
+        ApplicationProfileInstance? application,
+        IObjectSpace? objectSpace = null)
     {
-        if (application?.ApplicationProfile?.NestedTemplates == null)
+        var profileId = application?.ApplicationProfile?.ID ?? Guid.Empty;
+        if (objectSpace != null && profileId != Guid.Empty)
+            return HasAnyMergeNestedTemplate(objectSpace, profileId);
+
+        return application?.ApplicationProfile?.NestedTemplates
+            ?.Any(t => t != null && t.TemplateKind != ApplicationProfileTemplateKind.PdfForm)
+        == true;
+    }
+
+    public static IReadOnlyList<ApplicationProfileTemplate> GetOrderedTemplates(
+        ApplicationProfileInstance? application,
+        IObjectSpace? objectSpace = null)
+    {
+        var source = ResolveMergeTemplates(application, objectSpace, recycled: false);
+        if (source.Count == 0)
             return Array.Empty<ApplicationProfileTemplate>();
 
-        return application.ApplicationProfile.NestedTemplates
-            .Where(t => t != null && t.TemplateKind != ApplicationProfileTemplateKind.PdfForm)
+        return source
             .Where(t => IsVisibleForInstance(t, application))
             .OrderBy(t => t.SortOrder)
             .ThenBy(t => t.TemplateName, StringComparer.OrdinalIgnoreCase)
             .ToList();
+    }
+
+    /// <summary>
+    /// Recycled Word/Excel nested rows for this profile (not filtered by contract).
+    /// Newest first.
+    /// </summary>
+    public static IReadOnlyList<ApplicationProfileTemplate> GetRecycledTemplates(
+        ApplicationProfileInstance? application,
+        IObjectSpace? objectSpace = null)
+    {
+        var source = ResolveMergeTemplates(application, objectSpace, recycled: true);
+        if (source.Count == 0)
+            return Array.Empty<ApplicationProfileTemplate>();
+
+        return source
+            .OrderByDescending(t => t.RecycledAtUtc)
+            .ThenBy(t => t.TemplateName, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    /// <summary>
+    /// Nested Word/Excel rows for the profile. Recycle state is taken from the database
+    /// (AsNoTracking id query) so a pooled identity map cannot keep RecycledAtUtc stale.
+    /// </summary>
+    public static IReadOnlyList<ApplicationProfileTemplate> LoadMergeTemplates(
+        IObjectSpace objectSpace,
+        Guid profileId) =>
+        LoadMergeTemplates(objectSpace, profileId, recycled: null);
+
+    private static bool HasAnyMergeNestedTemplate(IObjectSpace objectSpace, Guid profileId)
+    {
+        if (objectSpace is EFCoreObjectSpace { DbContext: Visa2026EFCoreDbContext db })
+        {
+            return db.ApplicationProfileTemplates
+                .AsNoTracking()
+                .Any(t => t.ApplicationProfileId == profileId
+                    && t.TemplateKind != ApplicationProfileTemplateKind.PdfForm);
+        }
+
+        return objectSpace.GetObjectsQuery<ApplicationProfileTemplate>()
+            .Any(t => t.ApplicationProfileId == profileId
+                && t.TemplateKind != ApplicationProfileTemplateKind.PdfForm);
+    }
+
+    private static IReadOnlyList<ApplicationProfileTemplate> LoadMergeTemplates(
+        IObjectSpace objectSpace,
+        Guid profileId,
+        bool? recycled)
+    {
+        if (objectSpace == null || profileId == Guid.Empty)
+            return Array.Empty<ApplicationProfileTemplate>();
+
+        var ids = QueryMergeTemplateIds(objectSpace, profileId, recycled);
+        if (ids.Count == 0)
+            return Array.Empty<ApplicationProfileTemplate>();
+
+        var templates = new List<ApplicationProfileTemplate>(ids.Count);
+        foreach (var id in ids)
+        {
+            var template = objectSpace.GetObjectByKey<ApplicationProfileTemplate>(id);
+            if (template == null)
+                continue;
+
+            RefreshTrackedTemplate(objectSpace, template);
+            templates.Add(template);
+        }
+
+        return templates;
+    }
+
+    private static IReadOnlyList<Guid> QueryMergeTemplateIds(
+        IObjectSpace objectSpace,
+        Guid profileId,
+        bool? recycled)
+    {
+        if (objectSpace is EFCoreObjectSpace { DbContext: Visa2026EFCoreDbContext db })
+        {
+            IQueryable<ApplicationProfileTemplate> query = db.ApplicationProfileTemplates
+                .AsNoTracking()
+                .Where(t => t.ApplicationProfileId == profileId
+                    && t.TemplateKind != ApplicationProfileTemplateKind.PdfForm);
+            query = ApplyRecycledFilter(query, recycled);
+            return query.Select(t => t.ID).ToList();
+        }
+
+        IQueryable<ApplicationProfileTemplate> objectsQuery = objectSpace
+            .GetObjectsQuery<ApplicationProfileTemplate>()
+            .Where(t => t.ApplicationProfileId == profileId
+                && t.TemplateKind != ApplicationProfileTemplateKind.PdfForm);
+        objectsQuery = ApplyRecycledFilter(objectsQuery, recycled);
+        return objectsQuery.Select(t => t.ID).ToList();
+    }
+
+    private static IQueryable<ApplicationProfileTemplate> ApplyRecycledFilter(
+        IQueryable<ApplicationProfileTemplate> query,
+        bool? recycled)
+    {
+        if (recycled == true)
+            return query.Where(t => t.RecycledAtUtc != null);
+        if (recycled == false)
+            return query.Where(t => t.RecycledAtUtc == null);
+        return query;
+    }
+
+    private static void RefreshTrackedTemplate(IObjectSpace objectSpace, ApplicationProfileTemplate template)
+    {
+        if (template == null || objectSpace.IsNewObject(template))
+            return;
+
+        if (objectSpace is EFCoreObjectSpace { DbContext: { } dbContext })
+        {
+            var entry = dbContext.Entry(template);
+            if (entry.State is not (EntityState.Unchanged or EntityState.Modified))
+                return;
+
+            try
+            {
+                entry.Reload();
+            }
+            catch (InvalidOperationException)
+            {
+                // Row was purged or is no longer in this DbContext.
+            }
+
+            return;
+        }
+
+        objectSpace.ReloadObject(template);
+    }
+
+    private static IReadOnlyList<ApplicationProfileTemplate> ResolveMergeTemplates(
+        ApplicationProfileInstance? application,
+        IObjectSpace? objectSpace,
+        bool? recycled)
+    {
+        var profileId = application?.ApplicationProfile?.ID ?? Guid.Empty;
+        if (objectSpace != null && profileId != Guid.Empty)
+            return LoadMergeTemplates(objectSpace, profileId, recycled);
+
+        if (application?.ApplicationProfile?.NestedTemplates == null)
+            return Array.Empty<ApplicationProfileTemplate>();
+
+        IEnumerable<ApplicationProfileTemplate> source = application.ApplicationProfile.NestedTemplates
+            .Where(t => t != null && t.TemplateKind != ApplicationProfileTemplateKind.PdfForm);
+
+        if (recycled == true)
+            source = source.Where(t => t.RecycledAtUtc != null);
+        else if (recycled == false)
+            source = source.Where(t => t.RecycledAtUtc == null);
+
+        return source.ToList();
     }
 
     public static bool IsVisibleForInstance(

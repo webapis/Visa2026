@@ -431,6 +431,12 @@ public static class ApplicationProfileSchemaSql
     internal const string EnsureTemplateApplicableMigrationServicePostgres =
         """ALTER TABLE "ApplicationProfileTemplates" ADD COLUMN IF NOT EXISTS "ApplicableMigrationServiceId" uuid NULL;""";
 
+    internal const string EnsureTemplateRecycledAtUtcPostgres =
+        """ALTER TABLE "ApplicationProfileTemplates" ADD COLUMN IF NOT EXISTS "RecycledAtUtc" timestamp with time zone NULL;""";
+
+    internal const string EnsureTemplateRecycledByUserNamePostgres =
+        """ALTER TABLE "ApplicationProfileTemplates" ADD COLUMN IF NOT EXISTS "RecycledByUserName" character varying(255) NULL;""";
+
     internal const string EnsureApprovalLegVersionsTablePostgres = """
         CREATE TABLE IF NOT EXISTS "ApplicationProfileApprovalLegVersions" (
             "ID" uuid NOT NULL,
@@ -669,6 +675,8 @@ public static class ApplicationProfileSchemaSql
         EnsureInstanceEntryCheckPointPostgres,
         EnsureTemplateApplicableProjectContractPostgres,
         EnsureTemplateApplicableMigrationServicePostgres,
+        EnsureTemplateRecycledAtUtcPostgres,
+        EnsureTemplateRecycledByUserNamePostgres,
         EnsureApprovalLegVersionsTablePostgres,
         HealApprovalLegVersionsGcRecordPostgres,
         EnsureApprovalLegVersionsFkPostgres,
@@ -707,6 +715,12 @@ public static class ApplicationProfileSchemaSql
 
         IF COL_LENGTH(N'dbo.ApplicationProfileTemplates', N'ApplicableMigrationServiceId') IS NULL
             ALTER TABLE dbo.ApplicationProfileTemplates ADD ApplicableMigrationServiceId uniqueidentifier NULL;
+
+        IF COL_LENGTH(N'dbo.ApplicationProfileTemplates', N'RecycledAtUtc') IS NULL
+            ALTER TABLE dbo.ApplicationProfileTemplates ADD RecycledAtUtc datetime2 NULL;
+
+        IF COL_LENGTH(N'dbo.ApplicationProfileTemplates', N'RecycledByUserName') IS NULL
+            ALTER TABLE dbo.ApplicationProfileTemplates ADD RecycledByUserName nvarchar(255) NULL;
 
         IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
            AND COL_LENGTH(N'dbo.ApplicationProfiles', N'ProduceRejection') IS NULL

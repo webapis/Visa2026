@@ -1146,6 +1146,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "ministrlik arkaly",
             ["ru-RU"] = "через министерства",
         },
+        ["ApplicationReportPackage.CatalogTab"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Catalog",
+            ["tr-TR"] = "Katalog",
+            ["tk-TM"] = "Katalog",
+            ["ru-RU"] = "Каталог",
+        },
         ["ApplicationReportPackage.ClearSelection"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Clear selection",
@@ -1153,12 +1160,68 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Saýlawy arassala",
             ["ru-RU"] = "Снять выбор",
         },
+        ["ApplicationReportPackage.DeletePermanently"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Delete permanently",
+            ["tr-TR"] = "Kalıcı olarak sil",
+            ["tk-TM"] = "Hemişelik poz",
+            ["ru-RU"] = "Удалить навсегда",
+        },
+        ["ApplicationReportPackage.DeletePermanently.Confirm"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Permanently delete \"{0}\"? This cannot be undone.",
+            ["tr-TR"] = "\"{0}\" kalıcı olarak silinsin mi? Bu işlem geri alınamaz.",
+            ["tk-TM"] = "\"{0}\" hemişelik pozulsynmy? Yzyna gaýtaryp bolmaýar.",
+            ["ru-RU"] = "Окончательно удалить «{0}»? Отменить нельзя.",
+        },
+        ["ApplicationReportPackage.DeletePermanently.ConfirmAction"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Delete permanently",
+            ["tr-TR"] = "Kalıcı olarak sil",
+            ["tk-TM"] = "Hemişelik poz",
+            ["ru-RU"] = "Удалить навсегда",
+        },
+        ["ApplicationReportPackage.DeletePermanently.Tooltip"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Permanently delete this template from Recycle Bin. This cannot be undone.",
+            ["tr-TR"] = "Bu şablonu Geri Dönüşüm kutusundan kalıcı olarak siler. Geri alınamaz.",
+            ["tk-TM"] = "Bu şablony Geri gaýtaryşdan hemişelik pozýar. Yzyna gaýtaryp bolmaýar.",
+            ["ru-RU"] = "Окончательно удалить шаблон из Корзины. Отменить нельзя.",
+        },
         ["ApplicationReportPackage.DownloadPackage"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Download package",
             ["tr-TR"] = "Paketi indir",
             ["tk-TM"] = "Paketi göçür",
             ["ru-RU"] = "Скачать пакет",
+        },
+        ["ApplicationReportPackage.DownloadTemplate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Download",
+            ["tr-TR"] = "İndir",
+            ["tk-TM"] = "Göçür",
+            ["ru-RU"] = "Скачать",
+        },
+        ["ApplicationReportPackage.DownloadTemplate.Downloaded"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Downloaded template \"{0}\" ({1}).",
+            ["tr-TR"] = "Şablon \"{0}\" indirildi ({1}).",
+            ["tk-TM"] = "Şablon \"{0}\" göçürildi ({1}).",
+            ["ru-RU"] = "Шаблон «{0}» скачан ({1}).",
+        },
+        ["ApplicationReportPackage.DownloadTemplate.Failed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Could not download the template file.",
+            ["tr-TR"] = "Şablon dosyası indirilemedi.",
+            ["tk-TM"] = "Şablon faýly göçürilmedi.",
+            ["ru-RU"] = "Не удалось скачать файл шаблона.",
+        },
+        ["ApplicationReportPackage.DownloadTemplate.Tooltip"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Download the saved Word or Excel template file (placeholders, not filled case data).",
+            ["tr-TR"] = "Kayıtlı Word veya Excel şablon dosyasını indirir (yer tutucular; doldurulmuş başvuru verisi değil).",
+            ["tk-TM"] = "Ýazdyrylan Word ýa-da Excel şablon faýlyny göçürýär (ýer tutujylar; doldurylan arza maglumaty däl).",
+            ["ru-RU"] = "Скачать сохранённый файл шаблона Word или Excel (плейсхолдеры, не заполненные данные заявки).",
         },
         ["ApplicationReportPackage.EditTemplate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -1377,6 +1440,34 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "+ {0} beýleki mümkin çatşyk.",
             ["ru-RU"] = "+ ещё {0} возможных проблем(ы).",
         },
+        ["ApplicationReportPackage.MoveToRecycleBin"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Delete",
+            ["tr-TR"] = "Sil",
+            ["tk-TM"] = "Poz",
+            ["ru-RU"] = "Удалить",
+        },
+        ["ApplicationReportPackage.MoveToRecycleBin.Confirm"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Move \"{0}\" to Recycle Bin? You can restore it later.",
+            ["tr-TR"] = "\"{0}\" Geri Dönüşüm kutusuna taşınsın mı? Daha sonra geri yükleyebilirsiniz.",
+            ["tk-TM"] = "\"{0}\" Geri gaýtaryşa geçirilsinmi? Soňra dikeldip bilersiňiz.",
+            ["ru-RU"] = "Переместить «{0}» в Корзину? Позже можно восстановить.",
+        },
+        ["ApplicationReportPackage.MoveToRecycleBin.ConfirmAction"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Move to Recycle Bin",
+            ["tr-TR"] = "Geri Dönüşüme taşı",
+            ["tk-TM"] = "Geri gaýtaryşa geçir",
+            ["ru-RU"] = "В Корзину",
+        },
+        ["ApplicationReportPackage.MoveToRecycleBin.Tooltip"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Move this officer-created template to Recycle Bin. Seeded library templates stay in the catalog.",
+            ["tr-TR"] = "Bu memur şablonunu Geri Dönüşüm kutusuna taşır. Kitaplık şablonları katalogda kalır.",
+            ["tk-TM"] = "Bu işgär şablonyny Geri gaýtaryşa geçirýär. Kitaphana şablonlary katalogda galýar.",
+            ["ru-RU"] = "Переместить этот шаблон офицера в Корзину. Библиотечные шаблоны остаются в каталоге.",
+        },
         ["ApplicationReportPackage.Package.Error"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Could not queue the report package.",
@@ -1425,34 +1516,6 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Önizleme",
             ["tk-TM"] = "Öňünden görmek",
             ["ru-RU"] = "Просмотр",
-        },
-        ["ApplicationReportPackage.DownloadTemplate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Download",
-            ["tr-TR"] = "İndir",
-            ["tk-TM"] = "Göçür",
-            ["ru-RU"] = "Скачать",
-        },
-        ["ApplicationReportPackage.DownloadTemplate.Tooltip"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Download the saved Word or Excel template file (placeholders, not filled case data).",
-            ["tr-TR"] = "Kayıtlı Word veya Excel şablon dosyasını indirir (yer tutucular; doldurulmuş başvuru verisi değil).",
-            ["tk-TM"] = "Ýazdyrylan Word ýa-da Excel şablon faýlyny göçürýär (ýer tutujylar; doldurylan arza maglumaty däl).",
-            ["ru-RU"] = "Скачать сохранённый файл шаблона Word или Excel (плейсхолдеры, не заполненные данные заявки).",
-        },
-        ["ApplicationReportPackage.DownloadTemplate.Failed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Could not download the template file.",
-            ["tr-TR"] = "Şablon dosyası indirilemedi.",
-            ["tk-TM"] = "Şablon faýly göçürilmedi.",
-            ["ru-RU"] = "Не удалось скачать файл шаблона.",
-        },
-        ["ApplicationReportPackage.DownloadTemplate.Downloaded"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Downloaded template \"{0}\" ({1}).",
-            ["tr-TR"] = "Şablon \"{0}\" indirildi ({1}).",
-            ["tk-TM"] = "Şablon \"{0}\" göçürildi ({1}).",
-            ["ru-RU"] = "Шаблон «{0}» скачан ({1}).",
         },
         ["ApplicationReportPackage.Preview.Converting"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -1580,6 +1643,83 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Barla",
             ["ru-RU"] = "Проверить",
         },
+        ["ApplicationReportPackage.RecycleBin.Deleted"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "\"{0}\" deleted permanently.",
+            ["tr-TR"] = "\"{0}\" kalıcı olarak silindi.",
+            ["tk-TM"] = "\"{0}\" hemişelik pozuldy.",
+            ["ru-RU"] = "«{0}» удалён навсегда.",
+        },
+        ["ApplicationReportPackage.RecycleBin.Empty"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Recycle Bin is empty.",
+            ["tr-TR"] = "Geri Dönüşüm kutusu boş.",
+            ["tk-TM"] = "Geri gaýtaryş boş.",
+            ["ru-RU"] = "Корзина пуста.",
+        },
+        ["ApplicationReportPackage.RecycleBin.Failed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Could not update Recycle Bin.",
+            ["tr-TR"] = "Geri Dönüşüm kutusu güncellenemedi.",
+            ["tk-TM"] = "Geri gaýtaryş täzelenmedi.",
+            ["ru-RU"] = "Не удалось обновить Корзину.",
+        },
+        ["ApplicationReportPackage.RecycleBin.InBin"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "In bin",
+            ["tr-TR"] = "Kutuda",
+            ["tk-TM"] = "Gutuda",
+            ["ru-RU"] = "В корзине",
+        },
+        ["ApplicationReportPackage.RecycleBin.Moved"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "\"{0}\" moved to Recycle Bin.",
+            ["tr-TR"] = "\"{0}\" Geri Dönüşüm kutusuna taşındı.",
+            ["tk-TM"] = "\"{0}\" Geri gaýtaryşa geçirildi.",
+            ["ru-RU"] = "«{0}» перемещён в Корзину.",
+        },
+        ["ApplicationReportPackage.RecycleBin.Moving"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Moving \"{0}\" to Recycle Bin…",
+            ["tr-TR"] = "\"{0}\" Geri Dönüşüm kutusuna taşınıyor…",
+            ["tk-TM"] = "\"{0}\" Geri gaýtaryşa geçirilýär…",
+            ["ru-RU"] = "«{0}» перемещается в Корзину…",
+        },
+        ["ApplicationReportPackage.RecycleBin.Restoring"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Restoring \"{0}\" to the catalog…",
+            ["tr-TR"] = "\"{0}\" kataloga geri yükleniyor…",
+            ["tk-TM"] = "\"{0}\" kataloga dikeldilýär…",
+            ["ru-RU"] = "«{0}» возвращается в каталог…",
+        },
+        ["ApplicationReportPackage.RecycleBin.Deleting"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Deleting \"{0}\" permanently…",
+            ["tr-TR"] = "\"{0}\" kalıcı olarak siliniyor…",
+            ["tk-TM"] = "\"{0}\" hemişelik pozulýar…",
+            ["ru-RU"] = "«{0}» удаляется навсегда…",
+        },
+        ["ApplicationReportPackage.RecycleBin.RecycledOn"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Removed {0}",
+            ["tr-TR"] = "Kaldırıldı: {0}",
+            ["tk-TM"] = "Aýryldy: {0}",
+            ["ru-RU"] = "Удалено {0}",
+        },
+        ["ApplicationReportPackage.RecycleBin.Restored"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "\"{0}\" restored to the catalog.",
+            ["tr-TR"] = "\"{0}\" kataloga geri yüklendi.",
+            ["tk-TM"] = "\"{0}\" kataloga dikeldildi.",
+            ["ru-RU"] = "«{0}» возвращён в каталог.",
+        },
+        ["ApplicationReportPackage.RecycleBinTab"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Recycle Bin ({0})",
+            ["tr-TR"] = "Geri dönüşüm ({0})",
+            ["tk-TM"] = "Geri gaýtaryş ({0})",
+            ["ru-RU"] = "Корзина ({0})",
+        },
         ["ApplicationReportPackage.Refresh"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Refresh",
@@ -1614,6 +1754,20 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Yenile: {0} içe aktarıldı, {1} değişmedi, {2} başarısız.",
             ["tk-TM"] = "Täzele: {0} import edildi, {1} üýtgemedi, {2} şowsuz.",
             ["ru-RU"] = "Обновить: {0} импортировано, {1} без изменений, {2} ошибок.",
+        },
+        ["ApplicationReportPackage.Restore"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Restore",
+            ["tr-TR"] = "Geri yükle",
+            ["tk-TM"] = "Dikelt",
+            ["ru-RU"] = "Восстановить",
+        },
+        ["ApplicationReportPackage.Restore.Tooltip"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Return this template to the Resminamalar catalog.",
+            ["tr-TR"] = "Bu şablonu Resminamalar kataloğuna geri alır.",
+            ["tk-TM"] = "Bu şablony Resminamalar katalogyna gaýtarýar.",
+            ["ru-RU"] = "Вернуть шаблон в каталог Resminamalar.",
         },
         ["ApplicationReportPackage.SectionCustom"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

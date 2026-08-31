@@ -24,7 +24,7 @@ public static class ApplicationWorkspaceResminamalarOpenHelper
         var catalog = catalogService.Build(objectSpace, applicationBo, WordReportGenerationContext.ForApplication());
 
         string? emptyMessage = null;
-        if (catalog.TotalCount == 0)
+        if (catalog.TotalCount == 0 && catalog.RecycleBinEntries.Count == 0 && !catalog.HasProfileNestedCatalog)
         {
             emptyMessage = VisaUiMessages.Format(
                 "WordReports.NoApplicationScopeTemplates",

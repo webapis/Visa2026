@@ -41,6 +41,19 @@ public sealed class ApplicationReportPackageModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    public IReadOnlyList<ApplicationWordReportPackageCatalogEntry> RecycleBinEntries
+    {
+        get => GetPropertyValue<IReadOnlyList<ApplicationWordReportPackageCatalogEntry>>()
+               ?? Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+        set => SetPropertyValue(value);
+    }
+
+    public bool ShowRecycleBin
+    {
+        get => GetPropertyValue<bool>();
+        set => SetPropertyValue(value);
+    }
+
     public EventCallback RefreshRequested
     {
         get => GetPropertyValue<EventCallback>();

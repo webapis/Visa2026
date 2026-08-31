@@ -73,4 +73,19 @@ public class ApplicationProfileApprovalLegVersionSchemaSqlTests
             ApplicationProfileSchemaSql.EnsureDefaultApprovalLegProfilePostgres,
             StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void HostStart_AddsNestedTemplateRecycleBinColumns()
+    {
+        Assert.Contains(
+            ApplicationProfileSchemaSql.EnsureTemplateRecycledAtUtcPostgres,
+            ApplicationProfileSchemaSql.EnsureTemplateCatalogColumnsPostgresStatements);
+        Assert.Contains(
+            ApplicationProfileSchemaSql.EnsureTemplateRecycledByUserNamePostgres,
+            ApplicationProfileSchemaSql.EnsureTemplateCatalogColumnsPostgresStatements);
+        Assert.Contains("RecycledAtUtc", ApplicationProfileSchemaSql.EnsureTemplateRecycledAtUtcPostgres, StringComparison.Ordinal);
+        Assert.Contains("RecycledByUserName", ApplicationProfileSchemaSql.EnsureTemplateRecycledByUserNamePostgres, StringComparison.Ordinal);
+        Assert.Contains("RecycledAtUtc", ApplicationProfileSchemaSql.EnsureTemplateCatalogColumnsSqlServer, StringComparison.Ordinal);
+        Assert.Contains("RecycledByUserName", ApplicationProfileSchemaSql.EnsureTemplateCatalogColumnsSqlServer, StringComparison.Ordinal);
+    }
 }

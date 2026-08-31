@@ -2792,8 +2792,9 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
     white-space: nowrap;
 }
 
-.app-report-package__entry-progress {
-    margin-top: 0.45rem;
+.app-report-package__recycle-progress {
+    margin-top: 0.4rem;
+    max-width: 22rem;
 }
 
 .app-report-package__preview-progress-track {

@@ -133,6 +133,19 @@
   color: var(--rmc-muted);
 }
 
+.resminamalar-catalog__pane-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 0.5rem;
+}
+
+.resminamalar-catalog__pane-tab--active {
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
 .resminamalar-catalog__actions {
   flex: 0 0 auto;
   display: flex;
@@ -141,7 +154,7 @@
   justify-content: flex-end;
   gap: 8px;
   margin-left: auto;
-  max-width: 14rem;
+  max-width: 22rem;
 }
 
 .resminamalar-catalog__actions .app-report-package__readiness {

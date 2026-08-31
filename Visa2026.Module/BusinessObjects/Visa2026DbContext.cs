@@ -727,6 +727,7 @@ namespace Visa2026.Module.BusinessObjects
             {
                 b.Property(t => t.TemplateName).HasMaxLength(255);
                 b.Property(t => t.CategoryKey).HasMaxLength(64);
+                b.Property(t => t.RecycledByUserName).HasMaxLength(255);
                 b.HasOne(t => t.ApplicationProfile)
                     .WithMany(p => p.NestedTemplates)
                     .HasForeignKey(t => t.ApplicationProfileId)

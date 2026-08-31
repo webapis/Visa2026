@@ -15,11 +15,7 @@
         </div>
     </div>
 
-    @if (!string.IsNullOrWhiteSpace(_emptyMessage))
-    {
-        <div class="app-item-doc-copies__empty" role="status"><p>@_emptyMessage</p></div>
-    }
-    else if (_applicationId == Guid.Empty || _catalogEntries.Count == 0)
+    @if (_applicationId == Guid.Empty)
     {
         <div class="app-item-doc-copies__empty" role="status"><p>@EmptyCatalog</p></div>
     }
@@ -32,6 +28,8 @@
                                                  ApplicationItemIds="_applicationItemIds"
                                                  ApplicationNumber="@_applicationNumber"
                                                  CatalogEntries="_catalogEntries"
+                                                 RecycleBinEntries="_recycleBinEntries"
+                                                 ShowRecycleBin="_showRecycleBin"
                                                  UiCultureName="_uiCultureName"
                                                  UseInlinePreview="true"
                                                  RefreshRequested="_refreshRequested"
@@ -55,7 +53,9 @@
     private string _applicationNumber = string.Empty;
     private IReadOnlyList<ApplicationWordReportPackageCatalogEntry> _catalogEntries =
         Array.Empty<ApplicationWordReportPackageCatalogEntry>();
-    private string _emptyMessage = string.Empty;
+    private IReadOnlyList<ApplicationWordReportPackageCatalogEntry> _recycleBinEntries =
+        Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+    private bool _showRecycleBin;
     private string _uiCultureName = string.Empty;
     private EventCallback _refreshRequested;
 
@@ -73,7 +73,8 @@
         if (_applicationId == Guid.Empty)
         {
             _catalogEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
-            _emptyMessage = string.Empty;
+            _recycleBinEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+            _showRecycleBin = false;
             return;
         }
 
@@ -87,19 +88,17 @@
         if (application == null)
         {
             _catalogEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+            _recycleBinEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+            _showRecycleBin = false;
             _applicationNumber = string.Empty;
-            _emptyMessage = EmptyCatalog;
             return;
         }
 
         var catalog = CatalogService.Build(objectSpace, application, WordReportGenerationContext.ForApplication());
         _catalogEntries = catalog.Entries;
+        _recycleBinEntries = catalog.RecycleBinEntries;
+        _showRecycleBin = catalog.HasProfileNestedCatalog;
         _applicationNumber = application.FullApplicationNumber ?? application.ProcessNumber ?? string.Empty;
-        _emptyMessage = catalog.TotalCount == 0
-            ? VisaUiMessages.Format(
-                "WordReports.NoApplicationScopeTemplates",
-                application.ApplicationProfile?.Name ?? application.ApplicationType?.NameTm ?? "Application")
-            : string.Empty;
     }
 
     private Task ReloadCatalogAsync()

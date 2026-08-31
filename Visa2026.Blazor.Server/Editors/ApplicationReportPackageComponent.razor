@@ -3,6 +3,8 @@
 @using DevExpress.Blazor
 @using Microsoft.AspNetCore.Components
 @using Microsoft.JSInterop
+@using DevExpress.ExpressApp
+@using DevExpress.ExpressApp.Security
 @using DevExpress.ExpressApp.Blazor.Services
 @using Microsoft.AspNetCore.Http
 @using Visa2026.Blazor.Server.Localization
@@ -20,9 +22,26 @@
 @using Visa2026.Module.Services.RuntimeLogging
 
 <div class="app-report-package app-item-doc-copies @(UseInlinePreview ? "app-report-package--inline-slot" : string.Empty)">
-    @if (ApplicationProfileInstanceId != Guid.Empty && CatalogEntries.Count > 0)
+    @if (ApplicationProfileInstanceId != Guid.Empty)
     {
         <div class="app-item-doc-copies__top-actions app-report-package__top-selection">
+            @if (ShowRecycleBinTab)
+            {
+                <div class="resminamalar-catalog__pane-tabs" role="tablist">
+                    <DxButton Text="@Msg("ApplicationReportPackage.CatalogTab")"
+                              RenderStyle="ButtonRenderStyle.Link"
+                              SizeMode="SizeMode.Small"
+                              CssClass="@CatalogPaneTabCss"
+                              Click="@ShowCatalogPaneAsync" />
+                    <DxButton Text="@FormatMsg("ApplicationReportPackage.RecycleBinTab", VisibleRecycleBinEntries.Count)"
+                              RenderStyle="ButtonRenderStyle.Link"
+                              SizeMode="SizeMode.Small"
+                              CssClass="@RecycleBinPaneTabCss"
+                              Click="@ShowRecycleBinPaneAsync" />
+                </div>
+            }
+            @if (IsCatalogPane && VisibleCatalogEntries.Count > 0)
+            {
             <DxButton Text="@Msg("ApplicationReportPackage.SelectAll")"
                       RenderStyle="ButtonRenderStyle.Link"
                       SizeMode="SizeMode.Small"
@@ -33,6 +52,9 @@
                       SizeMode="SizeMode.Small"
                       CssClass="app-item-doc-copies__action-btn"
                       Click="@ClearSelectionAsync" />
+            }
+            @if (IsCatalogPane)
+            {
             <DxButton Text="@Msg("ApplicationReportPackage.PlaceholderManual")"
                       RenderStyle="ButtonRenderStyle.Link"
                       SizeMode="SizeMode.Small"
@@ -60,10 +82,87 @@
                           CssClass="app-item-doc-copies__action-btn"
                           Click="@(() => OpenConvertAsync(manual: true))" />
             }
+            }
         </div>
     }
     <div class="app-item-doc-copies__body">
-        @if (ApplicationProfileInstanceId == Guid.Empty || CatalogEntries.Count == 0)
+        @if (ApplicationProfileInstanceId == Guid.Empty)
+        {
+            <div class="app-item-doc-copies__empty" role="status">
+                <p>@Msg("ApplicationReportPackage.Empty")</p>
+            </div>
+        }
+        else if (!IsCatalogPane)
+        {
+            @if (VisibleRecycleBinEntries.Count == 0)
+            {
+                <div class="app-item-doc-copies__empty" role="status">
+                    <p>@Msg("ApplicationReportPackage.RecycleBin.Empty")</p>
+                </div>
+            }
+            else
+            {
+                <div class="resminamalar-catalog">
+                    <div class="resminamalar-catalog__cards">
+                        @foreach (var entry in VisibleRecycleBinEntries)
+                        {
+                            <section @key="entry.EntryKey" class="resminamalar-catalog__card app-report-package__entry" aria-label="@entry.DisplayName">
+                                <div class="resminamalar-catalog__card-head">
+                                    <span class="resminamalar-catalog__nav-icon @ResminamalarCatalogFormatIcons.CssClass(entry.Kind)"
+                                          aria-hidden="true">
+                                        @((MarkupString)ResminamalarCatalogFormatIcons.Svg(entry.Kind))
+                                    </span>
+                                    <div class="resminamalar-catalog__main">
+                                        <span class="resminamalar-catalog__title">@entry.DisplayName</span>
+                                        <span class="resminamalar-catalog__summary">@FormatRecycleSummary(entry)</span>
+                                    </div>
+                                    <div class="resminamalar-catalog__actions">
+                                        <span class="app-report-package__readiness app-report-package__readiness--warning">
+                                            @Msg("ApplicationReportPackage.RecycleBin.InBin")
+                                        </span>
+                                        @if (IsRecyclingEntry(entry))
+                                        {
+                                            <span class="app-report-package__preview-busy-label" role="status">
+                                                @GetRecycleBusyPrompt()
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                        <DxButton Text="@Msg("ApplicationReportPackage.Restore")"
+                                                  RenderStyle="ButtonRenderStyle.Link"
+                                                  SizeMode="SizeMode.Small"
+                                                  CssClass="app-item-doc-copies__action-btn"
+                                                  title="@Msg("ApplicationReportPackage.Restore.Tooltip")"
+                                                  Enabled="@(!_recycleBusy && !_packageBusy && !_previewBusy)"
+                                                  Click="@(() => RestoreFromRecycleBinAsync(entry))" />
+                                        <DxButton Text="@Msg("ApplicationReportPackage.DeletePermanently")"
+                                                  RenderStyle="ButtonRenderStyle.Link"
+                                                  SizeMode="SizeMode.Small"
+                                                  CssClass="app-item-doc-copies__action-btn"
+                                                  title="@Msg("ApplicationReportPackage.DeletePermanently.Tooltip")"
+                                                  Enabled="@(!_recycleBusy && !_packageBusy && !_previewBusy)"
+                                                  Click="@(() => BeginPurgeConfirm(entry))" />
+                                        }
+                                    </div>
+                                </div>
+                                @if (IsRecyclingEntry(entry))
+                                {
+                                    <div class="resminamalar-catalog__card-body">
+                                        <div class="app-report-package__entry-progress" role="progressbar" aria-busy="true"
+                                             aria-label="@GetRecycleBusyPrompt()">
+                                            <div class="app-report-package__preview-progress-track">
+                                                <div class="app-report-package__preview-progress-indeterminate"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </section>
+                        }
+                    </div>
+                </div>
+            }
+        }
+        else if (VisibleCatalogEntries.Count == 0)
         {
             <div class="app-item-doc-copies__empty" role="status">
                 <p>@Msg("ApplicationReportPackage.Empty")</p>
@@ -73,9 +172,9 @@
         {
             <div class="resminamalar-catalog">
                 <div class="resminamalar-catalog__cards">
-                    @foreach (var entry in CatalogEntries)
+                    @foreach (var entry in VisibleCatalogEntries)
                     {
-                        <section class="@GetEntryCssClass(entry, IsSelected(entry))" aria-label="@entry.DisplayName">
+                        <section @key="entry.EntryKey" class="@GetEntryCssClass(entry, IsSelected(entry))" aria-label="@entry.DisplayName">
                             <div class="resminamalar-catalog__card-head">
                                 <label class="resminamalar-catalog__include" title="@entry.DisplayName">
                                     <input type="checkbox"
@@ -94,7 +193,13 @@
                                     <span class="app-report-package__readiness @GetReadinessCssClass(entry)">
                                         @ReadinessLabel(entry)
                                     </span>
-                                    @if (IsPreviewingEntry(entry))
+                                    @if (IsRecyclingEntry(entry))
+                                    {
+                                        <span class="app-report-package__preview-busy-label" role="status">
+                                            @GetRecycleBusyPrompt()
+                                        </span>
+                                    }
+                                    else if (IsPreviewingEntry(entry))
                                     {
                                         <span class="app-report-package__preview-busy-label" role="status">
                                             @FormatMsg("ApplicationReportPackage.Preview.Downloading", entry.DisplayName)
@@ -132,18 +237,30 @@
                                                   RenderStyle="ButtonRenderStyle.Link"
                                                   SizeMode="SizeMode.Small"
                                                   CssClass="app-item-doc-copies__action-btn"
-                                                  Enabled="@(!_packageBusy && !_previewBusy)"
+                                                  Enabled="@(!_packageBusy && !_previewBusy && !_recycleBusy)"
                                                   Click="@(() => PreviewEntryAsync(entry))" />
+                                        @if (entry.CanMoveToRecycleBin)
+                                        {
+                                            <DxButton Text="@Msg("ApplicationReportPackage.MoveToRecycleBin")"
+                                                      RenderStyle="ButtonRenderStyle.Link"
+                                                      SizeMode="SizeMode.Small"
+                                                      CssClass="app-item-doc-copies__action-btn"
+                                                      title="@Msg("ApplicationReportPackage.MoveToRecycleBin.Tooltip")"
+                                                      Enabled="@(!_packageBusy && !_previewBusy && !_recycleBusy)"
+                                                      Click="@(() => BeginMoveToRecycleBinConfirm(entry))" />
+                                        }
                                     }
                                 </div>
                             </div>
-                            @if (IsPreviewingEntry(entry) || HasCardDetails(entry))
+                            @if (IsRecyclingEntry(entry) || IsPreviewingEntry(entry) || HasCardDetails(entry))
                             {
                                 <div class="resminamalar-catalog__card-body">
-                                    @if (IsPreviewingEntry(entry))
+                                    @if (IsRecyclingEntry(entry) || IsPreviewingEntry(entry))
                                     {
                                         <div class="app-report-package__entry-progress" role="progressbar" aria-busy="true"
-                                             aria-label="@FormatMsg("ApplicationReportPackage.Preview.Downloading", entry.DisplayName)">
+                                             aria-label="@(IsRecyclingEntry(entry)
+                                                 ? GetRecycleBusyPrompt()
+                                                 : FormatMsg("ApplicationReportPackage.Preview.Downloading", entry.DisplayName))">
                                             <div class="app-report-package__preview-progress-track">
                                                 <div class="app-report-package__preview-progress-indeterminate"></div>
                                             </div>
@@ -183,11 +300,27 @@
         }
     </div>
 
-    @if (ApplicationProfileInstanceId != Guid.Empty && CatalogEntries.Count > 0)
+    @if (ApplicationProfileInstanceId != Guid.Empty && ShouldShowFooter)
     {
         <footer class="app-item-doc-copies__footer">
             <div class="app-item-doc-copies__package-bar">
                 <div class="app-item-doc-copies__package-bar-main">
+                    @if (_recycleBusy && _recycleBusyEntry != null)
+                    {
+                        <p class="app-item-doc-copies__toolbar-hint" role="status">@GetRecycleBusyPrompt()</p>
+                        <div class="app-report-package__entry-progress app-report-package__recycle-progress"
+                             role="progressbar" aria-busy="true" aria-label="@GetRecycleBusyPrompt()">
+                            <div class="app-report-package__preview-progress-track">
+                                <div class="app-report-package__preview-progress-indeterminate"></div>
+                            </div>
+                        </div>
+                    }
+                    else if (_recycleConfirmKind != RecycleConfirmKind.None && _recycleConfirmEntry != null)
+                    {
+                        <p class="app-item-doc-copies__toolbar-hint">@GetRecycleConfirmPrompt()</p>
+                    }
+                    else if (IsCatalogPane)
+                    {
                     <p class="app-item-doc-copies__subtitle">@GetSubtitle()</p>
                     @if (_packageConfirmPending)
                     {
@@ -200,8 +333,33 @@
                             @_packageStatusMessage
                         </p>
                     }
+                    }
+                    else if (!string.IsNullOrWhiteSpace(_packageStatusMessage))
+                    {
+                        <p class="app-item-doc-copies__toolbar-hint @(_packageStatusIsError ? "app-item-doc-copies__toolbar-hint--error" : string.Empty)"
+                           role="@(_packageStatusIsError ? "alert" : "status")">
+                            @_packageStatusMessage
+                        </p>
+                    }
                 </div>
                 <div class="app-item-doc-copies__package-bar-actions">
+                    @if (!_recycleBusy && _recycleConfirmKind != RecycleConfirmKind.None)
+                    {
+                        <DxButton Text="@GetRecycleConfirmActionLabel()"
+                                  RenderStyle="ButtonRenderStyle.Link"
+                                  SizeMode="SizeMode.Small"
+                                  CssClass="app-item-doc-copies__action-btn"
+                                  Enabled="@(!_recycleBusy)"
+                                  Click="@ConfirmRecycleActionAsync" />
+                        <DxButton Text="@Msg("ApplicationReportPackage.PackageCancelConfirm")"
+                                  RenderStyle="ButtonRenderStyle.Link"
+                                  SizeMode="SizeMode.Small"
+                                  CssClass="app-item-doc-copies__action-btn"
+                                  Enabled="@(!_recycleBusy)"
+                                  Click="@CancelRecycleConfirm" />
+                    }
+                    else if (IsCatalogPane)
+                    {
                     @if (_packageConfirmPending)
                     {
                         <DxButton Text="@Msg("ApplicationReportPackage.PackageConfirmDownload")"
@@ -241,8 +399,11 @@
                               CssClass="app-item-doc-copies__action-btn"
                               Enabled="@(!_refreshBusy && !_packageBusy && !_syncBusy)"
                               Click="@OnRefreshClickAsync" />
+                    }
                 </div>
             </div>
+            @if (IsCatalogPane)
+            {
             <button type="button"
                     class="@GearButtonCssClass"
                     title="@GearToolTip"
@@ -253,6 +414,7 @@
                     <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94L14.4 2.81a.488.488 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.488.488 0 0 0-.59.22L2.74 8.87a.488.488 0 0 0 .12.61l2.03 1.58c-.05.3-.07.63-.07.94s.02.64.07.94l-2.03 1.58a.488.488 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.488.488 0 0 0-.12-.61l-2.03-1.58zM12 15.6A3.6 3.6 0 1 1 15.6 12 3.6 3.6 0 0 1 12 15.6z" />
                 </svg>
             </button>
+            }
         </footer>
     }
 </div>
@@ -279,12 +441,16 @@
     [Parameter] public string ApplicationNumber { get; set; } = string.Empty;
     [Parameter] public IReadOnlyList<ApplicationWordReportPackageCatalogEntry> CatalogEntries { get; set; } =
         Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+    [Parameter] public IReadOnlyList<ApplicationWordReportPackageCatalogEntry> RecycleBinEntries { get; set; } =
+        Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+    [Parameter] public bool ShowRecycleBin { get; set; }
     [Parameter] public EventCallback RefreshRequested { get; set; }
     [Parameter] public string UiCultureName { get; set; } = string.Empty;
     [Parameter] public bool UseInlinePreview { get; set; }
     [Parameter] public string? FocusEntryKey { get; set; }
     [Parameter] public EventCallback<ReportPackagePreviewRequest> OnInlinePreviewRequested { get; set; }
 
+    [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
     [Inject] private ApplicationWordReportPackageEnqueueService PackageEnqueueService { get; set; } = null!;
     [Inject] private UserReportTemplateStagingUiService TemplateStagingUiService { get; set; } = null!;
     [Inject] private IFileDownloader FileDownloader { get; set; } = null!;
@@ -321,6 +487,97 @@
     private Guid? _downloadTemplateId;
     private readonly HashSet<Guid> _downloadedTemplateIds = new();
     private bool ShowDetails;
+    private bool _recycleBusy;
+    private RecycleConfirmKind _recycleBusyKind = RecycleConfirmKind.None;
+    private ApplicationWordReportPackageCatalogEntry? _recycleBusyEntry;
+    private RecycleConfirmKind _recycleConfirmKind = RecycleConfirmKind.None;
+    private ApplicationWordReportPackageCatalogEntry? _recycleConfirmEntry;
+    private bool _showRecycleBinPane;
+    private readonly Dictionary<string, ApplicationWordReportPackageCatalogEntry> _pendingToBin =
+        new(StringComparer.Ordinal);
+    private readonly HashSet<string> _pendingRestoredKeys = new(StringComparer.Ordinal);
+    private readonly HashSet<string> _pendingPurgedKeys = new(StringComparer.Ordinal);
+
+    private enum RecycleConfirmKind
+    {
+        None,
+        Move,
+        Purge
+    }
+
+    private bool IsCatalogPane => !_showRecycleBinPane;
+
+    private bool ShowRecycleBinTab =>
+        ShowRecycleBin || RecycleBinEntries.Count > 0 || _pendingToBin.Count > 0;
+
+    private IReadOnlyList<ApplicationWordReportPackageCatalogEntry> VisibleCatalogEntries
+    {
+        get
+        {
+            var list = new List<ApplicationWordReportPackageCatalogEntry>();
+            foreach (var entry in CatalogEntries)
+            {
+                if (_pendingToBin.ContainsKey(entry.EntryKey))
+                    continue;
+                list.Add(entry);
+            }
+
+            foreach (var entry in RecycleBinEntries)
+            {
+                if (!_pendingRestoredKeys.Contains(entry.EntryKey))
+                    continue;
+                if (list.Exists(e => string.Equals(e.EntryKey, entry.EntryKey, StringComparison.Ordinal)))
+                    continue;
+                list.Add(entry);
+            }
+
+            return list;
+        }
+    }
+
+    private IReadOnlyList<ApplicationWordReportPackageCatalogEntry> VisibleRecycleBinEntries
+    {
+        get
+        {
+            var list = new List<ApplicationWordReportPackageCatalogEntry>();
+            foreach (var entry in RecycleBinEntries)
+            {
+                if (_pendingPurgedKeys.Contains(entry.EntryKey)
+                    || _pendingRestoredKeys.Contains(entry.EntryKey))
+                {
+                    continue;
+                }
+
+                list.Add(entry);
+            }
+
+            foreach (var pending in _pendingToBin.Values)
+            {
+                if (list.Exists(e => string.Equals(e.EntryKey, pending.EntryKey, StringComparison.Ordinal)))
+                    continue;
+                list.Add(pending);
+            }
+
+            return list;
+        }
+    }
+
+    private bool ShouldShowFooter =>
+        _recycleBusy
+        || _recycleConfirmKind != RecycleConfirmKind.None
+        || (IsCatalogPane && VisibleCatalogEntries.Count > 0)
+        || (!IsCatalogPane && VisibleRecycleBinEntries.Count > 0)
+        || !string.IsNullOrWhiteSpace(_packageStatusMessage);
+
+    private string CatalogPaneTabCss =>
+        IsCatalogPane
+            ? "app-item-doc-copies__action-btn resminamalar-catalog__pane-tab resminamalar-catalog__pane-tab--active"
+            : "app-item-doc-copies__action-btn resminamalar-catalog__pane-tab";
+
+    private string RecycleBinPaneTabCss =>
+        !IsCatalogPane
+            ? "app-item-doc-copies__action-btn resminamalar-catalog__pane-tab resminamalar-catalog__pane-tab--active"
+            : "app-item-doc-copies__action-btn resminamalar-catalog__pane-tab";
 
     private static readonly JsonSerializerOptions SyncResultJsonOptions = new()
     {
@@ -448,7 +705,16 @@
         _canConvertTemplates = TemplateConvertAccess.CanConvertTemplates();
         _canScanTemplates = TemplateScanAccess.CanCreateFromScan();
 
-        var currentKeys = CatalogEntries
+        ReconcilePendingRecycleOverlays();
+
+        if (!ShowRecycleBinTab)
+            _showRecycleBinPane = false;
+        else if (!IsCatalogPane
+            && VisibleRecycleBinEntries.Count == 0
+            && VisibleCatalogEntries.Count > 0)
+            _showRecycleBinPane = false;
+
+        var currentKeys = VisibleCatalogEntries
             .Select(entry => entry.EntryKey)
             .ToHashSet(StringComparer.Ordinal);
 
@@ -516,7 +782,7 @@
         VisaUiMessages.FormatForCulture(EffectiveUiCulture, key, args);
 
     private string GetSubtitle() =>
-        FormatMsg("ApplicationReportPackage.SubtitleSelected", SelectedCount, CatalogEntries.Count, ApplicationNumber);
+        FormatMsg("ApplicationReportPackage.SubtitleSelected", SelectedCount, VisibleCatalogEntries.Count, ApplicationNumber);
 
     private string GearToolTip => ShowDetails
         ? Msg("ApplicationReportPackage.Gear.HideDetails")
@@ -549,7 +815,7 @@
 
     private Task SelectAllAsync()
     {
-        foreach (var entry in CatalogEntries)
+        foreach (var entry in VisibleCatalogEntries)
             _selectedKeys.Add(entry.EntryKey);
         _packageConfirmPending = false;
         ClearStatusMessages();
@@ -562,6 +828,261 @@
         _packageConfirmPending = false;
         ClearStatusMessages();
         return Task.CompletedTask;
+    }
+
+    private void RememberPendingRecycleOverlay(
+        ApplicationWordReportPackageCatalogEntry entry,
+        RecycleConfirmKind expectedKind,
+        bool purge)
+    {
+        if (purge)
+        {
+            _pendingPurgedKeys.Add(entry.EntryKey);
+            _pendingToBin.Remove(entry.EntryKey);
+            _pendingRestoredKeys.Remove(entry.EntryKey);
+            return;
+        }
+
+        if (expectedKind == RecycleConfirmKind.Move)
+        {
+            _pendingToBin[entry.EntryKey] = entry;
+            _pendingRestoredKeys.Remove(entry.EntryKey);
+            _pendingPurgedKeys.Remove(entry.EntryKey);
+            _showRecycleBinPane = false;
+            _selectedKeys.Remove(entry.EntryKey);
+            return;
+        }
+
+        _pendingRestoredKeys.Add(entry.EntryKey);
+        _pendingToBin.Remove(entry.EntryKey);
+        _pendingPurgedKeys.Remove(entry.EntryKey);
+        _showRecycleBinPane = false;
+    }
+
+    private void ReconcilePendingRecycleOverlays()
+    {
+        foreach (var key in _pendingToBin.Keys.ToList())
+        {
+            var inBin = RecycleBinEntries.Any(e =>
+                string.Equals(e.EntryKey, key, StringComparison.Ordinal));
+            var inCatalog = CatalogEntries.Any(e =>
+                string.Equals(e.EntryKey, key, StringComparison.Ordinal));
+            // Keep the overlay until both parent lists catch up. Dropping it when the bin
+            // list updates first would put the row back in Catalog.
+            if (!inCatalog && inBin)
+                _pendingToBin.Remove(key);
+        }
+
+        foreach (var key in _pendingRestoredKeys.ToList())
+        {
+            var inCatalog = CatalogEntries.Any(e =>
+                string.Equals(e.EntryKey, key, StringComparison.Ordinal));
+            var inBin = RecycleBinEntries.Any(e =>
+                string.Equals(e.EntryKey, key, StringComparison.Ordinal));
+            if (inCatalog && !inBin)
+                _pendingRestoredKeys.Remove(key);
+        }
+
+        foreach (var key in _pendingPurgedKeys.ToList())
+        {
+            if (!RecycleBinEntries.Any(e =>
+                    string.Equals(e.EntryKey, key, StringComparison.Ordinal)))
+            {
+                _pendingPurgedKeys.Remove(key);
+            }
+        }
+    }
+
+    private Task ShowCatalogPaneAsync()
+    {
+        _showRecycleBinPane = false;
+        _recycleConfirmKind = RecycleConfirmKind.None;
+        _recycleConfirmEntry = null;
+        return Task.CompletedTask;
+    }
+
+    private Task ShowRecycleBinPaneAsync()
+    {
+        _showRecycleBinPane = true;
+        _packageConfirmPending = false;
+        _recycleConfirmKind = RecycleConfirmKind.None;
+        _recycleConfirmEntry = null;
+        return Task.CompletedTask;
+    }
+
+    private string FormatRecycleSummary(ApplicationWordReportPackageCatalogEntry entry)
+    {
+        var kind = FormatKindSummary(entry);
+        if (entry.RecycledAtUtc == null)
+            return kind;
+
+        var when = entry.RecycledAtUtc.Value.ToLocalTime().ToString("g");
+        var removed = FormatMsg("ApplicationReportPackage.RecycleBin.RecycledOn", when);
+        return string.IsNullOrWhiteSpace(entry.RecycledByUserName)
+            ? $"{kind} · {removed}"
+            : $"{kind} · {removed} · {entry.RecycledByUserName}";
+    }
+
+    private void BeginMoveToRecycleBinConfirm(ApplicationWordReportPackageCatalogEntry entry)
+    {
+        _packageConfirmPending = false;
+        _recycleConfirmKind = RecycleConfirmKind.Move;
+        _recycleConfirmEntry = entry;
+        ClearStatusMessages();
+    }
+
+    private void BeginPurgeConfirm(ApplicationWordReportPackageCatalogEntry entry)
+    {
+        _packageConfirmPending = false;
+        _recycleConfirmKind = RecycleConfirmKind.Purge;
+        _recycleConfirmEntry = entry;
+        ClearStatusMessages();
+    }
+
+    private void CancelRecycleConfirm()
+    {
+        if (_recycleBusy)
+            return;
+
+        _recycleConfirmKind = RecycleConfirmKind.None;
+        _recycleConfirmEntry = null;
+    }
+
+    private string GetRecycleConfirmPrompt()
+    {
+        var name = _recycleConfirmEntry?.DisplayName ?? string.Empty;
+        return _recycleConfirmKind == RecycleConfirmKind.Purge
+            ? FormatMsg("ApplicationReportPackage.DeletePermanently.Confirm", name)
+            : FormatMsg("ApplicationReportPackage.MoveToRecycleBin.Confirm", name);
+    }
+
+    private string GetRecycleConfirmActionLabel() =>
+        _recycleConfirmKind == RecycleConfirmKind.Purge
+            ? Msg("ApplicationReportPackage.DeletePermanently.ConfirmAction")
+            : Msg("ApplicationReportPackage.MoveToRecycleBin.ConfirmAction");
+
+    private Task ConfirmRecycleActionAsync()
+    {
+        if (_recycleConfirmKind == RecycleConfirmKind.Purge)
+            return PurgeFromRecycleBinAsync(_recycleConfirmEntry);
+        if (_recycleConfirmKind == RecycleConfirmKind.Move)
+            return MoveToRecycleBinAsync(_recycleConfirmEntry);
+        return Task.CompletedTask;
+    }
+
+    private async Task MoveToRecycleBinAsync(ApplicationWordReportPackageCatalogEntry? entry)
+    {
+        await MutateRecycleBinAsync(
+            entry,
+            RecycleConfirmKind.Move,
+            template => ApplicationProfileTemplateRecycleBin.Recycle(template, SecuritySystem.CurrentUserName),
+            "ApplicationReportPackage.RecycleBin.Moved",
+            stayOnRecycleBin: false);
+    }
+
+    private async Task RestoreFromRecycleBinAsync(ApplicationWordReportPackageCatalogEntry entry)
+    {
+        _recycleConfirmKind = RecycleConfirmKind.None;
+        _recycleConfirmEntry = null;
+        await MutateRecycleBinAsync(
+            entry,
+            RecycleConfirmKind.None,
+            ApplicationProfileTemplateRecycleBin.Restore,
+            "ApplicationReportPackage.RecycleBin.Restored",
+            stayOnRecycleBin: false);
+    }
+
+    private async Task PurgeFromRecycleBinAsync(ApplicationWordReportPackageCatalogEntry? entry)
+    {
+        await MutateRecycleBinAsync(
+            entry,
+            RecycleConfirmKind.Purge,
+            template => { },
+            "ApplicationReportPackage.RecycleBin.Deleted",
+            stayOnRecycleBin: true,
+            purge: true);
+    }
+
+    private async Task MutateRecycleBinAsync(
+        ApplicationWordReportPackageCatalogEntry? entry,
+        RecycleConfirmKind expectedKind,
+        Action<ApplicationProfileTemplate> mutate,
+        string successKey,
+        bool stayOnRecycleBin,
+        bool purge = false)
+    {
+        if (entry?.ApplicationProfileTemplateId is not Guid templateId || templateId == Guid.Empty)
+        {
+            _recycleConfirmKind = RecycleConfirmKind.None;
+            _recycleConfirmEntry = null;
+            _packageStatusMessage = Msg("ApplicationReportPackage.RecycleBin.Failed");
+            _packageStatusIsError = true;
+            return;
+        }
+        if (_recycleBusy)
+            return;
+
+        _recycleBusy = true;
+        _recycleBusyKind = expectedKind;
+        _recycleBusyEntry = entry;
+        ClearStatusMessages();
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+
+        try
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileTemplate>();
+            var template = ApplicationProfileNestedTemplateCatalogHelper.LoadProfileTemplate(objectSpace, templateId);
+            if (template == null)
+            {
+                _recycleConfirmKind = RecycleConfirmKind.None;
+                _recycleConfirmEntry = null;
+                _packageStatusMessage = Msg("ApplicationReportPackage.RecycleBin.Failed");
+                _packageStatusIsError = true;
+                return;
+            }
+
+            if (purge)
+                ApplicationProfileTemplateRecycleBin.Purge(objectSpace, template);
+            else
+            {
+                mutate(template);
+                objectSpace.SetModified(template);
+            }
+
+            objectSpace.CommitChanges();
+
+            _recycleConfirmKind = RecycleConfirmKind.None;
+            _recycleConfirmEntry = null;
+            RememberPendingRecycleOverlay(entry, expectedKind, purge);
+            await InvokeAsync(StateHasChanged);
+
+            if (RefreshRequested.HasDelegate)
+                await RefreshRequested.InvokeAsync();
+
+            _packageStatusMessage = FormatMsg(successKey, entry.DisplayName);
+            _packageStatusIsError = false;
+        }
+        catch (Exception ex)
+        {
+            _recycleConfirmKind = RecycleConfirmKind.None;
+            _recycleConfirmEntry = null;
+            _packageStatusMessage = ex is UserFriendlyException
+                ? ex.Message
+                : Msg("ApplicationReportPackage.RecycleBin.Failed");
+            _packageStatusIsError = true;
+            ErrorReporter.ReportReportPackageError(
+                "Resminamalar Recycle Bin update failed.",
+                ApplicationRuntimeLogCategories.ReportPackageComponent,
+                ex);
+        }
+        finally
+        {
+            _recycleBusy = false;
+            _recycleBusyKind = RecycleConfirmKind.None;
+            _recycleBusyEntry = null;
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     private async Task OpenPlaceholderManualAsync()
@@ -818,7 +1339,7 @@
             : Msg("ApplicationReportPackage.Readiness.Ready");
 
     private string GetEntryCssClass(ApplicationWordReportPackageCatalogEntry entry, bool isSelected) =>
-        IsPreviewingEntry(entry)
+        IsPreviewingEntry(entry) || IsRecyclingEntry(entry)
             ? $"{GetEntryStateCssClass(entry, isSelected)} app-report-package__entry--previewing"
             : GetEntryStateCssClass(entry, isSelected);
 
@@ -877,6 +1398,22 @@
         _previewBusy
         && !string.IsNullOrWhiteSpace(_previewEntryKey)
         && string.Equals(_previewEntryKey, entry.EntryKey, StringComparison.Ordinal);
+
+    private bool IsRecyclingEntry(ApplicationWordReportPackageCatalogEntry entry) =>
+        _recycleBusy
+        && _recycleBusyEntry != null
+        && string.Equals(_recycleBusyEntry.EntryKey, entry.EntryKey, StringComparison.Ordinal);
+
+    private string GetRecycleBusyPrompt()
+    {
+        var name = _recycleBusyEntry?.DisplayName ?? string.Empty;
+        return _recycleBusyKind switch
+        {
+            RecycleConfirmKind.Purge => FormatMsg("ApplicationReportPackage.RecycleBin.Deleting", name),
+            RecycleConfirmKind.Move => FormatMsg("ApplicationReportPackage.RecycleBin.Moving", name),
+            _ => FormatMsg("ApplicationReportPackage.RecycleBin.Restoring", name),
+        };
+    }
 
     private async Task PreviewEntryAsync(ApplicationWordReportPackageCatalogEntry entry)
     {

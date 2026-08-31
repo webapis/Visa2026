@@ -98,7 +98,7 @@ public class ApplicationItemWordReportsController : ViewController<ListView>
         var catalog = catalogService.Build(ObjectSpace, application!, context);
 
         string? emptyMessage = null;
-        if (catalog.TotalCount == 0)
+        if (catalog.TotalCount == 0 && catalog.RecycleBinEntries.Count == 0 && !catalog.HasProfileNestedCatalog)
             emptyMessage = VisaUiMessages.Get("WordReports.NoApplicableReports");
 
         var slotService = Application.ServiceProvider.GetService<IVisaPreviewSlotService>();

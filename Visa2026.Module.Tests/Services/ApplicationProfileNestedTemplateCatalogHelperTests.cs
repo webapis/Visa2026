@@ -89,6 +89,49 @@ public class ApplicationProfileNestedTemplateCatalogHelperTests
         Assert.DoesNotContain("Hidden", names);
     }
 
+    [Fact]
+    public void GetOrderedTemplates_HidesRecycledProfileSpecific()
+    {
+        var live = ProfileTemplate();
+        live.TemplateName = "Live";
+        var recycled = ProfileTemplate();
+        recycled.TemplateName = "Recycled";
+        recycled.RecycledAtUtc = DateTime.UtcNow;
+
+        var app = ViaMinistryApp(new ProjectContract { ID = Guid.NewGuid() });
+        app.ApplicationProfile!.NestedTemplates = new ObservableCollection<ApplicationProfileTemplate>
+        {
+            live, recycled,
+        };
+
+        var names = ApplicationProfileNestedTemplateCatalogHelper.GetOrderedTemplates(app)
+            .Select(t => t.TemplateName)
+            .ToList();
+
+        Assert.Contains("Live", names);
+        Assert.DoesNotContain("Recycled", names);
+        Assert.True(ApplicationProfileNestedTemplateCatalogHelper.UsesProfileNestedCatalog(app));
+        Assert.Equal("Recycled", ApplicationProfileNestedTemplateCatalogHelper.GetRecycledTemplates(app).Single().TemplateName);
+    }
+
+    [Fact]
+    public void UsesProfileNestedCatalog_TrueWhenOnlyRecycledRemain()
+    {
+        var recycled = ProfileTemplate();
+        recycled.TemplateName = "SANAW_CLK_013";
+        recycled.RecycledAtUtc = DateTime.UtcNow;
+
+        var app = ViaMinistryApp(new ProjectContract { ID = Guid.NewGuid() });
+        app.ApplicationProfile!.NestedTemplates = new ObservableCollection<ApplicationProfileTemplate>
+        {
+            recycled,
+        };
+
+        Assert.True(ApplicationProfileNestedTemplateCatalogHelper.UsesProfileNestedCatalog(app));
+        Assert.Empty(ApplicationProfileNestedTemplateCatalogHelper.GetOrderedTemplates(app));
+        Assert.Single(ApplicationProfileNestedTemplateCatalogHelper.GetRecycledTemplates(app));
+    }
+
     private static ApplicationProfileTemplate ProfileTemplate() =>
         new()
         {

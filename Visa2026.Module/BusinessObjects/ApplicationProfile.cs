@@ -9,7 +9,9 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
+using DevExpress.ExpressApp.EFCore;
 using DevExpress.ExpressApp.Model;
+using Microsoft.EntityFrameworkCore;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
@@ -472,6 +474,18 @@ public class ApplicationProfileTemplate : BaseObject
     /// </summary>
     public virtual MigrationService? ApplicableMigrationService { get; set; }
     public virtual Guid? ApplicableMigrationServiceId { get; set; }
+
+    /// <summary>
+    /// When set, this nested template is in the Resminamalar Recycle Bin (hidden from the live catalog).
+    /// Catalog Delete sets this; Recycle Bin Restore clears it; Recycle Bin Delete permanently removes the row.
+    /// Not XAF deferred deletion (<c>GCRecord</c>).
+    /// </summary>
+    [Browsable(false)]
+    public virtual DateTime? RecycledAtUtc { get; set; }
+
+    [Browsable(false)]
+    [MaxLength(255)]
+    public virtual string? RecycledByUserName { get; set; }
 }
 
 public enum ApplicationProfileTemplateKind
@@ -628,7 +642,8 @@ public static class ApplicationProfileLockHelper
     /// Per-profile <see cref="ApplicationProfile.DefaultApprovalLegProfile"/> is not a locked scalar
     /// (see <see cref="HasConfigurationScalarsChanged"/>). Legacy nested version rows may still
     /// change while locked because instances keep a snapshot. New nested templates may be added;
-    /// existing template rows stay blocked (see <see cref="EnsureNestedConfigurationEditable"/>).
+    /// Resminamalar Recycle Bin (recycle / restore / purge) may change existing template rows;
+    /// other existing template edits stay blocked (see <see cref="EnsureNestedConfigurationEditable"/>).
     /// </summary>
     public static bool AllowsNestedEditWhenConfigLocked(object? nested, IObjectSpace? objectSpace = null) =>
         nested switch
@@ -636,8 +651,73 @@ public static class ApplicationProfileLockHelper
             ApplicationProfileApprovalLegVersion or ApplicationProfileApprovalLeg => true,
             ApplicationProfileTemplate template
                 when objectSpace != null && objectSpace.IsNewObject(template) => true,
+            ApplicationProfileTemplate template
+                when objectSpace != null && IsResminamalarRecycleBinMutation(objectSpace, template) => true,
             _ => false,
         };
+
+    /// <summary>
+    /// Recycle Bin only: set/clear <see cref="ApplicationProfileTemplate.RecycledAtUtc"/> or
+    /// permanently delete a row that is already in the bin. Does not allow renaming or replacing files.
+    /// </summary>
+    public static bool IsResminamalarRecycleBinMutation(
+        IObjectSpace objectSpace,
+        ApplicationProfileTemplate template)
+    {
+        if (objectSpace == null || template == null)
+            return false;
+
+        if (objectSpace.IsObjectToDelete(template))
+            return IsAllowedResminamalarRecycleBinMutation(
+                isDelete: true,
+                template.RecycledAtUtc,
+                Array.Empty<string>());
+
+        if (objectSpace is not EFCoreObjectSpace { DbContext: { } dbContext })
+            return false;
+
+        var entry = dbContext.Entry(template);
+        if (entry.State != EntityState.Modified)
+            return false;
+
+        var modified = entry.Properties
+            .Where(p => p.IsModified)
+            .Select(p => p.Metadata.Name)
+            .ToList();
+
+        return IsAllowedResminamalarRecycleBinMutation(
+            isDelete: false,
+            template.RecycledAtUtc,
+            modified);
+    }
+
+    internal static bool IsAllowedResminamalarRecycleBinMutation(
+        bool isDelete,
+        DateTime? recycledAtUtc,
+        IEnumerable<string> modifiedMemberNames)
+    {
+        if (isDelete)
+            return recycledAtUtc != null;
+
+        var recycleMembers = new HashSet<string>(StringComparer.Ordinal)
+        {
+            nameof(ApplicationProfileTemplate.RecycledAtUtc),
+            nameof(ApplicationProfileTemplate.RecycledByUserName),
+            "OptimisticLockField",
+            "GCRecord",
+        };
+
+        var modified = modifiedMemberNames
+            .Where(n => !string.IsNullOrEmpty(n))
+            .ToList();
+        if (modified.Count == 0)
+            return false;
+        if (modified.Any(n => !recycleMembers.Contains(n)))
+            return false;
+
+        return modified.Contains(nameof(ApplicationProfileTemplate.RecycledAtUtc))
+            || modified.Contains(nameof(ApplicationProfileTemplate.RecycledByUserName));
+    }
 
     public static bool CanRemoveApprovalLegVersion(
         ApplicationProfile? profile,

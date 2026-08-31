@@ -47,6 +47,8 @@
                                                      ApplicationItemIds="_applicationItemIds"
                                                      ApplicationNumber="@_applicationNumber"
                                                      CatalogEntries="_catalogEntries"
+                                                     RecycleBinEntries="_recycleBinEntries"
+                                                     ShowRecycleBin="_showRecycleBin"
                                                      UiCultureName="_uiCultureName"
                                                      FocusEntryKey="_focusEntryKey"
                                                      UseInlinePreview="true"
@@ -79,6 +81,9 @@
     private string _applicationNumber = string.Empty;
     private IReadOnlyList<ApplicationWordReportPackageCatalogEntry> _catalogEntries =
         Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+    private IReadOnlyList<ApplicationWordReportPackageCatalogEntry> _recycleBinEntries =
+        Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+    private bool _showRecycleBin;
     private string _emptyMessage = string.Empty;
     private string _uiCultureName = string.Empty;
     private string? _focusEntryKey;
@@ -104,6 +109,8 @@
         {
             _applicationId = Guid.Empty;
             _catalogEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+            _recycleBinEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+            _showRecycleBin = false;
             _emptyMessage = string.Empty;
             _boundOccupantKey = null;
             _previewActive = false;
@@ -176,6 +183,8 @@
         if (application == null)
         {
             _catalogEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+            _recycleBinEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+            _showRecycleBin = false;
             _applicationNumber = string.Empty;
             return;
         }
@@ -186,7 +195,11 @@
 
         var catalog = CatalogService.Build(objectSpace, application, context);
         _catalogEntries = catalog.Entries;
+        _recycleBinEntries = catalog.RecycleBinEntries;
+        _showRecycleBin = catalog.HasProfileNestedCatalog;
         _applicationNumber = application.FullApplicationNumber ?? string.Empty;
+        if (catalog.HasProfileNestedCatalog || catalog.RecycleBinEntries.Count > 0)
+            _emptyMessage = string.Empty;
     }
 
     private Task ReloadCatalogAsync()

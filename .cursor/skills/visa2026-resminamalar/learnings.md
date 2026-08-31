@@ -25,6 +25,46 @@ Purpose: **catalog, seed gate, batch worker, preview, permissions, dialog UX** �
 
 ## Entries
 
+### 2026-08-31 — Recycle Bin Move progress while waiting (Application)
+
+- **Symptom**: After **Move to Recycle Bin**, the confirm bar sat still with no progress while the save/reload ran, so it looked like nothing happened.
+- **Try**: Catalog Delete → confirm **Move to Recycle Bin** on `SANAW_CLK_07`.
+- **Test**: Blazor Debug build. Officer: confirm Move — footer/card show indeterminate progress and “Moving …”; then the row leaves Catalog.
+- **Root cause**: `_recycleBusy` only disabled buttons. `StateHasChanged` did not yield, so the circuit started the ObjectSpace commit before a progress paint.
+- **Fix**: Keep the confirm. Show Preview-style progress on the card and footer; `Task.Yield` after busy paint; Restore/Purge use the same indicator.
+- **Prevent**: Recycle mutations that touch ObjectSpace must yield after setting busy so the indicator can render.
+- **Cross-skill**: —
+
+### 2026-08-31 — Recycle Bin Delete persists but catalog row stays (Application)
+
+- **Symptom**: Catalog **Move to Recycle Bin** writes `RecycledAtUtc` (Recycle Bin count can already be > 0) but the same card stays in Catalog.
+- **Try**: Confirm Delete on `SCREENSHOT 2024-08-28 11:53:28` while Recycle Bin already had 4 items.
+- **Test**: Nested catalog helper + Recycle Bin tests; Blazor Debug build. Officer: restart, Move to Recycle Bin — row leaves Catalog immediately, Recycle Bin count increments.
+- **Root cause**: Catalog reload used tracked `ApplicationProfileTemplate` instances. EF kept `RecycledAtUtc == null` after another ObjectSpace committed. Overlay then dropped as soon as the bin list looked updated, which put the stale catalog row back on screen.
+- **Fix**: Recycle vs live lists keyed from an `AsNoTracking` id query; reload tracked rows from the store; keep the catalog overlay until the parent catalog list no longer contains the row **and** the bin list contains it.
+- **Prevent**: Do not classify Recycle Bin from identity-map `RecycledAtUtc` after a different ObjectSpace saved. Do not drop a pending overlay on `inBin` alone.
+- **Cross-skill**: application-profile
+
+### 2026-08-31 — Recycle Bin Delete no-op on locked profile (Application)
+
+- **Symptom**: Catalog Delete shows confirm; **Move to Recycle Bin** does not move the row (case already In progress). Recycle Bin count unchanged.
+- **Try**: Confirm on `SCREENSHOT 2024-08-28 115127` / SANAW_CLK_* while profile is config-locked.
+- **Test**: `IsAllowedResminamalarRecycleBinMutation` (recycle fields yes; TemplateName no; purge only when already recycled); lock helper + Recycle Bin tests; Blazor Debug build.
+- **Root cause**: `EnsureNestedConfigurationEditable` blocks saving existing `ApplicationProfileTemplate` after lock state A. Recycle is an update of `RecycledAtUtc`, not a new row. Confirm UI also hid the lock exception.
+- **Fix**: Allow Recycle Bin-only mutations (recycle/restore fields or purge of an already-recycled row) while locked; show the exception and clear confirm on failure.
+- **Prevent**: Do not treat Recycle Bin as a configuration-template edit; still block rename/file replace on locked profiles.
+- **Cross-skill**: application-profile
+
+### 2026-08-31 — Resminamalar Recycle Bin for officer templates (Application)
+
+- **Symptom**: Officers needed to remove extra scan/convert templates (SANAW_CLK_*) without destroying them; Recycle Bin did not exist.
+- **Try**: Catalog **Delete** on this-profile nested rows; Recycle Bin **Restore** / **Delete permanently**.
+- **Test**: `ApplicationProfileTemplateRecycleBinTests`; nested catalog hides recycled and stays on nested mode when only recycled remain; schema SQL includes `RecycledAtUtc`; Blazor Server Debug build.
+- **Root cause**: Nested `ApplicationProfileTemplate` had no recycle fields; catalog listed every Word/Excel row; empty catalog hid the component.
+- **Fix**: `RecycledAtUtc` / `RecycledByUserName`; catalog Delete moves ProfileSpecific rows; Recycle Bin tab Restore/Purge; seeded Category/Global have no Delete; re-Approve same name clears recycle.
+- **Prevent**: Do not use XAF `GCRecord` / generic `IsDeleted` for this; do not fall back to seeded user catalog when only recycled nested rows remain.
+- **Cross-skill**: application-profile | template-scan
+
 ### 2026-08-31 — Excel catalog Preview ran Word PDF (`report_….docx`) (Application)
 
 - **Symptom**: Scan-saved Excel READY with people; catalog Preview is a white PDF titled `report_20230321.docx`; same-case Word Preview fills.

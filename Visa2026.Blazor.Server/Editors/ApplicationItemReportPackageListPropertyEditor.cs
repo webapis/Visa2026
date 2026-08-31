@@ -89,6 +89,8 @@ public sealed class ApplicationItemReportPackageListPropertyEditor : BlazorPrope
         ComponentModel.PackageScope = WordReportPackageScope.ApplicationRosterMergeLine;
         ComponentModel.ApplicationItemIds = itemIds;
         ComponentModel.CatalogEntries = catalog.Entries;
+        ComponentModel.RecycleBinEntries = catalog.RecycleBinEntries;
+        ComponentModel.ShowRecycleBin = catalog.HasProfileNestedCatalog;
     }
 
     private void ResetComponentModel()
@@ -98,6 +100,8 @@ public sealed class ApplicationItemReportPackageListPropertyEditor : BlazorPrope
         ComponentModel.PackageScope = WordReportPackageScope.ApplicationRosterMergeLine;
         ComponentModel.ApplicationItemIds = Array.Empty<Guid>();
         ComponentModel.CatalogEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+        ComponentModel.RecycleBinEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+        ComponentModel.ShowRecycleBin = false;
     }
 
     private string ResolveUiCultureName() =>

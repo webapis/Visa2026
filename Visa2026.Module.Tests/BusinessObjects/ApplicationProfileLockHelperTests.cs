@@ -84,6 +84,27 @@ public class ApplicationProfileLockHelperTests
     }
 
     [Fact]
+    public void IsAllowedResminamalarRecycleBinMutation_AllowsRecycleFieldsOnly()
+    {
+        Assert.True(ApplicationProfileLockHelper.IsAllowedResminamalarRecycleBinMutation(
+            isDelete: false,
+            recycledAtUtc: DateTime.UtcNow,
+            modifiedMemberNames: [nameof(ApplicationProfileTemplate.RecycledAtUtc), nameof(ApplicationProfileTemplate.RecycledByUserName)]));
+        Assert.True(ApplicationProfileLockHelper.IsAllowedResminamalarRecycleBinMutation(
+            isDelete: true,
+            recycledAtUtc: DateTime.UtcNow,
+            modifiedMemberNames: []));
+        Assert.False(ApplicationProfileLockHelper.IsAllowedResminamalarRecycleBinMutation(
+            isDelete: true,
+            recycledAtUtc: null,
+            modifiedMemberNames: []));
+        Assert.False(ApplicationProfileLockHelper.IsAllowedResminamalarRecycleBinMutation(
+            isDelete: false,
+            recycledAtUtc: DateTime.UtcNow,
+            modifiedMemberNames: [nameof(ApplicationProfileTemplate.TemplateName)]));
+    }
+
+    [Fact]
     public void CanRemoveApprovalLegVersion_RequiresAnotherVersion()
     {
         var profile = new ApplicationProfile();

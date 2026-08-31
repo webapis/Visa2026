@@ -63,6 +63,7 @@ disable-model-invocation: false
 | **Sanaw** preview fails; `RowNo` empty hint | `UsesSingleDocumentItemList` / `BuildSanawyStyleRows` — not labor-contract per-item path | **This skill** + user-report-templates |
 | Excel catalog Preview is a **blank PDF**; Word Preview OK; title is `report_….docx` | Nested catalog keys are `profile:{id}` not `user:{id}` — `ResolveDownloadFileName` fell back to `.docx` so Word PDF ran on Excel bytes | **This skill** |
 | `Invalid column name` on batch table | `BatchWorkerSchemaGate`, updaters, `FORCE_XAF_DB_UPDATE` | **lifecycle-docker** |
+| **Delete / Move to Recycle Bin** persists but the catalog card stays | Recycle Bin count vs Catalog row; restart then retry | **This skill** — learnings *catalog row stays* / *locked profile no-op* |
 | **Edit template** does nothing / export failed | `TemplateEditStaging:Enabled`, HTTPS (prod), folder chosen | **This skill** — [`TEMPLATE_STAGING_EDIT.md`](../../../docs/TEMPLATE_STAGING_EDIT.md) |
 | **Sync to database** — file locked / 0 imported | Close Word/Excel; hash unchanged skips import | **This skill** |
 | Preview stale after sync | Run **Sync to database** (imports share) then **Refresh** if needed | **This skill** |
@@ -75,7 +76,7 @@ disable-model-invocation: false
 |----------|----------------|
 | **Resminamalar** dialog UI (`ApplicationReportPackageComponent`) | Designing Word/Excel layout in `.docx`/`.xlsx` |
 | **Desktop template staging** — export to UNC, **Sync to database**, `UserReportTemplateStagingService` | In-browser Rich Edit / Spreadsheet in catalog |
-| Catalog + readiness + selection + preview + enqueue | New `*_map.md` / placeholder tokens |
+| Catalog + readiness + selection + preview + enqueue + Recycle Bin | New `*_map.md` / placeholder tokens |
 | `UserReportTemplate` **visibility in catalog** (symptom: missing row) | Seed registration in `UserReportTemplateUpdater` (template skill) |
 | `WordReportGenerationBatch` worker / toast / ZIP | [Document copies](../visa2026-document-copies/SKILL.md) / [PDF form mapping](../visa2026-pdf-form-mapping/SKILL.md) |
 | `UserReportTemplateSeedGate` (empty list after deploy) | DevExpress XtraReports / `Reports/` (removed) |

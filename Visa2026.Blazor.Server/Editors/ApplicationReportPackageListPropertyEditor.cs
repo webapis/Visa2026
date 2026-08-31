@@ -61,6 +61,8 @@ public sealed class ApplicationReportPackageListPropertyEditor : BlazorPropertyE
             ComponentModel.PackageScope = WordReportPackageScope.ApplicationProfileInstance;
             ComponentModel.ApplicationItemIds = Array.Empty<Guid>();
             ComponentModel.CatalogEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+            ComponentModel.RecycleBinEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+            ComponentModel.ShowRecycleBin = false;
             return;
         }
 
@@ -73,6 +75,8 @@ public sealed class ApplicationReportPackageListPropertyEditor : BlazorPropertyE
             ComponentModel.PackageScope = WordReportPackageScope.ApplicationProfileInstance;
             ComponentModel.ApplicationItemIds = Array.Empty<Guid>();
             ComponentModel.CatalogEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+            ComponentModel.RecycleBinEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+            ComponentModel.ShowRecycleBin = false;
             return;
         }
 
@@ -85,6 +89,8 @@ public sealed class ApplicationReportPackageListPropertyEditor : BlazorPropertyE
         ComponentModel.PackageScope = WordReportPackageScope.ApplicationProfileInstance;
         ComponentModel.ApplicationItemIds = Array.Empty<Guid>();
         ComponentModel.CatalogEntries = catalog.Entries;
+        ComponentModel.RecycleBinEntries = catalog.RecycleBinEntries;
+        ComponentModel.ShowRecycleBin = catalog.HasProfileNestedCatalog;
     }
 
     private string ResolveUiCultureName() =>

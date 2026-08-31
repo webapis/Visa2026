@@ -40,6 +40,8 @@ public static class ApplicationProfileTemplateSaveHelper
         template.TemplateKind = request.TemplateKind;
         template.CatalogScope = request.CatalogScope;
         template.DataScope = request.DataScope;
+        template.RecycledAtUtc = null;
+        template.RecycledByUserName = null;
         template.TemplateFile ??= objectSpace.CreateObject<DevExpress.Persistent.BaseImpl.EF.FileData>();
         template.TemplateFile.FileName = fileName;
         template.TemplateFile.Content = request.Content;

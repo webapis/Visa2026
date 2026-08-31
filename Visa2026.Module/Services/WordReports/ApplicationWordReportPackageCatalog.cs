@@ -37,11 +37,27 @@ public sealed class ApplicationWordReportPackageCatalogEntry
     public Guid? UserReportTemplateId { get; init; }
 
     public Guid? ApplicationProfileTemplateId { get; init; }
+
+    /// <summary>Officer-created this-profile nested row — catalog Delete moves it to Recycle Bin.</summary>
+    public bool CanMoveToRecycleBin { get; init; }
+
+    public DateTime? RecycledAtUtc { get; init; }
+
+    public string? RecycledByUserName { get; init; }
 }
 
 public sealed class ApplicationWordReportPackageCatalog
 {
     public required IReadOnlyList<ApplicationWordReportPackageCatalogEntry> Entries { get; init; }
+
+    public IReadOnlyList<ApplicationWordReportPackageCatalogEntry> RecycleBinEntries { get; init; } =
+        Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+
+    /// <summary>
+    /// Profile has Word/Excel nested templates (live or recycled). Show Recycle Bin tab;
+    /// do not fall back to the seeded user-template catalog.
+    /// </summary>
+    public bool HasProfileNestedCatalog { get; init; }
 
     public int TotalCount => Entries.Count;
 
@@ -79,10 +95,15 @@ public sealed class ApplicationWordReportPackageCatalogService
         var selectedItems = context.ResolveApplicationItems(objectSpace, application);
         var entries = new List<ApplicationWordReportPackageCatalogEntry>();
 
-        if (ApplicationProfileNestedTemplateCatalogHelper.UsesProfileNestedCatalog(application))
+        if (ApplicationProfileNestedTemplateCatalogHelper.UsesProfileNestedCatalog(application, objectSpace))
         {
             entries.AddRange(BuildProfileNestedEntries(objectSpace, application, selectedItems));
-            return new ApplicationWordReportPackageCatalog { Entries = entries };
+            return new ApplicationWordReportPackageCatalog
+            {
+                Entries = entries,
+                RecycleBinEntries = BuildRecycleBinEntries(objectSpace, application).ToList(),
+                HasProfileNestedCatalog = true,
+            };
         }
 
         var visibilityService = serviceProvider.GetService<IUserReportVisibilityService>();
@@ -126,7 +147,11 @@ public sealed class ApplicationWordReportPackageCatalogService
             }
         }
 
-        return new ApplicationWordReportPackageCatalog { Entries = entries };
+        return new ApplicationWordReportPackageCatalog
+        {
+            Entries = entries,
+            HasProfileNestedCatalog = false,
+        };
     }
 
     private IEnumerable<ApplicationWordReportPackageCatalogEntry> BuildProfileNestedEntries(
@@ -134,7 +159,7 @@ public sealed class ApplicationWordReportPackageCatalogService
         ApplicationProfileInstance application,
         IList<ApplicationRosterMergeLine> selectedItems)
     {
-        foreach (var profileTemplate in ApplicationProfileNestedTemplateCatalogHelper.GetOrderedTemplates(application))
+        foreach (var profileTemplate in ApplicationProfileNestedTemplateCatalogHelper.GetOrderedTemplates(application, objectSpace))
         {
             var loadedProfileTemplate = ApplicationProfileNestedTemplateCatalogHelper.LoadProfileTemplate(
                     objectSpace,
@@ -175,6 +200,43 @@ public sealed class ApplicationWordReportPackageCatalogService
                 ReadinessHints = dryRunHints,
                 UserReportTemplateId = userTemplate?.ID,
                 ApplicationProfileTemplateId = loadedProfileTemplate.ID,
+                CanMoveToRecycleBin = ApplicationProfileTemplateRecycleBin.CanMoveToRecycleBin(
+                    loadedProfileTemplate),
+            };
+        }
+    }
+
+    private IEnumerable<ApplicationWordReportPackageCatalogEntry> BuildRecycleBinEntries(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance application)
+    {
+        foreach (var profileTemplate in ApplicationProfileNestedTemplateCatalogHelper.GetRecycledTemplates(application, objectSpace))
+        {
+            var loadedProfileTemplate = ApplicationProfileNestedTemplateCatalogHelper.LoadProfileTemplate(
+                    objectSpace,
+                    profileTemplate.ID)
+                ?? profileTemplate;
+
+            var userTemplate = ApplicationProfileNestedTemplateCatalogHelper.TryResolveMergeTemplate(
+                objectSpace,
+                loadedProfileTemplate);
+
+            yield return new ApplicationWordReportPackageCatalogEntry
+            {
+                EntryKey = ApplicationProfileNestedTemplateCatalogHelper.BuildEntryKey(loadedProfileTemplate),
+                DisplayName = loadedProfileTemplate.TemplateName ?? string.Empty,
+                OutputFileName = ApplicationProfileNestedTemplateCatalogHelper.ResolveOutputFileName(
+                    loadedProfileTemplate,
+                    userTemplate),
+                Kind = ApplicationProfileNestedTemplateCatalogHelper.ResolveEntryKind(
+                    loadedProfileTemplate,
+                    userTemplate),
+                Readiness = ApplicationWordReportPackageReadinessLevel.Warning,
+                ReadinessMessageKey = "ApplicationReportPackage.RecycleBin.InBin",
+                UserReportTemplateId = userTemplate?.ID,
+                ApplicationProfileTemplateId = loadedProfileTemplate.ID,
+                RecycledAtUtc = loadedProfileTemplate.RecycledAtUtc,
+                RecycledByUserName = loadedProfileTemplate.RecycledByUserName,
             };
         }
     }
