@@ -1,0 +1,211 @@
+@namespace Visa2026.Blazor.Server.Editors
+@using Visa2026.Module.Services.TemplateConvert
+@using Visa2026.Module.Services.TemplateScan
+
+<div class="tas-viewport tas-viewport--a4 tas-review-doc @(Outline?.IsLandscape == true ? "tas-viewport--landscape" : null)">
+    <div class="tas-a4-page @(Outline?.IsLandscape == true ? "tas-a4-page--landscape" : null)"
+         aria-label="In-process template preview">
+        @if (Outline == null || !Outline.IsReadable)
+        {
+            <p class="tas-review-doc__empty">The uploaded file could not be shown here. Mapped fields stay in the list.</p>
+        }
+        else if (Outline.Format == TemplateSourceFormat.Docx)
+        {
+            <div class="tac-doc">
+                @foreach (var paragraph in Outline.Paragraphs)
+                {
+                    @if (paragraph.Part == WordPart.Body)
+                    {
+                        @if (paragraph.Text.Length == 0)
+                        {
+                            <p class="tac-doc__row">&nbsp;</p>
+                        }
+                        else
+                        {
+                            <p class="tac-doc__row">
+                                @foreach (var piece in Pieces(paragraph))
+                                {
+                                    @if (piece.Mark == null)
+                                    {
+                                        @piece.Text
+                                    }
+                                    else
+                                    {
+                                        <span class="@MarkCss(piece.Mark)"
+                                              title="@piece.Mark.LabelText"
+                                              @onmouseenter="() => Hover(piece.Mark.DisplayId)"
+                                              @onmouseleave="ClearHover">
+                                            <span class="tas-mark__n">@piece.Mark.DisplayOrder</span>@piece.Text
+                                        </span>
+                                    }
+                                }
+                            </p>
+                        }
+                    }
+                }
+            </div>
+        }
+        else
+        {
+            @foreach (var sheet in Outline.Sheets)
+            {
+                <span class="tac-sheet__tab">@sheet.Name</span>
+                <table class="tac-sheet__grid">
+                    <tbody>
+                        @foreach (var row in sheet.Cells.Select(c => c.RowNumber).Distinct().OrderBy(r => r).Take(40))
+                        {
+                            <tr>
+                                @foreach (var cell in sheet.Cells.Where(c => c.RowNumber == row).OrderBy(c => c.ColumnNumber).Take(12))
+                                {
+                                    <td>
+                                        @foreach (var piece in ExcelPieces(cell))
+                                        {
+                                            @if (piece.Mark == null)
+                                            {
+                                                @piece.Text
+                                            }
+                                            else
+                                            {
+                                                <span class="@MarkCss(piece.Mark)"
+                                                      title="@piece.Mark.LabelText"
+                                                      @onmouseenter="() => Hover(piece.Mark.DisplayId)"
+                                                      @onmouseleave="ClearHover">
+                                                    <span class="tas-mark__n">@piece.Mark.DisplayOrder</span>@piece.Text
+                                                </span>
+                                            }
+                                        }
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        }
+    </div>
+</div>
+<p class="tas-review-doc__hint">In process — numbered marks are placeholder candidates. Same numbers as Detected fields.</p>
+
+@code {
+    [Parameter, EditorRequired] public TemplateDocumentOutline? Outline { get; set; }
+    [Parameter] public IReadOnlyList<ScanReviewOrderedField> Marks { get; set; } = Array.Empty<ScanReviewOrderedField>();
+    [Parameter] public string? HoveredFieldId { get; set; }
+    [Parameter] public EventCallback<string?> HoveredFieldIdChanged { get; set; }
+
+    private IEnumerable<(string Text, ScanReviewOrderedField? Mark)> Pieces(TemplateOutlineParagraph paragraph)
+    {
+        var text = paragraph.Text ?? string.Empty;
+        var hits = new List<(ScanReviewOrderedField Mark, int Start, int Length)>();
+        foreach (var mark in Marks)
+        {
+            var span = SpanOn(paragraph, mark);
+            if (span is { } located)
+                hits.Add((mark, located.Start, located.Length));
+        }
+
+        hits.Sort(static (a, b) => a.Start.CompareTo(b.Start));
+
+        var position = 0;
+        foreach (var (mark, start, spanLength) in hits)
+        {
+            if (start < position || start > text.Length)
+                continue;
+
+            if (start > position)
+                yield return (text[position..start], null);
+
+            var length = Math.Min(spanLength, text.Length - start);
+            if (length <= 0)
+                continue;
+
+            yield return (text.Substring(start, length), mark);
+            position = start + length;
+        }
+
+        if (position < text.Length)
+            yield return (text[position..], null);
+    }
+
+    private (int Start, int Length)? SpanOn(TemplateOutlineParagraph paragraph, ScanReviewOrderedField mark)
+    {
+        if (mark.DisplayRegion is DocumentRegion.WordSpan span
+            && string.Equals(span.ParagraphAddress, paragraph.Address, StringComparison.Ordinal)
+            && span.Start >= 0
+            && span.Start < paragraph.Text.Length)
+        {
+            var length = Math.Min(span.Length, paragraph.Text.Length - span.Start);
+            return length > 0 ? (span.Start, length) : null;
+        }
+
+        return null;
+    }
+
+    private IEnumerable<(string Text, ScanReviewOrderedField? Mark)> ExcelPieces(TemplateOutlineCell cell)
+    {
+        var text = cell.Text ?? string.Empty;
+        var parts = Marks
+            .Where(m => m.SourceRegion is DocumentRegion.ExcelCell excel
+                && string.Equals(excel.SheetName, cell.SheetName, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(excel.CellReference, cell.CellReference, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(m => m.PartIndex)
+            .ToList();
+
+        if (parts.Count == 0)
+        {
+            yield return (text, null);
+            yield break;
+        }
+
+        if (parts.Count == 1 && parts[0].PartIndex <= 0)
+        {
+            yield return (text, parts[0]);
+            yield break;
+        }
+
+        var position = 0;
+        foreach (var mark in parts)
+        {
+            var needle = mark.LabelText ?? string.Empty;
+            if (needle.Length == 0)
+                continue;
+
+            var start = text.IndexOf(needle, position, StringComparison.Ordinal);
+            if (start < 0)
+                start = text.IndexOf(needle, StringComparison.Ordinal);
+            if (start < 0 || start < position)
+                continue;
+
+            if (start > position)
+                yield return (text[position..start], null);
+
+            yield return (text.Substring(start, needle.Length), mark);
+            position = start + needle.Length;
+        }
+
+        if (position < text.Length)
+            yield return (text[position..], null);
+        else if (position == 0)
+            yield return (text, parts[0]);
+    }
+
+    private string MarkCss(ScanReviewOrderedField mark)
+    {
+        var css = mark.IsGap ? "tas-mark tas-mark--gap" : "tas-mark";
+        if (IdsMatch(HoveredFieldId, mark.DisplayId, mark.FieldId))
+            css += " is-hovered";
+        return css;
+    }
+
+    private static bool IdsMatch(string? selected, string overlayId, string parentId)
+    {
+        if (string.IsNullOrWhiteSpace(selected))
+            return false;
+        if (string.Equals(selected, overlayId, StringComparison.Ordinal))
+            return true;
+        return string.Equals(selected, parentId, StringComparison.Ordinal);
+    }
+
+    private async Task Hover(string fieldId) => await HoveredFieldIdChanged.InvokeAsync(fieldId);
+
+    private async Task ClearHover() => await HoveredFieldIdChanged.InvokeAsync(null);
+}

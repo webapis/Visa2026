@@ -425,6 +425,82 @@ public class TemplateScanOrchestratorTests
     }
 
     [Fact]
+    public async Task GenerateAsync_recovers_yellow_spans_when_SourceRegion_missing()
+    {
+        var set = new ApplicationProfilePlaceholderSetService(new UserReportPlaceholderCatalogService()).GetSet(
+            new ApplicationProfilePlaceholderSetQuery
+            {
+                Profile = new ApplicationProfile(),
+                DataScope = ApplicationProfileTemplateDataScope.Both,
+                TemplateKind = ApplicationProfileTemplateKind.Word,
+            });
+
+        var bytes = ScanOfficeYellowExtractorTests.CreateWordWithCaptionThenYellow(
+            "we Kärhananyň wiza işleri boýunça ygtyýarly wekili:",
+            "Nepesowa Tumar Aşyrowna");
+        var yellows = new ScanOfficeYellowExtractor().Extract(bytes, ScanSourceKind.Word);
+        var proposal = ScanOfficeFieldPlanBuilder.Build(yellows, set, bytes, ScanSourceKind.Word);
+        var plan = new ScanFieldPlanMerger().Merge(new ScanFieldPlanMergeRequest
+        {
+            PlaceholderSet = set,
+            ScanKind = ScanKind.FilledSample,
+            Proposal = proposal,
+        });
+
+        Assert.All(plan.Fields, f => Assert.NotNull(f.SourceRegion));
+
+        var stripped = new ScanFieldPlan
+        {
+            PlaceholderSet = plan.PlaceholderSet,
+            ScanKind = plan.ScanKind,
+            Fields = plan.Fields.Select(f => new ScanDetectedField
+            {
+                FieldId = f.FieldId,
+                Box = f.Box,
+                PageIndex = f.PageIndex,
+                LabelText = f.LabelText,
+                ProposedToken = f.ProposedToken,
+                Confidence = f.Confidence,
+                Scope = f.Scope,
+                SourceRegion = null,
+                Alternatives = f.Alternatives,
+            }).ToList(),
+            StaticRegions = plan.StaticRegions,
+            Gaps = plan.Gaps,
+            PendingQuestions = plan.PendingQuestions,
+            Rationale = plan.Rationale,
+            Source = plan.Source,
+            YellowHighlightCount = plan.YellowHighlightCount,
+        };
+
+        var outcome = await CreateOrchestrator().GenerateAsync(new TemplateScanAnalysis
+        {
+            NormalizedInput = new ScanNormalizedInput
+            {
+                SourceKind = ScanSourceKind.Word,
+                Pages = Array.Empty<ScanPageImage>(),
+                OriginalByteLength = bytes.LongLength,
+                FileName = "wekil.docx",
+                OfficePackageBytes = bytes,
+            },
+            Suitability = new ScanSuitabilityReport
+            {
+                Verdict = ScanSuitabilityVerdict.Pass,
+                TextConfidence = 1.0,
+                Issues = Array.Empty<ScanSuitabilityIssue>(),
+            },
+            FieldPlan = stripped,
+            PlaceholderSet = set,
+            Playbook = new ScanAuthoringPlaybookService().GetPlaybook(),
+            TemplateName = "Wekil recover",
+            DataScope = ApplicationProfileTemplateDataScope.Both,
+        });
+
+        Assert.True(!outcome.HasErrors, string.Join(" | ", outcome.Errors));
+        Assert.Contains(outcome.EmittedTokens, t => t.Contains("RPFN", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
     public void DI_registers_orchestrator()
     {
         using var sp = BuildServiceProvider();

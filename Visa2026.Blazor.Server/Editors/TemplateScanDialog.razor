@@ -16,11 +16,11 @@
 @if (_open)
 {
     <div class="tas-backdrop" @onclick="RequestCloseAsync">
-        <div class="tas-modal @(_stage is Stage.FieldReview or Stage.Clarification or Stage.Preview or Stage.NeedsHelp ? "tas-modal--wide" : string.Empty)"
+        <div class="tas-modal @ModalWidthClass"
              role="dialog" aria-modal="true" aria-labelledby="tas-title" @onclick:stopPropagation="true">
             <header class="tas-modal__head">
                 <div>
-                    <h2 id="tas-title">Create template from yellow marks</h2>
+                    <h2 id="tas-title">@(IsEditingExisting ? "Review placeholders" : "Create template from yellow marks")</h2>
                     <p>@_profileName@(string.IsNullOrEmpty(_caseNumber) ? string.Empty : " · case " + _caseNumber)</p>
                 </div>
                 <button type="button" class="tas-icon-btn" aria-label="Close" @onclick="RequestCloseAsync">&#10005;</button>
@@ -162,8 +162,10 @@
                 else if (_stage == Stage.ScanFail && _ingest is { } failedIngest)
                 {
                     <div class="tas-fail-panel">
-                        <h3>Scan quality check failed</h3>
-                        <p>This scan cannot be turned into a template yet. Try a sharper photo, higher resolution, or a different file.</p>
+                        <h3>@(IsEditingExisting ? "This template cannot be reviewed" : "Scan quality check failed")</h3>
+                        <p>@(IsEditingExisting
+                            ? "The catalog file has no yellow highlights and no library placeholders to remap."
+                            : "This scan cannot be turned into a template yet. Try a sharper photo, higher resolution, or a different file.")</p>
                         <ul class="tas-issues" style="width:100%;text-align:left">
                             @foreach (var issue in failedIngest.Suitability.Issues)
                             {
@@ -181,13 +183,52 @@
                         </div>
                     }
 
+                    @if (IsEditingExisting)
+                    {
+                        <div class="tas-form" style="margin-bottom:0.75rem">
+                            <div class="tas-field">
+                                <label class="tas-field__label" for="tas-review-name">Template name <em>*</em></label>
+                                <input id="tas-review-name" class="tas-input" value="@_templateName"
+                                       @oninput="e => _templateName = e.Value?.ToString() ?? string.Empty" />
+                                @if (IsLockedExistingOverwrite)
+                                {
+                                    <small>Profile is locked — change the name to save a new catalog copy. Overwriting this template stays blocked.</small>
+                                }
+                            </div>
+                        </div>
+                    }
+
                     <TemplateScanFieldReviewView FieldPlan="plan"
                                                  Pages="ingest.Input.Pages"
                                                  FileName="@_fileName"
                                                  SuitabilityVerdict="ingest.Suitability.Verdict"
                                                  IsOfficeSource="ingest.Input.IsOfficeSource"
+                                                 OfficePackageBytes="ingest.Input.OfficePackageBytes"
+                                                 SourceKind="ingest.Input.SourceKind"
                                                  @bind-ActivePageIndex="_reviewPageIndex"
-                                                 @bind-HoveredFieldId="_hoveredFieldId" />
+                                                 @bind-HoveredFieldId="_hoveredFieldId"
+                                                 @bind-SelectedFieldId="_reviewSelectedFieldId"
+                                                 FieldPlanChanged="OnOfficerFieldPlanChanged"
+                                                 AskAiEnabled="_aiEnabled"
+                                                 AskAi="OpenReviewChat" />
+
+                    @if (_reviewChatOpen)
+                    {
+                        <div class="tas-review-chat">
+                            <TemplateScanClarificationView Compact="true"
+                                                         FocusCaption="@ReviewChatFocusCaption"
+                                                         Messages="_chatMessages"
+                                                         QuickReplies="_quickReplies"
+                                                         InputText="@_chatInput"
+                                                         InputTextChanged="OnChatInputChanged"
+                                                         Busy="_chatBusy"
+                                                         ShowRejectBanner="_chatRejectBanner"
+                                                         RejectBannerText="@_chatRejectText"
+                                                         OnSend="SendChatAsync"
+                                                         OnQuickReply="SendQuickReplyAsync"
+                                                         OnBack="HideReviewChat" />
+                        </div>
+                    }
 
                     @if (RequiresLowConfidenceAck)
                     {
@@ -230,6 +271,20 @@
                 }
                 else if (_stage == Stage.Preview && _outcome is { } outcome)
                 {
+                    @if (IsEditingExisting)
+                    {
+                        <div class="tas-form" style="margin-bottom:0.75rem">
+                            <div class="tas-field">
+                                <label class="tas-field__label" for="tas-preview-name">Template name <em>*</em></label>
+                                <input id="tas-preview-name" class="tas-input" value="@_templateName"
+                                       @oninput="e => _templateName = e.Value?.ToString() ?? string.Empty" />
+                                @if (IsLockedExistingOverwrite)
+                                {
+                                    <small>Profile is locked — change the name to save a new catalog copy.</small>
+                                }
+                            </div>
+                        </div>
+                    }
                     <TemplateScanPreviewView Outcome="outcome"
                                              TemplateName="@_templateName"
                                              ShowWarningAcknowledgement="outcome.HasWarnings && !outcome.HasErrors"
@@ -285,6 +340,12 @@
                 {
                     <span class="tas-foot__hint">Analyzing scan…</span>
                 }
+                else if (_stage == Stage.FieldReview)
+                {
+                    <span class="tas-foot__hint">@(IsEditingExisting
+                        ? "Numbered marks are the placeholders already in this catalog template. Click a row to add or change Short codes. × removes a redundant row. Comma combinations stay 6.1 / 6.2 / 6.3."
+                        : "Click a detected field to highlight it, then add placeholders from the Short list. × on the right removes a redundant row (a 10.2 part hides; the yellow span keeps remaining tokens). Ask AI is optional.")</span>
+                }
                 else
                 {
                     <span class="tas-foot__grow"></span>
@@ -307,7 +368,14 @@
                     {
                         <button type="button" class="tas-btn tas-btn--ghost" @onclick="OpenHelp">Needs help</button>
                     }
-                    <button type="button" class="tas-btn tas-btn--secondary" disabled="@(_busy || !_aiEnabled)" @onclick="OpenClarification" title="@(!_aiEnabled ? "Clarification chat needs a TemplateAiScan AI provider" : null)">Ask for clarification</button>
+                    @if (_reviewChatOpen)
+                    {
+                        <button type="button" class="tas-btn tas-btn--ghost" disabled="@_busy" @onclick="HideReviewChat">Hide chat</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="tas-btn tas-btn--secondary" disabled="@(_busy || !_aiEnabled)" @onclick="OpenClarification" title="@(!_aiEnabled ? "Clarification chat needs a TemplateAiScan AI provider" : null)">Ask for clarification</button>
+                    }
                     <button type="button" class="tas-btn tas-btn--primary" disabled="@(!CanContinue)" @onclick="GenerateAsync">Continue</button>
                 }
                 else if (_stage == Stage.Clarification)
@@ -408,6 +476,7 @@
     private byte[]? _fileBytes;
     private string _fileName = string.Empty;
     private string _templateName = string.Empty;
+    private string? _editingOriginalName;
     private ApplicationProfileTemplateCatalogScope _catalogScope = ApplicationProfileTemplateCatalogScope.ProfileSpecific;
     private ApplicationProfileTemplateDataScope _dataScope = ApplicationProfileTemplateDataScope.Both;
     private ScanKind _scanKind = ScanKind.FilledSample;
@@ -425,6 +494,9 @@
     private bool _previewAcknowledgedWarnings;
     private int _reviewPageIndex;
     private string? _hoveredFieldId;
+    private string? _reviewSelectedFieldId;
+    private bool _reviewChatOpen;
+    private string? _reviewChatFocusFieldId;
     private string? _message;
     private bool _messageIsError;
 
@@ -494,6 +566,31 @@
         await InvokeAsync(StateHasChanged);
     }
 
+    public async Task OpenForExistingTemplateAsync(
+        Guid applicationProfileInstanceId,
+        string caseNumber,
+        byte[] content,
+        string fileName,
+        string templateName,
+        ApplicationProfileTemplateDataScope dataScope,
+        ApplicationProfileTemplateCatalogScope catalogScope)
+    {
+        ArgumentNullException.ThrowIfNull(content);
+        if (content.Length == 0)
+            throw new ArgumentException("Template file has no content.", nameof(content));
+
+        await OpenAsync(applicationProfileInstanceId, caseNumber);
+        _fileBytes = content;
+        _fileName = string.IsNullOrWhiteSpace(fileName)
+            ? (string.IsNullOrWhiteSpace(templateName) ? "template.docx" : templateName + ".docx")
+            : fileName;
+        _templateName = templateName?.Trim() ?? string.Empty;
+        _editingOriginalName = _templateName;
+        _dataScope = dataScope;
+        _catalogScope = catalogScope;
+        await AnalyzeAsync();
+    }
+
     private static IReadOnlyList<InstanceOption> LoadInstanceOptions(ApplicationProfile profile, IObjectSpace objectSpace)
     {
         if (profile.ID == Guid.Empty)
@@ -525,6 +622,7 @@
         _fileBytes = null;
         _fileName = string.Empty;
         _templateName = string.Empty;
+        _editingOriginalName = null;
         _catalogScope = ApplicationProfileTemplateCatalogScope.ProfileSpecific;
         _dataScope = ApplicationProfileTemplateDataScope.Both;
         _scanKind = ScanKind.FilledSample;
@@ -539,6 +637,9 @@
         _previewAcknowledgedWarnings = false;
         _reviewPageIndex = 0;
         _hoveredFieldId = null;
+        _reviewSelectedFieldId = null;
+        _reviewChatOpen = false;
+        _reviewChatFocusFieldId = null;
         _message = null;
         _messageIsError = false;
         _chatMessages.Clear();
@@ -784,14 +885,34 @@
                 return;
             }
 
-            _valueHints = Array.Empty<ScanValueHint>();
+            var valueCandidates = Array.Empty<ValueCandidate>();
+            _valueHints = BuildValueHints(_placeholderSet, objectSpace);
+            if (_scanKind == ScanKind.FilledSample && _selectedInstanceId != Guid.Empty)
+            {
+                var instance = objectSpace.GetObjectByKey<ApplicationProfileInstance>(_selectedInstanceId);
+                if (instance != null)
+                {
+                    var map = ValueMaps.Build(new ApplicationProfileInstanceValueMapRequest
+                    {
+                        Instance = instance,
+                        PlaceholderSet = _placeholderSet,
+                        DataScope = _dataScope,
+                        RetainAmbiguousLiterals = true,
+                    });
+                    valueCandidates = map.Candidates.ToArray();
+                    _valueHints = map.Candidates
+                        .Select(static c => new ScanValueHint(c.Token, c.RawValue ?? c.NormalizedValue, null))
+                        .ToList();
+                }
+            }
 
             var fieldPlan = await FieldPlanService.BuildAsync(new ScanFieldPlanBuildRequest
             {
                 Ingest = ingest,
                 PlaceholderSet = _placeholderSet,
                 ScanKind = _scanKind,
-                ValueHints = Array.Empty<ScanValueHint>(),
+                ValueHints = _valueHints,
+                ValueCandidates = valueCandidates,
             }).ConfigureAwait(false);
 
             var gatedSuitability = ScanYellowHighlightGate.Apply(
@@ -817,6 +938,15 @@
             _ingest = ingest;
             _fieldPlan = fieldPlan;
             _reviewPageIndex = 0;
+            _reviewSelectedFieldId = null;
+            _reviewChatOpen = false;
+            _reviewChatFocusFieldId = null;
+            _chatMessages.Clear();
+            _quickReplies = Array.Empty<string>();
+            _chatInput = string.Empty;
+            _chatRejectBanner = false;
+            _chatRejectText = string.Empty;
+            _chatSeeded = false;
             var needsAck = fieldPlan.Fields.Any(static f => f.Confidence == ScanFieldConfidence.Low)
                 || ingest.Suitability.Verdict == ScanSuitabilityVerdict.Warn;
             _acknowledgedWarnings = !needsAck;
@@ -890,17 +1020,75 @@
             .ToList();
     }
 
+    private Task OnOfficerFieldPlanChanged(ScanFieldPlan plan)
+    {
+        _fieldPlan = plan;
+        RefreshAcknowledgement();
+        return Task.CompletedTask;
+    }
+
     private bool CanContinueFromChat => CanContinue && !_chatBusy;
 
-    private void OpenClarification()
+    private string? ReviewChatFocusCaption
     {
-        if (_fieldPlan == null || _ingest == null)
+        get
+        {
+            if (_fieldPlan == null || string.IsNullOrWhiteSpace(_reviewChatFocusFieldId))
+                return null;
+
+            var mark = ScanReviewFieldOrder.Order(_fieldPlan.Fields, _fieldPlan.Gaps)
+                .FirstOrDefault(m =>
+                    string.Equals(m.DisplayId, _reviewChatFocusFieldId, StringComparison.Ordinal)
+                    || string.Equals(m.FieldId, _reviewChatFocusFieldId, StringComparison.Ordinal));
+            if (mark == null)
+                return null;
+
+            var token = mark.ProposedToken;
+            if (string.IsNullOrWhiteSpace(token))
+                token = "unmapped";
+            return $"Mark #{mark.DisplayOrder}: “{mark.LabelText}” → {token}";
+        }
+    }
+
+    private void OpenClarification() => OpenReviewChatCore(_reviewSelectedFieldId);
+
+    private void OpenReviewChat(string fieldId) => OpenReviewChatCore(fieldId);
+
+    private void OpenReviewChatCore(string? fieldId)
+    {
+        if (!_aiEnabled || _fieldPlan == null || _ingest == null)
             return;
 
         SeedClarificationChat();
-        _stage = Stage.Clarification;
+        _reviewChatOpen = true;
         _message = null;
         _messageIsError = false;
+
+        var focusId = string.IsNullOrWhiteSpace(fieldId) ? null : fieldId.Trim();
+        if (string.IsNullOrWhiteSpace(focusId))
+            return;
+
+        if (string.Equals(_reviewChatFocusFieldId, focusId, StringComparison.Ordinal))
+            return;
+
+        _reviewChatFocusFieldId = focusId;
+        var ordered = ScanReviewFieldOrder.Order(_fieldPlan.Fields, _fieldPlan.Gaps);
+        var mark = ordered.FirstOrDefault(m =>
+            string.Equals(m.DisplayId, focusId, StringComparison.Ordinal)
+            || string.Equals(m.FieldId, focusId, StringComparison.Ordinal));
+        var displayOrder = mark?.DisplayOrder ?? "0";
+        var parentId = mark?.FieldId ?? ScanReviewFieldOrder.ParentFieldId(focusId);
+        _chatMessages.Add(new TemplateScanClarificationView.ChatMessage(
+            false,
+            ScanFieldPlanOfficerOverride.FormatOfficerHint(_fieldPlan, parentId, displayOrder),
+            Refused: false));
+    }
+
+    private void HideReviewChat()
+    {
+        _reviewChatOpen = false;
+        _chatRejectBanner = false;
+        _chatRejectText = string.Empty;
     }
 
     private void SeedClarificationChat()
@@ -972,11 +1160,25 @@
         _chatInput = string.Empty;
         await InvokeAsync(StateHasChanged);
 
+        var serviceMessage = message;
+        if (_fieldPlan != null && !string.IsNullOrWhiteSpace(_reviewChatFocusFieldId))
+        {
+            var ordered = ScanReviewFieldOrder.Order(_fieldPlan.Fields, _fieldPlan.Gaps);
+            var mark = ordered.FirstOrDefault(m =>
+                string.Equals(m.DisplayId, _reviewChatFocusFieldId, StringComparison.Ordinal)
+                || string.Equals(m.FieldId, _reviewChatFocusFieldId, StringComparison.Ordinal));
+            var displayOrder = mark?.DisplayOrder ?? "0";
+            var parentId = mark?.FieldId ?? ScanReviewFieldOrder.ParentFieldId(_reviewChatFocusFieldId);
+            serviceMessage = ScanFieldPlanOfficerOverride.FormatChatContext(_fieldPlan, parentId, displayOrder)
+                + " Officer request: "
+                + message;
+        }
+
         try
         {
             var result = await ClarificationService.ApplyAsync(new ScanClarificationTurnRequest
             {
-                OfficerMessage = message,
+                OfficerMessage = serviceMessage,
                 CurrentPlan = _fieldPlan,
                 Playbook = _ingest.Playbook,
                 PlaceholderSet = _placeholderSet,
@@ -1026,7 +1228,15 @@
         && (_source == EntrySource.Profile
             ? _hostProfile != null && _hostObjectSpace != null
             : _profileId != Guid.Empty)
-        && (!_outcome.HasWarnings || _previewAcknowledgedWarnings);
+        && (!_outcome.HasWarnings || _previewAcknowledgedWarnings)
+        && !IsLockedExistingOverwrite;
+
+    private bool IsEditingExisting => !string.IsNullOrWhiteSpace(_editingOriginalName);
+
+    private bool IsLockedExistingOverwrite =>
+        _configLocked
+        && IsEditingExisting
+        && string.Equals(_templateName.Trim(), _editingOriginalName!.Trim(), StringComparison.OrdinalIgnoreCase);
 
     private bool CanApproveFromHelp => _outcome != null && _helpReturnStage == Stage.Preview;
 
@@ -1299,6 +1509,9 @@
         _chatSeeded = false;
         _message = null;
         _messageIsError = false;
+        _reviewSelectedFieldId = null;
+        _reviewChatOpen = false;
+        _reviewChatFocusFieldId = null;
     }
 
     private async Task OnAddPreparedTemplateAsync()
@@ -1306,6 +1519,13 @@
         if (OnAddPreparedTemplate.HasDelegate)
             await OnAddPreparedTemplate.InvokeAsync();
     }
+
+    private string ModalWidthClass => _stage switch
+    {
+        Stage.FieldReview or Stage.Preview => "tas-modal--wide tas-modal--review",
+        Stage.Clarification or Stage.NeedsHelp => "tas-modal--wide",
+        _ => string.Empty,
+    };
 
     private string StepCssClass(int index)
     {

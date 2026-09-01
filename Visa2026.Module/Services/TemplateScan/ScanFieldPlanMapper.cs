@@ -19,6 +19,8 @@ internal static class ScanFieldPlanMapper
                 ProposedToken = f.ProposedToken,
                 Confidence = f.Confidence,
                 Scope = f.Scope,
+                SourceRegion = f.SourceRegion,
+                Alternatives = f.Alternatives,
             }).ToList(),
             StaticRegions = plan.StaticRegions.Select(static r => new ScanStaticRegionDraft
             {

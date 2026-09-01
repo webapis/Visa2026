@@ -166,6 +166,7 @@ public static class ExcelMappings
             new() { Header = "PhoneNumber", PayloadProperty = "PhoneNumber", Kind = ColumnKind.StringValue },
             new() { Header = "Email", PayloadProperty = "Email", Kind = ColumnKind.Scalar },
             new() { Header = "TaxInformation", PayloadProperty = "TaxInformation", Kind = ColumnKind.Scalar },
+            new() { Header = "RegistrationDate", PayloadProperty = "RegistrationDate", Kind = ColumnKind.Scalar },
         }
     };
 

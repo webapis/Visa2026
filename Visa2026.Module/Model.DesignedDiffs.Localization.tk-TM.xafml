@@ -817,6 +817,7 @@
         <Member Name="Email" Caption="E-poçta" />
         <Member Name="Name" Caption="Ady" />
         <Member Name="PhoneNumber" Caption="Telefon" />
+        <Member Name="RegistrationDate" Caption="Kärhana hasaba alyş senesi" />
         <Member Name="TaxInformation" Caption="Salgyt maglumaty" />
       </OwnMembers>
     </Class>
@@ -1506,6 +1507,7 @@
         <Member Name="PersonalNumber" Caption="Şahsy belgi" />
         <Member Name="Photo" Caption="Surat" />
         <Member Name="PositionHistory" Caption="Wezipe taryhy" />
+        <Member Name="PreviousWorkplacesInTurkmenistan" Caption="Türkmenistanda öňki işlän ýerleri" />
         <Member Name="ProjectContract" Caption="Taslama şertnamasy" />
         <Member Name="RejectionItems" Caption="Ret elementleri" />
         <Member Name="Relationship" Caption="Gatnaşyk" />

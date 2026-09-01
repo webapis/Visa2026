@@ -1,5 +1,7 @@
+using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using DevExpress.ExpressApp;
 using Visa2026.Module.Services;
@@ -33,6 +35,14 @@ namespace Visa2026.Module.BusinessObjects
         public virtual string Email { get; set; }
 
         public virtual string TaxInformation { get; set; }
+
+        [XafDisplayName("Company Registration Date")]
+        public virtual DateTime? RegistrationDate { get; set; }
+
+        [NotMapped]
+        [XafDisplayName("Company Registration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string RegistrationDateText =>
+            RegistrationDate is { } date && date.Year > 1 ? date.ToString("dd.MM.yyyy") : string.Empty;
 
         public static CompanyProfile? TryGetInstance(IObjectSpace objectSpace) =>
             OrganizationSingletonHelper.TryGet(objectSpace, (CompanyProfile p) => p.Name);

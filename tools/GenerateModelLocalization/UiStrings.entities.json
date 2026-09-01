@@ -129,7 +129,8 @@
         "Address": { "tr-TR": "Adres", "tk-TM": "Salgy", "ru-RU": "Адрес" },
         "PhoneNumber": { "tr-TR": "Telefon", "tk-TM": "Telefon", "ru-RU": "Телефон" },
         "Email": { "tr-TR": "E-posta", "tk-TM": "E-poçta", "ru-RU": "Эл. почта" },
-        "TaxInformation": { "tr-TR": "Vergi Bilgisi", "tk-TM": "Salgyt maglumaty", "ru-RU": "Налоговые данные" }
+        "TaxInformation": { "tr-TR": "Vergi Bilgisi", "tk-TM": "Salgyt maglumaty", "ru-RU": "Налоговые данные" },
+        "RegistrationDate": { "tr-TR": "Şirket Tescil Tarihi", "tk-TM": "Kärhana hasaba alyş senesi", "ru-RU": "Дата регистрации компании" }
       }
     },
     "ApplicationNumberingProfile": {

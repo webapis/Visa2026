@@ -100,6 +100,8 @@ namespace Visa2026.Module
                 new DatabaseUpdate.ApplicationTypeSelectionCodeUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationTypeCapabilityFlagsSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.PersonIncompleteDataSchemaUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.CompanyProfileRegistrationDateSchemaUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.PersonPreviousWorkplacesInTurkmenistanSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.PersonExportBatchSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.InvitationLegacyShapeSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationProfileInstanceProgressProcessNumberSchemaUpdater(objectSpace, versionFromDB),

@@ -32,6 +32,10 @@ public static class ScanYellowHighlightTokenResolver
         @"\b(köp\s+gezeklik|bir\s+gezeklik|iki\s+gezeklik|üç\s+gezeklik|multiple|single)\b",
         RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
 
+    private static readonly Regex NameAndDob = new(
+        @"^[\s_]*([\p{L}][\p{L}\s.'’-]{2,}?)\s+(\d{1,2}[./-]\d{1,2}[./-]\d{2,4}(?:\s*ý\.?)?)\s*_*$",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+
     private static readonly Regex Urgency = new(
         @"\b(Adaty|Gyssagly|Oran\s+gyssagly)\s+tertipde\s*!?",
         RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
@@ -49,6 +53,10 @@ public static class ScanYellowHighlightTokenResolver
 
         var text = yellowText?.Trim() ?? string.Empty;
         if (text.Length == 0)
+            return Array.Empty<ScanDetectedFieldDraft>();
+
+        // Comma means one yellow span is a combination candidate (6.1 / 6.2 / …), not several independent marks.
+        if (ScanCompoundYellowParts.IsCommaCombination(text))
             return Array.Empty<ScanDetectedFieldDraft>();
 
         var drafts = new List<ScanDetectedFieldDraft>();
@@ -163,8 +171,21 @@ public static class ScanYellowHighlightTokenResolver
         foreach (Match m in AppNumber.Matches(text))
             yield return (m.Value, "AFNUM", m.Index, m.Length);
 
+        var nameDob = NameAndDob.Match(text);
+        if (nameDob.Success)
+        {
+            yield return (nameDob.Groups[1].Value.Trim(), "PFN", nameDob.Groups[1].Index, nameDob.Groups[1].Length);
+            yield return (nameDob.Groups[2].Value.Trim(), "PDBT", nameDob.Groups[2].Index, nameDob.Groups[2].Length);
+        }
+
         foreach (Match m in DateLike.Matches(text))
+        {
+            if (nameDob.Success
+                && m.Index >= nameDob.Groups[2].Index
+                && m.Index < nameDob.Groups[2].Index + nameDob.Groups[2].Length)
+                continue;
             yield return (m.Value, "ADAT", m.Index, m.Length);
+        }
 
         foreach (Match m in CountWithWords.Matches(text))
         {

@@ -1,4 +1,5 @@
 @namespace Visa2026.Blazor.Server.Editors
+@using System.IO
 @using Visa2026.Module.Services.TemplateConvert
 @using Visa2026.Module.Services.TemplateScan
 
@@ -8,12 +9,26 @@
             <strong>@TemplateName</strong>
             <span class="tas-pill">@Outcome.EmittedTokens.Count placeholders</span>
         </div>
-        <div class="tas-viewport">
-            <TemplateConvertOutlineView Outline="Outcome.Outline" />
-        </div>
+        <TemplateScanOfficePdfPreview OfficeBytes="Outcome.Content"
+                                      FileName="@PreviewOfficeFileName"
+                                      LoadingText="Opening the draft template…"
+                                      Caption="Draft pages from the generated copy, with library tokens written in.">
+            <div class="tas-viewport @(UsesPageSheet ? "tas-viewport--a4" : null) @(IsLandscape ? "tas-viewport--landscape" : null)">
+                @if (UsesPageSheet)
+                {
+                    <div class="tas-a4-page @(IsLandscape ? "tas-a4-page--landscape" : null)" aria-label="A4 draft preview">
+                        <TemplateConvertOutlineView Outline="Outcome.Outline" />
+                    </div>
+                }
+                else
+                {
+                    <TemplateConvertOutlineView Outline="Outcome.Outline" />
+                }
+            </div>
+        </TemplateScanOfficePdfPreview>
         <div class="tas-inline-note">
             <strong>Draft template, not a filled document.</strong>
-            <span>Shows placeholder placement in the letter text. After save, use catalog <strong>Preview</strong> or <strong>Edit template</strong> for page layout.</span>
+            <span>Same page layout as the uploaded file, with library tokens written in. After save, catalog <strong>Preview</strong> fills the case.</span>
         </div>
     </div>
     <aside class="tas-rail @(Outcome.HasErrors ? "tas-rail--errors" : string.Empty)">
@@ -74,6 +89,23 @@
     [Parameter] public bool ShowWarningAcknowledgement { get; set; }
     [Parameter] public bool WarningAcknowledged { get; set; }
     [Parameter] public EventCallback<bool> WarningAcknowledgedChanged { get; set; }
+
+    private bool IsWordOutline =>
+        Outcome.Outline.IsReadable && Outcome.Outline.Format == TemplateSourceFormat.Docx;
+
+    private bool IsLandscape => Outcome.Outline.IsLandscape;
+
+    private bool UsesPageSheet => IsWordOutline || IsLandscape;
+
+    private string PreviewOfficeFileName
+    {
+        get
+        {
+            var stem = string.IsNullOrWhiteSpace(TemplateName) ? "draft" : TemplateName.Trim();
+            var ext = Outcome.SourceFormat == TemplateSourceFormat.Xlsx ? ".xlsx" : ".docx";
+            return Path.HasExtension(stem) ? stem : stem + ext;
+        }
+    }
 
     private async Task OnAckChanged(ChangeEventArgs e)
     {

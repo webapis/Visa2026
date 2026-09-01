@@ -99,17 +99,12 @@ internal static class WordTemplateTokenWriter
 
             var spans = group
                 .Select(static s => (Substitution: s, Span: (DocumentRegion.WordSpan)s.Region))
-                .OrderByDescending(static x => x.Span.Start)
                 .ToList();
 
-            if (TemplateSpanEditor.HasOverlap(spans.Select(static x => (x.Span.Start, x.Span.Length)).ToList()))
-            {
-                foreach (var item in spans)
-                    skipped.Add(new TemplateWriteSkip(item.Substitution.Region, item.Substitution.Token, "Overlapping spans in one paragraph."));
-                continue;
-            }
+            var (toApply, overlapSkipped) = CollapseOverlappingSpans(spans);
+            skipped.AddRange(overlapSkipped);
 
-            foreach (var (substitution, span) in spans)
+            foreach (var (substitution, span) in toApply.OrderByDescending(static x => x.Span.Start))
             {
                 if (TryReplaceSpan(paragraph, span.Start, span.Length, TemplateTokenSyntax.Wrap(substitution.Token), out var reason))
                     applied.Add(substitution);
@@ -118,6 +113,78 @@ internal static class WordTemplateTokenWriter
             }
         }
     }
+
+    /// <summary>
+    /// Duplicate yellow of the same token in one paragraph often shares nested Word spans
+    /// (e.g. "Mehmet ÇIRAK" inside "Mehmet ÇIRAK __"). Keep the longest span and drop the
+    /// rest silently. Different tokens that overlap still skip with a warning.
+    /// </summary>
+    private static (
+        List<(TokenSubstitution Substitution, DocumentRegion.WordSpan Span)> ToApply,
+        List<TemplateWriteSkip> Skipped)
+        CollapseOverlappingSpans(
+            List<(TokenSubstitution Substitution, DocumentRegion.WordSpan Span)> spans)
+    {
+        var toApply = new List<(TokenSubstitution Substitution, DocumentRegion.WordSpan Span)>();
+        var skipped = new List<TemplateWriteSkip>();
+        var used = new bool[spans.Count];
+
+        for (var i = 0; i < spans.Count; i++)
+        {
+            if (used[i])
+                continue;
+
+            var component = new List<int> { i };
+            used[i] = true;
+            for (var qi = 0; qi < component.Count; qi++)
+            {
+                var current = spans[component[qi]].Span;
+                for (var j = 0; j < spans.Count; j++)
+                {
+                    if (used[j] || !SpansOverlap(current, spans[j].Span))
+                        continue;
+                    used[j] = true;
+                    component.Add(j);
+                }
+            }
+
+            var items = component.Select(ix => spans[ix]).ToList();
+            if (items.Count == 1)
+            {
+                toApply.Add(items[0]);
+                continue;
+            }
+
+            var codes = items
+                .Select(static x => TemplateTokenSyntax.TryGetShortCode(x.Substitution.Token, out var code)
+                    ? code
+                    : x.Substitution.Token)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (codes.Count == 1)
+            {
+                toApply.Add(items
+                    .OrderByDescending(static x => x.Span.Length)
+                    .ThenBy(static x => x.Span.Start)
+                    .First());
+                continue;
+            }
+
+            foreach (var item in items)
+            {
+                skipped.Add(new TemplateWriteSkip(
+                    item.Substitution.Region,
+                    item.Substitution.Token,
+                    "Overlapping spans in one paragraph."));
+            }
+        }
+
+        return (toApply, skipped);
+    }
+
+    private static bool SpansOverlap(DocumentRegion.WordSpan a, DocumentRegion.WordSpan b) =>
+        a.Start < b.Start + b.Length && b.Start < a.Start + a.Length;
 
     private static void ApplyLoops(
         IReadOnlyDictionary<string, Paragraph> paragraphs,

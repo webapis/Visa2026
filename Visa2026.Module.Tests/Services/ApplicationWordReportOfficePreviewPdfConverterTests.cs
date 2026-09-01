@@ -30,6 +30,20 @@ public class ApplicationWordReportOfficePreviewPdfConverterTests
         Assert.Equal(fromXlsxName!.Length, fromWrongName.Length);
     }
 
+    [Fact]
+    public void TryConvertToPdf_word_openxml_emits_pdf()
+    {
+        var docx = Visa2026.Module.Tests.TemplateScan.ScanOfficeYellowExtractorTests.CreateWordFixture("Çalyk Enerji");
+        var pdf = new ApplicationWordReportOfficePreviewPdfConverter().TryConvertToPdf(docx, "borcnama.docx");
+
+        Assert.NotNull(pdf);
+        Assert.True(pdf!.Length > 200);
+        Assert.Equal((byte)'%', pdf[0]);
+        Assert.Equal((byte)'P', pdf[1]);
+        Assert.Equal((byte)'D', pdf[2]);
+        Assert.Equal((byte)'F', pdf[3]);
+    }
+
     private static byte[] CreateMinimalXlsx()
     {
         using var workbook = new XLWorkbook();

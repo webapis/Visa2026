@@ -1,150 +1,279 @@
 @namespace Visa2026.Blazor.Server.Editors
 @using Visa2026.Module.Services.TemplateConvert
 @using Visa2026.Module.Services.TemplateScan
+@using Visa2026.Module.Services.UserReports
 
-<div class="tas-split">
-    <div class="tas-split__scan">
-        <div class="tas-filebar">
-            <strong>@FileName</strong>
-            @if (Pages.Count > 1)
+@{
+    RenderFragment fieldsTable = @<table class="tas-field-table tas-field-table--manual">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Label</th>
+                <th>Short</th>
+                <th>Full name</th>
+                <th>Description</th>
+                <th>Sample</th>
+                <th>Conf.</th>
+                <th class="tas-row-remove-col"><span class="tas-sr-only">Remove</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in FieldRows)
             {
-                <span class="tas-pill">@Pages.Count pages</span>
-            }
-        </div>
-
-        @if (Pages.Count > 1)
-        {
-            <div class="tas-scan-toolbar">
-                <button type="button" class="tas-btn tas-btn--ghost" disabled="@(ActivePageIndex <= 0)" @onclick="PreviousPage">← Prev</button>
-                <span>Page @(ActivePageIndex + 1) of @Pages.Count</span>
-                <button type="button" class="tas-btn tas-btn--ghost" disabled="@(ActivePageIndex >= Pages.Count - 1)" @onclick="NextPage">Next →</button>
-            </div>
-        }
-
-        <div class="tas-scan-viewport">
-            <div class="tas-scan-stage">
-                @if (IsOfficeSource)
-                {
-                    <div class="tas-scan-placeholder">
-                        Yellow-marked <strong>@(OfficeKindLabel)</strong> — review mapped tokens in the list. Layout stays in the original file; Generate writes placeholders into a copy.
-                    </div>
-                }
-                else if (ShowImage)
-                {
-                    <img src="@PageDataUrl" alt="Scan page @(ActivePageIndex + 1)" class="tas-scan-img" />
-                    <div class="tas-scan-overlays">
-                        @foreach (var field in FieldsOnActivePage)
+                <tr class="@RowCss(row)"
+                    @onclick="() => SelectRow(row.RowKey)"
+                    @onmouseenter="() => SetHover(row.RowKey)"
+                    @onmouseleave="ClearHover">
+                    <td class="tas-rownum"><span class="tas-mark__n">@row.OrderLabel</span></td>
+                    <td>@row.LabelText</td>
+                    <td>
+                        @if (CanRemap(row))
                         {
-                            <div class="@BoxCss(field)"
-                                 style="@BoxStyle(field.Box)"
-                                 title="@FieldTooltip(field)"
-                                 @onmouseenter="() => SetHover(field.FieldId)"
-                                 @onmouseleave="ClearHover">
+                            <div class="tas-token-combo" @onclick:stopPropagation="true">
+                                @foreach (var shortCode in row.ShortCodes)
+                                {
+                                    <span class="tas-token-chip">
+                                        <code>@shortCode</code>
+                                        <button type="button"
+                                                class="tas-token-chip__remove"
+                                                title="Remove @shortCode"
+                                                @onclick="() => OnPlaceholderRemovedAsync(row, shortCode)">×</button>
+                                    </span>
+                                }
+                                <select class="tas-input tas-token-select"
+                                        value=""
+                                        @onchange="e => OnPlaceholderAddedAsync(row, e)">
+                                    <option value="">@(row.ShortCodes.Count == 0 ? "Choose placeholder…" : "Add placeholder…")</option>
+                                    @foreach (var group in RemainingChoiceGroups(row))
+                                    {
+                                        <optgroup label="@UserReportPlaceholderRelatedBoCatalog.DisplayNameEn(group.RelatedBo)">
+                                            @foreach (var entry in group.Entries)
+                                            {
+                                                <option value="@entry.ShortCode">@entry.ShortCode — @entry.LabelEn</option>
+                                            }
+                                        </optgroup>
+                                    }
+                                </select>
                             </div>
-                        }
-                    </div>
-                }
-                else
-                {
-                    <div class="tas-scan-placeholder">
-                        PDF page @(ActivePageIndex + 1) — layout preview uses detected field boxes until full rasterization ships.
-                    </div>
-                }
-            </div>
-        </div>
-
-        <div class="tas-chips" style="margin-top:0.55rem">
-            <span class="tas-chip tas-chip--ok">@MappedCount mapped</span>
-            @if (GapCount > 0)
-            {
-                <span class="tas-chip tas-chip--warn">@GapCount gaps</span>
-            }
-            @if (LowConfidenceCount > 0)
-            {
-                <span class="tas-chip tas-chip--warn">@LowConfidenceCount low confidence</span>
-            }
-        </div>
-    </div>
-
-    <aside class="tas-rail">
-        <div class="tas-suit @SuitabilityCssClass">@SuitabilityLabel</div>
-
-        <h4>Detected fields</h4>
-        <table class="tas-field-table">
-            <thead>
-                <tr>
-                    <th>Label</th>
-                    <th>Token</th>
-                    <th>Conf.</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var row in FieldRows)
-                {
-                    <tr class="@RowCss(row)"
-                        @onmouseenter="() => SetHover(row.FieldId)"
-                        @onmouseleave="ClearHover">
-                        <td>@row.LabelText</td>
-                        <td>
                             @if (!string.IsNullOrWhiteSpace(row.ProposedToken))
                             {
-                                <code>@DisplayToken(row.ProposedToken)</code>
-                                @if (row.Alternatives.Count > 1)
-                                {
-                                    <div class="tas-alt-list">
-                                        @foreach (var alt in row.Alternatives.Take(4))
-                                        {
-                                            <small class="tas-alt-item">
-                                                @alt.ScorePercent% <code>@DisplayToken(alt.Token)</code>
-                                                <span class="tas-alt-reason">@alt.Reason</span>
-                                            </small>
-                                        }
-                                    </div>
-                                }
+                                <div class="tas-token-line"><code>@DisplayToken(row.ProposedToken)</code></div>
                             }
-                            else
+                            @if (AskAiEnabled)
                             {
-                                <span class="tas-conf tas-conf--gap">Gap</span>
-                                @if (row.Alternatives.Count > 0)
-                                {
-                                    <div class="tas-alt-list">
-                                        @foreach (var alt in row.Alternatives.Take(4))
-                                        {
-                                            <small class="tas-alt-item">
-                                                @alt.ScorePercent% <code>@DisplayToken(alt.Token)</code>
-                                            </small>
-                                        }
-                                    </div>
-                                }
+                                <button type="button"
+                                        class="tas-btn tas-btn--ghost tas-ask-ai"
+                                        @onclick:stopPropagation="true"
+                                        @onclick="() => AskAiForRowAsync(row.ParentFieldId)">
+                                    Ask AI
+                                </button>
                             }
-                        </td>
-                        <td><span class="@ConfidenceCss(row)">@ConfidenceLabel(row)</span></td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+                        }
+                        else if (row.ShortCodes.Count > 0)
+                        {
+                            @foreach (var shortCode in row.ShortCodes)
+                            {
+                                <code class="tas-short">@shortCode</code>
+                            }
+                            <div class="tas-token-line"><code>@DisplayToken(row.ProposedToken)</code></div>
+                        }
+                        else if (row.IsGap)
+                        {
+                            <span class="tas-conf tas-conf--gap">Gap</span>
+                            @if (IsSelected(row) && AskAiEnabled)
+                            {
+                                <button type="button"
+                                        class="tas-btn tas-btn--ghost tas-ask-ai"
+                                        @onclick:stopPropagation="true"
+                                        @onclick="() => AskAiForRowAsync(row.ParentFieldId)">
+                                    Ask AI
+                                </button>
+                            }
+                        }
+                        else
+                        {
+                            <span class="tas-conf tas-conf--medium">Part</span>
+                        }
+                        @if (row.ShowAlternatives && row.Alternatives.Count > 1)
+                        {
+                            <div class="tas-alt-list">
+                                @foreach (var alt in row.Alternatives.Take(3))
+                                {
+                                    <small class="tas-alt-item">
+                                        @alt.ScorePercent% <code>@alt.ShortCode</code>
+                                        <span class="tas-alt-reason">@alt.Reason</span>
+                                    </small>
+                                }
+                            </div>
+                        }
+                    </td>
+                    <td><code class="tas-canonical">@row.FullName</code></td>
+                    <td>@row.Description</td>
+                    <td class="tas-sample" title="@row.Sample">@row.Sample</td>
+                    <td><span class="@ConfidenceCss(row)">@ConfidenceLabel(row)</span></td>
+                    <td class="tas-row-remove-col">
+                        <button type="button"
+                                class="tas-row-remove"
+                                title="Remove this detected field"
+                                aria-label="Remove detected field @row.OrderLabel"
+                                @onclick:stopPropagation="true"
+                                @onclick="() => OnDetectedFieldRemovedAsync(row)">×</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>;
+}
 
-        @if (Gaps.Count > 0)
-        {
-            <h4>Unmapped</h4>
-            <ul class="tas-issues">
-                @foreach (var gap in Gaps.Take(8))
+@if (IsOfficeSource)
+{
+    <div class="tas-split tas-split--review-office @(_outline?.IsLandscape == true ? "tas-split--landscape" : null)">
+        <div class="tas-split__scan">
+            <div class="tas-filebar">
+                <strong>@FileName</strong>
+                <span class="tas-pill">In process</span>
+            </div>
+            <TemplateScanOfficePdfPreview OfficeBytes="OfficePackageBytes"
+                                          FileName="@FileName"
+                                          Marks="OrderedMarks"
+                                          ActiveFieldId="@ActiveFieldId"
+                                          MarkFocus="_markFocus"
+                                          HoveredFieldIdChanged="OnHoverChanged">
+                <TemplateScanReviewDocumentView Outline="_outline"
+                                                Marks="OrderedMarks"
+                                                HoveredFieldId="@ActiveFieldId"
+                                                HoveredFieldIdChanged="OnHoverChanged" />
+            </TemplateScanOfficePdfPreview>
+        </div>
+        <aside class="tas-rail tas-rail--review">
+            <div class="tas-review-fields__toolbar">
+                <div>
+                    <div class="tas-suit @SuitabilityCssClass">@SuitabilityLabel</div>
+                </div>
+                <div class="tas-chips">
+                    <span class="tas-chip tas-chip--ok">@MappedCount mapped</span>
+                    @if (GapCount > 0)
+                    {
+                        <span class="tas-chip tas-chip--warn">@GapCount gaps</span>
+                    }
+                    @if (LowConfidenceCount > 0)
+                    {
+                        <span class="tas-chip tas-chip--warn">@LowConfidenceCount low confidence</span>
+                    }
+                </div>
+            </div>
+            <h4>Detected fields</h4>
+            @fieldsTable
+            @if (Gaps.Count > 0)
+            {
+                <h4>Unmapped</h4>
+                <ul class="tas-issues">
+                    @foreach (var gap in Gaps.Take(8))
+                    {
+                        <li class="tas-issue tas-issue--fail">@gap.LabelText</li>
+                    }
+                </ul>
+            }
+        </aside>
+    </div>
+}
+else
+{
+    <div class="tas-split tas-split--review-scan">
+        <div class="tas-split__scan">
+            <div class="tas-filebar">
+                <strong>@FileName</strong>
+                @if (Pages.Count > 1)
                 {
-                    <li class="tas-issue tas-issue--fail">@gap.LabelText</li>
+                    <span class="tas-pill">@Pages.Count pages</span>
                 }
-            </ul>
-        }
-    </aside>
-</div>
+            </div>
+
+            @if (Pages.Count > 1)
+            {
+                <div class="tas-scan-toolbar">
+                    <button type="button" class="tas-btn tas-btn--ghost" disabled="@(ActivePageIndex <= 0)" @onclick="PreviousPage">← Prev</button>
+                    <span>Page @(ActivePageIndex + 1) of @Pages.Count</span>
+                    <button type="button" class="tas-btn tas-btn--ghost" disabled="@(ActivePageIndex >= Pages.Count - 1)" @onclick="NextPage">Next →</button>
+                </div>
+            }
+
+            <div class="tas-scan-viewport">
+                <div class="tas-scan-stage">
+                    @if (ShowImage)
+                    {
+                        <img src="@PageDataUrl" alt="Scan page @(ActivePageIndex + 1)" class="tas-scan-img" />
+                        <div class="tas-scan-overlays">
+                            @foreach (var field in FieldsOnActivePage)
+                            {
+                                <div class="@BoxCss(field)"
+                                     style="@BoxStyle(field.Box)"
+                                     title="@FieldTooltip(field)"
+                                     @onmouseenter="() => SetHover(field.FieldId)"
+                                     @onmouseleave="ClearHover">
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="tas-scan-placeholder">
+                            PDF page @(ActivePageIndex + 1) — layout preview uses detected field boxes until full rasterization ships.
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="tas-chips" style="margin-top:0.55rem">
+                <span class="tas-chip tas-chip--ok">@MappedCount mapped</span>
+                @if (GapCount > 0)
+                {
+                    <span class="tas-chip tas-chip--warn">@GapCount gaps</span>
+                }
+                @if (LowConfidenceCount > 0)
+                {
+                    <span class="tas-chip tas-chip--warn">@LowConfidenceCount low confidence</span>
+                }
+            </div>
+        </div>
+
+        <aside class="tas-rail">
+            <div class="tas-suit @SuitabilityCssClass">@SuitabilityLabel</div>
+            <h4>Detected fields</h4>
+            @fieldsTable
+            @if (Gaps.Count > 0)
+            {
+                <h4>Unmapped</h4>
+                <ul class="tas-issues">
+                    @foreach (var gap in Gaps.Take(8))
+                    {
+                        <li class="tas-issue tas-issue--fail">@gap.LabelText</li>
+                    }
+                </ul>
+            }
+        </aside>
+    </div>
+}
 
 @code {
     private sealed record FieldRow(
-        string FieldId,
+        string OrderLabel,
+        string RowKey,
+        string ParentFieldId,
+        int PartIndex,
         string LabelText,
         string? ProposedToken,
+        IReadOnlyList<string> ShortCodes,
+        IReadOnlyList<string> ParentShortCodes,
+        string FullName,
+        string Description,
+        string Sample,
         ScanFieldConfidence Confidence,
         bool IsGap,
+        bool ShowAlternatives,
         IReadOnlyList<ScanTokenAlternative> Alternatives);
+
+    [Inject] private ITemplateDocumentOutlineReader Outlines { get; set; } = null!;
 
     [Parameter, EditorRequired] public ScanFieldPlan FieldPlan { get; set; } = null!;
     [Parameter, EditorRequired] public IReadOnlyList<ScanPageImage> Pages { get; set; } = Array.Empty<ScanPageImage>();
@@ -155,9 +284,27 @@
     [Parameter] public string? HoveredFieldId { get; set; }
     [Parameter] public EventCallback<string?> HoveredFieldIdChanged { get; set; }
     [Parameter] public bool IsOfficeSource { get; set; }
+    [Parameter] public byte[]? OfficePackageBytes { get; set; }
+    [Parameter] public ScanSourceKind SourceKind { get; set; } = ScanSourceKind.Word;
+    [Parameter] public string? SelectedFieldId { get; set; }
+    [Parameter] public EventCallback<string?> SelectedFieldIdChanged { get; set; }
+    [Parameter] public EventCallback<ScanFieldPlan> FieldPlanChanged { get; set; }
+    [Parameter] public bool AskAiEnabled { get; set; }
+    [Parameter] public EventCallback<string> AskAi { get; set; }
 
-    private string OfficeKindLabel =>
-        FileName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase) ? "Excel" : "Word";
+    private TemplateDocumentOutline? _outline;
+    private byte[]? _outlineSource;
+    private int _markFocus;
+
+    private string? ActiveFieldId => HoveredFieldId ?? SelectedFieldId;
+
+    private IReadOnlyList<UserReportPlaceholderCatalogEntry> PlaceholderChoices =>
+        FieldPlan.PlaceholderSet.Allowed
+            .OrderBy(static e => e.ShortCode, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+    private IReadOnlyList<ScanReviewOrderedField> OrderedMarks =>
+        ScanReviewFieldOrder.Order(FieldPlan.Fields, FieldPlan.Gaps);
 
     private ScanPageImage? ActivePage =>
         ActivePageIndex >= 0 && ActivePageIndex < Pages.Count ? Pages[ActivePageIndex] : null;
@@ -181,26 +328,76 @@
     {
         get
         {
-            var mapped = FieldPlan.Fields
-                .OrderByDescending(static f => f.Confidence)
-                .ThenBy(static f => f.LabelText, StringComparer.OrdinalIgnoreCase)
-                .Select(f => new FieldRow(
-                    f.FieldId,
-                    f.LabelText,
-                    f.ProposedToken,
-                    f.Confidence,
-                    IsGap: false,
-                    f.Alternatives));
-            var gaps = FieldPlan.Gaps
-                .Select(g => new FieldRow(
-                    g.FieldId,
-                    g.LabelText,
-                    g.SuggestedPropertyName,
+            var byId = FieldPlan.Fields.ToDictionary(static f => f.FieldId, StringComparer.Ordinal);
+            var rows = new List<FieldRow>();
+            foreach (var mark in OrderedMarks)
+            {
+                if (!mark.IsGap && byId.TryGetValue(mark.FieldId, out var field))
+                {
+                    rows.Add(ToRow(mark, field.ProposedToken, field.Confidence, false, field.Alternatives));
+                    continue;
+                }
+
+                rows.Add(ToRow(
+                    mark,
+                    mark.ProposedToken,
                     ScanFieldConfidence.Low,
-                    IsGap: true,
+                    true,
                     Array.Empty<ScanTokenAlternative>()));
-            return mapped.Concat(gaps).ToList();
+            }
+
+            return rows;
         }
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (!IsOfficeSource
+            || OfficePackageBytes is not { Length: > 64 } bytes
+            || ReferenceEquals(bytes, _outlineSource))
+            return;
+
+        var format = SourceKind == ScanSourceKind.Excel
+            ? TemplateSourceFormat.Xlsx
+            : TemplateSourceFormat.Docx;
+        _outline = Outlines.Read(bytes, format);
+        _outlineSource = bytes;
+    }
+
+    private FieldRow ToRow(
+        ScanReviewOrderedField mark,
+        string? parentToken,
+        ScanFieldConfidence confidence,
+        bool isGap,
+        IReadOnlyList<ScanTokenAlternative> alternatives)
+    {
+        var partCodes = TemplateTokenSyntax.GetShortCodes(mark.ProposedToken);
+        var parentCodes = TemplateTokenSyntax.GetShortCodes(parentToken);
+        var entries = new List<UserReportPlaceholderCatalogEntry>();
+        foreach (var code in partCodes)
+        {
+            var found = FieldPlan.PlaceholderSet.Allowed.FirstOrDefault(e =>
+                string.Equals(e.ShortCode, code, StringComparison.OrdinalIgnoreCase));
+            if (found != null)
+                entries.Add(found);
+        }
+
+        return new FieldRow(
+            mark.DisplayOrder,
+            mark.DisplayId,
+            mark.FieldId,
+            mark.PartIndex,
+            mark.LabelText,
+            mark.ProposedToken,
+            partCodes,
+            parentCodes,
+            string.Join(" · ", entries.Select(static e => e.CanonicalPath)),
+            string.Join(" · ", entries.Select(static e => e.LabelEn)),
+            string.Join(", ", entries.Select(static e => e.ExampleValue)),
+            confidence,
+            isGap,
+            mark.PartIndex <= 1,
+            alternatives);
     }
 
     private IReadOnlyList<ScanGap> Gaps => FieldPlan.Gaps;
@@ -222,6 +419,99 @@
         ScanSuitabilityVerdict.Fail => "tas-suit--fail",
         _ => "tas-suit--pass",
     };
+
+    private bool IsSelected(FieldRow row) =>
+        string.Equals(SelectedFieldId, row.RowKey, StringComparison.Ordinal)
+        || (string.Equals(SelectedFieldId, row.ParentFieldId, StringComparison.Ordinal)
+            && row.PartIndex <= 1);
+
+    private bool CanRemap(FieldRow row) => IsSelected(row) && !row.IsGap;
+
+    private IReadOnlyList<UserReportPlaceholderCatalogGroup> RemainingChoiceGroups(FieldRow row) =>
+        UserReportPlaceholderRelatedBoCatalog.Group(RemainingChoices(row));
+
+    private IReadOnlyList<UserReportPlaceholderCatalogEntry> RemainingChoices(FieldRow row) =>
+        PlaceholderChoices
+            .Where(e => !row.ParentShortCodes.Any(c =>
+                string.Equals(c, e.ShortCode, StringComparison.OrdinalIgnoreCase)))
+            .ToList();
+
+    private async Task OnPlaceholderAddedAsync(FieldRow row, ChangeEventArgs e)
+    {
+        var code = e.Value?.ToString();
+        if (string.IsNullOrWhiteSpace(code))
+            return;
+
+        var codes = row.ParentShortCodes.Append(code).ToList();
+        await ApplyCodesAsync(row, codes);
+    }
+
+    private Task OnPlaceholderRemovedAsync(FieldRow row, string code)
+    {
+        var codes = row.ParentShortCodes
+            .Where(c => !string.Equals(c, code, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        return ApplyCodesAsync(row, codes);
+    }
+
+    private async Task ApplyCodesAsync(FieldRow row, IReadOnlyList<string> codes)
+    {
+        var next = ScanFieldPlanOfficerOverride.ApplyTokens(FieldPlan, row.ParentFieldId, codes);
+        if (ReferenceEquals(next, FieldPlan))
+            return;
+
+        await FieldPlanChanged.InvokeAsync(next);
+        var stay = ScanReviewFieldOrder.Order(next.Fields, next.Gaps)
+            .FirstOrDefault(m => string.Equals(m.DisplayId, row.RowKey, StringComparison.Ordinal))
+            ?? ScanReviewFieldOrder.Order(next.Fields, next.Gaps)
+                .FirstOrDefault(m => string.Equals(m.FieldId, row.ParentFieldId, StringComparison.Ordinal));
+        if (stay != null)
+            await SetSelectedAsync(stay.DisplayId);
+    }
+
+    private async Task OnDetectedFieldRemovedAsync(FieldRow row)
+    {
+        var next = ScanFieldPlanOfficerOverride.RemoveReviewRow(FieldPlan, row.RowKey);
+        if (ReferenceEquals(next, FieldPlan))
+            return;
+
+        await FieldPlanChanged.InvokeAsync(next);
+        var ordered = ScanReviewFieldOrder.Order(next.Fields, next.Gaps);
+        var stay = ordered.FirstOrDefault(m =>
+                       string.Equals(m.FieldId, row.ParentFieldId, StringComparison.Ordinal))
+                   ?? ordered.FirstOrDefault();
+        await SetSelectedAsync(stay?.DisplayId);
+        if (stay != null)
+            _markFocus++;
+        else
+        {
+            HoveredFieldId = null;
+            await HoveredFieldIdChanged.InvokeAsync(null);
+        }
+    }
+
+    private Task AskAiForRowAsync(string fieldId) => AskAi.InvokeAsync(fieldId);
+
+    private async Task OnHoverChanged(string? fieldId)
+    {
+        if (!string.IsNullOrWhiteSpace(fieldId))
+            await SetSelectedAsync(fieldId);
+        HoveredFieldId = fieldId;
+        await HoveredFieldIdChanged.InvokeAsync(fieldId);
+    }
+
+    private async Task SelectRow(string fieldId)
+    {
+        await SetSelectedAsync(fieldId);
+        _markFocus++;
+        await SetHover(fieldId);
+    }
+
+    private async Task SetSelectedAsync(string? fieldId)
+    {
+        SelectedFieldId = fieldId;
+        await SelectedFieldIdChanged.InvokeAsync(fieldId);
+    }
 
     private async Task SetHover(string fieldId)
     {
@@ -256,8 +546,10 @@
     private string RowCss(FieldRow row)
     {
         var parts = new List<string>();
-        if (string.Equals(HoveredFieldId, row.FieldId, StringComparison.Ordinal))
+        if (IdsMatch(ActiveFieldId, row.RowKey, row.ParentFieldId))
             parts.Add("is-hovered");
+        if (IsSelected(row))
+            parts.Add("is-selected");
         if (row.IsGap)
             parts.Add("is-gap");
         return string.Join(' ', parts);
@@ -301,6 +593,15 @@
             : token.Contains("{{", StringComparison.Ordinal)
                 ? token
                 : TemplateTokenSyntax.Wrap(token);
+
+    private static bool IdsMatch(string? selected, string overlayId, string parentId)
+    {
+        if (string.IsNullOrWhiteSpace(selected))
+            return false;
+        if (string.Equals(selected, overlayId, StringComparison.Ordinal))
+            return true;
+        return string.Equals(selected, parentId, StringComparison.Ordinal);
+    }
 
     private static string ConfidenceCss(FieldRow row) => row.IsGap
         ? "tas-conf tas-conf--gap"

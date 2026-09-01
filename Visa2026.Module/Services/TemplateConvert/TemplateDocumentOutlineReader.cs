@@ -1,5 +1,6 @@
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
 
 #nullable enable
 
@@ -13,6 +14,12 @@ public sealed record TemplateOutlineCell(string SheetName, string CellReference,
 
 public sealed record TemplateOutlineSheet(string Name, IReadOnlyList<TemplateOutlineCell> Cells);
 
+public enum TemplatePageOrientation
+{
+    Portrait = 0,
+    Landscape = 1,
+}
+
 /// <summary>
 /// A read-only text projection of an uploaded document, addressed identically to
 /// <see cref="DocumentRegion"/>. The convert UI needs it to draw the document with highlights on top;
@@ -22,10 +29,13 @@ public sealed record TemplateDocumentOutline(
     TemplateSourceFormat Format,
     IReadOnlyList<TemplateOutlineParagraph> Paragraphs,
     IReadOnlyList<TemplateOutlineSheet> Sheets,
-    bool IsReadable)
+    bool IsReadable,
+    TemplatePageOrientation PageOrientation = TemplatePageOrientation.Portrait)
 {
     public static TemplateDocumentOutline Unreadable(TemplateSourceFormat format) =>
         new(format, Array.Empty<TemplateOutlineParagraph>(), Array.Empty<TemplateOutlineSheet>(), false);
+
+    public bool IsLandscape => PageOrientation == TemplatePageOrientation.Landscape;
 }
 
 public interface ITemplateDocumentOutlineReader
@@ -66,7 +76,12 @@ public sealed class TemplateDocumentOutlineReader : ITemplateDocumentOutlineRead
                 p.IsInTable))
             .ToList();
 
-        return new TemplateDocumentOutline(TemplateSourceFormat.Docx, paragraphs, Array.Empty<TemplateOutlineSheet>(), true);
+        return new TemplateDocumentOutline(
+            TemplateSourceFormat.Docx,
+            paragraphs,
+            Array.Empty<TemplateOutlineSheet>(),
+            true,
+            ReadWordOrientation(document));
     }
 
     private static TemplateDocumentOutline ReadExcel(byte[] content)
@@ -98,6 +113,38 @@ public sealed class TemplateDocumentOutlineReader : ITemplateDocumentOutlineRead
             sheets.Add(new TemplateOutlineSheet(worksheet.Name, cells));
         }
 
-        return new TemplateDocumentOutline(TemplateSourceFormat.Xlsx, Array.Empty<TemplateOutlineParagraph>(), sheets, true);
+        return new TemplateDocumentOutline(
+            TemplateSourceFormat.Xlsx,
+            Array.Empty<TemplateOutlineParagraph>(),
+            sheets,
+            true,
+            ReadExcelOrientation(workbook));
+    }
+
+    internal static TemplatePageOrientation ReadWordOrientation(WordprocessingDocument document)
+    {
+        var body = document.MainDocumentPart?.Document?.Body;
+        var size = body?.Elements<SectionProperties>().LastOrDefault()?.GetFirstChild<PageSize>()
+            ?? body?.Descendants<SectionProperties>().LastOrDefault()?.GetFirstChild<PageSize>();
+        if (size == null)
+            return TemplatePageOrientation.Portrait;
+
+        if (size.Orient?.Value == PageOrientationValues.Landscape)
+            return TemplatePageOrientation.Landscape;
+
+        var width = size.Width?.Value ?? 0;
+        var height = size.Height?.Value ?? 0;
+        return width > height ? TemplatePageOrientation.Landscape : TemplatePageOrientation.Portrait;
+    }
+
+    internal static TemplatePageOrientation ReadExcelOrientation(XLWorkbook workbook)
+    {
+        foreach (var worksheet in workbook.Worksheets)
+        {
+            if (worksheet.PageSetup.PageOrientation == XLPageOrientation.Landscape)
+                return TemplatePageOrientation.Landscape;
+        }
+
+        return TemplatePageOrientation.Portrait;
     }
 }

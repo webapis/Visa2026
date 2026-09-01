@@ -47,6 +47,7 @@ Each person holds **identity** data, **project contract** scope, **document hist
 |----------|--------|
 | `Email` | Format validation. |
 | `HireDate` | |
+| `PreviousWorkplacesInTurkmenistan` | Optional free text (Şahsy kagyz **Türkmenistanda öňki işlän ýerleri**). Merge: `Person_PreviousWorkplacesInTurkmenistan` / **PWTM**. Gear-hidden. Not `PositionHistory`. |
 | `WorkPermitItems`, `FamilyMembers`, `PositionHistory`, `EmployeeContracts`, `Salaries`, `WorkDuties` | Collections (see below). |
 | `VisaApplicationFamilyMembersText` | Manual visa PDF family block; custom editor. See [`docs/VISA_FAMILY_MEMBERS_TEXT_EDITOR.md`](../../docs/VISA_FAMILY_MEMBERS_TEXT_EDITOR.md). |
 

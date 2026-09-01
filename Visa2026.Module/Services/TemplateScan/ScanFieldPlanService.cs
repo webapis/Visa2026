@@ -35,13 +35,37 @@ public sealed class ScanFieldPlanService : IScanFieldPlanService
         }
 
         var yellows = _officeYellow.Extract(officeBytes, request.Ingest.Input.SourceKind);
-        var proposal = ScanOfficeFieldPlanBuilder.Build(
-            yellows,
-            request.PlaceholderSet,
-            officeBytes,
-            request.Ingest.Input.SourceKind);
+        ScanFieldPlanProposal proposal;
+        if (yellows.Count > 0)
+        {
+            proposal = ScanOfficeFieldPlanBuilder.Build(
+                yellows,
+                request.PlaceholderSet,
+                officeBytes,
+                request.Ingest.Input.SourceKind,
+                request.ValueCandidates);
 
-        proposal = await _refinement.RefineAsync(proposal, request, cancellationToken).ConfigureAwait(false);
+            proposal = await _refinement.RefineAsync(proposal, request, cancellationToken).ConfigureAwait(false);
+            proposal = ScanRepresentativeNameGuard.RewriteProposal(
+                proposal,
+                request.PlaceholderSet,
+                request.ValueCandidates);
+        }
+        else
+        {
+            var tokenSpans = ScanOfficeLibraryTokenExtractor.Extract(
+                officeBytes,
+                request.Ingest.Input.SourceKind,
+                request.PlaceholderSet);
+            proposal = tokenSpans.Count > 0
+                ? ScanOfficeFieldPlanBuilder.BuildFromLibraryTokens(tokenSpans, request.PlaceholderSet)
+                : ScanOfficeFieldPlanBuilder.Build(
+                    yellows,
+                    request.PlaceholderSet,
+                    officeBytes,
+                    request.Ingest.Input.SourceKind,
+                    request.ValueCandidates);
+        }
 
         return _merger.Merge(new ScanFieldPlanMergeRequest
         {

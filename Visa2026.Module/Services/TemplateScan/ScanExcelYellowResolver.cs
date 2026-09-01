@@ -314,6 +314,19 @@ public static class ScanExcelYellowResolver
             }
         }
 
+        // Sanaw "Raýatlygy" is the ISO code column (PNAT). A catalog exact-label
+        // hit for the nationality *name* (PNTM) must not outrank the column profile.
+        foreach (var prefer in preferCodes)
+        {
+            if (!merged.TryGetValue(prefer, out var existing))
+                continue;
+
+            merged[prefer] = existing with
+            {
+                ScorePercent = Math.Min(100, existing.ScorePercent + 20),
+            };
+        }
+
         return merged.Values
             .OrderByDescending(static c => c.ScorePercent)
             .ThenBy(static c => c.ShortCode, StringComparer.OrdinalIgnoreCase)
@@ -347,16 +360,23 @@ public static class ScanExcelYellowResolver
 
 internal static class ScanExcelWorkbookHelper
 {
-    public static string? GetColumnHeader(IXLWorksheet sheet, int columnNumber, int dataRow)
+    public static int? FindHeaderRow(IXLWorksheet sheet, int columnNumber, int dataRow)
     {
         for (var row = dataRow - 1; row >= Math.Max(1, dataRow - 20); row--)
         {
-            var text = ReadCellText(sheet.Cell(row, columnNumber));
-            if (!string.IsNullOrWhiteSpace(text))
-                return text;
+            if (!string.IsNullOrWhiteSpace(ReadCellText(sheet.Cell(row, columnNumber))))
+                return row;
         }
 
         return null;
+    }
+
+    public static string? GetColumnHeader(IXLWorksheet sheet, int columnNumber, int dataRow)
+    {
+        var row = FindHeaderRow(sheet, columnNumber, dataRow);
+        return row is int headerRow
+            ? ReadCellText(sheet.Cell(headerRow, columnNumber))
+            : null;
     }
 
     public static string ReadCellText(IXLCell cell)
@@ -385,13 +405,22 @@ internal static class ScanExcelColumnProfiles
         new(["№", "no", "setir belgisi"], ["RNUM"], false),
         new(["familiyasy", "familiya", "soyad"], ["PLN"], false),
         new(["ady", " ady"], ["PFNM"], false),
-        new(["doglan senesi we yeri", "doglan senesi", "dogum"], ["PDBT", "PCBC", "PBPL"], true),
+        new(["doglan senesi we yeri", "doglan senesi", "dogum"], ["PDBT", "PCBT", "PBPL"], true),
         new(["jynsy", "cinsiyet", "gender"], ["PGND"], false),
+        new(["nikasy", "marital"], ["PMST"], false),
         new(["rayatlygy", "uyruk", "nationality"], ["PNAT"], false),
+        new(["rayatlyk ady", "nationality name"], ["PNTM"], false),
         new(["pasport belgisi we mohleti", "pasport belgisi", "pasport"], ["PPN", "PPED"], true),
+        new(["pasport gornusi", "pasport tipi", "passport type"], ["PPTP"], false),
+        new(["pasport edarasy", "berlen edara", "authority"], ["PPAT"], false),
+        new(["berlen yurt", "pasport yurdy", "issued country"], ["PPCC", "PPCT"], true),
         new(["bilimi we okan yeri", "bilimi", "egitim"], ["EGLV", "EGIY"], true),
+        new(["okan yeri", "okuw jayy", "institution"], ["EGIN"], false),
+        new(["bitiren yyl", "graduation year", "mezuniyet"], ["EGYR"], false),
         new(["bilimine gora hunari", "hunari", "specialty"], ["EGSP"], false),
         new(["wezipesi", "wezepe", "pozisyon", "position"], ["POSN"], false),
+        new(["onki islan yerleri", "previous workplaces"], ["PWTM"], false),
+        new(["wiza ucin masgala", "family members for visa", "visa application family"], ["PVFM"], false),
         new(["mohleti we gezekligi", "gezeklik", "wiza"], ["AVPRD", "AVCAT"], true, LiteralPrefix: "cakylyk "),
         new(["turkmenistandaky salgysy", "turkmenistandaki"], ["ADRS"], false),
         new(["dasary yurtdaky salgysy", "dasary yurt"], ["PFAC", "PFAD"], true),

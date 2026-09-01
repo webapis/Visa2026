@@ -207,23 +207,13 @@
                                     }
                                     else
                                     {
-                                        @if (ShowDetails && CanEditTemplate(entry))
-                                        {
-                                            <DxButton Text="@Msg("ApplicationReportPackage.EditTemplate")"
-                                                      RenderStyle="ButtonRenderStyle.Link"
-                                                      SizeMode="SizeMode.Small"
-                                                      CssClass="app-item-doc-copies__action-btn"
-                                                      title="@Msg("ApplicationReportPackage.EditTemplate.Tooltip")"
-                                                      Enabled="@(!_packageBusy && !_previewBusy && !_refreshBusy && !_syncBusy && _editTemplateId == null && _downloadTemplateId == null)"
-                                                      Click="@(() => EditTemplateAsync(entry))" />
-                                            @if (IsDownloadedForEdit(entry))
-                                            {
-                                                <span class="app-report-package__staging-badge" role="status">
-                                                    @Msg("ApplicationReportPackage.EditTemplate.OnDownloaded")
-                                                </span>
-                                            }
-                                        }
-                                        @if (CanDownloadTemplate(entry))
+                                        <DxButton Text="@Msg("ApplicationReportPackage.Preview")"
+                                                  RenderStyle="ButtonRenderStyle.Link"
+                                                  SizeMode="SizeMode.Small"
+                                                  CssClass="app-item-doc-copies__action-btn"
+                                                  Enabled="@(!_packageBusy && !_previewBusy && !_recycleBusy)"
+                                                  Click="@(() => PreviewEntryAsync(entry))" />
+                                        @if (ShowDetails && CanDownloadTemplate(entry))
                                         {
                                             <DxButton Text="@Msg("ApplicationReportPackage.DownloadTemplate")"
                                                       RenderStyle="ButtonRenderStyle.Link"
@@ -233,21 +223,31 @@
                                                       Enabled="@(!_packageBusy && !_previewBusy && !_refreshBusy && !_syncBusy && _editTemplateId == null && _downloadTemplateId == null)"
                                                       Click="@(() => DownloadTemplateAsync(entry))" />
                                         }
-                                        <DxButton Text="@Msg("ApplicationReportPackage.Preview")"
-                                                  RenderStyle="ButtonRenderStyle.Link"
-                                                  SizeMode="SizeMode.Small"
-                                                  CssClass="app-item-doc-copies__action-btn"
-                                                  Enabled="@(!_packageBusy && !_previewBusy && !_recycleBusy)"
-                                                  Click="@(() => PreviewEntryAsync(entry))" />
-                                        @if (entry.CanMoveToRecycleBin)
+                                        @if (ShowDetails && CanReviewPlaceholders(entry))
                                         {
-                                            <DxButton Text="@Msg("ApplicationReportPackage.MoveToRecycleBin")"
+                                            <DxButton Text="Review placeholders"
                                                       RenderStyle="ButtonRenderStyle.Link"
                                                       SizeMode="SizeMode.Small"
                                                       CssClass="app-item-doc-copies__action-btn"
-                                                      title="@Msg("ApplicationReportPackage.MoveToRecycleBin.Tooltip")"
-                                                      Enabled="@(!_packageBusy && !_previewBusy && !_recycleBusy)"
-                                                      Click="@(() => BeginMoveToRecycleBinConfirm(entry))" />
+                                                      title="Open Create from yellow marks on this catalog template"
+                                                      Enabled="@(!_packageBusy && !_previewBusy && !_recycleBusy && !_scanReviewBusy)"
+                                                      Click="@(() => OpenScanReviewAsync(entry))" />
+                                        }
+                                        @if (ShowDetails && entry.CanMoveToRecycleBin)
+                                        {
+                                            <button type="button"
+                                                    class="resminamalar-catalog__recycle-btn"
+                                                    title="@Msg("ApplicationReportPackage.MoveToRecycleBin.Tooltip")"
+                                                    aria-label="@Msg("ApplicationReportPackage.MoveToRecycleBin.Tooltip")"
+                                                    disabled="@(_packageBusy || _previewBusy || _recycleBusy)"
+                                                    @onclick="() => BeginMoveToRecycleBinConfirm(entry)">
+                                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                                    <path d="M4 7h16" />
+                                                    <path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                                                    <path d="M6 7l1.2 13.2A1 1 0 0 0 8.2 21h7.6a1 1 0 0 0 1-.8L18 7" />
+                                                    <path d="M10 11v6M14 11v6" />
+                                                </svg>
+                                            </button>
                                         }
                                     }
                                 </div>
@@ -383,16 +383,6 @@
                                   Enabled="@(!_packageBusy && SelectedCount > 0)"
                                   Click="@OnDownloadPackageClickAsync" />
                     }
-                    @if (_canEditUserTemplates)
-                    {
-                        @* Native button — file picker needs a live user-activation token from onclick. *@
-                        <button type="button"
-                                class="dxbl-btn dxbl-btn-link dxbl-btn-sm app-item-doc-copies__action-btn app-report-package__sync-templates-btn"
-                                disabled="@(_syncBusy || _packageBusy || _refreshBusy)"
-                                onclick="visaTemplateStagingLocal.syncFromFilePickerDirect()">
-                            @Msg("ApplicationReportPackage.SyncTemplates")
-                        </button>
-                    }
                     <DxButton Text="@Msg("ApplicationReportPackage.Refresh")"
                               RenderStyle="ButtonRenderStyle.Link"
                               SizeMode="SizeMode.Small"
@@ -475,6 +465,7 @@
     private bool _packageConfirmPending;
     private bool _packageBusy;
     private bool _previewBusy;
+    private bool _scanReviewBusy;
     private string? _previewEntryKey;
     private string? _handledFocusEntryKey;
 
@@ -763,6 +754,101 @@
             return Task.CompletedTask;
 
         return _scanDialog.OpenAsync(ApplicationProfileInstanceId, ApplicationNumber);
+    }
+
+    private bool CanReviewPlaceholders(ApplicationWordReportPackageCatalogEntry entry) =>
+        ShowScanEntryVisible
+        && entry.ApplicationProfileTemplateId is Guid profileTemplateId
+        && profileTemplateId != Guid.Empty;
+
+    private async Task OpenScanReviewAsync(ApplicationWordReportPackageCatalogEntry entry)
+    {
+        if (!CanReviewPlaceholders(entry) || _scanDialog == null || _scanReviewBusy)
+            return;
+
+        if (entry.ApplicationProfileTemplateId is not Guid profileTemplateId || profileTemplateId == Guid.Empty)
+            return;
+
+        ClearStatusMessages();
+        _scanReviewBusy = true;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileTemplate>();
+            var template = ApplicationProfileNestedTemplateCatalogHelper.LoadProfileTemplate(objectSpace, profileTemplateId);
+            if (template == null)
+            {
+                _packageStatusMessage = "This catalog template is no longer available.";
+                _packageStatusIsError = true;
+                return;
+            }
+
+            var content = ReadProfileTemplateBytes(objectSpace, template);
+            if (content == null || content.Length == 0)
+            {
+                if (entry.UserReportTemplateId is Guid userTemplateId && userTemplateId != Guid.Empty)
+                {
+                    var outcome = await TemplateStagingUiService.DownloadTemplateAsync(userTemplateId);
+                    content = outcome.Result?.FileContent;
+                }
+            }
+
+            if (content == null || content.Length == 0)
+            {
+                _packageStatusMessage = "This catalog template has no file to review.";
+                _packageStatusIsError = true;
+                return;
+            }
+
+            var fileName = template.TemplateFile?.FileName;
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                var ext = entry.Kind == ApplicationWordReportPackageEntryKind.UserExcel ? ".xlsx" : ".docx";
+                fileName = (template.TemplateName?.Trim() ?? entry.DisplayName) + ext;
+            }
+
+            await _scanDialog.OpenForExistingTemplateAsync(
+                ApplicationProfileInstanceId,
+                ApplicationNumber,
+                content,
+                fileName,
+                template.TemplateName?.Trim() ?? entry.DisplayName,
+                template.DataScope,
+                template.CatalogScope);
+        }
+        catch (Exception ex)
+        {
+            _packageStatusMessage = "Could not open Review for this template.";
+            _packageStatusIsError = true;
+            ErrorReporter.ReportReportPackageError(
+                "Resminamalar open scan Review failed.",
+                ApplicationRuntimeLogCategories.ReportPackageComponent,
+                ex);
+        }
+        finally
+        {
+            _scanReviewBusy = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private static byte[]? ReadProfileTemplateBytes(IObjectSpace objectSpace, ApplicationProfileTemplate template)
+    {
+        var file = template.TemplateFile;
+        if (file == null)
+            return null;
+
+        if (file.Content is { Length: > 0 } content)
+            return content.ToArray();
+
+        if (file.ID == Guid.Empty)
+            return null;
+
+        return objectSpace.GetObjectsQuery<DevExpress.Persistent.BaseImpl.EF.FileData>()
+            .Where(f => f.ID == file.ID)
+            .Select(f => f.Content)
+            .FirstOrDefault();
     }
 
     private async Task OnConvertSavedAsync()

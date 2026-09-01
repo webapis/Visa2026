@@ -149,11 +149,19 @@ public class ApplicationProfilePlaceholderSetServiceTests
     }
 
     [Fact]
-    public void People_data_scope_excludes_header_only_tokens()
+    public void People_data_scope_allows_organization_singleton_tokens()
     {
         var set = GetSet(FullProfile(), ApplicationProfileTemplateDataScope.PeopleM2M);
 
-        Assert.True(Allows(set, "PFN"));
+        Assert.True(Allows(set, "ACPHN"));
+        Assert.True(Allows(set, "ACEML"));
+        Assert.True(Allows(set, "ACTAX"));
+        Assert.True(Allows(set, "CHPL"));
+        Assert.True(Allows(set, "CHPN"));
+        Assert.True(Allows(set, "RPFN"));
+        Assert.True(Allows(set, "RPPH"));
+        Assert.True(Allows(set, "RPPL"));
+        Assert.True(Allows(set, "RPCL"));
         Assert.Equal(PlaceholderExclusionReason.OutOfDataScope, ReasonFor(set, "AFNUM"));
     }
 

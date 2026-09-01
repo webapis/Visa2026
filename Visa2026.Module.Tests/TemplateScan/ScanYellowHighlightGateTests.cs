@@ -77,6 +77,27 @@ public class ScanYellowHighlightGateTests
     }
 
     [Fact]
+    public void Apply_ExistingTokens_NoYellow_Passes()
+    {
+        var plan = Plan(mapped: true, yellow: 0);
+        plan = new ScanFieldPlan
+        {
+            PlaceholderSet = plan.PlaceholderSet,
+            ScanKind = plan.ScanKind,
+            Fields = plan.Fields,
+            StaticRegions = plan.StaticRegions,
+            Gaps = plan.Gaps,
+            PendingQuestions = plan.PendingQuestions,
+            YellowHighlightCount = 0,
+            Source = ScanOfficeLibraryTokenExtractor.FieldPlanSource,
+        };
+
+        var report = ScanYellowHighlightGate.Apply(PriorPass(), yellowHighlightCount: 0, plan);
+        Assert.Equal(ScanSuitabilityVerdict.Pass, report.Verdict);
+        Assert.DoesNotContain(report.Issues, i => i.Code == ScanSuitabilityIssueCode.NoYellowHighlights);
+    }
+
+    [Fact]
     public void Apply_YellowMapped_Passes()
     {
         var report = ScanYellowHighlightGate.Apply(PriorPass(), yellowHighlightCount: 2, Plan(mapped: true, yellow: 2));

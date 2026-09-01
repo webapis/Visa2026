@@ -34,6 +34,7 @@ public static class UserReportMergeDataHelper
             ["FullApplicationNumber"] = application.FullApplicationNumber ?? string.Empty,
             ["ApplicationDateText"] = application.ApplicationDateText ?? string.Empty,
             ["CompanyName"] = application.Application_Company_Name ?? string.Empty,
+            ["Application_Company_RegistrationDateText"] = application.Application_Company_RegistrationDateText ?? string.Empty,
         };
         UserReportPlaceholderAliasRegistry.EnrichDictionary(data);
         return data;
@@ -46,15 +47,24 @@ public static class UserReportMergeDataHelper
             ["RowNo"] = rowNo,
             ["Person_LastName"] = item.Person_LastName ?? string.Empty,
             ["Person_FirstName"] = item.Person_FirstName ?? string.Empty,
+            ["Person_MiddleName"] = item.Person_MiddleName ?? string.Empty,
             ["Person_DateOfBirthText"] = item.Person_DateOfBirthText ?? string.Empty,
             ["Person_CountryOfBirthTm"] = item.Person_CountryOfBirthTm ?? string.Empty,
             ["Person_BirthPlace"] = item.Person_BirthPlace ?? string.Empty,
             ["Person_GenderTm"] = item.Person_GenderTm ?? string.Empty,
+            ["Person_MaritalStatusTm"] = item.Person_MaritalStatusTm ?? string.Empty,
             ["Person_NationalityCode"] = item.Person_NationalityCode ?? string.Empty,
+            ["Person_NationalityTm"] = item.Person_NationalityTm ?? string.Empty,
             ["Passport_Number"] = item.Passport_Number ?? string.Empty,
+            ["Passport_TypeTm"] = item.Passport_TypeTm ?? string.Empty,
+            ["Passport_Authority"] = item.Passport_Authority ?? string.Empty,
+            ["Passport_CountryCode"] = item.Passport_CountryCode ?? string.Empty,
+            ["Passport_CountryTm"] = item.Passport_CountryTm ?? string.Empty,
             ["Passport_ExpirationDateText"] = item.Passport_ExpirationDateText ?? string.Empty,
             ["Education_LevelTm"] = item.Education_LevelTm ?? string.Empty,
             ["Education_InstitutionName"] = item.Education_InstitutionName ?? string.Empty,
+            ["Education_CountryCode"] = item.Education_CountryCode ?? string.Empty,
+            ["Education_GraduationYear"] = item.Education_GraduationYear ?? string.Empty,
             ["Education_SpecialtyTm"] = item.Education_SpecialtyTm ?? string.Empty,
             ["Position_PositionTm"] = item.Position_PositionTm ?? string.Empty,
             ["Application_VisaPeriod_NameTm"] = item.Application_VisaPeriod_NameTm ?? string.Empty,
@@ -62,6 +72,8 @@ public static class UserReportMergeDataHelper
             ["Address_FullAddress"] = item.Address_FullAddress ?? string.Empty,
             ["Person_ForeignAddress"] = item.Person_ForeignAddress ?? string.Empty,
             ["Person_ForeignAddressCountryCode"] = item.Person_ForeignAddressCountryCode ?? string.Empty,
+            ["Person_PreviousWorkplacesInTurkmenistan"] = item.Person_PreviousWorkplacesInTurkmenistan ?? string.Empty,
+            ["Person_VisaApplicationFamilyMembersText"] = item.Person_VisaApplicationFamilyMembersText ?? string.Empty,
             ["Application_BorderZoneLocation_NameTm"] = item.Application_BorderZoneLocation_NameTm ?? string.Empty,
             ["Item_BorderZoneLocation_NameTm"] = item.Item_BorderZoneLocation_NameTm ?? string.Empty,
             ["BorderZoneLocation_NameTm"] = item.BorderZoneLocation_NameTm ?? string.Empty,
@@ -109,6 +121,7 @@ public static class UserReportMergeDataHelper
         || (placeholders != null && placeholders.Any(p =>
             p.IsValid
             && (RowTokenReferences(p.PlaceholderKey, "SahsyKagyz_FamilyStatusText")
+                || RowTokenReferences(p.PlaceholderKey, "Person_VisaApplicationFamilyMembersText")
                 || RowTokenReferences(p.PlaceholderKey, "Education_CountryCode"))));
 
     public static bool IsWizaYatyrylmakSanawUserReportTemplate(UserReportTemplate? template) =>
@@ -192,6 +205,10 @@ public static class UserReportMergeDataHelper
             ["Person_GenderTm"] = item.Person_GenderTm ?? string.Empty,
             ["Person_NationalityCode"] = item.Person_NationalityCode ?? string.Empty,
             ["Passport_Number"] = item.Passport_Number ?? string.Empty,
+            ["Passport_TypeTm"] = item.Passport_TypeTm ?? string.Empty,
+            ["Passport_Authority"] = item.Passport_Authority ?? string.Empty,
+            ["Passport_CountryCode"] = item.Passport_CountryCode ?? string.Empty,
+            ["Passport_CountryTm"] = item.Passport_CountryTm ?? string.Empty,
             ["Passport_ExpirationDateText"] = item.Passport_ExpirationDateText ?? string.Empty,
             ["Registration_GelmeginMaksadyTm"] = item.Registration_GelmeginMaksadyTm ?? string.Empty,
             ["CancelVisa_NumberBlock"] = item.CancelVisa_NumberBlock ?? string.Empty,
@@ -210,14 +227,21 @@ public static class UserReportMergeDataHelper
             ["Person_BirthPlace"] = item.Person_BirthPlace ?? string.Empty,
             ["Person_NationalityCode"] = item.Person_NationalityCode ?? string.Empty,
             ["Passport_Number"] = item.Passport_Number ?? string.Empty,
+            ["Passport_TypeTm"] = item.Passport_TypeTm ?? string.Empty,
+            ["Passport_Authority"] = item.Passport_Authority ?? string.Empty,
+            ["Passport_CountryCode"] = item.Passport_CountryCode ?? string.Empty,
+            ["Passport_CountryTm"] = item.Passport_CountryTm ?? string.Empty,
             ["Passport_IssueDateText"] = item.Passport_IssueDateText ?? string.Empty,
             ["Passport_ExpirationDateText"] = item.Passport_ExpirationDateText ?? string.Empty,
             ["Passport_PersonalNumber"] = item.Passport_PersonalNumber ?? string.Empty,
             ["Education_LevelTm"] = item.Education_LevelTm ?? string.Empty,
             ["Education_CountryCode"] = item.Education_CountryCode ?? string.Empty,
             ["Education_InstitutionName"] = item.Education_InstitutionName ?? string.Empty,
+            ["Education_GraduationYear"] = item.Education_GraduationYear ?? string.Empty,
             ["Education_SpecialtyTm"] = item.Education_SpecialtyTm ?? string.Empty,
             ["Position_PositionTm"] = item.Position_PositionTm ?? string.Empty,
+            ["Person_PreviousWorkplacesInTurkmenistan"] = item.Person_PreviousWorkplacesInTurkmenistan ?? string.Empty,
+            ["Person_VisaApplicationFamilyMembersText"] = item.Person_VisaApplicationFamilyMembersText ?? string.Empty,
             ["SahsyKagyz_FamilyStatusText"] = item.SahsyKagyz_FamilyStatusText ?? string.Empty,
             ["Person_ForeignAddressWithCountry"] = item.Person_ForeignAddressWithCountry ?? string.Empty,
             ["Application_SponsorName"] = item.Application_SponsorName ?? string.Empty,
@@ -235,11 +259,19 @@ public static class UserReportMergeDataHelper
             ["Person_NationalityCode"] = item.Person_NationalityCode ?? string.Empty,
             ["Person_DateOfBirthText"] = item.Person_DateOfBirthText ?? string.Empty,
             ["Passport_Number"] = item.Passport_Number ?? string.Empty,
+            ["Passport_TypeTm"] = item.Passport_TypeTm ?? string.Empty,
+            ["Passport_Authority"] = item.Passport_Authority ?? string.Empty,
+            ["Passport_CountryCode"] = item.Passport_CountryCode ?? string.Empty,
+            ["Passport_CountryTm"] = item.Passport_CountryTm ?? string.Empty,
             ["Passport_ExpirationDateText"] = item.Passport_ExpirationDateText ?? string.Empty,
             ["Passport_IssueDateText"] = item.Passport_IssueDateText ?? string.Empty,
             ["Person_CountryOfBirthCode"] = item.Person_CountryOfBirthCode ?? string.Empty,
+            ["Person_CountryOfBirthTm"] = item.Person_CountryOfBirthTm ?? string.Empty,
             ["Person_BirthPlace"] = item.Person_BirthPlace ?? string.Empty,
             ["Person_GenderTm"] = item.Person_GenderTm ?? string.Empty,
+            ["Person_MiddleName"] = item.Person_MiddleName ?? string.Empty,
+            ["Person_MaritalStatusTm"] = item.Person_MaritalStatusTm ?? string.Empty,
+            ["Person_NationalityTm"] = item.Person_NationalityTm ?? string.Empty,
             ["Person_ForeignAddressCountryCode"] = item.Person_ForeignAddressCountryCode ?? string.Empty,
             ["Person_ForeignAddress"] = item.Person_ForeignAddress ?? string.Empty,
             ["Travel_PurposeOfTravelTm"] = item.Travel_PurposeOfTravelTm ?? string.Empty,
@@ -337,6 +369,10 @@ public static class UserReportMergeDataHelper
                 ["Person_DateOfBirthText"] = item.Person_DateOfBirthText ?? string.Empty,
                 ["Position_PositionTm"] = item.Position_PositionTm ?? string.Empty,
                 ["Passport_Number"] = item.Passport_Number ?? string.Empty,
+                ["Passport_TypeTm"] = item.Passport_TypeTm ?? string.Empty,
+                ["Passport_Authority"] = item.Passport_Authority ?? string.Empty,
+                ["Passport_CountryCode"] = item.Passport_CountryCode ?? string.Empty,
+                ["Passport_CountryTm"] = item.Passport_CountryTm ?? string.Empty,
                 ["Application_SponsorName"] = item.Application_SponsorName ?? string.Empty,
                 ["Application_SponsorSignatory"] = item.Application_SponsorSignatory ?? string.Empty,
                 ["Application_CompanyAddress"] = item.Application_CompanyAddress ?? string.Empty,
@@ -445,6 +481,10 @@ public static class UserReportMergeDataHelper
             ["Person_FullName"] = item.Person_FullName ?? string.Empty,
             ["Position_PositionTm"] = item.Position_PositionTm ?? string.Empty,
             ["Passport_Number"] = item.Passport_Number ?? string.Empty,
+            ["Passport_TypeTm"] = item.Passport_TypeTm ?? string.Empty,
+            ["Passport_Authority"] = item.Passport_Authority ?? string.Empty,
+            ["Passport_CountryCode"] = item.Passport_CountryCode ?? string.Empty,
+            ["Passport_CountryTm"] = item.Passport_CountryTm ?? string.Empty,
             ["Visa_Number"] = item.Visa_Number ?? string.Empty,
             ["Visa_ExpirationDateText"] = item.Visa_ExpirationDateText ?? string.Empty,
             ["WorkPermit_Number"] = item.WorkPermit_Number ?? string.Empty,
@@ -458,6 +498,80 @@ public static class UserReportMergeDataHelper
             ["Contract_SalaryText"] = item.Contract_SalaryText ?? string.Empty,
             ["Salary_CurrencyCode"] = item.Salary_CurrencyCode ?? string.Empty,
         });
+
+    /// <summary>
+    /// Letter templates from yellow marks often emit <c>{{.PFN}}</c> without <c>{{#ds.rows}}</c>.
+    /// DocxTemplater then looks up those keys on <c>ds</c> and merge returns nothing.
+    /// Copy first-roster (or instance) values onto the root model when no row loop is present.
+    /// </summary>
+    public static void PromoteLooseRowTokensOntoRoot(
+        IReadOnlyList<string> extractedTokens,
+        IDictionary<string, object> data,
+        object? rootObject,
+        IList<ApplicationRosterMergeLine>? applicationItems)
+    {
+        ArgumentNullException.ThrowIfNull(extractedTokens);
+        ArgumentNullException.ThrowIfNull(data);
+
+        if (HasRowOrItemLoop(extractedTokens))
+            return;
+
+        var firstRow = ResolveFirstRowSource(rootObject, applicationItems);
+        if (firstRow == null && rootObject == null)
+            return;
+
+        foreach (var raw in extractedTokens)
+        {
+            if (string.IsNullOrWhiteSpace(raw) || !raw.StartsWith('.'))
+                continue;
+
+            var key = StripDocxModelPrefix(raw.TrimStart('.'));
+            if (key.Length == 0 || key.Contains('.'))
+                continue;
+
+            var canonical = UserReportPlaceholderAliasRegistry.ResolveCanonicalPropertyPath(key);
+            var value = GetPropertyValue(firstRow, canonical)
+                ?? GetPropertyValue(rootObject, canonical);
+            var coerced = UserReportPlaceholderBindingHelper.CoerceMergeValue(value, canonical);
+            data[key] = coerced;
+            if (!string.Equals(key, canonical, StringComparison.OrdinalIgnoreCase))
+                data[canonical] = coerced;
+        }
+
+        UserReportPlaceholderAliasRegistry.EnrichDictionary(data);
+    }
+
+    private static bool HasRowOrItemLoop(IReadOnlyList<string> extractedTokens)
+    {
+        foreach (var raw in extractedTokens)
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+                continue;
+            var name = StripDocxModelPrefix(raw.TrimStart('#', '/'));
+            if (name.Equals("rows", StringComparison.OrdinalIgnoreCase)
+                || name.Equals("ApplicationItems", StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static object? ResolveFirstRowSource(
+        object? rootObject,
+        IList<ApplicationRosterMergeLine>? applicationItems)
+    {
+        if (applicationItems is { Count: > 0 })
+            return applicationItems[0];
+        if (rootObject is ApplicationRosterMergeLine line)
+            return line;
+        if (rootObject is ApplicationProfileInstance instance)
+        {
+            var items = GetActiveApplicationItems(instance);
+            return items.Count > 0 ? items[0] : instance;
+        }
+
+        return rootObject;
+    }
 
     public static string StripDocxModelPrefix(string pathFromTemplate)
     {

@@ -23,9 +23,9 @@ Officers submit **wizard step screenshots** + optional **catalog Preview** + the
 | Step | Judge |
 |------|--------|
 | **1 Upload** | `.docx`/`.xlsx` only; yellow requirements; case hints |
-| **2 Review** | Mapped tokens vs yellow only; no bogus gaps |
+| **2 Review** | Mapped tokens vs yellow only; no bogus gaps. Left pane is the **uploaded Word/Excel as pdf.js pages** (no browser PDF chrome), numbered `#` on the letter matching Detected fields. **Click a Detected fields row** to highlight it and **add one or more library placeholders** on that same yellow mark (compound spans). Optional **Ask AI** docks chat with that mark’s context. Outline fallback if convert fails. Not `#visa-preview-slot` |
 | **3 Generate** | Token writer on **copy**; **strip all yellow** markup; diff gate |
-| **4 Preview** | Outline only (no PDF slot) |
+| **4 Preview** | Generated Office copy as PDF in the modal (not `#visa-preview-slot`). Outline fallback |
 | **5 Done** | Saved; correct TemplateKind |
 | **Catalog Preview** | Real page/sheet; **no yellow highlighter** left on filled text |
 
@@ -59,11 +59,28 @@ Officers submit **wizard step screenshots** + optional **catalog Preview** + the
 
 | Symptom | First step | Owner |
 |---------|------------|--------|
+| Review has extra 10.1 / 10.2 rows on one yellow | Row **×** hides that part; remaining token stays on the span. Last × drops the mark so Generate leaves printed text. Hard-refresh | **This skill** |
 | PNG/JPG/PDF rejected | Expected — use yellow-marked Word/Excel | **This skill** |
 | Yellow not detected | Word Text Highlight Color / Excel solid yellow fill | **This skill** |
 | Wrong tokens / compound split | `ScanYellowHighlightTokenResolver` + catalog ShortCodes | **This skill** + user-report-templates |
+| Wekil slot mapped to `{{.PFN}}` / catalog Preview fills a roster person | Printed caption `ygtyýarly wekili` → `{{ds.RPFN}}` (`AuthorizedRepresentative`). Isolated names stay `PFN`. Restart Analyze | **This skill** |
+| Review maps company hasaba alyş date to `ADAT` / `ApplicationDateText` | `CompanyProfile.RegistrationDate` + `{{ds.ACRDT}}`. Nearby `hasaba alyş` / `şahamça` → not letter date. Restart, Analyze, set Company Registration Date in Configuration | **This skill** + user-report-templates |
+| `42703: column c.RegistrationDate does not exist` | Host-start heal `CompanyProfileRegistrationDateSchemaSql`. Restart app (ModuleInfo already current skips XAF schema). Then Analyze | **This skill** |
+| Review left pane is HTML text, not the Word page | Office→PDF via pdf.js pages (`TemplateScanOfficePdfPreview`). Hard-refresh, Analyze again. Not `#visa-preview-slot` | **This skill** |
+| Review shows Chrome/Edge PDF toolbar or thumbnail sidebar | pdf.js canvases, not an iframe. Hard-refresh CSS/JS | **This skill** |
+| Review AI mapped the wrong placeholder | Click the Detected fields row; add/remove Short codes on that mark (one yellow span can be a combination). Optional Ask AI with that mark in context | **This skill** |
+| Yellow text contains a comma but Review is one row | Comma = combination candidate. Left label + parenthetical under the line (`hasaba alnan belgisi, senesi…`) guide each part. Review shows **6.1 / 6.2 / 6.3** with separate preview borders. Generate still writes one span. Restart, Analyze, hard-refresh | **This skill** |
+| Review lost numbered marks / row click does not highlight the letter | Numbered overlays + sticky row select (`ActiveFieldId`). Click a Detected fields row | **This skill** |
+| Review preview stays portrait for a landscape Word/Excel | Outline reads `sectPr`/`PageSetup`. Hard-refresh CSS, Analyze again. Not `#visa-preview-slot` | **This skill** |
+| Review has no left document / no `#` on fields | Office outline + `ScanReviewFieldOrder` (top→bottom). Not `#visa-preview-slot`. Restart Analyze | **This skill** |
+| Need to remap a saved Resminamalar template | Catalog row **Review placeholders** (nested this-profile Word/Excel). Opens scan Review on existing `{{…}}` tokens. Not desktop **Edit template**. Not `#visa-preview-slot` | **This skill** + resminamalar |
+| Preview: 0 placeholders / “No yellow-marked spans could be written” | Review had tokens but Generate lost Word spans — restart, Analyze, Continue | **This skill** |
+| Preview skips `CHFN`/`RPFN`: overlapping spans | Duplicate yellow of the same name in one paragraph — restart, Analyze, Generate | **This skill** |
+| Word letter catalog Preview fails after Approve | Row tokens `{{.PFN}}` without `{{#ds.rows}}` — restart, re-Approve | **This skill** + resminamalar |
 | Excel roster gaps (names, TUR, …) | Column header + manual inference (`ScanExcelYellowResolver`); not case value match | **This skill** |
-| Review shows `{{ds.PLN}}` / Approve blocks `not found on ApplicationProfileInstance` | Yellow sample row above row 5 was treated as header — Analyze again after restart | **This skill** |
+| Preview blocking `{{ds.PVFM}}` / `Person_* not found on ApplicationProfileInstance` | Şahsy yellow classified Header wrote `{{ds.CODE}}` for Row-only Person tokens. Continue / Regenerated writes `{{.PVFM}}` (`PDBT`/`PCBT`/`PBPL`/`PFWC` same). Restart, hard-refresh | **This skill** |
+| Review shows `{{ds.PLN}}` / Approve blocks `not found on ApplicationProfileInstance` | Row-only codes now stay `{{.PLN}}` even on Header yellow. Analyze again after restart | **This skill** |
+| Azure ambiguous guess needs more context | Payload sends role/description + nearby snippet — not the Office file | **This skill** |
 | Clarification chat disabled | Needs `TemplateAiScan` AI provider (optional); Analyze does not | **This skill** |
 | Config lock | May add **new** templates | application-profile |
 | Excel catalog Preview blank; pane titled `report_….docx` | Nested Resminamalar keys — Excel bytes converted as Word PDF | **resminamalar** |
@@ -76,7 +93,7 @@ Officers submit **wizard step screenshots** + optional **catalog Preview** + the
 |----|-----|
 | Yellow-marked `.docx` / `.xlsx` | PNG / JPG / PDF (retired) |
 | OpenXML yellow → tokens → Approve | Convert value-match modal |
-| Wizard outline Preview | `#visa-preview-slot` inside wizard |
+| Wizard Review/Preview pdf.js pages inside the modal | `#visa-preview-slot` inside wizard |
 | | Resminamalar ZIP |
 
 ## Locked rules
@@ -86,13 +103,17 @@ Officers submit **wizard step screenshots** + optional **catalog Preview** + the
 3. Preserve source Office layout (token writer on copy).
 4. **Yellow is scan markup only** — after Generate, strip **all** highlighter/yellow fill from the saved copy (not only substituted runs). Unmapped leftovers (e.g. `6 (alty)` when only VCAT mapped) must not survive catalog Preview.
 5. Officer Approve required.
-6. Wizard Preview = outline only.
+6. Wizard Review/Preview shows the Office file as **pdf.js pages inside the modal** (not `#visa-preview-slot`, not the browser PDF viewer chrome). Numbered marks + row highlight stay. HTML outline is fallback only.
 7. Config lock allows **new** templates.
+8. **Comma in a yellow highlight** means a combination candidate. Use the **left-side label** and the **parenthetical caption under the line** to guess each part. Review shows **6.1 / 6.2 / 6.3** with separate preview borders; Generate still writes one compound token on the original span.
+9. Resminamalar **Review placeholders** reopens the same Review dialog on a saved nested template. After Approve, yellow is gone — Review is driven by library `{{…}}` clusters (comma compounds stay one Generate span). Config lock still blocks overwrite of an existing name; officer must rename to save a copy.
 
 ## Pipeline
 
 ```text
-Upload .docx/.xlsx → Ingest → ScanOfficeYellowExtractor → Merge/split → Yellow gate
+Upload .docx/.xlsx (or Resminamalar Review placeholders)
+  → Ingest → ScanOfficeYellowExtractor (else library {{…}} clusters)
+  → Merge/split → Yellow gate (token-backed plans skip the no-yellow fail)
   → Review / optional Clarification
   → ITemplateTokenWriter → StripAllYellow* → diff gate → Extract/Validate → Outline → Approve
 ```
@@ -101,7 +122,7 @@ Upload .docx/.xlsx → Ingest → ScanOfficeYellowExtractor → Merge/split → 
 
 | Layer | Look at |
 |-------|---------|
-| UI | `TemplateScanDialog.razor`, wizard / Resminamalar entry **Create from yellow marks** |
+| UI | `TemplateScanDialog.razor`, Resminamalar **Create from yellow marks** / **Review placeholders** |
 | Yellow | `ScanOfficeYellowExtractor`, `ScanYellowHighlight*` |
 | Generate | `TemplateScanOrchestrator` Office path, `ITemplateTokenWriter`, `StripAllYellowMarkup` / `StripAllYellowFills` |
 | Tests | `Visa2026.Module.Tests/TemplateScan/` |

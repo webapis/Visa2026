@@ -263,6 +263,7 @@
         "Subcontractor": { "tr-TR": "Şirket (Taşeron)", "tk-TM": "Kompaniýa (Subpudarçy)", "ru-RU": "Компания (Субподрядчик)" },
         "Email": { "tr-TR": "E-posta", "tk-TM": "E-poçta", "ru-RU": "Эл. почта" },
         "HireDate": { "tr-TR": "İşe Giriş Tarihi", "tk-TM": "Işe giriş senesi", "ru-RU": "Дата приёма" },
+        "PreviousWorkplacesInTurkmenistan": { "tr-TR": "Türkmenistan'daki önceki iş yerleri", "tk-TM": "Türkmenistanda öňki işlän ýerleri", "ru-RU": "Предыдущие места работы в Туркменистане" },
         "IsArchived": { "tr-TR": "Arşivlendi", "tk-TM": "Arhiwlendi", "ru-RU": "В архиве" },
         "VisaApplicationFamilyMembersText": { "tr-TR": "Vize için aile (manuel)", "tk-TM": "Wiza üçin maşgala (el bilen)", "ru-RU": "Семья для визы (вручную)" },
         "SponsoringEmployee": { "tr-TR": "Sponsor Çalışan", "tk-TM": "Goldawçy işgär", "ru-RU": "Сотрудник-спонсор" },

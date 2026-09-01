@@ -16,12 +16,13 @@ public static class TemplateValueMatchKeys
 {
     private static readonly HashSet<string> PersonNameCodes = new(StringComparer.OrdinalIgnoreCase)
     {
-        "PFN", "PLN", "PFNM", "ACFNM", "CHFN", "SPFNM",
+        "PFN", "PLN", "PFNM", "PMNM", "ACFNM", "CHFN", "SPFNM", "RPFN", "PSEF",
     };
 
     private static readonly HashSet<string> IdentifierCodes = new(StringComparer.OrdinalIgnoreCase)
     {
         "PPN", "PPIN", "VNUM", "AFNUM", "AFNN", "WPNM", "INVN", "ACODE", "PNAT", "PCBC", "PFAC", "AMIG",
+        "CHPN", "RPPN", "EGCC",
     };
 
     private static readonly string[] DateInputFormats =

@@ -23,6 +23,17 @@ public sealed class ScanAmbiguousYellowMark
 
     public string? ColumnHeader { get; init; }
 
+    /// <summary>Word paragraph (or Excel header + cell) with the yellow span marked <c>&lt;&lt;&lt;…&gt;&gt;&gt;</c>.</summary>
+    public string? SurroundingSnippet { get; init; }
+
+    /// <summary>Printed label immediately before the yellow span, or the Excel column header.</summary>
+    public string? PrintedLabel { get; init; }
+
+    public string? SheetName { get; init; }
+
+    /// <summary>Excel header-row cells around the yellow column, e.g. <c>A: Familiýasy | B: Ady</c>.</summary>
+    public string? HeaderRow { get; init; }
+
     public ScanFieldScope Scope { get; init; } = ScanFieldScope.Row;
 
     public string? LocalProposedToken { get; init; }

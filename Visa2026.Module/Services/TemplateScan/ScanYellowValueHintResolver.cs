@@ -17,6 +17,7 @@ public static class ScanYellowValueHintResolver
         ["PCBC"] = 1,
         ["PFAC"] = 2,
         ["PDBT"] = 0,
+        ["ACRDT"] = 0,
         ["ADAT"] = 10,
         ["EGIY"] = 0,
         ["EGLV"] = 5,
@@ -24,7 +25,62 @@ public static class ScanYellowValueHintResolver
         ["PFAD"] = 0,
         ["PFWC"] = 1,
         ["ADRS"] = 2,
+        ["PFN"] = 0,
+        ["CHFN"] = 0,
+        ["RPFN"] = 20,
+        ["RPCL"] = 0,
+        ["ACFNM"] = 8,
     };
+
+    /// <summary>
+    /// Catalog <c>exampleValue</c> rows (no ellipsis stubs) so filled samples can map when
+    /// they match the manual examples even if the live case spelling differs.
+    /// </summary>
+    public static IReadOnlyList<ValueCandidate> CatalogExampleCandidates(
+        ApplicationProfilePlaceholderSet placeholderSet)
+    {
+        ArgumentNullException.ThrowIfNull(placeholderSet);
+        var list = new List<ValueCandidate>();
+        foreach (var entry in placeholderSet.Allowed)
+        {
+            if (entry.IsImage || string.IsNullOrWhiteSpace(entry.ExampleValue))
+                continue;
+            // Same sample name as CHFN; keep CHFN as the yellow-mark signatory token.
+            if (string.Equals(entry.ShortCode, "ACFNM", StringComparison.OrdinalIgnoreCase))
+                continue;
+            // Wekil name is instance-exact only — catalog example must not steal roster people.
+            if (string.Equals(entry.ShortCode, "RPFN", StringComparison.OrdinalIgnoreCase))
+                continue;
+            // Same sample name as header SPFNM; roster sponsor must not steal letter names.
+            if (string.Equals(entry.ShortCode, "PSEF", StringComparison.OrdinalIgnoreCase))
+                continue;
+            if (entry.ExampleValue.Contains('…')
+                || entry.ExampleValue.Contains("...", StringComparison.Ordinal))
+                continue;
+            if (!TemplateTextNormalizer.IsMatchable(entry.ExampleValue))
+                continue;
+
+            var kind = TemplateValueMatchKeys.Classify(entry.ShortCode, entry.ExampleValue);
+            var keys = TemplateValueMatchKeys.Build(entry.ExampleValue, kind);
+            if (keys.Count == 0)
+                continue;
+
+            var token = entry.BuildWordToken(
+                entry.Scope == UserReportPlaceholderScope.Row
+                    ? UserReportPlaceholderScope.Row
+                    : UserReportPlaceholderScope.Header);
+            list.Add(new ValueCandidate(
+                entry.ShortCode,
+                token,
+                entry.ExampleValue,
+                keys[0],
+                kind,
+                null,
+                keys));
+        }
+
+        return list;
+    }
 
     public static IReadOnlyList<ScanDetectedFieldDraft> Resolve(
         string? yellowText,
@@ -32,7 +88,8 @@ public static class ScanYellowValueHintResolver
         ApplicationProfilePlaceholderSet placeholderSet,
         IReadOnlyList<ValueCandidate> valueCandidates,
         HashSet<string> usedHeaderShortCodes,
-        DocumentRegion? sourceRegion = null)
+        DocumentRegion? sourceRegion = null,
+        bool preferHeaderToken = false)
     {
         ArgumentNullException.ThrowIfNull(placeholderSet);
         ArgumentNullException.ThrowIfNull(valueCandidates);
@@ -61,10 +118,24 @@ public static class ScanYellowValueHintResolver
             || !placeholderSet.Contains(code))
             return Array.Empty<ScanDetectedFieldDraft>();
 
+        if (string.Equals(code, "RPFN", StringComparison.OrdinalIgnoreCase)
+            && !ScanRepresentativeNameGuard.ShouldKeepRepresentativeFullName(
+                yellowText, placeholderSet, valueCandidates))
+        {
+            winner = matches.FirstOrDefault(static c =>
+                c.ShortCode.Equals("PFN", StringComparison.OrdinalIgnoreCase));
+            if (winner == null
+                || !TemplateTokenSyntax.TryGetShortCode(winner.Token, out code)
+                || !placeholderSet.Contains(code))
+                return Array.Empty<ScanDetectedFieldDraft>();
+        }
+
         var entry = placeholderSet.Allowed.First(e =>
             string.Equals(e.ShortCode, code, StringComparison.OrdinalIgnoreCase));
 
-        var usageScope = ResolveUsageScope(entry, winner);
+        var usageScope = preferHeaderToken && entry.Scope != UserReportPlaceholderScope.Row
+            ? UserReportPlaceholderScope.Header
+            : ResolveUsageScope(entry, winner);
         var isRow = usageScope == UserReportPlaceholderScope.Row;
         if (!isRow && !usedHeaderShortCodes.Add(code))
             return Array.Empty<ScanDetectedFieldDraft>();
@@ -119,7 +190,9 @@ public static class ScanYellowValueHintResolver
                 || string.Equals(identifier, rawIdentifier, StringComparison.Ordinal))
                 return true;
 
-            if (TryLongTextContains(rawFolded, folded) || TryLongTextContains(folded, rawFolded))
+            // Yellow snippet inside a longer stored value (e.g. "Garabogaz" in an address).
+            // Do not treat a short catalog value inside a longer compound yellow as a full-cell match.
+            if (TryLongTextContains(rawFolded, folded) || TryLongTextContains(rawIdentifier, identifier))
                 return true;
         }
 

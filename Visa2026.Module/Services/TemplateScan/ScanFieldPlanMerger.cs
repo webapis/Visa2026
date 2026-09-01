@@ -1,6 +1,7 @@
 #nullable enable
 
 using Visa2026.Module.Services.TemplateConvert;
+using Visa2026.Module.Services.UserReports;
 
 namespace Visa2026.Module.Services.TemplateScan;
 
@@ -78,7 +79,8 @@ public sealed class ScanFieldPlanMerger : IScanFieldPlanMerger
         // Excel inference / single-token drafts — do not re-run regex (dates become ADAT).
         if (ShouldKeepDraftToken(draft, allowed, usedCodes))
         {
-            fields.Add(ToField(draft, hintTokens));
+            RegisterUsedHeaderCode(draft, allowed, usedCodes);
+            fields.Add(ToField(draft, hintTokens, allowed));
             return;
         }
 
@@ -92,7 +94,7 @@ public sealed class ScanFieldPlanMerger : IScanFieldPlanMerger
             draft.SourceRegion);
 
         foreach (var r in resolved)
-            fields.Add(ToField(r, hintTokens));
+            fields.Add(ToField(r, hintTokens, allowed));
 
         if (resolved.Count > 0)
             return;
@@ -102,7 +104,7 @@ public sealed class ScanFieldPlanMerger : IScanFieldPlanMerger
             && allowed.Contains(shortCode)
             && usedCodes.Add(shortCode))
         {
-            fields.Add(ToField(draft, hintTokens));
+            fields.Add(ToField(draft, hintTokens, allowed));
             return;
         }
 
@@ -137,7 +139,34 @@ public sealed class ScanFieldPlanMerger : IScanFieldPlanMerger
                 || string.Equals(a.ShortCode, "COMPOUND", StringComparison.OrdinalIgnoreCase)))
             return true;
 
-        return false;
+        if (!TemplateTokenSyntax.TryGetShortCode(token, out var shortCode) || !allowed.Contains(shortCode))
+            return false;
+
+        // Office Analyze already bound a write address — do not re-split (dates become ADAT, regions drop).
+        if (draft.SourceRegion != null)
+            return true;
+
+        var entry = allowed.Allowed.FirstOrDefault(e =>
+            string.Equals(e.ShortCode, shortCode, StringComparison.OrdinalIgnoreCase));
+        return entry?.Scope == UserReportPlaceholderScope.Row
+            || draft.Scope == ScanFieldScope.Row;
+    }
+
+    private static void RegisterUsedHeaderCode(
+        ScanDetectedFieldDraft draft,
+        ApplicationProfilePlaceholderSet allowed,
+        HashSet<string> usedCodes)
+    {
+        if (!TemplateTokenSyntax.TryGetShortCode(draft.ProposedToken, out var shortCode)
+            || !allowed.Contains(shortCode))
+            return;
+
+        var entry = allowed.Allowed.FirstOrDefault(e =>
+            string.Equals(e.ShortCode, shortCode, StringComparison.OrdinalIgnoreCase));
+        if (entry?.Scope == UserReportPlaceholderScope.Row || draft.Scope == ScanFieldScope.Row)
+            return;
+
+        usedCodes.Add(shortCode);
     }
 
     private static void AbsorbUnmappedLabel(
@@ -162,20 +191,51 @@ public sealed class ScanFieldPlanMerger : IScanFieldPlanMerger
         if (resolved.Count > 0)
         {
             foreach (var r in resolved)
-                fields.Add(ToField(r, hintTokens));
+                fields.Add(ToField(r, hintTokens, allowed));
             return;
         }
 
         if (ScanYellowHighlightTokenResolver.IsYellowTextFullyMapped(labelText, allowed, usedCodes))
             return;
 
+        var key = TemplateTextNormalizer.NormalizeIdentifier(labelText);
+        if (key.Length >= TemplateTextNormalizer.MinimumMatchLength)
+        {
+            var prior = fields.FirstOrDefault(f =>
+                !string.IsNullOrWhiteSpace(f.ProposedToken)
+                && string.Equals(
+                    TemplateTextNormalizer.NormalizeIdentifier(f.LabelText),
+                    key,
+                    StringComparison.Ordinal));
+            if (prior != null)
+            {
+                fields.Add(new ScanDetectedField
+                {
+                    FieldId = fieldId,
+                    Box = box.Clamp(),
+                    PageIndex = pageIndex,
+                    LabelText = labelText,
+                    ProposedToken = prior.ProposedToken,
+                    Confidence = prior.Confidence,
+                    Scope = prior.Scope,
+                    SourceRegion = prior.SourceRegion,
+                    Alternatives = prior.Alternatives,
+                });
+                return;
+            }
+        }
+
         gaps.Add(new ScanGap(fieldId, labelText, suggested));
     }
 
-    private static ScanDetectedField ToField(ScanDetectedFieldDraft draft, HashSet<string> hintTokens)
+    private static ScanDetectedField ToField(
+        ScanDetectedFieldDraft draft,
+        HashSet<string> hintTokens,
+        ApplicationProfilePlaceholderSet allowed)
     {
         var confidence = draft.Confidence;
-        if (!string.IsNullOrWhiteSpace(draft.ProposedToken) && hintTokens.Contains(draft.ProposedToken))
+        var original = draft.ProposedToken!.Trim();
+        if (hintTokens.Contains(original))
             confidence = ScanFieldConfidence.High;
 
         return new ScanDetectedField
@@ -184,7 +244,7 @@ public sealed class ScanFieldPlanMerger : IScanFieldPlanMerger
             Box = draft.Box.Clamp(),
             PageIndex = draft.PageIndex,
             LabelText = draft.LabelText,
-            ProposedToken = draft.ProposedToken!.Trim(),
+            ProposedToken = ScanLibraryTokenRewriter.Rewrite(original, allowed),
             Confidence = confidence,
             Scope = draft.Scope,
             SourceRegion = draft.SourceRegion,

@@ -248,6 +248,12 @@ namespace Visa2026.Module.Services.UserReports
                 ["CompanyHead_PassportLine"] = item.CompanyHead_PassportLine ?? string.Empty,
                 ["Representative_FullName"] = item.Representative_FullName ?? string.Empty,
                 ["Representative_PassportLine"] = item.Representative_PassportLine ?? string.Empty,
+                ["Representative_Phone"] = item.Representative_Phone ?? string.Empty,
+                ["Representative_PassportPhoneLine"] = item.Representative_PassportPhoneLine ?? string.Empty,
+                ["CompanyHead_PassportNumber"] = item.CompanyHead_PassportNumber ?? string.Empty,
+                ["Application_Company_PhoneNumber"] = item.Application_Company_PhoneNumber ?? string.Empty,
+                ["Application_Company_TaxInformation"] = item.Application_Company_TaxInformation ?? string.Empty,
+                ["Application_Company_RegistrationDateText"] = item.Application_Company_RegistrationDateText ?? string.Empty,
                 ["Contract_StartDateText"] = item.Contract_StartDateText ?? string.Empty,
                 ["Contract_ExpirationDateText"] = item.Contract_ExpirationDateText ?? string.Empty,
                 ["Contract_PeriodFallbackText"] = item.Contract_PeriodFallbackText ?? string.Empty,
@@ -300,6 +306,12 @@ namespace Visa2026.Module.Services.UserReports
                         item.ApplicationProfileInstance,
                         applicationItems ?? [item]);
             }
+
+            UserReportMergeDataHelper.PromoteLooseRowTokensOntoRoot(
+                tokenList,
+                data,
+                rootObject,
+                applicationItems);
 
             foreach (var raw in tokenList)
             {

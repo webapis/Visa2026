@@ -48,6 +48,41 @@ public static class TemplateTokenSyntax
         return true;
     }
 
+    /// <summary>
+    /// Every catalog short code in a token string, including compounds
+    /// (<c>{{ds.RPPN}}, {{ds.RPPA}}</c>).
+    /// </summary>
+    public static IReadOnlyList<string> GetShortCodes(string? token)
+    {
+        if (string.IsNullOrWhiteSpace(token))
+            return Array.Empty<string>();
+
+        var codes = new List<string>();
+        var remaining = token.AsSpan();
+        while (true)
+        {
+            var start = remaining.IndexOf("{{".AsSpan(), StringComparison.Ordinal);
+            if (start < 0)
+                break;
+
+            remaining = remaining[(start + 2)..];
+            var end = remaining.IndexOf("}}".AsSpan(), StringComparison.Ordinal);
+            if (end < 0)
+                break;
+
+            var inner = remaining[..end].ToString();
+            remaining = remaining[(end + 2)..];
+            if (TryGetShortCode("{{" + inner + "}}", out var code)
+                && !codes.Exists(c => string.Equals(c, code, StringComparison.OrdinalIgnoreCase)))
+                codes.Add(code);
+        }
+
+        if (codes.Count == 0 && TryGetShortCode(token, out var single))
+            codes.Add(single);
+
+        return codes;
+    }
+
     private static string Bare(string token)
     {
         var value = (token ?? string.Empty).Trim();

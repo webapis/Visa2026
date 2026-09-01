@@ -669,6 +669,112 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         public string Application_CompanyHead_PositionTm => OrganizationReportHelper.GetSignatory(ObjectSpaceHelper.Get(this))?.PositionTitleTm ?? string.Empty;
 
+        [XafDisplayName("Company Tax Information (Word)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string Application_Company_TaxInformation =>
+            OrganizationReportHelper.GetCompanyProfile(ObjectSpaceHelper.Get(this))?.TaxInformation ?? string.Empty;
+
+        [XafDisplayName("Company Registration Date (Word)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string Application_Company_RegistrationDateText =>
+            OrganizationReportHelper.GetCompanyProfile(ObjectSpaceHelper.Get(this))?.RegistrationDateText ?? string.Empty;
+
+        [XafDisplayName("Company registry, address and phone (one line)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string Application_CompanyRegistryAddressLine
+        {
+            get
+            {
+                var c = OrganizationReportHelper.GetCompanyProfile(ObjectSpaceHelper.Get(this));
+                if (c == null)
+                    return string.Empty;
+                var parts = new List<string>();
+                if (!string.IsNullOrWhiteSpace(c.TaxInformation))
+                    parts.Add(c.TaxInformation.Trim());
+                if (!string.IsNullOrWhiteSpace(c.Address))
+                    parts.Add(c.Address.Trim());
+                if (!string.IsNullOrWhiteSpace(c.PhoneNumber))
+                    parts.Add(c.PhoneNumber.Trim());
+                return string.Join(" ", parts);
+            }
+        }
+
+        [XafDisplayName("Signatory Passport Number"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string CompanyHead_PassportNumber =>
+            OrganizationReportHelper.GetSignatory(ObjectSpaceHelper.Get(this))?.PassportNumber ?? string.Empty;
+
+        [XafDisplayName("Signatory Passport Authority"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string CompanyHead_PassportAuthority =>
+            OrganizationReportHelper.GetSignatory(ObjectSpaceHelper.Get(this))?.PassportAuthority ?? string.Empty;
+
+        [XafDisplayName("Signatory Passport Issue Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string CompanyHead_PassportIssueDateText =>
+            OrganizationPassportLineHelper.FormatIssueDateText(
+                OrganizationReportHelper.GetSignatory(ObjectSpaceHelper.Get(this))?.PassportIssueDate);
+
+        [XafDisplayName("Signatory Passport (one line)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string CompanyHead_PassportLine =>
+            OrganizationReportHelper.GetSignatory(ObjectSpaceHelper.Get(this))?.PassportLine ?? string.Empty;
+
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string CompanyHead_FullName => Application_CompanyHead_FullName;
+
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string CompanyHead_PositionTm => Application_CompanyHead_PositionTm;
+
+        [XafDisplayName("Representative Full Name"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string Representative_FullName =>
+            OrganizationReportHelper.GetRepresentative(ObjectSpaceHelper.Get(this))?.FullName ?? string.Empty;
+
+        [XafDisplayName("Representative Position (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string Representative_PositionTm =>
+            OrganizationReportHelper.GetRepresentative(ObjectSpaceHelper.Get(this))?.PositionTitleTm ?? string.Empty;
+
+        [XafDisplayName("Representative Phone"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string Representative_Phone =>
+            OrganizationReportHelper.GetRepresentative(ObjectSpaceHelper.Get(this))?.Phone ?? string.Empty;
+
+        [XafDisplayName("Representative Passport Number"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string Representative_PassportNumber =>
+            OrganizationReportHelper.GetRepresentative(ObjectSpaceHelper.Get(this))?.PassportNumber ?? string.Empty;
+
+        [XafDisplayName("Representative Passport Authority"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string Representative_PassportAuthority =>
+            OrganizationReportHelper.GetRepresentative(ObjectSpaceHelper.Get(this))?.PassportAuthority ?? string.Empty;
+
+        [XafDisplayName("Representative Passport Issue Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string Representative_PassportIssueDateText =>
+            OrganizationPassportLineHelper.FormatIssueDateText(
+                OrganizationReportHelper.GetRepresentative(ObjectSpaceHelper.Get(this))?.PassportIssueDate);
+
+        [XafDisplayName("Representative Passport (one line)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string Representative_PassportLine =>
+            OrganizationReportHelper.GetRepresentative(ObjectSpaceHelper.Get(this))?.PassportLine ?? string.Empty;
+
+        [XafDisplayName("Representative passport, authority and phone (one line)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string Representative_PassportPhoneLine
+        {
+            get
+            {
+                var r = OrganizationReportHelper.GetRepresentative(ObjectSpaceHelper.Get(this));
+                return r == null
+                    ? string.Empty
+                    : OrganizationPassportLineHelper.FormatNumberAuthorityPhone(r.PassportNumber, r.PassportAuthority, r.Phone);
+            }
+        }
+
         [XafDisplayName("ApplicationProfileInstance Type Name (Word)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
         public string ApplicationType_Name => ApplicationType?.Name ?? string.Empty;

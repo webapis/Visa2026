@@ -4,6 +4,185 @@ Append-only. Newest first under **## Entries**.
 
 ## Entries
 
+### 2026-09-01 — Şahsy Preview `{{ds.PVFM}}` blocked Approve
+
+- Need: Create from yellow marks Preview on Şahsy kagyz listed blocking `{{ds.PVFM}}` / `{{ds.PDBT}}` / `{{ds.PCBT}}` / `{{ds.PBPL}}` / `{{ds.PFWC}}` — property not found on ApplicationProfileInstance. `{{.PFN}}` was fine. Approve stayed disabled.
+- Cause: Word yellow on a letter is Header-scoped. Officer remap / Azure kept `{{ds.CODE}}`. Validator resolves short codes to `Person_*` and looks them up on the instance, not `ApplicationRosterMergeLine`. Merge only promotes `{{.CODE}}` onto the root when there is no `{{#ds.rows}}`.
+- Fix: Catalog Row-only entries always emit `{{.CODE}}` (`BuildWordToken` ignores Header usage). `ScanLibraryTokenRewriter` rewrites leftover `{{ds.PVFM}}` on merge, Azure sanitize, and Generate.
+- Officer: Restart, hard-refresh, Analyze, Continue (or Regenerated). Blocking list should clear so Approve can enable. Catalog Preview still uses first-roster promotion for letters without a rows loop.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-01 — Review row × removes a redundant detected field
+
+- Need: Şahsy kagyz family block split to 10.1 / 10.2; officers needed to dismiss the extra row without clearing **PVFM** on the yellow span.
+- Fix: Detected fields **×** (right of each row). Compound part is hidden (`HiddenPartIndexes`); parent token stays. Last remaining part or a simple mark is removed so Generate leaves the printed text. Unmapped gaps can be dismissed the same way.
+- Officer: Restart, hard-refresh, Analyze. Click **×** on the extra row (e.g. 10.2). Continue. The family highlight still writes **PVFM** if 10.1 kept it.
+- Cross-skill: none
+
+### 2026-09-01 — PNTM must not steal Sanaw Raýatlygy; isolated I-AŞ+phone stays RPCL
+
+- Need: Catalog **PNTM** (`Person_NationalityTm`) used the same tk-TM label **Raýatlygy** as the Sanaw ISO-code column, so yellow `TUR` mapped to PNTM. Isolated wekil `I-AŞ … +993…` comma lines were split to RPPL+ACPHN instead of **RPCL**.
+- Fix: PNTM label **Raýatlyk ady** / Nationality name. Column profile `rayatlygy` → **PNAT**; `rayatlyk ady` → **PNTM**. Profile prefer-codes beat a competing catalog exact-label. Compound binder keeps **RPCL** when there is no form-caption slot list. Catalog examples skip **PSEF** (same sample as **SPFNM**). Comma yellows skip catalog-example matching.
+- Officer: Restart, hard-refresh, Analyze. Sanaw **Raýatlygy** + `TUR` is **PNAT**. Wekil passport+phone without a parenthetical caption is **RPCL**.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-01 — Resminamalar Review placeholders reopens scan Review
+
+- Need: After Approve, yellow is stripped. Officers still need to remap placeholders on a catalog template (e.g. Gaybo-BORÇNAMA_115) without desktop Edit template and without uploading a new yellow file.
+- Fix: Catalog row **Review placeholders** (this-profile nested Word/Excel) opens `TemplateScanDialog.OpenForExistingTemplateAsync`. `ScanOfficeLibraryTokenExtractor` builds Review from library `{{…}}` clusters when yellow count is 0. Comma compounds stay one Generate span (6.1 / 6.2). Locked profiles cannot overwrite the same name — rename to save a copy. Not `#visa-preview-slot`.
+- Officer: Restart, hard-refresh. On Resminamalar, click **Review placeholders** next to Preview. Remap Short codes, Continue, Approve. If the profile is locked, change the template name before Approve.
+- Cross-skill: visa2026-resminamalar
+
+### 2026-09-01 — Comma yellow = combination; captions under the line guide parts
+
+- Need: Borçnama yellow values like `U37109249, T.C. AŞKABAT BE, 19.02.2024ý.` or company `№263407090, 02.02.2009ý., …, +993…` were one Review row. Officers need 6.1 / 6.2 / 6.3 with separate preview borders. The printed `(pasportyň seriýasy we belgisi, nirede we haçan berildi, möhleti)` under the line and the left label (`pasporty:`, `ygtyýarly wekili`) say what each comma part is.
+- Fix: `IsCommaCombination` keeps one Generate span. Review `ExpandCompounds` always splits on comma. Binder uses left label + parenthetical slots (`ScanFormCaptionHints`) so wekil lines go to `RPPN`/`RPPA`/`RPPH`, applicant passport to `PPN`/`PPAT`/`PPED`, company registry to `ACRDT`/`ACADR`/`ACPHN`. pdf.js overlays use segment text. Not `#visa-preview-slot`.
+- Officer: Restart, hard-refresh, Analyze again. Comma highlights become 6.1 / 6.2 / 6.3. Click a sub-row to add/fix that part’s placeholder. Continue still writes the whole yellow mark as one combined token.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-01 — Review Add-placeholder grouped by related BO; passport type/country/authority
+
+- Need: Officers and Ask AI could not find passport type, issued country, or authority. The Add-placeholder list was a flat A–Z dump.
+- Fix: Catalog `relatedBo` groups Review `<optgroup>` and Azure `allowedTokensByBo` (Passport, Person, Company, wekil, …). New codes `PPTP` / `PPAT` / `PPCC` / `PPCT`. Placeholder manual sections match.
+- Officer: Restart, hard-refresh, Analyze. Add placeholder shows groups (Passport, Person, …). For type / issued country / authority pick `PPTP` / `PPCC`+`PPCT` / `PPAT` — not wekil `RPPA`.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-01 — Review: one yellow mark can be several placeholders
+
+- Need: Some highlights are compound (passport number + authority + phone, name + date). A single Short dropdown could not represent that.
+- Fix: Selected row uses chips + **Add placeholder**. `ScanFieldPlanOfficerOverride.ApplyTokens` writes `{{ds.RPPN}}, {{ds.RPPA}}` (separator from the printed text) onto the same yellow span. `TemplateTokenSyntax.GetShortCodes` reads compounds.
+- Officer: Restart, hard-refresh, Analyze. Click the mark, add each library code. Continue. Same highlight, combined tokens.
+- Cross-skill: none
+
+### 2026-09-01 — Review: remap placeholder from selected row; optional Ask AI
+
+- Need: AI sometimes assigns the wrong library token. Officers need to correct it on Review without leaving the letter, and optionally ask AI with that mark in context.
+- Fix: Selected Detected fields row shows a Short dropdown (`ScanFieldPlanOfficerOverride.ApplyToken` keeps the yellow span). Ask AI / Ask for clarification docks compact chat on Review and prefixes the focused mark (label + current token) on send. Not `#visa-preview-slot`.
+- Officer: Restart, hard-refresh, Analyze. Click the wrong row (e.g. ADAT on a company date) and pick `ACRDT` from Short. Continue. Ask AI only if you want a suggestion.
+- Cross-skill: none
+
+### 2026-09-01 — Review PDF: no nested viewer; restore numbers and row highlight
+
+- Need: Chrome/Edge PDF iframe showed toolbar + thumbnail sidebar (preview-in-preview). Numbered squares disappeared. Clicking a Detected fields row did not highlight the letter.
+- Fix: Render converted PDF with pdf.js canvases (`template-scan-pdf-preview.js`). Overlay `#` badges by matching yellow labels in page text. Click a table row to keep the matching mark highlighted and scroll it into view. Not `#visa-preview-slot`.
+- Officer: Restart, hard-refresh. Left pane is the Word page only (no PDF sidebar). Marks 1…n sit on the yellow text. Click a row on the right to highlight the same number on the page.
+- Cross-skill: none
+
+### 2026-09-01 — Review/Preview uses the uploaded Office file as PDF
+
+- Need: Left Review pane was HTML outline; borçnama layout did not match the submitted Word page.
+- Fix: Convert the uploaded (Review) / generated (Preview) `.docx`/`.xlsx` with `ApplicationWordReportOfficePreviewPdfConverter` and show it in a modal iframe. Same engine as catalog Preview. Not `#visa-preview-slot`. HTML outline remains fallback.
+- Officer: Restart, hard-refresh CSS, Analyze again. Left pane should look like the Word pages (yellow highlighter kept on Review). Numbers stay in Detected fields.
+- Cross-skill: resminamalar (converter)
+
+### 2026-09-01 — Postgres 42703 CompanyProfiles.RegistrationDate
+
+- Need: F5 after ACRDT work threw `column c.RegistrationDate does not exist` on roster merge (`CompanyProfile.TryGetInstance`).
+- Cause: Property was added in code; XAF skipped schema because ModuleInfo already current.
+- Fix: `CompanyProfileRegistrationDateSchemaSql.ApplyIfMissing` on host start + ModuleUpdater. Tenant manifest 43 so catalog can seed `2009-02-02` when lookup sync runs.
+- Officer: Restart the app. If Configuration company date is still empty, set it or one-shot `FORCE_XAF_DB_UPDATE=true`. Then Analyze again.
+- Cross-skill: lookup-data
+
+### 2026-09-01 — Review/Preview sheet follows file orientation
+
+- Need: Left preview stayed portrait A4 even when the uploaded Word/Excel is landscape.
+- Fix: `TemplateDocumentOutline.PageOrientation` from Word `sectPr`/`pgSz` (Orient or width>height) and Excel `PageSetup`. Review + Generate Preview use `tas-a4-page--landscape` (297×210mm) and a wider left column. Not `#visa-preview-slot`.
+- Officer: Hard-refresh CSS, Analyze again. Portrait borçnama stays 210×297. Landscape letters/sanaw show a landscape sheet.
+- Cross-skill: none
+
+### 2026-09-01 — Review left preview: A4 column width
+
+- Need: In-process letter was a narrow pane (~0.9fr) so A4 text wrapped and scrolled.
+- Fix: Review modal ~1760px; left column up to `210mm`; viewport height `min(80vh, 297mm)`. Not `#visa-preview-slot`.
+- Officer: Hard-refresh CSS, Analyze again. Left sheet should be letter-width; Detected fields stay on the right.
+- Cross-skill: none
+
+### 2026-09-01 — Borçnama company date must be ACRDT, not ADAT
+
+- Steps attached: Review (`6aylık-BORÇNAMA_111.docx`, mark 2 `02.02.2009ý.`)
+- Need / Symptom: Isolated company hasaba alyş date mapped to `ApplicationDateText` / `{{ds.ADAT}}`
+- Cause: Date regex always emitted `ADAT`. No Company Registration Date on `CompanyProfile` / catalog.
+- Fix: Persisted `CompanyProfile.RegistrationDate`; placeholder `ACRDT` → `Application_Company_RegistrationDateText`. `ScanCompanyRegistrationDateGuard` rewrites `ADAT` when nearby is hasaba alyş / şahamça / tescil.
+- Officer: Restart so schema + tenant JSON (`2009-02-02`) apply. Analyze again. Mark 2 → Company registration date. Confirm Configuration → Company shows 02.02.2009.
+- Cross-skill: user-report-templates
+
+### 2026-09-01 — Review numbered preview verified on borçnama_111
+
+- Steps attached: Review (`6aylık-BORÇNAMA_111.docx`, 10 mapped)
+- Need / Symptom: Confirm left in-process letter + numbered squares match Detected fields `#`
+- Cause: n/a
+- Fix: No code change — confirmed good. Mark 1 company → `ASPN`; 2 `02.02.2009ý.` → `ADAT`; 3 Hilmi → `PFN`; same numbers in the table.
+- Officer: Continue to Generate when ready. Hover a row to highlight the matching square.
+- Cross-skill: none
+
+### 2026-09-01 — Review left preview: numbered marks matching field rows
+
+- Need: In-process preview of the uploaded Word/Excel on Review, with numbered rounded squares on placeholder candidates, top-to-bottom, matching Detected fields row numbers.
+- Fix: `ScanReviewFieldOrder` sorts by Word/Excel address. Left A4 outline (`TemplateScanReviewDocumentView`) wraps yellow spans with `#` squares. Table has a `#` column. Not `#visa-preview-slot`.
+- Officer: Restart, Analyze again. Left letter shows 1…n on yellow names; the same numbers lead Detected fields. Hover a row to highlight the mark.
+- Cross-skill: none
+
+### 2026-09-01 — Review table: manual Full name / Description / Sample
+
+- Symptom: Detected fields showed only short token + yellow label. Left pane was unused “Yellow-marked Word” help. Officers need Placeholder manual Full name, Description, and sample next to the short code.
+- Fix: Office Review is a full-width table: Label, Short, Full name (`CanonicalPath`), Description (`LabelEn`), Sample (`ExampleValue`), Conf. Left help card removed.
+- Officer: Restart / hard-refresh. Review of a borçnama should list e.g. `RPFN` / `Representative_FullName` / representative description / catalog example.
+- Cross-skill: user-report-templates (catalog)
+
+### 2026-09-01 — Borçnama_06: Review 10 mapped, Preview 0 placeholders
+
+- Symptom: Review of `6aylyk-BORÇNAMA_06.docx` mapped 10 fields (Nepesowa `{{ds.RPFN}}` correct). Generate Preview: **0 placeholders**, blocking *No yellow-marked spans could be written*, original letter text, Approve disabled. A4 sheet looked narrow in the gray well.
+- Cause: Generate only writes fields that still have `SourceRegion`. Merger re-split header tokens (ADAT/RPFN/CHFN) and clarification mapper dropped spans. Without an address the orchestrator returned the original package.
+- Fix: Keep office drafts that already have a token + span. Recover yellow addresses by label if a span is missing. Clarification mapper copies `SourceRegion`. A4 sheet fills the preview column; Review field rows have more padding.
+- Officer: Restart, Analyze `_06` again, Continue. Preview must list tokens (`{{ds.RPFN}}` on wekil). Approve when that list is not empty.
+- Cross-skill: none
+
+### 2026-09-01 — Review/Preview layout: fields width, A4 sheet, taller tokens
+
+- Symptom: Review Detected fields were a 320px rail while the Word hint pane was a tall empty box. Preview placeholders were short chips; the draft stretched full width instead of looking like a letter page.
+- Fix: Office Review uses `tas-split--review-office` (fields take remaining width). Word Preview wraps the outline in an A4 sheet (`210/297`). Placeholder chips use taller padding. Modal Review/Preview width `1340px`.
+- Officer: Restart or hard-refresh so `template-scan.css` reloads. Review table should be the wide pane; Preview should show a portrait page and larger placeholder rows.
+- Cross-skill: none
+
+### 2026-09-01 — Borçnama_03: wekil slot must be RPFN, not Person
+
+- Symptom: Review mapped Nepesowa under **Kärhananyň wiza işleri boýunça ygtyýarly wekili** to `{{.PFN}}` (“Person full name (roster) not representative”). After Approve, catalog Preview filled those lines with a case person (Serdar Nuri…), not Configuration `AuthorizedRepresentative` (Nejepowa). Hilmi + DOB and Mehmet `CHFN` were fine; `RPCL` was fine.
+- Cause: The name guard treated any person-shaped yellow that is not the exact catalog wekil as roster `PFN`. The borçnama **slot** is wekil; the yellow sample name is fictitious and must not decide the BO.
+- Fix: `ScanLetterRoleHint` + previous-paragraph printed label (`wekili` / `ygtyýarly`). Person-shaped yellow next to a wekil caption → `{{ds.RPFN}}`. Isolated Nepesowa (own paragraph, no wekil words) stays `PFN`. `RPCL` is not overwritten.
+- Officer: Restart, Analyze `6aylık-BORÇNAMA_03.docx` again. Nepesowa under wekili → `{{ds.RPFN}}`. Hilmi stays `{{.PFN}}`. Approve, then catalog Preview should show Configuration wekil, not a roster person.
+- Cross-skill: user-report-templates (RPFN ↔ AuthorizedRepresentative)
+
+### 2026-09-01 — Borçnama_02: Nepesowa still RPFN; catalog Preview empty
+
+- Symptom: Review 10 mapped; Nepesowa still `{{ds.RPFN}}`. Generate wrote 8 placeholders (overlap collapse worked — no skip warnings). Wizard outline still showed `___ Mehmet ÇIRAK ___` / `___ Nepesowa ___` on the signature lines. After Approve, Resminamalar catalog Preview: **Preview could not be generated** (READY chip).
+- Cause: (1) Instance `RPFN` was the sample name Nepesowa, so the wekil guard kept `RPFN` even though catalog wekil is **Nejepowa Gurlar Aglyyowna**. (2) Word letter used row tokens `{{.PFN}}` / `{{.ASPN}}` / `{{.PPN}}` with no `{{#ds.rows}}`. DocxTemplater looks those up on `ds` and merge returns no file → generic Preview error. Signature names stay literal if that occurrence was not yellow (yellow-only replace).
+- Fix: Person-shaped yellow stays `RPFN` only when it matches the catalog wekil example (or instance wekil when no example). Merge copies first-roster values onto `ds` when `{{.X}}` appears without a rows loop so catalog Preview can generate.
+- Officer: Restart, Analyze `6aylık-BORÇNAMA_02.docx` again (or Mark another file). Nepesowa must be `{{.PFN}}`. Approve again, then catalog Preview. Yellow only the signature names if those lines should become tokens. Download Word if PDF still fails.
+- Cross-skill: resminamalar | user-report-templates
+
+### 2026-09-01 — Azure ambiguous payload: role + nearby snippet, not the file
+
+- Ask: Pass long placeholder names instead of short codes, and send the Word/Excel file so Azure has more context.
+- Decision: Keep short codes as the reply key (Extract/Validate). Add `role` (Applicant / Signatory / Wekil / Company / Case) and a one-line `description` on `allowedTokens`. For each escalated mark send `printedLabel` + `surroundingSnippet` (Word paragraph with `<<<yellow>>>`) or Excel `sheetName` + `headerRow`. Never send Office bytes, page images, or live case values.
+- Officer: No wizard change. Restart only if Azure is on and a mark is still ambiguous after Analyze.
+- Cross-skill: none
+
+### 2026-08-31 — Borçnama Preview skipped CHFN/RPFN (overlapping duplicate yellows)
+
+- Symptom: After Analyze, Review showed 10 mapped including `{{ds.CHFN}}` ×2 (Mehmet) and `{{ds.RPFN}}` ×2 (Nepesowa). Generate/Preview had only 6 placeholders; warnings `Skipped {{ds.CHFN}}: Overlapping spans in one paragraph` and the same for `{{ds.RPFN}}`. Approve needed warning ack. Nepesowa was still the wekil token — Configuration wekil is **Nejepowa Gurlar Aglyyowna**.
+- Cause: (1) Duplicate yellow of the same name in one paragraph (`Mehmet` / `Mehmet __`, `Nepesowa` / `Nepesowa__`) share nested `WordSpan`s; the writer skipped the **entire** overlapping group. (2) Instance `RPFN` preference `0` beat roster `PFN` (default 50) when both matched the same person, so Review tagged applicants as wekil.
+- Fix: Same-token overlapping spans keep the longest write and drop the duplicate silently. Different-token overlaps still warn. `RPFN` only when the yellow **exactly** matches the wekil and is not also roster `PFN`; person-shaped names rewrite to `{{.PFN}}`. Catalog example no longer maps `RPFN`.
+- Officer: Restart, Analyze `6aylık-BORÇNAMA.docx` again, then Generate. Expect `{{ds.CHFN}}` and `{{.PFN}}` in the draft, **no** overlapping-span warnings for the duplicate Mehmet/Nepesowa highlights, and Nepesowa as `{{.PFN}}` not `{{ds.RPFN}}`.
+- Cross-skill: user-report-templates (RPFN vs PFN)
+
+### 2026-08-31 — Borçnama: Nepesowa tagged `RPFN` / gap (wekil vs person)
+
+- Symptom: Review mapped `I-AŞ 476479…+993…` to `{{ds.RPCL}}` (correct wekil passport/phone) but `Nepesowa Tumar Aşyrowna` became `{{ds.RPFN}}` or an UNMAPPED gap (`Nepesowa…___`). Officer read this as Authorized Representative not identified.
+- Cause: Tenant wekil is **Nejepowa Gurlar Aglyyowna** (`AuthorizedRepresentative`). Nepesowa is the **roster person**. AI/catalog treated any 3-word name as RPFN. Header uniqueness then blocked the underscored duplicate; merger also unique-constrained Row `PFN`.
+- Fix: Person-shaped yellow → `{{.PFN}}` (not RPFN). Duplicate normalized labels reuse the first token. Row/High Word drafts kept. Name+DOB splits to PFN+PDBT. AI prompt: RPFN* = tenant wekil only.
+- Officer: Restart, Analyze `6aylık-BORÇNAMA.docx` again. Expect `{{ds.RPCL}}` for the I-AŞ line, `{{.PFN}}` for Nepesowa (both highlights), `{{ds.CHFN}}` for Mehmet. RPFN only if the yellow name is the Configuration wekil.
+- Cross-skill: user-report-templates (RPFN/RPCL catalog)
+
 ### 2026-08-31 — `Sanaw_clk_012` Approve blocked: `{{ds.PLN}}` on row 4
 
 - Symptom: Review 14 mapped as `{{ds.ADRS}}` / `{{ds.RNUM}}` (not `{{.PLN}}`); Generate Preview had no `#ds.rows`; BLOCKING `Person_FirstName` not found on ApplicationProfileInstance; Approve disabled.

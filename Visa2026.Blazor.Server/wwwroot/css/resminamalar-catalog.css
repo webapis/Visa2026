@@ -157,6 +157,40 @@
   max-width: 22rem;
 }
 
+.resminamalar-catalog__recycle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--rmc-muted);
+  cursor: pointer;
+}
+
+.resminamalar-catalog__recycle-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, #dc2626 12%, transparent);
+  color: #b91c1c;
+}
+
+.resminamalar-catalog__recycle-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.resminamalar-catalog__recycle-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .resminamalar-catalog__actions .app-report-package__readiness {
   display: inline-flex;
   align-items: center;

@@ -88,6 +88,9 @@ public sealed class ScanDetectedFieldDraft
 
     /// <summary>Excel column header above the yellow cell (manual inference context).</summary>
     public string? ColumnHeader { get; init; }
+
+    /// <summary>Word printed caption before the yellow span (wekil / ýolbaşçy / applicant).</summary>
+    public string? NearbyLabel { get; init; }
 }
 
 public sealed class ScanStaticRegionDraft
@@ -165,6 +168,9 @@ public sealed class ScanDetectedField
     public DocumentRegion? SourceRegion { get; init; }
 
     public IReadOnlyList<ScanTokenAlternative> Alternatives { get; init; } = Array.Empty<ScanTokenAlternative>();
+
+    /// <summary>Compound Review parts (1-based) the officer dismissed. Generate still uses the parent span.</summary>
+    public IReadOnlyList<int> HiddenPartIndexes { get; init; } = Array.Empty<int>();
 }
 
 public sealed class ScanStaticRegion

@@ -737,7 +737,8 @@
                   <LayoutItem Id="Photo" ViewItem="Photo" Index="1" RelativeSize="30.854166666666664" CaptionLocation="Top" IsNewNode="True" />
                   <LayoutItem Id="IsArchived" ViewItem="IsArchived" Index="2" RelativeSize="5.034722222222222" IsNewNode="True" />
                   <LayoutItem Id="Email" ViewItem="Email" Index="3" RelativeSize="5.555555555555555" IsNewNode="True" />
-                  <LayoutItem Id="HireDate" ViewItem="HireDate" Index="4" RelativeSize="50.55555555555556" IsNewNode="True" />
+                  <LayoutItem Id="HireDate" ViewItem="HireDate" Index="4" RelativeSize="5.555555555555555" IsNewNode="True" />
+                  <LayoutItem Id="PreviousWorkplacesInTurkmenistan" ViewItem="PreviousWorkplacesInTurkmenistan" Index="5" RelativeSize="45" IsNewNode="True" />
                 </LayoutGroup>
               </LayoutGroup>
             </TabbedGroup>
@@ -827,7 +828,8 @@
                   <LayoutItem Id="Photo" ViewItem="Photo" Index="1" RelativeSize="30.854166666666664" CaptionLocation="Top" IsNewNode="True" />
                   <LayoutItem Id="IsArchived" ViewItem="IsArchived" Index="2" RelativeSize="5.034722222222222" IsNewNode="True" />
                   <LayoutItem Id="Email" ViewItem="Email" Index="3" RelativeSize="5.555555555555555" IsNewNode="True" />
-                  <LayoutItem Id="HireDate" ViewItem="HireDate" Index="4" RelativeSize="50.55555555555556" IsNewNode="True" />
+                  <LayoutItem Id="HireDate" ViewItem="HireDate" Index="4" RelativeSize="5.555555555555555" IsNewNode="True" />
+                  <LayoutItem Id="PreviousWorkplacesInTurkmenistan" ViewItem="PreviousWorkplacesInTurkmenistan" Index="5" RelativeSize="45" IsNewNode="True" />
                 </LayoutGroup>
               </LayoutGroup>
             </TabbedGroup>
@@ -942,7 +944,8 @@
                   <LayoutItem Id="Photo" ViewItem="Photo" Index="1" RelativeSize="35.05747126436781" CaptionLocation="Top" IsNewNode="True" />
                   <LayoutItem Id="IsArchived" ViewItem="IsArchived" Index="2" RelativeSize="5.555555555555555" IsNewNode="True" />
                   <LayoutItem Id="Email" ViewItem="Email" Index="3" RelativeSize="6.130268199233717" IsNewNode="True" />
-                  <LayoutItem Id="HireDate" ViewItem="HireDate" Index="4" RelativeSize="44.827586206896555" IsNewNode="True" />
+                  <LayoutItem Id="HireDate" ViewItem="HireDate" Index="4" RelativeSize="6.130268199233717" IsNewNode="True" />
+                  <LayoutItem Id="PreviousWorkplacesInTurkmenistan" ViewItem="PreviousWorkplacesInTurkmenistan" Index="5" RelativeSize="38.69731800766284" IsNewNode="True" />
                 </LayoutGroup>
               </LayoutGroup>
             </TabbedGroup>

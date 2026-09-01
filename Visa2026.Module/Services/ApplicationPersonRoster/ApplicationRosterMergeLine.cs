@@ -599,6 +599,18 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        /// <summary>Şahsy kagyz <c>Türkmenistanda öňki işlän ýerleri</c> — employee prior workplaces.</summary>
+        [XafDisplayName("Previous workplaces in Turkmenistan"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Person_PreviousWorkplacesInTurkmenistan => Person?.PreviousWorkplacesInTurkmenistan;
+
+        /// <summary>
+        /// Employee <see cref="Person.VisaApplicationFamilyMembersText"/> (raw stored lines).
+        /// Family-member roster rows use the sponsor. Not <see cref="SahsyKagyz_FamilyStatusText"/>.
+        /// </summary>
+        [XafDisplayName("Family members for visa (manual)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Person_VisaApplicationFamilyMembersText =>
+            PdfEmployeeForHouseholdOnVisaForm()?.VisaApplicationFamilyMembersText;
+
         [XafDisplayName("Photo"), VisibleInDetailView(false), VisibleInListView(false)]
         [ImageEditor(ListViewImageEditorCustomHeight = 75, DetailViewImageEditorFixedHeight = 150)]
         public byte[] Person_Photo => Person?.Photo;
@@ -637,6 +649,9 @@ namespace Visa2026.Module.BusinessObjects
         #region Passport
         [XafDisplayName("Passport Number"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Passport_Number => CurrentPassport?.PassportNumber;
+
+        [XafDisplayName("Passport Type (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Passport_TypeTm => CurrentPassport?.PassportType?.NameTm;
 
         [XafDisplayName("Passport Personal Number"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Passport_PersonalNumber => Person?.PersonalNumber ?? CurrentPassport?.PersonalNumber;
@@ -1186,6 +1201,69 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         [XafDisplayName("Representative Phone"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Representative_Phone => RepresentativeForReports()?.Phone ?? string.Empty;
+
+        [NotMapped]
+        [XafDisplayName("Representative Position (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Representative_PositionTm => RepresentativeForReports()?.PositionTitleTm ?? string.Empty;
+
+        [NotMapped]
+        [XafDisplayName("Representative Passport Number"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Representative_PassportNumber => RepresentativeForReports()?.PassportNumber ?? string.Empty;
+
+        [NotMapped]
+        [XafDisplayName("Representative Passport Authority"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Representative_PassportAuthority => RepresentativeForReports()?.PassportAuthority ?? string.Empty;
+
+        [NotMapped]
+        [XafDisplayName("Representative Passport Issue Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Representative_PassportIssueDateText =>
+            OrganizationPassportLineHelper.FormatIssueDateText(RepresentativeForReports()?.PassportIssueDate);
+
+        [NotMapped]
+        [XafDisplayName("Representative passport, authority and phone (one line)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Representative_PassportPhoneLine
+        {
+            get
+            {
+                var r = RepresentativeForReports();
+                return r == null
+                    ? string.Empty
+                    : OrganizationPassportLineHelper.FormatNumberAuthorityPhone(r.PassportNumber, r.PassportAuthority, r.Phone);
+            }
+        }
+
+        [NotMapped]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string Application_Company_Address => Application_CompanyAddress;
+
+        [NotMapped]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string Application_Company_PhoneNumber =>
+            OrganizationReportHelper.GetCompanyProfile(OrganizationReportHelper.ResolveObjectSpace(null, ApplicationProfileInstance))?.PhoneNumber ?? string.Empty;
+
+        [NotMapped]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string Application_Company_Email =>
+            OrganizationReportHelper.GetCompanyProfile(OrganizationReportHelper.ResolveObjectSpace(null, ApplicationProfileInstance))?.Email ?? string.Empty;
+
+        [NotMapped]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string Application_Company_TaxInformation =>
+            OrganizationReportHelper.GetCompanyProfile(OrganizationReportHelper.ResolveObjectSpace(null, ApplicationProfileInstance))?.TaxInformation ?? string.Empty;
+
+        [NotMapped]
+        [XafDisplayName("Company Registration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Application_Company_RegistrationDateText =>
+            OrganizationReportHelper.GetCompanyProfile(OrganizationReportHelper.ResolveObjectSpace(null, ApplicationProfileInstance))?.RegistrationDateText ?? string.Empty;
+
+        [NotMapped]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string Company_Code =>
+            OrganizationReportHelper.GetCompanyProfile(OrganizationReportHelper.ResolveObjectSpace(null, ApplicationProfileInstance))?.Code ?? string.Empty;
+
+        [NotMapped]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string Application_Company_Name => Application_SponsorName;
 
         /// <summary>Company tax/registration text, address and phone in one line (data entry controls formatting, e.g. №… date).</summary>
         [NotMapped]

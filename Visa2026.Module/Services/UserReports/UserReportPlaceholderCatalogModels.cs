@@ -64,6 +64,9 @@ public sealed class UserReportPlaceholderCatalogEntryDto
 
     /// <summary>Name of a <see cref="UserReportPlaceholderPack"/> member. Required for profile-scoped sets.</summary>
     public string PackKey { get; set; } = string.Empty;
+
+    /// <summary>Name of a <see cref="UserReportPlaceholderRelatedBo"/> member. Groups the officer manual and AI payload.</summary>
+    public string RelatedBo { get; set; } = string.Empty;
 }
 
 public sealed class UserReportPlaceholderCatalogEntry
@@ -90,6 +93,8 @@ public sealed class UserReportPlaceholderCatalogEntry
 
     public UserReportPlaceholderPack Pack { get; init; } = UserReportPlaceholderPack.Unknown;
 
+    public UserReportPlaceholderRelatedBo RelatedBo { get; init; } = UserReportPlaceholderRelatedBo.Unknown;
+
     public string GetLabel(string? cultureName)
     {
         var culture = (cultureName ?? string.Empty).Trim();
@@ -102,20 +107,26 @@ public sealed class UserReportPlaceholderCatalogEntry
         return LabelEn;
     }
 
+    /// <summary>
+    /// Catalog scope wins when the entry is Header-only or Row-only. Word yellow on şahsy-style
+    /// letters is classified Header, but Person tokens such as PVFM still belong on the roster line
+    /// as <c>{{.PVFM}}</c> — not <c>{{ds.PVFM}}</c> on <see cref="ApplicationProfileInstance"/>.
+    /// </summary>
+    public UserReportPlaceholderScope EffectiveUsage(UserReportPlaceholderScope usageScope) =>
+        Scope == UserReportPlaceholderScope.Both ? usageScope : Scope;
+
     public string BuildWordToken(UserReportPlaceholderScope usageScope)
     {
         if (IsImage)
             return $"{{{{IMAGE:{ShortCode}}}}}";
 
-        return usageScope == UserReportPlaceholderScope.Row
+        return EffectiveUsage(usageScope) == UserReportPlaceholderScope.Row
             ? $"{{{{.{ShortCode}}}}}"
             : $"{{{{ds.{ShortCode}}}}}";
     }
 
     public string BuildExcelToken(UserReportPlaceholderScope usageScope) =>
-        usageScope == UserReportPlaceholderScope.Row
-            ? $"{{{{.{ShortCode}}}}}"
-            : $"{{{{ds.{ShortCode}}}}}";
+        BuildWordToken(usageScope);
 }
 
 public sealed class UserReportPlaceholderManualQuery
@@ -124,5 +135,14 @@ public sealed class UserReportPlaceholderManualQuery
 
     public UserReportPlaceholderScope? Scope { get; init; }
 
+    public UserReportPlaceholderRelatedBo? RelatedBo { get; init; }
+
     public string? Search { get; init; }
+}
+
+public sealed class UserReportPlaceholderCatalogGroup
+{
+    public required UserReportPlaceholderRelatedBo RelatedBo { get; init; }
+
+    public required IReadOnlyList<UserReportPlaceholderCatalogEntry> Entries { get; init; }
 }

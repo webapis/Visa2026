@@ -1,7 +1,7 @@
 @namespace Visa2026.Blazor.Server.Editors
 @using Visa2026.Module.Services.TemplateScan
 
-<div class="tas-clarify">
+<div class="tas-clarify @(Compact ? "tas-clarify--compact" : null)">
     @if (ShowRejectBanner)
     {
         <div class="tas-banner tas-banner--warn">
@@ -9,9 +9,15 @@
         </div>
     }
 
-    <div class="tas-chat">
-        <h4>Clarify field mapping</h4>
-        <p class="tas-chat__hint">Ask about ambiguous labels, header vs roster fields, or which placeholder fits a gap. Layout and wording changes are not supported.</p>
+    <div class="tas-chat @(Compact ? "tas-chat--compact" : null)">
+        <h4>@(Compact && !string.IsNullOrWhiteSpace(FocusCaption) ? "Ask about this mark" : "Clarify field mapping")</h4>
+        @if (!string.IsNullOrWhiteSpace(FocusCaption))
+        {
+            <p class="tas-chat__focus">@FocusCaption</p>
+        }
+        <p class="tas-chat__hint">@(Compact && !string.IsNullOrWhiteSpace(FocusCaption)
+            ? "The selected yellow mark is already in context. Ask which library placeholders fit this highlight (one or several), or add them from the Short list above."
+            : "Ask about ambiguous labels, header vs roster fields, or which placeholder fits a gap. Layout and wording changes are not supported.")</p>
 
         <div class="tas-chat__log">
             @if (Messages.Count == 0)
@@ -58,7 +64,7 @@
     </div>
 
     <p class="tas-clarify__back">
-        <button type="button" class="tas-link" @onclick="OnBackClicked">← Back to field list</button>
+        <button type="button" class="tas-link" @onclick="OnBackClicked">@(Compact ? "Hide chat" : "← Back to field list")</button>
     </p>
 </div>
 
@@ -75,6 +81,8 @@
     [Parameter] public EventCallback OnSend { get; set; }
     [Parameter] public EventCallback<string> OnQuickReply { get; set; }
     [Parameter] public EventCallback OnBack { get; set; }
+    [Parameter] public bool Compact { get; set; }
+    [Parameter] public string? FocusCaption { get; set; }
 
     private static string MessageCss(ChatMessage msg)
     {

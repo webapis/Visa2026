@@ -359,6 +359,12 @@
     "tk-TM": "Işe kabul edilen senesi",
     "ru-RU": "Дата приёма на работу"
   },
+  "PersonDossier.Field.PreviousWorkplacesInTurkmenistan": {
+    "en": "Previous workplaces in Turkmenistan",
+    "tr-TR": "Türkmenistan'daki önceki iş yerleri",
+    "tk-TM": "Türkmenistanda öňki işlän ýerleri",
+    "ru-RU": "Предыдущие места работы в Туркменистане"
+  },
   "PersonDossier.Field.Email": {
     "en": "Email",
     "tr-TR": "E-posta",
@@ -1260,10 +1266,10 @@
     "ru-RU": "Просмотр"
   },
   "ApplicationReportPackage.DownloadTemplate": {
-    "en": "Download",
-    "tr-TR": "İndir",
-    "tk-TM": "Göçür",
-    "ru-RU": "Скачать"
+    "en": "Download Template",
+    "tr-TR": "Şablonu indir",
+    "tk-TM": "Şablony göçür",
+    "ru-RU": "Скачать шаблон"
   },
   "ApplicationReportPackage.DownloadTemplate.Tooltip": {
     "en": "Download the saved Word or Excel template file (placeholders, not filled case data).",
@@ -1895,6 +1901,12 @@
     "tk-TM": "Kod, ady ýa-da düşündiriş gözle…",
     "ru-RU": "Поиск кода, имени или подписи…"
   },
+  "PlaceholderManual.Filter.AllRecords": {
+    "en": "All records",
+    "tr-TR": "Tüm kayıtlar",
+    "tk-TM": "Hemme ýazgylar",
+    "ru-RU": "Все записи"
+  },
   "PlaceholderManual.Filter.AllScopes": {
     "en": "All scopes",
     "tr-TR": "Tüm kapsamlar",
@@ -1912,6 +1924,108 @@
     "tr-TR": "Satır (kişi satırı)",
     "tk-TM": "Setir (adam)",
     "ru-RU": "Строка (лицо)"
+  },
+  "PlaceholderManual.Group.AddressOfResidence": {
+    "en": "Address of residence",
+    "tr-TR": "İkamet adresi",
+    "tk-TM": "Ýaşaýyş salgysy",
+    "ru-RU": "Адрес проживания"
+  },
+  "PlaceholderManual.Group.Application": {
+    "en": "Application",
+    "tr-TR": "Başvuru",
+    "tk-TM": "Arza",
+    "ru-RU": "Заявка"
+  },
+  "PlaceholderManual.Group.AuthorizedRepresentative": {
+    "en": "Authorized representative (wekil)",
+    "tr-TR": "Yetkili temsilci (wekil)",
+    "tk-TM": "Ygtyýarly wekil",
+    "ru-RU": "Уполномоченный представитель"
+  },
+  "PlaceholderManual.Group.BorderZone": {
+    "en": "Border zone",
+    "tr-TR": "Sınır bölgesi",
+    "tk-TM": "Serhet ýakasy",
+    "ru-RU": "Пограничная зона"
+  },
+  "PlaceholderManual.Group.CompanyProfile": {
+    "en": "Company",
+    "tr-TR": "Şirket",
+    "tk-TM": "Kärhana",
+    "ru-RU": "Компания"
+  },
+  "PlaceholderManual.Group.CompanySignatory": {
+    "en": "Signatory",
+    "tr-TR": "İmza yetkilisi",
+    "tk-TM": "Gol çekiji",
+    "ru-RU": "Подписант"
+  },
+  "PlaceholderManual.Group.Education": {
+    "en": "Education",
+    "tr-TR": "Eğitim",
+    "tk-TM": "Bilim",
+    "ru-RU": "Образование"
+  },
+  "PlaceholderManual.Group.FamilyMember": {
+    "en": "Family member",
+    "tr-TR": "Aile üyesi",
+    "tk-TM": "Maşgala agzasy",
+    "ru-RU": "Член семьи"
+  },
+  "PlaceholderManual.Group.Invitation": {
+    "en": "Invitation",
+    "tr-TR": "Davetiye",
+    "tk-TM": "Çakylyk",
+    "ru-RU": "Приглашение"
+  },
+  "PlaceholderManual.Group.Passport": {
+    "en": "Passport",
+    "tr-TR": "Pasaport",
+    "tk-TM": "Pasport",
+    "ru-RU": "Паспорт"
+  },
+  "PlaceholderManual.Group.Person": {
+    "en": "Person",
+    "tr-TR": "Kişi",
+    "tk-TM": "Adam",
+    "ru-RU": "Лицо"
+  },
+  "PlaceholderManual.Group.Position": {
+    "en": "Position",
+    "tr-TR": "Pozisyon",
+    "tk-TM": "Wezipe",
+    "ru-RU": "Должность"
+  },
+  "PlaceholderManual.Group.RosterRow": {
+    "en": "Roster row",
+    "tr-TR": "Liste satırı",
+    "tk-TM": "Sanaw setiri",
+    "ru-RU": "Строка списка"
+  },
+  "PlaceholderManual.Group.Salary": {
+    "en": "Salary",
+    "tr-TR": "Maaş",
+    "tk-TM": "Aýlyk",
+    "ru-RU": "Зарплата"
+  },
+  "PlaceholderManual.Group.Travel": {
+    "en": "Travel",
+    "tr-TR": "Seyahat",
+    "tk-TM": "Syýahat",
+    "ru-RU": "Поездка"
+  },
+  "PlaceholderManual.Group.Visa": {
+    "en": "Visa",
+    "tr-TR": "Vize",
+    "tk-TM": "Wiza",
+    "ru-RU": "Виза"
+  },
+  "PlaceholderManual.Group.WorkPermit": {
+    "en": "Work permit",
+    "tr-TR": "Çalışma izni",
+    "tk-TM": "Iş rugsatnamasy",
+    "ru-RU": "Разрешение на работу"
   },
   "PlaceholderManual.Column.Short": {
     "en": "Short",

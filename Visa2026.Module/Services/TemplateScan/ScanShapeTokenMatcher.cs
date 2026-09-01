@@ -17,6 +17,14 @@ public static class ScanShapeTokenMatcher
         @"\b[A-Z]\d{6,9}\b",
         RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
+    private static readonly Regex TmInternalPassport = new(
+        @"\bI[-–]?\s*A[ŞS]\s*\d{5,8}\b",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+
+    private static readonly Regex PhoneLike = new(
+        @"\+?\s*993[\s\-]?\d{2}[\s\-]?\d{2}[\s\-]?\d{2}[\s\-]?\d{2}",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
     private static readonly Regex CountryCode = new(
         @"\b[A-Z]{3}\b",
         RegexOptions.Compiled | RegexOptions.CultureInvariant);
@@ -70,6 +78,7 @@ public static class ScanShapeTokenMatcher
         if (CountryCode.IsMatch(text))
         {
             Prefer("PNAT", 70, "Three-letter country code");
+            Prefer("PPCC", 66, "Passport issued-country code");
             Prefer("PCBC", 62, "Three-letter country code");
             Prefer("PFAC", 58, "Three-letter country code");
         }
@@ -77,12 +86,18 @@ public static class ScanShapeTokenMatcher
         if (DateLike.IsMatch(text))
         {
             Prefer("PDBT", 75, "Date shape");
+            Prefer("ACRDT", 72, "Date shape");
             Prefer("PPED", 68, "Date shape");
             Prefer("ADAT", 40, "Date shape");
         }
 
         if (PassportNumber.IsMatch(text))
             Prefer("PPN", 90, "Passport number shape");
+
+        if (TmInternalPassport.IsMatch(text) && PhoneLike.IsMatch(text) && text.Length >= 40)
+            Prefer("RPCL", 92, "Representative passport, authority and phone");
+        else if (TmInternalPassport.IsMatch(text) && text.Length >= 24)
+            Prefer("RPPL", 86, "Representative passport line");
 
         if (VisaPeriod.IsMatch(text))
         {
@@ -98,6 +113,9 @@ public static class ScanShapeTokenMatcher
 
         if (int.TryParse(text, out var n) && n >= 0 && n <= 999)
             Prefer("RNUM", 85, "Row index number");
+
+        if (LooksLikePersonFullName(text))
+            Prefer("PFN", 90, "Person full name (roster), not representative");
 
         if (text.Length >= TemplateTextNormalizer.MinimumMatchLength)
         {
@@ -117,5 +135,24 @@ public static class ScanShapeTokenMatcher
             .OrderByDescending(static c => c.ScorePercent)
             .ThenBy(static c => c.ShortCode, StringComparer.OrdinalIgnoreCase)
             .ToList();
+    }
+
+    /// <summary>
+    /// Roster person name: two to four letter-words, optional trailing underscores, no passport/phone block.
+    /// Must not steal Authorized Representative (RPFN) — that token is the tenant wekil only.
+    /// </summary>
+    internal static bool LooksLikePersonFullName(string text)
+    {
+        var trimmed = (text ?? string.Empty).Trim().Trim('_', ' ', '-');
+        if (trimmed.Length < TemplateTextNormalizer.MinimumMatchLength)
+            return false;
+        if (TmInternalPassport.IsMatch(trimmed) || PhoneLike.IsMatch(trimmed) || DateLike.IsMatch(trimmed))
+            return false;
+
+        var words = trimmed.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+        if (words.Length is < 2 or > 4)
+            return false;
+
+        return words.All(static w => w.Length >= 2 && w.All(static ch => char.IsLetter(ch) || ch is '\'' or '-' or '.' or 'ý' or 'Ý'));
     }
 }

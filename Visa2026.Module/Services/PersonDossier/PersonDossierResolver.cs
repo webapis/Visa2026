@@ -70,6 +70,7 @@ public static class PersonDossierResolver
         if (person.PersonRole == PersonRecordRole.Employee)
         {
             fields.Add(Field("HireDate", FormatDate(person.HireDate)));
+            fields.Add(Field("PreviousWorkplacesInTurkmenistan", person.PreviousWorkplacesInTurkmenistan));
             fields.Add(Field("Email", person.Email));
             fields.Add(Field("Subcontractor", Describe(person.Subcontractor)));
         }

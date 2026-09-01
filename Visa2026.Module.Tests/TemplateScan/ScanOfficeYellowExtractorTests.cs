@@ -138,4 +138,43 @@ public class ScanOfficeYellowExtractorTests
 
         return stream.ToArray();
     }
+
+    /// <summary>Yellow sample, then the parenthetical field map on the next line (borçnama form).</summary>
+    public static byte[] CreateWordWithYellowThenCaption(string leftLabel, string yellow, string caption)
+    {
+        using var stream = new MemoryStream();
+        using (var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document))
+        {
+            var main = document.AddMainDocumentPart();
+            main.Document = new Document(new Body(
+                new Paragraph(
+                    new Run(new Text(leftLabel) { Space = SpaceProcessingModeValues.Preserve }),
+                    new Run(
+                        new RunProperties(new Highlight { Val = HighlightColorValues.Yellow }),
+                        new Text(yellow))),
+                new Paragraph(new Run(new Text(caption)))));
+            main.Document.Save();
+        }
+
+        return stream.ToArray();
+    }
+
+    /// <summary>Plain caption paragraph, then a yellow sample on the next line (borçnama wekil slot).</summary>
+    public static byte[] CreateWordWithCaptionThenYellow(string caption, string yellow)
+    {
+        using var stream = new MemoryStream();
+        using (var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document))
+        {
+            var main = document.AddMainDocumentPart();
+            main.Document = new Document(new Body(
+                new Paragraph(new Run(new Text(caption))),
+                new Paragraph(
+                    new Run(
+                        new RunProperties(new Highlight { Val = HighlightColorValues.Yellow }),
+                        new Text(yellow)))));
+            main.Document.Save();
+        }
+
+        return stream.ToArray();
+    }
 }

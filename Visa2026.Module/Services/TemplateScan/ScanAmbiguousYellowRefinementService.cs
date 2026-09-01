@@ -43,14 +43,27 @@ public sealed class ScanAmbiguousYellowRefinementService : IScanAmbiguousYellowR
         if (ambiguous.Count == 0)
             return proposal;
 
-        var marks = ambiguous.Select(static draft => new ScanAmbiguousYellowMark
+        var contexts = ScanYellowMarkContextBuilder.Build(
+            buildRequest.Ingest.Input.OfficePackageBytes,
+            buildRequest.Ingest.Input.SourceKind,
+            ambiguous);
+
+        var marks = ambiguous.Select(draft =>
         {
-            FieldId = draft.FieldId,
-            YellowText = draft.LabelText,
-            ColumnHeader = draft.ColumnHeader,
-            Scope = draft.Scope,
-            LocalProposedToken = draft.ProposedToken,
-            LocalCandidates = draft.Alternatives,
+            contexts.TryGetValue(draft.FieldId, out var context);
+            return new ScanAmbiguousYellowMark
+            {
+                FieldId = draft.FieldId,
+                YellowText = draft.LabelText,
+                ColumnHeader = draft.ColumnHeader,
+                SurroundingSnippet = context?.SurroundingSnippet,
+                PrintedLabel = context?.PrintedLabel ?? draft.ColumnHeader,
+                SheetName = context?.SheetName,
+                HeaderRow = context?.HeaderRow,
+                Scope = draft.Scope,
+                LocalProposedToken = draft.ProposedToken,
+                LocalCandidates = draft.Alternatives,
+            };
         }).ToList();
 
         ScanAmbiguousYellowRefinementResult aiResult;
@@ -75,7 +88,13 @@ public sealed class ScanAmbiguousYellowRefinementService : IScanAmbiguousYellowR
             return proposal;
 
         var byId = aiResult.Marks.ToDictionary(static m => m.FieldId, StringComparer.Ordinal);
-        var updated = proposal.Fields.Select(draft => ApplyAiResult(draft, byId, buildRequest.PlaceholderSet)).ToList();
+        var updated = proposal.Fields
+            .Select(draft => ApplyAiResult(draft, byId, buildRequest.PlaceholderSet))
+            .Select(draft => ScanRepresentativeNameGuard.RewriteDraft(
+                draft,
+                buildRequest.PlaceholderSet,
+                buildRequest.ValueCandidates))
+            .ToList();
 
         return new ScanFieldPlanProposal
         {
@@ -131,6 +150,7 @@ public sealed class ScanAmbiguousYellowRefinementService : IScanAmbiguousYellowR
             Box = draft.Box,
             SourceRegion = draft.SourceRegion,
             ColumnHeader = draft.ColumnHeader,
+            NearbyLabel = draft.NearbyLabel,
             Alternatives = alternatives,
         };
 
@@ -143,7 +163,7 @@ public sealed class ScanAmbiguousYellowRefinementService : IScanAmbiguousYellowR
         if (trimmed.Contains("{{", StringComparison.Ordinal))
         {
             if (ContainsOnlyAllowedTokens(trimmed, placeholderSet))
-                return trimmed;
+                return ScanLibraryTokenRewriter.Rewrite(trimmed, placeholderSet);
             return null;
         }
 

@@ -7,6 +7,8 @@ public class TemplateValueMatchKeysTests
 {
     [Theory]
     [InlineData("PFN", "Aýnabat Meredowa", ValueKind.PersonName)]
+    [InlineData("PMNM", "Mine", ValueKind.PersonName)]
+    [InlineData("PSEF", "Ali Enes Yetkin", ValueKind.PersonName)]
     [InlineData("PPN", "T 12345678", ValueKind.Identifier)]
     [InlineData("PDBT", "18.01.1977", ValueKind.Date)]
     [InlineData("CSAL", "5000", ValueKind.Number)]

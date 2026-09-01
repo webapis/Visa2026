@@ -25,6 +25,46 @@ Purpose: **catalog, seed gate, batch worker, preview, permissions, dialog UX** �
 
 ## Entries
 
+### 2026-09-01 — Gear-only Download Template / Review / Recycle (Application)
+
+- **Symptom**: Catalog rows always showed Edit template, Download, Review placeholders, and Recycle; Download was labeled only Download.
+- **Try**: Resminamalar catalog on ApplicationProfileInstance 8/-015.
+- **Test**: Blazor Debug build. Officer: hard-refresh — default rows show Check + Preview; footer gear reveals Download Template, Review placeholders, Recycle. No Edit template.
+- **Root cause**: Download and Review/Recycle were always visible; Edit template duplicated Download for getting the file.
+- **Fix**: Removed catalog **Edit template**. Renamed Download → **Download Template**. Gated Download Template, Review placeholders, and Recycle behind `ShowDetails` (footer gear). Preview stays always on.
+- **Prevent**: Do not put template-file / remap / recycle actions on the default catalog row. Keep Recycle Bin tab Restore / Delete permanently always visible on that pane.
+- **Cross-skill**: visa2026-preview-slot
+
+### 2026-09-01 — Hide Sync footer; recycle-bin icon on catalog rows (Application)
+
+- **Symptom**: Footer **Sync to database** crowded Download package / Refresh. Row **Delete** text wrapped onto a second line.
+- **Try**: Resminamalar catalog on ApplicationProfileInstance 8/-015.
+- **Test**: Blazor Debug build. Officer: hard-refresh — footer is Download package + Refresh + gear; nested rows show a recycle-bin icon (tooltip still Move to Recycle Bin).
+- **Root cause**: Staging sync sat on the always-visible footer; Move to Recycle Bin used the localized **Delete** label.
+- **Fix**: Removed the catalog footer Sync button. Row action is an icon button (`.resminamalar-catalog__recycle-btn`); confirm bar still says Move to Recycle Bin.
+- **Prevent**: Do not put desktop staging Sync next to ZIP download. Keep Recycle Bin tab **Delete permanently** as text (that is a different action).
+- **Cross-skill**: visa2026-preview-slot
+
+### 2026-09-01 — Review placeholders from catalog row (Application)
+
+- **Symptom**: Officers could Preview a filled merge from Resminamalar but could not reopen Create-from-yellow Review to remap placeholders on that nested template.
+- **Try**: Catalog Preview of Gaybo-BORÇNAMA_115, then need Review of the saved template (tokens, no yellow).
+- **Test**: `ScanOfficeLibraryTokenExtractorTests`; `ScanYellowHighlightGateTests.Apply_ExistingTokens_NoYellow_Passes`; Blazor Debug build.
+- **Root cause**: Scan wizard started at Upload only; Analyze required yellow highlights. Saved templates have `{{…}}` after Approve strips yellow.
+- **Fix**: Catalog **Review placeholders** loads nested `ApplicationProfileTemplate` bytes into `OpenForExistingTemplateAsync`. Token clusters drive the field plan when yellow is absent.
+- **Prevent**: Do not send officers to desktop Edit template for placeholder remap. Seeded user-only rows (no nested profile id) stay without this button.
+- **Cross-skill**: visa2026-template-scan
+
+### 2026-09-01 — Scan Word letter Preview empty (`{{.PFN}}` no loop) (Application)
+
+- **Symptom**: `6aylık-BORÇNAMA_02` READY after Create from yellow marks; catalog Preview **Preview could not be generated**.
+- **Try**: Approve yellow-mark Word letter with `{{.PFN}}` / `{{.ASPN}}` and no `{{#ds.rows}}`.
+- **Test**: `UserReportLooseRowTokenPromoterTests`; officer re-Approve then Preview.
+- **Root cause**: DocxTemplater binds `{{.X}}` on `ds` when there is no rows loop; those keys were never copied onto the root model, so generate returned no file.
+- **Fix**: `PromoteLooseRowTokensOntoRoot` copies first-roster values onto `ds` when extracted tokens include `{{.X}}` and no `#ds.rows` / `#ds.ApplicationItems`.
+- **Prevent**: Word letters from scan may emit row tokens; merge must flatten first person onto `ds` or the letter must use a loop.
+- **Cross-skill**: visa2026-template-scan | user-report-templates
+
 ### 2026-08-31 — Recycle Bin Move progress while waiting (Application)
 
 - **Symptom**: After **Move to Recycle Bin**, the confirm bar sat still with no progress while the save/reload ran, so it looked like nothing happened.

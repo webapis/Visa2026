@@ -9,9 +9,26 @@ flowchart TD
     G4 -->|Yes| AI
     G4 -->|No| OK["Keep local guess"]
 
-    AI --> AZ["Azure receives:<br/>yellow text, column header,<br/>placeholder manual, local candidates"]
-    AZ --> OUT["Returns ranked tokens<br/>compound allowed"]
-    OUT --> OK
+    AI --> SYS["System prompt: map yellow sample literals<br/>to allowedTokens short codes; use role + nearby text"]
 
-    note2["Azure never receives<br/>case people or DB values"]
-    AZ --- note2
+    subgraph sent ["JSON user payload — what Azure sees"]
+        ENV["Envelope<br/>sourceKind Word or Excel<br/>playbookFingerprint only<br/>placeholderSetFingerprint<br/>JSON reply schema"]
+        LIB["allowedTokens — placeholder manual<br/>shortCode stays the reply key<br/>tokenHeader and tokenRow spellings<br/>labels en / tk / tr<br/>role Applicant Signatory Wekil Company Case<br/>description one line<br/>exampleValue shape hint<br/>canonicalPath<br/>scope Header / Row / Both"]
+        MK["marks — one object per escalated yellow<br/>fieldId<br/>yellowText sample literal<br/>printedLabel before the yellow<br/>surroundingSnippet paragraph with <<<yellow>>><br/>columnHeader Excel<br/>sheetName and headerRow Excel<br/>scope Header or Row<br/>localProposedToken<br/>localCandidates shortCode, token, scorePercent, reason"]
+        ENV --- LIB
+        LIB --- MK
+    end
+
+    subgraph never ["Never sent to Azure"]
+        N1["Selected case / roster people"]
+        N2["Live DB or instance values"]
+        N3["Office file bytes or page images"]
+        N4["Full document / passports dump"]
+    end
+
+    SYS --> CALL["Azure OpenAI chat completion<br/>text JSON, truncated to MaxPromptCharacters"]
+    sent --> CALL
+    never -.->|"blocked"| CALL
+
+    CALL --> OUT["JSON back per mark<br/>proposedToken — shortCode spellings<br/>confidence High Medium Low<br/>ranked candidates with scorePercent and reason"]
+    OUT --> OK

@@ -19,6 +19,7 @@ public sealed class ApplicationProfileWizardOrganizationSnapshot
     public string CompanyAddress { get; init; } = string.Empty;
     public string CompanyEmail { get; init; } = string.Empty;
     public string CompanyTaxInformation { get; init; } = string.Empty;
+    public string CompanyRegistrationDateText { get; init; } = string.Empty;
 
     public bool HasSignatory { get; init; }
     public string SignatoryFullName { get; init; } = string.Empty;
@@ -53,6 +54,7 @@ public sealed class ApplicationProfileWizardOrganizationSnapshot
             CompanyAddress = company?.Address ?? string.Empty,
             CompanyEmail = company?.Email ?? string.Empty,
             CompanyTaxInformation = company?.TaxInformation ?? string.Empty,
+            CompanyRegistrationDateText = company?.RegistrationDateText ?? string.Empty,
 
             HasSignatory = signatory != null,
             SignatoryFullName = signatory?.FullName ?? string.Empty,

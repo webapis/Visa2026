@@ -26,7 +26,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem(false)]
     [DefaultProperty(nameof(FullName))]
-    [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = PersonRoleHelper.NotEmployeeCriteria, Context = "DetailView", TargetItems = "Email;HireDate;MaritalStatus;WorkPermitItems;FamilyMembers;Educations;PositionHistory;Salaries;WorkDuties")]
+    [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = PersonRoleHelper.NotEmployeeCriteria, Context = "DetailView", TargetItems = "Email;HireDate;PreviousWorkplacesInTurkmenistan;MaritalStatus;WorkPermitItems;FamilyMembers;Educations;PositionHistory;Salaries;WorkDuties")]
     [Appearance("EmployeeOnly_Layout", AppearanceItemType = "LayoutItem", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = PersonRoleHelper.NotEmployeeCriteria, Context = "DetailView", TargetItems = "MaritalStatus")]
     [Appearance("EmployeeOnly_PersonRecordTabsLayout", AppearanceItemType = "LayoutItem", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = PersonRoleHelper.NotEmployeeCriteria, Context = "DetailView", TargetItems = "Educations;PositionHistory;Salaries;WorkDuties")]
     [Appearance("EmployeeOnly_IssuedFamilyMembersLayout", AppearanceItemType = "LayoutItem", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = PersonRoleHelper.NotEmployeeCriteria, Context = "DetailView", TargetItems = "FamilyMembers")]
@@ -420,6 +420,18 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
         [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime HireDate { get; set; }
+
+        /// <summary>
+        /// Prior employers or sites in Turkmenistan (Şahsy kagyz
+        /// <c>Türkmenistanda öňki işlän ýerleri</c>). Employees only. Optional.
+        /// </summary>
+        [MaxLength(500)]
+        [XafDisplayName("Previous workplaces in Turkmenistan")]
+        [ToolTip("Prior employers or sites in Turkmenistan for Şahsy kagyz. Use Ýok when none.")]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [ModelDefault("CustomCSSClassName", "e2e-person-previous-workplaces-in-turkmenistan")]
+        public virtual string PreviousWorkplacesInTurkmenistan { get; set; }
 
         /// <summary>
         /// Manual lines for visa outputs (PDF, Şahsy kagyz, Word). Authoritative source — linked

@@ -17,5 +17,21 @@ namespace Visa2026.Module.BusinessObjects
                 parts.Add($"{d:dd.MM.yyyy}ý.");
             return string.Join(", ", parts);
         }
+
+        public static string FormatIssueDateText(DateTime? issueDate) =>
+            issueDate is { } d && d != default ? $"{d:dd.MM.yyyy}" : string.Empty;
+
+        /// <summary>Yellow-mark compound on Borçnama: passport number, authority, phone (no issue date).</summary>
+        public static string FormatNumberAuthorityPhone(string? passportNumber, string? authority, string? phone)
+        {
+            var parts = new List<string>();
+            if (!string.IsNullOrWhiteSpace(passportNumber))
+                parts.Add(passportNumber.Trim());
+            if (!string.IsNullOrWhiteSpace(authority))
+                parts.Add(authority.Trim());
+            if (!string.IsNullOrWhiteSpace(phone))
+                parts.Add(phone.Trim());
+            return string.Join(", ", parts);
+        }
     }
 }

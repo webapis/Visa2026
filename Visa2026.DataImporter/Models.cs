@@ -587,6 +587,9 @@ public class CompanyProfileDto
 
     [JsonPropertyName("TaxInformation")]
     public string TaxInformation { get; set; } = "";
+
+    [JsonPropertyName("RegistrationDate")]
+    public DateTime? RegistrationDate { get; set; }
 }
 
 public class ApplicationNumberingProfileDto

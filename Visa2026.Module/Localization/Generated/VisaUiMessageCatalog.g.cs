@@ -1197,10 +1197,10 @@ public static partial class VisaUiMessageCatalog
         },
         ["ApplicationReportPackage.DownloadTemplate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Download",
-            ["tr-TR"] = "İndir",
-            ["tk-TM"] = "Göçür",
-            ["ru-RU"] = "Скачать",
+            ["en-US"] = "Download Template",
+            ["tr-TR"] = "Şablonu indir",
+            ["tk-TM"] = "Şablony göçür",
+            ["ru-RU"] = "Скачать шаблон",
         },
         ["ApplicationReportPackage.DownloadTemplate.Downloaded"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -4219,6 +4219,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Işe kabul edilen senesi",
             ["ru-RU"] = "Дата приёма на работу",
         },
+        ["PersonDossier.Field.PreviousWorkplacesInTurkmenistan"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Previous workplaces in Turkmenistan",
+            ["tr-TR"] = "Türkmenistan'daki önceki iş yerleri",
+            ["tk-TM"] = "Türkmenistanda öňki işlän ýerleri",
+            ["ru-RU"] = "Предыдущие места работы в Туркменистане",
+        },
         ["PersonDossier.Field.MaritalStatus"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Marital status",
@@ -4625,6 +4632,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Gözlegiňize laýyk bellik tapylmady.",
             ["ru-RU"] = "Нет заполнителей по вашему запросу.",
         },
+        ["PlaceholderManual.Filter.AllRecords"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "All records",
+            ["tr-TR"] = "Tüm kayıtlar",
+            ["tk-TM"] = "Hemme ýazgylar",
+            ["ru-RU"] = "Все записи",
+        },
         ["PlaceholderManual.Filter.AllScopes"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "All scopes",
@@ -4645,6 +4659,125 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Satır (kişi satırı)",
             ["tk-TM"] = "Setir (adam)",
             ["ru-RU"] = "Строка (лицо)",
+        },
+        ["PlaceholderManual.Group.AddressOfResidence"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Address of residence",
+            ["tr-TR"] = "İkamet adresi",
+            ["tk-TM"] = "Ýaşaýyş salgysy",
+            ["ru-RU"] = "Адрес проживания",
+        },
+        ["PlaceholderManual.Group.Application"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application",
+            ["tr-TR"] = "Başvuru",
+            ["tk-TM"] = "Arza",
+            ["ru-RU"] = "Заявка",
+        },
+        ["PlaceholderManual.Group.AuthorizedRepresentative"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Authorized representative (wekil)",
+            ["tr-TR"] = "Yetkili temsilci (wekil)",
+            ["tk-TM"] = "Ygtyýarly wekil",
+            ["ru-RU"] = "Уполномоченный представитель",
+        },
+        ["PlaceholderManual.Group.BorderZone"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Border zone",
+            ["tr-TR"] = "Sınır bölgesi",
+            ["tk-TM"] = "Serhet ýakasy",
+            ["ru-RU"] = "Пограничная зона",
+        },
+        ["PlaceholderManual.Group.CompanyProfile"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Company",
+            ["tr-TR"] = "Şirket",
+            ["tk-TM"] = "Kärhana",
+            ["ru-RU"] = "Компания",
+        },
+        ["PlaceholderManual.Group.CompanySignatory"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Signatory",
+            ["tr-TR"] = "İmza yetkilisi",
+            ["tk-TM"] = "Gol çekiji",
+            ["ru-RU"] = "Подписант",
+        },
+        ["PlaceholderManual.Group.Education"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Education",
+            ["tr-TR"] = "Eğitim",
+            ["tk-TM"] = "Bilim",
+            ["ru-RU"] = "Образование",
+        },
+        ["PlaceholderManual.Group.FamilyMember"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Family member",
+            ["tr-TR"] = "Aile üyesi",
+            ["tk-TM"] = "Maşgala agzasy",
+            ["ru-RU"] = "Член семьи",
+        },
+        ["PlaceholderManual.Group.Invitation"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Invitation",
+            ["tr-TR"] = "Davetiye",
+            ["tk-TM"] = "Çakylyk",
+            ["ru-RU"] = "Приглашение",
+        },
+        ["PlaceholderManual.Group.Passport"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Passport",
+            ["tr-TR"] = "Pasaport",
+            ["tk-TM"] = "Pasport",
+            ["ru-RU"] = "Паспорт",
+        },
+        ["PlaceholderManual.Group.Person"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Person",
+            ["tr-TR"] = "Kişi",
+            ["tk-TM"] = "Adam",
+            ["ru-RU"] = "Лицо",
+        },
+        ["PlaceholderManual.Group.Position"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Position",
+            ["tr-TR"] = "Pozisyon",
+            ["tk-TM"] = "Wezipe",
+            ["ru-RU"] = "Должность",
+        },
+        ["PlaceholderManual.Group.RosterRow"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Roster row",
+            ["tr-TR"] = "Liste satırı",
+            ["tk-TM"] = "Sanaw setiri",
+            ["ru-RU"] = "Строка списка",
+        },
+        ["PlaceholderManual.Group.Salary"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Salary",
+            ["tr-TR"] = "Maaş",
+            ["tk-TM"] = "Aýlyk",
+            ["ru-RU"] = "Зарплата",
+        },
+        ["PlaceholderManual.Group.Travel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Travel",
+            ["tr-TR"] = "Seyahat",
+            ["tk-TM"] = "Syýahat",
+            ["ru-RU"] = "Поездка",
+        },
+        ["PlaceholderManual.Group.Visa"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa",
+            ["tr-TR"] = "Vize",
+            ["tk-TM"] = "Wiza",
+            ["ru-RU"] = "Виза",
+        },
+        ["PlaceholderManual.Group.WorkPermit"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Work permit",
+            ["tr-TR"] = "Çalışma izni",
+            ["tk-TM"] = "Iş rugsatnamasy",
+            ["ru-RU"] = "Разрешение на работу",
         },
         ["PlaceholderManual.Search.Placeholder"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

@@ -61,6 +61,7 @@ disable-model-invocation: false
 | Extract security error from Edit template | `UserReportPlaceholder` permissions, non-secured OS in controller | **This skill** / security-access |
 | Preview OK, ZIP wrong or empty | Compare `SelectedReportKeysJson`, `SelectedApplicationItemIdsJson` | **This skill** |
 | **Sanaw** preview fails; `RowNo` empty hint | `UsesSingleDocumentItemList` / `BuildSanawyStyleRows` — not labor-contract per-item path | **This skill** + user-report-templates |
+| Need to remap placeholders on a saved catalog template | Row **Review placeholders** (this-profile nested Word/Excel) — not desktop **Edit template** | **template-scan** + this skill |
 | Excel catalog Preview is a **blank PDF**; Word Preview OK; title is `report_….docx` | Nested catalog keys are `profile:{id}` not `user:{id}` — `ResolveDownloadFileName` fell back to `.docx` so Word PDF ran on Excel bytes | **This skill** |
 | `Invalid column name` on batch table | `BatchWorkerSchemaGate`, updaters, `FORCE_XAF_DB_UPDATE` | **lifecycle-docker** |
 | **Delete / Move to Recycle Bin** persists but the catalog card stays | Recycle Bin count vs Catalog row; restart then retry | **This skill** — learnings *catalog row stays* / *locked profile no-op* |
@@ -99,8 +100,8 @@ Controllers: `WordReportsController`, `ApplicationItemWordReportsController`.
 ## Officer workflow (v2)
 
 1. Open dialog → see **user templates** (checkboxes, Ready / Check chips).
-2. Optional **gear** (footer): show **Edit template** + readiness hint lines (hidden by default).
-3. **Edit template** (when staging enabled + write permission): export to UNC share → desktop Word/Excel → **Sync to database** to import changes; **Refresh** reloads catalog only.
+2. Optional **gear** (footer): show **Download Template**, **Review placeholders**, Recycle, and readiness hint lines (hidden by default). **Edit template** is not on catalog rows — download the file instead.
+3. **Download Template** (gear on): browser download of the saved Word/Excel (placeholders, not filled case data).
 4. **Preview** → generate same bytes as ZIP → Office → PDF in popup.
 5. **Download package** → gap confirm if checked rows have warnings → `WordReportGenerationBatch` → toast **Download ZIP**.
 

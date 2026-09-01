@@ -72,21 +72,15 @@ public sealed class TemplateScanOrchestrator : ITemplateScanOrchestrator
             ? TemplateSourceFormat.Xlsx
             : TemplateSourceFormat.Docx;
 
-        var substitutions = new List<TokenSubstitution>();
-        foreach (var field in analysis.FieldPlan.Fields)
-        {
-            if (string.IsNullOrWhiteSpace(field.ProposedToken) || field.SourceRegion is null)
-                continue;
-            if (format == TemplateSourceFormat.Xlsx
-                && field.SourceRegion is DocumentRegion.ExcelCell excelCell
-                && !ScanExcelWorkbookPolicy.IsOnFirstWorksheet(package, excelCell.SheetName))
-                continue;
-            var trimmed = field.ProposedToken.Trim();
-            if (!trimmed.Contains("{{", StringComparison.Ordinal)
-                && !TemplateTokenSyntax.TryGetShortCode(trimmed, out _))
-                continue;
-            substitutions.Add(new TokenSubstitution(field.SourceRegion, trimmed));
-        }
+        var substitutions = ScanYellowSubstitutionBinder.Bind(
+            analysis.FieldPlan.Fields,
+            package,
+            analysis.NormalizedInput.SourceKind,
+            format)
+            .Select(s => new TokenSubstitution(
+                s.Region,
+                ScanLibraryTokenRewriter.Rewrite(s.Token, analysis.PlaceholderSet)))
+            .ToList();
 
         if (substitutions.Count == 0)
         {

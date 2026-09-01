@@ -159,6 +159,31 @@ public class TemplateTokenWriterTests
     }
 
     [Fact]
+    public void Word_overlapping_same_token_keeps_longest_span_silently()
+    {
+        var content = TemplateConvertFixtures.CreateWordDocument(
+            new[] { new[] { "Mehmet ÇIRAK __ signed" } });
+
+        var result = _writer.Apply(new TemplateTokenWriteRequest
+        {
+            SourceContent = content,
+            Format = TemplateSourceFormat.Docx,
+            Substitutions = new[]
+            {
+                new TokenSubstitution(new DocumentRegion.WordSpan("body/0", 0, 12), "ds.CHFN"),
+                new TokenSubstitution(new DocumentRegion.WordSpan("body/0", 0, 15), "ds.CHFN"),
+            },
+        });
+
+        Assert.Empty(result.Skipped);
+        Assert.Single(result.AppliedSubstitutions);
+        Assert.Equal(15, ((DocumentRegion.WordSpan)result.AppliedSubstitutions[0].Region).Length);
+        Assert.Equal(
+            "{{ds.CHFN}} signed",
+            TemplateConvertFixtures.GetParagraphText(result.Content, "body/0"));
+    }
+
+    [Fact]
     public void Word_loop_markers_wrap_the_boundary_paragraphs()
     {
         var content = TemplateConvertFixtures.CreateWordDocument(

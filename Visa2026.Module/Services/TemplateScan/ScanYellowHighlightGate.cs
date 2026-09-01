@@ -20,6 +20,12 @@ public static class ScanYellowHighlightGate
 
         if (yellowHighlightCount <= 0)
         {
+            if (string.Equals(fieldPlan.Source, ScanOfficeLibraryTokenExtractor.FieldPlanSource, StringComparison.Ordinal)
+                && fieldPlan.HasMappedFields)
+            {
+                return prior;
+            }
+
             issues.Add(new ScanSuitabilityIssue
             {
                 Code = ScanSuitabilityIssueCode.NoYellowHighlights,

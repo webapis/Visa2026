@@ -85,7 +85,7 @@ The dialog is **not** a second ZIP builder. It is the **evolved entry point** fo
 | **Catalog / readiness** | `ApplicationWordReportPackageCatalogService`, `ApplicationWordReportPackageReadinessEvaluator`, dry-run hints |
 
 | **UI** | Global **`#visa-preview-slot`** — `ResminamalarSlotPanel` + `ApplicationReportPackageComponent` (`UseInlinePreview`) + `ReportPackageInlinePreview` |
-| **Catalog chrome** | Flat selectable cards (`.resminamalar-catalog`) — Document Copies Prototype A **look** (format icon circle + title + summary + READY/CHECK + Preview / Download / **Delete** for this-profile officer templates); keep checkboxes / ZIP selection (no section Open). **Recycle Bin** tab: Restore + Delete permanently. See [`PREVIEW_SLOT.md`](PREVIEW_SLOT.md) § Resminamalar catalog chrome |
+| **Catalog chrome** | Flat selectable cards (`.resminamalar-catalog`) — Document Copies Prototype A **look** (format icon circle + title + summary + READY/CHECK + Preview / Download / recycle-bin icon for this-profile officer templates); keep checkboxes / ZIP selection (no section Open). **Recycle Bin** tab: Restore + Delete permanently. See [`PREVIEW_SLOT.md`](PREVIEW_SLOT.md) § Resminamalar catalog chrome |
 | **Slot shell** | [`.cursor/skills/visa2026-preview-slot/SKILL.md`](../.cursor/skills/visa2026-preview-slot/SKILL.md) + [`docs/PREVIEW_SLOT.md`](PREVIEW_SLOT.md) |
 
 | **Slot policy** | Single global occupant — **last open wins** (`OccupantKey` + `Version`); `@key` remount on switch; **owner-aware** auto-close (`OwnerViewId` = XAF `View.Id`) |
@@ -134,11 +134,13 @@ One **`#visa-preview-slot`** serves Resminamalar (application scope, item scope)
 
 | — | Review template list (checkboxes, Ready / Check) |
 
-| — | Optional **gear**: **Edit template** (local sandbox → desktop Word/Excel) + hint lines (hidden by default) |
+| — | Optional **gear**: **Download Template**, **Review placeholders**, Recycle, and readiness hint lines (hidden by default) |
 
 | — | **Choose template folder** (once), **Sync to database** after editing; **Refresh** reloads catalog only |
 
 | — | **Preview** → in-slot **PDF viewer** (catalog **or** preview — exclusive toggle; **Close** returns to catalog) |
+
+| — | **Review placeholders** (when Create from yellow marks is enabled) → scan Review on this-profile nested Word/Excel so officers can remap `{{…}}` after Approve stripped yellow |
 
 | — | **Download package** → optional gap confirm → queue |
 
@@ -146,7 +148,7 @@ One **`#visa-preview-slot`** serves Resminamalar (application scope, item scope)
 
 **Empty catalog:** slot still opens; localized message inside the panel (e.g. no Application-scope templates for this application type). No modal.
 
-**Recycle Bin:** **Delete** on an officer-created **this-profile** nested template (Create from yellow marks / Convert / Add prepared) asks to **Move to Recycle Bin**; confirm then shows a progress bar until the row leaves Catalog. Seeded library rows (Category / Global) have no Delete. Recycle Bin **Restore** returns the row to the live catalog; **Delete permanently** removes the nested template (and the linked `UserReportTemplate` when no other nested row shares the name). Recycle is profile-wide, not per case.
+**Recycle Bin:** Recycle-bin icon on an officer-created **this-profile** nested template (Create from yellow marks / Convert / Add prepared) asks to **Move to Recycle Bin**; confirm then shows a progress bar until the row leaves Catalog. Seeded library rows (Category / Global) have no recycle icon. Recycle Bin **Restore** returns the row to the live catalog; **Delete permanently** removes the nested template (and the linked `UserReportTemplate` when no other nested row shares the name). Recycle is profile-wide, not per case.
 
 
 
@@ -286,13 +288,13 @@ Shared types: `WordReportGenerationContext`, `WordReportDefinitionScopeHelper`, 
 
    - Each row: **include checkbox**, **Ready** / **Check** chip, optional warning text, **Preview**.
 
-   - **Edit template** + readiness hint lines when footer **gear** is on (hidden by default).
+   - Footer **gear** on: **Download Template**, **Review placeholders**, Recycle, and readiness hint lines (hidden by default). **Edit template** is not on catalog rows.
 
 2. **Footer**
 
    - Subtitle: selected count for application / items
 
-   - **Select all** | **Clear selection** | **Download package** | **Sync to database** (when staging enabled + write permission) | **Refresh** | **gear**
+   - **Select all** | **Clear selection** | **Download package** | **Refresh** | **gear**
 
 
 
@@ -310,7 +312,7 @@ Shared types: `WordReportGenerationContext`, `WordReportDefinitionScopeHelper`, 
 
 
 
-When **`TemplateEditStaging:Enabled`** is true and the user has **Write** on **`UserReportTemplate`**, the footer **gear** exposes **Edit template** on each catalog row. This is the **officer entry point** for template edits — the catalog no longer links to **`UserReportTemplate` DetailView**.
+When **`TemplateEditStaging:Enabled`** is true, catalog rows no longer show **Edit template**. Officers use **Download Template** (gear on) to save the Word/Excel file, then edit locally. Staging **Sync to database** remains available from the host when enabled.
 
 
 

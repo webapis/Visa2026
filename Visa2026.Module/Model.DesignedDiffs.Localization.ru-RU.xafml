@@ -817,6 +817,7 @@
         <Member Name="Email" Caption="Эл. почта" />
         <Member Name="Name" Caption="Имя" />
         <Member Name="PhoneNumber" Caption="Телефон" />
+        <Member Name="RegistrationDate" Caption="Дата регистрации компании" />
         <Member Name="TaxInformation" Caption="Налоговые данные" />
       </OwnMembers>
     </Class>
@@ -1506,6 +1507,7 @@
         <Member Name="PersonalNumber" Caption="Личный номер" />
         <Member Name="Photo" Caption="Фото" />
         <Member Name="PositionHistory" Caption="История должностей" />
+        <Member Name="PreviousWorkplacesInTurkmenistan" Caption="Предыдущие места работы в Туркменистане" />
         <Member Name="ProjectContract" Caption="Контракт проекта" />
         <Member Name="RejectionItems" Caption="Позиции отказа" />
         <Member Name="Relationship" Caption="Родство" />

@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Options;
 using Visa2026.Module.Services.TemplateConvert;
+using Visa2026.Module.Services.TemplateScan;
 using Visa2026.Module.Services.UserReports;
 
 namespace Visa2026.Module.Services.TemplateScan.Adapters;
@@ -178,7 +179,7 @@ public sealed class AzureOpenAiTemplateScanAiProvider : ITemplateScanAiProvider
                 Reconstruct the scanned ministry letter as Word blocks that MATCH the scan's layout and alignment — not a flat stack of left-aligned lines.
                 Keep static boilerplate wording (Turkmen/Turkish/etc.) intact.
                 For EVERY entry in mappedFields, replace the corresponding value ON THE SCAN with that exact token (even if valueHints differ — the scan may be from another case).
-                Typical placements: header № / application number → AFNUM; letter date → ADAT; urgency line → Urgency_NameTm; person count → TPCNT/TPCTX; visa period/category → VPER/VCAT.
+                Typical placements: header № / application number → AFNUM; letter date → ADAT; company hasaba alyş / tescil date → ACRDT (not ADAT); urgency line → Urgency_NameTm; person count → TPCNT/TPCTX; visa period/category → VPER/VCAT.
                 LAYOUT RULES (critical):
                 - When the scan has LEFT content and RIGHT content on the SAME horizontal band (e.g. №/date left + addressee right; director title left + signatory name right), emit kind=twoColumn with text=left and rightText=right. Use \\n inside a cell for multi-line stacks.
                 - Header twoColumn MUST be: left = №/application number AND letter date (stacked); right = addressee only (e.g. Türkmenistanyň Döwlet migrasiýa gullugyna). NEVER put ADAT/date alone on the right.
@@ -453,26 +454,14 @@ public sealed class AzureOpenAiTemplateScanAiProvider : ITemplateScanAiProvider
 
     private object[] BuildVisionUserContent(ScanFieldPlanRequest request)
     {
-        var allowed = request.PlaceholderSet.Allowed
-            .Select(e => new
-            {
-                e.ShortCode,
-                token = e.BuildWordToken(
-                    e.Scope == UserReportPlaceholderScope.Row
-                        ? UserReportPlaceholderScope.Row
-                        : UserReportPlaceholderScope.Header),
-                e.LabelEn,
-                example = e.ExampleValue,
-                path = e.CanonicalPath,
-                scope = e.Scope.ToString(),
-            });
+        var allowed = ScanPlaceholderManualAiDto.BuildAllowedTokensByBo(request.PlaceholderSet.Allowed);
 
         var textPayload = new
         {
             scanKind = request.ScanKind.ToString(),
             playbookFingerprint = request.Playbook.Fingerprint,
             placeholderSetFingerprint = request.PlaceholderSet.Fingerprint,
-            allowedTokens = allowed,
+            allowedTokensByBo = allowed,
             ocrLines = request.OcrLines.Select(l => new { l.PageIndex, l.Text }),
             valueHints = request.ValueHints.Select(h => new { h.Token, h.MaskedValue, h.LabelText }),
             deterministicSeeds = request.DeterministicSeeds.Select(f => new
@@ -532,9 +521,14 @@ public sealed class AzureOpenAiTemplateScanAiProvider : ITemplateScanAiProvider
                 scope = scopeParsed;
 
             var token = string.IsNullOrWhiteSpace(f.ProposedToken) ? null : f.ProposedToken.Trim();
-            if (token != null
-                && (!TemplateTokenSyntax.TryGetShortCode(token, out var code) || !allowed.Contains(code)))
-                token = null;
+            if (token != null)
+            {
+                var codes = TemplateTokenSyntax.GetShortCodes(token);
+                if (codes.Count == 0 || codes.Any(c => !allowed.Contains(c)))
+                    token = null;
+                else
+                    token = ScanLibraryTokenRewriter.Rewrite(token, request.PlaceholderSet);
+            }
 
             fields.Add(new ScanDetectedFieldDraft
             {
@@ -673,8 +667,14 @@ public sealed class AzureOpenAiTemplateScanAiProvider : ITemplateScanAiProvider
         You map YELLOW-HIGHLIGHTED SAMPLE LITERALS in Word/Excel templates to allowed merge placeholders.
         CRITICAL:
         - Yellow text is FICTITIOUS SAMPLE DATA for template authoring (e.g. "Erol", "Hilmi"). NEVER match against a live case database or officer roster.
-        - Compare yellow text to placeholder manual labels, exampleValue shapes, and Excel column headers only.
+        - Compare yellow text to placeholder manual labels, relatedBo group, role, description, exampleValue shapes, printedLabel, surroundingSnippet, and Excel headerRow — not a live case database.
         - exampleValue in the manual shows the KIND of value (date, country code, name), not a person to look up.
+        - allowedTokensByBo groups the placeholder manual by related business object (Passport, Person, CompanyProfile, AuthorizedRepresentative, …). Look in the matching group first.
+        - allowedTokens.role: Applicant = roster person; Wekil = tenant Authorized Representative; Signatory = gol çekiji; Company / Case = header scalars.
+        - RPFN, RPOS, RPPH, RPCL, RPPL, RPPN, RPPA, RPPD are Wekil only. Applicant names use PFN / PLN / PFNM.
+        - CHFN, ACFNM, ACPOS are Signatory. Company name/address use ASPN, ACADR, ACRGL.
+        - surroundingSnippet marks the yellow span with <<< >>>. Prefer printedLabel / headerRow over guessing from the name alone.
+        - Duplicate yellow of the same sample literal must reuse the same token. Do not invent a second code or leave a gap.
         MERGE TOOL RULES:
         - Word header scalars: {{ds.ShortCode}}; roster row inside loops: {{.ShortCode}}.
         - Excel sanaw tables: row {{.ShortCode}}; footer/header scalars {{ds.ShortCode}}; loop marker {{#ds.rows}}.
@@ -683,7 +683,7 @@ public sealed class AzureOpenAiTemplateScanAiProvider : ITemplateScanAiProvider
         TASK:
         1. For each mark, rank allowed tokens with scorePercent 0-100 and brief reason.
         2. proposedToken = best match (compound allowed). Use only allowedTokens short codes.
-        3. Prefer columnHeader when present (Excel). Use localCandidates as hints, you may override.
+        3. Prefer printedLabel, surroundingSnippet, columnHeader, and headerRow when present. Use localCandidates as hints, you may override.
         4. confidence: High (>=80), Medium (55-79), Low (<55).
         5. Reply JSON only per user schema.
         """;
@@ -703,50 +703,10 @@ public sealed class AzureOpenAiTemplateScanAiProvider : ITemplateScanAiProvider
         };
     }
 
-    private string BuildAmbiguousYellowUserPayload(ScanAmbiguousYellowRefinementRequest request)
-    {
-        var allowed = request.PlaceholderSet.Allowed
-            .Select(e => new
-            {
-                e.ShortCode,
-                tokenHeader = e.BuildWordToken(UserReportPlaceholderScope.Header),
-                tokenRow = e.BuildWordToken(UserReportPlaceholderScope.Row),
-                e.LabelEn,
-                labelTk = e.LabelTk,
-                labelTr = e.LabelTr,
-                example = e.ExampleValue,
-                path = e.CanonicalPath,
-                scope = e.Scope.ToString(),
-            });
-
-        var payload = new
-        {
-            sourceKind = request.SourceKind.ToString(),
-            playbookFingerprint = request.Playbook.Fingerprint,
-            placeholderSetFingerprint = request.PlaceholderSet.Fingerprint,
-            allowedTokens = allowed,
-            marks = request.Marks.Select(m => new
-            {
-                m.FieldId,
-                yellowText = m.YellowText,
-                m.ColumnHeader,
-                scope = m.Scope.ToString(),
-                localProposedToken = m.LocalProposedToken,
-                localCandidates = m.LocalCandidates.Select(c => new
-                {
-                    c.ShortCode,
-                    c.Token,
-                    c.ScorePercent,
-                    c.Reason,
-                }),
-            }),
-            schema = """
-                {"marks":[{"fieldId":"id","proposedToken":"{{.PLN}} or compound cell template","confidence":"High|Medium|Low","candidates":[{"shortCode":"PLN","token":"{{.PLN}}","scorePercent":92,"reason":"column Familiýasy"}]}],"rationale":"..."}
-                """,
-        };
-
-        return Truncate(JsonSerializer.Serialize(payload, JsonOptions), _options.MaxPromptCharacters);
-    }
+    private string BuildAmbiguousYellowUserPayload(ScanAmbiguousYellowRefinementRequest request) =>
+        Truncate(
+            JsonSerializer.Serialize(ScanAmbiguousYellowAzurePayload.Build(request), JsonOptions),
+            _options.MaxPromptCharacters);
 
     private ScanAmbiguousYellowRefinementResult? ParseAmbiguousYellow(
         string json,
@@ -837,7 +797,7 @@ public sealed class AzureOpenAiTemplateScanAiProvider : ITemplateScanAiProvider
 
         var trimmed = token.Trim();
         if (trimmed.Contains("{{", StringComparison.Ordinal))
-            return trimmed;
+            return ScanLibraryTokenRewriter.Rewrite(trimmed, placeholderSet);
 
         if (!TemplateTokenSyntax.TryGetShortCode(trimmed, out var code)
             || !placeholderSet.Contains(code))

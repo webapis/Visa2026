@@ -817,6 +817,7 @@
         <Member Name="Email" Caption="E-posta" />
         <Member Name="Name" Caption="Ad" />
         <Member Name="PhoneNumber" Caption="Telefon" />
+        <Member Name="RegistrationDate" Caption="Şirket Tescil Tarihi" />
         <Member Name="TaxInformation" Caption="Vergi Bilgisi" />
       </OwnMembers>
     </Class>
@@ -1506,6 +1507,7 @@
         <Member Name="PersonalNumber" Caption="Kişisel No" />
         <Member Name="Photo" Caption="Fotoğraf" />
         <Member Name="PositionHistory" Caption="Pozisyon Geçmişi" />
+        <Member Name="PreviousWorkplacesInTurkmenistan" Caption="Türkmenistan'daki önceki iş yerleri" />
         <Member Name="ProjectContract" Caption="Proje Sözleşmesi" />
         <Member Name="RejectionItems" Caption="Ret Kalemleri" />
         <Member Name="Relationship" Caption="Yakınlık" />
