@@ -1,5 +1,7 @@
 #nullable enable
 
+using System;
+using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.UserReports;
 using Xunit;
 
@@ -25,5 +27,67 @@ public class ApplicationProfileTemplateSaveHelperTests
             }));
 
         Assert.Contains("template name", ex.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void ApplyCatalogApplicability_SharedCatalog_ClearsContractBinding()
+    {
+        var contractId = Guid.NewGuid();
+        var template = new ApplicationProfileTemplate
+        {
+            CatalogScope = ApplicationProfileTemplateCatalogScope.Global,
+            ApplicableProjectContractId = contractId,
+        };
+
+        ApplicationProfileTemplateSaveHelper.ApplyCatalogApplicability(
+            template,
+            objectSpace: null,
+            ApplicationProfileTemplateCatalogScope.Global,
+            contractId,
+            migrationServiceId: null);
+
+        Assert.Null(template.ApplicableProjectContractId);
+        Assert.Null(template.ApplicableMigrationServiceId);
+    }
+
+    [Fact]
+    public void ApplyCatalogApplicability_ProfileSpecific_SetsProjectContract()
+    {
+        var contractId = Guid.NewGuid();
+        var template = new ApplicationProfileTemplate
+        {
+            CatalogScope = ApplicationProfileTemplateCatalogScope.ProfileSpecific,
+        };
+
+        ApplicationProfileTemplateSaveHelper.ApplyCatalogApplicability(
+            template,
+            objectSpace: null,
+            ApplicationProfileTemplateCatalogScope.ProfileSpecific,
+            contractId,
+            migrationServiceId: null);
+
+        Assert.Equal(contractId, template.ApplicableProjectContractId);
+        Assert.Null(template.ApplicableMigrationServiceId);
+    }
+
+    [Fact]
+    public void ApplyCatalogApplicability_ProfileSpecificEmpty_MeansAllInstances()
+    {
+        var template = new ApplicationProfileTemplate
+        {
+            CatalogScope = ApplicationProfileTemplateCatalogScope.ProfileSpecific,
+            ApplicableProjectContractId = Guid.NewGuid(),
+            ApplicableMigrationServiceId = Guid.NewGuid(),
+        };
+
+        ApplicationProfileTemplateSaveHelper.ApplyCatalogApplicability(
+            template,
+            objectSpace: null,
+            ApplicationProfileTemplateCatalogScope.ProfileSpecific,
+            projectContractId: null,
+            migrationServiceId: null);
+
+        Assert.Null(template.ApplicableProjectContractId);
+        Assert.Null(template.ApplicableMigrationServiceId);
     }
 }

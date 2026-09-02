@@ -34,6 +34,22 @@ public sealed class ApplicationProfileWizardLookupData
     public IReadOnlyList<ApplicationProfileWizardLookupItem> Cities { get; init; } = [];
     public IReadOnlyList<ApplicationProfileWizardLookupItem> BusinessTripAddresses { get; init; } = [];
 
+    /// <summary>
+    /// Project contracts (via ministry) or migration services (direct) for nested-template visibility.
+    /// Same catalogs as the Application Profile Templates wizard applicability dropdown.
+    /// </summary>
+    public static IReadOnlyList<ApplicationProfileWizardLookupItem> LoadApplicabilityItems(
+        IObjectSpace objectSpace,
+        bool viaMinistry)
+    {
+        if (objectSpace == null)
+            return Array.Empty<ApplicationProfileWizardLookupItem>();
+
+        return viaMinistry
+            ? LoadItems<ProjectContract>(objectSpace)
+            : LoadItems<MigrationService>(objectSpace);
+    }
+
     public static ApplicationProfileWizardLookupData Load(IObjectSpace objectSpace)
     {
         if (objectSpace == null)

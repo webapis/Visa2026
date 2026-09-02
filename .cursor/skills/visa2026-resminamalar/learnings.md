@@ -25,6 +25,16 @@ Purpose: **catalog, seed gate, batch worker, preview, permissions, dialog UX** �
 
 ## Entries
 
+### 2026-09-02 — Case summary Project change left stale Resminamalar catalog (Application)
+
+- **Symptom**: Changing **Project** on Case summary (e.g. 9/-003) did not swap contract-scoped nested templates on the Resminamalar tab.
+- **Try**: Via-ministry case; this-profile template bound to one Project contract; Edit Case summary Project to another contract; open Resminamalar.
+- **Test**: `ResminamalarCaseCatalogCacheTests` (3). Blazor Debug build. Officer: restart, hard-refresh, change Project, open Resminamalar — catalog should match the new contract (and hide the previous one).
+- **Root cause**: Per-circuit `ResminamalarCaseCatalogCache` keyed only on ApplicationProfileInstance id, so leaving Overview and returning reused the old filtered list.
+- **Fix**: Cache key includes Project contract and Migration service ids from Case summary header fields. Tab rebuilds when those lookups change. Catalog load Includes `ProjectContract` / `MigrationService`.
+- **Prevent**: Do not cache the nested catalog by case id alone when visibility depends on Case summary lookups.
+- **Cross-skill**: visa2026-template-scan | visa2026-preview-slot
+
 ### 2026-09-02 — Faster case Preview and Resminamalar tab switch (Application)
 
 - **Symptom**: Preview of `SAHSY KAGYZ_117` took ~5s; Close was sticky; switching to Resminamalar showed Opening Resminamalar… while the catalog rebuilt.

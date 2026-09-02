@@ -1,4 +1,5 @@
 @using DevExpress.ExpressApp
+@using Microsoft.EntityFrameworkCore
 @using Microsoft.Extensions.DependencyInjection
 @using Visa2026.Blazor.Server.Localization
 @using Visa2026.Module.BusinessObjects
@@ -76,7 +77,7 @@
     private bool _showRecycleBin;
     private string _uiCultureName = string.Empty;
     private EventCallback _refreshRequested;
-    private Guid _loadedCatalogApplicationId;
+    private ResminamalarCaseCatalogKey _loadedCatalogKey;
     private bool _catalogLoading;
     private bool _catalogLoadQueued;
 
@@ -119,19 +120,20 @@
             _catalogEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
             _recycleBinEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
             _showRecycleBin = false;
-            _loadedCatalogApplicationId = Guid.Empty;
+            _loadedCatalogKey = default;
             _catalogLoading = false;
             return;
         }
 
-        if (CatalogCache.TryGet(_applicationId, out var cached, out var cachedNumber))
+        var catalogKey = CurrentCatalogKey;
+        if (CatalogCache.TryGet(catalogKey, out var cached, out var cachedNumber))
         {
-            ApplyCatalog(cached, cachedNumber);
+            ApplyCatalog(cached, cachedNumber, catalogKey);
             _catalogLoading = false;
             return;
         }
 
-        if (_applicationId != _loadedCatalogApplicationId)
+        if (catalogKey != _loadedCatalogKey)
         {
             _catalogLoading = true;
             _catalogLoadQueued = true;
@@ -144,10 +146,15 @@
             return;
 
         _catalogLoadQueued = false;
-        var applicationId = _applicationId;
-        var catalog = await Task.Run(() => BuildCatalog(applicationId)).ConfigureAwait(true);
-        if (applicationId != _applicationId)
+        var catalogKey = CurrentCatalogKey;
+        var catalog = await Task.Run(() => BuildCatalog(catalogKey.ApplicationId)).ConfigureAwait(true);
+        if (catalogKey != CurrentCatalogKey)
+        {
+            _catalogLoadQueued = true;
+            _catalogLoading = true;
+            await InvokeAsync(StateHasChanged);
             return;
+        }
 
         if (catalog == null)
         {
@@ -155,31 +162,51 @@
             _recycleBinEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
             _showRecycleBin = false;
             _applicationNumber = string.Empty;
-            _loadedCatalogApplicationId = Guid.Empty;
+            _loadedCatalogKey = default;
             _catalogLoading = false;
             await InvokeAsync(StateHasChanged);
             return;
         }
 
-        CatalogCache.Set(applicationId, catalog.Value.Catalog, catalog.Value.ApplicationNumber);
-        ApplyCatalog(catalog.Value.Catalog, catalog.Value.ApplicationNumber);
+        CatalogCache.Set(catalogKey, catalog.Value.Catalog, catalog.Value.ApplicationNumber);
+        ApplyCatalog(catalog.Value.Catalog, catalog.Value.ApplicationNumber, catalogKey);
         _catalogLoading = false;
         await InvokeAsync(StateHasChanged);
     }
 
-    private void ApplyCatalog(ApplicationWordReportPackageCatalog catalog, string applicationNumber)
+    private ResminamalarCaseCatalogKey CurrentCatalogKey =>
+        new(
+            _applicationId,
+            HeaderLookupId(ApplicationWorkspaceCaseHeaderFieldsHelper.Project),
+            HeaderLookupId(ApplicationWorkspaceCaseHeaderFieldsHelper.MigrationService));
+
+    private Guid HeaderLookupId(string key)
+    {
+        var field = Snapshot?.CaseView.HeaderFields
+            .FirstOrDefault(item => string.Equals(item.Key, key, StringComparison.Ordinal));
+        return field?.SelectedId is Guid id && id != Guid.Empty ? id : Guid.Empty;
+    }
+
+    private void ApplyCatalog(
+        ApplicationWordReportPackageCatalog catalog,
+        string applicationNumber,
+        ResminamalarCaseCatalogKey key)
     {
         _catalogEntries = catalog.Entries;
         _recycleBinEntries = catalog.RecycleBinEntries;
         _showRecycleBin = catalog.HasProfileNestedCatalog;
         _applicationNumber = applicationNumber;
-        _loadedCatalogApplicationId = _applicationId;
+        _loadedCatalogKey = key;
     }
 
     private (ApplicationWordReportPackageCatalog Catalog, string ApplicationNumber)? BuildCatalog(Guid applicationId)
     {
         using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
-        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
+        var application = objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
+            .Include(item => item.ProjectContract)
+            .Include(item => item.MigrationService)
+            .Include(item => item.ApplicationProfile)
+            .FirstOrDefault(item => item.ID == applicationId);
         if (application == null)
             return null;
 
@@ -191,7 +218,7 @@
     private Task ReloadCatalogAsync()
     {
         CatalogCache.Clear();
-        _loadedCatalogApplicationId = Guid.Empty;
+        _loadedCatalogKey = default;
         _catalogLoading = true;
         _catalogLoadQueued = true;
         return InvokeAsync(StateHasChanged);

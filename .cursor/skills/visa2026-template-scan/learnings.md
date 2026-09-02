@@ -4,6 +4,14 @@ Append-only. Newest first under **## Entries**.
 
 ## Entries
 
+### 2026-09-02 — Create template Save to: Project contract / All contracts
+
+- Need: Under **Save to** on Create from yellow marks, officers needed the same visibility as the Application Profile Templates wizard: one `ProjectContract` (via ministry) or all contracts on this profile; direct-migration uses Migration service the same way.
+- Cause: Upload only had This profile / Shared catalog. `ApplicableProjectContractId` existed on the nested row and `IsVisibleForInstance` already filtered profile-specific rows, but Scan Approve never persisted the FK.
+- Fix: When **This profile only**, show the wizard dropdown (**All contracts** vs one Project contract; **All migration services** vs one service). Shared catalog hides it and clears the binding. `ApplicationProfileTemplateSaveHelper.ApplyCatalogApplicability` on Scan save (`SetApplicability`). Convert still does not overwrite an existing wizard binding.
+- Officer: Restart, hard-refresh. Create template → Save to **This profile only** → leave **All contracts** or pick one Project contract → Approve. Resminamalar on another contract of the same profile should hide a one-contract template. Shared catalog stays visible on every case of this profile.
+- Cross-skill: visa2026-resminamalar · visa2026-application-profile
+
 ### 2026-09-01 — Şahsy Preview `{{ds.PVFM}}` blocked Approve
 
 - Need: Create from yellow marks Preview on Şahsy kagyz listed blocking `{{ds.PVFM}}` / `{{ds.PDBT}}` / `{{ds.PCBT}}` / `{{ds.PBPL}}` / `{{ds.PFWC}}` — property not found on ApplicationProfileInstance. `{{.PFN}}` was fine. Approve stayed disabled.

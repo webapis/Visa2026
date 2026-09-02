@@ -40,6 +40,15 @@ public static class ApplicationProfileTemplateSaveHelper
         template.TemplateKind = request.TemplateKind;
         template.CatalogScope = request.CatalogScope;
         template.DataScope = request.DataScope;
+        if (request.SetApplicability)
+        {
+            ApplyCatalogApplicability(
+                template,
+                objectSpace,
+                request.CatalogScope,
+                request.ApplicableProjectContractId,
+                request.ApplicableMigrationServiceId);
+        }
         template.RecycledAtUtc = null;
         template.RecycledByUserName = null;
         template.TemplateFile ??= objectSpace.CreateObject<DevExpress.Persistent.BaseImpl.EF.FileData>();
@@ -54,6 +63,55 @@ public static class ApplicationProfileTemplateSaveHelper
         ApplicationProfileTemplateUserReportBridge.WriteMasterFile(objectSpace, userTemplate, request.Content, fileName);
 
         return template;
+    }
+
+    /// <summary>
+    /// Same rule as the Application Profile Templates wizard: profile-specific rows may bind one
+    /// Project contract (via ministry) or one Migration service (direct). Empty = every instance of this profile.
+    /// Shared catalog rows never keep a contract/service filter.
+    /// </summary>
+    public static void ApplyCatalogApplicability(
+        ApplicationProfileTemplate template,
+        IObjectSpace? objectSpace,
+        ApplicationProfileTemplateCatalogScope catalogScope,
+        Guid? projectContractId,
+        Guid? migrationServiceId)
+    {
+        ArgumentNullException.ThrowIfNull(template);
+
+        if (catalogScope != ApplicationProfileTemplateCatalogScope.ProfileSpecific)
+        {
+            ClearApplicability(template);
+            return;
+        }
+
+        if (projectContractId is Guid contractId && contractId != Guid.Empty)
+        {
+            template.ApplicableMigrationService = null;
+            template.ApplicableMigrationServiceId = null;
+            template.ApplicableProjectContractId = contractId;
+            template.ApplicableProjectContract = objectSpace?.GetObjectByKey<ProjectContract>(contractId);
+            return;
+        }
+
+        if (migrationServiceId is Guid serviceId && serviceId != Guid.Empty)
+        {
+            template.ApplicableProjectContract = null;
+            template.ApplicableProjectContractId = null;
+            template.ApplicableMigrationServiceId = serviceId;
+            template.ApplicableMigrationService = objectSpace?.GetObjectByKey<MigrationService>(serviceId);
+            return;
+        }
+
+        ClearApplicability(template);
+    }
+
+    private static void ClearApplicability(ApplicationProfileTemplate template)
+    {
+        template.ApplicableProjectContract = null;
+        template.ApplicableProjectContractId = null;
+        template.ApplicableMigrationService = null;
+        template.ApplicableMigrationServiceId = null;
     }
 }
 
@@ -74,4 +132,14 @@ public sealed class ApplicationProfileTemplateSaveRequest
     public required byte[] Content { get; init; }
 
     public string? FileName { get; init; }
+
+    /// <summary>
+    /// When true, persist <see cref="ApplicableProjectContractId"/> / <see cref="ApplicableMigrationServiceId"/>
+    /// (Create from yellow marks). Convert leaves this false so an overwrite does not wipe a wizard binding.
+    /// </summary>
+    public bool SetApplicability { get; init; }
+
+    public Guid? ApplicableProjectContractId { get; init; }
+
+    public Guid? ApplicableMigrationServiceId { get; init; }
 }

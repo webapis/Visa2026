@@ -289,6 +289,9 @@ public sealed class TemplateScanOrchestrator : ITemplateScanOrchestrator
             CatalogScope = request.CatalogScope,
             Content = request.Content,
             FileName = request.FileName,
+            SetApplicability = true,
+            ApplicableProjectContractId = request.ApplicableProjectContractId,
+            ApplicableMigrationServiceId = request.ApplicableMigrationServiceId,
         });
     }
 }

@@ -4,21 +4,30 @@ using System.Collections.Generic;
 namespace Visa2026.Module.Services.WordReports;
 
 /// <summary>
+/// Case-workspace catalog identity. Includes Project contract / Migration service so a Case summary
+/// change does not keep showing templates filtered for the previous lookup.
+/// </summary>
+public readonly record struct ResminamalarCaseCatalogKey(
+    Guid ApplicationId,
+    Guid ProjectContractId,
+    Guid MigrationServiceId);
+
+/// <summary>
 /// Per-circuit cache so leaving and returning to case Resminamalar does not rebuild the catalog.
 /// </summary>
 public sealed class ResminamalarCaseCatalogCache
 {
-    private Guid _applicationId;
+    private ResminamalarCaseCatalogKey _key;
     private string _applicationNumber = string.Empty;
     private ApplicationWordReportPackageCatalog? _catalog;
 
     public bool TryGet(
-        Guid applicationId,
+        ResminamalarCaseCatalogKey key,
         out ApplicationWordReportPackageCatalog catalog,
         out string applicationNumber)
     {
-        if (applicationId != Guid.Empty
-            && applicationId == _applicationId
+        if (key.ApplicationId != Guid.Empty
+            && key == _key
             && _catalog != null)
         {
             catalog = _catalog;
@@ -35,18 +44,18 @@ public sealed class ResminamalarCaseCatalogCache
     }
 
     public void Set(
-        Guid applicationId,
+        ResminamalarCaseCatalogKey key,
         ApplicationWordReportPackageCatalog catalog,
         string applicationNumber)
     {
-        _applicationId = applicationId;
+        _key = key;
         _catalog = catalog;
         _applicationNumber = applicationNumber ?? string.Empty;
     }
 
     public void Clear()
     {
-        _applicationId = Guid.Empty;
+        _key = default;
         _catalog = null;
         _applicationNumber = string.Empty;
     }

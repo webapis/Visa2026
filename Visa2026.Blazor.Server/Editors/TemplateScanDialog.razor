@@ -5,6 +5,7 @@
 @using Microsoft.AspNetCore.Components.Web
 @using Microsoft.Extensions.Options
 @using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Services.ApplicationProfileWizard
 @using Visa2026.Module.Services.RuntimeLogging
 @using Visa2026.Module.Services.TemplateConvert
 @using Visa2026.Module.Services.TemplateScan
@@ -65,6 +66,20 @@
                                        @onchange="() => _catalogScope = ApplicationProfileTemplateCatalogScope.Global" />
                                 <span>Shared catalog — confirmed at save (S5)</span>
                             </label>
+                            @if (_catalogScope == ApplicationProfileTemplateCatalogScope.ProfileSpecific)
+                            {
+                                <label class="tas-field tas-field--nested">
+                                    <span class="tas-field__label">@ApplicabilityTitle</span>
+                                    <select class="tas-input" value="@_applicabilityId" @onchange="OnApplicabilityChanged">
+                                        <option value="">@ApplicabilityEmptyLabel</option>
+                                        @foreach (var item in _applicabilityLookups)
+                                        {
+                                            <option value="@item.Id.ToString("D")">@item.DisplayName</option>
+                                        }
+                                    </select>
+                                    <small>@ApplicabilityHint</small>
+                                </label>
+                            }
                         </div>
 
                         <div class="tas-field">
@@ -75,7 +90,7 @@
                                 <option value="@ApplicationProfileTemplateDataScope.PeopleM2M">People — one row or document per person</option>
                                 <option value="@ApplicationProfileTemplateDataScope.Both">Both</option>
                             </select>
-                            <small>Same as Add prepared template. Sanaw / person lists need <strong>People</strong> or <strong>Both</strong> so row tokens and <code>{{#ds.rows}}</code> are available.</small>
+                            <small>Same as Add existing template. Sanaw / person lists need <strong>People</strong> or <strong>Both</strong> so row tokens and <code>{{#ds.rows}}</code> are available.</small>
                             @if (IsExcelUpload && _dataScope == ApplicationProfileTemplateDataScope.ApplicationHeader)
                             {
                                 <p class="tas-banner tas-banner--warn" style="margin:0.5rem 0 0">
@@ -155,7 +170,7 @@
                         }
 
                         <p class="tas-field">
-                            <button type="button" class="tas-link" @onclick="OnAddPreparedTemplateAsync">Add prepared template instead</button>
+                            <button type="button" class="tas-link" @onclick="OnAddPreparedTemplateAsync">Add existing template instead</button>
                         </p>
                     </div>
                 }
@@ -306,6 +321,10 @@
                                     <tr><th>Template</th><td>@_savedTemplateName</td></tr>
                                     <tr><th>Profile</th><td>@_profileName</td></tr>
                                     <tr><th>Available in</th><td>@(_catalogScope == ApplicationProfileTemplateCatalogScope.Global ? "Shared catalog" : "This profile only")</td></tr>
+                                    @if (_catalogScope == ApplicationProfileTemplateCatalogScope.ProfileSpecific)
+                                    {
+                                        <tr><th>Visible for</th><td>@ApplicabilitySummary</td></tr>
+                                    }
                                     @if (_outcome is { } saved)
                                     {
                                         <tr><th>Placeholders</th><td>@saved.EmittedTokens.Count</td></tr>
@@ -478,6 +497,10 @@
     private string _templateName = string.Empty;
     private string? _editingOriginalName;
     private ApplicationProfileTemplateCatalogScope _catalogScope = ApplicationProfileTemplateCatalogScope.ProfileSpecific;
+    private bool _isViaMinistry;
+    private string _applicabilityId = string.Empty;
+    private IReadOnlyList<ApplicationProfileWizardLookupItem> _applicabilityLookups =
+        Array.Empty<ApplicationProfileWizardLookupItem>();
     private ApplicationProfileTemplateDataScope _dataScope = ApplicationProfileTemplateDataScope.Both;
     private ScanKind _scanKind = ScanKind.FilledSample;
 
@@ -530,6 +553,7 @@
         _profileName = profile.Name ?? string.Empty;
         _configLocked = ApplicationProfileLockHelper.IsProfileConfigLocked(profile, objectSpace);
         _instanceOptions = LoadInstanceOptions(profile, objectSpace);
+        BindApplicabilityFromProfile(profile, objectSpace);
         _aiEnabled = Options.Value.Enabled && ScanAiProvider.IsEnabled;
 
         _open = true;
@@ -558,6 +582,7 @@
                 _profileId = profile.ID;
                 _profileName = profile.Name ?? string.Empty;
                 _configLocked = ApplicationProfileLockHelper.IsProfileConfigLocked(profile, objectSpace);
+                BindApplicabilityFromInstance(instance, profile, objectSpace);
             }
         }
 
@@ -573,7 +598,9 @@
         string fileName,
         string templateName,
         ApplicationProfileTemplateDataScope dataScope,
-        ApplicationProfileTemplateCatalogScope catalogScope)
+        ApplicationProfileTemplateCatalogScope catalogScope,
+        Guid? applicableProjectContractId = null,
+        Guid? applicableMigrationServiceId = null)
     {
         ArgumentNullException.ThrowIfNull(content);
         if (content.Length == 0)
@@ -588,6 +615,7 @@
         _editingOriginalName = _templateName;
         _dataScope = dataScope;
         _catalogScope = catalogScope;
+        _applicabilityId = FormatApplicabilityId(applicableProjectContractId, applicableMigrationServiceId);
         await AnalyzeAsync();
     }
 
@@ -624,6 +652,9 @@
         _templateName = string.Empty;
         _editingOriginalName = null;
         _catalogScope = ApplicationProfileTemplateCatalogScope.ProfileSpecific;
+        _isViaMinistry = false;
+        _applicabilityId = string.Empty;
+        _applicabilityLookups = Array.Empty<ApplicationProfileWizardLookupItem>();
         _dataScope = ApplicationProfileTemplateDataScope.Both;
         _scanKind = ScanKind.FilledSample;
         _pdfPageCount = 0;
@@ -651,6 +682,69 @@
         _chatSeeded = false;
         _savedTemplateName = string.Empty;
         _helpReturnStage = Stage.Upload;
+    }
+
+    private string ApplicabilityTitle =>
+        _isViaMinistry ? "Project contract" : "Migration service";
+
+    private string ApplicabilityEmptyLabel =>
+        _isViaMinistry ? "All contracts" : "All migration services";
+
+    private string ApplicabilityHint =>
+        _isViaMinistry
+            ? "Same as the profile template list. All contracts = every via-ministry case of this profile. Pick one Project contract to show only on matching cases."
+            : "Same as the profile template list. All migration services = every direct-migration case of this profile. Pick one service to show only on matching cases.";
+
+    private string ApplicabilitySummary
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(_applicabilityId))
+                return ApplicabilityEmptyLabel;
+
+            var match = _applicabilityLookups.FirstOrDefault(item =>
+                string.Equals(item.Id.ToString("D"), _applicabilityId, StringComparison.OrdinalIgnoreCase));
+            return match?.DisplayName ?? _applicabilityId;
+        }
+    }
+
+    private Guid? SelectedProjectContractId =>
+        _catalogScope == ApplicationProfileTemplateCatalogScope.ProfileSpecific && _isViaMinistry
+            ? ParseApplicabilityId()
+            : null;
+
+    private Guid? SelectedMigrationServiceId =>
+        _catalogScope == ApplicationProfileTemplateCatalogScope.ProfileSpecific && !_isViaMinistry
+            ? ParseApplicabilityId()
+            : null;
+
+    private Guid? ParseApplicabilityId() =>
+        Guid.TryParse(_applicabilityId, out var id) && id != Guid.Empty ? id : null;
+
+    private void OnApplicabilityChanged(ChangeEventArgs e) =>
+        _applicabilityId = e.Value?.ToString() ?? string.Empty;
+
+    private void BindApplicabilityFromProfile(ApplicationProfile profile, IObjectSpace objectSpace)
+    {
+        _isViaMinistry = profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries;
+        _applicabilityLookups = ApplicationProfileWizardLookupData.LoadApplicabilityItems(objectSpace, _isViaMinistry);
+    }
+
+    private void BindApplicabilityFromInstance(
+        ApplicationProfileInstance? instance,
+        ApplicationProfile profile,
+        IObjectSpace objectSpace)
+    {
+        var route = ApplicationProfileConfigurationResolver.GetProgressRoute(instance)
+            ?? profile.ProgressRoute;
+        _isViaMinistry = route == ApplicationProfileInstanceProgressRouteKind.ViaMinistries;
+        _applicabilityLookups = ApplicationProfileWizardLookupData.LoadApplicabilityItems(objectSpace, _isViaMinistry);
+    }
+
+    private string FormatApplicabilityId(Guid? projectContractId, Guid? migrationServiceId)
+    {
+        var id = _isViaMinistry ? projectContractId : migrationServiceId;
+        return id is Guid value && value != Guid.Empty ? value.ToString("D") : string.Empty;
     }
 
     private string CaseHintLabel
@@ -1346,6 +1440,8 @@
                 Content = _outcome.Content,
                 FileName = _templateName.Trim() + ext,
                 TemplateKind = _outcome.TemplateKind,
+                ApplicableProjectContractId = SelectedProjectContractId,
+                ApplicableMigrationServiceId = SelectedMigrationServiceId,
             });
 
             if (_source == EntrySource.Instance)

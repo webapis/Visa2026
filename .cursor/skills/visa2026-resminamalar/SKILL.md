@@ -54,6 +54,7 @@ disable-model-invocation: false
 
 | Symptom | First step | Likely owner |
 |---------|------------|--------------|
+| Case summary **Project** change does not swap Resminamalar contract templates | Restart, hard-refresh; cache is keyed by case + Project contract. Open Resminamalar after the save | **This skill** — learnings *stale Resminamalar catalog* |
 | **User Report Template** list empty; Resminamalar shows no rows | Restart app; look for `User report template seed completed` in logs; [UserReportTemplateSeedGate](../../../Visa2026.Blazor.Server/Services/UserReportTemplateSeedGate.cs) | **This skill** — see learnings *Empty list* |
 | Template exists in DB, missing from dialog | `IsActive`, applicable types/contracts, Application vs Item scope, `IUserReportVisibilityService` | **This skill** + template visibility (user-report-templates) |
 | **Check** chip but ZIP “should work” | Gap confirm is optional; hard fail = worker log | **This skill** (UX) vs **user-report-templates** (merge) |
@@ -67,7 +68,7 @@ disable-model-invocation: false
 | **Delete / Move to Recycle Bin** persists but the catalog card stays | Recycle Bin count vs Catalog row; restart then retry | **This skill** — learnings *catalog row stays* / *locked profile no-op* |
 | **Edit template** does nothing / export failed | `TemplateEditStaging:Enabled`, HTTPS (prod), folder chosen | **This skill** — [`TEMPLATE_STAGING_EDIT.md`](../../../docs/TEMPLATE_STAGING_EDIT.md) |
 | **Sync to database** — file locked / 0 imported | Close Word/Excel; hash unchanged skips import | **This skill** |
-| Preview stale after sync | Run **Sync to database** (imports share) then **Refresh** if needed | **This skill** |
+| Preview stale after sync | Run **Sync to database** (imports share); catalog reloads after import | **This skill** |
 | Şahsy / per-person form Preview shows only one roster person | Case workspace header chips; Preview must pass `ApplicationItemIds`. Nested `SAHSY KAGYZ_*` names need `LooksLikeSahsyKagyzName` | **This skill** |
 | Placeholder errors **after** sync import | `UserReportTemplateMaintenanceService` Extract/Validate | **user-report-templates** |
 ---

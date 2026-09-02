@@ -136,7 +136,7 @@ One **`#visa-preview-slot`** serves Resminamalar (application scope, item scope)
 
 | — | Optional **gear**: **Download Template**, **Review placeholders**, Recycle, and readiness hint lines (hidden by default) |
 
-| — | **Choose template folder** (once), **Sync to database** after editing; **Refresh** reloads catalog only |
+| — | **Choose template folder** (once), **Sync to database** after editing |
 
 | — | **Preview** → in-slot **PDF viewer** (catalog **or** preview — exclusive toggle; **Close** returns to catalog) |
 
@@ -148,7 +148,7 @@ One **`#visa-preview-slot`** serves Resminamalar (application scope, item scope)
 
 **Empty catalog:** slot still opens; localized message inside the panel (e.g. no Application-scope templates for this application type). No modal.
 
-**Recycle Bin:** Recycle-bin icon on an officer-created **this-profile** nested template (Create from yellow marks / Convert / Add prepared) asks to **Move to Recycle Bin**; confirm then shows a progress bar until the row leaves Catalog. Seeded library rows (Category / Global) have no recycle icon. Recycle Bin **Restore** returns the row to the live catalog; **Delete permanently** removes the nested template (and the linked `UserReportTemplate` when no other nested row shares the name). Recycle is profile-wide, not per case.
+**Recycle Bin:** Recycle-bin icon on an officer-created **this-profile** nested template (Create template / Add existing template) asks to **Move to Recycle Bin**; confirm then shows a progress bar until the row leaves Catalog. Seeded library rows (Category / Global) have no recycle icon. Recycle Bin **Restore** returns the row to the live catalog; **Delete permanently** removes the nested template (and the linked `UserReportTemplate` when no other nested row shares the name). Recycle is profile-wide, not per case.
 
 ### Case workspace
 
@@ -303,7 +303,7 @@ Shared types: `WordReportGenerationContext`, `WordReportDefinitionScopeHelper`, 
 
    - Subtitle: selected count for application / items
 
-   - **Select all** | **Clear selection** | **Download package** | **Refresh** | **gear**
+   - **Select all** | **Clear selection** | **Download package** | **gear**
 
 
 

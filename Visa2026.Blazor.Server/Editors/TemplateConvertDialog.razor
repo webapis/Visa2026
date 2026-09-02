@@ -17,7 +17,7 @@
             <header class="tac-modal__head">
                 <div>
                     <h2 id="tac-title">
-                        @(_manual ? "Add prepared template" : "Convert document to template")
+                        @(_manual ? "Add existing template" : "Convert document to template")
                     </h2>
                     <p>@_profileName@(string.IsNullOrEmpty(_caseNumber) ? string.Empty : " · case " + _caseNumber)</p>
                 </div>

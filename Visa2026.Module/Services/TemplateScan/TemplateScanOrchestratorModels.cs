@@ -89,4 +89,8 @@ public sealed class TemplateScanSaveRequest
     public required string FileName { get; init; }
 
     public ApplicationProfileTemplateKind TemplateKind { get; init; } = ApplicationProfileTemplateKind.Word;
+
+    public Guid? ApplicableProjectContractId { get; init; }
+
+    public Guid? ApplicableMigrationServiceId { get; init; }
 }

@@ -110,6 +110,7 @@
 .tas-input:focus { outline: 2px solid rgba(13, 148, 136, 0.35); border-color: #0d9488; }
 
 .tas-radio { display: flex; align-items: center; gap: 0.45rem; font-size: 0.85rem; color: #0f172a; }
+.tas-field--nested { margin-top: 0.55rem; padding-top: 0.55rem; border-top: 1px solid #e2e8f0; }
 
 .tas-drop {
   display: grid;

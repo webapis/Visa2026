@@ -63,7 +63,7 @@
                       Click="@OpenPlaceholderManualAsync" />
             @if (ShowScanEntryVisible)
             {
-                <DxButton Text="Create from yellow marks"
+                <DxButton Text="Create template"
                           RenderStyle="ButtonRenderStyle.Link"
                           SizeMode="SizeMode.Small"
                           CssClass="app-item-doc-copies__action-btn"
@@ -72,12 +72,7 @@
             }
             @if (ShowConvertEntry)
             {
-                <DxButton Text="Convert existing document"
-                          RenderStyle="ButtonRenderStyle.Link"
-                          SizeMode="SizeMode.Small"
-                          CssClass="app-item-doc-copies__action-btn"
-                          Click="@(() => OpenConvertAsync(manual: false))" />
-                <DxButton Text="Add prepared template"
+                <DxButton Text="Add existing template"
                           RenderStyle="ButtonRenderStyle.Link"
                           SizeMode="SizeMode.Small"
                           CssClass="app-item-doc-copies__action-btn"
@@ -260,12 +255,6 @@
                                   Enabled="@(!_packageBusy && SelectedCount > 0)"
                                   Click="@OnDownloadPackageClickAsync" />
                     }
-                    <DxButton Text="@Msg("ApplicationReportPackage.Refresh")"
-                              RenderStyle="ButtonRenderStyle.Link"
-                              SizeMode="SizeMode.Small"
-                              CssClass="app-item-doc-copies__action-btn"
-                              Enabled="@(!_refreshBusy && !_packageBusy && !_syncBusy)"
-                              Click="@OnRefreshClickAsync" />
                     }
                 </div>
             </div>
@@ -426,7 +415,7 @@
                                               RenderStyle="ButtonRenderStyle.Link"
                                               SizeMode="SizeMode.Small"
                                               CssClass="app-item-doc-copies__action-btn"
-                                              title="Open Create from yellow marks on this catalog template"
+                                              title="Remap placeholders on this catalog template"
                                               Enabled="@(!_packageBusy && !_previewBusy && !_recycleBusy && !_scanReviewBusy)"
                                               Click="@(() => OpenScanReviewAsync(entry))" />
                                 }
@@ -748,8 +737,8 @@
 
     private string ScanEntryTitle =>
         ScanEntryEnabled
-            ? "Upload a scan or photo and detect merge placeholders"
-            : "Enable TemplateAiScan with a vision provider (Azure OpenAI) in configuration";
+            ? "Create a template from a yellow-marked Word or Excel file"
+            : "Enable TemplateAiScan in configuration";
 
     private Task OpenConvertAsync(bool manual) =>
         _convertDialog?.OpenAsync(ApplicationProfileInstanceId, ApplicationNumber, manual) ?? Task.CompletedTask;
@@ -821,7 +810,9 @@
                 fileName,
                 template.TemplateName?.Trim() ?? entry.DisplayName,
                 template.DataScope,
-                template.CatalogScope);
+                template.CatalogScope,
+                template.ApplicableProjectContractId,
+                template.ApplicableMigrationServiceId);
         }
         catch (Exception ex)
         {
@@ -1402,27 +1393,6 @@
 
         if (RefreshRequested.HasDelegate)
             await RefreshRequested.InvokeAsync();
-    }
-
-    private async Task OnRefreshClickAsync()
-    {
-        if (_refreshBusy || _packageBusy || _syncBusy)
-            return;
-
-        _packageConfirmPending = false;
-        ClearStatusMessages();
-        _refreshBusy = true;
-
-        try
-        {
-            if (RefreshRequested.HasDelegate)
-                await RefreshRequested.InvokeAsync();
-        }
-        finally
-        {
-            _refreshBusy = false;
-            await InvokeAsync(StateHasChanged);
-        }
     }
 
     private string ReadinessLabel(ApplicationWordReportPackageCatalogEntry entry) =>
