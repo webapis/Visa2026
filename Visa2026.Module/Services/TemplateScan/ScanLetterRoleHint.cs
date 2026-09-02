@@ -34,6 +34,26 @@ public static class ScanLetterRoleHint
         return ScanLetterRole.Unknown;
     }
 
+    /// <summary>
+    /// Role from immediate surround, or from an inline title inside the yellow
+    /// ("Mudiri Name") when the left label is not a job-title field.
+    /// </summary>
+    public static ScanLetterRole FromYellowAndNearby(string? yellowText, params string?[] nearbyFragments)
+    {
+        var nearbyRole = FromNearbyText(nearbyFragments);
+        var nearbyFolded = TemplateTextNormalizer.NormalizeFolded(
+            string.Join(" ", nearbyFragments.Where(static f => !string.IsNullOrWhiteSpace(f))));
+        if (nearbyFolded.Contains("wezipe", StringComparison.Ordinal)
+            || nearbyFolded.Contains("hunar", StringComparison.Ordinal))
+            return nearbyRole;
+
+        var yellowFolded = TemplateTextNormalizer.NormalizeFolded(yellowText);
+        if (yellowFolded.StartsWith("mudiri ", StringComparison.Ordinal))
+            return ScanLetterRole.Signatory;
+
+        return nearbyRole;
+    }
+
     public static bool LooksLikeWekil(string? foldedOrRaw)
     {
         var folded = TemplateTextNormalizer.NormalizeFolded(foldedOrRaw);
@@ -47,9 +67,18 @@ public static class ScanLetterRoleHint
         folded.Contains("yolbascy", StringComparison.Ordinal)
         || folded.Contains("gol cekiji", StringComparison.Ordinal)
         || folded.Contains("signatory", StringComparison.Ordinal)
-        || folded.Contains("company head", StringComparison.Ordinal);
+        || folded.Contains("company head", StringComparison.Ordinal)
+        || folded.Contains("is beriji", StringComparison.Ordinal)
+        || folded.Equals("mudiri", StringComparison.Ordinal);
 
     private static bool LooksLikeApplicant(string folded) =>
         folded.Contains("doglan senesi", StringComparison.Ordinal)
-        || folded.Contains("atasynyn ady", StringComparison.Ordinal);
+        || folded.Contains("atasynyn ady", StringComparison.Ordinal)
+        || folded.Contains("familiyasy", StringComparison.Ordinal)
+        || folded.Contains("cagryl", StringComparison.Ordinal)
+        || folded.Contains("cagrylan adam", StringComparison.Ordinal)
+        || folded.Contains("hired person", StringComparison.Ordinal)
+        || folded.Contains("person being hired", StringComparison.Ordinal)
+        || folded.Equals("isgar", StringComparison.Ordinal)
+        || folded.Equals("isgari", StringComparison.Ordinal);
 }

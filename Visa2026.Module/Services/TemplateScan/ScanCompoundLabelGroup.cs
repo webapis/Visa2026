@@ -33,6 +33,8 @@ public static class ScanCompoundLabelGroup
             return UserReportPlaceholderRelatedBo.AuthorizedRepresentative;
         if (role == ScanLetterRole.Signatory)
             return UserReportPlaceholderRelatedBo.CompanySignatory;
+        if (role == ScanLetterRole.Applicant)
+            return UserReportPlaceholderRelatedBo.Person;
 
         var stem = Stem(nearbyLabel, columnHeader);
         if (stem.Length == 0)
@@ -68,6 +70,8 @@ public static class ScanCompoundLabelGroup
 
         if (LooksLikeEducation(stem))
             Add(UserReportPlaceholderRelatedBo.Education, 90);
+        if (LooksLikeHiredPerson(stem))
+            Add(UserReportPlaceholderRelatedBo.Person, 92);
         if (stem.Contains("pasport", StringComparison.Ordinal))
             Add(UserReportPlaceholderRelatedBo.Passport, 70);
         if (stem.Contains("karhana", StringComparison.Ordinal)
@@ -176,8 +180,19 @@ public static class ScanCompoundLabelGroup
 
     private static int DatePreferenceBoost(string shortCode, string nearbyFolded)
     {
-        if (string.IsNullOrEmpty(nearbyFolded)
-            || !nearbyFolded.Contains("mohlet", StringComparison.Ordinal))
+        if (string.IsNullOrEmpty(nearbyFolded))
+            return 0;
+
+        if (nearbyFolded.Contains("doglan", StringComparison.Ordinal))
+        {
+            if (shortCode.Equals("PDBT", StringComparison.OrdinalIgnoreCase))
+                return 20;
+            if (shortCode.Equals("ACRDT", StringComparison.OrdinalIgnoreCase)
+                || shortCode.Equals("ADAT", StringComparison.OrdinalIgnoreCase))
+                return -15;
+        }
+
+        if (!nearbyFolded.Contains("mohlet", StringComparison.Ordinal))
             return 0;
 
         if (shortCode.Equals("CHPE", StringComparison.OrdinalIgnoreCase)
@@ -206,6 +221,12 @@ public static class ScanCompoundLabelGroup
     private static bool StemMatches(string stem, string key) =>
         stem == key
         || (key.Length >= 4 && (stem.Contains(key, StringComparison.Ordinal) || key.Contains(stem, StringComparison.Ordinal)));
+
+    private static bool LooksLikeHiredPerson(string stem) =>
+        stem.Contains("cagryl", StringComparison.Ordinal)
+        || stem.Contains("cagrylan adam", StringComparison.Ordinal)
+        || stem.Contains("hired person", StringComparison.Ordinal)
+        || stem.Contains("invitee", StringComparison.Ordinal);
 
     private static bool LooksLikeEducation(string stem) =>
         stem.Contains("bilim", StringComparison.Ordinal)

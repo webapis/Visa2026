@@ -125,7 +125,7 @@ public static class ScanExcelYellowResolver
             : UserReportPlaceholderScope.Header;
 
         if (profile is { IsCompound: true })
-            return InferCompoundCell(cellText, profile, headerScores, placeholderSet, usageScope, scope);
+            return InferCompoundCell(cellText, header, profile, headerScores, placeholderSet, usageScope, scope);
 
         var preferCodes = profile?.ShortCodes
             ?? headerScores.Select(static h => h.Entry.ShortCode).Take(3).ToArray();
@@ -136,21 +136,47 @@ public static class ScanExcelYellowResolver
             usageScope,
             preferCodes);
 
-        var merged = MergeScores(shapeScores, headerScores, preferCodes, placeholderSet, usageScope);
+        var merged = MergeScores(shapeScores, headerScores, preferCodes, placeholderSet, usageScope)
+            .ToDictionary(static a => a.ShortCode, StringComparer.OrdinalIgnoreCase);
+        foreach (var surround in ScanSurroundPlaceholderPattern.Rank(
+                     cellText,
+                     header,
+                     null,
+                     placeholderSet,
+                     usageScope))
+        {
+            if (!merged.TryGetValue(surround.ShortCode, out var existing)
+                || surround.ScorePercent > existing.ScorePercent)
+                merged[surround.ShortCode] = surround;
+            else
+            {
+                merged[surround.ShortCode] = existing with
+                {
+                    ScorePercent = Math.Min(100, existing.ScorePercent + 8),
+                    Reason = existing.Reason + " + surround",
+                };
+            }
+        }
 
-        if (merged.Count == 0)
+        var rankedMerged = merged.Values
+            .OrderByDescending(static a => a.ScorePercent)
+            .ThenBy(static a => a.ShortCode, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (rankedMerged.Count == 0)
             return new CellInference(null, ScanFieldConfidence.Medium, scope, Array.Empty<ScanTokenAlternative>());
 
-        var top = merged[0];
+        var top = rankedMerged[0];
         var confidence = top.ScorePercent >= 80
             ? ScanFieldConfidence.High
             : top.ScorePercent >= 55 ? ScanFieldConfidence.Medium : ScanFieldConfidence.Low;
 
-        return new CellInference(top.Token, confidence, scope, merged.Take(5).ToList());
+        return new CellInference(top.Token, confidence, scope, rankedMerged.Take(5).ToList());
     }
 
     private static CellInference InferCompoundCell(
         string cellText,
+        string? header,
         ScanExcelColumnProfiles.Profile profile,
         IReadOnlyList<(UserReportPlaceholderCatalogEntry Entry, int Score)> headerScores,
         ApplicationProfilePlaceholderSet placeholderSet,
@@ -196,9 +222,22 @@ public static class ScanExcelYellowResolver
             var headerBoost = headerScores.FirstOrDefault(h =>
                 string.Equals(h.Entry.ShortCode, expectedCode, StringComparison.OrdinalIgnoreCase));
 
+            var surroundHit = ScanSurroundPlaceholderPattern.Rank(
+                    segment,
+                    header,
+                    null,
+                    placeholderSet,
+                    usageScope)
+                .FirstOrDefault(s =>
+                    string.Equals(s.ShortCode, expectedCode, StringComparison.OrdinalIgnoreCase));
+
             var score = Math.Max(
-                shapeScores.FirstOrDefault(s => string.Equals(s.ShortCode, expectedCode, StringComparison.OrdinalIgnoreCase))?.ScorePercent ?? 0,
-                headerBoost.Entry != null ? headerBoost.Score : 0);
+                Math.Max(
+                    shapeScores.FirstOrDefault(s =>
+                        string.Equals(s.ShortCode, expectedCode, StringComparison.OrdinalIgnoreCase))
+                        ?.ScorePercent ?? 0,
+                    headerBoost.Entry != null ? headerBoost.Score : 0),
+                surroundHit?.ScorePercent ?? 0);
 
             if (score < 40)
                 score = 70;
@@ -421,6 +460,8 @@ internal static class ScanExcelColumnProfiles
         new(["wezipesi", "wezepe", "pozisyon", "position"], ["POSN"], false),
         new(["onki islan yerleri", "previous workplaces"], ["PWTM"], false),
         new(["wiza ucin masgala", "family members for visa", "visa application family"], ["PVFM"], false),
+        new(["gelmeginin maksady", "gelmegin maksady", "purpose of arrival"], ["RGEL"], false),
+        new(["cagyran tarap", "inviting party"], ["ACNAM"], false),
         new(["mohleti we gezekligi", "gezeklik", "wiza"], ["AVPRD", "AVCAT"], true, LiteralPrefix: "cakylyk "),
         new(["turkmenistandaky salgysy", "turkmenistandaki"], ["ADRS"], false),
         new(["dasary yurtdaky salgysy", "dasary yurt"], ["PFAC", "PFAD"], true),

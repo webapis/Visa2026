@@ -74,7 +74,7 @@ Officers submit **wizard step screenshots** + optional **catalog Preview** + the
 | `42703: column c.RegistrationDate does not exist` | Host-start heal `CompanyProfileRegistrationDateSchemaSql`. Restart app (ModuleInfo already current skips XAF schema). Then Analyze | **This skill** |
 | Review left pane is HTML text, not the Word page | Office→PDF via pdf.js pages (`TemplateScanOfficePdfPreview`). Hard-refresh, Analyze again. Not `#visa-preview-slot` | **This skill** |
 | Review shows Chrome/Edge PDF toolbar or thumbnail sidebar | pdf.js canvases, not an iframe. Hard-refresh CSS/JS | **This skill** |
-| Review AI mapped the wrong placeholder | Click the Detected fields row; add/remove Short codes on that mark (one yellow span can be a combination). Optional Ask AI with that mark in context | **This skill** |
+| Hired-person / any left-label yellow guessed from value shape only | `ScanGuessingPatternRegistry` + `ScanSurroundPlaceholderPattern`: caption, left field label, inline prose, letter regex, Excel header. Restart, Analyze | **This skill** |
 | Yellow text contains a comma but Review is one row | Comma = combination candidate. Left label + parenthetical under the line (`hasaba alnan belgisi, senesi…`) guide each part. Review shows **6.1 / 6.2 / 6.3** with separate preview borders. Generate still writes one span. Restart, Analyze, hard-refresh | **This skill** |
 | Review lost numbered marks / row click does not highlight the letter | Numbered overlays + sticky row select (`ActiveFieldId`). Click a Detected fields row | **This skill** |
 | Review preview stays portrait for a landscape Word/Excel | Outline reads `sectPr`/`PageSetup`. Hard-refresh CSS, Analyze again. Not `#visa-preview-slot` | **This skill** |
@@ -111,7 +111,7 @@ Officers submit **wizard step screenshots** + optional **catalog Preview** + the
 5. Officer Approve required.
 6. Wizard Review/Preview shows the Office file as **pdf.js pages inside the modal** (not `#visa-preview-slot`, not the browser PDF viewer chrome). Numbered marks + row highlight stay. HTML outline is fallback only.
 7. Config lock allows **new** templates.
-8. **Comma in a yellow highlight** means a combination candidate. Use the **left-side label** and the **parenthetical caption under the line** to guess each part. Review shows **6.1 / 6.2 / 6.3** with separate preview borders; Generate still writes one compound token on the original span.
+8. **Layout-specific guessing patterns** (not one letter): **Official letter** (`№`, date, urgency, `N (words)`, `N (words) aý`, gezeklik); **caption under the line** (Borçnama); **left field label** (Şahsy kagyzy); **inline prose** (Zähmet şertnamasy); **Excel column header** (sanaw). Immediate surround + value shape still combine. Comma in a yellow highlight is a combination candidate (Review **6.1 / 6.2 / 6.3**; Generate writes one span).
 9. Resminamalar **Review placeholders** reopens the same Review dialog on a saved nested template. After Approve, yellow is gone — Review is driven by library `{{…}}` clusters (comma compounds stay one Generate span). Config lock still blocks overwrite of an existing name; officer must rename to save a copy.
 
 ## Pipeline

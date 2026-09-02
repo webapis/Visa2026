@@ -72,11 +72,13 @@ public static class ScanCompoundYellowBinder
         // Isolated I-AŞ + phone (no form caption) is one RPCL token. Caption slots still split.
         if (slots.Count == 0)
         {
-            var fullShape = ScanShapeTokenMatcher.ScoreSnippet(
-                labelText ?? string.Empty,
+            var fullRank = ScanSurroundPlaceholderPattern.Rank(
+                labelText,
+                nearbyLabel,
+                columnHeader,
                 placeholderSet,
                 usage);
-            if (fullShape.Any(static c =>
+            if (fullRank.Any(static c =>
                     c.ShortCode.Equals("RPCL", StringComparison.OrdinalIgnoreCase)
                     && c.ScorePercent >= 80))
                 return null;
@@ -183,6 +185,10 @@ public static class ScanCompoundYellowBinder
             var nearbyFolded = TemplateTextNormalizer.NormalizeFolded(nearby);
             var dateCodes = nearbyFolded.Contains("hasaba", StringComparison.Ordinal)
                 ? new[] { "ACRDT", "PPED", "PDBT", "ADAT" }
+                : nearbyFolded.Contains("doglan", StringComparison.Ordinal)
+                    || nearbyFolded.Contains("cagryl", StringComparison.Ordinal)
+                    || role == ScanLetterRole.Applicant
+                    ? new[] { "PDBT", "PPED", "ACRDT", "ADAT" }
                 : role == ScanLetterRole.Wekil
                     ? new[] { "RPPD", "PPED", "ACRDT" }
                     : new[] { "PPED", "PDBT", "ACRDT", "ADAT" };
@@ -203,10 +209,23 @@ public static class ScanCompoundYellowBinder
             && TryTake(placeholderSet, used, "RPPA"))
             return "RPPA";
 
-        var ranked = ScanShapeTokenMatcher.ScoreSnippet(segment, placeholderSet, usage);
-        var pick = ranked.FirstOrDefault(c =>
-            c.ScorePercent >= 55 && used.Add(ScanFormCaptionHints.RemapByRole(c.ShortCode, role)));
-        return pick == null ? null : ScanFormCaptionHints.RemapByRole(pick.ShortCode, role);
+        foreach (var alt in ScanSurroundPlaceholderPattern.Rank(
+                     segment,
+                     nearby,
+                     null,
+                     placeholderSet,
+                     usage))
+        {
+            if (alt.ScorePercent < 55)
+                continue;
+            var remapped = ScanFormCaptionHints.RemapByRole(alt.ShortCode, role);
+            if (!ScanCompoundYellowParts.SegmentFitsCode(segment, remapped))
+                continue;
+            if (TryTake(placeholderSet, used, remapped))
+                return remapped;
+        }
+
+        return null;
     }
 
     private static bool TryTake(

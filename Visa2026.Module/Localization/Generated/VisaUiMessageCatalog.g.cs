@@ -1146,6 +1146,27 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "ministrlik arkaly",
             ["ru-RU"] = "через министерства",
         },
+        ["ApplicationReportPackage.Catalog.CreatedAndUpdatedTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Created {0} · Updated {1}",
+            ["tr-TR"] = "Oluşturuldu: {0} · Güncellendi: {1}",
+            ["tk-TM"] = "Döredildi: {0} · Täzelendi: {1}",
+            ["ru-RU"] = "Создано {0} · Изменено {1}",
+        },
+        ["ApplicationReportPackage.Catalog.CreatedTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Created {0}",
+            ["tr-TR"] = "Oluşturuldu: {0}",
+            ["tk-TM"] = "Döredildi: {0}",
+            ["ru-RU"] = "Создано {0}",
+        },
+        ["ApplicationReportPackage.Catalog.UpdatedTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Updated {0}",
+            ["tr-TR"] = "Güncellendi: {0}",
+            ["tk-TM"] = "Täzelendi: {0}",
+            ["ru-RU"] = "Изменено {0}",
+        },
         ["ApplicationReportPackage.CatalogTab"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Catalog",
@@ -1650,6 +1671,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "\"{0}\" hemişelik pozuldy.",
             ["ru-RU"] = "«{0}» удалён навсегда.",
         },
+        ["ApplicationReportPackage.RecycleBin.Deleting"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Deleting \"{0}\" permanently…",
+            ["tr-TR"] = "\"{0}\" kalıcı olarak siliniyor…",
+            ["tk-TM"] = "\"{0}\" hemişelik pozulýar…",
+            ["ru-RU"] = "«{0}» удаляется навсегда…",
+        },
         ["ApplicationReportPackage.RecycleBin.Empty"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Recycle Bin is empty.",
@@ -1685,20 +1713,6 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "\"{0}\" Geri gaýtaryşa geçirilýär…",
             ["ru-RU"] = "«{0}» перемещается в Корзину…",
         },
-        ["ApplicationReportPackage.RecycleBin.Restoring"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Restoring \"{0}\" to the catalog…",
-            ["tr-TR"] = "\"{0}\" kataloga geri yükleniyor…",
-            ["tk-TM"] = "\"{0}\" kataloga dikeldilýär…",
-            ["ru-RU"] = "«{0}» возвращается в каталог…",
-        },
-        ["ApplicationReportPackage.RecycleBin.Deleting"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Deleting \"{0}\" permanently…",
-            ["tr-TR"] = "\"{0}\" kalıcı olarak siliniyor…",
-            ["tk-TM"] = "\"{0}\" hemişelik pozulýar…",
-            ["ru-RU"] = "«{0}» удаляется навсегда…",
-        },
         ["ApplicationReportPackage.RecycleBin.RecycledOn"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Removed {0}",
@@ -1712,6 +1726,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "\"{0}\" kataloga geri yüklendi.",
             ["tk-TM"] = "\"{0}\" kataloga dikeldildi.",
             ["ru-RU"] = "«{0}» возвращён в каталог.",
+        },
+        ["ApplicationReportPackage.RecycleBin.Restoring"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Restoring \"{0}\" to the catalog…",
+            ["tr-TR"] = "\"{0}\" kataloga geri yükleniyor…",
+            ["tk-TM"] = "\"{0}\" kataloga dikeldilýär…",
+            ["ru-RU"] = "«{0}» возвращается в каталог…",
         },
         ["ApplicationReportPackage.RecycleBinTab"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -4219,13 +4240,6 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Işe kabul edilen senesi",
             ["ru-RU"] = "Дата приёма на работу",
         },
-        ["PersonDossier.Field.PreviousWorkplacesInTurkmenistan"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Previous workplaces in Turkmenistan",
-            ["tr-TR"] = "Türkmenistan'daki önceki iş yerleri",
-            ["tk-TM"] = "Türkmenistanda öňki işlän ýerleri",
-            ["ru-RU"] = "Предыдущие места работы в Туркменистане",
-        },
         ["PersonDossier.Field.MaritalStatus"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Marital status",
@@ -4239,6 +4253,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Kişisel numara",
             ["tk-TM"] = "Şahsy belgisi",
             ["ru-RU"] = "Личный номер",
+        },
+        ["PersonDossier.Field.PreviousWorkplacesInTurkmenistan"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Previous workplaces in Turkmenistan",
+            ["tr-TR"] = "Türkmenistan'daki önceki iş yerleri",
+            ["tk-TM"] = "Türkmenistanda öňki işlän ýerleri",
+            ["ru-RU"] = "Предыдущие места работы в Туркменистане",
         },
         ["PersonDossier.Field.Relationship"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

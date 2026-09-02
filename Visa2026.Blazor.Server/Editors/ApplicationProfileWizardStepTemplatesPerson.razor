@@ -549,7 +549,6 @@
 
 <TemplateConvertDialog @ref="_convertDialog" OnTemplateSaved="OnConvertSaved" />
 <TemplateScanDialog @ref="_scanDialog"
-                    OnAddPreparedTemplate="OpenConvertManualAsync"
                     OnTemplateSaved="OnScanSaved"
                     OnFocusSavedTemplate="OnScanFocusTemplate" />
 
@@ -681,14 +680,6 @@
             return;
 
         await _scanDialog.OpenForProfileAsync(Profile, ObjectSpace);
-    }
-
-    private async Task OpenConvertManualAsync()
-    {
-        if (!ShowConvertEntry || _convertDialog == null || ObjectSpace == null)
-            return;
-
-        await _convertDialog.OpenForProfileAsync(Profile, ObjectSpace, manual: true);
     }
 
     private async Task OpenConvertAsync()

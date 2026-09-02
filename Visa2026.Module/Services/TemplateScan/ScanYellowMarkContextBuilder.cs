@@ -73,7 +73,6 @@ public static class ScanYellowMarkContextBuilder
             string? paragraphText = null;
             string? previousParagraph = null;
             string? nextParagraph = null;
-            var paragraphIndex = -1;
             var start = -1;
             var length = 0;
 
@@ -83,7 +82,6 @@ public static class ScanYellowMarkContextBuilder
                     string.Equals(p.Address, span.ParagraphAddress, StringComparison.Ordinal));
                 if (index >= 0)
                 {
-                    paragraphIndex = index;
                     paragraphText = paragraphs[index].Text;
                     start = span.Start;
                     length = span.Length;
@@ -102,7 +100,6 @@ public static class ScanYellowMarkContextBuilder
                     var found = paragraphs[i].Text.IndexOf(needle, StringComparison.Ordinal);
                     if (found < 0)
                         continue;
-                    paragraphIndex = i;
                     paragraphText = paragraphs[i].Text;
                     start = found;
                     length = needle.Length;
@@ -118,11 +115,10 @@ public static class ScanYellowMarkContextBuilder
                 continue;
 
             var printed = ExtractPrintedLabel(paragraphText, start, previousParagraph);
-            var lookback = LookbackFormLabels(paragraphs, paragraphIndex);
             map[draft.FieldId] = new ScanYellowMarkContext
             {
                 SurroundingSnippet = MarkAndTrim(paragraphText, start, length),
-                PrintedLabel = CombineLabels(lookback, printed),
+                PrintedLabel = printed,
                 FollowingCaption = ExtractFollowingCaption(paragraphText, start, length, nextParagraph),
             };
         }
@@ -216,10 +212,10 @@ public static class ScanYellowMarkContextBuilder
         var lastBreak = Math.Max(before.LastIndexOf('\n'), before.LastIndexOf('\r'));
         var line = lastBreak >= 0 ? before[(lastBreak + 1)..].Trim() : before;
 
-        // Borçnama: caption in the previous paragraph, yellow name alone on the next line.
-        if (line.Length < 8 && !string.IsNullOrWhiteSpace(previousParagraph))
+        // Direct previous paragraph only when this line has no left-side label.
+        if (line.Length < 8 && LooksLikeImmediateFormLabel(previousParagraph))
         {
-            var prev = previousParagraph.Trim();
+            var prev = previousParagraph!.Trim();
             if (prev.Length > 80)
                 prev = prev[^80..].Trim();
             if (prev.Length == 0)
@@ -253,43 +249,34 @@ public static class ScanYellowMarkContextBuilder
         return ScanFormCaptionHints.ExtractParentheticalList(combined);
     }
 
-    private static string? LookbackFormLabels(
-        IReadOnlyList<(string Address, string Text)> paragraphs,
-        int paragraphIndex)
+    /// <summary>
+    /// Immediate left / previous-line printed captions only — not company rows two lines above.
+    /// </summary>
+    internal static bool LooksLikeImmediateFormLabel(string? text)
     {
-        if (paragraphIndex <= 0)
-            return null;
+        var trimmed = (text ?? string.Empty).Trim();
+        if (trimmed.Length is < 4 or > 140)
+            return false;
 
-        var parts = new List<string>();
-        var from = Math.Max(0, paragraphIndex - 3);
-        for (var i = from; i < paragraphIndex; i++)
-        {
-            var text = paragraphs[i].Text?.Trim() ?? string.Empty;
-            if (text.Length is < 4 or > 140)
-                continue;
+        var folded = TemplateTextNormalizer.NormalizeFolded(trimmed);
+        if (folded.Contains("wekil", StringComparison.Ordinal)
+            || folded.Contains("yolbascy", StringComparison.Ordinal)
+            || folded.Contains("cagryl", StringComparison.Ordinal)
+            || folded.Contains("gol cekiji", StringComparison.Ordinal)
+            || folded.Contains("pasport", StringComparison.Ordinal)
+            || folded.Contains("hasaba", StringComparison.Ordinal)
+            || folded.Contains("karhana", StringComparison.Ordinal)
+            || folded.Contains("doglan senesi", StringComparison.Ordinal)
+            || folded.Contains("familiyasy", StringComparison.Ordinal))
+            return true;
 
-            var folded = TemplateTextNormalizer.NormalizeFolded(text);
-            if (folded.Contains("wekil", StringComparison.Ordinal)
-                || folded.Contains("yolbascy", StringComparison.Ordinal)
-                || folded.Contains("cagyrylan", StringComparison.Ordinal)
-                || folded.Contains("pasport", StringComparison.Ordinal)
-                || folded.Contains("hasaba", StringComparison.Ordinal)
-                || folded.Contains("karhana", StringComparison.Ordinal))
-            {
-                parts.Add(text);
-            }
-        }
+        if (ScanFormFieldLabelHints.LooksLikeFormFieldLabel(trimmed))
+            return true;
 
-        return parts.Count == 0 ? null : string.Join(" ", parts);
-    }
+        if (ScanFormCaptionHints.ExtractParentheticalList(trimmed) != null)
+            return true;
 
-    private static string? CombineLabels(string? lookback, string? printed)
-    {
-        if (string.IsNullOrWhiteSpace(lookback))
-            return printed;
-        if (string.IsNullOrWhiteSpace(printed) || lookback.Contains(printed, StringComparison.Ordinal))
-            return lookback;
-        return lookback + " " + printed;
+        return trimmed.Contains(':') && !ScanCompoundYellowParts.IsCommaCombination(trimmed);
     }
 
     private static string? FormatHeaderRow(IXLWorksheet sheet, int headerRow, int focusColumn)

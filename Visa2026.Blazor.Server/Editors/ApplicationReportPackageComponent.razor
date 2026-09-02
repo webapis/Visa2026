@@ -374,6 +374,13 @@
                         <div class="resminamalar-catalog__main">
                             <span class="resminamalar-catalog__title">@entry.DisplayName</span>
                             <span class="resminamalar-catalog__summary">@FormatKindSummary(entry)</span>
+                            @{
+                                var activity = FormatCatalogActivity(entry);
+                            }
+                            @if (!string.IsNullOrEmpty(activity))
+                            {
+                                <span class="resminamalar-catalog__meta" title="@FormatCatalogActivityTitle(entry)">@activity</span>
+                            }
                         </div>
                         <div class="resminamalar-catalog__actions">
                             <span class="app-report-package__readiness @GetReadinessCssClass(entry)">
@@ -1189,6 +1196,39 @@
         entry.Kind == ApplicationWordReportPackageEntryKind.UserExcel
             ? $"Excel · {FormatKind(entry.Kind)}"
             : $"Word · {FormatKind(entry.Kind)}";
+
+    private static string? FormatCatalogActivity(ApplicationWordReportPackageCatalogEntry entry) =>
+        TemplateCatalogAuditStamp.FormatQuietLine(
+            entry.CreatedOnUtc,
+            entry.CreatedByUserName,
+            entry.ModifiedOnUtc,
+            entry.ModifiedByUserName);
+
+    private string FormatCatalogActivityTitle(ApplicationWordReportPackageCatalogEntry entry)
+    {
+        var created = entry.CreatedOnUtc == null
+            ? null
+            : JoinActivityStamp(entry.CreatedOnUtc.Value, entry.CreatedByUserName);
+        var updated = entry.ModifiedOnUtc == null
+            ? null
+            : JoinActivityStamp(entry.ModifiedOnUtc.Value, entry.ModifiedByUserName);
+        if (created == null)
+            return updated == null
+                ? string.Empty
+                : FormatMsg("ApplicationReportPackage.Catalog.UpdatedTitle", updated);
+        if (updated == null || string.Equals(updated, created, StringComparison.Ordinal))
+            return FormatMsg("ApplicationReportPackage.Catalog.CreatedTitle", created);
+        return FormatMsg("ApplicationReportPackage.Catalog.CreatedAndUpdatedTitle", created, updated);
+    }
+
+    private static string JoinActivityStamp(DateTime utc, string? userName)
+    {
+        var local = utc.Kind == DateTimeKind.Utc
+            ? utc.ToLocalTime()
+            : DateTime.SpecifyKind(utc, DateTimeKind.Utc).ToLocalTime();
+        var stamp = local.ToString("g");
+        return string.IsNullOrWhiteSpace(userName) ? stamp : stamp + " · " + userName.Trim();
+    }
 
     private bool HasCardDetails(ApplicationWordReportPackageCatalogEntry entry) =>
         (!UseInlinePreview && !string.IsNullOrWhiteSpace(entry.OutputFileName))

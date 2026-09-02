@@ -226,18 +226,53 @@ public static class ScanCompoundYellowParts
             || code.EndsWith("ED", StringComparison.OrdinalIgnoreCase)
             || code.Equals("RPPD", StringComparison.OrdinalIgnoreCase)
             || code.Equals("CHPD", StringComparison.OrdinalIgnoreCase)
-            || code.Equals("CHPE", StringComparison.OrdinalIgnoreCase))
+            || code.Equals("CHPE", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("PPIS", StringComparison.OrdinalIgnoreCase))
             return DateLikeShape.IsMatch(segment);
+
+        if (code.Equals("PFN", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("RPFN", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("CHFN", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("ACFNM", StringComparison.OrdinalIgnoreCase))
+            return ScanShapeTokenMatcher.LooksLikePersonFullName(segment)
+                || ScanShapeTokenMatcher.LooksLikeTitledPersonName(segment);
+
+        if (code.Equals("PLN", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("PFNM", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("PMNM", StringComparison.OrdinalIgnoreCase))
+            return LooksLikeSingleNameWord(segment);
+
+        if (code.Equals("PNAT", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("PCBC", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("PPCC", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("PFAC", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("EGCC", StringComparison.OrdinalIgnoreCase))
+            return LooksLikeIso3(segment);
+
+        if (code.Equals("PPIN", StringComparison.OrdinalIgnoreCase))
+            return LooksLikePersonalNumber(segment);
+
+        if (code.Equals("PGND", StringComparison.OrdinalIgnoreCase))
+            return ScanShapeTokenMatcher.LooksLikeGenderWord(segment);
+
+        if (code.Equals("CSAL", StringComparison.OrdinalIgnoreCase))
+            return ScanShapeTokenMatcher.LooksLikeMoneyAmount(segment);
 
         if (code.Equals("ACPHN", StringComparison.OrdinalIgnoreCase)
             || code.Equals("RPPH", StringComparison.OrdinalIgnoreCase))
             return PhoneShape.IsMatch(segment);
 
-        if (code.Equals("ACADR", StringComparison.OrdinalIgnoreCase)
-            || code.Equals("PPAT", StringComparison.OrdinalIgnoreCase)
+        if (code.Equals("ACADR", StringComparison.OrdinalIgnoreCase))
+            return LooksLikeStreetAddress(segment);
+
+        if (code.Equals("PPAT", StringComparison.OrdinalIgnoreCase)
             || code.Equals("RPPA", StringComparison.OrdinalIgnoreCase)
             || code.Equals("CHPA", StringComparison.OrdinalIgnoreCase))
-            return segment.Length >= 8 && !DateLikeShape.IsMatch(segment) && !PhoneShape.IsMatch(segment);
+            return segment.Length >= 8
+                && !DateLikeShape.IsMatch(segment)
+                && !PhoneShape.IsMatch(segment)
+                && !LooksLikePassportNumber(segment)
+                && !ScanShapeTokenMatcher.LooksLikePersonFullName(segment);
 
         if (code.Equals("ACTAX", StringComparison.OrdinalIgnoreCase)
             || code.Equals("ACRGL", StringComparison.OrdinalIgnoreCase))
@@ -246,6 +281,53 @@ public static class ScanCompoundYellowParts
                 && !PhoneShape.IsMatch(segment);
 
         return false;
+    }
+
+    private static bool LooksLikeIso3(string segment)
+    {
+        var trimmed = segment.Trim();
+        return trimmed.Length == 3 && trimmed.All(static ch => ch is >= 'A' and <= 'Z' or >= 'a' and <= 'z');
+    }
+
+    private static bool LooksLikePersonalNumber(string segment)
+    {
+        var digits = segment.Where(char.IsDigit).Count();
+        return digits >= 7 && digits <= 15 && segment.Any(char.IsLetter) == false;
+    }
+
+    private static bool LooksLikeSingleNameWord(string segment)
+    {
+        var trimmed = segment.Trim().Trim('_', ' ', '-');
+        if (trimmed.Length < 2)
+            return false;
+        var words = trimmed.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+        return words.Length == 1 && words[0].Count(char.IsLetter) >= 2;
+    }
+
+    internal static bool LooksLikeStreetAddress(string segment)
+    {
+        if (string.IsNullOrWhiteSpace(segment)
+            || DateLikeShape.IsMatch(segment)
+            || PhoneShape.IsMatch(segment)
+            || ScanShapeTokenMatcher.LooksLikePersonFullName(segment))
+            return false;
+
+        var folded = TemplateTextNormalizer.NormalizeFolded(segment);
+        if (folded.Contains("sayol", StringComparison.Ordinal)
+            || folded.Contains("salgy", StringComparison.Ordinal)
+            || folded.Contains("kocesi", StringComparison.Ordinal)
+            || folded.Contains("street", StringComparison.Ordinal)
+            || folded.Contains("address", StringComparison.Ordinal)
+            || folded.Contains(" yuridiki", StringComparison.Ordinal))
+            return true;
+
+        if (segment.Length >= 8
+            && (segment.Any(char.IsDigit)
+                || segment.Contains(',', StringComparison.Ordinal)
+                || segment.Contains('.', StringComparison.Ordinal)))
+            return true;
+
+        return segment.Length >= 16;
     }
 
     private static IReadOnlyList<(string Text, int Offset, int Length)> SplitByDelimiter(string label, char delimiter)

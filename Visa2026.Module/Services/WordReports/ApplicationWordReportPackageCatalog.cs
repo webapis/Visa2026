@@ -41,6 +41,14 @@ public sealed class ApplicationWordReportPackageCatalogEntry
     /// <summary>Officer-created this-profile nested row — catalog Delete moves it to Recycle Bin.</summary>
     public bool CanMoveToRecycleBin { get; init; }
 
+    public DateTime? CreatedOnUtc { get; init; }
+
+    public string? CreatedByUserName { get; init; }
+
+    public DateTime? ModifiedOnUtc { get; init; }
+
+    public string? ModifiedByUserName { get; init; }
+
     public DateTime? RecycledAtUtc { get; init; }
 
     public string? RecycledByUserName { get; init; }
@@ -142,7 +150,11 @@ public sealed class ApplicationWordReportPackageCatalogService
                     Readiness = level,
                     ReadinessMessageKey = messageKey,
                     ReadinessHints = dryRunHints,
-                    UserReportTemplateId = template.ID
+                    UserReportTemplateId = template.ID,
+                    CreatedOnUtc = template.CreatedOnUtc,
+                    CreatedByUserName = template.CreatedByUserName,
+                    ModifiedOnUtc = template.ModifiedOnUtc,
+                    ModifiedByUserName = template.ModifiedByUserName
                 });
             }
         }
@@ -201,6 +213,10 @@ public sealed class ApplicationWordReportPackageCatalogService
                 ApplicationProfileTemplateId = profileTemplate.ID,
                 CanMoveToRecycleBin = ApplicationProfileTemplateRecycleBin.CanMoveToRecycleBin(
                     profileTemplate),
+                CreatedOnUtc = profileTemplate.CreatedOnUtc ?? userTemplate?.CreatedOnUtc,
+                CreatedByUserName = profileTemplate.CreatedByUserName ?? userTemplate?.CreatedByUserName,
+                ModifiedOnUtc = profileTemplate.ModifiedOnUtc ?? userTemplate?.ModifiedOnUtc,
+                ModifiedByUserName = profileTemplate.ModifiedByUserName ?? userTemplate?.ModifiedByUserName,
             };
         }
     }
@@ -234,6 +250,10 @@ public sealed class ApplicationWordReportPackageCatalogService
                 ApplicationProfileTemplateId = profileTemplate.ID,
                 RecycledAtUtc = profileTemplate.RecycledAtUtc,
                 RecycledByUserName = profileTemplate.RecycledByUserName,
+                CreatedOnUtc = profileTemplate.CreatedOnUtc ?? userTemplate?.CreatedOnUtc,
+                CreatedByUserName = profileTemplate.CreatedByUserName ?? userTemplate?.CreatedByUserName,
+                ModifiedOnUtc = profileTemplate.ModifiedOnUtc ?? userTemplate?.ModifiedOnUtc,
+                ModifiedByUserName = profileTemplate.ModifiedByUserName ?? userTemplate?.ModifiedByUserName,
             };
         }
     }

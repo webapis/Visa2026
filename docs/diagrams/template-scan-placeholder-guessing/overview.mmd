@@ -14,8 +14,8 @@ flowchart TB
 
     F --> G{Source kind?}
 
-    G -->|Excel .xlsx| H["ScanExcelYellowResolver<br/>rules-first inference"]
-    G -->|Word .docx| I["ScanYellowHighlightTokenResolver<br/>regex + compound split"]
+    G -->|Excel .xlsx| H["ScanExcelYellowResolver<br/>column-header pattern"]
+    G -->|Word .docx| I["Word layout patterns<br/>letter / caption / left-label / inline"]
 
     H --> J["ScanFieldPlanProposal<br/>drafts + ranked alternatives"]
     I --> J

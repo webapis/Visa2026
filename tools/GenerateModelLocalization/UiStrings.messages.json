@@ -1421,6 +1421,24 @@
     "tk-TM": "Aýryldy: {0}",
     "ru-RU": "Удалено {0}"
   },
+  "ApplicationReportPackage.Catalog.CreatedTitle": {
+    "en": "Created {0}",
+    "tr-TR": "Oluşturuldu: {0}",
+    "tk-TM": "Döredildi: {0}",
+    "ru-RU": "Создано {0}"
+  },
+  "ApplicationReportPackage.Catalog.UpdatedTitle": {
+    "en": "Updated {0}",
+    "tr-TR": "Güncellendi: {0}",
+    "tk-TM": "Täzelendi: {0}",
+    "ru-RU": "Изменено {0}"
+  },
+  "ApplicationReportPackage.Catalog.CreatedAndUpdatedTitle": {
+    "en": "Created {0} · Updated {1}",
+    "tr-TR": "Oluşturuldu: {0} · Güncellendi: {1}",
+    "tk-TM": "Döredildi: {0} · Täzelendi: {1}",
+    "ru-RU": "Создано {0} · Изменено {1}"
+  },
   "ApplicationReportPackage.EditTemplate": {
     "en": "Edit template",
     "tr-TR": "Şablonu düzenle",

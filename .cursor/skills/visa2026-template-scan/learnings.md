@@ -4,6 +4,54 @@ Append-only. Newest first under **## Entries**.
 
 ## Entries
 
+### 2026-09-02 — Drop profile-lock banner from Create from yellow marks
+
+- Need: Review needs vertical space for the letter and Detected fields. The orange “Profile locked — new templates only” banner did not change what the officer can do on Create new.
+- Cause: `_configLocked` painted the banner on every step, including add-new.
+- Fix: Removed the top banner. Lock still blocks overwrite (`IsLockedExistingOverwrite`); the name field keeps the short hint to rename and save a copy.
+- Officer: Restart, hard-refresh. Create from yellow marks Review should start at the document, no orange bar.
+- Cross-skill: visa2026-application-profile
+
+### 2026-09-02 — Remove Add existing template from Create from yellow marks
+
+- Need: Officers still saw **Add existing template instead** on Upload after the quieter form. Catalog already has Add existing template.
+- Cause: Scan dialog kept an escape hatch to Convert/manual upload.
+- Fix: Removed the link, `OnAddPreparedTemplate` callback, and the wizard binding. Add existing stays on Resminamalar / profile Templates.
+- Officer: Restart, hard-refresh. Create from yellow marks Upload should end at the file drop, then Cancel / Analyze file.
+- Cross-skill: visa2026-resminamalar
+
+### 2026-09-02 — Upload step quieter: Both default, tooltips, Analyze progress
+
+- Need: Officers said Create from yellow marks Upload had too much scattered help (Data, scan requirements, contract, case). Analyze file gave no visible progress.
+- Cause: Every field had a paragraph of help. Data dropdown repeated Add-existing wording. Case was shown again even when the header already had the case number.
+- Fix: Data scope is always Both (dropdown removed). Help moved to `?` tooltips. Case picker stays on the profile wizard only. Analyze shows a footer progress bar (Reading file / Finding yellow marks / Matching placeholders).
+- Officer: Restart, hard-refresh CSS. Open Create from yellow marks — Upload should be name, save-to, file. Click Analyze and watch the bar. Hover `?` for hints.
+- Cross-skill: visa2026-resminamalar
+
+### 2026-09-02 — Five layout guessing patterns, not one surround rule
+
+- Need: Officers sent Sahsy kagyzy (left labels), Borcnama (caption under the line), Excel sanaw (column headers), Zahmet sertnamasy (inline prose + Isgar/Is beriji), and a ministry letter (No, date, Gyssagly, 1 (bir), 1 (bir) ay, iki gezeklik). Each layout needs its own guessing pattern.
+- Cause: Caption-under-the-line surround was treated as the only nearby pattern. Sahsy field names without parentheses never preferred PNAT/PPIN/EGSP/POSN. Inline "Mudiri Name" looked like a roster person. Excel missed Gelmegin maksady / Cagyran tarap.
+- Fix: `ScanGuessingPatternRegistry` names OfficialLetter, CaptionUnderLine, LeftLabelForm, InlineProse, ExcelColumnHeader. Letter regex stays first. Rank uses `ScanFormFieldLabelHints` plus titled-director / money / personal-number shapes. Excel profiles add RGEL and ACNAM.
+- Officer: Restart, hard-refresh, Analyze any of those yellow-marked files. Sample names still change every time.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-02 — Surround text is a guessing pattern for every yellow file
+
+- Need: Immediate left label + caption under the line must drive placeholders on **all** similar Word/Excel files, not only one BORÇNAMA hired-person row. Sample names change every time.
+- Cause: Word guessing scored the yellow **value shape** first and ignored nearby text except inside the comma binder. Company rows above also leaked into nearby.
+- Fix: `ScanSurroundPlaceholderPattern` ranks catalog codes from immediate surround + shape (caption slots, left-label catalog match, group boost). Same pattern is one of the guessers in `ScanOfficeFieldPlanBuilder`, `ScanExcelYellowResolver` (header + compound cells), and `ScanCompoundYellowBinder` part pick. Compound comma split still uses `ScanCompoundYellowBinder`.
+- Officer: Restart, hard-refresh, Analyze any yellow-marked letter. Captions like `(ady … doglan senesi)` or `pasporty: (… möhleti)` should pick Person/Passport codes for whatever sample is highlighted.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-02 — Hired-person yellow guessed as company address (ACADR)
+
+- Need: BORÇNAMA Review 3.1 on a roster full name (sample was `Hilmi Erol`; next file can be any name) plus 3.2 DOB. Left label `Işe çagrylýan adam:` and caption `(ady, familiýasy, atasynyň ady, doglan senesi)` mean **Person full name** + birth date. Guess was **ACADR** / **ACRDT**.
+- Cause: Comma yellow used company-address shape (`length >= 8`) for the name part. Nearby mixed in `kärhana` from **two rows above**. Caption slots (`ady`…) did not map to **PFN**. Applicant role from `doglan senesi` was not turned into the Person catalog group.
+- Fix: Guess from **immediate** left label + caption under the line only (not company paragraphs above). Applicant / `çagrylýan adam` → Person. Caption `ady` / `familiýasy` / `atasynyň ady` → **PFN**; `doglan senesi` → **PDBT**. Two-to-four letter-word names fit **PFN**, not street **ACADR**. No sample-name hardcode.
+- Officer: Restart, hard-refresh, Analyze. Hired-person line should Review as **PFN** then **PDBT** for whatever name is yellow-marked.
+- Cross-skill: visa2026-user-report-templates
+
 ### 2026-09-02 — Signatory passport expiration missing from Review (CHPE)
 
 - Need: BORÇNAMA Review row 5.1 (`19.02.2034ý.`) is passport **möhleti**. Authorized signatory dropdown had CHPD (issue date) but no expiration token.

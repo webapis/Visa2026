@@ -86,45 +86,15 @@ public static class ScanOfficeFieldPlanBuilder
 
             if (resolved.Count == 0)
             {
-                var shape = ScanShapeTokenMatcher.ScoreSnippet(
+                resolved = ScanSurroundPlaceholderPattern.TryDraft(
                     yellow.Text,
+                    yellow.PageIndex,
+                    yellow.Region,
+                    nearbyLabel,
+                    columnHeader: null,
                     placeholderSet,
-                    UserReportPlaceholderScope.Header);
-                var top = shape.FirstOrDefault();
-                if (top != null
-                    && top.ScorePercent >= 80
-                    && placeholderSet.Contains(top.ShortCode))
-                {
-                    var entry = placeholderSet.Allowed.First(e =>
-                        string.Equals(e.ShortCode, top.ShortCode, StringComparison.OrdinalIgnoreCase));
-                    var usage = entry.Scope == UserReportPlaceholderScope.Row
-                        ? UserReportPlaceholderScope.Row
-                        : UserReportPlaceholderScope.Header;
-                    if (usage == UserReportPlaceholderScope.Header && !usedHeaderCodes.Add(top.ShortCode))
-                    {
-                        // header already taken — try duplicate clone below
-                    }
-                    else
-                    {
-                        resolved =
-                        [
-                            new ScanDetectedFieldDraft
-                            {
-                                FieldId = Guid.NewGuid().ToString("N"),
-                                PageIndex = yellow.PageIndex,
-                                LabelText = yellow.Text,
-                                ProposedToken = entry.BuildWordToken(usage),
-                                Confidence = ScanFieldConfidence.High,
-                                Scope = usage == UserReportPlaceholderScope.Row
-                                    ? ScanFieldScope.Row
-                                    : ScanFieldScope.Header,
-                                Box = ScanBoundingBox.FullPage,
-                                SourceRegion = yellow.Region,
-                                Alternatives = shape.Take(5).ToList(),
-                            },
-                        ];
-                    }
-                }
+                    usedHeaderCodes,
+                    ScanSurroundPlaceholderPattern.MinScore(nearbyLabel, null));
             }
 
             if (resolved.Count == 0)

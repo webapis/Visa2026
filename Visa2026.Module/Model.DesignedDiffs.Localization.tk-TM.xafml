@@ -700,6 +700,7 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="FullName" Caption="Doly ady" />
         <Member Name="PassportAuthority" Caption="Pasport beren edara" />
+        <Member Name="PassportExpirationDate" Caption="Pasport möhleti" />
         <Member Name="PassportIssueDate" Caption="Pasport berlen senesi" />
         <Member Name="PassportLine" Caption="Pasport (bir setir)" />
         <Member Name="PassportNumber" Caption="Pasport belgisi" />

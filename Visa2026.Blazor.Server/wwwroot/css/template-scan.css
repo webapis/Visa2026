@@ -93,10 +93,64 @@
 .tas-stepper__item.is-future { opacity: 0.55; }
 
 .tas-form { display: grid; gap: 1.05rem; }
+.tas-form.is-busy { pointer-events: none; opacity: 0.62; }
 .tas-field { display: grid; gap: 0.35rem; }
-.tas-field__label { font-size: 0.82rem; font-weight: 600; color: #0f172a; }
+.tas-field__label {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #0f172a;
+}
 .tas-field__label em { color: #dc2626; font-style: normal; }
 .tas-field small { font-size: 0.74rem; color: var(--os-muted, #64748b); }
+
+.tas-tip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.05rem;
+  height: 1.05rem;
+  margin-left: 0.35rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: help;
+}
+.tas-tip:hover,
+.tas-tip:focus {
+  background: #cbd5e1;
+  color: #0f172a;
+  outline: none;
+}
+.tas-tip::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 7px);
+  width: min(18rem, 70vw);
+  padding: 0.45rem 0.55rem;
+  border-radius: 6px;
+  background: #0f172a;
+  color: #f8fafc;
+  font-size: 0.72rem;
+  font-weight: 400;
+  line-height: 1.35;
+  text-align: left;
+  white-space: normal;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.22);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 4;
+}
+.tas-tip:hover::after,
+.tas-tip:focus::after { opacity: 1; }
 
 .tas-input {
   width: 100%;
@@ -113,6 +167,7 @@
 .tas-field--nested { margin-top: 0.55rem; padding-top: 0.55rem; border-top: 1px solid #e2e8f0; }
 
 .tas-drop {
+  position: relative;
   display: grid;
   justify-items: center;
   gap: 0.3rem;
@@ -121,6 +176,14 @@
   border-radius: 10px;
   background: #f0fdfa;
   text-align: center;
+  cursor: pointer;
+}
+.tas-drop input[type=file] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
   cursor: pointer;
 }
 .tas-drop.is-picked { border-style: solid; border-color: #99f6e4; background: #fff; }
@@ -141,11 +204,14 @@
 .tas-btn--primary:disabled { background: #cbd5e1; color: #f8fafc; cursor: not-allowed; }
 .tas-btn--ghost { background: #fff; color: #0d9488; border-color: #cbd5e1; }
 .tas-btn--ghost:hover { border-color: #0d9488; }
+.tas-btn--ghost:disabled { color: #94a3b8; border-color: #e2e8f0; cursor: not-allowed; }
+.tas-btn--ghost:disabled:hover { border-color: #e2e8f0; }
 .tas-btn--secondary { background: #f0fdfa; color: #0f766e; border-color: #99f6e4; }
 .tas-link { border: 0; background: none; color: #0d9488; font-size: 0.8rem; text-decoration: underline; cursor: pointer; padding: 0; }
 
 .tas-foot {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.6rem;
   padding: 0.85rem 1.35rem;
@@ -154,6 +220,25 @@
 }
 .tas-foot__grow { flex: 1; }
 .tas-foot__hint { flex: 1; font-size: 0.78rem; color: var(--os-muted, #64748b); }
+.tas-analyze {
+  flex: 1 1 100%;
+  display: grid;
+  gap: 0.35rem;
+}
+.tas-analyze span {
+  font-size: 0.78rem;
+  color: var(--os-muted, #64748b);
+}
+.tas-foot__actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-left: auto;
+}
+.tas-progress--foot {
+  width: 100%;
+  max-width: none;
+  height: 5px;
+}
 
 .tas-banner {
   display: flex;

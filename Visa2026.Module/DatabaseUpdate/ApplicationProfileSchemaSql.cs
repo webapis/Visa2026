@@ -437,6 +437,30 @@ public static class ApplicationProfileSchemaSql
     internal const string EnsureTemplateRecycledByUserNamePostgres =
         """ALTER TABLE "ApplicationProfileTemplates" ADD COLUMN IF NOT EXISTS "RecycledByUserName" character varying(255) NULL;""";
 
+    internal const string EnsureTemplateCreatedOnUtcPostgres =
+        """ALTER TABLE "ApplicationProfileTemplates" ADD COLUMN IF NOT EXISTS "CreatedOnUtc" timestamp with time zone NULL;""";
+
+    internal const string EnsureTemplateCreatedByUserNamePostgres =
+        """ALTER TABLE "ApplicationProfileTemplates" ADD COLUMN IF NOT EXISTS "CreatedByUserName" character varying(255) NULL;""";
+
+    internal const string EnsureTemplateModifiedOnUtcPostgres =
+        """ALTER TABLE "ApplicationProfileTemplates" ADD COLUMN IF NOT EXISTS "ModifiedOnUtc" timestamp with time zone NULL;""";
+
+    internal const string EnsureTemplateModifiedByUserNamePostgres =
+        """ALTER TABLE "ApplicationProfileTemplates" ADD COLUMN IF NOT EXISTS "ModifiedByUserName" character varying(255) NULL;""";
+
+    internal const string EnsureUserReportTemplateCreatedOnUtcPostgres =
+        """ALTER TABLE IF EXISTS "UserReportTemplates" ADD COLUMN IF NOT EXISTS "CreatedOnUtc" timestamp with time zone NULL;""";
+
+    internal const string EnsureUserReportTemplateCreatedByUserNamePostgres =
+        """ALTER TABLE IF EXISTS "UserReportTemplates" ADD COLUMN IF NOT EXISTS "CreatedByUserName" character varying(255) NULL;""";
+
+    internal const string EnsureUserReportTemplateModifiedOnUtcPostgres =
+        """ALTER TABLE IF EXISTS "UserReportTemplates" ADD COLUMN IF NOT EXISTS "ModifiedOnUtc" timestamp with time zone NULL;""";
+
+    internal const string EnsureUserReportTemplateModifiedByUserNamePostgres =
+        """ALTER TABLE IF EXISTS "UserReportTemplates" ADD COLUMN IF NOT EXISTS "ModifiedByUserName" character varying(255) NULL;""";
+
     internal const string EnsureApprovalLegVersionsTablePostgres = """
         CREATE TABLE IF NOT EXISTS "ApplicationProfileApprovalLegVersions" (
             "ID" uuid NOT NULL,
@@ -677,6 +701,14 @@ public static class ApplicationProfileSchemaSql
         EnsureTemplateApplicableMigrationServicePostgres,
         EnsureTemplateRecycledAtUtcPostgres,
         EnsureTemplateRecycledByUserNamePostgres,
+        EnsureTemplateCreatedOnUtcPostgres,
+        EnsureTemplateCreatedByUserNamePostgres,
+        EnsureTemplateModifiedOnUtcPostgres,
+        EnsureTemplateModifiedByUserNamePostgres,
+        EnsureUserReportTemplateCreatedOnUtcPostgres,
+        EnsureUserReportTemplateCreatedByUserNamePostgres,
+        EnsureUserReportTemplateModifiedOnUtcPostgres,
+        EnsureUserReportTemplateModifiedByUserNamePostgres,
         EnsureApprovalLegVersionsTablePostgres,
         HealApprovalLegVersionsGcRecordPostgres,
         EnsureApprovalLegVersionsFkPostgres,
@@ -721,6 +753,30 @@ public static class ApplicationProfileSchemaSql
 
         IF COL_LENGTH(N'dbo.ApplicationProfileTemplates', N'RecycledByUserName') IS NULL
             ALTER TABLE dbo.ApplicationProfileTemplates ADD RecycledByUserName nvarchar(255) NULL;
+
+        IF COL_LENGTH(N'dbo.ApplicationProfileTemplates', N'CreatedOnUtc') IS NULL
+            ALTER TABLE dbo.ApplicationProfileTemplates ADD CreatedOnUtc datetime2 NULL;
+
+        IF COL_LENGTH(N'dbo.ApplicationProfileTemplates', N'CreatedByUserName') IS NULL
+            ALTER TABLE dbo.ApplicationProfileTemplates ADD CreatedByUserName nvarchar(255) NULL;
+
+        IF COL_LENGTH(N'dbo.ApplicationProfileTemplates', N'ModifiedOnUtc') IS NULL
+            ALTER TABLE dbo.ApplicationProfileTemplates ADD ModifiedOnUtc datetime2 NULL;
+
+        IF COL_LENGTH(N'dbo.ApplicationProfileTemplates', N'ModifiedByUserName') IS NULL
+            ALTER TABLE dbo.ApplicationProfileTemplates ADD ModifiedByUserName nvarchar(255) NULL;
+
+        IF OBJECT_ID(N'dbo.UserReportTemplates', N'U') IS NOT NULL
+        BEGIN
+            IF COL_LENGTH(N'dbo.UserReportTemplates', N'CreatedOnUtc') IS NULL
+                ALTER TABLE dbo.UserReportTemplates ADD CreatedOnUtc datetime2 NULL;
+            IF COL_LENGTH(N'dbo.UserReportTemplates', N'CreatedByUserName') IS NULL
+                ALTER TABLE dbo.UserReportTemplates ADD CreatedByUserName nvarchar(255) NULL;
+            IF COL_LENGTH(N'dbo.UserReportTemplates', N'ModifiedOnUtc') IS NULL
+                ALTER TABLE dbo.UserReportTemplates ADD ModifiedOnUtc datetime2 NULL;
+            IF COL_LENGTH(N'dbo.UserReportTemplates', N'ModifiedByUserName') IS NULL
+                ALTER TABLE dbo.UserReportTemplates ADD ModifiedByUserName nvarchar(255) NULL;
+        END
 
         IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
            AND COL_LENGTH(N'dbo.ApplicationProfiles', N'ProduceRejection') IS NULL

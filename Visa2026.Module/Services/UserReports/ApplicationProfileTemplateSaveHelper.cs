@@ -55,6 +55,8 @@ public static class ApplicationProfileTemplateSaveHelper
         template.TemplateFile.FileName = fileName;
         template.TemplateFile.Content = request.Content;
 
+        TemplateCatalogAuditStamp.Touch(template, SecuritySystem.CurrentUserName);
+
         var userTemplate = ApplicationProfileTemplateUserReportBridge.EnsureLinkedUserReportTemplate(
             objectSpace,
             template,

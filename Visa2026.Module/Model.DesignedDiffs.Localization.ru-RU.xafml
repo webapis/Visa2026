@@ -700,6 +700,7 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="FullName" Caption="ФИО" />
         <Member Name="PassportAuthority" Caption="Орган выдачи паспорта" />
+        <Member Name="PassportExpirationDate" Caption="Срок действия паспорта" />
         <Member Name="PassportIssueDate" Caption="Дата выдачи паспорта" />
         <Member Name="PassportLine" Caption="Паспорт (одной строкой)" />
         <Member Name="PassportNumber" Caption="Номер паспорта" />

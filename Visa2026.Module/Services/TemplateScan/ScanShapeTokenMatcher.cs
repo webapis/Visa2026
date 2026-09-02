@@ -37,6 +37,10 @@ public static class ScanShapeTokenMatcher
         @"\b(köp\s+gezeklik|bir\s+gezeklik|iki\s+gezeklik|üç\s+gezeklik|multiple|single)\b",
         RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
 
+    private static readonly Regex MoneyAmount = new(
+        @"\b\d{1,3}(?:[.\s]\d{3})*(?:[.,]\d{2})?\s*(USD|EUR|TMT|manat)\b",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+
     private static readonly HashSet<string> GenderWords = new(StringComparer.OrdinalIgnoreCase)
     {
         "erkek", "ayal", "male", "female",
@@ -74,6 +78,15 @@ public static class ScanShapeTokenMatcher
 
         if (GenderWords.Contains(folded))
             Prefer("PGND", 88, "Gender word");
+
+        if (LooksLikeMoneyAmount(text))
+            Prefer("CSAL", 90, "Money amount");
+
+        if (LooksLikePersonalNumber(text))
+            Prefer("PPIN", 86, "Personal number digits");
+
+        if (LooksLikeCompanyLegalName(folded))
+            Prefer("ACNAM", 88, "Company legal name");
 
         if (CountryCode.IsMatch(text))
         {
@@ -114,7 +127,9 @@ public static class ScanShapeTokenMatcher
         if (int.TryParse(text, out var n) && n >= 0 && n <= 999)
             Prefer("RNUM", 85, "Row index number");
 
-        if (LooksLikePersonFullName(text))
+        if (LooksLikeTitledPersonName(text))
+            Prefer("CHFN", 92, "Director title + name");
+        else if (LooksLikePersonFullName(text))
             Prefer("PFN", 90, "Person full name (roster), not representative");
 
         if (text.Length >= TemplateTextNormalizer.MinimumMatchLength)
@@ -137,6 +152,42 @@ public static class ScanShapeTokenMatcher
             .ToList();
     }
 
+    internal static bool LooksLikeGenderWord(string text)
+    {
+        var folded = TemplateTextNormalizer.NormalizeFolded(text);
+        return GenderWords.Contains(folded);
+    }
+
+    internal static bool LooksLikeMoneyAmount(string text) =>
+        MoneyAmount.IsMatch((text ?? string.Empty).Trim());
+
+    internal static bool LooksLikeTitledPersonName(string text)
+    {
+        var folded = TemplateTextNormalizer.NormalizeFolded(text);
+        if (!folded.StartsWith("mudiri ", StringComparison.Ordinal))
+            return false;
+        var rest = (text ?? string.Empty).Trim();
+        var space = rest.IndexOf(' ');
+        if (space < 0 || space + 1 >= rest.Length)
+            return false;
+        return LooksLikePersonFullName(rest[(space + 1)..]);
+    }
+
+    private static bool LooksLikePersonalNumber(string text)
+    {
+        var trimmed = (text ?? string.Empty).Trim();
+        var digits = trimmed.Count(char.IsDigit);
+        return digits >= 7 && digits <= 15 && trimmed.All(static ch => char.IsDigit(ch) || char.IsWhiteSpace(ch));
+    }
+
+    private static bool LooksLikeCompanyLegalName(string folded) =>
+        folded.Contains("a.s", StringComparison.Ordinal)
+        || folded.Contains("kompaniyasy", StringComparison.Ordinal)
+        || folded.Contains("karhanasy", StringComparison.Ordinal)
+        || folded.Contains("ticaret", StringComparison.Ordinal)
+        || folded.Contains("sana yi", StringComparison.Ordinal)
+        || folded.Contains("sanayi", StringComparison.Ordinal);
+
     /// <summary>
     /// Roster person name: two to four letter-words, optional trailing underscores, no passport/phone block.
     /// Must not steal Authorized Representative (RPFN) — that token is the tenant wekil only.
@@ -153,6 +204,13 @@ public static class ScanShapeTokenMatcher
         if (words.Length is < 2 or > 4)
             return false;
 
-        return words.All(static w => w.Length >= 2 && w.All(static ch => char.IsLetter(ch) || ch is '\'' or '-' or '.' or 'ý' or 'Ý'));
+        static int LetterCount(string word) => word.Count(char.IsLetter);
+
+        if (!words.All(static w => LetterCount(w) >= 2 && w.All(static ch =>
+                char.IsLetter(ch) || ch is '\'' or '-' or '.' or 'ý' or 'Ý')))
+            return false;
+
+        // Two real given/family words — not "Asgabat s." or "T.G. ASGABAT SR".
+        return words.Count(static w => LetterCount(w) >= 3) >= 2;
     }
 }

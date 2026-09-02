@@ -1,9 +1,14 @@
 flowchart LR
-    W["Yellow paragraph text"] --> R["Regex patterns"]
-    R --> R1["App number AFNUM"]
-    R --> R2["Date ADAT"]
-    R --> R3["Visa period / count / category"]
-    R --> R4["Urgency phrase"]
-    R --> U{Matched?}
-    U -->|Yes| T["One or more drafts<br/>compound splits"]
-    U -->|No| G["Gap draft<br/>ProposedToken = null"]
+    W["Yellow paragraph text"] --> L{"Which layout pattern?"}
+    L -->|"Official letter<br/>No date urgency N ay gezeklik"| R["ScanYellowHighlightTokenResolver"]
+    L -->|"Caption under the line<br/>Borcnama"| C1["ScanSurroundPlaceholderPattern<br/>parenthetical slots"]
+    L -->|"Left field label<br/>Sahsy kagyzy"| C2["ScanSurroundPlaceholderPattern<br/>ScanFormFieldLabelHints"]
+    L -->|"Inline prose<br/>Zahmet / footer"| C3["ScanSurroundPlaceholderPattern<br/>title + Isgar / Is beriji"]
+    R --> T["Drafts"]
+    C1 --> X["Comma combination?<br/>ScanCompoundYellowBinder"]
+    C2 --> X
+    C3 --> X
+    X --> T
+    C2 --> G["Gap draft"]
+    C3 --> G
+

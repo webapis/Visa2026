@@ -97,6 +97,7 @@ public static class ApplicationProfileTemplateUserReportBridge
             ? (template.TemplateName + GetExtension(template))
             : fileName;
         template.TemplateFile.Content = content;
+        TemplateCatalogAuditStamp.Touch(template, SecuritySystem.CurrentUserName);
     }
 
     private static void SyncKind(UserReportTemplate userTemplate, ApplicationProfileTemplate profileTemplate)

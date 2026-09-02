@@ -85,7 +85,7 @@ The dialog is **not** a second ZIP builder. It is the **evolved entry point** fo
 | **Catalog / readiness** | `ApplicationWordReportPackageCatalogService`, `ApplicationWordReportPackageReadinessEvaluator`, dry-run hints |
 
 | **UI** | Global **`#visa-preview-slot`** — `ResminamalarSlotPanel` + `ApplicationReportPackageComponent` (`UseInlinePreview`) + `ReportPackageInlinePreview` |
-| **Catalog chrome** | Flat selectable cards (`.resminamalar-catalog`) — Document Copies Prototype A **look** (format icon circle + title + summary + READY/CHECK + Preview / Download Template / recycle-bin icon behind gear); keep checkboxes / ZIP selection. Case workspace: same flat catalog; header chips filter people. **Recycle Bin** tab: Restore + Delete permanently. See [`PREVIEW_SLOT.md`](PREVIEW_SLOT.md) § Resminamalar catalog chrome |
+| **Catalog chrome** | Flat selectable cards (`.resminamalar-catalog`) — Document Copies Prototype A **look** (format icon circle + title + summary + READY/CHECK + Preview / Download Template / recycle-bin icon behind gear); keep checkboxes / ZIP selection. Each row can show a **quiet** created/updated time and user name under the Word/Excel line (muted 11px). Case workspace: same flat catalog; header chips filter people. **Recycle Bin** tab: Restore + Delete permanently. See [`PREVIEW_SLOT.md`](PREVIEW_SLOT.md) § Resminamalar catalog chrome |
 | **Slot shell** | [`.cursor/skills/visa2026-preview-slot/SKILL.md`](../.cursor/skills/visa2026-preview-slot/SKILL.md) + [`docs/PREVIEW_SLOT.md`](PREVIEW_SLOT.md) |
 
 | **Slot policy** | Single global occupant — **last open wins** (`OccupantKey` + `Version`); `@key` remount on switch; **owner-aware** auto-close (`OwnerViewId` = XAF `View.Id`) |

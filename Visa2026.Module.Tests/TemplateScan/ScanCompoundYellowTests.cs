@@ -161,6 +161,51 @@ public class ScanCompoundYellowTests
     }
 
     [Fact]
+    public void Label_ise_cagrylan_adam_identifies_person_group()
+    {
+        Assert.Equal(
+            UserReportPlaceholderRelatedBo.Person,
+            ScanCompoundLabelGroup.Identify(
+                "Ise cagrylan adam: (ady, familiyasy, atasynyn ady, doglan senesi)",
+                null,
+                Set()));
+    }
+
+    [Theory]
+    [InlineData("Aynabat Meredowa, 03.04.1991")]
+    [InlineData("Gurban Annayew, 12.01.1985y.")]
+    public void Binder_maps_hired_person_name_and_dob_from_left_label_and_caption(string yellow)
+    {
+        var bound = ScanCompoundYellowBinder.TryBind(
+            yellow,
+            Set(),
+            UserReportPlaceholderScope.Row,
+            "Ise cagrylan adam: (ady, familiyasy, atasynyn ady, doglan senesi)");
+
+        Assert.NotNull(bound);
+        var codes = TemplateTokenSyntax.GetShortCodes(bound.Value.Token);
+        Assert.Equal(["PFN", "PDBT"], codes);
+        Assert.DoesNotContain("ACADR", codes);
+        Assert.DoesNotContain("ACRDT", codes);
+        Assert.DoesNotContain("PFNM", codes);
+    }
+
+    [Fact]
+    public void Binder_maps_hired_person_even_when_nearby_also_mentions_company()
+    {
+        var bound = ScanCompoundYellowBinder.TryBind(
+            "Meret Hydyrow, 21.08.1977",
+            Set(),
+            UserReportPlaceholderScope.Row,
+            "karhana (hasaba alnan belgisi, senesi, yuridiki salgysy) Ise cagrylan adam: (ady, familiyasy, atasynyn ady, doglan senesi)");
+
+        Assert.NotNull(bound);
+        Assert.Equal(
+            ["PFN", "PDBT"],
+            TemplateTokenSyntax.GetShortCodes(bound.Value.Token));
+    }
+
+    [Fact]
     public void Review_expands_comma_highlight_to_sub_rows_even_with_one_token()
     {
         var field = new ScanDetectedField

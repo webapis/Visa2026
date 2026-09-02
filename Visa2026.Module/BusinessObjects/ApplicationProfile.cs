@@ -486,6 +486,42 @@ public class ApplicationProfileTemplate : BaseObject
     [Browsable(false)]
     [MaxLength(255)]
     public virtual string? RecycledByUserName { get; set; }
+
+    [Browsable(false)]
+    public virtual DateTime? CreatedOnUtc { get; set; }
+
+    [Browsable(false)]
+    [MaxLength(255)]
+    public virtual string? CreatedByUserName { get; set; }
+
+    [Browsable(false)]
+    public virtual DateTime? ModifiedOnUtc { get; set; }
+
+    [Browsable(false)]
+    [MaxLength(255)]
+    public virtual string? ModifiedByUserName { get; set; }
+
+    public override void OnSaving()
+    {
+        base.OnSaving();
+        if (ObjectSpace is EFCoreObjectSpace { DbContext: { } dbContext })
+        {
+            var entry = dbContext.Entry(this);
+            if (entry.State == EntityState.Modified)
+            {
+                var modified = entry.Properties
+                    .Where(p => p.IsModified)
+                    .Select(p => p.Metadata.Name);
+                if (ApplicationProfileLockHelper.IsAllowedResminamalarRecycleBinMutation(
+                        isDelete: false,
+                        RecycledAtUtc,
+                        modified))
+                    return;
+            }
+        }
+
+        TemplateCatalogAuditStamp.Touch(this, SecuritySystem.CurrentUserName);
+    }
 }
 
 public enum ApplicationProfileTemplateKind

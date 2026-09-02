@@ -38,16 +38,9 @@
             </ol>
 
             <div class="tas-modal__body">
-                @if (_configLocked)
-                {
-                    <div class="tas-banner tas-banner--lock">
-                        Profile locked — you can add <strong>new</strong> templates only. Existing template edits stay blocked.
-                    </div>
-                }
-
                 @if (_stage == Stage.Upload)
                 {
-                    <div class="tas-form">
+                    <div class="tas-form @(_busy ? "is-busy" : null)">
                         <div class="tas-field">
                             <label class="tas-field__label" for="tas-name">Template name <em>*</em></label>
                             <input id="tas-name" class="tas-input" value="@_templateName"
@@ -55,21 +48,27 @@
                         </div>
 
                         <div class="tas-field">
-                            <span class="tas-field__label">Save to</span>
+                            <span class="tas-field__label">
+                                Save to
+                                <button type="button" class="tas-tip" data-tip="@SaveToHint" aria-label="@SaveToHint">?</button>
+                            </span>
                             <label class="tas-radio">
                                 <input type="radio" name="tas-scope" checked="@(_catalogScope == ApplicationProfileTemplateCatalogScope.ProfileSpecific)"
                                        @onchange="() => _catalogScope = ApplicationProfileTemplateCatalogScope.ProfileSpecific" />
-                                <span>This profile only — @_profileName</span>
+                                <span>This profile only</span>
                             </label>
                             <label class="tas-radio">
                                 <input type="radio" name="tas-scope" checked="@(_catalogScope == ApplicationProfileTemplateCatalogScope.Global)"
                                        @onchange="() => _catalogScope = ApplicationProfileTemplateCatalogScope.Global" />
-                                <span>Shared catalog — confirmed at save (S5)</span>
+                                <span>Shared catalog</span>
                             </label>
                             @if (_catalogScope == ApplicationProfileTemplateCatalogScope.ProfileSpecific)
                             {
-                                <label class="tas-field tas-field--nested">
-                                    <span class="tas-field__label">@ApplicabilityTitle</span>
+                                <div class="tas-field tas-field--nested">
+                                    <span class="tas-field__label">
+                                        @ApplicabilityTitle
+                                        <button type="button" class="tas-tip" data-tip="@ApplicabilityHint" aria-label="@ApplicabilityHint">?</button>
+                                    </span>
                                     <select class="tas-input" value="@_applicabilityId" @onchange="OnApplicabilityChanged">
                                         <option value="">@ApplicabilityEmptyLabel</option>
                                         @foreach (var item in _applicabilityLookups)
@@ -77,75 +76,52 @@
                                             <option value="@item.Id.ToString("D")">@item.DisplayName</option>
                                         }
                                     </select>
-                                    <small>@ApplicabilityHint</small>
-                                </label>
+                                </div>
                             }
                         </div>
 
-                        <div class="tas-field">
-                            <label class="tas-field__label" for="tas-data-scope">Data <em>*</em></label>
-                            <select id="tas-data-scope" class="tas-input" value="@_dataScope"
-                                    @onchange="OnDataScopeChanged">
-                                <option value="@ApplicationProfileTemplateDataScope.ApplicationHeader">Case header — one document per case</option>
-                                <option value="@ApplicationProfileTemplateDataScope.PeopleM2M">People — one row or document per person</option>
-                                <option value="@ApplicationProfileTemplateDataScope.Both">Both</option>
-                            </select>
-                            <small>Same as Add existing template. Sanaw / person lists need <strong>People</strong> or <strong>Both</strong> so row tokens and <code>{{#ds.rows}}</code> are available.</small>
-                            @if (IsExcelUpload && _dataScope == ApplicationProfileTemplateDataScope.ApplicationHeader)
-                            {
-                                <p class="tas-banner tas-banner--warn" style="margin:0.5rem 0 0">
-                                    This Excel file looks like a person list. Choose <strong>People</strong> or <strong>Both</strong> before Analyze — Case header will skip row tokens and leave gaps.
-                                </p>
-                            }
-                        </div>
+                        @if (_source != EntrySource.Instance)
+                        {
+                            <div class="tas-field">
+                                <span class="tas-field__label">
+                                    Case <em>*</em>
+                                    <button type="button" class="tas-tip" data-tip="@CaseHint" aria-label="@CaseHint">?</button>
+                                </span>
+                                @if (_instanceOptions.Count == 0)
+                                {
+                                    <p class="tas-banner tas-banner--fail" style="margin:0">
+                                        No cases on this profile yet. Add a case first to open the template wizard.
+                                    </p>
+                                }
+                                else
+                                {
+                                    <select id="tas-instance" class="tas-input" value="@_selectedInstanceId" @onchange="OnInstanceChanged">
+                                        <option value="@Guid.Empty">Choose a case…</option>
+                                        @foreach (var option in _instanceOptions)
+                                        {
+                                            <option value="@option.Id">@option.Label</option>
+                                        }
+                                    </select>
+                                }
+                            </div>
+                        }
 
                         <div class="tas-field">
-                            <span class="tas-field__label">Scan requirements</span>
-                            <p class="tas-inline-note" style="margin:0">
-                                Upload a <strong>filled sample</strong>. Mark every value that should become a placeholder with a
-                                <strong>yellow highlighter</strong>. Non-highlighted text stays literal forever.
-                            </p>
-                        </div>
-
-                        <div class="tas-field">
-                            <span class="tas-field__label">Case <em>*</em></span>
-                            @if (_source == EntrySource.Instance)
-                            {
-                                <input class="tas-input" value="@CaseHintLabel" readonly />
-                                <small>Workspace context only — yellow cells use sample data, not this case's people.</small>
-                            }
-                            else if (_instanceOptions.Count == 0)
-                            {
-                                <p class="tas-banner tas-banner--fail" style="margin:0">
-                                    No cases on this profile yet. Add a case first to open the template wizard.
-                                </p>
-                            }
-                            else
-                            {
-                                <select id="tas-instance" class="tas-input" value="@_selectedInstanceId" @onchange="OnInstanceChanged">
-                                    <option value="@Guid.Empty">Choose a case…</option>
-                                    @foreach (var option in _instanceOptions)
-                                    {
-                                        <option value="@option.Id">@option.Label</option>
-                                    }
-                                </select>
-                                <small>Placeholder guesses come from column headers and the manual — not from roster values on this case.</small>
-                            }
-                        </div>
-
-                        <div class="tas-field">
-                            <label class="tas-field__label" for="tas-file">Yellow-marked Word or Excel <em>*</em></label>
+                            <span class="tas-field__label">
+                                File <em>*</em>
+                                <button type="button" class="tas-tip" data-tip="@FileHint" aria-label="@FileHint">?</button>
+                            </span>
                             <label class="tas-drop @(_fileBytes is { Length: > 0 } ? "is-picked" : string.Empty)">
                                 <InputFile id="tas-file" OnChange="OnFileSelectedAsync" accept=".docx,.xlsx" />
                                 @if (_fileBytes is { Length: > 0 })
                                 {
                                     <strong>@_fileName</strong>
-                                    <small>@($"{_fileBytes.Length / 1024:N0} KB") · Word or Excel with yellow marks</small>
+                                    <small>@($"{_fileBytes.Length / 1024:N0} KB")</small>
                                 }
                                 else
                                 {
-                                    <strong>Drop yellow-marked Word or Excel here</strong>
-                                    <small>or click to browse — .docx / .xlsx only (Text Highlight Color or yellow cell fill)</small>
+                                    <strong>Drop Word or Excel here</strong>
+                                    <small>.docx / .xlsx with yellow marks</small>
                                 }
                             </label>
                         </div>
@@ -168,10 +144,6 @@
                                 <small>@SelectedPdfPagesSummary</small>
                             </div>
                         }
-
-                        <p class="tas-field">
-                            <button type="button" class="tas-link" @onclick="OnAddPreparedTemplateAsync">Add existing template instead</button>
-                        </p>
                     </div>
                 }
                 else if (_stage == Stage.ScanFail && _ingest is { } failedIngest)
@@ -347,7 +319,16 @@
             </div>
 
             <footer class="tas-foot">
-                @if (!string.IsNullOrEmpty(_message))
+                @if (_stage == Stage.Upload && _busy)
+                {
+                    <div class="tas-analyze" role="status" aria-live="polite">
+                        <div class="tas-progress tas-progress--foot">
+                            <div class="tas-progress__bar tas-progress__bar--indeterminate"></div>
+                        </div>
+                        <span>@_analyzeStatus</span>
+                    </div>
+                }
+                else if (!string.IsNullOrEmpty(_message))
                 {
                     <span class="tas-foot__hint" style="@(_messageIsError ? "color:#b91c1c" : string.Empty)">@_message</span>
                 }
@@ -372,8 +353,12 @@
 
                 @if (_stage == Stage.Upload)
                 {
-                    <button type="button" class="tas-btn tas-btn--ghost" @onclick="RequestCloseAsync">Cancel</button>
-                    <button type="button" class="tas-btn tas-btn--primary" disabled="@(!CanAnalyze)" @onclick="AnalyzeAsync">Analyze file</button>
+                    <div class="tas-foot__actions">
+                        <button type="button" class="tas-btn tas-btn--ghost" disabled="@_busy" @onclick="RequestCloseAsync">Cancel</button>
+                        <button type="button" class="tas-btn tas-btn--primary" disabled="@(!CanAnalyze)" @onclick="AnalyzeAsync">
+                            @(_busy ? "Analyzing…" : "Analyze file")
+                        </button>
+                    </div>
                 }
                 else if (_stage == Stage.ScanFail)
                 {
@@ -456,7 +441,6 @@
 
     private sealed record InstanceOption(Guid Id, string Label);
 
-    [Parameter] public EventCallback OnAddPreparedTemplate { get; set; }
     [Parameter] public EventCallback OnTemplateSaved { get; set; }
     [Parameter] public EventCallback<string> OnFocusSavedTemplate { get; set; }
 
@@ -479,6 +463,7 @@
     private Stage _stage = Stage.Upload;
     private Stage _helpReturnStage = Stage.Upload;
     private bool _busy;
+    private string _analyzeStatus = string.Empty;
     private bool _discardPrompt;
     private bool _configLocked;
     private bool _aiEnabled;
@@ -645,6 +630,7 @@
         _selectedInstanceId = Guid.Empty;
         _stage = Stage.Upload;
         _busy = false;
+        _analyzeStatus = string.Empty;
         _discardPrompt = false;
         _configLocked = false;
         _fileBytes = null;
@@ -692,8 +678,17 @@
 
     private string ApplicabilityHint =>
         _isViaMinistry
-            ? "Same as the profile template list. All contracts = every via-ministry case of this profile. Pick one Project contract to show only on matching cases."
-            : "Same as the profile template list. All migration services = every direct-migration case of this profile. Pick one service to show only on matching cases.";
+            ? "All contracts = every via-ministry case of this profile. Pick one Project contract to show only on matching cases."
+            : "All migration services = every direct-migration case of this profile. Pick one service to show only on matching cases.";
+
+    private const string SaveToHint =
+        "This profile only stays on this profile. Shared catalog is confirmed when you Approve.";
+
+    private const string CaseHint =
+        "Workspace context only. Yellow marks use the sample in the file, not this case's people.";
+
+    private const string FileHint =
+        "Upload a filled sample. Highlight every value that should become a placeholder in yellow (Word Text Highlight Color or Excel cell fill). Other text stays as printed.";
 
     private string ApplicabilitySummary
     {
@@ -747,17 +742,6 @@
         return id is Guid value && value != Guid.Empty ? value.ToString("D") : string.Empty;
     }
 
-    private string CaseHintLabel
-    {
-        get
-        {
-            if (!string.IsNullOrWhiteSpace(_caseNumber))
-                return _caseNumber;
-            var match = _instanceOptions.FirstOrDefault(o => o.Id == _selectedInstanceId);
-            return match?.Label ?? "This case";
-        }
-    }
-
     private Task RequestCloseAsync()
     {
         if (_busy)
@@ -783,12 +767,6 @@
         _open = false;
         Reset();
         await InvokeAsync(StateHasChanged);
-    }
-
-    private void OnDataScopeChanged(ChangeEventArgs args)
-    {
-        if (Enum.TryParse<ApplicationProfileTemplateDataScope>(args.Value?.ToString(), out var scope))
-            _dataScope = scope;
     }
 
     private void OnScanKindChanged(ScanKind kind)
@@ -869,9 +847,7 @@
         if (string.IsNullOrWhiteSpace(_templateName))
             _templateName = Path.GetFileNameWithoutExtension(file.Name);
 
-        // Sanaw Excel yellow marks are person rows — Case header hides PLN/RNUM/ds.rows and creates gaps.
-        if (extension == ".xlsx"
-            && _dataScope == ApplicationProfileTemplateDataScope.ApplicationHeader)
+        if (!IsEditingExisting)
             _dataScope = ApplicationProfileTemplateDataScope.Both;
 
         if (extension == ".pdf")
@@ -892,9 +868,6 @@
 
     private bool IsOfficeUpload =>
         Path.GetExtension(_fileName).ToLowerInvariant() is ".docx" or ".xlsx";
-
-    private bool IsExcelUpload =>
-        Path.GetExtension(_fileName).Equals(".xlsx", StringComparison.OrdinalIgnoreCase);
 
     private bool CanAnalyze =>
         !_busy
@@ -928,11 +901,13 @@
             return;
 
         _busy = true;
+        _analyzeStatus = "Reading file…";
         _message = null;
         _messageIsError = false;
         _ingest = null;
         _fieldPlan = null;
         await InvokeAsync(StateHasChanged);
+        await Task.Yield();
 
         IObjectSpace? ownedObjectSpace = _source == EntrySource.Profile
             ? null
@@ -961,6 +936,8 @@
                 FileName = _fileName,
                 SelectedPages = selectedPages,
             });
+
+            await SetAnalyzeStatusAsync("Finding yellow marks…");
 
             var templateKind = Path.GetExtension(_fileName).Equals(".xlsx", StringComparison.OrdinalIgnoreCase)
                 ? ApplicationProfileTemplateKind.Excel
@@ -1000,6 +977,7 @@
                 }
             }
 
+            await SetAnalyzeStatusAsync("Matching placeholders…");
             var fieldPlan = await FieldPlanService.BuildAsync(new ScanFieldPlanBuildRequest
             {
                 Ingest = ingest,
@@ -1044,6 +1022,7 @@
             var needsAck = fieldPlan.Fields.Any(static f => f.Confidence == ScanFieldConfidence.Low)
                 || ingest.Suitability.Verdict == ScanSuitabilityVerdict.Warn;
             _acknowledgedWarnings = !needsAck;
+            _analyzeStatus = "Opening review…";
             _stage = Stage.FieldReview;
         }
         catch (ScanNormalizationException ex)
@@ -1086,8 +1065,16 @@
         {
             ownedObjectSpace?.Dispose();
             _busy = false;
+            _analyzeStatus = string.Empty;
             await InvokeAsync(StateHasChanged);
         }
+    }
+
+    private async Task SetAnalyzeStatusAsync(string status)
+    {
+        _analyzeStatus = status;
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
     }
 
     private IReadOnlyList<ScanValueHint> BuildValueHints(
@@ -1608,12 +1595,6 @@
         _reviewSelectedFieldId = null;
         _reviewChatOpen = false;
         _reviewChatFocusFieldId = null;
-    }
-
-    private async Task OnAddPreparedTemplateAsync()
-    {
-        if (OnAddPreparedTemplate.HasDelegate)
-            await OnAddPreparedTemplate.InvokeAsync();
     }
 
     private string ModalWidthClass => _stage switch

@@ -119,6 +119,20 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("Caption", "Sort Order")]
         public virtual int SortOrder { get; set; } = 0;
 
+        [Browsable(false)]
+        public virtual DateTime? CreatedOnUtc { get; set; }
+
+        [Browsable(false)]
+        [MaxLength(255)]
+        public virtual string? CreatedByUserName { get; set; }
+
+        [Browsable(false)]
+        public virtual DateTime? ModifiedOnUtc { get; set; }
+
+        [Browsable(false)]
+        [MaxLength(255)]
+        public virtual string? ModifiedByUserName { get; set; }
+
         [Aggregated]
         [Browsable(false)]
         [VisibleInDetailView(false)]
@@ -160,6 +174,12 @@ namespace Visa2026.Module.BusinessObjects
                 return TemplateOutputFormat.Excel;
 
             return TemplateOutputFormat.Word;
+        }
+
+        public override void OnSaving()
+        {
+            base.OnSaving();
+            TemplateCatalogAuditStamp.Touch(this, SecuritySystem.CurrentUserName);
         }
     }
 }

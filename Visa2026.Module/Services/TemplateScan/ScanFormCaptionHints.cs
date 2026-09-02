@@ -62,6 +62,15 @@ public static class ScanFormCaptionHints
         if (folded.Contains("telefon", StringComparison.Ordinal))
             return role == ScanLetterRole.Wekil ? ["RPPH"] : ["ACPHN", "RPPH"];
 
+        if (folded.Contains("doglan", StringComparison.Ordinal))
+            return ["PDBT"];
+
+        if (folded.Contains("familiya", StringComparison.Ordinal)
+            || folded.Contains("atasynyn ady", StringComparison.Ordinal)
+            || folded.Contains("doly ady", StringComparison.Ordinal)
+            || folded.Equals("ady", StringComparison.Ordinal))
+            return NameCodes(role);
+
         if (folded.Contains("mohlet", StringComparison.Ordinal))
             return role switch
             {
@@ -92,6 +101,10 @@ public static class ScanFormCaptionHints
                 || nearby.Contains("karhana", StringComparison.Ordinal)
                 || nearby.Contains("yuridiki", StringComparison.Ordinal))
                 return ["ACRDT"];
+            if (nearby.Contains("doglan", StringComparison.Ordinal)
+                || nearby.Contains("cagryl", StringComparison.Ordinal)
+                || role == ScanLetterRole.Applicant)
+                return ["PDBT"];
             return role == ScanLetterRole.Applicant ? ["PDBT"] : ["ACRDT", "PDBT"];
         }
 
@@ -124,6 +137,14 @@ public static class ScanFormCaptionHints
                 _ => shortCode,
             },
             _ => shortCode,
+        };
+
+    private static IReadOnlyList<string> NameCodes(ScanLetterRole role) =>
+        role switch
+        {
+            ScanLetterRole.Wekil => ["RPFN"],
+            ScanLetterRole.Signatory => ["CHFN"],
+            _ => ["PFN"],
         };
 
     private static IReadOnlyList<string> PassportNumberCodes(ScanLetterRole role) =>

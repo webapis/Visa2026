@@ -700,6 +700,7 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="FullName" Caption="Ad Soyad" />
         <Member Name="PassportAuthority" Caption="Pasaport Veren Kurum" />
+        <Member Name="PassportExpirationDate" Caption="Pasaport Bitiş Tarihi" />
         <Member Name="PassportIssueDate" Caption="Pasaport Veriliş Tarihi" />
         <Member Name="PassportLine" Caption="Pasaport (tek satır)" />
         <Member Name="PassportNumber" Caption="Pasaport No" />

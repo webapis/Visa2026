@@ -97,6 +97,40 @@ public class ScanYellowMarkContextBuilderTests
     }
 
     [Fact]
+    public void Word_uses_left_label_and_caption_under_line_not_company_two_rows_above()
+    {
+        var bytes = CreateWordWithCompanyThenHiredPerson(
+            "Karhana (hasaba alnan belgisi, senesi, yuridiki salgysy, telefon belgisi)",
+            "No263407090, 02.02.2009y., Asgabat s., Bitarap Turkmenistan sayoly 538",
+            "Ise cagrylan adam:",
+            "Aynabat Meredowa, 03.04.1991",
+            "(ady, familiyasy, atasynyn ady, doglan senesi)");
+        var yellows = new ScanOfficeYellowExtractor().Extract(bytes, ScanSourceKind.Word);
+        var hired = Assert.Single(yellows, y => y.Text.Contains("Aynabat", StringComparison.Ordinal));
+        var drafts = new[]
+        {
+            new ScanDetectedFieldDraft
+            {
+                FieldId = "h1",
+                Box = ScanBoundingBox.FullPage,
+                PageIndex = 0,
+                LabelText = hired.Text,
+                SourceRegion = hired.Region,
+            },
+        };
+
+        var map = ScanYellowMarkContextBuilder.Build(bytes, ScanSourceKind.Word, drafts);
+        var context = Assert.Single(map).Value;
+
+        Assert.Contains("cagrylan adam", context.PrintedLabel, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("Karhana", context.PrintedLabel, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("hasaba", context.PrintedLabel, StringComparison.OrdinalIgnoreCase);
+        Assert.NotNull(context.FollowingCaption);
+        Assert.Contains("doglan senesi", context.FollowingCaption, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("familiyasy", context.FollowingCaption, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void Excel_includes_sheet_name_and_header_row()
     {
         using var ms = new MemoryStream();
@@ -160,6 +194,35 @@ public class ScanYellowMarkContextBuilderTests
                     new RunProperties(new Highlight { Val = HighlightColorValues.Yellow }),
                     new Text(yellow)));
             main.Document = new Document(new Body(paragraph));
+            main.Document.Save();
+        }
+
+        return stream.ToArray();
+    }
+
+    private static byte[] CreateWordWithCompanyThenHiredPerson(
+        string companyLabel,
+        string companyValues,
+        string hiredLabel,
+        string hiredYellow,
+        string hiredCaption)
+    {
+        using var stream = new MemoryStream();
+        using (var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document))
+        {
+            var main = document.AddMainDocumentPart();
+            main.Document = new Document(new Body(
+                new Paragraph(new Run(new Text(companyLabel))),
+                new Paragraph(
+                    new Run(
+                        new RunProperties(new Highlight { Val = HighlightColorValues.Yellow }),
+                        new Text(companyValues))),
+                new Paragraph(new Run(new Text(hiredLabel))),
+                new Paragraph(
+                    new Run(
+                        new RunProperties(new Highlight { Val = HighlightColorValues.Yellow }),
+                        new Text(hiredYellow))),
+                new Paragraph(new Run(new Text(hiredCaption)))));
             main.Document.Save();
         }
 

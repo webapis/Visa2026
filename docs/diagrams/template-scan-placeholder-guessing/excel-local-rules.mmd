@@ -12,9 +12,9 @@ flowchart LR
     C --> D
 
     D -->|Single value| S["ScanShapeTokenMatcher<br/>date, TUR, gender, passport, visa period…"]
-    D -->|Compound| X["Split segments<br/>map each to profile ShortCode<br/>build compound cell template"]
+    D -->|Compound| X["Split segments<br/>map each to profile ShortCode<br/>ScanSurroundPlaceholderPattern confirms"]
 
-    S --> M["Merge scores<br/>header + shape + profile boost"]
+    S --> M["Merge scores<br/>header + ScanSurroundPlaceholderPattern + shape"]
     X --> M
 
     M --> R["Rank top candidates<br/>score % + confidence High/Med/Low"]

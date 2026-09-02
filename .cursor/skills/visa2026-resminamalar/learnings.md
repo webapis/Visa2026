@@ -25,6 +25,16 @@ Purpose: **catalog, seed gate, batch worker, preview, permissions, dialog UX** �
 
 ## Entries
 
+### 2026-09-02 — Quiet created/updated stamp on catalog cards (Application)
+
+- **Symptom**: Officers wanted to see when a Resminamalar template was created or last changed, and by whom, without making the catalog louder.
+- **Try**: Case workspace Resminamalar list (Word/Excel rows).
+- **Test**: `TemplateCatalogAuditStampTests`. Blazor Debug build. Restart, hard-refresh: new/updated nested templates show a muted date · user line under Word/Excel. Hover for created vs updated. Recycle Bin still uses its own Removed line.
+- **Root cause**: Catalog cards only showed format; `ApplicationProfileTemplate` / `UserReportTemplate` had no created/modified fields.
+- **Fix**: Stamp `CreatedOnUtc` / `ModifiedOnUtc` + user name on save (skip Recycle Bin-only mutations). Schema heal. Catalog maps the fields; CSS `.resminamalar-catalog__meta` is 11px muted.
+- **Prevent**: Do not put this on READY/CHECK chips. Recycle mutations must not rewrite created/updated.
+- **Cross-skill**: visa2026-preview-slot
+
 ### 2026-09-02 — Case summary Project change left stale Resminamalar catalog (Application)
 
 - **Symptom**: Changing **Project** on Case summary (e.g. 9/-003) did not swap contract-scoped nested templates on the Resminamalar tab.

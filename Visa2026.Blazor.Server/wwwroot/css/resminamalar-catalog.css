@@ -133,6 +133,16 @@
   color: var(--rmc-muted);
 }
 
+.resminamalar-catalog__meta {
+  font-size: 11px;
+  line-height: 1.3;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--rmc-muted);
+  opacity: 0.72;
+}
+
 .resminamalar-catalog__pane-tabs {
   display: inline-flex;
   align-items: center;

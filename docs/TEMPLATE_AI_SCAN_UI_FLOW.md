@@ -36,7 +36,7 @@ This document defines **which control the officer touches and what happens next*
 | **X** · **Cancel** · backdrop · **Esc** | Close modal → V0 | After V1 analyze: **discard confirm** |
 | Modal opens | **V1**, state cleared | — |
 | Stepper | Display only | Upload → Review → Generate → Preview → Done |
-| Config lock | Banner: “Profile locked — new templates only” | Approve **enabled** for new template; edit existing blocked |
+| Config lock | No banner on Create new. Name-field hint only when remapping a locked existing row | Approve **enabled** for new template; overwrite of existing blocked |
 | AI off | Entry visible, disabled + badge | Add prepared template + Convert unchanged |
 
 ---
@@ -57,12 +57,11 @@ This document defines **which control the officer touches and what happens next*
 | Element | Type | Action | Result |
 |---------|------|--------|--------|
 | Template name | text | Edit | Required for Analyze |
-| Catalog target | radio | Profile-specific / Shared | Shared confirmed at Approve |
-| Data scope | select | Header / People / Both | Filters placeholder set |
-| Scan type | radio | Blank form / Filled sample | Filled → show instance picker (V11) |
-| File | drop zone | PNG, JPG, PDF | Multi-page PDF → V10 thumbnails |
-| **Analyze scan** | primary | Click | → suitability → V2 or V7 |
-| Add prepared template | link | Click | Leave for L12 manual path |
+| Catalog target | radio | This profile only / Shared catalog | Hints on `?`. Shared confirmed at Approve |
+| Project contract | select | All contracts / one contract | Shown when This profile only. Hint on `?` |
+| Case | select | Pick a case | Wizard entry only. Hidden from Resminamalar (case is in the title). Hint on `?` |
+| File | drop zone | `.docx` / `.xlsx` | Yellow-mark hint on `?`. Data scope is **Both** (no dropdown) |
+| **Analyze file** | primary | Click | Footer progress bar while reading / finding yellow / matching. Then V2 or V7 |
 
 **Analyze guard:** file + name + (filled ⇒ instance selected).
 
@@ -146,4 +145,7 @@ Wizard path: officer still clicks **Save profile** to persist (same as Convert w
 
 | Date | Change |
 |------|--------|
+| 2026-09-02 | Config lock: drop full-width banner; keep name-field hint on locked overwrite |
+| 2026-09-02 | V1: removed Add existing template escape link (use catalog / wizard Add existing) |
+| 2026-09-02 | V1 quieter: Data = Both (no dropdown); help on `?`; case hidden from Resminamalar; Analyze footer progress |
 | 2026-08-28 | Initial views V0–V12 aligned to prototypes 01–12 |
