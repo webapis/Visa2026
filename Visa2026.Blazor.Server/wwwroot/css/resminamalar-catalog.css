@@ -144,28 +144,80 @@
 }
 
 .resminamalar-catalog__pane-tabs {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin-right: 0.5rem;
+  display: flex;
+  align-items: flex-end;
+  gap: 1.35rem;
+  margin: 0;
 }
 
 .resminamalar-catalog__utilities {
   display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px;
-}
-
-.app-report-package__top-selection--content {
-  justify-content: flex-start;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.35rem 0.75rem;
-}
-
-.app-report-package__top-selection--shared .resminamalar-catalog__utilities {
+  justify-content: flex-end;
+  gap: 2px 4px;
   margin-left: auto;
+  padding-bottom: 0.45rem;
+}
+
+.app-item-doc-copies__top-actions.app-report-package__top-selection--content {
+  display: flex;
+  width: 100%;
+  justify-content: flex-start;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.75rem;
+  padding-bottom: 0;
+  box-sizing: border-box;
+}
+
+.resminamalar-catalog__pane-tab {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  padding: 0.2rem 0.05rem 0.7rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.2;
+  color: #334155;
+  cursor: pointer;
+  position: relative;
+  white-space: nowrap;
+}
+
+.resminamalar-catalog__pane-tab:hover {
+  color: #0f766e;
+  background: transparent;
+  text-decoration: none;
+}
+
+.resminamalar-catalog__pane-tab:focus-visible {
+  outline: 2px solid color-mix(in srgb, #0f766e 55%, transparent);
+  outline-offset: 2px;
+}
+
+.resminamalar-catalog__pane-tab--active {
+  font-weight: 700;
+  color: #0f766e;
+  text-decoration: none;
+}
+
+.resminamalar-catalog__pane-tab--active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 3px;
+  background: #0f766e;
+  border-radius: 2px 2px 0 0;
 }
 
 .resminamalar-catalog__shared-hint {
@@ -226,12 +278,6 @@
 
 .resminamalar-catalog__toggle:hover:not(:disabled).resminamalar-catalog__toggle--off {
   background: #cbd5e1;
-}
-
-.resminamalar-catalog__pane-tab--active {
-  font-weight: 700;
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
 }
 
 .resminamalar-catalog__actions {
@@ -363,6 +409,11 @@
 .resminamalar-slot-panel .app-report-package--inline-slot .app-report-package__top-selection {
   border-bottom-color: var(--resminamalar-slot-border, var(--rmc-border-soft));
   padding: 0.35rem 0.5rem 0.65rem;
+}
+
+.resminamalar-slot-panel .app-report-package--inline-slot .app-item-doc-copies__top-actions.app-report-package__top-selection--content {
+  justify-content: flex-start;
+  padding-bottom: 0;
 }
 
 @media (max-width: 22rem) {

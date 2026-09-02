@@ -23,6 +23,14 @@ Purpose: **shell, layout, occupants, catalog card UX, JS/CSS** — not Resminama
 
 ## Entries
 
+### 2026-09-02 — This profile / Shared tab bar vs utility links (CSS)
+
+- **Need**: Prototype has This profile / Shared as left tabs with a thick teal underline on the gray bar; Recycle Bin and Select all sit on the right as smaller blue links.
+- **Fix**: Native tab buttons (not DxButton Link). Active `::after` 3px `#0f766e` on the catalog bottom border. Utilities `margin-left: auto`. Recycle Bin stays an action link, not a third tab.
+- **Test**: Ctrl+F5 case Resminamalar This profile and Shared. Tabs left, Recycle Bin + actions right. Active tab teal bar, not the same underline as Select all.
+- **Prevent**: Do not put `app-item-doc-copies__action-btn` on content tabs. Do not group Recycle Bin in `role=tablist`.
+- **Cross-skill**: preview-slot | resminamalar
+
 ### 2026-09-02 — Resminamalar This profile / Shared tab chrome (Resminamalar)
 
 - **Need**: Case catalog tabs plus SHARED chip and green/grey ON/OFF pill matching the signed-off prototypes.

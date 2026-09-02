@@ -25,6 +25,16 @@ Purpose: **catalog, seed gate, batch worker, preview, permissions, dialog UX** �
 
 ## Entries
 
+### 2026-09-02 — This profile / Shared tab bar vs utility links (Application)
+
+- **Symptom**: This profile / Shared looked like the same blue links as Recycle Bin and Select all, all in one row with no teal tab bar.
+- **Try**: Case Resminamalar vs `docs/prototypes/resminamalar-this-profile-tab-prototype.png`.
+- **Test**: Ctrl+F5. Tabs left with thick teal underline; Recycle Bin and other actions on the right as smaller links.
+- **Root cause**: Tabs used `DxButton` Link + `app-item-doc-copies__action-btn`; Recycle Bin used pane-tab CSS; utilities only `margin-left: auto` on Shared.
+- **Fix**: Native tab buttons; `::after` 3px `#0f766e` on the catalog rule; Recycle Bin is a utility link; utilities always pushed right.
+- **Prevent**: Do not put action-btn classes on This profile / Shared. Do not put Recycle Bin in the tablist.
+- **Cross-skill**: visa2026-preview-slot
+
 ### 2026-09-02 — Shared OFF blocked on locked profile (Application)
 
 - **Symptom**: Shared tab ON worked; OFF showed "Nested templates cannot be changed while this profile is locked" (case 8/-015 already in progress).

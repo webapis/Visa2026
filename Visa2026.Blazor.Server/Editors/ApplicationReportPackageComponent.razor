@@ -30,16 +30,20 @@
             @if (ShowContentTabs)
             {
                 <div class="resminamalar-catalog__pane-tabs" role="tablist" aria-label="@Msg("ApplicationReportPackage.Title")">
-                    <DxButton Text="@FormatMsg("ApplicationReportPackage.ThisProfileTab", VisibleCatalogEntries.Count)"
-                              RenderStyle="ButtonRenderStyle.Link"
-                              SizeMode="SizeMode.Small"
-                              CssClass="@ThisProfilePaneTabCss"
-                              Click="@ShowThisProfilePaneAsync" />
-                    <DxButton Text="@FormatMsg("ApplicationReportPackage.SharedTab", SharedEntries.Count)"
-                              RenderStyle="ButtonRenderStyle.Link"
-                              SizeMode="SizeMode.Small"
-                              CssClass="@SharedPaneTabCss"
-                              Click="@ShowSharedPaneAsync" />
+                    <button type="button"
+                            role="tab"
+                            aria-selected="@(IsThisProfilePane ? "true" : "false")"
+                            class="@ThisProfilePaneTabCss"
+                            @onclick="ShowThisProfilePaneAsync">
+                        @FormatMsg("ApplicationReportPackage.ThisProfileTab", VisibleCatalogEntries.Count)
+                    </button>
+                    <button type="button"
+                            role="tab"
+                            aria-selected="@(IsSharedPane ? "true" : "false")"
+                            class="@SharedPaneTabCss"
+                            @onclick="ShowSharedPaneAsync">
+                        @FormatMsg("ApplicationReportPackage.SharedTab", SharedEntries.Count)
+                    </button>
                 </div>
                 <div class="resminamalar-catalog__utilities">
                     @if (ShowRecycleBinTab)
@@ -47,7 +51,7 @@
                         <DxButton Text="@FormatMsg("ApplicationReportPackage.RecycleBinTab", VisibleRecycleBinEntries.Count)"
                                   RenderStyle="ButtonRenderStyle.Link"
                                   SizeMode="SizeMode.Small"
-                                  CssClass="@RecycleBinPaneTabCss"
+                                  CssClass="app-item-doc-copies__action-btn"
                                   Click="@ShowRecycleBinPaneAsync" />
                     }
                     @if (IsThisProfilePane && VisibleCatalogEntries.Count > 0)
@@ -641,11 +645,9 @@
         ShowRecycleBin || SharedEntries.Count > 0;
 
     private string TopSelectionCss =>
-        !ShowContentTabs
-            ? string.Empty
-            : IsSharedPane
-                ? "app-report-package__top-selection--content app-report-package__top-selection--shared"
-                : "app-report-package__top-selection--content";
+        ShowContentTabs
+            ? "app-report-package__top-selection--content"
+            : string.Empty;
 
     private bool ShowRecycleBinTab =>
         ShowRecycleBin || RecycleBinEntries.Count > 0 || _pendingToBin.Count > 0;
@@ -711,15 +713,15 @@
 
     private string CatalogPaneTabCss =>
         IsThisProfilePane
-            ? "app-item-doc-copies__action-btn resminamalar-catalog__pane-tab resminamalar-catalog__pane-tab--active"
-            : "app-item-doc-copies__action-btn resminamalar-catalog__pane-tab";
+            ? "resminamalar-catalog__pane-tab resminamalar-catalog__pane-tab--active"
+            : "resminamalar-catalog__pane-tab";
 
     private string ThisProfilePaneTabCss => CatalogPaneTabCss;
 
     private string SharedPaneTabCss =>
         IsSharedPane
-            ? "app-item-doc-copies__action-btn resminamalar-catalog__pane-tab resminamalar-catalog__pane-tab--active"
-            : "app-item-doc-copies__action-btn resminamalar-catalog__pane-tab";
+            ? "resminamalar-catalog__pane-tab resminamalar-catalog__pane-tab--active"
+            : "resminamalar-catalog__pane-tab";
 
     private string RecycleBinPaneTabCss =>
         !IsCatalogPane
