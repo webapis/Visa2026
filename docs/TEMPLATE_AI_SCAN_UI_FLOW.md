@@ -45,10 +45,9 @@ This document defines **which control the officer touches and what happens next*
 
 | Element | Where | Action | Result |
 |---------|-------|--------|--------|
-| **Create from scan** | Wizard Templates step | Open modal V1 `source=wizard` | Optional instance picker (V11) |
-| **Create from scan** | Case Resminamalar row | Open modal V1 `source=instance` | Instance read-only context if scan filled |
-| **Convert existing document** | Same rows | Opens **Convert** modal | Unchanged |
-| **Add prepared template** | Same rows | Manual upload modal | Unchanged |
+| **Create from yellow marks** | Case Resminamalar | Open modal V1 `source=instance` | Instance context from the case |
+| **Convert existing document** | Case Resminamalar | Opens **Convert** modal | Unchanged |
+| **Add existing template** | Case Resminamalar | Manual upload | Unchanged |
 
 ---
 
@@ -145,6 +144,7 @@ Wizard path: officer still clicks **Save profile** to persist (same as Convert w
 
 | Date | Change |
 |------|--------|
+| 2026-09-02 | V0: Create from yellow marks / Convert / Add existing from case Resminamalar only (not wizard Templates) |
 | 2026-09-02 | Config lock: drop full-width banner; keep name-field hint on locked overwrite |
 | 2026-09-02 | V1: removed Add existing template escape link (use catalog / wizard Add existing) |
 | 2026-09-02 | V1 quieter: Data = Both (no dropdown); help on `?`; case hidden from Resminamalar; Analyze footer progress |

@@ -118,10 +118,10 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | S0e | Engineering spec Phase 0 + playbook stub | **Done** (2026-08-28) | [`TEMPLATE_AI_SCAN_ENGINEERING_SPEC.md`](../../../docs/TEMPLATE_AI_SCAN_ENGINEERING_SPEC.md) · `Resources/TemplateAuthoring/SCAN_AUTHORING_PLAYBOOK.md` · SD-D1–D10 locked |
 | S1 | Playbook loader, scan normalizer, suitability, options, DI | **Done** (2026-08-28) | `Services/TemplateScan/` — ingest pipeline, Spire PDF text OCR, 11 tests |
 | S2 | Vision provider + field plan merger | **Done** (2026-08-28) | `ITemplateScanAiProvider`, deterministic planner, merger, Azure vision adapter; 20 TemplateScan tests |
-| S3 | Blazor modal — upload + field review (V1–V2, V7–V8, V10–V11) | **Done** (2026-08-28) | `TemplateScanDialog.razor`, `TemplateScanFieldReviewView.razor`, wizard entry |
+| S3 | Blazor modal — upload + field review (V1–V2, V7–V8, V10–V11) | **Done** (2026-08-28) | `TemplateScanDialog.razor`, `TemplateScanFieldReviewView.razor`; **entry is case Resminamalar** (wizard Templates no longer creates files, 2026-09-02) |
 | S4 | Clarification chat (V3) | **Done** (2026-08-28) | `ITemplateScanClarificationService`, intent classifier, chat UI, Azure clarify |
 | S5 | Docx builder + Generate + preview/validate (V4–V5) | **Done** (2026-08-28) | `TemplateScanOrchestrator`, `ScanDraftDocxBuilder`, `TemplateScanPreviewView.razor` |
-| S6 | Save helper extract + wizard/case entries | **Done** (2026-08-28) | `ApplicationProfileTemplateSaveHelper`, V6 Done view, Resminamalar entry |
+| S6 | Save helper extract + case Resminamalar entry | **Done** (2026-08-28) | `ApplicationProfileTemplateSaveHelper`, V6 Done view, Resminamalar entry (wizard create removed 2026-09-02) |
 | S7 | Gap packet export (V9) + `TemplateScan` audit category | **Done** (2026-08-28) | `ScanGapPacketExporter`, `TemplateScanGapHelpView`, runtime log category |
 
 **Template AI scan sequencing:** independent of Convert E4 gate (no new BO in v1). S1 → S2 → S3/S4 → S5 → S6 → S7. S1–S3 can ship with `Provider=None` (entry disabled). Do **not** merge into `TemplateConvertDialog`.

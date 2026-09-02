@@ -10,7 +10,7 @@
 | Staged profiles | `staged-application-profiles-workspace-mockup.png`, `staged-profiles-listview-table-mockup.png`, `staged-profiles-grid-cards-mockup.png` |
 | In process | `process-started-profiles-listview-table-mockup.png`, `process-started-profiles-list-cards-mockup.png`, `process-started-application-profile-workspace-mockup.png`, `process-started-nav-*.png` (5 workspace tabs) |
 | Profile templates | `application-profile-templates-listview-mockup.png`, `application-profile-templates-grid-mockup.png`, `application-profile-template-overview-mockup.png`, `application-profile-template-wizard-mockup.png` + `step2`–`step5` |
-| Wizard template scopes / upload / edit (2026-08-12) | `application-profile-wizard-templates-three-scopes-prototype.png`, `application-profile-wizard-template-initial-upload-prototype.png`, `application-profile-wizard-template-data-scope-prototype.png`, `application-profile-wizard-template-edit-*-prototype.png`, `application-profile-wizard-template-add-data-scope-prototype.png` |
+| Wizard template scopes / upload / edit (2026-08-12) | Historical PNGs. **2026-09-02:** wizard Templates is **view + Preview** of this-profile files + **Include/Exclude** shared; officers author files on a case (Resminamalar). |
 | Approval leg versions (2026-08-18) | `application-profile-wizard-approval-leg-versions-prototype.png`, `application-profile-instance-create-choose-approval-legs-prototype.png` |
 | Approval leg slot CRUD (2026-08-27) | `approval-leg-profile-slot-01-catalog.png` … `-05-new.png` — [README](prototypes/approval-leg-profile-slot-README.md) |
 | Case summary instance fields (2026-08-18) | `application-profile-instance-case-summary-overview-properties-prototype.png`, `application-profile-instance-case-summary-edit-properties-prototype.png` |
@@ -432,6 +432,7 @@ When any linked Application reaches lock state **A** (first progress beyond offi
 | Switch Appearance / progress to profile | Done |
 | Config lock enforcement on profile edit | Done |
 | Configuration wizard UX | Done |
+| Wizard Templates: this-profile view/Preview; shared Include/Exclude (author on case Resminamalar) | **Done** (2026-09-02) |
 | Wizard Registration Check in / Check out | **Done** |
 | Wizard Process & SLA duration only | Done |
 | Profile-specific template applicability (contract / migration service) | Done |

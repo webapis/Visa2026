@@ -1,3 +1,11 @@
+### 2026-09-02 — Wizard Templates no longer creates files
+
+- **Need**: Officers already create, add, and recycle Word/Excel from a case (Resminamalar). Administrators should not repeat Add / Convert / Create from yellow marks on Configure → Templates.
+- **Fix**: Wizard **Templates & person** lists this-profile nested templates **view + Preview** only. Shared catalog stays **Include / Exclude**. Person-data checkboxes unchanged. Authoring stays on the case: Create from yellow marks, Add existing, Edit, Recycle, Project contract filter.
+- **Test**: Officer: stop F5, rebuild, Ctrl+F5. Configure a profile → Templates & person: no Add / Convert / yellow-marks buttons, no Edit/Remove on this-profile rows. Shared Include/Exclude still works. Open a case → Resminamalar to create a this-profile file; it appears on the wizard list after save/refresh.
+- **Prevent**: Do not put TemplateScanDialog / TemplateConvertDialog back on `ApplicationProfileWizardStepTemplatesPerson`. Do not treat wizard as the upload path for GT-15 letters.
+- **Cross-skill**: application-profile | visa2026-resminamalar | visa2026-template-scan
+
 ### 2026-08-28 — Application Profile Templates lives under Configuration
 
 - **Need**: Officers wanted **Application Profile Templates** in the Configuration accordion, not under Application Profile Instances.
