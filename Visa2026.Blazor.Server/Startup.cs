@@ -164,6 +164,7 @@ namespace Visa2026.Blazor.Server
                         ApplicationWorkspacePostgresViewsSql.ApplyIfMissing(connectionString);
                         PersonIncompleteDataSchemaSql.ApplyIfMissing(connectionString);
                         CompanyProfileRegistrationDateSchemaSql.ApplyIfMissing(connectionString);
+                        AuthorizedSignatoryPassportExpirationDateSchemaSql.ApplyIfMissing(connectionString);
                         PersonPreviousWorkplacesInTurkmenistanSchemaSql.ApplyIfMissing(connectionString);
                         InvitationLegacyShapeSchemaSql.ApplyIfMissing(connectionString);
                         ReportDashboardPostgresViewsHealSql.ApplyIfMissing(connectionString);
@@ -345,6 +346,7 @@ namespace Visa2026.Blazor.Server
                 ApplicationWorkspacePostgresViewsSql.ApplyIfMissing(connectionString);
                 PersonIncompleteDataSchemaSql.ApplyIfMissing(connectionString);
                 CompanyProfileRegistrationDateSchemaSql.ApplyIfMissing(connectionString);
+                AuthorizedSignatoryPassportExpirationDateSchemaSql.ApplyIfMissing(connectionString);
                 PersonPreviousWorkplacesInTurkmenistanSchemaSql.ApplyIfMissing(connectionString);
                 InvitationLegacyShapeSchemaSql.ApplyIfMissing(connectionString);
                 PersonExportBatchSchemaSql.ApplyIfMissing(connectionString);

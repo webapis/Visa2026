@@ -57,10 +57,19 @@ namespace Visa2026.Module.Services.UserReports
             {
                 if (match.Groups.Count > 1)
                 {
-                    var placeholder = match.Groups[1].Value;
-                    placeholders.Add(placeholder);
+                    var placeholder = NormalizeExtractedPlaceholder(match.Groups[1].Value);
+                    if (placeholder.Length > 0)
+                        placeholders.Add(placeholder);
                 }
             }
+        }
+
+        private static string NormalizeExtractedPlaceholder(string placeholder)
+        {
+            var normalized = WordUserReportImageInjector.NormalizeImageKey(placeholder);
+            if (normalized.StartsWith("IMAGE:", StringComparison.OrdinalIgnoreCase))
+                return normalized;
+            return (placeholder ?? string.Empty).Trim();
         }
     }
 }

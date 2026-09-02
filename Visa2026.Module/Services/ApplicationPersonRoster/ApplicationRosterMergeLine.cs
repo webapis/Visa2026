@@ -1184,6 +1184,11 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        [NotMapped]
+        [XafDisplayName("Signatory Passport Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string CompanyHead_PassportExpirationDateText =>
+            OrganizationPassportLineHelper.FormatIssueDateText(SignatoryForReports()?.PassportExpirationDate);
+
         /// <summary>One line for Borçnama-style forms: number, authority, issue date with year suffix.</summary>
         [NotMapped]
         [XafDisplayName("Signatory Passport (one line)"), VisibleInDetailView(false), VisibleInListView(false)]

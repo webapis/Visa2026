@@ -63,7 +63,12 @@ public static class ScanFormCaptionHints
             return role == ScanLetterRole.Wekil ? ["RPPH"] : ["ACPHN", "RPPH"];
 
         if (folded.Contains("mohlet", StringComparison.Ordinal))
-            return ["PPED"];
+            return role switch
+            {
+                ScanLetterRole.Signatory => ["CHPE"],
+                ScanLetterRole.Wekil => ["RPPD"],
+                _ => ["PPED"],
+            };
 
         if (folded.Contains("nirede", StringComparison.Ordinal)
             || folded.Contains("berildi", StringComparison.Ordinal)
@@ -114,7 +119,7 @@ public static class ScanFormCaptionHints
             {
                 "PPN" => "CHPN",
                 "PPAT" => "CHPA",
-                "PPED" => "CHPD",
+                "PPED" => "CHPE",
                 "PFN" => "CHFN",
                 _ => shortCode,
             },

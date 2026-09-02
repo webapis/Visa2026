@@ -82,6 +82,14 @@ public static class ScanCompoundYellowBinder
                 return null;
         }
 
+        var group = ScanCompoundLabelGroup.Identify(nearbyLabel, columnHeader, placeholderSet);
+        if (group != UserReportPlaceholderRelatedBo.Unknown)
+        {
+            var grouped = ScanCompoundLabelGroup.BindParts(segments, placeholderSet, group, nearby);
+            if (grouped != null)
+                return FinishBind(labelText, placeholderSet, usage, grouped, "Label group + comma segment");
+        }
+
         var catalog = ScanPlaceholderCatalogIndex.Build(placeholderSet);
         var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var codes = new string?[segments.Count];
@@ -104,6 +112,16 @@ public static class ScanCompoundYellowBinder
         if (bound.Count < 2 || bound.Distinct(StringComparer.OrdinalIgnoreCase).Count() < 2)
             return null;
 
+        return FinishBind(labelText, placeholderSet, usage, bound, "Form caption + comma segment");
+    }
+
+    private static (string Token, IReadOnlyList<ScanTokenAlternative> Alternatives)? FinishBind(
+        string? labelText,
+        ApplicationProfilePlaceholderSet placeholderSet,
+        UserReportPlaceholderScope usage,
+        IReadOnlyList<string> bound,
+        string reason)
+    {
         var tokens = new List<string>();
         var alternatives = new List<ScanTokenAlternative>();
         foreach (var code in bound)
@@ -117,7 +135,7 @@ public static class ScanCompoundYellowBinder
                     ? UserReportPlaceholderScope.Row
                     : usage);
             tokens.Add(token);
-            alternatives.Add(new ScanTokenAlternative(token, code, 88, "Form caption + comma segment"));
+            alternatives.Add(new ScanTokenAlternative(token, code, 88, reason));
         }
 
         return (ScanFieldPlanOfficerOverride.JoinLibraryTokens(labelText ?? string.Empty, null, tokens), alternatives);

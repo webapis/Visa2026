@@ -26,7 +26,7 @@ public static class ScanPlaceholderRoleCatalog
 
     private static readonly HashSet<string> Signatory = new(StringComparer.OrdinalIgnoreCase)
     {
-        "ACFNM", "ACPOS", "CHFN", "CHPL", "CHPN", "CHPA", "CHPD",
+        "ACFNM", "ACPOS", "CHFN", "CHPL", "CHPN", "CHPA", "CHPD", "CHPE",
     };
 
     private static readonly HashSet<string> Company = new(StringComparer.OrdinalIgnoreCase)

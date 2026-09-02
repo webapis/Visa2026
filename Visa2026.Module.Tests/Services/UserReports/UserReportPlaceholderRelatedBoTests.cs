@@ -143,6 +143,26 @@ public class UserReportPlaceholderRelatedBoTests
     }
 
     [Fact]
+    public void Grouped_manual_puts_authorized_signatory_codes_together()
+    {
+        var catalog = new UserReportPlaceholderCatalogService();
+        var groups = catalog.GetGroupedEntries();
+        var signatory = groups.Single(g => g.RelatedBo == UserReportPlaceholderRelatedBo.CompanySignatory);
+        var codes = signatory.Entries.Select(e => e.ShortCode).ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        Assert.Equal("Authorized signatory", UserReportPlaceholderRelatedBoCatalog.DisplayNameEn(signatory.RelatedBo));
+        Assert.Contains("ACFNM", codes);
+        Assert.Contains("ACPOS", codes);
+        Assert.Contains("CHFN", codes);
+        Assert.Contains("CHPL", codes);
+        Assert.Contains("CHPN", codes);
+        Assert.Contains("CHPA", codes);
+        Assert.Contains("CHPD", codes);
+        Assert.Contains("CHPE", codes);
+        Assert.DoesNotContain(signatory.Entries, e => e.RelatedBo != UserReportPlaceholderRelatedBo.CompanySignatory);
+    }
+
+    [Fact]
     public void Related_bo_filter_returns_only_that_group()
     {
         var catalog = new UserReportPlaceholderCatalogService();

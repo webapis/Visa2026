@@ -393,6 +393,7 @@ public static class UserReportMergeDataHelper
                 ["Application_CompanyRegistryAddressLine"] = item.Application_CompanyRegistryAddressLine ?? string.Empty,
                 ["CompanyHead_FullName"] = item.CompanyHead_FullName ?? string.Empty,
                 ["CompanyHead_PassportLine"] = item.CompanyHead_PassportLine ?? string.Empty,
+                ["CompanyHead_PassportExpirationDateText"] = item.CompanyHead_PassportExpirationDateText ?? string.Empty,
                 ["Representative_FullName"] = item.Representative_FullName ?? string.Empty,
                 ["Representative_PassportLine"] = item.Representative_PassportLine ?? string.Empty,
                 ["Contract_StartDateText"] = item.Contract_StartDateText ?? string.Empty,

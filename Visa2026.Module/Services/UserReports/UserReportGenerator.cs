@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using DocumentFormat.OpenXml.Packaging;
 using DocxTemplater;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.ApplicationPersonRoster;
@@ -246,6 +247,7 @@ namespace Visa2026.Module.Services.UserReports
                 ["Application_CompanyRegistryAddressLine"] = item.Application_CompanyRegistryAddressLine ?? string.Empty,
                 ["CompanyHead_FullName"] = item.CompanyHead_FullName ?? string.Empty,
                 ["CompanyHead_PassportLine"] = item.CompanyHead_PassportLine ?? string.Empty,
+                ["CompanyHead_PassportExpirationDateText"] = item.CompanyHead_PassportExpirationDateText ?? string.Empty,
                 ["Representative_FullName"] = item.Representative_FullName ?? string.Empty,
                 ["Representative_PassportLine"] = item.Representative_PassportLine ?? string.Empty,
                 ["Representative_Phone"] = item.Representative_Phone ?? string.Empty,
@@ -494,7 +496,20 @@ namespace Visa2026.Module.Services.UserReports
                 return true;
             }
 
-            // Placeholder rows may be stale; scan embedded template bytes for {{IMAGE:…}}.
+            try
+            {
+                using var stream = new MemoryStream(templateContent, writable: false);
+                using var document = WordprocessingDocument.Open(stream, false);
+                var text = document.MainDocumentPart?.Document?.InnerText ?? string.Empty;
+                if (WordUserReportImageInjector.PlaceholderRegex.IsMatch(text)
+                    || text.Contains("{{IMAGE:", StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+            catch (Exception)
+            {
+                // Fall through to a raw-byte scan of the zip package.
+            }
+
             return System.Text.Encoding.UTF8.GetString(templateContent)
                 .Contains("{{IMAGE:", StringComparison.OrdinalIgnoreCase);
         }

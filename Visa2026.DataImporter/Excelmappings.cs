@@ -199,6 +199,7 @@ public static class ExcelMappings
             new() { Header = "Passport Number", PayloadProperty = "PassportNumber", Kind = ColumnKind.StringValue },
             new() { Header = "Passport Authority", PayloadProperty = "PassportAuthority", Kind = ColumnKind.Scalar },
             new() { Header = "Passport Issue Date", PayloadProperty = "PassportIssueDate", Kind = ColumnKind.Scalar },
+            new() { Header = "Passport Expiration Date", PayloadProperty = "PassportExpirationDate", Kind = ColumnKind.Scalar },
         }
     };
 

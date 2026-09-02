@@ -225,7 +225,8 @@ public static class ScanCompoundYellowParts
             || code.EndsWith("DT", StringComparison.OrdinalIgnoreCase)
             || code.EndsWith("ED", StringComparison.OrdinalIgnoreCase)
             || code.Equals("RPPD", StringComparison.OrdinalIgnoreCase)
-            || code.Equals("CHPD", StringComparison.OrdinalIgnoreCase))
+            || code.Equals("CHPD", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("CHPE", StringComparison.OrdinalIgnoreCase))
             return DateLikeShape.IsMatch(segment);
 
         if (code.Equals("ACPHN", StringComparison.OrdinalIgnoreCase)

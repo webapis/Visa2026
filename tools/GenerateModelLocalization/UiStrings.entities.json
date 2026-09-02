@@ -152,6 +152,7 @@
         "PassportNumber": { "tr-TR": "Pasaport No", "tk-TM": "Pasport belgisi", "ru-RU": "Номер паспорта" },
         "PassportAuthority": { "tr-TR": "Pasaport Veren Kurum", "tk-TM": "Pasport beren edara", "ru-RU": "Орган выдачи паспорта" },
         "PassportIssueDate": { "tr-TR": "Pasaport Veriliş Tarihi", "tk-TM": "Pasport berlen senesi", "ru-RU": "Дата выдачи паспорта" },
+        "PassportExpirationDate": { "tr-TR": "Pasaport Bitiş Tarihi", "tk-TM": "Pasport möhleti", "ru-RU": "Срок действия паспорта" },
         "PassportLine": { "tr-TR": "Pasaport (tek satır)", "tk-TM": "Pasport (bir setir)", "ru-RU": "Паспорт (одной строкой)" }
       }
     },

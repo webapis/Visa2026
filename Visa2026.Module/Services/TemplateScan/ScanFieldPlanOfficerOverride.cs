@@ -84,6 +84,58 @@ public static class ScanFieldPlanOfficerOverride
     }
 
     /// <summary>
+    /// Remap one Review sub-row (5.1) without dropping sibling tokens on the same yellow span.
+    /// </summary>
+    public static ScanFieldPlan ApplyPartCodes(
+        ScanFieldPlan plan,
+        string rowKey,
+        IReadOnlyList<string>? partShortCodes)
+    {
+        ArgumentNullException.ThrowIfNull(plan);
+        if (string.IsNullOrWhiteSpace(rowKey))
+            return plan;
+
+        var parentId = ScanReviewFieldOrder.ParentFieldId(rowKey);
+        var partIndex = OverlayPartIndex(rowKey);
+        if (partIndex <= 0)
+            return ApplyTokens(plan, parentId, partShortCodes);
+
+        var field = plan.Fields.FirstOrDefault(f =>
+            string.Equals(f.FieldId, parentId, StringComparison.Ordinal));
+        if (field == null)
+            return plan;
+
+        var parts = ScanCompoundYellowParts.Split(field.LabelText, field.ProposedToken);
+        if (parts.Count <= 1)
+            return ApplyTokens(plan, parentId, partShortCodes);
+
+        var hidden = field.HiddenPartIndexes ?? Array.Empty<int>();
+        var requested = (partShortCodes ?? Array.Empty<string>())
+            .Select(static c => (c ?? string.Empty).Trim())
+            .Where(static c => c.Length > 0)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var allCodes = new List<string>();
+        foreach (var part in parts)
+        {
+            if (hidden.Contains(part.Index))
+                continue;
+
+            if (part.Index == partIndex)
+            {
+                allCodes.AddRange(requested);
+                continue;
+            }
+
+            if (!string.IsNullOrWhiteSpace(part.ShortCode))
+                allCodes.Add(part.ShortCode);
+        }
+
+        return ApplyTokens(plan, parentId, allCodes);
+    }
+
+    /// <summary>
     /// Dismiss a Detected fields row. A compound part (10.2) is hidden; the yellow span keeps remaining tokens.
     /// A whole mark (or the last remaining part) is removed so Generate leaves the printed text.
     /// </summary>

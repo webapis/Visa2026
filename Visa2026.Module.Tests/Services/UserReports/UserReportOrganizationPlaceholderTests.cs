@@ -25,6 +25,7 @@ public class UserReportOrganizationPlaceholderTests
         "CompanyHead_PassportNumber",
         "CompanyHead_PassportAuthority",
         "CompanyHead_PassportIssueDateText",
+        "CompanyHead_PassportExpirationDateText",
         "Representative_FullName",
         "Representative_PositionTm",
         "Representative_Phone",
@@ -47,6 +48,7 @@ public class UserReportOrganizationPlaceholderTests
         Assert.Contains("ACRDT", codes);
         Assert.Contains("CHPN", codes);
         Assert.Contains("CHPL", codes);
+        Assert.Contains("CHPE", codes);
         Assert.Contains("RPFN", codes);
         Assert.Contains("RPPH", codes);
         Assert.Contains("RPPL", codes);

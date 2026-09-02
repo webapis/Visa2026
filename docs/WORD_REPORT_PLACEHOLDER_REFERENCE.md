@@ -377,6 +377,7 @@ Use **`{{ds.Property}}`** when the root is **ApplicationItem**.
 | `CompanyHead_PassportNumber` | `string` | `…` | If signatory is expat |
 | `CompanyHead_PassportAuthority` | `string` | `…` | |
 | `CompanyHead_PassportIssueDateText` | `string` | `15.03.2020` | |
+| `CompanyHead_PassportExpirationDateText` | `string` | `19.02.2034` | Signatory passport expiration (`CHPE`) |
 | `CompanyHead_PassportLine` | `string` | `U1234567, …, 15.03.2020ý.` | One line |
 | `Representative_FullName` | `string` | `…` | |
 | `Representative_PassportLine` | `string` | `…` | |

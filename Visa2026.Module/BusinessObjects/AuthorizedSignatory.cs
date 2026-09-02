@@ -32,6 +32,9 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual DateTime? PassportIssueDate { get; set; }
 
+        [XafDisplayName("Passport Expiration Date")]
+        public virtual DateTime? PassportExpirationDate { get; set; }
+
         [NotMapped]
         [XafDisplayName("Passport (one line)")]
         public string PassportLine =>

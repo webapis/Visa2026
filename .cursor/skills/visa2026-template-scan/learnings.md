@@ -4,6 +4,38 @@ Append-only. Newest first under **## Entries**.
 
 ## Entries
 
+### 2026-09-02 — Signatory passport expiration missing from Review (CHPE)
+
+- Need: BORÇNAMA Review row 5.1 (`19.02.2034ý.`) is passport **möhleti**. Authorized signatory dropdown had CHPD (issue date) but no expiration token.
+- Cause: `AuthorizedSignatory` had no `PassportExpirationDate`. Catalog Signatory stopped at CHPD. Caption `mohlet` remapped person **PPED** onto **CHPD**.
+- Fix: BO + tenant seed `PassportExpirationDate`. Catalog **CHPE** (`CompanyHead_PassportExpirationDateText`). Signatory remap `PPED` → **CHPE**. Label-group bind prefers CHPE when nearby contains möhleti.
+- Officer: Restart, hard-refresh. Configuration → Authorized Signatory: fill Passport Expiration Date. Analyze again. Row 5.1 should pick **CHPE**.
+- Cross-skill: visa2026-user-report-templates · visa2026-lookup-data
+
+### 2026-09-02 — Comma yellow parts stay in the printed label's catalog group
+
+- Need: Combined yellow `Yokary, TUR, Gundogar mediterian uniwersiteti` must map to Education (`EGLV` / `EGCC` / `EGIN`), not Person nationality `PNAT` for `TUR`.
+- Cause: Each comma segment was scored against the whole catalog. `TUR` looks like a country code, so the binder picked Person/Passport codes. The printed label (`Bilimi`) was not used to lock the related-BO group first.
+- Fix: `ScanCompoundLabelGroup.Identify` reads the left-side / nearby label (and wekil/signatory captions) to pick the group, then `BindParts` assigns unused codes from that group only. Caption-slot binding remains the fallback.
+- Officer: Restart, hard-refresh, Analyze. An education line labeled Bilimi / Okuw should Review as **EGLV**, **EGCC**, **EGIN**.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-02 — Review Add-placeholder hid CompanySignatory codes (CHPN / CHPL)
+
+- Need: BORÇNAMA Review row 5.1 (signatory passport date) opened Add placeholder. Officers could not find CompanySignatory tokens. The native list grouped them as **Signatory** and hid **CHPN** / **CHPL** because those codes were already on sibling comma parts of the same yellow span. Keyboard search also failed (options start with short codes, not `CompanySignatory`).
+- Cause: Remaining choices used **parent** short codes. Compound 5.1 / 5.2 / 5.3 share one span, so sibling Signatory passport tokens disappeared from the date row. Native `<select>` has no filter on related BO name.
+- Fix: Filter box matches short code, labels, `CompanySignatory`, and **Authorized signatory**. Compound Add **replaces that part** (`ApplyPartCodes`) and lists unused codes for **this part** so CHPN / CHPL / CHPD stay visible. Group label is **Authorized signatory**.
+- Officer: Restart, hard-refresh. Click the date row, type `CompanySignatory` or `CHPD` in the filter, pick **CHPD** (issue date — not person **PPED**).
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-02 — Downloaded şahsy photo token wraps and Preview shows `{{IMAGE:Person_Photo}}`
+
+- Need: Catalog Preview filled the photo after Create from yellow marks. After **download template** + **Add existing template**, SAHSY KAGYZ_t showed the raw token in the photo box (CHECK chip).
+- Cause: `{{IMAGE:Person_Photo}}` is too long for the 35×45mm photo cell. Word wraps it (`Person_Phot` / `o}}`), often with a newline or a second paragraph. The injector only matched one paragraph and `[\w]+`, so the split token stayed literal.
+- Fix: Injector matches whitespace/soft-hyphen wraps and concatenates table-cell paragraphs. Extract normalizes `IMAGE:` keys. Scan again emits short `{{IMAGE:PPH}}` (injector still maps to `Person_Photo`). Seed şahsy_kagyz layout is unchanged.
+- Officer: Restart, hard-refresh, Preview the re-added template — the photo should fill without re-uploading. New Create-from-yellow-marks templates get `{{IMAGE:PPH}}` so a later download is less likely to wrap.
+- Cross-skill: visa2026-user-report-templates · visa2026-resminamalar
+
 ### 2026-09-02 — Sample Word photo becomes `{{IMAGE:Person_Photo}}`
 
 - Need: Officers asked whether inserting a person photo on the yellow-marked Word file is enough. Yellow scan only saw highlighter on **text**; a picture stayed a static sample.

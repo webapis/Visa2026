@@ -42,6 +42,53 @@ public class ScanCompoundYellowTests
         Assert.Empty(drafts);
     }
 
+    private static ApplicationProfilePlaceholderSet EducationSet() =>
+        new ApplicationProfilePlaceholderSetService(new UserReportPlaceholderCatalogService()).GetSet(
+            new ApplicationProfilePlaceholderSetQuery
+            {
+                Profile = new ApplicationProfile { RequirePersonEducation = true },
+                DataScope = ApplicationProfileTemplateDataScope.Both,
+                TemplateKind = ApplicationProfileTemplateKind.Word,
+            });
+
+    [Fact]
+    public void Label_bilimi_identifies_education_group()
+    {
+        Assert.Equal(
+            UserReportPlaceholderRelatedBo.Education,
+            ScanCompoundLabelGroup.Identify("Bilimi", null, EducationSet()));
+    }
+
+    [Fact]
+    public void Binder_maps_education_comma_line_inside_label_group()
+    {
+        var bound = ScanCompoundYellowBinder.TryBind(
+            "Yokary, TUR, Gundogar mediterian uniwersiteti",
+            EducationSet(),
+            UserReportPlaceholderScope.Row,
+            "Bilimi");
+
+        Assert.NotNull(bound);
+        var codes = TemplateTokenSyntax.GetShortCodes(bound.Value.Token);
+        Assert.Equal(["EGLV", "EGCC", "EGIN"], codes);
+        Assert.DoesNotContain("PNAT", codes);
+    }
+
+    [Fact]
+    public void Binder_maps_education_comma_line_with_turkmen_spelling()
+    {
+        var bound = ScanCompoundYellowBinder.TryBind(
+            "Ýokary, TUR, Gündogar mediterıan uniwersiteti",
+            EducationSet(),
+            UserReportPlaceholderScope.Row,
+            "Bilimi");
+
+        Assert.NotNull(bound);
+        Assert.Equal(
+            ["EGLV", "EGCC", "EGIN"],
+            TemplateTokenSyntax.GetShortCodes(bound.Value.Token));
+    }
+
     [Fact]
     public void Caption_slots_come_from_the_parenthetical_under_the_line()
     {
@@ -63,6 +110,22 @@ public class ScanCompoundYellowTests
         Assert.NotNull(bound);
         var codes = TemplateTokenSyntax.GetShortCodes(bound.Value.Token);
         Assert.Equal(["PPN", "PPAT", "PPED"], codes);
+    }
+
+    [Fact]
+    public void Binder_maps_signatory_passport_comma_line_expiration_to_CHPE()
+    {
+        var bound = ScanCompoundYellowBinder.TryBind(
+            "U57105240, T.G. ASGABAT SR, 19.02.2034",
+            Set(),
+            UserReportPlaceholderScope.Header,
+            "yolbascy pasporty: (pasportyn seriyasy we belgisi, nirede we hacan berildi, mohleti)");
+
+        Assert.NotNull(bound);
+        var codes = TemplateTokenSyntax.GetShortCodes(bound.Value.Token);
+        Assert.Equal(["CHPN", "CHPA", "CHPE"], codes);
+        Assert.DoesNotContain("CHPD", codes);
+        Assert.DoesNotContain("PPED", codes);
     }
 
     [Fact]

@@ -715,6 +715,12 @@ namespace Visa2026.Module.BusinessObjects
             OrganizationPassportLineHelper.FormatIssueDateText(
                 OrganizationReportHelper.GetSignatory(ObjectSpaceHelper.Get(this))?.PassportIssueDate);
 
+        [XafDisplayName("Signatory Passport Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string CompanyHead_PassportExpirationDateText =>
+            OrganizationPassportLineHelper.FormatIssueDateText(
+                OrganizationReportHelper.GetSignatory(ObjectSpaceHelper.Get(this))?.PassportExpirationDate);
+
         [XafDisplayName("Signatory Passport (one line)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
         public string CompanyHead_PassportLine =>

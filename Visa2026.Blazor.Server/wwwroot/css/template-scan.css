@@ -449,6 +449,12 @@
   min-width: 7rem;
   width: auto;
 }
+.tas-token-filter {
+  flex: 1 1 8rem;
+  min-width: 7rem;
+  font-size: 0.76rem;
+  padding: 0.28rem 0.4rem;
+}
 .tas-ask-ai {
   margin-top: 0.35rem;
   padding: 0.22rem 0.5rem;

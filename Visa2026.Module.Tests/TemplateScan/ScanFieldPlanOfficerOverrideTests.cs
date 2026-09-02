@@ -82,6 +82,26 @@ public class ScanFieldPlanOfficerOverrideTests
     }
 
     [Fact]
+    public void ApplyPartCodes_swaps_one_compound_part_and_keeps_siblings()
+    {
+        var set = HeaderSet();
+        var plan = Plan(
+            set,
+            "{{ds.CHPN}}, {{ds.CHPA}}, {{ds.ADAT}}",
+            new DocumentRegion.WordSpan("body/4", 0, 40),
+            "A0123456, Ankara, 28.05.2024");
+        var ordered = ScanReviewFieldOrder.Order(plan.Fields);
+        Assert.Equal(3, ordered.Count);
+        var datePart = ordered[2];
+        Assert.Equal("ADAT", TemplateTokenSyntax.GetShortCodes(datePart.ProposedToken).Single());
+
+        var next = ScanFieldPlanOfficerOverride.ApplyPartCodes(plan, datePart.DisplayId, ["CHPD"]);
+
+        var field = Assert.Single(next.Fields);
+        Assert.Equal(["CHPN", "CHPA", "CHPD"], TemplateTokenSyntax.GetShortCodes(field.ProposedToken));
+    }
+
+    [Fact]
     public void ApplyTokens_joins_two_header_codes_with_comma_from_label()
     {
         var set = HeaderSet();

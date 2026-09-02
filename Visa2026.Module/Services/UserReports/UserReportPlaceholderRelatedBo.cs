@@ -38,7 +38,7 @@ public static class UserReportPlaceholderRelatedBoCatalog
     {
         UserReportPlaceholderRelatedBo.Application => "Application",
         UserReportPlaceholderRelatedBo.CompanyProfile => "Company",
-        UserReportPlaceholderRelatedBo.CompanySignatory => "Signatory",
+        UserReportPlaceholderRelatedBo.CompanySignatory => "Authorized signatory",
         UserReportPlaceholderRelatedBo.AuthorizedRepresentative => "Authorized representative (wekil)",
         UserReportPlaceholderRelatedBo.Person => "Person",
         UserReportPlaceholderRelatedBo.Passport => "Passport",

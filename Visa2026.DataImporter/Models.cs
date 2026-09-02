@@ -632,6 +632,9 @@ public class AuthorizedSignatoryDto
 
     [JsonPropertyName("PassportIssueDate")]
     public DateTime? PassportIssueDate { get; set; }
+
+    [JsonPropertyName("PassportExpirationDate")]
+    public DateTime? PassportExpirationDate { get; set; }
 }
 
 public class AuthorizedRepresentativeDto

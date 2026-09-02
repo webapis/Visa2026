@@ -56,13 +56,13 @@ public class ScanLibraryTokenRewriterTests
     }
 
     [Fact]
-    public void Image_tokens_use_canonical_person_photo_path()
+    public void Image_tokens_use_short_code_so_photo_cells_do_not_wrap()
     {
         var set = Set();
         var entry = new UserReportPlaceholderCatalogService().GetEntries().Single(e =>
             string.Equals(e.ShortCode, "PPH", StringComparison.OrdinalIgnoreCase));
-        Assert.Equal("{{IMAGE:Person_Photo}}", entry.BuildWordToken(UserReportPlaceholderScope.Row));
-        Assert.Equal("{{IMAGE:Person_Photo}}", ScanLibraryTokenRewriter.Rewrite("{{IMAGE:PPH}}", set));
-        Assert.Equal("{{IMAGE:Person_Photo}}", ScanLibraryTokenRewriter.Rewrite("{{IMAGE:Person_Photo}}", set));
+        Assert.Equal("{{IMAGE:PPH}}", entry.BuildWordToken(UserReportPlaceholderScope.Row));
+        Assert.Equal("{{IMAGE:PPH}}", ScanLibraryTokenRewriter.Rewrite("{{IMAGE:PPH}}", set));
+        Assert.Equal("{{IMAGE:PPH}}", ScanLibraryTokenRewriter.Rewrite("{{IMAGE:Person_Photo}}", set));
     }
 }

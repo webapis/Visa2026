@@ -25,7 +25,8 @@ internal static class UserReportPlaceholderBindingHelper
     /// <summary>True when the raw token uses the post-merge photo injector prefix.</summary>
     public static bool IsImageInjectorToken(string placeholderKey) =>
         !string.IsNullOrWhiteSpace(placeholderKey)
-        && placeholderKey.Trim().StartsWith("IMAGE:", StringComparison.OrdinalIgnoreCase);
+        && WordUserReportImageInjector.NormalizeImageKey(placeholderKey)
+            .StartsWith("IMAGE:", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>Coerces values for <see cref="DocxTemplater.DocxTemplate.BindModel"/> (photos stay <see cref="byte[]"/>, not text).</summary>
     public static object CoerceMergeValue(object? value, string propertyPath)

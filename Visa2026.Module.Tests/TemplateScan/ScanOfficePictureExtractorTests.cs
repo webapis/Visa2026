@@ -55,7 +55,7 @@ public class ScanOfficePictureExtractorTests
 
         Assert.Contains(proposal.Fields, f =>
             f.SourceRegion is DocumentRegion.WordDrawing
-            && f.ProposedToken == "{{IMAGE:Person_Photo}}");
+            && f.ProposedToken == "{{IMAGE:PPH}}");
         Assert.Contains(proposal.Fields, f => f.ProposedToken != null
             && TemplateTokenSyntax.TryGetShortCode(f.ProposedToken, out var code)
             && code.Equals("AFNUM", StringComparison.OrdinalIgnoreCase));

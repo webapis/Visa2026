@@ -23,6 +23,20 @@ Keep **`SKILL.md`** stable; **promote** into `SKILL.md` only when the same lesso
 
 ## Entries
 
+### 2026-09-02 — Signatory passport expiration (`CHPE`)
+
+- **Symptom**: Create from yellow marks Review had no Authorized signatory expiration token for `19.02.2034ý.` (only CHPD issue date).
+- **Root cause**: `AuthorizedSignatory` had no expiration property; catalog had no `CompanyHead_PassportExpirationDateText`.
+- **Fix**: Persistent `PassportExpirationDate`, tenant seed, catalog **CHPE**, merge getters on instance and roster line.
+- **Prevent**: Signatory passport dates need both issue (`CHPD`) and expiration (`CHPE`), same as Person `PPID` / `PPED`.
+
+### 2026-09-02 — Wrapped `{{IMAGE:Person_Photo}}` after Word download
+
+- **Symptom**: Resminamalar Preview showed literal `{{IMAGE:Person_Photo}}` in the şahsy photo box after download + Add existing template. It had worked on the scan-generated row.
+- **Root cause**: The token is longer than the photo cell. Word inserts a line break / second paragraph. Injector required one contiguous `[\w]+` match. Catalog **PPH** is short enough to stay on one line.
+- **Fix**: Injector joins table-cell paragraphs and strips wrap whitespace; Extract stores `IMAGE:Person_Photo`. Scan `BuildWordToken` emits `{{IMAGE:PPH}}` again (alias still fills `Person.Photo`). Do not edit seed `.docx`.
+- **Prevent**: Prefer `{{IMAGE:PPH}}` in officer-created Word photo boxes. Keep seed `{{IMAGE:Person_Photo}}` as authored.
+
 ### 2026-09-02 — Image tokens are `{{IMAGE:Person_Photo}}` not `{{IMAGE:PPH}}`
 
 - **Symptom**: Catalog short code **PPH** wrote `{{IMAGE:PPH}}`. Preview cleared the token instead of injecting `Person.Photo`.

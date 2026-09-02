@@ -4697,7 +4697,7 @@ public static partial class VisaUiMessageCatalog
         },
         ["PlaceholderManual.Group.CompanySignatory"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Signatory",
+            ["en-US"] = "Authorized signatory",
             ["tr-TR"] = "İmza yetkilisi",
             ["tk-TM"] = "Gol çekiji",
             ["ru-RU"] = "Подписант",

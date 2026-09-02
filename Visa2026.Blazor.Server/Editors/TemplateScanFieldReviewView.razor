@@ -40,6 +40,12 @@
                                                 @onclick="() => OnPlaceholderRemovedAsync(row, shortCode)">×</button>
                                     </span>
                                 }
+                                <input class="tas-input tas-token-filter"
+                                       type="search"
+                                       placeholder="Filter (CompanySignatory, CHPD, …)"
+                                       value="@_choiceSearch"
+                                       @oninput="OnChoiceSearch"
+                                       @onclick:stopPropagation="true" />
                                 <select class="tas-input tas-token-select"
                                         value=""
                                         @onchange="e => OnPlaceholderAddedAsync(row, e)">
@@ -295,6 +301,8 @@ else
     private TemplateDocumentOutline? _outline;
     private byte[]? _outlineSource;
     private int _markFocus;
+    private string _choiceSearch = string.Empty;
+    private string? _choiceSearchFieldId;
 
     private string? ActiveFieldId => HoveredFieldId ?? SelectedFieldId;
 
@@ -352,6 +360,12 @@ else
 
     protected override void OnParametersSet()
     {
+        if (!string.Equals(_choiceSearchFieldId, SelectedFieldId, StringComparison.Ordinal))
+        {
+            _choiceSearchFieldId = SelectedFieldId;
+            _choiceSearch = string.Empty;
+        }
+
         if (!IsOfficeSource
             || OfficePackageBytes is not { Length: > 64 } bytes
             || ReferenceEquals(bytes, _outlineSource))
@@ -428,13 +442,13 @@ else
     private bool CanRemap(FieldRow row) => IsSelected(row) && !row.IsGap;
 
     private IReadOnlyList<UserReportPlaceholderCatalogGroup> RemainingChoiceGroups(FieldRow row) =>
-        UserReportPlaceholderRelatedBoCatalog.Group(RemainingChoices(row));
+        ScanPlaceholderChoiceList.RemainingGroups(
+            PlaceholderChoices,
+            row.ShortCodes,
+            _choiceSearch);
 
-    private IReadOnlyList<UserReportPlaceholderCatalogEntry> RemainingChoices(FieldRow row) =>
-        PlaceholderChoices
-            .Where(e => !row.ParentShortCodes.Any(c =>
-                string.Equals(c, e.ShortCode, StringComparison.OrdinalIgnoreCase)))
-            .ToList();
+    private void OnChoiceSearch(ChangeEventArgs e) =>
+        _choiceSearch = e.Value?.ToString() ?? string.Empty;
 
     private async Task OnPlaceholderAddedAsync(FieldRow row, ChangeEventArgs e)
     {
@@ -442,12 +456,29 @@ else
         if (string.IsNullOrWhiteSpace(code))
             return;
 
+        if (row.PartIndex > 0)
+        {
+            _choiceSearch = string.Empty;
+            await ApplyPlanAsync(row, ScanFieldPlanOfficerOverride.ApplyPartCodes(FieldPlan, row.RowKey, [code]));
+            return;
+        }
+
         var codes = row.ParentShortCodes.Append(code).ToList();
         await ApplyCodesAsync(row, codes);
     }
 
     private Task OnPlaceholderRemovedAsync(FieldRow row, string code)
     {
+        if (row.PartIndex > 0)
+        {
+            var partCodes = row.ShortCodes
+                .Where(c => !string.Equals(c, code, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            return ApplyPlanAsync(
+                row,
+                ScanFieldPlanOfficerOverride.ApplyPartCodes(FieldPlan, row.RowKey, partCodes));
+        }
+
         var codes = row.ParentShortCodes
             .Where(c => !string.Equals(c, code, StringComparison.OrdinalIgnoreCase))
             .ToList();
@@ -457,6 +488,11 @@ else
     private async Task ApplyCodesAsync(FieldRow row, IReadOnlyList<string> codes)
     {
         var next = ScanFieldPlanOfficerOverride.ApplyTokens(FieldPlan, row.ParentFieldId, codes);
+        await ApplyPlanAsync(row, next);
+    }
+
+    private async Task ApplyPlanAsync(FieldRow row, ScanFieldPlan next)
+    {
         if (ReferenceEquals(next, FieldPlan))
             return;
 

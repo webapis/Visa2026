@@ -118,10 +118,7 @@ public sealed class UserReportPlaceholderCatalogEntry
     public string BuildWordToken(UserReportPlaceholderScope usageScope)
     {
         if (IsImage)
-        {
-            var imageKey = string.IsNullOrWhiteSpace(CanonicalPath) ? ShortCode : CanonicalPath.Trim();
-            return $"{{{{IMAGE:{imageKey}}}}}";
-        }
+            return $"{{{{IMAGE:{ShortCode}}}}}";
 
         return EffectiveUsage(usageScope) == UserReportPlaceholderScope.Row
             ? $"{{{{.{ShortCode}}}}}"

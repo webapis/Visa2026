@@ -59,8 +59,12 @@ Officers submit **wizard step screenshots** + optional **catalog Preview** + the
 
 | Symptom | First step | Owner |
 |---------|------------|--------|
-| Inserted sample photo not mapped | Body portrait (not a tiny icon) → `{{IMAGE:Person_Photo}}` on Generate. Yellow still required for text values. Restart, Analyze | **This skill** |
+| Preview shows `{{IMAGE:Person_Photo}}` in the photo box after Add existing template | Word wrapped the long token in the photo cell. Restart, hard-refresh Preview. New Generate uses `{{IMAGE:PPH}}` | **This skill** + user-report-templates |
+| Inserted sample photo not mapped | Body portrait (not a tiny icon) → `{{IMAGE:PPH}}` on Generate (`Person_Photo` still injects). Yellow still required for text values. Restart, Analyze | **This skill** |
 | Create template should be one Project contract or all via-ministry cases | Upload **Save to** = This profile only. **All contracts** or pick one (same as profile Templates wizard). Shared catalog has no contract filter. Restart, hard-refresh | **This skill** |
+| Comma yellow guessed from the wrong catalog group (e.g. TUR → PNAT on an Education line) | Printed **label** picks the group first (`Bilimi` → Education), then each comma part is guessed inside that group (`EGLV`, `EGCC`, `EGIN`). Restart, Analyze | **This skill** |
+| Review Add placeholder missing Signatory / CompanySignatory (CHPN, CHPL, CHPD, CHPE) | Filter box: type `CompanySignatory` or `CHPE`. Group is **Authorized signatory**. Compound parts no longer hide sibling Signatory codes. Restart, hard-refresh | **This skill** |
+| Review date 5.1 (`19.02.2034ý.`) has no Signatory passport expiration | `AuthorizedSignatory.PassportExpirationDate` + catalog **CHPE**. Fill expiration in Configuration. Restart, Analyze | **This skill** + user-report-templates |
 | Review has extra 10.1 / 10.2 rows on one yellow | Row **×** hides that part; remaining token stays on the span. Last × drops the mark so Generate leaves printed text. Hard-refresh | **This skill** |
 | PNG/JPG/PDF rejected | Expected — use yellow-marked Word/Excel | **This skill** |
 | Yellow not detected | Word Text Highlight Color / Excel solid yellow fill | **This skill** |
@@ -114,7 +118,7 @@ Officers submit **wizard step screenshots** + optional **catalog Preview** + the
 
 ```text
 Upload .docx/.xlsx (or Resminamalar Review placeholders)
-  → Ingest → ScanOfficeYellowExtractor + body pictures (`{{IMAGE:Person_Photo}}`) (else library {{…}} clusters)
+  → Ingest → ScanOfficeYellowExtractor + body pictures (`{{IMAGE:PPH}}`) (else library {{…}} clusters)
   → Merge/split → Yellow gate (token-backed plans skip the no-yellow fail)
   → Review / optional Clarification
   → ITemplateTokenWriter → StripAllYellow* → diff gate → Extract/Validate → Outline → Approve
