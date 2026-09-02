@@ -320,8 +320,10 @@ public sealed class ApplicationWordReportEntryGenerator
     private static bool UsesPerItemWordOutput(UserReportTemplate template, WordReportGenerationContext context) =>
         context.Scope == WordReportPackageScope.ApplicationRosterMergeLine
         && template.GetEffectiveOutputFormat() == TemplateOutputFormat.Word
-        && template.RootBoType is UserReportBoType.ApplicationItem or UserReportBoType.Person
-        && !UserReportMergeDataHelper.UsesSingleDocumentItemList(template);
+        && !UserReportMergeDataHelper.UsesSingleDocumentItemList(template)
+        && (template.RootBoType is UserReportBoType.ApplicationItem or UserReportBoType.Person
+            || UserReportMergeDataHelper.IsSahsyKagyzUserReportTemplate(template)
+            || UserReportMergeDataHelper.TemplateUsesSahsyKagyzRowPlaceholders(template, template.Placeholders));
 
     private static string BuildPerItemUserTemplateFileName(UserReportTemplate template, ApplicationRosterMergeLine item)
     {

@@ -25,6 +25,16 @@ Purpose: **catalog, seed gate, batch worker, preview, permissions, dialog UX** �
 
 ## Entries
 
+### 2026-09-02 — Case workspace chips, no By person / By type (Application)
+
+- **Symptom**: Case Resminamalar Preview of `SAHSY KAGYZ_117` filled one person; officers did not want a By person / By type switch.
+- **Try**: ApplicationProfileInstance 8/-015 with two people; Resminamalar Preview after header chips.
+- **Test**: Officer confirmed after restart/hard-refresh. `UserReportSahsyKagyzNameTests` (8). Build skipped at commit request.
+- **Root cause**: Empty `ApplicationItemIds` used application-scope generate (first row only). Nested Şahsy names were not treated as per-person Word output. The Document copies layout switch was extra chrome.
+- **Fix**: Pass chip-selected `Person.ID`s into Preview/ZIP. `LooksLikeSahsyKagyzName` matches `SAHSY KAGYZ_*`. Flat catalog only; chips still filter people.
+- **Prevent**: Do not add By person / By type on Resminamalar. Case Preview must pass `ApplicationItemIds`. Do not require exact `Sahsy kagyz` for per-person merge.
+- **Cross-skill**: user-report-templates | visa2026-preview-slot
+
 ### 2026-09-01 — Gear-only Download Template / Review / Recycle (Application)
 
 - **Symptom**: Catalog rows always showed Edit template, Download, Review placeholders, and Recycle; Download was labeled only Download.

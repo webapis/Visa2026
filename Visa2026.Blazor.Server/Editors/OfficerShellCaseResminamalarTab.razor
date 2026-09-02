@@ -4,20 +4,30 @@
 @using Visa2026.Module.BusinessObjects
 @using Visa2026.Module.BusinessObjects.OfficerShell
 @using Visa2026.Module.Localization
+@using Visa2026.Module.Services.ApplicationItemLinkedDocuments
+@using Visa2026.Module.Services.ApplicationWorkspace
 @using Visa2026.Module.Services.PreviewSlot
 @using Visa2026.Module.Services.WordReports
 
 <div class="ct-resmi-page">
-    <div class="ct-resmi-head">
-        <div>
+    <header class="dc-page__head">
+        <div class="dc-page__head-row">
             <h2 class="ct-page__title">Report package catalog — Resminamalar</h2>
-            <p class="ct-page__sub">Generate a ZIP package of documents from profile nested templates.</p>
         </div>
-    </div>
+        <p class="ct-page__sub">@ResminamalarSubtitle</p>
+    </header>
 
     @if (_applicationId == Guid.Empty)
     {
         <div class="app-item-doc-copies__empty" role="status"><p>@EmptyCatalog</p></div>
+    }
+    else if (_rosterIds.Count == 0)
+    {
+        <p class="os-empty">No roster lines linked yet. Link people on the People tab first.</p>
+    }
+    else if (_applicationItemIds.Count == 0)
+    {
+        <p class="os-empty">Select at least one person in the header to view Resminamalar.</p>
     }
     else
     {
@@ -34,7 +44,7 @@
                                                  UseInlinePreview="true"
                                                  RefreshRequested="_refreshRequested"
                                                  OnInlinePreviewRequested="HandleInlinePreviewAsync" />
-                <div class="ct-resmi-info">ℹ Readiness is evaluated based on profile data and template merge fields. Templates with warnings can still be generated.</div>
+                <div class="ct-resmi-info">Readiness is evaluated based on profile data and template merge fields. Templates with warnings can still be generated.</div>
             </div>
         </div>
     }
@@ -42,6 +52,8 @@
 
 @code {
     [Parameter] public Guid ApplicationProfileInstanceId { get; set; }
+    [Parameter] public ApplicationWorkspaceSnapshot? Snapshot { get; set; }
+    [Parameter] public IReadOnlyList<Guid>? SelectedPersonIds { get; set; }
 
     [Inject] private ApplicationWordReportPackageCatalogService CatalogService { get; set; } = null!;
     [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
@@ -49,6 +61,7 @@
 
     private Guid _applicationId;
     private WordReportPackageScope _packageScope = WordReportPackageScope.ApplicationProfileInstance;
+    private IReadOnlyList<Guid> _rosterIds = Array.Empty<Guid>();
     private IReadOnlyList<Guid> _applicationItemIds = Array.Empty<Guid>();
     private string _applicationNumber = string.Empty;
     private IReadOnlyList<ApplicationWordReportPackageCatalogEntry> _catalogEntries =
@@ -61,6 +74,23 @@
 
     private string EmptyCatalog => VisaUiMessages.Get("ApplicationReportPackage.Empty", _uiCultureName);
 
+    private string ResminamalarSubtitle
+    {
+        get
+        {
+            if (_rosterIds.Count == 0)
+                return "Generate a ZIP package of documents from profile nested templates.";
+
+            if (_applicationItemIds.Count == 0)
+                return "Click a person in the header to include them in Resminamalar.";
+
+            if (_applicationItemIds.Count == _rosterIds.Count)
+                return "Preview a template to generate it for the selected people.";
+
+            return $"Showing {_applicationItemIds.Count} of {_rosterIds.Count} people. Click a header chip to include or hide someone.";
+        }
+    }
+
     protected override void OnInitialized()
     {
         _refreshRequested = EventCallback.Factory.Create(this, ReloadCatalogAsync);
@@ -70,6 +100,12 @@
     protected override void OnParametersSet()
     {
         _applicationId = ApplicationProfileInstanceId;
+        var people = Snapshot?.CaseView.People
+            .Where(person => person.PersonId != Guid.Empty)
+            .ToList() ?? [];
+        _rosterIds = people.Select(person => person.PersonId).Distinct().ToList();
+        _applicationItemIds = ApplicationItemDocumentCopiesPersonCatalog.FilterRosterIds(_rosterIds, SelectedPersonIds);
+
         if (_applicationId == Guid.Empty)
         {
             _catalogEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
@@ -112,11 +148,17 @@
         if (request.ApplicationProfileInstanceId == Guid.Empty || string.IsNullOrWhiteSpace(request.EntryKey))
             return;
 
+        var previewIds = request.ApplicationItemIds is { Count: > 0 }
+            ? request.ApplicationItemIds
+            : _applicationItemIds;
+        if (previewIds.Count == 0)
+            return;
+
         await PreviewSlotService.OpenResminamalarAsync(new ResminamalarSlotRequest
         {
             ApplicationProfileInstanceId = request.ApplicationProfileInstanceId,
-            Scope = _packageScope,
-            ApplicationItemIds = request.ApplicationItemIds ?? _applicationItemIds,
+            Scope = WordReportPackageScope.RosterPerson,
+            ApplicationItemIds = previewIds,
             FocusEntryKey = request.EntryKey,
             FocusDisplayName = request.DisplayName,
             OpenPreviewOnly = true,

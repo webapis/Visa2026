@@ -111,8 +111,22 @@ public static class UserReportMergeDataHelper
 
     public static bool IsSahsyKagyzUserReportTemplate(UserReportTemplate? template) =>
         template != null
-        && (string.Equals(template.TemplateName, "Sahsy kagyz", StringComparison.OrdinalIgnoreCase)
-            || (template.TemplateFile?.FileName?.Contains("sahsy_kagyz", StringComparison.OrdinalIgnoreCase) ?? false));
+        && (LooksLikeSahsyKagyzName(template.TemplateName)
+            || LooksLikeSahsyKagyzName(template.TemplateFile?.FileName));
+
+    /// <summary>
+    /// Seed <c>Sahsy kagyz</c> / <c>sahsy_kagyz.docx</c> and officer copies such as
+    /// <c>SAHSY KAGYZ_117</c>.
+    /// </summary>
+    public static bool LooksLikeSahsyKagyzName(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return false;
+
+        var folded = name.Replace('_', ' ').Replace('-', ' ');
+        return folded.Contains("sahsy", StringComparison.OrdinalIgnoreCase)
+            && folded.Contains("kagyz", StringComparison.OrdinalIgnoreCase);
+    }
 
     public static bool TemplateUsesSahsyKagyzRowPlaceholders(
         UserReportTemplate? template,

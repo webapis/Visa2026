@@ -2,6 +2,7 @@
 @namespace Visa2026.Blazor.Server.Editors
 @using DevExpress.Blazor
 @using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Web
 @using Microsoft.JSInterop
 @using DevExpress.ExpressApp
 @using DevExpress.ExpressApp.Security
@@ -171,131 +172,7 @@
         else
         {
             <div class="resminamalar-catalog">
-                <div class="resminamalar-catalog__cards">
-                    @foreach (var entry in VisibleCatalogEntries)
-                    {
-                        <section @key="entry.EntryKey" class="@GetEntryCssClass(entry, IsSelected(entry))" aria-label="@entry.DisplayName">
-                            <div class="resminamalar-catalog__card-head">
-                                <label class="resminamalar-catalog__include" title="@entry.DisplayName">
-                                    <input type="checkbox"
-                                           checked="@IsSelected(entry)"
-                                           @onchange="e => OnIncludeChanged(entry, e)" />
-                                </label>
-                                <span class="resminamalar-catalog__nav-icon @ResminamalarCatalogFormatIcons.CssClass(entry.Kind)"
-                                      aria-hidden="true">
-                                    @((MarkupString)ResminamalarCatalogFormatIcons.Svg(entry.Kind))
-                                </span>
-                                <div class="resminamalar-catalog__main">
-                                    <span class="resminamalar-catalog__title">@entry.DisplayName</span>
-                                    <span class="resminamalar-catalog__summary">@FormatKindSummary(entry)</span>
-                                </div>
-                                <div class="resminamalar-catalog__actions">
-                                    <span class="app-report-package__readiness @GetReadinessCssClass(entry)">
-                                        @ReadinessLabel(entry)
-                                    </span>
-                                    @if (IsRecyclingEntry(entry))
-                                    {
-                                        <span class="app-report-package__preview-busy-label" role="status">
-                                            @GetRecycleBusyPrompt()
-                                        </span>
-                                    }
-                                    else if (IsPreviewingEntry(entry))
-                                    {
-                                        <span class="app-report-package__preview-busy-label" role="status">
-                                            @FormatMsg("ApplicationReportPackage.Preview.Downloading", entry.DisplayName)
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        <DxButton Text="@Msg("ApplicationReportPackage.Preview")"
-                                                  RenderStyle="ButtonRenderStyle.Link"
-                                                  SizeMode="SizeMode.Small"
-                                                  CssClass="app-item-doc-copies__action-btn"
-                                                  Enabled="@(!_packageBusy && !_previewBusy && !_recycleBusy)"
-                                                  Click="@(() => PreviewEntryAsync(entry))" />
-                                        @if (ShowDetails && CanDownloadTemplate(entry))
-                                        {
-                                            <DxButton Text="@Msg("ApplicationReportPackage.DownloadTemplate")"
-                                                      RenderStyle="ButtonRenderStyle.Link"
-                                                      SizeMode="SizeMode.Small"
-                                                      CssClass="app-item-doc-copies__action-btn"
-                                                      title="@Msg("ApplicationReportPackage.DownloadTemplate.Tooltip")"
-                                                      Enabled="@(!_packageBusy && !_previewBusy && !_refreshBusy && !_syncBusy && _editTemplateId == null && _downloadTemplateId == null)"
-                                                      Click="@(() => DownloadTemplateAsync(entry))" />
-                                        }
-                                        @if (ShowDetails && CanReviewPlaceholders(entry))
-                                        {
-                                            <DxButton Text="Review placeholders"
-                                                      RenderStyle="ButtonRenderStyle.Link"
-                                                      SizeMode="SizeMode.Small"
-                                                      CssClass="app-item-doc-copies__action-btn"
-                                                      title="Open Create from yellow marks on this catalog template"
-                                                      Enabled="@(!_packageBusy && !_previewBusy && !_recycleBusy && !_scanReviewBusy)"
-                                                      Click="@(() => OpenScanReviewAsync(entry))" />
-                                        }
-                                        @if (ShowDetails && entry.CanMoveToRecycleBin)
-                                        {
-                                            <button type="button"
-                                                    class="resminamalar-catalog__recycle-btn"
-                                                    title="@Msg("ApplicationReportPackage.MoveToRecycleBin.Tooltip")"
-                                                    aria-label="@Msg("ApplicationReportPackage.MoveToRecycleBin.Tooltip")"
-                                                    disabled="@(_packageBusy || _previewBusy || _recycleBusy)"
-                                                    @onclick="() => BeginMoveToRecycleBinConfirm(entry)">
-                                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                                    <path d="M4 7h16" />
-                                                    <path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-                                                    <path d="M6 7l1.2 13.2A1 1 0 0 0 8.2 21h7.6a1 1 0 0 0 1-.8L18 7" />
-                                                    <path d="M10 11v6M14 11v6" />
-                                                </svg>
-                                            </button>
-                                        }
-                                    }
-                                </div>
-                            </div>
-                            @if (IsRecyclingEntry(entry) || IsPreviewingEntry(entry) || HasCardDetails(entry))
-                            {
-                                <div class="resminamalar-catalog__card-body">
-                                    @if (IsRecyclingEntry(entry) || IsPreviewingEntry(entry))
-                                    {
-                                        <div class="app-report-package__entry-progress" role="progressbar" aria-busy="true"
-                                             aria-label="@(IsRecyclingEntry(entry)
-                                                 ? GetRecycleBusyPrompt()
-                                                 : FormatMsg("ApplicationReportPackage.Preview.Downloading", entry.DisplayName))">
-                                            <div class="app-report-package__preview-progress-track">
-                                                <div class="app-report-package__preview-progress-indeterminate"></div>
-                                            </div>
-                                        </div>
-                                    }
-                                    @if (HasCardDetails(entry))
-                                    {
-                                        <div class="app-item-doc-copies__status">
-                                            @if (!UseInlinePreview && !string.IsNullOrWhiteSpace(entry.OutputFileName))
-                                            {
-                                                <p class="app-item-doc-copies__summary">@entry.OutputFileName</p>
-                                            }
-                                            @if (ShowDetails)
-                                            {
-                                                @if (!string.IsNullOrWhiteSpace(entry.ReadinessMessageKey))
-                                                {
-                                                    <p class="app-item-doc-copies__hint app-item-doc-copies__hint--warning">@Msg(entry.ReadinessMessageKey)</p>
-                                                }
-                                                @if (entry.ReadinessHints.Count > 0)
-                                                {
-                                                    <ul class="app-report-package__hints">
-                                                        @foreach (var hint in entry.ReadinessHints)
-                                                        {
-                                                            <li class="app-report-package__hint">@FormatHint(hint)</li>
-                                                        }
-                                                    </ul>
-                                                }
-                                            }
-                                        </div>
-                                    }
-                                </div>
-                            }
-                        </section>
-                    }
-                </div>
+                @RenderCatalogCards()
             </div>
         }
     </div>
@@ -487,6 +364,135 @@
     private readonly Dictionary<string, ApplicationWordReportPackageCatalogEntry> _pendingToBin =
         new(StringComparer.Ordinal);
     private readonly HashSet<string> _pendingRestoredKeys = new(StringComparer.Ordinal);
+
+    private RenderFragment RenderCatalogCards() =>
+        @<div class="resminamalar-catalog__cards">
+            @foreach (var entry in VisibleCatalogEntries)
+            {
+                <section @key="entry.EntryKey"
+                         class="@GetEntryCssClass(entry, IsSelected(entry))"
+                         aria-label="@entry.DisplayName">
+                    <div class="resminamalar-catalog__card-head">
+                        <label class="resminamalar-catalog__include" title="@entry.DisplayName">
+                            <input type="checkbox"
+                                   checked="@IsSelected(entry)"
+                                   @onchange="e => OnIncludeChanged(entry, e)" />
+                        </label>
+                        <span class="resminamalar-catalog__nav-icon @ResminamalarCatalogFormatIcons.CssClass(entry.Kind)"
+                              aria-hidden="true">
+                            @((MarkupString)ResminamalarCatalogFormatIcons.Svg(entry.Kind))
+                        </span>
+                        <div class="resminamalar-catalog__main">
+                            <span class="resminamalar-catalog__title">@entry.DisplayName</span>
+                            <span class="resminamalar-catalog__summary">@FormatKindSummary(entry)</span>
+                        </div>
+                        <div class="resminamalar-catalog__actions">
+                            <span class="app-report-package__readiness @GetReadinessCssClass(entry)">
+                                @ReadinessLabel(entry)
+                            </span>
+                            @if (IsRecyclingEntry(entry))
+                            {
+                                <span class="app-report-package__preview-busy-label" role="status">
+                                    @GetRecycleBusyPrompt()
+                                </span>
+                            }
+                            else if (IsPreviewingEntry(entry))
+                            {
+                                <span class="app-report-package__preview-busy-label" role="status">
+                                    @FormatMsg("ApplicationReportPackage.Preview.Downloading", entry.DisplayName)
+                                </span>
+                            }
+                            else
+                            {
+                                <DxButton Text="@Msg("ApplicationReportPackage.Preview")"
+                                          RenderStyle="ButtonRenderStyle.Link"
+                                          SizeMode="SizeMode.Small"
+                                          CssClass="app-item-doc-copies__action-btn"
+                                          Enabled="@(!_packageBusy && !_previewBusy && !_recycleBusy)"
+                                          Click="@(() => PreviewEntryAsync(entry))" />
+                                @if (ShowDetails && CanDownloadTemplate(entry))
+                                {
+                                    <DxButton Text="@Msg("ApplicationReportPackage.DownloadTemplate")"
+                                              RenderStyle="ButtonRenderStyle.Link"
+                                              SizeMode="SizeMode.Small"
+                                              CssClass="app-item-doc-copies__action-btn"
+                                              title="@Msg("ApplicationReportPackage.DownloadTemplate.Tooltip")"
+                                              Enabled="@(!_packageBusy && !_previewBusy && !_refreshBusy && !_syncBusy && _editTemplateId == null && _downloadTemplateId == null)"
+                                              Click="@(() => DownloadTemplateAsync(entry))" />
+                                }
+                                @if (ShowDetails && CanReviewPlaceholders(entry))
+                                {
+                                    <DxButton Text="Review placeholders"
+                                              RenderStyle="ButtonRenderStyle.Link"
+                                              SizeMode="SizeMode.Small"
+                                              CssClass="app-item-doc-copies__action-btn"
+                                              title="Open Create from yellow marks on this catalog template"
+                                              Enabled="@(!_packageBusy && !_previewBusy && !_recycleBusy && !_scanReviewBusy)"
+                                              Click="@(() => OpenScanReviewAsync(entry))" />
+                                }
+                                @if (ShowDetails && entry.CanMoveToRecycleBin)
+                                {
+                                    <button type="button"
+                                            class="resminamalar-catalog__recycle-btn"
+                                            title="@Msg("ApplicationReportPackage.MoveToRecycleBin.Tooltip")"
+                                            aria-label="@Msg("ApplicationReportPackage.MoveToRecycleBin.Tooltip")"
+                                            disabled="@(_packageBusy || _previewBusy || _recycleBusy)"
+                                            @onclick="() => BeginMoveToRecycleBinConfirm(entry)">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                            <path d="M4 7h16" />
+                                            <path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                                            <path d="M6 7l1.2 13.2A1 1 0 0 0 8.2 21h7.6a1 1 0 0 0 1-.8L18 7" />
+                                            <path d="M10 11v6M14 11v6" />
+                                        </svg>
+                                    </button>
+                                }
+                            }
+                        </div>
+                    </div>
+                    @if (IsRecyclingEntry(entry) || IsPreviewingEntry(entry) || HasCardDetails(entry))
+                    {
+                        <div class="resminamalar-catalog__card-body">
+                            @if (IsRecyclingEntry(entry) || IsPreviewingEntry(entry))
+                            {
+                                <div class="app-report-package__entry-progress" role="progressbar" aria-busy="true"
+                                     aria-label="@(IsRecyclingEntry(entry)
+                                         ? GetRecycleBusyPrompt()
+                                         : FormatMsg("ApplicationReportPackage.Preview.Downloading", entry.DisplayName))">
+                                    <div class="app-report-package__preview-progress-track">
+                                        <div class="app-report-package__preview-progress-indeterminate"></div>
+                                    </div>
+                                </div>
+                            }
+                            @if (HasCardDetails(entry))
+                            {
+                                <div class="app-item-doc-copies__status">
+                                    @if (!UseInlinePreview && !string.IsNullOrWhiteSpace(entry.OutputFileName))
+                                    {
+                                        <p class="app-item-doc-copies__summary">@entry.OutputFileName</p>
+                                    }
+                                    @if (ShowDetails)
+                                    {
+                                        @if (!string.IsNullOrWhiteSpace(entry.ReadinessMessageKey))
+                                        {
+                                            <p class="app-item-doc-copies__hint app-item-doc-copies__hint--warning">@Msg(entry.ReadinessMessageKey)</p>
+                                        }
+                                        @if (entry.ReadinessHints.Count > 0)
+                                        {
+                                            <ul class="app-report-package__hints">
+                                                @foreach (var hint in entry.ReadinessHints)
+                                                {
+                                                    <li class="app-report-package__hint">@FormatHint(hint)</li>
+                                                }
+                                            </ul>
+                                        }
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                </section>
+            }
+        </div>;
     private readonly HashSet<string> _pendingPurgedKeys = new(StringComparer.Ordinal);
 
     private enum RecycleConfirmKind
@@ -1424,7 +1430,9 @@
             ? Msg("ApplicationReportPackage.Readiness.Warning")
             : Msg("ApplicationReportPackage.Readiness.Ready");
 
-    private string GetEntryCssClass(ApplicationWordReportPackageCatalogEntry entry, bool isSelected) =>
+    private string GetEntryCssClass(
+        ApplicationWordReportPackageCatalogEntry entry,
+        bool isSelected) =>
         IsPreviewingEntry(entry) || IsRecyclingEntry(entry)
             ? $"{GetEntryStateCssClass(entry, isSelected)} app-report-package__entry--previewing"
             : GetEntryStateCssClass(entry, isSelected);
@@ -1509,6 +1517,8 @@
         if (!UseInlinePreview && _previewDialog == null)
             return;
 
+        var previewIds = ApplicationItemIds;
+
         ClearStatusMessages();
         _previewBusy = true;
         _previewEntryKey = entry.EntryKey;
@@ -1524,12 +1534,12 @@
                     ApplicationProfileInstanceId = ApplicationProfileInstanceId,
                     EntryKey = entry.EntryKey,
                     DisplayName = entry.DisplayName,
-                    ApplicationItemIds = ApplicationItemIds,
+                    ApplicationItemIds = previewIds,
                 });
             }
             else if (_previewDialog != null)
             {
-                await _previewDialog.OpenAsync(ApplicationProfileInstanceId, entry.EntryKey, entry.DisplayName, ApplicationItemIds);
+                await _previewDialog.OpenAsync(ApplicationProfileInstanceId, entry.EntryKey, entry.DisplayName, previewIds);
             }
         }
         finally

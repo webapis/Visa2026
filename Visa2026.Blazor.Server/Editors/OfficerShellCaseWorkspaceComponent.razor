@@ -182,7 +182,9 @@
                                                          PreviewSlotOwnerViewId="@PreviewSlotOwnerViewId" />
                             break;
                         case "resminamalar":
-                            <OfficerShellCaseResminamalarTab ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId" />
+                            <OfficerShellCaseResminamalarTab ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId"
+                                                            Snapshot="Snapshot"
+                                                            SelectedPersonIds="SelectedDocumentPersonIds" />
                             break;
                         case "sla":
                             @RenderSla(view)

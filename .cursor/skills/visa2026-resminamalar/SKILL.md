@@ -68,6 +68,7 @@ disable-model-invocation: false
 | **Edit template** does nothing / export failed | `TemplateEditStaging:Enabled`, HTTPS (prod), folder chosen | **This skill** — [`TEMPLATE_STAGING_EDIT.md`](../../../docs/TEMPLATE_STAGING_EDIT.md) |
 | **Sync to database** — file locked / 0 imported | Close Word/Excel; hash unchanged skips import | **This skill** |
 | Preview stale after sync | Run **Sync to database** (imports share) then **Refresh** if needed | **This skill** |
+| Şahsy / per-person form Preview shows only one roster person | Case workspace header chips; Preview must pass `ApplicationItemIds`. Nested `SAHSY KAGYZ_*` names need `LooksLikeSahsyKagyzName` | **This skill** |
 | Placeholder errors **after** sync import | `UserReportTemplateMaintenanceService` Extract/Validate | **user-report-templates** |
 ---
 
@@ -101,9 +102,10 @@ Controllers: `WordReportsController`, `ApplicationItemWordReportsController`.
 
 1. Open dialog → see **user templates** (checkboxes, Ready / Check chips).
 2. Optional **gear** (footer): show **Download Template**, **Review placeholders**, Recycle, and readiness hint lines (hidden by default). **Edit template** is not on catalog rows — download the file instead.
-3. **Download Template** (gear on): browser download of the saved Word/Excel (placeholders, not filled case data).
-4. **Preview** → generate same bytes as ZIP → Office → PDF in popup.
-5. **Download package** → gap confirm if checked rows have warnings → `WordReportGenerationBatch` → toast **Download ZIP**.
+3. Case workspace: one flat catalog (no By person / By type switch). Header chips filter who is generated. Preview of Şahsy kagyz includes every selected person.
+4. **Download Template** (gear on): browser download of the saved Word/Excel (placeholders, not filled case data).
+5. **Preview** → generate same bytes as ZIP → Office → PDF in popup.
+6. **Download package** → gap confirm if checked rows have warnings → `WordReportGenerationBatch` → toast **Download ZIP**.
 
 **Parity rule:** preview and ZIP must use **`ApplicationWordReportEntryGenerator`** only — no second merge path.
 

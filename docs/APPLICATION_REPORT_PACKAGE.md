@@ -85,7 +85,7 @@ The dialog is **not** a second ZIP builder. It is the **evolved entry point** fo
 | **Catalog / readiness** | `ApplicationWordReportPackageCatalogService`, `ApplicationWordReportPackageReadinessEvaluator`, dry-run hints |
 
 | **UI** | Global **`#visa-preview-slot`** — `ResminamalarSlotPanel` + `ApplicationReportPackageComponent` (`UseInlinePreview`) + `ReportPackageInlinePreview` |
-| **Catalog chrome** | Flat selectable cards (`.resminamalar-catalog`) — Document Copies Prototype A **look** (format icon circle + title + summary + READY/CHECK + Preview / Download / recycle-bin icon for this-profile officer templates); keep checkboxes / ZIP selection (no section Open). **Recycle Bin** tab: Restore + Delete permanently. See [`PREVIEW_SLOT.md`](PREVIEW_SLOT.md) § Resminamalar catalog chrome |
+| **Catalog chrome** | Flat selectable cards (`.resminamalar-catalog`) — Document Copies Prototype A **look** (format icon circle + title + summary + READY/CHECK + Preview / Download Template / recycle-bin icon behind gear); keep checkboxes / ZIP selection. Case workspace: same flat catalog; header chips filter people. **Recycle Bin** tab: Restore + Delete permanently. See [`PREVIEW_SLOT.md`](PREVIEW_SLOT.md) § Resminamalar catalog chrome |
 | **Slot shell** | [`.cursor/skills/visa2026-preview-slot/SKILL.md`](../.cursor/skills/visa2026-preview-slot/SKILL.md) + [`docs/PREVIEW_SLOT.md`](PREVIEW_SLOT.md) |
 
 | **Slot policy** | Single global occupant — **last open wins** (`OccupantKey` + `Version`); `@key` remount on switch; **owner-aware** auto-close (`OwnerViewId` = XAF `View.Id`) |
@@ -149,6 +149,15 @@ One **`#visa-preview-slot`** serves Resminamalar (application scope, item scope)
 **Empty catalog:** slot still opens; localized message inside the panel (e.g. no Application-scope templates for this application type). No modal.
 
 **Recycle Bin:** Recycle-bin icon on an officer-created **this-profile** nested template (Create from yellow marks / Convert / Add prepared) asks to **Move to Recycle Bin**; confirm then shows a progress bar until the row leaves Catalog. Seeded library rows (Category / Global) have no recycle icon. Recycle Bin **Restore** returns the row to the live catalog; **Delete permanently** removes the nested template (and the linked `UserReportTemplate` when no other nested row shares the name). Recycle is profile-wide, not per case.
+
+### Case workspace
+
+On the in-process case **Resminamalar** tab (same header people chips as Document copies):
+
+- Header chips **include or hide** roster people (default: all selected). Catalog Preview and **Download package** use the filtered `Person.ID` set.
+- The catalog is a single flat template list (no By person / By type switch). Row **Preview** generates the template for **all** chip-selected people (per-person Word forms such as Şahsy kagyz are merged into one PDF).
+- Sanaw / list templates stay one document with a row per selected person.
+- ListView / Application DetailView Resminamalar (no case chips) is unchanged: generate for the full roster unless item ids are passed.
 
 
 
