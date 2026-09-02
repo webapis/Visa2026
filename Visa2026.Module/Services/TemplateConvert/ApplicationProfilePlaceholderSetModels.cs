@@ -47,7 +47,7 @@ public sealed class ApplicationProfilePlaceholderSet
     /// <summary>SHA-256 of the sorted allowed short codes. Audit trail and provider cache key.</summary>
     public required string Fingerprint { get; init; }
 
-    /// <summary>Accepts a bare short code or a full token (<c>{{ds.PFN}}</c>, <c>{{.PFN}}</c>, <c>{{IMAGE:PPH}}</c>).</summary>
+    /// <summary>Accepts a bare short code or a full token (<c>{{ds.PFN}}</c>, <c>{{.PFN}}</c>, <c>{{IMAGE:PPH}}</c>, <c>{{IMAGE:Person_Photo}}</c>).</summary>
     public bool Contains(string token)
     {
         if (!TemplateTokenSyntax.TryGetShortCode(token, out var shortCode))

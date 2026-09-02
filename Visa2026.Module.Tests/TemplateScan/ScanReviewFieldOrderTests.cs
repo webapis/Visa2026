@@ -40,6 +40,19 @@ public class ScanReviewFieldOrderTests
         Assert.Equal(2, ordered[1].Order);
     }
 
+    [Fact]
+    public void Order_places_a_picture_slot_after_earlier_text_in_the_same_paragraph()
+    {
+        var fields = new[]
+        {
+            Field("name", "Hilmi", new DocumentRegion.WordSpan("body/0", 0, 5)),
+            Field("photo", "Person photo", new DocumentRegion.WordDrawing("body/0", 0, 8)),
+        };
+
+        var ordered = ScanReviewFieldOrder.Order(fields);
+        Assert.Equal(new[] { "name", "photo" }, ordered.Select(o => o.FieldId).ToArray());
+    }
+
     private static ScanDetectedField Field(string id, string label, DocumentRegion? region) =>
         new()
         {

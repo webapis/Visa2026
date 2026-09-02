@@ -162,6 +162,27 @@ public static class ScanReviewFieldOrder
             return addr != 0 ? addr : leftWord.Start.CompareTo(rightWord.Start);
         }
 
+        if (left is DocumentRegion.WordDrawing leftDrawing && right is DocumentRegion.WordDrawing rightDrawing)
+        {
+            var addr = CompareAddress(leftDrawing.ParagraphAddress, rightDrawing.ParagraphAddress);
+            if (addr != 0)
+                return addr;
+            var offset = leftDrawing.TextInsertOffset.CompareTo(rightDrawing.TextInsertOffset);
+            return offset != 0 ? offset : leftDrawing.DrawingIndex.CompareTo(rightDrawing.DrawingIndex);
+        }
+
+        if (left is DocumentRegion.WordDrawing leftPic && right is DocumentRegion.WordSpan rightSpan)
+        {
+            var addr = CompareAddress(leftPic.ParagraphAddress, rightSpan.ParagraphAddress);
+            return addr != 0 ? addr : leftPic.TextInsertOffset.CompareTo(rightSpan.Start);
+        }
+
+        if (left is DocumentRegion.WordSpan leftSpan && right is DocumentRegion.WordDrawing rightPic)
+        {
+            var addr = CompareAddress(leftSpan.ParagraphAddress, rightPic.ParagraphAddress);
+            return addr != 0 ? addr : leftSpan.Start.CompareTo(rightPic.TextInsertOffset);
+        }
+
         if (left is DocumentRegion.ExcelCell leftCell && right is DocumentRegion.ExcelCell rightCell)
         {
             var sheet = string.Compare(leftCell.SheetName, rightCell.SheetName, StringComparison.OrdinalIgnoreCase);

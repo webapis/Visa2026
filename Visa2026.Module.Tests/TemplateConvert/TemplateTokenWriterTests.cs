@@ -102,6 +102,32 @@ public class TemplateTokenWriterTests
     }
 
     [Fact]
+    public void Word_inline_portrait_is_replaced_by_person_photo_token()
+    {
+        var width = 35L * WordInlinePictureLocator.EmuPerMillimetre;
+        var height = 45L * WordInlinePictureLocator.EmuPerMillimetre;
+        var content = TemplateConvertFixtures.CreateWordWithInlinePicture("Suraty: ", width, height);
+        var region = new DocumentRegion.WordDrawing("body/0", 0, "Suraty: ".Length);
+
+        var result = _writer.Apply(new TemplateTokenWriteRequest
+        {
+            SourceContent = content,
+            Format = TemplateSourceFormat.Docx,
+            Substitutions = new[]
+            {
+                new TokenSubstitution(region, "IMAGE:Person_Photo"),
+            },
+        });
+
+        Assert.Empty(result.Skipped);
+        Assert.Single(result.AppliedSubstitutions);
+        Assert.Equal(
+            "Suraty: {{IMAGE:Person_Photo}}",
+            TemplateConvertFixtures.GetParagraphText(result.Content, "body/0"));
+        Assert.Equal(2, TemplateConvertFixtures.GetRuns(result.Content, "body/0").Count);
+    }
+
+    [Fact]
     public void Word_span_outside_the_paragraph_is_skipped_and_text_is_untouched()
     {
         var result = _writer.Apply(new TemplateTokenWriteRequest

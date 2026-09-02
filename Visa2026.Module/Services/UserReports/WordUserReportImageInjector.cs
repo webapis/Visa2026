@@ -90,14 +90,15 @@ public static class WordUserReportImageInjector
                 ? match.Groups["key"].Value
                 : match.Groups["key2"].Value;
 
-            if (string.IsNullOrEmpty(photoKey) || !photosByKey.TryGetValue(photoKey, out var photos))
+            if (string.IsNullOrEmpty(photoKey)
+                || !TryResolvePhotos(photosByKey, cursors, photoKey, out var photos, out var lookupKey))
             {
                 RemoveTextRange(textNodes, match.Index, match.Length);
                 continue;
             }
 
-            var index = cursors[photoKey];
-            cursors[photoKey] = index + 1;
+            var index = cursors[lookupKey];
+            cursors[lookupKey] = index + 1;
             var imageBytes = index < photos.Count ? photos[index] : Array.Empty<byte>();
 
             var anchor = GetFirstTextInRange(textNodes, match.Index, match.Length);
@@ -111,6 +112,45 @@ public static class WordUserReportImageInjector
         }
 
         return nextDrawingId;
+    }
+
+    private static bool TryResolvePhotos(
+        IReadOnlyDictionary<string, IReadOnlyList<byte[]>> photosByKey,
+        Dictionary<string, int> cursors,
+        string photoKey,
+        out IReadOnlyList<byte[]> photos,
+        out string lookupKey)
+    {
+        photos = Array.Empty<byte[]>();
+        lookupKey = photoKey;
+
+        if (photosByKey.TryGetValue(photoKey, out photos!))
+            return EnsureCursor(cursors, photoKey);
+
+        var canonical = UserReportPlaceholderAliasRegistry.ResolveCanonicalPropertyPath(photoKey);
+        if (!string.Equals(canonical, photoKey, StringComparison.OrdinalIgnoreCase)
+            && photosByKey.TryGetValue(canonical, out photos!))
+        {
+            lookupKey = canonical;
+            return EnsureCursor(cursors, lookupKey);
+        }
+
+        if (UserReportPlaceholderAliasRegistry.TryGetShortCode(photoKey, out var shortCode)
+            && photosByKey.TryGetValue(shortCode, out photos!))
+        {
+            lookupKey = shortCode;
+            return EnsureCursor(cursors, lookupKey);
+        }
+
+        photos = Array.Empty<byte[]>();
+        return false;
+    }
+
+    private static bool EnsureCursor(Dictionary<string, int> cursors, string key)
+    {
+        if (!cursors.ContainsKey(key))
+            cursors[key] = 0;
+        return true;
     }
 
     private static (Run Run, Text Text)? GetFirstTextInRange(IReadOnlyList<Text> textNodes, int start, int length)

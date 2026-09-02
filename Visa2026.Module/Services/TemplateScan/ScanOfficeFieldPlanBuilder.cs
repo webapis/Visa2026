@@ -163,6 +163,8 @@ public static class ScanOfficeFieldPlanBuilder
                 placeholderSet));
         }
 
+        drafts.AddRange(BuildPersonPhotoDrafts(officeBytes, sourceKind, placeholderSet, drafts));
+
         return new ScanFieldPlanProposal
         {
             Fields = drafts,
@@ -214,6 +216,52 @@ public static class ScanOfficeFieldPlanBuilder
             Rationale = ScanOfficeLibraryTokenExtractor.FieldPlanSource,
             Source = ScanOfficeLibraryTokenExtractor.FieldPlanSource,
         };
+    }
+
+    internal static IReadOnlyList<ScanDetectedFieldDraft> BuildPersonPhotoDrafts(
+        byte[]? officeBytes,
+        ScanSourceKind sourceKind,
+        ApplicationProfilePlaceholderSet placeholderSet,
+        IReadOnlyList<ScanDetectedFieldDraft> existing)
+    {
+        if (sourceKind != ScanSourceKind.Word || officeBytes is not { Length: > 64 })
+            return Array.Empty<ScanDetectedFieldDraft>();
+
+        var photo = placeholderSet.Allowed.FirstOrDefault(static e =>
+            e.IsImage
+            && (string.Equals(e.ShortCode, "PPH", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(e.CanonicalPath, "Person_Photo", StringComparison.OrdinalIgnoreCase)));
+        if (photo == null)
+            return Array.Empty<ScanDetectedFieldDraft>();
+
+        var slots = ScanOfficePictureExtractor.Extract(officeBytes);
+        if (slots.Count == 0)
+            return Array.Empty<ScanDetectedFieldDraft>();
+
+        var token = photo.BuildWordToken(UserReportPlaceholderScope.Row);
+        var label = string.IsNullOrWhiteSpace(photo.LabelEn) ? "Person photo" : photo.LabelEn;
+        var drafts = new List<ScanDetectedFieldDraft>(slots.Count);
+        foreach (var slot in slots)
+        {
+            if (existing.Any(d => d.SourceRegion is DocumentRegion.WordDrawing drawing
+                && string.Equals(drawing.ParagraphAddress, slot.ParagraphAddress, StringComparison.Ordinal)
+                && drawing.DrawingIndex == slot.DrawingIndex))
+                continue;
+
+            drafts.Add(new ScanDetectedFieldDraft
+            {
+                FieldId = Guid.NewGuid().ToString("N"),
+                PageIndex = 0,
+                LabelText = label,
+                ProposedToken = token,
+                Confidence = ScanFieldConfidence.High,
+                Scope = ScanFieldScope.Row,
+                Box = ScanBoundingBox.FullPage,
+                SourceRegion = slot,
+            });
+        }
+
+        return drafts;
     }
 
     private static ScanFieldScope ScopeFromCodes(

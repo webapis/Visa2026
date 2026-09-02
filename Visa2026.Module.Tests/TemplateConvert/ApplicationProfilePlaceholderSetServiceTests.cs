@@ -231,8 +231,12 @@ public class ApplicationProfilePlaceholderSetServiceTests
         Assert.True(GetSet(FullProfile()).Contains(token));
 
     [Fact]
-    public void Contains_recognises_image_tokens() =>
-        Assert.True(GetSet(FullProfile()).Contains("{{IMAGE:PPH}}"));
+    public void Contains_recognises_image_tokens()
+    {
+        var set = GetSet(FullProfile());
+        Assert.True(set.Contains("{{IMAGE:PPH}}"));
+        Assert.True(set.Contains("{{IMAGE:Person_Photo}}"));
+    }
 
     [Theory]
     [InlineData("{{ds.NOPE}}")]

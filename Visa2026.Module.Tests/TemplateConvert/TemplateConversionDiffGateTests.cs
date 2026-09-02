@@ -222,4 +222,36 @@ public class TemplateConversionDiffGateTests
 
         Assert.True(verdict.Passed, string.Join(" | ", verdict.Violations));
     }
+
+    [Fact]
+    public void Word_portrait_replaced_by_image_token_passes()
+    {
+        var width = 35L * WordInlinePictureLocator.EmuPerMillimetre;
+        var height = 45L * WordInlinePictureLocator.EmuPerMillimetre;
+        var original = TemplateConvertFixtures.CreateWordWithInlinePicture("Suraty: ", width, height);
+        var region = new DocumentRegion.WordDrawing("body/0", 0, "Suraty: ".Length);
+        var result = _writer.Apply(new TemplateTokenWriteRequest
+        {
+            SourceContent = original,
+            Format = TemplateSourceFormat.Docx,
+            Substitutions = new[]
+            {
+                new TokenSubstitution(region, "IMAGE:Person_Photo"),
+            },
+        });
+
+        var verdict = _gate.Verify(new TemplateDiffGateRequest
+        {
+            OriginalContent = original,
+            ConvertedContent = result.Content,
+            Format = TemplateSourceFormat.Docx,
+            Substitutions = result.AppliedSubstitutions,
+            Loops = result.AppliedLoops,
+        });
+
+        Assert.True(verdict.Passed, string.Join(" | ", verdict.Violations));
+        Assert.Equal(
+            "Suraty: {{IMAGE:Person_Photo}}",
+            TemplateConvertFixtures.GetParagraphText(result.Content, "body/0"));
+    }
 }

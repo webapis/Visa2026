@@ -54,4 +54,15 @@ public class ScanLibraryTokenRewriterTests
         Assert.Equal("{{.PVFM}}", entry.BuildWordToken(UserReportPlaceholderScope.Header));
         Assert.Equal("{{.PVFM}}", entry.BuildWordToken(UserReportPlaceholderScope.Row));
     }
+
+    [Fact]
+    public void Image_tokens_use_canonical_person_photo_path()
+    {
+        var set = Set();
+        var entry = new UserReportPlaceholderCatalogService().GetEntries().Single(e =>
+            string.Equals(e.ShortCode, "PPH", StringComparison.OrdinalIgnoreCase));
+        Assert.Equal("{{IMAGE:Person_Photo}}", entry.BuildWordToken(UserReportPlaceholderScope.Row));
+        Assert.Equal("{{IMAGE:Person_Photo}}", ScanLibraryTokenRewriter.Rewrite("{{IMAGE:PPH}}", set));
+        Assert.Equal("{{IMAGE:Person_Photo}}", ScanLibraryTokenRewriter.Rewrite("{{IMAGE:Person_Photo}}", set));
+    }
 }

@@ -32,7 +32,7 @@ internal static class WordConversionDiffInspector
         CompareFormattingParts(originalMain, convertedMain, violations);
         CompareSectionProperties(originalMain, convertedMain, violations);
         CompareTableShape(originalMain, convertedMain, violations);
-        CompareImageParts(originalMain, convertedMain, violations);
+        CompareImageParts(originalMain, convertedMain, request, violations);
         CompareParagraphs(original, converted, request, violations);
     }
 
@@ -85,10 +85,22 @@ internal static class WordConversionDiffInspector
         }
     }
 
-    private static void CompareImageParts(MainDocumentPart original, MainDocumentPart converted, List<string> violations)
+    private static void CompareImageParts(
+        MainDocumentPart original,
+        MainDocumentPart converted,
+        TemplateDiffGateRequest request,
+        List<string> violations)
     {
         var left = HashImageParts(original);
         var right = HashImageParts(converted);
+        var drawingReplacements = request.Substitutions.Count(static s => s.Region is DocumentRegion.WordDrawing);
+
+        if (drawingReplacements > 0
+            && right.Count <= left.Count
+            && right.All(h => left.Contains(h, StringComparer.Ordinal)))
+        {
+            return;
+        }
 
         if (left.Count != right.Count)
         {
@@ -217,16 +229,28 @@ internal sealed class WordTextExpectation
 
         foreach (var substitution in request.Substitutions)
         {
-            if (substitution.Region is not DocumentRegion.WordSpan span)
-                continue;
-
-            if (!edits.TryGetValue(span.ParagraphAddress, out var list))
+            if (substitution.Region is DocumentRegion.WordSpan span)
             {
-                list = new List<(int, int, string)>();
-                edits[span.ParagraphAddress] = list;
+                if (!edits.TryGetValue(span.ParagraphAddress, out var list))
+                {
+                    list = new List<(int, int, string)>();
+                    edits[span.ParagraphAddress] = list;
+                }
+
+                list.Add((span.Start, span.Length, TemplateTokenSyntax.Wrap(substitution.Token)));
+                continue;
             }
 
-            list.Add((span.Start, span.Length, TemplateTokenSyntax.Wrap(substitution.Token)));
+            if (substitution.Region is DocumentRegion.WordDrawing drawing)
+            {
+                if (!edits.TryGetValue(drawing.ParagraphAddress, out var drawingEdits))
+                {
+                    drawingEdits = new List<(int, int, string)>();
+                    edits[drawing.ParagraphAddress] = drawingEdits;
+                }
+
+                drawingEdits.Add((drawing.TextInsertOffset, 0, TemplateTokenSyntax.Wrap(substitution.Token)));
+            }
         }
 
         foreach (var loop in request.Loops)

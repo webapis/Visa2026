@@ -23,6 +23,13 @@ Keep **`SKILL.md`** stable; **promote** into `SKILL.md` only when the same lesso
 
 ## Entries
 
+### 2026-09-02 — Image tokens are `{{IMAGE:Person_Photo}}` not `{{IMAGE:PPH}}`
+
+- **Symptom**: Catalog short code **PPH** wrote `{{IMAGE:PPH}}`. Preview cleared the token instead of injecting `Person.Photo`.
+- **Root cause**: `WordUserReportImageInjector` looks up photos by `Person_Photo`. `[\w]+` captures `PPH` as a different key.
+- **Fix**: `BuildWordToken` for `IsImage` uses `CanonicalPath`. `TemplateTokenSyntax.TryGetShortCode` maps `Person_Photo` → **PPH**. Injector falls back `PPH` → `Person_Photo`. Create from yellow marks writes the canonical token when a sample portrait is in the Word body.
+- **Prevent**: Do not emit `{{IMAGE:PPH}}` on new Word templates. Do not edit seed `.docx` layout. Excel still rejects image tokens.
+
 ### 2026-09-01 — `{{ds.PVFM}}` is invalid on ApplicationProfileInstance
 
 - **Symptom**: Create from yellow marks Preview blocked Approve: `Person_VisaApplicationFamilyMembersText` (and other Person row fields) not found on ApplicationProfileInstance.

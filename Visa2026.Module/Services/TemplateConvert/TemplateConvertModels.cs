@@ -26,6 +26,13 @@ public abstract record DocumentRegion
 {
     public sealed record WordSpan(string ParagraphAddress, int Start, int Length) : DocumentRegion;
 
+    /// <summary>
+    /// An inline / anchored picture in a body paragraph. <paramref name="DrawingIndex"/> is the
+    /// ordinal among photo-sized drawings in that paragraph; <paramref name="TextInsertOffset"/>
+    /// is the concatenated <c>w:t</c> offset where the token is inserted after the drawing is removed.
+    /// </summary>
+    public sealed record WordDrawing(string ParagraphAddress, int DrawingIndex, int TextInsertOffset) : DocumentRegion;
+
     public sealed record ExcelCell(string SheetName, string CellReference) : DocumentRegion;
 }
 

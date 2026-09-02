@@ -1,5 +1,7 @@
 #nullable enable
 
+using Visa2026.Module.Services.UserReports;
+
 namespace Visa2026.Module.Services.TemplateConvert;
 
 /// <summary>
@@ -19,8 +21,9 @@ public static class TemplateTokenSyntax
     public static string LoopClose(string collectionToken) => $"{{{{/{Bare(collectionToken)}}}}}";
 
     /// <summary>
-    /// Reduces a token to its catalog short code: <c>{{ds.PFN}}</c>, <c>{{.PFN}}</c>, <c>{{IMAGE:PPH}}</c>,
-    /// and a bare <c>PFN</c> all resolve. Loop markers and property paths with further nesting do not.
+    /// Reduces a token to its catalog short code: <c>{{ds.PFN}}</c>, <c>{{.PFN}}</c>,
+    /// <c>{{IMAGE:PPH}}</c>, <c>{{IMAGE:Person_Photo}}</c>, and a bare <c>PFN</c> all resolve.
+    /// Loop markers and property paths with further nesting do not.
     /// </summary>
     public static bool TryGetShortCode(string? token, out string shortCode)
     {
@@ -41,7 +44,16 @@ public static class TemplateTokenSyntax
             value = value[1..];
 
         value = value.Trim();
-        if (value.Length == 0 || value.Contains('.', StringComparison.Ordinal))
+        if (value.Length == 0)
+            return false;
+
+        if (UserReportPlaceholderAliasRegistry.TryGetShortCode(value, out var fromCanonical))
+        {
+            shortCode = fromCanonical;
+            return true;
+        }
+
+        if (value.Contains('.', StringComparison.Ordinal))
             return false;
 
         shortCode = value;
@@ -106,7 +118,7 @@ public static class TemplateSpanEditor
         ArgumentNullException.ThrowIfNull(edits);
         var value = original ?? string.Empty;
 
-        foreach (var edit in edits.OrderByDescending(static e => e.Start))
+        foreach (var edit in edits.OrderByDescending(static e => e.Start).ThenByDescending(static e => e.Length))
         {
             if (edit.Start < 0 || edit.Length < 0 || edit.Start + edit.Length > value.Length)
                 continue;

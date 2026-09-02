@@ -109,6 +109,12 @@ public sealed class TemplateMappingPlanSanitizer : ITemplateMappingPlanSanitizer
                 && string.Equals(ea.CellReference, eb.CellReference, StringComparison.OrdinalIgnoreCase);
         }
 
+        if (a is DocumentRegion.WordDrawing da && b is DocumentRegion.WordDrawing db)
+        {
+            return string.Equals(da.ParagraphAddress, db.ParagraphAddress, StringComparison.Ordinal)
+                && da.DrawingIndex == db.DrawingIndex;
+        }
+
         return false;
     }
 }

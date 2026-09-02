@@ -303,6 +303,7 @@ public sealed class AzureOpenAiTemplateConvertAiProvider : ITemplateConvertAiPro
     internal static string RegionKey(DocumentRegion region) => region switch
     {
         DocumentRegion.WordSpan w => $"word:{w.ParagraphAddress}:{w.Start}:{w.Length}",
+        DocumentRegion.WordDrawing d => $"word-drawing:{d.ParagraphAddress}:{d.DrawingIndex}:{d.TextInsertOffset}",
         DocumentRegion.ExcelCell e => $"excel:{e.SheetName}:{e.CellReference}",
         _ => "unknown",
     };

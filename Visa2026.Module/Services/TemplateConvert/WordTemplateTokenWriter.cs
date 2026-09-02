@@ -81,15 +81,20 @@ internal static class WordTemplateTokenWriter
         List<TokenSubstitution> applied,
         List<TemplateWriteSkip> skipped)
     {
-        foreach (var group in substitutions.GroupBy(static s => (s.Region as DocumentRegion.WordSpan)?.ParagraphAddress))
+        var remaining = new List<TokenSubstitution>();
+        foreach (var substitution in substitutions)
         {
-            if (group.Key == null)
+            if (substitution.Region is DocumentRegion.WordSpan or DocumentRegion.WordDrawing)
             {
-                foreach (var substitution in group)
-                    skipped.Add(new TemplateWriteSkip(substitution.Region, substitution.Token, "Region is not a Word span."));
+                remaining.Add(substitution);
                 continue;
             }
 
+            skipped.Add(new TemplateWriteSkip(substitution.Region, substitution.Token, "Region is not a Word span."));
+        }
+
+        foreach (var group in remaining.GroupBy(static s => ParagraphAddress(s.Region), StringComparer.Ordinal))
+        {
             if (!paragraphs.TryGetValue(group.Key, out var paragraph))
             {
                 foreach (var substitution in group)
@@ -98,6 +103,7 @@ internal static class WordTemplateTokenWriter
             }
 
             var spans = group
+                .Where(static s => s.Region is DocumentRegion.WordSpan)
                 .Select(static s => (Substitution: s, Span: (DocumentRegion.WordSpan)s.Region))
                 .ToList();
 
@@ -111,8 +117,26 @@ internal static class WordTemplateTokenWriter
                 else
                     skipped.Add(new TemplateWriteSkip(substitution.Region, substitution.Token, reason));
             }
+
+            foreach (var substitution in group
+                .Where(static s => s.Region is DocumentRegion.WordDrawing)
+                .OrderByDescending(static s => ((DocumentRegion.WordDrawing)s.Region).DrawingIndex))
+            {
+                var drawing = (DocumentRegion.WordDrawing)substitution.Region;
+                if (TryReplaceDrawing(paragraph, drawing, TemplateTokenSyntax.Wrap(substitution.Token), out var reason))
+                    applied.Add(substitution);
+                else
+                    skipped.Add(new TemplateWriteSkip(substitution.Region, substitution.Token, reason));
+            }
         }
     }
+
+    private static string ParagraphAddress(DocumentRegion region) => region switch
+    {
+        DocumentRegion.WordSpan span => span.ParagraphAddress,
+        DocumentRegion.WordDrawing drawing => drawing.ParagraphAddress,
+        _ => string.Empty,
+    };
 
     /// <summary>
     /// Duplicate yellow of the same token in one paragraph often shares nested Word spans
@@ -211,6 +235,39 @@ internal static class WordTemplateTokenWriter
             AppendText(endParagraph, TemplateTokenSyntax.LoopClose(loop.CollectionToken));
             applied.Add(loop);
         }
+    }
+
+    private static bool TryReplaceDrawing(
+        Paragraph paragraph,
+        DocumentRegion.WordDrawing region,
+        string token,
+        out string reason)
+    {
+        reason = string.Empty;
+        var drawings = WordInlinePictureLocator.Enumerate(paragraph);
+        if (region.DrawingIndex < 0 || region.DrawingIndex >= drawings.Count)
+        {
+            reason = $"Drawing index {region.DrawingIndex} not found in paragraph '{region.ParagraphAddress}'.";
+            return false;
+        }
+
+        var drawing = drawings[region.DrawingIndex];
+        if (drawing.Parent is not Run run)
+        {
+            reason = "Picture is not inside a Word run.";
+            return false;
+        }
+
+        var next = drawing.NextSibling();
+        drawing.Remove();
+        var text = CreateText(token);
+        if (next != null)
+            run.InsertBefore(text, next);
+        else
+            run.AppendChild(text);
+
+        ClearHighlightMark(run);
+        return true;
     }
 
     private static bool TryReplaceSpan(Paragraph paragraph, int start, int length, string token, out string reason)

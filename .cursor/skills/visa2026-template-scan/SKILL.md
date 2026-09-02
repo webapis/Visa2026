@@ -59,6 +59,7 @@ Officers submit **wizard step screenshots** + optional **catalog Preview** + the
 
 | Symptom | First step | Owner |
 |---------|------------|--------|
+| Inserted sample photo not mapped | Body portrait (not a tiny icon) → `{{IMAGE:Person_Photo}}` on Generate. Yellow still required for text values. Restart, Analyze | **This skill** |
 | Create template should be one Project contract or all via-ministry cases | Upload **Save to** = This profile only. **All contracts** or pick one (same as profile Templates wizard). Shared catalog has no contract filter. Restart, hard-refresh | **This skill** |
 | Review has extra 10.1 / 10.2 rows on one yellow | Row **×** hides that part; remaining token stays on the span. Last × drops the mark so Generate leaves printed text. Hard-refresh | **This skill** |
 | PNG/JPG/PDF rejected | Expected — use yellow-marked Word/Excel | **This skill** |
@@ -113,7 +114,7 @@ Officers submit **wizard step screenshots** + optional **catalog Preview** + the
 
 ```text
 Upload .docx/.xlsx (or Resminamalar Review placeholders)
-  → Ingest → ScanOfficeYellowExtractor (else library {{…}} clusters)
+  → Ingest → ScanOfficeYellowExtractor + body pictures (`{{IMAGE:Person_Photo}}`) (else library {{…}} clusters)
   → Merge/split → Yellow gate (token-backed plans skip the no-yellow fail)
   → Review / optional Clarification
   → ITemplateTokenWriter → StripAllYellow* → diff gate → Extract/Validate → Outline → Approve

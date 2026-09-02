@@ -4,6 +4,14 @@ Append-only. Newest first under **## Entries**.
 
 ## Entries
 
+### 2026-09-02 — Sample Word photo becomes `{{IMAGE:Person_Photo}}`
+
+- Need: Officers asked whether inserting a person photo on the yellow-marked Word file is enough. Yellow scan only saw highlighter on **text**; a picture stayed a static sample.
+- Cause: Create from yellow marks had no picture detector. Catalog `PPH` emitted `{{IMAGE:PPH}}`, but merge injects photos keyed as `Person_Photo`, so that token was cleared.
+- Fix: Body inline pictures (not header/footer, not tiny icons) are photo slots. Generate replaces the drawing with `{{IMAGE:Person_Photo}}`. `BuildWordToken` for images uses the canonical path; `TryGetShortCode` maps `Person_Photo` → `PPH`; injector resolves `PPH` to `Person_Photo`. Excel still has no photo inject. PNG/JPG/PDF uploads stay retired.
+- Officer: Restart, hard-refresh. Analyze a yellow-marked Word that contains a sample portrait. Review shows **Person photo**. Continue / Approve. Catalog Preview fills the live `Person.Photo`. Do not yellow-highlight the picture itself.
+- Cross-skill: visa2026-user-report-templates
+
 ### 2026-09-02 — Create template Save to: Project contract / All contracts
 
 - Need: Under **Save to** on Create from yellow marks, officers needed the same visibility as the Application Profile Templates wizard: one `ProjectContract` (via ministry) or all contracts on this profile; direct-migration uses Migration service the same way.
