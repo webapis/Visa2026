@@ -85,7 +85,7 @@ The dialog is **not** a second ZIP builder. It is the **evolved entry point** fo
 | **Catalog / readiness** | `ApplicationWordReportPackageCatalogService`, `ApplicationWordReportPackageReadinessEvaluator`, dry-run hints |
 
 | **UI** | Global **`#visa-preview-slot`** — `ResminamalarSlotPanel` + `ApplicationReportPackageComponent` (`UseInlinePreview`) + `ReportPackageInlinePreview` |
-| **Catalog chrome** | Flat selectable cards (`.resminamalar-catalog`) — Document Copies Prototype A **look** (format icon circle + title + summary + READY/CHECK + Preview / Download Template / recycle-bin icon behind gear); keep checkboxes / ZIP selection. Each row can show a **quiet** created/updated time and user name under the Word/Excel line (muted 11px). Case workspace: same flat catalog; header chips filter people. **Recycle Bin** tab: Restore + Delete permanently. See [`PREVIEW_SLOT.md`](PREVIEW_SLOT.md) § Resminamalar catalog chrome |
+| **Catalog chrome** | Flat selectable cards (`.resminamalar-catalog`) — Document Copies Prototype A **look** (format icon circle + title + summary + READY/CHECK + Preview / Download Template / recycle-bin icon behind gear); keep checkboxes / ZIP selection. Each row can show a **quiet** created/updated time and user name under the Word/Excel line (muted 11px). Nested catalogs split **This profile** / **Shared** tabs: This profile is included rows (this-profile files plus ON shared rows marked **SHARED**); Shared is the library with ON/OFF include toggles (no ZIP checkboxes). Case workspace: same flat catalog; header chips filter people. **Recycle Bin** stays a utility link, not a third content tab. See [`PREVIEW_SLOT.md`](PREVIEW_SLOT.md) § Resminamalar catalog chrome |
 | **Slot shell** | [`.cursor/skills/visa2026-preview-slot/SKILL.md`](../.cursor/skills/visa2026-preview-slot/SKILL.md) + [`docs/PREVIEW_SLOT.md`](PREVIEW_SLOT.md) |
 
 | **Slot policy** | Single global occupant — **last open wins** (`OccupantKey` + `Version`); `@key` remount on switch; **owner-aware** auto-close (`OwnerViewId` = XAF `View.Id`) |
@@ -148,14 +148,16 @@ One **`#visa-preview-slot`** serves Resminamalar (application scope, item scope)
 
 **Empty catalog:** slot still opens; localized message inside the panel (e.g. no Application-scope templates for this application type). No modal.
 
-**Recycle Bin:** Recycle-bin icon on an officer-created **this-profile** nested template (Create template / Add existing template) asks to **Move to Recycle Bin**; confirm then shows a progress bar until the row leaves Catalog. Seeded library rows (Category / Global) have no recycle icon. Recycle Bin **Restore** returns the row to the live catalog; **Delete permanently** removes the nested template (and the linked `UserReportTemplate` when no other nested row shares the name). Recycle is profile-wide, not per case.
+**Recycle Bin:** Recycle-bin icon on an officer-created **this-profile** nested template (Create template / Add existing template) asks to **Move to Recycle Bin**; confirm then shows a progress bar until the row leaves Catalog. Seeded library rows (Category / Global) have no recycle icon — turn them off on the **Shared** tab instead. Recycle Bin **Restore** returns the row to the live catalog; **Delete permanently** removes the nested template (and the linked `UserReportTemplate` when no other nested row shares the name). Recycle is profile-wide, not per case.
 
 ### Case workspace
 
 On the in-process case **Resminamalar** tab (same header people chips as Document copies):
 
 - Header chips **include or hide** roster people (default: all selected). Catalog Preview and **Download package** use the filtered `Person.ID` set.
-- The catalog is a single flat template list (no By person / By type switch). Row **Preview** generates the template for **all** chip-selected people (per-person Word forms such as Şahsy kagyz are merged into one PDF).
+- The catalog is a single flat template list (no By person / By type switch). Nested catalogs use **This profile** / **Shared** tabs. Row **Preview** generates the template for **all** chip-selected people (per-person Word forms such as Şahsy kagyz are merged into one PDF).
+- **This profile:** included nested templates (officer this-profile files plus shared templates toggled ON). Checkboxes, READY/CHECK, Preview, Download package, Create template / Add existing stay here. Shared includes show a **SHARED** chip.
+- **Shared:** full shared library. Preview + ON/OFF include (same `ApplicationProfileTemplate` attach as wizard Include/Exclude). ON rows also appear on This profile. No ZIP checkboxes or Download package on this tab.
 - Sanaw / list templates stay one document with a row per selected person.
 - ListView / Application DetailView Resminamalar (no case chips) is unchanged: generate for the full roster unless item ids are passed.
 

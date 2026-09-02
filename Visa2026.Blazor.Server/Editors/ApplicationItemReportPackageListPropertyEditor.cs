@@ -90,6 +90,7 @@ public sealed class ApplicationItemReportPackageListPropertyEditor : BlazorPrope
         ComponentModel.ApplicationItemIds = itemIds;
         ComponentModel.CatalogEntries = catalog.Entries;
         ComponentModel.RecycleBinEntries = catalog.RecycleBinEntries;
+        ComponentModel.SharedEntries = catalog.SharedEntries;
         ComponentModel.ShowRecycleBin = catalog.HasProfileNestedCatalog;
     }
 
@@ -101,6 +102,7 @@ public sealed class ApplicationItemReportPackageListPropertyEditor : BlazorPrope
         ComponentModel.ApplicationItemIds = Array.Empty<Guid>();
         ComponentModel.CatalogEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
         ComponentModel.RecycleBinEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+        ComponentModel.SharedEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
         ComponentModel.ShowRecycleBin = false;
     }
 

@@ -48,6 +48,7 @@
                                                      ApplicationNumber="@_applicationNumber"
                                                      CatalogEntries="_catalogEntries"
                                                      RecycleBinEntries="_recycleBinEntries"
+                                                     SharedEntries="_sharedEntries"
                                                      ShowRecycleBin="_showRecycleBin"
                                                      UiCultureName="_uiCultureName"
                                                      FocusEntryKey="_focusEntryKey"
@@ -83,6 +84,8 @@
         Array.Empty<ApplicationWordReportPackageCatalogEntry>();
     private IReadOnlyList<ApplicationWordReportPackageCatalogEntry> _recycleBinEntries =
         Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+    private IReadOnlyList<ApplicationWordReportPackageCatalogEntry> _sharedEntries =
+        Array.Empty<ApplicationWordReportPackageCatalogEntry>();
     private bool _showRecycleBin;
     private string _emptyMessage = string.Empty;
     private string _uiCultureName = string.Empty;
@@ -110,6 +113,7 @@
             _applicationId = Guid.Empty;
             _catalogEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
             _recycleBinEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+            _sharedEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
             _showRecycleBin = false;
             _emptyMessage = string.Empty;
             _boundOccupantKey = null;
@@ -184,6 +188,7 @@
         {
             _catalogEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
             _recycleBinEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+            _sharedEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
             _showRecycleBin = false;
             _applicationNumber = string.Empty;
             return;
@@ -196,6 +201,7 @@
         var catalog = CatalogService.Build(objectSpace, application, context);
         _catalogEntries = catalog.Entries;
         _recycleBinEntries = catalog.RecycleBinEntries;
+        _sharedEntries = catalog.SharedEntries;
         _showRecycleBin = catalog.HasProfileNestedCatalog;
         _applicationNumber = application.FullApplicationNumber ?? string.Empty;
         if (catalog.HasProfileNestedCatalog || catalog.RecycleBinEntries.Count > 0)

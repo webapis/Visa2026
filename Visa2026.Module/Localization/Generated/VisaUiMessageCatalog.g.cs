@@ -1811,6 +1811,55 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Hemmesini saýla",
             ["ru-RU"] = "Выбрать все",
         },
+        ["ApplicationReportPackage.SharedChip"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "SHARED",
+            ["tr-TR"] = "ORTAK",
+            ["tk-TM"] = "UMUMY",
+            ["ru-RU"] = "ОБЩИЙ",
+        },
+        ["ApplicationReportPackage.SharedEmpty"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No shared templates in the library.",
+            ["tr-TR"] = "Kitaplıkta ortak şablon yok.",
+            ["tk-TM"] = "Kitaphanada umumy şablon ýok.",
+            ["ru-RU"] = "В библиотеке нет общих шаблонов.",
+        },
+        ["ApplicationReportPackage.SharedHint"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Turn on to use a shared template on this case. Enabled templates also appear on This profile with a Shared mark.",
+            ["tr-TR"] = "Bu davada ortak bir şablon kullanmak için açın. Açık şablonlar Bu profilde Ortak işaretiyle görünür.",
+            ["tk-TM"] = "Bu arzada umumy şablony ulanmak üçin açyň. Açyk şablonlar Bu profilde Umumy belgi bilen görünýär.",
+            ["ru-RU"] = "Включите, чтобы использовать общий шаблон в этом деле. Включённые шаблоны также видны на вкладке «Этот профиль» с меткой «Общий».",
+        },
+        ["ApplicationReportPackage.SharedTab"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Shared ({0})",
+            ["tr-TR"] = "Ortak ({0})",
+            ["tk-TM"] = "Umumy ({0})",
+            ["ru-RU"] = "Общие ({0})",
+        },
+        ["ApplicationReportPackage.SharedToggleFailed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Could not update the shared template for this profile.",
+            ["tr-TR"] = "Bu profil için ortak şablon güncellenemedi.",
+            ["tk-TM"] = "Bu profil üçin umumy şablony täzelemek başartmady.",
+            ["ru-RU"] = "Не удалось обновить общий шаблон для этого профиля.",
+        },
+        ["ApplicationReportPackage.SharedToggleOff"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "OFF",
+            ["tr-TR"] = "KAPALI",
+            ["tk-TM"] = "ÝAPYK",
+            ["ru-RU"] = "ВЫКЛ",
+        },
+        ["ApplicationReportPackage.SharedToggleOn"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "ON",
+            ["tr-TR"] = "AÇIK",
+            ["tk-TM"] = "AÇYK",
+            ["ru-RU"] = "ВКЛ",
+        },
         ["ApplicationReportPackage.Subtitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "{0} report(s) for application {1} (same scope as the Resminamalar ZIP).",
@@ -1859,6 +1908,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "İçe aktarılan değişiklik yok. Şablonu düzenle'den sonra kaydettiğiniz dosyayı seçin.",
             ["tk-TM"] = "Import edilen üýtgeşme ýok. Şablony redaktirle-den soň ýazdyran faýly saýlaň.",
             ["ru-RU"] = "Изменения не импортированы. Выберите отредактированный файл, сохранённый после «Редактировать шаблон».",
+        },
+        ["ApplicationReportPackage.ThisProfileTab"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "This profile ({0})",
+            ["tr-TR"] = "Bu profil ({0})",
+            ["tk-TM"] = "Bu profil ({0})",
+            ["ru-RU"] = "Этот профиль ({0})",
         },
         ["ApplicationReportPackage.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

@@ -1295,6 +1295,54 @@
     "tk-TM": "Katalog",
     "ru-RU": "Каталог"
   },
+  "ApplicationReportPackage.ThisProfileTab": {
+    "en": "This profile ({0})",
+    "tr-TR": "Bu profil ({0})",
+    "tk-TM": "Bu profil ({0})",
+    "ru-RU": "Этот профиль ({0})"
+  },
+  "ApplicationReportPackage.SharedTab": {
+    "en": "Shared ({0})",
+    "tr-TR": "Ortak ({0})",
+    "tk-TM": "Umumy ({0})",
+    "ru-RU": "Общие ({0})"
+  },
+  "ApplicationReportPackage.SharedChip": {
+    "en": "SHARED",
+    "tr-TR": "ORTAK",
+    "tk-TM": "UMUMY",
+    "ru-RU": "ОБЩИЙ"
+  },
+  "ApplicationReportPackage.SharedHint": {
+    "en": "Turn on to use a shared template on this case. Enabled templates also appear on This profile with a Shared mark.",
+    "tr-TR": "Bu davada ortak bir şablon kullanmak için açın. Açık şablonlar Bu profilde Ortak işaretiyle görünür.",
+    "tk-TM": "Bu arzada umumy şablony ulanmak üçin açyň. Açyk şablonlar Bu profilde Umumy belgi bilen görünýär.",
+    "ru-RU": "Включите, чтобы использовать общий шаблон в этом деле. Включённые шаблоны также видны на вкладке «Этот профиль» с меткой «Общий»."
+  },
+  "ApplicationReportPackage.SharedEmpty": {
+    "en": "No shared templates in the library.",
+    "tr-TR": "Kitaplıkta ortak şablon yok.",
+    "tk-TM": "Kitaphanada umumy şablon ýok.",
+    "ru-RU": "В библиотеке нет общих шаблонов."
+  },
+  "ApplicationReportPackage.SharedToggleOn": {
+    "en": "ON",
+    "tr-TR": "AÇIK",
+    "tk-TM": "AÇYK",
+    "ru-RU": "ВКЛ"
+  },
+  "ApplicationReportPackage.SharedToggleOff": {
+    "en": "OFF",
+    "tr-TR": "KAPALI",
+    "tk-TM": "ÝAPYK",
+    "ru-RU": "ВЫКЛ"
+  },
+  "ApplicationReportPackage.SharedToggleFailed": {
+    "en": "Could not update the shared template for this profile.",
+    "tr-TR": "Bu profil için ortak şablon güncellenemedi.",
+    "tk-TM": "Bu profil üçin umumy şablony täzelemek başartmady.",
+    "ru-RU": "Не удалось обновить общий шаблон для этого профиля."
+  },
   "ApplicationReportPackage.RecycleBinTab": {
     "en": "Recycle Bin ({0})",
     "tr-TR": "Geri dönüşüm ({0})",

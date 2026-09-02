@@ -105,6 +105,17 @@ public class ApplicationProfileLockHelperTests
     }
 
     [Fact]
+    public void IsAllowedResminamalarSharedIncludeMutation_AllowsSharedScopesOnly()
+    {
+        Assert.True(ApplicationProfileLockHelper.IsAllowedResminamalarSharedIncludeMutation(
+            ApplicationProfileTemplateCatalogScope.Global));
+        Assert.True(ApplicationProfileLockHelper.IsAllowedResminamalarSharedIncludeMutation(
+            ApplicationProfileTemplateCatalogScope.Category));
+        Assert.False(ApplicationProfileLockHelper.IsAllowedResminamalarSharedIncludeMutation(
+            ApplicationProfileTemplateCatalogScope.ProfileSpecific));
+    }
+
+    [Fact]
     public void CanRemoveApprovalLegVersion_RequiresAnotherVersion()
     {
         var profile = new ApplicationProfile();

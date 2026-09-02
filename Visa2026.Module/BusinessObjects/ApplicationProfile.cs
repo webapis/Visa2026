@@ -679,6 +679,7 @@ public static class ApplicationProfileLockHelper
     /// (see <see cref="HasConfigurationScalarsChanged"/>). Legacy nested version rows may still
     /// change while locked because instances keep a snapshot. New nested templates may be added;
     /// Resminamalar Recycle Bin (recycle / restore / purge) may change existing template rows;
+    /// Resminamalar Shared-tab exclude may delete a live Category/Global include;
     /// other existing template edits stay blocked (see <see cref="EnsureNestedConfigurationEditable"/>).
     /// </summary>
     public static bool AllowsNestedEditWhenConfigLocked(object? nested, IObjectSpace? objectSpace = null) =>
@@ -689,6 +690,8 @@ public static class ApplicationProfileLockHelper
                 when objectSpace != null && objectSpace.IsNewObject(template) => true,
             ApplicationProfileTemplate template
                 when objectSpace != null && IsResminamalarRecycleBinMutation(objectSpace, template) => true,
+            ApplicationProfileTemplate template
+                when objectSpace != null && IsResminamalarSharedIncludeMutation(objectSpace, template) => true,
             _ => false,
         };
 
@@ -754,6 +757,27 @@ public static class ApplicationProfileLockHelper
         return modified.Contains(nameof(ApplicationProfileTemplate.RecycledAtUtc))
             || modified.Contains(nameof(ApplicationProfileTemplate.RecycledByUserName));
     }
+
+    /// <summary>
+    /// Shared-tab OFF: delete a live Category/Global include. Does not allow deleting
+    /// this-profile files (those use Recycle Bin) or renaming/replacing files.
+    /// </summary>
+    public static bool IsResminamalarSharedIncludeMutation(
+        IObjectSpace objectSpace,
+        ApplicationProfileTemplate template)
+    {
+        if (objectSpace == null || template == null)
+            return false;
+
+        if (!objectSpace.IsObjectToDelete(template))
+            return false;
+
+        return IsAllowedResminamalarSharedIncludeMutation(template.CatalogScope);
+    }
+
+    internal static bool IsAllowedResminamalarSharedIncludeMutation(
+        ApplicationProfileTemplateCatalogScope catalogScope) =>
+        catalogScope != ApplicationProfileTemplateCatalogScope.ProfileSpecific;
 
     public static bool CanRemoveApprovalLegVersion(
         ApplicationProfile? profile,

@@ -44,6 +44,7 @@
                                                  ApplicationNumber="@_applicationNumber"
                                                  CatalogEntries="_catalogEntries"
                                                  RecycleBinEntries="_recycleBinEntries"
+                                                 SharedEntries="_sharedEntries"
                                                  ShowRecycleBin="_showRecycleBin"
                                                  UiCultureName="_uiCultureName"
                                                  UseInlinePreview="true"
@@ -73,6 +74,8 @@
     private IReadOnlyList<ApplicationWordReportPackageCatalogEntry> _catalogEntries =
         Array.Empty<ApplicationWordReportPackageCatalogEntry>();
     private IReadOnlyList<ApplicationWordReportPackageCatalogEntry> _recycleBinEntries =
+        Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+    private IReadOnlyList<ApplicationWordReportPackageCatalogEntry> _sharedEntries =
         Array.Empty<ApplicationWordReportPackageCatalogEntry>();
     private bool _showRecycleBin;
     private string _uiCultureName = string.Empty;
@@ -119,6 +122,7 @@
         {
             _catalogEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
             _recycleBinEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+            _sharedEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
             _showRecycleBin = false;
             _loadedCatalogKey = default;
             _catalogLoading = false;
@@ -160,6 +164,7 @@
         {
             _catalogEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
             _recycleBinEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+            _sharedEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
             _showRecycleBin = false;
             _applicationNumber = string.Empty;
             _loadedCatalogKey = default;
@@ -194,6 +199,7 @@
     {
         _catalogEntries = catalog.Entries;
         _recycleBinEntries = catalog.RecycleBinEntries;
+        _sharedEntries = catalog.SharedEntries;
         _showRecycleBin = catalog.HasProfileNestedCatalog;
         _applicationNumber = applicationNumber;
         _loadedCatalogKey = key;

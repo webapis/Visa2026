@@ -52,6 +52,20 @@ public sealed class ApplicationWordReportPackageCatalogEntry
     public DateTime? RecycledAtUtc { get; init; }
 
     public string? RecycledByUserName { get; init; }
+
+    public ApplicationProfileTemplateCatalogScope CatalogScope { get; init; }
+
+    public ApplicationProfileTemplateDataScope DataScope { get; init; }
+
+    public int SortOrder { get; init; }
+
+    public string? CategoryKey { get; init; }
+
+    /// <summary>Shared library row that is included for this profile (ON).</summary>
+    public bool IsSharedIncluded { get; init; }
+
+    public bool ShowsSharedChip =>
+        ApplicationProfileWizardTemplateScopeHelper.IsShared(CatalogScope);
 }
 
 public sealed class ApplicationWordReportPackageCatalog
@@ -59,6 +73,13 @@ public sealed class ApplicationWordReportPackageCatalog
     public required IReadOnlyList<ApplicationWordReportPackageCatalogEntry> Entries { get; init; }
 
     public IReadOnlyList<ApplicationWordReportPackageCatalogEntry> RecycleBinEntries { get; init; } =
+        Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+
+    /// <summary>
+    /// Full shared library for the Shared tab (included and not). Empty when the catalog
+    /// is the seeded fallback list (no nested profile templates).
+    /// </summary>
+    public IReadOnlyList<ApplicationWordReportPackageCatalogEntry> SharedEntries { get; init; } =
         Array.Empty<ApplicationWordReportPackageCatalogEntry>();
 
     /// <summary>
@@ -110,6 +131,7 @@ public sealed class ApplicationWordReportPackageCatalogService
             {
                 Entries = entries,
                 RecycleBinEntries = BuildRecycleBinEntries(objectSpace, application).ToList(),
+                SharedEntries = BuildSharedLibraryEntries(objectSpace, entries),
                 HasProfileNestedCatalog = true,
             };
         }
@@ -217,8 +239,59 @@ public sealed class ApplicationWordReportPackageCatalogService
                 CreatedByUserName = profileTemplate.CreatedByUserName ?? userTemplate?.CreatedByUserName,
                 ModifiedOnUtc = profileTemplate.ModifiedOnUtc ?? userTemplate?.ModifiedOnUtc,
                 ModifiedByUserName = profileTemplate.ModifiedByUserName ?? userTemplate?.ModifiedByUserName,
+                CatalogScope = profileTemplate.CatalogScope,
+                DataScope = profileTemplate.DataScope,
+                SortOrder = profileTemplate.SortOrder,
+                CategoryKey = profileTemplate.CategoryKey,
+                IsSharedIncluded = ApplicationProfileWizardTemplateScopeHelper.IsShared(
+                    profileTemplate.CatalogScope),
             };
         }
+    }
+
+    private IReadOnlyList<ApplicationWordReportPackageCatalogEntry> BuildSharedLibraryEntries(
+        IObjectSpace objectSpace,
+        IReadOnlyList<ApplicationWordReportPackageCatalogEntry> thisProfileEntries)
+    {
+        var sharedRows = ApplicationProfileWizardTemplateCatalog.Build(objectSpace).Shared;
+        if (sharedRows.Count == 0)
+            return Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+
+        var includedByName = thisProfileEntries
+            .Where(entry => entry.ShowsSharedChip)
+            .GroupBy(entry => entry.DisplayName, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
+
+        var list = new List<ApplicationWordReportPackageCatalogEntry>(sharedRows.Count);
+        foreach (var row in sharedRows)
+        {
+            if (includedByName.TryGetValue(row.Name, out var included))
+            {
+                list.Add(included);
+                continue;
+            }
+
+            var kind = row.Kind == ApplicationProfileTemplateKind.Excel
+                ? ApplicationWordReportPackageEntryKind.UserExcel
+                : ApplicationWordReportPackageEntryKind.UserWord;
+            var extension = kind == ApplicationWordReportPackageEntryKind.UserExcel ? ".xlsx" : ".docx";
+            list.Add(new ApplicationWordReportPackageCatalogEntry
+            {
+                EntryKey = BuildUserEntryKey(row.UserReportTemplateId),
+                DisplayName = row.Name,
+                OutputFileName = ZipEntryFileNameSanitizer.BuildReportEntryName(row.Name, extension),
+                Kind = kind,
+                Readiness = ApplicationWordReportPackageReadinessLevel.Ready,
+                UserReportTemplateId = row.UserReportTemplateId,
+                CatalogScope = row.Scope,
+                DataScope = row.DataScope,
+                SortOrder = row.SortOrder,
+                CategoryKey = row.CategoryKeys.FirstOrDefault(),
+                IsSharedIncluded = false,
+            });
+        }
+
+        return list;
     }
 
     private IEnumerable<ApplicationWordReportPackageCatalogEntry> BuildRecycleBinEntries(
@@ -289,7 +362,10 @@ public sealed class ApplicationWordReportPackageCatalogService
     }
 
     internal static string BuildUserEntryKey(UserReportTemplate template) =>
-        $"user:{template.ID:D}";
+        BuildUserEntryKey(template.ID);
+
+    internal static string BuildUserEntryKey(Guid templateId) =>
+        $"user:{templateId:D}";
 
     internal static bool TryParseUserTemplateId(string entryKey, out Guid templateId)
     {

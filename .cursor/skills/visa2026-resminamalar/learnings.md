@@ -25,6 +25,26 @@ Purpose: **catalog, seed gate, batch worker, preview, permissions, dialog UX** �
 
 ## Entries
 
+### 2026-09-02 — Shared OFF blocked on locked profile (Application)
+
+- **Symptom**: Shared tab ON worked; OFF showed "Nested templates cannot be changed while this profile is locked" (case 8/-015 already in progress).
+- **Try**: Nested-catalog case past office preparation; Shared tab; toggle a green ON row to OFF.
+- **Test**: `IsAllowedResminamalarSharedIncludeMutation_AllowsSharedScopesOnly`. Blazor Debug build. Restart, hard-refresh: Shared OFF on a locked profile removes the include and the This profile SHARED row.
+- **Root cause**: Config lock allows new nested templates (ON) and Recycle Bin field updates, but deleting a live include is an existing-row delete, so `EnsureNestedConfigurationEditable` threw.
+- **Fix**: Carve-out for deleting Category/Global includes (`IsResminamalarSharedIncludeMutation`). Exclude marks the row deleted before the lock check. This-profile files still use Recycle Bin.
+- **Prevent**: Do not allow delete of ProfileSpecific rows via Shared OFF. Do not open rename/file replace on locked profiles.
+- **Cross-skill**: visa2026-application-profile | visa2026-resminamalar
+
+### 2026-09-02 — This profile / Shared tabs with include toggle (Application)
+
+- **Symptom**: Officers wanted This profile vs Shared on case Resminamalar, with a toggle so ON shared files appear on This profile marked SHARED.
+- **Try**: Nested-catalog case workspace Resminamalar (not the seeded fallback list).
+- **Test**: `ApplicationProfileSharedTemplateIncludeHelperTests`. Blazor Debug build. Restart, hard-refresh: This profile / Shared tabs; Recycle Bin stays a utility; Shared ON/OFF persists as nested include (same as wizard Include); This profile shows SHARED chip on ON rows; Download package stays on This profile.
+- **Root cause**: Catalog listed only included nested rows; shared include/exclude lived only on the Application Profile wizard.
+- **Fix**: `SharedEntries` on the catalog; `ApplicationProfileSharedTemplateIncludeHelper` CommitChanges include/exclude; tabs + pill toggle + SHARED chip CSS.
+- **Prevent**: Do not put ZIP checkboxes or Download package on Shared. Do not make Recycle Bin a third content tab. Profiles without nested templates keep the old Catalog list.
+- **Cross-skill**: visa2026-preview-slot | visa2026-application-profile
+
 ### 2026-09-02 — Quiet created/updated stamp on catalog cards (Application)
 
 - **Symptom**: Officers wanted to see when a Resminamalar template was created or last changed, and by whom, without making the catalog louder.

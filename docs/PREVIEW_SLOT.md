@@ -96,7 +96,7 @@ Officer caption for the report package occupant is **Templates** (not Document C
 | Layer | Rule |
 |-------|------|
 | **Shell** | Still `resminamalar-slot-panel` + `.app-report-package--inline-slot` |
-| **Catalog chrome** | `.resminamalar-catalog` in [`resminamalar-catalog.css`](../Visa2026.Blazor.Server/wwwroot/css/resminamalar-catalog.css): **flat selectable cards** (checkbox + Word/Excel icon + title + format summary + READY/CHECK + Preview) |
+| **Catalog chrome** | `.resminamalar-catalog` in [`resminamalar-catalog.css`](../Visa2026.Blazor.Server/wwwroot/css/resminamalar-catalog.css): **flat selectable cards** (checkbox + Word/Excel icon + title + format summary + READY/CHECK + Preview). Nested catalogs add **This profile** / **Shared** tabs, a **SHARED** chip, and an ON/OFF pill on Shared. |
 | **Interaction** | Multi-select checkboxes, Select all / Clear, Download package, Sync, gear / Edit template — unchanged |
 | **Icons** | `ResminamalarCatalogFormatIcons` (Word blue / Excel green); do not reuse DocumentCopies brand mark |
 | **Not Document Copies** | No exclusive Open/expand sections; each template row is already a ZIP leaf |

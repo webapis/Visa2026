@@ -1,3 +1,11 @@
+### 2026-09-02 — Shared include OFF while config-locked
+
+- **Need**: Case Resminamalar Shared ON/OFF must work after lock state A. ON already created a new nested row; OFF deleted the include and hit `ConfigLockedCannotEditNested`.
+- **Fix**: `AllowsNestedEditWhenConfigLocked` allows delete of Category/Global includes (`IsResminamalarSharedIncludeMutation`). Profile-specific nested files stay Recycle Bin-only.
+- **Test**: `IsAllowedResminamalarSharedIncludeMutation_AllowsSharedScopesOnly`. Officer: restart, Shared tab, toggle ON then OFF on a case that has left office preparation.
+- **Prevent**: Do not treat Shared OFF as a this-profile template edit. Keep the Recycle Bin carve-out separate (recycled rows only).
+- **Cross-skill**: application-profile | visa2026-resminamalar
+
 ### 2026-09-02 — Wizard Templates no longer creates files
 
 - **Need**: Officers already create, add, and recycle Word/Excel from a case (Resminamalar). Administrators should not repeat Add / Convert / Create from yellow marks on Configure → Templates.

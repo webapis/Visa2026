@@ -17,6 +17,7 @@
 @using Visa2026.Module.Services.UserReports
 @using Visa2026.Module.Services.TemplateConvert
 @using Visa2026.Module.Services.TemplateScan
+@using Microsoft.EntityFrameworkCore
 @using Visa2026.Module.BusinessObjects
 @using Microsoft.Extensions.Options
 @using System.Text.Json
@@ -25,7 +26,72 @@
 <div class="app-report-package app-item-doc-copies @(UseInlinePreview ? "app-report-package--inline-slot" : string.Empty)">
     @if (ApplicationProfileInstanceId != Guid.Empty)
     {
-        <div class="app-item-doc-copies__top-actions app-report-package__top-selection">
+        <div class="app-item-doc-copies__top-actions app-report-package__top-selection @(TopSelectionCss)">
+            @if (ShowContentTabs)
+            {
+                <div class="resminamalar-catalog__pane-tabs" role="tablist" aria-label="@Msg("ApplicationReportPackage.Title")">
+                    <DxButton Text="@FormatMsg("ApplicationReportPackage.ThisProfileTab", VisibleCatalogEntries.Count)"
+                              RenderStyle="ButtonRenderStyle.Link"
+                              SizeMode="SizeMode.Small"
+                              CssClass="@ThisProfilePaneTabCss"
+                              Click="@ShowThisProfilePaneAsync" />
+                    <DxButton Text="@FormatMsg("ApplicationReportPackage.SharedTab", SharedEntries.Count)"
+                              RenderStyle="ButtonRenderStyle.Link"
+                              SizeMode="SizeMode.Small"
+                              CssClass="@SharedPaneTabCss"
+                              Click="@ShowSharedPaneAsync" />
+                </div>
+                <div class="resminamalar-catalog__utilities">
+                    @if (ShowRecycleBinTab)
+                    {
+                        <DxButton Text="@FormatMsg("ApplicationReportPackage.RecycleBinTab", VisibleRecycleBinEntries.Count)"
+                                  RenderStyle="ButtonRenderStyle.Link"
+                                  SizeMode="SizeMode.Small"
+                                  CssClass="@RecycleBinPaneTabCss"
+                                  Click="@ShowRecycleBinPaneAsync" />
+                    }
+                    @if (IsThisProfilePane && VisibleCatalogEntries.Count > 0)
+                    {
+                    <DxButton Text="@Msg("ApplicationReportPackage.SelectAll")"
+                              RenderStyle="ButtonRenderStyle.Link"
+                              SizeMode="SizeMode.Small"
+                              CssClass="app-item-doc-copies__action-btn"
+                              Click="@SelectAllAsync" />
+                    <DxButton Text="@Msg("ApplicationReportPackage.ClearSelection")"
+                              RenderStyle="ButtonRenderStyle.Link"
+                              SizeMode="SizeMode.Small"
+                              CssClass="app-item-doc-copies__action-btn"
+                              Click="@ClearSelectionAsync" />
+                    }
+                    @if (IsThisProfilePane)
+                    {
+                    <DxButton Text="@Msg("ApplicationReportPackage.PlaceholderManual")"
+                              RenderStyle="ButtonRenderStyle.Link"
+                              SizeMode="SizeMode.Small"
+                              CssClass="app-item-doc-copies__action-btn"
+                              Click="@OpenPlaceholderManualAsync" />
+                    @if (ShowScanEntryVisible)
+                    {
+                        <DxButton Text="Create template"
+                                  RenderStyle="ButtonRenderStyle.Link"
+                                  SizeMode="SizeMode.Small"
+                                  CssClass="app-item-doc-copies__action-btn"
+                                  title="@ScanEntryTitle"
+                                  Click="@OpenScanAsync" />
+                    }
+                    @if (ShowConvertEntry)
+                    {
+                        <DxButton Text="Add existing template"
+                                  RenderStyle="ButtonRenderStyle.Link"
+                                  SizeMode="SizeMode.Small"
+                                  CssClass="app-item-doc-copies__action-btn"
+                                  Click="@(() => OpenConvertAsync(manual: true))" />
+                    }
+                    }
+                </div>
+            }
+            else
+            {
             @if (ShowRecycleBinTab)
             {
                 <div class="resminamalar-catalog__pane-tabs" role="tablist">
@@ -77,6 +143,7 @@
                           SizeMode="SizeMode.Small"
                           CssClass="app-item-doc-copies__action-btn"
                           Click="@(() => OpenConvertAsync(manual: true))" />
+            }
             }
             }
         </div>
@@ -158,6 +225,22 @@
                 </div>
             }
         }
+        else if (IsSharedPane)
+        {
+            <p class="resminamalar-catalog__shared-hint">@Msg("ApplicationReportPackage.SharedHint")</p>
+            @if (SharedEntries.Count == 0)
+            {
+                <div class="app-item-doc-copies__empty" role="status">
+                    <p>@Msg("ApplicationReportPackage.SharedEmpty")</p>
+                </div>
+            }
+            else
+            {
+                <div class="resminamalar-catalog">
+                    @RenderSharedCards()
+                </div>
+            }
+        }
         else if (VisibleCatalogEntries.Count == 0)
         {
             <div class="app-item-doc-copies__empty" role="status">
@@ -191,7 +274,7 @@
                     {
                         <p class="app-item-doc-copies__toolbar-hint">@GetRecycleConfirmPrompt()</p>
                     }
-                    else if (IsCatalogPane)
+                    else if (IsThisProfilePane)
                     {
                     <p class="app-item-doc-copies__subtitle">@GetSubtitle()</p>
                     @if (_packageConfirmPending)
@@ -230,7 +313,7 @@
                                   Enabled="@(!_recycleBusy)"
                                   Click="@CancelRecycleConfirm" />
                     }
-                    else if (IsCatalogPane)
+                    else if (IsThisProfilePane)
                     {
                     @if (_packageConfirmPending)
                     {
@@ -299,6 +382,8 @@
         Array.Empty<ApplicationWordReportPackageCatalogEntry>();
     [Parameter] public IReadOnlyList<ApplicationWordReportPackageCatalogEntry> RecycleBinEntries { get; set; } =
         Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+    [Parameter] public IReadOnlyList<ApplicationWordReportPackageCatalogEntry> SharedEntries { get; set; } =
+        Array.Empty<ApplicationWordReportPackageCatalogEntry>();
     [Parameter] public bool ShowRecycleBin { get; set; }
     [Parameter] public EventCallback RefreshRequested { get; set; }
     [Parameter] public string UiCultureName { get; set; } = string.Empty;
@@ -350,6 +435,9 @@
     private RecycleConfirmKind _recycleConfirmKind = RecycleConfirmKind.None;
     private ApplicationWordReportPackageCatalogEntry? _recycleConfirmEntry;
     private bool _showRecycleBinPane;
+    private bool _showSharedPane;
+    private bool _sharedToggleBusy;
+    private string? _sharedToggleEntryKey;
     private readonly Dictionary<string, ApplicationWordReportPackageCatalogEntry> _pendingToBin =
         new(StringComparer.Ordinal);
     private readonly HashSet<string> _pendingRestoredKeys = new(StringComparer.Ordinal);
@@ -374,6 +462,10 @@
                         <div class="resminamalar-catalog__main">
                             <span class="resminamalar-catalog__title">@entry.DisplayName</span>
                             <span class="resminamalar-catalog__summary">@FormatKindSummary(entry)</span>
+                            @if (entry.ShowsSharedChip)
+                            {
+                                <span class="resminamalar-catalog__shared-chip">@Msg("ApplicationReportPackage.SharedChip")</span>
+                            }
                             @{
                                 var activity = FormatCatalogActivity(entry);
                             }
@@ -489,6 +581,47 @@
                 </section>
             }
         </div>;
+
+    private RenderFragment RenderSharedCards() =>
+        @<div class="resminamalar-catalog__cards">
+            @foreach (var entry in SharedEntries)
+            {
+                <section @key="entry.EntryKey"
+                         class="resminamalar-catalog__card app-report-package__entry"
+                         aria-label="@entry.DisplayName">
+                    <div class="resminamalar-catalog__card-head">
+                        <span class="resminamalar-catalog__nav-icon @ResminamalarCatalogFormatIcons.CssClass(entry.Kind)"
+                              aria-hidden="true">
+                            @((MarkupString)ResminamalarCatalogFormatIcons.Svg(entry.Kind))
+                        </span>
+                        <div class="resminamalar-catalog__main">
+                            <span class="resminamalar-catalog__title">@entry.DisplayName</span>
+                            <span class="resminamalar-catalog__summary">@FormatKindSummary(entry)</span>
+                        </div>
+                        <div class="resminamalar-catalog__actions">
+                            <DxButton Text="@Msg("ApplicationReportPackage.Preview")"
+                                      RenderStyle="ButtonRenderStyle.Link"
+                                      SizeMode="SizeMode.Small"
+                                      CssClass="app-item-doc-copies__action-btn"
+                                      Enabled="@(!_packageBusy && !_previewBusy && !_recycleBusy && !_sharedToggleBusy)"
+                                      Click="@(() => PreviewEntryAsync(entry))" />
+                            <button type="button"
+                                    class="resminamalar-catalog__toggle @(entry.IsSharedIncluded ? "resminamalar-catalog__toggle--on" : "resminamalar-catalog__toggle--off")"
+                                    role="switch"
+                                    aria-checked="@(entry.IsSharedIncluded ? "true" : "false")"
+                                    aria-label="@entry.DisplayName"
+                                    disabled="@(_packageBusy || _previewBusy || _recycleBusy || _sharedToggleBusy)"
+                                    @onclick="() => ToggleSharedIncludeAsync(entry)">
+                                @(entry.IsSharedIncluded
+                                    ? Msg("ApplicationReportPackage.SharedToggleOn")
+                                    : Msg("ApplicationReportPackage.SharedToggleOff"))
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            }
+        </div>;
+
     private readonly HashSet<string> _pendingPurgedKeys = new(StringComparer.Ordinal);
 
     private enum RecycleConfirmKind
@@ -499,6 +632,20 @@
     }
 
     private bool IsCatalogPane => !_showRecycleBinPane;
+
+    private bool IsThisProfilePane => !_showRecycleBinPane && !_showSharedPane;
+
+    private bool IsSharedPane => !_showRecycleBinPane && _showSharedPane;
+
+    private bool ShowContentTabs =>
+        ShowRecycleBin || SharedEntries.Count > 0;
+
+    private string TopSelectionCss =>
+        !ShowContentTabs
+            ? string.Empty
+            : IsSharedPane
+                ? "app-report-package__top-selection--content app-report-package__top-selection--shared"
+                : "app-report-package__top-selection--content";
 
     private bool ShowRecycleBinTab =>
         ShowRecycleBin || RecycleBinEntries.Count > 0 || _pendingToBin.Count > 0;
@@ -558,12 +705,19 @@
     private bool ShouldShowFooter =>
         _recycleBusy
         || _recycleConfirmKind != RecycleConfirmKind.None
-        || (IsCatalogPane && VisibleCatalogEntries.Count > 0)
+        || (IsThisProfilePane && VisibleCatalogEntries.Count > 0)
         || (!IsCatalogPane && VisibleRecycleBinEntries.Count > 0)
         || !string.IsNullOrWhiteSpace(_packageStatusMessage);
 
     private string CatalogPaneTabCss =>
-        IsCatalogPane
+        IsThisProfilePane
+            ? "app-item-doc-copies__action-btn resminamalar-catalog__pane-tab resminamalar-catalog__pane-tab--active"
+            : "app-item-doc-copies__action-btn resminamalar-catalog__pane-tab";
+
+    private string ThisProfilePaneTabCss => CatalogPaneTabCss;
+
+    private string SharedPaneTabCss =>
+        IsSharedPane
             ? "app-item-doc-copies__action-btn resminamalar-catalog__pane-tab resminamalar-catalog__pane-tab--active"
             : "app-item-doc-copies__action-btn resminamalar-catalog__pane-tab";
 
@@ -585,14 +739,16 @@
     protected override async Task OnParametersSetAsync()
     {
         if (string.IsNullOrWhiteSpace(FocusEntryKey)
-            || CatalogEntries.Count == 0
+            || (CatalogEntries.Count == 0 && SharedEntries.Count == 0)
             || string.Equals(_handledFocusEntryKey, FocusEntryKey, StringComparison.Ordinal))
         {
             return;
         }
 
         var entry = CatalogEntries.FirstOrDefault(e =>
-            string.Equals(e.EntryKey, FocusEntryKey, StringComparison.Ordinal));
+            string.Equals(e.EntryKey, FocusEntryKey, StringComparison.Ordinal))
+            ?? SharedEntries.FirstOrDefault(e =>
+                string.Equals(e.EntryKey, FocusEntryKey, StringComparison.Ordinal));
         if (entry == null)
             return;
 
@@ -983,9 +1139,22 @@
         }
     }
 
-    private Task ShowCatalogPaneAsync()
+    private Task ShowCatalogPaneAsync() => ShowThisProfilePaneAsync();
+
+    private Task ShowThisProfilePaneAsync()
     {
         _showRecycleBinPane = false;
+        _showSharedPane = false;
+        _recycleConfirmKind = RecycleConfirmKind.None;
+        _recycleConfirmEntry = null;
+        return Task.CompletedTask;
+    }
+
+    private Task ShowSharedPaneAsync()
+    {
+        _showRecycleBinPane = false;
+        _showSharedPane = true;
+        _packageConfirmPending = false;
         _recycleConfirmKind = RecycleConfirmKind.None;
         _recycleConfirmEntry = null;
         return Task.CompletedTask;
@@ -998,6 +1167,87 @@
         _recycleConfirmKind = RecycleConfirmKind.None;
         _recycleConfirmEntry = null;
         return Task.CompletedTask;
+    }
+
+    private async Task ToggleSharedIncludeAsync(ApplicationWordReportPackageCatalogEntry entry)
+    {
+        if (_sharedToggleBusy || _packageBusy || _previewBusy || _recycleBusy)
+            return;
+
+        _sharedToggleBusy = true;
+        _sharedToggleEntryKey = entry.EntryKey;
+        ClearStatusMessages();
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+
+        try
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileTemplate>();
+            var application = objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
+                .Include(item => item.ApplicationProfile)
+                    .ThenInclude(profile => profile.NestedTemplates)
+                .FirstOrDefault(item => item.ID == ApplicationProfileInstanceId);
+            var profile = application?.ApplicationProfile;
+            if (profile == null)
+            {
+                _packageStatusMessage = Msg("ApplicationReportPackage.SharedToggleFailed");
+                _packageStatusIsError = true;
+                return;
+            }
+
+            if (entry.IsSharedIncluded)
+            {
+                var nested = entry.ApplicationProfileTemplateId is Guid templateId && templateId != Guid.Empty
+                    ? ApplicationProfileNestedTemplateCatalogHelper.LoadProfileTemplate(objectSpace, templateId)
+                    : ApplicationProfileSharedTemplateIncludeHelper.FindLiveInclude(
+                        objectSpace, profile, entry.DisplayName);
+                if (nested == null)
+                {
+                    _packageStatusMessage = Msg("ApplicationReportPackage.SharedToggleFailed");
+                    _packageStatusIsError = true;
+                    return;
+                }
+
+                ApplicationProfileSharedTemplateIncludeHelper.Exclude(objectSpace, profile, nested);
+            }
+            else
+            {
+                var kind = entry.Kind == ApplicationWordReportPackageEntryKind.UserExcel
+                    ? ApplicationProfileTemplateKind.Excel
+                    : ApplicationProfileTemplateKind.Word;
+                ApplicationProfileSharedTemplateIncludeHelper.Include(
+                    objectSpace,
+                    profile,
+                    entry.DisplayName,
+                    kind,
+                    entry.SortOrder,
+                    entry.CatalogScope,
+                    entry.DataScope,
+                    entry.CategoryKey);
+            }
+
+            objectSpace.CommitChanges();
+
+            if (RefreshRequested.HasDelegate)
+                await RefreshRequested.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            _packageStatusMessage = ex is UserFriendlyException
+                ? ex.Message
+                : Msg("ApplicationReportPackage.SharedToggleFailed");
+            _packageStatusIsError = true;
+            ErrorReporter.ReportReportPackageError(
+                "Resminamalar shared include toggle failed.",
+                ApplicationRuntimeLogCategories.ReportPackageComponent,
+                ex);
+        }
+        finally
+        {
+            _sharedToggleBusy = false;
+            _sharedToggleEntryKey = null;
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     private string FormatRecycleSummary(ApplicationWordReportPackageCatalogEntry entry)

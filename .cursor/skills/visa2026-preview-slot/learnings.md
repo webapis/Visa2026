@@ -23,6 +23,14 @@ Purpose: **shell, layout, occupants, catalog card UX, JS/CSS** — not Resminama
 
 ## Entries
 
+### 2026-09-02 — Resminamalar This profile / Shared tab chrome (Resminamalar)
+
+- **Need**: Case catalog tabs plus SHARED chip and green/grey ON/OFF pill matching the signed-off prototypes.
+- **Fix**: `.resminamalar-catalog__pane-tabs` + `__utilities` (Recycle Bin stays a utility); `__shared-chip`; `__toggle--on` / `--off`. Shared tab uses `justify-content` so Recycle Bin sits on the right.
+- **Test**: Ctrl+F5 catalog This profile and Shared. Download package hidden on Shared. Chip only on included shared rows.
+- **Prevent**: Do not restyle Recycle Bin as a third content tab. Toggle CSS lives in `resminamalar-catalog.css`, not `site.css`.
+- **Cross-skill**: preview-slot | resminamalar
+
 ### 2026-08-27 — Remove Duplicate from approval-leg occupant
 
 - **Need**: Duplicate on in-use catalog rows and the locked editor footer is not wanted.
