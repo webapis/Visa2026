@@ -49,14 +49,23 @@ public sealed class ApplicationWordReportPackageFileAccess
         string entryKey) =>
         TryBuildPreviewBundleAsync(applicationId, entryKey, applicationItemIds: null);
 
-    public async Task<ApplicationWordReportPackagePreviewBundle?> TryBuildPreviewBundleAsync(
+    public Task<ApplicationWordReportPackagePreviewBundle?> TryBuildPreviewBundleAsync(
         Guid applicationId,
         string entryKey,
         IReadOnlyList<Guid>? applicationItemIds)
     {
         if (applicationId == Guid.Empty || string.IsNullOrWhiteSpace(entryKey))
-            return null;
+            return Task.FromResult<ApplicationWordReportPackagePreviewBundle?>(null);
 
+        var key = entryKey.Trim();
+        return Task.Run(() => BuildPreviewBundleCoreAsync(applicationId, key, applicationItemIds));
+    }
+
+    private async Task<ApplicationWordReportPackagePreviewBundle?> BuildPreviewBundleCoreAsync(
+        Guid applicationId,
+        string entryKey,
+        IReadOnlyList<Guid>? applicationItemIds)
+    {
         using var objectSpace = nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
         var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
         if (application == null)

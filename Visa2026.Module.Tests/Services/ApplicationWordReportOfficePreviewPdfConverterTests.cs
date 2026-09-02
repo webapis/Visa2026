@@ -44,6 +44,27 @@ public class ApplicationWordReportOfficePreviewPdfConverterTests
         Assert.Equal((byte)'F', pdf[3]);
     }
 
+    [Fact]
+    public void TryConvertManyToMergedPdf_joins_two_word_files()
+    {
+        var first = Visa2026.Module.Tests.TemplateScan.ScanOfficeYellowExtractorTests.CreateWordFixture("Birinji");
+        var second = Visa2026.Module.Tests.TemplateScan.ScanOfficeYellowExtractorTests.CreateWordFixture("Ikinji");
+        var converter = new ApplicationWordReportOfficePreviewPdfConverter();
+
+        var merged = converter.TryConvertManyToMergedPdf(
+        [
+            (first, "one.docx"),
+            (second, "two.docx"),
+        ]);
+
+        Assert.NotNull(merged);
+        Assert.True(merged!.Length > 200);
+        Assert.Equal((byte)'%', merged[0]);
+        Assert.Equal((byte)'P', merged[1]);
+        Assert.Equal((byte)'D', merged[2]);
+        Assert.Equal((byte)'F', merged[3]);
+    }
+
     private static byte[] CreateMinimalXlsx()
     {
         using var workbook = new XLWorkbook();

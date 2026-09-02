@@ -159,21 +159,20 @@ public sealed class ApplicationWordReportPackageCatalogService
         ApplicationProfileInstance application,
         IList<ApplicationRosterMergeLine> selectedItems)
     {
-        foreach (var profileTemplate in ApplicationProfileNestedTemplateCatalogHelper.GetOrderedTemplates(application, objectSpace))
-        {
-            var loadedProfileTemplate = ApplicationProfileNestedTemplateCatalogHelper.LoadProfileTemplate(
-                    objectSpace,
-                    profileTemplate.ID)
-                ?? profileTemplate;
+        var profileTemplates = ApplicationProfileNestedTemplateCatalogHelper
+            .GetOrderedTemplates(application, objectSpace);
+        var userByName = ApplicationProfileNestedTemplateCatalogHelper.LoadActiveUserTemplatesByName(
+            objectSpace,
+            profileTemplates.Select(template => template.TemplateName));
 
-            var userTemplate = ApplicationProfileNestedTemplateCatalogHelper.TryResolveMergeTemplate(
-                objectSpace,
-                loadedProfileTemplate);
+        foreach (var profileTemplate in profileTemplates)
+        {
+            userByName.TryGetValue(profileTemplate.TemplateName ?? string.Empty, out var userTemplate);
 
             var (level, messageKey) = EvaluateProfileTemplateReadiness(
                 objectSpace,
                 application,
-                loadedProfileTemplate,
+                profileTemplate,
                 userTemplate,
                 selectedItems);
 
@@ -187,21 +186,21 @@ public sealed class ApplicationWordReportPackageCatalogService
 
             yield return new ApplicationWordReportPackageCatalogEntry
             {
-                EntryKey = ApplicationProfileNestedTemplateCatalogHelper.BuildEntryKey(loadedProfileTemplate),
-                DisplayName = loadedProfileTemplate.TemplateName ?? string.Empty,
+                EntryKey = ApplicationProfileNestedTemplateCatalogHelper.BuildEntryKey(profileTemplate),
+                DisplayName = profileTemplate.TemplateName ?? string.Empty,
                 OutputFileName = ApplicationProfileNestedTemplateCatalogHelper.ResolveOutputFileName(
-                    loadedProfileTemplate,
+                    profileTemplate,
                     userTemplate),
                 Kind = ApplicationProfileNestedTemplateCatalogHelper.ResolveEntryKind(
-                    loadedProfileTemplate,
+                    profileTemplate,
                     userTemplate),
                 Readiness = level,
                 ReadinessMessageKey = messageKey,
                 ReadinessHints = dryRunHints,
                 UserReportTemplateId = userTemplate?.ID,
-                ApplicationProfileTemplateId = loadedProfileTemplate.ID,
+                ApplicationProfileTemplateId = profileTemplate.ID,
                 CanMoveToRecycleBin = ApplicationProfileTemplateRecycleBin.CanMoveToRecycleBin(
-                    loadedProfileTemplate),
+                    profileTemplate),
             };
         }
     }
@@ -210,33 +209,31 @@ public sealed class ApplicationWordReportPackageCatalogService
         IObjectSpace objectSpace,
         ApplicationProfileInstance application)
     {
-        foreach (var profileTemplate in ApplicationProfileNestedTemplateCatalogHelper.GetRecycledTemplates(application, objectSpace))
-        {
-            var loadedProfileTemplate = ApplicationProfileNestedTemplateCatalogHelper.LoadProfileTemplate(
-                    objectSpace,
-                    profileTemplate.ID)
-                ?? profileTemplate;
+        var recycled = ApplicationProfileNestedTemplateCatalogHelper.GetRecycledTemplates(application, objectSpace);
+        var userByName = ApplicationProfileNestedTemplateCatalogHelper.LoadActiveUserTemplatesByName(
+            objectSpace,
+            recycled.Select(template => template.TemplateName));
 
-            var userTemplate = ApplicationProfileNestedTemplateCatalogHelper.TryResolveMergeTemplate(
-                objectSpace,
-                loadedProfileTemplate);
+        foreach (var profileTemplate in recycled)
+        {
+            userByName.TryGetValue(profileTemplate.TemplateName ?? string.Empty, out var userTemplate);
 
             yield return new ApplicationWordReportPackageCatalogEntry
             {
-                EntryKey = ApplicationProfileNestedTemplateCatalogHelper.BuildEntryKey(loadedProfileTemplate),
-                DisplayName = loadedProfileTemplate.TemplateName ?? string.Empty,
+                EntryKey = ApplicationProfileNestedTemplateCatalogHelper.BuildEntryKey(profileTemplate),
+                DisplayName = profileTemplate.TemplateName ?? string.Empty,
                 OutputFileName = ApplicationProfileNestedTemplateCatalogHelper.ResolveOutputFileName(
-                    loadedProfileTemplate,
+                    profileTemplate,
                     userTemplate),
                 Kind = ApplicationProfileNestedTemplateCatalogHelper.ResolveEntryKind(
-                    loadedProfileTemplate,
+                    profileTemplate,
                     userTemplate),
                 Readiness = ApplicationWordReportPackageReadinessLevel.Warning,
                 ReadinessMessageKey = "ApplicationReportPackage.RecycleBin.InBin",
                 UserReportTemplateId = userTemplate?.ID,
-                ApplicationProfileTemplateId = loadedProfileTemplate.ID,
-                RecycledAtUtc = loadedProfileTemplate.RecycledAtUtc,
-                RecycledByUserName = loadedProfileTemplate.RecycledByUserName,
+                ApplicationProfileTemplateId = profileTemplate.ID,
+                RecycledAtUtc = profileTemplate.RecycledAtUtc,
+                RecycledByUserName = profileTemplate.RecycledByUserName,
             };
         }
     }
@@ -255,7 +252,9 @@ public sealed class ApplicationWordReportPackageCatalogService
                 "ApplicationReportPackage.Readiness.ProfileTemplateUnlinked");
         }
 
-        if (!ApplicationProfileNestedTemplateCatalogHelper.HasMergeableFile(profileTemplate, userTemplate))
+        var fileLoaded = profileTemplate.TemplateFile != null || userTemplate.TemplateFile != null;
+        if (fileLoaded
+            && !ApplicationProfileNestedTemplateCatalogHelper.HasMergeableFile(profileTemplate, userTemplate))
         {
             return (ApplicationWordReportPackageReadinessLevel.Warning,
                 "ApplicationReportPackage.Readiness.NoTemplateFile");
@@ -265,7 +264,8 @@ public sealed class ApplicationWordReportPackageCatalogService
             objectSpace,
             application,
             userTemplate,
-            selectedItems);
+            selectedItems,
+            requireLoadedTemplateFile: fileLoaded);
     }
 
     internal static string BuildUserEntryKey(UserReportTemplate template) =>

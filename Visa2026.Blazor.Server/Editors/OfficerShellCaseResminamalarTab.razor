@@ -29,6 +29,10 @@
     {
         <p class="os-empty">Select at least one person in the header to view Resminamalar.</p>
     }
+    else if (_catalogLoading)
+    {
+        <p class="os-empty" role="status">Loading catalog…</p>
+    }
     else
     {
         <div class="ct-resmi-split">
@@ -56,6 +60,7 @@
     [Parameter] public IReadOnlyList<Guid>? SelectedPersonIds { get; set; }
 
     [Inject] private ApplicationWordReportPackageCatalogService CatalogService { get; set; } = null!;
+    [Inject] private ResminamalarCaseCatalogCache CatalogCache { get; set; } = null!;
     [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
     [Inject] private IVisaPreviewSlotService PreviewSlotService { get; set; } = null!;
 
@@ -71,6 +76,9 @@
     private bool _showRecycleBin;
     private string _uiCultureName = string.Empty;
     private EventCallback _refreshRequested;
+    private Guid _loadedCatalogApplicationId;
+    private bool _catalogLoading;
+    private bool _catalogLoadQueued;
 
     private string EmptyCatalog => VisaUiMessages.Get("ApplicationReportPackage.Empty", _uiCultureName);
 
@@ -111,35 +119,81 @@
             _catalogEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
             _recycleBinEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
             _showRecycleBin = false;
+            _loadedCatalogApplicationId = Guid.Empty;
+            _catalogLoading = false;
             return;
         }
 
-        ReloadCatalog();
+        if (CatalogCache.TryGet(_applicationId, out var cached, out var cachedNumber))
+        {
+            ApplyCatalog(cached, cachedNumber);
+            _catalogLoading = false;
+            return;
+        }
+
+        if (_applicationId != _loadedCatalogApplicationId)
+        {
+            _catalogLoading = true;
+            _catalogLoadQueued = true;
+        }
     }
 
-    private void ReloadCatalog()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
-        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(_applicationId);
-        if (application == null)
+        if (!_catalogLoadQueued)
+            return;
+
+        _catalogLoadQueued = false;
+        var applicationId = _applicationId;
+        var catalog = await Task.Run(() => BuildCatalog(applicationId)).ConfigureAwait(true);
+        if (applicationId != _applicationId)
+            return;
+
+        if (catalog == null)
         {
             _catalogEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
             _recycleBinEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
             _showRecycleBin = false;
             _applicationNumber = string.Empty;
+            _loadedCatalogApplicationId = Guid.Empty;
+            _catalogLoading = false;
+            await InvokeAsync(StateHasChanged);
             return;
         }
 
-        var catalog = CatalogService.Build(objectSpace, application, WordReportGenerationContext.ForApplication());
+        CatalogCache.Set(applicationId, catalog.Value.Catalog, catalog.Value.ApplicationNumber);
+        ApplyCatalog(catalog.Value.Catalog, catalog.Value.ApplicationNumber);
+        _catalogLoading = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void ApplyCatalog(ApplicationWordReportPackageCatalog catalog, string applicationNumber)
+    {
         _catalogEntries = catalog.Entries;
         _recycleBinEntries = catalog.RecycleBinEntries;
         _showRecycleBin = catalog.HasProfileNestedCatalog;
-        _applicationNumber = application.FullApplicationNumber ?? application.ProcessNumber ?? string.Empty;
+        _applicationNumber = applicationNumber;
+        _loadedCatalogApplicationId = _applicationId;
+    }
+
+    private (ApplicationWordReportPackageCatalog Catalog, string ApplicationNumber)? BuildCatalog(Guid applicationId)
+    {
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
+        if (application == null)
+            return null;
+
+        var catalog = CatalogService.Build(objectSpace, application, WordReportGenerationContext.ForApplication());
+        var number = application.FullApplicationNumber ?? application.ProcessNumber ?? string.Empty;
+        return (catalog, number);
     }
 
     private Task ReloadCatalogAsync()
     {
-        ReloadCatalog();
+        CatalogCache.Clear();
+        _loadedCatalogApplicationId = Guid.Empty;
+        _catalogLoading = true;
+        _catalogLoadQueued = true;
         return InvokeAsync(StateHasChanged);
     }
 

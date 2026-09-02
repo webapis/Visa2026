@@ -56,12 +56,13 @@ public sealed class ApplicationWordReportEntryGenerator
         if (string.IsNullOrWhiteSpace(entryKey))
             return null;
 
-        var catalogService = serviceProvider.GetRequiredService<ApplicationWordReportPackageCatalogService>();
-        var catalog = catalogService.Build(objectSpace, application, context);
-        if (!catalog.Entries.Any(entry => string.Equals(entry.EntryKey, entryKey, StringComparison.Ordinal)))
-            return null;
-
-        var outputs = await GenerateEntryOutputsAsync(objectSpace, application, entryKey, context, catalog.Entries, cancellationToken)
+        var outputs = await GenerateEntryOutputsAsync(
+                objectSpace,
+                application,
+                entryKey,
+                context,
+                Array.Empty<ApplicationWordReportPackageCatalogEntry>(),
+                cancellationToken)
             .ConfigureAwait(false);
         var first = outputs.FirstOrDefault();
         if (first.Stream == null)
@@ -103,6 +104,20 @@ public sealed class ApplicationWordReportEntryGenerator
             throw new ArgumentNullException(nameof(application));
         if (context == null)
             throw new ArgumentNullException(nameof(context));
+
+        // Preview always asks for one catalog key. Rebuilding the full catalog (dry-run on
+        // every nested template) doubled open time before any Word/PDF work started.
+        if (selectedEntryKeys is { Count: 1 })
+        {
+            return await GenerateEntryOutputsAsync(
+                    objectSpace,
+                    application,
+                    selectedEntryKeys.First(),
+                    context,
+                    Array.Empty<ApplicationWordReportPackageCatalogEntry>(),
+                    cancellationToken)
+                .ConfigureAwait(false);
+        }
 
         var catalogService = serviceProvider.GetRequiredService<ApplicationWordReportPackageCatalogService>();
         var catalog = catalogService.Build(objectSpace, application, context);
@@ -203,17 +218,22 @@ public sealed class ApplicationWordReportEntryGenerator
         if (visibilityService == null && !skipVisibilityCheck)
             return new List<(string, MemoryStream)>();
 
-        var template = objectSpace.GetObjectsQuery<UserReportTemplate>()
-            .Include(t => t.ApplicableTypeLinks)
-                .ThenInclude(l => l.ApplicationType)
-            .Include(t => t.ApplicableGroupLinks)
-                .ThenInclude(l => l.ApplicationTypeGroup)
-                    .ThenInclude(g => g.Members)
-            .Include(t => t.ApplicableProjectContractLinks)
-                .ThenInclude(l => l.ProjectContract)
+        IQueryable<UserReportTemplate> templateQuery = objectSpace.GetObjectsQuery<UserReportTemplate>()
             .Include(t => t.TemplateFile)
-            .Include(t => t.Placeholders)
-            .FirstOrDefault(t => t.ID == templateId && t.IsActive);
+            .Include(t => t.Placeholders);
+        if (!skipVisibilityCheck)
+        {
+            templateQuery = templateQuery
+                .Include(t => t.ApplicableTypeLinks)
+                    .ThenInclude(l => l.ApplicationType)
+                .Include(t => t.ApplicableGroupLinks)
+                    .ThenInclude(l => l.ApplicationTypeGroup)
+                        .ThenInclude(g => g.Members)
+                .Include(t => t.ApplicableProjectContractLinks)
+                    .ThenInclude(l => l.ProjectContract);
+        }
+
+        var template = templateQuery.FirstOrDefault(t => t.ID == templateId && t.IsActive);
 
         if (template == null
             || (visibilityService != null
@@ -233,19 +253,31 @@ public sealed class ApplicationWordReportEntryGenerator
         }
 
         var selectedItems = context.ResolveApplicationItems(objectSpace, application);
-        var outputs = new List<(string FileName, MemoryStream Stream)>();
-        foreach (var item in selectedItems)
+        if (selectedItems.Count <= 1)
+        {
+            var outputs = new List<(string FileName, MemoryStream Stream)>();
+            var only = selectedItems.FirstOrDefault();
+            if (only == null)
+                return outputs;
+
+            cancellationToken.ThrowIfCancellationRequested();
+            var ms = await GenerateUserEntryForItemAsync(template, only, cancellationToken).ConfigureAwait(false);
+            if (ms != null)
+                outputs.Add((BuildPerItemUserTemplateFileName(template, only), ms));
+            return outputs;
+        }
+
+        var generated = await Task.WhenAll(selectedItems.Select(async item =>
         {
             cancellationToken.ThrowIfCancellationRequested();
             var ms = await GenerateUserEntryForItemAsync(template, item, cancellationToken).ConfigureAwait(false);
-            if (ms == null)
-                continue;
+            return (Item: item, Stream: ms);
+        })).ConfigureAwait(false);
 
-            var fileName = BuildPerItemUserTemplateFileName(template, item);
-            outputs.Add((fileName, ms));
-        }
-
-        return outputs;
+        return generated
+            .Where(pair => pair.Stream != null)
+            .Select(pair => (BuildPerItemUserTemplateFileName(template, pair.Item), pair.Stream!))
+            .ToList();
     }
 
     private async Task<MemoryStream?> GenerateUserEntryAsync(

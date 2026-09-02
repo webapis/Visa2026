@@ -275,12 +275,49 @@ public static class ApplicationProfileNestedTemplateCatalogHelper
         if (string.IsNullOrEmpty(name))
             return null;
 
+        var lowered = name.ToLower();
         return objectSpace.GetObjectsQuery<UserReportTemplate>()
             .Include(t => t.Placeholders)
             .Include(t => t.TemplateFile)
-            .Where(t => t.IsActive)
-            .AsEnumerable()
-            .FirstOrDefault(t => string.Equals(t.TemplateName, name, StringComparison.OrdinalIgnoreCase));
+            .Where(t => t.IsActive
+                && t.TemplateName != null
+                && t.TemplateName.ToLower() == lowered)
+            .FirstOrDefault();
+    }
+
+    /// <summary>
+    /// Active user templates matching nested catalog names. Placeholders only — do not
+    /// load <see cref="UserReportTemplate.TemplateFile"/> (that is the Word/Excel blob).
+    /// </summary>
+    public static IReadOnlyDictionary<string, UserReportTemplate> LoadActiveUserTemplatesByName(
+        IObjectSpace objectSpace,
+        IEnumerable<string?> names)
+    {
+        var wanted = names
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .Select(name => name!.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        if (objectSpace == null || wanted.Count == 0)
+            return new Dictionary<string, UserReportTemplate>(StringComparer.OrdinalIgnoreCase);
+
+        var lowered = wanted.Select(name => name.ToLower()).ToList();
+        var matches = objectSpace.GetObjectsQuery<UserReportTemplate>()
+            .Include(t => t.Placeholders)
+            .Where(t => t.IsActive
+                && t.TemplateName != null
+                && lowered.Contains(t.TemplateName.ToLower()))
+            .ToList();
+
+        var map = new Dictionary<string, UserReportTemplate>(StringComparer.OrdinalIgnoreCase);
+        foreach (var template in matches)
+        {
+            if (string.IsNullOrWhiteSpace(template.TemplateName) || map.ContainsKey(template.TemplateName))
+                continue;
+            map[template.TemplateName] = template;
+        }
+
+        return map;
     }
 
     public static bool HasMergeableFile(ApplicationProfileTemplate profileTemplate, UserReportTemplate? userTemplate) =>

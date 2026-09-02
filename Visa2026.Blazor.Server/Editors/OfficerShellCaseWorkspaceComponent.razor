@@ -308,8 +308,11 @@
             ? _peopleRecordKey
             : PeopleLinkedRecordFocusKey;
 
+    private VisaPreviewSlotMode _previewSlotMode;
+
     protected override void OnInitialized()
     {
+        _previewSlotMode = PreviewSlotService.State.Mode;
         PreviewSlotService.StateChanged += OnPreviewSlotStateChanged;
     }
 
@@ -318,7 +321,21 @@
         PreviewSlotService.StateChanged -= OnPreviewSlotStateChanged;
     }
 
-    private void OnPreviewSlotStateChanged() => _ = InvokeAsync(StateHasChanged);
+    private void OnPreviewSlotStateChanged()
+    {
+        var mode = PreviewSlotService.State.Mode;
+        var previous = _previewSlotMode;
+        _previewSlotMode = mode;
+
+        // Resminamalar preview lives in #visa-preview-slot. Re-rendering the case workspace
+        // rebuilds the 17-row catalog on the same circuit and makes open/close feel stuck.
+        if (mode == VisaPreviewSlotMode.Resminamalar)
+            return;
+        if (mode == VisaPreviewSlotMode.Closed && previous == VisaPreviewSlotMode.Resminamalar)
+            return;
+
+        _ = InvokeAsync(StateHasChanged);
+    }
 
     private bool IsIssuedRowOpen(string catalogKey, Guid rowId)
     {

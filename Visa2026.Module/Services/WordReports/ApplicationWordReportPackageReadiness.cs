@@ -73,9 +73,11 @@ public static class ApplicationWordReportPackageReadinessEvaluator
         IObjectSpace objectSpace,
         ApplicationProfileInstance application,
         UserReportTemplate template,
-        IList<ApplicationRosterMergeLine>? selectedItems = null)
+        IList<ApplicationRosterMergeLine>? selectedItems = null,
+        bool requireLoadedTemplateFile = true)
     {
-        if (template.TemplateFile == null || template.TemplateFile.Size <= 0)
+        if (requireLoadedTemplateFile
+            && (template.TemplateFile == null || template.TemplateFile.Size <= 0))
         {
             return (ApplicationWordReportPackageReadinessLevel.Warning,
                 "ApplicationReportPackage.Readiness.NoTemplateFile");

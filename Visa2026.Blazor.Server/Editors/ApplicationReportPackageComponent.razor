@@ -1520,6 +1520,19 @@
         var previewIds = ApplicationItemIds;
 
         ClearStatusMessages();
+
+        if (UseInlinePreview && OnInlinePreviewRequested.HasDelegate)
+        {
+            await OnInlinePreviewRequested.InvokeAsync(new ReportPackagePreviewRequest
+            {
+                ApplicationProfileInstanceId = ApplicationProfileInstanceId,
+                EntryKey = entry.EntryKey,
+                DisplayName = entry.DisplayName,
+                ApplicationItemIds = previewIds,
+            });
+            return;
+        }
+
         _previewBusy = true;
         _previewEntryKey = entry.EntryKey;
         await InvokeAsync(StateHasChanged);
@@ -1527,17 +1540,7 @@
 
         try
         {
-            if (UseInlinePreview && OnInlinePreviewRequested.HasDelegate)
-            {
-                await OnInlinePreviewRequested.InvokeAsync(new ReportPackagePreviewRequest
-                {
-                    ApplicationProfileInstanceId = ApplicationProfileInstanceId,
-                    EntryKey = entry.EntryKey,
-                    DisplayName = entry.DisplayName,
-                    ApplicationItemIds = previewIds,
-                });
-            }
-            else if (_previewDialog != null)
+            if (_previewDialog != null)
             {
                 await _previewDialog.OpenAsync(ApplicationProfileInstanceId, entry.EntryKey, entry.DisplayName, previewIds);
             }

@@ -309,6 +309,7 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<ApplicationProfileInstancePersonPdfBatchEnqueueService>();
             services.AddScoped<ApplicationItemDocumentPackageEnqueueService>();
             services.AddScoped<ApplicationWordReportPackageCatalogService>();
+            services.AddScoped<ResminamalarCaseCatalogCache>();
             services.AddScoped<ApplicationWordReportBatchEnqueueService>();
             services.AddSingleton<IWordReportBatchTrackNotifier, WordReportBatchTrackNotifier>();
             services.AddScoped<ApplicationWordReportPackageFileAccess>();

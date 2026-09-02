@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Threading.Tasks;
 using DevExpress.Spreadsheet;
 using DevExpress.XtraPrinting;
 using DevExpress.XtraRichEdit;
@@ -124,12 +125,18 @@ public sealed class ApplicationWordReportOfficePreviewPdfConverter
         if (officeFiles.Count == 1)
             return TryConvertToPdf(officeFiles[0].Content, officeFiles[0].FileName);
 
-        var pdfStreams = new List<MemoryStream>();
+        var pdfs = new byte[officeFiles.Count][];
+        Parallel.For(0, officeFiles.Count, index =>
+        {
+            var (content, fileName) = officeFiles[index];
+            pdfs[index] = TryConvertToPdf(content, fileName) ?? Array.Empty<byte>();
+        });
+
+        var pdfStreams = new List<MemoryStream>(officeFiles.Count);
         try
         {
-            foreach (var (content, fileName) in officeFiles)
+            foreach (var pdf in pdfs)
             {
-                var pdf = TryConvertToPdf(content, fileName);
                 if (pdf == null || pdf.Length == 0)
                     return null;
 

@@ -25,6 +25,16 @@ Purpose: **catalog, seed gate, batch worker, preview, permissions, dialog UX** �
 
 ## Entries
 
+### 2026-09-02 — Faster case Preview and Resminamalar tab switch (Application)
+
+- **Symptom**: Preview of `SAHSY KAGYZ_117` took ~5s; Close was sticky; switching to Resminamalar showed Opening Resminamalar… while the catalog rebuilt.
+- **Try**: Case 8/-015 with two people; Preview/Close then Overview → Resminamalar.
+- **Test**: Officer confirmed after restart/hard-refresh. Converter/entry-generator tests earlier this session. Build skipped at commit request.
+- **Root cause**: Tab switch and Preview both ran `CatalogService.Build` on the Blazor circuit. Nested catalog resolved each row with `AsEnumerable()` of every user template plus `TemplateFile` bytes. Şahsy Preview then generated and converted two Word files sequentially.
+- **Fix**: Query merge templates by name without file blobs; cache case catalog; load catalog after first paint. Single-key Preview skips catalog Build; person merges and PDF convert run in parallel off the UI thread; Close hides the slot first.
+- **Prevent**: Do not `AsEnumerable()` all `UserReportTemplate` rows with `TemplateFile` to match one name. Do not rebuild the 17-row catalog on Preview open/close or every tab remount.
+- **Cross-skill**: visa2026-preview-slot
+
 ### 2026-09-02 — Case workspace chips, no By person / By type (Application)
 
 - **Symptom**: Case Resminamalar Preview of `SAHSY KAGYZ_117` filled one person; officers did not want a By person / By type switch.

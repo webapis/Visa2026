@@ -204,9 +204,9 @@
 
     public async Task CloseAsync()
     {
-        await ResetStateAsync();
         if (PreviewClosed.HasDelegate)
             await PreviewClosed.InvokeAsync();
+        await ResetStateAsync();
     }
 
     private void SetPreviewError(string message, Exception? exception = null)
