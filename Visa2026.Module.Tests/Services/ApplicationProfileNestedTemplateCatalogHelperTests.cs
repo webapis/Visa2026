@@ -132,6 +132,24 @@ public class ApplicationProfileNestedTemplateCatalogHelperTests
         Assert.Single(ApplicationProfileNestedTemplateCatalogHelper.GetRecycledTemplates(app));
     }
 
+    [Fact]
+    public void UsesProfileNestedCatalog_TrueWhenProfileHasNoNestedTemplates()
+    {
+        var app = ViaMinistryApp(new ProjectContract { ID = Guid.NewGuid() });
+        app.ApplicationProfile!.NestedTemplates = new ObservableCollection<ApplicationProfileTemplate>();
+
+        Assert.True(ApplicationProfileNestedTemplateCatalogHelper.UsesProfileNestedCatalog(app));
+        Assert.Empty(ApplicationProfileNestedTemplateCatalogHelper.GetOrderedTemplates(app));
+        Assert.Empty(ApplicationProfileNestedTemplateCatalogHelper.GetRecycledTemplates(app));
+    }
+
+    [Fact]
+    public void UsesProfileNestedCatalog_FalseWhenNoProfile()
+    {
+        Assert.False(ApplicationProfileNestedTemplateCatalogHelper.UsesProfileNestedCatalog(
+            new ApplicationProfileInstance()));
+    }
+
     private static ApplicationProfileTemplate ProfileTemplate() =>
         new()
         {

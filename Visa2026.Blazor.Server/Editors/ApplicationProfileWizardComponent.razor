@@ -100,12 +100,7 @@
                 else if (_activeStep == 4)
                 {
                     <ApplicationProfileWizardStepTemplatesPerson Profile="Profile"
-                        Disabled="IsReadOnly"
-                        ObjectSpace="ObjectSpace"
-                        OwnerViewId="OwnerViewId"
-                        OnAddTemplate="AddTemplateCallback"
-                        OnRemoveTemplate="RemoveTemplateCallback"
-                        OnCreateTemplate="CreateTemplateCallback" />
+                        Disabled="IsReadOnly" />
                 }
                 else
                 {
@@ -140,7 +135,7 @@
         ("Company, Signatories", "Letterhead, signatory, representative"),
         ("Results & fields", "Required instance properties"),
         ("Process & SLA", "Ministry and migration duration"),
-                    ("Templates & person", "This-profile files, shared include, person data"),
+        ("Person data", "Required person-related rows"),
         ("Review & save", "Summary before publish"),
     ];
 
@@ -182,14 +177,6 @@
         string.IsNullOrWhiteSpace(Profile?.Name) ? "Unnamed profile" : Profile.Name.Trim();
 
     private void RefreshProfileName() => StateHasChanged();
-
-    private EventCallback AddTemplateCallback => EventCallback.Factory.Create(this, AddTemplate);
-
-    private EventCallback<ApplicationProfileTemplate> RemoveTemplateCallback =>
-        EventCallback.Factory.Create<ApplicationProfileTemplate>(this, RemoveTemplate);
-
-    private EventCallback<(string Name, ApplicationProfileTemplateKind Kind, int SortOrder, byte[]? FileBytes, string? FileName, ApplicationProfileTemplateCatalogScope CatalogScope, ApplicationProfileTemplateDataScope DataScope, string? CategoryKey)> CreateTemplateCallback =>
-        EventCallback.Factory.Create<(string, ApplicationProfileTemplateKind, int, byte[]?, string?, ApplicationProfileTemplateCatalogScope, ApplicationProfileTemplateDataScope, string?)>(this, CreateTemplate);
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -234,75 +221,4 @@
             os.Delete(leg);
     }
 
-    private void AddTemplate()
-    {
-        if (IsReadOnly || Profile == null || ObjectSpace is not { } os)
-            return;
-
-        var template = os.CreateObject<ApplicationProfileTemplate>();
-        template.ApplicationProfile = Profile;
-        template.TemplateName = "New template";
-        template.SortOrder = (Profile.NestedTemplates?.Count ?? 0) + 1;
-        if (Profile.NestedTemplates != null && !Profile.NestedTemplates.Contains(template))
-            Profile.NestedTemplates.Add(template);
-    }
-
-    private void CreateTemplate((string Name, ApplicationProfileTemplateKind Kind, int SortOrder, byte[]? FileBytes, string? FileName, ApplicationProfileTemplateCatalogScope CatalogScope, ApplicationProfileTemplateDataScope DataScope, string? CategoryKey) args)
-    {
-        if (Profile == null || ObjectSpace is not { } os)
-            return;
-
-        var name = args.Name?.Trim();
-        if (string.IsNullOrWhiteSpace(name))
-            return;
-
-        var existing = Profile.NestedTemplates?
-            .FirstOrDefault(t => string.Equals(t.TemplateName, name, StringComparison.OrdinalIgnoreCase));
-        if (existing != null)
-        {
-            if (IsReadOnly)
-                return;
-
-            existing.TemplateKind = args.Kind;
-            existing.SortOrder = args.SortOrder;
-            existing.CatalogScope = args.CatalogScope;
-            existing.DataScope = args.DataScope;
-            existing.CategoryKey = string.IsNullOrWhiteSpace(args.CategoryKey) ? existing.CategoryKey : args.CategoryKey.Trim();
-            if (args.FileBytes is { Length: > 0 })
-                AttachFile(os, existing, args.FileBytes, args.FileName ?? $"{name}.docx");
-            return;
-        }
-
-        var template = os.CreateObject<ApplicationProfileTemplate>();
-        template.ApplicationProfile = Profile;
-        template.TemplateName = name;
-        template.TemplateKind = args.Kind;
-        template.SortOrder = args.SortOrder > 0 ? args.SortOrder : (Profile.NestedTemplates?.Count ?? 0) + 1;
-        template.CatalogScope = args.CatalogScope;
-        template.DataScope = args.DataScope;
-        template.CategoryKey = string.IsNullOrWhiteSpace(args.CategoryKey) ? null : args.CategoryKey.Trim();
-        if (Profile.NestedTemplates != null && !Profile.NestedTemplates.Contains(template))
-            Profile.NestedTemplates.Add(template);
-        if (args.FileBytes is { Length: > 0 })
-            AttachFile(os, template, args.FileBytes, args.FileName ?? $"{name}.docx");
-    }
-
-    private static void AttachFile(
-        IObjectSpace os,
-        ApplicationProfileTemplate template,
-        byte[] bytes,
-        string fileName)
-    {
-        template.TemplateFile ??= os.CreateObject<DevExpress.Persistent.BaseImpl.EF.FileData>();
-        template.TemplateFile.FileName = fileName;
-        template.TemplateFile.Content = bytes;
-    }
-
-    private void RemoveTemplate(ApplicationProfileTemplate template)
-    {
-        if (IsReadOnly || ObjectSpace is not { } os || template == null)
-            return;
-
-        os.Delete(template);
-    }
 }

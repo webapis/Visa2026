@@ -64,7 +64,7 @@ disable-model-invocation: false
 | **Create from yellow marks** (yellow-marked Word/Excel) | [visa2026-template-scan](../visa2026-template-scan/SKILL.md) |
 | Document copies on roster (`ApplicationPerson` scope) | [visa2026-document-copies](../visa2026-document-copies/SKILL.md) |
 | Case tab catalog vs `#visa-preview-slot` preview-only | [visa2026-preview-slot](../visa2026-preview-slot/SKILL.md) |
-| Wizard Templates **Preview** + shared Include/Exclude | This skill — master file occupant. Authoring is **case Resminamalar**, not wizard Add/Convert/Scan |
+| Wizard **Person data** checkboxes | This skill. Templates (this-profile + Shared ON/OFF) live on **case Resminamalar**, not the wizard |
 | Person dossier (read-only 360; no Start application) | [visa2026-person-dossier](../visa2026-person-dossier/SKILL.md) |
 | Schema deploy / `FORCE_XAF_DB_UPDATE` | [visa2026-lifecycle-docker](../visa2026-lifecycle-docker/SKILL.md) |
 | VISA2014 import / dual-read Type FK | [visa2014-to-visa2026-import](../visa2014-to-visa2026-import/SKILL.md) |

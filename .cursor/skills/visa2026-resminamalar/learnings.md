@@ -25,6 +25,26 @@ Purpose: **catalog, seed gate, batch worker, preview, permissions, dialog UX** �
 
 ## Entries
 
+### 2026-09-03 — New profile showed flat library instead of This profile (0) (Application)
+
+- **Symptom**: First case on a new Application Profile listed ~12 seeded Word/Excel rows with no This profile / Shared tabs. Officers expected This profile (0) and Shared (N).
+- **Try**: Create a profile with no nested templates; open a case → Resminamalar.
+- **Test**: `UsesProfileNestedCatalog_TrueWhenProfileHasNoNestedTemplates`. Officer: stop F5, rebuild, Ctrl+F5. New profile case shows This profile (0) empty dashed box and Shared with ON/OFF.
+- **Root cause**: `UsesProfileNestedCatalog` was true only after at least one nested Word/Excel row existed. Empty profiles fell back to the visibility-filtered user-template list.
+- **Fix**: Nested catalog (tabs + Shared library) whenever the instance has an Application Profile. Seeded flat list remains only for Type-only dual-read cases.
+- **Prevent**: Do not treat “no nested rows yet” as “use the old Catalog list”.
+- **Cross-skill**: visa2026-application-profile | visa2026-preview-slot
+
+### 2026-09-03 — Shared include lives only on case (Application)
+
+- **Symptom**: Configure profile still listed this-profile files and Shared Include/Exclude after case Resminamalar already owned authoring and ON/OFF.
+- **Try**: Configure profile step vs case Resminamalar This profile / Shared.
+- **Test**: Officer: stop F5, rebuild, Ctrl+F5. Wizard **Person data** is checkboxes only. Case Shared ON/OFF still persists as nested include.
+- **Root cause**: Wizard kept a second catalog after case tabs shipped.
+- **Fix**: Removed wizard template lists. Shared include stays `ApplicationProfileSharedTemplateIncludeHelper` on the case. Seeded nested rows still appear on This profile until an officer turns them OFF.
+- **Prevent**: Do not add wizard Include/Exclude back. Do not auto-include the full Shared library on new profiles.
+- **Cross-skill**: visa2026-application-profile
+
 ### 2026-09-02 — This profile / Shared tab bar vs utility links (Application)
 
 - **Symptom**: This profile / Shared looked like the same blue links as Recycle Bin and Select all, all in one row with no teal tab bar.

@@ -76,15 +76,15 @@ public sealed class ApplicationWordReportPackageCatalog
         Array.Empty<ApplicationWordReportPackageCatalogEntry>();
 
     /// <summary>
-    /// Full shared library for the Shared tab (included and not). Empty when the catalog
-    /// is the seeded fallback list (no nested profile templates).
+    /// Full shared library for the Shared tab (included and not). Empty only when the
+    /// catalog is the legacy seeded fallback (instance has no Application Profile).
     /// </summary>
     public IReadOnlyList<ApplicationWordReportPackageCatalogEntry> SharedEntries { get; init; } =
         Array.Empty<ApplicationWordReportPackageCatalogEntry>();
 
     /// <summary>
-    /// Profile has Word/Excel nested templates (live or recycled). Show Recycle Bin tab;
-    /// do not fall back to the seeded user-template catalog.
+    /// Instance is bound to an Application Profile. Use This profile / Shared tabs
+    /// even when This profile is empty; do not dump the seeded library as a flat list.
     /// </summary>
     public bool HasProfileNestedCatalog { get; init; }
 

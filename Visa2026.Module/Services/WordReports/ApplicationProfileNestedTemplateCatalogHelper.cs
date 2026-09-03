@@ -15,10 +15,19 @@ public static class ApplicationProfileNestedTemplateCatalogHelper
 {
     public const string EntryKeyPrefix = "profile:";
 
+    /// <summary>
+    /// True when the case should use This profile / Shared tabs (including an empty
+    /// This profile). False only for dual-read Type-only instances with no profile.
+    /// </summary>
     public static bool UsesProfileNestedCatalog(
         ApplicationProfileInstance? application,
-        IObjectSpace? objectSpace = null) =>
-        HasAnyMergeNestedTemplate(application, objectSpace);
+        IObjectSpace? objectSpace = null)
+    {
+        if (application?.ApplicationProfile != null)
+            return true;
+
+        return HasAnyMergeNestedTemplate(application, objectSpace);
+    }
 
     /// <summary>
     /// True when the profile has Word/Excel nested rows, including Recycle Bin.

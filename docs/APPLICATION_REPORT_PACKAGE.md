@@ -155,9 +155,9 @@ One **`#visa-preview-slot`** serves Resminamalar (application scope, item scope)
 On the in-process case **Resminamalar** tab (same header people chips as Document copies):
 
 - Header chips **include or hide** roster people (default: all selected). Catalog Preview and **Download package** use the filtered `Person.ID` set.
-- The catalog is a single flat template list (no By person / By type switch). Nested catalogs use **This profile** / **Shared** tabs. Row **Preview** generates the template for **all** chip-selected people (per-person Word forms such as Şahsy kagyz are merged into one PDF).
-- **This profile:** included nested templates (officer this-profile files plus shared templates toggled ON). Checkboxes, READY/CHECK, Preview, Download package, Create template / Add existing stay here. Shared includes show a **SHARED** chip.
-- **Shared:** full shared library. Preview + ON/OFF include (same `ApplicationProfileTemplate` attach as wizard Include/Exclude). ON rows also appear on This profile. No ZIP checkboxes or Download package on this tab.
+- The catalog is a single flat template list (no By person / By type switch). A case with an Application Profile always uses **This profile** / **Shared** tabs, including **This profile (0)** on a brand-new profile. Do not show the seeded library as a flat list. Row **Preview** generates the template for **all** chip-selected people (per-person Word forms such as Şahsy kagyz are merged into one PDF).
+- **This profile:** included nested templates (officer this-profile files plus shared templates toggled ON). Empty until the officer creates a file or turns Shared ON. Checkboxes, READY/CHECK, Preview, Download package, Create template / Add existing stay here. Shared includes show a **SHARED** chip.
+- **Shared:** full shared library. Preview + ON/OFF include (`ApplicationProfileSharedTemplateIncludeHelper`). ON rows also appear on This profile. No ZIP checkboxes or Download package on this tab. Shared include is **not** on the Application Profile wizard (Person data checkboxes only).
 - Sanaw / list templates stay one document with a row per selected person.
 - ListView / Application DetailView Resminamalar (no case chips) is unchanged: generate for the full roster unless item ids are passed.
 

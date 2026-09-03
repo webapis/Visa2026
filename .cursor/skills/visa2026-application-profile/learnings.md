@@ -1,3 +1,19 @@
+### 2026-09-03 — New profile Resminamalar is This profile (0) not a flat list
+
+- **Need**: First case on a new Application Profile must look like the signed-off tabs: This profile (0) empty, Shared library with ON/OFF.
+- **Fix**: `UsesProfileNestedCatalog` is true whenever the instance has an Application Profile, even with zero nested rows. Catalog no longer dumps the seeded library onto This profile.
+- **Test**: `UsesProfileNestedCatalog_TrueWhenProfileHasNoNestedTemplates`. Officer: restart, hard-refresh, open Resminamalar on a new-profile case.
+- **Prevent**: Do not wait for the first Create template / Shared ON before showing tabs.
+- **Cross-skill**: visa2026-resminamalar
+
+### 2026-09-03 — Wizard Person data only (templates on case)
+
+- **Need**: Officers already create this-profile files and toggle Shared on case Resminamalar. Administrators should not manage the same lists on Configure profile.
+- **Fix**: Wizard step renamed **Person data**. This-profile list, Shared Include/Exclude, and Preview are gone. Person-row checkboxes and Last 1–3 stay. Review shows person toggles only. Shared attach remains `ApplicationProfileSharedTemplateIncludeHelper` on the case.
+- **Test**: Officer: stop F5, rebuild, Ctrl+F5. Configure a profile → step **Person data** has checkboxes only. Case Resminamalar This profile / Shared still creates files and ON/OFF include.
+- **Prevent**: Do not put TemplateScan / Convert / Shared include back on `ApplicationProfileWizardStepTemplatesPerson`. New profiles get Shared templates only when an officer turns them ON on a case (or seed already attached them).
+- **Cross-skill**: application-profile | visa2026-resminamalar
+
 ### 2026-09-02 — Shared include OFF while config-locked
 
 - **Need**: Case Resminamalar Shared ON/OFF must work after lock state A. ON already created a new nested row; OFF deleted the include and hit `ConfigLockedCannotEditNested`.

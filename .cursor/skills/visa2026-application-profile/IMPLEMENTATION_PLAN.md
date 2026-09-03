@@ -118,7 +118,7 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | S0e | Engineering spec Phase 0 + playbook stub | **Done** (2026-08-28) | [`TEMPLATE_AI_SCAN_ENGINEERING_SPEC.md`](../../../docs/TEMPLATE_AI_SCAN_ENGINEERING_SPEC.md) · `Resources/TemplateAuthoring/SCAN_AUTHORING_PLAYBOOK.md` · SD-D1–D10 locked |
 | S1 | Playbook loader, scan normalizer, suitability, options, DI | **Done** (2026-08-28) | `Services/TemplateScan/` — ingest pipeline, Spire PDF text OCR, 11 tests |
 | S2 | Vision provider + field plan merger | **Done** (2026-08-28) | `ITemplateScanAiProvider`, deterministic planner, merger, Azure vision adapter; 20 TemplateScan tests |
-| S3 | Blazor modal — upload + field review (V1–V2, V7–V8, V10–V11) | **Done** (2026-08-28) | `TemplateScanDialog.razor`, `TemplateScanFieldReviewView.razor`; **entry is case Resminamalar** (wizard Templates no longer creates files, 2026-09-02) |
+| S3 | Blazor modal — upload + field review (V1–V2, V7–V8, V10–V11) | **Done** (2026-08-28) | `TemplateScanDialog.razor`, `TemplateScanFieldReviewView.razor`; **entry is case Resminamalar** (wizard has no template list; Person data checkboxes only, 2026-09-03) |
 | S4 | Clarification chat (V3) | **Done** (2026-08-28) | `ITemplateScanClarificationService`, intent classifier, chat UI, Azure clarify |
 | S5 | Docx builder + Generate + preview/validate (V4–V5) | **Done** (2026-08-28) | `TemplateScanOrchestrator`, `ScanDraftDocxBuilder`, `TemplateScanPreviewView.razor` |
 | S6 | Save helper extract + case Resminamalar entry | **Done** (2026-08-28) | `ApplicationProfileTemplateSaveHelper`, V6 Done view, Resminamalar entry (wizard create removed 2026-09-02) |
@@ -213,7 +213,8 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 - `ApplicationProfileWizardComponent.razor` + step partials + `application-profile-wizard.css`
 - **Configure profile** action on Application Profiles ListView (saved rows only)
 - Respects `ApplicationProfileLockHelper` — read-only banner for locked config; **approval-leg versions** stay editable; **Save profile** remains for version changes
-- Steps: Identity · **Company, Signatories** · Results & fields · Process & SLA (embedded legs) · Templates & person · Review & save
+- Steps: Identity · **Company, Signatories** · Results & fields · Process & SLA (embedded legs) · **Person data** · Review & save
+- **Person data** is person-row checkboxes only. This-profile files and Shared ON/OFF live on case Resminamalar (2026-09-03).
 - **May produce** / **May cancel** / **May change** live under Identity **Related to** (`ActionFamily`): Issuance → produce; Cancellation → cancel; Change → change
 - **Registration is** Check in / Check out / Info change / Reg extension (`RegistrationKind`) when Related to = Registration; cleared for other families
 - **Approval legs** live under Identity **Directed to** as named **versions**; visible only for Via ministry; instances snapshot the chosen version at create
