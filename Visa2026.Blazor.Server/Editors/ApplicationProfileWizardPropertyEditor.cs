@@ -40,10 +40,6 @@ public class ApplicationProfileWizardPropertyEditor : BlazorPropertyEditorBase, 
         IsLoading = true,
         InitialLoadRequested = EventCallback.Factory.Create(this, LoadAsync),
         PublishRequested = EventCallback.Factory.Create(this, PublishAsync),
-        OpenCompanyRequested = EventCallback.Factory.Create(this, () => OpenOrganization(ApplicationProfileWizardOrganizationOpenHelper.Kind.Company)),
-        OpenSignatoryRequested = EventCallback.Factory.Create(this, () => OpenOrganization(ApplicationProfileWizardOrganizationOpenHelper.Kind.Signatory)),
-        OpenRepresentativeRequested = EventCallback.Factory.Create(this, () => OpenOrganization(ApplicationProfileWizardOrganizationOpenHelper.Kind.Representative)),
-        RefreshOrganizationRequested = EventCallback.Factory.Create(this, RefreshSupportingData),
     };
 
     protected override void OnCurrentObjectChanged()
@@ -78,7 +74,7 @@ public class ApplicationProfileWizardPropertyEditor : BlazorPropertyEditorBase, 
                 && _session?.ObjectSpace != null
                 && ApplicationProfileLockHelper.IsProfileConfigLocked(profile, _session.ObjectSpace);
 
-            RefreshSupportingData();
+            RefreshLookupData();
         }
         finally
         {
@@ -177,22 +173,6 @@ public class ApplicationProfileWizardPropertyEditor : BlazorPropertyEditorBase, 
         _session.ObjectSpace = _application.CreateObjectSpace(typeof(ApplicationProfile));
     }
 
-    private void RefreshSupportingData()
-    {
-        RefreshOrganizationSnapshot();
-        RefreshLookupData();
-    }
-
-    private void RefreshOrganizationSnapshot()
-    {
-        var model = ComponentModel;
-        if (model == null || _application == null)
-            return;
-
-        using var objectSpace = _application.CreateObjectSpace(typeof(CompanyProfile));
-        model.OrganizationSnapshot = ApplicationProfileWizardOrganizationSnapshot.Load(objectSpace);
-    }
-
     private void RefreshLookupData()
     {
         var model = ComponentModel;
@@ -201,16 +181,5 @@ public class ApplicationProfileWizardPropertyEditor : BlazorPropertyEditorBase, 
 
         using var objectSpace = _application.CreateObjectSpace(typeof(VisaType));
         model.Lookups = ApplicationProfileWizardLookupData.Load(objectSpace);
-    }
-
-    private void OpenOrganization(ApplicationProfileWizardOrganizationOpenHelper.Kind kind)
-    {
-        if (_application == null)
-            return;
-
-        ApplicationProfileWizardOrganizationOpenHelper.TryOpen(
-            _application,
-            kind,
-            RefreshOrganizationSnapshot);
     }
 }

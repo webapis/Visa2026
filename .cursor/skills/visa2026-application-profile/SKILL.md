@@ -133,6 +133,7 @@ flowchart LR
 | Document copies preview fails on roster line | `TryBuildMergedPdfForRoster` | Roster IDs are `ApplicationPerson`, not `ApplicationItem` |
 | Person detail crashes after Open from case | `PersonDetailOpenHelper` | Do not dispose ObjectSpace before `ShowView` |
 | Case summary tiles empty / Edit does not save | Profile `Require*` off (number/date are always shown); officer-shell `HeaderFieldChanged`; post-prep lock on type/contract only | `ApplicationWorkspaceCaseHeaderFieldsHelper`; `OfficerShellPropertyEditor.SaveHeaderFieldAsync` |
+| Wizard still has Company, Signatories | Removed 2026-09-03 — not profile config | Configuration → Organization catalogs; create **Choose Organization**; case Organization |
 
 ---
 
@@ -202,7 +203,7 @@ Use when user asks *how should I configure this profile?* — tailor to **Action
 
 - Set defaults for high-friction lookups (**Visa Type**, **Category**, **Period**, **Urgency**, **Entry check point**) when type always uses same values.
 - Leave dates (**Start/End**, **Entry**) without defaults — officer fills per case.
-- **Signatory defaults** seed at create but remain editable on Application.
+- Company / Signatory / Representative are **tenant catalogs**, not profile defaults. Officers pick them at create (**Choose Organization**) and on the case. Tenant **Default** is catalog `IsDefault`. Do not put them on the profile wizard.
 
 ### Lock awareness
 

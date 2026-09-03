@@ -1,3 +1,11 @@
+### 2026-09-03 — Remove Company, Signatories from the profile wizard
+
+- **Need**: Company / Signatory / Representative are tenant catalogs picked at instance create and on the case. The wizard step only previewed tenant Default and linked to Configuration — not profile configuration.
+- **Fix**: Dropped wizard step, Review "Default company & signatories", and profile overview Company/Signatories card. Deleted `ApplicationProfileWizardStepCompanySignatories`, `ApplicationProfileWizardOrganizationSnapshot`, and `ApplicationProfileWizardOrganizationOpenHelper`. Unused `ApplicationProfile.DefaultAuthorizedSignatory*` / `DefaultVisaRepresentative*` stay mapped but hidden.
+- **Test**: Module + Blazor Debug compile to temp succeeded (0 errors). Officer: stop F5, rebuild, Ctrl+F5. Configure profile — 5 steps, Identity then Results. Overview has no Company card. Catalogs still on Configuration / Choose Organization / case Organization.
+- **Prevent**: Do not add per-profile Company/Signatory/Representative onto the wizard. Tenant Default is catalog `IsDefault`. Do not drop those leftover profile FK columns in this change.
+- **Cross-skill**: application-profile
+
 ### 2026-09-03 — Choose Organization + New / pencil behind gear
 
 - **Need**: Creating an Application Profile Instance showed + New and pencil next to every Company / Signatory / Representative dropdown. Officers only need those when adding or editing a catalog record.

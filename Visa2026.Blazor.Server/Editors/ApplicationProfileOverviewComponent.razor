@@ -145,67 +145,6 @@
             </section>
         </div>
 
-        <section class="ap-overview__card">
-            <h2>Company, Signatories</h2>
-            <p class="ap-overview__hint">Tenant Default for new applications. Catalogs are lists (not singletons). Officers pick rows at create and on Case workspace → Organization.</p>
-            <div class="ap-overview__org">
-                <div>
-                    <h3>Company</h3>
-                    @if (!Snapshot.Organization.HasCompany)
-                    {
-                        <p class="ap-overview__empty">No Company record yet.</p>
-                    }
-                    else
-                    {
-                        <dl class="ap-overview__dl">
-                            <div><dt>Name</dt><dd>@OrDash(Snapshot.Organization.CompanyName)</dd></div>
-                            <div><dt>Code</dt><dd>@OrDash(Snapshot.Organization.CompanyCode)</dd></div>
-                            <div><dt>Phone</dt><dd>@OrDash(Snapshot.Organization.CompanyPhone)</dd></div>
-                            <div class="ap-overview__dl--full"><dt>Address</dt><dd>@OrDash(Snapshot.Organization.CompanyAddress)</dd></div>
-                            <div><dt>Email</dt><dd>@OrDash(Snapshot.Organization.CompanyEmail)</dd></div>
-                            <div><dt>Tax information</dt><dd>@OrDash(Snapshot.Organization.CompanyTaxInformation)</dd></div>
-                            <div><dt>Registration date</dt><dd>@OrDash(Snapshot.Organization.CompanyRegistrationDateText)</dd></div>
-                        </dl>
-                    }
-                </div>
-                <div>
-                    <h3>Authorized Signatory</h3>
-                    @if (!Snapshot.Organization.HasSignatory)
-                    {
-                        <p class="ap-overview__empty">No Authorized Signatory yet.</p>
-                    }
-                    else
-                    {
-                        <dl class="ap-overview__dl">
-                            <div><dt>Full name</dt><dd>@OrDash(Snapshot.Organization.SignatoryFullName)</dd></div>
-                            <div><dt>Position (Tm)</dt><dd>@OrDash(Snapshot.Organization.SignatoryPositionTitleTm)</dd></div>
-                            <div><dt>Passport number</dt><dd>@OrDash(Snapshot.Organization.SignatoryPassportNumber)</dd></div>
-                            <div><dt>Passport authority</dt><dd>@OrDash(Snapshot.Organization.SignatoryPassportAuthority)</dd></div>
-                            <div><dt>Passport issue date</dt><dd>@OrDash(Snapshot.Organization.SignatoryPassportIssueDateText)</dd></div>
-                        </dl>
-                    }
-                </div>
-                <div>
-                    <h3>Authorized Representative</h3>
-                    @if (!Snapshot.Organization.HasRepresentative)
-                    {
-                        <p class="ap-overview__empty">No Authorized Representative yet.</p>
-                    }
-                    else
-                    {
-                        <dl class="ap-overview__dl">
-                            <div><dt>Full name</dt><dd>@OrDash(Snapshot.Organization.RepresentativeFullName)</dd></div>
-                            <div><dt>Position (Tm)</dt><dd>@OrDash(Snapshot.Organization.RepresentativePositionTitleTm)</dd></div>
-                            <div><dt>Phone</dt><dd>@OrDash(Snapshot.Organization.RepresentativePhone)</dd></div>
-                            <div><dt>Passport number</dt><dd>@OrDash(Snapshot.Organization.RepresentativePassportNumber)</dd></div>
-                            <div><dt>Passport authority</dt><dd>@OrDash(Snapshot.Organization.RepresentativePassportAuthority)</dd></div>
-                            <div><dt>Passport issue date</dt><dd>@OrDash(Snapshot.Organization.RepresentativePassportIssueDateText)</dd></div>
-                        </dl>
-                    }
-                </div>
-            </div>
-        </section>
-
         <div class="ap-overview__grid">
             <section class="ap-overview__card">
                 <h2>Process &amp; SLA</h2>
@@ -427,9 +366,6 @@
     }
 
     private Task OpenInstanceAsync(Guid instanceId) => OpenInstanceRequested.InvokeAsync(instanceId);
-
-    private static string OrDash(string? value) =>
-        string.IsNullOrWhiteSpace(value) ? "—" : value;
 
     private bool CanOpenInstance(ApplicationProfileOverviewLinkedAppRow app) =>
         OpenInstanceRequested.HasDelegate && app.ApplicationProfileInstanceId != Guid.Empty;

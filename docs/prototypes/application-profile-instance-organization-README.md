@@ -31,4 +31,5 @@ This replaces the 2026-09-03 per-instance **copied scalars** letterhead model.
 
 - Application numbering remains one row
 - Per-Application-Profile defaults (rejected: tenant-wide Default)
+- Profile wizard **Company, Signatories** step (removed: not profile configuration)
 - Editing Name / Passport as **instance scalars** (rejected: + New / Edit opens the shared catalog record; that still updates every case that selected it)

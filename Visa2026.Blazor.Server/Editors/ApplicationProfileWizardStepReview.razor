@@ -1,6 +1,5 @@
 @using Visa2026.Module.BusinessObjects
 @using Visa2026.Module.Services.ApplicationProfilePicker
-@using Visa2026.Module.Services.ApplicationProfileWizard
 
 <div class="ap-wizard__panel-head">
     <h2>Review &amp; save</h2>
@@ -34,14 +33,6 @@
             </ul>
         </div>
         <div class="ap-wizard__sum-card">
-            <h4>Default company &amp; signatories</h4>
-            <ul>
-                <li>Company: @OrDash(Organization.CompanyName)</li>
-                <li>Signatory: @OrDash(Organization.SignatoryFullName)</li>
-                <li>Representative: @OrDash(Organization.RepresentativeFullName)</li>
-            </ul>
-        </div>
-        <div class="ap-wizard__sum-card">
             <h4>Fields</h4>
             <ul>
                 <li>Required props: @CountRequiredProps(Profile)</li>
@@ -64,11 +55,6 @@
 
 @code {
     [Parameter, EditorRequired] public ApplicationProfile Profile { get; set; } = null!;
-    [Parameter] public ApplicationProfileWizardOrganizationSnapshot Organization { get; set; } =
-        ApplicationProfileWizardOrganizationSnapshot.Empty;
-
-    private static string OrDash(string? value) =>
-        string.IsNullOrWhiteSpace(value) ? "—" : value;
 
     private static string FormatRoute(ApplicationProfileInstanceProgressRouteKind route) =>
         route == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService ? "Direct migration" : "Via ministry";

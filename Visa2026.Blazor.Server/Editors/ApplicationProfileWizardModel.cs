@@ -48,37 +48,6 @@ public sealed class ApplicationProfileWizardModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
-    public ApplicationProfileWizardOrganizationSnapshot OrganizationSnapshot
-    {
-        get => GetPropertyValue<ApplicationProfileWizardOrganizationSnapshot>()
-            ?? ApplicationProfileWizardOrganizationSnapshot.Empty;
-        set => SetPropertyValue(value);
-    }
-
-    public EventCallback OpenCompanyRequested
-    {
-        get => GetPropertyValue<EventCallback>();
-        set => SetPropertyValue(value);
-    }
-
-    public EventCallback OpenSignatoryRequested
-    {
-        get => GetPropertyValue<EventCallback>();
-        set => SetPropertyValue(value);
-    }
-
-    public EventCallback OpenRepresentativeRequested
-    {
-        get => GetPropertyValue<EventCallback>();
-        set => SetPropertyValue(value);
-    }
-
-    public EventCallback RefreshOrganizationRequested
-    {
-        get => GetPropertyValue<EventCallback>();
-        set => SetPropertyValue(value);
-    }
-
     public ApplicationProfileWizardLookupData Lookups
     {
         get => GetPropertyValue<ApplicationProfileWizardLookupData>()

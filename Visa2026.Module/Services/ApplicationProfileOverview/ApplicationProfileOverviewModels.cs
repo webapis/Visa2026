@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using DevExpress.ExpressApp;
-using Visa2026.Module.Services.ApplicationProfileWizard;
 
 namespace Visa2026.Module.Services.ApplicationProfileOverview;
 
@@ -39,9 +38,6 @@ public sealed class ApplicationProfileOverviewSnapshot
     public bool IsActive { get; init; } = true;
 
     public IReadOnlyList<string> LiveConfigurationLines { get; init; } = Array.Empty<string>();
-
-    public ApplicationProfileWizardOrganizationSnapshot Organization { get; init; }
-        = ApplicationProfileWizardOrganizationSnapshot.Empty;
 
     public int MinistrySlaDays { get; init; }
 

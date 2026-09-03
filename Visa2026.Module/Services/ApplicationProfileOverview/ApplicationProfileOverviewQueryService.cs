@@ -5,7 +5,6 @@ using DevExpress.ExpressApp;
 using Microsoft.EntityFrameworkCore;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.ApplicationProfilePicker;
-using Visa2026.Module.Services.ApplicationProfileWizard;
 using Visa2026.Module.Services.UserReports;
 
 namespace Visa2026.Module.Services.ApplicationProfileOverview;
@@ -124,7 +123,6 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
             IsConfigLocked = locked,
             IsActive = profile.IsActive,
             LiveConfigurationLines = BuildLiveConfigurationLines(profile),
-            Organization = ApplicationProfileWizardOrganizationSnapshot.Load(objectSpace),
             MinistrySlaDays = profile.MinistrySlaDays,
             MigrationSlaDays = profile.MigrationSlaDays,
             ProgressStates = [],

@@ -75,32 +75,23 @@
                 }
                 else if (_activeStep == 1)
                 {
-                    <ApplicationProfileWizardStepCompanySignatories Snapshot="OrganizationSnapshot"
-                        OpenCompanyRequested="OpenCompanyRequested"
-                        OpenSignatoryRequested="OpenSignatoryRequested"
-                        OpenRepresentativeRequested="OpenRepresentativeRequested"
-                        RefreshRequested="RefreshOrganizationRequested" />
-                }
-                else if (_activeStep == 2)
-                {
                     <ApplicationProfileWizardStepResults Profile="Profile"
                         Disabled="IsReadOnly"
                         Lookups="Lookups"
                         ObjectSpace="ObjectSpace" />
                 }
-                else if (_activeStep == 3)
+                else if (_activeStep == 2)
                 {
                     <ApplicationProfileWizardStepProcess Profile="Profile" Disabled="IsReadOnly" />
                 }
-                else if (_activeStep == 4)
+                else if (_activeStep == 3)
                 {
                     <ApplicationProfileWizardStepTemplatesPerson Profile="Profile"
                         Disabled="IsReadOnly" />
                 }
                 else
                 {
-                    <ApplicationProfileWizardStepReview Profile="Profile"
-                        Organization="OrganizationSnapshot" />
+                    <ApplicationProfileWizardStepReview Profile="Profile" />
                 }
 
                 <div class="ap-wizard__foot">
@@ -127,7 +118,6 @@
     private readonly (string Title, string Description)[] _steps =
     [
         ("Identity & purpose", "Name, route, audience"),
-        ("Company, Signatories", "Letterhead, signatory, representative"),
         ("Results & fields", "Required instance properties"),
         ("Process & SLA", "Ministry and migration duration"),
         ("Person data", "Required person-related rows"),
@@ -143,12 +133,6 @@
     [Parameter] public bool IsStatusError { get; set; }
     [Parameter] public EventCallback InitialLoadRequested { get; set; }
     [Parameter] public EventCallback PublishRequested { get; set; }
-    [Parameter] public ApplicationProfileWizardOrganizationSnapshot OrganizationSnapshot { get; set; } =
-        ApplicationProfileWizardOrganizationSnapshot.Empty;
-    [Parameter] public EventCallback OpenCompanyRequested { get; set; }
-    [Parameter] public EventCallback OpenSignatoryRequested { get; set; }
-    [Parameter] public EventCallback OpenRepresentativeRequested { get; set; }
-    [Parameter] public EventCallback RefreshOrganizationRequested { get; set; }
     [Parameter] public ApplicationProfileWizardLookupData Lookups { get; set; } =
         ApplicationProfileWizardLookupData.Empty;
 
@@ -170,8 +154,7 @@
     private async Task GoToStep(int index)
     {
         _activeStep = Math.Clamp(index, 0, _steps.Length - 1);
-        if (RefreshOrganizationRequested.HasDelegate)
-            await RefreshOrganizationRequested.InvokeAsync();
+        await Task.CompletedTask;
     }
 
     private Task NextStep() => GoToStep(_activeStep + 1);

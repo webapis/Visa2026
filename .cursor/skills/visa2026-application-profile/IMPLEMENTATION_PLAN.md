@@ -20,8 +20,8 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | 5 | Seed profiles from `ApplicationType` catalog | **Done** | `ApplicationProfileSeedSync` + mapper + updater + startup gate |
 | 6 | Switch Appearance / progress to profile | **Done** | `ApplicationProfileConfigurationResolver`, `Cfg*` criteria, progress route/SLA |
 | 7 | Config lock enforcement on profile edit UI | **Done** | DetailView read-only, save guard, clone duplicate |
-| 8 | Configuration wizard UX | **Done** | 6-step Blazor wizard; **Configure profile** on Application Profiles |
-| 8e | Wizard Company, Signatories | **Done** | Shows tenant Default; **Open catalog** opens Configuration **Organization catalogs** (**10z3**). |
+| 8 | Configuration wizard UX | **Done** | 5-step Blazor wizard; **Configure profile** on Application Profiles |
+| 8e | Wizard Company, Signatories | **Removed** | Not profile config. Catalogs live on Configuration, Choose Organization, and case Organization. |
 | 8f | Wizard Results default lookup dropdowns | **Done** | Catalog snapshots; default-value selects enabled only when Use is checked |
 | 8g | Wizard May produce / cancel / change with Related to | **Done** | Issuance → May produce; Cancellation → May cancel; Change → May change; moved off Results & fields |
 | 8o | Wizard Region and City lookups | **Done** | Split Region (city); instance Region + City; defaults + case summary |
@@ -43,7 +43,7 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | 10x | Case summary: edit instance Use fields | **Done** | Overview tiles + **Edit**; form + **Done**. Application number + date always shown (not profile-gated). Same Use fields. Persist on change; does not edit the profile template. Project is editable here (accepted prototype; do not re-lock via `IsProjectContractLocked`). Host-start adds `EntryCheckPointID`. |
 | 10z | Case Organization letterhead | **Done** | Scalar copy on instance (superseded by **10z2**) |
 | 10z2 | Organization catalogs (not singletons) | **Done** | Company / Signatory / Representative lists + tenant Default; create Choose Organization dropdowns; instance live FKs; case Organization dropdowns; merge from selected rows |
-| 10z3 | Organization catalogs Configuration page | **Done** | Config → **Organization catalogs**: three cards, **+ New**, search, Default / Make default, pencil → native DetailView. Wizard **Open catalog** opens this page. |
+| 10z3 | Organization catalogs Configuration page | **Done** | Config → **Organization catalogs**: three cards, **+ New**, search, Default / Make default, pencil → native DetailView. |
 | 10z4 | Inline organization catalog New/Edit | **Done** | Choose Organization: gear reveals **+ New / Edit**. Case Organization shows them only after section **Edit**. New row is selected / assigned on this case. |
 | 10x-fill | Case summary fill-state colors | **Done** | Empty/`—` red; still matches profile default (or auto number/date) blue; officer-changed green. Tiles + Edit form; border + light tint. |
 | 10v | People & links New missing person-owned BO | **Deferred** | In-tab **New {type}** removed — officers add person-owned data from **Open person detail**. Issued items stay on Overview → Issued records. `EnsureResolvedLink` kept for Relink. |
@@ -217,7 +217,7 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 - `ApplicationProfileWizardComponent.razor` + step partials + `application-profile-wizard.css`
 - **Configure profile** action on Application Profiles ListView (saved rows only)
 - Respects `ApplicationProfileLockHelper` — read-only banner for locked config; **Save profile** only when unlocked. Default chain is set on Choose Approval legs (allowed when locked)
-- Steps: Identity · **Company, Signatories** · Results & fields · Process & SLA · **Person data** · Review & save
+- Steps: Identity · Results & fields · Process & SLA · **Person data** · Review & save
 - **Person data** is person-row checkboxes only. This-profile files and Shared ON/OFF live on case Resminamalar (2026-09-03).
 - **May produce** / **May cancel** / **May change** live under Identity **Related to** (`ActionFamily`): Issuance → produce; Cancellation → cancel; Change → change
 - **Registration is** Check in / Check out / Info change / Reg extension (`RegistrationKind`) when Related to = Registration; cleared for other families

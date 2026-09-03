@@ -91,6 +91,7 @@ Only **configuration** that used to live on `ApplicationType` (and type-driven i
 | Business object | Property | Status | Replacement | Schema |
 |-----------------|----------|--------|-------------|--------|
 | **UserReportTemplate** | `ApplicabilityMode` | Deprecated | Applicable type/contract links + `VisibilityCriteria` | Column retained |
+| **ApplicationProfile** | `DefaultAuthorizedSignatory` / `DefaultVisaRepresentative` | Retained (hidden) | Tenant catalog **`IsDefault`**; instance FKs `OrganizationSignatoryId` / `OrganizationRepresentativeId` | Columns kept; UI hidden 2026-09-03. Not profile config — do not drop in this change. |
 | **Application** | `ApplicationType` | Deprecated | **`Application.ApplicationProfile`** (live FK; set only at create) | FK retained during dual-read |
 | **Application** | `ApplicationTypeQuickCode` | Deprecated | **Profile picker** at create (`ApplicationProfilePickerNewController`) | Not mapped; Blazor postback only |
 | **Application** | `CreationProgressRoute` | Deprecated | **`ApplicationProfile.ProgressRoute`** + picker filter | Column retained; was type-picker route filter |

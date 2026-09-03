@@ -227,12 +227,15 @@ public class ApplicationProfile : BaseObject
     public virtual CheckPoint? DefaultEntryCheckPoint { get; set; }
     public virtual Guid? DefaultEntryCheckPointId { get; set; }
 
-    // --- Signatory defaults (per-ApplicationProfileInstance values seeded at create) ---
-
+    // Unused leftover: tenant Default lives on catalog IsDefault, not on the profile.
+    [VisibleInDetailView(false), VisibleInListView(false), VisibleInLookupListView(false)]
     public virtual AuthorizedSignatory? DefaultAuthorizedSignatory { get; set; }
+    [VisibleInDetailView(false), VisibleInListView(false), VisibleInLookupListView(false)]
     public virtual Guid? DefaultAuthorizedSignatoryId { get; set; }
 
+    [VisibleInDetailView(false), VisibleInListView(false), VisibleInLookupListView(false)]
     public virtual AuthorizedRepresentative? DefaultVisaRepresentative { get; set; }
+    [VisibleInDetailView(false), VisibleInListView(false), VisibleInLookupListView(false)]
     public virtual Guid? DefaultVisaRepresentativeId { get; set; }
 
     // --- Process ---

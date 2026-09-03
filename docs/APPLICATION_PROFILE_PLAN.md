@@ -452,6 +452,7 @@ When any linked Application reaches lock state **A** (first progress beyond offi
 | Case Organization catalogs (live FKs, tenant Default) | **Done** (2026-09-03) |
 | Configuration Organization catalogs page (+ New) | **Done** (2026-09-03) |
 | Inline organization catalog New/Edit (create + case) | **Done** (2026-09-03) |
+| Wizard Company, Signatories step removed | **Done** (2026-09-03) |
 | Case summary fill-state (empty / default / officer) | **Done** |
 | Person M2M DetailView / hard-remove ApplicationItem | In progress (skip-navigation People + roster-line BO deleted; F5 heal pending) |
 | Workspace Document copies person filter + person catalog | Done (header chips; person-grouped catalog; slot viewer-only) |
