@@ -237,7 +237,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
         public string Company_Name =>
-            OrganizationReportHelper.GetCompanyProfile(OrganizationReportHelper.ResolveObjectSpace(ObjectSpaceHelper.Get(this), WorkPermit?.ApplicationProfileInstance))?.Name ?? string.Empty;
+            WorkPermit?.ApplicationProfileInstance?.Application_Company_Name ?? string.Empty;
 
         [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
         public string CompanyHead_PositionTm => WorkPermit?.ApplicationProfileInstance?.Application_CompanyHead_PositionTm ?? string.Empty;

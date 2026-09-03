@@ -283,6 +283,10 @@
     [Parameter] public string? HeaderFieldStatusMessage { get; set; }
     [Parameter] public bool HeaderFieldStatusIsError { get; set; }
     [Parameter] public EventCallback<ApplicationWorkspaceCaseHeaderFieldUpdate> HeaderFieldChanged { get; set; }
+    [Parameter] public string? OrganizationStatusMessage { get; set; }
+    [Parameter] public bool OrganizationStatusIsError { get; set; }
+    [Parameter] public EventCallback<ApplicationWorkspaceOrganizationLetterheadUpdate> OrganizationLetterheadChanged { get; set; }
+    [Parameter] public EventCallback<(string Kind, Guid Id)> OrganizationCatalogEditorRequested { get; set; }
     [Parameter] public string PreviewSlotOwnerViewId { get; set; } = OfficerShellViewIds.DetailView;
 
     private readonly HashSet<Guid> _selectedDocumentPersonIds = [];
@@ -292,9 +296,13 @@
     private string? _appliedPeopleFocusKey;
     private bool _caseSummaryEditing;
     private Guid _caseSummaryInstanceId;
+    private bool _organizationEditing;
 
     private bool IsCaseSummaryEditing =>
         _caseSummaryEditing && Snapshot?.CaseView.HeaderFields.Count > 0;
+
+    private bool IsOrganizationEditing =>
+        _organizationEditing && Snapshot != null;
 
     private IReadOnlyList<Guid> SelectedDocumentPersonIds =>
         _selectedDocumentPersonIds.Count == 0
@@ -388,6 +396,7 @@
         {
             _caseSummaryInstanceId = instanceId;
             _caseSummaryEditing = false;
+            _organizationEditing = false;
         }
 
         SyncDocumentPeopleFilter(Snapshot?.CaseView);
@@ -446,6 +455,125 @@
     }
 
     private void FinishCaseSummaryEdit() => _caseSummaryEditing = false;
+
+    private void StartOrganizationEdit() => _organizationEditing = true;
+
+    private void FinishOrganizationEdit() => _organizationEditing = false;
+
+    private Task OnOrganizationCatalogChanged(string kind, string? raw)
+    {
+        if (!OrganizationLetterheadChanged.HasDelegate || string.IsNullOrWhiteSpace(kind))
+            return Task.CompletedTask;
+
+        Guid.TryParse(raw, out var id);
+        return OrganizationLetterheadChanged.InvokeAsync(new ApplicationWorkspaceOrganizationLetterheadUpdate
+        {
+            Kind = kind,
+            SelectedId = id == Guid.Empty ? null : id,
+        });
+    }
+
+    private Task OnOrganizationMakeDefault(string kind, Guid? selectedId)
+    {
+        if (!OrganizationLetterheadChanged.HasDelegate || selectedId is not Guid id || id == Guid.Empty)
+            return Task.CompletedTask;
+
+        return OrganizationLetterheadChanged.InvokeAsync(new ApplicationWorkspaceOrganizationLetterheadUpdate
+        {
+            Kind = kind,
+            SelectedId = id,
+            MakeDefault = true,
+        });
+    }
+
+    private Task OnNewOrganizationCatalog(string kind) =>
+        OrganizationCatalogEditorRequested.HasDelegate
+            ? OrganizationCatalogEditorRequested.InvokeAsync((kind, Guid.Empty))
+            : Task.CompletedTask;
+
+    private Task OnEditOrganizationCatalog(string kind, Guid? selectedId) =>
+        selectedId is not Guid id || id == Guid.Empty || !OrganizationCatalogEditorRequested.HasDelegate
+            ? Task.CompletedTask
+            : OrganizationCatalogEditorRequested.InvokeAsync((kind, id));
+
+    private RenderFragment RenderOrgColHead(string title, string kind, Guid? selectedId) => __builder =>
+    {
+        <div class="cw-org-col-head">
+            <h3 class="cw-org-col-title">@title</h3>
+            <div class="cw-org-col-actions">
+                <button type="button"
+                        class="cw-org-new"
+                        @onclick="() => OnNewOrganizationCatalog(kind)">
+                    + New
+                </button>
+                <button type="button"
+                        class="cw-org-edit"
+                        aria-label="@($"Edit {title}")"
+                        disabled="@(selectedId is not Guid id || id == Guid.Empty)"
+                        @onclick="() => OnEditOrganizationCatalog(kind, selectedId)">
+                    ✎
+                </button>
+            </div>
+        </div>
+    };
+
+    private RenderFragment RenderOrgCatalogSelect(
+        string kind,
+        Guid? selectedId,
+        IReadOnlyList<OrganizationCatalogOption> options) => __builder =>
+    {
+        var selected = selectedId ?? Guid.Empty;
+        var current = options.FirstOrDefault(o => o.Id == selected);
+        <div class="cw-org-select-row">
+            <select class="cw-summary-field__input"
+                    value="@selected"
+                    @onchange="e => OnOrganizationCatalogChanged(kind, e.Value?.ToString())">
+                @if (options.Count == 0)
+                {
+                    <option value="">No catalog records yet</option>
+                }
+                else
+                {
+                    @foreach (var option in options)
+                    {
+                        <option value="@option.Id" selected="@(option.Id == selected)">@option.DisplayName</option>
+                    }
+                }
+            </select>
+            @if (current?.IsDefault == true)
+            {
+                <span class="cw-org-default-badge">Default</span>
+            }
+            @if (current != null && !current.IsDefault)
+            {
+                <button type="button"
+                        class="cw-org-make-default"
+                        @onclick="() => OnOrganizationMakeDefault(kind, selected)">
+                    Make default
+                </button>
+            }
+        </div>
+    };
+
+    private RenderFragment RenderOrgField(string label, string? value, bool multiline = false) => __builder =>
+    {
+        <label class="cw-summary-field">
+            <span class="cw-summary-field__label">@label</span>
+            @if (multiline)
+            {
+                <textarea class="cw-summary-field__input cw-summary-field__textarea"
+                          rows="3"
+                          disabled="true">@value</textarea>
+            }
+            else
+            {
+                <input type="text"
+                       class="cw-summary-field__input"
+                       value="@value"
+                       disabled="true" />
+            }
+        </label>
+    };
 
     private IEnumerable<ApplicationWorkspaceCaseSummaryTile> OverviewTiles(ApplicationWorkspaceCaseView view) =>
         view.HeaderFields.Count > 0
@@ -1096,6 +1224,107 @@
                             </aside>
                         }
                     </div>
+                }
+            </section>
+            <section class="cw-card">
+                <div class="cw-card__title-row">
+                    <div>
+                        <h2 class="cw-card__title">Organization</h2>
+                        <p class="cw-summary-sub">@(IsOrganizationEditing
+                            ? "Dropdowns choose which catalog records this case uses. + New and Edit add or update those records here."
+                            : "Letterhead for this application · live catalog records")</p>
+                    </div>
+                    @if (IsOrganizationEditing)
+                    {
+                        <button type="button" class="cw-summary-mode-btn" @onclick="FinishOrganizationEdit">Done</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="cw-summary-mode-btn" @onclick="StartOrganizationEdit">✎ Edit</button>
+                    }
+                </div>
+                <div class="cw-org-callout">
+                    @(IsOrganizationEditing
+                        ? "Dropdowns choose which shared Company / Signatory / Representative this case uses. + New and Edit open that catalog record here — same as Configuration → Organization catalogs. Make default applies to the next new application."
+                        : "This case is related to the selected catalog records. Other cases may use different rows. Editing a catalog record updates every case that selected it.")
+                </div>
+                @if (!string.IsNullOrWhiteSpace(OrganizationStatusMessage))
+                {
+                    <p class="cw-summary-status @(OrganizationStatusIsError ? "is-error" : null)">@OrganizationStatusMessage</p>
+                }
+                @{
+                    var org = view.OrganizationLetterhead;
+                }
+                @if (IsOrganizationEditing)
+                {
+                    <div class="cw-org-grid">
+                        <div>
+                            @RenderOrgColHead("Company", OrganizationCatalogHelper.Company, org.CompanyId)
+                            @RenderOrgCatalogSelect(OrganizationCatalogHelper.Company, org.CompanyId, org.CompanyOptions)
+                            <div class="cw-org-preview">
+                                @RenderOrgField("Name", org.CompanyName)
+                                @RenderOrgField("Code", org.CompanyCode)
+                                @RenderOrgField("Phone", org.CompanyPhone)
+                                @RenderOrgField("Address", org.CompanyAddress, multiline: true)
+                                @RenderOrgField("Email", org.CompanyEmail)
+                                @RenderOrgField("Tax information", org.CompanyTaxInformation)
+                                @RenderOrgField("Registration date", org.CompanyRegistrationDateText)
+                            </div>
+                        </div>
+                        <div>
+                            @RenderOrgColHead("Authorized Signatory", OrganizationCatalogHelper.Signatory, org.SignatoryId)
+                            @RenderOrgCatalogSelect(OrganizationCatalogHelper.Signatory, org.SignatoryId, org.SignatoryOptions)
+                            <div class="cw-org-preview">
+                                @RenderOrgField("Full name", org.SignatoryFullName)
+                                @RenderOrgField("Position (Tm)", org.SignatoryPositionTitleTm)
+                                @RenderOrgField("Passport number", org.SignatoryPassportNumber)
+                                @RenderOrgField("Passport authority", org.SignatoryPassportAuthority)
+                                @RenderOrgField("Passport issue date", org.SignatoryPassportIssueDateText)
+                                @RenderOrgField("Passport expiration date", org.SignatoryPassportExpirationDateText)
+                            </div>
+                        </div>
+                        <div>
+                            @RenderOrgColHead("Authorized Representative", OrganizationCatalogHelper.Representative, org.RepresentativeId)
+                            @RenderOrgCatalogSelect(OrganizationCatalogHelper.Representative, org.RepresentativeId, org.RepresentativeOptions)
+                            <div class="cw-org-preview">
+                                @RenderOrgField("Full name", org.RepresentativeFullName)
+                                @RenderOrgField("Position (Tm)", org.RepresentativePositionTitleTm)
+                                @RenderOrgField("Phone", org.RepresentativePhone)
+                                @RenderOrgField("Passport number", org.RepresentativePassportNumber)
+                                @RenderOrgField("Passport authority", org.RepresentativePassportAuthority)
+                                @RenderOrgField("Passport issue date", org.RepresentativePassportIssueDateText)
+                            </div>
+                        </div>
+                    </div>
+                    <p class="cw-summary-foot">Changing a dropdown updates only this case's relation. + New / Edit updates the shared catalog record used by every case that selected it.</p>
+                }
+                else
+                {
+                    <div class="cw-org-grid">
+                        <dl class="cw-org-dl">
+                            <h3 class="cw-org-col-title">Company</h3>
+                            <div><dt>Name</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyName)</dd></div>
+                            <div><dt>Code</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyCode)</dd></div>
+                            <div><dt>Phone</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyPhone)</dd></div>
+                            <div><dt>Address</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyAddress)</dd></div>
+                            <div><dt>Email</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyEmail)</dd></div>
+                            <div><dt>Tax</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyTaxInformation)</dd></div>
+                        </dl>
+                        <dl class="cw-org-dl">
+                            <h3 class="cw-org-col-title">Authorized Signatory</h3>
+                            <div><dt>Full name</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.SignatoryFullName)</dd></div>
+                            <div><dt>Position (Tm)</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.SignatoryPositionTitleTm)</dd></div>
+                            <div><dt>Passport number</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.SignatoryPassportNumber)</dd></div>
+                        </dl>
+                        <dl class="cw-org-dl">
+                            <h3 class="cw-org-col-title">Authorized Representative</h3>
+                            <div><dt>Full name</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.RepresentativeFullName)</dd></div>
+                            <div><dt>Position (Tm)</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.RepresentativePositionTitleTm)</dd></div>
+                            <div><dt>Phone</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.RepresentativePhone)</dd></div>
+                            <div><dt>Passport number</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.RepresentativePassportNumber)</dd></div>
+                        </dl>
+                    </div>
+                    <p class="cw-summary-foot">Resminamalar merge these fields from the selected catalog records on the next generate.</p>
                 }
             </section>
             <section class="cw-card">

@@ -58,16 +58,13 @@ public sealed class LookupCatalogSyncUpdater : ModuleUpdater
             var skipLine = $"LookupCatalogSyncUpdater: skipped JSON sync — {syncReason}";
             Tracing.Tracer.LogText(skipLine);
             Console.WriteLine(skipLine);
+            EnsureMissingOrganizationCatalogs(manifest);
+            RunDuplicateCleanup(manifest);
+            return;
         }
 
         int totalCreated = 0, totalUpdated = 0, totalSkipped = 0;
         int catalogsProcessed = 0;
-
-        if (!runCatalogSync)
-        {
-            RunDuplicateCleanup(manifest);
-            return;
-        }
 
         var preSyncDeduped = LookupCatalogEntitySync.RemoveDuplicateCatalogRows(ObjectSpace, manifest.Catalogs);
         if (preSyncDeduped > 0)
@@ -142,7 +139,22 @@ public sealed class LookupCatalogSyncUpdater : ModuleUpdater
         settings.LookupCatalogManifestVersion = manifestVersion;
         ObjectSpace.CommitChanges();
 
+        EnsureMissingOrganizationCatalogs(manifest);
         RunDuplicateCleanup(manifest);
+    }
+
+    private void EnsureMissingOrganizationCatalogs(LookupCatalogManifest manifest)
+    {
+        var created = LookupCatalogEntitySync.EnsureMissingOrganizationCatalogRows(
+            ObjectSpace, manifest.Catalogs);
+        if (created <= 0)
+            return;
+
+        ObjectSpace.CommitChanges();
+        var line =
+            $"LookupCatalogSyncUpdater: organization catalogs json-inserted {created} missing row(s).";
+        Tracing.Tracer.LogText(line);
+        Console.WriteLine(line);
     }
 
     private void RunDuplicateCleanup(LookupCatalogManifest manifest)

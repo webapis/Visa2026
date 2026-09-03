@@ -83,6 +83,9 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
                 .Include(a => a.BusinessTripAddress)
                     .ThenInclude(b => b.City)
                 .Include(a => a.EntryCheckPoint)
+                .Include(a => a.OrganizationCompany)
+                .Include(a => a.OrganizationSignatory)
+                .Include(a => a.OrganizationRepresentative)
                 .FirstOrDefault(a => a.ID == applicationId);
         }
         catch (Exception)

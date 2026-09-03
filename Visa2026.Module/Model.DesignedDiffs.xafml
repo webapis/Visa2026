@@ -141,6 +141,20 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <DetailView Id="OrganizationCatalogsHost_DetailView" Caption="Organization catalogs" AllowDelete="False" AllowNew="False" AllowEdit="True" CustomCSSClassName="org-catalogs-detail">
+      <Items>
+        <PropertyEditor Id="CatalogsUi" PropertyName="CatalogsUi" ShowCaption="False" />
+      </Items>
+      <Layout>
+        <LayoutGroup Id="Main" Direction="Vertical" RelativeSize="100" CustomCSSClassName="xaf-fill-root">
+          <LayoutGroup Id="SimpleEditors" ShowCaption="False" RelativeSize="100" CustomCSSClassName="xaf-fill-available">
+            <LayoutGroup Id="OrganizationCatalogsHost" ShowCaption="False" RelativeSize="100" CustomCSSClassName="xaf-fill-available">
+              <LayoutItem Id="CatalogsUi" ViewItem="CatalogsUi" ShowCaption="False" RelativeSize="100" Index="0" CustomCSSClassName="xaf-fill-available" />
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <DetailView Id="ReportDataV2_DetailView">
       <Layout>
         <LayoutGroup Id="Main">

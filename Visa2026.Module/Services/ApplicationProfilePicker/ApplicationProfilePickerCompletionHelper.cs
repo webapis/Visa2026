@@ -21,6 +21,14 @@ public static class ApplicationProfilePickerCompletionHelper
         XafApplication application,
         Guid profileId,
         Guid? approvalLegVersionId,
+        out string? errorMessage) =>
+        TryCreateApplication(application, profileId, approvalLegVersionId, organization: null, out errorMessage);
+
+    public static bool TryCreateApplication(
+        XafApplication application,
+        Guid profileId,
+        Guid? approvalLegVersionId,
+        ApplicationProfilePickerOrganizationSelection? organization,
         out string? errorMessage)
     {
         errorMessage = null;
@@ -38,7 +46,7 @@ public static class ApplicationProfilePickerCompletionHelper
             return false;
         }
 
-        return TryCreateApplicationCore(application, profileId, null, approvalLegVersionId, out errorMessage, out _);
+        return TryCreateApplicationCore(application, profileId, null, approvalLegVersionId, organization, out errorMessage, out _);
     }
 
     public static bool TryCreateApplicationFromPersonStart(
@@ -107,7 +115,7 @@ public static class ApplicationProfilePickerCompletionHelper
             return false;
         }
 
-        if (!TryCreateApplicationCore(application, profileId, selectedPeople, approvalLegVersionId, out errorMessage, out var appNumber))
+        if (!TryCreateApplicationCore(application, profileId, selectedPeople, approvalLegVersionId, organization: null, out errorMessage, out var appNumber))
             return false;
 
         var warningText = validation.Warnings.Count > 0
@@ -139,6 +147,7 @@ public static class ApplicationProfilePickerCompletionHelper
         Guid profileId,
         IReadOnlyList<Person>? peopleToLink,
         Guid? approvalLegVersionId,
+        ApplicationProfilePickerOrganizationSelection? organization,
         out string? errorMessage,
         out string? applicationNumber)
     {
@@ -195,6 +204,7 @@ public static class ApplicationProfilePickerCompletionHelper
                 profile,
                 context?.CreationProgressRoute);
             ApplicationProfileApprovalLegVersionHelper.ApplySnapshot(objectSpace, nestedApp, nestedVersion);
+            ApplyOrganization(objectSpace, nestedApp, organization);
             if (peopleToLink != null && peopleToLink.Count > 0)
                 ApplicationStartFromPersonHelper.LinkPeople(objectSpace, nestedApp, peopleToLink);
             if (!TryCommitNewApplication(objectSpace, out errorMessage))
@@ -221,6 +231,7 @@ public static class ApplicationProfilePickerCompletionHelper
             context?.CreationProgressRoute);
 
         ApplicationProfileApprovalLegVersionHelper.ApplySharedSnapshot(objectSpace, app, sharedProfile);
+        ApplyOrganization(objectSpace, app, organization);
 
         if (peopleToLink != null && peopleToLink.Count > 0)
             ApplicationStartFromPersonHelper.LinkPeople(objectSpace, app, peopleToLink);
@@ -244,6 +255,25 @@ public static class ApplicationProfilePickerCompletionHelper
         ShowViewInCurrentWindow(application, workspaceView);
 
         return true;
+    }
+
+    private static void ApplyOrganization(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance application,
+        ApplicationProfilePickerOrganizationSelection? organization)
+    {
+        if (organization == null)
+        {
+            OrganizationCatalogHelper.AssignDefaultsIfEmpty(application, objectSpace);
+            return;
+        }
+
+        OrganizationCatalogHelper.Assign(
+            application,
+            objectSpace,
+            organization.CompanyId,
+            organization.SignatoryId,
+            organization.RepresentativeId);
     }
 
     private static bool TryCommitNewApplication(IObjectSpace objectSpace, out string? errorMessage)
@@ -280,4 +310,13 @@ public static class ApplicationProfilePickerCompletionHelper
             new ShowViewParameters(view) { TargetWindow = TargetWindow.Current },
             new ShowViewSource(sourceFrame, null));
     }
+}
+
+public sealed class ApplicationProfilePickerOrganizationSelection
+{
+    public Guid? CompanyId { get; init; }
+
+    public Guid? SignatoryId { get; init; }
+
+    public Guid? RepresentativeId { get; init; }
 }

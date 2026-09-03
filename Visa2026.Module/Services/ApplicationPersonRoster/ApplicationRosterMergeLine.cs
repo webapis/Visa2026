@@ -956,7 +956,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Company Address"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Application_CompanyAddress =>
-            OrganizationReportHelper.GetCompanyProfile(OrganizationReportHelper.ResolveObjectSpace(null, ApplicationProfileInstance))?.Address ?? string.Empty;
+            ApplicationProfileInstance?.Application_Company_Address ?? string.Empty;
         #endregion
 
         #region WorkDuty
@@ -1131,7 +1131,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Sponsor Name"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Application_SponsorName =>
-            OrganizationReportHelper.GetCompanyProfile(OrganizationReportHelper.ResolveObjectSpace(null, ApplicationProfileInstance))?.Name ?? string.Empty;
+            ApplicationProfileInstance?.Application_Company_Name ?? string.Empty;
 
         [XafDisplayName("Sponsor Authorized Signatory"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Application_SponsorSignatory => ApplicationProfileInstance?.Application_CompanyHead_FullName ?? string.Empty;
@@ -1159,83 +1159,61 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInDetailView(false), VisibleInListView(false)]
         public int RowNumber { get; set; }
 
-        private AuthorizedSignatory? SignatoryForReports() =>
-            OrganizationReportHelper.GetSignatory(OrganizationReportHelper.ResolveObjectSpace(null, ApplicationProfileInstance));
-
-        private AuthorizedRepresentative? RepresentativeForReports() =>
-            OrganizationReportHelper.GetRepresentative(OrganizationReportHelper.ResolveObjectSpace(null, ApplicationProfileInstance));
+        private ApplicationProfileInstanceOrganizationLetterhead Letterhead =>
+            ApplicationProfileInstanceOrganizationLetterheadHelper.Resolve(ApplicationProfileInstance);
 
         [NotMapped]
         [XafDisplayName("Signatory Passport Number"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string CompanyHead_PassportNumber => SignatoryForReports()?.PassportNumber ?? string.Empty;
+        public string CompanyHead_PassportNumber => Letterhead.SignatoryPassportNumber ?? string.Empty;
 
         [NotMapped]
         [XafDisplayName("Signatory Passport Authority"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string CompanyHead_PassportAuthority => SignatoryForReports()?.PassportAuthority ?? string.Empty;
+        public string CompanyHead_PassportAuthority => Letterhead.SignatoryPassportAuthority ?? string.Empty;
 
         [NotMapped]
         [XafDisplayName("Signatory Passport Issue Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string CompanyHead_PassportIssueDateText
-        {
-            get
-            {
-                var d = SignatoryForReports()?.PassportIssueDate;
-                return d is { } date && date != default ? $"{date:dd.MM.yyyy}" : string.Empty;
-            }
-        }
+        public string CompanyHead_PassportIssueDateText => Letterhead.SignatoryPassportIssueDateText;
 
         [NotMapped]
         [XafDisplayName("Signatory Passport Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string CompanyHead_PassportExpirationDateText =>
-            OrganizationPassportLineHelper.FormatIssueDateText(SignatoryForReports()?.PassportExpirationDate);
+        public string CompanyHead_PassportExpirationDateText => Letterhead.SignatoryPassportExpirationDateText;
 
         /// <summary>One line for Borçnama-style forms: number, authority, issue date with year suffix.</summary>
         [NotMapped]
         [XafDisplayName("Signatory Passport (one line)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string CompanyHead_PassportLine => SignatoryForReports()?.PassportLine ?? string.Empty;
+        public string CompanyHead_PassportLine => Letterhead.SignatoryPassportLine;
 
         [NotMapped]
         [XafDisplayName("Representative Full Name"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Representative_FullName =>
-            RepresentativeForReports()?.FullName ?? string.Empty;
+        public string Representative_FullName => Letterhead.RepresentativeFullName ?? string.Empty;
 
         [NotMapped]
         [XafDisplayName("Representative Passport (one line)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Representative_PassportLine => RepresentativeForReports()?.PassportLine ?? string.Empty;
+        public string Representative_PassportLine => Letterhead.RepresentativePassportLine;
 
         [NotMapped]
         [XafDisplayName("Representative Phone"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Representative_Phone => RepresentativeForReports()?.Phone ?? string.Empty;
+        public string Representative_Phone => Letterhead.RepresentativePhone ?? string.Empty;
 
         [NotMapped]
         [XafDisplayName("Representative Position (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Representative_PositionTm => RepresentativeForReports()?.PositionTitleTm ?? string.Empty;
+        public string Representative_PositionTm => Letterhead.RepresentativePositionTitleTm ?? string.Empty;
 
         [NotMapped]
         [XafDisplayName("Representative Passport Number"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Representative_PassportNumber => RepresentativeForReports()?.PassportNumber ?? string.Empty;
+        public string Representative_PassportNumber => Letterhead.RepresentativePassportNumber ?? string.Empty;
 
         [NotMapped]
         [XafDisplayName("Representative Passport Authority"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Representative_PassportAuthority => RepresentativeForReports()?.PassportAuthority ?? string.Empty;
+        public string Representative_PassportAuthority => Letterhead.RepresentativePassportAuthority ?? string.Empty;
 
         [NotMapped]
         [XafDisplayName("Representative Passport Issue Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Representative_PassportIssueDateText =>
-            OrganizationPassportLineHelper.FormatIssueDateText(RepresentativeForReports()?.PassportIssueDate);
+        public string Representative_PassportIssueDateText => Letterhead.RepresentativePassportIssueDateText;
 
         [NotMapped]
         [XafDisplayName("Representative passport, authority and phone (one line)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Representative_PassportPhoneLine
-        {
-            get
-            {
-                var r = RepresentativeForReports();
-                return r == null
-                    ? string.Empty
-                    : OrganizationPassportLineHelper.FormatNumberAuthorityPhone(r.PassportNumber, r.PassportAuthority, r.Phone);
-            }
-        }
+        public string Representative_PassportPhoneLine => Letterhead.RepresentativePassportPhoneLine;
 
         [NotMapped]
         [VisibleInDetailView(false), VisibleInListView(false)]
@@ -1244,27 +1222,27 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         [VisibleInDetailView(false), VisibleInListView(false)]
         public string Application_Company_PhoneNumber =>
-            OrganizationReportHelper.GetCompanyProfile(OrganizationReportHelper.ResolveObjectSpace(null, ApplicationProfileInstance))?.PhoneNumber ?? string.Empty;
+            ApplicationProfileInstance?.Application_Company_PhoneNumber ?? string.Empty;
 
         [NotMapped]
         [VisibleInDetailView(false), VisibleInListView(false)]
         public string Application_Company_Email =>
-            OrganizationReportHelper.GetCompanyProfile(OrganizationReportHelper.ResolveObjectSpace(null, ApplicationProfileInstance))?.Email ?? string.Empty;
+            ApplicationProfileInstance?.Application_Company_Email ?? string.Empty;
 
         [NotMapped]
         [VisibleInDetailView(false), VisibleInListView(false)]
         public string Application_Company_TaxInformation =>
-            OrganizationReportHelper.GetCompanyProfile(OrganizationReportHelper.ResolveObjectSpace(null, ApplicationProfileInstance))?.TaxInformation ?? string.Empty;
+            ApplicationProfileInstance?.Application_Company_TaxInformation ?? string.Empty;
 
         [NotMapped]
         [XafDisplayName("Company Registration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Application_Company_RegistrationDateText =>
-            OrganizationReportHelper.GetCompanyProfile(OrganizationReportHelper.ResolveObjectSpace(null, ApplicationProfileInstance))?.RegistrationDateText ?? string.Empty;
+            ApplicationProfileInstance?.Application_Company_RegistrationDateText ?? string.Empty;
 
         [NotMapped]
         [VisibleInDetailView(false), VisibleInListView(false)]
         public string Company_Code =>
-            OrganizationReportHelper.GetCompanyProfile(OrganizationReportHelper.ResolveObjectSpace(null, ApplicationProfileInstance))?.Code ?? string.Empty;
+            ApplicationProfileInstance?.Company_Code ?? string.Empty;
 
         [NotMapped]
         [VisibleInDetailView(false), VisibleInListView(false)]
@@ -1273,24 +1251,8 @@ namespace Visa2026.Module.BusinessObjects
         /// <summary>Company tax/registration text, address and phone in one line (data entry controls formatting, e.g. №… date).</summary>
         [NotMapped]
         [XafDisplayName("Company registry, address and phone (one line)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Application_CompanyRegistryAddressLine
-        {
-            get
-            {
-                var c = OrganizationReportHelper.GetCompanyProfile(
-                    OrganizationReportHelper.ResolveObjectSpace(null, ApplicationProfileInstance));
-                if (c == null)
-                    return string.Empty;
-                var parts = new List<string>();
-                if (!string.IsNullOrWhiteSpace(c.TaxInformation))
-                    parts.Add(c.TaxInformation.Trim());
-                if (!string.IsNullOrWhiteSpace(c.Address))
-                    parts.Add(c.Address.Trim());
-                if (!string.IsNullOrWhiteSpace(c.PhoneNumber))
-                    parts.Add(c.PhoneNumber.Trim());
-                return string.Join(" ", parts);
-            }
-        }
+        public string Application_CompanyRegistryAddressLine =>
+            ApplicationProfileInstance?.Application_CompanyRegistryAddressLine ?? string.Empty;
         #endregion
 
         #region PDF Visa ApplicationProfileInstance (XFA) — family members aggregate

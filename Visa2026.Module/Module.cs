@@ -74,6 +74,7 @@ namespace Visa2026.Module
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ApplicationProfilePicker.ApplicationProfilePickerHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ApplicationProfileOverview.ApplicationProfileOverviewHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ApplicationProfileCatalog.ApplicationProfileCatalogHost));
+            AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.OrganizationCatalogs.OrganizationCatalogsHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.OfficerShell.OfficerShellHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.Feedback.UserFeedback));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.Operations.ApplicationRuntimeLog));
@@ -160,6 +161,9 @@ namespace Visa2026.Module
             updaters.Add(new DatabaseUpdate.ApplicationProfileCatalogDetailViewUpdater());
             updaters.Add(new DatabaseUpdate.ApplicationProfileCatalogLayoutUpdater());
             updaters.Add(new DatabaseUpdate.ApplicationProfileCatalogModelUpdater());
+            updaters.Add(new DatabaseUpdate.OrganizationCatalogsDetailViewUpdater());
+            updaters.Add(new DatabaseUpdate.OrganizationCatalogsLayoutUpdater());
+            updaters.Add(new DatabaseUpdate.OrganizationCatalogsModelUpdater());
             updaters.Add(new DatabaseUpdate.OfficerShellDetailViewUpdater());
             updaters.Add(new DatabaseUpdate.OfficerShellLayoutUpdater());
             updaters.Add(new DatabaseUpdate.OfficerShellModelUpdater());

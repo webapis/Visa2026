@@ -88,4 +88,30 @@ public class ApplicationProfileApprovalLegVersionSchemaSqlTests
         Assert.Contains("RecycledAtUtc", ApplicationProfileSchemaSql.EnsureTemplateCatalogColumnsSqlServer, StringComparison.Ordinal);
         Assert.Contains("RecycledByUserName", ApplicationProfileSchemaSql.EnsureTemplateCatalogColumnsSqlServer, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void HostStart_AddsInstanceLetterheadColumns()
+    {
+        foreach (var sql in ApplicationProfileSchemaSql.EnsureInstanceLetterheadPostgresStatements)
+            Assert.Contains(sql, ApplicationProfileSchemaSql.EnsureTemplateCatalogColumnsPostgresStatements);
+        Assert.Contains("LetterheadCopied", ApplicationProfileSchemaSql.EnsureInstanceLetterheadPostgres, StringComparison.Ordinal);
+        Assert.Contains("LetterheadCompanyName", ApplicationProfileSchemaSql.EnsureInstanceLetterheadPostgres, StringComparison.Ordinal);
+        Assert.Contains("LetterheadSignatoryFullName", ApplicationProfileSchemaSql.EnsureInstanceLetterheadPostgres, StringComparison.Ordinal);
+        Assert.Contains("LetterheadRepresentativeFullName", ApplicationProfileSchemaSql.EnsureInstanceLetterheadPostgres, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void HostStart_AddsOrganizationCatalogColumns()
+    {
+        foreach (var sql in ApplicationProfileSchemaSql.EnsureOrganizationCatalogPostgresStatements)
+            Assert.Contains(sql, ApplicationProfileSchemaSql.EnsureTemplateCatalogColumnsPostgresStatements);
+        Assert.Contains("IsDefault", ApplicationProfileSchemaSql.EnsureOrganizationCatalogPostgres, StringComparison.Ordinal);
+        Assert.Contains("OrganizationCompanyId", ApplicationProfileSchemaSql.EnsureOrganizationCatalogPostgres, StringComparison.Ordinal);
+        Assert.Contains("OrganizationSignatoryId", ApplicationProfileSchemaSql.EnsureOrganizationCatalogPostgres, StringComparison.Ordinal);
+        Assert.Contains("OrganizationRepresentativeId", ApplicationProfileSchemaSql.EnsureOrganizationCatalogPostgres, StringComparison.Ordinal);
+        Assert.Contains(ApplicationProfileSchemaSql.SeedDemoOrganizationCatalogPostgres,
+            ApplicationProfileSchemaSql.EnsureTemplateCatalogColumnsPostgresStatements);
+        Assert.Contains("DEM", ApplicationProfileSchemaSql.SeedDemoOrganizationCatalogPostgres, StringComparison.Ordinal);
+        Assert.Contains("Ali Demir", ApplicationProfileSchemaSql.SeedDemoOrganizationCatalogPostgres, StringComparison.Ordinal);
+    }
 }

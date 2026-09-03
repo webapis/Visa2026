@@ -404,6 +404,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
 
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Configuration", SecurityPermissionState.Allow);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Configuration/Items/ApplicationProfileCatalog", SecurityPermissionState.Allow);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Configuration/Items/OrganizationCatalogs", SecurityPermissionState.Allow);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/ApplicationProfileCatalog", SecurityPermissionState.Deny);
 
         // Explicitly DENY ApplicationProfileInstance Progress, Business Trip and Pdf Generation Batch
@@ -523,6 +524,11 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureReadWriteCreatePermission<FileData>(userRole);
     // Application.VisaPeriod lookup popup — officers add/edit periods without Lookup navigation.
     EnsureReadWriteCreatePermission<VisaPeriod>(userRole);
+    EnsureReadWriteCreatePermission<CompanyProfile>(userRole);
+    EnsureReadWriteCreatePermission<AuthorizedSignatory>(userRole);
+    EnsureReadWriteCreatePermission<AuthorizedRepresentative>(userRole);
+    EnsureTypePermission<BusinessObjects.OrganizationCatalogs.OrganizationCatalogsHost>(
+        userRole, SecurityOperations.Read, SecurityPermissionState.Allow);
     // Address of residence: allow adding supporting documents inline (no Documents navigation group access needed).
     EnsureFullAccessRecursivePermission<AddressOfResidence>(userRole);
     EnsureFullAccessRecursivePermission<AddressOfResidenceDocument>(userRole);
@@ -632,6 +638,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/OfficerShell", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/ApplicationProfileCatalog", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/OrganizationCatalogs", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/ApplicationProfileCatalog", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/ApplicationProfileInstanceProgress", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/BusinessTrip", SecurityPermissionState.Deny);
@@ -765,6 +772,11 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadOnlyPermission<MovementPermitLocation>(role);
             EnsureReadOnlyPermission<BorderZoneLocation>(role);
             EnsureReadOnlyPermission<ApplicationNumberingProfile>(role);
+            EnsureReadOnlyPermission<CompanyProfile>(role);
+            EnsureReadOnlyPermission<AuthorizedSignatory>(role);
+            EnsureReadOnlyPermission<AuthorizedRepresentative>(role);
+            EnsureTypePermission<BusinessObjects.OrganizationCatalogs.OrganizationCatalogsHost>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
             EnsureReadOnlyPermission<ExpirationAlertRule>(role);
             EnsureReadOnlyPermission<PdfFormMapping>(role);
 
@@ -1013,17 +1025,17 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         }
 
         /// <summary>
-        /// Tenant JSON organization singletons + project contracts (not global Lookup catalogs).
-        /// Read/write only on singletons — deploy sync owns row lifecycle (no create/delete).
+        /// Tenant JSON organization catalogs + project contracts (not global Lookup catalogs).
+        /// Company / Signatory / Representative allow Create; numbering stays a singleton (no create/delete).
         /// </summary>
         static void EnsureVisaOfficeConfigurationPermissions(PermissionPolicyRole role)
         {
             if (role == null)
                 return;
 
-            EnsureReadWriteOnlyPermission<CompanyProfile>(role);
-            EnsureReadWriteOnlyPermission<AuthorizedSignatory>(role);
-            EnsureReadWriteOnlyPermission<AuthorizedRepresentative>(role);
+            EnsureReadWriteCreatePermission<CompanyProfile>(role);
+            EnsureReadWriteCreatePermission<AuthorizedSignatory>(role);
+            EnsureReadWriteCreatePermission<AuthorizedRepresentative>(role);
             EnsureReadWriteOnlyPermission<ApplicationNumberingProfile>(role);
             EnsureReadWriteCreatePermission<ProjectContract>(role);
             EnsureReadWriteCreatePermission<ApprovingMinistry>(role);
@@ -1034,6 +1046,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureFullAccessRecursivePermission<ApplicationProfileTemplate>(role);
             EnsureFullAccessRecursivePermission<ApplicationProfileProgressStateSetting>(role);
             EnsureReadWriteCreatePermission<FileData>(role);
+            EnsureTypePermission<BusinessObjects.OrganizationCatalogs.OrganizationCatalogsHost>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
             EnsureTypePermission<ReportDataV2>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
             EnsureTypePermission<ReportVisibility>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
             EnsureReadOnlyPermission<PdfFormMapping>(role);
@@ -1087,6 +1101,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/Application_DirectMigration", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/OfficerShell", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/ApplicationProfileCatalog", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/OrganizationCatalogs", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Employees", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/FamilyMembers", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/TemporaryVisitors", SecurityPermissionState.Deny);

@@ -1,5 +1,5 @@
 {
-  "version": 43,
+  "version": 44,
   "catalogs": [
     {
       "id": "position",
@@ -38,7 +38,7 @@
       "entity": "CompanyProfile",
       "file": "company-profile.json",
       "matchKey": "Name",
-      "syncMode": "OverwriteScalars",
+      "syncMode": "InsertOnly",
       "optional": true
     },
     {
@@ -54,7 +54,7 @@
       "entity": "AuthorizedSignatory",
       "file": "authorized-signatory.json",
       "matchKey": "FullName",
-      "syncMode": "OverwriteScalars",
+      "syncMode": "InsertOnly",
       "optional": true
     },
     {
@@ -62,7 +62,7 @@
       "entity": "AuthorizedRepresentative",
       "file": "authorized-representative.json",
       "matchKey": "FullName",
-      "syncMode": "OverwriteScalars",
+      "syncMode": "InsertOnly",
       "optional": true
     },
     {

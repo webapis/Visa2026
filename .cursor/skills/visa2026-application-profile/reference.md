@@ -26,6 +26,7 @@ Companion to [SKILL.md](./SKILL.md).
 | Profile schema heal | `DatabaseUpdate/ApplicationProfileSchemaSql.cs` |
 | Lock helper | `ApplicationProfileLockHelper` in `ApplicationProfile.cs` |
 | Wizard UX | `ApplicationProfileWizard*`, `ApplicationProfileWizardComponent.razor` |
+| Organization catalogs (Config page + inline New/Edit) | `OrganizationCatalogsHost`, `OrganizationCatalogsOpenHelper`, `OrganizationCatalogsComponent.razor`, `OrganizationCatalogHelper`, picker/case **+ New / Edit** |
 | Approval-leg slot catalog | `ApprovalLegProfileSlotEditor`, `ApprovalLegProfileSlotPanel.razor`, `OpenApprovalLegCatalogAsync` |
 | Profile overview (live) | `ApplicationProfileOverviewQueryService`, `ApplicationProfileOverviewComponent.razor` |
 | Profile picker at create | `ApplicationProfilePicker*`, `ApplicationProfilePickerNewController` |

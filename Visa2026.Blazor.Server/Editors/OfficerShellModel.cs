@@ -591,4 +591,28 @@ public sealed class OfficerShellModel : ComponentModelBase
         get => GetPropertyValue<EventCallback<ApplicationWorkspaceCaseHeaderFieldUpdate>>();
         set => SetPropertyValue(value);
     }
+
+    public string? OrganizationStatusMessage
+    {
+        get => GetPropertyValue<string?>();
+        set => SetPropertyValue(value);
+    }
+
+    public bool OrganizationStatusIsError
+    {
+        get => GetPropertyValue<bool>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback<ApplicationWorkspaceOrganizationLetterheadUpdate> OrganizationLetterheadChanged
+    {
+        get => GetPropertyValue<EventCallback<ApplicationWorkspaceOrganizationLetterheadUpdate>>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback<(string Kind, Guid Id)> OrganizationCatalogEditorRequested
+    {
+        get => GetPropertyValue<EventCallback<(string Kind, Guid Id)>>();
+        set => SetPropertyValue(value);
+    }
 }

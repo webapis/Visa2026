@@ -1,5 +1,7 @@
 @using System.Linq
 @using Visa2026.Blazor.Server.Editors
+@using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Services.ApplicationWorkspace
 
 <div class="ap-picker">
     @if (IsLoading)
@@ -34,7 +36,7 @@
             {
                 <div class="ap-picker__versions-empty" role="status">
                     <p class="ap-picker__versions-empty-title">No shared approval-leg versions yet</p>
-                    <p>Create the first ministry chain here. It is shared for all via-ministry applications, not only this case. After Create, pick the card and Use profile. Catalog on the right lists inactive chains too.</p>
+                    <p>Create the first ministry chain here. It is shared for all via-ministry applications, not only this case. After Create, pick the card and continue. Catalog on the right lists inactive chains too.</p>
                     <div class="ap-picker__section-actions ap-picker__section-actions--empty">
                         <button type="button" class="ap-picker__link" @onclick="OpenApprovalLegCatalogAsync">Catalog</button>
                         <button type="button" class="ap-picker__btn ap-picker__btn--primary" @onclick="NewApprovalLegAsync">+ New</button>
@@ -95,11 +97,62 @@
             <button type="button" class="ap-picker__btn" @onclick="BackStepAsync">Back</button>
             <button type="button"
                     class="ap-picker__btn ap-picker__btn--primary"
-                    disabled="@(!CanCreateOnLegsStep)"
-                    @onclick="UseProfileAsync">
-                Use profile (live link)
+                    disabled="@(!CanContinueFromLegs)"
+                    @onclick="NextStepAsync">
+                Continue →
             </button>
         </div>
+    }
+    else if (Step == 3)
+    {
+        <header class="ap-picker__header ap-picker__header--with-gear">
+            <div>
+                <h1 class="ap-picker__title">Choose Organization</h1>
+                <p class="ap-picker__profile-name" title="@SelectedProfileName">@SelectedProfileName</p>
+                <p class="ap-picker__sub">
+                    This case will use the selected Company, Signatory, and Representative. Defaults are pre-selected; you can change them.
+                    <strong>Make default</strong> applies to the next new application.
+                    Use the gear to add or edit catalog records.
+                </p>
+            </div>
+            <button type="button"
+                    class="cs-multi-select-popup__gear-btn @(_orgCatalogManageOpen ? "cs-multi-select-popup__gear-btn--active" : null)"
+                    title="@(_orgCatalogManageOpen ? "Hide catalog New and Edit" : "Show catalog New and Edit")"
+                    aria-label="@(_orgCatalogManageOpen ? "Hide catalog New and Edit" : "Show catalog New and Edit")"
+                    aria-pressed="@_orgCatalogManageOpen"
+                    @onclick="ToggleOrgCatalogManage">
+                <svg class="cs-multi-select-popup__gear-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                    <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94L14.4 2.81a.488.488 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.488.488 0 0 0-.59.22L2.74 8.87a.488.488 0 0 0 .12.61l2.03 1.58c-.05.3-.07.63-.07.94s.02.64.07.94l-2.03 1.58a.488.488 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.488.488 0 0 0 .12-.61l-2.03-1.58zM12 15.6A3.6 3.6 0 1 1 15.6 12 3.6 3.6 0 0 1 12 15.6z" />
+                </svg>
+            </button>
+        </header>
+
+        @RenderStatus()
+
+        <div class="ap-picker__org">
+            @RenderOrgDropdown("Company", OrganizationCatalogHelper.Company, SelectedCompanyId, Companies, "Letterhead company for this application.")
+            @RenderOrgDropdown("Authorized Signatory", OrganizationCatalogHelper.Signatory, SelectedSignatoryId, Signatories, null)
+            @RenderOrgDropdown("Authorized Representative", OrganizationCatalogHelper.Representative, SelectedRepresentativeId, Representatives, null)
+        </div>
+
+        <div class="ap-picker__callout" role="note">
+            These are shared catalog records (not snapshots). Editing a catalog record later updates every case that selected it.
+            @if (_orgCatalogManageOpen)
+            {
+                <text> + New and Edit here are the same as Configuration → Organization catalogs.</text>
+            }
+        </div>
+
+        <div class="ap-picker__actions">
+            <button type="button" class="ap-picker__btn" @onclick="BackStepAsync">Back</button>
+            <button type="button"
+                    class="ap-picker__btn ap-picker__btn--primary"
+                    disabled="@(!CanCreateOnOrganizationStep)"
+                    @onclick="UseProfileAsync">
+                Use profile
+            </button>
+        </div>
+        <p class="ap-picker__foot-note">Application Profile: @SelectedProfileName · after profile@(SelectedRow?.RequiresApprovalLegVersion == true ? " and approval legs" : "")</p>
     }
     else
     {
@@ -159,24 +212,12 @@
             }
 
             <div class="ap-picker__actions">
-                @if (SelectedRow?.RequiresApprovalLegVersion == true)
-                {
-                    <button type="button"
-                            class="ap-picker__btn ap-picker__btn--primary"
-                            disabled="@(!CanContinueToLegs)"
-                            @onclick="NextStepAsync">
-                        Continue →
-                    </button>
-                }
-                else
-                {
-                    <button type="button"
-                            class="ap-picker__btn ap-picker__btn--primary"
-                            disabled="@(SelectedProfileId == Guid.Empty)"
-                            @onclick="UseProfileAsync">
-                        Use profile (live link)
-                    </button>
-                }
+                <button type="button"
+                        class="ap-picker__btn ap-picker__btn--primary"
+                        disabled="@(SelectedProfileId == Guid.Empty)"
+                        @onclick="NextStepAsync">
+                    Continue →
+                </button>
             </div>
         }
     }
@@ -202,8 +243,18 @@
     [Parameter] public EventCallback<Guid> OpenApprovalLegRequested { get; set; }
     [Parameter] public EventCallback OpenApprovalLegCatalogRequested { get; set; }
     [Parameter] public EventCallback<Guid> MakeDefaultApprovalLegRequested { get; set; }
+    [Parameter] public IReadOnlyList<OrganizationCatalogOption> Companies { get; set; } = Array.Empty<OrganizationCatalogOption>();
+    [Parameter] public IReadOnlyList<OrganizationCatalogOption> Signatories { get; set; } = Array.Empty<OrganizationCatalogOption>();
+    [Parameter] public IReadOnlyList<OrganizationCatalogOption> Representatives { get; set; } = Array.Empty<OrganizationCatalogOption>();
+    [Parameter] public Guid SelectedCompanyId { get; set; }
+    [Parameter] public Guid SelectedSignatoryId { get; set; }
+    [Parameter] public Guid SelectedRepresentativeId { get; set; }
+    [Parameter] public EventCallback<ApplicationWorkspaceOrganizationLetterheadUpdate> OrganizationChanged { get; set; }
+    [Parameter] public EventCallback<ApplicationWorkspaceOrganizationLetterheadUpdate> MakeDefaultOrganizationRequested { get; set; }
+    [Parameter] public EventCallback<(string Kind, Guid Id)> OrganizationCatalogEditorRequested { get; set; }
 
     private bool _initialLoadStarted;
+    private bool _orgCatalogManageOpen;
 
     private ApplicationProfilePickerModel.PickerRowModel? SelectedRow =>
         Rows.FirstOrDefault(r => r.ProfileId == SelectedProfileId);
@@ -211,13 +262,16 @@
     private string SelectedProfileName =>
         string.IsNullOrWhiteSpace(SelectedRow?.Name) ? "Unnamed profile" : SelectedRow.Name;
 
-    private bool CanContinueToLegs =>
-        SelectedRow != null
-        && SelectedRow.RequiresApprovalLegVersion;
-
-    private bool CanCreateOnLegsStep =>
+    private bool CanContinueFromLegs =>
         SelectedRow != null
         && SelectedVersionId != Guid.Empty;
+
+    private bool CanCreateOnOrganizationStep =>
+        SelectedCompanyId != Guid.Empty
+        && SelectedSignatoryId != Guid.Empty
+        && SelectedRepresentativeId != Guid.Empty;
+
+    private void ToggleOrgCatalogManage() => _orgCatalogManageOpen = !_orgCatalogManageOpen;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -235,6 +289,67 @@
             var css = IsStatusError ? "is-error" : IsStatusWarning ? "is-warn" : "is-ok";
             <div class="ap-picker__status @css" role="status">@StatusMessage</div>
         }
+    };
+
+    private RenderFragment RenderOrgDropdown(
+        string label,
+        string kind,
+        Guid selectedId,
+        IReadOnlyList<OrganizationCatalogOption> options,
+        string? hint) => __builder =>
+    {
+        var selected = options.FirstOrDefault(o => o.Id == selectedId);
+        <div class="ap-picker__org-field">
+            <label class="ap-picker__org-label">@label <span class="ap-picker__req" aria-hidden="true">*</span></label>
+            <div class="ap-picker__org-row">
+                <select class="ap-picker__org-select"
+                        value="@selectedId"
+                        @onchange="e => OnOrganizationChanged(kind, e.Value?.ToString())">
+                    @if (options.Count == 0)
+                    {
+                        <option value="">@(_orgCatalogManageOpen ? "No catalog records yet" : "No catalog records yet — use the gear to add one")</option>
+                    }
+                    else
+                    {
+                        @foreach (var option in options)
+                        {
+                            <option value="@option.Id" selected="@(option.Id == selectedId)">@option.DisplayName</option>
+                        }
+                    }
+                </select>
+                @if (_orgCatalogManageOpen)
+                {
+                    <button type="button"
+                            class="ap-picker__org-new"
+                            @onclick="() => OnNewOrganization(kind)">
+                        + New
+                    </button>
+                    <button type="button"
+                            class="ap-picker__org-edit"
+                            aria-label="@($"Edit {label}")"
+                            disabled="@(selectedId == Guid.Empty)"
+                            @onclick="() => OnEditOrganization(kind, selectedId)">
+                        ✎
+                    </button>
+                }
+                @if (selected?.IsDefault == true)
+                {
+                    <span class="ap-picker__badge ap-picker__badge--on">Default</span>
+                }
+                @if (selected != null && !selected.IsDefault)
+                {
+                    <button type="button"
+                            class="ap-picker__link"
+                            @onclick="() => OnMakeDefaultOrganization(kind, selectedId)">
+                        Make default
+                    </button>
+                }
+            </div>
+            @if (!string.IsNullOrWhiteSpace(hint))
+            {
+                <p class="ap-picker__org-hint">@hint</p>
+            }
+        </div>
     };
 
     private async Task SelectProfile(Guid profileId)
@@ -290,6 +405,42 @@
         if (MakeDefaultApprovalLegRequested.HasDelegate)
             await MakeDefaultApprovalLegRequested.InvokeAsync(versionId);
     }
+
+    private async Task OnOrganizationChanged(string kind, string? raw)
+    {
+        if (!OrganizationChanged.HasDelegate)
+            return;
+
+        Guid.TryParse(raw, out var id);
+        await OrganizationChanged.InvokeAsync(new ApplicationWorkspaceOrganizationLetterheadUpdate
+        {
+            Kind = kind,
+            SelectedId = id == Guid.Empty ? null : id,
+        });
+    }
+
+    private async Task OnMakeDefaultOrganization(string kind, Guid selectedId)
+    {
+        if (!MakeDefaultOrganizationRequested.HasDelegate)
+            return;
+
+        await MakeDefaultOrganizationRequested.InvokeAsync(new ApplicationWorkspaceOrganizationLetterheadUpdate
+        {
+            Kind = kind,
+            SelectedId = selectedId,
+            MakeDefault = true,
+        });
+    }
+
+    private Task OnNewOrganization(string kind) =>
+        OrganizationCatalogEditorRequested.HasDelegate
+            ? OrganizationCatalogEditorRequested.InvokeAsync((kind, Guid.Empty))
+            : Task.CompletedTask;
+
+    private Task OnEditOrganization(string kind, Guid id) =>
+        id == Guid.Empty || !OrganizationCatalogEditorRequested.HasDelegate
+            ? Task.CompletedTask
+            : OrganizationCatalogEditorRequested.InvokeAsync((kind, id));
 
     private async Task OnVersionKey(KeyboardEventArgs e, Guid versionId)
     {

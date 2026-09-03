@@ -20,6 +20,7 @@ using Visa2026.Module.Services.ApplicationPersonRoster;
 using Visa2026.Module.Services.ApplicationWorkspace;
 using Visa2026.Module.Services.OfficerShell;
 using Visa2026.Blazor.Server.Services;
+using Visa2026.Module.Services.OrganizationCatalogs;
 using Visa2026.Module.Services.PreviewSlot;
 
 namespace Visa2026.Blazor.Server.Editors;
@@ -77,6 +78,8 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         LinkPersonFromPickerRequested = EventCallback.Factory.Create<Guid>(this, LinkPersonFromPickerAsync),
         ClosePersonLinkPickerRequested = EventCallback.Factory.Create(this, ClosePersonLinkPickerAsync),
         HeaderFieldChanged = EventCallback.Factory.Create<ApplicationWorkspaceCaseHeaderFieldUpdate>(this, SaveHeaderFieldAsync),
+        OrganizationLetterheadChanged = EventCallback.Factory.Create<ApplicationWorkspaceOrganizationLetterheadUpdate>(this, SaveOrganizationLetterheadAsync),
+        OrganizationCatalogEditorRequested = EventCallback.Factory.Create<(string Kind, Guid Id)>(this, OpenOrganizationCatalogEditor),
         PersonLinkCandidates = Array.Empty<ApplicationProfileInstancePersonLinkCandidateRow>(),
     };
 
@@ -226,6 +229,75 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         model.HeaderFieldStatusMessage = null;
         model.HeaderFieldStatusIsError = false;
         await LoadAsync();
+    }
+
+    private async Task SaveOrganizationLetterheadAsync(ApplicationWorkspaceOrganizationLetterheadUpdate update)
+    {
+        var model = ComponentModel;
+        if (model == null || _application == null || update == null)
+            return;
+
+        var applicationId = ResolveApplicationProfileInstanceId();
+        if (applicationId == Guid.Empty)
+            return;
+
+        using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
+        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
+        if (application == null)
+            return;
+
+        if (update.MakeDefault)
+        {
+            var defaultId = update.SelectedId ?? Guid.Empty;
+            if (!OrganizationCatalogHelper.TryMakeDefault(objectSpace, update.Kind, defaultId, out var defaultError))
+            {
+                model.OrganizationStatusMessage = defaultError;
+                model.OrganizationStatusIsError = true;
+                return;
+            }
+        }
+        else if (!OrganizationCatalogHelper.TryAssign(
+                     application, objectSpace, update.Kind, update.SelectedId, out var error))
+        {
+            model.OrganizationStatusMessage = error;
+            model.OrganizationStatusIsError = true;
+            return;
+        }
+
+        objectSpace.SetModified(application);
+        if (objectSpace.IsModified)
+            objectSpace.CommitChanges();
+
+        model.OrganizationStatusMessage = null;
+        model.OrganizationStatusIsError = false;
+        await LoadAsync();
+    }
+
+    private void OpenOrganizationCatalogEditor((string Kind, Guid Id) request)
+    {
+        if (_application == null || string.IsNullOrWhiteSpace(request.Kind))
+            return;
+
+        var wasNew = request.Id == Guid.Empty;
+        OrganizationCatalogsOpenHelper.TryOpenEditor(
+            _application,
+            request.Kind,
+            request.Id,
+            onClosed: wasNew ? null : () => _ = LoadAsync(),
+            onSaved: savedId =>
+            {
+                if (wasNew && savedId != Guid.Empty)
+                {
+                    _ = SaveOrganizationLetterheadAsync(new ApplicationWorkspaceOrganizationLetterheadUpdate
+                    {
+                        Kind = request.Kind,
+                        SelectedId = savedId,
+                    });
+                    return;
+                }
+
+                _ = LoadAsync();
+            });
     }
 
     private void SelectPersonRow(int rowIndex)

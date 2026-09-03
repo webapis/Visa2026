@@ -46,6 +46,20 @@ internal static class ApplicationProfileSeedGate
                 result.ApplicationsBackfilled,
                 result.SkippedBecauseTenantCatalogPresent);
 
+            try
+            {
+                var organizationCreated = OrganizationCatalogSeed.EnsureMissing(objectSpace);
+                if (organizationCreated > 0)
+                    objectSpace.CommitChanges();
+                logger?.LogInformation(
+                    "Organization catalog seed: created={Created}.",
+                    organizationCreated);
+            }
+            catch (Exception orgEx)
+            {
+                logger?.LogWarning(orgEx, "Organization catalog seed failed. Demo Company/Signatory/Representative rows may be missing.");
+            }
+
             if (result.TypesWithoutProfile.Count > 0)
             {
                 logger?.LogWarning(
@@ -78,6 +92,13 @@ internal static class ApplicationProfileSeedGate
                 heal.ProfilesAssigned,
                 heal.NamesStamped,
                 heal.SnapshotsFilled);
+
+            var letterheadFilled = ApplicationProfileInstanceOrganizationLetterheadHelper.BackfillUncopied(healSpace);
+            if (letterheadFilled > 0)
+                healSpace.CommitChanges();
+            logger?.LogInformation(
+                "ApplicationProfile instance organization FKs heal: filled={Filled}.",
+                letterheadFilled);
         }
         catch (Exception ex)
         {

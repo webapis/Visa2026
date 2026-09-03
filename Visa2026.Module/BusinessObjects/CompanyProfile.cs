@@ -39,13 +39,17 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Company Registration Date")]
         public virtual DateTime? RegistrationDate { get; set; }
 
+        [XafDisplayName("Default")]
+        [ToolTip("Pre-selected when creating the next Application Profile Instance.")]
+        public virtual bool IsDefault { get; set; }
+
         [NotMapped]
         [XafDisplayName("Company Registration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string RegistrationDateText =>
             RegistrationDate is { } date && date.Year > 1 ? date.ToString("dd.MM.yyyy") : string.Empty;
 
         public static CompanyProfile? TryGetInstance(IObjectSpace objectSpace) =>
-            OrganizationSingletonHelper.TryGet(objectSpace, (CompanyProfile p) => p.Name);
+            OrganizationCatalogHelper.TryGetDefaultCompany(objectSpace);
 
         public static CompanyProfile GetOrCreateInstance(IObjectSpace objectSpace) =>
             TryGetInstance(objectSpace) ?? objectSpace.CreateObject<CompanyProfile>();

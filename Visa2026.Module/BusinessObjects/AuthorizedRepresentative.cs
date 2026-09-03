@@ -34,13 +34,17 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual DateTime? PassportIssueDate { get; set; }
 
+        [XafDisplayName("Default")]
+        [ToolTip("Pre-selected when creating the next Application Profile Instance.")]
+        public virtual bool IsDefault { get; set; }
+
         [NotMapped]
         [XafDisplayName("Passport (one line)")]
         public string PassportLine =>
             OrganizationPassportLineHelper.Format(PassportNumber, PassportAuthority, PassportIssueDate);
 
         public static AuthorizedRepresentative? TryGetInstance(IObjectSpace objectSpace) =>
-            OrganizationSingletonHelper.TryGet(objectSpace, (AuthorizedRepresentative p) => p.FullName);
+            OrganizationCatalogHelper.TryGetDefaultRepresentative(objectSpace);
 
         public static AuthorizedRepresentative GetOrCreateInstance(IObjectSpace objectSpace) =>
             TryGetInstance(objectSpace) ?? objectSpace.CreateObject<AuthorizedRepresentative>();

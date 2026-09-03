@@ -22,6 +22,7 @@ using Visa2026.Module.Services.ApplicationPersonRoster;
 using Visa2026.Module.Localization;
 using Visa2026.Module.Services.OfficerShell;
 using Visa2026.Blazor.Server.Services;
+using Visa2026.Module.Services.OrganizationCatalogs;
 using Visa2026.Module.Services.PreviewSlot;
 
 namespace Visa2026.Blazor.Server.Editors;
@@ -117,6 +118,8 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         LinkPersonFromPickerRequested = EventCallback.Factory.Create<Guid>(this, LinkPersonFromPickerAsync),
         ClosePersonLinkPickerRequested = EventCallback.Factory.Create(this, ClosePersonLinkPickerAsync),
         HeaderFieldChanged = EventCallback.Factory.Create<ApplicationWorkspaceCaseHeaderFieldUpdate>(this, SaveHeaderFieldAsync),
+        OrganizationLetterheadChanged = EventCallback.Factory.Create<ApplicationWorkspaceOrganizationLetterheadUpdate>(this, SaveOrganizationLetterheadAsync),
+        OrganizationCatalogEditorRequested = EventCallback.Factory.Create<(string Kind, Guid Id)>(this, OpenOrganizationCatalogEditor),
     };
 
     protected override void OnCurrentObjectChanged()
@@ -554,6 +557,83 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         model.HeaderFieldStatusMessage = null;
         model.HeaderFieldStatusIsError = false;
         await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId);
+    }
+
+    private async Task SaveOrganizationLetterheadAsync(ApplicationWorkspaceOrganizationLetterheadUpdate update)
+    {
+        var model = ComponentModel;
+        if (model == null || _application == null || update == null)
+            return;
+
+        if (model.CaseApplicationProfileInstanceId == Guid.Empty)
+            return;
+
+        using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
+        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(model.CaseApplicationProfileInstanceId);
+        if (application == null)
+            return;
+
+        if (update.MakeDefault)
+        {
+            var defaultId = update.SelectedId ?? Guid.Empty;
+            if (!OrganizationCatalogHelper.TryMakeDefault(objectSpace, update.Kind, defaultId, out var defaultError))
+            {
+                model.OrganizationStatusMessage = defaultError;
+                model.OrganizationStatusIsError = true;
+                return;
+            }
+        }
+        else if (!OrganizationCatalogHelper.TryAssign(
+                     application, objectSpace, update.Kind, update.SelectedId, out var error))
+        {
+            model.OrganizationStatusMessage = error;
+            model.OrganizationStatusIsError = true;
+            return;
+        }
+
+        objectSpace.SetModified(application);
+        if (objectSpace.IsModified)
+            objectSpace.CommitChanges();
+
+        model.OrganizationStatusMessage = null;
+        model.OrganizationStatusIsError = false;
+        await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId);
+    }
+
+    private void OpenOrganizationCatalogEditor((string Kind, Guid Id) request)
+    {
+        if (_application == null || string.IsNullOrWhiteSpace(request.Kind))
+            return;
+
+        var wasNew = request.Id == Guid.Empty;
+        OrganizationCatalogsOpenHelper.TryOpenEditor(
+            _application,
+            request.Kind,
+            request.Id,
+            onClosed: wasNew ? null : ReloadCaseOrganization,
+            onSaved: savedId =>
+            {
+                if (wasNew && savedId != Guid.Empty)
+                {
+                    _ = SaveOrganizationLetterheadAsync(new ApplicationWorkspaceOrganizationLetterheadUpdate
+                    {
+                        Kind = request.Kind,
+                        SelectedId = savedId,
+                    });
+                    return;
+                }
+
+                ReloadCaseOrganization();
+            });
+    }
+
+    private void ReloadCaseOrganization()
+    {
+        var model = ComponentModel;
+        if (model == null || model.CaseApplicationProfileInstanceId == Guid.Empty)
+            return;
+
+        _ = LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId);
     }
 
     private async Task UnlinkPersonAsync(Guid personId)

@@ -8,6 +8,15 @@
       "Email": "info@calikenerji.com",
       "TaxInformation": "TAX000000",
       "RegistrationDate": "2009-02-02"
+    },
+    {
+      "Name": "Demo Hyzmatlar HJ",
+      "Code": "DEM",
+      "Address": "Asgabat, demo address 1",
+      "PhoneNumber": "99311111111",
+      "Email": "demo-company@example.invalid",
+      "TaxInformation": "TAX111111",
+      "RegistrationDate": "2015-06-15"
     }
   ]
 }

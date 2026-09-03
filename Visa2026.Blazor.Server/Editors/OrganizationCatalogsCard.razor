@@ -1,0 +1,116 @@
+@using Visa2026.Module.BusinessObjects
+
+<article class="org-catalogs__card">
+    <header class="org-catalogs__card-head">
+        <h2 class="org-catalogs__card-title">@Title</h2>
+        <div class="org-catalogs__card-actions">
+            <button type="button" class="org-catalogs__new" @onclick="OnNew">+ New</button>
+            <button type="button"
+                    class="org-catalogs__search-toggle"
+                    aria-label="@($"Search {Title}")"
+                    aria-expanded="@_searchOpen"
+                    @onclick="ToggleSearch">
+                ⌕
+            </button>
+        </div>
+    </header>
+
+    @if (_searchOpen)
+    {
+        <div class="org-catalogs__search">
+            <input type="search"
+                   placeholder="Search…"
+                   value="@_search"
+                   @oninput="OnSearch" />
+        </div>
+    }
+
+    @if (Filtered.Count == 0)
+    {
+        <p class="org-catalogs__empty">No records match.</p>
+    }
+    else
+    {
+        <div class="org-catalogs__table-wrap">
+            <table class="org-catalogs__table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        @if (ShowCode)
+                        {
+                            <th>Code</th>
+                        }
+                        <th>Default</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in Filtered)
+                    {
+                        <tr>
+                            <td>@(ShowCode ? row.Name : row.DisplayName)</td>
+                            @if (ShowCode)
+                            {
+                                <td>@row.Code</td>
+                            }
+                            <td>
+                                @if (row.IsDefault)
+                                {
+                                    <span class="org-catalogs__badge">Default</span>
+                                }
+                                else
+                                {
+                                    <button type="button"
+                                            class="org-catalogs__link"
+                                            @onclick="() => OnMakeDefault(row.Id)">
+                                        Make default
+                                    </button>
+                                }
+                            </td>
+                            <td class="org-catalogs__row-actions">
+                                <button type="button"
+                                        class="org-catalogs__edit"
+                                        aria-label="@($"Edit {row.Name}")"
+                                        @onclick="() => OnEdit(row.Id)">
+                                    ✎
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <footer class="org-catalogs__count">@(Filtered.Count == 1 ? "1 record" : $"{Filtered.Count} records")</footer>
+</article>
+
+@code {
+    [Parameter] public string Title { get; set; } = string.Empty;
+    [Parameter] public string Kind { get; set; } = string.Empty;
+    [Parameter] public bool ShowCode { get; set; }
+    [Parameter] public IReadOnlyList<OrganizationCatalogRow> Rows { get; set; } = Array.Empty<OrganizationCatalogRow>();
+    [Parameter] public EventCallback<string> NewRequested { get; set; }
+    [Parameter] public EventCallback<(string Kind, Guid Id)> EditRequested { get; set; }
+    [Parameter] public EventCallback<(string Kind, Guid Id)> MakeDefaultRequested { get; set; }
+
+    private string _search = string.Empty;
+    private bool _searchOpen;
+
+    private IReadOnlyList<OrganizationCatalogRow> Filtered =>
+        OrganizationCatalogHelper.FilterRows(Rows, _search);
+
+    private void ToggleSearch() => _searchOpen = !_searchOpen;
+
+    private void OnSearch(ChangeEventArgs e)
+    {
+        _search = e.Value?.ToString() ?? string.Empty;
+        _searchOpen = true;
+    }
+
+    private Task OnNew() => NewRequested.InvokeAsync(Kind);
+
+    private Task OnEdit(Guid id) => EditRequested.InvokeAsync((Kind, id));
+
+    private Task OnMakeDefault(Guid id) => MakeDefaultRequested.InvokeAsync((Kind, id));
+}

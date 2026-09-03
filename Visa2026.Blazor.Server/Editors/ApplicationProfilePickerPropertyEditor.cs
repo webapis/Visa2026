@@ -14,7 +14,9 @@ using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.BusinessObjects.ApplicationProfilePicker;
 using Visa2026.Module.Editors;
 using Visa2026.Module.Services.ApplicationProfilePicker;
+using Visa2026.Module.Services.ApplicationWorkspace;
 using Visa2026.Module.Services.ApplicationProfileWizard;
+using Visa2026.Module.Services.OrganizationCatalogs;
 using Visa2026.Module.Services.PreviewSlot;
 
 namespace Visa2026.Blazor.Server.Editors;
@@ -59,6 +61,9 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         OpenApprovalLegRequested = EventCallback.Factory.Create<Guid>(this, OpenApprovalLeg),
         OpenApprovalLegCatalogRequested = EventCallback.Factory.Create(this, OpenApprovalLegCatalog),
         MakeDefaultApprovalLegRequested = EventCallback.Factory.Create<Guid>(this, SetDefaultApprovalLeg),
+        OrganizationChanged = EventCallback.Factory.Create<ApplicationWorkspaceOrganizationLetterheadUpdate>(this, SelectOrganization),
+        MakeDefaultOrganizationRequested = EventCallback.Factory.Create<ApplicationWorkspaceOrganizationLetterheadUpdate>(this, MakeDefaultOrganization),
+        OrganizationCatalogEditorRequested = EventCallback.Factory.Create<(string Kind, Guid Id)>(this, OpenOrganizationCatalogEditor),
     };
 
     protected override void OnCurrentObjectChanged()
@@ -145,6 +150,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
                 model.SelectedProfileId = model.Rows[0].ProfileId;
 
             EnsureSelectedVersion(model);
+            LoadOrganizationCatalogs(objectSpace, model);
         }
         catch (Exception ex)
         {
@@ -171,14 +177,23 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         }
 
         var selected = model.Rows.FirstOrDefault(r => r.ProfileId == model.SelectedProfileId);
-        if (selected == null || !selected.RequiresApprovalLegVersion)
+        if (model.Step == 2)
         {
-            await UseProfileAsync();
+            await ContinueFromLegsAsync();
             return;
         }
 
-        EnsureSelectedVersion(model);
-        model.Step = 2;
+        if (selected?.RequiresApprovalLegVersion == true)
+        {
+            EnsureSelectedVersion(model);
+            model.Step = 2;
+        }
+        else
+        {
+            EnsureOrganizationSelection(model);
+            model.Step = 3;
+        }
+
         model.StatusMessage = null;
         model.IsStatusError = false;
         await Task.Delay(16);
@@ -190,10 +205,35 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         if (model == null)
             return;
 
-        model.Step = 1;
+        var selected = model.Rows.FirstOrDefault(r => r.ProfileId == model.SelectedProfileId);
+        if (model.Step == 3 && selected?.RequiresApprovalLegVersion == true)
+            model.Step = 2;
+        else
+            model.Step = 1;
+
         model.StatusMessage = null;
         model.IsStatusError = false;
         model.IsStatusWarning = false;
+        await Task.Delay(16);
+    }
+
+    private async Task ContinueFromLegsAsync()
+    {
+        var model = ComponentModel;
+        if (model == null)
+            return;
+
+        if (model.SelectedVersionId == Guid.Empty)
+        {
+            model.StatusMessage = "Select an approval-leg version.";
+            model.IsStatusError = true;
+            return;
+        }
+
+        EnsureOrganizationSelection(model);
+        model.Step = 3;
+        model.StatusMessage = null;
+        model.IsStatusError = false;
         await Task.Delay(16);
     }
 
@@ -211,7 +251,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         }
 
         var selected = model.Rows.FirstOrDefault(r => r.ProfileId == model.SelectedProfileId);
-        if (selected?.RequiresApprovalLegVersion == true && model.Step != 2)
+        if (model.Step != 3)
         {
             await NextStepAsync();
             return;
@@ -226,10 +266,18 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
 
         await Task.Delay(16);
 
+        var organization = new ApplicationProfilePickerOrganizationSelection
+        {
+            CompanyId = model.SelectedCompanyId == Guid.Empty ? null : model.SelectedCompanyId,
+            SignatoryId = model.SelectedSignatoryId == Guid.Empty ? null : model.SelectedSignatoryId,
+            RepresentativeId = model.SelectedRepresentativeId == Guid.Empty ? null : model.SelectedRepresentativeId,
+        };
+
         if (!ApplicationProfilePickerCompletionHelper.TryCreateApplication(
                 _application,
                 model.SelectedProfileId,
                 model.SelectedVersionId == Guid.Empty ? null : model.SelectedVersionId,
+                organization,
                 out var createError))
         {
             model.StatusMessage = createError;
@@ -369,5 +417,107 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         if (preferId is Guid id && id != Guid.Empty)
             model.SelectedVersionId = id;
         EnsureSelectedVersion(model);
+    }
+
+    private void LoadOrganizationCatalogs(IObjectSpace objectSpace, ApplicationProfilePickerModel model)
+    {
+        model.Companies = OrganizationCatalogHelper.ListCompanies(objectSpace);
+        model.Signatories = OrganizationCatalogHelper.ListSignatories(objectSpace);
+        model.Representatives = OrganizationCatalogHelper.ListRepresentatives(objectSpace);
+        EnsureOrganizationSelection(model);
+    }
+
+    private static void EnsureOrganizationSelection(ApplicationProfilePickerModel model)
+    {
+        model.SelectedCompanyId = EnsureCatalogId(model.SelectedCompanyId, model.Companies);
+        model.SelectedSignatoryId = EnsureCatalogId(model.SelectedSignatoryId, model.Signatories);
+        model.SelectedRepresentativeId = EnsureCatalogId(model.SelectedRepresentativeId, model.Representatives);
+    }
+
+    private static Guid EnsureCatalogId(Guid current, IReadOnlyList<OrganizationCatalogOption> options)
+    {
+        if (current != Guid.Empty && options.Any(o => o.Id == current))
+            return current;
+
+        return options.FirstOrDefault(o => o.IsDefault)?.Id
+            ?? options.FirstOrDefault()?.Id
+            ?? Guid.Empty;
+    }
+
+    private void SelectOrganization(ApplicationWorkspaceOrganizationLetterheadUpdate update)
+    {
+        var model = ComponentModel;
+        if (model == null || update == null)
+            return;
+
+        var id = update.SelectedId ?? Guid.Empty;
+        switch (update.Kind)
+        {
+            case OrganizationCatalogHelper.Company:
+                model.SelectedCompanyId = id;
+                break;
+            case OrganizationCatalogHelper.Signatory:
+                model.SelectedSignatoryId = id;
+                break;
+            case OrganizationCatalogHelper.Representative:
+                model.SelectedRepresentativeId = id;
+                break;
+        }
+    }
+
+    private void MakeDefaultOrganization(ApplicationWorkspaceOrganizationLetterheadUpdate update)
+    {
+        var model = ComponentModel;
+        if (model == null || _application == null || update == null)
+            return;
+
+        var id = update.SelectedId ?? Guid.Empty;
+        using var objectSpace = _application.CreateObjectSpace(typeof(CompanyProfile));
+        if (!OrganizationCatalogHelper.TryMakeDefault(objectSpace, update.Kind, id, out var error))
+        {
+            model.StatusMessage = error;
+            model.IsStatusError = true;
+            return;
+        }
+
+        LoadOrganizationCatalogs(objectSpace, model);
+        model.Step = 3;
+        model.StatusMessage = null;
+        model.IsStatusError = false;
+    }
+
+    private void OpenOrganizationCatalogEditor((string Kind, Guid Id) request)
+    {
+        if (_application == null || string.IsNullOrWhiteSpace(request.Kind))
+            return;
+
+        OrganizationCatalogsOpenHelper.TryOpenEditor(
+            _application,
+            request.Kind,
+            request.Id,
+            onClosed: () => ReloadOrganizationCatalogs(request.Kind, preferId: null),
+            onSaved: savedId => ReloadOrganizationCatalogs(request.Kind, savedId));
+    }
+
+    private void ReloadOrganizationCatalogs(string kind, Guid? preferId)
+    {
+        var model = ComponentModel;
+        if (model == null || _application == null)
+            return;
+
+        using var objectSpace = _application.CreateObjectSpace(typeof(CompanyProfile));
+        LoadOrganizationCatalogs(objectSpace, model);
+        if (preferId is Guid id && id != Guid.Empty)
+        {
+            SelectOrganization(new ApplicationWorkspaceOrganizationLetterheadUpdate
+            {
+                Kind = kind,
+                SelectedId = id,
+            });
+        }
+
+        model.Step = 3;
+        model.StatusMessage = null;
+        model.IsStatusError = false;
     }
 }

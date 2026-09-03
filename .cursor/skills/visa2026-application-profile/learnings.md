@@ -1,3 +1,76 @@
+### 2026-09-03 — Choose Organization + New / pencil behind gear
+
+- **Need**: Creating an Application Profile Instance showed + New and pencil next to every Company / Signatory / Representative dropdown. Officers only need those when adding or editing a catalog record.
+- **Fix**: Gear in the Choose Organization header (top-right). Default is dropdowns + Default / Make default only. Gear on reveals + New and pencil. Same catalog modal as Configuration.
+- **Test**: Compile to temp (F5 may lock bin). Officer: stop F5, rebuild, Ctrl+F5. New application → Choose Organization → no + New / pencil until gear; click gear → add/edit; Use profile still works with defaults.
+- **Prevent**: Do not leave catalog New/Edit always visible on create. Case Organization still uses section Edit, not this gear. Empty lists: empty dropdown hint points at the gear.
+- **Cross-skill**: application-profile
+
+### 2026-09-03 — Case Organization + New / pencil only in Edit mode
+
+- **Need**: On Application Profile Instance Overview, Organization **+ New** and pencil were visible next to Company / Signatory / Representative while the section was still read-only. They should appear only after the section **Edit** button.
+- **Fix**: Overview columns are titles only. `RenderOrgColHead` (+ New / pencil) stays on the Edit layout with the dropdowns.
+- **Test**: Blazor Debug build. Officer: Ctrl+F5. Overview Organization has section Edit only; click Edit → + New and pencil appear; Done hides them again.
+- **Prevent**: Do not put catalog New/Edit on the read-only Organization overview. Create picker Choose Organization still always shows + New / pencil.
+- **Cross-skill**: application-profile
+
+### 2026-09-03 — Inline + New / Edit on Choose Organization and case Organization
+
+- **Need**: Officers should add and update Company / Signatory / Representative from Application Profile Instance create (Choose Organization) and from the case Organization section, not only from Configuration → Organization catalogs.
+- **Fix**: Same `OrganizationCatalogsOpenHelper.TryOpenEditor` modal as Config. Choose Organization has **+ New** and pencil next to each dropdown (new row is selected after save). Case Organization has **+ New** / pencil on each column in overview and edit; new row is assigned to this case. Values remain live catalog FKs, not instance scalars.
+- **Test**: Blazor + Module Debug build succeeded. Officer: stop F5, rebuild, Ctrl+F5. New application → Choose Organization → + New Company → Save → dropdown includes and selects it → Use profile. Case Overview → Organization → pencil / + New on Signatory → preview updates. Other cases that picked a different row stay unchanged. Config Organization catalogs still works.
+- **Prevent**: Do not treat Name / Passport as per-instance copies. Editing a catalog row still updates every case that selected it. Keep `[DomainComponent]` on `OrganizationCatalogsHost`. Keep helpers in `namespace Visa2026.Module.BusinessObjects`. The older "Do not add + New on Choose Organization" line is superseded.
+- **Cross-skill**: application-profile
+
+### 2026-09-03 — Organization catalogs Configuration page (+ New)
+
+- **Need**: Officers must create and edit Company / Signatory / Representative rows on a Configuration page (prototype), not on Choose Organization (pick-only) or case Organization Edit (dropdown + preview).
+- **Fix**: Config → **Organization catalogs** (`OrganizationCatalogsHost` + three cards). **+ New** and pencil open the native DetailView modal; **Make default** uses `OrganizationCatalogHelper.TryMakeDefault`. Wizard **Open catalog** opens this page. Create granted on the three BOs (numbering stays a singleton). Native Company/Signatory/Rep nav stays hidden.
+- **Test**: `DisplayPerson_joins_name_and_title`; `FilterRows_matches_name_code_and_title`. Officer: stop F5, rebuild, Ctrl+F5. Configuration → Organization catalogs → + New Company → Save → row appears. Make default on the other row. Pencil edits the live catalog record.
+- **Prevent**: Do not add + New on Choose Organization. Non-persistent XAF catalog hosts need `[DomainComponent]` (XAF0016 / type-not-registered on EF Core). Same shell pattern as Application Profile catalog — not a persistent BO. Keep helpers in `namespace Visa2026.Module.BusinessObjects`.
+- **Cross-skill**: application-profile
+
+### 2026-09-03 — Demo organization rows still missing after FORCE_XAF
+
+- **Need**: Dropdowns still had one Company / Signatory / Representative after JSON + insert-missing on LookupCatalogSyncUpdater. That updater's JSON sync is skipped when the stored manifest version matches, and F5 often skips ModuleUpdaters even with FORCE_XAF when schema looks current.
+- **Fix**: Insert demo rows in host-start `ApplicationProfileSchemaSql.ApplyIfMissing` (`DEM` / Ali Demir / Orazowa Gulsat) and `ApplicationProfileSeedGate` → `OrganizationCatalogSeed.EnsureMissing`.
+- **Test**: `SeedDemoOrganizationCatalogPostgres` in template-column list; `Tenant_organization_json_includes_demo_row`. Officer: **stop F5, rebuild, F5**. Company dropdown should include **Demo Hyzmatlar HJ (DEM)**.
+- **Prevent**: Do not rely on LookupCatalogSyncUpdater alone for extra organization catalog rows.
+- **Cross-skill**: application-profile | visa2026-lookup-data
+
+### 2026-09-03 — Organization catalog JSON not applied on F5
+
+- **Need**: Extra Company / Signatory / Representative JSON rows never appeared. Dropdowns still had one Default. `FORCE_XAF_DB_UPDATE` ran updaters but **JSON catalog sync is skipped** when `LookupCatalogManifestVersion` already matches.
+- **Fix**: `EnsureMissingOrganizationCatalogRows` insert-only on every updater run (even when full sync is skipped). Those three tenant catalogs are `InsertOnly` so officer-edited Calik rows are not overwritten.
+- **Test**: `Tenant_organization_json_includes_demo_row`. Officer: stop F5, rebuild, F5. Console: `organization catalogs inserted N missing row(s)`. Case Organization Edit should list two Companies / Signatories / Representatives.
+- **Prevent**: Do not expect `--forceUpdate` / FORCE_XAF to re-run full OverwriteScalars catalog sync. New organization JSON keys need the insert-missing path (or a tenant manifest version bump for a full sync).
+- **Cross-skill**: application-profile | visa2026-lookup-data
+
+### 2026-09-03 — Extra demo Company / Signatory / Representative seed rows
+
+- **Need**: Officer needed a second catalog row to try changing Organization on an Application Profile Instance.
+- **Fix**: Added one demo row each in `tenant/company-profile.json` (DEM), `authorized-signatory.json` (Ali Demir), `authorized-representative.json` (Orazowa Gülşat). Existing Calik rows unchanged. No `IsDefault` in JSON.
+- **Test**: Restart so `LookupCatalogSyncUpdater` runs (`FORCE_XAF_DB_UPDATE=true` if the DB is already current). Choose Organization / Case Organization Edit should list two options per dropdown.
+- **Prevent**: Do not put `IsDefault` in tenant JSON. Extra Company/Signatory/Rep rows are not pruned (only numbering is a singleton).
+- **Cross-skill**: application-profile | visa2026-lookup-data
+
+### 2026-09-03 — Organization catalogs are live FKs (not copies)
+
+- **Need**: Officers must pick **different** Company / Signatory / Representative per case, keep extra catalog rows, and set a tenant **Default** for the next create. Scalar copies (10z) hid Configuration edits from other cases that should share the same person.
+- **Fix**: Catalogs are **not singletons** (numbering still is). Instance stores `OrganizationCompanyId` / `OrganizationSignatoryId` / `OrganizationRepresentativeId`. Create picker **Choose Organization** (after profile, and after legs if via-ministry) has three dropdowns + **Make default**. Case Organization Edit is dropdown-only with a read-only preview. Merge reads the selected rows. Wizard **Open catalog** is the native ListView. F5 backfill assigns Default FKs when empty.
+- **Test**: `Resolve_uses_instance_relations_when_set`; `AssignDefaultsIfEmpty_skips_when_company_already_set`; `DisplayCompany_includes_code`; `HostStart_AddsOrganizationCatalogColumns`. Blazor + Module compile to temp. Officer: stop F5, rebuild, Ctrl+F5. New application → Choose Organization → change a dropdown / Make default → Use profile. Case Organization Edit → change Signatory (other cases that picked a different row stay). Add a second Company on the native list.
+- **Prevent**: Do not prune extra Company/Signatory/Rep rows on F5. Do not put `IsDefault` in tenant JSON. Do not revive scalar letterhead editors or Reset-from-Configuration. Keep `OrganizationCatalogHelper` in `namespace Visa2026.Module.BusinessObjects`.
+- **Cross-skill**: application-profile | visa2026-resminamalar
+
+### 2026-09-03 — Case Organization letterhead is per instance
+
+
+- **Need**: Officers asked to stop editing Company / Signatory / Representative on Configure profile, because that changed every template on the next generate. Product: **per-instance copies**, not a shortcut to tenant singletons.
+- **Fix**: Copy Configuration singletons onto `ApplicationProfileInstance` at create (`LetterheadCopied`). Case workspace Overview **Organization** card edits this case. Word/PDF merge tokens read the instance copy. F5 backfill copies existing rows once. Wizard Company step is **Edit defaults** for new applications. **Reset from Configuration defaults** overwrites this case only.
+- **Test**: `TryApplyField_writes_and_marks_copied`; `CopyFromConfigurationIfEmpty_skips_when_already_copied`; `HostStart_AddsInstanceLetterheadColumns`. Blazor + Module compile to temp (F5 can lock `bin`). Officer: stop F5, rebuild, Ctrl+F5. Open a case → Overview **Organization** → Edit a signatory name → Done → generate Resminamalar (this case changes, another case does not). New application copies current Configuration.
+- **Prevent**: Do not put the tenant singleton editor on the case. Do not attach letterhead to the Application Profile template. Do not restamp when `LetterheadCopied` is true (except Reset). Keep the letterhead helper in `namespace Visa2026.Module.BusinessObjects` — `Services.ApplicationProfile` makes `ApplicationProfile` a namespace (CS0118).
+- **Cross-skill**: application-profile | visa2026-resminamalar
+
 ### 2026-09-03 — Wizard Identity has no Approval legs block
 
 - **Need**: Default and catalog live on Choose Approval legs. The leftover Identity heading, callout, and “Current default: TE-EN” were still on Configure profile.

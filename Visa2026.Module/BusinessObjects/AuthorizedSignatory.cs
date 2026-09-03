@@ -35,13 +35,17 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Passport Expiration Date")]
         public virtual DateTime? PassportExpirationDate { get; set; }
 
+        [XafDisplayName("Default")]
+        [ToolTip("Pre-selected when creating the next Application Profile Instance.")]
+        public virtual bool IsDefault { get; set; }
+
         [NotMapped]
         [XafDisplayName("Passport (one line)")]
         public string PassportLine =>
             OrganizationPassportLineHelper.Format(PassportNumber, PassportAuthority, PassportIssueDate);
 
         public static AuthorizedSignatory? TryGetInstance(IObjectSpace objectSpace) =>
-            OrganizationSingletonHelper.TryGet(objectSpace, (AuthorizedSignatory p) => p.FullName);
+            OrganizationCatalogHelper.TryGetDefaultSignatory(objectSpace);
 
         public static AuthorizedSignatory GetOrCreateInstance(IObjectSpace objectSpace) =>
             TryGetInstance(objectSpace) ?? objectSpace.CreateObject<AuthorizedSignatory>();

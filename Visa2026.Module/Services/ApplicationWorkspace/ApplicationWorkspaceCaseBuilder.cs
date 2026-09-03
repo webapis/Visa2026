@@ -85,6 +85,7 @@ internal static class ApplicationWorkspaceCaseBuilder
         {
             Chrome = syncedChrome,
             HeaderFields = headerFields,
+            OrganizationLetterhead = ApplicationProfileInstanceOrganizationLetterheadHelper.Resolve(application, objectSpace),
             SummaryTiles = headerFields.Count > 0
                 ? headerFields.Select(field => Tile(field.Label, field.DisplayValue, field.Tone, field.Glyph, field.FillState, field.Key)).ToList()
                 : application != null

@@ -88,16 +88,17 @@ private static readonly string ReadWriteCreateWithoutDelete =
 
 Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates. Seeded user: **`VisaOffice`** (`Default` + `VisaOffice`). Does **not** include case processing (Application, Person, …).
 
-### Read + Write (no Create/Delete) — organization singletons
+### Read + Write (no Create/Delete) — numbering singleton
 
 | Type |
 |------|
-| `CompanyProfile`, `AuthorizedSignatory`, `AuthorizedRepresentative`, `ApplicationNumberingProfile` |
+| `ApplicationNumberingProfile` |
 
 ### Read + Write + Create (no Delete)
 
 | Type |
 |------|
+| `CompanyProfile`, `AuthorizedSignatory`, `AuthorizedRepresentative` (Organization catalogs) |
 | `ProjectContract`, `FileData` |
 | `UserReportTemplate`, `UserReportTemplateApplicationType`, `UserReportTemplateApplicationTypeGroup`, `UserReportTemplateProjectContract` |
 
@@ -122,7 +123,7 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 
 | Area |
 |------|
-| **Configuration** — company, signatory, representative, numbering, project contracts, ministries, document expiration alerts, upload limits (ministry review SLA catalog hidden; type permissions retained) |
+| **Configuration** — Organization catalogs, numbering, project contracts, ministries, document expiration alerts, upload limits (ministry review SLA catalog hidden; type permissions retained) |
 | **Reports** — `UserReportTemplate` |
 
 ---
@@ -154,6 +155,7 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 | `RejectionItem` | Read, Write, Create |
 | `WorkPermit` | Read, Write, Create |
 | `WorkPermitItem` | Read, Write, Create |
+| `CompanyProfile`, `AuthorizedSignatory`, `AuthorizedRepresentative` | Read, Write, Create (Organization catalogs) |
 
 ### Read Only
 | Type |

@@ -49,6 +49,7 @@ disable-model-invocation: false
 | Approval leg slot CRUD (2026-08-27) | `approval-leg-profile-slot-01-catalog.png` … `-05-new.png` |
 | Choose Approval legs manage (2026-09-03) | `choose-approval-legs-manage-01-picker.png` … `-05-slot-edit.png` — shipped |
 | Case summary instance fields (2026-08-18) | `application-profile-instance-case-summary-overview-properties-prototype.png`, `application-profile-instance-case-summary-edit-properties-prototype.png` |
+| Case Organization catalogs (2026-09-03) | `application-profile-instance-create-choose-organization-prototype.png`, `application-profile-instance-organization-overview-prototype.png`, `application-profile-instance-organization-edit-prototype.png`, `application-profile-organization-catalogs-prototype.png` — live FKs **10z2**; Config **10z3**; inline **+ New / Edit** (**10z4**: create gear, case section Edit) |
 
 **Retired:** HTML/Excel/`images/` prototypes removed 2026-08-10 — see plan §9.
 

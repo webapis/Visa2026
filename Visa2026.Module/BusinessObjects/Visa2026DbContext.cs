@@ -644,6 +644,22 @@ namespace Visa2026.Module.BusinessObjects
                     .IsRequired(false)
                     .OnDelete(DeleteBehavior.NoAction);
                 b.Property(a => a.Purpose).HasMaxLength(700);
+                b.Property(a => a.LetterheadCompanyCode).HasMaxLength(10);
+                b.HasOne(a => a.OrganizationCompany)
+                    .WithMany()
+                    .HasForeignKey(a => a.OrganizationCompanyId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(a => a.OrganizationSignatory)
+                    .WithMany()
+                    .HasForeignKey(a => a.OrganizationSignatoryId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(a => a.OrganizationRepresentative)
+                    .WithMany()
+                    .HasForeignKey(a => a.OrganizationRepresentativeId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
                 b.Property(a => a.BorderZoneLocation).HasMaxLength(500);
                 b.Property(a => a.MovementPermitLocation).HasMaxLength(500);
                 b.HasIndex(a => new { a.AppNumberPrefix, a.ApplicationNumber, a.Year, a.Month })

@@ -108,6 +108,10 @@ public static class ApplicationProfileSeedSync
         if (instanceLegs.ProfilesAssigned + instanceLegs.NamesStamped + instanceLegs.SnapshotsFilled > 0)
             objectSpace.CommitChanges();
 
+        var letterheadFilled = ApplicationProfileInstanceOrganizationLetterheadHelper.BackfillUncopied(objectSpace);
+        if (letterheadFilled > 0)
+            objectSpace.CommitChanges();
+
         if (created > 0 || updated > 0 || backfilled > 0)
         {
             Tracing.Tracer.LogText(

@@ -72,7 +72,7 @@ namespace Visa2026.Module.DatabaseUpdate
         }
 
         /// <summary>
-        /// Shared catalogs are edited from Application Profile (wizard / slot). Hide leftover Configuration nav.
+        /// Shared catalogs are edited from Organization catalogs / Application Profile wizard. Hide leftover native BO nav.
         /// Ministry SLA days also live on the profile; keep the singleton for snapshot fallback.
         /// </summary>
         private static void HideTemplateOwnedConfigurationNavigation(IModelNavigationItems navigationItems)

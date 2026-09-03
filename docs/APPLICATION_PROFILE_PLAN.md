@@ -15,6 +15,7 @@
 | Approval leg slot CRUD (2026-08-27) | `approval-leg-profile-slot-01-catalog.png` … `-05-new.png` — [README](prototypes/approval-leg-profile-slot-README.md) |
 | Choose Approval legs manage (2026-09-03) | `choose-approval-legs-manage-01-picker.png` … `-05-slot-edit.png` — [README](prototypes/choose-approval-legs-manage-README.md). **Shipped.** |
 | Case summary instance fields (2026-08-18) | `application-profile-instance-case-summary-overview-properties-prototype.png`, `application-profile-instance-case-summary-edit-properties-prototype.png` |
+| Case Organization catalogs (2026-09-03) | `application-profile-instance-create-choose-organization-prototype.png`, overview/edit PNGs, `application-profile-organization-catalogs-prototype.png` — [README](prototypes/application-profile-instance-organization-README.md). **Shipped** (live FKs, tenant Default; Config + inline **+ New / Edit**). |
 
 Full inventory: **§9**. **Interactive HTML (planned):** [`APPLICATION_PROFILE_HTML_PROTOTYPE_PLAN.md`](APPLICATION_PROFILE_HTML_PROTOTYPE_PLAN.md).
 **Related today:** `ApplicationProfile` *(replacement)*, `ApplicationType` *(deprecated — dual-read)*, `Application`, `ApplicationItem` *(planned hard remove)*, `ApplicationProgress`, `Person` + related BOs, `ApprovalLegProfile`, `UserReportTemplate`, `ProjectContract`
@@ -56,7 +57,7 @@ Application-type behavior is **scattered** across `ApplicationType` `Show*` / `C
 | 14 | Workflow-only fields | Catalog fields needed for progress/routing still appear on Application even if unused in Word/Excel. |
 | 15 | Template-driven surface | Per-Application catalog fields visible primarily from nested-template usage ∪ workflow need. |
 | 16 | Profile identity on Application | Name / Description / Code: **visible** on Application, **not** editable there (read live from profile); also available to merge. |
-| 17 | Signatory on Application | Authorized signatory + Visa representative: **visible + editable + persistent** per Application (Excel); defaults from profile at create. |
+| 17 | Organization letterhead on Application | Company, Authorized Signatory, and Authorized Representative are **catalogs** (not singletons). Instance stores **live FKs**. Officers pick at create (dropdowns pre-filled from **tenant Default**); Case Organization can change the relation. Merge reads the selected rows. Editing a catalog row updates every case that selected it. |
 | 18 | Profile pick timing | Application may set `ApplicationProfile` **only at create**. No switch to another profile afterward. |
 | 20 | ApplicationType deprecation | **`ApplicationType` is deprecated.** New configuration and officer UX use **`ApplicationProfile`**. Keep Type table/FK for dual-read and import until cutover; do not add new Type flags. Registry: [`docs/DEPRECATED.md`](DEPRECATED.md). |
 
@@ -97,8 +98,8 @@ Stored on Application. Seeded from profile defaults at initial usage. Editable a
 | 12 | Work Permit Location | Lookup |
 | 13 | Entry Date | Date |
 | 14 | Entry Check Point | Lookup |
-| 15 | Authorized signatory | Lookup · default from profile |
-| 16 | Visa representative | Lookup · default from profile |
+| 15 | Company letterhead | Live FK to `CompanyProfile` catalog; tenant Default at create |
+| 16 | Authorized signatory + representative | Live FKs to catalog rows; tenant Default at create |
 
 Visibility of 1–14 still follows §2.4 (template ∪ workflow). Signatory fields follow Excel: visible + editable.
 
@@ -447,6 +448,10 @@ When any linked Application reaches lock state **A** (first progress beyond offi
 | Custom catalog home (replace native List/Detail officer UI) | Done |
 | Profile picker at Application create | Done |
 | Case summary instance Use fields (overview tiles + Edit/Done) | **Done** |
+| Case Organization letterhead (instance copy) | **Done** (2026-09-03) then superseded |
+| Case Organization catalogs (live FKs, tenant Default) | **Done** (2026-09-03) |
+| Configuration Organization catalogs page (+ New) | **Done** (2026-09-03) |
+| Inline organization catalog New/Edit (create + case) | **Done** (2026-09-03) |
 | Case summary fill-state (empty / default / officer) | **Done** |
 | Person M2M DetailView / hard-remove ApplicationItem | In progress (skip-navigation People + roster-line BO deleted; F5 heal pending) |
 | Workspace Document copies person filter + person catalog | Done (header chips; person-grouped catalog; slot viewer-only) |
@@ -558,5 +563,7 @@ All files live in [`docs/prototypes/`](prototypes/) only (no subfolders).
 | `choose-approval-legs-manage-05-slot-edit.png` | Picker left + slot **Open** unused chain |
 | `application-profile-instance-case-summary-overview-properties-prototype.png` | Overview **Case summary** — read-only tiles for profile **Use** fields; **Edit** switches to form mode |
 | `application-profile-instance-case-summary-edit-properties-prototype.png` | Overview **Case summary** — edit mode (dropdowns/dates); **Done** returns to tiles |
+| `application-profile-instance-organization-overview-prototype.png` | Overview **Organization** — Company / Signatory / Representative tiles on the instance; **Edit** |
+| `application-profile-instance-organization-edit-prototype.png` | Overview **Organization** — edit form + **Reset from Configuration defaults**; this case only |
 
 **Retired (do not link):** `application-profile-wizard.html`, `application-profile-usage.html`, `application-detail-m2m.html`, `application-profile-platform-prototype.html`, `images/ap-*.png`, `Application-profile-wizard-draft.xlsx`.

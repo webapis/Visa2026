@@ -112,6 +112,10 @@
                                                                 HeaderFieldStatusMessage="@HeaderFieldStatusMessage"
                                                                 HeaderFieldStatusIsError="@HeaderFieldStatusIsError"
                                                                 HeaderFieldChanged="@HeaderFieldChanged"
+                                                                OrganizationStatusMessage="@OrganizationStatusMessage"
+                                                                OrganizationStatusIsError="@OrganizationStatusIsError"
+                                                                OrganizationLetterheadChanged="@OrganizationLetterheadChanged"
+                                                                OrganizationCatalogEditorRequested="@OrganizationCatalogEditorRequested"
                                                                 PreviewSlotOwnerViewId="@OfficerShellViewIds.DetailView" />
                             break;
                     }
@@ -217,6 +221,10 @@
     [Parameter] public string? HeaderFieldStatusMessage { get; set; }
     [Parameter] public bool HeaderFieldStatusIsError { get; set; }
     [Parameter] public EventCallback<ApplicationWorkspaceCaseHeaderFieldUpdate> HeaderFieldChanged { get; set; }
+    [Parameter] public string? OrganizationStatusMessage { get; set; }
+    [Parameter] public bool OrganizationStatusIsError { get; set; }
+    [Parameter] public EventCallback<ApplicationWorkspaceOrganizationLetterheadUpdate> OrganizationLetterheadChanged { get; set; }
+    [Parameter] public EventCallback<(string Kind, Guid Id)> OrganizationCatalogEditorRequested { get; set; }
 
     private bool _initialLoadStarted;
     private bool ShowListSearch => CurrentPage is OfficerShellPage.Staged or OfficerShellPage.InProcess;

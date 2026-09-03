@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.Services.ApplicationWorkspace;
 
@@ -12,6 +13,8 @@ public sealed class ApplicationWorkspaceCaseView
 
     public IReadOnlyList<ApplicationWorkspaceCaseHeaderField> HeaderFields { get; set; }
         = Array.Empty<ApplicationWorkspaceCaseHeaderField>();
+
+    public ApplicationProfileInstanceOrganizationLetterhead OrganizationLetterhead { get; init; } = new();
 
     public IReadOnlyList<ApplicationWorkspaceCaseLinkedTile> LinkedRecordTiles { get; init; }
         = Array.Empty<ApplicationWorkspaceCaseLinkedTile>();
@@ -129,6 +132,15 @@ public sealed class ApplicationWorkspaceCaseHeaderFieldUpdate
     public string Key { get; init; } = string.Empty;
 
     public string? Value { get; init; }
+}
+
+public sealed class ApplicationWorkspaceOrganizationLetterheadUpdate
+{
+    public string Kind { get; init; } = string.Empty;
+
+    public Guid? SelectedId { get; init; }
+
+    public bool MakeDefault { get; init; }
 }
 
 public sealed class ApplicationWorkspaceCaseLinkedTile

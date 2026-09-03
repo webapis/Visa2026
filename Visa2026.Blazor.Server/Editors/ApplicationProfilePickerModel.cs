@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using DevExpress.ExpressApp.Blazor.Components.Models;
 using Microsoft.AspNetCore.Components;
+using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.ApplicationWorkspace;
 
 namespace Visa2026.Blazor.Server.Editors;
 
@@ -121,6 +123,60 @@ public sealed class ApplicationProfilePickerModel : ComponentModelBase
     public EventCallback<Guid> MakeDefaultApprovalLegRequested
     {
         get => GetPropertyValue<EventCallback<Guid>>();
+        set => SetPropertyValue(value);
+    }
+
+    public IReadOnlyList<OrganizationCatalogOption> Companies
+    {
+        get => GetPropertyValue<IReadOnlyList<OrganizationCatalogOption>>() ?? Array.Empty<OrganizationCatalogOption>();
+        set => SetPropertyValue(value);
+    }
+
+    public IReadOnlyList<OrganizationCatalogOption> Signatories
+    {
+        get => GetPropertyValue<IReadOnlyList<OrganizationCatalogOption>>() ?? Array.Empty<OrganizationCatalogOption>();
+        set => SetPropertyValue(value);
+    }
+
+    public IReadOnlyList<OrganizationCatalogOption> Representatives
+    {
+        get => GetPropertyValue<IReadOnlyList<OrganizationCatalogOption>>() ?? Array.Empty<OrganizationCatalogOption>();
+        set => SetPropertyValue(value);
+    }
+
+    public Guid SelectedCompanyId
+    {
+        get => GetPropertyValue<Guid>();
+        set => SetPropertyValue(value);
+    }
+
+    public Guid SelectedSignatoryId
+    {
+        get => GetPropertyValue<Guid>();
+        set => SetPropertyValue(value);
+    }
+
+    public Guid SelectedRepresentativeId
+    {
+        get => GetPropertyValue<Guid>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback<ApplicationWorkspaceOrganizationLetterheadUpdate> OrganizationChanged
+    {
+        get => GetPropertyValue<EventCallback<ApplicationWorkspaceOrganizationLetterheadUpdate>>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback<ApplicationWorkspaceOrganizationLetterheadUpdate> MakeDefaultOrganizationRequested
+    {
+        get => GetPropertyValue<EventCallback<ApplicationWorkspaceOrganizationLetterheadUpdate>>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback<(string Kind, Guid Id)> OrganizationCatalogEditorRequested
+    {
+        get => GetPropertyValue<EventCallback<(string Kind, Guid Id)>>();
         set => SetPropertyValue(value);
     }
 

@@ -5,8 +5,8 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Module.Services.ApplicationProfileWizard;
 
 /// <summary>
-/// Live tenant Company / Signatory / Representative for the profile wizard.
-/// Values are read from Configuration singletons — never copied onto <see cref="ApplicationProfile"/>.
+/// Live tenant Default Company / Signatory / Representative for the profile wizard.
+/// Values are read from Configuration catalogs — never copied onto <see cref="ApplicationProfile"/>.
 /// </summary>
 public sealed class ApplicationProfileWizardOrganizationSnapshot
 {
