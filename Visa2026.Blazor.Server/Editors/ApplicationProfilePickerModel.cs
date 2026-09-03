@@ -100,6 +100,30 @@ public sealed class ApplicationProfilePickerModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    public EventCallback NewApprovalLegRequested
+    {
+        get => GetPropertyValue<EventCallback>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback<Guid> OpenApprovalLegRequested
+    {
+        get => GetPropertyValue<EventCallback<Guid>>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback OpenApprovalLegCatalogRequested
+    {
+        get => GetPropertyValue<EventCallback>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback<Guid> MakeDefaultApprovalLegRequested
+    {
+        get => GetPropertyValue<EventCallback<Guid>>();
+        set => SetPropertyValue(value);
+    }
+
     public sealed class PickerRowModel
     {
         public Guid ProfileId { get; init; }

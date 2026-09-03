@@ -79,24 +79,6 @@ public sealed class ApplicationProfileWizardModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
-    public EventCallback OpenSharedApprovalLegCatalogRequested
-    {
-        get => GetPropertyValue<EventCallback>();
-        set => SetPropertyValue(value);
-    }
-
-    public EventCallback RefreshSharedApprovalLegsRequested
-    {
-        get => GetPropertyValue<EventCallback>();
-        set => SetPropertyValue(value);
-    }
-
-    public int SharedApprovalLegsRevision
-    {
-        get => GetPropertyValue<int>();
-        set => SetPropertyValue(value);
-    }
-
     public ApplicationProfileWizardLookupData Lookups
     {
         get => GetPropertyValue<ApplicationProfileWizardLookupData>()

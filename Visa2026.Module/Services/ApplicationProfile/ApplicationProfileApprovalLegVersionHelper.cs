@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.EFCore;
+using DevExpress.Persistent.Base;
 using Microsoft.EntityFrameworkCore;
 
 namespace Visa2026.Module.BusinessObjects;
@@ -31,6 +33,76 @@ public static class ApplicationProfileApprovalLegVersionHelper
             .OrderBy(p => p.Code, StringComparer.OrdinalIgnoreCase)
             .ThenBy(p => p.NameTm, StringComparer.OrdinalIgnoreCase)
             .ToList();
+    }
+
+    /// <summary>
+    /// True when seed JSON may fill <see cref="ApplicationProfile.DefaultApprovalLegProfile"/>.
+    /// Officers set Default on Choose Approval legs; do not overwrite an existing value on F5.
+    /// </summary>
+    public static bool ShouldSeedTemplateDefault(Guid? currentDefaultId) =>
+        currentDefaultId is not Guid id || id == Guid.Empty;
+
+    public static void AssignTemplateDefault(ApplicationProfile profile, ApprovalLegProfile chain)
+    {
+        ArgumentNullException.ThrowIfNull(profile);
+        ArgumentNullException.ThrowIfNull(chain);
+        profile.DefaultApprovalLegProfile = chain;
+        profile.DefaultApprovalLegProfileId = chain.ID;
+    }
+
+    public static bool TrySetTemplateDefault(
+        IObjectSpace objectSpace,
+        Guid applicationProfileId,
+        Guid approvalLegProfileId,
+        out string? error)
+    {
+        error = null;
+        if (objectSpace == null || applicationProfileId == Guid.Empty || approvalLegProfileId == Guid.Empty)
+        {
+            error = "Could not set the default approval-leg chain.";
+            return false;
+        }
+
+        var profile = objectSpace.GetObjectByKey<ApplicationProfile>(applicationProfileId);
+        if (profile == null)
+        {
+            error = "That Application Profile was not found.";
+            return false;
+        }
+
+        if (profile.ProgressRoute != ApplicationProfileInstanceProgressRouteKind.ViaMinistries)
+        {
+            error = "Direct migration has no ministry approval legs.";
+            return false;
+        }
+
+        var chain = objectSpace.GetObjectByKey<ApprovalLegProfile>(approvalLegProfileId);
+        if (chain == null || !chain.IsActive)
+        {
+            error = "That approval-leg chain is not available.";
+            return false;
+        }
+
+        if (profile.DefaultApprovalLegProfileId == chain.ID)
+            return true;
+
+        AssignTemplateDefault(profile, chain);
+        if (objectSpace is EFCoreObjectSpace { DbContext: { } dbContext })
+            dbContext.ChangeTracker.DetectChanges();
+        objectSpace.SetModified(profile);
+
+        try
+        {
+            objectSpace.CommitChanges();
+        }
+        catch (Exception ex)
+        {
+            Tracing.Tracer.LogError($"ApplicationProfile.TrySetTemplateDefault failed: {ex}");
+            error = "Could not set the default approval-leg chain.";
+            return false;
+        }
+
+        return true;
     }
 
     public static IReadOnlyList<ApplicationProfileApprovalLegVersion> GetOrderedVersions(ApplicationProfile? profile)
@@ -150,7 +222,7 @@ public static class ApplicationProfileApprovalLegVersionHelper
                 return false;
             }
 
-            errorMessage = "No shared approval-leg versions in Configuration. Add Approval leg profiles before creating an application.";
+            errorMessage = "No shared approval-leg versions yet. Add a chain on Choose Approval legs.";
             return false;
         }
 

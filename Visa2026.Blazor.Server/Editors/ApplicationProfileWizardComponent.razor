@@ -38,8 +38,7 @@
         {
             <div class="ap-wizard__lock-banner">
                 This profile is <strong>config-locked</strong> because a linked application has left office preparation.
-                Edit shared <strong>approval leg versions</strong> under Configuration; set this template's <strong>Default</strong> here. Already-started applications keep their snapshot.
-                Other configuration stays locked. Use <strong>Clone</strong> on the profile list to copy the rest of the profile.
+                Configuration stays locked. Use <strong>Clone</strong> on the profile list to copy it.
             </div>
         }
 
@@ -71,10 +70,6 @@
                 {
                     <ApplicationProfileWizardStepIdentity Profile="Profile"
                         Disabled="IsReadOnly"
-                        SharedApprovalLegProfiles="SharedApprovalLegProfiles"
-                        SharedApprovalLegsRevision="SharedApprovalLegsRevision"
-                        OpenSharedCatalogRequested="OpenSharedCatalogCallback"
-                        RefreshSharedRequested="RefreshSharedCallback"
                         ClearLegsRequested="ClearLegsCallback"
                         NameChanged="RefreshProfileName" />
                 }
@@ -117,7 +112,7 @@
                         {
                             <button type="button" class="ap-wizard__btn ap-wizard__btn--primary" @onclick="NextStep">Continue →</button>
                         }
-                        else if (!IsReadOnly || CanSaveLockedVersions)
+                        else if (!IsReadOnly)
                         {
                             <button type="button" class="ap-wizard__btn ap-wizard__btn--primary" @onclick="PublishAsync">Save profile</button>
                         }
@@ -131,7 +126,7 @@
 @code {
     private readonly (string Title, string Description)[] _steps =
     [
-        ("Identity & purpose", "Name, route, legs, audience"),
+        ("Identity & purpose", "Name, route, audience"),
         ("Company, Signatories", "Letterhead, signatory, representative"),
         ("Results & fields", "Required instance properties"),
         ("Process & SLA", "Ministry and migration duration"),
@@ -154,23 +149,11 @@
     [Parameter] public EventCallback OpenSignatoryRequested { get; set; }
     [Parameter] public EventCallback OpenRepresentativeRequested { get; set; }
     [Parameter] public EventCallback RefreshOrganizationRequested { get; set; }
-    [Parameter] public EventCallback OpenSharedApprovalLegCatalogRequested { get; set; }
-    [Parameter] public EventCallback RefreshSharedApprovalLegsRequested { get; set; }
-    [Parameter] public int SharedApprovalLegsRevision { get; set; }
     [Parameter] public ApplicationProfileWizardLookupData Lookups { get; set; } =
         ApplicationProfileWizardLookupData.Empty;
 
     private int _activeStep;
-    private IReadOnlyList<ApprovalLegProfile> _sharedApprovalLegs = Array.Empty<ApprovalLegProfile>();
 
-    private IReadOnlyList<ApprovalLegProfile> SharedApprovalLegProfiles => _sharedApprovalLegs;
-
-    private bool CanSaveLockedVersions =>
-        IsReadOnly
-        && Profile?.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries;
-
-    private EventCallback OpenSharedCatalogCallback => OpenSharedApprovalLegCatalogRequested;
-    private EventCallback RefreshSharedCallback => RefreshSharedApprovalLegsRequested;
     private EventCallback ClearLegsCallback => EventCallback.Factory.Create(this, ClearLegs);
 
     private string ProfileNameDisplay =>
@@ -182,14 +165,6 @@
     {
         if (firstRender && InitialLoadRequested.HasDelegate)
             await InitialLoadRequested.InvokeAsync();
-    }
-
-    protected override void OnParametersSet()
-    {
-        if (ObjectSpace == null)
-            return;
-
-        _sharedApprovalLegs = ApplicationProfileApprovalLegVersionHelper.GetSharedActiveProfiles(ObjectSpace);
     }
 
     private async Task GoToStep(int index)

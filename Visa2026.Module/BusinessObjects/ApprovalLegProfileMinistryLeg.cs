@@ -62,13 +62,11 @@ public class ApprovalLegProfileMinistryLeg : BaseObject
         if (ApprovalLegProfile == null)
             return;
 
-        var objectSpace = ObjectSpaceHelper.Get(ApprovalLegProfile) ?? ObjectSpaceHelper.Get(this);
-        if (objectSpace == null || objectSpace.IsNewObject(ApprovalLegProfile))
-        {
-            ApprovalLegProfileId = Guid.Empty;
-            return;
-        }
-
+        // Guid.Empty is a real FK value. Blanking it while the parent is still new
+        // makes EF insert 00000000-... and Postgres rejects the ministry-leg row.
+        // Use the parent client id (XAF assigns it on CreateObject) so parent + legs
+        // in the same commit share one key. Nested popup saves still redirect when
+        // the parent is not in the batch (WouldOrphan / SaveBeforeMinistryLeg).
         ApprovalLegProfileId = ApprovalLegProfile.ID;
     }
 }

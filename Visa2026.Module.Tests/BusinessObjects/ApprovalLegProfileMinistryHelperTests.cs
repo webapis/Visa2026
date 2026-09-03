@@ -89,4 +89,23 @@ public sealed class ApprovalLegProfileMinistryHelperTests
 
         Assert.Null(ApprovalLegProfileMinistryHelper.GetMinistryShortNameForLeg(app, 1));
     }
+
+    [Fact]
+    public void SyncForeignKeys_copies_parent_id_while_parent_is_new()
+    {
+        var parentId = Guid.Parse("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee");
+        var ministryId = Guid.Parse("11111111-2222-3333-4444-555555555555");
+        var parent = new ApprovalLegProfile { ID = parentId };
+        var ministry = new ApprovingMinistry { ID = ministryId };
+        var leg = new ApprovalLegProfileMinistryLeg
+        {
+            ApprovalLegProfile = parent,
+            ApprovingMinistry = ministry,
+        };
+
+        leg.SyncForeignKeys();
+
+        Assert.Equal(parentId, leg.ApprovalLegProfileId);
+        Assert.Equal(ministryId, leg.ApprovingMinistryId);
+    }
 }

@@ -86,6 +86,11 @@ public sealed class VisaPreviewSlotState
 
 public sealed class ApprovalLegCatalogSlotRequest
 {
+    /// <summary>Open the slot on the blank + New form.</summary>
+    public bool StartNew { get; init; }
+
+    /// <summary>Open the slot editor for this shared chain.</summary>
+    public Guid? FocusProfileId { get; init; }
 }
 
 public sealed class DocumentCopiesSlotRequest

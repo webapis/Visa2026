@@ -14,10 +14,6 @@
                 <li>@Profile.Name</li>
                 <li>Code @Profile.Code @(string.IsNullOrWhiteSpace(Profile.SelectionCode) ? "" : $"· quick {Profile.SelectionCode}")</li>
                 <li>@FormatRoute(Profile.ProgressRoute) · @FormatAudience(Profile) · @FormatRelatedTo(Profile)</li>
-                @if (Profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries)
-                {
-                    <li>Default approval legs: @(Profile.DefaultApprovalLegProfile?.Code ?? Profile.DefaultApprovalLegProfile?.NameTm ?? "—")</li>
-                }
                 @if (Profile.ActionFamily == ApplicationProfileActionFamily.Issuance)
                 {
                     <li>Produces: @FormatProduce(Profile)</li>

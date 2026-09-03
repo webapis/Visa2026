@@ -1,3 +1,59 @@
+### 2026-09-03 — Wizard Identity has no Approval legs block
+
+- **Need**: Default and catalog live on Choose Approval legs. The leftover Identity heading, callout, and “Current default: TE-EN” were still on Configure profile.
+- **Fix**: Removed the Approval legs section from Identity, Default from Review, catalog-open plumbing from the wizard, and locked Save-for-Default. Process copy no longer says legs are on Identity.
+- **Test**: Officer: stop F5, rebuild, Ctrl+F5. Configure a via-ministry profile → Identity goes Directed to → may be for. No Approval legs. Review has no Default line. Choose Approval legs still has Catalog / Make default.
+- **Prevent**: Do not put Approval legs copy back on Identity or Review. Keep ClearLegs when switching to Direct migration.
+- **Cross-skill**: application-profile
+
+### 2026-09-03 — Make default on Choose Approval legs
+
+- **Need**: Officers should set this template's Default chain on Choose Approval legs, not Configure Identity radios.
+- **Fix**: **Make default** on each non-default card persists `ApplicationProfile.DefaultApprovalLegProfile` (config-lock still allows this scalar). Identity shows the current Default read-only. Seed JSON fills Default only when empty.
+- **Test**: `ShouldSeedTemplateDefault_true_when_empty`; `AssignTemplateDefault_sets_profile_fk`. Officer: stop F5, rebuild, Ctrl+F5. Choose Approval legs → Make default on another card. Default badge moves. New application on the same profile pre-selects that card. Configure Identity has no Default radios.
+- **Prevent**: Do not put Default radios back on Identity. Do not overwrite an existing Default from approval-leg-versions JSON on F5. Do not restamp started cases.
+- **Cross-skill**: application-profile
+
+### 2026-09-03 — Choose Approval legs Catalog opens the slot list
+
+- **Need**: Officers could + New or Open one card, but not open the shared catalog list on the right (inactive chains, search, all Open).
+- **Fix**: **Catalog** next to + New (and on the empty dashed box) opens `#visa-preview-slot` with an empty `ApprovalLegCatalogSlotRequest` — same occupant list as Configuration, not the New form.
+- **Test**: Officer: stop F5, rebuild, Ctrl+F5. Choose Approval legs → Catalog. Right slot shows Approval leg profiles (search, Active/Inactive, Open). + New still opens the blank form; card Open still edits that chain.
+- **Prevent**: Do not send Catalog to `StartNew` or `FocusProfileId`. Inactive chains stay off the picker cards; Catalog is how you find them.
+- **Cross-skill**: application-profile | visa2026-preview-slot
+
+### 2026-09-03 — Approval-leg Active off did not persist
+
+- **Need**: Open a shared chain, turn Active off, Save — still Active (picker card stayed; catalog badge stayed on).
+- **Fix**: Slot Save `DetectChanges` + `SetModified` before commit (same as wizard Save profile). Active toggle uses `onchange` so the draft flag is set before Save. Seed `EnsureProfiles` no longer restores `IsActive` on existing rows.
+- **Test**: `ApplyScalars_writes_inactive`. Officer: stop F5, rebuild, Ctrl+F5. Choose Approval legs → Open → Active off → Save. Slot catalog shows Inactive; the card is gone from Choose Approval legs.
+- **Prevent**: Do not rely on XAF to notice a lone bool change. Do not write `IsActive` from `approval-leg-profile.json` onto existing officer-edited chains.
+- **Cross-skill**: application-profile | visa2026-preview-slot
+
+### 2026-09-03 — + New approval-leg Create failed with generic SaveFailed
+
+- **Need**: Officer + New on Choose Approval legs (Code `EN-AH-GU`, 3 ministries) showed **Could not save the approval-leg profile.**
+- **Fix**: `SyncForeignKeys` no longer writes `ApprovalLegProfileId = Guid.Empty` while the parent is new (EF inserts `00000000-...` and Postgres rejects the FK). Slot Create/Save call `PrepareLegsForCommit` and log swallowed commit errors; `UserFriendlyException` is shown instead of the generic banner.
+- **Test**: `SyncForeignKeys_copies_parent_id_while_parent_is_new`. Officer: stop F5, rebuild, Ctrl+F5. Choose Approval legs → + New → same three ministries → Create. New card selected; Use profile enabled.
+- **Prevent**: Do not blank a required Guid FK to “mean unset”. Do not swallow `CommitChanges` without logging.
+- **Cross-skill**: application-profile | visa2026-preview-slot
+
+### 2026-09-03 — Approval legs stay tenant-shared (not per instance)
+
+- **Need**: + New on Choose Approval legs must not look or behave like a chain for that one case.
+- **Fix**: Picker lists only `GetSharedActiveProfiles` (no leftover per-profile nested versions). Copy says shared for every via-ministry application; this case only snapshots the pick. Slot hints no longer send officers to wizard Refresh.
+- **Test**: Create a chain on one profile’s Choose Approval legs, start another via-ministry profile — same cards appear.
+- **Prevent**: Do not attach `ApprovalLegProfile` to `ApplicationProfileInstance`. Do not fall back to `ApplicationProfileApprovalLegVersion` on the picker.
+- **Cross-skill**: application-profile
+
+### 2026-09-03 — Choose Approval legs creates and opens shared chains
+
+- **Need**: Officers should add or edit shared ministry chains when creating a case, not from Configure Identity **Edit in Configuration**.
+- **Fix**: Via-ministry picker always continues to Choose Approval legs (including 0 chains). **+ New** / **Open** reuse `ApprovalLegProfileSlotPanel`. After Create/Save the new card is selected. Configure Identity keeps **Default** radios only. Empty catalog copy no longer sends officers to Configuration.
+- **Test**: `RequiresApprovalLegVersion_TrueForViaMinistryEvenWhenEmpty`. Officer: stop F5, rebuild, Ctrl+F5. New via-ministry application → Continue → empty + New → Create chain → card selected → Use profile. Open an unused card to edit. Configure Identity has no Edit in Configuration.
+- **Prevent**: Do not copy chains onto the Application Profile. Do not block Continue when the shared catalog is empty. Do not put slot CRUD back on the wizard.
+- **Cross-skill**: application-profile | visa2026-preview-slot
+
 ### 2026-09-03 — New profile Resminamalar is This profile (0) not a flat list
 
 - **Need**: First case on a new Application Profile must look like the signed-off tabs: This profile (0) empty, Shared library with ON/OFF.

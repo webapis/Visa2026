@@ -23,6 +23,41 @@ Purpose: **shell, layout, occupants, catalog card UX, JS/CSS** — not Resminama
 
 ## Entries
 
+### 2026-09-03 — Catalog on Choose Approval legs opens the occupant list
+
+- **Symptom**: No picker action opened the approval-leg catalog list in `#visa-preview-slot` (only + New / per-card Open).
+- **Fix**: **Catalog** link → empty `ApprovalLegCatalogSlotRequest`. Version remount shows the list.
+- **Test**: Officer: restart, hard-refresh. Choose Approval legs → Catalog. Slot title Approval leg profiles with search and Open.
+- **Prevent**: Do not reuse StartNew for this action.
+- **Cross-skill**: visa2026-application-profile
+
+### 2026-09-03 — Approval-leg Active off did not persist
+
+- **Symptom**: Slot Active switch off + Save left the chain active (picker still listed it).
+- **Root cause**: Save without `SetModified` skipped the bool; seed sync restored `IsActive` from JSON.
+- **Fix**: Module `MarkModified` on Save; seed only sets Active on new seed rows. Occupant toggle uses `onchange`.
+- **Test**: `ApplyScalars_writes_inactive`. Officer: restart, Open → Active off → Save; catalog Inactive, picker card gone.
+- **Prevent**: Do not `@bind` the Active switch if Save can race the bind. Do not clobber officer Active from catalog JSON.
+- **Cross-skill**: visa2026-application-profile
+
+### 2026-09-03 — Approval-leg slot Create failed (SaveFailed)
+
+- **Symptom**: + New from Choose Approval legs → Create showed **Could not save the approval-leg profile.**
+- **Root cause**: New-parent ministry legs wrote `ApprovalLegProfileId = Guid.Empty`.
+- **Fix**: Module `SyncForeignKeys` copies the parent client id. Occupant Create/Save unchanged.
+- **Test**: `SyncForeignKeys_copies_parent_id_while_parent_is_new`. Officer: restart, hard-refresh, + New → Create.
+- **Prevent**: Do not treat empty Guid as “FK unset” on this occupant’s persist path.
+- **Cross-skill**: visa2026-application-profile
+
+### 2026-09-03 — Approval-leg slot opens from Choose Approval legs
+
+- **Symptom**: Officers needed + New / Open on instance create, not only Configure Identity Edit in Configuration.
+- **Fix**: Same `ApprovalLegCatalog` occupant. `ApprovalLegCatalogSlotRequest.StartNew` / `FocusProfileId` open New or Edit. Notifier now carries the changed chain id so the picker selects the new card.
+- **Test**: Officer: restart, hard-refresh. Choose Approval legs → + New → Create; slot then picker card selected. Open on a card opens the editor.
+- **Prevent**: Do not add a second approval-leg CRUD host. Do not remount the picker to loading while the slot saves.
+- **Cross-skill**: visa2026-application-profile
+
+
 ### 2026-09-02 — This profile / Shared tab bar vs utility links (CSS)
 
 - **Need**: Prototype has This profile / Shared as left tabs with a thick teal underline on the gray bar; Recycle Bin and Select all sit on the right as smaller blue links.

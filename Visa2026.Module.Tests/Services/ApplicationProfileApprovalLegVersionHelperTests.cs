@@ -176,4 +176,27 @@ public class ApplicationProfileApprovalLegVersionHelperTests
 
         return profile;
     }
+
+    [Fact]
+    public void ShouldSeedTemplateDefault_true_when_empty()
+    {
+        Assert.True(ApplicationProfileApprovalLegVersionHelper.ShouldSeedTemplateDefault(null));
+        Assert.True(ApplicationProfileApprovalLegVersionHelper.ShouldSeedTemplateDefault(Guid.Empty));
+        Assert.False(ApplicationProfileApprovalLegVersionHelper.ShouldSeedTemplateDefault(Guid.NewGuid()));
+    }
+
+    [Fact]
+    public void AssignTemplateDefault_sets_profile_fk()
+    {
+        var profile = new ApplicationProfile
+        {
+            ProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
+        };
+        var chain = new ApprovalLegProfile { ID = Guid.NewGuid(), IsActive = true };
+
+        ApplicationProfileApprovalLegVersionHelper.AssignTemplateDefault(profile, chain);
+
+        Assert.Same(chain, profile.DefaultApprovalLegProfile);
+        Assert.Equal(chain.ID, profile.DefaultApprovalLegProfileId);
+    }
 }

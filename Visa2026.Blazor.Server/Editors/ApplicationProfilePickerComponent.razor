@@ -13,44 +13,82 @@
                 <h1 class="ap-picker__title">Choose Approval legs</h1>
                 <p class="ap-picker__profile-name" title="@SelectedProfileName">@SelectedProfileName</p>
                 <p class="ap-picker__sub">
-                    Choose which shared approval-leg version this application will follow. Ministries are snapshotted onto the application and will not change if Configuration is edited later.
+                    These chains are shared for every via-ministry application. Pick one for this case; ministries are copied onto it and will not change if the shared catalog is edited later.
+                    <strong>Make default</strong> is the pre-selected chain the next time someone creates from this profile.
                 </p>
             </div>
         </header>
 
         @RenderStatus()
 
-        @if (SelectedRow?.MissingApprovalLegVersions == true)
+        @if (SelectedRow != null)
         {
-            <div class="ap-picker__hint">No shared approval-leg versions in Configuration. Add Approval leg profiles before creating an application.</div>
-        }
-        else if (SelectedRow != null)
-        {
-            <h2 class="ap-picker__section-title">Approval legs *</h2>
-            <div class="ap-picker__versions">
-                @foreach (var version in SelectedRow.ApprovalLegVersions)
-                {
-                    var versionSelected = version.VersionId == SelectedVersionId;
-                    <button type="button"
-                            class="ap-picker__version @(versionSelected ? "is-selected" : null)"
-                            @onclick="() => SelectVersion(version.VersionId)">
-                        <span class="ap-picker__version-title">
-                            @version.Name
-                            @if (version.IsDefault)
-                            {
-                                <span class="ap-picker__badge ap-picker__badge--on">Default</span>
-                            }
-                        </span>
-                        <ol class="ap-picker__version-legs">
-                            @foreach (var ministry in version.MinistryNames)
-                            {
-                                <li>@ministry</li>
-                            }
-                        </ol>
-                        <span class="ap-picker__meta">@version.MinistryNames.Count ministries</span>
-                    </button>
-                }
+            <div class="ap-picker__section-head">
+                <h2 class="ap-picker__section-title">Approval legs *</h2>
+                <div class="ap-picker__section-actions">
+                    <button type="button" class="ap-picker__link" @onclick="OpenApprovalLegCatalogAsync">Catalog</button>
+                    <button type="button" class="ap-picker__link" @onclick="NewApprovalLegAsync">+ New</button>
+                </div>
             </div>
+            @if (SelectedRow.MissingApprovalLegVersions)
+            {
+                <div class="ap-picker__versions-empty" role="status">
+                    <p class="ap-picker__versions-empty-title">No shared approval-leg versions yet</p>
+                    <p>Create the first ministry chain here. It is shared for all via-ministry applications, not only this case. After Create, pick the card and Use profile. Catalog on the right lists inactive chains too.</p>
+                    <div class="ap-picker__section-actions ap-picker__section-actions--empty">
+                        <button type="button" class="ap-picker__link" @onclick="OpenApprovalLegCatalogAsync">Catalog</button>
+                        <button type="button" class="ap-picker__btn ap-picker__btn--primary" @onclick="NewApprovalLegAsync">+ New</button>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="ap-picker__versions">
+                    @foreach (var version in SelectedRow.ApprovalLegVersions)
+                    {
+                        var versionSelected = version.VersionId == SelectedVersionId;
+                        <div class="ap-picker__version @(versionSelected ? "is-selected" : null)"
+                             role="button"
+                             tabindex="0"
+                             @onclick="() => SelectVersion(version.VersionId)"
+                             @onkeydown="e => OnVersionKey(e, version.VersionId)">
+                            <span class="ap-picker__version-title">
+                                @version.Name
+                                @if (version.IsDefault)
+                                {
+                                    <span class="ap-picker__badge ap-picker__badge--on">Default</span>
+                                }
+                            </span>
+                            <ol class="ap-picker__version-legs">
+                                @foreach (var ministry in version.MinistryNames)
+                                {
+                                    <li>@ministry</li>
+                                }
+                            </ol>
+                            <div class="ap-picker__version-foot">
+                                <span class="ap-picker__meta">@version.MinistryNames.Count ministries</span>
+                                <span class="ap-picker__version-foot-actions">
+                                    @if (!version.IsDefault)
+                                    {
+                                        <button type="button"
+                                                class="ap-picker__link"
+                                                @onclick="() => MakeDefaultApprovalLegAsync(version.VersionId)"
+                                                @onclick:stopPropagation="true">
+                                            Make default
+                                        </button>
+                                    }
+                                    <button type="button"
+                                            class="ap-picker__link"
+                                            @onclick="() => OpenApprovalLegAsync(version.VersionId)"
+                                            @onclick:stopPropagation="true">
+                                        Open
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
         }
 
         <div class="ap-picker__actions">
@@ -117,7 +155,7 @@
 
             @if (SelectedRow?.MissingApprovalLegVersions == true)
             {
-                <div class="ap-picker__hint">No shared approval-leg versions in Configuration. Add Approval leg profiles before creating an application.</div>
+                <div class="ap-picker__hint">Continue to choose or create a shared approval-leg version. New chains are available for every via-ministry application.</div>
             }
 
             <div class="ap-picker__actions">
@@ -160,6 +198,10 @@
     [Parameter] public EventCallback BackStepRequested { get; set; }
     [Parameter] public EventCallback<Guid> SelectProfileRequested { get; set; }
     [Parameter] public EventCallback<Guid> SelectVersionRequested { get; set; }
+    [Parameter] public EventCallback NewApprovalLegRequested { get; set; }
+    [Parameter] public EventCallback<Guid> OpenApprovalLegRequested { get; set; }
+    [Parameter] public EventCallback OpenApprovalLegCatalogRequested { get; set; }
+    [Parameter] public EventCallback<Guid> MakeDefaultApprovalLegRequested { get; set; }
 
     private bool _initialLoadStarted;
 
@@ -171,12 +213,10 @@
 
     private bool CanContinueToLegs =>
         SelectedRow != null
-        && SelectedRow.RequiresApprovalLegVersion
-        && !SelectedRow.MissingApprovalLegVersions;
+        && SelectedRow.RequiresApprovalLegVersion;
 
     private bool CanCreateOnLegsStep =>
         SelectedRow != null
-        && !SelectedRow.MissingApprovalLegVersions
         && SelectedVersionId != Guid.Empty;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -225,5 +265,35 @@
     {
         if (BackStepRequested.HasDelegate)
             await BackStepRequested.InvokeAsync();
+    }
+
+    private async Task NewApprovalLegAsync()
+    {
+        if (NewApprovalLegRequested.HasDelegate)
+            await NewApprovalLegRequested.InvokeAsync();
+    }
+
+    private async Task OpenApprovalLegAsync(Guid versionId)
+    {
+        if (OpenApprovalLegRequested.HasDelegate)
+            await OpenApprovalLegRequested.InvokeAsync(versionId);
+    }
+
+    private async Task OpenApprovalLegCatalogAsync()
+    {
+        if (OpenApprovalLegCatalogRequested.HasDelegate)
+            await OpenApprovalLegCatalogRequested.InvokeAsync();
+    }
+
+    private async Task MakeDefaultApprovalLegAsync(Guid versionId)
+    {
+        if (MakeDefaultApprovalLegRequested.HasDelegate)
+            await MakeDefaultApprovalLegRequested.InvokeAsync(versionId);
+    }
+
+    private async Task OnVersionKey(KeyboardEventArgs e, Guid versionId)
+    {
+        if (e.Key is "Enter" or " ")
+            await SelectVersion(versionId);
     }
 }

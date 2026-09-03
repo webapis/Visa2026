@@ -188,6 +188,7 @@ internal static class ApprovalLegProfileMinistryLegCatalogSync
         {
             profile = objectSpace.CreateObject<ApprovalLegProfile>();
             profile.Code = code;
+            profile.IsActive = row.IsActive;
             created++;
         }
         else
@@ -201,7 +202,7 @@ internal static class ApprovalLegProfileMinistryLegCatalogSync
         if (!string.IsNullOrWhiteSpace(row.LocalizationKey))
             profile.LocalizationKey = row.LocalizationKey.Trim();
 
-        profile.IsActive = row.IsActive;
+        // Officers turn Active off in the slot catalog. Do not restore it from JSON on F5.
         return profile;
     }
 

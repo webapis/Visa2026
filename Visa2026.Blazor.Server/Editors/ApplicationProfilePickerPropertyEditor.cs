@@ -14,6 +14,8 @@ using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.BusinessObjects.ApplicationProfilePicker;
 using Visa2026.Module.Editors;
 using Visa2026.Module.Services.ApplicationProfilePicker;
+using Visa2026.Module.Services.ApplicationProfileWizard;
+using Visa2026.Module.Services.PreviewSlot;
 
 namespace Visa2026.Blazor.Server.Editors;
 
@@ -23,6 +25,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
     private XafApplication? _application;
     private IApplicationProfilePickerQueryService? _queryService;
     private IApplicationProfilePickerContext? _context;
+    private IApprovalLegCatalogChangeNotifier? _catalogChanged;
 
     public ApplicationProfilePickerPropertyEditor(Type objectType, IModelMemberViewItem model)
         : base(objectType, model) { }
@@ -34,6 +37,12 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         _application = application;
         _queryService = application.ServiceProvider?.GetService<IApplicationProfilePickerQueryService>();
         _context = application.ServiceProvider?.GetService<IApplicationProfilePickerContext>();
+        _catalogChanged = application.ServiceProvider?.GetService<IApprovalLegCatalogChangeNotifier>();
+        if (_catalogChanged != null)
+        {
+            _catalogChanged.Changed -= OnApprovalLegCatalogChanged;
+            _catalogChanged.Changed += OnApprovalLegCatalogChanged;
+        }
     }
 
     protected override IComponentModel CreateComponentModel() => new ApplicationProfilePickerModel
@@ -46,6 +55,10 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         BackStepRequested = EventCallback.Factory.Create(this, BackStepAsync),
         SelectProfileRequested = EventCallback.Factory.Create<Guid>(this, SelectProfile),
         SelectVersionRequested = EventCallback.Factory.Create<Guid>(this, SelectVersion),
+        NewApprovalLegRequested = EventCallback.Factory.Create(this, OpenNewApprovalLeg),
+        OpenApprovalLegRequested = EventCallback.Factory.Create<Guid>(this, OpenApprovalLeg),
+        OpenApprovalLegCatalogRequested = EventCallback.Factory.Create(this, OpenApprovalLegCatalog),
+        MakeDefaultApprovalLegRequested = EventCallback.Factory.Create<Guid>(this, SetDefaultApprovalLeg),
     };
 
     protected override void OnCurrentObjectChanged()
@@ -64,17 +77,21 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
             ? ApplicationProfilePickerContextGate.Get(_application)
             : null);
 
-    private async Task LoadAsync()
+    private Task LoadAsync() => LoadAsync(showLoading: true);
+
+    private async Task LoadAsync(bool showLoading)
     {
         var model = ComponentModel;
         if (model == null)
             return;
 
-        model.IsLoading = true;
+        if (showLoading)
+            model.IsLoading = true;
         model.StatusMessage = null;
         model.IsStatusError = false;
         model.IsStatusWarning = false;
-        await Task.Delay(16);
+        if (showLoading)
+            await Task.Delay(16);
 
         try
         {
@@ -160,13 +177,6 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
             return;
         }
 
-        if (selected.MissingApprovalLegVersions)
-        {
-            model.StatusMessage = "No shared approval-leg versions in Configuration. Add Approval leg profiles before creating an application.";
-            model.IsStatusError = true;
-            return;
-        }
-
         EnsureSelectedVersion(model);
         model.Step = 2;
         model.StatusMessage = null;
@@ -201,13 +211,6 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         }
 
         var selected = model.Rows.FirstOrDefault(r => r.ProfileId == model.SelectedProfileId);
-        if (selected?.MissingApprovalLegVersions == true)
-        {
-            model.StatusMessage = "No shared approval-leg versions in Configuration. Add Approval leg profiles before creating an application.";
-            model.IsStatusError = true;
-            return;
-        }
-
         if (selected?.RequiresApprovalLegVersion == true && model.Step != 2)
         {
             await NextStepAsync();
@@ -277,5 +280,94 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         var defaultVersion = selected.ApprovalLegVersions.FirstOrDefault(v => v.IsDefault)
             ?? selected.ApprovalLegVersions.FirstOrDefault();
         model.SelectedVersionId = defaultVersion?.VersionId ?? Guid.Empty;
+    }
+
+    private async Task SetDefaultApprovalLeg(Guid versionId)
+    {
+        var model = ComponentModel;
+        if (model == null || _application == null || versionId == Guid.Empty)
+            return;
+
+        var factory = _application.ServiceProvider?.GetService<INonSecuredObjectSpaceFactory>();
+        if (factory == null)
+        {
+            model.StatusMessage = "Could not set the default approval-leg chain.";
+            model.IsStatusError = true;
+            return;
+        }
+
+        using var objectSpace = factory.CreateNonSecuredObjectSpace<ApplicationProfile>();
+        if (!ApplicationProfileApprovalLegVersionHelper.TrySetTemplateDefault(
+                objectSpace,
+                model.SelectedProfileId,
+                versionId,
+                out var error))
+        {
+            model.StatusMessage = error ?? "Could not set the default approval-leg chain.";
+            model.IsStatusError = true;
+            return;
+        }
+
+        var step = model.Step;
+        await LoadAsync(showLoading: false);
+        model.Step = step;
+        model.SelectedVersionId = versionId;
+        EnsureSelectedVersion(model);
+    }
+
+    private void OpenApprovalLegCatalog()
+    {
+        if (_application == null)
+            return;
+
+        ApplicationProfileWizardApprovalLegCatalogOpenHelper.TryOpen(
+            _application,
+            onChanged: OnApprovalLegCatalogChanged,
+            ownerViewId: VisaPreviewSlotViewHelper.ResolveOwnerViewId(View),
+            request: new ApprovalLegCatalogSlotRequest());
+    }
+
+    private void OpenNewApprovalLeg()
+    {
+        if (_application == null)
+            return;
+
+        ApplicationProfileWizardApprovalLegCatalogOpenHelper.TryOpen(
+            _application,
+            onChanged: OnApprovalLegCatalogChanged,
+            ownerViewId: VisaPreviewSlotViewHelper.ResolveOwnerViewId(View),
+            request: new ApprovalLegCatalogSlotRequest { StartNew = true });
+    }
+
+    private void OpenApprovalLeg(Guid versionId)
+    {
+        if (_application == null || versionId == Guid.Empty)
+            return;
+
+        ApplicationProfileWizardApprovalLegCatalogOpenHelper.TryOpen(
+            _application,
+            onChanged: OnApprovalLegCatalogChanged,
+            ownerViewId: VisaPreviewSlotViewHelper.ResolveOwnerViewId(View),
+            request: new ApprovalLegCatalogSlotRequest { FocusProfileId = versionId });
+    }
+
+    private void OnApprovalLegCatalogChanged()
+    {
+        _ = ReloadAfterCatalogChangeAsync();
+    }
+
+    private async Task ReloadAfterCatalogChangeAsync()
+    {
+        var model = ComponentModel;
+        if (model == null)
+            return;
+
+        var step = model.Step;
+        var preferId = _catalogChanged?.LastChangedProfileId;
+        await LoadAsync(showLoading: false);
+        model.Step = step;
+        if (preferId is Guid id && id != Guid.Empty)
+            model.SelectedVersionId = id;
+        EnsureSelectedVersion(model);
     }
 }

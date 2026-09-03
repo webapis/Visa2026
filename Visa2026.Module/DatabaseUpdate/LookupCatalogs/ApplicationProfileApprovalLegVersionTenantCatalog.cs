@@ -142,9 +142,10 @@ internal static class ApplicationProfileApprovalLegVersionTenantCatalogSync
                     Tracing.Tracer.LogText(
                         $"ApplicationProfileApprovalLegVersionTenantCatalogSync: ApprovalLegProfile '{defaultCode}' missing for {row.ProfileCode}.");
                 }
-                else if (profile.DefaultApprovalLegProfile?.ID != shared.ID)
+                else if (ApplicationProfileApprovalLegVersionHelper.ShouldSeedTemplateDefault(
+                             profile.DefaultApprovalLegProfileId))
                 {
-                    profile.DefaultApprovalLegProfile = shared;
+                    ApplicationProfileApprovalLegVersionHelper.AssignTemplateDefault(profile, shared);
                     defaultsSet++;
                 }
             }

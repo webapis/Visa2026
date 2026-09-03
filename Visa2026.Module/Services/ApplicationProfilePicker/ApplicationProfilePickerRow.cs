@@ -33,8 +33,7 @@ public sealed class ApplicationProfilePickerRow
         = Array.Empty<ApplicationProfilePickerVersionOption>();
 
     public bool RequiresApprovalLegVersion =>
-        ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries
-        && ApprovalLegVersions.Count > 0;
+        ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries;
 
     public string MetaLine =>
         $"{Code} · Related to: {ApplicationProfilePickerDisplayHelper.FormatRelatedTo(ActionFamily, RegistrationKind)} · "

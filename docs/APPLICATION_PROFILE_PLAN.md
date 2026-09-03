@@ -13,6 +13,7 @@
 | Wizard template scopes / upload / edit (2026-08-12) | Historical PNGs. **2026-09-03:** wizard step is **Person data** checkboxes only. This-profile files and Shared ON/OFF live on case Resminamalar. |
 | Approval leg versions (2026-08-18) | `application-profile-wizard-approval-leg-versions-prototype.png`, `application-profile-instance-create-choose-approval-legs-prototype.png` |
 | Approval leg slot CRUD (2026-08-27) | `approval-leg-profile-slot-01-catalog.png` … `-05-new.png` — [README](prototypes/approval-leg-profile-slot-README.md) |
+| Choose Approval legs manage (2026-09-03) | `choose-approval-legs-manage-01-picker.png` … `-05-slot-edit.png` — [README](prototypes/choose-approval-legs-manage-README.md). **Shipped.** |
 | Case summary instance fields (2026-08-18) | `application-profile-instance-case-summary-overview-properties-prototype.png`, `application-profile-instance-case-summary-edit-properties-prototype.png` |
 
 Full inventory: **§9**. **Interactive HTML (planned):** [`APPLICATION_PROFILE_HTML_PROTOTYPE_PLAN.md`](APPLICATION_PROFILE_HTML_PROTOTYPE_PLAN.md).
@@ -45,7 +46,7 @@ Application-type behavior is **scattered** across `ApplicationType` `Show*` / `C
 |---|--------|----------|
 | 5 | Scope / applicability | **Freeform criteria** filters which profiles appear in the Application picker. |
 | 6 | “Related to” (action family) | **Exclusive radio:** Issuance \| Cancellation \| Change \| Registration \| Business trip. When **Registration**, also **Check in**, **Check out**, **Info change**, or **Reg extension** (`RegistrationKind`) for Report Dashboard queries. **Configuration-related**. |
-| 7 | Approval legs | **Shared** tenant catalog: `ApprovalLegProfile` (Configuration), like Company / Signatory. Each via-ministry profile stores only **`DefaultApprovalLegProfile`**. Officer **must pick a shared version** at instance create. Instance **snapshots** ministries; later Configuration or default edits do not change already-started cases. Do **not** copy chains onto each profile. |
+| 7 | Approval legs | **Shared** tenant catalog: `ApprovalLegProfile` (Configuration), like Company / Signatory. Each via-ministry profile stores only **`DefaultApprovalLegProfile`**. Officer **must pick a shared version** at instance create (**Choose Approval legs**: pick, **Catalog**, **+ New**, **Open**, **Make default**). Instance **snapshots** ministries; later catalog or default edits do not change already-started cases. Do **not** copy chains onto each profile. Configure Identity has **no Approval legs UI**. |
 | 8 | Process states | **Not officer-configured.** Instance steps follow **Directed to** + **Approval legs** + the fixed progress graph. Profile stores **SLA days** only. |
 | 9 | Templates | **Nest files** on the profile. Configuration-related; list **visible** on Application, **not** editable per Application. |
 | 10 | Person data (v1) | Four checkboxes: Passport, Education, Position, Local address. Configuration-related (live readiness / template packs). |
@@ -440,6 +441,7 @@ When any linked Application reaches lock state **A** (first progress beyond offi
 | Approval leg versions (shared catalog + instance snapshot) | **Done** (Phase B 2026-08-20: imported instances keep inferred chain; snapshots + version name backfill) |
 | Locked profile: still set Default approval legs | **Done** |
 | Approval-leg catalog in preview slot | **Done** |
+| Choose Approval legs Catalog / + New / Open / Make default | **Done** (2026-09-03) |
 | Wizard Project contract on Identity (Via ministry) | Done |
 | Profile overview (live linked instances) | Done |
 | Custom catalog home (replace native List/Detail officer UI) | Done |
@@ -549,6 +551,11 @@ All files live in [`docs/prototypes/`](prototypes/) only (no subfolders).
 | `approval-leg-profile-slot-03-edit.png` | Slot Open on unused chain — edit ministries, Save / Delete |
 | `approval-leg-profile-slot-04-empty.png` | Empty shared catalog + wizard hint to add the first chain |
 | `approval-leg-profile-slot-05-new.png` | Slot **+ New** — blank Code, empty ministries, Cancel / Create |
+| `choose-approval-legs-manage-01-picker.png` | Create instance — cards + **+ New** / **Open** (shared catalog) |
+| `choose-approval-legs-manage-02-empty.png` | Create instance — 0 chains; empty box + **+ New** |
+| `choose-approval-legs-manage-03-slot-catalog.png` | Picker left + slot catalog (not Configure Identity) |
+| `choose-approval-legs-manage-04-slot-new.png` | Picker left + slot **+ New** form |
+| `choose-approval-legs-manage-05-slot-edit.png` | Picker left + slot **Open** unused chain |
 | `application-profile-instance-case-summary-overview-properties-prototype.png` | Overview **Case summary** — read-only tiles for profile **Use** fields; **Edit** switches to form mode |
 | `application-profile-instance-case-summary-edit-properties-prototype.png` | Overview **Case summary** — edit mode (dropdowns/dates); **Done** returns to tiles |
 

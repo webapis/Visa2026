@@ -34,55 +34,6 @@
                 Direct migration service
             </label>
         </div>
-        @if (ShowApprovalLegs)
-        {
-            <h3 class="ap-wizard__subhead">Approval leg versions</h3>
-            <div class="ap-wizard__callout">
-                Shared for the whole tenant (like Company / Signatory). Officers pick one when creating an application.
-                Already-started applications keep a snapshot. Edit chains under Configuration.
-            </div>
-            <div class="ap-wizard__org-toolbar">
-                <button type="button" class="ap-wizard__btn ap-wizard__btn--secondary" @onclick="RefreshSharedRequested">Refresh from Configuration</button>
-                <button type="button" class="ap-wizard__btn ap-wizard__btn--secondary" @onclick="OpenSharedCatalogRequested">Edit in Configuration</button>
-            </div>
-            @if (SharedApprovalLegProfiles.Count == 0)
-            {
-                <p class="ap-wizard__hint">No shared approval-leg versions yet. Use Edit in Configuration to add chains (e.g. TE-EN).</p>
-            }
-            else
-            {
-                <div class="ap-wizard__versions">
-                    @foreach (var shared in SharedApprovalLegProfiles)
-                    {
-                        var isDefault = Profile.DefaultApprovalLegProfileId == shared.ID;
-                        <div class="ap-wizard__version @(isDefault ? "is-default" : null)">
-                            <div class="ap-wizard__version-head">
-                                <label class="ap-wizard__version-select">
-                                    <input type="radio" name="ap-default-shared-leg"
-                                           checked="@isDefault"
-                                           @onchange="@(() => SetDefaultShared(shared))" />
-                                    <span>@(string.IsNullOrWhiteSpace(shared.Code) ? "Version" : shared.Code)</span>
-                                </label>
-                                <span>@(shared.NameTm ?? shared.Code)</span>
-                                @if (isDefault)
-                                {
-                                    <span class="ap-wizard__pill ap-wizard__pill--on">Default for this template</span>
-                                }
-                                else
-                                {
-                                    <button type="button" class="ap-wizard__link" @onclick="() => SetDefaultShared(shared)">Make default</button>
-                                }
-                            </div>
-                            <p class="ap-wizard__hint">@PreviewSharedLegs(shared)</p>
-                        </div>
-                    }
-                </div>
-            }
-        }
-        else
-        {
-            <p class="ap-wizard__hint">Direct migration has no ministry approval legs.</p>
-        }
     </div>
     <div class="ap-wizard__section">
         <h3>ApplicationProfileInstance may be for</h3>
@@ -188,10 +139,6 @@
 @code {
     [Parameter, EditorRequired] public ApplicationProfile Profile { get; set; } = null!;
     [Parameter] public bool Disabled { get; set; }
-    [Parameter] public IReadOnlyList<ApprovalLegProfile> SharedApprovalLegProfiles { get; set; } = Array.Empty<ApprovalLegProfile>();
-    [Parameter] public int SharedApprovalLegsRevision { get; set; }
-    [Parameter] public EventCallback OpenSharedCatalogRequested { get; set; }
-    [Parameter] public EventCallback RefreshSharedRequested { get; set; }
     [Parameter] public EventCallback ClearLegsRequested { get; set; }
     [Parameter] public EventCallback NameChanged { get; set; }
 
@@ -208,8 +155,6 @@
     private bool ShowMayCancel => Profile.ActionFamily == ApplicationProfileActionFamily.Cancellation;
     private bool ShowMayChange => Profile.ActionFamily == ApplicationProfileActionFamily.Change;
     private bool ShowRegistrationKind => Profile.ActionFamily == ApplicationProfileActionFamily.Registration;
-    private bool ShowApprovalLegs =>
-        Profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries;
 
     private Task NotifyNameChanged() => NameChanged.InvokeAsync();
 
@@ -227,32 +172,6 @@
 
         if (route == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService)
             Profile.DefaultApprovalLegProfile = null;
-    }
-
-    private void SetDefaultShared(ApprovalLegProfile shared)
-    {
-        if (shared == null)
-            return;
-
-        Profile.DefaultApprovalLegProfile = shared;
-        Profile.DefaultApprovalLegProfileId = shared.ID;
-    }
-
-    private static string PreviewSharedLegs(ApprovalLegProfile shared)
-    {
-        var legs = (shared.MinistryLegs ?? Enumerable.Empty<ApprovalLegProfileMinistryLeg>())
-            .Where(l => l.ApprovingMinistry != null)
-            .OrderBy(l => l.Sequence ?? int.MaxValue)
-            .ToList();
-        var names = legs
-            .Select(l => l.ApprovingMinistry?.ShortNameTm ?? l.ApprovingMinistry?.NameTm)
-            .Where(n => !string.IsNullOrWhiteSpace(n))
-            .Take(4)
-            .ToList();
-        if (names.Count == 0)
-            return $"{legs.Count} ministries";
-
-        return $"{legs.Count} ministries · {string.Join(" · ", names)}";
     }
 
     private void SetActionFamily(ApplicationProfileActionFamily family)

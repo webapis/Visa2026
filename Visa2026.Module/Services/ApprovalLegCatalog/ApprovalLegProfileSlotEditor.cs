@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.EFCore;
+using DevExpress.Persistent.Base;
 using Microsoft.EntityFrameworkCore;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
@@ -179,6 +181,7 @@ public static class ApprovalLegProfileSlotEditor
         }
 
         ApprovalLegProfileMinistryHelper.WireMinistryLegs(profile);
+        ApprovalLegProfileMinistryHelper.PrepareLegsForCommit(objectSpace);
         if (profile.IsActive
             && !ApprovalLegProfileMinistryHelper.TryValidateLegSla(objectSpace, profile, out var slaError))
         {
@@ -187,15 +190,8 @@ public static class ApprovalLegProfileSlotEditor
             return false;
         }
 
-        try
-        {
-            objectSpace.CommitChanges();
-        }
-        catch (Exception)
-        {
-            error = VisaUiMessages.Get("ApprovalLegProfile.Slot.SaveFailed");
+        if (!TryCommit(objectSpace, out error))
             return false;
-        }
 
         id = profile.ID;
         return true;
@@ -235,6 +231,7 @@ public static class ApprovalLegProfileSlotEditor
             return false;
 
         ApprovalLegProfileMinistryHelper.WireMinistryLegs(profile);
+        ApprovalLegProfileMinistryHelper.PrepareLegsForCommit(objectSpace);
         if (profile.IsActive
             && !ApprovalLegProfileMinistryHelper.TryValidateLegSla(objectSpace, profile, out var slaError))
         {
@@ -242,17 +239,8 @@ public static class ApprovalLegProfileSlotEditor
             return false;
         }
 
-        try
-        {
-            objectSpace.CommitChanges();
-        }
-        catch (Exception)
-        {
-            error = VisaUiMessages.Get("ApprovalLegProfile.Slot.SaveFailed");
-            return false;
-        }
-
-        return true;
+        MarkModified(objectSpace, profile);
+        return TryCommit(objectSpace, out error);
     }
 
     public static bool TryDelete(IObjectSpace objectSpace, Guid id, out string? error)
@@ -278,17 +266,7 @@ public static class ApprovalLegProfileSlotEditor
         }
 
         objectSpace.Delete(profile);
-        try
-        {
-            objectSpace.CommitChanges();
-        }
-        catch (Exception)
-        {
-            error = VisaUiMessages.Get("ApprovalLegProfile.Slot.SaveFailed");
-            return false;
-        }
-
-        return true;
+        return TryCommit(objectSpace, out error);
     }
 
     public static bool TryCreateMinistry(
@@ -330,8 +308,9 @@ public static class ApprovalLegProfileSlotEditor
         {
             objectSpace.CommitChanges();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Tracing.Tracer.LogError($"ApprovalLegProfile.TryCreateMinistry failed: {ex}");
             error = VisaUiMessages.Get("ApprovalLegProfile.Slot.CreateMinistryFailed");
             return false;
         }
@@ -453,7 +432,7 @@ public static class ApprovalLegProfileSlotEditor
         return true;
     }
 
-    private static void ApplyScalars(ApprovalLegProfile profile, ApprovalLegProfileSlotDraft draft)
+    internal static void ApplyScalars(ApprovalLegProfile profile, ApprovalLegProfileSlotDraft draft)
     {
         profile.Code = draft.Code;
         profile.IsActive = draft.IsActive;
@@ -464,6 +443,14 @@ public static class ApprovalLegProfileSlotEditor
         profile.Name = draft.Code;
 #pragma warning restore CS0618
         profile.LocalizationKey = draft.Code;
+    }
+
+    internal static void MarkModified(IObjectSpace objectSpace, ApprovalLegProfile profile)
+    {
+        if (objectSpace is EFCoreObjectSpace { DbContext: { } dbContext })
+            dbContext.ChangeTracker.DetectChanges();
+
+        objectSpace.SetModified(profile);
     }
 
     private static bool TryReplaceLegs(
@@ -496,6 +483,34 @@ public static class ApprovalLegProfileSlotEditor
         }
 
         return true;
+    }
+
+    private static bool TryCommit(IObjectSpace objectSpace, out string? error)
+    {
+        error = null;
+        try
+        {
+            objectSpace.CommitChanges();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Tracing.Tracer.LogError($"ApprovalLegProfile slot commit failed: {ex}");
+            error = ResolveCommitError(ex);
+            return false;
+        }
+    }
+
+    internal static string ResolveCommitError(Exception ex)
+    {
+        var generic = VisaUiMessages.Get("ApprovalLegProfile.Slot.SaveFailed");
+        for (var current = ex; current != null; current = current.InnerException)
+        {
+            if (current is UserFriendlyException ufe && !string.IsNullOrWhiteSpace(ufe.Message))
+                return ufe.Message;
+        }
+
+        return generic;
     }
 
     private static bool HasStructuralLegChanges(

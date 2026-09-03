@@ -47,6 +47,7 @@ disable-model-invocation: false
 | Templates | `application-profile-templates-listview-mockup.png`, `application-profile-template-overview-mockup.png`, `application-profile-template-wizard*.png` |
 | Approval leg versions (2026-08-18) | `application-profile-wizard-approval-leg-versions-prototype.png`, `application-profile-instance-create-choose-approval-legs-prototype.png` |
 | Approval leg slot CRUD (2026-08-27) | `approval-leg-profile-slot-01-catalog.png` … `-05-new.png` |
+| Choose Approval legs manage (2026-09-03) | `choose-approval-legs-manage-01-picker.png` … `-05-slot-edit.png` — shipped |
 | Case summary instance fields (2026-08-18) | `application-profile-instance-case-summary-overview-properties-prototype.png`, `application-profile-instance-case-summary-edit-properties-prototype.png` |
 
 **Retired:** HTML/Excel/`images/` prototypes removed 2026-08-10 — see plan §9.
@@ -116,7 +117,7 @@ flowchart LR
 | Defaults not applied on create | `Application.ApplyDefaultsForApplicationProfile` | Profile default FKs; ImmediatePostData |
 | Officer can change profile on detail | `[Appearance]` read-only on DetailView | Enforce create-only in controller |
 | Config still editable after submit | `ApplicationProfile.IsConfigLocked` + wizard | `ApplicationProfileLockHelper`, `LatestPrimaryStateCode` |
-| Locked profile cannot change Default approval legs | Default is a lock carve-out (snapshots) | Wizard Identity shared list + **Default**; `HasConfigurationScalarsChanged` ignores `DefaultApprovalLegProfileId`; **Edit in Configuration** |
+| Locked profile cannot change Default approval legs | Default is a lock carve-out (snapshots) | Wizard Identity **Default** only; `HasConfigurationScalarsChanged` ignores `DefaultApprovalLegProfileId`; chains: Choose Approval legs **+ New** / **Open** |
 | Visibility still follows ApplicationType | grep `Show*` / `ApplicationType` in Appearance | Slice 2: profile-driven rules |
 | Progress route ignores profile | `ApplicationType.ApplicationProgressRoute` still used | Wire `ApplicationProfile.ProgressRoute` in resolver |
 | Type required but Profile optional | Dual-read phase | Seed profiles; backfill FK; document in IMPLEMENTATION_PLAN |
@@ -158,7 +159,7 @@ When starting a slice, set its row to **In progress** in IMPLEMENTATION_PLAN; se
 |-------------|-----------|----------------------|
 | Configure profile → Templates **Preview** | Wizard list / Edit modal | **File occupant** (`OpenFileAsync` master PDF) |
 | Case workspace tab → **Preview** | Catalog / list | **Viewer only** (`OpenPreviewOnly` + focus key) |
-| Configure profile → Identity **Edit in Configuration** | Wizard stays | **Approval-leg catalog** (`OpenApprovalLegCatalogAsync`) |
+| Choose Approval legs **+ New** / **Open** (or leftover wizard open) | Picker stays | **Approval-leg catalog** (`OpenApprovalLegCatalogAsync`) |
 | Case workspace Progress → ministry letter filename | Timeline (current file name) | **Viewer only** (`ProgressLettersSlotRequest.OpenPreviewOnly` + `FocusProgressId`) |
 | Rail / legacy DetailView action | — | Full catalog in slot |
 

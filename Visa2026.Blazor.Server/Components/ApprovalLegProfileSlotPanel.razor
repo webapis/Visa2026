@@ -1,5 +1,6 @@
 @namespace Visa2026.Blazor.Server.Components
 @using DevExpress.ExpressApp
+@using Microsoft.AspNetCore.Components
 @using Visa2026.Blazor.Server.Localization
 @using Visa2026.Module.BusinessObjects
 @using Visa2026.Module.Localization
@@ -128,7 +129,10 @@
                                        disabled="@_busy" />
                             </label>
                             <label class="approval-leg-slot__toggle">
-                                <input type="checkbox" @bind="_draft.IsActive" disabled="@_busy" />
+                                <input type="checkbox"
+                                       checked="@_draft.IsActive"
+                                       disabled="@_busy"
+                                       @onchange="OnActiveToggled" />
                                 <span>@Msg("ApprovalLegProfile.Slot.Active")</span>
                             </label>
                         </div>
@@ -301,6 +305,7 @@
     private IReadOnlyList<ApprovalLegProfileSlotCatalogRow> _rows = Array.Empty<ApprovalLegProfileSlotCatalogRow>();
     private IReadOnlyList<ApprovalLegProfileSlotMinistryOption> _ministries = Array.Empty<ApprovalLegProfileSlotMinistryOption>();
     private ApprovalLegProfileSlotDraft? _draft;
+    private bool _appliedRequest;
 
     private string CloseLabel => VisaUiMessages.Get("ApplicationItemDocumentCopies.Action.Close", _uiCultureName);
 
@@ -336,6 +341,18 @@
         ReloadCatalog();
     }
 
+    protected override void OnParametersSet()
+    {
+        if (_appliedRequest)
+            return;
+
+        _appliedRequest = true;
+        if (Request?.StartNew == true)
+            StartNew();
+        else if (Request?.FocusProfileId is Guid focusId && focusId != Guid.Empty)
+            OpenRow(focusId);
+    }
+
     private string Msg(string key) => VisaUiMessages.Get(key, _uiCultureName);
 
     private string UsedBy(int count) =>
@@ -346,6 +363,16 @@
         using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApprovalLegProfile>();
         _rows = ApprovalLegProfileSlotEditor.List(objectSpace, _search);
         _ministries = ApprovalLegProfileSlotEditor.ListMinistries(objectSpace);
+    }
+
+    private void OnActiveToggled(ChangeEventArgs e)
+    {
+        if (_draft == null || _busy)
+            return;
+
+        _draft.IsActive = e.Value is bool flag
+            ? flag
+            : bool.TryParse(e.Value?.ToString(), out var parsed) && parsed;
     }
 
     private void StartNew()
@@ -490,9 +517,9 @@
         if (_draft == null)
             return Msg("ApprovalLegProfile.Slot.SaveFailed");
         using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApprovalLegProfile>();
-        if (!ApprovalLegProfileSlotEditor.TryCreate(objectSpace, _draft, out _, out var error))
+        if (!ApprovalLegProfileSlotEditor.TryCreate(objectSpace, _draft, out var createdId, out var error))
             return error;
-        CatalogChanged.Notify();
+        CatalogChanged.Notify(createdId);
         BackToCatalog();
         return null;
     });
@@ -504,7 +531,7 @@
         using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApprovalLegProfile>();
         if (!ApprovalLegProfileSlotEditor.TrySave(objectSpace, _draft, out var error))
             return error;
-        CatalogChanged.Notify();
+        CatalogChanged.Notify(_draft.Id);
         BackToCatalog();
         return null;
     });

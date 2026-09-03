@@ -2796,10 +2796,10 @@
     "ru-RU": "Используется в {0} заявках"
   },
   "ApprovalLegProfile.Slot.CatalogHint": {
-    "en": "Open edits the shared chain. Default for this template stays on the wizard radios.",
-    "tr-TR": "Aç, paylaşılan zinciri düzenler. Bu şablonun varsayılanı sihirbaz radyolarında kalır.",
-    "tk-TM": "Aç paýlaşylan zynjyry redaktirleýär. Bu şablonyň deslapky belligi jadygöý radio-larynda galýar.",
-    "ru-RU": "Открыть правит общую цепочку. Значение по умолчанию для шаблона остаётся на радиокнопках мастера."
+    "en": "Open edits the shared chain used by every via-ministry application. This case only snapshots the card you pick.",
+    "tr-TR": "Aç, tüm bakanlık başvurularının kullandığı paylaşılan zinciri düzenler. Bu dosya yalnızca seçtiğiniz kartı kopyalar.",
+    "tk-TM": "Aç ähli ministrlik arzalarynyň ulanýan paýlaşylan zynjyryny redaktirleýär. Bu arza diňe saýlan kartyň nusgasyny saklaýar.",
+    "ru-RU": "Открыть правит общую цепочку для всех заявок через министерства. Эта заявка только снимает снимок выбранной карточки."
   },
   "ApprovalLegProfile.Slot.EmptyTitle": {
     "en": "No approval-leg profiles yet",
@@ -2808,16 +2808,16 @@
     "ru-RU": "Профилей этапов пока нет"
   },
   "ApprovalLegProfile.Slot.EmptyBody": {
-    "en": "Create the first shared ministry chain. Officers pick it as Default on the wizard after Refresh.",
-    "tr-TR": "İlk paylaşılan bakanlık zincirini oluşturun. Memurlar yenilemeden sonra sihirbazda Varsayılan olarak seçer.",
-    "tk-TM": "Ilkinji paýlaşylan ministrlik zynjyryny dörediň. Işgärler täzelemekden soň jadygöýde deslapky hökmünde saýlaýar.",
-    "ru-RU": "Создайте первую общую цепочку министерств. Сотрудники выберут её как значение по умолчанию в мастере после обновления."
+    "en": "Create the first shared ministry chain. It is available for every via-ministry application, not only this case.",
+    "tr-TR": "İlk paylaşılan bakanlık zincirini oluşturun. Yalnızca bu dosya için değil, tüm bakanlık başvuruları için geçerlidir.",
+    "tk-TM": "Ilkinji paýlaşylan ministrlik zynjyryny dörediň. Diňe bu arza üçin däl, ähli ministrlik arzalary üçin elýeterli.",
+    "ru-RU": "Создайте первую общую цепочку министерств. Она доступна всем заявкам через министерства, не только этой."
   },
   "ApprovalLegProfile.Slot.EmptyFooter": {
-    "en": "Default for this template stays on the wizard radios after the first chain exists.",
-    "tr-TR": "İlk zincir oluşunca bu şablonun varsayılanı sihirbaz radyolarında kalır.",
-    "tk-TM": "Ilkinji zynjyr döredilenden soň bu şablonyň deslapkysy jadygöý radio-larynda galýar.",
-    "ru-RU": "После появления первой цепочки значение по умолчанию для шаблона остаётся на радиокнопках мастера."
+    "en": "New chains are shared. Configure profile only sets which card is Default for that template.",
+    "tr-TR": "Yeni zincirler paylaşılır. Şablon sihirbazı yalnızca o şablonun Varsayılan kartını ayarlar.",
+    "tk-TM": "Täze zynjyrlar paýlaşylýar. Configure profile diňe şol şablon üçin deslapky karty belleýär.",
+    "ru-RU": "Новые цепочки общие. Мастер профиля задаёт только карточку по умолчанию для этого шаблона."
   },
   "ApprovalLegProfile.Slot.NewTitle": {
     "en": "New approval-leg profile",
@@ -2826,10 +2826,10 @@
     "ru-RU": "Новый профиль этапов"
   },
   "ApprovalLegProfile.Slot.NewHint": {
-    "en": "Create adds a shared catalog chain. Then Refresh on the wizard to set Default.",
-    "tr-TR": "Oluştur paylaşılan bir zincir ekler. Varsayılanı ayarlamak için sihirbazda Yenile’ye basın.",
-    "tk-TM": "Döret paýlaşylan katalog zynjyryny goşýar. Deslapkyny sazlamak üçin jadygöýde Täzele.",
-    "ru-RU": "Создать добавляет общую цепочку. Затем обновите мастер, чтобы задать значение по умолчанию."
+    "en": "Create adds a shared catalog chain for every via-ministry application. It will appear as a card on Choose Approval legs.",
+    "tr-TR": "Oluştur, tüm bakanlık başvuruları için paylaşılan bir zincir ekler. Choose Approval legs adımında kart olarak görünür.",
+    "tk-TM": "Döret ähli ministrlik arzalary üçin paýlaşylan katalog zynjyryny goşýar. Ol Choose Approval legs ädiminde kart bolup görünýär.",
+    "ru-RU": "Создать добавляет общую цепочку для всех заявок через министерства. Она появится карточкой на шаге Choose Approval legs."
   },
   "ApprovalLegProfile.Slot.EditTitle": {
     "en": "Edit approval-leg profile",

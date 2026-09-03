@@ -26,13 +26,13 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | 8g | Wizard May produce / cancel / change with Related to | **Done** | Issuance → May produce; Cancellation → May cancel; Change → May change; moved off Results & fields |
 | 8o | Wizard Region and City lookups | **Done** | Split Region (city); instance Region + City; defaults + case summary |
 | 8n | Wizard Registration Check in / Check out / Info change / Reg extension | **Done** | `RegistrationKind` on profile; Identity radios when Related to = Registration; dashboard SQL predicates ready, views not switched yet |
-| 8h | Wizard Approval legs with Directed to | **Done** | Via ministry → legs on Identity; Direct migration hides and clears legs |
+| 8h | Wizard Approval legs with Directed to | **Done** | Removed from Identity. Default + catalog live on Choose Approval legs. Direct migration still clears Default / legacy nested rows |
 | 8i | Wizard Project contract with Directed to | **Done** | Via ministry → Project contract on Identity; gone from Results; instance copy is read-only |
 | 8j | Wizard Process & SLA is duration only | **Done** | Removed ministry/migration state Include/SLA-track tables; instance process is Directed to + legs |
 | 8k | Profile-specific template applicability | **Done** | Per-row Project contract (Via ministry) or Migration service (Direct) dropdown; instance catalog filters; Project back on Results |
 | 8l | Approval leg versions (shared catalog + snapshot) | **Done** | Shared `ApprovalLegProfile`; profile Default only; create picker snapshots. **Phase A seed:** Calik Defaults from VISA2015. **Phase B:** instance FK / Default → snapshots + version name |
-| 8m | Locked profile: still set Default approval legs | **Done** | Config lock A keeps other fields read-only; **Default** for this template stays editable; chains edited in Configuration; cannot change Name / May produce |
-| 8p | Approval-leg catalog in preview slot | **Done** | Wizard **Edit in Configuration** opens `#visa-preview-slot` catalog CRUD (no XAF ListView). Default stays on wizard radios. **+ New ministry** creates `ApprovingMinistry` in the slot. No Duplicate. |
+| 8m | Locked profile: still set Default approval legs | **Done** | Config lock A keeps wizard fields read-only. **Make default** is on Choose Approval legs (allowed when locked). Cannot change Name / May produce |
+| 8p | Approval-leg catalog in preview slot | **Done** | Choose Approval legs **Catalog** / **+ New** / **Open** open `#visa-preview-slot` (no wizard Identity UI). **Make default** sets the profile Default. **+ New ministry** creates `ApprovingMinistry` in the slot. No Duplicate. |
 | 8d | Wizard step 4 real template catalog + persist scope | **Done** | Two officer scopes: Profile-specific and Shared. Shared Include/Exclude; GT-15 names excluded from Shared (upload under Profile-specific). **Preview** uses `#visa-preview-slot` File occupant (master PDF, placeholders). Internal Category/Global type-links unchanged. |
 | 8a | Application Profile overview (live) | **Done** | Live config/defaults/legs/templates + linked `ApplicationProfileInstance` rows; overview shows wizard identity, company/signatories, required fields, SLA days, template scope; mock only if profile id unresolved |
 | 8c | Custom catalog home (replace native List/Detail UI) | **Done** | List first; row opens overview; **Back to list**; New/Configure → wizard (new tab); **Save profile** reloads catalog; **Delete** when Linked = 0; toolbar **Total: N**; table-body scroll, sticky header |
@@ -212,12 +212,12 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 - `IApplicationProfileWizardSession` + `IApplicationProfileWizardPendingOpen` (Blazor DI)
 - `ApplicationProfileWizardComponent.razor` + step partials + `application-profile-wizard.css`
 - **Configure profile** action on Application Profiles ListView (saved rows only)
-- Respects `ApplicationProfileLockHelper` — read-only banner for locked config; **approval-leg versions** stay editable; **Save profile** remains for version changes
-- Steps: Identity · **Company, Signatories** · Results & fields · Process & SLA (embedded legs) · **Person data** · Review & save
+- Respects `ApplicationProfileLockHelper` — read-only banner for locked config; **Save profile** only when unlocked. Default chain is set on Choose Approval legs (allowed when locked)
+- Steps: Identity · **Company, Signatories** · Results & fields · Process & SLA · **Person data** · Review & save
 - **Person data** is person-row checkboxes only. This-profile files and Shared ON/OFF live on case Resminamalar (2026-09-03).
 - **May produce** / **May cancel** / **May change** live under Identity **Related to** (`ActionFamily`): Issuance → produce; Cancellation → cancel; Change → change
 - **Registration is** Check in / Check out / Info change / Reg extension (`RegistrationKind`) when Related to = Registration; cleared for other families
-- **Approval legs** live under Identity **Directed to** as named **versions**; visible only for Via ministry; instances snapshot the chosen version at create
+- **Approval legs** are not on the wizard. Shared `ApprovalLegProfile` catalog; profile holds **Default** only; officers pick / create / set Default on **Choose Approval legs**; instances snapshot ministries at create
 - **Project contract** lives under Identity **Directed to**; visible + required only for Via ministry; Direct migration hides and clears it. Results & fields no longer lists Project. Instances copy the contract at create and cannot edit it.
 - Identity wizard edits **Name** only — Description, Code, and Selection/quick code stay on the BO (auto Code at create) and are not shown on that step. The **name stays in the wizard header** on every step.
 - **Process & SLA** is Ministry/Migration **days** only. State Include/SLA-track checklists are not officer-configured and do not drive instance Advance.
@@ -244,13 +244,14 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 
 **Delivered:**
 
-- Wizard Identity: shared list + **Edit in Configuration** / Refresh; radio **Default for this template**
-- Create picker: required shared version cards; ministries copied to `ApplicationProfileInstanceApprovalLegSnapshot`
+- Wizard Identity: Directed to only (no Approval legs block). **Make default** is on Choose Approval legs.
+- Create picker **Choose Approval legs**: required pick + **Catalog** / **+ New** / **Open** / **Make default** (same `#visa-preview-slot` catalog); empty catalog can create the first chain. Slot Create writes parent + legs with a real FK (not `Guid.Empty`). Default is stored on the Application Profile and set from this step, not Configure Identity.
+- Ministries copied to `ApplicationProfileInstanceApprovalLegSnapshot`
 - Progress timeline reads **snapshots first**
 - Calik seed sets Defaults from VISA2015 frequency and **clears nested** `ApplicationProfileApprovalLegVersion` copies
 - **Phase B:** imported via-ministry instances keep their inferred `ApprovalLegProfile`; empty FK uses template Default; missing snapshots + `ApprovalLegVersionName` are filled on F5 (`ApplicationProfileInstanceApprovalLegBackfill`) and `--backfill-application-approval-leg-snapshots`
 
-**Verify:** stop F5, rebuild, F5. Configure profile → Identity shows shared versions. New application → pick a version. Open an imported via-ministry case — Ministrlik / snapshot legs match the instance chain (not necessarily the template Default).
+**Verify:** stop F5, rebuild, F5. Configure profile → Identity has Directed to only (no Approval legs). New application → Choose Approval legs → Make default → Default badge moves. Open an imported via-ministry case — Ministrlik / snapshot legs match the instance chain (not necessarily the template Default).
 
 ---
 
@@ -260,19 +261,18 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 
 **Delivered:**
 
-- Wizard Identity: **Default** radio stays enabled when the rest of the profile is read-only
+- Wizard Identity has no Default UI; **Make default** is on Choose Approval legs (still allowed when config-locked)
 - **Save profile** remains on Review when Via ministry + locked
-- **Edit in Configuration** / Refresh stay available
 - Nested save guard still blocks templates / progress-state settings
 - Started cases are not restamped
 
-**Verify:** stop F5, rebuild, F5. Open a **Config locked** Via ministry profile → Identity → change Default → Review → **Save profile**. Name / May produce stay disabled. Open an in-process case — ministries unchanged.
+**Verify:** stop F5, rebuild, F5. Open a **Config locked** Via ministry profile → Identity has no Approval legs block. New application on that profile → Choose Approval legs → **Make default**. Name / May produce stay disabled. Open an in-process case — ministries unchanged.
 
 ---
 
 ## Slice 8p — Approval-leg catalog in preview slot — **Done**
 
-**Goal:** **Edit in Configuration** on wizard Identity opens the shared `ApprovalLegProfile` catalog in `#visa-preview-slot` (prototypes 01–05). No XAF ListView / DetailView / OK-Cancel lookup.
+**Goal:** Shared `ApprovalLegProfile` catalog in `#visa-preview-slot` (prototypes 01–05), opened from **Choose Approval legs** (Catalog / + New / Open). No wizard Identity UI. No XAF ListView / DetailView / OK-Cancel lookup.
 
 **Delivered:**
 
@@ -280,9 +280,9 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 - Empty catalog and New form (Cancel / Create)
 - Unused chain: edit ministries, Save / Delete; **+ New ministry** creates `ApprovingMinistry` in the slot (Short name + Official name) then appends it to the chain
 - In-use chain: ministries locked; Code / Active still saveable
-- Slot does **not** set Default — wizard radios + Refresh remain
+- Slot does **not** set Default — **Make default** on Choose Approval legs does
 
-**Verify:** stop F5, rebuild, Ctrl+F5. Configure a via-ministry profile → Identity → **Edit in Configuration**. Slot catalog; Open a used chain → ministries locked, Code/Active still saveable; **+ New** → Create; Refresh radios; Default unchanged unless officer picks it.
+**Verify:** stop F5, rebuild, Ctrl+F5. New via-ministry application → Choose Approval legs → **Catalog**. Slot catalog; Open a used chain → ministries locked, Code/Active still saveable; **+ New** → Create. **Make default** moves the Default badge. Configure Identity has no Approval legs block.
 
 ---
 

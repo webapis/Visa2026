@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
 using Visa2026.Module.Services.ApprovalLegCatalog;
 using Xunit;
@@ -96,5 +98,34 @@ public sealed class ApprovalLegProfileSlotEditorTests
         var existing = new[] { "Energetika", "TNGIZ" };
         Assert.True(ApprovalLegProfileSlotEditor.IsShortNameTaken(existing, "energetika"));
         Assert.False(ApprovalLegProfileSlotEditor.IsShortNameTaken(existing, "Türkmengaz"));
+    }
+
+    [Fact]
+    public void ResolveCommitError_keeps_generic_for_unknown_failures()
+    {
+        var error = ApprovalLegProfileSlotEditor.ResolveCommitError(new InvalidOperationException("fk"));
+        Assert.Equal(VisaUiMessages.Get("ApprovalLegProfile.Slot.SaveFailed"), error);
+    }
+
+    [Fact]
+    public void ApplyScalars_writes_inactive()
+    {
+        var profile = new ApprovalLegProfile { IsActive = true, Code = "EN-AH-GU" };
+        var draft = new ApprovalLegProfileSlotDraft
+        {
+            Code = "EN-AH-GU",
+            IsActive = false,
+            Legs =
+            [
+                new ApprovalLegProfileSlotLegDraft { Caption = "Energetika" },
+                new ApprovalLegProfileSlotLegDraft { Caption = "Aşgabat häkimlik" },
+                new ApprovalLegProfileSlotLegDraft { Caption = "Gurluşyk" },
+            ],
+        };
+
+        ApprovalLegProfileSlotEditor.ApplyScalars(profile, draft);
+
+        Assert.False(profile.IsActive);
+        Assert.Equal("EN-AH-GU", profile.Code);
     }
 }
