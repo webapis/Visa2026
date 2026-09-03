@@ -1,3 +1,11 @@
+### 2026-09-03 — Case summary completeness gate during Office preparation
+
+- **Need**: Officers could leave Overview (Progress, Document copies, Resminamalar, SLA) and Advance while Case summary still had empty required tiles (Project, Work permit location).
+- **Fix**: `ApplicationWorkspaceCaseSummaryCompletenessGate` — while the current step is Office preparation, `FillState.Empty` fields (except Process number) block process tabs, Advance/Revert, and New issued. People & links stay open. Red banner names the missing labels and opens Case summary Edit. Readiness **Required data complete** uses the same missing list. After Office preparation, tabs stay unlocked.
+- **Test**: `MissingRequiredFields_ignores_process_number_and_filled_tiles`; `BlocksTab_office_prep_blocks_progress_not_people`; `BlocksTab_after_office_prep_does_not_lock`; `BlocksTab_blue_defaults_are_complete` (5 passed). Module + Blazor Debug compile to temp succeeded. Officer: stop F5, rebuild, Ctrl+F5. Open a WP case with empty Project / Work permit location — Overview banner; Progress/Advance stay; People works; fill both → Continue.
+- **Prevent**: Do not treat blue profile defaults as missing. Do not lock People & links. Do not include Process number (Advance rule). Do not keep the lock after leaving Office preparation.
+- **Cross-skill**: application-profile | application-progress
+
 ### 2026-09-03 — Remove Company, Signatories from the profile wizard
 
 - **Need**: Company / Signatory / Representative are tenant catalogs picked at instance create and on the case. The wizard step only previewed tenant Default and linked to Configuration — not profile configuration.

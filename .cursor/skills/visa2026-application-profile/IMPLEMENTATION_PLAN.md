@@ -46,6 +46,7 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | 10z3 | Organization catalogs Configuration page | **Done** | Config → **Organization catalogs**: three cards, **+ New**, search, Default / Make default, pencil → native DetailView. |
 | 10z4 | Inline organization catalog New/Edit | **Done** | Choose Organization: gear reveals **+ New / Edit**. Case Organization shows them only after section **Edit**. New row is selected / assigned on this case. |
 | 10x-fill | Case summary fill-state colors | **Done** | Empty/`—` red; still matches profile default (or auto number/date) blue; officer-changed green. Tiles + Edit form; border + light tint. |
+| 10x-gate | Case summary completeness gate | **Done** | Office preparation: empty (red) Case summary fields block Progress / documents / Resminamalar / SLA / Advance. People & links stay open. Banner names missing fields. |
 | 10v | People & links New missing person-owned BO | **Deferred** | In-tab **New {type}** removed — officers add person-owned data from **Open person detail**. Issued items stay on Overview → Issued records. `EnsureResolvedLink` kept for Relink. |
 | 10w | People & links Relink / Unlink columns | **Done** | Per-person **Relink** and **Unlink** next to Open person detail; Relink pins missing ResolvedLinks; Unlink removes that person + links; both disabled when process-complete locked; toolbar Unlink removed |
 | 10p | Process-complete lock on resolved links | **Done** | `PROCESS_ISSUED` / `REJECTED` / `CANCELLED`; roster + ResolvedLinks immutable; UI lock badge |

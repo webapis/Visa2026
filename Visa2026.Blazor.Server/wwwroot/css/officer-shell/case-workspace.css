@@ -127,6 +127,12 @@ button.cw-person:focus-visible {
 .cw-summary-mode-btn:hover { border-color: #64748b; background: #f8fafc; }
 .cw-summary-empty, .cw-summary-foot, .cw-summary-status { margin: 0 0 8px; font-size: 0.8rem; color: var(--os-muted); }
 .cw-summary-status.is-error { color: #b91c1c; }
+.cw-summary-gate { margin: 0 0 12px; }
+.cw-summary-gate__body {
+  display: flex; flex-wrap: wrap; gap: 10px 16px;
+  align-items: flex-start; justify-content: space-between;
+}
+.cw-summary-gate__body p { margin: 0; flex: 1 1 16rem; font-weight: 650; }
 .cw-summary-body {
   display: flex;
   gap: 14px;
@@ -392,6 +398,7 @@ select.cw-summary-field__input option {
 .cw-checklist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .cw-checklist li { display: flex; gap: 8px; align-items: center; font-size: 0.84rem; }
 .cw-checklist .bi { color: var(--os-ok); }
+.cw-checklist li.is-incomplete { color: #991b1b; font-weight: 650; }
 
 .cw-rail-btn {
   display: flex; align-items: center; gap: 8px; width: 100%; padding: 10px 12px; margin-bottom: 8px;

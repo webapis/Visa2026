@@ -128,6 +128,7 @@
                     <button type="button"
                             class="cw-nav__item @(DisplayedTab == tab.Key ? "is-active" : null)"
                             disabled="@_tabSwitching"
+                            title="@TabBlockedTitle(tab.Key)"
                             @onclick="() => SelectTab(tab.Key)">
                         <span aria-hidden="true">@tab.Glyph</span>
                         <span>@tab.Label</span>
@@ -406,6 +407,13 @@
         // so Visa type / Project / etc. keep a matching <option> and stay visible.
         if (_caseSummaryEditing)
             EnsureHeaderLookupCatalogs();
+
+        if (ApplicationWorkspaceCaseSummaryCompletenessGate.BlocksTab(Snapshot?.CaseView, ActiveTab)
+            && CaseTabChanged.HasDelegate
+            && !_tabSwitching)
+        {
+            _ = CaseTabChanged.InvokeAsync("overview");
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -416,6 +424,36 @@
         _tabSwitching = false;
         _pendingTab = null;
         await InvokeAsync(StateHasChanged);
+    }
+
+    private IReadOnlyList<ApplicationWorkspaceCaseHeaderField> MissingSummaryFields =>
+        ApplicationWorkspaceCaseSummaryCompletenessGate.MissingRequiredFields(Snapshot?.CaseView?.HeaderFields);
+
+    private bool IsSummaryProcessGateActive =>
+        ApplicationWorkspaceCaseSummaryCompletenessGate.BlocksProcessNavigation(Snapshot?.CaseView);
+
+    private string SummaryGateBannerMessage =>
+        ApplicationWorkspaceCaseSummaryCompletenessGate.FormatBannerMessage(MissingSummaryFields);
+
+    private string SummaryGateReadinessSuffix =>
+        ApplicationWorkspaceCaseSummaryCompletenessGate.FormatReadinessMissingSuffix(MissingSummaryFields);
+
+    private string? TabBlockedTitle(string tabKey) =>
+        ApplicationWorkspaceCaseSummaryCompletenessGate.BlocksTab(Snapshot?.CaseView, tabKey)
+            ? "Complete required Case summary fields first"
+            : null;
+
+    private bool TryBlockIncompleteProcessWork(string? tabKey = null)
+    {
+        var view = Snapshot?.CaseView;
+        var blocked = tabKey == null
+            ? ApplicationWorkspaceCaseSummaryCompletenessGate.BlocksProcessNavigation(view)
+            : ApplicationWorkspaceCaseSummaryCompletenessGate.BlocksTab(view, tabKey);
+        if (!blocked)
+            return false;
+
+        StartCaseSummaryEdit();
+        return true;
     }
 
     private void StartCaseSummaryEdit()
@@ -732,6 +770,9 @@
 
     private async Task NewIssuedHeaderAsync(string key)
     {
+        if (TryBlockIncompleteProcessWork())
+            return;
+
         if (Snapshot == null || Snapshot.ApplicationProfileInstanceId == Guid.Empty)
             return;
 
@@ -1157,6 +1198,20 @@
                         }
                     }
                 </div>
+                @if (IsSummaryProcessGateActive)
+                {
+                    <div class="os-banner os-banner--error cw-summary-gate" role="alert">
+                        <div class="cw-summary-gate__body">
+                            <p>@SummaryGateBannerMessage</p>
+                            @if (!IsCaseSummaryEditing)
+                            {
+                                <button type="button" class="os-btn os-btn--primary" @onclick="StartCaseSummaryEdit">
+                                    Edit Case summary
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
                 @if (!string.IsNullOrWhiteSpace(HeaderFieldStatusMessage))
                 {
                     <p class="cw-summary-status @(HeaderFieldStatusIsError ? "is-error" : null)">@HeaderFieldStatusMessage</p>
@@ -1799,7 +1854,14 @@
                 <section class="cw-rail-block">
                     <h4>Readiness</h4>
                     <ul class="cw-checklist">
-                        <li>✓ Required data complete</li>
+                        @if (MissingSummaryFields.Count == 0)
+                        {
+                            <li>✓ Required data complete</li>
+                        }
+                        else
+                        {
+                            <li class="is-incomplete">○ Required data complete@SummaryGateReadinessSuffix</li>
+                        }
                         <li>✓ BO states valid</li>
                     </ul>
                 </section>
@@ -1948,6 +2010,13 @@
     {
         if (string.IsNullOrWhiteSpace(key) || _tabSwitching)
             return;
+        if (ApplicationWorkspaceCaseSummaryCompletenessGate.BlocksTab(Snapshot?.CaseView, key))
+        {
+            StartCaseSummaryEdit();
+            if (!string.Equals(ActiveTab, "overview", StringComparison.OrdinalIgnoreCase))
+                await SelectTab("overview");
+            return;
+        }
         if (string.Equals(key, ActiveTab, StringComparison.OrdinalIgnoreCase) && _tabContentReady)
             return;
 
@@ -2070,6 +2139,9 @@
     private Task LinkPersonAsync() => LinkPersonRequested.InvokeAsync();
     private Task AdvanceProgressAsync()
     {
+        if (TryBlockIncompleteProcessWork())
+            return Task.CompletedTask;
+
         var current = Snapshot?.CaseView.ProgressSteps.FirstOrDefault(s => s.State == "current")
             ?? Snapshot?.CaseView.ProgressSteps.FirstOrDefault(s => s.CanAdvance);
         if (current?.CanAdvance != true || current.AdvanceOptions.Count == 0)
@@ -2100,6 +2172,9 @@
 
     private Task RevertProgressAsync()
     {
+        if (TryBlockIncompleteProcessWork())
+            return Task.CompletedTask;
+
         if (!CanRevertFromRail)
             return SelectTab("progress");
 

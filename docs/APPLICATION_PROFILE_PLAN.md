@@ -454,6 +454,7 @@ When any linked Application reaches lock state **A** (first progress beyond offi
 | Inline organization catalog New/Edit (create + case) | **Done** (2026-09-03) |
 | Wizard Company, Signatories step removed | **Done** (2026-09-03) |
 | Case summary fill-state (empty / default / officer) | **Done** |
+| Case summary completeness gate (office prep) | **Done** (2026-09-03) |
 | Person M2M DetailView / hard-remove ApplicationItem | In progress (skip-navigation People + roster-line BO deleted; F5 heal pending) |
 | Workspace Document copies person filter + person catalog | Done (header chips; person-grouped catalog; slot viewer-only) |
 | Document copies from linked records (ID labels) | Done (ResolvedLinks; Passport/Visa numbers — not Current/Previous) |

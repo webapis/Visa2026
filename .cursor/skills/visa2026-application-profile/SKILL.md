@@ -134,6 +134,7 @@ flowchart LR
 | Person detail crashes after Open from case | `PersonDetailOpenHelper` | Do not dispose ObjectSpace before `ShowView` |
 | Case summary tiles empty / Edit does not save | Profile `Require*` off (number/date are always shown); officer-shell `HeaderFieldChanged`; post-prep lock on type/contract only | `ApplicationWorkspaceCaseHeaderFieldsHelper`; `OfficerShellPropertyEditor.SaveHeaderFieldAsync` |
 | Wizard still has Company, Signatories | Removed 2026-09-03 — not profile config | Configuration → Organization catalogs; create **Choose Organization**; case Organization |
+| Can leave Overview with empty Case summary | Office preparation + red tiles | `ApplicationWorkspaceCaseSummaryCompletenessGate`; People & links stay open |
 
 ---
 
