@@ -1,3 +1,19 @@
+### 2026-09-04 — Create Case summary hides auto number/date and stacks fields
+
+- **Need**: Application number and date are generated on save. Showing them on create made Application number look missing and blocked Create. The 3-column grid also clipped labels.
+- **Fix**: `ForCreate` drops Application number, Application date, and Process number. Fields stack one per line (`ap-picker__summary-form`). Number/date still allocate on first save. Overview Edit can still change them later.
+- **Test**: `ForCreate_hides_auto_number_date_and_process_number`; `CanCreate_true_when_defaults_fill_required_fields` (4 passed). Blazor compile to temp succeeded. Officer: stop F5, rebuild, Ctrl+F5. Create step lists Visa type / Category / Period / Project / … vertically; Create is not blocked by Application number.
+- **Prevent**: Do not put auto Application number/date on the create step. Do not use the Overview 3-column Case summary grid in the picker.
+- **Cross-skill**: application-profile
+
+### 2026-09-04 — Case summary is a create-picker step
+
+- **Need**: Officers had to Edit Case summary after create (Project, Entry check point, Work permit location often empty). They want those Use fields set before the instance exists.
+- **Fix**: After Choose Organization, **Continue** opens **Case summary**. Same `ApplicationWorkspaceCaseHeaderFieldsHelper` fields as Overview Edit (no Process number). Profile defaults + auto number/date pre-fill. **Create application** is disabled while required fields are empty. Updates apply on the first save only if the officer changed them. Overview Edit remains.
+- **Test**: `ApplicationProfilePickerCaseSummaryDraftTests` 4 passed. Module + Blazor Debug compile to temp succeeded. Officer: stop F5, rebuild, Ctrl+F5. New via-ministry instance → legs → Organization → Case summary → fill required → Create. Overview should not start with red required tiles.
+- **Prevent**: Do not keep **Use profile** on Organization. Do not skip this step. Do not require Process number at create. Do not write Application number/date as manual unless the officer edited them.
+- **Cross-skill**: application-profile
+
 ### 2026-09-04 — Missing approval letter upload without Revert
 
 - **Need**: Officers must attach a missing ministry approval/disapproval letter on the completed Progress step, without Revert. Amber cue on Progress nav; Advance stays allowed.

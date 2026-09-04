@@ -36,12 +36,13 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | 8d | Wizard step 4 real template catalog + persist scope | **Done** | Two officer scopes: Profile-specific and Shared. Shared Include/Exclude; GT-15 names excluded from Shared (upload under Profile-specific). **Preview** uses `#visa-preview-slot` File occupant (master PDF, placeholders). Internal Category/Global type-links unchanged. |
 | 8a | Application Profile overview (live) | **Done** | Live config/defaults/templates + linked instances. No Approval legs catalog card (Choose Approval legs). No Company/Signatories card. |
 | 8c | Custom catalog home (replace native List/Detail UI) | **Done** | List first; row opens overview; **Back to list**; New/Configure → wizard (new tab); **Save profile** reloads catalog; **Delete** when Linked = 0; toolbar **Total: N**; table-body scroll, sticky header |
-| 9 | Profile picker at Application create | **Done** | **New** on Application Profile Instances lists only. Via ministry: profile → Approval legs → **Choose Organization**. Direct: profile → Choose Organization. |
+| 9 | Profile picker at Application create | **Done** | **New** on Application Profile Instances lists only. Via ministry: profile → Approval legs → Organization → **Case summary**. Direct: profile → Organization → **Case summary**. |
+| 10x-create | Case summary on create (no post-create Edit) | **Done** | Last picker step after Organization. Same Use fields as Overview Edit except Application number / date / Process number (auto). One field per line. Create blocked while required fields empty. Overview Edit stays for later changes. |
 | 10 | Person M2M DetailView; hard-remove `ApplicationItem` | **In progress** | Skip-navigation `People` + child BO M2M (includes **MedicalRecord**, **WorkDuty**). Output headers Invitation / WorkPermit / BorderZone / Rejection / IssuedVisas are **1:N** (May produce), not skip-nav. Wizard **May produce** includes Rejection. Person issued tab **Applications (linked)** verified. Rebuild DataImporter + resume Wave 2b (`-StartAt ApplicationProfileInstancePerson`); then People-tab / copies / Resminamalar smoke. |
 | 10n | §10 auto-link gate + sticky ResolvedLinks | **Done** | `RequirePerson*` gate; sticky `LinkedObjectId`; toggle-off keeps existing; unit tests |
 | 10o | Workspace Linked records tiles from ResolvedLinks | **Done** | Catalog + overview tiles; People tab uses same `cw-link-tile` cards; click shows that person's records; gated by person-config |
 | 10o-miss | People & links missing / complete cues | **Done** | Short tiles red; Passport/Visa `—` red when that kind is short; nav red people-count (dot if no roster) or green check when complete. Issued empty tiles unchanged. |
-| 10x | Case summary: edit instance Use fields | **Done** | Overview tiles + **Edit**; form + **Done**. Application number + date always shown (not profile-gated). Same Use fields. Persist on change; does not edit the profile template. Project is editable here (accepted prototype; do not re-lock via `IsProjectContractLocked`). Host-start adds `EntryCheckPointID`. |
+| 10x | Case summary: edit instance Use fields | **Done** | Overview tiles + **Edit**; form + **Done**. Application number + date always shown (not profile-gated). Same Use fields. Persist on change; does not edit the profile template. Project is editable here (accepted prototype; do not re-lock via `IsProjectContractLocked`). Host-start adds `EntryCheckPointID`. Create-time fill is **10x-create**. |
 | 10z | Case Organization letterhead | **Done** | Scalar copy on instance (superseded by **10z2**) |
 | 10z2 | Organization catalogs (not singletons) | **Done** | Company / Signatory / Representative lists + tenant Default; create Choose Organization dropdowns; instance live FKs; case Organization dropdowns; merge from selected rows |
 | 10z3 | Organization catalogs Configuration page | **Done** | Host page kept; **hidden from Configuration nav**. Officers add/edit from Choose Organization (gear) and case Organization Edit. |
@@ -304,10 +305,10 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 - `IApplicationProfilePickerQueryService` — active profiles, route filter, MRU sort, applicability criteria
 - `ApplicationProfilePickerNewController` — intercepts **New** on Application ListViews (skipped during data import)
 - **Use profile (live link)** creates Application, sets `ApplicationProfile` + dual-read `ApplicationType`, applies defaults, opens DetailView
-- Via ministry: **Continue →** then **Choose Approval legs** (always, even when there is one version; Default pre-selected). Direct migration: **Use profile** on step 1.
+- Via ministry: **Continue →** then **Choose Approval legs** (always, even when there is one version; Default pre-selected) → **Choose Organization** → **Case summary** → **Create application**. Direct migration: profile → Organization → Case summary.
 - Locked profiles remain selectable (config lock badge only)
 
-**Verify:** Applications via ministry → **New** → pick profile → **Continue** → Approval legs (profile name in header) → **Use profile**. Direct migration: pick → **Use profile**.
+**Verify:** Applications via ministry → **New** → pick profile → Approval legs → Organization → Case summary → **Create application**. Direct: profile → Organization → Case summary.
 
 **Next:** Slice 13b — drop `Applications.ApplicationTypeID` after import cutover (Report Dashboard, sync rules, PDF mapping).
 
@@ -331,7 +332,7 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 
 **2026-08-27:** Officers create Application Profile Instances **only** from Application Profile Instances lists (Choose Application Profile picker). Person DetailView and Person Dossier **Start process…** are hidden.
 
-Via-ministry picker is **two steps**: profile → Approval legs (always shown, even when there is one version). Direct migration stays one step. People are linked later on the case.
+Via-ministry picker: profile → Approval legs → Organization → Case summary. Direct: profile → Organization → Case summary. People are linked later on the case.
 
 `ApplicationStartFromPersonHelper` remains for roster linking after create.
 

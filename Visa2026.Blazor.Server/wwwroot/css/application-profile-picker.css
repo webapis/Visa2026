@@ -384,3 +384,25 @@
     color: var(--ap-muted);
     font-size: 0.78rem;
 }
+
+.ap-picker__crumb {
+    margin: 10px 0 0;
+    color: var(--ap-muted);
+    font-size: 0.82rem;
+}
+
+.ap-picker__crumb strong {
+    color: var(--ap-ink);
+    font-weight: 650;
+}
+
+.ap-picker__summary {
+    margin: 0 0 14px;
+}
+
+.ap-picker__summary-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 28rem;
+}

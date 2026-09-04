@@ -1,6 +1,8 @@
 @using System.Linq
 @using Visa2026.Blazor.Server.Editors
 @using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Editors
+@using Visa2026.Module.Services.ApplicationProfilePicker
 @using Visa2026.Module.Services.ApplicationWorkspace
 
 <div class="ap-picker">
@@ -147,12 +149,66 @@
             <button type="button" class="ap-picker__btn" @onclick="BackStepAsync">Back</button>
             <button type="button"
                     class="ap-picker__btn ap-picker__btn--primary"
-                    disabled="@(!CanCreateOnOrganizationStep)"
-                    @onclick="UseProfileAsync">
-                Use profile
+                    disabled="@(!CanContinueFromOrganization)"
+                    @onclick="NextStepAsync">
+                Continue →
             </button>
         </div>
-        <p class="ap-picker__foot-note">Application Profile: @SelectedProfileName · after profile@(SelectedRow?.RequiresApprovalLegVersion == true ? " and approval legs" : "")</p>
+        <p class="ap-picker__foot-note">Application Profile: @SelectedProfileName · next: Case summary</p>
+    }
+    else if (Step == 4)
+    {
+        var missing = ApplicationWorkspaceCaseSummaryCompletenessGate.MissingRequiredFields(CaseSummaryFields);
+
+        <header class="ap-picker__header">
+            <div>
+                <h1 class="ap-picker__title">Case summary</h1>
+                <p class="ap-picker__profile-name" title="@SelectedProfileName">@SelectedProfileName</p>
+                <p class="ap-picker__sub">
+                    Same Use fields as the case Overview. Profile defaults are already filled. Set the rest now so you do not need to Edit after create. Changing these does not change the Application Profile template.
+                </p>
+                <p class="ap-picker__crumb">
+                    Profile · @(SelectedRow?.RequiresApprovalLegVersion == true ? "Approval legs · " : null)Organization · <strong>Case summary</strong>
+                </p>
+            </div>
+        </header>
+
+        @RenderStatus()
+
+        @if (CaseSummaryFields.Count == 0)
+        {
+            <p class="ap-picker__hint">No Application Profile Instance properties required on this profile.</p>
+        }
+        else
+        {
+            <div class="ap-picker__summary">
+                <div class="ap-picker__summary-form">
+                    @foreach (var field in CaseSummaryFields)
+                    {
+                        @RenderSummaryField(field)
+                    }
+                </div>
+            </div>
+        }
+
+        <div class="ap-picker__callout" role="note">
+            Required Case summary fields must be set here. Create opens the case workspace ready for People &amp; links.
+        </div>
+        @if (missing.Count > 0)
+        {
+            <div class="ap-picker__status is-error" role="status">@ApplicationWorkspaceCaseSummaryCompletenessGate.FormatBannerMessage(missing)</div>
+        }
+
+        <div class="ap-picker__actions">
+            <button type="button" class="ap-picker__btn" @onclick="BackStepAsync">Back</button>
+            <button type="button"
+                    class="ap-picker__btn ap-picker__btn--primary"
+                    disabled="@(!CanCreateOnCaseSummaryStep)"
+                    @onclick="UseProfileAsync">
+                Create application
+            </button>
+        </div>
+        <p class="ap-picker__foot-note">Application Profile: @SelectedProfileName · last step before create</p>
     }
     else
     {
@@ -252,6 +308,8 @@
     [Parameter] public EventCallback<ApplicationWorkspaceOrganizationLetterheadUpdate> OrganizationChanged { get; set; }
     [Parameter] public EventCallback<ApplicationWorkspaceOrganizationLetterheadUpdate> MakeDefaultOrganizationRequested { get; set; }
     [Parameter] public EventCallback<(string Kind, Guid Id)> OrganizationCatalogEditorRequested { get; set; }
+    [Parameter] public IReadOnlyList<ApplicationWorkspaceCaseHeaderField> CaseSummaryFields { get; set; } = Array.Empty<ApplicationWorkspaceCaseHeaderField>();
+    [Parameter] public EventCallback<ApplicationWorkspaceCaseHeaderFieldUpdate> CaseSummaryFieldChanged { get; set; }
 
     private bool _initialLoadStarted;
     private bool _orgCatalogManageOpen;
@@ -266,10 +324,14 @@
         SelectedRow != null
         && SelectedVersionId != Guid.Empty;
 
-    private bool CanCreateOnOrganizationStep =>
+    private bool CanContinueFromOrganization =>
         SelectedCompanyId != Guid.Empty
         && SelectedSignatoryId != Guid.Empty
         && SelectedRepresentativeId != Guid.Empty;
+
+    private bool CanCreateOnCaseSummaryStep =>
+        CanContinueFromOrganization
+        && ApplicationProfilePickerCaseSummaryDraft.CanCreate(CaseSummaryFields);
 
     private void ToggleOrgCatalogManage() => _orgCatalogManageOpen = !_orgCatalogManageOpen;
 
@@ -441,6 +503,93 @@
         id == Guid.Empty || !OrganizationCatalogEditorRequested.HasDelegate
             ? Task.CompletedTask
             : OrganizationCatalogEditorRequested.InvokeAsync((kind, id));
+
+    private RenderFragment RenderSummaryField(ApplicationWorkspaceCaseHeaderField field) => __builder =>
+    {
+        var required = field.FillState == ApplicationWorkspaceCaseSummaryFillState.Empty
+            && !ApplicationWorkspaceCaseHeaderFieldsHelper.IsIdentityField(field.Key);
+        <label class="cw-summary-field cw-summary-field--fill-@ApplicationWorkspaceCaseSummaryFill.CssToken(field.FillState)">
+            <span class="cw-summary-field__label">
+                @field.Label
+                @if (required)
+                {
+                    <span class="ap-picker__req" aria-hidden="true"> *</span>
+                }
+            </span>
+            @if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Date)
+            {
+                <input type="date"
+                       class="cw-summary-field__input"
+                       value="@field.Value"
+                       disabled="@field.ReadOnly"
+                       @onchange="e => OnCaseSummaryFieldChanged(field.Key, e.Value?.ToString())" />
+            }
+            else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.CommaSeparatedMultiSelect)
+            {
+                <BorderZoneLocationField Value="@field.Value"
+                                         EditorAlias="@EditorAliasFor(field.Key)"
+                                         ReadOnly="@field.ReadOnly"
+                                         CatalogItems="@field.MultiSelectOptions"
+                                         ValueChanged="@(value => OnCaseSummaryFieldChanged(field.Key, value))" />
+            }
+            else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Lookup)
+            {
+                <select class="cw-summary-field__input"
+                        value="@field.Value"
+                        disabled="@field.ReadOnly"
+                        @onchange="e => OnCaseSummaryFieldChanged(field.Key, e.Value?.ToString())">
+                    <option value="">— Select —</option>
+                    @foreach (var option in field.Options)
+                    {
+                        var optionId = option.Id.ToString("D");
+                        <option value="@optionId" selected="@(string.Equals(field.Value, optionId, StringComparison.OrdinalIgnoreCase))">@option.DisplayName</option>
+                    }
+                </select>
+            }
+            else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.ShortText)
+            {
+                <input type="text"
+                       class="cw-summary-field__input"
+                       value="@field.Value"
+                       maxlength="@(field.MaxLength ?? ApplicationWorkspaceCaseHeaderFieldsHelper.InstanceNumberMaxLength)"
+                       disabled="@field.ReadOnly"
+                       @onchange="e => OnCaseSummaryFieldChanged(field.Key, e.Value?.ToString())" />
+            }
+            else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Text)
+            {
+                <textarea class="cw-summary-field__input cw-summary-field__textarea"
+                          maxlength="@ApplicationWorkspaceCaseHeaderFieldsHelper.PurposeMaxLength"
+                          rows="4"
+                          disabled="@field.ReadOnly"
+                          @onchange="e => OnCaseSummaryFieldChanged(field.Key, e.Value?.ToString())">@field.Value</textarea>
+            }
+            else
+            {
+                <input type="text"
+                       class="cw-summary-field__input"
+                       value="@field.Value"
+                       disabled="@field.ReadOnly"
+                       @onchange="e => OnCaseSummaryFieldChanged(field.Key, e.Value?.ToString())" />
+            }
+        </label>
+    };
+
+    private static string EditorAliasFor(string? fieldKey) =>
+        string.Equals(fieldKey, ApplicationWorkspaceCaseHeaderFieldsHelper.WorkPermitLocation, StringComparison.Ordinal)
+            ? CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation
+            : CommaSeparatedMultiSelectEditorAliases.BorderZone;
+
+    private Task OnCaseSummaryFieldChanged(string key, string? value)
+    {
+        if (!CaseSummaryFieldChanged.HasDelegate || string.IsNullOrWhiteSpace(key))
+            return Task.CompletedTask;
+
+        return CaseSummaryFieldChanged.InvokeAsync(new ApplicationWorkspaceCaseHeaderFieldUpdate
+        {
+            Key = key,
+            Value = value,
+        });
+    }
 
     private async Task OnVersionKey(KeyboardEventArgs e, Guid versionId)
     {

@@ -180,6 +180,19 @@ public sealed class ApplicationProfilePickerModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    public IReadOnlyList<ApplicationWorkspaceCaseHeaderField> CaseSummaryFields
+    {
+        get => GetPropertyValue<IReadOnlyList<ApplicationWorkspaceCaseHeaderField>>()
+            ?? Array.Empty<ApplicationWorkspaceCaseHeaderField>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback<ApplicationWorkspaceCaseHeaderFieldUpdate> CaseSummaryFieldChanged
+    {
+        get => GetPropertyValue<EventCallback<ApplicationWorkspaceCaseHeaderFieldUpdate>>();
+        set => SetPropertyValue(value);
+    }
+
     public sealed class PickerRowModel
     {
         public Guid ProfileId { get; init; }

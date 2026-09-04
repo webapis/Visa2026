@@ -50,6 +50,7 @@ disable-model-invocation: false
 | Choose Approval legs manage (2026-09-03) | `choose-approval-legs-manage-01-picker.png` … `-05-slot-edit.png` — shipped |
 | Case summary instance fields (2026-08-18) | `application-profile-instance-case-summary-overview-properties-prototype.png`, `application-profile-instance-case-summary-edit-properties-prototype.png` |
 | Case Organization catalogs (2026-09-03) | `application-profile-instance-create-choose-organization-prototype.png`, `application-profile-instance-organization-overview-prototype.png`, `application-profile-instance-organization-edit-prototype.png`, `application-profile-organization-catalogs-prototype.png` — live FKs **10z2**; Config **10z3**; inline **+ New / Edit** (**10z4**: create gear, case section Edit) |
+| Create Case summary (2026-09-04) | `application-profile-instance-create-case-summary-prototype.png` — last create step after Organization; same Use fields as Overview Edit; picker **10x-create** |
 | People & links missing / complete (2026-09-03) | `application-profile-instance-people-links-missing-prototype.png`, `application-profile-instance-people-links-complete-prototype.png` — red short tiles + nav count; green check when complete |
 | Overview missing / complete Case summary (2026-09-03) | `application-profile-instance-overview-missing-prototype.png`, `application-profile-instance-overview-complete-prototype.png` — empty required tiles + Overview nav red count / green check |
 | Document copies missing / complete (2026-09-03) | `application-profile-instance-document-copies-missing-prototype.png`, `application-profile-instance-document-copies-complete-prototype.png` — amber warning Missing rows + nav count of missing required slots; green check when all required scans are present |
@@ -136,6 +137,7 @@ flowchart LR
 | Document copies preview fails on roster line | `TryBuildMergedPdfForRoster` | Roster IDs are `ApplicationPerson`, not `ApplicationItem` |
 | Person detail crashes after Open from case | `PersonDetailOpenHelper` | Do not dispose ObjectSpace before `ShowView` |
 | Case summary tiles empty / Edit does not save | Profile `Require*` off (number/date are always shown); officer-shell `HeaderFieldChanged`; post-prep lock on type/contract only | `ApplicationWorkspaceCaseHeaderFieldsHelper`; `OfficerShellPropertyEditor.SaveHeaderFieldAsync` |
+| Create still lands on empty Case summary | Picker must finish on **Case summary** (step 4), not Organization | `ApplicationProfilePickerCaseSummaryDraft`; Organization is **Continue** |
 | Wizard still has Company, Signatories | Removed 2026-09-03 — not profile config | Configuration → Organization catalogs; create **Choose Organization**; case Organization |
 | Template overview lists Approval legs catalog | Removed — shared catalog, not profile config | **Choose Approval legs** (pick / Catalog / Make default) |
 | Can leave Overview with empty Case summary | Office preparation + red tiles | `ApplicationWorkspaceCaseSummaryCompletenessGate`; People & links stay open |

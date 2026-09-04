@@ -46,7 +46,47 @@ public static class ApplicationProfilePickerCompletionHelper
             return false;
         }
 
-        return TryCreateApplicationCore(application, profileId, null, approvalLegVersionId, organization, out errorMessage, out _);
+        return TryCreateApplication(
+            application,
+            profileId,
+            approvalLegVersionId,
+            organization,
+            caseSummary: null,
+            out errorMessage);
+    }
+
+    public static bool TryCreateApplication(
+        XafApplication application,
+        Guid profileId,
+        Guid? approvalLegVersionId,
+        ApplicationProfilePickerOrganizationSelection? organization,
+        IReadOnlyList<ApplicationWorkspaceCaseHeaderFieldUpdate>? caseSummary,
+        out string? errorMessage)
+    {
+        errorMessage = null;
+
+        if (application == null || profileId == Guid.Empty)
+        {
+            errorMessage = "Select an Application Profile first.";
+            return false;
+        }
+
+        var context = ApplicationProfilePickerContextGate.Get(application);
+        if (context?.SeedPersonId is Guid seedPersonId && seedPersonId != Guid.Empty)
+        {
+            errorMessage = "Select people for this ApplicationProfileInstance first.";
+            return false;
+        }
+
+        return TryCreateApplicationCore(
+            application,
+            profileId,
+            null,
+            approvalLegVersionId,
+            organization,
+            caseSummary,
+            out errorMessage,
+            out _);
     }
 
     public static bool TryCreateApplicationFromPersonStart(
@@ -115,7 +155,15 @@ public static class ApplicationProfilePickerCompletionHelper
             return false;
         }
 
-        if (!TryCreateApplicationCore(application, profileId, selectedPeople, approvalLegVersionId, organization: null, out errorMessage, out var appNumber))
+        if (!TryCreateApplicationCore(
+                application,
+                profileId,
+                selectedPeople,
+                approvalLegVersionId,
+                organization: null,
+                caseSummary: null,
+                out errorMessage,
+                out var appNumber))
             return false;
 
         var warningText = validation.Warnings.Count > 0
@@ -148,6 +196,7 @@ public static class ApplicationProfilePickerCompletionHelper
         IReadOnlyList<Person>? peopleToLink,
         Guid? approvalLegVersionId,
         ApplicationProfilePickerOrganizationSelection? organization,
+        IReadOnlyList<ApplicationWorkspaceCaseHeaderFieldUpdate>? caseSummary,
         out string? errorMessage,
         out string? applicationNumber)
     {
@@ -205,6 +254,8 @@ public static class ApplicationProfilePickerCompletionHelper
                 context?.CreationProgressRoute);
             ApplicationProfileApprovalLegVersionHelper.ApplySnapshot(objectSpace, nestedApp, nestedVersion);
             ApplyOrganization(objectSpace, nestedApp, organization);
+            if (!TryApplyCaseSummary(objectSpace, nestedApp, profile, caseSummary, out errorMessage))
+                return false;
             if (peopleToLink != null && peopleToLink.Count > 0)
                 ApplicationStartFromPersonHelper.LinkPeople(objectSpace, nestedApp, peopleToLink);
             if (!TryCommitNewApplication(objectSpace, out errorMessage))
@@ -232,6 +283,8 @@ public static class ApplicationProfilePickerCompletionHelper
 
         ApplicationProfileApprovalLegVersionHelper.ApplySharedSnapshot(objectSpace, app, sharedProfile);
         ApplyOrganization(objectSpace, app, organization);
+        if (!TryApplyCaseSummary(objectSpace, app, profile, caseSummary, out errorMessage))
+            return false;
 
         if (peopleToLink != null && peopleToLink.Count > 0)
             ApplicationStartFromPersonHelper.LinkPeople(objectSpace, app, peopleToLink);
@@ -255,6 +308,34 @@ public static class ApplicationProfilePickerCompletionHelper
         ShowViewInCurrentWindow(application, workspaceView);
 
         return true;
+    }
+
+    private static bool TryApplyCaseSummary(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance application,
+        ApplicationProfile profile,
+        IReadOnlyList<ApplicationWorkspaceCaseHeaderFieldUpdate>? caseSummary,
+        out string? errorMessage)
+    {
+        if (!ApplicationProfilePickerCaseSummaryDraft.TryApplyUpdates(
+                application,
+                objectSpace,
+                caseSummary,
+                out errorMessage))
+            return false;
+
+        var fields = ApplicationProfilePickerCaseSummaryDraft.ForCreate(
+            ApplicationWorkspaceCaseHeaderFieldsHelper.Build(
+                application,
+                profile,
+                objectSpace,
+                loadLookupCatalogs: false));
+        if (ApplicationProfilePickerCaseSummaryDraft.CanCreate(fields))
+            return true;
+
+        errorMessage = ApplicationWorkspaceCaseSummaryCompletenessGate.FormatBannerMessage(
+            ApplicationWorkspaceCaseSummaryCompletenessGate.MissingRequiredFields(fields));
+        return false;
     }
 
     private static void ApplyOrganization(

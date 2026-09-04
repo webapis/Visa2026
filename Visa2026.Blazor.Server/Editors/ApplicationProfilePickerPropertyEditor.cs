@@ -28,6 +28,8 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
     private IApplicationProfilePickerQueryService? _queryService;
     private IApplicationProfilePickerContext? _context;
     private IApprovalLegCatalogChangeNotifier? _catalogChanged;
+    private IReadOnlyList<ApplicationWorkspaceCaseHeaderFieldUpdate> _caseSummaryUpdates
+        = Array.Empty<ApplicationWorkspaceCaseHeaderFieldUpdate>();
 
     public ApplicationProfilePickerPropertyEditor(Type objectType, IModelMemberViewItem model)
         : base(objectType, model) { }
@@ -64,6 +66,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         OrganizationChanged = EventCallback.Factory.Create<ApplicationWorkspaceOrganizationLetterheadUpdate>(this, SelectOrganization),
         MakeDefaultOrganizationRequested = EventCallback.Factory.Create<ApplicationWorkspaceOrganizationLetterheadUpdate>(this, MakeDefaultOrganization),
         OrganizationCatalogEditorRequested = EventCallback.Factory.Create<(string Kind, Guid Id)>(this, OpenOrganizationCatalogEditor),
+        CaseSummaryFieldChanged = EventCallback.Factory.Create<ApplicationWorkspaceCaseHeaderFieldUpdate>(this, OnCaseSummaryFieldChanged),
     };
 
     protected override void OnCurrentObjectChanged()
@@ -177,6 +180,12 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         }
 
         var selected = model.Rows.FirstOrDefault(r => r.ProfileId == model.SelectedProfileId);
+        if (model.Step == 3)
+        {
+            await ContinueFromOrganizationAsync();
+            return;
+        }
+
         if (model.Step == 2)
         {
             await ContinueFromLegsAsync();
@@ -206,7 +215,9 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
             return;
 
         var selected = model.Rows.FirstOrDefault(r => r.ProfileId == model.SelectedProfileId);
-        if (model.Step == 3 && selected?.RequiresApprovalLegVersion == true)
+        if (model.Step == 4)
+            model.Step = 3;
+        else if (model.Step == 3 && selected?.RequiresApprovalLegVersion == true)
             model.Step = 2;
         else
             model.Step = 1;
@@ -237,6 +248,28 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         await Task.Delay(16);
     }
 
+    private async Task ContinueFromOrganizationAsync()
+    {
+        var model = ComponentModel;
+        if (model == null || _application == null)
+            return;
+
+        if (model.SelectedCompanyId == Guid.Empty
+            || model.SelectedSignatoryId == Guid.Empty
+            || model.SelectedRepresentativeId == Guid.Empty)
+        {
+            model.StatusMessage = "Select Company, Signatory, and Representative.";
+            model.IsStatusError = true;
+            return;
+        }
+
+        LoadCaseSummaryDraft(model);
+        model.Step = 4;
+        model.StatusMessage = null;
+        model.IsStatusError = false;
+        await Task.Delay(16);
+    }
+
     private async Task UseProfileAsync()
     {
         var model = ComponentModel;
@@ -251,7 +284,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         }
 
         var selected = model.Rows.FirstOrDefault(r => r.ProfileId == model.SelectedProfileId);
-        if (model.Step != 3)
+        if (model.Step != 4)
         {
             await NextStepAsync();
             return;
@@ -273,11 +306,20 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
             RepresentativeId = model.SelectedRepresentativeId == Guid.Empty ? null : model.SelectedRepresentativeId,
         };
 
+        if (!ApplicationProfilePickerCaseSummaryDraft.CanCreate(model.CaseSummaryFields))
+        {
+            model.StatusMessage = ApplicationWorkspaceCaseSummaryCompletenessGate.FormatBannerMessage(
+                ApplicationWorkspaceCaseSummaryCompletenessGate.MissingRequiredFields(model.CaseSummaryFields));
+            model.IsStatusError = true;
+            return;
+        }
+
         if (!ApplicationProfilePickerCompletionHelper.TryCreateApplication(
                 _application,
                 model.SelectedProfileId,
                 model.SelectedVersionId == Guid.Empty ? null : model.SelectedVersionId,
                 organization,
+                _caseSummaryUpdates,
                 out var createError))
         {
             model.StatusMessage = createError;
@@ -299,6 +341,8 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         model.StatusMessage = null;
         model.IsStatusError = false;
         model.IsStatusWarning = false;
+        _caseSummaryUpdates = Array.Empty<ApplicationWorkspaceCaseHeaderFieldUpdate>();
+        model.CaseSummaryFields = Array.Empty<ApplicationWorkspaceCaseHeaderField>();
         EnsureSelectedVersion(model);
     }
 
@@ -519,5 +563,33 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         model.Step = 3;
         model.StatusMessage = null;
         model.IsStatusError = false;
+    }
+
+    private void OnCaseSummaryFieldChanged(ApplicationWorkspaceCaseHeaderFieldUpdate update)
+    {
+        var model = ComponentModel;
+        if (model == null || update == null || string.IsNullOrWhiteSpace(update.Key))
+            return;
+
+        _caseSummaryUpdates = ApplicationProfilePickerCaseSummaryDraft.Merge(_caseSummaryUpdates, update);
+        LoadCaseSummaryDraft(model);
+        model.Step = 4;
+        model.StatusMessage = null;
+        model.IsStatusError = false;
+    }
+
+    private void LoadCaseSummaryDraft(ApplicationProfilePickerModel model)
+    {
+        if (_application == null)
+        {
+            model.CaseSummaryFields = Array.Empty<ApplicationWorkspaceCaseHeaderField>();
+            return;
+        }
+
+        using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
+        model.CaseSummaryFields = ApplicationProfilePickerCaseSummaryDraft.Build(
+            objectSpace,
+            model.SelectedProfileId,
+            _caseSummaryUpdates);
     }
 }
