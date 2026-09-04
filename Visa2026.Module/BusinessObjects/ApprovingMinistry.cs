@@ -14,10 +14,10 @@ namespace Visa2026.Module.BusinessObjects;
 /// </summary>
 [DefaultClassOptions]
 [DefaultProperty(nameof(ShortNameTm))]
-[NavigationItem("Configuration")]
+[NavigationItem(false)]
 public class ApprovingMinistry : LookupBase
 {
-    /// <summary>Short label shown on <see cref="ApplicationProgress"/> ministry steps.</summary>
+    /// <summary>Short label shown on <see cref="ApplicationProfileInstanceProgress"/> ministry steps.</summary>
     [RuleRequiredField]
     [MaxLength(40)]
     [XafDisplayName("Short name")]

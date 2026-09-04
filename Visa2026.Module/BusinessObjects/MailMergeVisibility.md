@@ -60,16 +60,16 @@ The system consists of the following components:
 
 ### 3.2. Example Configuration
 
-To make the "Visa Grant Letter" template visible *only* when the Application status is 'Approved':
+To make the "Visa Grant Letter" template visible *only* when the ApplicationProfileInstance status is 'Approved':
 
 *   **Template Name**: Visa Grant Letter
-*   **Target Type**: Application
+*   **Target Type**: ApplicationProfileInstance
 *   **Visibility Criteria**: `[CurrentState.State] = 'Approved'`
 
-To make a "Rejection Notice" visible *only* when the Application status is 'Rejected':
+To make a "Rejection Notice" visible *only* when the ApplicationProfileInstance status is 'Rejected':
 
 *   **Template Name**: Rejection Notice
-*   **Target Type**: Application
+*   **Target Type**: ApplicationProfileInstance
 *   **Visibility Criteria**: `[CurrentState.State] = 'Rejected'`
 
 ## 4. Important Considerations

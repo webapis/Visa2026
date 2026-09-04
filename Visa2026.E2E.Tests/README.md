@@ -31,10 +31,10 @@ This project contains the end-to-end (E2E) functional tests for the Visa2026 app
 1.  **Test Initialization**: An xUnit test method (e.g., `TestBlazorAppWithEts`) is executed.
 2.  **Fixture Setup**: The `EasyTestFixtureContext` is initialized. It registers the Blazor application and the test database.
 3.  **Database Reset**: The test database is dropped and recreated to ensure a clean state for each test run.
-4.  **Application Launch**: The `RunApplication` method launches the Blazor application using the settings from `Config.xml`.
+4.  **ApplicationProfileInstance Launch**: The `RunApplication` method launches the Blazor application using the settings from `Config.xml`.
 5.  **Test Script Execution**: The `ExecuteTest` method runs a specified `.ets` script file. The EasyTest adapter translates the script commands into Selenium WebDriver actions that are performed in the browser.
 6.  **Assertions**: The script checks for expected outcomes, such as a specific view being displayed or data being saved correctly. If an assertion fails, the test fails.
-7.  **Application Shutdown**: After the test completes, the `Dispose` method in `Visa2026Tests` closes the application.
+7.  **ApplicationProfileInstance Shutdown**: After the test completes, the `Dispose` method in `Visa2026Tests` closes the application.
 
 ---
 
@@ -89,7 +89,7 @@ The EasyTest framework is currently configured to use **Microsoft Edge**.
 
 The application is configured to find the driver automatically through the system's PATH. The browser type is specified in `Config.xml` via the `Browser="Edge"` attribute.
 
-### Application Behavior
+### ApplicationProfileInstance Behavior
 1.  **Initialization**: The test runner initializes the test fixture. The existing PostgreSQL test database (`visa2026_easytest`) is dropped and recreated to ensure a clean environment.
 2.  **Launch**: On local dev, a visible Microsoft Edge window opens (headed). On CI (`CI=true` / `VISA2026_E2E_HEADLESS`), Edge runs headless — see `EasyTestBrowserMode.cs`.
 3.  **Navigation**: The browser will navigate to the local URL of the Blazor application (e.g., `http://localhost:5050`).

@@ -1,4 +1,4 @@
-# Application Number Format
+# ApplicationProfileInstance Number Format
 
 ## Overview
 
@@ -73,7 +73,7 @@ Once the live DB surpasses the seed value the seed has **no further effect** —
 
 ## Manual Entry — Entering Historical Records
 
-When the visa department needs to back-enter applications that existed **before** the system was deployed, enable the **Manual Entry** flag on the Application record.
+When the visa department needs to back-enter applications that existed **before** the system was deployed, enable the **Manual Entry** flag on the ApplicationProfileInstance record.
 
 ### What changes when Manual Entry is on
 
@@ -97,11 +97,11 @@ IsNewObject?
 
 ### Step-by-step for back-entry
 
-1. Create a new Application
+1. Create a new ApplicationProfileInstance
 2. Check **Manual Entry**
-3. Set **Application Date** to the original date (e.g. `15.03.2026`)
+3. Set **ApplicationProfileInstance Date** to the original date (e.g. `15.03.2026`)
 4. Set **App Number Prefix** if it differs from the company default
-5. Type the **Application Number** (e.g. `1150`)
+5. Type the **ApplicationProfileInstance Number** (e.g. `1150`)
 6. Fill in all other required fields normally
 7. Save — `FullApplicationNumber` is set to `{prefix}1150`, no sequence counter is touched
 

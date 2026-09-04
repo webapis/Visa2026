@@ -1,28 +1,22 @@
 -- Report Dashboard: To Be Checked In (Registration).
--- Valid visas with no ApplicationItem.CurrentVisa link to any App_Reg_* type.
+-- Valid visas with no registration visa link on the M2M roster (ResolvedLink LinkKind = Visa).
 -- Person must be in-country: latest TravelHistory is ExternalArrival.
 -- Chart: days since that arrival TravelDate.
 DROP VIEW IF EXISTS vw_rd_to_be_checked_in;
 CREATE VIEW vw_rd_to_be_checked_in AS
 WITH reg_linked AS (
-    SELECT DISTINCT ai."CurrentVisaId" AS "VisaId"
-    FROM "ApplicationItems" ai
-    INNER JOIN "Applications" a
-        ON a."ID" = ai."ApplicationID" AND COALESCE(a."GCRecord", 0) = 0
-    INNER JOIN "ApplicationTypes" at
-        ON at."ID" = a."ApplicationTypeID" AND COALESCE(at."GCRecord", 0) = 0
-    WHERE COALESCE(ai."GCRecord", 0) = 0
-      AND ai."CurrentVisaId" IS NOT NULL
-      AND at."Name" IN (
-            'App_Reg_Check_In',
-            'App_Reg_Check_In_Internal',
-            'App_Reg_Check_Out',
-            'App_Reg_Check_Out_Internal',
-            'App_Reg_ext',
-            'App_Reg_Info_Change_Address',
-            'App_Reg_Info_Change_Passport',
-            'App_Reg_Info_Change_Visa'
-        )
+    SELECT DISTINCT rl."LinkedObjectId" AS "VisaId"
+    FROM "ApplicationProfileInstancePersonResolvedLinks" rl
+    INNER JOIN "ApplicationProfileInstancePeople" ap
+        ON ap."ApplicationProfileInstanceId" = rl."ApplicationProfileInstanceId" AND ap."PersonId" = rl."PersonId"
+    INNER JOIN "ApplicationProfileInstances" a
+        ON a."ID" = ap."ApplicationProfileInstanceId" AND COALESCE(a."GCRecord", 0) = 0
+    INNER JOIN "ApplicationProfiles" apf
+        ON apf."ID" = a."ApplicationProfileID" AND COALESCE(apf."GCRecord", 0) = 0
+    WHERE COALESCE(rl."GCRecord", 0) = 0
+      AND rl."LinkKind" = 1
+      AND rl."LinkedObjectId" IS NOT NULL
+      AND COALESCE(apf."ActionFamily", 0) = 2
 ),
 latest_travel AS (
     SELECT DISTINCT ON (th."PersonID")

@@ -14,7 +14,7 @@ internal static class UserReportTemplateVisibilityHelper
     public static List<UserReportTemplate> GetVisibleActiveTemplates(
         IObjectSpace objectSpace,
         IUserReportVisibilityService visibilityService,
-        Application application)
+        ApplicationProfileInstance application)
     {
         return objectSpace.GetObjectsQuery<UserReportTemplate>()
             .Include(t => t.ApplicableTypeLinks)
@@ -33,7 +33,7 @@ internal static class UserReportTemplateVisibilityHelper
     public static bool AnyVisibleActiveTemplate(
         IObjectSpace objectSpace,
         IUserReportVisibilityService visibilityService,
-        Application application) =>
+        ApplicationProfileInstance application) =>
         objectSpace.GetObjectsQuery<UserReportTemplate>()
             .Include(t => t.ApplicableTypeLinks)
                 .ThenInclude(l => l.ApplicationType)

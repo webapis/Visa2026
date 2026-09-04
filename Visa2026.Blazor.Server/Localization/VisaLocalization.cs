@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 namespace Visa2026.Blazor.Server.Localization;
 
 /// <summary>
-/// Layer A (UI) cultures for ASP.NET Core request localization and XAF Application Model.
+/// Layer A (UI) cultures for ASP.NET Core request localization and XAF ApplicationProfileInstance Model.
 /// First entry is the default (<see cref="DefaultCultureName"/>).
 /// </summary>
 public static class VisaLocalization
@@ -93,7 +93,7 @@ public static class VisaLocalization
         return false;
     }
 
-    /// <summary>Application title for HTML &lt;title&gt;, splash screen, and pre-Blazor host shell.</summary>
+    /// <summary>ApplicationProfileInstance title for HTML &lt;title&gt;, splash screen, and pre-Blazor host shell.</summary>
     public static string GetApplicationTitle()
     {
         if (!TryNormalizeCulture(CultureInfo.CurrentUICulture.Name, out string culture))
@@ -110,11 +110,11 @@ public static class VisaLocalization
         };
     }
 
-    /// <summary>DevExpress Blazor grid search box placeholder (not in XAF Application Model).</summary>
+    /// <summary>DevExpress Blazor grid search box placeholder (not in XAF ApplicationProfileInstance Model).</summary>
     public static string GetGridSearchBoxNullText() =>
         GetShellText("TypeToSearch", GetShellText("TextToSearch", "Text to search..."));
 
-    /// <summary>DevExpress Blazor grid empty-state message (not in XAF Application Model).</summary>
+    /// <summary>DevExpress Blazor grid empty-state message (not in XAF ApplicationProfileInstance Model).</summary>
     public static string GetGridEmptyDataText() => GetShellText("NoDataToDisplay", "No data to display");
 
     /// <summary>Empty-state message when a column filter or search text is active.</summary>

@@ -5,8 +5,10 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using DocumentFormat.OpenXml.Packaging;
 using DocxTemplater;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 
 namespace Visa2026.Module.Services.UserReports
 {
@@ -22,9 +24,9 @@ namespace Visa2026.Module.Services.UserReports
 
         public async Task GenerateAsync(
             UserReportTemplate template,
-            Application application,
+            ApplicationProfileInstance application,
             Stream outputStream,
-            IList<ApplicationItem>? applicationItems = null)
+            IList<ApplicationRosterMergeLine>? applicationItems = null)
         {
             var data = BuildDataDictionary(template, application, applicationItems);
             PopulateSyntheticRowsIfNeeded(template, application, data, applicationItems);
@@ -38,27 +40,27 @@ namespace Visa2026.Module.Services.UserReports
             await RenderTemplateAsync(template, data, outputStream, applicationItems);
         }
 
-        public async Task GenerateAsync(UserReportTemplate template, ApplicationItem applicationItem, Stream outputStream)
+        public async Task GenerateAsync(UserReportTemplate template, ApplicationRosterMergeLine applicationItem, Stream outputStream)
         {
-            if (applicationItem.Application != null
+            if (applicationItem.ApplicationProfileInstance != null
                 && UserReportMergeDataHelper.UsesSingleDocumentItemList(template))
             {
-                await GenerateAsync(template, applicationItem.Application, outputStream, [applicationItem])
+                await GenerateAsync(template, applicationItem.ApplicationProfileInstance, outputStream, [applicationItem])
                     .ConfigureAwait(false);
                 return;
             }
 
-            var applicationItems = new List<ApplicationItem> { applicationItem };
+            var applicationItems = new List<ApplicationRosterMergeLine> { applicationItem };
             var data = BuildDataDictionary(template, applicationItem);
             if (template.RootBoType == UserReportBoType.ApplicationItem)
                 data["rows"] = UserReportMergeDataHelper.BuildSingleItemRowsForTemplate(applicationItem, template);
 
-            if (applicationItem.Application != null)
+            if (applicationItem.ApplicationProfileInstance != null)
             {
-                EnsureForma16RowsWhenNeeded(template, data, applicationItem.Application, applicationItems);
-                EnsureSahsyKagyzRowsWhenNeeded(template, data, applicationItem.Application, applicationItems);
-                EnsureWizaYatyrylmakSanawRowsWhenNeeded(template, data, applicationItem.Application, applicationItems);
-                EnsureSanawyRowsWhenNeeded(template, data, applicationItem.Application, applicationItems);
+                EnsureForma16RowsWhenNeeded(template, data, applicationItem.ApplicationProfileInstance, applicationItems);
+                EnsureSahsyKagyzRowsWhenNeeded(template, data, applicationItem.ApplicationProfileInstance, applicationItems);
+                EnsureWizaYatyrylmakSanawRowsWhenNeeded(template, data, applicationItem.ApplicationProfileInstance, applicationItems);
+                EnsureSanawyRowsWhenNeeded(template, data, applicationItem.ApplicationProfileInstance, applicationItems);
             }
 
             await EnsureDataCoversDocumentPlaceholdersAsync(template, applicationItem, data, applicationItems)
@@ -69,7 +71,7 @@ namespace Visa2026.Module.Services.UserReports
         private Dictionary<string, object> BuildDataDictionary(
             UserReportTemplate template,
             object rootObject,
-            IList<ApplicationItem>? applicationItems = null)
+            IList<ApplicationRosterMergeLine>? applicationItems = null)
         {
             var data = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
@@ -90,7 +92,7 @@ namespace Visa2026.Module.Services.UserReports
                 var collectionName = NormalizeBindModelKey(collectionPlaceholder.PlaceholderKey.TrimStart('#'));
                 if (string.Equals(collectionName, "rows", StringComparison.OrdinalIgnoreCase)
                     && (template.RootBoType == UserReportBoType.ApplicationItem
-                        || template.RootBoType == UserReportBoType.Application))
+                        || template.RootBoType == UserReportBoType.ApplicationProfileInstance))
                 {
                     continue;
                 }
@@ -115,9 +117,9 @@ namespace Visa2026.Module.Services.UserReports
         /// </summary>
         private static void PopulateSyntheticRowsIfNeeded(
             UserReportTemplate template,
-            Application application,
+            ApplicationProfileInstance application,
             Dictionary<string, object> data,
-            IList<ApplicationItem>? applicationItems = null)
+            IList<ApplicationRosterMergeLine>? applicationItems = null)
         {
             if (!TemplateUsesSyntheticRowsCollection(template))
                 return;
@@ -126,9 +128,9 @@ namespace Visa2026.Module.Services.UserReports
         }
 
         private static object ResolveSyntheticRows(
-            Application application,
+            ApplicationProfileInstance application,
             UserReportTemplate template,
-            IList<ApplicationItem>? applicationItems)
+            IList<ApplicationRosterMergeLine>? applicationItems)
         {
             if (UserReportMergeDataHelper.TemplateUsesPersonListRowPlaceholders(template.Placeholders)
                 || UserReportMergeDataHelper.IsSanawUserReportTemplate(template))
@@ -146,8 +148,8 @@ namespace Visa2026.Module.Services.UserReports
         private static void EnsureForma16RowsWhenNeeded(
             UserReportTemplate template,
             Dictionary<string, object> data,
-            Application application,
-            IList<ApplicationItem>? applicationItems)
+            ApplicationProfileInstance application,
+            IList<ApplicationRosterMergeLine>? applicationItems)
         {
             if (!UserReportMergeDataHelper.TemplateUsesRegistrationForm16RowPlaceholders(template, template.Placeholders)
                 && !UserReportMergeDataHelper.IsForma16UserReportTemplate(template))
@@ -162,8 +164,8 @@ namespace Visa2026.Module.Services.UserReports
         private static void EnsureSahsyKagyzRowsWhenNeeded(
             UserReportTemplate template,
             Dictionary<string, object> data,
-            Application application,
-            IList<ApplicationItem>? applicationItems)
+            ApplicationProfileInstance application,
+            IList<ApplicationRosterMergeLine>? applicationItems)
         {
             if (!UserReportMergeDataHelper.TemplateUsesSahsyKagyzRowPlaceholders(template, template.Placeholders)
                 && !UserReportMergeDataHelper.IsSahsyKagyzUserReportTemplate(template))
@@ -177,8 +179,8 @@ namespace Visa2026.Module.Services.UserReports
         private static void EnsureWizaYatyrylmakSanawRowsWhenNeeded(
             UserReportTemplate template,
             Dictionary<string, object> data,
-            Application application,
-            IList<ApplicationItem>? applicationItems)
+            ApplicationProfileInstance application,
+            IList<ApplicationRosterMergeLine>? applicationItems)
         {
             if (!UserReportMergeDataHelper.TemplateUsesWizaYatyrylmakSanawRowPlaceholders(template, template.Placeholders)
                 && !UserReportMergeDataHelper.IsWizaYatyrylmakSanawUserReportTemplate(template))
@@ -192,8 +194,8 @@ namespace Visa2026.Module.Services.UserReports
         private static void EnsureSanawyRowsWhenNeeded(
             UserReportTemplate template,
             Dictionary<string, object> data,
-            Application application,
-            IList<ApplicationItem>? applicationItems)
+            ApplicationProfileInstance application,
+            IList<ApplicationRosterMergeLine>? applicationItems)
         {
             if (!UserReportMergeDataHelper.ShouldUseSanawyStyleRows(template, template.Placeholders))
                 return;
@@ -220,18 +222,18 @@ namespace Visa2026.Module.Services.UserReports
         /// Row dictionary keys aligned with the built-in labor contract item Word report and Contract.docx.
         /// </summary>
         private static List<Dictionary<string, object>> BuildLaborContractStyleRows(
-            Application application,
-            IList<ApplicationItem>? applicationItems = null)
+            ApplicationProfileInstance application,
+            IList<ApplicationRosterMergeLine>? applicationItems = null)
         {
             var items = applicationItems != null && applicationItems.Count > 0
                 ? applicationItems.Where(i => i != null)
-                : (application.ApplicationItems ?? Enumerable.Empty<ApplicationItem>())
+                : ApplicationRosterHelper.GetMergeLineItems(application)
                     .Where(i => i != null);
 
             return items.Select(BuildLaborContractRowDictionary).ToList();
         }
 
-        private static Dictionary<string, object> BuildLaborContractRowDictionary(ApplicationItem item)
+        private static Dictionary<string, object> BuildLaborContractRowDictionary(ApplicationRosterMergeLine item)
         {
             return new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
             {
@@ -245,8 +247,15 @@ namespace Visa2026.Module.Services.UserReports
                 ["Application_CompanyRegistryAddressLine"] = item.Application_CompanyRegistryAddressLine ?? string.Empty,
                 ["CompanyHead_FullName"] = item.CompanyHead_FullName ?? string.Empty,
                 ["CompanyHead_PassportLine"] = item.CompanyHead_PassportLine ?? string.Empty,
+                ["CompanyHead_PassportExpirationDateText"] = item.CompanyHead_PassportExpirationDateText ?? string.Empty,
                 ["Representative_FullName"] = item.Representative_FullName ?? string.Empty,
                 ["Representative_PassportLine"] = item.Representative_PassportLine ?? string.Empty,
+                ["Representative_Phone"] = item.Representative_Phone ?? string.Empty,
+                ["Representative_PassportPhoneLine"] = item.Representative_PassportPhoneLine ?? string.Empty,
+                ["CompanyHead_PassportNumber"] = item.CompanyHead_PassportNumber ?? string.Empty,
+                ["Application_Company_PhoneNumber"] = item.Application_Company_PhoneNumber ?? string.Empty,
+                ["Application_Company_TaxInformation"] = item.Application_Company_TaxInformation ?? string.Empty,
+                ["Application_Company_RegistrationDateText"] = item.Application_Company_RegistrationDateText ?? string.Empty,
                 ["Contract_StartDateText"] = item.Contract_StartDateText ?? string.Empty,
                 ["Contract_ExpirationDateText"] = item.Contract_ExpirationDateText ?? string.Empty,
                 ["Contract_PeriodFallbackText"] = item.Contract_PeriodFallbackText ?? string.Empty,
@@ -280,7 +289,7 @@ namespace Visa2026.Module.Services.UserReports
             UserReportTemplate template,
             object rootObject,
             Dictionary<string, object> data,
-            IList<ApplicationItem>? applicationItems = null)
+            IList<ApplicationRosterMergeLine>? applicationItems = null)
         {
             var content = template.TemplateFile.Content;
             if (content == null || content.Length == 0)
@@ -292,13 +301,19 @@ namespace Visa2026.Module.Services.UserReports
 
             if (UserReportMergeDataHelper.ShouldUseSanawyStyleRows(template, template.Placeholders, tokenList))
             {
-                if (rootObject is Application applicationRoot)
+                if (rootObject is ApplicationProfileInstance applicationRoot)
                     data["rows"] = UserReportMergeDataHelper.BuildSanawyStyleRows(applicationRoot, applicationItems);
-                else if (rootObject is ApplicationItem item && item.Application != null)
+                else if (rootObject is ApplicationRosterMergeLine item && item.ApplicationProfileInstance != null)
                     data["rows"] = UserReportMergeDataHelper.BuildSanawyStyleRows(
-                        item.Application,
+                        item.ApplicationProfileInstance,
                         applicationItems ?? [item]);
             }
+
+            UserReportMergeDataHelper.PromoteLooseRowTokensOntoRoot(
+                tokenList,
+                data,
+                rootObject,
+                applicationItems);
 
             foreach (var raw in tokenList)
             {
@@ -315,13 +330,13 @@ namespace Visa2026.Module.Services.UserReports
                     if (UserReportMergeDataHelper.TemplateUsesRegistrationForm16RowPlaceholders(template, template.Placeholders)
                         || UserReportMergeDataHelper.IsForma16UserReportTemplate(template))
                     {
-                        if (rootObject is Application application)
+                        if (rootObject is ApplicationProfileInstance application)
                             data["rows"] = UserReportMergeDataHelper.BuildRegistrationForm16StyleRows(application, applicationItems);
                     }
                     else if (UserReportMergeDataHelper.TemplateUsesSahsyKagyzRowPlaceholders(template, template.Placeholders)
                              || UserReportMergeDataHelper.IsSahsyKagyzUserReportTemplate(template))
                     {
-                        if (rootObject is Application application)
+                        if (rootObject is ApplicationProfileInstance application)
                             data["rows"] = UserReportMergeDataHelper.BuildSahsyKagyzStyleRows(application, applicationItems);
                     }
 
@@ -367,25 +382,25 @@ namespace Visa2026.Module.Services.UserReports
             object rootObject,
             string collectionPath,
             UserReportTemplate template,
-            IList<ApplicationItem>? applicationItems = null)
+            IList<ApplicationRosterMergeLine>? applicationItems = null)
         {
             if (string.Equals(collectionPath, "rows", StringComparison.OrdinalIgnoreCase))
             {
-                if (rootObject is Application application)
+                if (rootObject is ApplicationProfileInstance application)
                     return ResolveSyntheticRows(application, template, applicationItems);
-                if (rootObject is ApplicationItem item && item.Application != null)
-                    return ResolveSyntheticRows(item.Application, template, applicationItems);
+                if (rootObject is ApplicationRosterMergeLine item && item.ApplicationProfileInstance != null)
+                    return ResolveSyntheticRows(item.ApplicationProfileInstance, template, applicationItems);
             }
 
             // Photo roster templates: typed rows with byte[] for WordUserReportImageInjector ({{IMAGE:Person_Photo}}).
             if (string.Equals(collectionPath, "ApplicationItems", StringComparison.OrdinalIgnoreCase))
             {
                 var items = new List<object>();
-                IEnumerable<ApplicationItem> source = applicationItems != null
+                IEnumerable<ApplicationRosterMergeLine> source = applicationItems != null
                     ? applicationItems.Where(i => i != null)
                     : (GetPropertyValue(rootObject, collectionPath) as IEnumerable)?
-                        .OfType<ApplicationItem>()
-                    ?? Enumerable.Empty<ApplicationItem>();
+                        .OfType<ApplicationRosterMergeLine>()
+                    ?? Enumerable.Empty<ApplicationRosterMergeLine>();
 
                 foreach (var ai in source)
                     items.Add(ApplicationItemPhotoMergeRow.From(ai));
@@ -433,7 +448,7 @@ namespace Visa2026.Module.Services.UserReports
             UserReportTemplate template,
             Dictionary<string, object> data,
             Stream outputStream,
-            IList<ApplicationItem>? applicationItems = null)
+            IList<ApplicationRosterMergeLine>? applicationItems = null)
         {
             var content = template.TemplateFile.Content;
             if (content == null || content.Length == 0)
@@ -481,7 +496,20 @@ namespace Visa2026.Module.Services.UserReports
                 return true;
             }
 
-            // Placeholder rows may be stale; scan embedded template bytes for {{IMAGE:…}}.
+            try
+            {
+                using var stream = new MemoryStream(templateContent, writable: false);
+                using var document = WordprocessingDocument.Open(stream, false);
+                var text = document.MainDocumentPart?.Document?.InnerText ?? string.Empty;
+                if (WordUserReportImageInjector.PlaceholderRegex.IsMatch(text)
+                    || text.Contains("{{IMAGE:", StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+            catch (Exception)
+            {
+                // Fall through to a raw-byte scan of the zip package.
+            }
+
             return System.Text.Encoding.UTF8.GetString(templateContent)
                 .Contains("{{IMAGE:", StringComparison.OrdinalIgnoreCase);
         }

@@ -7,9 +7,9 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// Refreshes <see cref="Application"/> ListView row colors when <see cref="ApplicationProgress"/> changes.
+/// Refreshes <see cref="Application"/> ListView row colors when <see cref="ApplicationProfileInstanceProgress"/> changes.
 /// </summary>
-public sealed class ApplicationProgressRowStateRefreshController : ViewController
+public sealed class ApplicationProfileInstanceProgressRowStateRefreshController : ViewController
 {
     protected override void OnActivated()
     {
@@ -35,9 +35,9 @@ public sealed class ApplicationProgressRowStateRefreshController : ViewControlle
 
     private void SyncLatestProgressFields()
     {
-        var applications = ObjectSpace.ModifiedObjects.OfType<ApplicationProgress>()
-            .Select(progress => progress.Application)
-            .Concat(ObjectSpace.ModifiedObjects.OfType<Application>())
+        var applications = ObjectSpace.ModifiedObjects.OfType<ApplicationProfileInstanceProgress>()
+            .Select(progress => progress.ApplicationProfileInstance)
+            .Concat(ObjectSpace.ModifiedObjects.OfType<ApplicationProfileInstance>())
             .Where(application => application != null)
             .Distinct()
             .ToList();
@@ -48,14 +48,14 @@ public sealed class ApplicationProgressRowStateRefreshController : ViewControlle
 
     private void ObjectSpace_ObjectChanged(object sender, ObjectChangedEventArgs e)
     {
-        if (e.Object is ApplicationProgress progress)
+        if (e.Object is ApplicationProfileInstanceProgress progress)
         {
-            progress.Application?.InvalidateListViewDisplayCache();
+            progress.ApplicationProfileInstance?.InvalidateListViewDisplayCache();
             RefreshAppearance();
             return;
         }
 
-        if (e.Object is Application)
+        if (e.Object is ApplicationProfileInstance)
             RefreshAppearance();
     }
 
@@ -63,15 +63,15 @@ public sealed class ApplicationProgressRowStateRefreshController : ViewControlle
     {
         if (Frame.View is ListView { ObjectTypeInfo.Type: var type } listView)
         {
-            if (type == typeof(Application))
+            if (type == typeof(ApplicationProfileInstance))
             {
-                foreach (var application in listView.CollectionSource.List.OfType<Application>())
+                foreach (var application in listView.CollectionSource.List.OfType<ApplicationProfileInstance>())
                     application.InvalidateListViewDisplayCache();
             }
-            else if (type == typeof(ApplicationItem))
+            else if (type == typeof(ApplicationRosterMergeLine))
             {
-                foreach (var application in listView.CollectionSource.List.OfType<ApplicationItem>()
-                             .Select(item => item.Application)
+                foreach (var application in listView.CollectionSource.List.OfType<ApplicationRosterMergeLine>()
+                             .Select(item => item.ApplicationProfileInstance)
                              .Where(application => application != null)
                              .Distinct())
                 {
@@ -83,12 +83,12 @@ public sealed class ApplicationProgressRowStateRefreshController : ViewControlle
         Frame.GetController<AppearanceController>()?.Refresh();
 
         if (Frame.View is DetailView detailView
-            && detailView.CurrentObject is BusinessObjects.Application)
+            && detailView.CurrentObject is BusinessObjects.ApplicationProfileInstance)
         {
             detailView.Refresh();
         }
         else if (Frame.View is ListView { ObjectTypeInfo.Type: var itemListType }
-                 && itemListType == typeof(ApplicationItem))
+                 && itemListType == typeof(ApplicationRosterMergeLine))
         {
             Frame.View.Refresh();
         }

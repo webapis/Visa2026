@@ -10,7 +10,7 @@ using Visa2026.Module.Services.WordReports;
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// "Resminamalar" on the Application detail view — opens the inline report package slot (v2).
+/// "Resminamalar" on the ApplicationProfileInstance detail view — opens the inline report package slot (v2).
 /// </summary>
 public class WordReportsController : ViewController<DetailView>
 {
@@ -18,7 +18,7 @@ public class WordReportsController : ViewController<DetailView>
 
     public WordReportsController()
     {
-        TargetObjectType = typeof(Application);
+        TargetObjectType = typeof(ApplicationProfileInstance);
         TargetViewType = ViewType.DetailView;
 
         resminamalarAction = new SimpleAction(this, "GenerateWordReports", "Reports");
@@ -44,7 +44,7 @@ public class WordReportsController : ViewController<DetailView>
 
     private void UpdateActionState()
     {
-        var application = View?.CurrentObject as Application;
+        var application = View?.CurrentObject as ApplicationProfileInstance;
         if (application == null)
         {
             resminamalarAction.Enabled["NoApplication"] = false;
@@ -57,7 +57,7 @@ public class WordReportsController : ViewController<DetailView>
 
     private void ResminamalarAction_Execute(object sender, SimpleActionExecuteEventArgs e)
     {
-        var application = (Application)e.CurrentObject;
+        var application = (ApplicationProfileInstance)e.CurrentObject;
         var applicationId = (Guid)ObjectSpace.GetKeyValue(application);
         if (applicationId == Guid.Empty)
         {
@@ -71,7 +71,7 @@ public class WordReportsController : ViewController<DetailView>
         var catalog = catalogService.Build(ObjectSpace, application, WordReportGenerationContext.ForApplication());
 
         string? emptyMessage = null;
-        if (catalog.TotalCount == 0)
+        if (catalog.TotalCount == 0 && catalog.RecycleBinEntries.Count == 0 && !catalog.HasProfileNestedCatalog)
         {
             emptyMessage = VisaUiMessages.Format(
                 "WordReports.NoApplicationScopeTemplates",
@@ -89,13 +89,13 @@ public class WordReportsController : ViewController<DetailView>
 
         slotService.OpenResminamalarAsync(new ResminamalarSlotRequest
         {
-            ApplicationId = applicationId,
-            Scope = WordReportPackageScope.Application,
+            ApplicationProfileInstanceId = applicationId,
+            Scope = WordReportPackageScope.ApplicationProfileInstance,
             EmptyCatalogMessage = emptyMessage,
         }, VisaPreviewSlotViewHelper.ResolveOwnerViewId(View)).GetAwaiter().GetResult();
     }
 
-    private static string ResolveApplicationTypeLabel(Application application)
+    private static string ResolveApplicationTypeLabel(ApplicationProfileInstance application)
     {
         var type = application.ApplicationType;
         if (type == null)

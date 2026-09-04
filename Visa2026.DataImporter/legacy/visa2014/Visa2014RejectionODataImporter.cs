@@ -10,7 +10,7 @@ internal sealed class Visa2014RejectionImportResult
     public int SkippedCount { get; init; }
     public int DedupeMergedCount { get; init; }
     public int SkippedAlreadyImported { get; init; }
-    public int SkippedMissingApplicationIdMap { get; init; }
+    public int SkippedMissingApplicationProfileInstanceIdMap { get; init; }
     public int PostedCount { get; init; }
     public int FailedCount { get; init; }
     public string? IdMapPath { get; init; }
@@ -37,17 +37,17 @@ internal static class Visa2014RejectionODataImporter
 
         if (dryRun)
         {
-            int missingApp = CountMissingApplicationIdMap(batch.ImportRows, applicationIdMap);
+            int missingApp = CountMissingApplicationProfileInstanceIdMap(batch.ImportRows, applicationIdMap);
             Console.WriteLine(
                 $"DRY RUN: {batch.ImportRows.Count} row(s) ready to POST " +
-                $"({batch.Skipped.Count} skipped, {missingApp} missing Application id-map, {batch.DedupeMergedCount} dedupe groups).");
+                $"({batch.Skipped.Count} skipped, {missingApp} missing ApplicationProfileInstance id-map, {batch.DedupeMergedCount} dedupe groups).");
             return new Visa2014RejectionImportResult
             {
                 LegacyRowCount = batch.LegacyRowCount,
                 PreparedCount = batch.ImportRows.Count,
                 SkippedCount = batch.Skipped.Count,
                 DedupeMergedCount = batch.DedupeMergedCount,
-                SkippedMissingApplicationIdMap = missingApp,
+                SkippedMissingApplicationProfileInstanceIdMap = missingApp,
             };
         }
 
@@ -59,7 +59,7 @@ internal static class Visa2014RejectionODataImporter
         int posted = 0;
         int failed = 0;
         int skippedAlreadyImported = 0;
-        int skippedMissingApplicationIdMap = 0;
+        int skippedMissingApplicationProfileInstanceIdMap = 0;
 
         foreach (var row in batch.ImportRows)
         {
@@ -74,9 +74,9 @@ internal static class Visa2014RejectionODataImporter
 
             if (!TryResolveApplication(row, applicationIdMap, out var applicationId))
             {
-                skippedMissingApplicationIdMap++;
+                skippedMissingApplicationProfileInstanceIdMap++;
                 if (verbose)
-                    Console.WriteLine($"  SKIP {legacyOid}: Application not in id-map");
+                    Console.WriteLine($"  SKIP {legacyOid}: ApplicationProfileInstance not in id-map");
                 continue;
             }
 
@@ -135,7 +135,7 @@ internal static class Visa2014RejectionODataImporter
             SkippedCount = batch.Skipped.Count,
             DedupeMergedCount = batch.DedupeMergedCount,
             SkippedAlreadyImported = skippedAlreadyImported,
-            SkippedMissingApplicationIdMap = skippedMissingApplicationIdMap,
+            SkippedMissingApplicationProfileInstanceIdMap = skippedMissingApplicationProfileInstanceIdMap,
             PostedCount = posted,
             FailedCount = failed,
             IdMapPath = idMapPath,
@@ -143,7 +143,7 @@ internal static class Visa2014RejectionODataImporter
         };
     }
 
-    private static int CountMissingApplicationIdMap(
+    private static int CountMissingApplicationProfileInstanceIdMap(
         IReadOnlyList<Dictionary<string, object?>> importRows,
         IReadOnlyDictionary<Guid, Guid> applicationIdMap)
     {
@@ -163,9 +163,9 @@ internal static class Visa2014RejectionODataImporter
         out Guid applicationId)
     {
         applicationId = Guid.Empty;
-        if (!TryResolveLegacyGuid(row, "Application", out var legacyApplicationOid))
+        if (!TryResolveLegacyGuid(row, "Application", out var legacyApplicationProfileInstanceOid))
             return false;
-        return applicationIdMap.TryGetValue(legacyApplicationOid, out applicationId);
+        return applicationIdMap.TryGetValue(legacyApplicationProfileInstanceOid, out applicationId);
     }
 
     private static Dictionary<string, object?>? BuildPayload(

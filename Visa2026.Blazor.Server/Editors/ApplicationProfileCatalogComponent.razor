@@ -1,0 +1,179 @@
+@using Visa2026.Module.Localization
+@using Visa2026.Module.Services.ApplicationProfileCatalog
+@using Visa2026.Module.Services.ApplicationProfileOverview
+
+<div class="ap-catalog @(SelectedProfileId == Guid.Empty ? "ap-catalog--list" : "ap-catalog--detail")">
+    @if (IsLoading)
+    {
+        <div class="ap-catalog__loading" role="status">Loading Application Profiles…</div>
+    }
+    else
+    {
+        @if (!string.IsNullOrWhiteSpace(StatusMessage))
+        {
+            <div class="ap-catalog__status @(IsStatusError ? "is-error" : "is-ok")" role="status">@StatusMessage</div>
+        }
+
+        @if (SelectedProfileId == Guid.Empty)
+        {
+            <div class="ap-catalog__list-page">
+                <header class="ap-catalog__list-head">
+                    <div class="ap-catalog__list-head-left">
+                        <div class="ap-catalog__search ap-catalog__search--toolbar">
+                            <span aria-hidden="true">⌕</span>
+                            <input type="search"
+                                   placeholder="Search profiles…"
+                                   value="@SearchText"
+                                   @oninput="OnSearchInput" />
+                        </div>
+                        <span class="ap-catalog__total" aria-live="polite">
+                            @VisaUiMessages.Format("Grid.TotalCount", Rows.Count)
+                        </span>
+                    </div>
+                    <button type="button" class="ap-catalog__new ap-catalog__new--toolbar" @onclick="NewProfileAsync">
+                        New Application Profile
+                    </button>
+                </header>
+
+                @if (Rows.Count == 0)
+                {
+                    <div class="ap-catalog__rail-empty">No profiles match.</div>
+                }
+                else
+                {
+                    <div class="ap-catalog__table-wrap">
+                        <table class="ap-catalog__table">
+                            <thead>
+                                <tr>
+                                    <th>Template</th>
+                                    <th>Code</th>
+                                    <th>Action family</th>
+                                    <th>Progress route</th>
+                                    <th>Status</th>
+                                    <th>Linked</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var row in Rows)
+                                {
+                                    <tr @onclick="() => SelectProfileAsync(row.ProfileId)">
+                                        <td>
+                                            <span class="ap-catalog__dot" aria-hidden="true"></span>
+                                            @row.RailLabel
+                                        </td>
+                                        <td>@row.Code</td>
+                                        <td>@row.ActionFamilyLabel</td>
+                                        <td>@row.ProgressRouteLabel</td>
+                                        <td>@StatusLabel(row)</td>
+                                        <td>@row.LinkedApplicationCount</td>
+                                        <td class="ap-catalog__actions" @onclick:stopPropagation="true">
+                                            @if (ApplicationProfileUnlinkedDeleteHelper.CanDelete(row.LinkedApplicationCount))
+                                            {
+                                                @if (_confirmDeleteId == row.ProfileId)
+                                                {
+                                                    <button type="button"
+                                                            class="ap-catalog__delete ap-catalog__delete--confirm"
+                                                            @onclick="() => ConfirmDeleteAsync(row.ProfileId)">
+                                                        Confirm delete
+                                                    </button>
+                                                    <button type="button"
+                                                            class="ap-catalog__delete-cancel"
+                                                            @onclick="CancelDelete">
+                                                        Cancel
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <button type="button"
+                                                            class="ap-catalog__delete"
+                                                            title="Delete this template"
+                                                            @onclick="() => AskDelete(row.ProfileId)">
+                                                        Delete
+                                                    </button>
+                                                }
+                                            }
+                                            <span class="ap-catalog__chev" aria-hidden="true">›</span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="ap-catalog__detail-page">
+                <ApplicationProfileOverviewComponent IsLoading="@IsOverviewLoading"
+                                                     Snapshot="@OverviewSnapshot"
+                                                     ConfigureRequested="@ConfigureRequested"
+                                                     CloseRequested="@CloseProfileAsync"
+                                                     OpenInstanceRequested="@OpenInstanceRequested"
+                                                     DeleteProfileRequested="@DeleteProfileRequested" />
+            </div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public bool IsOverviewLoading { get; set; }
+    [Parameter] public IReadOnlyList<ApplicationProfileCatalogRow> Rows { get; set; } = Array.Empty<ApplicationProfileCatalogRow>();
+    [Parameter] public Guid SelectedProfileId { get; set; }
+    [Parameter] public ApplicationProfileOverviewSnapshot? OverviewSnapshot { get; set; }
+    [Parameter] public string SearchText { get; set; } = string.Empty;
+    [Parameter] public string? StatusMessage { get; set; }
+    [Parameter] public bool IsStatusError { get; set; }
+    [Parameter] public EventCallback InitialLoadRequested { get; set; }
+    [Parameter] public EventCallback NewProfileRequested { get; set; }
+    [Parameter] public EventCallback<Guid> SelectProfileRequested { get; set; }
+    [Parameter] public EventCallback ConfigureRequested { get; set; }
+    [Parameter] public EventCallback<string> SearchTextChanged { get; set; }
+    [Parameter] public EventCallback CloseProfileRequested { get; set; }
+    [Parameter] public EventCallback<Guid> OpenInstanceRequested { get; set; }
+    [Parameter] public EventCallback<Guid> DeleteProfileRequested { get; set; }
+
+    private Guid _confirmDeleteId;
+    private bool _initialLoadStarted;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _initialLoadStarted || !InitialLoadRequested.HasDelegate)
+            return;
+
+        _initialLoadStarted = true;
+        await InitialLoadRequested.InvokeAsync();
+    }
+
+    private Task NewProfileAsync() => NewProfileRequested.InvokeAsync();
+
+    private Task SelectProfileAsync(Guid profileId) => SelectProfileRequested.InvokeAsync(profileId);
+
+    private Task CloseProfileAsync() => CloseProfileRequested.InvokeAsync();
+
+    private async Task OnSearchInput(ChangeEventArgs e)
+    {
+        if (SearchTextChanged.HasDelegate)
+            await SearchTextChanged.InvokeAsync(e.Value?.ToString() ?? string.Empty);
+    }
+
+    private static string StatusLabel(ApplicationProfileCatalogRow row)
+    {
+        if (!row.IsActive)
+            return "Inactive";
+        return row.IsConfigLocked ? "Config locked" : "Active";
+    }
+
+    private void AskDelete(Guid profileId) => _confirmDeleteId = profileId;
+
+    private void CancelDelete() => _confirmDeleteId = Guid.Empty;
+
+    private async Task ConfirmDeleteAsync(Guid profileId)
+    {
+        _confirmDeleteId = Guid.Empty;
+        if (DeleteProfileRequested.HasDelegate)
+            await DeleteProfileRequested.InvokeAsync(profileId);
+    }
+}

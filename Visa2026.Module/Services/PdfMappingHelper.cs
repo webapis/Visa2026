@@ -114,7 +114,57 @@ namespace Visa2026.Module.Services
                 })
                 .ToList();
 
-            return NormalizeFamilyMemberMappings(mappings);
+            return FinalizeMappings(mappings);
+        }
+
+        internal static IList<PdfFormMappingDefinition> FinalizeMappings(IList<PdfFormMappingDefinition> mappings)
+        {
+            var list = mappings?.ToList() ?? [];
+            EnsureCoreSeedMappings(list);
+            return NormalizeFamilyMemberMappings(list);
+        }
+
+        internal static void EnsureCoreSeedMappings(IList<PdfFormMappingDefinition> mappings)
+        {
+            foreach (var seed in PdfFormMappingSeedCatalog.Core)
+            {
+                var existing = mappings.FirstOrDefault(m => m.PdfFieldKey == seed.PdfFieldKey);
+                if (existing == null)
+                {
+                    var def = new PdfFormMappingDefinition
+                    {
+                        PdfFieldKey = seed.PdfFieldKey,
+                        Description = seed.Description,
+                        MappingMode = seed.Mode,
+                    };
+                    ApplySeedValue(def, seed);
+                    mappings.Add(def);
+                    continue;
+                }
+
+                existing.Description = seed.Description;
+                existing.MappingMode = seed.Mode;
+                existing.PropertyPath = null;
+                existing.Expression = null;
+                existing.ConstantValue = null;
+                ApplySeedValue(existing, seed);
+            }
+        }
+
+        private static void ApplySeedValue(PdfFormMappingDefinition def, PdfFormMappingSeedCatalog.Seed seed)
+        {
+            switch (seed.Mode)
+            {
+                case PdfMappingMode.Property:
+                    def.PropertyPath = seed.PropertyPath;
+                    break;
+                case PdfMappingMode.Expression:
+                    def.Expression = seed.ExpressionOrConstant;
+                    break;
+                case PdfMappingMode.Constant:
+                    def.ConstantValue = seed.ExpressionOrConstant;
+                    break;
+            }
         }
 
         /// <summary>
@@ -224,8 +274,8 @@ namespace Visa2026.Module.Services
         // This method is extracted from ApplicationItemPdfController to be reused.
         public static void MapApplicationData(
             Dictionary<string, object> data,
-            Application application,
-            ApplicationItem item,
+            ApplicationProfileInstance application,
+            ApplicationRosterMergeLine item,
             IObjectSpace objectSpace,
             ILogger logger = null,
             IList<PdfFormMappingDefinition> mappings = null,
@@ -272,7 +322,9 @@ namespace Visa2026.Module.Services
                                 {
                                     if (!IsPdfMappingSourceAllowed(application, item, mapping.MappingMode, mapping.PropertyPath, mapping.Expression, logger, pdfVisibilityGateNotes, mapping))
                                         break;
-                                    var evaluator = new ExpressionEvaluator(TypeDescriptor.GetProperties(item), CriteriaOperator.Parse(mapping.Expression));
+                                    var expression = RewriteApplicationRoot(
+                                        RewriteLegacyApplicationItemPropertyPath(mapping.Expression));
+                                    var evaluator = new ExpressionEvaluator(TypeDescriptor.GetProperties(item), CriteriaOperator.Parse(expression));
                                     val = evaluator.Evaluate(item);
                                 }
                                 break;
@@ -302,28 +354,40 @@ namespace Visa2026.Module.Services
         {
             if (obj == null || string.IsNullOrEmpty(path)) return null;
 
-            path = RewriteLegacyApplicationItemPropertyPath(path);
+            path = RewriteApplicationRoot(RewriteLegacyApplicationItemPropertyPath(path));
 
             object current = obj;
             foreach (string part in path.Split('.'))
             {
                 if (current == null) return null;
                 Type type = current.GetType();
-                PropertyInfo info = type.GetProperty(part, BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
+                PropertyInfo info = FindInstanceProperty(type, part);
                 if (info == null) return null;
                 current = info.GetValue(current, null);
             }
             return current;
         }
 
+        private static PropertyInfo FindInstanceProperty(Type type, string name)
+        {
+            for (var t = type; t != null && t != typeof(object); t = t.BaseType)
+            {
+                var declared = t.GetProperty(name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+                if (declared != null)
+                    return declared;
+            }
+
+            return type.GetProperty(name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+        }
+
         /// <summary>
         /// PDF property/expression mappings are skipped unless the same <see cref="ApplicationType"/> flags and
-        /// linked objects that drive XAF <see cref="ApplicationItem"/> / <see cref="Application"/> visibility are satisfied
+        /// linked objects that drive XAF <see cref="ApplicationRosterMergeLine"/> / <see cref="Application"/> visibility are satisfied
         /// (and required navigations are non-null where the path reads through them).
         /// </summary>
         private static bool IsPdfMappingSourceAllowed(
-            Application application,
-            ApplicationItem item,
+            ApplicationProfileInstance application,
+            ApplicationRosterMergeLine item,
             PdfMappingMode mode,
             string propertyPath,
             string expression,
@@ -361,7 +425,7 @@ namespace Visa2026.Module.Services
         }
 
         /// <summary>
-        /// Registration/business-trip line fields were merged onto <see cref="ApplicationItem"/>; PDF mappings may
+        /// Registration/business-trip line fields were merged onto <see cref="ApplicationRosterMergeLine"/>; PDF mappings may
         /// still use <c>CurrentRegistration.*</c> or <c>CurrentBusinessTrip.*</c> from removed navigations.
         /// </summary>
         private static string RewriteLegacyApplicationItemPropertyPath(string path)
@@ -378,20 +442,36 @@ namespace Visa2026.Module.Services
             return path;
         }
 
+        /// <summary>
+        /// PdfFormMapping still uses Application.* from the ApplicationItem era.
+        /// The merge-line navigation is ApplicationProfileInstance.
+        /// Do not apply this rewrite to visibility-gate source strings (they still match Application.*).
+        /// </summary>
+        private static string RewriteApplicationRoot(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path)
+                || !path.Contains("Application.", StringComparison.Ordinal))
+            {
+                return path;
+            }
+
+            return path.Replace("Application.", "ApplicationProfileInstance.", StringComparison.Ordinal);
+        }
+
         private static class PdfMappingSourceGate
         {
             private static bool Token(string source, string token) =>
                 !string.IsNullOrEmpty(source) && !string.IsNullOrEmpty(token) &&
                 Regex.IsMatch(source, @"\b" + Regex.Escape(token) + @"\b", RegexOptions.CultureInvariant);
 
-            private static bool AppSegment(Application application, string source, string segmentAfterApplicationDot)
+            private static bool AppSegment(ApplicationProfileInstance application, string source, string segmentAfterApplicationDot)
             {
                 if (application == null)
                     return false;
                 return source.IndexOf("Application." + segmentAfterApplicationDot, StringComparison.Ordinal) >= 0;
             }
 
-            public static bool IsAllowed(Application application, ApplicationItem item, string source)
+            public static bool IsAllowed(ApplicationProfileInstance application, ApplicationRosterMergeLine item, string source)
             {
                 if (application == null)
                     return false;
@@ -449,7 +529,8 @@ namespace Visa2026.Module.Services
 
                 if (AppSegment(application, source, "MovementPermitLocation"))
                 {
-                    if (!TypeOk(x => x.ShowMovementPermitLocation) || application.MovementPermitLocation == null)
+                    if (!TypeOk(x => x.ShowMovementPermitLocation)
+                        || string.IsNullOrWhiteSpace(application.MovementPermitLocation))
                         return false;
                 }
 
@@ -481,7 +562,7 @@ namespace Visa2026.Module.Services
                 if (item == null)
                     return false;
 
-                // --- ApplicationItem: employee-only fields (no ApplicationType flag; mirror ApplyCurrentFieldsFromSelectedPerson) ---
+                // --- ApplicationRosterMergeLine: employee-only fields (no ApplicationType flag; mirror ApplyCurrentFieldsFromSelectedPerson) ---
                 if (Token(source, "CurrentPositionHistory"))
                 {
                     if (item.Person?.IsEmployee != true)
@@ -494,7 +575,7 @@ namespace Visa2026.Module.Services
                         return false;
                 }
 
-                // PreviousVisa removed from ApplicationItem; token is not supported.
+                // PreviousVisa removed from ApplicationRosterMergeLine; token is not supported.
                 if (Token(source, "PreviousVisa"))
                     return false;
 
@@ -573,7 +654,7 @@ namespace Visa2026.Module.Services
                 if (Token(source, "CurrentPassport") && item.CurrentPassport == null)
                     return false;
 
-                // --- ApplicationItem status columns (mirror ApplicationItem Appearance) ---
+                // --- ApplicationRosterMergeLine status columns (mirror ApplicationRosterMergeLine Appearance) ---
                 if (Token(source, "InvitationItemIsIssued") && !TypeOk(x => x.ShowInvitationItemIsIssued))
                     return false;
                 if (Token(source, "WorkPermitItemIsIssued") && !TypeOk(x => x.ShowWorkPermitItemIsIssued))

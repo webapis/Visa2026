@@ -16,7 +16,7 @@ The following table explains each property, the expected format, and provides ex
 
 | Property | Description | Format / Notes | Example Value |
 | :--- | :--- | :--- | :--- |
-| **Name** | A descriptive name for the rule to identify it in lists. | Free text. | `Update Application when Visa Issued` |
+| **Name** | A descriptive name for the rule to identify it in lists. | Free text. | `Update ApplicationProfileInstance when Visa Issued` |
 | **Source Type** | The type of Business Object that triggers this rule. | Dropdown selection. | `Visa` |
 | **Source Property** | (Optional) If selected, the rule only runs if this specific property on the Source object is involved. | Dropdown (populated based on Source Type). | `IsCancelled` |
 | **Source Value** | (Optional) If `Source Property` is selected, the rule only runs if the property's value matches this string. | String representation of the value. | `true` |
@@ -101,10 +101,10 @@ This is the most common pattern. It is used when an item in one collection (e.g.
 *   **Target Path**: Navigates *up* to the common parent and then *down* to the target collection. Example: `Invitation.Application.ApplicationItems`.
 *   **Target Match Criteria**: **Required**. Used to find the specific item in the target collection. Example: `[Person.ID] = '@Source.Person.ID'`.
 
-#### Example: Mark Application Item when Invitation Item is Created
+#### Example: Mark ApplicationProfileInstance Item when Invitation Item is Created
 *Scenario: When a new person is added to an invitation (`InvitationItem`), find the corresponding person in the main application (`ApplicationItem`) and check the "InvitationItemIsIssued" box.*
 
-*   **Name**: `Set Invitation Issued Flag on Application Item`
+*   **Name**: `Set Invitation Issued Flag on ApplicationProfileInstance Item`
 *   **Source Type**: `InvitationItem`
 *   **Trigger Type**: `Save`
 *   **Source Criteria**: `[Invitation.Application.ApplicationType.Code] In ('get_invitation', 'get_invitation_wp', 'change_invitation')`
@@ -114,7 +114,7 @@ This is the most common pattern. It is used when an item in one collection (e.g.
 *   **Target Property**: `InvitationItemIsIssued`
 *   **Target Value**: `true`
 
-#### Example: Mark Application Item as Rejected
+#### Example: Mark ApplicationProfileInstance Item as Rejected
 *Scenario: When a new Rejection Item is created, find the corresponding person in the main application (`ApplicationItem`) and check the "RejectionIssued" box.*
 
 *   **Name**: `Set Rejection Issued Flag`
@@ -139,10 +139,10 @@ This is the most common pattern. It is used when an item in one collection (e.g.
 *   **Target Property**: `CurrentVisa.IsExtended`
 *   **Target Value**: `true`
 
-#### Example: Mark Application Item as Invitation Cancelled
+#### Example: Mark ApplicationProfileInstance Item as Invitation Cancelled
 *Scenario: When an `InvitationItem` is cancelled, find the corresponding `ApplicationItem` (via Person) and check the "InvitationItemIsCancelled" box.*
 
-*   **Name**: `Set Invitation Cancelled Flag on Application Item`
+*   **Name**: `Set Invitation Cancelled Flag on ApplicationProfileInstance Item`
 *   **Source Type**: `InvitationItem`
 *   **Source Property**: `IsCancelled`
 *   **Source Value**: `true`
@@ -209,11 +209,11 @@ This pattern is used when a child object needs to update a property on its direc
 *   **Target Path**: The name of the navigation property that points to the parent. Example: `Application`.
 *   **Target Match Criteria**: Should be empty, as the target is a single object.
 
-#### Example: Update Application Status from a Progress Item
-*Scenario: When a new `ApplicationProgress` item is created with the state "In Progress", update a status flag on the parent `Application`.*
+#### Example: Update ApplicationProfileInstance Status from a Progress Item
+*Scenario: When a new `ApplicationProfileInstanceProgress` item is created with the state "In Progress", update a status flag on the parent `Application`.*
 
-*   **Name**: `Set Application to 'In Progress'`
-*   **Source Type**: `ApplicationProgress`
+*   **Name**: `Set ApplicationProfileInstance to 'In Progress'`
+*   **Source Type**: `ApplicationProfileInstanceProgress`
 *   **Trigger Type**: `Save`
 *   **Source Criteria**: `[State.Code] = 'IN_PROGRESS'`
 *   **Target Path**: `Application`
@@ -262,7 +262,7 @@ This pattern is used to link the Source object to a property on the Target objec
 
 If a rule is not working:
 1.  Check the **Sync Rule Logs** tab on the rule detail view.
-2.  **Warning: Target path resulted in null**: This means the link between objects is missing (e.g., The Visa doesn't have an Application selected).
+2.  **Warning: Target path resulted in null**: This means the link between objects is missing (e.g., The Visa doesn't have an ApplicationProfileInstance selected).
 3.  **Warning: Target property not found**: Check if the `Target Property` name is spelled correctly (though the dropdown helps prevent this).
 4.  **Skipped**: The `Source Criteria` or `Source Value` conditions were not met.
 

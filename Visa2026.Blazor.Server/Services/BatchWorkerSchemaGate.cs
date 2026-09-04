@@ -7,6 +7,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Visa2026.Module.DatabaseUpdate;
 using Visa2026.Module.Services.RuntimeLogging;
 
 namespace Visa2026.Blazor.Server.Services;
@@ -82,9 +83,11 @@ internal static class BatchWorkerSchemaGate
         }
     }
 
-    public static bool IsMissingBatchTableException(Exception ex) => ContainsSqlError(ex, 208);
+    public static bool IsMissingBatchTableException(Exception ex) =>
+        ContainsSqlError(ex, 208) || PostgresRelationExists.IsUndefinedTable(ex);
 
-    public static bool IsMissingBatchColumnException(Exception ex) => ContainsSqlError(ex, 207);
+    public static bool IsMissingBatchColumnException(Exception ex) =>
+        ContainsSqlError(ex, 207) || PostgresRelationExists.IsUndefinedColumn(ex);
 
     private static bool ContainsSqlError(Exception ex, int errorNumber)
     {
@@ -103,9 +106,15 @@ internal static class BatchWorkerSchemaGate
         if (string.IsNullOrWhiteSpace(connectionString))
             return false;
 
-        // PostgreSQL Demo: EF creates tables via XAF update; skip SQL Server readiness probe.
-        if (Visa2026.Module.DatabaseUpdate.DatabaseProviderDetector.IsPostgreSql(connectionString))
-            return true;
+        // Wait until XAF CheckCompatibility has created the batch tables (do not CREATE them here).
+        if (DatabaseProviderDetector.IsPostgreSql(connectionString))
+        {
+            return PostgresRelationExists.All(
+                connectionString,
+                "PdfGenerationBatches",
+                "WordReportGenerationBatches",
+                "PersonExportBatches");
+        }
 
         try
         {

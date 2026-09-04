@@ -4,7 +4,7 @@ description: Transfer of visas to new passports for both employees
 dependsOn: VisaExt
 sync: false
 anchor:
-  entity: Application
+  entity: ApplicationProfileInstance
   key: FullApplicationNumber
   value: 2/-015
 data:
@@ -26,9 +26,9 @@ data:
     Issued Place: Aşgabat şäher howa menzilindäki MGP
     Passport Number: TR8877665
   Applications:
-  - Application Number: 015
+  - ApplicationProfileInstance Number: 015
     Date: 2027-02-15
-    Application Type: App_Change_Passport
+    ApplicationProfileInstance Type: App_Change_Passport
     Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
     Urgency: Adaty tertipde !
   ApplicationItems:

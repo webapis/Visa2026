@@ -9,6 +9,7 @@ using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -33,12 +34,8 @@ namespace Visa2026.Module.BusinessObjects
                 if (base.Person != value)
                 {
                     base.Person = value;
-                    if (base.Person != null && Rejection?.Application != null)
-                    {
-                        var appItem = Rejection.Application.ApplicationItems.FirstOrDefault(ai => ai.Person?.ID == base.Person.ID);
-                        if (appItem != null)
-                            Passport = appItem.CurrentPassport;
-                    }
+                    if (base.Person != null)
+                        Passport = ApplicationProfileInstancePersonValidItems.ResolvePassport(base.Person);
                 }
             }
         }
@@ -80,13 +77,7 @@ namespace Visa2026.Module.BusinessObjects
 
         private void MarkLinkedApplicationItemRejected()
         {
-            if (Person == null || Rejection?.Application?.ApplicationItems == null)
-                return;
-
-            var appItem = Rejection.Application.ApplicationItems
-                .FirstOrDefault(ai => ai.Person?.ID == Person.ID);
-            if (appItem != null)
-                appItem.RejectionIssued = true;
+            // ApplicationRosterMergeLine hard-removed; rejection linkage is via ResolvedLinks / M2M roster.
         }
 
         public virtual void OnDeleting()

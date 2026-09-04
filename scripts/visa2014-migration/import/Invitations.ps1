@@ -62,7 +62,7 @@ if ($LASTEXITCODE -ne 0) { throw "Build failed" }
 if (-not $ItemsOnly) {
     Invoke-Visa2014Import -Entity "Invitation" -ExtraArgs @(
         "--id-map-output", (Join-Path $mapRoot "Invitation.json"),
-        "--application-id-map", (Join-Path $mapRoot "Application.json")
+        "--application-id-map", (Join-Path $mapRoot "ApplicationProfileInstance.json")
     )
 }
 

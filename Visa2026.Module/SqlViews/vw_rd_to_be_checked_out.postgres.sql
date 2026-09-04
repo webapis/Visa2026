@@ -4,15 +4,18 @@
 DROP VIEW IF EXISTS vw_rd_to_be_checked_out;
 CREATE VIEW vw_rd_to_be_checked_out AS
 WITH checkout_linked AS (
-    SELECT DISTINCT ai."CurrentVisaId" AS "VisaId"
-    FROM "ApplicationItems" ai
-    INNER JOIN "Applications" a
-        ON a."ID" = ai."ApplicationID" AND COALESCE(a."GCRecord", 0) = 0
-    INNER JOIN "ApplicationTypes" at
-        ON at."ID" = a."ApplicationTypeID" AND COALESCE(at."GCRecord", 0) = 0
-    WHERE COALESCE(ai."GCRecord", 0) = 0
-      AND ai."CurrentVisaId" IS NOT NULL
-      AND at."Name" IN ('App_Reg_Check_Out', 'App_Reg_Check_Out_Internal')
+    SELECT DISTINCT rl."LinkedObjectId" AS "VisaId"
+    FROM "ApplicationProfileInstancePersonResolvedLinks" rl
+    INNER JOIN "ApplicationProfileInstancePeople" ap
+        ON ap."ApplicationProfileInstanceId" = rl."ApplicationProfileInstanceId" AND ap."PersonId" = rl."PersonId"
+    INNER JOIN "ApplicationProfileInstances" a
+        ON a."ID" = ap."ApplicationProfileInstanceId" AND COALESCE(a."GCRecord", 0) = 0
+    INNER JOIN "ApplicationProfiles" apf
+        ON apf."ID" = a."ApplicationProfileID" AND COALESCE(apf."GCRecord", 0) = 0
+    WHERE COALESCE(rl."GCRecord", 0) = 0
+      AND rl."LinkKind" = 1
+      AND rl."LinkedObjectId" IS NOT NULL
+      AND apf."Code" = 'check_out'
 )
 SELECT
     v."ID" AS "ID",

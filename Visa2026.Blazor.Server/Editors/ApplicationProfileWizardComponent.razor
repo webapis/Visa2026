@@ -1,0 +1,182 @@
+@using DevExpress.ExpressApp
+@using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Services.ApplicationProfileWizard
+
+<div class="ap-wizard">
+    @if (IsLoading)
+    {
+        <div class="ap-wizard__loading" role="status">Loading configuration wizard…</div>
+    }
+    else if (Profile == null)
+    {
+        <div class="ap-wizard__loading ap-wizard__loading--empty">No Application Profile selected.</div>
+    }
+    else
+    {
+        <header class="ap-wizard__header">
+            <div>
+                <h1 class="ap-wizard__title">Application Profile</h1>
+                <p class="ap-wizard__profile-name" title="@ProfileNameDisplay">@ProfileNameDisplay</p>
+                <p class="ap-wizard__sub">
+                    Configure what applications using this profile need — live FK; per-ApplicationProfileInstance values get defaults at create.
+                </p>
+            </div>
+            <div class="ap-wizard__pills">
+                <span class="ap-wizard__pill ap-wizard__pill--on">Live configuration</span>
+                @if (IsReadOnly)
+                {
+                    <span class="ap-wizard__pill ap-wizard__pill--warn">Config locked</span>
+                }
+                else
+                {
+                    <span class="ap-wizard__pill">Draft · save to publish</span>
+                }
+            </div>
+        </header>
+
+        @if (IsReadOnly)
+        {
+            <div class="ap-wizard__lock-banner">
+                This profile is <strong>config-locked</strong> because a linked application has left office preparation.
+                Configuration stays locked. Use <strong>Clone</strong> on the profile list to copy it.
+            </div>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(StatusMessage))
+        {
+            <div class="ap-wizard__status @(IsStatusError ? "is-error" : "is-ok")" role="status">@StatusMessage</div>
+        }
+
+        <div class="ap-wizard__layout">
+            <nav class="ap-wizard__steps" aria-label="Wizard steps">
+                <h2>Steps</h2>
+                @for (var i = 0; i < _steps.Length; i++)
+                {
+                    var step = _steps[i];
+                    <button type="button"
+                            class="ap-wizard__step @(i == _activeStep ? "is-active" : null)"
+                            @onclick="() => GoToStep(i)">
+                        <span class="ap-wizard__step-n">@(i + 1)</span>
+                        <span>
+                            <span class="ap-wizard__step-t">@step.Title</span>
+                            <span class="ap-wizard__step-d">@step.Description</span>
+                        </span>
+                    </button>
+                }
+            </nav>
+
+            <div class="ap-wizard__panel">
+                @if (_activeStep == 0)
+                {
+                    <ApplicationProfileWizardStepIdentity Profile="Profile"
+                        Disabled="IsReadOnly"
+                        ClearLegsRequested="ClearLegsCallback"
+                        NameChanged="RefreshProfileName" />
+                }
+                else if (_activeStep == 1)
+                {
+                    <ApplicationProfileWizardStepResults Profile="Profile"
+                        Disabled="IsReadOnly"
+                        Lookups="Lookups"
+                        ObjectSpace="ObjectSpace" />
+                }
+                else if (_activeStep == 2)
+                {
+                    <ApplicationProfileWizardStepProcess Profile="Profile" Disabled="IsReadOnly" />
+                }
+                else if (_activeStep == 3)
+                {
+                    <ApplicationProfileWizardStepTemplatesPerson Profile="Profile"
+                        Disabled="IsReadOnly" />
+                }
+                else
+                {
+                    <ApplicationProfileWizardStepReview Profile="Profile" />
+                }
+
+                <div class="ap-wizard__foot">
+                    <button type="button" class="ap-wizard__btn ap-wizard__btn--secondary"
+                            disabled="@(_activeStep == 0)"
+                            @onclick="PreviousStep">← Back</button>
+                    <div class="ap-wizard__foot-right">
+                        @if (_activeStep < _steps.Length - 1)
+                        {
+                            <button type="button" class="ap-wizard__btn ap-wizard__btn--primary" @onclick="NextStep">Continue →</button>
+                        }
+                        else if (!IsReadOnly)
+                        {
+                            <button type="button" class="ap-wizard__btn ap-wizard__btn--primary" @onclick="PublishAsync">Save profile</button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private readonly (string Title, string Description)[] _steps =
+    [
+        ("Identity & purpose", "Name, route, audience"),
+        ("Results & fields", "Required instance properties"),
+        ("Process & SLA", "Ministry and migration duration"),
+        ("Person data", "Required person-related rows"),
+        ("Review & save", "Summary before publish"),
+    ];
+
+    [Parameter] public ApplicationProfile? Profile { get; set; }
+    [Parameter] public IObjectSpace? ObjectSpace { get; set; }
+    [Parameter] public string? OwnerViewId { get; set; }
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public bool IsReadOnly { get; set; }
+    [Parameter] public string? StatusMessage { get; set; }
+    [Parameter] public bool IsStatusError { get; set; }
+    [Parameter] public EventCallback InitialLoadRequested { get; set; }
+    [Parameter] public EventCallback PublishRequested { get; set; }
+    [Parameter] public ApplicationProfileWizardLookupData Lookups { get; set; } =
+        ApplicationProfileWizardLookupData.Empty;
+
+    private int _activeStep;
+
+    private EventCallback ClearLegsCallback => EventCallback.Factory.Create(this, ClearLegs);
+
+    private string ProfileNameDisplay =>
+        string.IsNullOrWhiteSpace(Profile?.Name) ? "Unnamed profile" : Profile.Name.Trim();
+
+    private void RefreshProfileName() => StateHasChanged();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && InitialLoadRequested.HasDelegate)
+            await InitialLoadRequested.InvokeAsync();
+    }
+
+    private async Task GoToStep(int index)
+    {
+        _activeStep = Math.Clamp(index, 0, _steps.Length - 1);
+        await Task.CompletedTask;
+    }
+
+    private Task NextStep() => GoToStep(_activeStep + 1);
+    private Task PreviousStep() => GoToStep(_activeStep - 1);
+
+    private async Task PublishAsync()
+    {
+        if (PublishRequested.HasDelegate)
+            await PublishRequested.InvokeAsync();
+    }
+
+    private void ClearLegs()
+    {
+        if (IsReadOnly || Profile == null || ObjectSpace is not { } os)
+            return;
+
+        Profile.DefaultApprovalLegProfile = null;
+        Profile.DefaultApprovalLegProfileId = null;
+        foreach (var version in (Profile.ApprovalLegVersions ?? []).ToList())
+            os.Delete(version);
+        foreach (var leg in (Profile.ApprovalLegs ?? []).ToList())
+            os.Delete(leg);
+    }
+
+}

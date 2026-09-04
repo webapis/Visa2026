@@ -17,6 +17,7 @@ using Microsoft.Extensions.Logging;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
 using Visa2026.Module.Services;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 using Visa2026.Module.Services.RuntimeLogging;
 
 namespace Visa2026.Blazor.Server.Services;
@@ -108,7 +109,7 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
         try
         {
             var keyType = ResolveKeyType(batch.ItemKeyType);
-            var keys = JsonSerializer.Deserialize<List<string>>(batch.ItemKeysJson) ?? new List<string>();
+            var (rosterApplicationId, keys) = ParseRosterKeys(batch.ItemKeysJson);
             batch.TotalItems = keys.Count;
             os.CommitChanges();
 
@@ -183,14 +184,14 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                 batch.IncludeInvitationCopies,
                 batch.IncludeFamilyRelationshipCopies);
 
-            string zipName = BuildZipName(os, keys, relativeTemplatePath);
+            string zipName = BuildZipName(os, keys, relativeTemplatePath, rosterApplicationId);
             // Filled PDFs only under PDF_Form/; passport and other attachments use zipInnerRoot null (archive root).
             string filledPdfZipFolder = ApplicationSupportingDocumentsPacker.FilledApplicationFormsZipFolderName;
             string tempZipPath = Path.Combine(Path.GetTempPath(), $"visa_batch_{Guid.NewGuid():N}.zip");
 
             var visibilityNotesAggregate = new List<string>();
             var packagingNotes = new List<string>();
-            Guid? packagingApplicationId = null;
+            Guid? packagingApplicationProfileInstanceId = null;
             var usedZipEntryPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             List<MemoryStream>? currentPassportPdfMergeSlices = batch.IncludePassportCopies && includeMergedPdfs ? new List<MemoryStream>() : null;
             List<MemoryStream>? currentVisaPdfMergeSlices = batch.IncludeVisaCopies && includeMergedPdfs ? new List<MemoryStream>() : null;
@@ -212,15 +213,15 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                         stoppingToken.ThrowIfCancellationRequested();
 
                         var key = ConvertKey(keyType, keyString);
-                        var item = LoadApplicationItemForPdfBatch(os, key);
-                        if (item == null || item.Application == null )
+                        var item = LoadPackageLineForPdfBatch(os, keyType, key, rosterApplicationId);
+                        if (item == null || item.ApplicationProfileInstance == null)
                             continue;
 
-                        packagingApplicationId ??= item.Application?.ID;
+                        packagingApplicationProfileInstanceId ??= item.ApplicationProfileInstance?.ID;
 
                         var data = new Dictionary<string, object>();
                         var itemVisibilityNotes = new List<string>();
-                        PdfMappingHelper.MapApplicationData(data, item.Application, item, os, null, mappings, itemVisibilityNotes);
+                        PdfMappingHelper.MapApplicationData(data, item.ApplicationProfileInstance, item, os, null, mappings, itemVisibilityNotes);
                         if (itemVisibilityNotes.Count > 0)
                         {
                             string personLabel = item.Person != null ? item.Person.FullName : "Unknown person";
@@ -348,7 +349,7 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                     packagingTextForBatch = ApplicationSupportingDocumentsPacker.BuildPackagingNotesText(
                         packagingNotes,
                         (Guid)os.GetKeyValue(batch),
-                        packagingApplicationId,
+                        packagingApplicationProfileInstanceId,
                         DateTime.UtcNow,
                         packagingCulture);
                     await ApplicationSupportingDocumentsPacker.WritePackagingNotesZipEntryAsync(
@@ -414,32 +415,48 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
         return ApplicationRuntimeLogErrorCodes.PdfBatchFailed;
     }
 
-    private static ApplicationItem LoadApplicationItemForPdfBatch(IObjectSpace os, object key)
+    private static ApplicationRosterMergeLine? LoadPackageLineForPdfBatch(
+        IObjectSpace os,
+        Type keyType,
+        object key,
+        Guid applicationProfileInstanceId)
     {
-        // GetObjectByKey can leave reference navigations unloaded in background processing; explicit Include
-        // ensures CurrentPassport (and other slots) match the DB for ZIP packing.
-        if (key is Guid id)
+        if (keyType != typeof(Person) && keyType != typeof(Guid))
+            throw new InvalidOperationException(
+                "This package was queued for application roster rows that no longer exist. " +
+                "Request the package again from the application roster.");
+
+        if (key is not Guid personId || personId == Guid.Empty)
+            return null;
+
+        if (!ApplicationRosterHelper.TryLoadSharedApplicationPeople(
+                os,
+                [personId],
+                applicationProfileInstanceId,
+                out var application,
+                out var people)
+            || application == null
+            || people.Count == 0)
         {
-            return os.GetObjectsQuery<ApplicationItem>()
-                .AsSplitQuery()
-                .Where(ai => ai.ID == id)
-                .Include(ai => ai.Application)
-                .Include(ai => ai.Person)
-                .Include(ai => ai.CurrentPassport)
-                .Include(ai => ai.PreviousPassport)
-                .Include(ai => ai.CurrentVisa)
-                .Include(ai => ai.NextVisa)
-                .Include(ai => ai.CurrentMedicalRecord)
-                .Include(ai => ai.CurrentAddressOfResidence)
-                .Include(ai => ai.CurrentEducation)
-                .Include(ai => ai.CurrentWorkPermitItem)
-                .Include(ai => ai.PreviousWorkPermitItem)
-                .Include(ai => ai.CurrentInvitationItem)
-                .Include(ai => ai.PreviousInvitationItem)
-                .FirstOrDefault();
+            return null;
         }
 
-        return os.GetObjectByKey<ApplicationItem>(key);
+        return ApplicationProfileInstancePersonPdfPackageLineHydrator.Hydrate(os, application, people[0]);
+    }
+
+    private static (Guid ApplicationId, List<string> Keys) ParseRosterKeys(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json))
+            return (Guid.Empty, []);
+
+        var trimmed = json.TrimStart();
+        if (trimmed.StartsWith('{'))
+        {
+            var payload = JsonSerializer.Deserialize<PdfBatchRosterKeyPayload>(json);
+            return (payload?.ApplicationProfileInstanceId ?? Guid.Empty, payload?.PersonIds ?? []);
+        }
+
+        return (Guid.Empty, JsonSerializer.Deserialize<List<string>>(json) ?? []);
     }
 
     private static string TruncatePdfNotes(string text, int maxChars = 100_000)
@@ -457,15 +474,17 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
     {
         var t = Type.GetType(assemblyQualifiedName, throwOnError: false);
         // ItemKeysJson holds stringified Guid keys. Some enqueue paths incorrectly stored
-        // typeof(ApplicationItem); treat entity types as Guid for backward compatibility.
-        if (t == null || t == typeof(ApplicationItem))
+        // typeof(ApplicationRosterMergeLine); treat entity types as Guid for backward compatibility.
+        if (t == null || t == typeof(ApplicationRosterMergeLine))
             return typeof(Guid);
+        if (t == typeof(Person))
+            return typeof(Person);
         return t;
     }
 
     private static object ConvertKey(Type keyType, string keyString)
     {
-        if (keyType == typeof(Guid))
+        if (keyType == typeof(Guid) || keyType == typeof(Person))
             return Guid.Parse(keyString);
         if (keyType == typeof(int))
             return int.Parse(keyString, CultureInfo.InvariantCulture);
@@ -477,7 +496,7 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
         return Convert.ChangeType(keyString, keyType, CultureInfo.InvariantCulture);
     }
 
-    private static string BuildZipName(IObjectSpace os, List<string> keyStrings, string relativeTemplatePath)
+    private static string BuildZipName(IObjectSpace os, List<string> keyStrings, string relativeTemplatePath, Guid applicationProfileInstanceId)
     {
         // Template hint (file name without extension)
         var templateHint = Path.GetFileNameWithoutExtension(relativeTemplatePath ?? string.Empty);
@@ -485,31 +504,33 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
         if (templateHint.StartsWith("Visa_", StringComparison.OrdinalIgnoreCase))
             templateHint = SanitizeFileNamePart(templateHint["Visa_".Length..]);
 
-        // Try to detect single Application context (GUID keys expected for ApplicationItem).
         string appPart = "MULTIAPP";
         string datePart = DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
         try
         {
-            var guids = keyStrings
-                .Select(s => Guid.TryParse(s, out var g) ? (Guid?)g : null)
-                .Where(g => g != null)
-                .Select(g => g!.Value)
-                .ToList();
+            ApplicationProfileInstance? application = null;
+            if (applicationProfileInstanceId != Guid.Empty)
+                application = os.GetObjectByKey<ApplicationProfileInstance>(applicationProfileInstanceId);
 
-            if (guids.Count > 0)
+            if (application == null)
             {
-                var apps = os.GetObjectsQuery<ApplicationItem>()
-                    .Where(ai => guids.Contains(ai.ID) && ai.Application != null)
-                    .Select(ai => new { ai.Application.ID, ai.Application.FullApplicationNumber, ai.Application.ApplicationDate })
-                    .Distinct()
+                var guids = keyStrings
+                    .Select(s => Guid.TryParse(s, out var g) ? (Guid?)g : null)
+                    .Where(g => g != null)
+                    .Select(g => g!.Value)
                     .ToList();
-
-                if (apps.Count == 1)
+                if (guids.Count > 0
+                    && ApplicationRosterHelper.TryLoadSharedApplicationPeople(os, guids, Guid.Empty, out var shared, out _)
+                    && shared != null)
                 {
-                    var a = apps[0];
-                    appPart = SanitizeFileNamePart(string.IsNullOrWhiteSpace(a.FullApplicationNumber) ? "APP" : a.FullApplicationNumber);
-                    datePart = a.ApplicationDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+                    application = shared;
                 }
+            }
+
+            if (application != null)
+            {
+                appPart = SanitizeFileNamePart(string.IsNullOrWhiteSpace(application.FullApplicationNumber) ? "APP" : application.FullApplicationNumber);
+                datePart = application.ApplicationDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
             }
         }
         catch
@@ -537,177 +558,3 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
         return filtered.Length > 80 ? filtered.Substring(0, 80).TrimEnd('_', ' ') : filtered;
     }
 }
-
-#if false
-    private async Task ProcessOneBatchAsync(CancellationToken stoppingToken)
-    {
-        using var scope = scopeFactory.CreateScope();
-        // IMPORTANT: BackgroundService runs without a UI/user principal. Do NOT use IObjectSpaceFactory here,
-        // because in secured apps it tries to authenticate and fails with "The user name must not be empty."
-        // We explicitly use the non-secured EFCoreObjectSpaceProvider registered in Startup.
-        var osProvider = scope.ServiceProvider
-            .GetServices<IObjectSpaceProvider>()
-            .FirstOrDefault(p =>
-            {
-                var fullName = p.GetType().FullName ?? string.Empty;
-                // non-secured provider type: DevExpress.ExpressApp.EFCore.EFCoreObjectSpaceProvider`1
-                // secured provider type lives under DevExpress.EntityFrameworkCore.Security.*
-                return fullName.StartsWith("DevExpress.ExpressApp.EFCore.EFCoreObjectSpaceProvider", StringComparison.Ordinal)
-                       && !fullName.Contains("DevExpress.EntityFrameworkCore.Security", StringComparison.Ordinal);
-            });
-
-        if (osProvider == null)
-        {
-            var providers = scope.ServiceProvider.GetServices<IObjectSpaceProvider>()
-                .Select(p => p.GetType().FullName ?? p.GetType().Name)
-                .Distinct()
-                .OrderBy(n => n, StringComparer.Ordinal);
-
-            throw new InvalidOperationException(
-                "Non-secured EFCoreObjectSpaceProvider is not registered. " +
-                "Ensure Startup.ObjectSpaceProviders.AddEFCore().WithAuditedDbContext(...) is configured." +
-                Environment.NewLine +
-                "Registered IObjectSpaceProvider types:" +
-                Environment.NewLine +
-                string.Join(Environment.NewLine, providers));
-        }
-
-        var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-        var pdfFillerService = scope.ServiceProvider.GetRequiredService<IPdfFormFillerService>();
-
-        using var os = osProvider.CreateObjectSpace();
-
-        var batch = os.GetObjectsQuery<PdfGenerationBatch>()
-            .Where(b => b.Status == PdfGenerationBatchStatus.Queued)
-            .OrderBy(b => b.CreatedOnUtc)
-            .FirstOrDefault();
-
-        if (batch == null)
-            return;
-
-        logger.LogInformation(
-            "Picked queued PDF batch. BatchId={BatchId} RequestedBy={RequestedBy} TotalItems={TotalItems}",
-            os.GetKeyValue(batch),
-            batch.RequestedBy,
-            batch.TotalItems);
-
-        batch.Status = PdfGenerationBatchStatus.Running;
-        batch.ErrorMessage = null;
-        batch.ProcessedItems = 0;
-        os.CommitChanges();
-
-        try
-        {
-            var keyType = ResolveKeyType(batch.ItemKeyType);
-            var keys = JsonSerializer.Deserialize<List<string>>(batch.ItemKeysJson) ?? new List<string>();
-            batch.TotalItems = keys.Count;
-            os.CommitChanges();
-
-            string relativeTemplatePath = configuration["PdfSettings:TemplatePath"];
-            if (string.IsNullOrWhiteSpace(relativeTemplatePath))
-                throw new InvalidOperationException("PdfSettings:TemplatePath is not configured.");
-
-            var templatePath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, relativeTemplatePath));
-            if (!File.Exists(templatePath))
-                throw new FileNotFoundException($"PDF template not found: {relativeTemplatePath}", templatePath);
-
-            var mappings = PdfMappingHelper.GetMappings(os);
-
-            string zipName = $"Visa_Selected_{keys.Count}_{DateTime.UtcNow:yyyyMMddHHmmss}.zip";
-            string zipFolder = Path.GetFileNameWithoutExtension(zipName);
-            string tempZipPath = Path.Combine(Path.GetTempPath(), $"visa_batch_{Guid.NewGuid():N}.zip");
-            try
-            {
-                using (var fs = new FileStream(tempZipPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read, 64 * 1024, FileOptions.SequentialScan))
-                using (var archive = new ZipArchive(fs, ZipArchiveMode.Create, leaveOpen: true))
-                {
-                    int idx = 1;
-                    foreach (var keyString in keys)
-                    {
-                        stoppingToken.ThrowIfCancellationRequested();
-
-                        var key = ConvertKey(keyType, keyString);
-                        var item = os.GetObjectByKey<ApplicationItem>(key);
-                        if (item == null || item.Application == null )
-                            continue;
-
-                        var data = new Dictionary<string, object>();
-                        PdfMappingHelper.MapApplicationData(data, item.Application, item, os, null, mappings);
-
-                        string personName = item.Person != null ? $"{item.Person.FirstName}_{item.Person.LastName}" : "Unknown";
-                        string entryName = $"{zipFolder}/{idx:00}_{personName}.pdf";
-                        idx++;
-
-                        using var pdfStream = new MemoryStream();
-                        pdfFillerService.FillForm(templatePath, pdfStream, data);
-                        pdfStream.Position = 0;
-
-                        {
-                            var entry = archive.CreateEntry(entryName, CompressionLevel.Fastest);
-                            await using (var entryStream = entry.Open())
-                            {
-                                await pdfStream.CopyToAsync(entryStream, 64 * 1024, stoppingToken).ConfigureAwait(false);
-                            }
-                        }
-
-                        batch.ProcessedItems++;
-                        os.CommitChanges();
-                    }
-                }
-
-                batch.ZipFile ??= os.CreateObject<FileData>();
-                await using (var readStream = new FileStream(tempZipPath, FileMode.Open, FileAccess.Read, FileShare.Read, 64 * 1024, FileOptions.SequentialScan))
-                {
-                    // FileData API supports LoadFromStream in XAF BaseImpl.
-                    batch.ZipFile.LoadFromStream(zipName, readStream);
-                }
-
-                batch.Status = PdfGenerationBatchStatus.Completed;
-                os.CommitChanges();
-                logger.LogInformation(
-                    "Completed PDF batch. BatchId={BatchId} ProcessedItems={ProcessedItems} ZipSize={ZipSize}",
-                    os.GetKeyValue(batch),
-                    batch.ProcessedItems,
-                    batch.ZipFile?.Size);
-            }
-            finally
-            {
-                try { File.Delete(tempZipPath); } catch { }
-            }
-        }
-        catch (Exception ex)
-        {
-            logger.LogErrorWithCode(
-                ResolvePdfBatchErrorCode(ex),
-                ex,
-                "PDF batch failed. BatchId={BatchId}",
-                os.GetKeyValue(batch));
-            batch.Status = PdfGenerationBatchStatus.Failed;
-            batch.ErrorMessage = ex.Message;
-            os.CommitChanges();
-        }
-    }
-
-    private static Type ResolveKeyType(string assemblyQualifiedName)
-    {
-        var t = Type.GetType(assemblyQualifiedName, throwOnError: false);
-        return t ?? typeof(Guid);
-    }
-
-    private static object ConvertKey(Type keyType, string keyString)
-    {
-        if (keyType == typeof(Guid))
-            return Guid.Parse(keyString);
-        if (keyType == typeof(int))
-            return int.Parse(keyString, CultureInfo.InvariantCulture);
-        if (keyType == typeof(long))
-            return long.Parse(keyString, CultureInfo.InvariantCulture);
-        if (keyType == typeof(string))
-            return keyString;
-
-        // last resort: try Convert.ChangeType
-        return Convert.ChangeType(keyString, keyType, CultureInfo.InvariantCulture);
-    }
-}
-
-#endif

@@ -2,9 +2,7 @@
 
 Append-only. Read before permission work; append after **verified** fixes (User role, not Admin-only).
 
-Format: `YYYY-MM-DD — symptom — cause — fix (files)`.
-
----
+- **2026-08-14 — VisaOffice could not delete Application Profile templates** — `EnsureReadWriteCreatePermission` leaves Delete null — `EnsureFullAccessRecursivePermission` on `ApplicationProfile` + nested legs/templates/state settings (`Updater.cs`). Catalog still blocks delete when any `ApplicationProfileInstance` is linked.
 
 ## Seeded from docs/ROLE_PERMISSIONS_GUIDE.md
 

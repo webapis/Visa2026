@@ -83,6 +83,11 @@ public static class PersonExportBatchSchemaSql
         if (string.IsNullOrWhiteSpace(connectionString))
             return;
 
+        // Greenfield: creating this table alone makes EF skip EnsureCreated (no users / no other tables).
+        if (DatabaseProviderDetector.IsPostgreSql(connectionString)
+            && !PostgresRelationExists.All(connectionString, "People"))
+            return;
+
         var cleaned = DatabaseProviderDetector.StripEfCoreProvider(connectionString);
         if (DatabaseProviderDetector.IsPostgreSql(connectionString))
         {

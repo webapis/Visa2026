@@ -66,13 +66,13 @@ this.Detail.HeightF = 580F;  // overrides Group C base default of 540F
 |---|---|---|
 | `TotalPersonCount` | `Application` | ✅ |
 | `TotalPersonCountText` | `Application` | ✅ |
-| `MovementPermitLocation_NameTm` | `Application → MovementPermitLocation` | ✅ |
+| `MovementPermitLocation_NameTm` | `ApplicationProfileInstance → MovementPermitLocation` | ✅ |
 
 ---
 
 ## ReportsUpdater.cs entry
 
 ```csharp
-AddPredefinedReport<AppAdditionalWPLocationReport>("App Additional WP Location Report", typeof(Application), isInplaceReport: true);
+AddPredefinedReport<AppAdditionalWPLocationReport>("App Additional WP Location Report", typeof(ApplicationProfileInstance), isInplaceReport: true);
 CreateReportVisibility("App Additional WP Location Report", "[ApplicationType.Name] = 'App_Additional_WP_location'");
 ```

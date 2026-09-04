@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel;
 using System.Linq;
@@ -8,6 +10,8 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
+using Visa2026.Module.Services;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -29,14 +33,8 @@ namespace Visa2026.Module.BusinessObjects
                 if (person != value)
                 {
                     person = value;
-                    if (person != null && BorderZone?.Application != null)
-                    {
-                        var appItem = BorderZone.Application.ApplicationItems.FirstOrDefault(ai => ai.Person?.ID == person.ID);
-                        if (appItem != null)
-                        {
-                            Passport = appItem.CurrentPassport;
-                        }
-                    }
+                    if (person != null)
+                        Passport = ApplicationProfileInstancePersonValidItems.ResolvePassport(person);
                 }
             }
         }
@@ -44,7 +42,15 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Passport Passport { get; set; }
 
-        public virtual bool IsCancelled { get; set; }
+        [NotMapped]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInDetailView(false)]
+        public bool IsCancelled => IssuedDocumentLifecycle.IsCancelled(this);
+
+        [NotMapped]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInDetailView(false)]
+        public bool IsChanged => IssuedDocumentLifecycle.IsChanged(this);
 
 
         public override void OnSaving()
@@ -60,5 +66,10 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("AllowEdit", "False")]
         public string DocumentCopiesListLink =>
             Visa2026.Module.Localization.VisaUiMessages.Get("BorderZoneDocumentCopies.List.ColumnLink");
+
+        /// <summary>Skip-navigation M2M with <see cref="ApplicationProfileInstance"/> (same pattern as Person). Not aggregated.</summary>
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInListView(false)]
+        public virtual IList<ApplicationProfileInstance> ApplicationProfileInstances { get; set; } = new ObservableCollection<ApplicationProfileInstance>();
     }
 }

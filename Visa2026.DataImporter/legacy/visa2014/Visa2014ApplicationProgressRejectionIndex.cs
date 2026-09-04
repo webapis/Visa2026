@@ -5,7 +5,7 @@ namespace Visa2026.DataImporter.Legacy.Visa2014;
 /// (legacy PersonInApplication vs PersonInInvitation under ApplicationResult Result=Rejection).
 /// Used with OR legacy Application.Rejected=1 to synthesize PROCESS_REJECTED.
 /// </summary>
-internal sealed record Visa2014ApplicationProgressRejectionEvidence(
+internal sealed record Visa2014ApplicationProfileInstanceProgressRejectionEvidence(
     int ApplicationItemCount,
     int RejectionItemCount,
     DateTime? RejectionDate,
@@ -15,7 +15,7 @@ internal sealed record Visa2014ApplicationProgressRejectionEvidence(
         ApplicationItemCount > 0 && ApplicationItemCount == RejectionItemCount;
 }
 
-internal static class Visa2014ApplicationProgressRejectionIndex
+internal static class Visa2014ApplicationProfileInstanceProgressRejectionIndex
 {
     private static readonly DateTime LegacyDateThreshold = new(2000, 1, 1);
 
@@ -24,7 +24,7 @@ internal static class Visa2014ApplicationProgressRejectionIndex
     /// </summary>
     internal const string LoadSql = """
         SELECT
-            CAST(a.Oid AS varchar(36)) AS ApplicationOid,
+            CAST(a.Oid AS varchar(36)) AS ApplicationProfileInstanceOid,
             pia.ItemCount AS ApplicationItemCount,
             rej.RejectionItemCount,
             CONVERT(varchar(10), rej.MaxIssuedDate, 23) AS MaxRejectionIssuedDate,
@@ -55,15 +55,15 @@ internal static class Visa2014ApplicationProgressRejectionIndex
           AND pia.ItemCount = rej.RejectionItemCount
         """;
 
-    public static IReadOnlyDictionary<Guid, Visa2014ApplicationProgressRejectionEvidence> Load(
+    public static IReadOnlyDictionary<Guid, Visa2014ApplicationProfileInstanceProgressRejectionEvidence> Load(
         string connectionString,
         bool verbose)
     {
         var dictRows = Visa2014SqlCmdReader.Query(connectionString, LoadSql, verbose);
-        var map = new Dictionary<Guid, Visa2014ApplicationProgressRejectionEvidence>();
+        var map = new Dictionary<Guid, Visa2014ApplicationProfileInstanceProgressRejectionEvidence>();
         foreach (var row in dictRows)
         {
-            if (!row.TryGetValue("ApplicationOid", out var oidText)
+            if (!row.TryGetValue("ApplicationProfileInstanceOid", out var oidText)
                 || !Guid.TryParse(oidText?.Trim(), out var applicationOid))
                 continue;
 
@@ -74,19 +74,19 @@ internal static class Visa2014ApplicationProgressRejectionIndex
 
         if (verbose)
             Console.WriteLine(
-                $"INF ApplicationProgress rejection coverage index: {map.Count} legacy application(s) with full RejectionItem coverage.");
+                $"INF ApplicationProfileInstanceProgress rejection coverage index: {map.Count} legacy application(s) with full RejectionItem coverage.");
 
         return map;
     }
 
-    internal static Visa2014ApplicationProgressRejectionEvidence BuildEvidence(
+    internal static Visa2014ApplicationProfileInstanceProgressRejectionEvidence BuildEvidence(
         IReadOnlyDictionary<string, string?> row)
     {
         var itemCount = ParseCount(row.GetValueOrDefault("ApplicationItemCount"));
         var rejectionItemCount = ParseCount(row.GetValueOrDefault("RejectionItemCount"));
         var rejectionDate = TryParseDate(row.GetValueOrDefault("MaxRejectionIssuedDate"));
         var numbers = NormalizeRef(row.GetValueOrDefault("RejectionNumbers"));
-        return new Visa2014ApplicationProgressRejectionEvidence(
+        return new Visa2014ApplicationProfileInstanceProgressRejectionEvidence(
             itemCount,
             rejectionItemCount,
             IsLegacyDateSet(rejectionDate) ? rejectionDate : null,

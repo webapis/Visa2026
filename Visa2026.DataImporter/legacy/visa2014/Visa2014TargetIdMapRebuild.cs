@@ -84,7 +84,7 @@ internal static class Visa2014TargetIdMapRebuild
         {
             var previousMap = File.Exists(mapPath) ? Visa2014IdMapHelper.Load(mapPath) : null;
             var applicationItemIdMapPath = Path.Combine(mapDir, "ApplicationItem.json");
-            var rebuild = await Visa2014ApplicationIdMapRebuild.RebuildAsync(
+            var rebuild = await Visa2014ApplicationProfileInstanceIdMapRebuild.RebuildAsync(
                 conn,
                 source.ConnectionString,
                 source.LookupTranslationPaths,
@@ -97,7 +97,7 @@ internal static class Visa2014TargetIdMapRebuild
 
             if (previousMap is { Count: > 0 })
             {
-                var preserved = MergePreservedApplicationIdMapEntries(map, previousMap, verbose);
+                var preserved = MergePreservedApplicationProfileInstanceIdMapEntries(map, previousMap, verbose);
                 matched += preserved;
             }
 
@@ -115,14 +115,14 @@ internal static class Visa2014TargetIdMapRebuild
                     legacyIdentities[legacyOid] = identity.Value;
             }
 
-            var collisions = Visa2014ApplicationTransform.FindApplicationIdMapCrossDateTargetCollisions(
+            var collisions = Visa2014ApplicationTransform.FindApplicationProfileInstanceIdMapCrossDateTargetCollisions(
                 map,
                 legacyIdentities);
             if (collisions.Count > 0)
             {
                 Console.Error.WriteLine(
-                    $"ERR Application id-map rebuild: {collisions.Count} target collision(s) — " +
-                    "multiple legacy Application Oids mapped to the same target.");
+                    $"ERR ApplicationProfileInstance id-map rebuild: {collisions.Count} target collision(s) — " +
+                    "multiple legacy ApplicationProfileInstance Oids mapped to the same target.");
                 foreach (var collision in collisions.Take(20))
                     Console.Error.WriteLine($"ERR   {collision}");
                 if (collisions.Count > 20)
@@ -580,7 +580,7 @@ internal static class Visa2014TargetIdMapRebuild
         return 0;
     }
 
-    private static int MergePreservedApplicationIdMapEntries(
+    private static int MergePreservedApplicationProfileInstanceIdMapEntries(
         Dictionary<Guid, Guid> map,
         IReadOnlyDictionary<Guid, Guid> previousMap,
         bool verbose)

@@ -37,6 +37,7 @@ public static class HeaderLinkedDocumentsResolver
             HeaderDocumentCopiesFamily.Invitation => ResolveInvitation(objectSpace, parentId, contextItemId),
             HeaderDocumentCopiesFamily.Rejection => ResolveRejection(objectSpace, parentId, contextItemId),
             HeaderDocumentCopiesFamily.BorderZone => ResolveBorderZone(objectSpace, parentId, contextItemId),
+            HeaderDocumentCopiesFamily.Visa => ResolveVisa(objectSpace, parentId, contextItemId),
             _ => throw new ArgumentOutOfRangeException(nameof(family), family, null),
         };
     }
@@ -177,6 +178,39 @@ public static class HeaderLinkedDocumentsResolver
         };
     }
 
+    private static HeaderLinkedDocumentsSnapshot ResolveVisa(
+        IObjectSpace os,
+        Guid parentId,
+        Guid? contextItemId)
+    {
+        var visa = os.GetObjectByKey<Visa>(parentId);
+        if (visa == null)
+        {
+            return new HeaderLinkedDocumentsSnapshot
+            {
+                Family = HeaderDocumentCopiesFamily.Visa,
+                ParentId = parentId,
+                ContextItemId = contextItemId,
+            };
+        }
+
+        visa = os.GetObject(visa);
+
+        return new HeaderLinkedDocumentsSnapshot
+        {
+            Family = HeaderDocumentCopiesFamily.Visa,
+            ParentId = visa.ID,
+            ContextItemId = contextItemId,
+            HeaderTitle = visa.VisaNumber ?? string.Empty,
+            Subtitle = BuildVisaSubtitle(visa),
+            ShowSharedScansHint = false,
+            Records = LoadDocumentRecords<VisaDocument>(
+                os,
+                d => d.Visa.ID == visa.ID,
+                doc => $"VisaDocument:{doc.ID:N}"),
+        };
+    }
+
     private static string? BuildWorkPermitSubtitle(IObjectSpace os, WorkPermit workPermit, Guid? contextItemId)
     {
         if (contextItemId is Guid itemId && itemId != Guid.Empty)
@@ -191,7 +225,7 @@ public static class HeaderLinkedDocumentsResolver
             }
         }
 
-        return BuildApplicationSubtitle(workPermit.Application);
+        return BuildApplicationSubtitle(workPermit.ApplicationProfileInstance);
     }
 
     private static string? BuildInvitationSubtitle(IObjectSpace os, Invitation invitation, Guid? contextItemId)
@@ -208,7 +242,7 @@ public static class HeaderLinkedDocumentsResolver
             }
         }
 
-        return BuildApplicationSubtitle(invitation.Application);
+        return BuildApplicationSubtitle(invitation.ApplicationProfileInstance);
     }
 
     private static string? BuildRejectionSubtitle(IObjectSpace os, Rejection rejection, Guid? contextItemId)
@@ -226,7 +260,7 @@ public static class HeaderLinkedDocumentsResolver
             }
         }
 
-        return BuildApplicationSubtitle(rejection.Application);
+        return BuildApplicationSubtitle(rejection.ApplicationProfileInstance);
     }
 
     private static string? BuildBorderZoneSubtitle(IObjectSpace os, BorderZone borderZone, Guid? contextItemId)
@@ -243,10 +277,19 @@ public static class HeaderLinkedDocumentsResolver
             }
         }
 
-        return BuildApplicationSubtitle(borderZone.Application);
+        return BuildApplicationSubtitle(borderZone.ApplicationProfileInstance);
     }
 
-    private static string? BuildApplicationSubtitle(Application? application)
+    private static string? BuildVisaSubtitle(Visa visa)
+    {
+        var personName = visa.Passport?.Person?.FullName;
+        if (!string.IsNullOrWhiteSpace(personName))
+            return personName.Trim();
+
+        return BuildApplicationSubtitle(visa.IssuingApplicationProfileInstance);
+    }
+
+    private static string? BuildApplicationSubtitle(ApplicationProfileInstance? application)
     {
         if (application == null)
             return null;
@@ -255,7 +298,7 @@ public static class HeaderLinkedDocumentsResolver
         if (string.IsNullOrWhiteSpace(number))
             return null;
 
-        return VisaUiMessages.Format("HeaderDocumentCopies.Subtitle.Application", number);
+        return VisaUiMessages.Format("HeaderDocumentCopies.Subtitle.ApplicationProfileInstance", number);
     }
 
     private static IReadOnlyList<HeaderLinkedDocumentRecord> LoadDocumentRecords<TDocument>(

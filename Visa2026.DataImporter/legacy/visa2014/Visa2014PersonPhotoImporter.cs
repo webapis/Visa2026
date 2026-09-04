@@ -91,6 +91,9 @@ internal static class Visa2014PersonPhotoImporter
             }
         }
 
+        if (!dryRun)
+            await target.FlushAsync();
+
         return new Visa2014PersonPhotoImportResult
         {
             IdMapEntries = idMap.Count,

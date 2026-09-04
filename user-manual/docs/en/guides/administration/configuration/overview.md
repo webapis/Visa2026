@@ -59,6 +59,7 @@ The menu lists eleven items. Some open a **single company record** (singleton); 
 | **Ministry review SLA** | Singleton | Default working-day SLA per ministry leg | [SLA settings](sla.md) |
 | **Document expiration alerts** | Catalog | Calendar-day thresholds before document expiry | [Alerts and upload limits](alerts-and-upload-limits.md) |
 | **Upload limits** | Singleton | Max image and attachment size (MB) | [Alerts and upload limits](alerts-and-upload-limits.md) |
+| **Application Profiles** | Catalog | Reusable application configuration (route, fields, templates) | [Application profiles](application-profiles.md) |
 
 ## Singleton vs catalog
 
@@ -99,6 +100,7 @@ flowchart LR
 
 - **Organization** values merge into [Resminamalar](../../applications/resminamalar.md) Word reports (company block, signatory lines).
 - **Project contracts** and **Approval Leg Profile** filter choices on [Create an application](../../applications/create.md) and drive [Track application progress](../../applications/progress.md) ministry steps.
+- **Application Profiles** define which fields and progress rules officers get when they [choose a profile](../../applications/application-profiles.md) at create.
 - **SLA** settings feed working-day warnings on progress (when enabled in your deployment).
 - **Document expiration alerts** define when visas, passports, and similar records show **expiring soon** states used by dashboard and list styling.
 - **Upload limits** cap scan and attachment size on person and application forms.
@@ -109,6 +111,7 @@ flowchart LR
 |-------|-------|
 | Company identity and numbering | [Organization settings](organization.md) |
 | Contracts and ministry routes | [Contracts and approvals](contracts-and-approvals.md) |
+| Application profiles (wizard) | [Application profiles](application-profiles.md) |
 | Migration and ministry SLA | [SLA settings](sla.md) |
 | Expiry thresholds and file sizes | [Alerts and upload limits](alerts-and-upload-limits.md) |
 | Report templates (separate menu) | [User report templates](../user-report-templates.md) |

@@ -1,0 +1,605 @@
+@using System.Collections.Generic
+@using System.Linq
+@using System.IO
+@using Microsoft.AspNetCore.Components.Forms
+@using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.BusinessObjects.ApplicationWorkspace
+@using Visa2026.Module.BusinessObjects.OfficerShell
+@using Visa2026.Module.Services.ApplicationWorkspace
+
+<div class="ct-page">
+    @if (!string.IsNullOrWhiteSpace(DisplayStatusMessage))
+    {
+        <div class="os-banner @(DisplayStatusIsError ? "os-banner--error" : "os-banner--ok")"
+             style="margin-bottom:12px"
+             role="@(DisplayStatusIsError ? "alert" : "status")">@DisplayStatusMessage</div>
+    }
+
+    <h2 class="ct-page__title">Progress</h2>
+    <p class="ct-page__sub">ApplicationProfileInstance process for @view.Chrome.TemplateFamilyLabel · current step: @CurrentStepHeading</p>
+    <div class="ct-prog-v-list">
+        @foreach (var step in view.ProgressSteps)
+        {
+            // Result dropdown is unsaved until Advance. Keep the current node blue + pen
+            // (same as Office preparation), not Issued/Approved green tick.
+            var isCurrent = string.Equals(step.State, "current", StringComparison.OrdinalIgnoreCase);
+            var badge = !string.IsNullOrWhiteSpace(step.CurrentStateLabel)
+                ? step.CurrentStateLabel
+                : step.State == "done" && !string.Equals(step.Key, "office", StringComparison.OrdinalIgnoreCase)
+                    ? "Completed"
+                    : isCurrent ? "In progress"
+                    : step.State == "pending" ? "Pending"
+                    : string.Empty;
+            var tone = isCurrent ? "current" : step.OutcomeKind;
+            var badgeCls = tone switch
+            {
+                "issued" => "issued",
+                "rejected" => "rejected",
+                "cancelled" => "cancelled",
+                "current" => "active",
+                "pending" => "muted",
+                _ => "ok",
+            };
+            var letterName = step.MinistryLetterFileName;
+            var letterProgressId = step.ProgressId;
+            var icon = isCurrent
+                ? "✎"
+                : tone switch
+                {
+                    "rejected" => "✕",
+                    "cancelled" => "–",
+                    "issued" or "ok" => "✓",
+                    _ => "○",
+                };
+            <div class="ct-prog-v ct-prog-v--@step.State ct-prog-v--tone-@tone">
+                <div class="ct-prog-v__rail">
+                    <span class="ct-prog-v__date">@(string.IsNullOrWhiteSpace(step.Date) ? "—" : step.Date)</span>
+                    <span class="ct-prog-v__dot">@icon</span>
+                    <span class="ct-prog-v__line"></span>
+                </div>
+                <div class="ct-prog-v__body">
+                    <div class="ct-prog-v__head">
+                        <strong>@step.Label</strong>
+                        @if (!string.IsNullOrWhiteSpace(badge))
+                        {
+                            <span class="cw-prog-step__badge cw-prog-step__badge--@badgeCls">@badge</span>
+                        }
+                    </div>
+                    @if (step.State != "current" && ShowRevertToHere && step.CanRevertToHere)
+                    {
+                        <p style="margin:6px 0 0">
+                            <button type="button"
+                                    class="os-btn os-btn--ghost"
+                                    disabled="@_busy"
+                                    @onclick="() => RevertAsync(step)">
+                                ◀ Revert to here
+                            </button>
+                        </p>
+                    }
+                    @if (step.State != "current"
+                        && !string.IsNullOrWhiteSpace(letterName)
+                        && letterProgressId is Guid)
+                    {
+                        <p class="ct-prog-v__letter">
+                            <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
+                                                               ProgressId="letterProgressId"
+                                                               FileName="@letterName"
+                                                               OwnerViewId="@PreviewSlotOwnerViewId" />
+                        </p>
+                    }
+                    else if (step.State != "current" && step.MissingMinistryLetter)
+                    {
+                        <div class="ct-prog-v__letter-missing">
+                            <span class="person-dossier__pill st-pending doc-copies-catalog__pill doc-copies-catalog__pill--missing">Missing</span>
+                            <label class="ct-label">Approval / disapproval letter</label>
+                            <label class="ct-upload ct-upload--action ct-upload--missing">
+                                <InputFile OnChange="e => OnMinistryLetterSelected(e, step)" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp" disabled="@_busy" />
+                                <span>☁ Upload a copy of the approval letter<br /><span>PDF or scan up to @MaxUploadMb MB</span></span>
+                            </label>
+                        </div>
+                    }
+                    @if (step.State == "current")
+                    {
+                        <div class="ct-prog-detail">
+                            <div class="ct-prog-detail__grid">
+                                <div>
+                                    <label class="ct-label" for="officer-notes-@ApplicationProfileInstanceId">Officer notes</label>
+                                    <textarea id="officer-notes-@ApplicationProfileInstanceId"
+                                              class="ct-textarea"
+                                              rows="3"
+                                              placeholder="Add notes for the current progress step…"
+                                              value="@_officerNotes"
+                                              @oninput="OnNotesInput"
+                                              disabled="@_busy"></textarea>
+                                    <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+                                        <button type="button" class="os-btn" disabled="@(_busy || _notesDirty == false)" @onclick="SaveNotesAsync">Save notes</button>
+                                    </div>
+                                </div>
+                                <dl class="ct-meta">
+                                    <div><dt>Current state</dt><dd><span class="os-status os-status--process">@(string.IsNullOrWhiteSpace(step.CurrentStateLabel) ? step.Label : step.CurrentStateLabel)</span></dd></div>
+                                    <div><dt>Started on</dt><dd>@step.Date</dd></div>
+                                    <div><dt>SLA target</dt><dd>@(string.IsNullOrWhiteSpace(step.SlaTargetDate) ? "—" : step.SlaTargetDate)</dd></div>
+                                </dl>
+                            </div>
+
+                            @if (step.CanAdvance)
+                            {
+                                <div class="ct-prog-advance" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--os-line)">
+                                    <label class="ct-label @(IsDateInvalid ? "ct-label--error" : null)" for="advance-date-@ApplicationProfileInstanceId">Date</label>
+                                    <input id="advance-date-@ApplicationProfileInstanceId"
+                                           @ref="_advanceDateInput"
+                                           type="date"
+                                           class="os-input @(IsDateInvalid ? "is-invalid" : null)"
+                                           aria-invalid="@IsDateInvalid"
+                                           @bind="_advanceDate"
+                                           @bind:format="yyyy-MM-dd"
+                                           disabled="@_busy" />
+                                    @if (step.ResultOptions.Count > 0)
+                                    {
+                                        <label class="ct-label @(IsResultInvalid ? "ct-label--error" : null)" for="advance-state-@ApplicationProfileInstanceId" style="margin-top:10px">Result</label>
+                                        <select id="advance-state-@ApplicationProfileInstanceId"
+                                                @ref="_advanceResultInput"
+                                                class="os-input @(IsResultInvalid ? "is-invalid" : null)"
+                                                aria-invalid="@IsResultInvalid"
+                                                @bind="_selectedAdvanceStateCode"
+                                                disabled="@_busy">
+                                            @if (step.ResultOptions.All(o => o.StateCode != _selectedAdvanceStateCode))
+                                            {
+                                                <option value="@_selectedAdvanceStateCode">—</option>
+                                            }
+                                            @foreach (var option in step.ResultOptions)
+                                            {
+                                                <option value="@option.StateCode">@option.Label</option>
+                                            }
+                                        </select>
+                                    }
+                                    @if (ShowProcessNumberOnAdvance)
+                                    {
+                                        <label class="ct-label @(IsProcessNumberInvalid ? "ct-label--error" : null)" for="advance-process-number-@ApplicationProfileInstanceId" style="margin-top:10px">Process number</label>
+                                        <input id="advance-process-number-@ApplicationProfileInstanceId"
+                                               @ref="_advanceProcessNumberInput"
+                                               type="text"
+                                               class="os-input @(IsProcessNumberInvalid ? "is-invalid" : null)"
+                                               aria-invalid="@IsProcessNumberInvalid"
+                                               maxlength="@ApplicationProcessNumberHelper.MaxLength"
+                                               @bind="_processNumber"
+                                               @bind:event="oninput"
+                                               disabled="@_busy"
+                                               placeholder="Migration Service number" />
+                                    }
+                                    @if (step.ShowMinistryLetterUpload)
+                                    {
+                                        <label class="ct-label @(step.MissingMinistryLetter ? "ct-label--warn" : null)" style="margin-top:10px">Approval / disapproval letter</label>
+                                        @if (step.MissingMinistryLetter)
+                                        {
+                                            <span class="person-dossier__pill st-pending doc-copies-catalog__pill doc-copies-catalog__pill--missing" style="margin:0 0 8px">Missing</span>
+                                        }
+                                        @if (!string.IsNullOrWhiteSpace(letterName) && letterProgressId is Guid)
+                                        {
+                                            <p class="ct-muted" style="margin:0 0 8px">
+                                                <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
+                                                                                   ProgressId="letterProgressId"
+                                                                                   FileName="@letterName"
+                                                                                   OwnerViewId="@PreviewSlotOwnerViewId" />
+                                            </p>
+                                        }
+                                        else if (!string.IsNullOrWhiteSpace(_pendingLetterName))
+                                        {
+                                            <p class="ct-muted" style="margin:0 0 8px">@_pendingLetterName — stored when you Advance progress</p>
+                                        }
+                                        <label class="ct-upload ct-upload--action @(step.MissingMinistryLetter ? "ct-upload--missing" : null)">
+                                            <InputFile OnChange="e => OnMinistryLetterSelected(e, step)" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp" disabled="@_busy" />
+                                            <span>☁ Upload file<br /><span>PDF or scan up to @MaxUploadMb MB</span></span>
+                                        </label>
+                                    }
+                                    <button type="button"
+                                            class="os-btn os-btn--primary"
+                                            style="margin-top:10px"
+                                            disabled="@(_busy || string.IsNullOrWhiteSpace(_selectedAdvanceStateCode))"
+                                            @onclick="AdvanceAsync">
+                                        ▶ Advance progress
+                                    </button>
+                                    @if (step.CanRevert)
+                                    {
+                                        <button type="button"
+                                                class="os-btn os-btn--ghost"
+                                                style="margin-top:10px;margin-left:8px"
+                                                disabled="@_busy"
+                                                @onclick="() => RevertAsync(step)">
+                                            ◀ Revert progress
+                                        </button>
+                                    }
+                                </div>
+                            }
+                            else if (step.ShowMinistryLetterUpload
+                                || step.CanRevert
+                                || !string.IsNullOrWhiteSpace(step.AdvanceBlockedReason))
+                            {
+                                <div class="ct-prog-advance" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--os-line)">
+                                    @if (!string.IsNullOrWhiteSpace(step.AdvanceBlockedReason))
+                                    {
+                                        <p class="ct-muted" style="margin:0 0 10px">@step.AdvanceBlockedReason</p>
+                                    }
+                                    @if (step.ShowMinistryLetterUpload)
+                                    {
+                                        <label class="ct-label @(step.MissingMinistryLetter ? "ct-label--warn" : null)">Approval / disapproval letter</label>
+                                        @if (step.MissingMinistryLetter)
+                                        {
+                                            <span class="person-dossier__pill st-pending doc-copies-catalog__pill doc-copies-catalog__pill--missing" style="margin:0 0 8px">Missing</span>
+                                        }
+                                        @if (!string.IsNullOrWhiteSpace(letterName) && letterProgressId is Guid)
+                                        {
+                                            <p class="ct-muted" style="margin:0 0 8px">
+                                                <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
+                                                                                   ProgressId="letterProgressId"
+                                                                                   FileName="@letterName"
+                                                                                   OwnerViewId="@PreviewSlotOwnerViewId" />
+                                            </p>
+                                        }
+                                        else if (!string.IsNullOrWhiteSpace(_pendingLetterName))
+                                        {
+                                            <p class="ct-muted" style="margin:0 0 8px">@_pendingLetterName</p>
+                                        }
+                                        <label class="ct-upload ct-upload--action @(step.MissingMinistryLetter ? "ct-upload--missing" : null)" style="margin-bottom:10px">
+                                            <InputFile OnChange="e => OnMinistryLetterSelected(e, step)" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp" disabled="@_busy" />
+                                            <span>☁ Upload file<br /><span>PDF or scan up to @MaxUploadMb MB</span></span>
+                                        </label>
+                                    }
+                                    @if (step.CanRevert)
+                                    {
+                                        <button type="button"
+                                                class="os-btn os-btn--ghost"
+                                                disabled="@_busy"
+                                                @onclick="() => RevertAsync(step)">
+                                            ◀ Revert progress
+                                        </button>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (ProgressHistory.Count > 0)
+    {
+        <h3 class="ct-page__title" style="margin-top:24px">History</h3>
+        <ul class="cw-timeline">
+            @foreach (var row in ProgressHistory)
+            {
+                <li><strong>@row.State</strong><span>@row.Date</span></li>
+            }
+        </ul>
+    }
+</div>
+
+@code {
+    [Parameter] public Guid ApplicationProfileInstanceId { get; set; }
+    [Parameter] public ApplicationWorkspaceCaseView View { get; set; } = new();
+    [Parameter] public IReadOnlyList<ApplicationWorkspaceProgressRow> ProgressHistory { get; set; }
+        = Array.Empty<ApplicationWorkspaceProgressRow>();
+    [Parameter] public string? StatusMessage { get; set; }
+    [Parameter] public bool IsStatusError { get; set; }
+    [Parameter] public EventCallback<string> SaveNotesRequested { get; set; }
+    [Parameter] public EventCallback<OfficerShellCaseProgressFileUpload> UploadMinistryLetterRequested { get; set; }
+    [Parameter] public EventCallback<OfficerShellCaseProgressAdvanceRequest> AdvanceProgressRequested { get; set; }
+    [Parameter] public EventCallback<OfficerShellCaseProgressRevertRequest> RevertProgressRequested { get; set; }
+    [Parameter] public bool ShowRevertToHere { get; set; }
+    [Parameter] public string PreviewSlotOwnerViewId { get; set; } = OfficerShellViewIds.DetailView;
+
+    private string _officerNotes = string.Empty;
+    private string _selectedAdvanceStateCode = string.Empty;
+    private string _processNumber = string.Empty;
+    private DateTime _advanceDate = DateTime.Today;
+    private bool _busy;
+    private bool _notesDirty;
+    private string _pendingLetterStepKey = string.Empty;
+    private string _pendingLetterName = string.Empty;
+    private byte[]? _pendingLetterContent;
+    private string? _localAdvanceError;
+    private bool _advanceFieldErrors;
+    private bool _wasStatusError;
+    private bool _focusInvalidAdvanceField;
+    private ElementReference _advanceDateInput;
+    private ElementReference _advanceResultInput;
+    private ElementReference _advanceProcessNumberInput;
+
+    internal DateTime AdvanceDate => _advanceDate == default ? DateTime.Today : _advanceDate.Date;
+
+    internal string SelectedAdvanceStateCode => _selectedAdvanceStateCode;
+
+    internal string ProcessNumberOnAdvance => _processNumber;
+
+    private bool ShowProcessNumberOnAdvance =>
+        view.Chrome.ShowProcessNumber
+        && ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(_selectedAdvanceStateCode);
+
+    private string? DisplayStatusMessage =>
+        !string.IsNullOrWhiteSpace(_localAdvanceError) ? _localAdvanceError : StatusMessage;
+
+    private bool DisplayStatusIsError =>
+        !string.IsNullOrWhiteSpace(_localAdvanceError) || IsStatusError;
+
+    private bool IsAdvanceFieldErrorMode => _advanceFieldErrors || IsStatusError;
+
+    private bool IsDateInvalid => IsAdvanceFieldErrorMode && _advanceDate == default;
+
+    private bool IsResultInvalid
+    {
+        get
+        {
+            if (!IsAdvanceFieldErrorMode)
+                return false;
+
+            var current = View.ProgressSteps.FirstOrDefault(s => s.State == "current");
+            return current != null
+                && current.ResultOptions.Count > 0
+                && string.IsNullOrWhiteSpace(_selectedAdvanceStateCode);
+        }
+    }
+
+    private bool IsProcessNumberInvalid
+    {
+        get
+        {
+            if (!IsAdvanceFieldErrorMode || !ShowProcessNumberOnAdvance)
+                return false;
+
+            if (string.IsNullOrWhiteSpace(_processNumber))
+                return true;
+
+            return IsStatusError
+                && !string.IsNullOrWhiteSpace(StatusMessage)
+                && StatusMessage.Contains("Process number", StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    internal string? PendingLetterFileName =>
+        string.IsNullOrWhiteSpace(_pendingLetterName) ? null : _pendingLetterName;
+
+    internal byte[]? PendingLetterContent => _pendingLetterContent;
+
+    private ApplicationWorkspaceCaseView view => View;
+    private int MaxUploadMb => 10;
+
+    protected override void OnParametersSet()
+    {
+        if (IsStatusError)
+        {
+            if (!_wasStatusError)
+                _focusInvalidAdvanceField = true;
+            _advanceFieldErrors = true;
+            _localAdvanceError = null;
+        }
+        else if (string.Equals(StatusMessage, "Progress advanced.", StringComparison.Ordinal))
+        {
+            _advanceFieldErrors = false;
+            _localAdvanceError = null;
+        }
+
+        _wasStatusError = IsStatusError;
+
+        var current = View.ProgressSteps.FirstOrDefault(s => s.State == "current");
+        if (current == null)
+            return;
+
+        if (!string.Equals(_pendingLetterStepKey, current.Key, StringComparison.OrdinalIgnoreCase))
+        {
+            _pendingLetterStepKey = string.Empty;
+            _pendingLetterName = string.Empty;
+            _pendingLetterContent = null;
+        }
+
+        if (!_notesDirty)
+            _officerNotes = current.OfficerNotes ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(_processNumber) && !string.IsNullOrWhiteSpace(view.Chrome.ProcessNumber))
+            _processNumber = view.Chrome.ProcessNumber;
+
+        if (string.IsNullOrWhiteSpace(_selectedAdvanceStateCode)
+            || current.ResultOptions.All(o => o.StateCode != _selectedAdvanceStateCode))
+        {
+            _selectedAdvanceStateCode = ApplicationWorkspaceProgressAdvancePreview.PreferredAdvanceCode(
+                current.Key,
+                current.AdvanceOptions,
+                _selectedAdvanceStateCode) ?? string.Empty;
+        }
+    }
+
+    private string CurrentStepHeading
+    {
+        get
+        {
+            var current = view.ProgressSteps.FirstOrDefault(s => s.State == "current");
+            if (current == null)
+                return view.Chrome.CurrentStep;
+
+            var result = current.CurrentStateLabel;
+            if (string.IsNullOrWhiteSpace(result)
+                || string.Equals(result, current.Label, StringComparison.OrdinalIgnoreCase))
+                return current.Label;
+
+            return $"{current.Label} · {result}";
+        }
+    }
+
+    private void OnNotesInput(ChangeEventArgs e)
+    {
+        _officerNotes = e.Value?.ToString() ?? string.Empty;
+        _notesDirty = true;
+    }
+
+    private async Task SaveNotesAsync()
+    {
+        if (_busy)
+            return;
+
+        _busy = true;
+        try
+        {
+            await SaveNotesRequested.InvokeAsync(_officerNotes);
+            _notesDirty = false;
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task OnMinistryLetterSelected(InputFileChangeEventArgs e, ApplicationWorkspaceCaseProgressStep step)
+    {
+        var file = e.File;
+        if (file == null || _busy)
+            return;
+
+        _busy = true;
+        try
+        {
+            await using var stream = file.OpenReadStream(MaxUploadMb * 1024 * 1024);
+            using var memory = new MemoryStream();
+            await stream.CopyToAsync(memory);
+            var content = memory.ToArray();
+
+            var attachTo = step.DecisionProgressId
+                ?? (step.MissingMinistryLetter ? step.ProgressId : null);
+            if (attachTo is Guid progressId && progressId != Guid.Empty)
+            {
+                await UploadMinistryLetterRequested.InvokeAsync(new OfficerShellCaseProgressFileUpload
+                {
+                    FileName = file.Name,
+                    Content = content,
+                    ProgressId = progressId,
+                });
+                return;
+            }
+
+            _pendingLetterStepKey = step.Key;
+            _pendingLetterName = file.Name;
+            _pendingLetterContent = content;
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    internal Task AdvanceFromRailAsync() => AdvanceAsync();
+
+    private async Task AdvanceAsync()
+    {
+        if (_busy)
+            return;
+
+        var current = View.ProgressSteps.FirstOrDefault(s => s.State == "current");
+        var code = ApplicationWorkspaceProgressAdvancePreview.PreferredAdvanceCode(
+            current?.Key ?? string.Empty,
+            current?.AdvanceOptions ?? Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>(),
+            _selectedAdvanceStateCode);
+        if (string.IsNullOrWhiteSpace(code))
+            return;
+
+        _localAdvanceError = null;
+        if (!TryValidateAdvance(code, out var validationError))
+        {
+            _advanceFieldErrors = true;
+            _localAdvanceError = validationError;
+            _focusInvalidAdvanceField = true;
+            return;
+        }
+
+        _busy = true;
+        try
+        {
+            await AdvanceProgressRequested.InvokeAsync(new OfficerShellCaseProgressAdvanceRequest
+            {
+                StateCode = code,
+                Notes = _officerNotes,
+                Date = AdvanceDate,
+                LetterFileName = _pendingLetterName,
+                LetterContent = _pendingLetterContent,
+                ProcessNumber = _processNumber,
+            });
+            _notesDirty = false;
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private bool TryValidateAdvance(string code, out string? error)
+    {
+        if (_advanceDate == default)
+        {
+            error = "Date is required.";
+            return false;
+        }
+
+        var current = View.ProgressSteps.FirstOrDefault(s => s.State == "current");
+        if (current != null
+            && current.ResultOptions.Count > 0
+            && string.IsNullOrWhiteSpace(_selectedAdvanceStateCode))
+        {
+            error = "Result is required to advance progress.";
+            return false;
+        }
+
+        var requireProcessNumber = view.Chrome.ShowProcessNumber
+            && ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(code);
+        if (requireProcessNumber && string.IsNullOrWhiteSpace(_processNumber))
+        {
+            error = "Process number is required when submitting to Migration Service.";
+            return false;
+        }
+
+        error = null;
+        return true;
+    }
+
+    private async Task FocusFirstInvalidAdvanceFieldAsync()
+    {
+        try
+        {
+            if (IsDateInvalid)
+                await _advanceDateInput.FocusAsync();
+            else if (IsResultInvalid)
+                await _advanceResultInput.FocusAsync();
+            else if (IsProcessNumberInvalid)
+                await _advanceProcessNumberInput.FocusAsync();
+        }
+        catch (InvalidOperationException)
+        {
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_focusInvalidAdvanceField)
+            return;
+
+        _focusInvalidAdvanceField = false;
+        await FocusFirstInvalidAdvanceFieldAsync();
+    }
+
+    private async Task RevertAsync(ApplicationWorkspaceCaseProgressStep step)
+    {
+        if (_busy)
+            return;
+
+        _busy = true;
+        try
+        {
+            await RevertProgressRequested.InvokeAsync(new OfficerShellCaseProgressRevertRequest
+            {
+                StepKey = step.CanRevertToHere && !step.CanRevert ? step.Key : null,
+            });
+            _notesDirty = false;
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+}

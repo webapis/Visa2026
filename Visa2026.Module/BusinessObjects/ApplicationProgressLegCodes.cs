@@ -7,7 +7,7 @@ namespace Visa2026.Module.BusinessObjects;
 /// <summary>
 /// Dynamic <see cref="ApplicationState"/> codes for ministry review legs 1…N.
 /// </summary>
-public static class ApplicationProgressLegCodes
+public static class ApplicationProfileInstanceProgressLegCodes
 {
     public const int MaxLegCount = 5;
 

@@ -59,5 +59,5 @@ This object inherits from `BaseObject` and implements the `IExpirationLogic` and
 - **Navigation**: "Invitation" group.
 - **Default Property**: `InvitationNumber`.
 - **Always visible**: Number, Issued Date, Visa Category, Visa Period, Expiration Date, Days Remaining.
-- **Gear**: Application, visa start/end flag and dates.
+- **Gear**: ApplicationProfileInstance, visa start/end flag and dates.
 - **Status**: Edit **Cancelled**, **Changed**, and **Used** on each **Invitation Item**, not on this header.

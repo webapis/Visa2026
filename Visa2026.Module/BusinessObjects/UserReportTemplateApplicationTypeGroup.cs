@@ -22,7 +22,7 @@ public class UserReportTemplateApplicationTypeGroup : BaseObject
     public virtual UserReportTemplate UserReportTemplate { get; set; } = null!;
 
     [RuleRequiredField]
-    [XafDisplayName("Application Type Group")]
+    [XafDisplayName("ApplicationProfileInstance Type Group")]
     public virtual ApplicationTypeGroup ApplicationTypeGroup { get; set; } = null!;
 
     [Browsable(false)]

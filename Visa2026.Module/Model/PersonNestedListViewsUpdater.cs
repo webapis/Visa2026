@@ -9,11 +9,9 @@ namespace Visa2026.Module.Model;
 /// </summary>
 public sealed class PersonNestedListViewsUpdater : ModelNodesGeneratorUpdater<ModelViewsNodesGenerator>
 {
-    /// <summary>Nested path: type lives on the parent <c>Application</c>, not on <c>ApplicationItem</c>.</summary>
-    internal const string ApplicationTypePropertyName = "Application.ApplicationType";
-
-    /// <summary>Nested path: date lives on the parent <c>Application</c>, not on <c>ApplicationItem</c>.</summary>
-    internal const string ApplicationDatePropertyName = "Application.ApplicationDate";
+    internal const string ApplicationDatePropertyName = "ApplicationDate";
+    internal const string ApplicationProfilePropertyName = "ApplicationProfile";
+    internal const string ApplicationTypePropertyName = "ApplicationType";
 
     public override void UpdateNode(ModelNode node)
     {
@@ -26,8 +24,8 @@ public sealed class PersonNestedListViewsUpdater : ModelNodesGeneratorUpdater<Mo
             ConfigureReadOnlyNestedListView(listView);
         }
 
-        if (views[PersonNestedCollectionLayout.ApplicationItemsListView] is IModelListView applicationItemsListView)
-            EnsureApplicationDateAndTypeColumns(applicationItemsListView);
+        if (views[PersonNestedCollectionLayout.ApplicationProfileInstancesListView] is IModelListView applicationPeopleListView)
+            EnsureApplicationDateAndProfileColumns(applicationPeopleListView);
     }
 
     internal static void ConfigureReadOnlyNestedListView(IModelListView listView)
@@ -40,9 +38,29 @@ public sealed class PersonNestedListViewsUpdater : ModelNodesGeneratorUpdater<Mo
     }
 
     /// <summary>
-    /// Officers need application date and type on Person → Application items (issued);
-    /// items from different applications differ.
+    /// Officers need application date and profile on Person → Profile instances (linked);
+    /// rows from different applications differ.
     /// </summary>
+    internal static void EnsureApplicationDateAndProfileColumns(IModelListView listView)
+    {
+        var applicationColumn = listView.Columns["ApplicationNumber"]
+            ?? listView.Columns["FullApplicationNumber"];
+        var baseIndex = applicationColumn?.Index is int applicationIndex and >= 0
+            ? applicationIndex
+            : 1;
+
+        var dateColumn = listView.Columns[ApplicationDatePropertyName]
+            ?? listView.Columns.AddNode<IModelColumn>(ApplicationDatePropertyName);
+        dateColumn.PropertyName = ApplicationDatePropertyName;
+        dateColumn.Index = baseIndex + 1;
+
+        var profileColumn = listView.Columns[ApplicationProfilePropertyName]
+            ?? listView.Columns.AddNode<IModelColumn>(ApplicationProfilePropertyName);
+        profileColumn.PropertyName = ApplicationProfilePropertyName;
+        profileColumn.Index = baseIndex + 2;
+    }
+
+    /// <summary>Legacy ApplicationRosterMergeLine nested list (slice 10 close-out).</summary>
     internal static void EnsureApplicationDateAndTypeColumns(IModelListView listView)
     {
         var applicationColumn = listView.Columns["Application"];

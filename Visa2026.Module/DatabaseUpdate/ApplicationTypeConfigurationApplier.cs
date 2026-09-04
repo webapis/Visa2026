@@ -17,9 +17,9 @@ internal static class ApplicationTypeConfigurationApplier
         target.LifecycleStage = source.LifecycleStage;
         target.Category = source.Category;
         target.DurationInDays = source.DurationInDays;
-        target.ApplicationProgressRoute = source.ApplicationProgressRoute;
-        target.MinistryReviewDepth = ApplicationProgressRouteHelper.NormalizeMinistryReviewDepth(
-            source.ApplicationProgressRoute,
+        target.ApplicationProfileInstanceProgressRoute = source.ApplicationProfileInstanceProgressRoute;
+        target.MinistryReviewDepth = ApplicationProfileInstanceProgressRouteHelper.NormalizeMinistryReviewDepth(
+            source.ApplicationProfileInstanceProgressRoute,
             source.MinistryReviewDepth);
 
         if (overwriteShowFlags)

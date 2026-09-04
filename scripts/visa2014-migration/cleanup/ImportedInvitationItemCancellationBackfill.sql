@@ -12,8 +12,8 @@ BEGIN
     UPDATE ApplicationItems SET PreviousInvitationItemID = NULL WHERE PreviousInvitationItemID IS NOT NULL;
 END
 
-IF OBJECT_ID('dbo.Visas', 'U') IS NOT NULL AND COL_LENGTH('dbo.Visas', 'InvitationItemID') IS NOT NULL
-    UPDATE Visas SET InvitationItemID = NULL WHERE InvitationItemID IS NOT NULL;
+IF OBJECT_ID('dbo.Visas', 'U') IS NOT NULL AND COL_LENGTH('dbo.Visas', 'IssuingInvitationItemID') IS NOT NULL
+    UPDATE Visas SET IssuingInvitationItemID = NULL WHERE IssuingInvitationItemID IS NOT NULL;
 
 IF OBJECT_ID('dbo.InvitationItems', 'U') IS NOT NULL
     DELETE FROM InvitationItems;

@@ -45,7 +45,7 @@ disable-model-invocation: false
 
 1. **Main area, not preview slot** — dossier is an XAF DetailView over `PersonDossierHost`. Putting it in `#visa-preview-slot` would evict Document copies (one occupant).
 2. **Not a Report Dashboard panel** — one person, no Status buckets / Preview↔ListView parity. Search entry only is a dashboard category.
-3. **Read-only** — officers edit on typed Person DetailView; dossier never writes domain data.
+3. **Read-only** — officers edit on typed Person DetailView; dossier never writes domain data. Do **not** add Start application / create Application Profile Instance from dossier.
 4. **Copies `OwnerViewId` = dossier view** — `PersonDossierViewIds.DetailView` (or `VisaPreviewSlotViewHelper.ResolveOwnerViewId`). Wrong owner → slot closes when navigating search → dossier.
 5. **Director export ≠ ministry ZIP** — `PersonExportBatch` / packer / toast. Do **not** route through `PdfGenerationBatch`.
 6. **Paper = export HTML fragment** — `PersonDossierDocumentHtmlBuilder.BuildFragment` in A4 chrome; do not open the preview slot for Paper (keeps copies beside dossier).
@@ -83,6 +83,7 @@ disable-model-invocation: false
 
 | Symptom | First step | Likely owner |
 |---------|------------|--------------|
+| Start process / Start application on dossier | Hidden — instances are created only from Application Profile Instances lists | **application-profile** |
 | Dossier opens then copies slot closes | `OwnerViewId` must be dossier DetailView id | **This skill** + preview-slot |
 | Stuck "Opening dossier… 0%" on dashboard after close | `_localLoading` cleared in `finally` on row select | **report-dashboard** |
 | Plain "Loading dossier…" / no progress | Staged load in `PersonDossierPropertyEditor.LoadAsync` | **This skill** |

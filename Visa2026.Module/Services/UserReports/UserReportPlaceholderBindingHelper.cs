@@ -25,7 +25,8 @@ internal static class UserReportPlaceholderBindingHelper
     /// <summary>True when the raw token uses the post-merge photo injector prefix.</summary>
     public static bool IsImageInjectorToken(string placeholderKey) =>
         !string.IsNullOrWhiteSpace(placeholderKey)
-        && placeholderKey.Trim().StartsWith("IMAGE:", StringComparison.OrdinalIgnoreCase);
+        && WordUserReportImageInjector.NormalizeImageKey(placeholderKey)
+            .StartsWith("IMAGE:", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>Coerces values for <see cref="DocxTemplater.DocxTemplate.BindModel"/> (photos stay <see cref="byte[]"/>, not text).</summary>
     public static object CoerceMergeValue(object? value, string propertyPath)
@@ -47,21 +48,21 @@ internal static class UserReportPlaceholderBindingHelper
         if (string.IsNullOrWhiteSpace(propertyPath))
             return false;
 
-        var prop = typeof(BusinessObjects.ApplicationItem).GetProperty(
+        var prop = typeof(BusinessObjects.ApplicationRosterMergeLine).GetProperty(
             propertyPath,
             BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
         if (prop?.PropertyType == typeof(byte[]))
         {
-            declaringType = typeof(BusinessObjects.ApplicationItem);
+            declaringType = typeof(BusinessObjects.ApplicationRosterMergeLine);
             return true;
         }
 
-        prop = typeof(BusinessObjects.Application).GetProperty(
+        prop = typeof(BusinessObjects.ApplicationProfileInstance).GetProperty(
             propertyPath,
             BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
         if (prop?.PropertyType == typeof(byte[]))
         {
-            declaringType = typeof(BusinessObjects.Application);
+            declaringType = typeof(BusinessObjects.ApplicationProfileInstance);
             return true;
         }
 

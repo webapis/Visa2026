@@ -3,18 +3,22 @@ using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 using Visa2026.Blazor.Server.Editors;
-using ApplicationBO = Visa2026.Module.BusinessObjects.Application;
+using ApplicationBO = Visa2026.Module.BusinessObjects.ApplicationProfileInstance;
 
 namespace Visa2026.Blazor.Server.Controllers;
 
 /// <summary>
-/// Keeps a single Application.BorderZoneLocation editor on Application detail.
-/// Hides duplicate editors left after the FK-to-string migration that otherwise
-/// appear below the Application Items list.
+/// Keeps a single comma-separated editor on ApplicationProfileInstance detail for
+/// BorderZoneLocation and MovementPermitLocation. Hides duplicate editors left after
+/// FK-to-string migrations.
 /// </summary>
 public sealed class ApplicationDetailViewBorderZoneController : ViewController<DetailView>
 {
-    private const string BorderZonePropertyName = nameof(ApplicationBO.BorderZoneLocation);
+    private static readonly string[] MultiSelectPropertyNames =
+    [
+        nameof(ApplicationBO.BorderZoneLocation),
+        nameof(ApplicationBO.MovementPermitLocation),
+    ];
 
     public ApplicationDetailViewBorderZoneController()
     {
@@ -25,37 +29,33 @@ public sealed class ApplicationDetailViewBorderZoneController : ViewController<D
     protected override void OnViewControlsCreated()
     {
         base.OnViewControlsCreated();
-        HideDuplicateBorderZoneEditors();
+        foreach (var propertyName in MultiSelectPropertyNames)
+            HideDuplicateEditors(propertyName);
     }
 
-    private void HideDuplicateBorderZoneEditors()
+    private void HideDuplicateEditors(string propertyName)
     {
-        var borderZoneEditors = View.GetItems<PropertyEditor>()
-            .Where(IsBorderZonePropertyEditor)
+        var editors = View.GetItems<PropertyEditor>()
+            .Where(editor => IsPropertyEditor(editor, propertyName))
             .ToList();
 
-        if (borderZoneEditors.Count <= 1)
-        {
+        if (editors.Count <= 1)
             return;
-        }
 
-        // Prefer the multi-select editor that is already visible in the main form column.
-        var keep = borderZoneEditors.OfType<CommaSeparatedMultiSelectPropertyEditor>().FirstOrDefault()
-            ?? borderZoneEditors[0];
+        var keep = editors.OfType<CommaSeparatedMultiSelectPropertyEditor>().FirstOrDefault()
+            ?? editors[0];
 
-        foreach (var editor in borderZoneEditors)
+        foreach (var editor in editors)
         {
             if (!ReferenceEquals(editor, keep))
-            {
                 HideViewItem(editor);
-            }
         }
     }
 
-    private static bool IsBorderZonePropertyEditor(PropertyEditor editor) =>
-        string.Equals(editor.Id, BorderZonePropertyName, StringComparison.Ordinal)
-        || string.Equals(editor.PropertyName, BorderZonePropertyName, StringComparison.Ordinal)
-        || string.Equals(editor.MemberInfo?.Name, BorderZonePropertyName, StringComparison.Ordinal);
+    private static bool IsPropertyEditor(PropertyEditor editor, string propertyName) =>
+        string.Equals(editor.Id, propertyName, StringComparison.Ordinal)
+        || string.Equals(editor.PropertyName, propertyName, StringComparison.Ordinal)
+        || string.Equals(editor.MemberInfo?.Name, propertyName, StringComparison.Ordinal);
 
     private static void HideViewItem(ViewItem item)
     {

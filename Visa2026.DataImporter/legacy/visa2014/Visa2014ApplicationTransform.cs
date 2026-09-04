@@ -209,10 +209,16 @@ internal static class Visa2014ApplicationTransform
         string connectionString,
         IReadOnlyList<string> lookupTranslationPaths,
         int? maxRows,
-        bool verbose)
+        bool verbose,
+        string? applicationTypeName = null)
     {
         var catalogs = Visa2014LookupTranslator.Load(lookupTranslationPaths);
-        var sql = maxRows is > 0
+        var filterType = string.IsNullOrWhiteSpace(applicationTypeName)
+            ? null
+            : applicationTypeName.Trim();
+
+        // TOP before transform is only safe when not filtering by ApplicationType.Name.
+        var sql = maxRows is > 0 && filterType == null
             ? $"SELECT TOP ({maxRows.Value}) * FROM ({ExtractSql}) AS q"
             : ExtractSql;
 
@@ -232,7 +238,33 @@ internal static class Visa2014ApplicationTransform
 
         var batch = TransformRows(rawRows, catalogs, out _, out _, out _);
         EnrichMigrationServiceInference(connectionString, batch.ImportRows, verbose);
-        return batch;
+
+        if (filterType == null)
+            return batch;
+
+        var matched = batch.ImportRows
+            .Where(r => string.Equals(
+                r.GetValueOrDefault("ApplicationType") as string,
+                filterType,
+                StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        var matchCount = matched.Count;
+        if (maxRows is > 0 && matched.Count > maxRows.Value)
+            matched = matched.Take(maxRows.Value).ToList();
+
+        Console.WriteLine(
+            $"INF ApplicationType filter '{filterType}': {matchCount} prepared match(es); posting {matched.Count}" +
+            (maxRows is > 0 ? $" (max-rows={maxRows.Value})" : "") + ".");
+
+        return new Visa2014PersonImportBatch
+        {
+            ImportRows = matched,
+            Skipped = batch.Skipped,
+            UnmappedLookups = batch.UnmappedLookups,
+            DedupeSummary = batch.DedupeSummary,
+            LegacyRowCount = batch.LegacyRowCount,
+            DedupeMergedCount = batch.DedupeMergedCount,
+        };
     }
 
     internal static bool TryParseRawRow(IReadOnlyDictionary<string, string?> row, out Visa2014ApplicationRawRow parsed)
@@ -364,7 +396,7 @@ internal static class Visa2014ApplicationTransform
             .Select(r => new
             {
                 Row = r,
-                IdentityKey = Visa2014ApplicationTransform.BuildApplicationIdentityGroupKey(
+                IdentityKey = Visa2014ApplicationTransform.BuildApplicationProfileInstanceIdentityGroupKey(
                     r.Raw.ManualApplicationNumber,
                     r.Raw.ManualApplicationDate,
                     BuildApplicationTypeComposite(r.Raw)),
@@ -383,7 +415,7 @@ internal static class Visa2014ApplicationTransform
             dedupeSummary.Add(new Dictionary<string, object?>(StringComparer.Ordinal)
             {
                 ["_dedupeGroupId"] = groupId,
-                ["key"] = Visa2014ApplicationTransform.ApplicationIdentityDedupeKeyName,
+                ["key"] = Visa2014ApplicationTransform.ApplicationProfileInstanceIdentityDedupeKeyName,
                 ["normalizedValue"] = group.Key,
                 ["memberCount"] = members.Count,
                 ["canonicalRule"] = "keep_all_import_with_legacy_oid_upsert",
@@ -440,7 +472,7 @@ internal static class Visa2014ApplicationTransform
         if (!TrySetApplicationType(row, catalogs, applicationTypeComposite, unmapped, ref skipReason))
             return row;
 
-        // Legacy Application has no VisaType — infer from resolved ApplicationType.Name.
+        // Legacy ApplicationProfileInstance has no VisaType — infer from resolved ApplicationType.Name.
         TrySetInferredVisaType(row);
 
         TrySetMigrationService(row, catalogs, raw, unmapped);
@@ -990,7 +1022,7 @@ internal static class Visa2014ApplicationTransform
             Console.WriteLine($"INF MigrationService address inference: {enriched} row(s) enriched.");
     }
 
-    internal const string ApplicationIdentityDedupeKeyName = "FullApplicationNumber+ApplicationDate+ApplicationType";
+    internal const string ApplicationProfileInstanceIdentityDedupeKeyName = "FullApplicationNumber+ApplicationDate+ApplicationType";
 
     internal const string ApplicationTargetLookupSql =
         """
@@ -1023,7 +1055,7 @@ internal static class Visa2014ApplicationTransform
         DateTime ApplicationDate,
         string ApplicationTypeName)
     {
-        public string GroupKey => BuildApplicationIdentityGroupKey(
+        public string GroupKey => BuildApplicationProfileInstanceIdentityGroupKey(
             FullApplicationNumber,
             ApplicationDate,
             ApplicationTypeName)!;
@@ -1048,7 +1080,7 @@ internal static class Visa2014ApplicationTransform
         }
     }
 
-    internal static string? BuildApplicationIdentityGroupKey(
+    internal static string? BuildApplicationProfileInstanceIdentityGroupKey(
         string? fullApplicationNumber,
         DateTime? applicationDate,
         string? applicationTypeName = null)
@@ -1076,7 +1108,7 @@ internal static class Visa2014ApplicationTransform
         return !string.IsNullOrWhiteSpace(text) && DateTime.TryParse(text, out applicationDate);
     }
 
-    internal static IReadOnlyList<string> FindApplicationIdMapCrossDateCollisions(
+    internal static IReadOnlyList<string> FindApplicationProfileInstanceIdMapCrossDateCollisions(
         IReadOnlyDictionary<Guid, Guid> idMap,
         string legacyConnectionString,
         IReadOnlyList<string> lookupTranslationPaths)
@@ -1094,10 +1126,10 @@ internal static class Visa2014ApplicationTransform
                 legacyIdentities[legacyOid] = identity.Value;
         }
 
-        return FindApplicationIdMapCrossDateTargetCollisions(idMap, legacyIdentities);
+        return FindApplicationProfileInstanceIdMapCrossDateTargetCollisions(idMap, legacyIdentities);
     }
 
-    internal static IReadOnlyList<string> FindApplicationIdMapCrossDateTargetCollisions(
+    internal static IReadOnlyList<string> FindApplicationProfileInstanceIdMapCrossDateTargetCollisions(
         IReadOnlyDictionary<Guid, Guid> idMap,
         IReadOnlyDictionary<Guid, ApplicationImportIdentity> legacyIdentities)
     {

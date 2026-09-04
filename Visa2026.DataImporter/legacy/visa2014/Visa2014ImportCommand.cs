@@ -1,3 +1,5 @@
+using Visa2026.Module.Services.MigrationImport;
+
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
 internal static class Visa2014ImportCommand
@@ -5,6 +7,17 @@ internal static class Visa2014ImportCommand
     public static async Task<int> RunAsync(IReadOnlyList<string> args, bool verbose)
     {
         var entity = GetOptionValue(args, "--entity");
+        if (string.Equals(entity, "Application", StringComparison.OrdinalIgnoreCase))
+        {
+            Console.Error.WriteLine("ERR Entity 'Application' was renamed to ApplicationProfileInstance (hard break). Use --entity ApplicationProfileInstance.");
+            return 2;
+        }
+        if (string.Equals(entity, "ApplicationItem", StringComparison.OrdinalIgnoreCase))
+        {
+            Console.Error.WriteLine(
+                "ERR Entity 'ApplicationItem' is retired (Phase B hard-remove). Use --entity ApplicationProfileInstancePerson (M2M roster).");
+            return 2;
+        }
         if (string.IsNullOrWhiteSpace(entity))
         {
             Console.Error.WriteLine("ERR --import-visa2014 requires --entity <Name> (e.g. Person, Passport).");
@@ -15,8 +28,8 @@ internal static class Visa2014ImportCommand
             || string.Equals(entity, "Passport", StringComparison.OrdinalIgnoreCase)
             || string.Equals(entity, "Visa", StringComparison.OrdinalIgnoreCase)
             || string.Equals(entity, "Education", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(entity, "Application", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(entity, "ApplicationProgress", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(entity, "ApplicationProfileInstance", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(entity, "ApplicationProfileInstanceProgress", StringComparison.OrdinalIgnoreCase)
             || string.Equals(entity, "EmployeePositionHistory", StringComparison.OrdinalIgnoreCase)
             || string.Equals(entity, "EmployeeSalary", StringComparison.OrdinalIgnoreCase)
             || string.Equals(entity, "AddressOfResidence", StringComparison.OrdinalIgnoreCase)
@@ -26,10 +39,10 @@ internal static class Visa2014ImportCommand
             || string.Equals(entity, "InvitationItem", StringComparison.OrdinalIgnoreCase)
             || string.Equals(entity, "Rejection", StringComparison.OrdinalIgnoreCase)
             || string.Equals(entity, "RejectionItem", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(entity, "ApplicationItem", StringComparison.OrdinalIgnoreCase);
+            || string.Equals(entity, "ApplicationProfileInstancePerson", StringComparison.OrdinalIgnoreCase);
         if (!supported)
         {
-            Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person, Passport, Visa, Education, Application, ApplicationProgress, ApplicationItem, EmployeePositionHistory, EmployeeSalary, AddressOfResidence, WorkPermit, WorkPermitItem, Invitation, InvitationItem, Rejection, RejectionItem.");
+            Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person, Passport, Visa, Education, ApplicationProfileInstance, ApplicationProfileInstanceProgress, ApplicationProfileInstancePerson, EmployeePositionHistory, EmployeeSalary, AddressOfResidence, WorkPermit, WorkPermitItem, Invitation, InvitationItem, Rejection, RejectionItem.");
             return 1;
         }
 
@@ -76,9 +89,10 @@ internal static class Visa2014ImportCommand
         bool supplementPermitPersons = HasArg(args, "--supplement-permit-persons");
         bool supplementPermitPassports = HasArg(args, "--supplement-permit-passports");
 
-        var requiresHeadless = string.Equals(entity, "Application", StringComparison.OrdinalIgnoreCase)
+        var requiresHeadless = string.Equals(entity, "ApplicationProfileInstance", StringComparison.OrdinalIgnoreCase)
             || string.Equals(entity, "ApplicationItem", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(entity, "ApplicationProgress", StringComparison.OrdinalIgnoreCase);
+            || string.Equals(entity, "ApplicationProfileInstancePerson", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(entity, "ApplicationProfileInstanceProgress", StringComparison.OrdinalIgnoreCase);
         if (!dryRun && requiresHeadless && !inProcess)
         {
             Console.Error.WriteLine(
@@ -88,7 +102,7 @@ internal static class Visa2014ImportCommand
         }
 
         if (!dryRun
-            && string.Equals(entity, "Application", StringComparison.OrdinalIgnoreCase)
+            && string.Equals(entity, "ApplicationProfileInstance", StringComparison.OrdinalIgnoreCase)
             && !HasArg(args, "--skip-tenant-catalog-generation"))
         {
             var catalogExit = Visa2014TenantCatalogGenerationCommand.Run(dataImporterRoot, args, verbose);
@@ -121,6 +135,9 @@ internal static class Visa2014ImportCommand
             Console.WriteLine($"INF   - {path}");
         if (maxRows.HasValue)
             Console.WriteLine($"INF Max rows: {maxRows.Value}");
+        var applicationTypeFilter = GetOptionValue(args, "--application-type");
+        if (!string.IsNullOrWhiteSpace(applicationTypeFilter))
+            Console.WriteLine($"INF ApplicationType filter: {applicationTypeFilter.Trim()}");
         if (dryRun)
             Console.WriteLine("INF Mode: dry-run (no POST)");
 
@@ -181,7 +198,7 @@ internal static class Visa2014ImportCommand
                     await resolver.LoadAsync(api, tenantCatalogDir);
             }
 
-            // Seed cleanup for ApplicationProgress is only available over OData; the headless
+            // Seed cleanup for ApplicationProfileInstanceProgress is only available over OData; the headless
             // path imports Applications with SuppressInitialProgress, so there are no seeds.
             var seedCleanupApi = inProcess ? null : api;
 
@@ -191,21 +208,23 @@ internal static class Visa2014ImportCommand
             else if (string.Equals(entity, "Passport", StringComparison.OrdinalIgnoreCase))
                 exitCode = await RunPassportImportAsync(target, resolver, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose, supplementPermitPassports);
             else if (string.Equals(entity, "Visa", StringComparison.OrdinalIgnoreCase))
-                exitCode = await RunVisaImportAsync(target, resolver, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose);
+                exitCode = await RunVisaImportAsync(
+                    target, resolver, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose, session?.ObjectSpaceFactory);
             else if (string.Equals(entity, "Education", StringComparison.OrdinalIgnoreCase))
                 exitCode = await RunEducationImportAsync(target, resolver, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose);
-            else if (string.Equals(entity, "Application", StringComparison.OrdinalIgnoreCase))
+            else if (string.Equals(entity, "ApplicationProfileInstance", StringComparison.OrdinalIgnoreCase))
                 exitCode = await RunApplicationImportAsync(
                     target, resolver, source, args, idMapPath, maxRows, dryRun, verbose, session);
-            else if (string.Equals(entity, "ApplicationProgress", StringComparison.OrdinalIgnoreCase))
-                exitCode = await RunApplicationProgressImportAsync(
+            else if (string.Equals(entity, "ApplicationProfileInstanceProgress", StringComparison.OrdinalIgnoreCase))
+                exitCode = await RunApplicationProfileInstanceProgressImportAsync(
                     target, resolver, seedCleanupApi, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose, session);
             else if (string.Equals(entity, "AddressOfResidence", StringComparison.OrdinalIgnoreCase))
                 exitCode = await RunAddressOfResidenceImportAsync(target, resolver, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose);
             else if (string.Equals(entity, "EmployeeSalary", StringComparison.OrdinalIgnoreCase))
                 exitCode = await RunEmployeeSalaryImportAsync(target, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose);
             else if (string.Equals(entity, "WorkPermit", StringComparison.OrdinalIgnoreCase))
-                exitCode = await RunWorkPermitImportAsync(target, source, args, idMapPath, maxRows, dryRun, verbose);
+                exitCode = await RunWorkPermitImportAsync(
+                    target, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose, session?.ObjectSpaceFactory);
             else if (string.Equals(entity, "WorkPermitItem", StringComparison.OrdinalIgnoreCase))
                 exitCode = await RunWorkPermitItemImportAsync(target, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose);
             else if (string.Equals(entity, "Invitation", StringComparison.OrdinalIgnoreCase))
@@ -219,6 +238,9 @@ internal static class Visa2014ImportCommand
             else if (string.Equals(entity, "ApplicationItem", StringComparison.OrdinalIgnoreCase))
                 exitCode = await RunApplicationItemImportAsync(
                     target, resolver, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose, session);
+            else if (string.Equals(entity, "ApplicationProfileInstancePerson", StringComparison.OrdinalIgnoreCase))
+                exitCode = await RunApplicationProfileInstancePersonImportAsync(
+                    source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose, session);
             else
                 exitCode = await RunEmployeePositionHistoryImportAsync(
                     target, resolver, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose, supplementPermitPositions);
@@ -398,18 +420,33 @@ internal static class Visa2014ImportCommand
         string visaIdMapPath,
         int? maxRows,
         bool dryRun,
-        bool verbose)
+        bool verbose,
+        DevExpress.ExpressApp.INonSecuredObjectSpaceFactory? objectSpaceFactory = null)
     {
         var passportIdMapPath = GetOptionValue(args, "--passport-id-map")
             ?? source.IdMapPath(dataImporterRoot, "Passport");
+        var applicationIdMapPath = GetOptionValue(args, "--application-id-map")
+            ?? source.IdMapPath(dataImporterRoot, "ApplicationProfileInstance");
+        var applicationIdMap = File.Exists(applicationIdMapPath)
+            ? Visa2014IdMapHelper.Load(applicationIdMapPath)
+            : new Dictionary<Guid, Guid>();
 
         Console.WriteLine($"INF Passport id-map: {passportIdMapPath}");
+        Console.WriteLine($"INF ApplicationProfileInstance id-map: {applicationIdMapPath} ({applicationIdMap.Count} entries)");
+        if (!dryRun && objectSpaceFactory == null && applicationIdMap.Count > 0)
+        {
+            Console.WriteLine(
+                "WRN Visa IssuingApplicationProfileInstance backfill requires --inprocess; " +
+                "new posts still include IssuingApplicationProfileInstance when mapped.");
+        }
 
         var result = await Visa2014VisaODataImporter.RunAsync(
             target,
             resolver,
             source.ConnectionString,
             source.LookupTranslationPaths,
+            applicationIdMap,
+            objectSpaceFactory,
             passportIdMapPath,
             dryRun ? null : visaIdMapPath,
             maxRows,
@@ -421,7 +458,7 @@ internal static class Visa2014ImportCommand
         if (!dryRun)
         {
             Console.WriteLine(
-                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (no Passport map): {result.SkippedNoPassportMap}  Skipped (already imported): {result.SkippedAlreadyImported}");
+                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (no Passport map): {result.SkippedNoPassportMap}  Skipped (already imported): {result.SkippedAlreadyImported}  IssuingApplicationProfileInstance patched: {result.PatchedIssuingApplicationProfileInstanceCount}  ApplicationProfileInstance not in id-map (visa still posted): {result.SkippedMissingApplicationProfileInstanceIdMap}");
             if (result.IdMapPath != null)
                 Console.WriteLine($"INF Id-map: {result.IdMapPath}");
         }
@@ -507,7 +544,8 @@ internal static class Visa2014ImportCommand
             verbose,
             headlessSession?.ObjectSpaceFactory,
             Visa2014ParallelImportPoster.ResolveDegree(args),
-            ResolveBatchSize(args));
+            ResolveBatchSize(args),
+            GetOptionValue(args, "--application-type"));
 
         Console.WriteLine($"INF Legacy SQL rows: {result.LegacyRowCount}");
         Console.WriteLine($"INF Prepared: {result.PreparedCount}  Skipped: {result.SkippedCount}  Dedupe merged: {result.DedupeMergedCount}");
@@ -530,7 +568,7 @@ internal static class Visa2014ImportCommand
         return result.FailedCount > 0 ? 1 : 0;
     }
 
-    private static async Task<int> RunApplicationProgressImportAsync(
+    private static async Task<int> RunApplicationProfileInstanceProgressImportAsync(
         IVisa2014ImportTarget target,
         Visa2014ODataLookupResolver resolver,
         Visa2026.DataImporter.ApiClient? seedCleanupApi,
@@ -544,11 +582,11 @@ internal static class Visa2014ImportCommand
         Visa2014HeadlessImportSession? headlessSession = null)
     {
         var applicationIdMapPath = GetOptionValue(args, "--application-id-map")
-            ?? source.IdMapPath(dataImporterRoot, "Application");
+            ?? source.IdMapPath(dataImporterRoot, "ApplicationProfileInstance");
 
-        Console.WriteLine($"INF Application id-map: {applicationIdMapPath}");
+        Console.WriteLine($"INF ApplicationProfileInstance id-map: {applicationIdMapPath}");
 
-        var result = await Visa2014ApplicationProgressODataImporter.RunAsync(
+        var result = await Visa2014ApplicationProfileInstanceProgressODataImporter.RunAsync(
             target,
             resolver,
             seedCleanupApi,
@@ -569,13 +607,13 @@ internal static class Visa2014ImportCommand
         if (!dryRun)
         {
             Console.WriteLine(
-                $"INF Seeds removed: {result.SeedsRemovedBeforeImport}  Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (no Application map): {result.SkippedNoApplicationMap}  Skipped (already imported): {result.SkippedAlreadyImported}");
+                $"INF Seeds removed: {result.SeedsRemovedBeforeImport}  Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (no ApplicationProfileInstance map): {result.SkippedNoApplicationMap}  Skipped (already imported): {result.SkippedAlreadyImported}");
             if (result.IdMapPath != null)
                 Console.WriteLine($"INF Id-map: {result.IdMapPath}");
         }
         else if (result.SkippedNoApplicationMap > 0)
         {
-            Console.WriteLine($"INF Would skip (no Application map): {result.SkippedNoApplicationMap}");
+            Console.WriteLine($"INF Would skip (no ApplicationProfileInstance map): {result.SkippedNoApplicationMap}");
         }
 
         if (result.FailedCount > 0)
@@ -642,6 +680,74 @@ internal static class Visa2014ImportCommand
         return result.FailedCount > 0 ? 1 : 0;
     }
 
+    private static async Task<int> RunApplicationProfileInstancePersonImportAsync(
+        Visa2014LegacySourceProfile source,
+        string dataImporterRoot,
+        IReadOnlyList<string> args,
+        string applicationPersonIdMapPath,
+        int? maxRows,
+        bool dryRun,
+        bool verbose,
+        Visa2014HeadlessImportSession? headlessSession)
+    {
+        if (!dryRun && headlessSession?.ObjectSpaceFactory == null)
+        {
+            Console.Error.WriteLine(
+                "ERR ApplicationProfileInstancePerson import requires --inprocess (headless ObjectSpace) for LinkPerson + ResolvedLinks.");
+            return 1;
+        }
+
+        var applicationIdMapPath = GetOptionValue(args, "--application-id-map")
+            ?? source.IdMapPath(dataImporterRoot, "ApplicationProfileInstance");
+        var personIdMapPath = GetOptionValue(args, "--person-id-map")
+            ?? source.IdMapPath(dataImporterRoot, "Person");
+
+        Console.WriteLine($"INF ApplicationProfileInstance id-map: {applicationIdMapPath}");
+        Console.WriteLine($"INF Person id-map: {personIdMapPath}");
+
+        IDisposable? importScope = null;
+        if (!dryRun)
+            importScope = MigrationImportContext.BeginDataImportScope();
+        try
+        {
+            var result = await Visa2014ApplicationProfileInstancePersonImporter.RunAsync(
+                headlessSession?.ObjectSpaceFactory,
+                source.ConnectionString,
+                source.LookupTranslationPaths,
+                applicationIdMapPath,
+                personIdMapPath,
+                applicationPersonIdMapPath,
+                maxRows,
+                dryRun,
+                verbose,
+                ResolveBatchSize(args));
+
+            Console.WriteLine($"INF Legacy SQL rows: {result.LegacyRowCount}");
+            Console.WriteLine($"INF Prepared: {result.PreparedCount}  Skipped: {result.SkippedCount}");
+            if (!dryRun)
+            {
+                Console.WriteLine(
+                    $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  " +
+                    $"Skipped (missing id-map): {result.SkippedMissingRequiredIdMap}  " +
+                    $"Skipped (already imported): {result.SkippedAlreadyImported}");
+                Console.WriteLine($"INF ResolvedLinks created (sum): {result.AutoLinkedCount}");
+                if (result.IdMapPath != null)
+                    Console.WriteLine($"INF Id-map: {result.IdMapPath}");
+            }
+
+            foreach (var error in result.Errors.Take(20))
+                Console.Error.WriteLine($"ERR {error}");
+            if (result.Errors.Count > 20)
+                Console.Error.WriteLine($"ERR ... and {result.Errors.Count - 20} more");
+
+            return result.FailedCount > 0 ? 1 : 0;
+        }
+        finally
+        {
+            importScope?.Dispose();
+        }
+    }
+
     private static async Task<int> RunApplicationItemImportAsync(
         IVisa2014ImportTarget target,
         Visa2014ODataLookupResolver resolver,
@@ -655,7 +761,7 @@ internal static class Visa2014ImportCommand
         Visa2014HeadlessImportSession? headlessSession = null)
     {
         var applicationIdMapPath = GetOptionValue(args, "--application-id-map")
-            ?? source.IdMapPath(dataImporterRoot, "Application");
+            ?? source.IdMapPath(dataImporterRoot, "ApplicationProfileInstance");
         var personIdMapPath = GetOptionValue(args, "--person-id-map")
             ?? source.IdMapPath(dataImporterRoot, "Person");
         var passportIdMapPath = GetOptionValue(args, "--passport-id-map")
@@ -675,7 +781,7 @@ internal static class Visa2014ImportCommand
         var invitationItemIdMapPath = GetOptionValue(args, "--invitation-item-id-map")
             ?? source.IdMapPath(dataImporterRoot, "InvitationItem");
 
-        Console.WriteLine($"INF Application id-map: {applicationIdMapPath}");
+        Console.WriteLine($"INF ApplicationProfileInstance id-map: {applicationIdMapPath}");
         Console.WriteLine($"INF Person id-map: {personIdMapPath}");
         Console.WriteLine($"INF Passport id-map: {passportIdMapPath}");
         Console.WriteLine($"INF Visa id-map: {visaIdMapPath}");
@@ -839,16 +945,34 @@ internal static class Visa2014ImportCommand
     private static async Task<int> RunWorkPermitImportAsync(
         IVisa2014ImportTarget target,
         Visa2014LegacySourceProfile source,
+        string dataImporterRoot,
         IReadOnlyList<string> args,
         string workPermitIdMapPath,
         int? maxRows,
         bool dryRun,
-        bool verbose)
+        bool verbose,
+        DevExpress.ExpressApp.INonSecuredObjectSpaceFactory? objectSpaceFactory = null)
     {
+        var applicationIdMapPath = GetOptionValue(args, "--application-id-map")
+            ?? source.IdMapPath(dataImporterRoot, "ApplicationProfileInstance");
+        var applicationIdMap = File.Exists(applicationIdMapPath)
+            ? Visa2014IdMapHelper.Load(applicationIdMapPath)
+            : new Dictionary<Guid, Guid>();
+
+        Console.WriteLine($"INF ApplicationProfileInstance id-map: {applicationIdMapPath} ({applicationIdMap.Count} entries)");
+        if (!dryRun && objectSpaceFactory == null && applicationIdMap.Count > 0)
+        {
+            Console.WriteLine(
+                "WRN WorkPermit ApplicationProfileInstance backfill requires --inprocess; " +
+                "new posts still include ApplicationProfileInstance when mapped.");
+        }
+
         var result = await Visa2014WorkPermitODataImporter.RunAsync(
             target,
             source.ConnectionString,
             source.LookupTranslationPaths,
+            applicationIdMap,
+            objectSpaceFactory,
             dryRun ? null : workPermitIdMapPath,
             maxRows,
             dryRun,
@@ -859,7 +983,7 @@ internal static class Visa2014ImportCommand
         if (!dryRun)
         {
             Console.WriteLine(
-                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (already imported): {result.SkippedAlreadyImported}");
+                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (already imported): {result.SkippedAlreadyImported}  Application FK patched: {result.PatchedApplicationProfileInstanceCount}  ApplicationProfileInstance not in id-map (header still posted): {result.SkippedMissingApplicationProfileInstanceIdMap}");
             if (result.IdMapPath != null)
                 Console.WriteLine($"INF Id-map: {result.IdMapPath}");
         }
@@ -959,12 +1083,12 @@ internal static class Visa2014ImportCommand
         DevExpress.ExpressApp.INonSecuredObjectSpaceFactory? objectSpaceFactory = null)
     {
         var applicationIdMapPath = GetOptionValue(args, "--application-id-map")
-            ?? source.IdMapPath(dataImporterRoot, "Application");
+            ?? source.IdMapPath(dataImporterRoot, "ApplicationProfileInstance");
         var applicationIdMap = File.Exists(applicationIdMapPath)
             ? Visa2014IdMapHelper.Load(applicationIdMapPath)
             : new Dictionary<Guid, Guid>();
 
-        Console.WriteLine($"INF Application id-map: {applicationIdMapPath} ({applicationIdMap.Count} entries)");
+        Console.WriteLine($"INF ApplicationProfileInstance id-map: {applicationIdMapPath} ({applicationIdMap.Count} entries)");
 
         var result = await Visa2014InvitationODataImporter.RunAsync(
             target,
@@ -982,7 +1106,7 @@ internal static class Visa2014ImportCommand
         if (!dryRun)
         {
             Console.WriteLine(
-                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (already imported): {result.SkippedAlreadyImported}  Application not in id-map (header still posted): {result.SkippedMissingApplicationIdMap}");
+                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (already imported): {result.SkippedAlreadyImported}  Application FK patched: {result.PatchedApplicationProfileInstanceCount}  ApplicationProfileInstance not in id-map (header still posted): {result.SkippedMissingApplicationProfileInstanceIdMap}");
             if (result.IdMapPath != null)
                 Console.WriteLine($"INF Id-map: {result.IdMapPath}");
         }
@@ -1067,12 +1191,12 @@ internal static class Visa2014ImportCommand
         bool verbose)
     {
         var applicationIdMapPath = GetOptionValue(args, "--application-id-map")
-            ?? source.IdMapPath(dataImporterRoot, "Application");
+            ?? source.IdMapPath(dataImporterRoot, "ApplicationProfileInstance");
         var applicationIdMap = File.Exists(applicationIdMapPath)
             ? Visa2014IdMapHelper.Load(applicationIdMapPath)
             : new Dictionary<Guid, Guid>();
 
-        Console.WriteLine($"INF Application id-map: {applicationIdMapPath} ({applicationIdMap.Count} entries)");
+        Console.WriteLine($"INF ApplicationProfileInstance id-map: {applicationIdMapPath} ({applicationIdMap.Count} entries)");
 
         var result = await Visa2014RejectionODataImporter.RunAsync(
             target,
@@ -1089,13 +1213,13 @@ internal static class Visa2014ImportCommand
         if (!dryRun)
         {
             Console.WriteLine(
-                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (already imported): {result.SkippedAlreadyImported}  Skipped (Application not in id-map): {result.SkippedMissingApplicationIdMap}");
+                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (already imported): {result.SkippedAlreadyImported}  Skipped (ApplicationProfileInstance not in id-map): {result.SkippedMissingApplicationProfileInstanceIdMap}");
             if (result.IdMapPath != null)
                 Console.WriteLine($"INF Id-map: {result.IdMapPath}");
         }
-        else if (result.SkippedMissingApplicationIdMap > 0)
+        else if (result.SkippedMissingApplicationProfileInstanceIdMap > 0)
         {
-            Console.WriteLine($"INF Would skip (Application not in id-map): {result.SkippedMissingApplicationIdMap}");
+            Console.WriteLine($"INF Would skip (ApplicationProfileInstance not in id-map): {result.SkippedMissingApplicationProfileInstanceIdMap}");
         }
 
         if (result.FailedCount > 0)

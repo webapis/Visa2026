@@ -10,7 +10,7 @@ public sealed class ApplicationReportPackageModel : ComponentModelBase
 {
     public override Type ComponentType => typeof(ApplicationReportPackageComponent);
 
-    public Guid ApplicationId
+    public Guid ApplicationProfileInstanceId
     {
         get => GetPropertyValue<Guid>();
         set => SetPropertyValue(value);
@@ -38,6 +38,26 @@ public sealed class ApplicationReportPackageModel : ComponentModelBase
     {
         get => GetPropertyValue<IReadOnlyList<ApplicationWordReportPackageCatalogEntry>>()
                ?? Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+        set => SetPropertyValue(value);
+    }
+
+    public IReadOnlyList<ApplicationWordReportPackageCatalogEntry> RecycleBinEntries
+    {
+        get => GetPropertyValue<IReadOnlyList<ApplicationWordReportPackageCatalogEntry>>()
+               ?? Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+        set => SetPropertyValue(value);
+    }
+
+    public IReadOnlyList<ApplicationWordReportPackageCatalogEntry> SharedEntries
+    {
+        get => GetPropertyValue<IReadOnlyList<ApplicationWordReportPackageCatalogEntry>>()
+               ?? Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+        set => SetPropertyValue(value);
+    }
+
+    public bool ShowRecycleBin
+    {
+        get => GetPropertyValue<bool>();
         set => SetPropertyValue(value);
     }
 

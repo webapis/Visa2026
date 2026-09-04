@@ -5,7 +5,7 @@ using DevExpress.ExpressApp.Updating;
 namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
-/// Copies legacy <c>ApplicationItems.MovementRecordId</c> travel data onto <see cref="BusinessObjects.ApplicationItem"/>
+/// Copies legacy <c>ApplicationItems.MovementRecordId</c> travel data onto <see cref="BusinessObjects.ApplicationRosterMergeLine"/>
 /// scalar columns, then drops the FK column after schema sync.
 /// </summary>
 public class ApplicationItemMovementFlattenUpdater : ModuleUpdater

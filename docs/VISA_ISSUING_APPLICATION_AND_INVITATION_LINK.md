@@ -58,7 +58,7 @@ Identifying the related source `ApplicationItem` and (when applicable) `Invitati
 2. Import matcher (§4) must **not** be used for UI auto-default.
 3. Each path resolves **both** targets with path-specific steps:
    - match `ApplicationItem` → set `Visa.IssuingApplicationItem`
-   - if `CanIssueInvitation` → match `InvitationItem` → set `Visa.InvitationItem`
+   - if `CanIssueInvitation` → match `InvitationItem` → set `Visa.IssuingInvitationItem`
 4. Shared concepts (capability flags, cancelled exclusion, single-use intent) may be documented once (§2) but algorithms stay separate.
 
 ---
@@ -67,11 +67,11 @@ Identifying the related source `ApplicationItem` and (when applicable) `Invitati
 
 | Term | Meaning |
 |------|---------|
-| **Used invitation item** | An `InvitationItem` that is linked from a `Visa.InvitationItem` because that visa was issued from that invitation line. |
+| **Used invitation item** | An `InvitationItem` that is linked from a `Visa.IssuingInvitationItem` because that visa was issued from that invitation line. |
 | **Issuing application item** | `Visa.IssuingApplicationItem` — the matched `ApplicationItem` under an eligible issuing application for that person. |
 | **Eligible issuing application types** | Application types with **`CanIssueVisa = true` OR `CanIssueInvitation = true`**. Either flag qualifies a type as a valid parent for `IssuingApplicationItem`. |
 | **Visa-issuing application types** | Application types with `CanIssueVisa = true`. Included in eligible issuing types. |
-| **Invitation-issuing application types** | Application types with `CanIssueInvitation = true`. Included in eligible issuing types; when the selected issuing application’s type has this flag, `Visa.InvitationItem` **must** also be set. |
+| **Invitation-issuing application types** | Application types with `CanIssueInvitation = true`. Included in eligible issuing types; when the selected issuing application’s type has this flag, `Visa.IssuingInvitationItem` **must** also be set. |
 | **Path A / Manual create** | Officer creates a new `Visa` in the XAF UI — uses §3 matcher. |
 | **Path B / Import create** | `Visa` rows created by VISA2014 → Visa2026 import — uses §4 matcher. |
 
@@ -106,8 +106,8 @@ Applies to **both** Path A and Path B (eligibility only; matching algorithm diff
 | Target property | Source BO to match | Condition |
 |-----------------|--------------------|-----------|
 | `Visa.IssuingApplicationItem` | `ApplicationItem` | Application type has `CanIssueVisa` **or** `CanIssueInvitation` |
-| `Visa.InvitationItem` | `InvitationItem` | Issuing application type has `CanIssueInvitation` |
-| `Visa.InvitationItem` | — (leave null) | Issuing application type is `CanIssueVisa` only |
+| `Visa.IssuingInvitationItem` | `InvitationItem` | Issuing application type has `CanIssueInvitation` |
+| `Visa.IssuingInvitationItem` | — (leave null) | Issuing application type is `CanIssueVisa` only |
 
 ---
 
@@ -150,7 +150,7 @@ Only application items whose parent `Application.ApplicationType` has **`CanIssu
 
 ### 3.3a Match InvitationItem (only if CanIssueInvitation)
 
-If the matched `IssuingApplicationItem` belongs to an application whose type has `CanIssueInvitation = true`, then Path A must also match and set `Visa.InvitationItem` (same person, matching invitation under that application / invitation flow, unused, not cancelled — per §3.1, §3.4).
+If the matched `IssuingApplicationItem` belongs to an application whose type has `CanIssueInvitation = true`, then Path A must also match and set `Visa.IssuingInvitationItem` (same person, matching invitation under that application / invitation flow, unused, not cancelled — per §3.1, §3.4).
 
 If the issuing type does **not** have `CanIssueInvitation`, `InvitationItem` must remain null and must not be required.
 
@@ -200,7 +200,7 @@ When enough context exists at create (at least `Passport` / person; `IssueDate` 
 
 ### 3.8 Side effect: mark invitation item used
 
-When Path A sets `Visa.InvitationItem`, set **`InvitationItem.IsUsed = true`** automatically (respect exclusive flags: Cancelled / Changed / Used — linking as used clears/forbids the others per existing `InvitationItem` rules).
+When Path A sets `Visa.IssuingInvitationItem`, set **`InvitationItem.IsUsed = true`** automatically (respect exclusive flags: Cancelled / Changed / Used — linking as used clears/forbids the others per existing `InvitationItem` rules).
 
 ---
 
@@ -227,7 +227,7 @@ Path B owns a **separate** matcher that, for each imported `Visa`:
 For each imported `Visa`, find and set:
 
 - `Visa.IssuingApplicationItem` → via **legacy ProcessNumber / extension-sibling** correction (not target closest-match)
-- `Visa.InvitationItem` → closest matching target `InvitationItem` **only when** the issuing application type has `CanIssueInvitation`; otherwise leave null
+- `Visa.IssuingInvitationItem` → closest matching target `InvitationItem` **only when** the issuing application type has `CanIssueInvitation`; otherwise leave null
 
 #### 4.1.2 IssuingApplicationItem (existing post-pass + predecessor)
 

@@ -25,7 +25,7 @@ namespace Visa2026.Module.Services
 
         public static IList<ApplicationTypeCodePickerRow> LoadRows(
             IObjectSpace objectSpace,
-            ApplicationProgressRouteKind? progressRouteFilter)
+            ApplicationProfileInstanceProgressRouteKind? progressRouteFilter)
         {
             ArgumentNullException.ThrowIfNull(objectSpace);
 
@@ -33,7 +33,7 @@ namespace Visa2026.Module.Services
                 .Where(t => t.SelectionCode != null && t.SelectionCode != "");
 
             if (progressRouteFilter.HasValue)
-                query = query.Where(t => t.ApplicationProgressRoute == progressRouteFilter.Value);
+                query = query.Where(t => t.ApplicationProfileInstanceProgressRoute == progressRouteFilter.Value);
 
             return query.OrderBy(t => t.SelectionCode)
                 .AsEnumerable()

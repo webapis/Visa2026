@@ -7,13 +7,13 @@ using Visa2026.Module.Localization;
 namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
-/// Legal <see cref="ApplicationProgress"/> state transitions per route (location removed from progress model).
+/// Legal <see cref="ApplicationProfileInstanceProgress"/> state transitions per route (location removed from progress model).
 /// </summary>
-public static class ApplicationProgressTransitionHelper
+public static class ApplicationProfileInstanceProgressTransitionHelper
 {
     private readonly record struct ProgressStep(string StateCode)
     {
-        public static ProgressStep Parse(ApplicationProgress? progress) =>
+        public static ProgressStep Parse(ApplicationProfileInstanceProgress? progress) =>
             progress?.State?.Code == null
                 ? default
                 : new ProgressStep(progress.State.Code.Trim());
@@ -25,17 +25,17 @@ public static class ApplicationProgressTransitionHelper
 
     private static readonly HashSet<string> TerminalStateCodes = new(StringComparer.OrdinalIgnoreCase)
     {
-        ApplicationProgressStateCodes.ProcessIssued,
-        ApplicationProgressStateCodes.ProcessRejected,
-        ApplicationProgressStateCodes.ProcessCancelled,
-        ApplicationProgressStateCodes.Review1Rejected,
-        ApplicationProgressStateCodes.Review2Rejected
+        ApplicationProfileInstanceProgressStateCodes.ProcessIssued,
+        ApplicationProfileInstanceProgressStateCodes.ProcessRejected,
+        ApplicationProfileInstanceProgressStateCodes.ProcessCancelled,
+        ApplicationProfileInstanceProgressStateCodes.Review1Rejected,
+        ApplicationProfileInstanceProgressStateCodes.Review2Rejected
     };
 
-    static ApplicationProgressTransitionHelper()
+    static ApplicationProfileInstanceProgressTransitionHelper()
     {
-        for (var leg = 3; leg <= ApplicationProgressLegCodes.MaxLegCount; leg++)
-            TerminalStateCodes.Add(ApplicationProgressLegCodes.ReviewRejected(leg));
+        for (var leg = 3; leg <= ApplicationProfileInstanceProgressLegCodes.MaxLegCount; leg++)
+            TerminalStateCodes.Add(ApplicationProfileInstanceProgressLegCodes.ReviewRejected(leg));
     }
 
     public static bool IsTerminalStateCode(string? stateCode)
@@ -45,13 +45,13 @@ public static class ApplicationProgressTransitionHelper
 
         var trimmed = stateCode.Trim();
         return TerminalStateCodes.Contains(trimmed)
-            || ApplicationProgressLegCodes.IsReviewRejectedStateCode(trimmed);
+            || ApplicationProfileInstanceProgressLegCodes.IsReviewRejectedStateCode(trimmed);
     }
 
     public static IReadOnlyList<string> GetAllowedNextStateCodes(
-        Application? application,
-        ApplicationProgress? afterStep,
-        ApplicationProgress? currentRow = null)
+        ApplicationProfileInstance? application,
+        ApplicationProfileInstanceProgress? afterStep,
+        ApplicationProfileInstanceProgress? currentRow = null)
     {
         if (application == null)
             return Array.Empty<string>();
@@ -63,13 +63,13 @@ public static class ApplicationProgressTransitionHelper
         if (IsTerminalStateCode(afterStep.State?.Code))
             return Array.Empty<string>();
 
-        var route = ApplicationProgressRouteHelper.GetTypePickerRouteFilter(application);
+        var route = ApplicationProfileInstanceProgressRouteHelper.GetTypePickerRouteFilter(application);
         if (!route.HasValue)
-            return ApplicationProgressRouteHelper.GetAllowedStateCodes(application);
+            return ApplicationProfileInstanceProgressRouteHelper.GetAllowedStateCodes(application);
 
-        var legCount = ApplicationProgressProfileResolver.GetMinistryLegCount(application);
+        var legCount = ApplicationProfileInstanceProgressProfileResolver.GetMinistryLegCount(application);
         var fromStep = ProgressStep.Parse(afterStep);
-        var routeAllowed = ApplicationProgressRouteHelper.GetAllowedStateCodes(route.Value, legCount)
+        var routeAllowed = ApplicationProfileInstanceProgressRouteHelper.GetAllowedStateCodes(route.Value, legCount)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         // Legacy prep rows: allow leaving office into the first active step.
@@ -92,25 +92,25 @@ public static class ApplicationProgressTransitionHelper
     /// State codes allowed in the UI for this progress row (transition from prior step; keeps current value when editing).
     /// </summary>
     public static IReadOnlyList<string> GetAllowedStateCodesForProgressRow(
-        ApplicationProgress progress,
+        ApplicationProfileInstanceProgress progress,
         IObjectSpace? objectSpace)
     {
-        if (progress.Application == null)
+        if (progress.ApplicationProfileInstance == null)
             return Array.Empty<string>();
 
         var codes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         if (!string.IsNullOrWhiteSpace(progress.State?.Code))
             codes.Add(progress.State.Code.Trim());
 
-        ApplicationProgress? afterStep;
+        ApplicationProfileInstanceProgress? afterStep;
         if (objectSpace != null && objectSpace.IsNewObject(progress))
-            afterStep = GetLatestProgress(progress.Application, progress, objectSpace);
+            afterStep = GetLatestProgress(progress.ApplicationProfileInstance, progress, objectSpace);
         else
-            afterStep = GetPreviousProgress(progress.Application, progress, objectSpace);
+            afterStep = GetPreviousProgress(progress.ApplicationProfileInstance, progress, objectSpace);
 
         if (afterStep == null)
         {
-            foreach (var code in GetAllowedFirstStateCodes(progress.Application))
+            foreach (var code in GetAllowedFirstStateCodes(progress.ApplicationProfileInstance))
                 codes.Add(code);
             return codes.ToList();
         }
@@ -118,31 +118,31 @@ public static class ApplicationProgressTransitionHelper
         if (IsTerminalStateCode(afterStep.State?.Code))
             return codes.ToList();
 
-        foreach (var code in GetAllowedNextStateCodes(progress.Application, afterStep, progress))
+        foreach (var code in GetAllowedNextStateCodes(progress.ApplicationProfileInstance, afterStep, progress))
             codes.Add(code);
 
         return codes.ToList();
     }
 
     public static string? GetSuggestedNextStateCode(
-        Application? application,
-        ApplicationProgress? latestExcludingCurrent)
+        ApplicationProfileInstance? application,
+        ApplicationProfileInstanceProgress? latestExcludingCurrent)
     {
         var nextStates = GetAllowedNextStateCodes(application, latestExcludingCurrent);
         return nextStates.Count == 0 ? null : nextStates[0];
     }
 
-    public static void TryApplySuggestedNextStep(ApplicationProgress progress)
+    public static void TryApplySuggestedNextStep(ApplicationProfileInstanceProgress progress)
     {
-        if (progress.Application == null || progress.State != null)
+        if (progress.ApplicationProfileInstance == null || progress.State != null)
             return;
 
-        var objectSpace = ObjectSpaceHelper.Get(progress.Application) ?? ObjectSpaceHelper.Get(progress);
+        var objectSpace = ObjectSpaceHelper.Get(progress.ApplicationProfileInstance) ?? ObjectSpaceHelper.Get(progress);
         if (objectSpace == null)
             return;
 
-        var afterStep = GetLatestProgress(progress.Application, progress, objectSpace);
-        var suggested = GetSuggestedNextStateCode(progress.Application, afterStep);
+        var afterStep = GetLatestProgress(progress.ApplicationProfileInstance, progress, objectSpace);
+        var suggested = GetSuggestedNextStateCode(progress.ApplicationProfileInstance, afterStep);
         if (string.IsNullOrWhiteSpace(suggested))
             return;
 
@@ -156,44 +156,43 @@ public static class ApplicationProgressTransitionHelper
             .FirstOrDefault(s => s.Code == code);
 
     public static bool TryValidateProgressStep(
-        ApplicationProgress? progress,
+        ApplicationProfileInstanceProgress? progress,
         IObjectSpace? objectSpace,
         out string? errorMessage)
     {
         errorMessage = null;
-        if (progress?.Application == null)
+        if (progress?.ApplicationProfileInstance == null)
             return true;
 
-        if (!ApplicationProgressRouteHelper.TryValidateProgressStep(progress, out errorMessage))
+        if (!ApplicationProfileInstanceProgressRouteHelper.TryValidateProgressStep(progress, out errorMessage))
             return false;
 
-        if (!ApplicationProgressProfileResolver.TryValidateProjectContractForProgress(progress, objectSpace, out errorMessage))
+        if (!ApplicationProfileInstanceProgressProfileResolver.TryValidateProjectContractForProgress(progress, objectSpace, out errorMessage))
             return false;
 
-        var previous = GetPreviousProgress(progress.Application, progress, objectSpace);
+        var previous = GetPreviousProgress(progress.ApplicationProfileInstance, progress, objectSpace);
         if (previous == null)
         {
-            if (!IsAllowedFirstState(progress.Application, progress.State?.Code))
+            if (!IsAllowedFirstState(progress.ApplicationProfileInstance, progress.State?.Code))
             {
-                errorMessage = VisaUiMessages.Get("ApplicationProgress.FirstStepMustBeOfficePreparation");
+                errorMessage = VisaUiMessages.Get("ApplicationProfileInstanceProgress.FirstStepMustBeOfficePreparation");
                 return false;
             }
 
             if (ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(progress.State?.Code)
-                && progress.Application?.ApplicationType?.MigrationSlaProfile?.MaxDaysInReview is not > 0)
+                && !ApplicationProfileConfigurationResolver.HasMigrationSlaConfigured(progress.ApplicationProfileInstance))
             {
-                errorMessage = VisaUiMessages.Get("ApplicationProgress.MigrationSlaProfileRequired");
+                errorMessage = VisaUiMessages.Get("ApplicationProfileInstanceProgress.MigrationSlaProfileRequired");
                 return false;
             }
 
             if (progress.State?.Code != null
-                && string.Equals(progress.State.Code.Trim(), ApplicationProgressLegCodes.ReviewStarted(1), StringComparison.OrdinalIgnoreCase)
-                && objectSpace != null
-                && ApplicationProgressRouteHelper.GetTypePickerRouteFilter(progress.Application)
-                    == ApplicationProgressRouteKind.ViaMinistries
-                && !MinistryReviewSlaHelper.TryValidateConfigured(objectSpace, out _))
+                && string.Equals(progress.State.Code.Trim(), ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1), StringComparison.OrdinalIgnoreCase)
+                && ApplicationProfileInstanceProgressRouteHelper.GetTypePickerRouteFilter(progress.ApplicationProfileInstance)
+                    == ApplicationProfileInstanceProgressRouteKind.ViaMinistries
+                && IsMinistryReviewSlaMissing(progress.ApplicationProfileInstance, objectSpace))
             {
-                errorMessage = VisaUiMessages.Get("ApplicationProgress.MinistryReviewSlaRequired");
+                errorMessage = VisaUiMessages.Get("ApplicationProfileInstanceProgress.MinistryReviewSlaRequired");
                 return false;
             }
 
@@ -202,42 +201,41 @@ public static class ApplicationProgressTransitionHelper
 
         if (IsTerminalStateCode(previous.State?.Code))
         {
-            errorMessage = VisaUiMessages.Get("ApplicationProgress.CannotAdvanceFromTerminal");
+            errorMessage = VisaUiMessages.Get("ApplicationProfileInstanceProgress.CannotAdvanceFromTerminal");
             return false;
         }
 
         if (progress.Date.Date < previous.Date.Date)
         {
-            errorMessage = VisaUiMessages.Get("ApplicationProgress.DateCannotBeBeforePrevious");
+            errorMessage = VisaUiMessages.Get("ApplicationProfileInstanceProgress.DateCannotBeBeforePrevious");
             return false;
         }
 
-        var route = ApplicationProgressRouteHelper.GetTypePickerRouteFilter(progress.Application);
+        var route = ApplicationProfileInstanceProgressRouteHelper.GetTypePickerRouteFilter(progress.ApplicationProfileInstance);
         if (!route.HasValue)
             return true;
 
-        var legCount = ApplicationProgressProfileResolver.GetMinistryLegCount(progress.Application);
+        var legCount = ApplicationProfileInstanceProgressProfileResolver.GetMinistryLegCount(progress.ApplicationProfileInstance);
         var fromStep = ProgressStep.Parse(previous);
         var toStep = ProgressStep.Parse(progress);
 
         if (IsTransitionAllowed(route.Value, legCount, fromStep, toStep))
         {
             if (progress.State?.Code != null
-                && (string.Equals(progress.State.Code.Trim(), ApplicationProgressLegCodes.ReviewStarted(1), StringComparison.OrdinalIgnoreCase)
+                && (string.Equals(progress.State.Code.Trim(), ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1), StringComparison.OrdinalIgnoreCase)
                     || (progress.State.Code.Trim().EndsWith("_REVIEW_APPROVED", StringComparison.OrdinalIgnoreCase)
-                        && ApplicationProgressLegCodes.TryParseMinistryLegFromStateCode(progress.State.Code, out _)))
-                && objectSpace != null
-                && route.Value == ApplicationProgressRouteKind.ViaMinistries
-                && !MinistryReviewSlaHelper.TryValidateConfigured(objectSpace, out _))
+                        && ApplicationProfileInstanceProgressLegCodes.TryParseMinistryLegFromStateCode(progress.State.Code, out _)))
+                && route.Value == ApplicationProfileInstanceProgressRouteKind.ViaMinistries
+                && IsMinistryReviewSlaMissing(progress.ApplicationProfileInstance, objectSpace))
             {
-                errorMessage = VisaUiMessages.Get("ApplicationProgress.MinistryReviewSlaRequired");
+                errorMessage = VisaUiMessages.Get("ApplicationProfileInstanceProgress.MinistryReviewSlaRequired");
                 return false;
             }
 
             if (ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(progress.State?.Code)
-                && progress.Application?.ApplicationType?.MigrationSlaProfile?.MaxDaysInReview is not > 0)
+                && !ApplicationProfileConfigurationResolver.HasMigrationSlaConfigured(progress.ApplicationProfileInstance))
             {
-                errorMessage = VisaUiMessages.Get("ApplicationProgress.MigrationSlaProfileRequired");
+                errorMessage = VisaUiMessages.Get("ApplicationProfileInstanceProgress.MigrationSlaProfileRequired");
                 return false;
             }
 
@@ -245,23 +243,23 @@ public static class ApplicationProgressTransitionHelper
         }
 
         errorMessage = VisaUiMessages.Format(
-            "ApplicationProgress.InvalidTransition",
+            "ApplicationProfileInstanceProgress.InvalidTransition",
             FormatStep(fromStep),
             FormatStep(toStep));
         return false;
     }
 
-    private static ApplicationProgress? GetLatestProgress(
-        Application application,
-        ApplicationProgress? exclude,
+    private static ApplicationProfileInstanceProgress? GetLatestProgress(
+        ApplicationProfileInstance application,
+        ApplicationProfileInstanceProgress? exclude,
         IObjectSpace? objectSpace) =>
-        ApplicationProgressHelper.GetLatest(
+        ApplicationProfileInstanceProgressHelper.GetLatest(
             application.ProgressHistory?.Where(p => p != exclude && (objectSpace == null || !objectSpace.IsObjectToDelete(p))),
             objectSpace);
 
-    private static ApplicationProgress? GetPreviousProgress(
-        Application application,
-        ApplicationProgress current,
+    private static ApplicationProfileInstanceProgress? GetPreviousProgress(
+        ApplicationProfileInstance application,
+        ApplicationProfileInstanceProgress current,
         IObjectSpace? objectSpace)
     {
         var others = application.ProgressHistory?
@@ -270,6 +268,11 @@ public static class ApplicationProgressTransitionHelper
         if (others == null || others.Count == 0)
             return null;
 
+        var isNew = current.ID == Guid.Empty
+            || (objectSpace != null && objectSpace.IsNewObject(current));
+        if (isNew)
+            return ApplicationProfileInstanceProgressHelper.GetLatest(others, objectSpace);
+
         return others
             .Where(p => p.Date < current.Date || (p.Date == current.Date && p.ID != Guid.Empty && current.ID != Guid.Empty && p.ID < current.ID))
             .OrderByDescending(p => p.Date)
@@ -277,31 +280,44 @@ public static class ApplicationProgressTransitionHelper
             .FirstOrDefault();
     }
 
-    private static bool IsLegacyOfficePreparation(string? stateCode) =>
-        string.Equals(stateCode, ApplicationProgressStateCodes.IsBeingPrepared, StringComparison.OrdinalIgnoreCase);
-
-    private static IReadOnlyList<string> GetAllowedFirstStateCodes(Application? application)
+    private static bool IsMinistryReviewSlaMissing(
+        ApplicationProfileInstance application,
+        IObjectSpace? objectSpace)
     {
-        var route = ApplicationProgressRouteHelper.GetTypePickerRouteFilter(application);
-        if (route == ApplicationProgressRouteKind.DirectToMigrationService)
+        if (ApplicationProfileConfigurationResolver.HasMinistrySlaConfigured(application))
+            return false;
+
+        if (objectSpace == null)
+            return false;
+
+        return !MinistryReviewSlaHelper.TryValidateConfigured(objectSpace, out _);
+    }
+
+    private static bool IsLegacyOfficePreparation(string? stateCode) =>
+        string.Equals(stateCode, ApplicationProfileInstanceProgressStateCodes.IsBeingPrepared, StringComparison.OrdinalIgnoreCase);
+
+    private static IReadOnlyList<string> GetAllowedFirstStateCodes(ApplicationProfileInstance? application)
+    {
+        var route = ApplicationProfileInstanceProgressRouteHelper.GetTypePickerRouteFilter(application);
+        if (route == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService)
         {
             return
             [
-                ApplicationProgressStateCodes.ProcessStarted,
-                ApplicationProgressStateCodes.ProcessCancelled
+                ApplicationProfileInstanceProgressStateCodes.ProcessStarted,
+                ApplicationProfileInstanceProgressStateCodes.ProcessCancelled
             ];
         }
 
         // Via ministries (or unknown): first explicit step is first-leg started (office is implied).
         return
         [
-            ApplicationProgressLegCodes.ReviewStarted(1),
-            ApplicationProgressLegCodes.ReviewRejected(1),
-            ApplicationProgressStateCodes.ProcessCancelled
+            ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1),
+            ApplicationProfileInstanceProgressLegCodes.ReviewRejected(1),
+            ApplicationProfileInstanceProgressStateCodes.ProcessCancelled
         ];
     }
 
-    private static bool IsAllowedFirstState(Application? application, string? stateCode)
+    private static bool IsAllowedFirstState(ApplicationProfileInstance? application, string? stateCode)
     {
         if (string.IsNullOrWhiteSpace(stateCode))
             return false;
@@ -313,7 +329,7 @@ public static class ApplicationProgressTransitionHelper
     }
 
     private static bool IsTransitionAllowed(
-        ApplicationProgressRouteKind route,
+        ApplicationProfileInstanceProgressRouteKind route,
         int ministryLegCount,
         ProgressStep from,
         ProgressStep to)
@@ -323,42 +339,42 @@ public static class ApplicationProgressTransitionHelper
 
         if (IsLegacyOfficePreparation(from.StateCode))
         {
-            if (route == ApplicationProgressRouteKind.DirectToMigrationService)
+            if (route == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService)
             {
-                return string.Equals(to.StateCode, ApplicationProgressStateCodes.ProcessStarted, StringComparison.OrdinalIgnoreCase)
-                    || string.Equals(to.StateCode, ApplicationProgressStateCodes.ProcessCancelled, StringComparison.OrdinalIgnoreCase);
+                return string.Equals(to.StateCode, ApplicationProfileInstanceProgressStateCodes.ProcessStarted, StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(to.StateCode, ApplicationProfileInstanceProgressStateCodes.ProcessCancelled, StringComparison.OrdinalIgnoreCase);
             }
 
-            return string.Equals(to.StateCode, ApplicationProgressLegCodes.ReviewStarted(1), StringComparison.OrdinalIgnoreCase)
-                || string.Equals(to.StateCode, ApplicationProgressLegCodes.ReviewRejected(1), StringComparison.OrdinalIgnoreCase)
-                || string.Equals(to.StateCode, ApplicationProgressStateCodes.ProcessCancelled, StringComparison.OrdinalIgnoreCase);
+            return string.Equals(to.StateCode, ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1), StringComparison.OrdinalIgnoreCase)
+                || string.Equals(to.StateCode, ApplicationProfileInstanceProgressLegCodes.ReviewRejected(1), StringComparison.OrdinalIgnoreCase)
+                || string.Equals(to.StateCode, ApplicationProfileInstanceProgressStateCodes.ProcessCancelled, StringComparison.OrdinalIgnoreCase);
         }
 
         return GetTransitions(route, ministryLegCount).Any(t => StepsEqual(t.From, from) && StepsEqual(t.To, to));
     }
 
     private static IEnumerable<ProgressTransition> GetTransitions(
-        ApplicationProgressRouteKind route,
+        ApplicationProfileInstanceProgressRouteKind route,
         int ministryLegCount)
     {
-        var processStarted = Step(ApplicationProgressStateCodes.ProcessStarted);
+        var processStarted = Step(ApplicationProfileInstanceProgressStateCodes.ProcessStarted);
         var edges = new List<ProgressTransition>();
 
-        if (route == ApplicationProgressRouteKind.DirectToMigrationService)
+        if (route == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService)
         {
             AddProcessOutcomes(edges, processStarted);
             AddCancellationFromActiveSteps(edges, processStarted);
             return edges;
         }
 
-        var legCount = Math.Clamp(ministryLegCount, 1, ApplicationProgressLegCodes.MaxLegCount);
-        var started1 = Step(ApplicationProgressLegCodes.ReviewStarted(1));
+        var legCount = Math.Clamp(ministryLegCount, 1, ApplicationProfileInstanceProgressLegCodes.MaxLegCount);
+        var started1 = Step(ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1));
         var approvedSteps = new List<ProgressStep>();
 
         for (var leg = 1; leg <= legCount; leg++)
         {
-            var approved = Step(ApplicationProgressLegCodes.ReviewApproved(leg));
-            var rejected = Step(ApplicationProgressLegCodes.ReviewRejected(leg));
+            var approved = Step(ApplicationProfileInstanceProgressLegCodes.ReviewApproved(leg));
+            var rejected = Step(ApplicationProfileInstanceProgressLegCodes.ReviewRejected(leg));
             approvedSteps.Add(approved);
 
             if (leg == 1)
@@ -387,14 +403,14 @@ public static class ApplicationProgressTransitionHelper
 
     private static void AddProcessOutcomes(List<ProgressTransition> edges, ProgressStep processStarted)
     {
-        edges.Add(new ProgressTransition(processStarted, Step(ApplicationProgressStateCodes.ProcessIssued)));
-        edges.Add(new ProgressTransition(processStarted, Step(ApplicationProgressStateCodes.ProcessRejected)));
+        edges.Add(new ProgressTransition(processStarted, Step(ApplicationProfileInstanceProgressStateCodes.ProcessIssued)));
+        edges.Add(new ProgressTransition(processStarted, Step(ApplicationProfileInstanceProgressStateCodes.ProcessRejected)));
     }
 
     private static void AddCancellationFromActiveSteps(List<ProgressTransition> edges, params ProgressStep[] fromSteps)
     {
         foreach (var from in fromSteps)
-            edges.Add(new ProgressTransition(from, Step(ApplicationProgressStateCodes.ProcessCancelled)));
+            edges.Add(new ProgressTransition(from, Step(ApplicationProfileInstanceProgressStateCodes.ProcessCancelled)));
     }
 
     private static ProgressStep Step(string stateCode) => new(stateCode);

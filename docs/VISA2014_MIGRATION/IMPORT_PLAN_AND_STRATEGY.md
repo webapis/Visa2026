@@ -81,7 +81,7 @@ Waves match [`importPhases`](../../Visa2026.DataImporter/legacy/visa2014/order.y
 | **0 — Strategy** | — | Plan approved | MCP + `VISA2015` accessible |
 | **1 — Prerequisites** | `prerequisites` | Target lookups seeded; layer 3 for shared catalogs | Strategy `approved`; Blazor updaters run once |
 | **2 — Person domain** | `person-domain` | Person (+ children: Education, …) | Wave 1; Person dossier complete; **Excel preview reviewed**; `importConfirmed` |
-| **3 — Application domain** | `application-domain` | Application, ApplicationItem | Person imported + id-map; dossiers confirmed |
+| **3 — Application domain** | `application-domain` | Application (profile instance), **ApplicationPerson** M2M (not ApplicationItem); person-related auto-link on resolve | Person + person-related scalars imported + id-maps; profiles seeded (Wave 0b/1) |
 | **4 — Permits & visas** | `permits-and-visas` | Invitation, WorkPermit, Visa, BorderZone, Rejection | Application domain stable |
 | **5 — Progress & history** | `progress-and-history` | ApplicationProgress, legacy state | Owning applications imported |
 | **6 — Attachments** | `attachments` | File blobs, scan links (`PassportCopy`, `FileData`, …) | Parent BO id-map complete; scalar OData reconciled |

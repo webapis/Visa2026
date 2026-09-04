@@ -8,8 +8,8 @@ public class Visa2014ApplicationMinistryLegCountResolverTests
     [Fact]
     public void SynthesizeSteps_SimpleProcessWithProfileLegCount2_IncludesMinistryLegs()
     {
-        var raw = new Visa2014ApplicationProgressRawRow(
-            LegacyApplicationOid: Guid.NewGuid(),
+        var raw = new Visa2014ApplicationProfileInstanceProgressRawRow(
+            LegacyApplicationProfileInstanceOid: Guid.NewGuid(),
             ManualApplicationNumber: "7/-8308",
             ManualApplicationDate: new DateTime(2016, 7, 12),
             IsLongProcess: false,
@@ -32,7 +32,7 @@ public class Visa2014ApplicationMinistryLegCountResolverTests
             Cancelled: false,
             Rejected: false);
 
-        var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(raw, ministryLegCount: 2);
+        var steps = Visa2014ApplicationProfileInstanceProgressTransform.SynthesizeSteps(raw, ministryLegCount: 2);
 
         Assert.Equal(4, steps.Count);
         Assert.Contains(steps, s => s.StateCode == "1_REVIEW_STARTED");

@@ -4,7 +4,7 @@ description: Registration of employee arrival into Turkmenistan
 dependsOn: Shared
 sync: false
 anchor:
-  entity: Application
+  entity: ApplicationProfileInstance
   key: FullApplicationNumber
   value: 4/-003
 data:
@@ -43,9 +43,9 @@ data:
     Start Date: 2026-04-02
     Expiration Date: 2027-04-02
   Applications:
-  - Application Number: 003
+  - ApplicationProfileInstance Number: 003
     Date: 2026-04-02
-    Application Type: App_Reg_Check_In
+    ApplicationProfileInstance Type: App_Reg_Check_In
     Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
   ApplicationItems:
   - Person: John Doe

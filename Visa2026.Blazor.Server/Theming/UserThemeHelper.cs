@@ -243,7 +243,7 @@ public static class UserThemeHelper
 
     static IObjectSpace CreateUserObjectSpace(XafApplication application) =>
         TryCreateUserObjectSpace(application)
-        ?? throw new InvalidOperationException("Application services are not available.");
+        ?? throw new InvalidOperationException("ApplicationProfileInstance services are not available.");
 
     static string? NormalizeStoredThemeCaption(string? caption) =>
         string.IsNullOrWhiteSpace(caption)

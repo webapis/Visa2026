@@ -7,6 +7,7 @@ using DevExpress.Persistent.BaseImpl.EF;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 using Visa2026.Module.Services.ApplicationItemLinkedDocuments;
 
 namespace Visa2026.Module.Services.ApplicationItemLinkedDocuments;
@@ -24,46 +25,58 @@ public sealed class ApplicationItemDocumentCopyPdfMerger
         this.logger = logger;
     }
 
-    public bool TryBuildMergedPdf(
-        IReadOnlyList<Guid> applicationItemIds,
+    /// <summary>
+    /// Merge slot files for skip-navigation People on an application.
+    /// <paramref name="applicationPersonIds"/> and <see cref="ApplicationItemLinkedDocumentFileEntry.ApplicationItemId"/>
+    /// are Person ids (legacy property name).
+    /// </summary>
+    public bool TryBuildMergedPdfForRoster(
+        IReadOnlyList<Guid> applicationPersonIds,
         string slotKey,
         string slotLabel,
         IReadOnlyList<ApplicationItemLinkedDocumentFileEntry> entries,
         out byte[]? content,
-        out string? fileName)
+        out string? fileName,
+        Guid applicationId = default)
     {
         content = null;
         fileName = null;
 
-        if (applicationItemIds == null || applicationItemIds.Count == 0 || string.IsNullOrWhiteSpace(slotKey))
+        if (applicationPersonIds == null || applicationPersonIds.Count == 0 || string.IsNullOrWhiteSpace(slotKey))
             return false;
 
         if (entries == null || entries.Count == 0)
             return false;
 
-        var allowedItemIds = applicationItemIds
+        var allowedRowIds = applicationPersonIds
             .Where(id => id != Guid.Empty)
             .Distinct()
             .ToHashSet();
 
-        if (allowedItemIds.Count == 0)
+        if (allowedRowIds.Count == 0)
             return false;
 
-        using var objectSpace = nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationItem>();
-        var snapshots = new Dictionary<Guid, ApplicationItemLinkedDocumentsSnapshot>();
-
-        foreach (var itemId in allowedItemIds)
+        using var objectSpace = nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        if (!ApplicationRosterHelper.TryLoadSharedApplicationPeople(
+                objectSpace,
+                applicationPersonIds,
+                applicationId,
+                out var application,
+                out var people)
+            || application == null)
         {
-            var item = objectSpace.GetObjectByKey<ApplicationItem>(itemId);
-            if (item == null)
-                return false;
+            return false;
+        }
 
-            snapshots[itemId] = ApplicationItemLinkedDocumentsResolver.Resolve(objectSpace, item);
+        var snapshots = new Dictionary<Guid, ApplicationItemLinkedDocumentsSnapshot>();
+        foreach (var person in people)
+        {
+            snapshots[person.ID] = ApplicationPersonLinkedDocumentsResolver.Resolve(objectSpace, application, person);
         }
 
         foreach (var entry in entries)
         {
-            if (!allowedItemIds.Contains(entry.ApplicationItemId))
+            if (!allowedRowIds.Contains(entry.ApplicationItemId))
                 return false;
 
             if (!snapshots.TryGetValue(entry.ApplicationItemId, out var snapshot))

@@ -3,7 +3,7 @@
 | Field | Value |
 |-------|-------|
 | **Status** | Approved |
-| **Map version** | 1.0.4 |
+| **Map version** | 1.0.5 |
 | **Basename** | `sahsy_kagyz` |
 | **Template file(s)** | `sahsy_kagyz.docx` |
 | **Format** | Word |
@@ -17,7 +17,7 @@
 
 ## Dynamic vs static rule (authoritative)
 
-On **`sahsy_kagyz.png`**, only content shown with **yellow background** is **dynamic** (`{{ds.rows.*}}` or `{{IMAGE:…}}`). **All other** text — title, field labels, declaration paragraph, **Türkmenistanda öňki işlän ýerleri** (blank underline), date line, **M.Ý.**, signature line — stays **static** literal Turkmen in Word. **Do not** add placeholders outside yellow regions.
+On **`sahsy_kagyz.png`**, only content shown with **yellow background** is **dynamic** (`{{ds.rows.*}}` or `{{IMAGE:…}}`). **All other** text — title, field labels, declaration paragraph, date line, **M.Ý.**, signature line — stays **static** literal Turkmen in Word. **Do not** add placeholders outside yellow regions. **F09** (`Türkmenistanda öňki işlän ýerleri`) is now a merge field from `Person.PreviousWorkplacesInTurkmenistan` even though the original scan underline was blank.
 
 ### Yellow-highlighted regions → placeholders
 
@@ -38,13 +38,14 @@ On **`sahsy_kagyz.png`**, only content shown with **yellow background** is **dyn
 | _(full education line)_ | F06 | F06a + static `, ` + F06b + static `, ` + F06c — see §6 assembly |
 | `elektrik-elektronika inženerçiligi` | F07 | `{{ds.rows.Education_SpecialtyTm}}` |
 | `Taslamanyň dolandyryş müdiri` | F08 | `{{ds.rows.Position_PositionTm}}` |
+| _(prior workplaces underline)_ | F09 | `{{ds.rows.Person_PreviousWorkplacesInTurkmenistan}}` |
 | `ayaly-Firuza Mine Erol …` | F10 | `{{ds.rows.SahsyKagyz_FamilyStatusText}}` |
 | `TUR, Tatlısu mah. …` | F11 | `{{ds.rows.Person_ForeignAddressWithCountry}}` |
 | `«Çalık Enerji Sanayi ve Ticaret A.Ş»` | SIG-CO | static `«` + `{{ds.rows.Application_SponsorName}}` + static `»` |
 | `Türkmenistandaky Şahamçasynyň müdiri` | SIG-T | `{{ds.rows.Application_CompanyHead_PositionTm}}` |
 | `Mehmet ÇIRAK` | SIG-N | `{{ds.rows.Application_CompanyHead_FullName}}` |
 
-**Not yellow (static §8):** **ŞAHSY KAGYZY** title; all field **labels**; declaration paragraph; **Türkmenistanda öňki işlän ýerleri:** empty underline; date line `"____" … 20____ ý.`; **M.Ý.**; **goly** signature line.
+**Not yellow (static §8):** **ŞAHSY KAGYZY** title; all field **labels**; declaration paragraph; date line `"____" … 20____ ý.`; **M.Ý.**; **goly** signature line.
 
 ---
 
@@ -104,7 +105,7 @@ On **`sahsy_kagyz.png`**, only content shown with **yellow background** is **dyn
 |-------|-------|
 | Paper / workbook | A4 portrait |
 | Structure summary | Title → **photo (yellow)** → labeled fields (yellow values only) → static declaration → **yellow signatory block** → static date / stamp / signature scaffolding |
-| Static regions | Title, labels, declaration, F09 prior-work underline (empty), date / **M.Ý.** / **goly** lines |
+| Static regions | Title, labels, declaration, date / **M.Ý.** / **goly** lines |
 | Dynamic regions | Yellow spans only (§6 + yellow table above) |
 | Typography notes | Serif; values on underlines |
 
@@ -135,7 +136,7 @@ Wrap **entire form** (including signatory block) in `{{#ds.rows}}` … `{{/ds.ro
 | F06 | Education | Bilimi, okan ýeri (assembled) | `{{ds.rows.Education_LevelTm}}`, `{{ds.rows.Education_CountryCode}}`, `{{ds.rows.Education_InstitutionName}}` | (F06a–c) | string | Ýokary, TUR, Gündogar mediterian uniwersiteti | **Word order:** `F06a` + static `, ` + `F06b` + static `, ` + `F06c` |
 | F07 | Specialty | Hünäri | `{{ds.rows.Education_SpecialtyTm}}` | `Education_SpecialtyTm` | string | elektrik-elektronika inženerçiligi | **Yellow** |
 | F08 | Position | Wezipesi | `{{ds.rows.Position_PositionTm}}` | `Position_PositionTm` | string | Taslamanyň dolandyryş müdiri | **Yellow** |
-| F09 | Prior work TM | Türkmenistanda öňki işlän ýerleri: | _none_ | — | — | _(blank)_ | **Not yellow** — leave empty underline; no placeholder |
+| F09 | Prior work TM | Türkmenistanda öňki işlän ýerleri: | `{{ds.rows.Person_PreviousWorkplacesInTurkmenistan}}` | `Person_PreviousWorkplacesInTurkmenistan` | string | _(blank on scan)_ | `Person.PreviousWorkplacesInTurkmenistan`; short code **PWTM**; empty when unset |
 | F10 | Family | Maşgala ýagdaýy | `{{ds.rows.SahsyKagyz_FamilyStatusText}}` | `SahsyKagyz_FamilyStatusText` | string | ayaly-Firuza Mine Erol 23.05.1985ý. TUR., gyzy-Nil Erol 03.07.2014ý. TUR. | **Yellow** — `Person.FamilyMembers` inline format or manual visa text |
 | F11 | Foreign address | Daşary ýurtdaky ýaşaýan anyk salgysy | `{{ds.rows.Person_ForeignAddressWithCountry}}` | `Person_ForeignAddressWithCountry` | string | TUR, Tatlısu mah. … | **Yellow** |
 | SIG-CO | Signatory | (company name) | `«{{ds.rows.Application_SponsorName}}»` | `Application_SponsorName` | string | Çalık Enerji Sanayi ve Ticaret A.Ş | **Yellow** — guillemets **static** in Word as `«` … `»` around token |
@@ -162,7 +163,7 @@ Wrap **entire form** (including signatory block) in `{{#ds.rows}}` … `{{/ds.ro
 ## §8 Static text inventory
 
 - **ŞAHSY KAGYZY** (title, centered)
-- Field labels: **Familiýasy, ady, atasynyň ady**; **Doglan senesi we ýeri**; **Raýatlygy**; **Pasportyň belgisi, berlen senesi we möhleti**; **Şahsy belgisi**; **Bilimi, okan ýeri**; **Hünäri**; **Wezipesi**; **Türkmenistanda öňki işlän ýerleri:** (label + **empty** underline — not yellow); **Maşgala ýagdaýy**; **Daşary ýurtdaky ýaşaýan anyk salgysy**
+- Field labels: **Familiýasy, ady, atasynyň ady**; **Doglan senesi we ýeri**; **Raýatlygy**; **Pasportyň belgisi, berlen senesi we möhleti**; **Şahsy belgisi**; **Bilimi, okan ýeri**; **Hünäri**; **Wezipesi**; **Türkmenistanda öňki işlän ýerleri:** (label only — value is **F09**); **Maşgala ýagdaýy**; **Daşary ýurtdaky ýaşaýan anyk salgysy**
 - Declaration: *Daşary ýurt raýatlary barada galp maglumatlary görkezilen ýagdaýynda Türkmenistanyň kanunçylygyna laýyklykda doly jogapkärçiligi çekýärin.*
 - **SIG-D:** date line `"____" _______________ 20____ ý.` (blank — not yellow)
 - **SIG-S:** `M.Ý.` (not yellow)
@@ -205,6 +206,7 @@ Wrap **entire form** (including signatory block) in `{{#ds.rows}}` … `{{/ds.ro
 | Row loop | `{{#ds.rows}}` before first field; `{{/ds.rows}}` after signatory block |
 | Multi-item | `{{:s:}}{{:PageBreak}}` at end of each form when **N > 1** |
 | Company (yellow) | `«{{ds.rows.Application_SponsorName}}»` (guillemets static) |
+| Prior work (F09) | `{{ds.rows.Person_PreviousWorkplacesInTurkmenistan}}` on the underline after the label |
 | Split runs | Re-type any token Word split across runs if Extract misses it |
 
 **Seed:** `UserReportTemplateUpdater` — **Sahsy kagyz**, sort **67**, `App_Inv` + `App_Inv_And_WP`. **Merge:** `BuildSahsyKagyzStyleRows` in `UserReportMergeDataHelper.cs`.
@@ -229,6 +231,7 @@ Wrap **entire form** (including signatory block) in `{{#ds.rows}}` … `{{/ds.ro
 | F06c | Gündogar mediterian uniwersiteti |
 | F07 | elektrik-elektronika inženerçiligi |
 | F08 | Taslamanyň dolandyryş müdiri |
+| F09 | _(blank on scan — officer `Person.PreviousWorkplacesInTurkmenistan`)_ |
 | F10 | ayaly-Firuza Mine Erol 23.05.1985ý. TUR., gyzy-Nil Erol 03.07.2014ý. TUR. |
 | F11 | TUR, Tatlısu mah. Şahin cad. Yüksel City A Blok, No:58A/5 Ümraniye/İstanbul |
 | SIG-CO | Çalık Enerji Sanayi ve Ticaret A.Ş |
@@ -243,7 +246,7 @@ Wrap **entire form** (including signatory block) in `{{#ds.rows}}` … `{{/ds.ro
 |----------|-------|
 | **`GT-15_Elyasow_ckl_map.md`** | Same **yellow-only** authoring rule |
 | **`Sanaw_ckl_map.md`** | Same `Application_CompanyHead_*` sources; Sanaw uses footer **outside** `rows` (one table); **sahsy_kagyz** uses **`ds.rows.*`** inside loop (one form per item) |
-| **BO** | `Education_CountryCode`, `SahsyKagyz_FamilyStatusText` on `ApplicationItem` |
+| **BO** | `Education_CountryCode`, `SahsyKagyz_FamilyStatusText`, `Person_PreviousWorkplacesInTurkmenistan` on roster merge line |
 | **Seed** | **Sahsy kagyz** — `UserReportTemplateUpdater` sort **67** |
 
 ---
@@ -263,3 +266,4 @@ N/A
 | 1.0.2 | 2026-05-28 | User | Passport **issue** / **expiration** dates explicit: **F04b** `Passport_IssueDateText`, **F04c** `Passport_ExpirationDateText` in yellow table + §6 assembly row |
 | 1.0.3 | 2026-05-28 | User | Education **level** explicit: **F06a** `Education_LevelTm`; split F06b/F06c in yellow table + §6 assembly row |
 | 1.0.4 | 2026-05-28 | User + agent | Placeholders in docx; map **Approved**; seed + `BuildSahsyKagyzStyleRows`; BO properties added |
+| 1.0.5 | 2026-09-01 | User + agent | **F09** `Person_PreviousWorkplacesInTurkmenistan` / **PWTM** — prior workplaces from employee Person |

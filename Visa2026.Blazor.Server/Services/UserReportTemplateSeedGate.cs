@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Core;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Visa2026.Module;
@@ -31,6 +32,16 @@ internal static class UserReportTemplateSeedGate
 
         try
         {
+            var configuration = services.GetService<IConfiguration>();
+            var connectionString = configuration?.GetConnectionString("DefaultConnection")
+                ?? configuration?.GetConnectionString("ConnectionString");
+            if (!PostgresRelationExists.All(connectionString, "ApplicationTypes", "UserReportTemplates"))
+            {
+                logger?.LogInformation(
+                    "User report template seed skipped — schema not created yet (CheckCompatibility still pending).");
+                return;
+            }
+
             using var scope = services.CreateScope();
             var scopedServices = scope.ServiceProvider;
             var osFactory = scopedServices.GetRequiredService<INonSecuredObjectSpaceFactory>();

@@ -5,7 +5,7 @@ This ensures that for any given application process, users are only presented wi
 
 Core properties like `Passport` and `Employee` are generally visible for all types. The `FamilyMember` lookup is visible only when the parent `Application.IsForFamily` flag is set to `true`. When a family member is selected, the `Employee` lookup is automatically populated and made read-only.
 
-| Application Context | Application Type (SubType) | Visible Properties in ApplicationItem |
+| ApplicationProfileInstance Context | ApplicationProfileInstance Type (SubType) | Visible Properties in ApplicationItem |
 | :--- | :--- | :--- |
 | **Employee & Family** | `ApplicationForInvitation` | `Passport`, `Position` |
 | **Employee** | `ApplicationForChangingInvitation` | `Passport`, `Position` |

@@ -6,28 +6,30 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Visa2026.Module.Localization;
 using Visa2026.Module.Services;
+using Visa2026.Module.Services.ApplicationPersonRoster;
+using Visa2026.Module.Services.PreviewSlot;
 
 namespace Visa2026.Blazor.Server.Services;
 
 public sealed class ApplicationItemDocumentPackageEnqueueService
 {
     private readonly IHttpContextAccessor httpContextAccessor;
-    private readonly ApplicationItemPdfBatchEnqueueService batchEnqueueService;
+    private readonly ApplicationProfileInstancePersonPdfBatchEnqueueService rosterBatchEnqueueService;
 
     public ApplicationItemDocumentPackageEnqueueService(
         IHttpContextAccessor httpContextAccessor,
-        ApplicationItemPdfBatchEnqueueService batchEnqueueService)
+        ApplicationProfileInstancePersonPdfBatchEnqueueService rosterBatchEnqueueService)
     {
         this.httpContextAccessor = httpContextAccessor;
-        this.batchEnqueueService = batchEnqueueService;
+        this.rosterBatchEnqueueService = rosterBatchEnqueueService;
     }
 
     public Task<ApplicationItemDocumentPackageEnqueueOutcome> EnqueueDefaultPackageAsync(
-        IReadOnlyList<Guid> applicationItemIds) =>
-        EnqueuePackageAsync(applicationItemIds, ApplicationItemDocumentPackageOptions.CreateDefaults());
+        IReadOnlyList<Guid> lineIds) =>
+        EnqueuePackageAsync(lineIds, ApplicationItemDocumentPackageOptions.CreateDefaults());
 
     public Task<ApplicationItemDocumentPackageEnqueueOutcome> EnqueuePackageAsync(
-        IReadOnlyList<Guid> applicationItemIds,
+        IReadOnlyList<Guid> lineIds,
         ApplicationItemDocumentPackageOptions packageOptions)
     {
         string? userName = httpContextAccessor.HttpContext?.User?.Identity?.Name
@@ -43,15 +45,17 @@ public sealed class ApplicationItemDocumentPackageEnqueueService
         }
 
         string culture = VisaUiMessages.NormalizeCultureName(CultureInfo.CurrentUICulture.Name);
+        ApplicationItemPdfBatchEnqueueResult? result = null;
+        string? errorMessageKey = null;
+        bool enqueued = rosterBatchEnqueueService.TryEnqueuePackage(
+            lineIds,
+            packageOptions,
+            userName,
+            culture,
+            out result,
+            out errorMessageKey);
 
-        if (!batchEnqueueService.TryEnqueuePackage(
-                applicationItemIds,
-                packageOptions,
-                userName,
-                culture,
-                out var result,
-                out var errorMessageKey)
-            || result == null)
+        if (!enqueued || result == null)
         {
             return Task.FromResult(new ApplicationItemDocumentPackageEnqueueOutcome
             {

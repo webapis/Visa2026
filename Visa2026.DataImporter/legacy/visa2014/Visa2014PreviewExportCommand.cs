@@ -13,7 +13,7 @@ internal static class Visa2014PreviewExportCommand
 
         if (!IsSupportedEntity(entity))
         {
-            Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person, Passport, Visa, Education, EmployeePositionHistory, EmployeeSalary, AddressOfResidence, WorkPermit, WorkPermitItem, Invitation, InvitationItem, Rejection, RejectionItem, PrivateHouse, Lodging, Hotel, Hospital, OtherSite, Application, ApplicationItem, ApplicationProgress, ProjectContractMinistryLeg, ApplicationMigrationServiceInference.");
+            Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person, Passport, Visa, Education, EmployeePositionHistory, EmployeeSalary, AddressOfResidence, WorkPermit, WorkPermitItem, Invitation, InvitationItem, Rejection, RejectionItem, PrivateHouse, Lodging, Hotel, Hospital, OtherSite, ApplicationProfileInstance, ApplicationProfileCatalog, ApplicationItem, ApplicationProfileInstanceProgress, ProjectContractMinistryLeg, ApplicationMigrationServiceInference.");
             return 1;
         }
 
@@ -80,8 +80,8 @@ internal static class Visa2014PreviewExportCommand
                     maxRows,
                     verbose,
                     source.Id)
-                : string.Equals(entity, "ApplicationProgress", StringComparison.OrdinalIgnoreCase)
-                ? Visa2014ApplicationProgressPreviewExporter.Export(
+                : string.Equals(entity, "ApplicationProfileInstanceProgress", StringComparison.OrdinalIgnoreCase)
+                ? Visa2014ApplicationProfileInstanceProgressPreviewExporter.Export(
                     source.ConnectionString,
                     source.LookupTranslationPaths,
                     output,
@@ -90,6 +90,14 @@ internal static class Visa2014PreviewExportCommand
                     source.Id)
                 : string.Equals(entity, "Application", StringComparison.OrdinalIgnoreCase)
                 ? Visa2014ApplicationPreviewExporter.Export(
+                    source.ConnectionString,
+                    source.LookupTranslationPaths,
+                    output,
+                    maxRows,
+                    verbose,
+                    source.Id)
+                : string.Equals(entity, "ApplicationProfileCatalog", StringComparison.OrdinalIgnoreCase)
+                ? Visa2014ApplicationProfileCatalogExporter.Export(
                     source.ConnectionString,
                     source.LookupTranslationPaths,
                     output,
@@ -277,8 +285,9 @@ internal static class Visa2014PreviewExportCommand
         || string.Equals(entity, "Hospital", StringComparison.OrdinalIgnoreCase)
         || string.Equals(entity, "OtherSite", StringComparison.OrdinalIgnoreCase)
         || string.Equals(entity, "Application", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(entity, "ApplicationProfileCatalog", StringComparison.OrdinalIgnoreCase)
         || string.Equals(entity, "ApplicationItem", StringComparison.OrdinalIgnoreCase)
-        || string.Equals(entity, "ApplicationProgress", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(entity, "ApplicationProfileInstanceProgress", StringComparison.OrdinalIgnoreCase)
         || string.Equals(entity, "ProjectContractMinistryLeg", StringComparison.OrdinalIgnoreCase)
         || string.Equals(entity, "ApplicationMigrationServiceInference", StringComparison.OrdinalIgnoreCase);
 

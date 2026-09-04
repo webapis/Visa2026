@@ -20,7 +20,7 @@ namespace Visa2026.Module.BusinessObjects;
 
 /// </summary>
 
-public static class ApplicationProgressProfileResolver
+public static class ApplicationProfileInstanceProgressProfileResolver
 
 {
 
@@ -28,13 +28,13 @@ public static class ApplicationProgressProfileResolver
 
     /// Header members locked after approval leaves office preparation. Workflow fields (visa, travel,
 
-    /// locations, child collections) and optional detail fields remain editable for later process steps.
+    /// locations, child collections), application number, and application date remain editable.
 
     /// </summary>
 
     public const string LockedApplicationHeaderTargetItems =
 
-        "IsManualEntry;ApplicationNumber;AppNumberPrefix;FullApplicationNumber;ApplicationDate;ApplicationTypeQuickCode;ApprovalLegProfile;ProjectContract";
+        "ApplicationTypeQuickCode;ApprovalLegProfile;ProjectContract";
 
     /// <summary>
     /// Detail members read-only when <see cref="Application.IsWorkflowTerminal"/> is true.
@@ -45,43 +45,73 @@ public static class ApplicationProgressProfileResolver
 
 
 
-    public static bool RequiresProjectContract(Application? application)
+    public static bool RequiresProjectContract(ApplicationProfileInstance? application)
 
     {
 
-        if (application?.ApplicationType?.ShowProjectContract != true)
+        if (!ApplicationProfileConfigurationResolver.ShowProjectContract(application))
 
             return false;
 
 
 
-        var route = ApplicationProgressRouteHelper.GetTypePickerRouteFilter(application);
+        var route = ApplicationProfileInstanceProgressRouteHelper.GetTypePickerRouteFilter(application);
 
-        return route == ApplicationProgressRouteKind.ViaMinistries;
+        return route == ApplicationProfileInstanceProgressRouteKind.ViaMinistries;
 
     }
 
 
 
-    public static bool RequiresApprovalLegProfile(Application? application)
+    public static bool RequiresApprovalLegProfile(ApplicationProfileInstance? application)
 
     {
 
-        if (application?.ApplicationType?.ShowApprovalLegProfile != true)
+        if (!ApplicationProfileConfigurationResolver.ShowApprovalLegProfile(application))
 
             return false;
 
 
 
-        var route = ApplicationProgressRouteHelper.GetTypePickerRouteFilter(application);
+        var route = ApplicationProfileInstanceProgressRouteHelper.GetTypePickerRouteFilter(application);
 
-        return route == ApplicationProgressRouteKind.ViaMinistries;
+        return route == ApplicationProfileInstanceProgressRouteKind.ViaMinistries;
 
     }
 
 
 
-    public static int GetMinistryLegCount(Application? application)
+    public static bool HasConfiguredMinistryLegs(ApplicationProfileInstance? application)
+
+    {
+
+        if (application == null)
+
+            return false;
+
+
+
+        if (ApplicationProfileConfigurationResolver.GetEmbeddedProfileMinistryLegCount(application) > 0)
+
+            return true;
+
+
+
+        if (application.ApprovalLegSnapshots?.Any(s => !string.IsNullOrWhiteSpace(s.MinistryShortName)) == true)
+
+            return true;
+
+
+
+        return application.ApprovalLegProfile != null
+
+            && ApprovalLegProfileMinistryHelper.HasConfiguredLegs(application.ApprovalLegProfile);
+
+    }
+
+
+
+    public static int GetMinistryLegCount(ApplicationProfileInstance? application)
 
     {
 
@@ -91,9 +121,9 @@ public static class ApplicationProgressProfileResolver
 
 
 
-        var route = ApplicationProgressRouteHelper.GetTypePickerRouteFilter(application);
+        var route = ApplicationProfileInstanceProgressRouteHelper.GetTypePickerRouteFilter(application);
 
-        if (!route.HasValue || route.Value == ApplicationProgressRouteKind.DirectToMigrationService)
+        if (!route.HasValue || route.Value == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService)
 
             return 0;
 
@@ -109,7 +139,15 @@ public static class ApplicationProgressProfileResolver
 
 
 
-        if (application.ApplicationType?.ShowApprovalLegProfile == true
+        var embeddedLegCount = ApplicationProfileConfigurationResolver.GetEmbeddedProfileMinistryLegCount(application);
+
+        if (embeddedLegCount > 0)
+
+            return embeddedLegCount;
+
+
+
+        if (ApplicationProfileConfigurationResolver.ShowApprovalLegProfile(application)
 
             && application.ApprovalLegProfile != null)
 
@@ -129,7 +167,7 @@ public static class ApplicationProgressProfileResolver
 
 
 
-    public static MinistryReviewDepth GetMinistryReviewDepth(Application? application)
+    public static MinistryReviewDepth GetMinistryReviewDepth(ApplicationProfileInstance? application)
 
     {
 
@@ -147,21 +185,21 @@ public static class ApplicationProgressProfileResolver
 
             ? MinistryReviewDepth.FirstMinistryOnly
 
-            : ApplicationProgressRouteHelper.NormalizeMinistryReviewDepth(
+            : ApplicationProfileInstanceProgressRouteHelper.NormalizeMinistryReviewDepth(
 
-                applicationType.ApplicationProgressRoute,
+                applicationType.ApplicationProfileInstanceProgressRoute,
 
                 applicationType.MinistryReviewDepth);
 
 
 
-    public static bool HasAnyProgressHistory(Application? application, IObjectSpace? objectSpace = null) =>
+    public static bool HasAnyProgressHistory(ApplicationProfileInstance? application, IObjectSpace? objectSpace = null) =>
 
-        ApplicationProgressHelper.GetLatest(application?.ProgressHistory, objectSpace) != null;
+        ApplicationProfileInstanceProgressHelper.GetLatest(application?.ProgressHistory, objectSpace) != null;
 
 
 
-    public static bool HasProgressBeyondOfficePreparation(Application? application, IObjectSpace? objectSpace = null)
+    public static bool HasProgressBeyondOfficePreparation(ApplicationProfileInstance? application, IObjectSpace? objectSpace = null)
 
     {
 
@@ -183,14 +221,14 @@ public static class ApplicationProgressProfileResolver
 
     public static bool IsApplicationLockedAfterOfficePreparation(
 
-        Application? application,
+        ApplicationProfileInstance? application,
 
         IObjectSpace? objectSpace = null) =>
 
         HasProgressBeyondOfficePreparation(application, objectSpace);
 
-    public static bool IsWorkflowTerminal(Application? application) =>
-        IsProcessTerminalStateCode(ApplicationProgressPrimaryStateCodeResolver.Resolve(application));
+    public static bool IsWorkflowTerminal(ApplicationProfileInstance? application) =>
+        IsProcessTerminalStateCode(ApplicationProfileInstanceProgressPrimaryStateCodeResolver.Resolve(application));
 
     public static bool IsProcessTerminalStateCode(string? stateCode)
     {
@@ -198,18 +236,18 @@ public static class ApplicationProgressProfileResolver
             return false;
 
         var trimmed = stateCode.Trim();
-        return string.Equals(trimmed, ApplicationProgressStateCodes.ProcessCancelled, StringComparison.OrdinalIgnoreCase)
-            || string.Equals(trimmed, ApplicationProgressStateCodes.ProcessRejected, StringComparison.OrdinalIgnoreCase)
-            || string.Equals(trimmed, ApplicationProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase);
+        return string.Equals(trimmed, ApplicationProfileInstanceProgressStateCodes.ProcessCancelled, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(trimmed, ApplicationProfileInstanceProgressStateCodes.ProcessRejected, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(trimmed, ApplicationProfileInstanceProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase);
     }
 
 
 
-    public static bool IsProjectContractLocked(Application? application, IObjectSpace? objectSpace = null)
+    public static bool IsProjectContractLocked(ApplicationProfileInstance? application, IObjectSpace? objectSpace = null)
 
     {
 
-        if (application?.ApplicationType?.ShowProjectContract != true)
+        if (!ApplicationProfileConfigurationResolver.ShowProjectContract(application))
 
             return false;
 
@@ -221,11 +259,11 @@ public static class ApplicationProgressProfileResolver
 
 
 
-    public static bool IsApprovalLegProfileLocked(Application? application, IObjectSpace? objectSpace = null)
+    public static bool IsApprovalLegProfileLocked(ApplicationProfileInstance? application, IObjectSpace? objectSpace = null)
 
     {
 
-        if (application?.ApplicationType?.ShowApprovalLegProfile != true)
+        if (!ApplicationProfileConfigurationResolver.ShowApprovalLegProfile(application))
 
             return false;
 
@@ -239,7 +277,7 @@ public static class ApplicationProgressProfileResolver
 
     public static bool TryValidateApplicationUnchangedAfterProgress(
 
-        Application? application,
+        ApplicationProfileInstance? application,
 
         IObjectSpace objectSpace,
 
@@ -261,7 +299,7 @@ public static class ApplicationProgressProfileResolver
 
 
 
-        var original = objectSpace.GetObjectByKey<Application>(application.ID);
+        var original = objectSpace.GetObjectByKey<ApplicationProfileInstance>(application.ID);
 
         if (original == null)
 
@@ -295,7 +333,7 @@ public static class ApplicationProgressProfileResolver
 
         errorMessage = null;
 
-        foreach (var application in objectSpace.GetObjectsToSave(false).OfType<Application>())
+        foreach (var application in objectSpace.GetObjectsToSave(false).OfType<ApplicationProfileInstance>())
 
         {
 
@@ -303,7 +341,7 @@ public static class ApplicationProgressProfileResolver
 
                 continue;
 
-            var original = objectSpace.GetObjectByKey<Application>(application.ID);
+            var original = objectSpace.GetObjectByKey<ApplicationProfileInstance>(application.ID);
 
             if (original == null || !IsWorkflowTerminal(original))
 
@@ -319,7 +357,7 @@ public static class ApplicationProgressProfileResolver
 
         {
 
-            if (child is Application or ApplicationProgress)
+            if (child is ApplicationProfileInstance or ApplicationProfileInstanceProgress)
 
                 continue;
 
@@ -329,7 +367,7 @@ public static class ApplicationProgressProfileResolver
 
                 continue;
 
-            var originalParent = objectSpace.GetObjectByKey<Application>(parent.ID);
+            var originalParent = objectSpace.GetObjectByKey<ApplicationProfileInstance>(parent.ID);
 
             if (originalParent == null || !IsWorkflowTerminal(originalParent))
 
@@ -345,19 +383,19 @@ public static class ApplicationProgressProfileResolver
 
     }
 
-    private static Application? TryGetParentApplication(object entity) =>
+    private static ApplicationProfileInstance? TryGetParentApplication(object entity) =>
 
         entity switch
 
         {
 
-            ApplicationItem item => item.Application,
+            ApplicationRosterMergeLine item => item.ApplicationProfileInstance,
 
-            Invitation invitation => invitation.Application,
+            Invitation invitation => invitation.ApplicationProfileInstance,
 
-            Rejection rejection => rejection.Application,
+            Rejection rejection => rejection.ApplicationProfileInstance,
 
-            WorkPermit workPermit => workPermit.Application,
+            WorkPermit workPermit => workPermit.ApplicationProfileInstance,
 
             _ => null
 
@@ -367,7 +405,7 @@ public static class ApplicationProgressProfileResolver
 
     public static bool TryValidateProjectContractUnchangedAfterProgress(
 
-        Application? application,
+        ApplicationProfileInstance? application,
 
         IObjectSpace objectSpace,
 
@@ -379,7 +417,7 @@ public static class ApplicationProgressProfileResolver
 
     public static bool TryValidateProjectContractOnApplication(
 
-        Application? application,
+        ApplicationProfileInstance? application,
 
         IObjectSpace? objectSpace,
 
@@ -419,7 +457,7 @@ public static class ApplicationProgressProfileResolver
 
 
 
-        errorMessage = VisaUiMessages.Get("ApplicationProgress.ProjectContractRequired");
+        errorMessage = VisaUiMessages.Get("ApplicationProfileInstanceProgress.ProjectContractRequired");
 
         return false;
 
@@ -429,7 +467,7 @@ public static class ApplicationProgressProfileResolver
 
     public static bool TryValidateApprovalLegProfileOnApplication(
 
-        Application? application,
+        ApplicationProfileInstance? application,
 
         IObjectSpace? objectSpace,
 
@@ -445,15 +483,15 @@ public static class ApplicationProgressProfileResolver
 
 
 
+        if (HasConfiguredMinistryLegs(application))
+
+            return true;
+
+
+
         if (application.ApprovalLegProfile != null)
 
         {
-
-            if (ApprovalLegProfileMinistryHelper.HasConfiguredLegs(application.ApprovalLegProfile))
-
-                return true;
-
-
 
             if (!HasProgressBeyondOfficePreparation(application, objectSpace))
 
@@ -475,7 +513,7 @@ public static class ApplicationProgressProfileResolver
 
 
 
-        errorMessage = VisaUiMessages.Get("ApplicationProgress.ApprovalLegProfileRequired");
+        errorMessage = VisaUiMessages.Get("ApplicationProfileInstanceProgress.ApprovalLegProfileRequired");
 
         return false;
 
@@ -485,7 +523,7 @@ public static class ApplicationProgressProfileResolver
 
     public static bool TryValidateProjectContractForProgress(
 
-        ApplicationProgress progress,
+        ApplicationProfileInstanceProgress progress,
 
         IObjectSpace? objectSpace,
 
@@ -495,7 +533,7 @@ public static class ApplicationProgressProfileResolver
 
         errorMessage = null;
 
-        var application = progress.Application;
+        var application = progress.ApplicationProfileInstance;
 
         if (application == null)
 
@@ -527,7 +565,7 @@ public static class ApplicationProgressProfileResolver
 
 
 
-        errorMessage = VisaUiMessages.Get("ApplicationProgress.ProjectContractRequired");
+        errorMessage = VisaUiMessages.Get("ApplicationProfileInstanceProgress.ProjectContractRequired");
 
         return false;
 
@@ -537,7 +575,7 @@ public static class ApplicationProgressProfileResolver
 
     public static bool TryValidateApprovalLegProfileForProgress(
 
-        ApplicationProgress progress,
+        ApplicationProfileInstanceProgress progress,
 
         IObjectSpace? objectSpace,
 
@@ -547,7 +585,7 @@ public static class ApplicationProgressProfileResolver
 
         errorMessage = null;
 
-        var application = progress.Application;
+        var application = progress.ApplicationProfileInstance;
 
         if (application == null || !RequiresApprovalLegProfile(application))
 
@@ -555,17 +593,9 @@ public static class ApplicationProgressProfileResolver
 
 
 
-        if (application.ApprovalLegProfile != null
+        if (HasConfiguredMinistryLegs(application))
 
-            && TryValidateApprovalLegProfileOnApplication(application, objectSpace, out errorMessage))
-
-            return errorMessage == null;
-
-
-
-        if (application.ApprovalLegProfile != null)
-
-            return false;
+            return true;
 
 
 
@@ -575,7 +605,7 @@ public static class ApplicationProgressProfileResolver
 
 
 
-        errorMessage = VisaUiMessages.Get("ApplicationProgress.ApprovalLegProfileRequired");
+        errorMessage = VisaUiMessages.Get("ApplicationProfileInstanceProgress.ApprovalLegProfileRequired");
 
         return false;
 
@@ -585,7 +615,7 @@ public static class ApplicationProgressProfileResolver
 
     public static bool WouldMinistryDepthChange(
 
-        Application application,
+        ApplicationProfileInstance application,
 
         ProjectContract? previousContract,
 
@@ -597,7 +627,7 @@ public static class ApplicationProgressProfileResolver
 
     public static bool WouldMinistryDepthChange(
 
-        Application application,
+        ApplicationProfileInstance application,
 
         ApprovalLegProfile? previousProfile,
 
@@ -605,15 +635,15 @@ public static class ApplicationProgressProfileResolver
 
     {
 
-        var route = ApplicationProgressRouteHelper.GetTypePickerRouteFilter(application);
+        var route = ApplicationProfileInstanceProgressRouteHelper.GetTypePickerRouteFilter(application);
 
-        if (route != ApplicationProgressRouteKind.ViaMinistries)
+        if (route != ApplicationProfileInstanceProgressRouteKind.ViaMinistries)
 
             return false;
 
 
 
-        if (application.ApplicationType?.ShowApprovalLegProfile != true)
+        if (!ApplicationProfileConfigurationResolver.ShowApprovalLegProfile(application))
 
             return false;
 
@@ -631,13 +661,13 @@ public static class ApplicationProgressProfileResolver
 
         depth == MinistryReviewDepth.FirstAndSecondMinistry
 
-            ? VisaUiMessages.Get("ApplicationProgressProfile.MinistryDepth.Two")
+            ? VisaUiMessages.Get("ApplicationProfileInstanceProgressProfile.MinistryDepth.Two")
 
             : depth == MinistryReviewDepth.FirstMinistryOnly
 
-                ? VisaUiMessages.Get("ApplicationProgressProfile.MinistryDepth.One")
+                ? VisaUiMessages.Get("ApplicationProfileInstanceProgressProfile.MinistryDepth.One")
 
-                : VisaUiMessages.Get("ApplicationProgressProfile.MinistryDepth.None");
+                : VisaUiMessages.Get("ApplicationProfileInstanceProgressProfile.MinistryDepth.None");
 
 
 
@@ -647,19 +677,19 @@ public static class ApplicationProgressProfileResolver
 
         {
 
-            0 => VisaUiMessages.Get("ApplicationProgressProfile.MinistryDepth.None"),
+            0 => VisaUiMessages.Get("ApplicationProfileInstanceProgressProfile.MinistryDepth.None"),
 
-            1 => VisaUiMessages.Get("ApplicationProgressProfile.MinistryDepth.One"),
+            1 => VisaUiMessages.Get("ApplicationProfileInstanceProgressProfile.MinistryDepth.One"),
 
-            2 => VisaUiMessages.Get("ApplicationProgressProfile.MinistryDepth.Two"),
+            2 => VisaUiMessages.Get("ApplicationProfileInstanceProgressProfile.MinistryDepth.Two"),
 
-            _ => VisaUiMessages.Format("ApplicationProgressProfile.MinistryDepth.Many", legCount)
+            _ => VisaUiMessages.Format("ApplicationProfileInstanceProgressProfile.MinistryDepth.Many", legCount)
 
         };
 
 
 
-    private static int ResolveLegCountForProfile(Application application, ApprovalLegProfile? profile)
+    private static int ResolveLegCountForProfile(ApplicationProfileInstance application, ApprovalLegProfile? profile)
 
     {
 
@@ -713,7 +743,7 @@ public static class ApplicationProgressProfileResolver
 
 
 
-    private static bool IsPermittedWithoutProjectContract(ApplicationProgress progress, IObjectSpace? objectSpace)
+    private static bool IsPermittedWithoutProjectContract(ApplicationProfileInstanceProgress progress, IObjectSpace? objectSpace)
 
     {
 
@@ -723,7 +753,7 @@ public static class ApplicationProgressProfileResolver
 
 
 
-        var application = progress.Application;
+        var application = progress.ApplicationProfileInstance;
 
         if (application?.ProgressHistory == null)
 
@@ -745,7 +775,7 @@ public static class ApplicationProgressProfileResolver
 
 
 
-    private static bool IsPermittedWithoutApprovalLegProfile(ApplicationProgress progress, IObjectSpace? objectSpace)
+    private static bool IsPermittedWithoutApprovalLegProfile(ApplicationProfileInstanceProgress progress, IObjectSpace? objectSpace)
 
     {
 
@@ -755,7 +785,7 @@ public static class ApplicationProgressProfileResolver
 
 
 
-        var application = progress.Application;
+        var application = progress.ApplicationProfileInstance;
 
         if (application?.ProgressHistory == null)
 
@@ -777,25 +807,15 @@ public static class ApplicationProgressProfileResolver
 
 
 
-        private static bool IsOfficePreparationStep(ApplicationProgress progress) =>
+        private static bool IsOfficePreparationStep(ApplicationProfileInstanceProgress progress) =>
         progress.State != null
-        && string.Equals(progress.State.Code, ApplicationProgressStateCodes.IsBeingPrepared, StringComparison.OrdinalIgnoreCase);
+        && string.Equals(progress.State.Code, ApplicationProfileInstanceProgressStateCodes.IsBeingPrepared, StringComparison.OrdinalIgnoreCase);
 
 
 
-    private static bool ApplicationLockedHeaderScalarsDiffer(Application original, Application current) =>
+    private static bool ApplicationLockedHeaderScalarsDiffer(ApplicationProfileInstance original, ApplicationProfileInstance current) =>
 
-        original.IsManualEntry != current.IsManualEntry
-
-        || !string.Equals(original.ApplicationNumber, current.ApplicationNumber, StringComparison.Ordinal)
-
-        || !string.Equals(original.AppNumberPrefix, current.AppNumberPrefix, StringComparison.Ordinal)
-
-        || !string.Equals(original.FullApplicationNumber, current.FullApplicationNumber, StringComparison.Ordinal)
-
-        || original.ApplicationDate != current.ApplicationDate
-
-        || original.ApplicationType?.ID != current.ApplicationType?.ID
+        original.ApplicationType?.ID != current.ApplicationType?.ID
 
         || original.ApprovalLegProfile?.ID != current.ApprovalLegProfile?.ID
 

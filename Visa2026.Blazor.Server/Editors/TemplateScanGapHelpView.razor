@@ -1,0 +1,66 @@
+@namespace Visa2026.Blazor.Server.Editors
+@using Visa2026.Module.Services.TemplateConvert
+@using Visa2026.Module.Services.TemplateScan
+
+<div class="tas-help">
+    <h3>What could not be mapped</h3>
+    <p>These scan fields have no placeholder in this profile's allowed set. Export a gap packet for a developer to add catalog support, then scan again after deploy.</p>
+
+    @if (Gaps.Count == 0 && UnmappedFields.Count == 0)
+    {
+        <p class="tas-chat__empty">No gaps are recorded — every detected field mapped to a placeholder, or none were detected.</p>
+    }
+    else
+    {
+        <ul class="tas-gap-list">
+            @foreach (var gap in Gaps)
+            {
+                <li class="tas-gap-list__item">
+                    <span class="tas-conf tas-conf--gap">Gap</span>
+                    <strong>@gap.LabelText</strong>
+                    @if (!string.IsNullOrWhiteSpace(gap.SuggestedPropertyName))
+                    {
+                        <code>suggested: @gap.SuggestedPropertyName</code>
+                    }
+                </li>
+            }
+            @foreach (var field in UnmappedFields)
+            {
+                <li class="tas-gap-list__item">
+                    <span class="tas-conf tas-conf--low">Unmapped</span>
+                    <strong>@field.LabelText</strong>
+                    <span>page @(field.PageIndex + 1)</span>
+                </li>
+            }
+        </ul>
+    }
+
+    @if (ValidationIssues.Count > 0)
+    {
+        <h4>Validation issues</h4>
+        <ul class="tas-issues">
+            @foreach (var issue in ValidationIssues.Take(8))
+            {
+                <li class="tas-issue @(issue.Severity == TemplateValidationSeverity.Error ? "tas-issue--fail" : "tas-issue--warn")">
+                    @issue.Message
+                </li>
+            }
+        </ul>
+    }
+
+    <div class="tas-help__meta">
+        <div><span>Scan file</span><strong>@ScanFileName</strong></div>
+        <div><span>Profile</span><strong>@ProfileName</strong></div>
+        <div><span>Instance</span><strong>@InstanceLabel</strong></div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public IReadOnlyList<ScanGap> Gaps { get; set; } = Array.Empty<ScanGap>();
+    [Parameter] public IReadOnlyList<ScanDetectedField> UnmappedFields { get; set; } = Array.Empty<ScanDetectedField>();
+    [Parameter] public IReadOnlyList<TemplateValidationIssue> ValidationIssues { get; set; } =
+        Array.Empty<TemplateValidationIssue>();
+    [Parameter] public string ScanFileName { get; set; } = string.Empty;
+    [Parameter] public string ProfileName { get; set; } = string.Empty;
+    [Parameter] public string InstanceLabel { get; set; } = "—";
+}

@@ -89,7 +89,16 @@ LEFT JOIN LATERAL (
         ON vp."ID" = v."PassportID" AND COALESCE(vp."GCRecord", 0) = 0
     WHERE vp."PersonID" = p."ID"
       AND COALESCE(v."GCRecord", 0) = 0
-      AND COALESCE(v."IsCancelled", FALSE) = FALSE
+      AND NOT EXISTS (
+      SELECT 1
+      FROM "ApplicationProfileInstanceVisas" j
+      INNER JOIN "ApplicationProfileInstances" api ON api."ID" = j."ApplicationProfileInstanceId"
+      INNER JOIN "ApplicationProfiles" ap ON ap."ID" = api."ApplicationProfileID"
+      WHERE j."VisaId" = v."ID"
+        AND COALESCE(api."GCRecord", 0) = 0
+        AND COALESCE(ap."GCRecord", 0) = 0
+        AND ap."ActionFamily" = 1
+        AND BTRIM(COALESCE(api."LatestPrimaryStateCode", '')) = 'PROCESS_ISSUED')
     ORDER BY v."ExpirationDate" DESC NULLS LAST, v."IssueDate" DESC NULLS LAST
     LIMIT 1
 ) cv ON TRUE

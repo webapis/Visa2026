@@ -1,0 +1,203 @@
+@namespace Visa2026.Blazor.Server.Editors
+@using Microsoft.JSInterop
+@using Visa2026.Module.Services.TemplateScan
+@using Visa2026.Module.Services.WordReports
+@implements IAsyncDisposable
+
+@if (_loading)
+{
+    <div class="tas-office-pdf" role="status" aria-live="polite">
+        <p class="tas-office-pdf__state">@LoadingText</p>
+    </div>
+}
+else if (_pdfBytes is { Length: > 64 } && !_paintFailed)
+{
+    <div @ref="_host" class="tas-office-pdf tas-office-pdf--pages"></div>
+    @if (!string.IsNullOrWhiteSpace(Caption))
+    {
+        <p class="tas-review-doc__hint">@Caption</p>
+    }
+}
+else
+{
+    @ChildContent
+}
+
+@code {
+    [Parameter] public byte[]? OfficeBytes { get; set; }
+    [Parameter] public string? FileName { get; set; }
+    [Parameter] public string Caption { get; set; } = "Same pages as the uploaded file. Numbered marks match Detected fields — a combination (passport number, issued place, date) uses 6.1 / 6.2 / 6.3 with a separate border. Click a row, then add placeholders from the Short list.";
+    [Parameter] public string LoadingText { get; set; } = "Opening the uploaded file…";
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public IReadOnlyList<ScanReviewOrderedField> Marks { get; set; } = Array.Empty<ScanReviewOrderedField>();
+    [Parameter] public string? ActiveFieldId { get; set; }
+    [Parameter] public int MarkFocus { get; set; }
+    [Parameter] public EventCallback<string?> HoveredFieldIdChanged { get; set; }
+
+    [Inject] private ApplicationWordReportOfficePreviewPdfConverter Converter { get; set; } = null!;
+    [Inject] private IJSRuntime JS { get; set; } = null!;
+
+    private byte[]? _source;
+    private byte[]? _pdfBytes;
+    private string? _fileName;
+    private bool _loading;
+    private bool _needsPaint;
+    private bool _paintFailed;
+    private int _generation;
+    private int _appliedFocus = -1;
+    private string? _appliedActive;
+    private string? _appliedMarksKey;
+    private ElementReference _host;
+    private IJSObjectReference? _module;
+    private DotNetObjectReference<TemplateScanOfficePdfPreview>? _self;
+
+    protected override void OnInitialized()
+    {
+        _self = DotNetObjectReference.Create(this);
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (OfficeBytes is not { Length: > 64 } bytes || ReferenceEquals(bytes, _source))
+            return;
+
+        _source = bytes;
+        _fileName = string.IsNullOrWhiteSpace(FileName) ? "upload.docx" : FileName.Trim();
+        var generation = ++_generation;
+        _loading = true;
+        _paintFailed = false;
+        _pdfBytes = null;
+        _needsPaint = false;
+        await ClearHostAsync();
+        await InvokeAsync(StateHasChanged);
+
+        byte[]? pdf = null;
+        try
+        {
+            var snapshot = bytes;
+            var name = _fileName;
+            pdf = await Task.Run(() => Converter.TryConvertToPdf(snapshot, name));
+        }
+        catch
+        {
+            pdf = null;
+        }
+
+        if (generation != _generation)
+            return;
+
+        _pdfBytes = pdf is { Length: > 64 } ? pdf : null;
+        _needsPaint = _pdfBytes != null;
+        _loading = false;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_pdfBytes is not { Length: > 64 } || _paintFailed)
+            return;
+
+        try
+        {
+            _module ??= await JS.InvokeAsync<IJSObjectReference>(
+                "import",
+                "/lib/pdfjs/template-scan-pdf-preview.js?v=tasmarks2");
+
+            if (_needsPaint)
+            {
+                _needsPaint = false;
+                _appliedActive = null;
+                _appliedFocus = -1;
+                _appliedMarksKey = MarksKey();
+                await _module.InvokeVoidAsync("render", _host, _pdfBytes, MarkPayload(), _self);
+            }
+            else if (!string.Equals(_appliedMarksKey, MarksKey(), StringComparison.Ordinal))
+            {
+                _appliedMarksKey = MarksKey();
+                await _module.InvokeVoidAsync("updateMarks", _host, MarkPayload(), _self);
+            }
+
+            if (!string.Equals(_appliedActive, ActiveFieldId, StringComparison.Ordinal)
+                || _appliedFocus != MarkFocus)
+            {
+                var scroll = MarkFocus != _appliedFocus && MarkFocus > 0;
+                _appliedActive = ActiveFieldId;
+                _appliedFocus = MarkFocus;
+                await _module.InvokeVoidAsync("setActive", _host, ActiveFieldId ?? string.Empty, scroll);
+            }
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+        catch
+        {
+            _paintFailed = true;
+            _pdfBytes = null;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnMarkActivate(string fieldId)
+    {
+        if (string.IsNullOrWhiteSpace(fieldId))
+            return;
+        await HoveredFieldIdChanged.InvokeAsync(fieldId);
+    }
+
+    private List<object> MarkPayload()
+    {
+        var payload = new List<object>(Marks.Count);
+        foreach (var mark in Marks)
+        {
+            payload.Add(new
+            {
+                fieldId = mark.DisplayId,
+                order = mark.DisplayOrder,
+                label = mark.LabelText,
+                isGap = mark.IsGap
+            });
+        }
+
+        return payload;
+    }
+
+    private string MarksKey() =>
+        string.Join("|", Marks.Select(static m => m.DisplayId + ":" + m.DisplayOrder + ":" + m.LabelText));
+
+    private async Task ClearHostAsync()
+    {
+        if (_module is null)
+            return;
+
+        try
+        {
+            await _module.InvokeVoidAsync("clear", _host);
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+        catch
+        {
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _generation++;
+        await ClearHostAsync();
+        _self?.Dispose();
+        _self = null;
+        if (_module is not null)
+        {
+            try
+            {
+                await _module.DisposeAsync();
+            }
+            catch (JSDisconnectedException)
+            {
+            }
+
+            _module = null;
+        }
+    }
+}

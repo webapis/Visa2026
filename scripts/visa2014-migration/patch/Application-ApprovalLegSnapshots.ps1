@@ -1,7 +1,8 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  Backfill Application.ApprovalLegSnapshots from ApprovalLegProfile (fills Ministrlik on progress).
+  Backfill instance ApprovalLegSnapshots + ApprovalLegVersionName from ApprovalLegProfile
+  (instance FK, else template Default). Fills Ministrlik on progress.
 
 .DESCRIPTION
   Safe for already-migrated data: does NOT delete or regenerate ApplicationProgress rows.

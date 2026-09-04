@@ -11,7 +11,7 @@ namespace Visa2026.DataImporter.Legacy.Visa2014;
 
 /// <summary>
 /// Post-import expected-vs-actual mapping verify (MAPPING_VERIFICATION.md).
-/// Application + ApplicationProgress — reuses each entity's PrepareImportBatch for expected values.
+/// ApplicationProfileInstance + ApplicationProfileInstanceProgress — reuses each entity's PrepareImportBatch for expected values.
 /// </summary>
 internal static class Visa2014MappingVerifyCommand
 {
@@ -35,14 +35,19 @@ internal static class Visa2014MappingVerifyCommand
         try { source = Visa2014LegacySource.Resolve(dataImporterRoot, solutionRoot, args); }
         catch (Exception ex) { Console.Error.WriteLine($"ERR {ex.Message}"); return Task.FromResult(1); }
 
-        var entity = GetOptionValue(args, "--entity") ?? "Application";
-        if (string.Equals(entity, "ApplicationProgress", StringComparison.OrdinalIgnoreCase))
-            return Visa2014ApplicationProgressMappingVerify.RunAsync(args, verbose);
+        var entity = GetOptionValue(args, "--entity") ?? "ApplicationProfileInstance";
+        if (string.Equals(entity, "Application", StringComparison.OrdinalIgnoreCase))
+        {
+            Console.Error.WriteLine("ERR Entity 'Application' was renamed to ApplicationProfileInstance (hard break). Use --entity ApplicationProfileInstance.");
+            return Task.FromResult(2);
+        }
+        if (string.Equals(entity, "ApplicationProfileInstanceProgress", StringComparison.OrdinalIgnoreCase))
+            return Visa2014ApplicationProfileInstanceProgressMappingVerify.RunAsync(args, verbose);
 
-        if (!string.Equals(entity, "Application", StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(entity, "ApplicationProfileInstance", StringComparison.OrdinalIgnoreCase))
         {
             Console.Error.WriteLine(
-                $"ERR Mapping verify supports --entity Application|ApplicationProgress (got '{entity}'). " +
+                $"ERR Mapping verify supports --entity ApplicationProfileInstance|ApplicationProfileInstanceProgress (got '{entity}'). " +
                 "See docs/VISA2014_MIGRATION/MAPPING_VERIFICATION.md");
             return Task.FromResult(1);
         }
@@ -57,7 +62,7 @@ internal static class Visa2014MappingVerifyCommand
         }
 
         var applicationIdMapPath = GetOptionValue(args, "--application-id-map")
-            ?? source.IdMapPath(dataImporterRoot, "Application");
+            ?? source.IdMapPath(dataImporterRoot, "ApplicationProfileInstance");
 
         var tierText = (GetOptionValue(args, "--tier") ?? "B").Trim().ToUpperInvariant();
         if (tierText is not ("A" or "B" or "C"))
@@ -88,17 +93,17 @@ internal static class Visa2014MappingVerifyCommand
                 "import-logs",
                 $"mapping-verify-Application-{source.Id}-{DateTime.UtcNow:yyyyMMdd-HHmmss}.json");
 
-        Console.WriteLine("=== VISA2014 mapping verify (Application) ===");
+        Console.WriteLine("=== VISA2014 mapping verify (ApplicationProfileInstance) ===");
         Console.WriteLine($"INF Legacy source: {source.Id}");
         Console.WriteLine($"INF Target SQL: {MaskConnectionString(targetConnection)}");
-        Console.WriteLine($"INF Application id-map: {applicationIdMapPath}");
+        Console.WriteLine($"INF ApplicationProfileInstance id-map: {applicationIdMapPath}");
         Console.WriteLine($"INF Tier: {tierText} (histograms={(runTierA ? "yes" : "no")}, parity={(runParity ? (full ? "full" : $"sample {sample}") : "no")})");
         if (maxRows.HasValue)
             Console.WriteLine($"INF Max transform rows: {maxRows.Value}");
 
         if (!File.Exists(applicationIdMapPath))
         {
-            Console.Error.WriteLine($"ERR Application id-map not found: {applicationIdMapPath}");
+            Console.Error.WriteLine($"ERR ApplicationProfileInstance id-map not found: {applicationIdMapPath}");
             return Task.FromResult(1);
         }
 
@@ -112,7 +117,7 @@ internal static class Visa2014MappingVerifyCommand
             return Task.FromResult(1);
         }
 
-        Console.WriteLine("INF Building expected payloads via Application transform...");
+        Console.WriteLine("INF Building expected payloads via ApplicationProfileInstance transform...");
         var catalogs = Visa2014LookupTranslator.Load(source.LookupTranslationPaths);
         var batch = Visa2014ApplicationTransform.PrepareImportBatch(
             source.ConnectionString,
@@ -463,7 +468,7 @@ internal static class Visa2014MappingVerifyCommand
         string tierText,
         bool verbose)
     {
-        using var objectSpace = objectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Bo.Application));
+        using var objectSpace = objectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Bo.ApplicationProfileInstance));
         MigrationImportContext.ApplyImportObjectSpaceHooks(objectSpace);
 
         var appsById = LoadApplications(objectSpace, candidates.Mapped.Select(c => c.TargetId));
@@ -575,7 +580,7 @@ internal static class Visa2014MappingVerifyCommand
                         TargetId = c.TargetId.ToString("D"),
                         Field = "(row)",
                         Expected = "(mapped)",
-                        Actual = "(missing target Application)",
+                        Actual = "(missing target ApplicationProfileInstance)",
                         Severity = "error",
                     });
                     continue;
@@ -676,18 +681,18 @@ internal static class Visa2014MappingVerifyCommand
             _ => false,
         };
 
-    private static Dictionary<Guid, Bo.Application> LoadApplications(
+    private static Dictionary<Guid, Bo.ApplicationProfileInstance> LoadApplications(
         IObjectSpace objectSpace,
         IEnumerable<Guid> targetIds)
     {
         var ids = targetIds.Distinct().ToList();
-        var result = new Dictionary<Guid, Bo.Application>();
+        var result = new Dictionary<Guid, Bo.ApplicationProfileInstance>();
         const int chunkSize = 400;
         for (var i = 0; i < ids.Count; i += chunkSize)
         {
             var chunk = ids.Skip(i).Take(chunkSize).ToList();
             var chunkSet = chunk.ToHashSet();
-            var rows = objectSpace.GetObjectsQuery<Bo.Application>()
+            var rows = objectSpace.GetObjectsQuery<Bo.ApplicationProfileInstance>()
                 .Where(a => chunkSet.Contains(a.ID))
                 .ToList();
             foreach (var app in rows)
@@ -697,7 +702,7 @@ internal static class Visa2014MappingVerifyCommand
         return result;
     }
 
-    private static string? ReadActual(Bo.Application app, VerifyFieldDef field) =>
+    private static string? ReadActual(Bo.ApplicationProfileInstance app, VerifyFieldDef field) =>
         field.Name switch
         {
             "ApplicationType" => app.ApplicationType?.Name,
@@ -712,7 +717,7 @@ internal static class Visa2014MappingVerifyCommand
             _ => null,
         };
 
-    private static bool ValuesMatch(VerifyFieldDef field, string? expected, string? actual, Bo.Application app)
+    private static bool ValuesMatch(VerifyFieldDef field, string? expected, string? actual, Bo.ApplicationProfileInstance app)
     {
         if (string.IsNullOrEmpty(expected) && string.IsNullOrEmpty(actual))
             return true;

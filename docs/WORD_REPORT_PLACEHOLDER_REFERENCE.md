@@ -88,6 +88,8 @@ Use when the template **root** is **Application**.
 | `Application_Company_Address` | `string` | `Aşgabat ş., Bitarap Türkmenistan şaýoly 538` | |
 | `Application_Company_PhoneNumber` | `string` | `+993 12 …` | *(from profile)* |
 | `Application_Company_Email` | `string` | `info@…` | *(from profile)* |
+| `Application_Company_TaxInformation` | `string` | `TAX100000` | From company profile |
+| `Application_Company_RegistrationDateText` | `string` | `02.02.2009` | Company **hasaba alyş** date (**dd.MM.yyyy**). Token `{{ds.ACRDT}}`. Not application date (`ApplicationDateText` / `ADAT`) |
 | `Application_CompanyHead_FullName` | `string` | `Mehmet ÇIRAK` | Signatory |
 | `Application_CompanyHead_PositionTm` | `string` | `Türkmenistandaky Şahamçasynyň müdiri` | |
 
@@ -181,24 +183,26 @@ Use **`{{ds.Property}}`** when the root is **ApplicationItem**.
 | `Person_FullName` | `string` | `Yetkin Didem` | |
 | `Person_LastName` | `string` | `Yetkin` | |
 | `Person_FirstName` | `string` | `Didem` | |
-| `Person_MiddleName` | `string` | *(optional)* | |
-| `Person_GenderTm` | `string` | `Aýal` | |
-| `Person_MaritalStatusTm` | `string` | `Nikaly` | |
-| `Person_BirthPlace` | `string` | `Türkiye/Gaziantep` | |
+| `Person_MiddleName` | `string` | *(optional)* | Short **PMNM** |
+| `Person_GenderTm` | `string` | `Aýal` | Short **PGND** |
+| `Person_MaritalStatusTm` | `string` | `Nikaly` | Short **PMST** |
+| `Person_BirthPlace` | `string` | `Türkiye/Gaziantep` | Short **PBPL** |
 | `Person_DateOfBirth` | `DateTime?` | `18.01.1977` | |
-| `Person_DateOfBirthText` | `string` | `18.01.1977` | |
-| `Person_NationalityCode` | `string` | `TUR` | |
-| `Person_NationalityTm` | `string` | `Türkiýe` | |
-| `Person_CountryOfBirthCode` | `string` | `TUR` | |
-| `Person_CountryOfBirthTm` | `string` | `Türkiýe` | |
+| `Person_DateOfBirthText` | `string` | `18.01.1977` | Short **PDBT** |
+| `Person_NationalityCode` | `string` | `TUR` | Short **PNAT** |
+| `Person_NationalityTm` | `string` | `Türkiýe` | Short **PNTM** (name; Sanaw **Raýatlygy** column is **PNAT** code) |
+| `Person_CountryOfBirthCode` | `string` | `TUR` | Short **PCBC** |
+| `Person_CountryOfBirthTm` | `string` | `Türkiýe` | Short **PCBT** — Sanaw birth-country name |
 | `Person_ForeignAddress` | `string` | `Emek mahallesi … gaziantep` | |
 | `Person_ForeignAddressCountryCode` | `string` | `TUR` | |
 | `Person_ForeignAddressWithCountry` | `string` | `TUR, Emek mahallesi …` | |
+| `Person_PreviousWorkplacesInTurkmenistan` | `string` | `Ýok` | Şahsy kagyz **Türkmenistanda öňki işlän ýerleri**; empty when unset |
+| `Person_VisaApplicationFamilyMembersText` | `string` | `Name; 23.05.1985; ayaly; TUR` | Short **PVFM** — raw employee manual family block; family-member rows use the sponsor. Not **SKFM** |
 | `Person_Photo` | `byte[]` | *(image)* | `{{IMAGE:Person_Photo}}` |
 | `Person_IsEmployee` | `bool` | `false` | FM line |
-| `Person_RelationshipTm` | `string` | `ayaly` | To sponsor |
-| `Person_SponsoringEmployeeFullName` | `string` | `Ali Enes Yetkin` | |
-| `Person_SponsoringEmployeePositionTm` | `string` | `… müdiriniň orunbasary` | |
+| `Person_RelationshipTm` | `string` | `ayaly` | To sponsor; short **PREL** |
+| `Person_SponsoringEmployeeFullName` | `string` | `Ali Enes Yetkin` | Roster row; short **PSEF** (not header **SPFNM**) |
+| `Person_SponsoringEmployeePositionTm` | `string` | `… müdiriniň orunbasary` | Short **PSEP** |
 
 ### Position
 
@@ -212,15 +216,16 @@ Use **`{{ds.Property}}`** when the root is **ApplicationItem**.
 
 | Property | Type | Example output | Notes |
 |----------|------|----------------|--------|
-| `Passport_Number` | `string` | `U36556957` | |
+| `Passport_Number` | `string` | `U36556957` | Short `{{.PPN}}` |
+| `Passport_TypeTm` | `string` | `P - MILLI PASPORT` | `PassportType.NameTm`. Short `{{.PPTP}}` |
 | `Passport_PersonalNumber` | `string` | `11402573788` | |
-| `Passport_Authority` | `string` | *(authority)* | |
+| `Passport_Authority` | `string` | `Ankara` | Short `{{.PPAT}}` |
 | `Passport_IssueDate` | `DateTime?` | `20.05.2024` | |
 | `Passport_IssueDateText` | `string` | `20.05.2024` | |
 | `Passport_ExpirationDate` | `DateTime?` | `20.05.2034` | |
 | `Passport_ExpirationDateText` | `string` | `20.05.2034` | |
-| `Passport_CountryCode` | `string` | `TUR` | |
-| `Passport_CountryTm` | `string` | `Türkiýe` | |
+| `Passport_CountryCode` | `string` | `TUR` | `IssuedCountry.Code`. Short `{{.PPCC}}` |
+| `Passport_CountryTm` | `string` | `Türkiýe` | `IssuedCountry.NameTm`. Short `{{.PPCT}}` |
 
 ### Passport (previous)
 
@@ -304,12 +309,12 @@ Use **`{{ds.Property}}`** when the root is **ApplicationItem**.
 
 | Property | Type | Example output | Notes |
 |----------|------|----------------|--------|
-| `Education_GraduationYear` | `string` | `2002` | |
-| `Education_LevelTm` | `string` | `Ýokary` | |
-| `Education_InstitutionName` | `string` | `Gündogar mediterian uniwersiteti` | NameTm-first |
-| `Education_SpecialtyTm` | `string` | `elektrik-elektronika inženerçiligi` | |
-| `Education_CountryCode` | `string` | `TUR` | |
-| `Education_LevelAndInstitutionTm` | `string` | `Ýokary, Gündogar mediterian uniwersiteti` | Comma if both set |
+| `Education_GraduationYear` | `string` | `2002` | Short **EGYR** |
+| `Education_LevelTm` | `string` | `Ýokary` | Short **EGLV** |
+| `Education_InstitutionName` | `string` | `Gündogar mediterian uniwersiteti` | NameTm-first; short **EGIN** |
+| `Education_SpecialtyTm` | `string` | `elektrik-elektronika inženerçiligi` | Short **EGSP** |
+| `Education_CountryCode` | `string` | `TUR` | Short **EGCC** |
+| `Education_LevelAndInstitutionTm` | `string` | `Ýokary, Gündogar mediterian uniwersiteti` | Comma if both set; short **EGIY** |
 
 ### Work permit
 
@@ -372,6 +377,7 @@ Use **`{{ds.Property}}`** when the root is **ApplicationItem**.
 | `CompanyHead_PassportNumber` | `string` | `…` | If signatory is expat |
 | `CompanyHead_PassportAuthority` | `string` | `…` | |
 | `CompanyHead_PassportIssueDateText` | `string` | `15.03.2020` | |
+| `CompanyHead_PassportExpirationDateText` | `string` | `19.02.2034` | Signatory passport expiration (`CHPE`) |
 | `CompanyHead_PassportLine` | `string` | `U1234567, …, 15.03.2020ý.` | One line |
 | `Representative_FullName` | `string` | `…` | |
 | `Representative_PassportLine` | `string` | `…` | |
@@ -409,7 +415,8 @@ Also valid in **Word/Excel user templates** (same getters as XFA PDF fill). PDF 
 
 | Property | Type | Example output | Notes |
 |----------|------|----------------|--------|
-| `SahsyKagyz_FamilyStatusText` | `string` | `ayaly-Firuza Mine Erol 23.05.1985ý. TUR., gyzy-Nil Erol 03.07.2014ý. TUR.` | Maşgala ýagdaýy |
+| `SahsyKagyz_FamilyStatusText` | `string` | `ayaly-Firuza Mine Erol 23.05.1985ý. TUR., gyzy-Nil Erol 03.07.2014ý. TUR.` | Maşgala ýagdaýy (**SKFM**). Source is **PVFM** / `VisaApplicationFamilyMembersText` |
+| `Person_PreviousWorkplacesInTurkmenistan` | `string` | `Ýok` | Türkmenistanda öňki işlän ýerleri (`PWTM`) |
 | `FM_EducationLevelTm` | `string` | `Çaga` / `Orta` / `Ýokary` | FM under 18 → `Çaga`; adult FM → `Orta`; employee → education level |
 | `FM_SpecialtyTm` | `string` | `Çaga` / `Orta` / specialty | Same age rules |
 | `FM_WezipesiTm` | `string` | `Zähmeti goramak we tehniki howpsuzlyk boýunça başlyk Bóra Yolcu-ň gyzy` | FM: sponsor line; employee: position only |

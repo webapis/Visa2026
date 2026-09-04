@@ -11,45 +11,57 @@ public static class VisaPreviewSlotOccupantKeys
 {
     public static string ForResminamalar(ResminamalarSlotRequest request)
     {
-        if (request.ApplicationId == Guid.Empty)
+        if (request.ApplicationProfileInstanceId == Guid.Empty)
             return "resminamalar:empty";
 
-        if (request.Scope == WordReportPackageScope.ApplicationItem)
+        if (request.Scope == WordReportPackageScope.ApplicationRosterMergeLine)
         {
             var ids = request.ApplicationItemIds?
                 .Where(id => id != Guid.Empty)
                 .OrderBy(id => id)
                 .ToArray() ?? Array.Empty<Guid>();
-            return $"resminamalar:items:{request.ApplicationId:N}:{string.Join(',', ids.Select(id => id.ToString("N")))}";
+            return $"resminamalar:items:{request.ApplicationProfileInstanceId:N}:{string.Join(',', ids.Select(id => id.ToString("N")))}";
         }
 
-        return $"resminamalar:app:{request.ApplicationId:N}";
+        return $"resminamalar:app:{request.ApplicationProfileInstanceId:N}";
     }
 
     public static string ForFile(string sourceType, Guid objectId) =>
         $"file:{sourceType?.Trim()}:{objectId:N}";
 
-    public static string ForDocumentCopies(IReadOnlyList<Guid> applicationItemIds)
+    public static string ForDocumentCopies(DocumentCopiesSlotRequest? request) =>
+        request == null
+            ? ForDocumentCopiesRoster(Guid.Empty, Array.Empty<Guid>())
+            : ForDocumentCopiesRoster(request.ApplicationProfileInstanceId, request.ApplicationProfileInstancePersonIds);
+
+    public static string ForDocumentCopiesRoster(Guid applicationId, IReadOnlyList<Guid> applicationPersonIds)
     {
-        var ids = applicationItemIds?
+        var ids = applicationPersonIds?
             .Where(id => id != Guid.Empty)
             .OrderBy(id => id)
             .ToArray() ?? Array.Empty<Guid>();
 
-        if (ids.Length == 0)
-            return "document-copies:empty";
+        if (applicationId == Guid.Empty || ids.Length == 0)
+            return "document-copies:roster:empty";
 
-        return $"document-copies:items:{string.Join(',', ids.Select(id => id.ToString("N")))}";
+        return $"document-copies:roster:{applicationId:N}:{string.Join(',', ids.Select(id => id.ToString("N")))}";
     }
-
-    public static string ForDocumentCopies(DocumentCopiesSlotRequest request) =>
-        ForDocumentCopies(request?.ApplicationItemIds ?? Array.Empty<Guid>());
 
     public static string ForProgressLetters(Guid applicationId) =>
         applicationId == Guid.Empty ? "progress-letters:empty" : $"progress-letters:app:{applicationId:N}";
 
-    public static string ForProgressLetters(ProgressLettersSlotRequest request) =>
-        ForProgressLetters(request?.ApplicationId ?? Guid.Empty);
+    public static string ForProgressLetters(ProgressLettersSlotRequest request)
+    {
+        var baseKey = ForProgressLetters(request?.ApplicationProfileInstanceId ?? Guid.Empty);
+        if (request?.OpenPreviewOnly == true
+            && request.FocusProgressId is Guid focus
+            && focus != Guid.Empty)
+        {
+            return $"{baseKey}|preview:{focus:N}";
+        }
+
+        return baseKey;
+    }
 
     public static string ForPersonDocumentCopies(IReadOnlyList<Guid> personIds)
     {
@@ -81,14 +93,51 @@ public static class VisaPreviewSlotOccupantKeys
             HeaderDocumentCopiesFamily.Invitation => "invitation-document-copies:invitation",
             HeaderDocumentCopiesFamily.Rejection => "rejection-document-copies:rejection",
             HeaderDocumentCopiesFamily.BorderZone => "border-zone-document-copies:border-zone",
+            HeaderDocumentCopiesFamily.Visa => "visa-document-copies:visa",
             _ => "header-document-copies:unknown",
         };
 
-        return $"{prefix}:{request.ParentId:N}";
+        var key = $"{prefix}:{request.ParentId:N}";
+        if (request.OpenPreviewOnly)
+        {
+            var focus = string.IsNullOrWhiteSpace(request.FocusRecordKey)
+                ? "first"
+                : request.FocusRecordKey.Trim();
+            return $"{key}|preview:{focus}";
+        }
+
+        return key;
     }
 
     public static string ForPlaceholderManual(UserReportBoType? filterRootBoType) =>
         filterRootBoType is UserReportBoType root
             ? $"placeholder-manual:root:{root}"
             : "placeholder-manual:all";
+
+    public static string ForIssueIssuedHeader(IssueIssuedHeaderSlotRequest request)
+    {
+        if (request == null || request.ApplicationProfileInstanceId == Guid.Empty)
+            return "issue-issued-header:empty";
+
+        var kind = string.IsNullOrWhiteSpace(request.CatalogKey)
+            ? request.Kind.ToString().ToLowerInvariant()
+            : request.CatalogKey.Trim().ToLowerInvariant();
+        var baseKey = $"issue-issued-header:{kind}:{request.ApplicationProfileInstanceId:N}";
+        if (request.ExistingHeaderId is Guid existing && existing != Guid.Empty)
+            return $"{baseKey}|header:{existing:N}";
+        return baseKey;
+    }
+
+    public static string ForIssueIssuedVisa(IssueIssuedVisaSlotRequest request)
+    {
+        if (request == null || request.ApplicationProfileInstanceId == Guid.Empty)
+            return "issue-issued-visa:empty";
+
+        var baseKey = $"issue-issued-visa:{request.ApplicationProfileInstanceId:N}";
+        if (request.ExistingVisaId is Guid visaId && visaId != Guid.Empty)
+            return $"{baseKey}|visa:{visaId:N}";
+        return baseKey;
+    }
+
+    public static string ForApprovalLegCatalog() => "approval-leg-catalog:tenant";
 }

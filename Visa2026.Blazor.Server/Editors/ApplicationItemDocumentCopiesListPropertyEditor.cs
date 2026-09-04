@@ -14,6 +14,7 @@ using Visa2026.Blazor.Server.Localization;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Editors;
 using Visa2026.Module.Services.ApplicationItemLinkedDocuments;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 
 namespace Visa2026.Blazor.Server.Editors;
 
@@ -71,15 +72,22 @@ public sealed class ApplicationItemDocumentCopiesListPropertyEditor : BlazorProp
             return;
         }
 
-        using var itemObjectSpace = _application.CreateObjectSpace(typeof(ApplicationItem));
-        var items = itemIds
-            .Select(id => itemObjectSpace.GetObjectByKey<ApplicationItem>(id))
-            .Where(item => item != null)
-            .Cast<ApplicationItem>()
-            .ToList();
+        using var itemObjectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
+        if (!ApplicationRosterHelper.TryLoadSharedApplicationPeople(
+                itemObjectSpace,
+                itemIds,
+                applicationId: Guid.Empty,
+                out var application,
+                out var people)
+            || application == null)
+        {
+            ComponentModel.ApplicationItemIds = Array.Empty<Guid>();
+            ComponentModel.MergedGroups = Array.Empty<ApplicationItemLinkedDocumentMergedGroup>();
+            return;
+        }
 
-        ComponentModel.ApplicationItemIds = items.Select(item => item.ID).ToList();
-        var lines = ApplicationItemLinkedDocumentsResolver.ResolveMany(itemObjectSpace, items);
+        ComponentModel.ApplicationItemIds = people.Select(p => p.ID).ToList();
+        var lines = ApplicationPersonLinkedDocumentsResolver.ResolveMany(itemObjectSpace, application, people);
         ComponentModel.MergedGroups = ApplicationItemLinkedDocumentsMerger.MergeBySlot(lines);
     }
 

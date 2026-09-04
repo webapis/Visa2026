@@ -25,7 +25,7 @@ Legacy seeds may lack maps — backfill before major changes.
 
 | Layout | Filename hint (new seeds) | Root BO | Word tokens |
 |--------|---------------------------|---------|-------------|
-| Application letter | `*_App.docx` | `Application` | `{{ds.*}}` |
+| ApplicationProfileInstance letter | `*_App.docx` | `Application` | `{{ds.*}}` |
 | One form per person in one file | `*_ItemRows.docx` | `ApplicationItem` | `{{#ds.rows}}` … `{{ds.rows.*}}` … `{{/ds.rows}}` |
 | Table of all items | `*_ItemRoster.docx` | `Application` | `{{#ds.ApplicationItems}}` … `{{.Field}}` |
 | Single item only | `*_ItemOne.docx` | `ApplicationItem` | `{{ds.*}}` (item fields) |
@@ -82,18 +82,18 @@ applicableProjectContractNameTmContains: "GT-15",
 | `Borcnama.docx` | **Borcnama** | ApplicationItem (`{{#ds.rows}}`) | All application types |
 | `Contract_uzt.docx` | **Contract** | ApplicationItem | Types: visa/WP extension family |
 | `Contract_Inv.docx` | **Contract Inv** | ApplicationItem | `App_Inv_And_WP` only |
-| `GT-15_Sazakow_uzt.docx` | **GT-15_Sazakow_uzt** | Application | `App_Visa_and_WP_Ext` + GT-15 contracts |
-| `GT-15_Elyasow_uzt.docx` | **GT-15_Elyasow_uzt** | Application | same |
-| `GT-15_Elyasow_ckl.docx` | **GT-15_Elyasow_ckl** | Application | **`App_Inv_And_WP`** + GT-15 contracts; **`GT-15_Elyasow_ckl_map.md`** (Approved) |
-| `GT-15_Elyasow_ckl_only.docx` | **GT-15_Elyasow_ckl_only** | Application | **`App_Inv`** + GT-15; **`GT-15_Elyasow_ckl_only_map.md`** (Approved) — çakylyk only |
-| `GT-15_Migrasiya_ckl_hat.docx` | **GT-15_Migrasiya_ckl_hat** | Application | **`App_Inv`**, **`App_Inv_And_WP`** + GT-15; Migrasiya hat; static **Ministr** / **A.Saparow** — **`GT-15_Migrasiya_ckl_hat_map.md`** |
-| `GT-15_MINSTROY_uzt.docx` | **GT-15_MINSTROY_uzt** | Application | same |
+| `GT-15_Sazakow_uzt.docx` | **GT-15_Sazakow_uzt** | ApplicationProfileInstance | `App_Visa_and_WP_Ext` + GT-15 contracts |
+| `GT-15_Elyasow_uzt.docx` | **GT-15_Elyasow_uzt** | ApplicationProfileInstance | same |
+| `GT-15_Elyasow_ckl.docx` | **GT-15_Elyasow_ckl** | ApplicationProfileInstance | **`App_Inv_And_WP`** + GT-15 contracts; **`GT-15_Elyasow_ckl_map.md`** (Approved) |
+| `GT-15_Elyasow_ckl_only.docx` | **GT-15_Elyasow_ckl_only** | ApplicationProfileInstance | **`App_Inv`** + GT-15; **`GT-15_Elyasow_ckl_only_map.md`** (Approved) — çakylyk only |
+| `GT-15_Migrasiya_ckl_hat.docx` | **GT-15_Migrasiya_ckl_hat** | ApplicationProfileInstance | **`App_Inv`**, **`App_Inv_And_WP`** + GT-15; Migrasiya hat; static **Ministr** / **A.Saparow** — **`GT-15_Migrasiya_ckl_hat_map.md`** |
+| `GT-15_MINSTROY_uzt.docx` | **GT-15_MINSTROY_uzt** | ApplicationProfileInstance | same |
 | `Sanaw_uzt.docx` | **Sanaw** | ApplicationItem | `App_Visa_and_WP_Ext` |
 | `Sanaw_ckl.docx` | **Sanaw_ckl** | ApplicationItem | **`App_Inv`**, **`App_Inv_And_WP`** + GT-15; **`Sanaw_ckl_map.md`** — ItemRows 14-col sanawy |
 | `Excel/Sanaw_ckl.xlsx` | **Sanaw_ckl (Excel)** | ApplicationItem | Same visibility; **`Excel/Sanaw_ckl_map.md`** |
 | `Excel/Sanaw_ckl_ministr_saparov.xlsx` | **Sanaw_ckl_ministr_saparov (Excel)** | ApplicationItem | Same as Sanaw_ckl (Excel); static **Ministr** / **A.Saparow** footer |
 | `Excel/Sanaw_hasaba_alys.xlsx` | **Hasaba almak sanawy (Excel)** | ApplicationItem | Registration app types; **`Excel/Sanaw_hasaba_alys_map.md`** |
-| `hasaba_almak_hat.docx` | **Hasaba almak hat** | Application | `App_Reg_Check_In` |
+| `hasaba_almak_hat.docx` | **Hasaba almak hat** | ApplicationProfileInstance | `App_Reg_Check_In` |
 | `Excel/433_gurlusyk_uzt.xlsx` | **Gurlusyk** | ApplicationItem | WP / visa extension types |
 | `Excel/433_gurlusyk_ckl.xlsx` | **Gurlusyk ckl** | ApplicationItem | **`App_Inv_And_WP`** + GT-15; **`Excel/433_gurlusyk_ckl_map.md`** |
 | `Excel/433-ek_uzt.xlsx` | **433-ek sanawy** | ApplicationItem | same |

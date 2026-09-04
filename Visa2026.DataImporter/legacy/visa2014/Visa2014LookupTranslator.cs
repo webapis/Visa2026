@@ -174,7 +174,7 @@ internal static class Visa2014LookupTranslator
 
     /// <summary>
     /// Adds identity legacy→target entries from a NameTm JSON catalog (e.g. city.json)
-    /// so CityByName fold-matching can resolve Application city labels.
+    /// so CityByName fold-matching can resolve ApplicationProfileInstance city labels.
     /// </summary>
     public static void EnrichIdentityFromNameTmJson(
         IDictionary<string, Visa2014LookupCatalog> catalogs,

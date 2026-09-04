@@ -20,9 +20,9 @@ public class ExcelReportGenerator : IExcelReportGenerator
 
     public Task GenerateAsync(
         UserReportTemplate template,
-        Application application,
+        ApplicationProfileInstance application,
         Stream outputStream,
-        IList<ApplicationItem>? applicationItems = null)
+        IList<ApplicationRosterMergeLine>? applicationItems = null)
     {
         if (template.ExcelMergeMode != ExcelMergeMode.ItemList)
             throw new NotSupportedException("Excel list generation requires ExcelMergeMode.ItemList.");
@@ -83,21 +83,21 @@ public class ExcelReportGenerator : IExcelReportGenerator
         return Task.CompletedTask;
     }
 
-    public Task GenerateAsync(UserReportTemplate template, ApplicationItem applicationItem, Stream outputStream)
+    public Task GenerateAsync(UserReportTemplate template, ApplicationRosterMergeLine applicationItem, Stream outputStream)
     {
         throw new NotSupportedException("Single-item Excel generation is planned for v1.1.");
     }
 
     private static Dictionary<string, object> BuildItemListRowDictionary(
         UserReportTemplate template,
-        ApplicationItem item,
+        ApplicationRosterMergeLine item,
         int rowNumber) =>
         UserReportMergeDataHelper.IsWizaYatyrylmakSanawUserReportTemplate(template)
         || UserReportMergeDataHelper.TemplateUsesWizaYatyrylmakSanawRowPlaceholders(template, template.Placeholders)
             ? UserReportMergeDataHelper.BuildWizaYatyrylmakSanawExcelRowDictionary(item, rowNumber)
             : UserReportMergeDataHelper.BuildExcelItemListRowDictionary(item, rowNumber);
 
-    private Dictionary<string, object> BuildHeaderData(UserReportTemplate template, Application application)
+    private Dictionary<string, object> BuildHeaderData(UserReportTemplate template, ApplicationProfileInstance application)
     {
         var data = UserReportMergeDataHelper.BuildApplicationHeaderDictionary(application);
 
@@ -132,7 +132,7 @@ public class ExcelReportGenerator : IExcelReportGenerator
         IReadOnlyDictionary<string, object> headerData,
         IReadOnlyDictionary<string, object> rowData,
         UserReportTemplate template,
-        ApplicationItem? item)
+        ApplicationRosterMergeLine? item)
     {
         var lastColumn = worksheet.LastColumnUsed()?.ColumnNumber()
             ?? row.LastCellUsed()?.Address.ColumnNumber
@@ -147,7 +147,7 @@ public class ExcelReportGenerator : IExcelReportGenerator
         IReadOnlyDictionary<string, object> headerData,
         IReadOnlyDictionary<string, object>? rowData,
         UserReportTemplate? template,
-        ApplicationItem? item = null)
+        ApplicationRosterMergeLine? item = null)
     {
         var text = cell.GetFormattedString();
         if (string.IsNullOrEmpty(text) || !text.Contains("{{", StringComparison.Ordinal))
@@ -205,7 +205,7 @@ public class ExcelReportGenerator : IExcelReportGenerator
     private static string? TryResolveRowToken(
         string key,
         IReadOnlyDictionary<string, object>? rowData,
-        ApplicationItem? item)
+        ApplicationRosterMergeLine? item)
     {
         if (rowData != null && rowData.TryGetValue(key, out var rowValue))
             return FormatValue(rowValue);

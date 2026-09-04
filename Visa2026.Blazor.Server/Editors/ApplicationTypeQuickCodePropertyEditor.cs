@@ -11,7 +11,7 @@ using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Editors;
 using Visa2026.Module.Localization;
 using Visa2026.Module.Services;
-using AppBO = Visa2026.Module.BusinessObjects.Application;
+using AppBO = Visa2026.Module.BusinessObjects.ApplicationProfileInstance;
 
 namespace Visa2026.Blazor.Server.Editors;
 
@@ -77,7 +77,7 @@ public class ApplicationTypeQuickCodePropertyEditor : BlazorPropertyEditorBase, 
             return;
 
         ComponentModel.ObjectSpace = _objectSpace;
-        var routeFilter = ApplicationProgressRouteHelper.GetTypePickerRouteFilter(GetApplication());
+        var routeFilter = ApplicationProfileInstanceProgressRouteHelper.GetTypePickerRouteFilter(GetApplication());
         ComponentModel.PickerRows = ApplicationTypeCodePickerHelper.LoadRows(_objectSpace, routeFilter).ToList();
         Log($"Picker opened, rows={ComponentModel.PickerRows.Count}, routeFilter={routeFilter}");
     }

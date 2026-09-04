@@ -1,5 +1,7 @@
+using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using DevExpress.ExpressApp;
 using Visa2026.Module.Services;
@@ -13,7 +15,7 @@ namespace Visa2026.Module.BusinessObjects
 {
     [UserDocumentation("administration/configuration/organization", Category = "Administration")]
     [DefaultClassOptions]
-    [NavigationItem("Configuration")]
+    [NavigationItem(false)]
     [DisplayName("Company")]
     [ImageName("BO_Organization")]
     public class CompanyProfile : BaseObject
@@ -34,8 +36,20 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual string TaxInformation { get; set; }
 
+        [XafDisplayName("Company Registration Date")]
+        public virtual DateTime? RegistrationDate { get; set; }
+
+        [XafDisplayName("Default")]
+        [ToolTip("Pre-selected when creating the next Application Profile Instance.")]
+        public virtual bool IsDefault { get; set; }
+
+        [NotMapped]
+        [XafDisplayName("Company Registration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string RegistrationDateText =>
+            RegistrationDate is { } date && date.Year > 1 ? date.ToString("dd.MM.yyyy") : string.Empty;
+
         public static CompanyProfile? TryGetInstance(IObjectSpace objectSpace) =>
-            OrganizationSingletonHelper.TryGet(objectSpace, (CompanyProfile p) => p.Name);
+            OrganizationCatalogHelper.TryGetDefaultCompany(objectSpace);
 
         public static CompanyProfile GetOrCreateInstance(IObjectSpace objectSpace) =>
             TryGetInstance(objectSpace) ?? objectSpace.CreateObject<CompanyProfile>();

@@ -1,0 +1,24 @@
+flowchart LR
+    subgraph PerCell["For each yellow cell"]
+        Y["Yellow sample text<br/>e.g. Erol, Hilmi"]
+        H["Column header lookup<br/>ScanExcelWorkbookHelper"]
+        P["Column profile match<br/>ScanExcelColumnProfiles"]
+        C["Manual label scoring<br/>ScanPlaceholderCatalogIndex"]
+    end
+
+    Y --> D{"Compound column?<br/>split on , and /"}
+    H --> D
+    P --> D
+    C --> D
+
+    D -->|Single value| S["ScanShapeTokenMatcher<br/>date, TUR, gender, passport, visa period…"]
+    D -->|Compound| X["Split segments<br/>map each to profile ShortCode<br/>ScanSurroundPlaceholderPattern confirms"]
+
+    S --> M["Merge scores<br/>header + ScanSurroundPlaceholderPattern + shape"]
+    X --> M
+
+    M --> R["Rank top candidates<br/>score % + confidence High/Med/Low"]
+    R --> T["ScanDetectedFieldDraft<br/>ProposedToken + Alternatives"]
+
+    note1["Sample literals are matched against<br/>headers + manual shapes only<br/>NOT case roster people"]
+    T --- note1

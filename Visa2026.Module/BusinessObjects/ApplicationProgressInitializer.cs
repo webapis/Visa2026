@@ -8,9 +8,9 @@ namespace Visa2026.Module.BusinessObjects
     /// Office preparation is implied when there is no progress history (no seed row).
     /// Kept as a no-op hook from <see cref="Application"/> create for backward compatibility.
     /// </summary>
-    public static class ApplicationProgressInitializer
+    public static class ApplicationProfileInstanceProgressInitializer
     {
-        public static void EnsureInitialProgress(Application application, IObjectSpace objectSpace)
+        public static void EnsureInitialProgress(ApplicationProfileInstance application, IObjectSpace objectSpace)
         {
             _ = application;
             _ = objectSpace;

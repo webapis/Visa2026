@@ -1,7 +1,7 @@
 namespace Visa2026.Module.BusinessObjects;
 
-/// <summary>SLA evaluation for the current <see cref="ApplicationProgress"/> ministry review step.</summary>
-public enum ApplicationProgressSlaStatus
+/// <summary>SLA evaluation for the current <see cref="ApplicationProfileInstanceProgress"/> ministry review step.</summary>
+public enum ApplicationProfileInstanceProgressSlaStatus
 {
     None = 0,
     Ok = 1,

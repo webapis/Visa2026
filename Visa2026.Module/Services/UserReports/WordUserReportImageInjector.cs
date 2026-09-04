@@ -14,10 +14,12 @@ namespace Visa2026.Module.Services.UserReports;
 /// </summary>
 public static class WordUserReportImageInjector
 {
-    /// <summary>Matches explicit image markers and legacy DocxTemplater <c>:img()</c> tokens.</summary>
+    /// <summary>Matches explicit image markers and legacy DocxTemplater <c>:img()</c> tokens.
+    /// Whitespace, soft hyphens, and line wraps inside the token are allowed so a photo-cell
+    /// round-trip through Word still injects.</summary>
     public static readonly Regex PlaceholderRegex = new(
-        @"\{\{IMAGE:(?<key>[\w]+)\}\}|\{\{(?:[^}]*\.)?(?<key2>[\w]+):img(?:\([^)]*\))?\}\}|System\.Byte\[\]",
-        RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+        @"\{\{\s*IMAGE\s*:\s*(?<key>[^}]+?)\s*\}\}|\{\{(?:[^}]*\.)?(?<key2>[\w]+):img(?:\([^)]*\))?\}\}|System\.Byte\[\]",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
     private const long EmuPerMm = 36000L;
     private const long DefaultWidthEmu = 35L * EmuPerMm;
@@ -29,21 +31,41 @@ public static class WordUserReportImageInjector
         ArgumentNullException.ThrowIfNull(output);
         photosByKey ??= new Dictionary<string, IReadOnlyList<byte[]>>(StringComparer.OrdinalIgnoreCase);
 
-        using var document = WordprocessingDocument.Open(mergedDocx, true);
-        var mainPart = document.MainDocumentPart
-            ?? throw new InvalidOperationException("Word document has no main document part.");
-
-        var cursors = photosByKey.Keys.ToDictionary(static k => k, _ => 0, StringComparer.OrdinalIgnoreCase);
-        var nextDrawingId = GetMaxDrawingPropertyId(mainPart) + 1U;
-
-        foreach (var root in EnumerateOpenXmlTextRoots(mainPart))
+        using (var document = WordprocessingDocument.Open(mergedDocx, true))
         {
-            foreach (var paragraph in root.Descendants<Paragraph>().ToList())
-                nextDrawingId = ProcessParagraphImagePlaceholders(mainPart, paragraph, photosByKey, cursors, nextDrawingId);
+            var mainPart = document.MainDocumentPart
+                ?? throw new InvalidOperationException("Word document has no main document part.");
+
+            var cursors = photosByKey.Keys.ToDictionary(static k => k, _ => 0, StringComparer.OrdinalIgnoreCase);
+            var nextDrawingId = GetMaxDrawingPropertyId(mainPart) + 1U;
+
+            foreach (var root in EnumerateOpenXmlTextRoots(mainPart))
+            {
+                foreach (var cell in root.Descendants<TableCell>().ToList())
+                {
+                    var owned = cell.Descendants<Text>()
+                        .Where(t => t.Ancestors<TableCell>().FirstOrDefault() == cell)
+                        .ToList();
+                    nextDrawingId = ProcessTextScope(mainPart, owned, photosByKey, cursors, nextDrawingId);
+                }
+
+                foreach (var paragraph in root.Descendants<Paragraph>().ToList())
+                {
+                    if (paragraph.Ancestors<TableCell>().Any())
+                        continue;
+                    nextDrawingId = ProcessTextScope(
+                        mainPart,
+                        paragraph.Descendants<Text>().ToList(),
+                        photosByKey,
+                        cursors,
+                        nextDrawingId);
+                }
+            }
+
+            mainPart.Document.Save();
+            document.Save();
         }
 
-        mainPart.Document.Save();
-        document.Save();
         mergedDocx.Position = 0;
         mergedDocx.CopyTo(output);
     }
@@ -66,16 +88,16 @@ public static class WordUserReportImageInjector
     }
 
     /// <summary>
-    /// Word often splits <c>{{IMAGE:Person_Photo}}</c> across several <c>w:t</c> runs; match on combined paragraph text.
+    /// Word often splits <c>{{IMAGE:Person_Photo}}</c> across runs, a <c>w:br</c>, or two
+    /// paragraphs in a narrow table cell (photo box). Match on concatenated <c>w:t</c> text.
     /// </summary>
-    private static uint ProcessParagraphImagePlaceholders(
+    private static uint ProcessTextScope(
         MainDocumentPart mainPart,
-        Paragraph paragraph,
+        List<Text> textNodes,
         IReadOnlyDictionary<string, IReadOnlyList<byte[]>> photosByKey,
         Dictionary<string, int> cursors,
         uint nextDrawingId)
     {
-        var textNodes = paragraph.Descendants<Text>().ToList();
         if (textNodes.Count == 0)
             return nextDrawingId;
 
@@ -86,18 +108,20 @@ public static class WordUserReportImageInjector
         var matches = PlaceholderRegex.Matches(combined).Cast<Match>().OrderByDescending(static m => m.Index).ToList();
         foreach (var match in matches)
         {
-            var photoKey = match.Groups["key"].Success
-                ? match.Groups["key"].Value
-                : match.Groups["key2"].Value;
+            var photoKey = NormalizeImageKey(
+                match.Groups["key"].Success
+                    ? match.Groups["key"].Value
+                    : match.Groups["key2"].Value);
 
-            if (string.IsNullOrEmpty(photoKey) || !photosByKey.TryGetValue(photoKey, out var photos))
+            if (string.IsNullOrEmpty(photoKey)
+                || !TryResolvePhotos(photosByKey, cursors, photoKey, out var photos, out var lookupKey))
             {
                 RemoveTextRange(textNodes, match.Index, match.Length);
                 continue;
             }
 
-            var index = cursors[photoKey];
-            cursors[photoKey] = index + 1;
+            var index = cursors[lookupKey];
+            cursors[lookupKey] = index + 1;
             var imageBytes = index < photos.Count ? photos[index] : Array.Empty<byte>();
 
             var anchor = GetFirstTextInRange(textNodes, match.Index, match.Length);
@@ -111,6 +135,64 @@ public static class WordUserReportImageInjector
         }
 
         return nextDrawingId;
+    }
+
+    internal static string NormalizeImageKey(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+            return string.Empty;
+
+        var buffer = new char[raw.Length];
+        var n = 0;
+        foreach (var ch in raw)
+        {
+            if (char.IsWhiteSpace(ch) || ch is '\u00AD' or '\u200B' or '\u200C' or '\u200D' or '-')
+                continue;
+            buffer[n++] = ch;
+        }
+
+        return n == 0 ? string.Empty : new string(buffer, 0, n);
+    }
+
+    private static bool TryResolvePhotos(
+        IReadOnlyDictionary<string, IReadOnlyList<byte[]>> photosByKey,
+        Dictionary<string, int> cursors,
+        string photoKey,
+        out IReadOnlyList<byte[]> photos,
+        out string lookupKey)
+    {
+        photos = Array.Empty<byte[]>();
+        lookupKey = photoKey = NormalizeImageKey(photoKey);
+        if (lookupKey.Length == 0)
+            return false;
+
+        if (photosByKey.TryGetValue(photoKey, out photos!))
+            return EnsureCursor(cursors, photoKey);
+
+        var canonical = UserReportPlaceholderAliasRegistry.ResolveCanonicalPropertyPath(photoKey);
+        if (!string.Equals(canonical, photoKey, StringComparison.OrdinalIgnoreCase)
+            && photosByKey.TryGetValue(canonical, out photos!))
+        {
+            lookupKey = canonical;
+            return EnsureCursor(cursors, lookupKey);
+        }
+
+        if (UserReportPlaceholderAliasRegistry.TryGetShortCode(photoKey, out var shortCode)
+            && photosByKey.TryGetValue(shortCode, out photos!))
+        {
+            lookupKey = shortCode;
+            return EnsureCursor(cursors, lookupKey);
+        }
+
+        photos = Array.Empty<byte[]>();
+        return false;
+    }
+
+    private static bool EnsureCursor(Dictionary<string, int> cursors, string key)
+    {
+        if (!cursors.ContainsKey(key))
+            cursors[key] = 0;
+        return true;
     }
 
     private static (Run Run, Text Text)? GetFirstTextInRange(IReadOnlyList<Text> textNodes, int start, int length)

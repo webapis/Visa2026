@@ -7,6 +7,7 @@ using DevExpress.Persistent.BaseImpl.EF;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 using Visa2026.Module.Services;
 
 namespace Visa2026.Module.Services.ApplicationItemLinkedDocuments;
@@ -30,26 +31,27 @@ public sealed class ApplicationItemDocumentBatchSummaryPdfBuilder
         this.logger = logger;
     }
 
-    public bool TryBuild(
-        IReadOnlyList<Guid> applicationItemIds,
+    public bool TryBuildForRoster(
+        IReadOnlyList<Guid> applicationPersonIds,
         ApplicationItemDocumentBatchSummaryKind kind,
         ApplicationItemDocumentPackageOptions packageOptions,
         out byte[]? content,
-        out string? fileName)
+        out string? fileName,
+        Guid applicationId = default)
     {
         content = null;
         fileName = ApplicationItemDocumentBatchSummaryKindMapping.GetDownloadFileName(kind);
 
-        var itemIds = applicationItemIds?
+        var rowIds = applicationPersonIds?
             .Where(id => id != Guid.Empty)
             .Distinct()
             .ToList() ?? new List<Guid>();
 
-        if (itemIds.Count == 0)
+        if (rowIds.Count == 0)
             return false;
 
         if (kind == ApplicationItemDocumentBatchSummaryKind.AllDiplomas)
-            return TryBuildAllDiplomasPdf(itemIds, packageOptions, out content);
+            return TryBuildAllDiplomasPdfForRoster(rowIds, packageOptions, out content);
 
         string? slotKey = kind switch
         {
@@ -62,30 +64,34 @@ public sealed class ApplicationItemDocumentBatchSummaryPdfBuilder
         if (slotKey == null)
             return false;
 
-        using var objectSpace = nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationItem>();
-        var items = itemIds
-            .Select(id => objectSpace.GetObjectByKey<ApplicationItem>(id))
-            .Where(item => item != null)
-            .Cast<ApplicationItem>()
-            .ToList();
-
-        if (items.Count != itemIds.Count)
+        using var objectSpace = nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        if (!ApplicationRosterHelper.TryLoadSharedApplicationPeople(
+                objectSpace,
+                rowIds,
+                applicationId,
+                out var application,
+                out var people)
+            || application == null
+            || people.Count != rowIds.Count)
+        {
             return false;
+        }
 
-        var lines = ApplicationItemLinkedDocumentsResolver.ResolveMany(objectSpace, items);
+        var lines = ApplicationPersonLinkedDocumentsResolver.ResolveMany(objectSpace, application, people);
         var mergedGroup = ApplicationItemLinkedDocumentsMerger.MergeBySlot(lines)
             .FirstOrDefault(g => string.Equals(g.SlotKey, slotKey, StringComparison.Ordinal));
 
         if (mergedGroup == null || mergedGroup.Files.Count == 0)
             return false;
 
-        if (!slotMerger.TryBuildMergedPdf(
-                itemIds,
+        if (!slotMerger.TryBuildMergedPdfForRoster(
+                rowIds,
                 slotKey,
                 mergedGroup.SlotLabel,
                 mergedGroup.Files,
                 out content,
-                out _)
+                out _,
+                application.ID)
             || content == null
             || content.Length == 0)
         {
@@ -95,8 +101,8 @@ public sealed class ApplicationItemDocumentBatchSummaryPdfBuilder
         return true;
     }
 
-    private bool TryBuildAllDiplomasPdf(
-        IReadOnlyList<Guid> itemIds,
+    private bool TryBuildAllDiplomasPdfForRoster(
+        IReadOnlyList<Guid> rowIds,
         ApplicationItemDocumentPackageOptions packageOptions,
         out byte[]? content)
     {
@@ -104,19 +110,20 @@ public sealed class ApplicationItemDocumentBatchSummaryPdfBuilder
         if (packageOptions.DiplomaScope != PdfBatchDiplomaScope.AllEducations)
             return false;
 
-        using var objectSpace = nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationItem>();
+        using var objectSpace = nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<Person>();
         var pdfStreams = new List<MemoryStream>();
 
         try
         {
-            foreach (var itemId in itemIds)
+            foreach (var rowId in rowIds)
             {
-                var item = objectSpace.GetObjectByKey<ApplicationItem>(itemId);
-                if (item?.Person == null)
+                var person = objectSpace.GetObjectByKey<Person>(rowId);
+                if (person == null)
                     continue;
 
+                var personId = person.ID;
                 var educations = objectSpace.GetObjectsQuery<Education>()
-                    .Where(e => e.Person.ID == item.Person.ID)
+                    .Where(e => e.Person.ID == personId)
                     .Include(e => e.EducationInstitution)
                     .AsEnumerable()
                     .OrderByDescending(e => ParseGraduationYearForSort(e.GraduationYear))

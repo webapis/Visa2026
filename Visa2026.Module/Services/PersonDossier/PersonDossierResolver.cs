@@ -70,6 +70,7 @@ public static class PersonDossierResolver
         if (person.PersonRole == PersonRecordRole.Employee)
         {
             fields.Add(Field("HireDate", FormatDate(person.HireDate)));
+            fields.Add(Field("PreviousWorkplacesInTurkmenistan", person.PreviousWorkplacesInTurkmenistan));
             fields.Add(Field("Email", person.Email));
             fields.Add(Field("Subcontractor", Describe(person.Subcontractor)));
         }
@@ -473,25 +474,25 @@ public static class PersonDossierResolver
 
     private static PersonDossierSection BuildApplications(Person person)
     {
-        var records = Safe(person.ApplicationItems)
-            .OrderByDescending(item => item.Application?.ApplicationDate ?? DateTime.MinValue)
-            .Select(item => new PersonDossierRecord
+        var apps = Safe(person.ApplicationProfileInstances)
+            .OrderByDescending(app => app.ApplicationDate)
+            .Select(app => new PersonDossierRecord
             {
-                RecordKey = $"ApplicationItem:{item.ID}",
-                SourceObjectId = item.ID,
-                SourceObjectType = typeof(ApplicationItem),
+                RecordKey = $"Application:{app.ID}",
+                SourceObjectId = app.ID,
+                SourceObjectType = typeof(ApplicationProfileInstance),
                 Cells =
                 [
-                    item.Application?.FullApplicationNumber ?? string.Empty,
-                    Describe(item.Application?.ApplicationType),
-                    FormatDate(item.Application?.ApplicationDate),
+                    app.FullApplicationNumber ?? app.ApplicationNumber ?? string.Empty,
+                    app.ApplicationProfile?.Name ?? Describe(app.ApplicationType),
+                    FormatDate(app.ApplicationDate),
                 ],
-                StatusLabel = item.LastApplicationState ?? string.Empty,
+                StatusLabel = app.LatestProgress?.State?.NameTm ?? string.Empty,
             })
             .ToList();
 
         return Section("applications", 100,
-            ["ApplicationNumber", "ApplicationType", "ApplicationDate"], records);
+            ["ApplicationNumber", "ApplicationProfile", "ApplicationDate"], apps);
     }
 
     private static PersonDossierSection BuildInvitations(Person person)

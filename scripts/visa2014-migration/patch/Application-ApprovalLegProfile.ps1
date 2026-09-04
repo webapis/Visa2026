@@ -30,7 +30,7 @@ if (-not $DryRun -and [string]::IsNullOrWhiteSpace($ImportPassword)) {
     throw "Set VISA2026_IMPORT_PASSWORD or pass -ImportPassword for OData PATCH."
 }
 
-$mapPath = Join-Path $repoRoot "Visa2026.DataImporter/legacy/visa2014/id-maps/$LegacySource/Application.json"
+$mapPath = Join-Path $repoRoot "Visa2026.DataImporter/legacy/visa2014/id-maps/$LegacySource/ApplicationProfileInstance.json"
 if (-not (Test-Path $mapPath)) {
     throw "Application id-map not found: $mapPath"
 }

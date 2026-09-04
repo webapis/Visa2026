@@ -1,6 +1,6 @@
 namespace Visa2026.Module.Services.PreviewSlot;
 
-public sealed class ApplicationProgressLetterCatalogEntry
+public sealed class ApplicationProfileInstanceProgressLetterCatalogEntry
 {
     public Guid ProgressId { get; init; }
 

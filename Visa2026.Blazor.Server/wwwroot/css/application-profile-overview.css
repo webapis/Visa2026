@@ -1,0 +1,277 @@
+.ap-overview {
+    --ap-ink: #1a2332;
+    --ap-muted: #5c6b7a;
+    --ap-line: #d5dde6;
+    --ap-panel: #ffffff;
+    --ap-accent: #0b6e4f;
+    --ap-accent-soft: #e6f3ee;
+    --ap-warn-soft: #fff4e5;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    color: var(--ap-ink);
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 8px 4px 32px;
+}
+
+.ap-overview__loading {
+    padding: 24px;
+    color: var(--ap-muted);
+}
+
+.ap-overview__banner {
+    margin-bottom: 14px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #e8f0fa;
+    border: 1px solid #c9d6e4;
+    font-size: 0.88rem;
+}
+
+.ap-overview__header {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
+.ap-overview__header-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    position: relative;
+}
+
+.ap-overview__close {
+    align-self: flex-end;
+    border: none;
+    background: transparent;
+    color: var(--ap-muted);
+    font-size: 1.5rem;
+    line-height: 1;
+    padding: 2px 8px;
+    margin: -4px -4px 0 0;
+    cursor: pointer;
+    border-radius: 6px;
+}
+.ap-overview__close:hover {
+    background: #eef2f6;
+    color: var(--ap-ink);
+}
+
+.ap-overview__back {
+    display: inline-block;
+    border: none;
+    background: transparent;
+    color: var(--ap-accent);
+    font-size: 0.85rem;
+    font-weight: 650;
+    padding: 0;
+    margin: 0 0 8px;
+    cursor: pointer;
+}
+.ap-overview__back:hover { text-decoration: underline; }
+
+.ap-overview__btn {
+    border: 1px solid var(--ap-line);
+    background: #fff;
+    color: var(--ap-ink);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+.ap-overview__btn--primary {
+    background: var(--ap-accent);
+    border-color: var(--ap-accent);
+    color: #fff;
+}
+.ap-overview__btn--primary:hover { filter: brightness(0.92); }
+.ap-overview__btn--danger-outline {
+    border-color: #d7b4b4;
+    color: #9b2c2c;
+}
+.ap-overview__btn--danger-outline:hover { background: #fdf2f2; }
+.ap-overview__btn--danger {
+    background: #9b2c2c;
+    border-color: #9b2c2c;
+    color: #fff;
+}
+.ap-overview__btn--danger:hover { filter: brightness(0.92); }
+
+.ap-overview__title { margin: 0 0 4px; font-size: 1.45rem; font-weight: 650; }
+.ap-overview__sub { margin: 0; color: var(--ap-muted); font-size: 0.92rem; }
+.ap-overview__subhead {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 12px 0 8px;
+    font-size: 0.95rem;
+    font-weight: 650;
+}
+.ap-overview__desc { margin: 8px 0 0; font-size: 0.88rem; max-width: 60ch; }
+
+.ap-overview__pills { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-start; }
+.ap-overview__pill {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--ap-line);
+    background: #fff;
+    color: var(--ap-muted);
+}
+.ap-overview__pill--on {
+    background: var(--ap-accent-soft);
+    border-color: #b7d9cb;
+    color: #08553c;
+}
+.ap-overview__pill--warn {
+    background: var(--ap-warn-soft);
+    border-color: #f0d4a8;
+    color: #7c4a03;
+}
+
+.ap-overview__audience {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.ap-overview__label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ap-muted);
+}
+
+.ap-overview__chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.ap-overview__chip {
+    font-size: 0.78rem;
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: var(--ap-accent-soft);
+    border: 1px solid #b7d9cb;
+    color: #08553c;
+}
+
+.ap-overview__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+@media (max-width: 860px) {
+    .ap-overview__grid { grid-template-columns: 1fr; }
+}
+
+.ap-overview__card {
+    background: var(--ap-panel);
+    border: 1px solid var(--ap-line);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+}
+.ap-overview__card h2 {
+    margin: 0 0 6px;
+    font-size: 1rem;
+}
+.ap-overview__hint {
+    margin: 0 0 10px;
+    font-size: 0.82rem;
+    color: var(--ap-muted);
+}
+.ap-overview__count {
+    font-weight: 500;
+    color: var(--ap-muted);
+    font-size: 0.85rem;
+}
+
+.ap-overview__list {
+    margin: 0;
+    padding-left: 1.2rem;
+    font-size: 0.88rem;
+}
+.ap-overview__list li { margin: 4px 0; }
+
+.ap-overview__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+.ap-overview__table th,
+.ap-overview__table td {
+    border-bottom: 1px solid #eef2f6;
+    padding: 8px 6px;
+    text-align: left;
+}
+.ap-overview__table th {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ap-muted);
+}
+
+.ap-overview__empty {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--ap-muted);
+}
+
+.ap-overview__link {
+    border: none;
+    background: none;
+    padding: 0;
+    color: var(--ap-accent);
+    font: inherit;
+    font-weight: 650;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+}
+.ap-overview__chip--quiet {
+    background: #eef2f6;
+    border-color: var(--ap-line);
+    color: var(--ap-muted);
+    margin-left: 6px;
+}
+
+.ap-overview__org {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+@media (max-width: 960px) {
+    .ap-overview__org { grid-template-columns: 1fr; }
+}
+.ap-overview__org h3 {
+    margin: 0 0 8px;
+    font-size: 0.88rem;
+}
+
+.ap-overview__dl {
+    display: grid;
+    grid-template-columns: minmax(7rem, 38%) 1fr;
+    gap: 4px 10px;
+    margin: 0;
+    font-size: 0.82rem;
+}
+.ap-overview__dl--full {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: minmax(7rem, 38%) 1fr;
+    gap: 4px 10px;
+}
+.ap-overview__dl dt {
+    margin: 0;
+    color: var(--ap-muted);
+    font-weight: 600;
+}
+.ap-overview__dl dd {
+    margin: 0;
+}

@@ -129,7 +129,8 @@
         "Address": { "tr-TR": "Adres", "tk-TM": "Salgy", "ru-RU": "Адрес" },
         "PhoneNumber": { "tr-TR": "Telefon", "tk-TM": "Telefon", "ru-RU": "Телефон" },
         "Email": { "tr-TR": "E-posta", "tk-TM": "E-poçta", "ru-RU": "Эл. почта" },
-        "TaxInformation": { "tr-TR": "Vergi Bilgisi", "tk-TM": "Salgyt maglumaty", "ru-RU": "Налоговые данные" }
+        "TaxInformation": { "tr-TR": "Vergi Bilgisi", "tk-TM": "Salgyt maglumaty", "ru-RU": "Налоговые данные" },
+        "RegistrationDate": { "tr-TR": "Şirket Tescil Tarihi", "tk-TM": "Kärhana hasaba alyş senesi", "ru-RU": "Дата регистрации компании" }
       }
     },
     "ApplicationNumberingProfile": {
@@ -151,6 +152,7 @@
         "PassportNumber": { "tr-TR": "Pasaport No", "tk-TM": "Pasport belgisi", "ru-RU": "Номер паспорта" },
         "PassportAuthority": { "tr-TR": "Pasaport Veren Kurum", "tk-TM": "Pasport beren edara", "ru-RU": "Орган выдачи паспорта" },
         "PassportIssueDate": { "tr-TR": "Pasaport Veriliş Tarihi", "tk-TM": "Pasport berlen senesi", "ru-RU": "Дата выдачи паспорта" },
+        "PassportExpirationDate": { "tr-TR": "Pasaport Bitiş Tarihi", "tk-TM": "Pasport möhleti", "ru-RU": "Срок действия паспорта" },
         "PassportLine": { "tr-TR": "Pasaport (tek satır)", "tk-TM": "Pasport (bir setir)", "ru-RU": "Паспорт (одной строкой)" }
       }
     },
@@ -279,40 +281,6 @@
           "tr-TR": "Uyarı (iş günleri)",
           "tk-TM": "Duýduryş (iş günleri)",
           "ru-RU": "Предупреждение (рабочие дни)"
-        }
-      }
-    },
-    "ApplicationMigrationSlaProfile": {
-      "caption": {
-        "en-US": "Migration SLA profile",
-        "tr-TR": "Göç SLA profili",
-        "tk-TM": "Migrasiýa SLA profili",
-        "ru-RU": "Профиль SLA миграции"
-      },
-      "listCaption": {
-        "en-US": "Migration SLA profiles",
-        "tr-TR": "Göç SLA profilleri",
-        "tk-TM": "Migrasiýa SLA profilleri",
-        "ru-RU": "Профили SLA миграции"
-      },
-      "members": {
-        "MaxDaysInReview": {
-          "en-US": "Max working days",
-          "tr-TR": "Azami iş günleri",
-          "tk-TM": "Maks. iş günleri",
-          "ru-RU": "Макс. рабочих дней"
-        },
-        "WarningDaysBeforeMax": {
-          "en-US": "Warning (working days)",
-          "tr-TR": "Uyarı (iş günleri)",
-          "tk-TM": "Duýduryş (iş günleri)",
-          "ru-RU": "Предупреждение (рабочие дни)"
-        },
-        "ApplicationTypes": {
-          "en-US": "Application types",
-          "tr-TR": "Başvuru türleri",
-          "tk-TM": "Arza görnüşleri",
-          "ru-RU": "Типы заявок"
         }
       }
     },

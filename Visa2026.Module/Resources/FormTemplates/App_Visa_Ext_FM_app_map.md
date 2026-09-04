@@ -77,16 +77,16 @@ this.Detail.HeightF = 633F;
 |---|---|---|
 | `TotalPersonCount` | `Application` | ✅ |
 | `TotalPersonCountText` | `Application` | ✅ |
-| `VisaCategory_NameTm` | `Application → VisaCategory` | ✅ |
-| `FamilyMember_Relationship_NameTm` | `Application → ApplicationItems[0] → Person → Relationship` | ✅ |
-| `SponsoringEmployee_FullName` | `Application → ApplicationItems[0] → Person → SponsoringEmployee` | ✅ |
-| `SponsoringEmployee_PositionTm` | `Application → ApplicationItems[0] → Person → SponsoringEmployee → Position` | ✅ |
+| `VisaCategory_NameTm` | `ApplicationProfileInstance → VisaCategory` | ✅ |
+| `FamilyMember_Relationship_NameTm` | `ApplicationProfileInstance → ApplicationItems[0] → Person → Relationship` | ✅ |
+| `SponsoringEmployee_FullName` | `ApplicationProfileInstance → ApplicationItems[0] → Person → SponsoringEmployee` | ✅ |
+| `SponsoringEmployee_PositionTm` | `ApplicationProfileInstance → ApplicationItems[0] → Person → SponsoringEmployee → Position` | ✅ |
 
 ---
 
 ## ReportsUpdater.cs entry
 
 ```csharp
-AddPredefinedReport<AppVisaExtFMReport>("App Visa Ext FM Report", typeof(Application), isInplaceReport: true);
+AddPredefinedReport<AppVisaExtFMReport>("App Visa Ext FM Report", typeof(ApplicationProfileInstance), isInplaceReport: true);
 CreateReportVisibility("App Visa Ext FM Report", "[ApplicationType.Name] = 'App_Visa_Ext_FM'");
 ```

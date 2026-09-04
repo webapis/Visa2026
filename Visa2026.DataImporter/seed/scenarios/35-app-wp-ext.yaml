@@ -4,15 +4,15 @@ description: Stakeholder demo — work permit extension only
 dependsOn: InvitationAndWorkPermit
 sync: false
 anchor:
-  entity: Application
+  entity: ApplicationProfileInstance
   key: FullApplicationNumber
   value: 4/-063
 data:
   Applications:
-  - Application Number: 063
+  - ApplicationProfileInstance Number: 063
     Date: 2026-07-01
     Project Contract: GT-15
-    Application Type: App_WP_Ext
+    ApplicationProfileInstance Type: App_WP_Ext
   ApplicationItems:
   - Application: 4/-063
     Person: Kemal Arslan

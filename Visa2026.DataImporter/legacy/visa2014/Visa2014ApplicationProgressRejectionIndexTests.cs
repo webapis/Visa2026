@@ -3,12 +3,12 @@ using Xunit;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014.Tests;
 
-public class Visa2014ApplicationProgressRejectionIndexTests
+public class Visa2014ApplicationProfileInstanceProgressRejectionIndexTests
 {
     [Fact]
     public void BuildEvidence_FullCoverage_WhenCountsMatchAndPositive()
     {
-        var evidence = Visa2014ApplicationProgressRejectionIndex.BuildEvidence(
+        var evidence = Visa2014ApplicationProfileInstanceProgressRejectionIndex.BuildEvidence(
             new Dictionary<string, string?>(StringComparer.Ordinal)
             {
                 ["ApplicationItemCount"] = "3",
@@ -27,7 +27,7 @@ public class Visa2014ApplicationProgressRejectionIndexTests
     [Fact]
     public void BuildEvidence_NotFullCoverage_WhenPartialOrZero()
     {
-        var partial = Visa2014ApplicationProgressRejectionIndex.BuildEvidence(
+        var partial = Visa2014ApplicationProfileInstanceProgressRejectionIndex.BuildEvidence(
             new Dictionary<string, string?>(StringComparer.Ordinal)
             {
                 ["ApplicationItemCount"] = "5",
@@ -35,7 +35,7 @@ public class Visa2014ApplicationProgressRejectionIndexTests
             });
         Assert.False(partial.HasFullCoverage);
 
-        var zero = Visa2014ApplicationProgressRejectionIndex.BuildEvidence(
+        var zero = Visa2014ApplicationProfileInstanceProgressRejectionIndex.BuildEvidence(
             new Dictionary<string, string?>(StringComparer.Ordinal)
             {
                 ["ApplicationItemCount"] = "0",

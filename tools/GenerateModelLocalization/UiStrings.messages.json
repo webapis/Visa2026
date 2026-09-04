@@ -359,6 +359,12 @@
     "tk-TM": "Işe kabul edilen senesi",
     "ru-RU": "Дата приёма на работу"
   },
+  "PersonDossier.Field.PreviousWorkplacesInTurkmenistan": {
+    "en": "Previous workplaces in Turkmenistan",
+    "tr-TR": "Türkmenistan'daki önceki iş yerleri",
+    "tk-TM": "Türkmenistanda öňki işlän ýerleri",
+    "ru-RU": "Предыдущие места работы в Туркменистане"
+  },
   "PersonDossier.Field.Email": {
     "en": "Email",
     "tr-TR": "E-posta",
@@ -1259,6 +1265,228 @@
     "tk-TM": "Öňünden görmek",
     "ru-RU": "Просмотр"
   },
+  "ApplicationReportPackage.DownloadTemplate": {
+    "en": "Download Template",
+    "tr-TR": "Şablonu indir",
+    "tk-TM": "Şablony göçür",
+    "ru-RU": "Скачать шаблон"
+  },
+  "ApplicationReportPackage.DownloadTemplate.Tooltip": {
+    "en": "Download the saved Word or Excel template file (placeholders, not filled case data).",
+    "tr-TR": "Kayıtlı Word veya Excel şablon dosyasını indirir (yer tutucular; doldurulmuş başvuru verisi değil).",
+    "tk-TM": "Ýazdyrylan Word ýa-da Excel şablon faýlyny göçürýär (ýer tutujylar; doldurylan arza maglumaty däl).",
+    "ru-RU": "Скачать сохранённый файл шаблона Word или Excel (плейсхолдеры, не заполненные данные заявки)."
+  },
+  "ApplicationReportPackage.DownloadTemplate.Failed": {
+    "en": "Could not download the template file.",
+    "tr-TR": "Şablon dosyası indirilemedi.",
+    "tk-TM": "Şablon faýly göçürilmedi.",
+    "ru-RU": "Не удалось скачать файл шаблона."
+  },
+  "ApplicationReportPackage.DownloadTemplate.Downloaded": {
+    "en": "Downloaded template \"{0}\" ({1}).",
+    "tr-TR": "Şablon \"{0}\" indirildi ({1}).",
+    "tk-TM": "Şablon \"{0}\" göçürildi ({1}).",
+    "ru-RU": "Шаблон «{0}» скачан ({1})."
+  },
+  "ApplicationReportPackage.CatalogTab": {
+    "en": "Catalog",
+    "tr-TR": "Katalog",
+    "tk-TM": "Katalog",
+    "ru-RU": "Каталог"
+  },
+  "ApplicationReportPackage.ThisProfileTab": {
+    "en": "This profile ({0})",
+    "tr-TR": "Bu profil ({0})",
+    "tk-TM": "Bu profil ({0})",
+    "ru-RU": "Этот профиль ({0})"
+  },
+  "ApplicationReportPackage.SharedTab": {
+    "en": "Shared ({0})",
+    "tr-TR": "Ortak ({0})",
+    "tk-TM": "Umumy ({0})",
+    "ru-RU": "Общие ({0})"
+  },
+  "ApplicationReportPackage.SharedChip": {
+    "en": "SHARED",
+    "tr-TR": "ORTAK",
+    "tk-TM": "UMUMY",
+    "ru-RU": "ОБЩИЙ"
+  },
+  "ApplicationReportPackage.SharedHint": {
+    "en": "Turn on to use a shared template on this case. Enabled templates also appear on This profile with a Shared mark.",
+    "tr-TR": "Bu davada ortak bir şablon kullanmak için açın. Açık şablonlar Bu profilde Ortak işaretiyle görünür.",
+    "tk-TM": "Bu arzada umumy şablony ulanmak üçin açyň. Açyk şablonlar Bu profilde Umumy belgi bilen görünýär.",
+    "ru-RU": "Включите, чтобы использовать общий шаблон в этом деле. Включённые шаблоны также видны на вкладке «Этот профиль» с меткой «Общий»."
+  },
+  "ApplicationReportPackage.SharedEmpty": {
+    "en": "No shared templates in the library.",
+    "tr-TR": "Kitaplıkta ortak şablon yok.",
+    "tk-TM": "Kitaphanada umumy şablon ýok.",
+    "ru-RU": "В библиотеке нет общих шаблонов."
+  },
+  "ApplicationReportPackage.SharedToggleOn": {
+    "en": "ON",
+    "tr-TR": "AÇIK",
+    "tk-TM": "AÇYK",
+    "ru-RU": "ВКЛ"
+  },
+  "ApplicationReportPackage.SharedToggleOff": {
+    "en": "OFF",
+    "tr-TR": "KAPALI",
+    "tk-TM": "ÝAPYK",
+    "ru-RU": "ВЫКЛ"
+  },
+  "ApplicationReportPackage.SharedToggleFailed": {
+    "en": "Could not update the shared template for this profile.",
+    "tr-TR": "Bu profil için ortak şablon güncellenemedi.",
+    "tk-TM": "Bu profil üçin umumy şablony täzelemek başartmady.",
+    "ru-RU": "Не удалось обновить общий шаблон для этого профиля."
+  },
+  "ApplicationReportPackage.RecycleBinTab": {
+    "en": "Recycle Bin ({0})",
+    "tr-TR": "Geri dönüşüm ({0})",
+    "tk-TM": "Geri gaýtaryş ({0})",
+    "ru-RU": "Корзина ({0})"
+  },
+  "ApplicationReportPackage.MoveToRecycleBin": {
+    "en": "Delete",
+    "tr-TR": "Sil",
+    "tk-TM": "Poz",
+    "ru-RU": "Удалить"
+  },
+  "ApplicationReportPackage.MoveToRecycleBin.Tooltip": {
+    "en": "Move this officer-created template to Recycle Bin. Seeded library templates stay in the catalog.",
+    "tr-TR": "Bu memur şablonunu Geri Dönüşüm kutusuna taşır. Kitaplık şablonları katalogda kalır.",
+    "tk-TM": "Bu işgär şablonyny Geri gaýtaryşa geçirýär. Kitaphana şablonlary katalogda galýar.",
+    "ru-RU": "Переместить этот шаблон офицера в Корзину. Библиотечные шаблоны остаются в каталоге."
+  },
+  "ApplicationReportPackage.MoveToRecycleBin.Confirm": {
+    "en": "Move \"{0}\" to Recycle Bin? You can restore it later.",
+    "tr-TR": "\"{0}\" Geri Dönüşüm kutusuna taşınsın mı? Daha sonra geri yükleyebilirsiniz.",
+    "tk-TM": "\"{0}\" Geri gaýtaryşa geçirilsinmi? Soňra dikeldip bilersiňiz.",
+    "ru-RU": "Переместить «{0}» в Корзину? Позже можно восстановить."
+  },
+  "ApplicationReportPackage.MoveToRecycleBin.ConfirmAction": {
+    "en": "Move to Recycle Bin",
+    "tr-TR": "Geri Dönüşüme taşı",
+    "tk-TM": "Geri gaýtaryşa geçir",
+    "ru-RU": "В Корзину"
+  },
+  "ApplicationReportPackage.Restore": {
+    "en": "Restore",
+    "tr-TR": "Geri yükle",
+    "tk-TM": "Dikelt",
+    "ru-RU": "Восстановить"
+  },
+  "ApplicationReportPackage.Restore.Tooltip": {
+    "en": "Return this template to the Resminamalar catalog.",
+    "tr-TR": "Bu şablonu Resminamalar kataloğuna geri alır.",
+    "tk-TM": "Bu şablony Resminamalar katalogyna gaýtarýar.",
+    "ru-RU": "Вернуть шаблон в каталог Resminamalar."
+  },
+  "ApplicationReportPackage.DeletePermanently": {
+    "en": "Delete permanently",
+    "tr-TR": "Kalıcı olarak sil",
+    "tk-TM": "Hemişelik poz",
+    "ru-RU": "Удалить навсегда"
+  },
+  "ApplicationReportPackage.DeletePermanently.Tooltip": {
+    "en": "Permanently delete this template from Recycle Bin. This cannot be undone.",
+    "tr-TR": "Bu şablonu Geri Dönüşüm kutusundan kalıcı olarak siler. Geri alınamaz.",
+    "tk-TM": "Bu şablony Geri gaýtaryşdan hemişelik pozýar. Yzyna gaýtaryp bolmaýar.",
+    "ru-RU": "Окончательно удалить шаблон из Корзины. Отменить нельзя."
+  },
+  "ApplicationReportPackage.DeletePermanently.Confirm": {
+    "en": "Permanently delete \"{0}\"? This cannot be undone.",
+    "tr-TR": "\"{0}\" kalıcı olarak silinsin mi? Bu işlem geri alınamaz.",
+    "tk-TM": "\"{0}\" hemişelik pozulsynmy? Yzyna gaýtaryp bolmaýar.",
+    "ru-RU": "Окончательно удалить «{0}»? Отменить нельзя."
+  },
+  "ApplicationReportPackage.DeletePermanently.ConfirmAction": {
+    "en": "Delete permanently",
+    "tr-TR": "Kalıcı olarak sil",
+    "tk-TM": "Hemişelik poz",
+    "ru-RU": "Удалить навсегда"
+  },
+  "ApplicationReportPackage.RecycleBin.Empty": {
+    "en": "Recycle Bin is empty.",
+    "tr-TR": "Geri Dönüşüm kutusu boş.",
+    "tk-TM": "Geri gaýtaryş boş.",
+    "ru-RU": "Корзина пуста."
+  },
+  "ApplicationReportPackage.RecycleBin.Moved": {
+    "en": "\"{0}\" moved to Recycle Bin.",
+    "tr-TR": "\"{0}\" Geri Dönüşüm kutusuna taşındı.",
+    "tk-TM": "\"{0}\" Geri gaýtaryşa geçirildi.",
+    "ru-RU": "«{0}» перемещён в Корзину."
+  },
+  "ApplicationReportPackage.RecycleBin.Moving": {
+    "en": "Moving \"{0}\" to Recycle Bin…",
+    "tr-TR": "\"{0}\" Geri Dönüşüm kutusuna taşınıyor…",
+    "tk-TM": "\"{0}\" Geri gaýtaryşa geçirilýär…",
+    "ru-RU": "«{0}» перемещается в Корзину…"
+  },
+  "ApplicationReportPackage.RecycleBin.Restoring": {
+    "en": "Restoring \"{0}\" to the catalog…",
+    "tr-TR": "\"{0}\" kataloga geri yükleniyor…",
+    "tk-TM": "\"{0}\" kataloga dikeldilýär…",
+    "ru-RU": "«{0}» возвращается в каталог…"
+  },
+  "ApplicationReportPackage.RecycleBin.Deleting": {
+    "en": "Deleting \"{0}\" permanently…",
+    "tr-TR": "\"{0}\" kalıcı olarak siliniyor…",
+    "tk-TM": "\"{0}\" hemişelik pozulýar…",
+    "ru-RU": "«{0}» удаляется навсегда…"
+  },
+  "ApplicationReportPackage.RecycleBin.Restored": {
+    "en": "\"{0}\" restored to the catalog.",
+    "tr-TR": "\"{0}\" kataloga geri yüklendi.",
+    "tk-TM": "\"{0}\" kataloga dikeldildi.",
+    "ru-RU": "«{0}» возвращён в каталог."
+  },
+  "ApplicationReportPackage.RecycleBin.Deleted": {
+    "en": "\"{0}\" deleted permanently.",
+    "tr-TR": "\"{0}\" kalıcı olarak silindi.",
+    "tk-TM": "\"{0}\" hemişelik pozuldy.",
+    "ru-RU": "«{0}» удалён навсегда."
+  },
+  "ApplicationReportPackage.RecycleBin.Failed": {
+    "en": "Could not update Recycle Bin.",
+    "tr-TR": "Geri Dönüşüm kutusu güncellenemedi.",
+    "tk-TM": "Geri gaýtaryş täzelenmedi.",
+    "ru-RU": "Не удалось обновить Корзину."
+  },
+  "ApplicationReportPackage.RecycleBin.InBin": {
+    "en": "In bin",
+    "tr-TR": "Kutuda",
+    "tk-TM": "Gutuda",
+    "ru-RU": "В корзине"
+  },
+  "ApplicationReportPackage.RecycleBin.RecycledOn": {
+    "en": "Removed {0}",
+    "tr-TR": "Kaldırıldı: {0}",
+    "tk-TM": "Aýryldy: {0}",
+    "ru-RU": "Удалено {0}"
+  },
+  "ApplicationReportPackage.Catalog.CreatedTitle": {
+    "en": "Created {0}",
+    "tr-TR": "Oluşturuldu: {0}",
+    "tk-TM": "Döredildi: {0}",
+    "ru-RU": "Создано {0}"
+  },
+  "ApplicationReportPackage.Catalog.UpdatedTitle": {
+    "en": "Updated {0}",
+    "tr-TR": "Güncellendi: {0}",
+    "tk-TM": "Täzelendi: {0}",
+    "ru-RU": "Изменено {0}"
+  },
+  "ApplicationReportPackage.Catalog.CreatedAndUpdatedTitle": {
+    "en": "Created {0} · Updated {1}",
+    "tr-TR": "Oluşturuldu: {0} · Güncellendi: {1}",
+    "tk-TM": "Döredildi: {0} · Täzelendi: {1}",
+    "ru-RU": "Создано {0} · Изменено {1}"
+  },
   "ApplicationReportPackage.EditTemplate": {
     "en": "Edit template",
     "tr-TR": "Şablonu düzenle",
@@ -1559,6 +1787,12 @@
     "tk-TM": "Şablon faýly ýok ýa-da boş.",
     "ru-RU": "Файл шаблона отсутствует или пуст."
   },
+  "ApplicationReportPackage.Readiness.ProfileTemplateUnlinked": {
+    "en": "No matching User Report Template — link by the same name under Configuration.",
+    "tr-TR": "Eşleşen kullanıcı rapor şablonu yok — Yapılandırma altında aynı adla bağlayın.",
+    "tk-TM": "Gabat gelýän ulanyjy hasabat şablony ýok — Sazlamalar boýunça şol bir at bilen baglaň.",
+    "ru-RU": "Нет соответствующего пользовательского шаблона — свяжите по тем же именем в разделе конфигурации."
+  },
   "ApplicationReportPackage.Readiness.NotValidated": {
     "en": "Placeholders were not extracted or validated.",
     "tr-TR": "Yer tutucular çıkarılmadı veya doğrulanmadı.",
@@ -1733,6 +1967,12 @@
     "tk-TM": "Kod, ady ýa-da düşündiriş gözle…",
     "ru-RU": "Поиск кода, имени или подписи…"
   },
+  "PlaceholderManual.Filter.AllRecords": {
+    "en": "All records",
+    "tr-TR": "Tüm kayıtlar",
+    "tk-TM": "Hemme ýazgylar",
+    "ru-RU": "Все записи"
+  },
   "PlaceholderManual.Filter.AllScopes": {
     "en": "All scopes",
     "tr-TR": "Tüm kapsamlar",
@@ -1750,6 +1990,108 @@
     "tr-TR": "Satır (kişi satırı)",
     "tk-TM": "Setir (adam)",
     "ru-RU": "Строка (лицо)"
+  },
+  "PlaceholderManual.Group.AddressOfResidence": {
+    "en": "Address of residence",
+    "tr-TR": "İkamet adresi",
+    "tk-TM": "Ýaşaýyş salgysy",
+    "ru-RU": "Адрес проживания"
+  },
+  "PlaceholderManual.Group.Application": {
+    "en": "Application",
+    "tr-TR": "Başvuru",
+    "tk-TM": "Arza",
+    "ru-RU": "Заявка"
+  },
+  "PlaceholderManual.Group.AuthorizedRepresentative": {
+    "en": "Authorized representative (wekil)",
+    "tr-TR": "Yetkili temsilci (wekil)",
+    "tk-TM": "Ygtyýarly wekil",
+    "ru-RU": "Уполномоченный представитель"
+  },
+  "PlaceholderManual.Group.BorderZone": {
+    "en": "Border zone",
+    "tr-TR": "Sınır bölgesi",
+    "tk-TM": "Serhet ýakasy",
+    "ru-RU": "Пограничная зона"
+  },
+  "PlaceholderManual.Group.CompanyProfile": {
+    "en": "Company",
+    "tr-TR": "Şirket",
+    "tk-TM": "Kärhana",
+    "ru-RU": "Компания"
+  },
+  "PlaceholderManual.Group.CompanySignatory": {
+    "en": "Authorized signatory",
+    "tr-TR": "İmza yetkilisi",
+    "tk-TM": "Gol çekiji",
+    "ru-RU": "Подписант"
+  },
+  "PlaceholderManual.Group.Education": {
+    "en": "Education",
+    "tr-TR": "Eğitim",
+    "tk-TM": "Bilim",
+    "ru-RU": "Образование"
+  },
+  "PlaceholderManual.Group.FamilyMember": {
+    "en": "Family member",
+    "tr-TR": "Aile üyesi",
+    "tk-TM": "Maşgala agzasy",
+    "ru-RU": "Член семьи"
+  },
+  "PlaceholderManual.Group.Invitation": {
+    "en": "Invitation",
+    "tr-TR": "Davetiye",
+    "tk-TM": "Çakylyk",
+    "ru-RU": "Приглашение"
+  },
+  "PlaceholderManual.Group.Passport": {
+    "en": "Passport",
+    "tr-TR": "Pasaport",
+    "tk-TM": "Pasport",
+    "ru-RU": "Паспорт"
+  },
+  "PlaceholderManual.Group.Person": {
+    "en": "Person",
+    "tr-TR": "Kişi",
+    "tk-TM": "Adam",
+    "ru-RU": "Лицо"
+  },
+  "PlaceholderManual.Group.Position": {
+    "en": "Position",
+    "tr-TR": "Pozisyon",
+    "tk-TM": "Wezipe",
+    "ru-RU": "Должность"
+  },
+  "PlaceholderManual.Group.RosterRow": {
+    "en": "Roster row",
+    "tr-TR": "Liste satırı",
+    "tk-TM": "Sanaw setiri",
+    "ru-RU": "Строка списка"
+  },
+  "PlaceholderManual.Group.Salary": {
+    "en": "Salary",
+    "tr-TR": "Maaş",
+    "tk-TM": "Aýlyk",
+    "ru-RU": "Зарплата"
+  },
+  "PlaceholderManual.Group.Travel": {
+    "en": "Travel",
+    "tr-TR": "Seyahat",
+    "tk-TM": "Syýahat",
+    "ru-RU": "Поездка"
+  },
+  "PlaceholderManual.Group.Visa": {
+    "en": "Visa",
+    "tr-TR": "Vize",
+    "tk-TM": "Wiza",
+    "ru-RU": "Виза"
+  },
+  "PlaceholderManual.Group.WorkPermit": {
+    "en": "Work permit",
+    "tr-TR": "Çalışma izni",
+    "tk-TM": "Iş rugsatnamasy",
+    "ru-RU": "Разрешение на работу"
   },
   "PlaceholderManual.Column.Short": {
     "en": "Short",
@@ -2189,11 +2531,35 @@
     "tk-TM": "Ministrlik ýa-da migrasiýa ösüşi ýazylan soň arza meýdanlaryny üýtgetmek bolmaýar.",
     "ru-RU": "Поля заявки нельзя изменить после записи прогресса министерства или миграции."
   },
+  "ApplicationProfile.ConfigLockedCannotEdit": {
+    "en": "This application profile is locked because a linked application has left office preparation. Duplicate the profile to change configuration.",
+    "tr-TR": "Bağlı bir arza ofis hazırlığını geçtiği için bu profil kilitlendi. Yapılandırmayı değiştirmek için profili kopyalayın.",
+    "tk-TM": "Baglanyşykly arza edara taýýarlygyny geçendigi üçin bu profil gulplandy. Sazlamany üýtgetmek üçin profili göçüriň.",
+    "ru-RU": "Профиль заблокирован: связанная заявка вышла из офисной подготовки. Скопируйте профиль, чтобы изменить конфигурацию."
+  },
+  "ApplicationProfile.ConfigLockedCannotEditNested": {
+    "en": "Nested templates cannot be changed while this profile is locked. Approval leg versions can still be edited.",
+    "tr-TR": "Profil kilitliyken iç şablonlar değiştirilemez. Onay adımı sürümleri yine de düzenlenebilir.",
+    "tk-TM": "Profil gulplanykça iç şablonlary üýtgedip bolmaýar. Tassyklama ädim wersiýalaryny henizem üýtgedip bolýar.",
+    "ru-RU": "Пока профиль заблокирован, вложенные шаблоны менять нельзя. Версии этапов согласования можно редактировать."
+  },
+  "ApplicationProfile.ConfigLockedCannotRemoveLastApprovalLegVersion": {
+    "en": "Keep at least one approval-leg version while this profile is config-locked. Duplicate a version instead of removing the last one.",
+    "tr-TR": "Profil kilitliyken en az bir onay adımı sürümü kalmalıdır. Son sürümü silmek yerine kopyalayın.",
+    "tk-TM": "Profil gulplanykça iň bolmanda bir tassyklama ädim wersiýasy galmaly. Soňkysyny pozmak ýerine göçüriň.",
+    "ru-RU": "Пока профиль заблокирован, должна остаться хотя бы одна версия этапов. Скопируйте версию вместо удаления последней."
+  },
   "Application.FieldsLockedWhenWorkflowTerminal": {
     "en": "This application is closed (issued, rejected, or cancelled). Edit the last progress step to reopen it.",
     "tr-TR": "Bu arza kapatıldı (verildi, reddedildi veya iptal edildi). Yeniden açmak için son ilerleme adımını düzenleyin.",
     "tk-TM": "Bu arza ýapyldy (berildi, ret edildi ýa-da ýatyryldy). Täzeden açmak üçin soňky ösüş ädimini üýtgediň.",
     "ru-RU": "Заявка закрыта (выдана, отклонена или отменена). Измените последний шаг прогресса, чтобы открыть снова."
+  },
+  "ApplicationPerson.RosterLockedWhenWorkflowTerminal": {
+    "en": "People and linked records cannot be changed after the process is complete (issued, rejected, or cancelled). Edit the last progress step to reopen the case.",
+    "tr-TR": "Süreç tamamlandıktan sonra (verildi, reddedildi veya iptal edildi) kişiler ve bağlı kayıtlar değiştirilemez. Davayı yeniden açmak için son ilerleme adımını düzenleyin.",
+    "tk-TM": "Proses tamamlandan soň (berildi, ret edildi ýa-da ýatyryldy) adamlar we baglanan ýazgylar üýtgedilip bolmaýar. Arzany täzeden açmak üçin soňky ösüş ädimini üýtgediň.",
+    "ru-RU": "После завершения процесса (выдано, отклонено или отменено) нельзя менять людей и связанные записи. Измените последний шаг прогресса, чтобы снова открыть дело."
   },
   "Application.ProjectContractLockedAfterProgress": {
     "en": "Project contract cannot change after ministry or migration steps were recorded.",
@@ -2309,18 +2675,6 @@
     "tk-TM": "Bu arza görnüşinde migrasiýa SLA profili ýok (ýa-da iň ýokary iş günleri bellenmedi). Migrasiýa gullugyna geçmezden öň arza görnüşine profil belläň.",
     "ru-RU": "У типа заявки не задан профиль SLA миграционной службы (или не указано макс. число рабочих дней). Назначьте профиль типу заявки перед переводом в миграционную службу."
   },
-  "ApplicationType.MigrationSlaProfileMissingWarning": {
-    "en": "No migration SLA profile is assigned. Officers cannot advance applications of this type to migration service until a profile with max working days is set.",
-    "tr-TR": "Migrasyon SLA profili atanmamış. Azami iş günü olan bir profil tanımlanana kadar bu tür başvurular migrasyon servisine ilerletilemez.",
-    "tk-TM": "Migrasiýa SLA profili bellenmedi. Iň ýokary iş günleri bar profil bellänçä bu görnüşli arzalar migrasiýa gullugyna geçirilip bilmez.",
-    "ru-RU": "Профиль SLA миграционной службы не назначен. Заявки этого типа нельзя переводить в миграционную службу, пока не задан профиль с макс. числом рабочих дней."
-  },
-  "ApplicationMigrationSlaProfile.DeleteBlocked": {
-    "en": "This migration SLA profile is used by one or more application types and cannot be deleted.",
-    "tr-TR": "Bu migrasyon SLA profili bir veya daha fazla başvuru türü tarafından kullanılıyor; silinemez.",
-    "tk-TM": "Bu migrasiýa SLA profili bir ýa-da has köp arza görnüşinde ulanylýar; pozup bolmaýar.",
-    "ru-RU": "Этот профиль SLA миграционной службы используется одним или несколькими типами заявок и не может быть удалён."
-  },
   "ExpirationAlertRule.ConfigurationOnly": {
     "en": "Only configured document expiration rules can be edited here.",
     "tr-TR": "Burada yalnızca yapılandırılmış belge sona erme kuralları düzenlenebilir.",
@@ -2386,6 +2740,324 @@
     "tr-TR": "Bu onay bakanlık profili başvurularda kullanılıyor. Bakanlık adımlarını değiştirmek için kopyalayın.",
     "tk-TM": "Bu ministrlik ylalaşyk ädimleri profili arzalarda ulanylýar. Ministrlik ädimlerini üýtgetmek üçin göçürip alň.",
     "ru-RU": "Этот профиль этапов уже используется заявками. Скопируйте его, чтобы изменить этапы министерств."
+  },
+  "ApprovalLegProfile.Slot.Title": {
+    "en": "Approval leg profiles",
+    "tr-TR": "Onay bakanlık profilleri",
+    "tk-TM": "Ministrlik ylalaşyk ädimleri",
+    "ru-RU": "Профили этапов министерств"
+  },
+  "ApprovalLegProfile.Slot.Subtitle": {
+    "en": "Shared ministry chains · tenant catalog",
+    "tr-TR": "Paylaşılan bakanlık zincirleri · kiracı kataloğu",
+    "tk-TM": "Paýlaşylan ministrlik zynjyrlary · kärendeçi katalog",
+    "ru-RU": "Общие цепочки министерств · каталог арендатора"
+  },
+  "ApprovalLegProfile.Slot.SearchPlaceholder": {
+    "en": "Search chains…",
+    "tr-TR": "Zincir ara…",
+    "tk-TM": "Zynjyr gözle…",
+    "ru-RU": "Искать цепочки…"
+  },
+  "ApprovalLegProfile.Slot.New": {
+    "en": "+ New",
+    "tr-TR": "+ Yeni",
+    "tk-TM": "+ Täze",
+    "ru-RU": "+ Создать"
+  },
+  "ApprovalLegProfile.Slot.Open": {
+    "en": "Open",
+    "tr-TR": "Aç",
+    "tk-TM": "Aç",
+    "ru-RU": "Открыть"
+  },
+  "ApprovalLegProfile.Slot.Duplicate": {
+    "en": "Duplicate",
+    "tr-TR": "Kopyala",
+    "tk-TM": "Göçür",
+    "ru-RU": "Дублировать"
+  },
+  "ApprovalLegProfile.Slot.Active": {
+    "en": "Active",
+    "tr-TR": "Aktif",
+    "tk-TM": "Aktiw",
+    "ru-RU": "Активен"
+  },
+  "ApprovalLegProfile.Slot.Inactive": {
+    "en": "Inactive",
+    "tr-TR": "Pasif",
+    "tk-TM": "Aktiw däl",
+    "ru-RU": "Неактивен"
+  },
+  "ApprovalLegProfile.Slot.UsedBy": {
+    "en": "Used by {0} applications",
+    "tr-TR": "{0} başvuruda kullanılıyor",
+    "tk-TM": "{0} arzada ulanylýar",
+    "ru-RU": "Используется в {0} заявках"
+  },
+  "ApprovalLegProfile.Slot.CatalogHint": {
+    "en": "Open edits the shared chain used by every via-ministry application. This case only snapshots the card you pick.",
+    "tr-TR": "Aç, tüm bakanlık başvurularının kullandığı paylaşılan zinciri düzenler. Bu dosya yalnızca seçtiğiniz kartı kopyalar.",
+    "tk-TM": "Aç ähli ministrlik arzalarynyň ulanýan paýlaşylan zynjyryny redaktirleýär. Bu arza diňe saýlan kartyň nusgasyny saklaýar.",
+    "ru-RU": "Открыть правит общую цепочку для всех заявок через министерства. Эта заявка только снимает снимок выбранной карточки."
+  },
+  "ApprovalLegProfile.Slot.EmptyTitle": {
+    "en": "No approval-leg profiles yet",
+    "tr-TR": "Henüz onay bakanlık profili yok",
+    "tk-TM": "Ministrlik ylalaşyk ädimleri entek ýok",
+    "ru-RU": "Профилей этапов пока нет"
+  },
+  "ApprovalLegProfile.Slot.EmptyBody": {
+    "en": "Create the first shared ministry chain. It is available for every via-ministry application, not only this case.",
+    "tr-TR": "İlk paylaşılan bakanlık zincirini oluşturun. Yalnızca bu dosya için değil, tüm bakanlık başvuruları için geçerlidir.",
+    "tk-TM": "Ilkinji paýlaşylan ministrlik zynjyryny dörediň. Diňe bu arza üçin däl, ähli ministrlik arzalary üçin elýeterli.",
+    "ru-RU": "Создайте первую общую цепочку министерств. Она доступна всем заявкам через министерства, не только этой."
+  },
+  "ApprovalLegProfile.Slot.EmptyFooter": {
+    "en": "New chains are shared. Configure profile only sets which card is Default for that template.",
+    "tr-TR": "Yeni zincirler paylaşılır. Şablon sihirbazı yalnızca o şablonun Varsayılan kartını ayarlar.",
+    "tk-TM": "Täze zynjyrlar paýlaşylýar. Configure profile diňe şol şablon üçin deslapky karty belleýär.",
+    "ru-RU": "Новые цепочки общие. Мастер профиля задаёт только карточку по умолчанию для этого шаблона."
+  },
+  "ApprovalLegProfile.Slot.NewTitle": {
+    "en": "New approval-leg profile",
+    "tr-TR": "Yeni onay bakanlık profili",
+    "tk-TM": "Täze ministrlik ylalaşyk ädimleri",
+    "ru-RU": "Новый профиль этапов"
+  },
+  "ApprovalLegProfile.Slot.NewHint": {
+    "en": "Create adds a shared catalog chain for every via-ministry application. It will appear as a card on Choose Approval legs.",
+    "tr-TR": "Oluştur, tüm bakanlık başvuruları için paylaşılan bir zincir ekler. Choose Approval legs adımında kart olarak görünür.",
+    "tk-TM": "Döret ähli ministrlik arzalary üçin paýlaşylan katalog zynjyryny goşýar. Ol Choose Approval legs ädiminde kart bolup görünýär.",
+    "ru-RU": "Создать добавляет общую цепочку для всех заявок через министерства. Она появится карточкой на шаге Choose Approval legs."
+  },
+  "ApprovalLegProfile.Slot.EditTitle": {
+    "en": "Edit approval-leg profile",
+    "tr-TR": "Onay bakanlık profilini düzenle",
+    "tk-TM": "Ministrlik ylalaşyk ädimlerini redaktirle",
+    "ru-RU": "Изменить профиль этапов"
+  },
+  "ApprovalLegProfile.Slot.BackCatalog": {
+    "en": "Catalog",
+    "tr-TR": "Katalog",
+    "tk-TM": "Katalog",
+    "ru-RU": "Каталог"
+  },
+  "ApprovalLegProfile.Slot.Code": {
+    "en": "Code",
+    "tr-TR": "Kod",
+    "tk-TM": "Kod",
+    "ru-RU": "Код"
+  },
+  "ApprovalLegProfile.Slot.CodePlaceholder": {
+    "en": "TE-EN",
+    "tr-TR": "TE-EN",
+    "tk-TM": "TE-EN",
+    "ru-RU": "TE-EN"
+  },
+  "ApprovalLegProfile.Slot.Ministries": {
+    "en": "Ministries ({0})",
+    "tr-TR": "Bakanlıklar ({0})",
+    "tk-TM": "Ministrlikler ({0})",
+    "ru-RU": "Министерства ({0})"
+  },
+  "ApprovalLegProfile.Slot.NoMinistries": {
+    "en": "No ministries yet. Add at least one.",
+    "tr-TR": "Henüz bakanlık yok. En az bir tane ekleyin.",
+    "tk-TM": "Ministrlik entek ýok. Azyndan birini goşuň.",
+    "ru-RU": "Министерств пока нет. Добавьте хотя бы одно."
+  },
+  "ApprovalLegProfile.Slot.AddMinistry": {
+    "en": "Add ministry",
+    "tr-TR": "Bakanlık ekle",
+    "tk-TM": "Ministrlik goş",
+    "ru-RU": "Добавить министерство"
+  },
+  "ApprovalLegProfile.Slot.SelectMinistry": {
+    "en": "Select ministry…",
+    "tr-TR": "Bakanlık seçin…",
+    "tk-TM": "Ministrlik saýlaň…",
+    "ru-RU": "Выберите министерство…"
+  },
+  "ApprovalLegProfile.Slot.Add": {
+    "en": "Add",
+    "tr-TR": "Ekle",
+    "tk-TM": "Goş",
+    "ru-RU": "Добавить"
+  },
+  "ApprovalLegProfile.Slot.Remove": {
+    "en": "Remove",
+    "tr-TR": "Kaldır",
+    "tk-TM": "Aýyr",
+    "ru-RU": "Удалить"
+  },
+  "ApprovalLegProfile.Slot.MoveUp": {
+    "en": "Up",
+    "tr-TR": "Yukarı",
+    "tk-TM": "Ýokary",
+    "ru-RU": "Вверх"
+  },
+  "ApprovalLegProfile.Slot.MoveDown": {
+    "en": "Down",
+    "tr-TR": "Aşağı",
+    "tk-TM": "Aşak",
+    "ru-RU": "Вниз"
+  },
+  "ApprovalLegProfile.Slot.Cancel": {
+    "en": "Cancel",
+    "tr-TR": "İptal",
+    "tk-TM": "Ýatyr",
+    "ru-RU": "Отмена"
+  },
+  "ApprovalLegProfile.Slot.Create": {
+    "en": "Create",
+    "tr-TR": "Oluştur",
+    "tk-TM": "Döret",
+    "ru-RU": "Создать"
+  },
+  "ApprovalLegProfile.Slot.Save": {
+    "en": "Save",
+    "tr-TR": "Kaydet",
+    "tk-TM": "Ýazdyr",
+    "ru-RU": "Сохранить"
+  },
+  "ApprovalLegProfile.Slot.Delete": {
+    "en": "Delete",
+    "tr-TR": "Sil",
+    "tk-TM": "Poz",
+    "ru-RU": "Удалить"
+  },
+  "ApprovalLegProfile.Slot.LockedHint": {
+    "en": "This chain is used by applications. Ministry order is locked.",
+    "tr-TR": "Bu zincir başvurularda kullanılıyor. Bakanlık sırası kilitli.",
+    "tk-TM": "Bu zynjyr arzalarda ulanylýar. Ministrlik tertibi gulply.",
+    "ru-RU": "Эта цепочка используется заявками. Порядок министерств заблокирован."
+  },
+  "ApprovalLegProfile.Slot.UnusedHint": {
+    "en": "Not used by applications yet. Ministry order can be changed.",
+    "tr-TR": "Henüz başvurularda kullanılmıyor. Bakanlık sırası değiştirilebilir.",
+    "tk-TM": "Entak arzalarda ulanylmaýar. Ministrlik tertibini üýtgedip bolýar.",
+    "ru-RU": "Пока не используется заявками. Порядок министерств можно менять."
+  },
+  "ApprovalLegProfile.Slot.ConfirmDelete": {
+    "en": "Delete this unused chain?",
+    "tr-TR": "Bu kullanılmayan zincir silinsin mi?",
+    "tk-TM": "Bu ulanylmaýan zynjyr pozulsynmy?",
+    "ru-RU": "Удалить эту неиспользуемую цепочку?"
+  },
+  "ApprovalLegProfile.Slot.CodeRequired": {
+    "en": "Enter a code or add ministries so a code can be generated.",
+    "tr-TR": "Bir kod girin veya kod üretmek için bakanlık ekleyin.",
+    "tk-TM": "Kod giriziň ýa-da kod döretmek üçin ministrlik goşuň.",
+    "ru-RU": "Введите код или добавьте министерства, чтобы сформировать код."
+  },
+  "ApprovalLegProfile.Slot.CodeTaken": {
+    "en": "That code is already used by another chain.",
+    "tr-TR": "Bu kod başka bir zincirde kullanılıyor.",
+    "tk-TM": "Bu kod başga zynjyrda ulanylýar.",
+    "ru-RU": "Этот код уже используется другой цепочкой."
+  },
+  "ApprovalLegProfile.Slot.DuplicateMinistry": {
+    "en": "That ministry is already on this chain.",
+    "tr-TR": "Bu bakanlık zaten bu zincirde.",
+    "tk-TM": "Bu ministrlik eýýäm bu zynjyrda.",
+    "ru-RU": "Это министерство уже есть в цепочке."
+  },
+  "ApprovalLegProfile.Slot.MinistryMissing": {
+    "en": "A selected ministry is no longer available.",
+    "tr-TR": "Seçilen bakanlık artık yok.",
+    "tk-TM": "Saýlanan ministrlik indi ýok.",
+    "ru-RU": "Выбранное министерство больше недоступно."
+  },
+  "ApprovalLegProfile.Slot.NotFound": {
+    "en": "That approval-leg profile was not found.",
+    "tr-TR": "Onay bakanlık profili bulunamadı.",
+    "tk-TM": "Ministrlik ylalaşyk ädimleri tapylmady.",
+    "ru-RU": "Профиль этапов не найден."
+  },
+  "ApprovalLegProfile.Slot.SaveFailed": {
+    "en": "Could not save the approval-leg profile.",
+    "tr-TR": "Onay bakanlık profili kaydedilemedi.",
+    "tk-TM": "Ministrlik ylalaşyk ädimleri ýazdyrylmady.",
+    "ru-RU": "Не удалось сохранить профиль этапов."
+  },
+  "ApprovalLegProfile.Slot.DeleteInUseBlocked": {
+    "en": "This chain is used by applications. It cannot be deleted.",
+    "tr-TR": "Bu zincir başvurularda kullanılıyor. Silinemez.",
+    "tk-TM": "Bu zynjyr arzalarda ulanylýar. Ony pozup bolmaýar.",
+    "ru-RU": "Эта цепочка используется заявками. Её нельзя удалить."
+  },
+  "ApprovalLegProfile.Slot.SaveHint": {
+    "en": "Save updates the shared catalog. Wizard Default radios are unchanged until Refresh.",
+    "tr-TR": "Kaydet paylaşılan kataloğu günceller. Sihirbaz Varsayılan radyoları Yenile’ye kadar değişmez.",
+    "tk-TM": "Ýazdyr paýlaşylan katalogy täzeleýär. Jadygöý deslapky radio-lary Täzeleýänçä üýtgemeýär.",
+    "ru-RU": "Сохранить обновляет общий каталог. Радиокнопки Default мастера не меняются до обновления."
+  },
+  "ApprovalLegProfile.Slot.NewMinistry": {
+    "en": "+ New ministry",
+    "tr-TR": "+ Yeni bakanlık",
+    "tk-TM": "+ Täze ministrlik",
+    "ru-RU": "+ Новое министерство"
+  },
+  "ApprovalLegProfile.Slot.NewMinistryHint": {
+    "en": "Creates a shared ministry, then adds it to this chain.",
+    "tr-TR": "Paylaşılan bir bakanlık oluşturur ve bu zincire ekler.",
+    "tk-TM": "Paýlaşylan ministrlik döredýär we bu zynjyra goşýar.",
+    "ru-RU": "Создаёт общее министерство и добавляет его в эту цепочку."
+  },
+  "ApprovalLegProfile.Slot.NewMinistryShortName": {
+    "en": "Short name",
+    "tr-TR": "Kısa ad",
+    "tk-TM": "Gysga ady",
+    "ru-RU": "Краткое имя"
+  },
+  "ApprovalLegProfile.Slot.NewMinistryOfficialName": {
+    "en": "Official name",
+    "tr-TR": "Resmi ad",
+    "tk-TM": "Resmi ady",
+    "ru-RU": "Официальное имя"
+  },
+  "ApprovalLegProfile.Slot.NewMinistryShortPlaceholder": {
+    "en": "Türkmengaz",
+    "tr-TR": "Türkmengaz",
+    "tk-TM": "Türkmengaz",
+    "ru-RU": "Türkmengaz"
+  },
+  "ApprovalLegProfile.Slot.NewMinistryOfficialPlaceholder": {
+    "en": "\"Türkmengaz\" döwlet konserni",
+    "tr-TR": "\"Türkmengaz\" döwlet konserni",
+    "tk-TM": "\"Türkmengaz\" döwlet konserni",
+    "ru-RU": "\"Türkmengaz\" döwlet konserni"
+  },
+  "ApprovalLegProfile.Slot.CreateMinistry": {
+    "en": "Create ministry",
+    "tr-TR": "Bakanlık oluştur",
+    "tk-TM": "Ministrlik döret",
+    "ru-RU": "Создать министерство"
+  },
+  "ApprovalLegProfile.Slot.ShortNameRequired": {
+    "en": "Enter a short name.",
+    "tr-TR": "Kısa ad girin.",
+    "tk-TM": "Gysga ad giriziň.",
+    "ru-RU": "Введите краткое имя."
+  },
+  "ApprovalLegProfile.Slot.OfficialNameRequired": {
+    "en": "Enter the official name.",
+    "tr-TR": "Resmi adı girin.",
+    "tk-TM": "Resmi ady giriziň.",
+    "ru-RU": "Введите официальное имя."
+  },
+  "ApprovalLegProfile.Slot.MinistryNameTaken": {
+    "en": "That short name is already used. Pick it from the list.",
+    "tr-TR": "Bu kısa ad zaten kullanılıyor. Listeden seçin.",
+    "tk-TM": "Bu gysga ad eýýäm ulanylýar. Sanawdan saýlaň.",
+    "ru-RU": "Это краткое имя уже используется. Выберите его в списке."
+  },
+  "ApprovalLegProfile.Slot.CreateMinistryFailed": {
+    "en": "Could not create the ministry.",
+    "tr-TR": "Bakanlık oluşturulamadı.",
+    "tk-TM": "Ministrlik döredilmedi.",
+    "ru-RU": "Не удалось создать министерство."
   },
   "ApplicationProgressProfile.MinistryDepth.Many": {
     "en": "{0} ministries",
@@ -3611,6 +4283,48 @@
     "tk-TM": "Saýlanan setiriň doly Arza ýazgysyny aç",
     "ru-RU": "Открыть полную запись заявки для выбранной строки"
   },
+  "InvitationItem.IssueVisa.ToolTip": {
+    "en": "Create a new visa for this person using this invitation line and its issuing application case",
+    "tr-TR": "Bu davet satırı ve bağlı başvuru dosyası ile bu kişi için yeni vize oluştur",
+    "tk-TM": "Bu çakylyk setiri we baglanyşykly arza faýly bilen bu adam üçin täze wiza döret",
+    "ru-RU": "Создать новую визу для этого лица по этой строке приглашения и связанному делу заявки"
+  },
+  "InvitationItem.IssueVisa.NotAvailable": {
+    "en": "Cannot issue a visa from this invitation item.",
+    "tr-TR": "Bu davet kaleminden vize düzenlenemez.",
+    "tk-TM": "Bu çakylyk elementinden wiza berilip bolmaýar.",
+    "ru-RU": "Нельзя оформить визу по этой позиции приглашения."
+  },
+  "InvitationItem.IssueVisa.ItemUsedOrClosed": {
+    "en": "This invitation line is cancelled, changed, or already used.",
+    "tr-TR": "Bu davet kalemi iptal edilmiş, değiştirilmiş veya zaten kullanılmış.",
+    "tk-TM": "Bu çakylyk setiri ýatyrylan, üýtgedilen ýa-da eýýäm ulanylan.",
+    "ru-RU": "Эта строка приглашения отменена, изменена или уже использована."
+  },
+  "InvitationItem.IssueVisa.VisaAlreadyIssued": {
+    "en": "A visa is already linked to this invitation line.",
+    "tr-TR": "Bu davet kalemine zaten bir vize bağlı.",
+    "tk-TM": "Bu çakylyk elementine eýýäm wiza baglanyşdyrylan.",
+    "ru-RU": "К этой строке приглашения уже привязана виза."
+  },
+  "InvitationItem.IssueVisa.NoIssuingInstance": {
+    "en": "The parent invitation has no issuing Application Profile Instance.",
+    "tr-TR": "Üst davetin düzenleyen Başvuru Profili örneği yok.",
+    "tk-TM": "Esasy çakylygyň berijisi Başvuru Profili nusgasy ýok.",
+    "ru-RU": "У родительского приглашения нет выдавшего экземпляра профиля заявки."
+  },
+  "InvitationItem.IssueVisa.IneligibleInstance": {
+    "en": "The issuing application case cannot produce visas from invitations.",
+    "tr-TR": "Düzenleyen başvuru dosyası davetten vize üretemez.",
+    "tk-TM": "Berijisi arza faýly çakylykdan wiza berip bilmeýär.",
+    "ru-RU": "Выдавшее дело заявки не может оформить визу по приглашению."
+  },
+  "InvitationItem.IssueVisa.NoPassport": {
+    "en": "This invitation line has no person or passport.",
+    "tr-TR": "Bu davet kalemine kişi veya pasaport bağlı değil.",
+    "tk-TM": "Bu çakylyk setirinde adam ýa-da pasport ýok.",
+    "ru-RU": "У этой строки приглашения нет лица или паспорта."
+  },
   "AddressOfResidence.LodgingDocumentsGuidance": {
     "en": "Documents are stored on the Lodging record (not on this address). Select a lodging above, then open Lookup → Housing → Lodging to add or change files.",
     "tr-TR": "Belgeler bu ikamet kaydında değil, Konaklama kaydında tutulur. Yukarıdan bir konaklama seçin; dosya eklemek veya değiştirmek için Referans → Konut → Konaklama kaydını açın.",
@@ -3761,6 +4475,12 @@
     "tk-TM": "Saýlanan {0} arza elementi üçin skan faýllar (PDF gaplamak bilen birmeňzeş çäk).",
     "ru-RU": "Скан-копии для {0} выбранных позиций (тот же охват, что и PDF-пакет)."
   },
+  "ApplicationItemDocumentCopies.List.SubtitlePeople": {
+    "en": "Scanned files for {0} selected people (same scope as PDF packaging).",
+    "tr-TR": "Seçilen {0} kişiye ait taranmış dosyalar (PDF paketleme ile aynı kapsam).",
+    "tk-TM": "Saýlanan {0} adam üçin skan faýllar (PDF gaplamak bilen birmeňzeş çäk).",
+    "ru-RU": "Скан-копии для {0} выбранных лиц (тот же охват, что и PDF-пакет)."
+  },
   "ApplicationItemDocumentCopies.Empty.NoSelection": {
     "en": "Select one or more application lines to view document copies.",
     "tr-TR": "Belge kopyalarını görmek için bir veya daha fazla başvuru kalemi seçin.",
@@ -3790,6 +4510,12 @@
     "tr-TR": "Henüz taranmış kopya eklenmedi.",
     "tk-TM": "Entek skan nusga goşulmady.",
     "ru-RU": "Скан-копии пока не прикреплены."
+  },
+  "ApplicationItemDocumentCopies.Summary.PersonReady": {
+    "en": "{0} of {1} ready",
+    "tr-TR": "{0} / {1} hazır",
+    "tk-TM": "{0} / {1} taýyn",
+    "ru-RU": "{0} из {1} готово"
   },
   "ApplicationItemDocumentCopies.Summary.Files": {
     "en": "{0} file(s)",
@@ -4204,6 +4930,12 @@
     "tr-TR": "{1} başvuru satırından {0} tanesi",
     "tk-TM": "{1} arza setirinden {0} sany",
     "ru-RU": "{0} из {1} позиций заявления"
+  },
+  "ApplicationItemDocumentCopies.Summary.ApplicationFormPeople": {
+    "en": "{0} of {1} people",
+    "tr-TR": "{0} / {1} kişi",
+    "tk-TM": "{0} / {1} adam",
+    "ru-RU": "{0} из {1} лиц"
   },
   "ApplicationItemDocumentCopies.Slot.Passport.Current": {
     "en": "Current passport",
@@ -4672,6 +5404,12 @@
     "tr-TR": "Davet {0}",
     "tk-TM": "Çakylyk {0}",
     "ru-RU": "Приглашение {0}"
+  },
+  "PersonDocumentCopies.Record.BorderZone": {
+    "en": "Border zone {0}",
+    "tr-TR": "Sınır bölgesi {0}",
+    "tk-TM": "Serhet zolagy {0}",
+    "ru-RU": "Приграничная зона {0}"
   },
   "PersonDocumentCopies.Record.Rejection": {
     "en": "Rejection {0}",

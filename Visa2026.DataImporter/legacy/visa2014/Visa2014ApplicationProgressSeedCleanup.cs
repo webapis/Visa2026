@@ -3,21 +3,21 @@ using Visa2026.DataImporter;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
-internal sealed class Visa2014ApplicationProgressSeedCleanupResult
+internal sealed class Visa2014ApplicationProfileInstanceProgressSeedCleanupResult
 {
     public int ProgressRowsScanned { get; init; }
     public int SeedRowsMatched { get; init; }
     public int Deleted { get; init; }
-    public int SkippedNotInApplicationIdMap { get; init; }
+    public int SkippedNotInApplicationProfileInstanceIdMap { get; init; }
     public int Failed { get; init; }
     public IReadOnlyList<string> Errors { get; init; } = [];
 }
 
 /// <summary>
-/// Removes auto-seeded ApplicationProgress rows (IS_BEING_PREPARED @ AT_OFFICE, empty Description)
-/// created by <see cref="ApplicationProgressInitializer"/> during Application OData import.
+/// Removes auto-seeded ApplicationProfileInstanceProgress rows (IS_BEING_PREPARED @ AT_OFFICE, empty Description)
+/// created by <see cref="ApplicationProfileInstanceProgressInitializer"/> during ApplicationProfileInstance OData import.
 /// </summary>
-internal static class Visa2014ApplicationProgressSeedCleanup
+internal static class Visa2014ApplicationProfileInstanceProgressSeedCleanup
 {
     public static async Task<int> RunCommandAsync(IReadOnlyList<string> args, bool verbose)
     {
@@ -48,15 +48,15 @@ internal static class Visa2014ApplicationProgressSeedCleanup
         var password = GetOptionValue(args, "--password") ?? "";
 
         var applicationIdMapPath = GetOptionValue(args, "--application-id-map")
-            ?? source.IdMapPath(dataImporterRoot, "Application");
+            ?? source.IdMapPath(dataImporterRoot, "ApplicationProfileInstance");
 
         bool dryRun = HasArg(args, "--dry-run");
         bool noWait = HasArg(args, "--no-wait");
         bool restrictToIdMap = !HasArg(args, "--all-applications");
 
-        Console.WriteLine("=== VISA2014 ApplicationProgress seed cleanup");
+        Console.WriteLine("=== VISA2014 ApplicationProfileInstanceProgress seed cleanup");
         Console.WriteLine($"INF Target API: {apiBaseUrl}");
-        Console.WriteLine($"INF Application id-map: {applicationIdMapPath}");
+        Console.WriteLine($"INF ApplicationProfileInstance id-map: {applicationIdMapPath}");
         Console.WriteLine($"INF Scope: {(restrictToIdMap ? "applications in id-map only" : "all applications")}");
         if (dryRun)
             Console.WriteLine("INF Mode: dry-run (no DELETE)");
@@ -74,12 +74,12 @@ internal static class Visa2014ApplicationProgressSeedCleanup
             {
                 if (!File.Exists(applicationIdMapPath))
                 {
-                    Console.Error.WriteLine($"ERR Application id-map not found: {applicationIdMapPath}");
+                    Console.Error.WriteLine($"ERR ApplicationProfileInstance id-map not found: {applicationIdMapPath}");
                     return 1;
                 }
 
                 applicationIds = Visa2014IdMapHelper.Load(applicationIdMapPath).Values.ToHashSet();
-                Console.WriteLine($"INF Application id-map entries: {applicationIds.Count}");
+                Console.WriteLine($"INF ApplicationProfileInstance id-map entries: {applicationIds.Count}");
             }
 
             var result = await RunAsync(api, applicationIds, dryRun, verbose);
@@ -87,8 +87,8 @@ internal static class Visa2014ApplicationProgressSeedCleanup
             Console.WriteLine($"INF Progress rows scanned: {result.ProgressRowsScanned}");
             Console.WriteLine($"INF Seed rows matched: {result.SeedRowsMatched}");
             Console.WriteLine($"INF Deleted: {result.Deleted}");
-            if (result.SkippedNotInApplicationIdMap > 0)
-                Console.WriteLine($"INF Skipped (not in Application id-map): {result.SkippedNotInApplicationIdMap}");
+            if (result.SkippedNotInApplicationProfileInstanceIdMap > 0)
+                Console.WriteLine($"INF Skipped (not in ApplicationProfileInstance id-map): {result.SkippedNotInApplicationProfileInstanceIdMap}");
             Console.WriteLine($"INF Failed: {result.Failed}");
 
             foreach (var error in result.Errors.Take(20))
@@ -107,31 +107,31 @@ internal static class Visa2014ApplicationProgressSeedCleanup
         }
     }
 
-    public static async Task<Visa2014ApplicationProgressSeedCleanupResult> RunAsync(
+    public static async Task<Visa2014ApplicationProfileInstanceProgressSeedCleanupResult> RunAsync(
         ApiClient api,
-        IReadOnlySet<Guid>? restrictToApplicationIds,
+        IReadOnlySet<Guid>? restrictToApplicationProfileInstanceIds,
         bool dryRun,
         bool verbose)
     {
-        var progressRows = await api.GetAllAsync<ApplicationProgress>(
-            "ApplicationProgress",
-            "$expand=Application,State,Location");
+        var progressRows = await api.GetAllAsync<ApplicationProfileInstanceProgress>(
+            "ApplicationProfileInstanceProgress",
+            "$expand=ApplicationProfileInstance,State,Location");
 
         var errors = new List<string>();
         int matched = 0, deleted = 0, skippedScope = 0, failed = 0;
 
         foreach (var row in progressRows)
         {
-            if (!Visa2014ApplicationProgressSeedHelper.IsInitializerSeed(row))
+            if (!Visa2014ApplicationProfileInstanceProgressSeedHelper.IsInitializerSeed(row))
                 continue;
 
             matched++;
 
-            var applicationId = row.Application?.Id ?? Guid.Empty;
+            var applicationId = row.ApplicationProfileInstance?.Id ?? Guid.Empty;
             if (applicationId == Guid.Empty)
                 continue;
 
-            if (restrictToApplicationIds != null && !restrictToApplicationIds.Contains(applicationId))
+            if (restrictToApplicationProfileInstanceIds != null && !restrictToApplicationProfileInstanceIds.Contains(applicationId))
             {
                 skippedScope++;
                 continue;
@@ -142,17 +142,17 @@ internal static class Visa2014ApplicationProgressSeedCleanup
                 if (dryRun)
                 {
                     if (verbose)
-                        Console.WriteLine($"  DRY DELETE ApplicationProgress {row.Id} (Application {applicationId})");
+                        Console.WriteLine($"  DRY DELETE ApplicationProfileInstanceProgress {row.Id} (ApplicationProfileInstance {applicationId})");
                     deleted++;
                     continue;
                 }
 
-                await api.DeleteAsync("ApplicationProgress", row.Id);
+                await api.DeleteAsync("ApplicationProfileInstanceProgress", row.Id);
                 deleted++;
                 if (deleted % 500 == 0)
                     Console.WriteLine($"INF Progress: {deleted} seed row(s) deleted...");
                 if (verbose)
-                    Console.WriteLine($"  DELETE ApplicationProgress {row.Id} (Application {applicationId})");
+                    Console.WriteLine($"  DELETE ApplicationProfileInstanceProgress {row.Id} (ApplicationProfileInstance {applicationId})");
             }
             catch (Exception ex)
             {
@@ -162,12 +162,12 @@ internal static class Visa2014ApplicationProgressSeedCleanup
             }
         }
 
-        return new Visa2014ApplicationProgressSeedCleanupResult
+        return new Visa2014ApplicationProfileInstanceProgressSeedCleanupResult
         {
             ProgressRowsScanned = progressRows.Count,
             SeedRowsMatched = matched,
             Deleted = deleted,
-            SkippedNotInApplicationIdMap = skippedScope,
+            SkippedNotInApplicationProfileInstanceIdMap = skippedScope,
             Failed = failed,
             Errors = errors,
         };

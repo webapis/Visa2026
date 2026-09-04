@@ -39,12 +39,12 @@ public class WorkPermitImporter
     {
         Console.WriteLine($"=== POST {Entity}: {number} ===");
 
-        // To link an existing Application, we pass the ID in a nested object.
+        // To link an existing ApplicationProfileInstance, we pass the ID in a nested object.
         var payload = new
         {
             WorkPermitNumber = number,
             IssuedDate = startDate,
-            Application = new { ID = applicationId }
+            ApplicationProfileInstance = new { ID = applicationId }
         };
 
         var created = await _api.CreateAsync<WorkPermit>(Entity, payload);
@@ -66,15 +66,15 @@ public class WorkPermitImporter
             try
             {
                 // Prepare payload
-                // We ensure the Application relationship is passed correctly if it exists in the source record
+                // We ensure the ApplicationProfileInstance relationship is passed correctly if it exists in the source record
                 object payload;
-                if (record.Application != null)
+                if (record.ApplicationProfileInstance != null)
                 {
                     payload = new
                     {
                         record.WorkPermitNumber,
                         record.IssuedDate,
-                        Application = new { ID = record.Application.Id }
+                        ApplicationProfileInstance = new { ID = record.ApplicationProfileInstance.Id }
                     };
                 }
                 else

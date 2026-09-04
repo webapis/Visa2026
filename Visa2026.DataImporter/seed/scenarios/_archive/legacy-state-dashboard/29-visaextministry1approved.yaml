@@ -4,7 +4,7 @@ description: Visa extension approved by Ministry 1 — tests V-10a dashboard sta
 dependsOn: VisaExtMinistry1
 sync: false
 anchor:
-  entity: Application
+  entity: ApplicationProfileInstance
   key: FullApplicationNumber
   value: 4/-029
 data:
@@ -28,12 +28,12 @@ data:
     Expiration Date: 2026-04-30
     Passport Number: RU1111111
   Applications:
-  - Application Number: 029
+  - ApplicationProfileInstance Number: 029
     Date: 2026-04-15
     Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
     Project Contract: GT-15
     Filter: Visa
-    Application Type: App_Visa_Ext
+    ApplicationProfileInstance Type: App_Visa_Ext
     Urgency: Adaty tertipde !
     Visa Period: 3 (üç) aý
     Visa Category: Köp gezeklik
@@ -42,7 +42,7 @@ data:
     Person: Viktor Smirnov
     Passport Number: RU1111111
     Visa Number: TM-2026-V-015
-  ApplicationProgresses:
+  ApplicationProfileInstanceProgresses:
   - Application: 4/-029
     State: 1_REVIEW_APPROVED
     Location: AT_THE_MINISTERY_1

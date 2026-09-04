@@ -77,7 +77,10 @@ disable-model-invocation: false
 | Illegal next state on save | Trace `ApplicationProgressTransitionHelper.TryValidateProgressStep` | Leg count vs transition graph (leg1 STARTED only) |
 | Contract required / legs required message | `ApplicationProgressProfileResolver.TryValidate*` | `ProjectContract` + `MinistryLegs` |
 | Ministry column empty on progress | `ApprovalLegSnapshots` + `ApprovalLegProfileMinistryHelper.GetMinistryShortNameForProgressStep` (falls back to live profile legs) | Snapshot missing on import; heal via `EnsureSnapshots` on Application save |
-| Letter upload hidden when it should show | `IsMinistryDecisionStateCode` + `[Appearance]` on `MinistryLetterFile` | State code or criteria |
+| Letter upload hidden when it should show | Workspace: current `leg-*` Result (pending until Advance) **or** completed Approved/Unapproved with no file (`MissingMinistryLetter` — attach to that row, no Revert). DetailView: `IsMinistryDecisionStateCode` + `[Appearance]` | Timeline flag vs `DecisionProgressId` / `ProgressId` |
+| Cancelled on Office stays “Office preparation” after Advance | History has `PROCESS_CANCELLED`; overlay on `BuildOfficeStep` + `FormatChromeCurrentStep` | Implied-office slot (no previous row) |
+| Office Result missing Submitted | `IsOfficeSubmitted` / Office `ResultOptions`; Advance still `1_REVIEW_STARTED` or `PROCESS_STARTED` | Leave-office Result, not a new timeline node |
+| Approval letter Preview shows Please wait / Adobe Reader | File is filled XFA; `ProgressLettersInlinePreview` + `PdfXfaDocument.ContainsXfa` (pdf.js, not iframe) | Preview slot occupant |
 | Application list row color wrong | **`visa2026-bo-state-colors`** — `PrimaryStateCode`, `BoStateAppearanceColors` | Not transition helper |
 | Cannot edit contract legs | `ProjectContractMinistryController` — duplicate contract row instead | Structural immutability |
 | New ministry leg count (e.g. 4th) | Add catalog rows `4_REVIEW_*`, `AT_THE_MINISTERY_4`; bump manifest; extend loop in helpers (max `MaxLegCount`) | Catalog + helpers |
@@ -104,7 +107,7 @@ disable-model-invocation: false
 ### Ministry decision letter (scalar file)
 
 - Property: `ApplicationProgress.MinistryLetterFile` (`FileData`, `[FileAttachment]`).
-- Visible when `IsMinistryDecisionStep` (approved/rejected ministry states only).
+- Visible when `IsMinistryDecisionStep` (approved/rejected ministry states only). Workspace Progress shows upload on the current ministry Result step even before that row exists; the file is stored on Advance.
 - Validation: size via `SystemSettings.MaxDocumentSizeInMB`; content via `DocumentFileUploadConstraints`.
 - Schema: `ApplicationProgressMinistryLetterFileSchemaUpdater` + `ApplicationProgressMinistryLetterFileSchemaSql` (idempotent SQL before EF sync).
 

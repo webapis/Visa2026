@@ -1,4 +1,4 @@
-﻿using DevExpress.EntityFrameworkCore.Security;
+using DevExpress.EntityFrameworkCore.Security;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor;
@@ -22,7 +22,7 @@ namespace Visa2026.Blazor.Server
 
         void Visa2026BlazorApplication_CustomizeLanguage(object sender, CustomizeLanguageEventArgs e)
         {
-            // Align XAF Application Model language with ASP.NET request culture (cookie / default en-US).
+            // Align XAF ApplicationProfileInstance Model language with ASP.NET request culture (cookie / default en-US).
             if (VisaLocalization.TryNormalizeCulture(
                     System.Globalization.CultureInfo.CurrentUICulture.Name,
                     out string fromRequest))

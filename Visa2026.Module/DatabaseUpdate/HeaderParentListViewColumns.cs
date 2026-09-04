@@ -55,7 +55,7 @@ internal static class HeaderParentListViewColumns
                 nameof(BusinessObjects.Rejection.DocumentCopiesListLink),
                 nameof(BusinessObjects.Rejection.Date),
                 nameof(BusinessObjects.Rejection.RejectedDocNumber),
-                nameof(BusinessObjects.Rejection.Application),
+                nameof(BusinessObjects.Rejection.ApplicationProfileInstance),
                 nameof(BusinessObjects.Rejection.Reason),
             ],
             [200, 48, 100, 120, 140, 240]
@@ -69,7 +69,7 @@ internal static class HeaderParentListViewColumns
                 nameof(BusinessObjects.BorderZone.ExpirationDate),
                 nameof(BusinessObjects.BorderZone.DaysRemaining),
                 nameof(BusinessObjects.BorderZone.ValidityDuration),
-                nameof(BusinessObjects.BorderZone.Application),
+                nameof(BusinessObjects.BorderZone.ApplicationProfileInstance),
             ],
             [110, 48, 100, 100, 72, 120, 140]
         ),
@@ -85,7 +85,7 @@ internal static class HeaderParentListViewColumns
                 nameof(BusinessObjects.InvitationItem.Person),
                 nameof(BusinessObjects.InvitationItem.Passport),
                 nameof(BusinessObjects.InvitationItem.Invitation),
-                nameof(BusinessObjects.InvitationItem.Application),
+                nameof(BusinessObjects.InvitationItem.ApplicationProfileInstance),
                 nameof(BusinessObjects.InvitationItem.IsCancelled),
                 nameof(BusinessObjects.InvitationItem.IsUsed),
                 nameof(BusinessObjects.InvitationItem.IssuedVisa),

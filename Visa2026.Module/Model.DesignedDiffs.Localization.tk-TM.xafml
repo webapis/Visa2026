@@ -358,15 +358,6 @@
         <Member Name="ValidityDuration" Caption="Möhleti" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationMigrationSlaProfile" Caption="Migrasiýa SLA profili">
-      <OwnMembers>
-        <Member Name="ApplicationTypes" Caption="Arza görnüşleri" />
-        <Member Name="DateDeleted" Caption="Pozulan senesi" />
-        <Member Name="DeletedBy" Caption="Pozan" />
-        <Member Name="MaxDaysInReview" Caption="Maks. iş günleri" />
-        <Member Name="WarningDaysBeforeMax" Caption="Duýduryş (iş günleri)" />
-      </OwnMembers>
-    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationNumberingProfile" Caption="Arza belgileme">
       <OwnMembers>
         <Member Name="ApplicationNumberPadding" Caption="Arza belgisi uzynlygy" />
@@ -709,6 +700,7 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="FullName" Caption="Doly ady" />
         <Member Name="PassportAuthority" Caption="Pasport beren edara" />
+        <Member Name="PassportExpirationDate" Caption="Pasport möhleti" />
         <Member Name="PassportIssueDate" Caption="Pasport berlen senesi" />
         <Member Name="PassportLine" Caption="Pasport (bir setir)" />
         <Member Name="PassportNumber" Caption="Pasport belgisi" />
@@ -826,6 +818,7 @@
         <Member Name="Email" Caption="E-poçta" />
         <Member Name="Name" Caption="Ady" />
         <Member Name="PhoneNumber" Caption="Telefon" />
+        <Member Name="RegistrationDate" Caption="Kärhana hasaba alyş senesi" />
         <Member Name="TaxInformation" Caption="Salgyt maglumaty" />
       </OwnMembers>
     </Class>
@@ -1515,6 +1508,7 @@
         <Member Name="PersonalNumber" Caption="Şahsy belgi" />
         <Member Name="Photo" Caption="Surat" />
         <Member Name="PositionHistory" Caption="Wezipe taryhy" />
+        <Member Name="PreviousWorkplacesInTurkmenistan" Caption="Türkmenistanda öňki işlän ýerleri" />
         <Member Name="ProjectContract" Caption="Taslama şertnamasy" />
         <Member Name="RejectionItems" Caption="Ret elementleri" />
         <Member Name="Relationship" Caption="Gatnaşyk" />
@@ -1921,6 +1915,8 @@
         <Member Name="Notes" Caption="Syýahat bellikleri" />
         <Member Name="Person" Caption="Adam" />
         <Member Name="Region" Caption="Welaýat" />
+        <Member Name="SourceApplication_ApplicationDate" Caption="Arza senesi" />
+        <Member Name="SourceApplication_FullApplicationNumber" Caption="Arza belgisi" />
         <Member Name="Title" Caption="Ady" />
         <Member Name="TravelDate" Caption="Syýahat senesi" />
         <Member Name="TravelType" Caption="Syýahat görnüşi" />
@@ -2488,12 +2484,10 @@
     <DetailView Id="ApplicationItemReportPackageListHost_DetailView" Caption="Şablonlar" />
     <DetailView Id="ApplicationLocation_DetailView" Caption="Arza ýeri" />
     <ListView Id="ApplicationLocation_ListView" Caption="Arza ýerleri" />
-    <DetailView Id="ApplicationMigrationSlaProfile_DetailView" Caption="Migrasiýa SLA profili" />
-    <ListView Id="ApplicationMigrationSlaProfile_ListView" Caption="Migrasiýa SLA profilleri" />
     <DetailView Id="ApplicationNumberingProfile_DetailView" Caption="Arza belgileme" />
     <ListView Id="ApplicationNumberingProfile_ListView" Caption="Arza belgileme" />
-    <DetailView Id="ApplicationProgress_DetailView" Caption="Arza ösüşi" />
-    <ListView Id="ApplicationProgress_ListView" Caption="Arza ösüşleri">
+    <DetailView Id="ApplicationProfileInstanceProgress_DetailView" Caption="Arza ösüşi" />
+    <ListView Id="ApplicationProfileInstanceProgress_ListView" Caption="Arza ösüşleri">
       <Columns>
         <ColumnInfo Id="Date" Caption="Sene" />
         <ColumnInfo Id="Description" Caption="Düşündiriş" />
@@ -2501,6 +2495,8 @@
         <ColumnInfo Id="StatusListLabel" Caption="Ýagdaý" />
       </Columns>
     </ListView>
+    <DetailView Id="ApplicationProgress_DetailView" Caption="Arza ösüşi" />
+    <ListView Id="ApplicationProgress_ListView" Caption="Arza ösüşleri" />
     <DetailView Id="ApplicationReason_DetailView" Caption="Arza sebäbi" />
     <ListView Id="ApplicationReason_ListView" Caption="Arza sebäpleri" />
     <DetailView Id="ApplicationReportPackageListHost_DetailView" Caption="Şablonlar" />
@@ -2927,6 +2923,8 @@
         <ColumnInfo Id="CheckPoint" Caption="Kontrol nokady" />
         <ColumnInfo Id="MovementType" Caption="Hereket görnüşi" />
         <ColumnInfo Id="Notes" Caption="Syýahat bellikleri" />
+        <ColumnInfo Id="SourceApplication_ApplicationDate" Caption="Arza senesi" />
+        <ColumnInfo Id="SourceApplication_FullApplicationNumber" Caption="Arza belgisi" />
         <ColumnInfo Id="TravelDate" Caption="Syýahat senesi" />
         <ColumnInfo Id="TravelType" Caption="Syýahat görnüşi" />
       </Columns>

@@ -11,7 +11,7 @@
 
 **Layout family:** **`ItemRows`** — `ExcelMergeMode.ItemList`; one workbook per application; template **data row** copies per **`ApplicationItem`**.
 
-**Application type:** **`App_Cancel_Visa` only** (`cancel_visa`, selection **807**). Pairs with Word letter **`../wiza_yatyrylmak_hat.docx`** (sort **68**).
+**ApplicationProfileInstance type:** **`App_Cancel_Visa` only** (`cancel_visa`, selection **807**). Pairs with Word letter **`../wiza_yatyrylmak_hat.docx`** (sort **68**).
 
 **Core rule:** **`CurrentVisa`** and **`NextVisa`** on the **same person** → **one Excel row**; visa columns use **`{{.CancelVisa_*Block}}`** (multiline / wrap text) — **not** a second row per visa.
 

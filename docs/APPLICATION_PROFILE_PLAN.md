@@ -1,0 +1,581 @@
+# Application Profile — live configuration + per-Application values (plan)
+
+**Status:** Binding model locked · **`ApplicationType` deprecated** · first code slice: `ApplicationProfile` BO + `Application.ApplicationProfile` FK (dual-read) · UX prototypes · ApplicationItem / M2M DetailView not implemented yet  
+**Agent skill:** [`.cursor/skills/visa2026-application-profile/SKILL.md`](../.cursor/skills/visa2026-application-profile/SKILL.md) — implementation tracker ([`IMPLEMENTATION_PLAN.md`](../.cursor/skills/visa2026-application-profile/IMPLEMENTATION_PLAN.md)), experience log (`learnings.md`), officer configuration suggestions.  
+**Prototypes:** [`docs/prototypes/`](prototypes/) — **22 PNG mockups** (2026-08-10). Retired same date: HTML storyboards (`application-profile-wizard.html`, `application-profile-usage.html`, `application-detail-m2m.html`), `images/ap-*.png`, `Application-profile-wizard-draft.xlsx`. Field E–H classification remains in this plan (§6) and [skill `reference.md`](../.cursor/skills/visa2026-application-profile/reference.md).
+
+| Group | Files |
+|-------|--------|
+| App shell | `visa2026-custom-left-navigation-shell-mockup.png`, `application-profiles-navigation-sidebar-mockup.png` |
+| Staged profiles | `staged-application-profiles-workspace-mockup.png`, `staged-profiles-listview-table-mockup.png`, `staged-profiles-grid-cards-mockup.png` |
+| In process | `process-started-profiles-listview-table-mockup.png`, `process-started-profiles-list-cards-mockup.png`, `process-started-application-profile-workspace-mockup.png`, `process-started-nav-*.png` (5 workspace tabs) |
+| Profile templates | `application-profile-templates-listview-mockup.png`, `application-profile-templates-grid-mockup.png`, `application-profile-template-overview-mockup.png`, `application-profile-template-wizard-mockup.png` + `step2`–`step5` |
+| Wizard template scopes / upload / edit (2026-08-12) | Historical PNGs. **2026-09-03:** wizard step is **Person data** checkboxes only. This-profile files and Shared ON/OFF live on case Resminamalar. |
+| Approval leg versions (2026-08-18) | `application-profile-wizard-approval-leg-versions-prototype.png`, `application-profile-instance-create-choose-approval-legs-prototype.png` |
+| Approval leg slot CRUD (2026-08-27) | `approval-leg-profile-slot-01-catalog.png` … `-05-new.png` — [README](prototypes/approval-leg-profile-slot-README.md) |
+| Choose Approval legs manage (2026-09-03) | `choose-approval-legs-manage-01-picker.png` … `-05-slot-edit.png` — [README](prototypes/choose-approval-legs-manage-README.md). **Shipped.** |
+| Case summary instance fields (2026-08-18) | `application-profile-instance-case-summary-overview-properties-prototype.png`, `application-profile-instance-case-summary-edit-properties-prototype.png` |
+| Case Organization catalogs (2026-09-03) | `application-profile-instance-create-choose-organization-prototype.png`, overview/edit PNGs, `application-profile-organization-catalogs-prototype.png` — [README](prototypes/application-profile-instance-organization-README.md). **Shipped** (live FKs, tenant Default; Config + inline **+ New / Edit**). |
+
+Full inventory: **§9**. **Interactive HTML (planned):** [`APPLICATION_PROFILE_HTML_PROTOTYPE_PLAN.md`](APPLICATION_PROFILE_HTML_PROTOTYPE_PLAN.md).
+**Related today:** `ApplicationProfile` *(replacement)*, `ApplicationType` *(deprecated — dual-read)*, `Application`, `ApplicationItem` *(planned hard remove)*, `ApplicationProgress`, `Person` + related BOs, `ApprovalLegProfile`, `UserReportTemplate`, `ProjectContract`
+
+---
+
+## 1. Problem
+
+Application-type behavior is **scattered** across `ApplicationType` `Show*` / `CanIssue*` flags, hard-coded defaults in `Application.cs`, progress/legs, and template applicability. Officers need one **Application Profile** that is easy to configure and reuse.
+
+**Why not full clone:** if the Application kept a frozen copy of the whole profile, later configuration fixes (route, “related to”, produce/cancel, legs, templates, person requirements) would **not** affect existing Applications. That defeats central configuration. The updated Excel splits fields into **configuration-related** (live) vs **per-Application** (persistent values with defaults).
+
+---
+
+## 2. Locked decisions
+
+### 2.0 Binding model (replaces full clone)
+
+| # | Topic | Decision |
+|---|--------|----------|
+| 1 | Profile binding | Application holds a **live FK** to `ApplicationProfile`. **Do not** deep-clone the whole profile. |
+| 2 | Configuration changes | Edits to **configuration-related** profile fields take effect on **all Applications** that reference that profile (visibility, tracking, process rules, templates, person requirements). |
+| 3 | Per-Application values | **Per-Application** fields are stored on the Application (or its items). On first use / create, seed from profile **defaults**; afterward officers edit them independently. Profile default changes do **not** overwrite existing Application values. |
+| 4 | Excel classification | Each wizard field is tagged (Excel cols E–H): Visibility on Application · Editable+persistent per Application · Configuration related · Only per Application related. |
+
+### 2.1 Other locked product decisions
+
+| # | Topic | Decision |
+|---|--------|----------|
+| 5 | Scope / applicability | **Freeform criteria** filters which profiles appear in the Application picker. |
+| 6 | “Related to” (action family) | **Exclusive radio:** Issuance \| Cancellation \| Change \| Registration \| Business trip. When **Registration**, also **Check in**, **Check out**, **Info change**, or **Reg extension** (`RegistrationKind`) for Report Dashboard queries. **Configuration-related**. |
+| 7 | Approval legs | **Shared** tenant catalog: `ApprovalLegProfile` (Configuration), like Company / Signatory. Each via-ministry profile stores only **`DefaultApprovalLegProfile`**. Officer **must pick a shared version** at instance create (**Choose Approval legs**: pick, **Catalog**, **+ New**, **Open**, **Make default**). Instance **snapshots** ministries; later catalog or default edits do not change already-started cases. Do **not** copy chains onto each profile. Configure Identity has **no Approval legs UI**. |
+| 8 | Process states | **Not officer-configured.** Instance steps follow **Directed to** + **Approval legs** + the fixed progress graph. Profile stores **SLA days** only. |
+| 9 | Templates | **Nest files** on the profile. Configuration-related; list **visible** on Application, **not** editable per Application. |
+| 10 | Person data (v1) | Four checkboxes: Passport, Education, Position, Local address. Configuration-related (live readiness / template packs). |
+| 11 | Who configures | **Selected officers**; **wizard** UX for v1. |
+| 12 | Defaults in template fill | If a per-Application value is empty at merge, use profile default. |
+| 13 | Placeholder naming | Keep today’s **`{{…}}`**. |
+| 14 | Workflow-only fields | Catalog fields needed for progress/routing still appear on Application even if unused in Word/Excel. |
+| 15 | Template-driven surface | Per-Application catalog fields visible primarily from nested-template usage ∪ workflow need. |
+| 16 | Profile identity on Application | Name / Description / Code: **visible** on Application, **not** editable there (read live from profile); also available to merge. |
+| 17 | Organization letterhead on Application | Company, Authorized Signatory, and Authorized Representative are **catalogs** (not singletons). Instance stores **live FKs**. Officers pick at create (dropdowns pre-filled from **tenant Default**); Case Organization can change the relation. Merge reads the selected rows. Editing a catalog row updates every case that selected it. |
+| 18 | Profile pick timing | Application may set `ApplicationProfile` **only at create**. No switch to another profile afterward. |
+| 20 | ApplicationType deprecation | **`ApplicationType` is deprecated.** New configuration and officer UX use **`ApplicationProfile`**. Keep Type table/FK for dual-read and import until cutover; do not add new Type flags. Registry: [`docs/DEPRECATED.md`](DEPRECATED.md). |
+
+### 2.2 Configuration-related (live from profile)
+
+Stored only on `ApplicationProfile`. Application **reads** them via FK. Officers do **not** edit these on the Application. Profile updates apply to existing Applications.
+
+| Group | Fields | Visible on Application? |
+|-------|--------|-------------------------|
+| Identity | Application Name, Description, Code | Yes (read-only) |
+| Directed to | Via ministry · Direct migration | No (controls behavior) |
+| May be for | Employee · Family member · Temporary visitor | No |
+| Related to | Issuance · Cancellation · Change · Registration (Check in \| Check out \| Info change \| Reg extension) · Business trip | No (controls tracking / visibility / dashboard) |
+| Produce | Invitation · Work permit · Visa · Border zone · Work location | No |
+| Cancel existing | Invitation(s) · WP(s) · Visa(s) · Border zone · Application(s) | No |
+| Process | Approval legs (**shared** `ApprovalLegProfile` catalog; profile holds **Default** only; **snapshot** on the instance after create) · SLA days (ministry / migration, live) | No |
+| Templates | Name · Type · File. Profile-specific rows may bind to a Project contract (Via ministry) or Migration service (Direct); instance catalog filters by the instance lookup. Empty binding = all instances. Officers create this-profile files and toggle Shared ON/OFF on **case Resminamalar** (not the configuration wizard). | Yes (catalog list; not editable) |
+| Person requirements | Passport · Education · Position · Address | No (gates readiness / packs) |
+
+### 2.3 Per-Application related (persistent on Application)
+
+Stored on Application. Seeded from profile defaults at initial usage. Editable afterward. Profile default changes do not overwrite saved values.
+
+| # | Property | Notes |
+|---|----------|--------|
+| 1 | Visa Type | Lookup · often has default |
+| 2 | Visa Category | Lookup · often has default |
+| 3 | Visa Period | Lookup · often has default |
+| 4 | Border Zone | Lookup |
+| 5 | Migration Service | Lookup · also workflow |
+| 6 | Start Date | Date |
+| 7 | End Date | Date |
+| 8 | Region | Lookup · often paired with City |
+| 8b | City | Lookup · belongs to Region |
+| 9 | Business Trip Address | Lookup |
+| 10 | Project | Lookup · also workflow; filters profile-specific templates (Via ministry) |
+| 11 | Urgency | Lookup |
+| 12 | Work Permit Location | Lookup |
+| 13 | Entry Date | Date |
+| 14 | Entry Check Point | Lookup |
+| 15 | Company letterhead | Live FK to `CompanyProfile` catalog; tenant Default at create |
+| 16 | Authorized signatory + representative | Live FKs to catalog rows; tenant Default at create |
+
+Visibility of 1–14 still follows §2.4 (template ∪ workflow). Signatory fields follow Excel: visible + editable.
+
+### 2.4 Application form visibility (per-Application catalog)
+
+| Shown / editable when | Rule |
+|----------------------|------|
+| Used in nested Word/Excel | `{{…}}` in at least one profile template → visible + editable |
+| Workflow-only | Needed for progress/routing even if unused in templates → still visible + editable |
+| Neither | Hidden on Application |
+
+Configuration-related fields are never “edited on Application”; some are shown read-only (identity, template list).
+
+### 2.5 Person toggles — recommendation (pending confirm)
+
+Keep **explicit** profile toggles for readiness + enabling person/roster `{{…}}` packs; constrain publish if a template references a pack while its toggle is off.
+
+### 2.6 Profile edit lock (in-progress Applications)
+
+**Rule:** Allow profile configuration edits **until** at least one Application that references the profile reaches lock state **A**. After that, lock configuration-related editing on the profile.
+
+| Topic | Decision |
+|-------|----------|
+| **Lock state (A)** | First progress beyond office preparation / **submitted** to ministry or migration (left-office / submitted) |
+| Trigger | Any linked Application’s current progress ≥ lock state A |
+| Effect | Block wizard/config edits to configuration-related fields (Related to, Directed to, produce/cancel, templates, person toggles, route, audience, identity). **Exception:** **approval-leg versions** may be added, duplicated, renamed, and edited while locked (instances keep a snapshot at create). Cannot remove the last version while locked. |
+| Per-Application values | Unaffected — officers still edit Visa Type, dates, signatories, etc. on each Application |
+| Profile FK on Application | Set **only at create** — never switch afterward (§18) |
+| New Applications on locked profile | **Yes** — still allowed (FK + defaults); profile config remains read-only |
+| Unlock | **Open** — recommendation: auto-unlock when no Applications remain at/above lock state A; optional admin override |
+
+### Still open (narrow)
+
+| # | Topic | Notes |
+|---|--------|------|
+| A | Unlock / admin override | Recommend auto-unlock when no apps at/above lock state A. |
+| B | Required-to-save vs visible | Undecided. Recommendation: visible = template ∪ workflow; required = separate flag. |
+| C | Derive vs constrain catalog | **Closed for template AI convert** ([`TEMPLATE_AI_CONVERT_ENGINEERING_SPEC.md`](TEMPLATE_AI_CONVERT_ENGINEERING_SPEC.md) `E-D5`): **constrain** — profile-scoped allowed set; unknown names never become mergeable tokens. Still undecided for other placeholder surfaces. |
+| D | Temporary visitor | Real for v1? |
+| E | Field placement | Largely settled: 14 props on Application (§10.4). Any remaining former ApplicationItem-only fields? |
+| F | SLA integers vs tiers | Raw days on profile? |
+| G | Merge host | Same Resminamalar / Word–Excel pipeline? |
+| H | Person-config Excel sync | Re-attach updated `Application.xlsx` (Downloads) — not present in cloud workspace yet. |
+| I | TravelHistory validity | Current/latest vs broader set when auto-resolving. |
+| J | Wide view columns | Mandatory joined columns for v1 roster? |
+| K | Unlock profile config | Auto when no apps ≥ lock state A? |
+
+---
+
+## 10. Application DetailView redesign — retire ApplicationItem
+
+**Status:** Decisions locked (§10.1 + §10.1a naming) · UX prototypes · People M2M shipped · §10 auto-link + sticky + Linked records tiles + process-complete lock shipped (10n–10p) · Overview **Issued records** 1:N create (10q) · Issued visa compose roster source (10q-iv)
+**Prototype:** [`docs/prototypes/process-started-application-profile-workspace-mockup.png`](prototypes/process-started-application-profile-workspace-mockup.png) (+ `process-started-nav-*.png` workspace tabs). Staged queue: `staged-profiles-*.png`.
+
+### 10.1a Naming (product vs persistence)
+
+| Product language | Persisted BO | Role |
+|------------------|--------------|------|
+| **Application Profile** (template) | `ApplicationProfile` | Shared live configuration (toggles, templates, route, …) |
+| **Application Profile instance** (“in process”) | `ApplicationProfileInstance` | One running case; **live FK** to profile |
+| Progress lines / Application Process | `ApplicationProfileInstanceProgress` | Append-only steps on that **instance** |
+| Linked records (Passport, Visa, …) | `ApplicationProfileInstancePersonResolvedLink` | Sticky auto-links per `(instance, person, kind)`; gated by profile `RequirePerson*` |
+| People on a case | Skip-navigation M2M (join table, **not** a BO) | `People` / `ApplicationProfileInstances`; officers link/unlink Person only |
+| Linked child records (Passport, Visa, …) | Skip-navigation M2M + sticky `ApplicationProfileInstancePersonResolvedLink` | Same join pattern as People; auto-filled when Person is linked |
+
+- **`ApplicationNumber` / `ApplicationDate`** live on the **instance** (`ApplicationProfileInstance`) — not on the shared `ApplicationProfile` template. CLR property names may remain until a follow-on polish; **UI captions** must say profile instance / process number.
+- Persistence cutover: **§13** (new tables + same-Guid copy + hard break). Legacy name `Application` is removed.
+
+### 10.1 Locked decisions
+
+| # | Topic | Decision |
+|---|--------|----------|
+| 1 | ApplicationItem | **Hard remove** (no migrate-in-place dual model). |
+| 2 | Roster | Application has **many People** via **EF skip-navigation M2M**. Person-related child BOs (Passport, Visa, Education, AddressOfResidence, EmployeePositionHistory, EmployeeSalary, MedicalRecord, WorkDuty, InvitationItem, WorkPermitItem, BorderZoneItem, TravelHistory) have the **same skip-nav M2M** (`ApplicationProfileInstances` on the child; hidden collections on the instance). Join tables are composite PK only — **no XAF join BO**, no `[Aggregated]`. Sticky history also stays on `ApplicationProfileInstancePersonResolvedLink`; LinkPerson dual-writes M2M membership. **Output headers** Invitation / WorkPermit / BorderZone / Rejection / IssuedVisas are **1:N** (instance has many; child FK) — not skip-nav. Visibility on the instance is **May produce**. |
+| 3 | Link on Person add | When a `Person` is linked, **auto-resolve and link** related M2M rows for that person — **only** types with profile **`RequirePerson*` checked**. Dated document types (Passport, Visa, Invitation item, Work permit item, Border zone item) take the profile **Last 1–3** (default 1). Other types stay **one current** row. Validity: §10.2. Missing expected rows are **flagged**, not blocked. |
+| 4 | Sticky links (history) | Keep the **originally linked** child instances. Do **not** silently swap to a newer passport/visa on reopen. Person **unlink** removes that person’s auto-linked child links on the instance. |
+| 5 | Manual child links | Officers **only link/unlink `Person`**. Child BOs are **never** manually linked or unlinked — always auto-resolved (when toggles allow). |
+| 6 | SQL presentation | **One wide roster SQL view** — **one row per linked Person** with joined columns from auto-linked children. |
+| 7 | Tab / linked-record visibility | Driven by Application Profile **person-config** (`RequirePerson*` / wizard “Required person-related data”). |
+| 8 | Application-scoped props | Per-Application catalog on `Application` (Visa Type … Entry Check Point, etc.). Visibility + defaults from profile. |
+| 9 | TravelHistory | **Not** profile scalar configuration. `TravelHistory` M2M on **Application**, auto-resolved when Person is linked **if** `RequirePersonTravelHistory` is on. |
+| 10 | Left rail | Pick at create · open/edit profile config · new Application from profile. |
+| 11 | Issued documents | Input M2M: existing InvitationItem / WorkPermitItem / BorderZoneItem / Visa / … Output headers: **1:N** Invitation / WorkPermit / BorderZone / Rejection / **IssuedVisas** on the instance (`[Aggregated]` + FK; tabs hidden unless profile **May produce**). New visa and visa-extension results use **`Visa.IssuingApplicationProfileInstance`** → `IssuedVisas` (input linked visas stay skip-nav `Visas`). **Issued visa origin:** [`APPLICATION_PROFILE_ISSUED_VISA_ORIGIN.md`](./APPLICATION_PROFILE_ISSUED_VISA_ORIGIN.md). **Issued work permit origin (diagram + YAML, implementation planned):** [`APPLICATION_PROFILE_ISSUED_WORK_PERMIT_ORIGIN.md`](./APPLICATION_PROFILE_ISSUED_WORK_PERMIT_ORIGIN.md). |
+| 12 | Toggle turned off later | **Hide** that type + **stop new** auto-links. **Do not unlink** existing instance links (preserves history). |
+| 13 | Process complete | After the instance process completes, linked person-related BOs on that instance are **locked** from further change (live links only until then). |
+| 14 | Progress integration | Case workspace progress stepper/timeline is append-only **`ApplicationProgress`** on the instance (not nested under the config profile BO). |
+
+### 10.2 Valid / active resolve rules
+
+| BO | Include when |
+|----|----------------|
+| Passport | **Expiration is not checked.** Last N by `IssueDate` (expired previous booklet is OK). |
+| Visa | Started, not cancelled/changed, and not expired. Last N when the profile Last-count is &gt; 1. |
+| AddressOfResidence | Current (PersonCurrentItems-style) |
+| Education | Current |
+| EmployeePositionHistory (Position) | Current |
+| EmployeeSalary | Current |
+| MedicalRecord | Not expired |
+| InvitationItem | Active (`!IsCancelled && !IsChanged && !IsUsed`) and parent Invitation not expired. Last N when the profile Last-count is &gt; 1. Flags are **derived**: cancelled/changed = skip-nav link on a **PROCESS_ISSUED** Cancellation/Change instance; used = issuing visa. |
+| WorkPermitItem | Not cancelled/changed and not expired (same derived rules). Last N when the profile Last-count is &gt; 1. |
+| BorderZoneItem | Not cancelled/changed and parent BorderZone not expired. Last N when the profile Last-count is &gt; 1. |
+| RejectionItem | **Current / not cancelled** |
+| TravelHistory | **TBD** (recommend: current / latest relevant movements — confirm) |
+
+**Officer vs import:** §10.2 validity is for **manual officer** link/create (`ApplicationProfileInstancePersonValidItems.EnforceOfficerLinkValidity`). **VISA2014 import** (`MigrationImportContext.IsDataImport`) keeps historical current rows via `PersonCurrentItems` — expired/past related data still auto-links.
+
+### 10.3 Person-config block → tabs / linked records
+
+Profile toggles (configuration-related, live) control which person-data tabs and **Linked records** tiles apply, and which types auto-link when People are linked. Wizard step 4 **Required person-related data** maps to `RequirePerson*` on `ApplicationProfile`. **Last 1 / Last 2 / Last 3** sits only next to Passport, Visa, Invitation item, Work permit item, and Border zone item (cap 3). Education / Position / Address / Salary / Medical / Rejection / Travel stay one current row. Calik seed: `pasport_change` Last 2 passports (Visa 1); `cancel_invitation` Last 2 invitations; `cancel_invitation_wp` Last 2 invitations + Last 2 work permits; `cancel_visa_wp` Last 2 visas + Last 2 work permits; `cancel_workpermit` Last 2 work permits. Invitation/WP/visa Last 2 means up to 2 valid rows. Shortfall (including `pasport_change` with only one passport) is flagged; create is not blocked.
+
+Expected members: Passport · Education · Position · Address of residence · Visa · Invitation item · Work permit item · Border zone item · Salary · Medical · Rejection item · Travel history · …
+
+| Toggle | Effect |
+|--------|--------|
+| **On** | Visible; auto-link valid instances when Person is linked |
+| **Off** | Not visible for new work; no new auto-links; existing instance links kept (§10.1 #12) |
+
+### 10.4 Per-Application property catalog
+
+From Excel **Application properties required** (visible + editable + persistent per Application instance):
+
+| # | Property | Default from profile? |
+|---|----------|------------------------|
+| 1–5 | Visa Type, Category, Period, Border Zone, Migration Service | Yes |
+| 6–7 | Start Date, End Date | No |
+| 8–9 | Region (City), Business Trip Address | No |
+| 10–11 | Project, Urgency | Yes |
+| 12 | Work Permit Location | No |
+| 13 | Entry Date | No |
+| 14 | Entry Check Point | Yes |
+
+These remain **Application** (instance) fields. Movement history itself comes from **`TravelHistory` M2M** on the instance.
+
+### 10.5 Still open (narrow)
+
+1. **TravelHistory “valid”** — current/latest only, or all non-cancelled movements in a window?
+2. **Wide view columns** — mandatory joined columns for v1 roster?
+3. **Unlock profile config** — auto when no apps ≥ lock state A?
+4. ~~**Process-complete lock trigger**~~ — **Locked 2026-08-12 (slice 10p):** same as `Application.IsWorkflowTerminal` — latest progress `PROCESS_ISSUED`, `PROCESS_REJECTED`, or `PROCESS_CANCELLED`. Ministry review rejects (`*_REVIEW_REJECTED`) are **not** lock triggers (process may continue). Unlock by editing/deleting the last progress step (existing workflow-terminal UX).
+
+### Sketch layout (prototype)
+
+| Region | Content |
+|--------|---------|
+| Left rail | Profiles: pick at create · open config · new instance from profile |
+| Top | Progress · header (№ / date on instance) · SLA |
+| Middle | Live profile summary + linked records |
+| Bottom | People roster + tabs from person-config |
+
+```mermaid
+flowchart TB
+  Template[ApplicationProfile template]
+  Inst[Application = profile instance]
+  Template -->|live FK| Inst
+  Add[Link or unlink Person only]
+  Add --> Resolve[Auto-link if RequirePerson* on + valid]
+  Resolve --> M2M[Application M2M: Passport Visa …]
+  ToggleOff[Toggle off later] -->|hide + no new links| M2M
+  ToggleOff -.->|keep existing| M2M
+  Done[Process complete] -->|lock links| M2M
+  Progress[ApplicationProgress append-only] --> Inst
+  M2M --> UI[Case workspace Linked records]
+```
+
+---
+
+## 11. Start Application from Person / Dossier — **removed**
+
+**Status:** Officers create Application Profile Instances **only** from Application Profile Instances lists (**New** → Choose Application Profile). Person DetailView and Person Dossier do **not** start instances.
+
+### Create picker (locked)
+
+| Entry | Officer action | Result |
+|-------|----------------|--------|
+| Person DetailView | *(no Start application)* | Create from **Application Profile Instances** lists only |
+| Person Dossier | *(no Start application)* | Same; dossier stays read-only 360 |
+| Application Profile Instances list | **New** → Choose Application Profile | Via ministry: **step 1 profile**, **step 2 Approval legs** (always, even if one version; Default pre-selected). Direct migration: profile then create. Officer adds people on the case. |
+
+```mermaid
+flowchart LR
+  List[Application Profile Instances New]
+  List --> Pick[Step 1 Choose profile]
+  Pick -->|Via ministry| Legs[Step 2 Choose Approval legs]
+  Pick -->|Direct migration| App[Create instance + live FK]
+  Legs --> App
+  App --> Case[Officer adds people on the case]
+```
+
+### Track Application Profiles used for a Person
+
+**Prefer derived tracking** (no second write model):
+
+- Source of truth: Applications where Person ∈ Application.People M2M, grouped by `Application.ApplicationProfile`.
+- Person / Dossier UI surfaces:
+  - **Applications** list (number, date, state, profile name/code)
+  - **Profiles used** chips or compact list (distinct profiles ever used)
+  - Optional: **Open applications** using a profile (warn before starting another)
+
+Avoid a separate `PersonApplicationProfileUsage` table unless you need to record “officer considered profile X but cancelled before save.”
+
+### Retired Person / Dossier start dialog (do not re-enable)
+
+Historical locked Qs for the removed Person/Dossier picker (kept so they are not rebuilt):
+
+| # | Topic | Decision (retired) |
+|---|--------|----------|
+| 1 | Multi-select People | Was seed Person + more; people are now linked on the case after create. |
+| 2–11 | Candidate mix, family suggest, audience, duplicate warn, MRU, stay on Dossier, flag incomplete, open-app warn, via-ministry ProjectContract gate, dossier Applications section | Do not restore as a create path. Dossier Applications section remains a read-only list. |
+
+---
+
+## 3. Domain shape (sketch — not implemented)
+
+```
+ApplicationProfile                         // configuration (live)
+  ├─ Name, Description, Code
+  ├─ Route, Audience, ActionFamily (Related to)
+  ├─ Produce[] / CancelExisting[]
+  ├─ FieldCatalog[]                        // which of 14 enabled + default values
+  ├─ SignatoryDefault, RepresentativeDefault
+  ├─ ApprovalLeg[]
+  ├─ ProcessStateFlag[] + SlaDays
+  ├─ NestedTemplate[] + FileData
+  ├─ PersonDataRequirements                // 4 toggles
+  ├─ ApplicabilityCriteria
+  └─ (derived) IsConfigLocked            // true when any linked App ≥ lock state A
+
+Application
+  ├─ ApplicationProfile (FK, required)     // LIVE — set only at create; never switch
+  ├─ VisaType, VisaCategory, …             // per-Application values (persistent)
+  ├─ AuthorizedSignatory, VisaRepresentative
+  ├─ People M2M (+ auto-resolved child M2Ms incl. TravelHistory)
+  ├─ Invitations / WorkPermits (issued headers)
+  └─ … progress, etc.
+// Visa.IssuingApplication → Application (replaces IssuingApplicationItem)
+// TravelHistory M2M — not profile scalar travel configuration
+```
+
+**Create algorithm:** pick profile (only at create) → set FK → copy **defaults only** into empty per-Application fields → thereafter read configuration live from profile; persist only per-Application values. Profile FK is immutable after create.
+
+```mermaid
+flowchart LR
+  P[Application Profile config]
+  A[Application]
+  P -->|live FK: related-to, produce, legs, templates, person flags| A
+  P -->|defaults once at create| V[Per-Application field values]
+  V --> A
+  P2[Later profile config edit] -->|affects apps until lock state| A
+  Lock[App reaches lock progress state] -->|blocks profile config edits| P
+  P2 -.->|does not overwrite| V
+```
+
+---
+
+## 4. Properties → form + Word/Excel merge
+
+```mermaid
+flowchart TB
+  PLive[Live profile config]
+  PLive --> VisRules[Visibility / process / person packs]
+  PLive --> Tmpl[Nested Word/Excel files]
+  Tmpl --> FormVis[Which per-App fields show]
+  Wf[Workflow-needed fields] --> FormVis
+  FormVis --> Vals[Per-Application values]
+  Def[Profile defaults if empty] --> Fill[Fill templates]
+  Vals --> Fill
+  PLive --> AutoId[Identity read-only + merge]
+  AutoId --> Fill
+```
+
+1. Application resolves profile via FK (always current).  
+2. Form shows per-Application fields in (template usage ∪ workflow).  
+3. Merge value = Application value if set; else profile default.  
+4. Identity from live profile (read-only on form; merge). Signatory values from Application (seeded from defaults).  
+5. Person toggles on profile gate readiness + packs.  
+6. Fill nested profile templates with `{{…}}`.
+
+---
+
+## 5. How officers use Application Profile
+
+### Story A — Configure profile
+Selected officer runs wizard; sets configuration-related options and defaults for per-Application fields; publishes.
+
+### Story B — Create Application
+Pick profile **once at create** (criteria filter) → FK set (immutable) → defaults applied to per-Application fields → officer edits those values.
+
+### Story C — Use Application
+Form visibility / process / templates / person rules come **live** from profile. Officer only edits per-Application values (and progress data). Cannot change profile.
+
+### Story D — Improve configuration (while unlocked)
+Edit profile (e.g. change Related to, add template). **Existing Applications** pick up configuration behavior. Saved per-Application values stay as entered.
+
+### Story E — Profile locks
+When any linked Application reaches lock state **A** (first progress beyond office preparation / submitted to ministry or migration), the configuration wizard becomes read-only for that profile. New Applications may still pick the locked profile. Per-Application field edits on Applications continue.
+---
+
+## 6. Excel → classification (cols E–H)
+
+| Excel meaning | Plan term |
+|---------------|-----------|
+| G Configuration Related = 1 | Live on profile; not edited on Application |
+| H Only Per Application Related = 1 | Persistent on Application; defaults from profile |
+| E Visibility on Application = 1 | Show on Application UI (read-only if config; editable if per-App) |
+| F Editable Per Application = 1 | Officer may change; value stored on Application |
+
+---
+
+## 7. Migration posture (after UX sign-off)
+
+1. Lock open items A–I.  
+2. Field dictionary from Excel E–H → BO members → `{{…}}`.  
+3. Introduce `ApplicationProfile` + `Application.ApplicationProfile` FK; mark **`ApplicationType` deprecated** (dual-read).  
+4. Seed profiles from type catalog; switch Appearance / progress / reports to profile.  
+5. Remove `Application.ApplicationType` FK and retire Type/group/template-type links.  
+5. Align plan copy with staged → in-process PNG prototypes (§9); pivot to template → staged → merge model as product direction evolves.
+
+---
+
+## 12. Implementation progress
+
+**Maintained in sync with:** [`.cursor/skills/visa2026-application-profile/IMPLEMENTATION_PLAN.md`](../.cursor/skills/visa2026-application-profile/IMPLEMENTATION_PLAN.md)
+
+| Slice | Status |
+|-------|--------|
+| Plan + prototypes | Done |
+| **Deprecate `ApplicationType` BO** (registry, UI caption/tooltip, dual-read retained) | Done |
+| `ApplicationProfile` BO + approval legs + nested templates | Done (v1 scalars/collections) |
+| `Application.ApplicationProfile` live FK + default seeding | Done (optional during dual-read) |
+| Permissions (Users read / VisaOffice manage) | Done |
+| Seed profiles from ApplicationType catalog | Done |
+| Switch Appearance / progress to profile | Done |
+| Config lock enforcement on profile edit | Done |
+| Configuration wizard UX | Done |
+| Wizard Templates: this-profile view/Preview; shared Include/Exclude (author on case Resminamalar) | **Superseded** (2026-09-02) |
+| Wizard Person data only (templates + Shared include on case Resminamalar) | **Done** (2026-09-03) |
+| Wizard Registration Check in / Check out | **Done** |
+| Wizard Process & SLA duration only | Done |
+| Profile-specific template applicability (contract / migration service) | Done |
+| Approval leg versions (shared catalog + instance snapshot) | **Done** (Phase B 2026-08-20: imported instances keep inferred chain; snapshots + version name backfill) |
+| Locked profile: still set Default approval legs | **Done** |
+| Approval-leg catalog in preview slot | **Done** |
+| Choose Approval legs Catalog / + New / Open / Make default | **Done** (2026-09-03) |
+| Wizard Project contract on Identity (Via ministry) | Done |
+| Profile overview (live linked instances) | Done |
+| Template overview Approval legs card removed | **Done** (2026-09-03) |
+| Custom catalog home (replace native List/Detail officer UI) | Done |
+| Profile picker at Application create | Done |
+| Case summary instance Use fields (overview tiles + Edit/Done) | **Done** |
+| Case Organization letterhead (instance copy) | **Done** (2026-09-03) then superseded |
+| Case Organization catalogs (live FKs, tenant Default) | **Done** (2026-09-03) |
+| Configuration Organization catalogs page (+ New) | **Done** (2026-09-03); **hidden from left nav** |
+| Inline organization catalog New/Edit (create + case) | **Done** (2026-09-03) |
+| Wizard Company, Signatories step removed | **Done** (2026-09-03) |
+| Case summary fill-state (empty / default / officer) | **Done** |
+| Case summary completeness gate (office prep) | **Done** (2026-09-03) |
+| People & links missing / complete cues | **Done** (2026-09-03) |
+| Overview missing / complete Case summary cues | **Done** (2026-09-03) |
+| Document copies missing / complete cues | **Done** (2026-09-03) |
+| Person M2M DetailView / hard-remove ApplicationItem | In progress (skip-navigation People + roster-line BO deleted; F5 heal pending) |
+| Workspace Document copies person filter + person catalog | Done (header chips; person-grouped catalog; slot viewer-only) |
+| Document copies from linked records (ID labels) | Done (ResolvedLinks; Passport/Visa numbers — not Current/Previous) |
+| §10.2 valid/not-expired auto-link gate | Done (officer-only except **Passport expiration is not checked**; VISA2014 import keeps historical current rows) |
+| Person Last-N auto-link (Passport / Visa / Invitation / WP / Border zone) | **Done** (Last 1–3; flag missing; Calik: `pasport_change` Last 2 passports; `cancel_invitation` / `cancel_invitation_wp` / `cancel_visa_wp` / `cancel_workpermit` Last 2 on the cancel target types) |
+| Overview Issued records (1:N Invitation / WorkPermit / BorderZone / Rejection / issued Visa) | Done (May produce tiles + New from Overview) |
+| Person/Dossier Start application | **Removed** (create only from Application Profile Instances picker; via-ministry = profile then Approval legs) |
+| Remove `Application.ApplicationType` FK | Deferred (after import cutover) |
+| **§13 Instance rename** (`Application` → `ApplicationProfileInstance`) | Done (R0–R6; Demo F5/import operator-run) |
+
+---
+
+## 13. Instance rename cutover (`Application` → `ApplicationProfileInstance`)
+
+**Status:** Decisions locked 2026-08-12 · Implementation slices R0–R6 in skill IMPLEMENTATION_PLAN  
+**Canonical agent plan:** `.cursor/plans/profile_instance_cutover_*.plan.md` (do not edit from product docs)
+
+### 13.1 Locked decisions
+
+| Topic | Decision |
+|-------|----------|
+| Timing | Parallel with Wave 2b (do not wait for ApplicationItem hard-remove) |
+| Cutover | Big-bang (no dual-read OData alias) |
+| Persistence | New tables + **same-Guid copy**, then drop old |
+| Name scope | Header + related instance types (Progress, Person, ResolvedLink, ApprovalLegSnapshot, child FKs, Visa.Issuing*) |
+| Import | Hard break: `--entity ApplicationProfileInstance` |
+| Officer UI | “Application Profile instance” / process number only — no residual case “Application” |
+
+**Do not rename:** `ApplicationProfile*`, `ApplicationType*`, `ApplicationState` / `ApplicationLocation`, `ApplicationUser*`, `ApplicationRuntimeLog*`, `ApplicationNumberingProfile`, DevExpress `XafApplication`.
+
+### 13.2 Rename map
+
+| Today | After |
+|-------|--------|
+| `Application` / `Applications` | `ApplicationProfileInstance` / `ApplicationProfileInstances` |
+| `ApplicationProgress` | `ApplicationProfileInstanceProgress` |
+| `ApplicationPerson` (+ ResolvedLink) | Skip-nav People + `ApplicationProfileInstancePersonResolvedLink` (no roster-line BO) |
+| `ApplicationApprovalLegSnapshot` | `ApplicationProfileInstanceApprovalLegSnapshot` |
+| `Visa.IssuingApplication` | `Visa.IssuingApplicationProfileInstance` |
+| Import `--entity Application` | `--entity ApplicationProfileInstance` |
+
+`ApplicationItem` is **not** renamed — Wave 2b hard-remove path; FK points at instance table until dropped.
+
+### 13.3 Phases (R0–R6)
+
+See skill IMPLEMENTATION_PLAN slices R0–R6: spec → new BOs/tables → copy updater → code/OData/import/SQL hard switch → drop old → UI copy → verify.
+
+---
+
+## 8. Non-goals (this phase)
+
+- Full profile clone / re-sync machinery (rejected).  
+- Expanding person matrix beyond four toggles in the first UX slice (Excel person-config may extend later).
+
+---
+
+## 9. Prototype inventory (PNG — 2026-08-10)
+
+All files live in [`docs/prototypes/`](prototypes/) only (no subfolders).
+
+| File | Purpose |
+|------|---------|
+| `visa2026-custom-left-navigation-shell-mockup.png` | Custom app shell — replaces native XAF left nav |
+| `application-profiles-navigation-sidebar-mockup.png` | Staged / In process / Profile templates nav IA |
+| `staged-application-profiles-workspace-mockup.png` | Staged profiles — grouped workspace + Start process |
+| `staged-profiles-listview-table-mockup.png` | Staged profiles — ListView |
+| `staged-profiles-grid-cards-mockup.png` | Staged profiles — grid |
+| `process-started-profiles-listview-table-mockup.png` | In process — ListView |
+| `process-started-profiles-list-cards-mockup.png` | In process — card grid |
+| `process-started-application-profile-workspace-mockup.png` | In process case — Overview tab |
+| `process-started-nav-overview.png` | Workspace — Overview (alt) |
+| `process-started-nav-overview-issued-records.png` | Overview — Issued records card (1:N Invitation / Work permit / Border zone / Rejection; May produce) |
+| `process-started-nav-overview-issued-records-add.png` | Overview — Add invitation empty state under Issued records |
+| `process-started-nav-people-links.png` | Workspace — People & links |
+| `application-profile-instance-people-links-missing-prototype.png` | People & links — short tiles red + nav missing count |
+| `application-profile-instance-people-links-complete-prototype.png` | People & links — all required links present; nav green check |
+| `process-started-nav-progress.png` | Workspace — Progress |
+| `process-started-nav-overview-approval-legs.png` | Overview stepper — office + 3 ministry legs + migration (mixed complete / current / pending) |
+| `process-started-nav-progress-approval-legs.png` | Progress tab — same mixed legs; current ministry expanded |
+| `process-started-nav-progress-migration-in-process.png` | Progress tab — all ministry legs approved; Migration On process |
+| `process-started-nav-document-copies.png` | Workspace — Document copies |
+| `application-profile-instance-document-copies-missing-prototype.png` | Document copies — missing required scans + nav count (**prototype**) |
+| `application-profile-instance-document-copies-complete-prototype.png` | Document copies — all required scans present; nav green check (**prototype**) |
+| `process-started-nav-resminamalar.png` | Workspace — Resminamalar |
+| `process-started-nav-sla-deadlines.png` | Workspace — SLA & deadlines |
+| `application-profile-templates-listview-mockup.png` | Profile templates catalog — ListView |
+| `application-profile-templates-grid-mockup.png` | Profile templates catalog — grid |
+| `application-profile-template-overview-mockup.png` | Single template — read-only overview |
+| `application-profile-template-wizard-mockup.png` | Template wizard — step 1 Identity & purpose |
+| `application-profile-template-wizard-step2-mockup.png` | Template wizard — step 2 Results & defaults |
+| `application-profile-template-wizard-step3-mockup.png` | Template wizard — step 3 Process & SLA |
+| `application-profile-template-wizard-step4-mockup.png` | Template wizard — step 4 Templates & person |
+| `application-profile-template-wizard-step5-mockup.png` | Template wizard — step 5 Review & publish |
+| `application-profile-wizard-templates-three-scopes-prototype.png` | Step 4 — three scopes (profile / category / global) |
+| `application-profile-wizard-template-initial-upload-prototype.png` | Step 4 — Add template initial upload |
+| `application-profile-wizard-template-data-scope-prototype.png` | Step 4 — Data for this template (header / M2M / both) |
+| `application-profile-wizard-template-add-data-scope-prototype.png` | Step 4 — Add modal (upload + data scope) |
+| `application-profile-wizard-template-edit-ui-prototype.png` | Step 4 — Edit template modal |
+| `application-profile-wizard-template-edit-scenario-prototype.png` | Step 4 — Edit Word/Excel scenario |
+| `application-profile-wizard-template-edit-word-prototype.png` | Step 4 — Edit Word template (detail) |
+| `application-profile-wizard-approval-leg-versions-prototype.png` | Identity — named **approval-leg versions** on this profile (own copies; Default + Duplicate / Remove / Add version) |
+| `application-profile-instance-create-choose-approval-legs-prototype.png` | New instance — **required** pick of a version; ministries snapshot onto the application |
+| `approval-leg-profile-slot-01-catalog.png` | Wizard **Edit in Configuration** → custom slot catalog (no XAF popup) |
+| `approval-leg-profile-slot-02-edit-locked.png` | Slot Open on in-use chain — ministries locked, Duplicate |
+| `approval-leg-profile-slot-03-edit.png` | Slot Open on unused chain — edit ministries, Save / Delete |
+| `approval-leg-profile-slot-04-empty.png` | Empty shared catalog + wizard hint to add the first chain |
+| `approval-leg-profile-slot-05-new.png` | Slot **+ New** — blank Code, empty ministries, Cancel / Create |
+| `choose-approval-legs-manage-01-picker.png` | Create instance — cards + **+ New** / **Open** (shared catalog) |
+| `choose-approval-legs-manage-02-empty.png` | Create instance — 0 chains; empty box + **+ New** |
+| `choose-approval-legs-manage-03-slot-catalog.png` | Picker left + slot catalog (not Configure Identity) |
+| `choose-approval-legs-manage-04-slot-new.png` | Picker left + slot **+ New** form |
+| `choose-approval-legs-manage-05-slot-edit.png` | Picker left + slot **Open** unused chain |
+| `application-profile-instance-case-summary-overview-properties-prototype.png` | Overview **Case summary** — read-only tiles for profile **Use** fields; **Edit** switches to form mode |
+| `application-profile-instance-overview-missing-prototype.png` | Overview — empty required Case summary tiles + nav missing count |
+| `application-profile-instance-overview-complete-prototype.png` | Overview — required Case summary filled; nav green check |
+| `application-profile-instance-case-summary-edit-properties-prototype.png` | Overview **Case summary** — edit mode (dropdowns/dates); **Done** returns to tiles |
+| `application-profile-instance-organization-overview-prototype.png` | Overview **Organization** — Company / Signatory / Representative tiles on the instance; **Edit** |
+| `application-profile-instance-organization-edit-prototype.png` | Overview **Organization** — edit form + **Reset from Configuration defaults**; this case only |
+
+**Retired (do not link):** `application-profile-wizard.html`, `application-profile-usage.html`, `application-detail-m2m.html`, `application-profile-platform-prototype.html`, `images/ap-*.png`, `Application-profile-wizard-draft.xlsx`.

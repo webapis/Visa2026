@@ -17,7 +17,7 @@ internal sealed class Visa2014ApplicationVisaTypeCorrectionResult
 }
 
 /// <summary>
-/// Patches <see cref="Bo.Application.VisaType"/> from ApplicationType.Name using
+/// Patches <see cref="Bo.ApplicationProfileInstance.VisaType"/> from ApplicationType.Name using
 /// <see cref="Visa2014ApplicationVisaTypeInference"/> (legacy has no Application.VisaType FK).
 /// </summary>
 internal static class Visa2014ApplicationVisaTypeCorrection
@@ -41,7 +41,7 @@ internal static class Visa2014ApplicationVisaTypeCorrection
             ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
             ?? "Host=localhost;Port=5432;Database=visa2026;Username=postgres;Password=Visa2026Local;Persist Security Info=True;EFCoreProvider=Postgres";
 
-        Console.WriteLine("=== VISA2014 Application VisaType inference correction");
+        Console.WriteLine("=== VISA2014 ApplicationProfileInstance VisaType inference correction");
         Console.WriteLine($"INF Legacy source: {source.Id}");
         Console.WriteLine($"INF Target SQL: {MaskConnectionString(targetConnection)}");
         if (dryRun) Console.WriteLine("INF Mode: dry-run (no writes)");
@@ -54,7 +54,7 @@ internal static class Visa2014ApplicationVisaTypeCorrection
             importScope = MigrationImportContext.BeginDataImportScope();
 
             var resolver = new Visa2014ODataLookupResolver();
-            using (var lookupSpace = host.ObjectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Bo.Application)))
+            using (var lookupSpace = host.ObjectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Bo.ApplicationProfileInstance)))
             {
                 MigrationImportContext.ApplyImportObjectSpaceHooks(lookupSpace);
                 resolver.LoadFromObjectSpace(lookupSpace, Visa2014HeadlessImportSession.ResolveTenantCatalogDirStatic());
@@ -98,10 +98,10 @@ internal static class Visa2014ApplicationVisaTypeCorrection
         var skippedNoInference = 0;
         var unresolved = 0;
 
-        using var objectSpace = objectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Bo.Application));
+        using var objectSpace = objectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Bo.ApplicationProfileInstance));
         MigrationImportContext.ApplyImportObjectSpaceHooks(objectSpace);
 
-        var applications = objectSpace.GetObjectsQuery<Bo.Application>()
+        var applications = objectSpace.GetObjectsQuery<Bo.ApplicationProfileInstance>()
             .Where(a => a.ApplicationType != null)
             .ToList();
 
@@ -127,7 +127,7 @@ internal static class Visa2014ApplicationVisaTypeCorrection
             if (targetVisaType == null)
             {
                 unresolved++;
-                errors.Add($"Application {application.ID} ({application.FullApplicationNumber}): VisaType key '{key}' not found");
+                errors.Add($"ApplicationProfileInstance {application.ID} ({application.FullApplicationNumber}): VisaType key '{key}' not found");
                 continue;
             }
 

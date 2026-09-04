@@ -1,0 +1,897 @@
+@namespace Visa2026.Blazor.Server.Components
+@using System.Linq
+@using DevExpress.ExpressApp
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Forms
+@using Visa2026.Blazor.Server.Editors
+@using Visa2026.Blazor.Server.Services
+@using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Services
+@using Visa2026.Module.Services.ApplicationWorkspace
+@using Visa2026.Module.Services.PreviewSlot
+
+<div class="resminamalar-slot-panel issue-issued-header-slot-panel issue-issued-visa-slot-panel">
+    <div class="resminamalar-slot-panel__header visa-preview-drawer__header">
+        <div class="visa-preview-drawer__title-block">
+            <span class="visa-preview-drawer__title">@PanelTitle</span>
+            @if (!string.IsNullOrWhiteSpace(_draft?.ApplicationCaption))
+            {
+                <span class="visa-preview-drawer__subtitle">@_draft!.ApplicationCaption@ProfileSuffix</span>
+            }
+        </div>
+        <div class="visa-preview-drawer__header-actions">
+            <button class="visa-preview-drawer__btn visa-preview-drawer__btn--close"
+                    type="button"
+                    title="Close"
+                    @onclick="ClosePanelAsync">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="resminamalar-slot-panel__body">
+        <div class="resminamalar-slot-panel__catalog issue-issued-header-slot issue-issued-visa-slot">
+            @if (_loadError != null)
+            {
+                <p class="issue-issued-header-slot__error">@_loadError</p>
+            }
+            else if (_draft == null)
+            {
+                <p class="issue-issued-header-slot__muted">Loading…</p>
+            }
+            else if (_result?.Succeeded == true)
+            {
+                <p class="issue-issued-visa-slot__banner issue-issued-visa-slot__banner--success">
+                    @CreatedBannerText
+                </p>
+                @foreach (var group in CreatedGroups)
+                {
+                    <section class="issue-issued-visa-slot__group">
+                        <h3 class="issue-issued-visa-slot__group-title">@CreatedGroupTitle(group.Key)</h3>
+                        @foreach (var row in group)
+                        {
+                            <article class="issue-issued-visa-slot__card">
+                                <div class="issue-issued-visa-slot__card-head">
+                                    <span class="issue-issued-visa-slot__avatar">@Initials(row.PersonName)</span>
+                                    <span class="issue-issued-visa-slot__person">@row.PersonName</span>
+                                    <span class="issue-issued-header-slot__status issue-issued-header-slot__status--ready">Issued</span>
+                                </div>
+                                <dl class="issue-issued-visa-slot__readonly-grid">
+                                    <div>
+                                        <dt>Visa number</dt>
+                                        <dd>@row.VisaNumber</dd>
+                                    </div>
+                                    <div>
+                                        <dt>Visa type</dt>
+                                        <dd>@row.VisaTypeCaption</dd>
+                                    </div>
+                                    <div>
+                                        <dt>Category</dt>
+                                        <dd>@row.VisaCategoryCaption</dd>
+                                    </div>
+                                    <div>
+                                        <dt>Period</dt>
+                                        <dd>@row.VisaPeriodCaption</dd>
+                                    </div>
+                                    <div>
+                                        <dt>Issued</dt>
+                                        <dd>@row.IssueDate.ToString("dd MMM yyyy")</dd>
+                                    </div>
+                                    <div>
+                                        <dt>Expiration</dt>
+                                        <dd>@(row.ExpirationDate?.ToString("dd MMM yyyy") ?? "—")</dd>
+                                    </div>
+                                    <div>
+                                        <dt>Passport number</dt>
+                                        <dd>@row.PassportNumber</dd>
+                                    </div>
+                                    <div>
+                                        <dt>Border zone</dt>
+                                        <dd>@(string.IsNullOrWhiteSpace(row.BorderZoneCaption) ? "Ýok" : row.BorderZoneCaption)</dd>
+                                    </div>
+                                </dl>
+                            </article>
+                        }
+                    </section>
+                }
+                <div class="issue-issued-visa-slot__actions">
+                    <button type="button" class="issue-issued-header-slot__btn" @onclick="ClosePanelAsync">Close</button>
+                    <button type="button" class="issue-issued-header-slot__btn issue-issued-header-slot__btn--primary" @onclick="OpenCreatedInApp">
+                        Open in app
+                    </button>
+                </div>
+            }
+            else
+            {
+                @if (!_draft.IsEditMode)
+                {
+                    <p class="issue-issued-visa-slot__banner issue-issued-visa-slot__banner--info">
+                        @(_draft.UsesInvitationSource
+                            ? "One visa per person who has an issued invitation on this case. Linked invitation items are not a visa source."
+                            : "One visa per person on this case. Linked visas are not a visa source.")
+                    </p>
+                    @if (!_draft.HasUnusedLine)
+                    {
+                        <p class="issue-issued-visa-slot__banner issue-issued-visa-slot__banner--warn">
+                            @UnusedWarningText
+                        </p>
+                    }
+                }
+                @if (!string.IsNullOrWhiteSpace(_saveMessage))
+                {
+                    <p class="issue-issued-visa-slot__banner issue-issued-visa-slot__banner--success">@_saveMessage</p>
+                }
+                @if (!string.IsNullOrWhiteSpace(_actionError))
+                {
+                    <p class="issue-issued-header-slot__error">@_actionError</p>
+                }
+                <IssueComposeFieldCueLegend />
+
+                @foreach (var group in _draft.Groups)
+                {
+                    <section class="issue-issued-visa-slot__group">
+                        <h3 class="issue-issued-visa-slot__group-title">
+                            @(_draft.UsesInvitationSource
+                                ? $"Invitation {group.InvitationNumber} · {group.InvitationIssuedDate:dd MMM yyyy}"
+                                : "People on this case")
+                        </h3>
+                        @foreach (var person in group.People)
+                        {
+                            var issued = person.AlreadyIssued && !_draft.IsEditMode;
+                            var cardClass = issued
+                                ? "issue-issued-visa-slot__card issue-issued-visa-slot__card--issued"
+                                : person.Include || _draft.IsEditMode
+                                    ? "issue-issued-visa-slot__card"
+                                    : "issue-issued-visa-slot__card issue-issued-visa-slot__card--off";
+                            <article class="@cardClass">
+                                <div class="issue-issued-visa-slot__card-head">
+                                    @if (!_draft.IsEditMode)
+                                    {
+                                        <input type="checkbox"
+                                               disabled="@(person.AlreadyIssued || !person.IsReady)"
+                                               checked="@person.Include"
+                                               @onchange="e => OnIncludeChanged(person, e)" />
+                                    }
+                                    <span class="issue-issued-visa-slot__avatar">@Initials(person.PersonName)</span>
+                                    <span class="issue-issued-visa-slot__person">@person.PersonName</span>
+                                    @if (issued)
+                                    {
+                                        <span class="issue-issued-header-slot__status issue-issued-header-slot__status--ready">Visa issued</span>
+                                    }
+                                    else if (!_draft.IsEditMode && !person.IsReady)
+                                    {
+                                        <span class="issue-issued-header-slot__status issue-issued-header-slot__status--warn">No passport</span>
+                                    }
+                                    else if (!_draft.IsEditMode && person.Include)
+                                    {
+                                        <button type="button" class="issue-issued-header-slot__link-btn" @onclick="() => RemovePerson(person)">Remove</button>
+                                    }
+                                </div>
+
+                                @if (issued)
+                                {
+                                    <dl class="issue-issued-visa-slot__readonly-grid">
+                                        <div>
+                                            <dt>Visa number</dt>
+                                            <dd>@(person.ExistingVisaNumber ?? person.VisaNumber)</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Visa type</dt>
+                                            <dd>@LookupCaption(_draft.VisaTypes, person.VisaTypeId)</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Category</dt>
+                                            <dd>@LookupCaption(_draft.VisaCategories, person.VisaCategoryId)</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Period</dt>
+                                            <dd>@LookupCaption(_draft.VisaPeriods, person.VisaPeriodId)</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Issued place</dt>
+                                            <dd>@LookupCaption(_draft.VisaIssuedPlaces, person.VisaIssuedPlaceId)</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Issued</dt>
+                                            <dd>@person.IssueDate.ToString("dd MMM yyyy")</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Expiration</dt>
+                                            <dd>@(person.ExpirationDate?.ToString("dd MMM yyyy") ?? "—")</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Passport number</dt>
+                                            <dd>@person.PassportNumber</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Border zone</dt>
+                                            <dd>@(string.IsNullOrWhiteSpace(person.BorderZoneLocation) ? "Ýok" : person.BorderZoneLocation)</dd>
+                                        </div>
+                                    </dl>
+                                    <p class="issue-issued-visa-slot__note">
+                                        @(_draft.UsesInvitationSource
+                                            ? "This issued invitation line already has a visa."
+                                            : "This person already has a visa on this case.")
+                                    </p>
+                                }
+                                else if (person.Include || _draft.IsEditMode)
+                                {
+                                    var card = person;
+                                    var numberKey = CueKey(card, "visaNumber");
+                                    var typeKey = CueKey(card, "visaType");
+                                    var categoryKey = CueKey(card, "visaCategory");
+                                    var periodKey = CueKey(card, "visaPeriod");
+                                    var placeKey = CueKey(card, "visaPlace");
+                                    var issueKey = CueKey(card, "issueDate");
+                                    var expKey = CueKey(card, "expiration");
+                                    var zoneKey = CueKey(card, "borderZone");
+                                    var passportKey = CueKey(card, "passport");
+                                    <div class="issue-issued-header-slot__grid">
+                                        <label class="issue-issued-header-slot__field @FieldCueClass(numberKey, true, IssueComposeFieldCue.HasText(card.VisaNumber))">
+                                            <span>Visa number *</span>
+                                            <input class="issue-issued-header-slot__input"
+                                                   @bind="card.VisaNumber"
+                                                   @onfocusout="() => ReviewField(numberKey)" />
+                                        </label>
+                                        <label class="issue-issued-header-slot__field @FieldCueClass(typeKey, true, IssueComposeFieldCue.HasId(card.VisaTypeId))">
+                                            <span>Visa type *</span>
+                                            <select class="issue-issued-header-slot__input"
+                                                    value="@GuidText(card.VisaTypeId)"
+                                                    @onchange="e => SetGuidAndReview(v => card.VisaTypeId = v, e.Value, typeKey)"
+                                                    @onfocusout="() => ReviewField(typeKey)">
+                                                <option value="">—</option>
+                                                @foreach (var opt in _draft.VisaTypes)
+                                                {
+                                                    <option value="@opt.Id.ToString("N")">@opt.Caption</option>
+                                                }
+                                            </select>
+                                        </label>
+                                        <label class="issue-issued-header-slot__field @FieldCueClass(categoryKey, true, IssueComposeFieldCue.HasId(card.VisaCategoryId))">
+                                            <span>Visa category *</span>
+                                            <select class="issue-issued-header-slot__input"
+                                                    value="@GuidText(card.VisaCategoryId)"
+                                                    @onchange="e => SetGuidAndReview(v => card.VisaCategoryId = v, e.Value, categoryKey)"
+                                                    @onfocusout="() => ReviewField(categoryKey)">
+                                                <option value="">—</option>
+                                                @foreach (var opt in _draft.VisaCategories)
+                                                {
+                                                    <option value="@opt.Id.ToString("N")">@opt.Caption</option>
+                                                }
+                                            </select>
+                                        </label>
+                                        <label class="issue-issued-header-slot__field @FieldCueClass(periodKey, true, IssueComposeFieldCue.HasId(card.VisaPeriodId))">
+                                            <span>Visa period *</span>
+                                            <select class="issue-issued-header-slot__input"
+                                                    value="@GuidText(card.VisaPeriodId)"
+                                                    @onchange="e => SetGuidAndReview(v => card.VisaPeriodId = v, e.Value, periodKey)"
+                                                    @onfocusout="() => ReviewField(periodKey)">
+                                                <option value="">—</option>
+                                                @foreach (var opt in _draft.VisaPeriods)
+                                                {
+                                                    <option value="@opt.Id.ToString("N")">@opt.Caption</option>
+                                                }
+                                            </select>
+                                        </label>
+                                        <label class="issue-issued-header-slot__field @FieldCueClass(placeKey, true, IssueComposeFieldCue.HasId(card.VisaIssuedPlaceId))">
+                                            <span>Visa issued place *</span>
+                                            <select class="issue-issued-header-slot__input"
+                                                    value="@GuidText(card.VisaIssuedPlaceId)"
+                                                    @onchange="e => SetGuidAndReview(v => card.VisaIssuedPlaceId = v, e.Value, placeKey)"
+                                                    @onfocusout="() => ReviewField(placeKey)">
+                                                <option value="">—</option>
+                                                @foreach (var opt in _draft.VisaIssuedPlaces)
+                                                {
+                                                    <option value="@opt.Id.ToString("N")">@opt.Caption</option>
+                                                }
+                                            </select>
+                                        </label>
+                                        <label class="issue-issued-header-slot__field @FieldCueClass(issueKey, true, IssueComposeFieldCue.HasDate(card.IssueDate))">
+                                            <span>Issued date *</span>
+                                            <input class="issue-issued-header-slot__input"
+                                                   type="date"
+                                                   @bind="card.IssueDate"
+                                                   @bind:format="yyyy-MM-dd"
+                                                   @onfocusout="() => ReviewField(issueKey)" />
+                                        </label>
+                                        <label class="issue-issued-header-slot__field @FieldCueClass(expKey, true, IssueComposeFieldCue.HasDate(card.ExpirationDate))">
+                                            <span>Expiration *</span>
+                                            <input class="issue-issued-header-slot__input"
+                                                   type="date"
+                                                   @bind="card.ExpirationDate"
+                                                   @bind:format="yyyy-MM-dd"
+                                                   @onfocusout="() => ReviewField(expKey)" />
+                                        </label>
+                                        <div class="issue-issued-header-slot__field issue-issued-header-slot__field--wide @FieldCueClass(zoneKey, false, IssueComposeFieldCue.HasText(card.BorderZoneLocation))">
+                                            <span>Border zone</span>
+                                            <BorderZoneLocationField Value="@card.BorderZoneLocation"
+                                                                     ValueChanged="@(value => OnPersonBorderZoneChanged(card, value, zoneKey))" />
+                                        </div>
+                                        <label class="issue-issued-header-slot__field issue-issued-header-slot__field--wide @FieldCueClass(passportKey, false, IssueComposeFieldCue.HasText(card.PassportNumber), true)">
+                                            <span>Passport number</span>
+                                            <input class="issue-issued-header-slot__input" value="@card.PassportNumber" disabled />
+                                        </label>
+                                        <div class="issue-issued-header-slot__field issue-issued-header-slot__field--wide">
+                                            <span>Visa copy</span>
+                                            <p class="issue-issued-header-slot__muted">
+                                                PDF or scan of this visa. Allowed: PDF, PNG, JPEG, TIFF, GIF, BMP — up to @MaxCopyUploadMb MB.
+                                            </p>
+                                            @if (card.Documents.Count == 0 && string.IsNullOrWhiteSpace(card.PendingCopyFileName))
+                                            {
+                                                <p class="issue-issued-header-slot__muted">No copy attached yet.</p>
+                                            }
+                                            else
+                                            {
+                                                <ul class="issue-issued-visa-slot__copy-list">
+                                                    @foreach (var doc in card.Documents)
+                                                    {
+                                                        <li @key="@doc.DocumentId">
+                                                            <span>@doc.FileName</span>
+                                                            @if (_draft.IsEditMode)
+                                                            {
+                                                                <button type="button"
+                                                                        class="issue-issued-header-slot__link-btn"
+                                                                        disabled="@_busy"
+                                                                        @onclick="() => RemoveCopyAsync(card, doc.DocumentId)">
+                                                                    Remove
+                                                                </button>
+                                                            }
+                                                        </li>
+                                                    }
+                                                    @if (!string.IsNullOrWhiteSpace(card.PendingCopyFileName))
+                                                    {
+                                                        <li>
+                                                            <span>@card.PendingCopyFileName (attaches on Create)</span>
+                                                            <button type="button"
+                                                                    class="issue-issued-header-slot__link-btn"
+                                                                    disabled="@_busy"
+                                                                    @onclick="() => ClearPendingCopy(card)">
+                                                                Remove
+                                                            </button>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            }
+                                            <label class="issue-issued-header-slot__upload">
+                                                <InputFile OnChange="e => OnCopyFileSelectedAsync(card, e)"
+                                                           accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp"
+                                                           disabled="@_busy" />
+                                                <span>Upload copy</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                }
+                            </article>
+                        }
+                    </section>
+                }
+
+                @if (!_draft.IsEditMode && _draft.PeopleWithoutIssuedInvitation.Count > 0)
+                {
+                    var omittedNames = string.Join(", ", _draft.PeopleWithoutIssuedInvitation);
+                    var omittedVerb = _draft.PeopleWithoutIssuedInvitation.Count == 1 ? "is" : "are";
+                    var omittedHave = _draft.PeopleWithoutIssuedInvitation.Count == 1 ? "has" : "have";
+                    <p class="issue-issued-visa-slot__omit">
+                        @omittedNames @omittedVerb on this case but @omittedHave no issued invitation — not listed.
+                    </p>
+                }
+
+                <div class="issue-issued-visa-slot__actions">
+                    <button type="button" class="issue-issued-header-slot__btn" disabled="@_busy" @onclick="ClosePanelAsync">Cancel</button>
+                    @if (_draft.IsEditMode)
+                    {
+                        <button type="button"
+                                class="issue-issued-header-slot__btn issue-issued-header-slot__btn--primary"
+                                disabled="@(!CanSaveVisa)"
+                                @onclick="SaveAsync">
+                            @(_busy ? "Saving…" : "Save")
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button"
+                                class="issue-issued-header-slot__btn issue-issued-header-slot__btn--primary"
+                                disabled="@(!CanCreate)"
+                                @onclick="CreateAsync">
+                            @(_busy ? "Creating…" : "Create visas")
+                        </button>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public IssueIssuedVisaSlotRequest? Request { get; set; }
+    [Parameter] public EventCallback CloseRequested { get; set; }
+
+    [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
+    [Inject] private IVisaPreviewSlotService SlotService { get; set; } = null!;
+    [Inject] private IApplicationWorkspacePersonUiActions? WorkspaceActions { get; set; }
+
+    private IssueIssuedVisaComposeDraft? _draft;
+    private IssueIssuedVisaCreateResult? _result;
+    private string? _loadError;
+    private string? _actionError;
+    private string? _saveMessage;
+    private string? _boundOccupantKey;
+    private string? _pristineFingerprint;
+    private bool _busy;
+    private const int MaxCopyUploadMb = 5;
+    private readonly HashSet<string> _reviewedFields = new(StringComparer.Ordinal);
+    private readonly HashSet<string> _defaultFields = new(StringComparer.Ordinal);
+
+    private string PanelTitle =>
+        _draft?.IsEditMode == true
+            ? (string.IsNullOrWhiteSpace(_draft.Title) ? "Issued visa" : _draft.Title)
+            : _result?.Succeeded == true ? "Issued visas" : "New issued visa";
+
+    private string ProfileSuffix =>
+        string.IsNullOrWhiteSpace(_draft?.ProfileCode) ? string.Empty : $" · {_draft.ProfileCode}";
+
+    private string CreatedBannerText
+    {
+        get
+        {
+            var count = _result?.Rows.Count ?? 0;
+            if (_draft?.UsesInvitationSource == true)
+            {
+                return count == 1
+                    ? "1 visa created — one per person with an issued invitation."
+                    : $"{count} visas created — one per person with an issued invitation.";
+            }
+
+            return count == 1
+                ? "1 visa created — one per person on this case."
+                : $"{count} visas created — one per person on this case.";
+        }
+    }
+
+    private string UnusedWarningText
+    {
+        get
+        {
+            if (_draft == null)
+                return string.Empty;
+            if (_draft.UsesInvitationSource)
+                return "Cannot create visas — no unused issued invitation line.";
+            if (!_draft.AllPeople.Any())
+                return "Cannot create visas — no people on this case.";
+            return "Cannot create visas — every person on this case already has an issued visa.";
+        }
+    }
+
+    private IEnumerable<IGrouping<string, IssueIssuedVisaCreatedRow>> CreatedGroups =>
+        (_result?.Rows ?? Array.Empty<IssueIssuedVisaCreatedRow>())
+            .GroupBy(r => CreatedGroupKey(r));
+
+    private string CreatedGroupKey(IssueIssuedVisaCreatedRow row)
+    {
+        if (_draft?.UsesInvitationSource != true)
+            return "People on this case";
+        return string.IsNullOrWhiteSpace(row.InvitationNumber) ? "—" : row.InvitationNumber;
+    }
+
+    private string CreatedGroupTitle(string key) =>
+        _draft?.UsesInvitationSource == true ? $"Invitation {key}" : key;
+
+    private bool CanCreate =>
+        _draft != null
+        && !_busy
+        && _draft.HasUnusedLine
+        && _draft.SelectedUnusedCount > 0;
+
+    /// <summary>
+    /// Edit: Save only when modified (XAF ObjectSpace.IsModified style).
+    /// </summary>
+    private bool CanSaveVisa =>
+        _draft is { IsEditMode: true }
+        && !_busy
+        && IsDirty;
+
+    private bool IsDirty =>
+        _draft != null
+        && !string.IsNullOrEmpty(_pristineFingerprint)
+        && !string.Equals(_pristineFingerprint, BuildFingerprint(), StringComparison.Ordinal);
+
+    protected override void OnParametersSet()
+    {
+        if (Request == null)
+        {
+            _draft = null;
+            _result = null;
+            _loadError = "Compose request is missing.";
+            _boundOccupantKey = null;
+            _pristineFingerprint = null;
+            return;
+        }
+
+        var occupantKey = VisaPreviewSlotOccupantKeys.ForIssueIssuedVisa(Request);
+        if (string.Equals(_boundOccupantKey, occupantKey, StringComparison.Ordinal) && _draft != null)
+            return;
+
+        _boundOccupantKey = occupantKey;
+        _result = null;
+        _actionError = null;
+        _saveMessage = null;
+        LoadDraft();
+    }
+
+    private void LoadDraft()
+    {
+        _loadError = null;
+        _draft = null;
+        _result = null;
+        if (Request == null || Request.ApplicationProfileInstanceId == Guid.Empty)
+        {
+            _loadError = "Application is not available.";
+            _pristineFingerprint = null;
+            return;
+        }
+
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        if (Request.ExistingVisaId is Guid visaId && visaId != Guid.Empty)
+        {
+            _draft = IssueIssuedVisaComposeService.LoadExistingDraft(
+                objectSpace,
+                Request.ApplicationProfileInstanceId,
+                visaId);
+            if (_draft == null)
+            {
+                _loadError = "This visa is not issued by this application.";
+                _pristineFingerprint = null;
+            }
+            else
+            {
+                CaptureFieldCues();
+                CapturePristine();
+            }
+            return;
+        }
+
+        _draft = IssueIssuedVisaComposeService.LoadDraft(objectSpace, Request.ApplicationProfileInstanceId);
+        if (_draft == null)
+        {
+            _loadError = "This application cannot issue visas.";
+            _pristineFingerprint = null;
+        }
+        else
+        {
+            CaptureFieldCues();
+            CapturePristine();
+        }
+    }
+
+    private void OnIncludeChanged(IssueIssuedVisaPersonCardDraft person, ChangeEventArgs e)
+    {
+        if (person.AlreadyIssued || !person.IsReady)
+            return;
+
+        person.Include = e.Value is bool flag
+            ? flag
+            : bool.TryParse(e.Value?.ToString(), out var parsed) && parsed;
+    }
+
+    private void RemovePerson(IssueIssuedVisaPersonCardDraft person)
+    {
+        if (person.AlreadyIssued)
+            return;
+        person.Include = false;
+    }
+
+    private void OnPersonBorderZoneChanged(IssueIssuedVisaPersonCardDraft person, string? value, string cueKey)
+    {
+        person.BorderZoneLocation = value ?? string.Empty;
+        ReviewField(cueKey);
+    }
+
+    private static string CueKey(IssueIssuedVisaPersonCardDraft person, string field)
+    {
+        var id = person.InvitationItemId != Guid.Empty ? person.InvitationItemId : person.PersonId;
+        return $"{id:N}:{field}";
+    }
+
+    private string FieldCueClass(string key, bool required, bool hasValue, bool sourced = false) =>
+        IssueComposeFieldCue.FieldClass(
+            required,
+            hasValue,
+            isDefault: _defaultFields.Contains(key),
+            reviewed: _reviewedFields.Contains(key),
+            sourced);
+
+    private void ReviewField(string key)
+    {
+        if (string.IsNullOrEmpty(key))
+            return;
+        _reviewedFields.Add(key);
+    }
+
+    private void SetGuidAndReview(Action<Guid?> setter, object? raw, string cueKey)
+    {
+        setter(ParseGuid(raw));
+        ReviewField(cueKey);
+    }
+
+    private void CaptureFieldCues()
+    {
+        _reviewedFields.Clear();
+        _defaultFields.Clear();
+        if (_draft == null)
+            return;
+
+        foreach (var person in _draft.AllPeople)
+        {
+            if (IssueComposeFieldCue.HasText(person.VisaNumber))
+                _defaultFields.Add(CueKey(person, "visaNumber"));
+            if (IssueComposeFieldCue.HasId(person.VisaTypeId))
+                _defaultFields.Add(CueKey(person, "visaType"));
+            if (IssueComposeFieldCue.HasId(person.VisaCategoryId))
+                _defaultFields.Add(CueKey(person, "visaCategory"));
+            if (IssueComposeFieldCue.HasId(person.VisaPeriodId))
+                _defaultFields.Add(CueKey(person, "visaPeriod"));
+            if (IssueComposeFieldCue.HasId(person.VisaIssuedPlaceId))
+                _defaultFields.Add(CueKey(person, "visaPlace"));
+            if (IssueComposeFieldCue.HasDate(person.IssueDate))
+                _defaultFields.Add(CueKey(person, "issueDate"));
+            if (IssueComposeFieldCue.HasDate(person.ExpirationDate))
+                _defaultFields.Add(CueKey(person, "expiration"));
+            if (IssueComposeFieldCue.HasText(person.BorderZoneLocation))
+                _defaultFields.Add(CueKey(person, "borderZone"));
+        }
+
+        if (_draft.IsEditMode)
+        {
+            foreach (var key in _defaultFields)
+                _reviewedFields.Add(key);
+            _defaultFields.Clear();
+        }
+    }
+
+    private void ClearPendingCopy(IssueIssuedVisaPersonCardDraft person)
+    {
+        person.PendingCopyFileName = null;
+        person.PendingCopyBytes = null;
+        _actionError = null;
+    }
+
+    private async Task OnCopyFileSelectedAsync(IssueIssuedVisaPersonCardDraft person, InputFileChangeEventArgs args)
+    {
+        if (_draft == null || _busy || args.FileCount == 0)
+            return;
+
+        var file = args.File;
+        if (file == null)
+            return;
+
+        _busy = true;
+        _actionError = null;
+        _saveMessage = null;
+        try
+        {
+            await using var stream = file.OpenReadStream(MaxCopyUploadMb * 1024L * 1024L);
+            using var memory = new System.IO.MemoryStream();
+            await stream.CopyToAsync(memory);
+            var content = memory.ToArray();
+            var fileName = file.Name;
+
+            if (_draft.IsEditMode && person.ExistingVisaId is Guid visaId && visaId != Guid.Empty)
+            {
+                using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+                var result = IssueIssuedVisaComposeService.AddDocument(
+                    objectSpace,
+                    Request!.ApplicationProfileInstanceId,
+                    visaId,
+                    fileName,
+                    content);
+                if (!result.Succeeded)
+                {
+                    _actionError = result.ErrorMessage;
+                    return;
+                }
+
+                ReloadDocuments(person);
+                _saveMessage = "Copy saved.";
+                WorkspaceActions?.NotifyWorkspaceChanged();
+            }
+            else
+            {
+                using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+                var validationError = IssueIssuedHeaderComposeService.ValidateDocumentBytes(
+                    objectSpace, fileName, content);
+                if (!string.IsNullOrEmpty(validationError))
+                {
+                    _actionError = validationError;
+                    return;
+                }
+
+                person.PendingCopyFileName = fileName;
+                person.PendingCopyBytes = content;
+            }
+        }
+        catch (Exception ex)
+        {
+            _actionError = ex.Message;
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task RemoveCopyAsync(IssueIssuedVisaPersonCardDraft person, Guid documentId)
+    {
+        if (_draft == null || _busy || documentId == Guid.Empty)
+            return;
+        if (person.ExistingVisaId is not Guid visaId || visaId == Guid.Empty)
+            return;
+
+        _busy = true;
+        _actionError = null;
+        try
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+            var result = IssueIssuedVisaComposeService.RemoveDocument(
+                objectSpace,
+                Request!.ApplicationProfileInstanceId,
+                visaId,
+                documentId);
+            if (!result.Succeeded)
+            {
+                _actionError = result.ErrorMessage;
+                return;
+            }
+
+            ReloadDocuments(person);
+            WorkspaceActions?.NotifyWorkspaceChanged();
+        }
+        finally
+        {
+            _busy = false;
+        }
+
+        await Task.CompletedTask;
+    }
+
+    private void ReloadDocuments(IssueIssuedVisaPersonCardDraft person)
+    {
+        if (person.ExistingVisaId is not Guid visaId || visaId == Guid.Empty)
+            return;
+
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        person.Documents = IssueIssuedVisaComposeService.ListDocuments(objectSpace, visaId).ToList();
+    }
+
+    private void CapturePristine()
+    {
+        _pristineFingerprint = _draft == null ? null : BuildFingerprint();
+    }
+
+    private string BuildFingerprint()
+    {
+        var person = _draft?.AllPeople.FirstOrDefault();
+        if (person == null)
+            return string.Empty;
+
+        return string.Join("|",
+            person.VisaNumber?.Trim() ?? string.Empty,
+            GuidText(person.VisaTypeId),
+            GuidText(person.VisaCategoryId),
+            GuidText(person.VisaPeriodId),
+            GuidText(person.VisaIssuedPlaceId),
+            person.IssueDate.ToString("yyyy-MM-dd"),
+            person.ExpirationDate?.ToString("yyyy-MM-dd") ?? string.Empty,
+            person.BorderZoneLocation?.Trim() ?? string.Empty);
+    }
+
+    private async Task CreateAsync()
+    {
+        if (!CanCreate || Request == null || _draft == null)
+            return;
+
+        _busy = true;
+        _actionError = null;
+        try
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+            _result = IssueIssuedVisaComposeService.Create(objectSpace, _draft);
+            if (_result.Succeeded)
+            {
+                WorkspaceActions?.NotifyWorkspaceChanged();
+            }
+            else
+            {
+                _actionError = _result.ErrorMessage ?? "Cannot create visas.";
+                _result = null;
+            }
+        }
+        finally
+        {
+            _busy = false;
+        }
+
+        await Task.CompletedTask;
+    }
+
+    private async Task SaveAsync()
+    {
+        if (!CanSaveVisa || Request == null || _draft == null)
+            return;
+
+        _busy = true;
+        _actionError = null;
+        _saveMessage = null;
+        try
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+            var result = IssueIssuedVisaComposeService.Update(objectSpace, _draft);
+            if (result.Succeeded)
+            {
+                WorkspaceActions?.NotifyWorkspaceChanged();
+                LoadDraft();
+                _saveMessage = "Visa saved.";
+            }
+            else
+            {
+                _actionError = result.ErrorMessage ?? "Cannot save visa.";
+            }
+        }
+        finally
+        {
+            _busy = false;
+        }
+
+        await Task.CompletedTask;
+    }
+
+    private async Task OpenCreatedInApp()
+    {
+        var first = _result?.Rows.FirstOrDefault();
+        if (first == null || Request == null || first.VisaId == Guid.Empty)
+        {
+            await ClosePanelAsync();
+            return;
+        }
+
+        await SlotService.OpenIssueIssuedVisaAsync(
+            new IssueIssuedVisaSlotRequest
+            {
+                ApplicationProfileInstanceId = Request.ApplicationProfileInstanceId,
+                ExistingVisaId = first.VisaId,
+            },
+            SlotService.State.OwnerViewId);
+    }
+
+    private Task ClosePanelAsync() => CloseRequested.InvokeAsync();
+
+    private static string GuidText(Guid? id) =>
+        id is Guid g && g != Guid.Empty ? g.ToString("N") : string.Empty;
+
+    private static Guid? ParseGuid(object? value)
+    {
+        var text = value?.ToString();
+        return Guid.TryParse(text, out var id) && id != Guid.Empty ? id : null;
+    }
+
+    private static string LookupCaption(IReadOnlyList<IssueIssuedVisaLookupOption> options, Guid? id)
+    {
+        if (id is not Guid guid || guid == Guid.Empty)
+            return "—";
+        return options.FirstOrDefault(o => o.Id == guid)?.Caption ?? "—";
+    }
+
+    private static string Initials(string? name)
+    {
+        var parts = (name ?? string.Empty).Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 0)
+            return "?";
+        if (parts.Length == 1)
+        {
+            var one = parts[0];
+            return one.Length >= 2 ? one[..2].ToUpperInvariant() : one.ToUpperInvariant();
+        }
+
+        return $"{char.ToUpperInvariant(parts[0][0])}{char.ToUpperInvariant(parts[1][0])}";
+    }
+}

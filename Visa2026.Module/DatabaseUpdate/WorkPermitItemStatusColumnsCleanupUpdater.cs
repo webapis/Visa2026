@@ -5,7 +5,7 @@ using DevExpress.ExpressApp.Updating;
 namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
-/// Drops <c>WorkPermitItems.IsChanged</c> and <c>WorkPermitItems.IsExtended</c>; change workflow uses <see cref="BusinessObjects.ApplicationItem.WorkPermitItemIsChanged"/> only.
+/// Drops <c>WorkPermitItems.IsChanged</c> and <c>WorkPermitItems.IsExtended</c>; change workflow uses <see cref="BusinessObjects.ApplicationRosterMergeLine.WorkPermitItemIsChanged"/> only.
 /// </summary>
 public sealed class WorkPermitItemStatusColumnsCleanupUpdater : ModuleUpdater
 {

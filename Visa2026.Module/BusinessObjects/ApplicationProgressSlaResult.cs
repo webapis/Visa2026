@@ -1,7 +1,7 @@
 namespace Visa2026.Module.BusinessObjects;
 
-public readonly record struct ApplicationProgressSlaResult(
-    ApplicationProgressSlaStatus Status,
+public readonly record struct ApplicationProfileInstanceProgressSlaResult(
+    ApplicationProfileInstanceProgressSlaStatus Status,
     int? WorkingDaysInCurrentStep,
     int? MaxDaysInReview,
     int? WarningDaysBeforeMax,
@@ -9,8 +9,8 @@ public readonly record struct ApplicationProgressSlaResult(
 {
     public string? AppearanceStateCode => Status switch
     {
-        ApplicationProgressSlaStatus.Warning => ApplicationProgressSlaCodes.Warning,
-        ApplicationProgressSlaStatus.Overdue => ApplicationProgressSlaCodes.Overdue,
+        ApplicationProfileInstanceProgressSlaStatus.Warning => ApplicationProfileInstanceProgressSlaCodes.Warning,
+        ApplicationProfileInstanceProgressSlaStatus.Overdue => ApplicationProfileInstanceProgressSlaCodes.Overdue,
         _ => null
     };
 }

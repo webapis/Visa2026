@@ -4,7 +4,7 @@
 
 The `IExpirationLogic` interface defines a standard contract for business objects whose **validity states** use the **`DaysRemaining`** temporal type — a countdown to `ExpirationDate`.
 
-> **Temporal types:** See **[`docs/BO_STATE_TEMPORAL_TYPES.md`](../../docs/BO_STATE_TEMPORAL_TYPES.md)** for the full registry (`DaysRemaining` vs `DaysElapsed`). Process/workflow BOs such as **`ApplicationProgress`** use **`DaysElapsed`** instead and do **not** implement this interface.
+> **Temporal types:** See **[`docs/BO_STATE_TEMPORAL_TYPES.md`](../../docs/BO_STATE_TEMPORAL_TYPES.md)** for the full registry (`DaysRemaining` vs `DaysElapsed`). Process/workflow BOs such as **`ApplicationProfileInstanceProgress`** use **`DaysElapsed`** instead and do **not** implement this interface.
 
 ## 2. Purpose & Problem Solved
 
@@ -46,7 +46,7 @@ Optional on implementing classes (not on the interface):
 | **Invitation** | `ExpirationDate` | `Invitation` |
 | **BorderZone** | `ExpirationDate` | `BorderZone` |
 
-**Not** implementing this interface: **`Application`**, **`ApplicationProgress`** (workflow — **`DaysElapsed`** on `ApplicationProgress.Date`).
+**Not** implementing this interface: **`Application`**, **`ApplicationProfileInstanceProgress`** (workflow — **`DaysElapsed`** on `ApplicationProfileInstanceProgress.Date`).
 
 ## 6. Usage examples
 

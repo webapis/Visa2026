@@ -14,15 +14,15 @@ namespace Visa2026.Module.Controllers
 
             bool allowEdit = false; // Default to locked
 
-            // Allow editing only when creating a new Person from an ApplicationItem
-            // where the Application category is 'Both'.
+            // Allow editing only when creating a new Person from an ApplicationRosterMergeLine
+            // where the ApplicationProfileInstance category is 'Both'.
             if (View.ObjectSpace.IsNewObject(View.CurrentObject))
             {
                 if (View.ObjectSpace.Owner is Link link &&
                     link.ListView.CollectionSource is PropertyCollectionSource propertyCollectionSource &&
-                    propertyCollectionSource.MasterObject is ApplicationItem appItem)
+                    propertyCollectionSource.MasterObject is ApplicationRosterMergeLine appItem)
                 {
-                    if (appItem.Application?.ApplicationType?.Category == ApplicationTypeCategory.Both)
+                    if (appItem.ApplicationProfileInstance?.ApplicationType?.Category == ApplicationTypeCategory.Both)
                     {
                         allowEdit = true;
                     }

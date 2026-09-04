@@ -10,8 +10,6 @@ namespace Visa2026.Module.DatabaseUpdate;
 /// <summary>
 /// Syncs <see cref="ApplicationType"/> rows from <see cref="ApplicationTypeConfigurationSeed"/>.
 /// On every deploy: all <c>Show*</c> flags are overwritten from seed. Other fields are updated when seed supplies values.
-/// Migration SLA profile links are applied by <see cref="ApplicationMigrationSlaProfileTypeLinkUpdater"/>
-/// from nested <c>ApplicationTypeNames</c> on tenant <c>application-migration-sla-profile.json</c>.
 /// Creates missing types by <see cref="ApplicationType.Name"/>.
 /// </summary>
 public sealed class ApplicationTypeConfigurationUpdater : ModuleUpdater

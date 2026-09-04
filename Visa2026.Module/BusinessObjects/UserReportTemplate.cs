@@ -62,12 +62,12 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("Caption", "Root Business Object")]
         [ImmediatePostData]
         [ToolTip("Criteria editor member list follows this type. Changing it clears no text — re-open the criteria popup if members look wrong.")]
-        public virtual UserReportBoType RootBoType { get; set; } = UserReportBoType.Application;
+        public virtual UserReportBoType RootBoType { get; set; } = UserReportBoType.ApplicationProfileInstance;
 
         [Browsable(false)]
         [VisibleInDetailView(false)]
         [VisibleInListView(false)]
-        [Obsolete("No longer used. Visibility is determined by Applicable Application Types, Applicable Application Type Groups, Applicable Project Contracts, and Visibility Criteria.")]
+        [Obsolete("No longer used. Visibility is determined by Applicable ApplicationProfileInstance Types, Applicable ApplicationProfileInstance Type Groups, Applicable Project Contracts, and Visibility Criteria.")]
         public virtual ApplicabilityMode ApplicabilityMode { get; set; } = ApplicabilityMode.AllTypes;
 
         [FieldSize(FieldSizeAttribute.Unlimited)]
@@ -76,7 +76,7 @@ namespace Visa2026.Module.BusinessObjects
         [EditorAlias(EditorAliases.PopupCriteriaPropertyEditor)]
         [VisibleInDetailView(true)]
         [VisibleInListView(false)]
-        [ToolTip("Optional. When empty, no extra filter. When set, the criteria must pass on the Application or on child rows per Root Business Object.")]
+        [ToolTip("Optional. When empty, no extra filter. When set, the criteria must pass on the ApplicationProfileInstance or on child rows per Root Business Object.")]
         public virtual string VisibilityCriteria { get; set; } = string.Empty;
 
         /// <summary>Type passed to the criteria property editor; aligned with <see cref="RootBoType"/>.</summary>
@@ -85,23 +85,23 @@ namespace Visa2026.Module.BusinessObjects
         public virtual Type CriteriaTargetType =>
             RootBoType switch
             {
-                UserReportBoType.ApplicationItem => typeof(ApplicationItem),
+                UserReportBoType.ApplicationItem => typeof(ApplicationRosterMergeLine),
                 UserReportBoType.Person => typeof(Person),
-                _ => typeof(Application)
+                _ => typeof(ApplicationProfileInstance)
             };
 
         [Aggregated]
-        [ModelDefault("Caption", "Applicable Application Types")]
+        [ModelDefault("Caption", "Applicable ApplicationProfileInstance Types")]
         [VisibleInDetailView(true)]
         [VisibleInListView(false)]
         [ToolTip("Optional individual types. Empty type links and empty group links = all application types. When either list has rows, the current Application’s type must match a linked type or a member of a linked group (union).")]
         public virtual IList<UserReportTemplateApplicationType> ApplicableTypeLinks { get; set; }
 
         [Aggregated]
-        [ModelDefault("Caption", "Applicable Application Type Groups")]
+        [ModelDefault("Caption", "Applicable ApplicationProfileInstance Type Groups")]
         [VisibleInDetailView(true)]
         [VisibleInListView(false)]
-        [ToolTip("Optional groups (e.g. Registration). Combined with Applicable Application Types as a union. Empty type links and empty group links = all application types.")]
+        [ToolTip("Optional groups (e.g. Registration). Combined with Applicable ApplicationProfileInstance Types as a union. Empty type links and empty group links = all application types.")]
         public virtual IList<UserReportTemplateApplicationTypeGroup> ApplicableGroupLinks { get; set; }
 
         [Aggregated]
@@ -110,7 +110,7 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(false)]
         [Appearance("HideApplicableProjectContractsForPersonRoot", Visibility = ViewItemVisibility.Hide,
             Criteria = "RootBoType = ##Enum#Visa2026.Module.BusinessObjects.UserReportBoType,Person#")]
-        [ToolTip("Optional. When empty, no project-contract filter. When set, the current Application’s Project Contract must match one of these rows (Application and ApplicationItem roots). Use Visibility Criteria for patterns such as GT-15 (NameTm contains).")]
+        [ToolTip("Optional. When empty, no project-contract filter. When set, the current Application’s Project Contract must match one of these rows (ApplicationProfileInstance and ApplicationRosterMergeLine roots). Use Visibility Criteria for patterns such as GT-15 (NameTm contains).")]
         public virtual IList<UserReportTemplateProjectContract> ApplicableProjectContractLinks { get; set; }
 
         [ModelDefault("Caption", "Is Active")]
@@ -118,6 +118,20 @@ namespace Visa2026.Module.BusinessObjects
 
         [ModelDefault("Caption", "Sort Order")]
         public virtual int SortOrder { get; set; } = 0;
+
+        [Browsable(false)]
+        public virtual DateTime? CreatedOnUtc { get; set; }
+
+        [Browsable(false)]
+        [MaxLength(255)]
+        public virtual string? CreatedByUserName { get; set; }
+
+        [Browsable(false)]
+        public virtual DateTime? ModifiedOnUtc { get; set; }
+
+        [Browsable(false)]
+        [MaxLength(255)]
+        public virtual string? ModifiedByUserName { get; set; }
 
         [Aggregated]
         [Browsable(false)]
@@ -160,6 +174,12 @@ namespace Visa2026.Module.BusinessObjects
                 return TemplateOutputFormat.Excel;
 
             return TemplateOutputFormat.Word;
+        }
+
+        public override void OnSaving()
+        {
+            base.OnSaving();
+            TemplateCatalogAuditStamp.Touch(this, SecuritySystem.CurrentUserName);
         }
     }
 }

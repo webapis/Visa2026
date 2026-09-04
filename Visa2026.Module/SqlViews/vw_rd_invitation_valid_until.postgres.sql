@@ -43,8 +43,8 @@ INNER JOIN "Invitations" inv
     ON inv."ID" = ii."InvitationID" AND COALESCE(inv."GCRecord", 0) = 0
 INNER JOIN "People" p
     ON p."ID" = ii."PersonID" AND COALESCE(p."GCRecord", 0) = 0
-LEFT JOIN "Applications" a
-    ON a."ID" = inv."ApplicationID" AND COALESCE(a."GCRecord", 0) = 0
+LEFT JOIN "ApplicationProfileInstances" a
+    ON a."ID" = inv."ApplicationProfileInstanceID" AND COALESCE(a."GCRecord", 0) = 0
 LEFT JOIN "ProjectContracts" apc
     ON apc."ID" = a."ProjectContractID" AND COALESCE(apc."GCRecord", 0) = 0
 LEFT JOIN "ProjectContracts" pc
@@ -54,9 +54,20 @@ LEFT JOIN "People" sp
 LEFT JOIN "ProjectContracts" spc
     ON spc."ID" = sp."ProjectContractID" AND COALESCE(spc."GCRecord", 0) = 0
 WHERE COALESCE(ii."GCRecord", 0) = 0
-  AND COALESCE(ii."IsUsed", FALSE) = FALSE
-  AND COALESCE(ii."IsCancelled", FALSE) = FALSE
-  AND COALESCE(ii."IsChanged", FALSE) = FALSE
+  AND NOT EXISTS (
+      SELECT 1 FROM "Visas" vis
+      WHERE vis."IssuingInvitationItemID" = ii."ID"
+        AND COALESCE(vis."GCRecord", 0) = 0)
+  AND NOT EXISTS (
+      SELECT 1
+      FROM "ApplicationProfileInstanceInvitationItems" j
+      INNER JOIN "ApplicationProfileInstances" api ON api."ID" = j."ApplicationProfileInstanceId"
+      INNER JOIN "ApplicationProfiles" ap ON ap."ID" = api."ApplicationProfileID"
+      WHERE j."InvitationItemId" = ii."ID"
+        AND COALESCE(api."GCRecord", 0) = 0
+        AND COALESCE(ap."GCRecord", 0) = 0
+        AND ap."ActionFamily" IN (1, 4)
+        AND BTRIM(COALESCE(api."LatestPrimaryStateCode", '')) = 'PROCESS_ISSUED')
   AND ii."PersonID" IS NOT NULL
   AND inv."ExpirationDate" IS NOT NULL
   AND (inv."ExpirationDate")::date >= CURRENT_DATE;

@@ -1,0 +1,1643 @@
+@namespace Visa2026.Blazor.Server.Editors
+@using DevExpress.Data.Filtering
+@using DevExpress.ExpressApp
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.Extensions.Options
+@using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Services.ApplicationProfileWizard
+@using Visa2026.Module.Services.RuntimeLogging
+@using Visa2026.Module.Services.TemplateConvert
+@using Visa2026.Module.Services.TemplateScan
+@using Visa2026.Module.Services
+@using Visa2026.Module.Services.UserReports
+
+@* Officer-facing scan-to-template modal (S3). Interaction contract: docs/TEMPLATE_AI_SCAN_UI_FLOW.md. *@
+
+@if (_open)
+{
+    <div class="tas-backdrop" @onclick="RequestCloseAsync">
+        <div class="tas-modal @ModalWidthClass"
+             role="dialog" aria-modal="true" aria-labelledby="tas-title" @onclick:stopPropagation="true">
+            <header class="tas-modal__head">
+                <div>
+                    <h2 id="tas-title">@(IsEditingExisting ? "Review placeholders" : "Create template from yellow marks")</h2>
+                    <p>@_profileName@(string.IsNullOrEmpty(_caseNumber) ? string.Empty : " · case " + _caseNumber)</p>
+                </div>
+                <button type="button" class="tas-icon-btn" aria-label="Close" @onclick="RequestCloseAsync">&#10005;</button>
+            </header>
+
+            <ol class="tas-stepper">
+                @foreach (var step in StepLabels)
+                {
+                    <li class="tas-stepper__item @StepCssClass(step.Index)">
+                        <span class="tas-stepper__dot">@StepMark(step.Index)</span>
+                        <span>@step.Label</span>
+                    </li>
+                }
+            </ol>
+
+            <div class="tas-modal__body">
+                @if (_stage == Stage.Upload)
+                {
+                    <div class="tas-form @(_busy ? "is-busy" : null)">
+                        <div class="tas-field">
+                            <label class="tas-field__label" for="tas-name">Template name <em>*</em></label>
+                            <input id="tas-name" class="tas-input" value="@_templateName"
+                                   @oninput="e => _templateName = e.Value?.ToString() ?? string.Empty" />
+                        </div>
+
+                        <div class="tas-field">
+                            <span class="tas-field__label">
+                                Save to
+                                <button type="button" class="tas-tip" data-tip="@SaveToHint" aria-label="@SaveToHint">?</button>
+                            </span>
+                            <label class="tas-radio">
+                                <input type="radio" name="tas-scope" checked="@(_catalogScope == ApplicationProfileTemplateCatalogScope.ProfileSpecific)"
+                                       @onchange="() => _catalogScope = ApplicationProfileTemplateCatalogScope.ProfileSpecific" />
+                                <span>This profile only</span>
+                            </label>
+                            <label class="tas-radio">
+                                <input type="radio" name="tas-scope" checked="@(_catalogScope == ApplicationProfileTemplateCatalogScope.Global)"
+                                       @onchange="() => _catalogScope = ApplicationProfileTemplateCatalogScope.Global" />
+                                <span>Shared catalog</span>
+                            </label>
+                            @if (_catalogScope == ApplicationProfileTemplateCatalogScope.ProfileSpecific)
+                            {
+                                <div class="tas-field tas-field--nested">
+                                    <span class="tas-field__label">
+                                        @ApplicabilityTitle
+                                        <button type="button" class="tas-tip" data-tip="@ApplicabilityHint" aria-label="@ApplicabilityHint">?</button>
+                                    </span>
+                                    <select class="tas-input" value="@_applicabilityId" @onchange="OnApplicabilityChanged">
+                                        <option value="">@ApplicabilityEmptyLabel</option>
+                                        @foreach (var item in _applicabilityLookups)
+                                        {
+                                            <option value="@item.Id.ToString("D")">@item.DisplayName</option>
+                                        }
+                                    </select>
+                                </div>
+                            }
+                        </div>
+
+                        @if (_source != EntrySource.Instance)
+                        {
+                            <div class="tas-field">
+                                <span class="tas-field__label">
+                                    Case <em>*</em>
+                                    <button type="button" class="tas-tip" data-tip="@CaseHint" aria-label="@CaseHint">?</button>
+                                </span>
+                                @if (_instanceOptions.Count == 0)
+                                {
+                                    <p class="tas-banner tas-banner--fail" style="margin:0">
+                                        No cases on this profile yet. Add a case first to open the template wizard.
+                                    </p>
+                                }
+                                else
+                                {
+                                    <select id="tas-instance" class="tas-input" value="@_selectedInstanceId" @onchange="OnInstanceChanged">
+                                        <option value="@Guid.Empty">Choose a case…</option>
+                                        @foreach (var option in _instanceOptions)
+                                        {
+                                            <option value="@option.Id">@option.Label</option>
+                                        }
+                                    </select>
+                                }
+                            </div>
+                        }
+
+                        <div class="tas-field">
+                            <span class="tas-field__label">
+                                File <em>*</em>
+                                <button type="button" class="tas-tip" data-tip="@FileHint" aria-label="@FileHint">?</button>
+                            </span>
+                            <label class="tas-drop @(_fileBytes is { Length: > 0 } ? "is-picked" : string.Empty)">
+                                <InputFile id="tas-file" OnChange="OnFileSelectedAsync" accept=".docx,.xlsx" />
+                                @if (_fileBytes is { Length: > 0 })
+                                {
+                                    <strong>@_fileName</strong>
+                                    <small>@($"{_fileBytes.Length / 1024:N0} KB")</small>
+                                }
+                                else
+                                {
+                                    <strong>Drop Word or Excel here</strong>
+                                    <small>.docx / .xlsx with yellow marks</small>
+                                }
+                            </label>
+                        </div>
+
+                        @if (false && _pdfPageCount > 1)
+                        {
+                            <div class="tas-field">
+                                <span class="tas-field__label">PDF pages (@_pdfPageCount total · pick up to @Options.Value.MaxPdfPages)</span>
+                                <div class="tas-pdf-pages">
+                                    @for (var page = 1; page <= _pdfPageCount; page++)
+                                    {
+                                        var selected = _selectedPdfPages.Contains(page);
+                                        <label class="tas-pdf-page @(selected ? "is-on" : string.Empty)">
+                                            <input type="checkbox" checked="@selected" @onchange="e => TogglePdfPage(page, e)" hidden />
+                                            <span class="tas-pdf-page__thumb"></span>
+                                            <span>Page @(page)</span>
+                                        </label>
+                                    }
+                                </div>
+                                <small>@SelectedPdfPagesSummary</small>
+                            </div>
+                        }
+                    </div>
+                }
+                else if (_stage == Stage.ScanFail && _ingest is { } failedIngest)
+                {
+                    <div class="tas-fail-panel">
+                        <h3>@(IsEditingExisting ? "This template cannot be reviewed" : "Scan quality check failed")</h3>
+                        <p>@(IsEditingExisting
+                            ? "The catalog file has no yellow highlights and no library placeholders to remap."
+                            : "This scan cannot be turned into a template yet. Try a sharper photo, higher resolution, or a different file.")</p>
+                        <ul class="tas-issues" style="width:100%;text-align:left">
+                            @foreach (var issue in failedIngest.Suitability.Issues)
+                            {
+                                <li class="tas-issue tas-issue--fail">@issue.Message</li>
+                            }
+                        </ul>
+                    </div>
+                }
+                else if (_stage == Stage.FieldReview && _ingest is { } ingest && _fieldPlan is { } plan)
+                {
+                    @if (RequiresLowConfidenceAck)
+                    {
+                        <div class="tas-banner tas-banner--warn">
+                            Some fields have low confidence or the scan quality is borderline. Review boxes on the scan and acknowledge before continuing.
+                        </div>
+                    }
+
+                    @if (IsEditingExisting)
+                    {
+                        <div class="tas-form" style="margin-bottom:0.75rem">
+                            <div class="tas-field">
+                                <label class="tas-field__label" for="tas-review-name">Template name <em>*</em></label>
+                                <input id="tas-review-name" class="tas-input" value="@_templateName"
+                                       @oninput="e => _templateName = e.Value?.ToString() ?? string.Empty" />
+                                @if (IsLockedExistingOverwrite)
+                                {
+                                    <small>Profile is locked — change the name to save a new catalog copy. Overwriting this template stays blocked.</small>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <TemplateScanFieldReviewView FieldPlan="plan"
+                                                 Pages="ingest.Input.Pages"
+                                                 FileName="@_fileName"
+                                                 SuitabilityVerdict="ingest.Suitability.Verdict"
+                                                 IsOfficeSource="ingest.Input.IsOfficeSource"
+                                                 OfficePackageBytes="ingest.Input.OfficePackageBytes"
+                                                 SourceKind="ingest.Input.SourceKind"
+                                                 @bind-ActivePageIndex="_reviewPageIndex"
+                                                 @bind-HoveredFieldId="_hoveredFieldId"
+                                                 @bind-SelectedFieldId="_reviewSelectedFieldId"
+                                                 FieldPlanChanged="OnOfficerFieldPlanChanged"
+                                                 AskAiEnabled="_aiEnabled"
+                                                 AskAi="OpenReviewChat" />
+
+                    @if (_reviewChatOpen)
+                    {
+                        <div class="tas-review-chat">
+                            <TemplateScanClarificationView Compact="true"
+                                                         FocusCaption="@ReviewChatFocusCaption"
+                                                         Messages="_chatMessages"
+                                                         QuickReplies="_quickReplies"
+                                                         InputText="@_chatInput"
+                                                         InputTextChanged="OnChatInputChanged"
+                                                         Busy="_chatBusy"
+                                                         ShowRejectBanner="_chatRejectBanner"
+                                                         RejectBannerText="@_chatRejectText"
+                                                         OnSend="SendChatAsync"
+                                                         OnQuickReply="SendQuickReplyAsync"
+                                                         OnBack="HideReviewChat" />
+                        </div>
+                    }
+
+                    @if (RequiresLowConfidenceAck)
+                    {
+                        <label class="tas-ack">
+                            <input type="checkbox" checked="@_acknowledgedWarnings"
+                                   @onchange="e => _acknowledgedWarnings = (bool?)e.Value == true" />
+                            <span><strong>I reviewed the warnings</strong> and want to continue with this field plan.</span>
+                        </label>
+                    }
+                }
+                else if (_stage == Stage.Clarification && _fieldPlan is { } chatPlan && _ingest is { } chatIngest)
+                {
+                    <TemplateScanClarificationView Messages="_chatMessages"
+                                                 QuickReplies="_quickReplies"
+                                                 InputText="@_chatInput"
+                                                 InputTextChanged="OnChatInputChanged"
+                                                 Busy="_chatBusy"
+                                                 ShowRejectBanner="_chatRejectBanner"
+                                                 RejectBannerText="@_chatRejectText"
+                                                 OnSend="SendChatAsync"
+                                                 OnQuickReply="SendQuickReplyAsync"
+                                                 OnBack="BackToFieldReview" />
+                }
+                else if (_stage == Stage.Generating)
+                {
+                    <div class="tas-generating">
+                        <h3>Building draft template…</h3>
+                        <p>@(IsOfficeUpload ? "Writing library tokens into your yellow-marked Word/Excel file…" : "Turning the reviewed field plan into a merge template…") Extract/Validate runs next.</p>
+                        <div class="tas-progress"><div class="tas-progress__bar tas-progress__bar--indeterminate"></div></div>
+                    </div>
+                }
+                else if (_stage == Stage.NeedsHelp && _fieldPlan is { } helpPlan)
+                {
+                    <TemplateScanGapHelpView Gaps="helpPlan.Gaps"
+                                             UnmappedFields="UnmappedDetectedFields"
+                                             ValidationIssues="_outcome?.Validation.Issues ?? Array.Empty<TemplateValidationIssue>()"
+                                             ScanFileName="@_fileName"
+                                             ProfileName="@_profileName"
+                                             InstanceLabel="@HelpInstanceLabel" />
+                }
+                else if (_stage == Stage.Preview && _outcome is { } outcome)
+                {
+                    @if (IsEditingExisting)
+                    {
+                        <div class="tas-form" style="margin-bottom:0.75rem">
+                            <div class="tas-field">
+                                <label class="tas-field__label" for="tas-preview-name">Template name <em>*</em></label>
+                                <input id="tas-preview-name" class="tas-input" value="@_templateName"
+                                       @oninput="e => _templateName = e.Value?.ToString() ?? string.Empty" />
+                                @if (IsLockedExistingOverwrite)
+                                {
+                                    <small>Profile is locked — change the name to save a new catalog copy.</small>
+                                }
+                            </div>
+                        </div>
+                    }
+                    <TemplateScanPreviewView Outcome="outcome"
+                                             TemplateName="@_templateName"
+                                             ShowWarningAcknowledgement="outcome.HasWarnings && !outcome.HasErrors"
+                                             @bind-WarningAcknowledged="_previewAcknowledgedWarnings" />
+                }
+                else if (_stage == Stage.Done)
+                {
+                    <div class="tas-done">
+                        <div class="tas-done__main">
+                            <div class="tas-done__icon">&#10003;</div>
+                            <h3>@(_source == EntrySource.Profile ? "Template added to the profile" : "Template saved")</h3>
+                            <p>
+                                @(_source == EntrySource.Profile
+                                    ? "It is in the profile's template list. Press Save profile to keep it."
+                                    : "It is now in the Resminamalar catalog for this case.")
+                            </p>
+                            <table class="tas-done__table">
+                                <tbody>
+                                    <tr><th>Template</th><td>@_savedTemplateName</td></tr>
+                                    <tr><th>Profile</th><td>@_profileName</td></tr>
+                                    <tr><th>Available in</th><td>@(_catalogScope == ApplicationProfileTemplateCatalogScope.Global ? "Shared catalog" : "This profile only")</td></tr>
+                                    @if (_catalogScope == ApplicationProfileTemplateCatalogScope.ProfileSpecific)
+                                    {
+                                        <tr><th>Visible for</th><td>@ApplicabilitySummary</td></tr>
+                                    }
+                                    @if (_outcome is { } saved)
+                                    {
+                                        <tr><th>Placeholders</th><td>@saved.EmittedTokens.Count</td></tr>
+                                    }
+                                </tbody>
+                            </table>
+                            @if (_source == EntrySource.Profile && OnFocusSavedTemplate.HasDelegate)
+                            {
+                                <p class="tas-done__actions">
+                                    <button type="button" class="tas-link" @onclick="FocusSavedTemplateAsync">View in template list</button>
+                                </p>
+                            }
+                        </div>
+                        <aside class="tas-done__note">
+                            <h4>Next</h4>
+                            <p>Select it in the catalog to generate, or open it with <strong>Edit template</strong> to adjust wording in Word or Excel.</p>
+                        </aside>
+                    </div>
+                }
+            </div>
+
+            <footer class="tas-foot">
+                @if (_stage == Stage.Upload && _busy)
+                {
+                    <div class="tas-analyze" role="status" aria-live="polite">
+                        <div class="tas-progress tas-progress--foot">
+                            <div class="tas-progress__bar tas-progress__bar--indeterminate"></div>
+                        </div>
+                        <span>@_analyzeStatus</span>
+                    </div>
+                }
+                else if (!string.IsNullOrEmpty(_message))
+                {
+                    <span class="tas-foot__hint" style="@(_messageIsError ? "color:#b91c1c" : string.Empty)">@_message</span>
+                }
+                else if (_busy && _stage == Stage.Generating)
+                {
+                    <span class="tas-foot__hint">Generating draft…</span>
+                }
+                else if (_busy)
+                {
+                    <span class="tas-foot__hint">Analyzing scan…</span>
+                }
+                else if (_stage == Stage.FieldReview)
+                {
+                    <span class="tas-foot__hint">@(IsEditingExisting
+                        ? "Numbered marks are the placeholders already in this catalog template. Click a row to add or change Short codes. × removes a redundant row. Comma combinations stay 6.1 / 6.2 / 6.3."
+                        : "Click a detected field to highlight it, then add placeholders from the Short list. × on the right removes a redundant row (a 10.2 part hides; the yellow span keeps remaining tokens). Ask AI is optional.")</span>
+                }
+                else
+                {
+                    <span class="tas-foot__grow"></span>
+                }
+
+                @if (_stage == Stage.Upload)
+                {
+                    <div class="tas-foot__actions">
+                        <button type="button" class="tas-btn tas-btn--ghost" disabled="@_busy" @onclick="RequestCloseAsync">Cancel</button>
+                        <button type="button" class="tas-btn tas-btn--primary" disabled="@(!CanAnalyze)" @onclick="AnalyzeAsync">
+                            @(_busy ? "Analyzing…" : "Analyze file")
+                        </button>
+                    </div>
+                }
+                else if (_stage == Stage.ScanFail)
+                {
+                    <button type="button" class="tas-btn tas-btn--ghost" @onclick="RequestCloseAsync">Cancel</button>
+                    <button type="button" class="tas-btn tas-btn--primary" @onclick="BackToUpload">Upload different file</button>
+                }
+                else if (_stage == Stage.FieldReview)
+                {
+                    <button type="button" class="tas-btn tas-btn--ghost" @onclick="BackToUpload">Upload different file</button>
+                    @if (ShowNeedsHelpEntry)
+                    {
+                        <button type="button" class="tas-btn tas-btn--ghost" @onclick="OpenHelp">Needs help</button>
+                    }
+                    @if (_reviewChatOpen)
+                    {
+                        <button type="button" class="tas-btn tas-btn--ghost" disabled="@_busy" @onclick="HideReviewChat">Hide chat</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="tas-btn tas-btn--secondary" disabled="@(_busy || !_aiEnabled)" @onclick="OpenClarification" title="@(!_aiEnabled ? "Clarification chat needs a TemplateAiScan AI provider" : null)">Ask for clarification</button>
+                    }
+                    <button type="button" class="tas-btn tas-btn--primary" disabled="@(!CanContinue)" @onclick="GenerateAsync">Continue</button>
+                }
+                else if (_stage == Stage.Clarification)
+                {
+                    <button type="button" class="tas-btn tas-btn--ghost" @onclick="BackToFieldReview">Back to field list</button>
+                    <button type="button" class="tas-btn tas-btn--primary" disabled="@(!CanContinueFromChat)" @onclick="GenerateAsync">Continue to generate</button>
+                }
+                else if (_stage == Stage.Preview && _outcome is { })
+                {
+                    <button type="button" class="tas-btn tas-btn--ghost" @onclick="BackToFieldReview">Back to field list</button>
+                    @if (ShowNeedsHelpEntry)
+                    {
+                        <button type="button" class="tas-btn tas-btn--ghost" @onclick="OpenHelp">Needs help</button>
+                    }
+                    <button type="button" class="tas-btn tas-btn--ghost" @onclick="GenerateAsync">Regenerate</button>
+                    <button type="button" class="tas-btn tas-btn--primary" disabled="@(!CanApprove)" @onclick="ApproveAsync">Approve — save to profile</button>
+                }
+                else if (_stage == Stage.NeedsHelp)
+                {
+                    <button type="button" class="tas-btn tas-btn--ghost" @onclick="CloseHelp">Back</button>
+                    <button type="button" class="tas-btn tas-btn--ghost" @onclick="DownloadGapPacketMarkdownAsync">Download Markdown</button>
+                    <button type="button" class="tas-btn tas-btn--primary" @onclick="DownloadGapPacketJsonAsync">Download gap packet</button>
+                    @if (CanApproveFromHelp)
+                    {
+                        <button type="button" class="tas-btn tas-btn--secondary" disabled="@(!CanApprove)" @onclick="ApproveAsync">Approve anyway</button>
+                    }
+                }
+                else if (_stage == Stage.Done)
+                {
+                    <button type="button" class="tas-btn tas-btn--ghost" @onclick="ScanAnother">Mark another file</button>
+                    <button type="button" class="tas-btn tas-btn--primary" @onclick="CloseAsync">Close</button>
+                }
+            </footer>
+
+            @if (_discardPrompt)
+            {
+                <div class="tas-confirm">
+                    <div class="tas-confirm__box">
+                        <h3>Discard this scan?</h3>
+                        <ul>
+                            <li>The uploaded scan and detected fields are dropped.</li>
+                            <li>Nothing has been saved to the profile yet.</li>
+                        </ul>
+                        <div class="tas-confirm__actions">
+                            <button type="button" class="tas-btn tas-btn--ghost" @onclick="() => _discardPrompt = false">Keep working</button>
+                            <button type="button" class="tas-btn tas-btn--primary" @onclick="CloseAsync">Discard</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    private enum Stage { Upload = 0, ScanFail = 1, FieldReview = 2, Clarification = 3, Generating = 4, Preview = 5, Done = 6, NeedsHelp = 7 }
+
+    private enum EntrySource { Instance, Profile }
+
+    private sealed record InstanceOption(Guid Id, string Label);
+
+    [Parameter] public EventCallback OnTemplateSaved { get; set; }
+    [Parameter] public EventCallback<string> OnFocusSavedTemplate { get; set; }
+
+    [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
+    [Inject] private IScanIngestService IngestService { get; set; } = null!;
+    [Inject] private IScanFieldPlanService FieldPlanService { get; set; } = null!;
+    [Inject] private IApplicationProfilePlaceholderSetService PlaceholderSets { get; set; } = null!;
+    [Inject] private IApplicationProfileInstanceValueMapService ValueMaps { get; set; } = null!;
+    [Inject] private ITemplateScanAiProvider ScanAiProvider { get; set; } = null!;
+    [Inject] private ITemplateScanClarificationService ClarificationService { get; set; } = null!;
+    [Inject] private ITemplateScanOrchestrator Orchestrator { get; set; } = null!;
+    [Inject] private IScanGapPacketExporter GapPacketExporter { get; set; } = null!;
+    [Inject] private IFileDownloader FileDownloader { get; set; } = null!;
+    [Inject] private IOptions<TemplateAiScanOptions> Options { get; set; } = null!;
+    [Inject] private IApplicationErrorReporter ErrorReporter { get; set; } = null!;
+    [Inject] private IUserReportTemplateMaintenanceService UserReportMaintenance { get; set; } = null!;
+
+    private bool _open;
+    private EntrySource _source = EntrySource.Profile;
+    private Stage _stage = Stage.Upload;
+    private Stage _helpReturnStage = Stage.Upload;
+    private bool _busy;
+    private string _analyzeStatus = string.Empty;
+    private bool _discardPrompt;
+    private bool _configLocked;
+    private bool _aiEnabled;
+
+    private IObjectSpace? _hostObjectSpace;
+    private ApplicationProfile? _hostProfile;
+    private IReadOnlyList<InstanceOption> _instanceOptions = Array.Empty<InstanceOption>();
+    private Guid _selectedInstanceId;
+    private Guid _profileId;
+    private string _profileName = string.Empty;
+    private string _caseNumber = string.Empty;
+    private string _savedTemplateName = string.Empty;
+
+    private byte[]? _fileBytes;
+    private string _fileName = string.Empty;
+    private string _templateName = string.Empty;
+    private string? _editingOriginalName;
+    private ApplicationProfileTemplateCatalogScope _catalogScope = ApplicationProfileTemplateCatalogScope.ProfileSpecific;
+    private bool _isViaMinistry;
+    private string _applicabilityId = string.Empty;
+    private IReadOnlyList<ApplicationProfileWizardLookupItem> _applicabilityLookups =
+        Array.Empty<ApplicationProfileWizardLookupItem>();
+    private ApplicationProfileTemplateDataScope _dataScope = ApplicationProfileTemplateDataScope.Both;
+    private ScanKind _scanKind = ScanKind.FilledSample;
+
+    private int _pdfPageCount;
+    private readonly HashSet<int> _selectedPdfPages = new();
+
+    private ScanIngestResult? _ingest;
+    private ScanFieldPlan? _fieldPlan;
+    private ApplicationProfilePlaceholderSet? _placeholderSet;
+    private TemplateScanOutcome? _outcome;
+    private IReadOnlyList<ScanValueHint> _valueHints = Array.Empty<ScanValueHint>();
+
+    private bool _acknowledgedWarnings;
+    private bool _previewAcknowledgedWarnings;
+    private int _reviewPageIndex;
+    private string? _hoveredFieldId;
+    private string? _reviewSelectedFieldId;
+    private bool _reviewChatOpen;
+    private string? _reviewChatFocusFieldId;
+    private string? _message;
+    private bool _messageIsError;
+
+    private readonly List<TemplateScanClarificationView.ChatMessage> _chatMessages = new();
+    private IReadOnlyList<string> _quickReplies = Array.Empty<string>();
+    private string _chatInput = string.Empty;
+    private bool _chatBusy;
+    private bool _chatRejectBanner;
+    private string _chatRejectText = string.Empty;
+    private bool _chatSeeded;
+
+    private static readonly (int Index, string Label)[] StepLabels =
+    [
+        (1, "Upload"),
+        (2, "Review"),
+        (3, "Generate"),
+        (4, "Preview"),
+        (5, "Done"),
+    ];
+
+    public async Task OpenForProfileAsync(ApplicationProfile profile, IObjectSpace objectSpace)
+    {
+        ArgumentNullException.ThrowIfNull(profile);
+        ArgumentNullException.ThrowIfNull(objectSpace);
+
+        Reset();
+        _source = EntrySource.Profile;
+        _hostObjectSpace = objectSpace;
+        _hostProfile = profile;
+        _profileId = profile.ID;
+        _profileName = profile.Name ?? string.Empty;
+        _configLocked = ApplicationProfileLockHelper.IsProfileConfigLocked(profile, objectSpace);
+        _instanceOptions = LoadInstanceOptions(profile, objectSpace);
+        BindApplicabilityFromProfile(profile, objectSpace);
+        _aiEnabled = Options.Value.Enabled && ScanAiProvider.IsEnabled;
+
+        _open = true;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public async Task OpenAsync(Guid applicationProfileInstanceId, string caseNumber)
+    {
+        Reset();
+        _source = EntrySource.Instance;
+        _caseNumber = caseNumber ?? string.Empty;
+        _selectedInstanceId = applicationProfileInstanceId;
+        _scanKind = ScanKind.FilledSample;
+
+        using (var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>())
+        {
+            var instance = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationProfileInstanceId);
+            var profile = instance?.ApplicationProfile;
+            if (profile == null)
+            {
+                _message = "This case has no application profile.";
+                _messageIsError = true;
+            }
+            else
+            {
+                _profileId = profile.ID;
+                _profileName = profile.Name ?? string.Empty;
+                _configLocked = ApplicationProfileLockHelper.IsProfileConfigLocked(profile, objectSpace);
+                BindApplicabilityFromInstance(instance, profile, objectSpace);
+            }
+        }
+
+        _aiEnabled = Options.Value.Enabled && ScanAiProvider.IsEnabled;
+        _open = true;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public async Task OpenForExistingTemplateAsync(
+        Guid applicationProfileInstanceId,
+        string caseNumber,
+        byte[] content,
+        string fileName,
+        string templateName,
+        ApplicationProfileTemplateDataScope dataScope,
+        ApplicationProfileTemplateCatalogScope catalogScope,
+        Guid? applicableProjectContractId = null,
+        Guid? applicableMigrationServiceId = null)
+    {
+        ArgumentNullException.ThrowIfNull(content);
+        if (content.Length == 0)
+            throw new ArgumentException("Template file has no content.", nameof(content));
+
+        await OpenAsync(applicationProfileInstanceId, caseNumber);
+        _fileBytes = content;
+        _fileName = string.IsNullOrWhiteSpace(fileName)
+            ? (string.IsNullOrWhiteSpace(templateName) ? "template.docx" : templateName + ".docx")
+            : fileName;
+        _templateName = templateName?.Trim() ?? string.Empty;
+        _editingOriginalName = _templateName;
+        _dataScope = dataScope;
+        _catalogScope = catalogScope;
+        _applicabilityId = FormatApplicabilityId(applicableProjectContractId, applicableMigrationServiceId);
+        await AnalyzeAsync();
+    }
+
+    private static IReadOnlyList<InstanceOption> LoadInstanceOptions(ApplicationProfile profile, IObjectSpace objectSpace)
+    {
+        if (profile.ID == Guid.Empty)
+            return Array.Empty<InstanceOption>();
+
+        return objectSpace.GetObjects<ApplicationProfileInstance>(
+                CriteriaOperator.Parse("ApplicationProfile.ID = ?", profile.ID))
+            .OrderByDescending(static i => i.ApplicationDate)
+            .Take(25)
+            .Select(static i => new InstanceOption(
+                i.ID,
+                string.IsNullOrWhiteSpace(i.FullApplicationNumber)
+                    ? $"{i.ApplicationDate:dd.MM.yyyy}"
+                    : $"{i.FullApplicationNumber} · {i.ApplicationDate:dd.MM.yyyy}"))
+            .ToList();
+    }
+
+    private void Reset()
+    {
+        _source = EntrySource.Profile;
+        _hostObjectSpace = null;
+        _hostProfile = null;
+        _instanceOptions = Array.Empty<InstanceOption>();
+        _selectedInstanceId = Guid.Empty;
+        _stage = Stage.Upload;
+        _busy = false;
+        _analyzeStatus = string.Empty;
+        _discardPrompt = false;
+        _configLocked = false;
+        _fileBytes = null;
+        _fileName = string.Empty;
+        _templateName = string.Empty;
+        _editingOriginalName = null;
+        _catalogScope = ApplicationProfileTemplateCatalogScope.ProfileSpecific;
+        _isViaMinistry = false;
+        _applicabilityId = string.Empty;
+        _applicabilityLookups = Array.Empty<ApplicationProfileWizardLookupItem>();
+        _dataScope = ApplicationProfileTemplateDataScope.Both;
+        _scanKind = ScanKind.FilledSample;
+        _pdfPageCount = 0;
+        _selectedPdfPages.Clear();
+        _ingest = null;
+        _fieldPlan = null;
+        _outcome = null;
+        _placeholderSet = null;
+        _valueHints = Array.Empty<ScanValueHint>();
+        _acknowledgedWarnings = false;
+        _previewAcknowledgedWarnings = false;
+        _reviewPageIndex = 0;
+        _hoveredFieldId = null;
+        _reviewSelectedFieldId = null;
+        _reviewChatOpen = false;
+        _reviewChatFocusFieldId = null;
+        _message = null;
+        _messageIsError = false;
+        _chatMessages.Clear();
+        _quickReplies = Array.Empty<string>();
+        _chatInput = string.Empty;
+        _chatBusy = false;
+        _chatRejectBanner = false;
+        _chatRejectText = string.Empty;
+        _chatSeeded = false;
+        _savedTemplateName = string.Empty;
+        _helpReturnStage = Stage.Upload;
+    }
+
+    private string ApplicabilityTitle =>
+        _isViaMinistry ? "Project contract" : "Migration service";
+
+    private string ApplicabilityEmptyLabel =>
+        _isViaMinistry ? "All contracts" : "All migration services";
+
+    private string ApplicabilityHint =>
+        _isViaMinistry
+            ? "All contracts = every via-ministry case of this profile. Pick one Project contract to show only on matching cases."
+            : "All migration services = every direct-migration case of this profile. Pick one service to show only on matching cases.";
+
+    private const string SaveToHint =
+        "This profile only stays on this profile. Shared catalog is confirmed when you Approve.";
+
+    private const string CaseHint =
+        "Workspace context only. Yellow marks use the sample in the file, not this case's people.";
+
+    private const string FileHint =
+        "Upload a filled sample. Highlight every value that should become a placeholder in yellow (Word Text Highlight Color or Excel cell fill). Other text stays as printed.";
+
+    private string ApplicabilitySummary
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(_applicabilityId))
+                return ApplicabilityEmptyLabel;
+
+            var match = _applicabilityLookups.FirstOrDefault(item =>
+                string.Equals(item.Id.ToString("D"), _applicabilityId, StringComparison.OrdinalIgnoreCase));
+            return match?.DisplayName ?? _applicabilityId;
+        }
+    }
+
+    private Guid? SelectedProjectContractId =>
+        _catalogScope == ApplicationProfileTemplateCatalogScope.ProfileSpecific && _isViaMinistry
+            ? ParseApplicabilityId()
+            : null;
+
+    private Guid? SelectedMigrationServiceId =>
+        _catalogScope == ApplicationProfileTemplateCatalogScope.ProfileSpecific && !_isViaMinistry
+            ? ParseApplicabilityId()
+            : null;
+
+    private Guid? ParseApplicabilityId() =>
+        Guid.TryParse(_applicabilityId, out var id) && id != Guid.Empty ? id : null;
+
+    private void OnApplicabilityChanged(ChangeEventArgs e) =>
+        _applicabilityId = e.Value?.ToString() ?? string.Empty;
+
+    private void BindApplicabilityFromProfile(ApplicationProfile profile, IObjectSpace objectSpace)
+    {
+        _isViaMinistry = profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries;
+        _applicabilityLookups = ApplicationProfileWizardLookupData.LoadApplicabilityItems(objectSpace, _isViaMinistry);
+    }
+
+    private void BindApplicabilityFromInstance(
+        ApplicationProfileInstance? instance,
+        ApplicationProfile profile,
+        IObjectSpace objectSpace)
+    {
+        var route = ApplicationProfileConfigurationResolver.GetProgressRoute(instance)
+            ?? profile.ProgressRoute;
+        _isViaMinistry = route == ApplicationProfileInstanceProgressRouteKind.ViaMinistries;
+        _applicabilityLookups = ApplicationProfileWizardLookupData.LoadApplicabilityItems(objectSpace, _isViaMinistry);
+    }
+
+    private string FormatApplicabilityId(Guid? projectContractId, Guid? migrationServiceId)
+    {
+        var id = _isViaMinistry ? projectContractId : migrationServiceId;
+        return id is Guid value && value != Guid.Empty ? value.ToString("D") : string.Empty;
+    }
+
+    private Task RequestCloseAsync()
+    {
+        if (_busy)
+            return Task.CompletedTask;
+
+        if (_stage is Stage.FieldReview or Stage.Clarification or Stage.Generating or Stage.Preview)
+        {
+            _discardPrompt = true;
+            return InvokeAsync(StateHasChanged);
+        }
+
+        if (_stage == Stage.NeedsHelp)
+        {
+            CloseHelp();
+            return InvokeAsync(StateHasChanged);
+        }
+
+        return CloseAsync();
+    }
+
+    private async Task CloseAsync()
+    {
+        _open = false;
+        Reset();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void OnScanKindChanged(ScanKind kind)
+    {
+        _scanKind = kind;
+        if (kind == ScanKind.BlankForm)
+            _selectedInstanceId = Guid.Empty;
+    }
+
+    private void OnInstanceChanged(ChangeEventArgs args)
+    {
+        _selectedInstanceId = Guid.TryParse(args.Value?.ToString(), out var id) ? id : Guid.Empty;
+    }
+
+    private void TogglePdfPage(int page, ChangeEventArgs args)
+    {
+        var selected = (bool?)args.Value == true;
+        if (selected)
+            _selectedPdfPages.Add(page);
+        else
+            _selectedPdfPages.Remove(page);
+    }
+
+    private string SelectedPdfPagesSummary
+    {
+        get
+        {
+            if (_selectedPdfPages.Count == 0)
+                return "Select at least one page.";
+            var ordered = _selectedPdfPages.OrderBy(static p => p).ToList();
+            if (ordered.Count > Options.Value.MaxPdfPages)
+                return $"Too many pages selected ({ordered.Count}). Maximum is {Options.Value.MaxPdfPages}.";
+            return $"Analyzing pages: {string.Join(", ", ordered)}";
+        }
+    }
+
+    private async Task OnFileSelectedAsync(InputFileChangeEventArgs args)
+    {
+        var file = args.File;
+        if (file == null)
+            return;
+
+        _message = null;
+        _messageIsError = false;
+        _fileBytes = null;
+        _fileName = string.Empty;
+        _pdfPageCount = 0;
+        _selectedPdfPages.Clear();
+
+        var extension = Path.GetExtension(file.Name).ToLowerInvariant();
+        if (extension is not (".docx" or ".xlsx"))
+        {
+            _message = "Only Word (.docx) and Excel (.xlsx) with yellow highlights are supported. PNG/JPG/PDF uploads are retired.";
+            _messageIsError = true;
+            return;
+        }
+
+        var hardLimit = Options.Value.HardMaxUploadBytes;
+        if (file.Size > hardLimit)
+        {
+            _message = $"This file is {file.Size / 1048576} MB and the hard limit is {hardLimit / 1048576} MB.";
+            _messageIsError = true;
+            return;
+        }
+
+        if (file.Size > Options.Value.MaxUploadBytes)
+        {
+            _message = $"Large file ({file.Size / 1048576} MB). Analysis may be slower; warn threshold is {Options.Value.MaxUploadBytes / 1048576} MB.";
+            _messageIsError = false;
+        }
+
+        await using var stream = file.OpenReadStream(hardLimit);
+        using var buffer = new MemoryStream();
+        await stream.CopyToAsync(buffer);
+
+        _fileBytes = buffer.ToArray();
+        _fileName = file.Name;
+        if (string.IsNullOrWhiteSpace(_templateName))
+            _templateName = Path.GetFileNameWithoutExtension(file.Name);
+
+        if (!IsEditingExisting)
+            _dataScope = ApplicationProfileTemplateDataScope.Both;
+
+        if (extension == ".pdf")
+        {
+            try
+            {
+                _pdfPageCount = ScanPdfMetadataReader.ReadPageCount(_fileBytes);
+                for (var page = 1; page <= Math.Min(_pdfPageCount, Options.Value.MaxPdfPages); page++)
+                    _selectedPdfPages.Add(page);
+            }
+            catch (Exception ex)
+            {
+                _message = $"Could not read PDF: {ex.Message}";
+                _messageIsError = true;
+            }
+        }
+    }
+
+    private bool IsOfficeUpload =>
+        Path.GetExtension(_fileName).ToLowerInvariant() is ".docx" or ".xlsx";
+
+    private bool CanAnalyze =>
+        !_busy
+        && IsOfficeUpload
+        && _fileBytes is { Length: > 0 }
+        && !string.IsNullOrWhiteSpace(_templateName)
+        && _profileId != Guid.Empty
+        && _selectedInstanceId != Guid.Empty;
+
+    private bool PdfSelectionValid =>
+        _pdfPageCount <= 1
+        || (_selectedPdfPages.Count > 0 && _selectedPdfPages.Count <= Options.Value.MaxPdfPages);
+
+    private bool RequiresLowConfidenceAck =>
+        _fieldPlan?.Fields.Any(static f => f.Confidence == ScanFieldConfidence.Low) == true
+        || _ingest?.Suitability.Verdict == ScanSuitabilityVerdict.Warn;
+
+    private bool CanContinue =>
+        !_busy
+        && _fieldPlan is { HasMappedFields: true }
+        && _ingest?.Suitability.CanContinue == true
+        && (!RequiresLowConfidenceAck || _acknowledgedWarnings);
+
+    private async Task AnalyzeAsync()
+    {
+        if (!CanAnalyze || _fileBytes == null)
+            return;
+        if (_source == EntrySource.Profile && (_hostProfile == null || _hostObjectSpace == null))
+            return;
+        if (_source == EntrySource.Instance && _profileId == Guid.Empty)
+            return;
+
+        _busy = true;
+        _analyzeStatus = "Reading file…";
+        _message = null;
+        _messageIsError = false;
+        _ingest = null;
+        _fieldPlan = null;
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+
+        IObjectSpace? ownedObjectSpace = _source == EntrySource.Profile
+            ? null
+            : ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfile>();
+
+        try
+        {
+            var objectSpace = ownedObjectSpace ?? _hostObjectSpace!;
+            var profile = _source == EntrySource.Profile
+                ? _hostProfile!
+                : objectSpace.GetObjectByKey<ApplicationProfile>(_profileId);
+            if (profile == null)
+            {
+                _message = "The application profile is no longer available.";
+                _messageIsError = true;
+                return;
+            }
+
+            IReadOnlyList<int>? selectedPages = null;
+            if (_pdfPageCount > 1)
+                selectedPages = _selectedPdfPages.OrderBy(static p => p).ToList();
+
+            var ingest = IngestService.Ingest(new ScanNormalizeRequest
+            {
+                Content = _fileBytes,
+                FileName = _fileName,
+                SelectedPages = selectedPages,
+            });
+
+            await SetAnalyzeStatusAsync("Finding yellow marks…");
+
+            var templateKind = Path.GetExtension(_fileName).Equals(".xlsx", StringComparison.OrdinalIgnoreCase)
+                ? ApplicationProfileTemplateKind.Excel
+                : ApplicationProfileTemplateKind.Word;
+            _placeholderSet = PlaceholderSets.GetSet(new ApplicationProfilePlaceholderSetQuery
+            {
+                Profile = profile,
+                DataScope = _dataScope,
+                TemplateKind = templateKind,
+            });
+
+            if (!ingest.Suitability.CanContinue)
+            {
+                _ingest = ingest;
+                _stage = Stage.ScanFail;
+                return;
+            }
+
+            var valueCandidates = Array.Empty<ValueCandidate>();
+            _valueHints = BuildValueHints(_placeholderSet, objectSpace);
+            if (_scanKind == ScanKind.FilledSample && _selectedInstanceId != Guid.Empty)
+            {
+                var instance = objectSpace.GetObjectByKey<ApplicationProfileInstance>(_selectedInstanceId);
+                if (instance != null)
+                {
+                    var map = ValueMaps.Build(new ApplicationProfileInstanceValueMapRequest
+                    {
+                        Instance = instance,
+                        PlaceholderSet = _placeholderSet,
+                        DataScope = _dataScope,
+                        RetainAmbiguousLiterals = true,
+                    });
+                    valueCandidates = map.Candidates.ToArray();
+                    _valueHints = map.Candidates
+                        .Select(static c => new ScanValueHint(c.Token, c.RawValue ?? c.NormalizedValue, null))
+                        .ToList();
+                }
+            }
+
+            await SetAnalyzeStatusAsync("Matching placeholders…");
+            var fieldPlan = await FieldPlanService.BuildAsync(new ScanFieldPlanBuildRequest
+            {
+                Ingest = ingest,
+                PlaceholderSet = _placeholderSet,
+                ScanKind = _scanKind,
+                ValueHints = _valueHints,
+                ValueCandidates = valueCandidates,
+            }).ConfigureAwait(false);
+
+            var gatedSuitability = ScanYellowHighlightGate.Apply(
+                ingest.Suitability,
+                fieldPlan.YellowHighlightCount,
+                fieldPlan);
+            ingest = new ScanIngestResult
+            {
+                Input = ingest.Input,
+                Ocr = ingest.Ocr,
+                Suitability = gatedSuitability,
+                Playbook = ingest.Playbook,
+            };
+
+            if (!gatedSuitability.CanContinue)
+            {
+                _ingest = ingest;
+                _fieldPlan = fieldPlan;
+                _stage = Stage.ScanFail;
+                return;
+            }
+
+            _ingest = ingest;
+            _fieldPlan = fieldPlan;
+            _reviewPageIndex = 0;
+            _reviewSelectedFieldId = null;
+            _reviewChatOpen = false;
+            _reviewChatFocusFieldId = null;
+            _chatMessages.Clear();
+            _quickReplies = Array.Empty<string>();
+            _chatInput = string.Empty;
+            _chatRejectBanner = false;
+            _chatRejectText = string.Empty;
+            _chatSeeded = false;
+            var needsAck = fieldPlan.Fields.Any(static f => f.Confidence == ScanFieldConfidence.Low)
+                || ingest.Suitability.Verdict == ScanSuitabilityVerdict.Warn;
+            _acknowledgedWarnings = !needsAck;
+            _analyzeStatus = "Opening review…";
+            _stage = Stage.FieldReview;
+        }
+        catch (ScanNormalizationException ex)
+        {
+            _ingest = new ScanIngestResult
+            {
+                Input = new ScanNormalizedInput
+                {
+                    SourceKind = ScanSourceKind.Pdf,
+                    Pages = Array.Empty<ScanPageImage>(),
+                    OriginalByteLength = _fileBytes.LongLength,
+                    FileName = _fileName,
+                },
+                Ocr = new ScanOcrResult { Lines = Array.Empty<ScanOcrLine>(), TextConfidence = 0 },
+                Suitability = new ScanSuitabilityReport
+                {
+                    Verdict = ScanSuitabilityVerdict.Fail,
+                    TextConfidence = 0,
+                    Issues =
+                    [
+                        new ScanSuitabilityIssue { Code = ex.Code, Message = ex.Message },
+                    ],
+                },
+                Playbook = new ScanAuthoringPlaybook
+                {
+                    Markdown = string.Empty,
+                    Fingerprint = string.Empty,
+                    VersionLabel = string.Empty,
+                },
+            };
+            _stage = Stage.ScanFail;
+        }
+        catch (Exception ex)
+        {
+            ErrorReporter.ReportReportPackageError("Template scan analysis failed.", ApplicationRuntimeLogCategories.TemplateScan, ex);
+            _message = "Analysis failed: " + ex.Message;
+            _messageIsError = true;
+        }
+        finally
+        {
+            ownedObjectSpace?.Dispose();
+            _busy = false;
+            _analyzeStatus = string.Empty;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task SetAnalyzeStatusAsync(string status)
+    {
+        _analyzeStatus = status;
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+    }
+
+    private IReadOnlyList<ScanValueHint> BuildValueHints(
+        ApplicationProfilePlaceholderSet placeholderSet,
+        IObjectSpace objectSpace)
+    {
+        if (_scanKind != ScanKind.FilledSample || _selectedInstanceId == Guid.Empty)
+            return Array.Empty<ScanValueHint>();
+
+        var instance = objectSpace.GetObjectByKey<ApplicationProfileInstance>(_selectedInstanceId);
+        if (instance == null)
+            return Array.Empty<ScanValueHint>();
+
+        var map = ValueMaps.Build(new ApplicationProfileInstanceValueMapRequest
+        {
+            Instance = instance,
+            PlaceholderSet = placeholderSet,
+            DataScope = _dataScope,
+            RetainAmbiguousLiterals = true,
+        });
+
+        return map.Candidates
+            .Select(static c => new ScanValueHint(c.Token, c.RawValue ?? c.NormalizedValue, null))
+            .ToList();
+    }
+
+    private Task OnOfficerFieldPlanChanged(ScanFieldPlan plan)
+    {
+        _fieldPlan = plan;
+        RefreshAcknowledgement();
+        return Task.CompletedTask;
+    }
+
+    private bool CanContinueFromChat => CanContinue && !_chatBusy;
+
+    private string? ReviewChatFocusCaption
+    {
+        get
+        {
+            if (_fieldPlan == null || string.IsNullOrWhiteSpace(_reviewChatFocusFieldId))
+                return null;
+
+            var mark = ScanReviewFieldOrder.Order(_fieldPlan.Fields, _fieldPlan.Gaps)
+                .FirstOrDefault(m =>
+                    string.Equals(m.DisplayId, _reviewChatFocusFieldId, StringComparison.Ordinal)
+                    || string.Equals(m.FieldId, _reviewChatFocusFieldId, StringComparison.Ordinal));
+            if (mark == null)
+                return null;
+
+            var token = mark.ProposedToken;
+            if (string.IsNullOrWhiteSpace(token))
+                token = "unmapped";
+            return $"Mark #{mark.DisplayOrder}: “{mark.LabelText}” → {token}";
+        }
+    }
+
+    private void OpenClarification() => OpenReviewChatCore(_reviewSelectedFieldId);
+
+    private void OpenReviewChat(string fieldId) => OpenReviewChatCore(fieldId);
+
+    private void OpenReviewChatCore(string? fieldId)
+    {
+        if (!_aiEnabled || _fieldPlan == null || _ingest == null)
+            return;
+
+        SeedClarificationChat();
+        _reviewChatOpen = true;
+        _message = null;
+        _messageIsError = false;
+
+        var focusId = string.IsNullOrWhiteSpace(fieldId) ? null : fieldId.Trim();
+        if (string.IsNullOrWhiteSpace(focusId))
+            return;
+
+        if (string.Equals(_reviewChatFocusFieldId, focusId, StringComparison.Ordinal))
+            return;
+
+        _reviewChatFocusFieldId = focusId;
+        var ordered = ScanReviewFieldOrder.Order(_fieldPlan.Fields, _fieldPlan.Gaps);
+        var mark = ordered.FirstOrDefault(m =>
+            string.Equals(m.DisplayId, focusId, StringComparison.Ordinal)
+            || string.Equals(m.FieldId, focusId, StringComparison.Ordinal));
+        var displayOrder = mark?.DisplayOrder ?? "0";
+        var parentId = mark?.FieldId ?? ScanReviewFieldOrder.ParentFieldId(focusId);
+        _chatMessages.Add(new TemplateScanClarificationView.ChatMessage(
+            false,
+            ScanFieldPlanOfficerOverride.FormatOfficerHint(_fieldPlan, parentId, displayOrder),
+            Refused: false));
+    }
+
+    private void HideReviewChat()
+    {
+        _reviewChatOpen = false;
+        _chatRejectBanner = false;
+        _chatRejectText = string.Empty;
+    }
+
+    private void SeedClarificationChat()
+    {
+        if (_chatSeeded || _fieldPlan == null)
+            return;
+
+        _chatSeeded = true;
+        foreach (var prompt in _fieldPlan.PendingQuestions)
+        {
+            if (!string.IsNullOrWhiteSpace(prompt.Question))
+                _chatMessages.Add(new TemplateScanClarificationView.ChatMessage(false, prompt.Question, Refused: false));
+        }
+
+        _quickReplies = _fieldPlan.PendingQuestions
+            .SelectMany(static q => q.SuggestedAnswers)
+            .Where(static a => !string.IsNullOrWhiteSpace(a))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Take(6)
+            .ToList();
+    }
+
+    private void BackToFieldReview()
+    {
+        _stage = Stage.FieldReview;
+        _outcome = null;
+        _previewAcknowledgedWarnings = false;
+        _chatRejectBanner = false;
+        _chatRejectText = string.Empty;
+        _message = null;
+        _messageIsError = false;
+        RefreshAcknowledgement();
+    }
+
+    private void RefreshAcknowledgement()
+    {
+        if (_fieldPlan == null)
+            return;
+
+        var needsAck = _fieldPlan.Fields.Any(static f => f.Confidence == ScanFieldConfidence.Low)
+            || _ingest?.Suitability.Verdict == ScanSuitabilityVerdict.Warn;
+        if (!needsAck)
+            _acknowledgedWarnings = true;
+    }
+
+    private Task OnChatInputChanged(string value)
+    {
+        _chatInput = value;
+        return Task.CompletedTask;
+    }
+
+    private Task SendQuickReplyAsync(string reply) => SendChatInternalAsync(reply);
+
+    private Task SendChatAsync() => SendChatInternalAsync(_chatInput);
+
+    private async Task SendChatInternalAsync(string rawMessage)
+    {
+        if (_chatBusy || _fieldPlan == null || _ingest == null || _placeholderSet == null)
+            return;
+
+        var message = (rawMessage ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(message))
+            return;
+
+        _chatBusy = true;
+        _chatRejectBanner = false;
+        _chatRejectText = string.Empty;
+        _chatMessages.Add(new TemplateScanClarificationView.ChatMessage(true, message, Refused: false));
+        _chatInput = string.Empty;
+        await InvokeAsync(StateHasChanged);
+
+        var serviceMessage = message;
+        if (_fieldPlan != null && !string.IsNullOrWhiteSpace(_reviewChatFocusFieldId))
+        {
+            var ordered = ScanReviewFieldOrder.Order(_fieldPlan.Fields, _fieldPlan.Gaps);
+            var mark = ordered.FirstOrDefault(m =>
+                string.Equals(m.DisplayId, _reviewChatFocusFieldId, StringComparison.Ordinal)
+                || string.Equals(m.FieldId, _reviewChatFocusFieldId, StringComparison.Ordinal));
+            var displayOrder = mark?.DisplayOrder ?? "0";
+            var parentId = mark?.FieldId ?? ScanReviewFieldOrder.ParentFieldId(_reviewChatFocusFieldId);
+            serviceMessage = ScanFieldPlanOfficerOverride.FormatChatContext(_fieldPlan, parentId, displayOrder)
+                + " Officer request: "
+                + message;
+        }
+
+        try
+        {
+            var result = await ClarificationService.ApplyAsync(new ScanClarificationTurnRequest
+            {
+                OfficerMessage = serviceMessage,
+                CurrentPlan = _fieldPlan,
+                Playbook = _ingest.Playbook,
+                PlaceholderSet = _placeholderSet,
+                ScanKind = _scanKind,
+                ValueHints = _valueHints,
+            }).ConfigureAwait(false);
+
+            var refused = !result.Accepted
+                && result.RejectReason == ScanClarificationRejectReason.OutOfScopeContentEdit;
+            _chatMessages.Add(new TemplateScanClarificationView.ChatMessage(false, result.ReplyText, refused));
+
+            if (result.Accepted)
+            {
+                _fieldPlan = result.Plan;
+                _quickReplies = result.Plan.PendingQuestions
+                    .SelectMany(static q => q.SuggestedAnswers)
+                    .Where(static a => !string.IsNullOrWhiteSpace(a))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .Take(6)
+                    .ToList();
+                RefreshAcknowledgement();
+            }
+            else if (refused)
+            {
+                _chatRejectBanner = true;
+                _chatRejectText = result.ReplyText;
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorReporter.ReportReportPackageError("Template scan clarification failed.", ApplicationRuntimeLogCategories.TemplateScan, ex);
+            _chatMessages.Add(new TemplateScanClarificationView.ChatMessage(
+                false,
+                "Something went wrong sending that message. Try again or go back to the field list.",
+                Refused: true));
+        }
+        finally
+        {
+            _chatBusy = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private bool CanApprove =>
+        !_busy
+        && _outcome is { CanApprove: true }
+        && (_source == EntrySource.Profile
+            ? _hostProfile != null && _hostObjectSpace != null
+            : _profileId != Guid.Empty)
+        && (!_outcome.HasWarnings || _previewAcknowledgedWarnings)
+        && !IsLockedExistingOverwrite;
+
+    private bool IsEditingExisting => !string.IsNullOrWhiteSpace(_editingOriginalName);
+
+    private bool IsLockedExistingOverwrite =>
+        _configLocked
+        && IsEditingExisting
+        && string.Equals(_templateName.Trim(), _editingOriginalName!.Trim(), StringComparison.OrdinalIgnoreCase);
+
+    private bool CanApproveFromHelp => _outcome != null && _helpReturnStage == Stage.Preview;
+
+    private bool ShowNeedsHelpEntry => _fieldPlan is { Gaps.Count: > 0 }
+        || UnmappedDetectedFields.Count > 0
+        || _outcome is { Validation.HasHardFailure: true };
+
+    private IReadOnlyList<ScanDetectedField> UnmappedDetectedFields =>
+        _fieldPlan?.Fields.Where(static f => string.IsNullOrWhiteSpace(f.ProposedToken)).ToList()
+        ?? (IReadOnlyList<ScanDetectedField>)Array.Empty<ScanDetectedField>();
+
+    private string HelpInstanceLabel =>
+        _selectedInstanceId == Guid.Empty
+            ? "—"
+            : (string.IsNullOrWhiteSpace(_caseNumber) ? _selectedInstanceId.ToString("D") : _caseNumber);
+
+    private TemplateScanAnalysis? BuildAnalysis()
+    {
+        if (_ingest == null || _fieldPlan == null || _placeholderSet == null)
+            return null;
+
+        return new TemplateScanAnalysis
+        {
+            NormalizedInput = _ingest.Input,
+            Suitability = _ingest.Suitability,
+            FieldPlan = _fieldPlan,
+            PlaceholderSet = _placeholderSet,
+            Playbook = _ingest.Playbook,
+            TemplateName = _templateName,
+            DataScope = _dataScope,
+            ScanKind = _scanKind,
+            OcrLines = _ingest.Ocr.Lines,
+            ValueHints = _valueHints ?? Array.Empty<ScanValueHint>(),
+        };
+    }
+
+    private async Task GenerateAsync()
+    {
+        var analysis = BuildAnalysis();
+        if (analysis == null || !analysis.CanGenerate)
+            return;
+
+        _stage = Stage.Generating;
+        _busy = true;
+        _message = null;
+        _messageIsError = false;
+        _outcome = null;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            var outcome = await Orchestrator.GenerateAsync(analysis).ConfigureAwait(false);
+            _outcome = outcome;
+            _previewAcknowledgedWarnings = !outcome.HasWarnings;
+            _stage = Stage.Preview;
+        }
+        catch (Exception ex)
+        {
+            ErrorReporter.ReportReportPackageError("Template scan generate failed.", ApplicationRuntimeLogCategories.TemplateScan, ex);
+            _message = "Draft generation failed. Try reviewing fields again or upload a different scan.";
+            _messageIsError = true;
+            _stage = Stage.FieldReview;
+        }
+        finally
+        {
+            _busy = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task ApproveAsync()
+    {
+        if (!CanApprove || _outcome == null)
+            return;
+        if (_source == EntrySource.Profile && (_hostProfile == null || _hostObjectSpace == null))
+            return;
+
+        _busy = true;
+        _message = null;
+        _messageIsError = false;
+
+        IObjectSpace? ownedObjectSpace = _source == EntrySource.Profile
+            ? null
+            : ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfile>();
+
+        try
+        {
+            var objectSpace = ownedObjectSpace ?? _hostObjectSpace!;
+            var profile = _source == EntrySource.Profile
+                ? _hostProfile!
+                : objectSpace.GetObjectByKey<ApplicationProfile>(_profileId);
+            if (profile == null)
+            {
+                _message = "The application profile is no longer available.";
+                _messageIsError = true;
+                return;
+            }
+
+            var ext = _outcome.SourceFormat == TemplateSourceFormat.Xlsx ? ".xlsx" : ".docx";
+            Orchestrator.Save(new TemplateScanSaveRequest
+            {
+                ObjectSpace = objectSpace,
+                Profile = profile,
+                TemplateName = _templateName.Trim(),
+                DataScope = _dataScope,
+                CatalogScope = _catalogScope,
+                Content = _outcome.Content,
+                FileName = _templateName.Trim() + ext,
+                TemplateKind = _outcome.TemplateKind,
+                ApplicableProjectContractId = SelectedProjectContractId,
+                ApplicableMigrationServiceId = SelectedMigrationServiceId,
+            });
+
+            if (_source == EntrySource.Instance)
+                objectSpace.CommitChanges();
+
+            var userTemplate = ApplicationProfileTemplateUserReportBridge.TryFindByName(
+                objectSpace,
+                _templateName.Trim());
+            if (userTemplate != null)
+                await UserReportMaintenance.ExtractAndValidatePlaceholdersAsync(userTemplate.ID);
+
+            _savedTemplateName = _templateName.Trim();
+            _stage = Stage.Done;
+            _message = null;
+            _messageIsError = false;
+
+            if (OnTemplateSaved.HasDelegate)
+                await OnTemplateSaved.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            ErrorReporter.ReportReportPackageError("Template scan save failed.", ApplicationRuntimeLogCategories.TemplateScan, ex);
+            _message = ex.Message;
+            _messageIsError = true;
+        }
+        finally
+        {
+            ownedObjectSpace?.Dispose();
+            _busy = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void OpenHelp()
+    {
+        if (_fieldPlan == null)
+            return;
+
+        _helpReturnStage = _stage;
+        _stage = Stage.NeedsHelp;
+        _message = null;
+        _messageIsError = false;
+    }
+
+    private void CloseHelp()
+    {
+        _stage = _helpReturnStage;
+        _message = null;
+        _messageIsError = false;
+    }
+
+    private ScanGapPacketRequest? BuildGapPacketRequest()
+    {
+        if (_fieldPlan == null || _fileBytes is not { Length: > 0 } || _profileId == Guid.Empty)
+            return null;
+
+        return new ScanGapPacketRequest
+        {
+            ApplicationProfileId = _profileId,
+            ApplicationProfileInstanceId = _selectedInstanceId == Guid.Empty ? null : _selectedInstanceId,
+            ScanContentSha256 = ScanGapPacketExporter.ComputeContentSha256(_fileBytes),
+            FieldPlan = _fieldPlan,
+            Validation = _outcome?.Validation,
+            PlaybookFingerprint = _ingest?.Playbook.Fingerprint ?? _fieldPlan.PlaceholderSet.Fingerprint,
+            PlaceholderSetFingerprint = _fieldPlan.PlaceholderSet.Fingerprint,
+            TemplateName = _templateName,
+            ScanFileName = _fileName,
+            ProfileName = _profileName,
+            CatalogScope = _catalogScope,
+            DataScope = _dataScope,
+        };
+    }
+
+    private async Task DownloadGapPacketJsonAsync() => await DownloadGapPacketAsync(json: true);
+
+    private async Task DownloadGapPacketMarkdownAsync() => await DownloadGapPacketAsync(json: false);
+
+    private async Task DownloadGapPacketAsync(bool json)
+    {
+        var request = BuildGapPacketRequest();
+        if (request == null)
+        {
+            _message = "Nothing to export yet — analyze a scan first.";
+            _messageIsError = true;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        try
+        {
+            var bytes = json
+                ? GapPacketExporter.ExportJson(request)
+                : GapPacketExporter.ExportMarkdown(request);
+            var stem = string.IsNullOrWhiteSpace(_templateName) ? "scan-gaps" : _templateName.Trim();
+            var fileName = json ? $"{stem}-gaps.json" : $"{stem}-gaps.md";
+            var contentType = json ? "application/json" : "text/markdown";
+            await using var stream = new MemoryStream(bytes);
+            await FileDownloader.DownloadAsync(fileName, stream, contentType);
+            _message = json ? "Gap packet downloaded (JSON)." : "Gap packet downloaded (Markdown).";
+            _messageIsError = false;
+        }
+        catch (Exception ex)
+        {
+            ErrorReporter.ReportReportPackageError("Template scan gap packet export failed.", ApplicationRuntimeLogCategories.TemplateScan, ex);
+            _message = "Gap packet export failed.";
+            _messageIsError = true;
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task FocusSavedTemplateAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_savedTemplateName) || !OnFocusSavedTemplate.HasDelegate)
+            return;
+
+        await OnFocusSavedTemplate.InvokeAsync(_savedTemplateName);
+        await CloseAsync();
+    }
+
+    private void ScanAnother()
+    {
+        var source = _source;
+        var caseNumber = _caseNumber;
+        var profileId = _profileId;
+        var profileName = _profileName;
+        var hostObjectSpace = _hostObjectSpace;
+        var hostProfile = _hostProfile;
+        var instanceOptions = _instanceOptions;
+        var selectedInstanceId = _selectedInstanceId;
+        var configLocked = _configLocked;
+
+        Reset();
+
+        _source = source;
+        _caseNumber = caseNumber;
+        _profileId = profileId;
+        _profileName = profileName;
+        _hostObjectSpace = hostObjectSpace;
+        _hostProfile = hostProfile;
+        _instanceOptions = instanceOptions;
+        _selectedInstanceId = selectedInstanceId;
+        _configLocked = configLocked;
+        _scanKind = ScanKind.FilledSample;
+        _aiEnabled = Options.Value.Enabled && ScanAiProvider.IsEnabled;
+    }
+
+    private void BackToUpload()
+    {
+        _stage = Stage.Upload;
+        _ingest = null;
+        _fieldPlan = null;
+        _outcome = null;
+        _acknowledgedWarnings = false;
+        _previewAcknowledgedWarnings = false;
+        _chatMessages.Clear();
+        _quickReplies = Array.Empty<string>();
+        _chatInput = string.Empty;
+        _chatRejectBanner = false;
+        _chatRejectText = string.Empty;
+        _chatSeeded = false;
+        _message = null;
+        _messageIsError = false;
+        _reviewSelectedFieldId = null;
+        _reviewChatOpen = false;
+        _reviewChatFocusFieldId = null;
+    }
+
+    private string ModalWidthClass => _stage switch
+    {
+        Stage.FieldReview or Stage.Preview => "tas-modal--wide tas-modal--review",
+        Stage.Clarification or Stage.NeedsHelp => "tas-modal--wide",
+        _ => string.Empty,
+    };
+
+    private string StepCssClass(int index)
+    {
+        var active = _stage switch
+        {
+            Stage.Upload => 1,
+            Stage.ScanFail => 1,
+            Stage.FieldReview => 2,
+            Stage.Clarification => 2,
+            Stage.Generating => 3,
+            Stage.Preview => 4,
+            Stage.Done => 5,
+            _ => 1,
+        };
+
+        var doneThrough = _stage switch
+        {
+            Stage.Done => 5,
+            Stage.Preview => 4,
+            Stage.Generating => 2,
+            Stage.Clarification or Stage.FieldReview => 1,
+            _ => 0,
+        };
+
+        if (index == active)
+            return "is-active";
+        if (index <= doneThrough)
+            return "is-done";
+        return "is-future";
+    }
+
+    private static string StepMark(int index) => index switch
+    {
+        1 => "1",
+        2 => "2",
+        _ => "•",
+    };
+}

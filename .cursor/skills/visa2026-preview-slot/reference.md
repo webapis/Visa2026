@@ -13,15 +13,25 @@ XAF Controller
   → *SlotPanel (catalog) or *InlinePreview (exclusive preview)
 ```
 
-## Occupant keys (`VisaPreviewSlotOccupantKeys`)
+## Occupant keys (VisaPreviewSlotOccupantKeys)
+
+Also: `issue-issued-header:{catalogKey}:{appId:N}` via `ForIssueIssuedHeader` (compose New invitation / work permit / rejection / border zone).
+Also: `issue-issued-visa:{appId:N}` via `ForIssueIssuedVisa` (New issued visa — invitation lines or case roster).
+Also: `approval-leg-catalog:tenant` via `ForApprovalLegCatalog` (wizard **Edit in Configuration**).
 
 | Pattern | When |
 |---------|------|
 | `resminamalar:app:{applicationId}` | Application-scope Resminamalar |
 | `resminamalar:items:{appId}:{sortedItemIds}` | ApplicationItem ListView scope |
 | `document-copies:items:{sortedItemIds}` | Document copies |
-| `progress-letters:app:{appId}` or with focus id | Ministry letter catalog |
-| `file:{sourceType}:{objectId}` | Generic file preview |
+| `progress-letters:app:{appId}` | Ministry letter catalog |
+| `progress-letters:app:{appId}` plus `preview:{progressId}` | Workspace Progress filename (`OpenPreviewOnly`) |
+| `file:{sourceType}:{objectId}` | Generic file preview (`progress-letter`, `user-report-template`, `application-profile-template`) |
+| `issue-issued-header:{catalogKey}:{appId}` | New invitation / WP / rejection / border zone compose (ForIssueIssuedHeader) |
+| `issue-issued-visa:{appId}` | New issued visa compose (ForIssueIssuedVisa) |
+| `approval-leg-catalog:tenant` | Shared approval-leg catalog from wizard Identity |
+
+Register new Word/Excel “look” previews as `IFilePreviewSource` + `OpenFileAsync`. Do not add a Resminamalar occupant from the Application Profile wizard (no live application to merge).
 
 ## Panel state machine
 
@@ -75,6 +85,8 @@ Defined on `.resminamalar-slot-panel`:
 | `syncSlotTheme()` | Copy theme vars into slot |
 | `syncInlinePreviewHeight()` | PDF iframe height after resize |
 | `registerHost` / `unregisterHost` | `VisaPreviewSlotHost` JS interop |
+| `openIssueIssuedHeader` | Issue invitation / WP / rejection / border zone compose |
+| `openIssueIssuedVisa` | Path A New issued visa compose, or edit when `existingVisaId` is passed |
 
 Hard-refresh required after JS/CSS changes (Ctrl+F5).
 

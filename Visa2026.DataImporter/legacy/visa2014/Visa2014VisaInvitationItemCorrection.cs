@@ -20,7 +20,7 @@ internal sealed class Visa2014VisaInvitationItemCorrectionResult
 }
 
 /// <summary>
-/// Path B post-pass: set Visa.InvitationItem (and IsUsed) after IssuingApplicationItem correction.
+/// Path B post-pass: set Visa.IssuingInvitationItem after IssuingApplicationItem correction.
 /// Target-side closest-match only; does not call Path A.
 /// </summary>
 internal static class Visa2014VisaInvitationItemCorrection
@@ -108,8 +108,8 @@ internal static class Visa2014VisaInvitationItemCorrection
             .ToDictionary(v => v.ID);
 
         var linkedInvitationIds = objectSpace.GetObjectsQuery<Bo.Visa>()
-            .Where(v => v.GCRecord == 0 && v.InvitationItem != null)
-            .Select(v => new { VisaId = v.ID, InvitationItemId = v.InvitationItem!.ID })
+            .Where(v => v.GCRecord == 0 && v.IssuingInvitationItem != null)
+            .Select(v => new { VisaId = v.ID, InvitationItemId = v.IssuingInvitationItem!.ID })
             .ToList()
             .GroupBy(x => x.InvitationItemId)
             .ToDictionary(g => g.Key, g => g.Select(x => x.VisaId).ToHashSet());
@@ -126,14 +126,14 @@ internal static class Visa2014VisaInvitationItemCorrection
                 continue;
             }
 
-            var issuingItem = visa.IssuingApplicationItem;
-            if (issuingItem == null)
+            var issuingApplication = visa.IssuingApplicationProfileInstance;
+            if (issuingApplication == null)
             {
                 noIssuing++;
                 continue;
             }
 
-            var applicationType = issuingItem.Application?.ApplicationType;
+            var applicationType = issuingApplication.ApplicationType;
             if (!ApplicationTypeCapabilities.CanIssueInvitation(applicationType))
             {
                 notInvIssuing++;
@@ -141,21 +141,19 @@ internal static class Visa2014VisaInvitationItemCorrection
             }
 
             var person = visa.Passport?.Person;
-            var application = issuingItem.Application;
+            var application = issuingApplication;
             if (person == null || application == null)
             {
                 noPerson++;
                 continue;
             }
 
-            if (visa.InvitationItem != null
-                && visa.InvitationItem.Person?.ID == person.ID
-                && visa.InvitationItem.Invitation?.Application?.ID == application.ID
-                && !visa.InvitationItem.IsCancelled
-                && !visa.InvitationItem.IsChanged)
+            if (visa.IssuingInvitationItem != null
+                && visa.IssuingInvitationItem.Person?.ID == person.ID
+                && visa.IssuingInvitationItem.Invitation?.ApplicationProfileInstance?.ID == application.ID
+                && !visa.IssuingInvitationItem.IsCancelled
+                && !visa.IssuingInvitationItem.IsChanged)
             {
-                if (!dryRun && !visa.InvitationItem.IsUsed)
-                    visa.InvitationItem.IsUsed = true;
                 alreadyCorrect++;
                 continue;
             }
@@ -166,15 +164,15 @@ internal static class Visa2014VisaInvitationItemCorrection
                 .ToHashSet();
 
             var candidates = invitationItems
-                .Where(ii => ii.Person != null && ii.Invitation?.Application != null)
+                .Where(ii => ii.Person != null && ii.Invitation?.ApplicationProfileInstance != null)
                 .Select(ii => new Visa2014VisaInvitationItemLinkCandidate
                 {
                     InvitationItemId = ii.ID,
                     InvitationId = ii.Invitation!.ID,
                     PersonId = ii.Person!.ID,
-                    ApplicationId = ii.Invitation.Application!.ID,
+                    ApplicationProfileInstanceId = ii.Invitation.ApplicationProfileInstance!.ID,
                     IssuedDate = ii.Invitation.IssuedDate,
-                    ApplicationDate = ii.Invitation.Application.ApplicationDate,
+                    ApplicationDate = ii.Invitation.ApplicationProfileInstance.ApplicationDate,
                     IsCancelled = ii.IsCancelled,
                     IsChanged = ii.IsChanged,
                     IsUsed = ii.IsUsed,
@@ -208,9 +206,7 @@ internal static class Visa2014VisaInvitationItemCorrection
                 continue;
             }
 
-            visa.InvitationItem = match;
-            if (!match.IsUsed)
-                match.IsUsed = true;
+            visa.IssuingInvitationItem = match;
 
             if (!linkedInvitationIds.TryGetValue(match.ID, out var visaSet))
             {

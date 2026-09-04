@@ -7,6 +7,8 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.EFCore;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
+using Visa2026.Module.Services.ApplicationPersonRoster;
+using Visa2026.Module.Services;
 
 namespace Visa2026.Module.Services.ReportDashboard;
 
@@ -120,17 +122,17 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         return category switch
         {
             ReportDashboardCategory.ApplicationViaMinistry =>
-                objectSpace.GetObjectsQuery<Application>()
+                objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
                     .Count(a => a.ApplicationDate >= cutoff
                         && a.ApplicationType != null
-                        && a.ApplicationType.ApplicationProgressRoute
-                            == ApplicationProgressRouteKind.ViaMinistries),
+                        && a.ApplicationType.ApplicationProfileInstanceProgressRoute
+                            == ApplicationProfileInstanceProgressRouteKind.ViaMinistries),
             ReportDashboardCategory.ApplicationDirectMigration =>
-                objectSpace.GetObjectsQuery<Application>()
+                objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
                     .Count(a => a.ApplicationDate >= cutoff
                         && a.ApplicationType != null
-                        && a.ApplicationType.ApplicationProgressRoute
-                            == ApplicationProgressRouteKind.DirectToMigrationService),
+                        && a.ApplicationType.ApplicationProfileInstanceProgressRoute
+                            == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService),
             ReportDashboardCategory.VisaExtension =>
                 objectSpace.GetObjectsQuery<VisaExtensionStatus>()
                     .Count(v => v.Person != null && (role == null || v.Person.PersonRole == role)
@@ -148,28 +150,21 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                     .Count(w => w.Person != null && (role == null || w.Person.PersonRole == role)
                                 && (w.ExpirationDate == null || w.ExpirationDate >= cutoff)),
             ReportDashboardCategory.Travel =>
-                objectSpace.GetObjectsQuery<ApplicationItem>()
-                    .Count(a => a.Person != null && (role == null || a.Person.PersonRole == role)
-                                && a.TravelDate != null && a.TravelDate >= cutoff),
+                TryGetDbContext(objectSpace, out var dbTravel)
+                    ? ReportDashboardRosterQueryHelper.CountTravelLines(dbTravel, role, cutoff)
+                    : 0,
             ReportDashboardCategory.AddressOfResidence =>
-                objectSpace.GetObjectsQuery<ApplicationItem>()
-                    .Count(ai => ai.CurrentAddressOfResidence != null
-                                && ai.Person != null && (role == null || ai.Person.PersonRole == role)
-                                && !ai.Person.IsArchived
-                                && ai.Application != null
-                                && ai.Application.ApplicationDate >= cutoff),
+                TryGetDbContext(objectSpace, out var dbAddr)
+                    ? ReportDashboardRosterQueryHelper.CountAddressApplicationLines(dbAddr, role, cutoff)
+                    : 0,
             ReportDashboardCategory.BorderZone =>
                 objectSpace.GetObjectsQuery<BorderZoneItem>()
                     .Count(b => b.Person != null && (role == null || b.Person.PersonRole == role)
                                 && (b.BorderZone == null || b.BorderZone.ExpirationDate == null || b.BorderZone.ExpirationDate >= cutoff)),
             ReportDashboardCategory.Passport =>
-                objectSpace.GetObjectsQuery<ApplicationItem>()
-                    .Count(ai => ai.CurrentPassport != null
-                                && ai.Person != null && (role == null || ai.Person.PersonRole == role)
-                                && !ai.Person.IsArchived
-                                && ai.Application != null
-                                && ai.Application.ApplicationDate != null
-                                && ai.Application.ApplicationDate >= cutoff),
+                TryGetDbContext(objectSpace, out var dbPassport)
+                    ? ReportDashboardRosterQueryHelper.CountPassportApplicationLines(dbPassport, role, cutoff)
+                    : 0,
             ReportDashboardCategory.Education =>
                 objectSpace.GetObjectsQuery<Education>()
                     .Count(e => e.Person != null && (role == null || e.Person.PersonRole == role)),
@@ -355,9 +350,9 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
     // ---- Category loaders -----------------------------------------------
 
     /// <summary>
-    /// Application Status: chart Status = combined
+    /// ApplicationProfileInstance Status: chart Status = combined
     /// State · Ministry depth · Approval leg · Migration SLA.
-    /// Population filtered by <see cref="ApplicationProgressRouteKind"/> (same as nav ListViews).
+    /// Population filtered by <see cref="ApplicationProfileInstanceProgressRouteKind"/> (same as nav ListViews).
     /// </summary>
     private static ReportDashboardPanelData LoadApplication(
         IObjectSpace objectSpace,
@@ -368,14 +363,14 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         bool includeCompletedApplicationProcesses,
         bool includeCancelledApplicationProcesses)
     {
-        // Legacy keys (by-progress / by-type / all / type:*) → Application Status.
+        // Legacy keys (by-progress / by-type / all / type:*) → ApplicationProfileInstance Status.
         if (subReport is "by-progress" or "by-type" or "all" or "default"
             || string.IsNullOrWhiteSpace(subReport)
             || subReport.StartsWith("type:", StringComparison.Ordinal))
             subReport = ReportDashboardCatalog.ApplicationStatusSubReportKey;
 
-        var route = ReportDashboardCatalog.ApplicationProgressRouteFor(category)
-            ?? ApplicationProgressRouteKind.ViaMinistries;
+        var route = ReportDashboardCatalog.ApplicationProfileInstanceProgressRouteFor(category)
+            ?? ApplicationProfileInstanceProgressRouteKind.ViaMinistries;
 
         var query = FilterApplications(
             objectSpace, route, role, projectKey, cutoff,
@@ -410,7 +405,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                 return new ReportDashboardPreviewRow
                 {
                     RecordId = a.ID,
-                    Name = FirstApplicationPersonName(a),
+                    Name = FirstApplicationProfileInstancePersonName(a),
                     Project = ProjectLabel(a.ProjectContract),
                     ColumnA = a.FullApplicationNumber ?? a.ApplicationNumber ?? string.Empty,
                     ColumnB = FormatDate(a.ApplicationDate),
@@ -422,28 +417,28 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
 
         return BuildPanel(
             personType, category, subReport, rows,
-            excelHint, excelConfigured, buckets, totalCount, "Application Status");
+            excelHint, excelConfigured, buckets, totalCount, "ApplicationProfileInstance Status");
     }
 
-    private static IQueryable<Application> FilterApplications(
+    private static IQueryable<ApplicationProfileInstance> FilterApplications(
         IObjectSpace objectSpace,
-        ApplicationProgressRouteKind route,
+        ApplicationProfileInstanceProgressRouteKind route,
         PersonRecordRole? role,
         string projectKey,
         DateTime cutoff,
         bool includeCompletedApplicationProcesses,
         bool includeCancelledApplicationProcesses)
     {
-        var query = objectSpace.GetObjectsQuery<Application>()
+        var query = objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
             .Where(a => (a.ApplicationDate == null || a.ApplicationDate >= cutoff)
                 && a.ApplicationType != null
-                && a.ApplicationType.ApplicationProgressRoute == route);
+                && a.ApplicationType.ApplicationProfileInstanceProgressRoute == route);
 
         if (role.HasValue)
         {
             var roleValue = role.Value;
-            query = query.Where(a => a.ApplicationItems.Any(ai =>
-                ai.Person != null && ai.Person.PersonRole == roleValue));
+            query = query.Where(a =>
+                a.People.Any(ap => ap != null && ap.PersonRole == roleValue));
         }
 
         if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
@@ -457,7 +452,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             query = query.Where(a =>
                 a.LatestProgress == null
                 || a.LatestProgress.State == null
-                || a.LatestProgress.State.Code != ApplicationProgressStateCodes.ProcessIssued);
+                || a.LatestProgress.State.Code != ApplicationProfileInstanceProgressStateCodes.ProcessIssued);
         }
 
         if (!includeCancelledApplicationProcesses)
@@ -465,19 +460,19 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             query = query.Where(a =>
                 a.LatestProgress == null
                 || a.LatestProgress.State == null
-                || a.LatestProgress.State.Code != ApplicationProgressStateCodes.ProcessCancelled);
+                || a.LatestProgress.State.Code != ApplicationProfileInstanceProgressStateCodes.ProcessCancelled);
         }
 
         return query;
     }
 
-    private static string FormatApplicationCombinedStateLabel(Application application)
+    private static string FormatApplicationCombinedStateLabel(ApplicationProfileInstance application)
     {
         var state = string.IsNullOrWhiteSpace(application.CurrentState)
             ? "Being Prepared"
             : application.CurrentState.Trim();
-        var depth = ApplicationProgressProfileResolver.FormatMinistryReviewDepthLabel(
-            ApplicationProgressProfileResolver.GetMinistryReviewDepth(application));
+        var depth = ApplicationProfileInstanceProgressProfileResolver.FormatMinistryReviewDepthLabel(
+            ApplicationProfileInstanceProgressProfileResolver.GetMinistryReviewDepth(application));
         var leg = application.ApprovalLegProfile == null
             ? "—"
             : (string.IsNullOrWhiteSpace(application.ApprovalLegProfile.NameTm)
@@ -491,11 +486,12 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         return $"{state} · {depth} · {leg} · {migration}";
     }
 
-    private static string FirstApplicationPersonName(Application application)
+    private static string FirstApplicationProfileInstancePersonName(ApplicationProfileInstance application)
     {
-        var name = application.ApplicationItems?
-            .OrderBy(ai => ai.ID)
-            .Select(ai => ai.Person?.FullName)
+        var name = application.People?
+            .OrderBy(p => p.LastName)
+            .ThenBy(p => p.FirstName)
+            .Select(p => p.FullName)
             .FirstOrDefault(n => !string.IsNullOrWhiteSpace(n));
         if (!string.IsNullOrWhiteSpace(name))
             return name!;
@@ -766,7 +762,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                 .AsNoTracking()
                 .Where(r => !r.IsArchived && r.PersonOid != null)
                 .AsEnumerable()
-                .Where(r => !ApplicationProgressStateCodes.IsTerminalOutcome(r.ProgressStateCode))
+                .Where(r => !ApplicationProfileInstanceProgressStateCodes.IsTerminalOutcome(r.ProgressStateCode))
                 .Select(r => r.PersonOid!.Value)
                 .Distinct()
                 .ToHashSet();
@@ -1102,7 +1098,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
 
     /// <summary>
     /// Loads Visa State from <c>vw_rd_visa_state</c>
-    /// (Extension Started: valid last-visa on visa-extension ApplicationItem;
+    /// (Extension Started: valid last-visa on visa-extension ApplicationRosterMergeLine;
     /// application progress must not contain PROCESS_CANCELLED).
     /// </summary>
     private static ReportDashboardPanelData LoadVisaStateFromView(
@@ -1330,7 +1326,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
 
     /// <summary>
     /// Chart/table Status for legacy shared <see cref="VwRdVisaAppProgress"/> rows
-    /// (ProcessState naming matches <see cref="ApplicationProgress.StatusListLabel"/>).
+    /// (ProcessState naming matches <see cref="ApplicationProfileInstanceProgress.StatusListLabel"/>).
     /// Dedicated wrapper views expose <c>StatusLabel</c> directly — prefer that path.
     /// </summary>
     private static Dictionary<Guid, string> ResolveVisaAppProgressStatusLabels(
@@ -1354,17 +1350,17 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
 
         var appIds = rows
-            .Where(r => r.ApplicationOid.HasValue)
-            .Select(r => r.ApplicationOid!.Value)
+            .Where(r => r.ApplicationProfileInstanceOid.HasValue)
+            .Select(r => r.ApplicationProfileInstanceOid!.Value)
             .Distinct()
             .ToList();
 
         var needVisaDims = mode is VisaAppProgressPanelMode.OnExtensionByPeriodCategoryType
             or VisaAppProgressPanelMode.ExtensionResultByPeriodCategoryType;
-        Dictionary<Guid, Application> appsById = [];
+        Dictionary<Guid, ApplicationProfileInstance> appsById = [];
         if (appIds.Count > 0)
         {
-            IQueryable<Application> appQuery = db.Applications.AsNoTracking()
+            IQueryable<ApplicationProfileInstance> appQuery = db.ApplicationProfileInstances.AsNoTracking()
                 .Where(a => appIds.Contains(a.ID))
                 .Include(a => a.ApprovalLegSnapshots)
                 .Include(a => a.ApprovalLegProfile!)
@@ -1383,7 +1379,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
 
         foreach (var row in rows)
         {
-            appsById.TryGetValue(row.ApplicationOid ?? Guid.Empty, out var app);
+            appsById.TryGetValue(row.ApplicationProfileInstanceOid ?? Guid.Empty, out var app);
             var processState = ResolveOnExtensionProcessStateLabel(row, app, stateByCode);
 
             if (mode is VisaAppProgressPanelMode.OnExtensionByPeriodCategoryType
@@ -1425,11 +1421,11 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         if (string.IsNullOrEmpty(code))
             return false;
 
-        if (string.Equals(code, ApplicationProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase)
-            || string.Equals(code, ApplicationProgressStateCodes.ProcessRejected, StringComparison.OrdinalIgnoreCase)
-            || string.Equals(code, ApplicationProgressStateCodes.ProcessCancelled, StringComparison.OrdinalIgnoreCase)
-            || string.Equals(code, ApplicationProgressStateCodes.Review1Rejected, StringComparison.OrdinalIgnoreCase)
-            || string.Equals(code, ApplicationProgressStateCodes.Review2Rejected, StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(code, ApplicationProfileInstanceProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(code, ApplicationProfileInstanceProgressStateCodes.ProcessRejected, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(code, ApplicationProfileInstanceProgressStateCodes.ProcessCancelled, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(code, ApplicationProfileInstanceProgressStateCodes.Review1Rejected, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(code, ApplicationProfileInstanceProgressStateCodes.Review2Rejected, StringComparison.OrdinalIgnoreCase))
             return true;
 
         // Legacy multi-leg ministry rejects (3–5) — same “completed” treatment as 1st/2nd.
@@ -1467,14 +1463,14 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
 
     private static string ResolveOnExtensionProcessStateLabel(
         VwRdVisaAppProgress row,
-        Application? app,
+        ApplicationProfileInstance? app,
         IReadOnlyDictionary<string, ApplicationState> stateByCode)
     {
         var code = row.ProgressStateCode?.Trim();
         string stateLabel;
         if (string.IsNullOrEmpty(code))
         {
-            stateLabel = ApplicationProgressPrimaryStateCodeResolver.ResolveDisplayNameFromLatest(null)
+            stateLabel = ApplicationProfileInstanceProgressPrimaryStateCodeResolver.ResolveDisplayNameFromLatest(null)
                 ?? "Being Prepared";
         }
         else if (stateByCode.TryGetValue(code, out var state))
@@ -1498,7 +1494,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                 app, code, locationCode: null);
         }
 
-        return ApplicationProgressListLabelHelper.FormatStatusLabel(stateLabel, ministry);
+        return ApplicationProfileInstanceProgressListLabelHelper.FormatStatusLabel(stateLabel, ministry);
     }
 
     private static ReportDashboardPanelData LoadVisaExtensionLegacy(
@@ -1511,8 +1507,8 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                         && (v.ApplicationDate == null || v.ApplicationDate >= cutoff));
 
         if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
-            query = query.Where(v => v.Application != null && v.Application.ProjectContract != null
-                && (v.Application.ProjectContract.Name == projectKey || v.Application.ProjectContract.NameTm == projectKey));
+            query = query.Where(v => v.ApplicationProfileInstance != null && v.ApplicationProfileInstance.ProjectContract != null
+                && (v.ApplicationProfileInstance.ProjectContract.Name == projectKey || v.ApplicationProfileInstance.ProjectContract.NameTm == projectKey));
 
         var rows = query.OrderByDescending(v => v.ApplicationDate).Take(PreviewLimit).AsEnumerable()
             .Select(v =>
@@ -1523,7 +1519,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                 {
                     RecordId = v.ID,
                     Name = v.Person?.FullName ?? string.Empty,
-                    Project = ProjectLabel(v.Application?.ProjectContract),
+                    Project = ProjectLabel(v.ApplicationProfileInstance?.ProjectContract),
                     ColumnA = FormatDate(v.ExpiringVisa?.ExpirationDate),
                     ColumnB = FormatDate(v.ApplicationDate),
                     Status = status,
@@ -1677,9 +1673,11 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         string? excelHint, bool excelConfigured, DateTime cutoff)
     {
         var today = DateTime.Today;
-        var query = FilterInvitationItems(objectSpace, role, projectKey, cutoff)
-            .Where(i => !i.IsUsed && !i.IsCancelled && !i.IsChanged
-                        && i.Invitation != null
+        var query = IssuedDocumentLifecycle.WhereInvitationItemNotUsed(
+            IssuedDocumentLifecycle.WhereInvitationItemNotChanged(
+                IssuedDocumentLifecycle.WhereInvitationItemNotCancelled(
+                    FilterInvitationItems(objectSpace, role, projectKey, cutoff))))
+            .Where(i => i.Invitation != null
                         && i.Invitation.ExpirationDate != null
                         && i.Invitation.ExpirationDate >= today);
 
@@ -1689,8 +1687,8 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                 ?? i.Invitation?.VisaPeriod?.Name;
             var category = i.Invitation?.VisaCategory?.NameTm
                 ?? i.Invitation?.VisaCategory?.Name;
-            var type = i.Invitation?.Application?.VisaType?.NameTm
-                ?? i.Invitation?.Application?.VisaType?.Name;
+            var type = i.Invitation?.ApplicationProfileInstance?.VisaType?.NameTm
+                ?? i.Invitation?.ApplicationProfileInstance?.VisaType?.Name;
             var periodLabel = string.IsNullOrWhiteSpace(period) ? "(No period)" : period!.Trim();
             var categoryLabel = string.IsNullOrWhiteSpace(category) ? "(No category)" : category!.Trim();
             var typeLabel = string.IsNullOrWhiteSpace(type) ? "(No type)" : type!.Trim();
@@ -1790,9 +1788,11 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         string? excelHint, bool excelConfigured, DateTime cutoff)
     {
         var today = DateTime.Today;
-        var query = FilterInvitationItems(objectSpace, role, projectKey, cutoff)
-            .Where(i => !i.IsUsed && !i.IsCancelled && !i.IsChanged
-                        && i.Invitation != null
+        var query = IssuedDocumentLifecycle.WhereInvitationItemNotUsed(
+            IssuedDocumentLifecycle.WhereInvitationItemNotChanged(
+                IssuedDocumentLifecycle.WhereInvitationItemNotCancelled(
+                    FilterInvitationItems(objectSpace, role, projectKey, cutoff))))
+            .Where(i => i.Invitation != null
                         && i.Invitation.ExpirationDate != null
                         && i.Invitation.ExpirationDate >= today);
 
@@ -1945,7 +1945,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                     .Where(ii => itemIds.Contains(ii.ID))
                     .Include(ii => ii.Invitation!).ThenInclude(inv => inv.VisaPeriod)
                     .Include(ii => ii.Invitation!).ThenInclude(inv => inv.VisaCategory)
-                    .Include(ii => ii.Invitation!).ThenInclude(inv => inv.Application!).ThenInclude(a => a.VisaType)
+                    .Include(ii => ii.Invitation!).ThenInclude(inv => inv.ApplicationProfileInstance!).ThenInclude(a => a.VisaType)
                     .AsEnumerable()
                     .ToDictionary(
                         ii => ii.ID,
@@ -1953,7 +1953,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                         {
                             var period = LookupLabelOrMissing(ii.Invitation?.VisaPeriod, "(No period)");
                             var category = LookupLabelOrMissing(ii.Invitation?.VisaCategory, "(No category)");
-                            var type = LookupLabelOrMissing(ii.Invitation?.Application?.VisaType, "(No type)");
+                            var type = LookupLabelOrMissing(ii.Invitation?.ApplicationProfileInstance?.VisaType, "(No type)");
                             return $"{period} · {category} · {type}";
                         });
             }
@@ -2026,20 +2026,19 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         InvitationItemBucket bucket)
     {
         var today = DateTime.Today;
-        var query = FilterInvitationItems(objectSpace, role, projectKey, cutoff)
-            .Where(i => !i.IsCancelled && !i.IsChanged);
+        var query = IssuedDocumentLifecycle.WhereInvitationItemNotChanged(
+            IssuedDocumentLifecycle.WhereInvitationItemNotCancelled(
+                FilterInvitationItems(objectSpace, role, projectKey, cutoff)));
 
         query = bucket switch
         {
-            InvitationItemBucket.Used => query.Where(i => i.IsUsed),
-            InvitationItemBucket.Expired => query.Where(i =>
-                !i.IsUsed
-                && i.Invitation != null
+            InvitationItemBucket.Used => IssuedDocumentLifecycle.WhereInvitationItemUsed(query),
+            InvitationItemBucket.Expired => IssuedDocumentLifecycle.WhereInvitationItemNotUsed(query).Where(i =>
+                i.Invitation != null
                 && i.Invitation.ExpirationDate != null
                 && i.Invitation.ExpirationDate < today),
-            _ => query.Where(i =>
-                !i.IsUsed
-                && i.Invitation != null
+            _ => IssuedDocumentLifecycle.WhereInvitationItemNotUsed(query).Where(i =>
+                i.Invitation != null
                 && i.Invitation.ExpirationDate != null
                 && i.Invitation.ExpirationDate >= today),
         };
@@ -2086,8 +2085,8 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
     }
 
     /// <summary>
-    /// Application (direct migration) On Process (A) / Process Complete from vw_rd_*.
-    /// Chart Status = Application Type · StatusListLabel (process state).
+    /// ApplicationProfileInstance (direct migration) On Process (A) / Process Complete from vw_rd_*.
+    /// Chart Status = ApplicationProfileInstance Type · StatusListLabel (process state).
     /// </summary>
     private static ReportDashboardPanelData LoadApplicationDirectMigrationFromView(
         IObjectSpace objectSpace, PersonRecordRole? role, string projectKey,
@@ -2108,7 +2107,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         {
             var completed = ReportDashboardCatalog.UsesApplicationDirectMigrationRdCompletedListView(subReport);
 
-            List<(Guid ID, Guid? ApplicationOid, string? PersonName, string? ProjectName, string? ProjectNameRaw,
+            List<(Guid ID, Guid? ApplicationProfileInstanceOid, string? PersonName, string? ProjectName, string? ProjectNameRaw,
                 string? ProjectNameTm, int PersonRoleCode, string? ApplicationTypeLabel, string? ApplicationNumber,
                 DateTime? ApplicationDate, string? ProgressStateCode, string? StatusLabel)> list;
 
@@ -2118,7 +2117,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                     .Where(r => !r.IsArchived)
                     .AsEnumerable()
                     .Select(r => (
-                        r.ID, r.ApplicationOid, r.PersonName, r.ProjectName, r.ProjectNameRaw, r.ProjectNameTm,
+                        r.ID, r.ApplicationProfileInstanceOid, r.PersonName, r.ProjectName, r.ProjectNameRaw, r.ProjectNameTm,
                         r.PersonRoleCode, r.ApplicationTypeLabel, r.ApplicationNumber, r.ApplicationDate,
                         r.ProgressStateCode, r.StatusLabel))
                     .ToList();
@@ -2129,7 +2128,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                     .Where(r => !r.IsArchived)
                     .AsEnumerable()
                     .Select(r => (
-                        r.ID, r.ApplicationOid, r.PersonName, r.ProjectName, r.ProjectNameRaw, r.ProjectNameTm,
+                        r.ID, r.ApplicationProfileInstanceOid, r.PersonName, r.ProjectName, r.ProjectNameRaw, r.ProjectNameTm,
                         r.PersonRoleCode, r.ApplicationTypeLabel, r.ApplicationNumber, r.ApplicationDate,
                         r.ProgressStateCode, r.StatusLabel))
                     .ToList();
@@ -2166,14 +2165,14 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                 .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
 
             var appIds = list
-                .Where(r => r.ApplicationOid.HasValue)
-                .Select(r => r.ApplicationOid!.Value)
+                .Where(r => r.ApplicationProfileInstanceOid.HasValue)
+                .Select(r => r.ApplicationProfileInstanceOid!.Value)
                 .Distinct()
                 .ToList();
-            Dictionary<Guid, Application> appsById = [];
+            Dictionary<Guid, ApplicationProfileInstance> appsById = [];
             if (appIds.Count > 0)
             {
-                appsById = db.Applications.AsNoTracking()
+                appsById = db.ApplicationProfileInstances.AsNoTracking()
                     .Where(a => appIds.Contains(a.ID))
                     .Include(a => a.ApprovalLegSnapshots)
                     .Include(a => a.ApprovalLegProfile!)
@@ -2185,12 +2184,12 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
 
             var labeled = list.Select(r =>
             {
-                Application? app = null;
-                if (r.ApplicationOid is Guid appOid)
+                ApplicationProfileInstance? app = null;
+                if (r.ApplicationProfileInstanceOid is Guid appOid)
                     appsById.TryGetValue(appOid, out app);
 
                 var viaRow = new AppViaMinistryRow(
-                    r.ID, r.ApplicationOid, r.PersonName, r.ProjectName, r.ProjectNameRaw, r.ProjectNameTm,
+                    r.ID, r.ApplicationProfileInstanceOid, r.PersonName, r.ProjectName, r.ProjectNameRaw, r.ProjectNameTm,
                     r.PersonRoleCode, null, r.ApplicationTypeLabel, null, null, null, null, null,
                     r.ApplicationNumber, r.ApplicationDate, r.ProgressStateCode, r.StatusLabel,
                     null, null, null);
@@ -2245,7 +2244,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
     }
 
     /// <summary>
-    /// Application (via ministry) dedicated vw_rd_* panels.
+    /// ApplicationProfileInstance (via ministry) dedicated vw_rd_* panels.
     /// Chart Status = Project · StatusListLabel or Period · Category · Type · StatusListLabel.
     /// </summary>
     private static ReportDashboardPanelData LoadApplicationViaMinistryFromView(
@@ -2346,7 +2345,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
 
     private readonly record struct AppViaMinistryRow(
         Guid ID,
-        Guid? ApplicationOid,
+        Guid? ApplicationProfileInstanceOid,
         string? PersonName,
         string? ProjectName,
         string? ProjectNameRaw,
@@ -2381,7 +2380,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                     .Where(r => !r.IsArchived)
                     .AsEnumerable()
                     .Select(p => new AppViaMinistryRow(
-                        p.ID, p.ApplicationOid, p.PersonName, p.ProjectName, p.ProjectNameRaw, p.ProjectNameTm,
+                        p.ID, p.ApplicationProfileInstanceOid, p.PersonName, p.ProjectName, p.ProjectNameRaw, p.ProjectNameTm,
                         p.PersonRoleCode, p.PositionLabel, p.ApplicationTypeLabel,
                         p.VisaPeriodLabel, p.VisaTypeLabel,
                         null, null, null,
@@ -2393,7 +2392,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                     .Where(r => !r.IsArchived)
                     .AsEnumerable()
                     .Select(r => new AppViaMinistryRow(
-                        r.ID, r.ApplicationOid, r.PersonName, r.ProjectName, r.ProjectNameRaw, r.ProjectNameTm,
+                        r.ID, r.ApplicationProfileInstanceOid, r.PersonName, r.ProjectName, r.ProjectNameRaw, r.ProjectNameTm,
                         r.PersonRoleCode, r.PositionLabel, r.ApplicationTypeLabel,
                         r.VisaPeriodLabel, r.VisaTypeLabel,
                         null, null, null,
@@ -2405,7 +2404,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                     .Where(r => !r.IsArchived)
                     .AsEnumerable()
                     .Select(r => new AppViaMinistryRow(
-                        r.ID, r.ApplicationOid, r.PersonName, r.ProjectName, r.ProjectNameRaw, r.ProjectNameTm,
+                        r.ID, r.ApplicationProfileInstanceOid, r.PersonName, r.ProjectName, r.ProjectNameRaw, r.ProjectNameTm,
                         r.PersonRoleCode, r.PositionLabel, r.ApplicationTypeLabel,
                         r.VisaPeriodLabel, r.VisaTypeLabel,
                         null, null, r.InvitationNumber,
@@ -2417,7 +2416,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                     .Where(r => !r.IsArchived)
                     .AsEnumerable()
                     .Select(r => new AppViaMinistryRow(
-                        r.ID, r.ApplicationOid, r.PersonName, r.ProjectName, r.ProjectNameRaw, r.ProjectNameTm,
+                        r.ID, r.ApplicationProfileInstanceOid, r.PersonName, r.ProjectName, r.ProjectNameRaw, r.ProjectNameTm,
                         r.PersonRoleCode, r.PositionLabel, r.ApplicationTypeLabel,
                         r.VisaPeriodLabel, r.VisaTypeLabel,
                         null, null, r.InvitationNumber,
@@ -2429,7 +2428,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                     .Where(r => !r.IsArchived)
                     .AsEnumerable()
                     .Select(r => new AppViaMinistryRow(
-                        r.ID, r.ApplicationOid, r.PersonName, r.ProjectName, r.ProjectNameRaw, r.ProjectNameTm,
+                        r.ID, r.ApplicationProfileInstanceOid, r.PersonName, r.ProjectName, r.ProjectNameRaw, r.ProjectNameTm,
                         r.PersonRoleCode, r.PositionLabel, r.ApplicationTypeLabel,
                         r.VisaPeriodLabel, r.VisaTypeLabel,
                         null, null, null,
@@ -2441,7 +2440,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                     .Where(r => !r.IsArchived)
                     .AsEnumerable()
                     .Select(r => new AppViaMinistryRow(
-                        r.ID, r.ApplicationOid, r.PersonName, r.ProjectName, r.ProjectNameRaw, r.ProjectNameTm,
+                        r.ID, r.ApplicationProfileInstanceOid, r.PersonName, r.ProjectName, r.ProjectNameRaw, r.ProjectNameTm,
                         r.PersonRoleCode, r.PositionLabel, r.ApplicationTypeLabel,
                         r.VisaPeriodLabel, r.VisaTypeLabel,
                         null, null, null,
@@ -2453,7 +2452,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                     .Where(r => !r.IsArchived)
                     .AsEnumerable()
                     .Select(r => new AppViaMinistryRow(
-                        r.ID, r.ApplicationOid, r.PersonName, r.ProjectName, r.ProjectNameRaw, r.ProjectNameTm,
+                        r.ID, r.ApplicationProfileInstanceOid, r.PersonName, r.ProjectName, r.ProjectNameRaw, r.ProjectNameTm,
                         r.PersonRoleCode, r.PositionLabel, r.ApplicationTypeLabel,
                         r.VisaPeriodLabel, r.VisaTypeLabel,
                         r.VisaOnExtensionNumber, r.IssuedVisaNumber, null,
@@ -2465,7 +2464,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                     .Where(r => !r.IsArchived)
                     .AsEnumerable()
                     .Select(r => new AppViaMinistryRow(
-                        r.ID, r.ApplicationOid, r.PersonName, r.ProjectName, r.ProjectNameRaw, r.ProjectNameTm,
+                        r.ID, r.ApplicationProfileInstanceOid, r.PersonName, r.ProjectName, r.ProjectNameRaw, r.ProjectNameTm,
                         r.PersonRoleCode, r.PositionLabel, r.ApplicationTypeLabel,
                         r.VisaPeriodLabel, r.VisaTypeLabel,
                         r.VisaOnExtensionNumber, r.IssuedVisaNumber, null,
@@ -2477,7 +2476,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                     .Where(r => !r.IsArchived)
                     .AsEnumerable()
                     .Select(r => new AppViaMinistryRow(
-                        r.ID, r.ApplicationOid, r.PersonName, r.ProjectName, r.ProjectNameRaw, r.ProjectNameTm,
+                        r.ID, r.ApplicationProfileInstanceOid, r.PersonName, r.ProjectName, r.ProjectNameRaw, r.ProjectNameTm,
                         r.PersonRoleCode, r.PositionLabel, r.ApplicationTypeLabel,
                         r.VisaPeriodLabel, r.VisaTypeLabel,
                         null, null, null,
@@ -2489,7 +2488,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                     .Where(r => !r.IsArchived)
                     .AsEnumerable()
                     .Select(r => new AppViaMinistryRow(
-                        r.ID, r.ApplicationOid, r.PersonName, r.ProjectName, r.ProjectNameRaw, r.ProjectNameTm,
+                        r.ID, r.ApplicationProfileInstanceOid, r.PersonName, r.ProjectName, r.ProjectNameRaw, r.ProjectNameTm,
                         r.PersonRoleCode, r.PositionLabel, r.ApplicationTypeLabel,
                         r.VisaPeriodLabel, r.VisaTypeLabel,
                         null, null, null,
@@ -2548,14 +2547,14 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
 
         var appIds = rows
-            .Where(r => r.ApplicationOid.HasValue)
-            .Select(r => r.ApplicationOid!.Value)
+            .Where(r => r.ApplicationProfileInstanceOid.HasValue)
+            .Select(r => r.ApplicationProfileInstanceOid!.Value)
             .Distinct()
             .ToList();
-        Dictionary<Guid, Application> appsById = [];
+        Dictionary<Guid, ApplicationProfileInstance> appsById = [];
         if (appIds.Count > 0)
         {
-            appsById = db.Applications.AsNoTracking()
+            appsById = db.ApplicationProfileInstances.AsNoTracking()
                 .Where(a => appIds.Contains(a.ID))
                 .Include(a => a.ApprovalLegSnapshots)
                 .Include(a => a.ApprovalLegProfile!)
@@ -2567,8 +2566,8 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
 
         foreach (var row in rows)
         {
-            Application? app = null;
-            if (row.ApplicationOid is Guid appOid)
+            ApplicationProfileInstance? app = null;
+            if (row.ApplicationProfileInstanceOid is Guid appOid)
                 appsById.TryGetValue(appOid, out app);
             var processState = ResolveApplicationViaMinistryProcessStateLabel(row, app, stateByCode);
             if (byPeriodCategoryType)
@@ -2590,14 +2589,14 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
 
     private static string ResolveApplicationViaMinistryProcessStateLabel(
         AppViaMinistryRow row,
-        Application? app,
+        ApplicationProfileInstance? app,
         IReadOnlyDictionary<string, ApplicationState> stateByCode)
     {
         var code = row.ProgressStateCode?.Trim();
         string stateLabel;
         if (string.IsNullOrEmpty(code))
         {
-            stateLabel = ApplicationProgressPrimaryStateCodeResolver.ResolveDisplayNameFromLatest(null)
+            stateLabel = ApplicationProfileInstanceProgressPrimaryStateCodeResolver.ResolveDisplayNameFromLatest(null)
                 ?? (!string.IsNullOrWhiteSpace(row.StatusLabel) ? row.StatusLabel.Trim() : "At office");
         }
         else if (stateByCode.TryGetValue(code, out var state))
@@ -2619,7 +2618,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                 app, code, locationCode: null);
         }
 
-        return ApplicationProgressListLabelHelper.FormatStatusLabel(stateLabel, ministry);
+        return ApplicationProfileInstanceProgressListLabelHelper.FormatStatusLabel(stateLabel, ministry);
     }
 
     /// <summary>
@@ -2633,11 +2632,11 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
     {
         subReport = ReportDashboardCatalog.AppViaMinistryInvitationOnProcessKey;
 
-        var query = objectSpace.GetObjectsQuery<Application>()
+        var query = objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
             .Where(a => a.ApplicationType != null
                         && a.ApplicationType.CanIssueInvitation
-                        && a.ApplicationType.ApplicationProgressRoute
-                            == ApplicationProgressRouteKind.ViaMinistries
+                        && a.ApplicationType.ApplicationProfileInstanceProgressRoute
+                            == ApplicationProfileInstanceProgressRouteKind.ViaMinistries
                         && (a.ApplicationDate == default || a.ApplicationDate >= cutoff)
                         && !a.Invitations.Any());
 
@@ -2674,7 +2673,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                 .GroupBy(s => s.Code!.Trim(), StringComparer.OrdinalIgnoreCase)
                 .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
 
-        var itemRows = new List<(ApplicationItem Item, Application App, string Status, string ProcessState, string Project, string Position, string AppType, string VisaPeriod, string VisaType)>();
+        var itemRows = new List<(ApplicationRosterMergeLine Item, ApplicationProfileInstance App, string Status, string ProcessState, string Project, string Position, string AppType, string VisaPeriod, string VisaType)>();
         foreach (var a in apps)
         {
             var code = !string.IsNullOrWhiteSpace(a.LatestPrimaryStateCode)
@@ -2683,7 +2682,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             string stateLabel;
             if (string.IsNullOrEmpty(code))
             {
-                stateLabel = ApplicationProgressPrimaryStateCodeResolver.ResolveDisplayNameFromLatest(null)
+                stateLabel = ApplicationProfileInstanceProgressPrimaryStateCodeResolver.ResolveDisplayNameFromLatest(null)
                     ?? "At office";
             }
             else if (stateByCode.TryGetValue(code, out var state))
@@ -2698,7 +2697,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
 
             var ministry = ApprovalLegProfileMinistryHelper.GetMinistryShortNameForProgressStep(
                 a, code, locationCode: null);
-            var processState = ApplicationProgressListLabelHelper.FormatStatusLabel(stateLabel, ministry);
+            var processState = ApplicationProfileInstanceProgressListLabelHelper.FormatStatusLabel(stateLabel, ministry);
             var project = ProjectLabel(a.ProjectContract);
             if (string.IsNullOrWhiteSpace(project))
                 project = "(No project)";
@@ -2709,11 +2708,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             var visaPeriod = a.VisaPeriod?.NameTm ?? a.VisaPeriod?.Name ?? string.Empty;
             var visaType = a.VisaType?.NameTm ?? a.VisaType?.Name ?? string.Empty;
 
-            var items = (a.ApplicationItems ?? Array.Empty<ApplicationItem>())
-                .Where(ai => ai != null)
-                .OrderBy(ai => ai.Person?.FullName ?? string.Empty)
-                .ThenBy(ai => ai.ID)
-                .ToList();
+            var items = ApplicationRosterHelper.GetMergeLineItems(objectSpace, a);
             if (items.Count == 0)
                 continue;
 
@@ -2806,26 +2801,20 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
 
             var list = query.ToList();
 
-            // Match EF: person-type filter = any ApplicationItem with that role (not only first person).
+            // Person-type filter = any M2M roster person with that role.
             if (role.HasValue)
             {
-                var roleValue = role.Value;
-                var appIdsWithRole = db.ApplicationItems
-                    .AsNoTracking()
-                    .Where(ai => ai.Application != null && ai.Person != null && ai.Person.PersonRole == roleValue)
-                    .Select(ai => ai.Application!.ID)
-                    .Distinct()
-                    .ToHashSet();
+                var appIdsWithRole = ReportDashboardRosterQueryHelper.ApplicationProfileInstanceIdsWithPersonRole(db, role.Value);
                 list = list.Where(r => appIdsWithRole.Contains(r.ID)).ToList();
             }
 
-            Dictionary<Guid, Application> appsById = [];
+            Dictionary<Guid, ApplicationProfileInstance> appsById = [];
             Dictionary<Guid, string?> primaryCodeByAppId = [];
             if (list.Count > 0)
             {
                 var appIds = list.Select(r => r.ID).ToList();
                 // LatestPrimaryStateCode is authoritative when LatestProgress FK is unset but scalars are synced.
-                primaryCodeByAppId = db.Applications.AsNoTracking()
+                primaryCodeByAppId = db.ApplicationProfileInstances.AsNoTracking()
                     .Where(a => appIds.Contains(a.ID))
                     .Select(a => new { a.ID, a.LatestPrimaryStateCode })
                     .AsEnumerable()
@@ -2845,7 +2834,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                 if (list.Count > 0)
                 {
                     var remainingIds = list.Select(r => r.ID).ToList();
-                    IQueryable<Application> appQuery = db.Applications.AsNoTracking()
+                    IQueryable<ApplicationProfileInstance> appQuery = db.ApplicationProfileInstances.AsNoTracking()
                         .Where(a => remainingIds.Contains(a.ID));
                     if (byPeriodCategoryType)
                     {
@@ -2942,7 +2931,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
 
         // Invitation-issuing applications still in progress (not completed) and with no Invitation yet.
         // Prefer LatestPrimaryStateCode — LatestProgress FK is often null while the scalar code is synced.
-        var query = objectSpace.GetObjectsQuery<Application>()
+        var query = objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
             .Where(a => a.ApplicationType != null
                         && a.ApplicationType.CanIssueInvitation
                         && (a.ApplicationDate == null || a.ApplicationDate >= cutoff)
@@ -2951,8 +2940,8 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         if (role.HasValue)
         {
             var roleValue = role.Value;
-            query = query.Where(a => a.ApplicationItems.Any(ai =>
-                ai.Person != null && ai.Person.PersonRole == roleValue));
+            query = query.Where(a =>
+                a.People.Any(ap => ap != null && ap.PersonRole == roleValue));
         }
 
         if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
@@ -3009,7 +2998,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                 return new ReportDashboardPreviewRow
                 {
                     RecordId = a.ID,
-                    Name = FirstApplicationPersonName(a),
+                    Name = FirstApplicationProfileInstancePersonName(a),
                     Project = ProjectLabel(a.ProjectContract),
                     ColumnA = a.FullApplicationNumber ?? a.ApplicationNumber ?? string.Empty,
                     ColumnB = FormatDate(a.ApplicationDate),
@@ -3031,7 +3020,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
     /// (PROCESS_ISSUED / PROCESS_CANCELLED / PROCESS_REJECTED / *_REVIEW_REJECTED).
     /// Uses <see cref="Application.LatestPrimaryStateCode"/> (not LatestProgress FK — often unset).
     /// Status = Project · ProcessState or Period · Category · Type · ProcessState
-    /// (ProcessState naming matches Extension Result / <see cref="ApplicationProgress.StatusListLabel"/>).
+    /// (ProcessState naming matches Extension Result / <see cref="ApplicationProfileInstanceProgress.StatusListLabel"/>).
     /// </summary>
     private static ReportDashboardPanelData LoadInvitationProcessResult(
         IObjectSpace objectSpace, PersonRecordRole? role, string projectKey,
@@ -3043,7 +3032,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         if (!byPeriodCategoryType)
             subReport = "process-result";
 
-        var query = objectSpace.GetObjectsQuery<Application>()
+        var query = objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
             .Where(a => a.ApplicationType != null
                         && a.ApplicationType.CanIssueInvitation
                         && (a.ApplicationDate == null || a.ApplicationDate >= cutoff));
@@ -3051,8 +3040,8 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         if (role.HasValue)
         {
             var roleValue = role.Value;
-            query = query.Where(a => a.ApplicationItems.Any(ai =>
-                ai.Person != null && ai.Person.PersonRole == roleValue));
+            query = query.Where(a =>
+                a.People.Any(ap => ap != null && ap.PersonRole == roleValue));
         }
 
         if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
@@ -3129,7 +3118,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                 return new ReportDashboardPreviewRow
                 {
                     RecordId = a.ID,
-                    Name = FirstApplicationPersonName(a),
+                    Name = FirstApplicationProfileInstancePersonName(a),
                     Project = ProjectLabel(a.ProjectContract),
                     ColumnA = a.FullApplicationNumber ?? a.ApplicationNumber ?? string.Empty,
                     ColumnB = FormatDate(a.ApplicationDate),
@@ -3145,7 +3134,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
     }
 
     private static string ResolveInvitationProcessResultStateLabel(
-        Application app,
+        ApplicationProfileInstance app,
         IReadOnlyDictionary<string, ApplicationState> stateByCode)
     {
         var code = (!string.IsNullOrWhiteSpace(app.LatestPrimaryStateCode)
@@ -3155,7 +3144,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         string stateLabel;
         if (string.IsNullOrEmpty(code))
         {
-            stateLabel = ApplicationProgressPrimaryStateCodeResolver.ResolveDisplayNameFromLatest(null)
+            stateLabel = ApplicationProfileInstanceProgressPrimaryStateCodeResolver.ResolveDisplayNameFromLatest(null)
                 ?? "Being Prepared";
         }
         else if (stateByCode.TryGetValue(code, out var state))
@@ -3175,7 +3164,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
 
         var ministry = ApprovalLegProfileMinistryHelper.GetMinistryShortNameForProgressStep(
             app, code, locationCode: null);
-        return ApplicationProgressListLabelHelper.FormatStatusLabel(stateLabel, ministry);
+        return ApplicationProfileInstanceProgressListLabelHelper.FormatStatusLabel(stateLabel, ministry);
     }
 
     private static IQueryable<InvitationItem> FilterInvitationItems(
@@ -3190,10 +3179,10 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
         {
             query = query.Where(i =>
-                (i.Invitation!.Application != null
-                    && i.Invitation.Application.ProjectContract != null
-                    && (i.Invitation.Application.ProjectContract.Name == projectKey
-                        || i.Invitation.Application.ProjectContract.NameTm == projectKey))
+                (i.Invitation!.ApplicationProfileInstance != null
+                    && i.Invitation.ApplicationProfileInstance.ProjectContract != null
+                    && (i.Invitation.ApplicationProfileInstance.ProjectContract.Name == projectKey
+                        || i.Invitation.ApplicationProfileInstance.ProjectContract.NameTm == projectKey))
                 || (i.Person!.ProjectContract != null
                     && (i.Person.ProjectContract.Name == projectKey
                         || i.Person.ProjectContract.NameTm == projectKey)));
@@ -3204,7 +3193,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
 
     private static string InvitationItemProjectLabel(InvitationItem item)
     {
-        var fromApp = ProjectLabel(item.Invitation?.Application?.ProjectContract);
+        var fromApp = ProjectLabel(item.Invitation?.ApplicationProfileInstance?.ProjectContract);
         if (!string.IsNullOrWhiteSpace(fromApp))
             return fromApp;
         return ProjectLabel(item.Person?.ProjectContract);
@@ -3247,8 +3236,8 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
     }
 
     /// <summary>
-    /// Registration On process: ApplicationItems on any App_Reg_* type whose Application
-    /// is not terminal (same exclude list as Invitation Process). One row per ApplicationItem.
+    /// Registration On process: roster lines on any App_Reg_* type whose ApplicationProfileInstance
+    /// is not terminal (same exclude list as Invitation Process). One row per ApplicationProfileInstancePerson (M2M) or legacy ApplicationRosterMergeLine.
     /// Status = ApplicationType · ProcessState (localized; ProcessState matches StatusListLabel).
     /// </summary>
     private static ReportDashboardPanelData LoadRegistrationOnProcess(
@@ -3268,62 +3257,25 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
 
         try
         {
-            IQueryable<ApplicationItem> query = db.ApplicationItems.AsNoTracking()
-                .Where(ai => ai.Application != null
-                    && ai.Application.ApplicationType != null
-                    && ai.Application.ApplicationType.Name != null
-                    && regTypes.Contains(ai.Application.ApplicationType.Name)
-                    && (ai.Application.ApplicationDate == null || ai.Application.ApplicationDate >= cutoff)
-                    && ai.Person != null
-                    && !ai.Person.IsArchived);
-
-            if (role.HasValue)
-            {
-                var roleValue = role.Value;
-                query = query.Where(ai => ai.Person!.PersonRole == roleValue);
-            }
-
-            if (validVisaPersonIds != null)
-                query = query.Where(ai => validVisaPersonIds.Contains(ai.Person!.ID));
-
-            if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
-            {
-                query = query.Where(ai =>
-                    (ai.Application!.ProjectContract != null
-                        && (ai.Application.ProjectContract.Name == projectKey
-                            || ai.Application.ProjectContract.NameTm == projectKey))
-                    || (ai.Person!.ProjectContract != null
-                        && (ai.Person.ProjectContract.Name == projectKey
-                            || ai.Person.ProjectContract.NameTm == projectKey)));
-            }
-
-            var items = query
-                .Include(ai => ai.Person!)
-                    .ThenInclude(p => p.ProjectContract)
-                .Include(ai => ai.Application!).ThenInclude(a => a.ApplicationType)
-                .Include(ai => ai.Application!).ThenInclude(a => a.ProjectContract)
-                .Include(ai => ai.Application!).ThenInclude(a => a.ApprovalLegSnapshots)
-                .Include(ai => ai.Application!).ThenInclude(a => a.ApprovalLegProfile!)
-                    .ThenInclude(p => p.MinistryLegs!)
-                    .ThenInclude(l => l.ApprovingMinistry)
-                .Include(ai => ai.Application!).ThenInclude(a => a.LatestProgress!)
-                    .ThenInclude(p => p.State)
-                .ToList()
-                .Where(ai =>
+            var items = ReportDashboardRosterQueryHelper.LoadRegistrationOnProcessLines(
+                db, regTypes, cutoff, role, projectKey, validVisaPersonIds)
+                .Where(line =>
                 {
-                    var code = !string.IsNullOrWhiteSpace(ai.Application!.LatestPrimaryStateCode)
-                        ? ai.Application.LatestPrimaryStateCode
-                        : ai.Application.LatestProgress?.State?.Code;
+                    var app = line.ApplicationProfileInstance;
+                    var code = !string.IsNullOrWhiteSpace(app.LatestPrimaryStateCode)
+                        ? app.LatestPrimaryStateCode
+                        : app.LatestProgress?.State?.Code;
                     return !IsInvitationProcessCompleted(code);
                 })
                 .ToList();
 
             var codes = items
-                .Select(ai =>
+                .Select(line =>
                 {
-                    var code = !string.IsNullOrWhiteSpace(ai.Application!.LatestPrimaryStateCode)
-                        ? ai.Application.LatestPrimaryStateCode
-                        : ai.Application.LatestProgress?.State?.Code;
+                    var app = line.ApplicationProfileInstance;
+                    var code = !string.IsNullOrWhiteSpace(app.LatestPrimaryStateCode)
+                        ? app.LatestPrimaryStateCode
+                        : app.LatestProgress?.State?.Code;
                     return code?.Trim();
                 })
                 .Where(c => !string.IsNullOrEmpty(c))
@@ -3339,13 +3291,13 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                     .GroupBy(s => s.Code!.Trim(), StringComparer.OrdinalIgnoreCase)
                     .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
 
-            var labeled = items.Select(ai =>
+            var labeled = items.Select(line =>
             {
-                var app = ai.Application!;
+                var app = line.ApplicationProfileInstance;
                 var appType = LookupLabelOrMissing(app.ApplicationType, "(No type)");
                 var processState = ResolveInvitationProcessResultStateLabel(app, stateByCode);
                 var status = $"{appType} · {processState}";
-                return (Item: ai, Status: status, ProcessState: processState);
+                return (Line: line, Status: status, ProcessState: processState);
             }).ToList();
 
             var groups = labeled
@@ -3357,20 +3309,20 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             var cssByLabel = buckets.ToDictionary(b => b.Label, b => b.CssClass, StringComparer.Ordinal);
 
             var rows = labeled
-                .OrderByDescending(x => x.Item.Application?.ApplicationDate)
-                .ThenBy(x => x.Item.Person?.FullName)
+                .OrderByDescending(x => x.Line.ApplicationProfileInstance.ApplicationDate)
+                .ThenBy(x => x.Line.Person.FullName)
                 .Take(PreviewLimit)
                 .Select(x =>
                 {
-                    var app = x.Item.Application!;
+                    var app = x.Line.ApplicationProfileInstance;
                     var project = ProjectLabel(app.ProjectContract);
                     if (string.IsNullOrWhiteSpace(project))
-                        project = ProjectLabel(x.Item.Person?.ProjectContract);
+                        project = ProjectLabel(x.Line.Person.ProjectContract);
                     var progressCss = StatusCss(x.ProcessState, null);
                     return new ReportDashboardPreviewRow
                     {
-                        RecordId = x.Item.ID,
-                        Name = x.Item.Person?.FullName ?? string.Empty,
+                        RecordId = x.Line.RecordId,
+                        Name = x.Line.Person.FullName ?? string.Empty,
                         Project = project,
                         ColumnA = app.FullApplicationNumber ?? app.ApplicationNumber ?? string.Empty,
                         ColumnB = FormatDate(app.ApplicationDate),
@@ -3635,25 +3587,43 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                     _ => "st-cat-5"
                 };
 
-                // Active Registered (V): Period from registration Application (Visa has no VisaPeriod);
+                // Active Registered (V): Period from registration ApplicationProfileInstance (Visa has no VisaPeriod);
                 // Category + Type from linked CurrentVisa (Application.VisaType is often default WP).
                 Dictionary<Guid, string> pctByItemId = [];
                 if (usePeriodCategoryTypeBuckets && list.Count > 0)
                 {
-                    var itemIds = list.Select(r => r.ID).ToList();
-                    pctByItemId = db.ApplicationItems.AsNoTracking()
-                        .Where(ai => itemIds.Contains(ai.ID))
-                        .Include(ai => ai.Application!).ThenInclude(a => a.VisaPeriod)
-                        .Include(ai => ai.CurrentVisa!).ThenInclude(v => v.VisaCategory)
-                        .Include(ai => ai.CurrentVisa!).ThenInclude(v => v.VisaType)
-                        .AsEnumerable()
+                    var personOids = list
+                        .Where(r => r.PersonOid != null && r.PersonOid != Guid.Empty)
+                        .Select(r => r.PersonOid!.Value)
+                        .Distinct()
+                        .ToList();
+                    var resolved = db.ApplicationProfileInstancePersonResolvedLinks.AsNoTracking()
+                        .Where(rl => personOids.Contains(rl.PersonId))
+                        .Include(rl => rl.ApplicationProfileInstance!).ThenInclude(a => a.VisaPeriod)
+                        .ToList();
+                    var visaIds = resolved
+                        .Where(rl => rl.LinkKind == ApplicationProfileInstancePersonLinkKind.Visa && rl.LinkedObjectId != null)
+                        .Select(rl => rl.LinkedObjectId!.Value)
+                        .Distinct()
+                        .ToList();
+                    var visasById = visaIds.Count == 0
+                        ? new Dictionary<Guid, Visa>()
+                        : db.Visas.AsNoTracking()
+                            .Where(v => visaIds.Contains(v.ID))
+                            .Include(v => v.VisaCategory)
+                            .Include(v => v.VisaType)
+                            .ToDictionary(v => v.ID);
+                    pctByItemId = resolved
+                        .GroupBy(rl => rl.PersonId)
                         .ToDictionary(
-                            ai => ai.ID,
-                            ai =>
+                            g => g.Key,
+                            g =>
                             {
-                                var period = LookupLabelOrMissing(ai.Application?.VisaPeriod, "(No period)");
-                                var category = LookupLabelOrMissing(ai.CurrentVisa?.VisaCategory, "(No category)");
-                                var type = LookupLabelOrMissing(ai.CurrentVisa?.VisaType, "(No type)");
+                                var period = LookupLabelOrMissing(g.First().ApplicationProfileInstance?.VisaPeriod, "(No period)");
+                                var visaId = g.FirstOrDefault(rl => rl.LinkKind == ApplicationProfileInstancePersonLinkKind.Visa)?.LinkedObjectId;
+                                visasById.TryGetValue(visaId ?? Guid.Empty, out var visa);
+                                var category = LookupLabelOrMissing(visa?.VisaCategory, "(No category)");
+                                var type = LookupLabelOrMissing(visa?.VisaType, "(No type)");
                                 return $"{period} · {category} · {type}";
                             });
                 }
@@ -3663,7 +3633,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                     if (useCityBuckets)
                         return string.IsNullOrWhiteSpace(r.CityLabel) ? "Unknown city" : r.CityLabel.Trim();
                     if (usePeriodCategoryTypeBuckets)
-                        return pctByItemId.TryGetValue(r.ID, out var pct)
+                        return pctByItemId.TryGetValue(r.PersonOid ?? Guid.Empty, out var pct)
                             ? pct
                             : "(No period) · (No category) · (No type)";
                     // check-in-by-project
@@ -3849,9 +3819,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         if (objectSpace is not EFCoreObjectSpace efOs
             || efOs.DbContext is not Visa2026EFCoreDbContext db)
         {
-            return LoadWorkPermitExtensionResultLegacy(
-                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff,
-                includeArchivedPersons, validVisaPersonIds);
+            return LoadWorkPermitExtensionResultWithoutView(personType, subReport, excelHint, excelConfigured);
         }
 
         var resultCodes = ReportDashboardCatalog.WorkPermitExtensionResultStateCodes;
@@ -3917,9 +3885,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         }
         catch (Exception ex) when (IsMissingReportDashboardView(ex))
         {
-            return LoadWorkPermitExtensionResultLegacy(
-                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff,
-                includeArchivedPersons, validVisaPersonIds);
+            return LoadWorkPermitExtensionResultWithoutView(personType, subReport, excelHint, excelConfigured);
         }
     }
 
@@ -3957,15 +3923,15 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
 
         var appIds = rows
-            .Where(r => r.ApplicationOid.HasValue)
-            .Select(r => r.ApplicationOid!.Value)
+            .Where(r => r.ApplicationProfileInstanceOid.HasValue)
+            .Select(r => r.ApplicationProfileInstanceOid!.Value)
             .Distinct()
             .ToList();
 
-        Dictionary<Guid, Application> appsById = [];
+        Dictionary<Guid, ApplicationProfileInstance> appsById = [];
         if (appIds.Count > 0)
         {
-            appsById = db.Applications.AsNoTracking()
+            appsById = db.ApplicationProfileInstances.AsNoTracking()
                 .Where(a => appIds.Contains(a.ID))
                 .Include(a => a.ApprovalLegSnapshots)
                 .Include(a => a.ApprovalLegProfile!)
@@ -3977,7 +3943,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
 
         foreach (var row in rows)
         {
-            appsById.TryGetValue(row.ApplicationOid ?? Guid.Empty, out var app);
+            appsById.TryGetValue(row.ApplicationProfileInstanceOid ?? Guid.Empty, out var app);
             var processState = ResolveWorkPermitAppProgressProcessStateLabel(row, app, stateByCode);
             var project = string.IsNullOrWhiteSpace(row.ProjectName)
                 ? "(No project)"
@@ -3990,14 +3956,14 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
 
     private static string ResolveWorkPermitAppProgressProcessStateLabel(
         VwRdWorkPermitAppProgress row,
-        Application? app,
+        ApplicationProfileInstance? app,
         IReadOnlyDictionary<string, ApplicationState> stateByCode)
     {
         var code = row.ProgressStateCode?.Trim();
         string stateLabel;
         if (string.IsNullOrEmpty(code))
         {
-            stateLabel = ApplicationProgressPrimaryStateCodeResolver.ResolveDisplayNameFromLatest(null)
+            stateLabel = ApplicationProfileInstanceProgressPrimaryStateCodeResolver.ResolveDisplayNameFromLatest(null)
                 ?? "Being Prepared";
         }
         else if (stateByCode.TryGetValue(code, out var state))
@@ -4021,100 +3987,20 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                 app, code, locationCode: null);
         }
 
-        return ApplicationProgressListLabelHelper.FormatStatusLabel(stateLabel, ministry);
+        return ApplicationProfileInstanceProgressListLabelHelper.FormatStatusLabel(stateLabel, ministry);
     }
 
-    private static ReportDashboardPanelData LoadWorkPermitExtensionResultLegacy(
-        IObjectSpace objectSpace, PersonRecordRole? role, string projectKey,
+    /// <summary>
+    /// Fallback when <c>vw_rd_work_permit_app_progress</c> is unavailable: the roster lines behind this report
+    /// are only queryable through the EF context, so there is nothing to fall back to.
+    /// </summary>
+    private static ReportDashboardPanelData LoadWorkPermitExtensionResultWithoutView(
         ReportDashboardPersonType personType, string subReport,
-        string? excelHint, bool excelConfigured, DateTime cutoff,
-        bool includeArchivedPersons,
-        HashSet<Guid>? validVisaPersonIds)
-    {
-        var typeNames = ReportDashboardCatalog.WorkPermitExtensionApplicationTypeNames;
-        var resultCodes = ReportDashboardCatalog.WorkPermitExtensionResultStateCodes;
-        var query = objectSpace.GetObjectsQuery<ApplicationItem>()
-            .Where(ai => ai.Person != null
-                && ai.CurrentWorkPermitItem != null
-                && ai.Application != null
-                && ai.Application.ApplicationType != null
-                && typeNames.Contains(ai.Application.ApplicationType.Name)
-                && (ai.Application.ApplicationDate == default
-                    || ai.Application.ApplicationDate >= cutoff)
-                && (role == null || ai.Person.PersonRole == role));
-
-        if (!includeArchivedPersons)
-            query = query.Where(ai => !ai.Person!.IsArchived);
-
-        if (validVisaPersonIds != null)
-            query = query.Where(ai => validVisaPersonIds.Contains(ai.Person!.ID));
-
-        if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
-        {
-            query = query.Where(ai =>
-                ai.Application!.ProjectContract != null
-                && (ai.Application.ProjectContract.Name == projectKey
-                    || ai.Application.ProjectContract.NameTm == projectKey));
-        }
-
-        var items = query.AsEnumerable().ToList();
-        var labeled = new List<(ApplicationItem Item, string Status, string Project)>();
-        foreach (var ai in items)
-        {
-            var app = ai.Application!;
-            var latest = app.ProgressHistory?
-                .OrderByDescending(p => p.Date)
-                .ThenByDescending(p => p.ID)
-                .FirstOrDefault();
-            var code = latest?.State?.Code ?? app.LatestPrimaryStateCode;
-            if (!IsWorkPermitExtensionResultState(code, resultCodes))
-                continue;
-
-            var stateLabel = latest != null
-                ? (LookupLocalization.GetDisplayName(latest.State) ?? latest.State?.Name ?? code ?? "Unknown")
-                : (code ?? "Unknown");
-            var ministry = ApprovalLegProfileMinistryHelper.GetMinistryShortNameForProgressStep(
-                app, code, locationCode: null);
-            var processState = ApplicationProgressListLabelHelper.FormatStatusLabel(stateLabel, ministry);
-            var project = ProjectLabel(app.ProjectContract);
-            if (string.IsNullOrWhiteSpace(project))
-                project = ProjectLabel(ai.Person?.ProjectContract);
-            if (string.IsNullOrWhiteSpace(project))
-                project = "(No project)";
-            labeled.Add((ai, $"{project} · {processState}", project));
-        }
-
-        var groups = labeled
-            .GroupBy(x => x.Status, StringComparer.Ordinal)
-            .Select(g => (Label: g.Key, Count: g.Count()))
-            .OrderByDescending(g => g.Count)
-            .ToList();
-        var buckets = AssignExtensionResultCss(groups);
-        var cssByLabel = buckets.ToDictionary(b => b.Label, b => b.CssClass, StringComparer.Ordinal);
-
-        var rows = labeled
-            .OrderByDescending(x => x.Item.Application?.ApplicationDate)
-            .Take(PreviewLimit)
-            .Select(x => new ReportDashboardPreviewRow
-            {
-                RecordId = x.Item.ID,
-                Name = x.Item.Person?.FullName ?? string.Empty,
-                Project = x.Project,
-                ColumnA = x.Item.Application?.FullApplicationNumber
-                    ?? x.Item.Application?.ApplicationNumber
-                    ?? string.Empty,
-                ColumnB = FormatDate(x.Item.Application?.ApplicationDate == default
-                    ? null
-                    : x.Item.Application.ApplicationDate),
-                Status = x.Status,
-                StatusCssClass = cssByLabel.TryGetValue(x.Status, out var c) ? c : "st-expiring"
-            })
-            .ToList();
-
-        return BuildPanel(
-            personType, ReportDashboardCategory.WorkPermit, subReport, rows,
-            excelHint, excelConfigured, buckets, labeled.Count);
-    }
+        string? excelHint, bool excelConfigured) =>
+        BuildPanel(
+            personType, ReportDashboardCategory.WorkPermit, subReport,
+            new List<ReportDashboardPreviewRow>(), excelHint, excelConfigured,
+            new List<ReportDashboardStatusBucket>(), 0);
 
     /// <summary>
     /// Active WorkPermit (P): valid items from <c>vw_rd_work_permit_active</c>; Status = Project.
@@ -4303,12 +4189,12 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         HashSet<Guid>? validVisaPersonIds)
     {
         var today = DateTime.Today;
-        var query = objectSpace.GetObjectsQuery<WorkPermitItem>()
-            .Where(w => w.Person != null
-                && (role == null || w.Person.PersonRole == role)
-                && !w.IsCancelled
-                && w.ExpirationDate != default
-                && w.ExpirationDate.Date >= today);
+        var query = IssuedDocumentLifecycle.WhereWorkPermitItemNotCancelled(
+            objectSpace.GetObjectsQuery<WorkPermitItem>()
+                .Where(w => w.Person != null
+                    && (role == null || w.Person.PersonRole == role)
+                    && w.ExpirationDate != default
+                    && w.ExpirationDate.Date >= today));
 
         if (!includeArchivedPersons)
             query = query.Where(w => !w.Person!.IsArchived);
@@ -4322,10 +4208,10 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                 (w.Person!.ProjectContract != null
                     && (w.Person.ProjectContract.Name == projectKey
                         || w.Person.ProjectContract.NameTm == projectKey))
-                || (w.WorkPermit != null && w.WorkPermit.Application != null
-                    && w.WorkPermit.Application.ProjectContract != null
-                    && (w.WorkPermit.Application.ProjectContract.Name == projectKey
-                        || w.WorkPermit.Application.ProjectContract.NameTm == projectKey)));
+                || (w.WorkPermit != null && w.WorkPermit.ApplicationProfileInstance != null
+                    && w.WorkPermit.ApplicationProfileInstance.ProjectContract != null
+                    && (w.WorkPermit.ApplicationProfileInstance.ProjectContract.Name == projectKey
+                        || w.WorkPermit.ApplicationProfileInstance.ProjectContract.NameTm == projectKey)));
         }
 
         var list = query.AsEnumerable().ToList();
@@ -4338,7 +4224,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             if (string.IsNullOrWhiteSpace(project))
                 project = ProjectLabel(w.Person?.SponsoringEmployee?.ProjectContract);
             if (string.IsNullOrWhiteSpace(project))
-                project = ProjectLabel(w.WorkPermit?.Application?.ProjectContract);
+                project = ProjectLabel(w.WorkPermit?.ApplicationProfileInstance?.ProjectContract);
             if (string.IsNullOrWhiteSpace(project))
                 project = "(No project)";
             return (Row: w, Status: project);
@@ -4354,7 +4240,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                 if (string.IsNullOrWhiteSpace(project))
                     project = ProjectLabel(w.Person?.SponsoringEmployee?.ProjectContract);
                 if (string.IsNullOrWhiteSpace(project))
-                    project = ProjectLabel(w.WorkPermit?.Application?.ProjectContract);
+                    project = ProjectLabel(w.WorkPermit?.ApplicationProfileInstance?.ProjectContract);
                 return project;
             },
             w => !string.IsNullOrWhiteSpace(w.WorkPermitNumber) ? w.WorkPermitNumber : w.ASNumber,
@@ -4483,10 +4369,10 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             query = query.Where(w => validVisaPersonIds.Contains(w.Person!.ID));
 
         if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
-            query = query.Where(w => w.WorkPermit != null && w.WorkPermit.Application != null
-                && w.WorkPermit.Application.ProjectContract != null
-                && (w.WorkPermit.Application.ProjectContract.Name == projectKey
-                    || w.WorkPermit.Application.ProjectContract.NameTm == projectKey));
+            query = query.Where(w => w.WorkPermit != null && w.WorkPermit.ApplicationProfileInstance != null
+                && w.WorkPermit.ApplicationProfileInstance.ProjectContract != null
+                && (w.WorkPermit.ApplicationProfileInstance.ProjectContract.Name == projectKey
+                    || w.WorkPermit.ApplicationProfileInstance.ProjectContract.NameTm == projectKey));
 
         _ = cutoff;
         var today = DateTime.Today;
@@ -4518,7 +4404,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                 var status = PassportValidityBucket(exp, today);
                 var project = ProjectLabel(w.Person?.ProjectContract);
                 if (string.IsNullOrEmpty(project))
-                    project = ProjectLabel(w.WorkPermit?.Application?.ProjectContract);
+                    project = ProjectLabel(w.WorkPermit?.ApplicationProfileInstance?.ProjectContract);
                 return new ReportDashboardPreviewRow
                 {
                     RecordId = w.ID,
@@ -4555,14 +4441,8 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         if (validVisaPersonIds == null)
         {
             // Valid visa only uses a separate person-based path and ignores Last N months.
-            addressIdSet = db.ApplicationItems
-                .AsNoTracking()
-                .Where(ai => ai.CurrentAddressOfResidence != null
-                    && ai.Application != null
-                    && ai.Application.ApplicationDate >= cutoff)
-                .Select(ai => ai.CurrentAddressOfResidence!.ID)
-                .Distinct()
-                .ToHashSet();
+            addressIdSet = ReportDashboardRosterQueryHelper.GetLinkedChildIdsInApplicationDateRange(
+                db, ApplicationProfileInstancePersonLinkKind.AddressOfResidence, cutoff);
         }
 
         if (addressIdSet is { Count: 0 })
@@ -4786,26 +4666,27 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         string? excelHint, bool excelConfigured, DateTime cutoff,
         HashSet<Guid>? validVisaPersonIds = null)
     {
-        var query = objectSpace.GetObjectsQuery<ApplicationItem>()
-            .Where(a => a.Person != null && (role == null || a.Person.PersonRole == role)
-                        && a.TravelDate != null && a.TravelDate >= cutoff);
+        List<ReportDashboardRosterQueryHelper.TravelLine> travelLines;
+        if (TryGetDbContext(objectSpace, out var db))
+        {
+            travelLines = ReportDashboardRosterQueryHelper.LoadTravelLines(
+                db, role, projectKey, cutoff, validVisaPersonIds, PreviewLimit);
+        }
+        else
+        {
+            // Travel dates live on roster lines, which are only queryable through the EF context.
+            travelLines = new List<ReportDashboardRosterQueryHelper.TravelLine>();
+        }
 
-        if (validVisaPersonIds != null)
-            query = query.Where(a => validVisaPersonIds.Contains(a.Person!.ID));
-
-        if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
-            query = query.Where(a => a.Application != null && a.Application.ProjectContract != null
-                && (a.Application.ProjectContract.Name == projectKey || a.Application.ProjectContract.NameTm == projectKey));
-
-        var rows = query.OrderByDescending(a => a.TravelDate).Take(PreviewLimit).AsEnumerable().Select(a =>
+        var rows = travelLines.Select(a =>
         {
             const string status = "Approved";
             return new ReportDashboardPreviewRow
             {
-                RecordId = a.ID,
+                RecordId = a.RecordId,
                 Name = a.Person?.FullName ?? string.Empty,
-                Project = ProjectLabel(a.Application?.ProjectContract),
-                ColumnA = a.Application?.ApplicationNumber ?? string.Empty,
+                Project = ProjectLabel(a.ApplicationProfileInstance?.ProjectContract),
+                ColumnA = a.ApplicationProfileInstance?.ApplicationNumber ?? string.Empty,
                 ColumnB = FormatDate(a.TravelDate),
                 Status = status,
                 StatusCssClass = StatusCss(status, null)
@@ -4829,10 +4710,10 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             query = query.Where(b => validVisaPersonIds.Contains(b.Person!.ID));
 
         if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
-            query = query.Where(b => b.BorderZone != null && b.BorderZone.Application != null
-                && b.BorderZone.Application.ProjectContract != null
-                && (b.BorderZone.Application.ProjectContract.Name == projectKey
-                    || b.BorderZone.Application.ProjectContract.NameTm == projectKey));
+            query = query.Where(b => b.BorderZone != null && b.BorderZone.ApplicationProfileInstance != null
+                && b.BorderZone.ApplicationProfileInstance.ProjectContract != null
+                && (b.BorderZone.ApplicationProfileInstance.ProjectContract.Name == projectKey
+                    || b.BorderZone.ApplicationProfileInstance.ProjectContract.NameTm == projectKey));
 
         var rows = query.Take(PreviewLimit).AsEnumerable().Select(b =>
         {
@@ -4841,7 +4722,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             {
                 RecordId = b.ID,
                 Name = b.Person?.FullName ?? string.Empty,
-                Project = ProjectLabel(b.BorderZone?.Application?.ProjectContract),
+                Project = ProjectLabel(b.BorderZone?.ApplicationProfileInstance?.ProjectContract),
                 ColumnA = b.BorderZone?.BorderZoneNumber ?? string.Empty,
                 ColumnB = FormatDate(b.BorderZone?.ExpirationDate),
                 Status = status,
@@ -4869,7 +4750,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                 validVisaPersonIds);
         }
 
-        // Otherwise: ApplicationItem.CurrentPassport in Last N months; one last active passport per person.
+        // Otherwise: ApplicationRosterMergeLine.CurrentPassport in Last N months; one last active passport per person.
         return LoadPassportFromView(
             objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff,
             validVisaPersonIds: null);
@@ -5085,7 +4966,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         if (objectSpace is not EFCoreObjectSpace efOs
             || efOs.DbContext is not Visa2026EFCoreDbContext db)
         {
-            return LoadPassportLegacy(objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff, validVisaPersonIds);
+            return LoadPassportWithoutView(objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, validVisaPersonIds);
         }
 
         var categorical = subReport is "by-type" or "by-citizenship";
@@ -5185,7 +5066,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         }
         catch (PostgresException ex) when (ex.SqlState is PostgresErrorCodes.UndefinedTable or PostgresErrorCodes.UndefinedColumn)
         {
-            return LoadPassportLegacy(objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff, validVisaPersonIds);
+            return LoadPassportWithoutView(objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, validVisaPersonIds);
         }
     }
 
@@ -5202,131 +5083,32 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             })
             .ToList();
     }
-    private static ReportDashboardPanelData LoadPassportLegacy(
+    /// <summary>
+    /// Fallback when <c>vw_rd_passport</c> is unavailable: the date-ranged universe comes from roster links,
+    /// which need the EF context, so only the valid-visa variant (plain <see cref="Passport"/> query) can answer.
+    /// </summary>
+    private static ReportDashboardPanelData LoadPassportWithoutView(
         IObjectSpace objectSpace, PersonRecordRole? role, string projectKey,
         ReportDashboardPersonType personType, string subReport,
-        string? excelHint, bool excelConfigured, DateTime cutoff,
-        HashSet<Guid>? validVisaPersonIds = null)
-    {
-        if (validVisaPersonIds != null)
-        {
-            return LoadPassportLegacyValidVisaOnly(
+        string? excelHint, bool excelConfigured,
+        HashSet<Guid>? validVisaPersonIds) =>
+        validVisaPersonIds != null
+            ? LoadPassportLegacyValidVisaOnly(
                 objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured,
-                validVisaPersonIds);
-        }
+                validVisaPersonIds)
+            : BuildPanel(
+                personType, ReportDashboardCategory.Passport, subReport,
+                new List<ReportDashboardPreviewRow>(), excelHint, excelConfigured,
+                new List<ReportDashboardStatusBucket>(), 0);
 
-        // Same universe as vw_rd_passport: ApplicationItems with CurrentPassport in date range.
-        var query = objectSpace.GetObjectsQuery<ApplicationItem>()
-            .Where(ai => ai.CurrentPassport != null
-                        && ai.Person != null && (role == null || ai.Person.PersonRole == role)
-                        && !ai.Person.IsArchived
-                        && ai.Application != null
-                        && ai.Application.ApplicationDate != null
-                        && ai.Application.ApplicationDate >= cutoff);
-
-        if (validVisaPersonIds != null)
-            query = query.Where(ai => validVisaPersonIds.Contains(ai.Person!.ID));
-
-        if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
-        {
-            query = query.Where(ai =>
-                (ai.Application!.ProjectContract != null
-                    && (ai.Application.ProjectContract.Name == projectKey || ai.Application.ProjectContract.NameTm == projectKey))
-                || (ai.Person!.ProjectContract != null
-                    && (ai.Person.ProjectContract.Name == projectKey || ai.Person.ProjectContract.NameTm == projectKey)));
-        }
-
-        var today = DateTime.Today;
-        // One last passport per person: latest IssueDate (then passport ID), matching GetCurrentPassport.
-        var items = query.AsEnumerable()
-            .Where(ai => ai.CurrentPassport != null && ai.Person != null)
-            .GroupBy(ai => ai.Person!.ID)
-            .Select(g => g
-                .OrderByDescending(ai => ai.CurrentPassport!.IssueDate ?? DateTime.MinValue)
-                .ThenByDescending(ai => ai.CurrentPassport!.ID)
-                .ThenByDescending(ai => ai.Application!.ApplicationDate)
-                .First())
-            .Where(ai => IsActivePassport(false, isLastPassport: true, ai.CurrentPassport!.ExpirationDate, today))
-            .ToList();
-        var categorical = subReport is "by-type" or "by-citizenship";
-
-        static string TypeLabelOf(ApplicationItem ai) =>
-            ai.CurrentPassport?.PassportType?.NameTm ?? ai.CurrentPassport?.PassportType?.Name ?? "Unknown";
-        static string CitizenshipLabelOf(ApplicationItem ai) =>
-            ai.Person?.Nationality?.NameTm ?? ai.Person?.Nationality?.Name ?? "Unknown";
-
-        List<ReportDashboardStatusBucket> buckets;
-        if (categorical)
-        {
-            var groups = items
-                .GroupBy(ai => subReport == "by-citizenship" ? CitizenshipLabelOf(ai) : TypeLabelOf(ai))
-                .Select(g => (Label: g.Key, Count: g.Count()))
-                .OrderByDescending(g => g.Count)
-                .ToList();
-            buckets = AssignCategoricalCss(groups);
-        }
-        else
-        {
-            buckets = items
-                .GroupBy(ai => PassportValidityBucket(ai.CurrentPassport!.ExpirationDate, today))
-                .Select(g => new ReportDashboardStatusBucket
-                {
-                    Label = g.Key,
-                    Count = g.Count(),
-                    CssClass = PassportValidityCss(g.First().CurrentPassport!.ExpirationDate, today)
-                })
-                .OrderByDescending(b => b.Count)
-                .ToList();
-        }
-
-        var cssByLabel = buckets.ToDictionary(b => b.Label, b => b.CssClass, StringComparer.Ordinal);
-
-        IEnumerable<ApplicationItem> preview = categorical
-            ? items.OrderBy(ai => subReport == "by-citizenship" ? CitizenshipLabelOf(ai) : TypeLabelOf(ai))
-                .ThenBy(ai => ai.CurrentPassport!.ExpirationDate)
-            : items.OrderBy(ai => PassportValidityBucket(ai.CurrentPassport!.ExpirationDate, today) == "Expired")
-                .ThenBy(ai => ai.CurrentPassport!.ExpirationDate);
-
-        var rows = preview
-            .Take(PreviewLimit)
-            .Select(ai =>
-            {
-                var status = subReport switch
-                {
-                    "by-type" => TypeLabelOf(ai),
-                    "by-citizenship" => CitizenshipLabelOf(ai),
-                    _ => PassportValidityBucket(ai.CurrentPassport!.ExpirationDate, today)
-                };
-                var css = categorical
-                    ? (cssByLabel.TryGetValue(status, out var c) ? c : "st-cat-1")
-                    : PassportValidityCss(ai.CurrentPassport!.ExpirationDate, today);
-                return new ReportDashboardPreviewRow
-                {
-                    RecordId = ai.CurrentPassport!.ID,
-                    Name = ai.Person?.FullName ?? string.Empty,
-                    Project = ProjectLabel(ai.Application?.ProjectContract ?? ai.Person?.ProjectContract),
-                    ColumnA = ai.CurrentPassport.PassportNumber ?? string.Empty,
-                    ColumnB = FormatDate(ai.CurrentPassport.ExpirationDate),
-                    Status = status,
-                    StatusCssClass = css
-                };
-            })
-            .ToList();
-
-        return BuildPanel(
-            personType, ReportDashboardCategory.Passport, subReport, rows,
-            excelHint, excelConfigured, buckets, items.Count);
-    }
     /// <summary>
     /// Person IDs with at least one valid visa (not cancelled, expiry on or after today).
     /// </summary>
     private static HashSet<Guid> LoadValidVisaPersonIds(Visa2026EFCoreDbContext db)
     {
         var today = DateTime.Today;
-        return db.Visas
-            .AsNoTracking()
-            .Where(v => !v.IsCancelled
-                && v.ExpirationDate >= today
+        return IssuedDocumentLifecycle.WhereVisaNotCancelled(db.Visas.AsNoTracking())
+            .Where(v => v.ExpirationDate >= today
                 && v.Passport != null
                 && v.Passport.Person != null)
             .Select(v => v.Passport!.Person!.ID)
@@ -5490,28 +5272,6 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         };
     }
 
-    /// <summary>
-    /// Education used as <see cref="ApplicationItem.CurrentEducation"/> on an application
-    /// whose <see cref="Application.ApplicationDate"/> is on/after <paramref name="cutoff"/>.
-    /// </summary>
-    private static IQueryable<VwRdEducation> FilterEducationByApplicationDate(
-        Visa2026EFCoreDbContext db, IQueryable<VwRdEducation> query, DateTime cutoff) =>
-        query.Where(r =>
-            db.ApplicationItems.Any(ai =>
-                ai.CurrentEducation != null
-                && ai.CurrentEducation.ID == r.ID
-                && ai.Application != null
-                && ai.Application.ApplicationDate >= cutoff));
-
-    private static IQueryable<VwRdEducationByCountry> FilterEducationByCountryByApplicationDate(
-        Visa2026EFCoreDbContext db, IQueryable<VwRdEducationByCountry> query, DateTime cutoff) =>
-        query.Where(r =>
-            db.ApplicationItems.Any(ai =>
-                ai.CurrentEducation != null
-                && ai.CurrentEducation.ID == r.ID
-                && ai.Application != null
-                && ai.Application.ApplicationDate >= cutoff));
-
     private static ReportDashboardPanelData LoadEducation(
         IObjectSpace objectSpace, PersonRecordRole? role, string projectKey,
         ReportDashboardPersonType personType, string subReport,
@@ -5537,8 +5297,18 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
 
         if (validVisaPersonIds == null)
         {
-            // Used as ApplicationItem.CurrentEducation with Application.ApplicationDate in range.
-            query = FilterEducationByApplicationDate(db, query, cutoff);
+            var educationIdSet = ReportDashboardRosterQueryHelper.GetLinkedChildIdsInApplicationDateRange(
+                db, ApplicationProfileInstancePersonLinkKind.Education, cutoff);
+            if (educationIdSet.Count == 0)
+            {
+                return BuildPanel(
+                    personType, ReportDashboardCategory.Education, subReport,
+                    new List<ReportDashboardPreviewRow>(),
+                    excelHint, excelConfigured,
+                    Array.Empty<ReportDashboardStatusBucket>(), 0);
+            }
+
+            query = query.Where(r => educationIdSet.Contains(r.ID));
         }
         else
         {
@@ -5657,7 +5427,20 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         IQueryable<VwRdEducationByCountry> query = db.VwRdEducationByCountry.AsNoTracking();
 
         if (validVisaPersonIds == null)
-            query = FilterEducationByCountryByApplicationDate(db, query, cutoff);
+        {
+            var educationIdSet = ReportDashboardRosterQueryHelper.GetLinkedChildIdsInApplicationDateRange(
+                db, ApplicationProfileInstancePersonLinkKind.Education, cutoff);
+            if (educationIdSet.Count == 0)
+            {
+                return BuildPanel(
+                    personType, ReportDashboardCategory.Education, subReport,
+                    new List<ReportDashboardPreviewRow>(),
+                    excelHint, excelConfigured,
+                    Array.Empty<ReportDashboardStatusBucket>(), 0);
+            }
+
+            query = query.Where(r => educationIdSet.Contains(r.ID));
+        }
         else
             query = query.Where(r => r.PersonOid != null && validVisaPersonIds.Contains(r.PersonOid.Value));
 
@@ -5770,26 +5553,16 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         else if (objectSpace is EFCoreObjectSpace efOs
             && efOs.DbContext is Visa2026EFCoreDbContext db)
         {
-            items = query
-                .Where(e =>
-                    db.ApplicationItems.Any(ai =>
-                        ai.CurrentEducation != null
-                        && ai.CurrentEducation.ID == e.ID
-                        && ai.Application != null
-                        && ai.Application.ApplicationDate >= cutoff))
-                .AsEnumerable()
-                .ToList();
+            var educationIdSet = ReportDashboardRosterQueryHelper.GetLinkedChildIdsInApplicationDateRange(
+                db, ApplicationProfileInstancePersonLinkKind.Education, cutoff);
+            items = educationIdSet.Count == 0
+                ? new List<Education>()
+                : query.Where(e => educationIdSet.Contains(e.ID)).AsEnumerable().ToList();
         }
         else
         {
-            var educationIdsInRange = objectSpace.GetObjectsQuery<ApplicationItem>()
-                .Where(ai => ai.CurrentEducation != null
-                    && ai.Application != null
-                    && ai.Application.ApplicationDate >= cutoff)
-                .Select(ai => ai.CurrentEducation!.ID)
-                .Distinct()
-                .ToHashSet();
-            items = query.AsEnumerable().Where(e => educationIdsInRange.Contains(e.ID)).ToList();
+            // Roster links are only reachable through the EF context; without it there is no date range to filter by.
+            items = new List<Education>();
         }
 
         static string LevelOf(Education e) =>
@@ -5868,13 +5641,18 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
 
         if (validVisaPersonIds == null)
         {
-            // Used as ApplicationItem.CurrentPositionHistory with Application.ApplicationDate in range.
-            query = query.Where(r =>
-                db.ApplicationItems.Any(ai =>
-                    ai.CurrentPositionHistory != null
-                    && ai.CurrentPositionHistory.ID == r.ID
-                    && ai.Application != null
-                    && ai.Application.ApplicationDate >= cutoff));
+            var positionIdSet = ReportDashboardRosterQueryHelper.GetLinkedChildIdsInApplicationDateRange(
+                db, ApplicationProfileInstancePersonLinkKind.Position, cutoff);
+            if (positionIdSet.Count == 0)
+            {
+                return BuildPanel(
+                    personType, ReportDashboardCategory.PositionHistory, subReport,
+                    new List<ReportDashboardPreviewRow>(),
+                    excelHint, excelConfigured,
+                    Array.Empty<ReportDashboardStatusBucket>(), 0);
+            }
+
+            query = query.Where(r => positionIdSet.Contains(r.ID));
         }
         else
         {
@@ -6197,7 +5975,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
     };
 
     /// <summary>
-    /// Medical records by validity. Last-N uses ApplicationItem.CurrentMedicalRecord;
+    /// Medical records by validity. Last-N uses ApplicationRosterMergeLine.CurrentMedicalRecord;
     /// Valid visa only ignores Last-N and keeps one current medical per person
     /// (latest IssueDate then ID — same as PersonCurrentItems.GetCurrentMedicalRecord).
     /// </summary>
@@ -6217,14 +5995,8 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         HashSet<Guid>? medicalIdSet = null;
         if (validVisaPersonIds == null)
         {
-            medicalIdSet = db.ApplicationItems
-                .AsNoTracking()
-                .Where(ai => ai.CurrentMedicalRecord != null
-                    && ai.Application != null
-                    && ai.Application.ApplicationDate >= cutoff)
-                .Select(ai => ai.CurrentMedicalRecord!.ID)
-                .Distinct()
-                .ToHashSet();
+            medicalIdSet = ReportDashboardRosterQueryHelper.GetLinkedChildIdsInApplicationDateRange(
+                db, ApplicationProfileInstancePersonLinkKind.MedicalRecord, cutoff);
         }
 
         if (medicalIdSet is { Count: 0 })
@@ -6409,5 +6181,17 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             || status.Contains("Active",    StringComparison.OrdinalIgnoreCase)
             || status.Contains("Completed", StringComparison.OrdinalIgnoreCase))           return "st-approved";
         return "st-pending";
+    }
+
+    private static bool TryGetDbContext(IObjectSpace objectSpace, out Visa2026EFCoreDbContext db)
+    {
+        if (objectSpace is EFCoreObjectSpace efOs && efOs.DbContext is Visa2026EFCoreDbContext context)
+        {
+            db = context;
+            return true;
+        }
+
+        db = null!;
+        return false;
     }
 }

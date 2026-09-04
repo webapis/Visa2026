@@ -1,3 +1,4 @@
+using System.Data;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Data.SqlClient;
@@ -79,7 +80,7 @@ internal static class Visa2014VisaDocumentImporter
             byte[]? blob;
             try
             {
-                blob = await ReadVisaBlobAsync(connection, blobColumn, legacyVisaOid);
+                blob = await ReadVisaBlobAsync(connection, legacyConnectionString, blobColumn, legacyVisaOid);
             }
             catch (Exception ex)
             {
@@ -193,13 +194,50 @@ internal static class Visa2014VisaDocumentImporter
         return result;
     }
 
-    private static async Task<byte[]?> ReadVisaBlobAsync(SqlConnection connection, string blobColumn, Guid legacyVisaOid)
+    private static async Task<byte[]?> ReadVisaBlobAsync(
+        SqlConnection connection,
+        string legacyConnectionString,
+        string blobColumn,
+        Guid legacyVisaOid)
     {
-        var sql = $"SELECT [{blobColumn}] FROM dbo.Visa WHERE Oid = @oid";
-        await using var command = new SqlCommand(sql, connection);
+        try
+        {
+            await EnsureOpenAsync(connection);
+            return await ReadVisaBlobOnceAsync(connection, blobColumn, legacyVisaOid);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"WRN VisaDocument blob {legacyVisaOid}: {ex.Message} — retrying on a new connection");
+            await using var retry = new SqlConnection(legacyConnectionString);
+            await retry.OpenAsync();
+            var blob = await ReadVisaBlobOnceAsync(retry, blobColumn, legacyVisaOid);
+            try { connection.Close(); } catch { /* original connection is broken */ }
+            return blob;
+        }
+    }
+
+    private static async Task<byte[]?> ReadVisaBlobOnceAsync(
+        SqlConnection connection,
+        string blobColumn,
+        Guid legacyVisaOid)
+    {
+        var sql = $"SELECT [{blobColumn.Replace("]", "]]")}] FROM dbo.Visa WHERE Oid = @oid";
+        await using var command = new SqlCommand(sql, connection) { CommandTimeout = 180 };
         command.Parameters.AddWithValue("@oid", legacyVisaOid);
         var scalar = await command.ExecuteScalarAsync();
         return scalar is byte[] bytes && bytes.Length > 0 ? bytes : null;
+    }
+
+    private static async Task EnsureOpenAsync(SqlConnection connection)
+    {
+        if (connection.State == ConnectionState.Open)
+            return;
+        if (connection.State != ConnectionState.Closed)
+        {
+            try { connection.Close(); } catch { /* ignore broken close */ }
+        }
+
+        await connection.OpenAsync();
     }
 
     private static Dictionary<Guid, Guid> LoadOptionalDocumentIdMap(string? path)

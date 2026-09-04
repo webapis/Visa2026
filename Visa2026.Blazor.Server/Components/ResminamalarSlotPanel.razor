@@ -42,12 +42,16 @@
                 }
                 else if (_applicationId != Guid.Empty)
                 {
-                    <ApplicationReportPackageComponent ApplicationId="_applicationId"
+                    <ApplicationReportPackageComponent ApplicationProfileInstanceId="_applicationId"
                                                      PackageScope="_packageScope"
                                                      ApplicationItemIds="_applicationItemIds"
-                                                     ApplicationNumber="_applicationNumber"
+                                                     ApplicationNumber="@_applicationNumber"
                                                      CatalogEntries="_catalogEntries"
+                                                     RecycleBinEntries="_recycleBinEntries"
+                                                     SharedEntries="_sharedEntries"
+                                                     ShowRecycleBin="_showRecycleBin"
                                                      UiCultureName="_uiCultureName"
+                                                     FocusEntryKey="_focusEntryKey"
                                                      UseInlinePreview="true"
                                                      RefreshRequested="_refreshRequested"
                                                      OnInlinePreviewRequested="HandleInlinePreviewAsync" />
@@ -73,14 +77,22 @@
     [Inject] private IJSRuntime JS { get; set; } = null!;
 
     private Guid _applicationId;
-    private WordReportPackageScope _packageScope = WordReportPackageScope.Application;
+    private WordReportPackageScope _packageScope = WordReportPackageScope.ApplicationProfileInstance;
     private IReadOnlyList<Guid> _applicationItemIds = Array.Empty<Guid>();
     private string _applicationNumber = string.Empty;
     private IReadOnlyList<ApplicationWordReportPackageCatalogEntry> _catalogEntries =
         Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+    private IReadOnlyList<ApplicationWordReportPackageCatalogEntry> _recycleBinEntries =
+        Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+    private IReadOnlyList<ApplicationWordReportPackageCatalogEntry> _sharedEntries =
+        Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+    private bool _showRecycleBin;
     private string _emptyMessage = string.Empty;
     private string _uiCultureName = string.Empty;
+    private string? _focusEntryKey;
     private bool _previewActive;
+    private bool _previewOnlyMode;
+    private ReportPackagePreviewRequest? _pendingPreviewRequest;
     private ReportPackageInlinePreview? _inlinePreview;
     private EventCallback _refreshRequested;
     private string? _boundOccupantKey;
@@ -96,34 +108,68 @@
 
     protected override void OnParametersSet()
     {
-        if (Request == null || Request.ApplicationId == Guid.Empty)
+        if (Request == null || Request.ApplicationProfileInstanceId == Guid.Empty)
         {
             _applicationId = Guid.Empty;
             _catalogEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+            _recycleBinEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+            _sharedEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+            _showRecycleBin = false;
             _emptyMessage = string.Empty;
             _boundOccupantKey = null;
             _previewActive = false;
+            _previewOnlyMode = false;
+            _pendingPreviewRequest = null;
             return;
         }
 
         var occupantKey = VisaPreviewSlotOccupantKeys.ForResminamalar(Request);
-        if (!string.Equals(_boundOccupantKey, occupantKey, StringComparison.Ordinal))
+        var stateKey = Request.OpenPreviewOnly && !string.IsNullOrWhiteSpace(Request.FocusEntryKey)
+            ? $"{occupantKey}|preview:{Request.FocusEntryKey.Trim()}"
+            : occupantKey;
+
+        if (!string.Equals(_boundOccupantKey, stateKey, StringComparison.Ordinal))
         {
-            _boundOccupantKey = occupantKey;
-            _previewActive = false;
+            _boundOccupantKey = stateKey;
+            _previewOnlyMode = Request.OpenPreviewOnly;
+            if (_previewOnlyMode)
+            {
+                _previewActive = true;
+                _pendingPreviewRequest = BuildPreviewRequest(Request);
+            }
+            else
+            {
+                _previewActive = false;
+                _pendingPreviewRequest = null;
+            }
         }
 
-        _applicationId = Request.ApplicationId;
+        _applicationId = Request.ApplicationProfileInstanceId;
         _packageScope = Request.Scope;
         _applicationItemIds = Request.ApplicationItemIds ?? Array.Empty<Guid>();
         _emptyMessage = Request.EmptyCatalogMessage ?? string.Empty;
+        _focusEntryKey = string.IsNullOrWhiteSpace(Request.FocusEntryKey)
+            ? null
+            : Request.FocusEntryKey.Trim();
 
-        if (string.IsNullOrWhiteSpace(_emptyMessage))
+        if (!_previewOnlyMode && string.IsNullOrWhiteSpace(_emptyMessage))
             ReloadCatalog();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (_pendingPreviewRequest != null)
+        {
+            var request = _pendingPreviewRequest;
+            _pendingPreviewRequest = null;
+            await InvokeAsync(StateHasChanged);
+            await Task.Yield();
+
+            if (_inlinePreview != null)
+                await _inlinePreview.OpenAsync(request);
+            return;
+        }
+
         if (_previewActive || _applicationId == Guid.Empty)
             return;
 
@@ -136,22 +182,30 @@
 
     private void ReloadCatalog()
     {
-        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<Application>();
-        var application = objectSpace.GetObjectByKey<Application>(_applicationId);
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(_applicationId);
         if (application == null)
         {
             _catalogEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+            _recycleBinEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+            _sharedEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+            _showRecycleBin = false;
             _applicationNumber = string.Empty;
             return;
         }
 
-        var context = _packageScope == WordReportPackageScope.ApplicationItem
+        var context = _packageScope == WordReportPackageScope.RosterPerson
             ? WordReportGenerationContext.ForApplicationItems(_applicationItemIds.ToList())
             : WordReportGenerationContext.ForApplication();
 
         var catalog = CatalogService.Build(objectSpace, application, context);
         _catalogEntries = catalog.Entries;
+        _recycleBinEntries = catalog.RecycleBinEntries;
+        _sharedEntries = catalog.SharedEntries;
+        _showRecycleBin = catalog.HasProfileNestedCatalog;
         _applicationNumber = application.FullApplicationNumber ?? string.Empty;
+        if (catalog.HasProfileNestedCatalog || catalog.RecycleBinEntries.Count > 0)
+            _emptyMessage = string.Empty;
     }
 
     private Task ReloadCatalogAsync()
@@ -173,16 +227,45 @@
 
     private async Task OnPreviewClosedAsync()
     {
+        if (_previewOnlyMode)
+        {
+            _previewOnlyMode = false;
+            _previewActive = false;
+            _focusEntryKey = null;
+            await SlotService.CloseAsync();
+            return;
+        }
+
         _previewActive = false;
+        _focusEntryKey = null;
         await InvokeAsync(StateHasChanged);
     }
 
     private async Task ClosePanelAsync()
     {
+        _previewOnlyMode = false;
         _previewActive = false;
+        _focusEntryKey = null;
+        _pendingPreviewRequest = null;
         if (CloseRequested.HasDelegate)
             await CloseRequested.InvokeAsync();
         else
             await SlotService.CloseAsync();
+    }
+
+    private static ReportPackagePreviewRequest? BuildPreviewRequest(ResminamalarSlotRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.FocusEntryKey))
+            return null;
+
+        return new ReportPackagePreviewRequest
+        {
+            ApplicationProfileInstanceId = request.ApplicationProfileInstanceId,
+            EntryKey = request.FocusEntryKey.Trim(),
+            DisplayName = string.IsNullOrWhiteSpace(request.FocusDisplayName)
+                ? request.FocusEntryKey.Trim()
+                : request.FocusDisplayName.Trim(),
+            ApplicationItemIds = request.ApplicationItemIds,
+        };
     }
 }

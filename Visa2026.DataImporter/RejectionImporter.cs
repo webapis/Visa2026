@@ -27,7 +27,7 @@ public class RejectionImporter
         }
         foreach (var item in items)
         {
-            var appNum = item.Application?.ApplicationNumber ?? "No App";
+            var appNum = item.ApplicationProfileInstance?.ApplicationNumber ?? "No App";
             Console.WriteLine($"  [{item.Id}] Doc#: {item.RejectedDocNumber} (App: {appNum}) on {item.Date:d}");
         }
         Console.WriteLine();
@@ -46,7 +46,7 @@ public class RejectionImporter
 
         var payload = new
         {
-            Application = new { ID = applicationId },
+            ApplicationProfileInstance = new { ID = applicationId },
             RejectedDocNumber = rejectedDocNumber,
             Reason = reason,
             Date = date
@@ -79,7 +79,7 @@ public class RejectionImporter
             {
                 var payload = new
                 {
-                    Application = record.Application != null ? new { ID = record.Application.Id } : null,
+                    ApplicationProfileInstance = record.ApplicationProfileInstance != null ? new { ID = record.ApplicationProfileInstance.Id } : null,
                     RejectedDocNumber = record.RejectedDocNumber,
                     Reason = record.Reason,
                     Date = record.Date

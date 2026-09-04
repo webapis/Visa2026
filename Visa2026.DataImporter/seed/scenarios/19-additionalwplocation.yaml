@@ -4,15 +4,15 @@ description: Additional movement permit location for Kemal Arslan
 dependsOn: InvitationAndWorkPermit
 sync: false
 anchor:
-  entity: Application
+  entity: ApplicationProfileInstance
   key: FullApplicationNumber
   value: 6/-019
 data:
   Applications:
-  - Application Number: 019
+  - ApplicationProfileInstance Number: 019
     Date: 2026-06-01
     Project Contract: GT-15
-    Application Type: App_Additional_WP_location
+    ApplicationProfileInstance Type: App_Additional_WP_location
     Movement Permit Location: Aşgabat merkezi ofisimizde
   ApplicationItems:
   - Application: 6/-019

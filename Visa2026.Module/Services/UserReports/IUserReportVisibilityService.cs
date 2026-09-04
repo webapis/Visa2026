@@ -9,6 +9,6 @@ namespace Visa2026.Module.Services.UserReports
         /// <param name="template">The user-defined template</param>
         /// <param name="application">The application to check against</param>
         /// <returns>True if the template should be shown in Resminamalar</returns>
-        bool IsTemplateVisible(UserReportTemplate template, Application application);
+        bool IsTemplateVisible(UserReportTemplate template, ApplicationProfileInstance application);
     }
 }

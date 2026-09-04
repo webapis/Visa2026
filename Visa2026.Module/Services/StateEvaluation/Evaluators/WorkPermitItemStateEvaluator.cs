@@ -28,7 +28,7 @@ namespace Visa2026.Module.Services.StateEvaluation.Evaluators
                 return Make("ExpiringSoon", StateSeverity.Warning, days, id, $"Work Permit: Expiring Soon ({days} days remaining)");
 
             if (ExpirationEvaluationHelper.IsExtensionApplicationRequired(wp, ExpirationAlertBusinessObjectKeys.WorkPermitItem, settings))
-                return Make("ExtensionApplicationRequired", StateSeverity.Warning, days, id, $"Work Permit: Extension Application Required ({days} days remaining)");
+                return Make("ExtensionApplicationRequired", StateSeverity.Warning, days, id, $"Work Permit: Extension ApplicationProfileInstance Required ({days} days remaining)");
 
             return Make("Active", StateSeverity.None, days, id, $"Work Permit: Active ({days} days remaining)");
         }

@@ -12,7 +12,7 @@ internal sealed class ApplicationItemPhotoMergeRow
 
     public byte[] Person_Photo { get; init; } = Array.Empty<byte>();
 
-    public static ApplicationItemPhotoMergeRow From(ApplicationItem item)
+    public static ApplicationItemPhotoMergeRow From(ApplicationRosterMergeLine item)
     {
         var photo = item.Person?.Photo;
         return new ApplicationItemPhotoMergeRow

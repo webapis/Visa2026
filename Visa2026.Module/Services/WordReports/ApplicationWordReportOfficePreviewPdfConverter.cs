@@ -1,7 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Threading.Tasks;
 using DevExpress.Spreadsheet;
+using DevExpress.XtraPrinting;
 using DevExpress.XtraRichEdit;
 using Visa2026.Module.Services;
 
@@ -15,12 +19,47 @@ public sealed class ApplicationWordReportOfficePreviewPdfConverter
         if (officeContent == null || officeContent.Length == 0 || string.IsNullOrWhiteSpace(fileName))
             return null;
 
+        // Nested catalog filename bugs used to label Excel bytes as .docx. ZIP parts win over
+        // the extension so Preview still uses Spreadsheet ExportToPdf.
+        if (LooksLikeOpenXmlExcel(officeContent))
+            return ConvertExcelToPdf(officeContent);
+        if (LooksLikeOpenXmlWord(officeContent))
+            return ConvertWordToPdf(officeContent);
+
         return Path.GetExtension(fileName).ToLowerInvariant() switch
         {
             ".docx" => ConvertWordToPdf(officeContent),
             ".xlsx" or ".xlsm" => ConvertExcelToPdf(officeContent),
             _ => null
         };
+    }
+
+    internal static bool LooksLikeOpenXmlExcel(byte[] content) =>
+        OpenXmlPackageHasEntryPrefix(content, "xl/");
+
+    internal static bool LooksLikeOpenXmlWord(byte[] content) =>
+        OpenXmlPackageHasEntryPrefix(content, "word/");
+
+    private static bool OpenXmlPackageHasEntryPrefix(byte[] content, string prefix)
+    {
+        if (content == null || content.Length < 4)
+            return false;
+
+        try
+        {
+            using var input = new MemoryStream(content, writable: false);
+            using var zip = new ZipArchive(input, ZipArchiveMode.Read, leaveOpen: true);
+            return zip.Entries.Any(entry =>
+                entry.FullName.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
+        }
+        catch (InvalidDataException)
+        {
+            return false;
+        }
+        catch (IOException)
+        {
+            return false;
+        }
     }
 
     private static byte[]? ConvertWordToPdf(byte[] content)
@@ -42,8 +81,30 @@ public sealed class ApplicationWordReportOfficePreviewPdfConverter
         workbook.LoadDocument(input);
         workbook.CalculateFull();
 
+        if (workbook.Worksheets.Count == 0)
+            return null;
+
+        // Match merge + yellow-mark scan: preview only the first worksheet. Drop extras so
+        // DevExpress does not emit blank leading pages from unused sheets.
+        while (workbook.Worksheets.Count > 1)
+            workbook.Worksheets.RemoveAt(workbook.Worksheets.Count - 1);
+
+        var worksheet = workbook.Worksheets[0];
+        workbook.Worksheets.ActiveWorksheet = worksheet;
+
+        // Officer sanaw files often keep a stale Print_Area (empty col A after insert, or a
+        // blank extra sheet). Each print area becomes its own PDF page — first page looks empty.
+        worksheet.ClearPrintRange();
+        var usedRange = worksheet.GetUsedRange();
+        if (usedRange != null)
+            worksheet.SetPrintRange(usedRange);
+
+        var printOptions = worksheet.PrintOptions;
+        printOptions.FitToPage = true;
+        printOptions.FitToWidth = 1;
+
         using var output = new MemoryStream();
-        workbook.ExportToPdf(output);
+        workbook.ExportToPdf(output, new PdfExportOptions(), worksheet.Name);
         return ToByteArray(output);
     }
 
@@ -64,12 +125,18 @@ public sealed class ApplicationWordReportOfficePreviewPdfConverter
         if (officeFiles.Count == 1)
             return TryConvertToPdf(officeFiles[0].Content, officeFiles[0].FileName);
 
-        var pdfStreams = new List<MemoryStream>();
+        var pdfs = new byte[officeFiles.Count][];
+        Parallel.For(0, officeFiles.Count, index =>
+        {
+            var (content, fileName) = officeFiles[index];
+            pdfs[index] = TryConvertToPdf(content, fileName) ?? Array.Empty<byte>();
+        });
+
+        var pdfStreams = new List<MemoryStream>(officeFiles.Count);
         try
         {
-            foreach (var (content, fileName) in officeFiles)
+            foreach (var pdf in pdfs)
             {
-                var pdf = TryConvertToPdf(content, fileName);
                 if (pdf == null || pdf.Length == 0)
                     return null;
 

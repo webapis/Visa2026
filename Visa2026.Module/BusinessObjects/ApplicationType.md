@@ -19,7 +19,7 @@ This object inherits from the `LookupBase` class, which provides the standard `N
 | `LifecycleStage` | `ApplicationLifecycleStage` (Enum) | Specifies the stage of the application lifecycle this type belongs to (e.g., Entry, Stay, Exit). | |
 | `Category` | `ApplicationTypeCategory` (Enum) | Specifies if the application type is for an `Employee`, `FamilyMember`, or `Both`. | Required. |
 | `DurationInDays` | `int` | The number of days used to calculate the default expiration date for an Application. | |
-| `ApplicationProgressRoute` | `ApplicationProgressRouteKind` (Enum) | Ministry workflow vs direct to migration service (`ViaMinistries`, `DirectToMigrationService`). Seeded in `ApplicationTypeConfigurationCatalog.json`; drives allowed `ApplicationProgress` state/location codes. | |
+| `ApplicationProfileInstanceProgressRoute` | `ApplicationProfileInstanceProgressRouteKind` (Enum) | Ministry workflow vs direct to migration service (`ViaMinistries`, `DirectToMigrationService`). Seeded in `ApplicationTypeConfigurationCatalog.json`; drives allowed `ApplicationProfileInstanceProgress` state/location codes. | |
 | `MinistryReviewDepth` | `MinistryReviewDepth` (Enum) | `None`, `FirstMinistryOnly`, or `FirstAndSecondMinistry` when route is `ViaMinistries`. | |
 | `ShowProjectContract` | `bool` | Controls visibility of the `ProjectContract` property in the `Application` Detail View. **Not** used for progress routing at runtime. | |
 | `ShowVisaPeriod` | `bool` | Controls visibility of the `VisaPeriod` property in the `Application` Detail View. | |
@@ -34,7 +34,7 @@ This object inherits from the `LookupBase` class, which provides the standard `N
 | `CanIssueInvitation` | `bool` | Capability: successful processing may produce a new `Invitation`. Drives `Invitation.Application` filtering. Distinct from `ShowInvitations`. | |
 | `CanIssueWorkPermit` | `bool` | Capability: successful processing may produce a new `WorkPermit`. Drives `WorkPermit.Application` filtering. Distinct from `ShowWorkPermits`. | |
 | `ShowApplicationItems` | `bool` | Controls visibility of the `ApplicationItems` collection in the `Application` Detail View. | |
-| `ShowApplicationReason` | `bool` | Legacy flag (Application reason field on Application is not used). | |
+| `ShowApplicationReason` | `bool` | Legacy flag (ApplicationProfileInstance reason field on ApplicationProfileInstance is not used). | |
 | `ShowMigrationService` | `bool` | Controls visibility of the `MigrationService` property in the `Application` Detail View. | |
 | `ShowBusinessTripPlan` | `bool` | Controls visibility of the `BusinessTripPlan` property in the `Application` Detail View. | |
 | `ShowBusinessTrips` | `bool` | Controls visibility of the `BusinessTrips` collection in the `Application` Detail View. | |
@@ -55,14 +55,13 @@ This object inherits from the `LookupBase` class, which provides the standard `N
 
 ## 4. Legacy relationships (hidden from UI)
 
-`ApplicationTypeFilter`, `ApplicationTypeFilterNames`, and `ApplicationReasons` remain in the model for import/DB compatibility but are **not shown** on the Application Type detail view. Use **`SelectionCode`**, **`Category`**, and visibility flags instead.
+`ApplicationTypeFilter`, `ApplicationTypeFilterNames`, and `ApplicationReasons` remain in the model for import/DB compatibility but are **not shown** on the ApplicationProfileInstance Type detail view. Use **`SelectionCode`**, **`Category`**, and visibility flags instead.
 
 ---
 
 ## 5. Relationships to Other Objects
 
-- **`ApplicationMigrationSlaProfile`**: Optional SLA tier for migration-service processing (`MigrationSlaProfile` / `MigrationSlaProfileId`).
-- **`ApplicationReason`**: Nested reasons collection (legacy / import; hidden from Application Type detail).
+- **`ApplicationReason`**: Nested reasons collection (legacy / import; hidden from ApplicationProfileInstance Type detail).
 
 ---
 

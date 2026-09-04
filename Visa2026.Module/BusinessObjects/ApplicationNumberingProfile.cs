@@ -16,7 +16,7 @@ namespace Visa2026.Module.BusinessObjects;
 /// </summary>
 [DefaultClassOptions]
 [NavigationItem("Configuration")]
-[DisplayName("Application Numbering")]
+[DisplayName("ApplicationProfileInstance Numbering")]
 [DefaultProperty(nameof(AppNumberPrefix))]
 public class ApplicationNumberingProfile : BaseObject
 {

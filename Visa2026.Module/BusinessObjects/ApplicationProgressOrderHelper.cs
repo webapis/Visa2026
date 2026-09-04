@@ -5,7 +5,7 @@ using DevExpress.ExpressApp;
 
 namespace Visa2026.Module.BusinessObjects;
 
-public static class ApplicationProgressOrderHelper
+public static class ApplicationProfileInstanceProgressOrderHelper
 {
     /// <summary>
     /// Canonical timeline rank for a progress step. Legacy <c>_REVIEW_STARTED</c> rows sort
@@ -18,10 +18,10 @@ public static class ApplicationProgressOrderHelper
 
         var state = stateCode.Trim();
 
-        if (string.Equals(state, ApplicationProgressStateCodes.IsBeingPrepared, StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(state, ApplicationProfileInstanceProgressStateCodes.IsBeingPrepared, StringComparison.OrdinalIgnoreCase))
             return 0;
 
-        if (ApplicationProgressLegCodes.TryParseMinistryLegFromStateCode(state, out var leg))
+        if (ApplicationProfileInstanceProgressLegCodes.TryParseMinistryLegFromStateCode(state, out var leg))
         {
             if (state.EndsWith("_REVIEW_STARTED", StringComparison.OrdinalIgnoreCase))
                 return 9 + leg * 2;
@@ -33,13 +33,13 @@ public static class ApplicationProgressOrderHelper
                 return 11 + leg * 2;
         }
 
-        if (string.Equals(state, ApplicationProgressStateCodes.ProcessStarted, StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(state, ApplicationProfileInstanceProgressStateCodes.ProcessStarted, StringComparison.OrdinalIgnoreCase))
             return 999;
-        if (string.Equals(state, ApplicationProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(state, ApplicationProfileInstanceProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase))
             return 1000;
-        if (string.Equals(state, ApplicationProgressStateCodes.ProcessCancelled, StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(state, ApplicationProfileInstanceProgressStateCodes.ProcessCancelled, StringComparison.OrdinalIgnoreCase))
             return 1001;
-        if (string.Equals(state, ApplicationProgressStateCodes.ProcessRejected, StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(state, ApplicationProfileInstanceProgressStateCodes.ProcessRejected, StringComparison.OrdinalIgnoreCase))
             return 1002;
 
         return 500;
@@ -64,7 +64,7 @@ public static class ApplicationProgressOrderHelper
         return idA.CompareTo(idB);
     }
 
-    public static int CompareTimelineOrder(ApplicationProgress a, ApplicationProgress b) =>
+    public static int CompareTimelineOrder(ApplicationProfileInstanceProgress a, ApplicationProfileInstanceProgress b) =>
         CompareTimelineOrder(
             a?.State?.Code,
             a?.Date ?? DateTime.MinValue,
@@ -73,26 +73,26 @@ public static class ApplicationProgressOrderHelper
             b?.Date ?? DateTime.MinValue,
             b?.ID ?? Guid.Empty);
 
-    /// <summary>Assigns 1-based <see cref="ApplicationProgress.Order"/> values within each application group.</summary>
-    public static void AssignTimelineOrders(IReadOnlyList<ApplicationProgress> siblings)
+    /// <summary>Assigns 1-based <see cref="ApplicationProfileInstanceProgress.Order"/> values within each application group.</summary>
+    public static void AssignTimelineOrders(IReadOnlyList<ApplicationProfileInstanceProgress> siblings)
     {
         if (siblings == null || siblings.Count == 0)
             return;
 
         var ordered = siblings
-            .OrderBy(p => p, Comparer<ApplicationProgress>.Create(CompareTimelineOrder))
+            .OrderBy(p => p, Comparer<ApplicationProfileInstanceProgress>.Create(CompareTimelineOrder))
             .ToList();
 
         for (var i = 0; i < ordered.Count; i++)
             ordered[i].Order = i + 1;
     }
 
-    public static int ResolveNextOrder(ApplicationProgress progress, IObjectSpace objectSpace)
+    public static int ResolveNextOrder(ApplicationProfileInstanceProgress progress, IObjectSpace objectSpace)
     {
         if (progress == null || objectSpace == null)
             return 1;
 
-        var application = progress.Application;
+        var application = progress.ApplicationProfileInstance;
         if (application == null)
             return 1;
 
@@ -112,8 +112,8 @@ public static class ApplicationProgressOrderHelper
 
         if (!objectSpace.IsNewObject(application) && application.ID != Guid.Empty)
         {
-            var persistedMax = objectSpace.GetObjectsQuery<ApplicationProgress>()
-                .Where(p => p.Application != null && p.Application.ID == application.ID && p.ID != progress.ID)
+            var persistedMax = objectSpace.GetObjectsQuery<ApplicationProfileInstanceProgress>()
+                .Where(p => p.ApplicationProfileInstance != null && p.ApplicationProfileInstance.ID == application.ID && p.ID != progress.ID)
                 .Select(p => (int?)p.Order)
                 .Max() ?? 0;
 
@@ -122,8 +122,8 @@ public static class ApplicationProgressOrderHelper
 
         return maxOrder + 1;
     }
-    /// <summary>Compares sibling rows: <see cref="ApplicationProgress.Order"/> first, then workflow/date/ID.</summary>
-    public static int CompareSiblingOrder(ApplicationProgress a, ApplicationProgress b)
+    /// <summary>Compares sibling rows: <see cref="ApplicationProfileInstanceProgress.Order"/> first, then workflow/date/ID.</summary>
+    public static int CompareSiblingOrder(ApplicationProfileInstanceProgress a, ApplicationProfileInstanceProgress b)
     {
         if (ReferenceEquals(a, b))
             return 0;
@@ -145,12 +145,12 @@ public static class ApplicationProgressOrderHelper
         return CompareTimelineOrder(a!, b!);
     }
 
-    public static ApplicationProgress? GetLastTimelineStep(Application application, IObjectSpace objectSpace)
+    public static ApplicationProfileInstanceProgress? GetLastTimelineStep(ApplicationProfileInstance application, IObjectSpace objectSpace)
     {
         if (application == null || objectSpace == null)
             return null;
 
-        ApplicationProgress? last = null;
+        ApplicationProfileInstanceProgress? last = null;
         foreach (var sibling in GetTimelineSiblings(application, objectSpace))
         {
             if (last == null || CompareSiblingOrder(sibling, last) > 0)
@@ -160,16 +160,16 @@ public static class ApplicationProgressOrderHelper
         return last;
     }
 
-    public static bool IsLastTimelineStep(ApplicationProgress progress, IObjectSpace objectSpace)
+    public static bool IsLastTimelineStep(ApplicationProfileInstanceProgress progress, IObjectSpace objectSpace)
     {
-        if (progress?.Application == null || objectSpace == null)
+        if (progress?.ApplicationProfileInstance == null || objectSpace == null)
             return false;
 
-        var last = GetLastTimelineStep(progress.Application, objectSpace);
+        var last = GetLastTimelineStep(progress.ApplicationProfileInstance, objectSpace);
         return last != null && ReferenceEquals(last, progress);
     }
 
-    private static IEnumerable<ApplicationProgress> GetTimelineSiblings(Application application, IObjectSpace objectSpace)
+    private static IEnumerable<ApplicationProfileInstanceProgress> GetTimelineSiblings(ApplicationProfileInstance application, IObjectSpace objectSpace)
     {
         var seen = new HashSet<Guid>();
 
@@ -190,8 +190,8 @@ public static class ApplicationProgressOrderHelper
         if (objectSpace.IsNewObject(application) || application.ID == Guid.Empty)
             yield break;
 
-        foreach (var progress in objectSpace.GetObjectsQuery<ApplicationProgress>()
-                     .Where(p => p.Application != null && p.Application.ID == application.ID))
+        foreach (var progress in objectSpace.GetObjectsQuery<ApplicationProfileInstanceProgress>()
+                     .Where(p => p.ApplicationProfileInstance != null && p.ApplicationProfileInstance.ID == application.ID))
         {
             if (objectSpace.IsObjectToDelete(progress))
                 continue;

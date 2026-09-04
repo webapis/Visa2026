@@ -1,0 +1,599 @@
+@using System.Linq
+@using Visa2026.Blazor.Server.Editors
+@using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Editors
+@using Visa2026.Module.Services.ApplicationProfilePicker
+@using Visa2026.Module.Services.ApplicationWorkspace
+
+<div class="ap-picker">
+    @if (IsLoading)
+    {
+        <div class="ap-picker__loading" role="status">Loading Application Profiles…</div>
+    }
+    else if (Step == 2)
+    {
+        <header class="ap-picker__header">
+            <div>
+                <h1 class="ap-picker__title">Choose Approval legs</h1>
+                <p class="ap-picker__profile-name" title="@SelectedProfileName">@SelectedProfileName</p>
+                <p class="ap-picker__sub">
+                    These chains are shared for every via-ministry application. Pick one for this case; ministries are copied onto it and will not change if the shared catalog is edited later.
+                    <strong>Make default</strong> is the pre-selected chain the next time someone creates from this profile.
+                </p>
+            </div>
+        </header>
+
+        @RenderStatus()
+
+        @if (SelectedRow != null)
+        {
+            <div class="ap-picker__section-head">
+                <h2 class="ap-picker__section-title">Approval legs *</h2>
+                <div class="ap-picker__section-actions">
+                    <button type="button" class="ap-picker__link" @onclick="OpenApprovalLegCatalogAsync">Catalog</button>
+                    <button type="button" class="ap-picker__link" @onclick="NewApprovalLegAsync">+ New</button>
+                </div>
+            </div>
+            @if (SelectedRow.MissingApprovalLegVersions)
+            {
+                <div class="ap-picker__versions-empty" role="status">
+                    <p class="ap-picker__versions-empty-title">No shared approval-leg versions yet</p>
+                    <p>Create the first ministry chain here. It is shared for all via-ministry applications, not only this case. After Create, pick the card and continue. Catalog on the right lists inactive chains too.</p>
+                    <div class="ap-picker__section-actions ap-picker__section-actions--empty">
+                        <button type="button" class="ap-picker__link" @onclick="OpenApprovalLegCatalogAsync">Catalog</button>
+                        <button type="button" class="ap-picker__btn ap-picker__btn--primary" @onclick="NewApprovalLegAsync">+ New</button>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="ap-picker__versions">
+                    @foreach (var version in SelectedRow.ApprovalLegVersions)
+                    {
+                        var versionSelected = version.VersionId == SelectedVersionId;
+                        <div class="ap-picker__version @(versionSelected ? "is-selected" : null)"
+                             role="button"
+                             tabindex="0"
+                             @onclick="() => SelectVersion(version.VersionId)"
+                             @onkeydown="e => OnVersionKey(e, version.VersionId)">
+                            <span class="ap-picker__version-title">
+                                @version.Name
+                                @if (version.IsDefault)
+                                {
+                                    <span class="ap-picker__badge ap-picker__badge--on">Default</span>
+                                }
+                            </span>
+                            <ol class="ap-picker__version-legs">
+                                @foreach (var ministry in version.MinistryNames)
+                                {
+                                    <li>@ministry</li>
+                                }
+                            </ol>
+                            <div class="ap-picker__version-foot">
+                                <span class="ap-picker__meta">@version.MinistryNames.Count ministries</span>
+                                <span class="ap-picker__version-foot-actions">
+                                    @if (!version.IsDefault)
+                                    {
+                                        <button type="button"
+                                                class="ap-picker__link"
+                                                @onclick="() => MakeDefaultApprovalLegAsync(version.VersionId)"
+                                                @onclick:stopPropagation="true">
+                                            Make default
+                                        </button>
+                                    }
+                                    <button type="button"
+                                            class="ap-picker__link"
+                                            @onclick="() => OpenApprovalLegAsync(version.VersionId)"
+                                            @onclick:stopPropagation="true">
+                                        Open
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        }
+
+        <div class="ap-picker__actions">
+            <button type="button" class="ap-picker__btn" @onclick="BackStepAsync">Back</button>
+            <button type="button"
+                    class="ap-picker__btn ap-picker__btn--primary"
+                    disabled="@(!CanContinueFromLegs)"
+                    @onclick="NextStepAsync">
+                Continue →
+            </button>
+        </div>
+    }
+    else if (Step == 3)
+    {
+        <header class="ap-picker__header ap-picker__header--with-gear">
+            <div>
+                <h1 class="ap-picker__title">Choose Organization</h1>
+                <p class="ap-picker__profile-name" title="@SelectedProfileName">@SelectedProfileName</p>
+                <p class="ap-picker__sub">
+                    This case will use the selected Company, Signatory, and Representative. Defaults are pre-selected; you can change them.
+                    <strong>Make default</strong> applies to the next new application.
+                    Use the gear to add or edit catalog records.
+                </p>
+            </div>
+            <button type="button"
+                    class="cs-multi-select-popup__gear-btn @(_orgCatalogManageOpen ? "cs-multi-select-popup__gear-btn--active" : null)"
+                    title="@(_orgCatalogManageOpen ? "Hide catalog New and Edit" : "Show catalog New and Edit")"
+                    aria-label="@(_orgCatalogManageOpen ? "Hide catalog New and Edit" : "Show catalog New and Edit")"
+                    aria-pressed="@_orgCatalogManageOpen"
+                    @onclick="ToggleOrgCatalogManage">
+                <svg class="cs-multi-select-popup__gear-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                    <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94L14.4 2.81a.488.488 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.488.488 0 0 0-.59.22L2.74 8.87a.488.488 0 0 0 .12.61l2.03 1.58c-.05.3-.07.63-.07.94s.02.64.07.94l-2.03 1.58a.488.488 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.488.488 0 0 0 .12-.61l-2.03-1.58zM12 15.6A3.6 3.6 0 1 1 15.6 12 3.6 3.6 0 0 1 12 15.6z" />
+                </svg>
+            </button>
+        </header>
+
+        @RenderStatus()
+
+        <div class="ap-picker__org">
+            @RenderOrgDropdown("Company", OrganizationCatalogHelper.Company, SelectedCompanyId, Companies, "Letterhead company for this application.")
+            @RenderOrgDropdown("Authorized Signatory", OrganizationCatalogHelper.Signatory, SelectedSignatoryId, Signatories, null)
+            @RenderOrgDropdown("Authorized Representative", OrganizationCatalogHelper.Representative, SelectedRepresentativeId, Representatives, null)
+        </div>
+
+        <div class="ap-picker__callout" role="note">
+            These are shared catalog records (not snapshots). Editing a catalog record later updates every case that selected it.
+            @if (_orgCatalogManageOpen)
+            {
+                <text> + New and Edit here are the same as Configuration → Organization catalogs.</text>
+            }
+        </div>
+
+        <div class="ap-picker__actions">
+            <button type="button" class="ap-picker__btn" @onclick="BackStepAsync">Back</button>
+            <button type="button"
+                    class="ap-picker__btn ap-picker__btn--primary"
+                    disabled="@(!CanContinueFromOrganization)"
+                    @onclick="NextStepAsync">
+                Continue →
+            </button>
+        </div>
+        <p class="ap-picker__foot-note">Application Profile: @SelectedProfileName · next: Case summary</p>
+    }
+    else if (Step == 4)
+    {
+        var missing = ApplicationWorkspaceCaseSummaryCompletenessGate.MissingRequiredFields(CaseSummaryFields);
+
+        <header class="ap-picker__header">
+            <div>
+                <h1 class="ap-picker__title">Case summary</h1>
+                <p class="ap-picker__profile-name" title="@SelectedProfileName">@SelectedProfileName</p>
+                <p class="ap-picker__sub">
+                    Same Use fields as the case Overview. Profile defaults are already filled. Set the rest now so you do not need to Edit after create. Changing these does not change the Application Profile template.
+                </p>
+                <p class="ap-picker__crumb">
+                    Profile · @(SelectedRow?.RequiresApprovalLegVersion == true ? "Approval legs · " : null)Organization · <strong>Case summary</strong>
+                </p>
+            </div>
+        </header>
+
+        @RenderStatus()
+
+        @if (CaseSummaryFields.Count == 0)
+        {
+            <p class="ap-picker__hint">No Application Profile Instance properties required on this profile.</p>
+        }
+        else
+        {
+            <div class="ap-picker__summary">
+                <div class="ap-picker__summary-form">
+                    @foreach (var field in CaseSummaryFields)
+                    {
+                        @RenderSummaryField(field)
+                    }
+                </div>
+            </div>
+        }
+
+        <div class="ap-picker__callout" role="note">
+            Required Case summary fields must be set here. Create opens the case workspace ready for People &amp; links.
+        </div>
+        @if (missing.Count > 0)
+        {
+            <div class="ap-picker__status is-error" role="status">@ApplicationWorkspaceCaseSummaryCompletenessGate.FormatBannerMessage(missing)</div>
+        }
+
+        <div class="ap-picker__actions">
+            <button type="button" class="ap-picker__btn" @onclick="BackStepAsync">Back</button>
+            <button type="button"
+                    class="ap-picker__btn ap-picker__btn--primary"
+                    disabled="@(!CanCreateOnCaseSummaryStep)"
+                    @onclick="UseProfileAsync">
+                Create application
+            </button>
+        </div>
+        <p class="ap-picker__foot-note">Application Profile: @SelectedProfileName · last step before create</p>
+    }
+    else
+    {
+        <header class="ap-picker__header">
+            <div>
+                <h1 class="ap-picker__title">Choose Application Profile</h1>
+                <p class="ap-picker__sub">
+                    Sets a live configuration link and seeds per-ApplicationProfileInstance defaults once. Profile cannot be changed after save.
+                </p>
+            </div>
+        </header>
+
+        @if (!string.IsNullOrWhiteSpace(RouteHint))
+        {
+            <div class="ap-picker__hint">@RouteHint</div>
+        }
+
+        @RenderStatus()
+
+        @if (Rows.Count == 0)
+        {
+            <div class="ap-picker__empty">
+                No active Application Profiles match this list. Configure profiles under <strong>Configuration → Application Profiles</strong>.
+            </div>
+        }
+        else
+        {
+            <ul class="ap-picker__list" role="listbox" aria-label="Application Profiles">
+                @foreach (var row in Rows)
+                {
+                    var selected = row.ProfileId == SelectedProfileId;
+                    <li class="ap-picker__item @(selected ? "is-selected" : null)"
+                        role="option"
+                        aria-selected="@selected"
+                        @onclick="() => SelectProfile(row.ProfileId)">
+                        <div class="ap-picker__item-main">
+                            <strong>@row.Name</strong>
+                            <div class="ap-picker__meta">@row.MetaLine</div>
+                        </div>
+                        <div class="ap-picker__badges">
+                            @if (row.IsConfigLocked)
+                            {
+                                <span class="ap-picker__badge ap-picker__badge--muted">Config locked</span>
+                            }
+                            @if (selected)
+                            {
+                                <span class="ap-picker__badge ap-picker__badge--on">Selected</span>
+                            }
+                        </div>
+                    </li>
+                }
+            </ul>
+
+            @if (SelectedRow?.MissingApprovalLegVersions == true)
+            {
+                <div class="ap-picker__hint">Continue to choose or create a shared approval-leg version. New chains are available for every via-ministry application.</div>
+            }
+
+            <div class="ap-picker__actions">
+                <button type="button"
+                        class="ap-picker__btn ap-picker__btn--primary"
+                        disabled="@(SelectedProfileId == Guid.Empty)"
+                        @onclick="NextStepAsync">
+                    Continue →
+                </button>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public int Step { get; set; } = 1;
+    [Parameter] public IReadOnlyList<ApplicationProfilePickerModel.PickerRowModel> Rows { get; set; } = Array.Empty<ApplicationProfilePickerModel.PickerRowModel>();
+    [Parameter] public Guid SelectedProfileId { get; set; }
+    [Parameter] public Guid SelectedVersionId { get; set; }
+    [Parameter] public string? StatusMessage { get; set; }
+    [Parameter] public bool IsStatusError { get; set; }
+    [Parameter] public bool IsStatusWarning { get; set; }
+    [Parameter] public string? RouteHint { get; set; }
+    [Parameter] public EventCallback InitialLoadRequested { get; set; }
+    [Parameter] public EventCallback UseProfileRequested { get; set; }
+    [Parameter] public EventCallback NextStepRequested { get; set; }
+    [Parameter] public EventCallback BackStepRequested { get; set; }
+    [Parameter] public EventCallback<Guid> SelectProfileRequested { get; set; }
+    [Parameter] public EventCallback<Guid> SelectVersionRequested { get; set; }
+    [Parameter] public EventCallback NewApprovalLegRequested { get; set; }
+    [Parameter] public EventCallback<Guid> OpenApprovalLegRequested { get; set; }
+    [Parameter] public EventCallback OpenApprovalLegCatalogRequested { get; set; }
+    [Parameter] public EventCallback<Guid> MakeDefaultApprovalLegRequested { get; set; }
+    [Parameter] public IReadOnlyList<OrganizationCatalogOption> Companies { get; set; } = Array.Empty<OrganizationCatalogOption>();
+    [Parameter] public IReadOnlyList<OrganizationCatalogOption> Signatories { get; set; } = Array.Empty<OrganizationCatalogOption>();
+    [Parameter] public IReadOnlyList<OrganizationCatalogOption> Representatives { get; set; } = Array.Empty<OrganizationCatalogOption>();
+    [Parameter] public Guid SelectedCompanyId { get; set; }
+    [Parameter] public Guid SelectedSignatoryId { get; set; }
+    [Parameter] public Guid SelectedRepresentativeId { get; set; }
+    [Parameter] public EventCallback<ApplicationWorkspaceOrganizationLetterheadUpdate> OrganizationChanged { get; set; }
+    [Parameter] public EventCallback<ApplicationWorkspaceOrganizationLetterheadUpdate> MakeDefaultOrganizationRequested { get; set; }
+    [Parameter] public EventCallback<(string Kind, Guid Id)> OrganizationCatalogEditorRequested { get; set; }
+    [Parameter] public IReadOnlyList<ApplicationWorkspaceCaseHeaderField> CaseSummaryFields { get; set; } = Array.Empty<ApplicationWorkspaceCaseHeaderField>();
+    [Parameter] public EventCallback<ApplicationWorkspaceCaseHeaderFieldUpdate> CaseSummaryFieldChanged { get; set; }
+
+    private bool _initialLoadStarted;
+    private bool _orgCatalogManageOpen;
+
+    private ApplicationProfilePickerModel.PickerRowModel? SelectedRow =>
+        Rows.FirstOrDefault(r => r.ProfileId == SelectedProfileId);
+
+    private string SelectedProfileName =>
+        string.IsNullOrWhiteSpace(SelectedRow?.Name) ? "Unnamed profile" : SelectedRow.Name;
+
+    private bool CanContinueFromLegs =>
+        SelectedRow != null
+        && SelectedVersionId != Guid.Empty;
+
+    private bool CanContinueFromOrganization =>
+        SelectedCompanyId != Guid.Empty
+        && SelectedSignatoryId != Guid.Empty
+        && SelectedRepresentativeId != Guid.Empty;
+
+    private bool CanCreateOnCaseSummaryStep =>
+        CanContinueFromOrganization
+        && ApplicationProfilePickerCaseSummaryDraft.CanCreate(CaseSummaryFields);
+
+    private void ToggleOrgCatalogManage() => _orgCatalogManageOpen = !_orgCatalogManageOpen;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _initialLoadStarted || !InitialLoadRequested.HasDelegate)
+            return;
+
+        _initialLoadStarted = true;
+        await InitialLoadRequested.InvokeAsync();
+    }
+
+    private RenderFragment RenderStatus() => __builder =>
+    {
+        if (!string.IsNullOrWhiteSpace(StatusMessage))
+        {
+            var css = IsStatusError ? "is-error" : IsStatusWarning ? "is-warn" : "is-ok";
+            <div class="ap-picker__status @css" role="status">@StatusMessage</div>
+        }
+    };
+
+    private RenderFragment RenderOrgDropdown(
+        string label,
+        string kind,
+        Guid selectedId,
+        IReadOnlyList<OrganizationCatalogOption> options,
+        string? hint) => __builder =>
+    {
+        var selected = options.FirstOrDefault(o => o.Id == selectedId);
+        <div class="ap-picker__org-field">
+            <label class="ap-picker__org-label">@label <span class="ap-picker__req" aria-hidden="true">*</span></label>
+            <div class="ap-picker__org-row">
+                <select class="ap-picker__org-select"
+                        value="@selectedId"
+                        @onchange="e => OnOrganizationChanged(kind, e.Value?.ToString())">
+                    @if (options.Count == 0)
+                    {
+                        <option value="">@(_orgCatalogManageOpen ? "No catalog records yet" : "No catalog records yet — use the gear to add one")</option>
+                    }
+                    else
+                    {
+                        @foreach (var option in options)
+                        {
+                            <option value="@option.Id" selected="@(option.Id == selectedId)">@option.DisplayName</option>
+                        }
+                    }
+                </select>
+                @if (_orgCatalogManageOpen)
+                {
+                    <button type="button"
+                            class="ap-picker__org-new"
+                            @onclick="() => OnNewOrganization(kind)">
+                        + New
+                    </button>
+                    <button type="button"
+                            class="ap-picker__org-edit"
+                            aria-label="@($"Edit {label}")"
+                            disabled="@(selectedId == Guid.Empty)"
+                            @onclick="() => OnEditOrganization(kind, selectedId)">
+                        ✎
+                    </button>
+                }
+                @if (selected?.IsDefault == true)
+                {
+                    <span class="ap-picker__badge ap-picker__badge--on">Default</span>
+                }
+                @if (selected != null && !selected.IsDefault)
+                {
+                    <button type="button"
+                            class="ap-picker__link"
+                            @onclick="() => OnMakeDefaultOrganization(kind, selectedId)">
+                        Make default
+                    </button>
+                }
+            </div>
+            @if (!string.IsNullOrWhiteSpace(hint))
+            {
+                <p class="ap-picker__org-hint">@hint</p>
+            }
+        </div>
+    };
+
+    private async Task SelectProfile(Guid profileId)
+    {
+        if (SelectProfileRequested.HasDelegate)
+            await SelectProfileRequested.InvokeAsync(profileId);
+    }
+
+    private async Task SelectVersion(Guid versionId)
+    {
+        if (SelectVersionRequested.HasDelegate)
+            await SelectVersionRequested.InvokeAsync(versionId);
+    }
+
+    private async Task UseProfileAsync()
+    {
+        if (UseProfileRequested.HasDelegate)
+            await UseProfileRequested.InvokeAsync();
+    }
+
+    private async Task NextStepAsync()
+    {
+        if (NextStepRequested.HasDelegate)
+            await NextStepRequested.InvokeAsync();
+    }
+
+    private async Task BackStepAsync()
+    {
+        if (BackStepRequested.HasDelegate)
+            await BackStepRequested.InvokeAsync();
+    }
+
+    private async Task NewApprovalLegAsync()
+    {
+        if (NewApprovalLegRequested.HasDelegate)
+            await NewApprovalLegRequested.InvokeAsync();
+    }
+
+    private async Task OpenApprovalLegAsync(Guid versionId)
+    {
+        if (OpenApprovalLegRequested.HasDelegate)
+            await OpenApprovalLegRequested.InvokeAsync(versionId);
+    }
+
+    private async Task OpenApprovalLegCatalogAsync()
+    {
+        if (OpenApprovalLegCatalogRequested.HasDelegate)
+            await OpenApprovalLegCatalogRequested.InvokeAsync();
+    }
+
+    private async Task MakeDefaultApprovalLegAsync(Guid versionId)
+    {
+        if (MakeDefaultApprovalLegRequested.HasDelegate)
+            await MakeDefaultApprovalLegRequested.InvokeAsync(versionId);
+    }
+
+    private async Task OnOrganizationChanged(string kind, string? raw)
+    {
+        if (!OrganizationChanged.HasDelegate)
+            return;
+
+        Guid.TryParse(raw, out var id);
+        await OrganizationChanged.InvokeAsync(new ApplicationWorkspaceOrganizationLetterheadUpdate
+        {
+            Kind = kind,
+            SelectedId = id == Guid.Empty ? null : id,
+        });
+    }
+
+    private async Task OnMakeDefaultOrganization(string kind, Guid selectedId)
+    {
+        if (!MakeDefaultOrganizationRequested.HasDelegate)
+            return;
+
+        await MakeDefaultOrganizationRequested.InvokeAsync(new ApplicationWorkspaceOrganizationLetterheadUpdate
+        {
+            Kind = kind,
+            SelectedId = selectedId,
+            MakeDefault = true,
+        });
+    }
+
+    private Task OnNewOrganization(string kind) =>
+        OrganizationCatalogEditorRequested.HasDelegate
+            ? OrganizationCatalogEditorRequested.InvokeAsync((kind, Guid.Empty))
+            : Task.CompletedTask;
+
+    private Task OnEditOrganization(string kind, Guid id) =>
+        id == Guid.Empty || !OrganizationCatalogEditorRequested.HasDelegate
+            ? Task.CompletedTask
+            : OrganizationCatalogEditorRequested.InvokeAsync((kind, id));
+
+    private RenderFragment RenderSummaryField(ApplicationWorkspaceCaseHeaderField field) => __builder =>
+    {
+        var required = field.FillState == ApplicationWorkspaceCaseSummaryFillState.Empty
+            && !ApplicationWorkspaceCaseHeaderFieldsHelper.IsIdentityField(field.Key);
+        <label class="cw-summary-field cw-summary-field--fill-@ApplicationWorkspaceCaseSummaryFill.CssToken(field.FillState)">
+            <span class="cw-summary-field__label">
+                @field.Label
+                @if (required)
+                {
+                    <span class="ap-picker__req" aria-hidden="true"> *</span>
+                }
+            </span>
+            @if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Date)
+            {
+                <input type="date"
+                       class="cw-summary-field__input"
+                       value="@field.Value"
+                       disabled="@field.ReadOnly"
+                       @onchange="e => OnCaseSummaryFieldChanged(field.Key, e.Value?.ToString())" />
+            }
+            else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.CommaSeparatedMultiSelect)
+            {
+                <BorderZoneLocationField Value="@field.Value"
+                                         EditorAlias="@EditorAliasFor(field.Key)"
+                                         ReadOnly="@field.ReadOnly"
+                                         CatalogItems="@field.MultiSelectOptions"
+                                         ValueChanged="@(value => OnCaseSummaryFieldChanged(field.Key, value))" />
+            }
+            else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Lookup)
+            {
+                <select class="cw-summary-field__input"
+                        value="@field.Value"
+                        disabled="@field.ReadOnly"
+                        @onchange="e => OnCaseSummaryFieldChanged(field.Key, e.Value?.ToString())">
+                    <option value="">— Select —</option>
+                    @foreach (var option in field.Options)
+                    {
+                        var optionId = option.Id.ToString("D");
+                        <option value="@optionId" selected="@(string.Equals(field.Value, optionId, StringComparison.OrdinalIgnoreCase))">@option.DisplayName</option>
+                    }
+                </select>
+            }
+            else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.ShortText)
+            {
+                <input type="text"
+                       class="cw-summary-field__input"
+                       value="@field.Value"
+                       maxlength="@(field.MaxLength ?? ApplicationWorkspaceCaseHeaderFieldsHelper.InstanceNumberMaxLength)"
+                       disabled="@field.ReadOnly"
+                       @onchange="e => OnCaseSummaryFieldChanged(field.Key, e.Value?.ToString())" />
+            }
+            else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Text)
+            {
+                <textarea class="cw-summary-field__input cw-summary-field__textarea"
+                          maxlength="@ApplicationWorkspaceCaseHeaderFieldsHelper.PurposeMaxLength"
+                          rows="4"
+                          disabled="@field.ReadOnly"
+                          @onchange="e => OnCaseSummaryFieldChanged(field.Key, e.Value?.ToString())">@field.Value</textarea>
+            }
+            else
+            {
+                <input type="text"
+                       class="cw-summary-field__input"
+                       value="@field.Value"
+                       disabled="@field.ReadOnly"
+                       @onchange="e => OnCaseSummaryFieldChanged(field.Key, e.Value?.ToString())" />
+            }
+        </label>
+    };
+
+    private static string EditorAliasFor(string? fieldKey) =>
+        string.Equals(fieldKey, ApplicationWorkspaceCaseHeaderFieldsHelper.WorkPermitLocation, StringComparison.Ordinal)
+            ? CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation
+            : CommaSeparatedMultiSelectEditorAliases.BorderZone;
+
+    private Task OnCaseSummaryFieldChanged(string key, string? value)
+    {
+        if (!CaseSummaryFieldChanged.HasDelegate || string.IsNullOrWhiteSpace(key))
+            return Task.CompletedTask;
+
+        return CaseSummaryFieldChanged.InvokeAsync(new ApplicationWorkspaceCaseHeaderFieldUpdate
+        {
+            Key = key,
+            Value = value,
+        });
+    }
+
+    private async Task OnVersionKey(KeyboardEventArgs e, Guid versionId)
+    {
+        if (e.Key is "Enter" or " ")
+            await SelectVersion(versionId);
+    }
+}

@@ -1,0 +1,34 @@
+flowchart TD
+    D["Draft after local rules"] --> G1{ProposedToken null?}
+    G1 -->|Yes| AI["Escalate to Azure"]
+    G1 -->|No| G2{Confidence Low?}
+    G2 -->|Yes| AI
+    G2 -->|No| G3{"Top score < 80%?"}
+    G3 -->|Yes| AI
+    G3 -->|No| G4{"Gap to 2nd candidate < 15%?"}
+    G4 -->|Yes| AI
+    G4 -->|No| OK["Keep local guess"]
+
+    AI --> SYS["System prompt: map yellow sample literals<br/>to allowedTokens short codes; use role + nearby text"]
+
+    subgraph sent ["JSON user payload — what Azure sees"]
+        ENV["Envelope<br/>sourceKind Word or Excel<br/>playbookFingerprint only<br/>placeholderSetFingerprint<br/>JSON reply schema"]
+        LIB["allowedTokens — placeholder manual<br/>shortCode stays the reply key<br/>tokenHeader and tokenRow spellings<br/>labels en / tk / tr<br/>role Applicant Signatory Wekil Company Case<br/>description one line<br/>exampleValue shape hint<br/>canonicalPath<br/>scope Header / Row / Both"]
+        MK["marks — one object per escalated yellow<br/>fieldId<br/>yellowText sample literal<br/>printedLabel before the yellow<br/>surroundingSnippet paragraph with <<<yellow>>><br/>columnHeader Excel<br/>sheetName and headerRow Excel<br/>scope Header or Row<br/>localProposedToken<br/>localCandidates shortCode, token, scorePercent, reason"]
+        ENV --- LIB
+        LIB --- MK
+    end
+
+    subgraph never ["Never sent to Azure"]
+        N1["Selected case / roster people"]
+        N2["Live DB or instance values"]
+        N3["Office file bytes or page images"]
+        N4["Full document / passports dump"]
+    end
+
+    SYS --> CALL["Azure OpenAI chat completion<br/>text JSON, truncated to MaxPromptCharacters"]
+    sent --> CALL
+    never -.->|"blocked"| CALL
+
+    CALL --> OUT["JSON back per mark<br/>proposedToken — shortCode spellings<br/>confidence High Medium Low<br/>ranked candidates with scorePercent and reason"]
+    OUT --> OK

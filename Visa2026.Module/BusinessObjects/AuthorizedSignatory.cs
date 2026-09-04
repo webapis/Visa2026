@@ -12,7 +12,7 @@ using Visa2026.Module.Services;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Configuration")]
+    [NavigationItem(false)]
     [DisplayName("Authorized Signatory")]
     [DefaultProperty(nameof(FullName))]
     [ImageName("BO_Position")]
@@ -32,13 +32,20 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual DateTime? PassportIssueDate { get; set; }
 
+        [XafDisplayName("Passport Expiration Date")]
+        public virtual DateTime? PassportExpirationDate { get; set; }
+
+        [XafDisplayName("Default")]
+        [ToolTip("Pre-selected when creating the next Application Profile Instance.")]
+        public virtual bool IsDefault { get; set; }
+
         [NotMapped]
         [XafDisplayName("Passport (one line)")]
         public string PassportLine =>
             OrganizationPassportLineHelper.Format(PassportNumber, PassportAuthority, PassportIssueDate);
 
         public static AuthorizedSignatory? TryGetInstance(IObjectSpace objectSpace) =>
-            OrganizationSingletonHelper.TryGet(objectSpace, (AuthorizedSignatory p) => p.FullName);
+            OrganizationCatalogHelper.TryGetDefaultSignatory(objectSpace);
 
         public static AuthorizedSignatory GetOrCreateInstance(IObjectSpace objectSpace) =>
             TryGetInstance(objectSpace) ?? objectSpace.CreateObject<AuthorizedSignatory>();

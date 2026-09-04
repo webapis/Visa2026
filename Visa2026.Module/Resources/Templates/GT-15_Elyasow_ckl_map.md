@@ -20,7 +20,7 @@
 | **Template file** | `Visa2026.Module/Resources/Templates/GT-15_Elyasow_ckl.docx` |
 | **Pipeline** | User report seed (**`visa2026-user-report-templates`**) — manual Word; **do not** regenerate from `tools/GenerateTemplates` |
 | **Root BO** | **`Application`** (`UserReportBoType.Application`) |
-| **Application type** | **`App_Inv_And_WP`** only (`ApplicationType.Name`) |
+| **ApplicationProfileInstance type** | **`App_Inv_And_WP`** only (`ApplicationType.Name`) |
 | **Project contract filter** | `ProjectContract.NameTm` contains **`GT-15`** (case-insensitive) — seed via `applicableProjectContractNameTmContains: "GT-15"` |
 | **Legacy sibling** | `GT-15_Elyasow_uzt.docx` — different file; seeded for **`App_Visa_and_WP_Ext`** (not this map) — **do not conflate** with **ckl** |
 | **Xtra cross-check** | **`AppInvAndWPReport`** + **`FormTemplates/App_Inv_And_WP_app_map.md`** + code-backed **`App_Inv_And_WP_Letter.docx`** (same request paragraph: **TotalPersonCount**, **VisaPeriod**, **VisaCategory**, “çakylyk we iş rugsatnamasy”) |
@@ -232,5 +232,5 @@ N/A — Word only.
 | 1.0.4 | 2026-05-21 | **G1:** `TotalPersonCount` + `TotalPersonCountText` → `1 (bir)` on Goşundy line 1. Seed registered (sort 58). |
 | 1.0.3 | 2026-05-21 | **Approved** by user. Yellow-only dynamic rule; **`App_Inv_And_WP`** + GT-15. |
 | 1.0.2 | 2026-05-21 | **R1**, **S1**, **B1** marked **static** (§8); removed ministry / `ProjectContract_Description` placeholders from §6. |
-| 1.0.1 | 2026-05-21 | **Application type** corrected to **`App_Inv_And_WP`** (was `App_Visa_and_WP_Ext`). |
+| 1.0.1 | 2026-05-21 | **ApplicationProfileInstance type** corrected to **`App_Inv_And_WP`** (was `App_Visa_and_WP_Ext`). |
 | 1.0.0 | 2026-05-20 | Initial map; scan + map co-located under **`Resources/Templates/`** (user report seed). |

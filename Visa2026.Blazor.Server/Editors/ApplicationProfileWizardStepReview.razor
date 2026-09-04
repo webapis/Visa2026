@@ -1,0 +1,148 @@
+@using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Services.ApplicationProfilePicker
+
+<div class="ap-wizard__panel-head">
+    <h2>Review &amp; save</h2>
+    <p>Confirm before publishing. Applications reference this profile live; per-ApplicationProfileInstance fields get defaults at create.</p>
+</div>
+<div class="ap-wizard__panel-body">
+    <div class="ap-wizard__summary">
+        <div class="ap-wizard__sum-card">
+            <h4>Identity</h4>
+            <ul>
+                <li>@Profile.Name</li>
+                <li>Code @Profile.Code @(string.IsNullOrWhiteSpace(Profile.SelectionCode) ? "" : $"· quick {Profile.SelectionCode}")</li>
+                <li>@FormatRoute(Profile.ProgressRoute) · @FormatAudience(Profile) · @FormatRelatedTo(Profile)</li>
+                @if (Profile.ActionFamily == ApplicationProfileActionFamily.Issuance)
+                {
+                    <li>Produces: @FormatProduce(Profile)</li>
+                }
+                else if (Profile.ActionFamily == ApplicationProfileActionFamily.Cancellation)
+                {
+                    <li>Cancel: @FormatCancel(Profile)</li>
+                }
+                else if (Profile.ActionFamily == ApplicationProfileActionFamily.Change)
+                {
+                    <li>Change: @FormatChange(Profile)</li>
+                }
+                else if (Profile.ActionFamily == ApplicationProfileActionFamily.Registration
+                    && Profile.RegistrationKind != ApplicationProfileRegistrationKind.None)
+                {
+                    <li>Registration is: @FormatRegistrationKind(Profile.RegistrationKind)</li>
+                }
+            </ul>
+        </div>
+        <div class="ap-wizard__sum-card">
+            <h4>Fields</h4>
+            <ul>
+                <li>Required props: @CountRequiredProps(Profile)</li>
+            </ul>
+        </div>
+        <div class="ap-wizard__sum-card">
+            <h4>Process</h4>
+            <ul>
+                <li>SLA ministry / migration: @Profile.MinistrySlaDays / @Profile.MigrationSlaDays days</li>
+            </ul>
+        </div>
+        <div class="ap-wizard__sum-card">
+            <h4>Person data</h4>
+            <ul>
+                <li>Person toggles: @CountPersonToggles(Profile)</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public ApplicationProfile Profile { get; set; } = null!;
+
+    private static string FormatRoute(ApplicationProfileInstanceProgressRouteKind route) =>
+        route == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService ? "Direct migration" : "Via ministry";
+
+    private static string FormatAudience(ApplicationProfile profile)
+    {
+        var parts = new List<string>();
+        if (profile.ForEmployee) parts.Add("Employee");
+        if (profile.ForFamilyMember) parts.Add("Family");
+        if (profile.ForTemporaryVisitor) parts.Add("Visitor");
+        return parts.Count == 0 ? "—" : string.Join(", ", parts);
+    }
+
+    private static string FormatRelatedTo(ApplicationProfile profile) =>
+        ApplicationProfilePickerDisplayHelper.FormatRelatedTo(profile);
+
+    private static string FormatRegistrationKind(ApplicationProfileRegistrationKind kind) =>
+        ApplicationProfilePickerDisplayHelper.FormatRegistrationKind(kind);
+
+    private static string FormatProduce(ApplicationProfile p)
+    {
+        var items = new List<string>();
+        if (p.ProduceInvitation) items.Add("invitation");
+        if (p.ProduceWorkPermit) items.Add("work permit");
+        if (p.ProduceVisa) items.Add("visa");
+        if (p.ProduceBorderZone) items.Add("border zone");
+        if (p.ProduceRejection) items.Add("rejection");
+        if (p.ProduceWorkLocation) items.Add("work location");
+        return items.Count == 0 ? "—" : string.Join(", ", items);
+    }
+
+    private static string FormatCancel(ApplicationProfile p)
+    {
+        var items = new List<string>();
+        if (p.CancelInvitations) items.Add("invitation");
+        if (p.CancelWorkPermits) items.Add("work permit");
+        if (p.CancelVisas) items.Add("visa");
+        return items.Count == 0 ? "—" : string.Join(", ", items);
+    }
+
+    private static string FormatChange(ApplicationProfile p)
+    {
+        var items = new List<string>();
+        if (p.ChangeInvitations) items.Add("invitation");
+        if (p.ChangeWorkPermits) items.Add("work permit");
+        if (p.ChangeVisas) items.Add("visa");
+        if (p.ChangeBorderZonePermits) items.Add("border zone");
+        if (p.ChangeApplicationProfileInstances) items.Add("application");
+        return items.Count == 0 ? "—" : string.Join(", ", items);
+    }
+
+    private static int CountRequiredProps(ApplicationProfile p)
+    {
+        var n = 0;
+        if (p.RequireVisaType) n++;
+        if (p.RequireVisaCategory) n++;
+        if (p.RequireVisaPeriod) n++;
+        if (p.RequireBorderZone) n++;
+        if (p.RequireMigrationService) n++;
+        if (p.RequireStartDate) n++;
+        if (p.RequireEndDate) n++;
+        if (p.RequireRegion) n++;
+        if (p.RequireCity) n++;
+        if (p.RequireBusinessTripAddress) n++;
+        if (p.RequirePurpose) n++;
+        if (p.RequireProject) n++;
+        if (p.RequireUrgency) n++;
+        if (p.RequireWorkPermitLocation) n++;
+        if (p.RequireEntryDate) n++;
+        if (p.RequireEntryCheckPoint) n++;
+        return n;
+    }
+
+    private static int CountPersonToggles(ApplicationProfile p)
+    {
+        var n = 0;
+        if (p.RequirePersonPassport) n++;
+        if (p.RequirePersonEducation) n++;
+        if (p.RequirePersonPosition) n++;
+        if (p.RequirePersonAddressOfResidence) n++;
+        if (p.RequirePersonVisa) n++;
+        if (p.RequirePersonInvitationItem) n++;
+        if (p.RequirePersonWorkPermitItem) n++;
+        if (p.RequirePersonBorderZoneItem) n++;
+        if (p.RequirePersonSalary) n++;
+        if (p.RequirePersonMedical) n++;
+        if (p.RequirePersonRejectionItem) n++;
+        if (p.RequirePersonTravelHistory && p.ActionFamily != ApplicationProfileActionFamily.BusinessTrip) n++;
+        return n;
+    }
+}

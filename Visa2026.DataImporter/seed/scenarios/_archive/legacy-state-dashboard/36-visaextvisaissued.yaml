@@ -4,7 +4,7 @@ description: Visa extension process issued — application and item created — 
 dependsOn: VisaExtProcessRejected
 sync: false
 anchor:
-  entity: Application
+  entity: ApplicationProfileInstance
   key: FullApplicationNumber
   value: 3/-036
 data:
@@ -28,12 +28,12 @@ data:
     Expiration Date: 2026-04-30
     Passport Number: DE8888888
   Applications:
-  - Application Number: 036
+  - ApplicationProfileInstance Number: 036
     Date: 2026-03-28
     Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
     Project Contract: GT-15
     Filter: Visa
-    Application Type: App_Visa_Ext
+    ApplicationProfileInstance Type: App_Visa_Ext
     Urgency: Adaty tertipde !
     Visa Period: 3 (üç) aý
     Visa Category: Köp gezeklik
@@ -43,7 +43,7 @@ data:
     Passport Number: DE8888888
     Visa Number: TM-2026-V-022
     Visa Issued: true
-  ApplicationProgresses:
+  ApplicationProfileInstanceProgresses:
   - Application: 3/-036
     State: PROCESS_ISSUED
     Location: AT_MIGRATION_SERVICE

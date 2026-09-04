@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Visa2026.Module.Tests.BusinessObjects;
 
-public class ApplicationProgressOrderHelperTests
+public class ApplicationProfileInstanceProgressOrderHelperTests
 {
     [Theory]
     [InlineData("IS_BEING_PREPARED", 0)]
@@ -20,13 +20,13 @@ public class ApplicationProgressOrderHelperTests
     [InlineData("PROCESS_ISSUED", 1000)]
     public void GetWorkflowSortKey_MatchesCanonicalTimeline(string stateCode, int expected)
     {
-        Assert.Equal(expected, ApplicationProgressOrderHelper.GetWorkflowSortKey(stateCode));
+        Assert.Equal(expected, ApplicationProfileInstanceProgressOrderHelper.GetWorkflowSortKey(stateCode));
     }
 
     [Fact]
     public void CompareTimelineOrder_PrefersWorkflowSequenceOverDate()
     {
-        var compare = ApplicationProgressOrderHelper.CompareTimelineOrder(
+        var compare = ApplicationProfileInstanceProgressOrderHelper.CompareTimelineOrder(
             "1_REVIEW_APPROVED",
             new DateTime(2026, 5, 2),
             Guid.Empty,
@@ -36,7 +36,7 @@ public class ApplicationProgressOrderHelperTests
 
         Assert.True(compare < 0);
 
-        compare = ApplicationProgressOrderHelper.CompareTimelineOrder(
+        compare = ApplicationProfileInstanceProgressOrderHelper.CompareTimelineOrder(
             "1_REVIEW_STARTED",
             new DateTime(2026, 4, 30),
             Guid.Empty,
@@ -53,14 +53,14 @@ public class ApplicationProgressOrderHelperTests
         var earlierDateLaterOrder = Progress(order: 3, date: new DateTime(2026, 5, 1));
         var laterDateEarlierOrder = Progress(order: 2, date: new DateTime(2026, 6, 1));
 
-        Assert.True(ApplicationProgressOrderHelper.CompareSiblingOrder(earlierDateLaterOrder, laterDateEarlierOrder) > 0);
+        Assert.True(ApplicationProfileInstanceProgressOrderHelper.CompareSiblingOrder(earlierDateLaterOrder, laterDateEarlierOrder) > 0);
     }
 
     [Fact]
     public void CompareSiblingOrder_SelectsHighestOrderAsLatest()
     {
-        var application = new Application();
-        var steps = new List<ApplicationProgress>
+        var application = new ApplicationProfileInstance();
+        var steps = new List<ApplicationProfileInstanceProgress>
         {
             Progress(order: 1, date: new DateTime(2026, 1, 1)),
             Progress(order: 2, date: new DateTime(2026, 1, 2)),
@@ -68,22 +68,22 @@ public class ApplicationProgressOrderHelperTests
         };
         foreach (var step in steps)
         {
-            step.Application = application;
+            step.ApplicationProfileInstance = application;
             application.ProgressHistory.Add(step);
         }
 
         var last = application.ProgressHistory
-            .OrderByDescending(p => p, Comparer<ApplicationProgress>.Create(ApplicationProgressOrderHelper.CompareSiblingOrder))
+            .OrderByDescending(p => p, Comparer<ApplicationProfileInstanceProgress>.Create(ApplicationProfileInstanceProgressOrderHelper.CompareSiblingOrder))
             .First();
 
         Assert.Same(steps[2], last);
     }
 
-    private static ApplicationProgress Progress(int order, DateTime date) =>
+    private static ApplicationProfileInstanceProgress Progress(int order, DateTime date) =>
         new()
         {
             Order = order,
             Date = date,
-            State = new ApplicationState { Code = ApplicationProgressStateCodes.ProcessStarted },
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.ProcessStarted },
         };
 }

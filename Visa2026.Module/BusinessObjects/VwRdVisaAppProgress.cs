@@ -9,7 +9,7 @@ namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
 /// Report Dashboard Visa On Extension / Extension Result row from <c>vw_rd_visa_app_progress</c>.
-/// One ApplicationItem per row (visa-extension types with CurrentVisa).
+/// One ApplicationRosterMergeLine per row (visa-extension types with CurrentVisa).
 /// Shared by dashboard preview and Open ListView (not <see cref="VisaExtensionStatus"/>).
 /// </summary>
 [DefaultClassOptions]
@@ -26,11 +26,11 @@ public class VwRdVisaAppProgress
     public virtual Guid ID { get; set; }
 
     [Browsable(false)]
-    public virtual Guid? ApplicationOid { get; set; }
+    public virtual Guid? ApplicationProfileInstanceOid { get; set; }
 
-    [ForeignKey(nameof(ApplicationOid))]
+    [ForeignKey(nameof(ApplicationProfileInstanceOid))]
     [ModelDefault("Caption", "Application")]
-    public virtual Application Application { get; set; }
+    public virtual ApplicationProfileInstance ApplicationProfileInstance { get; set; }
 
     [Browsable(false)]
     public virtual Guid? PersonOid { get; set; }

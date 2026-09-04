@@ -14,9 +14,9 @@ public enum ReportDashboardPersonType
 
 public enum ReportDashboardCategory
 {
-    /// <summary>Applications on the ministry-review route (ApplicationProgressRouteKind.ViaMinistries).</summary>
+    /// <summary>Applications on the ministry-review route (ApplicationProfileInstanceProgressRouteKind.ViaMinistries).</summary>
     ApplicationViaMinistry,
-    /// <summary>Applications that go directly to migration (ApplicationProgressRouteKind.DirectToMigrationService).</summary>
+    /// <summary>Applications that go directly to migration (ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService).</summary>
     ApplicationDirectMigration,
     VisaExtension,
     Invitation,

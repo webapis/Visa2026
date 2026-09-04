@@ -4,7 +4,7 @@ description: Exit visa application for employees preparing to leave Turkmenistan
 dependsOn: BusinessTripArrival
 sync: false
 anchor:
-  entity: Application
+  entity: ApplicationProfileInstance
   key: FullApplicationNumber
   value: 4/-026
 data:
@@ -26,10 +26,10 @@ data:
     Issued Place: Aşgabat şäher howa menzilindäki MGP
     Passport Number: TR8877665
   Applications:
-  - Application Number: 026
+  - ApplicationProfileInstance Number: 026
     Date: 2027-04-10
     Project Contract: GT-15
-    Application Type: App_Exit_Visa
+    ApplicationProfileInstance Type: App_Exit_Visa
     Urgency: Adaty tertipde !
     Visa Period: 1 (bir) aý
     Visa Category: Bir gezeklik

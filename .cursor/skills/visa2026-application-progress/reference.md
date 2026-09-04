@@ -15,7 +15,7 @@ Companion to [SKILL.md](./SKILL.md).
 | **Deprecated** enum | `ApplicationStatus.cs` — use `ApplicationState` catalog codes only |
 | Leg code builders | `ApplicationProgressLegCodes.cs` (`MaxLegCount = 5`, `IsMinistryDecisionStateCode`) |
 | Stable constants | `ApplicationProgressCatalogCodes.cs`, `ApplicationProgressStateCodes`, `ApplicationProgressLocationCodes` |
-| Resolver (leg count, contract rules, header lock) | `ApplicationProgressProfileResolver.cs` — `LockedApplicationHeaderTargetItems`, `HasProgressBeyondOfficePreparation`, `TryValidateApplicationUnchangedAfterProgress`; see [approval doc §3.4](../../../docs/APPLICATION_PROGRESS_APPROVAL_AND_CONTRACT_DEPTH.md) |
+| Resolver (leg count, contract rules, header lock) | `ApplicationProgressProfileResolver.cs` — `LockedApplicationHeaderTargetItems` (type / approval legs / project; number and date stay editable), `HasProgressBeyondOfficePreparation`, `TryValidateApplicationUnchangedAfterProgress`; see [approval doc §3.4](../../../docs/APPLICATION_PROGRESS_APPROVAL_AND_CONTRACT_DEPTH.md) |
 | Allowed codes / suggestions | `ApplicationProgressRouteHelper.cs` |
 | Transition graph + save validation | `ApplicationProgressTransitionHelper.cs` |
 | Latest row helper | `ApplicationProgressHelper.cs` |

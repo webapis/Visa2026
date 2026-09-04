@@ -38,7 +38,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual PdfMappingMode MappingMode { get; set; }
 
         [Appearance("PropertyPathVisible", Visibility = ViewItemVisibility.Hide, Criteria = "MappingMode != 'Property'")]
-        [ToolTip("The property path relative to ApplicationItem (e.g., Person.LastName, Application.VisaType.PdfForm_Code)")]
+        [ToolTip("The property path relative to ApplicationRosterMergeLine (e.g., Person.LastName, Application.VisaType.PdfForm_Code)")]
         public virtual string PropertyPath { get; set; }
 
         [Appearance("ExpressionVisible", Visibility = ViewItemVisibility.Hide, Criteria = "MappingMode != 'Expression'")]
@@ -74,6 +74,6 @@ namespace Visa2026.Module.BusinessObjects
 
         [NotMapped]
         [Browsable(false)]
-        public Type TargetType => typeof(ApplicationItem);
+        public Type TargetType => typeof(ApplicationRosterMergeLine);
     }
 }

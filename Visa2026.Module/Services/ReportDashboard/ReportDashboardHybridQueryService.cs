@@ -13,8 +13,8 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
     /// <summary>
     /// Sub-reports that load from SQL views / real EF queries.
     /// Add entries one at a time after verifying each view.
-    /// Application (direct migration) On Process (A) / Process Complete promote via <see cref="RealSubReports"/>.
-    /// Application (via ministry) promotes one sub-report at a time via <see cref="RealSubReports"/>.
+    /// ApplicationProfileInstance (direct migration) On Process (A) / Process Complete promote via <see cref="RealSubReports"/>.
+    /// ApplicationProfileInstance (via ministry) promotes one sub-report at a time via <see cref="RealSubReports"/>.
     /// </summary>
     private static readonly HashSet<(ReportDashboardCategory Category, string SubReport)> RealSubReports =
     [

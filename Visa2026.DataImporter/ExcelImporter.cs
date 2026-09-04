@@ -543,7 +543,7 @@ public class ExcelImporter
         Dictionary<string, int> headerIndex,
         List<object> row)
     {
-        var fullNumber = GetRowCell(headerIndex, row, "Full Application Number");
+        var fullNumber = GetRowCell(headerIndex, row, "Full ApplicationProfileInstance Number");
         if (!string.IsNullOrWhiteSpace(fullNumber))
         {
             var byFull = await QueryMatchingIdsAsync("Application",
@@ -551,7 +551,7 @@ public class ExcelImporter
             return byFull.Count > 0 ? byFull[0] : null;
         }
 
-        var appNumber = GetRowCell(headerIndex, row, "Application Number");
+        var appNumber = GetRowCell(headerIndex, row, "ApplicationProfileInstance Number");
         var dateRaw = GetRowCell(headerIndex, row, "Date");
         if (string.IsNullOrWhiteSpace(appNumber) || string.IsNullOrWhiteSpace(dateRaw))
             return null;
@@ -946,7 +946,7 @@ public class ExcelImporter
 
     private async Task ClearApplicationScopedDataAsync(YamlScenario scenario)
     {
-        if (!scenario.Data!.TryGetValue("Applications", out var appRows) || appRows.Count == 0)
+        if (!scenario.Data!.TryGetValue("ApplicationProfileInstances", out var appRows) || appRows.Count == 0)
             return;
 
         var (headerIndex, dataRows) = ConvertYamlRows(appRows);
@@ -965,7 +965,7 @@ public class ExcelImporter
             deleted += await DeleteAllMatchingAsync("WorkPermit", $"Application/ID eq {idLiteral}");
             deleted += await DeleteAllMatchingAsync("RejectionItem", $"Rejection/Application/ID eq {idLiteral}");
             deleted += await DeleteAllMatchingAsync("Rejection", $"Application/ID eq {idLiteral}");
-            deleted += await DeleteAllMatchingAsync("ApplicationProgress", $"Application/ID eq {idLiteral}");
+            deleted += await DeleteAllMatchingAsync("ApplicationProfileInstanceProgress", $"Application/ID eq {idLiteral}");
 
             try
             {
@@ -974,12 +974,12 @@ public class ExcelImporter
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"  ⚠ Could not delete Application ({appId}): {ex.Message}");
+                Console.WriteLine($"  ⚠ Could not delete ApplicationProfileInstance ({appId}): {ex.Message}");
             }
 
             if (deleted > 0)
             {
-                var appNumber = GetRowCell(headerIndex, row, "Application Number");
+                var appNumber = GetRowCell(headerIndex, row, "ApplicationProfileInstance Number");
                 var label = string.IsNullOrWhiteSpace(appNumber) ? appId.ToString() : appNumber;
                 Console.WriteLine($"  🗑 Cleared application scope for #{label} ({deleted} record(s)).");
             }

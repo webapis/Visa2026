@@ -1,4 +1,4 @@
-﻿using DevExpress.ExpressApp;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -10,11 +10,12 @@ namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
 /// Tenant singleton: working-day SLA for ministry review legs (elapsed from prior step until <c>{n}_REVIEW_APPROVED</c>).
-/// Copied to <see cref="ApplicationApprovalLegSnapshot"/> when an application selects an
+/// Copied to <see cref="ApplicationProfileInstanceApprovalLegSnapshot"/> when an application selects an
 /// <see cref="ApprovalLegProfile"/>.
+/// Hidden from Configuration — officers set days on <see cref="ApplicationProfile.MinistrySlaDays"/>.
 /// </summary>
 [DefaultClassOptions]
-[NavigationItem("Configuration")]
+[NavigationItem(false)]
 [DisplayName("Ministry review SLA")]
 [RuleCriteria(
     "MinistryReviewSlaSettingsWarningBeforeMax",

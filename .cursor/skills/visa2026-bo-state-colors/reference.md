@@ -16,7 +16,7 @@ Use when implementing evaluators, `PrimaryStateCode`, or choosing between flag v
 | **D** | Process history | Latest `ApplicationProgress` by `Date`, `ID` | `ApplicationProgress`, `ApplicationProgressHelper`, `application-state.json`, `application-location.json` | `PROCESS_ISSUED`, `AT_OFFICE`, `1_REVIEW_STARTED` | Catalog `Code` direct |
 | **E** | Cross-BO linkage | Join related entities + `ApplicationType.Name` | `ApplicationItem.CurrentVisa`, `IssuingApplicationItem`, `Registration`, `Rejection`/`RejectionItem`, `TravelHistory` | `OnExtension`, person-level `IsRejected` | Evaluator or SQL view |
 | **F** | Current vs historical | `PersonCurrentItems` — instance ≠ current | `GetCurrentVisa`, `GetCurrentWorkPermitItem`, `VisaIsEffectiveOn` | `Archived` | Evaluator branch |
-| **G** | SQL view | `SqlViewsUpdater` + EF `ToView` entity | `View_VisaExtensionStatus`, `VisaExtensionStatus`, `WorkPermitExtensionStatus` | Extension dashboard states | View column → registry |
+| **G** | SQL view | `ReportDashboardPostgresViewsUpdater` / heal + EF `ToView` entity | `View_VisaExtensionStatus`, `VisaExtensionStatus` (`WorkPermitExtensionStatus`: no PostgreSQL body) | Extension dashboard states | View column → registry |
 | **H** | Configuration | Thresholds / type flags branch logic | `SystemSettings`, `ApplicationType.Show*`, `ApplicationTypeConfigurationSeed` | `ExpiringSoonNotRequired` (subtype) | Inside evaluator; not a color by itself |
 
 ### Evaluator vs flag authority (Visa and similar)

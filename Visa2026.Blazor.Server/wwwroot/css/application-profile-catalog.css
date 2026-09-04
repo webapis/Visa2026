@@ -1,0 +1,406 @@
+.ap-catalog {
+    --ap-ink: #1a2332;
+    --ap-muted: #5c6b7a;
+    --ap-line: #d5dde6;
+    --ap-panel: #ffffff;
+    --ap-accent: #0b6e4f;
+    --ap-accent-soft: #e6f3ee;
+    --ap-accent-deep: #08553c;
+    --ap-sidebar: #f7fafc;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    color: var(--ap-ink);
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+/*
+  Cap the catalog DetailView to the pane under XAF header + MDI tabs.
+  height:100% on layout groups does not give a definite height, so the table
+  grew and the page scrolled (thead sticky then failed).
+*/
+.ap-catalog-detail {
+    height: calc(100svh - 7.5rem) !important;
+    max-height: calc(100svh - 7.5rem) !important;
+    overflow: hidden !important;
+}
+
+.ap-catalog-detail,
+.ap-catalog-detail .xaf-detail-view,
+.ap-catalog-detail .layout-main,
+.ap-catalog-detail .layout-SimpleEditors,
+.ap-catalog-detail .layout-ApplicationProfileCatalogHost,
+.ap-catalog-detail .layout-item-CatalogUi {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+.ap-catalog-detail .layout-item-CatalogUi .dxbl-fl-ctrl,
+.ap-catalog-detail .layout-item-CatalogUi .dxbl-fl-ctrl > * {
+    flex: 1 1 0%;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+.ap-catalog--list {
+    padding: 8px 8px 0;
+    height: 100%;
+    max-height: 100%;
+}
+
+.xaf-view:has(.ap-catalog--list),
+.dxbl-tab-page:has(.ap-catalog--list),
+.dxbl-tabpage:has(.ap-catalog--list),
+.dxbl-tab-page-content:has(.ap-catalog--list),
+.dxbl-tabpage-content:has(.ap-catalog--list),
+.dxbl-application:has(.ap-catalog--list) .xaf-view {
+    overflow: hidden !important;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+}
+
+.ap-catalog__loading,
+.ap-catalog__empty-main,
+.ap-catalog__rail-empty {
+    padding: 24px;
+    color: var(--ap-muted);
+    border: 1px solid var(--ap-line);
+    border-radius: 10px;
+    background: #fbfcfd;
+}
+
+.ap-catalog__list-page > .ap-catalog__rail-empty {
+    flex: 1;
+    min-height: 0;
+}
+
+.ap-catalog__status {
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    flex-shrink: 0;
+}
+.ap-catalog__status.is-ok { background: var(--ap-accent-soft); border: 1px solid #b7d9cb; }
+.ap-catalog__status.is-error { background: #fde8e8; border: 1px solid #f5c2c2; }
+
+.ap-catalog__shell {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 12px;
+    min-height: 640px;
+}
+
+@media (max-width: 960px) {
+    .ap-catalog__shell { grid-template-columns: 1fr; }
+}
+
+.ap-catalog__rail {
+    background: var(--ap-sidebar);
+    border: 1px solid var(--ap-line);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+}
+
+.ap-catalog__rail-title {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 650;
+}
+
+.ap-catalog__search {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--ap-line);
+    background: var(--ap-panel);
+    border-radius: 8px;
+    padding: 7px 9px;
+}
+
+.ap-catalog__search input {
+    border: 0;
+    outline: 0;
+    width: 100%;
+    font: inherit;
+    font-size: 0.85rem;
+    background: transparent;
+    color: var(--ap-ink);
+}
+
+.ap-catalog__profile-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    overflow: auto;
+    flex: 1;
+    min-height: 120px;
+}
+
+.ap-catalog__profile-row {
+    display: grid;
+    grid-template-columns: 14px 1fr auto;
+    gap: 8px;
+    align-items: center;
+    padding: 9px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--ap-line);
+    margin-bottom: 4px;
+    font-size: 0.82rem;
+    background: var(--ap-panel);
+    cursor: pointer;
+}
+
+.ap-catalog__profile-row:hover {
+    border-color: #b7d9cb;
+}
+
+.ap-catalog__profile-row.is-active {
+    background: var(--ap-accent-soft);
+    border-color: #8fc9b0;
+}
+
+.ap-catalog__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ap-accent);
+    display: inline-block;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.ap-catalog__profile-row.is-active .ap-catalog__dot {
+    background: var(--ap-accent);
+}
+
+.ap-catalog__profile-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ap-catalog__lock {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 1px solid #f0d4a8;
+    background: #fff4e5;
+    color: #7c4a03;
+    font-size: 0.65rem;
+    font-weight: 700;
+    display: grid;
+    place-items: center;
+}
+
+.ap-catalog__new {
+    border: 1px dashed #b7d9cb;
+    background: var(--ap-accent-soft);
+    color: var(--ap-accent-deep);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 0.85rem;
+    font-weight: 650;
+    cursor: pointer;
+    text-align: left;
+}
+
+.ap-catalog__new:hover {
+    background: #d7eee4;
+}
+
+.ap-catalog__new--toolbar {
+    border-style: solid;
+    background: var(--ap-accent);
+    color: #fff;
+    border-color: var(--ap-accent);
+    white-space: nowrap;
+}
+.ap-catalog__new--toolbar:hover {
+    background: var(--ap-accent-deep);
+    color: #fff;
+}
+
+.ap-catalog__list-page {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.ap-catalog__list-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+}
+
+.ap-catalog__list-head-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+    flex: 1;
+}
+
+.ap-catalog__search--toolbar {
+    max-width: 360px;
+}
+
+.ap-catalog__total {
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--bs-secondary-color, #6c757d);
+    white-space: nowrap;
+}
+
+.ap-catalog__table-wrap {
+    border: 1px solid var(--ap-line);
+    border-radius: 12px;
+    background: var(--ap-panel);
+    flex: 1 1 0%;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+    /* Independent of XAF height chain: keep the scrollport inside the table border. */
+    max-height: calc(100svh - 13.5rem);
+}
+
+.ap-catalog__table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.88rem;
+}
+
+.ap-catalog__table th,
+.ap-catalog__table td {
+    padding: 11px 14px;
+    border-bottom: 1px solid #eef2f6;
+    text-align: left;
+}
+
+.ap-catalog__table thead {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+}
+
+.ap-catalog__table th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ap-muted);
+    font-weight: 700;
+    background: var(--ap-panel);
+    box-shadow: 0 1px 0 var(--ap-line);
+}
+
+.ap-catalog__table tbody tr {
+    cursor: pointer;
+}
+
+.ap-catalog__table tbody tr:hover td {
+    background: #f4faf7;
+}
+
+.ap-catalog__chev {
+    color: #94a3b8;
+    text-align: right;
+    width: 28px;
+}
+
+.ap-catalog__actions {
+    white-space: nowrap;
+    text-align: right;
+    width: 1%;
+}
+
+.ap-catalog__actions .ap-catalog__chev {
+    display: inline-block;
+    width: auto;
+    margin-left: 8px;
+}
+
+.ap-catalog__delete,
+.ap-catalog__delete-cancel {
+    border: 1px solid #d7b4b4;
+    background: #fff;
+    color: #9b2c2c;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 0.78rem;
+    font-weight: 650;
+    cursor: pointer;
+}
+
+.ap-catalog__delete:hover,
+.ap-catalog__delete--confirm {
+    background: #9b2c2c;
+    border-color: #9b2c2c;
+    color: #fff;
+}
+
+.ap-catalog__delete-cancel {
+    color: var(--ap-muted);
+    border-color: var(--ap-line);
+    margin-left: 4px;
+}
+
+.ap-catalog__detail-page {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+}
+
+.ap-catalog__detail-page .ap-overview {
+    max-width: none;
+    margin: 0;
+    padding: 4px 0 8px;
+}
+
+.ap-catalog__main {
+    min-width: 0;
+    border: 1px solid var(--ap-line);
+    border-radius: 12px;
+    background: var(--ap-panel);
+    padding: 8px 12px 16px;
+    overflow: auto;
+}
+
+.ap-catalog__main .ap-overview {
+    max-width: none;
+    margin: 0;
+    padding: 4px 0 8px;
+}

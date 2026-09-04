@@ -80,7 +80,7 @@ public class PersonOfficerJourneyTests : E2ETestBase
         SaveSalaryDetail();
         AssertSalaryShowsAmount(E2ETestSalaryCreateValues.Amount);
 
-        // Travel — manual External Arrival (ApplicationItem sync removed; split New button)
+        // Travel — manual External Arrival (ApplicationRosterMergeLine sync removed; split New button)
         ReturnToSavedEmployeeDetail();
         ExecutePersonTravelExternalArrivalNestedNew();
         FillTravelExternalArrivalRequiredFields();

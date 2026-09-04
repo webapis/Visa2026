@@ -238,14 +238,11 @@ internal static class Visa2014InvitationItemODataImporter
         Guid passportId,
         Guid invitationId)
     {
-        var isCancelled = row.GetValueOrDefault("IsCancelled") is bool cancelled && cancelled;
-
         return new Dictionary<string, object?>(StringComparer.Ordinal)
         {
             ["Person"] = new { ID = personId },
             ["Passport"] = new { ID = passportId },
             ["Invitation"] = new { ID = invitationId },
-            ["IsCancelled"] = isCancelled,
         };
     }
 
@@ -259,10 +256,6 @@ internal static class Visa2014InvitationItemODataImporter
 
     private static Dictionary<string, object?>? BuildPayloadWithoutParents(Dictionary<string, object?> row)
     {
-        var isCancelled = row.GetValueOrDefault("IsCancelled") is bool cancelled && cancelled;
-        return new Dictionary<string, object?>(StringComparer.Ordinal)
-        {
-            ["IsCancelled"] = isCancelled,
-        };
+        return new Dictionary<string, object?>(StringComparer.Ordinal);
     }
 }

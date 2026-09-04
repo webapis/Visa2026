@@ -6,6 +6,191 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 
 ## Entries
 
+### 2026-09-04 — Upload missing approval letter without Revert
+
+- **Need**: If the approval/disapproval letter was not attached when the ministry was Approved or Unapproved, the officer must upload it on that completed step. Revert is not required. Advance stays allowed (cue only).
+- **Fix**: Done `leg-*` decision rows without a file set `MissingMinistryLetter` and `ShowMinistryLetterUpload`. Progress nav shows an amber count. Upload calls `SetMinistryLetter` with `DecisionProgressId` (fallback `ProgressId`) and commits on that history row. Current-step files with no decision row are still pending until Advance. Office / Migration / Cancelled do not require a letter.
+- **Test**: `ApplicationWorkspaceProgressLetterCompletenessTests` + `Build_Issued_KeepsMinistryLetterFileNamesOnDoneLegs` / `Build_FirstLegApproved_NextMinistryIsCurrent` / `Build_LastMinistryApproved_MigrationIsCurrent` (27 ApplicationWorkspaceProgress tests passed). Module + Blazor Debug compile to temp succeeded.
+- **Prevent**: Do not hide upload on a completed ministry that has no letter. Do not stash that file as pending-until-Advance. Do not block Advance on a missing letter. Do not paint Progress with a green check when the count is 0.
+- **Cross-skill**: visa2026-application-profile
+
+### 2026-09-03 — Approval deadline showed localization keys
+
+- **Need**: Applications via ministry **Approval deadline** showed `ApplicationProfileInstanceProgress.Sla.Ok` / `.Warning` / `.Overdue` instead of ministry + day N of max.
+- **Fix**: `ApplicationProfileInstanceProgressSlaHelper.FormatStatement` uses catalog keys `ApplicationProgress.Sla.*` (already translated). Missing keys make `VisaUiMessages.Get` return the key itself.
+- **Test**: `FormatStatement_UsesCatalogTemplate_NotRawKey` (Ok / Warning / Overdue). Module.Tests compiled to temp (9 passed). Officer: stop F5, rebuild, Ctrl+F5. Via ministry list — Approval deadline like `Energetika: day 3 of 10`, not a key. Issued rows stay blank.
+- **Prevent**: After renaming ApplicationProgress → ApplicationProfileInstanceProgress, keep existing `ApplicationProgress.Sla.*` message keys (or add catalog entries before switching). Do not assume a C# type rename updates `VisaUiMessageCatalog`.
+- **Cross-skill**: visa2026-application-profile
+
+### 2026-08-28 — Progress Advance errors use red banner and field borders
+
+- Failed Advance on the case Progress tab uses a red error banner (not peach `--warn`) and the same red border on empty required fields (Process number, Result, Date). Duplicate process number also rings the input. Do not restyle all shell `--warn` banners.
+- Prevent: Do not leave Process number unhighlighted when the toast says it is required.
+- Cross-skill: visa2026-application-profile
+
+### 2026-08-28 — Direct Start process does not write Submitted / process number
+
+- Start process is merge/ready only. Direct-to-migration stays at office until Advance to `PROCESS_STARTED` with the officer-typed Migration Service number. Staged vs in-process uses `HasLeftStagedQueue`, not empty `ProcessNumber`.
+- Prevent: Do not allocate `YYYY-NNNN` into `ProcessNumber`. Do not skip the process-number field when Result is Submitted on Migration.
+- Cross-skill: visa2026-application-profile
+
+### 2026-08-27 — Application number and date stay editable after office prep
+
+- Case workspace officers must change instance `FullApplicationNumber` / `ApplicationDate` on in-process cases. Header lock no longer includes numbering or date (`LockedApplicationHeaderTargetItems` is type / approval legs / project only). Terminal workflow still blocks all instance saves.
+- Test: `ApplicationLockedHeaderScalarsDiffer_IgnoresApplicationNumberAndDateChange`.
+- Prevent: Do not put `ApplicationNumber` / `ApplicationDate` back on the office-prep lock. Keep `ProjectContract` / `ApplicationType` locked.
+- Cross-skill: visa2026-application-profile
+
+### 2026-08-18 — Submitted stays on the Office progress bar
+
+- After later Approvals, the bar only showed each ministry’s latest result, so Submitted disappeared (Activity still had it). Office now keeps **Submitted** + that row’s date once `1_REVIEW_STARTED` / `PROCESS_STARTED` exists. No extra timeline node.
+- Test: `Build_SubmittedThenApproved_OfficeKeepsSubmittedOnBar`. Stop F5, rebuild, F5. On **8/-010** Overview — Office preparation shows Submitted and date; Türkmenenergo stays Approved.
+- Prevent: Do not leave Office done with an empty badge after Submit. Do not add a separate Submitted step between Office and the first ministry.
+- Cross-skill: visa2026-application-profile
+
+### 2026-08-18 — Submitted stays in progress History
+
+- Submitted was stored as `1_REVIEW_STARTED` but Overview Activity used lookup NameTm (“Sent for agreement”) and only the last 3–4 rows, so it vanished after later Approvals.
+- Activity / History now use catalog labels (**Submitted**, **Approved**) and list every progress row. Progress tab shows the same log.
+- Test: `Build_Activities_KeepSubmittedAfterLaterApprovals`. Stop F5, rebuild, F5. After Submit then Approve — History still shows Submitted with its date.
+- Prevent: Do not label History from `ApplicationState.NameTm`. Do not `Take(3)` the progress log.
+- Cross-skill: visa2026-application-profile
+
+### 2026-08-18 — Office Result lists Submitted (leave-office)
+
+- Officers could not pick Submitted on Office; it was a hidden default Advance (`1_REVIEW_STARTED`). Option A: Office Result is Submitted (default) then Cancelled. Advance writes the first-ministry (or Migration `PROCESS_STARTED`) row with the officer Date. After Advance, current is that ministry · Submitted; Office is done without a “Completed” badge.
+- Test: `IsResultForStep_Submitted_IsTrueOnOfficeOnly` + `PreferredAdvanceCode_Office_UsesFirstMinistryStarted` + empty-history ResultOptions. Stop F5, rebuild, F5. On **8/-010** Office — Result Submitted, set Date, Advance → first ministry Submitted with that date.
+- Prevent: Do not add a separate Submitted timeline node. Do not put Submitted on a ministry Result. Do not write `IS_BEING_PREPARED`.
+- Cross-skill: visa2026-application-profile
+
+### 2026-08-18 — Office Cancelled officer-verified
+
+- Officer confirmed: after Advance with Result Cancelled on Office preparation, the Office node shows Cancelled (not Office preparation / In process).
+- Cross-skill: visa2026-application-profile
+
+### 2026-08-18 — Office Cancelled stays on Office after Advance
+
+- Result Cancelled on Office preparation wrote `PROCESS_CANCELLED` (History was correct) but the Office node always showed `OfficeLabel` / “In process”. `SlotAnchorForCurrent` has no previous row from implied office, so the cancelled overlay never ran (`BuildOfficeStep` had no latest overlay; chrome skipped office result labels).
+- Office now overlays the cancelled row (label, outcome, date, Revert). Chrome is `Office preparation · Cancelled`. Header Cancelled badge follows `OutcomeKind`.
+- Test: `Build_OfficeCancelled_ShowsCancelledOnOffice`. Stop F5, rebuild, F5. On **8/-010** after revert to office — Result Cancelled → Advance → Office badge Cancelled; ministries stay Pending; Revert still works.
+- Prevent: Do not keep Office `CurrentStateLabel` as the step name when latest is `PROCESS_CANCELLED`. Do not drop office result labels in `FormatChromeCurrentStep`.
+- Cross-skill: visa2026-application-profile
+
+### 2026-08-18 — Cancelled Result stays on the current ministry
+
+- Selecting Cancelled on Tarkusenergo (Submitted) left the badge on Submitted. After Advance, `PROCESS_CANCELLED` was treated as Migration (`SlotKeyFor` / ministry-catalog match) so the wrong node changed.
+- Cancelled is a Result of the current slot (preview + Advance). Timeline uses the previous row to keep Cancelled on that ministry, not Migration.
+- Test: `IsResultForStep_Cancelled_IsTrueOnCurrentSlot` + `Build_FirstLegStartedThenCancelled_KeepsCancelledOnThatMinistry` + `Build_FirstLegApprovedThenCancelled_KeepsCancelledOnNextMinistry`. Stop F5, rebuild, F5. On **8/-006** Tarkusenergo — Result Cancelled updates that badge; Advance Cancelled stays on Tarkusenergo.
+- Prevent: Do not map `PROCESS_CANCELLED` to Migration or always to leg 1. Do not preview the first Result option when Cancelled is selected.
+- Cross-skill: visa2026-application-profile
+
+### 2026-08-17 — Result includes Cancelled last on every current step
+
+- Officers needed **Cancelled** (`PROCESS_CANCELLED`) next to Approved / Disapproved (Unapproved). It was already a legal next state but hidden from Result.
+- Result lists same-slot decisions, then Cancelled last. Default Advance stays Approved (or Submitted on Office / Migration enter). Picking Cancelled writes that row.
+- Test: `PreferredAdvanceCode_Ministry_DefaultsToApprovedNotCancelled` + timeline ResultOptions last code. Stop F5, rebuild, F5. On **B/-008** Energetika Result — Approved, Unapproved, Cancelled.
+- Prevent: Do not default Advance to Cancelled when it is the last Result option. Do not put first-ministry Submitted on Office Result.
+- Cross-skill: visa2026-application-profile
+
+### 2026-08-17 — Letter upload only on the current ministry edit form
+
+- Completed ministries each showed a dashed Upload file box (Issued 8/-005). Officers only need that control on the step they are recording.
+- Upload stays on the current ministry Result form. Done nodes keep **View letter** only.
+- Test: `Build_FirstLegApproved_NextMinistryIsCurrent` — done leg `ShowMinistryLetterUpload` false; current true. Stop F5, rebuild, F5. On **8/-005** Progress — no upload on Approved ministries; View letter still opens the slot.
+- Prevent: Do not set `ShowMinistryLetterUpload` from `decisionRow != null` on done legs.
+- Cross-skill: visa2026-application-profile
+
+### 2026-08-17 — Ministry letter Preview still iframed compressed XFA
+
+- View letter on a filled Application form showed Please wait + Spire evaluation (Chrome PDF viewer). `/XFA` was only inside a Flate stream, so the occupant iframed the bytes.
+- Progress letter PDFs always go through pdf.js now; detection also inflates streams. Scans still canvas-render. Download unchanged.
+- Test: `PdfXfaDocumentTests`. Stop F5, rebuild, F5, Ctrl+F5. **B/-010** Progress → View letter.
+- Prevent: Do not iframe ministry-letter PDFs. Do not Spire-flatten for Chrome.
+- Cross-skill: visa2026-preview-slot | visa2026-document-copies
+
+### 2026-08-17 — Approval letter upload on the ministry Result step
+
+- After Result belonged to the current ministry, upload hid because that node often has no decision row yet (`ShowMinistryLetterUpload` required `IsMinistryDecisionStep` on latest). Officers need to attach the approval/disapproval letter on Energetika (and other ministries) before Advance.
+- Upload shows when the current ministry has a Result (Approved/Disapproved). The file is held until Advance and stored on the new decision row. Completed ministries with a decision row can still upload onto that row (`DecisionProgressId`).
+- Test: `Build_FirstLegApproved_NextMinistryIsCurrent` expects `ShowMinistryLetterUpload`. Stop F5, rebuild, F5. On **8/-010** Energetika — upload a letter, Advance Approved — letter sits on Energetika; View letter still works.
+- Prevent: Do not require a saved decision row before showing upload on a ministry Result step. Do not attach a pending letter to the previous ministry’s latest row.
+- Cross-skill: visa2026-application-profile | visa2026-preview-slot
+
+### 2026-08-17 — Progress Result belongs to the current node
+
+- **Next step** sat on Office / an approved ministry but the values were the following node (Submitted, or the next ministry’s Approved/Disapproved). Officers should set **this** step’s result.
+- **Result** dropdown = same-slot decisions only (Approved / Disapproved / Issued / Rejected). Office has no Result — Advance starts the first ministry as Submitted. After a ministry is Approved, that node is done and the next ministry (or Migration) becomes current. Started/Cancelled are not Result values.
+- Test: `ApplicationWorkspaceProgressAdvancePreviewTests` + `Build_FirstLegApproved_NextMinistryIsCurrent` + `Build_LastMinistryApproved_MigrationIsCurrent`. Stop F5, rebuild, F5. On **8/-010** Office — no Result dropdown; Advance → Türkmenenergo Submitted. On a ministry — Result Approved/Disapproved updates that ministry’s badge.
+- Prevent: Do not label a following ministry’s state as Next step on the current node. Do not keep current on an already-Approved ministry while the dropdown sets the next one.
+- Cross-skill: visa2026-application-profile
+
+### 2026-08-17 — Next step dropdown previews the current ministry badge
+
+- Changing Next step to Disapproved left the Energetika badge and header on Approved (recorded state). For the current slot, the badge, header, and Current state now follow the selected Next step when that choice is a result of the same ministry/migration (not the following step).
+- Test: `ApplicationWorkspaceProgressAdvancePreviewTests`. Stop F5, rebuild, F5. On **8/-010** Progress → Energetika → Next step Disapproved — badge and “current step: Energetika · Disapproved” update before Advance.
+- Prevent: Do not keep CurrentStateLabel on the current node when the officer has picked a same-slot result. Do not retarget the badge when Next step is the following ministry.
+- Cross-skill: visa2026-application-profile
+
+### 2026-08-17 — Revert to here stays hidden until Revert progress
+
+- Revert to here on every completed node made a rare jump look like a daily action. **Revert progress** stays visible (current step + Progress rail). **Revert to here** appears only after a successful Revert, for this case visit. Advance, Back to list, or opening another case hides it again.
+- Verify: stop F5, rebuild, F5. On **8/-006** Progress — only Revert progress at first; after one revert, Revert to here on completed steps; Advance hides them again.
+- Prevent: Do not show Revert to here on first paint. First click of Revert progress must still delete the latest row.
+- Cross-skill: visa2026-application-profile
+
+### 2026-08-17 — Ministry letter Preview paints XFA via pdf.js
+
+- Officers often attach a filled Application form (XFA) as the approval letter. Slot iframe showed Please wait. Same pdf.js path as Document copies Application form Preview (`PdfXfaDocument.ContainsXfa`).
+- Test: `PdfXfaDocumentTests`. Stop F5, rebuild, F5, Ctrl+F5. Progress letter filename → slot shows the form; Download still XFA for Foxit.
+- Prevent: Do not iframe XFA letters. Scanned non-XFA PDFs keep the iframe.
+- Cross-skill: visa2026-preview-slot | visa2026-document-copies
+
+### 2026-08-17 — Workspace Advance records officer-entered step date
+
+- Advance always wrote `DateTime.Today`. Officers need the real ministry/migration date on each new `ApplicationProfileInstanceProgress` row. Progress tab Advance now has a Date field (default today); rail Advance from Overview opens Progress first so the date can be set. Still blocked if the date is before the previous row (`DateCannotBeBeforePrevious`).
+- Verify: stop F5, rebuild, F5. On **8/-009** Progress — set Date to a past day, Advance; timeline shows that date. Date before the previous step is rejected.
+- Prevent: Do not silently overwrite officer Date with today after the picker is set.
+- Cross-skill: visa2026-application-profile
+
+### 2026-08-17 — Workspace Progress can revert backward to office
+
+- Officers needed to undo a mistaken Advance (wrong step or wrong ministry letter). History stays append-only: revert **deletes** later rows, it does not rewrite them. **Revert progress** removes the latest row (repeatable through Issued/Rejected/Cancelled). **Revert to here** on a completed slot (including Office preparation) drops every row after that slot. Empty history is implied office again; People lock follows the new latest row. Nested ListView still allows delete-last only.
+- Test: `ApplicationProgressRevertHelperTests` + timeline CanRevert flags. Stop F5, rebuild, F5, Ctrl+F5. On **8/-009** Progress: Revert from Migration → previous ministry; Revert to here on Office → implied office; Advance still works.
+- Prevent: Do not insert compensating “reverted” rows. Do not iframe/flatten for this. Repeat Revert until office; do not skip-delete older rows except via Revert to here.
+- Cross-skill: visa2026-application-profile
+
+### 2026-08-14 — Approval letters stay visible after the ministry step is done
+
+- Upload still attaches `MinistryLetterFile` to the decision row. Case workspace now lists that filename on completed ministry nodes (Progress + Overview) and opens the preview slot. Previously the name was only copied onto the current step.
+- Prevent: Do not treat letter preview as current-step-only UI.
+- Cross-skill: visa2026-application-profile | visa2026-preview-slot
+
+### 2026-08-14 — Workspace Progress letter preview uses preview slot, not download
+
+- Officer clicks the uploaded ministry letter on the case Progress tab → `#visa-preview-slot` `ProgressLetters` occupant (`OpenPreviewOnly` + `FocusProgressId`). File bytes still come from `ApplicationProfileInstanceProgressMinistryLetterFileAccess` / `ProgressLettersInlinePreview`.
+- Prevent: Do not open `target="_blank"` for workspace letter preview. ListView grid `.app-progress-letter-link` still opens the slot catalog.
+- Cross-skill: visa2026-preview-slot | visa2026-application-profile
+
+### 2026-08-14 — Officer workspace steps come from Application Profile, not 1_REVIEW_STARTED labels
+
+- Workspace Progress nodes and badges use Application Profile Approval legs + Process & SLA display names (Submitted / Approved). `ApplicationState` codes such as `1_REVIEW_STARTED` remain on history rows for storage/import only. Slot matching uses template display order (1..N), not snapshot Sequence vs parsed `N_REVIEW_*`.
+- Prevent: Do not build officer Advance options from ApplicationProgress transition lists when the instance has an Application Profile.
+- Cross-skill: visa2026-application-profile
+
+### 2026-08-14 — Workspace Advance ignored embedded profile legs
+
+- First Advance from implied office failed (often silently) when the instance used `ApplicationProfile.ApprovalLegs` instead of `ApprovalLegProfile`. `TryValidateApprovalLegProfileForProgress` required the lookup BO; ministry SLA required `MinistryReviewSlaSettings` even when the profile had `MinistrySlaDays`. Rail Advance with 2+ next steps was a tab switch only.
+- Validation now accepts embedded legs/snapshots; profile ministry SLA days satisfy the first `1_REVIEW_STARTED` check. New rows in `ProgressHistory` use latest existing history as previous when the current row is unsaved (same-day advance).
+- Prevent: Do not require `ApprovalLegProfile` when the live Application Profile already has approval legs.
+- Cross-skill: visa2026-application-profile
+
+### 2026-08-14 — Workspace Progress tab: implied office notes + real timeline
+
+- Empty `ProgressHistory` is implied office (no `IS_BEING_PREPARED` row). The case workspace Progress tab now lists that office step plus real history rows, not four PNG buckets. Officer notes at office persist on `ApplicationProfileInstance.OfficePreparationNotes` and copy onto the first explicit progress row on advance.
+- Schema: `OfficePreparationNotes` text/nvarchar(max) via host-start `ApplicationProfileSchemaSql` (`ADD COLUMN IF NOT EXISTS`).
+- Prevent: Do not seed a prepare row to make notes work.
+- Cross-skill: visa2026-application-profile
+
 ### 2026-07-25 — Hide Approval/Migration deadline on Direct migration ListView
 
 - **Request**: Hide **Approval deadline** (`ProgressSlaStatement`) and **Migration deadline** (`MigrationSlaStatement`) on `Application_ListView_DirectMigration` only.

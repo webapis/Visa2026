@@ -25,9 +25,9 @@ This section details the data fields of the `InvitationItem` object as defined i
 | `FamilyMember` | `FamilyMember` | A wrapper to get/set the `Person` as a `FamilyMember`. | | Inherited from `PersonLinkedItemBase`. Hidden if `Invitation.Application.IsForFamily` is false. |
 | `InvitationItemName` | `string` | Display name (set on save). | | Default display property; optional (gear). |
 | `IsPersonValid` | `bool` | A validation property to ensure the selected person is part of the parent application. | | `RuleFromBoolProperty` with ID `InvitationItem_PersonIsValid`. |
-| `IsCancelled` | `bool` | This line cancelled. | | Optional (gear); mutually exclusive with `IsChanged` and `IsUsed`; setting on one item applies to all siblings on the same invitation. |
-| `IsChanged` | `bool` | This line superseded by a change workflow. | | Optional (gear); mutually exclusive with `IsCancelled` and `IsUsed`; setting on one item applies to all siblings. |
-| `IsUsed` | `bool` | Linked to a visa / consumed in workflow. | | Optional (gear); mutually exclusive with `IsCancelled` and `IsChanged`; per item only. |
+| `IsCancelled` | `bool` | Derived: linked on a completed Cancellation instance (`PROCESS_ISSUED`). | | `[NotMapped]`; not officer-editable. |
+| `IsChanged` | `bool` | Derived: linked on a completed Change instance. Cancelled wins. | | `[NotMapped]`; not officer-editable. |
+| `IsUsed` | `bool` | Derived: a visa points at this line (`IssuedVisa`). | | `[NotMapped]`; not officer-editable. |
 | `IsActive` | `bool` | Indicates the InvitationItem is active or not. | | |
 
 ---
@@ -51,8 +51,7 @@ This section details the data fields of the `InvitationItem` object as defined i
 
 ## 6. UI & Behavior Notes
 
-- **Optional detail fields**: `IsCancelled`, `IsChanged`, and `IsUsed` are behind the gear toggle; any flag `true` auto-expands on open.
-- **Status flags (single source of truth)**: At most one of `IsCancelled`, `IsChanged`, or `IsUsed` per item. Setting `IsCancelled` or `IsChanged` on one item updates every non-deleted sibling on the same invitation. The `Invitation` header has no status columns.
+- **Derived lifecycle**: `IsCancelled` / `IsChanged` / `IsUsed` are not stored. Cancelled/changed when this line is on a **PROCESS_ISSUED** Cancellation/Change profile instance; used when a visa has `IssuingInvitationItem`. Cancelled wins over changed. The `Invitation` header has no status columns.
 - **Navigation**: This object appears in the navigation menu under the "Invitation" group.
 - **Default Property**: `InvitationItemName` is the default property used for display purposes.
 - **Conditional UI**: The `Employee` and `FamilyMember` properties are conditionally displayed based on the `IsForFamily` property of the parent `Application`.

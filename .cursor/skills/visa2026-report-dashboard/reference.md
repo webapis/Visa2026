@@ -16,7 +16,7 @@
 | `DatabaseUpdate/ReportDashboardDetailViewUpdater.cs` | Hides the property label in the XAF DetailView. |
 | `DatabaseUpdate/ReportDashboardModelUpdater.cs` | Registers the Dashboard DetailView in the XAF model. |
 | `Editors/ReportDashboardEditorAliases.cs` | String constant `Dashboard` for the editor alias. |
-| `SqlViews/` | One `.sql` + `.postgres.sql` **per subreport** (`vw_rd_{category}_{subreport}`); shared base/wrapper allowed for (P)/(V). |
+| `SqlViews/` | One `.postgres.sql` **per subreport** (`vw_rd_{category}_{subreport}`); shared base/wrapper allowed for (P)/(V). PostgreSQL only — the SQL Server `.sql` twins and `SqlViewsUpdater` are removed. Roster-bodied views are placeholders redirected by `ReportDashboardSqlViewResource.Load` to `ReportDashboardPostgresRosterSql`. |
 
 ### Visa2026.Blazor.Server
 

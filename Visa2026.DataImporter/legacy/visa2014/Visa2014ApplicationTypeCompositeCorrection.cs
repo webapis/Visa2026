@@ -40,17 +40,17 @@ internal static class Visa2014ApplicationTypeCompositeCorrection
             ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
             ?? "Host=localhost;Port=5432;Database=visa2026;Username=postgres;Password=Visa2026Local;Persist Security Info=True;EFCoreProvider=Postgres";
         var applicationIdMapPath = GetOptionValue(args, "--application-id-map")
-            ?? source.IdMapPath(dataImporterRoot, "Application");
+            ?? source.IdMapPath(dataImporterRoot, "ApplicationProfileInstance");
 
-        Console.WriteLine("=== VISA2014 Application ApplicationType composite correction");
+        Console.WriteLine("=== VISA2014 ApplicationProfileInstance ApplicationType composite correction");
         Console.WriteLine($"INF Legacy source: {source.Id}");
         Console.WriteLine($"INF Target SQL: {MaskConnectionString(targetConnection)}");
-        Console.WriteLine($"INF Application id-map: {applicationIdMapPath}");
+        Console.WriteLine($"INF ApplicationProfileInstance id-map: {applicationIdMapPath}");
         if (dryRun) Console.WriteLine("INF Mode: dry-run (no writes)");
 
         if (!File.Exists(applicationIdMapPath))
         {
-            Console.Error.WriteLine($"ERR Application id-map not found: {applicationIdMapPath}");
+            Console.Error.WriteLine($"ERR ApplicationProfileInstance id-map not found: {applicationIdMapPath}");
             return Task.FromResult(1);
         }
 
@@ -129,7 +129,7 @@ internal static class Visa2014ApplicationTypeCompositeCorrection
         int alreadyCorrect = 0;
         int skippedTransform = 0;
 
-        using var objectSpace = objectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Bo.Application));
+        using var objectSpace = objectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Bo.ApplicationProfileInstance));
         MigrationImportContext.ApplyImportObjectSpaceHooks(objectSpace);
 
         var typeByName = objectSpace.GetObjectsQuery<Bo.ApplicationType>()
@@ -151,10 +151,10 @@ internal static class Visa2014ApplicationTypeCompositeCorrection
                 continue;
             }
 
-            var application = objectSpace.GetObjectByKey<Bo.Application>(targetId);
+            var application = objectSpace.GetObjectByKey<Bo.ApplicationProfileInstance>(targetId);
             if (application == null)
             {
-                errors.Add($"Legacy {legacyOid:D}: target Application {targetId:D} not found");
+                errors.Add($"Legacy {legacyOid:D}: target ApplicationProfileInstance {targetId:D} not found");
                 continue;
             }
 
@@ -169,7 +169,7 @@ internal static class Visa2014ApplicationTypeCompositeCorrection
             if (verbose)
             {
                 Console.WriteLine(
-                    $"  RETYPE Application {targetId:D} ({application.FullApplicationNumber}): " +
+                    $"  RETYPE ApplicationProfileInstance {targetId:D} ({application.FullApplicationNumber}): " +
                     $"{currentName ?? "(null)"} -> {targetTypeName} (legacy {legacyOid:D})");
             }
 

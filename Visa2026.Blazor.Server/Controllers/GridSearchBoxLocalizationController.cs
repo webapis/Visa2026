@@ -9,7 +9,7 @@ namespace Visa2026.Blazor.Server.Controllers;
 
 /// <summary>
 /// Localizes DevExpress Blazor grid chrome (search placeholder, empty-state text)
-/// not driven by XAF Application Model captions, enables the filter panel when
+/// not driven by XAF ApplicationProfileInstance Model captions, enables the filter panel when
 /// column filters are active, and offers Clear filters in the empty state.
 /// </summary>
 public sealed class GridSearchBoxLocalizationController : ViewController<ListView>

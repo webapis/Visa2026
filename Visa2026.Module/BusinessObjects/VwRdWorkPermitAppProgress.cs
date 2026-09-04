@@ -6,7 +6,7 @@ namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
 /// Report Dashboard WorkPermit Extension / Extension Result from vw_rd_work_permit_app_progress.
-/// One ApplicationItem per row (App_WP_Ext / App_Visa_and_WP_Ext with CurrentWorkPermitItem).
+/// One ApplicationRosterMergeLine per row (App_WP_Ext / App_Visa_and_WP_Ext with CurrentWorkPermitItem).
 /// Chart Status is resolved in C# as Project · ProcessState.
 /// </summary>
 [Browsable(false)]
@@ -14,7 +14,7 @@ public class VwRdWorkPermitAppProgress
 {
     [Key]
     public virtual Guid ID { get; set; }
-    public virtual Guid? ApplicationOid { get; set; }
+    public virtual Guid? ApplicationProfileInstanceOid { get; set; }
     public virtual Guid? PersonOid { get; set; }
     public virtual string PersonName { get; set; }
     public virtual string ProjectName { get; set; }

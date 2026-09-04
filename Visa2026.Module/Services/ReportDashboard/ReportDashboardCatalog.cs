@@ -121,7 +121,7 @@ public static class ReportDashboardCatalog
     public static bool SupportsIncludeCancelledApplicationProcesses(ReportDashboardCategory category) =>
         false;
 
-    // Application (via ministry) sub-report keys
+    // ApplicationProfileInstance (via ministry) sub-report keys
     public const string AppViaMinistryInvitationOnProcessKey = "invitation-on-process";
     public const string AppViaMinistryInvitationOnProcessVKey = "invitation-on-process-by-period-category-type";
     public const string AppViaMinistryVisaExtOnProcessKey = "visa-extension-on-process";
@@ -134,8 +134,8 @@ public static class ReportDashboardCatalog
     public const string AppViaMinistryOtherCompletedKey = "other-completed";
 
     /// <summary>
-    /// Report Dashboard categories that mirror the Application nav split
-    /// (<see cref="ApplicationProgressRouteKind"/>).
+    /// Report Dashboard categories that mirror the ApplicationProfileInstance nav split
+    /// (<see cref="ApplicationProfileInstanceProgressRouteKind"/>).
     /// </summary>
     public static bool IsApplicationCategory(ReportDashboardCategory category) =>
         category is ReportDashboardCategory.ApplicationViaMinistry
@@ -143,28 +143,28 @@ public static class ReportDashboardCatalog
 
     /// <summary>
     /// Route filter matching XAF nav ListViews
-    /// (<see cref="ApplicationProgressRouteNavigation"/>).
+    /// (<see cref="ApplicationProfileInstanceProgressRouteNavigation"/>).
     /// </summary>
-    public static ApplicationProgressRouteKind? ApplicationProgressRouteFor(
+    public static ApplicationProfileInstanceProgressRouteKind? ApplicationProfileInstanceProgressRouteFor(
         ReportDashboardCategory category) =>
         category switch
         {
             ReportDashboardCategory.ApplicationViaMinistry =>
-                ApplicationProgressRouteKind.ViaMinistries,
+                ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
             ReportDashboardCategory.ApplicationDirectMigration =>
-                ApplicationProgressRouteKind.DirectToMigrationService,
+                ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService,
             _ => null
         };
 
     /// <summary>
-    /// Legacy Application Status key (replaced by On Process (A) / Process Complete).
+    /// Legacy ApplicationProfileInstance Status key (replaced by On Process (A) / Process Complete).
     /// </summary>
     public const string ApplicationStatusSubReportKey = "app-status";
 
-    /// <summary>Application (direct migration) — On Process (A); chart = Application Type · StatusListLabel.</summary>
+    /// <summary>ApplicationProfileInstance (direct migration) — On Process (A); chart = ApplicationProfileInstance Type · StatusListLabel.</summary>
     public const string AppDirectOnProcessAKey = "on-process-a";
 
-    /// <summary>Application (direct migration) — Process Complete; chart = Application Type · StatusListLabel (terminal).</summary>
+    /// <summary>ApplicationProfileInstance (direct migration) — Process Complete; chart = ApplicationProfileInstance Type · StatusListLabel (terminal).</summary>
     public const string AppDirectProcessCompleteKey = "process-complete";
 
     public static bool UsesApplicationDirectMigrationRdListView(string? subReport) =>
@@ -175,7 +175,7 @@ public static class ReportDashboardCatalog
 
     /// <summary>
     /// Categories that show a local "Last N months" filter (not a global top-bar control).
-    /// Education / Passport: ApplicationItem usage filtered by Application.ApplicationDate.
+    /// Education / Passport: ApplicationRosterMergeLine usage filtered by Application.ApplicationDate.
     /// </summary>
     public static bool SupportsCategoryDateRange(ReportDashboardCategory category) =>
         category is ReportDashboardCategory.Education
@@ -220,11 +220,11 @@ public static class ReportDashboardCatalog
     /// </summary>
     public static readonly string[] WorkPermitExtensionResultStateCodes =
     [
-        ApplicationProgressStateCodes.ProcessIssued,
-        ApplicationProgressStateCodes.ProcessCancelled,
-        ApplicationProgressStateCodes.ProcessRejected,
-        ApplicationProgressStateCodes.Review1Rejected,
-        ApplicationProgressStateCodes.Review2Rejected,
+        ApplicationProfileInstanceProgressStateCodes.ProcessIssued,
+        ApplicationProfileInstanceProgressStateCodes.ProcessCancelled,
+        ApplicationProfileInstanceProgressStateCodes.ProcessRejected,
+        ApplicationProfileInstanceProgressStateCodes.Review1Rejected,
+        ApplicationProfileInstanceProgressStateCodes.Review2Rejected,
     ];
 
     // ---- Sub-reports per category ----------------------------------------
@@ -425,7 +425,7 @@ public static class ReportDashboardCatalog
     private static IReadOnlyList<ReportDashboardSubReport> RawSubReports(ReportDashboardCategory category) => category switch
     {
         ReportDashboardCategory.ApplicationViaMinistry => [
-            // Short labels (card is already "Application (via ministry)") — match Invitation/Visa chip length
+            // Short labels (card is already "ApplicationProfileInstance (via ministry)") — match Invitation/Visa chip length
             new() { Key = AppViaMinistryInvitationOnProcessKey, Label = "Invitation on Process (P)" },
             new() { Key = AppViaMinistryInvitationOnProcessVKey, Label = "Invitation on Process (V)" },
             new() { Key = AppViaMinistryVisaExtOnProcessKey, Label = "Visa Extension on Process (P)" },
@@ -627,7 +627,7 @@ public static class ReportDashboardCatalog
     public static bool UsesApplicationViaMinistryInvitationOnProcessListView(string? subReport) =>
         string.Equals(subReport, AppViaMinistryInvitationOnProcessKey, StringComparison.Ordinal);
 
-    /// <summary>Any Application (via ministry) dedicated vw_rd_* ListView / loader.</summary>
+    /// <summary>Any ApplicationProfileInstance (via ministry) dedicated vw_rd_* ListView / loader.</summary>
     public static bool UsesApplicationViaMinistryRdListView(string? subReport) =>
         subReport is AppViaMinistryInvitationOnProcessKey
             or AppViaMinistryInvitationOnProcessVKey
@@ -776,9 +776,9 @@ public static class ReportDashboardCatalog
     public static string ListViewId(ReportDashboardCategory category) => category switch
     {
         ReportDashboardCategory.ApplicationViaMinistry =>
-            ApplicationProgressRouteNavigation.ListViewViaMinistries,
+            ApplicationProfileInstanceProgressRouteNavigation.ListViewViaMinistries,
         ReportDashboardCategory.ApplicationDirectMigration =>
-            ApplicationProgressRouteNavigation.ListViewDirectMigration,
+            ApplicationProfileInstanceProgressRouteNavigation.ListViewDirectMigration,
         ReportDashboardCategory.VisaExtension => "VisaExtensionStatus_ListView",
         ReportDashboardCategory.Invitation    => "InvitationItem_ListView",
         ReportDashboardCategory.Registration  => "ApplicationItem_ListView",
@@ -799,12 +799,12 @@ public static class ReportDashboardCatalog
     public static Type ListViewType(ReportDashboardCategory category) => category switch
     {
         ReportDashboardCategory.ApplicationViaMinistry
-            or ReportDashboardCategory.ApplicationDirectMigration => typeof(Application),
+            or ReportDashboardCategory.ApplicationDirectMigration => typeof(ApplicationProfileInstance),
         ReportDashboardCategory.VisaExtension    => typeof(VisaExtensionStatus),
         ReportDashboardCategory.Invitation       => typeof(InvitationItem),
-        ReportDashboardCategory.Registration     => typeof(ApplicationItem),
+        ReportDashboardCategory.Registration     => typeof(ApplicationRosterMergeLine),
         ReportDashboardCategory.WorkPermit       => typeof(WorkPermitItem),
-        ReportDashboardCategory.Travel           => typeof(ApplicationItem),
+        ReportDashboardCategory.Travel           => typeof(ApplicationRosterMergeLine),
         ReportDashboardCategory.AddressOfResidence => typeof(AddressOfResidence),
         ReportDashboardCategory.BorderZone       => typeof(BorderZoneItem),
         ReportDashboardCategory.Passport         => typeof(Passport),
@@ -851,7 +851,7 @@ public static class ReportDashboardCatalog
             (ReportDashboardCategory.ApplicationDirectMigration, AppDirectOnProcessAKey)
                 or (ReportDashboardCategory.ApplicationDirectMigration, AppDirectProcessCompleteKey)
                 or (ReportDashboardCategory.ApplicationDirectMigration, _) =>
-                ["Name", "Project", "App Type", "App #", "App Date", "Application Type · Process State"],
+                ["Name", "Project", "App Type", "App #", "App Date", "ApplicationProfileInstance Type · Process State"],
             // Categorical: last column = grouping dimension; ColumnA = passport # or identifier
             (ReportDashboardCategory.Passport, "by-type")         => ["Name", "Project", "Passport #",  "Expiry", "Type"],
             (ReportDashboardCategory.Passport, "by-citizenship")   => ["Name", "Project", "Passport #",  "Expiry", "Citizenship"],
@@ -864,7 +864,7 @@ public static class ReportDashboardCatalog
             (ReportDashboardCategory.Registration, "to-be-checked-in") => ["Name", "Project", "Visa #", "Entry", "Days Since Entry"],
             (ReportDashboardCategory.Registration, "to-be-checked-out") => ["Name", "Project", "Visa #", "Expiry", "Days Remaining"],
             (ReportDashboardCategory.Registration, "on-process") =>
-                ["Name", "Project", "App #", "App Date", "Application Type · Process State"],
+                ["Name", "Project", "App #", "App Date", "ApplicationProfileInstance Type · Process State"],
             (ReportDashboardCategory.Registration, _) => ["Name", "Project", "Visa #", "Expiry", "Process State"],
             (ReportDashboardCategory.BorderZone, "by-zone")        => ["Name", "Project", "BZ Number",   "Valid Until", "Zone"],
             (ReportDashboardCategory.VisaExtension, "active-by-project") =>
@@ -1051,12 +1051,12 @@ public static class ReportDashboardCatalog
                         : PersonRoleCriteria(personType);
         }
 
-        // Domain Application ListViews only (not dedicated vw_rd_* Application rows).
+        // Domain ApplicationProfileInstance ListViews only (not dedicated vw_rd_* ApplicationProfileInstance rows).
         if (IsApplicationCategory(category) && !usesRdAppRow)
         {
             var routeCriteria = category == ReportDashboardCategory.ApplicationViaMinistry
-                ? ApplicationProgressRouteNavigation.CriteriaViaMinistries
-                : ApplicationProgressRouteNavigation.CriteriaDirectMigration;
+                ? ApplicationProfileInstanceProgressRouteNavigation.CriteriaViaMinistries
+                : ApplicationProfileInstanceProgressRouteNavigation.CriteriaDirectMigration;
             roleCriteria = $"({roleCriteria}) And ({routeCriteria})";
         }
 
@@ -1075,11 +1075,11 @@ public static class ReportDashboardCatalog
                     ReportDashboardCategory.VisaExtension =>
                         $"[Application.ProjectContract.Name] = '{Escape(projectKey)}' Or [Application.ProjectContract.NameTm] = '{Escape(projectKey)}'",
                     ReportDashboardCategory.Invitation =>
-                        $"[Invitation.Application.ProjectContract.Name] = '{Escape(projectKey)}' Or [Invitation.Application.ProjectContract.NameTm] = '{Escape(projectKey)}'",
+                        $"[Invitation.ApplicationProfileInstance.ProjectContract.Name] = '{Escape(projectKey)}' Or [Invitation.ApplicationProfileInstance.ProjectContract.NameTm] = '{Escape(projectKey)}'",
                     ReportDashboardCategory.WorkPermit =>
-                        $"[WorkPermit.Application.ProjectContract.Name] = '{Escape(projectKey)}' Or [WorkPermit.Application.ProjectContract.NameTm] = '{Escape(projectKey)}'",
+                        $"[WorkPermit.ApplicationProfileInstance.ProjectContract.Name] = '{Escape(projectKey)}' Or [WorkPermit.ApplicationProfileInstance.ProjectContract.NameTm] = '{Escape(projectKey)}'",
                     ReportDashboardCategory.BorderZone =>
-                        $"[BorderZone.Application.ProjectContract.Name] = '{Escape(projectKey)}' Or [BorderZone.Application.ProjectContract.NameTm] = '{Escape(projectKey)}'",
+                        $"[BorderZone.ApplicationProfileInstance.ProjectContract.Name] = '{Escape(projectKey)}' Or [BorderZone.ApplicationProfileInstance.ProjectContract.NameTm] = '{Escape(projectKey)}'",
                     ReportDashboardCategory.Travel =>
                         $"[Application.ProjectContract.Name] = '{Escape(projectKey)}' Or [Application.ProjectContract.NameTm] = '{Escape(projectKey)}'",
                     ReportDashboardCategory.Registration
@@ -1137,7 +1137,7 @@ public static class ReportDashboardCatalog
             else if (UsesApplicationDirectMigrationRdListView(subReport)
                 && category == ReportDashboardCategory.ApplicationDirectMigration)
             {
-                // Chart Status = Application Type · StatusListLabel; view StatusLabel is process alone.
+                // Chart Status = ApplicationProfileInstance Type · StatusListLabel; view StatusLabel is process alone.
                 var parts = statusLabel.Split(" · ", StringSplitOptions.None);
                 if (parts.Length >= 2)
                 {
@@ -1245,9 +1245,9 @@ public static class ReportDashboardCatalog
     /// </summary>
     public static string BuildVisaAppProgressPopulationCriteria(string? subReport)
     {
-        var issued = ApplicationProgressStateCodes.ProcessIssued;
-        var cancelled = ApplicationProgressStateCodes.ProcessCancelled;
-        var rejected = ApplicationProgressStateCodes.ProcessRejected;
+        var issued = ApplicationProfileInstanceProgressStateCodes.ProcessIssued;
+        var cancelled = ApplicationProfileInstanceProgressStateCodes.ProcessCancelled;
+        var rejected = ApplicationProfileInstanceProgressStateCodes.ProcessRejected;
         var terminal =
             $"([ProgressStateCode] In ('{issued}', '{cancelled}', '{rejected}') Or EndsWith([ProgressStateCode], '_REVIEW_REJECTED'))";
         if (subReport is "extension-result" or "extension-result-by-period-category-type")

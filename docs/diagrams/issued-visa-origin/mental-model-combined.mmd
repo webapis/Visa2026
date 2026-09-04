@@ -1,0 +1,24 @@
+flowchart TB
+    subgraph extension ["Extension profile"]
+        API1["Application Profile Instance"]
+        V1["Visa"]
+        API1 -->|"New issued visa"| V1
+        V1 -->|"IssuingApplicationProfileInstance"| API1
+    end
+
+    subgraph invitation ["Invitation profile"]
+        API2["Application Profile Instance"]
+        INV["Invitation"]
+        II["InvitationItem lines (issued)"]
+        V2["Visa"]
+
+        API2 -->|"New invitation"| INV
+        INV -->|"ApplicationProfileInstance"| API2
+        INV --> II
+
+        API2 -->|"New issued visa"| V2
+        V2 -->|"IssuingApplicationProfileInstance"| API2
+        V2 -->|"IssuingInvitationItem"| II
+
+        II -->|"Issue visa (shortcut)"| V2
+    end

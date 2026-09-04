@@ -1,0 +1,79 @@
+@using Visa2026.Module.BusinessObjects
+
+<div class="org-catalogs">
+    @if (IsLoading)
+    {
+        <div class="org-catalogs__loading" role="status">Loading Organization catalogs…</div>
+    }
+    else
+    {
+        <header class="org-catalogs__head">
+            <h1 class="org-catalogs__title">Organization catalogs</h1>
+            <p class="org-catalogs__sub">
+                Shared Company, Authorized Signatory, and Authorized Representative records.
+                One Default per list is used when creating the next Application Profile Instance.
+            </p>
+        </header>
+
+        <div class="org-catalogs__callout" role="note">
+            <ul>
+                <li>Not singletons. Application Profile Instances pick a row at create.</li>
+                <li>Editing a row updates every case that selected it.</li>
+                <li>Application numbering stays a singleton.</li>
+            </ul>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(StatusMessage))
+        {
+            <div class="org-catalogs__status @(IsStatusError ? "is-error" : "is-ok")" role="status">@StatusMessage</div>
+        }
+
+        <div class="org-catalogs__cards">
+            <OrganizationCatalogsCard Title="Company"
+                                      Kind="@OrganizationCatalogHelper.Company"
+                                      ShowCode="true"
+                                      Rows="@CompanyRows"
+                                      NewRequested="@NewRequested"
+                                      EditRequested="@EditRequested"
+                                      MakeDefaultRequested="@MakeDefaultRequested" />
+            <OrganizationCatalogsCard Title="Authorized Signatory"
+                                      Kind="@OrganizationCatalogHelper.Signatory"
+                                      Rows="@SignatoryRows"
+                                      NewRequested="@NewRequested"
+                                      EditRequested="@EditRequested"
+                                      MakeDefaultRequested="@MakeDefaultRequested" />
+            <OrganizationCatalogsCard Title="Authorized Representative"
+                                      Kind="@OrganizationCatalogHelper.Representative"
+                                      Rows="@RepresentativeRows"
+                                      NewRequested="@NewRequested"
+                                      EditRequested="@EditRequested"
+                                      MakeDefaultRequested="@MakeDefaultRequested" />
+        </div>
+
+        <p class="org-catalogs__foot">Application numbering remains one record.</p>
+    }
+</div>
+
+@code {
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public IReadOnlyList<OrganizationCatalogRow> CompanyRows { get; set; } = Array.Empty<OrganizationCatalogRow>();
+    [Parameter] public IReadOnlyList<OrganizationCatalogRow> SignatoryRows { get; set; } = Array.Empty<OrganizationCatalogRow>();
+    [Parameter] public IReadOnlyList<OrganizationCatalogRow> RepresentativeRows { get; set; } = Array.Empty<OrganizationCatalogRow>();
+    [Parameter] public string? StatusMessage { get; set; }
+    [Parameter] public bool IsStatusError { get; set; }
+    [Parameter] public EventCallback InitialLoadRequested { get; set; }
+    [Parameter] public EventCallback<string> NewRequested { get; set; }
+    [Parameter] public EventCallback<(string Kind, Guid Id)> EditRequested { get; set; }
+    [Parameter] public EventCallback<(string Kind, Guid Id)> MakeDefaultRequested { get; set; }
+
+    private bool _initialLoadStarted;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _initialLoadStarted || !InitialLoadRequested.HasDelegate)
+            return;
+
+        _initialLoadStarted = true;
+        await InitialLoadRequested.InvokeAsync();
+    }
+}

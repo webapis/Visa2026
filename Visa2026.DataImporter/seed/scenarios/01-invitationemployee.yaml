@@ -1,6 +1,6 @@
 order: 1
 name: InvitationEmployee
-description: Application for invitation of an expat employee
+description: ApplicationProfileInstance for invitation of an expat employee
 dependsOn: Shared
 sync: true
 anchor:
@@ -74,10 +74,10 @@ data:
     Start Date: 2026-04-02
     Expiration Date: 2027-04-02
   Applications:
-  - Application Number: 001
+  - ApplicationProfileInstance Number: 001
     Date: 2026-04-02
     Project Contract: GT-15
-    Application Type: App_Inv
+    ApplicationProfileInstance Type: App_Inv
     Urgency: Adaty tertipde !
     Visa Period: 1 (bir) aý
     Visa Type: BS1-İşerwürlik

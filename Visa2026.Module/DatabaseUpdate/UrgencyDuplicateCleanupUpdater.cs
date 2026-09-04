@@ -61,7 +61,7 @@ public sealed class UrgencyDuplicateCleanupUpdater : ModuleUpdater
 
     private int RepointApplications(Urgency from, Urgency to)
     {
-        var applications = ObjectSpace.GetObjectsQuery<Application>()
+        var applications = ObjectSpace.GetObjectsQuery<ApplicationProfileInstance>()
             .Where(a => a.Urgency != null && a.Urgency.ID == from.ID)
             .ToList();
 

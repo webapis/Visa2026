@@ -51,11 +51,29 @@ else if (_state.Mode == VisaPreviewSlotMode.PlaceholderManual)
                                 Request="_state.PlaceholderManual"
                                 CloseRequested="CloseFromPanelAsync" />
 }
+else if (_state.Mode == VisaPreviewSlotMode.IssueIssuedHeader && _state.IssueIssuedHeader != null)
+{
+    <IssueIssuedHeaderSlotPanel @key="@($"{_state.OccupantKey}|{_state.Version}")"
+                                Request="_state.IssueIssuedHeader"
+                                CloseRequested="CloseFromPanelAsync" />
+}
+else if (_state.Mode == VisaPreviewSlotMode.IssueIssuedVisa && _state.IssueIssuedVisa != null)
+{
+    <IssueIssuedVisaSlotPanel @key="@($"{_state.OccupantKey}|{_state.Version}")"
+                              Request="_state.IssueIssuedVisa"
+                              CloseRequested="CloseFromPanelAsync" />
+}
+else if (_state.Mode == VisaPreviewSlotMode.ApprovalLegCatalog)
+{
+    <ApprovalLegProfileSlotPanel @key="@($"{_state.OccupantKey}|{_state.Version}")"
+                                 Request="_state.ApprovalLegCatalog"
+                                 CloseRequested="CloseFromPanelAsync" />
+}
 
 @code {
     [Inject] private IVisaPreviewSlotService SlotService { get; set; } = null!;
     [Inject] private IJSRuntime JS { get; set; } = null!;
-    [Inject] private ApplicationProgressMinistryLetterFileAccess FileAccess { get; set; } = null!;
+    [Inject] private ApplicationProfileInstanceProgressMinistryLetterFileAccess FileAccess { get; set; } = null!;
     [Inject] private PersonDossierNavigationHelper DossierNavigation { get; set; } = null!;
 
     private VisaPreviewSlotState _state = new();
@@ -92,11 +110,7 @@ else if (_state.Mode == VisaPreviewSlotMode.PlaceholderManual)
     private void OnSlotStateChanged()
     {
         _state = SlotService.State;
-        _ = InvokeAsync(async () =>
-        {
-            await ApplyStateAsync();
-            StateHasChanged();
-        });
+        _ = InvokeAsync(StateHasChanged);
     }
 
     private async Task ApplyStateAsync()
@@ -111,9 +125,11 @@ else if (_state.Mode == VisaPreviewSlotMode.PlaceholderManual)
         if (_state.Mode == VisaPreviewSlotMode.File
             && !string.IsNullOrWhiteSpace(_state.FileSourceType)
             && _state.FileObjectId != Guid.Empty
-            && _state.Version != _lastFileOpenVersion
-            && _fileDrawer != null)
+            && _state.Version != _lastFileOpenVersion)
         {
+            if (_fileDrawer == null)
+                return;
+
             _lastFileOpenVersion = _state.Version;
             await _fileDrawer.OpenFilePreviewAsync(_state.FileSourceType, _state.FileObjectId);
         }
@@ -124,12 +140,12 @@ else if (_state.Mode == VisaPreviewSlotMode.PlaceholderManual)
         OpenFileFromJsAsync(sourceType, objectIdText);
 
     [JSInvokable]
-    public Task OpenFileFromJsAsync(string sourceType, string objectIdText)
+    public Task OpenFileFromJsAsync(string sourceType, string objectIdText, string? ownerViewId = null)
     {
         if (!Guid.TryParse(objectIdText, out var objectId) || objectId == Guid.Empty)
             return Task.CompletedTask;
 
-        return SlotService.OpenFileAsync(sourceType, objectId);
+        return SlotService.OpenFileAsync(sourceType, objectId, ownerViewId);
     }
 
     [JSInvokable]
@@ -139,7 +155,7 @@ else if (_state.Mode == VisaPreviewSlotMode.PlaceholderManual)
             return Task.CompletedTask;
 
         if (!Enum.TryParse<WordReportPackageScope>(scopeText, ignoreCase: true, out var scope))
-            scope = WordReportPackageScope.Application;
+            scope = WordReportPackageScope.ApplicationProfileInstance;
 
         IReadOnlyList<Guid> itemIds = Array.Empty<Guid>();
         if (!string.IsNullOrWhiteSpace(itemIdsJson))
@@ -153,7 +169,7 @@ else if (_state.Mode == VisaPreviewSlotMode.PlaceholderManual)
 
         return SlotService.OpenResminamalarAsync(new ResminamalarSlotRequest
         {
-            ApplicationId = applicationId,
+            ApplicationProfileInstanceId = applicationId,
             Scope = scope,
             ApplicationItemIds = itemIds,
         });
@@ -162,8 +178,8 @@ else if (_state.Mode == VisaPreviewSlotMode.PlaceholderManual)
     [JSInvokable]
     public Task OpenProgressLettersFromJsAsync(string applicationIdText, string focusProgressIdText)
     {
-        var applicationId = Guid.TryParse(applicationIdText, out var parsedApplicationId)
-            ? parsedApplicationId
+        var applicationId = Guid.TryParse(applicationIdText, out var parsedApplicationProfileInstanceId)
+            ? parsedApplicationProfileInstanceId
             : Guid.Empty;
         Guid? focusProgressId = Guid.TryParse(focusProgressIdText, out var parsedFocusId) && parsedFocusId != Guid.Empty
             ? parsedFocusId
@@ -171,9 +187,9 @@ else if (_state.Mode == VisaPreviewSlotMode.PlaceholderManual)
 
         if (applicationId == Guid.Empty
             && focusProgressId is Guid progressId
-            && FileAccess.TryGetApplicationIdForProgress(progressId, out var resolvedApplicationId))
+            && FileAccess.TryGetApplicationProfileInstanceIdForProgress(progressId, out var resolvedApplicationProfileInstanceId))
         {
-            applicationId = resolvedApplicationId;
+            applicationId = resolvedApplicationProfileInstanceId;
         }
 
         if (applicationId == Guid.Empty)
@@ -181,7 +197,7 @@ else if (_state.Mode == VisaPreviewSlotMode.PlaceholderManual)
 
         return SlotService.OpenProgressLettersAsync(new ProgressLettersSlotRequest
         {
-            ApplicationId = applicationId,
+            ApplicationProfileInstanceId = applicationId,
             FocusProgressId = focusProgressId,
         });
     }
@@ -245,7 +261,76 @@ else if (_state.Mode == VisaPreviewSlotMode.PlaceholderManual)
     }
 
     [JSInvokable]
+    public Task OpenHeaderDocumentCopiesPreviewFromJsAsync(string familyText, string parentIdText, string? ownerViewId = null)
+    {
+        if (!Enum.TryParse<HeaderDocumentCopiesFamily>(familyText, ignoreCase: true, out var family))
+            return Task.CompletedTask;
+
+        if (!Guid.TryParse(parentIdText, out var parentId) || parentId == Guid.Empty)
+            return Task.CompletedTask;
+
+        return SlotService.OpenHeaderDocumentCopiesAsync(new HeaderDocumentCopiesSlotRequest
+        {
+            Family = family,
+            ParentId = parentId,
+            OpenPreviewOnly = true,
+        }, ownerViewId);
+    }
+
+    [JSInvokable]
     public void MarkHeaderDocumentCopiesLinkClickPending() => HeaderDocumentCopiesLinkClickGate.MarkPending();
+
+    [JSInvokable]
+    public Task OpenIssueIssuedHeaderFromJsAsync(
+        string applicationIdText,
+        string kindText,
+        string catalogKey,
+        string? ownerViewId = null,
+        string? existingHeaderIdText = null)
+    {
+        if (!Guid.TryParse(applicationIdText, out var applicationId) || applicationId == Guid.Empty)
+            return Task.CompletedTask;
+
+        if (!Enum.TryParse<IssueIssuedHeaderKind>(kindText, ignoreCase: true, out var kind))
+        {
+            if (!IssueIssuedHeaderComposeService.TryResolveKind(catalogKey, out kind))
+                return Task.CompletedTask;
+        }
+
+        Guid? existingHeaderId = Guid.TryParse(existingHeaderIdText, out var existing) && existing != Guid.Empty
+            ? existing
+            : null;
+
+        return SlotService.OpenIssueIssuedHeaderAsync(new IssueIssuedHeaderSlotRequest
+        {
+            ApplicationProfileInstanceId = applicationId,
+            Kind = kind,
+            CatalogKey = string.IsNullOrWhiteSpace(catalogKey)
+                ? IssueIssuedHeaderComposeService.CatalogKeyFor(kind)
+                : catalogKey.Trim(),
+            ExistingHeaderId = existingHeaderId,
+        }, ownerViewId);
+    }
+
+    [JSInvokable]
+    public Task OpenIssueIssuedVisaFromJsAsync(
+        string applicationIdText,
+        string? ownerViewId = null,
+        string? existingVisaIdText = null)
+    {
+        if (!Guid.TryParse(applicationIdText, out var applicationId) || applicationId == Guid.Empty)
+            return Task.CompletedTask;
+
+        Guid? existingVisaId = Guid.TryParse(existingVisaIdText, out var visaId) && visaId != Guid.Empty
+            ? visaId
+            : null;
+
+        return SlotService.OpenIssueIssuedVisaAsync(new IssueIssuedVisaSlotRequest
+        {
+            ApplicationProfileInstanceId = applicationId,
+            ExistingVisaId = existingVisaId,
+        }, ownerViewId);
+    }
 
     [JSInvokable]
     public Task CloseFromJsAsync() => SlotService.CloseAsync();

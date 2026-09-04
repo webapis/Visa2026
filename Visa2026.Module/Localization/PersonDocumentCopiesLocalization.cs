@@ -27,6 +27,9 @@ public static class PersonDocumentCopiesLocalization
     public static string FormatInvitationRecord(string? number) =>
         FormatRecord("PersonDocumentCopies.Record.Invitation", number);
 
+    public static string FormatBorderZoneRecord(string? number) =>
+        FormatRecord("PersonDocumentCopies.Record.BorderZone", number);
+
     public static string FormatRejectionRecord(string? caption) =>
         FormatRecord("PersonDocumentCopies.Record.Rejection", caption);
 

@@ -6,6 +6,8 @@ public interface IUserReportPlaceholderCatalogService
 {
     IReadOnlyList<UserReportPlaceholderCatalogEntry> GetEntries(UserReportPlaceholderManualQuery? query = null);
 
+    IReadOnlyList<UserReportPlaceholderCatalogGroup> GetGroupedEntries(UserReportPlaceholderManualQuery? query = null);
+
     string ResolveCanonicalPropertyPath(string propertyPath);
 }
 
@@ -36,6 +38,9 @@ public sealed class UserReportPlaceholderCatalogService : IUserReportPlaceholder
                 || e.Scope == scope);
         }
 
+        if (query.RelatedBo is UserReportPlaceholderRelatedBo relatedBo)
+            filtered = filtered.Where(e => e.RelatedBo == relatedBo);
+
         if (!string.IsNullOrWhiteSpace(query.Search))
         {
             var term = query.Search.Trim();
@@ -45,14 +50,22 @@ public sealed class UserReportPlaceholderCatalogService : IUserReportPlaceholder
                 || e.LabelEn.Contains(term, StringComparison.OrdinalIgnoreCase)
                 || e.LabelTk.Contains(term, StringComparison.OrdinalIgnoreCase)
                 || e.LabelRu.Contains(term, StringComparison.OrdinalIgnoreCase)
-                || e.LabelTr.Contains(term, StringComparison.OrdinalIgnoreCase));
+                || e.LabelTr.Contains(term, StringComparison.OrdinalIgnoreCase)
+                || e.RelatedBo.ToString().Contains(term, StringComparison.OrdinalIgnoreCase)
+                || UserReportPlaceholderRelatedBoCatalog.DisplayNameEn(e.RelatedBo)
+                    .Contains(term, StringComparison.OrdinalIgnoreCase));
         }
 
         return filtered
-            .OrderBy(e => e.Scope)
+            .OrderBy(e => UserReportPlaceholderRelatedBoCatalog.SortOrder(e.RelatedBo))
+            .ThenBy(e => e.Scope)
             .ThenBy(e => e.ShortCode, StringComparer.OrdinalIgnoreCase)
             .ToList();
     }
+
+    public IReadOnlyList<UserReportPlaceholderCatalogGroup> GetGroupedEntries(
+        UserReportPlaceholderManualQuery? query = null) =>
+        UserReportPlaceholderRelatedBoCatalog.Group(GetEntries(query));
 
     public string ResolveCanonicalPropertyPath(string propertyPath) =>
         UserReportPlaceholderAliasRegistry.ResolveCanonicalPropertyPath(propertyPath);
@@ -79,10 +92,36 @@ public sealed class UserReportPlaceholderCatalogService : IUserReportPlaceholder
                 LabelRu = GetLabel(dto.Labels, "ru-RU"),
                 LabelTr = GetLabel(dto.Labels, "tr-TR"),
                 IsImage = dto.IsImage,
+                Pack = ParsePack(dto.PackKey),
+                RelatedBo = ParseRelatedBo(dto.RelatedBo),
             });
         }
 
         return list;
+    }
+
+    /// <summary>
+    /// An unrecognised or missing <c>packKey</c> stays <see cref="UserReportPlaceholderPack.Unknown"/> so a typo
+    /// excludes the token from profile-scoped sets rather than leaking it into every profile.
+    /// </summary>
+    private static UserReportPlaceholderPack ParsePack(string? packKey)
+    {
+        if (string.IsNullOrWhiteSpace(packKey))
+            return UserReportPlaceholderPack.Unknown;
+
+        return Enum.TryParse<UserReportPlaceholderPack>(packKey.Trim(), ignoreCase: true, out var parsed)
+            ? parsed
+            : UserReportPlaceholderPack.Unknown;
+    }
+
+    private static UserReportPlaceholderRelatedBo ParseRelatedBo(string? relatedBo)
+    {
+        if (string.IsNullOrWhiteSpace(relatedBo))
+            return UserReportPlaceholderRelatedBo.Unknown;
+
+        return Enum.TryParse<UserReportPlaceholderRelatedBo>(relatedBo.Trim(), ignoreCase: true, out var parsed)
+            ? parsed
+            : UserReportPlaceholderRelatedBo.Unknown;
     }
 
     private static UserReportPlaceholderScope ParseScope(IReadOnlyList<string>? scopes)
@@ -102,16 +141,32 @@ public sealed class UserReportPlaceholderCatalogService : IUserReportPlaceholder
     private static IReadOnlyList<UserReportBoType> ParseRootBoTypes(IReadOnlyList<string>? rootBoTypes)
     {
         if (rootBoTypes == null || rootBoTypes.Count == 0)
-            return [UserReportBoType.Application, UserReportBoType.ApplicationItem];
+            return [UserReportBoType.ApplicationProfileInstance, UserReportBoType.ApplicationItem];
 
         var list = new List<UserReportBoType>();
         foreach (var name in rootBoTypes)
         {
-            if (Enum.TryParse<UserReportBoType>(name, ignoreCase: true, out var parsed))
+            if (string.IsNullOrWhiteSpace(name))
+                continue;
+
+            // Catalog JSON historically used "Application" for the case/header root.
+            if (string.Equals(name.Trim(), "Application", StringComparison.OrdinalIgnoreCase))
+            {
+                if (!list.Contains(UserReportBoType.ApplicationProfileInstance))
+                    list.Add(UserReportBoType.ApplicationProfileInstance);
+                continue;
+            }
+
+            if (Enum.TryParse(name.Trim(), ignoreCase: true, out UserReportBoType parsed)
+                && !list.Contains(parsed))
+            {
                 list.Add(parsed);
+            }
         }
 
-        return list.Count > 0 ? list : [UserReportBoType.Application, UserReportBoType.ApplicationItem];
+        return list.Count > 0
+            ? list
+            : [UserReportBoType.ApplicationProfileInstance, UserReportBoType.ApplicationItem];
     }
 
     private static string GetLabel(IReadOnlyDictionary<string, string>? labels, string key)

@@ -60,7 +60,7 @@ A dictionary-based data transfer pattern (`Dictionary<string, object>`) was chos
 │  UI Layer (DevExpress XAF)      │
 │                                 │
 │  ApplicationItemPdfController   │  ← Single item PDF (DetailView or ListView)
-│  ApplicationPdfController       │  ← All items merged PDF (Application DetailView)
+│  ApplicationPdfController       │  ← All items merged PDF (ApplicationProfileInstance DetailView)
 └────────────┬────────────────────┘
              │ calls
              ▼
@@ -189,7 +189,7 @@ After filling, `form.IsFlatten = true` is set before `SaveToStream`. This conver
 
 | XFA Key | Form Label | Type | C# Source | Notes |
 |---------|-----------|------|-----------|-------|
-| `topmostSubform[0].Page2[0]._25[0]` | 28. Visa category | choiceList | `Application.VisaType` / `CurrentVisa.VisaType` | Application level serves as default. |
+| `topmostSubform[0].Page2[0]._25[0]` | 28. Visa category | choiceList | `Application.VisaType` / `CurrentVisa.VisaType` | ApplicationProfileInstance level serves as default. |
 | `topmostSubform[0].Page2[0]._27[0]` | Duration of stay | textEdit | `Application.VisaPeriod.PdfForm_Count` | |
 | `topmostSubform[0].Page2[0]._271[0]`| Duration unit | choiceList | `Application.VisaPeriod.PdfForm__Code` | Raw: 'GUN', 'AY', 'YYL' |
 | `topmostSubform[0].Page2[0]._33[0]` | Region of stay | choiceList | `CurrentAddressOfResidence.Region.PdfForm_Code` | |
@@ -202,7 +202,7 @@ After filling, `form.IsFlatten = true` is set before `SaveToStream`. This conver
 
 Dynamic PDF field values come from **`PdfFormMapping`** rows loaded from the database. `PdfMappingHelper.MapApplicationData` builds the `Dictionary<string, object>` used by `IPdfFormFillerService`.
 
-### `PdfMappingSourceGate` (ApplicationItem / Application visibility)
+### `PdfMappingSourceGate` (ApplicationItem / ApplicationProfileInstance visibility)
 
 For **`Property`** and **`Expression`** mapping modes only, each rule is applied **only if** `PdfMappingSourceGate.IsAllowed` passes. That gate aligns PDF generation with **what the UI exposes** for the current application:
 

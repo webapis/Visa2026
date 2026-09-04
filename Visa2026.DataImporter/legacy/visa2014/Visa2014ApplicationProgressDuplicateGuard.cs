@@ -3,31 +3,31 @@ using Microsoft.Data.SqlClient;
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
 /// <summary>
-/// Prevents sync from inserting a second <c>ApplicationProgress</c> for the same
-/// (Application, ProgressOrder) when the synthetic id-map key is missing.
+/// Prevents sync from inserting a second <c>ApplicationProfileInstanceProgress</c> for the same
+/// (ApplicationProfileInstance, ProgressOrder) when the synthetic id-map key is missing.
 /// </summary>
-internal sealed class Visa2014ApplicationProgressDuplicateGuard
+internal sealed class Visa2014ApplicationProfileInstanceProgressDuplicateGuard
 {
     private const string CanonicalPairsSql = """
-        SELECT CAST(ApplicationID AS varchar(36)) AS ApplicationId,
+        SELECT CAST(ApplicationProfileInstanceID AS varchar(36)) AS ApplicationProfileInstanceId,
                ProgressOrder,
                CAST(MIN(ID) AS varchar(36)) AS ProgressId
-        FROM dbo.ApplicationProgresses
+        FROM dbo.ApplicationProfileInstanceProgresses
         WHERE (GCRecord IS NULL OR GCRecord = 0)
-          AND ApplicationID IS NOT NULL
-        GROUP BY ApplicationID, ProgressOrder
+          AND ApplicationProfileInstanceID IS NOT NULL
+        GROUP BY ApplicationProfileInstanceID, ProgressOrder
         """;
 
-    private readonly Dictionary<(Guid ApplicationId, int Order), Guid> _canonicalByPair = new();
+    private readonly Dictionary<(Guid ApplicationProfileInstanceId, int Order), Guid> _canonicalByPair = new();
 
     public int LoadedPairCount => _canonicalByPair.Count;
 
-    public static async Task<Visa2014ApplicationProgressDuplicateGuard> LoadFromSqlAsync(
+    public static async Task<Visa2014ApplicationProfileInstanceProgressDuplicateGuard> LoadFromSqlAsync(
         string targetConnectionString,
         bool verbose,
         CancellationToken cancellationToken = default)
     {
-        var guard = new Visa2014ApplicationProgressDuplicateGuard();
+        var guard = new Visa2014ApplicationProfileInstanceProgressDuplicateGuard();
         if (string.IsNullOrWhiteSpace(targetConnectionString))
             return guard;
 
@@ -48,7 +48,7 @@ internal sealed class Visa2014ApplicationProgressDuplicateGuard
         }
 
         if (verbose)
-            Console.WriteLine($"INF ApplicationProgress duplicate guard: {guard.LoadedPairCount} (Application, Order) pair(s)");
+            Console.WriteLine($"INF ApplicationProfileInstanceProgress duplicate guard: {guard.LoadedPairCount} (ApplicationProfileInstance, Order) pair(s)");
 
         return guard;
     }

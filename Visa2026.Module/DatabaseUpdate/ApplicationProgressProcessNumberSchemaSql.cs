@@ -5,10 +5,10 @@ using Npgsql;
 namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
-/// Idempotent SQL for <see cref="BusinessObjects.ApplicationProgress.ProcessNumber"/>
-/// and denormalized <see cref="BusinessObjects.Application.ProcessNumber"/>.
+/// Idempotent SQL for <see cref="BusinessObjects.ApplicationProfileInstanceProgress.ProcessNumber"/>
+/// and denormalized <see cref="BusinessObjects.ApplicationProfileInstance.ProcessNumber"/>.
 /// </summary>
-public static class ApplicationProgressProcessNumberSchemaSql
+public static class ApplicationProfileInstanceProgressProcessNumberSchemaSql
 {
     /// <summary>
     /// Host-start heal via Npgsql (not XAF statement splitter). Guard empty DBs with
@@ -18,40 +18,90 @@ public static class ApplicationProgressProcessNumberSchemaSql
     internal const string EnsureColumnsPostgres = """
         DO $$
         BEGIN
-          IF to_regclass('public."ApplicationProgresses"') IS NULL
-             OR to_regclass('public."Applications"') IS NULL THEN
+          IF to_regclass('public."ApplicationProfileInstanceProgresses"') IS NULL
+             OR to_regclass('public."ApplicationProfileInstances"') IS NULL THEN
             RETURN;
           END IF;
 
-          ALTER TABLE "ApplicationProgresses" ADD COLUMN IF NOT EXISTS "ProcessNumber" character varying(100) NULL;
-          ALTER TABLE "Applications" ADD COLUMN IF NOT EXISTS "ProcessNumber" character varying(100) NULL;
+          ALTER TABLE "ApplicationProfileInstanceProgresses" ADD COLUMN IF NOT EXISTS "ProcessNumber" character varying(100) NULL;
+          ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "ProcessNumber" character varying(100) NULL;
+          ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "HasLeftStagedQueue" boolean NOT NULL DEFAULT false;
+
+          UPDATE "ApplicationProfileInstances"
+          SET "HasLeftStagedQueue" = true
+          WHERE COALESCE("HasLeftStagedQueue", false) = false
+            AND (
+              ("ProcessNumber" IS NOT NULL AND TRIM("ProcessNumber") <> '')
+              OR (
+                "LatestPrimaryStateCode" IS NOT NULL
+                AND TRIM("LatestPrimaryStateCode") <> ''
+                AND "LatestPrimaryStateCode" NOT IN ('OFFICE_PREPARATION', 'DRAFT')
+              )
+            );
+
+          IF NOT EXISTS (
+            SELECT 1 FROM pg_indexes
+            WHERE schemaname = 'public'
+              AND indexname = 'IX_ApplicationProfileInstances_ProcessNumber') THEN
+            CREATE UNIQUE INDEX "IX_ApplicationProfileInstances_ProcessNumber"
+              ON "ApplicationProfileInstances" ("ProcessNumber")
+              WHERE "ProcessNumber" IS NOT NULL AND TRIM("ProcessNumber") <> '' AND "GCRecord" IS NULL;
+          END IF;
         END $$;
         """;
 
     internal const string EnsureColumnsSqlServer = """
-        IF OBJECT_ID(N'dbo.ApplicationProgresses', N'U') IS NOT NULL
-           AND COL_LENGTH(N'dbo.ApplicationProgresses', N'ProcessNumber') IS NULL
-            ALTER TABLE dbo.ApplicationProgresses ADD ProcessNumber nvarchar(100) NULL;
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstanceProgresses', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfileInstanceProgresses', N'ProcessNumber') IS NULL
+            ALTER TABLE dbo.ApplicationProfileInstanceProgresses ADD ProcessNumber nvarchar(100) NULL;
 
-        IF OBJECT_ID(N'dbo.Applications', N'U') IS NOT NULL
-           AND COL_LENGTH(N'dbo.Applications', N'ProcessNumber') IS NULL
-            ALTER TABLE dbo.Applications ADD ProcessNumber nvarchar(100) NULL;
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfileInstances', N'ProcessNumber') IS NULL
+            ALTER TABLE dbo.ApplicationProfileInstances ADD ProcessNumber nvarchar(100) NULL;
+
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfileInstances', N'HasLeftStagedQueue') IS NULL
+            ALTER TABLE dbo.ApplicationProfileInstances ADD HasLeftStagedQueue bit NOT NULL
+                CONSTRAINT DF_ApplicationProfileInstances_HasLeftStagedQueue DEFAULT (0);
+
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfileInstances', N'HasLeftStagedQueue') IS NOT NULL
+            UPDATE dbo.ApplicationProfileInstances
+            SET HasLeftStagedQueue = 1
+            WHERE ISNULL(HasLeftStagedQueue, 0) = 0
+              AND (
+                (ProcessNumber IS NOT NULL AND LTRIM(RTRIM(ProcessNumber)) <> N'')
+                OR (
+                  LatestPrimaryStateCode IS NOT NULL
+                  AND LTRIM(RTRIM(LatestPrimaryStateCode)) <> N''
+                  AND LatestPrimaryStateCode NOT IN (N'OFFICE_PREPARATION', N'DRAFT')
+                )
+              );
+
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
+           AND NOT EXISTS (
+             SELECT 1 FROM sys.indexes
+             WHERE name = N'IX_ApplicationProfileInstances_ProcessNumber'
+               AND object_id = OBJECT_ID(N'dbo.ApplicationProfileInstances'))
+            CREATE UNIQUE INDEX IX_ApplicationProfileInstances_ProcessNumber
+              ON dbo.ApplicationProfileInstances (ProcessNumber)
+              WHERE ProcessNumber IS NOT NULL AND ProcessNumber <> N'' AND GCRecord IS NULL;
         """;
 
     /// <summary>
     /// Legacy import stored process number in Description on PROCESS_STARTED.
     /// </summary>
     internal const string BackfillProgressFromDescriptionSqlServer = """
-        IF OBJECT_ID(N'dbo.ApplicationProgresses', N'U') IS NULL
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstanceProgresses', N'U') IS NULL
             RETURN;
-        IF COL_LENGTH(N'dbo.ApplicationProgresses', N'ProcessNumber') IS NULL
+        IF COL_LENGTH(N'dbo.ApplicationProfileInstanceProgresses', N'ProcessNumber') IS NULL
             RETURN;
         IF OBJECT_ID(N'dbo.ApplicationStates', N'U') IS NULL
             RETURN;
 
         UPDATE ap
         SET ProcessNumber = LEFT(LTRIM(RTRIM(ap.Description)), 100)
-        FROM dbo.ApplicationProgresses ap
+        FROM dbo.ApplicationProfileInstanceProgresses ap
         INNER JOIN dbo.ApplicationStates st ON st.ID = ap.StateID
         WHERE st.Code = N'PROCESS_STARTED'
           AND ap.ProcessNumber IS NULL
@@ -62,12 +112,12 @@ public static class ApplicationProgressProcessNumberSchemaSql
     internal const string BackfillProgressFromDescriptionPostgres = """
         DO $$
         BEGIN
-          IF to_regclass('public."ApplicationProgresses"') IS NULL
+          IF to_regclass('public."ApplicationProfileInstanceProgresses"') IS NULL
              OR to_regclass('public."ApplicationStates"') IS NULL THEN
             RETURN;
           END IF;
 
-          UPDATE "ApplicationProgresses" ap
+          UPDATE "ApplicationProfileInstanceProgresses" ap
           SET "ProcessNumber" = LEFT(TRIM(ap."Description"), 100)
           FROM "ApplicationStates" st
           WHERE st."ID" = ap."StateID"
@@ -79,55 +129,55 @@ public static class ApplicationProgressProcessNumberSchemaSql
         """;
 
     internal const string BackfillApplicationFromProgressSqlServer = """
-        IF OBJECT_ID(N'dbo.Applications', N'U') IS NULL
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NULL
             RETURN;
-        IF COL_LENGTH(N'dbo.Applications', N'ProcessNumber') IS NULL
+        IF COL_LENGTH(N'dbo.ApplicationProfileInstances', N'ProcessNumber') IS NULL
             RETURN;
-        IF OBJECT_ID(N'dbo.ApplicationProgresses', N'U') IS NULL
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstanceProgresses', N'U') IS NULL
             RETURN;
         IF OBJECT_ID(N'dbo.ApplicationStates', N'U') IS NULL
             RETURN;
 
         UPDATE a
         SET ProcessNumber = src.ProcessNumber
-        FROM dbo.Applications a
+        FROM dbo.ApplicationProfileInstances a
         INNER JOIN (
-            SELECT ap.ApplicationID, ap.ProcessNumber,
+            SELECT ap.ApplicationProfileInstanceID, ap.ProcessNumber,
                    ROW_NUMBER() OVER (
-                       PARTITION BY ap.ApplicationID
+                       PARTITION BY ap.ApplicationProfileInstanceID
                        ORDER BY ap.ProgressOrder ASC, ap.Date ASC, ap.ID ASC) AS rn
-            FROM dbo.ApplicationProgresses ap
+            FROM dbo.ApplicationProfileInstanceProgresses ap
             INNER JOIN dbo.ApplicationStates st ON st.ID = ap.StateID
             WHERE st.Code = N'PROCESS_STARTED'
               AND ap.ProcessNumber IS NOT NULL
               AND LTRIM(RTRIM(ap.ProcessNumber)) <> N''
-        ) src ON src.ApplicationID = a.ID AND src.rn = 1
+        ) src ON src.ApplicationProfileInstanceID = a.ID AND src.rn = 1
         WHERE a.ProcessNumber IS NULL;
         """;
 
     internal const string BackfillApplicationFromProgressPostgres = """
         DO $$
         BEGIN
-          IF to_regclass('public."Applications"') IS NULL
-             OR to_regclass('public."ApplicationProgresses"') IS NULL
+          IF to_regclass('public."ApplicationProfileInstances"') IS NULL
+             OR to_regclass('public."ApplicationProfileInstanceProgresses"') IS NULL
              OR to_regclass('public."ApplicationStates"') IS NULL THEN
             RETURN;
           END IF;
 
-          UPDATE "Applications" a
+          UPDATE "ApplicationProfileInstances" a
           SET "ProcessNumber" = src."ProcessNumber"
           FROM (
-              SELECT ap."ApplicationID", ap."ProcessNumber",
+              SELECT ap."ApplicationProfileInstanceID", ap."ProcessNumber",
                      ROW_NUMBER() OVER (
-                         PARTITION BY ap."ApplicationID"
+                         PARTITION BY ap."ApplicationProfileInstanceID"
                          ORDER BY ap."ProgressOrder" ASC, ap."Date" ASC, ap."ID" ASC) AS rn
-              FROM "ApplicationProgresses" ap
+              FROM "ApplicationProfileInstanceProgresses" ap
               INNER JOIN "ApplicationStates" st ON st."ID" = ap."StateID"
               WHERE st."Code" = 'PROCESS_STARTED'
                 AND ap."ProcessNumber" IS NOT NULL
                 AND TRIM(ap."ProcessNumber") <> ''
           ) src
-          WHERE src."ApplicationID" = a."ID"
+          WHERE src."ApplicationProfileInstanceID" = a."ID"
             AND src.rn = 1
             AND a."ProcessNumber" IS NULL;
         END $$;

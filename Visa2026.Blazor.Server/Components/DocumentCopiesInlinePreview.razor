@@ -12,6 +12,8 @@
 @using Visa2026.Module.Services.ApplicationItemLinkedDocuments
 @using Visa2026.Module.Services.PreviewSlot
 @using Visa2026.Module.Services.RuntimeLogging
+@using System.Linq
+@using System.Collections.Generic
 @implements IAsyncDisposable
 
 <div class="report-package-inline-preview app-item-doc-copies-preview">
@@ -58,6 +60,15 @@
         {
             <div class="app-item-doc-copies-preview__state app-item-doc-copies-preview__state--error" role="alert">@_error</div>
         }
+        else if (_useXfaViewer)
+        {
+            <div class="app-item-doc-copies-preview__viewer-shell report-package-inline-preview__viewer-shell">
+                <div @ref="_xfaHost"
+                     class="app-item-doc-copies-preview__xfa-host"
+                     data-bs-theme="light"
+                     title="@_fileName"></div>
+            </div>
+        }
         else if (!string.IsNullOrWhiteSpace(_pdfBlobUrl))
         {
             <div class="app-item-doc-copies-preview__viewer-shell report-package-inline-preview__viewer-shell">
@@ -72,6 +83,7 @@
 
 @code {
     [Parameter] public IReadOnlyList<Guid> ApplicationItemIds { get; set; } = Array.Empty<Guid>();
+    [Parameter] public Guid ApplicationProfileInstanceId { get; set; }
     [Parameter] public EventCallback PreviewClosed { get; set; }
     [Parameter] public string UiCultureName { get; set; } = string.Empty;
 
@@ -86,8 +98,16 @@
     private string _error = string.Empty;
     private bool _loading;
     private string? _pdfBlobUrl;
+    private ElementReference _xfaHost;
+    private bool _useXfaViewer;
+    private IReadOnlyList<byte[]>? _xfaDocuments;
+    private IReadOnlyList<string?>? _xfaPhotoDataUris;
+    private readonly List<string> _xfaBlobUrls = new();
+    private IJSObjectReference? _xfaJsModule;
+    private bool _xfaRenderPending;
     private byte[]? _pdfDownloadContent;
     private string _pdfDownloadFileName = string.Empty;
+    private string _pdfDownloadContentType = "application/pdf";
     private string _activeSlotKey = string.Empty;
     private ApplicationItemDocumentPackageOptions _packageOptions = ApplicationItemDocumentPackageOptions.CreateDefaults();
     private string _previewLoadingLabel = string.Empty;
@@ -126,11 +146,39 @@
         _packageOptions = request.PackageOptions ?? ApplicationItemDocumentPackageOptions.CreateDefaults();
         _previewLoadingLabel = FormatMsg("ApplicationReportPackage.Preview.Downloading", request.DisplayName);
 
+        if (ApplicationItemDocumentCopiesTypeCatalog.IsApplicationFormPreview(request.SlotKey, request.FamilyKey))
+        {
+            await OpenApplicationFormAsync(request.DisplayName);
+            return;
+        }
+
         await OpenPdfAsync(
             request.DisplayName,
             () =>
             {
-                if (!FileAccess.TryGetMergedSlotPdf(ApplicationItemIds, request.SlotKey, out var result) || result == null)
+                var familyKey = request.FamilyKey;
+                if (string.IsNullOrWhiteSpace(familyKey))
+                    ApplicationItemDocumentCopiesTypeCatalog.TryParseFamilyPreviewKey(request.SlotKey, out familyKey);
+
+                if (!string.IsNullOrWhiteSpace(familyKey))
+                {
+                    if (!FileAccess.TryGetMergedFamilyPdf(
+                            ApplicationItemIds,
+                            familyKey,
+                            out var familyResult,
+                            ApplicationProfileInstanceId)
+                        || familyResult == null)
+                        return (null, null, PreviewError);
+
+                    return (familyResult.Content, familyResult.FileName, null);
+                }
+
+                if (!FileAccess.TryGetMergedSlotPdf(
+                        ApplicationItemIds,
+                        request.SlotKey,
+                        out var result,
+                        ApplicationProfileInstanceId)
+                    || result == null)
                     return (null, null, PreviewError);
 
                 return (result.Content, result.FileName, null);
@@ -144,6 +192,60 @@
             await PreviewClosed.InvokeAsync();
     }
 
+    private async Task OpenApplicationFormAsync(string headerLabel)
+    {
+        _pdfDownloadContent = null;
+        _pdfDownloadFileName = string.Empty;
+        _pdfDownloadContentType = "application/pdf";
+        _fileName = headerLabel;
+        _previewLoadingLabel = FormatMsg("ApplicationReportPackage.Preview.Downloading", headerLabel);
+        _error = string.Empty;
+        _loading = true;
+
+        await ClearXfaViewerAsync();
+        await RevokePdfBlobUrlAsync();
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+
+        try
+        {
+            if (!FileAccess.TryGetFilledApplicationFormPreview(
+                    ApplicationItemIds,
+                    out var preview,
+                    out var download,
+                    out var errorKey,
+                    ApplicationProfileInstanceId)
+                || preview == null
+                || preview.Content.Length == 0)
+            {
+                SetPreviewError(
+                    !string.IsNullOrWhiteSpace(errorKey) ? Msg(errorKey) : PreviewError);
+                return;
+            }
+
+            _fileName = string.IsNullOrWhiteSpace(preview.FileName) ? headerLabel : preview.FileName;
+            _pdfDownloadContent = download?.Content ?? preview.Content;
+            _pdfDownloadFileName = download?.FileName ?? preview.FileName;
+            _pdfDownloadContentType = download?.ContentType ?? "application/pdf";
+            _xfaDocuments = preview.XfaDocuments is { Count: > 0 }
+                ? preview.XfaDocuments
+                : new[] { preview.Content };
+            _xfaPhotoDataUris = preview.PhotoDataUris;
+            _useXfaViewer = true;
+            _xfaRenderPending = true;
+        }
+        catch (Exception ex)
+        {
+            SetPreviewError(PreviewError, ex);
+        }
+        finally
+        {
+            _loading = false;
+            await InvokeAsync(StateHasChanged);
+            await ScheduleViewerLayoutSyncAsync();
+        }
+    }
+
     private async Task OpenPdfAsync(
         string headerLabel,
         Func<(byte[]? Content, string? FileName, string? Error)> loadPdf)
@@ -155,6 +257,7 @@
         _error = string.Empty;
         _loading = true;
 
+        await ClearXfaViewerAsync();
         await RevokePdfBlobUrlAsync();
         await InvokeAsync(StateHasChanged);
         await Task.Yield();
@@ -177,6 +280,7 @@
             _fileName = string.IsNullOrWhiteSpace(fileName) ? headerLabel : fileName;
             _pdfDownloadContent = content;
             _pdfDownloadFileName = string.IsNullOrWhiteSpace(fileName) ? "document-copies.pdf" : fileName;
+            _pdfDownloadContentType = "application/pdf";
             _pdfBlobUrl = await JS.InvokeAsync<string>("visaDocumentCopyPreview.createPdfBlobUrl", content);
         }
         catch (Exception ex)
@@ -210,13 +314,19 @@
         using var stream = new MemoryStream(_pdfDownloadContent, writable: false);
         await FileDownloader.DownloadAsync(
             string.IsNullOrWhiteSpace(_pdfDownloadFileName) ? "document-copies.pdf" : _pdfDownloadFileName,
-            stream);
+            stream,
+            _pdfDownloadContentType);
     }
 
     private async Task DownloadBatchSummaryAsync()
     {
         if (!ApplicationItemDocumentBatchSummaryKindMapping.TryFromSlotKey(_activeSlotKey, _packageOptions, out var kind)
-            || !FileAccess.TryGetBatchSummaryPdf(ApplicationItemIds, kind, _packageOptions, out var result)
+            || !FileAccess.TryGetBatchSummaryPdf(
+                ApplicationItemIds,
+                kind,
+                _packageOptions,
+                out var result,
+                ApplicationProfileInstanceId)
             || result == null)
         {
             SetPreviewError(PreviewError);
@@ -228,14 +338,88 @@
         await FileDownloader.DownloadAsync(result.FileName, stream, result.ContentType);
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_xfaRenderPending || !_useXfaViewer || _loading || _xfaDocuments == null || _xfaDocuments.Count == 0)
+            return;
+
+        _xfaRenderPending = false;
+        try
+        {
+            await RenderXfaDocumentsAsync(_xfaDocuments, _xfaPhotoDataUris);
+            await ScheduleViewerLayoutSyncAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+        catch (Exception ex)
+        {
+            SetPreviewError(PreviewError, ex);
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task RenderXfaDocumentsAsync(IReadOnlyList<byte[]> documents, IReadOnlyList<string?>? photoDataUris)
+    {
+        await RevokeXfaBlobUrlsAsync();
+        var previewDocs = new List<object>();
+        for (var i = 0; i < documents.Count; i++)
+        {
+            var pdf = documents[i];
+            if (pdf == null || pdf.Length == 0)
+                continue;
+
+            var url = await JS.InvokeAsync<string>("visaDocumentCopyPreview.createPdfBlobUrl", pdf);
+            if (string.IsNullOrWhiteSpace(url))
+                continue;
+
+            _xfaBlobUrls.Add(url);
+            previewDocs.Add(new XfaPreviewJsDocument
+            {
+                Url = url,
+                PhotoDataUri = photoDataUris != null && i < photoDataUris.Count ? photoDataUris[i] : null
+            });
+        }
+
+        if (previewDocs.Count == 0)
+            throw new InvalidOperationException("Application form preview has no PDF bytes.");
+
+        try
+        {
+            _xfaJsModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "/lib/pdfjs/visa-xfa-preview.js?v=xfaphoto2");
+        }
+        catch (JSDisconnectedException)
+        {
+            throw;
+        }
+        catch (JSException)
+        {
+            _xfaJsModule = null;
+        }
+
+        if (_xfaJsModule != null)
+        {
+            await _xfaJsModule.InvokeVoidAsync("renderAll", _xfaHost, previewDocs);
+            return;
+        }
+
+        await JS.InvokeVoidAsync("visaXfaPreview.renderAll", _xfaHost, previewDocs);
+    }
+
+    private sealed class XfaPreviewJsDocument
+    {
+        public string Url { get; set; } = string.Empty;
+        public string? PhotoDataUri { get; set; }
+    }
+
     private async Task ScheduleViewerLayoutSyncAsync()
     {
-        if (string.IsNullOrWhiteSpace(_pdfBlobUrl))
+        if (string.IsNullOrWhiteSpace(_pdfBlobUrl) && !_useXfaViewer)
             return;
 
         var generation = ++_layoutSyncGeneration;
         await Task.Delay(150);
-        if (generation != _layoutSyncGeneration || string.IsNullOrWhiteSpace(_pdfBlobUrl))
+        if (generation != _layoutSyncGeneration || (string.IsNullOrWhiteSpace(_pdfBlobUrl) && !_useXfaViewer))
             return;
 
         try
@@ -255,8 +439,47 @@
         _previewLoadingLabel = string.Empty;
         _pdfDownloadContent = null;
         _pdfDownloadFileName = string.Empty;
+        _pdfDownloadContentType = "application/pdf";
         _packageOptions = ApplicationItemDocumentPackageOptions.CreateDefaults();
+        await ClearXfaViewerAsync();
         await RevokePdfBlobUrlAsync();
+    }
+
+    private async Task ClearXfaViewerAsync()
+    {
+        _xfaRenderPending = false;
+        _xfaDocuments = null;
+        _xfaPhotoDataUris = null;
+        if (_useXfaViewer)
+        {
+            try
+            {
+                if (_xfaJsModule != null)
+                    await _xfaJsModule.InvokeVoidAsync("clear", _xfaHost);
+                else
+                    await JS.InvokeVoidAsync("visaXfaPreview.clear", _xfaHost);
+            }
+            catch (JSDisconnectedException) { }
+            catch (JSException) { }
+        }
+
+        await RevokeXfaBlobUrlsAsync();
+        _useXfaViewer = false;
+    }
+
+    private async Task RevokeXfaBlobUrlsAsync()
+    {
+        foreach (var url in _xfaBlobUrls)
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("visaDocumentCopyPreview.revokePdfBlobUrl", url);
+            }
+            catch (JSDisconnectedException) { }
+            catch (JSException) { }
+        }
+
+        _xfaBlobUrls.Clear();
     }
 
     private async Task RevokePdfBlobUrlAsync()
@@ -273,5 +496,19 @@
         _pdfBlobUrl = null;
     }
 
-    public async ValueTask DisposeAsync() => await RevokePdfBlobUrlAsync();
+    public async ValueTask DisposeAsync()
+    {
+        await ClearXfaViewerAsync();
+        await RevokePdfBlobUrlAsync();
+        if (_xfaJsModule != null)
+        {
+            try
+            {
+                await _xfaJsModule.DisposeAsync();
+            }
+            catch (JSDisconnectedException) { }
+
+            _xfaJsModule = null;
+        }
+    }
 }

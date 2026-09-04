@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Visa2026.Module.Services.ApplicationItemLinkedDocuments;
 
-/// <summary>A document slot on an <see cref="BusinessObjects.ApplicationItem"/> (passport, visa, diploma, …).</summary>
+/// <summary>A document slot on an <see cref="BusinessObjects.ApplicationRosterMergeLine"/> (passport, visa, diploma, …).</summary>
 public sealed class ApplicationItemLinkedDocumentGroup
 {
     public string SlotKey { get; init; } = string.Empty;

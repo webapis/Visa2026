@@ -12,6 +12,8 @@ using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.DC;
+using Visa2026.Module.Services;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -50,9 +52,53 @@ namespace Visa2026.Module.BusinessObjects
         public virtual DateTime? ExpirationDate { get; protected set; }
 
         [RuleRequiredField]
-        public virtual Application Application { get; set; }
+        [ImmediatePostData]
+        [VisibleInListView(false)]
+        [DataSourceProperty(nameof(AvailableApplicationProfileInstances))]
+        [InverseProperty(nameof(ApplicationProfileInstance.BorderZones))]
+        [ToolTip("Link this border-zone permit to the application that produced it.")]
+        public virtual ApplicationProfileInstance ApplicationProfileInstance { get; set; }
+
+        /// <summary>Candidate applications whose profile may produce a border-zone permit.</summary>
+        [NotMapped]
+        [Browsable(false)]
+        public IList<ApplicationProfileInstance> AvailableApplicationProfileInstances
+        {
+            get
+            {
+                var objectSpace = ObjectSpaceHelper.Get(this);
+                if (objectSpace == null)
+                    return new List<ApplicationProfileInstance>();
+
+                return objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
+                    .Where(a =>
+                        (a.ApplicationProfile != null && a.ApplicationProfile.ProduceBorderZone)
+                        || (a.ApplicationType != null && a.ApplicationType.ShowBorderZoneLocation))
+                    .OrderByDescending(a => a.ApplicationDate)
+                    .ThenBy(a => a.FullApplicationNumber)
+                    .ToList();
+            }
+        }
+
+        [RuleFromBoolProperty(
+            "BorderZone_ApplicationTypeAllowed",
+            DefaultContexts.Save,
+            "ApplicationProfileInstance must be a type that can produce a border-zone permit.")]
+        [Browsable(false)]
+        public bool IsApplicationTypeAllowed
+        {
+            get
+            {
+                if (ApplicationProfileInstance == null)
+                    return true;
+                return ApplicationTypeCapabilities.CanIssueBorderZone(ApplicationProfileInstance);
+            }
+        }
         
-        public virtual bool IsCancelled { get; set; }
+        [NotMapped]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInDetailView(false)]
+        public bool IsCancelled => IssuedDocumentLifecycle.IsCancelled(this);
         
         [Aggregated]
         [InverseProperty(nameof(BorderZoneItem.BorderZone))]
@@ -81,7 +127,7 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                return Application?.ApplicationItems.Select(ai => ai.Person).ToList() ?? new List<Person>();
+                return ApplicationRosterHelper.GetRosterPeople(ApplicationProfileInstance);
             }
         }
 

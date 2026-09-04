@@ -33,6 +33,6 @@ public class VwRdRegistration
     public virtual string ExpiryBucketLabel { get; set; }
     public virtual string ExpiryBucketCssClass { get; set; }
     public virtual bool IsArchived { get; set; }
-    /// <summary>City from last registration ApplicationItem.CurrentAddressOfResidence.</summary>
+    /// <summary>City from last registration roster line resolved address link.</summary>
     public virtual string CityLabel { get; set; }
 }

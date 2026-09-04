@@ -29,7 +29,7 @@ The following components are implemented to achieve this dynamic configuration:
         *   **Example**: If you have a report defined as `AddPredefinedReport<MyCustomReport>("MyCustomReport", ...)` in `ReportsUpdater.cs`, the `ReportName` in `ReportVisibility` must be "MyCustomReport".
     *   `ReportDisplayName (String)`: The display name of the report, shown in the UI.
         *   **Details**: This property determines the text that users see in the report selection menus. It can be different from the `ReportName` to provide a more user-friendly label.
-        *   **Example**: You might have `ReportName` set to "ApplicationVisaExtEmp" but the `ReportDisplayName` set to "Application for Visa Extension".  The latter is what users will see.
+        *   **Example**: You might have `ReportName` set to "ApplicationVisaExtEmp" but the `ReportDisplayName` set to "ApplicationProfileInstance for Visa Extension".  The latter is what users will see.
     *   `TargetTypeFullName (String)`: Stores the full name of the target business object type (e.g., "Visa2026.Module.BusinessObjects.Application").
         *   **Details**: This property holds the fully qualified name of the business object type to which the visibility rule applies. The `VisibilityCriteria` will be evaluated against objects of this type.
         *   **Example**: To make a report visible only for `Application` objects, you would set `TargetTypeFullName` to "Visa2026.Module.BusinessObjects.Application". Make sure the namespace is correct.
@@ -91,10 +91,10 @@ The following components are implemented to achieve this dynamic configuration:
 7.  Define the `VisibilityCriteria` using the Criteria Language Syntax. This expression will be evaluated against objects of the selected `TargetType`.
 
 ### 3.2. Example Configuration
-To show the "Application For Employee's Visa Extension Report" only when the `Application.ApplicationType.Name` is "Wiza we Iş Rugsatnamasyny Uzaltmak (IŞG)", configure the `ReportVisibility` record as follows:
+To show the "ApplicationProfileInstance For Employee's Visa Extension Report" only when the `Application.ApplicationType.Name` is "Wiza we Iş Rugsatnamasyny Uzaltmak (IŞG)", configure the `ReportVisibility` record as follows:
 
-*   `ReportName`: Application For Employee's Visa Extension Report
-*   `ReportDisplayName`: Application For Employee's Visa Extension Report
+*   `ReportName`: ApplicationProfileInstance For Employee's Visa Extension Report
+*   `ReportDisplayName`: ApplicationProfileInstance For Employee's Visa Extension Report
 *   `VisibilityCriteria`: `[ApplicationType.Name] = 'Wiza we Iş Rugsatnamasyny Uzaltmak (IŞG)'`*   `EnableReportVisibility`: True
 *   `Roles`: (leave empty for no role restriction)
 

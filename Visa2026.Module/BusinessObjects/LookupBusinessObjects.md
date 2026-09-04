@@ -47,7 +47,7 @@ The following Business Objects adhere to this pattern:
 | **Region** | Administrative regions (Welaýatlar). | Used to group `WorkPermitLocation`. |
 | **Specialty** | Academic or professional specialties. | - |
 | **Subcontractor** | External companies providing services. | Lookup popup shows `NameTm` only. |
-| **Urgency** | Application processing priority levels. | Includes `Priority` (int) for sorting. |
+| **Urgency** | ApplicationProfileInstance processing priority levels. | Includes `Priority` (int) for sorting. |
 | **ValidityDuration** | Standard durations for document validity. | Includes `NumberOfDays` (int). |
 | **VisaCategory** | Entry frequency (Single, Multiple). | - |
 | **VisaIssuedPlace** | Locations where visas are issued. | Includes `IsDefault` (bool). |

@@ -1,0 +1,28 @@
+flowchart TB
+    subgraph instance ["Application Profile Instance"]
+        API["Application Profile Instance"]
+    end
+
+    subgraph issued ["1. Issued output — May produce Invitation"]
+        INV["Invitation header"]
+        II["InvitationItem lines\n(Invitation → InvitationItems)"]
+        API -->|"New invitation"| INV
+        INV -->|"ApplicationProfileInstance"| API
+        INV --> II
+    end
+
+    subgraph input ["2. Input / linked — existing person data"]
+        IIM2M["InvitationItems M2M\n(ApplicationProfileInstance.InvitationItems)"]
+        API -.->|"skip-nav link"| IIM2M
+        IIM2M -->|"example consumers"| CC["Cancel invitation /\nChange invitation workflows"]
+    end
+
+    subgraph visaCreate ["Visa create — issued lines only"]
+        V["Visa"]
+        API -->|"New issued visa\n(Path A)"| V
+        V -->|"IssuingApplicationProfileInstance"| API
+        V -->|"IssuingInvitationItem\n(auto Path A)"| II
+        II -->|"Issue visa (shortcut)"| V
+    end
+
+    IIM2M -.->|"NOT a visa source"| X["✗ cannot set\nVisa.IssuingInvitationItem"]

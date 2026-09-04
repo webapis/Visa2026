@@ -43,7 +43,7 @@ the source of truth:
 |------|----------------|
 | Countries, regions, visa types, genders, … | `Visa2026.Module/DatabaseUpdate/LookupCatalogs/*.json` |
 | Tenant-specific (position, department, project contract, company profile, signatories, …) | `Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/*.json` |
-| Application types, `Show*` flags, selection codes | `Visa2026.Module/DatabaseUpdate/LookupCatalogs/ApplicationTypeConfigurationCatalog.json` |
+| ApplicationProfileInstance types, `Show*` flags, selection codes | `Visa2026.Module/DatabaseUpdate/LookupCatalogs/ApplicationTypeConfigurationCatalog.json` |
 | Seeding / deploy behavior | [`docs/LOOKUP_SEEDING.md`](../docs/LOOKUP_SEEDING.md) |
 | Human-readable snapshot (secondary) | (Removed) — use JSON catalogs + `ApplicationTypeConfigurationCatalog.json` |
 
@@ -140,7 +140,7 @@ dotnet run --project Visa2026.DataImporter -- --sync
 |-------|----------------|
 | Persons | Email |
 | Passports | Passport Number |
-| Applications | Application Number + Date, or optional **Full Application Number** column |
+| Applications | ApplicationProfileInstance Number + Date, or optional **Full ApplicationProfileInstance Number** column |
 | ApplicationItems | `ApplicationItemName` = `{Person} - {Application}` (e.g. `John Doe - 4/-001`) |
 | InvitationItems | `InvitationItemName` = `{Person} - {Invitation Number}` |
 | Visas | Visa Number |
@@ -180,17 +180,17 @@ The enforced order is:
 14. Applications                ← depends on ProjectContract, ApplicationType,
                                    ApplicationTypeFilter (org from singletons at runtime)
 15. Visas                       ← MUST come before ApplicationItems
-16. ApplicationItems            ← depends on Application, Person, Passport, Visa; registration/travel when ShowRegistrations
+16. ApplicationItems            ← depends on ApplicationProfileInstance, Person, Passport, Visa; registration/travel when ShowRegistrations
 17. BusinessTripPurpose         ← simple lookup (seeded in Shared)
 18. BusinessTripAddress         ← MUST come before BusinessTrips
-19. BusinessTrips               ← depends on Application, Person, BusinessTripAddress
-20. Invitations                 ← depends on Application
+19. BusinessTrips               ← depends on ApplicationProfileInstance, Person, BusinessTripAddress
+20. Invitations                 ← depends on ApplicationProfileInstance
 21. InvitationItems             ← depends on Invitation, Person, Passport
-22. WorkPermits                 ← depends on Application
+22. WorkPermits                 ← depends on ApplicationProfileInstance
 23. WorkPermitItems             ← depends on WorkPermit, Person, Passport, PositionHistory
-24. Rejections                  ← depends on Application
+24. Rejections                  ← depends on ApplicationProfileInstance
 25. RejectionItems              ← depends on Rejection, Person
-26. ApplicationProgresses       ← depends on Application, ApplicationState, ApplicationLocation
+26. ApplicationProfileInstanceProgresses       ← depends on ApplicationProfileInstance, ApplicationState, ApplicationLocation
 ```
 
 **Critical ordering rules:**
@@ -344,12 +344,12 @@ The enforced order is:
 
 | Column | Required | Type | Notes |
 |--------|----------|------|-------|
-| Application Number | Yes | StringValue | Numeric portion only (e.g. `003`); combined with prefix server-side |
+| ApplicationProfileInstance Number | Yes | StringValue | Numeric portion only (e.g. `003`); combined with prefix server-side |
 | Date | Yes | Scalar | ISO date |
 | Company | | LookupByName | |
 | Project Contract | | LookupByName | |
 | Filter | | LookupByName | ApplicationTypeFilter.Name (e.g. `Visa`, `Registration`, `BusinessTrip`) |
-| Application Type | | LookupByName | ApplicationType.Name (e.g. `App_Exit_Visa`) |
+| ApplicationProfileInstance Type | | LookupByName | ApplicationType.Name (e.g. `App_Exit_Visa`) |
 | Category | | *(obsolete)* | **Do not use** on `Applications` — category is on `ApplicationType` only (stripped by importer). |
 | Migration Service | | LookupByName | MigrationService.Name (long Turkmen name) |
 | Urgency | | LookupByName | e.g. `Adaty tertipde !` |
@@ -366,8 +366,8 @@ The enforced order is:
 
 > **FullApplicationNumber:** Built on save from **ApplicationNumberingProfile**
 > (`tenant/application-numbering.json`) using `AppNumberFormat` tokens. Current tenant
-> format: `{MONTH}/-{NUMBER}` → e.g. `4/-003` for Application Number `003` with
-> Application Date in April. Use the **full** value in child sheets (ApplicationItems,
+> format: `{MONTH}/-{NUMBER}` → e.g. `4/-003` for ApplicationProfileInstance Number `003` with
+> ApplicationProfileInstance Date in April. Use the **full** value in child sheets (ApplicationItems,
 > ApplicationItems, anchors). See `Visa2026.Module/Resources/AppNumberFormat.md`.
 
 ### Visas
@@ -387,7 +387,7 @@ The enforced order is:
 
 | Column | Required | Type | Notes |
 |--------|----------|------|-------|
-| Application | Yes | LookupByName | Filter: `FullApplicationNumber` (e.g. `4/-003`) |
+| ApplicationProfileInstance | Yes | LookupByName | Filter: `FullApplicationNumber` (e.g. `4/-003`) |
 | Person | Yes | PersonLookupByName | |
 | Passport Number | Yes | LookupByName | Filter: `PassportNumber` |
 | Visa Number | | LookupByName | Filter: `VisaNumber` — the **current/existing** visa being worked on |
@@ -417,7 +417,7 @@ The enforced order is:
 | Visa Cancelled | | Bool | `true` when current visa is cancelled |
 | Visa Changed | | Bool | `true` when visa is changed (not cancelled) |
 
-**Visibility (required for stakeholder seed):** include a column only when the scenario’s `Application Type` has the matching `Show*` flag in `Visa2026.Module/DatabaseUpdate/LookupCatalogs/ApplicationTypeConfigurationCatalog.json`. Examples:
+**Visibility (required for stakeholder seed):** include a column only when the scenario’s `ApplicationProfileInstance Type` has the matching `Show*` flag in `Visa2026.Module/DatabaseUpdate/LookupCatalogs/ApplicationTypeConfigurationCatalog.json`. Examples:
 
 | Column | ApplicationType flag |
 |--------|----------------------|
@@ -463,7 +463,7 @@ One row per person per application. Must come **after** `BusinessTripAddress`.
 | Column | Required | Type | Notes |
 |--------|----------|------|-------|
 | Person | Yes | PersonLookupByName | |
-| Application | Yes | LookupByName | Filter: `FullApplicationNumber` |
+| ApplicationProfileInstance | Yes | LookupByName | Filter: `FullApplicationNumber` |
 | Passport Number | | LookupByName | Filter: `PassportNumber` |
 | Visa Number | | LookupByName | Filter: `VisaNumber` |
 | Address | | LookupByName | Filter: `FullAddress` — CurrentAddressOfResidence |
@@ -476,7 +476,7 @@ One row per person per application. Must come **after** `BusinessTripAddress`.
 |--------|----------|------|-------|
 | Invitation Number | Yes | StringValue | e.g. `INV-2026-001` — used as lookup key |
 | Start Date | Yes | Scalar | |
-| Application | | LookupByName | Filter: `FullApplicationNumber` |
+| ApplicationProfileInstance | | LookupByName | Filter: `FullApplicationNumber` |
 | Validity Duration | | LookupByName | ValidityDuration.Name |
 
 ### InvitationItems
@@ -496,7 +496,7 @@ One row per person per application. Must come **after** `BusinessTripAddress`.
 |--------|----------|------|-------|
 | Work Permit Number | Yes | StringValue | e.g. `WP-2026-001` — used as lookup key |
 | Start Date | Yes | Scalar | |
-| Application | | LookupByName | Filter: `FullApplicationNumber` |
+| ApplicationProfileInstance | | LookupByName | Filter: `FullApplicationNumber` |
 
 ### WorkPermitItems
 
@@ -516,18 +516,18 @@ One row per person per application. Must come **after** `BusinessTripAddress`.
 |--------|----------|------|-------|
 | Rejection Number | Yes | StringValue | e.g. `REJ-2026-001` |
 | Date | Yes | Scalar | |
-| Application | | LookupByName | Filter: `FullApplicationNumber` |
+| ApplicationProfileInstance | | LookupByName | Filter: `FullApplicationNumber` |
 
 RejectionItems link to Rejection by `RejectedDocNumber` and to Person by full name.
 
-### ApplicationProgresses
+### ApplicationProfileInstanceProgresses
 
 One row per state transition per application. Sets `Application.CurrentState` server-side via `OnSaving`.
-Must come **after** `ApplicationItems` — the Application must already exist.
+Must come **after** `ApplicationItems` — the ApplicationProfileInstance must already exist.
 
 | Column | Required | Type | Notes |
 |--------|----------|------|-------|
-| Application | Yes | LookupByName | Filter: `FullApplicationNumber` |
+| ApplicationProfileInstance | Yes | LookupByName | Filter: `FullApplicationNumber` |
 | State | Yes | LookupByName | Filter: `Code` — use ApplicationState.Code (e.g. `1_REVIEW_STARTED`) |
 | Location | Yes | LookupByName | Filter: `Code` — use ApplicationLocation.Code (e.g. `AT_THE_MINISTERY_1`) |
 | Date | Yes | Scalar | ISO date |
@@ -553,9 +553,9 @@ which sheets/columns are required in a scenario:
 | `ShowWorkPermits` | Work permit documents | `WorkPermits`, `WorkPermitItems` |
 | `ShowRejections` | Rejection records | `Rejections`, `RejectionItems` |
 | `ShowBusinessTrips` | Business trip records | `BusinessTripAddress`, `BusinessTrips` |
-| `ShowFromCity` | Origin city on Application | `From City` in Applications |
-| `ShowToCity` | Destination city on Application | `To City` in Applications |
-| `ShowMigrationService` | Migration service on Application | `Migration Service` in Applications |
+| `ShowFromCity` | Origin city on ApplicationProfileInstance | `From City` in Applications |
+| `ShowToCity` | Destination city on ApplicationProfileInstance | `To City` in Applications |
+| `ShowMigrationService` | Migration service on ApplicationProfileInstance | `Migration Service` in Applications |
 | `ShowBusinessTripPlan` | Business trip dates/purpose | `Business Trip Start/End Date`, `Business Trip Purpose` |
 | `ApplicationTypeFilter` | Filter category | `Filter` in Applications must match |
 
@@ -598,7 +598,7 @@ Seeds:
 2. **Use `Application.FullApplicationNumber` as the anchor** for any scenario that
    creates an Application. This is the most stable and unique identifier.
 
-3. **Never reuse Application Numbers.** The auto-generated `FullApplicationNumber`
+3. **Never reuse ApplicationProfileInstance Numbers.** The auto-generated `FullApplicationNumber`
    (e.g. `10/-007`) must be globally unique across all scenarios.
 
 4. **Visa numbers must be globally unique.** Use sequential numbering
@@ -631,14 +631,14 @@ Seeds:
 
 ## Numbering Conventions
 
-Application display numbers come from **`ApplicationNumberingProfile`**
+ApplicationProfileInstance display numbers come from **`ApplicationNumberingProfile`**
 (`LookupCatalogs/tenant/application-numbering.json`). Current seed: format `{MONTH}/-{NUMBER}`,
-padding `3`, empty prefix → **`{month}/-{number}`** (month from Application Date).
+padding `3`, empty prefix → **`{month}/-{number}`** (month from ApplicationProfileInstance Date).
 
 | Entity | Pattern | Example |
 |--------|---------|---------|
-| Application Number | `{seq:D3}` in yaml | `003`, `024` |
-| Full Application Number | `{month}/-{Application Number}` | `4/-003` (April + `003`) |
+| ApplicationProfileInstance Number | `{seq:D3}` in yaml | `003`, `024` |
+| Full ApplicationProfileInstance Number | `{month}/-{ApplicationProfileInstance Number}` | `4/-003` (April + `003`) |
 | Visa (employee) | `TM-2026-V-{seq:D3}` | `TM-2026-V-010` |
 | Visa (family member) | `TM-2026-V-FM-{seq:D3}` | `TM-2026-V-FM-007` |
 | Invitation | `INV-2026-{seq:D3}` | `INV-2026-001` |
@@ -690,7 +690,7 @@ data:
   Applications:
     - ...
       Filter: BusinessTrip
-      Application Type: App_Business_Trip_Departure   # or Arrival
+      ApplicationProfileInstance Type: App_Business_Trip_Departure   # or Arrival
       To City: <city>           # Departure: where they're going
       # From City: <city>       # Arrival: where they came from
       Business Trip Start Date: YYYY-MM-DD
@@ -702,7 +702,7 @@ data:
       Full Address: <unique address string>
   BusinessTrips:
     - Person: ...
-      Application: 4/-003   # FullApplicationNumber — month from Application Date
+      Application: 4/-003   # FullApplicationNumber — month from ApplicationProfileInstance Date
       Passport Number: ...
       Visa Number: ...
       Address: <current residence full address>
@@ -790,4 +790,4 @@ See **`seed/STAKEHOLDER_DEMO.md`**.
 | 52 | ExpiredToBeCheckedOutLink | App_Reg_Check_In | Registration | 4/-053; links person `v06a.checkout.pending@visa2026.local` |
 | 53 | ExpiredMissedTimelyCheckoutLink | App_Reg_Check_In | Registration | 4/-054; links person `v06d.checkout.missed@visa2026.local` |
 
-**Next available:** Application number `055`, Visa number `TM-2026-V-038`
+**Next available:** ApplicationProfileInstance number `055`, Visa number `TM-2026-V-038`

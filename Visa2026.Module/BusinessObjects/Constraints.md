@@ -2,7 +2,7 @@
 
 This document describes constraints applied to properties in various Business Objects.
 
-## Application
+## ApplicationProfileInstance
 
 | Property Name | Constraints |
 |---|---|

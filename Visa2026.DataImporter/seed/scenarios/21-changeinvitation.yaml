@@ -4,14 +4,14 @@ description: Change of invitation terms for John Doe (validity extended to 6 mon
 dependsOn: InvitationEmployee
 sync: false
 anchor:
-  entity: Application
+  entity: ApplicationProfileInstance
   key: FullApplicationNumber
   value: 5/-021
 data:
   Applications:
-  - Application Number: 021
+  - ApplicationProfileInstance Number: 021
     Date: 2026-05-10
-    Application Type: App_Change_Inv
+    ApplicationProfileInstance Type: App_Change_Inv
     Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
   ApplicationItems:
   - Application: 5/-021

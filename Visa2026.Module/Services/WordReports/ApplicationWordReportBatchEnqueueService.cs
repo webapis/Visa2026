@@ -31,7 +31,7 @@ public sealed class ApplicationWordReportBatchEnqueueService
 
     public bool TryEnqueueApplication(
         IObjectSpace objectSpace,
-        Application application,
+        ApplicationProfileInstance application,
         string requestedBy,
         out ApplicationWordReportBatchEnqueueResult? result,
         out string? errorMessageKey) =>
@@ -39,7 +39,7 @@ public sealed class ApplicationWordReportBatchEnqueueService
 
     public bool TryEnqueueApplication(
         IObjectSpace objectSpace,
-        Application application,
+        ApplicationProfileInstance application,
         string requestedBy,
         IReadOnlyList<string>? selectedEntryKeys,
         out ApplicationWordReportBatchEnqueueResult? result,
@@ -55,7 +55,7 @@ public sealed class ApplicationWordReportBatchEnqueueService
 
     public bool TryEnqueueApplication(
         IObjectSpace objectSpace,
-        Application application,
+        ApplicationProfileInstance application,
         string requestedBy,
         IReadOnlyList<string>? selectedEntryKeys,
         WordReportGenerationContext context,
@@ -110,11 +110,11 @@ public sealed class ApplicationWordReportBatchEnqueueService
         using var os = nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<WordReportGenerationBatch>();
         var batch = os.CreateObject<WordReportGenerationBatch>();
         batch.RequestedBy = requestedBy;
-        batch.ApplicationID = applicationId;
+        batch.ApplicationProfileInstanceID = applicationId;
         batch.TotalReports = normalizedSelection.Count;
         batch.ProcessedReports = 0;
         batch.SelectedReportKeysJson = ApplicationWordReportPackageSelectionHelper.Serialize(normalizedSelection.ToList());
-        batch.SelectedApplicationItemIdsJson = context.Scope == WordReportPackageScope.ApplicationItem
+        batch.SelectedApplicationItemIdsJson = context.Scope == WordReportPackageScope.ApplicationRosterMergeLine
             ? ApplicationWordReportPackageApplicationItemIdsHelper.Serialize(context.SelectedApplicationItemIds.ToList())
             : null;
         batch.Status = WordReportGenerationBatchStatus.Queued;

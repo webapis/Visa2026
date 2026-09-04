@@ -156,6 +156,10 @@ static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
         "--skip-target-check",
         "--import-visa2014",
         "--generate-visa2014-tenant-catalogs",
+        "--export-visa2014-application-profile-tenant-json",
+        "--export-visa2014-application-profile-nested-template-preview",
+        "--export-visa2014-application-profile-nested-template-tenant-json",
+        "--export-visa2014-application-profile-approval-leg-version-matrix",
         "--expand-visa2014-id-map",
         "--rebuild-visa2014-id-maps",
         "--import-visa2014-files",
@@ -167,6 +171,8 @@ static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
         "--patch-visa2014-application-migration-service",
         "--patch-visa2014-application-migration-service-inference",
         "--patch-visa2014-application-project-contract",
+        "--patch-visa2014-application-profile",
+        "--patch-visa2014-application-profile-nested-templates",
         "--correct-visa-application-types",
         "--correct-application-progress-ministry-legs",
         "--backfill-application-approval-leg-snapshots",
@@ -273,24 +279,33 @@ static void PrintHelp()
     Console.WriteLine("  --dump-lookups              Legacy: generate a markdown dump from lookup.xlsm.");
     Console.WriteLine("  --export-lookup-catalogs    Export lookup.xlsm → Module/LookupCatalogs/*.json");
     Console.WriteLine("  --export-seed               Split legacy data.yaml → seed/scenarios/ (one-time migration).");
-    Console.WriteLine("  --export-visa2014-preview   Legacy SQL → Excel preview (requires --entity Person|Passport|Visa|Education|EmployeePositionHistory|EmployeeSalary|WorkPermit|WorkPermitItem|AddressOfResidence|PrivateHouse|Lodging|Hotel|Hospital|OtherSite|Application|ApplicationItem|ApplicationProgress|ProjectContractMinistryLeg).");
-    Console.WriteLine("      Options: --entity Person|Passport|Visa|Education|EmployeePositionHistory|WorkPermit|WorkPermitItem|Application|ApplicationItem|ApplicationProgress|ProjectContractMinistryLeg [--legacy-source calik-energi|gap-insaat] [--output path.xlsx]");
+    Console.WriteLine("  --export-visa2014-preview   Legacy SQL → Excel preview (requires --entity …|Application|ApplicationProfileCatalog|ApplicationItem|…).");
+    Console.WriteLine("      Options: --entity Person|Passport|Visa|Education|EmployeePositionHistory|WorkPermit|WorkPermitItem|Application|ApplicationItem|ApplicationProfileInstanceProgress|ProjectContractMinistryLeg [--legacy-source calik-energi|gap-insaat] [--output path.xlsx]");
     Console.WriteLine("                [--connection conn] [--max-rows N]");
     Console.WriteLine("  --export-visa2014-import-gaps  Target-aware Excel of unresolved import rows (manual review; not exclusions).");
     Console.WriteLine("      Options: --entity AddressOfResidence --inprocess --target-connection conn [--legacy-source calik-energi-onprem-demo]");
     Console.WriteLine("  --preflight-visa2014-lookups  Audit live lookups → translate → verify target catalogs (gate before full Import).");
-    Console.WriteLine("  --verify-visa2014-mapping   Post-import expected vs actual (Application|ApplicationProgress; --entity --tier --sample/--full --report/--report-html).");
+    Console.WriteLine("  --verify-visa2014-mapping   Post-import expected vs actual (Application|ApplicationProfileInstanceProgress; --entity --tier --sample/--full --report/--report-html).");
     Console.WriteLine("      Options: [--legacy-source …] [--target-connection conn] [--catalog-only] [--skip-target-check]");
     Console.WriteLine("                [--entity Person,AddressOfResidence,…] [--max-rows N] [--output report.json]");
     Console.WriteLine("                [--person-id-map path] [--address-id-map path] [--output path.xlsx] [--max-rows N]");
     Console.WriteLine("  --rebuild-visa2014-geography-db  Build reference SQLite DB of Turkmenistan regions/cities for import conflict resolution.");
     Console.WriteLine("      Options: [--output path\\turkmenistan-geography.db] [--verbose]");
     Console.WriteLine("  --generate-visa2014-tenant-catalogs  VISA2015 → tenant project-contract + approval-leg-profile JSON (order.yaml steps).");
+    Console.WriteLine("  --export-visa2014-application-profile-tenant-json  Wave 1: legacy → application-profile.calik-energi.json (after Excel sign-off).");
+    Console.WriteLine("      Options: [--legacy-source calik-energi|calik-energi-local-pg] [--output path.json] [--max-rows N]");
+    Console.WriteLine("  --export-visa2014-application-profile-nested-template-preview  Wave 3: target DB → nested-template Excel proposal.");
+    Console.WriteLine("      Options: --target-connection conn [--output path.xlsx]");
+    Console.WriteLine("  --export-visa2014-application-profile-nested-template-tenant-json  Wave 3: target DB → nested-template tenant JSON.");
+    Console.WriteLine("  --export-visa2014-application-profile-approval-leg-version-matrix  Phase A: VISA2015 → approval-leg version frequency + seed JSON.");
+    Console.WriteLine("      Options: [--legacy-source calik-energi] [--output path.json] [--matrix-report path.md] [--max-rows N]");
+    Console.WriteLine("      Options: --target-connection conn [--output path.json]");
     Console.WriteLine("      Options: [--legacy-source calik-energi|calik-energi-onprem-staging] [--connection conn] [--force]");
     Console.WriteLine("  --import-visa2014           Legacy SQL → Visa2026 headless ObjectSpace (requires --inprocess).");
+    Console.WriteLine("      --entity Person|Passport|Visa|Education|EmployeePositionHistory|EmployeeSalary|AddressOfResidence|Application|ApplicationProfileInstancePerson|ApplicationItem|ApplicationProfileInstanceProgress|WorkPermit|WorkPermitItem|Invitation|InvitationItem|Rejection|RejectionItem");
     Console.WriteLine("      Options: --entity Person|Passport|... [--legacy-source calik-energi] [--inprocess] [--target-connection conn]");
-    Console.WriteLine("                [--max-rows N] [--dry-run] [--batch-size N] [--parallelism N] [--id-map-output path.json] [--no-wait]");
-    Console.WriteLine("                --parallelism: worker count for Application/ApplicationItem/ApplicationProgress (default 4; headless only)");
+    Console.WriteLine("                [--max-rows N] [--application-type App_Inv] [--dry-run] [--batch-size N] [--parallelism N] [--id-map-output path.json] [--no-wait]");
+    Console.WriteLine("                --parallelism: worker count for Application/ApplicationItem/ApplicationProfileInstanceProgress (default 4; headless only)");
     Console.WriteLine("                [--supplement-permit-positions]  EmployeePositionHistory: import soft-deleted WH referenced by WorkPermit");
     Console.WriteLine("                [--supplement-permit-persons]  Person: import soft-deleted Person referenced by active WorkPermit (IsArchived)");
     Console.WriteLine("                [--supplement-permit-passports]  Passport: import Passport rows referenced by active WorkPermit");
@@ -308,7 +323,7 @@ static void PrintHelp()
     Console.WriteLine("  --cleanup-visa2014-person-middlename     Move employee Person.MiddleName (legacy position title) to");
     Console.WriteLine("                                           current EmployeePositionHistory.ActualPosition, then clear MiddleName.");
     Console.WriteLine("      Options: [--dry-run] [--api-base-url url] [--user Admin] [--password pwd] [--no-wait] [--verbose]");
-    Console.WriteLine("  --cleanup-visa2014-application-progress-seeds  DELETE auto-seeded ApplicationProgress rows");
+    Console.WriteLine("  --cleanup-visa2014-application-progress-seeds  DELETE auto-seeded ApplicationProfileInstanceProgress rows");
     Console.WriteLine("  --patch-visa2014-application-migration-service PATCH Application.MigrationService on imported apps");
     Console.WriteLine("      (DepartmentForRegistration FK mapping — approved lookup-translations)");
     Console.WriteLine("      Options: [--legacy-source calik-energi] [--application-id-map path.json]");
@@ -318,15 +333,17 @@ static void PrintHelp()
     Console.WriteLine("      Options: [--legacy-source calik-energi] [--inference-rules path.yaml] [--application-id-map path.json]");
     Console.WriteLine("                [--dry-run] [--force] [--api-base-url url] [--no-wait] [--verbose]");
     Console.WriteLine("  --patch-visa2014-application-project-contract  PATCH Application.ProjectContract (ShowProjectContract types)");
+    Console.WriteLine("  --patch-visa2014-application-profile  PATCH Application.ApplicationProfile from legacy ApplicationType (Wave 2; --target-connection, --dry-run, --skip-report path)");
+    Console.WriteLine("  --patch-visa2014-application-profile-nested-templates  PATCH ApplicationProfile.NestedTemplates from tenant JSON (Wave 3; --target-connection, --dry-run)");
     Console.WriteLine("  --correct-visa-application-types  Retype App_Visa_Ext→708, FM via-ministry + progress regen (--legacy-source, --dry-run)");
     Console.WriteLine("  --correct-application-progress-ministry-legs  Regenerate progress for via-ministry apps missing ministry legs (profile/snapshot leg count; --legacy-source, --dry-run)");
-    Console.WriteLine("  --backfill-application-approval-leg-snapshots  Fill ApprovalLegSnapshots from ApprovalLegProfile (Ministrlik; no progress delete; --target-connection, --dry-run)");
-    Console.WriteLine("  --correct-application-progress-order  Recompute ApplicationProgress.Order from workflow sequence (all apps; --target-connection, --dry-run)");
+    Console.WriteLine("  --backfill-application-approval-leg-snapshots  Fill instance snapshots + version name from ApprovalLegProfile / profile Default (Ministrlik; no progress delete; --target-connection, --dry-run)");
+    Console.WriteLine("  --correct-application-progress-order  Recompute ApplicationProfileInstanceProgress.Order from workflow sequence (all apps; --target-connection, --dry-run)");
     Console.WriteLine("  --correct-person-subcontractor  Patch Person.Subcontractor from legacy IDNumber / Tasaron (--legacy-source, --dry-run)");
     Console.WriteLine("  --correct-person-relationship  Patch Person.Relationship from legacy FamilyMemberRelation (--legacy-source, --dry-run)");
     Console.WriteLine("  --correct-person-address-of-residence  Backfill Person AddressOfResidence from PIA + patch ApplicationItem (--legacy-source, --dry-run)");
     Console.WriteLine("  --correct-application-item-person-current  Backfill ApplicationItem CurrentEducation/CurrentSalary/CurrentWorkPermitItem from Person (--dry-run)");
-    Console.WriteLine("  --correct-application-item-application-parent  Reparent ApplicationItems after Application id-map rebuild (--legacy-source, --dry-run)");
+    Console.WriteLine("  --correct-application-item-application-parent  Reparent ApplicationItems after ApplicationProfileInstance id-map rebuild (--legacy-source, --dry-run)");
     Console.WriteLine("  --correct-application-type-composite  Retype Application.ApplicationType from legacy SubType enum (--legacy-source, --dry-run)");
     Console.WriteLine("  --correct-visa-type  Patch Visa.VisaType from legacy TypeOfVisaL:mgCode (--legacy-source, --dry-run)");
     Console.WriteLine("  --correct-application-visa-type  Infer Application.VisaType from ApplicationType.Name (no legacy FK; --target-connection, --dry-run)");
@@ -512,6 +529,46 @@ if (HasArg(args, "--rebuild-visa2014-id-maps"))
     return;
 }
 
+if (HasArg(args, "--export-visa2014-application-profile-tenant-json"))
+{
+    Log.Phase("VISA2014 ApplicationProfile tenant JSON export (Wave 1)");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = Visa2014ApplicationProfileTenantCatalogExportCommand.Run(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
+if (HasArg(args, "--export-visa2014-application-profile-nested-template-preview"))
+{
+    Log.Phase("VISA2014 ApplicationProfile nested templates preview (Wave 3)");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = Visa2014ApplicationProfileNestedTemplateExportCommand.RunPreview(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
+if (HasArg(args, "--export-visa2014-application-profile-nested-template-tenant-json"))
+{
+    Log.Phase("VISA2014 ApplicationProfile nested templates tenant JSON (Wave 3)");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = Visa2014ApplicationProfileNestedTemplateExportCommand.RunTenantJson(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
+if (HasArg(args, "--export-visa2014-application-profile-approval-leg-version-matrix"))
+{
+    Log.Phase("VISA2014 ApplicationProfile approval-leg version matrix (Phase A)");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = Visa2014ApplicationProfileApprovalLegVersionMatrixCommand.Run(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
 if (HasArg(args, "--generate-visa2014-tenant-catalogs"))
 {
     Log.Phase("VISA2014 tenant catalog generation");
@@ -596,9 +653,9 @@ if (HasArg(args, "--cleanup-visa2014-person-middlename"))
 
 if (HasArg(args, "--cleanup-visa2014-application-progress-seeds"))
 {
-    Log.Phase("VISA2014 ApplicationProgress seed cleanup");
+    Log.Phase("VISA2014 ApplicationProfileInstanceProgress seed cleanup");
     bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
-    int exitCode = await Visa2014ApplicationProgressSeedCleanup.RunCommandAsync(args, isVerbose);
+    int exitCode = await Visa2014ApplicationProfileInstanceProgressSeedCleanup.RunCommandAsync(args, isVerbose);
     Log.Close();
     Environment.ExitCode = exitCode;
     return;
@@ -634,9 +691,29 @@ if (HasArg(args, "--patch-visa2014-application-project-contract"))
     return;
 }
 
+if (HasArg(args, "--patch-visa2014-application-profile"))
+{
+    Log.Phase("VISA2014 Application.ApplicationProfile PATCH (Wave 2)");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = await Visa2014ApplicationProfilePatch.RunCommandAsync(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
+if (HasArg(args, "--patch-visa2014-application-profile-nested-templates"))
+{
+    Log.Phase("VISA2014 ApplicationProfile nested templates PATCH (Wave 3)");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = await Visa2014ApplicationProfileNestedTemplatePatch.RunCommandAsync(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
 if (HasArg(args, "--correct-visa-application-types"))
 {
-    Log.Phase("VISA2014 Application type route correction");
+    Log.Phase("VISA2014 ApplicationProfileInstance type route correction");
     bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
     int exitCode = await Visa2014ApplicationTypeRouteCorrection.RunCommandAsync(args, isVerbose);
     Log.Close();
@@ -646,9 +723,9 @@ if (HasArg(args, "--correct-visa-application-types"))
 
 if (HasArg(args, "--correct-application-progress-ministry-legs"))
 {
-    Log.Phase("VISA2014 ApplicationProgress ministry-leg correction");
+    Log.Phase("VISA2014 ApplicationProfileInstanceProgress ministry-leg correction");
     bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
-    int exitCode = await Visa2014ApplicationProgressMinistryLegCorrection.RunCommandAsync(args, isVerbose);
+    int exitCode = await Visa2014ApplicationProfileInstanceProgressMinistryLegCorrection.RunCommandAsync(args, isVerbose);
     Log.Close();
     Environment.ExitCode = exitCode;
     return;
@@ -656,9 +733,9 @@ if (HasArg(args, "--correct-application-progress-ministry-legs"))
 
 if (HasArg(args, "--backfill-application-approval-leg-snapshots"))
 {
-    Log.Phase("VISA2014 Application ApprovalLegSnapshot backfill (Ministrlik)");
+    Log.Phase("VISA2014 ApplicationProfileInstance ApprovalLegSnapshot backfill (Ministrlik)");
     bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
-    int exitCode = await Visa2014ApplicationApprovalLegSnapshotBackfill.RunCommandAsync(args, isVerbose);
+    int exitCode = await Visa2014ApplicationProfileInstanceApprovalLegSnapshotBackfill.RunCommandAsync(args, isVerbose);
     Log.Close();
     Environment.ExitCode = exitCode;
     return;
@@ -666,9 +743,9 @@ if (HasArg(args, "--backfill-application-approval-leg-snapshots"))
 
 if (HasArg(args, "--correct-application-progress-order"))
 {
-    Log.Phase("VISA2014 ApplicationProgress workflow order correction");
+    Log.Phase("VISA2014 ApplicationProfileInstanceProgress workflow order correction");
     bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
-    int exitCode = await Visa2014ApplicationProgressOrderCorrection.RunCommandAsync(args, isVerbose);
+    int exitCode = await Visa2014ApplicationProfileInstanceProgressOrderCorrection.RunCommandAsync(args, isVerbose);
     Log.Close();
     Environment.ExitCode = exitCode;
     return;
@@ -716,7 +793,7 @@ if (HasArg(args, "--correct-application-item-person-current"))
 
 if (HasArg(args, "--correct-application-item-application-parent"))
 {
-    Log.Phase("VISA2014 ApplicationItem Application parent correction");
+    Log.Phase("VISA2014 ApplicationItem ApplicationProfileInstance parent correction");
     bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
     int exitCode = await Visa2014ApplicationItemApplicationParentCorrection.RunCommandAsync(args, isVerbose);
     Log.Close();
@@ -726,7 +803,7 @@ if (HasArg(args, "--correct-application-item-application-parent"))
 
 if (HasArg(args, "--correct-application-type-composite"))
 {
-    Log.Phase("VISA2014 Application ApplicationType composite correction");
+    Log.Phase("VISA2014 ApplicationProfileInstance ApplicationType composite correction");
     bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
     int exitCode = await Visa2014ApplicationTypeCompositeCorrection.RunCommandAsync(args, isVerbose);
     Log.Close();
@@ -744,11 +821,12 @@ if (HasArg(args, "--correct-visa-type"))
     return;
 }
 
-if (HasArg(args, "--correct-visa2014-issuing-application-item"))
+if (HasArg(args, "--correct-visa2014-issuing-application-item")
+    || HasArg(args, "--correct-visa2014-issuing-application-profile-instance"))
 {
-    Log.Phase("VISA2014 Visa IssuingApplicationItem correction");
+    Log.Phase("VISA2014 Visa IssuingApplicationProfileInstance correction");
     bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
-    int exitCode = await Visa2014VisaIssuingApplicationItemCorrection.RunCommandAsync(args, isVerbose);
+    int exitCode = await Visa2014VisaIssuingApplicationProfileInstanceCorrection.RunCommandAsync(args, isVerbose);
     Log.Close();
     Environment.ExitCode = exitCode;
     return;
@@ -764,9 +842,19 @@ if (HasArg(args, "--correct-visa2014-invitation-item"))
     return;
 }
 
+if (HasArg(args, "--correct-visa2014-existing-item-links"))
+{
+    Log.Phase("VISA2014 existing WorkPermitItem/InvitationItem → ApplicationProfileInstance M2M");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = await Visa2014ExistingItemLinkCorrection.RunCommandAsync(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
 if (HasArg(args, "--correct-application-visa-type"))
 {
-    Log.Phase("VISA2014 Application VisaType inference correction");
+    Log.Phase("VISA2014 ApplicationProfileInstance VisaType inference correction");
     bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
     int exitCode = await Visa2014ApplicationVisaTypeCorrection.RunCommandAsync(args, isVerbose);
     Log.Close();
@@ -963,7 +1051,7 @@ try
         var medicalRecordImporter    = new MedicalRecordImporter(api);
         var applicationImporter      = new ApplicationImporter(api);
         var appItemImporter          = new ApplicationItemImporter(api);
-        var appProgressImporter      = new ApplicationProgressImporter(api);
+        var appProgressImporter      = new ApplicationProfileInstanceProgressImporter(api);
         var invitationImporter       = new InvitationImporter(api);
         var invitationItemImporter   = new InvitationItemImporter(api);
         var workPermitImporter       = new WorkPermitImporter(api);
@@ -1252,13 +1340,13 @@ try
         #endregion
 
         // ===================================================================
-        #region Phase 5 — Application
+        #region Phase 5 — ApplicationProfileInstance
         // ===================================================================
         Log.Phase("Phase 5: Creating Application");
 
         Log.Step("Creating application...");
         var application = await applicationImporter.CreateOneAsync(DateTime.Today, ApplicationTypeCategory.Employee, appType.Id);
-        if (application == null) { Log.Error("Application creation failed — aborting."); return; }
+        if (application == null) { Log.Error("ApplicationProfileInstance creation failed — aborting."); return; }
         Log.Ok($"Application: {application.Id}");
 
         Log.Step("Creating application item...");
@@ -1271,7 +1359,7 @@ try
         Log.Ok($"ApplicationItem: {appItem.Id}");
 
         Log.Step("Logging initial application progress...");
-        await appProgressImporter.CreateOneAsync(application.Id, appState!.Id, DateTime.Now, "Application submitted.");
+        await appProgressImporter.CreateOneAsync(application.Id, appState!.Id, DateTime.Now, "ApplicationProfileInstance submitted.");
         Log.Ok("Phase 5 complete.");
         #endregion
 
@@ -1318,7 +1406,7 @@ try
         await api.CreateAsync<object>("TravelHistory", arrivalPayload);
         Log.Ok("TravelHistory created.");
 
-        // BusinessTrip creation removed — fields moved to Application (BusinessTripStartDate, BusinessTripEndDate, BusinessTripPurpose).
+        // BusinessTrip creation removed — fields moved to ApplicationProfileInstance (BusinessTripStartDate, BusinessTripEndDate, BusinessTripPurpose).
 
         Log.Ok("Phase 7 complete.");
         #endregion

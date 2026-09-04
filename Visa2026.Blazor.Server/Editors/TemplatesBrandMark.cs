@@ -2,7 +2,7 @@ namespace Visa2026.Blazor.Server.Editors;
 
 /// <summary>
 /// Dedicated Templates brand mark (report package catalog — officer caption "Templates").
-/// Shared across Application / ApplicationItem toolbar actions and slot chrome.
+/// Shared across ApplicationProfileInstance / ApplicationRosterMergeLine toolbar actions and slot chrome.
 /// </summary>
 internal static class TemplatesBrandMark
 {

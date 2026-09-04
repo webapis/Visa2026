@@ -1,0 +1,30 @@
+flowchart TB
+    subgraph instance ["Application Profile Instance"]
+        API["Application Profile Instance"]
+        PEOPLE["People on this case\n(ApplicationProfileInstancePerson)"]
+        API --> PEOPLE
+    end
+
+    subgraph issued ["1. Issued output — May produce Visa"]
+        V["Visa"]
+        API -->|"New issued visa\n(extension / direct)"| V
+        V -->|"IssuingApplicationProfileInstance"| API
+        PEOPLE -->|"one visa per unused person"| V
+        V -->|"Passport"| PEOPLE
+        V -->|"IssuingInvitationItem"| NIL["null"]
+    end
+
+    subgraph sibling ["May produce Work permit — sibling tile"]
+        WP["WorkPermit header"]
+        API -->|"New work permit"| WP
+        WP -->|"ApplicationProfileInstance"| API
+    end
+
+    subgraph input ["2. Input / linked — existing person data"]
+        VM2M["Visas M2M\n(ApplicationProfileInstance.Visas)"]
+        API -.->|"skip-nav link"| VM2M
+        VM2M -->|"example consumers"| CC["Cancel / change /\nprior-visa workflows"]
+    end
+
+    VM2M -.->|"NOT a visa source"| X["✗ linked visas do not stamp origin"]
+    WP -.->|"NOT a visa source"| X

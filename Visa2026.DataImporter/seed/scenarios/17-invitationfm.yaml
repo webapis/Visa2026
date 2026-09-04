@@ -4,7 +4,7 @@ description: Invitation application for family members of John Doe (spouse + dau
 dependsOn: InvitationEmployee
 sync: false
 anchor:
-  entity: Application
+  entity: ApplicationProfileInstance
   key: FullApplicationNumber
   value: 4/-017
 data:
@@ -113,10 +113,10 @@ data:
     Start Date: 2026-11-01
     Expiration Date: 2027-11-01
   Applications:
-  - Application Number: 017
+  - ApplicationProfileInstance Number: 017
     Date: 2026-04-05
     Project Contract: GT-15
-    Application Type: App_Inv_FM
+    ApplicationProfileInstance Type: App_Inv_FM
     Urgency: Adaty tertipde !
     Visa Period: 3 (üç) aý
     Visa Category: Köp gezeklik

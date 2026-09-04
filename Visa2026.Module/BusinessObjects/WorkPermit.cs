@@ -13,6 +13,8 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using Visa2026.Module.Editors;
+using Visa2026.Module.Services;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -43,32 +45,37 @@ namespace Visa2026.Module.BusinessObjects
         public bool ShowOptionalFields { get; set; }
 
         /// <summary>
-        /// Optional link to a visa application. When set, work permit items can be validated against that application's people.
-        /// Only applications whose type has <see cref="ApplicationType.CanIssueWorkPermit"/> are offered.
+        /// Application Profile Instance that issued this work permit (1:N from instance Issued records).
+        /// Set at create from instance workspace; read-only on detail. Import sets via Path B.
         /// </summary>
-        [ImmediatePostData]
+        [ExcludeFromOptionalDetailFields]
+        [ModelDefault("AllowEdit", "False")]
         [VisibleInListView(false)]
         [VisibleInDetailView(true)]
         [VisibleInLookupListView(false)]
-        [DataSourceProperty(nameof(AvailableApplications))]
-        [ToolTip("Link this work permit to an application when one exists. Leave empty for standalone work permits.")]
-        public virtual Application Application { get; set; }
+        [DataSourceProperty(nameof(AvailableApplicationProfileInstances))]
+        [ToolTip("Application Profile Instance that produced this work permit. Set when created from Issued records on that case.")]
+        [InverseProperty(nameof(ApplicationProfileInstance.WorkPermits))]
+        [XafDisplayName("Issuing profile instance")]
+        public virtual ApplicationProfileInstance ApplicationProfileInstance { get; set; }
 
         /// <summary>
         /// Candidate applications for <see cref="Application"/> (types that may produce a work permit).
         /// </summary>
         [NotMapped]
         [Browsable(false)]
-        public IList<Application> AvailableApplications
+        public IList<ApplicationProfileInstance> AvailableApplicationProfileInstances
         {
             get
             {
                 var objectSpace = ObjectSpaceHelper.Get(this);
                 if (objectSpace == null)
-                    return new List<Application>();
+                    return new List<ApplicationProfileInstance>();
 
-                return objectSpace.GetObjectsQuery<Application>()
-                    .Where(a => a.ApplicationType != null && a.ApplicationType.CanIssueWorkPermit)
+                return objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
+                    .Where(a =>
+                        (a.ApplicationProfile != null && a.ApplicationProfile.ProduceWorkPermit)
+                        || (a.ApplicationType != null && a.ApplicationType.CanIssueWorkPermit))
                     .OrderByDescending(a => a.ApplicationDate)
                     .ThenBy(a => a.FullApplicationNumber)
                     .ToList();
@@ -76,18 +83,63 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         [RuleFromBoolProperty(
+            "WorkPermit_ApplicationProfileInstanceRequired",
+            DefaultContexts.Save,
+            "Create the work permit from Application Profile Instance → Issued records (New work permit), not from the Work Permit list.")]
+        [Browsable(false)]
+        public bool IsApplicationProfileInstanceRequired =>
+            WorkPermitIssuingOriginPolicy.HasRequiredApplicationProfileInstance(this);
+
+        [RuleFromBoolProperty(
             "WorkPermit_ApplicationTypeAllowed",
             DefaultContexts.Save,
-            "Application must be a type that can issue a work permit.")]
+            "ApplicationProfileInstance must be a type that can issue a work permit.")]
         [Browsable(false)]
         public bool IsApplicationTypeAllowed
         {
             get
             {
-                if (Application == null)
+                if (ApplicationProfileInstance == null)
                     return true;
-                return ApplicationTypeCapabilities.CanIssueWorkPermit(Application.ApplicationType);
+                return ApplicationTypeCapabilities.CanIssueWorkPermit(ApplicationProfileInstance);
             }
+        }
+
+        [RuleFromBoolProperty(
+            "WorkPermit_ApplicationProfileInstanceSingleUse",
+            DefaultContexts.Save,
+            "This issuing application is already linked to another work permit.")]
+        [Browsable(false)]
+        public bool IsApplicationProfileInstanceSingleUse
+        {
+            get
+            {
+                if (ApplicationProfileInstance == null)
+                    return true;
+
+                var objectSpace = ObjectSpaceHelper.Get(this);
+                if (objectSpace == null)
+                    return true;
+
+                var appId = ApplicationProfileInstance.ID;
+                return !objectSpace.GetObjectsQuery<WorkPermit>()
+                    .Any(w => w.ID != ID
+                        && w.ApplicationProfileInstance != null
+                        && w.ApplicationProfileInstance.ID == appId);
+            }
+        }
+
+        public override void OnCreated()
+        {
+            base.OnCreated();
+            if (IssuedDate == default)
+                IssuedDate = DateTime.Today;
+        }
+
+        public override void OnSaving()
+        {
+            WorkPermitIssuedRosterItemsHelper.EnsureRosterWorkPermitItems(this);
+            base.OnSaving();
         }
 
         [Aggregated]
@@ -118,13 +170,11 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                if (Application?.ApplicationItems != null)
-                {
-                    return Application.ApplicationItems
-                        .Select(ai => ai.Person)
-                        .Where(p => p != null && p.IsEmployee)
-                        .ToList()!;
-                }
+                var roster = ApplicationRosterHelper.GetRosterPeople(ApplicationProfileInstance)
+                    .Where(p => p.IsEmployee)
+                    .ToList();
+                if (roster.Count > 0)
+                    return roster;
 
                 IObjectSpace? objectSpace = ObjectSpaceHelper.Get(this);
                 if (objectSpace == null)

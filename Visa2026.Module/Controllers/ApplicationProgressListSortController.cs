@@ -1,21 +1,21 @@
-﻿using DevExpress.ExpressApp;
+using DevExpress.ExpressApp;
 using DevExpress.Xpo;
 using DevExpress.Xpo.DB;
 using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.Controllers;
 
-public sealed class ApplicationProgressListSortController : ViewController<ListView>
+public sealed class ApplicationProfileInstanceProgressListSortController : ViewController<ListView>
 {
     private static readonly string[] TargetListViewIds =
     [
         "Application_ProgressHistory_ListView",
-        "ApplicationProgress_ListView",
+        "ApplicationProfileInstanceProgress_ListView",
     ];
 
-    public ApplicationProgressListSortController()
+    public ApplicationProfileInstanceProgressListSortController()
     {
-        TargetObjectType = typeof(ApplicationProgress);
+        TargetObjectType = typeof(ApplicationProfileInstanceProgress);
     }
 
     protected override void OnActivated()
@@ -43,7 +43,7 @@ public sealed class ApplicationProgressListSortController : ViewController<ListV
         View.CollectionSource.CanApplySorting = true;
         View.CollectionSource.Sorting =
         [
-            new SortProperty(nameof(ApplicationProgress.Order), SortingDirection.Ascending),
+            new SortProperty(nameof(ApplicationProfileInstanceProgress.Order), SortingDirection.Ascending),
         ];
     }
 }

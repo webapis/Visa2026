@@ -70,8 +70,8 @@ Inherited from `AppGroupABaseReport` — **535F** (= attachments end 524F + 11F)
 |---|---|---|
 | `TotalPersonCount` | `Application` | ✅ |
 | `TotalPersonCountText` | `Application` | ✅ |
-| `VisaPeriod_NameTm` | `Application → VisaPeriod` | ✅ |
-| `VisaCategory_NameTm` | `Application → VisaCategory` | ✅ |
+| `VisaPeriod_NameTm` | `ApplicationProfileInstance → VisaPeriod` | ✅ |
+| `VisaCategory_NameTm` | `ApplicationProfileInstance → VisaCategory` | ✅ |
 
 Properties consumed by `AppGroupABaseReport` (Recipient, Urgency, Greeting, Description, CompanyHead) are not repeated here — see the group base.
 
@@ -80,6 +80,6 @@ Properties consumed by `AppGroupABaseReport` (Recipient, Urgency, Greeting, Desc
 ## ReportsUpdater.cs entry
 
 ```csharp
-AddPredefinedReport<AppInvReport>("App Inv Report", typeof(Application), isInplaceReport: true);
+AddPredefinedReport<AppInvReport>("App Inv Report", typeof(ApplicationProfileInstance), isInplaceReport: true);
 CreateReportVisibility("App Inv Report", "[ApplicationType.Name] = 'App_Inv'");
 ```

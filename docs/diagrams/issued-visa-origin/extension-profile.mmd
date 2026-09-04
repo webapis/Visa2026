@@ -1,0 +1,7 @@
+flowchart TB
+    subgraph extension ["Extension profile"]
+        API1["Application Profile Instance"]
+        V1["Visa"]
+        API1 -->|"New issued visa"| V1
+        V1 -->|"IssuingApplicationProfileInstance"| API1
+    end

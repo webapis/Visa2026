@@ -32,12 +32,12 @@ SELECT
 FROM "RejectionItems" ri
 INNER JOIN "Rejections" r
     ON r."ID" = ri."RejectionID" AND COALESCE(r."GCRecord", 0) = 0
-INNER JOIN "Applications" a
-    ON a."ID" = r."ApplicationID" AND COALESCE(a."GCRecord", 0) = 0
-INNER JOIN "ApplicationTypes" at
-    ON at."ID" = a."ApplicationTypeID"
-   AND COALESCE(at."GCRecord", 0) = 0
-   AND COALESCE(at."CanIssueInvitation", FALSE) = TRUE
+INNER JOIN "ApplicationProfileInstances" a
+    ON a."ID" = r."ApplicationProfileInstanceID" AND COALESCE(a."GCRecord", 0) = 0
+INNER JOIN "ApplicationProfiles" apf
+    ON apf."ID" = a."ApplicationProfileID"
+   AND COALESCE(apf."GCRecord", 0) = 0
+   AND COALESCE(apf."ProduceInvitation", FALSE) = TRUE
 INNER JOIN "People" p
     ON p."ID" = ri."PersonID" AND COALESCE(p."GCRecord", 0) = 0
 LEFT JOIN "ProjectContracts" apc
@@ -90,17 +90,17 @@ SELECT
     )                                                                       AS "StatusLabel",
     'st-cat-1'                                                              AS "StatusCssClass",
     COALESCE(first_p."IsArchived", FALSE)                                   AS "IsArchived"
-FROM "Applications" a
-INNER JOIN "ApplicationTypes" at
-    ON at."ID" = a."ApplicationTypeID"
-   AND COALESCE(at."GCRecord", 0) = 0
-   AND COALESCE(at."CanIssueInvitation", FALSE) = TRUE
+FROM "ApplicationProfileInstances" a
+INNER JOIN "ApplicationProfiles" apf
+    ON apf."ID" = a."ApplicationProfileID"
+   AND COALESCE(apf."GCRecord", 0) = 0
+   AND COALESCE(apf."ProduceInvitation", FALSE) = TRUE
 LEFT JOIN "ProjectContracts" apc
     ON apc."ID" = a."ProjectContractID" AND COALESCE(apc."GCRecord", 0) = 0
 LEFT JOIN LATERAL (
     SELECT ap."StateID"
-    FROM "ApplicationProgresses" ap
-    WHERE ap."ApplicationID" = a."ID"
+    FROM "ApplicationProfileInstanceProgresses" ap
+    WHERE ap."ApplicationProfileInstanceID" = a."ID"
       AND COALESCE(ap."GCRecord", 0) = 0
     ORDER BY ap."Date" DESC NULLS LAST, ap."ID" DESC
     LIMIT 1
@@ -110,15 +110,14 @@ INNER JOIN "ApplicationStates" ast
    AND COALESCE(ast."GCRecord", 0) = 0
    AND ast."Code" = 'PROCESS_REJECTED'
 LEFT JOIN LATERAL (
-    SELECT ai."PersonID"
-    FROM "ApplicationItems" ai
-    WHERE ai."ApplicationID" = a."ID"
-      AND COALESCE(ai."GCRecord", 0) = 0
-    ORDER BY ai."ID"
+    SELECT ap_row."PersonId"
+    FROM "ApplicationProfileInstancePeople" ap_row
+    WHERE ap_row."ApplicationProfileInstanceId" = a."ID"
+    ORDER BY ap_row."PersonId"
     LIMIT 1
-) first_ai ON TRUE
+) first_m2m ON TRUE
 LEFT JOIN "People" first_p
-    ON first_p."ID" = first_ai."PersonID" AND COALESCE(first_p."GCRecord", 0) = 0
+    ON first_p."ID" = first_m2m."PersonId" AND COALESCE(first_p."GCRecord", 0) = 0
 LEFT JOIN "ProjectContracts" pc
     ON pc."ID" = first_p."ProjectContractID" AND COALESCE(pc."GCRecord", 0) = 0
 LEFT JOIN "People" sp
@@ -129,6 +128,6 @@ WHERE COALESCE(a."GCRecord", 0) = 0
   AND NOT EXISTS (
         SELECT 1
         FROM "Rejections" r
-        WHERE r."ApplicationID" = a."ID"
+        WHERE r."ApplicationProfileInstanceID" = a."ID"
           AND COALESCE(r."GCRecord", 0) = 0
     );

@@ -358,15 +358,6 @@
         <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationMigrationSlaProfile" Caption="Göç SLA profili">
-      <OwnMembers>
-        <Member Name="ApplicationTypes" Caption="Başvuru türleri" />
-        <Member Name="DateDeleted" Caption="Silinme Tarihi" />
-        <Member Name="DeletedBy" Caption="Silen" />
-        <Member Name="MaxDaysInReview" Caption="Azami iş günleri" />
-        <Member Name="WarningDaysBeforeMax" Caption="Uyarı (iş günleri)" />
-      </OwnMembers>
-    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationNumberingProfile" Caption="Başvuru Numaralandırma">
       <OwnMembers>
         <Member Name="ApplicationNumberPadding" Caption="Başvuru No Uzunluğu" />
@@ -709,6 +700,7 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="FullName" Caption="Ad Soyad" />
         <Member Name="PassportAuthority" Caption="Pasaport Veren Kurum" />
+        <Member Name="PassportExpirationDate" Caption="Pasaport Bitiş Tarihi" />
         <Member Name="PassportIssueDate" Caption="Pasaport Veriliş Tarihi" />
         <Member Name="PassportLine" Caption="Pasaport (tek satır)" />
         <Member Name="PassportNumber" Caption="Pasaport No" />
@@ -826,6 +818,7 @@
         <Member Name="Email" Caption="E-posta" />
         <Member Name="Name" Caption="Ad" />
         <Member Name="PhoneNumber" Caption="Telefon" />
+        <Member Name="RegistrationDate" Caption="Şirket Tescil Tarihi" />
         <Member Name="TaxInformation" Caption="Vergi Bilgisi" />
       </OwnMembers>
     </Class>
@@ -1515,6 +1508,7 @@
         <Member Name="PersonalNumber" Caption="Kişisel No" />
         <Member Name="Photo" Caption="Fotoğraf" />
         <Member Name="PositionHistory" Caption="Pozisyon Geçmişi" />
+        <Member Name="PreviousWorkplacesInTurkmenistan" Caption="Türkmenistan'daki önceki iş yerleri" />
         <Member Name="ProjectContract" Caption="Proje Sözleşmesi" />
         <Member Name="RejectionItems" Caption="Ret Kalemleri" />
         <Member Name="Relationship" Caption="Yakınlık" />
@@ -1921,6 +1915,8 @@
         <Member Name="Notes" Caption="Seyahat Notları" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Region" Caption="Bölge" />
+        <Member Name="SourceApplication_ApplicationDate" Caption="Başvuru Tarihi" />
+        <Member Name="SourceApplication_FullApplicationNumber" Caption="Başvuru No" />
         <Member Name="Title" Caption="Başlık" />
         <Member Name="TravelDate" Caption="Seyahat Tarihi" />
         <Member Name="TravelType" Caption="Seyahat Türü" />
@@ -2488,12 +2484,10 @@
     <DetailView Id="ApplicationItemReportPackageListHost_DetailView" Caption="Şablonlar" />
     <DetailView Id="ApplicationLocation_DetailView" Caption="Başvuru Yeri" />
     <ListView Id="ApplicationLocation_ListView" Caption="Başvuru Yerleri" />
-    <DetailView Id="ApplicationMigrationSlaProfile_DetailView" Caption="Göç SLA profili" />
-    <ListView Id="ApplicationMigrationSlaProfile_ListView" Caption="Göç SLA profilleri" />
     <DetailView Id="ApplicationNumberingProfile_DetailView" Caption="Başvuru Numaralandırma" />
     <ListView Id="ApplicationNumberingProfile_ListView" Caption="Başvuru Numaralandırma" />
-    <DetailView Id="ApplicationProgress_DetailView" Caption="Başvuru İlerlemesi" />
-    <ListView Id="ApplicationProgress_ListView" Caption="Başvuru İlerlemeleri">
+    <DetailView Id="ApplicationProfileInstanceProgress_DetailView" Caption="Başvuru İlerlemesi" />
+    <ListView Id="ApplicationProfileInstanceProgress_ListView" Caption="Başvuru İlerlemeleri">
       <Columns>
         <ColumnInfo Id="Date" Caption="Tarih" />
         <ColumnInfo Id="Description" Caption="Açıklama" />
@@ -2501,6 +2495,8 @@
         <ColumnInfo Id="StatusListLabel" Caption="Durum" />
       </Columns>
     </ListView>
+    <DetailView Id="ApplicationProgress_DetailView" Caption="Başvuru İlerlemesi" />
+    <ListView Id="ApplicationProgress_ListView" Caption="Başvuru İlerlemeleri" />
     <DetailView Id="ApplicationReason_DetailView" Caption="Başvuru Nedeni" />
     <ListView Id="ApplicationReason_ListView" Caption="Başvuru Nedenleri" />
     <DetailView Id="ApplicationReportPackageListHost_DetailView" Caption="Şablonlar" />
@@ -2927,6 +2923,8 @@
         <ColumnInfo Id="CheckPoint" Caption="Kontrol Noktası" />
         <ColumnInfo Id="MovementType" Caption="Hareket Türü" />
         <ColumnInfo Id="Notes" Caption="Seyahat Notları" />
+        <ColumnInfo Id="SourceApplication_ApplicationDate" Caption="Başvuru Tarihi" />
+        <ColumnInfo Id="SourceApplication_FullApplicationNumber" Caption="Başvuru No" />
         <ColumnInfo Id="TravelDate" Caption="Seyahat Tarihi" />
         <ColumnInfo Id="TravelType" Caption="Seyahat Türü" />
       </Columns>

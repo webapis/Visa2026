@@ -1,0 +1,90 @@
+@using Visa2026.Module.Services.OfficerShell
+
+<div class="os-pager">
+    <div class="os-pager__summary">@SummaryText</div>
+    <div class="os-pager__size">
+        <label class="os-pager__size-label" for="@SelectId">Rows per page</label>
+        <select class="os-pager__size-select form-select form-select-sm"
+                id="@SelectId"
+                value="@PageSize"
+                @onchange="OnPageSizeChanged">
+            @foreach (var size in OfficerShellPagination.PageSizeOptions)
+            {
+                <option value="@size">@size</option>
+            }
+        </select>
+    </div>
+    <nav class="os-pager__nav" aria-label="Pagination">
+        <ul class="pagination pagination-sm mb-0">
+            <li class="page-item @(Page <= 1 ? "disabled" : null)">
+                <button type="button" class="page-link" disabled="@(Page <= 1)" @onclick="() => GoToPage(Page - 1)" aria-label="Previous page">‹</button>
+            </li>
+            @foreach (var item in PageItems())
+            {
+                if (item.IsEllipsis)
+                {
+                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                }
+                else
+                {
+                    <li class="page-item @(item.Number == Page ? "active" : null)">
+                        <button type="button" class="page-link" @onclick="() => GoToPage(item.Number)">@item.Number</button>
+                    </li>
+                }
+            }
+            <li class="page-item @(Page >= TotalPages ? "disabled" : null)">
+                <button type="button" class="page-link" disabled="@(Page >= TotalPages)" @onclick="() => GoToPage(Page + 1)" aria-label="Next page">›</button>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+@code {
+    [Parameter] public string PagerId { get; set; } = "list";
+    [Parameter] public int Page { get; set; } = 1;
+    [Parameter] public int PageSize { get; set; } = 25;
+    [Parameter] public int Total { get; set; }
+    [Parameter] public int TotalPages { get; set; } = 1;
+    [Parameter] public int Start { get; set; }
+    [Parameter] public int End { get; set; }
+    [Parameter] public EventCallback<int> PageChanged { get; set; }
+    [Parameter] public EventCallback<int> PageSizeChanged { get; set; }
+
+    private string SelectId => $"pager-size-{PagerId}";
+    private string SummaryText => Total == 0 ? "Showing 0 of 0" : $"Showing {Start}–{End} of {Total}";
+
+    private async Task GoToPage(int page)
+    {
+        if (page < 1 || page > TotalPages || page == Page)
+            return;
+        if (PageChanged.HasDelegate)
+            await PageChanged.InvokeAsync(page);
+    }
+
+    private async Task OnPageSizeChanged(ChangeEventArgs e)
+    {
+        if (!int.TryParse(e.Value?.ToString(), out var size))
+            return;
+        if (PageSizeChanged.HasDelegate)
+            await PageSizeChanged.InvokeAsync(size);
+    }
+
+    private IEnumerable<(bool IsEllipsis, int Number)> PageItems()
+    {
+        if (TotalPages <= 7)
+        {
+            for (var i = 1; i <= TotalPages; i++)
+                yield return (false, i);
+            yield break;
+        }
+
+        yield return (false, 1);
+        if (Page > 3)
+            yield return (true, 0);
+        for (var n = Math.Max(2, Page - 1); n <= Math.Min(TotalPages - 1, Page + 1); n++)
+            yield return (false, n);
+        if (Page < TotalPages - 2)
+            yield return (true, 0);
+        yield return (false, TotalPages);
+    }
+}

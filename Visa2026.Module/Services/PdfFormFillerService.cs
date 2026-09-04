@@ -76,7 +76,15 @@ namespace Visa2026.Module.Services
 
                     foreach (var field in loFields)
                     {
-                        if (data.TryGetValue(field.Name, out object value) && value != null)
+                        if (_logger.IsEnabled(LogLevel.Debug)
+                            && field.Name != null
+                            && field.Name.IndexOf("Image", StringComparison.OrdinalIgnoreCase) >= 0)
+                        {
+                            _logger.LogDebug("XFA image-like field '{FieldName}' type={FieldType}.",
+                                field.Name, field.GetType().Name);
+                        }
+
+                        if (PdfXfaFieldValueLookup.TryGetValue(data, field.Name, out object value) && value != null)
                         {
                             _logger.LogDebug("Filling field '{FieldName}' (type: {FieldType}).",
                                 field.Name, field.GetType().Name);
@@ -220,46 +228,24 @@ namespace Visa2026.Module.Services
                     _logger.LogWarning("The form is not an XFA form. AcroForm filling is not implemented in this example.");
                 }
 
-                // Directly patch the XFA datasets XML for image fields.
-                // ImageValueBase64 appears to be a no-op in Spire 12.x — direct XML edit is required.
-                if (form.XFAForm?.XmlDatasets != null && _pendingImageBase64.Count > 0)
+                // ImageEdit fields are often missing from XfaFields / not typed as XfaImageField.
+                // Collect byte[] photos from the mapping dictionary so XML patches still run.
+                // Foxit/Adobe paint the saved ImageField1; pdf.js does not — preview overlays
+                // Person.Photo via PdfPersonPhotoDataUri.
+                foreach (var pair in data)
                 {
-                    try
-                    {
-                        XmlNode xfaRoot = form.XFAForm.XmlDatasets;
-                        XmlDocument xfaDoc = xfaRoot as XmlDocument ?? xfaRoot.OwnerDocument;
-                        _logger.LogInformation("XFA datasets root: {Root}", xfaRoot.Name);
-                        _logger.LogInformation("XFA datasets preview: {Xml}",
-                            xfaRoot.OuterXml.Length > 400 ? xfaRoot.OuterXml[..400] : xfaRoot.OuterXml);
+                    if (!TryGetPngBytes(pair.Value, out var pngBytes) || pngBytes.Length == 0)
+                        continue;
+                    var b64 = Convert.ToBase64String(pngBytes);
+                    if (!_pendingImageBase64.ContainsKey(pair.Key))
+                        _pendingImageBase64[pair.Key] = b64;
+                }
 
-                        foreach (var kv in _pendingImageBase64)
-                        {
-                            // Field name pattern: topmostSubform[0].Page1[0].ImageField1[0]
-                            // Strip array indices to get simple element name: ImageField1
-                            string localName = System.Text.RegularExpressions.Regex.Replace(
-                                kv.Key.Split('.')[^1], @"\[\d+\]", "");
-
-                            var node = xfaRoot.SelectSingleNode($"//*[local-name()='{localName}']");
-                            if (node != null)
-                            {
-                                node.InnerText = kv.Value;
-                                var attr = node.Attributes["xfa:contentType"]
-                                    ?? xfaDoc.CreateAttribute("xfa", "contentType", "http://www.xfa.org/schema/xfa-data/1.0/");
-                                attr.Value = "image/png";
-                                node.Attributes.SetNamedItem(attr);
-                                _logger.LogInformation("XFA datasets: set image data on <{Node}> ({Len} chars).",
-                                    localName, kv.Value.Length);
-                            }
-                            else
-                            {
-                                _logger.LogWarning("XFA datasets: node <{Node}> not found.", localName);
-                            }
-                        }
-                    }
-                    catch (Exception xmlEx)
-                    {
-                        _logger.LogWarning(xmlEx, "Direct XFA datasets image patch failed.");
-                    }
+                // Direct XML edit is required: ImageValueBase64 is a no-op in Spire 12.x.
+                // pdf.js XFA preview also needs <value><image> on the template field (not datasets only).
+                if (_pendingImageBase64.Count > 0 && form.XFAForm != null)
+                {
+                    PatchXfaImagePackets(form.XFAForm, _pendingImageBase64);
                 }
 
                 // Save via a temp file (mirrors the working VISA2014 approach).
@@ -339,6 +325,165 @@ namespace Visa2026.Module.Services
                     "An unexpected error occurred during PDF merging.");
                 throw;
             }
+        }
+
+        private void PatchXfaImagePackets(XFAForm xfaForm, Dictionary<string, string> imagesByFieldName)
+        {
+            foreach (var kv in imagesByFieldName)
+            {
+                var localName = PdfXfaFieldValueLookup.LocalName(kv.Key);
+                if (string.IsNullOrEmpty(localName))
+                    continue;
+
+                try
+                {
+                    xfaForm[localName] = kv.Value;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "XFAForm indexer could not set '{Name}'.", localName);
+                }
+
+                PatchXfaDatasetsImage(xfaForm.XmlDatasets, localName, kv.Value);
+                PatchXfaTemplateImage(xfaForm.XmlTemplate, localName, kv.Value);
+            }
+        }
+
+        private void PatchXfaDatasetsImage(XmlNode datasetsRoot, string localName, string base64)
+        {
+            if (datasetsRoot == null || string.IsNullOrEmpty(localName))
+                return;
+
+            try
+            {
+                var doc = datasetsRoot as XmlDocument ?? datasetsRoot.OwnerDocument;
+                if (doc == null)
+                    return;
+
+                var node = datasetsRoot.SelectSingleNode($"//*[local-name()='{localName}']");
+                if (node == null)
+                {
+                    _logger.LogWarning("XFA datasets: node <{Node}> not found.", localName);
+                    return;
+                }
+
+                node.InnerText = base64;
+                var attr = node.Attributes["xfa:contentType"]
+                    ?? doc.CreateAttribute("xfa", "contentType", "http://www.xfa.org/schema/xfa-data/1.0/");
+                attr.Value = "image/png";
+                node.Attributes.SetNamedItem(attr);
+                _logger.LogInformation("XFA datasets: set image data on <{Node}> ({Len} chars).",
+                    localName, base64.Length);
+            }
+            catch (Exception xmlEx)
+            {
+                _logger.LogWarning(xmlEx, "XFA datasets image patch failed for {Node}.", localName);
+            }
+        }
+
+        private void PatchXfaTemplateImage(XmlNode templateRoot, string localName, string base64)
+        {
+            if (templateRoot == null || string.IsNullOrEmpty(localName))
+                return;
+
+            try
+            {
+                var field = templateRoot.SelectSingleNode($"//*[local-name()='field' and @name='{localName}']");
+                if (field == null)
+                {
+                    _logger.LogWarning("XFA template: field '{Name}' not found.", localName);
+                    return;
+                }
+
+                var doc = field.OwnerDocument;
+                if (doc == null)
+                    return;
+
+                var ns = field.NamespaceURI;
+                XmlNode valueNode = null;
+                XmlNode imageNode = null;
+                foreach (XmlNode child in field.ChildNodes)
+                {
+                    if (child.LocalName == "value")
+                        valueNode = child;
+                }
+
+                if (valueNode != null)
+                {
+                    foreach (XmlNode child in valueNode.ChildNodes)
+                    {
+                        if (child.LocalName == "image")
+                            imageNode = child;
+                    }
+                }
+
+                if (valueNode == null)
+                {
+                    valueNode = string.IsNullOrEmpty(ns)
+                        ? doc.CreateElement("value")
+                        : doc.CreateElement("value", ns);
+                    field.AppendChild(valueNode);
+                }
+
+                if (imageNode == null)
+                {
+                    imageNode = string.IsNullOrEmpty(ns)
+                        ? doc.CreateElement("image")
+                        : doc.CreateElement("image", ns);
+                    valueNode.AppendChild(imageNode);
+                }
+
+                var contentType = imageNode.Attributes["contentType"] ?? doc.CreateAttribute("contentType");
+                contentType.Value = "image/png";
+                imageNode.Attributes.SetNamedItem(contentType);
+
+                var encoding = imageNode.Attributes["transferEncoding"] ?? doc.CreateAttribute("transferEncoding");
+                encoding.Value = "base64";
+                imageNode.Attributes.SetNamedItem(encoding);
+
+                if (imageNode.Attributes["href"] != null)
+                    imageNode.Attributes.RemoveNamedItem("href");
+
+                imageNode.InnerText = base64;
+                _logger.LogInformation("XFA template: set <image> on field '{Name}' ({Len} chars).",
+                    localName, base64.Length);
+            }
+            catch (Exception xmlEx)
+            {
+                _logger.LogWarning(xmlEx, "XFA template image patch failed for {Name}.", localName);
+            }
+        }
+
+        private static bool TryGetPngBytes(object value, out byte[] pngBytes)
+        {
+            pngBytes = null;
+            if (value is byte[] rawBytes && rawBytes.Length > 0)
+            {
+                try
+                {
+                    using var ms = new MemoryStream(rawBytes);
+                    using var img = Image.FromStream(ms);
+                    using var tmp = new MemoryStream();
+                    img.Save(tmp, ImageFormat.Png);
+                    pngBytes = tmp.ToArray();
+                    return pngBytes.Length > 0;
+                }
+                catch
+                {
+                    pngBytes = rawBytes;
+                    return true;
+                }
+            }
+
+            if (value is Image imageObj)
+            {
+                using var tmp = new MemoryStream();
+                imageObj.Save(tmp, ImageFormat.Png);
+                pngBytes = tmp.ToArray();
+                return pngBytes.Length > 0;
+            }
+
+            return false;
         }
     }
 }

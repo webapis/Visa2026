@@ -2,7 +2,7 @@ using System;
 namespace Visa2026.Module.BusinessObjects
 {
     /// <summary>Stable <see cref="ApplicationState.Code"/> values from <c>application-state.json</c>.</summary>
-    public static class ApplicationProgressStateCodes
+    public static class ApplicationProfileInstanceProgressStateCodes
     {
         public const string IsBeingPrepared = "IS_BEING_PREPARED";
 
@@ -40,7 +40,7 @@ namespace Visa2026.Module.BusinessObjects
     }
 
     /// <summary>Stable <see cref="ApplicationLocation.Code"/> values from <c>application-location.json</c>.</summary>
-    public static class ApplicationProgressLocationCodes
+    public static class ApplicationProfileInstanceProgressLocationCodes
     {
         public const string AtOffice = "AT_OFFICE";
         public const string AtMinistry1 = "AT_THE_MINISTERY_1";

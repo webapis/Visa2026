@@ -358,15 +358,6 @@
         <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationMigrationSlaProfile" Caption="Профиль SLA миграции">
-      <OwnMembers>
-        <Member Name="ApplicationTypes" Caption="Типы заявок" />
-        <Member Name="DateDeleted" Caption="Дата удаления" />
-        <Member Name="DeletedBy" Caption="Удалил" />
-        <Member Name="MaxDaysInReview" Caption="Макс. рабочих дней" />
-        <Member Name="WarningDaysBeforeMax" Caption="Предупреждение (рабочие дни)" />
-      </OwnMembers>
-    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationNumberingProfile" Caption="Нумерация заявок">
       <OwnMembers>
         <Member Name="ApplicationNumberPadding" Caption="Длина номера заявки" />
@@ -709,6 +700,7 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="FullName" Caption="ФИО" />
         <Member Name="PassportAuthority" Caption="Орган выдачи паспорта" />
+        <Member Name="PassportExpirationDate" Caption="Срок действия паспорта" />
         <Member Name="PassportIssueDate" Caption="Дата выдачи паспорта" />
         <Member Name="PassportLine" Caption="Паспорт (одной строкой)" />
         <Member Name="PassportNumber" Caption="Номер паспорта" />
@@ -826,6 +818,7 @@
         <Member Name="Email" Caption="Эл. почта" />
         <Member Name="Name" Caption="Имя" />
         <Member Name="PhoneNumber" Caption="Телефон" />
+        <Member Name="RegistrationDate" Caption="Дата регистрации компании" />
         <Member Name="TaxInformation" Caption="Налоговые данные" />
       </OwnMembers>
     </Class>
@@ -1515,6 +1508,7 @@
         <Member Name="PersonalNumber" Caption="Личный номер" />
         <Member Name="Photo" Caption="Фото" />
         <Member Name="PositionHistory" Caption="История должностей" />
+        <Member Name="PreviousWorkplacesInTurkmenistan" Caption="Предыдущие места работы в Туркменистане" />
         <Member Name="ProjectContract" Caption="Контракт проекта" />
         <Member Name="RejectionItems" Caption="Позиции отказа" />
         <Member Name="Relationship" Caption="Родство" />
@@ -1921,6 +1915,8 @@
         <Member Name="Notes" Caption="Примечания к поездке" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Region" Caption="Регион" />
+        <Member Name="SourceApplication_ApplicationDate" Caption="Дата заявки" />
+        <Member Name="SourceApplication_FullApplicationNumber" Caption="Номер заявки" />
         <Member Name="Title" Caption="Заголовок" />
         <Member Name="TravelDate" Caption="Дата поездки" />
         <Member Name="TravelType" Caption="Тип поездки" />
@@ -2488,12 +2484,10 @@
     <DetailView Id="ApplicationItemReportPackageListHost_DetailView" Caption="Шаблоны" />
     <DetailView Id="ApplicationLocation_DetailView" Caption="Место заявки" />
     <ListView Id="ApplicationLocation_ListView" Caption="Места заявки" />
-    <DetailView Id="ApplicationMigrationSlaProfile_DetailView" Caption="Профиль SLA миграции" />
-    <ListView Id="ApplicationMigrationSlaProfile_ListView" Caption="Профили SLA миграции" />
     <DetailView Id="ApplicationNumberingProfile_DetailView" Caption="Нумерация заявок" />
     <ListView Id="ApplicationNumberingProfile_ListView" Caption="Нумерация заявок" />
-    <DetailView Id="ApplicationProgress_DetailView" Caption="Прогресс заявки" />
-    <ListView Id="ApplicationProgress_ListView" Caption="Прогресс заявок">
+    <DetailView Id="ApplicationProfileInstanceProgress_DetailView" Caption="Прогресс заявки" />
+    <ListView Id="ApplicationProfileInstanceProgress_ListView" Caption="Прогресс заявок">
       <Columns>
         <ColumnInfo Id="Date" Caption="Дата" />
         <ColumnInfo Id="Description" Caption="Описание" />
@@ -2501,6 +2495,8 @@
         <ColumnInfo Id="StatusListLabel" Caption="Состояние" />
       </Columns>
     </ListView>
+    <DetailView Id="ApplicationProgress_DetailView" Caption="Прогресс заявки" />
+    <ListView Id="ApplicationProgress_ListView" Caption="Прогресс заявок" />
     <DetailView Id="ApplicationReason_DetailView" Caption="Причина заявки" />
     <ListView Id="ApplicationReason_ListView" Caption="Причины заявки" />
     <DetailView Id="ApplicationReportPackageListHost_DetailView" Caption="Шаблоны" />
@@ -2927,6 +2923,8 @@
         <ColumnInfo Id="CheckPoint" Caption="КПП" />
         <ColumnInfo Id="MovementType" Caption="Тип перемещения" />
         <ColumnInfo Id="Notes" Caption="Примечания к поездке" />
+        <ColumnInfo Id="SourceApplication_ApplicationDate" Caption="Дата заявки" />
+        <ColumnInfo Id="SourceApplication_FullApplicationNumber" Caption="Номер заявки" />
         <ColumnInfo Id="TravelDate" Caption="Дата поездки" />
         <ColumnInfo Id="TravelType" Caption="Тип поездки" />
       </Columns>

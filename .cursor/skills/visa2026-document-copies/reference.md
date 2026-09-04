@@ -69,8 +69,9 @@ flowchart TB
 
 | Helper | Role |
 |--------|------|
-| `visaDocumentCopyPreview.createPdfBlobUrl` | Iframe preview blob URL |
+| `visaDocumentCopyPreview.createPdfBlobUrl` | Iframe preview blob URL (scans) |
 | `visaDocumentCopyPreview.revokePdfBlobUrl` | Cleanup |
+| `visaXfaPreview.renderAll` | pdf.js XFA Application form preview (`wwwroot/lib/pdfjs/`) |
 | `visaPdfBatchToast.setCurrentBatchId` | Register batch for toast |
 | `visaPdfBatchToast.fetchJson` | Authorized API fetch (toast) |
 

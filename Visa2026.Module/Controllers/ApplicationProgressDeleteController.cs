@@ -6,8 +6,8 @@ using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.Controllers;
 
-/// <summary>Only the tail <see cref="ApplicationProgress"/> row on an application may be deleted.</summary>
-public sealed class ApplicationProgressDeleteController : ObjectViewController<ObjectView, ApplicationProgress>
+/// <summary>Only the tail <see cref="ApplicationProfileInstanceProgress"/> row on an application may be deleted.</summary>
+public sealed class ApplicationProfileInstanceProgressDeleteController : ObjectViewController<ObjectView, ApplicationProfileInstanceProgress>
 {
     private DeleteObjectsViewController? _deleteController;
 
@@ -28,7 +28,7 @@ public sealed class ApplicationProgressDeleteController : ObjectViewController<O
         View.CurrentObjectChanged -= View_SelectionChanged;
         if (View is ListView listView)
             listView.SelectionChanged -= View_SelectionChanged;
-        _deleteController?.DeleteAction.Enabled.RemoveItem(nameof(ApplicationProgressDeleteController));
+        _deleteController?.DeleteAction.Enabled.RemoveItem(nameof(ApplicationProfileInstanceProgressDeleteController));
         base.OnDeactivated();
     }
 
@@ -37,27 +37,27 @@ public sealed class ApplicationProgressDeleteController : ObjectViewController<O
     private void UpdateDeleteActionState()
     {
         _deleteController?.DeleteAction.Enabled.SetItemValue(
-            nameof(ApplicationProgressDeleteController),
+            nameof(ApplicationProfileInstanceProgressDeleteController),
             CanDeleteCurrentSelection());
     }
 
     private bool CanDeleteCurrentSelection()
     {
-        var selected = View.SelectedObjects.Cast<ApplicationProgress>().ToList();
+        var selected = View.SelectedObjects.Cast<ApplicationProfileInstanceProgress>().ToList();
         if (selected.Count != 1)
             return false;
 
-        return ApplicationProgressOrderHelper.IsLastTimelineStep(selected[0], ObjectSpace);
+        return ApplicationProfileInstanceProgressOrderHelper.IsLastTimelineStep(selected[0], ObjectSpace);
     }
 
     private void ObjectSpace_ObjectDeleting(object sender, ObjectsManipulatingEventArgs e)
     {
-        foreach (var progress in e.Objects.OfType<ApplicationProgress>())
+        foreach (var progress in e.Objects.OfType<ApplicationProfileInstanceProgress>())
         {
-            if (ApplicationProgressOrderHelper.IsLastTimelineStep(progress, ObjectSpace))
+            if (ApplicationProfileInstanceProgressOrderHelper.IsLastTimelineStep(progress, ObjectSpace))
                 continue;
 
-            throw new UserFriendlyException(VisaUiMessages.Get("ApplicationProgress.OnlyLastStepDeletable"));
+            throw new UserFriendlyException(VisaUiMessages.Get("ApplicationProfileInstanceProgress.OnlyLastStepDeletable"));
         }
     }
 }

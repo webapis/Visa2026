@@ -19,9 +19,9 @@ namespace Visa2026.Module.BusinessObjects
         [Key, Browsable(false), MaxLength(100)]
         public virtual string ID { get; set; }
 
-        public virtual Guid? ApplicationID { get; set; }
-        [ForeignKey(nameof(ApplicationID))]
-        public virtual Application Application { get; set; }
+        public virtual Guid? ApplicationProfileInstanceID { get; set; }
+        [ForeignKey(nameof(ApplicationProfileInstanceID))]
+        public virtual ApplicationProfileInstance ApplicationProfileInstance { get; set; }
 
         public virtual Guid? ExpiringWorkPermitItemID { get; set; }
         [ForeignKey(nameof(ExpiringWorkPermitItemID))]
@@ -36,16 +36,14 @@ namespace Visa2026.Module.BusinessObjects
         [ForeignKey(nameof(PassportID))]
         public virtual Passport Passport { get; set; }
 
-        // Part of Composite Key
+        // Part of Composite Key. Roster line navigation removed with ApplicationItem (Phase B):
+        // the roster line is no longer a business object, so this stays a bare key column.
         [Browsable(false)]
         public virtual Guid? ApplicationItemID { get; set; }
-        [ForeignKey(nameof(ApplicationItemID))]
-        [ModelDefault("Caption", "App Item")]
-        public virtual ApplicationItem? ApplicationItem { get; set; }
 
         // Part of Composite Key
         [Browsable(false)]
-        public virtual Guid ApplicationProgressID { get; set; }
+        public virtual Guid ApplicationProfileInstanceProgressID { get; set; }
 
         // --- Info Columns ---
 

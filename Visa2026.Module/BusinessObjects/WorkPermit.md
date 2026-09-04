@@ -37,7 +37,7 @@ This section details the data fields of the `WorkPermit` object as defined in `W
 ## 5. Business Rules & Logic
 
 - **`AvailableEmployees`**: When `Application` is set, lists employees from that application's items; otherwise lists all active employees (standalone work permits).
-- **`AvailableApplications`**: Datasource for `Application` — only types with `ApplicationType.CanIssueWorkPermit`.
+- **`AvailableApplicationProfileInstances`**: Datasource for `Application` — only types with `ApplicationType.CanIssueWorkPermit`.
 - **`IsApplicationTypeAllowed`**: when `Application` is set, requires `CanIssueWorkPermit`.
 - **Optional detail fields**: `Application` is behind the gear toggle; auto-expands when set.
 

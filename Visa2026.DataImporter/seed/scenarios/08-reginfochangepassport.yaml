@@ -4,7 +4,7 @@ description: Registration update after employees received new passports
 dependsOn: CheckIn
 sync: false
 anchor:
-  entity: Application
+  entity: ApplicationProfileInstance
   key: FullApplicationNumber
   value: 10/-008
 data:
@@ -24,9 +24,9 @@ data:
     Expiration Date: 2036-10-15
     Issued Country: Türkiýe
   Applications:
-  - Application Number: 008
+  - ApplicationProfileInstance Number: 008
     Date: 2026-10-15
-    Application Type: App_Reg_Info_Change_Passport
+    ApplicationProfileInstance Type: App_Reg_Info_Change_Passport
     Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
   ApplicationItems:
   - Person: John Doe

@@ -26,7 +26,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem(false)]
     [DefaultProperty(nameof(FullName))]
-    [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = PersonRoleHelper.NotEmployeeCriteria, Context = "DetailView", TargetItems = "Email;HireDate;MaritalStatus;WorkPermitItems;FamilyMembers;Educations;PositionHistory;Salaries;WorkDuties")]
+    [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = PersonRoleHelper.NotEmployeeCriteria, Context = "DetailView", TargetItems = "Email;HireDate;PreviousWorkplacesInTurkmenistan;MaritalStatus;WorkPermitItems;FamilyMembers;Educations;PositionHistory;Salaries;WorkDuties")]
     [Appearance("EmployeeOnly_Layout", AppearanceItemType = "LayoutItem", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = PersonRoleHelper.NotEmployeeCriteria, Context = "DetailView", TargetItems = "MaritalStatus")]
     [Appearance("EmployeeOnly_PersonRecordTabsLayout", AppearanceItemType = "LayoutItem", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = PersonRoleHelper.NotEmployeeCriteria, Context = "DetailView", TargetItems = "Educations;PositionHistory;Salaries;WorkDuties")]
     [Appearance("EmployeeOnly_IssuedFamilyMembersLayout", AppearanceItemType = "LayoutItem", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = PersonRoleHelper.NotEmployeeCriteria, Context = "DetailView", TargetItems = "FamilyMembers")]
@@ -64,7 +64,7 @@ namespace Visa2026.Module.BusinessObjects
             InvitationItems = new ObservableCollection<InvitationItem>();
             RejectionItems = new ObservableCollection<RejectionItem>();
             TravelHistories = new ObservableCollection<TravelHistory>();
-            ApplicationItems = new ObservableCollection<ApplicationItem>();
+            ApplicationProfileInstances = new ObservableCollection<ApplicationProfileInstance>();
             WorkDuties = new ObservableCollection<WorkDuty>();
         }
 
@@ -422,6 +422,18 @@ namespace Visa2026.Module.BusinessObjects
         public virtual DateTime HireDate { get; set; }
 
         /// <summary>
+        /// Prior employers or sites in Turkmenistan (Şahsy kagyz
+        /// <c>Türkmenistanda öňki işlän ýerleri</c>). Employees only. Optional.
+        /// </summary>
+        [MaxLength(500)]
+        [XafDisplayName("Previous workplaces in Turkmenistan")]
+        [ToolTip("Prior employers or sites in Turkmenistan for Şahsy kagyz. Use Ýok when none.")]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [ModelDefault("CustomCSSClassName", "e2e-person-previous-workplaces-in-turkmenistan")]
+        public virtual string PreviousWorkplacesInTurkmenistan { get; set; }
+
+        /// <summary>
         /// Manual lines for visa outputs (PDF, Şahsy kagyz, Word). Authoritative source — linked
         /// <see cref="FamilyMembers"/> do not override this field.
         /// Format (one person per line): Full name; dd.MM.yyyy; Relation (e.g. NameTm); Country code (e.g. TUR).
@@ -566,9 +578,10 @@ namespace Visa2026.Module.BusinessObjects
         [Aggregated]
         public virtual IList<TravelHistory> TravelHistories { get; set; }
 
-        [InverseProperty(nameof(ApplicationItem.Person))]
-         [ModelDefault("AllowEdit", "False")]
-        public virtual IList<ApplicationItem> ApplicationItems { get; set; }
+        [InverseProperty(nameof(ApplicationProfileInstance.People))]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInListView(false)]
+        public virtual IList<ApplicationProfileInstance> ApplicationProfileInstances { get; set; }
 
         public override void OnCreated()
         {

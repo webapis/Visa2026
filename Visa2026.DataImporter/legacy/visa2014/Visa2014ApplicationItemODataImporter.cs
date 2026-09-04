@@ -43,6 +43,7 @@ internal static class Visa2014ApplicationItemODataImporter
         int parallelism = 0,
         int batchSize = 50)
     {
+        throw new InvalidOperationException("ApplicationItem OData import is retired (Phase B hard-remove). Use --entity ApplicationProfileInstancePerson (skip-navigation People).");
         _ = objectSpaceFactory;
         _ = parallelism;
         _ = batchSize;
@@ -57,15 +58,15 @@ internal static class Visa2014ApplicationItemODataImporter
         var workPermitItemIdMap = LoadOptionalIdMap(workPermitItemIdMapPath);
         var invitationItemIdMap = LoadOptionalIdMap(invitationItemIdMapPath);
 
-        var applicationIdMapCollisions = Visa2014ApplicationTransform.FindApplicationIdMapCrossDateCollisions(
+        var applicationIdMapCollisions = Visa2014ApplicationTransform.FindApplicationProfileInstanceIdMapCrossDateCollisions(
             applicationIdMap,
             legacyConnectionString,
             lookupTranslationPaths);
         if (applicationIdMapCollisions.Count > 0)
         {
             Console.Error.WriteLine(
-                $"ERR Application id-map has {applicationIdMapCollisions.Count} cross-date collision(s). " +
-                "Rebuild with --rebuild-visa2014-id-maps --entity Application (matches FullApplicationNumber + ApplicationDate per legacy Oid).");
+                $"ERR ApplicationProfileInstance id-map has {applicationIdMapCollisions.Count} cross-date collision(s). " +
+                "Rebuild with --rebuild-visa2014-id-maps --entity ApplicationProfileInstance (matches FullApplicationNumber + ApplicationDate per legacy Oid).");
             foreach (var collision in applicationIdMapCollisions.Take(20))
                 Console.Error.WriteLine($"ERR   {collision}");
             if (applicationIdMapCollisions.Count > 20)
@@ -80,7 +81,7 @@ internal static class Visa2014ApplicationItemODataImporter
 
         if (verbose)
         {
-            Console.WriteLine($"INF Application id-map entries: {applicationIdMap.Count}");
+            Console.WriteLine($"INF ApplicationProfileInstance id-map entries: {applicationIdMap.Count}");
             Console.WriteLine($"INF Person id-map entries: {personIdMap.Count}");
             Console.WriteLine($"INF Passport id-map entries: {passportIdMap.Count}");
             Console.WriteLine($"INF Visa id-map entries: {visaIdMap.Count}");
@@ -115,7 +116,7 @@ internal static class Visa2014ApplicationItemODataImporter
             Console.WriteLine($"INF Missing parent id-map: {gap.MissingRequiredIdMap}");
             if (gap.MissingRequiredIdMap > 0)
             {
-                Console.WriteLine($"INF   Application not in id-map: {gap.MissingApplication}");
+                Console.WriteLine($"INF   ApplicationProfileInstance not in id-map: {gap.MissingApplication}");
                 Console.WriteLine($"INF   Person not in id-map: {gap.MissingPerson}");
                 Console.WriteLine($"INF   Passport not in id-map: {gap.MissingPassport}");
                 Console.WriteLine($"INF   Missing legacy FK on row: {gap.MissingLegacyField}");
@@ -234,7 +235,7 @@ internal static class Visa2014ApplicationItemODataImporter
                 }
 
                 var createdId = await target.CreateAsync(
-                    typeof(Visa2026.Module.BusinessObjects.ApplicationItem), payload);
+                    typeof(Visa2026.Module.BusinessObjects.Person), payload);
                 if (!createdId.HasValue)
                 {
                     failed++;
@@ -345,7 +346,7 @@ internal static class Visa2014ApplicationItemODataImporter
 
             if (!TryResolveRequiredIds(row, applicationIdMap, personIdMap, passportIdMap, out _, out _, out _, out var missingReason))
             {
-                if (missingReason.StartsWith("Application ", StringComparison.Ordinal))
+                if (missingReason.StartsWith("ApplicationProfileInstance ", StringComparison.Ordinal))
                     missingApplication++;
                 else if (missingReason.StartsWith("Person ", StringComparison.Ordinal))
                     missingPerson++;
@@ -385,15 +386,15 @@ internal static class Visa2014ApplicationItemODataImporter
         passportId = Guid.Empty;
         missingReason = "";
 
-        if (!TryParseLegacyGuid(row, "Application", out var legacyApplicationOid))
+        if (!TryParseLegacyGuid(row, "Application", out var legacyApplicationProfileInstanceOid))
         {
-            missingReason = "missing legacy Application Oid on row";
+            missingReason = "missing legacy ApplicationProfileInstance Oid on row";
             return false;
         }
 
-        if (!applicationIdMap.TryGetValue(legacyApplicationOid, out applicationId))
+        if (!applicationIdMap.TryGetValue(legacyApplicationProfileInstanceOid, out applicationId))
         {
-            missingReason = $"Application {legacyApplicationOid} not in id-map";
+            missingReason = $"ApplicationProfileInstance {legacyApplicationProfileInstanceOid} not in id-map";
             return false;
         }
 

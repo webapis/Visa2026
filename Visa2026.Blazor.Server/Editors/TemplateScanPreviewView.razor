@@ -1,0 +1,115 @@
+@namespace Visa2026.Blazor.Server.Editors
+@using System.IO
+@using Visa2026.Module.Services.TemplateConvert
+@using Visa2026.Module.Services.TemplateScan
+
+<div class="tas-split tas-split--preview">
+    <div class="tas-split__scan">
+        <div class="tas-filebar">
+            <strong>@TemplateName</strong>
+            <span class="tas-pill">@Outcome.EmittedTokens.Count placeholders</span>
+        </div>
+        <TemplateScanOfficePdfPreview OfficeBytes="Outcome.Content"
+                                      FileName="@PreviewOfficeFileName"
+                                      LoadingText="Opening the draft template…"
+                                      Caption="Draft pages from the generated copy, with library tokens written in.">
+            <div class="tas-viewport @(UsesPageSheet ? "tas-viewport--a4" : null) @(IsLandscape ? "tas-viewport--landscape" : null)">
+                @if (UsesPageSheet)
+                {
+                    <div class="tas-a4-page @(IsLandscape ? "tas-a4-page--landscape" : null)" aria-label="A4 draft preview">
+                        <TemplateConvertOutlineView Outline="Outcome.Outline" />
+                    </div>
+                }
+                else
+                {
+                    <TemplateConvertOutlineView Outline="Outcome.Outline" />
+                }
+            </div>
+        </TemplateScanOfficePdfPreview>
+        <div class="tas-inline-note">
+            <strong>Draft template, not a filled document.</strong>
+            <span>Same page layout as the uploaded file, with library tokens written in. After save, catalog <strong>Preview</strong> fills the case.</span>
+        </div>
+    </div>
+    <aside class="tas-rail @(Outcome.HasErrors ? "tas-rail--errors" : string.Empty)">
+        @if (Outcome.HasErrors)
+        {
+            <h4>Blocking problems</h4>
+            <ul class="tas-issues">
+                @foreach (var error in Outcome.Errors)
+                {
+                    <li class="tas-issue tas-issue--fail">@error</li>
+                }
+            </ul>
+        }
+
+        @if (Outcome.HasWarnings)
+        {
+            <h4>Warnings</h4>
+            <ul class="tas-issues">
+                @foreach (var warning in Outcome.Warnings)
+                {
+                    <li class="tas-issue tas-issue--warn">@warning</li>
+                }
+            </ul>
+        }
+
+        <h4>Placeholders</h4>
+        <ul class="tas-token-list">
+            @foreach (var token in Outcome.Validation.Tokens)
+            {
+                <li><code>@token</code></li>
+            }
+        </ul>
+
+        @if (Outcome.Gaps.Count > 0)
+        {
+            <h4>Scan gaps (@Outcome.Gaps.Count)</h4>
+            <ul class="tas-issues">
+                @foreach (var gap in Outcome.Gaps.Take(6))
+                {
+                    <li class="tas-issue tas-issue--warn">@gap.LabelText</li>
+                }
+            </ul>
+        }
+
+        @if (Outcome.HasWarnings && !Outcome.HasErrors && ShowWarningAcknowledgement)
+        {
+            <label class="tas-ack">
+                <input type="checkbox" checked="@WarningAcknowledged" @onchange="OnAckChanged" />
+                <span><strong>I understand the warnings</strong> and want to save this template.</span>
+            </label>
+        }
+    </aside>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public TemplateScanOutcome Outcome { get; set; } = null!;
+    [Parameter] public string TemplateName { get; set; } = string.Empty;
+    [Parameter] public bool ShowWarningAcknowledgement { get; set; }
+    [Parameter] public bool WarningAcknowledged { get; set; }
+    [Parameter] public EventCallback<bool> WarningAcknowledgedChanged { get; set; }
+
+    private bool IsWordOutline =>
+        Outcome.Outline.IsReadable && Outcome.Outline.Format == TemplateSourceFormat.Docx;
+
+    private bool IsLandscape => Outcome.Outline.IsLandscape;
+
+    private bool UsesPageSheet => IsWordOutline || IsLandscape;
+
+    private string PreviewOfficeFileName
+    {
+        get
+        {
+            var stem = string.IsNullOrWhiteSpace(TemplateName) ? "draft" : TemplateName.Trim();
+            var ext = Outcome.SourceFormat == TemplateSourceFormat.Xlsx ? ".xlsx" : ".docx";
+            return Path.HasExtension(stem) ? stem : stem + ext;
+        }
+    }
+
+    private async Task OnAckChanged(ChangeEventArgs e)
+    {
+        var value = (bool?)e.Value == true;
+        await WarningAcknowledgedChanged.InvokeAsync(value);
+    }
+}

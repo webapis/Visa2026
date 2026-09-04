@@ -1,0 +1,912 @@
+@namespace Visa2026.Blazor.Server.Editors
+@using DevExpress.Data.Filtering
+@using DevExpress.ExpressApp
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.Extensions.Options
+@using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Services.RuntimeLogging
+@using Visa2026.Module.Services.TemplateConvert
+
+@* Officer-facing template conversion (E7b). Interaction contract: docs/TEMPLATE_AI_CONVERT_UI_FLOW.md. *@
+
+@if (_open)
+{
+    <div class="tac-backdrop" @onclick="RequestCloseAsync">
+        <div class="tac-modal tac-modal--wide" role="dialog" aria-modal="true" aria-labelledby="tac-title" @onclick:stopPropagation="true">
+            <header class="tac-modal__head">
+                <div>
+                    <h2 id="tac-title">
+                        @(_manual ? "Add existing template" : "Convert document to template")
+                    </h2>
+                    <p>@_profileName@(string.IsNullOrEmpty(_caseNumber) ? string.Empty : " · case " + _caseNumber)</p>
+                </div>
+                <button type="button" class="tac-icon-btn" aria-label="Close" @onclick="RequestCloseAsync">&#10005;</button>
+            </header>
+
+            @if (!_manual)
+            {
+                <ol class="tac-stepper">
+                    @foreach (var step in Steps)
+                    {
+                        <li class="tac-stepper__item @StepCssClass(step.Stage)">
+                            <span class="tac-stepper__dot">@step.Number</span>
+                            <span>@step.Label</span>
+                        </li>
+                    }
+                </ol>
+            }
+
+            <div class="tac-modal__body">
+                @if (_stage == Stage.Upload)
+                {
+                    <div class="tac-form">
+                        @if (_source == EntrySource.Profile && !_manual)
+                        {
+                            <div class="tac-field">
+                                <label class="tac-field__label" for="tac-instance">Case to match against <em>*</em></label>
+                                @if (_instanceOptions.Count == 0)
+                                {
+                                    <p class="tac-note tac-note--fail">
+                                        This profile has no cases yet. Matching needs one real case to read values from,
+                                        so use <strong>+ Add template</strong> for an already prepared file.
+                                    </p>
+                                }
+                                else
+                                {
+                                    <select id="tac-instance" class="tac-input" value="@_selectedInstanceId"
+                                            @onchange="OnInstanceChanged">
+                                        <option value="@Guid.Empty">Choose a case…</option>
+                                        @foreach (var option in _instanceOptions)
+                                        {
+                                            <option value="@option.Id">@option.Label</option>
+                                        }
+                                    </select>
+                                    <small>Its values are what gets recognised in the upload. Nothing is written to the case.</small>
+                                }
+                            </div>
+                        }
+
+                        <div class="tac-field">
+                            <label class="tac-field__label" for="tac-file">Document <em>*</em></label>
+                            <label class="tac-drop @(_fileBytes is { Length: > 0 } ? "is-picked" : string.Empty)">
+                                <InputFile id="tac-file" OnChange="OnFileSelectedAsync" accept=".docx,.xlsx" />
+                                @if (_fileBytes is { Length: > 0 })
+                                {
+                                    <strong>@_fileName</strong>
+                                    <small>@($"{_fileBytes.Length / 1024:N0} KB") · click to choose a different file</small>
+                                }
+                                else
+                                {
+                                    <strong>Drop a filled .docx or .xlsx here</strong>
+                                    <small>or click to browse — the case values in it are what gets mapped</small>
+                                }
+                            </label>
+                        </div>
+
+                        <div class="tac-field">
+                            <label class="tac-field__label" for="tac-name">Template name <em>*</em></label>
+                            <input id="tac-name" class="tac-input" value="@_templateName"
+                                   @oninput="e => _templateName = e.Value?.ToString() ?? string.Empty" />
+                        </div>
+
+                        <div class="tac-field">
+                            <span class="tac-field__label">Save to</span>
+                            <label class="tac-radio">
+                                <input type="radio" name="tac-scope" checked="@(_catalogScope == ApplicationProfileTemplateCatalogScope.ProfileSpecific)"
+                                       @onchange="() => _catalogScope = ApplicationProfileTemplateCatalogScope.ProfileSpecific" />
+                                <span>This profile only — @_profileName</span>
+                            </label>
+                            <label class="tac-radio">
+                                <input type="radio" name="tac-scope" checked="@(_catalogScope == ApplicationProfileTemplateCatalogScope.Global)"
+                                       @onchange="() => _catalogScope = ApplicationProfileTemplateCatalogScope.Global" />
+                                <span>Shared catalog — available to every profile</span>
+                            </label>
+                        </div>
+
+                        <div class="tac-field">
+                            <label class="tac-field__label" for="tac-data-scope">Data</label>
+                            <select id="tac-data-scope" class="tac-input" value="@_dataScope"
+                                    @onchange="OnDataScopeChanged">
+                                <option value="@ApplicationProfileTemplateDataScope.ApplicationHeader">Case header — one document per case</option>
+                                <option value="@ApplicationProfileTemplateDataScope.PeopleM2M">People — one row or document per person</option>
+                                <option value="@ApplicationProfileTemplateDataScope.Both">Both</option>
+                            </select>
+                            <small>Header fields convert today. Person rosters are recognised but still need a developer.</small>
+                        </div>
+                    </div>
+                }
+                else if (_stage == Stage.Candidate && _analysis is { } analysis)
+                {
+                    <div class="tac-split">
+                        <div class="tac-split__doc">
+                            <div class="tac-filebar">
+                                <strong>@_fileName</strong>
+                                <span class="tac-pill">@(analysis.Format == TemplateSourceFormat.Xlsx ? "Excel" : "Word")</span>
+                            </div>
+                            <div class="tac-viewport">
+                                <TemplateConvertOutlineView Outline="analysis.Outline" Highlights="analysis.Candidate.Highlights" />
+                            </div>
+                            <div class="tac-legend">
+                                <span><i class="tac-swatch tac-swatch--match"></i>Found in this case — becomes a placeholder</span>
+                                <span><i class="tac-swatch tac-swatch--gap"></i>Looks like data but was not found</span>
+                            </div>
+                        </div>
+                        <aside class="tac-rail">
+                            <div class="tac-suit @SuitabilityCssClass(analysis.Candidate.Level)">
+                                @SuitabilityLabel(analysis.Candidate.Level)
+                            </div>
+                            <h4>Summary</h4>
+                            <div class="tac-chips">
+                                <span class="tac-chip tac-chip--ok">@analysis.Candidate.DistinctHeaderMatches header fields matched</span>
+                                @if (analysis.Candidate.DistinctRowMatches > 0)
+                                {
+                                    <span class="tac-chip tac-chip--info">@analysis.Candidate.DistinctRowMatches person fields matched</span>
+                                }
+                                @if (analysis.Candidate.GapCount > 0)
+                                {
+                                    <span class="tac-chip tac-chip--warn">@analysis.Candidate.GapCount possible gaps</span>
+                                }
+                            </div>
+                            <h4>Why</h4>
+                            <ul class="tac-criteria @CriteriaCssClass(analysis.Candidate.Level)">
+                                @foreach (var reason in analysis.Candidate.Reasons)
+                                {
+                                    <li><i>&bull;</i><span>@reason.Message</span></li>
+                                }
+                            </ul>
+                            @if (analysis.RosterLoopBlocksConversion)
+                            {
+                                <p class="tac-note tac-note--fail">
+                                    This document repeats one row per person, but safe loop markers could not be placed —
+                                    prepare the template manually and add it with <strong>Add prepared template</strong>.
+                                </p>
+                            }
+                            @if (analysis.Candidate.RequiresWarningAcknowledgement && !analysis.RosterLoopBlocksConversion)
+                            {
+                                <label class="tac-ack">
+                                    <input type="checkbox" checked="@_acknowledgedWarnings"
+                                           @onchange="e => _acknowledgedWarnings = (bool?)e.Value == true" />
+                                    <span><strong>Continue with warnings.</strong> Few case values were found, so the template may need manual work afterwards.</span>
+                                </label>
+                            }
+                        </aside>
+                    </div>
+                }
+                else if (_stage == Stage.Preview && _outcome is { } outcome)
+                {
+                    <div class="tac-split tac-split--preview">
+                        <div class="tac-split__doc">
+                            <div class="tac-filebar">
+                                <strong>@_templateName</strong>
+                                <span class="tac-pill">@outcome.Applied.Count placeholders written</span>
+                            </div>
+                            <div class="tac-viewport">
+                                <TemplateConvertOutlineView Outline="outcome.Outline" />
+                            </div>
+                            <div class="tac-inline-warn">
+                                <div>
+                                    <strong>This is the template, not a filled document.</strong>
+                                    <span>Merged preview against this case comes with the preview pipeline; the placeholders above are what gets saved.</span>
+                                </div>
+                            </div>
+                        </div>
+                        <aside class="tac-rail @(outcome.HasErrors ? "tac-rail--errors" : string.Empty)">
+                            @if (outcome.HasErrors)
+                            {
+                                <h4>Blocking problems</h4>
+                                <ul class="tac-issues">
+                                    @foreach (var error in outcome.Errors)
+                                    {
+                                        <li class="tac-issue tac-issue--error">@error</li>
+                                    }
+                                </ul>
+                                <p class="tac-note">Mapping chat is unavailable while tokens are broken - convert again or edit the file.</p>
+                            }
+                            else
+                            {
+                                <div class="tac-chat">
+                                    <h4>Adjust mapping</h4>
+                                    <div class="tac-chat__log">
+                                        @if (_chatMessages.Count == 0)
+                                        {
+                                            <p class="tac-chat__empty">Ask to change which fields become placeholders. I cannot change layout or wording.</p>
+                                        }
+                                        else
+                                        {
+                                            @foreach (var msg in _chatMessages)
+                                            {
+                                                <div class="@ChatBubbleCss(msg)">
+                                                    @if (!msg.IsOfficer)
+                                                    {
+                                                        <span class="tac-msg__avatar" aria-hidden="true">AI</span>
+                                                    }
+                                                    <div class="tac-msg__body">@msg.Text</div>
+                                                </div>
+                                            }
+                                        }
+                                    </div>
+                                    <div class="tac-chat__compose">
+                                        <input class="tac-input" placeholder="Ask me to adjust mapping..."
+                                               value="@_chatInput"
+                                               disabled="@(_busy || _chatBusy)"
+                                               @oninput="e => _chatInput = e.Value?.ToString() ?? string.Empty"
+                                               @onkeydown="OnChatKeyDown" />
+                                        <button type="button" class="tac-btn tac-btn--primary"
+                                                disabled="@(_busy || _chatBusy || string.IsNullOrWhiteSpace(_chatInput))"
+                                                @onclick="SendChatAsync">Send</button>
+                                    </div>
+                                </div>
+                            }
+                            @if (outcome.HasWarnings)
+                            {
+                                <h4>Warnings</h4>
+                                <ul class="tac-issues">
+                                    @foreach (var warning in outcome.Warnings)
+                                    {
+                                        <li class="tac-issue tac-issue--warning">@warning</li>
+                                    }
+                                </ul>
+                            }
+                            <h4>Mapped fields</h4>
+                            <ul class="tac-hl-list">
+                                @foreach (var applied in outcome.Applied)
+                                {
+                                    <li>
+                                        <span class="tac-hl-list__badge is-match">field</span>
+                                        <span class="tac-hl-list__text">@DescribeRegion(applied.Region)</span>
+                                        <code>@TemplateTokenSyntax.Wrap(applied.Token)</code>
+                                    </li>
+                                }
+                            </ul>
+                            @if (outcome.HasWarnings && !outcome.HasErrors)
+                            {
+                                <label class="tac-ack">
+                                    <input type="checkbox" checked="@_acknowledgedWarnings"
+                                           @onchange="e => _acknowledgedWarnings = (bool?)e.Value == true" />
+                                    <span><strong>I understand the warnings</strong> and want to save this template.</span>
+                                </label>
+                            }
+                        </aside>
+                    </div>
+                }
+                else if (_stage == Stage.Done)
+                {
+                    <div class="tac-done">
+                        <div class="tac-done__main">
+                            <div class="tac-done__icon">&#10003;</div>
+                            <h3>@(_source == EntrySource.Profile ? "Template added to the profile" : "Template saved")</h3>
+                            <p>
+                                @(_source == EntrySource.Profile
+                                    ? "It is in the profile's template list. Press Save profile to keep it."
+                                    : "It is now in the Resminamalar catalog for this case.")
+                            </p>
+                            <table class="tac-done__table">
+                                <tbody>
+                                    <tr><th>Template</th><td>@_savedTemplateName</td></tr>
+                                    <tr><th>Profile</th><td>@_profileName</td></tr>
+                                    <tr><th>Available in</th><td>@(_catalogScope == ApplicationProfileTemplateCatalogScope.Global ? "Shared catalog" : "This profile only")</td></tr>
+                                    @if (!_manual && _outcome is { } saved)
+                                    {
+                                        <tr><th>Placeholders written</th><td>@saved.Applied.Count</td></tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <aside class="tac-done__note">
+                            <h4>Next</h4>
+                            <p>Select it in the catalog to generate, or open it with <strong>Edit template</strong> to adjust wording in Word or Excel.</p>
+                        </aside>
+                    </div>
+                }
+            </div>
+
+            <footer class="tac-foot">
+                @if (!string.IsNullOrEmpty(_message))
+                {
+                    <span class="tac-foot__hint" style="@(_messageIsError ? "color:#b91c1c" : string.Empty)">@_message</span>
+                }
+                else if (_busy)
+                {
+                    <span class="tac-foot__hint">Working…</span>
+                }
+                else
+                {
+                    <span class="tac-foot__grow"></span>
+                }
+
+                @if (_stage == Stage.Upload)
+                {
+                    <button type="button" class="tac-btn tac-btn--ghost" @onclick="RequestCloseAsync">Cancel</button>
+                    @if (_manual)
+                    {
+                        <button type="button" class="tac-btn tac-btn--primary" disabled="@(!CanAddManual)" @onclick="AddManualAsync">Add to profile</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="tac-btn tac-btn--primary" disabled="@(!CanAnalyze)" @onclick="AnalyzeAsync">Check document</button>
+                    }
+                }
+                else if (_stage == Stage.Candidate)
+                {
+                    <button type="button" class="tac-btn tac-btn--ghost" @onclick="BackToUpload">Try another file</button>
+                    <button type="button" class="tac-btn tac-btn--primary" disabled="@(!CanConvert)" @onclick="ConvertAsync">Convert</button>
+                }
+                else if (_stage == Stage.Preview)
+                {
+                    <button type="button" class="tac-btn tac-btn--ghost" @onclick="BackToUpload">Start over</button>
+                    <button type="button" class="tac-btn tac-btn--primary" disabled="@(!CanApprove)" @onclick="ApproveAsync">Approve — save to profile</button>
+                }
+                else
+                {
+                    <button type="button" class="tac-btn tac-btn--ghost" @onclick="ConvertAnother">Add another</button>
+                    <button type="button" class="tac-btn tac-btn--primary" @onclick="CloseAsync">Close</button>
+                }
+            </footer>
+
+            @if (_discardPrompt)
+            {
+                <div class="tac-confirm">
+                    <div class="tac-confirm__box">
+                        <h3>Discard this conversion?</h3>
+                        <ul>
+                            <li>The uploaded document and everything mapped so far are dropped.</li>
+                            <li>Nothing has been saved to the profile yet.</li>
+                        </ul>
+                        <div class="tac-confirm__actions">
+                            <button type="button" class="tac-btn tac-btn--ghost" @onclick="() => _discardPrompt = false">Keep working</button>
+                            <button type="button" class="tac-btn tac-btn--primary" @onclick="CloseAsync">Discard</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    private enum Stage { Upload = 0, Candidate = 1, Preview = 2, Done = 3 }
+
+    /// <summary>
+    /// Instance = opened from a case, so the case is the match context and the dialog owns its object space.
+    /// Profile = opened from the wizard, so the officer picks a case and the wizard's object space and Save profile apply.
+    /// </summary>
+    private enum EntrySource { Instance, Profile }
+
+    private sealed record InstanceOption(Guid Id, string Label);
+
+    private sealed record ChatBubble(bool IsOfficer, string Text, bool Refused);
+
+    [Parameter] public EventCallback OnTemplateSaved { get; set; }
+
+    [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
+    [Inject] private ITemplateConvertOrchestrator Orchestrator { get; set; } = null!;
+    [Inject] private IOptions<TemplateAiConvertOptions> Options { get; set; } = null!;
+    [Inject] private IApplicationErrorReporter ErrorReporter { get; set; } = null!;
+    [Inject] private ITemplateConvertChatService ChatService { get; set; } = null!;
+
+    private bool _open;
+    private bool _manual;
+    private EntrySource _source = EntrySource.Instance;
+    private Stage _stage = Stage.Upload;
+    private bool _busy;
+    private bool _discardPrompt;
+
+    private IObjectSpace? _hostObjectSpace;
+    private ApplicationProfile? _hostProfile;
+    private IReadOnlyList<InstanceOption> _instanceOptions = Array.Empty<InstanceOption>();
+    private Guid _selectedInstanceId;
+
+    private Guid _instanceId;
+    private Guid _profileId;
+    private string _profileName = string.Empty;
+    private string _caseNumber = string.Empty;
+    private byte[]? _fileBytes;
+    private string _fileName = string.Empty;
+    private string _templateName = string.Empty;
+    private ApplicationProfileTemplateCatalogScope _catalogScope = ApplicationProfileTemplateCatalogScope.ProfileSpecific;
+    private ApplicationProfileTemplateDataScope _dataScope = ApplicationProfileTemplateDataScope.ApplicationHeader;
+
+    private TemplateConvertAnalysis? _analysis;
+    private TemplateConvertOutcome? _outcome;
+    private bool _acknowledgedWarnings;
+    private string? _message;
+    private bool _messageIsError;
+    private string _savedTemplateName = string.Empty;
+
+    private readonly List<ChatBubble> _chatMessages = new();
+    private string _chatInput = string.Empty;
+    private bool _chatBusy;
+    private TemplateMappingPlan? _currentPlan;
+
+    private static readonly (Stage Stage, int Number, string Label)[] Steps =
+    {
+        (Stage.Upload, 1, "Upload"),
+        (Stage.Candidate, 2, "Check"),
+        (Stage.Preview, 3, "Preview"),
+        (Stage.Done, 4, "Done"),
+    };
+
+    public async Task OpenAsync(Guid applicationProfileInstanceId, string caseNumber, bool manual = false)
+    {
+        Reset();
+        _manual = manual;
+        _instanceId = applicationProfileInstanceId;
+        _caseNumber = caseNumber ?? string.Empty;
+
+        using (var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>())
+        {
+            var instance = objectSpace.GetObjectByKey<ApplicationProfileInstance>(_instanceId);
+            var profile = instance?.ApplicationProfile;
+            if (profile == null)
+            {
+                _message = "This case has no application profile, so there is nothing to add a template to.";
+                _messageIsError = true;
+            }
+            else
+            {
+                _profileId = profile.ID;
+                _profileName = profile.Name ?? string.Empty;
+            }
+        }
+
+        _open = true;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    /// <summary>
+    /// Wizard entry. The profile is the one being edited, so the template is written into the wizard's
+    /// object space and only reaches the database when the officer saves the profile.
+    /// </summary>
+    public async Task OpenForProfileAsync(ApplicationProfile profile, IObjectSpace objectSpace, bool manual = false)
+    {
+        ArgumentNullException.ThrowIfNull(profile);
+        ArgumentNullException.ThrowIfNull(objectSpace);
+
+        Reset();
+        _source = EntrySource.Profile;
+        _manual = manual;
+        _hostObjectSpace = objectSpace;
+        _hostProfile = profile;
+        _profileId = profile.ID;
+        _profileName = profile.Name ?? string.Empty;
+        _instanceOptions = manual ? Array.Empty<InstanceOption>() : LoadInstanceOptions(profile, objectSpace);
+
+        _open = true;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    /// <summary>Newest cases only: the officer needs one representative filled case, not a case browser.</summary>
+    private static IReadOnlyList<InstanceOption> LoadInstanceOptions(ApplicationProfile profile, IObjectSpace objectSpace)
+    {
+        if (profile.ID == Guid.Empty)
+            return Array.Empty<InstanceOption>();
+
+        return objectSpace.GetObjects<ApplicationProfileInstance>(
+                CriteriaOperator.Parse("ApplicationProfile.ID = ?", profile.ID))
+            .OrderByDescending(static i => i.ApplicationDate)
+            .Take(25)
+            .Select(static i => new InstanceOption(
+                i.ID,
+                string.IsNullOrWhiteSpace(i.FullApplicationNumber)
+                    ? $"{i.ApplicationDate:dd.MM.yyyy}"
+                    : $"{i.FullApplicationNumber} · {i.ApplicationDate:dd.MM.yyyy}"))
+            .ToList();
+    }
+
+    private void OnInstanceChanged(ChangeEventArgs args)
+    {
+        _selectedInstanceId = Guid.TryParse(args.Value?.ToString(), out var id) ? id : Guid.Empty;
+    }
+
+    private void Reset()
+    {
+        _manual = false;
+        _source = EntrySource.Instance;
+        _hostObjectSpace = null;
+        _hostProfile = null;
+        _instanceOptions = Array.Empty<InstanceOption>();
+        _selectedInstanceId = Guid.Empty;
+        _stage = Stage.Upload;
+        _busy = false;
+        _discardPrompt = false;
+        _fileBytes = null;
+        _fileName = string.Empty;
+        _templateName = string.Empty;
+        _catalogScope = ApplicationProfileTemplateCatalogScope.ProfileSpecific;
+        _dataScope = ApplicationProfileTemplateDataScope.ApplicationHeader;
+        _analysis = null;
+        _outcome = null;
+        _acknowledgedWarnings = false;
+        _message = null;
+        _messageIsError = false;
+        _savedTemplateName = string.Empty;
+        _chatMessages.Clear();
+        _chatInput = string.Empty;
+        _chatBusy = false;
+        _currentPlan = null;
+    }
+
+    private Task RequestCloseAsync()
+    {
+        if (_busy)
+            return Task.CompletedTask;
+
+        // Nothing is persisted before Done, so anything past the upload screen is worth confirming.
+        if (_stage is Stage.Candidate or Stage.Preview)
+        {
+            _discardPrompt = true;
+            return InvokeAsync(StateHasChanged);
+        }
+
+        return CloseAsync();
+    }
+
+    private async Task CloseAsync()
+    {
+        _open = false;
+        Reset();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void OnDataScopeChanged(ChangeEventArgs args)
+    {
+        if (Enum.TryParse<ApplicationProfileTemplateDataScope>(args.Value?.ToString(), out var scope))
+            _dataScope = scope;
+    }
+
+    private async Task OnFileSelectedAsync(InputFileChangeEventArgs args)
+    {
+        var file = args.File;
+        if (file == null)
+            return;
+
+        _message = null;
+        _messageIsError = false;
+        _fileBytes = null;
+        _fileName = string.Empty;
+
+        if (!Orchestrator.TryResolveFormat(file.Name, out _))
+        {
+            _message = "Only Word (.docx) and Excel (.xlsx) files are supported. Save older .doc or .xls files in the new format first.";
+            _messageIsError = true;
+            return;
+        }
+
+        var limit = Options.Value.MaxUploadBytes;
+        if (file.Size > limit)
+        {
+            _message = $"This file is {file.Size / 1048576} MB and the limit is {limit / 1048576} MB.";
+            _messageIsError = true;
+            return;
+        }
+
+        await using var stream = file.OpenReadStream(limit);
+        using var buffer = new MemoryStream();
+        await stream.CopyToAsync(buffer);
+
+        _fileBytes = buffer.ToArray();
+        _fileName = file.Name;
+        if (string.IsNullOrWhiteSpace(_templateName))
+            _templateName = Path.GetFileNameWithoutExtension(file.Name);
+    }
+
+    private bool CanAnalyze =>
+        !_busy
+        && _fileBytes is { Length: > 0 }
+        && !string.IsNullOrWhiteSpace(_templateName)
+        && _profileId != Guid.Empty
+        && (_source == EntrySource.Instance || _selectedInstanceId != Guid.Empty);
+
+    private async Task AnalyzeAsync()
+    {
+        if (!CanAnalyze)
+            return;
+
+        _busy = true;
+        _message = null;
+        _messageIsError = false;
+        await InvokeAsync(StateHasChanged);
+
+        // The wizard owns its object space and must keep owning it; only the case-side entry creates one.
+        IObjectSpace? ownedObjectSpace = _source == EntrySource.Profile
+            ? null
+            : ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+
+        try
+        {
+            var objectSpace = ownedObjectSpace ?? _hostObjectSpace!;
+            var instanceId = _source == EntrySource.Profile ? _selectedInstanceId : _instanceId;
+            var instance = objectSpace.GetObjectByKey<ApplicationProfileInstance>(instanceId);
+            var profile = _source == EntrySource.Profile ? _hostProfile : instance?.ApplicationProfile;
+            if (instance == null || profile == null)
+            {
+                _message = "This case is no longer available.";
+                _messageIsError = true;
+                return;
+            }
+
+            _analysis = Orchestrator.Analyze(new TemplateConvertAnalyzeRequest
+            {
+                Profile = profile,
+                Instance = instance,
+                Content = _fileBytes!,
+                FileName = _fileName,
+                DataScope = _dataScope,
+            });
+
+            _acknowledgedWarnings = false;
+            _stage = Stage.Candidate;
+        }
+        catch (Exception ex)
+        {
+            _message = "The document could not be checked: " + ex.Message;
+            _messageIsError = true;
+            ErrorReporter.ReportReportPackageError("Template convert candidate check failed.", "TemplateConvert", ex);
+        }
+        finally
+        {
+            ownedObjectSpace?.Dispose();
+            _busy = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private bool CanConvert =>
+        !_busy
+        && _analysis is { CanConvert: true }
+        && (!_analysis.Candidate.RequiresWarningAcknowledgement || _acknowledgedWarnings);
+
+    private async Task ConvertAsync()
+    {
+        if (!CanConvert || _analysis == null || _fileBytes == null)
+            return;
+
+        _busy = true;
+        _message = null;
+        _messageIsError = false;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            _outcome = await Orchestrator.ConvertAsync(_analysis, _fileBytes);
+            _currentPlan = new TemplateMappingPlan(_outcome.Applied.ToList(), Array.Empty<LoopMarker>(), Array.Empty<MappingGap>(), null);
+            _chatMessages.Clear();
+            _chatInput = string.Empty;
+            _acknowledgedWarnings = false;
+            _stage = Stage.Preview;
+        }
+        catch (Exception ex)
+        {
+            _message = "The conversion failed: " + ex.Message;
+            _messageIsError = true;
+            ErrorReporter.ReportReportPackageError("Template convert write failed.", "TemplateConvert", ex);
+        }
+        finally
+        {
+            _busy = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private bool CanApprove =>
+        !_busy
+        && _outcome is { HasErrors: false }
+        && (!_outcome.HasWarnings || _acknowledgedWarnings);
+
+    private bool CanAddManual =>
+        !_busy && _fileBytes is { Length: > 0 } && !string.IsNullOrWhiteSpace(_templateName);
+
+    private Task ApproveAsync() => SaveAsync(_outcome?.Content, converted: true);
+
+    private Task AddManualAsync() => SaveAsync(_fileBytes, converted: false);
+
+    private async Task SaveAsync(byte[]? content, bool converted)
+    {
+        if (content is not { Length: > 0 })
+            return;
+        if (converted ? !CanApprove : !CanAddManual)
+            return;
+
+        _busy = true;
+        await InvokeAsync(StateHasChanged);
+
+        IObjectSpace? ownedObjectSpace = _source == EntrySource.Profile
+            ? null
+            : ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfile>();
+
+        try
+        {
+            var objectSpace = ownedObjectSpace ?? _hostObjectSpace!;
+            var profile = _source == EntrySource.Profile
+                ? _hostProfile
+                : objectSpace.GetObjectByKey<ApplicationProfile>(_profileId);
+            if (profile == null)
+            {
+                _message = "The application profile is no longer available.";
+                _messageIsError = true;
+                return;
+            }
+
+            var kind = Orchestrator.TryResolveFormat(_fileName, out var format) && format == TemplateSourceFormat.Xlsx
+                ? ApplicationProfileTemplateKind.Excel
+                : ApplicationProfileTemplateKind.Word;
+
+            Orchestrator.Save(new TemplateConvertSaveRequest
+            {
+                ObjectSpace = objectSpace,
+                Profile = profile,
+                TemplateName = _templateName.Trim(),
+                TemplateKind = kind,
+                DataScope = _dataScope,
+                CatalogScope = _catalogScope,
+                Content = content,
+                FileName = _fileName,
+            });
+
+            // The wizard commits with "Save profile"; committing here would half-save a profile the officer is still editing.
+            if (_source == EntrySource.Instance)
+                objectSpace.CommitChanges();
+
+            _savedTemplateName = _templateName.Trim();
+            _stage = Stage.Done;
+            _message = null;
+            _messageIsError = false;
+
+            if (OnTemplateSaved.HasDelegate)
+                await OnTemplateSaved.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            _message = "The template could not be saved: " + ex.Message;
+            _messageIsError = true;
+            ErrorReporter.ReportReportPackageError("Template convert save failed.", "TemplateConvert", ex);
+        }
+        finally
+        {
+            ownedObjectSpace?.Dispose();
+            _busy = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void BackToUpload()
+    {
+        _stage = Stage.Upload;
+        _analysis = null;
+        _outcome = null;
+        _acknowledgedWarnings = false;
+        _discardPrompt = false;
+    }
+
+    private void ConvertAnother()
+    {
+        var manual = _manual;
+        var source = _source;
+        var instanceId = _instanceId;
+        var caseNumber = _caseNumber;
+        var profileId = _profileId;
+        var profileName = _profileName;
+        var hostObjectSpace = _hostObjectSpace;
+        var hostProfile = _hostProfile;
+        var instanceOptions = _instanceOptions;
+        var selectedInstanceId = _selectedInstanceId;
+
+        Reset();
+
+        _manual = manual;
+        _source = source;
+        _instanceId = instanceId;
+        _caseNumber = caseNumber;
+        _profileId = profileId;
+        _profileName = profileName;
+        _hostObjectSpace = hostObjectSpace;
+        _hostProfile = hostProfile;
+        _instanceOptions = instanceOptions;
+        _selectedInstanceId = selectedInstanceId;
+    }
+
+
+    private async Task OnChatKeyDown(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+            await SendChatAsync();
+    }
+
+    private async Task SendChatAsync()
+    {
+        if (_chatBusy || _busy || _analysis == null || _outcome == null || _fileBytes == null)
+            return;
+        if (_outcome.HasErrors)
+            return;
+
+        var text = _chatInput.Trim();
+        if (string.IsNullOrEmpty(text))
+            return;
+
+        _chatBusy = true;
+        _chatInput = string.Empty;
+        _chatMessages.Add(new ChatBubble(true, text, false));
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            var plan = _currentPlan ?? new TemplateMappingPlan(
+                _outcome.Applied.ToList(),
+                Array.Empty<LoopMarker>(),
+                Array.Empty<MappingGap>(),
+                null);
+
+            var regions = TemplateMappingRequestBuilder.FromCandidate(
+                _analysis.Format,
+                _analysis.PlaceholderSet,
+                _analysis.Candidate,
+                Options.Value.RedactIdentifiersInExtract).Regions;
+
+            var turn = await ChatService.ApplyAsync(new TemplateConvertChatServiceRequest
+            {
+                Message = text,
+                CurrentPlan = plan,
+                Regions = regions,
+                PlaceholderSet = _analysis.PlaceholderSet,
+                CurrentDraftContent = _outcome.Content,
+            });
+
+            if (turn.Accepted)
+            {
+                _outcome = await Orchestrator.ApplyPlanAsync(_analysis, _fileBytes, turn.Plan);
+                _currentPlan = turn.Plan;
+                _acknowledgedWarnings = false;
+            }
+
+            _chatMessages.Add(new ChatBubble(false, turn.ReplyText, !turn.Accepted));
+        }
+        catch (Exception ex)
+        {
+            _chatMessages.Add(new ChatBubble(false, "The mapping adjustment failed: " + ex.Message, true));
+            ErrorReporter.ReportReportPackageError("Template convert chat failed.", "TemplateConvert", ex);
+        }
+        finally
+        {
+            _chatBusy = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+    private static string ChatBubbleCss(ChatBubble msg) =>
+        "tac-msg tac-msg--" + (msg.IsOfficer ? "officer" : "assistant") + (msg.Refused ? " is-refused" : string.Empty);
+
+    private string StepCssClass(Stage stage)
+    {
+        if (stage == _stage)
+            return "is-active";
+        return (int)stage < (int)_stage ? "is-done" : string.Empty;
+    }
+
+    private static string SuitabilityCssClass(SuitabilityLevel level) => level switch
+    {
+        SuitabilityLevel.Pass => "tac-suit--pass",
+        SuitabilityLevel.Warn => "tac-suit--warn",
+        _ => "tac-suit--fail",
+    };
+
+    private static string SuitabilityLabel(SuitabilityLevel level) => level switch
+    {
+        SuitabilityLevel.Pass => "Good candidate",
+        SuitabilityLevel.Warn => "Weak candidate",
+        _ => "Not a candidate",
+    };
+
+    private static string CriteriaCssClass(SuitabilityLevel level) => level switch
+    {
+        SuitabilityLevel.Pass => string.Empty,
+        SuitabilityLevel.Warn => "tac-criteria--warn",
+        _ => "tac-criteria--fail",
+    };
+
+    private static string DescribeRegion(DocumentRegion region) => region switch
+    {
+        DocumentRegion.WordSpan span => span.ParagraphAddress,
+        DocumentRegion.ExcelCell cell => $"{cell.SheetName}!{cell.CellReference}",
+        _ => string.Empty,
+    };
+}

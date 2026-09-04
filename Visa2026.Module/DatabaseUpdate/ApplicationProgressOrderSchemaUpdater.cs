@@ -4,9 +4,9 @@ using DevExpress.ExpressApp.Updating;
 
 namespace Visa2026.Module.DatabaseUpdate;
 
-public sealed class ApplicationProgressOrderSchemaUpdater : ModuleUpdater
+public sealed class ApplicationProfileInstanceProgressOrderSchemaUpdater : ModuleUpdater
 {
-    public ApplicationProgressOrderSchemaUpdater(IObjectSpace objectSpace, Version currentDBVersion)
+    public ApplicationProfileInstanceProgressOrderSchemaUpdater(IObjectSpace objectSpace, Version currentDBVersion)
         : base(objectSpace, currentDBVersion)
     {
     }
@@ -25,7 +25,7 @@ public sealed class ApplicationProgressOrderSchemaUpdater : ModuleUpdater
 
     private void ApplySchemaSql()
     {
-        ExecuteNonQueryCommand(ApplicationProgressOrderSchemaSql.EnsureProgressOrderColumnSql, false);
-        ExecuteNonQueryCommand(ApplicationProgressOrderSchemaSql.BackfillProgressOrderSql, false);
+        ExecuteNonQueryCommand(ApplicationProfileInstanceProgressOrderSchemaSql.EnsureProgressOrderColumnSql, false);
+        ExecuteNonQueryCommand(ApplicationProfileInstanceProgressOrderSchemaSql.BackfillProgressOrderSql, false);
     }
 }

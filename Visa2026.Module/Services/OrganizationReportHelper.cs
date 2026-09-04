@@ -30,7 +30,7 @@ namespace Visa2026.Module.Services
         public static ApplicationNumberingProfile GetOrCreateApplicationNumbering(IObjectSpace objectSpace) =>
             ApplicationNumberingProfile.GetOrCreateInstance(objectSpace);
 
-        public static IObjectSpace? ResolveObjectSpace(IObjectSpace? primary, Application? application) =>
+        public static IObjectSpace? ResolveObjectSpace(IObjectSpace? primary, ApplicationProfileInstance? application) =>
             primary ?? ObjectSpaceHelper.Get(application);
     }
 }

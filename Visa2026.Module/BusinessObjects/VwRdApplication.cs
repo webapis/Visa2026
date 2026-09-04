@@ -5,8 +5,8 @@ using System.ComponentModel.DataAnnotations;
 namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
-/// Report Dashboard Application category row from vw_rd_application.
-/// One header Application per row (by-progress / by-type).
+/// Report Dashboard ApplicationProfileInstance category row from vw_rd_application.
+/// One header ApplicationProfileInstance per row (by-progress / by-type).
 /// </summary>
 [Browsable(false)]
 public class VwRdApplication

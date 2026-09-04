@@ -25,6 +25,206 @@ Purpose: **catalog, seed gate, batch worker, preview, permissions, dialog UX** �
 
 ## Entries
 
+### 2026-09-03 — New profile showed flat library instead of This profile (0) (Application)
+
+- **Symptom**: First case on a new Application Profile listed ~12 seeded Word/Excel rows with no This profile / Shared tabs. Officers expected This profile (0) and Shared (N).
+- **Try**: Create a profile with no nested templates; open a case → Resminamalar.
+- **Test**: `UsesProfileNestedCatalog_TrueWhenProfileHasNoNestedTemplates`. Officer: stop F5, rebuild, Ctrl+F5. New profile case shows This profile (0) empty dashed box and Shared with ON/OFF.
+- **Root cause**: `UsesProfileNestedCatalog` was true only after at least one nested Word/Excel row existed. Empty profiles fell back to the visibility-filtered user-template list.
+- **Fix**: Nested catalog (tabs + Shared library) whenever the instance has an Application Profile. Seeded flat list remains only for Type-only dual-read cases.
+- **Prevent**: Do not treat “no nested rows yet” as “use the old Catalog list”.
+- **Cross-skill**: visa2026-application-profile | visa2026-preview-slot
+
+### 2026-09-03 — Shared include lives only on case (Application)
+
+- **Symptom**: Configure profile still listed this-profile files and Shared Include/Exclude after case Resminamalar already owned authoring and ON/OFF.
+- **Try**: Configure profile step vs case Resminamalar This profile / Shared.
+- **Test**: Officer: stop F5, rebuild, Ctrl+F5. Wizard **Person data** is checkboxes only. Case Shared ON/OFF still persists as nested include.
+- **Root cause**: Wizard kept a second catalog after case tabs shipped.
+- **Fix**: Removed wizard template lists. Shared include stays `ApplicationProfileSharedTemplateIncludeHelper` on the case. Seeded nested rows still appear on This profile until an officer turns them OFF.
+- **Prevent**: Do not add wizard Include/Exclude back. Do not auto-include the full Shared library on new profiles.
+- **Cross-skill**: visa2026-application-profile
+
+### 2026-09-02 — This profile / Shared tab bar vs utility links (Application)
+
+- **Symptom**: This profile / Shared looked like the same blue links as Recycle Bin and Select all, all in one row with no teal tab bar.
+- **Try**: Case Resminamalar vs `docs/prototypes/resminamalar-this-profile-tab-prototype.png`.
+- **Test**: Ctrl+F5. Tabs left with thick teal underline; Recycle Bin and other actions on the right as smaller links.
+- **Root cause**: Tabs used `DxButton` Link + `app-item-doc-copies__action-btn`; Recycle Bin used pane-tab CSS; utilities only `margin-left: auto` on Shared.
+- **Fix**: Native tab buttons; `::after` 3px `#0f766e` on the catalog rule; Recycle Bin is a utility link; utilities always pushed right.
+- **Prevent**: Do not put action-btn classes on This profile / Shared. Do not put Recycle Bin in the tablist.
+- **Cross-skill**: visa2026-preview-slot
+
+### 2026-09-02 — Shared OFF blocked on locked profile (Application)
+
+- **Symptom**: Shared tab ON worked; OFF showed "Nested templates cannot be changed while this profile is locked" (case 8/-015 already in progress).
+- **Try**: Nested-catalog case past office preparation; Shared tab; toggle a green ON row to OFF.
+- **Test**: `IsAllowedResminamalarSharedIncludeMutation_AllowsSharedScopesOnly`. Blazor Debug build. Restart, hard-refresh: Shared OFF on a locked profile removes the include and the This profile SHARED row.
+- **Root cause**: Config lock allows new nested templates (ON) and Recycle Bin field updates, but deleting a live include is an existing-row delete, so `EnsureNestedConfigurationEditable` threw.
+- **Fix**: Carve-out for deleting Category/Global includes (`IsResminamalarSharedIncludeMutation`). Exclude marks the row deleted before the lock check. This-profile files still use Recycle Bin.
+- **Prevent**: Do not allow delete of ProfileSpecific rows via Shared OFF. Do not open rename/file replace on locked profiles.
+- **Cross-skill**: visa2026-application-profile | visa2026-resminamalar
+
+### 2026-09-02 — This profile / Shared tabs with include toggle (Application)
+
+- **Symptom**: Officers wanted This profile vs Shared on case Resminamalar, with a toggle so ON shared files appear on This profile marked SHARED.
+- **Try**: Nested-catalog case workspace Resminamalar (not the seeded fallback list).
+- **Test**: `ApplicationProfileSharedTemplateIncludeHelperTests`. Blazor Debug build. Restart, hard-refresh: This profile / Shared tabs; Recycle Bin stays a utility; Shared ON/OFF persists as nested include (same as wizard Include); This profile shows SHARED chip on ON rows; Download package stays on This profile.
+- **Root cause**: Catalog listed only included nested rows; shared include/exclude lived only on the Application Profile wizard.
+- **Fix**: `SharedEntries` on the catalog; `ApplicationProfileSharedTemplateIncludeHelper` CommitChanges include/exclude; tabs + pill toggle + SHARED chip CSS.
+- **Prevent**: Do not put ZIP checkboxes or Download package on Shared. Do not make Recycle Bin a third content tab. Profiles without nested templates keep the old Catalog list.
+- **Cross-skill**: visa2026-preview-slot | visa2026-application-profile
+
+### 2026-09-02 — Quiet created/updated stamp on catalog cards (Application)
+
+- **Symptom**: Officers wanted to see when a Resminamalar template was created or last changed, and by whom, without making the catalog louder.
+- **Try**: Case workspace Resminamalar list (Word/Excel rows).
+- **Test**: `TemplateCatalogAuditStampTests`. Blazor Debug build. Restart, hard-refresh: new/updated nested templates show a muted date · user line under Word/Excel. Hover for created vs updated. Recycle Bin still uses its own Removed line.
+- **Root cause**: Catalog cards only showed format; `ApplicationProfileTemplate` / `UserReportTemplate` had no created/modified fields.
+- **Fix**: Stamp `CreatedOnUtc` / `ModifiedOnUtc` + user name on save (skip Recycle Bin-only mutations). Schema heal. Catalog maps the fields; CSS `.resminamalar-catalog__meta` is 11px muted.
+- **Prevent**: Do not put this on READY/CHECK chips. Recycle mutations must not rewrite created/updated.
+- **Cross-skill**: visa2026-preview-slot
+
+### 2026-09-02 — Case summary Project change left stale Resminamalar catalog (Application)
+
+- **Symptom**: Changing **Project** on Case summary (e.g. 9/-003) did not swap contract-scoped nested templates on the Resminamalar tab.
+- **Try**: Via-ministry case; this-profile template bound to one Project contract; Edit Case summary Project to another contract; open Resminamalar.
+- **Test**: `ResminamalarCaseCatalogCacheTests` (3). Blazor Debug build. Officer: restart, hard-refresh, change Project, open Resminamalar — catalog should match the new contract (and hide the previous one).
+- **Root cause**: Per-circuit `ResminamalarCaseCatalogCache` keyed only on ApplicationProfileInstance id, so leaving Overview and returning reused the old filtered list.
+- **Fix**: Cache key includes Project contract and Migration service ids from Case summary header fields. Tab rebuilds when those lookups change. Catalog load Includes `ProjectContract` / `MigrationService`.
+- **Prevent**: Do not cache the nested catalog by case id alone when visibility depends on Case summary lookups.
+- **Cross-skill**: visa2026-template-scan | visa2026-preview-slot
+
+### 2026-09-02 — Faster case Preview and Resminamalar tab switch (Application)
+
+- **Symptom**: Preview of `SAHSY KAGYZ_117` took ~5s; Close was sticky; switching to Resminamalar showed Opening Resminamalar… while the catalog rebuilt.
+- **Try**: Case 8/-015 with two people; Preview/Close then Overview → Resminamalar.
+- **Test**: Officer confirmed after restart/hard-refresh. Converter/entry-generator tests earlier this session. Build skipped at commit request.
+- **Root cause**: Tab switch and Preview both ran `CatalogService.Build` on the Blazor circuit. Nested catalog resolved each row with `AsEnumerable()` of every user template plus `TemplateFile` bytes. Şahsy Preview then generated and converted two Word files sequentially.
+- **Fix**: Query merge templates by name without file blobs; cache case catalog; load catalog after first paint. Single-key Preview skips catalog Build; person merges and PDF convert run in parallel off the UI thread; Close hides the slot first.
+- **Prevent**: Do not `AsEnumerable()` all `UserReportTemplate` rows with `TemplateFile` to match one name. Do not rebuild the 17-row catalog on Preview open/close or every tab remount.
+- **Cross-skill**: visa2026-preview-slot
+
+### 2026-09-02 — Case workspace chips, no By person / By type (Application)
+
+- **Symptom**: Case Resminamalar Preview of `SAHSY KAGYZ_117` filled one person; officers did not want a By person / By type switch.
+- **Try**: ApplicationProfileInstance 8/-015 with two people; Resminamalar Preview after header chips.
+- **Test**: Officer confirmed after restart/hard-refresh. `UserReportSahsyKagyzNameTests` (8). Build skipped at commit request.
+- **Root cause**: Empty `ApplicationItemIds` used application-scope generate (first row only). Nested Şahsy names were not treated as per-person Word output. The Document copies layout switch was extra chrome.
+- **Fix**: Pass chip-selected `Person.ID`s into Preview/ZIP. `LooksLikeSahsyKagyzName` matches `SAHSY KAGYZ_*`. Flat catalog only; chips still filter people.
+- **Prevent**: Do not add By person / By type on Resminamalar. Case Preview must pass `ApplicationItemIds`. Do not require exact `Sahsy kagyz` for per-person merge.
+- **Cross-skill**: user-report-templates | visa2026-preview-slot
+
+### 2026-09-01 — Gear-only Download Template / Review / Recycle (Application)
+
+- **Symptom**: Catalog rows always showed Edit template, Download, Review placeholders, and Recycle; Download was labeled only Download.
+- **Try**: Resminamalar catalog on ApplicationProfileInstance 8/-015.
+- **Test**: Blazor Debug build. Officer: hard-refresh — default rows show Check + Preview; footer gear reveals Download Template, Review placeholders, Recycle. No Edit template.
+- **Root cause**: Download and Review/Recycle were always visible; Edit template duplicated Download for getting the file.
+- **Fix**: Removed catalog **Edit template**. Renamed Download → **Download Template**. Gated Download Template, Review placeholders, and Recycle behind `ShowDetails` (footer gear). Preview stays always on.
+- **Prevent**: Do not put template-file / remap / recycle actions on the default catalog row. Keep Recycle Bin tab Restore / Delete permanently always visible on that pane.
+- **Cross-skill**: visa2026-preview-slot
+
+### 2026-09-01 — Hide Sync footer; recycle-bin icon on catalog rows (Application)
+
+- **Symptom**: Footer **Sync to database** crowded Download package / Refresh. Row **Delete** text wrapped onto a second line.
+- **Try**: Resminamalar catalog on ApplicationProfileInstance 8/-015.
+- **Test**: Blazor Debug build. Officer: hard-refresh — footer is Download package + Refresh + gear; nested rows show a recycle-bin icon (tooltip still Move to Recycle Bin).
+- **Root cause**: Staging sync sat on the always-visible footer; Move to Recycle Bin used the localized **Delete** label.
+- **Fix**: Removed the catalog footer Sync button. Row action is an icon button (`.resminamalar-catalog__recycle-btn`); confirm bar still says Move to Recycle Bin.
+- **Prevent**: Do not put desktop staging Sync next to ZIP download. Keep Recycle Bin tab **Delete permanently** as text (that is a different action).
+- **Cross-skill**: visa2026-preview-slot
+
+### 2026-09-01 — Review placeholders from catalog row (Application)
+
+- **Symptom**: Officers could Preview a filled merge from Resminamalar but could not reopen Create-from-yellow Review to remap placeholders on that nested template.
+- **Try**: Catalog Preview of Gaybo-BORÇNAMA_115, then need Review of the saved template (tokens, no yellow).
+- **Test**: `ScanOfficeLibraryTokenExtractorTests`; `ScanYellowHighlightGateTests.Apply_ExistingTokens_NoYellow_Passes`; Blazor Debug build.
+- **Root cause**: Scan wizard started at Upload only; Analyze required yellow highlights. Saved templates have `{{…}}` after Approve strips yellow.
+- **Fix**: Catalog **Review placeholders** loads nested `ApplicationProfileTemplate` bytes into `OpenForExistingTemplateAsync`. Token clusters drive the field plan when yellow is absent.
+- **Prevent**: Do not send officers to desktop Edit template for placeholder remap. Seeded user-only rows (no nested profile id) stay without this button.
+- **Cross-skill**: visa2026-template-scan
+
+### 2026-09-01 — Scan Word letter Preview empty (`{{.PFN}}` no loop) (Application)
+
+- **Symptom**: `6aylık-BORÇNAMA_02` READY after Create from yellow marks; catalog Preview **Preview could not be generated**.
+- **Try**: Approve yellow-mark Word letter with `{{.PFN}}` / `{{.ASPN}}` and no `{{#ds.rows}}`.
+- **Test**: `UserReportLooseRowTokenPromoterTests`; officer re-Approve then Preview.
+- **Root cause**: DocxTemplater binds `{{.X}}` on `ds` when there is no rows loop; those keys were never copied onto the root model, so generate returned no file.
+- **Fix**: `PromoteLooseRowTokensOntoRoot` copies first-roster values onto `ds` when extracted tokens include `{{.X}}` and no `#ds.rows` / `#ds.ApplicationItems`.
+- **Prevent**: Word letters from scan may emit row tokens; merge must flatten first person onto `ds` or the letter must use a loop.
+- **Cross-skill**: visa2026-template-scan | user-report-templates
+
+### 2026-08-31 — Recycle Bin Move progress while waiting (Application)
+
+- **Symptom**: After **Move to Recycle Bin**, the confirm bar sat still with no progress while the save/reload ran, so it looked like nothing happened.
+- **Try**: Catalog Delete → confirm **Move to Recycle Bin** on `SANAW_CLK_07`.
+- **Test**: Blazor Debug build. Officer: confirm Move — footer/card show indeterminate progress and “Moving …”; then the row leaves Catalog.
+- **Root cause**: `_recycleBusy` only disabled buttons. `StateHasChanged` did not yield, so the circuit started the ObjectSpace commit before a progress paint.
+- **Fix**: Keep the confirm. Show Preview-style progress on the card and footer; `Task.Yield` after busy paint; Restore/Purge use the same indicator.
+- **Prevent**: Recycle mutations that touch ObjectSpace must yield after setting busy so the indicator can render.
+- **Cross-skill**: —
+
+### 2026-08-31 — Recycle Bin Delete persists but catalog row stays (Application)
+
+- **Symptom**: Catalog **Move to Recycle Bin** writes `RecycledAtUtc` (Recycle Bin count can already be > 0) but the same card stays in Catalog.
+- **Try**: Confirm Delete on `SCREENSHOT 2024-08-28 11:53:28` while Recycle Bin already had 4 items.
+- **Test**: Nested catalog helper + Recycle Bin tests; Blazor Debug build. Officer: restart, Move to Recycle Bin — row leaves Catalog immediately, Recycle Bin count increments.
+- **Root cause**: Catalog reload used tracked `ApplicationProfileTemplate` instances. EF kept `RecycledAtUtc == null` after another ObjectSpace committed. Overlay then dropped as soon as the bin list looked updated, which put the stale catalog row back on screen.
+- **Fix**: Recycle vs live lists keyed from an `AsNoTracking` id query; reload tracked rows from the store; keep the catalog overlay until the parent catalog list no longer contains the row **and** the bin list contains it.
+- **Prevent**: Do not classify Recycle Bin from identity-map `RecycledAtUtc` after a different ObjectSpace saved. Do not drop a pending overlay on `inBin` alone.
+- **Cross-skill**: application-profile
+
+### 2026-08-31 — Recycle Bin Delete no-op on locked profile (Application)
+
+- **Symptom**: Catalog Delete shows confirm; **Move to Recycle Bin** does not move the row (case already In progress). Recycle Bin count unchanged.
+- **Try**: Confirm on `SCREENSHOT 2024-08-28 115127` / SANAW_CLK_* while profile is config-locked.
+- **Test**: `IsAllowedResminamalarRecycleBinMutation` (recycle fields yes; TemplateName no; purge only when already recycled); lock helper + Recycle Bin tests; Blazor Debug build.
+- **Root cause**: `EnsureNestedConfigurationEditable` blocks saving existing `ApplicationProfileTemplate` after lock state A. Recycle is an update of `RecycledAtUtc`, not a new row. Confirm UI also hid the lock exception.
+- **Fix**: Allow Recycle Bin-only mutations (recycle/restore fields or purge of an already-recycled row) while locked; show the exception and clear confirm on failure.
+- **Prevent**: Do not treat Recycle Bin as a configuration-template edit; still block rename/file replace on locked profiles.
+- **Cross-skill**: application-profile
+
+### 2026-08-31 — Resminamalar Recycle Bin for officer templates (Application)
+
+- **Symptom**: Officers needed to remove extra scan/convert templates (SANAW_CLK_*) without destroying them; Recycle Bin did not exist.
+- **Try**: Catalog **Delete** on this-profile nested rows; Recycle Bin **Restore** / **Delete permanently**.
+- **Test**: `ApplicationProfileTemplateRecycleBinTests`; nested catalog hides recycled and stays on nested mode when only recycled remain; schema SQL includes `RecycledAtUtc`; Blazor Server Debug build.
+- **Root cause**: Nested `ApplicationProfileTemplate` had no recycle fields; catalog listed every Word/Excel row; empty catalog hid the component.
+- **Fix**: `RecycledAtUtc` / `RecycledByUserName`; catalog Delete moves ProfileSpecific rows; Recycle Bin tab Restore/Purge; seeded Category/Global have no Delete; re-Approve same name clears recycle.
+- **Prevent**: Do not use XAF `GCRecord` / generic `IsDeleted` for this; do not fall back to seeded user catalog when only recycled nested rows remain.
+- **Cross-skill**: application-profile | template-scan
+
+### 2026-08-31 — Excel catalog Preview ran Word PDF (`report_….docx`) (Application)
+
+- **Symptom**: Scan-saved Excel READY with people; catalog Preview is a white PDF titled `report_20230321.docx`; same-case Word Preview fills.
+- **Try**: Extra col A / print-area PDF tweaks; officer screenshots of wizard + catalog.
+- **Test**: `ApplicationWordReportEntryGeneratorTests` (nested `profile:` catalog → `.xlsx`); `ApplicationWordReportOfficePreviewPdfConverterTests` (xlsx bytes named `.docx` still Spreadsheet PDF).
+- **Root cause**: `ResolveDownloadFileName` matched only `user:{id}`. Profile-nested catalog keys are `profile:{id}`, so lookup missed and fell back to `report_yyyyMMdd.docx`. Converter chose Word from the extension.
+- **Fix**: Match catalog by `UserReportTemplateId` (and keep `user:` key); always use `GetEffectiveOutputFormat()` for `.xlsx`/`.docx`. Converter sniffs ZIP `xl/` vs `word/` before the filename.
+- **Prevent**: Never infer Office PDF path from filename alone; never require `user:` keys on nested profile catalogs.
+- **Cross-skill**: template-scan
+
+### 2026-08-31 — Excel Preview PDF blank while Word Preview fills (Application)
+
+- **Symptom**: Scan-saved Excel READY; catalog Preview is a white page; same case Word sanaw Preview shows people.
+- **Try**: Extra empty column A so `{{#ds.rows}}` validates; Download Excel vs Preview PDF.
+- **Test**: Diff gate prepend test; Module compile with `ExportToPdf(stream, PdfExportOptions, sheetName)`.
+- **Root cause**: Stale worksheet print area (empty col A) exported as first PDF page; Word uses RichEdit so it is unaffected.
+- **Fix**: `ClearPrintRange` + used-range print + fit-to-width + export named first sheet only.
+- **Prevent**: Do not `ExportToPdf(stream)` on a workbook that still has Print_Area from the officer sample.
+- **Cross-skill**: template-scan
+
+### 2026-08-31 — Catalog Download template + Excel ds.rows vs merged cells (Application)
+
+- **Symptom**: Yellow-mark Excel `Sanaw_clk_05` saved READY; Generate warned `Skipped ds.rows` on merged `J5:K5`; catalog Preview failed; officers asked to download saved templates from Resminamalar.
+- **Try**: Align loop with `Sanaw_ckl_map.md` (col A); add per-row Download.
+- **Test**: `TemplateRosterLoopPlannerTests` merge skip → C5; Module/Blazor build; officer: Download gets `.xlsx`; re-Approve after rebuild → Preview with `#ds.rows` in A (or next unmerged free col).
+- **Root cause**: Loop write landed on/near merge `J5:K5` (non-anchor skip); no catalog action for raw template file (only Edit under gear + filled ZIP).
+- **Fix**: Planner skips merged/formula cells when workbook bytes passed; catalog **Download** via `TryReadTemplateFileAsync` + `IFileDownloader` (always visible, not gear).
+- **Prevent**: Always pass scan source workbook into `PlanExcelLoopsFromSubstitutions`; never place `{{#ds.rows}}` inside merges.
+- **Cross-skill**: resminamalar | template-scan | user-report-templates
+
 ### 2026-07-31 — Officer caption Templates + dedicated brand mark
 
 - **Ask**: Dedicated brand like Document Copies; rename Resminamalar to Templates (catalog shows template previews).

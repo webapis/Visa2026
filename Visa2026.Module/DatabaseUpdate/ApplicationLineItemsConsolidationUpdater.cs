@@ -7,7 +7,7 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
-/// Registration and BusinessTrip lines are consolidated into <see cref="ApplicationItem"/>.
+/// Registration and BusinessTrip lines are consolidated into <see cref="ApplicationRosterMergeLine"/>.
 /// Ensures application types that used separate collections now use <see cref="ApplicationType.ShowApplicationItems"/>.
 /// Remaps legacy <see cref="UserReportBoType"/> values on user templates.
 /// </summary>
@@ -26,7 +26,7 @@ public class ApplicationLineItemsConsolidationUpdater : ModuleUpdater
         {
             if (applicationType.ShowRegistrations || applicationType.ShowBusinessTrips)
                 applicationType.ShowApplicationItems = true;
-            // Keep ShowRegistrations / ShowBusinessTrips: they gate ApplicationItem line fields and app-level headers, not removed collections.
+            // Keep ShowRegistrations / ShowBusinessTrips: they gate ApplicationRosterMergeLine line fields and app-level headers, not removed collections.
         }
 
         const int legacyRegistration = 2;

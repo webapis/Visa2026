@@ -1,0 +1,269 @@
+@using System.Linq
+@using Visa2026.Module.Services.ApplicationProfileCatalog
+@using Visa2026.Module.Services.ApplicationProfileOverview
+@using Visa2026.Module.Services.OfficerShell
+
+@if (DetailOpen)
+{
+    <div class="tc-overview">
+        <aside class="tc-rail" aria-label="Templates">
+            <div class="tc-rail__search">
+                <span aria-hidden="true">⌕</span>
+                <input type="search" placeholder="Search templates…" value="@SearchText" @oninput="OnSearchInput" />
+            </div>
+            <div class="tc-rail__label">Templates</div>
+            <ul class="tc-rail__list">
+                @foreach (var row in FilteredRows)
+                {
+                    var active = row.ProfileId == SelectedProfileId;
+                    var color = OfficerShellTemplateFamily.GetColor(row.TemplateFamilyKey);
+                    <li class="tc-rail__item @(active ? "is-active" : null)"
+                        @onclick="() => OpenDetailAsync(row.ProfileId)">
+                        <div class="tc-rail__icon" style="background:@color">@FamilyGlyph(row.TemplateFamilyKey)</div>
+                        <div>
+                            <p class="tc-rail__name">@row.Name</p>
+                            <div class="tc-rail__sub">
+                                <span class="tc-status__dot" style="background:@StatusDotColor(row.StatusKey)"></span>
+                                @StatusLabel(row.StatusKey)
+                            </div>
+                        </div>
+                        <span aria-hidden="true">›</span>
+                    </li>
+                }
+            </ul>
+        </aside>
+        <div>
+            @if (IsOverviewLoading)
+            {
+                <div class="os-loading" role="status">Loading template overview…</div>
+            }
+            else
+            {
+                <ApplicationProfileOverviewComponent IsLoading="false"
+                                                     Snapshot="@OverviewSnapshot"
+                                                     ConfigureRequested="@ConfigureRequested"
+                                                     CloseRequested="@BackToCatalogAsync"
+                                                     OpenInstanceRequested="@OpenInstanceRequested" />
+            }
+        </div>
+    </div>
+}
+else
+{
+    <div class="os-page-head">
+        <div>
+            <h1 class="os-page-title">Profile templates</h1>
+            <p class="os-page-sub">Configure reusable templates officers clone to stage application profiles.</p>
+        </div>
+        <button type="button" class="os-btn os-btn--primary" @onclick="NewProfileAsync">+ New template</button>
+    </div>
+
+    <div class="os-toolbar" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+        <div class="tc-toolbar-search">
+            <span aria-hidden="true">⌕</span>
+            <input type="search" placeholder="Search templates…" value="@SearchText" @oninput="OnSearchInput" />
+        </div>
+        @RenderViewToggle()
+    </div>
+
+    <OfficerShellFamilyChips ActiveKey="@FamilyFilter"
+                             Counts="@FamilyCounts()"
+                             TotalCount="@FilteredRows.Count"
+                             FilterChanged="@FamilyFilterChanged" />
+
+    @if (ViewMode == "grid")
+    {
+        <div class="tc-tpl-grid">
+            @foreach (var row in PageResult.PageItems)
+            {
+                var color = OfficerShellTemplateFamily.GetColor(row.TemplateFamilyKey);
+                <article class="tc-tpl-card" style="--os-card-accent:@color" @onclick="() => OpenDetailAsync(row.ProfileId)">
+                    <div class="tc-tpl-card__stripe" style="background:@color"></div>
+                    <div class="tc-tpl-card__body">
+                        <div class="tc-tpl-card__head">
+                            <div class="tc-tpl-card__icon" style="background:@color">@FamilyGlyph(row.TemplateFamilyKey)</div>
+                            <div>
+                                <h3 class="tc-tpl-card__title">@row.Name</h3>
+                                <span class="tc-tpl-card__code">@row.Code</span>
+                            </div>
+                        </div>
+                        <dl class="tc-tpl-card__kv">
+                            <dt>Action route</dt><dd>@row.ActionFamilyLabel</dd>
+                            <dt>Issuance via</dt><dd>@row.ProgressRouteLabel</dd>
+                        </dl>
+                        <div class="tc-tpl-card__status"><span class="@StatusClass(row.StatusKey)"><span class="tc-status__dot @StatusDotClass(row.StatusKey)"></span>@StatusLabel(row.StatusKey)</span></div>
+                        <div class="tc-tpl-card__stats">
+                            <div class="tc-tpl-card__stat"><strong>@row.StagedUses</strong><span>Staged</span></div>
+                            @if (row.InProcessUses > 0)
+                            {
+                                <div class="tc-tpl-card__stat"><strong>@row.InProcessUses</strong><span>In process</span></div>
+                            }
+                        </div>
+                    </div>
+                    <div class="tc-tpl-card__foot">
+                        <button type="button" class="os-btn os-btn--ghost" @onclick:stopPropagation="true" @onclick="() => ConfigureAsync(row.ProfileId)">Configure</button>
+                        <span class="os-table__chev">›</span>
+                    </div>
+                </article>
+            }
+        </div>
+    }
+    else
+    {
+        <table class="os-table os-table--clickable">
+            <thead>
+                <tr>
+                    <th>Template name</th>
+                    <th>Code</th>
+                    <th>Action family</th>
+                    <th>Progress route</th>
+                    <th>Status</th>
+                    <th>Staged</th>
+                    <th>In process</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in PageResult.PageItems)
+                {
+                    <tr @onclick="() => OpenDetailAsync(row.ProfileId)">
+                        <td><span class="os-dot" style="background:@OfficerShellTemplateFamily.GetColor(row.TemplateFamilyKey)"></span> @row.Name</td>
+                        <td><code>@row.Code</code></td>
+                        <td>@row.ActionFamilyLabel</td>
+                        <td>@row.ProgressRouteLabel</td>
+                        <td><span class="@StatusClass(row.StatusKey)"><span class="tc-status__dot @StatusDotClass(row.StatusKey)"></span>@StatusLabel(row.StatusKey)</span></td>
+                        <td>@row.StagedUses</td>
+                        <td>@row.InProcessUses</td>
+                        <td class="os-table__chev">›</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <OfficerShellPaginationBar PagerId="templates"
+                               Page="@PageResult.Page"
+                               PageSize="@PageResult.PageSize"
+                               Total="@PageResult.Total"
+                               TotalPages="@PageResult.TotalPages"
+                               Start="@PageResult.Start"
+                               End="@PageResult.End"
+                               PageChanged="@PageChanged"
+                               PageSizeChanged="@PageSizeChanged" />
+}
+
+@code {
+    [Parameter] public IReadOnlyList<ApplicationProfileCatalogRow> Rows { get; set; } = Array.Empty<ApplicationProfileCatalogRow>();
+    [Parameter] public string SearchText { get; set; } = string.Empty;
+    [Parameter] public string ViewMode { get; set; } = "list";
+    [Parameter] public string FamilyFilter { get; set; } = OfficerShellTemplateFamily.All;
+    [Parameter] public int Page { get; set; } = 1;
+    [Parameter] public int PageSize { get; set; } = 25;
+    [Parameter] public bool DetailOpen { get; set; }
+    [Parameter] public Guid SelectedProfileId { get; set; }
+    [Parameter] public ApplicationProfileOverviewSnapshot? OverviewSnapshot { get; set; }
+    [Parameter] public bool IsOverviewLoading { get; set; }
+    [Parameter] public EventCallback<string> SearchTextChanged { get; set; }
+    [Parameter] public EventCallback<string> ViewModeChanged { get; set; }
+    [Parameter] public EventCallback<string> FamilyFilterChanged { get; set; }
+    [Parameter] public EventCallback<int> PageChanged { get; set; }
+    [Parameter] public EventCallback<int> PageSizeChanged { get; set; }
+    [Parameter] public EventCallback<Guid> OpenDetailRequested { get; set; }
+    [Parameter] public EventCallback BackToCatalogRequested { get; set; }
+    [Parameter] public EventCallback NewProfileRequested { get; set; }
+    [Parameter] public EventCallback ConfigureRequested { get; set; }
+    [Parameter] public EventCallback<Guid> ConfigureProfileRequested { get; set; }
+    [Parameter] public EventCallback<Guid> OpenInstanceRequested { get; set; }
+
+    private IReadOnlyList<ApplicationProfileCatalogRow> FilteredRows => ApplyFilters().ToList();
+    private OfficerShellPaginationResult<ApplicationProfileCatalogRow> PageResult =>
+        OfficerShellPagination.Paginate(FilteredRows, new OfficerShellPaginationState { Page = Page, PageSize = PageSize });
+
+    private IEnumerable<ApplicationProfileCatalogRow> ApplyFilters()
+    {
+        IEnumerable<ApplicationProfileCatalogRow> rows = Rows;
+        var q = (SearchText ?? string.Empty).Trim();
+        if (!string.IsNullOrEmpty(q))
+        {
+            rows = rows.Where(r =>
+                r.Name.Contains(q, StringComparison.OrdinalIgnoreCase)
+                || r.Code.Contains(q, StringComparison.OrdinalIgnoreCase)
+                || (r.SelectionCode?.Contains(q, StringComparison.OrdinalIgnoreCase) ?? false));
+        }
+
+        if (FamilyFilter != OfficerShellTemplateFamily.All)
+            rows = rows.Where(r => r.TemplateFamilyKey == FamilyFilter);
+        return rows;
+    }
+
+    private Dictionary<string, int> FamilyCounts()
+    {
+        var counts = new Dictionary<string, int>();
+        var q = (SearchText ?? string.Empty).Trim();
+        var baseRows = string.IsNullOrEmpty(q)
+            ? Rows
+            : Rows.Where(r =>
+                r.Name.Contains(q, StringComparison.OrdinalIgnoreCase)
+                || r.Code.Contains(q, StringComparison.OrdinalIgnoreCase)
+                || (r.SelectionCode?.Contains(q, StringComparison.OrdinalIgnoreCase) ?? false));
+        foreach (var group in baseRows.GroupBy(r => r.TemplateFamilyKey))
+            counts[group.Key] = group.Count();
+        return counts;
+    }
+
+    private RenderFragment RenderViewToggle() => __builder =>
+    {
+        <div class="os-toggle">
+            <button type="button" class="@(ViewMode == "list" ? "is-active" : null)" @onclick='() => ViewModeChanged.InvokeAsync("list")'>List</button>
+            <button type="button" class="@(ViewMode == "grid" ? "is-active" : null)" @onclick='() => ViewModeChanged.InvokeAsync("grid")'>Grid</button>
+        </div>;
+    };
+
+    private static string StatusClass(string statusKey) => statusKey switch
+    {
+        "locked" => "tc-status tc-status--locked",
+        "draft" => "tc-status tc-status--draft",
+        _ => "tc-status tc-status--active",
+    };
+
+    private static string StatusDotClass(string statusKey) =>
+        statusKey == "draft" ? "tc-status__dot--draft" : "tc-status__dot--active";
+
+    private static string StatusLabel(string statusKey) => statusKey switch
+    {
+        "locked" => "Locked",
+        "draft" => "Draft",
+        _ => "Active",
+    };
+
+    private static string StatusDotColor(string statusKey) => statusKey switch
+    {
+        "draft" => "#f59e0b",
+        _ => "#22c55e",
+    };
+
+    private static string FamilyGlyph(string key) => key switch
+    {
+        OfficerShellTemplateFamily.Registration => "R",
+        OfficerShellTemplateFamily.Extension => "E",
+        OfficerShellTemplateFamily.WorkPermit => "W",
+        _ => "I",
+    };
+
+    private async Task OnSearchInput(ChangeEventArgs e)
+    {
+        if (SearchTextChanged.HasDelegate)
+            await SearchTextChanged.InvokeAsync(e.Value?.ToString() ?? string.Empty);
+    }
+
+    private Task OpenDetailAsync(Guid profileId) => OpenDetailRequested.InvokeAsync(profileId);
+    private Task BackToCatalogAsync() => BackToCatalogRequested.InvokeAsync();
+    private Task NewProfileAsync() => NewProfileRequested.InvokeAsync();
+    private async Task ConfigureAsync(Guid profileId)
+    {
+        if (ConfigureProfileRequested.HasDelegate)
+            await ConfigureProfileRequested.InvokeAsync(profileId);
+        else if (ConfigureRequested.HasDelegate)
+            await ConfigureRequested.InvokeAsync();
+    }
+}

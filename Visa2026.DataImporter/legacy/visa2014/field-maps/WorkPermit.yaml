@@ -23,9 +23,12 @@ deduplication:
 
 propertyGaps:
   targetOnly:
-    - property: Application
-      disposition: omit_from_post
-      notes: Optional link — pilot imports with Application=null
+    - property: ApplicationProfileInstance
+      disposition: resolve_after_application_wave
+      notes: >-
+        Newly issued only — WorkPermit.ProcessNumber → PersonInApplication → Application
+        (majority Application per WorkPermitLetter). Existing PIA.WorkPermit links WorkPermitItem
+        via --correct-visa2014-existing-item-links (ResolvedLink + M2M), not this header FK.
     - property: ShowOptionalFields
       disposition: omit_from_post
 

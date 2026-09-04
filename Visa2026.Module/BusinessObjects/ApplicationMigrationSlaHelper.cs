@@ -6,35 +6,33 @@ namespace Visa2026.Module.BusinessObjects;
 
 public static class ApplicationMigrationSlaHelper
 {
-    public static ApplicationProgressSlaResult Resolve(Application? application, ApplicationProgress? latest = null)
+    public static ApplicationProfileInstanceProgressSlaResult Resolve(ApplicationProfileInstance? application, ApplicationProfileInstanceProgress? latest = null)
     {
         if (application?.ProgressHistory == null)
             return default;
 
-        latest ??= ApplicationProgressHelper.GetLatest(application.ProgressHistory);
+        latest ??= ApplicationProfileInstanceProgressHelper.GetLatest(application.ProgressHistory);
         if (latest?.State?.Code == null || latest.Date == default)
             return default;
 
         if (!IsMigrationServiceProcessStartedStep(latest.State.Code))
             return default;
 
+        if (application.ApplicationProfile is { MigrationSlaDays: > 0 } applicationProfile)
+        {
+            var workingDays = WorkingDaysHelper.CountWorkingDaysInclusive(latest.Date, DateTime.Today);
+            var maxDays = applicationProfile.MigrationSlaDays;
+            var label = VisaUiMessages.Get("ApplicationMigration.Sla.DefaultLabel");
+            var status = ResolveStatus(workingDays, maxDays, warningDaysBeforeMax: null);
+            return new ApplicationProfileInstanceProgressSlaResult(status, workingDays, maxDays, null, label);
+        }
 
-        var profile = application.ApplicationType?.MigrationSlaProfile;
-        if (profile?.MaxDaysInReview is not > 0)
-            return default;
-
-        var workingDays = WorkingDaysHelper.CountWorkingDaysInclusive(latest.Date, DateTime.Today);
-        var maxDays = profile.MaxDaysInReview.Value;
-        var warningDays = profile.WarningDaysBeforeMax;
-        var label = ResolveProfileDisplayLabel(profile);
-
-        var status = ResolveStatus(workingDays, maxDays, warningDays);
-        return new ApplicationProgressSlaResult(status, workingDays, maxDays, warningDays, label);
+        return default;
     }
 
-    public static string FormatStatement(ApplicationProgressSlaResult sla)
+    public static string FormatStatement(ApplicationProfileInstanceProgressSlaResult sla)
     {
-        if (sla.Status == ApplicationProgressSlaStatus.None
+        if (sla.Status == ApplicationProfileInstanceProgressSlaStatus.None
             || sla.WorkingDaysInCurrentStep is not int days
             || sla.MaxDaysInReview is not int max)
             return string.Empty;
@@ -44,12 +42,12 @@ public static class ApplicationMigrationSlaHelper
             : sla.MinistryShortName!;
         return sla.Status switch
         {
-            ApplicationProgressSlaStatus.Overdue => VisaUiMessages.Format(
+            ApplicationProfileInstanceProgressSlaStatus.Overdue => VisaUiMessages.Format(
                 "ApplicationMigration.Sla.Overdue",
                 label,
                 days,
                 max),
-            ApplicationProgressSlaStatus.Warning => VisaUiMessages.Format(
+            ApplicationProfileInstanceProgressSlaStatus.Warning => VisaUiMessages.Format(
                 "ApplicationMigration.Sla.Warning",
                 label,
                 days,
@@ -62,50 +60,26 @@ public static class ApplicationMigrationSlaHelper
         };
     }
 
-    /// <summary>UI label for the migration SLA tier; follows current UI culture (not report <see cref="LookupBase.NameTm"/>).</summary>
-    public static string ResolveProfileDisplayLabel(ApplicationMigrationSlaProfile? profile)
-    {
-        if (profile == null)
-            return VisaUiMessages.Get("ApplicationMigration.Sla.DefaultLabel");
-
-        var code = profile.Code?.Trim();
-        if (!string.IsNullOrEmpty(code))
-        {
-            var key = "ApplicationMigration.Sla.Profile." + code;
-            var localized = VisaUiMessages.Get(key);
-            if (!string.Equals(localized, key, StringComparison.Ordinal))
-                return localized;
-        }
-
-        if (!string.IsNullOrWhiteSpace(profile.NameTm))
-            return profile.NameTm.Trim();
-
-        if (!string.IsNullOrWhiteSpace(code))
-            return code;
-
-        return VisaUiMessages.Get("ApplicationMigration.Sla.DefaultLabel");
-    }
-
     public static bool IsMigrationServiceProcessStartedStep(string? stateCode) =>
-        string.Equals(stateCode, ApplicationProgressStateCodes.ProcessStarted, StringComparison.OrdinalIgnoreCase);
+        string.Equals(stateCode, ApplicationProfileInstanceProgressStateCodes.ProcessStarted, StringComparison.OrdinalIgnoreCase);
 
     public static bool IsTerminalMigrationState(string? stateCode) =>
         stateCode != null
-        && (string.Equals(stateCode, ApplicationProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase)
-            || string.Equals(stateCode, ApplicationProgressStateCodes.ProcessRejected, StringComparison.OrdinalIgnoreCase)
-            || string.Equals(stateCode, ApplicationProgressStateCodes.ProcessCancelled, StringComparison.OrdinalIgnoreCase));
+        && (string.Equals(stateCode, ApplicationProfileInstanceProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(stateCode, ApplicationProfileInstanceProgressStateCodes.ProcessRejected, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(stateCode, ApplicationProfileInstanceProgressStateCodes.ProcessCancelled, StringComparison.OrdinalIgnoreCase));
 
-    private static ApplicationProgressSlaStatus ResolveStatus(
+    private static ApplicationProfileInstanceProgressSlaStatus ResolveStatus(
         int workingDays,
         int maxDays,
         int? warningDaysBeforeMax)
     {
         if (workingDays > maxDays)
-            return ApplicationProgressSlaStatus.Overdue;
+            return ApplicationProfileInstanceProgressSlaStatus.Overdue;
 
         if (warningDaysBeforeMax is > 0 && workingDays > warningDaysBeforeMax)
-            return ApplicationProgressSlaStatus.Warning;
+            return ApplicationProfileInstanceProgressSlaStatus.Warning;
 
-        return ApplicationProgressSlaStatus.Ok;
+        return ApplicationProfileInstanceProgressSlaStatus.Ok;
     }
 }

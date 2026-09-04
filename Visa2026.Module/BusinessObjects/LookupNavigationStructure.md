@@ -108,7 +108,7 @@ public class VisaCategory : BaseObject
 | **WorkPermit** | Work permits issued to employees. |
 | **WorkPermitLetter** | Official letters related to work permits. |
 
-### 9. Application (Operational)
+### 9. ApplicationProfileInstance (Operational)
 *Contains operational data related to visa applications.*
 
 | Business Object | Description |

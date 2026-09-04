@@ -74,6 +74,16 @@ internal sealed partial class Visa2014ODataLookupResolver
             Code = x.Code ?? "",
             IsDefault = x.IsDefault,
         });
+        _applicationProfiles = MapLookup(objectSpace.GetObjectsQuery<Bo.ApplicationProfile>(), x => new Dto.ApplicationProfile
+        {
+            Id = x.ID,
+            Name = x.Name ?? "",
+            Code = x.Code ?? "",
+            IsActive = x.IsActive,
+            DefaultProjectContract = x.DefaultProjectContractId.HasValue
+                ? new Dto.ODataEntityRef { Id = x.DefaultProjectContractId.Value }
+                : null,
+        });
         _urgencies = MapLookupDto<Bo.Urgency, Dto.Urgency>(objectSpace);
         _visaPeriods = MapLookupDto<Bo.VisaPeriod, Dto.VisaPeriod>(objectSpace);
         _visaCategories = MapLookupDto<Bo.VisaCategory, Dto.VisaCategory>(objectSpace);

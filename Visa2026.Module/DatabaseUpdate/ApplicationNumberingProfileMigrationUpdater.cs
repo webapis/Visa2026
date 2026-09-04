@@ -6,7 +6,7 @@ namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
 /// Copies application numbering from legacy <c>SystemSettings</c> or <c>CompanyProfiles</c> columns
-/// onto <see cref="BusinessObjects.ApplicationNumberingProfile"/> when tenant fields are still empty.
+/// onto <see cref="BusinessObjects.ApplicationProfileInstanceNumberingProfile"/> when tenant fields are still empty.
 /// </summary>
 public sealed class ApplicationNumberingProfileMigrationUpdater : ModuleUpdater
 {

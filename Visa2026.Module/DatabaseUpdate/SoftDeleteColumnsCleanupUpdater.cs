@@ -34,7 +34,7 @@ public sealed class SoftDeleteColumnsCleanupUpdater : ModuleUpdater
         "ContractTemplates",
         "BusinessTripPlans",
         "Cities",
-        "Applications",
+        "ApplicationProfileInstances",
         "People",
     ];
 

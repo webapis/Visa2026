@@ -2,7 +2,7 @@ namespace Visa2026.Blazor.Server.Editors;
 
 /// <summary>
 /// Dedicated Document copies brand mark (Prototype C: stacked pages + paperclip).
-/// Shared across Person / ApplicationItem / Header entry points and slot chrome.
+/// Shared across Person / ApplicationRosterMergeLine / Header entry points and slot chrome.
 /// </summary>
 internal static class DocumentCopiesBrandMark
 {

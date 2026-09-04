@@ -6,9 +6,9 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Blazor.Server.Controllers;
 
 /// <summary>
-/// Always opens <see cref="Application"/> detail on the Application tab (not the last-selected Progress tab).
+/// Always opens <see cref="Application"/> detail on the ApplicationProfileInstance tab (not the last-selected Progress tab).
 /// </summary>
-public sealed class ApplicationDetailViewDefaultTabController : ObjectViewController<DetailView, Application>
+public sealed class ApplicationDetailViewDefaultTabController : ObjectViewController<DetailView, ApplicationProfileInstance>
 {
     private const string MainTabbedGroupId = "Item1";
 

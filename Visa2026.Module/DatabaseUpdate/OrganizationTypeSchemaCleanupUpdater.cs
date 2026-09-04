@@ -29,7 +29,7 @@ public sealed class OrganizationTypeSchemaCleanupUpdater : ModuleUpdater
 
     private void DropOrganizationTypeArtifacts()
     {
-        DropColumnIfExists("Applications", "OrganizationTypeID");
+        DropColumnIfExists("ApplicationProfileInstances", "OrganizationTypeID");
         DropColumnIfExists("ApplicationTypes", "OrganizationTypeID");
         DropOrganizationTypesTable();
     }

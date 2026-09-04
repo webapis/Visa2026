@@ -72,9 +72,9 @@ fields:
     missingBehavior: skip_row
 
   - source: ApplicationResult.Application
-    target: Application
+    target: ApplicationProfileInstance
     transform: fk_id_map
-    idMapEntity: Application
+    idMapEntity: ApplicationProfileInstance
     missingBehavior: skip_row
     notes: Required on Visa2026 Rejection BO
 

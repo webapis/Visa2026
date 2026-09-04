@@ -66,9 +66,9 @@
 </div>
 
 @code {
-    [Parameter] public Guid ApplicationId { get; set; }
-    [Parameter] public IReadOnlyList<ApplicationProgressLetterCatalogEntry> Entries { get; set; } =
-        Array.Empty<ApplicationProgressLetterCatalogEntry>();
+    [Parameter] public Guid ApplicationProfileInstanceId { get; set; }
+    [Parameter] public IReadOnlyList<ApplicationProfileInstanceProgressLetterCatalogEntry> Entries { get; set; } =
+        Array.Empty<ApplicationProfileInstanceProgressLetterCatalogEntry>();
     [Parameter] public Guid? FocusProgressId { get; set; }
     [Parameter] public string UiCultureName { get; set; } = string.Empty;
     [Parameter] public EventCallback<ProgressLettersInlinePreviewRequest> OnInlinePreviewRequested { get; set; }
@@ -87,7 +87,7 @@
     private string FormatMsg(string key, params object[] args) =>
         VisaUiMessages.FormatForCulture(EffectiveUiCulture, key, args);
 
-    private string EmptyMessage => Msg("ApplicationProgress.MinistryLetters.Empty");
+    private string EmptyMessage => Msg("ApplicationProfileInstanceProgress.MinistryLetters.Empty");
     private string ActionPreview => Msg("ApplicationItemDocumentCopies.Action.Preview");
 
     private bool IsAnyPreviewLoading => !string.IsNullOrEmpty(_previewLoadingProgressId);
@@ -113,7 +113,7 @@
         await PreviewAsync(entry);
     }
 
-    private string GetEntryCssClass(ApplicationProgressLetterCatalogEntry entry)
+    private string GetEntryCssClass(ApplicationProfileInstanceProgressLetterCatalogEntry entry)
     {
         var css = "app-item-doc-copies__group app-item-doc-copies__group--ready";
         if (FocusProgressId == entry.ProgressId)
@@ -127,9 +127,9 @@
 
     private static string FormatDate(DateTime date) => date.ToString("dd.MM.yyyy");
 
-    private async Task PreviewAsync(ApplicationProgressLetterCatalogEntry entry)
+    private async Task PreviewAsync(ApplicationProfileInstanceProgressLetterCatalogEntry entry)
     {
-        if (ApplicationId == Guid.Empty || entry.ProgressId == Guid.Empty || IsAnyPreviewLoading)
+        if (ApplicationProfileInstanceId == Guid.Empty || entry.ProgressId == Guid.Empty || IsAnyPreviewLoading)
             return;
 
         if (!OnInlinePreviewRequested.HasDelegate)
@@ -149,7 +149,7 @@
         {
             await OnInlinePreviewRequested.InvokeAsync(new ProgressLettersInlinePreviewRequest
             {
-                ApplicationId = ApplicationId,
+                ApplicationProfileInstanceId = ApplicationProfileInstanceId,
                 ProgressId = entry.ProgressId,
                 DisplayName = displayName,
             });

@@ -28,7 +28,7 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
 
     public ApplicationListViewPreloadController()
     {
-        TargetObjectType = typeof(Application);
+        TargetObjectType = typeof(ApplicationProfileInstance);
     }
 
     protected override void OnActivated()
@@ -91,7 +91,7 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
         var pendingIds = new List<Guid>();
         for (var rowIndex = Math.Max(0, visibleIndex - ScrollBehindRows); rowIndex < visibleIndex + ScrollAheadRows; rowIndex++)
         {
-            if (grid.GetDataItem(rowIndex) is not Application application)
+            if (grid.GetDataItem(rowIndex) is not ApplicationProfileInstance application)
                 break;
 
             if (!preloadedIds.Contains(application.ID))
@@ -120,14 +120,14 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
         if (View?.CollectionSource.List == null || View.CollectionSource.List.Count == 0)
             return;
 
-        var ids = View.CollectionSource.List.OfType<Application>().Select(a => a.ID).Distinct().ToList();
+        var ids = View.CollectionSource.List.OfType<ApplicationProfileInstance>().Select(a => a.ID).Distinct().ToList();
         var syncRowCount = Math.Min(syncBatches * BatchSize, ids.Count);
         for (var offset = 0; offset < syncRowCount; offset += BatchSize)
             PreloadByIds(ids.Skip(offset).Take(BatchSize).ToList());
 
         if (syncRowCount > 0 && View != null)
         {
-            // Grid may have bound empty NotMapped SLA values before MigrationSlaProfile was included.
+            // Grid may have bound empty NotMapped SLA values before ApplicationProfile was included.
             // Force rebind so Migration deadline / working days pick up the warmed cache.
             suppressCollectionReloadPreload = true;
             try
@@ -175,11 +175,12 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
         if (batchIds.Count == 0)
             return;
 
-        var applications = ObjectSpace.GetObjectsQuery<Application>()
+        var applications = ObjectSpace.GetObjectsQuery<ApplicationProfileInstance>()
             .Where(application => batchIds.Contains(application.ID))
             .Include(application => application.LatestProgress!).ThenInclude(progress => progress.State)
             .Include(application => application.LatestProgress!).ThenInclude(progress => progress.State)
-            .Include(application => application.ApplicationType!).ThenInclude(applicationType => applicationType.MigrationSlaProfile)
+            .Include(application => application.ApplicationProfile)
+            .Include(application => application.ApplicationType!)
             .Include(application => application.ApprovalLegProfile!)
                 .ThenInclude(profile => profile.MinistryLegs)
                 .ThenInclude(leg => leg.ApprovingMinistry)
@@ -190,15 +191,14 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
             .AsSplitQuery()
             .ToList();
 
-        var itemCounts = ObjectSpace.GetObjectsQuery<ApplicationItem>()
-            .Where(item => batchIds.Contains(item.Application.ID))
-            .GroupBy(item => item.Application.ID)
-            .Select(group => new { ApplicationId = group.Key, Count = group.Count() })
-            .ToDictionary(x => x.ApplicationId, x => x.Count);
+        var personCounts = ObjectSpace.GetObjectsQuery<ApplicationProfileInstance>()
+            .Where(application => batchIds.Contains(application.ID))
+            .Select(application => new { ApplicationProfileInstanceId = application.ID, Count = application.People.Count })
+            .ToDictionary(x => x.ApplicationProfileInstanceId, x => x.Count);
 
         foreach (var application in applications)
         {
-            application.SetListViewTotalPersonCount(itemCounts.GetValueOrDefault(application.ID, 0));
+            application.SetListViewTotalPersonCount(personCounts.GetValueOrDefault(application.ID, 0));
             application.InvalidateListViewDisplayCache();
             application.WarmListViewDisplayCache();
             preloadedIds.Add(application.ID);

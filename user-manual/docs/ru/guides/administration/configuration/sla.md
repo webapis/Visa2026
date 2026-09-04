@@ -4,8 +4,8 @@ slug: administration/configuration/sla
 locale: ru
 tier: 8
 guideStatus: draft
-bo: ApplicationMigrationSlaProfile
-navPath: Configuration
+bo: ApplicationProfile
+navPath: Application Profiles
 roles: [Administrator, VisaOffice]
 prerequisiteSlugs:
   - administration/configuration/overview
@@ -15,11 +15,6 @@ verified: false
 
 # Настройки SLA
 
-| Меню | Область |
-|------|---------|
-| **Ministry review SLA** | Singleton — этапы министерств (рабочие дни) |
-| **Application Migration Sla Profile** | SLA миграционной службы — привязка **Application types** |
-
-**Warning** должно быть меньше **Max working days**.
+Рабочие дни SLA задаются на каждом **Application Profile** в шаге **Process & SLA** (**Ministry SLA days** / **Migration SLA days**), а не в Configuration.
 
 [Прогресс заявки](../../applications/progress.md) · [Обзор](overview.md)

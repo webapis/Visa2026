@@ -11,7 +11,7 @@
 
 **Layout family:** **`AppScalar`** — one **Çalık Enerji** branch letter per **`Application`** (Group D — national Migration Service head).
 
-**Application type:** **`App_Cancel_Visa` only** (`cancel_visa`, selection **807**). Not for `App_Cancel_Visa_and_WP`, `App_Cancel_Visa_Ext`, or other cancellation types.
+**ApplicationProfileInstance type:** **`App_Cancel_Visa` only** (`cancel_visa`, selection **807**). Not for `App_Cancel_Visa_and_WP`, `App_Cancel_Visa_Ext`, or other cancellation types.
 
 **Template state:** **Implemented** — Extract/Validate OK; Resminamalar verified (e.g. **2 (iki)** persons / **4 (dört)** visas on test application).
 

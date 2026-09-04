@@ -4,15 +4,15 @@ description: Stakeholder demo — family invitation based on employee work permi
 dependsOn: InvitationFM
 sync: false
 anchor:
-  entity: Application
+  entity: ApplicationProfileInstance
   key: FullApplicationNumber
   value: 4/-060
 data:
   Applications:
-  - Application Number: 060
+  - ApplicationProfileInstance Number: 060
     Date: 2026-05-15
     Project Contract: GT-15
-    Application Type: App_Inv_According_to_WP
+    ApplicationProfileInstance Type: App_Inv_According_to_WP
     Urgency: Adaty tertipde !
     Visa Period: 3 (üç) aý
     Visa Category: Köp gezeklik

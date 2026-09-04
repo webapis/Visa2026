@@ -15,6 +15,9 @@ using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using Visa2026.Module.Editors;
 
+using Visa2026.Module.Services;
+using Visa2026.Module.Services.ApplicationPersonRoster;
+
 namespace Visa2026.Module.BusinessObjects
 {
     /// <summary>
@@ -102,6 +105,27 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Expiration Date")]
         public virtual DateTime? ExpirationDate { get; set; }
 
+        /// <summary>
+        /// Same comma-separated <see cref="BorderZoneName"/> catalog as <see cref="Visa.BorderZoneLocation"/>.
+        /// Copied onto Path A visas when the officer creates them from this invitation.
+        /// </summary>
+        [MaxLength(500)]
+        [RuleRequiredField]
+        [VisibleInListView(false)]
+        [EditorAlias(CommaSeparatedMultiSelectEditorAliases.BorderZone)]
+        [CommaSeparatedMultiSelect(
+            CatalogEntityType = typeof(BorderZoneName),
+            NoneValue = CommaSeparatedSelectionHelper.NoneValue)]
+        [XafDisplayName("Border zone")]
+        public virtual string BorderZoneLocation { get; set; }
+
+        [Browsable(false)]
+        [XafDisplayName("Border Zone Location (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string BorderZoneLocation_NameTm =>
+            BorderZoneSelectionHelper.IsNoneValue(BorderZoneLocation)
+                ? BorderZoneSelectionHelper.NoneValue
+                : BorderZoneLocation?.Trim() ?? BorderZoneSelectionHelper.NoneValue;
+
         [NotMapped]
         [ImmediatePostData]
         [Index(-1000)]
@@ -113,32 +137,37 @@ namespace Visa2026.Module.BusinessObjects
         public bool ShowOptionalFields { get; set; }
 
         /// <summary>
-        /// Optional link to a visa application. When set, invitation items are limited to people on that application.
-        /// Only applications whose type has <see cref="ApplicationType.CanIssueInvitation"/> are offered.
+        /// Application Profile Instance that issued this invitation (1:N from instance Issued records).
+        /// Set at create from instance workspace; read-only on detail. Import sets via Path B.
         /// </summary>
-        [ImmediatePostData]
+        [ExcludeFromOptionalDetailFields]
+        [ModelDefault("AllowEdit", "False")]
         [VisibleInListView(false)]
         [VisibleInDetailView(true)]
         [VisibleInLookupListView(false)]
-        [DataSourceProperty(nameof(AvailableApplications))]
-        [ToolTip("Link this invitation to an application when one exists. Leave empty for standalone invitations.")]
-        public virtual Application Application { get; set; }
+        [DataSourceProperty(nameof(AvailableApplicationProfileInstances))]
+        [InverseProperty(nameof(ApplicationProfileInstance.Invitations))]
+        [XafDisplayName("Issuing profile instance")]
+        [ToolTip("Application Profile Instance that produced this invitation. Set when created from Issued records on that case.")]
+        public virtual ApplicationProfileInstance ApplicationProfileInstance { get; set; }
 
         /// <summary>
         /// Candidate applications for <see cref="Application"/> (types that may produce an invitation).
         /// </summary>
         [NotMapped]
         [Browsable(false)]
-        public IList<Application> AvailableApplications
+        public IList<ApplicationProfileInstance> AvailableApplicationProfileInstances
         {
             get
             {
                 var objectSpace = ObjectSpaceHelper.Get(this);
                 if (objectSpace == null)
-                    return new List<Application>();
+                    return new List<ApplicationProfileInstance>();
 
-                return objectSpace.GetObjectsQuery<Application>()
-                    .Where(a => a.ApplicationType != null && a.ApplicationType.CanIssueInvitation)
+                return objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
+                    .Where(a =>
+                        (a.ApplicationProfile != null && a.ApplicationProfile.ProduceInvitation)
+                        || (a.ApplicationType != null && a.ApplicationType.CanIssueInvitation))
                     .OrderByDescending(a => a.ApplicationDate)
                     .ThenBy(a => a.FullApplicationNumber)
                     .ToList();
@@ -146,17 +175,49 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         [RuleFromBoolProperty(
+            "Invitation_ApplicationProfileInstanceRequired",
+            DefaultContexts.Save,
+            "Create the invitation from Application Profile Instance → Issued records (New invitation), not from the Invitation list.")]
+        [Browsable(false)]
+        public bool IsApplicationProfileInstanceRequired =>
+            InvitationIssuingOriginPolicy.HasRequiredApplicationProfileInstance(this);
+
+        [RuleFromBoolProperty(
             "Invitation_ApplicationTypeAllowed",
             DefaultContexts.Save,
-            "Application must be a type that can issue an invitation.")]
+            "ApplicationProfileInstance must be a type that can issue an invitation.")]
         [Browsable(false)]
         public bool IsApplicationTypeAllowed
         {
             get
             {
-                if (Application == null)
+                if (ApplicationProfileInstance == null)
                     return true;
-                return ApplicationTypeCapabilities.CanIssueInvitation(Application.ApplicationType);
+                return ApplicationTypeCapabilities.CanIssueInvitation(ApplicationProfileInstance);
+            }
+        }
+
+        [RuleFromBoolProperty(
+            "Invitation_ApplicationProfileInstanceSingleUse",
+            DefaultContexts.Save,
+            "This issuing application is already linked to another invitation.")]
+        [Browsable(false)]
+        public bool IsApplicationProfileInstanceSingleUse
+        {
+            get
+            {
+                if (ApplicationProfileInstance == null)
+                    return true;
+
+                var objectSpace = ObjectSpaceHelper.Get(this);
+                if (objectSpace == null)
+                    return true;
+
+                var appId = ApplicationProfileInstance.ID;
+                return !objectSpace.GetObjectsQuery<Invitation>()
+                    .Any(i => i.ID != ID
+                        && i.ApplicationProfileInstance != null
+                        && i.ApplicationProfileInstance.ID == appId);
             }
         }
 
@@ -206,13 +267,9 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                if (Application?.ApplicationItems != null)
-                {
-                    return Application.ApplicationItems
-                        .Select(ai => ai.Person)
-                        .Where(p => p != null)
-                        .ToList()!;
-                }
+                var roster = ApplicationRosterHelper.GetRosterPeople(ApplicationProfileInstance);
+                if (roster.Count > 0)
+                    return roster;
 
                 IObjectSpace? objectSpace = ObjectSpaceHelper.Get(this);
                 if (objectSpace == null)
@@ -242,6 +299,24 @@ namespace Visa2026.Module.BusinessObjects
             {
                 IssuedDate = DateTime.Today;
             }
+
+            if (string.IsNullOrWhiteSpace(BorderZoneLocation)
+                && ApplicationProfileInstance != null
+                && !string.IsNullOrWhiteSpace(ApplicationProfileInstance.BorderZoneLocation))
+            {
+                BorderZoneLocation = ApplicationProfileInstance.BorderZoneLocation;
+            }
+
+            BorderZoneSelectionHelper.ApplyDefaultIfEmpty(this);
+        }
+
+        public override void OnSaving()
+        {
+            BorderZoneSelectionHelper.ApplyDefaultIfEmpty(this);
+            // Do not auto-add roster people here. One application may issue several invitations
+            // (one person per letter or a shared letter). Filling the whole roster on every save
+            // pulled people from invitation 009 onto 010 when only expiry changed.
+            base.OnSaving();
         }
 
         /// <summary>ListView link column that opens header document copies in the preview slot.</summary>

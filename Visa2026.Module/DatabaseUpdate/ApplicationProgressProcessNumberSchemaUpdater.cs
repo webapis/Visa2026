@@ -5,12 +5,12 @@ using DevExpress.ExpressApp.Updating;
 namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
-/// Adds <c>ProcessNumber</c> on <c>ApplicationProgresses</c> and denormalized <c>Applications.ProcessNumber</c>
+/// Adds <c>ProcessNumber</c> on <c>ApplicationProfileInstanceProgresses</c> and denormalized <c>Applications.ProcessNumber</c>
 /// before/after EF schema sync (SQL Server and PostgreSQL).
 /// </summary>
-public sealed class ApplicationProgressProcessNumberSchemaUpdater : ModuleUpdater
+public sealed class ApplicationProfileInstanceProgressProcessNumberSchemaUpdater : ModuleUpdater
 {
-    public ApplicationProgressProcessNumberSchemaUpdater(IObjectSpace objectSpace, Version currentDBVersion)
+    public ApplicationProfileInstanceProgressProcessNumberSchemaUpdater(IObjectSpace objectSpace, Version currentDBVersion)
         : base(objectSpace, currentDBVersion)
     {
     }
@@ -31,22 +31,22 @@ public sealed class ApplicationProgressProcessNumberSchemaUpdater : ModuleUpdate
     private void EnsureColumns()
     {
         if (DatabaseProviderDetector.IsPostgreSql(ObjectSpace))
-            ExecuteNonQueryCommand(ApplicationProgressProcessNumberSchemaSql.EnsureColumnsPostgres, false);
+            ExecuteNonQueryCommand(ApplicationProfileInstanceProgressProcessNumberSchemaSql.EnsureColumnsPostgres, false);
         else
-            ExecuteNonQueryCommand(ApplicationProgressProcessNumberSchemaSql.EnsureColumnsSqlServer, false);
+            ExecuteNonQueryCommand(ApplicationProfileInstanceProgressProcessNumberSchemaSql.EnsureColumnsSqlServer, false);
     }
 
     private void Backfill()
     {
         if (DatabaseProviderDetector.IsPostgreSql(ObjectSpace))
         {
-            ExecuteNonQueryCommand(ApplicationProgressProcessNumberSchemaSql.BackfillProgressFromDescriptionPostgres, false);
-            ExecuteNonQueryCommand(ApplicationProgressProcessNumberSchemaSql.BackfillApplicationFromProgressPostgres, false);
+            ExecuteNonQueryCommand(ApplicationProfileInstanceProgressProcessNumberSchemaSql.BackfillProgressFromDescriptionPostgres, false);
+            ExecuteNonQueryCommand(ApplicationProfileInstanceProgressProcessNumberSchemaSql.BackfillApplicationFromProgressPostgres, false);
         }
         else
         {
-            ExecuteNonQueryCommand(ApplicationProgressProcessNumberSchemaSql.BackfillProgressFromDescriptionSqlServer, false);
-            ExecuteNonQueryCommand(ApplicationProgressProcessNumberSchemaSql.BackfillApplicationFromProgressSqlServer, false);
+            ExecuteNonQueryCommand(ApplicationProfileInstanceProgressProcessNumberSchemaSql.BackfillProgressFromDescriptionSqlServer, false);
+            ExecuteNonQueryCommand(ApplicationProfileInstanceProgressProcessNumberSchemaSql.BackfillApplicationFromProgressSqlServer, false);
         }
     }
 }

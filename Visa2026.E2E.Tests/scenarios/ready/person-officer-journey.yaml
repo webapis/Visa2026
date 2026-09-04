@@ -16,7 +16,7 @@ steps:
   - login:
       user: standarduser
       password: ""
-  - navigate: Application
+  - navigate: ApplicationProfileInstance
   - assert-action: New
   - goto: Person_ListView_Employees
   - assert-action: New

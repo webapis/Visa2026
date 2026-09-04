@@ -45,7 +45,7 @@ internal static class Visa2014ApplicationProjectContractPatch
         var userName = GetOptionValue(args, "--user") ?? "Admin";
         var password = GetOptionValue(args, "--password") ?? "";
         var applicationIdMapPath = GetOptionValue(args, "--application-id-map")
-            ?? source.IdMapPath(dataImporterRoot, "Application");
+            ?? source.IdMapPath(dataImporterRoot, "ApplicationProfileInstance");
 
         bool dryRun = HasArg(args, "--dry-run");
         bool noWait = HasArg(args, "--no-wait");
@@ -54,7 +54,7 @@ internal static class Visa2014ApplicationProjectContractPatch
         Console.WriteLine("=== VISA2014 Application.ProjectContract PATCH");
         Console.WriteLine($"INF Legacy source: {source.Id}");
         Console.WriteLine($"INF Target API: {apiBaseUrl}");
-        Console.WriteLine($"INF Application id-map: {applicationIdMapPath}");
+        Console.WriteLine($"INF ApplicationProfileInstance id-map: {applicationIdMapPath}");
         if (dryRun)
             Console.WriteLine("INF Mode: dry-run (no PATCH)");
 
@@ -72,7 +72,7 @@ internal static class Visa2014ApplicationProjectContractPatch
 
         if (!File.Exists(applicationIdMapPath))
         {
-            Console.Error.WriteLine($"ERR Application id-map not found: {applicationIdMapPath}");
+            Console.Error.WriteLine($"ERR ApplicationProfileInstance id-map not found: {applicationIdMapPath}");
             return 1;
         }
 
@@ -83,7 +83,7 @@ internal static class Visa2014ApplicationProjectContractPatch
             verbose);
 
         var idMap = Visa2014IdMapHelper.Load(applicationIdMapPath);
-        Console.WriteLine($"INF Application id-map entries: {idMap.Count}");
+        Console.WriteLine($"INF ApplicationProfileInstance id-map entries: {idMap.Count}");
         Console.WriteLine($"INF Transform import rows: {batch.ImportRows.Count}");
 
         var api = new ApiClient(apiBaseUrl, userName, password) { Verbose = verbose };
@@ -152,7 +152,7 @@ internal static class Visa2014ApplicationProjectContractPatch
                 continue;
             }
 
-            if (!applicationIdMap.TryGetValue(legacyOid, out var targetApplicationId))
+            if (!applicationIdMap.TryGetValue(legacyOid, out var targetApplicationProfileInstanceId))
             {
                 skippedMap++;
                 continue;
@@ -163,8 +163,8 @@ internal static class Visa2014ApplicationProjectContractPatch
             {
                 failed++;
                 var fullNumber = row.GetValueOrDefault("FullApplicationNumber") as string ?? legacyOid.ToString();
-                errors.Add($"Application {fullNumber} ({targetApplicationId}): ProjectContract not in OData — '{projectContractCode}'");
-                Console.Error.WriteLine($"ERR Application {fullNumber}: ProjectContract not found for '{projectContractCode}'");
+                errors.Add($"ApplicationProfileInstance {fullNumber} ({targetApplicationProfileInstanceId}): ProjectContract not in OData — '{projectContractCode}'");
+                Console.Error.WriteLine($"ERR ApplicationProfileInstance {fullNumber}: ProjectContract not found for '{projectContractCode}'");
                 continue;
             }
 
@@ -177,13 +177,13 @@ internal static class Visa2014ApplicationProjectContractPatch
                     patched++;
                     if (verbose)
                     {
-                        var fullNumber = row.GetValueOrDefault("FullApplicationNumber") as string ?? targetApplicationId.ToString();
-                        Console.WriteLine($"  DRY PATCH Application {fullNumber} ({targetApplicationId}) ProjectContract={projectContractCode}");
+                        var fullNumber = row.GetValueOrDefault("FullApplicationNumber") as string ?? targetApplicationProfileInstanceId.ToString();
+                        Console.WriteLine($"  DRY PATCH ApplicationProfileInstance {fullNumber} ({targetApplicationProfileInstanceId}) ProjectContract={projectContractCode}");
                     }
                     continue;
                 }
 
-                await api.UpdateAsync("Application", targetApplicationId, new Dictionary<string, object?>
+                await api.UpdateAsync("Application", targetApplicationProfileInstanceId, new Dictionary<string, object?>
                 {
                     ["ProjectContract"] = new { ID = projectContractId.Value },
                 });
@@ -195,8 +195,8 @@ internal static class Visa2014ApplicationProjectContractPatch
             catch (Exception ex)
             {
                 failed++;
-                errors.Add($"{targetApplicationId}: {ex.Message}");
-                Console.Error.WriteLine($"ERR {targetApplicationId}: {ex.Message}");
+                errors.Add($"{targetApplicationProfileInstanceId}: {ex.Message}");
+                Console.Error.WriteLine($"ERR {targetApplicationProfileInstanceId}: {ex.Message}");
             }
         }
 

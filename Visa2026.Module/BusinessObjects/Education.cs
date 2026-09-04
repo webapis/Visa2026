@@ -68,6 +68,11 @@ namespace Visa2026.Module.BusinessObjects
         [Aggregated]
         public virtual IList<EducationDocument> Documents { get; set; }
 
+        /// <summary>Skip-navigation M2M with <see cref="ApplicationProfileInstance"/> (same pattern as Person). Not aggregated.</summary>
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInListView(false)]
+        public virtual IList<ApplicationProfileInstance> ApplicationProfileInstances { get; set; } = new ObservableCollection<ApplicationProfileInstance>();
+
         [NotMapped]
         public string EducationDescription
         {

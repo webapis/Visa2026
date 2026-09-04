@@ -44,7 +44,7 @@ internal static class Visa2014ApplicationTypeRouteCorrection
             ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
             ?? "Host=localhost;Port=5432;Database=visa2026;Username=postgres;Password=Visa2026Local;Persist Security Info=True;EFCoreProvider=Postgres";
 
-        Console.WriteLine("=== VISA2014 Application type route correction");
+        Console.WriteLine("=== VISA2014 ApplicationProfileInstance type route correction");
         Console.WriteLine($"INF Legacy source: {source.Id}");
         Console.WriteLine($"INF Target SQL: {MaskConnectionString(targetConnection)}");
         if (dryRun) Console.WriteLine("INF Mode: dry-run (no writes)");
@@ -64,13 +64,13 @@ internal static class Visa2014ApplicationTypeRouteCorrection
             }
 
             var target = new Visa2014ObjectSpaceImportTarget(host.ObjectSpaceFactory, batchSize: 50);
-            var applicationIdMap = File.Exists(source.IdMapPath(dataImporterRoot, "Application"))
-                ? Visa2014IdMapHelper.Load(source.IdMapPath(dataImporterRoot, "Application"))
+            var applicationIdMap = File.Exists(source.IdMapPath(dataImporterRoot, "ApplicationProfileInstance"))
+                ? Visa2014IdMapHelper.Load(source.IdMapPath(dataImporterRoot, "ApplicationProfileInstance"))
                 : new Dictionary<Guid, Guid>();
 
             var result = await RunAsync(host.ObjectSpaceFactory, target, resolver, source.ConnectionString,
                 source.LookupTranslationPaths, applicationIdMap,
-                source.IdMapPath(dataImporterRoot, "ApplicationProgress"), dryRun, verbose);
+                source.IdMapPath(dataImporterRoot, "ApplicationProfileInstanceProgress"), dryRun, verbose);
 
             Console.WriteLine($"INF Employee retyped: {result.EmployeeRetyped}");
             Console.WriteLine($"INF Employee items backfilled: {result.EmployeeItemsBackfilled}");
@@ -113,7 +113,7 @@ internal static class Visa2014ApplicationTypeRouteCorrection
         int employeeRetyped = 0, itemsBackfilled = 0, familyCorrected = 0;
         int progressDeleted = 0, progressPosted = 0, progressFailed = 0;
 
-        using var objectSpace = objectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Bo.Application));
+        using var objectSpace = objectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Bo.ApplicationProfileInstance));
         MigrationImportContext.ApplyImportObjectSpaceHooks(objectSpace);
 
         var visaExtType = objectSpace.GetObjectsQuery<Bo.ApplicationType>().FirstOrDefault(t => t.Name == EmployeeVisaExtName);
@@ -124,23 +124,18 @@ internal static class Visa2014ApplicationTypeRouteCorrection
         if (visaExtType == null || visaAndWpType == null)
             throw new InvalidOperationException("ApplicationType seed missing -- run Update-LocalDatabase.ps1 -ForceUpdate first.");
 
-        if (familyVisaExtType?.ApplicationProgressRoute != Bo.ApplicationProgressRouteKind.ViaMinistries
-            || familyNewbornType?.ApplicationProgressRoute != Bo.ApplicationProgressRouteKind.ViaMinistries)
+        if (familyVisaExtType?.ApplicationProfileInstanceProgressRoute != Bo.ApplicationProfileInstanceProgressRouteKind.ViaMinistries
+            || familyNewbornType?.ApplicationProfileInstanceProgressRoute != Bo.ApplicationProfileInstanceProgressRouteKind.ViaMinistries)
             throw new InvalidOperationException("FM types not ViaMinistries -- sync ApplicationTypeConfigurationCatalog first.");
 
-        var employeeApps = objectSpace.GetObjectsQuery<Bo.Application>()
+        var employeeApps = objectSpace.GetObjectsQuery<Bo.ApplicationProfileInstance>()
             .Where(a => a.ApplicationType != null && a.ApplicationType.ID == visaExtType.ID).ToList();
         if (verbose) Console.WriteLine($"INF Phase 1: {employeeApps.Count} App_Visa_Ext application(s)");
 
         foreach (var application in employeeApps)
         {
             if (!dryRun) application.ApplicationType = visaAndWpType;
-            foreach (var item in application.ApplicationItems ?? [])
-            {
-                if (item.Person == null || !item.Person.IsEmployee) continue;
-                if (!dryRun) BackfillEmployeeVisaAndWpItem(item);
-                itemsBackfilled++;
-            }
+            // Phase B: ApplicationItem row backfill retired (M2M roster + ResolvedLinks).
             employeeRetyped++;
         }
         if (!dryRun && employeeApps.Count > 0) objectSpace.CommitChanges();
@@ -149,17 +144,17 @@ internal static class Visa2014ApplicationTypeRouteCorrection
         if (familyVisaExtType != null) familyTypeIds.Add(familyVisaExtType.ID);
         if (familyNewbornType != null) familyTypeIds.Add(familyNewbornType.ID);
 
-        var familyApps = objectSpace.GetObjectsQuery<Bo.Application>()
+        var familyApps = objectSpace.GetObjectsQuery<Bo.ApplicationProfileInstance>()
             .Where(a => a.ApplicationType != null && familyTypeIds.Contains(a.ApplicationType.ID)).ToList();
         if (verbose) Console.WriteLine($"INF Phase 2: {familyApps.Count} family visa application(s)");
 
         var familyAppIds = familyApps.Select(a => a.ID).ToHashSet();
         if (familyAppIds.Count > 0)
         {
-            using var progressSpace = objectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Bo.ApplicationProgress));
+            using var progressSpace = objectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Bo.ApplicationProfileInstanceProgress));
             MigrationImportContext.ApplyImportObjectSpaceHooks(progressSpace);
-            var progresses = progressSpace.GetObjectsQuery<Bo.ApplicationProgress>()
-                .Where(p => p.Application != null && familyAppIds.Contains(p.Application.ID)).ToList();
+            var progresses = progressSpace.GetObjectsQuery<Bo.ApplicationProfileInstanceProgress>()
+                .Where(p => p.ApplicationProfileInstance != null && familyAppIds.Contains(p.ApplicationProfileInstance.ID)).ToList();
             progressDeleted = progresses.Count;
             if (!dryRun)
             {
@@ -171,20 +166,20 @@ internal static class Visa2014ApplicationTypeRouteCorrection
 
         foreach (var applicationId in familyAppIds)
         {
-            using var familySpace = objectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Bo.Application));
+            using var familySpace = objectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Bo.ApplicationProfileInstance));
             MigrationImportContext.ApplyImportObjectSpaceHooks(familySpace);
-            var application = familySpace.GetObjectByKey<Bo.Application>(applicationId);
+            var application = familySpace.GetObjectByKey<Bo.ApplicationProfileInstance>(applicationId);
             if (application == null)
             {
-                errors.Add($"Application {applicationId}: not found");
+                errors.Add($"ApplicationProfileInstance {applicationId}: not found");
                 continue;
             }
 
             var sponsor = ResolveSponsoringEmployee(application);
             var contract = sponsor?.ProjectContract;
-            if (contract == null) { errors.Add($"Application {application.ID}: no sponsor ProjectContract"); continue; }
+            if (contract == null) { errors.Add($"ApplicationProfileInstance {application.ID}: no sponsor ProjectContract"); continue; }
             var profile = ResolveApprovalLegProfileFromSponsorContract(familySpace, contract);
-            if (profile == null) { errors.Add($"Application {application.ID}: no ApprovalLegProfile for contract {contract.Code}"); continue; }
+            if (profile == null) { errors.Add($"ApplicationProfileInstance {application.ID}: no ApprovalLegProfile for contract {contract.Code}"); continue; }
             if (!dryRun)
             {
                 application.ProjectContract = familySpace.GetObject(contract);
@@ -200,7 +195,7 @@ internal static class Visa2014ApplicationTypeRouteCorrection
                 .ToDictionary(kv => kv.Key, kv => kv.Value);
             var targetLegCounts = Visa2014ApplicationMinistryLegCountResolver.LoadFromObjectSpace(objectSpaceFactory);
             var familyLegCounts = Visa2014ApplicationMinistryLegCountResolver.MapLegacyLegCounts(legacyToTarget, targetLegCounts);
-            var regen = await Visa2014ApplicationProgressODataImporter.RegenerateForLegacyApplicationsAsync(
+            var regen = await Visa2014ApplicationProfileInstanceProgressODataImporter.RegenerateForLegacyApplicationsAsync(
                 target, resolver, legacyConnectionString, lookupTranslationPaths, legacyToTarget, familyLegCounts, dryRun, verbose);
             progressPosted = regen.PostedCount;
             progressFailed = regen.FailedCount;
@@ -217,23 +212,11 @@ internal static class Visa2014ApplicationTypeRouteCorrection
         };
     }
 
-    private static void BackfillEmployeeVisaAndWpItem(Bo.ApplicationItem item)
-    {
-        var person = item.Person!;
-        item.CurrentPositionHistory = Bo.PersonCurrentItems.GetCurrentPositionHistory(person);
-        item.CurrentSalary = Bo.PersonCurrentItems.GetCurrentSalary(person);
-        item.CurrentWorkDuty = Bo.PersonCurrentItems.GetCurrentWorkDuty(person);
-        var workPermitItem = Bo.PersonCurrentItems.GetCurrentWorkPermitItem(person);
-        item.CurrentWorkPermitItem = workPermitItem;
-        item.WorkPermittedLocations = workPermitItem?.WorkPermittedLocations ?? string.Empty;
-        if (item.VisaIssued) { item.VisaIsChanged = true; if (workPermitItem != null) item.WorkPermitItemIsIssued = true; }
-    }
 
-    private static Bo.Person? ResolveSponsoringEmployee(Bo.Application application)
+    private static Bo.Person? ResolveSponsoringEmployee(Bo.ApplicationProfileInstance application)
     {
-        foreach (var item in application.ApplicationItems ?? [])
+        foreach (var person in application.People ?? [])
         {
-            var person = item.Person;
             if (person == null) continue;
             if (!person.IsEmployee && person.SponsoringEmployee != null) return person.SponsoringEmployee;
             if (person.IsEmployee) return person;
@@ -247,7 +230,7 @@ internal static class Visa2014ApplicationTypeRouteCorrection
             .Where(x => x.ProjectContract != null && x.ProjectContract.ID == contract.ID)
             .Select(x => x.ApprovalLegProfile).Where(p => p != null && p.IsActive).ToList();
         if (allowed.Count == 1) return allowed[0];
-        var dominantProfileId = objectSpace.GetObjectsQuery<Bo.Application>()
+        var dominantProfileId = objectSpace.GetObjectsQuery<Bo.ApplicationProfileInstance>()
             .Where(a => a.ProjectContract != null && a.ProjectContract.ID == contract.ID
                 && a.ApprovalLegProfile != null && a.ApplicationType != null
                 && a.ApplicationType.Category == Bo.ApplicationTypeCategory.Employee)

@@ -244,7 +244,7 @@ SELECT 'VisaWithIssuing' AS bo, COUNT(*)::int AS c FROM public."Visas"
 WHERE ("GCRecord" IS NULL OR "GCRecord" = 0) AND "IssuingApplicationItemID" IS NOT NULL
 UNION ALL
 SELECT 'VisaWithInvitation' AS bo, COUNT(*)::int AS c FROM public."Visas"
-WHERE ("GCRecord" IS NULL OR "GCRecord" = 0) AND "InvitationItemID" IS NOT NULL;
+WHERE ("GCRecord" IS NULL OR "GCRecord" = 0) AND "IssuingInvitationItemID" IS NOT NULL;
 "@ | Set-Content -LiteralPath $linkSqlFile -Encoding UTF8
             $linkRows = & $psql -h localhost -U $pgUser -d $pgDatabase -t -A -F '|' -f $linkSqlFile 2>$null
             Remove-Item -LiteralPath $linkSqlFile -Force -ErrorAction SilentlyContinue
@@ -260,7 +260,7 @@ WHERE ("GCRecord" IS NULL OR "GCRecord" = 0) AND "InvitationItemID" IS NOT NULL;
             $parts += "SELECT '$bo' AS BO, COUNT(*) AS C FROM [$t] WHERE GCRecord IS NULL OR GCRecord = 0"
         }
         $parts += "SELECT 'VisaWithIssuing' AS BO, COUNT(*) AS C FROM [Visas] WHERE (GCRecord IS NULL OR GCRecord = 0) AND IssuingApplicationItemID IS NOT NULL"
-        $parts += "SELECT 'VisaWithInvitation' AS BO, COUNT(*) AS C FROM [Visas] WHERE (GCRecord IS NULL OR GCRecord = 0) AND InvitationItemID IS NOT NULL"
+        $parts += "SELECT 'VisaWithInvitation' AS BO, COUNT(*) AS C FROM [Visas] WHERE (GCRecord IS NULL OR GCRecord = 0) AND IssuingInvitationItemID IS NOT NULL"
         $sql = "SET NOCOUNT ON; USE [$dbName]; " + ($parts -join ' UNION ALL ') + ';'
         $rows = sqlcmd -S 'localhost\SQLEXPRESS' -E -C -Q $sql -W -s '|' -h -1 2>$null
         foreach ($r in @($rows)) {

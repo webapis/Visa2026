@@ -4,14 +4,14 @@ using Xunit;
 
 namespace Visa2026.Module.Tests.BusinessObjects;
 
-public class ApplicationProgressProfileResolverTests
+public class ApplicationProfileInstanceProgressProfileResolverTests
 {
     [Fact]
     public void GetMinistryLegCount_UsesApprovalLegProfileWhenShowApprovalLegProfile()
     {
         var type = new ApplicationType
         {
-            ApplicationProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
+            ApplicationProfileInstanceProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
             ShowProjectContract = true,
             ShowApprovalLegProfile = true
         };
@@ -24,14 +24,14 @@ public class ApplicationProgressProfileResolverTests
             ]
         };
         var contract = new ProjectContract();
-        var app = new Application
+        var app = new ApplicationProfileInstance
         {
             ApplicationType = type,
             ApprovalLegProfile = profile,
             ProjectContract = contract
         };
 
-        Assert.Equal(2, ApplicationProgressProfileResolver.GetMinistryLegCount(app));
+        Assert.Equal(2, ApplicationProfileInstanceProgressProfileResolver.GetMinistryLegCount(app));
     }
 
     [Fact]
@@ -39,19 +39,61 @@ public class ApplicationProgressProfileResolverTests
     {
         var type = new ApplicationType
         {
-            ApplicationProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
+            ApplicationProfileInstanceProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
             ShowApprovalLegProfile = true,
             ShowProjectContract = true
         };
-        var app = new Application { ApplicationType = type };
-        var progress = new ApplicationProgress
+        var app = new ApplicationProfileInstance { ApplicationType = type };
+        var progress = new ApplicationProfileInstanceProgress
         {
-            Application = app,
-            State = new ApplicationState { Code = ApplicationProgressStateCodes.Review1Approved },
+            ApplicationProfileInstance = app,
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.Review1Approved },
         };
 
-        Assert.False(ApplicationProgressProfileResolver.TryValidateApprovalLegProfileForProgress(progress, null, out var message));
+        Assert.False(ApplicationProfileInstanceProgressProfileResolver.TryValidateApprovalLegProfileForProgress(progress, null, out var message));
         Assert.False(string.IsNullOrWhiteSpace(message));
+    }
+
+    [Fact]
+    public void TryValidateApprovalLegProfileForProgress_AllowsFirstMinistryStepWhenEmbeddedProfileLegs()
+    {
+        var profile = new ApplicationProfile
+        {
+            ProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
+        };
+        profile.ApprovalLegs.Add(new ApplicationProfileApprovalLeg
+        {
+            Sequence = 1,
+            ApprovingMinistry = new ApprovingMinistry { ShortNameTm = "Turkmenenergo" },
+        });
+        var app = new ApplicationProfileInstance { ApplicationProfile = profile };
+        var progress = new ApplicationProfileInstanceProgress
+        {
+            ApplicationProfileInstance = app,
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1) },
+        };
+
+        Assert.True(ApplicationProfileInstanceProgressProfileResolver.TryValidateApprovalLegProfileForProgress(progress, null, out var message));
+        Assert.True(string.IsNullOrWhiteSpace(message));
+    }
+
+    [Fact]
+    public void GetSuggestedNextStateAfterOfficePreparation_UsesEmbeddedProfileLegs()
+    {
+        var profile = new ApplicationProfile
+        {
+            ProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
+        };
+        profile.ApprovalLegs.Add(new ApplicationProfileApprovalLeg
+        {
+            Sequence = 1,
+            ApprovingMinistry = new ApprovingMinistry { ShortNameTm = "Turkmenenergo" },
+        });
+        var app = new ApplicationProfileInstance { ApplicationProfile = profile };
+
+        Assert.Equal(
+            ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1),
+            ApplicationProfileInstanceProgressRouteHelper.GetSuggestedNextStateAfterOfficePreparation(app));
     }
 
     [Fact]
@@ -59,10 +101,10 @@ public class ApplicationProgressProfileResolverTests
     {
         var type = new ApplicationType
         {
-            ApplicationProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
+            ApplicationProfileInstanceProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
             ShowApprovalLegProfile = true
         };
-        var app = new Application { ApplicationType = type };
+        var app = new ApplicationProfileInstance { ApplicationType = type };
         var oneLeg = new ApprovalLegProfile
         {
             MinistryLegs = [new ApprovalLegProfileMinistryLeg { Sequence = 1, ApprovingMinistry = new ApprovingMinistry() }]
@@ -76,19 +118,19 @@ public class ApplicationProgressProfileResolverTests
             ]
         };
 
-        Assert.True(ApplicationProgressProfileResolver.WouldMinistryDepthChange(app, oneLeg, twoLeg));
-        Assert.False(ApplicationProgressProfileResolver.WouldMinistryDepthChange(app, oneLeg, oneLeg));
+        Assert.True(ApplicationProfileInstanceProgressProfileResolver.WouldMinistryDepthChange(app, oneLeg, twoLeg));
+        Assert.False(ApplicationProfileInstanceProgressProfileResolver.WouldMinistryDepthChange(app, oneLeg, oneLeg));
     }
 
     [Fact]
     public void ApplicationLockedHeaderScalarsDiffer_DetectsApprovalLegProfileChange()
     {
-        var original = new Application
+        var original = new ApplicationProfileInstance
         {
             ApplicationNumber = "1",
             ApprovalLegProfile = new ApprovalLegProfile { ID = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa") }
         };
-        var current = new Application
+        var current = new ApplicationProfileInstance
         {
             ApplicationNumber = "1",
             ApprovalLegProfile = new ApprovalLegProfile { ID = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb") }
@@ -102,16 +144,16 @@ public class ApplicationProgressProfileResolverTests
     {
         var type = new ApplicationType
         {
-            ApplicationProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
+            ApplicationProfileInstanceProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
             ShowProjectContract = true,
             MinistryReviewDepth = MinistryReviewDepth.FirstMinistryOnly
         };
-        var app = new Application { ApplicationType = type, ProjectContract = new ProjectContract() };
+        var app = new ApplicationProfileInstance { ApplicationType = type, ProjectContract = new ProjectContract() };
 
-        Assert.Equal(1, ApplicationProgressProfileResolver.GetMinistryLegCount(app));
+        Assert.Equal(1, ApplicationProfileInstanceProgressProfileResolver.GetMinistryLegCount(app));
         Assert.Equal(
             MinistryReviewDepth.FirstMinistryOnly,
-            ApplicationProgressProfileResolver.GetMinistryReviewDepth(app));
+            ApplicationProfileInstanceProgressProfileResolver.GetMinistryReviewDepth(app));
     }
 
     [Fact]
@@ -119,7 +161,7 @@ public class ApplicationProgressProfileResolverTests
     {
         var type = new ApplicationType
         {
-            ApplicationProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
+            ApplicationProfileInstanceProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
             ShowApprovalLegProfile = true
         };
         var profile = new ApprovalLegProfile
@@ -131,9 +173,9 @@ public class ApplicationProgressProfileResolverTests
                 new ApprovalLegProfileMinistryLeg { Sequence = 3, ApprovingMinistry = new ApprovingMinistry() }
             ]
         };
-        var app = new Application { ApplicationType = type, ApprovalLegProfile = profile };
+        var app = new ApplicationProfileInstance { ApplicationType = type, ApprovalLegProfile = profile };
 
-        Assert.Equal(3, ApplicationProgressProfileResolver.GetMinistryLegCount(app));
+        Assert.Equal(3, ApplicationProfileInstanceProgressProfileResolver.GetMinistryLegCount(app));
     }
 
     [Fact]
@@ -141,21 +183,21 @@ public class ApplicationProgressProfileResolverTests
     {
         var type = new ApplicationType
         {
-            ApplicationProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
+            ApplicationProfileInstanceProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
             ShowProjectContract = true
         };
-        var app = new Application
+        var app = new ApplicationProfileInstance
         {
             ApplicationType = type,
             ProjectContract = new ProjectContract(),
             ApprovalLegSnapshots =
             [
-                new ApplicationApprovalLegSnapshot { Sequence = 1, MinistryShortName = "A" },
-                new ApplicationApprovalLegSnapshot { Sequence = 2, MinistryShortName = "B" }
+                new ApplicationProfileInstanceApprovalLegSnapshot { Sequence = 1, MinistryShortName = "A" },
+                new ApplicationProfileInstanceApprovalLegSnapshot { Sequence = 2, MinistryShortName = "B" }
             ]
         };
 
-        Assert.Equal(2, ApplicationProgressProfileResolver.GetMinistryLegCount(app));
+        Assert.Equal(2, ApplicationProfileInstanceProgressProfileResolver.GetMinistryLegCount(app));
     }
 
     [Fact]
@@ -163,15 +205,15 @@ public class ApplicationProgressProfileResolverTests
     {
         var type = new ApplicationType
         {
-            ApplicationProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
+            ApplicationProfileInstanceProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
             MinistryReviewDepth = MinistryReviewDepth.FirstAndSecondMinistry,
             ShowProjectContract = true
         };
-        var app = new Application { ApplicationType = type };
+        var app = new ApplicationProfileInstance { ApplicationType = type };
 
         Assert.Equal(
             MinistryReviewDepth.FirstAndSecondMinistry,
-            ApplicationProgressProfileResolver.GetMinistryReviewDepth(app));
+            ApplicationProfileInstanceProgressProfileResolver.GetMinistryReviewDepth(app));
     }
 
     [Fact]
@@ -179,16 +221,16 @@ public class ApplicationProgressProfileResolverTests
     {
         var type = new ApplicationType
         {
-            ApplicationProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
+            ApplicationProfileInstanceProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
             MinistryReviewDepth = MinistryReviewDepth.FirstMinistryOnly,
             ShowProjectContract = false
         };
         var contract = new ProjectContract();
-        var app = new Application { ApplicationType = type, ProjectContract = contract };
+        var app = new ApplicationProfileInstance { ApplicationType = type, ProjectContract = contract };
 
         Assert.Equal(
             MinistryReviewDepth.FirstMinistryOnly,
-            ApplicationProgressProfileResolver.GetMinistryReviewDepth(app));
+            ApplicationProfileInstanceProgressProfileResolver.GetMinistryReviewDepth(app));
     }
 
     [Fact]
@@ -196,17 +238,17 @@ public class ApplicationProgressProfileResolverTests
     {
         var type = new ApplicationType
         {
-            ApplicationProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
+            ApplicationProfileInstanceProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
             ShowProjectContract = true
         };
-        var app = new Application { ApplicationType = type };
-        var progress = new ApplicationProgress
+        var app = new ApplicationProfileInstance { ApplicationType = type };
+        var progress = new ApplicationProfileInstanceProgress
         {
-            Application = app,
-            State = new ApplicationState { Code = ApplicationProgressStateCodes.IsBeingPrepared },
+            ApplicationProfileInstance = app,
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.IsBeingPrepared },
         };
 
-        Assert.True(ApplicationProgressProfileResolver.TryValidateProjectContractForProgress(progress, null, out _));
+        Assert.True(ApplicationProfileInstanceProgressProfileResolver.TryValidateProjectContractForProgress(progress, null, out _));
     }
 
     [Fact]
@@ -214,17 +256,17 @@ public class ApplicationProgressProfileResolverTests
     {
         var type = new ApplicationType
         {
-            ApplicationProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
+            ApplicationProfileInstanceProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
             ShowProjectContract = true
         };
-        var app = new Application { ApplicationType = type };
-        var progress = new ApplicationProgress
+        var app = new ApplicationProfileInstance { ApplicationType = type };
+        var progress = new ApplicationProfileInstanceProgress
         {
-            Application = app,
-            State = new ApplicationState { Code = ApplicationProgressStateCodes.Review1Approved },
+            ApplicationProfileInstance = app,
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.Review1Approved },
         };
 
-        Assert.False(ApplicationProgressProfileResolver.TryValidateProjectContractForProgress(progress, null, out var message));
+        Assert.False(ApplicationProfileInstanceProgressProfileResolver.TryValidateProjectContractForProgress(progress, null, out var message));
         Assert.False(string.IsNullOrWhiteSpace(message));
     }
 
@@ -233,15 +275,15 @@ public class ApplicationProgressProfileResolverTests
     {
         var type = new ApplicationType
         {
-            ApplicationProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
+            ApplicationProfileInstanceProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
             ShowProjectContract = true
         };
-        var app = new Application { ApplicationType = type };
+        var app = new ApplicationProfileInstance { ApplicationType = type };
         var oneLeg = new ProjectContract();
         var threeLeg = new ProjectContract();
 
-        Assert.False(ApplicationProgressProfileResolver.WouldMinistryDepthChange(app, oneLeg, threeLeg));
-        Assert.False(ApplicationProgressProfileResolver.WouldMinistryDepthChange(app, oneLeg, oneLeg));
+        Assert.False(ApplicationProfileInstanceProgressProfileResolver.WouldMinistryDepthChange(app, oneLeg, threeLeg));
+        Assert.False(ApplicationProfileInstanceProgressProfileResolver.WouldMinistryDepthChange(app, oneLeg, oneLeg));
     }
 
     [Fact]
@@ -249,22 +291,22 @@ public class ApplicationProgressProfileResolverTests
     {
         var type = new ApplicationType
         {
-            ApplicationProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
+            ApplicationProfileInstanceProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
             ShowProjectContract = true
         };
-        var app = new Application
+        var app = new ApplicationProfileInstance
         {
             ApplicationType = type,
             ProgressHistory =
             [
-                new ApplicationProgress
+                new ApplicationProfileInstanceProgress
                 {
-                    State = new ApplicationState { Code = ApplicationProgressStateCodes.IsBeingPrepared },
+                    State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.IsBeingPrepared },
                 }
             ]
         };
 
-        Assert.False(ApplicationProgressProfileResolver.IsProjectContractLocked(app));
+        Assert.False(ApplicationProfileInstanceProgressProfileResolver.IsProjectContractLocked(app));
     }
 
     [Fact]
@@ -272,27 +314,27 @@ public class ApplicationProgressProfileResolverTests
     {
         var type = new ApplicationType
         {
-            ApplicationProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
+            ApplicationProfileInstanceProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
             ShowProjectContract = true
         };
-        var app = new Application
+        var app = new ApplicationProfileInstance
         {
             ApplicationType = type,
             ProgressHistory =
             [
-                new ApplicationProgress
+                new ApplicationProfileInstanceProgress
                 {
-                    State = new ApplicationState { Code = ApplicationProgressStateCodes.IsBeingPrepared },
+                    State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.IsBeingPrepared },
                 },
-                new ApplicationProgress
+                new ApplicationProfileInstanceProgress
                 {
-                    State = new ApplicationState { Code = ApplicationProgressStateCodes.Review1Started },
+                    State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.Review1Started },
                 }
             ]
         };
 
-        Assert.True(ApplicationProgressProfileResolver.IsProjectContractLocked(app));
-        Assert.True(ApplicationProgressProfileResolver.IsApplicationLockedAfterOfficePreparation(app));
+        Assert.True(ApplicationProfileInstanceProgressProfileResolver.IsProjectContractLocked(app));
+        Assert.True(ApplicationProfileInstanceProgressProfileResolver.IsApplicationLockedAfterOfficePreparation(app));
     }
 
     [Fact]
@@ -300,23 +342,23 @@ public class ApplicationProgressProfileResolverTests
     {
         var type = new ApplicationType
         {
-            ApplicationProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
+            ApplicationProfileInstanceProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
             ShowProjectContract = false
         };
-        var app = new Application
+        var app = new ApplicationProfileInstance
         {
             ApplicationType = type,
             ProgressHistory =
             [
-                new ApplicationProgress
+                new ApplicationProfileInstanceProgress
                 {
-                    State = new ApplicationState { Code = ApplicationProgressStateCodes.Review1Started },
+                    State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.Review1Started },
                 }
             ]
         };
 
-        Assert.True(ApplicationProgressProfileResolver.IsApplicationLockedAfterOfficePreparation(app));
-        Assert.False(ApplicationProgressProfileResolver.IsProjectContractLocked(app));
+        Assert.True(ApplicationProfileInstanceProgressProfileResolver.IsApplicationLockedAfterOfficePreparation(app));
+        Assert.False(ApplicationProfileInstanceProgressProfileResolver.IsProjectContractLocked(app));
     }
 
     [Fact]
@@ -324,22 +366,22 @@ public class ApplicationProgressProfileResolverTests
     {
         var type = new ApplicationType
         {
-            ApplicationProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
+            ApplicationProfileInstanceProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
             ShowProjectContract = false
         };
-        var app = new Application
+        var app = new ApplicationProfileInstance
         {
             ApplicationType = type,
             ProgressHistory =
             [
-                new ApplicationProgress
+                new ApplicationProfileInstanceProgress
                 {
-                    State = new ApplicationState { Code = ApplicationProgressStateCodes.Review1Started },
+                    State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.Review1Started },
                 }
             ]
         };
 
-        Assert.False(ApplicationProgressProfileResolver.IsProjectContractLocked(app));
+        Assert.False(ApplicationProfileInstanceProgressProfileResolver.IsProjectContractLocked(app));
     }
 
     [Fact]
@@ -347,16 +389,16 @@ public class ApplicationProgressProfileResolverTests
     {
         var type = new ApplicationType
         {
-            ApplicationProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
+            ApplicationProfileInstanceProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
             ShowProjectContract = true
         };
-        var original = new Application
+        var original = new ApplicationProfileInstance
         {
             ApplicationType = type,
             ApplicationNumber = "1",
             VisaPeriod = new VisaPeriod { LocalizationKey = "Month1" }
         };
-        var current = new Application
+        var current = new ApplicationProfileInstance
         {
             ApplicationType = type,
             ApplicationNumber = "1",
@@ -369,12 +411,12 @@ public class ApplicationProgressProfileResolverTests
     [Fact]
     public void ApplicationLockedHeaderScalarsDiffer_DetectsApplicationTypeChange()
     {
-        var original = new Application
+        var original = new ApplicationProfileInstance
         {
             ApplicationType = new ApplicationType { ID = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), Name = "A" },
             ApplicationNumber = "1"
         };
-        var current = new Application
+        var current = new ApplicationProfileInstance
         {
             ApplicationType = new ApplicationType { ID = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), Name = "B" },
             ApplicationNumber = "1"
@@ -383,9 +425,39 @@ public class ApplicationProgressProfileResolverTests
         Assert.True(InvokeApplicationLockedHeaderScalarsDiffer(original, current));
     }
 
-    private static bool InvokeApplicationLockedHeaderScalarsDiffer(Application original, Application current)
+    [Fact]
+    public void ApplicationLockedHeaderScalarsDiffer_IgnoresApplicationNumberAndDateChange()
     {
-        var method = typeof(ApplicationProgressProfileResolver).GetMethod(
+        var type = new ApplicationType
+        {
+            ApplicationProfileInstanceProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
+            ShowProjectContract = true
+        };
+        var original = new ApplicationProfileInstance
+        {
+            ApplicationType = type,
+            ApplicationNumber = "007",
+            AppNumberPrefix = "8",
+            FullApplicationNumber = "8/-007",
+            ApplicationDate = new DateTime(2024, 8, 25),
+            IsManualEntry = false,
+        };
+        var current = new ApplicationProfileInstance
+        {
+            ApplicationType = type,
+            ApplicationNumber = "008",
+            AppNumberPrefix = "8",
+            FullApplicationNumber = "8/-008",
+            ApplicationDate = new DateTime(2024, 9, 1),
+            IsManualEntry = true,
+        };
+
+        Assert.False(InvokeApplicationLockedHeaderScalarsDiffer(original, current));
+    }
+
+    private static bool InvokeApplicationLockedHeaderScalarsDiffer(ApplicationProfileInstance original, ApplicationProfileInstance current)
+    {
+        var method = typeof(ApplicationProfileInstanceProgressProfileResolver).GetMethod(
             "ApplicationLockedHeaderScalarsDiffer",
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
         Assert.NotNull(method);

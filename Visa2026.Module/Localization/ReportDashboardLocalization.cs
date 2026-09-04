@@ -175,7 +175,7 @@ public static class ReportDashboardLocalization
         "Period · Category · Type · State" => Get("ReportDashboard.Header.PeriodCategoryTypeState"),
         "Project · Period · Category · Type · State" => Get("ReportDashboard.Header.ProjectPeriodCategoryTypeState"),
         "Project · State" => Get("ReportDashboard.Header.ProjectState"),
-        "Application Type · Process State" => Get("ReportDashboard.Header.ApplicationTypeProcessState"),
+        "ApplicationProfileInstance Type · Process State" => Get("ReportDashboard.Header.ApplicationTypeProcessState"),
         "Rejection #" => Get("ReportDashboard.Header.RejectionNumber"),
         "Date" => Get("ReportDashboard.Header.Date"),
         "Issued" => Get("ReportDashboard.Header.Issued"),

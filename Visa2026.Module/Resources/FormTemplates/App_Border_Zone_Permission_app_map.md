@@ -68,13 +68,13 @@ this.Detail.HeightF = 540F;  // matches Group C base default
 |---|---|---|
 | `TotalPersonCount` | `Application` | ✅ |
 | `TotalPersonCountText` | `Application` | ✅ |
-| `BorderZoneLocation_NameTm` | `Application → BorderZoneLocation` | ✅ |
+| `BorderZoneLocation_NameTm` | `ApplicationProfileInstance → BorderZoneLocation` | ✅ |
 
 ---
 
 ## ReportsUpdater.cs entry
 
 ```csharp
-AddPredefinedReport<AppBorderZonePermissionReport>("App Border Zone Permission Report", typeof(Application), isInplaceReport: true);
+AddPredefinedReport<AppBorderZonePermissionReport>("App Border Zone Permission Report", typeof(ApplicationProfileInstance), isInplaceReport: true);
 CreateReportVisibility("App Border Zone Permission Report", "[ApplicationType.Name] = 'App_Border_Zone_Permission'");
 ```

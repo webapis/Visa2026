@@ -1,0 +1,1428 @@
+@namespace Visa2026.Blazor.Server.Components
+@using DevExpress.ExpressApp
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.JSInterop
+@using System.IO
+@using Visa2026.Blazor.Server.Editors
+@using Visa2026.Blazor.Server.Services
+@using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Editors
+@using Visa2026.Module.Services
+@using Visa2026.Module.Services.ApplicationWorkspace
+@using Visa2026.Module.Services.PreviewSlot
+
+<div class="resminamalar-slot-panel issue-issued-header-slot-panel">
+    <div class="resminamalar-slot-panel__header visa-preview-drawer__header">
+        <div class="visa-preview-drawer__title-block">
+            <span class="visa-preview-drawer__title">@(_draft?.Title ?? "Issued record")</span>
+            @if (!string.IsNullOrWhiteSpace(_draft?.ApplicationCaption))
+            {
+                <span class="visa-preview-drawer__subtitle">@_draft!.ApplicationCaption</span>
+            }
+        </div>
+        <div class="visa-preview-drawer__header-actions">
+            <button class="visa-preview-drawer__btn visa-preview-drawer__btn--close"
+                    type="button"
+                    title="Close"
+                    @onclick="ClosePanelAsync">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="resminamalar-slot-panel__body">
+        <div class="resminamalar-slot-panel__catalog issue-issued-header-slot">
+            @if (_loadError != null)
+            {
+                <p class="issue-issued-header-slot__error">@_loadError</p>
+            }
+            else if (_draft == null)
+            {
+                <p class="issue-issued-header-slot__muted">Loading…</p>
+            }
+            else if (_result?.Succeeded == true && !_showFormAfterSave)
+            {
+                <div class="issue-issued-header-slot__success">
+                    <p class="issue-issued-header-slot__success-title">
+                        @(_draft.IsEditMode ? $"Saved {_result.HeaderCaption}" : $"Created {_result.HeaderCaption}")
+                    </p>
+                    <p class="issue-issued-header-slot__muted">
+                        @if (_draft.Kind == IssueIssuedHeaderKind.WorkPermit)
+                        {
+                            @($"{_result.Lines.Count} employee(s) on this letter.")
+                        }
+                        else if (_draft.IsEditMode)
+                        {
+                            @($"{_result.Lines.Count} person(s) on the letter.")
+                        }
+                        else
+                        {
+                            @($"{_result.Lines.Count} person(s) across created invitation(s).")
+                        }
+                    </p>
+
+                    <table class="issue-issued-header-slot__table">
+                        <thead>
+                            <tr>
+                                <th>Person</th>
+                                <th>Passport</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var line in _result.Lines)
+                            {
+                                <tr>
+                                    <td>@line.PersonName</td>
+                                    <td>@line.PassportNumber</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                    <div class="issue-issued-header-slot__actions">
+                        <button type="button" class="issue-issued-header-slot__btn issue-issued-header-slot__btn--primary" @onclick="EditSavedHeaderAsync">
+                            Edit header
+                        </button>
+                        <button type="button" class="issue-issued-header-slot__btn" @onclick="ClosePanelAsync">
+                            Done
+                        </button>
+                        @if (!_draft.IsEditMode)
+                        {
+                            <button type="button" class="issue-issued-header-slot__btn" @onclick="StartAnotherAsync">
+                                Create another
+                            </button>
+                        }
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(_actionError))
+                    {
+                        <p class="issue-issued-header-slot__error">@_actionError</p>
+                    }
+                </div>
+            }
+            else
+            {
+                @if (_draft.Kind == IssueIssuedHeaderKind.WorkPermit && !_draft.IsEditMode)
+                {
+                    <p class="issue-issued-visa-slot__banner issue-issued-visa-slot__banner--info">
+                        One work permit letter for this case. Employees only. Linked work-permit items are not a source.
+                    </p>
+                }
+                @if (UseFieldCues)
+                {
+                    <IssueComposeFieldCueLegend />
+                }
+                <section class="issue-issued-header-slot__section">
+                    <h3 class="issue-issued-header-slot__section-title">Header</h3>
+                    <div class="issue-issued-header-slot__grid">
+                        <label class="issue-issued-header-slot__field @(HeaderCueClass("header:number", true, IssueComposeFieldCue.HasText(_draft.HeaderNumber)))">
+                            <span>@NumberLabel</span>
+                            <input class="issue-issued-header-slot__input"
+                                   @bind="_draft.HeaderNumber"
+                                   @onfocusout='() => ReviewField("header:number")' />
+                        </label>
+                        <label class="issue-issued-header-slot__field @(HeaderCueClass("header:date", true, IssueComposeFieldCue.HasDate(_primaryDate)))">
+                            <span>@PrimaryDateLabel</span>
+                            <input class="issue-issued-header-slot__input"
+                                   type="date"
+                                   @bind="_primaryDate"
+                                   @bind:format="yyyy-MM-dd"
+                                   @onfocusout='() => ReviewField("header:date")' />
+                        </label>
+                        @if (_draft.Kind == IssueIssuedHeaderKind.Invitation)
+                        {
+                            <label class="issue-issued-header-slot__field @(HeaderCueClass("header:expiration", true, IssueComposeFieldCue.HasDate(_expirationDate)))">
+                                <span>Expiration</span>
+                                <input class="issue-issued-header-slot__input"
+                                       type="date"
+                                       @bind="_expirationDate"
+                                       @bind:format="yyyy-MM-dd"
+                                       @onfocusout='() => ReviewField("header:expiration")' />
+                            </label>
+                            <label class="issue-issued-header-slot__field @(HeaderCueClass("header:category", true, IssueComposeFieldCue.HasText(_visaCategoryIdText)))">
+                                <span>Visa category</span>
+                                <select class="issue-issued-header-slot__input"
+                                        @bind="_visaCategoryIdText"
+                                        @bind:after='() => ReviewField("header:category")'
+                                        @onfocusout='() => ReviewField("header:category")'>
+                                    <option value="">—</option>
+                                    @foreach (var opt in _draft.VisaCategories)
+                                    {
+                                        <option value="@opt.Id.ToString("N")">@opt.Caption</option>
+                                    }
+                                </select>
+                            </label>
+                            <label class="issue-issued-header-slot__field @(HeaderCueClass("header:period", true, IssueComposeFieldCue.HasText(_visaPeriodIdText)))">
+                                <span>Visa period</span>
+                                <select class="issue-issued-header-slot__input"
+                                        @bind="_visaPeriodIdText"
+                                        @bind:after='() => ReviewField("header:period")'
+                                        @onfocusout='() => ReviewField("header:period")'>
+                                    <option value="">—</option>
+                                    @foreach (var opt in _draft.VisaPeriods)
+                                    {
+                                        <option value="@opt.Id.ToString("N")">@opt.Caption</option>
+                                    }
+                                </select>
+                            </label>
+                            <div class="issue-issued-header-slot__field issue-issued-header-slot__field--wide @(HeaderCueClass("header:borderZone", true, IssueComposeFieldCue.HasText(_draft.BorderZoneLocation)))">
+                                <span>Border zone</span>
+                                <BorderZoneLocationField Value="@_draft.BorderZoneLocation"
+                                                         ValueChanged="OnInvitationBorderZoneChanged" />
+                            </div>
+                            <label class="issue-issued-header-slot__field issue-issued-header-slot__field--wide issue-issued-header-slot__check-field">
+                                <input type="checkbox" @bind="_visaWindowDefined" />
+                                <span>Visa start and end date defined</span>
+                            </label>
+                            @if (_visaWindowDefined)
+                            {
+                                <label class="issue-issued-header-slot__field @(HeaderCueClass("header:visaStart", true, IssueComposeFieldCue.HasDate(_visaStartDate)))">
+                                    <span>Visa start date</span>
+                                    <input class="issue-issued-header-slot__input"
+                                           type="date"
+                                           @bind="_visaStartDate"
+                                           @bind:format="yyyy-MM-dd"
+                                           @onfocusout='() => ReviewField("header:visaStart")' />
+                                </label>
+                                <label class="issue-issued-header-slot__field @(HeaderCueClass("header:visaEnd", true, IssueComposeFieldCue.HasDate(_visaEndDate)))">
+                                    <span>Visa end date</span>
+                                    <input class="issue-issued-header-slot__input"
+                                           type="date"
+                                           @bind="_visaEndDate"
+                                           @bind:format="yyyy-MM-dd"
+                                           @onfocusout='() => ReviewField("header:visaEnd")' />
+                                </label>
+                            }
+                        }
+                        @if (_draft.Kind == IssueIssuedHeaderKind.Rejection)
+                        {
+                            <label class="issue-issued-header-slot__field issue-issued-header-slot__field--wide @(HeaderCueClass("header:reason", true, IssueComposeFieldCue.HasText(_draft.Reason)))">
+                                <span>Reason</span>
+                                <textarea class="issue-issued-header-slot__input issue-issued-header-slot__textarea"
+                                          @bind="_draft.Reason"
+                                          @onfocusout='() => ReviewField("header:reason")'
+                                          rows="3"></textarea>
+                            </label>
+                        }
+                        @if (_draft.Kind == IssueIssuedHeaderKind.BorderZone)
+                        {
+                            <label class="issue-issued-header-slot__field @(HeaderCueClass("header:duration", true, IssueComposeFieldCue.HasText(_validityDurationIdText)))">
+                                <span>Validity duration</span>
+                                <select class="issue-issued-header-slot__input"
+                                        @bind="_validityDurationIdText"
+                                        @bind:after='() => ReviewField("header:duration")'
+                                        @onfocusout='() => ReviewField("header:duration")'>
+                                    <option value="">—</option>
+                                    @foreach (var opt in _draft.ValidityDurations)
+                                    {
+                                        <option value="@opt.Id.ToString("N")">@opt.Caption</option>
+                                    }
+                                </select>
+                            </label>
+                            @if (_draft.ExpirationDate is DateTime exp)
+                            {
+                                <label class="issue-issued-header-slot__field @(HeaderCueClass("header:expiration", false, true, true))">
+                                    <span>Expiration (computed)</span>
+                                    <input class="issue-issued-header-slot__input" type="date" value="@exp.ToString("yyyy-MM-dd")" disabled />
+                                </label>
+                            }
+                        }
+                    </div>
+                </section>
+
+                @if (_draft.Kind == IssueIssuedHeaderKind.Invitation)
+                {
+                    <section class="issue-issued-header-slot__section">
+                        <div class="issue-issued-header-slot__section-head">
+                            <h3 class="issue-issued-header-slot__section-title">People on this invitation</h3>
+                            <span class="issue-issued-header-slot__muted">@AssignedPeople.Count on invitation</span>
+                        </div>
+                        <p class="issue-issued-header-slot__muted">
+                            Named on this invitation. Remove a person to make them available for another invitation.
+                        </p>
+                        @if (AssignedPeople.Count == 0)
+                        {
+                            <p class="issue-issued-header-slot__muted">No one is on this invitation yet.</p>
+                        }
+                        else
+                        {
+                            <table class="issue-issued-header-slot__table" @key="@($"{_boundOccupantKey}:assigned")">
+                                <thead>
+                                    <tr>
+                                        <th>Person</th>
+                                        <th>Passport</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var person in AssignedPeople)
+                                    {
+                                        <tr @key="@($"{_boundOccupantKey}:a:{person.PersonId:N}:{person.Include}")">
+                                            <td>@person.PersonName</td>
+                                            <td>@(string.IsNullOrWhiteSpace(person.PassportNumber) ? "—" : person.PassportNumber)</td>
+                                            <td>
+                                                @if (!person.IncludeLocked)
+                                                {
+                                                    <button type="button"
+                                                            class="issue-issued-header-slot__link-btn"
+                                                            @onclick="() => SetInclude(person, false)">
+                                                        Remove
+                                                    </button>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </section>
+
+                    @if (AvailablePeople.Count > 0)
+                    {
+                        <section class="issue-issued-header-slot__section issue-issued-header-slot__section--add">
+                            <div class="issue-issued-header-slot__section-head">
+                                <h3 class="issue-issued-header-slot__section-title">Available on this case</h3>
+                                <span class="issue-issued-header-slot__muted">@AvailablePeople.Count not on an invitation</span>
+                            </div>
+                            <p class="issue-issued-header-slot__muted">
+                                Not on any invitation yet. Add to this invitation, or use New invitation for a separate one.
+                            </p>
+                            <div class="issue-issued-header-slot__people-actions">
+                                <button type="button" class="issue-issued-header-slot__link-btn" @onclick="AddAllAvailableReady">Add all ready</button>
+                            </div>
+                            <table class="issue-issued-header-slot__table" @key="@($"{_boundOccupantKey}:available")">
+                                <thead>
+                                    <tr>
+                                        <th>Person</th>
+                                        <th>Passport</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var person in AvailablePeople)
+                                    {
+                                        <tr @key="@($"{_boundOccupantKey}:u:{person.PersonId:N}:{person.Include}")"
+                                            class="@(person.IsReady ? null : "issue-issued-header-slot__row--warn")">
+                                            <td>@person.PersonName</td>
+                                            <td>@(string.IsNullOrWhiteSpace(person.PassportNumber) ? "—" : person.PassportNumber)</td>
+                                            <td>
+                                                @if (person.IsReady && !person.IncludeLocked)
+                                                {
+                                                    <button type="button"
+                                                            class="issue-issued-header-slot__link-btn"
+                                                            @onclick="() => SetInclude(person, true)">
+                                                        Add
+                                                    </button>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </section>
+                    }
+                }
+                else if (_draft.Kind == IssueIssuedHeaderKind.WorkPermit)
+                {
+                    <section class="issue-issued-header-slot__section">
+                        <div class="issue-issued-header-slot__section-head">
+                            <h3 class="issue-issued-header-slot__section-title">People on this work permit</h3>
+                            <span class="issue-issued-header-slot__muted">@SelectedReadyCount ready of @SelectedCount selected</span>
+                        </div>
+                        <div class="issue-issued-header-slot__people-actions">
+                            <button type="button" class="issue-issued-header-slot__link-btn" @onclick="SelectAllReady">Select all ready</button>
+                            <button type="button" class="issue-issued-header-slot__link-btn" @onclick="SelectNone">Select none</button>
+                        </div>
+                        @if (_draft.People.Count == 0)
+                        {
+                            <p class="issue-issued-header-slot__muted">No employees on this case.</p>
+                        }
+                        else
+                        {
+                            @foreach (var person in _draft.People)
+                            {
+                                var cardClass = !person.Include
+                                    ? "issue-issued-visa-slot__card issue-issued-visa-slot__card--off"
+                                    : "issue-issued-visa-slot__card";
+                                <article class="@cardClass" @key="@($"{_boundOccupantKey}:wp:{person.PersonId:N}")">
+                                    <div class="issue-issued-visa-slot__card-head">
+                                        <input type="checkbox"
+                                               disabled="@person.IncludeLocked"
+                                               checked="@person.Include"
+                                               @onchange="e => ToggleInclude(person, e)" />
+                                        <span class="issue-issued-visa-slot__avatar">@Initials(person.PersonName)</span>
+                                        <span class="issue-issued-visa-slot__person">@person.PersonName</span>
+                                        @if (!person.IsReady)
+                                        {
+                                            <span class="issue-issued-header-slot__status issue-issued-header-slot__status--warn">@person.StatusCaption</span>
+                                        }
+                                        else if (person.Include && !_draft.IsEditMode && !person.IncludeLocked)
+                                        {
+                                            <button type="button" class="issue-issued-header-slot__link-btn" @onclick="() => SetInclude(person, false)">Remove</button>
+                                        }
+                                    </div>
+                                    @if (person.Include)
+                                    {
+                                        <div class="issue-issued-header-slot__grid">
+                                            <label class="issue-issued-header-slot__field @(WpCueClass(person, "itemNumber", true, IssueComposeFieldCue.HasText(person.ItemNumber)))">
+                                                <span>Item work-permit number *</span>
+                                                <input class="issue-issued-header-slot__input"
+                                                       @bind="person.ItemNumber"
+                                                       @onfocusout='() => ReviewWpField(person, "itemNumber")' />
+                                            </label>
+                                            <label class="issue-issued-header-slot__field @(WpCueClass(person, "asNumber", true, IssueComposeFieldCue.HasText(person.ASNumber)))">
+                                                <span>@(person.AsNumberReadOnly ? "Process number *" : "AS number *")</span>
+                                                <input class="issue-issued-header-slot__input"
+                                                       @bind="person.ASNumber"
+                                                       disabled="@person.AsNumberReadOnly"
+                                                       @onfocusout='() => ReviewWpField(person, "asNumber")' />
+                                            </label>
+                                            <label class="issue-issued-header-slot__field @(WpCueClass(person, "position", true, IssueComposeFieldCue.HasId(person.PositionId)))">
+                                                <span>Position *</span>
+                                                <select class="issue-issued-header-slot__input"
+                                                        value="@GuidText(person.PositionId)"
+                                                        @onchange='e => SetWpGuidAndReview(person, v => person.PositionId = v, e.Value, "position")'
+                                                        @onfocusout='() => ReviewWpField(person, "position")'>
+                                                    <option value="">—</option>
+                                                    @foreach (var opt in person.Positions)
+                                                    {
+                                                        <option value="@opt.Id.ToString("N")">@opt.Caption</option>
+                                                    }
+                                                </select>
+                                            </label>
+                                            <label class="issue-issued-header-slot__field @(WpCueClass(person, "passport", false, IssueComposeFieldCue.HasText(person.PassportNumber), true))">
+                                                <span>Passport number</span>
+                                                <input class="issue-issued-header-slot__input" value="@person.PassportNumber" disabled />
+                                            </label>
+                                            <label class="issue-issued-header-slot__field @(WpCueClass(person, "start", true, IssueComposeFieldCue.HasDate(person.ItemStartDate)))">
+                                                <span>Start *</span>
+                                                <input class="issue-issued-header-slot__input"
+                                                       type="date"
+                                                       @bind="person.ItemStartDate"
+                                                       @bind:format="yyyy-MM-dd"
+                                                       @onfocusout='() => ReviewWpField(person, "start")' />
+                                            </label>
+                                            <label class="issue-issued-header-slot__field @(WpCueClass(person, "end", true, IssueComposeFieldCue.HasDate(person.ItemExpirationDate)))">
+                                                <span>End *</span>
+                                                <input class="issue-issued-header-slot__input"
+                                                       type="date"
+                                                       @bind="person.ItemExpirationDate"
+                                                       @bind:format="yyyy-MM-dd"
+                                                       @onfocusout='() => ReviewWpField(person, "end")' />
+                                            </label>
+                                            <div class="issue-issued-header-slot__field issue-issued-header-slot__field--wide @(WpCueClass(person, "locations", true, IssueComposeFieldCue.HasText(person.WorkPermittedLocations)))">
+                                                <span>Work permitted locations *</span>
+                                                <BorderZoneLocationField EditorAlias="@CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation"
+                                                                         Value="@person.WorkPermittedLocations"
+                                                                         ValueChanged="@(value => OnWorkPermitLocationsChanged(person, value))" />
+                                            </div>
+                                        </div>
+                                        @if (!string.IsNullOrWhiteSpace(person.DatePrefillNote))
+                                        {
+                                            <p class="issue-issued-visa-slot__note">@person.DatePrefillNote</p>
+                                        }
+                                    }
+                                </article>
+                            }
+                        }
+                    </section>
+                }
+                else
+                {
+                <section class="issue-issued-header-slot__section">
+                    <div class="issue-issued-header-slot__section-head">
+                        <h3 class="issue-issued-header-slot__section-title">@PeopleOnRecordTitle</h3>
+                        <span class="issue-issued-header-slot__muted">@SelectedReadyCount ready of @SelectedCount selected</span>
+                    </div>
+                    <div class="issue-issued-header-slot__people-actions">
+                        <button type="button" class="issue-issued-header-slot__link-btn" @onclick="SelectAllReady">Select all ready</button>
+                        <button type="button" class="issue-issued-header-slot__link-btn" @onclick="SelectNone">Select none</button>
+                    </div>
+                    @if (_draft.People.Count == 0)
+                    {
+                        <p class="issue-issued-header-slot__muted">No people on this application roster.</p>
+                    }
+                    else
+                    {
+                        <table class="issue-issued-header-slot__table" @key="@(_boundOccupantKey ?? _draft.HeaderNumber)">
+                            <thead>
+                                <tr>
+                                    <th class="issue-issued-header-slot__check-col"></th>
+                                    <th>Person</th>
+                                    <th>Passport</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var person in _draft.People)
+                                {
+                                    var disabled = person.IncludeLocked;
+                                    <tr @key="@($"{_boundOccupantKey}:{person.PersonId:N}:{person.Include}:{person.StatusCaption}")"
+                                        class="@(person.IsReady ? null : "issue-issued-header-slot__row--warn") @(disabled && !person.Include ? "issue-issued-header-slot__row--disabled" : null)">
+                                        <td>
+                                            <input type="checkbox"
+                                                   @key="@($"{_boundOccupantKey}:{person.PersonId:N}:chk:{person.Include}")"
+                                                   checked="@person.Include"
+                                                   disabled="@disabled"
+                                                   @onchange="e => ToggleInclude(person, e)" />
+                                        </td>
+                                        <td>
+                                            @person.PersonName
+                                        </td>
+                                        <td>@(string.IsNullOrWhiteSpace(person.PassportNumber) ? "—" : person.PassportNumber)</td>
+                                        <td>
+                                            <span class="issue-issued-header-slot__status @PersonStatusCss(person)">
+                                                @person.StatusCaption
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </section>
+                }
+
+                <section class="issue-issued-header-slot__section">
+                    <div class="issue-issued-header-slot__section-head">
+                        <h3 class="issue-issued-header-slot__section-title">@CopySectionTitle</h3>
+                        <span class="issue-issued-header-slot__muted">@CopyFileCountLabel</span>
+                    </div>
+                    <p class="issue-issued-header-slot__muted">
+                        PDF or scan of this @(CopyNoun). Allowed: PDF, PNG, JPEG, TIFF, GIF, BMP — up to @MaxCopyUploadMb MB.
+                    </p>
+                    @if (_draft.Documents.Count == 0 && string.IsNullOrWhiteSpace(_pendingCopyName))
+                    {
+                        <p class="issue-issued-header-slot__muted">No copy attached yet.</p>
+                    }
+                    else
+                    {
+                        <table class="issue-issued-header-slot__table">
+                            <thead>
+                                <tr>
+                                    <th>File</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var doc in _draft.Documents)
+                                {
+                                    <tr @key="@doc.DocumentId">
+                                        <td>@doc.FileName</td>
+                                        <td>
+                                            <button type="button"
+                                                    class="issue-issued-header-slot__link-btn"
+                                                    disabled="@_busy"
+                                                    @onclick="() => RemoveCopyAsync(doc.DocumentId)">
+                                                Remove
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(_pendingCopyName))
+                                {
+                                    <tr>
+                                        <td>@_pendingCopyName (attaches on Create)</td>
+                                        <td>
+                                            <button type="button"
+                                                    class="issue-issued-header-slot__link-btn"
+                                                    disabled="@_busy"
+                                                    @onclick="ClearPendingCopy">
+                                                Remove
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    <label class="issue-issued-header-slot__upload">
+                        <InputFile OnChange="OnCopyFileSelectedAsync"
+                                   accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp"
+                                   disabled="@_busy" />
+                        <span>Upload copy</span>
+                    </label>
+                </section>
+
+                @if (!string.IsNullOrWhiteSpace(_actionError))
+                {
+                    <p class="issue-issued-header-slot__error">@_actionError</p>
+                }
+                @if (!string.IsNullOrWhiteSpace(_saveMessage))
+                {
+                    <p class="issue-issued-header-slot__muted">@_saveMessage</p>
+                }
+
+                <div class="issue-issued-header-slot__actions">
+                    @if (_draft.IsEditMode)
+                    {
+                        <button type="button"
+                                class="issue-issued-header-slot__btn issue-issued-header-slot__btn--danger"
+                                disabled="@_busy"
+                                @onclick="DeleteAsync">
+                            Delete
+                        </button>
+                    }
+                    <button type="button"
+                            class="issue-issued-header-slot__btn issue-issued-header-slot__btn--primary"
+                            disabled="@(_busy || !CanPersist)"
+                            @onclick="SaveAsync">
+                        @(_busy ? "Saving…" : (_draft.IsEditMode ? "Save" : "Create"))
+                    </button>
+                    <button type="button" class="issue-issued-header-slot__btn" disabled="@_busy" @onclick="ClosePanelAsync">
+                        @(_draft.IsEditMode ? "Close" : "Cancel")
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public IssueIssuedHeaderSlotRequest? Request { get; set; }
+    [Parameter] public EventCallback CloseRequested { get; set; }
+
+    [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
+    [Inject] private IVisaPreviewSlotService SlotService { get; set; } = null!;
+    [Inject] private IApplicationWorkspacePersonUiActions? WorkspaceActions { get; set; }
+    [Inject] private IJSRuntime JS { get; set; } = null!;
+
+    private IssueIssuedHeaderComposeDraft? _draft;
+    private IssueIssuedHeaderCreateResult? _result;
+    private string? _loadError;
+    private string? _actionError;
+    private string? _saveMessage;
+    private string? _boundOccupantKey;
+    private bool _busy;
+    private bool _showFormAfterSave;
+    private Guid? _sessionHeaderId;
+    private Guid? _loadedExistingHeaderId;
+    private DateTime _primaryDate = DateTime.Today;
+    private DateTime? _expirationDate;
+    private DateTime? _visaStartDate;
+    private DateTime? _visaEndDate;
+    private bool _visaWindowDefined;
+    private string _visaCategoryIdText = string.Empty;
+    private string _visaPeriodIdText = string.Empty;
+    private string _validityDurationIdText = string.Empty;
+    private string? _pristineFingerprint;
+    private bool _peopleDirty;
+    private string? _pendingCopyName;
+    private byte[]? _pendingCopyBytes;
+    private readonly HashSet<string> _reviewedFields = new(StringComparer.Ordinal);
+    private readonly HashSet<string> _defaultFields = new(StringComparer.Ordinal);
+
+    private const int MaxCopyUploadMb = 5;
+
+    private Guid? EffectiveExistingHeaderId =>
+        Request?.ExistingHeaderId is Guid rid && rid != Guid.Empty
+            ? rid
+            : _sessionHeaderId;
+
+    private string NumberLabel => _draft?.Kind switch
+    {
+        IssueIssuedHeaderKind.Invitation => "Invitation number",
+        IssueIssuedHeaderKind.WorkPermit => "Work permit number",
+        IssueIssuedHeaderKind.Rejection => "Rejected document number",
+        IssueIssuedHeaderKind.BorderZone => "Border zone number",
+        _ => "Number",
+    };
+
+    private string PrimaryDateLabel => _draft?.Kind switch
+    {
+        IssueIssuedHeaderKind.Rejection => "Date",
+        IssueIssuedHeaderKind.BorderZone => "Start date",
+        _ => "Issued date",
+    };
+
+    private int SelectedCount => _draft?.People.Count(p => p.Include) ?? 0;
+    private int SelectedReadyCount => _draft?.People.Count(p => p.Include && p.IsReady) ?? 0;
+
+    private string CopySectionTitle => _draft?.Kind switch
+    {
+        IssueIssuedHeaderKind.Invitation => "Invitation copy",
+        IssueIssuedHeaderKind.WorkPermit => "Work permit copy",
+        IssueIssuedHeaderKind.Rejection => "Rejection copy",
+        IssueIssuedHeaderKind.BorderZone => "Border zone copy",
+        _ => "Document copy",
+    };
+
+    private string CopyNoun => _draft?.Kind switch
+    {
+        IssueIssuedHeaderKind.Invitation => "invitation",
+        IssueIssuedHeaderKind.WorkPermit => "work permit",
+        IssueIssuedHeaderKind.Rejection => "rejection",
+        IssueIssuedHeaderKind.BorderZone => "border zone",
+        _ => "document",
+    };
+
+    private string PeopleOnRecordTitle => _draft?.Kind switch
+    {
+        IssueIssuedHeaderKind.WorkPermit => "People on this work permit",
+        IssueIssuedHeaderKind.Rejection => "People on this rejection",
+        IssueIssuedHeaderKind.BorderZone => "People on this border zone",
+        _ => "People on this record",
+    };
+
+    private string CopyFileCountLabel
+    {
+        get
+        {
+            var count = (_draft?.Documents.Count ?? 0) + (string.IsNullOrWhiteSpace(_pendingCopyName) ? 0 : 1);
+            return count == 0 ? "None" : $"{count} file{(count == 1 ? "" : "s")}";
+        }
+    }
+
+    private List<IssueIssuedHeaderPersonLineDraft> AssignedPeople =>
+        _draft?.People.Where(p => p.Include).ToList() ?? [];
+
+    private List<IssueIssuedHeaderPersonLineDraft> AvailablePeople =>
+        _draft?.People.Where(p => !p.Include).ToList() ?? [];
+
+    private bool CanSave =>
+        _draft != null
+        && !_busy
+        && !string.IsNullOrWhiteSpace(_draft.HeaderNumber)
+        && SelectedCount > 0
+        && SelectedReadyCount == SelectedCount
+        && (_draft.Kind != IssueIssuedHeaderKind.BorderZone
+            || TryParseGuid(_validityDurationIdText) != null)
+        && (_draft.Kind != IssueIssuedHeaderKind.Invitation
+            || !_visaWindowDefined
+            || (_visaStartDate.HasValue && _visaEndDate.HasValue))
+        && (_draft.Kind != IssueIssuedHeaderKind.WorkPermit || WorkPermitCardsComplete);
+
+    private bool WorkPermitCardsComplete =>
+        _draft != null
+        && _draft.People.Where(p => p.Include).All(IssueIssuedHeaderComposeService.IsWorkPermitCardComplete);
+
+    /// <summary>
+    /// Edit: Save only when modified (XAF ObjectSpace.IsModified style).
+    /// Create: enabled when the form is valid (new object is inherently unsaved).
+    /// </summary>
+    private bool CanPersist =>
+        CanSave && (!_draft!.IsEditMode || IsDirty);
+
+    private bool IsDirty =>
+        _draft != null
+        && !string.IsNullOrEmpty(_pristineFingerprint)
+        && !string.Equals(_pristineFingerprint, BuildFingerprint(), StringComparison.Ordinal);
+
+    protected override void OnParametersSet()
+    {
+        if (Request == null)
+        {
+            _draft = null;
+            _result = null;
+            _loadError = "Compose request is missing.";
+            _boundOccupantKey = null;
+            _sessionHeaderId = null;
+            _loadedExistingHeaderId = null;
+            _pristineFingerprint = null;
+            _peopleDirty = false;
+            _pendingCopyName = null;
+            _pendingCopyBytes = null;
+            return;
+        }
+
+        var occupantKey = VisaPreviewSlotOccupantKeys.ForIssueIssuedHeader(Request);
+        var requestHeaderId = Request.ExistingHeaderId is Guid rid && rid != Guid.Empty ? rid : (Guid?)null;
+        // Remount/@key usually resets fields; still compare header id so switching 005→006 always reloads.
+        if (string.Equals(_boundOccupantKey, occupantKey, StringComparison.Ordinal)
+            && _draft != null
+            && _loadedExistingHeaderId == requestHeaderId)
+            return;
+
+        _boundOccupantKey = occupantKey;
+        _loadedExistingHeaderId = requestHeaderId;
+        _result = null;
+        _actionError = null;
+        _saveMessage = null;
+        _showFormAfterSave = false;
+        _sessionHeaderId = requestHeaderId;
+        _pendingCopyName = null;
+        _pendingCopyBytes = null;
+        LoadDraft();
+    }
+
+    private void LoadDraft()
+    {
+        _loadError = null;
+        _draft = null;
+        _result = null;
+        if (Request == null || Request.ApplicationProfileInstanceId == Guid.Empty)
+        {
+            _loadError = "Application is not available.";
+            return;
+        }
+
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        if (EffectiveExistingHeaderId is Guid existingId && existingId != Guid.Empty)
+        {
+            _draft = IssueIssuedHeaderComposeService.LoadExistingDraft(
+                objectSpace,
+                Request.ApplicationProfileInstanceId,
+                Request.Kind,
+                existingId);
+            if (_draft == null)
+            {
+                _loadError = "Issued record was not found, or this profile cannot produce it.";
+                return;
+            }
+        }
+        else
+        {
+            _draft = IssueIssuedHeaderComposeService.LoadDraft(objectSpace, Request.ApplicationProfileInstanceId, Request.Kind);
+            if (_draft == null)
+            {
+                _loadError = "This profile cannot produce this issued record, or the application was not found.";
+                return;
+            }
+        }
+
+        ApplyDraftToBoundFields();
+        CaptureFieldCues();
+        CapturePristine();
+    }
+
+    private void ApplyDraftToBoundFields()
+    {
+        if (_draft == null)
+            return;
+
+        _primaryDate = _draft.PrimaryDate.Date;
+        _expirationDate = _draft.ExpirationDate?.Date;
+        _visaWindowDefined = _draft.IsVisaStartAndEndDateDefined;
+        _visaStartDate = _draft.VisaStartDate?.Date;
+        _visaEndDate = _draft.VisaEndDate?.Date;
+        _visaCategoryIdText = _draft.VisaCategoryId is Guid c && c != Guid.Empty ? c.ToString("N") : string.Empty;
+        _visaPeriodIdText = _draft.VisaPeriodId is Guid p && p != Guid.Empty ? p.ToString("N") : string.Empty;
+        _validityDurationIdText = _draft.ValidityDurationId is Guid v && v != Guid.Empty ? v.ToString("N") : string.Empty;
+    }
+
+    private void AddAllAvailableReady()
+    {
+        if (_draft == null)
+            return;
+        foreach (var person in _draft.People)
+        {
+            if (person.Include || person.IncludeLocked || !person.IsReady)
+                continue;
+            ApplyInclude(person, true);
+        }
+        _peopleDirty = true;
+        _actionError = null;
+        _saveMessage = null;
+    }
+
+    private void SetInclude(IssueIssuedHeaderPersonLineDraft person, bool include)
+    {
+        if (person.IncludeLocked)
+            return;
+        ApplyInclude(person, include);
+        _peopleDirty = true;
+        _actionError = null;
+        _saveMessage = null;
+    }
+
+    private void ApplyInclude(IssueIssuedHeaderPersonLineDraft person, bool include)
+    {
+        person.Include = include;
+        if (_draft?.Kind != IssueIssuedHeaderKind.Invitation)
+            return;
+        if (include)
+            person.StatusCaption = "On this invitation";
+        else if (person.IsReady)
+            person.StatusCaption = "Available";
+    }
+
+    private void SelectAllReady()
+    {
+        if (_draft == null) return;
+        foreach (var person in _draft.People)
+        {
+            if (person.IncludeLocked) continue;
+            if (_draft.Kind == IssueIssuedHeaderKind.WorkPermit && !person.IsEmployee) continue;
+            person.Include = person.IsReady;
+        }
+        _peopleDirty = true;
+        _actionError = null;
+        _saveMessage = null;
+    }
+
+    private void SelectNone()
+    {
+        if (_draft == null) return;
+        foreach (var person in _draft.People)
+        {
+            if (person.IncludeLocked) continue;
+            person.Include = false;
+        }
+        _peopleDirty = true;
+        _actionError = null;
+        _saveMessage = null;
+    }
+    private static string PersonStatusCss(IssueIssuedHeaderPersonLineDraft person)
+    {
+        if (!person.IsReady)
+            return "issue-issued-header-slot__status--warn";
+        if (person.StatusCaption.Equals("Available", StringComparison.OrdinalIgnoreCase)
+            || person.StatusCaption.StartsWith("On invitation ", StringComparison.OrdinalIgnoreCase)
+            || person.StatusCaption.StartsWith("Already on", StringComparison.OrdinalIgnoreCase))
+            return "issue-issued-header-slot__status--muted";
+        return "issue-issued-header-slot__status--ready";
+    }
+
+    private void ToggleInclude(IssueIssuedHeaderPersonLineDraft person, ChangeEventArgs e)
+    {
+        if (person.IncludeLocked)
+            return;
+        person.Include = e.Value is bool b && b;
+        _peopleDirty = true;
+        _actionError = null;
+        _saveMessage = null;
+    }
+
+    private void ApplyBoundFieldsToDraft()
+    {
+        if (_draft == null)
+            return;
+
+        _draft.PrimaryDate = _primaryDate.Date;
+        _draft.ExpirationDate = _expirationDate?.Date;
+        _draft.VisaCategoryId = TryParseGuid(_visaCategoryIdText);
+        _draft.VisaPeriodId = TryParseGuid(_visaPeriodIdText);
+        _draft.ValidityDurationId = TryParseGuid(_validityDurationIdText);
+        _draft.IsVisaStartAndEndDateDefined = _visaWindowDefined;
+        _draft.VisaStartDate = _visaWindowDefined ? _visaStartDate?.Date : null;
+        _draft.VisaEndDate = _visaWindowDefined ? _visaEndDate?.Date : null;
+    }
+
+    private Task OnInvitationBorderZoneChanged(string? value)
+    {
+        if (_draft == null)
+            return Task.CompletedTask;
+
+        _draft.BorderZoneLocation = value ?? string.Empty;
+        _actionError = null;
+        _saveMessage = null;
+        ReviewField("header:borderZone");
+        return Task.CompletedTask;
+    }
+
+    private void CapturePristine()
+    {
+        if (_draft == null)
+        {
+            _pristineFingerprint = null;
+            _peopleDirty = false;
+            return;
+        }
+
+        _pristineFingerprint = BuildFingerprint();
+        _peopleDirty = false;
+    }
+
+    private string BuildFingerprint()
+    {
+        if (_draft == null)
+            return string.Empty;
+
+        var included = string.Join(",",
+            _draft.People
+                .Where(p => p.Include)
+                .Select(p => p.PersonId.ToString("N"))
+                .OrderBy(x => x, StringComparer.Ordinal));
+
+        return string.Join("|",
+            _draft.HeaderNumber?.Trim() ?? string.Empty,
+            _primaryDate.ToString("yyyy-MM-dd"),
+            _expirationDate?.ToString("yyyy-MM-dd") ?? string.Empty,
+            _visaCategoryIdText,
+            _visaPeriodIdText,
+            _validityDurationIdText,
+            _draft.Reason?.Trim() ?? string.Empty,
+            _visaWindowDefined ? "1" : "0",
+            _visaStartDate?.ToString("yyyy-MM-dd") ?? string.Empty,
+            _visaEndDate?.ToString("yyyy-MM-dd") ?? string.Empty,
+            _draft.BorderZoneLocation?.Trim() ?? string.Empty,
+            included,
+            WorkPermitFingerprint());
+    }
+
+    private string WorkPermitFingerprint()
+    {
+        if (_draft?.Kind != IssueIssuedHeaderKind.WorkPermit)
+            return string.Empty;
+
+        return string.Join(";",
+            _draft.People
+                .Where(p => p.Include)
+                .OrderBy(p => p.PersonId)
+                .Select(p => string.Join(",",
+                    p.PersonId.ToString("N"),
+                    p.ItemNumber?.Trim() ?? string.Empty,
+                    p.ASNumber?.Trim() ?? string.Empty,
+                    p.PositionId?.ToString("N") ?? string.Empty,
+                    p.ItemStartDate?.ToString("yyyy-MM-dd") ?? string.Empty,
+                    p.ItemExpirationDate?.ToString("yyyy-MM-dd") ?? string.Empty,
+                    p.WorkPermittedLocations?.Trim() ?? string.Empty)));
+    }
+
+    private static Guid? TryParseGuid(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return null;
+        if (Guid.TryParseExact(text.Trim(), "N", out var id) || Guid.TryParse(text.Trim(), out id))
+            return id == Guid.Empty ? null : id;
+        return null;
+    }
+
+    private static Guid? ParseGuid(object? value) => TryParseGuid(value?.ToString());
+
+    private static string GuidText(Guid? id) =>
+        id is Guid g && g != Guid.Empty ? g.ToString("N") : string.Empty;
+
+    private static string Initials(string name)
+    {
+        var parts = (name ?? string.Empty).Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 0)
+            return "?";
+        if (parts.Length == 1)
+            return parts[0].Length >= 2 ? parts[0][..2].ToUpperInvariant() : parts[0].ToUpperInvariant();
+        return $"{char.ToUpperInvariant(parts[0][0])}{char.ToUpperInvariant(parts[^1][0])}";
+    }
+
+    private void OnWorkPermitLocationsChanged(IssueIssuedHeaderPersonLineDraft person, string? value)
+    {
+        person.WorkPermittedLocations = value?.Trim() ?? string.Empty;
+        _peopleDirty = true;
+        _actionError = null;
+        _saveMessage = null;
+        ReviewWpField(person, "locations");
+    }
+
+    private bool UseFieldCues => _draft != null;
+
+    private static string WpCueKey(IssueIssuedHeaderPersonLineDraft person, string field) =>
+        $"{person.PersonId:N}:{field}";
+
+    private string HeaderCueClass(string key, bool required, bool hasValue, bool sourced = false) =>
+        UseFieldCues
+            ? IssueComposeFieldCue.FieldClass(
+                required,
+                hasValue,
+                isDefault: _defaultFields.Contains(key),
+                reviewed: _reviewedFields.Contains(key),
+                sourced)
+            : string.Empty;
+
+    private string WpCueClass(
+        IssueIssuedHeaderPersonLineDraft person,
+        string field,
+        bool required,
+        bool hasValue,
+        bool sourced = false) =>
+        HeaderCueClass(WpCueKey(person, field), required, hasValue, sourced);
+
+    private void ReviewField(string key)
+    {
+        if (!UseFieldCues || string.IsNullOrEmpty(key))
+            return;
+        _reviewedFields.Add(key);
+    }
+
+    private void ReviewWpField(IssueIssuedHeaderPersonLineDraft person, string field) =>
+        ReviewField(WpCueKey(person, field));
+
+    private void SetWpGuidAndReview(
+        IssueIssuedHeaderPersonLineDraft person,
+        Action<Guid?> setter,
+        object? raw,
+        string field)
+    {
+        setter(ParseGuid(raw));
+        ReviewWpField(person, field);
+    }
+
+    private void CaptureFieldCues()
+    {
+        _reviewedFields.Clear();
+        _defaultFields.Clear();
+        if (_draft == null || !UseFieldCues)
+            return;
+
+        if (IssueComposeFieldCue.HasText(_draft.HeaderNumber))
+            _defaultFields.Add("header:number");
+        if (IssueComposeFieldCue.HasDate(_primaryDate))
+            _defaultFields.Add("header:date");
+        if (IssueComposeFieldCue.HasText(_validityDurationIdText))
+            _defaultFields.Add("header:duration");
+        if (IssueComposeFieldCue.HasDate(_expirationDate))
+            _defaultFields.Add("header:expiration");
+        if (IssueComposeFieldCue.HasText(_visaCategoryIdText))
+            _defaultFields.Add("header:category");
+        if (IssueComposeFieldCue.HasText(_visaPeriodIdText))
+            _defaultFields.Add("header:period");
+        if (IssueComposeFieldCue.HasText(_draft.BorderZoneLocation))
+            _defaultFields.Add("header:borderZone");
+        if (IssueComposeFieldCue.HasDate(_visaStartDate))
+            _defaultFields.Add("header:visaStart");
+        if (IssueComposeFieldCue.HasDate(_visaEndDate))
+            _defaultFields.Add("header:visaEnd");
+        if (IssueComposeFieldCue.HasText(_draft.Reason))
+            _defaultFields.Add("header:reason");
+
+        foreach (var person in _draft.People)
+        {
+            if (IssueComposeFieldCue.HasText(person.ItemNumber))
+                _defaultFields.Add(WpCueKey(person, "itemNumber"));
+            if (IssueComposeFieldCue.HasText(person.ASNumber))
+                _defaultFields.Add(WpCueKey(person, "asNumber"));
+            if (IssueComposeFieldCue.HasId(person.PositionId))
+                _defaultFields.Add(WpCueKey(person, "position"));
+            if (IssueComposeFieldCue.HasDate(person.ItemStartDate))
+                _defaultFields.Add(WpCueKey(person, "start"));
+            if (IssueComposeFieldCue.HasDate(person.ItemExpirationDate))
+                _defaultFields.Add(WpCueKey(person, "end"));
+            if (IssueComposeFieldCue.HasText(person.WorkPermittedLocations))
+                _defaultFields.Add(WpCueKey(person, "locations"));
+        }
+
+        if (_draft.IsEditMode)
+        {
+            foreach (var key in _defaultFields)
+                _reviewedFields.Add(key);
+            _defaultFields.Clear();
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        if (_draft == null || _busy)
+            return;
+
+        _busy = true;
+        _actionError = null;
+        _saveMessage = null;
+        ApplyBoundFieldsToDraft();
+        // Stale checkbox state must never promote someone already on another letter.
+        if (_draft.Kind == IssueIssuedHeaderKind.Invitation)
+        {
+            foreach (var person in _draft.People)
+            {
+                if (person.IncludeLocked && person.ExistingLineId is null)
+                    person.Include = false;
+            }
+        }
+
+        // Header-only Save must not touch InvitationItems. People sync only if the officer
+        // changed a person checkbox (not inferred from checkbox DOM / occupancy).
+        _draft.SyncPeopleOnSave = !_draft.IsEditMode || _peopleDirty;
+
+        try
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+            _result = _draft.IsEditMode
+                ? IssueIssuedHeaderComposeService.Update(objectSpace, _draft)
+                : IssueIssuedHeaderComposeService.Create(objectSpace, _draft);
+
+            if (_result.Succeeded)
+            {
+                var wasEdit = _draft.IsEditMode;
+                _sessionHeaderId = _result.HeaderId;
+
+                if (!wasEdit
+                    && _pendingCopyBytes is { Length: > 0 }
+                    && _result.HeaderId != Guid.Empty)
+                {
+                    var attach = IssueIssuedHeaderComposeService.AddDocument(
+                        objectSpace,
+                        Request!.ApplicationProfileInstanceId,
+                        Request.Kind,
+                        _result.HeaderId,
+                        _pendingCopyName ?? "invitation-copy.pdf",
+                        _pendingCopyBytes);
+                    _pendingCopyName = null;
+                    _pendingCopyBytes = null;
+                    if (!attach.Succeeded && !string.IsNullOrWhiteSpace(attach.ErrorMessage))
+                        _actionError = attach.ErrorMessage;
+                }
+
+                WorkspaceActions?.NotifyWorkspaceChanged();
+                _draft = IssueIssuedHeaderComposeService.LoadExistingDraft(
+                    objectSpace,
+                    Request!.ApplicationProfileInstanceId,
+                    Request.Kind,
+                    _result.HeaderId);
+                ApplyDraftToBoundFields();
+
+                CapturePristine();
+
+                if (wasEdit)
+                {
+                    _showFormAfterSave = true;
+                    _saveMessage = "Saved.";
+                    _result = null;
+                }
+                else
+                {
+                    _showFormAfterSave = false;
+                }
+            }
+            else
+            {
+                _actionError = _result.ErrorMessage;
+                _result = null;
+            }
+        }
+        catch (Exception ex)
+        {
+            _actionError = ex.Message;
+            _result = null;
+        }
+        finally
+        {
+            _busy = false;
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task EditSavedHeaderAsync()
+    {
+        if (_result?.HeaderId is not Guid headerId || headerId == Guid.Empty || Request == null)
+            return;
+
+        _sessionHeaderId = headerId;
+        _result = null;
+        _showFormAfterSave = true;
+        _actionError = null;
+        _saveMessage = null;
+
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        _draft = IssueIssuedHeaderComposeService.LoadExistingDraft(
+            objectSpace,
+            Request.ApplicationProfileInstanceId,
+            Request.Kind,
+            headerId);
+        if (_draft == null)
+        {
+            _loadError = "Could not reload issued record for edit.";
+        }
+        else
+        {
+            ApplyDraftToBoundFields();
+            CapturePristine();
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task StartAnotherAsync()
+    {
+        _result = null;
+        _actionError = null;
+        _saveMessage = null;
+        _sessionHeaderId = null;
+        _loadedExistingHeaderId = null;
+        _boundOccupantKey = null;
+        _showFormAfterSave = false;
+        LoadDraft();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void ClearPendingCopy()
+    {
+        _pendingCopyName = null;
+        _pendingCopyBytes = null;
+        _actionError = null;
+    }
+
+    private async Task OnCopyFileSelectedAsync(InputFileChangeEventArgs args)
+    {
+        if (_draft == null || _busy || args.FileCount == 0)
+            return;
+
+        var file = args.File;
+        if (file == null)
+            return;
+
+        _busy = true;
+        _actionError = null;
+        _saveMessage = null;
+        try
+        {
+            await using var stream = file.OpenReadStream(MaxCopyUploadMb * 1024L * 1024L);
+            using var memory = new MemoryStream();
+            await stream.CopyToAsync(memory);
+            var content = memory.ToArray();
+            var fileName = file.Name;
+
+            var headerId = EffectiveExistingHeaderId;
+            if (headerId is Guid id && id != Guid.Empty)
+            {
+                using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+                var result = IssueIssuedHeaderComposeService.AddDocument(
+                    objectSpace,
+                    Request!.ApplicationProfileInstanceId,
+                    Request.Kind,
+                    id,
+                    fileName,
+                    content);
+                if (!result.Succeeded)
+                {
+                    _actionError = result.ErrorMessage;
+                    return;
+                }
+
+                ReloadDocuments(objectSpace, id);
+                _saveMessage = "Copy saved.";
+                WorkspaceActions?.NotifyWorkspaceChanged();
+            }
+            else
+            {
+                using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+                var validationError = IssueIssuedHeaderComposeService.ValidateDocumentBytes(
+                    objectSpace, fileName, content);
+                if (!string.IsNullOrEmpty(validationError))
+                {
+                    _actionError = validationError;
+                    return;
+                }
+
+                _pendingCopyName = fileName;
+                _pendingCopyBytes = content;
+            }
+        }
+        catch (Exception ex)
+        {
+            _actionError = ex.Message;
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task RemoveCopyAsync(Guid documentId)
+    {
+        if (_draft == null || _busy || documentId == Guid.Empty)
+            return;
+
+        var headerId = EffectiveExistingHeaderId;
+        if (headerId is not Guid id || id == Guid.Empty)
+            return;
+
+        _busy = true;
+        _actionError = null;
+        try
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+            var result = IssueIssuedHeaderComposeService.RemoveDocument(
+                objectSpace,
+                Request!.ApplicationProfileInstanceId,
+                Request.Kind,
+                id,
+                documentId);
+            if (!result.Succeeded)
+            {
+                _actionError = result.ErrorMessage;
+                return;
+            }
+
+            ReloadDocuments(objectSpace, id);
+            WorkspaceActions?.NotifyWorkspaceChanged();
+        }
+        catch (Exception ex)
+        {
+            _actionError = ex.Message;
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private void ReloadDocuments(IObjectSpace objectSpace, Guid headerId)
+    {
+        if (_draft == null)
+            return;
+
+        _draft.Documents.Clear();
+        foreach (var row in IssueIssuedHeaderComposeService.ListDocuments(objectSpace, Request!.Kind, headerId))
+            _draft.Documents.Add(row);
+    }
+
+    private async Task DeleteAsync()
+    {
+        if (_draft == null || Request == null || !_draft.IsEditMode || _busy)
+            return;
+
+        var headerId = EffectiveExistingHeaderId;
+        if (headerId is not Guid id || id == Guid.Empty)
+            return;
+
+        var noun = Request.Kind switch
+        {
+            IssueIssuedHeaderKind.Invitation => "invitation",
+            IssueIssuedHeaderKind.WorkPermit => "work permit",
+            IssueIssuedHeaderKind.Rejection => "rejection",
+            IssueIssuedHeaderKind.BorderZone => "border zone",
+            _ => "record",
+        };
+        var caption = _draft.HeaderNumber?.Trim();
+        var label = string.IsNullOrWhiteSpace(caption) ? noun : $"{noun} {caption}";
+
+        bool confirmed;
+        try
+        {
+            confirmed = await JS.InvokeAsync<bool>("confirm", $"Delete {label}? This cannot be undone.");
+        }
+        catch (JSException)
+        {
+            return;
+        }
+        catch (InvalidOperationException)
+        {
+            return;
+        }
+
+        if (!confirmed)
+            return;
+
+        _busy = true;
+        _actionError = null;
+        _saveMessage = null;
+        try
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+            var result = IssueIssuedHeaderComposeService.Delete(
+                objectSpace,
+                Request.ApplicationProfileInstanceId,
+                Request.Kind,
+                id);
+            if (!result.Succeeded)
+            {
+                _actionError = result.ErrorMessage;
+                return;
+            }
+
+            WorkspaceActions?.NotifyWorkspaceChanged();
+            await ClosePanelAsync();
+        }
+        catch (Exception ex)
+        {
+            _actionError = ex.Message;
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private Task ClosePanelAsync() => CloseRequested.HasDelegate
+        ? CloseRequested.InvokeAsync()
+        : SlotService.CloseAsync();
+}

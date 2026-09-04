@@ -1,7 +1,7 @@
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
 /// <summary>
-/// Legacy Application has no VisaType FK. Infer Visa2026 <c>Application.VisaType</c>
+/// Legacy ApplicationProfileInstance has no VisaType FK. Infer Visa2026 <c>Application.VisaType</c>
 /// from the resolved <c>ApplicationType.Name</c> for types that use VisaPeriod.
 /// Keys are <see cref="VisaType.LocalizationKey"/> from visa-type.json.
 /// </summary>

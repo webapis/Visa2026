@@ -14,7 +14,7 @@ target:
 deduplication:
   enabled: true
   keys:
-    - Application
+    - ApplicationProfileInstance
     - Person
   personKeyRule: |
     Person legacy Oid = Employee when parent Application.ForEmployee=1;
@@ -25,18 +25,18 @@ deduplication:
   mergeBeforeImport: none
   action: import_one_skip_duplicates
   discoveryQuery: |
-    SELECT Application,
+    SELECT ApplicationProfileInstance,
            CASE WHEN a.ForEmployee=1 THEN pia.Employee ELSE pia.FamilyMember END AS person_oid,
            COUNT(*) cnt
     FROM dbo.PersonInApplication pia
     JOIN dbo.Application a ON a.Oid = pia.Application AND a.GCRecord IS NULL
     WHERE pia.GCRecord IS NULL
-    GROUP BY Application,
+    GROUP BY ApplicationProfileInstance,
              CASE WHEN a.ForEmployee=1 THEN pia.Employee ELSE pia.FamilyMember END
     HAVING COUNT(*) > 1;
   notes: |
     925 duplicate groups (1,221 extra rows); max duplicate count 2 per group on Çalik data.
-    Parent link uses legacy Application.Oid (GUID) via Application id-map — never FullApplicationNumber alone.
+    Parent link uses legacy Application.Oid (GUID) via ApplicationProfileInstance id-map — never FullApplicationNumber alone.
     Upsert/id-map keyed on legacy PersonInApplication.Oid; dedupe only skips duplicate PIAs on the same legacy Application+Person.
 
 propertyGaps:
@@ -111,7 +111,7 @@ propertyGaps:
     - property: RowNumber
       default: 0
       missingBehavior: use_default
-      notes: Optional list ordering — derive ROW_NUMBER per Application ordered by Oid if needed
+      notes: Optional list ordering — derive ROW_NUMBER per ApplicationProfileInstance ordered by Oid if needed
     - property: NextVisa
       disposition: derive
       notes: From Visa.ProcessNumber = PersonInApplication.Oid (5,744 links) — not a legacy column
@@ -139,7 +139,7 @@ propertyGaps:
       disposition: resolve_from_person_in_invitation
       missingBehavior: allow_null
       notes: |
-        Legacy PersonInInvitation row for same Application (via ApplicationResult) + Person.
+        Legacy PersonInInvitation row for same ApplicationProfileInstance (via ApplicationResult) + Person.
         InvitationItem id-map key = PersonInInvitation.Oid. Tie-break: latest ApplicationResult.IssuedDate.
     - property: PreviousInvitationItem
       disposition: defer
@@ -204,12 +204,12 @@ fields:
     upsertKey: true
     notes: id-map only — OData ID assigned on POST
 
-  - source: Application
-    target: Application
+  - source: ApplicationProfileInstance
+    target: ApplicationProfileInstance
     transform: fk_id_map
-    idMapEntity: Application
+    idMapEntity: ApplicationProfileInstance
     missingBehavior: skip_row
-    notes: Parent header — Application id-map required
+    notes: Parent header — ApplicationProfileInstance id-map required
 
   - source: Employee
     target: Person
@@ -274,7 +274,7 @@ fields:
     transform: fk_id_map
     idMapEntity: InvitationItem
     join: |
-      PersonInInvitation + ApplicationResult on same Application as PersonInApplication;
+      PersonInInvitation + ApplicationResult on same ApplicationProfileInstance as PersonInApplication;
       match Employee or FamilyMember; latest ApplicationResult.IssuedDate when multiple.
     missingBehavior: allow_null
     gatedBy: Application.ApplicationType.ShowCurrentInvitationItem
@@ -374,7 +374,7 @@ fields:
     missingBehavior: use_default
     default: Ýok
     gatedBy: Application.ApplicationType.ShowBorderZoneLocation
-    notes: Reuse Visa/Application BorderZoneName layer 3 — header matrix copied to line
+    notes: Reuse Visa/ApplicationProfileInstance BorderZoneName layer 3 — header matrix copied to line
 
   - source: WorkPermit
     target: WorkPermittedLocations
@@ -406,7 +406,7 @@ fields:
     transform: derive_processed_flags
     missingBehavior: use_default
     default: false
-    notes: Legacy PersonState enum richer than bool flags — approximate at import; refine in ApplicationProgress wave
+    notes: Legacy PersonState enum richer than bool flags — approximate at import; refine in ApplicationProfileInstanceProgress wave
 
   - source: null
     target: CurrentEducation
@@ -443,10 +443,10 @@ fields:
 
 import:
   rowFilter: GCRecord IS NULL
-  rowFilterNote: Import active PersonInApplication rows only; parent Application must resolve via id-map.
+  rowFilterNote: Import active PersonInApplication rows only; parent ApplicationProfileInstance must resolve via id-map.
   parentBlockerFilter: |
-    Skip row when parent Application composite ApplicationType is unmapped (E:44, E:55) —
-    same gate as Application header transform.
+    Skip row when parent ApplicationProfileInstance composite ApplicationType is unmapped (E:44, E:55) —
+    same gate as ApplicationProfileInstance header transform.
 
 export:
   sheetName: ApplicationItem
@@ -465,6 +465,6 @@ notes: |
   ApplicationType Show* flags gate which fields are required on POST (RuleRequiredField TargetCriteria).
   Importer must read parent Application.ApplicationType after header import — do not POST gated FKs when Show* is false.
   Omit ShowOptionalFields from OData payload ([NotMapped]).
-  Person uniqueness per Application enforced in Visa2026 — dedupe legacy duplicates before POST.
+  Person uniqueness per ApplicationProfileInstance enforced in Visa2026 — dedupe legacy duplicates before POST.
   RegistrationNumber legacy column has no target — 3,516 populated rows; preserve in audit column only unless product adds field.
   Order.yaml places ApplicationItem before WorkPermitItem — document allow_null CurrentWorkPermitItem or run WorkPermitItem import first for full fidelity.

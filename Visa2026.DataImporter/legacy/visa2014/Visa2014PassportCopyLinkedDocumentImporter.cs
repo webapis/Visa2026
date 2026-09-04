@@ -1,3 +1,4 @@
+using System.Data;
 using Microsoft.Data.SqlClient;
 using Bo = Visa2026.Module.BusinessObjects;
 
@@ -79,10 +80,16 @@ internal static class Visa2014PassportCopyLinkedDocumentImporter
                 continue;
             }
 
+            if (docMap.ContainsKey(legacyCopyOid))
+            {
+                skippedAlreadyImported++;
+                continue;
+            }
+
             byte[]? blob;
             try
             {
-                blob = await ReadCopyBlobAsync(connection, blobColumn, legacyCopyOid);
+                blob = await ReadCopyBlobAsync(connection, legacyConnectionString, blobColumn, legacyCopyOid);
             }
             catch (Exception ex)
             {
@@ -100,14 +107,6 @@ internal static class Visa2014PassportCopyLinkedDocumentImporter
             if (blob.Length > MaxDocumentBytes)
             {
                 skippedOversize++;
-                continue;
-            }
-
-            if (docMap.ContainsKey(legacyCopyOid))
-            {
-                skippedAlreadyImported++;
-                Visa2014LegacyBlobDedupeHelper.RegisterExistingBlob(
-                    importedBlobKeys, copyIndexByParent, targetParentId, blob);
                 continue;
             }
 
@@ -144,7 +143,7 @@ internal static class Visa2014PassportCopyLinkedDocumentImporter
                 posted++;
                 postedSinceLastSave++;
                 if (posted % 100 == 0)
-                    Console.WriteLine($"INF Progress: {posted} posted, {failed} failed...");
+                    Console.WriteLine($"INF Progress: {posted} posted, {failed} failed, {skippedAlreadyImported} already imported, {skippedNoParentMap} no parent map...");
 
                 if (postedSinceLastSave >= 100 && !string.IsNullOrWhiteSpace(documentIdMapOutputPath))
                 {
@@ -207,7 +206,7 @@ internal static class Visa2014PassportCopyLinkedDocumentImporter
             sql = sql.Replace("SELECT", $"SELECT TOP ({maxRows.Value})", StringComparison.Ordinal);
 
         var rows = new List<(Guid, Guid, string?)>();
-        await using var command = new SqlCommand(sql, connection);
+        await using var command = new SqlCommand(sql, connection) { CommandTimeout = 180 };
         await using var reader = await command.ExecuteReaderAsync();
         while (await reader.ReadAsync())
         {
@@ -224,15 +223,49 @@ internal static class Visa2014PassportCopyLinkedDocumentImporter
 
     private static async Task<byte[]?> ReadCopyBlobAsync(
         SqlConnection connection,
+        string legacyConnectionString,
+        string blobColumn,
+        Guid legacyCopyOid)
+    {
+        try
+        {
+            await EnsureOpenAsync(connection);
+            return await ReadCopyBlobOnceAsync(connection, blobColumn, legacyCopyOid);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"WRN PassportCopy-linked blob {legacyCopyOid}: {ex.Message} — retrying on a new connection");
+            await using var retry = new SqlConnection(legacyConnectionString);
+            await retry.OpenAsync();
+            var blob = await ReadCopyBlobOnceAsync(retry, blobColumn, legacyCopyOid);
+            try { connection.Close(); } catch { /* original connection is broken */ }
+            return blob;
+        }
+    }
+
+    private static async Task<byte[]?> ReadCopyBlobOnceAsync(
+        SqlConnection connection,
         string blobColumn,
         Guid legacyCopyOid)
     {
         var blobBracket = Visa2014LegacyTableColumnResolver.Bracket(blobColumn);
         var sql = $"SELECT {blobBracket} FROM dbo.PassportCopy WHERE Oid = @oid AND GCRecord IS NULL";
-        await using var command = new SqlCommand(sql, connection);
+        await using var command = new SqlCommand(sql, connection) { CommandTimeout = 180 };
         command.Parameters.AddWithValue("@oid", legacyCopyOid);
         var value = await command.ExecuteScalarAsync();
         return value is DBNull or null ? null : (byte[])value;
+    }
+
+    private static async Task EnsureOpenAsync(SqlConnection connection)
+    {
+        if (connection.State == ConnectionState.Open)
+            return;
+        if (connection.State != ConnectionState.Closed)
+        {
+            try { connection.Close(); } catch { /* ignore broken close */ }
+        }
+
+        await connection.OpenAsync();
     }
 
     private static Dictionary<Guid, Guid> LoadOptionalDocumentIdMap(string? path)

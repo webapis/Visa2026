@@ -1,0 +1,117 @@
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Web
+@using Visa2026.Module.BusinessObjects.ApplicationWorkspace
+@using Visa2026.Module.Services.ApplicationPersonLink
+@using Visa2026.Module.Services.ApplicationWorkspace
+@using Visa2026.Module.Services.OfficerShell
+
+<div class="app-workspace app-workspace--case">
+    <OfficerShellCaseWorkspaceComponent Snapshot="@Snapshot"
+                                        IsLoading="@IsLoading"
+                                        ActiveTab="@CaseTab"
+                                        SelectedPersonRowIndex="@SelectedPersonRowIndex"
+                                        PeopleLinkedRecordFocusKey="@PeopleLinkedRecordFocusKey"
+                                        CanLinkPerson="@CanLinkPerson"
+                                        CanUnlinkPerson="@CanUnlinkPerson"
+                                        CanOpenPersonDetail="@CanOpenPersonDetail"
+                                        CanOpenDocumentCopies="@CanOpenDocumentCopies"
+                                        CaseTabChanged="@CaseTabChanged"
+                                        LinkedRecordTileClicked="@LinkedRecordTileClicked"
+                                        IssuedHeaderNewRequested="@IssuedHeaderNewRequested"
+                                        IssuedHeaderOpenRequested="@IssuedHeaderOpenRequested"
+                                        BackToListRequested="@BackToListRequested"
+                                        LinkPersonRequested="@LinkPersonRequested"
+                                        UnlinkPersonRequested="@UnlinkPersonRequested"
+                                        OpenPersonDetailRequested="@OpenPersonDetailRequested"
+                                        OpenPersonDetailByIndexRequested="@OpenPersonDetailByIndexRequested"
+                                        RelinkPersonRequested="@RelinkPersonRequested"
+                                        OpenDocumentCopiesRequested="@OpenDocumentCopiesRequested"
+                                        OpenResminamalarRequested="@OpenResminamalarRequested"
+                                        SelectPersonRowRequested="@SelectPersonRowRequested"
+                                        ProgressStatusMessage="@ProgressStatusMessage"
+                                        ProgressStatusIsError="@ProgressStatusIsError"
+                                        ShowRevertToHere="@ShowProgressRevertToHere"
+                                        SaveProgressNotesRequested="@SaveProgressNotesRequested"
+                                        UploadMinistryLetterRequested="@UploadMinistryLetterRequested"
+                                        AdvanceProgressRequested="@AdvanceProgressRequested"
+                                        RevertProgressRequested="@RevertProgressRequested"
+                                        ShowPersonLinkPicker="@ShowPersonLinkPicker"
+                                        PersonLinkCandidates="@PersonLinkCandidates"
+                                        PersonLinkIsSearching="@PersonLinkIsSearching"
+                                        PersonLinkIsLinking="@PersonLinkIsLinking"
+                                        PersonLinkStatusMessage="@PersonLinkStatusMessage"
+                                        PersonLinkStatusIsError="@PersonLinkStatusIsError"
+                                        PersonLinkSearchRequested="@PersonLinkSearchRequested"
+                                        LinkPersonFromPickerRequested="@LinkPersonFromPickerRequested"
+                                        ClosePersonLinkPickerRequested="@ClosePersonLinkPickerRequested"
+                                        HeaderFieldStatusMessage="@HeaderFieldStatusMessage"
+                                        HeaderFieldStatusIsError="@HeaderFieldStatusIsError"
+                                        HeaderFieldChanged="@HeaderFieldChanged"
+                                        OrganizationStatusMessage="@OrganizationStatusMessage"
+                                        OrganizationStatusIsError="@OrganizationStatusIsError"
+                                        OrganizationLetterheadChanged="@OrganizationLetterheadChanged"
+                                        OrganizationCatalogEditorRequested="@OrganizationCatalogEditorRequested"
+                                        PreviewSlotOwnerViewId="@ApplicationWorkspaceViewIds.DetailView" />
+</div>
+
+@code {
+    [Parameter] public ApplicationWorkspaceSnapshot? Snapshot { get; set; }
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public string CaseTab { get; set; } = "overview";
+    [Parameter] public string? PeopleLinkedRecordFocusKey { get; set; }
+    [Parameter] public bool CanLinkPerson { get; set; }
+    [Parameter] public bool CanUnlinkPerson { get; set; }
+    [Parameter] public bool CanOpenPersonDetail { get; set; }
+    [Parameter] public bool CanOpenDocumentCopies { get; set; }
+    [Parameter] public int SelectedPersonRowIndex { get; set; } = -1;
+    [Parameter] public EventCallback InitialLoadRequested { get; set; }
+    [Parameter] public EventCallback LinkPersonRequested { get; set; }
+    [Parameter] public EventCallback<Guid> UnlinkPersonRequested { get; set; }
+    [Parameter] public EventCallback OpenPersonDetailRequested { get; set; }
+    [Parameter] public EventCallback OpenDocumentCopiesRequested { get; set; }
+    [Parameter] public EventCallback<int> SelectPersonRowRequested { get; set; }
+    [Parameter] public EventCallback<Guid> NewApplicationFromProfileRequested { get; set; }
+    [Parameter] public EventCallback<Guid> OpenProfileConfigRequested { get; set; }
+    [Parameter] public EventCallback<string> CaseTabChanged { get; set; }
+    [Parameter] public EventCallback<string> LinkedRecordTileClicked { get; set; }
+    [Parameter] public EventCallback<string> IssuedHeaderNewRequested { get; set; }
+    [Parameter] public EventCallback<ApplicationWorkspaceIssuedHeaderOpenRequest> IssuedHeaderOpenRequested { get; set; }
+    [Parameter] public EventCallback BackToListRequested { get; set; }
+    [Parameter] public EventCallback OpenResminamalarRequested { get; set; }
+    [Parameter] public EventCallback<int> OpenPersonDetailByIndexRequested { get; set; }
+    [Parameter] public EventCallback<Guid> RelinkPersonRequested { get; set; }
+    [Parameter] public string? ProgressStatusMessage { get; set; }
+    [Parameter] public bool ProgressStatusIsError { get; set; }
+    [Parameter] public bool ShowProgressRevertToHere { get; set; }
+    [Parameter] public EventCallback<string> SaveProgressNotesRequested { get; set; }
+    [Parameter] public EventCallback<OfficerShellCaseProgressFileUpload> UploadMinistryLetterRequested { get; set; }
+    [Parameter] public EventCallback<OfficerShellCaseProgressAdvanceRequest> AdvanceProgressRequested { get; set; }
+    [Parameter] public EventCallback<OfficerShellCaseProgressRevertRequest> RevertProgressRequested { get; set; }
+    [Parameter] public bool ShowPersonLinkPicker { get; set; }
+    [Parameter] public IReadOnlyList<ApplicationProfileInstancePersonLinkCandidateRow> PersonLinkCandidates { get; set; } = Array.Empty<ApplicationProfileInstancePersonLinkCandidateRow>();
+    [Parameter] public bool PersonLinkIsSearching { get; set; }
+    [Parameter] public bool PersonLinkIsLinking { get; set; }
+    [Parameter] public string? PersonLinkStatusMessage { get; set; }
+    [Parameter] public bool PersonLinkStatusIsError { get; set; }
+    [Parameter] public EventCallback<string> PersonLinkSearchRequested { get; set; }
+    [Parameter] public EventCallback<Guid> LinkPersonFromPickerRequested { get; set; }
+    [Parameter] public EventCallback ClosePersonLinkPickerRequested { get; set; }
+    [Parameter] public string? HeaderFieldStatusMessage { get; set; }
+    [Parameter] public bool HeaderFieldStatusIsError { get; set; }
+    [Parameter] public EventCallback<ApplicationWorkspaceCaseHeaderFieldUpdate> HeaderFieldChanged { get; set; }
+    [Parameter] public string? OrganizationStatusMessage { get; set; }
+    [Parameter] public bool OrganizationStatusIsError { get; set; }
+    [Parameter] public EventCallback<ApplicationWorkspaceOrganizationLetterheadUpdate> OrganizationLetterheadChanged { get; set; }
+    [Parameter] public EventCallback<(string Kind, Guid Id)> OrganizationCatalogEditorRequested { get; set; }
+
+    private bool _initialLoadStarted;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _initialLoadStarted || !InitialLoadRequested.HasDelegate)
+            return;
+
+        _initialLoadStarted = true;
+        await InitialLoadRequested.InvokeAsync();
+    }
+}

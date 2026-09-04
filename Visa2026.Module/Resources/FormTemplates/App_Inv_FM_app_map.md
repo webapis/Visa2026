@@ -75,11 +75,11 @@ this.Detail.HeightF = 633F;
 |---|---|---|
 | `TotalPersonCount` | `Application` | ✅ |
 | `TotalPersonCountText` | `Application` | ✅ |
-| `VisaPeriod_NameTm` | `Application → VisaPeriod` | ✅ |
-| `VisaCategory_NameTm` | `Application → VisaCategory` | ✅ |
-| `FamilyMember_Relationship_NameTm` | `Application → ApplicationItems[0] → Person → Relationship` | ✅ |
-| `SponsoringEmployee_FullName` | `Application → ApplicationItems[0] → Person → SponsoringEmployee` | ✅ |
-| `SponsoringEmployee_PositionTm` | `Application → ApplicationItems[0] → Person → SponsoringEmployee → Position` | ✅ |
+| `VisaPeriod_NameTm` | `ApplicationProfileInstance → VisaPeriod` | ✅ |
+| `VisaCategory_NameTm` | `ApplicationProfileInstance → VisaCategory` | ✅ |
+| `FamilyMember_Relationship_NameTm` | `ApplicationProfileInstance → ApplicationItems[0] → Person → Relationship` | ✅ |
+| `SponsoringEmployee_FullName` | `ApplicationProfileInstance → ApplicationItems[0] → Person → SponsoringEmployee` | ✅ |
+| `SponsoringEmployee_PositionTm` | `ApplicationProfileInstance → ApplicationItems[0] → Person → SponsoringEmployee → Position` | ✅ |
 
 > `FamilyMember_Relationship_NameTm` must store the genitive form (e.g. "aýalynyň", "çagasynyň") so the sentence reads naturally.
 
@@ -88,6 +88,6 @@ this.Detail.HeightF = 633F;
 ## ReportsUpdater.cs entry
 
 ```csharp
-AddPredefinedReport<AppInvFMReport>("App Inv FM Report", typeof(Application), isInplaceReport: true);
+AddPredefinedReport<AppInvFMReport>("App Inv FM Report", typeof(ApplicationProfileInstance), isInplaceReport: true);
 CreateReportVisibility("App Inv FM Report", "[ApplicationType.Name] = 'App_Inv_FM'");
 ```

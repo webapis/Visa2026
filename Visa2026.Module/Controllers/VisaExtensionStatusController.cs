@@ -3,7 +3,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.Persistent.Base;
 using Microsoft.Extensions.DependencyInjection;
-using AppBO = Visa2026.Module.BusinessObjects.Application;
+using AppBO = Visa2026.Module.BusinessObjects.ApplicationProfileInstance;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
 using Visa2026.Module.Services;
@@ -77,10 +77,10 @@ namespace Visa2026.Module.Controllers
         private void OnOpenApplication(object sender, SimpleActionExecuteEventArgs e)
         {
             var status = View.CurrentObject as VisaExtensionStatus;
-            if (status?.ApplicationID == null) return;
+            if (status?.ApplicationProfileInstanceID == null) return;
 
             var os = Application.CreateObjectSpace(typeof(AppBO));
-            var app = os.GetObjectByKey<AppBO>(status.ApplicationID.Value);
+            var app = os.GetObjectByKey<AppBO>(status.ApplicationProfileInstanceID.Value);
             if (app == null) return;
 
             var svp = new ShowViewParameters

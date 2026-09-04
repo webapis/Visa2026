@@ -9,7 +9,8 @@ namespace Visa2026.Module.BusinessObjects
 {
     /// <summary>
     /// Read-only MAGLUMAT row: person with current work permit, passport, visa, education, address.
-    /// Backed by View_ForeignWorkerMaglumat (see DatabaseUpdate.SqlViewsUpdater).
+    /// Backed by View_ForeignWorkerMaglumat, which has no PostgreSQL creator yet
+    /// (the SQL Server DDL was removed with ApplicationItem Phase B — see docs/DEPRECATED.md).
     /// </summary>
     [DefaultClassOptions]
     [NavigationItem("WorkPermit")]

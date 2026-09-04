@@ -1,0 +1,281 @@
+@using DevExpress.ExpressApp
+@using Microsoft.AspNetCore.Components
+@using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Editors
+@using Visa2026.Module.Localization
+@using Visa2026.Module.Services
+@implements IDisposable
+@inject INonSecuredObjectSpaceFactory ObjectSpaceFactory
+
+<CommaSeparatedMultiSelectComponent DisplayText="@_displayText"
+                                    CatalogItems="@_catalogItems"
+                                    SelectedItems="@_selectedItems"
+                                    DraftSelectedItems="@_draftSelectedItems"
+                                    SelectedItemsChanged="@OnSelectedItemsChangedAsync"
+                                    DraftSelectedItemsChanged="@OnDraftSelectedItemsChangedAsync"
+                                    PopupVisible="@_popupVisible"
+                                    PopupVisibleChanged="@OnPopupVisibleChangedAsync"
+                                    NewItemName="@_newItemName"
+                                    NewItemNameChanged="@OnNewItemNameChangedAsync"
+                                    AddItemRequested="@AddCatalogItemAsync"
+                                    RenameCatalogRequested="@RenameCatalogItemAsync"
+                                    DeleteCatalogRequested="@DeleteCatalogItemAsync"
+                                    ReadOnly="@ReadOnly"
+                                    AllowAddNew="@(!ReadOnly)"
+                                    AllowManageCatalog="@(!ReadOnly)"
+                                    StatusMessage="@_statusMessage"
+                                    StatusIsError="@_statusIsError"
+                                    PopupTitle="@Ui.PopupTitle"
+                                    PopupButtonTitle="@Ui.PopupButtonTitle"
+                                    AddPlaceholder="@Ui.AddPlaceholder"
+                                    AddButtonText="@Ui.AddButtonText"
+                                    OkText="@Ui.OkText"
+                                    CancelText="@Ui.CancelText"
+                                    SelectedCountFormat="@Ui.SelectedCountFormat"
+                                    EditButtonText="@Ui.EditButtonText"
+                                    DeleteButtonText="@Ui.DeleteButtonText"
+                                    EditPopupTitle="@Ui.EditPopupTitle"
+                                    SaveEditText="@Ui.SaveEditText"
+                                    DeleteConfirmTitle="@Ui.DeleteConfirmTitle"
+                                    DeleteConfirmFormat="@Ui.DeleteConfirmFormat"
+                                    EmptyListMessage="@Ui.EmptyListMessage"
+                                    ManageCatalogButtonText="@Ui.ManageCatalogButtonText"
+                                    DoneManageCatalogButtonText="@Ui.DoneManageCatalogButtonText" />
+
+@code {
+    [Parameter] public string EditorAlias { get; set; } = CommaSeparatedMultiSelectEditorAliases.BorderZone;
+    [Parameter] public string? Value { get; set; }
+    [Parameter] public bool ReadOnly { get; set; }
+    [Parameter] public IObjectSpace? ObjectSpace { get; set; }
+    [Parameter] public IEnumerable<string>? CatalogItems { get; set; }
+    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+
+    private CommaSeparatedMultiSelectAttribute Settings =>
+        CommaSeparatedMultiSelectDefaults.ForEditorAlias(EditorAlias);
+
+    private CommaSeparatedMultiSelectLocalization.UiTexts Ui =>
+        CommaSeparatedMultiSelectLocalization.Resolve(EditorAlias);
+
+    private IObjectSpace? _ownedObjectSpace;
+    private string _displayText = string.Empty;
+    private HashSet<string> _selectedItems = new(StringComparer.OrdinalIgnoreCase);
+    private HashSet<string> _draftSelectedItems = new(StringComparer.OrdinalIgnoreCase);
+    private List<string> _catalogItems = [];
+    private bool _popupVisible;
+    private string _newItemName = string.Empty;
+    private string _statusMessage = string.Empty;
+    private bool _statusIsError;
+
+    protected override void OnParametersSet()
+    {
+        SyncFromValue();
+        RefreshCatalog();
+    }
+
+    private IObjectSpace? EffectiveObjectSpace =>
+        ObjectSpace ?? _ownedObjectSpace;
+
+    private void EnsureOwnedObjectSpace()
+    {
+        if (ObjectSpace != null || _ownedObjectSpace != null)
+            return;
+
+        _ownedObjectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace(Settings.CatalogEntityType);
+    }
+
+    private void SyncFromValue()
+    {
+        _selectedItems = new HashSet<string>(
+            CommaSeparatedSelectionHelper.ParseSelected(Value, Settings.NoneValue),
+            StringComparer.OrdinalIgnoreCase);
+        _draftSelectedItems = CloneSet(_selectedItems);
+        _displayText = FormatDisplay(Value);
+    }
+
+    private void RefreshCatalog()
+    {
+        var catalog = CatalogItems?.Where(name => !string.IsNullOrWhiteSpace(name)).ToList()
+            ?? LoadCatalogFromObjectSpace();
+        _catalogItems = CommaSeparatedCatalogHelper.MergeCatalogWithSelected(catalog, _selectedItems).ToList();
+    }
+
+    private List<string> LoadCatalogFromObjectSpace()
+    {
+        EnsureOwnedObjectSpace();
+        var objectSpace = EffectiveObjectSpace;
+        if (objectSpace == null)
+            return [];
+
+        return CommaSeparatedCatalogHelper.LoadCatalogNames(
+                objectSpace,
+                Settings.CatalogEntityType,
+                Settings.NoneValue)
+            .ToList();
+    }
+
+    private Task OnSelectedItemsChangedAsync(HashSet<string> selected)
+    {
+        _selectedItems = selected ?? new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        _draftSelectedItems = CloneSet(_selectedItems);
+        var formatted = CommaSeparatedSelectionHelper.FormatSelected(_selectedItems, Settings.NoneValue);
+        _displayText = FormatDisplay(formatted);
+        _popupVisible = false;
+        CommitCatalogChanges();
+        RefreshCatalog();
+        return ValueChanged.InvokeAsync(formatted);
+    }
+
+    private Task OnDraftSelectedItemsChangedAsync(HashSet<string> draft)
+    {
+        _draftSelectedItems = draft ?? new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        return Task.CompletedTask;
+    }
+
+    private Task OnPopupVisibleChangedAsync(bool visible)
+    {
+        _popupVisible = visible;
+        if (visible)
+        {
+            _statusMessage = string.Empty;
+            _statusIsError = false;
+            _draftSelectedItems = CloneSet(_selectedItems);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnNewItemNameChangedAsync(string text)
+    {
+        _newItemName = text ?? string.Empty;
+        return Task.CompletedTask;
+    }
+
+    private Task AddCatalogItemAsync(string? nameFromUi)
+    {
+        var objectSpace = EffectiveObjectSpace;
+        if (objectSpace == null || ReadOnly)
+            return Task.CompletedTask;
+
+        var name = (nameFromUi ?? _newItemName)?.Trim();
+        if (string.IsNullOrWhiteSpace(name)
+            || CommaSeparatedSelectionHelper.IsNoneValue(name, Settings.NoneValue))
+        {
+            return Task.CompletedTask;
+        }
+
+        CommaSeparatedCatalogHelper.TryAddCatalogEntry(
+            objectSpace,
+            Settings.CatalogEntityType,
+            name,
+            commitChanges: false);
+
+        _draftSelectedItems.Add(name);
+        _newItemName = string.Empty;
+        RefreshCatalogAfterDraftChange();
+        _popupVisible = true;
+        return Task.CompletedTask;
+    }
+
+    private Task RenameCatalogItemAsync(CatalogRenameRequest request)
+    {
+        var objectSpace = EffectiveObjectSpace;
+        if (objectSpace == null || ReadOnly)
+            return Task.CompletedTask;
+
+        var result = CommaSeparatedCatalogHelper.TryRenameCatalogEntry(
+            objectSpace,
+            Settings.CatalogEntityType,
+            request.OldName,
+            request.NewName,
+            Settings.NoneValue,
+            commitChanges: false);
+
+        if (!result.Success)
+        {
+            _statusMessage = CommaSeparatedMultiSelectLocalization.LocalizeCatalogMessage(result.Message);
+            _statusIsError = true;
+            return Task.CompletedTask;
+        }
+
+        var newName = request.NewName.Trim();
+        if (_draftSelectedItems.Remove(request.OldName))
+            _draftSelectedItems.Add(newName);
+        if (_selectedItems.Remove(request.OldName))
+            _selectedItems.Add(newName);
+
+        var formatted = CommaSeparatedSelectionHelper.FormatSelected(_selectedItems, Settings.NoneValue);
+        _displayText = FormatDisplay(formatted);
+        RefreshCatalogAfterDraftChange(successMessage: Ui.RenameSuccessFormat);
+        return ValueChanged.InvokeAsync(formatted);
+    }
+
+    private Task DeleteCatalogItemAsync(string name)
+    {
+        var objectSpace = EffectiveObjectSpace;
+        if (objectSpace == null || ReadOnly || string.IsNullOrWhiteSpace(name))
+            return Task.CompletedTask;
+
+        var result = CommaSeparatedCatalogHelper.TryDeleteCatalogEntry(
+            objectSpace,
+            Settings.CatalogEntityType,
+            name,
+            Settings.NoneValue,
+            commitChanges: false);
+
+        if (!result.Success)
+        {
+            _statusMessage = CommaSeparatedMultiSelectLocalization.LocalizeCatalogMessage(result.Message);
+            _statusIsError = true;
+            return Task.CompletedTask;
+        }
+
+        _draftSelectedItems.Remove(name);
+        _selectedItems.Remove(name);
+        var formatted = CommaSeparatedSelectionHelper.FormatSelected(_selectedItems, Settings.NoneValue);
+        _displayText = FormatDisplay(formatted);
+        var successMessage = result.UsageCount > 0
+            ? string.Format(Ui.DeleteSuccessFormat, result.UsageCount)
+            : Ui.DeleteSuccessUnusedFormat;
+        RefreshCatalogAfterDraftChange(successMessage: successMessage, excludeName: name.Trim());
+        return ValueChanged.InvokeAsync(formatted);
+    }
+
+    private void RefreshCatalogAfterDraftChange(string? successMessage = null, string? excludeName = null)
+    {
+        var catalog = LoadCatalogFromObjectSpace();
+        if (!string.IsNullOrWhiteSpace(excludeName))
+        {
+            catalog = catalog
+                .Where(item => !string.Equals(item, excludeName, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        _catalogItems = CommaSeparatedCatalogHelper.MergeCatalogWithSelected(catalog, _draftSelectedItems).ToList();
+        _statusMessage = successMessage ?? string.Empty;
+        _statusIsError = false;
+        _popupVisible = true;
+    }
+
+    private void CommitCatalogChanges()
+    {
+        var objectSpace = EffectiveObjectSpace;
+        if (objectSpace?.IsModified == true)
+            objectSpace.CommitChanges();
+    }
+
+    private string FormatDisplay(string? stored) =>
+        CommaSeparatedSelectionHelper.FormatSelected(
+            CommaSeparatedSelectionHelper.ParseSelected(stored, Settings.NoneValue),
+            Settings.NoneValue);
+
+    private static HashSet<string> CloneSet(HashSet<string>? source) =>
+        source == null
+            ? new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            : new HashSet<string>(source, StringComparer.OrdinalIgnoreCase);
+
+    public void Dispose()
+    {
+        _ownedObjectSpace?.Dispose();
+        _ownedObjectSpace = null;
+    }
+}

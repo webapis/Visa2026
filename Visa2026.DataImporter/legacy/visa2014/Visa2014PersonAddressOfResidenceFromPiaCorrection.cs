@@ -190,87 +190,9 @@ internal static class Visa2014PersonAddressOfResidenceFromPiaCorrection
         int itemsUnchanged = 0;
         int itemsUnresolved = 0;
 
+        // Phase B: ApplicationItem removed — no CurrentAddressOfResidence backfill on roster lines.
         if (applicationItemIdMap.Count > 0)
-        {
-            var legacyPiaRows = LoadLegacyApplicationItemRows(
-                legacyConnectionString, applicationItemIdMap.Keys, verbose);
-
-            using var itemSpace = objectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Bo.ApplicationItem));
-            MigrationImportContext.ApplyImportObjectSpaceHooks(itemSpace);
-
-            foreach (var (legacyPiaOid, targetItemId) in applicationItemIdMap)
-            {
-                if (!legacyPiaRows.TryGetValue(legacyPiaOid, out var raw))
-                    continue;
-
-                var legacyAddressKey = Visa2014PiaAddressInference.ResolveApplicationItemCurrentAddressLegacyKey(raw);
-                if (!legacyAddressKey.HasValue)
-                    continue;
-
-                itemsInScope++;
-
-                var item = itemSpace.GetObjectByKey<Bo.ApplicationItem>(targetItemId);
-                if (item == null)
-                {
-                    errors.Add($"PIA {legacyPiaOid}: ApplicationItem {targetItemId} not found");
-                    continue;
-                }
-
-                if (item.Person == null)
-                {
-                    itemsUnresolved++;
-                    errors.Add($"PIA {legacyPiaOid}: ApplicationItem has no Person");
-                    continue;
-                }
-
-                Bo.AddressOfResidence? address;
-                if (!addressIdMap.TryGetValue(legacyAddressKey.Value, out var targetAddressId)
-                    || itemSpace.GetObjectByKey<Bo.AddressOfResidence>(targetAddressId) == null)
-                {
-                    if (!Visa2014ApplicationItemLegacyAddressResolver.TryEnsureLegacyAddressMapped(
-                            itemSpace,
-                            resolver,
-                            legacyConnectionString,
-                            lookupTranslationPaths,
-                            personIdMap,
-                            addressIdMap,
-                            legacyAddressKey.Value,
-                            raw,
-                            item.Person,
-                            dryRun,
-                            out address)
-                        || address == null)
-                    {
-                        itemsUnresolved++;
-                        if (verbose)
-                            Console.WriteLine($"WRN PIA {legacyPiaOid}: no id-map for address key {legacyAddressKey.Value}");
-                        continue;
-                    }
-                }
-                else
-                {
-                    address = itemSpace.GetObjectByKey<Bo.AddressOfResidence>(targetAddressId);
-                    if (address == null)
-                    {
-                        errors.Add($"PIA {legacyPiaOid}: AddressOfResidence {targetAddressId} not found");
-                        continue;
-                    }
-                }
-
-                if (item.CurrentAddressOfResidence?.ID == address.ID)
-                {
-                    itemsUnchanged++;
-                    continue;
-                }
-
-                if (!dryRun)
-                    item.CurrentAddressOfResidence = address;
-                itemsUpdated++;
-            }
-
-            if (!dryRun && (itemsUpdated > 0 || addressIdMap.Count > 0))
-                itemSpace.CommitChanges();
-        }
+            Console.WriteLine("INF Skipping ApplicationItem CurrentAddressOfResidence backfill (ApplicationItem retired).");
 
         return Task.FromResult(new Visa2014PersonAddressOfResidenceFromPiaCorrectionResult
         {

@@ -43,12 +43,12 @@ data:
     Expiration Date: 2026-04-09
     Passport Number: TM8001003
   Applications:
-  - Application Number: 052
+  - ApplicationProfileInstance Number: 052
     Date: 2026-04-20
     Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
     Project Contract: GT-15
     Filter: Registration
-    Application Type: App_Reg_Check_Out
+    ApplicationProfileInstance Type: App_Reg_Check_Out
     Category: 2
     Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
   Registrations:
@@ -63,7 +63,7 @@ data:
     Travel Date: 2026-04-22
     Check Point: Aşgabat şäher howa menzilindäki MGP
     Purpose of Travel: Işlemek üçin
-  ApplicationProgresses:
+  ApplicationProfileInstanceProgresses:
   - Application: 4/-052
     State: PROCESS_STARTED
     Location: AT_MIGRATION_SERVICE

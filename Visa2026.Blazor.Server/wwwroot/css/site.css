@@ -452,7 +452,7 @@ dxd-license,
     flex: 0 0 auto;
 }
 
-/* Application Progress tab — latest history row emphasis */
+/* ApplicationProfileInstance Progress tab — latest history row emphasis */
 .visa-progress-history-latest > td:first-child {
     box-shadow: inset 3px 0 0 #2563eb;
 }
@@ -528,7 +528,7 @@ dxd-license,
 }
 
 /* Soft-deleted rows in DxGrid (including nested ListViews such as Person.FamilyMembers). */
-/* Application ListView — row tint from latest ApplicationProgress (see BoStateAppearanceColors). */
+/* ApplicationProfileInstance ListView — row tint from latest ApplicationProfileInstanceProgress (see BoStateAppearanceColors). */
 .visa-progress-row.visa-progress-row--state-IS_BEING_PREPARED { --dxbl-grid-row-bg: #fef9c3; }
 .visa-progress-row.visa-progress-row--state-IS_BEING_PREPARED > td { color: #854d0e; }
 .visa-progress-row.visa-progress-row--state-1_REVIEW_STARTED { --dxbl-grid-row-bg: #dbeafe; }
@@ -2478,6 +2478,75 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
     background: transparent;
 }
 
+.app-item-doc-copies-preview__xfa-host {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    height: 100%;
+    min-height: 280px;
+    overflow: auto;
+    padding: 8px;
+    background: #525659;
+    color: #111;
+    color-scheme: light;
+    forced-color-adjust: none;
+}
+
+.visa-xfa-preview__page {
+    position: relative;
+    flex: 0 0 auto;
+    background: #fff;
+    color: #111;
+    color-scheme: light;
+    forced-color-adjust: none;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+    overflow: hidden;
+}
+
+/* ImageField1 on Visa_Application_TM_QR_08.pdf page 1 (210.016 x 297.01 mm).
+   Caption "FOTO" is 5mm at the bottom of the field — overlay the image area only. */
+.visa-xfa-preview__photo {
+    position: absolute;
+    left: 77.562%;
+    top: 5.818%;
+    width: 15.517%;
+    height: 13.998%;
+    object-fit: contain;
+    object-position: top center;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.visa-xfa-preview__page .xfaLayer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    color: #111;
+    background-color: #fff !important;
+    color-scheme: light;
+}
+
+/* pdf.js .xfaLayer * { color: inherit; background: transparent } would otherwise
+   pick up the dark preview-slot theme (black paper, unreadable fields). */
+.visa-xfa-preview__page .xfaLayer.xfaFont {
+    color: #111;
+}
+
+.visa-xfa-preview__page .xfaLayer > div {
+    background-color: #fff !important;
+}
+
+.visa-xfa-preview__page .xfaLayer input,
+.visa-xfa-preview__page .xfaLayer textarea,
+.visa-xfa-preview__page .xfaLayer select {
+    color-scheme: light;
+    color: #111;
+    background-color: #fff;
+}
+
 .app-item-doc-copies-preview-popup .dxbl-popup-content {
     display: flex;
     flex-direction: column;
@@ -2723,8 +2792,9 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
     white-space: nowrap;
 }
 
-.app-report-package__entry-progress {
-    margin-top: 0.45rem;
+.app-report-package__recycle-progress {
+    margin-top: 0.4rem;
+    max-width: 22rem;
 }
 
 .app-report-package__preview-progress-track {
@@ -3392,16 +3462,34 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
 .placeholder-manual-slot-panel__body {
     flex: 1 1 auto;
     min-height: 0;
-    overflow: hidden;
+    overflow: auto;
     display: flex;
     flex-direction: column;
-    padding: 0 var(--resminamalar-slot-inset-x) 0.75rem;
+    gap: 0.85rem;
+    padding: 0.65rem var(--resminamalar-slot-inset-x) 0.75rem;
+}
+
+.placeholder-manual-slot-panel__group {
+    flex: 0 0 auto;
+    min-width: 0;
+}
+
+.placeholder-manual-slot-panel__group-title {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    margin: 0 0 0.35rem;
+    padding: 0.35rem 0.15rem;
+    font-size: 0.75rem;
+    font-weight: 650;
+    letter-spacing: 0.02em;
+    background: var(--resminamalar-slot-surface-muted);
 }
 
 .placeholder-manual-slot-panel__table-wrap {
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     min-height: 0;
-    overflow: auto;
+    overflow: visible;
     border: 1px solid var(--resminamalar-slot-border);
     border-radius: var(--resminamalar-slot-radius);
     background: var(--resminamalar-slot-surface);

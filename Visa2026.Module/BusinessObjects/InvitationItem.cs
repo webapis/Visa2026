@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -12,24 +14,22 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
 using Visa2026.Module.Editors;
 using Visa2026.Module.Services;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Invitation")]
     [DefaultProperty(nameof(InvitationItemName))]
-    [RuleCriteria("InvitationItem_StatusFlagsExclusive", DefaultContexts.Save,
-        "Not (IsCancelled And IsChanged) And Not (IsCancelled And IsUsed) And Not (IsChanged And IsUsed)",
-        "Only one of Cancelled, Changed, or Used can be set on an invitation item.")]
     [Appearance("InvitationItem_CancelledRow", Priority = 310, AppearanceItemType = "ViewItem", TargetItems = "*",
         Criteria = "IsCancelled = true", Context = "ListView", BackColor = "LightCoral", FontColor = "Firebrick")]
+    [Appearance("InvitationItem_InputApplicationProfileInstancesHiddenWhenIssued", Priority = 50,
+        AppearanceItemType = "ViewItem", TargetItems = "ApplicationProfileInstances",
+        Criteria = "ApplicationProfileInstance is not null", Context = "DetailView",
+        Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide)]
     [SupportsOptionalDetailFields]
     public class InvitationItem : PersonLinkedItemBase<InvitationItem, Invitation>, IOptionalDetailFields
     {
-        private bool suppressStatusSync;
-        private bool isCancelled;
-        private bool isChanged;
-        private bool isUsed;
         [RuleRequiredField]
         public virtual Invitation Invitation { get; set; }
 
@@ -46,14 +46,8 @@ namespace Visa2026.Module.BusinessObjects
                 if (base.Person != value)
                 {
                     base.Person = value;
-                    if (base.Person != null && Invitation?.Application != null)
-                    {
-                        var appItem = Invitation.Application.ApplicationItems.FirstOrDefault(ai => ai.Person?.ID == base.Person.ID);
-                        if (appItem != null)
-                        {
-                            Passport = appItem.CurrentPassport;
-                        }
-                    }
+                    if (base.Person != null)
+                        Passport = ApplicationProfileInstancePersonValidItems.ResolvePassport(base.Person);
                 }
             }
         }
@@ -95,134 +89,41 @@ namespace Visa2026.Module.BusinessObjects
 
         public override void OnSaving()
         {
-            suppressStatusSync = true;
-            try
-            {
-                InvitationStatusFlagsHelper.NormalizeInvitationItem(this);
-                InvitationStatusFlagsHelper.AlignSiblingsFromItem(this);
-                InvitationStatusFlagsHelper.NormalizeInvitationItem(this);
-            }
-            finally
-            {
-                suppressStatusSync = false;
-            }
-
             base.OnSaving();
             InvitationItemName = $"{Person?.FullName} - {Invitation?.InvitationNumber}";
             CrossObjectSyncHelper.SyncOnSave(this);
         }
 
-        /// <summary>Optional; mutually exclusive with <see cref="IsChanged"/> and <see cref="IsUsed"/>.</summary>
-        [ImmediatePostData]
-        [VisibleInListView(false)]
-        public virtual bool IsCancelled
-        {
-            get => isCancelled;
-            set => SetItemStatusCancelled(value);
-        }
-
-        /// <summary>Optional; mutually exclusive with <see cref="IsCancelled"/> and <see cref="IsUsed"/>.</summary>
-        [ImmediatePostData]
-        [VisibleInListView(false)]
-        public virtual bool IsChanged
-        {
-            get => isChanged;
-            set => SetItemStatusChanged(value);
-        }
-
-        /// <summary>Optional; mutually exclusive with <see cref="IsCancelled"/> and <see cref="IsChanged"/>.</summary>
-        [ImmediatePostData]
-        [VisibleInListView(false)]
-        public virtual bool IsUsed
-        {
-            get => isUsed;
-            set => SetItemStatusUsed(value);
-        }
-
-        internal void SetItemStatusFlags(bool cancelled, bool changed, bool used)
-        {
-            suppressStatusSync = true;
-            try
-            {
-                isCancelled = cancelled;
-                isChanged = changed;
-                isUsed = used;
-            }
-            finally
-            {
-                suppressStatusSync = false;
-            }
-
-            ObjectSpaceHelper.Get(this)?.SetModified(this);
-        }
-
-        private void SetItemStatusCancelled(bool value)
-        {
-            if (suppressStatusSync)
-            {
-                isCancelled = value;
-                return;
-            }
-
-            if (isCancelled == value)
-            {
-                return;
-            }
-
-            isCancelled = value;
-            if (value)
-            {
-                isChanged = false;
-                isUsed = false;
-                InvitationStatusFlagsHelper.AlignSiblingsFromItem(this);
-            }
-        }
-
-        private void SetItemStatusChanged(bool value)
-        {
-            if (suppressStatusSync)
-            {
-                isChanged = value;
-                return;
-            }
-
-            if (isChanged == value)
-            {
-                return;
-            }
-
-            isChanged = value;
-            if (value)
-            {
-                isCancelled = false;
-                isUsed = false;
-                InvitationStatusFlagsHelper.AlignSiblingsFromItem(this);
-            }
-        }
-
-        private void SetItemStatusUsed(bool value)
-        {
-            if (suppressStatusSync)
-            {
-                isUsed = value;
-                return;
-            }
-
-            if (isUsed == value)
-            {
-                return;
-            }
-
-            isUsed = value;
-            if (value)
-            {
-                isCancelled = false;
-                isChanged = false;
-            }
-        }
+        /// <summary>
+        /// True when this line is linked on a completed Cancellation profile instance (<c>PROCESS_ISSUED</c>).
+        /// Officer auto-link requires this false (invitation item must still be valid: not cancelled/changed/used, parent not expired).
+        /// </summary>
+        [NotMapped]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInDetailView(false)]
+        [ExcludeFromOptionalDetailFields]
+        public bool IsCancelled => IssuedDocumentLifecycle.IsCancelled(this);
 
         /// <summary>
-        /// Application linked on the parent <see cref="Invitation"/> (if any). Read-only ListView/Detail convenience.
+        /// True when this line is linked on a completed Change profile instance (<c>PROCESS_ISSUED</c>).
+        /// </summary>
+        [NotMapped]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInDetailView(false)]
+        [ExcludeFromOptionalDetailFields]
+        public bool IsChanged => IssuedDocumentLifecycle.IsChanged(this);
+
+        /// <summary>
+        /// True when a visa was issued from this line (<see cref="IssuedVisa"/>).
+        /// </summary>
+        [NotMapped]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInDetailView(false)]
+        [ExcludeFromOptionalDetailFields]
+        public bool IsUsed => IssuedDocumentLifecycle.IsUsed(this);
+
+        /// <summary>
+        /// ApplicationProfileInstance linked on the parent <see cref="Invitation"/> (if any). Read-only ListView/Detail convenience.
         /// </summary>
         [NotMapped]
         [ExcludeFromOptionalDetailFields]
@@ -230,21 +131,21 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(true)]
         [VisibleInDetailView(true)]
         [VisibleInLookupListView(false)]
-        [XafDisplayName("Application")]
-        [ToolTip("Application linked on the parent invitation (Invitation.Application).")]
-        public Application Application => Invitation?.Application;
+        [XafDisplayName("Application Profile instance")]
+        [ToolTip("Issuing profile instance from the parent invitation header (Invitation.ApplicationProfileInstance).")]
+        public ApplicationProfileInstance ApplicationProfileInstance => Invitation?.ApplicationProfileInstance;
 
         /// <summary>
-        /// Visa issued using this invitation line (<see cref="Visa.InvitationItem"/>). Typically 0–1 when used.
+        /// Visa issued using this invitation line (<see cref="Visa.IssuingInvitationItem"/>). Typically 0–1 when used.
         /// Read-only; cell tint on ListView follows visa <see cref="Visa.StateSeverityLevel"/>.
         /// </summary>
         [ExcludeFromOptionalDetailFields]
-        [InverseProperty(nameof(Visa.InvitationItem))]
+        [InverseProperty(nameof(Visa.IssuingInvitationItem))]
         [ModelDefault("AllowEdit", "False")]
         [VisibleInListView(true)]
         [VisibleInLookupListView(false)]
         [XafDisplayName("Issued Visa")]
-        [ToolTip("Visa issued using this invitation item (Visa.InvitationItem).")]
+        [ToolTip("Visa issued using this invitation item (Visa.IssuingInvitationItem).")]
         [Appearance("InvitationItem_IssuedVisa_Info", Priority = 100, AppearanceItemType = "ViewItem", TargetItems = "IssuedVisa",
             Criteria = "IssuedVisa is not null and IssuedVisa.StateSeverityLevel = 1", Context = "ListView", BackColor = "LightSkyBlue")]
         [Appearance("InvitationItem_IssuedVisa_Warning", Priority = 200, AppearanceItemType = "ViewItem", TargetItems = "IssuedVisa",
@@ -252,6 +153,11 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("InvitationItem_IssuedVisa_Critical", Priority = 300, AppearanceItemType = "ViewItem", TargetItems = "IssuedVisa",
             Criteria = "IssuedVisa is not null and IssuedVisa.StateSeverityLevel >= 3", Context = "ListView", BackColor = "LightCoral")]
         public virtual Visa IssuedVisa { get; set; }
+
+        /// <summary>Skip-navigation M2M with <see cref="ApplicationProfileInstance"/> (input linked items). Distinct from parent <see cref="Invitation.ApplicationProfileInstance"/> issued-from FK.</summary>
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInListView(false)]
+        public virtual IList<ApplicationProfileInstance> ApplicationProfileInstances { get; set; } = new ObservableCollection<ApplicationProfileInstance>();
 
         /// <summary>ListView link column that opens header document copies in the preview slot.</summary>
         [NotMapped]

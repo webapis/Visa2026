@@ -9,11 +9,11 @@ Officers opening **Employee / Family member / Temporary visitor** saw **one long
 | Kind | Examples | Officer expectation |
 |------|----------|---------------------|
 | **Person record data** (editable) | Educations, Passports, Position history, Medical records, Addresses, Documents | "I add master data here." |
-| **Issued documents** (workflow output, browse-only) | Application items, Work permits, Invitations, Rejections, Family members (linked) | "These come from applications." |
+| **Issued documents** (workflow output, browse-only) | Applications (linked), Work permits, Invitations, Rejections, Family members (linked) | "These come from applications." |
 
 Same tab styling + visible **New** on nested grids caused officers to try adding rows in issued-document tabs.
 
-Domain model already marks issued collections read-only in [`Person.md`](../Visa2026.Module/BusinessObjects/Person.md) (`AllowEdit=False` on `WorkPermitItems`, `ApplicationItems`, etc.) — but **layout and nested ListView chrome** did not communicate that.
+Domain model already marks issued collections read-only in [`Person.md`](../Visa2026.Module/BusinessObjects/Person.md) (`AllowEdit=False` on `WorkPermitItems`, `ApplicationProfileInstances`, etc.) — but **layout and nested ListView chrome** did not communicate that.
 
 ## Solution (three layers)
 
@@ -41,7 +41,7 @@ Legacy single `TabbedGroup Id="Tabs"` is **`Removed="True"`** on typed views.
 | Family relation documents | — | Person record | — |
 | Position history, Salaries, Work duties, Travel histories | Person record (employee) | Mixed / employee-only hidden | Travel only |
 | Incomplete data (`IncompleteData`) | Person record (last tab; hidden when not incomplete) | Same | Same |
-| Application items, Work permit items, Invitations, Rejections | Issued | Issued | Application items + Invitations + Rejections |
+| Application profiles (linked) (`ApplicationProfileInstances`), Work permit items, Invitations, Rejections | Issued | Issued | Application profiles + Invitations + Rejections |
 | Family members (linked) | Issued | Issued (tab hidden for non-employees) | — |
 
 **Caption scope:** Parent-specific captions for layout id `Documents` / `Documents_Group` via `DocumentCollectionTabCaptionHelper` (e.g. Passport → **Passport copies**, Education → **Diploma copies**, Employee Person → **CV & personal files**). Property names stay `Documents`. Localized in `UiStrings.messages.json` + `UiStrings.document-copies.json`; English runtime via `VisaUiMessages` / `DocumentCollectionCaptionLayoutController`.
@@ -52,7 +52,7 @@ Issued tab **captions** use "(issued)" / "(linked)" suffix in English `Model.xaf
 
 **Updater:** `Visa2026.Module/Model/PersonNestedListViewsUpdater.cs` — sets on nested list view IDs:
 
-- `Person_ApplicationItems_ListView`
+- `Person_ApplicationProfileInstances_ListView`
 - `Person_WorkPermitItems_ListView`
 - `Person_InvitationItems_ListView`
 - `Person_RejectionItems_ListView`

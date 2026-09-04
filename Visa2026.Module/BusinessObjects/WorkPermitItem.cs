@@ -17,6 +17,7 @@ using Visa2026.Module.Services.StateEvaluation.Evaluators;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
 using Visa2026.Module.Editors;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -30,6 +31,10 @@ namespace Visa2026.Module.BusinessObjects
         Criteria = "StateSeverityLevel = 2", Context = "ListView", BackColor = "LightSalmon")]
     [Appearance("WPStateCritical", Priority = 300, AppearanceItemType = "ViewItem", TargetItems = "*",
         Criteria = "StateSeverityLevel >= 3", Context = "ListView", BackColor = "LightCoral")]
+    [Appearance("WorkPermitItem_InputApplicationProfileInstancesHiddenWhenIssued", Priority = 50,
+        AppearanceItemType = "ViewItem", TargetItems = "ApplicationProfileInstances",
+        Criteria = "ApplicationProfileInstance is not null", Context = "DetailView",
+        Visibility = ViewItemVisibility.Hide)]
     [SupportsOptionalDetailFields]
     public class WorkPermitItem : BaseObject, IExpirationLogic, IOptionalDetailFields
     {
@@ -139,6 +144,8 @@ namespace Visa2026.Module.BusinessObjects
         public bool ShowOptionalFields { get; set; }
 
         [RuleRequiredField]
+        [Appearance("WorkPermitItem_ASNumberReadOnlyFromInstance", Enabled = false, Context = "DetailView",
+            Criteria = "WorkPermit is not null And WorkPermit.ApplicationProfileInstance is not null And WorkPermit.ApplicationProfileInstance.ProcessNumber is not null And WorkPermit.ApplicationProfileInstance.ProcessNumber != ''")]
         public virtual string ASNumber { get; set; }
 
         public virtual WorkPermit WorkPermit { get; set; }
@@ -159,8 +166,8 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                if (Person == null || WorkPermit?.Application == null) return true;
-                return WorkPermit.Application.ApplicationItems.Any(ai => ai.Person?.ID == Person.ID);
+                if (Person == null || WorkPermit?.ApplicationProfileInstance == null) return true;
+                return ApplicationRosterHelper.IsPersonOnApplication(WorkPermit.ApplicationProfileInstance, Person);
             }
         }
 
@@ -230,13 +237,13 @@ namespace Visa2026.Module.BusinessObjects
 
         [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
         public string Company_Name =>
-            OrganizationReportHelper.GetCompanyProfile(OrganizationReportHelper.ResolveObjectSpace(ObjectSpaceHelper.Get(this), WorkPermit?.Application))?.Name ?? string.Empty;
+            WorkPermit?.ApplicationProfileInstance?.Application_Company_Name ?? string.Empty;
 
         [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
-        public string CompanyHead_PositionTm => WorkPermit?.Application?.Application_CompanyHead_PositionTm ?? string.Empty;
+        public string CompanyHead_PositionTm => WorkPermit?.ApplicationProfileInstance?.Application_CompanyHead_PositionTm ?? string.Empty;
 
         [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
-        public string CompanyHead_FullName => WorkPermit?.Application?.Application_CompanyHead_FullName ?? string.Empty;
+        public string CompanyHead_FullName => WorkPermit?.ApplicationProfileInstance?.Application_CompanyHead_FullName ?? string.Empty;
         #endregion
 
         public override void OnCreated()
@@ -250,16 +257,22 @@ namespace Visa2026.Module.BusinessObjects
             CrossObjectSyncHelper.SyncOnSave(this);
         }
 
-        /// <summary>Optional; editable on detail view (gear or when true). When the gear is off, also hidden if the linked application type disables the cancelled flag.</summary>
-        [ImmediatePostData]
-        [VisibleInListView(false)]
-        [VisibleInDetailView(true)]
-        [Appearance("WorkPermitItem_IsCancelledVisible", Visibility = ViewItemVisibility.Hide,
-            Criteria = "Not ShowOptionalFields And WorkPermit Is Not Null And WorkPermit.Application Is Not Null And WorkPermit.Application.ApplicationType Is Not Null And Not WorkPermit.Application.ApplicationType.ShowWorkPermitItemIsCancelled",
-            Context = "DetailView",
-            Priority = 50)]
-        public virtual bool IsCancelled { get; set; }
+        /// <summary>
+        /// Derived from linked completed Cancellation instances. Not stored.
+        /// Officer auto-link requires this false (work-permit item must still be valid: not cancelled/changed, not expired).
+        /// </summary>
+        [NotMapped]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInDetailView(false)]
+        [ExcludeFromOptionalDetailFields]
+        public bool IsCancelled => IssuedDocumentLifecycle.IsCancelled(this);
 
+        /// <summary>Derived from linked completed Change instances. Not stored. Cancelled wins.</summary>
+        [NotMapped]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInDetailView(false)]
+        [ExcludeFromOptionalDetailFields]
+        public bool IsChanged => IssuedDocumentLifecycle.IsChanged(this);
 
         [NotMapped]
         [Browsable(false)]
@@ -284,5 +297,23 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("AllowEdit", "False")]
         public string DocumentCopiesListLink =>
             Visa2026.Module.Localization.VisaUiMessages.Get("WorkPermitDocumentCopies.List.ColumnLink");
+
+        /// <summary>Skip-navigation M2M with <see cref="ApplicationProfileInstance"/> (input linked items). Distinct from parent <see cref="WorkPermit.ApplicationProfileInstance"/> issued-from FK.</summary>
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInListView(false)]
+        public virtual IList<ApplicationProfileInstance> ApplicationProfileInstances { get; set; } = new ObservableCollection<ApplicationProfileInstance>();
+
+        /// <summary>
+        /// ApplicationProfileInstance linked on the parent <see cref="WorkPermit"/> (if any). Read-only ListView/Detail convenience.
+        /// </summary>
+        [NotMapped]
+        [ExcludeFromOptionalDetailFields]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInListView(true)]
+        [VisibleInDetailView(true)]
+        [VisibleInLookupListView(false)]
+        [XafDisplayName("Application Profile instance")]
+        [ToolTip("Issuing profile instance from the parent work permit header (WorkPermit.ApplicationProfileInstance).")]
+        public ApplicationProfileInstance ApplicationProfileInstance => WorkPermit?.ApplicationProfileInstance;
     }
 }

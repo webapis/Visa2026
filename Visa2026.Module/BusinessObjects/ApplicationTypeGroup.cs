@@ -15,7 +15,7 @@ namespace Visa2026.Module.BusinessObjects;
 [DefaultClassOptions]
 [NavigationItem("Lookups")]
 [DefaultProperty(nameof(NameTm))]
-[ModelDefault("Caption", "Application Type Group")]
+[ModelDefault("Caption", "ApplicationProfileInstance Type Group")]
 public class ApplicationTypeGroup : LookupBase
 {
     public ApplicationTypeGroup()
@@ -33,7 +33,7 @@ public class ApplicationTypeGroup : LookupBase
     public virtual bool IsActive { get; set; } = true;
 
     [Aggregated]
-    [ModelDefault("Caption", "Application Types")]
-    [ToolTip("Application types that belong to this group for User Report Template applicability.")]
+    [ModelDefault("Caption", "ApplicationProfileInstance Types")]
+    [ToolTip("ApplicationProfileInstance types that belong to this group for User Report Template applicability.")]
     public virtual IList<ApplicationTypeGroupMember> Members { get; set; }
 }

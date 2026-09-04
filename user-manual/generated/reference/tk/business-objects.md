@@ -90,7 +90,8 @@ Category: Applications
 | Application Date | Yes |  |
 | Application Date (Word) | No |  |
 | Application Number | No |  |
-| Application Type | Yes |  |
+| Application Profile | No |  |
+| Application Type (Deprecated) | Yes |  |
 | Application Type Code | No |  |
 | Application Type Name (Word) | No |  |
 | Approval Leg Profile | No |  |
@@ -368,6 +369,84 @@ Category: Applications
 | Work Permit Start Date (Text) | No |  |
 | Work Permitted Locations | No |  |
 | Şahsy Kagyz Family Status | No |  |
+
+## Application Profile
+
+Category: Configuration
+
+| Field | Required | Hidden when |
+|-------|----------|-------------|
+| Applicability criteria | No |  |
+| Application name | Yes |  |
+| Code | Yes |  |
+| Config locked | No |  |
+| Default Authorized Signatory | No |  |
+| Default Authorized Signatory Id | No |  |
+| Default Border Zone Location | No |  |
+| Default Entry Check Point | No |  |
+| Default Entry Check Point Id | No |  |
+| Default Migration Service | No |  |
+| Default Migration Service Id | No |  |
+| Default Project Contract | No |  |
+| Default Project Contract Id | No |  |
+| Default Urgency | No |  |
+| Default Urgency Id | No |  |
+| Default Visa Category | No |  |
+| Default Visa Category Id | No |  |
+| Default Visa Period | No |  |
+| Default Visa Period Id | No |  |
+| Default Visa Representative | No |  |
+| Default Visa Representative Id | No |  |
+| Default Visa Type | No |  |
+| Default Visa Type Id | No |  |
+| Description | No |  |
+| Directed to | No |  |
+| Display Name | No |  |
+| For employee | No |  |
+| For family member | No |  |
+| For temporary visitor | No |  |
+| ID | No |  |
+| Is Active | No |  |
+| May cancel application(s) | No |  |
+| May cancel border zone permit(s) | No |  |
+| May cancel invitation(s) | No |  |
+| May cancel visa(s) | No |  |
+| May cancel work permit(s) | No |  |
+| May produce border zone | No |  |
+| May produce invitation | No |  |
+| May produce visa | No |  |
+| May produce work location | No |  |
+| May produce work permit | No |  |
+| Migration SLA (days) | No |  |
+| Ministry SLA (days) | No |  |
+| Related to | No |  |
+| Require Border Zone | No |  |
+| Require Business Trip Address | No |  |
+| Require End Date | No |  |
+| Require Entry Check Point | No |  |
+| Require Entry Date | No |  |
+| Require Migration Service | No |  |
+| Require Person Address Of Residence | No |  |
+| Require Person Border Zone Item | No |  |
+| Require Person Education | No |  |
+| Require Person Invitation Item | No |  |
+| Require Person Medical | No |  |
+| Require Person Passport | No |  |
+| Require Person Position | No |  |
+| Require Person Rejection Item | No |  |
+| Require Person Salary | No |  |
+| Require Person Travel History | No |  |
+| Require Person Visa | No |  |
+| Require Person Work Permit Item | No |  |
+| Require Project | No |  |
+| Require Region City | No |  |
+| Require Start Date | No |  |
+| Require Urgency | No |  |
+| Require Visa Category | No |  |
+| Require Visa Period | No |  |
+| Require Visa Type | No |  |
+| Require Work Permit Location | No |  |
+| Selection / quick code | No |  |
 
 ## Person
 

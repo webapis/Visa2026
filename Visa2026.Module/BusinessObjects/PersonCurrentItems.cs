@@ -159,7 +159,7 @@ namespace Visa2026.Module.BusinessObjects
         public static Person ExtractPerson(object source) =>
             source switch
             {
-                ApplicationItem ai => ai.Person,
+                ApplicationRosterMergeLine ai => ai.Person,
                 WorkPermitItem wpi => wpi.Person,
                 Passport passport => passport.Person,
                 Visa visa => visa.Passport?.Person,

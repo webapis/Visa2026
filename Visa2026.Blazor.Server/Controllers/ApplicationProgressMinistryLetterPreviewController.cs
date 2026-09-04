@@ -7,11 +7,11 @@ namespace Visa2026.Blazor.Server.Controllers;
 [ApiController]
 [Route("api/application-progress")]
 [Authorize]
-public sealed class ApplicationProgressMinistryLetterPreviewController : ControllerBase
+public sealed class ApplicationProfileInstanceProgressMinistryLetterPreviewController : ControllerBase
 {
-    private readonly ApplicationProgressMinistryLetterFileAccess fileAccess;
+    private readonly ApplicationProfileInstanceProgressMinistryLetterFileAccess fileAccess;
 
-    public ApplicationProgressMinistryLetterPreviewController(ApplicationProgressMinistryLetterFileAccess fileAccess) =>
+    public ApplicationProfileInstanceProgressMinistryLetterPreviewController(ApplicationProfileInstanceProgressMinistryLetterFileAccess fileAccess) =>
         this.fileAccess = fileAccess;
 
     [HttpGet("applications/{applicationId:guid}/progress/{progressId:guid}/ministry-letter/inline")]

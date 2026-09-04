@@ -1,0 +1,93 @@
+@using Visa2026.Module.BusinessObjects
+
+<div class="ap-wizard__panel-head">
+    <h2>Person data</h2>
+    <p>Choose which person-related rows this profile needs. Word and Excel templates are created on a case (Resminamalar This profile / Shared).</p>
+</div>
+<div class="ap-wizard__panel-body">
+    <div class="ap-wizard__section">
+        <h3>Required person-related data</h3>
+        <p class="ap-wizard__hint">Last 1–3 is only for Passport, Visa, Invitation, Work permit, and Border zone. Other types stay one current row. Missing rows are flagged; they do not block create.</p>
+        <div class="ap-wizard__choices ap-wizard__choices--grid">
+            <div class="ap-wizard__choice-cluster">
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonPassport" disabled="@Disabled" /> Passport</label>
+                @if (Profile.RequirePersonPassport)
+                {
+                    <select class="ap-wizard__last-n" @bind="Profile.PersonPassportLastCount" disabled="@Disabled" title="How many latest passports to auto-link">
+                        <option value="1">Last 1</option>
+                        <option value="2">Last 2</option>
+                        <option value="3">Last 3</option>
+                    </select>
+                }
+            </div>
+            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonEducation" disabled="@Disabled" /> Education</label>
+            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonPosition" disabled="@Disabled" /> Position</label>
+            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonAddressOfResidence" disabled="@Disabled" /> Address of residence</label>
+            <div class="ap-wizard__choice-cluster">
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonVisa" disabled="@Disabled" /> Visa</label>
+                @if (Profile.RequirePersonVisa)
+                {
+                    <select class="ap-wizard__last-n" @bind="Profile.PersonVisaLastCount" disabled="@Disabled" title="How many latest valid visas to auto-link">
+                        <option value="1">Last 1</option>
+                        <option value="2">Last 2</option>
+                        <option value="3">Last 3</option>
+                    </select>
+                }
+            </div>
+            <div class="ap-wizard__choice-cluster">
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonInvitationItem" disabled="@Disabled" /> Invitation item</label>
+                @if (Profile.RequirePersonInvitationItem)
+                {
+                    <select class="ap-wizard__last-n" @bind="Profile.PersonInvitationItemLastCount" disabled="@Disabled" title="How many latest valid invitation items to auto-link">
+                        <option value="1">Last 1</option>
+                        <option value="2">Last 2</option>
+                        <option value="3">Last 3</option>
+                    </select>
+                }
+            </div>
+            <div class="ap-wizard__choice-cluster">
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonWorkPermitItem" disabled="@Disabled" /> Work permit item</label>
+                @if (Profile.RequirePersonWorkPermitItem)
+                {
+                    <select class="ap-wizard__last-n" @bind="Profile.PersonWorkPermitItemLastCount" disabled="@Disabled" title="How many latest valid work-permit items to auto-link">
+                        <option value="1">Last 1</option>
+                        <option value="2">Last 2</option>
+                        <option value="3">Last 3</option>
+                    </select>
+                }
+            </div>
+            <div class="ap-wizard__choice-cluster">
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonBorderZoneItem" disabled="@Disabled" /> Border zone item</label>
+                @if (Profile.RequirePersonBorderZoneItem)
+                {
+                    <select class="ap-wizard__last-n" @bind="Profile.PersonBorderZoneItemLastCount" disabled="@Disabled" title="How many latest valid border-zone items to auto-link">
+                        <option value="1">Last 1</option>
+                        <option value="2">Last 2</option>
+                        <option value="3">Last 3</option>
+                    </select>
+                }
+            </div>
+            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonSalary" disabled="@Disabled" /> Salary</label>
+            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonMedical" disabled="@Disabled" /> Medical</label>
+            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonRejectionItem" disabled="@Disabled" /> Rejection item</label>
+            @if (!IsBusinessTripProfile)
+            {
+            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonTravelHistory" disabled="@Disabled" /> Travel history</label>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public ApplicationProfile Profile { get; set; } = null!;
+    [Parameter] public bool Disabled { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (IsBusinessTripProfile && Profile.RequirePersonTravelHistory)
+            Profile.RequirePersonTravelHistory = false;
+    }
+
+    private bool IsBusinessTripProfile =>
+        Profile.ActionFamily == ApplicationProfileActionFamily.BusinessTrip;
+}

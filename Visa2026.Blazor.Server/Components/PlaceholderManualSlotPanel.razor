@@ -29,6 +29,14 @@
                @bind="_search"
                @bind:event="oninput" />
         <select class="placeholder-manual-slot-panel__filter form-select form-select-sm"
+                @bind="_relatedBoFilter">
+            <option value="">@Msg("PlaceholderManual.Filter.AllRecords")</option>
+            @foreach (var relatedBo in RelatedBoFilterOptions)
+            {
+                <option value="@relatedBo">@GroupTitle(relatedBo)</option>
+            }
+        </select>
+        <select class="placeholder-manual-slot-panel__filter form-select form-select-sm"
                 @bind="_scopeFilter">
             <option value="">@Msg("PlaceholderManual.Filter.AllScopes")</option>
             <option value="Header">@Msg("PlaceholderManual.Filter.Header")</option>
@@ -37,47 +45,55 @@
     </div>
 
     <div class="placeholder-manual-slot-panel__body">
-        <div class="placeholder-manual-slot-panel__table-wrap">
-            <table class="placeholder-manual-slot-panel__table">
-                <thead>
-                    <tr>
-                        <th>@Msg("PlaceholderManual.Column.Short")</th>
-                        <th>@Msg("PlaceholderManual.Column.Canonical")</th>
-                        <th>@Msg("PlaceholderManual.Column.Label")</th>
-                        <th>@Msg("PlaceholderManual.Column.Example")</th>
-                        <th>@Msg("PlaceholderManual.Column.Word")</th>
-                        <th>@Msg("PlaceholderManual.Column.Excel")</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var entry in FilteredEntries)
-                    {
-                        var usageScope = entry.Scope == UserReportPlaceholderScope.Both
-                            ? UserReportPlaceholderScope.Row
-                            : entry.Scope;
-                        var wordToken = entry.BuildWordToken(usageScope);
-                        var excelToken = entry.BuildExcelToken(usageScope);
-                        <tr>
-                            <td><code>@entry.ShortCode</code></td>
-                            <td><code class="placeholder-manual-slot-panel__canonical">@entry.CanonicalPath</code></td>
-                            <td>@entry.GetLabel(_uiCultureName)</td>
-                            <td>@entry.ExampleValue</td>
-                            <td><code class="placeholder-manual-slot-panel__token">@wordToken</code></td>
-                            <td><code class="placeholder-manual-slot-panel__token">@excelToken</code></td>
-                            <td class="placeholder-manual-slot-panel__copy-cell">
-                                <DxButton Text="@Msg("PlaceholderManual.CopyWord")"
-                                          RenderStyle="ButtonRenderStyle.Link"
-                                          SizeMode="SizeMode.Small"
-                                          CssClass="app-item-doc-copies__action-btn"
-                                          Click="@(() => CopyTokenAsync(wordToken))" />
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-        @if (FilteredEntries.Count == 0)
+        @foreach (var group in GroupedEntries)
+        {
+            <section class="placeholder-manual-slot-panel__group">
+                <h3 class="placeholder-manual-slot-panel__group-title">@GroupTitle(group.RelatedBo)</h3>
+                <div class="placeholder-manual-slot-panel__table-wrap">
+                    <table class="placeholder-manual-slot-panel__table">
+                        <thead>
+                            <tr>
+                                <th>@Msg("PlaceholderManual.Column.Short")</th>
+                                <th>@Msg("PlaceholderManual.Column.Canonical")</th>
+                                <th>@Msg("PlaceholderManual.Column.Label")</th>
+                                <th>@Msg("PlaceholderManual.Column.Example")</th>
+                                <th>@Msg("PlaceholderManual.Column.Word")</th>
+                                <th>@Msg("PlaceholderManual.Column.Excel")</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var entry in group.Entries)
+                            {
+                                var usageScope = entry.Scope == UserReportPlaceholderScope.Both
+                                    ? (Request?.FilterRootBoType == UserReportBoType.ApplicationItem
+                                        ? UserReportPlaceholderScope.Row
+                                        : UserReportPlaceholderScope.Header)
+                                    : entry.Scope;
+                                var wordToken = entry.BuildWordToken(usageScope);
+                                var excelToken = entry.BuildExcelToken(usageScope);
+                                <tr>
+                                    <td><code>@entry.ShortCode</code></td>
+                                    <td><code class="placeholder-manual-slot-panel__canonical">@entry.CanonicalPath</code></td>
+                                    <td>@entry.GetLabel(_uiCultureName)</td>
+                                    <td>@entry.ExampleValue</td>
+                                    <td><code class="placeholder-manual-slot-panel__token">@wordToken</code></td>
+                                    <td><code class="placeholder-manual-slot-panel__token">@excelToken</code></td>
+                                    <td class="placeholder-manual-slot-panel__copy-cell">
+                                        <DxButton Text="@Msg("PlaceholderManual.CopyWord")"
+                                                  RenderStyle="ButtonRenderStyle.Link"
+                                                  SizeMode="SizeMode.Small"
+                                                  CssClass="app-item-doc-copies__action-btn"
+                                                  Click="@(() => CopyTokenAsync(wordToken))" />
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        }
+        @if (GroupedEntries.Count == 0)
         {
             <p class="app-item-doc-copies__empty" role="status">@Msg("PlaceholderManual.Empty")</p>
         }
@@ -94,13 +110,19 @@
     private string _uiCultureName = string.Empty;
     private string _search = string.Empty;
     private string _scopeFilter = string.Empty;
-    private IReadOnlyList<UserReportPlaceholderCatalogEntry> _entries = Array.Empty<UserReportPlaceholderCatalogEntry>();
+    private string _relatedBoFilter = string.Empty;
 
     private string Title => Msg("PlaceholderManual.Title");
     private string CloseLabel => VisaUiMessages.Get("ApplicationItemDocumentCopies.Action.Close", _uiCultureName);
     private string SearchPlaceholder => Msg("PlaceholderManual.Search.Placeholder");
 
-    private IReadOnlyList<UserReportPlaceholderCatalogEntry> FilteredEntries
+    private static IReadOnlyList<UserReportPlaceholderRelatedBo> RelatedBoFilterOptions { get; } =
+        Enum.GetValues<UserReportPlaceholderRelatedBo>()
+            .Where(static v => v != UserReportPlaceholderRelatedBo.Unknown)
+            .OrderBy(UserReportPlaceholderRelatedBoCatalog.SortOrder)
+            .ToList();
+
+    private IReadOnlyList<UserReportPlaceholderCatalogGroup> GroupedEntries
     {
         get
         {
@@ -111,10 +133,19 @@
                 _ => null,
             };
 
-            return CatalogService.GetEntries(new UserReportPlaceholderManualQuery
+            UserReportPlaceholderRelatedBo? relatedBo = null;
+            if (!string.IsNullOrWhiteSpace(_relatedBoFilter)
+                && Enum.TryParse(_relatedBoFilter, ignoreCase: true, out UserReportPlaceholderRelatedBo parsed)
+                && parsed != UserReportPlaceholderRelatedBo.Unknown)
+            {
+                relatedBo = parsed;
+            }
+
+            return CatalogService.GetGroupedEntries(new UserReportPlaceholderManualQuery
             {
                 RootBoType = Request?.FilterRootBoType,
                 Scope = scope,
+                RelatedBo = relatedBo,
                 Search = _search,
             });
         }
@@ -123,10 +154,15 @@
     protected override void OnInitialized()
     {
         _uiCultureName = VisaUiCultureResolver.Resolve();
-        _entries = CatalogService.GetEntries(new UserReportPlaceholderManualQuery
-        {
-            RootBoType = Request?.FilterRootBoType,
-        });
+    }
+
+    private string GroupTitle(UserReportPlaceholderRelatedBo relatedBo)
+    {
+        var localized = Msg(UserReportPlaceholderRelatedBoCatalog.LocalizationKey(relatedBo));
+        if (string.IsNullOrWhiteSpace(localized)
+            || localized.StartsWith("PlaceholderManual.Group.", StringComparison.Ordinal))
+            return UserReportPlaceholderRelatedBoCatalog.DisplayNameEn(relatedBo);
+        return localized;
     }
 
     private string Msg(string key) => VisaUiMessages.Get(key, _uiCultureName);

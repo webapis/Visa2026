@@ -1,3 +1,4 @@
+using System.Data;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Data.SqlClient;
@@ -76,10 +77,16 @@ internal static class Visa2014PassportCopyImporter
                 continue;
             }
 
+            if (existingCopyMap.ContainsKey(legacyCopyOid))
+            {
+                skippedAlreadyImported++;
+                continue;
+            }
+
             byte[]? blob;
             try
             {
-                blob = await ReadCopyBlobAsync(connection, blobColumn, legacyCopyOid);
+                blob = await ReadCopyBlobAsync(connection, legacyConnectionString, blobColumn, legacyCopyOid);
             }
             catch (Exception ex)
             {
@@ -99,14 +106,6 @@ internal static class Visa2014PassportCopyImporter
                 skippedOversize++;
                 if (verbose)
                     Console.WriteLine($"  SKIP copy {legacyCopyOid}: {blob.Length} bytes exceeds {MaxDocumentBytes} limit");
-                continue;
-            }
-
-            if (existingCopyMap.ContainsKey(legacyCopyOid))
-            {
-                skippedAlreadyImported++;
-                Visa2014LegacyBlobDedupeHelper.RegisterExistingBlob(
-                    importedBlobKeys, copyIndexByPassport, targetPassportId, blob);
                 continue;
             }
 
@@ -217,15 +216,48 @@ internal static class Visa2014PassportCopyImporter
 
     private static async Task<byte[]?> ReadCopyBlobAsync(
         SqlConnection connection,
+        string legacyConnectionString,
+        string blobColumn,
+        Guid legacyCopyOid)
+    {
+        try
+        {
+            await EnsureOpenAsync(connection);
+            return await ReadCopyBlobOnceAsync(connection, blobColumn, legacyCopyOid);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"WRN PassportCopy blob {legacyCopyOid}: {ex.Message} — retrying on a new connection");
+            await using var retry = new SqlConnection(legacyConnectionString);
+            await retry.OpenAsync();
+            var blob = await ReadCopyBlobOnceAsync(retry, blobColumn, legacyCopyOid);
+            try { connection.Close(); } catch { /* original connection is broken */ }
+            return blob;
+        }
+    }
+
+    private static async Task<byte[]?> ReadCopyBlobOnceAsync(
+        SqlConnection connection,
         string blobColumn,
         Guid legacyCopyOid)
     {
         var sql = $"SELECT [{blobColumn.Replace("]", "]]")}] FROM dbo.PassportCopy WHERE Oid = @oid AND GCRecord IS NULL";
-        await using var command = new SqlCommand(sql, connection);
+        await using var command = new SqlCommand(sql, connection) { CommandTimeout = 180 };
         command.Parameters.AddWithValue("@oid", legacyCopyOid);
-
         var value = await command.ExecuteScalarAsync();
         return value is DBNull or null ? null : (byte[])value;
+    }
+
+    private static async Task EnsureOpenAsync(SqlConnection connection)
+    {
+        if (connection.State == ConnectionState.Open)
+            return;
+        if (connection.State != ConnectionState.Closed)
+        {
+            try { connection.Close(); } catch { /* ignore broken close */ }
+        }
+
+        await connection.OpenAsync();
     }
 
     private static Dictionary<Guid, Guid> LoadOptionalCopyIdMap(string? path)

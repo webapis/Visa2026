@@ -46,12 +46,12 @@ which is already set.
 
 | Situation | Filename |
 |---|---|
-| Invitation form, Application level, single variant | `App_Inv_app.jpg` |
+| Invitation form, ApplicationProfileInstance level, single variant | `App_Inv_app.jpg` |
 | Invitation form, per-person level, single variant | `App_Inv_item.jpg` |
 | Invitation form, per-person, CLK contract only | `App_Inv_CLK_item.jpg` |
-| FM visa extension, Application level, 3 variants — first | `App_Visa_Ext_FM_app_v0.jpg` |
-| FM visa extension, Application level, 3 variants — second | `App_Visa_Ext_FM_app_v1.jpg` |
-| FM visa extension, Application level, 3 variants — third | `App_Visa_Ext_FM_app_v2.jpg` |
+| FM visa extension, ApplicationProfileInstance level, 3 variants — first | `App_Visa_Ext_FM_app_v0.jpg` |
+| FM visa extension, ApplicationProfileInstance level, 3 variants — second | `App_Visa_Ext_FM_app_v1.jpg` |
+| FM visa extension, ApplicationProfileInstance level, 3 variants — third | `App_Visa_Ext_FM_app_v2.jpg` |
 | Two-page form, page 1 | `App_Inv_And_WP_app_p1.jpg` |
 | Two-page form, page 2 | `App_Inv_And_WP_app_p2.jpg` |
 | Two-page form, variant 0, page 1 | `App_Visa_Ext_FM_CLK_app_v0_p1.jpg` |
@@ -188,7 +188,7 @@ table structure) is structurally the same → use one generic file. If they diff
 
 | Do not | Why |
 |---|---|
-| Name the file without the `_level` segment (e.g. `App_Inv.jpg`) | I cannot determine which data type (Application / ApplicationItem / Registration) this image belongs to |
+| Name the file without the `_level` segment (e.g. `App_Inv.jpg`) | I cannot determine which data type (ApplicationProfileInstance / ApplicationItem / Registration) this image belongs to |
 | Use `.png`, `.pdf`, `.docx` extensions | Only `.jpg` is accepted in `FormTemplates/` |
 | Place the file anywhere other than `Resources/FormTemplates/` | I will not find it |
 | Use a project contract code in lowercase (e.g. `_clk`) | Must be ALL CAPS to be distinguishable from the level segment |

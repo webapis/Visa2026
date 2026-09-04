@@ -5,30 +5,30 @@ using Xunit;
 
 namespace Visa2026.Module.Tests.BusinessObjects;
 
-public class ApplicationProgressTransitionHelperThreeLegTests
+public class ApplicationProfileInstanceProgressTransitionHelperThreeLegTests
 {
     [Fact]
     public void ThreeLegProfile_AllowsFullMinistryChain()
     {
         var app = BuildThreeLegApplication();
 
-        Assert.True(IsAllowedFirst(app, ApplicationProgressLegCodes.ReviewStarted(1)));
+        Assert.True(IsAllowedFirst(app, ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1)));
 
         Assert.True(IsAllowed(app,
-            ApplicationProgressLegCodes.ReviewStarted(1),
-            ApplicationProgressLegCodes.ReviewApproved(1)));
+            ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1),
+            ApplicationProfileInstanceProgressLegCodes.ReviewApproved(1)));
 
         Assert.True(IsAllowed(app,
-            ApplicationProgressLegCodes.ReviewApproved(1),
-            ApplicationProgressLegCodes.ReviewApproved(2)));
+            ApplicationProfileInstanceProgressLegCodes.ReviewApproved(1),
+            ApplicationProfileInstanceProgressLegCodes.ReviewApproved(2)));
 
         Assert.True(IsAllowed(app,
-            ApplicationProgressLegCodes.ReviewApproved(2),
-            ApplicationProgressLegCodes.ReviewApproved(3)));
+            ApplicationProfileInstanceProgressLegCodes.ReviewApproved(2),
+            ApplicationProfileInstanceProgressLegCodes.ReviewApproved(3)));
 
         Assert.True(IsAllowed(app,
-            ApplicationProgressLegCodes.ReviewApproved(3),
-            ApplicationProgressStateCodes.ProcessStarted));
+            ApplicationProfileInstanceProgressLegCodes.ReviewApproved(3),
+            ApplicationProfileInstanceProgressStateCodes.ProcessStarted));
     }
 
     [Fact]
@@ -36,22 +36,22 @@ public class ApplicationProgressTransitionHelperThreeLegTests
     {
         var app = BuildThreeLegApplication();
 
-        Assert.True(IsAllowedFirst(app, ApplicationProgressLegCodes.ReviewRejected(1)));
+        Assert.True(IsAllowedFirst(app, ApplicationProfileInstanceProgressLegCodes.ReviewRejected(1)));
 
         Assert.True(IsAllowed(app,
-            ApplicationProgressLegCodes.ReviewStarted(1),
-            ApplicationProgressLegCodes.ReviewRejected(1)));
+            ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1),
+            ApplicationProfileInstanceProgressLegCodes.ReviewRejected(1)));
 
         Assert.True(IsAllowed(app,
-            ApplicationProgressLegCodes.ReviewApproved(1),
-            ApplicationProgressLegCodes.ReviewRejected(2)));
+            ApplicationProfileInstanceProgressLegCodes.ReviewApproved(1),
+            ApplicationProfileInstanceProgressLegCodes.ReviewRejected(2)));
     }
 
     [Fact]
     public void ThreeLegProfile_BlocksPrepAsFirstStep()
     {
         var app = BuildThreeLegApplication();
-        Assert.False(IsAllowedFirst(app, ApplicationProgressStateCodes.IsBeingPrepared));
+        Assert.False(IsAllowedFirst(app, ApplicationProfileInstanceProgressStateCodes.IsBeingPrepared));
     }
 
     [Fact]
@@ -60,51 +60,75 @@ public class ApplicationProgressTransitionHelperThreeLegTests
         var app = BuildThreeLegApplication();
 
         Assert.False(IsAllowed(app,
-            ApplicationProgressLegCodes.ReviewApproved(1),
-            ApplicationProgressLegCodes.ReviewStarted(2)));
+            ApplicationProfileInstanceProgressLegCodes.ReviewApproved(1),
+            ApplicationProfileInstanceProgressLegCodes.ReviewStarted(2)));
     }
 
-    private static bool IsAllowedFirst(Application app, string toState)
+    [Fact]
+    public void SameDayNextStep_UsesExistingHistoryWhenCurrentIsNew()
     {
-        app.ProgressHistory = new ObservableCollection<ApplicationProgress>();
-        var current = new ApplicationProgress
+        var app = BuildThreeLegApplication();
+        var existing = new ApplicationProfileInstanceProgress
         {
-            Application = app,
+            ID = Guid.NewGuid(),
+            ApplicationProfileInstance = app,
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1) },
+            Date = DateTime.Today
+        };
+        app.ProgressHistory.Add(existing);
+
+        var current = new ApplicationProfileInstanceProgress
+        {
+            ApplicationProfileInstance = app,
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressLegCodes.ReviewApproved(1) },
+            Date = DateTime.Today
+        };
+        app.ProgressHistory.Add(current);
+
+        Assert.True(ApplicationProfileInstanceProgressTransitionHelper.TryValidateProgressStep(current, null, out var error));
+        Assert.True(string.IsNullOrWhiteSpace(error));
+    }
+
+    private static bool IsAllowedFirst(ApplicationProfileInstance app, string toState)
+    {
+        app.ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>();
+        var current = new ApplicationProfileInstanceProgress
+        {
+            ApplicationProfileInstance = app,
             State = new ApplicationState { Code = toState },
             Date = DateTime.Today
         };
-        return ApplicationProgressTransitionHelper.TryValidateProgressStep(current, null, out _);
+        return ApplicationProfileInstanceProgressTransitionHelper.TryValidateProgressStep(current, null, out _);
     }
 
-    private static bool IsAllowed(Application app, string fromState, string toState)
+    private static bool IsAllowed(ApplicationProfileInstance app, string fromState, string toState)
     {
-        app.ProgressHistory = new ObservableCollection<ApplicationProgress>
+        app.ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>
         {
             new()
             {
-                Application = app,
+                ApplicationProfileInstance = app,
                 State = new ApplicationState { Code = fromState },
                 Date = DateTime.Today.AddDays(-1)
             }
         };
 
-        var current = new ApplicationProgress
+        var current = new ApplicationProfileInstanceProgress
         {
-            Application = app,
+            ApplicationProfileInstance = app,
             State = new ApplicationState { Code = toState },
             Date = DateTime.Today
         };
 
-        return ApplicationProgressTransitionHelper.TryValidateProgressStep(current, null, out _);
+        return ApplicationProfileInstanceProgressTransitionHelper.TryValidateProgressStep(current, null, out _);
     }
 
-    private static Application BuildThreeLegApplication()
+    private static ApplicationProfileInstance BuildThreeLegApplication()
     {
         var type = new ApplicationType
         {
-            ApplicationProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
+            ApplicationProfileInstanceProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
             ShowApprovalLegProfile = true,
-            MigrationSlaProfile = new ApplicationMigrationSlaProfile { MaxDaysInReview = 10 }
         };
         var profile = new ApprovalLegProfile
         {
@@ -116,11 +140,16 @@ public class ApplicationProgressTransitionHelperThreeLegTests
             ]
         };
 
-        return new Application
+        return new ApplicationProfileInstance
         {
             ApplicationType = type,
+            ApplicationProfile = new ApplicationProfile
+            {
+                MigrationSlaDays = 10,
+                ProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
+            },
             ApprovalLegProfile = profile,
-            ProgressHistory = new ObservableCollection<ApplicationProgress>()
+            ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>()
         };
     }
 }

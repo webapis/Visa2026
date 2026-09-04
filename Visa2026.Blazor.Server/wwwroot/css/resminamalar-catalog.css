@@ -133,6 +133,153 @@
   color: var(--rmc-muted);
 }
 
+.resminamalar-catalog__meta {
+  font-size: 11px;
+  line-height: 1.3;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--rmc-muted);
+  opacity: 0.72;
+}
+
+.resminamalar-catalog__pane-tabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 1.35rem;
+  margin: 0;
+}
+
+.resminamalar-catalog__utilities {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px 4px;
+  margin-left: auto;
+  padding-bottom: 0.45rem;
+}
+
+.app-item-doc-copies__top-actions.app-report-package__top-selection--content {
+  display: flex;
+  width: 100%;
+  justify-content: flex-start;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.75rem;
+  padding-bottom: 0;
+  box-sizing: border-box;
+}
+
+.resminamalar-catalog__pane-tab {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  padding: 0.2rem 0.05rem 0.7rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.2;
+  color: #334155;
+  cursor: pointer;
+  position: relative;
+  white-space: nowrap;
+}
+
+.resminamalar-catalog__pane-tab:hover {
+  color: #0f766e;
+  background: transparent;
+  text-decoration: none;
+}
+
+.resminamalar-catalog__pane-tab:focus-visible {
+  outline: 2px solid color-mix(in srgb, #0f766e 55%, transparent);
+  outline-offset: 2px;
+}
+
+.resminamalar-catalog__pane-tab--active {
+  font-weight: 700;
+  color: #0f766e;
+  text-decoration: none;
+}
+
+.resminamalar-catalog__pane-tab--active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 3px;
+  background: #0f766e;
+  border-radius: 2px 2px 0 0;
+}
+
+.resminamalar-catalog__shared-hint {
+  margin: 0 0 0.65rem;
+  font-size: 0.8125rem;
+  color: var(--rmc-muted, #64748b);
+}
+
+.resminamalar-catalog__shared-chip {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  margin-top: 0.15rem;
+  padding: 0.08rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #1d4ed8;
+  background: color-mix(in srgb, #2563eb 16%, transparent);
+}
+
+.resminamalar-catalog__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3.15rem;
+  height: 1.55rem;
+  padding: 0 0.7rem;
+  border: 0;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.resminamalar-catalog__toggle--on {
+  color: #fff;
+  background: #22c55e;
+}
+
+.resminamalar-catalog__toggle--off {
+  color: #475569;
+  background: #e2e8f0;
+}
+
+.resminamalar-catalog__toggle:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.resminamalar-catalog__toggle:hover:not(:disabled).resminamalar-catalog__toggle--on {
+  background: #16a34a;
+}
+
+.resminamalar-catalog__toggle:hover:not(:disabled).resminamalar-catalog__toggle--off {
+  background: #cbd5e1;
+}
+
 .resminamalar-catalog__actions {
   flex: 0 0 auto;
   display: flex;
@@ -141,7 +288,41 @@
   justify-content: flex-end;
   gap: 8px;
   margin-left: auto;
-  max-width: 14rem;
+  max-width: 22rem;
+}
+
+.resminamalar-catalog__recycle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--rmc-muted);
+  cursor: pointer;
+}
+
+.resminamalar-catalog__recycle-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, #dc2626 12%, transparent);
+  color: #b91c1c;
+}
+
+.resminamalar-catalog__recycle-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.resminamalar-catalog__recycle-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .resminamalar-catalog__actions .app-report-package__readiness {
@@ -228,6 +409,11 @@
 .resminamalar-slot-panel .app-report-package--inline-slot .app-report-package__top-selection {
   border-bottom-color: var(--resminamalar-slot-border, var(--rmc-border-soft));
   padding: 0.35rem 0.5rem 0.65rem;
+}
+
+.resminamalar-slot-panel .app-report-package--inline-slot .app-item-doc-copies__top-actions.app-report-package__top-selection--content {
+  justify-content: flex-start;
+  padding-bottom: 0;
 }
 
 @media (max-width: 22rem) {

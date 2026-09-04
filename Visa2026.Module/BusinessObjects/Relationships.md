@@ -24,7 +24,7 @@ This document serves as the single source of truth for relationships between Bus
 | **Application** | `WorkPermits` | `WorkPermit` | `Application` | Aggregated. |
 | **Application** | `Invitations` | `Invitation` | `Application` | Aggregated. |
 | **Application** | `BorderZones` | `BorderZone` | - | Associated with this border zone. |
-| **Application** | `ProgressHistory` | `ApplicationProgress` | `Application` | Aggregated. |
+| **Application** | `ProgressHistory` | `ApplicationProfileInstanceProgress` | `Application` | Aggregated. |
 
 ## ApplicationItem Relationships
 
@@ -52,9 +52,9 @@ This document serves as the single source of truth for relationships between Bus
 | **ProjectContract** | `Ministry` | `Ministry` | - |
 | **Registration** | `RegistrationReason` | `RegistrationReason` | - |
 | **Application** | `Ministry` | `Ministry` | - |
-| **Application** | `CurrentState` | `ApplicationProgress` | - |
-| **ApplicationProgress** | `State` | `ApplicationState` | - |
-| **ApplicationProgress** | `Location` | `ApplicationLocation` | Required. |
+| **Application** | `CurrentState` | `ApplicationProfileInstanceProgress` | - |
+| **ApplicationProfileInstanceProgress** | `State` | `ApplicationState` | - |
+| **ApplicationProfileInstanceProgress** | `Location` | `ApplicationLocation` | Required. |
 
 
 ## Simple Lookup Objects (No Inverse Relationships)

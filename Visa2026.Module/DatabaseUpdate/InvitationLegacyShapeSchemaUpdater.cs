@@ -68,6 +68,12 @@ public sealed class InvitationLegacyShapeSchemaUpdater : ModuleUpdater
                     invitation.ExpirationDate = invitation.IssuedDate.AddDays(90);
                     changed = true;
                 }
+
+                if (string.IsNullOrWhiteSpace(invitation.BorderZoneLocation))
+                {
+                    invitation.BorderZoneLocation = Services.BorderZoneSelectionHelper.NoneValue;
+                    changed = true;
+                }
             }
 
             if (changed)

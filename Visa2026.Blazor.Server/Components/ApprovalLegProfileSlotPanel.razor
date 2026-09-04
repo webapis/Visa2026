@@ -1,0 +1,567 @@
+@namespace Visa2026.Blazor.Server.Components
+@using DevExpress.ExpressApp
+@using Microsoft.AspNetCore.Components
+@using Visa2026.Blazor.Server.Localization
+@using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Localization
+@using Visa2026.Module.Services.ApprovalLegCatalog
+@using Visa2026.Module.Services.PreviewSlot
+
+<div class="resminamalar-slot-panel approval-leg-slot-panel">
+    <div class="resminamalar-slot-panel__header visa-preview-drawer__header">
+        <div class="visa-preview-drawer__title-block">
+            @if (_screen != Screen.Catalog)
+            {
+                <button type="button" class="approval-leg-slot__back" @onclick="BackToCatalog">‹ @Msg("ApprovalLegProfile.Slot.BackCatalog")</button>
+            }
+            <span class="visa-preview-drawer__title">@HeaderTitle</span>
+            @if (!string.IsNullOrWhiteSpace(HeaderSubtitle))
+            {
+                <span class="visa-preview-drawer__subtitle">@HeaderSubtitle</span>
+            }
+        </div>
+        <div class="visa-preview-drawer__header-actions">
+            <button class="visa-preview-drawer__btn visa-preview-drawer__btn--close"
+                    type="button"
+                    title="@CloseLabel"
+                    @onclick="ClosePanelAsync">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="resminamalar-slot-panel__body">
+        <div class="resminamalar-slot-panel__catalog approval-leg-slot @(_screen == Screen.Catalog ? "approval-leg-slot--catalog" : "approval-leg-slot--editor")">
+            @if (!string.IsNullOrWhiteSpace(_error))
+            {
+                <p class="approval-leg-slot__error" role="alert">@_error</p>
+            }
+
+            @if (_screen == Screen.Catalog)
+            {
+                <div class="approval-leg-slot__toolbar">
+                    <input class="approval-leg-slot__search"
+                           type="search"
+                           placeholder="@Msg("ApprovalLegProfile.Slot.SearchPlaceholder")"
+                           @bind="_search"
+                           @bind:event="oninput"
+                           @bind:after="ReloadCatalog" />
+                    <button type="button" class="approval-leg-slot__btn approval-leg-slot__btn--primary" @onclick="StartNew" disabled="@_busy">
+                        @Msg("ApprovalLegProfile.Slot.New")
+                    </button>
+                </div>
+
+                @if (_rows.Count == 0)
+                {
+                    <div class="approval-leg-slot__empty">
+                        <p class="approval-leg-slot__empty-title">@Msg("ApprovalLegProfile.Slot.EmptyTitle")</p>
+                        <p class="approval-leg-slot__muted">@Msg("ApprovalLegProfile.Slot.EmptyBody")</p>
+                        <button type="button" class="approval-leg-slot__btn approval-leg-slot__btn--primary" @onclick="StartNew" disabled="@_busy">
+                            @Msg("ApprovalLegProfile.Slot.New")
+                        </button>
+                    </div>
+                    <p class="approval-leg-slot__hint">@Msg("ApprovalLegProfile.Slot.EmptyFooter")</p>
+                }
+                else
+                {
+                    <ul class="approval-leg-slot__list">
+                        @foreach (var row in _rows)
+                        {
+                            <li class="approval-leg-slot__card @(row.IsInUse ? "approval-leg-slot__card--used" : null)">
+                                <div class="approval-leg-slot__card-main">
+                                    <p class="approval-leg-slot__card-title">
+                                        <span>@row.Code</span>
+                                        @if (!string.IsNullOrWhiteSpace(row.MinistriesLabel))
+                                        {
+                                            <span class="approval-leg-slot__card-sep" aria-hidden="true">·</span>
+                                            <span class="approval-leg-slot__card-name">@row.MinistriesLabel</span>
+                                        }
+                                    </p>
+                                    <div class="approval-leg-slot__badges">
+                                        @if (row.IsActive)
+                                        {
+                                            <span class="approval-leg-slot__badge approval-leg-slot__badge--on">@Msg("ApprovalLegProfile.Slot.Active")</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="approval-leg-slot__badge">@Msg("ApprovalLegProfile.Slot.Inactive")</span>
+                                        }
+                                        @if (row.IsInUse)
+                                        {
+                                            <span class="approval-leg-slot__badge approval-leg-slot__badge--used">@UsedBy(row.UsedApplicationCount)</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="approval-leg-slot__card-actions">
+                                    <button type="button" class="approval-leg-slot__btn approval-leg-slot__btn--secondary" @onclick="() => OpenRow(row.Id)" disabled="@_busy">
+                                        @Msg("ApprovalLegProfile.Slot.Open")
+                                    </button>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                    <p class="approval-leg-slot__hint">@Msg("ApprovalLegProfile.Slot.CatalogHint")</p>
+                }
+            }
+            else if (_draft != null)
+            {
+                <div class="approval-leg-slot__scroll">
+                    @if (_draft.IsInUse)
+                    {
+                        <p class="approval-leg-slot__hint approval-leg-slot__hint--warn">@Msg("ApprovalLegProfile.Slot.LockedHint")</p>
+                    }
+                    else if (!_draft.IsNew)
+                    {
+                        <p class="approval-leg-slot__hint approval-leg-slot__hint--ok">@Msg("ApprovalLegProfile.Slot.UnusedHint")</p>
+                    }
+
+                    <section class="approval-leg-slot__section">
+                        <div class="approval-leg-slot__identity">
+                            <label class="approval-leg-slot__field">
+                                @Msg("ApprovalLegProfile.Slot.Code")
+                                <input type="text"
+                                       maxlength="20"
+                                       placeholder="@Msg("ApprovalLegProfile.Slot.CodePlaceholder")"
+                                       @bind="_draft.Code"
+                                       @bind:event="oninput"
+                                       disabled="@_busy" />
+                            </label>
+                            <label class="approval-leg-slot__toggle">
+                                <input type="checkbox"
+                                       checked="@_draft.IsActive"
+                                       disabled="@_busy"
+                                       @onchange="OnActiveToggled" />
+                                <span>@Msg("ApprovalLegProfile.Slot.Active")</span>
+                            </label>
+                        </div>
+                    </section>
+
+                    <section class="approval-leg-slot__section">
+                        <h3 class="approval-leg-slot__section-title">@MinistriesHeading</h3>
+                        @if (_draft.Legs.Count == 0)
+                        {
+                            <p class="approval-leg-slot__empty-legs">@Msg("ApprovalLegProfile.Slot.NoMinistries")</p>
+                        }
+                        else
+                        {
+                            <ol class="approval-leg-slot__legs">
+                                @for (var i = 0; i < _draft.Legs.Count; i++)
+                                {
+                                    var index = i;
+                                    var leg = _draft.Legs[index];
+                                    <li>
+                                        <span class="approval-leg-slot__leg-index">@(index + 1)</span>
+                                        <span class="approval-leg-slot__leg-name">@leg.Caption</span>
+                                        @if (!_draft.IsInUse)
+                                        {
+                                            <span class="approval-leg-slot__leg-actions">
+                                                <button type="button" class="approval-leg-slot__icon-btn" disabled="@(index == 0 || _busy)" @onclick="() => MoveLeg(index, -1)" title="@Msg("ApprovalLegProfile.Slot.MoveUp")">↑</button>
+                                                <button type="button" class="approval-leg-slot__icon-btn" disabled="@(index == _draft.Legs.Count - 1 || _busy)" @onclick="() => MoveLeg(index, 1)" title="@Msg("ApprovalLegProfile.Slot.MoveDown")">↓</button>
+                                                <button type="button" class="approval-leg-slot__icon-btn approval-leg-slot__icon-btn--danger" disabled="@_busy" @onclick="() => RemoveLeg(index)">@Msg("ApprovalLegProfile.Slot.Remove")</button>
+                                            </span>
+                                        }
+                                    </li>
+                                }
+                            </ol>
+                        }
+
+                        @if (!_draft.IsInUse)
+                        {
+                            <div class="approval-leg-slot__add">
+                                @if (_addingMinistry)
+                                {
+                                    <span class="approval-leg-slot__add-label">@Msg("ApprovalLegProfile.Slot.NewMinistry")</span>
+                                    <p class="approval-leg-slot__muted">@Msg("ApprovalLegProfile.Slot.NewMinistryHint")</p>
+                                    <label class="approval-leg-slot__field">
+                                        @Msg("ApprovalLegProfile.Slot.NewMinistryShortName")
+                                        <input type="text"
+                                               maxlength="@ApprovalLegProfileSlotEditor.ShortNameMaxLength"
+                                               placeholder="@Msg("ApprovalLegProfile.Slot.NewMinistryShortPlaceholder")"
+                                               @bind="_newShortName"
+                                               @bind:event="oninput"
+                                               disabled="@_busy" />
+                                    </label>
+                                    <label class="approval-leg-slot__field approval-leg-slot__field--wide">
+                                        @Msg("ApprovalLegProfile.Slot.NewMinistryOfficialName")
+                                        <input type="text"
+                                               maxlength="@ApprovalLegProfileSlotEditor.OfficialNameMaxLength"
+                                               placeholder="@Msg("ApprovalLegProfile.Slot.NewMinistryOfficialPlaceholder")"
+                                               @bind="_newOfficialName"
+                                               @bind:event="oninput"
+                                               disabled="@_busy" />
+                                    </label>
+                                    <div class="approval-leg-slot__add-row">
+                                        <button type="button" class="approval-leg-slot__btn approval-leg-slot__btn--secondary" @onclick="CancelNewMinistry" disabled="@_busy">
+                                            @Msg("ApprovalLegProfile.Slot.Cancel")
+                                        </button>
+                                        <button type="button" class="approval-leg-slot__btn approval-leg-slot__btn--primary" @onclick="CreateNewMinistry" disabled="@_busy">
+                                            @Msg("ApprovalLegProfile.Slot.CreateMinistry")
+                                        </button>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="approval-leg-slot__add-label">@Msg("ApprovalLegProfile.Slot.AddMinistry")</span>
+                                    <div class="approval-leg-slot__add-row">
+                                        <select @bind="_addMinistryIdText" disabled="@_busy">
+                                            <option value="">@Msg("ApprovalLegProfile.Slot.SelectMinistry")</option>
+                                            @foreach (var ministry in AvailableMinistries)
+                                            {
+                                                <option value="@ministry.Id.ToString("D")">@ministry.Caption</option>
+                                            }
+                                        </select>
+                                        <button type="button" class="approval-leg-slot__btn approval-leg-slot__btn--primary" @onclick="AddMinistry" disabled="@_busy">
+                                            @Msg("ApprovalLegProfile.Slot.Add")
+                                        </button>
+                                    </div>
+                                    <button type="button" class="approval-leg-slot__link" @onclick="StartNewMinistry" disabled="@_busy">
+                                        @Msg("ApprovalLegProfile.Slot.NewMinistry")
+                                    </button>
+                                }
+                            </div>
+                        }
+                    </section>
+                </div>
+
+                <div class="approval-leg-slot__foot">
+                    @if (_draft.IsNew)
+                    {
+                        <span></span>
+                        <div class="approval-leg-slot__foot-actions">
+                            <button type="button" class="approval-leg-slot__btn approval-leg-slot__btn--secondary" @onclick="BackToCatalog" disabled="@_busy">
+                                @Msg("ApprovalLegProfile.Slot.Cancel")
+                            </button>
+                            <button type="button" class="approval-leg-slot__btn approval-leg-slot__btn--primary" @onclick="CreateAsync" disabled="@_busy">
+                                @Msg("ApprovalLegProfile.Slot.Create")
+                            </button>
+                        </div>
+                    }
+                    else if (_draft.IsInUse)
+                    {
+                        <span></span>
+                        <div class="approval-leg-slot__foot-actions">
+                            <button type="button" class="approval-leg-slot__btn approval-leg-slot__btn--primary" @onclick="SaveAsync" disabled="@_busy">
+                                @Msg("ApprovalLegProfile.Slot.Save")
+                            </button>
+                        </div>
+                    }
+                    else if (_confirmDelete)
+                    {
+                        <span class="approval-leg-slot__muted">@Msg("ApprovalLegProfile.Slot.ConfirmDelete")</span>
+                        <div class="approval-leg-slot__foot-actions">
+                            <button type="button" class="approval-leg-slot__btn approval-leg-slot__btn--secondary" @onclick="() => _confirmDelete = false" disabled="@_busy">
+                                @Msg("ApprovalLegProfile.Slot.Cancel")
+                            </button>
+                            <button type="button" class="approval-leg-slot__btn approval-leg-slot__btn--danger" @onclick="DeleteAsync" disabled="@_busy">
+                                @Msg("ApprovalLegProfile.Slot.Delete")
+                            </button>
+                        </div>
+                    }
+                    else
+                    {
+                        <button type="button" class="approval-leg-slot__link-danger" @onclick="() => _confirmDelete = true" disabled="@_busy">
+                            @Msg("ApprovalLegProfile.Slot.Delete")
+                        </button>
+                        <div class="approval-leg-slot__foot-actions">
+                            <button type="button" class="approval-leg-slot__btn approval-leg-slot__btn--secondary" @onclick="BackToCatalog" disabled="@_busy">
+                                @Msg("ApprovalLegProfile.Slot.Cancel")
+                            </button>
+                            <button type="button" class="approval-leg-slot__btn approval-leg-slot__btn--primary" @onclick="SaveAsync" disabled="@_busy">
+                                @Msg("ApprovalLegProfile.Slot.Save")
+                            </button>
+                        </div>
+                    }
+                </div>
+                @if (!_draft.IsNew)
+                {
+                    <p class="approval-leg-slot__hint">@Msg("ApprovalLegProfile.Slot.SaveHint")</p>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private enum Screen { Catalog, Editor }
+
+    [Parameter] public ApprovalLegCatalogSlotRequest? Request { get; set; }
+    [Parameter] public EventCallback CloseRequested { get; set; }
+
+    [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
+    [Inject] private IApprovalLegCatalogChangeNotifier CatalogChanged { get; set; } = null!;
+
+    private string _uiCultureName = string.Empty;
+    private Screen _screen = Screen.Catalog;
+    private string _search = string.Empty;
+    private string? _error;
+    private bool _busy;
+    private bool _confirmDelete;
+    private bool _addingMinistry;
+    private string _addMinistryIdText = string.Empty;
+    private string _newShortName = string.Empty;
+    private string _newOfficialName = string.Empty;
+    private IReadOnlyList<ApprovalLegProfileSlotCatalogRow> _rows = Array.Empty<ApprovalLegProfileSlotCatalogRow>();
+    private IReadOnlyList<ApprovalLegProfileSlotMinistryOption> _ministries = Array.Empty<ApprovalLegProfileSlotMinistryOption>();
+    private ApprovalLegProfileSlotDraft? _draft;
+    private bool _appliedRequest;
+
+    private string CloseLabel => VisaUiMessages.Get("ApplicationItemDocumentCopies.Action.Close", _uiCultureName);
+
+    private string HeaderTitle => _screen == Screen.Catalog
+        ? Msg("ApprovalLegProfile.Slot.Title")
+        : _draft?.IsNew == true
+            ? Msg("ApprovalLegProfile.Slot.NewTitle")
+            : string.IsNullOrWhiteSpace(_draft?.Code)
+                ? Msg("ApprovalLegProfile.Slot.EditTitle")
+                : _draft!.Code;
+
+    private string? HeaderSubtitle => _screen == Screen.Catalog
+        ? Msg("ApprovalLegProfile.Slot.Subtitle")
+        : _draft?.IsNew == true
+            ? Msg("ApprovalLegProfile.Slot.NewHint")
+            : Msg("ApprovalLegProfile.Slot.EditTitle");
+
+    private string MinistriesHeading =>
+        VisaUiMessages.FormatForCulture(_uiCultureName, "ApprovalLegProfile.Slot.Ministries", _draft?.Legs.Count ?? 0);
+
+    private IEnumerable<ApprovalLegProfileSlotMinistryOption> AvailableMinistries
+    {
+        get
+        {
+            var taken = _draft?.Legs.Select(l => l.MinistryId).ToHashSet() ?? [];
+            return _ministries.Where(m => !taken.Contains(m.Id));
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        _uiCultureName = VisaUiCultureResolver.Resolve();
+        ReloadCatalog();
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (_appliedRequest)
+            return;
+
+        _appliedRequest = true;
+        if (Request?.StartNew == true)
+            StartNew();
+        else if (Request?.FocusProfileId is Guid focusId && focusId != Guid.Empty)
+            OpenRow(focusId);
+    }
+
+    private string Msg(string key) => VisaUiMessages.Get(key, _uiCultureName);
+
+    private string UsedBy(int count) =>
+        VisaUiMessages.FormatForCulture(_uiCultureName, "ApprovalLegProfile.Slot.UsedBy", count);
+
+    private void ReloadCatalog()
+    {
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApprovalLegProfile>();
+        _rows = ApprovalLegProfileSlotEditor.List(objectSpace, _search);
+        _ministries = ApprovalLegProfileSlotEditor.ListMinistries(objectSpace);
+    }
+
+    private void OnActiveToggled(ChangeEventArgs e)
+    {
+        if (_draft == null || _busy)
+            return;
+
+        _draft.IsActive = e.Value is bool flag
+            ? flag
+            : bool.TryParse(e.Value?.ToString(), out var parsed) && parsed;
+    }
+
+    private void StartNew()
+    {
+        _error = null;
+        _confirmDelete = false;
+        ResetAddMinistry();
+        _draft = ApprovalLegProfileSlotEditor.NewDraft();
+        _screen = Screen.Editor;
+    }
+
+    private void OpenRow(Guid id)
+    {
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApprovalLegProfile>();
+        var draft = ApprovalLegProfileSlotEditor.Load(objectSpace, id);
+        if (draft == null)
+        {
+            _error = Msg("ApprovalLegProfile.Slot.NotFound");
+            return;
+        }
+
+        _error = null;
+        _confirmDelete = false;
+        ResetAddMinistry();
+        _draft = draft;
+        _screen = Screen.Editor;
+    }
+
+    private void BackToCatalog()
+    {
+        _draft = null;
+        _confirmDelete = false;
+        _error = null;
+        ResetAddMinistry();
+        _screen = Screen.Catalog;
+        ReloadCatalog();
+    }
+
+    private void AddMinistry()
+    {
+        if (_draft == null || _draft.IsInUse)
+            return;
+        if (!Guid.TryParse(_addMinistryIdText, out var ministryId) || ministryId == Guid.Empty)
+            return;
+
+        var option = _ministries.FirstOrDefault(m => m.Id == ministryId);
+        if (option == null)
+            return;
+        if (_draft.Legs.Any(l => l.MinistryId == ministryId))
+        {
+            _error = Msg("ApprovalLegProfile.Slot.DuplicateMinistry");
+            return;
+        }
+
+        _draft.Legs.Add(new ApprovalLegProfileSlotLegDraft { MinistryId = option.Id, Caption = option.Caption });
+        _addMinistryIdText = string.Empty;
+        _error = null;
+    }
+
+    private void StartNewMinistry()
+    {
+        if (_draft == null || _draft.IsInUse)
+            return;
+        _addingMinistry = true;
+        _newShortName = string.Empty;
+        _newOfficialName = string.Empty;
+        _error = null;
+    }
+
+    private void CancelNewMinistry()
+    {
+        _addingMinistry = false;
+        _newShortName = string.Empty;
+        _newOfficialName = string.Empty;
+        _error = null;
+    }
+
+    private void CreateNewMinistry()
+    {
+        if (_draft == null || _draft.IsInUse)
+            return;
+
+        Persist(() =>
+        {
+            var draft = _draft;
+            if (draft == null)
+                return Msg("ApprovalLegProfile.Slot.SaveFailed");
+
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApprovingMinistry>();
+            if (!ApprovalLegProfileSlotEditor.TryCreateMinistry(
+                    objectSpace,
+                    _newShortName,
+                    _newOfficialName,
+                    out var created,
+                    out var error))
+                return error;
+
+            _ministries = ApprovalLegProfileSlotEditor.ListMinistries(objectSpace);
+            if (created != null && !draft.Legs.Any(l => l.MinistryId == created.Id))
+            {
+                draft.Legs.Add(new ApprovalLegProfileSlotLegDraft
+                {
+                    MinistryId = created.Id,
+                    Caption = created.Caption,
+                });
+            }
+
+            _addingMinistry = false;
+            _newShortName = string.Empty;
+            _newOfficialName = string.Empty;
+            return null;
+        });
+    }
+
+    private void ResetAddMinistry()
+    {
+        _addingMinistry = false;
+        _addMinistryIdText = string.Empty;
+        _newShortName = string.Empty;
+        _newOfficialName = string.Empty;
+    }
+
+    private void RemoveLeg(int index)
+    {
+        if (_draft == null || _draft.IsInUse || index < 0 || index >= _draft.Legs.Count)
+            return;
+        _draft.Legs.RemoveAt(index);
+    }
+
+    private void MoveLeg(int index, int delta)
+    {
+        if (_draft == null || _draft.IsInUse)
+            return;
+        var target = index + delta;
+        if (index < 0 || index >= _draft.Legs.Count || target < 0 || target >= _draft.Legs.Count)
+            return;
+        (_draft.Legs[index], _draft.Legs[target]) = (_draft.Legs[target], _draft.Legs[index]);
+    }
+
+    private void CreateAsync() => Persist(() =>
+    {
+        if (_draft == null)
+            return Msg("ApprovalLegProfile.Slot.SaveFailed");
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApprovalLegProfile>();
+        if (!ApprovalLegProfileSlotEditor.TryCreate(objectSpace, _draft, out var createdId, out var error))
+            return error;
+        CatalogChanged.Notify(createdId);
+        BackToCatalog();
+        return null;
+    });
+
+    private void SaveAsync() => Persist(() =>
+    {
+        if (_draft == null)
+            return Msg("ApprovalLegProfile.Slot.SaveFailed");
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApprovalLegProfile>();
+        if (!ApprovalLegProfileSlotEditor.TrySave(objectSpace, _draft, out var error))
+            return error;
+        CatalogChanged.Notify(_draft.Id);
+        BackToCatalog();
+        return null;
+    });
+
+    private void DeleteAsync() => Persist(() =>
+    {
+        if (_draft?.Id is not Guid id)
+            return Msg("ApprovalLegProfile.Slot.NotFound");
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApprovalLegProfile>();
+        if (!ApprovalLegProfileSlotEditor.TryDelete(objectSpace, id, out var error))
+            return error;
+        CatalogChanged.Notify();
+        BackToCatalog();
+        return null;
+    });
+
+    private void Persist(Func<string?> work)
+    {
+        if (_busy)
+            return;
+        _busy = true;
+        try
+        {
+            _error = work();
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private Task ClosePanelAsync() => CloseRequested.InvokeAsync();
+}

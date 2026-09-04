@@ -22,6 +22,14 @@ Record verified outcomes after catalog generator changes, CI fixes, guide public
 
 ## Entries
 
+### 2026-08-07 — Application Profile officer guides (preview, no E2E)
+
+- **Phase:** 2
+- **Area:** guide
+- **What worked:** EN drafts `applications/application-profiles` (officer model + picker) and `administration/configuration/application-profiles` (wizard); updated `create`, `overview`, configuration overview; `mkdocs.yml` nav; `screenshotsVersion: 2026.08-preview` + prose/mermaid — no `media-capture` registry or UserManual E2E.
+- **Gotcha / drift:** Legacy `application-create-step-02-type-selected` PNG still referenced with preview disclaimer; tr/tk/ru fall back to EN via i18n until translated.
+- **Follow-up:** Doc-anchored screenshots when picker/wizard UI stable; sync tr/tk/ru bodies; retire Application Type Code prose after cutover.
+
 ### 2026-08-04 — Skill and plan created
 
 - **Phase:** 0 (planning)

@@ -13,7 +13,7 @@ internal sealed record Visa2014VisaRawRow(
     DateTime? ExpirationDate,
     Guid LegacyPassportOid,
     string? AsNumber,
-    Guid? LegacyPersonInApplicationOid,
+    Guid? LegacyPersonInApplicationProfileInstanceOid,
     bool IsFamilyMemberPerson,
     bool BzDasoguz,
     bool BzTagtabazar,
@@ -66,7 +66,7 @@ internal static class Visa2014VisaTransform
             CONVERT(varchar(10), v.VisaEndDate, 23) AS VisaEndDate,
             CAST(v.Passport AS varchar(36)) AS LegacyPassportOid,
             v.ASNumber,
-            CAST(v.ProcessNumber AS varchar(36)) AS LegacyPersonInApplicationOid,
+            CAST(v.ProcessNumber AS varchar(36)) AS LegacyPersonInApplicationProfileInstanceOid,
             CASE WHEN v.BorderZone IS NULL THEN '0' ELSE '1' END AS HasBorderZoneFk,
             CASE WHEN ISNULL(bz.[Daşoguz], 0) = 1 THEN '1' ELSE '0' END AS BzDasoguz,
             CASE WHEN ISNULL(bz.Tagtabazar, 0) = 1 THEN '1' ELSE '0' END AS BzTagtabazar,
@@ -96,11 +96,12 @@ internal static class Visa2014VisaTransform
         "_hasVisaDocument", "_visaDocumentByteLength",
         "VisaNumber", "VisaType", "VisaCategory", "VisaIssuedPlace",
         "IssueDate", "StartDate", "ExpirationDate", "BorderZoneLocation", "Passport",
-        "ProcessNumber", "LegacyPersonInApplicationOid",
+        "Application", "ProcessNumber", "LegacyPersonInApplicationProfileInstanceOid",
         "ExtensionRequired", "IsCancelled", "IsChanged", "IsExtended", "ShowOptionalFields",
-        "InvitationItem", "IssuingApplicationItem", "Notes",
+        "IssuingInvitationItem", "Notes",
         "_legacy_VisaTypeComposite", "_legacy_VisaTypePersonOverride", "_legacy_VisaCategoryComposite",
-        "_legacy_IssuedPlaceOfVisaL", "_legacy_PassportOid", "_legacy_ASNumber", "_legacy_PersonInApplicationOid",
+        "_legacy_IssuedPlaceOfVisaL", "_legacy_PassportOid", "_legacy_ASNumber", "_legacy_PersonInApplicationProfileInstanceOid",
+        "_legacy_ApplicationProfileInstanceOid",
     ];
 
     public static Visa2014PersonImportBatch PrepareImportBatch(
@@ -133,7 +134,18 @@ internal static class Visa2014VisaTransform
             lookupTranslationPaths,
             verbose);
 
-        var transformed = TransformRows(rawRows, catalogs, cancellationIndex, out var skipped, out var unmappedDistinct, out var dedupeSummary);
+        var issuingApplicationByVisa = Visa2014VisaIssuingApplicationProfileInstanceIndex.Load(
+            connectionString,
+            verbose);
+
+        var transformed = TransformRows(
+            rawRows,
+            catalogs,
+            cancellationIndex,
+            issuingApplicationByVisa,
+            out var skipped,
+            out var unmappedDistinct,
+            out var dedupeSummary);
         return new Visa2014PersonImportBatch
         {
             ImportRows = transformed.ImportRows,
@@ -171,8 +183,8 @@ internal static class Visa2014VisaTransform
             AsNumber: string.IsNullOrWhiteSpace(row.GetValueOrDefault("ASNumber"))
                 ? null
                 : row.GetValueOrDefault("ASNumber")!.Trim(),
-            LegacyPersonInApplicationOid: Guid.TryParse(
-                    row.GetValueOrDefault("LegacyPersonInApplicationOid")?.Trim(), out var piaOid)
+            LegacyPersonInApplicationProfileInstanceOid: Guid.TryParse(
+                    row.GetValueOrDefault("LegacyPersonInApplicationProfileInstanceOid")?.Trim(), out var piaOid)
                 ? piaOid
                 : null,
             IsFamilyMemberPerson: row.GetValueOrDefault("IsFamilyMemberPerson") == "1",
@@ -194,6 +206,7 @@ internal static class Visa2014VisaTransform
         IReadOnlyList<Visa2014VisaRawRow> rawRows,
         IReadOnlyDictionary<string, Visa2014LookupCatalog> catalogs,
         Visa2014LegacyDocumentCancellationIndex cancellationIndex,
+        IReadOnlyDictionary<Guid, Guid> issuingApplicationByVisa,
         out List<Dictionary<string, object?>> skipped,
         out List<Dictionary<string, object?>> unmappedDistinct,
         out List<Dictionary<string, object?>> dedupeSummary)
@@ -217,7 +230,13 @@ internal static class Visa2014VisaTransform
                 continue;
             }
 
-            var export = BuildExportRow(row, catalogs, cancellationIndex, out var skipReason, out var rowUnmapped);
+            var export = BuildExportRow(
+                row,
+                catalogs,
+                cancellationIndex,
+                issuingApplicationByVisa,
+                out var skipReason,
+                out var rowUnmapped);
             foreach (var key in rowUnmapped)
                 unmappedSet.Add(key);
 
@@ -295,6 +314,7 @@ internal static class Visa2014VisaTransform
         WorkingRow working,
         IReadOnlyDictionary<string, Visa2014LookupCatalog> catalogs,
         Visa2014LegacyDocumentCancellationIndex cancellationIndex,
+        IReadOnlyDictionary<Guid, Guid> issuingApplicationByVisa,
         out string? skipReason,
         out List<string> unmapped)
     {
@@ -351,17 +371,22 @@ internal static class Visa2014VisaTransform
         row["ExpirationDate"] = raw.ExpirationDate;
         row["Passport"] = raw.LegacyPassportOid.ToString("D");
         row["ProcessNumber"] = raw.AsNumber;
-        row["LegacyPersonInApplicationOid"] = raw.LegacyPersonInApplicationOid;
+        row["LegacyPersonInApplicationProfileInstanceOid"] = raw.LegacyPersonInApplicationProfileInstanceOid;
         row["_legacy_ASNumber"] = raw.AsNumber;
-        row["_legacy_PersonInApplicationOid"] = raw.LegacyPersonInApplicationOid?.ToString("D");
+        row["_legacy_PersonInApplicationProfileInstanceOid"] = raw.LegacyPersonInApplicationProfileInstanceOid?.ToString("D");
         row["ExtensionRequired"] = true;
         row["IsCancelled"] = cancellationIndex.IsVisaCancelled(raw.LegacyOid);
         row["IsChanged"] = false;
         row["IsExtended"] = false;
         row["ShowOptionalFields"] = false;
-        row["InvitationItem"] = null;
-        row["IssuingApplicationItem"] = null;
+        row["IssuingInvitationItem"] = null;
         row["Notes"] = null;
+
+        if (issuingApplicationByVisa.TryGetValue(raw.LegacyOid, out var legacyApplicationOid))
+        {
+            row["Application"] = legacyApplicationOid.ToString("D");
+            row["_legacy_ApplicationProfileInstanceOid"] = legacyApplicationOid.ToString("D");
+        }
 
         var visaTypeComposite = BuildComposite(raw.TypeOfVisaL, raw.MgCode);
         row["_legacy_VisaTypeComposite"] = visaTypeComposite;

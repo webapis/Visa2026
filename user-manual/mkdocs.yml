@@ -132,6 +132,7 @@ nav:
           - guides/person/mark-incomplete.md
       - Applications:
           - guides/applications/overview.md
+          - guides/applications/application-profiles.md
           - guides/applications/create.md
           - guides/applications/add-items.md
           - guides/applications/progress.md
@@ -141,6 +142,7 @@ nav:
           - guides/administration/configuration/overview.md
           - Configuration:
               - guides/administration/configuration/organization.md
+              - guides/administration/configuration/application-profiles.md
               - guides/administration/configuration/contracts-and-approvals.md
               - guides/administration/configuration/sla.md
               - guides/administration/configuration/alerts-and-upload-limits.md

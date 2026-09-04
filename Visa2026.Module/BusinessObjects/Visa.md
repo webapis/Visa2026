@@ -2,7 +2,7 @@
 
 ## 1. Purpose
 
-The `Visa` business object stores information about a travel visa issued for a specific passport. Issuance may be tied to the application workflow via optional **`IssuingApplicationItem`** and **`InvitationItem`** links (see §3). Both appear on the detail view behind the **optional-fields gear** when collapsed; they auto-expand when populated.
+The `Visa` business object stores information about a travel visa issued for a specific passport. Issuance may be tied to the application workflow via optional **`IssuingApplicationItem`** and **`IssuingInvitationItem`** links (see §3). Both appear on the detail view behind the **optional-fields gear** when collapsed; they auto-expand when populated.
 
 ---
 
@@ -22,10 +22,10 @@ Key fields as implemented in `Visa.cs` (not exhaustive for derived/UI-only membe
 | `BorderZoneLocation` | `string` | Comma-separated border zone labels (`BorderZoneName` catalog). Required; defaults to **`Ýok`** when unset (no border zones). | `[RuleRequiredField]`; multi-select sentinel `Ýok`. |
 | `Passport` | `Passport` | Passport this visa is stamped on. | Required. |
 | **`AvailableIssuingApplicationItems`** | — | **Not mapped.** Filtered **`ApplicationItem`** list: same **`Person`** as **`Passport`**, parent **`ApplicationType.CanIssueVisa`**, not soft-deleted. Drives **`IssuingApplicationItem`** lookup (`[DataSourceProperty]`). |
-| **`IssuingApplicationItem`** | **`ApplicationItem`** | **The application line for the visa holder** under which this visa was issued. | **Optional** (gear). When set: same **`Person`** as **`Passport.Person`**, allowed **`ApplicationType.Name`**. UI caption: *Issuing Application Item*. |
-| **`AvailableInvitationItems`** | — | **Not mapped.** **`InvitationItem`** rows for **`Passport.Person`**. Drives **`InvitationItem`** lookup. |
-| `InvitationItem` | `InvitationItem` | Linked invitation line item for the visa holder. | **Optional** (gear). Person must match **`Passport.Person`** when set. |
-| `AssociatedApplicationItems` | `IList<ApplicationItem>` | Application items that reference this visa as their **target / current** visa (`ApplicationItem.CurrentVisa`). Inverse of `CurrentVisa`. | Optional collection. **`[VisibleInDetailView(false)]`** — not shown on Visa Detail View; linkage kept for logic/reports. |
+| **`IssuingApplicationItem`** | **`ApplicationItem`** | **The application line for the visa holder** under which this visa was issued. | **Optional** (gear). When set: same **`Person`** as **`Passport.Person`**, allowed **`ApplicationType.Name`**. UI caption: *Issuing ApplicationProfileInstance Item*. |
+| **`AvailableIssuingInvitationItems`** | — | **Not mapped.** **`IssuingInvitationItem`** rows for **`Passport.Person`**. Drives **`IssuingInvitationItem`** lookup. |
+| `IssuingInvitationItem` | `InvitationItem` | Linked invitation line item for the visa holder. | **Optional** (gear). Person must match **`Passport.Person`** when set. |
+| `AssociatedApplicationItems` | `IList<ApplicationItem>` | ApplicationProfileInstance items that reference this visa as their **target / current** visa (`ApplicationItem.CurrentVisa`). Inverse of `CurrentVisa`. | Optional collection. **`[VisibleInDetailView(false)]`** — not shown on Visa Detail View; linkage kept for logic/reports. |
 | `Images` | `IList<VisaImage>` | Scans of the visa. | Aggregated. |
 | `Documents` | `IList<VisaDocument>` | Related documents. | Aggregated. |
 | `Notes` | `string` | Free text. | Optional (gear). |
@@ -43,15 +43,15 @@ Key fields as implemented in `Visa.cs` (not exhaustive for derived/UI-only membe
 
 ---
 
-## 3. Application linkage (business rule)
+## 3. ApplicationProfileInstance linkage (business rule)
 
 | Concept | Meaning |
 |--------|---------|
 | **`IssuingApplicationItem`** | Points to the **`ApplicationItem`** whose **`Person`** must be **the visa holder** (`Passport.Person`). It is **that person’s line** on an **`Application`** that issued this visa—not another applicant’s line on the same batch. **May be omitted** (e.g. pre-system import, manual entry). |
-| **`InvitationItem`** | Optional link to the person’s invitation line used for this visa. |
+| **`IssuingInvitationItem`** | Optional link to the person’s invitation line used for this visa. |
 | **`AssociatedApplicationItems`** | Other **`ApplicationItem`** rows that **use this visa as `CurrentVisa`** (e.g. extensions, cancellations, downstream steps). One visa may appear here on zero or many items. |
 
-**Rule:** **`IssuingApplicationItem`** and **`InvitationItem`** are **not required** at save. When **`IssuingApplicationItem`** is set, person and application-type checks apply.
+**Rule:** **`IssuingApplicationItem`** and **`IssuingInvitationItem`** are **not required** at save. When **`IssuingApplicationItem`** is set, person and application-type checks apply.
 
 **Allowed issuing application types (when issuing item is used):** The parent **`Application`**’s **`ApplicationType.CanIssueVisa`** must be true (seeded for invitation flows, extensions, exit visa, passport change, etc.).
 
@@ -63,9 +63,9 @@ Key fields as implemented in `Visa.cs` (not exhaustive for derived/UI-only membe
 |-----------|---------|
 | `IsPersonValid` (`RuleFromBoolProperty`) | When **`IssuingApplicationItem`** is set, ensures **`IssuingApplicationItem.Person`** matches **`Passport.Person`**. |
 | `IsIssuingApplicationTypeAllowed` (`RuleFromBoolProperty`) | When **`IssuingApplicationItem`** is set, ensures **`ApplicationType.CanIssueVisa`**. |
-| `IsInvitationPersonValid` | When **`InvitationItem`** is set, ensures invitation person matches **`Passport.Person`**. |
+| `IsInvitationPersonValid` | When **`IssuingInvitationItem`** is set, ensures invitation person matches **`Passport.Person`**. |
 
-Lookup choices for **`IssuingApplicationItem`** come from **`AvailableIssuingApplicationItems`**; for **`InvitationItem`** from **`AvailableInvitationItems`** (**`[DataSourceProperty]`**).
+Lookup choices for **`IssuingApplicationItem`** come from **`AvailableIssuingApplicationItems`**; for **`IssuingInvitationItem`** from **`AvailableIssuingInvitationItems`** (**`[DataSourceProperty]`**).
 
 ---
 
@@ -73,7 +73,7 @@ Lookup choices for **`IssuingApplicationItem`** come from **`AvailableIssuingApp
 
 - Navigation: **Lookup/Visa**.
 - **`ExpirationDate`** must be later than **`StartDate`**.
-- Optional fields (including **`IssuingApplicationItem`**, **`InvitationItem`**, status flags, **`Notes`**) use the **gear toggle** — see **`docs/OPTIONAL_DETAIL_FIELDS.md`**.
+- Optional fields (including **`IssuingApplicationItem`**, **`IssuingInvitationItem`**, status flags, **`Notes`**) use the **gear toggle** — see **`docs/OPTIONAL_DETAIL_FIELDS.md`**.
 - List views: deleted rows grayed out; severity-based row coloring via state evaluation (`StateSeverityLevel`).
 - Only one active visa per **Person** at a time (see `SingleActiveBaseObject`).
 

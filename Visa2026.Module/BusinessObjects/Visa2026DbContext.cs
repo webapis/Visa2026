@@ -6,6 +6,8 @@ using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
 using DevExpress.Persistent.BaseImpl.EFCore.AuditTrail;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using System.Collections.Generic;
+using System.Linq.Expressions;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -94,16 +96,14 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<InvitationImage> InvitationImages { get; set; }
         public DbSet<InvitationDocument> InvitationDocuments { get; set; }
         public DbSet<MedicalRecordDocument> MedicalRecordDocuments { get; set; }
-        public DbSet<ApplicationItem> ApplicationItems { get; set; }
         public DbSet<ProjectContract> ProjectContracts { get; set; }
         public DbSet<ProjectContractImage> ProjectContractImages { get; set; }
         public DbSet<ProjectContractDocument> ProjectContractDocuments { get; set; }
         public DbSet<ApprovingMinistry> ApprovingMinistries { get; set; }
-        public DbSet<ApplicationMigrationSlaProfile> ApplicationMigrationSlaProfiles { get; set; }
         public DbSet<ApprovalLegProfile> ApprovalLegProfiles { get; set; }
         public DbSet<ApprovalLegProfileMinistryLeg> ApprovalLegProfileMinistryLegs { get; set; }
         public DbSet<ProjectContractApprovalLegProfile> ProjectContractApprovalLegProfiles { get; set; }
-        public DbSet<ApplicationApprovalLegSnapshot> ApplicationApprovalLegSnapshots { get; set; }
+        public DbSet<ApplicationProfileInstanceApprovalLegSnapshot> ApplicationProfileInstanceApprovalLegSnapshots { get; set; }
         public DbSet<VisaPeriod> VisaPeriods { get; set; }
         public DbSet<VisaCategory> VisaCategories { get; set; }
         public DbSet<Invitation> Invitations { get; set; }
@@ -113,25 +113,34 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<RejectionImage> RejectionImages { get; set; }
         public DbSet<RejectionDocument> RejectionDocuments { get; set; }
         public DbSet<BorderZone> BorderZones { get; set; }
+        public DbSet<BorderZoneItem> BorderZoneItems { get; set; }
         public DbSet<BorderZoneDocument> BorderZoneDocuments { get; set; }
         public DbSet<CheckPoint> CheckPoints { get; set; }
         public DbSet<VisaIssuedPlace> VisaIssuedPlaces { get; set; }
         public DbSet<PurposeOfTravel> PurposeOfTravels { get; set; }
+        public DbSet<BusinessTripAddress> BusinessTripAddresses { get; set; }
+        public DbSet<BusinessTripPurpose> BusinessTripPurposes { get; set; }
         public DbSet<WorkPermit> WorkPermits { get; set; }
         public DbSet<WorkPermitDocument> WorkPermitDocuments { get; set; }
         public DbSet<WorkPermitImage> WorkPermitImages { get; set; }
         public DbSet<Urgency> Urgencies { get; set; }
         public DbSet<Subcontractor> Subcontractors { get; set; }
-        public DbSet<Application> Applications { get; set; }
+        public DbSet<ApplicationProfileInstance> ApplicationProfileInstances { get; set; }
         public DbSet<MigrationService> MigrationServices { get; set; }
         public DbSet<EmployeeSalary> EmployeeSalaries { get; set; }
         public DbSet<WorkDuty> WorkDuties { get; set; }
         public DbSet<ContractTemplate> ContractTemplates { get; set; }
         public DbSet<ApplicationType> ApplicationTypes { get; set; }
+        public DbSet<ApplicationProfile> ApplicationProfiles { get; set; }
+        public DbSet<ApplicationProfileApprovalLeg> ApplicationProfileApprovalLegs { get; set; }
+        public DbSet<ApplicationProfileApprovalLegVersion> ApplicationProfileApprovalLegVersions { get; set; }
+        public DbSet<ApplicationProfileTemplate> ApplicationProfileTemplates { get; set; }
+        public DbSet<ApplicationProfileProgressStateSetting> ApplicationProfileProgressStateSettings { get; set; }
+        public DbSet<ApplicationProfileInstancePersonResolvedLink> ApplicationProfileInstancePersonResolvedLinks { get; set; }
         public DbSet<ApplicationTypeGroup> ApplicationTypeGroups { get; set; }
         public DbSet<ApplicationTypeGroupMember> ApplicationTypeGroupMembers { get; set; }
         public DbSet<ApplicationState> ApplicationStates { get; set; }
-        public DbSet<ApplicationProgress> ApplicationProgresses { get; set; }
+        public DbSet<ApplicationProfileInstanceProgress> ApplicationProfileInstanceProgresses { get; set; }
         public DbSet<ApplicationLocation> ApplicationLocations { get; set; }
         public DbSet<ValidityDuration> ValidityDurations { get; set; }
         public DbSet<VisaExtensionTracking> VisaExtensionTracking { get; set; }
@@ -248,11 +257,6 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<VisaExtensionTracking>(b => {
                 b.HasKey(t => t.ID);
                 b.ToView("View_VisaExtensionTracking");
-                b.HasOne(t => t.ApplicationItem)
-                    .WithMany()
-                    .HasForeignKey(t => t.ApplicationItemID)
-                    .IsRequired(false)
-                    .OnDelete(DeleteBehavior.NoAction);
             });
 
             modelBuilder.Entity<VisaExtensionStatus>(b => {
@@ -265,11 +269,6 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<WorkPermitExtensionTracking>(b => {
                 b.HasKey(t => t.ID);
                 b.ToView("View_WorkPermitExtensionTracking");
-                b.HasOne(t => t.ApplicationItem)
-                    .WithMany()
-                    .HasForeignKey(t => t.ApplicationItemID)
-                    .IsRequired(false)
-                    .OnDelete(DeleteBehavior.NoAction);
             });
 
             modelBuilder.Entity<WorkPermitExtensionStatus>(b => {
@@ -293,7 +292,7 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<VisaCancellationStatus>(b => {
                 b.HasKey(c => c.ID);
                 b.ToView("View_VisaCancellationStatus");
-                b.HasOne(c => c.Application).WithMany().HasForeignKey(c => c.ApplicationID).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(c => c.ApplicationProfileInstance).WithMany().HasForeignKey(c => c.ApplicationProfileInstanceID).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(c => c.Visa).WithMany().HasForeignKey(c => c.VisaID).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(c => c.Person).WithMany().HasForeignKey(c => c.PersonID).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(c => c.Passport).WithMany().HasForeignKey(c => c.PassportID).OnDelete(DeleteBehavior.NoAction);
@@ -404,7 +403,7 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<VwRdVisaAppProgress>(b => {
                 b.HasKey(t => t.ID);
                 b.ToView("vw_rd_visa_app_progress");
-                b.HasOne(t => t.Application).WithMany().HasForeignKey(t => t.ApplicationOid).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.ApplicationProfileInstance).WithMany().HasForeignKey(t => t.ApplicationProfileInstanceOid).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(t => t.ExpiringVisa).WithMany().HasForeignKey(t => t.ExpiringVisaID).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(t => t.Passport).WithMany().HasForeignKey(t => t.PassportID).OnDelete(DeleteBehavior.NoAction);
@@ -463,7 +462,7 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<VwRdVisaOnExtension>(b => {
                 b.HasKey(t => t.ID);
                 b.ToView("vw_rd_visa_on_extension");
-                b.HasOne(t => t.Application).WithMany().HasForeignKey(t => t.ApplicationOid).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.ApplicationProfileInstance).WithMany().HasForeignKey(t => t.ApplicationProfileInstanceOid).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(t => t.ExpiringVisa).WithMany().HasForeignKey(t => t.ExpiringVisaID).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(t => t.Passport).WithMany().HasForeignKey(t => t.PassportID).OnDelete(DeleteBehavior.NoAction);
@@ -473,7 +472,7 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<VwRdVisaOnExtensionByPeriodCategoryType>(b => {
                 b.HasKey(t => t.ID);
                 b.ToView("vw_rd_visa_on_extension_by_period_category_type");
-                b.HasOne(t => t.Application).WithMany().HasForeignKey(t => t.ApplicationOid).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.ApplicationProfileInstance).WithMany().HasForeignKey(t => t.ApplicationProfileInstanceOid).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(t => t.ExpiringVisa).WithMany().HasForeignKey(t => t.ExpiringVisaID).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(t => t.Passport).WithMany().HasForeignKey(t => t.PassportID).OnDelete(DeleteBehavior.NoAction);
@@ -483,7 +482,7 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<VwRdVisaExtensionResult>(b => {
                 b.HasKey(t => t.ID);
                 b.ToView("vw_rd_visa_extension_result");
-                b.HasOne(t => t.Application).WithMany().HasForeignKey(t => t.ApplicationOid).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.ApplicationProfileInstance).WithMany().HasForeignKey(t => t.ApplicationProfileInstanceOid).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(t => t.ExpiringVisa).WithMany().HasForeignKey(t => t.ExpiringVisaID).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(t => t.Passport).WithMany().HasForeignKey(t => t.PassportID).OnDelete(DeleteBehavior.NoAction);
@@ -493,7 +492,7 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<VwRdVisaExtensionResultByPeriodCategoryType>(b => {
                 b.HasKey(t => t.ID);
                 b.ToView("vw_rd_visa_extension_result_by_period_category_type");
-                b.HasOne(t => t.Application).WithMany().HasForeignKey(t => t.ApplicationOid).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.ApplicationProfileInstance).WithMany().HasForeignKey(t => t.ApplicationProfileInstanceOid).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(t => t.ExpiringVisa).WithMany().HasForeignKey(t => t.ExpiringVisaID).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(t => t.Passport).WithMany().HasForeignKey(t => t.PassportID).OnDelete(DeleteBehavior.NoAction);
@@ -619,27 +618,251 @@ namespace Visa2026.Module.BusinessObjects
                     .HasFilter(IndexFilter("[GCRecord] IS NULL"));
             });
 
-            modelBuilder.Entity<Application>(b => {
+            modelBuilder.Entity<ApplicationProfileInstance>(b => {
                 b.HasOne(a => a.LatestProgress)
                     .WithMany()
                     .HasForeignKey(a => a.LatestProgressId)
                     .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(a => a.ApplicationProfile)
+                    .WithMany(p => p.Instances)
+                    .HasForeignKey("ApplicationProfileID")
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.Restrict);
+                b.HasOne(a => a.Region)
+                    .WithMany()
+                    .HasForeignKey("RegionId")
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(a => a.City)
+                    .WithMany()
+                    .HasForeignKey("CityId")
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(a => a.BusinessTripAddress)
+                    .WithMany()
+                    .HasForeignKey("BusinessTripAddressId")
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.Property(a => a.Purpose).HasMaxLength(700);
+                b.Property(a => a.LetterheadCompanyCode).HasMaxLength(10);
+                b.HasOne(a => a.OrganizationCompany)
+                    .WithMany()
+                    .HasForeignKey(a => a.OrganizationCompanyId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(a => a.OrganizationSignatory)
+                    .WithMany()
+                    .HasForeignKey(a => a.OrganizationSignatoryId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(a => a.OrganizationRepresentative)
+                    .WithMany()
+                    .HasForeignKey(a => a.OrganizationRepresentativeId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
                 b.Property(a => a.BorderZoneLocation).HasMaxLength(500);
+                b.Property(a => a.MovementPermitLocation).HasMaxLength(500);
                 b.HasIndex(a => new { a.AppNumberPrefix, a.ApplicationNumber, a.Year, a.Month })
                  .IsUnique()
                  .HasFilter(IndexFilter("[IsManualEntry] = 0 AND [GCRecord] IS NULL"));
+                b.HasIndex(a => a.ProcessNumber)
+                 .IsUnique()
+                 .HasDatabaseName("IX_ApplicationProfileInstances_ProcessNumber")
+                 .HasFilter(IndexFilter("[ProcessNumber] IS NOT NULL AND [ProcessNumber] <> '' AND [GCRecord] IS NULL"));
                 b.HasIndex("ApplicationTypeID")
                  .HasDatabaseName("IX_Applications_ApplicationTypeID_List");
+                b.HasIndex("ApplicationProfileID")
+                 .HasDatabaseName("IX_Applications_ApplicationProfileID");
             });
 
-            modelBuilder.Entity<ApplicationProgress>(b => {
-                b.HasIndex("ApplicationID", nameof(ApplicationProgress.Order))
-                 .HasDatabaseName("IX_ApplicationProgresses_ApplicationID_ProgressOrder");
+            modelBuilder.Entity<ApplicationProfile>(b =>
+            {
+                b.Property(p => p.Name).HasMaxLength(200);
+                b.Property(p => p.Code).HasMaxLength(64);
+                b.Property(p => p.SelectionCode).HasMaxLength(3);
+                b.Property(p => p.DefaultBorderZoneLocation).HasMaxLength(500);
+                b.Property(p => p.DefaultWorkPermitLocation).HasMaxLength(500);
+                b.HasOne(p => p.DefaultApprovalLegProfile).WithMany().HasForeignKey(p => p.DefaultApprovalLegProfileId).OnDelete(DeleteBehavior.SetNull);
+                b.Property(p => p.DefaultPurpose).HasMaxLength(700);
+                b.HasOne(p => p.DefaultBusinessTripAddress)
+                    .WithMany()
+                    .HasForeignKey(p => p.DefaultBusinessTripAddressId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasIndex(p => p.Code)
+                    .IsUnique()
+                    .HasFilter(IndexFilter("[Code] IS NOT NULL AND [Code] <> '' AND [GCRecord] IS NULL"));
+                b.HasIndex(p => p.SelectionCode)
+                    .HasDatabaseName("IX_ApplicationProfiles_SelectionCode");
             });
 
-            modelBuilder.Entity<ApplicationApprovalLegSnapshot>(b => {
-                b.HasIndex(s => s.ApplicationId)
-                 .HasDatabaseName("IX_ApplicationApprovalLegSnapshots_ApplicationId");
+            modelBuilder.Entity<BusinessTripAddress>(b =>
+            {
+                b.ToTable("BusinessTripAddress");
+                b.Property(a => a.FullAddress).HasMaxLength(255);
+                b.HasOne(a => a.City)
+                    .WithMany()
+                    .HasForeignKey("CityID")
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<BusinessTripPurpose>(b =>
+            {
+                b.ToTable("BusinessTripPurpose");
+                b.Property(p => p.Name).HasMaxLength(200);
+                b.Property(p => p.Description).HasMaxLength(2000);
+            });
+
+            modelBuilder.Entity<ApplicationProfileApprovalLegVersion>(b =>
+            {
+                b.Property(v => v.Name).HasMaxLength(200);
+                b.HasOne(v => v.ApplicationProfile)
+                    .WithMany(p => p.ApprovalLegVersions)
+                    .HasForeignKey(v => v.ApplicationProfileId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                b.HasIndex(v => new { v.ApplicationProfileId, v.Sequence })
+                    .HasDatabaseName("IX_ApplicationProfileApprovalLegVersions_Profile_Sequence");
+            });
+
+            modelBuilder.Entity<ApplicationProfileApprovalLeg>(b =>
+            {
+                b.HasOne(l => l.ApplicationProfile)
+                    .WithMany(p => p.ApprovalLegs)
+                    .HasForeignKey(l => l.ApplicationProfileId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                b.HasOne(l => l.ApprovalLegVersion)
+                    .WithMany(v => v.Legs)
+                    .HasForeignKey(l => l.ApprovalLegVersionId)
+                    .OnDelete(DeleteBehavior.SetNull);
+                b.HasIndex(l => new { l.ApplicationProfileId, l.Sequence })
+                    .HasDatabaseName("IX_ApplicationProfileApprovalLegs_Profile_Sequence");
+            });
+
+            modelBuilder.Entity<ApplicationProfileTemplate>(b =>
+            {
+                b.Property(t => t.TemplateName).HasMaxLength(255);
+                b.Property(t => t.CategoryKey).HasMaxLength(64);
+                b.Property(t => t.RecycledByUserName).HasMaxLength(255);
+                b.Property(t => t.CreatedByUserName).HasMaxLength(255);
+                b.Property(t => t.ModifiedByUserName).HasMaxLength(255);
+                b.HasOne(t => t.ApplicationProfile)
+                    .WithMany(p => p.NestedTemplates)
+                    .HasForeignKey(t => t.ApplicationProfileId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                b.HasOne(t => t.ApplicableProjectContract)
+                    .WithMany()
+                    .HasForeignKey(t => t.ApplicableProjectContractId)
+                    .OnDelete(DeleteBehavior.SetNull);
+                b.HasOne(t => t.ApplicableMigrationService)
+                    .WithMany()
+                    .HasForeignKey(t => t.ApplicableMigrationServiceId)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<ApplicationProfileProgressStateSetting>(b =>
+            {
+                b.Property(s => s.StateCode).HasMaxLength(64);
+                b.HasOne(s => s.ApplicationProfile)
+                    .WithMany(p => p.ProgressStateSettings)
+                    .HasForeignKey(s => s.ApplicationProfileId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                b.HasIndex(s => new { s.ApplicationProfileId, s.Track, s.StateCode })
+                    .HasDatabaseName("IX_ApplicationProfileProgressStateSettings_Profile_Track_Code");
+            });
+
+            modelBuilder.Entity<ApplicationProfileInstance>()
+                .HasMany(a => a.People)
+                .WithMany(p => p.ApplicationProfileInstances)
+                .UsingEntity<Dictionary<string, object>>(
+                    "ApplicationProfileInstancePeople",
+                    right => right.HasOne<Person>()
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Restrict),
+                    left => left.HasOne<ApplicationProfileInstance>()
+                        .WithMany()
+                        .HasForeignKey("ApplicationProfileInstanceId")
+                        .OnDelete(DeleteBehavior.Cascade),
+                    join =>
+                    {
+                        join.ToTable("ApplicationProfileInstancePeople");
+                        join.HasKey("ApplicationProfileInstanceId", "PersonId");
+                    });
+
+            ConfigureInstanceChildSkipNav(modelBuilder, a => a.Passports, p => p.ApplicationProfileInstances, "ApplicationProfileInstancePassports", "PassportId");
+            ConfigureInstanceChildSkipNav(modelBuilder, a => a.Visas, v => v.ApplicationProfileInstances, "ApplicationProfileInstanceVisas", "VisaId");
+            ConfigureInstanceChildSkipNav(modelBuilder, a => a.Educations, e => e.ApplicationProfileInstances, "ApplicationProfileInstanceEducations", "EducationId");
+            ConfigureInstanceChildSkipNav(modelBuilder, a => a.AddressesOfResidence, aor => aor.ApplicationProfileInstances, "ApplicationProfileInstanceAddressesOfResidence", "AddressOfResidenceId");
+            ConfigureInstanceChildSkipNav(modelBuilder, a => a.PositionHistories, p => p.ApplicationProfileInstances, "ApplicationProfileInstanceEmployeePositionHistories", "EmployeePositionHistoryId");
+            ConfigureInstanceChildSkipNav(modelBuilder, a => a.Salaries, s => s.ApplicationProfileInstances, "ApplicationProfileInstanceEmployeeSalaries", "EmployeeSalaryId");
+            ConfigureInstanceChildSkipNav(modelBuilder, a => a.MedicalRecords, m => m.ApplicationProfileInstances, "ApplicationProfileInstanceMedicalRecords", "MedicalRecordId");
+            ConfigureInstanceChildSkipNav(modelBuilder, a => a.WorkDuties, w => w.ApplicationProfileInstances, "ApplicationProfileInstanceWorkDuties", "WorkDutyId");
+            ConfigureInstanceChildSkipNav(modelBuilder, a => a.InvitationItems, i => i.ApplicationProfileInstances, "ApplicationProfileInstanceInvitationItems", "InvitationItemId");
+            ConfigureInstanceChildSkipNav(modelBuilder, a => a.WorkPermitItems, w => w.ApplicationProfileInstances, "ApplicationProfileInstanceWorkPermitItems", "WorkPermitItemId");
+            ConfigureInstanceChildSkipNav(modelBuilder, a => a.BorderZoneItems, b => b.ApplicationProfileInstances, "ApplicationProfileInstanceBorderZoneItems", "BorderZoneItemId");
+            ConfigureInstanceChildSkipNav(modelBuilder, a => a.TravelHistories, t => t.ApplicationProfileInstances, "ApplicationProfileInstanceTravelHistories", "TravelHistoryId");
+
+            modelBuilder.Entity<Invitation>(b =>
+            {
+                b.HasOne(x => x.ApplicationProfileInstance)
+                    .WithMany(a => a.Invitations)
+                    .HasForeignKey("ApplicationProfileInstanceID")
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.Property(x => x.BorderZoneLocation).HasMaxLength(500);
+            });
+
+            modelBuilder.Entity<WorkPermit>(b =>
+            {
+                b.HasOne(x => x.ApplicationProfileInstance)
+                    .WithMany(a => a.WorkPermits)
+                    .HasForeignKey("ApplicationProfileInstanceID")
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<BorderZone>(b =>
+            {
+                b.HasOne(x => x.ApplicationProfileInstance)
+                    .WithMany(a => a.BorderZones)
+                    .HasForeignKey("ApplicationProfileInstanceID")
+                    .IsRequired()
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<Rejection>(b =>
+            {
+                b.HasOne(x => x.ApplicationProfileInstance)
+                    .WithMany(a => a.Rejections)
+                    .HasForeignKey("ApplicationProfileInstanceID")
+                    .IsRequired()
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<ApplicationProfileInstancePersonResolvedLink>(b =>
+            {
+                b.HasOne(l => l.ApplicationProfileInstance)
+                    .WithMany(a => a.PersonResolvedLinks)
+                    .HasForeignKey(l => l.ApplicationProfileInstanceId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                b.HasOne(l => l.Person)
+                    .WithMany()
+                    .HasForeignKey(l => l.PersonId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                b.HasIndex(l => new { l.ApplicationProfileInstanceId, l.PersonId, l.LinkKind, l.LinkedObjectId })
+                    .IsUnique()
+                    .HasDatabaseName("IX_ApplicationProfileInstancePersonResolvedLinks_Instance_Person_Kind_Object");
+            });
+
+            modelBuilder.Entity<ApplicationProfileInstanceProgress>(b => {
+                b.HasIndex("ApplicationProfileInstanceID", nameof(ApplicationProfileInstanceProgress.Order))
+                 .HasDatabaseName("IX_ApplicationProfileInstanceProgresses_ApplicationProfileInstanceID_ProgressOrder");
+            });
+
+            modelBuilder.Entity<ApplicationProfileInstanceApprovalLegSnapshot>(b => {
+                b.HasIndex(s => s.ApplicationProfileInstanceId)
+                 .HasDatabaseName("IX_ApplicationProfileInstanceApprovalLegSnapshots_ApplicationProfileInstanceId");
             });
 
             modelBuilder.Entity<ApplicationType>(b => {
@@ -647,10 +870,6 @@ namespace Visa2026.Module.BusinessObjects
                 b.HasIndex(t => t.SelectionCode)
                     .IsUnique()
                     .HasFilter(IndexFilter("[SelectionCode] IS NOT NULL AND [SelectionCode] <> ''"));
-                b.HasOne(t => t.MigrationSlaProfile)
-                    .WithMany(p => p.ApplicationTypes)
-                    .HasForeignKey(t => t.MigrationSlaProfileId)
-                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<ProjectContract>(b =>
@@ -677,37 +896,6 @@ namespace Visa2026.Module.BusinessObjects
                 b.Property(s => s.RuleVersion).HasMaxLength(64);
             });
 
-            // Break multiple cascade paths and cycles for SQL Server
-            modelBuilder.Entity<ApplicationItem>(b => {
-                b.HasOne(ai => ai.Person).WithMany(p => p.ApplicationItems).OnDelete(DeleteBehavior.NoAction);
-                b.HasOne(ai => ai.CurrentPassport).WithMany().OnDelete(DeleteBehavior.NoAction);
-                b.HasOne(ai => ai.PreviousPassport).WithMany().OnDelete(DeleteBehavior.NoAction);
-                b.HasOne(ai => ai.CurrentVisa).WithMany(v => v.AssociatedApplicationItems)
-                    .HasForeignKey(ai => ai.CurrentVisaId)
-                    .HasConstraintName("FK_ApplicationItems_Visas_CurrentVisaId")
-                    .OnDelete(DeleteBehavior.NoAction);
-                b.HasOne(ai => ai.NextVisa).WithMany()
-                    .HasForeignKey(ai => ai.NextVisaId)
-                    .HasConstraintName("FK_ApplicationItems_Visas_NextVisaId")
-                    .OnDelete(DeleteBehavior.NoAction);
-                b.HasOne(ai => ai.CurrentWorkPermitItem).WithMany().OnDelete(DeleteBehavior.NoAction);
-                // Keep legacy SQL column name SecondWorkPermitItemId (rename property only).
-                b.HasOne(ai => ai.PreviousWorkPermitItem).WithMany()
-                    .HasForeignKey("SecondWorkPermitItemId")
-                    .OnDelete(DeleteBehavior.NoAction);
-                b.HasOne(ai => ai.CurrentInvitationItem).WithMany().OnDelete(DeleteBehavior.NoAction);
-                b.HasOne(ai => ai.PreviousInvitationItem).WithMany().OnDelete(DeleteBehavior.NoAction);
-                b.HasOne(ai => ai.CurrentAddressOfResidence).WithMany().OnDelete(DeleteBehavior.NoAction);
-                b.HasOne(ai => ai.CheckPoint).WithMany().OnDelete(DeleteBehavior.NoAction);
-                b.HasOne(ai => ai.BusinessTripAddress).WithMany().OnDelete(DeleteBehavior.Cascade);
-                b.Property(ai => ai.BorderZoneLocation).HasMaxLength(500);
-                b.Property(ai => ai.WorkPermittedLocations).HasMaxLength(500);
-                b.HasOne(ai => ai.CurrentWorkDuty).WithMany().OnDelete(DeleteBehavior.NoAction);
-                b.HasOne(ai => ai.CurrentSalary).WithMany().OnDelete(DeleteBehavior.NoAction);
-                b.HasOne(ai => ai.CurrentMedicalRecord).WithMany().OnDelete(DeleteBehavior.NoAction);
-                b.HasOne(ai => ai.CurrentEducation).WithMany().OnDelete(DeleteBehavior.NoAction);
-            });
-
             modelBuilder.Entity<WorkPermitItem>(b => {
                 b.HasOne(wpi => wpi.Person).WithMany(p => p.WorkPermitItems).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(wpi => wpi.Passport).WithMany().OnDelete(DeleteBehavior.NoAction);
@@ -716,15 +904,17 @@ namespace Visa2026.Module.BusinessObjects
 
             modelBuilder.Entity<Visa>(b => {
                 b.HasOne(v => v.Passport).WithMany(p => p.Visas).OnDelete(DeleteBehavior.NoAction);
-                // Single-use by validation (Visa_IssuingApplicationItemSingleUse / Visa_InvitationItemSingleUse).
-                b.HasOne(v => v.IssuingApplicationItem)
-                    .WithOne(ai => ai.IssuedVisa)
-                    .HasForeignKey<Visa>("IssuingApplicationItemID")
+                b.HasOne(v => v.IssuingApplicationProfileInstance)
+                    .WithMany(a => a.IssuedVisas)
+                    .HasForeignKey("IssuingApplicationProfileInstanceID")
                     .OnDelete(DeleteBehavior.NoAction)
                     .IsRequired(false);
-                b.HasOne(v => v.InvitationItem)
+                b.HasIndex("IssuingApplicationProfileInstanceID")
+                    .HasDatabaseName("IX_Visas_IssuingApplicationProfileInstanceID");
+                // Single-use by validation (Visa_IssuingInvitationItemSingleUse).
+                b.HasOne(v => v.IssuingInvitationItem)
                     .WithOne(ii => ii.IssuedVisa)
-                    .HasForeignKey<Visa>("InvitationItemID")
+                    .HasForeignKey<Visa>("IssuingInvitationItemID")
                     .OnDelete(DeleteBehavior.NoAction)
                     .IsRequired(false);
                 b.Metadata.UseSqlOutputClause(false);
@@ -753,17 +943,6 @@ namespace Visa2026.Module.BusinessObjects
                 .HasIndex(p => p.PersonalNumber)
                 .IsUnique()
                 .HasFilter(IndexFilter("[PersonalNumber] IS NOT NULL AND [PersonalNumber] <> N'' AND [PersonalNumber] <> N'0'"));
-
-            // FIX: Person.ApplicationItems is a virtual collection navigation whose backing field
-            // cannot be discovered by the lazy-loading proxy (it is an auto-property or an inline-
-            // initialised collection). Configuring PropertyAccessMode.Property tells EF Core to
-            // call the getter/setter directly instead of looking for a private backing field,
-            // which resolves the startup exception:
-            //   "No backing field was found for property 'Person.ApplicationItems'.
-            //    Lazy-loaded navigations must have backing fields."
-            modelBuilder.Entity<Person>()
-                .Navigation(p => p.ApplicationItems)
-                .UsePropertyAccessMode(PropertyAccessMode.Property);
 
             modelBuilder.Entity<Person>()
                 .Navigation(p => p.WorkPermitItems)
@@ -796,9 +975,9 @@ namespace Visa2026.Module.BusinessObjects
 
             modelBuilder.Entity<WordReportGenerationBatch>(b =>
             {
-                b.HasOne(x => x.Application)
+                b.HasOne(x => x.ApplicationProfileInstance)
                     .WithMany()
-                    .HasForeignKey(x => x.ApplicationID)
+                    .HasForeignKey(x => x.ApplicationProfileInstanceID)
                     .OnDelete(DeleteBehavior.NoAction);
             });
 
@@ -839,6 +1018,34 @@ namespace Visa2026.Module.BusinessObjects
                 .HasMany(t => t.Aspects)
                 .WithOne(t => t.Owner)
                 .OnDelete(DeleteBehavior.Cascade);
+        }
+
+        private static void ConfigureInstanceChildSkipNav<TChild>(
+            ModelBuilder modelBuilder,
+            Expression<Func<ApplicationProfileInstance, IEnumerable<TChild>>> instanceCollection,
+            Expression<Func<TChild, IEnumerable<ApplicationProfileInstance>>> childCollection,
+            string tableName,
+            string childFk)
+            where TChild : class
+        {
+            modelBuilder.Entity<ApplicationProfileInstance>()
+                .HasMany(instanceCollection)
+                .WithMany(childCollection)
+                .UsingEntity<Dictionary<string, object>>(
+                    tableName,
+                    right => right.HasOne<TChild>()
+                        .WithMany()
+                        .HasForeignKey(childFk)
+                        .OnDelete(DeleteBehavior.Restrict),
+                    left => left.HasOne<ApplicationProfileInstance>()
+                        .WithMany()
+                        .HasForeignKey("ApplicationProfileInstanceId")
+                        .OnDelete(DeleteBehavior.Cascade),
+                    join =>
+                    {
+                        join.ToTable(tableName);
+                        join.HasKey("ApplicationProfileInstanceId", childFk);
+                    });
         }
     }
 

@@ -33,9 +33,9 @@ internal sealed class Visa2014ODataImportTarget : IVisa2014ImportTarget
         var entityName = entityType.Name;
         return entityName switch
         {
-            nameof(Application) => (await _api.CreateAsync<Application>(entityName, payload))?.Id,
+            nameof(ApplicationProfileInstance) => (await _api.CreateAsync<ApplicationProfileInstance>(entityName, payload))?.Id,
             nameof(ApplicationItem) => (await _api.CreateAsync<ApplicationItem>(entityName, payload))?.Id,
-            nameof(ApplicationProgress) => (await _api.CreateAsync<ApplicationProgress>(entityName, payload))?.Id,
+            nameof(ApplicationProfileInstanceProgress) => (await _api.CreateAsync<ApplicationProfileInstanceProgress>(entityName, payload))?.Id,
             nameof(Person) => (await _api.CreateAsync<Person>(entityName, payload))?.Id,
             nameof(Passport) => (await _api.CreateAsync<Passport>(entityName, payload))?.Id,
             nameof(Visa) => (await _api.CreateAsync<Visa>(entityName, payload))?.Id,

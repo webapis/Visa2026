@@ -61,7 +61,7 @@ All other 13 columns unchanged.
 
 ```csharp
 // xrCellMohleti — exit visa shows actual visa dates + number + category
-// rather than the application-level period + category stored on Application
+// rather than the application-level period + category stored on ApplicationProfileInstance
 this.xrCellMohleti.ExpressionBindings.Clear();
 this.xrCellMohleti.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text",
     "[Visa_StartDateText] + Char(10) + [Visa_ExpirationDateText] + Char(10) + '(' + [Visa_Number] + ') ' + [Visa_CategoryTm]"));

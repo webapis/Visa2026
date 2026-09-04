@@ -20,7 +20,7 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$TargetConnection,
 
-    [ValidateSet('Application', 'ApplicationProgress')]
+    [ValidateSet('Application', 'ApplicationProfileInstanceProgress')]
     [string]$Entity = 'Application',
 
     [ValidateSet('A', 'B', 'C')]

@@ -145,7 +145,7 @@ namespace Visa2026.Module.BusinessObjects
                         }
                     }
 
-                    // 3. Navigate to Target (Handle nested paths like "WorkPermit.Application.ApplicationItems")
+                    // 3. Navigate to Target (Handle nested paths like "WorkPermit.ApplicationProfileInstance.ApplicationItems")
                     object currentContext = sourceObject;
                     
                     if (string.Equals(rule.TargetPath, "@Self", StringComparison.OrdinalIgnoreCase))

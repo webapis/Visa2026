@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-08-06T05:13:14.5986668Z",
-  "assemblyVersion": "1.0.0.652",
+  "generatedAt": "2026-08-07T08:51:32.9167281Z",
+  "assemblyVersion": "1.0.0.653",
   "types": [
     {
       "name": "Application",
@@ -35,8 +35,13 @@
           "required": false
         },
         {
+          "name": "ApplicationProfile",
+          "displayName": "Application Profile",
+          "required": false
+        },
+        {
           "name": "ApplicationType",
-          "displayName": "Application Type",
+          "displayName": "Application Type (Deprecated)",
           "required": true
         },
         {
@@ -386,6 +391,7 @@
         }
       ],
       "guideSlugs": [
+        "applications/application-profiles",
         "applications/create",
         "applications/overview",
         "applications/resminamalar"
@@ -1369,6 +1375,373 @@
       ],
       "guideSlugs": [
         "administration/configuration/sla"
+      ]
+    },
+    {
+      "name": "ApplicationProfile",
+      "fullName": "Visa2026.Module.BusinessObjects.ApplicationProfile",
+      "displayName": "Application Profile",
+      "userDocSlug": "administration/configuration/application-profiles",
+      "userDocCategory": "Configuration",
+      "properties": [
+        {
+          "name": "ApplicabilityCriteria",
+          "displayName": "Applicability criteria",
+          "required": false
+        },
+        {
+          "name": "Name",
+          "displayName": "Application name",
+          "required": true
+        },
+        {
+          "name": "Code",
+          "displayName": "Code",
+          "required": true
+        },
+        {
+          "name": "IsConfigLocked",
+          "displayName": "Config locked",
+          "required": false
+        },
+        {
+          "name": "DefaultAuthorizedSignatory",
+          "displayName": "Default Authorized Signatory",
+          "required": false
+        },
+        {
+          "name": "DefaultAuthorizedSignatoryId",
+          "displayName": "Default Authorized Signatory Id",
+          "required": false
+        },
+        {
+          "name": "DefaultBorderZoneLocation",
+          "displayName": "Default Border Zone Location",
+          "required": false
+        },
+        {
+          "name": "DefaultEntryCheckPoint",
+          "displayName": "Default Entry Check Point",
+          "required": false
+        },
+        {
+          "name": "DefaultEntryCheckPointId",
+          "displayName": "Default Entry Check Point Id",
+          "required": false
+        },
+        {
+          "name": "DefaultMigrationService",
+          "displayName": "Default Migration Service",
+          "required": false
+        },
+        {
+          "name": "DefaultMigrationServiceId",
+          "displayName": "Default Migration Service Id",
+          "required": false
+        },
+        {
+          "name": "DefaultProjectContract",
+          "displayName": "Default Project Contract",
+          "required": false
+        },
+        {
+          "name": "DefaultProjectContractId",
+          "displayName": "Default Project Contract Id",
+          "required": false
+        },
+        {
+          "name": "DefaultUrgency",
+          "displayName": "Default Urgency",
+          "required": false
+        },
+        {
+          "name": "DefaultUrgencyId",
+          "displayName": "Default Urgency Id",
+          "required": false
+        },
+        {
+          "name": "DefaultVisaCategory",
+          "displayName": "Default Visa Category",
+          "required": false
+        },
+        {
+          "name": "DefaultVisaCategoryId",
+          "displayName": "Default Visa Category Id",
+          "required": false
+        },
+        {
+          "name": "DefaultVisaPeriod",
+          "displayName": "Default Visa Period",
+          "required": false
+        },
+        {
+          "name": "DefaultVisaPeriodId",
+          "displayName": "Default Visa Period Id",
+          "required": false
+        },
+        {
+          "name": "DefaultVisaRepresentative",
+          "displayName": "Default Visa Representative",
+          "required": false
+        },
+        {
+          "name": "DefaultVisaRepresentativeId",
+          "displayName": "Default Visa Representative Id",
+          "required": false
+        },
+        {
+          "name": "DefaultVisaType",
+          "displayName": "Default Visa Type",
+          "required": false
+        },
+        {
+          "name": "DefaultVisaTypeId",
+          "displayName": "Default Visa Type Id",
+          "required": false
+        },
+        {
+          "name": "Description",
+          "displayName": "Description",
+          "required": false
+        },
+        {
+          "name": "ProgressRoute",
+          "displayName": "Directed to",
+          "required": false
+        },
+        {
+          "name": "DisplayName",
+          "displayName": "Display Name",
+          "required": false
+        },
+        {
+          "name": "ForEmployee",
+          "displayName": "For employee",
+          "required": false
+        },
+        {
+          "name": "ForFamilyMember",
+          "displayName": "For family member",
+          "required": false
+        },
+        {
+          "name": "ForTemporaryVisitor",
+          "displayName": "For temporary visitor",
+          "required": false
+        },
+        {
+          "name": "ID",
+          "displayName": "ID",
+          "required": false
+        },
+        {
+          "name": "IsActive",
+          "displayName": "Is Active",
+          "required": false
+        },
+        {
+          "name": "CancelApplications",
+          "displayName": "May cancel application(s)",
+          "required": false
+        },
+        {
+          "name": "CancelBorderZonePermits",
+          "displayName": "May cancel border zone permit(s)",
+          "required": false
+        },
+        {
+          "name": "CancelInvitations",
+          "displayName": "May cancel invitation(s)",
+          "required": false
+        },
+        {
+          "name": "CancelVisas",
+          "displayName": "May cancel visa(s)",
+          "required": false
+        },
+        {
+          "name": "CancelWorkPermits",
+          "displayName": "May cancel work permit(s)",
+          "required": false
+        },
+        {
+          "name": "ProduceBorderZone",
+          "displayName": "May produce border zone",
+          "required": false
+        },
+        {
+          "name": "ProduceInvitation",
+          "displayName": "May produce invitation",
+          "required": false
+        },
+        {
+          "name": "ProduceVisa",
+          "displayName": "May produce visa",
+          "required": false
+        },
+        {
+          "name": "ProduceWorkLocation",
+          "displayName": "May produce work location",
+          "required": false
+        },
+        {
+          "name": "ProduceWorkPermit",
+          "displayName": "May produce work permit",
+          "required": false
+        },
+        {
+          "name": "MigrationSlaDays",
+          "displayName": "Migration SLA (days)",
+          "required": false
+        },
+        {
+          "name": "MinistrySlaDays",
+          "displayName": "Ministry SLA (days)",
+          "required": false
+        },
+        {
+          "name": "ActionFamily",
+          "displayName": "Related to",
+          "required": false
+        },
+        {
+          "name": "RequireBorderZone",
+          "displayName": "Require Border Zone",
+          "required": false
+        },
+        {
+          "name": "RequireBusinessTripAddress",
+          "displayName": "Require Business Trip Address",
+          "required": false
+        },
+        {
+          "name": "RequireEndDate",
+          "displayName": "Require End Date",
+          "required": false
+        },
+        {
+          "name": "RequireEntryCheckPoint",
+          "displayName": "Require Entry Check Point",
+          "required": false
+        },
+        {
+          "name": "RequireEntryDate",
+          "displayName": "Require Entry Date",
+          "required": false
+        },
+        {
+          "name": "RequireMigrationService",
+          "displayName": "Require Migration Service",
+          "required": false
+        },
+        {
+          "name": "RequirePersonAddressOfResidence",
+          "displayName": "Require Person Address Of Residence",
+          "required": false
+        },
+        {
+          "name": "RequirePersonBorderZoneItem",
+          "displayName": "Require Person Border Zone Item",
+          "required": false
+        },
+        {
+          "name": "RequirePersonEducation",
+          "displayName": "Require Person Education",
+          "required": false
+        },
+        {
+          "name": "RequirePersonInvitationItem",
+          "displayName": "Require Person Invitation Item",
+          "required": false
+        },
+        {
+          "name": "RequirePersonMedical",
+          "displayName": "Require Person Medical",
+          "required": false
+        },
+        {
+          "name": "RequirePersonPassport",
+          "displayName": "Require Person Passport",
+          "required": false
+        },
+        {
+          "name": "RequirePersonPosition",
+          "displayName": "Require Person Position",
+          "required": false
+        },
+        {
+          "name": "RequirePersonRejectionItem",
+          "displayName": "Require Person Rejection Item",
+          "required": false
+        },
+        {
+          "name": "RequirePersonSalary",
+          "displayName": "Require Person Salary",
+          "required": false
+        },
+        {
+          "name": "RequirePersonTravelHistory",
+          "displayName": "Require Person Travel History",
+          "required": false
+        },
+        {
+          "name": "RequirePersonVisa",
+          "displayName": "Require Person Visa",
+          "required": false
+        },
+        {
+          "name": "RequirePersonWorkPermitItem",
+          "displayName": "Require Person Work Permit Item",
+          "required": false
+        },
+        {
+          "name": "RequireProject",
+          "displayName": "Require Project",
+          "required": false
+        },
+        {
+          "name": "RequireRegionCity",
+          "displayName": "Require Region City",
+          "required": false
+        },
+        {
+          "name": "RequireStartDate",
+          "displayName": "Require Start Date",
+          "required": false
+        },
+        {
+          "name": "RequireUrgency",
+          "displayName": "Require Urgency",
+          "required": false
+        },
+        {
+          "name": "RequireVisaCategory",
+          "displayName": "Require Visa Category",
+          "required": false
+        },
+        {
+          "name": "RequireVisaPeriod",
+          "displayName": "Require Visa Period",
+          "required": false
+        },
+        {
+          "name": "RequireVisaType",
+          "displayName": "Require Visa Type",
+          "required": false
+        },
+        {
+          "name": "RequireWorkPermitLocation",
+          "displayName": "Require Work Permit Location",
+          "required": false
+        },
+        {
+          "name": "SelectionCode",
+          "displayName": "Selection / quick code",
+          "required": false
+        }
+      ],
+      "guideSlugs": [
+        "administration/configuration/application-profiles"
       ]
     },
     {

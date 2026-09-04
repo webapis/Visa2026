@@ -6,23 +6,23 @@ using DevExpress.ExpressApp;
 namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
-/// Resolves the latest <see cref="ApplicationProgress"/> row from history (order, then date/ID).
+/// Resolves the latest <see cref="ApplicationProfileInstanceProgress"/> row from history (order, then date/ID).
 /// </summary>
-public static class ApplicationProgressHelper
+public static class ApplicationProfileInstanceProgressHelper
 {
-    public static ApplicationProgress? GetLatest(IEnumerable<ApplicationProgress>? history, IObjectSpace? objectSpace = null)
+    public static ApplicationProfileInstanceProgress? GetLatest(IEnumerable<ApplicationProfileInstanceProgress>? history, IObjectSpace? objectSpace = null)
     {
         if (history == null)
             return null;
 
-        IEnumerable<ApplicationProgress> query = history;
+        IEnumerable<ApplicationProfileInstanceProgress> query = history;
         if (objectSpace != null)
             query = query.Where(p => !objectSpace.IsObjectToDelete(p));
 
-        ApplicationProgress? latest = null;
+        ApplicationProfileInstanceProgress? latest = null;
         foreach (var progress in query)
         {
-            if (latest == null || ApplicationProgressOrderHelper.CompareSiblingOrder(progress, latest) > 0)
+            if (latest == null || ApplicationProfileInstanceProgressOrderHelper.CompareSiblingOrder(progress, latest) > 0)
                 latest = progress;
         }
 

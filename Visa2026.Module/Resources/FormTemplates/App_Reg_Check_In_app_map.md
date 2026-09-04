@@ -61,6 +61,6 @@ this.Detail.HeightF = 492F;  // matches Group E base default
 ## ReportsUpdater.cs entry
 
 ```csharp
-AddPredefinedReport<AppRegCheckInReport>("App Reg Check In Report", typeof(Application), isInplaceReport: true);
+AddPredefinedReport<AppRegCheckInReport>("App Reg Check In Report", typeof(ApplicationProfileInstance), isInplaceReport: true);
 CreateReportVisibility("App Reg Check In Report", "[ApplicationType.Name] = 'App_Reg_Check_In'");
 ```

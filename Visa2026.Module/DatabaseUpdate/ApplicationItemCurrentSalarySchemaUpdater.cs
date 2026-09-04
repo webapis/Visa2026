@@ -6,7 +6,7 @@ namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
 /// Adds <see cref="BusinessObjects.ApplicationType.ShowCurrentSalary"/> and
-/// <see cref="BusinessObjects.ApplicationItem.CurrentSalary"/> columns before EF schema sync.
+/// <see cref="BusinessObjects.ApplicationRosterMergeLine.CurrentSalary"/> columns before EF schema sync.
 /// </summary>
 public sealed class ApplicationItemCurrentSalarySchemaUpdater : ModuleUpdater
 {

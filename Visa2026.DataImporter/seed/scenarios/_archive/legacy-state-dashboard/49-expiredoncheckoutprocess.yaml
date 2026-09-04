@@ -43,12 +43,12 @@ data:
     Expiration Date: 2026-04-10
     Passport Number: UZ7001002
   Applications:
-  - Application Number: 051
+  - ApplicationProfileInstance Number: 051
     Date: 2026-04-24
     Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
     Project Contract: GT-15
     Filter: Registration
-    Application Type: App_Reg_Check_Out
+    ApplicationProfileInstance Type: App_Reg_Check_Out
     Category: 2
     Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
   Registrations:
@@ -63,7 +63,7 @@ data:
     Travel Date: 2026-04-28
     Check Point: Aşgabat şäher howa menzilindäki MGP
     Purpose of Travel: Işlemek üçin
-  ApplicationProgresses:
+  ApplicationProfileInstanceProgresses:
   - Application: 4/-051
     State: PROCESS_STARTED
     Location: AT_MIGRATION_SERVICE

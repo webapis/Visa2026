@@ -25,6 +25,46 @@ Purpose: **XFA fill, PdfFormMapping rules, template, gates, converters** — not
 
 ## Entries
 
+### 2026-08-17 — Foxit paints ImageField1; pdf.js preview does not (filler)
+
+- **Symptom**: Officers saw the photo in Foxit after Download, but browser Application form Preview left FOTO empty.
+- **Try**: Earlier stream dump missed object-stream XFA packets and concluded SaveToFile dropped the image. Foxit screenshots disprove that for the Download file. pdf.js `enableXfa` still leaves ImageField1 blank (`href` / `$content` empty).
+- **Test**: Download → Foxit shows FOTO. Preview uses Person.Photo overlay at template coordinates (document-copies `?v=xfaphoto2`).
+- **Root cause**: pdf.js XFA image widgets do not resolve the saved ImageField1 packet the way Adobe/Foxit do.
+- **Fix**: Keep Spire image XML patch for Foxit. Do not flatten XFA for Chrome. Preview overlay is required.
+- **Prevent**: Do not iframe XFA or Spire-flatten for photo preview. Do not treat a naive PDF stream scan as proof the image is absent.
+- **Cross-skill**: document-copies
+
+### 2026-08-17 — Spire SaveToFile drops XFA ImageField1 (filler)
+
+- **Symptom**: Application form Preview FOTO box empty even when Person.Photo exists and text fields fill.
+- **Try**: ImageField1 is XfaImageField; ImageValueBase64 + XmlDatasets + XmlTemplate `<image>` all set in memory. Saved PDF still has empty `<ImageField1/>` and no XFAImages.
+- **Test**: `FillForm_AssignsImageField1InMemory` (logs). Preview overlay covered in document-copies.
+- **Root cause**: Spire 12.x SaveToFile does not persist XFA image XML mutations.
+- **Fix**: Keep the in-memory XML patch; browser preview overlays Person.Photo (`PdfPersonPhotoDataUri`). Foxit Download still depends on ÇAP ET / Adobe image handling, not pdf.js.
+- **Prevent**: Do not treat datasets InnerText as saved just because the log line ran.
+- **Cross-skill**: document-copies
+
+### 2026-08-17 — Application form Preview filled family only (mapping | filler)
+
+- **Symptom**: After the Application.* rewrite, Preview still downloaded an empty Şahsy kagyzy. Item 18 family text appeared; name/passport/company widgets stayed blank. Footer said the form was downloaded.
+- **Try**: Family `_181`–`_183` are injected in `NormalizeFamilyMemberMappings` even when `PdfFormMapping` rows are missing. Person/passport keys are not. Spire `field.Name` is often `_03` / `_03[0]`, while mappings use the full `topmostSubform[0].Page1[0]._03[0]` path, so exact `TryGetValue` misses.
+- **Test**: `FinalizeMappings_AddsPersonAndPassportWhenDatabaseEmpty`, `TryGetValue_MatchesFullPathToShortXfaName`. Stop F5, rebuild, F5. On **8/-009** Document copies → Application form Preview — Familyasy/Ady and passport number should fill.
+- **Root cause**: Fill used DB mappings only (plus family normalize) and required an exact XFA name match.
+- **Fix**: `PdfFormMappingSeedCatalog` + `FinalizeMappings` always ensure core person/passport/company keys. `PdfXfaFieldValueLookup` matches last node name (`_03` ↔ `..._03[0]`).
+- **Prevent**: Do not rely on PdfFormMapping rows being present for core visa fields. Do not match `data[field.Name]` only.
+- **Cross-skill**: document-copies | visa2026-application-profile
+
+### 2026-08-17 — Application.* PDF paths miss ApplicationProfileInstance (mapping)
+
+- **Symptom**: Document copies application form downloaded with name/passport/company empty. A few dropdowns showed template defaults (ÇAKYLÝYK / ADATY). Family lines (Pdf_FamilyMembers*) still filled.
+- **Try**: Workspace form uses `ApplicationRosterMergeLine` hydrated from People + ResolvedLinks. PdfFormMapping still uses `Application.ApplicationType.*` / `Application.Application_Company_*` from the ApplicationItem era. Merge line navigation is `ApplicationProfileInstance`.
+- **Test**: `PdfMappingHelperTests` (person name, `Application.*` rewrite, linked passport). Stop F5, rebuild, F5. On **8/-009** Document copies → Application form Preview — surname/name and passport number should fill.
+- **Root cause**: `GetValueByPath` / expressions resolved `Application` on the merge line (missing) so application-level fields were skipped. Person/passport paths were valid once the line had Person + CurrentPassport; rewrite also walks proxy types for nested properties.
+- **Fix**: Rewrite `Application.` → `ApplicationProfileInstance.` when reading values (not in the visibility gate). Alias `Application` on the merge line. Hydrate with `SuppressPersonCurrentFieldSync`.
+- **Prevent**: Do not map PDF fields from a property named `Application` on the roster line. New mappings may use `ApplicationProfileInstance.*` or `Person.*` / `CurrentPassport.*`.
+- **Cross-skill**: document-copies | visa2026-application-profile
+
 ### 2026-06-05 — Family members mapped to item 18, not _241 (mapping)
 
 - **Symptom**: Visa PDF showed `ESRA AKSOY; 12.10.1989; AYALY` under item 24 (work experience); item 18 family lines empty.

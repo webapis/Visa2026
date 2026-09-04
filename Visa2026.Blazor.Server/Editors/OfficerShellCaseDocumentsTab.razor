@@ -1,0 +1,191 @@
+@using DevExpress.ExpressApp
+@using Microsoft.Extensions.DependencyInjection
+@using Visa2026.Blazor.Server.Editors
+@using Visa2026.Blazor.Server.Localization
+@using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.BusinessObjects.OfficerShell
+@using Visa2026.Module.Services.ApplicationItemLinkedDocuments
+@using Visa2026.Module.Services.ApplicationPersonRoster
+@using Visa2026.Module.Services.ApplicationWorkspace
+@using Visa2026.Module.Services.PreviewSlot
+
+<div class="dc-page">
+    <header class="dc-page__head">
+        <div class="dc-page__head-row">
+            <h2>Document copies</h2>
+            @if (_rosterIds.Count > 0 && _lineIds.Count > 0)
+            {
+                <div class="dc-view-switch" role="group" aria-label="Document copies layout">
+                    <button type="button"
+                            class="dc-view-switch__btn @(!_groupByType ? "is-active" : null)"
+                            aria-pressed="@(!_groupByType)"
+                            @onclick="@(() => SetGroupByType(false))">
+                        By person
+                    </button>
+                    <button type="button"
+                            class="dc-view-switch__btn @(_groupByType ? "is-active" : null)"
+                            aria-pressed="@_groupByType"
+                            @onclick="@(() => SetGroupByType(true))">
+                        By type
+                    </button>
+                </div>
+            }
+        </div>
+        <p>@DocumentsSubtitle</p>
+    </header>
+
+    @if (_rosterIds.Count == 0)
+    {
+        <p class="os-empty">No roster lines linked yet. Link people on the People tab first.</p>
+    }
+    else if (_lineIds.Count == 0)
+    {
+        <p class="os-empty">Select at least one person in the header to view document copies.</p>
+    }
+    else
+    {
+        <div class="dc-split">
+            <div class="dc-list">
+                <ApplicationItemDocumentCopiesComponent ApplicationItemIds="_lineIds"
+                                                        ApplicationProfileInstanceId="ApplicationProfileInstanceId"
+                                                        MergedGroups="_mergedGroups"
+                                                        PersonLines="_personLines"
+                                                        GroupByPerson="@(!_groupByType)"
+                                                        GroupByDocumentType="@_groupByType"
+                                                        UiCultureName="_uiCultureName"
+                                                        UseInlinePreview="true"
+                                                        RefreshRequested="_refreshRequested"
+                                                        OnInlinePreviewRequested="HandleInlinePreviewAsync" />
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public Guid ApplicationProfileInstanceId { get; set; }
+    [Parameter] public ApplicationWorkspaceSnapshot? Snapshot { get; set; }
+    [Parameter] public IReadOnlyList<Guid>? SelectedPersonIds { get; set; }
+    [Parameter] public string PreviewSlotOwnerViewId { get; set; } = OfficerShellViewIds.DetailView;
+    [Parameter] public EventCallback CatalogReloaded { get; set; }
+
+    [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
+    [Inject] private IVisaPreviewSlotService PreviewSlotService { get; set; } = null!;
+
+    private bool _groupByType;
+    private IReadOnlyList<Guid> _rosterIds = Array.Empty<Guid>();
+    private IReadOnlyList<Guid> _lineIds = Array.Empty<Guid>();
+    private IReadOnlyList<ApplicationItemLinkedDocumentsLineSnapshot> _personLines =
+        Array.Empty<ApplicationItemLinkedDocumentsLineSnapshot>();
+    private IReadOnlyList<ApplicationItemLinkedDocumentMergedGroup> _mergedGroups =
+        Array.Empty<ApplicationItemLinkedDocumentMergedGroup>();
+    private string _uiCultureName = string.Empty;
+    private EventCallback _refreshRequested;
+
+    private string DocumentsSubtitle
+    {
+        get
+        {
+            if (_rosterIds.Count == 0)
+                return "Scan and manage required document copies for people in this application.";
+
+            if (_lineIds.Count == 0)
+                return "Click a person in the header to include them in Document copies.";
+
+            if (_groupByType)
+            {
+                if (_lineIds.Count == _rosterIds.Count)
+                    return "Grouped by document type. Preview a type to open all ready files for the selected people.";
+
+                return $"Showing {_lineIds.Count} of {_rosterIds.Count} people by document type. Click a header chip to include or hide someone.";
+            }
+
+            if (_lineIds.Count == _rosterIds.Count)
+                return "Scan and manage required document copies. Click a header chip to hide a person.";
+
+            return $"Showing {_lineIds.Count} of {_rosterIds.Count} people. Click a header chip to include or hide someone.";
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        _refreshRequested = EventCallback.Factory.Create(this, ReloadMergedGroupsAsync);
+        _uiCultureName = VisaUiCultureResolver.Resolve();
+    }
+
+    protected override void OnParametersSet()
+    {
+        var personTab = Snapshot?.Tabs.FirstOrDefault(t => t.Key == "person");
+        _rosterIds = personTab?.RowApplicationProfileInstancePersonIds
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .ToList() ?? [];
+
+        _lineIds = ApplicationItemDocumentCopiesPersonCatalog.FilterRosterIds(_rosterIds, SelectedPersonIds);
+        ReloadMergedGroups();
+    }
+
+    private void ReloadMergedGroups()
+    {
+        if (_lineIds.Count == 0)
+        {
+            _personLines = Array.Empty<ApplicationItemLinkedDocumentsLineSnapshot>();
+            _mergedGroups = Array.Empty<ApplicationItemLinkedDocumentMergedGroup>();
+            return;
+        }
+
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        if (!ApplicationRosterHelper.TryLoadSharedApplicationPeople(
+                objectSpace,
+                _lineIds,
+                ApplicationProfileInstanceId,
+                out var application,
+                out var people)
+            || application == null)
+        {
+            _personLines = Array.Empty<ApplicationItemLinkedDocumentsLineSnapshot>();
+            _mergedGroups = Array.Empty<ApplicationItemLinkedDocumentMergedGroup>();
+            return;
+        }
+
+        _lineIds = people.Select(p => p.ID).ToList();
+        _personLines = ApplicationPersonLinkedDocumentsResolver.ResolveMany(objectSpace, application, people);
+        _mergedGroups = ApplicationItemLinkedDocumentsMerger.MergeBySlot(_personLines);
+    }
+
+    private async Task ReloadMergedGroupsAsync()
+    {
+        ReloadMergedGroups();
+        if (CatalogReloaded.HasDelegate)
+            await CatalogReloaded.InvokeAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void SetGroupByType(bool groupByType)
+    {
+        if (_groupByType == groupByType)
+            return;
+
+        _groupByType = groupByType;
+    }
+
+    private async Task HandleInlinePreviewAsync(DocumentCopiesInlinePreviewRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.SlotKey))
+            return;
+
+        var previewIds = request.ApplicationProfileInstancePersonIds is { Count: > 0 }
+            ? request.ApplicationProfileInstancePersonIds
+            : _lineIds;
+        if (previewIds.Count == 0)
+            return;
+
+        await PreviewSlotService.OpenDocumentCopiesAsync(new DocumentCopiesSlotRequest
+        {
+            ApplicationProfileInstancePersonIds = previewIds,
+            ApplicationProfileInstanceId = ApplicationProfileInstanceId,
+            FocusSlotKey = request.SlotKey,
+            FocusDisplayName = request.DisplayName,
+            OpenPreviewOnly = true,
+        }, PreviewSlotOwnerViewId);
+    }
+}

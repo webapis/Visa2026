@@ -4,7 +4,7 @@ description: Visa transfer to new passport — process started — tests V-16 da
 dependsOn: VisaExtVisaIssuedLink
 sync: false
 anchor:
-  entity: Application
+  entity: ApplicationProfileInstance
   key: FullApplicationNumber
   value: 4/-038
 data:
@@ -32,12 +32,12 @@ data:
     Expiration Date: 2026-09-01
     Passport Number: SA1111111
   Applications:
-  - Application Number: 038
+  - ApplicationProfileInstance Number: 038
     Date: 2026-04-05
     Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
     Project Contract: GT-15
     Filter: Visa
-    Application Type: App_Change_Passport
+    ApplicationProfileInstance Type: App_Change_Passport
     Urgency: Adaty tertipde !
   ApplicationItems:
   - Application: 4/-038
@@ -45,7 +45,7 @@ data:
     Passport Number: SA2222222
     Visa Number: TM-2026-V-024
     Previous Passport: SA1111111
-  ApplicationProgresses:
+  ApplicationProfileInstanceProgresses:
   - Application: 4/-038
     State: PROCESS_STARTED
     Location: AT_MIGRATION_SERVICE

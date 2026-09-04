@@ -2,6 +2,14 @@
 
 Append-only notes from verified implementation runs. Read before implementing.
 
+### 2026-08-26 — Case-workspace issued visa Preview reuses header-copies occupant
+
+- **Need**: **Visas issued by this case** Preview of `VisaDocument` in `#visa-preview-slot`, same as invitation issued-row Preview.
+- **Fix**: Added `HeaderDocumentCopiesFamily.Visa`. Resolver/object-space/occupant key `visa-document-copies:visa:{id}`. Workspace Preview only — no Visa ListView Copies column, no Delete.
+- **Test**: Occupant-key + HasCopy unit tests. Blazor Debug build. Officer: Preview on a0002 with copy.
+- **Prevent**: Do not invent a File occupant for this; keep `OpenPreviewOnly` on `HeaderDocumentCopies`.
+- **Cross-skill**: invitation-work-permit-document-copies | preview-slot | application-profile
+
 ## 2026-06-06 — Phases 0–2 initial implementation
 
 - **`SupportingDocumentsPdfSharpHelper.TryWriteSinglePagePdfFromRasterBytes`** uses positional parameter `landscape`, not `landscapePage:` — mirror `PersonDocumentCopyPdfMerger` call style.

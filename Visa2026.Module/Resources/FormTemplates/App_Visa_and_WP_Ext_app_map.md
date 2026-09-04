@@ -66,16 +66,16 @@ this.Detail.HeightF = 540F;  // matches Group C base default
 |---|---|---|
 | `TotalPersonCount` | `Application` | ✅ |
 | `TotalPersonCountText` | `Application` | ✅ |
-| `VisaPeriod_NameTm` | `Application → VisaPeriod` | ✅ |
-| `VisaCategory_NameTm` | `Application → VisaCategory` | ✅ |
-| `Company.Name` | `Application → ProjectContract → Company` | ✅ |
+| `VisaPeriod_NameTm` | `ApplicationProfileInstance → VisaPeriod` | ✅ |
+| `VisaCategory_NameTm` | `ApplicationProfileInstance → VisaCategory` | ✅ |
+| `Company.Name` | `ApplicationProfileInstance → ProjectContract → Company` | ✅ |
 
 ---
 
 ## ReportsUpdater.cs entry
 
 ```csharp
-AddPredefinedReport<AppVisaAndWPExtReport>("App Visa And WP Ext Report", typeof(Application), isInplaceReport: true);
+AddPredefinedReport<AppVisaAndWPExtReport>("App Visa And WP Ext Report", typeof(ApplicationProfileInstance), isInplaceReport: true);
 CreateReportVisibility("App Visa And WP Ext Report", "[ApplicationType.Name] = 'App_Visa_and_WP_Ext'");
 ```
 

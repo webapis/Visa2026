@@ -29,6 +29,7 @@ internal sealed partial class Visa2014ODataLookupResolver
     private List<Hospital> _hospitals = [];
     private List<OtherSite> _otherSites = [];
     private List<ApplicationType> _applicationTypes = [];
+    private List<ApplicationProfile> _applicationProfiles = [];
     private List<Urgency> _urgencies = [];
     private List<VisaPeriod> _visaPeriods = [];
     private List<MovementPermitLocation> _movementPermitLocations = [];
@@ -64,6 +65,7 @@ internal sealed partial class Visa2014ODataLookupResolver
         _hospitals = await api.GetAllAsync<Hospital>("Hospital");
         _otherSites = await api.GetAllAsync<OtherSite>("OtherSite");
         _applicationTypes = await api.GetAllAsync<ApplicationType>("ApplicationType");
+        _applicationProfiles = await api.GetAllAsync<ApplicationProfile>("ApplicationProfile");
         _urgencies = await api.GetAllAsync<Urgency>("Urgency");
         _visaPeriods = await api.GetAllAsync<VisaPeriod>("VisaPeriod");
         _movementPermitLocations = await api.GetAllAsync<MovementPermitLocation>("MovementPermitLocation");
@@ -270,6 +272,13 @@ internal sealed partial class Visa2014ODataLookupResolver
 
     public Guid? ResolveApplicationType(string? name) =>
         ResolveByName(_applicationTypes, name, t => t.Name);
+
+    public Guid? ResolveApplicationProfile(string? applicationTypeName, string? projectContractCode = null) =>
+        Visa2014ApplicationProfileResolver.FindProfileId(
+            _applicationProfiles,
+            _projectContracts,
+            applicationTypeName,
+            projectContractCode);
 
     public Guid? ResolveApplicationState(string? code) =>
         ResolveByCode(_applicationStates, code, s => s.Code);
@@ -918,6 +927,7 @@ internal sealed partial class Visa2014ODataLookupResolver
         Hospital hs => hs.Id,
         OtherSite os => os.Id,
         ApplicationType at => at.Id,
+        ApplicationProfile ap => ap.Id,
         Urgency u => u.Id,
         VisaPeriod vp => vp.Id,
         MovementPermitLocation mpl => mpl.Id,

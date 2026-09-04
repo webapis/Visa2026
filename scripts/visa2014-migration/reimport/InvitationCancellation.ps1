@@ -73,16 +73,7 @@ if ($MaxRows -gt 0) { $importArgs += @("--max-rows", $MaxRows) }
 & dotnet @importArgs 2>&1 | Tee-Object -FilePath $logFile
 if ($LASTEXITCODE -ne 0) { throw "Import InvitationItem failed (exit $LASTEXITCODE)" }
 
-if (-not $SkipApplicationItems) {
-    Write-Host "=== Reimport ApplicationItems (relink CurrentInvitationItem) ===" -ForegroundColor Cyan
-    & (Join-Path $PSScriptRoot "ApplicationItems.ps1") `
-        -TargetConnection $TargetConnection `
-        -LegacySource $LegacySource `
-        -BatchSize $BatchSize `
-        -MaxRows $MaxRows `
-        -Configuration $Configuration
-    if ($LASTEXITCODE -ne 0) { throw "ApplicationItems reimport failed (exit $LASTEXITCODE)" }
-}
+Write-Host "=== Skip ApplicationItem relink (Phase B hard-remove; roster uses ResolvedLinks) ===" -ForegroundColor Yellow
 
 Write-Host "=== Reconcile cancelled flags ===" -ForegroundColor Cyan
 sqlcmd -S "(localdb)\mssqllocaldb" -d Visa2026 -E -C -W -Q "SET NOCOUNT ON; SELECT COUNT(*) AS invitation_items_cancelled FROM InvitationItems WHERE IsCancelled = 1; SELECT COUNT(*) AS app_items_inv_cancelled FROM ApplicationItems WHERE InvitationItemIsCancelled = 1;"

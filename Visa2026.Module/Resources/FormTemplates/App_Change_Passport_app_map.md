@@ -61,6 +61,6 @@ this.Detail.HeightF = 492F;  // matches Group D base default
 ## ReportsUpdater.cs entry
 
 ```csharp
-AddPredefinedReport<AppChangePassportReport>("App Change Passport Report", typeof(Application), isInplaceReport: true);
+AddPredefinedReport<AppChangePassportReport>("App Change Passport Report", typeof(ApplicationProfileInstance), isInplaceReport: true);
 CreateReportVisibility("App Change Passport Report", "[ApplicationType.Name] = 'App_Change_Passport'");
 ```

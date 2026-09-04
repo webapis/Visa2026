@@ -1,0 +1,2369 @@
+@using System.Collections.Generic
+@using System.Linq
+@using Microsoft.JSInterop
+@using DevExpress.ExpressApp
+@using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.BusinessObjects.OfficerShell
+@using Visa2026.Module.Services.ApplicationItemLinkedDocuments
+@using Visa2026.Module.Services.ApplicationWorkspace
+@using Visa2026.Module.Services.ApplicationPersonLink
+@using Visa2026.Module.Services.OfficerShell
+@using Visa2026.Module.Editors
+@using Visa2026.Module.Services.PreviewSlot
+@using Visa2026.Module.Services.HeaderLinkedDocuments
+@using Visa2026.Blazor.Server.Services
+@implements IDisposable
+@inject IJSRuntime JS
+@inject IVisaPreviewSlotService PreviewSlotService
+@inject INonSecuredObjectSpaceFactory ObjectSpaceFactory
+@inject IApplicationWorkspacePersonUiActions WorkspaceActions
+
+<div class="officer-case-workspace">
+    @if (IsLoading || Snapshot == null)
+    {
+        <div class="os-loading" role="status">Loading case workspace…</div>
+    }
+    else if (Snapshot.ApplicationProfileInstanceId == Guid.Empty)
+    {
+        <div class="os-loading">No case selected.</div>
+    }
+    else
+    {
+        var view = Snapshot.CaseView;
+        var chrome = view.Chrome;
+        <header class="cw-head">
+            <div class="cw-head__top">
+                <div class="cw-head__title-block">
+                    <div class="cw-head__accent" style="background:@OfficerShellTemplateFamily.GetColor(chrome.TemplateFamilyKey)"></div>
+                    <div>
+                        <h1>ApplicationProfileInstance № @chrome.DisplayNumber</h1>
+                        @{
+                            var profileName = !string.IsNullOrWhiteSpace(chrome.ProfileTemplateName)
+                                ? chrome.ProfileTemplateName
+                                : Snapshot!.Profile.Title;
+                        }
+                        @if (!string.IsNullOrWhiteSpace(profileName))
+                        {
+                            <p class="cw-head__profile" title="Application Profile">@profileName</p>
+                        }
+                        <p class="cw-head__sub">@chrome.TemplateFamilyLabel · Started @(string.IsNullOrWhiteSpace(chrome.StartedOn) ? "—" : chrome.StartedOn)</p>
+                    </div>
+                </div>
+                <div class="cw-head__badges">
+                    @{
+                        var processTone = view.ProgressSteps.LastOrDefault(s =>
+                            s.OutcomeKind is "issued" or "rejected" or "cancelled")?.OutcomeKind;
+                    }
+                    @if (chrome.SlaDaysRemaining is int slaDays)
+                    {
+                        <span class="cw-head-badge cw-head-badge--sla">📅 @slaDays days remaining</span>
+                    }
+                    @if (processTone == "issued")
+                    {
+                        <span class="cw-head-badge cw-head-badge--issued">Issued</span>
+                    }
+                    else if (processTone == "rejected")
+                    {
+                        <span class="cw-head-badge cw-head-badge--rejected">Rejected</span>
+                    }
+                    else if (processTone == "cancelled")
+                    {
+                        <span class="cw-head-badge cw-head-badge--cancelled">Cancelled</span>
+                    }
+                    else
+                    {
+                        <span class="cw-head-badge cw-head-badge--process">⚙ In process</span>
+                    }
+                    @if (view.Chrome.ResolvedLinksLocked)
+                    {
+                        <span class="cw-head-badge cw-head-badge--locked" title="People and linked records cannot be changed">🔒 Links locked</span>
+                    }
+                    <button type="button"
+                            class="cw-head__close"
+                            aria-label="Close case workspace"
+                            title="Close"
+                            @onclick="BackToListAsync">×</button>
+                </div>
+            </div>
+            <div class="cw-head__people">
+                @if (view.People.Count > 0)
+                {
+                    @foreach (var person in view.People)
+                    {
+                        var selected = IsDocumentPersonSelected(person.PersonId);
+                        var personName = ApplicationItemDocumentCopiesPersonCatalog.DisplayPersonName(person.Name);
+                        <button type="button"
+                                class="cw-person @(selected ? "is-selected" : "is-muted")"
+                                aria-pressed="@selected"
+                                title="@(selected
+                                    ? "Hide this person in Document copies"
+                                    : "Show this person in Document copies")"
+                                @onclick="() => ToggleDocumentPersonFilter(person.PersonId)">
+                            <span class="cw-person__avatar" style="background:@PersonColor(person.Index)">@Initials(personName)</span>
+                            @personName
+                        </button>
+                    }
+                }
+                else
+                {
+                    @foreach (var (name, index) in chrome.PeopleNames.Select((n, i) => (n, i)))
+                    {
+                        <span class="cw-person">
+                            <span class="cw-person__avatar" style="background:@PersonColor(index)">@Initials(name)</span>
+                            @name
+                        </span>
+                    }
+                }
+                @if (chrome.MergedFromCount is int merged && merged > 1)
+                {
+                    <span class="cw-merge">⊞ Merged from @merged staged profiles</span>
+                }
+            </div>
+        </header>
+
+        <div class="cw-layout @(IsWideTab(DisplayedTab) ? "cw-layout--wide" : null)">
+            <nav class="cw-nav" aria-label="Case sections">
+                @{
+                    var peopleNav = ApplicationWorkspacePeopleLinksCompleteness.Resolve(view);
+                    var peopleGaps = ApplicationWorkspacePeopleLinksCompleteness.PeopleWithGaps(view);
+                    var overviewNav = ApplicationWorkspaceCaseSummaryCompletenessGate.ResolveOverviewNav(view);
+                    var overviewMissing = ApplicationWorkspaceCaseSummaryCompletenessGate.MissingRequiredCount(view);
+                    var documentsNav = _documentCopiesNav;
+                    var documentsMissing = _documentCopiesMissing;
+                    var documentsNavReady = _documentCopiesNavReady;
+                    var progressLetterMissing = ApplicationWorkspaceProgressLetterCompleteness.MissingCount(view);
+                }
+                @foreach (var tab in CaseTabs)
+                {
+                    <button type="button"
+                            class="cw-nav__item @(DisplayedTab == tab.Key ? "is-active" : null)"
+                            disabled="@_tabSwitching"
+                            title="@TabBlockedTitle(tab.Key)"
+                            @onclick="() => SelectTab(tab.Key)">
+                        <span aria-hidden="true">@tab.Glyph</span>
+                        <span>@tab.Label</span>
+                        @if (tab.Key == "overview")
+                        {
+                            @if (overviewNav == ApplicationWorkspaceCaseSummaryCompletenessGate.OverviewNavStatus.Incomplete)
+                            {
+                                <span class="cw-nav__badge cw-nav__badge--missing"
+                                      title="@(overviewMissing == 1 ? "1 required Case summary field is empty" : overviewMissing + " required Case summary fields are empty")"
+                                      aria-label="@(overviewMissing == 1 ? "1 required Case summary field is empty" : overviewMissing + " required Case summary fields are empty")">@overviewMissing</span>
+                            }
+                            else
+                            {
+                                <span class="cw-nav__badge cw-nav__badge--ok"
+                                      title="Required Case summary complete"
+                                      aria-label="Required Case summary complete">✓</span>
+                            }
+                        }
+                        else if (tab.Key == "people")
+                        {
+                            @switch (peopleNav)
+                            {
+                                case ApplicationWorkspacePeopleLinksCompleteness.NavStatus.EmptyRoster:
+                                    <span class="cw-nav__badge cw-nav__badge--missing"
+                                          title="No people linked"
+                                          aria-label="No people linked"></span>
+                                    break;
+                                case ApplicationWorkspacePeopleLinksCompleteness.NavStatus.Incomplete:
+                                    <span class="cw-nav__badge cw-nav__badge--missing"
+                                          title="@(peopleGaps == 1 ? "1 person missing required linked records" : peopleGaps + " people missing required linked records")"
+                                          aria-label="@(peopleGaps == 1 ? "1 person missing required linked records" : peopleGaps + " people missing required linked records")">@peopleGaps</span>
+                                    break;
+                                default:
+                                    <span class="cw-nav__badge cw-nav__badge--ok"
+                                          title="Required person data complete"
+                                          aria-label="Required person data complete">✓</span>
+                                    break;
+                            }
+                        }
+                        else if (tab.Key == "progress" && progressLetterMissing > 0)
+                        {
+                            <span class="cw-nav__badge cw-nav__badge--warn"
+                                  title="@(progressLetterMissing == 1 ? "1 approval letter is missing" : progressLetterMissing + " approval letters are missing")"
+                                  aria-label="@(progressLetterMissing == 1 ? "1 approval letter is missing" : progressLetterMissing + " approval letters are missing")">@progressLetterMissing</span>
+                        }
+                        else if (tab.Key == "documents" && documentsNavReady)
+                        {
+                            @switch (documentsNav)
+                            {
+                                case ApplicationWorkspaceDocumentCopiesCompleteness.NavStatus.EmptyRoster:
+                                    <span class="cw-nav__badge cw-nav__badge--warn"
+                                          title="No people linked"
+                                          aria-label="No people linked"></span>
+                                    break;
+                                case ApplicationWorkspaceDocumentCopiesCompleteness.NavStatus.Incomplete:
+                                    <span class="cw-nav__badge cw-nav__badge--warn"
+                                          title="@(documentsMissing == 1 ? "1 required document copy is missing" : documentsMissing + " required document copies are missing")"
+                                          aria-label="@(documentsMissing == 1 ? "1 required document copy is missing" : documentsMissing + " required document copies are missing")">@documentsMissing</span>
+                                    break;
+                                default:
+                                    <span class="cw-nav__badge cw-nav__badge--ok"
+                                          title="Required document copies complete"
+                                          aria-label="Required document copies complete">✓</span>
+                                    break;
+                            }
+                        }
+                    </button>
+                }
+            </nav>
+
+            <div class="cw-main @(IsWideTab(DisplayedTab) ? "cw-main--full" : null) @(_tabSwitching ? "cw-main--switching" : null)">
+                @if (_tabSwitching)
+                {
+                    <div class="cw-tab-loading" role="status" aria-live="polite" aria-busy="true">
+                        <div class="cw-tab-loading__panel">
+                            <div class="cw-tab-loading__label">@TabSwitchStatus</div>
+                            <div class="cw-tab-loading__track"
+                                 role="progressbar"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100"
+                                 aria-label="@TabSwitchStatus">
+                                <div class="cw-tab-loading__fill cw-tab-loading__fill--indeterminate"></div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                @if (_tabContentReady)
+                {
+                    @switch (ActiveTab)
+                    {
+                        case "overview":
+                            @RenderOverview(view)
+                            break;
+                        case "people":
+                            @RenderPeople(view)
+                            break;
+                        case "progress":
+                            <OfficerShellCaseProgressTab @ref="_progressTab"
+                                                         ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId"
+                                                         View="view"
+                                                         ProgressHistory="Snapshot.ProgressHistory"
+                                                         StatusMessage="@ProgressStatusMessage"
+                                                         IsStatusError="@ProgressStatusIsError"
+                                                         SaveNotesRequested="@SaveProgressNotesRequested"
+                                                         UploadMinistryLetterRequested="@UploadMinistryLetterRequested"
+                                                         AdvanceProgressRequested="@AdvanceProgressRequested"
+                                                         RevertProgressRequested="@RevertProgressRequested"
+                                                         ShowRevertToHere="@ShowRevertToHere"
+                                                         PreviewSlotOwnerViewId="@PreviewSlotOwnerViewId" />
+                            break;
+                        case "documents":
+                            <OfficerShellCaseDocumentsTab ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId"
+                                                         Snapshot="Snapshot"
+                                                         SelectedPersonIds="SelectedDocumentPersonIds"
+                                                         PreviewSlotOwnerViewId="@PreviewSlotOwnerViewId"
+                                                         CatalogReloaded="OnDocumentCopiesCatalogReloaded" />
+                            break;
+                        case "resminamalar":
+                            <OfficerShellCaseResminamalarTab ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId"
+                                                            Snapshot="Snapshot"
+                                                            SelectedPersonIds="SelectedDocumentPersonIds" />
+                            break;
+                        case "sla":
+                            @RenderSla(view)
+                            break;
+                    }
+                }
+            </div>
+
+            @if (!IsWideTab(DisplayedTab))
+            {
+                <aside class="cw-rail">
+                    @RenderRail(view)
+                </aside>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private static readonly (string Key, string Label, string Glyph)[] CaseTabs =
+    [
+        ("overview", "Overview", "⌂"),
+        ("people", "People & links", "👥"),
+        ("progress", "Progress", "▤"),
+        ("documents", "Document copies", "📄"),
+        ("resminamalar", "Resminamalar", "📦"),
+        ("sla", "SLA & deadlines", "⏱"),
+    ];
+
+    private static readonly string[] PersonColors =
+        ["#7c3aed", "#0f9d58", "#ea580c", "#2563eb", "#db2777"];
+
+    private OfficerShellCaseProgressTab? _progressTab;
+    private string? _pendingTab;
+    private bool _tabSwitching;
+    private bool _tabContentReady = true;
+    private Guid _relinkingPersonId;
+    private string? _documentCopiesCompletenessKey;
+    private bool _documentCopiesNavReady;
+    private ApplicationWorkspaceDocumentCopiesCompleteness.NavStatus _documentCopiesNav =
+        ApplicationWorkspaceDocumentCopiesCompleteness.NavStatus.EmptyRoster;
+    private int _documentCopiesMissing;
+
+    private string DisplayedTab =>
+        string.IsNullOrWhiteSpace(_pendingTab) ? ActiveTab : _pendingTab;
+
+    private string PendingTabLabel
+    {
+        get
+        {
+            foreach (var tab in CaseTabs)
+            {
+                if (string.Equals(tab.Key, DisplayedTab, StringComparison.OrdinalIgnoreCase))
+                    return tab.Label;
+            }
+
+            return "section";
+        }
+    }
+
+    private string TabSwitchStatus => $"Opening {PendingTabLabel}…";
+
+    [Parameter] public ApplicationWorkspaceSnapshot? Snapshot { get; set; }
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public string ActiveTab { get; set; } = "overview";
+    [Parameter] public int SelectedPersonRowIndex { get; set; } = -1;
+    [Parameter] public string? PeopleLinkedRecordFocusKey { get; set; }
+    [Parameter] public bool CanLinkPerson { get; set; }
+    [Parameter] public bool CanUnlinkPerson { get; set; }
+    [Parameter] public bool CanOpenPersonDetail { get; set; }
+    [Parameter] public bool CanOpenDocumentCopies { get; set; }
+    [Parameter] public EventCallback<string> CaseTabChanged { get; set; }
+    [Parameter] public EventCallback<string> LinkedRecordTileClicked { get; set; }
+    [Parameter] public EventCallback<string> IssuedHeaderNewRequested { get; set; }
+    [Parameter] public EventCallback<ApplicationWorkspaceIssuedHeaderOpenRequest> IssuedHeaderOpenRequested { get; set; }
+    [Parameter] public EventCallback BackToListRequested { get; set; }
+    [Parameter] public EventCallback LinkPersonRequested { get; set; }
+    [Parameter] public EventCallback<Guid> UnlinkPersonRequested { get; set; }
+    [Parameter] public EventCallback OpenPersonDetailRequested { get; set; }
+    [Parameter] public EventCallback<int> OpenPersonDetailByIndexRequested { get; set; }
+    [Parameter] public EventCallback<Guid> RelinkPersonRequested { get; set; }
+    [Parameter] public EventCallback OpenDocumentCopiesRequested { get; set; }
+    [Parameter] public EventCallback OpenResminamalarRequested { get; set; }
+    [Parameter] public EventCallback<int> SelectPersonRowRequested { get; set; }
+    [Parameter] public string? ProgressStatusMessage { get; set; }
+    [Parameter] public bool ProgressStatusIsError { get; set; }
+    [Parameter] public EventCallback<string> SaveProgressNotesRequested { get; set; }
+    [Parameter] public EventCallback<OfficerShellCaseProgressFileUpload> UploadMinistryLetterRequested { get; set; }
+    [Parameter] public EventCallback<OfficerShellCaseProgressAdvanceRequest> AdvanceProgressRequested { get; set; }
+    [Parameter] public EventCallback<OfficerShellCaseProgressRevertRequest> RevertProgressRequested { get; set; }
+    [Parameter] public bool ShowRevertToHere { get; set; }
+    [Parameter] public bool ShowPersonLinkPicker { get; set; }
+    [Parameter] public IReadOnlyList<ApplicationProfileInstancePersonLinkCandidateRow> PersonLinkCandidates { get; set; } = Array.Empty<ApplicationProfileInstancePersonLinkCandidateRow>();
+    [Parameter] public bool PersonLinkIsSearching { get; set; }
+    [Parameter] public bool PersonLinkIsLinking { get; set; }
+    [Parameter] public string? PersonLinkStatusMessage { get; set; }
+    [Parameter] public bool PersonLinkStatusIsError { get; set; }
+    [Parameter] public EventCallback<string> PersonLinkSearchRequested { get; set; }
+    [Parameter] public EventCallback<Guid> LinkPersonFromPickerRequested { get; set; }
+    [Parameter] public EventCallback ClosePersonLinkPickerRequested { get; set; }
+    [Parameter] public string? HeaderFieldStatusMessage { get; set; }
+    [Parameter] public bool HeaderFieldStatusIsError { get; set; }
+    [Parameter] public EventCallback<ApplicationWorkspaceCaseHeaderFieldUpdate> HeaderFieldChanged { get; set; }
+    [Parameter] public string? OrganizationStatusMessage { get; set; }
+    [Parameter] public bool OrganizationStatusIsError { get; set; }
+    [Parameter] public EventCallback<ApplicationWorkspaceOrganizationLetterheadUpdate> OrganizationLetterheadChanged { get; set; }
+    [Parameter] public EventCallback<(string Kind, Guid Id)> OrganizationCatalogEditorRequested { get; set; }
+    [Parameter] public string PreviewSlotOwnerViewId { get; set; } = OfficerShellViewIds.DetailView;
+
+    private readonly HashSet<Guid> _selectedDocumentPersonIds = [];
+    private string _documentPeopleRosterKey = string.Empty;
+    private string? _peopleRecordKey;
+    private int? _peopleRecordPersonIndex;
+    private string? _appliedPeopleFocusKey;
+    private bool _caseSummaryEditing;
+    private Guid _caseSummaryInstanceId;
+    private bool _organizationEditing;
+
+    private bool IsCaseSummaryEditing =>
+        _caseSummaryEditing && Snapshot?.CaseView.HeaderFields.Count > 0;
+
+    private bool IsOrganizationEditing =>
+        _organizationEditing && Snapshot != null;
+
+    private IReadOnlyList<Guid> SelectedDocumentPersonIds =>
+        _selectedDocumentPersonIds.Count == 0
+            ? Array.Empty<Guid>()
+            : _selectedDocumentPersonIds.ToList();
+
+    private static bool IsWideTab(string tab) => tab is "documents" or "resminamalar";
+
+    private string? EffectivePeopleRecordKey =>
+        !string.IsNullOrWhiteSpace(_peopleRecordKey)
+            ? _peopleRecordKey
+            : PeopleLinkedRecordFocusKey;
+
+    private VisaPreviewSlotMode _previewSlotMode;
+
+    protected override void OnInitialized()
+    {
+        _previewSlotMode = PreviewSlotService.State.Mode;
+        PreviewSlotService.StateChanged += OnPreviewSlotStateChanged;
+    }
+
+    public void Dispose()
+    {
+        PreviewSlotService.StateChanged -= OnPreviewSlotStateChanged;
+    }
+
+    private void OnPreviewSlotStateChanged()
+    {
+        var mode = PreviewSlotService.State.Mode;
+        var previous = _previewSlotMode;
+        _previewSlotMode = mode;
+
+        // Resminamalar preview lives in #visa-preview-slot. Re-rendering the case workspace
+        // rebuilds the 17-row catalog on the same circuit and makes open/close feel stuck.
+        if (mode == VisaPreviewSlotMode.Resminamalar)
+            return;
+        if (mode == VisaPreviewSlotMode.Closed && previous == VisaPreviewSlotMode.Resminamalar)
+            return;
+
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private bool IsIssuedRowOpen(string catalogKey, Guid rowId)
+    {
+        if (rowId == Guid.Empty || Snapshot == null)
+            return false;
+
+        var state = PreviewSlotService.State;
+        var instanceId = Snapshot.ApplicationProfileInstanceId;
+
+        if (state.Mode == VisaPreviewSlotMode.IssueIssuedHeader)
+        {
+            var request = state.IssueIssuedHeader;
+            if (request == null
+                || request.ApplicationProfileInstanceId != instanceId
+                || request.ExistingHeaderId != rowId)
+            {
+                return false;
+            }
+
+            return IssueIssuedHeaderComposeService.TryResolveKind(catalogKey, out var kind)
+                && request.Kind == kind;
+        }
+
+        if (state.Mode == VisaPreviewSlotMode.HeaderDocumentCopies)
+        {
+            var copies = state.HeaderDocumentCopies;
+            if (copies == null || copies.ParentId != rowId)
+                return false;
+
+            return ApplicationWorkspaceIssuedRecordsCatalog.TryGetDocumentCopiesFamily(catalogKey, out var family)
+                && copies.Family == family;
+        }
+
+        if (state.Mode == VisaPreviewSlotMode.IssueIssuedVisa)
+        {
+            var visaRequest = state.IssueIssuedVisa;
+            return visaRequest != null
+                && visaRequest.ApplicationProfileInstanceId == instanceId
+                && visaRequest.ExistingVisaId == rowId
+                && string.Equals(catalogKey, ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, StringComparison.OrdinalIgnoreCase);
+        }
+
+        return false;
+    }
+
+    protected override void OnParametersSet()
+    {
+        var instanceId = Snapshot?.ApplicationProfileInstanceId ?? Guid.Empty;
+        if (instanceId != _caseSummaryInstanceId)
+        {
+            _caseSummaryInstanceId = instanceId;
+            _caseSummaryEditing = false;
+            _organizationEditing = false;
+            _documentCopiesCompletenessKey = null;
+            _documentCopiesNavReady = false;
+        }
+
+        SyncDocumentPeopleFilter(Snapshot?.CaseView);
+        SyncPeopleRecordFocus();
+        EnsureDocumentCopiesCompleteness(Snapshot?.CaseView);
+
+        // Save reloads CaseView without dropdown catalogs. Reload them while Edit is open
+        // so Visa type / Project / etc. keep a matching <option> and stay visible.
+        if (_caseSummaryEditing)
+            EnsureHeaderLookupCatalogs();
+
+        if (ApplicationWorkspaceCaseSummaryCompletenessGate.BlocksTab(Snapshot?.CaseView, ActiveTab)
+            && CaseTabChanged.HasDelegate
+            && !_tabSwitching)
+        {
+            _ = CaseTabChanged.InvokeAsync("overview");
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_tabSwitching || !_tabContentReady)
+            return;
+
+        _tabSwitching = false;
+        _pendingTab = null;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private IReadOnlyList<ApplicationWorkspaceCaseHeaderField> MissingSummaryFields =>
+        ApplicationWorkspaceCaseSummaryCompletenessGate.MissingRequiredFields(Snapshot?.CaseView?.HeaderFields);
+
+    private bool IsSummaryProcessGateActive =>
+        ApplicationWorkspaceCaseSummaryCompletenessGate.BlocksProcessNavigation(Snapshot?.CaseView);
+
+    private string SummaryGateBannerMessage =>
+        ApplicationWorkspaceCaseSummaryCompletenessGate.FormatBannerMessage(MissingSummaryFields);
+
+    private string SummaryGateReadinessSuffix =>
+        ApplicationWorkspaceCaseSummaryCompletenessGate.FormatReadinessMissingSuffix(MissingSummaryFields);
+
+    private string? TabBlockedTitle(string tabKey) =>
+        ApplicationWorkspaceCaseSummaryCompletenessGate.BlocksTab(Snapshot?.CaseView, tabKey)
+            ? "Complete required Case summary fields first"
+            : null;
+
+    private bool TryBlockIncompleteProcessWork(string? tabKey = null)
+    {
+        var view = Snapshot?.CaseView;
+        var blocked = tabKey == null
+            ? ApplicationWorkspaceCaseSummaryCompletenessGate.BlocksProcessNavigation(view)
+            : ApplicationWorkspaceCaseSummaryCompletenessGate.BlocksTab(view, tabKey);
+        if (!blocked)
+            return false;
+
+        StartCaseSummaryEdit();
+        return true;
+    }
+
+    private void StartCaseSummaryEdit()
+    {
+        EnsureHeaderLookupCatalogs();
+        _caseSummaryEditing = true;
+    }
+
+    private void EnsureHeaderLookupCatalogs()
+    {
+        var view = Snapshot?.CaseView;
+        if (view == null || view.HeaderFields.Count == 0)
+            return;
+
+        var needsCatalogs = view.HeaderFields.Any(field =>
+            field.Kind is ApplicationWorkspaceCaseHeaderFieldKind.Lookup
+                or ApplicationWorkspaceCaseHeaderFieldKind.CommaSeparatedMultiSelect
+            && field.Options.Count == 0
+            && field.MultiSelectOptions.Count == 0);
+        if (!needsCatalogs)
+            return;
+
+        var applicationId = Snapshot!.ApplicationProfileInstanceId;
+        if (applicationId == Guid.Empty)
+            return;
+
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
+        if (application == null)
+            return;
+
+        view.HeaderFields = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(
+            application,
+            application.ApplicationProfile,
+            objectSpace,
+            loadLookupCatalogs: true);
+    }
+
+    private void FinishCaseSummaryEdit() => _caseSummaryEditing = false;
+
+    private void StartOrganizationEdit() => _organizationEditing = true;
+
+    private void FinishOrganizationEdit() => _organizationEditing = false;
+
+    private Task OnOrganizationCatalogChanged(string kind, string? raw)
+    {
+        if (!OrganizationLetterheadChanged.HasDelegate || string.IsNullOrWhiteSpace(kind))
+            return Task.CompletedTask;
+
+        Guid.TryParse(raw, out var id);
+        return OrganizationLetterheadChanged.InvokeAsync(new ApplicationWorkspaceOrganizationLetterheadUpdate
+        {
+            Kind = kind,
+            SelectedId = id == Guid.Empty ? null : id,
+        });
+    }
+
+    private Task OnOrganizationMakeDefault(string kind, Guid? selectedId)
+    {
+        if (!OrganizationLetterheadChanged.HasDelegate || selectedId is not Guid id || id == Guid.Empty)
+            return Task.CompletedTask;
+
+        return OrganizationLetterheadChanged.InvokeAsync(new ApplicationWorkspaceOrganizationLetterheadUpdate
+        {
+            Kind = kind,
+            SelectedId = id,
+            MakeDefault = true,
+        });
+    }
+
+    private Task OnNewOrganizationCatalog(string kind) =>
+        OrganizationCatalogEditorRequested.HasDelegate
+            ? OrganizationCatalogEditorRequested.InvokeAsync((kind, Guid.Empty))
+            : Task.CompletedTask;
+
+    private Task OnEditOrganizationCatalog(string kind, Guid? selectedId) =>
+        selectedId is not Guid id || id == Guid.Empty || !OrganizationCatalogEditorRequested.HasDelegate
+            ? Task.CompletedTask
+            : OrganizationCatalogEditorRequested.InvokeAsync((kind, id));
+
+    private RenderFragment RenderOrgColHead(string title, string kind, Guid? selectedId) => __builder =>
+    {
+        <div class="cw-org-col-head">
+            <h3 class="cw-org-col-title">@title</h3>
+            <div class="cw-org-col-actions">
+                <button type="button"
+                        class="cw-org-new"
+                        @onclick="() => OnNewOrganizationCatalog(kind)">
+                    + New
+                </button>
+                <button type="button"
+                        class="cw-org-edit"
+                        aria-label="@($"Edit {title}")"
+                        disabled="@(selectedId is not Guid id || id == Guid.Empty)"
+                        @onclick="() => OnEditOrganizationCatalog(kind, selectedId)">
+                    ✎
+                </button>
+            </div>
+        </div>
+    };
+
+    private RenderFragment RenderOrgCatalogSelect(
+        string kind,
+        Guid? selectedId,
+        IReadOnlyList<OrganizationCatalogOption> options) => __builder =>
+    {
+        var selected = selectedId ?? Guid.Empty;
+        var current = options.FirstOrDefault(o => o.Id == selected);
+        <div class="cw-org-select-row">
+            <select class="cw-summary-field__input"
+                    value="@selected"
+                    @onchange="e => OnOrganizationCatalogChanged(kind, e.Value?.ToString())">
+                @if (options.Count == 0)
+                {
+                    <option value="">No catalog records yet</option>
+                }
+                else
+                {
+                    @foreach (var option in options)
+                    {
+                        <option value="@option.Id" selected="@(option.Id == selected)">@option.DisplayName</option>
+                    }
+                }
+            </select>
+            @if (current?.IsDefault == true)
+            {
+                <span class="cw-org-default-badge">Default</span>
+            }
+            @if (current != null && !current.IsDefault)
+            {
+                <button type="button"
+                        class="cw-org-make-default"
+                        @onclick="() => OnOrganizationMakeDefault(kind, selected)">
+                    Make default
+                </button>
+            }
+        </div>
+    };
+
+    private RenderFragment RenderOrgField(string label, string? value, bool multiline = false) => __builder =>
+    {
+        <label class="cw-summary-field">
+            <span class="cw-summary-field__label">@label</span>
+            @if (multiline)
+            {
+                <textarea class="cw-summary-field__input cw-summary-field__textarea"
+                          rows="3"
+                          disabled="true">@value</textarea>
+            }
+            else
+            {
+                <input type="text"
+                       class="cw-summary-field__input"
+                       value="@value"
+                       disabled="true" />
+            }
+        </label>
+    };
+
+    private IEnumerable<ApplicationWorkspaceCaseSummaryTile> OverviewTiles(ApplicationWorkspaceCaseView view) =>
+        view.HeaderFields.Count > 0
+            ? view.HeaderFields.Select(ToSummaryTile)
+            : view.SummaryTiles;
+
+    private static ApplicationWorkspaceCaseSummaryTile ToSummaryTile(ApplicationWorkspaceCaseHeaderField field) =>
+        new()
+        {
+            Key = field.Key,
+            Label = field.Label,
+            Value = field.DisplayValue,
+            Tone = field.Tone,
+            Glyph = field.Glyph,
+            FillState = field.FillState,
+        };
+
+    private static List<ApplicationWorkspaceCaseHeaderField> IdentityHeaderFields(
+        IEnumerable<ApplicationWorkspaceCaseHeaderField> fields)
+    {
+        var map = fields
+            .Where(field => !string.IsNullOrEmpty(field.Key))
+            .GroupBy(field => field.Key, StringComparer.Ordinal)
+            .ToDictionary(group => group.Key, group => group.First(), StringComparer.Ordinal);
+        var result = new List<ApplicationWorkspaceCaseHeaderField>(ApplicationWorkspaceCaseHeaderFieldsHelper.IdentityFieldKeys.Length);
+        foreach (var key in ApplicationWorkspaceCaseHeaderFieldsHelper.IdentityFieldKeys)
+        {
+            if (map.TryGetValue(key, out var field))
+                result.Add(field);
+        }
+
+        return result;
+    }
+
+    private static List<ApplicationWorkspaceCaseHeaderField> MainHeaderFields(
+        IEnumerable<ApplicationWorkspaceCaseHeaderField> fields) =>
+        fields.Where(field => !ApplicationWorkspaceCaseHeaderFieldsHelper.IsIdentityField(field.Key)).ToList();
+
+    private static List<ApplicationWorkspaceCaseSummaryTile> IdentityTiles(
+        IEnumerable<ApplicationWorkspaceCaseSummaryTile> tiles)
+    {
+        var map = tiles
+            .Where(tile => !string.IsNullOrEmpty(tile.Key))
+            .GroupBy(tile => tile.Key, StringComparer.Ordinal)
+            .ToDictionary(group => group.Key, group => group.First(), StringComparer.Ordinal);
+        var result = new List<ApplicationWorkspaceCaseSummaryTile>(ApplicationWorkspaceCaseHeaderFieldsHelper.IdentityFieldKeys.Length);
+        foreach (var key in ApplicationWorkspaceCaseHeaderFieldsHelper.IdentityFieldKeys)
+        {
+            if (map.TryGetValue(key, out var tile))
+                result.Add(tile);
+        }
+
+        return result;
+    }
+
+    private static List<ApplicationWorkspaceCaseSummaryTile> MainTiles(
+        IEnumerable<ApplicationWorkspaceCaseSummaryTile> tiles) =>
+        tiles.Where(tile => !ApplicationWorkspaceCaseHeaderFieldsHelper.IsIdentityField(tile.Key)).ToList();
+
+    private static string FillCss(ApplicationWorkspaceCaseSummaryFillState state) =>
+        ApplicationWorkspaceCaseSummaryFill.CssToken(state);
+
+    private static string EditorAliasFor(string? fieldKey) =>
+        string.Equals(fieldKey, ApplicationWorkspaceCaseHeaderFieldsHelper.WorkPermitLocation, StringComparison.Ordinal)
+            ? CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation
+            : CommaSeparatedMultiSelectEditorAliases.BorderZone;
+
+    private Task OnHeaderFieldChanged(string key, string? value)
+    {
+        if (!HeaderFieldChanged.HasDelegate || string.IsNullOrWhiteSpace(key))
+            return Task.CompletedTask;
+
+        return HeaderFieldChanged.InvokeAsync(new ApplicationWorkspaceCaseHeaderFieldUpdate
+        {
+            Key = key,
+            Value = value,
+        });
+    }
+
+    private void SyncPeopleRecordFocus()
+    {
+        var focus = string.IsNullOrWhiteSpace(PeopleLinkedRecordFocusKey)
+            ? null
+            : PeopleLinkedRecordFocusKey.Trim();
+        if (string.Equals(focus, _appliedPeopleFocusKey, StringComparison.OrdinalIgnoreCase))
+            return;
+
+        _appliedPeopleFocusKey = focus;
+        _peopleRecordKey = focus;
+        _peopleRecordPersonIndex = null;
+    }
+
+    private void SyncDocumentPeopleFilter(ApplicationWorkspaceCaseView? view)
+    {
+        var people = view?.People
+            .Where(person => person.PersonId != Guid.Empty)
+            .ToList() ?? [];
+        var key = string.Join(",", people.Select(person => person.PersonId).OrderBy(id => id));
+        if (!string.Equals(key, _documentPeopleRosterKey, StringComparison.Ordinal))
+        {
+            _documentPeopleRosterKey = key;
+            _selectedDocumentPersonIds.Clear();
+            foreach (var person in people)
+                _selectedDocumentPersonIds.Add(person.PersonId);
+            return;
+        }
+
+        var valid = people.Select(person => person.PersonId).ToHashSet();
+        _selectedDocumentPersonIds.RemoveWhere(id => !valid.Contains(id));
+    }
+
+    private bool IsDocumentPersonSelected(Guid personId) =>
+        personId != Guid.Empty && _selectedDocumentPersonIds.Contains(personId);
+
+    private void ToggleDocumentPersonFilter(Guid personId)
+    {
+        if (personId == Guid.Empty)
+            return;
+
+        if (!_selectedDocumentPersonIds.Remove(personId))
+            _selectedDocumentPersonIds.Add(personId);
+    }
+
+    private void OnDocumentCopiesCatalogReloaded()
+    {
+        _documentCopiesCompletenessKey = null;
+        EnsureDocumentCopiesCompleteness(Snapshot?.CaseView);
+    }
+
+    private void EnsureDocumentCopiesCompleteness(ApplicationWorkspaceCaseView? view)
+    {
+        var people = view?.People
+            .Where(person => person.PersonId != Guid.Empty)
+            .ToList() ?? [];
+        var instanceId = Snapshot?.ApplicationProfileInstanceId ?? Guid.Empty;
+        var key = instanceId.ToString("N") + ":" + string.Join(";", people.Select(person =>
+            person.PersonId.ToString("N") + ":" + string.Join(",",
+                person.Records.Select(record => record.Key + "=" + record.Count))));
+        if (string.Equals(key, _documentCopiesCompletenessKey, StringComparison.Ordinal))
+            return;
+
+        if (people.Count == 0)
+        {
+            _documentCopiesCompletenessKey = key;
+            _documentCopiesNavReady = true;
+            _documentCopiesNav = ApplicationWorkspaceDocumentCopiesCompleteness.NavStatus.EmptyRoster;
+            _documentCopiesMissing = 0;
+            return;
+        }
+
+        if (instanceId == Guid.Empty)
+            return;
+
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        var personIds = people.Select(person => person.PersonId).Distinct().ToList();
+        var summary = ApplicationWorkspaceDocumentCopiesCompleteness.TryLoadSummary(
+            objectSpace,
+            instanceId,
+            personIds);
+        if (summary == null)
+            return;
+
+        _documentCopiesCompletenessKey = key;
+        _documentCopiesNavReady = true;
+        _documentCopiesMissing = ApplicationWorkspaceDocumentCopiesCompleteness.MissingSlotCount(summary);
+        _documentCopiesNav = ApplicationWorkspaceDocumentCopiesCompleteness.Resolve(hasPeople: true, summary);
+    }
+
+    private string? _selectedIssuedKey;
+    private string? _issuedDeleteError;
+
+    private static string IssuedEmptyHint(ApplicationWorkspaceCaseView view, ApplicationWorkspaceCaseIssuedTile tile)
+    {
+        var number = view.Chrome.DisplayNumber;
+        if (string.IsNullOrWhiteSpace(number))
+            return tile.EmptyHint;
+
+        return tile.EmptyHint.Replace(
+            "this application.",
+            "Application № " + number + ".",
+            StringComparison.Ordinal);
+    }
+
+    private void SelectIssuedTile(string key)
+    {
+        _issuedDeleteError = null;
+        _selectedIssuedKey = string.Equals(_selectedIssuedKey, key, StringComparison.OrdinalIgnoreCase)
+            ? null
+            : key;
+    }
+
+    private void IssueRecordQuickAction()
+    {
+        var tiles = Snapshot?.CaseView.IssuedRecordTiles;
+        if (tiles == null || tiles.Count == 0)
+            return;
+
+        var empty = tiles.FirstOrDefault(t => t.Count == 0);
+        _selectedIssuedKey = (empty ?? tiles[0]).Key;
+    }
+
+    private async Task NewIssuedHeaderAsync(string key)
+    {
+        if (TryBlockIncompleteProcessWork())
+            return;
+
+        if (Snapshot == null || Snapshot.ApplicationProfileInstanceId == Guid.Empty)
+            return;
+
+        if (IssueIssuedHeaderComposeService.TryResolveKind(key, out _))
+        {
+            await OpenIssuedHeaderInSlotAsync(key, existingHeaderId: null);
+            return;
+        }
+
+        if (string.Equals(key, ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, StringComparison.OrdinalIgnoreCase)
+            && await TryOpenIssuedVisaInSlotAsync())
+        {
+            return;
+        }
+
+        if (IssuedHeaderNewRequested.HasDelegate)
+            await IssuedHeaderNewRequested.InvokeAsync(key);
+    }
+
+    private async Task OpenIssuedHeaderAsync(string key, Guid id)
+    {
+        if (id == Guid.Empty)
+            return;
+
+        if (IssueIssuedHeaderComposeService.TryResolveKind(key, out _))
+        {
+            await OpenIssuedHeaderInSlotAsync(key, id);
+            return;
+        }
+
+        if (string.Equals(key, ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, StringComparison.OrdinalIgnoreCase)
+            && await TryOpenIssuedVisaInSlotAsync(id))
+        {
+            return;
+        }
+
+        if (!IssuedHeaderOpenRequested.HasDelegate)
+            return;
+
+        await IssuedHeaderOpenRequested.InvokeAsync(new ApplicationWorkspaceIssuedHeaderOpenRequest
+        {
+            Key = key,
+            Id = id,
+        });
+    }
+
+    private async Task OpenIssuedHeaderInSlotAsync(string key, Guid? existingHeaderId)
+    {
+        if (Snapshot == null || Snapshot.ApplicationProfileInstanceId == Guid.Empty)
+            return;
+
+        if (!IssueIssuedHeaderComposeService.TryResolveKind(key, out var kind))
+            return;
+
+        var catalog = IssueIssuedHeaderComposeService.CatalogKeyFor(kind);
+        var appId = Snapshot.ApplicationProfileInstanceId;
+        var headerId = existingHeaderId is Guid id && id != Guid.Empty ? id : (Guid?)null;
+        var existingText = headerId is Guid h ? h.ToString("D") : string.Empty;
+        var request = new IssueIssuedHeaderSlotRequest
+        {
+            ApplicationProfileInstanceId = appId,
+            Kind = kind,
+            CatalogKey = catalog,
+            ExistingHeaderId = headerId,
+        };
+
+        // DI first so same-circuit Host StateChanged always sees the new header id.
+        await PreviewSlotService.OpenIssueIssuedHeaderAsync(request, PreviewSlotOwnerViewId);
+
+        // JS bridge for Host when it lives on a separate render root / circuit.
+        try
+        {
+            await JS.InvokeAsync<bool>(
+                "visaPreviewDrawer.openIssueIssuedHeader",
+                appId.ToString("D"),
+                kind.ToString(),
+                catalog,
+                PreviewSlotOwnerViewId ?? string.Empty,
+                existingText);
+        }
+        catch (JSException)
+        {
+        }
+        catch (InvalidOperationException)
+        {
+        }
+    }
+
+    private async Task<bool> TryOpenIssuedVisaInSlotAsync(Guid? existingVisaId = null)
+    {
+        if (Snapshot == null || Snapshot.ApplicationProfileInstanceId == Guid.Empty)
+            return false;
+
+        var tiles = Snapshot.CaseView?.IssuedRecordTiles;
+        if (tiles == null || tiles.Count == 0)
+            return false;
+
+        var invitationVisible = tiles.Any(t => string.Equals(t.Key, ApplicationWorkspaceIssuedRecordsCatalog.Invitation, StringComparison.OrdinalIgnoreCase));
+        var visaVisible = tiles.Any(t => string.Equals(t.Key, ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, StringComparison.OrdinalIgnoreCase));
+        if (!invitationVisible || !visaVisible)
+            return false;
+
+        var appId = Snapshot.ApplicationProfileInstanceId;
+        Guid? visaId = existingVisaId is Guid id && id != Guid.Empty ? id : null;
+        var request = new IssueIssuedVisaSlotRequest
+        {
+            ApplicationProfileInstanceId = appId,
+            ExistingVisaId = visaId,
+        };
+
+        await PreviewSlotService.OpenIssueIssuedVisaAsync(request, PreviewSlotOwnerViewId);
+
+        try
+        {
+            await JS.InvokeAsync<bool>(
+                "visaPreviewDrawer.openIssueIssuedVisa",
+                appId.ToString("D"),
+                PreviewSlotOwnerViewId ?? string.Empty,
+                visaId is Guid v ? v.ToString("D") : string.Empty);
+        }
+        catch (JSException)
+        {
+        }
+        catch (InvalidOperationException)
+        {
+        }
+
+        return true;
+    }
+
+    private async Task PreviewIssuedHeaderCopyAsync(string catalogKey, Guid headerId)
+    {
+        if (headerId == Guid.Empty)
+            return;
+        if (!ApplicationWorkspaceIssuedRecordsCatalog.TryGetDocumentCopiesFamily(catalogKey, out var family))
+            return;
+
+        var request = new HeaderDocumentCopiesSlotRequest
+        {
+            Family = family,
+            ParentId = headerId,
+            OpenPreviewOnly = true,
+        };
+
+        await PreviewSlotService.OpenHeaderDocumentCopiesAsync(request, PreviewSlotOwnerViewId);
+
+        try
+        {
+            await JS.InvokeVoidAsync(
+                "visaPreviewDrawer.openHeaderDocumentCopiesPreview",
+                family.ToString(),
+                headerId.ToString("D"),
+                PreviewSlotOwnerViewId ?? string.Empty);
+        }
+        catch (JSException)
+        {
+        }
+        catch (InvalidOperationException)
+        {
+        }
+    }
+
+    private async Task DeleteIssuedHeaderAsync(string catalogKey, Guid headerId, string caption)
+    {
+        _issuedDeleteError = null;
+        if (Snapshot == null || headerId == Guid.Empty)
+            return;
+        if (string.Equals(catalogKey, ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, StringComparison.OrdinalIgnoreCase))
+        {
+            await DeleteIssuedVisaAsync(headerId, caption);
+            return;
+        }
+        if (!IssueIssuedHeaderComposeService.TryResolveKind(catalogKey, out var kind))
+            return;
+
+        var noun = IssuedHeaderNoun(kind);
+        var label = string.IsNullOrWhiteSpace(caption) ? noun : $"{noun} {caption}";
+        bool confirmed;
+        try
+        {
+            confirmed = await JS.InvokeAsync<bool>("confirm", $"Delete {label}? This cannot be undone.");
+        }
+        catch (JSException)
+        {
+            return;
+        }
+        catch (InvalidOperationException)
+        {
+            return;
+        }
+
+        if (!confirmed)
+            return;
+
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        var result = IssueIssuedHeaderComposeService.Delete(
+            objectSpace,
+            Snapshot.ApplicationProfileInstanceId,
+            kind,
+            headerId);
+        if (!result.Succeeded)
+        {
+            _issuedDeleteError = result.ErrorMessage;
+            return;
+        }
+
+        await CloseIssuedHeaderPreviewIfOpenAsync(kind, headerId);
+        WorkspaceActions.NotifyWorkspaceChanged();
+    }
+
+    private async Task DeleteIssuedVisaAsync(Guid visaId, string caption)
+    {
+        _issuedDeleteError = null;
+        if (Snapshot == null || visaId == Guid.Empty)
+            return;
+
+        var label = string.IsNullOrWhiteSpace(caption) ? "visa" : $"visa {caption}";
+        bool confirmed;
+        try
+        {
+            confirmed = await JS.InvokeAsync<bool>("confirm", $"Delete {label}? This cannot be undone.");
+        }
+        catch (JSException)
+        {
+            return;
+        }
+        catch (InvalidOperationException)
+        {
+            return;
+        }
+
+        if (!confirmed)
+            return;
+
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        var result = IssueIssuedVisaComposeService.Delete(
+            objectSpace,
+            Snapshot.ApplicationProfileInstanceId,
+            visaId);
+        if (!result.Succeeded)
+        {
+            _issuedDeleteError = result.ErrorMessage;
+            return;
+        }
+
+        await CloseIssuedVisaSurfacesIfOpenAsync(visaId);
+        WorkspaceActions.NotifyWorkspaceChanged();
+    }
+
+    private async Task CloseIssuedVisaSurfacesIfOpenAsync(Guid visaId)
+    {
+        if (Snapshot == null || visaId == Guid.Empty)
+            return;
+
+        var state = PreviewSlotService.State;
+        var close = false;
+        if (state.Mode == VisaPreviewSlotMode.IssueIssuedVisa
+            && state.IssueIssuedVisa?.ExistingVisaId == visaId)
+        {
+            close = true;
+        }
+        else if (state.Mode == VisaPreviewSlotMode.HeaderDocumentCopies
+            && state.HeaderDocumentCopies?.Family == HeaderDocumentCopiesFamily.Visa
+            && state.HeaderDocumentCopies.ParentId == visaId)
+        {
+            close = true;
+        }
+
+        if (!close)
+            return;
+
+        await PreviewSlotService.CloseAsync();
+        try
+        {
+            await JS.InvokeVoidAsync("visaPreviewDrawer.close");
+        }
+        catch (JSException)
+        {
+        }
+        catch (InvalidOperationException)
+        {
+        }
+    }
+
+    private async Task CloseIssuedHeaderPreviewIfOpenAsync(IssueIssuedHeaderKind kind, Guid headerId)
+    {
+        if (Snapshot == null || headerId == Guid.Empty)
+            return;
+
+        var expected = VisaPreviewSlotOccupantKeys.ForIssueIssuedHeader(new IssueIssuedHeaderSlotRequest
+        {
+            ApplicationProfileInstanceId = Snapshot.ApplicationProfileInstanceId,
+            Kind = kind,
+            CatalogKey = IssueIssuedHeaderComposeService.CatalogKeyFor(kind),
+            ExistingHeaderId = headerId,
+        });
+        if (!string.Equals(PreviewSlotService.State.OccupantKey, expected, StringComparison.Ordinal))
+            return;
+
+        await PreviewSlotService.CloseAsync();
+        try
+        {
+            await JS.InvokeVoidAsync("visaPreviewDrawer.close");
+        }
+        catch (JSException)
+        {
+        }
+        catch (InvalidOperationException)
+        {
+        }
+    }
+
+    private static string IssuedHeaderNoun(IssueIssuedHeaderKind kind) => kind switch
+    {
+        IssueIssuedHeaderKind.Invitation => "invitation",
+        IssueIssuedHeaderKind.WorkPermit => "work permit",
+        IssueIssuedHeaderKind.Rejection => "rejection",
+        IssueIssuedHeaderKind.BorderZone => "border zone",
+        _ => "record",
+    };
+
+    private RenderFragment RenderSummaryTile(ApplicationWorkspaceCaseSummaryTile field) => __builder =>
+    {
+        <div class="cw-sum-tile cw-sum-tile--@field.Tone cw-sum-tile--fill-@FillCss(field.FillState)">
+            <span class="cw-sum-tile__icon">@field.Glyph</span>
+            <span class="cw-sum-tile__label">@field.Label</span>
+            <strong class="cw-sum-tile__value">@field.Value</strong>
+        </div>
+    };
+
+    private RenderFragment RenderSummaryField(ApplicationWorkspaceCaseHeaderField field) => __builder =>
+    {
+        <label class="cw-summary-field cw-summary-field--fill-@FillCss(field.FillState)">
+            <span class="cw-summary-field__label">@field.Label</span>
+            @if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Date)
+            {
+                <input type="date"
+                       class="cw-summary-field__input"
+                       value="@field.Value"
+                       disabled="@field.ReadOnly"
+                       @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())" />
+            }
+            else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.CommaSeparatedMultiSelect)
+            {
+                <BorderZoneLocationField Value="@field.Value"
+                                         EditorAlias="@EditorAliasFor(field.Key)"
+                                         ReadOnly="@field.ReadOnly"
+                                         CatalogItems="@field.MultiSelectOptions"
+                                         ValueChanged="@(value => OnHeaderFieldChanged(field.Key, value))" />
+            }
+            else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Lookup)
+            {
+                <select class="cw-summary-field__input"
+                        value="@field.Value"
+                        disabled="@field.ReadOnly"
+                        @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())">
+                    <option value="">— Select —</option>
+                    @foreach (var option in field.Options)
+                    {
+                        var optionId = option.Id.ToString("D");
+                        <option value="@optionId" selected="@(string.Equals(field.Value, optionId, StringComparison.OrdinalIgnoreCase))">@option.DisplayName</option>
+                    }
+                </select>
+            }
+            else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.ShortText)
+            {
+                <input type="text"
+                       class="cw-summary-field__input"
+                       value="@field.Value"
+                       maxlength="@(field.MaxLength ?? ApplicationWorkspaceCaseHeaderFieldsHelper.InstanceNumberMaxLength)"
+                       disabled="@field.ReadOnly"
+                       @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())" />
+            }
+            else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Text)
+            {
+                <textarea class="cw-summary-field__input cw-summary-field__textarea"
+                          maxlength="@ApplicationWorkspaceCaseHeaderFieldsHelper.PurposeMaxLength"
+                          rows="4"
+                          disabled="@field.ReadOnly"
+                          @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())">@field.Value</textarea>
+            }
+            else
+            {
+                <input type="text"
+                       class="cw-summary-field__input"
+                       value="@field.Value"
+                       disabled="@field.ReadOnly"
+                       @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())" />
+            }
+        </label>
+    };
+
+    private RenderFragment RenderOverview(ApplicationWorkspaceCaseView view) => __builder =>
+    {
+        <div class="cw-overview">
+            <section class="cw-card">
+                <div class="cw-card__title-row">
+                    <div>
+                        <h2 class="cw-card__title">Case summary</h2>
+                        @{
+                            var summaryProfileName = !string.IsNullOrWhiteSpace(view.Chrome.ProfileTemplateName)
+                                ? view.Chrome.ProfileTemplateName
+                                : Snapshot!.Profile.Title;
+                        }
+                        <p class="cw-summary-sub">
+                            @if (!string.IsNullOrWhiteSpace(summaryProfileName))
+                            {
+                                <span>Application Profile: <strong>@summaryProfileName</strong></span>
+                                <span> · </span>
+                            }
+                            <span>Use fields only@(IsCaseSummaryEditing ? " · Saved on this case (defaults copied at create)" : null)</span>
+                        </p>
+                    </div>
+                    @if (view.HeaderFields.Count > 0)
+                    {
+                        @if (IsCaseSummaryEditing)
+                        {
+                            <button type="button" class="cw-summary-mode-btn" @onclick="FinishCaseSummaryEdit">Done</button>
+                        }
+                        else
+                        {
+                            <button type="button" class="cw-summary-mode-btn" @onclick="StartCaseSummaryEdit">✎ Edit</button>
+                        }
+                    }
+                </div>
+                @if (IsSummaryProcessGateActive)
+                {
+                    <div class="os-banner os-banner--error cw-summary-gate" role="alert">
+                        <div class="cw-summary-gate__body">
+                            <p>@SummaryGateBannerMessage</p>
+                            @if (!IsCaseSummaryEditing)
+                            {
+                                <button type="button" class="os-btn os-btn--primary" @onclick="StartCaseSummaryEdit">
+                                    Edit Case summary
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+                @if (!string.IsNullOrWhiteSpace(HeaderFieldStatusMessage))
+                {
+                    <p class="cw-summary-status @(HeaderFieldStatusIsError ? "is-error" : null)">@HeaderFieldStatusMessage</p>
+                }
+                @if (view.HeaderFields.Count == 0 && view.SummaryTiles.Count == 0)
+                {
+                    <p class="cw-summary-empty">No ApplicationProfileInstance properties required on this profile.</p>
+                }
+                else if (IsCaseSummaryEditing && view.HeaderFields.Count > 0)
+                {
+                    var identityFields = IdentityHeaderFields(view.HeaderFields);
+                    var mainFields = MainHeaderFields(view.HeaderFields);
+                    <div class="cw-summary-body @(mainFields.Count == 0 ? "cw-summary-body--identity-only" : null)">
+                        @if (mainFields.Count > 0)
+                        {
+                            <div class="cw-summary-main">
+                                <div class="cw-summary-form">
+                                    @foreach (var field in mainFields)
+                                    {
+                                        @RenderSummaryField(field)
+                                    }
+                                </div>
+                            </div>
+                        }
+                        @if (identityFields.Count > 0)
+                        {
+                            <aside class="cw-summary-identity" aria-label="Application number, date, process number, and urgency">
+                                <div class="cw-summary-form cw-summary-form--stack">
+                                    @foreach (var field in identityFields)
+                                    {
+                                        @RenderSummaryField(field)
+                                    }
+                                </div>
+                            </aside>
+                        }
+                    </div>
+                    <p class="cw-summary-foot">Changing these does not change the Application Profile template.</p>
+                }
+                else
+                {
+                    var tiles = OverviewTiles(view).ToList();
+                    var identityTiles = IdentityTiles(tiles);
+                    var mainTiles = MainTiles(tiles);
+                    <div class="cw-summary-body @(mainTiles.Count == 0 ? "cw-summary-body--identity-only" : null)">
+                        @if (mainTiles.Count > 0)
+                        {
+                            <div class="cw-summary-main">
+                                <div class="cw-summary-grid">
+                                    @foreach (var field in mainTiles)
+                                    {
+                                        @RenderSummaryTile(field)
+                                    }
+                                </div>
+                            </div>
+                        }
+                        @if (identityTiles.Count > 0)
+                        {
+                            <aside class="cw-summary-identity" aria-label="Application number, date, process number, and urgency">
+                                <div class="cw-summary-grid cw-summary-grid--stack">
+                                    @foreach (var field in identityTiles)
+                                    {
+                                        @RenderSummaryTile(field)
+                                    }
+                                </div>
+                            </aside>
+                        }
+                    </div>
+                }
+            </section>
+            <section class="cw-card">
+                <div class="cw-card__title-row">
+                    <div>
+                        <h2 class="cw-card__title">Organization</h2>
+                        <p class="cw-summary-sub">@(IsOrganizationEditing
+                            ? "Dropdowns choose which catalog records this case uses. + New and Edit add or update those records here."
+                            : "Letterhead for this application · live catalog records")</p>
+                    </div>
+                    @if (IsOrganizationEditing)
+                    {
+                        <button type="button" class="cw-summary-mode-btn" @onclick="FinishOrganizationEdit">Done</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="cw-summary-mode-btn" @onclick="StartOrganizationEdit">✎ Edit</button>
+                    }
+                </div>
+                <div class="cw-org-callout">
+                    @(IsOrganizationEditing
+                        ? "Dropdowns choose which shared Company / Signatory / Representative this case uses. + New and Edit open that catalog record here — same as Configuration → Organization catalogs. Make default applies to the next new application."
+                        : "This case is related to the selected catalog records. Other cases may use different rows. Editing a catalog record updates every case that selected it.")
+                </div>
+                @if (!string.IsNullOrWhiteSpace(OrganizationStatusMessage))
+                {
+                    <p class="cw-summary-status @(OrganizationStatusIsError ? "is-error" : null)">@OrganizationStatusMessage</p>
+                }
+                @{
+                    var org = view.OrganizationLetterhead;
+                }
+                @if (IsOrganizationEditing)
+                {
+                    <div class="cw-org-grid">
+                        <div>
+                            @RenderOrgColHead("Company", OrganizationCatalogHelper.Company, org.CompanyId)
+                            @RenderOrgCatalogSelect(OrganizationCatalogHelper.Company, org.CompanyId, org.CompanyOptions)
+                            <div class="cw-org-preview">
+                                @RenderOrgField("Name", org.CompanyName)
+                                @RenderOrgField("Code", org.CompanyCode)
+                                @RenderOrgField("Phone", org.CompanyPhone)
+                                @RenderOrgField("Address", org.CompanyAddress, multiline: true)
+                                @RenderOrgField("Email", org.CompanyEmail)
+                                @RenderOrgField("Tax information", org.CompanyTaxInformation)
+                                @RenderOrgField("Registration date", org.CompanyRegistrationDateText)
+                            </div>
+                        </div>
+                        <div>
+                            @RenderOrgColHead("Authorized Signatory", OrganizationCatalogHelper.Signatory, org.SignatoryId)
+                            @RenderOrgCatalogSelect(OrganizationCatalogHelper.Signatory, org.SignatoryId, org.SignatoryOptions)
+                            <div class="cw-org-preview">
+                                @RenderOrgField("Full name", org.SignatoryFullName)
+                                @RenderOrgField("Position (Tm)", org.SignatoryPositionTitleTm)
+                                @RenderOrgField("Passport number", org.SignatoryPassportNumber)
+                                @RenderOrgField("Passport authority", org.SignatoryPassportAuthority)
+                                @RenderOrgField("Passport issue date", org.SignatoryPassportIssueDateText)
+                                @RenderOrgField("Passport expiration date", org.SignatoryPassportExpirationDateText)
+                            </div>
+                        </div>
+                        <div>
+                            @RenderOrgColHead("Authorized Representative", OrganizationCatalogHelper.Representative, org.RepresentativeId)
+                            @RenderOrgCatalogSelect(OrganizationCatalogHelper.Representative, org.RepresentativeId, org.RepresentativeOptions)
+                            <div class="cw-org-preview">
+                                @RenderOrgField("Full name", org.RepresentativeFullName)
+                                @RenderOrgField("Position (Tm)", org.RepresentativePositionTitleTm)
+                                @RenderOrgField("Phone", org.RepresentativePhone)
+                                @RenderOrgField("Passport number", org.RepresentativePassportNumber)
+                                @RenderOrgField("Passport authority", org.RepresentativePassportAuthority)
+                                @RenderOrgField("Passport issue date", org.RepresentativePassportIssueDateText)
+                            </div>
+                        </div>
+                    </div>
+                    <p class="cw-summary-foot">Changing a dropdown updates only this case's relation. + New / Edit updates the shared catalog record used by every case that selected it.</p>
+                }
+                else
+                {
+                    <div class="cw-org-grid">
+                        <dl class="cw-org-dl">
+                            <h3 class="cw-org-col-title">Company</h3>
+                            <div><dt>Name</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyName)</dd></div>
+                            <div><dt>Code</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyCode)</dd></div>
+                            <div><dt>Phone</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyPhone)</dd></div>
+                            <div><dt>Address</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyAddress)</dd></div>
+                            <div><dt>Email</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyEmail)</dd></div>
+                            <div><dt>Tax</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyTaxInformation)</dd></div>
+                        </dl>
+                        <dl class="cw-org-dl">
+                            <h3 class="cw-org-col-title">Authorized Signatory</h3>
+                            <div><dt>Full name</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.SignatoryFullName)</dd></div>
+                            <div><dt>Position (Tm)</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.SignatoryPositionTitleTm)</dd></div>
+                            <div><dt>Passport number</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.SignatoryPassportNumber)</dd></div>
+                        </dl>
+                        <dl class="cw-org-dl">
+                            <h3 class="cw-org-col-title">Authorized Representative</h3>
+                            <div><dt>Full name</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.RepresentativeFullName)</dd></div>
+                            <div><dt>Position (Tm)</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.RepresentativePositionTitleTm)</dd></div>
+                            <div><dt>Phone</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.RepresentativePhone)</dd></div>
+                            <div><dt>Passport number</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.RepresentativePassportNumber)</dd></div>
+                        </dl>
+                    </div>
+                    <p class="cw-summary-foot">Resminamalar merge these fields from the selected catalog records on the next generate.</p>
+                }
+            </section>
+            <section class="cw-card">
+                <h2 class="cw-card__title">ApplicationProfileInstance progress</h2>
+                <div class="cw-prog-stepper">
+                @for (var i = 0; i < view.ProgressSteps.Count; i++)
+                {
+                    var step = view.ProgressSteps[i];
+                    var currentIdx = view.ProgressSteps.ToList().FindIndex(s => s.State == "current");
+                    var badge = !string.IsNullOrWhiteSpace(step.CurrentStateLabel)
+                        ? step.CurrentStateLabel
+                        : step.State == "done" && !string.Equals(step.Key, "office", StringComparison.OrdinalIgnoreCase)
+                            ? "Completed"
+                            : step.State == "current" ? "In progress"
+                            : step.State == "pending" ? "Pending"
+                            : string.Empty;
+                    var badgeCls = step.OutcomeKind switch
+                    {
+                        "issued" => "issued",
+                        "rejected" => "rejected",
+                        "cancelled" => "cancelled",
+                        "current" => "active",
+                        "pending" => "muted",
+                        _ => "ok",
+                    };
+                    var lineCls = i < view.ProgressSteps.Count - 1
+                        ? i < currentIdx ? "done" : i == currentIdx ? "current" : "pending"
+                        : null;
+                    var dotGlyph = step.OutcomeKind switch
+                    {
+                        "rejected" => "✕",
+                        "cancelled" => "–",
+                        "issued" or "ok" => "✓",
+                        _ => step.State == "done" ? "✓" : (i + 1).ToString(),
+                    };
+                        <div class="cw-prog-step cw-prog-step--@step.State cw-prog-step--tone-@step.OutcomeKind">
+                            <div class="cw-prog-step__track">
+                                <span class="cw-prog-step__dot">@dotGlyph</span>
+                                @if (lineCls != null)
+                                {
+                                    <span class="cw-prog-step__line cw-prog-step__line--@lineCls"></span>
+                                }
+                            </div>
+                            <div class="cw-prog-step__body">
+                                <strong>@step.Label</strong>
+                                @if (!string.IsNullOrWhiteSpace(badge))
+                                {
+                                    <span class="cw-prog-step__badge cw-prog-step__badge--@badgeCls">@badge</span>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(step.Date))
+                                {
+                                    <span class="cw-prog-step__date">@step.Date</span>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(step.MinistryLetterFileName) && step.ProgressId is Guid)
+                                {
+                                    <span class="cw-prog-step__letter">
+                                        <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId"
+                                                                           ProgressId="step.ProgressId"
+                                                                           FileName="@step.MinistryLetterFileName"
+                                                                           OwnerViewId="@PreviewSlotOwnerViewId" />
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </section>
+            <section class="cw-card">
+                <h2 class="cw-card__title">Linked records</h2>
+                @if (view.Chrome.ResolvedLinksLocked)
+                {
+                    <p class="cw-linked-lock">🔒 Process complete — linked people and records are locked on this case.</p>
+                }
+                @if (view.LinkedRecordTiles.Count == 0)
+                {
+                    <p class="cw-linked-empty">No linked person-related records yet. Link people on the <strong>People &amp; links</strong> tab — records auto-resolve from profile requirements.</p>
+                }
+                else
+                {
+                    <div class="cw-link-row">
+                        @foreach (var tile in view.LinkedRecordTiles)
+                        {
+                            <button type="button"
+                                    class="cw-link-tile cw-link-tile--@tile.Tone @(ApplicationWorkspacePeopleLinksCompleteness.IsCountShort(tile.Count, tile.ExpectedCount) ? "is-empty" : null)"
+                                    @onclick="() => OpenLinkedRecordTile(tile.TabKey)">
+                                <span class="cw-link-tile__icon">@tile.Glyph</span>
+                                <span class="cw-link-tile__label">@tile.Label</span>
+                                <strong class="cw-link-tile__count">@FormatLinkedCount(tile.Count, tile.ExpectedCount)</strong>
+                                <span class="cw-link-tile__chev">›</span>
+                            </button>
+                        }
+                    </div>
+                }
+            </section>
+            @if (view.IssuedRecordTiles.Count > 0)
+            {
+                var selectedIssued = view.IssuedRecordTiles.FirstOrDefault(t =>
+                    string.Equals(t.Key, _selectedIssuedKey, StringComparison.OrdinalIgnoreCase));
+                <section class="cw-card">
+                    <h2 class="cw-card__title">Issued records</h2>
+                    <p class="cw-card__sub">Created by this application · visible when May produce is on</p>
+                    <div class="cw-issued-row">
+                        @foreach (var tile in view.IssuedRecordTiles)
+                        {
+                            var isSelected = string.Equals(tile.Key, _selectedIssuedKey, StringComparison.OrdinalIgnoreCase);
+                            <button type="button"
+                                    class="cw-link-tile cw-link-tile--@tile.Tone cw-issued-tile @(tile.Count == 0 ? "is-empty" : null) @(isSelected ? "is-selected" : null)"
+                                    @onclick="() => SelectIssuedTile(tile.Key)">
+                                <span class="cw-link-tile__icon">@tile.Glyph</span>
+                                <span class="cw-link-tile__label">@tile.Label</span>
+                                @if (tile.Count == 0)
+                                {
+                                    <span class="cw-issued-tile__add">@tile.AddCaption</span>
+                                }
+                                else
+                                {
+                                    <strong class="cw-link-tile__count">@tile.Count</strong>
+                                }
+                                <span class="cw-link-tile__chev">›</span>
+                            </button>
+                        }
+                    </div>
+                    @if (selectedIssued != null)
+                    {
+                        <div class="cw-issued-panel">
+                            <h3 class="cw-issued-panel__title">@selectedIssued.PanelTitle</h3>
+                            @if (selectedIssued.Count == 0)
+                            {
+                                <p class="cw-issued-panel__hint">@IssuedEmptyHint(view, selectedIssued)</p>
+                            }
+                            else
+                            {
+                                <ul class="cw-issued-list">
+                                    @foreach (var row in selectedIssued.Rows)
+                                    {
+                                        var issuedRowId = row.Id;
+                                        var issuedCatalogKey = selectedIssued.Key;
+                                        var issuedTitle = row.Title;
+                                        var canDeleteIssued = IssueIssuedHeaderComposeService.TryResolveKind(issuedCatalogKey, out _);
+                                        var isIssuedVisa = string.Equals(
+                                            issuedCatalogKey,
+                                            ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa,
+                                            StringComparison.OrdinalIgnoreCase);
+                                        var canPreviewIssued = canDeleteIssued || isIssuedVisa;
+                                        var issuedRowOpen = IsIssuedRowOpen(issuedCatalogKey, issuedRowId);
+                                        <li class="cw-issued-list__row @(issuedRowOpen ? "is-selected" : null)">
+                                            <button type="button"
+                                                    class="cw-issued-list__item"
+                                                    aria-current="@(issuedRowOpen ? "true" : null)"
+                                                    @onclick="() => OpenIssuedHeaderAsync(issuedCatalogKey, issuedRowId)">
+                                                <strong>@issuedTitle</strong>
+                                                <span>@row.Subtitle</span>
+                                            </button>
+                                            @if (canPreviewIssued)
+                                            {
+                                                <button type="button"
+                                                        class="cw-issued-list__preview"
+                                                        title="@(row.HasCopy ? "Preview copy" : "No copy attached yet")"
+                                                        disabled="@(!row.HasCopy)"
+                                                        @onclick="() => PreviewIssuedHeaderCopyAsync(issuedCatalogKey, issuedRowId)"
+                                                        @onclick:stopPropagation="true">
+                                                    Preview
+                                                </button>
+                                            }
+                                            @if (canDeleteIssued || isIssuedVisa)
+                                            {
+                                                <button type="button"
+                                                        class="cw-issued-list__delete"
+                                                        title="Delete"
+                                                        @onclick="() => DeleteIssuedHeaderAsync(issuedCatalogKey, issuedRowId, issuedTitle)"
+                                                        @onclick:stopPropagation="true">
+                                                    Delete
+                                                </button>
+                                            }
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(_issuedDeleteError))
+                            {
+                                <p class="cw-issued-panel__error">@_issuedDeleteError</p>
+                            }
+                            <div class="cw-issued-panel__actions">
+                                <button type="button" class="os-btn os-btn--primary" @onclick="() => NewIssuedHeaderAsync(selectedIssued.Key)">@selectedIssued.NewCaption</button>
+                            </div>
+                        </div>
+                    }
+                </section>
+            }
+            <p class="cw-foot">Application Profile: @(string.IsNullOrWhiteSpace(view.Chrome.ProfileTemplateName) ? Snapshot!.Profile.Title : view.Chrome.ProfileTemplateName)</p>
+        </div>;
+    };
+
+    private RenderFragment RenderPeople(ApplicationWorkspaceCaseView view) => __builder =>
+    {
+        <div class="ct-page">
+            <h2 class="ct-page__title">People on this case</h2>
+            @if (view.Chrome.ResolvedLinksLocked)
+            {
+                <p class="cw-linked-lock" style="margin-bottom:12px">🔒 People and linked records are locked — this process is complete (issued, rejected, or cancelled).</p>
+            }
+            <div class="os-toolbar" style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap">
+                <button type="button" class="os-btn os-btn--primary" disabled="@(!CanLinkPerson || ShowPersonLinkPicker || IsRelinking)" @onclick="LinkPersonAsync">Link existing…</button>
+            </div>
+            <OfficerShellPersonLinkPickerComponent IsOpen="@ShowPersonLinkPicker"
+                                                   Candidates="@PersonLinkCandidates"
+                                                   IsSearching="@PersonLinkIsSearching"
+                                                   IsLinking="@PersonLinkIsLinking"
+                                                   StatusMessage="@PersonLinkStatusMessage"
+                                                   IsStatusError="@PersonLinkStatusIsError"
+                                                   SearchRequested="@PersonLinkSearchRequested"
+                                                   LinkRequested="@LinkPersonFromPickerRequested"
+                                                   CloseRequested="@ClosePersonLinkPickerRequested" />
+            @if (view.People.Count == 0)
+            {
+                <p class="os-empty">No people linked.</p>
+            }
+            else
+            {
+                <div class="os-panel" style="margin-bottom:16px">
+                    <table class="os-table">
+                        <thead>
+                            <tr><th>Person</th><th>Role</th><th>Passport</th><th>Visa</th><th></th><th></th><th></th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var person in view.People)
+                            {
+                                <tr class="@(person.Index == SelectedPersonRowIndex ? "is-selected" : null)" @onclick="() => SelectPersonRow(person.Index)">
+                                    <td><span class="ct-link">@person.Name</span></td>
+                                    <td>@person.RoleLabel</td>
+                                    <td><code class="@(ApplicationWorkspacePeopleLinksCompleteness.IsKindShort(person, ApplicationWorkspacePeopleLinksCompleteness.PassportKey) ? "cw-cell-missing" : null)">@person.PassportNumber</code></td>
+                                    <td><code class="@(ApplicationWorkspacePeopleLinksCompleteness.IsKindShort(person, ApplicationWorkspacePeopleLinksCompleteness.VisaKey) ? "cw-cell-missing" : null)">@person.VisaNumber</code></td>
+                                    <td>
+                                        <button type="button"
+                                                class="os-btn os-btn--primary ct-btn-sm"
+                                                disabled="@(!CanLinkPerson || person.PersonId == Guid.Empty || IsRelinking)"
+                                                @onclick:stopPropagation="true"
+                                                @onclick="() => RelinkPersonById(person.PersonId)">
+                                            @(person.PersonId == _relinkingPersonId ? "Relinking…" : "Relink")
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <button type="button"
+                                                class="os-btn ct-btn-sm"
+                                                disabled="@(!CanUnlinkPerson || person.PersonId == Guid.Empty || IsRelinking)"
+                                                @onclick:stopPropagation="true"
+                                                @onclick="() => UnlinkPersonById(person.PersonId)">Unlink</button>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="os-btn os-btn--ghost ct-btn-sm" @onclick:stopPropagation="true" @onclick="() => OpenPersonByIndex(person.Index)">Open person detail</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <h2 class="ct-page__title">Linked records by person</h2>
+                @foreach (var person in view.People)
+                {
+                    <section class="ct-person-panel">
+                        <header class="ct-person-panel__head">
+                            <span>👤 <strong>@person.Name</strong></span>
+                            <button type="button" class="os-btn os-btn--ghost ct-btn-sm" @onclick="() => OpenPersonByIndex(person.Index)">Open person detail</button>
+                        </header>
+                        <div class="cw-link-row ct-person-panel__tiles">
+                            @foreach (var record in person.Records)
+                            {
+                                var isSelected = IsPersonRecordSelected(person.Index, record.Key);
+                                <button type="button"
+                                        class="cw-link-tile cw-link-tile--@record.Tone @(ApplicationWorkspacePeopleLinksCompleteness.IsRecordShort(record) ? "is-empty" : null) @(isSelected ? "is-selected" : null)"
+                                        @onclick="() => TogglePersonRecord(person.Index, record.Key)">
+                                    <span class="cw-link-tile__icon">@record.Glyph</span>
+                                    <span class="cw-link-tile__label">@record.Label</span>
+                                    <strong class="cw-link-tile__count">@FormatLinkedCount(record.Count, record.ExpectedCount)</strong>
+                                    <span class="cw-link-tile__chev">›</span>
+                                </button>
+                            }
+                        </div>
+                        @if (IsPersonRecordSelected(person.Index, EffectivePeopleRecordKey))
+                        {
+                            var selected = person.Records.FirstOrDefault(r =>
+                                string.Equals(r.Key, EffectivePeopleRecordKey, StringComparison.OrdinalIgnoreCase));
+                            if (selected != null)
+                            {
+                                var tab = FindLinkedTab(selected.Key);
+                                var rows = PersonRecordRows(person, selected.Key);
+                                var columns = LinkedRecordColumns(tab);
+                                <div class="cw-issued-panel ct-person-panel__records">
+                                    <h3 class="cw-issued-panel__title">@selected.Label</h3>
+                                    @if (rows.Count == 0)
+                                    {
+                                        <p class="cw-issued-panel__hint">@(tab?.EmptyMessage ?? $"No {selected.Label.ToLowerInvariant()} linked for {person.Name}.")</p>
+                                    }
+                                    else
+                                    {
+                                        <table class="os-table">
+                                            <thead>
+                                                <tr>
+                                                    @foreach (var column in columns)
+                                                    {
+                                                        <th>@column</th>
+                                                    }
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var row in rows)
+                                                {
+                                                    <tr>
+                                                        @foreach (var cell in LinkedRecordCells(tab, row))
+                                                        {
+                                                            <td>@cell</td>
+                                                        }
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    }
+                                    @if (view.Chrome.ResolvedLinksLocked)
+                                    {
+                                        <div class="cw-issued-panel__actions">
+                                            <p class="cw-issued-panel__hint">People and linked records are locked on this case.</p>
+                                        </div>
+                                    }
+                                    else if (IsIssuedPersonItem(selected.Key))
+                                    {
+                                        <div class="cw-issued-panel__actions">
+                                            <p class="cw-issued-panel__hint">Create this from Overview → Issued records, then it can link to this person.</p>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        }
+                    </section>
+                }
+            }
+        </div>;
+    };
+
+    private RenderFragment RenderSla(ApplicationWorkspaceCaseView view) => __builder =>
+    {
+        var sla = view.Sla;
+        var complete = sla.IsTerminal;
+        var caseRemaining = sla.CaseDaysRemaining;
+        var stepRemaining = sla.CurrentStepDaysRemaining;
+        var casePct = complete ? 100 : SlaRemainingPercent(caseRemaining, sla.TotalSlaDays);
+        var stepPct = complete ? 100 : SlaRemainingPercent(stepRemaining, Math.Max(stepRemaining ?? 0, 14));
+        var stepTitle = string.IsNullOrWhiteSpace(sla.CurrentStepLabel) ? "Current step" : sla.CurrentStepLabel;
+        var stepDue = SlaDisplayDate(sla.CurrentStepDueDate);
+        var started = SlaDisplayDate(sla.StartedOn);
+        var ministryDue = SlaDisplayDate(sla.MinistryDueDate);
+        var expected = SlaDisplayDate(sla.ExpectedCompletionDate);
+        var migrationDays = sla.MigrationSlaLabel.Split(' ').FirstOrDefault() ?? "—";
+        var caseStatusClass = complete ? "ct-sla-tone ct-sla-tone--ok" : SlaToneClass(caseRemaining);
+        var stepStatusClass = complete ? "ct-sla-tone ct-sla-tone--ok" : SlaToneClass(stepRemaining);
+        var caseRingClass = complete ? "ct-sla-ring--ok ct-sla-ring--done" : SlaRingTone(caseRemaining);
+        var stepRingClass = complete ? "ct-sla-ring--ok ct-sla-ring--done" : SlaRingTone(stepRemaining);
+        var caseValue = complete ? "Done" : (caseRemaining?.ToString() ?? "—");
+        var stepValue = complete ? "Done" : (stepRemaining?.ToString() ?? "—");
+        var caption = complete ? "complete" : "days left";
+        var caseLabel = complete ? sla.CaseStatus : SlaToneLabel(caseRemaining);
+        var stepStatusText = complete ? sla.CaseStatus : SlaToneLabel(stepRemaining);
+        var stepHint = complete ? "No open deadline" : (stepDue == "—" ? "No due date yet" : "Due " + stepDue);
+        var midTitle = complete ? "Completed" : "Current due";
+        var midDate = complete ? expected : ministryDue;
+        var endTitle = complete ? "Finished" : "Expected completion";
+        <div class="ct-page ct-sla">
+            <header class="ct-sla-head">
+                <h2 class="ct-page__title">SLA &amp; deadlines</h2>
+                <p class="ct-page__sub">Working days against the profile template. Dates in UTC+5 (Ashgabat).</p>
+            </header>
+            <div class="ct-sla-metrics">
+                <article class="ct-sla-metric">
+                    <h3>Overall case</h3>
+                    <div class="ct-sla-metric__body">
+                        <div class="ct-sla-gauge">
+                            <div class="ct-sla-ring ct-sla-ring--lg @caseRingClass" style="--ct-pct:@casePct%" role="img" aria-label="@caseLabel">
+                                <strong>@caseValue</strong>
+                            </div>
+                            <span class="ct-sla-gauge__caption">@caption</span>
+                        </div>
+                        <dl class="ct-sla-stats">
+                            <div><dt>Total SLA</dt><dd>@sla.TotalSlaDays days</dd></div>
+                            <div><dt>Elapsed</dt><dd>@sla.ElapsedDays days</dd></div>
+                            <div><dt>Status</dt><dd class="@caseStatusClass">@caseLabel</dd></div>
+                        </dl>
+                    </div>
+                </article>
+                <article class="ct-sla-metric">
+                    <h3>@stepTitle</h3>
+                    <p class="ct-sla-metric__hint">@stepHint</p>
+                    <div class="ct-sla-metric__body">
+                        <div class="ct-sla-gauge">
+                            <div class="ct-sla-ring @stepRingClass" style="--ct-pct:@stepPct%" role="img" aria-label="@stepStatusText">
+                                <strong>@stepValue</strong>
+                            </div>
+                            <span class="ct-sla-gauge__caption">@caption</span>
+                        </div>
+                        <dl class="ct-sla-stats">
+                            <div><dt>Status</dt><dd class="@stepStatusClass">@stepStatusText</dd></div>
+                        </dl>
+                    </div>
+                </article>
+                <article class="ct-sla-metric">
+                    <h3>Profile SLA</h3>
+                    <p class="ct-sla-metric__hint">Configured on template</p>
+                    <div class="ct-sla-metric__body ct-sla-metric__body--stack">
+                        <p class="ct-sla-metric__big">@migrationDays <span>days</span></p>
+                        <p class="ct-muted">@(string.IsNullOrWhiteSpace(sla.ProfileSlaSource) ? "Profile template" : sla.ProfileSlaSource)</p>
+                    </div>
+                </article>
+            </div>
+            <div class="ct-sla-timeline" aria-label="Case timeline">
+                <div class="ct-sla-timeline__node">
+                    <span class="ct-sla-timeline__dot" aria-hidden="true"></span>
+                    <strong>Started</strong>
+                    <span>@started</span>
+                </div>
+                <div class="ct-sla-timeline__node">
+                    <span class="ct-sla-timeline__dot @(complete ? "ct-sla-timeline__dot--muted" : null)" aria-hidden="true"></span>
+                    <strong>@midTitle</strong>
+                    <span>@midDate</span>
+                </div>
+                <div class="ct-sla-timeline__node">
+                    <span class="ct-sla-timeline__dot ct-sla-timeline__dot--muted" aria-hidden="true"></span>
+                    <strong>@endTitle</strong>
+                    <span>@expected</span>
+                </div>
+            </div>
+            <div class="ct-sla-lower">
+                <div class="ct-sla-table-wrap">
+                    <h3>SLA by step</h3>
+                    <table class="os-table">
+                        <thead><tr><th>Step</th><th>Due date</th><th>Days left</th><th>Status</th></tr></thead>
+                        <tbody>
+                            @foreach (var row in sla.Deadlines)
+                            {
+                                <tr class="@(row.IsCurrent ? "ct-sla-row--current" : null)">
+                                    <td>@if (row.IsCurrent) { <strong>@row.Step</strong> } else { @row.Step }</td>
+                                    <td>@SlaDisplayDate(row.DueDate)</td>
+                                    <td class="@(row.Status is "inprogress" or "overdue" ? (row.Status == "overdue" ? "ct-sla-days--due" : "ct-sla-days--ok") : null)">@SlaDisplayDate(row.DaysLeft)</td>
+                                    <td><span class="os-status os-status--@SlaStatusClass(row.Status)">@SlaStatusLabel(row.Status)</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="ct-sla-aside">
+                    @if (!string.IsNullOrWhiteSpace(sla.AlertMessage))
+                    {
+                        <div class="ct-sla-alert" role="status">
+                            <div>
+                                <strong>Deadline approaching</strong>
+                                <p>@sla.AlertMessage</p>
+                            </div>
+                        </div>
+                    }
+                    <div class="ct-sla-source">
+                        <h4>SLA source</h4>
+                        <p>@(string.IsNullOrWhiteSpace(sla.ProfileSlaSource) ? "Profile template" : sla.ProfileSlaSource)</p>
+                        <p class="ct-muted">Migration SLA <strong>@sla.TotalSlaDays days</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>;
+    };
+
+    private RenderFragment RenderRail(ApplicationWorkspaceCaseView view) => __builder =>
+    {
+        @switch (ActiveTab)
+        {
+            case "overview":
+                <section class="cw-rail-block">
+                    <h4>Readiness</h4>
+                    <ul class="cw-checklist">
+                        @if (MissingSummaryFields.Count == 0)
+                        {
+                            <li>✓ Required data complete</li>
+                        }
+                        else
+                        {
+                            <li class="is-incomplete">○ Required data complete@SummaryGateReadinessSuffix</li>
+                        }
+                        <li>✓ BO states valid</li>
+                    </ul>
+                </section>
+                <section class="cw-rail-block">
+                    <h4>Quick actions</h4>
+                    <button type="button" class="cw-rail-btn" @onclick='() => SelectTab("documents")'>📂 Open document copies</button>
+                    <button type="button" class="cw-rail-btn" @onclick='() => SelectTab("resminamalar")'>📦 Generate Resminamalar package</button>
+                    @if (view.IssuedRecordTiles.Count > 0)
+                    {
+                        <button type="button" class="cw-rail-btn" @onclick="IssueRecordQuickAction">＋ Issue record…</button>
+                    }
+                    <button type="button" class="cw-rail-btn cw-rail-btn--primary" @onclick="AdvanceProgressAsync">▶ Advance progress</button>
+                    @if (CanRevertFromRail)
+                    {
+                        <button type="button" class="cw-rail-btn" @onclick="RevertProgressAsync">◀ Revert progress</button>
+                    }
+                </section>
+                <section class="cw-rail-block">
+                    <h4>Activity</h4>
+                    <ul class="cw-timeline">
+                        @foreach (var item in view.Activities)
+                        {
+                            <li><strong>@item.Title</strong><span>@item.Subtitle</span></li>
+                        }
+                    </ul>
+                </section>
+                break;
+            case "people":
+                <section class="cw-rail-block">
+                    <h4>People summary</h4>
+                    <ul class="ct-summary-list">
+                        <li><span>Total</span><strong>@view.PeopleSummary.Total</strong></li>
+                        <li><span>Primary</span><strong>@view.PeopleSummary.Primary</strong></li>
+                        <li><span>Dependents</span><strong>@view.PeopleSummary.Dependents</strong></li>
+                        <li><span>Sponsors</span><strong>@view.PeopleSummary.Sponsors</strong></li>
+                    </ul>
+                </section>
+                <section class="cw-rail-block">
+                    <h4>Linked records summary</h4>
+                    <ul class="ct-summary-list">
+                        @foreach (var pair in view.LinkedRecordsSummary.OrderBy(p => p.Key))
+                        {
+                            <li><span>@pair.Key</span><strong>@pair.Value</strong></li>
+                        }
+                    </ul>
+                </section>
+                break;
+            case "progress":
+                var current = view.ProgressSteps.FirstOrDefault(s => s.State == "current");
+                var daysLeft = current?.SlaDaysRemaining;
+                var railComplete = view.Sla.IsTerminal;
+                var ringPct = railComplete ? 100 : SlaRemainingPercent(daysLeft, Math.Max(daysLeft ?? 0, 14));
+                var railRingClass = railComplete ? "ct-sla-ring--ok ct-sla-ring--done" : SlaRingTone(daysLeft);
+                var railValue = railComplete ? "Done" : (daysLeft?.ToString() ?? "—");
+                var railCaption = railComplete ? "complete" : "days left";
+                <section class="cw-rail-block">
+                    <h4>SLA for current step</h4>
+                    <div class="ct-sla-gauge">
+                        <div class="ct-sla-ring @railRingClass" style="--ct-pct:@ringPct%" role="img" aria-label="@railCaption">
+                            <strong>@railValue</strong>
+                        </div>
+                        <span class="ct-sla-gauge__caption">@railCaption</span>
+                    </div>
+                    @if (current != null)
+                    {
+                        <ul class="ct-summary-list" style="margin-top:10px">
+                            <li><span>Target date</span><strong>@(string.IsNullOrWhiteSpace(current.SlaTargetDate) ? "—" : current.SlaTargetDate)</strong></li>
+                        </ul>
+                    }
+                </section>
+                <section class="cw-rail-block">
+                    <button type="button" class="os-btn os-btn--primary" style="width:100%;margin-bottom:8px" @onclick="AdvanceProgressAsync">▶ Advance progress</button>
+                    @if (CanRevertFromRail)
+                    {
+                        <button type="button" class="os-btn os-btn--ghost" style="width:100%;margin-bottom:8px" @onclick="RevertProgressAsync">◀ Revert progress</button>
+                    }
+                </section>
+                <section class="cw-rail-block">
+                    <h4>History</h4>
+                    <ul class="cw-timeline">
+                        @foreach (var row in Snapshot!.ProgressHistory)
+                        {
+                            <li><strong>@row.State</strong><span>@row.Date</span></li>
+                        }
+                    </ul>
+                </section>
+                break;
+            case "sla":
+                break;
+        }
+    };
+
+    private static string SlaStatusClass(string status) => status switch
+    {
+        "completed" => "ready",
+        "inprogress" => "process",
+        "overdue" => "hold",
+        _ => "hold",
+    };
+
+    private static string SlaStatusLabel(string status) => status switch
+    {
+        "completed" => "Completed",
+        "inprogress" => "In progress",
+        "overdue" => "Overdue",
+        _ => "Pending",
+    };
+
+    private static int SlaRemainingPercent(int? remaining, int total)
+    {
+        if (total <= 0)
+            return remaining is > 0 ? 40 : 0;
+        var days = Math.Max(remaining ?? 0, 0);
+        return Math.Clamp((int)Math.Round(100.0 * days / total), 0, 100);
+    }
+
+    private static string SlaDisplayDate(string? value) =>
+        string.IsNullOrWhiteSpace(value) || value == "—" ? "—" : value.Trim();
+
+    private static string SlaRingTone(int? daysRemaining) => daysRemaining switch
+    {
+        null => "",
+        <= 1 => "ct-sla-ring--due",
+        <= 10 => "ct-sla-ring--warn",
+        _ => "ct-sla-ring--ok",
+    };
+
+    private static string SlaToneClass(int? daysRemaining) => daysRemaining switch
+    {
+        null => "ct-sla-tone",
+        <= 1 => "ct-sla-tone ct-sla-tone--due",
+        <= 10 => "ct-sla-tone ct-sla-tone--warn",
+        _ => "ct-sla-tone ct-sla-tone--ok",
+    };
+
+    private static string SlaToneLabel(int? daysRemaining) => daysRemaining switch
+    {
+        null => "—",
+        <= 0 => "Due",
+        1 => "Due tomorrow",
+        <= 10 => "Due soon",
+        _ => "On track",
+    };
+
+    private async Task SelectTab(string key)
+    {
+        if (string.IsNullOrWhiteSpace(key) || _tabSwitching)
+            return;
+        if (ApplicationWorkspaceCaseSummaryCompletenessGate.BlocksTab(Snapshot?.CaseView, key))
+        {
+            StartCaseSummaryEdit();
+            if (!string.Equals(ActiveTab, "overview", StringComparison.OrdinalIgnoreCase))
+                await SelectTab("overview");
+            return;
+        }
+        if (string.Equals(key, ActiveTab, StringComparison.OrdinalIgnoreCase) && _tabContentReady)
+            return;
+
+        await PaintTabSwitchAsync(key);
+        try
+        {
+            if (CaseTabChanged.HasDelegate)
+                await CaseTabChanged.InvokeAsync(key);
+        }
+        finally
+        {
+            _tabContentReady = true;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task PaintTabSwitchAsync(string key)
+    {
+        _pendingTab = key;
+        _tabSwitching = true;
+        _tabContentReady = false;
+        await InvokeAsync(StateHasChanged);
+        await Task.Delay(16);
+    }
+
+    private static bool IsIssuedPersonItem(string? key) =>
+        key is "inv" or "wp" or "bz" or "rejection";
+
+    private async Task OpenLinkedRecordTile(string tabKey)
+    {
+        if (_tabSwitching)
+            return;
+
+        await PaintTabSwitchAsync("people");
+        try
+        {
+            if (LinkedRecordTileClicked.HasDelegate)
+                await LinkedRecordTileClicked.InvokeAsync(tabKey);
+            else if (CaseTabChanged.HasDelegate)
+                await CaseTabChanged.InvokeAsync("people");
+        }
+        finally
+        {
+            _tabContentReady = true;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private bool IsPersonRecordSelected(int personIndex, string? recordKey)
+    {
+        if (string.IsNullOrWhiteSpace(recordKey) || string.IsNullOrWhiteSpace(EffectivePeopleRecordKey))
+            return false;
+        if (!string.Equals(recordKey, EffectivePeopleRecordKey, StringComparison.OrdinalIgnoreCase))
+            return false;
+        return _peopleRecordPersonIndex is not int scoped
+            || scoped == personIndex;
+    }
+
+    private void TogglePersonRecord(int personIndex, string recordKey)
+    {
+        if (IsPersonRecordSelected(personIndex, recordKey)
+            && _peopleRecordPersonIndex == personIndex)
+        {
+            _peopleRecordKey = null;
+            _peopleRecordPersonIndex = null;
+            return;
+        }
+
+        _peopleRecordKey = recordKey;
+        _peopleRecordPersonIndex = personIndex;
+    }
+
+    private ApplicationWorkspaceTab? FindLinkedTab(string? key)
+    {
+        if (string.IsNullOrWhiteSpace(key) || Snapshot?.Tabs == null)
+            return null;
+        return Snapshot.Tabs.FirstOrDefault(tab =>
+            string.Equals(tab.Key, key, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private IReadOnlyList<IReadOnlyList<string>> PersonRecordRows(
+        ApplicationWorkspaceCasePerson person,
+        string recordKey)
+    {
+        var tab = FindLinkedTab(recordKey);
+        if (tab == null || tab.Rows.Count == 0)
+            return Array.Empty<IReadOnlyList<string>>();
+
+        if (person.PersonId != Guid.Empty
+            && tab.RowPersonIds.Count == tab.Rows.Count)
+        {
+            return tab.Rows
+                .Where((_, index) => tab.RowPersonIds[index] == person.PersonId)
+                .ToList();
+        }
+
+        return tab.Rows
+            .Where(row => row.Count > 0
+                && string.Equals(row[0], person.Name, StringComparison.Ordinal))
+            .ToList();
+    }
+
+    private static IReadOnlyList<string> LinkedRecordColumns(ApplicationWorkspaceTab? tab)
+    {
+        if (tab == null || tab.Columns.Count == 0)
+            return Array.Empty<string>();
+        return tab.Columns[0] == "Person" ? tab.Columns.Skip(1).ToList() : tab.Columns;
+    }
+
+    private static IReadOnlyList<string> LinkedRecordCells(
+        ApplicationWorkspaceTab? tab,
+        IReadOnlyList<string> row)
+    {
+        if (tab != null && tab.Columns.Count > 0 && tab.Columns[0] == "Person" && row.Count > 1)
+            return row.Skip(1).ToList();
+        return row;
+    }
+
+    private Task BackToListAsync() => BackToListRequested.InvokeAsync();
+    private Task LinkPersonAsync() => LinkPersonRequested.InvokeAsync();
+    private Task AdvanceProgressAsync()
+    {
+        if (TryBlockIncompleteProcessWork())
+            return Task.CompletedTask;
+
+        var current = Snapshot?.CaseView.ProgressSteps.FirstOrDefault(s => s.State == "current")
+            ?? Snapshot?.CaseView.ProgressSteps.FirstOrDefault(s => s.CanAdvance);
+        if (current?.CanAdvance != true || current.AdvanceOptions.Count == 0)
+            return SelectTab("progress");
+
+        if (!string.Equals(ActiveTab, "progress", StringComparison.OrdinalIgnoreCase))
+            return SelectTab("progress");
+
+        if (_progressTab != null)
+            return _progressTab.AdvanceFromRailAsync();
+
+        return AdvanceProgressRequested.InvokeAsync(new OfficerShellCaseProgressAdvanceRequest
+        {
+            StateCode = ApplicationWorkspaceProgressAdvancePreview.PreferredAdvanceCode(
+                current.Key,
+                current.AdvanceOptions,
+                _progressTab?.SelectedAdvanceStateCode) ?? string.Empty,
+            Notes = current.OfficerNotes ?? string.Empty,
+            Date = _progressTab?.AdvanceDate ?? DateTime.Today,
+            LetterFileName = _progressTab?.PendingLetterFileName,
+            LetterContent = _progressTab?.PendingLetterContent,
+            ProcessNumber = _progressTab?.ProcessNumberOnAdvance,
+        });
+    }
+
+    private bool CanRevertFromRail =>
+        Snapshot?.CaseView.ProgressSteps.Any(s => s.CanRevert) == true;
+
+    private Task RevertProgressAsync()
+    {
+        if (TryBlockIncompleteProcessWork())
+            return Task.CompletedTask;
+
+        if (!CanRevertFromRail)
+            return SelectTab("progress");
+
+        if (!string.Equals(ActiveTab, "progress", StringComparison.OrdinalIgnoreCase))
+            return SelectTab("progress");
+
+        var last = Snapshot?.CaseView.ProgressSteps.FirstOrDefault(s => s.CanRevert);
+        return RevertProgressRequested.InvokeAsync(new OfficerShellCaseProgressRevertRequest
+        {
+            StepKey = last != null ? null : "office",
+        });
+    }
+
+    private async Task SelectPersonRow(int rowIndex)
+    {
+        if (SelectPersonRowRequested.HasDelegate)
+            await SelectPersonRowRequested.InvokeAsync(rowIndex);
+    }
+
+    private async Task OpenPersonByIndex(int rowIndex)
+    {
+        if (OpenPersonDetailByIndexRequested.HasDelegate)
+            await OpenPersonDetailByIndexRequested.InvokeAsync(rowIndex);
+        else if (OpenPersonDetailRequested.HasDelegate)
+            await OpenPersonDetailRequested.InvokeAsync();
+    }
+
+    private bool IsRelinking => _relinkingPersonId != Guid.Empty;
+
+    private async Task RelinkPersonById(Guid personId)
+    {
+        if (personId == Guid.Empty || !RelinkPersonRequested.HasDelegate || IsRelinking)
+            return;
+
+        _relinkingPersonId = personId;
+        await InvokeAsync(StateHasChanged);
+        await Task.Delay(16);
+        try
+        {
+            await RelinkPersonRequested.InvokeAsync(personId);
+        }
+        finally
+        {
+            _relinkingPersonId = Guid.Empty;
+        }
+    }
+
+    private async Task UnlinkPersonById(Guid personId)
+    {
+        if (personId == Guid.Empty || !UnlinkPersonRequested.HasDelegate)
+            return;
+        await UnlinkPersonRequested.InvokeAsync(personId);
+    }
+
+    private static string FormatLinkedCount(int count, int expected) =>
+        expected > 1 ? $"{count}/{expected}" : count.ToString();
+
+    private static string PersonColor(int index) => PersonColors[index % PersonColors.Length];
+
+    private static string Initials(string name)
+    {
+        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return string.Concat(parts.Take(2).Select(p => char.ToUpperInvariant(p[0])));
+    }
+}

@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <!-- Existing compiler/analyzer noise (nullable annotations outside #nullable, generated catalog, duplicate usings, Windows GDI in PDF/scan). Does not hide CS errors. -->
+    <NoWarn>$(NoWarn);CS0105;CS8632;CS8669;CA1416;XAF0022;XAF0025;XAF0031;XAF0033</NoWarn>
+  </PropertyGroup>
+</Project>

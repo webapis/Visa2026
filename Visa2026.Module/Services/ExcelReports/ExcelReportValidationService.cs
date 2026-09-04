@@ -83,7 +83,7 @@ public class ExcelReportValidationService : IExcelReportValidationService
                 }
 
                 var appResults = await _wordValidator
-                    .ValidatePlaceholdersAsync(new List<string> { $"ds.{clean}" }, UserReportBoType.Application)
+                    .ValidatePlaceholdersAsync(new List<string> { $"ds.{clean}" }, UserReportBoType.ApplicationProfileInstance)
                     .ConfigureAwait(false);
                 results.Add(appResults[0]);
                 continue;

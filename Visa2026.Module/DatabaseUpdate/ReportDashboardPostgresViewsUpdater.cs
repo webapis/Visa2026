@@ -5,7 +5,7 @@ using DevExpress.ExpressApp.Updating;
 namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
-/// Creates Report Dashboard SQL views on PostgreSQL (SqlViewsUpdater is SQL Server-only).
+/// Creates Report Dashboard SQL views on PostgreSQL (the only supported provider).
 /// </summary>
 public sealed class ReportDashboardPostgresViewsUpdater : ModuleUpdater
 {
@@ -73,53 +73,7 @@ public sealed class ReportDashboardPostgresViewsUpdater : ModuleUpdater
 private void CreateViewVisaExtensionStatus()
     {
         ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS ""View_VisaExtensionStatus"";", true);
-        ExecuteNonQueryCommand(@"
--- PostgreSQL counterpart of SqlViewsUpdater.CreateViewVisaExtensionStatus (SQL Server).
--- Note: ApplicationItems.""CurrentVisaId"" (mixed case) — not CurrentVisaID.
-CREATE VIEW ""View_VisaExtensionStatus"" AS
-SELECT
-    ai.""ID"",
-    ai.""ApplicationID"",
-    ai.""CurrentVisaId"" AS ""ExpiringVisaID"",
-    ai.""PersonID"",
-    ai.""CurrentPassportID"" AS ""PassportID"",
-    a.""ApplicationNumber"",
-    a.""ApplicationDate"",
-    latest_ap.""StateID"" AS ""CurrentStateID"",
-    latest_ap.""Date"" AS ""StatusDate"",
-    latest_ap.""Description"" AS ""StatusDescription"",
-    CASE
-        WHEN COALESCE(v.""IsCancelled"", FALSE) THEN 0
-        WHEN v.""ExpirationDate"" IS NULL THEN 0
-        WHEN (v.""ExpirationDate""::date - CURRENT_DATE) < 0 THEN 0
-        ELSE (v.""ExpirationDate""::date - CURRENT_DATE)
-    END AS ""DaysRemainingOnVisa"",
-    (SELECT iv.""ID"" FROM ""Visas"" iv
-     WHERE iv.""IssuingApplicationItemID"" = ai.""ID""
-     LIMIT 1) AS ""IssuedVisaID"",
-    (SELECT ri.""ID""
-     FROM ""Rejections"" r
-     JOIN ""RejectionItems"" ri ON ri.""RejectionID"" = r.""ID""
-     WHERE r.""ApplicationID"" = a.""ID"" AND ri.""PersonID"" = ai.""PersonID""
-     LIMIT 1) AS ""RejectionItemID""
-FROM ""ApplicationItems"" ai
-JOIN ""Applications"" a ON ai.""ApplicationID"" = a.""ID""
-JOIN ""ApplicationTypes"" at ON a.""ApplicationTypeID"" = at.""ID""
-LEFT JOIN ""Visas"" v ON ai.""CurrentVisaId"" = v.""ID""
-LEFT JOIN LATERAL (
-    SELECT ap.""StateID"", ap.""Date"", ap.""Description""
-    FROM ""ApplicationProgresses"" ap
-    WHERE ap.""ApplicationID"" = a.""ID""
-    ORDER BY ap.""Date"" DESC NULLS LAST, ap.""ID"" DESC
-    LIMIT 1
-) latest_ap ON TRUE
-WHERE at.""Name"" IN (
-      'App_Visa_Ext',
-      'App_Visa_Ext_According_to_WP',
-      'App_Visa_Ext_FM',
-      'App_Visa_and_WP_Ext'
-);
-", true);
+        ExecuteNonQueryCommand(ReportDashboardPostgresRosterSql.ViewVisaExtensionStatusSql, true);
     }
 
     private void CreateViewRdPassport()
@@ -127,75 +81,95 @@ WHERE at.""Name"" IN (
         ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_passport;", true);
         ExecuteNonQueryCommand(@"
 -- Report Dashboard: Passport (PostgreSQL).
--- One row per ApplicationItem that references a CurrentPassport.
--- Date filter (dashboard top-right) applies to Applications.ApplicationDate in the C# loader.
+-- One row per roster line with a resolved passport (M2M) or legacy ApplicationRosterMergeLine.CurrentPassport.
+-- Date filter (dashboard top-right) applies to ApplicationProfileInstances.ApplicationDate in the C# loader.
 -- Soft-delete: COALESCE(""GCRecord"", 0) = 0. IsArchived is exposed for app-side toggle.
 CREATE VIEW vw_rd_passport AS
 SELECT
-    ai.""ID""                                                                 AS ""ID"",
-    pp.""ID""                                                                 AS ""PassportOid"",
-    p.""ID""                                                                  AS ""PersonOid"",
-    CONCAT_WS(' ',
-        NULLIF(BTRIM(p.""FirstName""), ''),
-        NULLIF(BTRIM(p.""MiddleName""), ''),
-        NULLIF(BTRIM(p.""LastName""), '')
-    )                                                                       AS ""PersonName"",
-    COALESCE(
-        NULLIF(BTRIM(pc.""NameTm""), ''),
-        NULLIF(BTRIM(spc.""NameTm""), ''),
-        ''
-    )                                                                       AS ""ProjectName"",
-    COALESCE(pc.""NameTm"", spc.""NameTm"", '')                                 AS ""ProjectNameRaw"",
-    COALESCE(pc.""NameTm"", spc.""NameTm"", '')                                 AS ""ProjectNameTm"",
-    p.""PersonRole""                                                          AS ""PersonRoleCode"",
-    COALESCE(pp.""PassportNumber"", '')                                       AS ""PassportNumber"",
-    pp.""IssueDate""                                                          AS ""IssueDate"",
-    pp.""ExpirationDate""                                                     AS ""ExpirationDate"",
-    a.""ApplicationDate""                                                     AS ""ApplicationDate"",
-    COALESCE(NULLIF(BTRIM(pt.""NameTm""), ''), pt.""Name"", 'Unknown')          AS ""TypeLabel"",
-    COALESCE(NULLIF(BTRIM(nat.""NameTm""), ''), nat.""Name"", 'Unknown')         AS ""CitizenshipLabel"",
-    CASE
-      WHEN pp.""ExpirationDate"" IS NULL                                      THEN 'Pending'
-      WHEN (pp.""ExpirationDate"")::date < CURRENT_DATE                        THEN 'Expired'
-      WHEN (pp.""ExpirationDate"")::date <= (CURRENT_DATE + INTERVAL '30 days')::date
-                                                                             THEN 'Expiring (<30 days)'
-      WHEN (pp.""ExpirationDate"")::date <= (CURRENT_DATE + INTERVAL '90 days')::date
-                                                                             THEN 'Valid (31-90 days)'
-      ELSE                                                                   'Valid (>90 days)'
-    END                                                                     AS ""ValidityLabel"",
-    CASE
-      WHEN pp.""ExpirationDate"" IS NULL                                      THEN 'st-pending'
-      WHEN (pp.""ExpirationDate"")::date < CURRENT_DATE                        THEN 'st-expiring'
-      WHEN (pp.""ExpirationDate"")::date <= (CURRENT_DATE + INTERVAL '30 days')::date
-                                                                             THEN 'st-expiring'
-      WHEN (pp.""ExpirationDate"")::date <= (CURRENT_DATE + INTERVAL '90 days')::date
-                                                                             THEN 'st-pending'
-      ELSE                                                                   'st-approved'
-    END                                                                     AS ""ValidityCssClass"",
-    COALESCE(p.""IsArchived"", FALSE)                                         AS ""IsArchived""
-FROM ""ApplicationItems"" ai
-INNER JOIN ""Applications"" a
-    ON a.""ID"" = ai.""ApplicationID""
-   AND COALESCE(a.""GCRecord"", 0) = 0
-INNER JOIN ""Passports"" pp
-    ON pp.""ID"" = ai.""CurrentPassportID""
-   AND COALESCE(pp.""GCRecord"", 0) = 0
-INNER JOIN ""People"" p
-    ON p.""ID"" = ai.""PersonID""
-   AND COALESCE(p.""GCRecord"", 0) = 0
-LEFT JOIN ""ProjectContracts"" pc
-    ON pc.""ID"" = COALESCE(a.""ProjectContractID"", p.""ProjectContractID"")
-   AND COALESCE(pc.""GCRecord"", 0) = 0
-LEFT JOIN ""People"" sp
-    ON sp.""ID"" = p.""SponsoringEmployeeID"" AND COALESCE(sp.""GCRecord"", 0) = 0
-LEFT JOIN ""ProjectContracts"" spc
-    ON spc.""ID"" = sp.""ProjectContractID"" AND COALESCE(spc.""GCRecord"", 0) = 0
-LEFT JOIN ""PassportTypes"" pt
-    ON pt.""ID"" = pp.""PassportTypeID"" AND COALESCE(pt.""GCRecord"", 0) = 0
-LEFT JOIN ""Countries"" nat
-    ON nat.""ID"" = p.""NationalityID"" AND COALESCE(nat.""GCRecord"", 0) = 0
-WHERE COALESCE(ai.""GCRecord"", 0) = 0
-  AND ai.""CurrentPassportID"" IS NOT NULL;
+    line.""ID"",
+    line.""PassportOid"",
+    line.""PersonOid"",
+    line.""PersonName"",
+    line.""ProjectName"",
+    line.""ProjectNameRaw"",
+    line.""ProjectNameTm"",
+    line.""PersonRoleCode"",
+    line.""PassportNumber"",
+    line.""IssueDate"",
+    line.""ExpirationDate"",
+    line.""ApplicationDate"",
+    line.""TypeLabel"",
+    line.""CitizenshipLabel"",
+    line.""ValidityLabel"",
+    line.""ValidityCssClass"",
+    line.""IsArchived""
+FROM (
+    SELECT
+        md5(concat(ap.""ApplicationProfileInstanceId""::text, ap.""PersonId""::text))::uuid AS ""ID"",
+        pp.""ID""                                                                 AS ""PassportOid"",
+        p.""ID""                                                                  AS ""PersonOid"",
+        CONCAT_WS(' ',
+            NULLIF(BTRIM(p.""FirstName""), ''),
+            NULLIF(BTRIM(p.""MiddleName""), ''),
+            NULLIF(BTRIM(p.""LastName""), '')
+        )                                                                       AS ""PersonName"",
+        COALESCE(
+            NULLIF(BTRIM(pc.""NameTm""), ''),
+            NULLIF(BTRIM(spc.""NameTm""), ''),
+            ''
+        )                                                                       AS ""ProjectName"",
+        COALESCE(pc.""NameTm"", spc.""NameTm"", '')                             AS ""ProjectNameRaw"",
+        COALESCE(pc.""NameTm"", spc.""NameTm"", '')                             AS ""ProjectNameTm"",
+        p.""PersonRole""                                                          AS ""PersonRoleCode"",
+        COALESCE(pp.""PassportNumber"", '')                                       AS ""PassportNumber"",
+        pp.""IssueDate""                                                          AS ""IssueDate"",
+        pp.""ExpirationDate""                                                     AS ""ExpirationDate"",
+        a.""ApplicationDate""                                                     AS ""ApplicationDate"",
+        COALESCE(NULLIF(BTRIM(pt.""NameTm""), ''), pt.""Name"", 'Unknown')          AS ""TypeLabel"",
+        COALESCE(NULLIF(BTRIM(nat.""NameTm""), ''), nat.""Name"", 'Unknown')         AS ""CitizenshipLabel"",
+        CASE
+          WHEN pp.""ExpirationDate"" IS NULL                                      THEN 'Pending'
+          WHEN (pp.""ExpirationDate"")::date < CURRENT_DATE                        THEN 'Expired'
+          WHEN (pp.""ExpirationDate"")::date <= (CURRENT_DATE + INTERVAL '30 days')::date
+                                                                                 THEN 'Expiring (<30 days)'
+          WHEN (pp.""ExpirationDate"")::date <= (CURRENT_DATE + INTERVAL '90 days')::date
+                                                                                 THEN 'Valid (31-90 days)'
+          ELSE                                                                   'Valid (>90 days)'
+        END                                                                     AS ""ValidityLabel"",
+        CASE
+          WHEN pp.""ExpirationDate"" IS NULL                                      THEN 'st-pending'
+          WHEN (pp.""ExpirationDate"")::date < CURRENT_DATE                        THEN 'st-expiring'
+          WHEN (pp.""ExpirationDate"")::date <= (CURRENT_DATE + INTERVAL '30 days')::date
+                                                                                 THEN 'st-expiring'
+          WHEN (pp.""ExpirationDate"")::date <= (CURRENT_DATE + INTERVAL '90 days')::date
+                                                                                 THEN 'st-pending'
+          ELSE                                                                   'st-approved'
+        END                                                                     AS ""ValidityCssClass"",
+        COALESCE(p.""IsArchived"", FALSE)                                         AS ""IsArchived""
+    FROM ""ApplicationProfileInstancePeople"" ap
+    INNER JOIN ""ApplicationProfileInstances"" a
+        ON a.""ID"" = ap.""ApplicationProfileInstanceId"" AND COALESCE(a.""GCRecord"", 0) = 0
+    INNER JOIN ""ApplicationProfileInstancePersonResolvedLinks"" rl_pass
+        ON rl_pass.""ApplicationProfileInstanceId"" = ap.""ApplicationProfileInstanceId"" AND rl_pass.""PersonId"" = ap.""PersonId""
+       AND rl_pass.""LinkKind"" = " + ReportDashboardPostgresRosterSql.LinkKindPassport + @"
+       AND COALESCE(rl_pass.""GCRecord"", 0) = 0
+    INNER JOIN ""Passports"" pp
+        ON pp.""ID"" = rl_pass.""LinkedObjectId"" AND COALESCE(pp.""GCRecord"", 0) = 0
+    INNER JOIN ""People"" p
+        ON p.""ID"" = ap.""PersonId"" AND COALESCE(p.""GCRecord"", 0) = 0
+    LEFT JOIN ""ProjectContracts"" pc
+        ON pc.""ID"" = COALESCE(a.""ProjectContractID"", p.""ProjectContractID"")
+       AND COALESCE(pc.""GCRecord"", 0) = 0
+    LEFT JOIN ""People"" sp
+        ON sp.""ID"" = p.""SponsoringEmployeeID"" AND COALESCE(sp.""GCRecord"", 0) = 0
+    LEFT JOIN ""ProjectContracts"" spc
+        ON spc.""ID"" = sp.""ProjectContractID"" AND COALESCE(spc.""GCRecord"", 0) = 0
+    LEFT JOIN ""PassportTypes"" pt
+        ON pt.""ID"" = pp.""PassportTypeID"" AND COALESCE(pt.""GCRecord"", 0) = 0
+    LEFT JOIN ""Countries"" nat
+        ON nat.""ID"" = p.""NationalityID"" AND COALESCE(nat.""GCRecord"", 0) = 0
+    WHERE rl_pass.""LinkedObjectId"" IS NOT NULL
+) line;
 ", true);
     }
     private void CreateViewRdWorkPermit()
@@ -251,7 +225,16 @@ LEFT JOIN ""People"" sp
 LEFT JOIN ""ProjectContracts"" spc
     ON spc.""ID"" = sp.""ProjectContractID"" AND COALESCE(spc.""GCRecord"", 0) = 0
 WHERE COALESCE(wpi.""GCRecord"", 0) = 0
-  AND COALESCE(wpi.""IsCancelled"", FALSE) = FALSE
+  AND NOT EXISTS (
+      SELECT 1
+      FROM ""ApplicationProfileInstanceWorkPermitItems"" j
+      INNER JOIN ""ApplicationProfileInstances"" api ON api.""ID"" = j.""ApplicationProfileInstanceId""
+      INNER JOIN ""ApplicationProfiles"" ap ON ap.""ID"" = api.""ApplicationProfileID""
+      WHERE j.""WorkPermitItemId"" = wpi.""ID""
+        AND COALESCE(api.""GCRecord"", 0) = 0
+        AND COALESCE(ap.""GCRecord"", 0) = 0
+        AND ap.""ActionFamily"" = 1
+        AND BTRIM(COALESCE(api.""LatestPrimaryStateCode"", '')) = 'PROCESS_ISSUED')
   AND wpi.""PersonID"" IS NOT NULL
   AND wpi.""ExpirationDate"" IS NOT NULL
   AND (wpi.""ExpirationDate"")::date >= CURRENT_DATE;
@@ -299,7 +282,16 @@ LEFT JOIN ""People"" sp
 LEFT JOIN ""ProjectContracts"" spc
     ON spc.""ID"" = sp.""ProjectContractID"" AND COALESCE(spc.""GCRecord"", 0) = 0
 WHERE COALESCE(wpi.""GCRecord"", 0) = 0
-  AND COALESCE(wpi.""IsCancelled"", FALSE) = FALSE
+  AND NOT EXISTS (
+      SELECT 1
+      FROM ""ApplicationProfileInstanceWorkPermitItems"" j
+      INNER JOIN ""ApplicationProfileInstances"" api ON api.""ID"" = j.""ApplicationProfileInstanceId""
+      INNER JOIN ""ApplicationProfiles"" ap ON ap.""ID"" = api.""ApplicationProfileID""
+      WHERE j.""WorkPermitItemId"" = wpi.""ID""
+        AND COALESCE(api.""GCRecord"", 0) = 0
+        AND COALESCE(ap.""GCRecord"", 0) = 0
+        AND ap.""ActionFamily"" = 1
+        AND BTRIM(COALESCE(api.""LatestPrimaryStateCode"", '')) = 'PROCESS_ISSUED')
   AND wpi.""PersonID"" IS NOT NULL
   AND wpi.""ExpirationDate"" IS NOT NULL
   AND (wpi.""ExpirationDate"")::date >= CURRENT_DATE;
@@ -309,88 +301,7 @@ WHERE COALESCE(wpi.""GCRecord"", 0) = 0
         private void CreateViewRdWorkPermitAppProgress()
     {
         ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_work_permit_app_progress;", true);
-        ExecuteNonQueryCommand(@"
--- Report Dashboard: WorkPermit Extension / Extension Result (PostgreSQL).
-CREATE VIEW vw_rd_work_permit_app_progress AS
-SELECT
-    ai.""ID""                                                                 AS ""ID"",
-    a.""ID""                                                                  AS ""ApplicationOid"",
-    p.""ID""                                                                  AS ""PersonOid"",
-    CONCAT_WS(' ',
-        NULLIF(BTRIM(p.""FirstName""), ''),
-        NULLIF(BTRIM(p.""MiddleName""), ''),
-        NULLIF(BTRIM(p.""LastName""), '')
-    )                                                                       AS ""PersonName"",
-    COALESCE(
-        NULLIF(BTRIM(pc.""NameTm""), ''),
-        NULLIF(BTRIM(spc.""NameTm""), ''),
-        ''
-    )                                                                       AS ""ProjectName"",
-    COALESCE(pc.""NameTm"", spc.""NameTm"", '')                                 AS ""ProjectNameRaw"",
-    COALESCE(pc.""NameTm"", spc.""NameTm"", '')                                 AS ""ProjectNameTm"",
-    p.""PersonRole""                                                          AS ""PersonRoleCode"",
-    COALESCE(
-        NULLIF(BTRIM(a.""FullApplicationNumber""), ''),
-        NULLIF(BTRIM(a.""ApplicationNumber""), ''),
-        ''
-    )                                                                       AS ""ApplicationNumber"",
-    a.""ApplicationDate""                                                     AS ""ApplicationDate"",
-    COALESCE(
-        NULLIF(BTRIM(a.""LatestPrimaryStateCode""), ''),
-        NULLIF(BTRIM(ast.""Code""), ''),
-        ''
-    )                                                                       AS ""ProgressStateCode"",
-    COALESCE(
-        NULLIF(BTRIM(a.""LatestProgressDisplay""), ''),
-        NULLIF(BTRIM(ast.""Name""), ''),
-        NULLIF(BTRIM(ast.""NameTm""), ''),
-        'Being Prepared'
-    )                                                                       AS ""ProgressStateLabel"",
-    CASE
-      WHEN ast.""Code"" IN ('PROCESS_ISSUED', '1_REVIEW_APPROVED', '2_REVIEW_APPROVED')
-                                                                             THEN 'st-approved'
-      WHEN ast.""Code"" IN ('PROCESS_REJECTED', 'PROCESS_CANCELLED', '1_REVIEW_REJECTED', '2_REVIEW_REJECTED')
-                                                                             THEN 'st-expiring'
-      ELSE                                                                   'st-pending'
-    END                                                                     AS ""ProgressStateCssClass"",
-    COALESCE(p.""IsArchived"", FALSE)                                         AS ""IsArchived""
-FROM ""ApplicationItems"" ai
-INNER JOIN ""Applications"" a
-    ON a.""ID"" = ai.""ApplicationID""
-   AND COALESCE(a.""GCRecord"", 0) = 0
-INNER JOIN ""ApplicationTypes"" at
-    ON at.""ID"" = a.""ApplicationTypeID""
-   AND COALESCE(at.""GCRecord"", 0) = 0
-INNER JOIN ""People"" p
-    ON p.""ID"" = ai.""PersonID""
-   AND COALESCE(p.""GCRecord"", 0) = 0
-LEFT JOIN ""ProjectContracts"" pc
-    ON pc.""ID"" = COALESCE(a.""ProjectContractID"", p.""ProjectContractID"")
-   AND COALESCE(pc.""GCRecord"", 0) = 0
-LEFT JOIN ""People"" sp
-    ON sp.""ID"" = p.""SponsoringEmployeeID""
-   AND COALESCE(sp.""GCRecord"", 0) = 0
-LEFT JOIN ""ProjectContracts"" spc
-    ON spc.""ID"" = sp.""ProjectContractID""
-   AND COALESCE(spc.""GCRecord"", 0) = 0
-LEFT JOIN LATERAL (
-    SELECT ap.""StateID""
-    FROM ""ApplicationProgresses"" ap
-    WHERE ap.""ApplicationID"" = a.""ID""
-      AND COALESCE(ap.""GCRecord"", 0) = 0
-    ORDER BY ap.""Date"" DESC, ap.""ID"" DESC
-    LIMIT 1
-) latest_ap ON TRUE
-LEFT JOIN ""ApplicationStates"" ast
-    ON ast.""ID"" = latest_ap.""StateID""
-   AND COALESCE(ast.""GCRecord"", 0) = 0
-WHERE COALESCE(ai.""GCRecord"", 0) = 0
-  AND ai.""CurrentWorkPermitItemID"" IS NOT NULL
-  AND at.""Name"" IN (
-        'App_WP_Ext',
-        'App_Visa_and_WP_Ext'
-    );
-", true);
+        ExecuteNonQueryCommand(ReportDashboardPostgresRosterSql.WorkPermitAppProgressViewSql, true);
     }
 private void CreateViewRdInvitationReady()
     {
@@ -449,8 +360,8 @@ LEFT JOIN ""VisaPeriods"" vp
     ON vp.""ID"" = inv.""VisaPeriodID"" AND COALESCE(vp.""GCRecord"", 0) = 0
 LEFT JOIN ""VisaCategories"" vc
     ON vc.""ID"" = inv.""VisaCategoryID"" AND COALESCE(vc.""GCRecord"", 0) = 0
-LEFT JOIN ""Applications"" a
-    ON a.""ID"" = inv.""ApplicationID"" AND COALESCE(a.""GCRecord"", 0) = 0
+LEFT JOIN ""ApplicationProfileInstances"" a
+    ON a.""ID"" = inv.""ApplicationProfileInstanceID"" AND COALESCE(a.""GCRecord"", 0) = 0
 LEFT JOIN ""VisaTypes"" vt
     ON vt.""ID"" = a.""VisaTypeID"" AND COALESCE(vt.""GCRecord"", 0) = 0
 LEFT JOIN ""ProjectContracts"" apc
@@ -462,9 +373,20 @@ LEFT JOIN ""People"" sp
 LEFT JOIN ""ProjectContracts"" spc
     ON spc.""ID"" = sp.""ProjectContractID"" AND COALESCE(spc.""GCRecord"", 0) = 0
 WHERE COALESCE(ii.""GCRecord"", 0) = 0
-  AND COALESCE(ii.""IsUsed"", FALSE) = FALSE
-  AND COALESCE(ii.""IsCancelled"", FALSE) = FALSE
-  AND COALESCE(ii.""IsChanged"", FALSE) = FALSE
+  AND NOT EXISTS (
+      SELECT 1 FROM ""Visas"" vis
+      WHERE vis.""IssuingInvitationItemID"" = ii.""ID""
+        AND COALESCE(vis.""GCRecord"", 0) = 0)
+  AND NOT EXISTS (
+      SELECT 1
+      FROM ""ApplicationProfileInstanceInvitationItems"" j
+      INNER JOIN ""ApplicationProfileInstances"" api ON api.""ID"" = j.""ApplicationProfileInstanceId""
+      INNER JOIN ""ApplicationProfiles"" ap ON ap.""ID"" = api.""ApplicationProfileID""
+      WHERE j.""InvitationItemId"" = ii.""ID""
+        AND COALESCE(api.""GCRecord"", 0) = 0
+        AND COALESCE(ap.""GCRecord"", 0) = 0
+        AND ap.""ActionFamily"" IN (1, 4)
+        AND BTRIM(COALESCE(api.""LatestPrimaryStateCode"", '')) = 'PROCESS_ISSUED')
   AND ii.""PersonID"" IS NOT NULL
   AND inv.""ExpirationDate"" IS NOT NULL
   AND (inv.""ExpirationDate"")::date >= CURRENT_DATE;
@@ -517,18 +439,18 @@ SELECT
     END                                                                     AS ""StatusCssClass"",
     COALESCE(ast.""Code"", '')                                                AS ""ProgressStateCode"",
     COALESCE(first_p.""IsArchived"", FALSE)                                   AS ""IsArchived""
-FROM ""Applications"" a
-INNER JOIN ""ApplicationTypes"" at
-    ON at.""ID"" = a.""ApplicationTypeID""
-   AND COALESCE(at.""GCRecord"", 0) = 0
-   AND COALESCE(at.""CanIssueInvitation"", FALSE) = TRUE
+FROM ""ApplicationProfileInstances"" a
+INNER JOIN ""ApplicationProfiles"" apf
+    ON apf.""ID"" = a.""ApplicationProfileID""
+   AND COALESCE(apf.""GCRecord"", 0) = 0
+   AND COALESCE(apf.""ProduceInvitation"", FALSE) = TRUE
 LEFT JOIN ""ProjectContracts"" pc
     ON pc.""ID"" = a.""ProjectContractID""
    AND COALESCE(pc.""GCRecord"", 0) = 0
 LEFT JOIN LATERAL (
     SELECT ap.""StateID""
-    FROM ""ApplicationProgresses"" ap
-    WHERE ap.""ApplicationID"" = a.""ID""
+    FROM ""ApplicationProfileInstanceProgresses"" ap
+    WHERE ap.""ApplicationProfileInstanceID"" = a.""ID""
       AND COALESCE(ap.""GCRecord"", 0) = 0
     ORDER BY ap.""Date"" DESC NULLS LAST, ap.""ID"" DESC
     LIMIT 1
@@ -536,22 +458,15 @@ LEFT JOIN LATERAL (
 LEFT JOIN ""ApplicationStates"" ast
     ON ast.""ID"" = latest_ap.""StateID""
    AND COALESCE(ast.""GCRecord"", 0) = 0
-LEFT JOIN LATERAL (
-    SELECT ai.""PersonID""
-    FROM ""ApplicationItems"" ai
-    WHERE ai.""ApplicationID"" = a.""ID""
-      AND COALESCE(ai.""GCRecord"", 0) = 0
-    ORDER BY ai.""ID""
-    LIMIT 1
-) first_ai ON TRUE
+" + ReportDashboardPostgresRosterSql.FirstApplicationProfileInstancePersonLateralJoin + @"
 LEFT JOIN ""People"" first_p
-    ON first_p.""ID"" = first_ai.""PersonID""
+    ON first_p.""ID"" = first_m2m.""PersonId""
    AND COALESCE(first_p.""GCRecord"", 0) = 0
 WHERE COALESCE(a.""GCRecord"", 0) = 0
   AND NOT EXISTS (
         SELECT 1
         FROM ""Invitations"" inv
-        WHERE inv.""ApplicationID"" = a.""ID""
+        WHERE inv.""ApplicationProfileInstanceID"" = a.""ID""
           AND COALESCE(inv.""GCRecord"", 0) = 0
     )
   AND (
@@ -675,12 +590,12 @@ SELECT
 FROM ""RejectionItems"" ri
 INNER JOIN ""Rejections"" r
     ON r.""ID"" = ri.""RejectionID"" AND COALESCE(r.""GCRecord"", 0) = 0
-INNER JOIN ""Applications"" a
-    ON a.""ID"" = r.""ApplicationID"" AND COALESCE(a.""GCRecord"", 0) = 0
-INNER JOIN ""ApplicationTypes"" at
-    ON at.""ID"" = a.""ApplicationTypeID""
-   AND COALESCE(at.""GCRecord"", 0) = 0
-   AND COALESCE(at.""CanIssueInvitation"", FALSE) = TRUE
+INNER JOIN ""ApplicationProfileInstances"" a
+    ON a.""ID"" = r.""ApplicationProfileInstanceID"" AND COALESCE(a.""GCRecord"", 0) = 0
+INNER JOIN ""ApplicationProfiles"" apf
+    ON apf.""ID"" = a.""ApplicationProfileID""
+   AND COALESCE(apf.""GCRecord"", 0) = 0
+   AND COALESCE(apf.""ProduceInvitation"", FALSE) = TRUE
 INNER JOIN ""People"" p
     ON p.""ID"" = ri.""PersonID"" AND COALESCE(p.""GCRecord"", 0) = 0
 LEFT JOIN ""ProjectContracts"" apc
@@ -733,17 +648,17 @@ SELECT
     )                                                                       AS ""StatusLabel"",
     'st-cat-1'                                                              AS ""StatusCssClass"",
     COALESCE(first_p.""IsArchived"", FALSE)                                   AS ""IsArchived""
-FROM ""Applications"" a
-INNER JOIN ""ApplicationTypes"" at
-    ON at.""ID"" = a.""ApplicationTypeID""
-   AND COALESCE(at.""GCRecord"", 0) = 0
-   AND COALESCE(at.""CanIssueInvitation"", FALSE) = TRUE
+FROM ""ApplicationProfileInstances"" a
+INNER JOIN ""ApplicationProfiles"" apf
+    ON apf.""ID"" = a.""ApplicationProfileID""
+   AND COALESCE(apf.""GCRecord"", 0) = 0
+   AND COALESCE(apf.""ProduceInvitation"", FALSE) = TRUE
 LEFT JOIN ""ProjectContracts"" apc
     ON apc.""ID"" = a.""ProjectContractID"" AND COALESCE(apc.""GCRecord"", 0) = 0
 LEFT JOIN LATERAL (
     SELECT ap.""StateID""
-    FROM ""ApplicationProgresses"" ap
-    WHERE ap.""ApplicationID"" = a.""ID""
+    FROM ""ApplicationProfileInstanceProgresses"" ap
+    WHERE ap.""ApplicationProfileInstanceID"" = a.""ID""
       AND COALESCE(ap.""GCRecord"", 0) = 0
     ORDER BY ap.""Date"" DESC NULLS LAST, ap.""ID"" DESC
     LIMIT 1
@@ -752,16 +667,9 @@ INNER JOIN ""ApplicationStates"" ast
     ON ast.""ID"" = latest_ap.""StateID""
    AND COALESCE(ast.""GCRecord"", 0) = 0
    AND ast.""Code"" = 'PROCESS_REJECTED'
-LEFT JOIN LATERAL (
-    SELECT ai.""PersonID""
-    FROM ""ApplicationItems"" ai
-    WHERE ai.""ApplicationID"" = a.""ID""
-      AND COALESCE(ai.""GCRecord"", 0) = 0
-    ORDER BY ai.""ID""
-    LIMIT 1
-) first_ai ON TRUE
+" + ReportDashboardPostgresRosterSql.FirstApplicationProfileInstancePersonLateralJoin + @"
 LEFT JOIN ""People"" first_p
-    ON first_p.""ID"" = first_ai.""PersonID"" AND COALESCE(first_p.""GCRecord"", 0) = 0
+    ON first_p.""ID"" = first_m2m.""PersonId"" AND COALESCE(first_p.""GCRecord"", 0) = 0
 LEFT JOIN ""ProjectContracts"" pc
     ON pc.""ID"" = first_p.""ProjectContractID"" AND COALESCE(pc.""GCRecord"", 0) = 0
 LEFT JOIN ""People"" sp
@@ -772,7 +680,7 @@ WHERE COALESCE(a.""GCRecord"", 0) = 0
   AND NOT EXISTS (
         SELECT 1
         FROM ""Rejections"" r
-        WHERE r.""ApplicationID"" = a.""ID""
+        WHERE r.""ApplicationProfileInstanceID"" = a.""ID""
           AND COALESCE(r.""GCRecord"", 0) = 0
     );
 ", true);
@@ -816,8 +724,8 @@ INNER JOIN ""Invitations"" inv
     ON inv.""ID"" = ii.""InvitationID"" AND COALESCE(inv.""GCRecord"", 0) = 0
 INNER JOIN ""People"" p
     ON p.""ID"" = ii.""PersonID"" AND COALESCE(p.""GCRecord"", 0) = 0
-LEFT JOIN ""Applications"" a
-    ON a.""ID"" = inv.""ApplicationID"" AND COALESCE(a.""GCRecord"", 0) = 0
+LEFT JOIN ""ApplicationProfileInstances"" a
+    ON a.""ID"" = inv.""ApplicationProfileInstanceID"" AND COALESCE(a.""GCRecord"", 0) = 0
 LEFT JOIN ""ProjectContracts"" apc
     ON apc.""ID"" = a.""ProjectContractID"" AND COALESCE(apc.""GCRecord"", 0) = 0
 LEFT JOIN ""ProjectContracts"" pc
@@ -827,7 +735,10 @@ LEFT JOIN ""People"" sp
 LEFT JOIN ""ProjectContracts"" spc
     ON spc.""ID"" = sp.""ProjectContractID"" AND COALESCE(spc.""GCRecord"", 0) = 0
 WHERE COALESCE(ii.""GCRecord"", 0) = 0
-  AND COALESCE(ii.""IsUsed"", FALSE) = TRUE
+  AND EXISTS (
+      SELECT 1 FROM ""Visas"" vis
+      WHERE vis.""IssuingInvitationItemID"" = ii.""ID""
+        AND COALESCE(vis.""GCRecord"", 0) = 0)
   AND ii.""PersonID"" IS NOT NULL;
 ", true);
     }
@@ -879,8 +790,8 @@ INNER JOIN ""Invitations"" inv
     ON inv.""ID"" = ii.""InvitationID"" AND COALESCE(inv.""GCRecord"", 0) = 0
 INNER JOIN ""People"" p
     ON p.""ID"" = ii.""PersonID"" AND COALESCE(p.""GCRecord"", 0) = 0
-LEFT JOIN ""Applications"" a
-    ON a.""ID"" = inv.""ApplicationID"" AND COALESCE(a.""GCRecord"", 0) = 0
+LEFT JOIN ""ApplicationProfileInstances"" a
+    ON a.""ID"" = inv.""ApplicationProfileInstanceID"" AND COALESCE(a.""GCRecord"", 0) = 0
 LEFT JOIN ""ProjectContracts"" apc
     ON apc.""ID"" = a.""ProjectContractID"" AND COALESCE(apc.""GCRecord"", 0) = 0
 LEFT JOIN ""ProjectContracts"" pc
@@ -890,9 +801,20 @@ LEFT JOIN ""People"" sp
 LEFT JOIN ""ProjectContracts"" spc
     ON spc.""ID"" = sp.""ProjectContractID"" AND COALESCE(spc.""GCRecord"", 0) = 0
 WHERE COALESCE(ii.""GCRecord"", 0) = 0
-  AND COALESCE(ii.""IsUsed"", FALSE) = FALSE
-  AND COALESCE(ii.""IsCancelled"", FALSE) = FALSE
-  AND COALESCE(ii.""IsChanged"", FALSE) = FALSE
+  AND NOT EXISTS (
+      SELECT 1 FROM ""Visas"" vis
+      WHERE vis.""IssuingInvitationItemID"" = ii.""ID""
+        AND COALESCE(vis.""GCRecord"", 0) = 0)
+  AND NOT EXISTS (
+      SELECT 1
+      FROM ""ApplicationProfileInstanceInvitationItems"" j
+      INNER JOIN ""ApplicationProfileInstances"" api ON api.""ID"" = j.""ApplicationProfileInstanceId""
+      INNER JOIN ""ApplicationProfiles"" ap ON ap.""ID"" = api.""ApplicationProfileID""
+      WHERE j.""InvitationItemId"" = ii.""ID""
+        AND COALESCE(api.""GCRecord"", 0) = 0
+        AND COALESCE(ap.""GCRecord"", 0) = 0
+        AND ap.""ActionFamily"" IN (1, 4)
+        AND BTRIM(COALESCE(api.""LatestPrimaryStateCode"", '')) = 'PROCESS_ISSUED')
   AND ii.""PersonID"" IS NOT NULL
   AND inv.""ExpirationDate"" IS NOT NULL
   AND (inv.""ExpirationDate"")::date >= CURRENT_DATE;
@@ -900,108 +822,8 @@ WHERE COALESCE(ii.""GCRecord"", 0) = 0
     }
     private void CreateViewRdVisaAppProgress()
     {
-        ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_visa_app_progress;", true);
-        ExecuteNonQueryCommand(@"
--- Report Dashboard: Visa — Application Progress (PostgreSQL; shared preview + Open ListView).
-CREATE VIEW vw_rd_visa_app_progress AS
-SELECT
-    ai.""ID""                                                                 AS ""ID"",
-    a.""ID""                                                                  AS ""ApplicationOid"",
-    p.""ID""                                                                  AS ""PersonOid"",
-    ai.""CurrentVisaId""                                                      AS ""ExpiringVisaID"",
-    ai.""CurrentPassportID""                                                  AS ""PassportID"",
-    COALESCE(NULLIF(BTRIM(pp.""PassportNumber""), ''), '')                     AS ""PassportNumber"",
-    latest_ap.""StateID""                                                     AS ""CurrentStateID"",
-    CONCAT_WS(' ',
-        NULLIF(BTRIM(p.""FirstName""), ''),
-        NULLIF(BTRIM(p.""MiddleName""), ''),
-        NULLIF(BTRIM(p.""LastName""), '')
-    )                                                                       AS ""PersonName"",
-    COALESCE(
-        NULLIF(BTRIM(pc.""NameTm""), ''),
-        NULLIF(BTRIM(spc.""NameTm""), ''),
-        ''
-    )                                                                       AS ""ProjectName"",
-    COALESCE(pc.""NameTm"", spc.""NameTm"", '')                                 AS ""ProjectNameRaw"",
-    COALESCE(pc.""NameTm"", spc.""NameTm"", '')                                 AS ""ProjectNameTm"",
-    p.""PersonRole""                                                          AS ""PersonRoleCode"",
-    COALESCE(
-        NULLIF(BTRIM(a.""FullApplicationNumber""), ''),
-        NULLIF(BTRIM(a.""ApplicationNumber""), ''),
-        ''
-    )                                                                       AS ""ApplicationNumber"",
-    a.""ApplicationDate""                                                     AS ""ApplicationDate"",
-    latest_ap.""Date""                                                        AS ""StatusDate"",
-    COALESCE(
-        NULLIF(BTRIM(a.""LatestPrimaryStateCode""), ''),
-        NULLIF(BTRIM(ast.""Code""), ''),
-        ''
-    )                                                                       AS ""ProgressStateCode"",
-    COALESCE(
-        NULLIF(BTRIM(a.""LatestProgressDisplay""), ''),
-        NULLIF(BTRIM(ast.""Name""), ''),
-        NULLIF(BTRIM(ast.""NameTm""), ''),
-        'Being Prepared'
-    )                                                                       AS ""ProgressStateLabel"",
-    CASE
-      WHEN ast.""Code"" IN ('PROCESS_ISSUED', '1_REVIEW_APPROVED', '2_REVIEW_APPROVED')
-                                                                             THEN 'st-approved'
-      WHEN ast.""Code"" IN ('PROCESS_REJECTED', 'PROCESS_CANCELLED', '1_REVIEW_REJECTED', '2_REVIEW_REJECTED')
-                                                                             THEN 'st-expiring'
-      ELSE                                                                   'st-pending'
-    END                                                                     AS ""ProgressStateCssClass"",
-    CASE
-        WHEN COALESCE(v.""IsCancelled"", FALSE) THEN 0
-        WHEN v.""ExpirationDate"" IS NULL THEN 0
-        WHEN (v.""ExpirationDate""::date - CURRENT_DATE) < 0 THEN 0
-        ELSE (v.""ExpirationDate""::date - CURRENT_DATE)
-    END                                                                     AS ""DaysRemainingOnVisa"",
-    COALESCE(p.""IsArchived"", FALSE)                                         AS ""IsArchived""
-FROM ""ApplicationItems"" ai
-INNER JOIN ""Applications"" a
-    ON a.""ID"" = ai.""ApplicationID""
-   AND COALESCE(a.""GCRecord"", 0) = 0
-INNER JOIN ""ApplicationTypes"" at
-    ON at.""ID"" = a.""ApplicationTypeID""
-   AND COALESCE(at.""GCRecord"", 0) = 0
-INNER JOIN ""People"" p
-    ON p.""ID"" = ai.""PersonID""
-   AND COALESCE(p.""GCRecord"", 0) = 0
-LEFT JOIN ""ProjectContracts"" pc
-    ON pc.""ID"" = COALESCE(a.""ProjectContractID"", p.""ProjectContractID"")
-   AND COALESCE(pc.""GCRecord"", 0) = 0
-LEFT JOIN ""People"" sp
-    ON sp.""ID"" = p.""SponsoringEmployeeID""
-   AND COALESCE(sp.""GCRecord"", 0) = 0
-LEFT JOIN ""ProjectContracts"" spc
-    ON spc.""ID"" = sp.""ProjectContractID""
-   AND COALESCE(spc.""GCRecord"", 0) = 0
-LEFT JOIN ""Visas"" v
-    ON v.""ID"" = ai.""CurrentVisaId""
-   AND COALESCE(v.""GCRecord"", 0) = 0
-LEFT JOIN ""Passports"" pp
-    ON pp.""ID"" = ai.""CurrentPassportID""
-   AND COALESCE(pp.""GCRecord"", 0) = 0
-LEFT JOIN LATERAL (
-    SELECT ap.""StateID"", ap.""Date""
-    FROM ""ApplicationProgresses"" ap
-    WHERE ap.""ApplicationID"" = a.""ID""
-      AND COALESCE(ap.""GCRecord"", 0) = 0
-    ORDER BY ap.""Date"" DESC NULLS LAST, ap.""ID"" DESC
-    LIMIT 1
-) latest_ap ON TRUE
-LEFT JOIN ""ApplicationStates"" ast
-    ON ast.""ID"" = latest_ap.""StateID""
-   AND COALESCE(ast.""GCRecord"", 0) = 0
-WHERE COALESCE(ai.""GCRecord"", 0) = 0
-  AND ai.""CurrentVisaId"" IS NOT NULL
-  AND at.""Name"" IN (
-        'App_Visa_Ext',
-        'App_Visa_Ext_According_to_WP',
-        'App_Visa_Ext_FM',
-        'App_Visa_and_WP_Ext'
-    );
-", true);
+        ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_visa_app_progress CASCADE;", true);
+        ExecuteNonQueryCommand(ReportDashboardPostgresRosterSql.VisaAppProgressViewSql, true);
     }
     private void CreateViewRdProjects()
     {
@@ -1049,109 +871,7 @@ GROUP BY p.""PersonRole"";
     private void CreateViewRdVisaState()
     {
         ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_visa_state;", true);
-        ExecuteNonQueryCommand(@"
--- Report Dashboard: Visa State — Extension Started (PostgreSQL).
--- Plus: Application ProgressHistory must not contain PROCESS_CANCELLED.
-CREATE VIEW vw_rd_visa_state AS
-WITH ranked_visas AS (
-    SELECT
-        v.""ID"" AS ""VisaID"",
-        pp.""PersonID"",
-        v.""VisaNumber"",
-        v.""ExpirationDate"",
-        v.""StartDate"",
-        v.""IssueDate"",
-        ROW_NUMBER() OVER (
-            PARTITION BY pp.""PersonID""
-            ORDER BY v.""StartDate"" DESC NULLS LAST, v.""IssueDate"" DESC NULLS LAST, v.""ID"" DESC
-        ) AS rn
-    FROM ""Visas"" v
-    INNER JOIN ""Passports"" pp
-        ON pp.""ID"" = v.""PassportID""
-       AND COALESCE(pp.""GCRecord"", 0) = 0
-    WHERE COALESCE(v.""GCRecord"", 0) = 0
-      AND COALESCE(v.""IsCancelled"", FALSE) = FALSE
-      AND v.""StartDate"" IS NOT NULL
-      AND (v.""StartDate"")::date > DATE '1900-01-01'
-      AND (v.""StartDate"")::date <= CURRENT_DATE
-),
-ext_items AS (
-    SELECT
-        ai.""ID"" AS ""ApplicationItemID"",
-        ai.""PersonID"",
-        ai.""CurrentVisaId"" AS ""VisaID"",
-        a.""ID"" AS ""ApplicationID"",
-        a.""ApplicationNumber"",
-        a.""FullApplicationNumber"",
-        a.""ApplicationDate"",
-        a.""ProjectContractID"" AS ""ApplicationProjectContractID""
-    FROM ""ApplicationItems"" ai
-    INNER JOIN ""Applications"" a
-        ON a.""ID"" = ai.""ApplicationID""
-       AND COALESCE(a.""GCRecord"", 0) = 0
-    INNER JOIN ""ApplicationTypes"" at
-        ON at.""ID"" = a.""ApplicationTypeID""
-       AND COALESCE(at.""GCRecord"", 0) = 0
-    WHERE COALESCE(ai.""GCRecord"", 0) = 0
-      AND ai.""CurrentVisaId"" IS NOT NULL
-      AND at.""Name"" IN (
-            'App_Visa_Ext',
-            'App_Visa_Ext_According_to_WP',
-            'App_Visa_Ext_FM',
-            'App_Visa_and_WP_Ext'
-        )
-)
-SELECT
-    ei.""ApplicationItemID""                                              AS ""ID"",
-    p.""ID""                                                              AS ""PersonOid"",
-    CONCAT_WS(' ',
-        NULLIF(BTRIM(p.""FirstName""), ''),
-        NULLIF(BTRIM(p.""MiddleName""), ''),
-        NULLIF(BTRIM(p.""LastName""), '')
-    )                                                                   AS ""PersonName"",
-    COALESCE(
-        NULLIF(BTRIM(pc.""NameTm""), ''),
-        NULLIF(BTRIM(spc.""NameTm""), ''),
-        ''
-    )                                                                   AS ""ProjectName"",
-    COALESCE(pc.""NameTm"", spc.""NameTm"", '')                             AS ""ProjectNameRaw"",
-    COALESCE(pc.""NameTm"", spc.""NameTm"", '')                             AS ""ProjectNameTm"",
-    p.""PersonRole""                                                      AS ""PersonRoleCode"",
-    COALESCE(NULLIF(BTRIM(rv.""VisaNumber""), ''), '')                    AS ""VisaNumber"",
-    CASE WHEN (rv.""ExpirationDate"")::date > DATE '1900-01-01' THEN rv.""ExpirationDate"" ELSE NULL END AS ""ExpirationDate"",
-    'Extension Started'                                                 AS ""StateLabel"",
-    'st-pending'                                                        AS ""StateCssClass"",
-    COALESCE(p.""IsArchived"", FALSE)                                     AS ""IsArchived""
-FROM ext_items ei
-INNER JOIN ranked_visas rv
-    ON rv.""VisaID"" = ei.""VisaID""
-   AND rv.""PersonID"" = ei.""PersonID""
-   AND rv.rn = 1
-INNER JOIN ""People"" p
-    ON p.""ID"" = ei.""PersonID""
-   AND COALESCE(p.""GCRecord"", 0) = 0
-LEFT JOIN ""ProjectContracts"" pc
-    ON pc.""ID"" = COALESCE(ei.""ApplicationProjectContractID"", p.""ProjectContractID"")
-   AND COALESCE(pc.""GCRecord"", 0) = 0
-LEFT JOIN ""People"" sp
-    ON sp.""ID"" = p.""SponsoringEmployeeID""
-   AND COALESCE(sp.""GCRecord"", 0) = 0
-LEFT JOIN ""ProjectContracts"" spc
-    ON spc.""ID"" = sp.""ProjectContractID""
-   AND COALESCE(spc.""GCRecord"", 0) = 0
-WHERE rv.""ExpirationDate"" IS NOT NULL
-  AND (rv.""ExpirationDate"")::date >= CURRENT_DATE
-  AND NOT EXISTS (
-        SELECT 1
-        FROM ""ApplicationProgresses"" ap
-        INNER JOIN ""ApplicationStates"" ast
-            ON ast.""ID"" = ap.""StateID""
-           AND COALESCE(ast.""GCRecord"", 0) = 0
-        WHERE ap.""ApplicationID"" = ei.""ApplicationID""
-          AND COALESCE(ap.""GCRecord"", 0) = 0
-          AND ast.""Code"" = 'PROCESS_CANCELLED'
-      );
-", true);
+        ExecuteNonQueryCommand(ReportDashboardPostgresRosterSql.VisaStateViewSql, true);
     }
     private void CreateViewRdVisaByCategory()
     {
@@ -1202,7 +922,16 @@ LEFT JOIN ""ProjectContracts"" spc
     ON spc.""ID"" = sp.""ProjectContractID""
    AND COALESCE(spc.""GCRecord"", 0) = 0
 WHERE COALESCE(v.""GCRecord"", 0) = 0
-  AND COALESCE(v.""IsCancelled"", FALSE) = FALSE
+  AND NOT EXISTS (
+      SELECT 1
+      FROM ""ApplicationProfileInstanceVisas"" j
+      INNER JOIN ""ApplicationProfileInstances"" api ON api.""ID"" = j.""ApplicationProfileInstanceId""
+      INNER JOIN ""ApplicationProfiles"" ap ON ap.""ID"" = api.""ApplicationProfileID""
+      WHERE j.""VisaId"" = v.""ID""
+        AND COALESCE(api.""GCRecord"", 0) = 0
+        AND COALESCE(ap.""GCRecord"", 0) = 0
+        AND ap.""ActionFamily"" = 1
+        AND BTRIM(COALESCE(api.""LatestPrimaryStateCode"", '')) = 'PROCESS_ISSUED')
   AND v.""ExpirationDate"" IS NOT NULL
   AND (v.""ExpirationDate"")::date >= CURRENT_DATE;
 ", true);
@@ -1255,7 +984,16 @@ LEFT JOIN ""ProjectContracts"" spc
     ON spc.""ID"" = sp.""ProjectContractID""
    AND COALESCE(spc.""GCRecord"", 0) = 0
 WHERE COALESCE(v.""GCRecord"", 0) = 0
-  AND COALESCE(v.""IsCancelled"", FALSE) = FALSE
+  AND NOT EXISTS (
+      SELECT 1
+      FROM ""ApplicationProfileInstanceVisas"" j
+      INNER JOIN ""ApplicationProfileInstances"" api ON api.""ID"" = j.""ApplicationProfileInstanceId""
+      INNER JOIN ""ApplicationProfiles"" ap ON ap.""ID"" = api.""ApplicationProfileID""
+      WHERE j.""VisaId"" = v.""ID""
+        AND COALESCE(api.""GCRecord"", 0) = 0
+        AND COALESCE(ap.""GCRecord"", 0) = 0
+        AND ap.""ActionFamily"" = 1
+        AND BTRIM(COALESCE(api.""LatestPrimaryStateCode"", '')) = 'PROCESS_ISSUED')
   AND v.""ExpirationDate"" IS NOT NULL
   AND (v.""ExpirationDate"")::date >= CURRENT_DATE;
 ", true);
@@ -1353,7 +1091,16 @@ FROM (
         ON spc.""ID"" = sp.""ProjectContractID""
        AND COALESCE(spc.""GCRecord"", 0) = 0
     WHERE COALESCE(v.""GCRecord"", 0) = 0
-      AND COALESCE(v.""IsCancelled"", FALSE) = FALSE
+      AND NOT EXISTS (
+      SELECT 1
+      FROM ""ApplicationProfileInstanceVisas"" j
+      INNER JOIN ""ApplicationProfileInstances"" api ON api.""ID"" = j.""ApplicationProfileInstanceId""
+      INNER JOIN ""ApplicationProfiles"" ap ON ap.""ID"" = api.""ApplicationProfileID""
+      WHERE j.""VisaId"" = v.""ID""
+        AND COALESCE(api.""GCRecord"", 0) = 0
+        AND COALESCE(ap.""GCRecord"", 0) = 0
+        AND ap.""ActionFamily"" = 1
+        AND BTRIM(COALESCE(api.""LatestPrimaryStateCode"", '')) = 'PROCESS_ISSUED')
       AND v.""ExpirationDate"" IS NOT NULL
       AND (v.""ExpirationDate"")::date >= CURRENT_DATE
       AND v.""StartDate"" IS NOT NULL
@@ -1456,7 +1203,16 @@ FROM (
         ON spc.""ID"" = sp.""ProjectContractID""
        AND COALESCE(spc.""GCRecord"", 0) = 0
     WHERE COALESCE(v.""GCRecord"", 0) = 0
-      AND COALESCE(v.""IsCancelled"", FALSE) = FALSE
+      AND NOT EXISTS (
+      SELECT 1
+      FROM ""ApplicationProfileInstanceVisas"" j
+      INNER JOIN ""ApplicationProfileInstances"" api ON api.""ID"" = j.""ApplicationProfileInstanceId""
+      INNER JOIN ""ApplicationProfiles"" ap ON ap.""ID"" = api.""ApplicationProfileID""
+      WHERE j.""VisaId"" = v.""ID""
+        AND COALESCE(api.""GCRecord"", 0) = 0
+        AND COALESCE(ap.""GCRecord"", 0) = 0
+        AND ap.""ActionFamily"" = 1
+        AND BTRIM(COALESCE(api.""LatestPrimaryStateCode"", '')) = 'PROCESS_ISSUED')
       AND v.""ExpirationDate"" IS NOT NULL
       AND (v.""ExpirationDate"")::date >= CURRENT_DATE
 ) x;
@@ -1520,37 +1276,25 @@ WITH valid_visas AS (
     LEFT JOIN ""People"" sp ON sp.""ID"" = p.""SponsoringEmployeeID"" AND COALESCE(sp.""GCRecord"", 0) = 0
     LEFT JOIN ""ProjectContracts"" spc ON spc.""ID"" = sp.""ProjectContractID"" AND COALESCE(spc.""GCRecord"", 0) = 0
     WHERE COALESCE(v.""GCRecord"", 0) = 0
-      AND COALESCE(v.""IsCancelled"", FALSE) = FALSE
+      AND NOT EXISTS (
+      SELECT 1
+      FROM ""ApplicationProfileInstanceVisas"" j
+      INNER JOIN ""ApplicationProfileInstances"" api ON api.""ID"" = j.""ApplicationProfileInstanceId""
+      INNER JOIN ""ApplicationProfiles"" ap ON ap.""ID"" = api.""ApplicationProfileID""
+      WHERE j.""VisaId"" = v.""ID""
+        AND COALESCE(api.""GCRecord"", 0) = 0
+        AND COALESCE(ap.""GCRecord"", 0) = 0
+        AND ap.""ActionFamily"" = 1
+        AND BTRIM(COALESCE(api.""LatestPrimaryStateCode"", '')) = 'PROCESS_ISSUED')
       AND v.""ExpirationDate"" IS NOT NULL
       AND (v.""ExpirationDate"")::date >= CURRENT_DATE
       AND v.""StartDate"" IS NOT NULL
       AND (v.""StartDate"")::date > DATE '1900-01-01'
 ),
-unfinished_extension_people AS (
-    SELECT DISTINCT ai.""PersonID""
-    FROM ""ApplicationItems"" ai
-    INNER JOIN ""Applications"" a
-        ON a.""ID"" = ai.""ApplicationID"" AND COALESCE(a.""GCRecord"", 0) = 0
-    INNER JOIN ""ApplicationTypes"" at
-        ON at.""ID"" = a.""ApplicationTypeID"" AND COALESCE(at.""GCRecord"", 0) = 0
-    WHERE COALESCE(ai.""GCRecord"", 0) = 0
-      AND ai.""CurrentVisaId"" IS NOT NULL
-      AND ai.""PersonID"" IS NOT NULL
-      AND at.""Name"" IN (
-            'App_Visa_Ext',
-            'App_Visa_Ext_According_to_WP',
-            'App_Visa_Ext_FM',
-            'App_Visa_and_WP_Ext'
-        )
-      AND (
-          a.""LatestPrimaryStateCode"" IS NULL
-          OR BTRIM(a.""LatestPrimaryStateCode"") = ''
-          OR (
-               a.""LatestPrimaryStateCode"" NOT IN ('PROCESS_ISSUED', 'PROCESS_CANCELLED', 'PROCESS_REJECTED')
-               AND RIGHT(BTRIM(a.""LatestPrimaryStateCode""), 16) <> '_REVIEW_REJECTED'
-             )
-      )
-)
+"
+            + ReportDashboardPostgresRosterSql.CteVisaExtensionRosterLines() + @",
+"
+            + ReportDashboardPostgresRosterSql.UnfinishedExtensionPeopleCte() + @"
 SELECT
     v.""ID"",
     v.""PersonOid"",
@@ -1653,7 +1397,7 @@ LEFT JOIN vw_rd_visa_by_type t ON t.""ID"" = b.""ID"";
 CREATE VIEW vw_rd_visa_on_extension AS
 SELECT
     b.""ID"",
-    b.""ApplicationOid"",
+    b.""ApplicationProfileInstanceOid"",
     b.""PersonOid"",
     b.""ExpiringVisaID"",
     b.""PassportID"",
@@ -1695,7 +1439,7 @@ WHERE b.""ProgressStateCode"" IS NULL
 CREATE VIEW vw_rd_visa_on_extension_by_period_category_type AS
 SELECT
     b.""ID"",
-    b.""ApplicationOid"",
+    b.""ApplicationProfileInstanceOid"",
     b.""PersonOid"",
     b.""ExpiringVisaID"",
     b.""PassportID"",
@@ -1721,8 +1465,8 @@ SELECT
     ) AS ""StatusLabel"",
     b.""IsArchived""
 FROM vw_rd_visa_app_progress b
-LEFT JOIN ""Applications"" a
-    ON a.""ID"" = b.""ApplicationOid"" AND COALESCE(a.""GCRecord"", 0) = 0
+LEFT JOIN ""ApplicationProfileInstances"" a
+    ON a.""ID"" = b.""ApplicationProfileInstanceOid"" AND COALESCE(a.""GCRecord"", 0) = 0
 LEFT JOIN ""VisaPeriods"" vp
     ON vp.""ID"" = a.""VisaPeriodID"" AND COALESCE(vp.""GCRecord"", 0) = 0
 LEFT JOIN ""VisaCategories"" vc
@@ -1746,7 +1490,7 @@ WHERE b.""ProgressStateCode"" IS NULL
 CREATE VIEW vw_rd_visa_extension_result AS
 SELECT
     b.""ID"",
-    b.""ApplicationOid"",
+    b.""ApplicationProfileInstanceOid"",
     b.""PersonOid"",
     b.""ExpiringVisaID"",
     b.""PassportID"",
@@ -1784,7 +1528,7 @@ WHERE b.""ProgressStateCode"" IN ('PROCESS_ISSUED', 'PROCESS_CANCELLED', 'PROCES
 CREATE VIEW vw_rd_visa_extension_result_by_period_category_type AS
 SELECT
     b.""ID"",
-    b.""ApplicationOid"",
+    b.""ApplicationProfileInstanceOid"",
     b.""PersonOid"",
     b.""ExpiringVisaID"",
     b.""PassportID"",
@@ -1810,8 +1554,8 @@ SELECT
     ) AS ""StatusLabel"",
     b.""IsArchived""
 FROM vw_rd_visa_app_progress b
-LEFT JOIN ""Applications"" a
-    ON a.""ID"" = b.""ApplicationOid"" AND COALESCE(a.""GCRecord"", 0) = 0
+LEFT JOIN ""ApplicationProfileInstances"" a
+    ON a.""ID"" = b.""ApplicationProfileInstanceOid"" AND COALESCE(a.""GCRecord"", 0) = 0
 LEFT JOIN ""VisaPeriods"" vp
     ON vp.""ID"" = a.""VisaPeriodID"" AND COALESCE(vp.""GCRecord"", 0) = 0
 LEFT JOIN ""VisaCategories"" vc
@@ -1826,7 +1570,7 @@ private void CreateViewRdApplication()
     {
         ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_application;", true);
         ExecuteNonQueryCommand(@"
--- Report Dashboard: Application category (PostgreSQL).
+-- Report Dashboard: ApplicationProfileInstance category (PostgreSQL).
 CREATE VIEW vw_rd_application AS
 SELECT
     a.""ID""                                                                  AS ""ID"",
@@ -1866,23 +1610,24 @@ SELECT
                                                                              THEN 'st-expiring'
       ELSE                                                                   'st-pending'
     END                                                                     AS ""ProgressStateCssClass"",
-    COALESCE(ast.""Code"", '')                                                AS ""ProgressStateCode"",`r`n    COALESCE(
-        NULLIF(BTRIM(at.""NameTm""), ''),
-        NULLIF(BTRIM(at.""Name""), ''),
+    COALESCE(ast.""Code"", '')                                                AS ""ProgressStateCode"",
+    COALESCE(
+        NULLIF(BTRIM(apf.""Name""), ''),
+        NULLIF(BTRIM(apf.""Code""), ''),
         'Unknown'
     )                                                                       AS ""TypeLabel"",
     COALESCE(first_p.""IsArchived"", FALSE)                                   AS ""IsArchived""
-FROM ""Applications"" a
-LEFT JOIN ""ApplicationTypes"" at
-    ON at.""ID"" = a.""ApplicationTypeID""
-   AND COALESCE(at.""GCRecord"", 0) = 0
+FROM ""ApplicationProfileInstances"" a
+LEFT JOIN ""ApplicationProfiles"" apf
+    ON apf.""ID"" = a.""ApplicationProfileID""
+   AND COALESCE(apf.""GCRecord"", 0) = 0
 LEFT JOIN ""ProjectContracts"" pc
     ON pc.""ID"" = a.""ProjectContractID""
    AND COALESCE(pc.""GCRecord"", 0) = 0
 LEFT JOIN LATERAL (
     SELECT ap.""StateID""
-    FROM ""ApplicationProgresses"" ap
-    WHERE ap.""ApplicationID"" = a.""ID""
+    FROM ""ApplicationProfileInstanceProgresses"" ap
+    WHERE ap.""ApplicationProfileInstanceID"" = a.""ID""
       AND COALESCE(ap.""GCRecord"", 0) = 0
     ORDER BY ap.""Date"" DESC NULLS LAST, ap.""ID"" DESC
     LIMIT 1
@@ -1891,15 +1636,14 @@ LEFT JOIN ""ApplicationStates"" ast
     ON ast.""ID"" = latest_ap.""StateID""
    AND COALESCE(ast.""GCRecord"", 0) = 0
 LEFT JOIN LATERAL (
-    SELECT ai.""PersonID""
-    FROM ""ApplicationItems"" ai
-    WHERE ai.""ApplicationID"" = a.""ID""
-      AND COALESCE(ai.""GCRecord"", 0) = 0
-    ORDER BY ai.""ID""
+    SELECT ap_row.""PersonId""
+    FROM ""ApplicationProfileInstancePeople"" ap_row
+    WHERE ap_row.""ApplicationProfileInstanceId"" = a.""ID""
+    ORDER BY ap_row.""PersonId""
     LIMIT 1
-) first_ai ON TRUE
+) first_m2m ON TRUE
 LEFT JOIN ""People"" first_p
-    ON first_p.""ID"" = first_ai.""PersonID""
+    ON first_p.""ID"" = first_m2m.""PersonId""
    AND COALESCE(first_p.""GCRecord"", 0) = 0
 WHERE COALESCE(a.""GCRecord"", 0) = 0;
 ", true);
@@ -2095,178 +1839,18 @@ WHERE COALESCE(eph.""GCRecord"", 0) = 0;
     private void CreateViewRdRegistration()
     {
         ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_registration;", true);
-        ExecuteNonQueryCommand(@"
--- Report Dashboard: Registration category (PostgreSQL).
--- One row per not-expired visa: latest registration Application via ApplicationItem.CurrentVisa.
-CREATE VIEW vw_rd_registration AS
-WITH ranked AS (
-    SELECT
-        ai.""ID"" AS ""ID"",
-        p.""ID"" AS ""PersonOid"",
-        CONCAT_WS(' ',
-            NULLIF(BTRIM(p.""FirstName""), ''),
-            NULLIF(BTRIM(p.""MiddleName""), ''),
-            NULLIF(BTRIM(p.""LastName""), '')
-        ) AS ""PersonName"",
-        COALESCE(
-            NULLIF(BTRIM(pc.""NameTm""), ''),
-            NULLIF(BTRIM(spc.""NameTm""), ''),
-            ''
-        ) AS ""ProjectName"",
-        COALESCE(pc.""NameTm"", spc.""NameTm"", '') AS ""ProjectNameRaw"",
-        COALESCE(pc.""NameTm"", spc.""NameTm"", '') AS ""ProjectNameTm"",
-        p.""PersonRole"" AS ""PersonRoleCode"",
-        COALESCE(NULLIF(BTRIM(v.""VisaNumber""), ''), '') AS ""VisaNumber"",
-        v.""ExpirationDate"" AS ""VisaExpirationDate"",
-        COALESCE(
-            NULLIF(BTRIM(a.""FullApplicationNumber""), ''),
-            NULLIF(BTRIM(a.""ApplicationNumber""), ''),
-            ''
-        ) AS ""ApplicationNumber"",
-        a.""ApplicationDate"" AS ""ApplicationDate"",
-        at.""Name"" AS ""ApplicationTypeName"",
-        COALESCE(
-            NULLIF(BTRIM(at.""NameTm""), ''),
-            NULLIF(BTRIM(at.""Name""), ''),
-            'Unknown'
-        ) AS ""ApplicationTypeLabel"",
-        COALESCE(
-            NULLIF(BTRIM(ast.""NameTm""), ''),
-            NULLIF(BTRIM(ast.""Name""), ''),
-            'OFISDE'
-        ) AS ""ProgressStateLabel"",
-        CASE
-            WHEN ast.""Code"" IN ('PROCESS_ISSUED') THEN 'st-approved'
-            WHEN ast.""Code"" IN ('PROCESS_REJECTED', 'PROCESS_CANCELLED') THEN 'st-expiring'
-            WHEN ast.""Code"" IS NULL THEN 'st-pending'
-            ELSE 'st-pending'
-        END AS ""ProgressStateCssClass"",
-        COALESCE(ast.""Code"", 'AT_OFFICE') AS ""ProgressStateCode"",
-        ((v.""ExpirationDate"")::date - CURRENT_DATE) AS ""DaysRemaining"",
-        CASE
-            WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 0   THEN 'Expired'
-            WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 7   THEN '< 7 days'
-            WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 14  THEN '< 14 days'
-            WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 30  THEN '< 1 month'
-            WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 90  THEN '< 3 months'
-            WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 180 THEN '< 6 months'
-            ELSE '≥ 6 months'
-        END AS ""ExpiryBucketLabel"",
-        CASE
-            WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 0   THEN 'st-expiring'
-            WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 14  THEN 'st-expiring'
-            WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 90  THEN 'st-pending'
-            ELSE 'st-approved'
-        END AS ""ExpiryBucketCssClass"",
-        COALESCE(p.""IsArchived"", FALSE) AS ""IsArchived"",
-        COALESCE(
-            NULLIF(BTRIM(city.""NameTm""), ''),
-            NULLIF(BTRIM(city.""Name""), ''),
-            'Unknown city'
-        ) AS ""CityLabel"",
-        ROW_NUMBER() OVER (
-            PARTITION BY v.""ID""
-            ORDER BY a.""ApplicationDate"" DESC NULLS LAST, a.""ID"" DESC, ai.""ID"" DESC
-        ) AS rn
-    FROM ""Visas"" v
-    INNER JOIN ""Passports"" pp
-        ON pp.""ID"" = v.""PassportID"" AND COALESCE(pp.""GCRecord"", 0) = 0
-    INNER JOIN ""People"" p
-        ON p.""ID"" = pp.""PersonID"" AND COALESCE(p.""GCRecord"", 0) = 0
-    INNER JOIN ""ApplicationItems"" ai
-        ON ai.""CurrentVisaId"" = v.""ID"" AND COALESCE(ai.""GCRecord"", 0) = 0
-    INNER JOIN ""Applications"" a
-        ON a.""ID"" = ai.""ApplicationID"" AND COALESCE(a.""GCRecord"", 0) = 0
-    INNER JOIN ""ApplicationTypes"" at
-        ON at.""ID"" = a.""ApplicationTypeID"" AND COALESCE(at.""GCRecord"", 0) = 0
-    LEFT JOIN ""AddressesOfResidence"" addr
-        ON addr.""ID"" = ai.""CurrentAddressOfResidenceID"" AND COALESCE(addr.""GCRecord"", 0) = 0
-    LEFT JOIN ""Cities"" city
-        ON city.""ID"" = addr.""CityID"" AND COALESCE(city.""GCRecord"", 0) = 0
-    LEFT JOIN ""ProjectContracts"" pc
-        ON pc.""ID"" = COALESCE(a.""ProjectContractID"", p.""ProjectContractID"")
-       AND COALESCE(pc.""GCRecord"", 0) = 0
-    LEFT JOIN ""People"" sp
-        ON sp.""ID"" = p.""SponsoringEmployeeID"" AND COALESCE(sp.""GCRecord"", 0) = 0
-    LEFT JOIN ""ProjectContracts"" spc
-        ON spc.""ID"" = sp.""ProjectContractID"" AND COALESCE(spc.""GCRecord"", 0) = 0
-    LEFT JOIN LATERAL (
-        SELECT ap.""StateID""
-        FROM ""ApplicationProgresses"" ap
-        WHERE ap.""ApplicationID"" = a.""ID""
-          AND COALESCE(ap.""GCRecord"", 0) = 0
-        ORDER BY ap.""Date"" DESC NULLS LAST, ap.""ID"" DESC
-        LIMIT 1
-    ) latest_ap ON TRUE
-    LEFT JOIN ""ApplicationStates"" ast
-        ON ast.""ID"" = latest_ap.""StateID"" AND COALESCE(ast.""GCRecord"", 0) = 0
-    WHERE COALESCE(v.""GCRecord"", 0) = 0
-      AND at.""Name"" IN (
-            'App_Reg_Check_In',
-            'App_Reg_Check_In_Internal',
-            'App_Reg_Check_Out',
-            'App_Reg_Check_Out_Internal',
-            'App_Reg_ext',
-            'App_Reg_Info_Change_Address',
-            'App_Reg_Info_Change_Passport',
-            'App_Reg_Info_Change_Visa'
-        )
-)
-SELECT
-    ""ID"",
-    ""PersonOid"",
-    ""PersonName"",
-    ""ProjectName"",
-    ""ProjectNameRaw"",
-    ""ProjectNameTm"",
-    ""PersonRoleCode"",
-    ""VisaNumber"",
-    ""VisaExpirationDate"",
-    ""ApplicationNumber"",
-    ""ApplicationDate"",
-    ""ApplicationTypeName"",
-    ""ApplicationTypeLabel"",
-    ""ProgressStateLabel"",
-    ""ProgressStateCssClass"",
-    ""ProgressStateCode"",
-    ""DaysRemaining"",
-    ""ExpiryBucketLabel"",
-    ""ExpiryBucketCssClass"",
-    ""IsArchived"",
-    ""CityLabel""
-FROM ranked
-WHERE rn = 1;
-", true);
+        ExecuteNonQueryCommand(ReportDashboardPostgresRosterSql.RegistrationViewSql, true);
     }
     private void CreateViewRdToBeCheckedIn()
     {
         ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_to_be_checked_in;", true);
         ExecuteNonQueryCommand(@"
 -- Report Dashboard: To Be Checked In (Registration).
--- Valid visas with no ApplicationItem.CurrentVisa link to any App_Reg_* type.
+-- Valid visas with no registration CurrentVisa link (M2M resolved visa + legacy ApplicationRosterMergeLine).
 -- Person must be in-country: latest TravelHistory is ExternalArrival.
 -- Chart: days since that arrival TravelDate.
 CREATE VIEW vw_rd_to_be_checked_in AS
-WITH reg_linked AS (
-    SELECT DISTINCT ai.""CurrentVisaId"" AS ""VisaId""
-    FROM ""ApplicationItems"" ai
-    INNER JOIN ""Applications"" a
-        ON a.""ID"" = ai.""ApplicationID"" AND COALESCE(a.""GCRecord"", 0) = 0
-    INNER JOIN ""ApplicationTypes"" at
-        ON at.""ID"" = a.""ApplicationTypeID"" AND COALESCE(at.""GCRecord"", 0) = 0
-    WHERE COALESCE(ai.""GCRecord"", 0) = 0
-      AND ai.""CurrentVisaId"" IS NOT NULL
-      AND at.""Name"" IN (
-            'App_Reg_Check_In',
-            'App_Reg_Check_In_Internal',
-            'App_Reg_Check_Out',
-            'App_Reg_Check_Out_Internal',
-            'App_Reg_ext',
-            'App_Reg_Info_Change_Address',
-            'App_Reg_Info_Change_Passport',
-            'App_Reg_Info_Change_Visa'
-        )
-),
+WITH " + ReportDashboardPostgresRosterSql.CteRegLinkedVisaIds() + @",
 latest_travel AS (
     SELECT DISTINCT ON (th.""PersonID"")
         th.""PersonID"",
@@ -2339,17 +1923,7 @@ WHERE COALESCE(v.""GCRecord"", 0) = 0
 -- Valid visas expiring within 1 week (DaysRemaining < 7), no Check-Out / Check-Out Internal on CurrentVisa.
 -- Chart: < 1 day · < 2 days · … · < 7 days.
 CREATE VIEW vw_rd_to_be_checked_out AS
-WITH checkout_linked AS (
-    SELECT DISTINCT ai.""CurrentVisaId"" AS ""VisaId""
-    FROM ""ApplicationItems"" ai
-    INNER JOIN ""Applications"" a
-        ON a.""ID"" = ai.""ApplicationID"" AND COALESCE(a.""GCRecord"", 0) = 0
-    INNER JOIN ""ApplicationTypes"" at
-        ON at.""ID"" = a.""ApplicationTypeID"" AND COALESCE(at.""GCRecord"", 0) = 0
-    WHERE COALESCE(ai.""GCRecord"", 0) = 0
-      AND ai.""CurrentVisaId"" IS NOT NULL
-      AND at.""Name"" IN ('App_Reg_Check_Out', 'App_Reg_Check_Out_Internal')
-)
+WITH " + ReportDashboardPostgresRosterSql.CteCheckoutLinkedVisaIds() + @"
 SELECT
     v.""ID"" AS ""ID"",
     p.""ID"" AS ""PersonOid"",

@@ -70,6 +70,50 @@ internal static class LookupCatalogEntitySync
         return (created, updated, skipped);
     }
 
+    internal static readonly string[] OrganizationCatalogIds =
+    {
+        "company-profile",
+        "authorized-signatory",
+        "authorized-representative",
+    };
+
+    /// <summary>
+    /// Inserts JSON rows that are not already in the database. Runs even when full catalog
+    /// sync is skipped (manifest already applied). Does not overwrite officer-edited rows.
+    /// </summary>
+    public static int EnsureMissingOrganizationCatalogRows(
+        IObjectSpace objectSpace,
+        IEnumerable<LookupCatalogDefinition> catalogs)
+    {
+        ArgumentNullException.ThrowIfNull(objectSpace);
+        ArgumentNullException.ThrowIfNull(catalogs);
+
+        int created = 0;
+        foreach (var definition in catalogs)
+        {
+            if (!OrganizationCatalogIds.Contains(definition.Id, StringComparer.OrdinalIgnoreCase))
+                continue;
+
+            var file = LookupCatalogResourceLoader.LoadCatalogFile(definition.File);
+            if (file == null)
+                continue;
+
+            var insertOnly = new LookupCatalogDefinition
+            {
+                Id = definition.Id,
+                Entity = definition.Entity,
+                File = definition.File,
+                MatchKey = definition.MatchKey,
+                SyncMode = LookupCatalogSyncMode.InsertOnly,
+                Optional = true,
+            };
+            var result = Sync(objectSpace, insertOnly, file);
+            created += result.created;
+        }
+
+        return created;
+    }
+
     private static bool RowHasKey(Dictionary<string, JsonElement> row, LookupCatalogDefinition definition) =>
         definition.MatchKey switch
         {
@@ -101,14 +145,8 @@ internal static class LookupCatalogEntitySync
         LookupCatalogDefinition definition,
         Dictionary<string, JsonElement> row)
     {
-        if (entityType == typeof(CompanyProfile))
-            return FindOrganizationSingleton(objectSpace, typeof(CompanyProfile), definition, row, "Name");
         if (entityType == typeof(ApplicationNumberingProfile))
             return FindOrganizationSingleton(objectSpace, typeof(ApplicationNumberingProfile), definition, row, "Name");
-        if (entityType == typeof(AuthorizedSignatory))
-            return FindOrganizationSingleton(objectSpace, typeof(AuthorizedSignatory), definition, row, "FullName");
-        if (entityType == typeof(AuthorizedRepresentative))
-            return FindOrganizationSingleton(objectSpace, typeof(AuthorizedRepresentative), definition, row, "FullName");
 
         return definition.MatchKey switch
         {
@@ -458,10 +496,7 @@ internal static class LookupCatalogEntitySync
             .Where(p => p.CanRead && p.CanWrite && p.PropertyType == lookupType && p.GetIndexParameters().Length == 0);
 
     private static bool IsOrganizationSingletonEntity(string entity) =>
-        entity.Equals(nameof(CompanyProfile), StringComparison.OrdinalIgnoreCase)
-        || entity.Equals(nameof(ApplicationNumberingProfile), StringComparison.OrdinalIgnoreCase)
-        || entity.Equals(nameof(AuthorizedSignatory), StringComparison.OrdinalIgnoreCase)
-        || entity.Equals(nameof(AuthorizedRepresentative), StringComparison.OrdinalIgnoreCase);
+        entity.Equals(nameof(ApplicationNumberingProfile), StringComparison.OrdinalIgnoreCase);
 
     private static string OrganizationSingletonKeyProperty(string entity) =>
         entity.Equals(nameof(CompanyProfile), StringComparison.OrdinalIgnoreCase)
@@ -593,7 +628,7 @@ internal static class LookupCatalogEntitySync
         var id = contract.ID;
         int count = objectSpace.GetObjects(typeof(Person)).Cast<Person>()
             .Count(p => p.ProjectContract?.ID == id);
-        count += objectSpace.GetObjects(typeof(Application)).Cast<Application>()
+        count += objectSpace.GetObjects(typeof(ApplicationProfileInstance)).Cast<ApplicationProfileInstance>()
             .Count(a => a.ProjectContract?.ID == id);
         count += objectSpace.GetObjects(typeof(UserReportTemplateProjectContract))
             .Cast<UserReportTemplateProjectContract>()

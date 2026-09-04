@@ -69,6 +69,6 @@ this.Detail.HeightF = 492F;  // matches Group D base default
 ## ReportsUpdater.cs entry
 
 ```csharp
-AddPredefinedReport<AppCancelVisaAndWPReport>("App Cancel Visa And WP Report", typeof(Application), isInplaceReport: true);
+AddPredefinedReport<AppCancelVisaAndWPReport>("App Cancel Visa And WP Report", typeof(ApplicationProfileInstance), isInplaceReport: true);
 CreateReportVisibility("App Cancel Visa And WP Report", "[ApplicationType.Name] = 'App_Cancel_Visa_and_WP'");
 ```

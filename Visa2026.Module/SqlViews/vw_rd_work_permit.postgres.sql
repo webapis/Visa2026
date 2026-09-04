@@ -48,7 +48,16 @@ LEFT JOIN "People" sp
 LEFT JOIN "ProjectContracts" spc
     ON spc."ID" = sp."ProjectContractID" AND COALESCE(spc."GCRecord", 0) = 0
 WHERE COALESCE(wpi."GCRecord", 0) = 0
-  AND COALESCE(wpi."IsCancelled", FALSE) = FALSE
+  AND NOT EXISTS (
+      SELECT 1
+      FROM "ApplicationProfileInstanceWorkPermitItems" j
+      INNER JOIN "ApplicationProfileInstances" api ON api."ID" = j."ApplicationProfileInstanceId"
+      INNER JOIN "ApplicationProfiles" ap ON ap."ID" = api."ApplicationProfileID"
+      WHERE j."WorkPermitItemId" = wpi."ID"
+        AND COALESCE(api."GCRecord", 0) = 0
+        AND COALESCE(ap."GCRecord", 0) = 0
+        AND ap."ActionFamily" = 1
+        AND BTRIM(COALESCE(api."LatestPrimaryStateCode", '')) = 'PROCESS_ISSUED')
   AND wpi."PersonID" IS NOT NULL
   AND wpi."ExpirationDate" IS NOT NULL
   AND (wpi."ExpirationDate")::date >= CURRENT_DATE;

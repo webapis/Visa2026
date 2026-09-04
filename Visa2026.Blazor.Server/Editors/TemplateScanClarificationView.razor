@@ -1,0 +1,109 @@
+@namespace Visa2026.Blazor.Server.Editors
+@using Visa2026.Module.Services.TemplateScan
+
+<div class="tas-clarify @(Compact ? "tas-clarify--compact" : null)">
+    @if (ShowRejectBanner)
+    {
+        <div class="tas-banner tas-banner--warn">
+            @RejectBannerText
+        </div>
+    }
+
+    <div class="tas-chat @(Compact ? "tas-chat--compact" : null)">
+        <h4>@(Compact && !string.IsNullOrWhiteSpace(FocusCaption) ? "Ask about this mark" : "Clarify field mapping")</h4>
+        @if (!string.IsNullOrWhiteSpace(FocusCaption))
+        {
+            <p class="tas-chat__focus">@FocusCaption</p>
+        }
+        <p class="tas-chat__hint">@(Compact && !string.IsNullOrWhiteSpace(FocusCaption)
+            ? "The selected yellow mark is already in context. Ask which library placeholders fit this highlight (one or several), or add them from the Short list above."
+            : "Ask about ambiguous labels, header vs roster fields, or which placeholder fits a gap. Layout and wording changes are not supported.")</p>
+
+        <div class="tas-chat__log">
+            @if (Messages.Count == 0)
+            {
+                <p class="tas-chat__empty">Answer AI questions below or describe which label should map to which placeholder.</p>
+            }
+            else
+            {
+                @foreach (var msg in Messages)
+                {
+                    <div class="@MessageCss(msg)">
+                        @if (!msg.IsOfficer)
+                        {
+                            <span class="tas-msg__avatar" aria-hidden="true">AI</span>
+                        }
+                        <div class="tas-msg__body">@msg.Text</div>
+                    </div>
+                }
+            }
+        </div>
+
+        @if (QuickReplies.Count > 0)
+        {
+            <div class="tas-quick-replies">
+                @foreach (var reply in QuickReplies)
+                {
+                    <button type="button" class="tas-btn tas-btn--secondary" disabled="@Busy" @onclick="() => OnQuickReplyClicked(reply)">
+                        @reply
+                    </button>
+                }
+            </div>
+        }
+
+        <div class="tas-chat__compose">
+            <input class="tas-input" placeholder="e.g. Map the date line to application date, not contract date…"
+                   value="@InputText"
+                   disabled="@Busy"
+                   @oninput="OnInputChanged"
+                   @onkeydown="OnKeyDown" />
+            <button type="button" class="tas-btn tas-btn--primary" disabled="@(Busy || string.IsNullOrWhiteSpace(InputText))" @onclick="OnSendClicked">
+                Send
+            </button>
+        </div>
+    </div>
+
+    <p class="tas-clarify__back">
+        <button type="button" class="tas-link" @onclick="OnBackClicked">@(Compact ? "Hide chat" : "← Back to field list")</button>
+    </p>
+</div>
+
+@code {
+    public sealed record ChatMessage(bool IsOfficer, string Text, bool Refused);
+
+    [Parameter] public IReadOnlyList<ChatMessage> Messages { get; set; } = Array.Empty<ChatMessage>();
+    [Parameter] public IReadOnlyList<string> QuickReplies { get; set; } = Array.Empty<string>();
+    [Parameter] public string InputText { get; set; } = string.Empty;
+    [Parameter] public EventCallback<string> InputTextChanged { get; set; }
+    [Parameter] public bool Busy { get; set; }
+    [Parameter] public bool ShowRejectBanner { get; set; }
+    [Parameter] public string RejectBannerText { get; set; } = string.Empty;
+    [Parameter] public EventCallback OnSend { get; set; }
+    [Parameter] public EventCallback<string> OnQuickReply { get; set; }
+    [Parameter] public EventCallback OnBack { get; set; }
+    [Parameter] public bool Compact { get; set; }
+    [Parameter] public string? FocusCaption { get; set; }
+
+    private static string MessageCss(ChatMessage msg)
+    {
+        var cls = msg.IsOfficer ? "tas-msg tas-msg--officer" : "tas-msg tas-msg--assistant";
+        if (msg.Refused)
+            cls += " is-refused";
+        return cls;
+    }
+
+    private Task OnInputChanged(ChangeEventArgs e) =>
+        InputTextChanged.InvokeAsync(e.Value?.ToString() ?? string.Empty);
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !Busy && !string.IsNullOrWhiteSpace(InputText))
+            await OnSend.InvokeAsync();
+    }
+
+    private Task OnSendClicked() => OnSend.InvokeAsync();
+
+    private Task OnQuickReplyClicked(string reply) => OnQuickReply.InvokeAsync(reply);
+
+    private Task OnBackClicked() => OnBack.InvokeAsync();
+}

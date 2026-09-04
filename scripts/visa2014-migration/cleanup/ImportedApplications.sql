@@ -29,10 +29,10 @@ BEGIN
         INNER JOIN @appIds a ON ai.ApplicationID = a.ID;
     END
 
-    IF OBJECT_ID('dbo.Visas', 'U') IS NOT NULL AND COL_LENGTH('dbo.Visas', 'InvitationItemID') IS NOT NULL
-        UPDATE v SET InvitationItemID = NULL
+    IF OBJECT_ID('dbo.Visas', 'U') IS NOT NULL AND COL_LENGTH('dbo.Visas', 'IssuingInvitationItemID') IS NOT NULL
+        UPDATE v SET IssuingInvitationItemID = NULL
         FROM Visas v
-        INNER JOIN InvitationItems ii ON ii.ID = v.InvitationItemID
+        INNER JOIN InvitationItems ii ON ii.ID = v.IssuingInvitationItemID
         INNER JOIN Invitations i ON i.ID = ii.InvitationID
         INNER JOIN @appIds a ON i.ApplicationID = a.ID;
 

@@ -22,16 +22,16 @@ namespace Visa2026.Module.DatabaseUpdate
             // This log will be attached to the specific Visa being extended.
             CreateOrResetRule(
                 name: "Log Visa Extension Process Started",
-                sourceType: typeof(Application),
+                sourceType: typeof(ApplicationProfileInstance),
                 trigger: SyncTriggerType.PropertyChanged,
                 sourceProperty: "CurrentState",
                 sourceCriteria: "[CurrentState.State.Code] = 'SENT_TO_MINISTRY' And [ApplicationType.Code] = 'visa_extension'",
                 targetPath: "ApplicationItems",
                 targetMatchCriteria: "[CurrentVisa] Is Not Null",
-                targetType: typeof(ApplicationItem),
-                targetSubPath: "CurrentVisa", // Navigate from ApplicationItem to the Visa to log against it.
+                targetType: typeof(ApplicationRosterMergeLine),
+                targetSubPath: "CurrentVisa", // Navigate from ApplicationRosterMergeLine to the Visa to log against it.
                 state: "Extension Process Started",
-                descriptionTemplate: "Application sent to ministry."
+                descriptionTemplate: "ApplicationProfileInstance sent to ministry."
             );
 
             // New Rule: Log when a Work Permit Item is issued.
@@ -51,14 +51,14 @@ namespace Visa2026.Module.DatabaseUpdate
             );
 
             // New Rule: Log when a Visa is linked to a new Application.
-            // Triggers when an ApplicationItem is created that references a Visa.
+            // Triggers when an ApplicationRosterMergeLine is created that references a Visa.
             CreateOrResetRule(
                 name: "Log Visa Usage in Application",
-                sourceType: typeof(ApplicationItem),
+                sourceType: typeof(ApplicationRosterMergeLine),
                 trigger: SyncTriggerType.Create,
                 sourceProperty: null,
                 sourceCriteria: "[CurrentVisa] Is Not Null",
-                targetPath: "CurrentVisa", // Navigate from ApplicationItem to the Visa
+                targetPath: "CurrentVisa", // Navigate from ApplicationRosterMergeLine to the Visa
                 targetMatchCriteria: null,
                 targetType: typeof(Visa),
                 targetSubPath: null,

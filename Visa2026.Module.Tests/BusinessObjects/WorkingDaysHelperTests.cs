@@ -36,4 +36,24 @@ public class WorkingDaysHelperTests
 
         Assert.Equal(2, WorkingDaysHelper.CountWorkingDaysInclusive(friday, nextMonday));
     }
+
+    [Fact]
+    public void AddWorkingDaysInclusive_MondayPlusFive_IsFriday()
+    {
+        var monday = new DateTime(2026, 6, 1);
+        Assert.Equal(new DateTime(2026, 6, 5), WorkingDaysHelper.AddWorkingDaysInclusive(monday, 5));
+    }
+
+    [Fact]
+    public void AddWorkingDaysInclusive_FridayPlusTwo_IsMonday()
+    {
+        var friday = new DateTime(2026, 6, 5);
+        Assert.Equal(new DateTime(2026, 6, 8), WorkingDaysHelper.AddWorkingDaysInclusive(friday, 2));
+    }
+
+    [Fact]
+    public void NextWorkingDay_Friday_IsMonday()
+    {
+        Assert.Equal(new DateTime(2026, 6, 8), WorkingDaysHelper.NextWorkingDay(new DateTime(2026, 6, 5)));
+    }
 }

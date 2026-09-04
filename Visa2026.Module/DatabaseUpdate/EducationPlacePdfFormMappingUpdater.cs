@@ -6,7 +6,7 @@ using Visa2026.Module.Services;
 
 namespace Visa2026.Module.DatabaseUpdate;
 
-/// <summary>Rewrites item 21 (<c>_21</c> Okan ýeri) from legacy expression mapping to <see cref="ApplicationItem.Pdf_EducationPlaceOfStudy"/>.</summary>
+/// <summary>Rewrites item 21 (<c>_21</c> Okan ýeri) from legacy expression mapping to <see cref="ApplicationRosterMergeLine.Pdf_EducationPlaceOfStudy"/>.</summary>
 public sealed class EducationPlacePdfFormMappingUpdater : ModuleUpdater
 {
     public EducationPlacePdfFormMappingUpdater(IObjectSpace objectSpace, Version currentDBVersion)

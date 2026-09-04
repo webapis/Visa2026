@@ -6,7 +6,7 @@ namespace Visa2026.Module.Services;
 
 /// <summary>
 /// Parses and formats comma-separated label lists stored on string properties
-/// (e.g. <see cref="BusinessObjects.ApplicationItem.BorderZoneLocation"/>).
+/// (e.g. <see cref="BusinessObjects.ApplicationRosterMergeLine.BorderZoneLocation"/>).
 /// </summary>
 public static class CommaSeparatedSelectionHelper
 {
@@ -81,4 +81,20 @@ public static class CommaSeparatedSelectionHelper
     public static bool ContainsLabel(string? stored, string label, string? noneValue = null) =>
         !string.IsNullOrWhiteSpace(label)
         && ParseSelected(stored, noneValue).Any(z => string.Equals(z, label.Trim(), StringComparison.OrdinalIgnoreCase));
+
+    public static string ToggleLabel(string? stored, string label, bool selected, string? noneValue = null)
+    {
+        if (string.IsNullOrWhiteSpace(label))
+            return FormatSelected(ParseSelected(stored, noneValue), noneValue);
+
+        var items = ParseSelected(stored, noneValue).ToList();
+        var trimmed = label.Trim();
+        var contains = items.Any(z => string.Equals(z, trimmed, StringComparison.OrdinalIgnoreCase));
+        if (selected && !contains)
+            items.Add(trimmed);
+        else if (!selected && contains)
+            items.RemoveAll(z => string.Equals(z, trimmed, StringComparison.OrdinalIgnoreCase));
+
+        return FormatSelected(items, noneValue);
+    }
 }

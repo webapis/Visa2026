@@ -1,5 +1,5 @@
 {
-  "version": 41,
+  "version": 44,
   "catalogs": [
     {
       "id": "position",
@@ -38,7 +38,7 @@
       "entity": "CompanyProfile",
       "file": "company-profile.json",
       "matchKey": "Name",
-      "syncMode": "OverwriteScalars",
+      "syncMode": "InsertOnly",
       "optional": true
     },
     {
@@ -54,7 +54,7 @@
       "entity": "AuthorizedSignatory",
       "file": "authorized-signatory.json",
       "matchKey": "FullName",
-      "syncMode": "OverwriteScalars",
+      "syncMode": "InsertOnly",
       "optional": true
     },
     {
@@ -62,7 +62,7 @@
       "entity": "AuthorizedRepresentative",
       "file": "authorized-representative.json",
       "matchKey": "FullName",
-      "syncMode": "OverwriteScalars",
+      "syncMode": "InsertOnly",
       "optional": true
     },
     {
@@ -78,14 +78,6 @@
       "entity": "ApprovingMinistry",
       "file": "approving-ministry.json",
       "matchKey": "ShortNameTm",
-      "syncMode": "OverwriteScalars",
-      "optional": true
-    },
-    {
-      "id": "application-migration-sla-profile",
-      "entity": "ApplicationMigrationSlaProfile",
-      "file": "application-migration-sla-profile.json",
-      "matchKey": "CodeOrName",
       "syncMode": "OverwriteScalars",
       "optional": true
     },

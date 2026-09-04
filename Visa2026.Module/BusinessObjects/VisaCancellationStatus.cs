@@ -22,9 +22,9 @@ namespace Visa2026.Module.BusinessObjects
         public virtual Guid ID { get; set; }
 
         [Browsable(false)]
-        public virtual Guid? ApplicationID { get; set; }
-        [ForeignKey(nameof(ApplicationID))]
-        public virtual Application Application { get; set; }
+        public virtual Guid? ApplicationProfileInstanceID { get; set; }
+        [ForeignKey(nameof(ApplicationProfileInstanceID))]
+        public virtual ApplicationProfileInstance ApplicationProfileInstance { get; set; }
 
         [Browsable(false)]
         public virtual Guid? VisaID { get; set; }
@@ -50,7 +50,7 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime? ApplicationDate { get; set; }
 
-        [ModelDefault("Caption", "Application Type")]
+        [ModelDefault("Caption", "ApplicationProfileInstance Type")]
         public virtual string ApplicationTypeName { get; set; }
 
         [Browsable(false)]

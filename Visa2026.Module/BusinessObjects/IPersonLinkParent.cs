@@ -4,7 +4,7 @@ namespace Visa2026.Module.BusinessObjects
 {
     public interface IPersonLinkParent
     {
-        Application Application { get; }
+        ApplicationProfileInstance ApplicationProfileInstance { get; }
         IList<Person> AvailablePeople { get; }
     }
 }

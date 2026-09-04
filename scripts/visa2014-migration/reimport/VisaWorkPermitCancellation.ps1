@@ -92,16 +92,7 @@ Invoke-Visa2014Import -Entity "WorkPermitItem" -ExtraArgs @(
     "--work-permit-id-map", (Join-Path $mapRoot "WorkPermit.json")
 )
 
-if (-not $SkipApplicationItems) {
-    Write-Host "=== Reimport ApplicationItems (relink CurrentVisa / CurrentWorkPermitItem) ===" -ForegroundColor Cyan
-    & (Join-Path $PSScriptRoot "ApplicationItems.ps1") `
-        -TargetConnection $TargetConnection `
-        -LegacySource $LegacySource `
-        -BatchSize $BatchSize `
-        -MaxRows $MaxRows `
-        -Configuration $Configuration
-    if ($LASTEXITCODE -ne 0) { throw "ApplicationItems reimport failed (exit $LASTEXITCODE)" }
-}
+Write-Host "=== Skip ApplicationItem relink (Phase B hard-remove; roster uses ResolvedLinks) ===" -ForegroundColor Yellow
 
 Write-Host "=== Reconcile cancelled flags ===" -ForegroundColor Cyan
 sqlcmd -S "(localdb)\mssqllocaldb" -d Visa2026 -E -C -W -Q "SET NOCOUNT ON; SELECT COUNT(*) AS visas_cancelled FROM Visas WHERE IsCancelled = 1; SELECT COUNT(*) AS work_permit_items_cancelled FROM WorkPermitItems WHERE IsCancelled = 1; SELECT COUNT(*) AS app_items_wp_cancelled FROM ApplicationItems WHERE IsCancelled = 1; SELECT COUNT(*) AS app_items_visa_cancelled FROM ApplicationItems WHERE VisaIsCancelled = 1;"

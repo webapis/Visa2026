@@ -182,7 +182,7 @@ Document links on the main tab follow the opposite pattern for many application 
 
 ## 7. UI notes
 
-- **Navigation:** Application group (nested under `Application` detail).
+- **Navigation:** ApplicationProfileInstance group (nested under `Application` detail).
 - **Employee vs family member on the line:** `CurrentPositionHistory`, `CurrentSalary`, `CurrentWorkDuty`, and `CurrentWorkPermitItem` are hidden when `Person.IsEmployee` is false (FKs stay null; see `ApplyCurrentFieldsFromSelectedPerson`). On registration applications, `CurrentEducation` is hidden for everyone (employees and family). Family members on registration detail show read-only **`Registration_GelmeginMaksadyTm`** instead of an empty position lookup.
 - **Appearance:** Most document and status fields use `[Appearance(..., Criteria = "!Application.ApplicationType.Show…")]`.
 - **Detail layout:** `Model.xafml` (Blazor Server) — includes `WorkPermittedLocations` next to other document fields.
@@ -195,7 +195,7 @@ Document links on the main tab follow the opposite pattern for many application 
 | Topic | Doc |
 |-------|-----|
 | Parent application | [`APPLICATION.md`](APPLICATION.md) |
-| Application type flags | `ApplicationTypeConfigurationCatalog.json`, [`docs/LOOKUP_SEEDING.md`](../../docs/LOOKUP_SEEDING.md) |
+| ApplicationProfileInstance type flags | `ApplicationTypeConfigurationCatalog.json`, [`docs/LOOKUP_SEEDING.md`](../../docs/LOOKUP_SEEDING.md) |
 | Comma-separated editors | [`docs/COMMA_SEPARATED_MULTI_SELECT.md`](../../docs/COMMA_SEPARATED_MULTI_SELECT.md) |
 | Deprecated `Registration` BO | [`docs/DEPRECATED.md`](../../docs/DEPRECATED.md) |
 | Person “current” resolution | [`PersonCurrentItems.cs`](PersonCurrentItems.cs) |

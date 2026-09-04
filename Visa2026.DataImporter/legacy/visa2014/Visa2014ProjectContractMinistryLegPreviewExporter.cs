@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
 /// <summary>
-/// Read-only preview: derives <c>ProjectContract</c> ministry legs from legacy Application routing
+/// Read-only preview: derives <c>ProjectContract</c> ministry legs from legacy ApplicationProfileInstance routing
 /// (VISA2015) so they can be reviewed before the tenant seed is regenerated.
 ///
 /// Extraction rule (confirmed against Çalik VISA2015):

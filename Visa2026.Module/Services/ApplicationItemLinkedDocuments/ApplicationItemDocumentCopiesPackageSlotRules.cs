@@ -19,19 +19,19 @@ public static class ApplicationItemDocumentCopiesPackageSlotRules
         if (slotKey.StartsWith("WorkPermit.", StringComparison.Ordinal))
             return options.IncludeWorkPermitCopies;
 
-        if (string.Equals(slotKey, "Education.Current", StringComparison.Ordinal))
+        if (slotKey.StartsWith("Education.", StringComparison.Ordinal))
             return options.IncludeDiplomaFiles;
 
         if (slotKey.StartsWith("AddressOfResidence.", StringComparison.Ordinal))
             return options.IncludeAddressOfResidenceCopies;
 
-        if (string.Equals(slotKey, "MedicalRecord.Current", StringComparison.Ordinal))
+        if (slotKey.StartsWith("MedicalRecord.", StringComparison.Ordinal))
             return options.IncludeMedicalRecordCopies;
 
         if (slotKey.StartsWith("Invitation.", StringComparison.Ordinal))
             return options.IncludeInvitationCopies;
 
-        if (string.Equals(slotKey, "FamilyRelationship.Current", StringComparison.Ordinal))
+        if (slotKey.StartsWith("FamilyRelationship.", StringComparison.Ordinal))
             return options.IncludeFamilyRelationshipCopies;
 
         return false;

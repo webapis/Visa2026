@@ -3,7 +3,8 @@
 param(
     [string]$StartAt = 'Person',
     [string]$TargetConnection = '',
-    [string]$LegacySource = 'calik-energi'
+    [string]$LegacySource = 'calik-energi',
+    [switch]$SkipFileWaves
 )
 
 . (Join-Path $PSScriptRoot '..\_lib\Get-RepoRoot.ps1')
@@ -43,8 +44,8 @@ $steps = @(
     @{ Key = 'EmployeeSalary';          Kind = 'scalar'; Name = 'EmployeeSalary';          Extra = @() },
     @{ Key = 'AddressOfResidence';      Kind = 'scalar'; Name = 'AddressOfResidence';      Extra = @() },
     @{ Key = 'MedicalRecordDocument';   Kind = 'files';  Name = 'MedicalRecord.MedicalRecordDocument'; Extra = @('--import-visa2014-files','--entity','MedicalRecord','--property','MedicalRecordDocument') },
-    @{ Key = 'Application';             Kind = 'scalar'; Name = 'Application';             Extra = @('--skip-tenant-catalog-generation') },
-    # order.yaml: WorkPermit → WorkPermitItem → Invitation → InvitationItem → ApplicationItem
+    @{ Key = 'ApplicationProfileInstance'; Kind = 'scalar'; Name = 'ApplicationProfileInstance'; Extra = @('--skip-tenant-catalog-generation') },
+    # order.yaml: WorkPermit → WorkPermitItem → Invitation → InvitationItem → ApplicationProfileInstancePerson
     # Do not start the next BO unless the previous wave succeeds (exit 0 + FailedCount 0).
     @{ Key = 'WorkPermit';              Kind = 'scalar'; Name = 'WorkPermit';              Extra = @() },
     @{ Key = 'WorkPermitItem';          Kind = 'scalar'; Name = 'WorkPermitItem';          Extra = @() },
@@ -53,8 +54,10 @@ $steps = @(
     @{ Key = 'InvitationItem';          Kind = 'scalar'; Name = 'InvitationItem';          Extra = @() },
     @{ Key = 'InvitationDocument';      Kind = 'files';  Name = 'Invitation.InvitationDocument'; Extra = @('--import-visa2014-files','--entity','Invitation','--property','InvitationDocument') },
     @{ Key = 'FamilyProofDocument';     Kind = 'files';  Name = 'Person.FamilyProofDocument'; Extra = @('--import-visa2014-files','--entity','Person','--property','FamilyProofDocument') },
-    @{ Key = 'ApplicationItem';         Kind = 'scalar'; Name = 'ApplicationItem';         Extra = @() },
-    @{ Key = 'ApplicationProgress';     Kind = 'scalar'; Name = 'ApplicationProgress';     Extra = @() }
+    # Wave 2b: ApplicationProfileInstancePerson after permits (person scalars present for ResolvedLinks).
+    # ApplicationItem was hard-removed in Phase B; its importer now fail-fasts, so there is no step for it.
+    @{ Key = 'ApplicationProfileInstancePerson';       Kind = 'scalar'; Name = 'ApplicationProfileInstancePerson';       Extra = @() },
+    @{ Key = 'ApplicationProfileInstanceProgress';     Kind = 'scalar'; Name = 'ApplicationProfileInstanceProgress';     Extra = @() }
 )
 
 $started = $false
@@ -67,6 +70,11 @@ foreach ($step in $steps) {
     $log = Join-Path $logDir "$key.log"
     Write-Host "==================== $($step.Name) ====================" -ForegroundColor Cyan
     if ($step.Kind -eq 'files') {
+        if ($SkipFileWaves) {
+            Write-Host "SKIP_FILES $key" -ForegroundColor Yellow
+            $summary += "  $key -> skipped (SkipFileWaves)"
+            continue
+        }
         $args = @('run','--project','Visa2026.DataImporter','--no-launch-profile','--no-build','-c','Debug','--') + $step.Extra + $commonArgs
     } else {
         $args = @('run','--project','Visa2026.DataImporter','--no-launch-profile','--no-build','-c','Debug','--',
@@ -74,15 +82,15 @@ foreach ($step in $steps) {
     }
     & dotnet @args *>&1 | Tee-Object -FilePath $log | Out-Null
     $code = $LASTEXITCODE
-    $postedLine = ((Select-String -Path $log -Pattern 'Posted:|Patched:' | Select-Object -Last 1).Line) ?? ''
-    $preparedLine = ((Select-String -Path $log -Pattern 'Prepared:' | Select-Object -Last 1).Line) ?? ''
+    $postedLine = [string]((Select-String -Path $log -Pattern 'Posted:|Patched:' | Select-Object -Last 1).Line)
+    $preparedLine = [string]((Select-String -Path $log -Pattern 'Prepared:' | Select-Object -Last 1).Line)
     $summary += "  $key -> exit=$code  |  $($preparedLine.Trim())  |  $($postedLine.Trim())"
     $posted = if ($postedLine -match '(?:Posted|Patched):\s*(\d+)') { [int]$matches[1] } else { -1 }
     $prepared = if ($preparedLine -match 'Prepared:\s*(\d+)') { [int]$matches[1] } else { -1 }
     $failed = if ($postedLine -match 'Failed:\s*(\d+)') { [int]$matches[1] } else { 0 }
     # Import chain gate: do not start the next BO unless this wave succeeds.
     if ($code -ne 0 -or $failed -gt 0 -or ($posted -le 0 -and $prepared -gt 0)) {
-        Write-Host "STEP_FAILED $key exit=$code failed=$failed (posted/patched=$posted / prepared=$prepared) — halt chain" -ForegroundColor Red
+        Write-Host "STEP_FAILED $key exit=$code failed=$failed (posted/patched=$posted / prepared=$prepared) - halt chain" -ForegroundColor Red
         $summary | ForEach-Object { Write-Host $_ }
         exit 1
     }
@@ -93,9 +101,10 @@ $postCorrections = @(
     @{ Name = 'PersonSubcontractor'; Flag = '--correct-person-subcontractor' },
     @{ Name = 'PersonRelationship'; Flag = '--correct-person-relationship' },
     @{ Name = 'PersonAddressPia'; Flag = '--correct-person-address-of-residence' },
-    @{ Name = 'ApplicationItemPersonCurrent'; Flag = '--correct-application-item-person-current' },
     @{ Name = 'VisaType'; Flag = '--correct-visa-type' },
-    @{ Name = 'VisaIssuingApplicationItem'; Flag = '--correct-visa2014-issuing-application-item' },
+    # --correct-application-item-person-current and --correct-visa2014-issuing-application-item are retired
+    # (Phase B ApplicationItem hard-remove); roster person-current data now comes from ResolvedLinks and
+    # Visa issuing points at IssuingApplicationProfileInstance.
     @{ Name = 'VisaInvitationItem'; Flag = '--correct-visa2014-invitation-item' }
 )
 Write-Host "==================== postImportCorrections ====================" -ForegroundColor Cyan

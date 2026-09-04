@@ -56,8 +56,6 @@ public class WorkPermitItemImporter
             WorkPermitNumber = wpNumber,
             StartDate = startDate,
             ExpirationDate = expirationDate,
-            // Optional fields can be added here
-            IsCancelled = false
         };
 
         try
@@ -93,7 +91,6 @@ public class WorkPermitItemImporter
                     ASNumber = record.ASNumber,
                     StartDate = record.StartDate,
                     ExpirationDate = record.ExpirationDate,
-                    IsCancelled = record.IsCancelled,
 
                     // Relationships: OData requires { "ID": "guid" } for existing lookups
                     WorkPermit = record.WorkPermit != null ? new { ID = record.WorkPermit.Id } : null,

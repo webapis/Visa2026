@@ -1,0 +1,465 @@
+/* Issue issued-header compose occupant (Invitation / WP / Rejection / BorderZone) */
+
+.issue-issued-header-slot-panel.resminamalar-slot-panel {
+  --issue-issued-pad-x: 1.25rem;
+  --issue-issued-pad-y: 1rem;
+}
+
+.issue-issued-header-slot-panel .resminamalar-slot-panel__header.visa-preview-drawer__header {
+  padding: 0.9rem var(--issue-issued-pad-x);
+  border-bottom: 1px solid var(--bs-border-color, #e5e7eb);
+}
+
+.issue-issued-header-slot-panel .resminamalar-slot-panel__body {
+  padding: 0;
+}
+
+.issue-issued-header-slot-panel .resminamalar-slot-panel__catalog {
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.issue-issued-header-slot {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: var(--issue-issued-pad-y) var(--issue-issued-pad-x) 1.5rem;
+  width: 100%;
+  max-width: 40rem;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.issue-issued-header-slot__section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1rem 1.1rem 1.1rem;
+  border: 1px solid var(--bs-border-color, #e5e7eb);
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--bs-body-bg, #fff) 92%, var(--bs-tertiary-bg, #f8f9fa));
+}
+
+.issue-issued-header-slot__section--add {
+  background: color-mix(in srgb, var(--bs-tertiary-bg, #f8f9fa) 82%, transparent);
+}
+
+.issue-issued-header-slot__section--add .issue-issued-header-slot__section-title {
+  color: var(--bs-secondary-color, #6c757d);
+}
+
+.issue-issued-header-slot__section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.15rem;
+}
+
+.issue-issued-header-slot__section-title {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--bs-secondary-color, #6c757d);
+}
+
+.issue-issued-header-slot__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem 1rem;
+}
+
+.issue-issued-header-slot__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--bs-secondary-color, #495057);
+}
+
+.issue-issued-header-slot__field--wide {
+  grid-column: 1 / -1;
+}
+
+.issue-issued-header-slot__field .cs-multi-select-inline {
+  width: 100%;
+}
+
+.issue-issued-header-slot__input,
+.issue-issued-header-slot__textarea {
+  font: inherit;
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.35;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--bs-border-color, #ced4da);
+  border-radius: 0.4rem;
+  background: var(--bs-body-bg, #fff);
+  color: var(--bs-body-color, #212529);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.issue-issued-header-slot__input:focus,
+.issue-issued-header-slot__textarea:focus {
+  outline: 0;
+  border-color: color-mix(in srgb, var(--bs-primary, #0d6efd) 65%, #ced4da);
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--bs-primary, #0d6efd) 18%, transparent);
+}
+
+.issue-issued-header-slot__cue-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.85rem;
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--bs-secondary-color, #6c757d);
+}
+
+.issue-issued-header-slot__cue-swatch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.issue-issued-header-slot__cue-swatch::before {
+  content: "";
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 0.15rem;
+  border: 2px solid currentColor;
+  box-sizing: border-box;
+}
+
+.issue-issued-header-slot__cue-swatch--needs { color: #c05612; }
+.issue-issued-header-slot__cue-swatch--needs::before { border-color: #e67a22; background: color-mix(in srgb, #e67a22 18%, transparent); }
+.issue-issued-header-slot__cue-swatch--default { color: #2b4c7e; }
+.issue-issued-header-slot__cue-swatch--default::before { border-color: #2b6cb0; background: color-mix(in srgb, #2b6cb0 16%, transparent); }
+.issue-issued-header-slot__cue-swatch--confirmed { color: #1e7a34; }
+.issue-issued-header-slot__cue-swatch--confirmed::before { border-color: #2f9e44; background: color-mix(in srgb, #2f9e44 16%, transparent); }
+
+.issue-issued-header-slot__field--needs { --issue-cue: #e67a22; --issue-cue-ring: color-mix(in srgb, #e67a22 28%, transparent); }
+.issue-issued-header-slot__field--default { --issue-cue: #2b6cb0; --issue-cue-ring: color-mix(in srgb, #2b6cb0 22%, transparent); }
+.issue-issued-header-slot__field--confirmed { --issue-cue: #2f9e44; --issue-cue-ring: color-mix(in srgb, #2f9e44 22%, transparent); }
+.issue-issued-header-slot__field--sourced { --issue-cue: color-mix(in srgb, #2f9e44 62%, #6c757d); --issue-cue-ring: transparent; }
+
+.issue-issued-header-slot__field--needs .issue-issued-header-slot__input,
+.issue-issued-header-slot__field--default .issue-issued-header-slot__input,
+.issue-issued-header-slot__field--confirmed .issue-issued-header-slot__input,
+.issue-issued-header-slot__field--sourced .issue-issued-header-slot__input,
+.issue-issued-header-slot__field--needs .issue-issued-header-slot__textarea,
+.issue-issued-header-slot__field--default .issue-issued-header-slot__textarea,
+.issue-issued-header-slot__field--confirmed .issue-issued-header-slot__textarea {
+  border-color: var(--issue-cue);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--issue-cue) 22%, transparent);
+}
+
+.issue-issued-header-slot__field--needs .issue-issued-header-slot__input:focus,
+.issue-issued-header-slot__field--default .issue-issued-header-slot__input:focus,
+.issue-issued-header-slot__field--confirmed .issue-issued-header-slot__input:focus,
+.issue-issued-header-slot__field--needs .issue-issued-header-slot__textarea:focus,
+.issue-issued-header-slot__field--default .issue-issued-header-slot__textarea:focus,
+.issue-issued-header-slot__field--confirmed .issue-issued-header-slot__textarea:focus {
+  border-color: var(--issue-cue);
+  box-shadow: 0 0 0 0.2rem var(--issue-cue-ring);
+}
+
+.issue-issued-header-slot__field--needs .cs-multi-select-inline,
+.issue-issued-header-slot__field--default .cs-multi-select-inline,
+.issue-issued-header-slot__field--confirmed .cs-multi-select-inline,
+.issue-issued-header-slot__field--sourced .cs-multi-select-inline {
+  --dxbl-text-edit-border-color: var(--issue-cue);
+}
+
+.issue-issued-header-slot__field--needs .cs-multi-select-inline .dxbl-text-edit,
+.issue-issued-header-slot__field--default .cs-multi-select-inline .dxbl-text-edit,
+.issue-issued-header-slot__field--confirmed .cs-multi-select-inline .dxbl-text-edit,
+.issue-issued-header-slot__field--sourced .cs-multi-select-inline .dxbl-text-edit {
+  border-color: var(--issue-cue) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--issue-cue) 22%, transparent);
+}
+
+.issue-issued-header-slot__field--sourced .issue-issued-header-slot__input:disabled {
+  opacity: 1;
+  background: color-mix(in srgb, var(--bs-tertiary-bg, #f8f9fa) 70%, var(--bs-body-bg, #fff));
+}
+
+.visa-issued-new-cues .visa-field-cue--needs,
+.visa-issued-new-cues .visa-field-cue--default,
+.visa-issued-new-cues .visa-field-cue--confirmed,
+.visa-issued-new-cues .visa-field-cue--sourced {
+  --issue-cue: #ced4da;
+  --issue-cue-ring: transparent;
+}
+
+.visa-issued-new-cues .visa-field-cue--needs { --issue-cue: #e67a22; --issue-cue-ring: color-mix(in srgb, #e67a22 28%, transparent); }
+.visa-issued-new-cues .visa-field-cue--default { --issue-cue: #2b6cb0; --issue-cue-ring: color-mix(in srgb, #2b6cb0 22%, transparent); }
+.visa-issued-new-cues .visa-field-cue--confirmed { --issue-cue: #2f9e44; --issue-cue-ring: color-mix(in srgb, #2f9e44 22%, transparent); }
+.visa-issued-new-cues .visa-field-cue--sourced { --issue-cue: color-mix(in srgb, #2f9e44 62%, #6c757d); }
+
+.visa-issued-new-cues .visa-field-cue--needs .dxbl-text-edit,
+.visa-issued-new-cues .visa-field-cue--default .dxbl-text-edit,
+.visa-issued-new-cues .visa-field-cue--confirmed .dxbl-text-edit,
+.visa-issued-new-cues .visa-field-cue--sourced .dxbl-text-edit,
+.visa-issued-new-cues .visa-field-cue--needs .dxbl-date-edit,
+.visa-issued-new-cues .visa-field-cue--default .dxbl-date-edit,
+.visa-issued-new-cues .visa-field-cue--confirmed .dxbl-date-edit,
+.visa-issued-new-cues .visa-field-cue--sourced .dxbl-date-edit,
+.visa-issued-new-cues .visa-field-cue--needs textarea,
+.visa-issued-new-cues .visa-field-cue--default textarea,
+.visa-issued-new-cues .visa-field-cue--confirmed textarea,
+.visa-issued-new-cues .visa-field-cue--needs select,
+.visa-issued-new-cues .visa-field-cue--default select,
+.visa-issued-new-cues .visa-field-cue--confirmed select {
+  --dxbl-text-edit-border-color: var(--issue-cue);
+  border-color: var(--issue-cue) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--issue-cue) 22%, transparent);
+}
+
+.issue-issued-header-slot__textarea {
+  resize: vertical;
+  min-height: 4.5rem;
+}
+
+.issue-issued-header-slot__check-field {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  color: var(--bs-body-color, #212529);
+  padding-top: 0.15rem;
+}
+
+.issue-issued-header-slot__check-field input[type="checkbox"] {
+  margin: 0;
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.issue-issued-header-slot__people-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin: 0 0 0.15rem;
+}
+
+.issue-issued-header-slot__table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.85rem;
+  border: 1px solid var(--bs-border-color, #e5e7eb);
+  border-radius: 0.4rem;
+  overflow: hidden;
+  background: var(--bs-body-bg, #fff);
+}
+
+.issue-issued-header-slot__table th,
+.issue-issued-header-slot__table td {
+  text-align: left;
+  padding: 0.65rem 0.75rem;
+  border-bottom: 1px solid var(--bs-border-color, #e9ecef);
+  vertical-align: middle;
+}
+
+.issue-issued-header-slot__table thead th {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--bs-secondary-color, #6c757d);
+  background: color-mix(in srgb, var(--bs-tertiary-bg, #f8f9fa) 88%, #fff);
+}
+
+.issue-issued-header-slot__table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.issue-issued-header-slot__table tbody tr:hover td {
+  background: color-mix(in srgb, var(--bs-primary, #0d6efd) 4%, transparent);
+}
+
+.issue-issued-header-slot__check-col {
+  width: 2.25rem;
+}
+
+.issue-issued-header-slot__row--warn td {
+  background: color-mix(in srgb, #f0ad4e 10%, transparent);
+}
+
+.issue-issued-header-slot__row--disabled td {
+  opacity: 0.58;
+}
+
+.issue-issued-header-slot__status {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 650;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.issue-issued-header-slot__status--ready {
+  background: color-mix(in srgb, #28a745 16%, transparent);
+  color: #146c2e;
+}
+
+.issue-issued-header-slot__status--warn {
+  background: color-mix(in srgb, #dc3545 14%, transparent);
+  color: #a71d2a;
+}
+
+.issue-issued-header-slot__status--muted {
+  background: color-mix(in srgb, #6c757d 14%, transparent);
+  color: #495057;
+}
+
+.issue-issued-header-slot__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  padding-top: 0.35rem;
+  margin-top: 0.15rem;
+}
+
+.issue-issued-header-slot__btn {
+  appearance: none;
+  border: 1px solid var(--bs-border-color, #ced4da);
+  background: var(--bs-body-bg, #fff);
+  color: var(--bs-body-color, #212529);
+  border-radius: 0.4rem;
+  padding: 0.55rem 1rem;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 2.35rem;
+}
+
+.issue-issued-header-slot__btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--bs-tertiary-bg, #f8f9fa) 80%, #fff);
+}
+
+.issue-issued-header-slot__btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.issue-issued-header-slot__btn--primary {
+  background: var(--bs-primary, #0d6efd);
+  border-color: var(--bs-primary, #0d6efd);
+  color: #fff;
+}
+
+.issue-issued-header-slot__btn--primary:hover:not(:disabled) {
+  filter: brightness(0.96);
+  background: var(--bs-primary, #0d6efd);
+}
+
+.issue-issued-header-slot__btn--danger {
+  margin-right: auto;
+  color: #b91c1c;
+  border-color: #fecaca;
+  background: var(--bs-body-bg, #fff);
+}
+
+.issue-issued-header-slot__btn--danger:hover:not(:disabled) {
+  background: #fef2f2;
+}
+
+.issue-issued-header-slot__upload {
+  position: relative;
+  display: block;
+  border: 1px solid var(--bs-border-color, #ced4da);
+  border-radius: 0.4rem;
+  padding: 0.7rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--bs-body-color, #212529);
+  background: var(--bs-body-bg, #fff);
+}
+
+.issue-issued-header-slot__upload:hover {
+  background: color-mix(in srgb, var(--bs-tertiary-bg, #f8f9fa) 80%, #fff);
+}
+
+.issue-issued-header-slot__upload input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+
+.issue-issued-header-slot__link-btn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--bs-link-color, #0d6efd);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.15rem 0;
+  text-decoration: none;
+}
+
+.issue-issued-header-slot__link-btn:hover {
+  text-decoration: underline;
+}
+
+.issue-issued-header-slot__error {
+  margin: 0;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.4rem;
+  background: color-mix(in srgb, #dc3545 10%, transparent);
+  color: #a71d2a;
+  font-size: 0.85rem;
+}
+
+.issue-issued-header-slot__muted {
+  margin: 0;
+  color: var(--bs-secondary-color, #6c757d);
+  font-size: 0.8rem;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+.issue-issued-header-slot__success {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.issue-issued-header-slot__success-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 650;
+}
+
+@media (max-width: 640px) {
+  .issue-issued-header-slot-panel.resminamalar-slot-panel {
+    --issue-issued-pad-x: 0.85rem;
+    --issue-issued-pad-y: 0.85rem;
+  }
+
+  .issue-issued-header-slot__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .issue-issued-header-slot__section {
+    padding: 0.85rem 0.9rem;
+  }
+}
