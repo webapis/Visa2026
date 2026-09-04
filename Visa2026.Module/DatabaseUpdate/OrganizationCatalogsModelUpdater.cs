@@ -7,7 +7,7 @@ using Visa2026.Module.BusinessObjects.OrganizationCatalogs;
 namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
-/// Configuration folder item for Organization catalogs (Company / Signatory / Representative).
+/// Configuration folder item for Organization catalogs (kept off left nav; inline New/Edit on create and case).
 /// </summary>
 public sealed class OrganizationCatalogsModelUpdater : ModelNodesGeneratorUpdater<NavigationItemNodeGenerator>
 {
@@ -37,5 +37,6 @@ public sealed class OrganizationCatalogsModelUpdater : ModelNodesGeneratorUpdate
         navItem.Caption = OrganizationCatalogsViewIds.Caption;
         navItem.ImageName = "BO_Organization";
         navItem.Index = 1;
+        navItem.Visible = false;
     }
 }

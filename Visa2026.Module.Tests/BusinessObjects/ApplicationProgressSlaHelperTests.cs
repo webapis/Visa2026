@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Linq;
 using Visa2026.Module.BusinessObjects;
 using Xunit;
@@ -116,6 +117,30 @@ public class ApplicationProfileInstanceProgressSlaHelperTests
         var sla = ApplicationProfileInstanceProgressSlaHelper.Resolve(app);
 
         Assert.Equal(ApplicationProfileInstanceProgressSlaStatus.Warning, sla.Status);
+    }
+
+    [Theory]
+    [InlineData(ApplicationProfileInstanceProgressSlaStatus.Ok, "Energetika: day 3 of 10")]
+    [InlineData(ApplicationProfileInstanceProgressSlaStatus.Warning, "Energetika: day 3 of 10 (warning)")]
+    [InlineData(ApplicationProfileInstanceProgressSlaStatus.Overdue, "Energetika: day 3 of 10 (overdue)")]
+    public void FormatStatement_UsesCatalogTemplate_NotRawKey(
+        ApplicationProfileInstanceProgressSlaStatus status,
+        string expected)
+    {
+        var sla = new ApplicationProfileInstanceProgressSlaResult(status, 3, 10, 8, "Energetika");
+        var previous = CultureInfo.CurrentUICulture;
+        try
+        {
+            CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("en-US");
+            var text = ApplicationProfileInstanceProgressSlaHelper.FormatStatement(sla);
+            Assert.Equal(expected, text);
+            Assert.DoesNotContain("ApplicationProgress.Sla", text, StringComparison.Ordinal);
+            Assert.DoesNotContain("ApplicationProfileInstanceProgress.Sla", text, StringComparison.Ordinal);
+        }
+        finally
+        {
+            CultureInfo.CurrentUICulture = previous;
+        }
     }
 
     [Fact]

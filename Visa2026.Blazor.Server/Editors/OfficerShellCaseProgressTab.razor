@@ -87,6 +87,17 @@
                                                                OwnerViewId="@PreviewSlotOwnerViewId" />
                         </p>
                     }
+                    else if (step.State != "current" && step.MissingMinistryLetter)
+                    {
+                        <div class="ct-prog-v__letter-missing">
+                            <span class="person-dossier__pill st-pending doc-copies-catalog__pill doc-copies-catalog__pill--missing">Missing</span>
+                            <label class="ct-label">Approval / disapproval letter</label>
+                            <label class="ct-upload ct-upload--action ct-upload--missing">
+                                <InputFile OnChange="e => OnMinistryLetterSelected(e, step)" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp" disabled="@_busy" />
+                                <span>☁ Upload a copy of the approval letter<br /><span>PDF or scan up to @MaxUploadMb MB</span></span>
+                            </label>
+                        </div>
+                    }
                     @if (step.State == "current")
                     {
                         <div class="ct-prog-detail">
@@ -158,7 +169,11 @@
                                     }
                                     @if (step.ShowMinistryLetterUpload)
                                     {
-                                        <label class="ct-label" style="margin-top:10px">Approval / disapproval letter</label>
+                                        <label class="ct-label @(step.MissingMinistryLetter ? "ct-label--warn" : null)" style="margin-top:10px">Approval / disapproval letter</label>
+                                        @if (step.MissingMinistryLetter)
+                                        {
+                                            <span class="person-dossier__pill st-pending doc-copies-catalog__pill doc-copies-catalog__pill--missing" style="margin:0 0 8px">Missing</span>
+                                        }
                                         @if (!string.IsNullOrWhiteSpace(letterName) && letterProgressId is Guid)
                                         {
                                             <p class="ct-muted" style="margin:0 0 8px">
@@ -172,7 +187,7 @@
                                         {
                                             <p class="ct-muted" style="margin:0 0 8px">@_pendingLetterName — stored when you Advance progress</p>
                                         }
-                                        <label class="ct-upload ct-upload--action">
+                                        <label class="ct-upload ct-upload--action @(step.MissingMinistryLetter ? "ct-upload--missing" : null)">
                                             <InputFile OnChange="e => OnMinistryLetterSelected(e, step)" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp" disabled="@_busy" />
                                             <span>☁ Upload file<br /><span>PDF or scan up to @MaxUploadMb MB</span></span>
                                         </label>
@@ -207,7 +222,11 @@
                                     }
                                     @if (step.ShowMinistryLetterUpload)
                                     {
-                                        <label class="ct-label">Approval / disapproval letter</label>
+                                        <label class="ct-label @(step.MissingMinistryLetter ? "ct-label--warn" : null)">Approval / disapproval letter</label>
+                                        @if (step.MissingMinistryLetter)
+                                        {
+                                            <span class="person-dossier__pill st-pending doc-copies-catalog__pill doc-copies-catalog__pill--missing" style="margin:0 0 8px">Missing</span>
+                                        }
                                         @if (!string.IsNullOrWhiteSpace(letterName) && letterProgressId is Guid)
                                         {
                                             <p class="ct-muted" style="margin:0 0 8px">
@@ -221,7 +240,7 @@
                                         {
                                             <p class="ct-muted" style="margin:0 0 8px">@_pendingLetterName</p>
                                         }
-                                        <label class="ct-upload ct-upload--action" style="margin-bottom:10px">
+                                        <label class="ct-upload ct-upload--action @(step.MissingMinistryLetter ? "ct-upload--missing" : null)" style="margin-bottom:10px">
                                             <InputFile OnChange="e => OnMinistryLetterSelected(e, step)" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp" disabled="@_busy" />
                                             <span>☁ Upload file<br /><span>PDF or scan up to @MaxUploadMb MB</span></span>
                                         </label>
@@ -443,13 +462,15 @@
             await stream.CopyToAsync(memory);
             var content = memory.ToArray();
 
-            if (step.DecisionProgressId is Guid decisionId && decisionId != Guid.Empty)
+            var attachTo = step.DecisionProgressId
+                ?? (step.MissingMinistryLetter ? step.ProgressId : null);
+            if (attachTo is Guid progressId && progressId != Guid.Empty)
             {
                 await UploadMinistryLetterRequested.InvokeAsync(new OfficerShellCaseProgressFileUpload
                 {
                     FileName = file.Name,
                     Content = content,
-                    ProgressId = decisionId,
+                    ProgressId = progressId,
                 });
                 return;
             }

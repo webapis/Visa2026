@@ -66,6 +66,7 @@
     [Parameter] public ApplicationWorkspaceSnapshot? Snapshot { get; set; }
     [Parameter] public IReadOnlyList<Guid>? SelectedPersonIds { get; set; }
     [Parameter] public string PreviewSlotOwnerViewId { get; set; } = OfficerShellViewIds.DetailView;
+    [Parameter] public EventCallback CatalogReloaded { get; set; }
 
     [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
     [Inject] private IVisaPreviewSlotService PreviewSlotService { get; set; } = null!;
@@ -151,10 +152,12 @@
         _mergedGroups = ApplicationItemLinkedDocumentsMerger.MergeBySlot(_personLines);
     }
 
-    private Task ReloadMergedGroupsAsync()
+    private async Task ReloadMergedGroupsAsync()
     {
         ReloadMergedGroups();
-        return InvokeAsync(StateHasChanged);
+        if (CatalogReloaded.HasDelegate)
+            await CatalogReloaded.InvokeAsync();
+        await InvokeAsync(StateHasChanged);
     }
 
     private void SetGroupByType(bool groupByType)

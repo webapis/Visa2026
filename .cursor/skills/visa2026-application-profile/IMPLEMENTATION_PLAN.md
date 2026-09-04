@@ -34,18 +34,20 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | 8m | Locked profile: still set Default approval legs | **Done** | Config lock A keeps wizard fields read-only. **Make default** is on Choose Approval legs (allowed when locked). Cannot change Name / May produce |
 | 8p | Approval-leg catalog in preview slot | **Done** | Choose Approval legs **Catalog** / **+ New** / **Open** open `#visa-preview-slot` (no wizard Identity UI). **Make default** sets the profile Default. **+ New ministry** creates `ApprovingMinistry` in the slot. No Duplicate. |
 | 8d | Wizard step 4 real template catalog + persist scope | **Done** | Two officer scopes: Profile-specific and Shared. Shared Include/Exclude; GT-15 names excluded from Shared (upload under Profile-specific). **Preview** uses `#visa-preview-slot` File occupant (master PDF, placeholders). Internal Category/Global type-links unchanged. |
-| 8a | Application Profile overview (live) | **Done** | Live config/defaults/legs/templates + linked `ApplicationProfileInstance` rows; overview shows wizard identity, company/signatories, required fields, SLA days, template scope; mock only if profile id unresolved |
+| 8a | Application Profile overview (live) | **Done** | Live config/defaults/templates + linked instances. No Approval legs catalog card (Choose Approval legs). No Company/Signatories card. |
 | 8c | Custom catalog home (replace native List/Detail UI) | **Done** | List first; row opens overview; **Back to list**; New/Configure → wizard (new tab); **Save profile** reloads catalog; **Delete** when Linked = 0; toolbar **Total: N**; table-body scroll, sticky header |
 | 9 | Profile picker at Application create | **Done** | **New** on Application Profile Instances lists only. Via ministry: profile → Approval legs → **Choose Organization**. Direct: profile → Choose Organization. |
 | 10 | Person M2M DetailView; hard-remove `ApplicationItem` | **In progress** | Skip-navigation `People` + child BO M2M (includes **MedicalRecord**, **WorkDuty**). Output headers Invitation / WorkPermit / BorderZone / Rejection / IssuedVisas are **1:N** (May produce), not skip-nav. Wizard **May produce** includes Rejection. Person issued tab **Applications (linked)** verified. Rebuild DataImporter + resume Wave 2b (`-StartAt ApplicationProfileInstancePerson`); then People-tab / copies / Resminamalar smoke. |
 | 10n | §10 auto-link gate + sticky ResolvedLinks | **Done** | `RequirePerson*` gate; sticky `LinkedObjectId`; toggle-off keeps existing; unit tests |
 | 10o | Workspace Linked records tiles from ResolvedLinks | **Done** | Catalog + overview tiles; People tab uses same `cw-link-tile` cards; click shows that person's records; gated by person-config |
+| 10o-miss | People & links missing / complete cues | **Done** | Short tiles red; Passport/Visa `—` red when that kind is short; nav red people-count (dot if no roster) or green check when complete. Issued empty tiles unchanged. |
 | 10x | Case summary: edit instance Use fields | **Done** | Overview tiles + **Edit**; form + **Done**. Application number + date always shown (not profile-gated). Same Use fields. Persist on change; does not edit the profile template. Project is editable here (accepted prototype; do not re-lock via `IsProjectContractLocked`). Host-start adds `EntryCheckPointID`. |
 | 10z | Case Organization letterhead | **Done** | Scalar copy on instance (superseded by **10z2**) |
 | 10z2 | Organization catalogs (not singletons) | **Done** | Company / Signatory / Representative lists + tenant Default; create Choose Organization dropdowns; instance live FKs; case Organization dropdowns; merge from selected rows |
-| 10z3 | Organization catalogs Configuration page | **Done** | Config → **Organization catalogs**: three cards, **+ New**, search, Default / Make default, pencil → native DetailView. |
+| 10z3 | Organization catalogs Configuration page | **Done** | Host page kept; **hidden from Configuration nav**. Officers add/edit from Choose Organization (gear) and case Organization Edit. |
 | 10z4 | Inline organization catalog New/Edit | **Done** | Choose Organization: gear reveals **+ New / Edit**. Case Organization shows them only after section **Edit**. New row is selected / assigned on this case. |
 | 10x-fill | Case summary fill-state colors | **Done** | Empty/`—` red; still matches profile default (or auto number/date) blue; officer-changed green. Tiles + Edit form; border + light tint. |
+| 10x-overview-nav | Overview missing / complete nav | **Done** | Same red-count / green-check as People. Count = empty required Case summary fields (not Process number). Empty tiles dashed red label/value. |
 | 10x-gate | Case summary completeness gate | **Done** | Office preparation: empty (red) Case summary fields block Progress / documents / Resminamalar / SLA / Advance. People & links stay open. Banner names missing fields. |
 | 10v | People & links New missing person-owned BO | **Deferred** | In-tab **New {type}** removed — officers add person-owned data from **Open person detail**. Issued items stay on Overview → Issued records. `EnsureResolvedLink` kept for Relink. |
 | 10w | People & links Relink / Unlink columns | **Done** | Per-person **Relink** and **Unlink** next to Open person detail; Relink pins missing ResolvedLinks; Unlink removes that person + links; both disabled when process-complete locked; toolbar Unlink removed |
@@ -58,6 +60,7 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | 10c | Workspace in-tab actions + person SQL view | **Done** | Link/Unlink/Open detail wired in component; `vw_application_workspace_person`; row selection on Person tab |
 | 10d | ListView row opens workspace (default drill-in) | **Done** | `ApplicationListViewWorkspaceNavigationController` — row activate → workspace instead of legacy DetailView |
 | 10e | Document copies on workspace (roster line) | **Done** | `ApplicationPerson` keyed catalog + ZIP/preview; `DocumentCopiesLineScope`; legacy `ApplicationItem` ListView path retained |
+| 10e-miss | Document copies missing / complete cues | **Done** | Required scan gaps + partial slots: amber warning Missing rows; nav amber slot-count (dot if no roster) or green check. Full roster (not header chips). Application form is not a gap. Overview/People stay red. |
 | 10s | Workspace Document copies person filter + person catalog | **Done** | Header chips toggle roster; catalog grouped by person; Preview/package use filtered `Person.ID`s; slot stays viewer-only |
 | 10t | Document copies from linked records (ID labels) | **Done** | No Current/Previous/Next ApplicationItem slots; rows are ResolvedLinks labeled Passport/Visa/… number |
 | 10u | §10.2 valid/not-expired auto-link gate | **Done** | Officer-only: Visa/WP/Invitation/BorderZone/Medical must be valid not-expired. **Passport expiration is not checked** (slice 10y). Import uses PersonCurrentItems for Last 1. |
@@ -137,11 +140,11 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 
 **Delivered (2026-08-14):**
 
-- `ApplicationProfileOverviewQueryService` maps the selected `ApplicationProfile` (identity, company/signatories, required fields + defaults, process states, approval legs, person toggles, nested templates with scope/data) without mock fillers.
+- `ApplicationProfileOverviewQueryService` maps the selected `ApplicationProfile` (identity, required fields + defaults, process/SLA, person toggles, nested templates with scope/data) without mock fillers. Approval legs catalog and Company/Signatories are not on this overview.
 - Linked applications are real `ApplicationProfileInstance` rows (newest 25, full count in the heading). Click a number to open case workspace.
 - Prototype banner only when the profile id cannot be resolved (designer / missing object space).
 
-**Verify:** Application Profiles → Application Profile Templates → select a profile. No Prototype banner; linked table matches instances or shows empty.
+**Verify:** Application Profiles → Application Profile Templates → select a profile. No Prototype banner; no Approval legs catalog card; linked table matches instances or shows empty.
 
 ---
 

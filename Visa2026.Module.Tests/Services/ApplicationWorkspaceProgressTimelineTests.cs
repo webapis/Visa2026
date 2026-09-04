@@ -306,10 +306,13 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.Equal(
             ApplicationProfileInstanceProgressStateCodes.ProcessCancelled,
             steps[2].ResultOptions[^1].StateCode);
-        Assert.False(steps[1].ShowMinistryLetterUpload);
+        Assert.True(steps[1].MissingMinistryLetter);
+        Assert.True(steps[1].ShowMinistryLetterUpload);
         Assert.NotNull(steps[1].DecisionProgressId);
         Assert.True(steps[2].ShowMinistryLetterUpload);
         Assert.Null(steps[2].DecisionProgressId);
+        Assert.False(steps[2].MissingMinistryLetter);
+        Assert.True(steps[2].CanAdvance);
         Assert.True(steps[2].CanRevert);
     }
 
@@ -337,7 +340,10 @@ public class ApplicationWorkspaceProgressTimelineTests
             ApplicationProfileInstanceProgressStateCodes.ProcessCancelled,
             steps[4].ResultOptions[^1].StateCode);
         Assert.False(steps[4].ShowMinistryLetterUpload);
-        Assert.False(steps[3].ShowMinistryLetterUpload);
+        Assert.True(steps[3].MissingMinistryLetter);
+        Assert.True(steps[3].ShowMinistryLetterUpload);
+        Assert.True(steps[3].DecisionProgressId.HasValue);
+        Assert.True(steps[4].CanAdvance);
         Assert.Contains(steps[4].AdvanceOptions, o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.ProcessStarted);
     }
 
@@ -495,6 +501,10 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.Equal("energo.pdf", steps[1].MinistryLetterFileName);
         Assert.Equal(firstLetterId, steps[1].ProgressId);
         Assert.True(string.IsNullOrEmpty(steps[2].MinistryLetterFileName));
+        Assert.True(steps[2].MissingMinistryLetter);
+        Assert.True(steps[2].ShowMinistryLetterUpload);
+        Assert.True(steps[2].DecisionProgressId.HasValue);
+        Assert.False(steps[1].MissingMinistryLetter);
         Assert.Equal("gurlusyk.pdf", steps[3].MinistryLetterFileName);
         Assert.Equal(thirdLetterId, steps[3].ProgressId);
         Assert.Equal("ok", steps[1].OutcomeKind);

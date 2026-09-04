@@ -10,7 +10,7 @@ using Visa2026.Module.Services.UserReports;
 namespace Visa2026.Module.Services.ApplicationProfileOverview;
 
 /// <summary>
-/// Live Application Profile overview — configuration, defaults, legs, nested templates,
+/// Live Application Profile overview — configuration, defaults, nested templates,
 /// and linked <see cref="ApplicationProfileInstance"/> rows. Mock snapshot only when the
 /// profile id cannot be resolved (designer / missing object space).
 /// </summary>
@@ -35,14 +35,6 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
         try
         {
             return objectSpace.GetObjectsQuery<ApplicationProfile>()
-                .Include(p => p.DefaultApprovalLegProfile)
-                    .ThenInclude(d => d!.MinistryLegs)
-                        .ThenInclude(l => l.ApprovingMinistry)
-                .Include(p => p.ApprovalLegVersions)
-                    .ThenInclude(v => v.Legs)
-                        .ThenInclude(l => l.ApprovingMinistry)
-                .Include(p => p.ApprovalLegs)
-                    .ThenInclude(l => l.ApprovingMinistry)
                 .Include(p => p.NestedTemplates)
                 .Include(p => p.DefaultVisaType)
                 .Include(p => p.DefaultVisaCategory)
@@ -73,22 +65,6 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
             audience.Add("Family member");
         if (profile.ForTemporaryVisitor)
             audience.Add("Temporary visitor");
-
-        var versions = MapApprovalLegVersions(profile, objectSpace);
-
-        var legs = versions.Count > 0
-            ? versions.FirstOrDefault(v => v.IsDefault)?.Legs ?? versions[0].Legs
-            : profile.ApprovalLegs?
-                .OrderBy(l => l.Sequence)
-                .Select(l => new ApplicationProfileOverviewLegRow
-                {
-                    Sequence = l.Sequence ?? 0,
-                    MinistryName = l.ApprovingMinistry?.LocalizedDisplayName
-                        ?? l.ApprovingMinistry?.ShortNameTm
-                        ?? l.ApprovingMinistry?.NameTm
-                        ?? "—",
-                })
-                .ToList() ?? [];
 
         var templates = profile.NestedTemplates?
             .OrderBy(t => t.SortOrder)
@@ -127,78 +103,12 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
             MigrationSlaDays = profile.MigrationSlaDays,
             ProgressStates = [],
             PerApplicationDefaults = BuildDefaultRows(profile),
-            ApprovalLegs = legs,
-            ApprovalLegVersions = versions,
             PersonDataToggles = BuildPersonToggles(profile),
             NestedTemplates = templates,
             LinkedApplications = linkedRows,
             LinkedApplicationCount = linkedCount,
             IsPrototypeMock = false,
         };
-    }
-
-    private static List<ApplicationProfileOverviewVersionRow> MapApprovalLegVersions(
-        ApplicationProfile profile,
-        IObjectSpace? objectSpace)
-    {
-        var defaultId = profile.DefaultApprovalLegProfileId ?? profile.DefaultApprovalLegProfile?.ID;
-        IReadOnlyList<ApprovalLegProfile> shared = objectSpace != null
-            ? ApplicationProfileApprovalLegVersionHelper.GetSharedActiveProfiles(objectSpace)
-            : profile.DefaultApprovalLegProfile != null
-                ? [profile.DefaultApprovalLegProfile]
-                : [];
-
-        if (shared.Count > 0)
-        {
-            return shared.Select(p => new ApplicationProfileOverviewVersionRow
-            {
-                Name = FormatSharedApprovalLegName(p),
-                IsDefault = defaultId.HasValue && defaultId.Value == p.ID,
-                Legs = (p.MinistryLegs ?? Array.Empty<ApprovalLegProfileMinistryLeg>())
-                    .Where(l => l.ApprovingMinistry != null)
-                    .OrderBy(l => l.Sequence ?? int.MaxValue)
-                    .Select((l, i) => new ApplicationProfileOverviewLegRow
-                    {
-                        Sequence = i + 1,
-                        MinistryName = l.ApprovingMinistry?.LocalizedDisplayName
-                            ?? l.ApprovingMinistry?.ShortNameTm
-                            ?? l.ApprovingMinistry?.NameTm
-                            ?? "—",
-                    })
-                    .ToList(),
-            }).ToList();
-        }
-
-        return ApplicationProfileApprovalLegVersionHelper.GetOrderedVersions(profile)
-            .Select(v => new ApplicationProfileOverviewVersionRow
-            {
-                Name = string.IsNullOrWhiteSpace(v.Name) ? $"Version {v.Sequence}" : v.Name,
-                IsDefault = v.IsDefault,
-                Legs = ApplicationProfileApprovalLegVersionHelper.GetOrderedLegs(v)
-                    .Select((l, i) => new ApplicationProfileOverviewLegRow
-                    {
-                        Sequence = i + 1,
-                        MinistryName = l.ApprovingMinistry?.LocalizedDisplayName
-                            ?? l.ApprovingMinistry?.ShortNameTm
-                            ?? l.ApprovingMinistry?.NameTm
-                            ?? "—",
-                    })
-                    .ToList(),
-            })
-            .ToList();
-    }
-
-    private static string FormatSharedApprovalLegName(ApprovalLegProfile shared)
-    {
-        var code = shared.Code?.Trim();
-        var name = shared.NameTm?.Trim();
-        if (!string.IsNullOrWhiteSpace(code) && !string.IsNullOrWhiteSpace(name) && !string.Equals(code, name, StringComparison.OrdinalIgnoreCase))
-            return $"{code} · {name}";
-        if (!string.IsNullOrWhiteSpace(code))
-            return code!;
-        if (!string.IsNullOrWhiteSpace(name))
-            return name!;
-        return "Approval legs";
     }
 
     internal static ApplicationProfileOverviewLinkedAppRow MapLinkedRow(ApplicationProfileInstance instance)
@@ -465,11 +375,6 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
             [
                 new() { FieldLabel = "Visa Type", DefaultValue = "WP", Required = true },
                 new() { FieldLabel = "Visa Period", DefaultValue = "6 months", Required = true },
-            ],
-            ApprovalLegs =
-            [
-                new() { Sequence = 1, MinistryName = "Türkmenenergo" },
-                new() { Sequence = 2, MinistryName = "Migration service" },
             ],
             PersonDataToggles = ["Passport", "Position", "Education"],
             NestedTemplates =

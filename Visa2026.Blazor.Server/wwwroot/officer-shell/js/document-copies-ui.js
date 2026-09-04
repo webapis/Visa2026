@@ -65,7 +65,7 @@ function personBlock(person, pIdx, selectedIds) {
   const rows = person.slots.map(s => {
     const checked = selectedIds.has(s.id) && s.ready;
     const disabled = !s.ready ? 'disabled' : '';
-    return `<tr class="dc-row${s.ready ? '' : ' is-muted'}">
+    return `<tr class="dc-row${s.ready ? '' : ' is-missing'}">
       <td class="dc-row__num">${s.num}.</td>
       <td>${esc(s.label)}</td>
       <td>${statusBadge(s.ready)}</td>

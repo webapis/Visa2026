@@ -445,16 +445,20 @@ When any linked Application reaches lock state **A** (first progress beyond offi
 | Choose Approval legs Catalog / + New / Open / Make default | **Done** (2026-09-03) |
 | Wizard Project contract on Identity (Via ministry) | Done |
 | Profile overview (live linked instances) | Done |
+| Template overview Approval legs card removed | **Done** (2026-09-03) |
 | Custom catalog home (replace native List/Detail officer UI) | Done |
 | Profile picker at Application create | Done |
 | Case summary instance Use fields (overview tiles + Edit/Done) | **Done** |
 | Case Organization letterhead (instance copy) | **Done** (2026-09-03) then superseded |
 | Case Organization catalogs (live FKs, tenant Default) | **Done** (2026-09-03) |
-| Configuration Organization catalogs page (+ New) | **Done** (2026-09-03) |
+| Configuration Organization catalogs page (+ New) | **Done** (2026-09-03); **hidden from left nav** |
 | Inline organization catalog New/Edit (create + case) | **Done** (2026-09-03) |
 | Wizard Company, Signatories step removed | **Done** (2026-09-03) |
 | Case summary fill-state (empty / default / officer) | **Done** |
 | Case summary completeness gate (office prep) | **Done** (2026-09-03) |
+| People & links missing / complete cues | **Done** (2026-09-03) |
+| Overview missing / complete Case summary cues | **Done** (2026-09-03) |
+| Document copies missing / complete cues | **Done** (2026-09-03) |
 | Person M2M DetailView / hard-remove ApplicationItem | In progress (skip-navigation People + roster-line BO deleted; F5 heal pending) |
 | Workspace Document copies person filter + person catalog | Done (header chips; person-grouped catalog; slot viewer-only) |
 | Document copies from linked records (ID labels) | Done (ResolvedLinks; Passport/Visa numbers — not Current/Previous) |
@@ -529,11 +533,15 @@ All files live in [`docs/prototypes/`](prototypes/) only (no subfolders).
 | `process-started-nav-overview-issued-records.png` | Overview — Issued records card (1:N Invitation / Work permit / Border zone / Rejection; May produce) |
 | `process-started-nav-overview-issued-records-add.png` | Overview — Add invitation empty state under Issued records |
 | `process-started-nav-people-links.png` | Workspace — People & links |
+| `application-profile-instance-people-links-missing-prototype.png` | People & links — short tiles red + nav missing count |
+| `application-profile-instance-people-links-complete-prototype.png` | People & links — all required links present; nav green check |
 | `process-started-nav-progress.png` | Workspace — Progress |
 | `process-started-nav-overview-approval-legs.png` | Overview stepper — office + 3 ministry legs + migration (mixed complete / current / pending) |
 | `process-started-nav-progress-approval-legs.png` | Progress tab — same mixed legs; current ministry expanded |
 | `process-started-nav-progress-migration-in-process.png` | Progress tab — all ministry legs approved; Migration On process |
 | `process-started-nav-document-copies.png` | Workspace — Document copies |
+| `application-profile-instance-document-copies-missing-prototype.png` | Document copies — missing required scans + nav count (**prototype**) |
+| `application-profile-instance-document-copies-complete-prototype.png` | Document copies — all required scans present; nav green check (**prototype**) |
 | `process-started-nav-resminamalar.png` | Workspace — Resminamalar |
 | `process-started-nav-sla-deadlines.png` | Workspace — SLA & deadlines |
 | `application-profile-templates-listview-mockup.png` | Profile templates catalog — ListView |
@@ -564,6 +572,8 @@ All files live in [`docs/prototypes/`](prototypes/) only (no subfolders).
 | `choose-approval-legs-manage-04-slot-new.png` | Picker left + slot **+ New** form |
 | `choose-approval-legs-manage-05-slot-edit.png` | Picker left + slot **Open** unused chain |
 | `application-profile-instance-case-summary-overview-properties-prototype.png` | Overview **Case summary** — read-only tiles for profile **Use** fields; **Edit** switches to form mode |
+| `application-profile-instance-overview-missing-prototype.png` | Overview — empty required Case summary tiles + nav missing count |
+| `application-profile-instance-overview-complete-prototype.png` | Overview — required Case summary filled; nav green check |
 | `application-profile-instance-case-summary-edit-properties-prototype.png` | Overview **Case summary** — edit mode (dropdowns/dates); **Done** returns to tiles |
 | `application-profile-instance-organization-overview-prototype.png` | Overview **Organization** — Company / Signatory / Representative tiles on the instance; **Edit** |
 | `application-profile-instance-organization-edit-prototype.png` | Overview **Organization** — edit form + **Reset from Configuration defaults**; this case only |

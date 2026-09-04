@@ -343,6 +343,11 @@ internal static class ApplicationWorkspaceProgressTimeline
             ? ApplicationWorkspaceProgressAdvancePreview.ResultOptions(key, advanceOptions)
             : Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>();
         var decisionRow = row?.IsMinistryDecisionStep == true ? row : null;
+        var hasLetter = !string.IsNullOrWhiteSpace(letter?.MinistryLetterFileName);
+        var missingLetter = ApplicationWorkspaceProgressLetterCompleteness.ResolveMissing(
+            key,
+            row?.IsMinistryDecisionStep == true,
+            hasLetter);
 
         return new ApplicationWorkspaceCaseProgressStep
         {
@@ -358,10 +363,14 @@ internal static class ApplicationWorkspaceProgressTimeline
             ProgressId = letterId,
             OfficerNotes = isCurrent ? row?.Description ?? string.Empty : string.Empty,
             MinistryLetterFileName = letter?.MinistryLetterFileName ?? string.Empty,
-            ShowMinistryLetterUpload = isCurrent
+            ShowMinistryLetterUpload = (isCurrent
                 && key.StartsWith("leg-", StringComparison.OrdinalIgnoreCase)
-                && resultOptions.Count > 0,
-            DecisionProgressId = decisionRow != null && decisionRow.ID != Guid.Empty ? decisionRow.ID : null,
+                && resultOptions.Count > 0)
+                || missingLetter,
+            MissingMinistryLetter = missingLetter,
+            DecisionProgressId = decisionRow != null && decisionRow.ID != Guid.Empty
+                ? decisionRow.ID
+                : (missingLetter && row is { ID: var rowId } && rowId != Guid.Empty ? rowId : null),
             CanAdvance = isCurrent && canAdvance,
             CanRevert = CanRevertLast(latest, key) || (isCurrent && latest != null),
             CanRevertToHere = slotState == "done"

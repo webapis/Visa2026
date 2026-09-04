@@ -58,17 +58,17 @@ public static class ApplicationProfileInstanceProgressSlaHelper
         return sla.Status switch
         {
             ApplicationProfileInstanceProgressSlaStatus.Overdue => VisaUiMessages.Format(
-                "ApplicationProfileInstanceProgress.Sla.Overdue",
+                "ApplicationProgress.Sla.Overdue",
                 ministry,
                 days,
                 max),
             ApplicationProfileInstanceProgressSlaStatus.Warning => VisaUiMessages.Format(
-                "ApplicationProfileInstanceProgress.Sla.Warning",
+                "ApplicationProgress.Sla.Warning",
                 ministry,
                 days,
                 max),
             _ => VisaUiMessages.Format(
-                "ApplicationProfileInstanceProgress.Sla.Ok",
+                "ApplicationProgress.Sla.Ok",
                 ministry,
                 days,
                 max)

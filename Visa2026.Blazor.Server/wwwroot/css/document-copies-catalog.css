@@ -253,8 +253,33 @@
   font-weight: 600;
 }
 
-.doc-copies-catalog__row--empty .doc-copies-catalog__record-label {
-  color: color-mix(in srgb, var(--dcc-text) 72%, var(--dcc-surface));
+.doc-copies-catalog__row--empty,
+.doc-copies-catalog__row--missing {
+  background: #fff7ed;
+  border-bottom: 1px dashed #ea580c;
+  outline: 1px dashed #ea580c;
+  outline-offset: -2px;
+  border-radius: 6px;
+}
+
+.doc-copies-catalog__row--empty .doc-copies-catalog__record-label,
+.doc-copies-catalog__row--empty .doc-copies-catalog__col-files,
+.doc-copies-catalog__row--missing .doc-copies-catalog__record-label,
+.doc-copies-catalog__row--missing .doc-copies-catalog__col-files {
+  color: #c2410c;
+}
+
+.doc-copies-catalog__row--empty .doc-copies-catalog__pill,
+.doc-copies-catalog__row--missing .doc-copies-catalog__pill,
+.doc-copies-catalog__pill--missing {
+  background: #fff7ed;
+  border-color: #fdba74;
+  color: #c2410c;
+}
+
+.doc-copies-catalog__row--empty.doc-copies-catalog__row--clickable:hover,
+.doc-copies-catalog__row--missing.doc-copies-catalog__row--clickable:hover {
+  background: #ffedd5;
 }
 
 .doc-copies-catalog__progress-row {

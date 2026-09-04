@@ -1,3 +1,59 @@
+### 2026-09-04 — Missing approval letter upload without Revert
+
+- **Need**: Officers must attach a missing ministry approval/disapproval letter on the completed Progress step, without Revert. Amber cue on Progress nav; Advance stays allowed.
+- **Fix**: Done decision steps show Missing + upload. File attaches to that progress row immediately (`DecisionProgressId` / `ProgressId`). Document copies stay scans-only.
+- **Test**: Progress letter completeness + timeline tests (27 passed). Officer: stop F5, rebuild, Ctrl+F5. Via-ministry case with an Approved/Unapproved ministry and no letter — Progress amber count; upload on that step; Advance still works.
+- **Prevent**: Do not require Revert to attach a late letter. Do not block Advance. Do not add a Progress green check when no letters are missing.
+- **Cross-skill**: visa2026-application-progress
+
+### 2026-09-04 — Document copies missing uses warning amber, not red
+
+- **Need**: Officers asked for Missing Document copies in warning color. Red is reserved for Case summary / People gaps.
+- **Fix**: Catalog `--missing` rows and Missing chip are amber (`#fff7ed` / `#ea580c`). Document copies nav uses `cw-nav__badge--warn`. Overview and People stay red.
+- **Test**: CSS + nav class only. Officer: Ctrl+F5. Missing Address row and Document copies badge are orange; Overview/People badges stay red.
+- **Prevent**: Do not reuse `cw-nav__badge--missing` (red) on Document copies. Do not recolor Overview or People tiles.
+- **Cross-skill**: application-profile | document-copies
+
+### 2026-09-04 — Document copies missing / complete cues match prototypes
+
+- **Need**: Document copies still used orange Missing chips and a silent nav while People/Overview already had red-count / green-check. Prototypes: pale red dashed Missing rows; nav = missing required slot count or green check.
+- **Fix**: `ApplicationWorkspaceDocumentCopiesCompleteness` (gap + partial slots; empty roster = red dot; Application form is not a gap). Catalog rows use `--missing` boxed dashed red + red Missing chip. Nav uses full roster, not header chips.
+- **Test**: People completeness 6 + Document copies 3 passed. Module + Blazor Debug compile to temp succeeded. Officer: stop F5, rebuild, Ctrl+F5. Case with a missing scan — Document copies row red, nav count. All Ready — green check. Overview/People badges stay independent.
+- **Prevent**: Do not count Application form as a gap. Do not paint Ready rows green. Do not put a number in the green badge. Do not use header-chip filter for the nav count.
+- **Cross-skill**: application-profile | document-copies
+
+### 2026-09-03 — Overview missing / complete Case summary cues
+
+- **Need**: Empty required Case summary tiles were red, but Overview in the left nav had no cue. Officers on People/Progress could not see Case summary gaps without opening Overview.
+- **Fix**: Overview nav uses the same red-count / green-check language as People & links. Count = empty required Use fields (`FillState.Empty`), ignoring Process number. Green check when none are empty. Empty tiles also use dashed red label/value like People short tiles.
+- **Test**: `ResolveOverviewNav_missing_fields_is_incomplete`; `ResolveOverviewNav_filled_or_no_required_fields_is_complete` (gate tests 7 passed). Module + Blazor Debug compile to temp succeeded. Officer: stop F5, rebuild, Ctrl+F5. Empty Project / Entry check point — Overview badge 2, red tiles. Fill them — green check. People badge stays independent.
+- **Prevent**: Do not put a number in the green Overview badge. Do not count Process number. Do not paint every nav item green. Do not change the office-prep tab lock.
+- **Cross-skill**: application-profile
+
+### 2026-09-03 — People & links missing / complete cues
+
+- **Need**: Zero linked records (Visa / Salary / Medical) looked the same as filled tiles. Officers needed attention on People & links without opening every card. Complete roster should show a green nav cue, not a green number.
+- **Fix**: Short tiles (`Count` &lt; `ExpectedCount`) use Case summary empty red. Passport/Visa table `—` is red when that kind is short. Nav: red people-count (red dot if no one linked) or green check when every configured tile is filled. Filled tiles stay unchanged. Issued empty tiles stay dashed, not red.
+- **Test**: `ApplicationWorkspacePeopleLinksCompletenessTests` 5 passed. Module + Blazor Debug compile to temp succeeded. Officer: stop F5, rebuild, Ctrl+F5. Open a case with Visa/Salary 0 — red tiles + red nav count. Link the missing records / Relink — green check. No people — red dot.
+- **Prevent**: Do not put a number in the green badge. Do not paint filled tiles green. Do not count kinds that are not on the person (profile-hidden). Do not treat Issued records empty tiles as People gaps.
+- **Cross-skill**: application-profile
+
+### 2026-09-03 — Remove Approval legs card from profile overview
+
+- **Need**: Application Profile template overview listed every shared Approval leg chain (MC-02, TS-AM, …). Those are tenant catalog, not this template. Profile stores only Default; officers pick on Choose Approval legs.
+- **Fix**: Dropped the Approval legs card. Overview query no longer loads `GetSharedActiveProfiles` or nested profile legs. Process & SLA still notes that instance steps follow Directed to and Approval legs.
+- **Test**: `ApplicationProfileOverviewQueryServiceTests` 7 passed. Module + Blazor Debug compile to temp succeeded. Officer: stop F5, rebuild, Ctrl+F5. Open a via-ministry template — no Approval legs card. Choose Approval legs still has catalog / Default.
+- **Prevent**: Do not dump the shared ApprovalLegProfile catalog onto the template overview or wizard. Do not put Default back on Configure Identity.
+- **Cross-skill**: application-profile
+
+### 2026-09-03 — Hide Organization catalogs from Configuration nav
+
+- **Need**: Organization catalogs should not appear under Configuration in the left navigation. Officers add and edit Company / Signatory / Representative from Choose Organization (gear) and case Organization Edit.
+- **Fix**: `OrganizationCatalogsModelUpdater` sets the nav item `Visible = false`. `CustomNavigationUpdater` also hides `OrganizationCatalogs` / `OrganizationCatalogsHost` if they reappear. The catalog host page remains; native Company/Signatory/Rep nav stays hidden.
+- **Test**: Officer: stop F5, rebuild, Ctrl+F5. Configuration group has no Organization catalogs. Choose Organization gear and case Organization Edit still open New/Edit.
+- **Prevent**: Do not re-show the Configuration nav item. Do not hide inline New/Edit.
+- **Cross-skill**: application-profile
+
 ### 2026-09-03 — Case summary completeness gate during Office preparation
 
 - **Need**: Officers could leave Overview (Progress, Document copies, Resminamalar, SLA) and Advance while Case summary still had empty required tiles (Project, Work permit location).

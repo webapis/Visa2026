@@ -63,6 +63,20 @@
 .ct-prog-detail__grid { display: grid; grid-template-columns: 1fr 200px; gap: 14px; }
 @media (max-width: 800px) { .ct-prog-detail__grid { grid-template-columns: 1fr; } }
 .ct-label { display: block; font-size: 0.76rem; font-weight: 700; color: var(--os-muted); margin-bottom: 4px; }
+.ct-label--warn { color: #c2410c; }
+.ct-prog-v__letter-missing {
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  border: 1px dashed #ea580c;
+  border-radius: 8px;
+  background: #fff7ed;
+}
+.ct-prog-v__letter-missing .ct-label { margin-top: 8px; }
+.ct-upload--missing {
+  border-color: #ea580c;
+  background: #fff7ed;
+  color: #c2410c;
+}
 .ct-textarea {
   width: 100%; border: 1px solid var(--os-line); border-radius: 8px; padding: 8px; font-size: 0.84rem; resize: vertical;
 }

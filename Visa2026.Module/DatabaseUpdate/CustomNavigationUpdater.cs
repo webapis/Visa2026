@@ -72,7 +72,8 @@ namespace Visa2026.Module.DatabaseUpdate
         }
 
         /// <summary>
-        /// Shared catalogs are edited from Organization catalogs / Application Profile wizard. Hide leftover native BO nav.
+        /// Shared catalogs are edited from Choose Organization and case Organization (inline New/Edit).
+        /// Hide leftover native BO nav and the Organization catalogs Configuration item.
         /// Ministry SLA days also live on the profile; keep the singleton for snapshot fallback.
         /// </summary>
         private static void HideTemplateOwnedConfigurationNavigation(IModelNavigationItems navigationItems)
@@ -86,6 +87,8 @@ namespace Visa2026.Module.DatabaseUpdate
             HideNavItemIfPresent(configurationGroup, "AuthorizedSignatory");
             HideNavItemIfPresent(configurationGroup, "AuthorizedRepresentative");
             HideNavItemIfPresent(configurationGroup, "CompanyProfile");
+            HideNavItemIfPresent(configurationGroup, "OrganizationCatalogs");
+            HideNavItemIfPresent(configurationGroup, "OrganizationCatalogsHost");
         }
 
         private static void HideNavItemIfPresent(IModelNavigationItem parentGroup, string itemId)

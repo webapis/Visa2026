@@ -13,6 +13,7 @@
 @using Visa2026.Module.Localization
 @using Visa2026.Module.Services
 @using Visa2026.Module.Services.ApplicationItemLinkedDocuments
+@using Visa2026.Module.Services.ApplicationWorkspace
 @using Visa2026.Module.Services.PreviewSlot
 @using Visa2026.Module.Services.RuntimeLogging
 <div class="app-item-doc-copies doc-copies-catalog @(UseInlinePreview ? "app-item-doc-copies--inline-slot" : string.Empty)">
@@ -107,7 +108,7 @@
 
                                         @foreach (var row in typeSection.Rows)
                                         {
-                                            <div class="doc-copies-catalog__row @(row.IsReady ? null : "doc-copies-catalog__row--empty")"
+                                            <div class="doc-copies-catalog__row @(row.IsReady ? null : "doc-copies-catalog__row--empty doc-copies-catalog__row--missing")"
                                                  role="row">
                                                 <div class="doc-copies-catalog__col-person" role="cell">
                                                     <span class="doc-copies-catalog__record-label" title="@row.PersonName">@row.PersonName</span>
@@ -120,7 +121,7 @@
                                                         @(row.IsReady ? row.FileCount.ToString() : "—")
                                                     </div>
                                                     <div class="doc-copies-catalog__col-status" role="cell">
-                                                        <span class="@(row.IsReady ? "person-dossier__pill st-approved doc-copies-catalog__pill" : "person-dossier__pill st-expired doc-copies-catalog__pill")">
+                                                        <span class="@(row.IsReady ? "person-dossier__pill st-approved doc-copies-catalog__pill" : "person-dossier__pill st-pending doc-copies-catalog__pill doc-copies-catalog__pill--missing")">
                                                             @(row.IsReady ? StatusReady : StatusMissing)
                                                         </span>
                                                     </div>
@@ -926,24 +927,13 @@
         return FormatMsg("PersonDocumentCopies.Section.SummaryNone", total);
     }
 
-    private string GetGroupStatusLabel(ApplicationItemLinkedDocumentMergedGroup group)
-    {
-        if (group.LinkMissing || group.Files.Count == 0)
-            return StatusMissing;
-
-        if (group.MissingLines.Count > 0)
-            return StatusPartial;
-
-        return StatusReady;
-    }
+    private string GetGroupStatusLabel(ApplicationItemLinkedDocumentMergedGroup group) =>
+        ApplicationWorkspaceDocumentCopiesCompleteness.IsSlotMissing(group) ? StatusMissing : StatusReady;
 
     private static string GetGroupStatusPillCss(ApplicationItemLinkedDocumentMergedGroup group)
     {
-        if (group.LinkMissing || group.Files.Count == 0)
-            return "person-dossier__pill st-expiring doc-copies-catalog__pill";
-
-        if (group.MissingLines.Count > 0)
-            return "person-dossier__pill st-pending doc-copies-catalog__pill";
+        if (ApplicationWorkspaceDocumentCopiesCompleteness.IsSlotMissing(group))
+            return "person-dossier__pill st-pending doc-copies-catalog__pill doc-copies-catalog__pill--missing";
 
         return "person-dossier__pill st-approved doc-copies-catalog__pill";
     }
@@ -954,8 +944,11 @@
         bool rowLoading)
     {
         var classes = new List<string> { "doc-copies-catalog__row" };
-        if (group.Files.Count == 0)
+        if (ApplicationWorkspaceDocumentCopiesCompleteness.IsSlotMissing(group))
+        {
             classes.Add("doc-copies-catalog__row--empty");
+            classes.Add("doc-copies-catalog__row--missing");
+        }
         if (canPreview)
             classes.Add("doc-copies-catalog__row--clickable");
         if (rowLoading)

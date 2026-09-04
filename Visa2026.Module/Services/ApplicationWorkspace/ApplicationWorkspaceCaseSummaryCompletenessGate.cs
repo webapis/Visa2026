@@ -61,6 +61,18 @@ public static class ApplicationWorkspaceCaseSummaryCompletenessGate
     public static bool BlocksTab(ApplicationWorkspaceCaseView? view, string? tabKey) =>
         IsProcessTab(tabKey) && BlocksProcessNavigation(view);
 
+    public enum OverviewNavStatus
+    {
+        Incomplete = 0,
+        Complete = 1,
+    }
+
+    public static int MissingRequiredCount(ApplicationWorkspaceCaseView? view) =>
+        MissingRequiredFields(view?.HeaderFields).Count;
+
+    public static OverviewNavStatus ResolveOverviewNav(ApplicationWorkspaceCaseView? view) =>
+        MissingRequiredCount(view) > 0 ? OverviewNavStatus.Incomplete : OverviewNavStatus.Complete;
+
     public static string FormatBannerMessage(IReadOnlyList<ApplicationWorkspaceCaseHeaderField> missing)
     {
         if (missing == null || missing.Count == 0)

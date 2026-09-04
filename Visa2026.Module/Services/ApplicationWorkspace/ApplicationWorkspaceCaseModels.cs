@@ -225,6 +225,11 @@ public sealed class ApplicationWorkspaceCaseProgressStep
 
     public bool ShowMinistryLetterUpload { get; init; }
 
+    /// <summary>
+    /// Ministry Approved/Unapproved row exists and has no letter file. Cue only.
+    /// </summary>
+    public bool MissingMinistryLetter { get; init; }
+
     public Guid? DecisionProgressId { get; init; }
 
     /// <summary>

@@ -50,6 +50,7 @@ Companion to [SKILL.md](./SKILL.md).
 | Case snapshot builder | `ApplicationWorkspaceCaseBuilder.cs`, `ApplicationWorkspaceCaseModels.cs` |
 | Case summary Use fields | `ApplicationWorkspaceCaseHeaderFieldsHelper.cs` (application number/date always + Use-field tiles; Edit/Done persist on instance; fill-state empty/default/officer) |
 | Case summary completeness gate | `ApplicationWorkspaceCaseSummaryCompletenessGate.cs` — office prep + empty tiles block process tabs |
+| People / Overview / Document copies completeness | `ApplicationWorkspacePeopleLinksCompleteness.cs`, gate `ResolveOverviewNav`, `ApplicationWorkspaceDocumentCopiesCompleteness.cs` |
 | Person link picker (B8) | `IApplicationPersonLinkQueryService`, `OfficerShellPersonLinkPickerComponent.razor` |
 | Case progress in-shell (B7) | `IOfficerShellCaseProgressService`, `OfficerShellCaseProgressTab.razor` |
 | Immersive tab-bar hide (B6) | `OfficerShellImmersiveTabBarController.cs`, `officer-shell-host.css` |

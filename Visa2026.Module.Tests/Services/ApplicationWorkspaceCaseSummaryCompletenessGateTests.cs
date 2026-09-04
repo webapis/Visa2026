@@ -85,6 +85,38 @@ public class ApplicationWorkspaceCaseSummaryCompletenessGateTests
         Assert.Equal(" (2 missing)", ApplicationWorkspaceCaseSummaryCompletenessGate.FormatReadinessMissingSuffix(missing));
     }
 
+    [Fact]
+    public void ResolveOverviewNav_missing_fields_is_incomplete()
+    {
+        var view = OfficeView(
+            Field(ApplicationWorkspaceCaseHeaderFieldsHelper.Project, "Project", ApplicationWorkspaceCaseSummaryFillState.Empty),
+            Field(ApplicationWorkspaceCaseHeaderFieldsHelper.WorkPermitLocation, "Work permit location", ApplicationWorkspaceCaseSummaryFillState.Empty),
+            Field(ApplicationWorkspaceCaseHeaderFieldsHelper.ProcessNumber, "Process number", ApplicationWorkspaceCaseSummaryFillState.Empty));
+
+        Assert.Equal(2, ApplicationWorkspaceCaseSummaryCompletenessGate.MissingRequiredCount(view));
+        Assert.Equal(
+            ApplicationWorkspaceCaseSummaryCompletenessGate.OverviewNavStatus.Incomplete,
+            ApplicationWorkspaceCaseSummaryCompletenessGate.ResolveOverviewNav(view));
+    }
+
+    [Fact]
+    public void ResolveOverviewNav_filled_or_no_required_fields_is_complete()
+    {
+        var filled = OfficeView(
+            Field(ApplicationWorkspaceCaseHeaderFieldsHelper.VisaType, "Visa type", ApplicationWorkspaceCaseSummaryFillState.Default),
+            Field(ApplicationWorkspaceCaseHeaderFieldsHelper.Project, "Project", ApplicationWorkspaceCaseSummaryFillState.Officer));
+
+        Assert.Equal(
+            ApplicationWorkspaceCaseSummaryCompletenessGate.OverviewNavStatus.Complete,
+            ApplicationWorkspaceCaseSummaryCompletenessGate.ResolveOverviewNav(filled));
+        Assert.Equal(0, ApplicationWorkspaceCaseSummaryCompletenessGate.MissingRequiredCount(filled));
+
+        var none = new ApplicationWorkspaceCaseView();
+        Assert.Equal(
+            ApplicationWorkspaceCaseSummaryCompletenessGate.OverviewNavStatus.Complete,
+            ApplicationWorkspaceCaseSummaryCompletenessGate.ResolveOverviewNav(none));
+    }
+
     private static ApplicationWorkspaceCaseView OfficeView(params ApplicationWorkspaceCaseHeaderField[] fields) =>
         new()
         {

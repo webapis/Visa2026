@@ -6,6 +6,22 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 
 ## Entries
 
+### 2026-09-04 — Upload missing approval letter without Revert
+
+- **Need**: If the approval/disapproval letter was not attached when the ministry was Approved or Unapproved, the officer must upload it on that completed step. Revert is not required. Advance stays allowed (cue only).
+- **Fix**: Done `leg-*` decision rows without a file set `MissingMinistryLetter` and `ShowMinistryLetterUpload`. Progress nav shows an amber count. Upload calls `SetMinistryLetter` with `DecisionProgressId` (fallback `ProgressId`) and commits on that history row. Current-step files with no decision row are still pending until Advance. Office / Migration / Cancelled do not require a letter.
+- **Test**: `ApplicationWorkspaceProgressLetterCompletenessTests` + `Build_Issued_KeepsMinistryLetterFileNamesOnDoneLegs` / `Build_FirstLegApproved_NextMinistryIsCurrent` / `Build_LastMinistryApproved_MigrationIsCurrent` (27 ApplicationWorkspaceProgress tests passed). Module + Blazor Debug compile to temp succeeded.
+- **Prevent**: Do not hide upload on a completed ministry that has no letter. Do not stash that file as pending-until-Advance. Do not block Advance on a missing letter. Do not paint Progress with a green check when the count is 0.
+- **Cross-skill**: visa2026-application-profile
+
+### 2026-09-03 — Approval deadline showed localization keys
+
+- **Need**: Applications via ministry **Approval deadline** showed `ApplicationProfileInstanceProgress.Sla.Ok` / `.Warning` / `.Overdue` instead of ministry + day N of max.
+- **Fix**: `ApplicationProfileInstanceProgressSlaHelper.FormatStatement` uses catalog keys `ApplicationProgress.Sla.*` (already translated). Missing keys make `VisaUiMessages.Get` return the key itself.
+- **Test**: `FormatStatement_UsesCatalogTemplate_NotRawKey` (Ok / Warning / Overdue). Module.Tests compiled to temp (9 passed). Officer: stop F5, rebuild, Ctrl+F5. Via ministry list — Approval deadline like `Energetika: day 3 of 10`, not a key. Issued rows stay blank.
+- **Prevent**: After renaming ApplicationProgress → ApplicationProfileInstanceProgress, keep existing `ApplicationProgress.Sla.*` message keys (or add catalog entries before switching). Do not assume a C# type rename updates `VisaUiMessageCatalog`.
+- **Cross-skill**: visa2026-application-profile
+
 ### 2026-08-28 — Progress Advance errors use red banner and field borders
 
 - Failed Advance on the case Progress tab uses a red error banner (not peach `--warn`) and the same red border on empty required fields (Process number, Result, Date). Duplicate process number also rings the input. Do not restyle all shell `--warn` banners.

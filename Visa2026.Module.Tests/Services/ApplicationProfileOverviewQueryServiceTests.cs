@@ -41,10 +41,10 @@ public class ApplicationProfileOverviewQueryServiceTests
         Assert.Contains(snapshot.LiveConfigurationLines, l => l.Contains("invitation"));
         Assert.Contains(snapshot.LiveConfigurationLines, l => l.Contains("border zone permits"));
         Assert.DoesNotContain(snapshot.LiveConfigurationLines, l => l.StartsWith("Project contract:", StringComparison.Ordinal));
-        Assert.Empty(snapshot.ApprovalLegs);
         Assert.Empty(snapshot.NestedTemplates);
         Assert.Empty(snapshot.PersonDataToggles);
-        Assert.Empty(snapshot.PerApplicationDefaults);
+        Assert.Contains(snapshot.PerApplicationDefaults, r => r.FieldLabel == "Border Zone" && r.Required);
+        Assert.Contains(snapshot.PerApplicationDefaults, r => r.FieldLabel == "Process number" && r.Required);
         Assert.Empty(snapshot.LinkedApplications);
         Assert.Equal(0, snapshot.LinkedApplicationCount);
     }
@@ -164,34 +164,4 @@ public class ApplicationProfileOverviewQueryServiceTests
         Assert.Equal("Work permit", snapshot.NestedTemplates[0].Category);
     }
 
-    [Fact]
-    public void MapFromProfile_ShowsSharedDefaultApprovalLegs()
-    {
-        var shared = new ApprovalLegProfile
-        {
-            Code = "TE-EN",
-            NameTm = "Türkmenenergo-Energetika",
-        };
-        shared.MinistryLegs.Add(new ApprovalLegProfileMinistryLeg
-        {
-            Sequence = 1,
-            ApprovingMinistry = new ApprovingMinistry { ShortNameTm = "TE", NameTm = "Türkmenenergo" },
-        });
-
-        var profile = new ApplicationProfile
-        {
-            Name = "Visa",
-            Code = "VISA",
-            ProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
-            DefaultApprovalLegProfile = shared,
-            DefaultApprovalLegProfileId = shared.ID,
-        };
-
-        var snapshot = ApplicationProfileOverviewQueryService.MapFromProfile(profile, objectSpace: null);
-
-        Assert.Single(snapshot.ApprovalLegVersions);
-        Assert.True(snapshot.ApprovalLegVersions[0].IsDefault);
-        Assert.Contains("TE-EN", snapshot.ApprovalLegVersions[0].Name, StringComparison.Ordinal);
-        Assert.Equal("Türkmenenergo", snapshot.ApprovalLegs[0].MinistryName);
-    }
 }

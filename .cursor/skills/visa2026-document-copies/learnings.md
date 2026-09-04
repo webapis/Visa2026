@@ -25,6 +25,26 @@ Purpose: **dialog UX, scan preview, package enqueue, readiness, toast** — not 
 
 ## Entries
 
+### 2026-09-04 — Missing Document copies rows are warning amber (UX)
+
+- **Symptom**: Missing scan rows and the Document copies nav badge were red, same as Case summary / People gaps.
+- **Try**: Case workspace Document copies with Address (or any scan) Missing.
+- **Test**: Ctrl+F5 after rebuild. Missing row and nav count are orange; Ready rows unchanged.
+- **Root cause**: Completeness slice reused Case-summary red (`#dc2626`).
+- **Fix**: Amber warning palette on catalog `--missing` and `cw-nav__badge--warn`. Overview/People keep red.
+- **Prevent**: Do not put Document copies on `cw-nav__badge--missing`.
+- **Cross-skill**: document-copies | application-profile
+
+### 2026-09-04 — Workspace Document copies missing rows are red (UX)
+
+- **Symptom**: Missing scan rows used the orange `st-expiring` / gray empty look; officers could not see required-copy gaps at a glance.
+- **Try**: Case workspace Document copies with a person missing Education or Visa scan.
+- **Test**: `ApplicationWorkspaceDocumentCopiesCompletenessTests` 3 passed. Blazor Debug compile to temp succeeded.
+- **Root cause**: Shared catalog `--empty` only dashed the row bottom; Missing chip stayed amber in the HTML mock.
+- **Fix**: `--missing` boxed dashed red row + red Missing chip. Application form stays Ready (not a gap). Nav count lives in application-profile workspace.
+- **Prevent**: Do not treat Application form as a packaging gap for this badge. Do not paint Ready rows green.
+- **Cross-skill**: document-copies | application-profile
+
 ### 2026-08-17 — Application form Preview FOTO overlay missed the box (preview)
 
 - **Symptom**: Download opened in Foxit showed the person photo in FOTO; `#visa-preview-slot` showed a blank white rectangle. Same filled XFA (e.g. Serdar Nuri Küçükkaya / B/-009).

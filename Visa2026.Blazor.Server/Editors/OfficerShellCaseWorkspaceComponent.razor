@@ -123,6 +123,16 @@
 
         <div class="cw-layout @(IsWideTab(DisplayedTab) ? "cw-layout--wide" : null)">
             <nav class="cw-nav" aria-label="Case sections">
+                @{
+                    var peopleNav = ApplicationWorkspacePeopleLinksCompleteness.Resolve(view);
+                    var peopleGaps = ApplicationWorkspacePeopleLinksCompleteness.PeopleWithGaps(view);
+                    var overviewNav = ApplicationWorkspaceCaseSummaryCompletenessGate.ResolveOverviewNav(view);
+                    var overviewMissing = ApplicationWorkspaceCaseSummaryCompletenessGate.MissingRequiredCount(view);
+                    var documentsNav = _documentCopiesNav;
+                    var documentsMissing = _documentCopiesMissing;
+                    var documentsNavReady = _documentCopiesNavReady;
+                    var progressLetterMissing = ApplicationWorkspaceProgressLetterCompleteness.MissingCount(view);
+                }
                 @foreach (var tab in CaseTabs)
                 {
                     <button type="button"
@@ -132,6 +142,69 @@
                             @onclick="() => SelectTab(tab.Key)">
                         <span aria-hidden="true">@tab.Glyph</span>
                         <span>@tab.Label</span>
+                        @if (tab.Key == "overview")
+                        {
+                            @if (overviewNav == ApplicationWorkspaceCaseSummaryCompletenessGate.OverviewNavStatus.Incomplete)
+                            {
+                                <span class="cw-nav__badge cw-nav__badge--missing"
+                                      title="@(overviewMissing == 1 ? "1 required Case summary field is empty" : overviewMissing + " required Case summary fields are empty")"
+                                      aria-label="@(overviewMissing == 1 ? "1 required Case summary field is empty" : overviewMissing + " required Case summary fields are empty")">@overviewMissing</span>
+                            }
+                            else
+                            {
+                                <span class="cw-nav__badge cw-nav__badge--ok"
+                                      title="Required Case summary complete"
+                                      aria-label="Required Case summary complete">✓</span>
+                            }
+                        }
+                        else if (tab.Key == "people")
+                        {
+                            @switch (peopleNav)
+                            {
+                                case ApplicationWorkspacePeopleLinksCompleteness.NavStatus.EmptyRoster:
+                                    <span class="cw-nav__badge cw-nav__badge--missing"
+                                          title="No people linked"
+                                          aria-label="No people linked"></span>
+                                    break;
+                                case ApplicationWorkspacePeopleLinksCompleteness.NavStatus.Incomplete:
+                                    <span class="cw-nav__badge cw-nav__badge--missing"
+                                          title="@(peopleGaps == 1 ? "1 person missing required linked records" : peopleGaps + " people missing required linked records")"
+                                          aria-label="@(peopleGaps == 1 ? "1 person missing required linked records" : peopleGaps + " people missing required linked records")">@peopleGaps</span>
+                                    break;
+                                default:
+                                    <span class="cw-nav__badge cw-nav__badge--ok"
+                                          title="Required person data complete"
+                                          aria-label="Required person data complete">✓</span>
+                                    break;
+                            }
+                        }
+                        else if (tab.Key == "progress" && progressLetterMissing > 0)
+                        {
+                            <span class="cw-nav__badge cw-nav__badge--warn"
+                                  title="@(progressLetterMissing == 1 ? "1 approval letter is missing" : progressLetterMissing + " approval letters are missing")"
+                                  aria-label="@(progressLetterMissing == 1 ? "1 approval letter is missing" : progressLetterMissing + " approval letters are missing")">@progressLetterMissing</span>
+                        }
+                        else if (tab.Key == "documents" && documentsNavReady)
+                        {
+                            @switch (documentsNav)
+                            {
+                                case ApplicationWorkspaceDocumentCopiesCompleteness.NavStatus.EmptyRoster:
+                                    <span class="cw-nav__badge cw-nav__badge--warn"
+                                          title="No people linked"
+                                          aria-label="No people linked"></span>
+                                    break;
+                                case ApplicationWorkspaceDocumentCopiesCompleteness.NavStatus.Incomplete:
+                                    <span class="cw-nav__badge cw-nav__badge--warn"
+                                          title="@(documentsMissing == 1 ? "1 required document copy is missing" : documentsMissing + " required document copies are missing")"
+                                          aria-label="@(documentsMissing == 1 ? "1 required document copy is missing" : documentsMissing + " required document copies are missing")">@documentsMissing</span>
+                                    break;
+                                default:
+                                    <span class="cw-nav__badge cw-nav__badge--ok"
+                                          title="Required document copies complete"
+                                          aria-label="Required document copies complete">✓</span>
+                                    break;
+                            }
+                        }
                     </button>
                 }
             </nav>
@@ -180,7 +253,8 @@
                             <OfficerShellCaseDocumentsTab ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId"
                                                          Snapshot="Snapshot"
                                                          SelectedPersonIds="SelectedDocumentPersonIds"
-                                                         PreviewSlotOwnerViewId="@PreviewSlotOwnerViewId" />
+                                                         PreviewSlotOwnerViewId="@PreviewSlotOwnerViewId"
+                                                         CatalogReloaded="OnDocumentCopiesCatalogReloaded" />
                             break;
                         case "resminamalar":
                             <OfficerShellCaseResminamalarTab ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId"
@@ -223,6 +297,11 @@
     private bool _tabSwitching;
     private bool _tabContentReady = true;
     private Guid _relinkingPersonId;
+    private string? _documentCopiesCompletenessKey;
+    private bool _documentCopiesNavReady;
+    private ApplicationWorkspaceDocumentCopiesCompleteness.NavStatus _documentCopiesNav =
+        ApplicationWorkspaceDocumentCopiesCompleteness.NavStatus.EmptyRoster;
+    private int _documentCopiesMissing;
 
     private string DisplayedTab =>
         string.IsNullOrWhiteSpace(_pendingTab) ? ActiveTab : _pendingTab;
@@ -398,10 +477,13 @@
             _caseSummaryInstanceId = instanceId;
             _caseSummaryEditing = false;
             _organizationEditing = false;
+            _documentCopiesCompletenessKey = null;
+            _documentCopiesNavReady = false;
         }
 
         SyncDocumentPeopleFilter(Snapshot?.CaseView);
         SyncPeopleRecordFocus();
+        EnsureDocumentCopiesCompleteness(Snapshot?.CaseView);
 
         // Save reloads CaseView without dropdown catalogs. Reload them while Edit is open
         // so Visa type / Project / etc. keep a matching <option> and stay visible.
@@ -733,6 +815,51 @@
 
         if (!_selectedDocumentPersonIds.Remove(personId))
             _selectedDocumentPersonIds.Add(personId);
+    }
+
+    private void OnDocumentCopiesCatalogReloaded()
+    {
+        _documentCopiesCompletenessKey = null;
+        EnsureDocumentCopiesCompleteness(Snapshot?.CaseView);
+    }
+
+    private void EnsureDocumentCopiesCompleteness(ApplicationWorkspaceCaseView? view)
+    {
+        var people = view?.People
+            .Where(person => person.PersonId != Guid.Empty)
+            .ToList() ?? [];
+        var instanceId = Snapshot?.ApplicationProfileInstanceId ?? Guid.Empty;
+        var key = instanceId.ToString("N") + ":" + string.Join(";", people.Select(person =>
+            person.PersonId.ToString("N") + ":" + string.Join(",",
+                person.Records.Select(record => record.Key + "=" + record.Count))));
+        if (string.Equals(key, _documentCopiesCompletenessKey, StringComparison.Ordinal))
+            return;
+
+        if (people.Count == 0)
+        {
+            _documentCopiesCompletenessKey = key;
+            _documentCopiesNavReady = true;
+            _documentCopiesNav = ApplicationWorkspaceDocumentCopiesCompleteness.NavStatus.EmptyRoster;
+            _documentCopiesMissing = 0;
+            return;
+        }
+
+        if (instanceId == Guid.Empty)
+            return;
+
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        var personIds = people.Select(person => person.PersonId).Distinct().ToList();
+        var summary = ApplicationWorkspaceDocumentCopiesCompleteness.TryLoadSummary(
+            objectSpace,
+            instanceId,
+            personIds);
+        if (summary == null)
+            return;
+
+        _documentCopiesCompletenessKey = key;
+        _documentCopiesNavReady = true;
+        _documentCopiesMissing = ApplicationWorkspaceDocumentCopiesCompleteness.MissingSlotCount(summary);
+        _documentCopiesNav = ApplicationWorkspaceDocumentCopiesCompleteness.Resolve(hasPeople: true, summary);
     }
 
     private string? _selectedIssuedKey;
@@ -1463,7 +1590,7 @@
                         @foreach (var tile in view.LinkedRecordTiles)
                         {
                             <button type="button"
-                                    class="cw-link-tile cw-link-tile--@tile.Tone @(tile.Count < Math.Max(tile.ExpectedCount, 1) ? "is-empty" : null)"
+                                    class="cw-link-tile cw-link-tile--@tile.Tone @(ApplicationWorkspacePeopleLinksCompleteness.IsCountShort(tile.Count, tile.ExpectedCount) ? "is-empty" : null)"
                                     @onclick="() => OpenLinkedRecordTile(tile.TabKey)">
                                 <span class="cw-link-tile__icon">@tile.Glyph</span>
                                 <span class="cw-link-tile__label">@tile.Label</span>
@@ -1610,8 +1737,8 @@
                                 <tr class="@(person.Index == SelectedPersonRowIndex ? "is-selected" : null)" @onclick="() => SelectPersonRow(person.Index)">
                                     <td><span class="ct-link">@person.Name</span></td>
                                     <td>@person.RoleLabel</td>
-                                    <td><code>@person.PassportNumber</code></td>
-                                    <td><code>@person.VisaNumber</code></td>
+                                    <td><code class="@(ApplicationWorkspacePeopleLinksCompleteness.IsKindShort(person, ApplicationWorkspacePeopleLinksCompleteness.PassportKey) ? "cw-cell-missing" : null)">@person.PassportNumber</code></td>
+                                    <td><code class="@(ApplicationWorkspacePeopleLinksCompleteness.IsKindShort(person, ApplicationWorkspacePeopleLinksCompleteness.VisaKey) ? "cw-cell-missing" : null)">@person.VisaNumber</code></td>
                                     <td>
                                         <button type="button"
                                                 class="os-btn os-btn--primary ct-btn-sm"
@@ -1649,7 +1776,7 @@
                             {
                                 var isSelected = IsPersonRecordSelected(person.Index, record.Key);
                                 <button type="button"
-                                        class="cw-link-tile cw-link-tile--@record.Tone @(record.Count < Math.Max(record.ExpectedCount, 1) ? "is-empty" : null) @(isSelected ? "is-selected" : null)"
+                                        class="cw-link-tile cw-link-tile--@record.Tone @(ApplicationWorkspacePeopleLinksCompleteness.IsRecordShort(record) ? "is-empty" : null) @(isSelected ? "is-selected" : null)"
                                         @onclick="() => TogglePersonRecord(person.Index, record.Key)">
                                     <span class="cw-link-tile__icon">@record.Glyph</span>
                                     <span class="cw-link-tile__label">@record.Label</span>
