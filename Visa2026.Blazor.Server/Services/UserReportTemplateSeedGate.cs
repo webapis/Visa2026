@@ -15,7 +15,9 @@ namespace Visa2026.Blazor.Server.Services;
 /// <summary>
 /// XAF <see cref="XafApplication.CheckCompatibility"/> can run in <c>AddBuildStep</c> before
 /// <see cref="XafApplication.ServiceProvider"/> exists, so <see cref="UserReportTemplateUpdater"/>
-/// may skip embedded template seed during DB update. This gate runs after the host DI container is built.
+/// may skip embedded template seed during DB update. This gate runs after <c>app.UseXaf()</c>
+/// so ValueManager is Blazor-ready. Headless <c>--inprocess</c> import skips seed
+/// (<c>VISA2026_HEADLESS_IMPORT</c>).
 /// </summary>
 internal static class UserReportTemplateSeedGate
 {
@@ -27,6 +29,15 @@ internal static class UserReportTemplateSeedGate
         if (EasyTestHostMode.IsEnabled)
         {
             logger?.LogInformation("Skipping user report template seed for EasyTest host.");
+            return;
+        }
+
+        // Headless --inprocess import starts Configure before UseXaf(). Template OnSaving
+        // touches SecuritySystem.CurrentUserName and initializes SimpleValueManager, then
+        // UseXaf() cannot switch to AsyncValueManager (fresh Debug DB after DROP DATABASE).
+        if (IsEnvFlagSet("VISA2026_HEADLESS_IMPORT"))
+        {
+            logger?.LogInformation("Skipping user report template seed for headless VISA2014 import.");
             return;
         }
 
@@ -81,5 +92,12 @@ internal static class UserReportTemplateSeedGate
                 "User report template seed failed.");
             throw;
         }
+    }
+
+    private static bool IsEnvFlagSet(string name)
+    {
+        string? value = Environment.GetEnvironmentVariable(name);
+        return string.Equals(value, "true", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(value, "1", StringComparison.Ordinal);
     }
 }

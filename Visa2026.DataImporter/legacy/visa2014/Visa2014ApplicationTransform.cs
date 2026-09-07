@@ -237,6 +237,15 @@ internal static class Visa2014ApplicationTransform
             Console.WriteLine($"  Skipped {parseSkipped} sqlcmd row(s) with invalid shape.");
 
         var batch = TransformRows(rawRows, catalogs, out _, out _, out _);
+        if (filterType == null
+            || Visa2014ApplicationWorkPermitLocationFallbackIndex.IsAdditionalWpLocationType(filterType))
+        {
+            var wpLocationFallback = Visa2014ApplicationWorkPermitLocationFallbackIndex.Load(
+                connectionString, catalogs, verbose);
+            Visa2014ApplicationWorkPermitLocationFallbackIndex.ApplyWhenEmpty(
+                batch.ImportRows, wpLocationFallback);
+        }
+
         EnrichMigrationServiceInference(connectionString, batch.ImportRows, verbose);
 
         if (filterType == null)

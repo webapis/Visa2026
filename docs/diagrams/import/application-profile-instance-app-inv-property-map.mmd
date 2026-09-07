@@ -1,0 +1,60 @@
+flowchart TB
+  subgraph filter["This wave only --application-type App_Inv"]
+    direction TB
+    ALL["dbo.Application GCRecord IS NULL"] --> XFORM["transform all headers"]
+    XFORM -->|"keep ApplicationType.Name = App_Inv"| KEEP["employee invitation only"]
+    XFORM -->|"drop"| DROP1["App_Inv_And_WP E:0 inv+WP"]
+    XFORM -->|"drop"| DROP2["App_Inv_FM F:0"]
+    XFORM -->|"drop"| DROP3["every other type"]
+  end
+
+  subgraph sources["VISA2015 source for App_Inv"]
+    direction TB
+    A["dbo.Application"]
+    REG["dbo.IRegistration_Data"]
+    ATE["dbo.ApplicationTypeForEmployee<br/>SubType Invitation = 0"]
+    IWP["dbo.IsInvitationWithWorkPermit<br/>InvitationAndWorkPermitRequired = 0"]
+    CT["dbo.Contract"]
+    BZ["dbo.BorderZoneForVisa"]
+    A --- REG
+    A --- ATE
+    A --- IWP
+    A --- CT
+    A --- BZ
+  end
+
+  subgraph composite["Type / profile"]
+    direction LR
+    L_CMP["E:0:0:na:na"] -->|"lookup-translations"| T_AT["ApplicationType = App_Inv"]
+    T_AT -->|"ResolveApplicationProfile<br/>type + optional ProjectContract"| T_AP["ApplicationProfile<br/>Code get_invitation"]
+    T_AT -->|"Visa2014ApplicationVisaTypeInference"| T_VT["VisaType LocalizationKey BS1"]
+  end
+
+  subgraph number["Numbering"]
+    direction LR
+    L_MN["ManualApplicationNumber"] --> T_FULL["FullApplicationNumber"]
+    L_MN --> T_NUM["ApplicationNumber + AppNumberPrefix"]
+    L_DT["ManualApplicationDate"] --> T_DT["ApplicationDate Year Month"]
+    L_AR["AutoRegistration"] -->|"always true"| T_ME["IsManualEntry"]
+  end
+
+  subgraph lookups["Lookups shown on App_Inv"]
+    direction LR
+    L_UG["Urgency"] -->|"default NORM"| T_UG["Urgency"]
+    L_VP["VisaPeriod"] -->|"allow_null default Day30"| T_VP["VisaPeriod"]
+    L_VC["VisaCategory"] -->|"allow_null default Multiple"| T_VC["VisaCategory"]
+    L_PC["Contract.NumberOfContract"] -->|"calik overlay Code"| T_PC["ProjectContract"]
+    L_BZ["BorderZoneForVisa bits"] -->|"same as Visa"| T_BZ["BorderZoneLocation"]
+  end
+
+  subgraph later["Not this wave"]
+    direction LR
+    PIA["PersonInApplication"] --> ROSTER["ApplicationProfileInstancePerson"]
+    RES["ApplicationResult Result=0"] --> INV["Invitation + InvitationItem"]
+    PROG["ministry dates / ProcessNumber"] --> PH["ApplicationProfileInstanceProgress"]
+  end
+
+  KEEP --> composite
+  A --> number
+  A --> lookups
+  A --> later

@@ -15,6 +15,10 @@ internal static class Visa2014ApplicationProfileResolver
         if (type == null)
             return null;
 
+        var fromTenant = ResolveProfileCodeByTypeName(type.Name);
+        if (!string.IsNullOrWhiteSpace(fromTenant))
+            return fromTenant;
+
         var boType = new Bo.ApplicationType
         {
             Name = type.Name,
@@ -28,6 +32,10 @@ internal static class Visa2014ApplicationProfileResolver
         if (applicationType == null)
             return null;
 
+        var fromTenant = ResolveProfileCodeByTypeName(applicationType.Name);
+        if (!string.IsNullOrWhiteSpace(fromTenant))
+            return fromTenant;
+
         var boType = new Bo.ApplicationType
         {
             Name = applicationType.Name,
@@ -36,15 +44,25 @@ internal static class Visa2014ApplicationProfileResolver
         return ApplicationProfileFromApplicationTypeMapper.ResolveProfileCode(boType);
     }
 
-    public static string? ResolveProfileCode(Bo.ApplicationType applicationType) =>
-        applicationType == null ? null : ApplicationProfileFromApplicationTypeMapper.ResolveProfileCode(applicationType);
+    public static string? ResolveProfileCode(Bo.ApplicationType applicationType)
+    {
+        if (applicationType == null)
+            return null;
+
+        var fromTenant = ResolveProfileCodeByTypeName(applicationType.Name);
+        if (!string.IsNullOrWhiteSpace(fromTenant))
+            return fromTenant;
+
+        return ApplicationProfileFromApplicationTypeMapper.ResolveProfileCode(applicationType);
+    }
 
     public static string? ResolveProfileCodeByTypeName(string? applicationTypeName)
     {
-        if (!ApplicationProfileCatalogPreviewHelper.TryBuild(applicationTypeName, out var preview))
-            return null;
+        var fromLock = Visa2014ApplicationTypeProfileLock.ResolveProfileCode(applicationTypeName);
+        if (!string.IsNullOrWhiteSpace(fromLock))
+            return fromLock;
 
-        return preview.ProfileCode;
+        return ApplicationProfileCatalogPreviewHelper.ResolveImportProfileCode(applicationTypeName);
     }
 
     public static Guid? FindProfileId(

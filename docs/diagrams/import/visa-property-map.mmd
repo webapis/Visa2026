@@ -1,0 +1,47 @@
+flowchart TB
+  subgraph sources["VISA2015 source"]
+    direction TB
+    V["dbo.Visa<br/>active: GCRecord IS NULL"]
+    PP["dbo.Passport<br/>id-map required"]
+    VT["dbo.VisaType → IVisaType_Data"]
+    VC["dbo.VisaCategory"]
+    VIP["dbo.VisaIssuedPlace"]
+    BZ["dbo.BorderZoneForVisa<br/>bit matrix"]
+    V --- PP
+    V --- VT
+    V --- VC
+    V --- VIP
+    V --- BZ
+  end
+
+  subgraph identity["Numbers → Visa.cs"]
+    direction LR
+    L_VN["Visa.VisaNumber"] -->|"string_trim skip_row"| T_VN["VisaNumber"]
+    L_AS["Visa.ASNumber"] -->|"Işlenen belgisi string"| T_PN["ProcessNumber"]
+    L_PIA["Visa.ProcessNumber"] -->|"legacy PIA Guid"| T_LO["LegacyPersonInApplicationProfileInstanceOid"]
+  end
+
+  subgraph lookups["Lookups → Visa.cs"]
+    direction LR
+    L_TY["TypeOfVisaL + mgCode"] -->|"family-only person → FM<br/>else LocalizationKey; default WP"| T_TY["VisaType"]
+    L_CA["CategoryOfVisaL + mgCode"] -->|"Single / Double / Multiple"| T_CA["VisaCategory"]
+    L_PL["IssuedPlaceOfVisaL"] -->|"NameTm skip_row"| T_PL["VisaIssuedPlace"]
+    L_BZ["BorderZone bits"] -->|"comma-separated BorderZoneName<br/>none → Yok"| T_BZ["BorderZoneLocation"]
+  end
+
+  subgraph dates["Dates → Visa.cs"]
+    direction LR
+    L_ID["VisaIssuedDate"] -->|"date"| T_ID["IssueDate"]
+    L_SD["VisaStartDate"] -->|"date"| T_SD["StartDate"]
+    L_ED["VisaEndDate"] -->|"date"| T_ED["ExpirationDate"]
+  end
+
+  subgraph passportFk["Passport → Visa.cs"]
+    direction LR
+    L_PP["Visa.Passport"] -->|"fk_id_map Passport<br/>skip_row if unmapped"| T_PP["Passport"]
+  end
+
+  V --> identity
+  V --> lookups
+  V --> dates
+  V --> passportFk

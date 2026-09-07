@@ -465,67 +465,6 @@ public static class ApplicationProfileSchemaSql
     internal static string EnsureOrganizationCatalogPostgres =>
         string.Join(Environment.NewLine, EnsureOrganizationCatalogPostgresStatements);
 
-    /// <summary>
-    /// Second demo Company / Signatory / Representative so officers can change instance dropdowns.
-    /// Host-start <see cref="ApplyIfMissing"/> runs this even when ModuleUpdater catalog sync is skipped.
-    /// </summary>
-    internal const string SeedDemoOrganizationCatalogPostgres = """
-        DO $$
-        BEGIN
-          IF to_regclass('public."CompanyProfiles"') IS NULL THEN
-            RETURN;
-          END IF;
-
-          INSERT INTO "CompanyProfiles"
-            ("ID", "GCRecord", "OptimisticLockField", "Name", "Code", "Address", "PhoneNumber", "Email", "TaxInformation", "RegistrationDate", "IsDefault")
-          SELECT gen_random_uuid(), 0, 0,
-            'Demo Hyzmatlar HJ',
-            'DEM',
-            'Asgabat, demo address 1',
-            '99311111111',
-            'demo-company@example.invalid',
-            'TAX111111',
-            TIMESTAMP '2015-06-15',
-            false
-          WHERE NOT EXISTS (
-            SELECT 1 FROM "CompanyProfiles"
-            WHERE COALESCE("GCRecord", 0) = 0
-              AND ("Code" = 'DEM' OR "Name" = 'Demo Hyzmatlar HJ'));
-
-          INSERT INTO "AuthorizedSignatories"
-            ("ID", "GCRecord", "OptimisticLockField", "FullName", "PositionTitleTm", "PassportNumber", "PassportAuthority", "PassportIssueDate", "PassportExpirationDate", "IsDefault")
-          SELECT gen_random_uuid(), 0, 0,
-            'Ali Demir',
-            'Demo mudir orunbasary',
-            'U12345678',
-            'Istanbul',
-            TIMESTAMP '2020-01-20',
-            TIMESTAMP '2030-01-19',
-            false
-          WHERE NOT EXISTS (
-            SELECT 1 FROM "AuthorizedSignatories"
-            WHERE COALESCE("GCRecord", 0) = 0
-              AND "FullName" LIKE 'Ali Demir%');
-
-          INSERT INTO "AuthorizedRepresentatives"
-            ("ID", "GCRecord", "OptimisticLockField", "FullName", "PositionTitleTm", "Phone", "PassportNumber", "PassportAuthority", "PassportIssueDate", "IsDefault")
-          SELECT gen_random_uuid(), 0, 0,
-            'Orazowa Gulsat Rejepowna',
-            'Demo wiza hunarmeni',
-            '+993 65 00-00-00',
-            'I-AS 000001',
-            'Asgabat Hakimligi (demo)',
-            TIMESTAMP '2021-05-01',
-            false
-          WHERE NOT EXISTS (
-            SELECT 1 FROM "AuthorizedRepresentatives"
-            WHERE COALESCE("GCRecord", 0) = 0
-              AND "FullName" LIKE 'Orazowa%');
-        EXCEPTION WHEN OTHERS THEN
-          RAISE NOTICE 'Visa2026 demo organization catalog seed skipped: %', SQLERRM;
-        END $$;
-        """;
-
     internal const string EnsureTemplateApplicableProjectContractPostgres =
         """ALTER TABLE "ApplicationProfileTemplates" ADD COLUMN IF NOT EXISTS "ApplicableProjectContractId" uuid NULL;""";
 
@@ -800,7 +739,6 @@ public static class ApplicationProfileSchemaSql
         EnsureInstanceEntryCheckPointPostgres,
         ..EnsureInstanceLetterheadPostgresStatements,
         ..EnsureOrganizationCatalogPostgresStatements,
-        SeedDemoOrganizationCatalogPostgres,
         EnsureTemplateApplicableProjectContractPostgres,
         EnsureTemplateApplicableMigrationServicePostgres,
         EnsureTemplateRecycledAtUtcPostgres,

@@ -1,0 +1,33 @@
+flowchart TB
+  subgraph drop["Dropped dbo.AddressOfResidence / Address columns"]
+    D1["ShowAddressStartDate"]
+    D2["StartDateOfResidence — StartDate removed from Visa2026 BO"]
+    D3["AppConf / IRemainingDays_Data / OptimisticLockField"]
+  end
+
+  subgraph catalog["Site catalogs — do not import lookup tables"]
+    C1["Lodging / Hotel / Hospital / OtherSite<br/>seed from live .15 DISTINCT + tenant JSON"]
+    C2["Missing site FullAddress/Name<br/>→ incomplete OData payload / block_row"]
+    C3["DocumentOfAddress is Lojman/Patent/myhmanhana<br/>not AddressOfResidenceDocument bytes"]
+  end
+
+  subgraph pia["Automatic sub-pass — not a separate order.yaml entity"]
+    P1["Person with zero legacy AddressOfResidence<br/>but PersonInApplication has dbo.Address"] -->|"end of AOR import"| P2["synthesize one canonical row<br/>id-map aliases include synthetic keys"]
+  end
+
+  subgraph targetOnly["AddressOfResidence.cs with no legacy AOR column"]
+    TO1["Documents / Images — file wave TBD"]
+    TO2["DisplayAddress / DaysRemaining — computed"]
+    TO3["OtherSite — classified Lojman leftover"]
+    TO4["ApplicationProfileInstances — M2M later"]
+  end
+
+  subgraph idmap["Id-map"]
+    OID["dbo.AddressOfResidence.Oid"] -->|"legacy_id + PIA aliases"| MAP["id-maps/.../AddressOfResidence.json<br/>key count can exceed row count"]
+  end
+
+  subgraph defaults["Import defaults"]
+    DF1["Multiple concurrent residences per Person are valid"]
+    DF2["ExpirationDate only for PrivateHouse"]
+    DF3["Preflight skipped=3 / unmapped City-Region on Patent-only is OK"]
+  end

@@ -37,7 +37,9 @@ internal static class Visa2014ApplicationProfileInstancePersonImporter
         int? maxRows,
         bool dryRun,
         bool verbose,
-        int batchSize = 50)
+        int batchSize = 50,
+        string? passportIdMapPath = null,
+        string? visaIdMapPath = null)
     {
         if (!dryRun && objectSpaceFactory == null)
         {
@@ -50,6 +52,8 @@ internal static class Visa2014ApplicationProfileInstancePersonImporter
 
         var applicationIdMap = Visa2014IdMapHelper.Load(applicationIdMapPath);
         var personIdMap = Visa2014IdMapHelper.Load(personIdMapPath);
+        var passportIdMap = LoadOptionalIdMap(passportIdMapPath);
+        var visaIdMap = LoadOptionalIdMap(visaIdMapPath);
         if (applicationIdMap.Count == 0)
         {
             return new Visa2014ApplicationProfileInstancePersonImportResult
@@ -169,6 +173,8 @@ internal static class Visa2014ApplicationProfileInstancePersonImporter
                     continue;
                 }
 
+                PinDocumentSnapshot(objectSpace, application, linked, row, passportIdMap, visaIdMap);
+
                 idMap[legacyOid] = personId;
                 posted++;
                 autoLinked += ApplicationProfileInstancePersonResolver.LoadLinks(objectSpace, application.ID, personId).Count;
@@ -231,6 +237,40 @@ internal static class Visa2014ApplicationProfileInstancePersonImporter
             failed,
             skipped);
     }
+
+    private static void PinDocumentSnapshot(
+        DevExpress.ExpressApp.IObjectSpace objectSpace,
+        Bo.ApplicationProfileInstance application,
+        Bo.Person person,
+        Dictionary<string, object?> row,
+        IReadOnlyDictionary<Guid, Guid> passportIdMap,
+        IReadOnlyDictionary<Guid, Guid> visaIdMap)
+    {
+        var passportIds = Visa2014ApplicationPersonDocumentLinks.MapLegacyOids(
+            passportIdMap,
+            ParseGuid(row.GetValueOrDefault("PreviousPassport") as string),
+            ParseGuid(row.GetValueOrDefault("CurrentPassport") as string));
+        var visaIds = Visa2014ApplicationPersonDocumentLinks.MapLegacyOids(
+            visaIdMap,
+            ParseGuid(row.GetValueOrDefault("CurrentVisa") as string));
+
+        if (passportIds.Count > 0)
+        {
+            Visa2014ApplicationPersonDocumentLinks.ReplaceKind(
+                objectSpace, application, person,
+                ApplicationProfileInstancePersonLinkKind.Passport, passportIds);
+        }
+
+        if (visaIds.Count > 0)
+        {
+            Visa2014ApplicationPersonDocumentLinks.ReplaceKind(
+                objectSpace, application, person,
+                ApplicationProfileInstancePersonLinkKind.Visa, visaIds);
+        }
+    }
+
+    private static Guid? ParseGuid(string? text) =>
+        Guid.TryParse(text, out var g) ? g : null;
 
     private static bool TryResolveIds(
         Dictionary<string, object?> row,

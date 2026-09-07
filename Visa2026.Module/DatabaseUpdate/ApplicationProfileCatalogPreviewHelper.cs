@@ -31,6 +31,37 @@ public static class ApplicationProfileCatalogPreviewHelper
         return true;
     }
 
+    /// <summary>
+    /// Profile <c>Code</c> for VISA2014 import / profile patch. Prefers tenant
+    /// application-profile JSON (unique codes such as <c>get_invitation_fm</c>)
+    /// over <see cref="ApplicationType.Code"/>, which several invitation types share
+    /// (<c>get_invitation</c>).
+    /// </summary>
+    public static string? ResolveImportProfileCode(string? applicationTypeName)
+    {
+        if (string.IsNullOrWhiteSpace(applicationTypeName))
+            return null;
+
+        var typeName = applicationTypeName.Trim();
+        if (ApplicationProfileTenantCatalogLoader.TryLoadRows(out var rows))
+        {
+            var matches = rows
+                .Where(r =>
+                    string.Equals(r.ApplicationTypeName, typeName, StringComparison.OrdinalIgnoreCase)
+                    && !string.IsNullOrWhiteSpace(r.Code))
+                .ToList();
+            var typeOnly = matches.FirstOrDefault(r => string.IsNullOrWhiteSpace(r.DefaultProjectContractCode));
+            var code = (typeOnly ?? matches.FirstOrDefault())?.Code?.Trim();
+            if (!string.IsNullOrWhiteSpace(code))
+                return code;
+        }
+
+        if (TryBuild(typeName, out var preview) && !string.IsNullOrWhiteSpace(preview.ProfileCode))
+            return preview.ProfileCode.Trim();
+
+        return null;
+    }
+
     public static bool TryBuild(
         string? applicationTypeName,
         string? projectContractCode,

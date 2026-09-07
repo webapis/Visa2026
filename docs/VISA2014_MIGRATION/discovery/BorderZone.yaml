@@ -1,0 +1,87 @@
+# Discovery dossier — BorderZone (issued permit header, postAllTypeSlices)
+
+targetODataEntity: BorderZone
+discoveryStatus: complete
+
+legacy:
+  boClass: IApplicationForBorderZonePermit
+  boPath: VISA2014.Module/DC/IApplicationForBorderZonePermit.cs
+  tables:
+    - dbo.Application
+    - dbo.VisaPeriod
+    - dbo.IRegistration_Data
+  rowCount: 111
+  primaryKey: Oid
+  softDeleteColumn: GCRecord
+
+visa2026:
+  boPath: Visa2026.Module/BusinessObjects/BorderZone.cs
+  odataExposed: true
+
+mapping:
+  fieldMapFile: Visa2026.DataImporter/legacy/visa2014/field-maps/BorderZone.yaml
+  tableMappingId: border-zone-header
+  cardinality: one_issued_permit_per_border_zone_application
+  upsertKeys:
+    - BorderZoneNumber
+  lookupDependencies:
+    - ValidityDuration
+  duplicateGroups: 0
+  legacyOnlyCount: 0
+  targetOnlyCount: 1
+  mismatchCount: 0
+  blockedReason: null
+  notes: |
+    NO legacy issued-document table. VISA2014 has only:
+      dbo.BorderZoneForVisa — bit-matrix lookup (already mapped onto Application /
+      Visa BorderZoneLocation). IBorderZone is a Domain Component shared part,
+      not a persistent issued permit.
+    SYNTHESIS (locked 2026-09-07): one Visa2026 BorderZone per active
+    dbo.Application with ApplicationTypeForEmployee = 11
+    (App_Border_Zone_Permission / E:11). Family subtype 11 count = 0 on Çalik.
+    Çalik VISA2015: **111** headers; PersonInApplication **218**.
+
+    COLUMN MAP:
+      Application.Oid → id-map key AND ApplicationProfileInstance (same oid as
+        instance id-map).
+      Application.ProcessNumber → BorderZoneNumber (unique on 110 real numbers).
+      Application.ProcessDate → StartDate.
+      Application.BorderZonePeriod (dbo.VisaPeriod.CountMonth) → ValidityDuration
+        via closest 90/180/365 (Visa2014ValidityDurationHelper). Catalog only
+        has Month3/Month6/Year1 — 31/61/92/5-day legacy periods are inexact.
+      ExpirationDate is computed on save (StartDate + NumberOfDays); do not POST.
+
+    SKIP: 1 row ProcessNumber = 'Imza atilmadi Energ,minstr' and ProcessDate NULL
+    (2016-06-06 app 6/-8091) — not a permit number.
+
+    Locations stay on ApplicationProfileInstance.BorderZoneLocation (already
+    imported). BorderZone BO has no location property.
+
+    FILES: none on a dedicated letter table; scans wait in attachments.
+
+    ORDER: after all type slices and Rejection(+Item); before Visa remainder.
+    Items: PersonInApplication under the same 111 apps.
+
+checklist:
+  target_bo_reviewed: true
+  legacy_bo_located: true
+  legacy_schema_documented: true
+  table_mapping_registered: true
+  column_mapping_complete: true
+  lookup_values_mapped: true
+  property_gaps_documented: true
+  dedupe_rules_defined: true
+  excel_preview_exported: true
+  inventory_updated: true
+  learnings_appended: true
+
+completedAt: 2026-09-07
+completedBy: agent
+
+importConfirmation:
+  importConfirmed: true
+  importConfirmedAt: 2026-09-07
+  importConfirmedBy: developer
+  reviewNotes: |
+    Developer confirmed in chat 2026-09-07 to proceed with BorderZone header import
+    after Excel preview (110 import / 1 skip).

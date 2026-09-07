@@ -1,3 +1,10 @@
+### 2026-09-05 — Visa / WP / Invitation tiles match active count, not Last-N quota
+
+- **Need**: `cancel_visa_wp` Last 2 painted Visa and Work permit red `1/2` on issued 2/-210 even with one linked visa/WP. Officers: if the person has one active visa, link one; if two active, link two. Same for work permit and invitation. Red only when linked count is below that.
+- **Fix**: `ApplicationWorkspaceLastNExpected` — expected = min(Last-N, active linkable rows). Zero active: expect 1 while the case is open, expect 0 when links are locked (imported expired rows). Completeness uses that expected count. Overview tiles sum per-person expected.
+- **Test**: `ApplicationWorkspaceLastNExpectedTests` + completeness tests. Officer: stop F5, rebuild, Ctrl+F5. Open 2/-210 — Visa/WP not red, count `1`. A person with two active visas and one linked still shows `1/2` red.
+- **Prevent**: Do not treat profile Last 2 as a required quota for Visa / Work permit / Invitation. Passport Last-N is unchanged.
+- **Cross-skill**: application-profile
 ### 2026-09-04 — Create Case summary hides auto number/date and stacks fields
 
 - **Need**: Application number and date are generated on save. Showing them on create made Application number look missing and blocked Create. The 3-column grid also clipped labels.

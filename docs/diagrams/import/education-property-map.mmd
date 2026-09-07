@@ -1,0 +1,37 @@
+flowchart TB
+  subgraph sources["VISA2015 source"]
+    direction TB
+    E["dbo.Education<br/>active: GCRecord IS NULL"]
+    P["dbo.Person<br/>id-map required"]
+    EL["dbo.EducationLevel"]
+    EI["dbo.EducationInstitution"]
+    SP["dbo.Speciality<br/>FK column: Education.Spcialty"]
+    C["dbo.Country"]
+    E --- P
+    E --- EL
+    E --- EI
+    E --- SP
+    E --- C
+  end
+
+  subgraph personFk["Person → Education.cs"]
+    direction LR
+    L_PE["Education.Person"] -->|"fk_id_map Person<br/>skip_row if unmapped"| T_PE["Person"]
+  end
+
+  subgraph lookups["Lookups → Education.cs"]
+    direction LR
+    L_LV["EducationLevel.TitleOfEducationLevel<br/>+ mgCode"] -->|"{Title}:{mgCode} → LocalizationKey<br/>unmapped → SpecialSecondary"| T_LV["EducationLevel"]
+    L_IN["EducationInstitution.TitleOfIEducationInstitution"] -->|"lookup_nametm NameTm<br/>skip_row if catalog miss"| T_IN["EducationInstitution"]
+    L_SP["Speciality.TitleOfSpeciality"] -->|"lookup_nametm NameTm<br/>skip_row if catalog miss"| T_SP["Specialty"]
+    L_CO["Country.mgCode"] -->|"ISO3 prefix before '-'<br/>else NameOfCountry / NameOfCountryL<br/>UK → GBR"| T_CO["EducationCountry"]
+  end
+
+  subgraph year["Dates → Education.cs"]
+    direction LR
+    L_ED["Education.EducationEndDate"] -->|"year_string_from_datetime<br/>omit when null"| T_GY["GraduationYear"]
+  end
+
+  E --> personFk
+  E --> lookups
+  E --> year

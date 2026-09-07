@@ -20,6 +20,16 @@ internal interface IVisa2014ImportTarget
     Task SoftDeleteAsync(Type entityType, Guid id);
 
     Task FlushAsync();
+
+    /// <summary>
+    /// Existing Person in the target ObjectSpace (including uncommitted rows in this batch).
+    /// Non-sentinel personal numbers match that value; sentinel <c>0</c> matches name + birth date.
+    /// </summary>
+    Task<Guid?> TryFindPersonByIdentityAsync(
+        string? personalNumber,
+        string firstName,
+        string lastName,
+        DateTime dateOfBirth);
 }
 
 internal sealed class Visa2014ODataImportTarget : IVisa2014ImportTarget
@@ -58,6 +68,13 @@ internal sealed class Visa2014ODataImportTarget : IVisa2014ImportTarget
         throw new NotSupportedException("Soft-delete sync requires --inprocess.");
 
     public Task FlushAsync() => Task.CompletedTask;
+
+    public Task<Guid?> TryFindPersonByIdentityAsync(
+        string? personalNumber,
+        string firstName,
+        string lastName,
+        DateTime dateOfBirth) =>
+        Task.FromResult<Guid?>(null);
 }
 
 internal sealed class Visa2014DryRunImportTarget : IVisa2014ImportTarget
@@ -72,6 +89,13 @@ internal sealed class Visa2014DryRunImportTarget : IVisa2014ImportTarget
         Task.CompletedTask;
 
     public Task FlushAsync() => Task.CompletedTask;
+
+    public Task<Guid?> TryFindPersonByIdentityAsync(
+        string? personalNumber,
+        string firstName,
+        string lastName,
+        DateTime dateOfBirth) =>
+        Task.FromResult<Guid?>(null);
 }
 
 internal sealed class Visa2014ObjectSpaceImportTarget : IVisa2014ImportTarget, IDisposable
@@ -88,15 +112,7 @@ internal sealed class Visa2014ObjectSpaceImportTarget : IVisa2014ImportTarget, I
 
     public Task<Guid?> CreateAsync(Type entityType, IReadOnlyDictionary<string, object?> payload)
     {
-        var key = entityType.FullName ?? entityType.Name;
-        if (!_batches.TryGetValue(key, out var batch))
-        {
-            var objectSpace = _factory.CreateNonSecuredObjectSpace(entityType);
-            MigrationImportContext.ApplyImportObjectSpaceHooks(objectSpace);
-            batch = new BatchState(objectSpace);
-            _batches[key] = batch;
-        }
-
+        var batch = GetOrCreateBatch(entityType);
         var entity = batch.ObjectSpace.CreateObject(entityType);
         Migration.ObjectSpaceImportSink.ApplyPayload(batch.ObjectSpace, entity, payload);
         batch.Pending++;
@@ -162,11 +178,53 @@ internal sealed class Visa2014ObjectSpaceImportTarget : IVisa2014ImportTarget, I
         return Task.CompletedTask;
     }
 
+    public Task<Guid?> TryFindPersonByIdentityAsync(
+        string? personalNumber,
+        string firstName,
+        string lastName,
+        DateTime dateOfBirth)
+    {
+        var os = GetOrCreateBatch(typeof(Bo.Person)).ObjectSpace;
+        var query = os.GetObjectsQuery<Bo.Person>();
+        var normalized = Visa2014PersonTransform.NormalizePersonalNumber(personalNumber);
+        Bo.Person? hit;
+        if (!Visa2014PersonTransform.IsSentinelPersonalNumber(normalized))
+        {
+            hit = query.FirstOrDefault(p => p.PersonalNumber == normalized);
+        }
+        else
+        {
+            var day = dateOfBirth.Date;
+            var next = day.AddDays(1);
+            hit = query.FirstOrDefault(p =>
+                p.FirstName == firstName
+                && p.LastName == lastName
+                && p.DateOfBirth >= day
+                && p.DateOfBirth < next);
+        }
+
+        return Task.FromResult(hit?.ID);
+    }
+
     public void Dispose()
     {
         foreach (var batch in _batches.Values)
             batch.ObjectSpace.Dispose();
         _batches.Clear();
+    }
+
+    private BatchState GetOrCreateBatch(Type entityType)
+    {
+        var key = entityType.FullName ?? entityType.Name;
+        if (!_batches.TryGetValue(key, out var batch))
+        {
+            var objectSpace = _factory.CreateNonSecuredObjectSpace(entityType);
+            MigrationImportContext.ApplyImportObjectSpaceHooks(objectSpace);
+            batch = new BatchState(objectSpace);
+            _batches[key] = batch;
+        }
+
+        return batch;
     }
 
     private static void CommitBatch(BatchState batch)

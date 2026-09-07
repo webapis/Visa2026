@@ -48,6 +48,7 @@ public sealed class HeadlessMigrationHost : IDisposable
         // CreateHostBuilder skips Program.Main — set before any Npgsql type mapping.
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
+        Environment.SetEnvironmentVariable("VISA2026_HEADLESS_IMPORT", "true");
         Environment.SetEnvironmentVariable("ConnectionStrings__DefaultConnection", connectionString);
         Environment.SetEnvironmentVariable("ConnectionStrings__ConnectionString", connectionString);
 

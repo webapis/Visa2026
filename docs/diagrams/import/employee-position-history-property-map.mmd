@@ -1,0 +1,40 @@
+flowchart TB
+  subgraph sources["VISA2015 source"]
+    direction TB
+    W["dbo.WorkHistoryOfEmployee<br/>active: GCRecord IS NULL"]
+    P["dbo.Person<br/>FK column: Employee"]
+    POS["dbo.Position"]
+    DEP["dbo.Department"]
+    W --- P
+    W --- POS
+    W --- DEP
+  end
+
+  subgraph personFk["Person → EmployeePositionHistory.cs"]
+    direction LR
+    L_EMP["WorkHistoryOfEmployee.Employee"] -->|"fk_id_map Person<br/>skip_row if unmapped"| T_PE["Person"]
+  end
+
+  subgraph lookups["Lookups → EmployeePositionHistory.cs"]
+    direction LR
+    L_POS["Position.TitleOfPosition"] -->|"lookup_nametm NameTm<br/>skip_row if catalog miss"| T_POS["Position"]
+    L_DEP["Department.TitleOfDepartment"] -->|"lookup_nametm NameTm<br/>skip_row if catalog miss"| T_DEP["Department"]
+  end
+
+  subgraph actual["Actual / company title → EmployeePositionHistory.cs"]
+    direction LR
+    L_MN["Person.MiddleName<br/>current/latest row only"] -->|"normalize; no letters → '-'<br/>find-or-create ActualPosition.Name"| T_AP["ActualPosition"]
+    L_CODE["Position.Code<br/>older rows / empty MiddleName"] -->|"same normalizer"| T_AP
+  end
+
+  subgraph dates["Dates → EmployeePositionHistory.cs"]
+    direction LR
+    L_SD["StartDateOnThisPosition"] -->|"scalar_datetime<br/>skip_row if null"| T_SD["StartDate"]
+    L_ED["no legacy EndDate column"] -->|"next StartDate per Person<br/>latest row → null"| T_ED["EndDate"]
+  end
+
+  W --> personFk
+  W --> lookups
+  W --> actual
+  W --> dates
+  P --> actual

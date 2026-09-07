@@ -1,0 +1,30 @@
+flowchart TB
+  subgraph drop["Dropped dbo.Employee columns on this wave"]
+    D1["Tasaron — Subcontractor on Person, not salary"]
+    D2["Diploma / AIDS / foreign-address flags"]
+    D3["Bellik"]
+    D4["Salary FK itself — join only for Detail text"]
+  end
+
+  subgraph skip["Transform skip — not FailedCount"]
+    S1["missing Salary FK"]
+    S2["empty Salary.Detail"]
+    S3["unparseable Detail e.g. Alesta"]
+  end
+
+  subgraph targetOnly["EmployeeSalary.cs with no legacy salary column"]
+    TO1["ShowOptionalFields — NotMapped; omit on POST"]
+    TO2["Title — computed from Amount + Currency"]
+    TO3["ApplicationProfileInstances — M2M later; not this wave"]
+    TO4["EmployeeContract — removed from Visa2026; do not map"]
+  end
+
+  subgraph idmap["Id-map"]
+    OID["dbo.Employee.Oid"] -->|"same Guid as Person.Oid<br/>one salary row per employee"| MAP["id-maps/.../EmployeeSalary.json<br/>not EmployeeSalary.ID"]
+  end
+
+  subgraph defaults["Import defaults"]
+    DF1["Currency USD for all Calik rows"]
+    DF2["EndDate null — current snapshot only"]
+    DF3["Amount max 32 chars after normalize"]
+  end

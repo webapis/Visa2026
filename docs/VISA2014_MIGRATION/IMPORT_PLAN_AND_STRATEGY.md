@@ -2,7 +2,7 @@
 
 **Purpose:** Define **how** production data will be imported **before** any `--import-visa2014` implementation or OData load. Discovery and per-BO mapping answer *what* maps where; this document answers *when*, *where*, *in what order*, and *with what safeguards*.
 
-**Status:** `approved` (2026-06-21) — [`import-strategy.yaml`](../../Visa2026.DataImporter/legacy/visa2014/import-strategy.yaml). Per-BO `importConfirmed` and Excel preview still required before OData load.
+**Status:** `approved` (2026-06-21) — [`import-strategy.yaml`](../../Visa2026.DataImporter/legacy/visa2014/import-strategy.yaml). **Amendment 2026-09-04:** Application Profile Instances import **by ApplicationType slice** ([application-type-import-order.yaml](../../Visa2026.DataImporter/legacy/visa2014/application-type-import-order.yaml)). **Amendment 2026-09-04 (profile lock):** source composite → target `ApplicationType.Name` → unique Application Profile template ([application-type-profile-lock.yaml](../../Visa2026.DataImporter/legacy/visa2014/application-type-profile-lock.yaml)); do not pick a profile from shared `ApplicationType.Code`. **Amendment 2026-09-07:** optional **development** sample import + human comparison (`pilotThenHumanVerify`) — not a required step on Demo/Prod full Import. Per-BO `importConfirmed` and Excel preview still required before OData load.
 
 **Related:**
 
@@ -10,6 +10,7 @@
 - Per-BO mapping: discovery dossiers, `field-maps/`, `lookup-translations.yaml`
 - Runbook (after strategy approved): [import-practices.md](../../.cursor/skills/visa2014-to-visa2026-import/import-practices.md)
 - Agent skill: [visa2014-to-visa2026-import](../../.cursor/skills/visa2014-to-visa2026-import/SKILL.md)
+- Application Type slices: [application-type-import-order.yaml](../../Visa2026.DataImporter/legacy/visa2014/application-type-import-order.yaml)
 
 ---
 
@@ -72,23 +73,78 @@ These are **defaults** until changed here and in `import-strategy.yaml`. Update 
 
 ---
 
-## 3. Import waves (aligned with `order.yaml`)
+## 3. Import waves (aligned with `order.yaml` + Application Type slices)
 
-Waves match [`importPhases`](../../Visa2026.DataImporter/legacy/visa2014/order.yaml) in `order.yaml`. Each wave completes **discovery → confirmation → pilot → reconcile** before the next wave starts implementation at scale.
+Waves match [`importPhases`](../../Visa2026.DataImporter/legacy/visa2014/order.yaml) in `order.yaml`. **Application Profile Instances** (via-ministry headers) and interdependent issued BOs are **not** imported as “all headers, then all Invitation/WorkPermit/Visa.” Execution follows [`application-type-import-order.yaml`](../../Visa2026.DataImporter/legacy/visa2014/application-type-import-order.yaml) (locked 2026-09-04).
 
-| Wave | `importPhase` | Entities (extend as dossiers added) | Prerequisites |
-|------|---------------|-------------------------------------|---------------|
+Each wave still completes **discovery → confirmation → pilot → reconcile** before scaling that BO.
+
+| Wave | `importPhase` | What runs | Prerequisites |
+|------|---------------|-----------|---------------|
 | **0 — Strategy** | — | Plan approved | MCP + `VISA2015` accessible |
 | **1 — Prerequisites** | `prerequisites` | Target lookups seeded; layer 3 for shared catalogs | Strategy `approved`; Blazor updaters run once |
-| **2 — Person domain** | `person-domain` | Person (+ children: Education, …) | Wave 1; Person dossier complete; **Excel preview reviewed**; `importConfirmed` |
-| **3 — Application domain** | `application-domain` | Application (profile instance), **ApplicationPerson** M2M (not ApplicationItem); person-related auto-link on resolve | Person + person-related scalars imported + id-maps; profiles seeded (Wave 0b/1) |
-| **4 — Permits & visas** | `permits-and-visas` | Invitation, WorkPermit, Visa, BorderZone, Rejection | Application domain stable |
-| **5 — Progress & history** | `progress-and-history` | ApplicationProgress, legacy state | Owning applications imported |
-| **6 — Attachments** | `attachments` | File blobs, scan links (`PassportCopy`, `FileData`, …) | Parent BO id-map complete; scalar OData reconciled |
+| **2 — Person domain** | `person-domain` | Person, Passport, Education, position/salary/address, … **Visa is not in this wave** | Wave 1; Person dossier complete; **Excel preview reviewed**; `importConfirmed` |
+| **3 — Application Type slices** | `application-domain` + in-slice progress/issued/visa | **Per type** (living list; **`App_Inv` first**): instance header → roster → progress → Invitation/WorkPermit if the type generates them → Visa if that instance generates Visa. Then the **next** type. | Person + Passport (+ other person scalars except Visa); profiles seeded |
+| **4 — After all types** | `permits-and-visas` (remainder) | Rejection + RejectionItem; BorderZone **documents**; Visa rows with **no** issuing instance | Every type slice finished |
+| **5 — Attachments** | `attachments` | File blobs, scan links (`PassportCopy`, `VisaDocument`, …) | Parent BO id-map complete; scalar import reconciled |
 
-**Person pilot:** wave 2 loads **scalar Person** first; **`Person.Photo`** in a **file follow-up pass** (same pilot, after id-map) — not in Excel preview bytes. See [FILE_AND_IMAGE_IMPORT.md](../VISA2014_MIGRATION/FILE_AND_IMAGE_IMPORT.md).
+**Application Type bands** (type names inside a band are filled as we go — do not invent):
 
-**Pilot rule:** first OData load in each wave = **one BO**, verbose logging, count reconciliation, learnings appended — then expand within the wave.
+1. Produce **invitation** (including invitation + work permit) and may result in visa — **`App_Inv` first**.
+2. Produce **Visa**, **WorkPermit** (without invitation), or **BorderZone** — instances only for BorderZone; documents wait in wave 4.
+3. **Change** invitation or visa (`App_Change_Inv`, `App_Change_Visa_Category`, `App_Change_Passport`, …). These types **also produce** Invitation and/or Visa — still run the issued + visa inner steps.
+4. **Last:** types that do **not** produce Invitation, WorkPermit, Visa, or BorderZone — including **cancel** types (`App_Cancel_Inv`, `App_Cancel_Visa`, `App_Cancell_WP`, `App_Cancel_BZ`, …).
+
+**Inner sequence (one type):**
+
+```text
+ApplicationProfileInstance
+  → ApplicationProfileInstancePerson
+  → ApplicationProfileInstanceProgress
+  → Invitation + InvitationItem     (if type generates invitation)
+  → WorkPermit + WorkPermitItem     (if type generates work permit)
+  → Visa                            (if that instance generates Visa)
+```
+
+**Visa:** never before `IssuingApplicationProfileInstance`. Invitation-producing types must **not** require Visa on roster create. After Invitation (+ items) on `App_Inv`, still import visas whose issuing instance is that case. Local PG: **wipe** the old Passport-first Visa load and reimport per type when the slice reaches Visa.
+
+**Person files:** wave 2 loads **scalar Person** first; **`Person.Photo`** in a **file follow-up pass** (after id-map) — not in Excel preview bytes. See [FILE_AND_IMAGE_IMPORT.md](../VISA2014_MIGRATION/FILE_AND_IMAGE_IMPORT.md).
+
+### Sample import + human comparison (development only)
+
+Optional. Locked in `import-strategy.yaml` `pilotThenHumanVerify` (2026-09-07). Use on **local / mapping-development** loads to confirm a BO maps correctly. **Not** required on Demo/Prod full Import chains, and **not** a step before every BO once mapping for that BO is trusted.
+
+Distinct from Excel preview (that is **before** `importConfirmed`). Enable when the reviewer asks (or when first proving a new/changed importer).
+
+```text
+1. POST --max-rows N of the current BO only
+     N = 1 unless the reviewer asks for 2, 3, … (“compare 2”, “compare 5”)
+2. Halt. One Markdown table **per sample row**, friendly for a human scan:
+     header: BO + legacy Oid → Visa2026 ID
+     columns: Field | Legacy (VISA2015) | Imported (Visa2026) | Result
+     Result is Match, Not match, or Expected difference (documented transform / later wave)
+     lookups as labels (not GUIDs); empty as (empty)
+     plus a short list of Not match rows under that table
+3. Reviewer in chat:
+     - accept → import remainder of this BO (no --max-rows)
+     - suggest a mapping change → fix field-map / lookup-translations / importer C#
+       (permanent; never a one-off SQL patch of the sample rows) → re-import sample → show table again
+     - raise N → import additional sample rows, one table each, still halt
+4. Only after accept (when this gate is on): remainder of this BO.
+```
+
+Example (one sample Person):
+
+**Person** — legacy `a1b2…` → Visa2026 `c3d4…`
+
+| Field | Legacy (VISA2015) | Imported (Visa2026) | Result |
+|-------|-------------------|---------------------|--------|
+| First name | Annaguly | Annaguly | Match |
+| Last name | Orazow | Orazow | Match |
+| Birth date | 1984-03-12 | 1984-03-12 | Match |
+| Citizenship | Turkmenistan | Turkmenistan | Match |
+
+When this gate is **off**: import the full BO (FailedCount = 0), then the next `order.yaml` / inner-sequence step.
 
 ---
 

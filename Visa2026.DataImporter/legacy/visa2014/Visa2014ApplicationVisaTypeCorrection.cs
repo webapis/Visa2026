@@ -11,6 +11,9 @@ internal sealed class Visa2014ApplicationVisaTypeCorrectionResult
     public int ApplicationsInScope { get; init; }
     public int Updated { get; init; }
     public int AlreadyCorrect { get; init; }
+    public int ClearedNoInference { get; init; }
+    public int ClearedHiddenPeriod { get; init; }
+    public int ClearedHiddenCategory { get; init; }
     public int SkippedNoInference { get; init; }
     public int UnresolvedVisaType { get; init; }
     public IReadOnlyList<string> Errors { get; init; } = [];
@@ -64,9 +67,12 @@ internal static class Visa2014ApplicationVisaTypeCorrection
 
             var result = Run(host.ObjectSpaceFactory, resolver, dryRun, verbose);
             Console.WriteLine($"INF In scope: {result.ApplicationsInScope}");
-            Console.WriteLine($"INF Updated: {result.Updated}");
-            Console.WriteLine($"INF Already correct: {result.AlreadyCorrect}");
-            Console.WriteLine($"INF Skipped (no inference rule): {result.SkippedNoInference}");
+            Console.WriteLine($"INF VisaType updated: {result.Updated}");
+            Console.WriteLine($"INF VisaType already correct: {result.AlreadyCorrect}");
+            Console.WriteLine($"INF VisaType cleared (no inference / hidden): {result.ClearedNoInference}");
+            Console.WriteLine($"INF VisaPeriod cleared (ShowVisaPeriod=false): {result.ClearedHiddenPeriod}");
+            Console.WriteLine($"INF VisaCategory cleared (ShowVisaCategory=false): {result.ClearedHiddenCategory}");
+            Console.WriteLine($"INF Skipped (no inference rule, already null): {result.SkippedNoInference}");
             Console.WriteLine($"INF Unresolved VisaType key: {result.UnresolvedVisaType}");
             foreach (var error in result.Errors.Take(20))
                 Console.Error.WriteLine($"ERR {error}");
@@ -95,6 +101,9 @@ internal static class Visa2014ApplicationVisaTypeCorrection
         var errors = new List<string>();
         var updated = 0;
         var alreadyCorrect = 0;
+        var clearedNoInference = 0;
+        var clearedHiddenPeriod = 0;
+        var clearedHiddenCategory = 0;
         var skippedNoInference = 0;
         var unresolved = 0;
 
@@ -106,12 +115,51 @@ internal static class Visa2014ApplicationVisaTypeCorrection
             .ToList();
 
         var visaTypeCache = new Dictionary<string, Bo.VisaType?>(StringComparer.OrdinalIgnoreCase);
+        var dirty = false;
         foreach (var application in applications)
         {
+            if (application.ApplicationType?.ShowVisaPeriod == false && application.VisaPeriod != null)
+            {
+                if (verbose)
+                    Console.WriteLine($"INF {application.FullApplicationNumber}: clear hidden VisaPeriod");
+                if (!dryRun)
+                    application.VisaPeriod = null;
+                clearedHiddenPeriod++;
+                dirty = true;
+            }
+
+            if (application.ApplicationType?.ShowVisaCategory == false && application.VisaCategory != null)
+            {
+                if (verbose)
+                    Console.WriteLine($"INF {application.FullApplicationNumber}: clear hidden VisaCategory");
+                if (!dryRun)
+                    application.VisaCategory = null;
+                clearedHiddenCategory++;
+                dirty = true;
+            }
+
             var typeName = application.ApplicationType?.Name;
             if (!Visa2014ApplicationVisaTypeInference.TryInferVisaType(typeName, out var key))
             {
-                skippedNoInference++;
+                if (application.VisaType != null)
+                {
+                    if (verbose)
+                    {
+                        Console.WriteLine(
+                            $"INF {application.FullApplicationNumber}: {typeName} VisaType " +
+                            $"{application.VisaType.LocalizationKey} → (null) (no inference)");
+                    }
+
+                    if (!dryRun)
+                        application.VisaType = null;
+                    clearedNoInference++;
+                    dirty = true;
+                }
+                else
+                {
+                    skippedNoInference++;
+                }
+
                 continue;
             }
 
@@ -148,9 +196,10 @@ internal static class Visa2014ApplicationVisaTypeCorrection
             if (!dryRun)
                 application.VisaType = targetVisaType;
             updated++;
+            dirty = true;
         }
 
-        if (!dryRun && updated > 0)
+        if (!dryRun && dirty)
             objectSpace.CommitChanges();
 
         return new Visa2014ApplicationVisaTypeCorrectionResult
@@ -158,6 +207,9 @@ internal static class Visa2014ApplicationVisaTypeCorrection
             ApplicationsInScope = applications.Count,
             Updated = updated,
             AlreadyCorrect = alreadyCorrect,
+            ClearedNoInference = clearedNoInference,
+            ClearedHiddenPeriod = clearedHiddenPeriod,
+            ClearedHiddenCategory = clearedHiddenCategory,
             SkippedNoInference = skippedNoInference,
             UnresolvedVisaType = unresolved,
             Errors = errors,

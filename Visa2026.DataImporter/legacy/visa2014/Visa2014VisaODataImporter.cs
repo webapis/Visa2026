@@ -15,6 +15,7 @@ internal sealed class Visa2014VisaImportResult
     public int SkippedAlreadyImported { get; init; }
     public int SkippedMissingApplicationProfileInstanceIdMap { get; init; }
     public int PatchedIssuingApplicationProfileInstanceCount { get; init; }
+    public int PostedRemainderWithoutIssuingCount { get; init; }
     public int PostedCount { get; init; }
     public int FailedCount { get; init; }
     public string? IdMapPath { get; init; }
@@ -34,7 +35,8 @@ internal static class Visa2014VisaODataImporter
         string? visaIdMapOutputPath,
         int? maxRows,
         bool dryRun,
-        bool verbose)
+        bool verbose,
+        bool visaRemainder = false)
     {
         var passportIdMap = Visa2014IdMapHelper.Load(passportIdMapPath);
         if (verbose)
@@ -51,9 +53,12 @@ internal static class Visa2014VisaODataImporter
         if (dryRun)
         {
             int missingPassport = CountMissingPassportMap(batch.ImportRows, passportIdMap);
+            int missingIssuing = CountMissingIssuingApplicationMap(batch.ImportRows, applicationIdMap);
             Console.WriteLine(
                 $"DRY RUN: {batch.ImportRows.Count} row(s) ready to POST " +
-                $"({batch.Skipped.Count} skipped, {batch.DedupeMergedCount} dedupe merged, {missingPassport} missing Passport id-map).");
+                $"({batch.Skipped.Count} skipped, {batch.DedupeMergedCount} dedupe merged, {missingPassport} missing Passport id-map, {missingIssuing} missing issuing instance id-map" +
+                (visaRemainder ? "; remainder will POST without IssuingApplicationProfileInstance" : "") +
+                ").");
             return new Visa2014VisaImportResult
             {
                 LegacyRowCount = batch.LegacyRowCount,
@@ -61,6 +66,7 @@ internal static class Visa2014VisaODataImporter
                 SkippedCount = batch.Skipped.Count,
                 DedupeMergedCount = batch.DedupeMergedCount,
                 SkippedNoPassportMap = missingPassport,
+                SkippedMissingApplicationProfileInstanceIdMap = missingIssuing,
             };
         }
 
@@ -77,6 +83,7 @@ internal static class Visa2014VisaODataImporter
         int skippedAlreadyImported = 0;
         int skippedMissingApplicationProfileInstanceIdMap = 0;
         int patchedIssuingApplication = 0;
+        int postedRemainderWithoutIssuing = 0;
 
         using var backfillSpace = objectSpaceFactory?.CreateNonSecuredObjectSpace(typeof(Bo.Visa));
 
@@ -120,14 +127,25 @@ internal static class Visa2014VisaODataImporter
             try
             {
                 var payload = BuildPayload(row, resolver, passportId, applicationIdMap, out var missingApplication);
-                if (missingApplication)
-                    skippedMissingApplicationProfileInstanceIdMap++;
-
                 if (payload == null)
                 {
                     failed++;
                     errors.Add($"{legacyOid}: incomplete OData payload (lookup or required field)");
                     continue;
+                }
+
+                // Type-slice: only post visas whose issuing instance is in the
+                // ApplicationProfileInstance id-map. Remainder wave (--visa-remainder)
+                // posts the rest without IssuingApplicationProfileInstance (import
+                // skips the officer "create from instance" rule).
+                var hasIssuing = payload.ContainsKey("IssuingApplicationProfileInstance");
+                if (missingApplication || !hasIssuing)
+                {
+                    if (!visaRemainder)
+                    {
+                        skippedMissingApplicationProfileInstanceIdMap++;
+                        continue;
+                    }
                 }
 
                 var createdId = await target.CreateAsync(typeof(Bo.Visa), payload);
@@ -140,6 +158,8 @@ internal static class Visa2014VisaODataImporter
 
                 visaIdMap[legacyOid] = createdId.Value;
                 posted++;
+                if (missingApplication || !hasIssuing)
+                    postedRemainderWithoutIssuing++;
                 if (posted % 250 == 0)
                     Console.WriteLine($"INF Progress: {posted} posted, {failed} failed, {skippedNoPassport} no passport map...");
                 if (verbose)
@@ -181,6 +201,7 @@ internal static class Visa2014VisaODataImporter
             SkippedAlreadyImported = skippedAlreadyImported,
             SkippedMissingApplicationProfileInstanceIdMap = skippedMissingApplicationProfileInstanceIdMap,
             PatchedIssuingApplicationProfileInstanceCount = patchedIssuingApplication,
+            PostedRemainderWithoutIssuingCount = postedRemainderWithoutIssuing,
             PostedCount = posted,
             FailedCount = failed,
             IdMapPath = idMapPath,
@@ -215,6 +236,21 @@ internal static class Visa2014VisaODataImporter
         if (verbose)
             Console.WriteLine($"  PATCH Visa {visaId} IssuingApplicationProfileInstance={applicationId}");
         return true;
+    }
+
+    private static int CountMissingIssuingApplicationMap(
+        IReadOnlyList<Dictionary<string, object?>> importRows,
+        IReadOnlyDictionary<Guid, Guid> applicationIdMap)
+    {
+        int missing = 0;
+        foreach (var row in importRows)
+        {
+            if (!TryResolveLegacyGuid(row, "Application", out var legacyApplicationOid)
+                || !applicationIdMap.ContainsKey(legacyApplicationOid))
+                missing++;
+        }
+
+        return missing;
     }
 
     private static int CountMissingPassportMap(

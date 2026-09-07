@@ -13,7 +13,7 @@ internal static class Visa2014PreviewExportCommand
 
         if (!IsSupportedEntity(entity))
         {
-            Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person, Passport, Visa, Education, EmployeePositionHistory, EmployeeSalary, AddressOfResidence, WorkPermit, WorkPermitItem, Invitation, InvitationItem, Rejection, RejectionItem, PrivateHouse, Lodging, Hotel, Hospital, OtherSite, ApplicationProfileInstance, ApplicationProfileCatalog, ApplicationItem, ApplicationProfileInstanceProgress, ProjectContractMinistryLeg, ApplicationMigrationServiceInference.");
+            Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person, Passport, Visa, Education, EmployeePositionHistory, EmployeeSalary, AddressOfResidence, WorkPermit, WorkPermitItem, Invitation, InvitationItem, Rejection, RejectionItem, BorderZone, BorderZoneItem, PrivateHouse, Lodging, Hotel, Hospital, OtherSite, ApplicationProfileInstance, ApplicationProfileCatalog, ApplicationItem, ApplicationProfileInstanceProgress, ProjectContractMinistryLeg, ApplicationMigrationServiceInference.");
             return 1;
         }
 
@@ -216,6 +216,22 @@ internal static class Visa2014PreviewExportCommand
                     maxRows,
                     verbose,
                     source.Id)
+                : string.Equals(entity, "BorderZone", StringComparison.OrdinalIgnoreCase)
+                ? Visa2014BorderZonePreviewExporter.Export(
+                    source.ConnectionString,
+                    source.LookupTranslationPaths,
+                    output,
+                    maxRows,
+                    verbose,
+                    source.Id)
+                : string.Equals(entity, "BorderZoneItem", StringComparison.OrdinalIgnoreCase)
+                ? Visa2014BorderZoneItemPreviewExporter.Export(
+                    source.ConnectionString,
+                    source.LookupTranslationPaths,
+                    output,
+                    maxRows,
+                    verbose,
+                    source.Id)
                 : string.Equals(entity, "Education", StringComparison.OrdinalIgnoreCase)
                 ? Visa2014EducationPreviewExporter.Export(
                     source.ConnectionString,
@@ -278,6 +294,8 @@ internal static class Visa2014PreviewExportCommand
         || string.Equals(entity, "InvitationItem", StringComparison.OrdinalIgnoreCase)
         || string.Equals(entity, "Rejection", StringComparison.OrdinalIgnoreCase)
         || string.Equals(entity, "RejectionItem", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(entity, "BorderZone", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(entity, "BorderZoneItem", StringComparison.OrdinalIgnoreCase)
         || string.Equals(entity, "AddressOfResidence", StringComparison.OrdinalIgnoreCase)
         || string.Equals(entity, "PrivateHouse", StringComparison.OrdinalIgnoreCase)
         || string.Equals(entity, "Lodging", StringComparison.OrdinalIgnoreCase)

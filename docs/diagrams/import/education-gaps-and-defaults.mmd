@@ -1,0 +1,35 @@
+flowchart TB
+  subgraph drop["Dropped dbo.Education columns"]
+    D1["HasEducationPeriod"]
+    D2["EducationStartDate"]
+    D3["EducationEndDate as datetime<br/>only YEAR is kept"]
+    D4["OptimisticLockField"]
+  end
+
+  subgraph catalog["Catalogs — do not import lookup tables"]
+    C1["dbo.EducationInstitution / dbo.Speciality<br/>seed NameTm from live .15 DISTINCT"]
+    C2["Tenant JSON + local PG INSERT<br/>Seed-EducationLookupGapsToPostgres.ps1"]
+    C3["Missing NameTm → incomplete OData payload<br/>skip_row — not a Person-map miss"]
+    C1 --> C2 --> C3
+  end
+
+  subgraph fileWave["Later file wave — not scalar Education"]
+    F1["dbo.PassportCopy<br/>Education FK + diploma scan"] -->|"--import-visa2014-files<br/>--property EducationDocument"| F2["Education.Documents"]
+  end
+
+  subgraph targetOnly["Education.cs with no legacy Education column"]
+    TO1["ShowOptionalFields — NotMapped; omit on POST"]
+    TO2["Images — no EducationImage source on Calik VISA2015"]
+    TO3["EducationDescription — computed, not stored"]
+    TO4["ApplicationProfileInstances — M2M later; not this wave"]
+  end
+
+  subgraph idmap["Id-map only"]
+    OID["dbo.Education.Oid"] -->|"legacy_id"| MAP["id-maps/.../Education.json<br/>not Education.ID"]
+  end
+
+  subgraph defaults["Import defaults"]
+    DF1["EducationLevel unmapped → SpecialSecondary"]
+    DF2["GraduationYear empty allowed<br/>IsValidGraduationYear true"]
+    DF3["Multiple Education rows per Person are valid"]
+  end

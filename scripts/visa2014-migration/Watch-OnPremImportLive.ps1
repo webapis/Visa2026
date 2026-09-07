@@ -87,7 +87,7 @@ $script:DbCountMap = [ordered]@{
     AddressOfResidence       = 'AddressesOfResidence'
     EmployeeSalary           = 'EmployeeSalaries'
     MedicalRecord            = 'MedicalRecords'
-    Application              = 'Applications'
+    ApplicationProfileInstance = 'ApplicationProfileInstances'
     WorkPermit               = 'WorkPermits'
     WorkPermitItem           = 'WorkPermitItems'
     Invitation               = 'Invitations'
@@ -171,9 +171,12 @@ function Get-RemoteSnapshot {
 
 function Get-LocalSnapshot {
     $helper = Join-Path $scriptDir '_lib\Get-OnPremImportLiveSnapshot.ps1'
-    $argList = @('-Profile', $Profile, '-SyncHostRoot', $SyncHostRoot)
-    if ($NoDbCounts) { $argList += '-NoDbCounts' }
-    $raw = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $helper @argList
+    # Same process — nested powershell.exe hangs on this PC (CIM / extra host).
+    $raw = if ($NoDbCounts) {
+        & $helper -Profile $Profile -SyncHostRoot $SyncHostRoot -NoDbCounts
+    } else {
+        & $helper -Profile $Profile -SyncHostRoot $SyncHostRoot
+    }
     $text = ($raw | Out-String)
     $jsonLine = ($text -split "`r?`n" | Where-Object { $_.Trim().StartsWith('{') } | Select-Object -Last 1)
     if (-not $jsonLine) { throw "Local snapshot returned no JSON." }
@@ -699,6 +702,12 @@ function Write-LiveDashboard {
             $chainLogs = Get-ChildItem -Path $SyncHostRoot -Filter 'chain-console*.log' -ErrorAction SilentlyContinue |
                 Sort-Object LastWriteTime -Descending | Select-Object -First 1
             if ($chainLogs) { $progressLog = $chainLogs.FullName }
+        }
+        if (-not $progressLog -and $Profile -eq 'Local') {
+            $headlessLogs = Join-Path (Split-Path -Parent $SyncHostRoot) 'headless-import'
+            $cand = Get-ChildItem -Path $headlessLogs -Filter '*.log' -ErrorAction SilentlyContinue |
+                Sort-Object LastWriteTime -Descending | Select-Object -First 1
+            if ($cand) { $progressLog = $cand.FullName }
         }
         if ($progressLog) {
             Write-Host ("--- progress / {0} ---" -f (Split-Path -Leaf $progressLog)) -ForegroundColor Cyan

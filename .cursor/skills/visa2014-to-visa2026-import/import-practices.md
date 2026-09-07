@@ -22,17 +22,17 @@ Discovery/mapping rules live in [SKILL.md](./SKILL.md) and [VISA2014_MIGRATION.m
 | 0b | **Confirm before implement** | Excel preview reviewed; `importConfirmed: true` per BO; read/append **learnings.md** each session — **including failed import runs** |
 | 1 | **Headless XAF ObjectSpace** into Visa2026 (`--inprocess`) | Same validation/rules as UI — never direct SQL into Visa2026; **no OData writes** for migration (scalar or file waves) |
 | 2 | **Never write** to `VISA2015` | Legacy is read-only source |
-| 3 | **Dependency order** from `order.yaml` | FKs and id-map must exist before children |
-| 3b | **Stop before next BO** | Never start the **next** `order.yaml` entity until the **previous** wave succeeds (**exit 0** + **FailedCount = 0**). No `-ContinueOnError` on full chains. |
-| 3c | **Chain must include all parents** | Orchestrator step lists must match `order.yaml` (e.g. `WorkPermitItem` + `InvitationItem` before `ApplicationItem`). Omitting a parent BO is a bug, not a shortcut. |
-| 4 | **Three-layer mapping** at transform time | Table → column → lookup value before POST |
+| 3 | **Dependency order** from `order.yaml` + **ApplicationType slices** | FKs/id-maps; instance before issued before Visa |
+| 3b | **Stop before next step** | Never start the **next** inner step or type until the **previous** wave succeeds (**exit 0** + **FailedCount = 0**). No `-ContinueOnError` on full chains. |
+| 3c | **Chain must include issued items** | InvitationItem before Visa when the type generates invitation; WorkPermitItem when it generates WP. Omitting a parent BO is a bug, not a shortcut. |
+| 4 | **Three-layer mapping** at transform time | Table → column → lookup value before POST. Application headers also apply **application-type-profile-lock.yaml** (source type composite → target `ApplicationType.Name` → unique profile template). |
 | 5 | **Idempotent runs** | Re-run safe via natural-key upsert + id-map |
-| 6 | **Pilot → reconcile → expand** | One **confirmed** BO on disposable DB before full prod cutover |
+| 6 | **Pilot → reconcile → expand** | Full BO on disposable DB before prod. **Optional in development:** sample N rows (`--max-rows`), human compare, then remainder. Not required on Demo/Prod full Import. |
 | 7 | **Log skips and failures** | `skip_row`, unmapped lookups, OData 400 — no silent drops |
 | 7b | **Zero FailedCount** | A wave must finish with **FailedCount = 0**. Do not accept “N failed, continue”. |
 | 7c | **Intentional exclusions = approved + documented** | A row may be **skipped** (not failed) only if it has an **`approved`** entry in [`import-exclusions.yaml`](../../../docs/VISA2014_MIGRATION/import-exclusions.yaml): **why**, **how**, **counts** (headers/items/labels), **approvedBy/At**, evidence. Draft, then human approve, then wire `skip_row`, then reconcile Skipped* to documented counts. Unapproved skips are bugs. |
 | 8 | **Partial reimport = dev only** | `reimport/` scripts delete one BO scope on a **disposable** local DB while fixing importers — not staging/prod end-to-end |
-| 9 | **Dependency order always** | Full and partial reimport both follow `order.yaml` `dependsOn` — parents must exist (and id-maps resolve) before children; if you partial-reimport a parent, re-run downstream BOs in order |
+| 9 | **Dependency order always** | Person-domain from `order.yaml`; application-domain from `application-type-import-order.yaml` — instance before issued before Visa; if you partial-reimport a parent, re-run the rest of that type slice |
 | 10 | **Reuse scripts first** | Search [scripts/visa2014-migration/README.md](../../../scripts/visa2014-migration/README.md) before adding a `.ps1`; prefer DataImporter CLI + `-StartAt` / `-MaxRows` on existing scripts; new file only when nothing fits |
 
 ---
@@ -86,26 +86,32 @@ VISA2015 (read SQL)
 | Extract | Parameterized SQL; filter soft-delete (`GCRecord`, `rowFilter`) |
 | Dedupe | One canonical row per business key **before** POST |
 | Transform | Layer 3 **before** OData lookup query — never `$filter` with raw legacy string on target |
-| Load | One entity batch per `order.yaml` row; children after parents |
+| Load | One inner step per ApplicationType (person-domain: one `order.yaml` BO); children after parents |
 | Map IDs | Write `id-map/{Entity}-{legacyGuid}.json` on every successful create |
 | Gate | After each BO: exit 0 + FailedCount 0 **before** starting the next `order.yaml` entity |
 
 ### Chain halt (orchestrators)
 
 ```text
-for each entity in order.yaml entities[] (top → bottom):
-  run --import-visa2014 --entity <Entity>
-  if exit != 0 OR FailedCount > 0:
-    STOP  # do not start any later BO
-    fix root cause; resume at failed entity (-StartAt / --entity)
-  else:
-    continue
+person-domain (no Visa)
+for each ApplicationType in application-type-import-order.yaml:
+  for each inner step (header, roster, progress, issued*, visa*):
+    run --import-visa2014 --entity <Entity>  # filtered to that type
+    if exit != 0 OR FailedCount > 0:
+      STOP
+      fix; resume at failed step
+    else:
+      continue
+after all types:
+  Rejection, RejectionItem, BorderZone documents, Visa remainder
 ```
 
-**Canonical application-domain slice:**  
-`Application → WorkPermit → WorkPermitItem → Invitation → InvitationItem → ApplicationItem → ApplicationProgress`
+**Canonical Application Type inner sequence:**
+`ApplicationProfileInstance → ApplicationProfileInstancePerson → ApplicationProfileInstanceProgress → (Invitation → InvitationItem)? → (WorkPermit → WorkPermitItem)? → Visa?`
 
-Reference orchestrator with full list: `import/OnPrem-Sync.ps1`. Headless / local chains must include the same item waves.
+Living type list + bands: [`application-type-import-order.yaml`](../../../Visa2026.DataImporter/legacy/visa2014/application-type-import-order.yaml). First type: **`App_Inv`**. Skip WorkPermit on `App_Inv`. Do **not** import Visa after Passport.
+
+Reference orchestrator with full list: `import/OnPrem-Sync.ps1` (must be updated to type slices; until then run inner steps by `--entity` + type filter). Headless / local chains must not insert a global Visa wave before instances.
 
 ---
 
@@ -251,7 +257,7 @@ Implementation: `Visa2026.Blazor.Server/Services/Migration/HeadlessMigrationHost
 
 **Not for end-to-end migration.** Staging cutover and production use the full `order.yaml` sequence (`import/OnPrem-Staging.ps1`, `import/Run-HeadlessChain.ps1`, or entity-by-entity first load with reconcile) — never ad-hoc partial deletes on a DB you intend to keep.
 
-**Dependency order (both modes):** Whether end-to-end or partial, always respect `order.yaml` — walk `entities[]` top-to-bottom and satisfy every `dependsOn` before importing or partial-reimporting a BO. Partial reimport touches **one BO at a time**, but only when its parents are already correct in the target DB (and id-maps match). If you partial-reimport **Application**, re-run the full downstream chain: WorkPermit → WorkPermitItem → Invitation → InvitationItem → ApplicationItem → ApplicationProgress (see § Full application domain below).
+**Dependency order (both modes):** Person-domain follows `order.yaml` (no Visa). Application-domain follows [`application-type-import-order.yaml`](../../../Visa2026.DataImporter/legacy/visa2014/application-type-import-order.yaml) — finish the current type's inner sequence before the next type. If you partial-reimport **ApplicationProfileInstance** for a type, re-run that type: roster → progress → issued → visa.
 
 | Mode | When | Entry |
 |------|------|--------|
@@ -265,29 +271,26 @@ Scripts live under `reimport/` for historical path reasons; treat them as **part
 
 Use when **Application headers** or application-domain transforms changed and you need a **clean reload** of the whole application wave — not just one BO.
 
-**Canonical order** ([`order.yaml`](../../../Visa2026.DataImporter/legacy/visa2014/order.yaml)):
+**Canonical inner sequence** ([`application-type-import-order.yaml`](../../../Visa2026.DataImporter/legacy/visa2014/application-type-import-order.yaml)):
 
 ```text
-Application → WorkPermit → WorkPermitItem → Invitation → InvitationItem → ApplicationItem → ApplicationProgress
+ApplicationProfileInstance → ApplicationProfileInstancePerson → ApplicationProfileInstanceProgress
+  → Invitation → InvitationItem   (if type generates invitation)
+  → WorkPermit → WorkPermitItem   (if type generates work permit)
+  → Visa                          (if instance generates Visa)
 ```
 
-`reimport/Applications.ps1` alone is **not** enough: it deletes all manual-entry application scope (headers, items, progress, permits, invitations) but only **re-imports Application**. You must re-run downstream BOs in order.
+`reimport/Applications.ps1` alone is **not** enough: it deletes application scope but only **re-imports headers**. You must re-run the **same ApplicationType** inner steps (roster → progress → issued → visa). Do not reimport Visa until that type's issued steps are done. Local PG: wipe Visa before the first per-type Visa step.
 
 ```powershell
-# 1. Application headers (~12k rows; deletes full application scope first)
+# Per ApplicationType (example App_Inv). Do not flatten all types.
+# 1. Headers for that type
 .\scripts\visa2014-migration\reimport\Applications.ps1
-
-# 2. Work permits (headers then items)
-.\scripts\visa2014-migration\import\WorkPermits.ps1
-
-# 3. Invitations (headers then items)
-.\scripts\visa2014-migration\import\Invitations.ps1
-
-# 4. Application lines + post corrections (~21k rows; ~20 min)
-.\scripts\visa2014-migration\reimport\ApplicationItems.ps1
-
-# 5. Synthetic progress (~54k rows)
-.\scripts\visa2014-migration\reimport\ApplicationProgress.ps1
+# 2. Roster ApplicationProfileInstancePerson (type-filtered)
+# 3. Progress ApplicationProfileInstanceProgress (type-filtered)
+# 4. Invitation + InvitationItem if type generates invitation
+# 5. WorkPermit + WorkPermitItem if type generates work permit
+# 6. Visa after issued steps (wipe local PG Visa first if loaded after Passport)
 ```
 
 **Gotchas (calik-energi 2026-07-04):**
@@ -303,7 +306,7 @@ Application → WorkPermit → WorkPermitItem → Invitation → InvitationItem 
 
 **Pilot verify:** app **8/-967** — `App_Reg_Check_Out`, 1 progress step (`IS_BEING_PREPARED` @ `AT_OFFICE`), 2 items, 0 direct-ministry review rows.
 
-**Note:** `order.yaml` is authoritative. `Run-HeadlessChain.ps1` / local PG chains must include **WorkPermitItem** and **InvitationItem** before ApplicationItem (same as `OnPrem-Sync.ps1`). If a chain omitted those waves, treat it as a script bug and fix the step list — do not “catch up” by only importing ApplicationItem.
+**Note:** `application-type-import-order.yaml` is authoritative for instance/issued/visa **execution**. `order.yaml` remains BO `dependsOn` topology. If a chain still runs Visa after Passport, treat it as a script bug.
 
 ### Partial reimport — ApplicationItem only
 

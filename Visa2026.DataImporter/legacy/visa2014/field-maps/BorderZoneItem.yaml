@@ -1,0 +1,43 @@
+# BorderZoneItem field map — layer 2
+# Layer 1: table-mappings.yaml (id: border-zone-item)
+
+tableMappingId: border-zone-item
+
+source:
+  table: PersonInApplication
+  schema: dbo
+  filter: parent ApplicationTypeForEmployee = 11
+
+target:
+  odataEntity: BorderZoneItem
+
+deduplication:
+  enabled: false
+
+propertyGaps:
+  targetOnly: []
+
+fields:
+  - source: PersonInApplication.Oid
+    target: null
+    transform: legacy_id
+
+  - source: PersonInApplication.Employee / FamilyMember
+    target: Person
+    transform: fk_id_map
+    idMapEntity: Person
+    missingBehavior: skip_row
+    notes: COALESCE(Employee, FamilyMember)
+
+  - source: PersonInApplication.Passport
+    target: Passport
+    transform: fk_id_map
+    idMapEntity: Passport
+    missingBehavior: skip_row
+
+  - source: PersonInApplication.Application
+    target: BorderZone
+    transform: fk_id_map
+    idMapEntity: BorderZone
+    missingBehavior: skip_row
+    notes: Parent id-map key is Application.Oid

@@ -85,6 +85,9 @@ propertyGaps:
         (3) else other ProcessNumber (e.g. invitation) when still unset;
         (4) else target-side predecessor: ApplicationItem.CurrentVisa = prior visa on same passport.
         Sticky invitation ProcessNumber must not beat a real extension sibling.
+        After those links, keep at most one visa per PersonInApplication (earliest
+        VisaIssuedDate): later stickers that reuse the same ProcessNumber stay on
+        the Passport but are not Issued records on that application.
         Same correction also backfills Visa.ProcessNumber (ASNumber) and LegacyPersonInApplicationProfileInstanceOid.
     - property: Notes
       default: null

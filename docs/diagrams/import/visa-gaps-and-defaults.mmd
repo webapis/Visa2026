@@ -1,0 +1,38 @@
+flowchart TB
+  subgraph nameTrap["Two different ProcessNumber meanings"]
+    N1["legacy Visa.ASNumber<br/>stamp Işlenen belgisi"] -->|"scalar POST"| N2["Visa.ProcessNumber string"]
+    N3["legacy Visa.ProcessNumber<br/>PersonInApplication Guid"] -->|"scalar POST"| N4["LegacyPersonInApplicationProfileInstanceOid"]
+  end
+
+  subgraph drop["Dropped dbo.Visa columns"]
+    D1["IRemainingDays_Data / IMessage_Data"]
+    D2["HasabaAlynmayar — RegistrationState is computed"]
+    D3["AppConf / ImpVisaType / ImpVisaCategory / ImpVisaIssuedPlace / ImpPassport"]
+    D4["OptimisticLockField"]
+  end
+
+  subgraph later["Null on first Visa POST — later corrections"]
+    L1["IssuingApplicationProfileInstance"] -->|"after ApplicationProfileInstance wave"| L2["--correct-visa2014-issuing-application-item"]
+    L3["IssuingInvitationItem"] -->|"after InvitationItem"| L4["--correct-visa2014-invitation-item"]
+  end
+
+  subgraph fileWave["Later file wave — not scalar Visa"]
+    F1["Visa.GocuermeNusga<br/>inline varbinary"] -->|"--import-visa2014-files<br/>--property VisaDocument"| F2["Visa.Documents"]
+  end
+
+  subgraph dedupe["VisaNumber uniqueness"]
+    DU1["sentinels AFV0000000 / JLV0000000"] -->|"append last 8 of legacy Oid"| DU2["import all placeholders"]
+    DU3["real duplicate numbers"] -->|"keep latest VisaEndDate"| DU4["skip older Oid"]
+    DU5["Do not collapse to one visa per Passport"]
+  end
+
+  subgraph targetOnly["Visa.cs with no legacy Visa column"]
+    TO1["IsCancelled / IsChanged / IsExtended / ExtensionRequired — defaults"]
+    TO2["Notes / ShowOptionalFields — omit or default"]
+    TO3["RegistrationState — computed"]
+    TO4["ApplicationProfileInstances — input M2M later"]
+  end
+
+  subgraph idmap["Id-map only"]
+    OID["dbo.Visa.Oid"] -->|"legacy_id"| MAP["id-maps/.../Visa.json<br/>not Visa.ID"]
+  end

@@ -25,7 +25,25 @@ fields:
 
   - source: (derived)
     target: ResolvedLinks
-    notes: Immediate RefreshResolvedLinks gated by profile RequirePerson*. §10.2 validity is officer-only; import (IsDataImport) links historical current rows including expired.
+    notes: |
+      RefreshResolvedLinks fills Education/Address/etc. Passport and Visa are then
+      replaced from PersonInApplication.Passport + PreviousPassport + Visa (id-map).
+      Do not keep latest-N person documents on historical cases.
+      Correction: --correct-visa2014-application-person-document-links
+
+  - source: PersonInApplication.Passport
+    target: ResolvedLinks.Passport (current)
+    resolve: Passport id-map
+
+  - source: PersonInApplication.PreviousPassport
+    target: ResolvedLinks.Passport (previous)
+    resolve: Passport id-map
+    gatedBy: ApplicationType.ShowPreviousPassport
+
+  - source: PersonInApplication.Visa
+    target: ResolvedLinks.Visa (current)
+    resolve: Visa id-map
+    gatedBy: ApplicationType.ShowCurrentVisa
 
 skip:
   - parent ApplicationType composites E:44 / E:55 (skip_row)

@@ -1624,6 +1624,9 @@
                      "NameTm":  "Jemgyýet ylymlary"
                  },
                  {
+                     "NameTm":  "Jemgyýetde hasapçylyk"
+                 },
+                 {
                      "NameTm":  "jemgyýet ylymlary,SAP programma üpjünçiligi"
                  },
                  {
@@ -3284,5 +3287,105 @@
                  {
                      "NameTm":  "Barlag-ölçeg enjamlarynyň tehnologiýasy"
                  }
-             ,{"NameTm":"Tiz kömek kömekçisi"},{"NameTm":"Tiz kömek gyssagly ýagdaýlar boýunça komekçi"},{"NameTm":"Ýylylyk izolirleýjisi"},{"NameTm":"Energetika inženerçiligi"},{"NameTm":"Esasy gözegçilik işleri,Gurluşyk düzgünleri (hünär şahadatnamaly)"},{"NameTm":"Daşky gurşawy goramak inženerligi"},{"NameTm":"Turbageçirijileri himiki taýdan arassalamak"},{"NameTm":"Esasy gözegçilik işler, Himiki taýdan arassalaýyş işler(hünär şahadatnamaly)"},{"NameTm":"Turbalaryň himiki taýdan,ýokary basyşly suw we soda pürkmek arkaly arassalamak"},{"NameTm":"Himiki taýdan,ýokary basyşly suw we soda pürkmek arkaly arassalamak"}]
+             ,{"NameTm":"Tiz kömek kömekçisi"},{"NameTm":"Tiz kömek gyssagly ýagdaýlar boýunça komekçi"},{"NameTm":"Ýylylyk izolirleýjisi"},{"NameTm":"Energetika inženerçiligi"},{"NameTm":"Esasy gözegçilik işleri,Gurluşyk düzgünleri (hünär şahadatnamaly)"},{"NameTm":"Daşky gurşawy goramak inženerligi"},{"NameTm":"Turbageçirijileri himiki taýdan arassalamak"},{"NameTm":"Esasy gözegçilik işler, Himiki taýdan arassalaýyş işler(hünär şahadatnamaly)"},{"NameTm":"Turbalaryň himiki taýdan,ýokary basyşly suw we soda pürkmek arkaly arassalamak"},{"NameTm":"Himiki taýdan,ýokary basyşly suw we soda pürkmek arkaly arassalamak"},
+                 {
+                     "NameTm":  "Elektrik üpjünçiligi tehnologiýasy"
+                 },
+                 {
+                     "NameTm":  "Enjamlary abatlaýjy-gurnaýjy"
+                 },
+                 {
+                     "NameTm":  "Inženerçilik"
+                 },
+                 {
+                     "NameTm":  "Elektrik-elektronika tehnologiýasy/senagat abatlaýyş-bejeriş"
+                 },
+                 {
+                     "NameTm":  "Ätiýaçlandyryş işleri"
+                 },
+                 {
+                     "NameTm":  "Senagat Mehatronikasy boýunça ýokary derejeli tehniik"
+                 },
+                 {
+                     "NameTm":  "Oba-hojalyk-gurluşyk ussasy"
+                 },
+                 {
+                     "NameTm":  "İş dolandyryjy, Elektrik inženeri"
+                 },
+                 {
+                     "NameTm":  "Elektrik-elektronika inženerçiligi"
+                 },
+                 {
+                     "NameTm":  "Dizel ýangyçlar boýunça mehanik"
+                 },
+                 {
+                     "NameTm":  "Enjamlary balansirlemek"
+                 },
+                 {
+                     "NameTm":  "Işewürlik dolandyryşy/hereketlendirijiler"
+                 },
+                 {
+                     "NameTm":  "İş dolandyryş"
+                 },
+                 {
+                     "NameTm":  "Elektron maglumat inženerçiligi"
+                 },
+                 {
+                     "NameTm":  "Elektrik we mehanika inženerçiligi"
+                 },
+                 {
+                     "NameTm":  "Awtoulag motorlaryny abatlaýyş"
+                 },
+                 {
+                     "NameTm":  "Awtoulaglar inženerçiligi"
+                 },
+                 {
+                     "NameTm":  "Inženerçilik bakalawry (mehaniki inženerçilik)"
+                 },
+                 {
+                     "NameTm":  "Himiýa we Biomolekulýar inženerçiligi"
+                 },
+                 {
+                     "NameTm":  "Elektronika we gurallar inženerçiligi"
+                 },
+                 {
+                     "NameTm":  "Material ylymlary we inženerçilik"
+                 },
+                 {
+                     "NameTm":  "Awtomatlaşdyrma"
+                 },
+                 {
+                     "NameTm":  "Ýangyna garşy serişdeleri çalyjy"
+                 },
+                 {
+                     "NameTm":  "Himiýa inženerçiligi doktorlyk derejesi"
+                 },
+                 {
+                     "NameTm":  "Inžener-fizik-ýylylyk energiýa ulgamynyň energetigi"
+                 },
+                 {
+                     "NameTm":  "Tehniki ulgamlarda dolandyryş"
+                 },
+                 {
+                     "NameTm":  "Tebigy baýlyklaryň ýataklaryny ulanmak,işewürligi dolandyrmak boýunça magistr derejesi"
+                 },
+                 {
+                     "NameTm":  "Dolandyryş/Elektronika tehnologiýalary"
+                 },
+                 {
+                     "NameTm":  "Ekologiýa ulgamlarynyň ylymlary/Inženerçilik ylymlarynyň magistri"
+                 },
+                 {
+                     "NameTm":  "Mehatronika we amaly kompýutor tehnologiýalary"
+                 },
+                 {
+                     "NameTm":  "Çylşyrymly gurluşyk sekileriniň barlag okuwy barada şahadatnama"
+                 },
+                 {
+                     "NameTm":  "Tehniki hyzmat"
+                 },
+                 {
+                     "NameTm":  "Iş tejribeli, Gurluşyk we senagat ugry üçin howpsuzlyk şahadatnama"
+                 }
+]
 }

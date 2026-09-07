@@ -106,7 +106,7 @@ internal static class Visa2014PersonODataImporter
         foreach (var row in employees.Concat(familyMembers))
         {
             var legacyOid = (Guid)row["_legacyRowId"]!;
-            if (supplementPermitReferencedOnly && idMap.ContainsKey(legacyOid))
+            if (idMap.ContainsKey(legacyOid))
             {
                 skippedAlreadyImported++;
                 if (verbose)
@@ -134,6 +134,32 @@ internal static class Visa2014PersonODataImporter
                 continue;
             }
 
+            var personalNumber = row.GetValueOrDefault("PersonalNumber") as string ?? "0";
+            var firstName = row.GetValueOrDefault("FirstName") as string ?? "";
+            var lastName = row.GetValueOrDefault("LastName") as string ?? "";
+            var dateOfBirth = row.GetValueOrDefault("DateOfBirth") is DateTime dob
+                ? dob
+                : default;
+            var existingByIdentity = await target.TryFindPersonByIdentityAsync(
+                personalNumber,
+                firstName,
+                lastName,
+                dateOfBirth);
+            if (existingByIdentity.HasValue)
+            {
+                idMap[legacyOid] = existingByIdentity.Value;
+                relinkedToExisting++;
+                if (relinkedToExisting % 250 == 0)
+                {
+                    Console.WriteLine(
+                        $"INF Progress: {posted} posted, {failed} failed, {skippedAlreadyImported} already imported, {relinkedToExisting} relinked...");
+                    if (!string.IsNullOrWhiteSpace(idMapOutputPath))
+                        await WriteIdMapAsync(idMapOutputPath, idMap);
+                }
+
+                continue;
+            }
+
             try
             {
                 var payload = BuildPayload(row, resolver, idMap, employeeProjectContractByLegacyOid, employeeSubcontractorByLegacyOid);
@@ -150,8 +176,8 @@ internal static class Visa2014PersonODataImporter
                 posted++;
                 if (posted % 250 == 0)
                 {
-                    Console.WriteLine($"INF Progress: {posted} posted, {failed} failed, {skippedAlreadyImported} already imported...");
-                    if (supplementPermitReferencedOnly && !string.IsNullOrWhiteSpace(idMapOutputPath))
+                    Console.WriteLine($"INF Progress: {posted} posted, {failed} failed, {skippedAlreadyImported} already imported, {relinkedToExisting} relinked...");
+                    if (!string.IsNullOrWhiteSpace(idMapOutputPath))
                         await WriteIdMapAsync(idMapOutputPath, idMap);
                 }
                 if (verbose)

@@ -1286,10 +1286,15 @@ namespace Visa2026.Module.BusinessObjects
             {
                 ApplicationDate = DateTime.Now;
                 Urgency = objectSpace.GetObjectsQuery<Urgency>().FirstOrDefault(u => u.IsDefault);
-                VisaType = objectSpace.GetObjectsQuery<VisaType>().FirstOrDefault(v => v.IsDefault);
-                VisaCategory = objectSpace.GetObjectsQuery<VisaCategory>().FirstOrDefault(vc => vc.IsDefault);
-                VisaPeriod = objectSpace.GetObjectsQuery<VisaPeriod>().FirstOrDefault(vp => vp.IsDefault);
-                ProjectContract = objectSpace.GetObjectsQuery<ProjectContract>().FirstOrDefault(pc => pc.IsDefault);
+                // VISA2014 import applies VisaType/Period/Category/ProjectContract from the
+                // transform (including explicit null). Officer create still uses catalog IsDefault.
+                if (!MigrationImportContext.IsDataImport)
+                {
+                    VisaType = objectSpace.GetObjectsQuery<VisaType>().FirstOrDefault(v => v.IsDefault);
+                    VisaCategory = objectSpace.GetObjectsQuery<VisaCategory>().FirstOrDefault(vc => vc.IsDefault);
+                    VisaPeriod = objectSpace.GetObjectsQuery<VisaPeriod>().FirstOrDefault(vp => vp.IsDefault);
+                    ProjectContract = objectSpace.GetObjectsQuery<ProjectContract>().FirstOrDefault(pc => pc.IsDefault);
+                }
                 if (!SuppressInitialProgress && !MigrationImportContext.IsDataImport)
                     ApplicationProfileInstanceProgressInitializer.EnsureInitialProgress(this, objectSpace);
             }

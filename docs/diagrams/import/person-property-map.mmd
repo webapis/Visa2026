@@ -1,0 +1,59 @@
+flowchart TB
+  subgraph sources["VISA2015 source"]
+    direction TB
+    P["dbo.Person<br/>active: GCRecord IS NULL"]
+    PP["dbo.Passport<br/>canonical row per person"]
+    MS["dbo.MaritalStatus"]
+    CT["dbo.Contract"]
+    RL["dbo.Relation"]
+    P --- PP
+    P --- MS
+    P --- CT
+    P --- RL
+  end
+
+  subgraph identity["Name and birth → Person.cs"]
+    direction LR
+    L_FN["Person.FirstName"] -->|identity| T_FN["FirstName"]
+    L_LN["Person.LastName"] -->|identity| T_LN["LastName"]
+    L_BD["Person.BirthDate"] -->|date| T_DOB["DateOfBirth"]
+    L_BP["Person.BirthPlace"] -->|identity| T_BP["BirthPlace"]
+  end
+
+  subgraph lookups["Lookups → Person.cs"]
+    direction LR
+    L_BC["Person.BirthCountry"] -->|"Country.NameOfCountryL → Code"| T_COB["CountryOfBirth"]
+    L_FAC["Person.ForeignAddressCountry"] -->|"Country.NameOfCountryL → Code"| T_FAC["ForeignAddressCountry"]
+    L_G["Person.Gender"] -->|"Gender.TypeOfGenderL → Code"| T_G["Gender"]
+    L_MS["MaritalStatus.Status"] -->|"int 0–5 → Code"| T_MS["MaritalStatus"]
+    L_CT["Person.Contract"] -->|"NumberOfContract → Code"| T_PC["ProjectContract"]
+    L_REL["Person.FamilyMemberRelation"] -->|"Relation → Name"| T_REL["Relationship"]
+    L_IDN["Person.IDNumber"] -->|"text → Subcontractor.NameTm"| T_SUB["Subcontractor"]
+  end
+
+  subgraph address["Address and photo → Person.cs"]
+    direction LR
+    L_FA["Person.ForeignAddress"] -->|identity| T_FA["ForeignAddress"]
+    L_PH["Person.Photo"] -->|"bytes, file wave"| T_PH["Photo"]
+  end
+
+  subgraph role["Role, family, archive → Person.cs"]
+    direction LR
+    L_IE["Person.IsEmployee"] -->|bool| T_IE["IsEmployee"]
+    L_IF["Person.IsEmployee + IsFamilyMember"] -->|"enum_from_flags"| T_PR["PersonRole"]
+    L_EMP["Person.Employee"] -->|"fk_id_map Person"| T_SE["SponsoringEmployee"]
+    L_AP["Person.ActivePerson"] -->|"bool_invert"| T_IA["IsArchived"]
+    L_MSL["MaritalStatus.StatusL"] -->|identity| T_VF["VisaApplicationFamilyMembersText"]
+  end
+
+  subgraph passport["Canonical dbo.Passport → Person.cs"]
+    direction LR
+    L_PN["Passport.PersonalNumber"] -->|"custom_canonical_passport<br/>sentinels - . empty → 0"| T_PN["PersonalNumber"]
+    L_CIT["Passport.Citizenship"] -->|"Country.NameOfCountryL → Code"| T_NAT["Nationality"]
+  end
+
+  P --> identity
+  P --> lookups
+  P --> address
+  P --> role
+  PP --> passport

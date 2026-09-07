@@ -152,6 +152,29 @@ entities:
     notes: |
       importConfirmed + local PG import 2026-07-22: Posted 254 / Failed 0.
 
+  - targetODataEntity: BorderZone
+    discoveryDossier: discovery/BorderZone.yaml
+    tableMappingId: border-zone-header
+    discoveryStatus: complete
+    importConfirmed: true
+    importStatus: done
+    legacyTable: Application (E:11 synthesize)
+    legacyBo: IApplicationForBorderZonePermit
+    blockReason: null
+    notes: |
+      Discovery 2026-09-07: 111 apps; 1 skip junk ProcessNumber; Excel preview before POST.
+
+  - targetODataEntity: BorderZoneItem
+    discoveryDossier: discovery/BorderZoneItem.yaml
+    tableMappingId: border-zone-item
+    discoveryStatus: complete
+    importConfirmed: true
+    importStatus: complete
+    legacyTable: PersonInApplication (parent E:11)
+    legacyBo: PersonInApplication
+    blockReason: null
+    notes: Discovery 2026-09-07 — 218 lines; wait for header Excel confirm.
+
   - targetODataEntity: ApplicationProgress
     discoveryDossier: discovery/ApplicationProgress.yaml
     tableMappingId: application-progress-synthetic

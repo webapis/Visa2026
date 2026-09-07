@@ -1,104 +1,65 @@
--- Delete VISA2014-imported Application scope (IsManualEntry = true) for local PG reimport.
--- Run against Visa2026 PostgreSQL target only — never VISA2015.
+-- Hard-delete ApplicationProfileInstance rows on Visa2026 PostgreSQL (local reimport).
+-- Unlink issued headers first: WorkPermit / Invitation / Rejection FKs are ON DELETE CASCADE
+-- (a bare DELETE of instances would wipe those letters). BorderZone / Visa issuing /
+-- WordReportGenerationBatch are NO ACTION. LatestProgressId is NO ACTION onto progress.
+-- Preserves: ApplicationProfiles catalog, Person and other master data, WP/Inv/Rejection/Visa rows.
+-- Run against Visa2026 PostgreSQL only — never VISA2015.
 
 BEGIN;
 
-CREATE TEMP TABLE app_ids (id uuid PRIMARY KEY) ON COMMIT DROP;
-INSERT INTO app_ids (id)
-SELECT a."ID"
-FROM "Applications" a
-WHERE a."IsManualEntry" = true
-  AND COALESCE(a."GCRecord", 0) = 0;
-
 DO $$
 DECLARE
-    app_count integer;
+    inst_count integer;
+    progress_count integer;
+    people_count integer;
+    wp_linked integer;
+    inv_linked integer;
 BEGIN
-    SELECT COUNT(*) INTO app_count FROM app_ids;
-    RAISE NOTICE 'Applications to delete: %', app_count;
+    SELECT COUNT(*) INTO inst_count FROM "ApplicationProfileInstances";
+    SELECT COUNT(*) INTO progress_count FROM "ApplicationProfileInstanceProgresses";
+    SELECT COUNT(*) INTO people_count FROM "ApplicationProfileInstancePeople";
+    SELECT COUNT(*) INTO wp_linked FROM "WorkPermits" WHERE "ApplicationProfileInstanceID" IS NOT NULL;
+    SELECT COUNT(*) INTO inv_linked FROM "Invitations" WHERE "ApplicationProfileInstanceID" IS NOT NULL;
+    RAISE NOTICE 'Before: instances=% progress=% people=% wp_linked=% inv_linked=%',
+        inst_count, progress_count, people_count, wp_linked, inv_linked;
 
-    IF app_count = 0 THEN
-        RETURN;
-    END IF;
+    UPDATE "ApplicationProfileInstances"
+    SET "LatestProgressId" = NULL
+    WHERE "LatestProgressId" IS NOT NULL;
 
-    UPDATE "ApplicationItems" ai
-    SET
-        "CurrentInvitationItemID" = NULL,
-        "PreviousInvitationItemID" = NULL,
-        "CurrentWorkPermitItemID" = NULL,
-        "SecondWorkPermitItemId" = NULL
-    FROM app_ids a
-    WHERE ai."ApplicationID" = a.id;
+    UPDATE "WorkPermits"
+    SET "ApplicationProfileInstanceID" = NULL
+    WHERE "ApplicationProfileInstanceID" IS NOT NULL;
 
-    UPDATE "Visas" v
-    SET "IssuingInvitationItemID" = NULL
-    FROM "InvitationItems" ii
-    INNER JOIN "Invitations" i ON i."ID" = ii."InvitationID"
-    INNER JOIN app_ids a ON i."ApplicationID" = a.id
-    WHERE v."IssuingInvitationItemID" = ii."ID";
+    UPDATE "Invitations"
+    SET "ApplicationProfileInstanceID" = NULL
+    WHERE "ApplicationProfileInstanceID" IS NOT NULL;
 
-    DELETE FROM "TravelHistories" th
-    USING "ApplicationItems" ai, app_ids a
-    WHERE th."SourceApplicationItemID" = ai."ID"
-      AND ai."ApplicationID" = a.id;
+    UPDATE "Rejections"
+    SET "ApplicationProfileInstanceID" = NULL
+    WHERE "ApplicationProfileInstanceID" IS NOT NULL;
 
-    DELETE FROM "InvitationItems" ii
-    USING "Invitations" i, app_ids a
-    WHERE ii."InvitationID" = i."ID"
-      AND i."ApplicationID" = a.id;
+    UPDATE "BorderZones"
+    SET "ApplicationProfileInstanceID" = NULL
+    WHERE "ApplicationProfileInstanceID" IS NOT NULL;
 
-    DELETE FROM "WorkPermitItems" wi
-    USING "WorkPermits" w, app_ids a
-    WHERE wi."WorkPermitID" = w."ID"
-      AND w."ApplicationID" = a.id;
+    UPDATE "Visas"
+    SET "IssuingApplicationProfileInstanceID" = NULL
+    WHERE "IssuingApplicationProfileInstanceID" IS NOT NULL;
 
-    DELETE FROM "RejectionItems" ri
-    USING "Rejections" r, app_ids a
-    WHERE ri."RejectionID" = r."ID"
-      AND r."ApplicationID" = a.id;
+    UPDATE "WordReportGenerationBatches"
+    SET "ApplicationProfileInstanceID" = NULL
+    WHERE "ApplicationProfileInstanceID" IS NOT NULL;
 
-    DELETE FROM "ApplicationProgresses" ap
-    USING app_ids a
-    WHERE ap."ApplicationID" = a.id;
+    DELETE FROM "ApplicationProfileInstances";
 
-    DELETE FROM "ApplicationApprovalLegSnapshots" s
-    USING app_ids a
-    WHERE s."ApplicationId" = a.id;
-
-    DELETE FROM "ApplicationItems" ai
-    USING app_ids a
-    WHERE ai."ApplicationID" = a.id;
-
-    DELETE FROM "WordReportGenerationBatches" b
-    USING app_ids a
-    WHERE b."ApplicationID" = a.id;
-
-    DELETE FROM "Invitations" i
-    USING app_ids a
-    WHERE i."ApplicationID" = a.id;
-
-    DELETE FROM "WorkPermits" w
-    USING app_ids a
-    WHERE w."ApplicationID" = a.id;
-
-    DELETE FROM "Rejections" r
-    USING app_ids a
-    WHERE r."ApplicationID" = a.id;
-
-    DELETE FROM "BorderZones" bz
-    USING app_ids a
-    WHERE bz."ApplicationID" = a.id;
-
-    DELETE FROM "Applications" app
-    USING app_ids a
-    WHERE app."ID" = a.id;
-
-    RAISE NOTICE 'Remaining manual-entry apps after delete: %', (
-        SELECT COUNT(*)
-        FROM "Applications"
-        WHERE "IsManualEntry" = true
-          AND COALESCE("GCRecord", 0) = 0
-    );
+    SELECT COUNT(*) INTO inst_count FROM "ApplicationProfileInstances";
+    SELECT COUNT(*) INTO progress_count FROM "ApplicationProfileInstanceProgresses";
+    SELECT COUNT(*) INTO people_count FROM "ApplicationProfileInstancePeople";
+    SELECT COUNT(*) INTO wp_linked FROM "WorkPermits";
+    SELECT COUNT(*) INTO inv_linked FROM "Invitations";
+    RAISE NOTICE 'After: instances=% progress=% people=% work_permits=% invitations=%',
+        inst_count, progress_count, people_count, wp_linked, inv_linked;
 END $$;
 
 COMMIT;

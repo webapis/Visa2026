@@ -4,6 +4,8 @@
 -- skip-navigation join (ApplicationProfileInstanceId + PersonId only, no roster-line ID). Truncate
 -- it together with ResolvedLinks, otherwise Wave 2b reimport sees stale membership.
 -- IMPORTANT: Do NOT truncate FileData (CASCADE would wipe UserReportTemplates / ProjectContractDocuments).
+-- Do NOT truncate BusinessTripAddress: ApplicationProfiles.DefaultBusinessTripAddressId
+-- references it; TRUNCATE CASCADE would wipe ApplicationProfiles (seeded templates).
 -- After truncate, optionally: DELETE FROM "FileData" WHERE "ID" NOT IN (SELECT "TemplateFileID" FROM "UserReportTemplates" WHERE "TemplateFileID" IS NOT NULL);
 BEGIN;
 TRUNCATE TABLE
@@ -21,7 +23,7 @@ TRUNCATE TABLE
   "InvitationDocuments",
   "InvitationImages",
   "Invitations",
-  "BorderZoneItem",
+  "BorderZoneItems",
   "BorderZoneDocuments",
   "BorderZones",
   "RejectionItems",
@@ -29,7 +31,6 @@ TRUNCATE TABLE
   "RejectionImages",
   "Rejections",
   "TravelHistories",
-  "BusinessTripAddress",
   "VisaDocument",
   "VisaImages",
   "Visas",

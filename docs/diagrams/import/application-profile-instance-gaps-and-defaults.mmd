@@ -1,0 +1,37 @@
+flowchart TB
+  subgraph nameTrap["Legacy table vs target BO"]
+    N1["dbo.Application + IRegistration_Data"] -->|"header-only import"| N2["ApplicationProfileInstance"]
+    N3["Do not upsert on FullApplicationNumber"] -->|"862+ shared manual numbers"| N4["id-map key = Application.Oid"]
+  end
+
+  subgraph children["Child BOs — later waves"]
+    C1["PersonInApplication"] --> C2["ApplicationProfileInstancePerson / ApplicationItem"]
+    C3["ApplicationResult Result=0/1"] --> C4["Invitation / Rejection"]
+    C5["WorkPermit"] --> C6["WorkPermit header + items"]
+    C7["ministry dates / ProcessNumber"] --> C8["ApplicationProfileInstanceProgress"]
+  end
+
+  subgraph drop["Dropped or deferred on header"]
+    D1["SigningPerson / Bellik / NumberOfPages / NumberOfPerson"]
+    D2["NewRegistrationLocation / PreviousRegistrationLocation"]
+    D3["AppliedMinistery / DateForwardedToMonistery / …"]
+    D4["Cancelled / Rejected — progress terminal later"]
+    D5["SahsyKagyz — file wave"]
+  end
+
+  subgraph targetOnly["ApplicationProfileInstance.cs with no legacy header column"]
+    TO1["SuppressInitialProgress — true on import so progress wave seeds"]
+    TO2["CurrentState / PrimaryStateCode / SLA — computed"]
+    TO3["ApprovalLegSnapshots — later"]
+    TO4["People / Passports / Visas M2M — roster wave"]
+    TO5["FromCity — legacy trip is ToCity only"]
+  end
+
+  subgraph skip["Transform skip — not FailedCount"]
+    S1["ApplicationType composites E:33 and E:55"]
+    S2["missing ManualApplicationNumber or date"]
+  end
+
+  subgraph catalogs["Before this wave"]
+    CAT["tenantCatalogGeneration<br/>ApplicationProfile / ProjectContract / ApprovalLegProfile / Subcontractor"]
+  end

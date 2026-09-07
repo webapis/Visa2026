@@ -1,0 +1,28 @@
+flowchart TB
+  subgraph relocate["Relocated — not Person.cs"]
+    direction LR
+    M["dbo.Person.MiddleName<br/>legacy: job title, not a name"] -->|"EmployeePositionHistory wave"| AP["EmployeePositionHistory.ActualPosition"]
+  end
+
+  subgraph drop["Dropped dbo.Person columns"]
+    D1["IMessage_Data"]
+    D2["CountPerson"]
+    D3["ImpBirthCountry / ImpForeignAddressCountry / ImpGender / ImpContract / ImpMaritalStatus"]
+    D4["OptimisticLockField / ObjectType / AppConf"]
+    D5["AnketaCV / GosmacaMaglumat / RegistratinDescription / Berkan"]
+  end
+
+  subgraph targetOnly["Person.cs with no legacy Person column"]
+    TO1["MiddleName — left empty; do not copy Person.MiddleName"]
+    TO2["Email — default empty string"]
+    TO3["HireDate — allow null"]
+    TO4["PreviousWorkplacesInTurkmenistan — not in Person.yaml"]
+    TO5["Incomplete* flags / notes — officer-only, not imported"]
+    TO6["FullName / Age — computed, not stored from legacy"]
+  end
+
+  subgraph idmap["Id-map only"]
+    OID["dbo.Person.Oid"] -->|"legacy_id"| MAP["id-maps/.../Person.json<br/>not Person.ID"]
+  end
+
+  note["PersonalNumber is NOT Person.IDNumber.<br/>IDNumber maps to Subcontractor."]

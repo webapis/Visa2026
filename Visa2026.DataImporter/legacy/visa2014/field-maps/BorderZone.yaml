@@ -1,0 +1,64 @@
+# BorderZone field map — layer 2
+# Layer 1: table-mappings.yaml (id: border-zone-header)
+# Synthesized from App_Border_Zone_Permission applications — no legacy issued-letter table.
+
+tableMappingId: border-zone-header
+
+source:
+  table: Application
+  schema: dbo
+  filter: ApplicationTypeForEmployee.TypeOfApplicationForEmployee = 11 (App_Border_Zone_Permission)
+
+target:
+  odataEntity: BorderZone
+
+deduplication:
+  enabled: true
+  keys:
+    - BorderZoneNumber
+  notes: ProcessNumber unique on 110 real Çalik numbers; 1 junk ProcessNumber skipped.
+
+propertyGaps:
+  legacyOnly:
+    - column: BorderZoneForVisa
+      disposition: drop
+      notes: Already mapped to ApplicationProfileInstance.BorderZoneLocation
+    - column: ChooseBorderZoneType
+      disposition: drop
+  targetOnly:
+    - property: ExpirationDate
+      disposition: computed_on_save
+      notes: StartDate + ValidityDuration.NumberOfDays
+    - property: Documents
+      disposition: file_wave
+
+fields:
+  - source: Application.Oid
+    target: null
+    transform: legacy_id
+    notes: id-map key — same oid as ApplicationProfileInstance id-map
+
+  - source: Application.ProcessNumber
+    target: BorderZoneNumber
+    transform: identity_trim
+    missingBehavior: skip_row
+    notes: Skip non AS/CO permit numbers (1 Çalik row)
+
+  - source: Application.ProcessDate
+    target: StartDate
+    transform: date
+    missingBehavior: skip_row
+
+  - source: Application.BorderZonePeriod
+    target: ValidityDuration
+    transform: closest_day_span_to_validity_duration
+    candidates: [90, 180, 365]
+    lookupCatalog: ValidityDuration
+    missingBehavior: use_closest
+    notes: VisaPeriod.CountMonth → closest Month3/Month6/Year1
+
+  - source: Application.Oid
+    target: ApplicationProfileInstance
+    transform: fk_id_map
+    idMapEntity: ApplicationProfileInstance
+    missingBehavior: skip_row

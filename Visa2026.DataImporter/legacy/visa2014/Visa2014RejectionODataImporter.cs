@@ -181,7 +181,7 @@ internal static class Visa2014RejectionODataImporter
         {
             ["RejectedDocNumber"] = rejectedDocNumber.Trim(),
             ["Date"] = DateTime.SpecifyKind(date, DateTimeKind.Utc),
-            ["Application"] = new Dictionary<string, object?> { ["ID"] = applicationId },
+            ["ApplicationProfileInstance"] = new Dictionary<string, object?> { ["ID"] = applicationId },
             ["Reason"] = null,
         };
     }

@@ -353,14 +353,6 @@ namespace Visa2026.Blazor.Server
                 ReportDashboardPostgresViewsHealSql.ApplyIfMissing(connectionString);
             }
 
-            ApplicationProfileSeedGate.EnsureSynced(
-                app.ApplicationServices,
-                app.ApplicationServices.GetService<ILoggerFactory>()?.CreateLogger(typeof(ApplicationProfileSeedGate)));
-
-            UserReportTemplateSeedGate.EnsureSeeded(
-                app.ApplicationServices,
-                app.ApplicationServices.GetService<ILoggerFactory>()?.CreateLogger(typeof(UserReportTemplateSeedGate)));
-
             ApplicationUserThemePreferenceStartupGate.EnsureReady(
                 app.ApplicationServices,
                 app.ApplicationServices.GetService<ILoggerFactory>()?.CreateLogger(typeof(ApplicationUserThemePreferenceStartupGate)));
@@ -418,6 +410,16 @@ namespace Visa2026.Blazor.Server
             app.UseAuthorization();
             app.UseAntiforgery();
             app.UseXaf();
+
+            // After UseXaf so ValueManager is AsyncValueManager (profile template OnSaving uses SecuritySystem).
+            ApplicationProfileSeedGate.EnsureSynced(
+                app.ApplicationServices,
+                app.ApplicationServices.GetService<ILoggerFactory>()?.CreateLogger(typeof(ApplicationProfileSeedGate)));
+
+            // After UseXaf so ValueManager is AsyncValueManager (template OnSaving uses SecuritySystem).
+            UserReportTemplateSeedGate.EnsureSeeded(
+                app.ApplicationServices,
+                app.ApplicationServices.GetService<ILoggerFactory>()?.CreateLogger(typeof(UserReportTemplateSeedGate)));
 
             // Redirect root "/" to the login page
             app.Use(async (context, next) =>

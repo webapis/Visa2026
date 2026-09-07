@@ -74,7 +74,9 @@ Copy-paste into Cursor chat. Reference:
 | Compare in XAF | @visa2014-to-visa2026-import On Demo (Admin): Operations → Import reimport history — compare Left/Right RunIds for DbCounts, file waves, and file presence. Expect “file waves not run” unless archive had -IncludeFileWaves. |
 | Resume after fail | @visa2014-to-visa2026-import Import stopped at [Entity] FailedCount>0 - fix mapping/catalogs, then -StartAt [Entity] (-SkipLookupPreflight only if approved). |
 | Prod catch-up Import | @visa2014-to-visa2026-import OnPrem-Sync.ps1 -Profile Production -Mode Import for application-domain entities. Ask before running. Add -IncludeFileWaves only when intentional (disk/time). |
-| Single BO pilot | @visa2014-to-visa2026-import Pilot --import-visa2014 --entity [BO] --legacy-source calik-energi --inprocess after lookup resolution for that BO. |
+| Single BO by ApplicationType | @visa2014-to-visa2026-import Import --entity [BO] for ApplicationType [App_Inv] only. Inner sequence: header → roster → progress → issued → visa. Do not import Visa before the instance. |
+| Single BO mapping check (dev) | @visa2014-to-visa2026-import Development mapping check: --entity [BO] --max-rows [N default 1] --legacy-source calik-energi-local-pg --inprocess. Show one Field / Legacy / Imported / Result table per row; halt until I accept or suggest a mapping change. Then remainder. Not for Demo/Prod full Import. |
+| Compare more sample rows (dev) | @visa2014-to-visa2026-import Raise sample to N=[2+] for the current BO and show comparison again. Do not import remainder until I accept. |
 | Legacy MCP check | @visa2014-to-visa2026-import Preflight: visa2014-sql-remote to VISA2015 on 10.100.128.15 - SELECT DB_NAME(). |
 
 **Note:** `-IncludeFileWaves` is opt-in. Without it, history shows Files=No / empty document-copy steps; file-presence (Photo, *Document counts) can still be archived from the live DB.

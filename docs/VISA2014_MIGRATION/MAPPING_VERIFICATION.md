@@ -22,10 +22,22 @@
 Chain order (per BO):
 
 ```text
-lookup resolution → lookup preflight → import wave (exit 0 + FailedCount 0)
-  → mapping verify (exit 0)
-  → next order.yaml entity
+lookup resolution → lookup preflight
+  → [development only, when reviewer asks]
+       sample POST (--max-rows N; default N=1; reviewer may raise N)
+       → human comparison preview (chat table; halt)
+       → accept  OR  suggested mapping change (permanent YAML/C#) then re-sample
+  → remainder / full wave of this BO
+  → mapping verify when CLI exists (optional after full wave)
+  → next order.yaml / inner-sequence entity
 ```
+
+**Human preview (dev only):** when this gate is on, paste **one Markdown table per sample row** in chat and **wait**:
+
+| Field | Legacy (VISA2015) | Imported (Visa2026) | Result |
+|-------|-------------------|---------------------|--------|
+
+Identity (BO, legacy Oid, target ID) goes **above** the table. **Result** is `Match`, `Not match`, or `Expected difference` (documented transform or a later wave such as Photo). Lookups as human labels, not GUIDs. Empty values as `(empty)`. List **Not match** field names under the table. Do not dump raw JSON as the review UI.
 
 ---
 

@@ -10,8 +10,10 @@ using Visa2026.Module.DatabaseUpdate;
 namespace Visa2026.Blazor.Server.Services;
 
 /// <summary>
-/// Runs <see cref="ApplicationProfileSeedSync"/> after host DI is ready when ModuleUpdater was skipped.
+/// Runs <see cref="ApplicationProfileSeedSync"/> after <c>app.UseXaf()</c> when ModuleUpdater was skipped.
 /// Tenant catalog JSON is applied here too (not only on DB version bump).
+/// Headless <c>--inprocess</c> import skips sync (<c>VISA2026_HEADLESS_IMPORT</c>) — same ValueManager
+/// issue as user-report templates if this ran before UseXaf.
 /// Phase B approval-leg instance heal uses a separate ObjectSpace and never blocks startup.
 /// </summary>
 internal static class ApplicationProfileSeedGate
@@ -20,6 +22,12 @@ internal static class ApplicationProfileSeedGate
     {
         if (services == null)
             throw new ArgumentNullException(nameof(services));
+
+        if (IsEnvFlagSet("VISA2026_HEADLESS_IMPORT"))
+        {
+            logger?.LogInformation("Skipping ApplicationProfile seed sync for headless VISA2014 import.");
+            return;
+        }
 
         try
         {
@@ -76,6 +84,13 @@ internal static class ApplicationProfileSeedGate
             logger?.LogError(ex, "ApplicationProfileInstance profile seed sync failed.");
             throw;
         }
+    }
+
+    private static bool IsEnvFlagSet(string name)
+    {
+        string? value = Environment.GetEnvironmentVariable(name);
+        return string.Equals(value, "true", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(value, "1", StringComparison.Ordinal);
     }
 
     private static void RunApprovalLegInstanceHeal(

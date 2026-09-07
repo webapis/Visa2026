@@ -59,6 +59,29 @@ public class ApplicationWorkspacePeopleLinksCompletenessTests
         Assert.True(ApplicationWorkspacePeopleLinksCompleteness.IsCountShort(1, 2));
         Assert.False(ApplicationWorkspacePeopleLinksCompleteness.IsCountShort(1, 1));
         Assert.False(ApplicationWorkspacePeopleLinksCompleteness.IsCountShort(2, 1));
+        Assert.False(ApplicationWorkspacePeopleLinksCompleteness.IsCountShort(0, 0));
+        Assert.False(ApplicationWorkspacePeopleLinksCompleteness.IsCountShort(1, 0));
+    }
+
+    [Fact]
+    public void Resolve_one_active_visa_expected_one_is_complete()
+    {
+        var view = View(
+            Person("A", Record("visa", 1, 1), Record("wp", 1, 1), Record("passport", 1, 1)));
+
+        Assert.Equal(ApplicationWorkspacePeopleLinksCompleteness.NavStatus.Complete, ApplicationWorkspacePeopleLinksCompleteness.Resolve(view));
+        Assert.False(ApplicationWorkspacePeopleLinksCompleteness.IsKindShort(view.People[0], "visa"));
+        Assert.False(ApplicationWorkspacePeopleLinksCompleteness.IsKindShort(view.People[0], "wp"));
+    }
+
+    [Fact]
+    public void Resolve_two_active_one_linked_is_incomplete()
+    {
+        var view = View(Person("A", Record("visa", 1, 2), Record("wp", 1, 1)));
+
+        Assert.Equal(ApplicationWorkspacePeopleLinksCompleteness.NavStatus.Incomplete, ApplicationWorkspacePeopleLinksCompleteness.Resolve(view));
+        Assert.True(ApplicationWorkspacePeopleLinksCompleteness.IsKindShort(view.People[0], "visa"));
+        Assert.False(ApplicationWorkspacePeopleLinksCompleteness.IsKindShort(view.People[0], "wp"));
     }
 
     [Fact]
@@ -69,8 +92,36 @@ public class ApplicationWorkspacePeopleLinksCompletenessTests
         Assert.False(ApplicationWorkspacePeopleLinksCompleteness.IsKindShort(person, "visa"));
     }
 
+    [Fact]
+    public void Resolve_locked_one_linked_when_expected_one_is_complete()
+    {
+        var view = WithLocked(View(
+            Person("A", Record("visa", 1, 1), Record("wp", 1, 1))));
+
+        Assert.Equal(ApplicationWorkspacePeopleLinksCompleteness.NavStatus.Complete, ApplicationWorkspacePeopleLinksCompleteness.Resolve(view));
+        Assert.Equal(0, ApplicationWorkspacePeopleLinksCompleteness.PeopleWithGaps(view));
+        Assert.False(ApplicationWorkspacePeopleLinksCompleteness.IsKindShort(view.People[0], "visa", linksLocked: true));
+    }
+
+    [Fact]
+    public void Resolve_locked_zero_available_expected_zero_is_complete()
+    {
+        var view = WithLocked(View(Person("A", Record("visa", 0, 0), Record("wp", 1, 1))));
+
+        Assert.Equal(ApplicationWorkspacePeopleLinksCompleteness.NavStatus.Complete, ApplicationWorkspacePeopleLinksCompleteness.Resolve(view));
+        Assert.Equal(0, ApplicationWorkspacePeopleLinksCompleteness.PeopleWithGaps(view));
+        Assert.False(ApplicationWorkspacePeopleLinksCompleteness.IsKindShort(view.People[0], "visa", linksLocked: true));
+    }
+
     private static ApplicationWorkspaceCaseView View(params ApplicationWorkspaceCasePerson[] people) =>
         new() { People = people };
+
+    private static ApplicationWorkspaceCaseView WithLocked(ApplicationWorkspaceCaseView view) =>
+        new()
+        {
+            Chrome = new ApplicationWorkspaceCaseChrome { ResolvedLinksLocked = true },
+            People = view.People,
+        };
 
     private static ApplicationWorkspaceCasePerson Person(string name, params ApplicationWorkspaceCasePersonRecord[] records) =>
         new() { Name = name, Records = records };

@@ -99,7 +99,7 @@ Requires `ApplicationProfileTenantCatalogSeedUpdater` to have run once on the ta
 | People | Build **`ApplicationPerson` M2M** from legacy PersonInApplication (or equivalent) — **do not** import `ApplicationItem` |
 | Auto-link person-related BOs | **Immediate resolve** when creating ApplicationPerson links (Passport, Visa, Education, … per profile `RequirePerson*` + §10.2 valid rules) |
 | Child permits / invitations / visa issuing | Attach to **Application + Person** (and/or `ApplicationPerson`) only — **no** hidden ApplicationItem bridge (**option A**) |
-| Wave order implication | Person + person-related scalar BOs (Passport, Visa, Education, …) **before** Application / ApplicationPerson so immediate resolve can find targets |
+| Wave order implication | Person + Passport + other person scalars (**not Visa**) **before** Application Profile Instance. Visa is imported **inside each ApplicationType slice** after issued Invitation/WorkPermit. Invitation types must not require Visa on roster. |
 
 Implementation: **ApplicationPerson importer shipped 2026-08-12** (`--entity ApplicationPerson`, chains updated). ApplicationItem retained for dual-read / IssuingApplicationItem until child FK remap (WorkPermitItem / InvitationItem / Visa issuing → Application+Person). Track remap in import skill learnings.
 

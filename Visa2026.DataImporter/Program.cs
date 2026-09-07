@@ -185,6 +185,7 @@ static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
         "--correct-application-type-composite",
         "--correct-visa-type",
         "--correct-application-visa-type",
+        "--correct-visa2014-application-person-document-links",
         "--export-visa2014-actual-positions",
         "--apply-visa2014-actual-positions",
         "--auto-no-letters",
@@ -346,7 +347,8 @@ static void PrintHelp()
     Console.WriteLine("  --correct-application-item-application-parent  Reparent ApplicationItems after ApplicationProfileInstance id-map rebuild (--legacy-source, --dry-run)");
     Console.WriteLine("  --correct-application-type-composite  Retype Application.ApplicationType from legacy SubType enum (--legacy-source, --dry-run)");
     Console.WriteLine("  --correct-visa-type  Patch Visa.VisaType from legacy TypeOfVisaL:mgCode (--legacy-source, --dry-run)");
-    Console.WriteLine("  --correct-application-visa-type  Infer Application.VisaType from ApplicationType.Name (no legacy FK; --target-connection, --dry-run)");
+    Console.WriteLine("  --correct-application-visa-type  Infer Application.VisaType from ApplicationType.Name; clear hidden Period/Category and non-inferred Type (--target-connection, --dry-run)");
+    Console.WriteLine("  --correct-visa2014-application-person-document-links  Replace latest-N Passport/Visa ResolvedLinks with PersonInApplication snapshot (--legacy-source, --dry-run)");
     Console.WriteLine("           from legacy Application.Contract or linked Person.Contract (identity pass-through).");
     Console.WriteLine("      Options: [--legacy-source calik-energi] [--application-id-map path.json]");
     Console.WriteLine("                [--dry-run] [--api-base-url url] [--no-wait] [--verbose]");
@@ -821,6 +823,16 @@ if (HasArg(args, "--correct-visa-type"))
     return;
 }
 
+if (HasArg(args, "--correct-visa2014-movement-permit-location"))
+{
+    Log.Phase("VISA2014 App_Additional_WP_location MovementPermitLocation backfill");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = await Visa2014ApplicationMovementPermitLocationCorrection.RunCommandAsync(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
 if (HasArg(args, "--correct-visa2014-issuing-application-item")
     || HasArg(args, "--correct-visa2014-issuing-application-profile-instance"))
 {
@@ -857,6 +869,16 @@ if (HasArg(args, "--correct-application-visa-type"))
     Log.Phase("VISA2014 ApplicationProfileInstance VisaType inference correction");
     bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
     int exitCode = await Visa2014ApplicationVisaTypeCorrection.RunCommandAsync(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
+if (HasArg(args, "--correct-visa2014-application-person-document-links"))
+{
+    Log.Phase("VISA2014 ApplicationProfileInstancePerson document-link correction");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = await Visa2014ApplicationPersonDocumentLinkCorrection.RunCommandAsync(args, isVerbose);
     Log.Close();
     Environment.ExitCode = exitCode;
     return;

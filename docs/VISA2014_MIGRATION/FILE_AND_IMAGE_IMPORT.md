@@ -71,19 +71,32 @@ Document uploads in Visa2026 enforce type/size rules (`DocumentFileUploadConstra
 
 ## Ordering and gates
 
+**Locked attachments sequence (2026-09-07):** after all scalar waves. One `--import-visa2014-files` property at a time. Canonical list: [`application-type-import-order.yaml`](../../Visa2026.DataImporter/legacy/visa2014/application-type-import-order.yaml) `attachmentsSequence`.
+
+| # | `--entity` | `--property` | Parent id-map |
+|---|------------|--------------|---------------|
+| 1 | Person | Photo | Person |
+| 2 | Passport | PassportDocument | Passport |
+| 3 | Visa | VisaDocument | Visa |
+| 4 | Education | EducationDocument | Education |
+| 5 | MedicalRecord | MedicalRecordDocument | Person |
+| 6 | WorkPermit | WorkPermitDocument | WorkPermit |
+| 7 | Invitation | InvitationDocument | Invitation |
+| 8 | Person | FamilyProofDocument | Person |
+
+Not wired: RejectionDocument, BorderZoneDocument, MinistryLetterFile.
+
 Align with [`order.yaml`](../../Visa2026.DataImporter/legacy/visa2014/order.yaml) and import waves:
 
 | Step | Action | Gate |
 |------|--------|------|
 | 1 | Person **scalar** OData upsert (no `Photo` bytes in POST body if oversized / separate step) | Person `importConfirmed`; id-map for `Person.Oid` |
-| 2 | Person **Photo** file pass | Step 1 reconciled |
-| 3 | Transactional BOs (Application, ApplicationItem, Passport, …) scalar | Parent id-maps |
-| 4 | Per-BO document scans (`PassportCopy` → `PassportDocument`, …) | Owning BO + Passport/Visa id-maps |
-| 5 | **Attachments wave** (`importPhase: attachments`) | All parent BO id-maps stable |
+| 2 | All remaining scalar BOs (person-domain, type slices, Rejection, BorderZone, Visa remainder) | Parent id-maps |
+| 3 | **Attachments sequence** (`importPhase: attachments`) — table above | All parent BO id-maps stable |
 
-**Excel preview** runs at step 1 review only — **before** `importConfirmed` — and covers scalar columns + file **stubs**, not bytes.
+**Excel preview** runs at scalar review only — **before** `importConfirmed` — and covers scalar columns + file **stubs**, not bytes.
 
-**Pilot (Person):** scalar Person import first; Photo as **follow-up sub-pass** in same pilot or immediately after scalar reconciliation — document in run log.
+**Pilot (Person):** scalar Person import first; Photo is step 1 of the attachments sequence (not a mid-person-domain interrupt on full Import).
 
 ---
 

@@ -1,0 +1,39 @@
+flowchart TB
+  subgraph sources["VISA2015 — catalog proposal, not instance rows"]
+    direction TB
+    A["dbo.Application DISTINCT types"]
+    ATE["ApplicationTypeForEmployee / FamilyMember"]
+    CT["dbo.Contract — via-ministry grouping"]
+    L3["lookup-translations.yaml<br/>+ calik-energi overlay"]
+    A --- ATE
+    A --- CT
+    A --> L3
+  end
+
+  subgraph waves["Seed path — not --import-visa2014 --entity"]
+    direction TB
+    W0["Wave 0: ApplicationProfileCatalog-CalikEnergi.ps1<br/>Excel proposal + human SignOff"]
+    W1["Wave 1: ApplicationProfileTenant-CalikEnergi.ps1<br/>application-profile.calik-energi.json"]
+    SYNC["ApplicationProfileTenantCatalogSeedUpdater<br/>ForceUpdate / F5 ModuleUpdater"]
+    BO["ApplicationProfile.cs<br/>table ApplicationProfiles"]
+    W0 --> W1 --> SYNC --> BO
+  end
+
+  subgraph jsonRow["JSON row → ApplicationProfile.cs"]
+    direction LR
+    J1["ApplicationTypeName / ProfileCatalogKey"] -->|"resolver key"| C1["Code + Name"]
+    J2["ProgressRoute / ActionFamily / RegistrationKind"] --> C2["Directed to / Related to"]
+    J3["ForEmployee / ForFamilyMember"] --> C3["May be for"]
+    J4["Produce* / Cancel* / Change*"] --> C4["Produce / cancel / change flags"]
+    J5["Require* + Default*LocalizationKey"] --> C5["Field catalog + defaults"]
+    J6["MinistrySlaDays / MigrationSlaDays"] --> C6["SLA days"]
+  end
+
+  subgraph instance["Then — ApplicationProfileInstance import"]
+    direction LR
+    AT["translated ApplicationType.Name<br/>+ optional ProjectContract.Code"] -->|"ResolveApplicationProfile"| FK["ApplicationProfileInstance.ApplicationProfile"]
+    BO --> FK
+  end
+
+  L3 --> W0
+  BO --> jsonRow

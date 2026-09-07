@@ -1,0 +1,31 @@
+flowchart TB
+  subgraph notThisType["Do not mix with App_Inv"]
+    N1["E:0:1:na:na invitation + work permit"] --> N2["App_Inv_And_WP"]
+    N3["F:0:na:na:na family invitation"] --> N4["App_Inv_FM"]
+    N5["CanIssueWorkPermit false"] --> N6["no WorkPermit from this type"]
+  end
+
+  subgraph headerOnly["Header-only this wave"]
+    H1["id-map key = Application.Oid"]
+    H2["upsert never merges shared ManualApplicationNumber"]
+    H3["IsManualEntry always true"]
+    H4["SuppressInitialProgress true so progress wave seeds"]
+  end
+
+  subgraph unusedOnInv["On App_Inv header but Show-false or unused"]
+    U1["BusinessTripDestination / DateOfDeparture — ShowBusinessTrips false"]
+    U2["DepartmentForRegistration — ShowMigrationService false"]
+    U3["GosmacaIslemageRugsatYeri — ShowMovementPermitLocation false"]
+    U4["FromCity — none on invitation"]
+  end
+
+  subgraph childrenLater["Child BOs later — same App_Inv id-map"]
+    C1["Invitation / Rejection"]
+    C2["ApplicationProfileInstancePerson"]
+    C3["ApplicationProfileInstanceProgress"]
+    C4["Visa.IssuingApplicationProfileInstance after those waves"]
+  end
+
+  subgraph catalogs["Required before POST"]
+    CAT["ApplicationProfile get_invitation already in DB<br/>via-ministry may use contract-variant Code"]
+  end

@@ -1,0 +1,640 @@
+# VISA2014 -> Visa2026 -- Application Type import order (living list)
+#
+# Nested import for Application Profile Instances (via-ministry headers) and
+# interdependent issued BOs. Do not invent types beyond what is listed.
+# Append the next ApplicationType.Name when that type is locked.
+#
+# Walk: person-domain (no Visa) -> for each type in bands[] -> innerSequence
+# -> after ALL types: postAllTypeSlices -> attachments.
+# Optional local-dev mapping check: import-strategy.yaml pilotThenHumanVerify.
+#
+# Canonical narrative: docs/VISA2014_MIGRATION/IMPORT_PLAN_AND_STRATEGY.md
+# BO topology (dependsOn): order.yaml
+# Agent skill: .cursor/skills/visa2014-to-visa2026-import/SKILL.md
+#
+# Profile template lock (source composite -> target ApplicationType.Name ->
+# ApplicationProfile Code/Name): application-type-profile-lock.yaml
+# Do not infer ApplicationProfile from ApplicationType.Code (shared get_invitation).
+
+version: 1
+lockedAt: 2026-09-05
+lockedBy: developer (chat)
+
+sliceShape: per_type_full_inner_sequence
+# For each type: run the full inner sequence, then the next type.
+# Not: all types' headers, then all rosters.
+
+visaNeverBeforeIssuingInstance: true
+# Visa.IssuingApplicationProfileInstance requires the instance row first.
+# Do not import Visa after Passport as a person-domain wave.
+
+rosterInvitationTypesMustNotRequireVisa: true
+# Types that produce invitation must not require Visa on roster create
+# (ResolvedLinks / RequirePerson*). Visa is imported later in the same slice
+# when that instance issued a visa.
+
+localPg:
+  wipeVisaBeforePerTypeVisa: true
+  notes: |
+    Local PG already imported Visa before instances (legacy order).
+    Wipe Visa (+ VisaDocument as needed) and reimport per type when that
+    type reaches the visa inner step. Do not wipe during strategy-doc-only edits.
+
+innerSequence:
+  - id: header
+    entity: ApplicationProfileInstance
+    required: true
+  - id: roster
+    entity: ApplicationProfileInstancePerson
+    required: true
+  - id: progress
+    entity: ApplicationProfileInstanceProgress
+    required: true
+  - id: issued-invitation
+    entities:
+      - Invitation
+      - InvitationItem
+    when: type_generates_invitation
+  - id: issued-work-permit
+    entities:
+      - WorkPermit
+      - WorkPermitItem
+    when: type_generates_work_permit
+  - id: visa
+    entity: Visa
+    when: instance_generates_visa
+    notes: |
+      After Invitation (+ items) when the type produces invitation.
+      Still import visas whose IssuingApplicationProfileInstance is this case.
+      Skip this step when the type/instance does not generate Visa.
+
+# Dual-issue types (invitation AND work permit): Invitation header+items,
+# then WorkPermit header+items, then Visa. Skip a branch when the type
+# does not generate that document.
+
+postAllTypeSlices:
+  - id: rejection
+    entities:
+      - Rejection
+      - RejectionItem
+    notes: |
+      Global wave after every type slice. Local PG 2026-09-07 complete:
+      headers Posted **207**, items Posted **254**, Failed **0**, FK null **0**.
+  - id: border-zone-documents
+    entities:
+      - BorderZone
+    notes: |
+      Issued BorderZone documents after all types. Local PG 2026-09-07:
+      headers Posted **110**, items Posted **209**, Failed **0**.
+  - id: visa-remainder
+    entity: Visa
+    when: no_issuing_instance
+    notes: |
+      Local PG 2026-09-07 RunId 20260907-102109: Posted **609** (remainder **607**,
+      leftover with issuing **2**), Failed **0**, already **5709**, no Passport map **25**.
+      CLI `--visa-remainder`.
+
+# File / scan attachments after every scalar wave (locked 2026-09-07).
+# CLI: --import-visa2014-files --inprocess --entity <entity> --property <property>
+# Do not invent extra document BOs (RejectionDocument / BorderZoneDocument stay unwired).
+attachmentsSequence:
+  lockedAt: 2026-09-07
+  lockedBy: developer (chat)
+  notes: |
+    After postAllTypeSlices. One property per proceed. Parent id-map required.
+    Orchestrator: scripts/visa2014-migration/import/DocumentCopies.ps1
+  steps:
+    - id: person-photo
+      entity: Person
+      property: Photo
+      parentIdMap: Person
+    - id: passport-document
+      entity: Passport
+      property: PassportDocument
+      parentIdMap: Passport
+    - id: visa-document
+      entity: Visa
+      property: VisaDocument
+      parentIdMap: Visa
+    - id: education-document
+      entity: Education
+      property: EducationDocument
+      parentIdMap: Education
+    - id: medical-record-document
+      entity: MedicalRecord
+      property: MedicalRecordDocument
+      parentIdMap: Person
+      notes: Çalik Spid kepilnama — expected 0 blobs.
+    - id: work-permit-document
+      entity: WorkPermit
+      property: WorkPermitDocument
+      parentIdMap: WorkPermit
+      notes: |
+        Local PG 2026-09-07 RunId 20260907-111246: Posted 915, Failed 0,
+        no parent map 107, no blob 2. WorkPermit.json 361 / docs 915.
+    - id: invitation-document
+      entity: Invitation
+      property: InvitationDocument
+      parentIdMap: Invitation
+      notes: |
+        Local PG 2026-09-07 RunId 20260907-111637: Posted 3043, Failed 0,
+        no parent map 206, no blob 5. Invitation.json 2938 / docs 3043.
+    - id: family-proof-document
+      entity: Person
+      property: FamilyProofDocument
+      parentIdMap: Person
+      notes: |
+        Local PG 2026-09-07 RunId 20260907-112340: Posted 9 PersonDocument +
+        437 PersonFamilyRelationDocument, Failed 0, oversize 1, duplicate blob 3.
+        Last wired attachmentsSequence step.
+
+# Bands are locked. Type lists inside a band are filled as we go.
+# Locked types: App_Inv (done), App_Inv_And_WP (done), App_Inv_FM (done),
+# App_Inv_According_to_WP (done), App_Change_Inv (done), App_Change_Visa_Category (skip empty),
+# App_Change_Passport (done). Band 2 locked 2026-09-05: App_Visa_and_WP_Ext, App_Visa_Ext_FM,
+# App_Border_Zone_Permission (done), App_Additional_WP_location (done). Empty skips:
+# App_Visa_Ext, App_Visa_Ext_According_to_WP, App_WP_Ext, App_Exit_Visa, App_Visa_For_New_Born_FM.
+# Band 4 complete 2026-09-05. Live: App_Cancel_Visa_and_WP / App_Cancel_Visa /
+# App_Cancell_WP. Empty skips: App_Cancel_Inv_WP, App_Cancel_App, App_Cancel_Visa_Ext,
+# App_Cancel_Visa_and_WP_Ext, App_Cancel_Inv, App_Cancel_BZ.
+# Locked 2026-09-05 after band 4: App_Sevice_Passport first (E:10 + F:10;
+# invitation+visa), then all Registration (App_Reg_*), then Business trip.
+bands:
+  - id: 1-produce-invitation
+    description: >
+      Application Profile Instances that may produce invitation
+      (including invitation + work permit) and as a result visa.
+    types:
+      - name: App_Inv
+        status: done
+        sourceComposites: ["E:0:0:na:na"]
+        applicationProfileCode: get_invitation
+        applicationProfileName: Çakylyk Almak
+        generatesInvitation: true
+        generatesWorkPermit: false
+        generatesVisa: true
+        notes: |
+          First type. Local PG 2026-09-04 type-slice reimport complete:
+          headers **1810**, roster **3277**, progress **8809**, Invitation **1666**,
+          InvitationItem **3027**, Visa **1619**. WorkPermit skipped. Remainder
+          Visa after all types.
+      - name: App_Inv_And_WP
+        status: done
+        sourceComposites: ["E:0:1:na:na"]
+        applicationProfileCode: get_invitation_wp
+        applicationProfileName: Çakylyk we Iş Rugsatnamasyny Almak
+        generatesInvitation: true
+        generatesWorkPermit: true
+        generatesVisa: true
+        notes: |
+          Locked 2026-09-04 after App_Inv. Local PG type-slice complete:
+          headers **1178** (instance id-map 2988 with App_Inv 1810),
+          roster **2254** (people 5531), progress **5800** (14609),
+          Invitation **939** (2605), InvitationItem **1726** (4753),
+          WorkPermit **227**, WorkPermitItem **2115**, Visa **1128** (2747).
+          Remainder Visa after all types.
+      - name: App_Inv_FM
+        status: done
+        sourceComposites: ["F:0:na:na:na"]
+        applicationProfileCode: get_invitation_fm
+        applicationProfileName: Çakylyk Almak FM
+        generatesInvitation: true
+        generatesWorkPermit: false
+        generatesVisa: true
+        notes: |
+          Locked 2026-09-04 after App_Inv_And_WP. Local PG type-slice complete:
+          headers **228** (instance id-map 3216), roster **398** (people 5929),
+          progress **1120** (15729), Invitation **195** (2800), InvitationItem **352**
+          (5105), Visa **290** (3037). WorkPermit skipped. Remainder Visa after all types.
+      - name: App_Inv_According_to_WP
+        status: done
+        sourceComposites: ["E:20:na:na:na"]
+        applicationProfileCode: get_invitation_according_to_wp
+        applicationProfileName: İş Rugsatnama görä Çakylyk Almak
+        generatesInvitation: true
+        generatesWorkPermit: false
+        generatesVisa: true
+        notes: |
+          Locked 2026-09-04 after App_Inv_FM. Invitation according to existing WP
+          (does not issue WorkPermit). Invitation + InvitationItem, then Visa.
+          Local PG headers **61** (instance id-map **3277**; profile
+          İş Rugsatnama görä Çakylyk Almak / get_invitation_according_to_wp),
+          roster **84** (people **6013**), progress **289** (16018),
+          Invitation **49** (2849), InvitationItem **69** (5174), Visa **26** (3066). Inner sequence complete.
+          Skip WorkPermit. Remainder Visa after all types.
+      # further invitation-producing types appended when locked
+  - id: 2-produce-visa-workpermit-borderzone
+    description: >
+      Instances that produce Visa, WorkPermit (without invitation),
+      or BorderZone. Issued BorderZone documents wait in postAllTypeSlices.
+    types:
+      - name: App_Visa_and_WP_Ext
+        status: done
+        sourceComposites: ["E:7:na:na:na", "E:7:na:0:na", "E:7:na:1:na"]
+        applicationProfileCode: extend_visa_wp
+        applicationProfileName: Wiza we Iş Rugsatnamasyny Uzaltmak
+        generatesInvitation: false
+        generatesWorkPermit: true
+        generatesVisa: true
+        notes: |
+          Locked 2026-09-05 (band 2 first). Local PG type-slice complete:
+          headers **771** (instance id-map **4227**; profile
+          Wiza we Iş Rugsatnamasyny Uzaltmak / extend_visa_wp), roster **2527**
+          (people **8738**), progress **3760** (20136), WorkPermit **134**
+          (361), WorkPermitItem **1683** (3798), Visa **2120** (5281).
+          Skip Invitation. Remainder Visa after all types.
+      - name: App_Visa_Ext_FM
+        status: done
+        sourceComposites: ["F:7:na:na:na"]
+        applicationProfileCode: visa_ext_fm
+        applicationProfileName: Wiza Möhletini Uzaltmak FM
+        generatesInvitation: false
+        generatesWorkPermit: false
+        generatesVisa: true
+        notes: |
+          Locked 2026-09-05. Local PG type-slice complete: headers **333**
+          (instance id-map **4560**; profile Wiza Möhletini Uzaltmak FM /
+          visa_ext_fm), roster **680** (people **9418**), progress **1632**
+          (21768), Visa **415** (5696 live; 415 with this issuing type).
+          Skip Invitation and WorkPermit. Remainder Visa after all types.
+          Issuing origin: visas>roster **0** on this type.
+      - name: App_Border_Zone_Permission
+        status: done
+        sourceComposites: ["E:11:na:na:na"]
+        applicationProfileCode: get_border_zone
+        applicationProfileName: Serhet Ýaka Üçin Rugsatnama Almak
+        generatesInvitation: false
+        generatesWorkPermit: false
+        generatesVisa: false
+        notes: |
+          Local PG 2026-09-05 type-slice complete (header -> roster -> progress):
+          headers **111**, roster **218**, progress **450**. Skip Invitation,
+          WorkPermit, Visa. Issued BorderZone documents wait in
+          postAllTypeSlices. Enum 12 stays App_Cancel_Visa_and_WP (band 4).
+      - name: App_Additional_WP_location
+        status: done
+        sourceComposites: ["E:15:na:na:na"]
+        applicationProfileCode: change_workpermit
+        applicationProfileName: Iş Rugsatnama goşmaça  barjak ýeri
+        generatesInvitation: false
+        generatesWorkPermit: true
+        generatesVisa: false
+        notes: |
+          Local PG 2026-09-05 type-slice complete: headers **281**, roster **430**,
+          progress **1401**. WorkPermit Posted **0** (already **361** on
+          get_invitation_wp / extend_visa_wp; **49** letters still no instance
+          map). WorkPermitItem Posted **0** (already **3798**). Skip Invitation
+          and Visa. Additional-location apps do not create new WorkPermitLetter
+          headers in this wave.
+          Header MovementPermitLocation: GoşmaçaIşlemägeRugsatÝeri when set;
+          else majority PersonInApplication.WorkPermit.WorkPermitLocation bits
+          (import-strategy additionalWpLocationMovementPermitFromWorkPermit).
+      - name: App_Visa_Ext
+        status: skip
+        sourceComposites: []
+        applicationProfileCode: visa_ext
+        applicationProfileName: Wiza Möhletini Uzaltmak
+        generatesInvitation: false
+        generatesWorkPermit: false
+        generatesVisa: true
+        notes: |
+          Skip empty 2026-09-05. No live Çalik composites in the profile lock
+          (Visa2026-only). Employee enum 7 is App_Visa_and_WP_Ext.
+      - name: App_Visa_Ext_According_to_WP
+        status: skip
+        sourceComposites: []
+        applicationProfileCode: visa_ext_according_to_wp
+        applicationProfileName: Iş Rugsatnamasyna Görä Wizany Uzaltmak
+        generatesInvitation: false
+        generatesWorkPermit: false
+        generatesVisa: true
+        notes: Skip empty 2026-09-05. No live Çalik rows in the lock file.
+      - name: App_WP_Ext
+        status: skip
+        sourceComposites: []
+        applicationProfileCode: workpermit_extension
+        applicationProfileName: Iş Rugsatnamasyny Uzaltmak
+        generatesInvitation: false
+        generatesWorkPermit: true
+        generatesVisa: false
+        notes: Skip empty 2026-09-05. No live Çalik rows in the lock file.
+      - name: App_Exit_Visa
+        status: skip
+        sourceComposites: []
+        applicationProfileCode: visa_exit
+        applicationProfileName: Çykyş  Wiza Resmileşdirmek
+        generatesInvitation: false
+        generatesWorkPermit: false
+        generatesVisa: true
+        notes: |
+          Skip empty 2026-09-05. No live Çalik composites. E:55 is skip_row
+          (lookup-translations approved).
+      - name: App_Visa_For_New_Born_FM
+        status: skip
+        sourceComposites: []
+        applicationProfileCode: visa_for_new_born_fm
+        applicationProfileName: Täze dogulan çaga wiza resmileşdirmek FM
+        generatesInvitation: false
+        generatesWorkPermit: false
+        generatesVisa: true
+        notes: Skip empty 2026-09-05. No live Çalik rows in the lock file.
+  - id: 3-change-invitation-or-visa
+    description: >
+      Instances that change invitation or visa. These types also produce
+      Invitation and/or Visa -- still run the issued + visa inner steps.
+    types:
+      - name: App_Change_Inv
+        status: done
+        sourceComposites: ["E:1:na:na:na"]
+        applicationProfileCode: change_invitation
+        applicationProfileName: Çakylygy üýtgetmek
+        generatesInvitation: true
+        generatesWorkPermit: false
+        generatesVisa: true
+        notes: |
+          Locked 2026-09-05 after App_Inv_According_to_WP (band 1 remainder
+          App_Sevice_Passport deferred). Invitation + InvitationItem, then Visa.
+          Skip WorkPermit. Local PG headers **57** (instance id-map **3334**;
+          profile Çakylygy üýtgetmek / change_invitation), roster **57**
+          (people **6070**), progress **114** (16132), Invitation **55** (2904), InvitationItem **54** (5228), Visa **0** (3066). Inner sequence complete. Skip WorkPermit. Remainder Visa after all types.
+      - name: App_Change_Visa_Category
+        status: skip
+        sourceComposites: ["E:8:na:1:na", "E:8:na:0:na", "F:8:na:na:na"]
+        applicationProfileCode: visa_category_change
+        applicationProfileName: Wiza Kategoriýasyny üýtgetmek
+        generatesInvitation: false
+        generatesWorkPermit: false
+        generatesVisa: true
+        notes: |
+          Locked 2026-09-05 after App_Change_Inv. Local PG header wave 2026-09-05:
+          **0** matches. Live enum 8 = 0 rows; ID 8 is enum 7 (App_Visa_and_WP_Ext /
+          App_Visa_Ext_FM). Skipped empty on Calik 2026-09-05 (no enum-8 rows).
+      - name: App_Change_Passport
+        status: done
+        sourceComposites: ["E:9:na:na:na", "F:9:na:na:na"]
+        applicationProfileCode: pasport_change
+        applicationProfileName: Wizany KP>Täze Pasporta Geçirmek
+        generatesInvitation: false
+        generatesWorkPermit: false
+        generatesVisa: true
+        notes: |
+          Locked 2026-09-05. Visa only. Skip Invitation and WorkPermit.
+          Composites E:9 + F:9. Local PG headers **122** (instance id-map **3456**), roster **141** (people **6211**), progress **244** (16376), Visa **95** (3161). Inner sequence complete. Skip Invitation and WorkPermit. Remainder Visa after all types.
+  - id: 4-no-issued-documents
+    description: >
+      Last. Types that do not produce Invitation, WorkPermit, Visa, or
+      BorderZone -- including cancel types.
+    types:
+      - name: App_Cancel_Visa_and_WP
+        status: done
+        sourceComposites: ["E:12:na:na:na"]
+        applicationProfileCode: cancel_visa_wp
+        applicationProfileName: Wiza we Iş Rugsatnamany Ýatyrmak
+        generatesInvitation: false
+        generatesWorkPermit: false
+        generatesVisa: false
+        notes: |
+          Locked 2026-09-05 (band 4 first). Employee enum 12. Local PG headers
+          **327** (instance id-map **5279**), roster **621** (people **10687**),
+          progress **654** (24273). Skip Invitation, WorkPermit, Visa. Inner
+          sequence complete.
+      - name: App_Cancel_Inv_WP
+        status: skip
+        sourceComposites: []
+        applicationProfileCode: cancel_invitation_wp
+        applicationProfileName: Çakylyk we Iş Rugsatnamasyny Ýatyrmak
+        generatesInvitation: false
+        generatesWorkPermit: false
+        generatesVisa: false
+        notes: Skip empty 2026-09-05. No live Çalik composites in the profile lock.
+      - name: App_Cancel_App
+        status: skip
+        sourceComposites: []
+        applicationProfileCode: cancel_application
+        applicationProfileName: Ýüztutmany Ýatyrmak
+        generatesInvitation: false
+        generatesWorkPermit: false
+        generatesVisa: false
+        notes: Skip empty 2026-09-05. No live Çalik composites in the profile lock.
+      - name: App_Cancel_Visa_Ext
+        status: skip
+        sourceComposites: []
+        applicationProfileCode: cancel_visa_ext
+        applicationProfileName: Wizany Uzaltmak Barada Ýüztutmany Ýatyrmak
+        generatesInvitation: false
+        generatesWorkPermit: false
+        generatesVisa: false
+        notes: Skip empty 2026-09-05. No live Çalik composites in the profile lock.
+      - name: App_Cancel_Visa_and_WP_Ext
+        status: skip
+        sourceComposites: []
+        applicationProfileCode: cancel_visa_wp_ext
+        applicationProfileName: Wiza we Iş Rugsatnamany Uzaltmak Barada Ýüztutmany Ýatyrmak
+        generatesInvitation: false
+        generatesWorkPermit: false
+        generatesVisa: false
+        notes: Skip empty 2026-09-05. No live Çalik composites in the profile lock.
+      - name: App_Cancel_Inv
+        status: skip
+        sourceComposites: []
+        applicationProfileCode: cancel_invitation
+        applicationProfileName: Çakylygy Ýatyrmak
+        generatesInvitation: false
+        generatesWorkPermit: false
+        generatesVisa: false
+        notes: |
+          Skip empty 2026-09-05. Header probe Posted **0**. No live Çalik
+          composites in the profile lock. Instance count unchanged **5423**.
+      - name: App_Cancel_Visa
+        status: done
+        sourceComposites: ["E:21:na:na:na", "F:21:na:na:na"]
+        applicationProfileCode: cancel_visa
+        applicationProfileName: Wizany Ýatyrmak
+        generatesInvitation: false
+        generatesWorkPermit: false
+        generatesVisa: false
+        notes: |
+          Locked 2026-09-05 after App_Cancel_Visa_and_WP. Employee + Family
+          enum 21. Local PG headers **56** (instance id-map **5335**), roster
+          **115** (people **10802**), progress **108** (24381). Skip Invitation,
+          WorkPermit, Visa. Inner sequence complete.
+      - name: App_Cancell_WP
+        status: done
+        sourceComposites: ["E:22:na:na:na", "E:31:na:na:na"]
+        applicationProfileCode: cancel_workpermit
+        applicationProfileName: Iş Rugsatnamany Ýatyrmak
+        generatesInvitation: false
+        generatesWorkPermit: false
+        generatesVisa: false
+        notes: |
+          Locked 2026-09-05 after App_Cancel_Visa. Employee enum 22. Local PG
+          headers **88** (instance id-map **5423**), roster **196** (people
+          **10998**), progress **176** (24557). Skip Invitation, WorkPermit,
+          Visa. Inner sequence complete.
+      - name: App_Cancel_BZ
+        status: skip
+        sourceComposites: []
+        applicationProfileCode: cancel_borderzone
+        applicationProfileName: Serhet Ýaka Rugsady Ýatyrmak
+        generatesInvitation: false
+        generatesWorkPermit: false
+        generatesVisa: false
+        notes: |
+          Skip empty 2026-09-05. Header probe Posted **0**. No live Çalik
+          composites in the profile lock. Instance count unchanged **5423**.
+          Band 4 complete.
+  - id: 5-service-passport
+    description: >
+      Band-1 remainder. Invitation for service passport (Employee/Family
+      subtype 10). Runs before registration and business trip.
+    types:
+      - name: App_Sevice_Passport
+        status: done
+        sourceComposites: ["E:10:na:na:na", "F:10:na:na:na"]
+        applicationProfileCode: get_invitation_service_passport
+        applicationProfileName: Gulluk Pasporty Üçin Çakylyk Almak
+        generatesInvitation: true
+        generatesWorkPermit: false
+        generatesVisa: true
+        notes: |
+          Locked 2026-09-05 first after band 4. Local PG headers **44**
+          (instance id-map **5467**), roster **52** (people **11050**), progress
+          **209** (24766), Invitation **34** (2938), InvitationItem **41**
+          (5269), Visa **0** this type (live **5709**; **13** catch-up on prior
+          types). Skip WorkPermit. Inner sequence complete. Next: registration.
+  - id: 6-registration
+    description: >
+      Registration types. After App_Sevice_Passport. Skip Invitation,
+      WorkPermit, Visa.
+    types:
+      - name: App_Reg_Check_In
+        status: done
+        sourceComposites: ["E:2:na:na:na", "F:2:na:na:na"]
+        applicationProfileCode: check_in_from_abroad
+        applicationProfileName: Hasaba Almak (Daşary ýurtdan gelmegi sebäpli)
+        generatesInvitation: false
+        generatesWorkPermit: false
+        generatesVisa: false
+        notes: |
+          Locked 2026-09-05 after App_Sevice_Passport. Local PG headers **1808**
+          (instance id-map **7275**), roster **3123** (people **14173**), progress
+          **3608** (28374). Skip Invitation, WorkPermit, Visa. Inner sequence
+          complete. Next: App_Reg_Check_In_Internal.
+      - name: App_Reg_Check_In_Internal
+        status: done
+        sourceComposites: ["E:4:na:na:na", "F:4:na:na:na"]
+        applicationProfileCode: check_in_internal
+        applicationProfileName: Hasaba Almak (Welaýatdan gelmegi sebäpli)
+        generatesInvitation: false
+        generatesWorkPermit: false
+        generatesVisa: false
+        notes: |
+          Locked 2026-09-05 after App_Reg_Check_In. Local PG headers **490**
+          (instance id-map **7765**), roster **611** (people **14784**), progress
+          **980** (29354). Skip Invitation, WorkPermit, Visa. Inner sequence
+          complete. Next: App_Reg_ext.
+      - name: App_Reg_ext
+        status: done
+        sourceComposites: ["E:3:na:na:na", "F:3:na:na:na"]
+        applicationProfileCode: reg_extension
+        applicationProfileName: Hasaba alyşy uzaltmak
+        generatesInvitation: false
+        generatesWorkPermit: false
+        generatesVisa: false
+        notes: |
+          Locked 2026-09-07 after App_Reg_Check_In_Internal. Local PG headers
+          **1243** (instance id-map **9008**), roster **2661** (people **17445**,
+          this type **2656**), progress **2482** (31836). Skip Invitation,
+          WorkPermit, Visa. Inner sequence complete. Next: App_Reg_Check_Out.
+      - name: App_Reg_Check_Out
+        status: done
+        sourceComposites: ["E:6:na:na:na", "F:6:na:na:na"]
+        applicationProfileCode: check_out
+        applicationProfileName: Hasapdan Çykarmak (Daşary ýurda gitmegi)
+        generatesInvitation: false
+        generatesWorkPermit: false
+        generatesVisa: false
+        notes: |
+          Locked 2026-09-07 after App_Reg_ext. Local PG headers **2200**
+          (instance id-map **11208**), roster **3418** (people **20863**),
+          progress **4330** (36166). Skip Invitation, WorkPermit, Visa. Inner
+          sequence complete. Next: App_Reg_Info_Change_Address.
+      - name: App_Reg_Info_Change_Address
+        status: done
+        sourceComposites: ["E:5:na:na:na", "F:5:na:na:na"]
+        applicationProfileCode: reg_info_change_address
+        applicationProfileName: Hasaba alyş maglumatyň üýtgemegi (Salgy Çalyşmagy)
+        generatesInvitation: false
+        generatesWorkPermit: false
+        generatesVisa: false
+        notes: |
+          Locked 2026-09-07 after App_Reg_Check_Out. Local PG headers **647**
+          (instance id-map **11855**), roster **830** (people **21693**),
+          progress **1294** (37460). Skip Invitation, WorkPermit, Visa. Inner
+          sequence complete. Next: App_Reg_Info_Change_Passport.
+      - name: App_Reg_Info_Change_Passport
+        status: done
+        sourceComposites: ["E:5:na:na:1"]
+        applicationProfileCode: reg_info_change_passport
+        applicationProfileName: Hasaba alyş maglumatyň üýtgemegi (Pasport Çalışmagy)
+        generatesInvitation: false
+        generatesWorkPermit: false
+        generatesVisa: false
+        notes: |
+          Locked 2026-09-07 after App_Reg_Info_Change_Address. Local PG headers
+          **101** (instance id-map **11956**), roster **116** (people **21809**),
+          progress **202** (37662). Skip Invitation, WorkPermit, Visa. Inner
+          sequence complete. Next: App_Reg_Info_Change_Visa.
+      - name: App_Reg_Info_Change_Visa
+        status: skip
+        sourceComposites: ["E:5:na:na:2"]
+        applicationProfileCode: reg_info_change_visa
+        applicationProfileName: Hasaba alyş maglumatyň üýtgemegi (Visa Çalyşmagy)
+        generatesInvitation: false
+        generatesWorkPermit: false
+        generatesVisa: false
+        notes: |
+          Skip empty 2026-09-07. Header probe Posted **0**. Composite
+          E:5:na:na:2 has no live Çalik rows. Instance count unchanged **11956**.
+      - name: App_Reg_Check_Out_Internal
+        status: skip
+        sourceComposites: []
+        applicationProfileCode: check_out_internal
+        applicationProfileName: Hasapdan Çykarmak (Başga welaýata gitmegi)
+        generatesInvitation: false
+        generatesWorkPermit: false
+        generatesVisa: false
+        notes: |
+          Skip empty 2026-09-07. Header probe Posted **0**. No live Çalik
+          composites in the profile lock. Instance count unchanged **11956**.
+          Band 6 registration complete.
+  - id: 7-business-trip
+    description: >
+      Business trip types. After all registration. Skip Invitation,
+      WorkPermit, Visa.
+    types:
+      - name: App_Business_Trip_Departure
+        status: done
+        sourceComposites: ["E:13:na:na:na"]
+        applicationProfileCode: business_trip_departure
+        applicationProfileName: Iş Saparyna Gitmek
+        generatesInvitation: false
+        generatesWorkPermit: false
+        generatesVisa: false
+        notes: |
+          Locked 2026-09-07 after registration band. Local PG headers **594**
+          (instance id-map **12550**), roster **731** (people **22540**),
+          progress **1166** (38828). Skip Invitation, WorkPermit, Visa. Inner
+          sequence complete. Next: App_Business_Trip_Arrival.
+      - name: App_Business_Trip_Arrival
+        status: skip
+        sourceComposites: ["E:14:na:na:na"]
+        applicationProfileCode: business_trip_arrival
+        applicationProfileName: Iş Saparyna Gelmek
+        generatesInvitation: false
+        generatesWorkPermit: false
+        generatesVisa: false
+        notes: |
+          Skip empty 2026-09-07. Header probe Posted **0**. Composite
+          E:14:na:na:na has no live Çalik rows. Instance count unchanged
+          **12550**. Band 7 business trip complete.

@@ -67,7 +67,8 @@ internal static class ApplicationWorkspaceCaseBuilder
         var tabMap = tabs.ToDictionary(t => t.Key, StringComparer.OrdinalIgnoreCase);
         var rosterPeople = application?.People?.OrderBy(p => p.LastName).ThenBy(p => p.FirstName).ToList() ?? [];
         var rosterLinks = application?.PersonResolvedLinks?.ToList() ?? [];
-        var people = BuildPeople(tabMap, chrome.PeopleNames, application, rosterPeople, rosterLinks);
+        var linkableCounts = ApplicationWorkspaceLinkableActiveCounts.Load(objectSpace, rosterPeople);
+        var people = BuildPeople(tabMap, chrome.PeopleNames, application, rosterPeople, rosterLinks, linkableCounts, chrome.ResolvedLinksLocked);
         var linkedSummary = BuildLinkedSummary(application, rosterLinks, people);
         var progressSteps = application != null
             ? ApplicationWorkspaceProgressTimeline.Build(application, profile, sla, objectSpace)
@@ -91,7 +92,7 @@ internal static class ApplicationWorkspaceCaseBuilder
                 : application != null
                     ? Array.Empty<ApplicationWorkspaceCaseSummaryTile>()
                     : BuildSummaryTilesFromChrome(chrome),
-            LinkedRecordTiles = BuildLinkedTiles(application, rosterLinks, tabs, rosterPeople.Count),
+            LinkedRecordTiles = BuildLinkedTiles(application, rosterLinks, tabs, people),
             IssuedRecordTiles = BuildIssuedTiles(application, objectSpace),
             ProgressSteps = progressSteps,
             People = people,
@@ -223,22 +224,28 @@ internal static class ApplicationWorkspaceCaseBuilder
         ApplicationProfileInstance? application,
         IReadOnlyList<ApplicationProfileInstancePersonResolvedLink> rosterLinks,
         IReadOnlyList<ApplicationWorkspaceTab> tabs,
-        int personCount)
+        IReadOnlyList<ApplicationWorkspaceCasePerson> people)
     {
         if (application != null)
         {
             var tiles = new List<ApplicationWorkspaceCaseLinkedTile>();
             var toneIndex = 0;
-            var people = Math.Max(personCount, 1);
             foreach (var def in ApplicationWorkspaceLinkedRecordsCatalog.Definitions)
             {
                 if (!ApplicationWorkspaceLinkedRecordsCatalog.IsConfigured(application, def.Kind))
                     continue;
 
-                var perPerson = Math.Max(
-                    ApplicationProfilePersonLastCount.For(application, def.Kind),
-                    1);
-                var expected = perPerson * people;
+                var expected = people.Sum(p =>
+                    p.Records.FirstOrDefault(r =>
+                        string.Equals(r.Key, def.PersonRecordKey, StringComparison.OrdinalIgnoreCase))
+                        ?.ExpectedCount ?? 0);
+                if (expected == 0 && people.Count == 0)
+                {
+                    expected = Math.Max(
+                        ApplicationProfilePersonLastCount.For(application, def.Kind),
+                        1);
+                }
+
                 var count = ApplicationWorkspaceLinkedRecordsCatalog.CountResolved(rosterLinks, def.Kind);
                 tiles.Add(new ApplicationWorkspaceCaseLinkedTile
                 {
@@ -462,7 +469,9 @@ internal static class ApplicationWorkspaceCaseBuilder
         IReadOnlyList<string> peopleNames,
         ApplicationProfileInstance? application,
         IReadOnlyList<Person> rosterPeople,
-        IReadOnlyList<ApplicationProfileInstancePersonResolvedLink> rosterLinks)
+        IReadOnlyList<ApplicationProfileInstancePersonResolvedLink> rosterLinks,
+        ApplicationWorkspaceLinkableActiveCounts linkableCounts,
+        bool linksLocked)
     {
         if (!tabs.TryGetValue("person", out var personTab) || personTab.Rows.Count == 0)
             return Array.Empty<ApplicationWorkspaceCasePerson>();
@@ -473,10 +482,11 @@ internal static class ApplicationWorkspaceCaseBuilder
             var row = personTab.Rows[i];
             var name = row.Count > 0 ? row[0] : "—";
             var role = row.Count > 1 ? row[1] : "—";
+            var personId = i < personTab.RowPersonIds.Count ? personTab.RowPersonIds[i] : Guid.Empty;
             people.Add(new ApplicationWorkspaceCasePerson
             {
                 Index = i,
-                PersonId = i < personTab.RowPersonIds.Count ? personTab.RowPersonIds[i] : Guid.Empty,
+                PersonId = personId,
                 ApplicationProfileInstancePersonId = i < personTab.RowApplicationProfileInstancePersonIds.Count
                     ? personTab.RowApplicationProfileInstancePersonIds[i]
                     : Guid.Empty,
@@ -484,7 +494,8 @@ internal static class ApplicationWorkspaceCaseBuilder
                 RoleLabel = FormatRoleLabel(role),
                 PassportNumber = FirstCellForPerson(tabs, "passport", name, 1),
                 VisaNumber = FirstCellForPerson(tabs, "visa", name, 1),
-                Records = BuildPersonRecords(application, rosterPeople, rosterLinks, tabs, name, i),
+                Records = BuildPersonRecords(
+                    application, rosterLinks, tabs, name, personId, linkableCounts, linksLocked),
             });
         }
 
@@ -493,12 +504,15 @@ internal static class ApplicationWorkspaceCaseBuilder
             for (var i = 0; i < peopleNames.Count; i++)
             {
                 var name = peopleNames[i];
+                var personId = i < rosterPeople.Count ? rosterPeople[i].ID : Guid.Empty;
                 people.Add(new ApplicationWorkspaceCasePerson
                 {
                     Index = i,
+                    PersonId = personId,
                     Name = name,
                     RoleLabel = i == 0 ? "Primary applicant" : "Dependent",
-                    Records = BuildPersonRecords(application, rosterPeople, rosterLinks, tabs, name, i),
+                    Records = BuildPersonRecords(
+                        application, rosterLinks, tabs, name, personId, linkableCounts, linksLocked),
                 });
             }
         }
@@ -535,17 +549,14 @@ internal static class ApplicationWorkspaceCaseBuilder
 
     private static IReadOnlyList<ApplicationWorkspaceCasePersonRecord> BuildPersonRecords(
         ApplicationProfileInstance? application,
-        IReadOnlyList<Person> rosterPeople,
         IReadOnlyList<ApplicationProfileInstancePersonResolvedLink> rosterLinks,
         IReadOnlyDictionary<string, ApplicationWorkspaceTab> tabs,
         string personName,
-        int personIndex)
+        Guid personId,
+        ApplicationWorkspaceLinkableActiveCounts linkableCounts,
+        bool linksLocked)
     {
         var records = new List<ApplicationWorkspaceCasePersonRecord>();
-        Person? rosterPerson = personIndex >= 0 && personIndex < rosterPeople.Count
-            ? rosterPeople[personIndex]
-            : rosterPeople.FirstOrDefault(p =>
-                string.Equals(p.FullName, personName, StringComparison.Ordinal));
         var toneIndex = 0;
 
         foreach (var def in ApplicationWorkspaceLinkedRecordsCatalog.Definitions)
@@ -559,11 +570,13 @@ internal static class ApplicationWorkspaceCaseBuilder
                 continue;
             }
 
-            var expected = Math.Max(
-                ApplicationProfilePersonLastCount.For(application, def.Kind),
-                1);
-            var count = rosterPerson != null
-                ? ApplicationWorkspaceLinkedRecordsCatalog.CountResolvedForPerson(rosterLinks, rosterPerson.ID, def.Kind)
+            var lastN = ApplicationProfilePersonLastCount.For(application, def.Kind);
+            var available = personId != Guid.Empty
+                ? linkableCounts.Get(personId, def.Kind)
+                : 0;
+            var expected = ApplicationWorkspaceLastNExpected.Resolve(def.Kind, lastN, available, linksLocked);
+            var count = personId != Guid.Empty
+                ? ApplicationWorkspaceLinkedRecordsCatalog.CountResolvedForPerson(rosterLinks, personId, def.Kind)
                 : tabs.TryGetValue(def.TabKey, out var tab)
                     ? tab.Rows.Count(r => r.Count > 0 && string.Equals(r[0], personName, StringComparison.Ordinal))
                     : 0;

@@ -109,9 +109,7 @@ public class ApplicationProfileApprovalLegVersionSchemaSqlTests
         Assert.Contains("OrganizationCompanyId", ApplicationProfileSchemaSql.EnsureOrganizationCatalogPostgres, StringComparison.Ordinal);
         Assert.Contains("OrganizationSignatoryId", ApplicationProfileSchemaSql.EnsureOrganizationCatalogPostgres, StringComparison.Ordinal);
         Assert.Contains("OrganizationRepresentativeId", ApplicationProfileSchemaSql.EnsureOrganizationCatalogPostgres, StringComparison.Ordinal);
-        Assert.Contains(ApplicationProfileSchemaSql.SeedDemoOrganizationCatalogPostgres,
-            ApplicationProfileSchemaSql.EnsureTemplateCatalogColumnsPostgresStatements);
-        Assert.Contains("DEM", ApplicationProfileSchemaSql.SeedDemoOrganizationCatalogPostgres, StringComparison.Ordinal);
-        Assert.Contains("Ali Demir", ApplicationProfileSchemaSql.SeedDemoOrganizationCatalogPostgres, StringComparison.Ordinal);
+        Assert.DoesNotContain("Demo Hyzmatlar HJ", string.Join('\n', ApplicationProfileSchemaSql.EnsureTemplateCatalogColumnsPostgresStatements), StringComparison.Ordinal);
+        Assert.DoesNotContain("Ali Demir", string.Join('\n', ApplicationProfileSchemaSql.EnsureTemplateCatalogColumnsPostgresStatements), StringComparison.Ordinal);
     }
 }

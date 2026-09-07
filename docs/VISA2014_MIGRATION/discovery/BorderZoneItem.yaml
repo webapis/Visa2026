@@ -1,0 +1,61 @@
+# Discovery dossier — BorderZoneItem (issued permit lines, postAllTypeSlices)
+
+targetODataEntity: BorderZoneItem
+discoveryStatus: complete
+
+legacy:
+  boClass: IPersonInApplication
+  boPath: VISA2014.Module/DC (PersonInApplication)
+  tables:
+    - dbo.PersonInApplication
+    - dbo.Application
+  rowCount: 218
+  primaryKey: Oid
+  softDeleteColumn: GCRecord
+
+visa2026:
+  boPath: Visa2026.Module/BusinessObjects/BorderZoneItem.cs
+  odataExposed: true
+
+mapping:
+  fieldMapFile: Visa2026.DataImporter/legacy/visa2014/field-maps/BorderZoneItem.yaml
+  tableMappingId: border-zone-item
+  cardinality: one_item_per_person_in_border_zone_application
+  upsertKeys:
+    - BorderZone
+    - Person
+  lookupDependencies: []
+  duplicateGroups: 0
+  legacyOnlyCount: 0
+  targetOnlyCount: 0
+  mismatchCount: 0
+  blockedReason: null
+  notes: |
+    SYNTHESIS: PersonInApplication under ApplicationTypeForEmployee = 11.
+    Çalik: **218** lines; Person (COALESCE Employee/FamilyMember) and Passport
+    complete (0 null). Parent BorderZone id-map key = Application.Oid.
+    Skip lines whose parent header is skipped (the 1 invalid ProcessNumber app).
+
+checklist:
+  target_bo_reviewed: true
+  legacy_bo_located: true
+  legacy_schema_documented: true
+  table_mapping_registered: true
+  column_mapping_complete: true
+  lookup_values_mapped: true
+  property_gaps_documented: true
+  dedupe_rules_defined: true
+  excel_preview_exported: true
+  inventory_updated: true
+  learnings_appended: true
+
+completedAt: 2026-09-07
+completedBy: agent
+
+importConfirmation:
+  importConfirmed: true
+  importConfirmedAt: 2026-09-07
+  importConfirmedBy: developer
+  reviewNotes: |
+    Developer confirmed in chat 2026-09-07 after BorderZone headers Posted 110.
+    Import RunId 20260907-095952: Posted 209 / Failed 0 / 3 Passport id-map misses.

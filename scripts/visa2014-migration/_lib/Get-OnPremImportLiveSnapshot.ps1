@@ -41,7 +41,7 @@ $dbCountMap = [ordered]@{
     AddressOfResidence       = 'AddressesOfResidence'
     EmployeeSalary           = 'EmployeeSalaries'
     MedicalRecord            = 'MedicalRecords'
-    Application              = 'Applications'
+    ApplicationProfileInstance = 'ApplicationProfileInstances'
     WorkPermit               = 'WorkPermits'
     WorkPermitItem           = 'WorkPermitItems'
     Invitation               = 'Invitations'
@@ -54,6 +54,9 @@ $localPgEnvPath = Join-Path $SyncHostRoot 'local-pg.env'
 $isLocalPgRoot = Test-Path -LiteralPath $localPgEnvPath
 
 $diList = @()
+# Local PC: skip process enumeration (Get-CimInstance hangs here; Get-Process is optional).
+# Live percent comes from {entity}.sync-progress.json + CurrentWave in sync-run-status.json.
+if ($Profile -ne 'Local') {
 # DataImporter may run as "dotnet.exe … Visa2026.DataImporter" (local) or published Visa2026.DataImporter.exe (on-prem).
 $diProcessNames = @('Visa2026.DataImporter', 'dotnet')
 foreach ($procName in $diProcessNames) {
@@ -103,6 +106,7 @@ foreach ($procName in $diProcessNames) {
             $diList += @{ Pid = $_.Id; Entity = $entity }
         } catch {}
     }
+}
 }
 
 $taskNames = switch ($Profile) {
@@ -276,6 +280,7 @@ $progressJson = ''
 $idMapSubDir = switch ($Profile) {
     'Staging' { 'calik-energi-onprem-staging' }
     'Demo' { 'calik-energi-onprem-demo' }
+    'Local' { if ($localIdMapSubDir) { $localIdMapSubDir } else { 'calik-energi-local-pg' } }
     default { 'calik-energi-onprem-prod' }
 }
 if ($localIdMapSubDir) { $idMapSubDir = $localIdMapSubDir }
@@ -290,11 +295,43 @@ if (-not $currentWave -and $diList.Count -gt 0) {
     $currentWave = [string]$diList[0].Entity
 }
 if ($currentWave) {
-    $progPath = Join-Path $SyncHostRoot ("data\id-maps\{0}\{1}.sync-progress.json" -f $idMapSubDir, $currentWave)
-    if (Test-Path -LiteralPath $progPath) {
+    $progCandidates = @(
+        Join-Path $SyncHostRoot ("data\id-maps\{0}\{1}.sync-progress.json" -f $idMapSubDir, $currentWave)
+    )
+    if ($Profile -eq 'Local') {
+        $repo = (Resolve-Path (Join-Path $PSScriptRoot '..\..\..')).Path
+        $progCandidates += Join-Path $repo ("Visa2026.DataImporter\legacy\visa2014\id-maps\{0}\{1}.sync-progress.json" -f $idMapSubDir, $currentWave)
+        $progCandidates += Join-Path $repo ("Visa2026.DataImporter\bin\Debug\net8.0\legacy\visa2014\id-maps\{0}\{1}.sync-progress.json" -f $idMapSubDir, $currentWave)
+    }
+    foreach ($progPath in $progCandidates) {
+        if (-not (Test-Path -LiteralPath $progPath)) { continue }
         try {
             $progressJson = (Get-Content -LiteralPath $progPath -Raw -Encoding UTF8).Trim()
+            if ($progressJson) { break }
         } catch {}
+    }
+}
+
+# Single-entity --import-visa2014 has no CurrentWave; still show the newest sidecar.
+if (-not $progressJson -and $Profile -eq 'Local') {
+    $repo = (Resolve-Path (Join-Path $PSScriptRoot '..\..\..')).Path
+    $scanDirs = @(
+        Join-Path $SyncHostRoot ("data\id-maps\{0}" -f $idMapSubDir)
+        Join-Path $repo ("Visa2026.DataImporter\legacy\visa2014\id-maps\{0}" -f $idMapSubDir)
+        Join-Path $repo ("Visa2026.DataImporter\bin\Debug\net8.0\legacy\visa2014\id-maps\{0}" -f $idMapSubDir)
+    )
+    $newest = $null
+    foreach ($dir in $scanDirs) {
+        if (-not (Test-Path -LiteralPath $dir)) { continue }
+        $hit = Get-ChildItem -LiteralPath $dir -Filter '*.sync-progress.json' -ErrorAction SilentlyContinue |
+            Sort-Object LastWriteTime -Descending |
+            Select-Object -First 1
+        if ($hit -and (-not $newest -or $hit.LastWriteTime -gt $newest.LastWriteTime)) {
+            $newest = $hit
+        }
+    }
+    if ($newest) {
+        try { $progressJson = (Get-Content -LiteralPath $newest.FullName -Raw -Encoding UTF8).Trim() } catch {}
     }
 }
 

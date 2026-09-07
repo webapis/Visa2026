@@ -1,6 +1,10 @@
 # Generates tenant education-institution.calik-energi.json and specialty.calik-energi.json from VISA2015.
 # DISTINCT labels on active Education rows + union with existing tenant seed rows.
+# Calik Energi: default legacy host is 10.100.128.15 (not localhost\SQLEXPRESS).
 #Requires -Version 5.1
+param(
+    [string]$LegacyServer = '10.100.128.15'
+)
 . (Join-Path $PSScriptRoot '..\..\_lib\Get-RepoRoot.ps1')
 $repoRoot = Get-Visa2026RepoRoot
 Set-StrictMode -Version Latest
@@ -19,7 +23,7 @@ $specSeed = Join-Path $tenantDir 'specialty.json'
 function Get-DistinctLabels([string]$query) {
     $tempCsv = [System.IO.Path]::GetTempFileName()
     try {
-        & sqlcmd -S 'localhost\SQLEXPRESS' -U ReadOnlyUser -P $password -d VISA2015 -C `
+        & sqlcmd -S $LegacyServer -U ReadOnlyUser -P $password -d VISA2015 -C `
             -y 0 -s "`t" -Q $query -o $tempCsv -f o:65001 | Out-Null
         $labels = New-Object 'System.Collections.Generic.HashSet[string]' ([StringComparer]::Ordinal)
         Get-Content -LiteralPath $tempCsv -Encoding UTF8 |

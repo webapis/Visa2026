@@ -1590,7 +1590,7 @@
                         @foreach (var tile in view.LinkedRecordTiles)
                         {
                             <button type="button"
-                                    class="cw-link-tile cw-link-tile--@tile.Tone @(ApplicationWorkspacePeopleLinksCompleteness.IsCountShort(tile.Count, tile.ExpectedCount) ? "is-empty" : null)"
+                                    class="cw-link-tile cw-link-tile--@tile.Tone @(ApplicationWorkspacePeopleLinksCompleteness.IsCountShort(tile.Count, tile.ExpectedCount, view.Chrome.ResolvedLinksLocked) ? "is-empty" : null)"
                                     @onclick="() => OpenLinkedRecordTile(tile.TabKey)">
                                 <span class="cw-link-tile__icon">@tile.Glyph</span>
                                 <span class="cw-link-tile__label">@tile.Label</span>
@@ -1737,8 +1737,8 @@
                                 <tr class="@(person.Index == SelectedPersonRowIndex ? "is-selected" : null)" @onclick="() => SelectPersonRow(person.Index)">
                                     <td><span class="ct-link">@person.Name</span></td>
                                     <td>@person.RoleLabel</td>
-                                    <td><code class="@(ApplicationWorkspacePeopleLinksCompleteness.IsKindShort(person, ApplicationWorkspacePeopleLinksCompleteness.PassportKey) ? "cw-cell-missing" : null)">@person.PassportNumber</code></td>
-                                    <td><code class="@(ApplicationWorkspacePeopleLinksCompleteness.IsKindShort(person, ApplicationWorkspacePeopleLinksCompleteness.VisaKey) ? "cw-cell-missing" : null)">@person.VisaNumber</code></td>
+                                    <td><code class="@(ApplicationWorkspacePeopleLinksCompleteness.IsKindShort(person, ApplicationWorkspacePeopleLinksCompleteness.PassportKey, view.Chrome.ResolvedLinksLocked) ? "cw-cell-missing" : null)">@person.PassportNumber</code></td>
+                                    <td><code class="@(ApplicationWorkspacePeopleLinksCompleteness.IsKindShort(person, ApplicationWorkspacePeopleLinksCompleteness.VisaKey, view.Chrome.ResolvedLinksLocked) ? "cw-cell-missing" : null)">@person.VisaNumber</code></td>
                                     <td>
                                         <button type="button"
                                                 class="os-btn os-btn--primary ct-btn-sm"
@@ -1776,7 +1776,7 @@
                             {
                                 var isSelected = IsPersonRecordSelected(person.Index, record.Key);
                                 <button type="button"
-                                        class="cw-link-tile cw-link-tile--@record.Tone @(ApplicationWorkspacePeopleLinksCompleteness.IsRecordShort(record) ? "is-empty" : null) @(isSelected ? "is-selected" : null)"
+                                        class="cw-link-tile cw-link-tile--@record.Tone @(ApplicationWorkspacePeopleLinksCompleteness.IsRecordShort(record, view.Chrome.ResolvedLinksLocked) ? "is-empty" : null) @(isSelected ? "is-selected" : null)"
                                         @onclick="() => TogglePersonRecord(person.Index, record.Key)">
                                     <span class="cw-link-tile__icon">@record.Glyph</span>
                                     <span class="cw-link-tile__label">@record.Label</span>

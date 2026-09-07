@@ -96,13 +96,19 @@ internal static class Visa2014WorkPermitODataImporter
             try
             {
                 var payload = BuildPayload(row, applicationIdMap, out var missingApplication);
-                if (missingApplication)
-                    skippedMissingApplicationProfileInstanceIdMap++;
-
                 if (payload == null)
                 {
                     failed++;
                     errors.Add($"{legacyOid}: incomplete OData payload ({DescribePayloadGap(row)})");
+                    continue;
+                }
+
+                // Type-slice import: only post work permits whose Application is in the
+                // current ApplicationProfileInstance id-map. Other types post later; do
+                // not create header-only rows with a null instance FK.
+                if (missingApplication || !payload.ContainsKey("ApplicationProfileInstance"))
+                {
+                    skippedMissingApplicationProfileInstanceIdMap++;
                     continue;
                 }
 

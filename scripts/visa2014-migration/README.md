@@ -154,8 +154,9 @@ Procedure: [import-practices.md § Partial reimport](../../.cursor/skills/visa20
 | Project contract | `catalogs/generate/ProjectContract-CalikEnergi.ps1` | `catalogs/deploy/ProjectContract-CalikEnergi.ps1` |
 | Approval leg profile | `catalogs/generate/ApprovalLegProfile.ps1` | — |
 | Approval leg versions (per Application Profile) | `catalogs/generate/ApplicationProfileApprovalLegVersions-CalikEnergi.ps1` | deploy / host-start sync |
-| Education institution / specialty | `catalogs/generate/EducationLookup-CalikEnergi.ps1` | `catalogs/deploy/EducationLookup-CalikEnergi.ps1` |
-| Position / department | `catalogs/generate/PositionDepartmentLookup-CalikEnergi.ps1` | `catalogs/deploy/PositionDepartmentLookup-CalikEnergi.ps1` |
+| Education institution / specialty | `catalogs/generate/EducationLookup-CalikEnergi.ps1` (`-LegacyServer`, default `10.100.128.15`) | `catalogs/deploy/EducationLookup-CalikEnergi.ps1` |
+| Education lookup **gaps** → local PG + JSON append | `catalogs/Seed-EducationLookupGapsToPostgres.ps1` (`.15` DISTINCT vs PG `NameTm`; no full JSON rewrite) | — |
+| Position / department | `catalogs/generate/PositionDepartmentLookup-CalikEnergi.ps1` (`-LegacyServer`, default `10.100.128.15`) | `catalogs/deploy/PositionDepartmentLookup-CalikEnergi.ps1` |
 | Lodging | `catalogs/generate/Lodging-CalikEnergi.ps1` (+ Hotel/Hospital/OtherSite variants) | `catalogs/deploy/LodgingLookup-CalikEnergi.ps1` |
 | Hotel / hospital | `catalogs/generate/HotelHospital-CalikEnergi.ps1` | `catalogs/deploy/HotelHospitalLookup-CalikEnergi.ps1` |
 | Subcontractor | `catalogs/generate/Subcontractor-CalikEnergi.ps1` | `catalogs/deploy/Subcontractor-CalikEnergi.ps1` |

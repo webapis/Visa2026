@@ -1,0 +1,32 @@
+flowchart TB
+  subgraph sources["VISA2015 source"]
+    direction TB
+    EMP["dbo.Employee<br/>Oid = Person.Oid"]
+    P["dbo.Person<br/>active: GCRecord IS NULL"]
+    SAL["dbo.Salary"]
+    WH["dbo.WorkHistoryOfEmployee<br/>MAX StartDateOnThisPosition"]
+    EMP --- P
+    EMP --- SAL
+    EMP --- WH
+  end
+
+  subgraph personFk["Person → EmployeeSalary.cs"]
+    direction LR
+    L_OID["Employee.Oid"] -->|"fk_id_map Person<br/>skip_row if unmapped"| T_PE["Person"]
+  end
+
+  subgraph amount["Pay → EmployeeSalary.cs"]
+    direction LR
+    L_DET["Salary.Detail"] -->|"Visa2014SalaryAmountNormalizer<br/>skip empty / unparseable"| T_AMT["Amount"]
+    L_CUR["no structured currency column"] -->|"constant USD<br/>dtm in Detail ignored"| T_CUR["Currency"]
+  end
+
+  subgraph dates["Dates → EmployeeSalary.cs"]
+    direction LR
+    L_SD["MAX WorkHistoryOfEmployee.StartDateOnThisPosition"] -->|"current_position_start<br/>skip_row if null"| T_SD["StartDate"]
+    L_ED["no legacy salary period end"] -->|"constant null<br/>open current snapshot"| T_ED["EndDate"]
+  end
+
+  EMP --> personFk
+  EMP --> amount
+  WH --> dates

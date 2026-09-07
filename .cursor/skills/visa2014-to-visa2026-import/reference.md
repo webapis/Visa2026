@@ -4,7 +4,8 @@
 
 | Path | Role |
 |------|------|
-| `Visa2026.DataImporter/legacy/visa2014/order.yaml` | **Canonical dependency order** — discovery + OData import (`entities[]`) |
+| `Visa2026.DataImporter/legacy/visa2014/order.yaml` | **BO dependency topology** — discovery + `dependsOn` |
+| `Visa2026.DataImporter/legacy/visa2014/application-type-import-order.yaml` | **Living ApplicationType import bands + inner sequence** |
 | `docs/VISA2014_MIGRATION/IMPORT_PLAN_AND_STRATEGY.md` | **Import plan — approve before implementation** |
 | `docs/VISA2014_MIGRATION/EXCEL_PREVIEW_EXPORT.md` | **Consolidated legacy → Excel** preview before import |
 | `Visa2026.DataImporter/legacy/visa2014/preview-export/` | Output folder (`*.xlsx` gitignored) |
@@ -45,9 +46,9 @@ Shared repo root: `_lib/Get-RepoRoot.ps1`. Dot-source **after** `param()`, not i
 
 ## Orchestration scripts (`scripts/visa2014-migration/`)
 
-**Order rule:** Full and partial reimport both follow [`order.yaml`](../../../Visa2026.DataImporter/legacy/visa2014/order.yaml) `dependsOn`. Orchestration scripts run entities in that order; partial reimport is one BO at a time but only when parents are already valid — re-run downstream BOs in order after a parent partial reimport.
+**Order rule:** Person-domain follows [`order.yaml`](../../../Visa2026.DataImporter/legacy/visa2014/order.yaml) `dependsOn` (**no Visa**). Application Profile Instances follow [`application-type-import-order.yaml`](../../../Visa2026.DataImporter/legacy/visa2014/application-type-import-order.yaml) (per-type inner sequence). Partial reimport is one BO at a time but only when parents are already valid — re-run the rest of that type slice after a parent partial reimport.
 
-**Stop-before-next:** Do not start the next BO until the previous wave exits **0** with **FailedCount = 0**. Chain step lists must include every parent BO in `order.yaml` (including `WorkPermitItem` / `InvitationItem` before `ApplicationItem`). See [SKILL.md § Import chain gate](./SKILL.md).
+**Stop-before-next:** Do not start the next inner step or type until the previous wave exits **0** with **FailedCount = 0**. See [SKILL.md § Import chain gate](./SKILL.md).
 
 | When | Script | Notes |
 |------|--------|-------|

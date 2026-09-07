@@ -1,0 +1,200 @@
+# VISA2014 -> Visa2026 — locked ApplicationType name map + Application Profile template
+#
+# Import and --patch-visa2014-application-profile MUST resolve ApplicationProfile
+# from targetApplicationTypeName (this file), never from ApplicationType.Code.
+# Several invitation types share Code get_invitation; profile Codes are unique.
+#
+# Source identity is the lookup-translations ApplicationType composite key
+# ({E|F}:{subtype}:{invWp}:{wizaWp}:{changeInfo}). Target name is Visa2026
+# ApplicationType.Name. Profile name is the tenant template (Çakylyk Almak FM, …).
+#
+# Canonical: lookup-translations.yaml ApplicationType values[] must match
+# sourceComposites -> targetApplicationTypeName here.
+# Tenant JSON: Module/DatabaseUpdate/LookupCatalogs/tenant/application-profile.calik-energi.json
+
+version: 1
+lockedAt: 2026-09-04
+status: approved
+lockedBy: developer (chat)
+
+rows:
+  - sourceComposites: ["E:0:0:na:na"]
+    sourceLabel: Employee · Invitation (subtype 0)
+    targetApplicationTypeName: App_Inv
+    applicationProfileCode: get_invitation
+    applicationProfileName: Çakylyk Almak
+  - sourceComposites: ["E:0:1:na:na"]
+    sourceLabel: Employee · Invitation + work permit (subtype 0, inv+WP)
+    targetApplicationTypeName: App_Inv_And_WP
+    applicationProfileCode: get_invitation_wp
+    applicationProfileName: Çakylyk we Iş Rugsatnamasyny Almak
+  - sourceComposites: ["F:0:na:na:na"]
+    sourceLabel: Family · Invitation (subtype 0)
+    targetApplicationTypeName: App_Inv_FM
+    applicationProfileCode: get_invitation_fm
+    applicationProfileName: Çakylyk Almak FM
+  - sourceComposites: ["E:20:na:na:na"]
+    sourceLabel: Employee · Invitation per work permit (subtype 20)
+    targetApplicationTypeName: App_Inv_According_to_WP
+    applicationProfileCode: get_invitation_according_to_wp
+    applicationProfileName: İş Rugsatnama görä Çakylyk Almak
+  - sourceComposites: ["E:10:na:na:na", "F:10:na:na:na"]
+    sourceLabel: Employee/Family · Service passport invitation (subtype 10)
+    targetApplicationTypeName: App_Sevice_Passport
+    applicationProfileCode: get_invitation_service_passport
+    applicationProfileName: Gulluk Pasporty Üçin Çakylyk Almak
+  - sourceComposites: ["E:1:na:na:na"]
+    sourceLabel: Employee · Change invitation (subtype 1)
+    targetApplicationTypeName: App_Change_Inv
+    applicationProfileCode: change_invitation
+    applicationProfileName: Çakylygy üýtgetmek
+  - sourceComposites: ["E:7:na:na:na", "E:7:na:0:na", "E:7:na:1:na"]
+    sourceLabel: Employee · Visa extension / visa+WP extension (subtype 7)
+    targetApplicationTypeName: App_Visa_and_WP_Ext
+    applicationProfileCode: extend_visa_wp
+    applicationProfileName: Wiza we Iş Rugsatnamasyny Uzaltmak
+  - sourceComposites: ["F:7:na:na:na"]
+    sourceLabel: Family · Visa extension (subtype 7)
+    targetApplicationTypeName: App_Visa_Ext_FM
+    applicationProfileCode: visa_ext_fm
+    applicationProfileName: Wiza Möhletini Uzaltmak FM
+  - sourceComposites: ["E:8:na:1:na", "E:8:na:0:na", "F:8:na:na:na"]
+    sourceLabel: Employee/Family · Change visa category (subtype 8)
+    targetApplicationTypeName: App_Change_Visa_Category
+    applicationProfileCode: visa_category_change
+    applicationProfileName: Wiza Kategoriýasyny üýtgetmek
+  - sourceComposites: ["E:9:na:na:na", "F:9:na:na:na"]
+    sourceLabel: Employee/Family · Transfer visa to new passport (enum 9)
+    targetApplicationTypeName: App_Change_Passport
+    applicationProfileCode: pasport_change
+    applicationProfileName: Wizany KP>Täze Pasporta Geçirmek
+  - sourceComposites: ["E:2:na:na:na", "F:2:na:na:na"]
+    sourceLabel: Employee/Family · Registration upon arrival (subtype 2)
+    targetApplicationTypeName: App_Reg_Check_In
+    applicationProfileCode: check_in_from_abroad
+    applicationProfileName: Hasaba Almak (Daşary ýurtdan gelmegi sebäpli)
+  - sourceComposites: ["E:4:na:na:na", "F:4:na:na:na"]
+    sourceLabel: Employee/Family · Register at new location (subtype 4)
+    targetApplicationTypeName: App_Reg_Check_In_Internal
+    applicationProfileCode: check_in_internal
+    applicationProfileName: Hasaba Almak (Welaýatdan gelmegi sebäpli)
+  - sourceComposites: ["E:3:na:na:na", "F:3:na:na:na"]
+    sourceLabel: Employee/Family · Registration extension (subtype 3)
+    targetApplicationTypeName: App_Reg_ext
+    applicationProfileCode: reg_extension
+    applicationProfileName: Hasaba alyşy uzaltmak
+  - sourceComposites: ["E:6:na:na:na", "F:6:na:na:na"]
+    sourceLabel: Employee/Family · Strike-off / check-out (subtype 6)
+    targetApplicationTypeName: App_Reg_Check_Out
+    applicationProfileCode: check_out
+    applicationProfileName: Hasapdan Çykarmak (Daşary ýurda gitmegi)
+  - sourceComposites: ["E:5:na:na:na", "F:5:na:na:na"]
+    sourceLabel: Employee/Family · Change registration info — address (subtype 5)
+    targetApplicationTypeName: App_Reg_Info_Change_Address
+    applicationProfileCode: reg_info_change_address
+    applicationProfileName: Hasaba alyş maglumatyň üýtgemegi (Salgy Çalyşmagy)
+  - sourceComposites: ["E:5:na:na:1"]
+    sourceLabel: Employee · Change registration info — passport (subtype 5)
+    targetApplicationTypeName: App_Reg_Info_Change_Passport
+    applicationProfileCode: reg_info_change_passport
+    applicationProfileName: Hasaba alyş maglumatyň üýtgemegi (Pasport Çalışmagy)
+  - sourceComposites: ["E:5:na:na:2"]
+    sourceLabel: Employee · Change registration info — visa (subtype 5)
+    targetApplicationTypeName: App_Reg_Info_Change_Visa
+    applicationProfileCode: reg_info_change_visa
+    applicationProfileName: Hasaba alyş maglumatyň üýtgemegi (Visa Çalyşmagy)
+  - sourceComposites: ["E:13:na:na:na"]
+    sourceLabel: Employee · Business trip departure (subtype 13)
+    targetApplicationTypeName: App_Business_Trip_Departure
+    applicationProfileCode: business_trip_departure
+    applicationProfileName: Iş Saparyna Gitmek
+  - sourceComposites: ["E:14:na:na:na"]
+    sourceLabel: Employee · Business trip arrival (subtype 14)
+    targetApplicationTypeName: App_Business_Trip_Arrival
+    applicationProfileCode: business_trip_arrival
+    applicationProfileName: Iş Saparyna Gelmek
+  - sourceComposites: ["E:11:na:na:na"]
+    sourceLabel: Employee · Border zone permission (subtype 11)
+    targetApplicationTypeName: App_Border_Zone_Permission
+    applicationProfileCode: get_border_zone
+    applicationProfileName: Serhet Ýaka Üçin Rugsatnama Almak
+  - sourceComposites: ["E:15:na:na:na"]
+    sourceLabel: Employee · Additional work-permitted location (subtype 15)
+    targetApplicationTypeName: App_Additional_WP_location
+    applicationProfileCode: change_workpermit
+    applicationProfileName: Iş Rugsatnama goşmaça  barjak ýeri
+  - sourceComposites: ["E:12:na:na:na"]
+    sourceLabel: Employee · Cancel visa and work permit (subtype 12)
+    targetApplicationTypeName: App_Cancel_Visa_and_WP
+    applicationProfileCode: cancel_visa_wp
+    applicationProfileName: Wiza we Iş Rugsatnamany Ýatyrmak
+  - sourceComposites: ["E:31:na:na:na", "E:22:na:na:na"]
+    sourceLabel: Employee · Cancel work permit (subtype 31 / 22)
+    targetApplicationTypeName: App_Cancell_WP
+    applicationProfileCode: cancel_workpermit
+    applicationProfileName: Iş Rugsatnamany Ýatyrmak
+  - sourceComposites: ["E:45:na:na:na", "E:21:na:na:na", "F:45:na:na:na", "F:21:na:na:na"]
+    sourceLabel: Employee/Family · Cancel visa (subtype 45 / 21)
+    targetApplicationTypeName: App_Cancel_Visa
+    applicationProfileCode: cancel_visa
+    applicationProfileName: Wizany Ýatyrmak
+  - sourceComposites: []
+    sourceLabel: Visa2026-only / no Çalik composite yet
+    targetApplicationTypeName: App_Visa_Ext
+    applicationProfileCode: visa_ext
+    applicationProfileName: Wiza Möhletini Uzaltmak
+  - sourceComposites: []
+    sourceLabel: Visa2026-only / no Çalik composite yet
+    targetApplicationTypeName: App_Visa_Ext_According_to_WP
+    applicationProfileCode: visa_ext_according_to_wp
+    applicationProfileName: Iş Rugsatnamasyna Görä Wizany Uzaltmak
+  - sourceComposites: []
+    sourceLabel: Visa2026-only / no Çalik composite yet
+    targetApplicationTypeName: App_Exit_Visa
+    applicationProfileCode: visa_exit
+    applicationProfileName: Çykyş  Wiza Resmileşdirmek
+  - sourceComposites: []
+    sourceLabel: Visa2026-only / no Çalik composite yet
+    targetApplicationTypeName: App_Visa_For_New_Born_FM
+    applicationProfileCode: visa_for_new_born_fm
+    applicationProfileName: Täze dogulan çaga wiza resmileşdirmek FM
+  - sourceComposites: []
+    sourceLabel: Visa2026-only / no Çalik composite yet
+    targetApplicationTypeName: App_WP_Ext
+    applicationProfileCode: workpermit_extension
+    applicationProfileName: Iş Rugsatnamasyny Uzaltmak
+  - sourceComposites: []
+    sourceLabel: Visa2026-only / no Çalik composite yet
+    targetApplicationTypeName: App_Reg_Check_Out_Internal
+    applicationProfileCode: check_out_internal
+    applicationProfileName: Hasapdan Çykarmak (Başga welaýata gitmegi)
+  - sourceComposites: []
+    sourceLabel: Visa2026-only / no Çalik composite yet
+    targetApplicationTypeName: App_Cancel_Inv
+    applicationProfileCode: cancel_invitation
+    applicationProfileName: Çakylygy Ýatyrmak
+  - sourceComposites: []
+    sourceLabel: Visa2026-only / no Çalik composite yet
+    targetApplicationTypeName: App_Cancel_Inv_WP
+    applicationProfileCode: cancel_invitation_wp
+    applicationProfileName: Çakylyk we Iş Rugsatnamasyny Ýatyrmak
+  - sourceComposites: []
+    sourceLabel: Visa2026-only / no Çalik composite yet
+    targetApplicationTypeName: App_Cancel_BZ
+    applicationProfileCode: cancel_borderzone
+    applicationProfileName: Serhet Ýaka Rugsady Ýatyrmak
+  - sourceComposites: []
+    sourceLabel: Visa2026-only / no Çalik composite yet
+    targetApplicationTypeName: App_Cancel_App
+    applicationProfileCode: cancel_application
+    applicationProfileName: Ýüztutmany Ýatyrmak
+  - sourceComposites: []
+    sourceLabel: Visa2026-only / no Çalik composite yet
+    targetApplicationTypeName: App_Cancel_Visa_Ext
+    applicationProfileCode: cancel_visa_ext
+    applicationProfileName: Wizany Uzaltmak Barada Ýüztutmany Ýatyrmak
+  - sourceComposites: []
+    sourceLabel: Visa2026-only / no Çalik composite yet
+    targetApplicationTypeName: App_Cancel_Visa_and_WP_Ext
+    applicationProfileCode: cancel_visa_wp_ext
+    applicationProfileName: Wiza we Iş Rugsatnamany Uzaltmak Barada Ýüztutmany Ýatyrmak

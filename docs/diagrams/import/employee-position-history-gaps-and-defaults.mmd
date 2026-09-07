@@ -1,0 +1,37 @@
+flowchart TB
+  subgraph drop["Dropped dbo.WorkHistoryOfEmployee columns"]
+    D1["Company"]
+    D2["hasPositionStartDate — UI flag only"]
+    D3["ImpCompany / ImpDepartment / ImpPosition / ImpIDNumber"]
+  end
+
+  subgraph relocate["Relocated from dbo.Person"]
+    R1["Person.MiddleName<br/>legacy: job title, not a given name"] -->|"current/latest history row"| R2["ActualPosition.Name"]
+  end
+
+  subgraph catalog["Catalogs — do not import lookup tables"]
+    C1["dbo.Position / dbo.Department<br/>seed NameTm from live .15 DISTINCT"]
+    C2["ActualPosition is find-or-create by Name<br/>not a tenant JSON catalog"]
+    C3["Missing Position/Department NameTm<br/>→ incomplete OData payload / skip_row"]
+  end
+
+  subgraph targetOnly["EmployeePositionHistory.cs with no legacy WH column"]
+    TO1["ShowOptionalFields — NotMapped; omit on POST"]
+    TO2["Title — computed from Position.NameTm"]
+    TO3["ApplicationProfileInstances — M2M later; not this wave"]
+    TO4["No Calik file wave — no EmployeePositionHistoryDocument source"]
+  end
+
+  subgraph supplement["Later WorkPermit supplement — not this wave"]
+    S1["Soft-deleted WorkHistoryOfEmployee<br/>still referenced by active WorkPermit"] -->|"--supplement-permit-positions"| S2["extra EPH rows; EndDate null snapshot"]
+  end
+
+  subgraph idmap["Id-map only"]
+    OID["dbo.WorkHistoryOfEmployee.Oid"] -->|"legacy_id"| MAP["id-maps/.../EmployeePositionHistory.json<br/>not EmployeePositionHistory.ID"]
+  end
+
+  subgraph defaults["Import defaults"]
+    DF1["Multiple history rows per Person are valid"]
+    DF2["ActualPosition empty / numeric / punctuation → '-'"]
+    DF3["Last row per Person: EndDate null"]
+  end

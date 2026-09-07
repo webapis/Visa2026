@@ -2,6 +2,7 @@
 
 **Scope:** Application header import (`dbo.Application`).  
 **Layer 3:** `lookup-translations.yaml` → `ApplicationType` catalog.  
+**Profile template lock:** `Visa2026.DataImporter/legacy/visa2014/application-type-profile-lock.yaml` (source composite → target `ApplicationType.Name` → unique `ApplicationProfile` Code/Name).  
 **Discovery:** `docs/VISA2014_MIGRATION/discovery/Application.yaml` (2026-06-29).
 
 ## Composite key

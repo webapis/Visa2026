@@ -10,6 +10,7 @@ internal sealed class Visa2014VisaIssuingApplicationProfileInstanceCorrectionRes
     public int VisasInScope { get; init; }
     public int Updated { get; init; }
     public int AlreadyCorrect { get; init; }
+    public int ClearedStickyIssuing { get; init; }
     public int SkippedNoLegacyApplication { get; init; }
     public int SkippedMissingApplicationMap { get; init; }
     public int SkippedMissingVisaTarget { get; init; }
@@ -92,6 +93,7 @@ internal static class Visa2014VisaIssuingApplicationProfileInstanceCorrection
             Console.WriteLine($"INF Visas in id-map: {result.VisasInScope}");
             Console.WriteLine($"INF IssuingApplicationProfileInstance updated: {result.Updated}");
             Console.WriteLine($"INF Already correct: {result.AlreadyCorrect}");
+            Console.WriteLine($"INF Cleared sticky issuing FK: {result.ClearedStickyIssuing}");
             Console.WriteLine($"INF No legacy Application link: {result.SkippedNoLegacyApplication}");
             Console.WriteLine($"INF Application not in id-map: {result.SkippedMissingApplicationMap}");
             Console.WriteLine($"INF Missing Visa target: {result.SkippedMissingVisaTarget}");
@@ -121,6 +123,7 @@ internal static class Visa2014VisaIssuingApplicationProfileInstanceCorrection
         var errors = new List<string>();
         int updated = 0;
         int alreadyCorrect = 0;
+        int clearedStickyIssuing = 0;
         int skippedNoLegacyApplication = 0;
         int skippedMissingApplicationMap = 0;
         int skippedMissingVisaTarget = 0;
@@ -132,6 +135,22 @@ internal static class Visa2014VisaIssuingApplicationProfileInstanceCorrection
             if (!issuingByLegacyVisa.TryGetValue(legacyVisaOid, out var legacyApplicationOid))
             {
                 skippedNoLegacyApplication++;
+                var extra = objectSpace.GetObjectByKey<Bo.Visa>(targetVisaId);
+                if (extra?.IssuingApplicationProfileInstance != null)
+                {
+                    if (verbose)
+                    {
+                        Console.WriteLine(
+                            dryRun
+                                ? $"  DRY Visa {targetVisaId}: clear sticky IssuingApplicationProfileInstance"
+                                : $"  PATCH Visa {targetVisaId} IssuingApplicationProfileInstance=null (sticky extra)");
+                    }
+
+                    if (!dryRun)
+                        extra.IssuingApplicationProfileInstance = null;
+                    clearedStickyIssuing++;
+                }
+
                 continue;
             }
 
@@ -183,7 +202,7 @@ internal static class Visa2014VisaIssuingApplicationProfileInstanceCorrection
                 Console.WriteLine($"  PATCH Visa {targetVisaId} IssuingApplicationProfileInstance={applicationId}");
         }
 
-        if (!dryRun && updated > 0)
+        if (!dryRun && (updated > 0 || clearedStickyIssuing > 0))
             objectSpace.CommitChanges();
 
         return new Visa2014VisaIssuingApplicationProfileInstanceCorrectionResult
@@ -191,6 +210,7 @@ internal static class Visa2014VisaIssuingApplicationProfileInstanceCorrection
             VisasInScope = visaIdMap.Count,
             Updated = updated,
             AlreadyCorrect = alreadyCorrect,
+            ClearedStickyIssuing = clearedStickyIssuing,
             SkippedNoLegacyApplication = skippedNoLegacyApplication,
             SkippedMissingApplicationMap = skippedMissingApplicationMap,
             SkippedMissingVisaTarget = skippedMissingVisaTarget,

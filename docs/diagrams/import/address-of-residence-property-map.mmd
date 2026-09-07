@@ -1,0 +1,45 @@
+flowchart TB
+  subgraph sources["VISA2015 source"]
+    direction TB
+    AOR["dbo.AddressOfResidence<br/>active: GCRecord IS NULL"]
+    P["dbo.Person"]
+    A["dbo.Address"]
+    R["dbo.Region"]
+    SE["dbo.SaherEtrap"]
+    DOA["dbo.DocumentOfAddress<br/>type discriminator not a file"]
+    AOR --- P
+    AOR --- A
+    A --- R
+    A --- SE
+    A --- DOA
+  end
+
+  subgraph personFk["Person → AddressOfResidence.cs"]
+    direction LR
+    L_PE["AddressOfResidence.Person"] -->|"fk_id_map Person<br/>skip_row if unmapped"| T_PE["Person"]
+  end
+
+  subgraph typeMap["Type → AddressOfResidence.cs"]
+    direction LR
+    L_TY["TypeOfDocument"] -->|"Lojman: classify by AddressLine<br/>Patent: PrivateHouse unless hotel/lodging<br/>myhmanhana: Hotel or Hospital"| T_TY["Type"]
+  end
+
+  subgraph geo["Geography → AddressOfResidence.cs"]
+    direction LR
+    L_RG["Region.mgCode"] -->|"BN MR AH AS LB DZ → NameTm<br/>else infer from AddressLine"| T_RG["Region"]
+    L_CT["SaherEtrap.mgCode / name"] -->|"City PdfForm_Code<br/>fallback CityByName"| T_CT["City"]
+  end
+
+  subgraph site["Site / street → AddressOfResidence.cs"]
+    direction LR
+    L_LN["Address.AddressLine"] -->|"strip region/city prefix"| T_FA["FullAddress<br/>PrivateHouse"]
+    L_LN -->|"Type=Lodging lookup FullAddress"| T_LO["Lodging"]
+    L_LN -->|"Type=Hotel lookup Name"| T_HO["Hotel"]
+    L_LN -->|"Type=Hospital lookup Name"| T_HS["Hospital"]
+    L_EX["ExpiringDateOfAddressDocument"] -->|"date when PrivateHouse"| T_EX["ExpirationDate"]
+  end
+
+  AOR --> personFk
+  AOR --> typeMap
+  A --> geo
+  A --> site

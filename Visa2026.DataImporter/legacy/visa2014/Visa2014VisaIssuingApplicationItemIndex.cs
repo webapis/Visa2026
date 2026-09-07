@@ -4,6 +4,8 @@ namespace Visa2026.DataImporter.Legacy.Visa2014;
 /// Resolves legacy Visa.Oid → PersonInApplication.Oid for Visa.IssuingApplicationItem.
 /// Prefer ProcessNumber when that PIA is on an extension app (subtype 7);
 /// else extension sibling; else other ProcessNumber (e.g. sticky invitation FK).
+/// Then keep at most one visa per PIA (earliest issued date) so sticky ProcessNumber
+/// does not attach later stickers as Issued records.
 /// </summary>
 internal sealed record Visa2014VisaIssuingApplicationItemLink(
     Guid LegacyVisaOid,
@@ -159,7 +161,8 @@ internal static class Visa2014VisaIssuingApplicationItemIndex
             Console.WriteLine(
                 $"INF Visa IssuingApplicationItem index: {map.Count} visa(s) " +
                 $"(processnumber={byProcess}, extension_sibling={bySibling}; " +
-                $"legacy ProcessNumber extension={processExt}, other={processOther})");
+                $"legacy ProcessNumber extension={processExt}, other={processOther}; " +
+                "at most one visa per PersonInApplication)");
         }
 
         return map;
@@ -236,7 +239,33 @@ internal static class Visa2014VisaIssuingApplicationItemIndex
             map[visaOid] = new Visa2014VisaIssuingApplicationItemLink(visaOid, piaOid, "processnumber");
         }
 
+        KeepEarliestVisaPerPersonInApplication(map, visas);
         return map;
+    }
+
+    /// <summary>
+    /// Sticky <c>Visa.ProcessNumber</c> can point many later stickers at the same PIA.
+    /// Issued records allow at most one visa per roster person (one PIA).
+    /// Keep the earliest issued date (then visa Oid); extras import without issuing instance.
+    /// </summary>
+    internal static void KeepEarliestVisaPerPersonInApplication(
+        Dictionary<Guid, Visa2014VisaIssuingApplicationItemLink> map,
+        IEnumerable<(Guid VisaOid, Guid PassportOid, DateTime IssuedDate)> visas)
+    {
+        var issuedByVisa = visas
+            .GroupBy(v => v.VisaOid)
+            .ToDictionary(g => g.Key, g => g.Min(x => x.IssuedDate));
+
+        foreach (var group in map.Values.GroupBy(link => link.LegacyApplicationItemOid).Where(g => g.Count() > 1).ToList())
+        {
+            var ordered = group
+                .OrderBy(link => issuedByVisa.TryGetValue(link.LegacyVisaOid, out var issued) ? issued : DateTime.MaxValue)
+                .ThenBy(link => link.LegacyVisaOid)
+                .ToList();
+
+            for (var i = 1; i < ordered.Count; i++)
+                map.Remove(ordered[i].LegacyVisaOid);
+        }
     }
 
     private static bool TryGuid(IReadOnlyDictionary<string, string?> row, string key, out Guid value)

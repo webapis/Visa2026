@@ -109,7 +109,7 @@ flowchart TB
 2. **`visa2014-sql-local`** → `VISA2015` (legacy). **`visa2026-sql-local`** → Visa2026 DB (target validation).
 3. Never POST/PATCH to VISA2014 OData or write to `VISA2015` during import.
 4. **One BO at a time** — only one discovery dossier `in_progress`.
-5. Prefer checked-in artifacts: **`legacy/visa2014/order.yaml`** (dependency order), `discovery/{Entity}.yaml`, `entity-inventory.yaml`.
+5. Prefer checked-in artifacts: **`legacy/visa2014/order.yaml`** (BO `dependsOn`), **`application-type-import-order.yaml`** (ApplicationType slices), `discovery/{Entity}.yaml`, `entity-inventory.yaml`.
 
 ### Planned MCP configuration (`.cursor/mcp.json`)
 
@@ -410,10 +410,12 @@ Per-field keys for **missing values**, **mismatches**, and **dedupe** — see **
 
 ### Import order and discovery order (same file)
 
-**[`Visa2026.DataImporter/legacy/visa2014/order.yaml`](../Visa2026.DataImporter/legacy/visa2014/order.yaml)** is the single source of truth for:
+**[`Visa2026.DataImporter/legacy/visa2014/order.yaml`](../Visa2026.DataImporter/legacy/visa2014/order.yaml)** is the source of truth for **BO `dependsOn` topology** (discovery walk).
 
-1. **Discovery** — walk `entities[]` top-to-bottom; each entry's `dependsOn` must be satisfied before starting its dossier.
-2. **OData import** — load entities in the same sequence (grouped by `importPhase` for batch runs).
+**[`application-type-import-order.yaml`](../Visa2026.DataImporter/legacy/visa2014/application-type-import-order.yaml)** is the source of truth for **Application Profile Instance import execution** (per ApplicationType inner sequence; living type list).
+
+1. **Discovery** — walk `order.yaml` `entities[]` top-to-bottom; each entry's `dependsOn` must be satisfied before starting its dossier.
+2. **Import execution** — person-domain from `order.yaml` (**no Visa**). Instance / issued / visa from `application-type-import-order.yaml` (one type’s full inner sequence, then the next type).
 
 Rules when editing `order.yaml`:
 
@@ -422,14 +424,13 @@ Rules when editing `order.yaml`:
 - One BO per row: `targetODataEntity`, `dependsOn`, `discoveryDossier`, `discoveryStatus`, `importConfirmed`, `importPhase`.
 - **`importConfirmed: true`** required before import implementation or OData load for that row (see § Import confirmation gate).
 
-Typical sequence (extend as dossiers are added):
+Typical sequence (extend as dossiers / types are added):
 
-1. Lookups — seeded in Visa2026 by Module updaters; translate in `lookup-translations.yaml` when a transactional BO needs them  
-2. **Person** and person-scoped children (`dependsOn: [Person]`)  
-3. **Application** (`dependsOn: [Person]`) → **ApplicationItem** (`dependsOn: [Person, Application]`)  
-4. Visas, invitations, work permits (`dependsOn: [Application]` or `[ApplicationItem]`)  
-5. **ApplicationProgress** / history  
-6. **Attachments** last  
+1. Lookups — seeded in Visa2026 by Module updaters; translate in `lookup-translations.yaml` when a transactional BO needs them
+2. **Person** and person-scoped children except **Visa** (`Passport` yes)
+3. **Per ApplicationType** (`App_Inv` first): instance header → roster → progress → issued Invitation/WorkPermit (if generated) → Visa (if generated)
+4. After all types: Rejection, BorderZone documents, orphan Visa remainder
+5. **Attachments** last  
 
 ---
 

@@ -130,4 +130,30 @@ public class Visa2014VisaIssuingApplicationItemIndexTests
 
         Assert.Empty(map);
     }
+
+    [Fact]
+    public void Build_StickyProcessNumber_KeepsEarliestVisaPerPia()
+    {
+        var passport = Guid.NewGuid();
+        var firstVisa = Guid.Parse("11111111-1111-1111-1111-111111111111");
+        var laterVisa = Guid.Parse("22222222-2222-2222-2222-222222222222");
+        var pia = Guid.NewGuid();
+
+        var map = Visa2014VisaIssuingApplicationItemIndex.Build(
+            processNumberLinks:
+            [
+                (firstVisa, pia, IsExtensionApp: true),
+                (laterVisa, pia, IsExtensionApp: true),
+            ],
+            visas:
+            [
+                (firstVisa, passport, new DateTime(2018, 6, 4)),
+                (laterVisa, passport, new DateTime(2018, 11, 14)),
+            ],
+            extensionPias: []);
+
+        Assert.True(map.ContainsKey(firstVisa));
+        Assert.False(map.ContainsKey(laterVisa));
+        Assert.Equal(pia, map[firstVisa].LegacyApplicationItemOid);
+    }
 }

@@ -185,7 +185,7 @@ propertyGaps:
     - property: MovementPermitLocation
       default: null
       missingBehavior: allow_null
-      notes: Legacy GoşmaçaIşlemägeRugsatÝeri FK when populated
+      notes: Legacy GoşmaçaIşlemägeRugsatÝeri FK when populated. App_Additional_WP_location: if empty, majority PIA.WorkPermit.WorkPermitLocation bits.
     - property: ApplicationItems
       disposition: child_bo
     - property: Invitations
@@ -238,10 +238,10 @@ propertyGaps:
       notes: Long-process rows only; resolve NumberOfContract via calik-energi ProjectContract overlay
     - property: ApplicationType
       legacyColumn: ApplicationTypeForEmployee / ApplicationTypeForFamilyMember
-      notes: Composite transform — see lookup-translations ApplicationType catalog
+      notes: Composite transform — see lookup-translations ApplicationType catalog and application-type-profile-lock.yaml
     - property: ApplicationProfile
       legacyColumn: ApplicationTypeForEmployee / ApplicationTypeForFamilyMember
-      notes: Wave 2 — resolved from translated ApplicationType via ApplicationProfile.Code (tenant catalog); dual-read with ApplicationType on import
+      notes: Wave 2 — locked target ApplicationType.Name -> ApplicationProfile.Code (application-type-profile-lock.yaml); never ApplicationType.Code (shared get_invitation)
 
 fields:
   - source: Oid
@@ -391,6 +391,10 @@ fields:
     transform: lookup_nametm
     lookupCatalog: MovementPermitLocation
     missingBehavior: allow_null
+    notes: >
+      Header FK first. App_Additional_WP_location only: when header FK is null,
+      fill from majority PersonInApplication.WorkPermit.WorkPermitLocation
+      (WorkPermittedLocationName bit matrix). Never overwrite a non-empty header.
 
   - source: BusinessTripDestination
     target: ToCity

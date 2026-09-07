@@ -963,6 +963,9 @@ catalogs:
         target: App_Change_Visa_Category
       - legacy: "E:9:na:na:na"
         target: App_Change_Passport
+      - legacy: "F:9:na:na:na"
+        target: App_Change_Passport
+        notes: Family enum 9 (TypeOfApplicationForFamilyMember); 30 Calik rows
       - legacy: "E:14:na:na:na"
         target: App_Business_Trip_Arrival
       - legacy: "F:8:na:na:na"
@@ -993,6 +996,9 @@ catalogs:
       Drafted 2026-06-29. Subtype IDs map to legacy SubType enum (IApplication.cs).
       Approved 2026-06-29: skip unmapped E:44 (92 apps, 187 items) and E:55 (13 apps, 17 items) — 105 headers / 204 items.
       2 composite keys remain without Visa2026 ApplicationType.Name; rows skipped at import (not blocked).
+      ApplicationProfile template is locked per target ApplicationType.Name in
+      Visa2026.DataImporter/legacy/visa2014/application-type-profile-lock.yaml
+      (App_Inv_FM -> get_invitation_fm / Çakylyk Almak FM). Do not use ApplicationType.Code.
       importConfirmed still pending broader applicationWaveComplete gate in lookup-review-queue.yaml.
 
   - targetCatalog: PurposeOfTravel

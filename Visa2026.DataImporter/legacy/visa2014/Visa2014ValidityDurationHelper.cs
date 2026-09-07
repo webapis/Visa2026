@@ -24,6 +24,21 @@ internal static class Visa2014ValidityDurationHelper
         _ => numberOfDays.ToString(),
     };
 
+    public static Guid ResolveValidityDurationIdByDays(INonSecuredObjectSpaceFactory factory, int numberOfDays)
+    {
+        var targetDays = ClosestCandidateDaySpan(numberOfDays);
+        using var objectSpace = factory.CreateNonSecuredObjectSpace(typeof(Bo.ValidityDuration));
+        var durations = objectSpace.GetObjectsQuery<Bo.ValidityDuration>().ToList();
+        var match = durations.FirstOrDefault(d => d.NumberOfDays == targetDays);
+        if (match == null)
+        {
+            throw new InvalidOperationException(
+                $"Could not resolve ValidityDuration with NumberOfDays={targetDays} — ensure lookup catalogs are seeded.");
+        }
+
+        return match.ID;
+    }
+
     public static Guid ResolveClosestValidityDurationId(
         INonSecuredObjectSpaceFactory factory,
         DateTime startDate,

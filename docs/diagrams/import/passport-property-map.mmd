@@ -1,0 +1,39 @@
+flowchart TB
+  subgraph sources["VISA2015 source"]
+    direction TB
+    PP["dbo.Passport<br/>active: GCRecord IS NULL"]
+    P["dbo.Person<br/>id-map required"]
+    PT["dbo.PassportType"]
+    IC["dbo.Country<br/>PassportIssuedCountry"]
+    PP --- P
+    PP --- PT
+    PP --- IC
+  end
+
+  subgraph identity["Document → Passport.cs"]
+    direction LR
+    L_PN["Passport.PassportNumber"] -->|"identity_trim<br/>skip_row if empty"| T_PN["PassportNumber"]
+    L_PL["Passport.PassportIssuedPlace"] -->|"identity_trim"| T_AU["Authority"]
+  end
+
+  subgraph lookups["Lookups → Passport.cs"]
+    direction LR
+    L_TY["PassportType.TypeOfPassportL<br/>+ mgCode"] -->|"{L}:{mgCode} → LocalizationKey<br/>unmapped → P"| T_TY["PassportType"]
+    L_CO["Country.NameOfCountryL"] -->|"Country.Code<br/>skip_row if miss"| T_IC["IssuedCountry"]
+  end
+
+  subgraph dates["Dates → Passport.cs"]
+    direction LR
+    L_ID["PassportIssuedDate"] -->|"date skip_row"| T_ID["IssueDate"]
+    L_ED["PassportExpiringDate"] -->|"date skip_row"| T_ED["ExpirationDate"]
+  end
+
+  subgraph personFk["Person → Passport.cs"]
+    direction LR
+    L_PE["Passport.Person"] -->|"fk_id_map Person<br/>skip_row if unmapped"| T_PE["Person"]
+  end
+
+  PP --> identity
+  PP --> lookups
+  PP --> dates
+  PP --> personFk

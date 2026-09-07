@@ -24,15 +24,32 @@ public static class IssuedDocumentStatusColumnsCleanupSchemaSql
         """DROP VIEW IF EXISTS vw_rd_work_permit_active CASCADE;""",
     ];
 
+    // ALTER TABLE ... DROP COLUMN IF EXISTS still requires the table.
+    // Greenfield DROP DATABASE + CREATE DATABASE has no tables yet — skip via to_regclass.
     internal static readonly string[] DropColumnStatements =
     [
-        """ALTER TABLE "InvitationItems" DROP COLUMN IF EXISTS "IsCancelled" CASCADE;""",
-        """ALTER TABLE "InvitationItems" DROP COLUMN IF EXISTS "IsChanged" CASCADE;""",
-        """ALTER TABLE "InvitationItems" DROP COLUMN IF EXISTS "IsUsed" CASCADE;""",
-        """ALTER TABLE "WorkPermitItems" DROP COLUMN IF EXISTS "IsCancelled" CASCADE;""",
-        """ALTER TABLE "Visas" DROP COLUMN IF EXISTS "IsCancelled" CASCADE;""",
-        """ALTER TABLE "Visas" DROP COLUMN IF EXISTS "IsChanged" CASCADE;""",
-        """ALTER TABLE "BorderZones" DROP COLUMN IF EXISTS "IsCancelled" CASCADE;""",
-        """ALTER TABLE "BorderZoneItems" DROP COLUMN IF EXISTS "IsCancelled" CASCADE;""",
+        """
+        DO $$
+        BEGIN
+          IF to_regclass('public."InvitationItems"') IS NOT NULL THEN
+            ALTER TABLE "InvitationItems" DROP COLUMN IF EXISTS "IsCancelled" CASCADE;
+            ALTER TABLE "InvitationItems" DROP COLUMN IF EXISTS "IsChanged" CASCADE;
+            ALTER TABLE "InvitationItems" DROP COLUMN IF EXISTS "IsUsed" CASCADE;
+          END IF;
+          IF to_regclass('public."WorkPermitItems"') IS NOT NULL THEN
+            ALTER TABLE "WorkPermitItems" DROP COLUMN IF EXISTS "IsCancelled" CASCADE;
+          END IF;
+          IF to_regclass('public."Visas"') IS NOT NULL THEN
+            ALTER TABLE "Visas" DROP COLUMN IF EXISTS "IsCancelled" CASCADE;
+            ALTER TABLE "Visas" DROP COLUMN IF EXISTS "IsChanged" CASCADE;
+          END IF;
+          IF to_regclass('public."BorderZones"') IS NOT NULL THEN
+            ALTER TABLE "BorderZones" DROP COLUMN IF EXISTS "IsCancelled" CASCADE;
+          END IF;
+          IF to_regclass('public."BorderZoneItems"') IS NOT NULL THEN
+            ALTER TABLE "BorderZoneItems" DROP COLUMN IF EXISTS "IsCancelled" CASCADE;
+          END IF;
+        END $$;
+        """,
     ];
 }

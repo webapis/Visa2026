@@ -12,6 +12,9 @@ internal sealed record Visa2014ApplicationProfileInstancePersonRawRow(
     Guid LegacyApplicationProfileInstanceOid,
     Guid? LegacyEmployeeOid,
     Guid? LegacyFamilyMemberOid,
+    Guid? LegacyPassportOid,
+    Guid? LegacyPreviousPassportOid,
+    Guid? LegacyVisaOid,
     bool ForEmployee,
     bool ForFamilyMember,
     int? EmployeeSubtypeId,
@@ -30,6 +33,9 @@ internal static class Visa2014ApplicationProfileInstancePersonTransform
             CAST(pia.Application AS varchar(36)) AS ApplicationProfileInstanceOid,
             CAST(pia.Employee AS varchar(36)) AS EmployeeOid,
             CAST(pia.FamilyMember AS varchar(36)) AS FamilyMemberOid,
+            CAST(pia.Passport AS varchar(36)) AS PassportOid,
+            CAST(pia.PreviousPassport AS varchar(36)) AS PreviousPassportOid,
+            CAST(pia.Visa AS varchar(36)) AS VisaOid,
             CASE WHEN ISNULL(a.ForEmployee, 0) = 1 THEN '1' ELSE '0' END AS ForEmployee,
             CASE WHEN ISNULL(a.ForFamilyMember, 0) = 1 THEN '1' ELSE '0' END AS ForFamilyMember,
             ate.TypeOfApplicationForEmployee AS EmployeeSubtypeId,
@@ -128,6 +134,9 @@ internal static class Visa2014ApplicationProfileInstancePersonTransform
             LegacyApplicationProfileInstanceOid: applicationOid,
             LegacyEmployeeOid: ParseGuid(GetString(reader, "EmployeeOid")),
             LegacyFamilyMemberOid: ParseGuid(GetString(reader, "FamilyMemberOid")),
+            LegacyPassportOid: ParseGuid(GetString(reader, "PassportOid")),
+            LegacyPreviousPassportOid: ParseGuid(GetString(reader, "PreviousPassportOid")),
+            LegacyVisaOid: ParseGuid(GetString(reader, "VisaOid")),
             ForEmployee: GetString(reader, "ForEmployee") == "1",
             ForFamilyMember: GetString(reader, "ForFamilyMember") == "1",
             EmployeeSubtypeId: ParseNullableInt(GetString(reader, "EmployeeSubtypeId")),
@@ -225,6 +234,9 @@ internal static class Visa2014ApplicationProfileInstancePersonTransform
         }
 
         row["Person"] = personOid.Value.ToString("D");
+        row["CurrentPassport"] = raw.LegacyPassportOid?.ToString("D");
+        row["PreviousPassport"] = raw.LegacyPreviousPassportOid?.ToString("D");
+        row["CurrentVisa"] = raw.LegacyVisaOid?.ToString("D");
         return row;
     }
 

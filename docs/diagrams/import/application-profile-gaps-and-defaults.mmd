@@ -1,0 +1,21 @@
+flowchart TB
+  subgraph notThis["Not this catalog"]
+    N1["dbo.Application header rows"] -->|"later --entity ApplicationProfileInstance"| N2["ApplicationProfileInstance"]
+    N3["ApplicationProfileTemplate nested files"] -->|"ApplicationProfileNestedTemplates-CalikEnergi.ps1"| N4["profile NestedTemplates — Resminamalar"]
+    N5["ApprovalLegProfile versions"] -->|"ApplicationProfileApprovalLegVersions-CalikEnergi.ps1"| N6["shared legs catalog — pick at instance create"]
+  end
+
+  subgraph rule["Do not import ApplicationProfile as a transactional BO"]
+    R1["No --import-visa2014 --entity ApplicationProfile"]
+    R2["One profile per signed-off ApplicationType<br/>via-ministry may split by ProjectContract"]
+    R3["order.yaml tenantCatalogGeneration<br/>runs before application-domain"]
+  end
+
+  subgraph wipe["Local PG wipe"]
+    K1["Wipe-LocalPostgresTransactional.sql"] -->|"keeps ApplicationProfiles"| K2["templates survive instance wipe"]
+  end
+
+  subgraph gate["Instance import gate"]
+    G1["ResolveApplicationProfile miss"] -->|"incomplete payload / null FK"| G2["seed JSON + ForceUpdate first"]
+    G3["ApplicationType still dual-read"] -->|"deprecated — do not add new Type flags"| G4["profile Code / ProfileCatalogKey is the live FK"]
+  end
