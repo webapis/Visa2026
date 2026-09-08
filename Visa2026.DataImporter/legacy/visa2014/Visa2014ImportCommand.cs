@@ -745,6 +745,7 @@ internal static class Visa2014ImportCommand
         Console.WriteLine($"INF Person id-map: {personIdMapPath}");
         Console.WriteLine($"INF Passport id-map: {passportIdMapPath}");
         Console.WriteLine($"INF Visa id-map: {visaIdMapPath}");
+        Console.WriteLine($"INF WorkPermitItem id-map: {source.IdMapPath(dataImporterRoot, "WorkPermitItem")}");
 
         IDisposable? importScope = null;
         if (!dryRun)
@@ -763,7 +764,8 @@ internal static class Visa2014ImportCommand
                 verbose,
                 ResolveBatchSize(args),
                 passportIdMapPath,
-                visaIdMapPath);
+                visaIdMapPath,
+                source.IdMapPath(dataImporterRoot, "WorkPermitItem"));
 
             Console.WriteLine($"INF Legacy SQL rows: {result.LegacyRowCount}");
             Console.WriteLine($"INF Prepared: {result.PreparedCount}  Skipped: {result.SkippedCount}");

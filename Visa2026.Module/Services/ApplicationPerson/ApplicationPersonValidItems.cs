@@ -11,8 +11,8 @@ namespace Visa2026.Module.Services.ApplicationPersonRoster;
 /// Valid/active resolve rules for ApplicationProfileInstance Person M2M (plan §10.2).
 /// Officer link/create: Visa, WorkPermitItem, InvitationItem, BorderZoneItem, and MedicalRecord
 /// must be valid/not-expired. Passport expiration is not checked (previous expired booklet is OK).
-/// VISA2014 import (<see cref="MigrationImportContext.IsDataImport"/>) uses PersonCurrentItems
-/// so historical expired rows still link when Last-N is 1.
+/// VISA2014 roster import skips latest-N / PersonCurrentItems ("today") and pins
+/// PersonInApplication snapshot FKs instead. Officer Relink still uses current items.
 /// </summary>
 public static class ApplicationProfileInstancePersonValidItems
 {

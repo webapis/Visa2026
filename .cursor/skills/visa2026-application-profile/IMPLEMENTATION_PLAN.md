@@ -191,6 +191,8 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 - ListView intercepts: row → overview; New → create + wizard
 - Overview **Configure profile** CTA → wizard
 
+**List stays after close (2026-09-08):** Catalog row / native template ListView row / New open overview or wizard with `TargetWindow.NewWindow` so the Templates catalog (or ListView) MDI tab stays mounted. Overview **← Back to list** closes the overview tab.
+
 **Verify:** Configuration → Application Profile → catalog → open row → overview → Configure → wizard; New profile → wizard.
 
 ---
@@ -438,6 +440,8 @@ Via-ministry picker: profile → Approval legs → Organization → Case summary
 **Verify:** Applications (via ministry) → double-click row → workspace opens with live data.
 
 **Open speed (2026-08-26):** Row click still opens the case workspace (not native DetailView). First paint no longer heals person links or loads all lookup catalogs (cities/contracts). Catalogs load when the officer taps **Edit** on case summary. Linked records batch-load; issued “has copy” does not materialize `File.Size`.
+
+**List stays after close (2026-09-08):** Row activate / ListView **Open workspace** / **Start process** use `TargetWindow.NewWindow` so the Application Profile Instance ListView MDI tab stays mounted (standard TabbedMDI List → Detail). Closing the workspace returns focus to the list tab. Template Configure/New and linked-instance open from overview/catalog also use NewWindow.
 
 ---
 

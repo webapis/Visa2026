@@ -1,0 +1,35 @@
+@namespace Visa2026.Blazor.Server.Components
+@using DevExpress.Blazor
+
+@*
+  Shared officer date field: dd.MM.yyyy + advancing caret (same UX as Passport DetailView
+  DateTimeMaskAdvancingController / VisaFamilyMembersTextComponent).
+*@
+<DxDateEdit @bind-Date="Date"
+            @bind-Date:after="NotifyDateChangedAsync"
+            CssClass="@ResolvedCssClass"
+            Mask="dd.MM.yyyy"
+            DisplayFormat="dd.MM.yyyy"
+            PickerDisplayMode="DatePickerDisplayMode.Calendar"
+            ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+            Enabled="Enabled"
+            ReadOnly="ReadOnly">
+    <DxDateTimeMaskProperties CaretMode="MaskCaretMode.Advancing"
+                             UpdateNextSectionOnCycleChange="true" />
+</DxDateEdit>
+
+@code {
+    [Parameter] public DateTime? Date { get; set; }
+    [Parameter] public EventCallback<DateTime?> DateChanged { get; set; }
+    [Parameter] public string? CssClass { get; set; }
+    [Parameter] public bool Enabled { get; set; } = true;
+    [Parameter] public bool ReadOnly { get; set; }
+
+    private string ResolvedCssClass =>
+        string.IsNullOrWhiteSpace(CssClass)
+            ? "issue-issued-header-slot__input officer-date-edit"
+            : $"{CssClass} officer-date-edit";
+
+    private Task NotifyDateChangedAsync() =>
+        DateChanged.HasDelegate ? DateChanged.InvokeAsync(Date) : Task.CompletedTask;
+}

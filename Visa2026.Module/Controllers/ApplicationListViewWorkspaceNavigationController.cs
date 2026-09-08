@@ -55,8 +55,10 @@ public sealed class ApplicationListViewWorkspaceNavigationController : ViewContr
         if (workspaceView == null)
             return;
 
+        // NewWindow keeps the ListView MDI tab mounted (standard XAF TabbedMDI List → Detail).
+        // TargetWindow.Current replaced the list; closing the workspace left no list to return to.
         Application.ShowViewStrategy.ShowView(
-            new ShowViewParameters(workspaceView) { TargetWindow = TargetWindow.Current },
+            new ShowViewParameters(workspaceView) { TargetWindow = TargetWindow.NewWindow },
             new ShowViewSource(Frame, null));
 
         e.Handled = true;

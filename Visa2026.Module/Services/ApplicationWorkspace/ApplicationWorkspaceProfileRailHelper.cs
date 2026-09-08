@@ -101,7 +101,7 @@ public static class ApplicationWorkspaceProfileRailHelper
 
         var frame = sourceFrame ?? application.MainWindow;
         application.ShowViewStrategy.ShowView(
-            new ShowViewParameters(wizardView) { TargetWindow = TargetWindow.Current },
+            new ShowViewParameters(wizardView) { TargetWindow = TargetWindow.NewWindow },
             new ShowViewSource(frame, null));
 
         return true;

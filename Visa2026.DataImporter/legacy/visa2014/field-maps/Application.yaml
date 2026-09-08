@@ -229,7 +229,11 @@ propertyGaps:
       notes: EndOfBusinessTrip = DateOfDeparture + (DurationOfStay - 1) days
     - property: BorderZoneLocation
       legacyColumn: BorderZoneForVisa
-      notes: Bit matrix on dbo.BorderZoneForVisa — same transform as Visa.BorderZone
+      notes: |
+        Bit matrix on dbo.BorderZoneForVisa — same transform as Visa.BorderZone.
+        App_Border_Zone_Permission: 109/111 Çalik E:11 have the FK (requested zone).
+        Keep Ýok on the 2 incomplete headers (7/-134, 7/-135): ChooseBorderZoneType=0,
+        BorderZoneForVisa null, PIA.Visa also has no BorderZone. Locked 2026-09-08.
     - property: ToCity
       legacyColumn: BusinessTripDestination
       notes: ŞeherEtrap FK — reuse City/CityByName layer 3 from AddressOfResidence wave
@@ -385,6 +389,9 @@ fields:
     transform: border_zone_bit_matrix
     lookupCatalog: BorderZoneName
     missingBehavior: allow_null
+    notes: |
+      Empty → Ýok. Do not skip App_Border_Zone_Permission rows that lack the FK
+      (legacy incomplete 7/-134 and 7/-135).
 
   - source: GosmaçaIşlemägeRugsatÝeri
     target: MovementPermitLocation

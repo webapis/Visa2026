@@ -59,8 +59,9 @@ public sealed class ApplicationProfileListViewNavigationController : ViewControl
         if (overviewView == null)
             return;
 
+        // NewWindow keeps the template ListView MDI tab mounted (same as instance → workspace).
         Application.ShowViewStrategy.ShowView(
-            new ShowViewParameters(overviewView) { TargetWindow = TargetWindow.Current },
+            new ShowViewParameters(overviewView) { TargetWindow = TargetWindow.NewWindow },
             new ShowViewSource(Frame, null));
 
         e.Handled = true;

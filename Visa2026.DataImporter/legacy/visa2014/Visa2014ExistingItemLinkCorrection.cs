@@ -31,14 +31,21 @@ internal static class Visa2014ExistingItemLinkCorrection
         SELECT
             CAST(pia.Oid AS varchar(36)) AS PiaOid,
             CAST(pia.Application AS varchar(36)) AS ApplicationOid,
-            CAST(COALESCE(pia.Employee, pia.FamilyMember) AS varchar(36)) AS PersonOid,
+            CAST(CASE
+                WHEN ISNULL(a.ForFamilyMember, 0) = 1 THEN pia.FamilyMember
+                ELSE COALESCE(pia.Employee, pia.FamilyMember)
+            END AS varchar(36)) AS PersonOid,
             CAST(pia.WorkPermit AS varchar(36)) AS ExistingWorkPermitOid,
             CAST(pii.Oid AS varchar(36)) AS ExistingInvitationItemOid
         FROM dbo.PersonInApplication pia
+        INNER JOIN dbo.Application a ON a.Oid = pia.Application AND a.GCRecord IS NULL
         LEFT JOIN dbo.PersonInInvitation pii
             ON pii.Invitation = pia.InvitationToBeCancelled
            AND pii.GCRecord IS NULL
-           AND COALESCE(pii.Employee, pii.FamilyMember) = COALESCE(pia.Employee, pia.FamilyMember)
+           AND COALESCE(pii.Employee, pii.FamilyMember) = CASE
+                WHEN ISNULL(a.ForFamilyMember, 0) = 1 THEN pia.FamilyMember
+                ELSE COALESCE(pia.Employee, pia.FamilyMember)
+           END
         WHERE pia.GCRecord IS NULL
           AND (
                 pia.WorkPermit IS NOT NULL
@@ -250,19 +257,21 @@ internal static class Visa2014ExistingItemLinkCorrection
         bool verbose)
     {
         var existing = ApplicationProfileInstancePersonResolver.LoadLinks(objectSpace, application.ID, person.ID);
-        foreach (var link in existing)
-        {
-            if (link.LinkKind == kind && link.LinkedObjectId == linkedObjectId)
-                return LinkOutcome.Already;
-            if (link.LinkKind == kind && link.LinkedObjectId is Guid id && id != Guid.Empty && id != linkedObjectId)
-                return LinkOutcome.Already;
-        }
+        var existingIds = existing
+            .Where(l => l.LinkKind == kind)
+            .Select(l => l.LinkedObjectId)
+            .Where(id => id is Guid g && g != Guid.Empty)
+            .Select(id => id!.Value)
+            .ToList();
+        Visa2014ApplicationPersonDocumentLinks.Diff(existingIds, [linkedObjectId], out var remove, out var add);
+        if (remove.Count == 0 && add.Count == 0)
+            return LinkOutcome.Already;
 
         if (dryRun)
             return LinkOutcome.Linked;
 
-        ApplicationProfileInstancePersonResolver.EnsureResolvedLink(
-            objectSpace, application, person, kind, linkedObjectId);
+        Visa2014ApplicationPersonDocumentLinks.ReplaceKind(
+            objectSpace, application, person, kind, [linkedObjectId]);
         if (verbose)
             Console.WriteLine($"  LINK {kind} {linkedObjectId} -> app {application.ID} person {person.ID}");
         return LinkOutcome.Linked;

@@ -184,39 +184,21 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         }
     }
 
-    private async Task LoadCatalogAsync(OfficerShellModel model, IObjectSpace objectSpace)
+    private Task LoadCatalogAsync(OfficerShellModel model, IObjectSpace objectSpace)
     {
         var catalogService = _catalogQueryService
             ?? _application?.ServiceProvider?.GetService<IApplicationProfileCatalogQueryService>();
         if (catalogService == null)
-            return;
+            return Task.CompletedTask;
 
         _allCatalogRows = catalogService.GetProfiles(objectSpace);
         ApplyCatalogFilter(model);
 
-        if (model.TemplatesDetailOpen && model.SelectedProfileId != Guid.Empty)
-            await SelectProfileAsync(model.SelectedProfileId);
-        else if (model.CurrentPage == OfficerShellPage.Templates && !model.TemplatesDetailOpen)
-        {
-            model.SelectedProfileId = Guid.Empty;
-            model.OverviewSnapshot = null;
-        }
-        else
-        {
-            var keepSelection = model.SelectedProfileId != Guid.Empty
-                && _allCatalogRows.Any(r => r.ProfileId == model.SelectedProfileId);
-            var selectId = keepSelection
-                ? model.SelectedProfileId
-                : (_allCatalogRows.FirstOrDefault()?.ProfileId ?? Guid.Empty);
-
-            if (selectId != Guid.Empty)
-                await SelectProfileAsync(selectId);
-            else
-            {
-                model.SelectedProfileId = Guid.Empty;
-                model.OverviewSnapshot = null;
-            }
-        }
+        // Template overview opens in its own MDI tab; keep the Templates list page mounted.
+        model.TemplatesDetailOpen = false;
+        model.SelectedProfileId = Guid.Empty;
+        model.OverviewSnapshot = null;
+        return Task.CompletedTask;
     }
 
     private async Task LoadWorkspaceAsync(OfficerShellModel model, Guid applicationId)
@@ -1161,12 +1143,19 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
 
     private async Task OpenTemplateDetailAsync(Guid profileId)
     {
-        var model = ComponentModel;
-        if (model == null || profileId == Guid.Empty)
+        if (_application == null || profileId == Guid.Empty)
             return;
 
-        model.TemplatesDetailOpen = true;
-        await SelectProfileAsync(profileId);
+        var overviewView = ApplicationProfileOverviewOpenHelper.CreateOverviewView(_application, profileId);
+        if (overviewView == null)
+            return;
+
+        // Keep Templates catalog page mounted (same TabbedMDI pattern as instance lists).
+        _application.ShowViewStrategy.ShowView(
+            new ShowViewParameters(overviewView) { TargetWindow = TargetWindow.NewWindow },
+            new ShowViewSource(_application.MainWindow, null));
+
+        await Task.CompletedTask;
     }
 
     private Task BackToTemplateCatalogAsync()
@@ -1220,8 +1209,9 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         if (wizardView == null)
             return Task.CompletedTask;
 
+        // New tab so Application Profile Templates list stays mounted (same as catalog PE).
         _application.ShowViewStrategy.ShowView(
-            new ShowViewParameters(wizardView) { TargetWindow = TargetWindow.Current },
+            new ShowViewParameters(wizardView) { TargetWindow = TargetWindow.NewWindow },
             new ShowViewSource(_application.MainWindow, null));
 
         return Task.CompletedTask;
@@ -1238,7 +1228,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
             return Task.CompletedTask;
 
         _application.ShowViewStrategy.ShowView(
-            new ShowViewParameters(wizardView) { TargetWindow = TargetWindow.Current },
+            new ShowViewParameters(wizardView) { TargetWindow = TargetWindow.NewWindow },
             new ShowViewSource(_application.MainWindow, null));
 
         return Task.CompletedTask;

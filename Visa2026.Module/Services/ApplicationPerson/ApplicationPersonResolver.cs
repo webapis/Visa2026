@@ -4,6 +4,7 @@ using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.BaseImpl.EF;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.MigrationImport;
 
 namespace Visa2026.Module.Services.ApplicationPersonRoster;
 
@@ -36,6 +37,10 @@ public static class ApplicationProfileInstancePersonResolver
 
         var existing = LoadLinks(objectSpace, trackedApplication.ID, trackedPerson.ID);
         ApplicationProfileInstanceChildMembership.SyncFromResolvedLinks(objectSpace, trackedApplication, existing);
+        // Import pins PersonInApplication snapshots (Passport/Visa/WorkPermitItem). Do not attach
+        // today's PersonCurrentItems / latest-N onto historical application types.
+        if (MigrationImportContext.IsDataImport)
+            return;
         var candidates = ResolveEntities(objectSpace, trackedPerson, trackedApplication);
         foreach (var (kind, linkedObjectId) in CollectMissingAutoLinks(trackedApplication, existing, candidates))
         {
@@ -122,6 +127,9 @@ public static class ApplicationProfileInstancePersonResolver
             if (link.LinkedObjectId is Guid existingId && existingId != Guid.Empty)
                 ids.Add(existingId);
         }
+
+        if (MigrationImportContext.IsDataImport)
+            return [];
 
         var missing = new List<(ApplicationProfileInstancePersonLinkKind Kind, Guid LinkedObjectId)>();
         var addedByKind = new Dictionary<ApplicationProfileInstancePersonLinkKind, int>();

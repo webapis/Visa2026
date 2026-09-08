@@ -467,7 +467,7 @@ public class ApplicationProfileInstancePersonValidItemsTests
     }
 
     [Fact]
-    public void CollectMissingAutoLinks_AllowsExpiredPassportDuringDataImport()
+    public void CollectMissingAutoLinks_SkipsLatestNDuringDataImport()
     {
         var expiredId = Guid.Parse("99999999-9999-9999-9999-999999999999");
         var app = new ApplicationProfileInstance
@@ -486,9 +486,7 @@ public class ApplicationProfileInstancePersonValidItemsTests
             Array.Empty<ApplicationProfileInstancePersonResolvedLink>(),
             candidates);
 
-        Assert.Single(missing);
-        Assert.Equal(ApplicationProfileInstancePersonLinkKind.Passport, missing[0].Kind);
-        Assert.Equal(expiredId, missing[0].LinkedObjectId);
+        Assert.Empty(missing);
     }
 
     [Fact]

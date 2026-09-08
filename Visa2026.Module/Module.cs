@@ -140,6 +140,7 @@ namespace Visa2026.Module
             updaters.Add(new PersonNestedListViewsUpdater());
             updaters.Add(new ApplicationProfileInstanceChildNestedListViewsUpdater());
             updaters.Add(new ApplicationProfileInstanceHideDeprecatedTypeColumnUpdater());
+            updaters.Add(new ApplicationProfileInstanceMonthNameColumnUpdater());
             updaters.Add(new ExpirationAlertRuleViewsUpdater());
             updaters.Add(new ListViewShowFindPanelModelUpdater());
             updaters.Add(new DatabaseUpdate.HistoryDashboardViewItemUpdater());

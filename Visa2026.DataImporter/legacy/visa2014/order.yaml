@@ -9,7 +9,9 @@
 #   Person-domain first (Passport yes, Visa NO).
 #   Then one ApplicationType at a time (living list in application-type-import-order.yaml):
 #     header → roster → progress → issued Invitation/WorkPermit (if type generates) → Visa (if instance generates)
-#   Then next type. After ALL types: Rejection + BorderZone documents + orphan Visa remainder.
+#   Then next type. After ALL types: Rejection + BorderZone documents +
+#   --visa-remainder (no type filter) + --correct-visa2014-application-person-document-links.
+#   Never --visa-remainder on a per-type Visa step.
 #   Never import Visa before its IssuingApplicationProfileInstance.
 #
 # Rules:
@@ -455,7 +457,7 @@ importPhases:
   - id: application-domain
     description: Per ApplicationType slice — instance header, roster, in-slice issued Invitation/WorkPermit (see application-type-import-order.yaml)
   - id: permits-and-visas
-    description: In-slice Invitation/WorkPermit/Visa; after all types — Rejection, BorderZone documents, orphan Visa remainder
+    description: In-slice Invitation/WorkPermit/Visa (no --visa-remainder); after all types — Rejection, BorderZone documents, orphan Visa remainder, then PIA document-link correction
   - id: progress-and-history
     description: ApplicationProfileInstanceProgress inside each type slice (after roster, before issued documents)
   - id: attachments
@@ -509,3 +511,14 @@ postImportCorrections:
         Run after the type-slice Visa step (not after a Passport-first Visa wave).
         --correct-application-item-person-current and --correct-visa2014-issuing-application-item are retired
         (Phase B ApplicationItem hard-remove).
+    - id: application-person-document-links
+      cliFlag: --correct-visa2014-application-person-document-links
+      runAfter: postAllTypeSlices.visa-remainder
+      dependsOn:
+        - Visa
+        - ApplicationProfileInstancePerson
+      notes: |
+        Pins roster ResolvedLinks.Passport/Visa from PersonInApplication (id-map).
+        Required after orphan --visa-remainder, not after application-domain alone
+        (source visas on deleted issuing apps are not in the Visa id-map until remainder).
+        Optional after a type Visa wave. Do not pass --visa-remainder on type slices.

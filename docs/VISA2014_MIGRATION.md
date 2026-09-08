@@ -429,7 +429,7 @@ Typical sequence (extend as dossiers / types are added):
 1. Lookups — seeded in Visa2026 by Module updaters; translate in `lookup-translations.yaml` when a transactional BO needs them
 2. **Person** and person-scoped children except **Visa** (`Passport` yes)
 3. **Per ApplicationType** (`App_Inv` first): instance header → roster → progress → issued Invitation/WorkPermit (if generated) → Visa (if generated)
-4. After all types: Rejection, BorderZone documents, orphan Visa remainder
+4. After all types: Rejection, BorderZone documents, `--visa-remainder`, then `--correct-visa2014-application-person-document-links`
 5. **Attachments** last  
 
 ---

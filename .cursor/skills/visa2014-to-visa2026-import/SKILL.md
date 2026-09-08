@@ -156,11 +156,13 @@ for each ApplicationType in bands (living list; App_Inv first):
   issued     Invitation + InvitationItem     if type generates invitation
              WorkPermit + WorkPermitItem     if type generates work permit
   visa       Visa                            if that instance generates Visa
+             (no --visa-remainder on this step)
 next type
 after ALL types:
   Rejection + RejectionItem
   BorderZone documents
-  Visa remainder (no issuing instance)
+  Visa remainder (--entity Visa --visa-remainder; no --application-type)
+  PIA document-link pin (--correct-visa2014-application-person-document-links)
 attachments last:
   Person.Photo
   PassportDocument
@@ -178,6 +180,10 @@ attachments last:
 - Invitation-producing types **must not require Visa** on roster create.
 - Dual-issue types: Invitation header+items, then WorkPermit header+items, then Visa.
 - Band 2 BorderZone **instances** use the inner sequence without an in-slice BorderZone step; **BorderZone documents** wait with Rejection.
+- **Never `--visa-remainder` on a type slice.** Per-type Visa is `--entity Visa --application-type <Name>` only. Remainder is **after all types**, no type filter.
+- **Past, not today:** all imported applications are historical. Roster links must match `PersonInApplication` snapshots (Passport / Visa / WorkPermitItem). Do **not** attach latest-N / `PersonCurrentItems` during import (`IsDataImport` skips auto-link). Pin at roster; `--correct-visa2014-application-person-document-links` also pins WorkPermitItem. Officer Relink may still use today.
+- **PIA vs linked gap** is **only** expected when the source Oid is not in the id-map yet (typical: Visa until remainder). Then pin. Never leave latest-N in place of a mapped PIA FK.
+- Do **not** run remainder **before** later types’ headers if first POST must set `IssuingApplicationProfileInstance` (remainder POSTs leftovers with a null issuing FK).
 - Append the next `ApplicationType.Name` to the living list when that type is locked — do not invent the rest of the list.
 
 **Stop-before-next:**
@@ -706,6 +712,8 @@ Follow [import-practices.md](./import-practices.md) for every batch.
 | Application before Person | Invalid — `dependsOn` not satisfied |
 | Visa after Passport / before instance | Forbidden — Visa needs IssuingApplicationProfileInstance; wipe local PG Visa and reimport per type |
 | Next type before current inner sequence finishes | Forbidden — full slice per type, then next type |
+| `--visa-remainder` on `--application-type` | Forbidden — remainder is postAllTypeSlices only; type Visa has no remainder flag |
+| PIA document ≠ linked (passport/visa/WP) | Must match PIA snapshot, not today; pin roster + `--correct-visa2014-application-person-document-links`. Gap OK only until source Oid is in id-map |
 | Invitation before Progress on a type | Forbidden — inner order is header → roster → progress → issued → visa |
 | Next BO after failed parent wave | Forbidden — § Import chain gate; halt, fix, resume at failed entity |
 | Invitation Visa roster required | Forbidden — invitation-producing types must not require Visa on roster create |

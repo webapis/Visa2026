@@ -24,7 +24,6 @@ public class ApplicationProfileCatalogPropertyEditor : BlazorPropertyEditorBase,
 {
     private XafApplication? _application;
     private IApplicationProfileCatalogQueryService? _queryService;
-    private IApplicationProfileOverviewQueryService? _overviewQueryService;
     private IApplicationProfileCatalogReload? _reload;
     private IReadOnlyList<ApplicationProfileCatalogRow> _allRows = Array.Empty<ApplicationProfileCatalogRow>();
     private bool _reloadHooked;
@@ -38,7 +37,6 @@ public class ApplicationProfileCatalogPropertyEditor : BlazorPropertyEditorBase,
     {
         _application = application;
         _queryService = application.ServiceProvider?.GetService<IApplicationProfileCatalogQueryService>();
-        _overviewQueryService = application.ServiceProvider?.GetService<IApplicationProfileOverviewQueryService>();
         HookReload(application);
     }
 
@@ -125,16 +123,9 @@ public class ApplicationProfileCatalogPropertyEditor : BlazorPropertyEditorBase,
             _allRows = queryService.GetProfiles(objectSpace);
             ApplyFilter(model);
 
-            if (model.SelectedProfileId != Guid.Empty
-                && _allRows.Any(r => r.ProfileId == model.SelectedProfileId))
-            {
-                await SelectProfileAsync(model.SelectedProfileId);
-            }
-            else
-            {
-                model.SelectedProfileId = Guid.Empty;
-                model.OverviewSnapshot = null;
-            }
+            // Overview opens in its own MDI tab; keep the catalog list mounted.
+            model.SelectedProfileId = Guid.Empty;
+            model.OverviewSnapshot = null;
         }
         finally
         {
@@ -170,29 +161,20 @@ public class ApplicationProfileCatalogPropertyEditor : BlazorPropertyEditorBase,
             .ToList();
     }
 
-    private async Task SelectProfileAsync(Guid profileId)
+    private Task SelectProfileAsync(Guid profileId)
     {
-        var model = ComponentModel;
-        if (model == null || _application == null || profileId == Guid.Empty)
-            return;
+        if (_application == null || profileId == Guid.Empty)
+            return Task.CompletedTask;
 
-        model.SelectedProfileId = profileId;
-        model.IsOverviewLoading = true;
-        await Task.Delay(16);
+        var overviewView = ApplicationProfileOverviewOpenHelper.CreateOverviewView(_application, profileId);
+        if (overviewView == null)
+            return Task.CompletedTask;
 
-        try
-        {
-            var overviewService = _overviewQueryService
-                ?? _application.ServiceProvider?.GetService<IApplicationProfileOverviewQueryService>()
-                ?? new ApplicationProfileOverviewQueryService();
+        _application.ShowViewStrategy.ShowView(
+            new ShowViewParameters(overviewView) { TargetWindow = TargetWindow.NewWindow },
+            new ShowViewSource(_application.MainWindow, null));
 
-            using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfile));
-            model.OverviewSnapshot = overviewService.Load(profileId, objectSpace);
-        }
-        finally
-        {
-            model.IsOverviewLoading = false;
-        }
+        return Task.CompletedTask;
     }
 
     private Task NewProfileAsync()
@@ -282,7 +264,7 @@ public class ApplicationProfileCatalogPropertyEditor : BlazorPropertyEditorBase,
             return Task.CompletedTask;
 
         _application.ShowViewStrategy.ShowView(
-            new ShowViewParameters(workspaceView) { TargetWindow = TargetWindow.Current },
+            new ShowViewParameters(workspaceView) { TargetWindow = TargetWindow.NewWindow },
             new ShowViewSource(_application.MainWindow, null));
 
         return Task.CompletedTask;

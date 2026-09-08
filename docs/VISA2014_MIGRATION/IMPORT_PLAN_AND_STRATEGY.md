@@ -85,7 +85,7 @@ Each wave still completes **discovery → confirmation → pilot → reconcile**
 | **1 — Prerequisites** | `prerequisites` | Target lookups seeded; layer 3 for shared catalogs | Strategy `approved`; Blazor updaters run once |
 | **2 — Person domain** | `person-domain` | Person, Passport, Education, position/salary/address, … **Visa is not in this wave** | Wave 1; Person dossier complete; **Excel preview reviewed**; `importConfirmed` |
 | **3 — Application Type slices** | `application-domain` + in-slice progress/issued/visa | **Per type** (living list; **`App_Inv` first**): instance header → roster → progress → Invitation/WorkPermit if the type generates them → Visa if that instance generates Visa. Then the **next** type. | Person + Passport (+ other person scalars except Visa); profiles seeded |
-| **4 — After all types** | `permits-and-visas` (remainder) | Rejection + RejectionItem; BorderZone **documents**; Visa rows with **no** issuing instance | Every type slice finished |
+| **4 — After all types** | `permits-and-visas` (remainder) | Rejection + RejectionItem; BorderZone **documents**; **`--visa-remainder`** (no type filter); then **`--correct-visa2014-application-person-document-links`** | Every type slice finished |
 | **5 — Attachments** | `attachments` | File blobs, scan links (`PassportCopy`, `VisaDocument`, …) | Parent BO id-map complete; scalar import reconciled |
 
 **Application Type bands** (type names inside a band are filled as we go — do not invent):
@@ -103,10 +103,12 @@ ApplicationProfileInstance
   → ApplicationProfileInstanceProgress
   → Invitation + InvitationItem     (if type generates invitation)
   → WorkPermit + WorkPermitItem     (if type generates work permit)
-  → Visa                            (if that instance generates Visa)
+  → Visa                            (if that instance generates Visa; no --visa-remainder)
 ```
 
-**Visa:** never before `IssuingApplicationProfileInstance`. Invitation-producing types must **not** require Visa on roster create. After Invitation (+ items) on `App_Inv`, still import visas whose issuing instance is that case. Local PG: **wipe** the old Passport-first Visa load and reimport per type when the slice reaches Visa.
+**Historical snapshot (locked 2026-09-08):** every imported application is **past**. Roster `ResolvedLinks` must match `PersonInApplication` FKs (Passport / PreviousPassport / Visa / WorkPermit), not `PersonCurrentItems` / latest-N as of import day. Skip auto-link during `IsDataImport`; pin at roster import. `--correct-visa2014-application-person-document-links` also pins WorkPermitItem. Officer Relink after go-live may still use today. A PIA vs link gap is **only** expected when the source Oid is not in the id-map yet.
+
+**Visa:** never before `IssuingApplicationProfileInstance`. Invitation-producing types must **not** require Visa on roster create. After Invitation (+ items) on `App_Inv`, still import visas whose issuing instance is that case. **Never** `--visa-remainder` on a type slice. After **all** types: `--entity Visa --visa-remainder`, then `--correct-visa2014-application-person-document-links`. Local PG: **wipe** the old Passport-first Visa load and reimport per type when the slice reaches Visa. Do not run remainder before later types’ headers if first POST must set issuing FK.
 
 **Person files:** wave 2 loads **scalar Person** first; **`Person.Photo`** in a **file follow-up pass** (after id-map) — not in Excel preview bytes. See [FILE_AND_IMAGE_IMPORT.md](../VISA2014_MIGRATION/FILE_AND_IMAGE_IMPORT.md).
 

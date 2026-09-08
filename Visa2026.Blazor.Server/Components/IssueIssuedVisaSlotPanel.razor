@@ -289,19 +289,13 @@
                                         </label>
                                         <label class="issue-issued-header-slot__field @FieldCueClass(issueKey, true, IssueComposeFieldCue.HasDate(card.IssueDate))">
                                             <span>Issued date *</span>
-                                            <input class="issue-issued-header-slot__input"
-                                                   type="date"
-                                                   @bind="card.IssueDate"
-                                                   @bind:format="yyyy-MM-dd"
-                                                   @onfocusout="() => ReviewField(issueKey)" />
+                                            <OfficerDateEdit Date="card.IssueDate"
+                                                             DateChanged="value => OnVisaIssueDateChangedAsync(card, value, issueKey)" />
                                         </label>
                                         <label class="issue-issued-header-slot__field @FieldCueClass(expKey, true, IssueComposeFieldCue.HasDate(card.ExpirationDate))">
                                             <span>Expiration *</span>
-                                            <input class="issue-issued-header-slot__input"
-                                                   type="date"
-                                                   @bind="card.ExpirationDate"
-                                                   @bind:format="yyyy-MM-dd"
-                                                   @onfocusout="() => ReviewField(expKey)" />
+                                            <OfficerDateEdit @bind-Date="card.ExpirationDate"
+                                                             @bind-Date:after="() => ReviewField(expKey)" />
                                         </label>
                                         <div class="issue-issued-header-slot__field issue-issued-header-slot__field--wide @FieldCueClass(zoneKey, false, IssueComposeFieldCue.HasText(card.BorderZoneLocation))">
                                             <span>Border zone</span>
@@ -606,6 +600,16 @@
         if (string.IsNullOrEmpty(key))
             return;
         _reviewedFields.Add(key);
+    }
+
+    private Task OnVisaIssueDateChangedAsync(
+        IssueIssuedVisaPersonCardDraft card,
+        DateTime? value,
+        string cueKey)
+    {
+        card.IssueDate = value ?? DateTime.Today;
+        ReviewField(cueKey);
+        return Task.CompletedTask;
     }
 
     private void SetGuidAndReview(Action<Guid?> setter, object? raw, string cueKey)

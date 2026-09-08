@@ -68,6 +68,6 @@ public sealed class ApplicationStagedStartProcessController : ViewController<Lis
             return;
 
         e.ShowViewParameters.CreatedView = workspaceView;
-        e.ShowViewParameters.TargetWindow = TargetWindow.Current;
+        e.ShowViewParameters.TargetWindow = TargetWindow.NewWindow;
     }
 }

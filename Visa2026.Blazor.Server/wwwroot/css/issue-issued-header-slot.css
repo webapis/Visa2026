@@ -106,6 +106,14 @@
   box-sizing: border-box;
 }
 
+/* OfficerDateEdit (DxDateEdit) — same width as native slot inputs */
+.issue-issued-header-slot__field .officer-date-edit,
+.issue-issued-header-slot__field .dxbl-date-edit,
+.issue-issued-header-slot__field .dxbl-text-edit {
+  width: 100%;
+  max-width: 100%;
+}
+
 .issue-issued-header-slot__input:focus,
 .issue-issued-header-slot__textarea:focus {
   outline: 0;

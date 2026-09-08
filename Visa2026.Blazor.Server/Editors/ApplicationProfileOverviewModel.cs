@@ -34,7 +34,19 @@ public sealed class ApplicationProfileOverviewModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    public EventCallback CloseRequested
+    {
+        get => GetPropertyValue<EventCallback>();
+        set => SetPropertyValue(value);
+    }
+
     public EventCallback<Guid> OpenInstanceRequested
+    {
+        get => GetPropertyValue<EventCallback<Guid>>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback<Guid> DeleteProfileRequested
     {
         get => GetPropertyValue<EventCallback<Guid>>();
         set => SetPropertyValue(value);

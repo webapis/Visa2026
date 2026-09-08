@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.BusinessObjects.ApplicationProfileOverview;
 using Visa2026.Module.Editors;
+using Visa2026.Module.Services.ApplicationProfileCatalog;
 using Visa2026.Module.Services.ApplicationProfileOverview;
 using Visa2026.Module.Services.ApplicationProfileWizard;
 using Visa2026.Module.Services.ApplicationWorkspace;
@@ -40,6 +41,8 @@ public class ApplicationProfileOverviewPropertyEditor : BlazorPropertyEditorBase
         InitialLoadRequested = EventCallback.Factory.Create(this, LoadAsync),
         ConfigureRequested = EventCallback.Factory.Create(this, ConfigureAsync),
         OpenInstanceRequested = EventCallback.Factory.Create<Guid>(this, OpenLinkedInstanceAsync),
+        CloseRequested = EventCallback.Factory.Create(this, CloseAsync),
+        DeleteProfileRequested = EventCallback.Factory.Create<Guid>(this, DeleteProfileAsync),
     };
 
     protected override void OnCurrentObjectChanged()
@@ -99,7 +102,7 @@ public class ApplicationProfileOverviewPropertyEditor : BlazorPropertyEditorBase
             return Task.CompletedTask;
 
         _application.ShowViewStrategy.ShowView(
-            new ShowViewParameters(wizardView) { TargetWindow = TargetWindow.Current },
+            new ShowViewParameters(wizardView) { TargetWindow = TargetWindow.NewWindow },
             new ShowViewSource(_application.MainWindow, null));
 
         return Task.CompletedTask;
@@ -115,9 +118,36 @@ public class ApplicationProfileOverviewPropertyEditor : BlazorPropertyEditorBase
             return Task.CompletedTask;
 
         _application.ShowViewStrategy.ShowView(
-            new ShowViewParameters(workspaceView) { TargetWindow = TargetWindow.Current },
+            new ShowViewParameters(workspaceView) { TargetWindow = TargetWindow.NewWindow },
             new ShowViewSource(_application.MainWindow, null));
 
         return Task.CompletedTask;
+    }
+
+    private Task CloseAsync()
+    {
+        View?.Close();
+        return Task.CompletedTask;
+    }
+
+    private async Task DeleteProfileAsync(Guid profileId)
+    {
+        if (_application == null || profileId == Guid.Empty)
+            return;
+
+        using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfile));
+        if (!ApplicationProfileUnlinkedDeleteHelper.TryDelete(objectSpace, profileId, out var error))
+        {
+            _application.ShowViewStrategy.ShowMessage(
+                error ?? "Could not delete Application Profile template.",
+                InformationType.Warning);
+            return;
+        }
+
+        var reload = _application.ServiceProvider?.GetService<IApplicationProfileCatalogReload>();
+        if (reload != null)
+            await reload.RequestReloadAsync();
+
+        View?.Close();
     }
 }

@@ -1,4 +1,6 @@
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.EFCore;
+using Microsoft.EntityFrameworkCore;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.ApplicationPersonRoster;
 using Bo = Visa2026.Module.BusinessObjects;
@@ -6,9 +8,9 @@ using Bo = Visa2026.Module.BusinessObjects;
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
 /// <summary>
-/// Replaces Passport/Visa ResolvedLinks + skip-nav M2M with the PersonInApplication
-/// snapshot (Current/Previous passport, Current visa). Latest-N refresh is not the
-/// source of truth for historical import rows.
+/// Replaces Passport/Visa/WorkPermitItem ResolvedLinks + skip-nav M2M with the
+/// PersonInApplication snapshot. Latest-N / "today" is not the source of truth
+/// for historical import rows.
 /// </summary>
 internal static class Visa2014ApplicationPersonDocumentLinks
 {
@@ -65,20 +67,33 @@ internal static class Visa2014ApplicationPersonDocumentLinks
             .LoadLinks(objectSpace, application.ID, person.ID)
             .Where(l => l.LinkKind == kind)
             .ToList();
-        // GetObjectsQuery does not include unsaved CreateObject rows from LinkPerson/RefreshResolvedLinks.
+
+        void ConsiderPending(Bo.ApplicationProfileInstancePersonResolvedLink? pending)
+        {
+            if (pending == null || pending.LinkKind != kind)
+                return;
+            var pendingPersonId = pending.Person?.ID ?? pending.PersonId;
+            if (pendingPersonId != person.ID)
+                return;
+            var pendingAppId = pending.ApplicationProfileInstance?.ID ?? pending.ApplicationProfileInstanceId;
+            if (pendingAppId != application.ID)
+                return;
+            if (!existingLinks.Contains(pending))
+                existingLinks.Add(pending);
+        }
+
         if (application.PersonResolvedLinks != null)
         {
             foreach (var pending in application.PersonResolvedLinks)
-            {
-                if (pending == null || pending.LinkKind != kind)
-                    continue;
-                var pendingPersonId = pending.Person?.ID ?? pending.PersonId;
-                if (pendingPersonId != person.ID)
-                    continue;
-                if (!existingLinks.Contains(pending))
-                    existingLinks.Add(pending);
-            }
+                ConsiderPending(pending);
         }
+
+        foreach (var obj in objectSpace.ModifiedObjects)
+        {
+            if (obj is Bo.ApplicationProfileInstancePersonResolvedLink pending)
+                ConsiderPending(pending);
+        }
+
         var existingIds = existingLinks
             .Select(l => l.LinkedObjectId)
             .Where(id => id is Guid g && g != Guid.Empty)
@@ -97,8 +112,33 @@ internal static class Visa2014ApplicationPersonDocumentLinks
             changed++;
         }
 
+        var existingIdSet = existingIds.ToHashSet();
+        var db = (objectSpace as EFCoreObjectSpace)?.DbContext as Visa2026EFCoreDbContext;
         foreach (var id in add)
         {
+            if (!existingIdSet.Add(id))
+                continue;
+
+            if (db != null)
+            {
+                var tombstone = db.ApplicationProfileInstancePersonResolvedLinks
+                    .IgnoreQueryFilters()
+                    .FirstOrDefault(l =>
+                        l.ApplicationProfileInstanceId == application.ID
+                        && l.PersonId == person.ID
+                        && l.LinkKind == kind
+                        && l.LinkedObjectId == id);
+                if (tombstone != null)
+                {
+                    if (tombstone.GCRecord != 0)
+                        tombstone.GCRecord = 0;
+                    application.PersonResolvedLinks?.Add(tombstone);
+                    ApplicationProfileInstanceChildMembership.Add(objectSpace, application, kind, id);
+                    changed++;
+                    continue;
+                }
+            }
+
             var link = objectSpace.CreateObject<ApplicationProfileInstancePersonResolvedLink>();
             link.ApplicationProfileInstance = application;
             link.Person = person;

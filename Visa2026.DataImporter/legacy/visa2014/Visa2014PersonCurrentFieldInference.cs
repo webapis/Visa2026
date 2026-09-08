@@ -2,7 +2,8 @@ namespace Visa2026.DataImporter.Legacy.Visa2014;
 
 /// <summary>
 /// Resolves legacy keys for person-scoped ApplicationItem current fields at import time.
-/// Mirrors <see cref="Visa2026.Module.BusinessObjects.PersonCurrentItems"/> selection rules.
+/// Education still uses latest completed diploma when PIA has no education FK (ApplicationItem path).
+/// WorkPermitItem must come from PersonInApplication.WorkPermit only — no latest-N at import.
 /// </summary>
 internal static class Visa2014PersonCurrentFieldInference
 {
@@ -126,13 +127,8 @@ internal static class Visa2014PersonCurrentFieldInference
         if (flags.TryGetValue("ShowCurrentSalary", out var showSalary) && showSalary)
             row["CurrentSalary"] = personOid.ToString("D");
 
-        if (!raw.LegacyWorkPermitOid.HasValue
-            && row.GetValueOrDefault("CurrentWorkPermitItem") == null
-            && flags.TryGetValue("ShowCurrentWorkPermitItem", out var showWorkPermit) && showWorkPermit
-            && currentWorkPermitByPerson.TryGetValue(personOid, out var workPermitOid))
-        {
-            row["CurrentWorkPermitItem"] = workPermitOid.ToString("D");
-            row["_audit_WorkPermittedLocations"] = "pending_work_permit_location_audit";
-        }
+        // Import is historical: do not fill CurrentWorkPermitItem from latest-N / PersonCurrentItems
+        // when PersonInApplication.WorkPermit is null.
+        _ = currentWorkPermitByPerson;
     }
 }

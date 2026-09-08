@@ -82,6 +82,10 @@ public sealed class ApplicationWorkspaceController : ViewController
             return;
 
         e.ShowViewParameters.CreatedView = workspaceView;
-        e.ShowViewParameters.TargetWindow = TargetWindow.Current;
+        // From ListView: new tab so the list stays visible after the workspace is closed.
+        // From legacy DetailView: replace the current tab with the workspace.
+        e.ShowViewParameters.TargetWindow = View is ListView
+            ? TargetWindow.NewWindow
+            : TargetWindow.Current;
     }
 }

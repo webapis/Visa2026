@@ -25,6 +25,7 @@ Discovery/mapping rules live in [SKILL.md](./SKILL.md) and [VISA2014_MIGRATION.m
 | 3 | **Dependency order** from `order.yaml` + **ApplicationType slices** | FKs/id-maps; instance before issued before Visa |
 | 3b | **Stop before next step** | Never start the **next** inner step or type until the **previous** wave succeeds (**exit 0** + **FailedCount = 0**). No `-ContinueOnError` on full chains. |
 | 3c | **Chain must include issued items** | InvitationItem before Visa when the type generates invitation; WorkPermitItem when it generates WP. Omitting a parent BO is a bug, not a shortcut. |
+| 3d | **Past, not today** | Imported applications are historical. Roster `ResolvedLinks` = `PersonInApplication` snapshot FKs, never latest-N / `PersonCurrentItems` as of import day (`import-strategy.yaml` `historicalApplicationSnapshot`). Officer Relink after go-live may use today. |
 | 4 | **Three-layer mapping** at transform time | Table → column → lookup value before POST. Application headers also apply **application-type-profile-lock.yaml** (source type composite → target `ApplicationType.Name` → unique profile template). |
 | 5 | **Idempotent runs** | Re-run safe via natural-key upsert + id-map |
 | 6 | **Pilot → reconcile → expand** | Full BO on disposable DB before prod. **Optional in development:** sample N rows (`--max-rows`), human compare, then remainder. Not required on Demo/Prod full Import. |
@@ -103,11 +104,15 @@ for each ApplicationType in application-type-import-order.yaml:
     else:
       continue
 after all types:
-  Rejection, RejectionItem, BorderZone documents, Visa remainder
+  Rejection, RejectionItem, BorderZone documents,
+  Visa remainder (--visa-remainder, no type filter),
+  --correct-visa2014-application-person-document-links
 ```
 
 **Canonical Application Type inner sequence:**
 `ApplicationProfileInstance → ApplicationProfileInstancePerson → ApplicationProfileInstanceProgress → (Invitation → InvitationItem)? → (WorkPermit → WorkPermitItem)? → Visa?`
+
+Type-slice Visa: **do not** pass `--visa-remainder`. Roster `ResolvedLinks.Visa` is PIA.Visa (source), not the sticker this type issued. A PIA vs latest-N mismatch is expected until remainder + document-link correction (optional pin after a type Visa wave).
 
 Living type list + bands: [`application-type-import-order.yaml`](../../../Visa2026.DataImporter/legacy/visa2014/application-type-import-order.yaml). First type: **`App_Inv`**. Skip WorkPermit on `App_Inv`. Do **not** import Visa after Passport.
 
@@ -277,7 +282,7 @@ Use when **Application headers** or application-domain transforms changed and yo
 ApplicationProfileInstance → ApplicationProfileInstancePerson → ApplicationProfileInstanceProgress
   → Invitation → InvitationItem   (if type generates invitation)
   → WorkPermit → WorkPermitItem   (if type generates work permit)
-  → Visa                          (if instance generates Visa)
+  → Visa                          (if instance generates Visa; no --visa-remainder)
 ```
 
 `reimport/Applications.ps1` alone is **not** enough: it deletes application scope but only **re-imports headers**. You must re-run the **same ApplicationType** inner steps (roster → progress → issued → visa). Do not reimport Visa until that type's issued steps are done. Local PG: wipe Visa before the first per-type Visa step.
@@ -291,6 +296,7 @@ ApplicationProfileInstance → ApplicationProfileInstancePerson → ApplicationP
 # 4. Invitation + InvitationItem if type generates invitation
 # 5. WorkPermit + WorkPermitItem if type generates work permit
 # 6. Visa after issued steps (wipe local PG Visa first if loaded after Passport)
+# After ALL types: --visa-remainder then --correct-visa2014-application-person-document-links
 ```
 
 **Gotchas (calik-energi 2026-07-04):**

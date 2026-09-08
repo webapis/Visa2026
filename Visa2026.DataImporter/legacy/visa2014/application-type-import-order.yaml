@@ -5,7 +5,10 @@
 # Append the next ApplicationType.Name when that type is locked.
 #
 # Walk: person-domain (no Visa) -> for each type in bands[] -> innerSequence
-# -> after ALL types: postAllTypeSlices -> attachments.
+# -> after ALL types: postAllTypeSlices (Rejection, BorderZone documents,
+#    --visa-remainder, then --correct-visa2014-application-person-document-links)
+# -> attachments.
+# Never pass --visa-remainder on a per-type Visa step.
 # Optional local-dev mapping check: import-strategy.yaml pilotThenHumanVerify.
 #
 # Canonical narrative: docs/VISA2014_MIGRATION/IMPORT_PLAN_AND_STRATEGY.md
@@ -27,6 +30,11 @@ sliceShape: per_type_full_inner_sequence
 visaNeverBeforeIssuingInstance: true
 # Visa.IssuingApplicationProfileInstance requires the instance row first.
 # Do not import Visa after Passport as a person-domain wave.
+
+neverVisaRemainderOnTypeSlice: true
+# --visa-remainder also POSTs visas whose issuing instance is not in the
+# id-map yet (later types) with a null IssuingApplicationProfileInstance.
+# Type-slice Visa: --entity Visa --application-type <Name> only.
 
 rosterInvitationTypesMustNotRequireVisa: true
 # Types that produce invitation must not require Visa on roster create
@@ -67,6 +75,13 @@ innerSequence:
       After Invitation (+ items) when the type produces invitation.
       Still import visas whose IssuingApplicationProfileInstance is this case.
       Skip this step when the type/instance does not generate Visa.
+      Do NOT pass --visa-remainder here.
+      Roster ResolvedLinks.Visa is PersonInApplication.Visa (source), not the
+      sticker this type issued. A PIA.Visa mismatch vs latest-N is expected
+      until that Oid is in the Visa id-map (earlier type Visa wave, or
+      postAllTypeSlices remainder + document-link correction). Optional after
+      this step: --correct-visa2014-application-person-document-links (pins
+      source visas already imported). Required pin is after visa-remainder.
 
 # Dual-issue types (invitation AND work permit): Invitation header+items,
 # then WorkPermit header+items, then Visa. Skip a branch when the type
@@ -78,21 +93,38 @@ postAllTypeSlices:
       - Rejection
       - RejectionItem
     notes: |
-      Global wave after every type slice. Local PG 2026-09-07 complete:
-      headers Posted **207**, items Posted **254**, Failed **0**, FK null **0**.
+      This wipe 2026-09-08 remainder complete. Headers **207**, items **254**,
+      Failed **0**, FK null **0**. Next: BorderZone documents sample.
   - id: border-zone-documents
     entities:
       - BorderZone
     notes: |
-      Issued BorderZone documents after all types. Local PG 2026-09-07:
-      headers Posted **110**, items Posted **209**, Failed **0**.
+      This wipe 2026-09-08 remainder complete. Headers **110**, items **209**,
+      Failed **0**. Item skip 3 Passport id-map misses (same as 2026-09-07).
+      Next: --visa-remainder then document-link pin.
   - id: visa-remainder
     entity: Visa
     when: no_issuing_instance
+    cli: --import-visa2014 --entity Visa --visa-remainder
+    lockedAt: 2026-09-08
     notes: |
+      After ALL type-slice Visa waves (and Rejection + BorderZone documents).
+      No --application-type. Posts visas with no resolvable issuing instance
+      (deleted Application/PIA, e.g. source stickers on GCRecord apps) and any
+      leftover whose issuing instance is still not in the id-map.
       Local PG 2026-09-07 RunId 20260907-102109: Posted **609** (remainder **607**,
       leftover with issuing **2**), Failed **0**, already **5709**, no Passport map **25**.
-      CLI `--visa-remainder`.
+      Local PG 2026-09-08 mid-band: Posted **574** then document-link pin (later
+      type Visa waves skipped those Oids). This wipe after all types: Posted **0**,
+      already **6328**, no Passport map **25**. Next: document-link pin.
+  - id: application-person-document-links
+    cli: --correct-visa2014-application-person-document-links
+    lockedAt: 2026-09-08
+    after: visa-remainder
+    notes: |
+      This wipe 2026-09-08 after visa remainder: exit **0**. Passport **0**,
+      Visa **2**, WorkPermitItem **2** changed; already correct **22262**.
+      postAllTypeSlices scalar complete. Next: attachmentsSequence.
 
 # File / scan attachments after every scalar wave (locked 2026-09-07).
 # CLI: --import-visa2014-files --inprocess --entity <entity> --property <property>
@@ -267,10 +299,13 @@ bands:
         generatesWorkPermit: false
         generatesVisa: false
         notes: |
-          Local PG 2026-09-05 type-slice complete (header -> roster -> progress):
-          headers **111**, roster **218**, progress **450**. Skip Invitation,
-          WorkPermit, Visa. Issued BorderZone documents wait in
+          Skip Invitation, WorkPermit, Visa. Issued BorderZone documents wait in
           postAllTypeSlices. Enum 12 stays App_Cancel_Visa_and_WP (band 4).
+          BorderZoneLocation from Application.BorderZoneForVisa. Keep Ýok on
+          legacy-incomplete 7/-134 and 7/-135 (ChooseBorderZoneType=0, FK null).
+          Local PG 2026-09-08 type-slice complete: headers **111** (2 Ýok),
+          roster Posted sample 3+7 + remainder **208**, progress sample 8+10
+          + remainder **432**. Instance id-map **4500**.
       - name: App_Additional_WP_location
         status: done
         sourceComposites: ["E:15:na:na:na"]
@@ -467,10 +502,11 @@ bands:
         generatesWorkPermit: false
         generatesVisa: false
         notes: |
-          Locked 2026-09-05 after App_Cancel_Visa. Employee enum 22. Local PG
-          headers **88** (instance id-map **5423**), roster **196** (people
-          **10998**), progress **176** (24557). Skip Invitation, WorkPermit,
-          Visa. Inner sequence complete.
+          Locked 2026-09-05 after App_Cancel_Visa. This wipe 2026-09-08:
+          headers **89** (instance id-map **5433**), roster Posted **194**
+          (people **11024**), progress Posted **174** (24593). Skip Invitation,
+          WorkPermit, Visa. Inner sequence complete. Next this wipe:
+          App_Sevice_Passport (yaml later bands are from a prior DB).
       - name: App_Cancel_BZ
         status: skip
         sourceComposites: []
@@ -497,11 +533,11 @@ bands:
         generatesWorkPermit: false
         generatesVisa: true
         notes: |
-          Locked 2026-09-05 first after band 4. Local PG headers **44**
-          (instance id-map **5467**), roster **52** (people **11050**), progress
-          **209** (24766), Invitation **34** (2938), InvitationItem **41**
-          (5269), Visa **0** this type (live **5709**; **13** catch-up on prior
-          types). Skip WorkPermit. Inner sequence complete. Next: registration.
+          This wipe 2026-09-08 remainder complete. Headers **44** (instance
+          **5477**), roster Posted **50** (people **11076**), progress Posted
+          **200** (24802), Invitation Posted **32** (2941), InvitationItem
+          Posted **39** (5275), Visa Posted **0** (already 6328; issuing
+          patched 9). Skip WorkPermit. Next this wipe: App_Reg_Check_In.
   - id: 6-registration
     description: >
       Registration types. After App_Sevice_Passport. Skip Invitation,
@@ -516,10 +552,8 @@ bands:
         generatesWorkPermit: false
         generatesVisa: false
         notes: |
-          Locked 2026-09-05 after App_Sevice_Passport. Local PG headers **1808**
-          (instance id-map **7275**), roster **3123** (people **14173**), progress
-          **3608** (28374). Skip Invitation, WorkPermit, Visa. Inner sequence
-          complete. Next: App_Reg_Check_In_Internal.
+          This wipe 2026-09-08 remainder complete. Headers **1816**. Skip
+          Invitation, WorkPermit, Visa. Next: App_Reg_Check_In_Internal.
       - name: App_Reg_Check_In_Internal
         status: done
         sourceComposites: ["E:4:na:na:na", "F:4:na:na:na"]
@@ -529,10 +563,8 @@ bands:
         generatesWorkPermit: false
         generatesVisa: false
         notes: |
-          Locked 2026-09-05 after App_Reg_Check_In. Local PG headers **490**
-          (instance id-map **7765**), roster **611** (people **14784**), progress
-          **980** (29354). Skip Invitation, WorkPermit, Visa. Inner sequence
-          complete. Next: App_Reg_ext.
+          This wipe 2026-09-08 remainder complete. Headers **490**. Skip
+          Invitation, WorkPermit, Visa. Next: App_Reg_ext.
       - name: App_Reg_ext
         status: done
         sourceComposites: ["E:3:na:na:na", "F:3:na:na:na"]
@@ -542,10 +574,8 @@ bands:
         generatesWorkPermit: false
         generatesVisa: false
         notes: |
-          Locked 2026-09-07 after App_Reg_Check_In_Internal. Local PG headers
-          **1243** (instance id-map **9008**), roster **2661** (people **17445**,
-          this type **2656**), progress **2482** (31836). Skip Invitation,
-          WorkPermit, Visa. Inner sequence complete. Next: App_Reg_Check_Out.
+          This wipe 2026-09-08 remainder complete. Headers **1243**. Skip
+          Invitation, WorkPermit, Visa. Next: App_Reg_Check_Out.
       - name: App_Reg_Check_Out
         status: done
         sourceComposites: ["E:6:na:na:na", "F:6:na:na:na"]
@@ -555,10 +585,8 @@ bands:
         generatesWorkPermit: false
         generatesVisa: false
         notes: |
-          Locked 2026-09-07 after App_Reg_ext. Local PG headers **2200**
-          (instance id-map **11208**), roster **3418** (people **20863**),
-          progress **4330** (36166). Skip Invitation, WorkPermit, Visa. Inner
-          sequence complete. Next: App_Reg_Info_Change_Address.
+          This wipe 2026-09-08 remainder complete. Headers **2207**. Skip
+          Invitation, WorkPermit, Visa. Next: App_Reg_Info_Change_Address.
       - name: App_Reg_Info_Change_Address
         status: done
         sourceComposites: ["E:5:na:na:na", "F:5:na:na:na"]
@@ -568,10 +596,8 @@ bands:
         generatesWorkPermit: false
         generatesVisa: false
         notes: |
-          Locked 2026-09-07 after App_Reg_Check_Out. Local PG headers **647**
-          (instance id-map **11855**), roster **830** (people **21693**),
-          progress **1294** (37460). Skip Invitation, WorkPermit, Visa. Inner
-          sequence complete. Next: App_Reg_Info_Change_Passport.
+          This wipe 2026-09-08 remainder complete. Headers **647**. Skip
+          Invitation, WorkPermit, Visa. Next: App_Reg_Info_Change_Passport.
       - name: App_Reg_Info_Change_Passport
         status: done
         sourceComposites: ["E:5:na:na:1"]
@@ -581,10 +607,9 @@ bands:
         generatesWorkPermit: false
         generatesVisa: false
         notes: |
-          Locked 2026-09-07 after App_Reg_Info_Change_Address. Local PG headers
-          **101** (instance id-map **11956**), roster **116** (people **21809**),
-          progress **202** (37662). Skip Invitation, WorkPermit, Visa. Inner
-          sequence complete. Next: App_Reg_Info_Change_Visa.
+          This wipe 2026-09-08 remainder complete. Headers **101**. Skip
+          Invitation, WorkPermit, Visa. Next: skip empty Change_Visa and
+          Check_Out_Internal, then App_Business_Trip_Departure sample.
       - name: App_Reg_Info_Change_Visa
         status: skip
         sourceComposites: ["E:5:na:na:2"]
@@ -622,10 +647,9 @@ bands:
         generatesWorkPermit: false
         generatesVisa: false
         notes: |
-          Locked 2026-09-07 after registration band. Local PG headers **594**
-          (instance id-map **12550**), roster **731** (people **22540**),
-          progress **1166** (38828). Skip Invitation, WorkPermit, Visa. Inner
-          sequence complete. Next: App_Business_Trip_Arrival.
+          This wipe 2026-09-08 remainder complete. Headers **594**. Skip
+          Invitation, WorkPermit, Visa. Next: skip empty Arrival, then
+          postAllTypeSlices.
       - name: App_Business_Trip_Arrival
         status: skip
         sourceComposites: ["E:14:na:na:na"]
@@ -636,5 +660,5 @@ bands:
         generatesVisa: false
         notes: |
           Skip empty 2026-09-07. Header probe Posted **0**. Composite
-          E:14:na:na:na has no live Çalik rows. Instance count unchanged
-          **12550**. Band 7 business trip complete.
+          E:14:na:na:na has no live Çalik rows. This wipe instance **12575**.
+          Band 7 business trip complete. Next: postAllTypeSlices.

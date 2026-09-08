@@ -1,3 +1,602 @@
+### 2026-09-08 - FamilyProofDocument file wave .15 -> local PG (attachmentsSequence)
+
+- **Phase**: file import
+- **Mode**: `--import-visa2014-files --entity Person --property FamilyProofDocument --legacy-source calik-energi-local-pg --inprocess --no-wait --batch-size 50` `--id-map` full `Person.json`
+- **Outcome**: success (exit **0**, Failed **0**) — last wired attachmentsSequence step
+- **Environment**: local PostgreSQL `visa2026` / `calik-energi-local-pg` <- `10.100.128.15` / `VISA2015`
+- **Counts**: Person id-map **3409** / Legacy family-proof rows **450** / Posted PersonDocument **9** + PersonFamilyRelationDocument **437** (**446**) / Failed **0** / No person map **0** / No blob **0** / Oversize (>5MB) **1** / Duplicate blob **3** / already **0**.
+- **Id-map**: `id-maps/calik-energi-local-pg/FamilyProofDocument.json` (copied bin -> source).
+- **Log**: `artifacts/document-copies-import/FamilyProofDocument-20260908.log`
+- **Next**: attachmentsSequence complete for local PG this wipe. Unwired (do not invent): RejectionDocument, BorderZoneDocument, MinistryLetterFile.
+### 2026-09-08 - InvitationDocument file wave .15 -> local PG (attachmentsSequence)
+
+- **Phase**: file import
+- **Mode**: `--import-visa2014-files --entity Invitation --property InvitationDocument --legacy-source calik-energi-local-pg --inprocess --no-wait --batch-size 50`
+- **Outcome**: success (exit **0**, Failed **0**)
+- **Environment**: local PostgreSQL `visa2026` / `calik-energi-local-pg` <- `10.100.128.15` / `VISA2015`
+- **Counts**: Invitation id-map **2941** / Legacy copy rows **3256** / Posted **3046** / Failed **0** / No parent map **205** / No blob **5** / Oversize **0** / already **0**.
+- **Id-map**: `id-maps/calik-energi-local-pg/InvitationDocument.json` (copied bin -> source).
+- **Note**: skipped rebuilding Blazor (`bind-Date` RZ9991 in IssueIssued* panels). `dotnet build DataImporter /p:BuildProjectReferences=false` then full DLL path.
+- **Log**: `artifacts/document-copies-import/InvitationDocument-20260908.log`
+- **Next**: FamilyProofDocument. Halt until proceed.
+### 2026-09-08 - WorkPermitDocument file wave .15 -> local PG (attachmentsSequence)
+
+- **Phase**: file import
+- **Mode**: `--import-visa2014-files --entity WorkPermit --property WorkPermitDocument --legacy-source calik-energi-local-pg --inprocess --no-wait --batch-size 50`
+- **Outcome**: success (exit **0**, Failed **0**)
+- **Environment**: local PostgreSQL `visa2026` / `calik-energi-local-pg` <- `10.100.128.15` / `VISA2015`
+- **Counts**: WorkPermit id-map **361** / Legacy copy rows **1024** / Posted **915** / Failed **0** / No parent map **107** / No blob **2** / Oversize **0** / already **0**.
+- **Id-map**: `id-maps/calik-energi-local-pg/WorkPermitDocument.json` (copied bin -> source).
+- **Log**: `artifacts/document-copies-import/WorkPermitDocument-20260908.log`
+- **Next**: InvitationDocument. Halt until proceed.
+### 2026-09-08 - MedicalRecordDocument file wave .15 -> local PG (attachmentsSequence)
+
+- **Phase**: file import
+- **Mode**: `--import-visa2014-files --entity MedicalRecord --property MedicalRecordDocument --legacy-source calik-energi-local-pg --inprocess --no-wait --batch-size 50` `--id-map` full `Person.json`
+- **Outcome**: success (exit **0**, Failed **0**) — Calik no-op as expected
+- **Environment**: local PostgreSQL `visa2026` / `calik-energi-local-pg` <- `10.100.128.15` / `VISA2015`
+- **Counts**: Person id-map **3409** / Spid link rows **2** / Importable (Copy+FileData) **0** / Posted **0** / Failed **0** / Orphan copy link **2**.
+- **Note**: DataImporter bin emptied again (VS Insiders F5 `Visa2026.Blazor.Server` locked Module.dll). Stopped PID then rebuild. Do not F5 the Blazor host during remaining file waves.
+- **Log**: `artifacts/document-copies-import/MedicalRecordDocument-20260908.log`
+- **Next**: WorkPermitDocument. Halt until proceed.
+### 2026-09-08 - EducationDocument file wave .15 -> local PG (attachmentsSequence)
+
+- **Phase**: file import
+- **Mode**: `--import-visa2014-files --entity Education --property EducationDocument --legacy-source calik-energi-local-pg --inprocess --no-wait --batch-size 50`
+- **Outcome**: success (exit **0**, Failed **0**)
+- **Environment**: local PostgreSQL `visa2026` / `calik-energi-local-pg` <- `10.100.128.15` / `VISA2015`
+- **Counts**: Education id-map **3281** / Legacy diploma copy rows **4500** / Posted **4409** / Failed **0** / No education map **0** / No blob **34** / Oversize (>5MB) **40** / already **0** / Duplicate blob **17**.
+- **Id-map**: `id-maps/calik-energi-local-pg/EducationDocument.json` (copied bin -> source).
+- **Note**: first CLI failed (bin emptied to 9 files, `dotnet Visa2026.DataImporter.dll` not found). Rebuild Debug then `dotnet` full DLL path. Wall-clock ~10 min after host listen.
+- **Log**: `artifacts/document-copies-import/EducationDocument-20260908.log`
+- **Next**: MedicalRecordDocument. Halt until proceed.
+### 2026-09-08 - EducationDocument CLI fail (bin wiped)
+
+- **Phase**: file import
+- **Mode**: `dotnet Visa2026.DataImporter.dll --import-visa2014-files --entity Education --property EducationDocument`
+- **Outcome**: fail (exit **1**, no import)
+- **Cause**: `Visa2026.DataImporter\bin\Debug\net8.0` had **9** files; DLL and `runtimeconfig.json` missing. `dotnet` treated the name as a subcommand.
+- **Fix**: `dotnet build Visa2026.DataImporter -c Debug`, copy id-maps, run with full DLL path.### 2026-09-08 - VisaDocument file wave .15 -> local PG (attachmentsSequence)
+
+- **Phase**: file import
+- **Mode**: `--import-visa2014-files --entity Visa --property VisaDocument --legacy-source calik-energi-local-pg --inprocess --no-wait --batch-size 50`
+- **Outcome**: success (exit **0**, Failed **0**)
+- **Environment**: local PostgreSQL `visa2026` / `calik-energi-local-pg` <- `10.100.128.15` / `VISA2015`
+- **Counts**: Visa id-map **6328** / Rows with blob **6282** / Posted **6128** / Failed **0** / No visa map **67** / No blob **46** / Oversize (>5MB) **154** / already **0**.
+- **Id-map**: `id-maps/calik-energi-local-pg/VisaDocument.json` (copied bin -> source).
+- **Note**: wall-clock ~17 min after host listen (more rows than PassportDocument).
+- **Log**: `artifacts/document-copies-import/VisaDocument-20260908.log`
+- **Next**: EducationDocument. Halt until proceed.### 2026-09-08 - PassportDocument file wave .15 -> local PG (attachmentsSequence)
+
+- **Phase**: file import
+- **Mode**: `--import-visa2014-files --entity Passport --property PassportDocument --legacy-source calik-energi-local-pg --inprocess --no-wait --batch-size 50`
+- **Outcome**: success (exit **0**, Failed **0**)
+- **Environment**: local PostgreSQL `visa2026` / `calik-energi-local-pg` <- `10.100.128.15` / `VISA2015`
+- **Counts**: Passport id-map **3765** / Legacy copy rows **3800** / Posted **3749** / Failed **0** / No passport map **13** / No blob **1** / Oversize (>5MB) **37** / already **0**.
+- **Id-map**: `id-maps/calik-energi-local-pg/PassportCopy.json` (copied bin -> source).
+- **Note**: rebuild Debug first (`runtimeconfig.json` / `deps.json` missing after Photo run). Wall-clock ~6 min after host listen.
+- **Log**: `artifacts/document-copies-import/PassportDocument-20260908.log`
+- **Next**: VisaDocument. Halt until proceed.### 2026-09-08 - Person.Photo file wave .15 -> local PG (attachmentsSequence)
+
+- **Phase**: file import
+- **Mode**: `--import-visa2014-files --entity Person --property Photo --legacy-source calik-energi-local-pg --inprocess --no-wait --batch-size 50`
+- **Outcome**: success (exit **0**, Failed **0**)
+- **Environment**: local PostgreSQL `visa2026` / `calik-energi-local-pg` <- `10.100.128.15` / `VISA2015`
+- **Counts**: Id-map **3409** / Processed **3409** / Patched **3338** / No blob **71** / Failed **0**.
+- **Note**: rebuild Debug first (bin was missing `runtimeconfig.json`). Photo wall-clock ~4 min after host listen; blobs from `.15` then XAF PATCH FileData. Not a hang.
+- **Log**: `artifacts/document-copies-import/Person-Photo-20260908.log`
+- **Next**: PassportDocument. Halt until proceed.### 2026-09-08 - PIA document-link pin .15 -> local PG (after accept)
+
+- **Phase**: correction
+- **Mode**: `--correct-visa2014-application-person-document-links --legacy-source calik-energi-local-pg --application-id-map` full path `ApplicationProfileInstance.json`. `--target-connection` local PG.
+- **Outcome**: success (exit **0**, errors **0**)
+- **Counts**: Legacy PIA **22825**. Passport changed **0**. Visa changed **2**. WorkPermitItem changed **2**. Already correct **22262**. Missing parent id-map **258**. No mapped snapshot **188**.
+- **Logs**: `artifacts/headless-import/correct-pia-document-links-20260908.log`
+- **Next**: attachmentsSequence (file waves). postAllTypeSlices scalar complete.
+### 2026-09-08 - Visa remainder .15 -> local PG (postAllTypeSlices, after proceed)
+
+- **Phase**: import
+- **Mode**: `--import-visa2014 --entity Visa --visa-remainder --legacy-source calik-energi-local-pg --inprocess --no-wait --skip-tenant-catalog-generation --batch-size 50`. `--application-id-map` full path `ApplicationProfileInstance.json`. No `--application-type`.
+- **Outcome**: success (exit **0**, Failed **0**)
+- **Counts**: Legacy **6378** / Prepared **6353** / skip **19** / dedupe **6**. Posted **0** / already **6328** / no Passport map **25** / remainder without issuing **0** / issuing patched **0**.
+- **PG**: `Visas` **6328**. Type-slice Visa waves already posted every remainder candidate except 25 without Passport id-map.
+- **Id-maps**: Visa **6328**.
+- **Logs**: `artifacts/headless-import/Visa-remainder-20260908.log`
+- **Halt**: wait for accept before `--correct-visa2014-application-person-document-links` (pins PIA Passport/PreviousPassport/Visa/WorkPermit).
+### 2026-09-08 - BorderZone + BorderZoneItem remainder .15 -> local PG (after accept)
+
+- **Phase**: import
+- **Mode**: `--import-visa2014 --entity BorderZone` then `BorderZoneItem --border-zone-id-map` full path `BorderZone.json`. `--application-id-map` full path `ApplicationProfileInstance.json`. `--legacy-source calik-energi-local-pg --inprocess`. No BorderZoneDocument.
+- **Outcome**: success (exit **0**, Failed **0** both)
+- **Header**: Posted **108** / already **2** / prepared **110** / transform skip **1**. PG `BorderZones` **110**. Instance FK null **0**. ValidityDuration FK null **0**.
+- **Items**: Posted **207** / already **2** / prepared **212** / transform skip **6** / missing required id-map **3** (Passport, same as 2026-09-07). PG `BorderZoneItems` **209**. Person/Passport/BorderZone FK null **0**.
+- **Id-maps**: BorderZone **110**, BorderZoneItem **209**.
+- **Logs**: `artifacts/headless-import/BorderZone-header-remainder-20260908.log`, `BorderZoneItem-remainder-20260908.log`
+- **Next**: `--visa-remainder` (no `--application-type`), then `--correct-visa2014-application-person-document-links`.
+### 2026-09-08 - BorderZone + BorderZoneItem sample 2 .15 -> local PG (postAllTypeSlices)
+
+- **Phase**: import (sample)
+- **Mode**: `--entity BorderZone --application-id-map` full path `ApplicationProfileInstance.json`. First `--max-rows 2` Posted **1** (1 junk skip in TOP). Then `--max-rows 3` Posted **1** more. Then `--entity BorderZoneItem --border-zone-id-map` full path `BorderZone.sample2.json`. No BorderZoneDocument.
+- **Outcome**: headers Posted **2** Failed **0**. Items Posted **2** Failed **0** (missing parent map 210 of 212 prepared; transform skip 6).
+- **Headers**: `AS468709` start 2014-08-26 app `8/-3585` Fatih Akgollu U 00368984. `AS473641` start 2014-09-26 app `9/-3771` Levent Ozgur TOPAL U 06197890. Profile get_border_zone. PeriodDays 182 → ValidityDuration 180 (6 ay) closest Match. Employees.
+- **Halt**: wait for accept before BorderZone remainder, then BorderZoneItem remainder. Remainder may miss 3 Passport id-maps (same as 2026-09-07).
+- **Id-maps**: BorderZone **2**. Sample `BorderZone.sample2.json`.
+- **Logs**: `artifacts/headless-import/BorderZone-header-sample2-20260908.log`, `BorderZone-header-sample2b-20260908.log`, `BorderZoneItem-sample2-20260908.log`
+### 2026-09-08 - Rejection + RejectionItem remainder .15 -> local PG (after accept)
+
+- **Phase**: import
+- **Mode**: `--import-visa2014 --entity Rejection` then `RejectionItem --rejection-id-map` full path `Rejection.json`. `--legacy-source calik-energi-local-pg --inprocess`. `--application-id-map` full path `ApplicationProfileInstance.json`. No RejectionDocument.
+- **Outcome**: success (exit **0**, Failed **0** both)
+- **Header**: Posted **205** / already **2** / prepared **207**. PG `Rejections` **207**. Instance FK null **0**.
+- **Items**: Posted **252** / already **2** / prepared **254**. PG `RejectionItems` **254**. Person/Passport/Rejection FK null **0**.
+- **Id-maps**: Rejection **207**, RejectionItem **254**.
+- **Logs**: `artifacts/headless-import/Rejection-header-remainder-20260908.log`, `RejectionItem-remainder-20260908.log`
+- **Next**: BorderZone documents sample (header then items). Do not invent BorderZoneDocument. Then `--visa-remainder`, then document-link pin.
+### 2026-09-08 - Rejection + RejectionItem sample 2 .15 -> local PG (postAllTypeSlices)
+
+- **Phase**: import (sample)
+- **Mode**: `--entity Rejection --max-rows 2 --application-id-map` full path `ApplicationProfileInstance.json`, then `--entity RejectionItem --rejection-id-map` full path `Rejection.sample2.json`. `--legacy-source calik-energi-local-pg --inprocess`. No RejectionDocument.
+- **Outcome**: header Posted **2** Failed **0**. Items Posted **2** Failed **0** (missing parent map 252 of 254).
+- **Headers**: `101/2-819` date 2014-03-24 app `3/-2435` profile get_invitation_wp. `AS447001` date 2014-04-07 app `3/-2493` profile get_invitation. Employees Hakan YORUK U 08805860 / Ramazan MAMAK U 08743877. Number, date, app number, person, passport Match.
+- **Halt**: wait for accept before Rejection remainder, then RejectionItem remainder.
+- **Id-maps**: Rejection **2**. Sample `Rejection.sample2.json`.
+- **Logs**: `artifacts/headless-import/Rejection-header-sample2-20260908.log`, `RejectionItem-sample2-20260908.log`
+### 2026-09-08 - App_Business_Trip_Departure remainder .15 -> local PG (after accept)
+
+- **Phase**: import
+- **Mode**: `--import-visa2014 --entity ApplicationProfileInstance|Person|Progress --application-type App_Business_Trip_Departure --legacy-source calik-energi-local-pg --inprocess`. `--application-id-map` full path `ApplicationProfileInstance.json`. Progress `--batch-size 1`. Skip Invitation, WorkPermit, Visa. No `--visa-remainder`.
+- **Outcome**: success (exit **0**, Failed **0** all three)
+- **Header**: Posted **592** / already **2** / type **594**. PG `business_trip_departure` headers **594**.
+- **Roster**: Posted **727** / already **21838** / missing parent **52**.
+- **Progress**: Posted **1162** / already **37701** / no instance map **70**.
+- **Id-maps**: instance **12575**, person **22589**, progress **38868**.
+- **Logs**: `artifacts/headless-import/AppBizTripDep-header-remainder-20260908.log`, roster/progress `AppBizTripDep-*-remainder-20260908.log`
+- **Next**: skip empty App_Business_Trip_Arrival. Then postAllTypeSlices: Rejection, RejectionItem, BorderZone documents, `--visa-remainder`, `--correct-visa2014-application-person-document-links`. Do not invent RejectionDocument/BorderZoneDocument.
+### 2026-09-08 - App_Business_Trip_Departure header+roster+progress sample 2 .15 -> local PG
+
+- **Phase**: import (sample)
+- **Mode**: `--entity ApplicationProfileInstance --application-type App_Business_Trip_Departure --max-rows 2` then roster+progress with `--application-id-map` full path `ApplicationProfileInstance.sample2-btdep.json`. Progress `--batch-size 1`. Skip Invitation, WorkPermit, Visa. No `--visa-remainder`.
+- **Outcome**: header Posted **2** Failed **0** (594 type matches). Roster Posted **4**. Progress Posted **4**.
+- **Apps**: `2/-221` Bora Yolcu U31669065 visa A1548869 (employee, 2025-02-24). `4/-12929` three employees Burak BILGIN / Peter Anthony TERRIO / Todor Ivanov MIRKOV with matching passports and visas A1338445 / A1338267 / A1338268 (2019-04-15). Profile business_trip_departure. Cancelled=0. Roster people Match (Employee, not FamilyMember).
+- **Halt**: wait for accept before header remainder, then roster, progress.
+- **Id-maps**: instance **11983**. Sample `ApplicationProfileInstance.sample2-btdep.json`.
+- **Logs**: `artifacts/headless-import/AppBizTripDep-header-sample2-20260908.log`, roster/progress `AppBizTripDep-*-sample2-20260908.log`
+### 2026-09-08 - App_Reg_Info_Change_Passport remainder .15 -> local PG (after proceed)
+
+- **Phase**: import
+- **Mode**: `--import-visa2014 --entity ApplicationProfileInstance|Person|Progress --application-type App_Reg_Info_Change_Passport --legacy-source calik-energi-local-pg --inprocess`. `--application-id-map` full path `ApplicationProfileInstance.json`. Progress `--batch-size 1`. Skip Invitation, WorkPermit, Visa. No `--visa-remainder`.
+- **Outcome**: success (exit **0**, Failed **0** all three). First header attempt failed (missing `DevExpress.Office.v25.2.Core`); rebuilt DataImporter Debug, recopied id-maps, retried.
+- **Header**: Posted **99** / already **2** / type **101**.
+- **Roster**: Posted **114** / already **21720** / missing parent **782**.
+- **Progress**: Posted **198** / already **37499** / no instance map **1232**.
+- **Id-maps**: instance **11981**, person **21858**, progress **37702**.
+- **Logs**: `artifacts/headless-import/AppRegInfoPp-header-remainder-20260908.log`, roster/progress `AppRegInfoPp-*-remainder-20260908.log`
+- **Next**: skip empty App_Reg_Info_Change_Visa and App_Reg_Check_Out_Internal. Then App_Business_Trip_Departure sample. Skip Invitation, WorkPermit, Visa.
+### 2026-09-08 - App_Reg_Info_Change_Passport header+roster+progress sample 2 .15 -> local PG
+
+- **Phase**: import (sample)
+- **Mode**: `--entity ApplicationProfileInstance --application-type App_Reg_Info_Change_Passport --max-rows 2` then roster+progress with `--application-id-map` full path `ApplicationProfileInstance.sample2-regpp.json`. Progress `--batch-size 1`. Skip Invitation, WorkPermit, Visa. No `--visa-remainder`.
+- **Outcome**: header Posted **2** Failed **0** (101 type matches). Roster Posted **2**. Progress Posted **4**.
+- **Apps**: `1/-20` Mumin Abbaz U35307900 visa A1458728 (employee, 2023-01-17). `9/-3969` Anil Yilmaz GUNESLI U 09663605 visa A0893738 (2014-09-24). PreviousPassport empty both PIAs. Profile reg_info_change_passport. Cancelled=0. Passports+visas Match.
+- **Halt**: wait for accept before header remainder, then roster, progress.
+- **Id-maps**: instance **11882**. Sample `ApplicationProfileInstance.sample2-regpp.json`.
+- **Logs**: `artifacts/headless-import/AppRegInfoPp-header-sample2-20260908.log`, roster/progress `AppRegInfoPp-*-sample2-20260908.log`
+### 2026-09-08 - App_Reg_Info_Change_Address remainder .15 -> local PG (after accept)
+
+- **Phase**: import
+- **Mode**: `--import-visa2014 --entity ApplicationProfileInstance|Person|Progress --application-type App_Reg_Info_Change_Address --legacy-source calik-energi-local-pg --inprocess`. `--application-id-map` full path `ApplicationProfileInstance.json`. Progress `--batch-size 1`. Skip Invitation, WorkPermit, Visa. No `--visa-remainder`.
+- **Outcome**: success (exit **0**, Failed **0** all three)
+- **Header**: Posted **645** / already **2** / type **647**. PG `reg_info_change_address` headers **647**.
+- **Roster**: Posted **828** / already **20890** / missing parent **898**.
+- **Progress**: Posted **1290** / already **36205** / no instance map **1434**.
+- **Id-maps**: instance **11880**, person **21742**, progress **37500**.
+- **Logs**: `artifacts/headless-import/AppRegInfoAddr-header-remainder-20260908.log`, roster/progress `AppRegInfoAddr-*-remainder-20260908.log`
+- **Next**: App_Reg_Info_Change_Passport sample. Skip Invitation, WorkPermit, Visa.
+### 2026-09-08 - App_Reg_Info_Change_Address header+roster+progress sample 2 .15 -> local PG
+
+- **Phase**: import (sample)
+- **Mode**: `--entity ApplicationProfileInstance --application-type App_Reg_Info_Change_Address --max-rows 2` then roster+progress with `--application-id-map` full path `ApplicationProfileInstance.sample2-regaddr.json`. Progress `--batch-size 1`. Skip Invitation, WorkPermit, Visa. No `--visa-remainder`.
+- **Outcome**: header Posted **2** Failed **0** (647 type matches). Roster Posted **2**. Progress Posted **4**.
+- **Apps**: `1/-7127` Metin AKYOL U 02169790 visa A0981650 (employee, 2016-01-19). `5/-7997` Ersoy KETENE U 06171393 visa A1046630 (2016-06-08). Profile reg_info_change_address. Cancelled=0. Passports+visas Match.
+- **Halt**: wait for accept before header remainder, then roster, progress.
+- **Id-maps**: instance **11235**. Sample `ApplicationProfileInstance.sample2-regaddr.json`.
+- **Logs**: `artifacts/headless-import/AppRegInfoAddr-header-sample2-20260908.log`, roster/progress `AppRegInfoAddr-*-sample2-20260908.log`
+### 2026-09-08 - App_Reg_Check_Out remainder .15 -> local PG (after accept)
+
+- **Phase**: import
+- **Mode**: `--import-visa2014 --entity ApplicationProfileInstance|Person|Progress --application-type App_Reg_Check_Out --legacy-source calik-energi-local-pg --inprocess`. `--application-id-map` full path `ApplicationProfileInstance.json`. Progress `--batch-size 1`. Skip Invitation, WorkPermit, Visa. No `--visa-remainder`.
+- **Outcome**: success (exit **0**, Failed **0** all three)
+- **Header**: Posted **2205** / already **2** / type **2207**. PG `check_out` headers **2207**.
+- **Roster**: Posted **3430** / already **17458** / missing parent **1728**.
+- **Progress**: Posted **4326** / already **31875** / no instance map **2728**.
+- **Id-maps**: instance **11233**, person **20912**, progress **36206**.
+- **Logs**: `artifacts/headless-import/AppRegCheckOut-header-remainder-20260908.log`, roster/progress `AppRegCheckOut-*-remainder-20260908.log`
+- **Next**: App_Reg_Info_Change_Address sample. Skip Invitation, WorkPermit, Visa.
+### 2026-09-08 - App_Reg_Check_Out header+roster+progress sample 2 .15 -> local PG
+
+- **Phase**: import (sample)
+- **Mode**: `--entity ApplicationProfileInstance --application-type App_Reg_Check_Out --max-rows 2` then roster+progress with `--application-id-map` full path `ApplicationProfileInstance.sample2-regcheckout.json`. Progress `--batch-size 1`. Skip Invitation, WorkPermit, Visa. No `--visa-remainder`.
+- **Outcome**: header Posted **2** Failed **0** (2207 type matches). Roster Posted **2**. Progress Posted **4**.
+- **Apps**: `3/-201` Fuat Kelesoglu U34387202 visa A1601731 (employee, 2025-03-19). `9/-8752` Sulek UYSAL U 11110738 visa A1089789 (2016-09-30). Profile check_out. Cancelled=0. Passports+visas Match.
+- **Halt**: wait for accept before header remainder, then roster, progress.
+- **Id-maps**: instance **9028**. Sample `ApplicationProfileInstance.sample2-regcheckout.json`.
+- **Logs**: `artifacts/headless-import/AppRegCheckOut-header-sample2-20260908.log`, roster/progress `AppRegCheckOut-*-sample2-20260908.log`
+### 2026-09-08 - App_Reg_ext remainder .15 -> local PG (after accept)
+
+- **Phase**: import
+- **Mode**: `--import-visa2014 --entity ApplicationProfileInstance|Person|Progress --application-type App_Reg_ext --legacy-source calik-energi-local-pg --inprocess`. `--application-id-map` full path `ApplicationProfileInstance.json`. Progress `--batch-size 1`. Skip Invitation, WorkPermit, Visa. No `--visa-remainder`.
+- **Outcome**: success (exit **0**, Failed **0** all three)
+- **Header**: Posted **1241** / already **2** / type **1243**. PG `reg_extension` headers **1243**.
+- **Roster**: Posted **2653** / already **14803** / missing parent **5160**.
+- **Progress**: Posted **2478** / already **29393** / no instance map **7058**.
+- **Id-maps**: instance **9026**, person **17480**, progress **31876**.
+- **Logs**: `artifacts/headless-import/AppRegExt-header-remainder-20260908.log`, roster/progress `AppRegExt-*-remainder-20260908.log`
+- **Next**: App_Reg_Check_Out sample. Skip Invitation, WorkPermit, Visa.
+### 2026-09-08 - App_Reg_ext header+roster+progress sample 2 .15 -> local PG
+
+- **Phase**: import (sample)
+- **Mode**: `--entity ApplicationProfileInstance --application-type App_Reg_ext --max-rows 2` then roster+progress with `--application-id-map` full path `ApplicationProfileInstance.sample2-regext.json`. Progress `--batch-size 1`. Skip Invitation, WorkPermit, Visa. No `--visa-remainder`.
+- **Outcome**: header Posted **2** Failed **0** (1243 type matches). Roster Posted **3**. Progress Posted **4**.
+- **Apps**: `3/-376` Zekai Akurek U26213934 visa A1675436 + Abdul Ahad Raufi PO5427481 visa A1675435 (employee, 2026-03-04). `7/-1057` Selcuk Keles U24888382 visa A1634423 (2025-07-26). Profile reg_extension. Cancelled=0. Passports+visas Match.
+- **Halt**: wait for accept before header remainder, then roster, progress.
+- **Id-maps**: instance **7785**. Sample `ApplicationProfileInstance.sample2-regext.json`.
+- **Logs**: `artifacts/headless-import/AppRegExt-header-sample2-20260908.log`, roster/progress `AppRegExt-*-sample2-20260908.log`
+### 2026-09-08 - App_Reg_Check_In_Internal remainder .15 -> local PG (after accept)
+
+- **Phase**: import
+- **Mode**: `--import-visa2014 --entity ApplicationProfileInstance|Person|Progress --application-type App_Reg_Check_In_Internal --legacy-source calik-energi-local-pg --inprocess`. `--application-id-map` full path `ApplicationProfileInstance.json`. Progress `--batch-size 1`. Skip Invitation, WorkPermit, Visa. No `--visa-remainder`.
+- **Outcome**: success (exit **0**, Failed **0** all three)
+- **Header**: Posted **488** / already **2** / type **490**. PG `check_in_internal` headers **490**.
+- **Roster**: Posted **609** / already **14191** / missing parent **7816**.
+- **Progress**: Posted **976** / already **28413** / no instance map **9540**.
+- **Id-maps**: instance **7783**, person **14824**, progress **29394**.
+- **Logs**: `artifacts/headless-import/AppRegCheckInInt-header-remainder-20260908.log`, roster/progress `AppRegCheckInInt-*-remainder-20260908.log`
+- **Next**: App_Reg_ext sample. Skip Invitation, WorkPermit, Visa.
+### 2026-09-08 - App_Reg_Check_In_Internal header+roster+progress sample 2 .15 -> local PG
+
+- **Phase**: import (sample)
+- **Mode**: `--entity ApplicationProfileInstance --application-type App_Reg_Check_In_Internal --max-rows 2` then roster+progress with `--application-id-map` full path `ApplicationProfileInstance.sample2-reginternal.json`. Progress `--batch-size 1`. Skip Invitation, WorkPermit, Visa. No `--visa-remainder`.
+- **Outcome**: header Posted **2** Failed **0** (490 type matches). Roster Posted **2**. Progress Posted **4**.
+- **Apps**: `1/-9339` family 2017-01-18: PIA Employee Ahmet Murat Karaalp + FamilyMember Tetiana Karaalp FA917373 visa A1147551; roster person Tetiana (ForFamilyMember). `4/-5586` Omer BINARBASI U 07720860 visa A0929144 (employee, 2015-04-30). Passports+visas Match. Profile check_in_internal. Cancelled=0.
+- **Halt**: wait for accept before header remainder, then roster, progress.
+- **Id-maps**: instance **7295**. Sample `ApplicationProfileInstance.sample2-reginternal.json`.
+- **Logs**: `artifacts/headless-import/AppRegCheckInInt-header-sample2-20260908.log`, roster/progress `AppRegCheckInInt-*-sample2-20260908.log`
+### 2026-09-08 - App_Reg_Check_In remainder .15 -> local PG (after accept)
+
+- **Phase**: import
+- **Mode**: `--import-visa2014 --entity ApplicationProfileInstance|Person|Progress --application-type App_Reg_Check_In --legacy-source calik-energi-local-pg --inprocess`. `--application-id-map` full path `ApplicationProfileInstance.json`. Progress `--batch-size 1`. Skip Invitation, WorkPermit, Visa. No `--visa-remainder`.
+- **Outcome**: success (exit **0**, Failed **0** all three)
+- **Header**: Posted **1814** / already **2** / type **1816**. PG `check_in_from_abroad` headers **1816**.
+- **Roster**: Posted **3135** / already **11054** / missing parent **8427**.
+- **Progress**: Posted **3608** / already **24801** / no instance map **10520**.
+- **Id-maps**: instance **7293**, person **14213**, progress **28414**.
+- **Logs**: `artifacts/headless-import/AppRegCheckIn-header-remainder-20260908.log`, roster/progress `AppRegCheckIn-*-remainder-20260908.log`
+- **Next**: App_Reg_Check_In_Internal sample. Skip Invitation, WorkPermit, Visa.
+### 2026-09-08 - App_Reg_Check_In header+roster+progress sample 2 .15 -> local PG
+
+- **Phase**: import (sample)
+- **Mode**: `--entity ApplicationProfileInstance --application-type App_Reg_Check_In --max-rows 2` then roster+progress with `--application-id-map` full path `ApplicationProfileInstance.sample2-regcheckin.json`. Progress `--batch-size 1`. Skip Invitation, WorkPermit, Visa. No `--visa-remainder`.
+- **Outcome**: header Posted **2** Failed **0** (1816 type matches). Roster Posted **2**. Progress Posted **4**.
+- **Apps**: `4/-547` Gulladi Ramachandra Raghavendra --- Z4675820 visa A1704067 (employee, 2026-04-03, check_in_from_abroad). `2/-2348` Baris CAMCI U 04947836 visa A0820054 (2014-02-26). Passports+visas Match. Profile Match. Cancelled=0. ProcessNumber empty both sides.
+- **Halt**: wait for accept before header remainder, then roster, progress. Skip Invitation, WorkPermit, Visa.
+- **Id-maps**: instance **5479**. Sample `ApplicationProfileInstance.sample2-regcheckin.json`.
+- **Logs**: `artifacts/headless-import/AppRegCheckIn-header-sample2-20260908.log`, roster/progress `AppRegCheckIn-*-sample2-20260908.log`
+### 2026-09-08 - App_Sevice_Passport remainder .15 -> local PG (after accept)
+
+- **Phase**: import
+- **Mode**: `--import-visa2014 --entity ApplicationProfileInstance|Person|Progress|Invitation|InvitationItem|Visa --application-type App_Sevice_Passport --legacy-source calik-energi-local-pg --inprocess`. `--application-id-map` full path `ApplicationProfileInstance.json`. Progress `--batch-size 1`. Skip WorkPermit. No `--visa-remainder`.
+- **Outcome**: success (exit **0**, Failed **0** all six)
+- **Header**: Posted **42** / already **2** / type **44**. PG `get_invitation_service_passport` headers **44**.
+- **Roster**: Posted **50** / already **11002** / missing parent **11564**.
+- **Progress**: Posted **200** / already **24597** / no instance map **14132**.
+- **Invitation**: Posted **32** / already **2909** / instance not in map **2**.
+- **InvitationItem**: Posted **39** / already **5236** / missing id-map **30**.
+- **Visa**: Posted **0** / already **6328** / no passport **25** / issuing FK patched **9**.
+- **Id-maps**: instance **5477**, person **11076**, progress **24802**, Invitation **2941**, InvitationItem **5275**.
+- **Logs**: `artifacts/headless-import/AppSevicePp-header-remainder-20260908.log`, roster/progress/inv/invitem/visa `AppSevicePp-*-remainder-20260908.log`
+- **Next**: App_Reg_Check_In sample (skip Invitation, WorkPermit, Visa). This wipe has not run registration.
+### 2026-09-08 - App_Sevice_Passport header+roster+progress+Invitation sample 2 .15 -> local PG
+
+- **Phase**: import (sample)
+- **Mode**: `--entity ApplicationProfileInstance --application-type App_Sevice_Passport --max-rows 2` then roster+progress+Invitation+InvitationItem+Visa with `--application-id-map` full path `ApplicationProfileInstance.sample2-sevice.json`. Progress `--batch-size 1`. Skip WorkPermit. No `--visa-remainder`.
+- **Outcome**: header Posted **2** Failed **0** (44 type matches). Roster Posted **2**. Progress Posted **9**. Invitation Posted **2**. InvitationItem Posted **2**. Visa Posted **0** / already **6328** (PIA Visa empty both apps).
+- **Apps**: `11/-13247` Hikmet SEZER S 03046413 invitation AS0053302 2019-11-21..2020-02-21 (employee, get_invitation_service_passport). `8/-1528` Burak Yuksel S36243438 invitation CO0230857 2026-08-31..2026-11-27. ProcessNumber matches invitation Number. Cancelled=0. No previous passport.
+- **Halt**: wait for accept before header remainder, then roster, progress, Invitation, InvitationItem, Visa. Skip WorkPermit. Do not use `--visa-remainder` on this type.
+- **Id-maps**: instance **5435**. Sample `ApplicationProfileInstance.sample2-sevice.json`.
+- **Logs**: `artifacts/headless-import/AppSevicePp-header-sample2-20260908.log`, roster/progress/inv/invitem/visa `AppSevicePp-*-sample2-20260908.log`
+### 2026-09-08 - App_Cancell_WP remainder .15 -> local PG (after accept)
+
+- **Phase**: import
+- **Mode**: `--import-visa2014 --entity ApplicationProfileInstance|Person|Progress --application-type App_Cancell_WP --legacy-source calik-energi-local-pg --inprocess`. `--application-id-map` full path to `ApplicationProfileInstance.json`. Progress `--batch-size 1`. Skip Invitation, WorkPermit, Visa. No `--visa-remainder`.
+- **Outcome**: success (exit **0**, Failed **0** all three)
+- **Header**: Posted **87** / already **2** / type **89**. PG `cancel_workpermit` headers **89**.
+- **Roster**: Posted **194** / already **10806** / missing parent **11615**.
+- **Progress**: Posted **174** / already **24414** / no instance map **14341**.
+- **Id-maps**: instance **5433**, person **11024**, progress **24593**.
+- **Logs**: `artifacts/headless-import/AppCancellWp-header-remainder-20260908.log`, roster/progress `AppCancellWp-*-remainder-20260908.log`
+- **Next**: App_Cancel_BZ already skip. This wipe has not run band 5+; next live type **App_Sevice_Passport** (invitation+visa; skip WorkPermit). Wait for lock/sample.
+### 2026-09-08 - Strategy: imported applications are past (not today)
+
+- **Phase**: mapping / strategy
+- **Why**: App_Cancell_WP sample 4/-9661 linked WorkPermitItem 1757/29 (today's current) instead of PIA 5014/1. All VISA2014 data is historical.
+- **Locked**: `import-strategy.yaml` `historicalApplicationSnapshot` (past_not_today). Roster ResolvedLinks = PersonInApplication snapshot (Passport/PreviousPassport/Visa/WorkPermitItem). Skip latest-N / PersonCurrentItems during IsDataImport. Pin at roster; `--correct-visa2014-application-person-document-links` also pins WorkPermitItem. Officer Relink may still use today. Gap only when source Oid not in id-map.
+- **Code**: CollectMissingAutoLinks empty during import; PinDocumentSnapshot WP; ExistingItemLinkCorrection ReplaceKind; tombstone restore on unique index.
+- **Correction**: exit 0. WorkPermitItem links changed **523**. 4/-9661 should now be 5014/1.
+- **Halt**: App_Cancell_WP remainder still waiting for accept.
+### 2026-09-08 - App_Cancell_WP header+roster+progress sample 2 .15 -> local PG
+
+- **Phase**: import (sample)
+- **Mode**: `--entity ApplicationProfileInstance --application-type App_Cancell_WP --max-rows 2` then roster+progress with `--application-id-map` full path `ApplicationProfileInstance.sample2-cancelwp.json`. Progress `--batch-size 1`. Skip Invitation, WorkPermit, Visa. No `--visa-remainder`.
+- **Outcome**: header Posted **2** Failed **0** (88 type matches). Roster Posted **3**. Progress Posted **4**.
+- **Apps**: `3/-5341` Turgut MAHMUTOGLU U 04083490 WP 326/12 + Omer Akif KOPUZ U 01182745 WP 326/11 (employee, 2015-03-24). Passports+WP Match. `4/-9661` Graham Buchanan FULTON 801314039: PIA WP **5014/1** vs ResolvedLink WorkPermitItem **1757/29** Mismatch (PinDocumentSnapshot is Passport/Visa only; WP is latest-N auto-link). PROCESS_ISSUED Description **5014/1** Match vs PIA. Profile cancel_workpermit. Cancelled=0. Visa empty both sides.
+- **Halt**: wait for accept before header remainder, then roster, progress.
+- **Id-maps**: instance **5346**. Sample `ApplicationProfileInstance.sample2-cancelwp.json`.
+- **Logs**: `artifacts/headless-import/AppCancellWp-header-sample2-20260908-110739.log`, roster/progress `AppCancellWp-*-sample2-20260908.log`
+### 2026-09-08 - Family-app roster compare: use FamilyMember, not COALESCE(Employee)
+
+- **Phase**: mapping (sample verify)
+- **Why**: App_Cancel_Visa 8/-1609 looked like Person Mismatch (Hüseyin vs Elzem/Aysel). False alarm.
+- **Fact**: ForFamilyMember=1. Each PIA has Employee=Hüseyin (sponsor) and FamilyMember=Elzem Ayza / Aysel. Importer ResolvePersonOid uses FamilyMember when ForFamilyMember. COALESCE(Employee, FamilyMember) prefers the sponsor and hides the actual roster people.
+- **Passports/visas**: already matched; names Match when FamilyMember is used.
+### 2026-09-08 - App_Cancel_Visa remainder .15 -> local PG (after accept)
+
+- **Phase**: import
+- **Mode**: `--import-visa2014 --entity ApplicationProfileInstance|Person|Progress --application-type App_Cancel_Visa --legacy-source calik-energi-local-pg --inprocess`. Progress `--batch-size 1`. Skip Invitation, WorkPermit, Visa. No `--visa-remainder`.
+- **Outcome**: success (exit **0**, Failed **0** all three)
+- **Header**: Posted **54** / already **2** / type **56**. PG headers **56**. Id-map instance **5344**, person **10827**, progress **24415**.
+- **Roster**: Posted **115** / already **10688** / missing parent **11811**.
+- **Progress**: Posted **108** / already **24302** / no instance map **14517**.
+- **Logs**: `artifacts/headless-import/AppCancelVisa-header-remainder-20260908-110000.log`, roster/progress `AppCancelVisa-*-remainder-20260908.log`
+- **Next**: App_Cancell_WP (`cancel_workpermit`) sample 2. Skip Invitation, WorkPermit, Visa.
+### 2026-09-08 - App_Cancel_Visa header+roster+progress sample 2 .15 -> local PG
+
+- **Phase**: import (sample)
+- **Mode**: `--entity ApplicationProfileInstance --application-type App_Cancel_Visa --max-rows 2` then roster+progress with `--application-id-map` full path `ApplicationProfileInstance.sample2-cancelvisa.json`. Progress `--batch-size 1`. Skip Invitation, WorkPermit, Visa. No `--visa-remainder`.
+- **Outcome**: header Posted **2** Failed **0** (56 type matches). Roster Posted **3**. Progress Posted **4**.
+- **Apps**: `8/-1609` family 2026-08-31 `cancel_visa` / Wizany Yatyrmak, Cancelled=0. Legacy PIA both Person Hüseyin Kelebek (same Oid) passports U33420085 / U38044059 visas A1733700 / A1733699. PG roster resolved those passports to Elzem Ayza Kelebek and Aysel Kelebek (Person names Mismatch vs PIA; passport+visa numbers Match). `4/-9675` Alexandre DE TROIA passport 14DI07449 visa A1151045 (2017-01-09, AS578955) Match.
+- **Halt**: wait for accept before header remainder, then roster, progress.
+- **Id-maps**: instance **5290**. Sample `ApplicationProfileInstance.sample2-cancelvisa.json`.
+- **Logs**: `artifacts/headless-import/AppCancelVisa-header-sample2.log` (import `20260908-105535`), roster/progress `AppCancelVisa-*-sample2.log`
+### 2026-09-08 - App_Cancel_Visa_and_WP remainder .15 -> local PG (after accept)
+
+- **Phase**: import
+- **Mode**: `--import-visa2014 --entity ApplicationProfileInstance|Person|Progress --application-type App_Cancel_Visa_and_WP --legacy-source calik-energi-local-pg --inprocess`. Progress `--batch-size 1`. Skip Invitation, WorkPermit, Visa. No `--visa-remainder`. Rebuilt DataImporter.exe first.
+- **Outcome**: success (exit **0**, Failed **0** all three)
+- **Header**: Posted **326** / already **2** / type **328**. PG headers **328**. Id-map **5288**.
+- **Roster**: Posted **620** / already **10068** / missing parent **11926**.
+- **Progress**: Posted **652** / already **23650** / no instance map **14625**.
+- **Logs**: `artifacts/headless-import/AppCancelVisaWp-header-remainder-20260908-105132.log`, roster/progress `AppCancelVisaWp-*-remainder-20260908.log`
+- **Next**: skip App_Cancel_Inv_WP, App_Cancel_App, App_Cancel_Visa_Ext, App_Cancel_Visa_and_WP_Ext, App_Cancel_Inv. Then App_Cancel_Visa sample.
+### 2026-09-08 - App_Cancel_Visa_and_WP header+roster+progress sample 2 .15 -> local PG
+
+- **Phase**: import (sample)
+- **Mode**: `--entity ApplicationProfileInstance --application-type App_Cancel_Visa_and_WP --max-rows 2` then roster+progress with `--application-id-map ApplicationProfileInstance.sample2-cancelvisawp.json`. Progress `--batch-size 1`. Skip Invitation, WorkPermit, Visa. No `--visa-remainder`.
+- **Outcome**: header Posted **2** Failed **0** (328 type matches). Roster Posted **2**. Progress Posted **4**.
+- **Apps**: `6/-453` Mehmet Sahan Eken U32484504 visa A1511832 WP 277/3 (CO0123158). `12/-1122` Marko Lisicar 087394531 visa A1567709 WP 764/5 (CO0135802). Profile cancel_visa_wp. Application.Cancelled=0; PROCESS_ISSUED notes match WP AppruvalNumber.
+- **Halt**: wait for accept before header remainder, then roster, progress.
+- **Id-maps**: instance **4962**. Sample `ApplicationProfileInstance.sample2-cancelvisawp.json`.
+- **Logs**: `artifacts/headless-import/AppCancelVisaWp-header-sample2-20260908-103748.log`, roster/progress `AppCancelVisaWp-*-sample2-20260908.log`
+### 2026-09-08 - App_Change_Passport remainder .15 -> local PG (after accept)
+
+- **Phase**: import
+- **Mode**: `--import-visa2014 --entity ApplicationProfileInstance|Person|Progress|Visa --application-type App_Change_Passport --legacy-source calik-energi-local-pg --inprocess`. Progress `--batch-size 1`. Skip Invitation and WorkPermit. No `--visa-remainder`. Rebuilt DataImporter.exe first (bin cleaned).
+- **Outcome**: success (exit **0**, Failed **0** all four)
+- **Header**: Posted **120** / already **2** / type **122**. PG headers **122**. Id-map **4960**.
+- **Roster**: Posted **144** / already **9922** / missing parent **12548**.
+- **Progress**: Posted **240** / already **23406** / no instance map **15281**.
+- **Visa**: Posted **0** / already **6328** / no passport **25** / issuing FK patched **132**.
+- **Logs**: `artifacts/headless-import/AppChangePp-header-remainder-20260908-102711.log`, roster/progress/visa `AppChangePp-*-remainder-20260908*.log`
+- **Next**: band 4 App_Cancel_Visa_and_WP sample (skip Invitation, WorkPermit, Visa).
+### 2026-09-08 - App_Change_Passport sample comparison: include previous + new passport
+
+- **Phase**: mapping (sample verify)
+- **Why**: Reviewer could not see previous vs new passport on the Field | Legacy | Imported tables.
+- **Source**: PersonInApplication.PreviousPassport vs Passport. Imported as two ResolvedLinks LinkKind=Passport (previous first, then current).
+- **2/-291**: previous U 14404315 (2017-04-10..2027-04-10) / new U39222006 (2026-01-13..2036-01-12) Match.
+- **3/-11580**: previous U 13336055 (2016-10-25..2018-10-25) / new U 15980186 (2018-03-05..2028-03-04) Match.
+- **Halt**: still waiting for accept before App_Change_Passport remainder.
+### 2026-09-08 - App_Change_Passport header+roster+progress+Visa sample 2 .15 -> local PG
+
+- **Phase**: import (sample)
+- **Mode**: `--entity ApplicationProfileInstance --application-type App_Change_Passport --max-rows 2` then roster+progress+Visa with `--application-id-map ApplicationProfileInstance.sample2-changepp.json`. Progress `--batch-size 1`. Skip Invitation and WorkPermit. No `--visa-remainder`. Rebuilt DataImporter.exe (bin cleaned).
+- **Outcome**: header Posted **2** Failed **0** (122 type matches). Roster Posted **2**. Progress Posted **4**. Visa Posted **0** / already **6328** / issuing FK patched **2**.
+- **Apps**: `2/-291` Ismet Danis U39222006 (2026-02-19, pasport_change, AS0205257, visa A1675261 2026-02-20). `3/-11580` Fatih DANIS U 15980186 (2018-03-29, AS631968, visa A1247287 2018-04-02). Issuing via Visa.ASNumber = Application.ProcessNumber overlay.
+- **Halt**: wait for accept before App_Change_Passport header remainder, then roster, progress, Visa.
+- **Id-maps**: instance **4840**. Sample `ApplicationProfileInstance.sample2-changepp.json`.
+- **Logs**: `artifacts/headless-import/AppChangePp-header-sample2-20260908-101512.log`, roster/progress/visa `AppChangePp-*-sample2-20260908.log`
+### 2026-09-08 - App_Change_Visa_Category skip probe (this wipe)
+
+- **Phase**: import (probe)
+- **Mode**: `--entity ApplicationProfileInstance --application-type App_Change_Visa_Category --max-rows 2`
+- **Outcome**: **0** prepared matches, Posted **0** Failed **0**. Confirms yaml skip (no enum-8 rows).
+### 2026-09-08 - App_Change_Inv remainder .15 -> local PG (after accept)
+
+- **Phase**: import
+- **Mode**: `--import-visa2014 --entity ApplicationProfileInstance|Person|Progress|Invitation|InvitationItem|Visa --application-type App_Change_Inv --legacy-source calik-energi-local-pg --inprocess`. Progress `--batch-size 1`. Skip WorkPermit. No `--visa-remainder`.
+- **Outcome**: success (exit **0**, Failed **0** all six)
+- **Header**: Posted **55** / already **2** / type **57**. PG headers **57**. Id-map **4838**.
+- **Roster**: Posted **55** / already **9870** / missing parent **12689**. Id-map **9944**.
+- **Progress**: Posted **110** / already **23297** / no instance map **15525**. Id-map **23407**.
+- **Invitation**: Posted **53** / already **2854** / instance not in map **36**.
+- **InvitationItem**: Posted **53** / already **5181** / missing id-map **71** (includes sample `10/-6548` passport not in Passport map).
+- **Visa**: Posted **3** / already **6325** / no passport **25** / issuing FK patched **47**.
+- **Logs**: `artifacts/headless-import/AppChangeInv-header-remainder-20260908-100237.log`, roster/progress/inv/invitem/visa `AppChangeInv-*-remainder-20260908*.log`
+- **Next**: skip App_Change_Visa_Category (0 enum-8). Then App_Change_Passport sample.
+### 2026-09-08 - App_Change_Inv header+roster+progress+Invitation sample 2 .15 -> local PG
+
+- **Phase**: import (sample)
+- **Why**: After Additional WP remainder, yaml empty skips then band 3 (this wipe had 0 change_invitation / pasport_change / cancel headers). Not cancel first.
+- **Mode**: `--entity ApplicationProfileInstance --application-type App_Change_Inv --max-rows 2` then roster+progress+Invitation+InvitationItem+Visa with `--application-id-map ApplicationProfileInstance.sample2-changeinv.json` (full path). Progress `--batch-size 1`. Skip WorkPermit. No `--visa-remainder`.
+- **Outcome**: header Posted **2** Failed **0** (57 type matches). Roster Posted **2**. Progress Posted **4**. Invitation Posted **2**. InvitationItem Posted **1**. Visa Posted **0** / already **6325** / issuing not in sample map **3**.
+- **Apps**: `8/-1088` Sevki Gurhan KARS U88407662 (2025-08-01, change_invitation, invitation ASGH281608 2025-08-01..2025-10-28, item Match). `10/-6548` Devrim Bursal S 01841368 (2015-10-03, invitation ASGH367329 2015-09-30..2015-12-30; InvitationItem skipped -- PII.Passport `56894743-...` not in Passport id-map).
+- **Halt**: wait for accept before App_Change_Inv header remainder, then roster, progress, Invitation, InvitationItem, Visa. Do not use `--visa-remainder` on this type.
+- **Id-maps**: instance **4783**; sample `ApplicationProfileInstance.sample2-changeinv.json`.
+- **Logs**: `artifacts/headless-import/AppChangeInv-header-sample2-20260908-095457.log`, roster/progress/inv/invitem/visa `AppChangeInv-*-sample2-20260908.log`
+### 2026-09-08 - Empty skip probes after Additional WP (this wipe)
+
+- **Phase**: import (probe)
+- **Mode**: `--entity ApplicationProfileInstance --max-rows 2` for App_Visa_Ext, App_Visa_Ext_According_to_WP, App_WP_Ext, App_Exit_Visa, App_Visa_For_New_Born_FM.
+- **Outcome**: each **0** prepared matches, Posted **0** Failed **0**. Confirms yaml skip empty on Calik.
+- **Next**: band 3 App_Change_Inv (not cancel; those headers also 0 this wipe until imported).
+### 2026-09-08 - App_Additional_WP_location remainder .15 -> local PG (after accept)
+
+- **Phase**: import
+- **Mode**: `--import-visa2014 --entity ApplicationProfileInstance|Person|Progress|WorkPermit|WorkPermitItem --application-type App_Additional_WP_location --legacy-source calik-energi-local-pg --inprocess`. Progress `--batch-size 1`. Skip Invitation and Visa. No `--visa-remainder`.
+- **Outcome**: success (exit **0**, Failed **0** all five)
+- **Header**: Posted **279** / already **2** / type **281**. PG headers **281**. MovementPermitLocation backfill already=280 noFallback=**1**.
+- **noFallback**: `12/-6943` (2015-12-08). Header Goşmaça FK empty; PIA WorkPermit present but WorkPermitLocation **null**. Left MovementPermitLocation empty. Do not skip.
+- **Roster**: Posted **428** / already **9440** / missing parent **12746**. Id-map **9887**.
+- **Progress**: Posted **1391** / already **21902** / no instance map **15639**. Id-map **23293**.
+- **WorkPermit**: Posted **0** / already **361** / instance not in map **49**.
+- **WorkPermitItem**: Posted **0** / already **3798** / missing id-map **2699**.
+- **Instance id-map**: **4781**.
+- **Logs**: `artifacts/headless-import/AppAddWpLoc-header-remainder-20260908-094701.log`, roster `...-094747`, progress `...-094904`, wp `...-094950`, wpitem `...-095020`.
+- **Next**: empty skips (App_Visa_Ext, App_Visa_Ext_According_to_WP, App_WP_Ext, App_Exit_Visa, App_Visa_For_New_Born_FM). Then band 4 cancel types starting App_Cancel_Visa_and_WP (this wipe has not reimported cancel yet).
+### 2026-09-08 - App_Additional_WP_location header+roster+progress+WP sample 2 .15 -> local PG
+
+- **Phase**: import (sample)
+- **Mode**: `--entity ApplicationProfileInstance --application-type App_Additional_WP_location --max-rows 2` then roster+progress+WorkPermit with `--application-id-map ApplicationProfileInstance.sample2-addwp.json`. `--legacy-source calik-energi-local-pg --inprocess`. Progress `--batch-size 1`. Skip Invitation and Visa. No `--visa-remainder`. WorkPermitItem skipped on sample (letters already imported; item importer is not type-scoped).
+- **Outcome**: header Posted **2** Failed **0** (281 type matches). Roster Posted **2** Failed **0**. Progress Posted **10** Failed **0**. WorkPermit Posted **0** / already **361** / instance not in map **49**.
+- **Apps**: `5/-9807` Sevgi YAVAŞ U 12402046 (2017-05-05, change_workpermit, MP Mary şaheri + Türkmenbaşy şaheri from WP bits; header GoşmaçaIşlemägeRugsatÝeri FK empty; AS577518 / 4061/41). `7/-3395` Faruk YILDIZ U 02820662 (2014-07-08, MP Aşgabat/Mary/Akbugdaý/Serdarabat from WP bits; AS453223 / 1347/8).
+- **MovementPermitLocation**: header FK null; fallback majority PIA.WorkPermit.WorkPermitLocation bits Match PG. Backfill updated=0 already=2 noFallback=0.
+- **ProjectContract**: legacy Application.Contract null; PG defaulted to **14306 Mary** (AssignDefaultsIfEmpty / ShowProjectContract).
+- **Id-maps**: instance **4502**; person **9459**; progress **21902**. Sample `ApplicationProfileInstance.sample2-addwp.json`.
+- **Halt**: wait for accept before App_Additional_WP_location header remainder, then roster, progress, WorkPermit (+ items if needed). Do not import Invitation or Visa on this type.
+- **Logs**: `artifacts/headless-import/AppAddWpLoc-header-sample2-20260908-093519.log`, roster/progress/wp `AppAddWpLoc-*-sample2-20260908.log`
+### 2026-09-08 - App_Border_Zone_Permission remainder .15 -> local PG (after accept)
+
+- **Phase**: import
+- **Mode**: `--import-visa2014 --entity ApplicationProfileInstance|Person|Progress --application-type App_Border_Zone_Permission --legacy-source calik-energi-local-pg --inprocess`. Progress `--batch-size 1`. No Invitation/WorkPermit/Visa. No `--visa-remainder`.
+- **Outcome**: success (exit **0**, Failed **0** all three)
+- **Header**: Posted **107** / already **4** / type **111**. PG headers **111**, BorderZoneLocation Ýok **2** (7/-134, 7/-135). Id-map **4500**.
+- **Roster**: Posted **208** / already **9230** / missing parent **13170**. Id-map **9457**.
+- **Progress**: Posted **432** / already **21460** / no instance map **16201**. Id-map **21892**.
+- **Logs**: `artifacts/headless-import/AppBorderZone-header-remainder-20260908-093139.log`, roster `...-093209.log`, progress `...-093304.log`
+- **Next**: App_Additional_WP_location (header sample). Skip Invitation and Visa; WorkPermit if type generates.
+### 2026-09-08 - App_Border_Zone_Permission extra sample 2 with BorderZoneForVisa .15 -> local PG
+
+- **Phase**: import (sample)
+- **Why**: Reviewer asked to see samples where the requested zone exists (not 7/-134 Ýok).
+- **Mode**: `--entity ApplicationProfileInstance --application-type App_Border_Zone_Permission --max-rows 4` (first 2 already imported; Posted **2**). Roster+progress with `ApplicationProfileInstance.sample2-bz-haszone.json`.
+- **Outcome**: header Posted **2** Failed **0**. Roster Posted **7** Failed **0**. Progress Posted **10** Failed **0**.
+- **Apps**: `12/-6970` Hakan HACIPAŞAOĞLU, Farap etrap, 14080 Watan, AS536268; `6/-8091` six employees, Farap etrap, 14080 Watan, ProcessNumber `Imza atılmadı Energ,minstr`. Both `ChooseBorderZoneType=1` / Farap bit.
+- **Id-map**: instance **4393**. Sample `ApplicationProfileInstance.sample2-bz-haszone.json`.
+- **Halt**: wait for accept before header remainder. Ýok keep on 7/-134 and 7/-135 unchanged.
+- **Logs**: `artifacts/headless-import/AppBorderZone-roster-sample-haszone-20260908.log`, progress `AppBorderZone-progress-sample-haszone-20260908.log`
+### 2026-09-08 - App_Border_Zone_Permission keep Ýok on 2 incomplete headers
+
+- **Phase**: mapping
+- **Lock**: Keep `7/-134` and `7/-135` as BorderZoneLocation **Ýok** (legacy incomplete). Do not skip. Do not invent a zone from PIA.Visa (those visas have no BorderZone).
+- **Source**: 109/111 E:11 have `BorderZoneForVisa` (`ChooseBorderZoneType=1`). The 2 empties have `ChooseBorderZoneType=0`, FK null, `Bellik` null, process numbers set.
+- **Artifacts**: `field-maps/Application.yaml` BorderZoneLocation notes; `application-type-import-order.yaml` App_Border_Zone_Permission notes.
+- **Halt**: wait for accept before App_Border_Zone_Permission header remainder (sample 2 stays `7/-134` Ýok + `12/-12709` Farap etrap).
+### 2026-09-08 - App_Border_Zone_Permission header+roster+progress sample 2 .15 -> local PG
+
+- **Phase**: import (sample)
+- **Mode**: `--entity ApplicationProfileInstance --application-type App_Border_Zone_Permission --max-rows 2` then roster+progress with `--application-id-map ApplicationProfileInstance.sample2-bz.json`. `--legacy-source calik-energi-local-pg --inprocess --no-wait --skip-tenant-catalog-generation`. Progress `--batch-size 1`.
+- **Outcome**: header Posted **2** Failed **0** (111 type matches). Roster Posted **3** Failed **0**. Progress Posted **8** Failed **0**.
+- **RunId**: header `20260908-091156`
+- **Apps**: `7/-134` (Ahmet Faik Albayrak + Yusuf Ayabakan, 2020, profile get_border_zone, BZ Ýok, contract 1235-SERVIS MERKEZI); `12/-12709` (Özgür Purlu, 2018, Farap etrap, TAP). Skip Invitation, WorkPermit, Visa. Issued BorderZone documents wait in postAllTypeSlices.
+- **Id-maps**: instance **4391**; person **9242**; progress **21450**. Sample map `ApplicationProfileInstance.sample2-bz.json`.
+- **Halt**: wait for accept before App_Border_Zone_Permission header remainder, then roster, progress. Do not import Visa or `--visa-remainder` on this type.
+- **Logs**: `artifacts/headless-import/AppBorderZone-header-sample2-20260908-091156.log`, roster `AppBorderZone-roster-sample2-20260908-091241.log`, progress `AppBorderZone-progress-sample2-20260908-091308.log`
+### 2026-09-08 - Locked visa remainder + PIA pin in import strategy order
+
+- **Phase**: strategy
+- **Why**: Apply the agreed remainder/pin order so type slices do not use --visa-remainder and PIA.Visa mismatches are pinned after orphans exist in the Visa id-map.
+- **Locked**: never --visa-remainder on --application-type; per type header → roster → progress → issued → Visa; after all types Rejection → BorderZone documents → --entity Visa --visa-remainder → --correct-visa2014-application-person-document-links. PIA.Visa vs latest-N is expected until pin. Do not run remainder before later types' headers if first POST must set IssuingApplicationProfileInstance.
+- **Artifacts**: import-strategy.yaml pplicationTypeSlices; pplication-type-import-order.yaml postAllTypeSlices; order.yaml; SKILL.md; import-practices.md; IMPORT_PLAN_AND_STRATEGY.md; VISA2014_MIGRATION.md; ApplicationPerson.yaml.
+- **Next**: still halted before App_Border_Zone_Permission.
+### 2026-09-08 - Pin PIA Passport/Visa ResolvedLinks after importing no-issuing source visas
+
+- **Phase**: correction
+- **Why**: Ext FM sample ÖZKAN PIA.Visa A0835655/56/57 were not in Visa id-map (issuing app `4/-2612` AS447583 is GCRecord-deleted; PIA rows deleted). Roster Pin left latest-N visas. `--visa-remainder` then `--correct-visa2014-application-person-document-links`.
+- **Mode**: `--import-visa2014 --entity Visa --visa-remainder --legacy-source calik-energi-local-pg --inprocess` (full 4389 instance map; no type filter). Then `--correct-visa2014-application-person-document-links --legacy-source calik-energi-local-pg`.
+- **Outcome**: Visa remainder Posted **574** Failed **0** (already **5751**, no passport **25**). Visa id-map **6325**. Correction exit **0**: Visa links changed **3714**, Passport **0**, already correct **7127**, missing parent **13596**, no snapshot **65**.
+- **Sample after pin**: `3/-5371` ResolvedLinks Visa A0835655/57/56 Match PIA; issued stickers A0950024/25/26 still on instance. `9/-3876` A0877078 still Match.
+- **Note**: remainder also posted later-type issued visas without IssuingApplicationProfileInstance; later type Visa waves should backfill issuing.
+- **Logs**: `artifacts/headless-import/visa-remainder-no-issuing-20260908-090434.log`, `correct-pia-document-links-20260908-090513.log`
+- **Next**: still halted before App_Border_Zone_Permission.
+### 2026-09-08 - App_Visa_Ext_FM Visa remainder .15 -> local PG (after accept)
+
+- **Phase**: import
+- **Mode**: `--import-visa2014 --entity Visa --application-type App_Visa_Ext_FM --legacy-source calik-energi-local-pg --inprocess --no-wait --skip-tenant-catalog-generation --batch-size 50` (no `--visa-remainder`; prior type visas kept)
+- **Outcome**: success (exit **0**, Failed **0**)
+- **RunId**: `20260908-090057`
+- **Counts**: Legacy SQL **6375** / Prepared **6350** / skip **19** / dedupe **6** / Posted **574** / already **5177** / Failed **0** / no passport **25** / issuing not in instance map **574**. Id-map **5751**.
+- **Log**: `artifacts/headless-import/AppVisaExtFm-visa-remainder-20260908-090057.log`
+- **Next**: App_Visa_Ext_FM inner sequence complete. Next type from `application-type-import-order.yaml`: App_Border_Zone_Permission.
+### 2026-09-08 - App_Visa_Ext_FM Visa sample 2 alongside header apps .15 -> local PG
+
+- **Phase**: import (sample)
+- **Mode**: `--import-visa2014 --entity Visa --application-type App_Visa_Ext_FM --application-id-map ApplicationProfileInstance.sample2-visaextfm.json --legacy-source calik-energi-local-pg --inprocess --no-wait --skip-tenant-catalog-generation --batch-size 50` (no `--visa-remainder`; prior type visas kept)
+- **Outcome**: success (exit **0**, Posted **3**, Failed **0**). Prepared **6350** / already **5174** / no passport **25** / issuing not in sample map **1148**. Id-map **5177**.
+- **RunId**: `20260908-085803`
+- **Apps**: `3/-5371` issued AS overlay A0950024 Yeşim / A0950025 Doruk / A0950026 Kıvanç ÖZKAN (WP:11 → FM-Maşgala). Employee Özgür visas A0949803 / A1073536 on same PIA process path not Issued (not on family roster). `9/-3876` no issued visa (PIA.Visa source A0877078 already in map). PIA.Visa pin still latest-N for ÖZKAN (A0835655/56/57 still not in Visa id-map).
+- **Halt**: wait for accept before App_Visa_Ext_FM Visa remainder (full 4389 instance map). Do not use `--visa-remainder` on this type slice.
+- **Log**: `artifacts/headless-import/AppVisaExtFm-visa-sample2-20260908-085803.log`
+### 2026-09-08 - App_Visa_Ext_FM progress remainder .15 -> local PG (after accept)
+
+- **Phase**: import
+- **Mode**: `--import-visa2014 --entity ApplicationProfileInstanceProgress --application-type App_Visa_Ext_FM --legacy-source calik-energi-local-pg --inprocess --no-wait --skip-tenant-catalog-generation --batch-size 1`
+- **Outcome**: success (exit **0**, Failed **0**)
+- **RunId**: `20260908-085629`
+- **Counts**: Posted **1623** / already **19819** / Failed **0** / no instance map **16650**. Id-map **21442**.
+- **Log**: `artifacts/headless-import/AppVisaExtFm-progress-remainder-20260908-085629.log`
+- **Next**: App_Visa_Ext_FM Visa sample (header apps `3/-5371` / `9/-3876`; no `--visa-remainder`), then remainder. Skip Invitation and WorkPermit.
+### 2026-09-08 - App_Visa_Ext_FM roster remainder .15 -> local PG (after accept)
+
+- **Phase**: import
+- **Mode**: `--import-visa2014 --entity ApplicationProfileInstancePerson --application-type App_Visa_Ext_FM --legacy-source calik-energi-local-pg --inprocess --no-wait --skip-tenant-catalog-generation --batch-size 50`
+- **Outcome**: success (exit **0**, Failed **0**)
+- **RunId**: `20260908-085544`
+- **Counts**: Prepared **22627** / Posted **676** / already **8563** / Failed **0** / missing parent **13388**. Id-map **9239**.
+- **Log**: `artifacts/headless-import/AppVisaExtFm-roster-remainder-20260908-085544.log`
+- **Next**: App_Visa_Ext_FM progress remainder.
+### 2026-09-08 - App_Visa_Ext_FM header remainder .15 -> local PG (after accept)
+
+- **Phase**: import
+- **Mode**: `--import-visa2014 --entity ApplicationProfileInstance --application-type App_Visa_Ext_FM --legacy-source calik-energi-local-pg --inprocess --no-wait --skip-tenant-catalog-generation --batch-size 50`
+- **Outcome**: success (exit **0**, Failed **0**)
+- **RunId**: `20260908-085514`
+- **Counts**: Type filter **333** / Posted **331** / already **2** / Failed **0**. Instance id-map **4389** (4058 prior + 331).
+- **Log**: `artifacts/headless-import/AppVisaExtFm-header-remainder-20260908-085514.log`
+- **Next**: App_Visa_Ext_FM roster remainder, then progress remainder.
+### 2026-09-08 - App_Visa_Ext_FM sample: PIA document links vs ResolvedLinks
+
+- **Phase**: mapping check (no import)
+- **Apps**: `3/-5371` ÖZKAN ×3; `9/-3876` Ayşe Semiha HACIPAŞAOĞLU
+- **Passport**: PIA.Passport numbers Match ResolvedLinks Passport on all 4 people. PreviousPassport NULL; `ShowPreviousPassport=false`.
+- **Visa**: `ShowCurrentVisa=true`. Ayşe PIA.Visa A0877078 Match (already in Visa id-map). ÖZKAN PIA.Visa A0835657/A0835656/A0835655 **not** in Visa id-map or PG; ResolvedLinks still hold latest-N visas A1468263/A1468262/A1609186. Pin cannot replace until those source visas are imported (this type Visa step).
+- **Halt**: still waiting for accept on header/roster/progress sample before remainders.
+### 2026-09-08 - App_Visa_Ext_FM header+roster+progress sample 2 .15 -> local PG
+
+- **Phase**: import (sample)
+- **Mode**: `--entity ApplicationProfileInstance --application-type App_Visa_Ext_FM --max-rows 2` then roster+progress with `--application-id-map ApplicationProfileInstance.sample2-visaextfm.json`. `--legacy-source calik-energi-local-pg --inprocess --no-wait --skip-tenant-catalog-generation`
+- **Outcome**: header Posted **2** Failed **0** (333 type matches). Roster Posted **4** Failed **0**. Progress Posted **9** Failed **0**.
+- **RunId**: header `20260908-084754`
+- **Apps**: `3/-5371` (Yeşim / Doruk / Kıvanç ÖZKAN, 2015, 5 progress steps, PROCESS_ISSUED A1073536); `9/-3876` (Ayşe Semiha HACIPAŞAOĞLU, 2014, 4 steps, no PROCESS_ISSUED). Profile `visa_ext_fm` / Wiza Möhletini Uzaltmak FM. Composite `F:7`. Roster slots FamilyMember. Skip Invitation and WorkPermit.
+- **Id-maps**: instance **4058**; person **8563**; progress **19819**. Sample map `ApplicationProfileInstance.sample2-visaextfm.json`.
+- **Halt**: wait for accept before App_Visa_Ext_FM header remainder, then roster, progress, Visa (skip Invitation and WorkPermit).
+- **Logs**: `artifacts/headless-import/AppVisaExtFm-header-sample2-20260908-084754.log`, roster `AppVisaExtFm-roster-sample2-20260908-084823.log`, progress `AppVisaExtFm-progress-sample2-20260908-084848.log`
+### 2026-09-08 - App_Visa_and_WP_Ext Visa remainder .15 -> local PG (after accept)
+
+- **Phase**: import
+- **Mode**: `--import-visa2014 --entity Visa --application-type App_Visa_and_WP_Ext --legacy-source calik-energi-local-pg --inprocess --no-wait --skip-tenant-catalog-generation --batch-size 50` (no `--visa-remainder`; prior type visas kept)
+- **Outcome**: success (exit **0**, Failed **0**)
+- **RunId**: `20260908-084437`
+- **Counts**: Legacy SQL **6375** / Prepared **6350** / skip **19** / dedupe **6** / Posted **2013** / already **3161** / Failed **0** / no passport **25** / issuing not in instance map **1151**. Id-map **5174**.
+- **Log**: `artifacts/headless-import/AppVisaWpExt-visa-remainder-20260908-084437.log`
+- **Next**: App_Visa_and_WP_Ext inner sequence complete. Next type from `application-type-import-order.yaml`: App_Visa_Ext_FM (skip Invitation and WorkPermit).
+### 2026-09-08 - App_Visa_and_WP_Ext Visa sample 2 alongside header apps .15 -> local PG
+
+- **Phase**: import (sample)
+- **Mode**: `--import-visa2014 --entity Visa --application-type App_Visa_and_WP_Ext --application-id-map ApplicationProfileInstance.sample2-visaextwp.json --legacy-source calik-energi-local-pg --inprocess --no-wait --skip-tenant-catalog-generation --batch-size 50` (no `--visa-remainder`; prior type visas kept)
+- **Outcome**: success (exit **0**, Posted **2**, Failed **0**). Prepared **6350** / already **3159** / no passport **25** / issuing not in sample map **3164**. Id-map **3161**.
+- **RunId**: `20260908-084139`
+- **Apps**: `12/-4793` A0939432 Turgut KURUN (AS overlay AS487962; PIA.Visa source A0833039 not Issued). `3/-9562` A1184573 Fatih GÜZELBİLEN (AS overlay AS593378; PIA.Visa source A1137996 not Issued). VisaType WP:11 → `WP-Işçi Wiza`.
+- **Halt**: wait for accept before App_Visa_and_WP_Ext Visa remainder (full 4056 instance map). Do not use `--visa-remainder` on this type slice.
+- **Log**: `artifacts/headless-import/AppVisaWpExt-visa-sample2-20260908-084139.log`
 ### 2026-09-07 - App_Visa_and_WP_Ext WorkPermitItem remainder .15 -> local PG (after accept)
 
 - **Phase**: import
@@ -222,7 +821,7 @@
 - **Mode**: `--entity ApplicationProfileInstance --application-type App_Inv_FM --max-rows 2` then roster+progress with `--application-id-map ApplicationProfileInstance.sample2-invfm.json`. `--legacy-source calik-energi-local-pg --inprocess --no-wait --skip-tenant-catalog-generation`
 - **Outcome**: header Posted **2** Failed **0** (228 type matches). Roster Posted **2** Failed **0**. Progress Posted **10** Failed **0** (5 steps each, 1 ministry pair 1_REVIEW + 2_REVIEW).
 - **RunId**: header `20260907-164632`
-- **Apps**: `10/-4188` (Ayşe GÜNDOĞDU, family of Sevgi YAVAS, 2014); `5/-816` (Sema Bolat, family of Hasan Bolat, 2026). Profile `get_invitation_fm` / Çakylyk Almak FM. Composite `F:0:na:na:na`.
+- **Apps**: `10/-4188` (Ayşe GÜNDOĞDU, family of Sevgi YAVAŞ, 2014); `5/-816` (Sema Bolat, family of Hasan Bolat, 2026). Profile `get_invitation_fm` / Çakylyk Almak FM. Composite `F:0:na:na:na`.
 - **Halt**: wait for accept before App_Inv_FM header remainder, then roster, progress, Invitation, InvitationItem, Visa (skip WorkPermit).
 - **Logs**: `artifacts/headless-import/AppInvFm-header-sample2-20260907-164632.log`, roster `AppInvFm-roster-sample2-20260907-164709.log`, progress `AppInvFm-progress-sample2-20260907-164737.log`
 ### 2026-09-07 - App_Inv_And_WP Visa remainder .15 -> local PG (after accept)

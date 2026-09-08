@@ -4,10 +4,12 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Globalization;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.Persistent.Base;
 using System.Linq;
 using Visa2026.Module.Editors;
+using Visa2026.Module.Localization;
 using Visa2026.Module.Services;
 using Visa2026.Module.Services.ApplicationPersonRoster;
 using Visa2026.Module.Services.MigrationImport;
@@ -173,8 +175,19 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("AllowEdit", "False")]
         public virtual int Year { get; set; }
 
+        /// <summary>Stored calendar month (1–12). Hidden on ListViews — officers see <see cref="MonthName"/>.</summary>
         [ModelDefault("AllowEdit", "False")]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
         public virtual int Month { get; set; }
+
+        /// <summary>Localized month label for ListViews (avoids confusion with <see cref="TotalPersonCount"/>).</summary>
+        [XafDisplayName("Month")]
+        [NotMapped]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(true)]
+        [VisibleInLookupListView(false)]
+        public string MonthName => FormatMonthName(Month);
 
         private DateTime applicationDate;
         [RuleRequiredField]
@@ -1013,6 +1026,27 @@ namespace Visa2026.Module.BusinessObjects
         public string CancelInvCountText => NumberToTurkmenWords(CancelInvCount);
 
         #endregion
+
+        private static string FormatMonthName(int month)
+        {
+            if (month < 1 || month > 12)
+                return string.Empty;
+
+            var cultureName = VisaUiMessages.NormalizeCultureName(CultureInfo.CurrentUICulture.Name);
+            try
+            {
+                var culture = CultureInfo.GetCultureInfo(cultureName);
+                var name = culture.DateTimeFormat.GetMonthName(month);
+                if (!string.IsNullOrWhiteSpace(name))
+                    return name;
+            }
+            catch (CultureNotFoundException)
+            {
+                // fall through
+            }
+
+            return CultureInfo.GetCultureInfo(VisaUiMessages.DefaultCultureName).DateTimeFormat.GetMonthName(month);
+        }
 
         private static string NumberToTurkmenWords(int number)
         {

@@ -29,7 +29,10 @@ fields:
       RefreshResolvedLinks fills Education/Address/etc. Passport and Visa are then
       replaced from PersonInApplication.Passport + PreviousPassport + Visa (id-map).
       Do not keep latest-N person documents on historical cases.
-      Correction: --correct-visa2014-application-person-document-links
+      A PIA.Visa vs latest-N mismatch is expected until the source Visa Oid is
+      in the Visa id-map. Required after all types: --visa-remainder then
+      --correct-visa2014-application-person-document-links. Optional after a
+      type Visa wave. Never --visa-remainder on --application-type.
 
   - source: PersonInApplication.Passport
     target: ResolvedLinks.Passport (current)

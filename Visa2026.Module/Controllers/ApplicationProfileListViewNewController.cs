@@ -47,7 +47,7 @@ public sealed class ApplicationProfileListViewNewController : ViewController<Lis
             return;
 
         Application.ShowViewStrategy.ShowView(
-            new ShowViewParameters(wizardView) { TargetWindow = TargetWindow.Current },
+            new ShowViewParameters(wizardView) { TargetWindow = TargetWindow.NewWindow },
             new ShowViewSource(Frame, null));
     }
 }

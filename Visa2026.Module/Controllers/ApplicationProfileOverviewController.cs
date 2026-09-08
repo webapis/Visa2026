@@ -87,6 +87,8 @@ public sealed class ApplicationProfileOverviewController : ViewController
             return;
 
         e.ShowViewParameters.CreatedView = overviewView;
-        e.ShowViewParameters.TargetWindow = TargetWindow.Current;
+        e.ShowViewParameters.TargetWindow = View is ListView
+            ? TargetWindow.NewWindow
+            : TargetWindow.Current;
     }
 }

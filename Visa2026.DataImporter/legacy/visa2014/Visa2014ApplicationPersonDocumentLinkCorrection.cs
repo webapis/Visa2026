@@ -12,6 +12,7 @@ internal sealed class Visa2014ApplicationPersonDocumentLinkCorrectionResult
     public int LegacyRowsInScope { get; init; }
     public int PassportChanged { get; init; }
     public int VisaChanged { get; init; }
+    public int WorkPermitItemChanged { get; init; }
     public int AlreadyCorrect { get; init; }
     public int SkippedMissingParentIdMap { get; init; }
     public int SkippedNoSnapshot { get; init; }
@@ -19,8 +20,8 @@ internal sealed class Visa2014ApplicationPersonDocumentLinkCorrectionResult
 }
 
 /// <summary>
-/// Re-pins Passport/Visa ResolvedLinks from PersonInApplication.Passport /
-/// PreviousPassport / Visa (id-map), replacing latest-N refresh leftovers.
+/// Re-pins Passport/Visa/WorkPermitItem ResolvedLinks from PersonInApplication
+/// (id-map), replacing latest-N / "today" leftovers.
 /// </summary>
 internal static class Visa2014ApplicationPersonDocumentLinkCorrection
 {
@@ -78,11 +79,15 @@ internal static class Visa2014ApplicationPersonDocumentLinkCorrection
             var visaIdMap = LoadMap(
                 GetOptionValue(args, "--visa-id-map")
                 ?? source.IdMapPath(dataImporterRoot, "Visa"));
+            var workPermitItemIdMap = LoadMap(
+                GetOptionValue(args, "--workpermititem-id-map")
+                ?? source.IdMapPath(dataImporterRoot, "WorkPermitItem"));
 
             Console.WriteLine($"INF ApplicationProfileInstance id-map: {applicationIdMap.Count}");
             Console.WriteLine($"INF Person id-map: {personIdMap.Count}");
             Console.WriteLine($"INF Passport id-map: {passportIdMap.Count}");
             Console.WriteLine($"INF Visa id-map: {visaIdMap.Count}");
+            Console.WriteLine($"INF WorkPermitItem id-map: {workPermitItemIdMap.Count}");
 
             var result = Run(
                 host.ObjectSpaceFactory,
@@ -91,12 +96,14 @@ internal static class Visa2014ApplicationPersonDocumentLinkCorrection
                 personIdMap,
                 passportIdMap,
                 visaIdMap,
+                workPermitItemIdMap,
                 dryRun,
                 verbose);
 
             Console.WriteLine($"INF Legacy PIA rows: {result.LegacyRowsInScope}");
             Console.WriteLine($"INF Passport links changed: {result.PassportChanged}");
             Console.WriteLine($"INF Visa links changed: {result.VisaChanged}");
+            Console.WriteLine($"INF WorkPermitItem links changed: {result.WorkPermitItemChanged}");
             Console.WriteLine($"INF Already correct: {result.AlreadyCorrect}");
             Console.WriteLine($"INF Skipped missing parent id-map: {result.SkippedMissingParentIdMap}");
             Console.WriteLine($"INF Skipped (no mapped snapshot): {result.SkippedNoSnapshot}");
@@ -121,6 +128,7 @@ internal static class Visa2014ApplicationPersonDocumentLinkCorrection
         IReadOnlyDictionary<Guid, Guid> personIdMap,
         IReadOnlyDictionary<Guid, Guid> passportIdMap,
         IReadOnlyDictionary<Guid, Guid> visaIdMap,
+        IReadOnlyDictionary<Guid, Guid> workPermitItemIdMap,
         bool dryRun,
         bool verbose)
     {
@@ -129,6 +137,7 @@ internal static class Visa2014ApplicationPersonDocumentLinkCorrection
         var errors = new List<string>();
         var passportChanged = 0;
         var visaChanged = 0;
+        var workPermitItemChanged = 0;
         var alreadyCorrect = 0;
         var skippedMissingParent = 0;
         var skippedNoSnapshot = 0;
@@ -157,7 +166,9 @@ internal static class Visa2014ApplicationPersonDocumentLinkCorrection
                 passportIdMap, raw.LegacyPreviousPassportOid, raw.LegacyPassportOid);
             var visaIds = Visa2014ApplicationPersonDocumentLinks.MapLegacyOids(
                 visaIdMap, raw.LegacyVisaOid);
-            if (passportIds.Count == 0 && visaIds.Count == 0)
+            var workPermitItemIds = Visa2014ApplicationPersonDocumentLinks.MapLegacyOids(
+                workPermitItemIdMap, raw.LegacyWorkPermitOid);
+            if (passportIds.Count == 0 && visaIds.Count == 0 && workPermitItemIds.Count == 0)
             {
                 skippedNoSnapshot++;
                 continue;
@@ -184,10 +195,18 @@ internal static class Visa2014ApplicationPersonDocumentLinkCorrection
                 .Where(id => id is Guid g && g != Guid.Empty)
                 .Select(id => id!.Value)
                 .ToList();
+            var existingWorkPermits = existing
+                .Where(l => l.LinkKind == ApplicationProfileInstancePersonLinkKind.WorkPermitItem)
+                .Select(l => l.LinkedObjectId)
+                .Where(id => id is Guid g && g != Guid.Empty)
+                .Select(id => id!.Value)
+                .ToList();
 
             Visa2014ApplicationPersonDocumentLinks.Diff(existingPassports, passportIds, out var removeP, out var addP);
             Visa2014ApplicationPersonDocumentLinks.Diff(existingVisas, visaIds, out var removeV, out var addV);
-            if (removeP.Count == 0 && addP.Count == 0 && removeV.Count == 0 && addV.Count == 0)
+            Visa2014ApplicationPersonDocumentLinks.Diff(existingWorkPermits, workPermitItemIds, out var removeW, out var addW);
+            if (removeP.Count == 0 && addP.Count == 0 && removeV.Count == 0 && addV.Count == 0
+                && removeW.Count == 0 && addW.Count == 0)
             {
                 alreadyCorrect++;
                 continue;
@@ -197,7 +216,8 @@ internal static class Visa2014ApplicationPersonDocumentLinkCorrection
             {
                 Console.WriteLine(
                     $"INF app {application.FullApplicationNumber} person {personId}: " +
-                    $"passport -{removeP.Count}/+{addP.Count} visa -{removeV.Count}/+{addV.Count}");
+                    $"passport -{removeP.Count}/+{addP.Count} visa -{removeV.Count}/+{addV.Count} " +
+                    $"wp -{removeW.Count}/+{addW.Count}");
             }
 
             if (!dryRun)
@@ -210,6 +230,10 @@ internal static class Visa2014ApplicationPersonDocumentLinkCorrection
                     visaChanged += Visa2014ApplicationPersonDocumentLinks.ReplaceKind(
                         objectSpace, application, person,
                         ApplicationProfileInstancePersonLinkKind.Visa, visaIds);
+                if (workPermitItemIds.Count > 0)
+                    workPermitItemChanged += Visa2014ApplicationPersonDocumentLinks.ReplaceKind(
+                        objectSpace, application, person,
+                        ApplicationProfileInstancePersonLinkKind.WorkPermitItem, workPermitItemIds);
                 pending++;
                 if (pending >= 50)
                 {
@@ -223,6 +247,8 @@ internal static class Visa2014ApplicationPersonDocumentLinkCorrection
                     passportChanged++;
                 if (visaIds.Count > 0 && (removeV.Count > 0 || addV.Count > 0))
                     visaChanged++;
+                if (workPermitItemIds.Count > 0 && (removeW.Count > 0 || addW.Count > 0))
+                    workPermitItemChanged++;
             }
         }
 
@@ -234,6 +260,7 @@ internal static class Visa2014ApplicationPersonDocumentLinkCorrection
             LegacyRowsInScope = rawRows.Count,
             PassportChanged = passportChanged,
             VisaChanged = visaChanged,
+            WorkPermitItemChanged = workPermitItemChanged,
             AlreadyCorrect = alreadyCorrect,
             SkippedMissingParentIdMap = skippedMissingParent,
             SkippedNoSnapshot = skippedNoSnapshot,

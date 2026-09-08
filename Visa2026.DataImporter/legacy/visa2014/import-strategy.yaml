@@ -100,13 +100,39 @@ strategy:
   applicationTypeSlices:
     canonicalArtifact: Visa2026.DataImporter/legacy/visa2014/application-type-import-order.yaml
     lockedAt: 2026-09-04
+    visaRemainderAndLinkPinLockedAt: 2026-09-08
     sliceShape: per_type_full_inner_sequence
     firstType: App_Inv
     visaNeverBeforeIssuingInstance: true
     rosterInvitationTypesMustNotRequireVisa: true
+    neverVisaRemainderOnTypeSlice: true
     localPgWipeVisaBeforePerTypeVisa: true
     rejectionAndBorderZoneDocuments: after_all_type_slices
     orphanVisaRemainderWave: after_all_type_slices
+    applicationPersonDocumentLinkCorrection: immediately_after_orphan_visa_remainder
+    historicalApplicationSnapshot:
+      lockedAt: 2026-09-08
+      rule: past_not_today
+      why: All VISA2014 rows are historical. Import must not attach PersonCurrentItems / latest-N as of the import day.
+      rosterResolvedLinks: person_in_application_snapshot
+      snapshotKinds: [Passport, PreviousPassport, Visa, WorkPermitItem]
+      skipLatestNDuringDataImport: true
+      pinAtRosterImport: true
+      pinCorrectionAlsoWorkPermitItem: true
+      officerRelinkMayUseToday: true
+      missingIdMap: leave_unlinked_until_oid_in_map_then_pin
+    piaVisaResolvedLinkMismatch:
+      duringTypeSlice: expected_only_when_source_oid_not_in_id_map
+      neverBecauseLatestN: true
+      afterOrphanRemainder: pin_with_document_link_correction
+      optionalPinAfterTypeVisaWave: true
+    notes: |
+      Per type Visa: --entity Visa --application-type <Name> only (no --visa-remainder).
+      After ALL types: Rejection, BorderZone documents, then
+      --entity Visa --visa-remainder (no type filter), then
+      --correct-visa2014-application-person-document-links.
+      Do not run --visa-remainder before later types' headers if first POST
+      must set IssuingApplicationProfileInstance.
     applicationTypeProfileLock:
       canonicalArtifact: Visa2026.DataImporter/legacy/visa2014/application-type-profile-lock.yaml
       lockedAt: 2026-09-04
@@ -142,7 +168,10 @@ waves:
   - id: permits-and-visas
     importPhase: permits-and-visas
     status: not_started
-    notes: In-slice Invitation/WP/Visa; Rejection + BorderZone documents + orphan Visa after all types.
+    notes: >
+      In-slice Invitation/WP/Visa (no --visa-remainder on type slices).
+      After all types: Rejection + BorderZone documents + --visa-remainder
+      + --correct-visa2014-application-person-document-links.
   - id: progress-and-history
     importPhase: progress-and-history
     status: not_started

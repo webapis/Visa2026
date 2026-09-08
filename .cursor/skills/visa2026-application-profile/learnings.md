@@ -1,3 +1,38 @@
+### 2026-09-08 — Case workspace Invitation / WP / Visa dates use dd.MM.yyyy
+
+- **Need**: Issued-record compose drawers used browser `type="date"` (US MM/DD/YYYY). Officers wanted the same feel as Passport DetailView (`dd.MM.yyyy` + advancing caret).
+- **Fix**: Shared `OfficerDateEdit` (DxDateEdit Mask/DisplayFormat `dd.MM.yyyy`, `MaskCaretMode.Advancing`). Wired into `IssueIssuedHeaderSlotPanel` (Invitation/WP/Rejection/BorderZone header + WP item Start/End) and `IssueIssuedVisaSlotPanel` (Issued/Expiration). Non-nullable Issue/Primary dates use DateChanged handlers.
+- **Test**: Blazor Debug build succeeded. Officer: stop F5, rebuild, Ctrl+F5. Case workspace → Edit invitation / WP / New issued visa — dates show and type as dd.MM.yyyy; caret advances day→month→year.
+- **Prevent**: Do not use raw `type="date"` in issued-record slot panels. Prefer `OfficerDateEdit` for new officer date fields outside XAF DetailView.
+- **Cross-skill**: application-profile | preview-slot
+### 2026-09-08 — Instance ListView Month as name, not integer
+
+- **Need**: Month column showed `4`, `6`, `10` next to Person count integers — officers confused the two.
+- **Fix**: NotMapped `MonthName` (localized via CurrentUICulture / en-US fallback). Hide int `Month` on ListViews. `ApplicationProfileInstanceMonthNameColumnUpdater` swaps Month → MonthName on via/direct/staged/in-process/source and Person nested instance lists (keeps caption/index; prior Month sort stays on hidden Month).
+- **Test**: Module Debug build succeeded. Officer: stop F5, rebuild, Ctrl+F5. Via ministry — Month shows April/June/…; Person count stays numeric.
+- **Prevent**: Do not show raw Month int on officer ListViews. Keep Month persisted for numbering/SQL.
+- **Cross-skill**: application-profile
+### 2026-09-08 — Instance ListViews: no Lookup/Object hyperlinks
+
+- **Need**: Via ministry / Direct (and other ApplicationProfileInstance ListViews) showed FK columns (Application Profile, Approval leg, Visa type, …) as clickable links. Links stole clicks from row select / workspace open.
+- **Fix**: Blazor `ApplicationProfileInstanceListViewDisableObjectLinksController` sets `ShowLink = false` on `LookupPropertyEditor` / `ObjectPropertyEditor` for all `ApplicationProfileInstance` ListViews (custom route clones included). Row activate → workspace unchanged.
+- **Test**: Blazor Debug build succeeded. Officer: stop F5, rebuild, Ctrl+F5. Via ministry / Direct — Profile / Visa type / Approval leg are plain text; click row still opens workspace.
+- **Prevent**: Do not leave default ShowLink on instance list lookups. Do not disable ProcessCurrentObject (that opens workspace).
+- **Cross-skill**: application-profile
+### 2026-09-08 — Template catalog keeps list after opening overview
+
+- **Need**: Same TabbedMDI behaviour as Application Profile Instance lists — open template overview from the catalog, close it, catalog list tab still there. Catalog used inline list↔overview (`SelectedProfileId`) and native ListView used `TargetWindow.Current`.
+- **Fix**: Catalog / officer-shell row open → `ApplicationProfileOverviewOpenHelper` + `NewWindow`. Native `ApplicationProfileListViewNavigationController` / New / overview toolbar from ListView also `NewWindow`. Overview host **← Back to list** closes the tab; Delete reloads catalog then closes. Workspace rail Configure uses NewWindow.
+- **Test**: Build after change. Officer: stop F5, rebuild, Ctrl+F5. Configuration → Application Profile Templates → open row → overview new tab; close / Back to list → catalog tab still present.
+- **Prevent**: Do not swap catalog content to inline overview for row activate; do not open template overview/wizard from the list with `TargetWindow.Current`.
+- **Cross-skill**: application-profile
+### 2026-09-08 — Instance ListView / template keep list after closing detail
+
+- **Need**: Standard XAF TabbedMDI — open ListView, open row Detail (workspace / Configure), close detail, ListView tab still there. Application Profile Instance lists and template Configure replaced the list (`TargetWindow.Current`).
+- **Fix**: ListView row activate, ListView **Open workspace**, and **Start process** use `TargetWindow.NewWindow`. Template New/Configure (officer shell) and linked-instance open from catalog/overview also use NewWindow. Legacy DetailView **Open workspace** stays Current.
+- **Test**: `dotnet build Visa2026.slnx -c Debug` succeeded. Officer: stop F5, rebuild, Ctrl+F5. Via ministry / Direct list → open row → workspace new tab; close workspace → list tab still present. Templates → Configure → close wizard → catalog still there.
+- **Prevent**: Do not open case workspace or template wizard from a ListView/catalog with `TargetWindow.Current` (replaces the list). Same pattern as Person dossier ListView → NewWindow.
+- **Cross-skill**: application-profile
 ### 2026-09-05 — Visa / WP / Invitation tiles match active count, not Last-N quota
 
 - **Need**: `cancel_visa_wp` Last 2 painted Visa and Work permit red `1/2` on issued 2/-210 even with one linked visa/WP. Officers: if the person has one active visa, link one; if two active, link two. Same for work permit and invitation. Red only when linked count is below that.

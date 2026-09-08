@@ -348,7 +348,7 @@ static void PrintHelp()
     Console.WriteLine("  --correct-application-type-composite  Retype Application.ApplicationType from legacy SubType enum (--legacy-source, --dry-run)");
     Console.WriteLine("  --correct-visa-type  Patch Visa.VisaType from legacy TypeOfVisaL:mgCode (--legacy-source, --dry-run)");
     Console.WriteLine("  --correct-application-visa-type  Infer Application.VisaType from ApplicationType.Name; clear hidden Period/Category and non-inferred Type (--target-connection, --dry-run)");
-    Console.WriteLine("  --correct-visa2014-application-person-document-links  Replace latest-N Passport/Visa ResolvedLinks with PersonInApplication snapshot (--legacy-source, --dry-run)");
+    Console.WriteLine("  --correct-visa2014-application-person-document-links  Replace latest-N Passport/Visa/WorkPermitItem ResolvedLinks with PersonInApplication snapshot (--legacy-source, --dry-run)");
     Console.WriteLine("           from legacy Application.Contract or linked Person.Contract (identity pass-through).");
     Console.WriteLine("      Options: [--legacy-source calik-energi] [--application-id-map path.json]");
     Console.WriteLine("                [--dry-run] [--api-base-url url] [--no-wait] [--verbose]");

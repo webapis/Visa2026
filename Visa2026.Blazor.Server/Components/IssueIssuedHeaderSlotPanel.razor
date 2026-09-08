@@ -124,21 +124,15 @@
                         </label>
                         <label class="issue-issued-header-slot__field @(HeaderCueClass("header:date", true, IssueComposeFieldCue.HasDate(_primaryDate)))">
                             <span>@PrimaryDateLabel</span>
-                            <input class="issue-issued-header-slot__input"
-                                   type="date"
-                                   @bind="_primaryDate"
-                                   @bind:format="yyyy-MM-dd"
-                                   @onfocusout='() => ReviewField("header:date")' />
+                            <OfficerDateEdit Date="_primaryDate"
+                                             DateChanged="OnPrimaryDateChangedAsync" />
                         </label>
                         @if (_draft.Kind == IssueIssuedHeaderKind.Invitation)
                         {
                             <label class="issue-issued-header-slot__field @(HeaderCueClass("header:expiration", true, IssueComposeFieldCue.HasDate(_expirationDate)))">
                                 <span>Expiration</span>
-                                <input class="issue-issued-header-slot__input"
-                                       type="date"
-                                       @bind="_expirationDate"
-                                       @bind:format="yyyy-MM-dd"
-                                       @onfocusout='() => ReviewField("header:expiration")' />
+                                <OfficerDateEdit @bind-Date="_expirationDate"
+                                                 @bind-Date:after='() => ReviewField("header:expiration")' />
                             </label>
                             <label class="issue-issued-header-slot__field @(HeaderCueClass("header:category", true, IssueComposeFieldCue.HasText(_visaCategoryIdText)))">
                                 <span>Visa category</span>
@@ -179,19 +173,13 @@
                             {
                                 <label class="issue-issued-header-slot__field @(HeaderCueClass("header:visaStart", true, IssueComposeFieldCue.HasDate(_visaStartDate)))">
                                     <span>Visa start date</span>
-                                    <input class="issue-issued-header-slot__input"
-                                           type="date"
-                                           @bind="_visaStartDate"
-                                           @bind:format="yyyy-MM-dd"
-                                           @onfocusout='() => ReviewField("header:visaStart")' />
+                                    <OfficerDateEdit @bind-Date="_visaStartDate"
+                                                     @bind-Date:after='() => ReviewField("header:visaStart")' />
                                 </label>
                                 <label class="issue-issued-header-slot__field @(HeaderCueClass("header:visaEnd", true, IssueComposeFieldCue.HasDate(_visaEndDate)))">
                                     <span>Visa end date</span>
-                                    <input class="issue-issued-header-slot__input"
-                                           type="date"
-                                           @bind="_visaEndDate"
-                                           @bind:format="yyyy-MM-dd"
-                                           @onfocusout='() => ReviewField("header:visaEnd")' />
+                                    <OfficerDateEdit @bind-Date="_visaEndDate"
+                                                     @bind-Date:after='() => ReviewField("header:visaEnd")' />
                                 </label>
                             }
                         }
@@ -224,7 +212,7 @@
                             {
                                 <label class="issue-issued-header-slot__field @(HeaderCueClass("header:expiration", false, true, true))">
                                     <span>Expiration (computed)</span>
-                                    <input class="issue-issued-header-slot__input" type="date" value="@exp.ToString("yyyy-MM-dd")" disabled />
+                                    <OfficerDateEdit Date="exp" Enabled="false" />
                                 </label>
                             }
                         }
@@ -397,19 +385,13 @@
                                             </label>
                                             <label class="issue-issued-header-slot__field @(WpCueClass(person, "start", true, IssueComposeFieldCue.HasDate(person.ItemStartDate)))">
                                                 <span>Start *</span>
-                                                <input class="issue-issued-header-slot__input"
-                                                       type="date"
-                                                       @bind="person.ItemStartDate"
-                                                       @bind:format="yyyy-MM-dd"
-                                                       @onfocusout='() => ReviewWpField(person, "start")' />
+                                                <OfficerDateEdit @bind-Date="person.ItemStartDate"
+                                                                 @bind-Date:after='() => ReviewWpField(person, "start")' />
                                             </label>
                                             <label class="issue-issued-header-slot__field @(WpCueClass(person, "end", true, IssueComposeFieldCue.HasDate(person.ItemExpirationDate)))">
                                                 <span>End *</span>
-                                                <input class="issue-issued-header-slot__input"
-                                                       type="date"
-                                                       @bind="person.ItemExpirationDate"
-                                                       @bind:format="yyyy-MM-dd"
-                                                       @onfocusout='() => ReviewWpField(person, "end")' />
+                                                <OfficerDateEdit @bind-Date="person.ItemExpirationDate"
+                                                                 @bind-Date:after='() => ReviewWpField(person, "end")' />
                                             </label>
                                             <div class="issue-issued-header-slot__field issue-issued-header-slot__field--wide @(WpCueClass(person, "locations", true, IssueComposeFieldCue.HasText(person.WorkPermittedLocations)))">
                                                 <span>Work permitted locations *</span>
@@ -1031,6 +1013,13 @@
         if (!UseFieldCues || string.IsNullOrEmpty(key))
             return;
         _reviewedFields.Add(key);
+    }
+
+    private Task OnPrimaryDateChangedAsync(DateTime? value)
+    {
+        _primaryDate = value ?? DateTime.Today;
+        ReviewField("header:date");
+        return Task.CompletedTask;
     }
 
     private void ReviewWpField(IssueIssuedHeaderPersonLineDraft person, string field) =>

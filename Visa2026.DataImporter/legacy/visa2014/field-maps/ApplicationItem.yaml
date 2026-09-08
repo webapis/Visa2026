@@ -265,9 +265,10 @@ fields:
     missingBehavior: allow_null
     gatedBy: Application.ApplicationType.ShowCurrentWorkPermitItem
     notes: |
-      Primary: legacy PersonInApplication.WorkPermit FK → WorkPermitItem id-map (legacy Oid = dbo.WorkPermit.Oid).
-      Fallback when FK null: latest dbo.WorkPermit per employee (StartDate DESC, Oid DESC) — same rule as PersonCurrentItems.GetCurrentWorkPermitItem.
-      Employee lines only; gated by ShowCurrentWorkPermitItem.
+      Primary: PersonInApplication.WorkPermit → WorkPermitItem id-map (legacy Oid = dbo.WorkPermit.Oid).
+      Import is historical: pin this FK; do not attach today's current WorkPermitItem.
+      When FK is null, leave unlinked (no latest-N fallback during import).
+      Employee lines; gated by ShowCurrentWorkPermitItem. Officer Relink may use today.
 
   - source: PersonInInvitation
     target: CurrentInvitationItem
