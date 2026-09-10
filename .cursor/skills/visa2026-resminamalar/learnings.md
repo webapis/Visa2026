@@ -25,6 +25,16 @@ Purpose: **catalog, seed gate, batch worker, preview, permissions, dialog UX** �
 
 ## Entries
 
+### 2026-09-10 — Cover letter Preview one page per person (Application)
+
+- **Symptom**: Yuztutma Hasapdan Çykarmak catalog Preview on case 9/-1444 was three identical letter pages (roster of three). One template should be one letter.
+- **Try**: Resminamalar **This profile** → Preview **YUZTUTMA-HASAPDAN ÇYKARMAK** with all three people selected.
+- **Test**: `UserReportMergeHeaderFallbackTests.Yuztutma_ds_tokens_are_application_header_only`, `ApplicationWordReportEntryGeneratorTests.UsesPerItemWordOutput_false_for_header_only_yuztutma_even_when_item_root`.
+- **Root cause**: Preview scope is roster people. Header-only Word still counted as per-item because RootBo stayed ApplicationItem.
+- **Fix**: `IsApplicationHeaderOnlyWordTemplate` + catalog `ApplicationHeader` skip per-person Word. `EnsureLinkedUserReportTemplate` syncs `RootBoType` on save. ZIP uses the same generator.
+- **Prevent**: Do not PDF-merge one cover letter per selected person. Keep Şahsy / Forma 16 per person.
+- **Cross-skill**: visa2026-template-scan | visa2026-user-report-templates
+
 ### 2026-09-10 — Word cover letter Preview empty AFNUM/MSRV/TPCNT (Application)
 
 - **Symptom**: Nested Yuztutma letter catalog Preview filled ACPOS/CHFN only. Application number, date, addressee, and person count were blank. Output file was named for one roster person.

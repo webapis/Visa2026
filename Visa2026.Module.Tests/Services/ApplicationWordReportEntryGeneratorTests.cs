@@ -109,4 +109,63 @@ public class ApplicationWordReportEntryGeneratorTests
 
         Assert.Equal("Sanaw_ckl.docx", name);
     }
+
+    [Fact]
+    public void UsesPerItemWordOutput_false_for_header_only_yuztutma_even_when_item_root()
+    {
+        var template = WordItemRoot("Yuztutma-Hasapdan Cykarmak", "ds.AFNUM", "ds.TPCNT", "IMAGE:PPH");
+        var context = WordReportGenerationContext.ForRosterPersons(new[] { Guid.NewGuid(), Guid.NewGuid() });
+
+        Assert.False(ApplicationWordReportEntryGenerator.UsesPerItemWordOutput(template, context));
+    }
+
+    [Fact]
+    public void UsesPerItemWordOutput_false_when_catalog_data_scope_is_application_header()
+    {
+        var templateId = Guid.NewGuid();
+        var template = new UserReportTemplate
+        {
+            ID = templateId,
+            TemplateName = "Yuztutma-Hasapdan Cykarmak",
+            TemplateOutputFormat = TemplateOutputFormat.Word,
+            RootBoType = UserReportBoType.ApplicationItem,
+        };
+        var context = WordReportGenerationContext.ForRosterPersons(new[] { Guid.NewGuid() });
+        var catalog = new[]
+        {
+            new ApplicationWordReportPackageCatalogEntry
+            {
+                EntryKey = $"profile:{Guid.NewGuid():D}",
+                DisplayName = template.TemplateName,
+                OutputFileName = "Yuztutma.docx",
+                Kind = ApplicationWordReportPackageEntryKind.UserWord,
+                UserReportTemplateId = templateId,
+                DataScope = ApplicationProfileTemplateDataScope.ApplicationHeader,
+            }
+        };
+
+        Assert.False(ApplicationWordReportEntryGenerator.UsesPerItemWordOutput(template, context, catalog));
+    }
+
+    [Fact]
+    public void UsesPerItemWordOutput_true_for_forma16_row_tokens()
+    {
+        var template = WordItemRoot("FORMA 16", ".PFN", ".PNAT", "IMAGE:PPH");
+        var context = WordReportGenerationContext.ForRosterPersons(new[] { Guid.NewGuid(), Guid.NewGuid() });
+
+        Assert.True(ApplicationWordReportEntryGenerator.UsesPerItemWordOutput(template, context));
+    }
+
+    private static UserReportTemplate WordItemRoot(string name, params string[] keys)
+    {
+        var template = new UserReportTemplate
+        {
+            TemplateName = name,
+            TemplateOutputFormat = TemplateOutputFormat.Word,
+            RootBoType = UserReportBoType.ApplicationItem,
+        };
+        foreach (var key in keys)
+            template.Placeholders.Add(new UserReportPlaceholder { PlaceholderKey = key });
+        return template;
+    }
 }

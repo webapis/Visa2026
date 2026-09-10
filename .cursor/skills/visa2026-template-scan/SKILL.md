@@ -95,6 +95,7 @@ Officers submit **wizard step screenshots** + optional **catalog Preview** + the
 | Preview skips `CHFN`/`RPFN`: overlapping spans | Duplicate yellow of the same name in one paragraph — restart, Analyze, Generate | **This skill** |
 | Word letter catalog Preview fails after Approve | Row tokens `{{.PFN}}` without `{{#ds.rows}}` — restart, re-Approve | **This skill** + resminamalar |
 | Cover letter Preview empty (AFNUM/ADAT/MSRV/TPCNT) while ACPOS/CHFN fill | Scan defaulted Both → per-person Word. Rebuild; Preview the same row. Re-Approve so the letter is Application header (one file, not `ERDOGAN Arzu`) | **This skill** + resminamalar |
+| Catalog Preview of Yuztutma is one identical page per person | Header-only `{{ds.*}}` Word was still generated once per selected person. Rebuild; Preview — **one page**. Forma 16 / şahsy stay per person | **This skill** + resminamalar |
 | Excel roster gaps (names, TUR, …) | Column header + manual inference (`ScanExcelYellowResolver`); not case value match | **This skill** |
 | Preview blocking `{{ds.PVFM}}` / `Person_* not found on ApplicationProfileInstance` | Şahsy yellow classified Header wrote `{{ds.CODE}}` for Row-only Person tokens. Continue / Regenerated writes `{{.PVFM}}` (`PDBT`/`PCBT`/`PBPL`/`PFWC` same). Restart, hard-refresh | **This skill** |
 | Review shows `{{ds.PLN}}` / Approve blocks `not found on ApplicationProfileInstance` | Row-only codes now stay `{{.PLN}}` even on Header yellow. Analyze again after restart | **This skill** |

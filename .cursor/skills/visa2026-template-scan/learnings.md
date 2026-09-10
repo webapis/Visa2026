@@ -2,6 +2,14 @@
 
 Append-only. Newest first under **## Entries**.
 
+### 2026-09-10 — Yuztutma catalog Preview repeated one page per person
+
+- Need: Case 9/-1444 Hasapdan Çykarmak. Resminamalar **This profile** Preview of **YUZTUTMA-HASAPDAN ÇYKARMAK** showed 3 identical letter pages (one per Cengiz / Mustafa / Izzet). Officer expected one letter for the template.
+- Cause: Preview always passes selected people (`RosterPerson`). Cover letters still had `RootBoType` ApplicationItem (Scan default Both, and Re-Approve did not sync RootBo). `UsesPerItemWordOutput` then merged one Word file per person and PDF-stitched them.
+- Fix: Header-only Word (`{{ds.*}}` / `ds.*`, ignore IMAGE) emits one document even on a roster context. Nested catalog `ApplicationHeader` does the same. Approve / Re-Approve now writes `RootBoType` from DataScope. Forma 16 / şahsy `.PFN` stay per person; Sanaw `#ds.rows` stays one list.
+- Officer: Stop F5, rebuild, restart. Preview the same Yuztutma row — **one page**. No Re-Approve required for this Preview fix. SANAW / FORMA 16 should still be a list or one form per person.
+- Cross-skill: visa2026-resminamalar | visa2026-user-report-templates
+
 ### 2026-09-10 — This profile only letter appeared on Shared
 
 - Need: Case 3/-308 Hasapdan Çykarmak. Create from yellow marks **Save to** = This profile only (`…_2`). After Approve the letter was on the **Shared** tab with Preview OFF. This profile count also went up.

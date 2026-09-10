@@ -375,6 +375,44 @@ public static class UserReportMergeDataHelper
         && template.GetEffectiveOutputFormat() == TemplateOutputFormat.Word
         && ShouldUseSanawyStyleRows(template, template.Placeholders);
 
+    /// <summary>
+    /// Official letters (Yuztutma and similar) bind only application header tokens.
+    /// Resminamalar must emit one Word file even when selected people make the context
+    /// roster-scoped and <see cref="UserReportTemplate.RootBoType"/> is still ApplicationItem.
+    /// </summary>
+    public static bool IsApplicationHeaderOnlyWordTemplate(UserReportTemplate? template)
+    {
+        if (template == null || template.GetEffectiveOutputFormat() != TemplateOutputFormat.Word)
+            return false;
+
+        var placeholders = template.Placeholders;
+        if (placeholders == null || placeholders.Count == 0)
+            return false;
+
+        var sawBinding = false;
+        foreach (var placeholder in placeholders)
+        {
+            var key = placeholder.PlaceholderKey?.Trim() ?? string.Empty;
+            if (key.Length == 0)
+                continue;
+            if (key.Contains("IMAGE:", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            sawBinding = true;
+            if (placeholder.IsCollection || placeholder.IsRowProperty)
+                return false;
+            if (key.Contains("{{.", StringComparison.Ordinal)
+                || key.StartsWith(".", StringComparison.Ordinal)
+                || key.Contains("#ds.rows", StringComparison.OrdinalIgnoreCase)
+                || key.Contains("#rows", StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+        }
+
+        return sawBinding;
+    }
+
     /// <summary>Row list for a single-line ItemRows template (Contract, Forma 16, sahsy_kagyz, etc.).</summary>
     public static List<Dictionary<string, object>> BuildSingleItemRowsForTemplate(
         ApplicationRosterMergeLine item,

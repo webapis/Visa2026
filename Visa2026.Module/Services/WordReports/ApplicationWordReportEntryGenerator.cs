@@ -243,7 +243,7 @@ public sealed class ApplicationWordReportEntryGenerator
 
         var defaultFileName = ResolveDownloadFileName(template, catalogEntries);
 
-        if (!UsesPerItemWordOutput(template, context))
+        if (!UsesPerItemWordOutput(template, context, catalogEntries))
         {
             var stream = await GenerateUserEntryAsync(objectSpace, application, template, context, cancellationToken)
                 .ConfigureAwait(false);
@@ -288,14 +288,6 @@ public sealed class ApplicationWordReportEntryGenerator
         CancellationToken cancellationToken)
     {
         var selectedItems = context.ResolveApplicationItems(objectSpace, application);
-        if (UsesPerItemWordOutput(template, context))
-        {
-            var firstItem = selectedItems.FirstOrDefault();
-            return firstItem == null
-                ? null
-                : await GenerateUserEntryForItemAsync(template, firstItem, cancellationToken).ConfigureAwait(false);
-        }
-
         cancellationToken.ThrowIfCancellationRequested();
         var ms = new MemoryStream();
         if (template.GetEffectiveOutputFormat() == TemplateOutputFormat.Excel)
@@ -349,13 +341,37 @@ public sealed class ApplicationWordReportEntryGenerator
         return ms;
     }
 
-    private static bool UsesPerItemWordOutput(UserReportTemplate template, WordReportGenerationContext context) =>
-        context.Scope == WordReportPackageScope.ApplicationRosterMergeLine
-        && template.GetEffectiveOutputFormat() == TemplateOutputFormat.Word
-        && !UserReportMergeDataHelper.UsesSingleDocumentItemList(template)
-        && (template.RootBoType is UserReportBoType.ApplicationItem or UserReportBoType.Person
+    internal static bool UsesPerItemWordOutput(
+        UserReportTemplate template,
+        WordReportGenerationContext context,
+        IReadOnlyList<ApplicationWordReportPackageCatalogEntry>? catalogEntries = null)
+    {
+        if (context.Scope != WordReportPackageScope.RosterPerson)
+            return false;
+        if (template.GetEffectiveOutputFormat() != TemplateOutputFormat.Word)
+            return false;
+        if (UserReportMergeDataHelper.UsesSingleDocumentItemList(template))
+            return false;
+        if (UserReportMergeDataHelper.IsApplicationHeaderOnlyWordTemplate(template))
+            return false;
+        if (catalogEntries != null)
+        {
+            foreach (var entry in catalogEntries)
+            {
+                var sameTemplate = entry.UserReportTemplateId == template.ID
+                    || string.Equals(entry.DisplayName, template.TemplateName, StringComparison.OrdinalIgnoreCase);
+                if (sameTemplate
+                    && entry.DataScope == ApplicationProfileTemplateDataScope.ApplicationHeader)
+                {
+                    return false;
+                }
+            }
+        }
+
+        return template.RootBoType is UserReportBoType.ApplicationItem or UserReportBoType.Person
             || UserReportMergeDataHelper.IsSahsyKagyzUserReportTemplate(template)
-            || UserReportMergeDataHelper.TemplateUsesSahsyKagyzRowPlaceholders(template, template.Placeholders));
+            || UserReportMergeDataHelper.TemplateUsesSahsyKagyzRowPlaceholders(template, template.Placeholders);
+    }
 
     private static string BuildPerItemUserTemplateFileName(UserReportTemplate template, ApplicationRosterMergeLine item)
     {

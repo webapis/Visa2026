@@ -47,7 +47,7 @@ public static class ApplicationProfileTemplateUserReportBridge
             profileTemplate);
         if (existing != null)
         {
-            SyncKind(existing, profileTemplate);
+            SyncKind(existing, profileTemplate, rootBoType);
             EnsureMasterHasFile(objectSpace, existing, profileTemplate);
             return existing;
         }
@@ -60,7 +60,7 @@ public static class ApplicationProfileTemplateUserReportBridge
         if (inactive != null)
         {
             inactive.IsActive = true;
-            SyncKind(inactive, profileTemplate);
+            SyncKind(inactive, profileTemplate, rootBoType);
             EnsureMasterHasFile(objectSpace, inactive, profileTemplate);
             return inactive;
         }
@@ -69,11 +69,7 @@ public static class ApplicationProfileTemplateUserReportBridge
         created.TemplateName = name;
         created.IsActive = true;
         created.SortOrder = profileTemplate.SortOrder;
-        SyncKind(created, profileTemplate);
-        created.RootBoType = rootBoType
-            ?? (profileTemplate.TemplateKind == ApplicationProfileTemplateKind.Excel
-                ? UserReportBoType.ApplicationItem
-                : UserReportBoType.ApplicationItem);
+        SyncKind(created, profileTemplate, rootBoType);
         EnsureMasterHasFile(objectSpace, created, profileTemplate);
         return created;
     }
@@ -108,11 +104,16 @@ public static class ApplicationProfileTemplateUserReportBridge
         TemplateCatalogAuditStamp.Touch(template, SecuritySystem.CurrentUserName);
     }
 
-    private static void SyncKind(UserReportTemplate userTemplate, ApplicationProfileTemplate profileTemplate)
+    private static void SyncKind(
+        UserReportTemplate userTemplate,
+        ApplicationProfileTemplate profileTemplate,
+        UserReportBoType? rootBoType)
     {
         userTemplate.TemplateOutputFormat = profileTemplate.TemplateKind == ApplicationProfileTemplateKind.Excel
             ? TemplateOutputFormat.Excel
             : TemplateOutputFormat.Word;
+        userTemplate.RootBoType = rootBoType
+            ?? ApplicationProfileWizardTemplateCatalog.RootBoFromDataScope(profileTemplate.DataScope);
     }
 
     private static void EnsureMasterHasFile(
