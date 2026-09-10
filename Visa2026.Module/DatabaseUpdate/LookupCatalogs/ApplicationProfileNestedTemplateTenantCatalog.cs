@@ -105,6 +105,13 @@ internal static class ApplicationProfileNestedTemplateTenantCatalogSync
 {
     public static void Sync(IObjectSpace objectSpace)
     {
+        if (!UserReportTemplateUpdater.SeedEmbeddedTemplatesEnabled)
+        {
+            Tracing.Tracer.LogText(
+                "ApplicationProfileNestedTemplateTenantCatalogSync: skipped (embedded template seed disabled).");
+            return;
+        }
+
         if (!ApplicationProfileNestedTemplateTenantCatalogLoader.TryLoadRows(out var rows))
         {
             Tracing.Tracer.LogText(

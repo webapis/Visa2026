@@ -25,6 +25,13 @@ namespace Visa2026.Module.DatabaseUpdate
         /// <summary>Links all <see cref="ProjectContract"/> rows whose <see cref="LookupBase.NameTm"/> contains this substring (case-insensitive).</summary>
         private const string Gt15ProjectContractNameTmSubstring = "GT-15";
 
+        /// <summary>
+        /// Temporary: officers re-author Resminamalar from the case catalog (Add existing /
+        /// Create from yellow marks). Set to <c>true</c> to restore <c>EnsureTemplateExists</c>
+        /// from <c>Resources/Templates</c> embedded binaries.
+        /// </summary>
+        public const bool SeedEmbeddedTemplatesEnabled = false;
+
         private static readonly (string OldName, string NewName)[] SeedTemplateNameMigrations =
         {
             ("Contract (seed)", "Contract"),
@@ -82,6 +89,13 @@ namespace Visa2026.Module.DatabaseUpdate
 
         private void SeedEmbeddedTemplates(IServiceProvider rootServiceProvider)
         {
+            if (!SeedEmbeddedTemplatesEnabled)
+            {
+                Console.WriteLine(
+                    "UserReportTemplateUpdater: embedded Resources/Templates seed is temporarily disabled.");
+                return;
+            }
+
             using IServiceScope scope = rootServiceProvider.CreateScope();
             var wordExtractor = scope.ServiceProvider.GetService<IUserReportPlaceholderExtractor>();
             var wordValidator = scope.ServiceProvider.GetService<IUserReportValidationService>();

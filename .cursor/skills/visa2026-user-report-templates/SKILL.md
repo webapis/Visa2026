@@ -34,6 +34,7 @@ This skill covers **template files**, **maps**, **Extract/Validate**, **merge ro
 - **In scope:** user-report **seed** templates above, wired through **`UserReportTemplateUpdater`**. Same **`UserReportTemplate`** BO, **Extract** / **Validate**, **Resminamalar** zip (mixed `.docx` + `.xlsx`).
 - **Out of scope:** Any other `.docx` under **`Visa2026.Module/Resources/`** outside **`Templates/`** — code-backed reports removed; use **`visa2026-resminamalar`** for dialog/batch only.
 - **Do not** add embedded resources or updater seeds outside **`Templates/`** or **`Templates/Excel/`**.
+- **Temporary (2026-09-10):** `UserReportTemplateUpdater.SeedEmbeddedTemplatesEnabled` is **false**. Seed `.docx`/`.xlsx`/maps/scans were removed. Officers add templates from case Resminamalar. Flip the flag only after restoring embedded files.
 
 ### `*_map.md` + scan (blocking — before any other skill step)
 

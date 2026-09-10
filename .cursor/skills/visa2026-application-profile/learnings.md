@@ -1,3 +1,10 @@
+### 2026-09-10 — F5 crash ValueManagerContext after emptying Resminamalar catalog
+
+- **Need**: After purging nested + shared templates, host start died: `The ValueManagerContext is not active` in `ApplicationProfileTemplate.OnSaving` during `ApplicationProfileSeedSync` (nested-template tenant JSON recreate).
+- **Fix**: Audit stamp uses `TryCurrentUserName` (no SecuritySystem when context is missing). Nested-template tenant catalog sync is skipped while `SeedEmbeddedTemplatesEnabled` is false so This profile includes do not come back on F5.
+- **Prevent**: Do not call `SecuritySystem.CurrentUserName` from BO `OnSaving` on host-start ObjectSpaces. Nested includes belong with the Word/Excel seed flag.
+- **Cross-skill**: visa2026-resminamalar | visa2026-user-report-templates
+
 ### 2026-09-10 — Hasaba F16 empty travel and visa category merge
 
 - **Need**: Catalog Preview on Hasaba Almak 6/-1161 (Emre Akbulut) left `Travel_DateText`, `Travel_CheckPointTm`, `Application_VisaCategory_NameTm` empty though People & links had Travel history and a visa.

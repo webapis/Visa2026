@@ -1,5 +1,7 @@
 #nullable enable
 
+using DevExpress.ExpressApp;
+
 namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
@@ -7,6 +9,18 @@ namespace Visa2026.Module.BusinessObjects;
 /// </summary>
 public static class TemplateCatalogAuditStamp
 {
+    public static string? TryCurrentUserName()
+    {
+        try
+        {
+            return SecuritySystem.CurrentUserName;
+        }
+        catch (InvalidOperationException)
+        {
+            return null;
+        }
+    }
+
     public static void Touch(ApplicationProfileTemplate template, string? userName)
     {
         ArgumentNullException.ThrowIfNull(template);

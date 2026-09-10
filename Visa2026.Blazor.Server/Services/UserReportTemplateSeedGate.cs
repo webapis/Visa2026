@@ -64,6 +64,13 @@ internal static class UserReportTemplateSeedGate
             ApplicationTypeGroupSeed.EnsureRegistrationGroup(objectSpace);
             objectSpace.CommitChanges();
 
+            if (!UserReportTemplateUpdater.SeedEmbeddedTemplatesEnabled)
+            {
+                logger?.LogInformation(
+                    "User report template seed skipped (SeedEmbeddedTemplatesEnabled=false); ApplicationTypeGroup Registration ensured.");
+                return;
+            }
+
 #if DEBUG
             bool shouldSeed = true;
 #else

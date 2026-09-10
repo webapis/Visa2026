@@ -179,7 +179,7 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnSaving()
         {
             base.OnSaving();
-            TemplateCatalogAuditStamp.Touch(this, SecuritySystem.CurrentUserName);
+            TemplateCatalogAuditStamp.Touch(this, TemplateCatalogAuditStamp.TryCurrentUserName());
         }
     }
 }

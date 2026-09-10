@@ -1,5 +1,7 @@
 # User-Defined Report Templates
 
+**Temporary (2026-09-10):** embedded Word/Excel seeds are **disabled**. Binaries, maps, and scans were removed from this folder so officers can add templates from case Resminamalar (**Add existing template** / **Create from yellow marks**). Re-enable by restoring files, embedding them in `Visa2026.Module.csproj`, and setting `UserReportTemplateUpdater.SeedEmbeddedTemplatesEnabled = true`.
+
 This directory contains **seed** `.docx` / `.xlsx` files for the **User Report Template** feature. Each file must be an **Embedded Resource** in `Visa2026.Module.csproj` and registered in **`DatabaseUpdate/UserReportTemplateUpdater.cs`**.
 
 ## Mandatory trio per report (map-first)

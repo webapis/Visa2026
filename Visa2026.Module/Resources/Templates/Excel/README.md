@@ -1,5 +1,7 @@
 # Excel user report seeds
 
+**Temporary (2026-09-10):** Excel seed binaries, maps, and scans were removed. `UserReportTemplateUpdater.SeedEmbeddedTemplatesEnabled` is **false**. Restore files and flip that flag to re-seed.
+
 - Embed **`.xlsx`** only (merge uses ClosedXML). Legacy **`.xls`** must be saved as `.xlsx` in Excel before embed.
 - Add to `Visa2026.Module.csproj` as `EmbeddedResource`.
 - Register in `DatabaseUpdate/UserReportTemplateUpdater.cs` via `EnsureExcelTemplateExists`.

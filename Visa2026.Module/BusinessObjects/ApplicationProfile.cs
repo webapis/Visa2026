@@ -541,7 +541,7 @@ public class ApplicationProfileTemplate : BaseObject
             }
         }
 
-        TemplateCatalogAuditStamp.Touch(this, SecuritySystem.CurrentUserName);
+        TemplateCatalogAuditStamp.Touch(this, TemplateCatalogAuditStamp.TryCurrentUserName());
     }
 }
 

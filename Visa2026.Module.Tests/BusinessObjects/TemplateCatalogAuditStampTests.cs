@@ -9,6 +9,15 @@ namespace Visa2026.Module.Tests.BusinessObjects;
 public class TemplateCatalogAuditStampTests
 {
     [Fact]
+    public void Touch_accepts_null_user_when_security_context_is_missing()
+    {
+        var template = new ApplicationProfileTemplate();
+        TemplateCatalogAuditStamp.Touch(template, TemplateCatalogAuditStamp.TryCurrentUserName());
+        Assert.NotNull(template.CreatedOnUtc);
+        Assert.NotNull(template.ModifiedOnUtc);
+    }
+
+    [Fact]
     public void Touch_sets_created_once_and_refreshs_modified()
     {
         var template = new ApplicationProfileTemplate();
