@@ -65,8 +65,7 @@ public sealed class TemplateDocumentOutlineReader : ITemplateDocumentOutlineRead
 
     private static TemplateDocumentOutline ReadWord(byte[] content)
     {
-        using var stream = new MemoryStream(content, writable: false);
-        using var document = WordprocessingDocument.Open(stream, isEditable: false);
+        using var document = WordOpenXmlPackage.OpenRead(content);
 
         var paragraphs = WordTemplateAddressing.EnumerateParagraphs(document)
             .Select(p => new TemplateOutlineParagraph(

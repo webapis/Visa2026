@@ -107,4 +107,18 @@ public class ApplicationProfileTemplateSaveHelperTests
         Assert.Null(request.SourceContent);
         Assert.Null(request.SourceFileName);
     }
+
+    [Fact]
+    public void ShouldWriteLinkedMasterFile_ThisProfile_SkipsExistingSharedName()
+    {
+        Assert.True(ApplicationProfileTemplateSaveHelper.ShouldWriteLinkedMasterFile(
+            ApplicationProfileTemplateCatalogScope.Global,
+            nameIsUsedAsSharedInclude: true));
+        Assert.True(ApplicationProfileTemplateSaveHelper.ShouldWriteLinkedMasterFile(
+            ApplicationProfileTemplateCatalogScope.ProfileSpecific,
+            nameIsUsedAsSharedInclude: false));
+        Assert.False(ApplicationProfileTemplateSaveHelper.ShouldWriteLinkedMasterFile(
+            ApplicationProfileTemplateCatalogScope.ProfileSpecific,
+            nameIsUsedAsSharedInclude: true));
+    }
 }

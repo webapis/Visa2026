@@ -19,8 +19,9 @@ internal static class WordTemplateTokenWriter
     /// </summary>
     public static byte[] StripAllYellowMarkup(byte[] sourceContent)
     {
+        var loadable = WordOpenXmlPackage.EnsureLoadable(sourceContent);
         using var buffer = new MemoryStream();
-        buffer.Write(sourceContent, 0, sourceContent.Length);
+        buffer.Write(loadable, 0, loadable.Length);
         buffer.Position = 0;
 
         using (var document = WordprocessingDocument.Open(buffer, true))
@@ -56,8 +57,9 @@ internal static class WordTemplateTokenWriter
         var appliedLoops = new List<LoopMarker>();
         var skipped = new List<TemplateWriteSkip>();
 
+        var loadable = WordOpenXmlPackage.EnsureLoadable(sourceContent);
         using var buffer = new MemoryStream();
-        buffer.Write(sourceContent, 0, sourceContent.Length);
+        buffer.Write(loadable, 0, loadable.Length);
         buffer.Position = 0;
 
         using (var document = WordprocessingDocument.Open(buffer, true))

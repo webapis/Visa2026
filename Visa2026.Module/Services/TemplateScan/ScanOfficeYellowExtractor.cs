@@ -68,8 +68,23 @@ public sealed class ScanOfficeYellowExtractor : IScanOfficeYellowExtractor
 
     private static IReadOnlyList<ScanOfficeYellowSpan> ExtractWord(byte[] bytes)
     {
-        using var stream = new MemoryStream(bytes, writable: false);
-        using var document = WordprocessingDocument.Open(stream, false);
+        try
+        {
+            return ExtractWordCore(bytes);
+        }
+        catch (InvalidOperationException)
+        {
+            return Array.Empty<ScanOfficeYellowSpan>();
+        }
+        catch (OpenXmlPackageException)
+        {
+            return Array.Empty<ScanOfficeYellowSpan>();
+        }
+    }
+
+    private static IReadOnlyList<ScanOfficeYellowSpan> ExtractWordCore(byte[] bytes)
+    {
+        using var document = WordOpenXmlPackage.OpenRead(bytes);
         var results = new List<ScanOfficeYellowSpan>();
 
         foreach (var addressed in WordTemplateAddressing.EnumerateParagraphs(document))

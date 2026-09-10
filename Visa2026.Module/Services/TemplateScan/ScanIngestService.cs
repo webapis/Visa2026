@@ -43,7 +43,7 @@ public sealed class ScanIngestService : IScanIngestService
         var ocr = _ocr.Extract(new ScanOcrRequest
         {
             Input = input,
-            OriginalContent = request.Content,
+            OriginalContent = input.OfficePackageBytes ?? request.Content,
         });
         var suitability = _suitability.Evaluate(new ScanSuitabilityRequest
         {

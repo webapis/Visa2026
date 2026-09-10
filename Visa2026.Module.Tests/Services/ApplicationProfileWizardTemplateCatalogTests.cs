@@ -73,6 +73,22 @@ public class ApplicationProfileWizardTemplateCatalogTests
     }
 
     [Fact]
+    public void ProfilePrivateBackingNames_HidesThisProfileOnlyLettersFromShared()
+    {
+        var names = ApplicationProfileWizardTemplateCatalog.ProfilePrivateBackingNames(
+        [
+            ("YUZTUTMA-HASAPDAN ÇYKARMAK_2", ApplicationProfileTemplateCatalogScope.ProfileSpecific),
+            ("FORMA 16", ApplicationProfileTemplateCatalogScope.Global),
+            ("FORMA 16", ApplicationProfileTemplateCatalogScope.ProfileSpecific),
+            ("SANAW-HASABA ALMAK", ApplicationProfileTemplateCatalogScope.Category),
+        ]);
+
+        Assert.Contains("YUZTUTMA-HASAPDAN ÇYKARMAK_2", names);
+        Assert.DoesNotContain("FORMA 16", names);
+        Assert.DoesNotContain("SANAW-HASABA ALMAK", names);
+    }
+
+    [Fact]
     public void CitiesForRegion_UsesRegionIdAndNameTmFallback()
     {
         var ahalId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");

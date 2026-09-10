@@ -15,10 +15,8 @@ internal static class WordConversionDiffInspector
 {
     public static void Inspect(TemplateDiffGateRequest request, List<string> violations)
     {
-        using var originalStream = new MemoryStream(request.OriginalContent, writable: false);
-        using var convertedStream = new MemoryStream(request.ConvertedContent, writable: false);
-        using var original = WordprocessingDocument.Open(originalStream, false);
-        using var converted = WordprocessingDocument.Open(convertedStream, false);
+        using var original = WordOpenXmlPackage.OpenRead(request.OriginalContent);
+        using var converted = WordOpenXmlPackage.OpenRead(request.ConvertedContent);
 
         var originalMain = original.MainDocumentPart;
         var convertedMain = converted.MainDocumentPart;

@@ -70,6 +70,8 @@ Officers submit **wizard step screenshots** + optional **catalog Preview** + the
 | Review has extra 10.1 / 10.2 rows on one yellow | Row **×** hides that part; remaining token stays on the span. Last × drops the mark so Generate leaves printed text. Hard-refresh | **This skill** |
 | Azure Ask AI dumps dates on the selected WP mark | Chat now sends Review page + optional PNG/JPG. Attach a photo of line 12. Restart, hard-refresh | **This skill** |
 | Review Add placeholder is hard to find / need 12.3 on the same yellow | Select the row. Short column: Filter + **Add placeholder…**. Pick a code — appends a sibling. Hard-refresh | **This skill** |
+| This profile only letter appears on Shared | Approve wrote a merge backing `UserReportTemplate`. Rebuild; open **This profile**. Shared hides names that exist only as this-profile nested rows | **This skill** + resminamalar |
+| Analyze crashes `Specified part does not exist in the package` | Word ZIP lists a missing related part. Rebuild; Analyze again. If it still fails, Word **Save As** `.docx` | **This skill** |
 | PNG/JPG/PDF rejected | Expected — use yellow-marked Word/Excel | **This skill** |
 | Yellow not detected | Word Text Highlight Color / Excel solid yellow fill | **This skill** |
 | Wrong tokens / compound split | `ScanYellowHighlightTokenResolver` + catalog ShortCodes | **This skill** + user-report-templates |

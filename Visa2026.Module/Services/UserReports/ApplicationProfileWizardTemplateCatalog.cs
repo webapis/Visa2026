@@ -71,6 +71,7 @@ public static class ApplicationProfileWizardTemplateCatalog
             .Where(t => t.GetEffectiveOutputFormat() is TemplateOutputFormat.Word or TemplateOutputFormat.Excel)
             .ToList();
 
+        var privateBackingNames = LoadProfilePrivateBackingNames(objectSpace);
         var global = new List<CatalogRow>();
         var category = new List<CatalogRow>();
 
@@ -78,6 +79,8 @@ public static class ApplicationProfileWizardTemplateCatalog
         {
             var row = ToRow(template);
             if (IsProfileSpecificUploadOnly(row.Name))
+                continue;
+            if (privateBackingNames.Contains(row.Name))
                 continue;
             if (row.Scope == ApplicationProfileTemplateCatalogScope.Global)
                 global.Add(row);
@@ -111,6 +114,57 @@ public static class ApplicationProfileWizardTemplateCatalog
     public static bool IsProfileSpecificUploadOnly(string? templateName) =>
         !string.IsNullOrWhiteSpace(templateName)
         && templateName.Contains(ProfileSpecificUploadNameMarker, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Names that exist only as This-profile nested rows. Approve still creates a
+    /// <see cref="UserReportTemplate"/> for merge, but those files are not Shared catalog.
+    /// Recycled this-profile rows stay private so Recycle Bin does not republish them.
+    /// </summary>
+    public static HashSet<string> ProfilePrivateBackingNames(
+        IEnumerable<(string Name, ApplicationProfileTemplateCatalogScope Scope)> nested)
+    {
+        var shared = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var specific = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var row in nested ?? Array.Empty<(string, ApplicationProfileTemplateCatalogScope)>())
+        {
+            if (string.IsNullOrWhiteSpace(row.Name))
+                continue;
+            var name = row.Name.Trim();
+            if (row.Scope == ApplicationProfileTemplateCatalogScope.ProfileSpecific)
+                specific.Add(name);
+            else
+                shared.Add(name);
+        }
+
+        specific.ExceptWith(shared);
+        return specific;
+    }
+
+    public static HashSet<string> LoadProfilePrivateBackingNames(IObjectSpace objectSpace)
+    {
+        ArgumentNullException.ThrowIfNull(objectSpace);
+        var rows = objectSpace.GetObjectsQuery<ApplicationProfileTemplate>()
+            .Where(t => t.TemplateKind != ApplicationProfileTemplateKind.PdfForm)
+            .Select(t => new { t.TemplateName, t.CatalogScope })
+            .AsEnumerable()
+            .Where(t => !string.IsNullOrWhiteSpace(t.TemplateName))
+            .Select(t => (t.TemplateName!.Trim(), t.CatalogScope));
+        return ProfilePrivateBackingNames(rows);
+    }
+
+    public static bool IsSharedIncludeName(IObjectSpace objectSpace, string? name, Guid exceptNestedId)
+    {
+        if (objectSpace == null || string.IsNullOrWhiteSpace(name))
+            return false;
+
+        var lowered = name.Trim().ToLowerInvariant();
+        return objectSpace.GetObjectsQuery<ApplicationProfileTemplate>()
+            .Any(t => t.ID != exceptNestedId
+                && t.CatalogScope != ApplicationProfileTemplateCatalogScope.ProfileSpecific
+                && t.TemplateKind != ApplicationProfileTemplateKind.PdfForm
+                && t.TemplateName != null
+                && t.TemplateName.ToLower() == lowered);
+    }
 
     public static bool MatchesSharedSearch(CatalogRow row, string? query)
     {

@@ -2,7 +2,21 @@
 
 Append-only. Newest first under **## Entries**.
 
-## Entries
+### 2026-09-10 — This profile only letter appeared on Shared
+
+- Need: Case 3/-308 Hasapdan Çykarmak. Create from yellow marks **Save to** = This profile only (`…_2`). After Approve the letter was on the **Shared** tab with Preview OFF. This profile count also went up.
+- Cause: Approve always writes a tenant `UserReportTemplate` (needed for merge). Shared lists every active user template, so a this-profile-only name showed as a library row other cases can Include.
+- Fix: Shared catalog skips names that exist only as This-profile nested rows. This-profile Approve does not overwrite an existing Shared master of the same name.
+- Officer: Stop F5, rebuild, restart. Open Resminamalar → **This profile**. `_2` stays there. Shared should not list it. Already-saved `_2` does not need Re-Approve.
+- Cross-skill: visa2026-resminamalar
+
+### 2026-09-10 — Analyze crashed: Specified part does not exist in the package
+
+- Need: Create from yellow marks Analyze on a ministry Word (Hasaba / Yuztutma). Visual Studio stopped on `InvalidOperationException` in `WordTemplateAddressing.EnumerateParagraphs` → `MainDocumentPart.Document`.
+- Cause: Open XML loads every related part when reading the body. The `.docx` ZIP still listed a relationship (image, header, styles, mail-merge, …) whose file was not in the package. Ingest OCR opened that Word and threw before yellow marks were read.
+- Fix: `WordOpenXmlPackage.EnsureLoadable` drops relationships and content-type overrides that point at missing parts, then Analyze / Generate open that copy. OCR and yellow extract no longer throw on a dangling part.
+- Officer: Stop F5, rebuild, restart. Analyze the same `.docx` again. Yellow marks should list. If Word still will not open, Save As `.docx` in Microsoft Word and Analyze that copy.
+- Cross-skill: visa2026-resminamalar
 
 ### 2026-09-10 — Cover letter catalog Preview left AFNUM/ADAT/MSRV/TPCNT blank
 

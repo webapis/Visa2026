@@ -1042,6 +1042,7 @@
                 Content = fileBytes,
                 FileName = fileName,
             })).ConfigureAwait(true);
+            AdoptRepairedOfficeBytes(ingest);
 
             if (!ingest.Suitability.CanContinue)
             {
@@ -1066,7 +1067,7 @@
                 .ConfigureAwait(true);
             _reviewFromYellowSource = yellows.Count > 0;
             if (_reviewFromYellowSource)
-                _yellowSourceBytes = fileBytes;
+                _yellowSourceBytes = _fileBytes;
 
             var snapshot = ScanApprovedReviewSnapshot.Deserialize(_reviewPlanJson);
             IReadOnlyList<ScanOfficeYellowSpan>? mappedSpans = null;
@@ -1231,6 +1232,7 @@
                     FileName = fileName,
                     SelectedPages = selectedPages,
                 })).ConfigureAwait(true);
+                AdoptRepairedOfficeBytes(ingest);
             }
 
             await SetAnalyzeStatusAsync("Finding yellow marks…");
@@ -1451,7 +1453,9 @@
         catch (Exception ex)
         {
             ErrorReporter.ReportReportPackageError("Template scan analysis failed.", ApplicationRuntimeLogCategories.TemplateScan, ex);
-            _message = "Analysis failed: " + ex.Message;
+            _message = IsMissingOpenXmlPart(ex)
+                ? "This Word file has a missing internal part and could not be read. In Word, use File → Save As (.docx), then Analyze that copy."
+                : "Analysis failed: " + ex.Message;
             _messageIsError = true;
         }
         finally
@@ -1462,6 +1466,16 @@
             await InvokeAsync(StateHasChanged);
         }
     }
+
+    private void AdoptRepairedOfficeBytes(ScanIngestResult ingest)
+    {
+        if (ingest.Input.OfficePackageBytes is { Length: > 0 } repaired)
+            _fileBytes = repaired;
+    }
+
+    private static bool IsMissingOpenXmlPart(Exception ex) =>
+        ex is InvalidOperationException
+        && ex.Message.Contains("Specified part does not exist", StringComparison.OrdinalIgnoreCase);
 
     private async Task SetAnalyzeStatusAsync(string status)
     {

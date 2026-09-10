@@ -1,6 +1,5 @@
 #nullable enable
 
-using DocumentFormat.OpenXml.Packaging;
 using Visa2026.Module.Services.TemplateConvert;
 
 namespace Visa2026.Module.Services.TemplateScan;
@@ -18,8 +17,7 @@ internal static class ScanOfficePictureExtractor
         if (officeBytes.Length < 64)
             return Array.Empty<DocumentRegion.WordDrawing>();
 
-        using var stream = new MemoryStream(officeBytes, writable: false);
-        using var document = WordprocessingDocument.Open(stream, false);
+        using var document = WordOpenXmlPackage.OpenRead(officeBytes);
         var results = new List<DocumentRegion.WordDrawing>();
 
         foreach (var addressed in WordTemplateAddressing.EnumerateParagraphs(document))

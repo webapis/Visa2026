@@ -91,10 +91,28 @@ public static class ApplicationProfileTemplateSaveHelper
             template,
             ApplicationProfileWizardTemplateCatalog.RootBoFromDataScope(request.DataScope));
 
-        ApplicationProfileTemplateUserReportBridge.WriteMasterFile(objectSpace, userTemplate, content, fileName);
+        if (ShouldWriteLinkedMasterFile(
+                request.CatalogScope,
+                ApplicationProfileWizardTemplateCatalog.IsSharedIncludeName(
+                    objectSpace,
+                    name,
+                    template.ID)))
+        {
+            ApplicationProfileTemplateUserReportBridge.WriteMasterFile(objectSpace, userTemplate, content, fileName);
+        }
 
         return template;
     }
+
+    /// <summary>
+    /// Shared-catalog Approve always updates the library master. This-profile Approve updates the
+    /// private merge backing file only when that name is not already a Shared include.
+    /// </summary>
+    internal static bool ShouldWriteLinkedMasterFile(
+        ApplicationProfileTemplateCatalogScope catalogScope,
+        bool nameIsUsedAsSharedInclude) =>
+        catalogScope != ApplicationProfileTemplateCatalogScope.ProfileSpecific
+        || !nameIsUsedAsSharedInclude;
 
     /// <summary>
     /// Same rule as the Application Profile Templates wizard: profile-specific rows may bind one

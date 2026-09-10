@@ -35,24 +35,34 @@ public sealed class ScanOcrExtractor : IScanOcrExtractor
 
     private static ScanOcrResult ExtractFromWord(byte[] bytes)
     {
-        using var stream = new MemoryStream(bytes, writable: false);
-        using var document = WordprocessingDocument.Open(stream, false);
-        var lines = new List<ScanOcrLine>();
-        var totalChars = 0;
-        foreach (var addressed in WordTemplateAddressing.EnumerateParagraphs(document))
+        try
         {
-            var text = WordTemplateAddressing.GetParagraphText(addressed.Paragraph)?.Trim();
-            if (string.IsNullOrWhiteSpace(text))
-                continue;
-            totalChars += text.Length;
-            lines.Add(new ScanOcrLine { PageIndex = 0, Text = text, Confidence = 1.0 });
-        }
+            using var document = WordOpenXmlPackage.OpenRead(bytes);
+            var lines = new List<ScanOcrLine>();
+            var totalChars = 0;
+            foreach (var addressed in WordTemplateAddressing.EnumerateParagraphs(document))
+            {
+                var text = WordTemplateAddressing.GetParagraphText(addressed.Paragraph)?.Trim();
+                if (string.IsNullOrWhiteSpace(text))
+                    continue;
+                totalChars += text.Length;
+                lines.Add(new ScanOcrLine { PageIndex = 0, Text = text, Confidence = 1.0 });
+            }
 
-        return new ScanOcrResult
+            return new ScanOcrResult
+            {
+                Lines = lines,
+                TextConfidence = lines.Count == 0 ? 0 : 1.0,
+            };
+        }
+        catch (InvalidOperationException)
         {
-            Lines = lines,
-            TextConfidence = lines.Count == 0 ? 0 : 1.0,
-        };
+            return EmptyResult();
+        }
+        catch (OpenXmlPackageException)
+        {
+            return EmptyResult();
+        }
     }
 
     private static ScanOcrResult ExtractFromExcel(byte[] bytes)

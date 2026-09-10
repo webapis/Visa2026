@@ -1,7 +1,6 @@
 #nullable enable
 
 using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Packaging;
 using Visa2026.Module.Services.TemplateConvert;
 
 namespace Visa2026.Module.Services.TemplateScan;
@@ -59,8 +58,7 @@ public static class ScanYellowMarkContextBuilder
         IReadOnlyList<ScanDetectedFieldDraft> drafts,
         Dictionary<string, ScanYellowMarkContext> map)
     {
-        using var stream = new MemoryStream(officeBytes, writable: false);
-        using var document = WordprocessingDocument.Open(stream, false);
+        using var document = WordOpenXmlPackage.OpenRead(officeBytes);
         var paragraphs = WordTemplateAddressing.EnumerateParagraphs(document)
             .Select(static a => (a.Address, Text: WordTemplateAddressing.GetParagraphText(a.Paragraph)))
             .ToList();

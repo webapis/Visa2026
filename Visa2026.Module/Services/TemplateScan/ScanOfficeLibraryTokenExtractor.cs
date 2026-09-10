@@ -1,7 +1,6 @@
 #nullable enable
 
 using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Packaging;
 using Visa2026.Module.Services.TemplateConvert;
 using Visa2026.Module.Services.UserReports;
 
@@ -110,8 +109,7 @@ public static class ScanOfficeLibraryTokenExtractor
         byte[] bytes,
         ApplicationProfilePlaceholderSet placeholderSet)
     {
-        using var stream = new MemoryStream(bytes, writable: false);
-        using var document = WordprocessingDocument.Open(stream, false);
+        using var document = WordOpenXmlPackage.OpenRead(bytes);
         var results = new List<ScanOfficeYellowSpan>();
 
         foreach (var addressed in WordTemplateAddressing.EnumerateParagraphs(document))

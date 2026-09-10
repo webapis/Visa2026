@@ -2,6 +2,7 @@
 
 using Microsoft.Extensions.Options;
 using Spire.Pdf;
+using Visa2026.Module.Services.TemplateConvert;
 
 namespace Visa2026.Module.Services.TemplateScan;
 
@@ -85,7 +86,9 @@ public sealed class ScanInputNormalizer : IScanInputNormalizer
             ],
             OriginalByteLength = request.Content.LongLength,
             FileName = request.FileName,
-            OfficePackageBytes = request.Content,
+            OfficePackageBytes = kind == ScanSourceKind.Word
+                ? WordOpenXmlPackage.EnsureLoadable(request.Content)
+                : request.Content,
         };
     }
     private ScanNormalizedInput NormalizePdf(ScanNormalizeRequest request)
