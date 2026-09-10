@@ -321,6 +321,28 @@ internal sealed partial class Visa2014ODataLookupResolver
         return ResolveByCode(_checkPoints, nameTmOrCode, c => c.Code);
     }
 
+    public Guid? ResolveDefaultCheckPoint() =>
+        _checkPoints.FirstOrDefault(c => c.IsDefault)?.Id ?? _checkPoints.FirstOrDefault()?.Id;
+
+    public Guid? ResolveDefaultCountry() =>
+        _countries.FirstOrDefault(c => c.IsDefault)?.Id ?? _countries.FirstOrDefault()?.Id;
+
+    public Guid? ResolveDefaultRegion() =>
+        _regions.FirstOrDefault(r => r.IsDefault)?.Id ?? _regions.FirstOrDefault()?.Id;
+
+    public Guid? ResolveDefaultCity(Guid? regionId)
+    {
+        if (regionId.HasValue)
+        {
+            var inRegion = _cities.Where(c => c.Region != null && c.Region.Id == regionId.Value).ToList();
+            var preferred = inRegion.FirstOrDefault(c => c.IsDefault) ?? inRegion.FirstOrDefault();
+            if (preferred != null)
+                return preferred.Id;
+        }
+
+        return _cities.FirstOrDefault(c => c.IsDefault)?.Id ?? _cities.FirstOrDefault()?.Id;
+    }
+
     public Guid? ResolveBorderZoneLocation(string? commaSeparatedLabels)
     {
         if (string.IsNullOrWhiteSpace(commaSeparatedLabels))

@@ -1,0 +1,28 @@
+# TravelHistory — PersonInApplication grain + TravelInformation join
+targetODataEntity: TravelHistory
+legacyTable: dbo.PersonInApplication
+
+fields:
+  - source: PersonInApplication.Oid
+    target: _legacyRowId
+    notes: Id-map key. TravelInformation.Oid stored as alias when unique.
+
+  - source: PersonInApplication.Employee / FamilyMember
+    target: Person
+    required: true
+
+  - source: TravelInformation.TravelDate
+    target: TravelDate
+    notes: Fallback PersonInApplication.RegistrationDate when TI date is null.
+
+  - source: ApplicationType (composite)
+    target: TravelType + MovementType
+    notes: App_Reg_Check_In External/Entry; Check_Out External/Exit; Internal variants.
+
+  - source: PersonInApplication.CheckPoint
+    target: CheckPoint
+    notes: Prefer line FK; fallback TravelInformation.CheckPoint. External only.
+
+  - source: PersonInApplication.PurposeOfTrave
+    target: Notes
+    notes: PurposeOfTravel lookup label. TravelHistory has no PurposeOfTravel property.

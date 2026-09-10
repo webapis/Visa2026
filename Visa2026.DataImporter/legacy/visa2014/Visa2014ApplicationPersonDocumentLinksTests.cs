@@ -59,4 +59,63 @@ public class Visa2014ApplicationPersonDocumentLinksTests
 
         Assert.Equal([targetPrevious, targetCurrent], ids);
     }
+
+    [Fact]
+    public void ResolveAddressLegacyKey_PrefersAddressOfResidence()
+    {
+        var aor = Guid.NewGuid();
+        var direct = Guid.NewGuid();
+        var raw = new Visa2014ApplicationProfileInstancePersonRawRow(
+            LegacyOid: Guid.NewGuid(),
+            LegacyApplicationProfileInstanceOid: Guid.NewGuid(),
+            LegacyEmployeeOid: Guid.NewGuid(),
+            LegacyFamilyMemberOid: null,
+            LegacyPassportOid: null,
+            LegacyPreviousPassportOid: null,
+            LegacyVisaOid: null,
+            LegacyWorkPermitOid: null,
+            LegacyPositionOid: null,
+            LegacyAddressOfResidenceOid: aor,
+            LegacyDirectAddressOid: direct,
+            ForEmployee: true,
+            ForFamilyMember: false,
+            EmployeeSubtypeId: null,
+            FamilySubtypeId: null,
+            HasInvitationWpFk: false,
+            InvitationAndWorkPermitRequired: null,
+            HasWizaWpFk: false,
+            WizaAndWorkPermitRequired: null,
+            ChangeInformation: null);
+
+        Assert.Equal(aor, Visa2014ApplicationPersonRequiredPersonLinks.ResolveAddressLegacyKey(raw));
+    }
+
+    [Fact]
+    public void ResolveAddressLegacyKey_EmployeeDirectAddress_WhenNoAor()
+    {
+        var direct = Guid.NewGuid();
+        var raw = new Visa2014ApplicationProfileInstancePersonRawRow(
+            LegacyOid: Guid.NewGuid(),
+            LegacyApplicationProfileInstanceOid: Guid.NewGuid(),
+            LegacyEmployeeOid: Guid.NewGuid(),
+            LegacyFamilyMemberOid: null,
+            LegacyPassportOid: null,
+            LegacyPreviousPassportOid: null,
+            LegacyVisaOid: null,
+            LegacyWorkPermitOid: null,
+            LegacyPositionOid: null,
+            LegacyAddressOfResidenceOid: null,
+            LegacyDirectAddressOid: direct,
+            ForEmployee: true,
+            ForFamilyMember: false,
+            EmployeeSubtypeId: null,
+            FamilySubtypeId: null,
+            HasInvitationWpFk: false,
+            InvitationAndWorkPermitRequired: null,
+            HasWizaWpFk: false,
+            WizaAndWorkPermitRequired: null,
+            ChangeInformation: null);
+
+        Assert.Equal(direct, Visa2014ApplicationPersonRequiredPersonLinks.ResolveAddressLegacyKey(raw));
+    }
 }

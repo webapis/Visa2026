@@ -1,3 +1,4 @@
+using System.Linq;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.ApplicationPersonRoster;
@@ -40,7 +41,11 @@ internal static class Visa2014ApplicationProfileInstancePersonImporter
         int batchSize = 50,
         string? passportIdMapPath = null,
         string? visaIdMapPath = null,
-        string? workPermitItemIdMapPath = null)
+        string? workPermitItemIdMapPath = null,
+        string? educationIdMapPath = null,
+        string? addressIdMapPath = null,
+        string? positionHistoryIdMapPath = null,
+        string? travelHistoryIdMapPath = null)
     {
         if (!dryRun && objectSpaceFactory == null)
         {
@@ -56,6 +61,12 @@ internal static class Visa2014ApplicationProfileInstancePersonImporter
         var passportIdMap = LoadOptionalIdMap(passportIdMapPath);
         var visaIdMap = LoadOptionalIdMap(visaIdMapPath);
         var workPermitItemIdMap = LoadOptionalIdMap(workPermitItemIdMapPath);
+        var educationIdMap = LoadOptionalIdMap(educationIdMapPath);
+        var addressIdMap = LoadOptionalIdMap(addressIdMapPath);
+        var positionHistoryIdMap = LoadOptionalIdMap(positionHistoryIdMapPath);
+        var travelHistoryIdMap = LoadOptionalIdMap(travelHistoryIdMapPath);
+        var currentEducationByPerson = Visa2014PersonCurrentFieldInference.BuildCurrentEducationByPerson(
+            legacyConnectionString, verbose);
         if (applicationIdMap.Count == 0)
         {
             return new Visa2014ApplicationProfileInstancePersonImportResult
@@ -91,6 +102,7 @@ internal static class Visa2014ApplicationProfileInstancePersonImporter
         }
 
         var rawRows = Visa2014ApplicationProfileInstancePersonTransform.LoadRawRows(legacyConnectionString, maxRows, verbose);
+        var rawByOid = rawRows.ToDictionary(r => r.LegacyOid);
         var batch = Visa2014ApplicationProfileInstancePersonTransform.Transform(rawRows, out var skipped, out _);
         var existingMap = LoadOptionalIdMap(applicationPersonIdMapOutputPath);
 
@@ -137,16 +149,13 @@ internal static class Visa2014ApplicationProfileInstancePersonImporter
             var legacyOid = (Guid)row["_legacyRowId"]!;
             processed++;
 
-            if (idMap.ContainsKey(legacyOid))
-            {
-                skippedAlready++;
-                ReportProgress(applicationPersonIdMapOutputPath, processed, total, posted, failed, skippedAlready + skippedMissing);
-                continue;
-            }
-
+            var alreadyImported = idMap.ContainsKey(legacyOid);
             if (!TryResolveIds(row, applicationIdMap, personIdMap, out var applicationId, out var personId, out var miss))
             {
-                skippedMissing++;
+                if (alreadyImported)
+                    skippedAlready++;
+                else
+                    skippedMissing++;
                 if (verbose)
                     Console.WriteLine($"  SKIP {legacyOid}: {miss}");
                 ReportProgress(applicationPersonIdMapOutputPath, processed, total, posted, failed, skippedAlready + skippedMissing);
@@ -159,7 +168,10 @@ internal static class Visa2014ApplicationProfileInstancePersonImporter
                 var person = objectSpace.GetObjectByKey<Bo.Person>(personId);
                 if (application == null || person == null)
                 {
-                    skippedMissing++;
+                    if (alreadyImported)
+                        skippedAlready++;
+                    else
+                        skippedMissing++;
                     if (verbose)
                         Console.WriteLine($"  SKIP {legacyOid}: target Application/Person missing in DB");
                     ReportProgress(applicationPersonIdMapOutputPath, processed, total, posted, failed, skippedAlready + skippedMissing);
@@ -176,9 +188,24 @@ internal static class Visa2014ApplicationProfileInstancePersonImporter
                 }
 
                 PinDocumentSnapshot(objectSpace, application, linked, row, passportIdMap, visaIdMap, workPermitItemIdMap);
+                if (rawByOid.TryGetValue(legacyOid, out var raw))
+                {
+                    Visa2014ApplicationPersonRequiredPersonLinks.PinRequiredKinds(
+                        objectSpace, application, linked, raw,
+                        educationIdMap, currentEducationByPerson, addressIdMap, positionHistoryIdMap,
+                        travelHistoryIdMap,
+                        out _, out _, out _, out _,
+                        pinTravel: false);
+                }
 
-                idMap[legacyOid] = personId;
-                posted++;
+                if (alreadyImported)
+                    skippedAlready++;
+                else
+                {
+                    idMap[legacyOid] = personId;
+                    posted++;
+                }
+
                 autoLinked += ApplicationProfileInstancePersonResolver.LoadLinks(objectSpace, application.ID, personId).Count;
                 pendingInBatch++;
 
@@ -203,6 +230,13 @@ internal static class Visa2014ApplicationProfileInstancePersonImporter
 
         if (pendingInBatch > 0)
             objectSpace.CommitChanges();
+
+        var rosterBackfill = Visa2014ApplicationPersonRequiredPersonLinks.BackfillFromRoster(
+            objectSpace, dryRun: false);
+        Console.WriteLine(
+            $"INF Roster EPA backfill: education {rosterBackfill.Education} " +
+            $"address {rosterBackfill.Address} position {rosterBackfill.Position} travel {rosterBackfill.Travel}");
+        Console.Out.Flush();
 
         if (!string.IsNullOrWhiteSpace(applicationPersonIdMapOutputPath))
             await Visa2014IdMapHelper.SaveAsync(applicationPersonIdMapOutputPath, idMap);

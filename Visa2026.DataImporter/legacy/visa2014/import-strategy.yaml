@@ -116,9 +116,16 @@ strategy:
       why: All VISA2014 rows are historical. Import must not attach PersonCurrentItems / latest-N as of the import day.
       rosterResolvedLinks: person_in_application_snapshot
       snapshotKinds: [Passport, PreviousPassport, Visa, WorkPermitItem]
+      snapshotKindsWhenProfileRequires:
+        Education: RequirePersonEducation
+        Position: RequirePersonPosition
+        AddressOfResidence: RequirePersonAddressOfResidence
+        TravelHistory: RequirePersonTravelHistory
       skipLatestNDuringDataImport: true
       pinAtRosterImport: true
       pinCorrectionAlsoWorkPermitItem: true
+      pinRequiredEducationPositionAddressAtRosterAndCorrection: true
+      pinRequiredTravelHistoryAtRosterAndCorrection: true
       officerRelinkMayUseToday: true
       missingIdMap: leave_unlinked_until_oid_in_map_then_pin
     piaVisaResolvedLinkMismatch:
@@ -161,6 +168,11 @@ waves:
     importPhase: person-domain
     status: not_started
     pilotEntity: Person
+    notes: >
+      Includes TravelHistory after AddressOfResidence (order.yaml). Grain is
+      PersonInApplication joined to TravelInformation; CLI --entity TravelHistory.
+      Pin via SQL roster backfill on Registration ActionFamily only
+      (--travel-roster-backfill-only). Do not walk all PersonInApplication rows.
   - id: application-domain
     importPhase: application-domain
     status: not_started

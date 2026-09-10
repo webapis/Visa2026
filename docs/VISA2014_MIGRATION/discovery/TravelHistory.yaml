@@ -1,0 +1,11 @@
+# Discovery dossier — TravelHistory
+status: complete
+legacyGrain: dbo.PersonInApplication
+legacyJoin: dbo.TravelInformation (EmployeeEntryDate / FamilyMemberEntryDate)
+notes: |
+  Do not import TravelInformation as a standalone BO. Registration travel lives on
+  PersonInApplication (checkpoint, PurposeOfTrave, registration date) plus optional
+  TravelInformation (TravelDate, CheckPoint). Derive External/Internal Entry/Exit from
+  parent ApplicationType (App_Reg_Check_In / _Out / _Internal). Skip business-trip types.
+  Target is person TPH TravelHistory. Pin to roster when RequirePersonTravelHistory.
+  Live registration auto-sync stays retired.

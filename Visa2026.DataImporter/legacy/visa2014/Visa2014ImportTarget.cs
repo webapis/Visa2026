@@ -50,6 +50,9 @@ internal sealed class Visa2014ODataImportTarget : IVisa2014ImportTarget
             nameof(Passport) => (await _api.CreateAsync<Passport>(entityName, payload))?.Id,
             nameof(Visa) => (await _api.CreateAsync<Visa>(entityName, payload))?.Id,
             nameof(Education) => (await _api.CreateAsync<Education>(entityName, payload))?.Id,
+            nameof(Bo.ExternalArrival) or nameof(Bo.ExternalDeparture)
+                or nameof(Bo.InternalArrival) or nameof(Bo.InternalDeparture) =>
+                (await _api.CreateAsync<TravelHistory>("TravelHistory", payload))?.Id,
             nameof(EmployeePositionHistory) => (await _api.CreateAsync<EmployeePositionHistory>(entityName, payload))?.Id,
             nameof(EmployeeSalary) => (await _api.CreateAsync<EmployeeSalary>(entityName, payload))?.Id,
             nameof(AddressOfResidence) => (await _api.CreateAsync<AddressOfResidence>(entityName, payload))?.Id,

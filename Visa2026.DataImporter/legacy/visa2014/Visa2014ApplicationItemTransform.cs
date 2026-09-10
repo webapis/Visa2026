@@ -512,7 +512,7 @@ internal static class Visa2014ApplicationItemTransform
         : raw.ForFamilyMember ? raw.LegacyFamilyMemberOid
         : null;
 
-    private static void DeriveRegistrationTravelTypes(string? applicationTypeName, Dictionary<string, object?> row)
+    internal static void DeriveRegistrationTravelTypes(string? applicationTypeName, Dictionary<string, object?> row)
     {
         row["TravelType"] = null;
         row["MovementType"] = null;

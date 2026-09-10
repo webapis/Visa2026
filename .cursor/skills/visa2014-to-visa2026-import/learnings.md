@@ -1,3 +1,40 @@
+### 2026-09-09 - TravelHistory officer verified local PG
+
+- **Phase**: person-domain / TravelHistory
+- **Outcome**: officer confirmed fixed (Registration case chips after SQL pin)
+- **Environment**: local PostgreSQL `visa2026`
+- **Next**: Halt. Demo/Prod TravelHistory not run.
+### 2026-09-09 - TravelHistory pin: Registration SQL backfill, not all PIA
+
+- **Phase**: correction / roster ResolvedLinks
+- **Mode**: --correct-visa2014-application-person-document-links --travel-roster-backfill-only --legacy-source calik-energi-local-pg --inprocess --no-wait
+- **Outcome**: success (exit **0**)
+- **Why**: PIA checkpoint / RegistrationDate / travel FKs exist only when the Application is Registration. Walking all **22845** PIA rows for travel is wrong and slow. Stopped the full PIA pin (~7k/22845). Pin missing TravelHistory links where profile `ActionFamily = Registration` (2) and `RequirePersonTravelHistory`.
+- **Environment**: local PostgreSQL `visa2026`
+- **Counts**: SQL missing Registration pairs **7222** / links changed **7222**. No PIA loop.
+- **Log**: `artifacts/headless-import/travel-roster-backfill-20260909.log`
+- **Next**: refresh a Registration case. Chips stay 0 only when that person has no imported TravelHistory. Halt.
+### 2026-09-09 - TravelHistory from PersonInApplication .15 -> local PG
+
+- **Phase**: person-domain / TravelHistory
+- **Mode**: `--import-visa2014 --entity TravelHistory --legacy-source calik-energi-local-pg --inprocess --no-wait --batch-size 50`
+- **Outcome**: success (exit **0**, Failed **0**)
+- **Why**: Case Travel history chips were 0 because travel was never imported. Grain is **PersonInApplication** (checkpoint, PurposeOfTrave, RegistrationDate, Employee/FamilyMemberEntryDate FKs), joined to `dbo.TravelInformation` for TravelDate. Not TI-only. Registration types only (App_Reg_Check_In/_Out/_Internal). Live registration TravelHistory sync stays retired.
+- **Environment**: local PostgreSQL `visa2026` / `calik-energi-local-pg` <- `10.100.128.15` / `VISA2015`
+- **Counts**: Legacy SQL **22845** / Prepared **3512** / Posted **3512** / Failed **0** / no Person map **0** / already **0** / skipped **19333** (non-registration or no date) / dedupe **240**.
+- **Id-map**: `id-maps/calik-energi-local-pg/TravelHistory.json` (copied bin -> source). Key = PIA.Oid; TI.Oid alias when unique.
+- **Log**: `artifacts/headless-import/travel-history-20260909.log`
+- **Next**: `--correct-visa2014-application-person-document-links` to pin TravelHistory when `RequirePersonTravelHistory`. Halt until proceed. Last-N expected 0 when locked and the person has no travel rows.
+### 2026-09-09 - EPA roster backfill (Education/Position/Address) local PG
+
+- **Phase**: correction / roster ResolvedLinks
+- **Mode**: `--correct-visa2014-application-person-document-links --epa-roster-backfill-only --legacy-source calik-energi-local-pg --inprocess --no-wait` (no VISA2015 round-trip)
+- **Outcome**: success (exit **0**)
+- **Why**: Case workspace chips are `ApplicationProfileInstancePersonResolvedLink`, not Person children. Per-PIA `GetObjectsQuery` + `e.Person != null` missed co-applicants (e.g. `2/-311` Turan Birincioglu had Education/Position/Address on Person, chips 0). Slow PIA loop never finished.
+- **Fix**: SQL DISTINCT ON missing pairs where profile `RequirePerson*` and the person has a live child row; `ReplaceKind` in batches of 50. Same backfill runs at end of roster import and full document-link correction.
+- **Counts**: Education **4299** / Address **4729** / Position **3959**. Remaining required+has-child gaps **0**. `2/-311` both people now have LinkKind 0–4.
+- **Log**: `artifacts/headless-import/epa-roster-backfill-20260909.log`
+- **Next**: refresh Case workspace `2/-311`. Chips 0 remain only when that person has no Education/Position/Address row in Visa2026.
 ### 2026-09-08 - FamilyProofDocument file wave .15 -> local PG (attachmentsSequence)
 
 - **Phase**: file import

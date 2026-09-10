@@ -33,6 +33,12 @@ fields:
       in the Visa id-map. Required after all types: --visa-remainder then
       --correct-visa2014-application-person-document-links. Optional after a
       type Visa wave. Never --visa-remainder on --application-type.
+      When the instance Application Profile requires Education, Position, or
+      AddressOfResidence, pin those kinds from PIA.Position / PIA.AddressOfResidence
+      / PIA.Address (id-map) or the person's imported current row. Do not skip
+      that pin because IsDataImport disables RefreshResolvedLinks.
+      TravelHistory is a person child imported from the same PIA row (join
+      TravelInformation). Pin when RequirePersonTravelHistory.
 
   - source: PersonInApplication.Passport
     target: ResolvedLinks.Passport (current)

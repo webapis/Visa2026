@@ -56,4 +56,18 @@ public class ApplicationWorkspaceLastNExpectedTests
         Assert.Equal(2, ApplicationWorkspaceLastNExpected.Resolve(
             ApplicationProfileInstancePersonLinkKind.Passport, lastN: 2, availableActive: 1, linksLocked: false));
     }
+
+    [Fact]
+    public void TravelHistory_none_locked_expects_zero()
+    {
+        Assert.Equal(0, ApplicationWorkspaceLastNExpected.Resolve(
+            ApplicationProfileInstancePersonLinkKind.TravelHistory, lastN: 1, availableActive: 0, linksLocked: true));
+    }
+
+    [Fact]
+    public void TravelHistory_one_row_expects_one()
+    {
+        Assert.Equal(1, ApplicationWorkspaceLastNExpected.Resolve(
+            ApplicationProfileInstancePersonLinkKind.TravelHistory, lastN: 1, availableActive: 1, linksLocked: true));
+    }
 }

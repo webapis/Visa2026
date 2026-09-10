@@ -13,6 +13,10 @@ internal sealed class Visa2014ApplicationPersonDocumentLinkCorrectionResult
     public int PassportChanged { get; init; }
     public int VisaChanged { get; init; }
     public int WorkPermitItemChanged { get; init; }
+    public int EducationChanged { get; init; }
+    public int AddressChanged { get; init; }
+    public int PositionChanged { get; init; }
+    public int TravelChanged { get; init; }
     public int AlreadyCorrect { get; init; }
     public int SkippedMissingParentIdMap { get; init; }
     public int SkippedNoSnapshot { get; init; }
@@ -20,8 +24,8 @@ internal sealed class Visa2014ApplicationPersonDocumentLinkCorrectionResult
 }
 
 /// <summary>
-/// Re-pins Passport/Visa/WorkPermitItem ResolvedLinks from PersonInApplication
-/// (id-map), replacing latest-N / "today" leftovers.
+/// Re-pins Passport/Visa/WorkPermitItem from PersonInApplication, and Education /
+/// Position / AddressOfResidence when the instance profile requires those kinds.
 /// </summary>
 internal static class Visa2014ApplicationPersonDocumentLinkCorrection
 {
@@ -49,15 +53,20 @@ internal static class Visa2014ApplicationPersonDocumentLinkCorrection
         Console.WriteLine($"INF Target SQL: {MaskConnectionString(targetConnection)}");
         if (dryRun) Console.WriteLine("INF Mode: dry-run (no writes)");
 
-        try
+        var epaBackfillOnly = HasArg(args, "--epa-roster-backfill-only");
+        var travelBackfillOnly = HasArg(args, "--travel-roster-backfill-only");
+        if (!epaBackfillOnly && !travelBackfillOnly)
         {
-            Visa2014LegacySqlGuard.EnsureLegacyReadCredentials(source.ConnectionString);
-            await Visa2014LegacySqlGuard.EnsureLegacyConnectionAsync(source.ConnectionString);
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"ERR Legacy SQL: {ex.Message}");
-            return 1;
+            try
+            {
+                Visa2014LegacySqlGuard.EnsureLegacyReadCredentials(source.ConnectionString);
+                await Visa2014LegacySqlGuard.EnsureLegacyConnectionAsync(source.ConnectionString);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"ERR Legacy SQL: {ex.Message}");
+                return 1;
+            }
         }
 
         HeadlessMigrationHost? host = null;
@@ -66,6 +75,32 @@ internal static class Visa2014ApplicationPersonDocumentLinkCorrection
         {
             host = HeadlessMigrationHost.Start(targetConnection);
             importScope = MigrationImportContext.BeginDataImportScope();
+
+            if (epaBackfillOnly || travelBackfillOnly)
+            {
+                using var objectSpace = host.ObjectSpaceFactory.CreateNonSecuredObjectSpace(
+                    typeof(Bo.ApplicationProfileInstance));
+                MigrationImportContext.ApplyImportObjectSpaceHooks(objectSpace);
+                if (travelBackfillOnly)
+                    Console.WriteLine("INF Mode: Registration TravelHistory roster backfill only (no PIA loop)");
+                else
+                    Console.WriteLine("INF Mode: roster Education/Position/Address backfill only");
+                var backfill = Visa2014ApplicationPersonRequiredPersonLinks.BackfillFromRoster(
+                    objectSpace, dryRun,
+                    education: epaBackfillOnly,
+                    address: epaBackfillOnly,
+                    position: epaBackfillOnly,
+                    travel: travelBackfillOnly);
+                if (epaBackfillOnly)
+                {
+                    Console.WriteLine($"INF Education links changed: {backfill.Education}");
+                    Console.WriteLine($"INF Address links changed: {backfill.Address}");
+                    Console.WriteLine($"INF Position links changed: {backfill.Position}");
+                }
+                if (travelBackfillOnly)
+                    Console.WriteLine($"INF TravelHistory links changed: {backfill.Travel}");
+                return 0;
+            }
 
             var applicationIdMap = LoadMap(
                 GetOptionValue(args, "--application-id-map")
@@ -82,12 +117,28 @@ internal static class Visa2014ApplicationPersonDocumentLinkCorrection
             var workPermitItemIdMap = LoadMap(
                 GetOptionValue(args, "--workpermititem-id-map")
                 ?? source.IdMapPath(dataImporterRoot, "WorkPermitItem"));
+            var educationIdMap = LoadMap(
+                GetOptionValue(args, "--education-id-map")
+                ?? source.IdMapPath(dataImporterRoot, "Education"));
+            var addressIdMap = LoadMap(
+                GetOptionValue(args, "--address-id-map")
+                ?? source.IdMapPath(dataImporterRoot, "AddressOfResidence"));
+            var positionHistoryIdMap = LoadMap(
+                GetOptionValue(args, "--employeepositionhistory-id-map")
+                ?? source.IdMapPath(dataImporterRoot, "EmployeePositionHistory"));
+            var travelHistoryIdMap = LoadMap(
+                GetOptionValue(args, "--travelhistory-id-map")
+                ?? source.IdMapPath(dataImporterRoot, "TravelHistory"));
 
             Console.WriteLine($"INF ApplicationProfileInstance id-map: {applicationIdMap.Count}");
             Console.WriteLine($"INF Person id-map: {personIdMap.Count}");
             Console.WriteLine($"INF Passport id-map: {passportIdMap.Count}");
             Console.WriteLine($"INF Visa id-map: {visaIdMap.Count}");
             Console.WriteLine($"INF WorkPermitItem id-map: {workPermitItemIdMap.Count}");
+            Console.WriteLine($"INF Education id-map: {educationIdMap.Count}");
+            Console.WriteLine($"INF AddressOfResidence id-map: {addressIdMap.Count}");
+            Console.WriteLine($"INF EmployeePositionHistory id-map: {positionHistoryIdMap.Count}");
+            Console.WriteLine($"INF TravelHistory id-map: {travelHistoryIdMap.Count}");
 
             var result = Run(
                 host.ObjectSpaceFactory,
@@ -97,6 +148,10 @@ internal static class Visa2014ApplicationPersonDocumentLinkCorrection
                 passportIdMap,
                 visaIdMap,
                 workPermitItemIdMap,
+                educationIdMap,
+                addressIdMap,
+                positionHistoryIdMap,
+                travelHistoryIdMap,
                 dryRun,
                 verbose);
 
@@ -104,6 +159,10 @@ internal static class Visa2014ApplicationPersonDocumentLinkCorrection
             Console.WriteLine($"INF Passport links changed: {result.PassportChanged}");
             Console.WriteLine($"INF Visa links changed: {result.VisaChanged}");
             Console.WriteLine($"INF WorkPermitItem links changed: {result.WorkPermitItemChanged}");
+            Console.WriteLine($"INF Education links changed: {result.EducationChanged}");
+            Console.WriteLine($"INF Address links changed: {result.AddressChanged}");
+            Console.WriteLine($"INF Position links changed: {result.PositionChanged}");
+            Console.WriteLine($"INF TravelHistory links changed: {result.TravelChanged}");
             Console.WriteLine($"INF Already correct: {result.AlreadyCorrect}");
             Console.WriteLine($"INF Skipped missing parent id-map: {result.SkippedMissingParentIdMap}");
             Console.WriteLine($"INF Skipped (no mapped snapshot): {result.SkippedNoSnapshot}");
@@ -129,6 +188,10 @@ internal static class Visa2014ApplicationPersonDocumentLinkCorrection
         IReadOnlyDictionary<Guid, Guid> passportIdMap,
         IReadOnlyDictionary<Guid, Guid> visaIdMap,
         IReadOnlyDictionary<Guid, Guid> workPermitItemIdMap,
+        IReadOnlyDictionary<Guid, Guid> educationIdMap,
+        IReadOnlyDictionary<Guid, Guid> addressIdMap,
+        IReadOnlyDictionary<Guid, Guid> positionHistoryIdMap,
+        IReadOnlyDictionary<Guid, Guid> travelHistoryIdMap,
         bool dryRun,
         bool verbose)
     {
@@ -138,16 +201,34 @@ internal static class Visa2014ApplicationPersonDocumentLinkCorrection
         var passportChanged = 0;
         var visaChanged = 0;
         var workPermitItemChanged = 0;
+        var educationChanged = 0;
+        var addressChanged = 0;
+        var positionChanged = 0;
+        var travelChanged = 0;
         var alreadyCorrect = 0;
         var skippedMissingParent = 0;
         var skippedNoSnapshot = 0;
+
+        var currentEducationByPerson = Visa2014PersonCurrentFieldInference.BuildCurrentEducationByPerson(
+            legacyConnectionString, verbose);
 
         using var objectSpace = objectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Bo.ApplicationProfileInstance));
         MigrationImportContext.ApplyImportObjectSpaceHooks(objectSpace);
 
         var pending = 0;
+        var processed = 0;
+        var total = rawRows.Count;
+        Console.WriteLine($"INF PIA pin loop: {total} row(s)");
+        Console.Out.Flush();
         foreach (var raw in rawRows)
         {
+            processed++;
+            if (processed == 1 || processed % 500 == 0 || processed == total)
+            {
+                Console.WriteLine(
+                    $"INF PIA pin progress: {processed}/{total} travelChanged={travelChanged} alreadyCorrect={alreadyCorrect}");
+                Console.Out.Flush();
+            }
             var personOid = Visa2014ApplicationProfileInstancePersonTransform.ResolvePersonOid(raw);
             if (personOid is not Guid legacyPerson || legacyPerson == Guid.Empty)
             {
@@ -168,11 +249,6 @@ internal static class Visa2014ApplicationPersonDocumentLinkCorrection
                 visaIdMap, raw.LegacyVisaOid);
             var workPermitItemIds = Visa2014ApplicationPersonDocumentLinks.MapLegacyOids(
                 workPermitItemIdMap, raw.LegacyWorkPermitOid);
-            if (passportIds.Count == 0 && visaIds.Count == 0 && workPermitItemIds.Count == 0)
-            {
-                skippedNoSnapshot++;
-                continue;
-            }
 
             var application = objectSpace.GetObjectByKey<Bo.ApplicationProfileInstance>(applicationId);
             var person = objectSpace.GetObjectByKey<Bo.Person>(personId);
@@ -205,8 +281,61 @@ internal static class Visa2014ApplicationPersonDocumentLinkCorrection
             Visa2014ApplicationPersonDocumentLinks.Diff(existingPassports, passportIds, out var removeP, out var addP);
             Visa2014ApplicationPersonDocumentLinks.Diff(existingVisas, visaIds, out var removeV, out var addV);
             Visa2014ApplicationPersonDocumentLinks.Diff(existingWorkPermits, workPermitItemIds, out var removeW, out var addW);
+
+            var educationIds = ApplicationProfileInstancePersonResolver.IsAutoLinkEnabled(
+                    application, ApplicationProfileInstancePersonLinkKind.Education)
+                ? Visa2014ApplicationPersonRequiredPersonLinks.ResolveEducationIds(
+                    objectSpace, person, raw, educationIdMap, currentEducationByPerson)
+                : [];
+            var addressIds = ApplicationProfileInstancePersonResolver.IsAutoLinkEnabled(
+                    application, ApplicationProfileInstancePersonLinkKind.AddressOfResidence)
+                ? Visa2014ApplicationPersonRequiredPersonLinks.ResolveAddressIds(
+                    objectSpace, person, raw, addressIdMap,
+                    application.ApplicationDate == default ? DateTime.Today : application.ApplicationDate.Date)
+                : [];
+            var positionIds = ApplicationProfileInstancePersonResolver.IsAutoLinkEnabled(
+                    application, ApplicationProfileInstancePersonLinkKind.Position)
+                ? Visa2014ApplicationPersonRequiredPersonLinks.ResolvePositionIds(
+                    objectSpace, person, raw, positionHistoryIdMap,
+                    application.ApplicationDate == default ? DateTime.Today : application.ApplicationDate.Date)
+                : [];
+            // Travel lives on Registration applications only. Pin via SQL backfill, not every PIA row.
+
+            var existingEducation = existing
+                .Where(l => l.LinkKind == ApplicationProfileInstancePersonLinkKind.Education)
+                .Select(l => l.LinkedObjectId)
+                .Where(id => id is Guid g && g != Guid.Empty)
+                .Select(id => id!.Value)
+                .ToList();
+            var existingAddress = existing
+                .Where(l => l.LinkKind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence)
+                .Select(l => l.LinkedObjectId)
+                .Where(id => id is Guid g && g != Guid.Empty)
+                .Select(id => id!.Value)
+                .ToList();
+            var existingPosition = existing
+                .Where(l => l.LinkKind == ApplicationProfileInstancePersonLinkKind.Position)
+                .Select(l => l.LinkedObjectId)
+                .Where(id => id is Guid g && g != Guid.Empty)
+                .Select(id => id!.Value)
+                .ToList();
+            Visa2014ApplicationPersonDocumentLinks.Diff(existingEducation, educationIds, out var removeE, out var addE);
+            Visa2014ApplicationPersonDocumentLinks.Diff(existingAddress, addressIds, out var removeA, out var addA);
+            Visa2014ApplicationPersonDocumentLinks.Diff(existingPosition, positionIds, out var removePos, out var addPos);
+
+            var documentSnapshotEmpty = passportIds.Count == 0 && visaIds.Count == 0 && workPermitItemIds.Count == 0;
+            var requiredEmpty = educationIds.Count == 0 && addressIds.Count == 0 && positionIds.Count == 0;
+            if (documentSnapshotEmpty && requiredEmpty)
+            {
+                skippedNoSnapshot++;
+                continue;
+            }
+
             if (removeP.Count == 0 && addP.Count == 0 && removeV.Count == 0 && addV.Count == 0
-                && removeW.Count == 0 && addW.Count == 0)
+                && removeW.Count == 0 && addW.Count == 0
+                && removeE.Count == 0 && addE.Count == 0
+                && removeA.Count == 0 && addA.Count == 0
+                && removePos.Count == 0 && addPos.Count == 0)
             {
                 alreadyCorrect++;
                 continue;
@@ -217,7 +346,8 @@ internal static class Visa2014ApplicationPersonDocumentLinkCorrection
                 Console.WriteLine(
                     $"INF app {application.FullApplicationNumber} person {personId}: " +
                     $"passport -{removeP.Count}/+{addP.Count} visa -{removeV.Count}/+{addV.Count} " +
-                    $"wp -{removeW.Count}/+{addW.Count}");
+                    $"wp -{removeW.Count}/+{addW.Count} edu -{removeE.Count}/+{addE.Count} " +
+                    $"addr -{removeA.Count}/+{addA.Count} pos -{removePos.Count}/+{addPos.Count}");
             }
 
             if (!dryRun)
@@ -234,11 +364,22 @@ internal static class Visa2014ApplicationPersonDocumentLinkCorrection
                     workPermitItemChanged += Visa2014ApplicationPersonDocumentLinks.ReplaceKind(
                         objectSpace, application, person,
                         ApplicationProfileInstancePersonLinkKind.WorkPermitItem, workPermitItemIds);
+                Visa2014ApplicationPersonRequiredPersonLinks.PinRequiredKinds(
+                    objectSpace, application, person, raw,
+                    educationIdMap, currentEducationByPerson, addressIdMap, positionHistoryIdMap,
+                    travelHistoryIdMap,
+                    out var eduN, out var addrN, out var posN, out var travelN,
+                    pinTravel: false);
+                educationChanged += eduN;
+                addressChanged += addrN;
+                positionChanged += posN;
                 pending++;
                 if (pending >= 50)
                 {
                     objectSpace.CommitChanges();
                     pending = 0;
+                    Console.WriteLine($"INF PIA pin committed");
+                    Console.Out.Flush();
                 }
             }
             else
@@ -249,11 +390,25 @@ internal static class Visa2014ApplicationPersonDocumentLinkCorrection
                     visaChanged++;
                 if (workPermitItemIds.Count > 0 && (removeW.Count > 0 || addW.Count > 0))
                     workPermitItemChanged++;
+                if (educationIds.Count > 0 && (removeE.Count > 0 || addE.Count > 0))
+                    educationChanged++;
+                if (addressIds.Count > 0 && (removeA.Count > 0 || addA.Count > 0))
+                    addressChanged++;
+                if (positionIds.Count > 0 && (removePos.Count > 0 || addPos.Count > 0))
+                    positionChanged++;
             }
         }
 
         if (!dryRun && pending > 0)
             objectSpace.CommitChanges();
+
+        var rosterBackfill = Visa2014ApplicationPersonRequiredPersonLinks.BackfillFromRoster(
+            objectSpace, dryRun,
+            education: true, address: true, position: true, travel: true);
+        educationChanged += rosterBackfill.Education;
+        addressChanged += rosterBackfill.Address;
+        positionChanged += rosterBackfill.Position;
+        travelChanged += rosterBackfill.Travel;
 
         return new Visa2014ApplicationPersonDocumentLinkCorrectionResult
         {
@@ -261,6 +416,10 @@ internal static class Visa2014ApplicationPersonDocumentLinkCorrection
             PassportChanged = passportChanged,
             VisaChanged = visaChanged,
             WorkPermitItemChanged = workPermitItemChanged,
+            EducationChanged = educationChanged,
+            AddressChanged = addressChanged,
+            PositionChanged = positionChanged,
+            TravelChanged = travelChanged,
             AlreadyCorrect = alreadyCorrect,
             SkippedMissingParentIdMap = skippedMissingParent,
             SkippedNoSnapshot = skippedNoSnapshot,

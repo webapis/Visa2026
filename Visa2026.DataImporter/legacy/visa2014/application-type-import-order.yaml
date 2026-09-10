@@ -122,9 +122,13 @@ postAllTypeSlices:
     lockedAt: 2026-09-08
     after: visa-remainder
     notes: |
-      This wipe 2026-09-08 after visa remainder: exit **0**. Passport **0**,
-      Visa **2**, WorkPermitItem **2** changed; already correct **22262**.
-      postAllTypeSlices scalar complete. Next: attachmentsSequence.
+      Pins PIA Passport/Visa/WorkPermitItem. Also pins Education, Position,
+      AddressOfResidence when RequirePerson* is on. TravelHistory: Registration
+      ActionFamily SQL backfill only (--travel-roster-backfill-only); do not walk
+      all PersonInApplication (checkpoint/date/travel FKs exist only on Registration).
+      This wipe 2026-09-08 after visa remainder: Passport **0**, Visa **2**,
+      WorkPermitItem **2**; already **22262**. EPA 2026-09-09. Travel pin 2026-09-09:
+      **7222** Registration missing pairs.
 
 # File / scan attachments after every scalar wave (locked 2026-09-07).
 # CLI: --import-visa2014-files --inprocess --entity <entity> --property <property>

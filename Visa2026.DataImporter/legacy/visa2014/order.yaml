@@ -162,6 +162,29 @@ entities:
       AddressOfResidence children but PersonInApplication has dbo.Address, synthesize one canonical row per employee
       (latest application date). Id-map aliases include synthetic person key + legacy Address Oids. No separate entity wave.
 
+  - targetODataEntity: TravelHistory
+    dependsOn:
+      - Person
+    importPhase: person-domain
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/TravelHistory.yaml
+    discoveryStatus: complete
+    legacySource: calik-energi
+    importConfirmed: true
+    importConfirmedAt: 2026-09-09
+    importConfirmedBy: developer
+    importStatus: done
+    notes: |
+      Grain is PersonInApplication, not dbo.TravelInformation alone. Join TI on
+      EmployeeEntryDate / FamilyMemberEntryDate. Registration types only
+      (App_Reg_Check_In/_Out/_Internal). Date = TI.TravelDate else PIA.RegistrationDate.
+      Id-map key = PIA.Oid (TI.Oid alias when unique). Pin on Registration
+      profiles only (ActionFamily=2), SQL --travel-roster-backfill-only — not all PIA.
+      Do not resurrect live registration TravelHistory sync.
+      Local PG 2026-09-09: SQL **22845**, Prepared **3512**, Posted **3512**, Failed **0**,
+      skipped **19333** (non-registration / no date), dedupe **240**.
+      Id-map: id-maps/calik-energi-local-pg/TravelHistory.json.
+      Pin 2026-09-09: **7222** Registration roster pairs (missing travel link).
+
   - targetODataEntity: EmployeeSalary
     dependsOn:
       - Person

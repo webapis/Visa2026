@@ -303,7 +303,7 @@ static void PrintHelp()
     Console.WriteLine("      Options: --target-connection conn [--output path.json]");
     Console.WriteLine("      Options: [--legacy-source calik-energi|calik-energi-onprem-staging] [--connection conn] [--force]");
     Console.WriteLine("  --import-visa2014           Legacy SQL → Visa2026 headless ObjectSpace (requires --inprocess).");
-    Console.WriteLine("      --entity Person|Passport|Visa|Education|EmployeePositionHistory|EmployeeSalary|AddressOfResidence|Application|ApplicationProfileInstancePerson|ApplicationItem|ApplicationProfileInstanceProgress|WorkPermit|WorkPermitItem|Invitation|InvitationItem|Rejection|RejectionItem");
+    Console.WriteLine("      --entity Person|Passport|Visa|Education|TravelHistory|EmployeePositionHistory|EmployeeSalary|AddressOfResidence|Application|ApplicationProfileInstancePerson|ApplicationItem|ApplicationProfileInstanceProgress|WorkPermit|WorkPermitItem|Invitation|InvitationItem|Rejection|RejectionItem");
     Console.WriteLine("      Options: --entity Person|Passport|... [--legacy-source calik-energi] [--inprocess] [--target-connection conn]");
     Console.WriteLine("                [--max-rows N] [--application-type App_Inv] [--dry-run] [--batch-size N] [--parallelism N] [--id-map-output path.json] [--no-wait]");
     Console.WriteLine("                --parallelism: worker count for Application/ApplicationItem/ApplicationProfileInstanceProgress (default 4; headless only)");
@@ -348,7 +348,7 @@ static void PrintHelp()
     Console.WriteLine("  --correct-application-type-composite  Retype Application.ApplicationType from legacy SubType enum (--legacy-source, --dry-run)");
     Console.WriteLine("  --correct-visa-type  Patch Visa.VisaType from legacy TypeOfVisaL:mgCode (--legacy-source, --dry-run)");
     Console.WriteLine("  --correct-application-visa-type  Infer Application.VisaType from ApplicationType.Name; clear hidden Period/Category and non-inferred Type (--target-connection, --dry-run)");
-    Console.WriteLine("  --correct-visa2014-application-person-document-links  Replace latest-N Passport/Visa/WorkPermitItem ResolvedLinks with PersonInApplication snapshot (--legacy-source, --dry-run)");
+    Console.WriteLine("  --correct-visa2014-application-person-document-links  Pin PIA Passport/Visa/WorkPermitItem and profile-required Education/Position/Address ResolvedLinks. TravelHistory: Registration profiles only via SQL backfill (--legacy-source, --dry-run, --epa-roster-backfill-only, --travel-roster-backfill-only)");
     Console.WriteLine("           from legacy Application.Contract or linked Person.Contract (identity pass-through).");
     Console.WriteLine("      Options: [--legacy-source calik-energi] [--application-id-map path.json]");
     Console.WriteLine("                [--dry-run] [--api-base-url url] [--no-wait] [--verbose]");

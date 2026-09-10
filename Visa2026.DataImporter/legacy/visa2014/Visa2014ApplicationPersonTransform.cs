@@ -16,6 +16,9 @@ internal sealed record Visa2014ApplicationProfileInstancePersonRawRow(
     Guid? LegacyPreviousPassportOid,
     Guid? LegacyVisaOid,
     Guid? LegacyWorkPermitOid,
+    Guid? LegacyPositionOid,
+    Guid? LegacyAddressOfResidenceOid,
+    Guid? LegacyDirectAddressOid,
     bool ForEmployee,
     bool ForFamilyMember,
     int? EmployeeSubtypeId,
@@ -38,6 +41,9 @@ internal static class Visa2014ApplicationProfileInstancePersonTransform
             CAST(pia.PreviousPassport AS varchar(36)) AS PreviousPassportOid,
             CAST(pia.Visa AS varchar(36)) AS VisaOid,
             CAST(pia.WorkPermit AS varchar(36)) AS WorkPermitOid,
+            CAST(pia.Position AS varchar(36)) AS PositionOid,
+            CAST(pia.AddressOfResidence AS varchar(36)) AS AddressOfResidenceOid,
+            CAST(pia.Address AS varchar(36)) AS DirectAddressOid,
             CASE WHEN ISNULL(a.ForEmployee, 0) = 1 THEN '1' ELSE '0' END AS ForEmployee,
             CASE WHEN ISNULL(a.ForFamilyMember, 0) = 1 THEN '1' ELSE '0' END AS ForFamilyMember,
             ate.TypeOfApplicationForEmployee AS EmployeeSubtypeId,
@@ -140,6 +146,9 @@ internal static class Visa2014ApplicationProfileInstancePersonTransform
             LegacyPreviousPassportOid: ParseGuid(GetString(reader, "PreviousPassportOid")),
             LegacyVisaOid: ParseGuid(GetString(reader, "VisaOid")),
             LegacyWorkPermitOid: ParseGuid(GetString(reader, "WorkPermitOid")),
+            LegacyPositionOid: ParseGuid(GetString(reader, "PositionOid")),
+            LegacyAddressOfResidenceOid: ParseGuid(GetString(reader, "AddressOfResidenceOid")),
+            LegacyDirectAddressOid: ParseGuid(GetString(reader, "DirectAddressOid")),
             ForEmployee: GetString(reader, "ForEmployee") == "1",
             ForFamilyMember: GetString(reader, "ForFamilyMember") == "1",
             EmployeeSubtypeId: ParseNullableInt(GetString(reader, "EmployeeSubtypeId")),
@@ -241,6 +250,9 @@ internal static class Visa2014ApplicationProfileInstancePersonTransform
         row["PreviousPassport"] = raw.LegacyPreviousPassportOid?.ToString("D");
         row["CurrentVisa"] = raw.LegacyVisaOid?.ToString("D");
         row["CurrentWorkPermitItem"] = raw.LegacyWorkPermitOid?.ToString("D");
+        row["CurrentPositionHistory"] = raw.LegacyPositionOid?.ToString("D");
+        row["CurrentAddressOfResidence"] =
+            Visa2014ApplicationPersonRequiredPersonLinks.ResolveAddressLegacyKey(raw)?.ToString("D");
         return row;
     }
 
