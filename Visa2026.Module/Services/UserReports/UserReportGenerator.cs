@@ -73,7 +73,9 @@ namespace Visa2026.Module.Services.UserReports
             object rootObject,
             IList<ApplicationRosterMergeLine>? applicationItems = null)
         {
-            var data = rootObject is ApplicationProfileInstance headerApplication
+            var headerApplication = rootObject as ApplicationProfileInstance
+                ?? (rootObject as ApplicationRosterMergeLine)?.ApplicationProfileInstance;
+            var data = headerApplication != null
                 ? UserReportMergeDataHelper.BuildApplicationHeaderDictionary(headerApplication)
                 : new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
@@ -84,8 +86,17 @@ namespace Visa2026.Module.Services.UserReports
                 if (bindKey.StartsWith("rows.", StringComparison.OrdinalIgnoreCase))
                     continue;
 
-                var value = GetPropertyValue(rootObject, placeholder.ResolvedPropertyPath);
-                data[bindKey] = UserReportPlaceholderBindingHelper.CoerceMergeValue(value, placeholder.ResolvedPropertyPath);
+                var value = UserReportMergeDataHelper.GetPropertyValueFromItemOrApplication(
+                    rootObject,
+                    placeholder.ResolvedPropertyPath);
+                if (UserReportMergeDataHelper.IsMissingMergeValue(value)
+                    && data.TryGetValue(bindKey, out var existing)
+                    && !UserReportMergeDataHelper.IsMissingMergeValue(existing))
+                    continue;
+
+                data[bindKey] = UserReportPlaceholderBindingHelper.CoerceMergeValue(
+                    value,
+                    placeholder.ResolvedPropertyPath);
             }
 
             // Handle collection placeholders
@@ -372,10 +383,12 @@ namespace Visa2026.Module.Services.UserReports
                 if (UserReportPlaceholderBindingHelper.IsImageInjectorToken(raw.Trim()))
                     continue;
 
-                if (!data.ContainsKey(bindKey))
+                var scanned = UserReportMergeDataHelper.GetPropertyValueFromItemOrApplication(rootObject, bindKey);
+                if (!data.ContainsKey(bindKey)
+                    || (UserReportMergeDataHelper.IsMissingMergeValue(data[bindKey])
+                        && !UserReportMergeDataHelper.IsMissingMergeValue(scanned)))
                 {
-                    var value = GetPropertyValue(rootObject, bindKey);
-                    data[bindKey] = UserReportPlaceholderBindingHelper.CoerceMergeValue(value, bindKey);
+                    data[bindKey] = UserReportPlaceholderBindingHelper.CoerceMergeValue(scanned, bindKey);
                 }
             }
         }

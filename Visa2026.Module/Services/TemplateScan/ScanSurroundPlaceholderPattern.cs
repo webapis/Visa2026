@@ -47,6 +47,13 @@ public static class ScanSurroundPlaceholderPattern
             if (!placeholderSet.Contains(remapped))
                 return;
 
+            if (remapped.Equals("ADRS", StringComparison.OrdinalIgnoreCase)
+                && ScanOfficialLetterHints.LooksLikeMigrationAddressee(text))
+                return;
+            if (remapped.Equals("ACADR", StringComparison.OrdinalIgnoreCase)
+                && ScanOfficialLetterHints.LooksLikeBranchDirectorTitle(text))
+                return;
+
             var surroundFolded = TemplateTextNormalizer.NormalizeFolded(nearby);
             if (remapped.Equals("ACADR", StringComparison.OrdinalIgnoreCase)
                 && ScanFormCaptionHints.LooksLikePersonResidence(surroundFolded))
@@ -92,6 +99,15 @@ public static class ScanSurroundPlaceholderPattern
                 if (score < 55 || !Fits(text, entry.ShortCode))
                     continue;
                 Add(entry.ShortCode, Math.Min(94, score + 12), "Immediate left label");
+            }
+        }
+
+        if (ScanOfficialLetterHints.LooksLikeLetterBlock(text))
+        {
+            foreach (var preferred in ScanFormFieldLabelHints.PreferCodes(text, role))
+            {
+                if (LabelCompatible(text, preferred))
+                    Add(preferred, 95, "Official letter block");
             }
         }
 
@@ -216,8 +232,14 @@ public static class ScanSurroundPlaceholderPattern
             || ScanCompoundYellowParts.LooksLikePassportNumber(yellowText))
             return false;
 
+        if ((code.Equals("POSN", StringComparison.OrdinalIgnoreCase)
+                || code.Equals("ACPOS", StringComparison.OrdinalIgnoreCase))
+            && ScanShapeTokenMatcher.LooksLikePersonFullName(yellowText))
+            return false;
+
         return code.Equals("POSN", StringComparison.OrdinalIgnoreCase)
             || code.Equals("ACPOS", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("MSRV", StringComparison.OrdinalIgnoreCase)
             || code.Equals("EGSP", StringComparison.OrdinalIgnoreCase)
             || code.Equals("EGLV", StringComparison.OrdinalIgnoreCase)
             || code.Equals("EGIN", StringComparison.OrdinalIgnoreCase)

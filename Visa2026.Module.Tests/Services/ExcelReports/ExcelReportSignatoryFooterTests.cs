@@ -22,6 +22,11 @@ public class ExcelReportSignatoryFooterTests
         Assert.Equal("Mehmet Cirak", data["Application_CompanyHead_FullName"]);
         Assert.Equal("Mudir", data["ACPOS"]);
         Assert.Equal("Mehmet Cirak", data["ACFNM"]);
+        Assert.Equal("Mehmet Cirak", data["CHFN"]);
+        Assert.True(data.ContainsKey("AFNUM"));
+        Assert.True(data.ContainsKey("MSRV"));
+        Assert.True(data.ContainsKey("TPCNT"));
+        Assert.True(data.ContainsKey("TPCTX"));
     }
 
     [Fact]

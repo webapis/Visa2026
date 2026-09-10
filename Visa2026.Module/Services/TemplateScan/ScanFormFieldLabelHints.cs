@@ -17,6 +17,15 @@ public static class ScanFormFieldLabelHints
         if (folded.Length < 3)
             return Array.Empty<string>();
 
+        if (ScanOfficialLetterHints.LooksLikeMigrationAddressee(nearbyLabel))
+            return ["MSRV"];
+
+        if (ScanOfficialLetterHints.LooksLikeBranchDirectorTitle(nearbyLabel)
+            || (folded.Contains("sahamca", StringComparison.Ordinal)
+                && folded.Contains("mudiri", StringComparison.Ordinal)
+                && !folded.Contains("mudirine", StringComparison.Ordinal)))
+            return ["ACPOS"];
+
         if (folded.Contains("gelmegin", StringComparison.Ordinal))
             return ["RGEL"];
 
@@ -197,6 +206,8 @@ public static class ScanFormFieldLabelHints
             || folded.Equals("isgar", StringComparison.Ordinal)
             || folded.Contains("is beriji", StringComparison.Ordinal)
             || folded.Equals("mudiri", StringComparison.Ordinal)
+            || ScanOfficialLetterHints.LooksLikeBranchDirectorTitle(trimmed)
+            || ScanOfficialLetterHints.LooksLikeMigrationAddressee(trimmed)
             || folded.Contains("wiza", StringComparison.Ordinal)
             || folded.Contains("giren", StringComparison.Ordinal)
             || folded.Contains("kabul edyan", StringComparison.Ordinal)

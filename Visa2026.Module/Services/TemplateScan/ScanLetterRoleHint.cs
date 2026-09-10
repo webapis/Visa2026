@@ -48,7 +48,8 @@ public static class ScanLetterRoleHint
             return nearbyRole;
 
         var yellowFolded = TemplateTextNormalizer.NormalizeFolded(yellowText);
-        if (yellowFolded.StartsWith("mudiri ", StringComparison.Ordinal))
+        if (yellowFolded.StartsWith("mudiri ", StringComparison.Ordinal)
+            || ScanOfficialLetterHints.LooksLikeBranchDirectorTitle(yellowText))
             return ScanLetterRole.Signatory;
 
         return nearbyRole;
@@ -64,12 +65,16 @@ public static class ScanLetterRoleHint
     }
 
     private static bool LooksLikeSignatory(string folded) =>
-        folded.Contains("yolbascy", StringComparison.Ordinal)
-        || folded.Contains("gol cekiji", StringComparison.Ordinal)
-        || folded.Contains("signatory", StringComparison.Ordinal)
-        || folded.Contains("company head", StringComparison.Ordinal)
-        || folded.Contains("is beriji", StringComparison.Ordinal)
-        || folded.Equals("mudiri", StringComparison.Ordinal);
+        !folded.Contains("mudirine", StringComparison.Ordinal)
+        && !folded.Contains("mudirlig", StringComparison.Ordinal)
+        && (folded.Contains("yolbascy", StringComparison.Ordinal)
+            || folded.Contains("gol cekiji", StringComparison.Ordinal)
+            || folded.Contains("signatory", StringComparison.Ordinal)
+            || folded.Contains("company head", StringComparison.Ordinal)
+            || folded.Contains("is beriji", StringComparison.Ordinal)
+            || folded.Equals("mudiri", StringComparison.Ordinal)
+            || (folded.Contains("sahamca", StringComparison.Ordinal)
+                && folded.Contains("mudiri", StringComparison.Ordinal)));
 
     private static bool LooksLikeApplicant(string folded) =>
         folded.Contains("doglan senesi", StringComparison.Ordinal)

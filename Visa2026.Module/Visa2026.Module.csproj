@@ -4,7 +4,7 @@
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <Deterministic>false</Deterministic>
     <!-- Change wildcard to specific version to control DB migrations / ModuleInfo (triggers ReportsUpdater etc. on existing DBs) -->
-    <AssemblyVersion>1.0.0.737</AssemblyVersion>
+    <AssemblyVersion>1.0.0.738</AssemblyVersion>
     <Configurations>Debug;Release;EasyTest</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
@@ -16,28 +16,6 @@
   <ItemGroup>
     <None Remove="Model.DesignedDiffs.xafml" />
     <None Remove="Resources\Visa_Application_TM_QR_08.pdf" />
-    <None Remove="Resources\Templates\Borcnama.docx" />
-    <None Remove="Resources\Templates\Contract_uzt.docx" />
-    <None Remove="Resources\Templates\Contract_Inv.docx" />
-    <None Remove="Resources\Templates\GT-15_Sazakow_uzt.docx" />
-    <None Remove="Resources\Templates\GT-15_Elyasow_uzt.docx" />
-    <None Remove="Resources\Templates\GT-15_Elyasow_ckl.docx" />
-    <None Remove="Resources\Templates\GT-15_Elyasow_ckl_only.docx" />
-    <None Remove="Resources\Templates\GT-15_Migrasiya_ckl_hat.docx" />
-    <None Remove="Resources\Templates\GT-15_MINSTROY_uzt.docx" />
-    <None Remove="Resources\Templates\Sanaw_uzt.docx" />
-    <None Remove="Resources\Templates\hasaba_almak_hat.docx" />
-    <None Remove="Resources\Templates\Forma_16.docx" />
-    <None Remove="Resources\Templates\Sanaw_ckl.docx" />
-    <None Remove="Resources\Templates\sahsy_kagyz.docx" />
-    <None Remove="Resources\Templates\wiza_yatyrylmak_hat.docx" />
-    <None Remove="Resources\Templates\Excel\433_gurlusyk_uzt.xlsx" />
-    <None Remove="Resources\Templates\Excel\433_gurlusyk_ckl.xlsx" />
-    <None Remove="Resources\Templates\Excel\433-ek_uzt.xlsx" />
-    <None Remove="Resources\Templates\Excel\Sanaw_ckl.xlsx" />
-    <None Remove="Resources\Templates\Excel\Sanaw_ckl_ministr_saparov.xlsx" />
-    <None Remove="Resources\Templates\Excel\wiza_yatyrylmak_sanaw.xlsx" />
-    <None Remove="Resources\Templates\Excel\Sanaw_hasaba_alys.xlsx" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Images\CalikLogo.png" />
@@ -57,28 +35,6 @@
     <EmbeddedResource Include="Model.DesignedDiffs.Localization.tr-TR.xafml" />
     <EmbeddedResource Include="Model.DesignedDiffs.Localization.tk-TM.xafml" />
     <EmbeddedResource Include="Model.DesignedDiffs.Localization.ru-RU.xafml" />
-    <EmbeddedResource Include="Resources\Templates\Borcnama.docx" />
-    <EmbeddedResource Include="Resources\Templates\Contract_uzt.docx" />
-    <EmbeddedResource Include="Resources\Templates\Contract_Inv.docx" />
-    <EmbeddedResource Include="Resources\Templates\GT-15_Sazakow_uzt.docx" />
-    <EmbeddedResource Include="Resources\Templates\GT-15_Elyasow_uzt.docx" />
-    <EmbeddedResource Include="Resources\Templates\GT-15_Elyasow_ckl.docx" />
-    <EmbeddedResource Include="Resources\Templates\GT-15_Elyasow_ckl_only.docx" />
-    <EmbeddedResource Include="Resources\Templates\GT-15_Migrasiya_ckl_hat.docx" />
-    <EmbeddedResource Include="Resources\Templates\GT-15_MINSTROY_uzt.docx" />
-    <EmbeddedResource Include="Resources\Templates\Sanaw_uzt.docx" />
-    <EmbeddedResource Include="Resources\Templates\hasaba_almak_hat.docx" />
-    <EmbeddedResource Include="Resources\Templates\Forma_16.docx" />
-    <EmbeddedResource Include="Resources\Templates\Sanaw_ckl.docx" />
-    <EmbeddedResource Include="Resources\Templates\sahsy_kagyz.docx" />
-    <EmbeddedResource Include="Resources\Templates\wiza_yatyrylmak_hat.docx" />
-    <EmbeddedResource Include="Resources\Templates\Excel\433_gurlusyk_uzt.xlsx" />
-    <EmbeddedResource Include="Resources\Templates\Excel\433_gurlusyk_ckl.xlsx" />
-    <EmbeddedResource Include="Resources\Templates\Excel\433-ek_uzt.xlsx" />
-    <EmbeddedResource Include="Resources\Templates\Excel\Sanaw_ckl.xlsx" />
-    <EmbeddedResource Include="Resources\Templates\Excel\Sanaw_ckl_ministr_saparov.xlsx" />
-    <EmbeddedResource Include="Resources\Templates\Excel\wiza_yatyrylmak_sanaw.xlsx" />
-    <EmbeddedResource Include="Resources\Templates\Excel\Sanaw_hasaba_alys.xlsx" />
     <EmbeddedResource Include="Resources\Visa_Application_TM_QR_08.pdf">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>

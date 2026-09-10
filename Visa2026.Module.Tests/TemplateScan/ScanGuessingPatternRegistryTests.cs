@@ -51,6 +51,17 @@ public class ScanGuessingPatternRegistryTests
     }
 
     [Fact]
+    public void Detect_cover_letter_addressee_as_official_letter()
+    {
+        var kinds = ScanGuessingPatternRegistry.Detect(
+            "Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine",
+            null,
+            null,
+            ScanSourceKind.Word);
+        Assert.Contains(kinds, k => k == ScanGuessingPatternKind.OfficialLetter);
+    }
+
+    [Fact]
     public void Detect_borcnama_caption_under_the_line()
     {
         var kinds = ScanGuessingPatternRegistry.Detect(

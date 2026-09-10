@@ -1949,6 +1949,8 @@
 
         try
         {
+            _dataScope = ScanTemplateDataScope.FromFieldPlan(_fieldPlan, _dataScope);
+
             var objectSpace = ownedObjectSpace ?? _hostObjectSpace!;
             var profile = _source == EntrySource.Profile
                 ? _hostProfile!

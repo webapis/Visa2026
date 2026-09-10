@@ -62,6 +62,7 @@ public static class ScanGuessingPatternRegistry
         var folded = TemplateTextNormalizer.NormalizeFolded(text);
         return folded.Contains("tertipde", StringComparison.Ordinal)
             || folded.Contains("gezeklik", StringComparison.Ordinal)
+            || ScanOfficialLetterHints.LooksLikeLetterBlock(text)
             || System.Text.RegularExpressions.Regex.IsMatch(text, @"№?\s*\d+\s*/\s*-?\s*\d+")
             || System.Text.RegularExpressions.Regex.IsMatch(text, @"\b\d+\s*\([^)]+\)\s*aý\b", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
     }

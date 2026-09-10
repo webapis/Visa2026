@@ -63,6 +63,7 @@ disable-model-invocation: false
 | Preview OK, ZIP wrong or empty | Compare `SelectedReportKeysJson`, `SelectedApplicationItemIdsJson` | **This skill** |
 | **Sanaw** preview fails; `RowNo` empty hint | `UsesSingleDocumentItemList` / `BuildSanawyStyleRows` — not labor-contract per-item path | **This skill** + user-report-templates |
 | Need to remap placeholders on a saved catalog template | Row **Review placeholders** (this-profile nested Word/Excel) — not desktop **Edit template** | **template-scan** + this skill |
+| Cover letter Preview empty except signatory; file named for one person | Rebuild; Preview again. Header `{{ds.AFNUM}}` / `MSRV` / `TPCNT` now fill from the case. Re-Approve yellow-marks letters so they are Application header | **template-scan** + user-report-templates |
 | Excel catalog Preview is a **blank PDF**; Word Preview OK; title is `report_….docx` | Nested catalog keys are `profile:{id}` not `user:{id}` — `ResolveDownloadFileName` fell back to `.docx` so Word PDF ran on Excel bytes | **This skill** |
 | Excel Preview is **portrait** for a wide sanaw (Hasaba almak, squeezed columns) | Custom Office→PDF converter, **not** XAF / XtraReports. `ExcelPreviewPageLayout` + `ApplicationWordReportOfficePreviewPdfConverter` | **This skill** |
 | `Invalid column name` on batch table | `BatchWorkerSchemaGate`, updaters, `FORCE_XAF_DB_UPDATE` | **lifecycle-docker** |

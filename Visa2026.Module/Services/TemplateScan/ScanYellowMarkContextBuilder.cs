@@ -263,6 +263,7 @@ public static class ScanYellowMarkContextBuilder
             || folded.Contains("yolbascy", StringComparison.Ordinal)
             || folded.Contains("cagryl", StringComparison.Ordinal)
             || folded.Contains("gol cekiji", StringComparison.Ordinal)
+            || ScanOfficialLetterHints.LooksLikeBranchDirectorTitle(trimmed)
             || folded.Contains("pasport", StringComparison.Ordinal)
             || folded.Contains("hasaba", StringComparison.Ordinal)
             || folded.Contains("karhana", StringComparison.Ordinal)

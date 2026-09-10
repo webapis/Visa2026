@@ -35,10 +35,18 @@ public static class UserReportMergeDataHelper
             ["ApplicationDateText"] = application.ApplicationDateText ?? string.Empty,
             ["CompanyName"] = application.Application_Company_Name ?? string.Empty,
             ["Application_Company_RegistrationDateText"] = application.Application_Company_RegistrationDateText ?? string.Empty,
+            ["MigrationService_NameTm"] = application.MigrationService_NameTm ?? string.Empty,
+            ["TotalPersonCount"] = application.TotalPersonCount,
+            ["TotalPersonCountText"] = application.TotalPersonCountText ?? string.Empty,
+            ["Urgency_NameTm"] = application.Urgency_NameTm ?? string.Empty,
+            ["VisaPeriod_NameTm"] = application.VisaPeriod_NameTm ?? string.Empty,
+            ["VisaCategory_NameTm"] = application.VisaCategory_NameTm ?? string.Empty,
             // Sanaw footer (ACPOS / ACFNM) sits below {{#ds.rows}}. Excel merge fills those
             // cells from this dictionary, not from Placeholders / row copy.
             ["Application_CompanyHead_PositionTm"] = application.Application_CompanyHead_PositionTm ?? string.Empty,
             ["Application_CompanyHead_FullName"] = application.Application_CompanyHead_FullName ?? string.Empty,
+            ["CompanyHead_FullName"] = application.CompanyHead_FullName ?? string.Empty,
+            ["CompanyHead_PositionTm"] = application.CompanyHead_PositionTm ?? string.Empty,
         };
         UserReportPlaceholderAliasRegistry.EnrichDictionary(data);
         return data;
@@ -621,6 +629,25 @@ public static class UserReportMergeDataHelper
 
         return p;
     }
+
+    /// <summary>
+    /// Letter <c>{{ds.AFNUM}}</c> / <c>MSRV</c> / <c>TPCNT</c> live on the application.
+    /// ApplicationItem-root merge otherwise looks them up on the roster line and writes blanks.
+    /// </summary>
+    public static object? GetPropertyValueFromItemOrApplication(object? obj, string propertyPath)
+    {
+        var value = GetPropertyValue(obj, propertyPath);
+        if (!IsMissingMergeValue(value))
+            return value;
+
+        if (obj is ApplicationRosterMergeLine { ApplicationProfileInstance: { } application })
+            return GetPropertyValue(application, propertyPath);
+
+        return value;
+    }
+
+    internal static bool IsMissingMergeValue(object? value) =>
+        value is null || value is string text && string.IsNullOrWhiteSpace(text);
 
     public static object? GetPropertyValue(object? obj, string propertyPath)
     {

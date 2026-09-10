@@ -56,7 +56,9 @@ public static class ScanOfficeFieldPlanBuilder
             }
 
             IReadOnlyList<ScanDetectedFieldDraft> resolved = Array.Empty<ScanDetectedFieldDraft>();
-            var preferLeftLabel = ScanFormFieldLabelHints.LooksLikeFormFieldLabel(nearbyLabel);
+            var preferLeftLabel = ScanFormFieldLabelHints.LooksLikeFormFieldLabel(nearbyLabel)
+                || ScanOfficialLetterHints.LooksLikeLetterBlock(yellow.Text)
+                || ScanOfficialLetterHints.LooksLikeBranchDirectorTitle(nearbyLabel);
             if (preferLeftLabel)
             {
                 resolved = ScanSurroundPlaceholderPattern.TryDraft(

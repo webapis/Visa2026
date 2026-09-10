@@ -729,6 +729,7 @@ public sealed class AzureOpenAiTemplateScanAiProvider : ITemplateScanAiProvider
         - allowedTokens.role: Applicant = roster person; Wekil = tenant Authorized Representative; Signatory = gol çekiji; Company / Case = header scalars.
         - RPFN, RPOS, RPPH, RPCL, RPPL, RPPN, RPPA, RPPD are Wekil only. Applicant names use PFN / PLN / PFNM.
         - CHFN, ACFNM, ACPOS are Signatory. Company name/legal address use ASPN, ACADR, ACRGL. Person residence on this case (People & links Address) uses ADRS, never ACADR.
+        - Official cover letters: a yellow addressee with Döwlet migrasiýa gullugy / müdirine is MSRV, not ADRS (Aşgabat şäheri in that line is the office, not person residence). Yellow "şahamçasynyň müdiri" / branch director title is ACPOS, not ACADR. The name on the next line is CHFN or ACFNM, not a roster PFN.
         - surroundingSnippet marks the yellow span with <<< >>>. Prefer printedLabel / headerRow over guessing from the name alone.
         - Duplicate yellow of the same sample literal must reuse the same token. Do not invent a second code or leave a gap.
         MERGE TOOL RULES:

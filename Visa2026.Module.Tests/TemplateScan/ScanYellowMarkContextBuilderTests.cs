@@ -67,6 +67,34 @@ public class ScanYellowMarkContextBuilderTests
     }
 
     [Fact]
+    public void Word_uses_previous_paragraph_when_yellow_is_branch_director_title()
+    {
+        var bytes = ScanOfficeYellowExtractorTests.CreateWordWithCaptionThenYellow(
+            "Türkmenistandaky şahamçasynyň müdiri",
+            "Mehmet Çırak");
+        var yellows = new ScanOfficeYellowExtractor().Extract(bytes, ScanSourceKind.Word);
+        var yellow = Assert.Single(yellows);
+        var drafts = new[]
+        {
+            new ScanDetectedFieldDraft
+            {
+                FieldId = "s1",
+                Box = ScanBoundingBox.FullPage,
+                PageIndex = 0,
+                LabelText = yellow.Text,
+                ProposedToken = "{{ds.CHFN}}",
+                SourceRegion = yellow.Region,
+            },
+        };
+
+        var map = ScanYellowMarkContextBuilder.Build(bytes, ScanSourceKind.Word, drafts);
+        var context = Assert.Single(map).Value;
+
+        Assert.Contains("müdiri", context.PrintedLabel, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("şahamça", context.PrintedLabel, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void Word_captures_parenthetical_caption_under_the_yellow_line()
     {
         var bytes = ScanOfficeYellowExtractorTests.CreateWordWithYellowThenCaption(

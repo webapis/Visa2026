@@ -4,6 +4,14 @@ Append-only. Newest first under **## Entries**.
 
 ## Entries
 
+### 2026-09-10 — Cover letter catalog Preview left AFNUM/ADAT/MSRV/TPCNT blank
+
+- Need: Yuztutma Hasaba Almak case 10/-12521. Wizard Generate showed `{{ds.AFNUM}}` `ADAT` `MSRV` `TPCNT` `ACPOS` `CHFN`. Catalog Preview filled only signatory (Demo mudir orunbasary / Ali Demir); number, date, addressee, and count were empty. Download name was `… ERDOGAN Arzu.docx`.
+- Cause: Create from yellow marks defaults DataScope Both → RootBo ApplicationItem → per-person Word. Merge looked up FullApplicationNumber / MigrationService_NameTm / TotalPersonCount on the roster line (those properties are not there). ACPOS/CHFN exist on the line so they filled. Wizard Preview is the tokenized copy (expected).
+- Fix: Item-root merge seeds the application header dictionary and falls back to the instance for missing keys (AFNUM, MSRV, TPCNT, …). Approve infers ApplicationHeader when Review tokens are only `{{ds.*}}` (photo tokens do not force per-person). Official-letter guessing maps addressee → MSRV, şahamçasynyň müdiri → ACPOS, following name → CHFN.
+- Officer: Stop F5, rebuild, restart. Preview the same Yuztutma row — number, date, migration service, and person count should fill. Re-Approve once so the catalog row is Application header (one letter for the case, not a file named after Arzu).
+- Cross-skill: visa2026-resminamalar | visa2026-user-report-templates
+
 ### 2026-09-10 — Review placeholders lost photo mapping after Open yellow file
 
 - Need: After uploading the yellow `_F16` Word, Review showed the letter and text Short codes, but **Person photo** / `{{IMAGE:PPH}}` was gone. The sample portrait stayed on the page. Continue left catalog Preview as a static picture.

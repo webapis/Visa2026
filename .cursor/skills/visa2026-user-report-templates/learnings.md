@@ -23,6 +23,21 @@ Keep **`SKILL.md`** stable; **promote** into `SKILL.md` only when the same lesso
 
 ## Entries
 
+### 2026-09-10 — Yuztutma cover letter (family: AppScalar)
+
+- **Symptom**: Resminamalar Preview of a yellow-marks Word letter left `{{ds.AFNUM}}` / `ADAT` / `MSRV` / `TPCNT` empty; `ACPOS` / `CHFN` filled. File name used a roster person.
+- **Root cause**: ApplicationItem-root DocxTemplater model had signatory aliases on the merge line but not FullApplicationNumber, MigrationService_NameTm, or TotalPersonCount. Thin header dictionary also omitted those letter scalars.
+- **Fix**: Header dictionary always includes those instance properties (short-code aliases via Enrich). Item-root merge copies the header dict and falls back to the parent instance instead of overwriting with blanks.
+- **Prevent**: Cover letters with only `{{ds.*}}` must not rely on roster-line property names. Do not add one-off `FullApplicationNumber` aliases on `ApplicationRosterMergeLine` when the instance already has them.
+- **Cross-skill**: visa2026-template-scan | visa2026-resminamalar
+
+### 2026-09-10 — Temporarily disable Resources/Templates seed (officer re-author)
+
+- **Symptom**: Officers will re-add Word/Excel from case Resminamalar (Add existing / Create from yellow marks). Shipped seeds would reappear on F5 (`DEBUG` always re-seeds).
+- **Fix**: `UserReportTemplateUpdater.SeedEmbeddedTemplatesEnabled = false`. Seed binaries, `*_map.md`, and scans deleted from `Resources/Templates`. Local F5 `visa2026` nested + shared catalog rows purged.
+- **Prevent**: Do not set the flag back to true until seed files are restored and embedded in the Module csproj.
+- **Cross-skill**: visa2026-resminamalar | visa2026-template-scan | visa2026-application-profile
+
 ### 2026-09-10 — Forma 16 / Hasaba empty TRDT TRCK AVCAT (Emre Akbulut)
 
 - **Symptom**: Resminamalar Preview of officer `_F16.docx` warned Line "Emre Akbulut": `Travel_CheckPointTm`, `Travel_DateText`, `Application_VisaCategory_NameTm` empty. People & links had Travel history Entry 11.08.2025 Aşgabat şäher howa menzili MGSP and a linked visa.

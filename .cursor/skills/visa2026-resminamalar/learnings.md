@@ -25,6 +25,16 @@ Purpose: **catalog, seed gate, batch worker, preview, permissions, dialog UX** �
 
 ## Entries
 
+### 2026-09-10 — Word cover letter Preview empty AFNUM/MSRV/TPCNT (Application)
+
+- **Symptom**: Nested Yuztutma letter catalog Preview filled ACPOS/CHFN only. Application number, date, addressee, and person count were blank. Output file was named for one roster person.
+- **Try**: Case 10/-12521 Hasaba Almak; Preview `_Yuztutma-Hasaba Almak …_03`. Wizard Generate had the `{{ds.*}}` tokens.
+- **Test**: `UserReportMergeHeaderFallbackTests`, `ScanTemplateDataScopeTests`, `ExcelReportSignatoryFooterTests.HeaderDictionary_includes_signatory_short_codes`.
+- **Root cause**: Scan saved Both → ApplicationItem Word → per-person generate. Header short codes are not properties on `ApplicationRosterMergeLine`.
+- **Fix**: Seed item-root Word merge from `BuildApplicationHeaderDictionary` (now includes MSRV/TPCNT/TPCTX/CHFN) and resolve missing keys on the instance. New header-only scans Approve as ApplicationHeader.
+- **Prevent**: Do not treat a case cover letter as Şahsy/F16 per-person output. `{{ds.AFNUM}}` is an application scalar.
+- **Cross-skill**: visa2026-template-scan | visa2026-user-report-templates
+
 ### 2026-09-09 — Excel Preview omitted ACPOS/ACFNM footer (Application)
 
 - **Symptom**: Yellow-marks Review showed 13 mapped; 12 ACPOS and 13 ACFNM sat below the 11-column table. Resminamalar Preview of sanaw-hasaba almak.xlsx was landscape page 1 of 1 with blank space under the table — no signatory.

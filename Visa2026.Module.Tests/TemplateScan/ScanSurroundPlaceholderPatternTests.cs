@@ -107,4 +107,52 @@ public class ScanSurroundPlaceholderPatternTests
             a => a.ShortCode.Equals("PFN", StringComparison.OrdinalIgnoreCase)
                 || a.ShortCode.Equals("PDBT", StringComparison.OrdinalIgnoreCase));
     }
+
+    [Fact]
+    public void Cover_letter_addressee_ranks_MSRV_not_residence()
+    {
+        var ranked = ScanSurroundPlaceholderPattern.Rank(
+            "Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine",
+            null,
+            null,
+            Set(),
+            UserReportPlaceholderScope.Header);
+
+        Assert.Equal("MSRV", ranked[0].ShortCode);
+        Assert.True(ranked[0].ScorePercent >= ScanSurroundPlaceholderPattern.NearbyMinScore);
+        Assert.DoesNotContain(
+            ranked.Take(2),
+            a => a.ShortCode.Equals("ADRS", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void Cover_letter_branch_director_title_ranks_ACPOS()
+    {
+        var ranked = ScanSurroundPlaceholderPattern.Rank(
+            "Türkmenistandaky şahamçasynyň müdiri",
+            null,
+            null,
+            Set(),
+            UserReportPlaceholderScope.Header);
+
+        Assert.Equal("ACPOS", ranked[0].ShortCode);
+        Assert.DoesNotContain(
+            ranked.Take(2),
+            a => a.ShortCode.Equals("ACADR", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void Cover_letter_signatory_name_after_title_ranks_CHFN_not_roster()
+    {
+        var ranked = ScanSurroundPlaceholderPattern.Rank(
+            "Mehmet Çırak",
+            "Türkmenistandaky şahamçasynyň müdiri",
+            null,
+            Set(),
+            UserReportPlaceholderScope.Header);
+
+        Assert.Contains(ranked[0].ShortCode, new[] { "CHFN", "ACFNM" }, StringComparer.OrdinalIgnoreCase);
+        Assert.NotEqual("ACPOS", ranked[0].ShortCode);
+        Assert.NotEqual("PFN", ranked[0].ShortCode);
+    }
 }
