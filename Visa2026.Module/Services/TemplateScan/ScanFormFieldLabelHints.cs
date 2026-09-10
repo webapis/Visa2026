@@ -5,19 +5,58 @@ using Visa2026.Module.Services.TemplateConvert;
 namespace Visa2026.Module.Services.TemplateScan;
 
 /// <summary>
-/// Left-side form field names without a parenthetical caption (Sahsy kagyzy, Excel headers,
-/// contract footer labels). Catalog ScoreHeader still runs; these prefers lock the obvious codes.
+/// Left-side form field names without a parenthetical caption (Sahsy kagyzy, Forma 16
+/// numbered 1–15 labels, Excel headers, contract footer labels). Catalog ScoreHeader
+/// still runs; these prefers lock the obvious codes.
 /// </summary>
 public static class ScanFormFieldLabelHints
 {
     public static IReadOnlyList<string> PreferCodes(string? nearbyLabel, ScanLetterRole role)
     {
-        var folded = TemplateTextNormalizer.NormalizeFolded(nearbyLabel);
+        var folded = StripLeadingItemNumber(TemplateTextNormalizer.NormalizeFolded(nearbyLabel));
         if (folded.Length < 3)
             return Array.Empty<string>();
 
         if (folded.Contains("gelmegin", StringComparison.Ordinal))
             return ["RGEL"];
+
+        if (folded.Contains("kabul edyan", StringComparison.Ordinal)
+            || folded.Contains("kabul ediji", StringComparison.Ordinal))
+            return ["ACNAM", "ACADR"];
+
+        if (folded.Contains("giren", StringComparison.Ordinal) && folded.Contains("yeri", StringComparison.Ordinal))
+            return ["TRCK"];
+
+        if (folded.Contains("giren", StringComparison.Ordinal)
+            && (folded.Contains("wagt", StringComparison.Ordinal) || folded.Contains("senesi", StringComparison.Ordinal)))
+            return ["TRDT"];
+
+        if (folded.Contains("wiza", StringComparison.Ordinal)
+            && folded.Contains("berlen", StringComparison.Ordinal)
+            && (folded.Contains("senesi", StringComparison.Ordinal) || folded.Contains("mohlet", StringComparison.Ordinal)))
+            return ["VISD", "VSTD", "VEDT"];
+
+        if (folded.Contains("wiza", StringComparison.Ordinal)
+            && folded.Contains("berlen", StringComparison.Ordinal)
+            && folded.Contains("yeri", StringComparison.Ordinal))
+            return ["VPLC"];
+
+        if (folded.Contains("wiza", StringComparison.Ordinal)
+            && (folded.Contains("dereje", StringComparison.Ordinal)
+                || folded.Contains("gornus", StringComparison.Ordinal)
+                || folded.Contains("gorunsi", StringComparison.Ordinal)
+                || folded.Contains("belgi", StringComparison.Ordinal)))
+            return ["VCTM", "VTYP", "VNUM"];
+
+        if (folded.Contains("bolyan yeri", StringComparison.Ordinal)
+            || folded.Contains("bolyan yer", StringComparison.Ordinal)
+            || (folded.Contains("turkmenistan", StringComparison.Ordinal)
+                && folded.Contains("bolyan", StringComparison.Ordinal)))
+            return ["ADRS"];
+
+        if (folded.Contains("oy salgy", StringComparison.Ordinal)
+            || folded.Equals("oy salgysy", StringComparison.Ordinal))
+            return ["PFAC", "PFAD", "PFWC"];
 
         if (folded.Contains("cagyran tarap", StringComparison.Ordinal)
             || folded.Contains("cagyrjan tarap", StringComparison.Ordinal))
@@ -41,6 +80,21 @@ public static class ScanFormFieldLabelHints
             && (folded.Contains("salgy", StringComparison.Ordinal) || folded.Contains("yasa", StringComparison.Ordinal)))
             return ["PFWC", "PFAD", "PFAC"];
 
+        if ((folded.Contains("turkmenistan", StringComparison.Ordinal)
+                || folded.Contains("yasayan", StringComparison.Ordinal)
+                || folded.Contains("yasayys", StringComparison.Ordinal)
+                || folded.Contains("ikamet", StringComparison.Ordinal)
+                || folded.Contains("residence", StringComparison.Ordinal))
+            && (folded.Contains("salgy", StringComparison.Ordinal)
+                || folded.Contains("adres", StringComparison.Ordinal)
+                || folded.Contains("ikamet", StringComparison.Ordinal)))
+            return ["ADRS"];
+
+        if (folded.Contains("salgy", StringComparison.Ordinal)
+            && !folded.Contains("yuridiki", StringComparison.Ordinal)
+            && !folded.Contains("karhana", StringComparison.Ordinal))
+            return ["ADRS"];
+
         if (folded.Contains("onki islan", StringComparison.Ordinal)
             || folded.Contains("onki isleyen", StringComparison.Ordinal))
             return ["PWTM"];
@@ -53,22 +107,42 @@ public static class ScanFormFieldLabelHints
             || folded.Equals("wezipesi", StringComparison.Ordinal))
             return role == ScanLetterRole.Signatory ? ["ACPOS", "POSN"] : ["POSN"];
 
-        if (folded.Contains("doglan senesi we yeri", StringComparison.Ordinal)
-            || (folded.Contains("doglan", StringComparison.Ordinal) && folded.Contains("yeri", StringComparison.Ordinal)))
+        if (folded.Contains("doglan senesi we yeri", StringComparison.Ordinal))
             return ["PDBT", "PCBC", "PBPL"];
+
+        if (folded.Contains("doglan senesi", StringComparison.Ordinal)
+            && !folded.Contains("yeri", StringComparison.Ordinal)
+            && !folded.Contains("yurdy", StringComparison.Ordinal))
+            return ["PDBT"];
+
+        if (folded.Contains("doglan", StringComparison.Ordinal)
+            && (folded.Contains("yeri", StringComparison.Ordinal) || folded.Contains("yurdy", StringComparison.Ordinal)))
+            return ["PCBC", "PBPL"];
 
         if (folded.Contains("bilimi", StringComparison.Ordinal)
             || folded.Contains("okan yeri", StringComparison.Ordinal))
             return ["EGLV", "EGCC", "EGIN"];
 
         if (folded.Contains("pasport", StringComparison.Ordinal)
-            && (folded.Contains("belgi", StringComparison.Ordinal) || folded.Contains("mohlet", StringComparison.Ordinal)))
+            && folded.Contains("belgi", StringComparison.Ordinal)
+            && !folded.Contains("mohlet", StringComparison.Ordinal))
         {
             return role switch
             {
                 ScanLetterRole.Signatory => ["CHPN", "CHPD", "CHPE"],
                 ScanLetterRole.Wekil => ["RPPN", "RPPA", "RPPH"],
-                _ => ["PPN", "PPIS", "PPED"],
+                _ => ["PPN", "PPED"],
+            };
+        }
+
+        if (folded.Contains("pasport", StringComparison.Ordinal)
+            && folded.Contains("mohlet", StringComparison.Ordinal))
+        {
+            return role switch
+            {
+                ScanLetterRole.Signatory => ["CHPD", "CHPE"],
+                ScanLetterRole.Wekil => ["RPPD"],
+                _ => ["PPIS", "PPED"],
             };
         }
 
@@ -101,10 +175,10 @@ public static class ScanFormFieldLabelHints
     public static bool LooksLikeFormFieldLabel(string? text)
     {
         var trimmed = (text ?? string.Empty).Trim();
-        if (trimmed.Length is < 3 or > 120)
+        if (trimmed.Length is < 3 or > 160)
             return false;
 
-        var folded = TemplateTextNormalizer.NormalizeFolded(trimmed);
+        var folded = StripLeadingItemNumber(TemplateTextNormalizer.NormalizeFolded(trimmed));
         return folded.Contains("rayatlyg", StringComparison.Ordinal)
             || folded.Contains("sahsy belgi", StringComparison.Ordinal)
             || folded.Contains("bilim", StringComparison.Ordinal)
@@ -122,6 +196,31 @@ public static class ScanFormFieldLabelHints
             || folded.Contains("cagyran tarap", StringComparison.Ordinal)
             || folded.Equals("isgar", StringComparison.Ordinal)
             || folded.Contains("is beriji", StringComparison.Ordinal)
-            || folded.Equals("mudiri", StringComparison.Ordinal);
+            || folded.Equals("mudiri", StringComparison.Ordinal)
+            || folded.Contains("wiza", StringComparison.Ordinal)
+            || folded.Contains("giren", StringComparison.Ordinal)
+            || folded.Contains("kabul edyan", StringComparison.Ordinal)
+            || folded.Contains("bolyan yeri", StringComparison.Ordinal)
+            || folded.Contains("oy salgy", StringComparison.Ordinal);
+    }
+
+    internal static string StripLeadingItemNumber(string folded)
+    {
+        if (string.IsNullOrEmpty(folded))
+            return folded ?? string.Empty;
+
+        var i = 0;
+        while (i < folded.Length && char.IsDigit(folded[i]))
+            i++;
+        if (i is < 1 or > 2)
+            return folded;
+        if (i >= folded.Length)
+            return folded;
+        if (folded[i] is not ('.' or ')' or ':'))
+            return folded;
+        i++;
+        while (i < folded.Length && folded[i] == ' ')
+            i++;
+        return i >= folded.Length ? folded : folded[i..];
     }
 }

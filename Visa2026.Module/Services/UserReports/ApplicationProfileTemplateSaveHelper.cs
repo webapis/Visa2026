@@ -3,6 +3,8 @@
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.ApplicationProfileWizard;
+using Visa2026.Module.Services.TemplateScan;
+using Visa2026.Module.Services.WordReports;
 
 namespace Visa2026.Module.Services.UserReports;
 
@@ -37,23 +39,50 @@ public static class ApplicationProfileTemplateSaveHelper
                 profile.NestedTemplates.Add(template);
         }
 
-        template.TemplateKind = request.TemplateKind;
-        template.CatalogScope = request.CatalogScope;
-        template.DataScope = request.DataScope;
-        if (request.SetApplicability)
+        var writeCatalogMetadata = objectSpace.IsNewObject(template)
+            || !ApplicationProfileLockHelper.IsProfileConfigLocked(profile, objectSpace);
+        if (writeCatalogMetadata)
         {
-            ApplyCatalogApplicability(
-                template,
-                objectSpace,
-                request.CatalogScope,
-                request.ApplicableProjectContractId,
-                request.ApplicableMigrationServiceId);
+            template.TemplateKind = request.TemplateKind;
+            template.CatalogScope = request.CatalogScope;
+            template.DataScope = request.DataScope;
+            if (request.SetApplicability)
+            {
+                ApplyCatalogApplicability(
+                    template,
+                    objectSpace,
+                    request.CatalogScope,
+                    request.ApplicableProjectContractId,
+                    request.ApplicableMigrationServiceId);
+            }
+            template.RecycledAtUtc = null;
+            template.RecycledByUserName = null;
         }
-        template.RecycledAtUtc = null;
-        template.RecycledByUserName = null;
+        var content = request.TemplateKind == ApplicationProfileTemplateKind.Excel
+            ? ExcelPreviewPageLayout.StampFromContent(request.Content)
+            : request.Content;
         template.TemplateFile ??= objectSpace.CreateObject<DevExpress.Persistent.BaseImpl.EF.FileData>();
         template.TemplateFile.FileName = fileName;
-        template.TemplateFile.Content = request.Content;
+        template.TemplateFile.Content = content;
+
+        if (request.SourceContent is { Length: > 0 }
+            && ScanOfficeYellowExtractor.HasHighlights(
+                request.SourceContent,
+                request.TemplateKind == ApplicationProfileTemplateKind.Excel
+                    ? ScanSourceKind.Excel
+                    : ScanSourceKind.Word))
+        {
+            template.SourceFile ??= objectSpace.CreateObject<DevExpress.Persistent.BaseImpl.EF.FileData>();
+            template.SourceFile.FileName = string.IsNullOrWhiteSpace(request.SourceFileName)
+                ? fileName
+                : request.SourceFileName.Trim();
+            template.SourceFile.Content = request.SourceContent;
+        }
+
+        if (request.ReviewPlanJson != null)
+            template.ReviewPlanJson = string.IsNullOrWhiteSpace(request.ReviewPlanJson)
+                ? null
+                : request.ReviewPlanJson;
 
         TemplateCatalogAuditStamp.Touch(template, SecuritySystem.CurrentUserName);
 
@@ -62,7 +91,7 @@ public static class ApplicationProfileTemplateSaveHelper
             template,
             ApplicationProfileWizardTemplateCatalog.RootBoFromDataScope(request.DataScope));
 
-        ApplicationProfileTemplateUserReportBridge.WriteMasterFile(objectSpace, userTemplate, request.Content, fileName);
+        ApplicationProfileTemplateUserReportBridge.WriteMasterFile(objectSpace, userTemplate, content, fileName);
 
         return template;
     }
@@ -134,6 +163,20 @@ public sealed class ApplicationProfileTemplateSaveRequest
     public required byte[] Content { get; init; }
 
     public string? FileName { get; init; }
+
+    /// <summary>
+    /// Yellow-marked upload bytes. When omitted or empty, an existing
+    /// <see cref="ApplicationProfileTemplate.SourceFile"/> is left unchanged (Convert overwrite).
+    /// </summary>
+    public byte[]? SourceContent { get; init; }
+
+    public string? SourceFileName { get; init; }
+
+    /// <summary>
+    /// Approved Review snapshot. When omitted (Convert), an existing
+    /// <see cref="ApplicationProfileTemplate.ReviewPlanJson"/> is left unchanged.
+    /// </summary>
+    public string? ReviewPlanJson { get; init; }
 
     /// <summary>
     /// When true, persist <see cref="ApplicableProjectContractId"/> / <see cref="ApplicableMigrationServiceId"/>

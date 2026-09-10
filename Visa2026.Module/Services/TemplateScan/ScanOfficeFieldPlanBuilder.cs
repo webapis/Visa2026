@@ -13,7 +13,8 @@ public static class ScanOfficeFieldPlanBuilder
         ApplicationProfilePlaceholderSet placeholderSet,
         byte[]? officeBytes = null,
         ScanSourceKind sourceKind = ScanSourceKind.Word,
-        IReadOnlyList<ValueCandidate>? valueCandidates = null)
+        IReadOnlyList<ValueCandidate>? valueCandidates = null,
+        IReadOnlyList<ScanDetectedField>? lockedFields = null)
     {
         ArgumentNullException.ThrowIfNull(yellows);
         ArgumentNullException.ThrowIfNull(placeholderSet);
@@ -21,7 +22,7 @@ public static class ScanOfficeFieldPlanBuilder
         if (sourceKind == ScanSourceKind.Excel
             && officeBytes is { Length: > 0 })
         {
-            var excelFields = ScanExcelYellowResolver.Resolve(officeBytes, yellows, placeholderSet)
+            var excelFields = ScanExcelYellowResolver.Resolve(officeBytes, yellows, placeholderSet, lockedFields)
                 .SelectMany(draft => ScanCompoundYellowBinder.Upgrade([draft], placeholderSet))
                 .ToList();
             return new ScanFieldPlanProposal
@@ -36,6 +37,8 @@ public static class ScanOfficeFieldPlanBuilder
 
         var drafts = new List<ScanDetectedFieldDraft>();
         var usedHeaderCodes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        ScanFieldPlanLockMerge.RegisterUsedHeaderCodes(lockedFields, placeholderSet, usedHeaderCodes);
+        var lockedByKey = ScanFieldPlanLockMerge.Index(lockedFields);
         var instanceCandidates = valueCandidates ?? Array.Empty<ValueCandidate>();
         var catalogExamples = ScanYellowValueHintResolver.CatalogExampleCandidates(placeholderSet);
         var nearbyByIndex = BuildNearbyLabels(officeBytes, sourceKind, yellows);
@@ -45,13 +48,38 @@ public static class ScanOfficeFieldPlanBuilder
             var yellow = yellows[yellowIndex];
             nearbyByIndex.TryGetValue(yellowIndex, out var nearbyLabel);
 
-            var resolved = ScanYellowHighlightTokenResolver.ResolveFromYellowText(
-                yellow.Text,
-                ScanBoundingBox.FullPage,
-                yellow.PageIndex,
-                placeholderSet,
-                usedHeaderCodes,
-                yellow.Region);
+            var lockKey = ScanDocumentRegionKey.ForRegion(yellow.Region);
+            if (lockKey != null && lockedByKey.TryGetValue(lockKey, out var lockedPin))
+            {
+                drafts.Add(ScanFieldPlanLockMerge.ToDraft(lockedPin, yellow));
+                continue;
+            }
+
+            IReadOnlyList<ScanDetectedFieldDraft> resolved = Array.Empty<ScanDetectedFieldDraft>();
+            var preferLeftLabel = ScanFormFieldLabelHints.LooksLikeFormFieldLabel(nearbyLabel);
+            if (preferLeftLabel)
+            {
+                resolved = ScanSurroundPlaceholderPattern.TryDraft(
+                    yellow.Text,
+                    yellow.PageIndex,
+                    yellow.Region,
+                    nearbyLabel,
+                    columnHeader: null,
+                    placeholderSet,
+                    usedHeaderCodes,
+                    ScanSurroundPlaceholderPattern.MinScore(nearbyLabel, null));
+            }
+
+            if (resolved.Count == 0)
+            {
+                resolved = ScanYellowHighlightTokenResolver.ResolveFromYellowText(
+                    yellow.Text,
+                    ScanBoundingBox.FullPage,
+                    yellow.PageIndex,
+                    placeholderSet,
+                    usedHeaderCodes,
+                    yellow.Region);
+            }
 
             if (resolved.Count == 0 && instanceCandidates.Count > 0)
             {

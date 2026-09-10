@@ -108,10 +108,25 @@ public static class ScanFormCaptionHints
             return role == ScanLetterRole.Applicant ? ["PDBT"] : ["ACRDT", "PDBT"];
         }
 
-        if (folded.Contains("salgy", StringComparison.Ordinal)
-            || folded.Contains("yuridiki", StringComparison.Ordinal)
-            || folded.Contains("adres", StringComparison.Ordinal))
+        if (folded.Contains("dasary", StringComparison.Ordinal)
+            && (folded.Contains("salgy", StringComparison.Ordinal) || folded.Contains("adres", StringComparison.Ordinal)))
+            return ["PFAD", "PFWC"];
+
+        if (folded.Contains("yuridiki", StringComparison.Ordinal)
+            || nearby.Contains("yuridiki", StringComparison.Ordinal)
+            || folded.Contains("karhana", StringComparison.Ordinal)
+            || nearby.Contains("karhana", StringComparison.Ordinal)
+            || nearby.Contains("is beriji", StringComparison.Ordinal))
             return ["ACADR"];
+
+        if (folded.Contains("salgy", StringComparison.Ordinal)
+            || folded.Contains("adres", StringComparison.Ordinal)
+            || folded.Contains("ikamet", StringComparison.Ordinal))
+        {
+            if (LooksLikeCompanyAddress(folded) || LooksLikeCompanyAddress(nearby))
+                return ["ACADR"];
+            return ["ADRS"];
+        }
 
         return Array.Empty<string>();
     }
@@ -162,4 +177,22 @@ public static class ScanFormCaptionHints
             ScanLetterRole.Signatory => ["CHPA"],
             _ => ["PPAT"],
         };
+
+    internal static bool LooksLikeCompanyAddress(string folded) =>
+        folded.Contains("yuridiki", StringComparison.Ordinal)
+        || folded.Contains("karhana", StringComparison.Ordinal)
+        || folded.Contains("sirket", StringComparison.Ordinal)
+        || folded.Contains("company", StringComparison.Ordinal)
+        || folded.Contains("is beriji", StringComparison.Ordinal);
+
+    internal static bool LooksLikePersonResidence(string folded) =>
+        !LooksLikeCompanyAddress(folded)
+        && (folded.Contains("turkmenistan", StringComparison.Ordinal)
+            || folded.Contains("yasayan", StringComparison.Ordinal)
+            || folded.Contains("yasayys", StringComparison.Ordinal)
+            || folded.Contains("ikamet", StringComparison.Ordinal)
+            || folded.Contains("residence", StringComparison.Ordinal))
+        && (folded.Contains("salgy", StringComparison.Ordinal)
+            || folded.Contains("adres", StringComparison.Ordinal)
+            || folded.Contains("ikamet", StringComparison.Ordinal));
 }

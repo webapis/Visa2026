@@ -90,4 +90,21 @@ public class ApplicationProfileTemplateSaveHelperTests
         Assert.Null(template.ApplicableProjectContractId);
         Assert.Null(template.ApplicableMigrationServiceId);
     }
+
+    [Fact]
+    public void SaveRequest_omits_source_so_convert_does_not_require_yellow_bytes()
+    {
+        var request = new ApplicationProfileTemplateSaveRequest
+        {
+            ObjectSpace = null!,
+            Profile = null!,
+            TemplateName = "Converted",
+            DataScope = ApplicationProfileTemplateDataScope.Both,
+            CatalogScope = ApplicationProfileTemplateCatalogScope.ProfileSpecific,
+            Content = [1],
+        };
+
+        Assert.Null(request.SourceContent);
+        Assert.Null(request.SourceFileName);
+    }
 }

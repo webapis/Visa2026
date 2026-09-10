@@ -40,6 +40,12 @@ public sealed class TemplateAiScanOptions
     /// <summary>Max yellow marks sent per Azure refinement call.</summary>
     public int AmbiguousYellowMaxMarksPerCall { get; set; } = 24;
 
+    /// <summary>Max bytes for one Ask AI PNG/JPG attachment.</summary>
+    public int MaxChatImageBytes { get; set; } = 8_388_608;
+
+    /// <summary>Max officer images attached on one Ask AI turn.</summary>
+    public int MaxChatImages { get; set; } = 2;
+
     public TemplateAiScanAzureOpenAiOptions AzureOpenAI { get; set; } = new();
 
     public ScanSuitabilityOptions Suitability { get; set; } = new();

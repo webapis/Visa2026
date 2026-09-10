@@ -18,6 +18,9 @@ public static class ScanAmbiguousYellowAzurePayload
             sourceKind = request.SourceKind.ToString(),
             playbookFingerprint = request.Playbook.Fingerprint,
             placeholderSetFingerprint = request.PlaceholderSet.Fingerprint,
+            officerHints = request.OfficerHints.ToPayload(),
+            hasReviewPageImages = (request.Pages ?? Array.Empty<ScanPageImage>())
+                .Any(static p => ScanVisionImageDataUrl.TryGetDataUrl(p, out _)),
             allowedTokensByBo = allowed,
             marks = request.Marks.Select(static m => new
             {

@@ -163,7 +163,8 @@ public static class ApplicationProfileFromApplicationTypeMapper
         profile.RequirePersonSalary = type.ShowCurrentSalary;
         profile.RequirePersonMedical = type.ShowCurrentMedicalRecord;
         profile.RequirePersonRejectionItem = type.ShowRejections;
-        profile.RequirePersonTravelHistory = false;
+        profile.RequirePersonTravelHistory =
+            profile.ActionFamily != ApplicationProfileActionFamily.BusinessTrip;
     }
 
     private static void ApplySla(ApplicationProfile profile, ApplicationType type)

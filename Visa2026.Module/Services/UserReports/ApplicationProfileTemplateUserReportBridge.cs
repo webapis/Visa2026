@@ -92,10 +92,18 @@ public static class ApplicationProfileTemplateUserReportBridge
         ArgumentNullException.ThrowIfNull(template);
         ArgumentNullException.ThrowIfNull(content);
 
-        template.TemplateFile ??= objectSpace.CreateObject<FileData>();
-        template.TemplateFile.FileName = string.IsNullOrWhiteSpace(fileName)
+        var resolvedName = string.IsNullOrWhiteSpace(fileName)
             ? (template.TemplateName + GetExtension(template))
             : fileName;
+        if (template.GetEffectiveOutputFormat() == TemplateOutputFormat.Excel
+            || resolvedName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase)
+            || resolvedName.EndsWith(".xlsm", StringComparison.OrdinalIgnoreCase))
+        {
+            content = ExcelPreviewPageLayout.StampFromContent(content);
+        }
+
+        template.TemplateFile ??= objectSpace.CreateObject<FileData>();
+        template.TemplateFile.FileName = resolvedName;
         template.TemplateFile.Content = content;
         TemplateCatalogAuditStamp.Touch(template, SecuritySystem.CurrentUserName);
     }

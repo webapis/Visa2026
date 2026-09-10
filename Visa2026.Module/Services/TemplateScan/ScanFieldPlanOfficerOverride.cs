@@ -83,6 +83,54 @@ public static class ScanFieldPlanOfficerOverride
         return WithFields(plan, fields, plan.Gaps);
     }
 
+    /// <summary>Lock or unlock a yellow span so Remap unmarked will skip or re-guess it.</summary>
+    public static ScanFieldPlan SetLocked(ScanFieldPlan plan, string fieldId, bool locked)
+    {
+        ArgumentNullException.ThrowIfNull(plan);
+        var resolvedId = ScanReviewFieldOrder.ParentFieldId(fieldId);
+        if (string.IsNullOrWhiteSpace(resolvedId))
+            return plan;
+
+        var index = -1;
+        for (var i = 0; i < plan.Fields.Count; i++)
+        {
+            if (string.Equals(plan.Fields[i].FieldId, resolvedId, StringComparison.Ordinal))
+            {
+                index = i;
+                break;
+            }
+        }
+
+        if (index < 0 || plan.Fields[index].IsLocked == locked)
+            return plan;
+
+        var fields = plan.Fields.ToList();
+        var field = fields[index];
+        fields[index] = CopyField(field, field.ProposedToken, field.Confidence, field.HiddenPartIndexes, locked);
+        return WithFields(plan, fields, plan.Gaps);
+    }
+
+    /// <summary>Lock every mapped yellow so Remap unmarked only targets gaps and unlocked rows.</summary>
+    public static ScanFieldPlan LockMapped(ScanFieldPlan plan)
+    {
+        ArgumentNullException.ThrowIfNull(plan);
+        var changed = false;
+        var fields = new List<ScanDetectedField>(plan.Fields.Count);
+        foreach (var field in plan.Fields)
+        {
+            if (!field.IsLocked && !string.IsNullOrWhiteSpace(field.ProposedToken))
+            {
+                changed = true;
+                fields.Add(CopyField(field, field.ProposedToken, field.Confidence, field.HiddenPartIndexes, locked: true));
+                continue;
+            }
+
+            fields.Add(field);
+        }
+
+        return changed ? WithFields(plan, fields, plan.Gaps) : plan;
+    }
+
     /// <summary>
     /// Remap one Review sub-row (5.1) without dropping sibling tokens on the same yellow span.
     /// </summary>
@@ -130,6 +178,42 @@ public static class ScanFieldPlanOfficerOverride
 
             if (!string.IsNullOrWhiteSpace(part.ShortCode))
                 allCodes.Add(part.ShortCode);
+        }
+
+        return ApplyTokens(plan, parentId, allCodes);
+    }
+
+    /// <summary>
+    /// Officer Add placeholder on 12.1 / 12.2 appends a sibling (12.3) on the same yellow span.
+    /// Empty unmapped parts still use <see cref="ApplyPartCodes"/> to fill that slot.
+    /// </summary>
+    public static ScanFieldPlan AppendShortCodes(
+        ScanFieldPlan plan,
+        string rowKey,
+        IReadOnlyList<string>? extraShortCodes)
+    {
+        ArgumentNullException.ThrowIfNull(plan);
+        if (string.IsNullOrWhiteSpace(rowKey))
+            return plan;
+
+        var parentId = ScanReviewFieldOrder.ParentFieldId(rowKey);
+        var field = plan.Fields.FirstOrDefault(f =>
+            string.Equals(f.FieldId, parentId, StringComparison.Ordinal));
+        if (field == null)
+            return plan;
+
+        var extra = (extraShortCodes ?? Array.Empty<string>())
+            .Select(static c => (c ?? string.Empty).Trim())
+            .Where(static c => c.Length > 0)
+            .ToList();
+        if (extra.Count == 0)
+            return plan;
+
+        var allCodes = TemplateTokenSyntax.GetShortCodes(field.ProposedToken).ToList();
+        foreach (var code in extra)
+        {
+            if (!allCodes.Contains(code, StringComparer.OrdinalIgnoreCase))
+                allCodes.Add(code);
         }
 
         return ApplyTokens(plan, parentId, allCodes);
@@ -252,7 +336,8 @@ public static class ScanFieldPlanOfficerOverride
         ScanDetectedField field,
         string? token,
         ScanFieldConfidence confidence,
-        IReadOnlyList<int>? hiddenPartIndexes = null) =>
+        IReadOnlyList<int>? hiddenPartIndexes = null,
+        bool? locked = null) =>
         new()
         {
             FieldId = field.FieldId,
@@ -265,6 +350,7 @@ public static class ScanFieldPlanOfficerOverride
             SourceRegion = field.SourceRegion,
             Alternatives = field.Alternatives,
             HiddenPartIndexes = hiddenPartIndexes ?? field.HiddenPartIndexes,
+            IsLocked = locked ?? field.IsLocked,
         };
 
     private static int OverlayPartIndex(string rowKey)
@@ -303,9 +389,9 @@ public static class ScanFieldPlanOfficerOverride
             var gap = plan.Gaps.FirstOrDefault(g =>
                 string.Equals(g.FieldId, resolvedId, StringComparison.Ordinal));
             if (gap != null)
-                return $"Focused yellow mark #{displayOrder}. Printed text: \"{gap.LabelText}\". Currently unmapped. Suggest one or more library placeholders from the profile set for this same highlight.";
+                return $"Focused yellow mark #{displayOrder}. Printed text: \"{gap.LabelText}\". Currently unmapped. If the officer is talking about this highlight, suggest placeholders for it. If they name a different Review # or printed form line, change those fieldIds instead.";
 
-            return $"Focused yellow mark #{displayOrder}.";
+            return $"Focused yellow mark #{displayOrder}. If the officer names a different Review # or form line, remap those yellows, not this mark.";
         }
 
         var codes = TemplateTokenSyntax.GetShortCodes(field.ProposedToken);
@@ -322,7 +408,7 @@ public static class ScanFieldPlanOfficerOverride
         }
 
         var nameBit = names.Count == 0 ? string.Empty : $" Full name: {string.Join(" · ", names)}.";
-        return $"Focused yellow mark #{displayOrder}. Printed text: \"{field.LabelText}\". Current placeholder: {current}.{nameBit} Remap this mark to one or more library placeholders from the profile set (same yellow span).";
+        return $"Focused yellow mark #{displayOrder}. Printed text: \"{field.LabelText}\". Current placeholder: {current}.{nameBit} Remap this fieldId only when the officer means this printed text. If they name another Review # or form line (for example 12. Wizanyň berilen senesi), change those fieldIds and leave this mark unchanged.";
     }
 
     internal static string JoinLibraryTokens(

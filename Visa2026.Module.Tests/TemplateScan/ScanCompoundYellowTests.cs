@@ -230,6 +230,28 @@ public class ScanCompoundYellowTests
     }
 
     [Fact]
+    public void Review_shows_officer_added_subsection_beyond_comma_segments()
+    {
+        var field = new ScanDetectedField
+        {
+            FieldId = "mark12",
+            Box = ScanBoundingBox.FullPage,
+            PageIndex = 0,
+            LabelText = "FM, U3655957",
+            ProposedToken = "{{.VTYP}}, {{.PPN}}, {{.VPLC}}",
+            Confidence = ScanFieldConfidence.High,
+            Scope = ScanFieldScope.Row,
+            SourceRegion = new DocumentRegion.WordSpan("body/12", 0, 20),
+        };
+
+        var ordered = ScanReviewFieldOrder.Order([field]);
+        Assert.Equal(["1.1", "1.2", "1.3"], ordered.Select(o => o.DisplayOrder).ToArray());
+        Assert.Equal("VTYP", TemplateTokenSyntax.GetShortCodes(ordered[0].ProposedToken).Single());
+        Assert.Equal("PPN", TemplateTokenSyntax.GetShortCodes(ordered[1].ProposedToken).Single());
+        Assert.Equal("VPLC", TemplateTokenSyntax.GetShortCodes(ordered[2].ProposedToken).Single());
+    }
+
+    [Fact]
     public void Review_hides_dismissed_compound_parts()
     {
         var field = new ScanDetectedField

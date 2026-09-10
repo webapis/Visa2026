@@ -67,6 +67,10 @@ public static class ApplicationProfileInstancePersonPdfPackageLineHydrator
         item.CurrentWorkDuty = First<WorkDuty>(objectSpace, idsByKind, ApplicationProfileInstancePersonLinkKind.WorkDuty);
         item.CurrentSalary = First<EmployeeSalary>(objectSpace, idsByKind, ApplicationProfileInstancePersonLinkKind.Salary);
         item.CurrentMedicalRecord = First<MedicalRecord>(objectSpace, idsByKind, ApplicationProfileInstancePersonLinkKind.MedicalRecord);
+        item.CurrentTravelHistory = LoadMany<TravelHistory>(objectSpace, idsByKind, ApplicationProfileInstancePersonLinkKind.TravelHistory)
+            .OrderByDescending(t => t.TravelDate)
+            .ThenByDescending(t => t.ID)
+            .FirstOrDefault();
 
         return item;
     }

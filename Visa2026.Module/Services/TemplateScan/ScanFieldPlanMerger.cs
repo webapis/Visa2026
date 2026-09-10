@@ -76,6 +76,13 @@ public sealed class ScanFieldPlanMerger : IScanFieldPlanMerger
         List<ScanDetectedField> fields,
         List<ScanGap> gaps)
     {
+        if (draft.IsLocked)
+        {
+            RegisterUsedHeaderCode(draft, allowed, usedCodes);
+            fields.Add(ToField(draft, hintTokens, allowed));
+            return;
+        }
+
         // Excel inference / single-token drafts — do not re-run regex (dates become ADAT).
         if (ShouldKeepDraftToken(draft, allowed, usedCodes))
         {
@@ -234,9 +241,14 @@ public sealed class ScanFieldPlanMerger : IScanFieldPlanMerger
         ApplicationProfilePlaceholderSet allowed)
     {
         var confidence = draft.Confidence;
-        var original = draft.ProposedToken!.Trim();
-        if (hintTokens.Contains(original))
-            confidence = ScanFieldConfidence.High;
+        string? token = null;
+        if (!string.IsNullOrWhiteSpace(draft.ProposedToken))
+        {
+            var original = draft.ProposedToken.Trim();
+            if (hintTokens.Contains(original))
+                confidence = ScanFieldConfidence.High;
+            token = ScanLibraryTokenRewriter.Rewrite(original, allowed);
+        }
 
         return new ScanDetectedField
         {
@@ -244,11 +256,12 @@ public sealed class ScanFieldPlanMerger : IScanFieldPlanMerger
             Box = draft.Box.Clamp(),
             PageIndex = draft.PageIndex,
             LabelText = draft.LabelText,
-            ProposedToken = ScanLibraryTokenRewriter.Rewrite(original, allowed),
+            ProposedToken = token,
             Confidence = confidence,
             Scope = draft.Scope,
             SourceRegion = draft.SourceRegion,
             Alternatives = draft.Alternatives,
+            IsLocked = draft.IsLocked,
         };
     }
 }

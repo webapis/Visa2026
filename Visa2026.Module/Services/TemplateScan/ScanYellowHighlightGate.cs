@@ -20,7 +20,8 @@ public static class ScanYellowHighlightGate
 
         if (yellowHighlightCount <= 0)
         {
-            if (string.Equals(fieldPlan.Source, ScanOfficeLibraryTokenExtractor.FieldPlanSource, StringComparison.Ordinal)
+            if ((string.Equals(fieldPlan.Source, ScanOfficeLibraryTokenExtractor.FieldPlanSource, StringComparison.Ordinal)
+                    || string.Equals(fieldPlan.Source, ScanApprovedReviewSnapshot.FieldPlanSource, StringComparison.Ordinal))
                 && fieldPlan.HasMappedFields)
             {
                 return prior;

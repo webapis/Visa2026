@@ -121,6 +121,85 @@ public class AzureOpenAiTemplateScanAiProviderTests
     }
 
     [Fact]
+    public async Task ClarifyAsync_sends_officer_image_and_skips_placeholder_page()
+    {
+        var set = FullSet();
+        var current = new ScanFieldPlanMerger().Merge(new ScanFieldPlanMergeRequest
+        {
+            PlaceholderSet = set,
+            ScanKind = ScanKind.FilledSample,
+            Proposal = new ScanFieldPlanProposal
+            {
+                Fields =
+                [
+                    new ScanDetectedFieldDraft
+                    {
+                        FieldId = "f1",
+                        PageIndex = 0,
+                        LabelText = "WP",
+                        ProposedToken = "{{ds.VTYP}}",
+                        Confidence = ScanFieldConfidence.High,
+                        Scope = ScanFieldScope.Header,
+                        Box = ScanBoundingBox.FullPage,
+                    },
+                ],
+                Source = "test",
+            },
+        });
+
+        var clarifyJson =
+            """
+            {"accepted":true,"replyText":"Mapped dates on line 12.","fields":[{"fieldId":"f1","pageIndex":0,"labelText":"WP","proposedToken":"{{ds.VTYP}}","confidence":"High","scope":"Header","box":{"left":0.1,"top":0.2,"right":0.9,"bottom":0.25}}],"gaps":[]}
+            """;
+
+        string? body = null;
+        var handler = new StubHandler(req =>
+        {
+            body = req.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
+            return new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(WrapChatCompletion(clarifyJson), Encoding.UTF8, "application/json"),
+            };
+        });
+
+        Assert.True(ScanChatImageAttachment.TryCreate(
+            ScanTestImageFactory.CreatePngWithDimensions(120, 80),
+            "line12.png",
+            1_000_000,
+            out var officerImage,
+            out _));
+
+        var provider = new AzureOpenAiTemplateScanAiProvider(
+            Options.Create(EnabledOptions()),
+            new HttpClient(handler));
+
+        var result = await provider.ClarifyAsync(new ScanClarificationRequest
+        {
+            OfficerMessage = "Dates belong to line 12.",
+            CurrentPlan = current,
+            Playbook = new ScanAuthoringPlaybookService().GetPlaybook(),
+            PlaceholderSet = set,
+            Pages =
+            [
+                new ScanPageImage
+                {
+                    PageIndex = 0,
+                    PngBytes = ScanTestImageFactory.CreatePngWithDimensions(1, 1),
+                    WidthPx = 1,
+                    HeightPx = 1,
+                },
+            ],
+            OfficerImages = [officerImage],
+        });
+
+        Assert.True(result.Accepted);
+        Assert.False(string.IsNullOrEmpty(body));
+        Assert.Contains("image_url", body, StringComparison.Ordinal);
+        Assert.Contains("Officer-attached", body, StringComparison.Ordinal);
+        Assert.DoesNotContain("Review page 1", body, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Di_resolves_azure_provider_when_configured()
     {
         var services = new ServiceCollection();

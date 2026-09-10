@@ -4842,6 +4842,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Syýahat",
             ["ru-RU"] = "Поездка",
         },
+        ["PlaceholderManual.Group.TravelHistory"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Travel history",
+            ["tr-TR"] = "Seyahat geçmişi",
+            ["tk-TM"] = "Syýahat taryhy",
+            ["ru-RU"] = "История поездок",
+        },
         ["PlaceholderManual.Group.Visa"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Visa",

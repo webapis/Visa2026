@@ -37,4 +37,77 @@ internal static class ScanOfficePictureExtractor
 
         return results;
     }
+
+    /// <summary>
+    /// Body portraits as Review/Generate slots. Photos are drawings, not yellow highlighter.
+    /// </summary>
+    public static IReadOnlyList<ScanOfficeYellowSpan> AsYellowSpans(byte[] officeBytes)
+    {
+        var slots = Extract(officeBytes);
+        if (slots.Count == 0)
+            return Array.Empty<ScanOfficeYellowSpan>();
+
+        var spans = new List<ScanOfficeYellowSpan>(slots.Count);
+        foreach (var slot in slots)
+        {
+            spans.Add(new ScanOfficeYellowSpan
+            {
+                Text = "Person photo",
+                Region = slot,
+                PageIndex = 0,
+            });
+        }
+
+        return spans;
+    }
+
+    public static IReadOnlyList<ScanOfficeYellowSpan> MergeInto(
+        IReadOnlyList<ScanOfficeYellowSpan> yellows,
+        byte[]? officeBytes,
+        ScanSourceKind sourceKind)
+    {
+        yellows ??= Array.Empty<ScanOfficeYellowSpan>();
+        if (sourceKind != ScanSourceKind.Word || officeBytes is not { Length: > 64 })
+            return yellows;
+
+        var photos = AsYellowSpans(officeBytes);
+        if (photos.Count == 0)
+            return yellows;
+
+        var merged = new List<ScanOfficeYellowSpan>(yellows.Count + photos.Count);
+        var keys = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var yellow in yellows)
+        {
+            merged.Add(yellow);
+            var key = ScanDocumentRegionKey.ForRegion(yellow.Region);
+            if (key != null)
+                keys.Add(key);
+        }
+
+        foreach (var photo in photos)
+        {
+            var key = ScanDocumentRegionKey.ForRegion(photo.Region);
+            if (key != null && !keys.Add(key))
+                continue;
+            merged.Add(photo);
+        }
+
+        return merged;
+    }
+
+    public static bool IsPersonPhotoToken(string? token)
+    {
+        if (string.IsNullOrWhiteSpace(token))
+            return false;
+        if (token.Contains("IMAGE:", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        foreach (var code in TemplateTokenSyntax.GetShortCodes(token))
+        {
+            if (code.Equals("PPH", StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        return false;
+    }
 }

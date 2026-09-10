@@ -84,6 +84,21 @@ public class ApplicationProfileLockHelperTests
     }
 
     [Fact]
+    public void IsAllowedTemplateContentMutation_AllowsFileAndReviewPlanOnly()
+    {
+        Assert.True(ApplicationProfileLockHelper.IsAllowedTemplateContentMutation(
+            [nameof(ApplicationProfileTemplate.TemplateFile), nameof(ApplicationProfileTemplate.ReviewPlanJson)]));
+        Assert.True(ApplicationProfileLockHelper.IsAllowedTemplateContentMutation(
+            ["SourceFileID", nameof(ApplicationProfileTemplate.ModifiedOnUtc)]));
+        Assert.False(ApplicationProfileLockHelper.IsAllowedTemplateContentMutation(
+            [nameof(ApplicationProfileTemplate.TemplateName)]));
+        Assert.False(ApplicationProfileLockHelper.IsAllowedTemplateContentMutation(
+            [nameof(ApplicationProfileTemplate.TemplateFile), nameof(ApplicationProfileTemplate.CatalogScope)]));
+        Assert.False(ApplicationProfileLockHelper.IsAllowedTemplateContentMutation(
+            [nameof(ApplicationProfileTemplate.ModifiedOnUtc)]));
+    }
+
+    [Fact]
     public void IsAllowedResminamalarRecycleBinMutation_AllowsRecycleFieldsOnly()
     {
         Assert.True(ApplicationProfileLockHelper.IsAllowedResminamalarRecycleBinMutation(

@@ -91,6 +91,9 @@ public sealed class ScanDetectedFieldDraft
 
     /// <summary>Word printed caption before the yellow span (wekil / ýolbaşçy / applicant).</summary>
     public string? NearbyLabel { get; init; }
+
+    /// <summary>Officer locked this yellow on Review — Remap unmarked must keep the token.</summary>
+    public bool IsLocked { get; init; }
 }
 
 public sealed class ScanStaticRegionDraft
@@ -171,6 +174,9 @@ public sealed class ScanDetectedField
 
     /// <summary>Compound Review parts (1-based) the officer dismissed. Generate still uses the parent span.</summary>
     public IReadOnlyList<int> HiddenPartIndexes { get; init; } = Array.Empty<int>();
+
+    /// <summary>Officer locked this yellow on Review — Remap unmarked must keep the token.</summary>
+    public bool IsLocked { get; init; }
 }
 
 public sealed class ScanStaticRegion
@@ -198,6 +204,18 @@ public sealed class ScanFieldPlanBuildRequest
 
     /// <summary>Case instance values for matching yellow cell text (same map as Convert).</summary>
     public IReadOnlyList<ValueCandidate> ValueCandidates { get; init; } = Array.Empty<ValueCandidate>();
+
+    /// <summary>Review rows the officer locked. Remap unmarked keeps their placeholders.</summary>
+    public IReadOnlyList<ScanDetectedField> LockedFields { get; init; } = Array.Empty<ScanDetectedField>();
+
+    /// <summary>Optional Review checkboxes: leftover yellows and/or wrong unlocked placeholders.</summary>
+    public ScanRemapOfficerHints RemapHints { get; init; } = ScanRemapOfficerHints.None;
+
+    /// <summary>Review page rasters (pdf.js) when the officer says unidentified yellows remain.</summary>
+    public IReadOnlyList<ScanPageImage> ReviewPages { get; init; } = Array.Empty<ScanPageImage>();
+
+    /// <summary>Local remap first; AI runs in a second pass so Review is not stuck on page capture.</summary>
+    public bool SkipAiRefinement { get; init; }
 }
 
 public sealed class ScanFieldPlanMergeRequest
@@ -220,6 +238,12 @@ public sealed class ScanClarificationRequest
     public required ScanAuthoringPlaybook Playbook { get; init; }
 
     public required ApplicationProfilePlaceholderSet PlaceholderSet { get; init; }
+
+    /// <summary>Review page rasters of the uploaded Word/Excel (skip 1x1 placeholders).</summary>
+    public IReadOnlyList<ScanPageImage> Pages { get; init; } = Array.Empty<ScanPageImage>();
+
+    /// <summary>Optional officer PNG/JPG screenshots or photos of the form.</summary>
+    public IReadOnlyList<ScanPageImage> OfficerImages { get; init; } = Array.Empty<ScanPageImage>();
 }
 
 public sealed class ScanClarificationResult
@@ -252,6 +276,10 @@ public sealed class ScanClarificationTurnRequest
     public ScanKind ScanKind { get; init; } = ScanKind.BlankForm;
 
     public IReadOnlyList<ScanValueHint> ValueHints { get; init; } = Array.Empty<ScanValueHint>();
+
+    public IReadOnlyList<ScanPageImage> Pages { get; init; } = Array.Empty<ScanPageImage>();
+
+    public IReadOnlyList<ScanPageImage> OfficerImages { get; init; } = Array.Empty<ScanPageImage>();
 }
 
 public sealed class ScanClarificationTurnResult

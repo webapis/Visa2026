@@ -5,10 +5,23 @@ namespace Visa2026.Module.Services.TemplateScan;
 /// <summary>Decides when local rules should escalate a yellow mark to Azure for placeholder guessing.</summary>
 public static class ScanAmbiguousYellowGate
 {
-    public static bool NeedsAiRefinement(ScanDetectedFieldDraft draft, TemplateAiScanOptions options)
+    public static bool NeedsAiRefinement(
+        ScanDetectedFieldDraft draft,
+        TemplateAiScanOptions options,
+        ScanRemapOfficerHints? remapHints = null)
     {
         ArgumentNullException.ThrowIfNull(draft);
         ArgumentNullException.ThrowIfNull(options);
+
+        if (draft.IsLocked)
+            return false;
+
+        var hints = remapHints ?? ScanRemapOfficerHints.None;
+        if (hints.IncorrectPlaceholders)
+            return true;
+
+        if (hints.UnidentifiedYellows && string.IsNullOrWhiteSpace(draft.ProposedToken))
+            return true;
 
         if (draft.ProposedToken == null)
             return true;
@@ -36,13 +49,17 @@ public static class ScanAmbiguousYellowGate
 
     public static IReadOnlyList<ScanDetectedFieldDraft> SelectForRefinement(
         IReadOnlyList<ScanDetectedFieldDraft> fields,
-        TemplateAiScanOptions options)
+        TemplateAiScanOptions options,
+        ScanRemapOfficerHints? remapHints = null)
     {
         ArgumentNullException.ThrowIfNull(fields);
         ArgumentNullException.ThrowIfNull(options);
 
+        var hints = remapHints ?? ScanRemapOfficerHints.None;
         return fields
-            .Where(f => NeedsAiRefinement(f, options))
+            .Where(f => NeedsAiRefinement(f, options, hints))
+            .OrderBy(static f => string.IsNullOrWhiteSpace(f.ProposedToken) ? 0 : 1)
+            .ThenBy(static f => f.Confidence)
             .Take(Math.Clamp(options.AmbiguousYellowMaxMarksPerCall, 1, 40))
             .ToList();
     }

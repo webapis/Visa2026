@@ -530,9 +530,7 @@ internal static class ApplicationProfileTenantCatalogSync
         profile.RequirePersonMedical = row.RequirePersonMedical;
         profile.RequirePersonRejectionItem = row.RequirePersonRejectionItem;
         profile.RequirePersonTravelHistory =
-            profile.ActionFamily == ApplicationProfileActionFamily.BusinessTrip
-                ? false
-                : row.RequirePersonTravelHistory;
+            profile.ActionFamily != ApplicationProfileActionFamily.BusinessTrip;
         profile.PersonPassportLastCount = ApplicationProfilePersonLastCount.Clamp(row.PersonPassportLastCount);
         profile.PersonVisaLastCount = ApplicationProfilePersonLastCount.Clamp(row.PersonVisaLastCount);
         profile.PersonInvitationItemLastCount = ApplicationProfilePersonLastCount.Clamp(row.PersonInvitationItemLastCount);

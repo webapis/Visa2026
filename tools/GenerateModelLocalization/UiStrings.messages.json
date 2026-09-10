@@ -2081,6 +2081,12 @@
     "tk-TM": "Syýahat",
     "ru-RU": "Поездка"
   },
+  "PlaceholderManual.Group.TravelHistory": {
+    "en": "Travel history",
+    "tr-TR": "Seyahat geçmişi",
+    "tk-TM": "Syýahat taryhy",
+    "ru-RU": "История поездок"
+  },
   "PlaceholderManual.Group.Visa": {
     "en": "Visa",
     "tr-TR": "Vize",

@@ -70,8 +70,14 @@ public static class ScanCompoundLabelGroup
 
         if (LooksLikeEducation(stem))
             Add(UserReportPlaceholderRelatedBo.Education, 90);
+        if (LooksLikeResidenceAddress(stem))
+            Add(UserReportPlaceholderRelatedBo.AddressOfResidence, 90);
         if (LooksLikeHiredPerson(stem))
             Add(UserReportPlaceholderRelatedBo.Person, 92);
+        if (LooksLikeVisa(stem))
+            Add(UserReportPlaceholderRelatedBo.Visa, 90);
+        if (LooksLikeTravel(stem))
+            Add(UserReportPlaceholderRelatedBo.Travel, 90);
         if (stem.Contains("pasport", StringComparison.Ordinal))
             Add(UserReportPlaceholderRelatedBo.Passport, 70);
         if (stem.Contains("karhana", StringComparison.Ordinal)
@@ -192,6 +198,19 @@ public static class ScanCompoundLabelGroup
                 return -15;
         }
 
+        if (nearbyFolded.Contains("wiza", StringComparison.Ordinal)
+            && nearbyFolded.Contains("berlen", StringComparison.Ordinal))
+        {
+            if (shortCode.Equals("VISD", StringComparison.OrdinalIgnoreCase)
+                || shortCode.Equals("VSTD", StringComparison.OrdinalIgnoreCase)
+                || shortCode.Equals("VEDT", StringComparison.OrdinalIgnoreCase))
+                return 20;
+            if (shortCode.Equals("PDBT", StringComparison.OrdinalIgnoreCase)
+                || shortCode.Equals("ADAT", StringComparison.OrdinalIgnoreCase)
+                || shortCode.Equals("ACRDT", StringComparison.OrdinalIgnoreCase))
+                return -15;
+        }
+
         if (!nearbyFolded.Contains("mohlet", StringComparison.Ordinal))
             return 0;
 
@@ -215,7 +234,8 @@ public static class ScanCompoundLabelGroup
             return string.Empty;
 
         var withoutSlots = Parenthetical.Replace(joined, " ");
-        return TemplateTextNormalizer.NormalizeFolded(withoutSlots);
+        return ScanFormFieldLabelHints.StripLeadingItemNumber(
+            TemplateTextNormalizer.NormalizeFolded(withoutSlots));
     }
 
     private static bool StemMatches(string stem, string key) =>
@@ -234,6 +254,29 @@ public static class ScanCompoundLabelGroup
         || stem.Contains("okan", StringComparison.Ordinal)
         || stem.Contains("education", StringComparison.Ordinal)
         || stem.Contains("hunar", StringComparison.Ordinal);
+
+    private static bool LooksLikeResidenceAddress(string stem) =>
+        !stem.Contains("yuridiki", StringComparison.Ordinal)
+        && !stem.Contains("karhana", StringComparison.Ordinal)
+        && !stem.Contains("dasary", StringComparison.Ordinal)
+        && (stem.Contains("turkmenistandaky salgy", StringComparison.Ordinal)
+            || stem.Contains("yasayan salgy", StringComparison.Ordinal)
+            || stem.Contains("yasayys salgy", StringComparison.Ordinal)
+            || stem.Contains("ikamet", StringComparison.Ordinal)
+            || stem.Contains("residence address", StringComparison.Ordinal)
+            || stem.Contains("bolyan yeri", StringComparison.Ordinal)
+            || (stem.Contains("turkmenistan", StringComparison.Ordinal)
+                && stem.Contains("bolyan", StringComparison.Ordinal))
+            || (stem.Contains("salgy", StringComparison.Ordinal)
+                && (stem.Contains("turkmenistan", StringComparison.Ordinal)
+                    || stem.Contains("yasayan", StringComparison.Ordinal))));
+
+    private static bool LooksLikeVisa(string stem) =>
+        stem.Contains("wiza", StringComparison.Ordinal)
+        && !stem.Contains("giren", StringComparison.Ordinal);
+
+    private static bool LooksLikeTravel(string stem) =>
+        stem.Contains("giren", StringComparison.Ordinal);
 
     private static bool HasUsableExample(string example) =>
         example.Length >= 2

@@ -174,6 +174,19 @@ public class ApplicationProfileConfigurationResolverTests
     }
 
     [Fact]
+    public void RequirePersonTravelHistory_IsTrueForIssuanceWhenFlagOn()
+    {
+        var profile = new ApplicationProfile
+        {
+            ActionFamily = ApplicationProfileActionFamily.Issuance,
+            RequirePersonTravelHistory = true,
+        };
+        var app = new ApplicationProfileInstance { ApplicationProfile = profile };
+
+        Assert.True(ApplicationProfileConfigurationResolver.RequirePersonTravelHistory(app));
+    }
+
+    [Fact]
     public void GetMinistryLegCount_UsesEmbeddedProfileLegs()
     {
         var profile = new ApplicationProfile

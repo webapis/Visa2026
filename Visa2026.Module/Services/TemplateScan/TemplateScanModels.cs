@@ -69,12 +69,15 @@ public sealed class ScanPageImage
 {
     public required int PageIndex { get; init; }
 
-    /// <summary>PNG bytes for vision calls. PDF pages may use a placeholder raster until S2.</summary>
+    /// <summary>PNG or JPEG bytes for vision calls. PDF/Office Analyze may use a 1x1 placeholder.</summary>
     public required byte[] PngBytes { get; init; }
 
     public required int WidthPx { get; init; }
 
     public required int HeightPx { get; init; }
+
+    /// <summary><c>image/png</c> or <c>image/jpeg</c>.</summary>
+    public string MimeType { get; init; } = "image/png";
 }
 
 public sealed class ScanOcrLine

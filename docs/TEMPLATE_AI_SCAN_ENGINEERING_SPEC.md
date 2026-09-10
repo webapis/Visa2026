@@ -468,7 +468,7 @@ Approved 2026-08-28.
 | **SD-D2** | Suitability thresholds | Fail &lt; 0.40 text confidence; Warn 0.40–0.70; Pass &gt; 0.70. Config-bound |
 | **SD-D3** | PDF page cap | **5 pages** v1 (`MaxPdfPages`). Officer selects subset (V10) |
 | **SD-D4** | Vision backend v1 | **Azure OpenAI vision** deployment on same resource as Convert; Document Intelligence optional spike — not dual-required for v1 |
-| **SD-D5** | Draft persistence | **Ephemeral** — bytes live in modal state until Approve. No `TemplateScanDraft` BO in v1 (product O3) |
+| **SD-D5** | Draft persistence | **Ephemeral** — bytes live in modal state until Approve. No `TemplateScanDraft` BO in v1 (product O3). After Approve, the yellow upload is stored as `ApplicationProfileTemplate.SourceFile` (Review / Remap); the mapped copy stays `TemplateFile` (Resminamalar Preview / ZIP) |
 | **SD-D6** | Warning gate | Same as Convert **E-D2**: checkbox on Preview for `Warning`; `Error` blocks Approve |
 | **SD-D7** | Config lock | **New** template save allowed while locked (existing Convert carve-out). No extra engineering |
 | **SD-D8** | Save helper | Extract `ApplicationProfileTemplateSaveHelper` from `TemplateConvertOrchestrator.Save` in **S6** — both features call it |

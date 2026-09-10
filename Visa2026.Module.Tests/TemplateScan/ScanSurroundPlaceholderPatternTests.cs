@@ -44,6 +44,38 @@ public class ScanSurroundPlaceholderPatternTests
     }
 
     [Fact]
+    public void Turkmenistan_residence_column_ranks_ADRS_not_company_address()
+    {
+        var ranked = ScanSurroundPlaceholderPattern.Rank(
+            "Aşgabat şäheriniň 11-nji (Bagtyýarlyk) etrap, I.Gandyýew köçesi",
+            "Türkmenistandaky salgysy",
+            "Türkmenistandaky salgysy",
+            Set(),
+            UserReportPlaceholderScope.Row);
+
+        Assert.Equal("ADRS", ranked[0].ShortCode);
+        Assert.True(ranked[0].ScorePercent >= ScanSurroundPlaceholderPattern.NearbyMinScore);
+        Assert.DoesNotContain(
+            ranked.Take(2),
+            a => a.ShortCode.Equals("ACADR", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void Company_legal_address_caption_still_ranks_ACADR()
+    {
+        var ranked = ScanSurroundPlaceholderPattern.Rank(
+            "Aşgabat ş., Bitarap Türkmenistan şaýoly 538",
+            "Karhana (hasaba alnan belgisi, senesi, yuridiki salgysy, telefon belgisi)",
+            null,
+            Set(),
+            UserReportPlaceholderScope.Header);
+
+        Assert.Contains(
+            ranked.Take(3),
+            a => a.ShortCode.Equals("ACADR", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
     public void Surround_pattern_does_not_map_a_hired_person_name_to_company_address()
     {
         var ranked = ScanSurroundPlaceholderPattern.Rank(

@@ -23,6 +23,51 @@ Keep **`SKILL.md`** stable; **promote** into `SKILL.md` only when the same lesso
 
 ## Entries
 
+### 2026-09-10 — Forma 16 / Hasaba empty TRDT TRCK AVCAT (Emre Akbulut)
+
+- **Symptom**: Resminamalar Preview of officer `_F16.docx` warned Line "Emre Akbulut": `Travel_CheckPointTm`, `Travel_DateText`, `Application_VisaCategory_NameTm` empty. People & links had Travel history Entry 11.08.2025 Aşgabat şäher howa menzili MGSP and a linked visa.
+- **Root cause**: Official Forma 16 and yellow-marks Review use registration **TRDT**/**TRCK** and instance **AVCAT**. Hasaba Almak has no registration-line TravelDate/CheckPoint and `RequireVisaCategory` is off, so instance `VisaCategory` is null. Values live on linked `TravelHistory` and `Visa`.
+- **Fix**: `Travel_DateText` / `Travel_CheckPointTm` fall back to `CurrentTravelHistory` (date + place/city) when the registration line is empty. `Application_VisaCategory_NameTm` falls back to linked visa, then invitation. Registration/instance values still win when set. Catalog tokens stay distinct (no TRDT=THDT alias).
+- **Prevent**: Do not tell officers to remap F16 Giren wagty/ýeri to THDT/THCP just to fill Preview. Do not require Visa category on the Hasaba instance when the person visa already has one.
+- **Verified**: Officer confirmed Hasaba F16 Preview filled after rebuild.
+- **Cross-skill**: visa2026-application-profile | visa2026-resminamalar | visa2026-template-scan
+
+### 2026-09-09 — TravelHistory placeholders for People & links (THKD/THDT/THCP)
+
+- **Symptom**: After Travel history was required on profiles, Create from yellow marks / Resminamalar still had no tokens for People & links Kind / Date / Check point. Existing **TRDT** / **TRCK** are registration-line `TravelDate` / `CheckPoint`, not `TravelHistory`.
+- **Root cause**: `PersonTravelHistory` pack existed with zero catalog rows. Merge hydrator never assigned a linked `TravelHistory`.
+- **Fix**: Catalog **THKD** Kind, **THDT** date, **THCP** checkpoint, **THPL** place (checkpoint or city), plus type/country/region/city/notes. Hydrator sets `CurrentTravelHistory` from resolved links. Do not alias TRDT/TRCK to TravelHistory.
+- **Prevent**: People & links travel columns map to `TravelHistory_*`, not registration `Travel_*`.
+- **Cross-skill**: visa2026-application-profile | visa2026-template-scan
+
+
+
+- **Symptom**: Placeholders 12 ACPOS and 13 ACFNM visible on Review below the table; Resminamalar Preview showed only the 11-column people list.
+- **Root cause**: Excel header dictionary did not include CompanyHead. Footer cells are merged with no roster line, so missing header keys become blank.
+- **Fix**: `BuildApplicationHeaderDictionary` always includes signatory position + name (aliases ACPOS/ACFNM). Excel merge `.` tokens can resolve from header.
+- **Prevent**: Footer signatory tokens must live on the application header dict, not only on Extracted Placeholders or the ItemList row dictionary.
+
+### 2026-09-09 — ADRS includes City (Sanaw_hasaba_alys.xlsx)
+
+- Symptom: Hasaba almak Preview *Türkmenistandaky salgysy* showed only the street (`FullAddress`). People & links also has City (`Turkmenbashy etraby`).
+- Root cause: `Address_FullAddress` / `ADRS` returned `CurrentAddressOfResidence.FullAddress` only.
+- Fix: `AddressOfResidenceReportText.CityAndStreet` prefixes `City.NameTm` when it is not already in the street. Same getter on the roster line and WorkPermitItem.
+- Prevent: Do not add a second city token for this column; ADRS is city + street. Do not duplicate City when FullAddress already contains it.
+
+### 2026-09-09 — ADRS residence address (family: ItemList)
+
+- Symptom: Yellow-marks Review attached company ACADR for Türkmenistandaky salgysy because officers could not find a case-linked residence token.
+- Root cause: ADRS existed (Address_FullAddress on the roster line from People & links Address) but pack PersonAddressOfResidence hid it; salgy captions always preferred ACADR.
+- Fix: Catalog ADRS packKey Core; still relatedBo AddressOfResidence. Merge unchanged (ApplicationRosterMergeLine.Address_FullAddress).
+- Prevent: Do not map person residence to Application_Company_Address. Company legal address stays ACADR (yuridiki / kärhana only).
+
+### 2026-09-09 — Sanaw_hasaba_alys.xlsx (family: ItemList)
+
+- **Symptom**: Uploaded / synced wide Excel templates kept portrait PageSetup; Resminamalar Preview squeezed the sanaw.
+- **Root cause**: Preview PDF orientation came from DevExpress Spreadsheet default, not from used-range width. Upload did not write Landscape into the stored file.
+- **Fix**: `ExcelPreviewPageLayout.StampFromContent` on nested save, master `WriteMasterFile`, and staging/HTTP upload. Preview still infers landscape even if the stored file stays portrait.
+- **Prevent**: Do not add an officer page-layout picker. Do not rebuild xlsx with ZipFile. Preview owner is resminamalar (`ApplicationWordReportOfficePreviewPdfConverter`), not XtraReports.
+
 ### 2026-09-02 — Signatory passport expiration (`CHPE`)
 
 - **Symptom**: Create from yellow marks Review had no Authorized signatory expiration token for `19.02.2034ý.` (only CHPD issue date).

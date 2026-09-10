@@ -25,6 +25,7 @@ public enum UserReportPlaceholderRelatedBo
     FamilyMember = 15,
     BorderZone = 16,
     RosterRow = 17,
+    TravelHistory = 18,
 }
 
 public static class UserReportPlaceholderRelatedBoCatalog
@@ -53,6 +54,7 @@ public static class UserReportPlaceholderRelatedBoCatalog
         UserReportPlaceholderRelatedBo.FamilyMember => "Family member",
         UserReportPlaceholderRelatedBo.BorderZone => "Border zone",
         UserReportPlaceholderRelatedBo.RosterRow => "Roster row",
+        UserReportPlaceholderRelatedBo.TravelHistory => "Travel history",
         _ => relatedBo.ToString(),
     };
 

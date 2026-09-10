@@ -113,6 +113,36 @@ public class ScanExcelYellowResolverTests
     }
 
     [Fact]
+    public void Resolve_maps_hasaba_residence_column_to_ADRS_not_company_address()
+    {
+        var set = PlaceholderSet();
+        using var ms = new MemoryStream();
+        using (var wb = new XLWorkbook())
+        {
+            var ws = wb.AddWorksheet("Sanaw");
+            ws.Cell("K2").Value = "Wiza maglumatlary";
+            ws.Cell("L2").Value = "Türkmenistandaky salgysy";
+            ws.Cell("K3").Value = "A1688318 FM";
+            ws.Cell("K3").Style.Fill.BackgroundColor = XLColor.Yellow;
+            ws.Cell("L3").Value = "Aşgabat şäheriniň 11-nji (Bagtyýarlyk) etrap, I.Gandyýew köçesi jaý-12";
+            ws.Cell("L3").Style.Fill.BackgroundColor = XLColor.Yellow;
+            wb.SaveAs(ms);
+        }
+
+        var bytes = ms.ToArray();
+        var yellows = new ScanOfficeYellowExtractor().Extract(bytes, ScanSourceKind.Excel);
+        var fields = ScanExcelYellowResolver.Resolve(bytes, yellows, set);
+
+        var address = Assert.Single(fields, f => f.LabelText.Contains("Bagtyýarlyk", StringComparison.Ordinal));
+        Assert.Equal(ScanFieldScope.Row, address.Scope);
+        Assert.Equal("{{.ADRS}}", address.ProposedToken);
+        Assert.DoesNotContain("ACADR", address.ProposedToken, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain(
+            address.Alternatives.Take(2),
+            a => a.ShortCode.Equals("ACADR", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
     public void Resolve_maps_border_zone_from_column_header()
     {
         var set = PlaceholderSet();

@@ -4,6 +4,8 @@
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Web
 @using Microsoft.Extensions.Options
+@using Microsoft.JSInterop
+@using System.Text.Json.Serialization
 @using Visa2026.Module.BusinessObjects
 @using Visa2026.Module.Services.ApplicationProfileWizard
 @using Visa2026.Module.Services.RuntimeLogging
@@ -124,6 +126,10 @@
                                     <small>.docx / .xlsx with yellow marks</small>
                                 }
                             </label>
+                            @if (IsEditingExisting)
+                            {
+                                <small>Upload the yellow-marked Word/Excel. Saved Short codes stay; this page is only to attach the original highlights.</small>
+                            }
                         </div>
 
                         @if (false && _pdfPageCount > 1)
@@ -179,9 +185,17 @@
                                        @oninput="e => _templateName = e.Value?.ToString() ?? string.Empty" />
                                 @if (IsLockedExistingOverwrite)
                                 {
-                                    <small>Profile is locked — change the name to save a new catalog copy. Overwriting this template stays blocked.</small>
+                                    <small>Profile is locked — Approve updates this file. Change the name only to save a new catalog copy.</small>
                                 }
                             </div>
+                        </div>
+                    }
+
+                    @if (IsEditingExisting && !_reviewFromYellowSource)
+                    {
+                        <div class="tas-banner tas-banner--warn">
+                            The yellow-marked original is not stored for this catalog file, so this page shows mapped placeholders.
+                            Click <strong>Upload different file</strong> and choose the yellow Word/Excel — saved Short codes stay.
                         </div>
                     }
 
@@ -211,6 +225,9 @@
                                                          Busy="_chatBusy"
                                                          ShowRejectBanner="_chatRejectBanner"
                                                          RejectBannerText="@_chatRejectText"
+                                                         OfficerImageNames="ChatOfficerImageNames"
+                                                         OnImageFile="OnChatImageSelectedAsync"
+                                                         OnClearImage="OnChatImageCleared"
                                                          OnSend="SendChatAsync"
                                                          OnQuickReply="SendQuickReplyAsync"
                                                          OnBack="HideReviewChat" />
@@ -235,6 +252,9 @@
                                                  Busy="_chatBusy"
                                                  ShowRejectBanner="_chatRejectBanner"
                                                  RejectBannerText="@_chatRejectText"
+                                                 OfficerImageNames="ChatOfficerImageNames"
+                                                 OnImageFile="OnChatImageSelectedAsync"
+                                                 OnClearImage="OnChatImageCleared"
                                                  OnSend="SendChatAsync"
                                                  OnQuickReply="SendQuickReplyAsync"
                                                  OnBack="BackToFieldReview" />
@@ -267,7 +287,7 @@
                                        @oninput="e => _templateName = e.Value?.ToString() ?? string.Empty" />
                                 @if (IsLockedExistingOverwrite)
                                 {
-                                    <small>Profile is locked — change the name to save a new catalog copy.</small>
+                                    <small>Profile is locked — Approve updates this file. Change the name only to save a new catalog copy.</small>
                                 }
                             </div>
                         </div>
@@ -319,7 +339,7 @@
             </div>
 
             <footer class="tas-foot">
-                @if (_stage == Stage.Upload && _busy)
+                @if ((_stage == Stage.Upload || _stage == Stage.FieldReview) && _busy)
                 {
                     <div class="tas-analyze" role="status" aria-live="polite">
                         <div class="tas-progress tas-progress--foot">
@@ -338,13 +358,19 @@
                 }
                 else if (_busy)
                 {
-                    <span class="tas-foot__hint">Analyzing scan…</span>
+                    <span class="tas-foot__hint">@(string.IsNullOrWhiteSpace(_analyzeStatus) ? "Analyzing scan…" : _analyzeStatus)</span>
                 }
                 else if (_stage == Stage.FieldReview)
                 {
                     <span class="tas-foot__hint">@(IsEditingExisting
-                        ? "Numbered marks are the placeholders already in this catalog template. Click a row to add or change Short codes. × removes a redundant row. Comma combinations stay 6.1 / 6.2 / 6.3."
-                        : "Click a detected field to highlight it, then add placeholders from the Short list. × on the right removes a redundant row (a 10.2 part hides; the yellow span keeps remaining tokens). Ask AI is optional.")</span>
+                            ? (_restoredApprovedReview
+                                ? (_reviewFromYellowSource
+                                    ? "Saved placeholders are restored. Change a Short code if needed, or unlock a row and click Remap unmarked. Continue saves without re-guessing."
+                                    : "Saved placeholders are restored, but the left page is the mapped catalog file. Upload the yellow-marked Word/Excel to see highlighted samples — Short codes stay.")
+                                : (_reviewFromYellowSource
+                                    ? "Numbered marks are the yellow source saved with this catalog template. Lock reviewed rows, then Remap unmarked to re-guess the rest. × removes a redundant row. Comma combinations stay 6.1 / 6.2 / 6.3."
+                                    : "Numbered marks are the placeholders already in this catalog template. Lock reviewed rows, then Remap unmarked to re-guess the rest. × removes a redundant row. Comma combinations stay 6.1 / 6.2 / 6.3."))
+                        : "Lock correct rows. Tick leftover yellows and/or wrong placeholders, then Remap unmarked. Locked Short codes stay. Click a row to add Short codes.")</span>
                 }
                 else
                 {
@@ -356,7 +382,11 @@
                     <div class="tas-foot__actions">
                         <button type="button" class="tas-btn tas-btn--ghost" disabled="@_busy" @onclick="RequestCloseAsync">Cancel</button>
                         <button type="button" class="tas-btn tas-btn--primary" disabled="@(!CanAnalyze)" @onclick="AnalyzeAsync">
-                            @(_busy ? "Analyzing…" : "Analyze file")
+                            @(_busy
+                                ? "Opening…"
+                                : (IsEditingExisting && !string.IsNullOrWhiteSpace(_reviewPlanJson)
+                                    ? "Open yellow file"
+                                    : "Analyze file"))
                         </button>
                     </div>
                 }
@@ -367,7 +397,17 @@
                 }
                 else if (_stage == Stage.FieldReview)
                 {
-                    <button type="button" class="tas-btn tas-btn--ghost" @onclick="BackToUpload">Upload different file</button>
+                    <fieldset class="tas-remap-hints" disabled="@_busy" title="@(_aiEnabled ? "Hints go to Remap unmarked. Locked rows stay." : "AI is off — remap still re-guesses unlocked yellows locally.")">
+                        <label class="tas-remap-hint">
+                            <input type="checkbox" @bind="_remapHintUnidentified" />
+                            Unidentified yellows remain
+                        </label>
+                        <label class="tas-remap-hint">
+                            <input type="checkbox" @bind="_remapHintIncorrect" />
+                            Some placeholders are wrong
+                        </label>
+                    </fieldset>
+                    <button type="button" class="tas-btn tas-btn--ghost" disabled="@_busy" @onclick="BackToUpload">Upload different file</button>
                     @if (ShowNeedsHelpEntry)
                     {
                         <button type="button" class="tas-btn tas-btn--ghost" @onclick="OpenHelp">Needs help</button>
@@ -380,7 +420,13 @@
                     {
                         <button type="button" class="tas-btn tas-btn--secondary" disabled="@(_busy || !_aiEnabled)" @onclick="OpenClarification" title="@(!_aiEnabled ? "Clarification chat needs a TemplateAiScan AI provider" : null)">Ask for clarification</button>
                     }
-                    <button type="button" class="tas-btn tas-btn--primary" disabled="@(!CanContinue)" @onclick="GenerateAsync">Continue</button>
+                    <button type="button"
+                            class="tas-btn tas-btn--secondary"
+                            disabled="@(!CanRemapUnmarked)"
+                            title="Re-guess placeholders on yellows that are not locked. Tick the checkboxes first if yellows were missed or unlocked Short codes are wrong."
+                            @onclick:stopPropagation="true"
+                            @onclick="RemapUnlockedAsync">@(_busy && _stage == Stage.FieldReview ? "Remapping…" : "Remap unmarked")</button>
+                    <button type="button" class="tas-btn tas-btn--primary" disabled="@(!CanContinue)" @onclick:stopPropagation="true" @onclick="GenerateAsync">Continue</button>
                 }
                 else if (_stage == Stage.Clarification)
                 {
@@ -446,6 +492,7 @@
 
     [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
     [Inject] private IScanIngestService IngestService { get; set; } = null!;
+    [Inject] private IScanOfficeYellowExtractor OfficeYellowExtractor { get; set; } = null!;
     [Inject] private IScanFieldPlanService FieldPlanService { get; set; } = null!;
     [Inject] private IApplicationProfilePlaceholderSetService PlaceholderSets { get; set; } = null!;
     [Inject] private IApplicationProfileInstanceValueMapService ValueMaps { get; set; } = null!;
@@ -455,6 +502,7 @@
     [Inject] private IScanGapPacketExporter GapPacketExporter { get; set; } = null!;
     [Inject] private IFileDownloader FileDownloader { get; set; } = null!;
     [Inject] private IOptions<TemplateAiScanOptions> Options { get; set; } = null!;
+    [Inject] private IJSRuntime JS { get; set; } = null!;
     [Inject] private IApplicationErrorReporter ErrorReporter { get; set; } = null!;
     [Inject] private IUserReportTemplateMaintenanceService UserReportMaintenance { get; set; } = null!;
 
@@ -481,6 +529,11 @@
     private string _fileName = string.Empty;
     private string _templateName = string.Empty;
     private string? _editingOriginalName;
+    private bool _reviewFromYellowSource;
+    private byte[]? _yellowSourceBytes;
+    private bool _restoredApprovedReview;
+    private string? _reviewPlanJson;
+    private byte[]? _mappedTemplateBytes;
     private ApplicationProfileTemplateCatalogScope _catalogScope = ApplicationProfileTemplateCatalogScope.ProfileSpecific;
     private bool _isViaMinistry;
     private string _applicabilityId = string.Empty;
@@ -494,9 +547,11 @@
 
     private ScanIngestResult? _ingest;
     private ScanFieldPlan? _fieldPlan;
+    private ScanFieldPlan? _reviewPlanBeforeGenerate;
     private ApplicationProfilePlaceholderSet? _placeholderSet;
     private TemplateScanOutcome? _outcome;
     private IReadOnlyList<ScanValueHint> _valueHints = Array.Empty<ScanValueHint>();
+    private IReadOnlyList<ValueCandidate> _valueCandidates = Array.Empty<ValueCandidate>();
 
     private bool _acknowledgedWarnings;
     private bool _previewAcknowledgedWarnings;
@@ -505,6 +560,8 @@
     private string? _reviewSelectedFieldId;
     private bool _reviewChatOpen;
     private string? _reviewChatFocusFieldId;
+    private bool _remapHintUnidentified;
+    private bool _remapHintIncorrect;
     private string? _message;
     private bool _messageIsError;
 
@@ -515,6 +572,10 @@
     private bool _chatRejectBanner;
     private string _chatRejectText = string.Empty;
     private bool _chatSeeded;
+    private readonly List<(string Name, ScanPageImage Image)> _chatOfficerImages = new();
+
+    private IReadOnlyList<string> ChatOfficerImageNames =>
+        _chatOfficerImages.Select(static x => x.Name).ToList();
 
     private static readonly (int Index, string Label)[] StepLabels =
     [
@@ -585,13 +646,20 @@
         ApplicationProfileTemplateDataScope dataScope,
         ApplicationProfileTemplateCatalogScope catalogScope,
         Guid? applicableProjectContractId = null,
-        Guid? applicableMigrationServiceId = null)
+        Guid? applicableMigrationServiceId = null,
+        bool fromYellowSource = false,
+        string? reviewPlanJson = null,
+        byte[]? mappedTemplateBytes = null)
     {
         ArgumentNullException.ThrowIfNull(content);
         if (content.Length == 0)
             throw new ArgumentException("Template file has no content.", nameof(content));
 
         await OpenAsync(applicationProfileInstanceId, caseNumber);
+        _reviewFromYellowSource = fromYellowSource;
+        _yellowSourceBytes = fromYellowSource && content.Length > 0 ? content : null;
+        _reviewPlanJson = reviewPlanJson;
+        _mappedTemplateBytes = mappedTemplateBytes is { Length: > 0 } ? mappedTemplateBytes : null;
         _fileBytes = content;
         _fileName = string.IsNullOrWhiteSpace(fileName)
             ? (string.IsNullOrWhiteSpace(templateName) ? "template.docx" : templateName + ".docx")
@@ -601,7 +669,7 @@
         _dataScope = dataScope;
         _catalogScope = catalogScope;
         _applicabilityId = FormatApplicabilityId(applicableProjectContractId, applicableMigrationServiceId);
-        await AnalyzeAsync();
+        await RestoreApprovedReviewAsync();
     }
 
     private static IReadOnlyList<InstanceOption> LoadInstanceOptions(ApplicationProfile profile, IObjectSpace objectSpace)
@@ -637,6 +705,11 @@
         _fileName = string.Empty;
         _templateName = string.Empty;
         _editingOriginalName = null;
+        _reviewFromYellowSource = false;
+        _yellowSourceBytes = null;
+        _restoredApprovedReview = false;
+        _reviewPlanJson = null;
+        _mappedTemplateBytes = null;
         _catalogScope = ApplicationProfileTemplateCatalogScope.ProfileSpecific;
         _isViaMinistry = false;
         _applicabilityId = string.Empty;
@@ -647,9 +720,11 @@
         _selectedPdfPages.Clear();
         _ingest = null;
         _fieldPlan = null;
+        _reviewPlanBeforeGenerate = null;
         _outcome = null;
         _placeholderSet = null;
         _valueHints = Array.Empty<ScanValueHint>();
+        _valueCandidates = Array.Empty<ValueCandidate>();
         _acknowledgedWarnings = false;
         _previewAcknowledgedWarnings = false;
         _reviewPageIndex = 0;
@@ -668,6 +743,9 @@
         _chatSeeded = false;
         _savedTemplateName = string.Empty;
         _helpReturnStage = Stage.Upload;
+        _chatOfficerImages.Clear();
+        _remapHintUnidentified = false;
+        _remapHintIncorrect = false;
     }
 
     private string ApplicabilityTitle =>
@@ -891,21 +969,229 @@
         && _ingest?.Suitability.CanContinue == true
         && (!RequiresLowConfidenceAck || _acknowledgedWarnings);
 
-    private async Task AnalyzeAsync()
+    private bool CanRemapUnmarked =>
+        !_busy
+        && IsOfficeUpload
+        && _fileBytes is { Length: > 0 }
+        && _fieldPlan != null
+        && _profileId != Guid.Empty
+        && (_source != EntrySource.Profile || (_hostProfile != null && _hostObjectSpace != null))
+        && (_source != EntrySource.Instance || _profileId != Guid.Empty);
+
+    private Task RemapUnlockedAsync() => RunFieldPlanAsync(remap: true);
+
+    private void ApplyRemapReviewSelection(ScanFieldPlan fieldPlan, string? selectionKey)
     {
-        if (!CanAnalyze || _fileBytes == null)
+        if (selectionKey == null)
+            return;
+
+        var match = fieldPlan.Fields.FirstOrDefault(f =>
+            string.Equals(ScanDocumentRegionKey.ForField(f), selectionKey, StringComparison.Ordinal));
+        if (match == null)
+            return;
+
+        var ordered = ScanReviewFieldOrder.Order(fieldPlan.Fields, fieldPlan.Gaps);
+        _reviewSelectedFieldId = ordered.FirstOrDefault(m =>
+                string.Equals(m.FieldId, match.FieldId, StringComparison.Ordinal))
+            ?.DisplayId ?? match.FieldId;
+    }
+
+    private Task AnalyzeAsync()
+    {
+        if (IsEditingExisting && !string.IsNullOrWhiteSpace(_reviewPlanJson))
+            return RestoreApprovedReviewAsync();
+        return RunFieldPlanAsync(remap: false);
+    }
+
+    private async Task RestoreApprovedReviewAsync()
+    {
+        if (_fileBytes is not { Length: > 0 } || _profileId == Guid.Empty)
+            return;
+        if (_source == EntrySource.Profile && (_hostProfile == null || _hostObjectSpace == null))
+            return;
+
+        _busy = true;
+        _analyzeStatus = "Opening saved placeholders…";
+        _message = null;
+        _messageIsError = false;
+        _restoredApprovedReview = false;
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+
+        IObjectSpace? ownedObjectSpace = _source == EntrySource.Profile
+            ? null
+            : ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfile>();
+
+        try
+        {
+            var objectSpace = ownedObjectSpace ?? _hostObjectSpace!;
+            var profile = _source == EntrySource.Profile
+                ? _hostProfile!
+                : objectSpace.GetObjectByKey<ApplicationProfile>(_profileId);
+            if (profile == null)
+            {
+                _message = "The application profile is no longer available.";
+                _messageIsError = true;
+                return;
+            }
+
+            var fileBytes = _fileBytes;
+            var fileName = _fileName;
+            var ingest = await Task.Run(() => IngestService.Ingest(new ScanNormalizeRequest
+            {
+                Content = fileBytes,
+                FileName = fileName,
+            })).ConfigureAwait(true);
+
+            if (!ingest.Suitability.CanContinue)
+            {
+                _ingest = ingest;
+                _stage = Stage.ScanFail;
+                return;
+            }
+
+            var templateKind = Path.GetExtension(_fileName).Equals(".xlsx", StringComparison.OrdinalIgnoreCase)
+                ? ApplicationProfileTemplateKind.Excel
+                : ApplicationProfileTemplateKind.Word;
+            _placeholderSet = PlaceholderSets.GetSet(new ApplicationProfilePlaceholderSetQuery
+            {
+                Profile = profile,
+                DataScope = _dataScope,
+                TemplateKind = templateKind,
+            });
+
+            var sourceKind = ingest.Input.SourceKind;
+            var officeBytes = ingest.Input.OfficePackageBytes ?? fileBytes;
+            var yellows = await Task.Run(() => OfficeYellowExtractor.Extract(officeBytes, sourceKind))
+                .ConfigureAwait(true);
+            _reviewFromYellowSource = yellows.Count > 0;
+            if (_reviewFromYellowSource)
+                _yellowSourceBytes = fileBytes;
+
+            var snapshot = ScanApprovedReviewSnapshot.Deserialize(_reviewPlanJson);
+            IReadOnlyList<ScanOfficeYellowSpan>? mappedSpans = null;
+            if (snapshot == null && _mappedTemplateBytes is { Length: > 0 } mappedBytes)
+            {
+                var set = _placeholderSet;
+                mappedSpans = await Task.Run(() =>
+                        ScanOfficeLibraryTokenExtractor.Extract(mappedBytes, sourceKind, set))
+                    .ConfigureAwait(true);
+            }
+
+            var fieldPlan = ScanApprovedReviewRestorer.Restore(
+                _placeholderSet,
+                yellows,
+                snapshot,
+                mappedSpans,
+                officeBytes,
+                sourceKind);
+
+            var gatedSuitability = ScanYellowHighlightGate.Apply(
+                ingest.Suitability,
+                fieldPlan.YellowHighlightCount,
+                fieldPlan);
+            if (!ReferenceEquals(ingest.Suitability, gatedSuitability))
+            {
+                ingest = new ScanIngestResult
+                {
+                    Input = ingest.Input,
+                    Ocr = ingest.Ocr,
+                    Suitability = gatedSuitability,
+                    Playbook = ingest.Playbook,
+                };
+            }
+
+            if (!gatedSuitability.CanContinue)
+            {
+                _ingest = ingest;
+                _fieldPlan = fieldPlan;
+                _stage = Stage.ScanFail;
+                return;
+            }
+
+            _ingest = ingest;
+            _fieldPlan = fieldPlan;
+            _restoredApprovedReview = true;
+            _reviewPageIndex = 0;
+            _reviewSelectedFieldId = null;
+            _reviewChatOpen = false;
+            _reviewChatFocusFieldId = null;
+            _chatMessages.Clear();
+            _quickReplies = Array.Empty<string>();
+            _chatInput = string.Empty;
+            _chatRejectBanner = false;
+            _chatRejectText = string.Empty;
+            _chatSeeded = false;
+            _chatOfficerImages.Clear();
+            _acknowledgedWarnings = true;
+            _analyzeStatus = string.Empty;
+            _stage = Stage.FieldReview;
+        }
+        catch (Exception ex)
+        {
+            ErrorReporter.ReportReportPackageError(
+                "Template scan restore Review failed.",
+                ApplicationRuntimeLogCategories.TemplateScan,
+                ex);
+            _message = "Could not open the saved placeholders. Remap unmarked only if you want to re-guess.";
+            _messageIsError = true;
+        }
+        finally
+        {
+            ownedObjectSpace?.Dispose();
+            _busy = false;
+            _analyzeStatus = string.Empty;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task RunFieldPlanAsync(bool remap)
+    {
+        if (remap)
+        {
+            if (!CanRemapUnmarked || _fileBytes == null)
+                return;
+        }
+        else if (!CanAnalyze || _fileBytes == null)
             return;
         if (_source == EntrySource.Profile && (_hostProfile == null || _hostObjectSpace == null))
             return;
         if (_source == EntrySource.Instance && _profileId == Guid.Empty)
             return;
 
+        if (remap)
+            _restoredApprovedReview = false;
+
+        var lockedFields = remap && _fieldPlan != null
+            ? _fieldPlan.Fields.Where(static f => f.IsLocked).ToList()
+            : (IReadOnlyList<ScanDetectedField>)Array.Empty<ScanDetectedField>();
+        string? selectionKey = null;
+        if (remap && _fieldPlan != null && !string.IsNullOrWhiteSpace(_reviewSelectedFieldId))
+        {
+            var mark = ScanReviewFieldOrder.Order(_fieldPlan.Fields, _fieldPlan.Gaps)
+                .FirstOrDefault(m =>
+                    string.Equals(m.DisplayId, _reviewSelectedFieldId, StringComparison.Ordinal)
+                    || string.Equals(m.FieldId, _reviewSelectedFieldId, StringComparison.Ordinal));
+            var selected = mark == null
+                ? null
+                : _fieldPlan.Fields.FirstOrDefault(f =>
+                    string.Equals(f.FieldId, mark.FieldId, StringComparison.Ordinal));
+            if (selected != null)
+                selectionKey = ScanDocumentRegionKey.ForField(selected);
+        }
+
         _busy = true;
-        _analyzeStatus = "Reading file…";
+        _analyzeStatus = remap ? "Remapping unmarked yellows…" : "Reading file…";
         _message = null;
         _messageIsError = false;
-        _ingest = null;
-        _fieldPlan = null;
+        if (!remap)
+        {
+            _ingest = null;
+            _fieldPlan = null;
+            _reviewPlanBeforeGenerate = null;
+            _remapHintUnidentified = false;
+            _remapHintIncorrect = false;
+        }
         await InvokeAsync(StateHasChanged);
         await Task.Yield();
 
@@ -930,77 +1216,127 @@
             if (_pdfPageCount > 1)
                 selectedPages = _selectedPdfPages.OrderBy(static p => p).ToList();
 
-            var ingest = IngestService.Ingest(new ScanNormalizeRequest
+            ScanIngestResult ingest;
+            if (remap && _ingest != null)
             {
-                Content = _fileBytes,
-                FileName = _fileName,
-                SelectedPages = selectedPages,
-            });
+                ingest = _ingest;
+            }
+            else
+            {
+                var fileBytes = _fileBytes;
+                var fileName = _fileName;
+                ingest = await Task.Run(() => IngestService.Ingest(new ScanNormalizeRequest
+                {
+                    Content = fileBytes,
+                    FileName = fileName,
+                    SelectedPages = selectedPages,
+                })).ConfigureAwait(true);
+            }
 
             await SetAnalyzeStatusAsync("Finding yellow marks…");
 
             var templateKind = Path.GetExtension(_fileName).Equals(".xlsx", StringComparison.OrdinalIgnoreCase)
                 ? ApplicationProfileTemplateKind.Excel
                 : ApplicationProfileTemplateKind.Word;
-            _placeholderSet = PlaceholderSets.GetSet(new ApplicationProfilePlaceholderSetQuery
+            if (!remap || _placeholderSet == null)
             {
-                Profile = profile,
-                DataScope = _dataScope,
-                TemplateKind = templateKind,
-            });
+                _placeholderSet = PlaceholderSets.GetSet(new ApplicationProfilePlaceholderSetQuery
+                {
+                    Profile = profile,
+                    DataScope = _dataScope,
+                    TemplateKind = templateKind,
+                });
+            }
 
             if (!ingest.Suitability.CanContinue)
             {
+                if (remap)
+                {
+                    _message = "Remap could not re-read the file. Locked placeholders were not changed.";
+                    _messageIsError = true;
+                    return;
+                }
+
                 _ingest = ingest;
                 _stage = Stage.ScanFail;
                 return;
             }
 
-            var valueCandidates = Array.Empty<ValueCandidate>();
-            _valueHints = BuildValueHints(_placeholderSet, objectSpace);
-            if (_scanKind == ScanKind.FilledSample && _selectedInstanceId != Guid.Empty)
+            IReadOnlyList<ValueCandidate> valueCandidates;
+            if (remap && _valueCandidates.Count > 0)
             {
-                var instance = objectSpace.GetObjectByKey<ApplicationProfileInstance>(_selectedInstanceId);
-                if (instance != null)
+                valueCandidates = _valueCandidates;
+            }
+            else
+            {
+                valueCandidates = Array.Empty<ValueCandidate>();
+                _valueHints = BuildValueHints(_placeholderSet, objectSpace);
+                if (_scanKind == ScanKind.FilledSample && _selectedInstanceId != Guid.Empty)
                 {
-                    var map = ValueMaps.Build(new ApplicationProfileInstanceValueMapRequest
+                    var instance = objectSpace.GetObjectByKey<ApplicationProfileInstance>(_selectedInstanceId);
+                    if (instance != null)
                     {
-                        Instance = instance,
-                        PlaceholderSet = _placeholderSet,
-                        DataScope = _dataScope,
-                        RetainAmbiguousLiterals = true,
-                    });
-                    valueCandidates = map.Candidates.ToArray();
-                    _valueHints = map.Candidates
-                        .Select(static c => new ScanValueHint(c.Token, c.RawValue ?? c.NormalizedValue, null))
-                        .ToList();
+                        var map = ValueMaps.Build(new ApplicationProfileInstanceValueMapRequest
+                        {
+                            Instance = instance,
+                            PlaceholderSet = _placeholderSet,
+                            DataScope = _dataScope,
+                            RetainAmbiguousLiterals = true,
+                        });
+                        valueCandidates = map.Candidates.ToArray();
+                        _valueHints = map.Candidates
+                            .Select(static c => new ScanValueHint(c.Token, c.RawValue ?? c.NormalizedValue, null))
+                            .ToList();
+                    }
                 }
+
+                _valueCandidates = valueCandidates;
             }
 
             await SetAnalyzeStatusAsync("Matching placeholders…");
-            var fieldPlan = await FieldPlanService.BuildAsync(new ScanFieldPlanBuildRequest
-            {
-                Ingest = ingest,
-                PlaceholderSet = _placeholderSet,
-                ScanKind = _scanKind,
-                ValueHints = _valueHints,
-                ValueCandidates = valueCandidates,
-            }).ConfigureAwait(false);
+            var remapHints = remap
+                ? new ScanRemapOfficerHints(_remapHintUnidentified, _remapHintIncorrect)
+                : ScanRemapOfficerHints.None;
+            var askAi = remap && remapHints.Any && _aiEnabled;
+
+            var fieldPlan = await ScanFieldPlanBuildOffCircuit.RunAsync(
+                FieldPlanService,
+                new ScanFieldPlanBuildRequest
+                {
+                    Ingest = ingest,
+                    PlaceholderSet = _placeholderSet,
+                    ScanKind = _scanKind,
+                    ValueHints = _valueHints,
+                    ValueCandidates = valueCandidates,
+                    LockedFields = lockedFields,
+                    RemapHints = remapHints,
+                    SkipAiRefinement = askAi,
+                }).ConfigureAwait(true);
 
             var gatedSuitability = ScanYellowHighlightGate.Apply(
                 ingest.Suitability,
                 fieldPlan.YellowHighlightCount,
                 fieldPlan);
-            ingest = new ScanIngestResult
+            if (!ReferenceEquals(ingest.Suitability, gatedSuitability))
             {
-                Input = ingest.Input,
-                Ocr = ingest.Ocr,
-                Suitability = gatedSuitability,
-                Playbook = ingest.Playbook,
-            };
+                ingest = new ScanIngestResult
+                {
+                    Input = ingest.Input,
+                    Ocr = ingest.Ocr,
+                    Suitability = gatedSuitability,
+                    Playbook = ingest.Playbook,
+                };
+            }
 
             if (!gatedSuitability.CanContinue)
             {
+                if (remap)
+                {
+                    _message = "Remap could not match the yellow marks. Locked placeholders were not changed.";
+                    _messageIsError = true;
+                    return;
+                }
+
                 _ingest = ingest;
                 _fieldPlan = fieldPlan;
                 _stage = Stage.ScanFail;
@@ -1009,6 +1345,55 @@
 
             _ingest = ingest;
             _fieldPlan = fieldPlan;
+            if (remap)
+            {
+                ApplyRemapReviewSelection(fieldPlan, selectionKey);
+                var remapNeedsAck = fieldPlan.Fields.Any(static f => f.Confidence == ScanFieldConfidence.Low)
+                    || ingest.Suitability.Verdict == ScanSuitabilityVerdict.Warn;
+                if (remapNeedsAck)
+                    _acknowledgedWarnings = false;
+                _message = "Unlocked placeholders were remapped. Review the numbered list, then Continue.";
+                _messageIsError = false;
+                _stage = Stage.FieldReview;
+                await InvokeAsync(StateHasChanged);
+                await Task.Yield();
+            }
+
+            if (askAi)
+            {
+                await SetAnalyzeStatusAsync(remapHints.UnidentifiedYellows
+                    ? "Asking AI about leftover yellows…"
+                    : "Asking AI to re-check placeholders…");
+                try
+                {
+                    fieldPlan = await ScanFieldPlanBuildOffCircuit.RunAsync(
+                        FieldPlanService,
+                        new ScanFieldPlanBuildRequest
+                        {
+                            Ingest = ingest,
+                            PlaceholderSet = _placeholderSet,
+                            ScanKind = _scanKind,
+                            ValueHints = _valueHints,
+                            ValueCandidates = valueCandidates,
+                            LockedFields = lockedFields,
+                            RemapHints = remapHints,
+                        }).ConfigureAwait(true);
+                    _fieldPlan = fieldPlan;
+                    if (remap)
+                        ApplyRemapReviewSelection(fieldPlan, selectionKey);
+                }
+                catch (Exception ex)
+                {
+                    ErrorReporter.ReportReportPackageError(
+                        "Template scan AI remap failed.",
+                        ApplicationRuntimeLogCategories.TemplateScan,
+                        ex);
+                }
+            }
+
+            if (remap)
+                return;
+
             _reviewPageIndex = 0;
             _reviewSelectedFieldId = null;
             _reviewChatOpen = false;
@@ -1019,6 +1404,7 @@
             _chatRejectBanner = false;
             _chatRejectText = string.Empty;
             _chatSeeded = false;
+            _chatOfficerImages.Clear();
             var needsAck = fieldPlan.Fields.Any(static f => f.Confidence == ScanFieldConfidence.Low)
                 || ingest.Suitability.Verdict == ScanSuitabilityVerdict.Warn;
             _acknowledgedWarnings = !needsAck;
@@ -1027,6 +1413,13 @@
         }
         catch (ScanNormalizationException ex)
         {
+            if (remap)
+            {
+                _message = ex.Message;
+                _messageIsError = true;
+                return;
+            }
+
             _ingest = new ScanIngestResult
             {
                 Input = new ScanNormalizedInput
@@ -1170,6 +1563,7 @@
         _reviewChatOpen = false;
         _chatRejectBanner = false;
         _chatRejectText = string.Empty;
+        _chatOfficerImages.Clear();
     }
 
     private void SeedClarificationChat()
@@ -1192,8 +1586,29 @@
             .ToList();
     }
 
+    private static ScanFieldPlan? CloneReviewPlan(ScanFieldPlan? plan)
+    {
+        if (plan == null)
+            return null;
+
+        return new ScanFieldPlan
+        {
+            PlaceholderSet = plan.PlaceholderSet,
+            ScanKind = plan.ScanKind,
+            Fields = plan.Fields.ToList(),
+            StaticRegions = plan.StaticRegions,
+            Gaps = plan.Gaps,
+            PendingQuestions = plan.PendingQuestions,
+            Rationale = plan.Rationale,
+            Source = plan.Source,
+            YellowHighlightCount = plan.YellowHighlightCount,
+        };
+    }
+
     private void BackToFieldReview()
     {
+        if (_reviewPlanBeforeGenerate != null)
+            _fieldPlan = _reviewPlanBeforeGenerate;
         _stage = Stage.FieldReview;
         _outcome = null;
         _previewAcknowledgedWarnings = false;
@@ -1225,19 +1640,131 @@
 
     private Task SendChatAsync() => SendChatInternalAsync(_chatInput);
 
+    private async Task OnChatImageSelectedAsync(InputFileChangeEventArgs args)
+    {
+        var file = args.File;
+        if (file == null)
+            return;
+
+        var maxImages = Math.Max(1, Options.Value.MaxChatImages);
+        if (_chatOfficerImages.Count >= maxImages)
+        {
+            _chatRejectBanner = true;
+            _chatRejectText = $"Attach at most {maxImages} images.";
+            return;
+        }
+
+        var maxBytes = Options.Value.MaxChatImageBytes > 0 ? Options.Value.MaxChatImageBytes : 8_388_608;
+        try
+        {
+            await using var stream = file.OpenReadStream(maxBytes);
+            using var memory = new MemoryStream();
+            await stream.CopyToAsync(memory);
+            if (!ScanChatImageAttachment.TryCreate(memory.ToArray(), file.Name, maxBytes, out var image, out var error))
+            {
+                _chatRejectBanner = true;
+                _chatRejectText = error;
+                return;
+            }
+
+            var name = string.IsNullOrWhiteSpace(file.Name) ? "image.png" : file.Name.Trim();
+            _chatOfficerImages.Add((name, image));
+            _chatRejectBanner = false;
+            _chatRejectText = string.Empty;
+        }
+        catch (IOException)
+        {
+            _chatRejectBanner = true;
+            _chatRejectText = "Could not read that image.";
+        }
+    }
+
+    private void OnChatImageCleared(string name)
+    {
+        _chatOfficerImages.RemoveAll(x => string.Equals(x.Name, name, StringComparison.Ordinal));
+    }
+
+    private async Task<IReadOnlyList<ScanPageImage>> CaptureReviewPageImagesAsync(
+        int maxWidth = 1280,
+        int timeoutMs = 15000)
+    {
+        try
+        {
+            using var timeout = new CancellationTokenSource(TimeSpan.FromMilliseconds(Math.Clamp(timeoutMs, 1000, 30000)));
+            var dtos = await JS.InvokeAsync<ReviewPagePngDto[]>(
+                "visaTemplateScanPdfPreview.exportPagePngs",
+                timeout.Token,
+                2,
+                maxWidth);
+            if (dtos == null || dtos.Length == 0)
+                return Array.Empty<ScanPageImage>();
+
+            var pages = new List<ScanPageImage>();
+            for (var i = 0; i < dtos.Length; i++)
+            {
+                var dto = dtos[i];
+                if (string.IsNullOrWhiteSpace(dto.B64))
+                    continue;
+                byte[] bytes;
+                try
+                {
+                    bytes = Convert.FromBase64String(dto.B64);
+                }
+                catch (FormatException)
+                {
+                    continue;
+                }
+
+                pages.Add(new ScanPageImage
+                {
+                    PageIndex = i,
+                    PngBytes = bytes,
+                    WidthPx = dto.Width > 0 ? dto.Width : 1,
+                    HeightPx = dto.Height > 0 ? dto.Height : 1,
+                    MimeType = string.IsNullOrWhiteSpace(dto.Mime) ? "image/jpeg" : dto.Mime,
+                });
+            }
+
+            return pages;
+        }
+        catch (JSException)
+        {
+            return Array.Empty<ScanPageImage>();
+        }
+        catch (JSDisconnectedException)
+        {
+            return Array.Empty<ScanPageImage>();
+        }
+        catch (TaskCanceledException)
+        {
+            return Array.Empty<ScanPageImage>();
+        }
+        catch (OperationCanceledException)
+        {
+            return Array.Empty<ScanPageImage>();
+        }
+    }
+
     private async Task SendChatInternalAsync(string rawMessage)
     {
         if (_chatBusy || _fieldPlan == null || _ingest == null || _placeholderSet == null)
             return;
 
         var message = (rawMessage ?? string.Empty).Trim();
-        if (string.IsNullOrWhiteSpace(message))
+        if (string.IsNullOrWhiteSpace(message) && _chatOfficerImages.Count == 0)
             return;
+
+        if (string.IsNullOrWhiteSpace(message))
+            message = "Use the attached image to place the missing placeholders on the correct yellow marks.";
+
+        var display = message;
+        if (_chatOfficerImages.Count > 0)
+            display += " (attached: " + string.Join(", ", _chatOfficerImages.Select(static x => x.Name)) + ")";
 
         _chatBusy = true;
         _chatRejectBanner = false;
         _chatRejectText = string.Empty;
-        _chatMessages.Add(new TemplateScanClarificationView.ChatMessage(true, message, Refused: false));
+        _chatMessages.Add(new TemplateScanClarificationView.ChatMessage(true, display, Refused: false));
         _chatInput = string.Empty;
         await InvokeAsync(StateHasChanged);
 
@@ -1255,8 +1782,11 @@
                 + message;
         }
 
+        IReadOnlyList<ScanPageImage> pages = Array.Empty<ScanPageImage>();
         try
         {
+            var captured = await CaptureReviewPageImagesAsync();
+            pages = captured.Count > 0 ? captured : _ingest.Input.Pages;
             var result = await ClarificationService.ApplyAsync(new ScanClarificationTurnRequest
             {
                 OfficerMessage = serviceMessage,
@@ -1265,6 +1795,8 @@
                 PlaceholderSet = _placeholderSet,
                 ScanKind = _scanKind,
                 ValueHints = _valueHints,
+                Pages = pages,
+                OfficerImages = _chatOfficerImages.Select(static x => x.Image).ToList(),
             }).ConfigureAwait(false);
 
             var refused = !result.Accepted
@@ -1273,8 +1805,9 @@
 
             if (result.Accepted)
             {
-                _fieldPlan = result.Plan;
-                _quickReplies = result.Plan.PendingQuestions
+                var locked = _fieldPlan.Fields.Where(static f => f.IsLocked).ToList();
+                _fieldPlan = ScanFieldPlanLockMerge.Apply(result.Plan, locked);
+                _quickReplies = _fieldPlan.PendingQuestions
                     .SelectMany(static q => q.SuggestedAnswers)
                     .Where(static a => !string.IsNullOrWhiteSpace(a))
                     .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -1309,8 +1842,7 @@
         && (_source == EntrySource.Profile
             ? _hostProfile != null && _hostObjectSpace != null
             : _profileId != Guid.Empty)
-        && (!_outcome.HasWarnings || _previewAcknowledgedWarnings)
-        && !IsLockedExistingOverwrite;
+        && (!_outcome.HasWarnings || _previewAcknowledgedWarnings);
 
     private bool IsEditingExisting => !string.IsNullOrWhiteSpace(_editingOriginalName);
 
@@ -1356,10 +1888,22 @@
 
     private async Task GenerateAsync()
     {
+        if (!ScanWizardGenerateGuard.AllowStart(
+                _busy,
+                onFieldReview: _stage == Stage.FieldReview,
+                onClarification: _stage == Stage.Clarification,
+                onPreview: _stage == Stage.Preview))
+            return;
+        if (_stage == Stage.FieldReview && !CanContinue)
+            return;
+        if (_stage == Stage.Clarification && !CanContinueFromChat)
+            return;
+
         var analysis = BuildAnalysis();
         if (analysis == null || !analysis.CanGenerate)
             return;
 
+        _reviewPlanBeforeGenerate = CloneReviewPlan(_fieldPlan);
         _stage = Stage.Generating;
         _busy = true;
         _message = null;
@@ -1426,6 +1970,17 @@
                 CatalogScope = _catalogScope,
                 Content = _outcome.Content,
                 FileName = _templateName.Trim() + ext,
+                SourceContent = _yellowSourceBytes
+                    ?? (_fileBytes is { Length: > 0 } yellowCandidate
+                        && ScanOfficeYellowExtractor.HasHighlights(
+                            yellowCandidate,
+                            ScanOfficeYellowExtractor.KindFromFileName(_fileName))
+                        ? yellowCandidate
+                        : null),
+                SourceFileName = _fileName,
+                ReviewPlanJson = _fieldPlan == null
+                    ? null
+                    : ScanApprovedReviewSnapshot.Serialize(_fieldPlan),
                 TemplateKind = _outcome.TemplateKind,
                 ApplicableProjectContractId = SelectedProjectContractId,
                 ApplicableMigrationServiceId = SelectedMigrationServiceId,
@@ -1581,6 +2136,7 @@
         _stage = Stage.Upload;
         _ingest = null;
         _fieldPlan = null;
+        _reviewPlanBeforeGenerate = null;
         _outcome = null;
         _acknowledgedWarnings = false;
         _previewAcknowledgedWarnings = false;
@@ -1590,11 +2146,14 @@
         _chatRejectBanner = false;
         _chatRejectText = string.Empty;
         _chatSeeded = false;
+        _chatOfficerImages.Clear();
         _message = null;
         _messageIsError = false;
         _reviewSelectedFieldId = null;
         _reviewChatOpen = false;
         _reviewChatFocusFieldId = null;
+        _remapHintUnidentified = false;
+        _remapHintIncorrect = false;
     }
 
     private string ModalWidthClass => _stage switch
@@ -1640,4 +2199,19 @@
         2 => "2",
         _ => "•",
     };
+
+    private sealed class ReviewPagePngDto
+    {
+        [JsonPropertyName("mime")]
+        public string? Mime { get; set; }
+
+        [JsonPropertyName("b64")]
+        public string? B64 { get; set; }
+
+        [JsonPropertyName("width")]
+        public int Width { get; set; }
+
+        [JsonPropertyName("height")]
+        public int Height { get; set; }
+    }
 }

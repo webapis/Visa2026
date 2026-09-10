@@ -47,6 +47,11 @@ public static class ScanSurroundPlaceholderPattern
             if (!placeholderSet.Contains(remapped))
                 return;
 
+            var surroundFolded = TemplateTextNormalizer.NormalizeFolded(nearby);
+            if (remapped.Equals("ACADR", StringComparison.OrdinalIgnoreCase)
+                && ScanFormCaptionHints.LooksLikePersonResidence(surroundFolded))
+                return;
+
             var entry = placeholderSet.Allowed.First(e =>
                 string.Equals(e.ShortCode, remapped, StringComparison.OrdinalIgnoreCase));
             var token = entry.BuildWordToken(
@@ -222,7 +227,14 @@ public static class ScanSurroundPlaceholderPattern
             || code.Equals("PFAD", StringComparison.OrdinalIgnoreCase)
             || code.Equals("PBPL", StringComparison.OrdinalIgnoreCase)
             || code.Equals("RGEL", StringComparison.OrdinalIgnoreCase)
-            || code.Equals("ACNAM", StringComparison.OrdinalIgnoreCase);
+            || code.Equals("ACNAM", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("ADRS", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("VPLC", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("TRCK", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("VTYP", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("VCTM", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("VNUM", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("ACADR", StringComparison.OrdinalIgnoreCase);
     }
 
     private static string Join(string? nearbyLabel, string? columnHeader) =>

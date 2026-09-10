@@ -45,6 +45,27 @@ public sealed class ScanOfficeYellowExtractor : IScanOfficeYellowExtractor
         };
     }
 
+    public static ScanSourceKind KindFromFileName(string? fileName) =>
+        string.Equals(Path.GetExtension(fileName), ".xlsx", StringComparison.OrdinalIgnoreCase)
+            ? ScanSourceKind.Excel
+            : ScanSourceKind.Word;
+
+    /// <summary>True when the Office package still has yellow highlighter / yellow cell fill.</summary>
+    public static bool HasHighlights(byte[] officeBytes, ScanSourceKind kind)
+    {
+        try
+        {
+            return new ScanOfficeYellowExtractor().Extract(officeBytes, kind).Count > 0;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
+    internal static bool IsZipOfficePackage(byte[] bytes) =>
+        bytes.Length >= 64 && bytes[0] == (byte)'P' && bytes[1] == (byte)'K';
+
     private static IReadOnlyList<ScanOfficeYellowSpan> ExtractWord(byte[] bytes)
     {
         using var stream = new MemoryStream(bytes, writable: false);

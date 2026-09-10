@@ -14,7 +14,7 @@
                 <th>Description</th>
                 <th>Sample</th>
                 <th>Conf.</th>
-                <th class="tas-row-remove-col"><span class="tas-sr-only">Remove</span></th>
+                <th class="tas-row-actions-col"><span class="tas-sr-only">Actions</span></th>
             </tr>
         </thead>
         <tbody>
@@ -42,14 +42,14 @@
                                 }
                                 <input class="tas-input tas-token-filter"
                                        type="search"
-                                       placeholder="Filter (CompanySignatory, CHPD, …)"
+                                       placeholder="Filter (VPLC, Visa, …)"
                                        value="@_choiceSearch"
-                                       @oninput="OnChoiceSearch"
-                                       @onclick:stopPropagation="true" />
-                                <select class="tas-input tas-token-select"
-                                        value=""
+                                       @oninput="OnChoiceSearch" />
+                                <select class="tas-token-select"
+                                        @key="@(row.RowKey + "|" + (row.ProposedToken ?? string.Empty))"
+                                        disabled="@(!HasRemainingPlaceholders(row))"
                                         @onchange="e => OnPlaceholderAddedAsync(row, e)">
-                                    <option value="">@(row.ShortCodes.Count == 0 ? "Choose placeholder…" : "Add placeholder…")</option>
+                                    <option value="">Add placeholder…</option>
                                     @foreach (var group in RemainingChoiceGroups(row))
                                     {
                                         <optgroup label="@UserReportPlaceholderRelatedBoCatalog.DisplayNameEn(group.RelatedBo)">
@@ -65,7 +65,7 @@
                             {
                                 <div class="tas-token-line"><code>@DisplayToken(row.ProposedToken)</code></div>
                             }
-                            @if (AskAiEnabled)
+                            @if (AskAiEnabled && !row.IsLocked)
                             {
                                 <button type="button"
                                         class="tas-btn tas-btn--ghost tas-ask-ai"
@@ -117,12 +117,20 @@
                     <td>@row.Description</td>
                     <td class="tas-sample" title="@row.Sample">@row.Sample</td>
                     <td><span class="@ConfidenceCss(row)">@ConfidenceLabel(row)</span></td>
-                    <td class="tas-row-remove-col">
+                    <td class="tas-row-actions-col" @onclick:stopPropagation="true">
+                        @if (!row.IsGap)
+                        {
+                            <button type="button"
+                                    class="tas-row-lock @(row.IsLocked ? "is-on" : null)"
+                                    title="@(row.IsLocked ? "Unlock so Remap unmarked can change this yellow" : "Lock this yellow so Remap unmarked will not change it")"
+                                    aria-label="@(row.IsLocked ? "Unlock detected field " + row.OrderLabel : "Lock detected field " + row.OrderLabel)"
+                                    @onclick="() => OnLockToggledAsync(row)">@(row.IsLocked ? "Unlock" : "Lock")</button>
+                        }
                         <button type="button"
                                 class="tas-row-remove"
                                 title="Remove this detected field"
                                 aria-label="Remove detected field @row.OrderLabel"
-                                @onclick:stopPropagation="true"
+                                disabled="@row.IsLocked"
                                 @onclick="() => OnDetectedFieldRemovedAsync(row)">×</button>
                     </td>
                 </tr>
@@ -139,7 +147,8 @@
                 <strong>@FileName</strong>
                 <span class="tas-pill">In process</span>
             </div>
-            <TemplateScanOfficePdfPreview OfficeBytes="OfficePackageBytes"
+            <TemplateScanOfficePdfPreview @key="@("review-office-pdf")"
+                                          OfficeBytes="OfficePackageBytes"
                                           FileName="@FileName"
                                           Marks="OrderedMarks"
                                           ActiveFieldId="@ActiveFieldId"
@@ -158,6 +167,10 @@
                 </div>
                 <div class="tas-chips">
                     <span class="tas-chip tas-chip--ok">@MappedCount mapped</span>
+                    @if (LockedCount > 0)
+                    {
+                        <span class="tas-chip">@LockedCount locked</span>
+                    }
                     @if (GapCount > 0)
                     {
                         <span class="tas-chip tas-chip--warn">@GapCount gaps</span>
@@ -166,6 +179,11 @@
                     {
                         <span class="tas-chip tas-chip--warn">@LowConfidenceCount low confidence</span>
                     }
+                    <button type="button"
+                            class="tas-btn tas-btn--ghost tas-lock-mapped"
+                            disabled="@(!CanLockMapped)"
+                            title="Lock every mapped yellow so Remap unmarked only guesses unlocked rows"
+                            @onclick="LockMappedAsync">Lock mapped</button>
                 </div>
             </div>
             <h4>Detected fields</h4>
@@ -276,6 +294,7 @@ else
         string Sample,
         ScanFieldConfidence Confidence,
         bool IsGap,
+        bool IsLocked,
         bool ShowAlternatives,
         IReadOnlyList<ScanTokenAlternative> Alternatives);
 
@@ -342,7 +361,7 @@ else
             {
                 if (!mark.IsGap && byId.TryGetValue(mark.FieldId, out var field))
                 {
-                    rows.Add(ToRow(mark, field.ProposedToken, field.Confidence, false, field.Alternatives));
+                    rows.Add(ToRow(mark, field.ProposedToken, field.Confidence, false, field.IsLocked, field.Alternatives));
                     continue;
                 }
 
@@ -351,6 +370,7 @@ else
                     mark.ProposedToken,
                     ScanFieldConfidence.Low,
                     true,
+                    false,
                     Array.Empty<ScanTokenAlternative>()));
             }
 
@@ -383,6 +403,7 @@ else
         string? parentToken,
         ScanFieldConfidence confidence,
         bool isGap,
+        bool isLocked,
         IReadOnlyList<ScanTokenAlternative> alternatives)
     {
         var partCodes = TemplateTokenSyntax.GetShortCodes(mark.ProposedToken);
@@ -410,6 +431,7 @@ else
             string.Join(", ", entries.Select(static e => e.ExampleValue)),
             confidence,
             isGap,
+            isLocked,
             mark.PartIndex <= 1,
             alternatives);
     }
@@ -417,8 +439,11 @@ else
     private IReadOnlyList<ScanGap> Gaps => FieldPlan.Gaps;
 
     private int MappedCount => FieldPlan.Fields.Count(static f => !string.IsNullOrWhiteSpace(f.ProposedToken));
+    private int LockedCount => FieldPlan.Fields.Count(static f => f.IsLocked);
     private int GapCount => FieldPlan.Gaps.Count;
     private int LowConfidenceCount => FieldPlan.Fields.Count(static f => f.Confidence == ScanFieldConfidence.Low);
+    private bool CanLockMapped => FieldPlan.Fields.Any(static f =>
+        !f.IsLocked && !string.IsNullOrWhiteSpace(f.ProposedToken));
 
     private string SuitabilityLabel => SuitabilityVerdict switch
     {
@@ -439,27 +464,45 @@ else
         || (string.Equals(SelectedFieldId, row.ParentFieldId, StringComparison.Ordinal)
             && row.PartIndex <= 1);
 
-    private bool CanRemap(FieldRow row) => IsSelected(row) && !row.IsGap;
+    private bool CanRemap(FieldRow row) => IsSelected(row) && !row.IsGap && !row.IsLocked;
+
+    private IReadOnlyList<string> OccupiedShortCodes(FieldRow row) =>
+        row.ParentShortCodes.Count > 0 ? row.ParentShortCodes : row.ShortCodes;
 
     private IReadOnlyList<UserReportPlaceholderCatalogGroup> RemainingChoiceGroups(FieldRow row) =>
-        ScanPlaceholderChoiceList.RemainingGroups(
-            PlaceholderChoices,
-            row.ShortCodes,
-            _choiceSearch);
+        ScanPlaceholderChoiceList.RemainingGroups(PlaceholderChoices, OccupiedShortCodes(row), _choiceSearch);
+
+    private bool HasRemainingPlaceholders(FieldRow row) =>
+        ScanPlaceholderChoiceList.RemainingGroups(PlaceholderChoices, OccupiedShortCodes(row), string.Empty)
+            .SelectMany(static g => g.Entries)
+            .Any();
 
     private void OnChoiceSearch(ChangeEventArgs e) =>
         _choiceSearch = e.Value?.ToString() ?? string.Empty;
 
-    private async Task OnPlaceholderAddedAsync(FieldRow row, ChangeEventArgs e)
+    private Task OnPlaceholderAddedAsync(FieldRow row, ChangeEventArgs e)
     {
-        var code = e.Value?.ToString();
+        _choiceSearch = string.Empty;
+        return OnPlaceholderCodeChosenAsync(row, e.Value?.ToString());
+    }
+
+    private async Task OnPlaceholderCodeChosenAsync(FieldRow row, string? code)
+    {
         if (string.IsNullOrWhiteSpace(code))
             return;
 
+        if (row.PartIndex > 0 && row.ShortCodes.Count == 0)
+        {
+            await ApplyPlanAsync(row, ScanFieldPlanOfficerOverride.ApplyPartCodes(FieldPlan, row.RowKey, [code]));
+            return;
+        }
+
         if (row.PartIndex > 0)
         {
-            _choiceSearch = string.Empty;
-            await ApplyPlanAsync(row, ScanFieldPlanOfficerOverride.ApplyPartCodes(FieldPlan, row.RowKey, [code]));
+            await ApplyPlanAsync(
+                row,
+                ScanFieldPlanOfficerOverride.AppendShortCodes(FieldPlan, row.RowKey, [code]),
+                selectLastSibling: true);
             return;
         }
 
@@ -491,16 +534,19 @@ else
         await ApplyPlanAsync(row, next);
     }
 
-    private async Task ApplyPlanAsync(FieldRow row, ScanFieldPlan next)
+    private async Task ApplyPlanAsync(FieldRow row, ScanFieldPlan next, bool selectLastSibling = false)
     {
         if (ReferenceEquals(next, FieldPlan))
             return;
 
         await FieldPlanChanged.InvokeAsync(next);
-        var stay = ScanReviewFieldOrder.Order(next.Fields, next.Gaps)
-            .FirstOrDefault(m => string.Equals(m.DisplayId, row.RowKey, StringComparison.Ordinal))
-            ?? ScanReviewFieldOrder.Order(next.Fields, next.Gaps)
-                .FirstOrDefault(m => string.Equals(m.FieldId, row.ParentFieldId, StringComparison.Ordinal));
+        var ordered = ScanReviewFieldOrder.Order(next.Fields, next.Gaps);
+        var stay = selectLastSibling
+            ? ordered.LastOrDefault(m =>
+                string.Equals(m.FieldId, row.ParentFieldId, StringComparison.Ordinal))
+            : ordered.FirstOrDefault(m => string.Equals(m.DisplayId, row.RowKey, StringComparison.Ordinal))
+                ?? ordered.FirstOrDefault(m =>
+                    string.Equals(m.FieldId, row.ParentFieldId, StringComparison.Ordinal));
         if (stay != null)
             await SetSelectedAsync(stay.DisplayId);
     }
@@ -524,6 +570,24 @@ else
             HoveredFieldId = null;
             await HoveredFieldIdChanged.InvokeAsync(null);
         }
+    }
+
+    private async Task OnLockToggledAsync(FieldRow row)
+    {
+        var next = ScanFieldPlanOfficerOverride.SetLocked(FieldPlan, row.ParentFieldId, !row.IsLocked);
+        if (ReferenceEquals(next, FieldPlan))
+            return;
+
+        await FieldPlanChanged.InvokeAsync(next);
+    }
+
+    private async Task LockMappedAsync()
+    {
+        var next = ScanFieldPlanOfficerOverride.LockMapped(FieldPlan);
+        if (ReferenceEquals(next, FieldPlan))
+            return;
+
+        await FieldPlanChanged.InvokeAsync(next);
     }
 
     private Task AskAiForRowAsync(string fieldId) => AskAi.InvokeAsync(fieldId);
@@ -588,6 +652,8 @@ else
             parts.Add("is-selected");
         if (row.IsGap)
             parts.Add("is-gap");
+        if (row.IsLocked)
+            parts.Add("is-locked");
         return string.Join(' ', parts);
     }
 

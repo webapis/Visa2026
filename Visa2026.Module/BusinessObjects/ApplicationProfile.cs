@@ -269,7 +269,7 @@ public class ApplicationProfile : BaseObject
     public virtual bool RequirePersonSalary { get; set; }
     public virtual bool RequirePersonMedical { get; set; }
     public virtual bool RequirePersonRejectionItem { get; set; }
-    public virtual bool RequirePersonTravelHistory { get; set; }
+    public virtual bool RequirePersonTravelHistory { get; set; } = true;
 
     /// <summary>Latest passports to auto-link (1–3). Used only when <see cref="RequirePersonPassport"/> is on. Expiration is not checked.</summary>
     public virtual int PersonPassportLastCount { get; set; } = 1;
@@ -461,6 +461,24 @@ public class ApplicationProfileTemplate : BaseObject
     [Aggregated, ExpandObjectMembers(ExpandObjectMembers.Never)]
     [XafDisplayName("Template file")]
     public virtual FileData? TemplateFile { get; set; }
+
+    /// <summary>
+    /// Yellow-marked Word/Excel uploaded to Create from yellow marks. Review placeholders /
+    /// Remap unmarked use this when present; Resminamalar Preview/ZIP always uses <see cref="TemplateFile"/>.
+    /// </summary>
+    [Aggregated, ExpandObjectMembers(ExpandObjectMembers.Never)]
+    [Browsable(false)]
+    [VisibleInDetailView(false), VisibleInListView(false), VisibleInLookupListView(false)]
+    [XafDisplayName("Yellow source file")]
+    public virtual FileData? SourceFile { get; set; }
+
+    /// <summary>
+    /// Approved Review field plan (tokens, locks, OpenXML regions). Review placeholders
+    /// restores this instead of re-guessing. Remap unmarked is the only re-guess path.
+    /// </summary>
+    [Browsable(false)]
+    [VisibleInDetailView(false), VisibleInListView(false), VisibleInLookupListView(false)]
+    public virtual string? ReviewPlanJson { get; set; }
 
     public virtual int SortOrder { get; set; }
 
@@ -683,6 +701,7 @@ public static class ApplicationProfileLockHelper
     /// change while locked because instances keep a snapshot. New nested templates may be added;
     /// Resminamalar Recycle Bin (recycle / restore / purge) may change existing template rows;
     /// Resminamalar Shared-tab exclude may delete a live Category/Global include;
+    /// Review placeholders / Create from yellow marks may replace the Word/Excel file and review snapshot;
     /// other existing template edits stay blocked (see <see cref="EnsureNestedConfigurationEditable"/>).
     /// </summary>
     public static bool AllowsNestedEditWhenConfigLocked(object? nested, IObjectSpace? objectSpace = null) =>
@@ -692,11 +711,75 @@ public static class ApplicationProfileLockHelper
             ApplicationProfileTemplate template
                 when objectSpace != null && objectSpace.IsNewObject(template) => true,
             ApplicationProfileTemplate template
+                when objectSpace != null && IsTemplateContentMutation(objectSpace, template) => true,
+            ApplicationProfileTemplate template
                 when objectSpace != null && IsResminamalarRecycleBinMutation(objectSpace, template) => true,
             ApplicationProfileTemplate template
                 when objectSpace != null && IsResminamalarSharedIncludeMutation(objectSpace, template) => true,
             _ => false,
         };
+
+    /// <summary>
+    /// Review placeholders / Create from yellow marks: replace the mapped file, yellow source,
+    /// and review snapshot. Does not allow renaming or changing catalog scope / applicability.
+    /// </summary>
+    public static bool IsTemplateContentMutation(
+        IObjectSpace objectSpace,
+        ApplicationProfileTemplate template)
+    {
+        if (objectSpace == null || template == null)
+            return false;
+
+        if (objectSpace.IsNewObject(template) || objectSpace.IsObjectToDelete(template))
+            return false;
+
+        if (objectSpace is not EFCoreObjectSpace { DbContext: { } dbContext })
+            return false;
+
+        var entry = dbContext.Entry(template);
+        if (entry.State != EntityState.Modified)
+            return false;
+
+        var modified = entry.Properties
+            .Where(p => p.IsModified)
+            .Select(p => p.Metadata.Name)
+            .ToList();
+
+        return IsAllowedTemplateContentMutation(modified);
+    }
+
+    internal static bool IsAllowedTemplateContentMutation(IEnumerable<string> modifiedMemberNames)
+    {
+        var allowed = new HashSet<string>(StringComparer.Ordinal)
+        {
+            nameof(ApplicationProfileTemplate.TemplateFile),
+            nameof(ApplicationProfileTemplate.SourceFile),
+            nameof(ApplicationProfileTemplate.ReviewPlanJson),
+            nameof(ApplicationProfileTemplate.ModifiedOnUtc),
+            nameof(ApplicationProfileTemplate.ModifiedByUserName),
+            nameof(ApplicationProfileTemplate.CreatedOnUtc),
+            nameof(ApplicationProfileTemplate.CreatedByUserName),
+            "TemplateFileID",
+            "TemplateFileId",
+            "SourceFileID",
+            "SourceFileId",
+            "OptimisticLockField",
+            "GCRecord",
+        };
+
+        var modified = modifiedMemberNames
+            .Where(n => !string.IsNullOrEmpty(n))
+            .ToList();
+        if (modified.Count == 0)
+            return false;
+        if (modified.Any(n => !allowed.Contains(n)))
+            return false;
+
+        return modified.Any(n =>
+            n.StartsWith("TemplateFile", StringComparison.Ordinal)
+            || n.StartsWith("SourceFile", StringComparison.Ordinal)
+            || string.Equals(n, nameof(ApplicationProfileTemplate.ReviewPlanJson), StringComparison.Ordinal));
+    }
 
     /// <summary>
     /// Recycle Bin only: set/clear <see cref="ApplicationProfileTemplate.RecycledAtUtc"/> or

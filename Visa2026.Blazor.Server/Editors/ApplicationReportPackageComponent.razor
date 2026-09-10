@@ -944,7 +944,20 @@
                 return;
             }
 
-            var content = ReadProfileTemplateBytes(objectSpace, template);
+            byte[]? content = null;
+            var fileName = string.Empty;
+            var fromYellowSource = false;
+            if (ApplicationProfileTemplateScanSource.TryReadReviewBytes(
+                    objectSpace,
+                    template,
+                    out var reviewBytes,
+                    out var reviewFileName,
+                    out fromYellowSource))
+            {
+                content = reviewBytes;
+                fileName = reviewFileName;
+            }
+
             if (content == null || content.Length == 0)
             {
                 if (entry.UserReportTemplateId is Guid userTemplateId && userTemplateId != Guid.Empty)
@@ -961,13 +974,18 @@
                 return;
             }
 
-            var fileName = template.TemplateFile?.FileName;
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                fileName = template.TemplateFile?.FileName;
+            }
+
             if (string.IsNullOrWhiteSpace(fileName))
             {
                 var ext = entry.Kind == ApplicationWordReportPackageEntryKind.UserExcel ? ".xlsx" : ".docx";
                 fileName = (template.TemplateName?.Trim() ?? entry.DisplayName) + ext;
             }
 
+            var mappedBytes = ReadProfileTemplateBytes(objectSpace, template);
             await _scanDialog.OpenForExistingTemplateAsync(
                 ApplicationProfileInstanceId,
                 ApplicationNumber,
@@ -977,7 +995,10 @@
                 template.DataScope,
                 template.CatalogScope,
                 template.ApplicableProjectContractId,
-                template.ApplicableMigrationServiceId);
+                template.ApplicableMigrationServiceId,
+                fromYellowSource,
+                template.ReviewPlanJson,
+                mappedBytes);
         }
         catch (Exception ex)
         {

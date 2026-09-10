@@ -4,6 +4,158 @@ Append-only. Newest first under **## Entries**.
 
 ## Entries
 
+### 2026-09-10 — Review placeholders lost photo mapping after Open yellow file
+
+- Need: After uploading the yellow `_F16` Word, Review showed the letter and text Short codes, but **Person photo** / `{{IMAGE:PPH}}` was gone. The sample portrait stayed on the page. Continue left catalog Preview as a static picture.
+- Cause: Photos are Word drawings, not yellow highlighter. Restore only extracted yellows. Snapshot often stored IMAGE as a WordSpan (`{{IMAGE:PPH}}` on the mapped file) or a stale drawing address. Unused non-drawing IMAGE rows were dropped. Generate bound yellows only, so the portrait was never replaced.
+- Fix: Restore merges live body portraits and re-pins IMAGE/PPH onto them (exact drawing, then leftover pictures). Generate binds IMAGE tokens to drawings only — never onto text yellows. Yellow Word without a portrait does not invent PPH.
+- Officer: Stop F5, rebuild, restart. Review placeholders → Open yellow file. Detected fields should list **Person photo** (`PPH`). Continue should replace the sample portrait with `{{IMAGE:PPH}}`. Re-Approve `_F16` once so the snapshot stores the live drawing.
+- Cross-skill: visa2026-resminamalar | visa2026-user-report-templates
+
+### 2026-09-10 — Review placeholders showed mapped tokens, not the yellow letter
+
+- Need: Review placeholders on `_F16`. Left page showed `{{.PFN}}` / `{{.PNAT}}` in the form (photo still there), Detected fields labels were tokens. Officer expected the yellow-highlighted sample (Yerkin Didem, dates).
+- Cause: No usable yellow `SourceFile` (never stored, or Approve wrote the mapped catalog copy into SourceFile). Review ingested `TemplateFile`. Labels came from token spans.
+- Fix: Open Review only treats SourceFile as yellow when it still has highlighter. Approve writes SourceFile only from yellow bytes. Mapped-only Review shows a banner; **Upload different file** then **Open yellow file** restores saved Short codes onto the yellow letter.
+- Officer: Stop F5, rebuild, restart. Review placeholders → Upload different file → pick the yellow `_F16` Word → Open yellow file. Left page should show highlighted samples. Continue / Approve stores that yellow file for next time.
+- Cross-skill: visa2026-resminamalar
+
+### 2026-09-10 — Approve save disabled after placeholder edits (config lock)
+
+- Need: Review placeholders on `_F16.00` (Hasaba, profile locked). Officer changed Short codes, Continue, Preview looked right. **Approve — save to profile** stayed grey. Hint said to rename.
+- Cause: Config lock blocked overwrite of an existing catalog name (`IsLockedExistingOverwrite`). Review placeholders is how officers fix the Word file on a live case, so forcing a copy left the old `_F16.00` wrong.
+- Fix: Approve on the same name updates `TemplateFile` / `SourceFile` / `ReviewPlanJson` only. Catalog scope and applicability stay locked. Rename still creates a new catalog row.
+- Officer: Stop F5, rebuild, restart. Review placeholders → Continue → Approve on `_F16.00` should save. Change the name only if you want a second catalog copy.
+- Cross-skill: visa2026-application-profile | visa2026-resminamalar
+
+### 2026-09-10 — Continue then Back shifted locked placeholders
+
+- Need: `_F16` Review placeholders. Locked rows. Continue → Preview (`{{.AVCAT}}, {{.PFN}}, {{.PPN}}` on the visa line) → **Back to field list**. Short codes looked shifted (11 / 11.2 / 11.3 compound, PFN duplicated onto the wrong yellow) even though rows stayed locked.
+- Cause: Mapped-file overlay treated a comma-joined library cluster as one span and pinned all three codes on the first visa yellow. Generate re-extracted yellows and could steal another mark by sample text when Start/Length drifted. Back did not keep a clone of the Review list.
+- Fix: Overlay / snapshot restore split a cluster 1:1 onto sibling yellows in the same paragraph (keep the compound only when that cell is one yellow). Duplicate PFN is allowed. Generate binds by exact OpenXML key, then the same paragraph/cell slot — never label text. Compound writes also split onto leftover yellows. Back restores the pre-Continue list.
+- Officer: Stop F5, rebuild, restart. Re-Approve `_F16` once so `ReviewPlanJson` is 1:1. Continue then Back to field list should keep the same locked Short codes. Remap unmarked is still the only re-guess.
+- Cross-skill: visa2026-resminamalar
+
+### 2026-09-10 — Review placeholders must not re-guess
+
+- Need: Catalog **Review placeholders** on `_F16` rebuilt the list from yellow (Analyze). Locked / approved Short codes were lost. Officers wanted to tweak one row or Continue with no change.
+- Cause: `OpenForExistingTemplateAsync` always called Analyze. Yellow `SourceFile` made that a full re-guess. Locks lived only in the modal.
+- Fix: Approve stores `ReviewPlanJson` (tokens, locks, regions; mapped rows locked). Review placeholders ingests the yellow file for the page only and restores that snapshot. No snapshot → overlay mapped `TemplateFile` tokens onto yellows by paragraph/cell. Remap unmarked is the only re-guess.
+- Officer: Stop F5, rebuild, restart. Re-Approve `_F16` once. Review placeholders should show the last Short codes, locked. Continue without Remap unmarked to keep them.
+- Cross-skill: visa2026-resminamalar
+
+### 2026-09-10 — Persist yellow source next to mapped catalog file
+
+- Need: After Approve, Review placeholders / Remap unmarked reopened the mapped `TemplateFile` (tokens, yellow stripped). Officers could not remap the original yellow Word/Excel after the dialog closed.
+- Cause: Approve wrote only the generated copy. Upload bytes lived in modal state (SD-D5). No mid-wizard draft BO — but the **approved** yellow file was not stored.
+- Fix: `ApplicationProfileTemplate.SourceFile` holds the yellow upload. Approve writes both files. Review prefers `SourceFile`, else falls back to `TemplateFile` (seeds / old rows). Convert omit leaves `SourceFile` unchanged. Resminamalar Preview/ZIP still merge `TemplateFile` only.
+- Officer: Stop F5, rebuild, restart (schema adds `SourceFileID`). Re-Approve `_F16` once so the yellow upload is stored. After that, Review placeholders opens the yellow letter. Cards approved before this build still use mapped tokens until one re-Approve.
+- Cross-skill: visa2026-resminamalar | visa2026-application-profile
+
+### 2026-09-10 — Remap unmarked still showed reconnect then Review
+
+- Need: After the off-circuit build, Remap unmarked on `_F16` still flashed "Attempting to reconnect 1 of 8", then Review returned (Word page + list, footer remapped). "Unidentified yellows remain" was ticked.
+- Cause: Remap still rebuilt instance value maps on the circuit, then exported Forma 16 pdf.js JPEGs for AI. Either step blocks SignalR. Local field plan was already enough.
+- Fix: Remap reuses cached value candidates. Local list paints first. Remap AI is text-only (no `exportPagePngs`). Ask AI chat can still attach a page if needed.
+- Officer: Stop F5, rebuild, Ctrl+F5. Remap unmarked should keep Review visible. Ticking leftover-yellows no longer captures the page (avoids the white reconnect).
+- Cross-skill: none
+
+### 2026-09-10 — Remap unmarked blanked Review then HTML outline
+
+- Need: Remap unmarked on `_F16` Review placeholders: page went white ("Attempting to reconnect 1 of 8") for a couple of seconds, then Review came back as the HTML outline (numbered tokens), not the Word pdf.js page.
+- Cause: Remap re-ran OpenXML field-plan extract on the Blazor circuit. SignalR dropped. After reconnect, pdf.js interop was dead and Office preview treated that as paint-failed → outline fallback. Re-ingest was unnecessary; Review already had the file.
+- Fix: Remap reuses the current ingest (same Office bytes, PDF stays mounted). Local field-plan build runs on a thread pool (`ScanFieldPlanBuildOffCircuit`). Preview retries JS after disconnect instead of immediately showing the outline.
+- Officer: Stop F5, rebuild, Ctrl+F5. Review placeholders → lock / unlock → Remap unmarked. The Word page should stay; the numbered list updates. Do not wait on the reconnect banner.
+- Cross-skill: none
+
+### 2026-09-10 — Remap unmarked opened Preview instead of Review
+
+- Need: After Approve, Review placeholders on `_F16`. Officer locked all rows, unlocked 12.1 / 12.2 / 12.3, clicked Remap unmarked. Wizard jumped to Preview (Back to field list / Regenerate / Approve) instead of staying on the numbered list.
+- Cause: Remap sets `_busy` and stays on FieldReview, but `GenerateAsync` (Continue) did not check busy/stage. A second click or a queued Continue event during remap ran generate and won the race. Hiding hint checkboxes while busy also shifted the footer.
+- Fix: `ScanWizardGenerateGuard` — Continue/Regenerate ignored while busy or off Review/chat/Preview. Remap success stays on Review with a footer note. Hint checkboxes stay mounted (disabled while remapping).
+- Officer: Stop F5, rebuild, Ctrl+F5. Review placeholders → lock the good rows → unlock 12.1–12.3 → Remap unmarked. You should stay on Review and see the remapped Short codes. Continue is a separate click.
+- Cross-skill: none
+
+### 2026-09-10 — F16 Review TRDT/TRCK/AVCAT empty in Resminamalar
+
+- Need: Officer `_F16.docx` Review used TRDT, TRCK, and Application_VisaCategory_NameTm. Catalog Preview on Hasaba said those fields were empty.
+- Cause: Those tokens are registration-line / instance VisaCategory. Hasaba stores entry on Travel history and category on the linked visa.
+- Fix: Merge getters fall back (user-report-templates). Do not remap Giren wagty/ýeri to THDT/THCP just to fill Preview. Catalog short codes stay distinct.
+- Officer: Stop F5, rebuild, restart. Open Resminamalar Preview of F16 again — no re-Approve needed. Confirmed filled.
+- Cross-skill: visa2026-user-report-templates | visa2026-application-profile
+
+### 2026-09-09 — Remap unmarked hung on leftover-yellows AI
+
+- Need: After Remap unmarked (both hint boxes ticked) Review sat on **Sending leftover yellows to AI…** / **Remapping…** with Continue disabled. Detected fields did not update.
+- Cause: Remap captured a full-page JPEG via pdf.js `toDataURL` *before* rebuilding the field plan, then sent it to Azure. Forma 16 pages are large; capture blocked the circuit.
+- Fix: Local remap first (SkipAi). Then capture a smaller JPEG (800px, 8s timeout). Then AI. Footer shows a progress bar; hint checkboxes hide while busy.
+- Officer: Stop F5, rebuild, Ctrl+F5. Lock good rows, tick the hints, Remap unmarked. The numbered list should refresh quickly; AI may still run a few seconds after that.
+- Cross-skill: none
+
+### 2026-09-09 — Remap unmarked officer hint checkboxes
+
+- Need: Before Remap unmarked, officers wanted to tell the tool that yellows were missed and/or unlocked placeholders were wrong, so AI could focus.
+- Cause: Remap only locked vs unlocked. Ambiguous AI skipped High-confidence wrong tokens and did not get the Review page for leftover yellow.
+- Fix: Review footer checkboxes **Unidentified yellows remain** and **Some placeholders are wrong** (optional, both allowed). Unidentified: unmapped marks first + page images to Azure. Incorrect: send unlocked marks even when local confidence is High. Locked rows stay out.
+- Officer: Stop F5, rebuild, Ctrl+F5. Lock correct rows. Tick one or both boxes, then **Remap unmarked**. Do not use Preview Regenerate for this.
+- Cross-skill: none
+
+### 2026-09-09 — Lock reviewed placeholders and Remap unmarked
+
+- Need: Forma 16 Review left unnumbered yellows. Officers wanted to keep reviewed Short codes while re-guessing the rest of the same uploaded Word/Excel.
+- Cause: Analyze always rebuilt the whole plan. FieldId is a new Guid each pass. Preview already has Regenerate (token write), Review had only Upload different file.
+- Fix: Per-row **Lock** (whole yellow span, including 12.1/12.2). **Lock mapped** for every tokened row. **Remap unmarked** re-runs Analyze on the same bytes, seeds used header codes from locked rows, and restores locked tokens by OpenXML/Excel region. Unlocked and previously unmapped yellows are guessed again. Ask AI cannot overwrite locked rows.
+- Officer: Stop F5, rebuild, Ctrl+F5. On Review, lock rows you already checked (or Lock mapped). Click **Remap unmarked** — not Preview Regenerate, not Upload different file. Unnumbered yellows should pick up leftover placeholders.
+- Cross-skill: none
+
+### 2026-09-09 — Remove corner Add placeholder button
+
+- Need: Officers wanted the previous Short-column way to change placeholders, not the new bottom-right **Add placeholder** button.
+- Cause: Review last column pinned a corner button and popup over High / ×.
+- Fix: Restored Filter + grouped **Add placeholder…** dropdown on the selected Short column. Row × stays on the right. Append-sibling (12.3) is unchanged.
+- Officer: Stop F5, rebuild, Ctrl+F5. Select a row, use Short list **Add placeholder…**. Do not look for a button under High.
+- Cross-skill: none
+
+### 2026-09-09 — Ask AI sends Azure the page plus optional PNG/JPG
+
+- Need: Ask AI put visa dates (VISD/VSTD/VEDT) on the selected WP mark instead of form line 12. Officers asked to send the template to Azure and to attach an image when needed.
+- Cause: ClarifyAsync was text-only JSON. Wizard Upload still rejects PNG (correct). Azure never saw the printed line.
+- Fix: Ask AI sends Review page canvases (pdf.js JPEG) plus optional officer PNG/JPG. Prompt: remap the named form line, not the focused mark unless printed text matches. Analyze Upload stays .docx/.xlsx only.
+- Officer: Stop F5, rebuild, Ctrl+F5. Select the date yellow on line 12, or attach a PNG/JPG of that line, then Ask AI. Do not expect Upload to accept images.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-09 — Add placeholder at selected-row bottom-right
+
+- Need: Officers needed a missed placeholder on a specific yellow (e.g. 12.3). The Short-column dropdown was easy to miss; they asked for a button at the right bottom of the selected row.
+- Cause: Add lived in the Short column as Filter + dropdown, mixed with chips and Ask AI.
+- Fix: Selected row last column: × at the top, **Add placeholder** pinned bottom-right. Click opens a filter + grouped catalog. Pick a code still appends a sibling (`AppendShortCodes`). Chip × remaps/drops a part.
+- Officer: Stop F5, rebuild, Ctrl+F5. Select 12.2. Use **Add placeholder** under High / ×. Filter e.g. VPLC. A 12.3 row appears on the same yellow mark.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-09 — Add missed compound subsection (12.3)
+
+- Need: Forma 16 Review had 12.1 / 12.2. AI missed a third placeholder on the same yellow. Officers needed to add 12.3.
+- Cause: Add placeholder on a 12.2 row called ApplyPartCodes and replaced 12.2 instead of appending a sibling. Extra tokens beyond comma segments were dropped from Review numbering.
+- Fix: Add placeholder on 12.1 / 12.2 appends a sibling (AppendShortCodes). Empty unmapped parts still fill that slot. Split keeps leftover codes as 12.3. Dropdown hides codes already on the parent span.
+- Officer: Stop F5, rebuild, Ctrl+F5. Select 12.2, Add placeholder (e.g. VPLC). A 12.3 row appears on the same yellow mark. Continue / Generate writes all three tokens. Chip x still remaps or drops a part.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-09 — ADRS Preview omitted City
+
+- Need: After ADRS mapping was correct, hasaba Preview still printed only the street. Officers expected City from People & links (`Turkmenbashy etraby`) in the same cell.
+- Cause: `Address_FullAddress` was `FullAddress` only.
+- Fix: Prefix `City.NameTm` when missing from the street. Token stays ADRS.
+- Officer: Stop F5, rebuild, Ctrl+F5, Preview Hasaba almak sanawy. Column *Türkmenistandaky salgysy* should start with the City name, then the street.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-09 — Hasaba Excel 11.1 attached company address (ACADR)
+
+- Need: Create from yellow marks Review on hasaba almak.xlsx mapped *Türkmenistandaky salgysy* (Aşgabat etrap / köçe) to company ADDR / ACADR. Officers needed the residence address linked on the Application Profile Instance (People & links Address), same as person/passport/visa.
+- Cause: Catalog already had ADRS → Address_FullAddress, but it was gated by RequirePersonAddressOfResidence so Review often hid it. Any caption containing salgy preferred ACADR (company legal address).
+- Fix: ADRS is Core (always offered next to person data). Caption/label/Excel header: residence salgy → ADRS; yuridiki/kärhana → ACADR. Merge fills Address_FullAddress from the instance-linked AddressOfResidence.
+- Officer: Stop F5, rebuild, Ctrl+F5. Analyze again. Row 11.1 should show ADRS — Residence address (person on this case). Do not pick Company address.
+- Cross-skill: visa2026-user-report-templates | visa2026-application-profile
+
 ### 2026-09-02 — Drop profile-lock banner from Create from yellow marks
 
 - Need: Review needs vertical space for the letter and Detected fields. The orange “Profile locked — new templates only” banner did not change what the officer can do on Create new.

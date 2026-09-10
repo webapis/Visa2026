@@ -43,6 +43,9 @@ public static class ScanCompanyRegistrationDateGuard
         ArgumentNullException.ThrowIfNull(draft);
         ArgumentNullException.ThrowIfNull(placeholderSet);
 
+        if (draft.IsLocked)
+            return draft;
+
         if (!placeholderSet.Contains(CompanyRegistrationDateCode))
             return draft;
 
@@ -85,6 +88,7 @@ public static class ScanCompanyRegistrationDateGuard
                     "Company registration date — not application date"),
                 .. draft.Alternatives,
             ],
+            IsLocked = draft.IsLocked,
         };
     }
 

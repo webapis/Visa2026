@@ -90,6 +90,22 @@ public class ApplicationProfileApprovalLegVersionSchemaSqlTests
     }
 
     [Fact]
+    public void HostStart_AddsNestedTemplateYellowSourceFileColumn()
+    {
+        Assert.Contains(
+            ApplicationProfileSchemaSql.EnsureTemplateSourceFileIdPostgres,
+            ApplicationProfileSchemaSql.EnsureTemplateCatalogColumnsPostgresStatements);
+        Assert.Contains("SourceFileID", ApplicationProfileSchemaSql.EnsureTemplateSourceFileIdPostgres, StringComparison.Ordinal);
+        Assert.Contains("SourceFileID", ApplicationProfileSchemaSql.EnsureTemplateCatalogColumnsSqlServer, StringComparison.Ordinal);
+        Assert.Contains("SourceFileID", ApplicationProfileSchemaSql.EnsureSchemaPostgres, StringComparison.Ordinal);
+        Assert.Contains(
+            ApplicationProfileSchemaSql.EnsureTemplateReviewPlanJsonPostgres,
+            ApplicationProfileSchemaSql.EnsureTemplateCatalogColumnsPostgresStatements);
+        Assert.Contains("ReviewPlanJson", ApplicationProfileSchemaSql.EnsureTemplateReviewPlanJsonPostgres, StringComparison.Ordinal);
+        Assert.Contains("ReviewPlanJson", ApplicationProfileSchemaSql.EnsureTemplateCatalogColumnsSqlServer, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void HostStart_AddsInstanceLetterheadColumns()
     {
         foreach (var sql in ApplicationProfileSchemaSql.EnsureInstanceLetterheadPostgresStatements)

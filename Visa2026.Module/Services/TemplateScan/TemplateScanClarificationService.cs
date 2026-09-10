@@ -60,6 +60,8 @@ public sealed class TemplateScanClarificationService : ITemplateScanClarificatio
                 CurrentPlan = request.CurrentPlan,
                 Playbook = request.Playbook,
                 PlaceholderSet = request.PlaceholderSet,
+                Pages = request.Pages ?? Array.Empty<ScanPageImage>(),
+                OfficerImages = request.OfficerImages ?? Array.Empty<ScanPageImage>(),
             },
             cancellationToken).ConfigureAwait(false);
 

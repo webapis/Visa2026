@@ -266,6 +266,48 @@ async function clear(container) {
     await destroyHost(container);
 }
 
-const api = { render, clear, setActive, updateMarks };
+function exportPagePngs(maxPages, maxWidth) {
+    const root = document.querySelector(".tas-office-pdf--pages");
+    if (!root) {
+        return [];
+    }
+
+    const limit = Math.max(1, Math.min(maxPages || 2, 5));
+    const maxW = Math.max(320, Math.min(maxWidth || 1280, 1600));
+    const canvases = root.querySelectorAll("canvas");
+    const out = [];
+    for (let i = 0; i < canvases.length && out.length < limit; i++) {
+        const src = canvases[i];
+        if (!src || !src.width || !src.height) {
+            continue;
+        }
+
+        let canvas = src;
+        if (src.width > maxW) {
+            const scale = maxW / src.width;
+            canvas = document.createElement("canvas");
+            canvas.width = maxW;
+            canvas.height = Math.max(1, Math.round(src.height * scale));
+            const ctx = canvas.getContext("2d");
+            if (!ctx) {
+                continue;
+            }
+            ctx.drawImage(src, 0, 0, canvas.width, canvas.height);
+        }
+
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.72);
+        const comma = dataUrl.indexOf(",");
+        out.push({
+            mime: "image/jpeg",
+            b64: comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl,
+            width: canvas.width,
+            height: canvas.height
+        });
+    }
+
+    return out;
+}
+
+const api = { render, clear, setActive, updateMarks, exportPagePngs };
 window.visaTemplateScanPdfPreview = api;
-export { render, clear, setActive, updateMarks };
+export { render, clear, setActive, updateMarks, exportPagePngs };

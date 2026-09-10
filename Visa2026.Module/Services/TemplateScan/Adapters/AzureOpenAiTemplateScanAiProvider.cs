@@ -76,8 +76,8 @@ public sealed class AzureOpenAiTemplateScanAiProvider : ITemplateScanAiProvider
             };
         }
 
-        var user = BuildClarificationUserPrompt(request);
-        var json = await CompleteJsonAsync(ClarificationSystemPrompt, new object[] { new { type = "text", text = user } }, cancellationToken)
+        var userParts = BuildClarificationUserContent(request);
+        var json = await CompleteJsonAsync(ClarificationSystemPrompt, userParts, cancellationToken)
             .ConfigureAwait(false);
         return ParseClarification(json, request)
             ?? new ScanClarificationResult
@@ -127,9 +127,24 @@ public sealed class AzureOpenAiTemplateScanAiProvider : ITemplateScanAiProvider
         try
         {
             var userText = BuildAmbiguousYellowUserPayload(request);
+            var parts = new List<object>
+            {
+                new { type = "text", text = userText },
+            };
+            if (request.OfficerHints.UnidentifiedYellows)
+            {
+                foreach (var page in (request.Pages ?? Array.Empty<ScanPageImage>()).Take(5))
+                {
+                    if (!ScanVisionImageDataUrl.TryGetDataUrl(page, out var url))
+                        continue;
+                    parts.Add(new { type = "text", text = $"Review page {page.PageIndex + 1} of the uploaded Word/Excel:" });
+                    parts.Add(new { type = "image_url", image_url = new { url, detail = "high" } });
+                }
+            }
+
             var json = await CompleteJsonAsync(
                     AmbiguousYellowSystemPrompt,
-                    [new { type = "text", text = userText }],
+                    parts.ToArray(),
                     cancellationToken)
                 .ConfigureAwait(false);
 
@@ -563,7 +578,7 @@ public sealed class AzureOpenAiTemplateScanAiProvider : ITemplateScanAiProvider
         };
     }
 
-    private string BuildClarificationUserPrompt(ScanClarificationRequest request)
+    private object[] BuildClarificationUserContent(ScanClarificationRequest request)
     {
         var allowed = request.PlaceholderSet.Allowed
             .Select(e => new
@@ -579,11 +594,17 @@ public sealed class AzureOpenAiTemplateScanAiProvider : ITemplateScanAiProvider
                 scope = e.Scope.ToString(),
             });
 
+        var ordered = ScanReviewFieldOrder.Order(request.CurrentPlan.Fields, request.CurrentPlan.Gaps);
+        var byId = ordered
+            .GroupBy(static m => m.FieldId, StringComparer.Ordinal)
+            .ToDictionary(static g => g.Key, static g => g.First().DisplayOrder, StringComparer.Ordinal);
+
         var current = new
         {
             fields = request.CurrentPlan.Fields.Select(f => new
             {
                 f.FieldId,
+                reviewNumber = byId.GetValueOrDefault(f.FieldId),
                 f.PageIndex,
                 f.LabelText,
                 f.ProposedToken,
@@ -591,7 +612,13 @@ public sealed class AzureOpenAiTemplateScanAiProvider : ITemplateScanAiProvider
                 scope = f.Scope.ToString(),
                 box = new { f.Box.Left, f.Box.Top, f.Box.Right, f.Box.Bottom },
             }),
-            gaps = request.CurrentPlan.Gaps.Select(g => new { g.FieldId, g.LabelText, g.SuggestedPropertyName }),
+            gaps = request.CurrentPlan.Gaps.Select(g => new
+            {
+                g.FieldId,
+                reviewNumber = byId.GetValueOrDefault(g.FieldId),
+                g.LabelText,
+                g.SuggestedPropertyName,
+            }),
             pendingQuestions = request.CurrentPlan.PendingQuestions.Select(q => new { q.Question, q.SuggestedAnswers }),
         };
 
@@ -602,12 +629,38 @@ public sealed class AzureOpenAiTemplateScanAiProvider : ITemplateScanAiProvider
             placeholderSetFingerprint = request.PlaceholderSet.Fingerprint,
             allowedTokens = allowed,
             currentPlan = current,
+            hasReviewPageImages = (request.Pages ?? Array.Empty<ScanPageImage>())
+                .Any(static p => ScanVisionImageDataUrl.TryGetDataUrl(p, out _)),
+            officerImageCount = (request.OfficerImages ?? Array.Empty<ScanPageImage>()).Count,
             schema = """
                 {"accepted":true,"replyText":"short officer-facing reply","fields":[{"fieldId":"uuid","pageIndex":0,"labelText":"label","proposedToken":"{{ds.AFNUM}} or null","confidence":"High|Medium|Low","scope":"Header|Row|LoopBoundary","box":{"left":0.1,"top":0.2,"right":0.9,"bottom":0.25}}],"gaps":[{"fieldId":"uuid","labelText":"snippet","suggestedPropertyName":null}],"pendingQuestions":[{"question":"...","suggestedAnswers":["a","b"]}],"rationale":"..."}
                 """,
         };
 
-        return Truncate(JsonSerializer.Serialize(payload, JsonOptions), _options.MaxPromptCharacters);
+        var parts = new List<object>
+        {
+            new { type = "text", text = Truncate(JsonSerializer.Serialize(payload, JsonOptions), _options.MaxPromptCharacters) },
+        };
+
+        foreach (var page in (request.Pages ?? Array.Empty<ScanPageImage>()).Take(5))
+        {
+            if (!ScanVisionImageDataUrl.TryGetDataUrl(page, out var url))
+                continue;
+            parts.Add(new { type = "text", text = $"Review page {page.PageIndex + 1} of the uploaded Word/Excel:" });
+            parts.Add(new { type = "image_url", image_url = new { url, detail = "high" } });
+        }
+
+        var officerIndex = 0;
+        foreach (var image in request.OfficerImages ?? Array.Empty<ScanPageImage>())
+        {
+            if (!ScanVisionImageDataUrl.TryGetDataUrl(image, out var url))
+                continue;
+            officerIndex++;
+            parts.Add(new { type = "text", text = $"Officer-attached image {officerIndex} (screenshot or photo of the form):" });
+            parts.Add(new { type = "image_url", image_url = new { url, detail = "high" } });
+        }
+
+        return parts.ToArray();
     }
 
     private ScanClarificationResult? ParseClarification(string json, ScanClarificationRequest request)
@@ -644,9 +697,12 @@ public sealed class AzureOpenAiTemplateScanAiProvider : ITemplateScanAiProvider
         Rules:
         1. Mapping only — adjust which labels map to allowed placeholders; never rewrite ministry boilerplate or change layout intent.
         2. Use only tokens from allowedTokens.
-        3. Preserve fieldId values when updating existing fields; add new fieldIds for newly detected labels.
+        3. Preserve fieldId values when updating existing fields; add new fieldIds only when a yellow highlight is missing from currentPlan.
         4. Set accepted=false when the officer asks for out-of-scope edits (wording, fonts, translation, scan quality).
-        5. Reply with JSON only matching the schema in the user message.
+        5. Images: Review page images (if present) show the uploaded Word/Excel with numbered marks. Officer-attached images are extra screenshots or photos. Use them to see WHERE each yellow sits on the form.
+        6. Remap the focused mark only when the officer means that printed text. If they name another Review # or printed form line (e.g. 12. Wizanyň berilen senesi we möhleti), change those fieldIds. Do not dump date tokens (VISD/VSTD/VEDT) onto a visa-type/number yellow (WP, FM, gezeklik, A168…).
+        7. One separate yellow highlight = one field. Three date highlights on one form line = three fields (issued / start / end), left-to-right, not one compound on a different line.
+        8. Reply with JSON only matching the schema in the user message.
         """;
 
     private const string LayoutSystemPrompt =
@@ -672,7 +728,7 @@ public sealed class AzureOpenAiTemplateScanAiProvider : ITemplateScanAiProvider
         - allowedTokensByBo groups the placeholder manual by related business object (Passport, Person, CompanyProfile, AuthorizedRepresentative, …). Look in the matching group first.
         - allowedTokens.role: Applicant = roster person; Wekil = tenant Authorized Representative; Signatory = gol çekiji; Company / Case = header scalars.
         - RPFN, RPOS, RPPH, RPCL, RPPL, RPPN, RPPA, RPPD are Wekil only. Applicant names use PFN / PLN / PFNM.
-        - CHFN, ACFNM, ACPOS are Signatory. Company name/address use ASPN, ACADR, ACRGL.
+        - CHFN, ACFNM, ACPOS are Signatory. Company name/legal address use ASPN, ACADR, ACRGL. Person residence on this case (People & links Address) uses ADRS, never ACADR.
         - surroundingSnippet marks the yellow span with <<< >>>. Prefer printedLabel / headerRow over guessing from the name alone.
         - Duplicate yellow of the same sample literal must reuse the same token. Do not invent a second code or leave a gap.
         MERGE TOOL RULES:
@@ -685,7 +741,10 @@ public sealed class AzureOpenAiTemplateScanAiProvider : ITemplateScanAiProvider
         2. proposedToken = best match (compound allowed). Use only allowedTokens short codes.
         3. Prefer printedLabel, surroundingSnippet, columnHeader, and headerRow when present. Use localCandidates as hints, you may override.
         4. confidence: High (>=80), Medium (55-79), Low (<55).
-        5. Reply JSON only per user schema.
+        5. If officerHints.unidentifiedYellows: prioritize marks with null localProposedToken. Use page images for leftover yellow highlights. Do not invent fieldIds.
+        6. If officerHints.incorrectPlaceholders: localProposedToken on these marks may be wrong. Re-choose from allowedTokens; do not keep a High local guess.
+        7. Marks omitted from the request are locked — do not emit tokens for them.
+        8. Reply JSON only per user schema.
         """;
 
     private static ScanAmbiguousYellowRefinementResult PassthroughAmbiguousYellow(ScanAmbiguousYellowRefinementRequest request)

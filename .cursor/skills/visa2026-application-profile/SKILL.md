@@ -205,7 +205,7 @@ Use when user asks *how should I configure this profile?* — tailor to **Action
 - **Invitation / work permit / visa Last 2** means **up to 2 valid rows** (person may have 1 or 2). Missing expected rows are flagged; create is not blocked. Calik: `cancel_invitation` invitation Last 2; `cancel_invitation_wp` invitation + WP Last 2; `cancel_visa_wp` visa + WP Last 2; `cancel_workpermit` WP Last 2.
 - **Registration** profiles always turn **Position** on and never use **Urgency**.
 - Turn on **Education / Address** when templates use those `{{…}}` packs or readiness checks need them.
-- **TravelHistory** — M2M on Application (not profile scalar); toggle gates tab only.
+- **TravelHistory** — on for every family **except Business trip** (hard-hidden). Calik tenant catalog sets `RequirePersonTravelHistory` true on all other profiles; People & links shows the Travel history tile.
 - Before publish: if nested template references a person pack, corresponding `RequirePerson*` should be on (plan §2.5 recommendation).
 
 ### Per-Application defaults

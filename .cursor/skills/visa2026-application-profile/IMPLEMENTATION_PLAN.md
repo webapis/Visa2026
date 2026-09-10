@@ -473,7 +473,7 @@ Via-ministry picker: profile → Approval legs → Organization → Case summary
 | Wave | Status | Doc |
 |------|--------|-----|
 | 0b | **Done** | [APPLICATION_PROFILE_CATALOG_WAVE0.md](../../../docs/VISA2014_MIGRATION/APPLICATION_PROFILE_CATALOG_WAVE0.md) |
-| 1 | **Done** | Tenant `application-profile.calik-energi.json` |
+| 1 | **Done** | Tenant `application-profile.calik-energi.json` — `RequirePersonTravelHistory` **on** for all families except Business trip |
 | 2 | **Done** (local) | `Application-Profile.ps1` patch |
 | 3 | **Done** (local) | [APPLICATION_PROFILE_CATALOG_WAVE3.md](../../../docs/VISA2014_MIGRATION/APPLICATION_PROFILE_CATALOG_WAVE3.md) — 637 nested templates patched |
 

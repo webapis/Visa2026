@@ -35,6 +35,10 @@ public static class UserReportMergeDataHelper
             ["ApplicationDateText"] = application.ApplicationDateText ?? string.Empty,
             ["CompanyName"] = application.Application_Company_Name ?? string.Empty,
             ["Application_Company_RegistrationDateText"] = application.Application_Company_RegistrationDateText ?? string.Empty,
+            // Sanaw footer (ACPOS / ACFNM) sits below {{#ds.rows}}. Excel merge fills those
+            // cells from this dictionary, not from Placeholders / row copy.
+            ["Application_CompanyHead_PositionTm"] = application.Application_CompanyHead_PositionTm ?? string.Empty,
+            ["Application_CompanyHead_FullName"] = application.Application_CompanyHead_FullName ?? string.Empty,
         };
         UserReportPlaceholderAliasRegistry.EnrichDictionary(data);
         return data;
@@ -304,6 +308,15 @@ public static class UserReportMergeDataHelper
             ["Visa_ExpirationDateText"] = item.Visa_ExpirationDateText ?? string.Empty,
             ["Travel_DateText"] = item.Travel_DateText ?? string.Empty,
             ["Travel_CheckPointTm"] = item.Travel_CheckPointTm ?? string.Empty,
+            ["TravelHistory_Kind"] = item.TravelHistory_Kind ?? string.Empty,
+            ["TravelHistory_DateText"] = item.TravelHistory_DateText ?? string.Empty,
+            ["TravelHistory_CheckPointTm"] = item.TravelHistory_CheckPointTm ?? string.Empty,
+            ["TravelHistory_PlaceTm"] = item.TravelHistory_PlaceTm ?? string.Empty,
+            ["TravelHistory_TravelType"] = item.TravelHistory_TravelType ?? string.Empty,
+            ["TravelHistory_CountryTm"] = item.TravelHistory_CountryTm ?? string.Empty,
+            ["TravelHistory_RegionTm"] = item.TravelHistory_RegionTm ?? string.Empty,
+            ["TravelHistory_CityTm"] = item.TravelHistory_CityTm ?? string.Empty,
+            ["TravelHistory_Notes"] = item.TravelHistory_Notes ?? string.Empty,
             ["Application_SponsorName"] = item.Application_SponsorName ?? string.Empty,
             ["Application_CompanyAddress"] = item.Application_CompanyAddress ?? string.Empty,
             ["Application_MigrationServiceCode"] = item.Application_MigrationServiceCode ?? string.Empty,
@@ -477,6 +490,15 @@ public static class UserReportMergeDataHelper
             ["Visa_TypeTm"] = item.Visa_TypeTm ?? string.Empty,
             ["Registration_GelmeginMaksadyTm"] = item.Registration_GelmeginMaksadyTm ?? string.Empty,
             ["WorkPermit_WorkPermittedLocations"] = item.WorkPermit_WorkPermittedLocations ?? string.Empty,
+            ["TravelHistory_Kind"] = item.TravelHistory_Kind ?? string.Empty,
+            ["TravelHistory_DateText"] = item.TravelHistory_DateText ?? string.Empty,
+            ["TravelHistory_CheckPointTm"] = item.TravelHistory_CheckPointTm ?? string.Empty,
+            ["TravelHistory_PlaceTm"] = item.TravelHistory_PlaceTm ?? string.Empty,
+            ["TravelHistory_TravelType"] = item.TravelHistory_TravelType ?? string.Empty,
+            ["TravelHistory_CountryTm"] = item.TravelHistory_CountryTm ?? string.Empty,
+            ["TravelHistory_RegionTm"] = item.TravelHistory_RegionTm ?? string.Empty,
+            ["TravelHistory_CityTm"] = item.TravelHistory_CityTm ?? string.Empty,
+            ["TravelHistory_Notes"] = item.TravelHistory_Notes ?? string.Empty,
         };
 
         return WithAliasKeys(row);

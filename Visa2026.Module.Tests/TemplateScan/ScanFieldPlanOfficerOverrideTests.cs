@@ -102,6 +102,28 @@ public class ScanFieldPlanOfficerOverrideTests
     }
 
     [Fact]
+    public void AppendShortCodes_adds_a_sibling_subsection()
+    {
+        var set = HeaderSet();
+        var plan = Plan(
+            set,
+            "{{ds.CHPN}}, {{ds.CHPA}}",
+            new DocumentRegion.WordSpan("body/4", 0, 40),
+            "A0123456, Ankara");
+        var ordered = ScanReviewFieldOrder.Order(plan.Fields);
+        Assert.Equal(2, ordered.Count);
+
+        var next = ScanFieldPlanOfficerOverride.AppendShortCodes(plan, ordered[1].DisplayId, ["CHPD"]);
+
+        var field = Assert.Single(next.Fields);
+        Assert.Equal(["CHPN", "CHPA", "CHPD"], TemplateTokenSyntax.GetShortCodes(field.ProposedToken));
+        var shown = ScanReviewFieldOrder.Order(next.Fields);
+        Assert.Equal(3, shown.Count);
+        Assert.Equal("1.3", shown[2].DisplayOrder);
+        Assert.Equal("CHPD", TemplateTokenSyntax.GetShortCodes(shown[2].ProposedToken).Single());
+    }
+
+    [Fact]
     public void ApplyTokens_joins_two_header_codes_with_comma_from_label()
     {
         var set = HeaderSet();
@@ -197,6 +219,29 @@ public class ScanFieldPlanOfficerOverrideTests
     {
         var field = Assert.Single(Plan(BothSet(), "{{ds.PVFM}}", null, "family block").Fields);
         Assert.Equal("{{.PVFM}}", field.ProposedToken);
+    }
+
+    [Fact]
+    public void SetLocked_toggles_the_yellow_span()
+    {
+        var set = HeaderSet();
+        var plan = Plan(set, "{{ds.ADAT}}", new DocumentRegion.WordSpan("body/0", 0, 10));
+        var fieldId = Assert.Single(plan.Fields).FieldId;
+
+        var locked = ScanFieldPlanOfficerOverride.SetLocked(plan, fieldId, true);
+        Assert.True(Assert.Single(locked.Fields).IsLocked);
+
+        var unlocked = ScanFieldPlanOfficerOverride.SetLocked(locked, fieldId, false);
+        Assert.False(Assert.Single(unlocked.Fields).IsLocked);
+    }
+
+    [Fact]
+    public void LockMapped_locks_rows_that_already_have_a_token()
+    {
+        var set = HeaderSet();
+        var mapped = Plan(set, "{{ds.ADAT}}", new DocumentRegion.WordSpan("body/0", 0, 10));
+        var next = ScanFieldPlanOfficerOverride.LockMapped(mapped);
+        Assert.True(Assert.Single(next.Fields).IsLocked);
     }
 
     [Fact]

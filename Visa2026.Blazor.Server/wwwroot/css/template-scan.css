@@ -220,6 +220,34 @@
 }
 .tas-foot__grow { flex: 1; }
 .tas-foot__hint { flex: 1; font-size: 0.78rem; color: var(--os-muted, #64748b); }
+.tas-remap-hints {
+  flex: 1 1 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-inline-size: 0;
+}
+.tas-remap-hints:disabled {
+  opacity: 0.55;
+}
+.tas-remap-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: #334155;
+  cursor: pointer;
+  user-select: none;
+}
+.tas-remap-hint input {
+  width: 0.95rem;
+  height: 0.95rem;
+  accent-color: #0d9488;
+}
 .tas-analyze {
   flex: 1 1 100%;
   display: grid;
@@ -496,6 +524,37 @@
   color: #b91c1c;
   background: #fee2e2;
 }
+.tas-row-remove:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.tas-row-remove:disabled:hover {
+  color: #94a3b8;
+  background: transparent;
+}
+.tas-row-lock {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #334155;
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 0.12rem 0.35rem;
+  border-radius: 4px;
+  margin-right: 0.2rem;
+}
+.tas-row-lock:hover { border-color: #0d9488; color: #0f766e; }
+.tas-row-lock.is-on {
+  background: #ecfdf5;
+  border-color: #5eead4;
+  color: #0f766e;
+}
+.tas-field-table tr.is-locked td { color: #334155; }
+.tas-lock-mapped {
+  font-size: 0.72rem;
+  padding: 0.12rem 0.45rem;
+}
 .tas-sr-only {
   position: absolute;
   width: 1px;
@@ -647,7 +706,47 @@
   gap: 0.55rem;
   align-content: start;
 }
-.tas-chat__compose { display: flex; gap: 0.4rem; }
+.tas-chat__compose { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; }
+.tas-chat__compose .tas-input { flex: 1 1 12rem; min-width: 8rem; }
+.tas-chat__attach {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.32rem 0.55rem;
+  border: 1px solid #99f6e4;
+  border-radius: 6px;
+  background: #f0fdfa;
+  color: #0f766e;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.tas-chat__attach input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.tas-chat__attach-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.tas-chat__attach-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 999px;
+  background: #ecfeff;
+  color: #155e75;
+  font-size: 0.72rem;
+}
 
 .tas-msg { display: flex; gap: 0.4rem; }
 .tas-msg--officer { justify-content: flex-end; }

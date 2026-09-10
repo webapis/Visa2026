@@ -270,6 +270,7 @@ public static class ApplicationProfileNestedTemplateCatalogHelper
 
         return objectSpace.GetObjectsQuery<ApplicationProfileTemplate>()
             .Include(t => t.TemplateFile)
+            .Include(t => t.SourceFile)
             .FirstOrDefault(t => t.ID == profileTemplateId);
     }
 

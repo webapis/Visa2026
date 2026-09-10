@@ -140,7 +140,9 @@ public static class ScanShapeTokenMatcher
             Prefer("EGSP", 30, "Specialty-like text");
             Prefer("EGIY", 28, "Education-like text");
             Prefer("PFAD", 28, "Address-like text");
-            Prefer("ADRS", 26, "Address-like text");
+            var residenceStreet = LooksLikeTmResidenceStreet(folded);
+            Prefer("ADRS", residenceStreet ? 88 : 26,
+                residenceStreet ? "Turkmenistan residence street" : "Address-like text");
             Prefer("PBPL", 24, "Place-like text");
         }
 
@@ -179,6 +181,15 @@ public static class ScanShapeTokenMatcher
         var digits = trimmed.Count(char.IsDigit);
         return digits >= 7 && digits <= 15 && trimmed.All(static ch => char.IsDigit(ch) || char.IsWhiteSpace(ch));
     }
+
+    internal static bool LooksLikeTmResidenceStreet(string folded) =>
+        folded.Contains("asgabat", StringComparison.Ordinal)
+        && (folded.Contains("saher", StringComparison.Ordinal)
+            || folded.Contains("etrap", StringComparison.Ordinal)
+            || folded.Contains("kocesi", StringComparison.Ordinal)
+            || folded.Contains("jay", StringComparison.Ordinal)
+            || folded.Contains("oy-", StringComparison.Ordinal)
+            || folded.Contains("oy ", StringComparison.Ordinal));
 
     private static bool LooksLikeCompanyLegalName(string folded) =>
         folded.Contains("a.s", StringComparison.Ordinal)

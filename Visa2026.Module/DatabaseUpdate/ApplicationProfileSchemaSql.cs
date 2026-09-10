@@ -131,6 +131,8 @@ public static class ApplicationProfileSchemaSql
                 "DataScope" integer NOT NULL DEFAULT 1,
                 "CategoryKey" character varying(64) NULL,
                 "TemplateFileID" uuid NULL,
+                "SourceFileID" uuid NULL,
+                "ReviewPlanJson" text NULL,
                 "SortOrder" integer NOT NULL DEFAULT 0,
                 "ApplicableProjectContractId" uuid NULL,
                 "ApplicableMigrationServiceId" uuid NULL,
@@ -300,6 +302,8 @@ public static class ApplicationProfileSchemaSql
                 DataScope int NOT NULL CONSTRAINT DF_ApplicationProfileTemplates_DataScope DEFAULT (1),
                 CategoryKey nvarchar(64) NULL,
                 TemplateFileID uniqueidentifier NULL,
+                SourceFileID uniqueidentifier NULL,
+                ReviewPlanJson nvarchar(max) NULL,
                 SortOrder int NOT NULL CONSTRAINT DF_ApplicationProfileTemplates_SortOrder DEFAULT (0),
                 ApplicableProjectContractId uniqueidentifier NULL,
                 ApplicableMigrationServiceId uniqueidentifier NULL,
@@ -488,6 +492,12 @@ public static class ApplicationProfileSchemaSql
 
     internal const string EnsureTemplateModifiedByUserNamePostgres =
         """ALTER TABLE "ApplicationProfileTemplates" ADD COLUMN IF NOT EXISTS "ModifiedByUserName" character varying(255) NULL;""";
+
+    internal const string EnsureTemplateSourceFileIdPostgres =
+        """ALTER TABLE "ApplicationProfileTemplates" ADD COLUMN IF NOT EXISTS "SourceFileID" uuid NULL;""";
+
+    internal const string EnsureTemplateReviewPlanJsonPostgres =
+        """ALTER TABLE "ApplicationProfileTemplates" ADD COLUMN IF NOT EXISTS "ReviewPlanJson" text NULL;""";
 
     internal const string EnsureUserReportTemplateCreatedOnUtcPostgres =
         """ALTER TABLE IF EXISTS "UserReportTemplates" ADD COLUMN IF NOT EXISTS "CreatedOnUtc" timestamp with time zone NULL;""";
@@ -747,6 +757,8 @@ public static class ApplicationProfileSchemaSql
         EnsureTemplateCreatedByUserNamePostgres,
         EnsureTemplateModifiedOnUtcPostgres,
         EnsureTemplateModifiedByUserNamePostgres,
+        EnsureTemplateSourceFileIdPostgres,
+        EnsureTemplateReviewPlanJsonPostgres,
         EnsureUserReportTemplateCreatedOnUtcPostgres,
         EnsureUserReportTemplateCreatedByUserNamePostgres,
         EnsureUserReportTemplateModifiedOnUtcPostgres,
@@ -807,6 +819,12 @@ public static class ApplicationProfileSchemaSql
 
         IF COL_LENGTH(N'dbo.ApplicationProfileTemplates', N'ModifiedByUserName') IS NULL
             ALTER TABLE dbo.ApplicationProfileTemplates ADD ModifiedByUserName nvarchar(255) NULL;
+
+        IF COL_LENGTH(N'dbo.ApplicationProfileTemplates', N'SourceFileID') IS NULL
+            ALTER TABLE dbo.ApplicationProfileTemplates ADD SourceFileID uniqueidentifier NULL;
+
+        IF COL_LENGTH(N'dbo.ApplicationProfileTemplates', N'ReviewPlanJson') IS NULL
+            ALTER TABLE dbo.ApplicationProfileTemplates ADD ReviewPlanJson nvarchar(max) NULL;
 
         IF OBJECT_ID(N'dbo.UserReportTemplates', N'U') IS NOT NULL
         BEGIN

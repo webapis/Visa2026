@@ -23,7 +23,7 @@ Officers submit **wizard step screenshots** + optional **catalog Preview** + the
 | Step | Judge |
 |------|--------|
 | **1 Upload** | `.docx`/`.xlsx` only; yellow requirements; case hints |
-| **2 Review** | Mapped tokens vs yellow only; no bogus gaps. Left pane is the **uploaded Word/Excel as pdf.js pages** (no browser PDF chrome), numbered `#` on the letter matching Detected fields. **Click a Detected fields row** to highlight it and **add one or more library placeholders** on that same yellow mark (compound spans). Optional **Ask AI** docks chat with that mark’s context. Outline fallback if convert fails. Not `#visa-preview-slot` |
+| **2 Review** | Mapped tokens vs yellow only; no bogus gaps. Left pane is the **uploaded Word/Excel as pdf.js pages** (no browser PDF chrome), numbered `#` on the letter matching Detected fields. **Click a Detected fields row** to highlight it and **add one or more library placeholders** on that same yellow mark (compound spans). **Lock** a reviewed yellow. Optional checkboxes **Unidentified yellows remain** / **Some placeholders are wrong**, then **Remap unmarked** (locked Short codes stay; hints steer AI). Optional **Ask AI** docks chat with that mark’s context and may send the Review page plus an officer **PNG/JPG** to Azure. Outline fallback if convert fails. Not `#visa-preview-slot` |
 | **3 Generate** | Token writer on **copy**; **strip all yellow** markup; diff gate |
 | **4 Preview** | Generated Office copy as PDF in the modal (not `#visa-preview-slot`). Outline fallback |
 | **5 Done** | Saved; correct TemplateKind |
@@ -61,16 +61,21 @@ Officers submit **wizard step screenshots** + optional **catalog Preview** + the
 |---------|------------|--------|
 | Preview shows `{{IMAGE:Person_Photo}}` in the photo box after Add existing template | Word wrapped the long token in the photo cell. Restart, hard-refresh Preview. New Generate uses `{{IMAGE:PPH}}` | **This skill** + user-report-templates |
 | Inserted sample photo not mapped | Body portrait (not a tiny icon) → `{{IMAGE:PPH}}` on Generate (`Person_Photo` still injects). Yellow still required for text values. Restart, Analyze | **This skill** |
+| Review placeholders dropped Person photo after Open yellow file | Restore re-pins `{{IMAGE:PPH}}` onto the live body portrait (do not yellow-highlight the picture). Continue replaces the sample photo. Re-Approve once. Restart | **This skill** |
 | Create template should be one Project contract or all via-ministry cases | Upload **Save to** = This profile only. **All contracts** or pick one (same as profile Templates wizard). Shared catalog has no contract filter. Restart, hard-refresh | **This skill** |
 | Comma yellow guessed from the wrong catalog group (e.g. TUR → PNAT on an Education line) | Printed **label** picks the group first (`Bilimi` → Education), then each comma part is guessed inside that group (`EGLV`, `EGCC`, `EGIN`). Restart, Analyze | **This skill** |
 | Review Add placeholder missing Signatory / CompanySignatory (CHPN, CHPL, CHPD, CHPE) | Filter box: type `CompanySignatory` or `CHPE`. Group is **Authorized signatory**. Compound parts no longer hide sibling Signatory codes. Restart, hard-refresh | **This skill** |
 | Review date 5.1 (`19.02.2034ý.`) has no Signatory passport expiration | `AuthorizedSignatory.PassportExpirationDate` + catalog **CHPE**. Fill expiration in Configuration. Restart, Analyze | **This skill** + user-report-templates |
+| Review missed yellows / remap wiped reviewed Short codes | Lock the reviewed row (or **Lock mapped**). Tick **Unidentified yellows remain** and/or **Some placeholders are wrong**, then **Remap unmarked**. Locked rows stay. Not Preview **Regenerate**. Restart, hard-refresh | **This skill** |
 | Review has extra 10.1 / 10.2 rows on one yellow | Row **×** hides that part; remaining token stays on the span. Last × drops the mark so Generate leaves printed text. Hard-refresh | **This skill** |
+| Azure Ask AI dumps dates on the selected WP mark | Chat now sends Review page + optional PNG/JPG. Attach a photo of line 12. Restart, hard-refresh | **This skill** |
+| Review Add placeholder is hard to find / need 12.3 on the same yellow | Select the row. Short column: Filter + **Add placeholder…**. Pick a code — appends a sibling. Hard-refresh | **This skill** |
 | PNG/JPG/PDF rejected | Expected — use yellow-marked Word/Excel | **This skill** |
 | Yellow not detected | Word Text Highlight Color / Excel solid yellow fill | **This skill** |
 | Wrong tokens / compound split | `ScanYellowHighlightTokenResolver` + catalog ShortCodes | **This skill** + user-report-templates |
 | Wekil slot mapped to `{{.PFN}}` / catalog Preview fills a roster person | Printed caption `ygtyýarly wekili` → `{{ds.RPFN}}` (`AuthorizedRepresentative`). Isolated names stay `PFN`. Restart Analyze | **This skill** |
 | Review maps company hasaba alyş date to `ADAT` / `ApplicationDateText` | `CompanyProfile.RegistrationDate` + `{{ds.ACRDT}}`. Nearby `hasaba alyş` / `şahamça` → not letter date. Restart, Analyze, set Company Registration Date in Configuration | **This skill** + user-report-templates |
+| Review 11.1 / *Türkmenistandaky salgysy* mapped to company `ACADR` | Person residence on the case is **`ADRS`** (`Address_FullAddress` from People & links Address). Restart, Analyze, hard-refresh | **This skill** + user-report-templates |
 | `42703: column c.RegistrationDate does not exist` | Host-start heal `CompanyProfileRegistrationDateSchemaSql`. Restart app (ModuleInfo already current skips XAF schema). Then Analyze | **This skill** |
 | Review left pane is HTML text, not the Word page | Office→PDF via pdf.js pages (`TemplateScanOfficePdfPreview`). Hard-refresh, Analyze again. Not `#visa-preview-slot` | **This skill** |
 | Review shows Chrome/Edge PDF toolbar or thumbnail sidebar | pdf.js canvases, not an iframe. Hard-refresh CSS/JS | **This skill** |
@@ -79,7 +84,11 @@ Officers submit **wizard step screenshots** + optional **catalog Preview** + the
 | Review lost numbered marks / row click does not highlight the letter | Numbered overlays + sticky row select (`ActiveFieldId`). Click a Detected fields row | **This skill** |
 | Review preview stays portrait for a landscape Word/Excel | Outline reads `sectPr`/`PageSetup`. Hard-refresh CSS, Analyze again. Not `#visa-preview-slot` | **This skill** |
 | Review has no left document / no `#` on fields | Office outline + `ScanReviewFieldOrder` (top→bottom). Not `#visa-preview-slot`. Restart Analyze | **This skill** |
-| Need to remap a saved Resminamalar template | Catalog row **Review placeholders** (nested this-profile Word/Excel). Opens scan Review on existing `{{…}}` tokens. Not desktop **Edit template**. Not `#visa-preview-slot` | **This skill** + resminamalar |
+| Need to remap a saved Resminamalar template | Catalog **Review placeholders** restores the last approved mapping. Use **Remap unmarked** only to re-guess unlocked rows. Not desktop **Edit template**. Not `#visa-preview-slot` | **This skill** + resminamalar |
+| Review placeholders shows `{{.PFN}}` instead of the yellow letter | Left page is the mapped catalog file — yellow original missing or overwritten. Upload the yellow Word/Excel (saved Short codes stay). Restart, then Approve once to store SourceFile | **This skill** |
+| Approve — save disabled after placeholder edits on `_F16` | Profile is locked. Approve now updates this file. Restart. Rename only if you want a new catalog copy | **This skill** |
+| Continue then Back to field list shifted locked Short codes | Generate re-anchors by OpenXML key / same-paragraph slot, never sample text. Mapped `{{.AVCAT}}, {{.PFN}}, {{.PPN}}` clusters split 1:1 onto sibling yellows (duplicate PFN is allowed). **Back to field list** restores the Review list from before Continue. Re-Approve `_F16` once. Restart | **This skill** |
+| Review placeholders wiped locks / remapped everything | Open restores `ReviewPlanJson` (no Analyze). Remap unmarked only if you want a re-guess. Re-Approve once so the snapshot is stored. Restart | **This skill** |
 | Preview: 0 placeholders / “No yellow-marked spans could be written” | Review had tokens but Generate lost Word spans — restart, Analyze, Continue | **This skill** |
 | Preview skips `CHFN`/`RPFN`: overlapping spans | Duplicate yellow of the same name in one paragraph — restart, Analyze, Generate | **This skill** |
 | Word letter catalog Preview fails after Approve | Row tokens `{{.PFN}}` without `{{#ds.rows}}` — restart, re-Approve | **This skill** + resminamalar |
@@ -88,7 +97,7 @@ Officers submit **wizard step screenshots** + optional **catalog Preview** + the
 | Review shows `{{ds.PLN}}` / Approve blocks `not found on ApplicationProfileInstance` | Row-only codes now stay `{{.PLN}}` even on Header yellow. Analyze again after restart | **This skill** |
 | Azure ambiguous guess needs more context | Payload sends role/description + nearby snippet — not the Office file | **This skill** |
 | Clarification chat disabled | Needs `TemplateAiScan` AI provider (optional); Analyze does not | **This skill** |
-| Config lock | May add **new** templates | application-profile |
+| Config lock | May add **new** templates; Review placeholders may **update the same file** | application-profile |
 | Excel catalog Preview blank; pane titled `report_….docx` | Nested Resminamalar keys — Excel bytes converted as Word PDF | **resminamalar** |
 | Diff gate fail on Generate | Span addresses; fingerprints **ignore** yellow strip | **This skill** + Convert writer |
 | Yellow remains after Approve / catalog Preview | `StripAllYellowMarkup` / `StripAllYellowFills` after write; re-Approve old templates | **This skill** |
@@ -110,9 +119,9 @@ Officers submit **wizard step screenshots** + optional **catalog Preview** + the
 4. **Yellow is scan markup only** — after Generate, strip **all** highlighter/yellow fill from the saved copy (not only substituted runs). Unmapped leftovers (e.g. `6 (alty)` when only VCAT mapped) must not survive catalog Preview.
 5. Officer Approve required.
 6. Wizard Review/Preview shows the Office file as **pdf.js pages inside the modal** (not `#visa-preview-slot`, not the browser PDF viewer chrome). Numbered marks + row highlight stay. HTML outline is fallback only.
-7. Config lock allows **new** templates.
+7. Config lock allows **new** templates and **file updates** on an existing catalog name (Review placeholders). Renaming still creates a copy. Catalog scope / applicability stay locked.
 8. **Layout-specific guessing patterns** (not one letter): **Official letter** (`№`, date, urgency, `N (words)`, `N (words) aý`, gezeklik); **caption under the line** (Borçnama); **left field label** (Şahsy kagyzy); **inline prose** (Zähmet şertnamasy); **Excel column header** (sanaw). Immediate surround + value shape still combine. Comma in a yellow highlight is a combination candidate (Review **6.1 / 6.2 / 6.3**; Generate writes one span).
-9. Resminamalar **Review placeholders** reopens the same Review dialog on a saved nested template. After Approve, yellow is gone — Review is driven by library `{{…}}` clusters (comma compounds stay one Generate span). Config lock still blocks overwrite of an existing name; officer must rename to save a copy.
+9. Resminamalar **Review placeholders** reopens the last **approved** mapping (`ReviewPlanJson` + yellow `SourceFile`). It does **not** re-guess. Remap unmarked is the only re-guess. Config lock does **not** block Approve of the same name — only the Word/Excel file and snapshot are replaced.
 
 ## Pipeline
 

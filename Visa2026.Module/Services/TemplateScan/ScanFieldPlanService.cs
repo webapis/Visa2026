@@ -43,9 +43,14 @@ public sealed class ScanFieldPlanService : IScanFieldPlanService
                 request.PlaceholderSet,
                 officeBytes,
                 request.Ingest.Input.SourceKind,
-                request.ValueCandidates);
+                request.ValueCandidates,
+                request.LockedFields);
 
-            proposal = await _refinement.RefineAsync(proposal, request, cancellationToken).ConfigureAwait(false);
+            if (!request.SkipAiRefinement)
+            {
+                proposal = await _refinement.RefineAsync(proposal, request, cancellationToken).ConfigureAwait(false);
+            }
+
             proposal = ScanRepresentativeNameGuard.RewriteProposal(
                 proposal,
                 request.PlaceholderSet,
@@ -64,15 +69,17 @@ public sealed class ScanFieldPlanService : IScanFieldPlanService
                     request.PlaceholderSet,
                     officeBytes,
                     request.Ingest.Input.SourceKind,
-                    request.ValueCandidates);
+                    request.ValueCandidates,
+                    request.LockedFields);
         }
 
-        return _merger.Merge(new ScanFieldPlanMergeRequest
+        var merged = _merger.Merge(new ScanFieldPlanMergeRequest
         {
             Proposal = proposal,
             PlaceholderSet = request.PlaceholderSet,
             ScanKind = request.ScanKind,
             ValueHints = request.ValueHints,
         });
+        return ScanFieldPlanLockMerge.Apply(merged, request.LockedFields);
     }
 }

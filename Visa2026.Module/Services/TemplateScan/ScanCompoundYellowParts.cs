@@ -163,19 +163,26 @@ public static class ScanCompoundYellowParts
                 assignedToken[i] = i < tokens.Count ? tokens[i] : null;
             }
         }
-        else
+        var leftoverCodes = new List<string>();
+        var leftoverTokens = new List<string?>();
+        if (codes.Count != segments.Count)
         {
             for (var i = 0; i < codes.Count; i++)
             {
                 var slot = BestUnusedSlot(segments, codes[i], assignedCode);
                 if (slot < 0)
-                    break;
+                {
+                    leftoverCodes.Add(codes[i]);
+                    leftoverTokens.Add(i < tokens.Count ? tokens[i] : null);
+                    continue;
+                }
+
                 assignedCode[slot] = codes[i];
                 assignedToken[slot] = i < tokens.Count ? tokens[i] : null;
             }
         }
 
-        var parts = new List<ScanCompoundPart>(segments.Count);
+        var parts = new List<ScanCompoundPart>(segments.Count + leftoverCodes.Count);
         for (var i = 0; i < segments.Count; i++)
         {
             var segment = segments[i];
@@ -186,6 +193,21 @@ public static class ScanCompoundYellowParts
                 assignedCode[i] ?? string.Empty,
                 segment.Offset,
                 segment.Length));
+        }
+
+        var tailOffset = segments.Count > 0
+            ? segments[^1].Offset + Math.Max(1, segments[^1].Length)
+            : 0;
+        for (var i = 0; i < leftoverCodes.Count; i++)
+        {
+            var token = leftoverTokens[i];
+            parts.Add(new ScanCompoundPart(
+                parts.Count + 1,
+                leftoverCodes[i],
+                token,
+                leftoverCodes[i],
+                tailOffset,
+                Math.Max(1, leftoverCodes[i].Length)));
         }
 
         return parts;
@@ -227,7 +249,9 @@ public static class ScanCompoundYellowParts
             || code.Equals("RPPD", StringComparison.OrdinalIgnoreCase)
             || code.Equals("CHPD", StringComparison.OrdinalIgnoreCase)
             || code.Equals("CHPE", StringComparison.OrdinalIgnoreCase)
-            || code.Equals("PPIS", StringComparison.OrdinalIgnoreCase))
+            || code.Equals("PPIS", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("VISD", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("VSTD", StringComparison.OrdinalIgnoreCase))
             return DateLikeShape.IsMatch(segment);
 
         if (code.Equals("PFN", StringComparison.OrdinalIgnoreCase)

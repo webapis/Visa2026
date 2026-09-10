@@ -15,7 +15,8 @@ public static class ScanExcelYellowResolver
     public static IReadOnlyList<ScanDetectedFieldDraft> Resolve(
         byte[] workbookBytes,
         IReadOnlyList<ScanOfficeYellowSpan> yellows,
-        ApplicationProfilePlaceholderSet placeholderSet)
+        ApplicationProfilePlaceholderSet placeholderSet,
+        IReadOnlyList<ScanDetectedField>? lockedFields = null)
     {
         ArgumentNullException.ThrowIfNull(workbookBytes);
         ArgumentNullException.ThrowIfNull(yellows);
@@ -28,10 +29,19 @@ public static class ScanExcelYellowResolver
         using var workbook = new XLWorkbook(stream);
         var catalog = ScanPlaceholderCatalogIndex.Build(placeholderSet);
         var usedHeaderCodes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        ScanFieldPlanLockMerge.RegisterUsedHeaderCodes(lockedFields, placeholderSet, usedHeaderCodes);
+        var lockedByKey = ScanFieldPlanLockMerge.Index(lockedFields);
         var drafts = new List<ScanDetectedFieldDraft>();
 
         foreach (var yellow in yellows)
         {
+            var lockKey = ScanDocumentRegionKey.ForRegion(yellow.Region);
+            if (lockKey != null && lockedByKey.TryGetValue(lockKey, out var lockedPin))
+            {
+                drafts.Add(ScanFieldPlanLockMerge.ToDraft(lockedPin, yellow));
+                continue;
+            }
+
             if (yellow.Region is not DocumentRegion.ExcelCell excelCell)
                 continue;
 
@@ -329,6 +339,10 @@ public static class ScanExcelYellowResolver
 
         foreach (var (entry, score) in headerScores)
         {
+            if (entry.ShortCode.Equals("ACADR", StringComparison.OrdinalIgnoreCase)
+                && preferCodes.Contains("ADRS", StringComparer.OrdinalIgnoreCase))
+                continue;
+
             var token = entry.BuildWordToken(
                 entry.Scope == UserReportPlaceholderScope.Header
                     ? UserReportPlaceholderScope.Header
@@ -463,7 +477,7 @@ internal static class ScanExcelColumnProfiles
         new(["gelmeginin maksady", "gelmegin maksady", "purpose of arrival"], ["RGEL"], false),
         new(["cagyran tarap", "inviting party"], ["ACNAM"], false),
         new(["mohleti we gezekligi", "gezeklik", "wiza"], ["AVPRD", "AVCAT"], true, LiteralPrefix: "cakylyk "),
-        new(["turkmenistandaky salgysy", "turkmenistandaki"], ["ADRS"], false),
+        new(["turkmenistandaky salgysy", "turkmenistandaky", "yasayan salgysy", "yasayys salgysy", "ikamet adresi", "residence address"], ["ADRS"], false),
         new(["dasary yurtdaky salgysy", "dasary yurt"], ["PFAC", "PFAD"], true),
         new(["barjak serhet yakasy", "serhet yaka", "border zone"], ["ABZLN"], false),
         new(["sahamcanyn mudiri", "gol cekiji wezipesi"], ["ACPOS"], false),

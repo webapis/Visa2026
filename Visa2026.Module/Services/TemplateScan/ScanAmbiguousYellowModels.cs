@@ -13,6 +13,10 @@ public sealed class ScanAmbiguousYellowRefinementRequest
     public required ScanSourceKind SourceKind { get; init; }
 
     public required IReadOnlyList<ScanAmbiguousYellowMark> Marks { get; init; }
+
+    public ScanRemapOfficerHints OfficerHints { get; init; } = ScanRemapOfficerHints.None;
+
+    public IReadOnlyList<ScanPageImage> Pages { get; init; } = Array.Empty<ScanPageImage>();
 }
 
 public sealed class ScanAmbiguousYellowMark

@@ -39,7 +39,10 @@ public sealed class ScanAmbiguousYellowRefinementService : IScanAmbiguousYellowR
             || !_provider.IsEnabled)
             return proposal;
 
-        var ambiguous = ScanAmbiguousYellowGate.SelectForRefinement(proposal.Fields, _options);
+        var ambiguous = ScanAmbiguousYellowGate.SelectForRefinement(
+            proposal.Fields,
+            _options,
+            buildRequest.RemapHints);
         if (ambiguous.Count == 0)
             return proposal;
 
@@ -76,6 +79,8 @@ public sealed class ScanAmbiguousYellowRefinementService : IScanAmbiguousYellowR
                     PlaceholderSet = buildRequest.PlaceholderSet,
                     SourceKind = buildRequest.Ingest.Input.SourceKind,
                     Marks = marks,
+                    OfficerHints = buildRequest.RemapHints,
+                    Pages = buildRequest.ReviewPages,
                 },
                 cancellationToken).ConfigureAwait(false);
         }
@@ -113,7 +118,7 @@ public sealed class ScanAmbiguousYellowRefinementService : IScanAmbiguousYellowR
         IReadOnlyDictionary<string, ScanAmbiguousYellowMarkResult> aiById,
         ApplicationProfilePlaceholderSet placeholderSet)
     {
-        if (!aiById.TryGetValue(draft.FieldId, out var ai))
+        if (draft.IsLocked || !aiById.TryGetValue(draft.FieldId, out var ai))
             return draft;
 
         var token = SanitizeToken(ai.ProposedToken, placeholderSet);
@@ -152,6 +157,7 @@ public sealed class ScanAmbiguousYellowRefinementService : IScanAmbiguousYellowR
             ColumnHeader = draft.ColumnHeader,
             NearbyLabel = draft.NearbyLabel,
             Alternatives = alternatives,
+            IsLocked = draft.IsLocked,
         };
 
     private static string? SanitizeToken(string? token, ApplicationProfilePlaceholderSet placeholderSet)

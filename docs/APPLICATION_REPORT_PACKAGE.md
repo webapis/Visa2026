@@ -217,7 +217,7 @@ flowchart LR
 
 
 
-**Preview** generates the same file as the ZIP (`ApplicationWordReportEntryGenerator`), converts **Word (`.docx`)** and **Excel (`.xlsx`)** to PDF with **DevExpress Office File API**, and shows the PDF in the **inline slot** (`ReportPackageInlinePreview` — same iframe/blob pattern as Document copies). Legacy modal `ApplicationReportPackagePreviewDialog` remains for property-editor hosts only.
+**Preview** generates the same file as the ZIP (`ApplicationWordReportEntryGenerator`), converts **Word (`.docx`)** and **Excel (`.xlsx`)** to PDF with **DevExpress Office File API** (`ApplicationWordReportOfficePreviewPdfConverter` — not an XAF / XtraReports preview), and shows the PDF in the **inline slot** (`ReportPackageInlinePreview` — same iframe/blob pattern as Document copies). Excel page orientation is **A4 landscape or portrait from the sheet** (workbook PageSetup, otherwise used-range width) — no officer control. Legacy modal `ApplicationReportPackagePreviewDialog` remains for property-editor hosts only.
 
 
 

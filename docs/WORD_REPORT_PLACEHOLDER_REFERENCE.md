@@ -274,12 +274,30 @@ Use **`{{ds.Property}}`** when the root is **ApplicationItem**.
 
 ### Travel / check-in movement (item)
 
+Registration line fields on the roster (`TravelDate`, `CheckPoint`). Distinct from linked **Travel history**.
+
 | Property | Type | Example output | Notes |
 |----------|------|----------------|--------|
 | `Travel_Date` | `DateTime?` | `20.01.2026` | |
-| `Travel_DateText` | `string` | `20.01.2026` | |
+| `Travel_DateText` | `string` | `20.01.2026` | Short **TRDT** |
 | `Travel_PurposeOfTravelTm` | `string` | `Position_PositionTm` (alias; not a purpose lookup) | Not Forma 16 §8 |
-| `Travel_CheckPointTm` | `string` | `Aşgabat … MGP` | |
+| `Travel_CheckPointTm` | `string` | `Aşgabat … MGP` | Short **TRCK** |
+
+### Travel history (People & links)
+
+Case-linked `TravelHistory` (latest linked row). Short codes in the **Travel history** group. Pack `PersonTravelHistory` (profile **Travel history** toggle).
+
+| Property | Type | Example output | Notes |
+|----------|------|----------------|--------|
+| `TravelHistory_Kind` | `string` | `Entry` | MovementType, else TravelType. Short **THKD**. People & links Kind |
+| `TravelHistory_DateText` | `string` | `20.07.2026` | Short **THDT**. People & links Date |
+| `TravelHistory_CheckPointTm` | `string` | `Aşgabat şäher howa menzilindäki MGP` | Short **THCP** |
+| `TravelHistory_PlaceTm` | `string` | `Aşgabat şäher howa menzilindäki MGP` | Checkpoint, else city. Short **THPL**. People & links Check point |
+| `TravelHistory_TravelType` | `string` | `External` | Internal / External. Short **THTP** |
+| `TravelHistory_CountryTm` | `string` | `Türkiýe` | External. Short **THCN** |
+| `TravelHistory_RegionTm` | `string` | `Ahal welaýaty` | Internal. Short **THRG** |
+| `TravelHistory_CityTm` | `string` | `Aşgabat şäheri` | Internal. Short **THCT** |
+| `TravelHistory_Notes` | `string` | | Short **THNT** |
 
 ### Registration / Forma 16 (item)
 

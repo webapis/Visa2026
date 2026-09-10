@@ -54,5 +54,41 @@ public class ScanAmbiguousYellowAzurePayloadTests
         Assert.Contains("\\u003C\\u003C\\u003C", json, StringComparison.Ordinal);
         Assert.Contains("\"printedLabel\":\"Wekil ady\"", json, StringComparison.Ordinal);
         Assert.DoesNotContain("OfficePackage", json, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("\"unidentifiedYellows\":false", json, StringComparison.Ordinal);
+        Assert.Contains("\"incorrectPlaceholders\":false", json, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Build_includes_officer_remap_hints()
+    {
+        var set = new ApplicationProfilePlaceholderSetService(new UserReportPlaceholderCatalogService()).GetSet(
+            new ApplicationProfilePlaceholderSetQuery
+            {
+                Profile = new ApplicationProfile { RequirePersonPassport = true },
+                DataScope = ApplicationProfileTemplateDataScope.Both,
+                TemplateKind = ApplicationProfileTemplateKind.Word,
+            });
+
+        var payload = ScanAmbiguousYellowAzurePayload.Build(new ScanAmbiguousYellowRefinementRequest
+        {
+            Playbook = new ScanAuthoringPlaybook { Markdown = "rules", Fingerprint = "fp", VersionLabel = "1" },
+            PlaceholderSet = set,
+            SourceKind = ScanSourceKind.Word,
+            OfficerHints = new ScanRemapOfficerHints(true, true),
+            Marks =
+            [
+                new ScanAmbiguousYellowMark
+                {
+                    FieldId = "n1",
+                    YellowText = "leftover",
+                },
+            ],
+        });
+
+        var json = JsonSerializer.Serialize(payload);
+        Assert.Contains("\"unidentifiedYellows\":true", json, StringComparison.Ordinal);
+        Assert.Contains("\"incorrectPlaceholders\":true", json, StringComparison.Ordinal);
+        Assert.Contains("no numbered placeholder", json, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("unlocked placeholders are wrong", json, StringComparison.OrdinalIgnoreCase);
     }
 }

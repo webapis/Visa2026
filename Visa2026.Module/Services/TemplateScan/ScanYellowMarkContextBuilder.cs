@@ -255,7 +255,7 @@ public static class ScanYellowMarkContextBuilder
     internal static bool LooksLikeImmediateFormLabel(string? text)
     {
         var trimmed = (text ?? string.Empty).Trim();
-        if (trimmed.Length is < 4 or > 140)
+        if (trimmed.Length is < 4 or > 160)
             return false;
 
         var folded = TemplateTextNormalizer.NormalizeFolded(trimmed);

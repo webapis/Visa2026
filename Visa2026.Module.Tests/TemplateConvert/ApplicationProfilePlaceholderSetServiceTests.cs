@@ -71,6 +71,17 @@ public class ApplicationProfilePlaceholderSetServiceTests
     }
 
     [Fact]
+    public void Residence_address_stays_with_core_person_data_when_address_pack_is_off()
+    {
+        var profile = FullProfile();
+        profile.RequirePersonAddressOfResidence = false;
+
+        Assert.True(Allows(GetSet(profile), "ADRS"));
+        Assert.True(Allows(GetSet(profile), "PFN"));
+        Assert.True(Allows(GetSet(profile), "PFAD"));
+    }
+
+    [Fact]
     public void Disabling_the_visa_pack_excludes_visa_tokens()
     {
         var profile = FullProfile();
@@ -137,6 +148,24 @@ public class ApplicationProfilePlaceholderSetServiceTests
 
         Assert.Equal(PlaceholderExclusionReason.PersonPackDisabled, ReasonFor(set, "RGEL"));
         Assert.Equal(PlaceholderExclusionReason.PersonPackDisabled, ReasonFor(set, "POSN"));
+    }
+
+    [Fact]
+    public void Travel_history_tokens_follow_the_travel_history_pack()
+    {
+        var profile = FullProfile();
+        Assert.True(Allows(GetSet(profile), "THKD"));
+        Assert.True(Allows(GetSet(profile), "THDT"));
+        Assert.True(Allows(GetSet(profile), "THCP"));
+        Assert.True(Allows(GetSet(profile), "THPL"));
+
+        profile.RequirePersonTravelHistory = false;
+        var set = GetSet(profile);
+
+        Assert.Equal(PlaceholderExclusionReason.PersonPackDisabled, ReasonFor(set, "THKD"));
+        Assert.Equal(PlaceholderExclusionReason.PersonPackDisabled, ReasonFor(set, "THDT"));
+        Assert.True(Allows(set, "TRDT"));
+        Assert.True(Allows(set, "TRCK"));
     }
 
     [Fact]

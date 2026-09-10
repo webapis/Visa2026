@@ -36,7 +36,7 @@ This document defines **which control the officer touches and what happens next*
 | **X** · **Cancel** · backdrop · **Esc** | Close modal → V0 | After V1 analyze: **discard confirm** |
 | Modal opens | **V1**, state cleared | — |
 | Stepper | Display only | Upload → Review → Generate → Preview → Done |
-| Config lock | No banner on Create new. Name-field hint only when remapping a locked existing row | Approve **enabled** for new template; overwrite of existing blocked |
+| Config lock | Name-field hint when remapping a locked existing row | Approve **updates this file**; rename to add a catalog copy |
 | AI off | Entry visible, disabled + badge | Add prepared template + Convert unchanged |
 
 ---
@@ -144,6 +144,7 @@ Wizard path: officer still clicks **Save profile** to persist (same as Convert w
 
 | Date | Change |
 |------|--------|
+| 2026-09-10 | Config lock: Approve updates the same catalog file; rename only to add a copy |
 | 2026-09-02 | V0: Create from yellow marks / Convert / Add existing from case Resminamalar only (not wizard Templates) |
 | 2026-09-02 | Config lock: drop full-width banner; keep name-field hint on locked overwrite |
 | 2026-09-02 | V1: removed Add existing template escape link (use catalog / wizard Add existing) |

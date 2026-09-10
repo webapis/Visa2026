@@ -88,6 +88,13 @@ public sealed class TemplateScanSaveRequest
 
     public required string FileName { get; init; }
 
+    /// <summary>Yellow-marked upload. Review placeholders / Remap unmarked reopen these bytes after Approve.</summary>
+    public byte[]? SourceContent { get; init; }
+
+    public string? SourceFileName { get; init; }
+
+    public string? ReviewPlanJson { get; init; }
+
     public ApplicationProfileTemplateKind TemplateKind { get; init; } = ApplicationProfileTemplateKind.Word;
 
     public Guid? ApplicableProjectContractId { get; init; }

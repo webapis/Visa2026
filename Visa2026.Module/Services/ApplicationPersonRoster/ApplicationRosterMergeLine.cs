@@ -800,7 +800,8 @@ namespace Visa2026.Module.BusinessObjects
 
         #region Address
         [XafDisplayName("Address Full Address"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Address_FullAddress => CurrentAddressOfResidence?.FullAddress;
+        public string Address_FullAddress =>
+            AddressOfResidenceReportText.CityAndStreet(CurrentAddressOfResidence);
 
         [XafDisplayName("Address Type"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Address_Type => CurrentAddressOfResidence?.Type?.ToString();
@@ -820,17 +821,68 @@ namespace Visa2026.Module.BusinessObjects
 
         #region Travel
         [XafDisplayName("Travel Date"), VisibleInDetailView(false), VisibleInListView(false)]
-        public DateTime? Travel_Date => TravelDate;
+        public DateTime? Travel_Date =>
+            TravelDate is DateTime d && d != default ? d : TravelHistory_Date;
 
         [XafDisplayName("Travel Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Travel_DateText => $"{TravelDate:dd.MM.yyyy}";
+        public string Travel_DateText =>
+            TravelDate is DateTime d && d != default
+                ? $"{d:dd.MM.yyyy}"
+                : TravelHistory_DateText;
 
         /// <summary>Alias for reports; registration travel purpose uses <see cref="CurrentPositionHistory"/>.</summary>
         [XafDisplayName("Travel Purpose of Travel (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Travel_PurposeOfTravelTm => Position_PositionTm;
 
         [XafDisplayName("Travel Checkpoint (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Travel_CheckPointTm => CheckPoint?.NameTm;
+        public string Travel_CheckPointTm =>
+            CheckPoint?.NameTm
+            ?? TravelHistory_PlaceTm;
+        #endregion
+
+        #region Travel history (People & links)
+        /// <summary>Case-linked <see cref="TravelHistory"/> (resolved links). Not the registration line TravelDate/CheckPoint.</summary>
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public TravelHistory CurrentTravelHistory { get; set; }
+
+        [XafDisplayName("Travel history kind"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string TravelHistory_Kind =>
+            CurrentTravelHistory?.MovementType?.ToString()
+            ?? CurrentTravelHistory?.TravelType?.ToString()
+            ?? string.Empty;
+
+        [XafDisplayName("Travel history date"), VisibleInDetailView(false), VisibleInListView(false)]
+        public DateTime? TravelHistory_Date =>
+            CurrentTravelHistory is { TravelDate: var d } && d != default ? d : null;
+
+        [XafDisplayName("Travel history date (text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string TravelHistory_DateText =>
+            TravelHistory_Date is DateTime d ? $"{d:dd.MM.yyyy}" : string.Empty;
+
+        [XafDisplayName("Travel history checkpoint (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string TravelHistory_CheckPointTm => CurrentTravelHistory?.CheckPoint?.NameTm ?? string.Empty;
+
+        /// <summary>People & links Check point column: checkpoint, else city (internal travel).</summary>
+        [XafDisplayName("Travel history place (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string TravelHistory_PlaceTm =>
+            CurrentTravelHistory?.CheckPoint?.NameTm
+            ?? CurrentTravelHistory?.City?.NameTm
+            ?? string.Empty;
+
+        [XafDisplayName("Travel history type"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string TravelHistory_TravelType => CurrentTravelHistory?.TravelType?.ToString() ?? string.Empty;
+
+        [XafDisplayName("Travel history country (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string TravelHistory_CountryTm => CurrentTravelHistory?.Country?.NameTm ?? string.Empty;
+
+        [XafDisplayName("Travel history region (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string TravelHistory_RegionTm => CurrentTravelHistory?.Region?.NameTm ?? string.Empty;
+
+        [XafDisplayName("Travel history city (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string TravelHistory_CityTm => CurrentTravelHistory?.City?.NameTm ?? string.Empty;
+
+        [XafDisplayName("Travel history notes"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string TravelHistory_Notes => CurrentTravelHistory?.Notes ?? string.Empty;
         #endregion
 
         #region Registration report fields (Forma 16, RegistrationList)
@@ -1109,7 +1161,10 @@ namespace Visa2026.Module.BusinessObjects
         public string VisaPeriod_NameTm => Application_VisaPeriod_NameTm;
 
         [XafDisplayName("Visa Category (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Application_VisaCategory_NameTm => ApplicationProfileInstance?.VisaCategory?.NameTm;
+        public string Application_VisaCategory_NameTm =>
+            ApplicationProfileInstance?.VisaCategory?.NameTm
+            ?? CurrentVisa?.VisaCategory?.NameTm
+            ?? CurrentInvitationItem?.Invitation?.VisaCategory?.NameTm;
 
         /// <summary>Alias for <c>{{ds.VisaCategory_NameTm}}</c> on ApplicationItem-root Word templates.</summary>
         public string VisaCategory_NameTm => Application_VisaCategory_NameTm;

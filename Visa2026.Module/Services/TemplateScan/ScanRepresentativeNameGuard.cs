@@ -24,6 +24,9 @@ public static class ScanRepresentativeNameGuard
         ArgumentNullException.ThrowIfNull(draft);
         ArgumentNullException.ThrowIfNull(placeholderSet);
 
+        if (draft.IsLocked)
+            return draft;
+
         var nearbyRole = ScanLetterRoleHint.FromNearbyText(draft.NearbyLabel, draft.ColumnHeader);
         if (nearbyRole == ScanLetterRole.Wekil
             && ScanShapeTokenMatcher.LooksLikePersonFullName(draft.LabelText ?? string.Empty))
@@ -103,6 +106,7 @@ public static class ScanRepresentativeNameGuard
             ColumnHeader = draft.ColumnHeader,
             NearbyLabel = draft.NearbyLabel,
             Alternatives = alternatives ?? draft.Alternatives,
+            IsLocked = draft.IsLocked,
         };
 
     public static IReadOnlyList<ScanDetectedFieldDraft> RewriteDrafts(

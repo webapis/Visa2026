@@ -44,6 +44,7 @@ else
     private bool _needsPaint;
     private bool _paintFailed;
     private int _generation;
+    private int _paintAttempts;
     private int _appliedFocus = -1;
     private string? _appliedActive;
     private string? _appliedMarksKey;
@@ -100,7 +101,7 @@ else
         {
             _module ??= await JS.InvokeAsync<IJSObjectReference>(
                 "import",
-                "/lib/pdfjs/template-scan-pdf-preview.js?v=tasmarks2");
+                "/lib/pdfjs/template-scan-pdf-preview.js?v=tasmarks3");
 
             if (_needsPaint)
             {
@@ -124,15 +125,28 @@ else
                 _appliedFocus = MarkFocus;
                 await _module.InvokeVoidAsync("setActive", _host, ActiveFieldId ?? string.Empty, scroll);
             }
+
+            _paintAttempts = 0;
         }
         catch (JSDisconnectedException)
         {
+            _module = null;
+            _needsPaint = _pdfBytes is { Length: > 64 };
         }
         catch
         {
-            _paintFailed = true;
-            _pdfBytes = null;
-            await InvokeAsync(StateHasChanged);
+            _module = null;
+            _paintAttempts++;
+            if (_paintAttempts >= 2)
+            {
+                _paintFailed = true;
+                _pdfBytes = null;
+                await InvokeAsync(StateHasChanged);
+            }
+            else
+            {
+                _needsPaint = _pdfBytes is { Length: > 64 };
+            }
         }
     }
 

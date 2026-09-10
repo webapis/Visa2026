@@ -55,6 +55,26 @@ public class ScanPlaceholderChoiceListTests
         Assert.DoesNotContain(groups, g => g.RelatedBo == UserReportPlaceholderRelatedBo.Person);
     }
 
+    [Fact]
+    public void Travel_history_search_matches_group_display_name()
+    {
+        var allowed = FullSet().Allowed;
+        var groups = ScanPlaceholderChoiceList.RemainingGroups(
+            allowed,
+            hideShortCodes: Array.Empty<string>(),
+            search: "travel history");
+        Assert.Contains(groups, g => g.RelatedBo == UserReportPlaceholderRelatedBo.TravelHistory);
+        var codes = groups
+            .Single(g => g.RelatedBo == UserReportPlaceholderRelatedBo.TravelHistory)
+            .Entries
+            .Select(e => e.ShortCode)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        Assert.Contains("THKD", codes);
+        Assert.Contains("THDT", codes);
+        Assert.Contains("THCP", codes);
+        Assert.Contains("THPL", codes);
+    }
+
     private static ApplicationProfilePlaceholderSet FullSet() =>
         new ApplicationProfilePlaceholderSetService(new UserReportPlaceholderCatalogService()).GetSet(
             new ApplicationProfilePlaceholderSetQuery

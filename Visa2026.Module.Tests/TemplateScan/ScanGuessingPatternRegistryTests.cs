@@ -10,6 +10,21 @@ namespace Visa2026.Module.Tests.TemplateScan;
 
 public class ScanGuessingPatternRegistryTests
 {
+    private static ApplicationProfilePlaceholderSet Forma16Set() =>
+        new ApplicationProfilePlaceholderSetService(new UserReportPlaceholderCatalogService()).GetSet(
+            new ApplicationProfilePlaceholderSetQuery
+            {
+                Profile = new ApplicationProfile
+                {
+                    RequirePersonPassport = true,
+                    RequirePersonVisa = true,
+                    RequirePersonPosition = true,
+                    RequirePersonAddressOfResidence = true,
+                },
+                DataScope = ApplicationProfileTemplateDataScope.Both,
+                TemplateKind = ApplicationProfileTemplateKind.Word,
+            });
+
     private static ApplicationProfilePlaceholderSet Set() =>
         new ApplicationProfilePlaceholderSetService(new UserReportPlaceholderCatalogService()).GetSet(
             new ApplicationProfilePlaceholderSetQuery
@@ -92,6 +107,48 @@ public class ScanGuessingPatternRegistryTests
         var ranked = ScanSurroundPlaceholderPattern.Rank(
             yellow, nearby, null, Set(), UserReportPlaceholderScope.Row);
         Assert.Equal(expected, ranked[0].ShortCode);
+    }
+
+    [Theory]
+    [InlineData("Yetkin Didem", "1. Familiyasy, ady, atasynyn ady", "PFN")]
+    [InlineData("TUR", "2. Rayatlygy", "PNAT")]
+    [InlineData("18.01.1977", "3. Doglan senesi", "PDBT")]
+    [InlineData("U36556957", "4. Pasportynyn belgisi", "PPN")]
+    [InlineData("TUR", "5. Doglan yeri, yurdy", "PCBC")]
+    [InlineData("Ayal", "6. Jynsy", "PGND")]
+    [InlineData("Emek mahallesi gazi ali dusun caddesi", "7. Oy salgysy", "PFAC")]
+    [InlineData("Turkmenistandaky sahamca mudirinin orunbasarynyn - gyzy", "8. Gelmeginin maksady", "RGEL")]
+    [InlineData("Asgabat saherinin 1958-nji (Andalyp) kocesi jay-86", "9. Turkmenistanda bolyan yeri", "ADRS")]
+    [InlineData("A1688318", "10. Wizanyn derejesi, gornusi we belgi", "VNUM")]
+    [InlineData("Asgabat saher howa menzilindaki MGP", "11. Wizanyn berlen yeri (yurdy)", "VPLC")]
+    [InlineData("20.01.2026", "12. Wizanyn berlen senesi we mohleti", "VISD")]
+    [InlineData("20.01.2026", "13. Giren wagty", "TRDT")]
+    [InlineData("Asgabat saher howa menzilindaki MGP", "14. Giren yeri", "TRCK")]
+    [InlineData("Calik Enerji Sanayi we Tijaret", "15. Kabul edyan edara ya-da sahsyyet", "ACNAM")]
+    public void Numbered_left_labels_rank_forma16_placeholders(string yellow, string nearby, string expected)
+    {
+        var ranked = ScanSurroundPlaceholderPattern.Rank(
+            yellow, nearby, null, Forma16Set(), UserReportPlaceholderScope.Row);
+        Assert.Equal(expected, ranked[0].ShortCode);
+    }
+
+    [Fact]
+    public void Numbered_visa_row_is_left_label_form()
+    {
+        var kinds = ScanGuessingPatternRegistry.Detect(
+            "20.01.2026-de",
+            "12. Wizanyn berlen senesi we mohleti",
+            null,
+            ScanSourceKind.Word);
+        Assert.Contains(kinds, k => k == ScanGuessingPatternKind.LeftLabelForm);
+    }
+
+    [Fact]
+    public void StripLeadingItemNumber_drops_forma16_index()
+    {
+        Assert.Equal(
+            "wizanyn berlen senesi we mohleti",
+            ScanFormFieldLabelHints.StripLeadingItemNumber("12. wizanyn berlen senesi we mohleti"));
     }
 
     [Fact]

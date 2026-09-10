@@ -1,4 +1,28 @@
-### 2026-09-08 — Case workspace Invitation / WP / Visa dates use dd.MM.yyyy
+### 2026-09-10 — Hasaba F16 empty travel and visa category merge
+
+- **Need**: Catalog Preview on Hasaba Almak 6/-1161 (Emre Akbulut) left `Travel_DateText`, `Travel_CheckPointTm`, `Application_VisaCategory_NameTm` empty though People & links had Travel history and a visa.
+- **Fix**: Merge-line getters fall back to linked `TravelHistory` and `Visa`/`Invitation` when the registration line and instance VisaCategory are empty. Tokens unchanged.
+- **Test**: `ApplicationRosterMergeLineTravelHistoryPlaceholderTests` fallback facts. Officer confirmed Preview filled.
+- **Prevent**: Hasaba does not store Giren wagty/ýeri on a registration TravelDate/CheckPoint. Do not hide Travel history on check-in profiles.
+- **Cross-skill**: visa2026-user-report-templates | visa2026-resminamalar
+
+### 2026-09-09 — TravelHistory merge placeholders (THKD / THDT / THCP)
+
+- **Need**: Templates needed People & links Travel history Kind / Date / Check point. Catalog only had registration **TRDT** / **TRCK**.
+- **Fix**: `TravelHistory_*` placeholders + hydrator `CurrentTravelHistory` from resolved links. Pack `PersonTravelHistory`.
+- **Test**: Stop F5 then rebuild — previous `dotnet test` hung on a locked Module.dll. Officer: Ctrl+F5; Create from yellow marks Add placeholder → group **Travel history**.
+- **Prevent**: Do not reuse TRDT/TRCK for linked TravelHistory.
+- **Cross-skill**: visa2026-user-report-templates | visa2026-template-scan
+
+### 2026-09-09 — All profile templates include Travel history (except business trip)
+
+- **Need**: Officers expected **Travel history** on every Application Profile template (wizard Person data + People & links tiles). Hasaba Almak (`check_in_from_abroad`) and issuance/cancel/change seeds had `RequirePersonTravelHistory` off, so the tile never appeared. Config lock only blocks the wizard; tenant catalog sync still updates locked rows.
+- **Fix**: Calik `application-profile.calik-energi.json` sets the flag **true** on all families except **Business trip**. Tenant `ApplyRow` and type mapper force the same. New `ApplicationProfile` defaults the toggle on (same as Passport). Resolver still hides Travel history for `ActionFamily=BusinessTrip`.
+- **Test**: `ApplicationProfileTenantCatalogTravelHistoryTests` + resolver/mapper tests — 45 passed with Module Debug build.
+- **Prevent**: Do not leave Travel history off in tenant JSON for issuance/registration/cancel/change. Do not re-enable it on business-trip profiles (wizard hides the checkbox). Restart after rebuild so catalog sync writes the flag; Clone is not required for this seed change.
+- **Cross-skill**: application-profile | visa2026-lookup-data
+
+
 
 - **Need**: Issued-record compose drawers used browser `type="date"` (US MM/DD/YYYY). Officers wanted the same feel as Passport DetailView (`dd.MM.yyyy` + advancing caret).
 - **Fix**: Shared `OfficerDateEdit` (DxDateEdit Mask/DisplayFormat `dd.MM.yyyy`, `MaskCaretMode.Advancing`). Wired into `IssueIssuedHeaderSlotPanel` (Invitation/WP/Rejection/BorderZone header + WP item Start/End) and `IssueIssuedVisaSlotPanel` (Issued/Expiration). Non-nullable Issue/Primary dates use DateChanged handlers.

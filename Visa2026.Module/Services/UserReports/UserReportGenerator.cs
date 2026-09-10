@@ -73,7 +73,9 @@ namespace Visa2026.Module.Services.UserReports
             object rootObject,
             IList<ApplicationRosterMergeLine>? applicationItems = null)
         {
-            var data = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+            var data = rootObject is ApplicationProfileInstance headerApplication
+                ? UserReportMergeDataHelper.BuildApplicationHeaderDictionary(headerApplication)
+                : new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
             // Map each validated placeholder to its value
             foreach (var placeholder in template.Placeholders.Where(p => p.IsValid && !p.IsRowProperty))
