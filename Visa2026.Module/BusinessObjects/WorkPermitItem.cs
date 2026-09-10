@@ -218,7 +218,8 @@ namespace Visa2026.Module.BusinessObjects
         public string Position_NameTm => CurrentPositionHistory?.Position?.NameTm;
 
         [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
-        public string Address_FullAddress => PersonCurrentItems.GetCurrentAddressOfResidence(Person)?.FullAddress;
+        public string Address_FullAddress =>
+            AddressOfResidenceReportText.CityAndStreet(PersonCurrentItems.GetCurrentAddressOfResidence(Person));
 
         [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
         public string WP_StartDateText => StartDate.ToString("dd.MM.yyyy");

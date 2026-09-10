@@ -166,6 +166,9 @@ public class ExcelReportGenerator : IExcelReportGenerator
                 if (TryResolveRowToken(key, rowData, item) is { } dotResolved)
                     return dotResolved;
 
+                if (TryResolveHeaderToken(key, headerData) is { } headerFromDot)
+                    return headerFromDot;
+
                 return string.Empty;
             }
 
@@ -179,8 +182,8 @@ public class ExcelReportGenerator : IExcelReportGenerator
 
             if (string.Equals(bindKey, "rows", StringComparison.OrdinalIgnoreCase))
                 return string.Empty;
-            if (headerData.TryGetValue(bindKey, out var headerValue))
-                return FormatValue(headerValue);
+            if (TryResolveHeaderToken(bindKey, headerData) is { } headerResolved)
+                return headerResolved;
 
             if (item != null)
                 return FormatValue(UserReportMergeDataHelper.GetPropertyValue(item, bindKey));
@@ -220,6 +223,21 @@ public class ExcelReportGenerator : IExcelReportGenerator
 
         if (item != null)
             return FormatValue(UserReportMergeDataHelper.GetPropertyValue(item, key));
+
+        return null;
+    }
+
+    private static string? TryResolveHeaderToken(string key, IReadOnlyDictionary<string, object> headerData)
+    {
+        if (headerData.TryGetValue(key, out var headerValue))
+            return FormatValue(headerValue);
+
+        var canonicalKey = UserReportPlaceholderAliasRegistry.ResolveCanonicalPropertyPath(key);
+        if (!string.Equals(canonicalKey, key, StringComparison.OrdinalIgnoreCase)
+            && headerData.TryGetValue(canonicalKey, out headerValue))
+        {
+            return FormatValue(headerValue);
+        }
 
         return null;
     }

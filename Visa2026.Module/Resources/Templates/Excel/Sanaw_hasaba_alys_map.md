@@ -3,7 +3,7 @@
 | Field | Value |
 |-------|-------|
 | **Status** | Implemented |
-| **Map version** | 1.0.2 |
+| **Map version** | 1.0.4 |
 | **Basename** | `Sanaw_hasaba_alys` |
 | **Template file(s)** | `Excel/Sanaw_hasaba_alys.xlsx` |
 | **Format** | Excel (user report seed) |
@@ -113,7 +113,7 @@ Author **row 3** only for item fields. Excel list convention: **`{{.PropertyName
 | C08 | I3 | Pasportynyň (… resminamanyň) möhleti | `{{.Passport_ExpirationDateText}}` | `Passport_ExpirationDateText` | `20.05.2030` | |
 | C09 | J3 | Gelmeginiň maksady | `{{.Registration_GelmeginMaksadyTm}}` | `Registration_GelmeginMaksadyTm` | `Türkmenistandaky şahamça müdiriniň orunbasary-Ali Enes Yetkin-ň aýaly` | Wrap text |
 | C10 | K3 | Wiza maglumatlary | `{{.Visa_Number}} {{.Visa_TypeTm}} {{.Visa_StartDateText}} {{.Visa_ExpirationDateText}}` | `CurrentVisa` | `A1688318 FM 20.02.2026 06.07.2026` | Single line; spaces between tokens |
-| C11 | L3 | Türkmenistandaky salgysy | `{{.Address_FullAddress}}` | `Address_FullAddress` | `Aşgabat şäheriniň 1958-nji (Andalyp) köçesi jaý-86, öý-114` | Wrap text |
+| C11 | L3 | Türkmenistandaky salgysy | `{{.Address_FullAddress}}` | `Address_FullAddress` | `Aşgabat şäheriniň 1958-nji (Andalyp) köçesi jaý-86, öý-114` | Wrap text. Value is **Region + City + street**. Omit Region when it is **Aşgabat şäheri** (same as City). Welaýat names print as **welaýatynyň**. Skip a part already present in the street. |
 
 **Not used:** `{{.Visa_DurationFrequencyBlock}}` (multiline — Gurlusyk layout); **`CancelVisa_*Block`** (cancel-visa sanaw only).
 

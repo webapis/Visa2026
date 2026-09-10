@@ -4,6 +4,7 @@ using DevExpress.ExpressApp.EFCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.WordReports;
 
 namespace Visa2026.Module.Services.UserReports;
 
@@ -135,6 +136,9 @@ public sealed class UserReportTemplateStagingService : IUserReportTemplateStagin
                     displayName,
                     $"Uploaded file exceeds maximum size ({_options.MaxFileSizeBytes} bytes).");
             }
+
+            if (outputFormat == TemplateOutputFormat.Excel)
+                stagedContent = ExcelPreviewPageLayout.StampFromContent(stagedContent);
 
             var currentContent = ReadFileContent(objectSpace, template.TemplateFile) ?? Array.Empty<byte>();
             var stagedHash = ComputeSha256Hex(stagedContent);

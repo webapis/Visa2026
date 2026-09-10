@@ -99,9 +99,7 @@ public sealed class ApplicationWordReportOfficePreviewPdfConverter
         if (usedRange != null)
             worksheet.SetPrintRange(usedRange);
 
-        var printOptions = worksheet.PrintOptions;
-        printOptions.FitToPage = true;
-        printOptions.FitToWidth = 1;
+        ExcelPreviewPageLayout.ApplyToWorksheet(worksheet);
 
         using var output = new MemoryStream();
         workbook.ExportToPdf(output, new PdfExportOptions(), worksheet.Name);

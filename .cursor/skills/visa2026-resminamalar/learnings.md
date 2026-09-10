@@ -25,6 +25,26 @@ Purpose: **catalog, seed gate, batch worker, preview, permissions, dialog UX** �
 
 ## Entries
 
+### 2026-09-09 — Excel Preview omitted ACPOS/ACFNM footer (Application)
+
+- **Symptom**: Yellow-marks Review showed 13 mapped; 12 ACPOS and 13 ACFNM sat below the 11-column table. Resminamalar Preview of sanaw-hasaba almak.xlsx was landscape page 1 of 1 with blank space under the table — no signatory.
+- **Try**: Case 2/-311 Hasaba Almak; Preview SANAW-HASABA ALMAK. Review placeholders vs catalog Preview. Not XtraReports.
+- **Test**: `ExcelReportSignatoryFooterTests` (2 passed). Officer: stop F5, rebuild, Ctrl+F5, Preview the same Excel row. Footer should show Configuration Authorized Signatory position + full name.
+- **Root cause**: Excel `BuildHeaderData` started from a thin `BuildApplicationHeaderDictionary` (number/date/company only). Footer cells merge with `item: null`, so they only fill from that dictionary. Scan footer tokens (`{{ds.ACPOS}}` / `{{.ACFNM}}`) were empty unless Extract had persisted non-row placeholders. Empty cells then dropped out of the PDF used range.
+- **Fix**: Always put `Application_CompanyHead_PositionTm` / `FullName` on the header dictionary (Enrich adds ACPOS/ACFNM). Excel `.` tokens fall back to header when they are not on the loop row. Word merge starts from the same header dictionary.
+- **Prevent**: Do not treat 12/13 as extra table columns. Signatory is the footer below the grid (seed map B6/I6). Do not rely on Placeholders Extract for those header scalars.
+- **Cross-skill**: visa2026-user-report-templates | visa2026-template-scan
+
+### 2026-09-09 — Excel Preview used portrait on wide sanaw (Application)
+
+- **Symptom**: Hasaba almak sanawy (Excel) Preview was A4 portrait: columns squeezed, empty space at the bottom. Officers expected landscape from the 11-column sheet.
+- **Try**: Case Resminamalar Preview on Hasaba almak sanawy. Do not open XAF XtraReports — Preview is `ApplicationWordReportOfficePreviewPdfConverter` (custom Office File API → PDF in the preview slot).
+- **Test**: `ExcelPreviewPageLayoutTests` (9 with existing converter tests). Wide 11-column xlsx PDF first page Width > Height. Officer: stop F5, rebuild, Ctrl+F5, Preview the same row.
+- **Root cause**: `ConvertExcelToPdf` set FitToWidth but left worksheet orientation at the workbook default (portrait). Existing templates often have no Landscape PageSetup.
+- **Fix**: `ExcelPreviewPageLayout` — landscape when PageSetup is landscape or used width is wider than A4 portrait (~80 character units / 8+ columns). Applied on every Excel Preview. Upload/save/staging stamps Landscape + A4 into the stored xlsx when content is wide (print metadata only).
+- **Prevent**: Do not add a portrait/landscape officer control. Do not "fix" `RegistrationListReport` for this Preview. Word Preview already follows `sectPr`.
+- **Cross-skill**: visa2026-preview-slot | visa2026-user-report-templates
+
 ### 2026-09-03 — New profile showed flat library instead of This profile (0) (Application)
 
 - **Symptom**: First case on a new Application Profile listed ~12 seeded Word/Excel rows with no This profile / Shared tabs. Officers expected This profile (0) and Shared (N).
