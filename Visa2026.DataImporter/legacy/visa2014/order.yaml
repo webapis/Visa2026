@@ -545,3 +545,18 @@ postImportCorrections:
         Required after orphan --visa-remainder, not after application-domain alone
         (source visas on deleted issuing apps are not in the Visa id-map until remainder).
         Optional after a type Visa wave. Do not pass --visa-remainder on type slices.
+    - id: epa-roster-backfill
+      cliFlag: --correct-visa2014-application-person-document-links --epa-roster-backfill-only
+      runAfter: postImportCorrections.application-person-document-links
+      dependsOn:
+        - Education
+        - AddressOfResidence
+        - EmployeePositionHistory
+        - ApplicationProfileInstancePerson
+      notes: |
+        Mandatory after document-link correction (import-strategy.yaml
+        calikAddressPositionEpaLock, 2026-09-11). Pins missing Education /
+        AddressOfResidence / Position roster links where RequirePerson* is on.
+        Calik: Address and Position required on every profile, including
+        App_Change_Inv. Re-run if those flags turned on after a prior EPA pass.
+        Position SQL: employees only.

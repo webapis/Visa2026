@@ -63,7 +63,9 @@ public static class ApplicationProfileInstancePersonPdfPackageLineHydrator
         AssignWorkPermits(objectSpace, item, idsByKind);
         item.CurrentEducation = First<Education>(objectSpace, idsByKind, ApplicationProfileInstancePersonLinkKind.Education);
         item.CurrentAddressOfResidence = First<AddressOfResidence>(objectSpace, idsByKind, ApplicationProfileInstancePersonLinkKind.AddressOfResidence);
-        item.CurrentPositionHistory = First<EmployeePositionHistory>(objectSpace, idsByKind, ApplicationProfileInstancePersonLinkKind.Position);
+        item.CurrentPositionHistory = FamilyMemberSponsorPositionCaption.UsesSponsorPosition(trackedPerson)
+            ? PersonCurrentItems.GetCurrentPositionHistory(trackedPerson.SponsoringEmployee)
+            : First<EmployeePositionHistory>(objectSpace, idsByKind, ApplicationProfileInstancePersonLinkKind.Position);
         item.CurrentWorkDuty = First<WorkDuty>(objectSpace, idsByKind, ApplicationProfileInstancePersonLinkKind.WorkDuty);
         item.CurrentSalary = First<EmployeeSalary>(objectSpace, idsByKind, ApplicationProfileInstancePersonLinkKind.Salary);
         item.CurrentMedicalRecord = First<MedicalRecord>(objectSpace, idsByKind, ApplicationProfileInstancePersonLinkKind.MedicalRecord);

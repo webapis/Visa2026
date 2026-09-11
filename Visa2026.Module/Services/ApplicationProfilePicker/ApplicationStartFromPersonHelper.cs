@@ -200,8 +200,18 @@ public static class ApplicationStartFromPersonHelper
             return true;
         if (profile.RequirePersonAddressOfResidence && ApplicationProfileInstancePersonValidItems.ResolveAddress(person) == null)
             return true;
-        if (profile.RequirePersonPosition && ApplicationProfileInstancePersonValidItems.ResolvePosition(person) == null)
-            return true;
+        if (profile.RequirePersonPosition)
+        {
+            if (FamilyMemberSponsorPositionCaption.UsesSponsorPosition(person))
+            {
+                if (!FamilyMemberSponsorPositionCaption.IsComplete(person))
+                    return true;
+            }
+            else if (ApplicationProfileInstancePersonValidItems.ResolvePosition(person) == null)
+            {
+                return true;
+            }
+        }
         if (profile.RequirePersonSalary && ApplicationProfileInstancePersonValidItems.ResolveSalary(person) == null)
             return true;
         if (profile.RequirePersonMedical && ApplicationProfileInstancePersonValidItems.ResolveMedical(person) == null)

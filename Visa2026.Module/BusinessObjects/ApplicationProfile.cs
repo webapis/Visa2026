@@ -260,8 +260,8 @@ public class ApplicationProfile : BaseObject
 
     public virtual bool RequirePersonPassport { get; set; } = true;
     public virtual bool RequirePersonEducation { get; set; }
-    public virtual bool RequirePersonPosition { get; set; }
-    public virtual bool RequirePersonAddressOfResidence { get; set; }
+    public virtual bool RequirePersonPosition { get; set; } = true;
+    public virtual bool RequirePersonAddressOfResidence { get; set; } = true;
     public virtual bool RequirePersonVisa { get; set; }
     public virtual bool RequirePersonInvitationItem { get; set; }
     public virtual bool RequirePersonWorkPermitItem { get; set; }

@@ -1,3 +1,14 @@
+### 2026-09-11 - EPA backfill after Address/Position required on all profiles
+
+- **Phase**: correction / roster ResolvedLinks
+- **Mode**: `--correct-visa2014-application-person-document-links --epa-roster-backfill-only --legacy-source calik-energi-local-pg --inprocess --no-wait`
+- **Outcome**: success (exit **0**)
+- **Why**: Çakylygy üýtgetmek (App_Change_Inv / 3/-352) showed Position 0 / Address 0. First EPA backfill ran while those `RequirePerson*` flags were false on invitation-change (and other) profiles. Tiles appeared after catalog sync; links were never pinned.
+- **Environment**: local PostgreSQL `visa2026`
+- **Counts**: Education **0** / Address **771** / Position **1367** (employees only).
+- **Log**: `artifacts/headless-import/epa-roster-backfill-change-inv-20260911.log`
+- **Next**: refresh 3/-352. Address/Position 0 only if that person has no imported child row (or FM Position uses sponsor caption). Halt.
+- **Strategy (2026-09-11):** this case was **not** in the import gate until now. Locked in `import-strategy.yaml` (`calikAddressPositionEpaLock`), `order.yaml` `epa-roster-backfill`, `application-type-import-order.yaml` (document-links + App_Change_Inv), `IMPORT_PLAN_AND_STRATEGY.md` wave 4. Next Demo/Prod/full import must run `--epa-roster-backfill-only` after document-links and re-run EPA if `RequirePerson*` flags changed.
 ### 2026-09-09 - TravelHistory officer verified local PG
 
 - **Phase**: person-domain / TravelHistory

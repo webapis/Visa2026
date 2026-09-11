@@ -236,9 +236,13 @@ internal static class ApplicationWorkspaceCaseBuilder
                     continue;
 
                 var expected = people.Sum(p =>
-                    p.Records.FirstOrDefault(r =>
-                        string.Equals(r.Key, def.PersonRecordKey, StringComparison.OrdinalIgnoreCase))
-                        ?.ExpectedCount ?? 0);
+                {
+                    var record = p.Records.FirstOrDefault(r =>
+                        string.Equals(r.Key, def.PersonRecordKey, StringComparison.OrdinalIgnoreCase));
+                    if (record == null || record.IsCaptionOnly)
+                        return 0;
+                    return record.ExpectedCount;
+                });
                 if (expected == 0 && people.Count == 0)
                 {
                     expected = Math.Max(
@@ -246,7 +250,14 @@ internal static class ApplicationWorkspaceCaseBuilder
                         1);
                 }
 
-                var count = ApplicationWorkspaceLinkedRecordsCatalog.CountResolved(rosterLinks, def.Kind);
+                var count = people.Sum(p =>
+                {
+                    var record = p.Records.FirstOrDefault(r =>
+                        string.Equals(r.Key, def.PersonRecordKey, StringComparison.OrdinalIgnoreCase));
+                    if (record == null || record.IsCaptionOnly)
+                        return 0;
+                    return record.Count;
+                });
                 tiles.Add(new ApplicationWorkspaceCaseLinkedTile
                 {
                     TabKey = def.TabKey,
@@ -495,7 +506,7 @@ internal static class ApplicationWorkspaceCaseBuilder
                 PassportNumber = FirstCellForPerson(tabs, "passport", name, 1),
                 VisaNumber = FirstCellForPerson(tabs, "visa", name, 1),
                 Records = BuildPersonRecords(
-                    application, rosterLinks, tabs, name, personId, linkableCounts, linksLocked),
+                    application, rosterPeople, rosterLinks, tabs, name, personId, linkableCounts, linksLocked),
             });
         }
 
@@ -512,7 +523,7 @@ internal static class ApplicationWorkspaceCaseBuilder
                     Name = name,
                     RoleLabel = i == 0 ? "Primary applicant" : "Dependent",
                     Records = BuildPersonRecords(
-                        application, rosterLinks, tabs, name, personId, linkableCounts, linksLocked),
+                        application, rosterPeople, rosterLinks, tabs, name, personId, linkableCounts, linksLocked),
                 });
             }
         }
@@ -549,6 +560,7 @@ internal static class ApplicationWorkspaceCaseBuilder
 
     private static IReadOnlyList<ApplicationWorkspaceCasePersonRecord> BuildPersonRecords(
         ApplicationProfileInstance? application,
+        IReadOnlyList<Person> rosterPeople,
         IReadOnlyList<ApplicationProfileInstancePersonResolvedLink> rosterLinks,
         IReadOnlyDictionary<string, ApplicationWorkspaceTab> tabs,
         string personName,
@@ -571,6 +583,30 @@ internal static class ApplicationWorkspaceCaseBuilder
             }
 
             var lastN = ApplicationProfilePersonLastCount.For(application, def.Kind);
+            var rosterPerson = personId != Guid.Empty
+                ? rosterPeople.FirstOrDefault(p => p.ID == personId)
+                : null;
+            if (def.Kind == ApplicationProfileInstancePersonLinkKind.Position
+                && FamilyMemberSponsorPositionCaption.UsesSponsorPosition(rosterPerson))
+            {
+                var caption = FamilyMemberSponsorPositionCaption.FormatTm(rosterPerson);
+                var complete = FamilyMemberSponsorPositionCaption.IsComplete(rosterPerson);
+                records.Add(new ApplicationWorkspaceCasePersonRecord
+                {
+                    Key = def.PersonRecordKey,
+                    Label = def.Label,
+                    Count = complete ? 1 : 0,
+                    ExpectedCount = 1,
+                    State = complete ? "valid" : "empty",
+                    Glyph = def.Glyph,
+                    Tone = LinkedTones[toneIndex % LinkedTones.Length],
+                    IsCaptionOnly = true,
+                    Caption = string.IsNullOrWhiteSpace(caption) ? "—" : caption,
+                });
+                toneIndex++;
+                continue;
+            }
+
             var available = personId != Guid.Empty
                 ? linkableCounts.Get(personId, def.Kind)
                 : 0;
@@ -626,7 +662,16 @@ internal static class ApplicationWorkspaceCaseBuilder
                 if (!ApplicationWorkspaceLinkedRecordsCatalog.IsConfigured(application, def.Kind))
                     continue;
 
-                var count = ApplicationWorkspaceLinkedRecordsCatalog.CountResolved(rosterLinks, def.Kind);
+                var count = people.Count > 0
+                    ? people.Sum(p =>
+                    {
+                        var record = p.Records.FirstOrDefault(r =>
+                            string.Equals(r.Key, def.PersonRecordKey, StringComparison.OrdinalIgnoreCase));
+                        if (record == null || record.IsCaptionOnly)
+                            return 0;
+                        return record.Count;
+                    })
+                    : ApplicationWorkspaceLinkedRecordsCatalog.CountResolved(rosterLinks, def.Kind);
                 if (count > 0)
                     totals[def.Label] = count;
             }
@@ -637,7 +682,7 @@ internal static class ApplicationWorkspaceCaseBuilder
         var fallback = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         foreach (var person in people)
         {
-            foreach (var record in person.Records.Where(r => r.State == "valid"))
+            foreach (var record in person.Records.Where(r => r.State == "valid" && !r.IsCaptionOnly))
             {
                 fallback[record.Label] = fallback.GetValueOrDefault(record.Label) + Math.Max(record.Count, 1);
             }

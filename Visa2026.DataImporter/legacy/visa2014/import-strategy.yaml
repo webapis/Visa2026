@@ -126,6 +126,24 @@ strategy:
       pinCorrectionAlsoWorkPermitItem: true
       pinRequiredEducationPositionAddressAtRosterAndCorrection: true
       pinRequiredTravelHistoryAtRosterAndCorrection: true
+      allCalikProfilesRequirePersonAddressAndPosition: true
+      pinPositionLinksEmployeesOnly: true
+      mandatoryEpaRosterBackfillAfterDocumentLinks: true
+      reRunEpaRosterBackfillWhenRequirePersonFlagsTurnOn: true
+      calikAddressPositionEpaLock:
+        lockedAt: 2026-09-11
+        why: >
+          Pin only runs when instance RequirePerson* is true. Invitation-change
+          (App_Change_Inv / change_invitation) and other profiles used to leave
+          Address and Position off, so first EPA backfill skipped those kinds
+          (example local 3/-352). Calik tenant catalog now forces
+          RequirePersonAddressOfResidence and RequirePersonPosition on every
+          profile. After document-link correction, always run
+          --epa-roster-backfill-only. If flags turn on after a prior import,
+          re-run EPA — do not reuse the first EPA counts. Position SQL pin is
+          employees only (family members use sponsor caption, not a Position chip).
+        includesForgottenTypes:
+          - App_Change_Inv
       officerRelinkMayUseToday: true
       missingIdMap: leave_unlinked_until_oid_in_map_then_pin
     piaVisaResolvedLinkMismatch:
@@ -137,7 +155,10 @@ strategy:
       Per type Visa: --entity Visa --application-type <Name> only (no --visa-remainder).
       After ALL types: Rejection, BorderZone documents, then
       --entity Visa --visa-remainder (no type filter), then
-      --correct-visa2014-application-person-document-links.
+      --correct-visa2014-application-person-document-links, then
+      --epa-roster-backfill-only (Address/Position required on all Calik
+      profiles, including App_Change_Inv). Then --travel-roster-backfill-only
+      (Registration ActionFamily only).
       Do not run --visa-remainder before later types' headers if first POST
       must set IssuingApplicationProfileInstance.
     applicationTypeProfileLock:
@@ -183,7 +204,10 @@ waves:
     notes: >
       In-slice Invitation/WP/Visa (no --visa-remainder on type slices).
       After all types: Rejection + BorderZone documents + --visa-remainder
-      + --correct-visa2014-application-person-document-links.
+      + --correct-visa2014-application-person-document-links
+      + --epa-roster-backfill-only (mandatory; Address/Position on every
+      Calik profile including App_Change_Inv)
+      + --travel-roster-backfill-only (Registration only).
   - id: progress-and-history
     importPhase: progress-and-history
     status: not_started

@@ -298,6 +298,11 @@ public sealed class ApplicationWorkspaceCasePersonRecord
     public string Glyph { get; init; } = "•";
 
     public string Tone { get; init; } = "blue";
+
+    /// <summary>Read-only sponsor Wezipesi on dependents; not a Position Relink tile.</summary>
+    public bool IsCaptionOnly { get; init; }
+
+    public string Caption { get; init; } = string.Empty;
 }
 
 public sealed class ApplicationWorkspaceCaseActivity

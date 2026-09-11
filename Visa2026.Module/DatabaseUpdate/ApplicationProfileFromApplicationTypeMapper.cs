@@ -154,8 +154,8 @@ public static class ApplicationProfileFromApplicationTypeMapper
     {
         profile.RequirePersonPassport = type.ShowPreviousPassport || type.ShowApplicationItems;
         profile.RequirePersonEducation = type.ShowCurrentEducation;
-        profile.RequirePersonPosition = type.ShowCurrentWorkDuty;
-        profile.RequirePersonAddressOfResidence = type.ShowCurrentAddressOfResidence;
+        profile.RequirePersonPosition = true;
+        profile.RequirePersonAddressOfResidence = true;
         profile.RequirePersonVisa = type.ShowCurrentVisa || type.ShowNextVisa;
         profile.RequirePersonInvitationItem = type.ShowCurrentInvitationItem || type.ShowPreviousInvitationItem;
         profile.RequirePersonWorkPermitItem = type.ShowCurrentWorkPermitItem || type.ShowPreviousWorkPermitItem;

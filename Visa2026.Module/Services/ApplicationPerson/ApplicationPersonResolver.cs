@@ -281,8 +281,11 @@ public static class ApplicationProfileInstancePersonResolver
                 person, ApplicationProfilePersonLastCount.For(application, ApplicationProfileInstancePersonLinkKind.Visa)));
         rows.Add((ApplicationProfileInstancePersonLinkKind.Education, ApplicationProfileInstancePersonValidItems.ResolveEducation(person)));
         rows.Add((ApplicationProfileInstancePersonLinkKind.AddressOfResidence, ApplicationProfileInstancePersonValidItems.ResolveAddress(person)));
-        rows.Add((ApplicationProfileInstancePersonLinkKind.Position, ApplicationProfileInstancePersonValidItems.ResolvePosition(person)));
-        rows.Add((ApplicationProfileInstancePersonLinkKind.WorkDuty, ApplicationProfileInstancePersonValidItems.ResolveWorkDuty(person)));
+        if (person.IsEmployee)
+        {
+            rows.Add((ApplicationProfileInstancePersonLinkKind.Position, ApplicationProfileInstancePersonValidItems.ResolvePosition(person)));
+            rows.Add((ApplicationProfileInstancePersonLinkKind.WorkDuty, ApplicationProfileInstancePersonValidItems.ResolveWorkDuty(person)));
+        }
         rows.Add((ApplicationProfileInstancePersonLinkKind.Salary, ApplicationProfileInstancePersonValidItems.ResolveSalary(person)));
         rows.Add((ApplicationProfileInstancePersonLinkKind.MedicalRecord, ApplicationProfileInstancePersonValidItems.ResolveMedical(person)));
         AddRange(rows, ApplicationProfileInstancePersonLinkKind.InvitationItem,

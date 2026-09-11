@@ -107,6 +107,8 @@ after all types:
   Rejection, RejectionItem, BorderZone documents,
   Visa remainder (--visa-remainder, no type filter),
   --correct-visa2014-application-person-document-links
+  --epa-roster-backfill-only   # mandatory; Address+Position on every Calik profile including App_Change_Inv
+  --travel-roster-backfill-only  # Registration ActionFamily only
 ```
 
 **Canonical Application Type inner sequence:**
@@ -297,6 +299,8 @@ ApplicationProfileInstance → ApplicationProfileInstancePerson → ApplicationP
 # 5. WorkPermit + WorkPermitItem if type generates work permit
 # 6. Visa after issued steps (wipe local PG Visa first if loaded after Passport)
 # After ALL types: --visa-remainder then --correct-visa2014-application-person-document-links
+# then --epa-roster-backfill-only (Address/Position on all Calik profiles incl. App_Change_Inv)
+# then --travel-roster-backfill-only (Registration only)
 ```
 
 **Gotchas (calik-energi 2026-07-04):**

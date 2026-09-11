@@ -1774,15 +1774,27 @@
                         <div class="cw-link-row ct-person-panel__tiles">
                             @foreach (var record in person.Records)
                             {
-                                var isSelected = IsPersonRecordSelected(person.Index, record.Key);
-                                <button type="button"
-                                        class="cw-link-tile cw-link-tile--@record.Tone @(ApplicationWorkspacePeopleLinksCompleteness.IsRecordShort(record, view.Chrome.ResolvedLinksLocked) ? "is-empty" : null) @(isSelected ? "is-selected" : null)"
-                                        @onclick="() => TogglePersonRecord(person.Index, record.Key)">
-                                    <span class="cw-link-tile__icon">@record.Glyph</span>
-                                    <span class="cw-link-tile__label">@record.Label</span>
-                                    <strong class="cw-link-tile__count">@FormatLinkedCount(record.Count, record.ExpectedCount)</strong>
-                                    <span class="cw-link-tile__chev">›</span>
-                                </button>
+                                var isEmpty = ApplicationWorkspacePeopleLinksCompleteness.IsRecordShort(record, view.Chrome.ResolvedLinksLocked);
+                                if (record.IsCaptionOnly)
+                                {
+                                    <div class="cw-link-tile cw-link-tile--caption cw-link-tile--@record.Tone @(isEmpty ? "is-empty" : null)">
+                                        <span class="cw-link-tile__icon">@record.Glyph</span>
+                                        <span class="cw-link-tile__label">@record.Label</span>
+                                        <span class="cw-link-tile__caption">@record.Caption</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    var isSelected = IsPersonRecordSelected(person.Index, record.Key);
+                                    <button type="button"
+                                            class="cw-link-tile cw-link-tile--@record.Tone @(isEmpty ? "is-empty" : null) @(isSelected ? "is-selected" : null)"
+                                            @onclick="() => TogglePersonRecord(person.Index, record.Key)">
+                                        <span class="cw-link-tile__icon">@record.Glyph</span>
+                                        <span class="cw-link-tile__label">@record.Label</span>
+                                        <strong class="cw-link-tile__count">@FormatLinkedCount(record.Count, record.ExpectedCount)</strong>
+                                        <span class="cw-link-tile__chev">›</span>
+                                    </button>
+                                }
                             }
                         </div>
                         @if (IsPersonRecordSelected(person.Index, EffectivePeopleRecordKey))

@@ -90,7 +90,8 @@ internal static class Visa2014ApplicationPersonRequiredPersonLinks
             changed += addressChanged;
         }
 
-        if (ApplicationProfileInstancePersonResolver.IsAutoLinkEnabled(
+        if (person.IsEmployee
+            && ApplicationProfileInstancePersonResolver.IsAutoLinkEnabled(
             application, ApplicationProfileInstancePersonLinkKind.Position))
         {
             var ids = ResolvePositionIds(objectSpace, person, raw, positionHistoryIdMap, asOf);
@@ -435,6 +436,10 @@ internal static class Visa2014ApplicationPersonRequiredPersonLinks
             ON i."ID" = pe."ApplicationProfileInstanceId" AND COALESCE(i."GCRecord", 0) = 0
         INNER JOIN "ApplicationProfiles" pr
             ON pr."ID" = i."ApplicationProfileID" AND pr."RequirePersonPosition" = TRUE
+        INNER JOIN "People" ppl
+            ON ppl."ID" = pe."PersonId"
+            AND ppl."IsEmployee" = TRUE
+            AND COALESCE(ppl."GCRecord", 0) = 0
         INNER JOIN "EmployeePositionHistories" h
             ON h."PersonID" = pe."PersonId" AND COALESCE(h."GCRecord", 0) = 0
         WHERE NOT EXISTS (

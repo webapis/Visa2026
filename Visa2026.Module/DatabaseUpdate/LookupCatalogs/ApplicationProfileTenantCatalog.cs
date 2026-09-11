@@ -520,8 +520,8 @@ internal static class ApplicationProfileTenantCatalogSync
 
         profile.RequirePersonPassport = row.RequirePersonPassport;
         profile.RequirePersonEducation = row.RequirePersonEducation;
-        profile.RequirePersonPosition = row.RequirePersonPosition;
-        profile.RequirePersonAddressOfResidence = row.RequirePersonAddressOfResidence;
+        profile.RequirePersonPosition = true;
+        profile.RequirePersonAddressOfResidence = true;
         profile.RequirePersonVisa = row.RequirePersonVisa;
         profile.RequirePersonInvitationItem = row.RequirePersonInvitationItem;
         profile.RequirePersonWorkPermitItem = row.RequirePersonWorkPermitItem;

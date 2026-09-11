@@ -85,7 +85,7 @@ Each wave still completes **discovery → confirmation → pilot → reconcile**
 | **1 — Prerequisites** | `prerequisites` | Target lookups seeded; layer 3 for shared catalogs | Strategy `approved`; Blazor updaters run once |
 | **2 — Person domain** | `person-domain` | Person, Passport, Education, position/salary/address, … **Visa is not in this wave** | Wave 1; Person dossier complete; **Excel preview reviewed**; `importConfirmed` |
 | **3 — Application Type slices** | `application-domain` + in-slice progress/issued/visa | **Per type** (living list; **`App_Inv` first**): instance header → roster → progress → Invitation/WorkPermit if the type generates them → Visa if that instance generates Visa. Then the **next** type. | Person + Passport (+ other person scalars except Visa); profiles seeded |
-| **4 — After all types** | `permits-and-visas` (remainder) | Rejection + RejectionItem; BorderZone **documents**; **`--visa-remainder`** (no type filter); then **`--correct-visa2014-application-person-document-links`** | Every type slice finished |
+| **4 — After all types** | `permits-and-visas` (remainder) | Rejection + RejectionItem; BorderZone **documents**; **`--visa-remainder`** (no type filter); then **`--correct-visa2014-application-person-document-links`**; then **`--epa-roster-backfill-only`** (Address/Position required on every Calik profile, including **App_Change_Inv** — re-run if `RequirePerson*` turned on after a prior EPA); then **`--travel-roster-backfill-only`** (Registration only) | Every type slice finished |
 | **5 — Attachments** | `attachments` | File blobs, scan links (`PassportCopy`, `VisaDocument`, …) | Parent BO id-map complete; scalar import reconciled |
 
 **Application Type bands** (type names inside a band are filled as we go — do not invent):
@@ -107,6 +107,8 @@ ApplicationProfileInstance
 ```
 
 **Historical snapshot (locked 2026-09-08):** every imported application is **past**. Roster `ResolvedLinks` must match `PersonInApplication` FKs (Passport / PreviousPassport / Visa / WorkPermit), not `PersonCurrentItems` / latest-N as of import day. Skip auto-link during `IsDataImport`; pin at roster import. `--correct-visa2014-application-person-document-links` also pins WorkPermitItem. Officer Relink after go-live may still use today. A PIA vs link gap is **only** expected when the source Oid is not in the id-map yet.
+
+**Calik Address + Position on all profiles (locked 2026-09-11):** tenant catalog forces `RequirePersonAddressOfResidence` and `RequirePersonPosition` on **every** profile, including invitation-change (`App_Change_Inv` / `change_invitation`). Pin and EPA SQL only fire when those flags are true — a first EPA pass while flags were off left Address/Position unlinked (local 3/-352). After document-link correction, **always** `--epa-roster-backfill-only`. If flags turn on after a prior import, **re-run EPA**. Position links are employees only.
 
 **Visa:** never before `IssuingApplicationProfileInstance`. Invitation-producing types must **not** require Visa on roster create. After Invitation (+ items) on `App_Inv`, still import visas whose issuing instance is that case. **Never** `--visa-remainder` on a type slice. After **all** types: `--entity Visa --visa-remainder`, then `--correct-visa2014-application-person-document-links`. Local PG: **wipe** the old Passport-first Visa load and reimport per type when the slice reaches Visa. Do not run remainder before later types’ headers if first POST must set issuing FK.
 

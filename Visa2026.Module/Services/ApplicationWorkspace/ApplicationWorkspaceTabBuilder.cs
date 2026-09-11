@@ -292,7 +292,9 @@ internal static class ApplicationWorkspaceTabBuilder
         Dictionary<(ApplicationProfileInstancePersonLinkKind Kind, Guid Id), object> linkedEntities) =>
         Tab("position", "Position", ApplicationWorkspaceLinkedRecordsCatalog.IsConfigured(application, ApplicationProfileInstancePersonLinkKind.Position),
             ["Person", "Position", "From"],
-            RowsForKind<EmployeePositionHistory>(people, linksByPerson, linkedEntities, ApplicationProfileInstancePersonLinkKind.Position, (person, pos) =>
+            RowsForKind<EmployeePositionHistory>(
+                people.Where(p => p.IsEmployee).ToList(),
+                linksByPerson, linkedEntities, ApplicationProfileInstancePersonLinkKind.Position, (person, pos) =>
             [
                 PersonName(person),
                 pos.Position?.NameTm ?? "—",

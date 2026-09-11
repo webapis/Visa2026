@@ -203,8 +203,9 @@ Use when user asks *how should I configure this profile?* — tailor to **Action
 
 - Always **Passport** for issuance unless exceptional legacy type. Use **Last 2** on **passport-change** (`pasport_change`) only — old + new booklet (expired previous is OK). If only one passport exists, **flag** (`1/2`); **do not block create**. Registration passport-info-change stays Last 1.
 - **Invitation / work permit / visa Last 2** means **up to 2 valid rows** (person may have 1 or 2). Missing expected rows are flagged; create is not blocked. Calik: `cancel_invitation` invitation Last 2; `cancel_invitation_wp` invitation + WP Last 2; `cancel_visa_wp` visa + WP Last 2; `cancel_workpermit` WP Last 2.
-- **Registration** profiles always turn **Position** on and never use **Urgency**.
-- Turn on **Education / Address** when templates use those `{{…}}` packs or readiness checks need them.
+- **Address of residence** and **Position** (`EmployeePositionHistory`) — on for **every** template (including business trip). Calik tenant catalog + `ApplyRow` / type mapper force both flags; People & links shows the tiles. Config lock does not block this seed sync.
+- **Registration** profiles also never use **Urgency**.
+- Turn on **Education** when templates use that `{{…}}` pack or readiness checks need it.
 - **TravelHistory** — on for every family **except Business trip** (hard-hidden). Calik tenant catalog sets `RequirePersonTravelHistory` true on all other profiles; People & links shows the Travel history tile.
 - Before publish: if nested template references a person pack, corresponding `RequirePerson*` should be on (plan §2.5 recommendation).
 

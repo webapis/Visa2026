@@ -16,6 +16,7 @@ using DevExpress.ExpressApp.DC;
 using Visa2026.Module.Editors;
 using Visa2026.Module.Services;
 using Visa2026.Module.Documentation;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -1585,13 +1586,10 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                if (Person?.IsEmployee != false) return Position_PositionTm;
-                var emp = Person?.SponsoringEmployee;
-                if (emp == null) return Position_PositionTm;
-                var pos  = PersonCurrentItems.GetCurrentPositionHistory(emp)?.Position?.NameTm ?? string.Empty;
-                var name = emp.FullName ?? string.Empty;
-                var rel  = Person?.Relationship?.NameTm ?? string.Empty;
-                return $"{pos} {name}-\u0148 {rel}".Trim();
+                if (!FamilyMemberSponsorPositionCaption.UsesSponsorPosition(Person))
+                    return Position_PositionTm;
+                var caption = FamilyMemberSponsorPositionCaption.FormatTm(Person);
+                return string.IsNullOrWhiteSpace(caption) ? Position_PositionTm : caption;
             }
         }
         #endregion

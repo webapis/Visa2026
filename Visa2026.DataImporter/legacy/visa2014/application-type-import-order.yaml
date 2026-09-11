@@ -123,7 +123,11 @@ postAllTypeSlices:
     after: visa-remainder
     notes: |
       Pins PIA Passport/Visa/WorkPermitItem. Also pins Education, Position,
-      AddressOfResidence when RequirePerson* is on. TravelHistory: Registration
+      AddressOfResidence when RequirePerson* is on. Calik locked 2026-09-11:
+      every profile requires Address and Position (including App_Change_Inv /
+      change_invitation). After this CLI, always --epa-roster-backfill-only;
+      re-run EPA if RequirePerson* flags turned on after a prior pin.
+      Position pin: employees only. TravelHistory: Registration
       ActionFamily SQL backfill only (--travel-roster-backfill-only); do not walk
       all PersonInApplication (checkpoint/date/travel FKs exist only on Registration).
       This wipe 2026-09-08 after visa remainder: Passport **0**, Visa **2**,
@@ -396,6 +400,9 @@ bands:
           Skip WorkPermit. Local PG headers **57** (instance id-map **3334**;
           profile Çakylygy üýtgetmek / change_invitation), roster **57**
           (people **6070**), progress **114** (16132), Invitation **55** (2904), InvitationItem **54** (5228), Visa **0** (3066). Inner sequence complete. Skip WorkPermit. Remainder Visa after all types.
+          Roster Address/Position: required on change_invitation (catalog lock).
+          Do not skip --epa-roster-backfill-only for this type — first EPA on
+          2026-09-09 ran while RequirePersonAddress/Position were false here.
       - name: App_Change_Visa_Category
         status: skip
         sourceComposites: ["E:8:na:1:na", "E:8:na:0:na", "F:8:na:na:na"]

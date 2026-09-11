@@ -1,3 +1,17 @@
+### 2026-09-11 — Dependent Position tile is sponsor Wezipesi text
+
+- **Need**: Dependents do not own EmployeePositionHistory. Officers still need Wezipesi on FM cases: sponsor position + relationship. Profile Position toggle stays on for templates.
+- **Fix**: People & links Position for `!IsEmployee` is a read-only caption (`FamilyMemberSponsorPositionCaption` / `FM_WezipesiTm`). Completeness uses that line, not a Position Relink. Auto-link and import pin skip Position on family members. Position tab lists employees only.
+- **Test**: `FamilyMemberSponsorPositionCaptionTests` + people-links completeness (18 passed in filter; issued-catalog 2 failures are MayProduce, unrelated).
+- **Prevent**: Do not pin the sponsor's EmployeePositionHistory onto the dependent. Do not turn RequirePersonPosition off on ForFamilyMember profiles.
+- **Officer**: stop F5, rebuild, Ctrl+F5. Mixed case: employee keeps Position 1; dependent shows the sponsor Wezipesi label.
+### 2026-09-11 — All profile templates include Address and Position
+
+- **Need**: Case workspace for Çakylygy üýtgetmek (3/-352) showed no Address of residence / Position tiles. Wizard Person data had those checkboxes off on a config-locked profile.
+- **Fix**: Calik `application-profile.calik-energi.json` sets `RequirePersonAddressOfResidence` and `RequirePersonPosition` true on all **36** templates. Tenant `ApplyRow` and type mapper force both. New `ApplicationProfile` defaults both on.
+- **Test**: `ApplicationProfileTenantCatalogAddressPositionTests` (+ travel catalog tests) passed.
+- **Prevent**: Do not leave Address/Position off in tenant JSON. Restart after rebuild so catalog sync writes locked profiles; Clone is not required.
+- **Cross-skill**: visa2026-lookup-data
 ### 2026-09-10 — F5 crash ValueManagerContext after emptying Resminamalar catalog
 
 - **Need**: After purging nested + shared templates, host start died: `The ValueManagerContext is not active` in `ApplicationProfileTemplate.OnSaving` during `ApplicationProfileSeedSync` (nested-template tenant JSON recreate).

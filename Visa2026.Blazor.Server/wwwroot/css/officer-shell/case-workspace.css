@@ -382,6 +382,22 @@ select.cw-summary-field__input option {
 .cw-link-tile__label { font-size: 0.76rem; color: var(--os-muted); }
 .cw-link-tile__count { font-size: 1.25rem; font-weight: 750; }
 .cw-link-tile__chev { color: #94a3b8; grid-row: 1 / span 2; }
+.cw-link-tile--caption {
+  cursor: default;
+  min-width: 220px;
+}
+.cw-link-tile--caption:hover { border-color: var(--os-line); background: #fff; }
+.cw-link-tile--caption .cw-link-tile__caption {
+  grid-column: 1 / -1;
+  font-size: 0.82rem;
+  font-weight: 650;
+  line-height: 1.35;
+  white-space: normal;
+  color: #0f172a;
+}
+.cw-link-tile--caption.is-empty:not(.cw-issued-tile) .cw-link-tile__caption {
+  color: #b91c1c;
+}
 .cw-linked-empty {
   margin: 0; padding: 12px 14px; border-radius: 10px; background: #f8fafc;
   border: 1px dashed #cbd5e1; color: var(--os-muted); font-size: 0.84rem; line-height: 1.45;
