@@ -2,6 +2,72 @@
 
 Append-only. Newest first under **## Entries**.
 
+### 2026-09-12 — Review could not add a placeholder on unidentified yellows
+
+- Need: After the searchable-picker change, cancel-visa sanaw Review row 4 stayed **Part**. Officer could not assign a library code to an unidentified yellow.
+- Cause: Native `<select>` was replaced with a custom list. That list only opened on focus and sat inside `overflow: auto`, so it never popped over the table. Unmapped rows also hid Add until the row was selected, so they showed **Part**.
+- Fix: Restore Filter + **Add placeholder…** `<select>` (browser list escapes overflow). Search still filters options (`education`, `speciality`). Unmapped unlocked rows always show Add. Education codes stay in the cancel-visa set.
+- Officer: Stop F5, rebuild, restart, hard-refresh Review. Unidentified yellows show **Add placeholder…**. Filter `education` / `EGLV` / `EGIN` / `EGSP`, then pick from Add.
+- Prevent: Do not replace the Review Add `<select>` with an in-cell custom dropdown.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-12 — Cancel-visa Review could not find education placeholders
+
+- Need: Wizany Ýatyrmak sanaw Review. Officer could not find education level / institution / specialty (`EGLV` / `EGIN` / `EGSP`). Typed in the native Add-placeholder `<select>`.
+- Cause: `PersonEducation` pack was gated by `AllowsPersonEducation && RequirePersonEducation`. Cancel-visa hides the People & links Education tile, so those codes were not in `PlaceholderSet.Allowed`. Native `<select>` typeahead only matches the start of `EGLV — Education level`, so typing `education` or `speciality` never hit the option text.
+- Fix: Always offer PersonEducation tokens for mapping. Hydrator fills `CurrentEducation` from a linked Education or `PersonCurrentItems.GetCurrentEducation`. Review picker is a searchable list (`education`, `speciality`→specialty, pack name). Do not turn the Education tile back on.
+- Officer: Stop F5, rebuild, restart, hard-refresh Review. Select the Hünäri/bilimi yellow. Search `education` / `EGLV` / `EGIN` / `EGSP` / `speciality`. Preview fills from the person’s current education even when Education is not linked.
+- Prevent: Do not hide catalog Education tokens when the People & links tile is off. Do not rely on native `<select>` search.
+- Cross-skill: visa2026-user-report-templates | visa2026-application-profile
+
+### 2026-09-12 — Cancel-visa Review 6/7 CVCNT sample stayed 1
+
+- Need: 9/-001. Two valid visas linked. Review placeholders 6 (`CVCNT`) and 7 (`CVCTX`) still showed sample `1` / `bir`. Preview printed `1 (bir)`.
+- Cause: Mapping was already CVCNT. Merge counted CurrentVisa + NextVisa (future start), not Last-N pins.
+- Fix: Merge count is distinct Visa resolved links (user-report-templates). Short codes unchanged. No Re-Approve.
+- Officer: Stop F5, rebuild, Preview Ýüztutma — `2 (iki)`.
+- Prevent: Do not remap CVCNT when the sample is wrong; fix the count.
+- Cross-skill: visa2026-user-report-templates | visa2026-resminamalar
+
+### 2026-09-11 — Cancel-visa letter visa count mapped to TPCNT
+
+- Need: Wizany Ýatyrmak cover letter. Yellow `1 (bir)` next to *daşary ýurt raýaty* is person count; the second `1 (bir)` next to *wizasy ýatyrmak* is visas to cancel. Scan always emitted TPCNT/TPCTX.
+- Cause: `CountWithWords` always mapped to TPCNT. Catalog had no CVCNT. Header merge dict omitted `CancelVisaCount` (property already existed on the instance). Duplicate-label clone copied the first TPCNT onto the second `1 (bir)`.
+- Fix: Catalog **CVCNT** / **CVCTX** → `CancelVisaCount` / `CancelVisaCountText`. Header dict + Enrich. Scan uses the window after each count (or following caption): *raýat* → TPCNT; *wiza*+*yatyr* → CVCNT. Do not clone TPCNT onto a visa-cancel nearby.
+- Verify: `Resolve_CancelVisaLetter_MapsPersonThenVisaCount`, isolated nearby tests, catalog RelatedBo, header dict keys.
+- Officer: Stop F5, rebuild, restart. Analyze the cancel-visa letter. Person `1 (bir)` → TPCNT/TPCTX. Visa `1 (bir)` → CVCNT/CVCTX. Preview should fill both from the case (visas = CurrentVisa + NextVisa per roster line).
+- Prevent: Do not treat every `N (words)` as person count. Do not add a second NotMapped property — `CancelVisaCount` already exists.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-11 — Passport-change sanaw Review/Preview only latest passport
+
+- Need: Case 5/-814 Wizany KP-i Täze Pasporta Geçirmek. Excel DAŞARY ÝURT RAÝATYNYŇ SANAWY has Kiçirak (previous booklet) then Täze (new). Preview filled only the last valid passport.
+- Steps attached: Review + Resminamalar Preview
+- Cause: Both yellow tables mapped to `PPN`. Excel generator expanded the first `{{#ds.rows}}` only; the second table was merged with `rowData: null`. Loop planner used the minimum yellow row. People & links already hydrates `CurrentPassport` + `PreviousPassport`.
+- Fix: Kiçirak Analyze → `PRPN` family. Merge expands both stacked tables; Kiçirak `{{.PPN}}` overlays previous booklet so already-approved files fill without Re-Approve. Close-marker rows that hold titles are stripped, not deleted.
+- Verify: `PassportChangeSanawSectionTests`, `ExcelReportPassportChangeSanawTests`, `Resolve_maps_kicirak_passport_column_to_previous_short_codes`, two-row loop planner. Filter passed 49.
+- Officer: Stop F5, rebuild, restart. Preview the same Excel. Kiçirak = old booklet, Täze = new. Link two passports on the person. New Analyze should show `PRPN` on Kiçirak.
+- Prevent: Do not remap `RPPN`. Do not delete the Täze title row as `{{/ds.rows}}`.
+- Cross-skill: visa2026-user-report-templates | visa2026-resminamalar
+
+### 2026-09-11 — Excel Review `#` squares sat at the page corner
+
+- Need: Case 3/-15202 Çakylygy üýtgetmek. Review of `Sanaw-cakylygy-uytgetmek.xlsx` put every numbered square at the top-left of the white PDF page, not on the yellow sanaw cells.
+- Steps attached: Review screenshot
+- Cause: Left pane is Excel→PDF + pdf.js. Marks were placed by matching sample text (`1`, `TUR`, dates) in page text. Short labels hit the first PDF text item at the origin. Excel cells also had `Box = FullPage` and no cell geometry in the overlay payload.
+- Fix: `ScanExcelPreviewMarkGeometry` maps each yellow cell onto the first-sheet used range. Review payload sends `l/t/w/h` (+ aspect). pdf.js (`?v=tasmarks4`) places those marks on the printed table cluster, or on a Fit-to-width page frame when text positions are junk. Word letters still use label match.
+- Verify: `ScanExcelPreviewMarkGeometryTests` (4). Full `TemplateScan` filter: 276 passed; 6 unrelated guessing tests already failing.
+- Prevent: Do not locate Excel Review marks by sample text.
+- Cross-skill: none
+
+### 2026-09-11 — Change-invitation letter Invitation group confirmed
+
+- Need: Çakylygy üýtgetmek Ýüztutma. Officer confirmed after rebuild.
+- Cause: Invitation number / dates were row-only (`INVN`) or missing (`INVS`, `INVE`).
+- Fix: Invitation group Header+Row codes. One invitation per case in the paragraph (`{{ds.INVN}}` `{{ds.INVS}}` `{{ds.INVE}}`). Several people on that invitation stay one letter.
+- Officer: Already verified. Review Add placeholder → **Invitation**.
+- Cross-skill: visa2026-user-report-templates | visa2026-resminamalar
+
 ### 2026-09-10 — Yuztutma catalog Preview repeated one page per person
 
 - Need: Case 9/-1444 Hasapdan Çykarmak. Resminamalar **This profile** Preview of **YUZTUTMA-HASAPDAN ÇYKARMAK** showed 3 identical letter pages (one per Cengiz / Mustafa / Izzet). Officer expected one letter for the template.

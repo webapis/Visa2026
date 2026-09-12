@@ -7,8 +7,8 @@ namespace Visa2026.Module.Services.TemplateConvert;
 
 /// <summary>
 /// Maps a placeholder pack to the profile toggle that decides whether the underlying record is
-/// collected at all. A token whose record the profile never collects can never be filled, so it must
-/// not be offered for mapping.
+/// collected at all. PersonEducation is always offered: Education lives on Person even when the
+/// People & links Education tile is hidden. Other packs stay gated so uncollectable tokens are not mapped.
 /// </summary>
 public static class ApplicationProfilePlaceholderPackMap
 {
@@ -21,7 +21,9 @@ public static class ApplicationProfilePlaceholderPackMap
             UserReportPlaceholderPack.Core => true,
             UserReportPlaceholderPack.PersonPassport => profile.RequirePersonPassport,
             UserReportPlaceholderPack.PersonVisa => profile.RequirePersonVisa,
-            UserReportPlaceholderPack.PersonEducation => profile.RequirePersonEducation,
+            // Education lives on Person. Cancel-visa hides the People & links tile
+            // (RequirePersonEducation / AllowsPersonEducation) but sanaw still maps EGLV/EGIN/EGSP.
+            UserReportPlaceholderPack.PersonEducation => true,
             UserReportPlaceholderPack.PersonAddressOfResidence => profile.RequirePersonAddressOfResidence,
             UserReportPlaceholderPack.PersonPosition => profile.RequirePersonPosition,
             UserReportPlaceholderPack.PersonSalary => profile.RequirePersonSalary,
@@ -30,7 +32,9 @@ public static class ApplicationProfilePlaceholderPackMap
             UserReportPlaceholderPack.PersonWorkPermitItem => profile.RequirePersonWorkPermitItem,
             UserReportPlaceholderPack.PersonBorderZoneItem => profile.RequirePersonBorderZoneItem,
             UserReportPlaceholderPack.PersonRejectionItem => profile.RequirePersonRejectionItem,
-            UserReportPlaceholderPack.PersonTravelHistory => profile.RequirePersonTravelHistory,
+            UserReportPlaceholderPack.PersonTravelHistory =>
+                ApplicationProfileTravelHistoryPolicy.AllowsPersonTravelHistory(profile)
+                && profile.RequirePersonTravelHistory,
             _ => false,
         };
     }

@@ -61,7 +61,8 @@ public static class ApplicationProfileInstancePersonPdfPackageLineHydrator
         AssignVisas(objectSpace, item, idsByKind);
         AssignInvitations(objectSpace, item, idsByKind);
         AssignWorkPermits(objectSpace, item, idsByKind);
-        item.CurrentEducation = First<Education>(objectSpace, idsByKind, ApplicationProfileInstancePersonLinkKind.Education);
+        item.CurrentEducation = First<Education>(objectSpace, idsByKind, ApplicationProfileInstancePersonLinkKind.Education)
+            ?? PersonCurrentItems.GetCurrentEducation(trackedPerson);
         item.CurrentAddressOfResidence = First<AddressOfResidence>(objectSpace, idsByKind, ApplicationProfileInstancePersonLinkKind.AddressOfResidence);
         item.CurrentPositionHistory = FamilyMemberSponsorPositionCaption.UsesSponsorPosition(trackedPerson)
             ? PersonCurrentItems.GetCurrentPositionHistory(trackedPerson.SponsoringEmployee)
@@ -101,6 +102,7 @@ public static class ApplicationProfileInstancePersonPdfPackageLineHydrator
             .ThenByDescending(v => v.ID)
             .ToList();
         item.CurrentVisa = visas.ElementAtOrDefault(0);
+        item.NextVisa = visas.ElementAtOrDefault(1);
     }
 
     private static void AssignInvitations(

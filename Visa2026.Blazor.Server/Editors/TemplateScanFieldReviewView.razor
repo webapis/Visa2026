@@ -42,11 +42,12 @@
                                 }
                                 <input class="tas-input tas-token-filter"
                                        type="search"
-                                       placeholder="Filter (VPLC, Visa, …)"
+                                       placeholder="Search EGLV, education, specialty…"
                                        value="@_choiceSearch"
+                                       @onfocus="() => OnChoiceFocusAsync(row)"
                                        @oninput="OnChoiceSearch" />
                                 <select class="tas-token-select"
-                                        @key="@(row.RowKey + "|" + (row.ProposedToken ?? string.Empty))"
+                                        @key="@(row.RowKey + "|" + (row.ProposedToken ?? string.Empty) + "|" + _choiceSearch)"
                                         disabled="@(!HasRemainingPlaceholders(row))"
                                         @onchange="e => OnPlaceholderAddedAsync(row, e)">
                                     <option value="">Add placeholder…</option>
@@ -464,7 +465,8 @@ else
         || (string.Equals(SelectedFieldId, row.ParentFieldId, StringComparison.Ordinal)
             && row.PartIndex <= 1);
 
-    private bool CanRemap(FieldRow row) => IsSelected(row) && !row.IsGap && !row.IsLocked;
+    private bool CanRemap(FieldRow row) =>
+        !row.IsLocked && !row.IsGap && (IsSelected(row) || row.ShortCodes.Count == 0);
 
     private IReadOnlyList<string> OccupiedShortCodes(FieldRow row) =>
         row.ParentShortCodes.Count > 0 ? row.ParentShortCodes : row.ShortCodes;
@@ -479,6 +481,11 @@ else
 
     private void OnChoiceSearch(ChangeEventArgs e) =>
         _choiceSearch = e.Value?.ToString() ?? string.Empty;
+
+    private Task OnChoiceFocusAsync(FieldRow row) =>
+        string.Equals(SelectedFieldId, row.RowKey, StringComparison.Ordinal)
+            ? Task.CompletedTask
+            : SelectRow(row.RowKey);
 
     private Task OnPlaceholderAddedAsync(FieldRow row, ChangeEventArgs e)
     {

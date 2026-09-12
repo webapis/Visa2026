@@ -43,14 +43,34 @@ public static class ScanPlaceholderChoiceList
         if (term.Length == 0)
             return true;
 
-        return Contains(entry.ShortCode, term)
-            || Contains(entry.CanonicalPath, term)
-            || Contains(entry.LabelEn, term)
-            || Contains(entry.LabelTk, term)
-            || Contains(entry.LabelRu, term)
-            || Contains(entry.LabelTr, term)
-            || Contains(entry.RelatedBo.ToString(), term)
-            || Contains(UserReportPlaceholderRelatedBoCatalog.DisplayNameEn(entry.RelatedBo), term);
+        foreach (var variant in ExpandTerms(term))
+        {
+            if (MatchesFields(entry, variant))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static bool MatchesFields(UserReportPlaceholderCatalogEntry entry, string term) =>
+        Contains(entry.ShortCode, term)
+        || Contains(entry.CanonicalPath, term)
+        || Contains(entry.LabelEn, term)
+        || Contains(entry.LabelTk, term)
+        || Contains(entry.LabelRu, term)
+        || Contains(entry.LabelTr, term)
+        || Contains(entry.ExampleValue, term)
+        || Contains(entry.Pack.ToString(), term)
+        || Contains(entry.RelatedBo.ToString(), term)
+        || Contains(UserReportPlaceholderRelatedBoCatalog.DisplayNameEn(entry.RelatedBo), term);
+
+    private static IEnumerable<string> ExpandTerms(string term)
+    {
+        yield return term;
+        if (term.Contains("speciality", StringComparison.OrdinalIgnoreCase))
+            yield return term.Replace("speciality", "specialty", StringComparison.OrdinalIgnoreCase);
+        if (term.Contains("specialities", StringComparison.OrdinalIgnoreCase))
+            yield return term.Replace("specialities", "specialties", StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool Contains(string? value, string term) =>

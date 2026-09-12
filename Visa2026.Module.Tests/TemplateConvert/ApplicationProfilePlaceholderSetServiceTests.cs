@@ -282,4 +282,18 @@ public class ApplicationProfilePlaceholderSetServiceTests
 
         Assert.False(GetSet(profile).Contains("{{.VNUM}}"));
     }
+
+    [Fact]
+    public void Visa_cancellation_still_allows_person_education_tokens()
+    {
+        var profile = FullProfile();
+        profile.Code = "cancel_visa";
+        profile.CancelVisas = true;
+        profile.RequirePersonEducation = false;
+
+        var set = GetSet(profile, ApplicationProfileTemplateDataScope.Both, ApplicationProfileTemplateKind.Excel);
+        Assert.True(Allows(set, "EGLV"));
+        Assert.True(Allows(set, "EGIN"));
+        Assert.True(Allows(set, "EGSP"));
+    }
 }

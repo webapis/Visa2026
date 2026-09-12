@@ -56,6 +56,51 @@ public class ScanPlaceholderChoiceListTests
     }
 
     [Fact]
+    public void Education_search_keeps_level_institution_and_specialty()
+    {
+        var allowed = FullSet().Allowed;
+        var groups = ScanPlaceholderChoiceList.RemainingGroups(
+            allowed,
+            hideShortCodes: Array.Empty<string>(),
+            search: "education");
+        var education = Assert.Single(groups, g => g.RelatedBo == UserReportPlaceholderRelatedBo.Education);
+        var codes = education.Entries.Select(e => e.ShortCode).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        Assert.Contains("EGLV", codes);
+        Assert.Contains("EGIN", codes);
+        Assert.Contains("EGSP", codes);
+    }
+
+    [Theory]
+    [InlineData("speciality")]
+    [InlineData("specialty")]
+    [InlineData("institution")]
+    [InlineData("education level")]
+    [InlineData("PersonEducation")]
+    [InlineData("EGLV")]
+    public void Education_search_aliases_find_catalog_codes(string search)
+    {
+        var allowed = FullSet().Allowed;
+        var codes = ScanPlaceholderChoiceList.RemainingGroups(allowed, hideShortCodes: Array.Empty<string>(), search)
+            .SelectMany(static g => g.Entries)
+            .Select(static e => e.ShortCode)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        Assert.NotEmpty(codes);
+        if (search.Contains("special", StringComparison.OrdinalIgnoreCase))
+            Assert.Contains("EGSP", codes);
+        else if (search.Contains("institution", StringComparison.OrdinalIgnoreCase))
+            Assert.Contains("EGIN", codes);
+        else if (search.Contains("level", StringComparison.OrdinalIgnoreCase) || search.Equals("EGLV", StringComparison.OrdinalIgnoreCase))
+            Assert.Contains("EGLV", codes);
+        else
+        {
+            Assert.Contains("EGLV", codes);
+            Assert.Contains("EGIN", codes);
+            Assert.Contains("EGSP", codes);
+        }
+    }
+
+    [Fact]
     public void Travel_history_search_matches_group_display_name()
     {
         var allowed = FullSet().Allowed;
