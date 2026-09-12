@@ -42,7 +42,7 @@
                                 }
                                 <input class="tas-input tas-token-filter"
                                        type="search"
-                                       placeholder="Search EGLV, education, specialty…"
+                                       placeholder="Search PBPL, birth place, Doglan…"
                                        value="@_choiceSearch"
                                        @onfocus="() => OnChoiceFocusAsync(row)"
                                        @oninput="OnChoiceSearch" />
@@ -56,7 +56,7 @@
                                         <optgroup label="@UserReportPlaceholderRelatedBoCatalog.DisplayNameEn(group.RelatedBo)">
                                             @foreach (var entry in group.Entries)
                                             {
-                                                <option value="@entry.ShortCode">@entry.ShortCode — @entry.LabelEn</option>
+                                                <option value="@entry.ShortCode">@entry.LabelEn — @entry.ShortCode (@entry.CanonicalPath)</option>
                                             }
                                         </optgroup>
                                     }
@@ -466,7 +466,7 @@ else
             && row.PartIndex <= 1);
 
     private bool CanRemap(FieldRow row) =>
-        !row.IsLocked && !row.IsGap && (IsSelected(row) || row.ShortCodes.Count == 0);
+        !row.IsLocked && (IsSelected(row) || row.ShortCodes.Count == 0 || row.IsGap);
 
     private IReadOnlyList<string> OccupiedShortCodes(FieldRow row) =>
         row.ParentShortCodes.Count > 0 ? row.ParentShortCodes : row.ShortCodes;

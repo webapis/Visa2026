@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.EFCore;
 using DevExpress.Persistent.BaseImpl.EF;
+using Microsoft.EntityFrameworkCore;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.MigrationImport;
 
@@ -35,7 +37,9 @@ public static class ApplicationProfileInstancePersonResolver
         if (ApplicationProfileInstancePersonRosterLockHelper.AreResolvedLinksLocked(trackedApplication))
             return;
 
-        var existing = LoadLinks(objectSpace, trackedApplication.ID, trackedPerson.ID);
+        EnsureApplicationProfileLoaded(objectSpace, trackedApplication);
+
+        var existing = LoadLinks(objectSpace, trackedApplication, trackedPerson.ID);
         ApplicationProfileInstanceChildMembership.SyncFromResolvedLinks(objectSpace, trackedApplication, existing);
         // Import pins PersonInApplication snapshots (Passport/Visa/WorkPermitItem). Do not attach
         // today's PersonCurrentItems / latest-N onto historical application types.
@@ -54,6 +58,47 @@ public static class ApplicationProfileInstancePersonResolver
         }
     }
 
+    /// <summary>
+    /// Instance <see cref="ApplicationProfileInstance.ApplicationProfile"/> uses a backing field,
+    /// so a fresh ObjectSpace GetObjectByKey often leaves Last-N at the default of 1.
+    /// Loads the profile from the shadow FK — does not ReloadObject the instance
+    /// (that would drop an in-memory People add on first Link).
+    /// </summary>
+    public static bool EnsureApplicationProfileLoaded(
+        IObjectSpace? objectSpace,
+        ApplicationProfileInstance? application)
+    {
+        if (application?.ApplicationProfile != null)
+            return true;
+        if (objectSpace == null || application == null)
+            return false;
+
+        var profileId = TryGetApplicationProfileId(objectSpace, application);
+        if (profileId is not Guid id || id == Guid.Empty)
+            return false;
+
+        application.ApplicationProfile = objectSpace.GetObjectByKey<ApplicationProfile>(id);
+        return application.ApplicationProfile != null;
+    }
+
+    public static Guid? TryGetApplicationProfileId(
+        IObjectSpace? objectSpace,
+        ApplicationProfileInstance? application)
+    {
+        if (application?.ApplicationProfile != null)
+            return application.ApplicationProfile.ID;
+        if (objectSpace is not EFCoreObjectSpace { DbContext: { } db } || application == null)
+            return null;
+
+        var entry = db.Entry(application);
+        if (entry.State == EntityState.Detached)
+            return null;
+
+        var property = entry.Properties.FirstOrDefault(p =>
+            string.Equals(p.Metadata.Name, "ApplicationProfileID", StringComparison.OrdinalIgnoreCase));
+        return property?.CurrentValue is Guid id && id != Guid.Empty ? id : null;
+    }
+
     public static IList<ApplicationProfileInstancePersonResolvedLink> LoadLinks(
         IObjectSpace objectSpace,
         Guid applicationId,
@@ -62,9 +107,97 @@ public static class ApplicationProfileInstancePersonResolver
         if (objectSpace == null || applicationId == Guid.Empty || personId == Guid.Empty)
             return [];
 
-        return objectSpace.GetObjectsQuery<ApplicationProfileInstancePersonResolvedLink>()
-            .Where(l => l.ApplicationProfileInstanceId == applicationId && l.PersonId == personId)
-            .ToList();
+        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
+        return LoadLinks(objectSpace, application, personId);
+    }
+
+    public static IList<ApplicationProfileInstancePersonResolvedLink> LoadLinks(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance? application,
+        Guid personId)
+    {
+        if (objectSpace == null || personId == Guid.Empty)
+            return [];
+
+        var applicationId = application?.ID ?? Guid.Empty;
+        var fromQuery = applicationId == Guid.Empty
+            ? []
+            : objectSpace.GetObjectsQuery<ApplicationProfileInstancePersonResolvedLink>()
+                .Where(l => l.ApplicationProfileInstanceId == applicationId && l.PersonId == personId)
+                .ToList();
+
+        return MergeTrackedLinks(fromQuery, application, personId);
+    }
+
+    /// <summary>
+    /// Relink creates links in-memory before Commit. The query does not see those rows yet,
+    /// so a second Ensure would pin the same visa twice.
+    /// </summary>
+    public static IList<ApplicationProfileInstancePersonResolvedLink> MergeTrackedLinks(
+        IEnumerable<ApplicationProfileInstancePersonResolvedLink>? fromQuery,
+        ApplicationProfileInstance? application,
+        Guid personId)
+    {
+        var links = (fromQuery ?? []).Where(l => l != null).ToList();
+        if (application?.PersonResolvedLinks == null || personId == Guid.Empty)
+            return links;
+
+        foreach (var link in application.PersonResolvedLinks)
+        {
+            if (link == null || !BelongsToPerson(link, personId))
+                continue;
+            if (links.Any(l => SameResolvedLink(l, link)))
+                continue;
+            links.Add(link);
+        }
+
+        return links;
+    }
+
+    public static int RemoveDuplicateResolvedLinks(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance application,
+        Person person)
+    {
+        if (objectSpace == null || application == null || person == null || person.ID == Guid.Empty)
+            return 0;
+
+        var links = LoadLinks(objectSpace, application, person.ID);
+        var seen = new HashSet<(ApplicationProfileInstancePersonLinkKind Kind, Guid LinkedObjectId)>();
+        var removed = 0;
+        foreach (var link in links)
+        {
+            if (link.LinkKind is not { } kind
+                || link.LinkedObjectId is not Guid linkedId
+                || linkedId == Guid.Empty)
+                continue;
+
+            if (seen.Add((kind, linkedId)))
+                continue;
+
+            application.PersonResolvedLinks?.Remove(link);
+            objectSpace.Delete(link);
+            removed++;
+        }
+
+        return removed;
+    }
+
+    private static bool BelongsToPerson(ApplicationProfileInstancePersonResolvedLink link, Guid personId) =>
+        link.PersonId == personId || link.Person?.ID == personId;
+
+    private static bool SameResolvedLink(
+        ApplicationProfileInstancePersonResolvedLink left,
+        ApplicationProfileInstancePersonResolvedLink right)
+    {
+        if (ReferenceEquals(left, right))
+            return true;
+        if (left.ID != Guid.Empty && left.ID == right.ID)
+            return true;
+        return left.LinkKind == right.LinkKind
+            && left.LinkedObjectId is Guid leftId
+            && right.LinkedObjectId == leftId
+            && leftId != Guid.Empty;
     }
 
     /// <summary>
@@ -242,7 +375,7 @@ public static class ApplicationProfileInstancePersonResolver
         if (ApplicationProfileInstancePersonRosterLockHelper.AreResolvedLinksLocked(trackedApplication))
             return;
 
-        var existing = LoadLinks(objectSpace, trackedApplication.ID, trackedPerson.ID);
+        var existing = LoadLinks(objectSpace, trackedApplication, trackedPerson.ID);
         var lastCount = ApplicationProfilePersonLastCount.For(trackedApplication, kind);
         if (lastCount <= 0)
             return;
@@ -275,10 +408,14 @@ public static class ApplicationProfileInstancePersonResolver
         var rows = new List<(ApplicationProfileInstancePersonLinkKind Kind, object? Entity)>();
         AddRange(rows, ApplicationProfileInstancePersonLinkKind.Passport,
             ApplicationProfileInstancePersonValidItems.ResolvePassports(
-                person, ApplicationProfilePersonLastCount.For(application, ApplicationProfileInstancePersonLinkKind.Passport)));
+                objectSpace,
+                person,
+                ApplicationProfilePersonLastCount.For(application, ApplicationProfileInstancePersonLinkKind.Passport)));
         AddRange(rows, ApplicationProfileInstancePersonLinkKind.Visa,
             ApplicationProfileInstancePersonValidItems.ResolveVisas(
-                person, ApplicationProfilePersonLastCount.For(application, ApplicationProfileInstancePersonLinkKind.Visa)));
+                objectSpace,
+                person,
+                ApplicationProfilePersonLastCount.For(application, ApplicationProfileInstancePersonLinkKind.Visa)));
         rows.Add((ApplicationProfileInstancePersonLinkKind.Education, ApplicationProfileInstancePersonValidItems.ResolveEducation(person)));
         rows.Add((ApplicationProfileInstancePersonLinkKind.AddressOfResidence, ApplicationProfileInstancePersonValidItems.ResolveAddress(person)));
         if (person.IsEmployee)
@@ -290,10 +427,14 @@ public static class ApplicationProfileInstancePersonResolver
         rows.Add((ApplicationProfileInstancePersonLinkKind.MedicalRecord, ApplicationProfileInstancePersonValidItems.ResolveMedical(person)));
         AddRange(rows, ApplicationProfileInstancePersonLinkKind.InvitationItem,
             ApplicationProfileInstancePersonValidItems.ResolveInvitationItems(
-                person, ApplicationProfilePersonLastCount.For(application, ApplicationProfileInstancePersonLinkKind.InvitationItem)));
+                objectSpace,
+                person,
+                ApplicationProfilePersonLastCount.For(application, ApplicationProfileInstancePersonLinkKind.InvitationItem)));
         AddRange(rows, ApplicationProfileInstancePersonLinkKind.WorkPermitItem,
             ApplicationProfileInstancePersonValidItems.ResolveWorkPermitItems(
-                person, ApplicationProfilePersonLastCount.For(application, ApplicationProfileInstancePersonLinkKind.WorkPermitItem)));
+                objectSpace,
+                person,
+                ApplicationProfilePersonLastCount.For(application, ApplicationProfileInstancePersonLinkKind.WorkPermitItem)));
         AddRange(rows, ApplicationProfileInstancePersonLinkKind.BorderZoneItem,
             ApplicationProfileInstancePersonValidItems.ResolveBorderZoneItems(
                 objectSpace,

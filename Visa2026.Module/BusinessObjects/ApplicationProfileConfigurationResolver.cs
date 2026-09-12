@@ -285,17 +285,22 @@ public static class ApplicationProfileConfigurationResolver
     public static bool ShowCurrentMedicalRecord(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequirePersonMedical, t => t.ShowCurrentMedicalRecord);
 
-    public static bool ShowCurrentEducation(ApplicationProfileInstance? application) =>
-        Resolve(application, p => p.RequirePersonEducation, t => t.ShowCurrentEducation);
+    public static bool ShowCurrentEducation(ApplicationProfileInstance? application)
+    {
+        if (!ApplicationProfileEducationPolicy.AllowsPersonEducation(application?.ApplicationProfile))
+            return false;
+
+        return Resolve(application, p => p.RequirePersonEducation, t => t.ShowCurrentEducation);
+    }
 
     /// <summary>Profile-only (no Type Show*); gates BorderZoneItem auto-link.</summary>
     public static bool RequirePersonBorderZoneItem(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequirePersonBorderZoneItem, _ => false);
 
-    /// <summary>Profile-only (no Type Show*); gates TravelHistory auto-link. Business-trip profiles never require this.</summary>
+    /// <summary>Profile-only (no Type Show*); gates TravelHistory auto-link. Business-trip and invitation templates never require this.</summary>
     public static bool RequirePersonTravelHistory(ApplicationProfileInstance? application)
     {
-        if (application?.ApplicationProfile is { ActionFamily: ApplicationProfileActionFamily.BusinessTrip })
+        if (!ApplicationProfileTravelHistoryPolicy.AllowsPersonTravelHistory(application?.ApplicationProfile))
             return false;
 
         return Resolve(application, p => p.RequirePersonTravelHistory, _ => false);

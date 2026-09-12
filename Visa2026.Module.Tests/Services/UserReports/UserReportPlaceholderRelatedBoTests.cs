@@ -10,6 +10,24 @@ namespace Visa2026.Module.Tests.Services.UserReports;
 
 public class UserReportPlaceholderRelatedBoTests
 {
+    [Theory]
+    [InlineData("CVCNT", "CancelVisaCount")]
+    [InlineData("CVCTX", "CancelVisaCountText")]
+    [InlineData("CWCNT", "CancelWPCount")]
+    [InlineData("CWCTX", "CancelWPCountText")]
+    public void Cancel_document_count_tokens_are_catalogued(string shortCode, string canonical)
+    {
+        var catalog = new UserReportPlaceholderCatalogService();
+        var entry = catalog.GetEntries().Single(e =>
+            string.Equals(e.ShortCode, shortCode, StringComparison.OrdinalIgnoreCase));
+
+        Assert.Equal(canonical, entry.CanonicalPath);
+        Assert.Equal(UserReportPlaceholderPack.Core, entry.Pack);
+        Assert.Equal(UserReportPlaceholderRelatedBo.Application, entry.RelatedBo);
+        Assert.Equal(UserReportPlaceholderScope.Header, entry.Scope);
+        Assert.Equal("{{ds." + shortCode + "}}", entry.BuildWordToken(UserReportPlaceholderScope.Header));
+    }
+
     [Fact]
     public void Catalog_assigns_a_known_related_bo_to_every_entry()
     {
@@ -27,6 +45,13 @@ public class UserReportPlaceholderRelatedBoTests
     [InlineData("PPAT", "Passport_Authority")]
     [InlineData("PPCC", "Passport_CountryCode")]
     [InlineData("PPCT", "Passport_CountryTm")]
+    [InlineData("PRPN", "PreviousPassport_Number")]
+    [InlineData("PRIS", "PreviousPassport_IssueDateText")]
+    [InlineData("PRED", "PreviousPassport_ExpirationDateText")]
+    [InlineData("PRTP", "PreviousPassport_TypeTm")]
+    [InlineData("PRAT", "PreviousPassport_Authority")]
+    [InlineData("PRCC", "PreviousPassport_CountryCode")]
+    [InlineData("PRCT", "PreviousPassport_CountryTm")]
     public void Passport_tokens_are_catalogued(string shortCode, string canonical)
     {
         var catalog = new UserReportPlaceholderCatalogService();
@@ -135,6 +160,9 @@ public class UserReportPlaceholderRelatedBoTests
         var codes = passport.Entries.Select(e => e.ShortCode).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         Assert.Contains("PPN", codes);
+        Assert.Contains("PRPN", codes);
+        Assert.Contains("PRIS", codes);
+        Assert.Contains("PRED", codes);
         Assert.Contains("PPTP", codes);
         Assert.Contains("PPAT", codes);
         Assert.Contains("PPCC", codes);
@@ -160,6 +188,64 @@ public class UserReportPlaceholderRelatedBoTests
         Assert.Contains("CHPD", codes);
         Assert.Contains("CHPE", codes);
         Assert.DoesNotContain(signatory.Entries, e => e.RelatedBo != UserReportPlaceholderRelatedBo.CompanySignatory);
+    }
+
+    [Theory]
+    [InlineData("CWNB", "CancelWorkPermit_NumberBlock")]
+    [InlineData("CWSB", "CancelWorkPermit_StartDateBlock")]
+    [InlineData("CWEB", "CancelWorkPermit_ExpirationDateBlock")]
+    public void Cancel_work_permit_block_tokens_are_catalogued(string shortCode, string canonical)
+    {
+        var catalog = new UserReportPlaceholderCatalogService();
+        var entry = catalog.GetEntries().Single(e =>
+            string.Equals(e.ShortCode, shortCode, StringComparison.OrdinalIgnoreCase));
+
+        Assert.Equal(canonical, entry.CanonicalPath);
+        Assert.Equal(UserReportPlaceholderPack.PersonWorkPermitItem, entry.Pack);
+        Assert.Equal(UserReportPlaceholderRelatedBo.WorkPermit, entry.RelatedBo);
+        Assert.Contains(UserReportBoType.ApplicationProfileInstance, entry.RootBoTypes);
+        Assert.Contains(UserReportBoType.ApplicationItem, entry.RootBoTypes);
+        Assert.NotNull(typeof(ApplicationRosterMergeLine).GetProperty(
+            canonical, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase));
+    }
+
+    [Theory]
+    [InlineData("INVN", "Invitation_Number")]
+    [InlineData("INVS", "Invitation_StartDateText")]
+    [InlineData("INVE", "Invitation_ExpirationDateText")]
+    public void Invitation_tokens_are_catalogued(string shortCode, string canonical)
+    {
+        var catalog = new UserReportPlaceholderCatalogService();
+        var entry = catalog.GetEntries().Single(e =>
+            string.Equals(e.ShortCode, shortCode, StringComparison.OrdinalIgnoreCase));
+
+        Assert.Equal(canonical, entry.CanonicalPath);
+        Assert.Equal(UserReportPlaceholderPack.PersonInvitationItem, entry.Pack);
+        Assert.Equal(UserReportPlaceholderRelatedBo.Invitation, entry.RelatedBo);
+        Assert.Equal(UserReportPlaceholderScope.Both, entry.Scope);
+        Assert.Equal("{{ds." + shortCode + "}}", entry.BuildWordToken(UserReportPlaceholderScope.Header));
+        Assert.Equal("{{." + shortCode + "}}", entry.BuildWordToken(UserReportPlaceholderScope.Row));
+        Assert.Contains(UserReportBoType.ApplicationProfileInstance, entry.RootBoTypes);
+        Assert.Contains(UserReportBoType.ApplicationItem, entry.RootBoTypes);
+
+        var flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase;
+        Assert.NotNull(typeof(ApplicationRosterMergeLine).GetProperty(canonical, flags));
+        Assert.NotNull(typeof(ApplicationProfileInstance).GetProperty(canonical, flags));
+    }
+
+    [Fact]
+    public void Grouped_manual_puts_invitation_codes_together()
+    {
+        var catalog = new UserReportPlaceholderCatalogService();
+        var groups = catalog.GetGroupedEntries();
+        var invitation = groups.Single(g => g.RelatedBo == UserReportPlaceholderRelatedBo.Invitation);
+        var codes = invitation.Entries.Select(e => e.ShortCode).ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        Assert.Equal("Invitation", UserReportPlaceholderRelatedBoCatalog.DisplayNameEn(invitation.RelatedBo));
+        Assert.Contains("INVN", codes);
+        Assert.Contains("INVS", codes);
+        Assert.Contains("INVE", codes);
+        Assert.DoesNotContain(invitation.Entries, e => e.RelatedBo != UserReportPlaceholderRelatedBo.Invitation);
     }
 
     [Fact]

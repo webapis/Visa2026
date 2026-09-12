@@ -46,7 +46,8 @@ public static class ScanYellowHighlightTokenResolver
         int pageIndex,
         ApplicationProfilePlaceholderSet placeholderSet,
         HashSet<string> usedShortCodes,
-        DocumentRegion? sourceRegion = null)
+        DocumentRegion? sourceRegion = null,
+        string? nearbyLabel = null)
     {
         ArgumentNullException.ThrowIfNull(placeholderSet);
         ArgumentNullException.ThrowIfNull(usedShortCodes);
@@ -60,7 +61,7 @@ public static class ScanYellowHighlightTokenResolver
             return Array.Empty<ScanDetectedFieldDraft>();
 
         var drafts = new List<ScanDetectedFieldDraft>();
-        var candidates = ExtractCandidates(text).ToList();
+        var candidates = ExtractCandidates(text, nearbyLabel).ToList();
         foreach (var (snippet, code, index, length) in candidates)
         {
             if (string.IsNullOrWhiteSpace(snippet) || !placeholderSet.Contains(code))
@@ -119,7 +120,8 @@ public static class ScanYellowHighlightTokenResolver
     public static bool IsYellowTextFullyMapped(
         string? yellowText,
         ApplicationProfilePlaceholderSet placeholderSet,
-        IReadOnlyCollection<string> usedShortCodes)
+        IReadOnlyCollection<string> usedShortCodes,
+        string? nearbyLabel = null)
     {
         ArgumentNullException.ThrowIfNull(placeholderSet);
         ArgumentNullException.ThrowIfNull(usedShortCodes);
@@ -128,7 +130,7 @@ public static class ScanYellowHighlightTokenResolver
         if (text.Length == 0)
             return false;
 
-        var codes = ExtractCandidates(text)
+        var codes = ExtractCandidates(text, nearbyLabel)
             .Select(static c => c.ShortCode)
             .Where(placeholderSet.Contains)
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -163,7 +165,9 @@ public static class ScanYellowHighlightTokenResolver
         return new ScanBoundingBox(box.Left, top, box.Right, bottom).Clamp();
     }
 
-    private static IEnumerable<(string Snippet, string ShortCode, int Index, int Length)> ExtractCandidates(string text)
+    private static IEnumerable<(string Snippet, string ShortCode, int Index, int Length)> ExtractCandidates(
+        string text,
+        string? nearbyLabel = null)
     {
         foreach (Match m in Urgency.Matches(text))
             yield return (m.Value, "Urgency_NameTm", m.Index, m.Length);
@@ -187,14 +191,28 @@ public static class ScanYellowHighlightTokenResolver
             yield return (m.Value, "ADAT", m.Index, m.Length);
         }
 
+        var pairedCount = false;
         foreach (Match m in CountWithWords.Matches(text))
         {
             var after = text[(m.Index + m.Length)..];
             if (after.TrimStart().StartsWith("aý", StringComparison.OrdinalIgnoreCase))
                 continue;
 
-            yield return (m.Groups[1].Value, "TPCNT", m.Groups[1].Index, m.Groups[1].Length);
-            yield return (m.Groups[2].Value.Trim(), "TPCTX", m.Groups[2].Index, m.Groups[2].Length);
+            pairedCount = true;
+            var context = string.IsNullOrWhiteSpace(after) ? nearbyLabel : after;
+            var (countCode, wordsCode) = ScanOfficialLetterHints.ResolveCountTokenCodes(context);
+
+            yield return (m.Groups[1].Value, countCode, m.Groups[1].Index, m.Groups[1].Length);
+            yield return (m.Groups[2].Value.Trim(), wordsCode, m.Groups[2].Index, m.Groups[2].Length);
+        }
+
+        if (!pairedCount && ScanOfficialLetterHints.LooksLikeCountContext(nearbyLabel))
+        {
+            var (countCode, wordsCode) = ScanOfficialLetterHints.ResolveCountTokenCodes(nearbyLabel);
+            if (TryIsolatedCountDigit(text, out var digit, out var digitIndex, out var digitLength))
+                yield return (digit, countCode, digitIndex, digitLength);
+            else if (TryIsolatedCountWords(text, out var words, out var wordsIndex, out var wordsLength))
+                yield return (words, wordsCode, wordsIndex, wordsLength);
         }
 
         foreach (Match m in VisaPeriod.Matches(text))
@@ -202,5 +220,55 @@ public static class ScanYellowHighlightTokenResolver
 
         foreach (Match m in VisaCategory.Matches(text))
             yield return (m.Value.Trim(), "VCAT", m.Index, m.Length);
+    }
+
+    private static readonly HashSet<string> FoldedCountWords = new(StringComparer.Ordinal)
+    {
+        "nol", "bir", "iki", "uc", "dort", "bas", "alty", "yedi", "sekiz", "dokuz",
+        "on", "on bir", "on iki", "on uc", "on dort", "on bas", "on alty", "on yedi",
+        "on sekiz", "on dokuz",
+        "yigrimi", "otuz", "kyrk", "elli", "altmys", "yetmis", "segsen", "togsan",
+    };
+
+    private static readonly Regex IsolatedCountDigit = new(
+        @"^\s*(\d{1,3})\s*$",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+    private static bool TryIsolatedCountDigit(string text, out string digit, out int index, out int length)
+    {
+        var match = IsolatedCountDigit.Match(text);
+        if (!match.Success)
+        {
+            digit = string.Empty;
+            index = 0;
+            length = 0;
+            return false;
+        }
+
+        digit = match.Groups[1].Value;
+        index = match.Groups[1].Index;
+        length = match.Groups[1].Length;
+        return true;
+    }
+
+    private static bool TryIsolatedCountWords(string text, out string words, out int index, out int length)
+    {
+        words = string.Empty;
+        index = 0;
+        length = 0;
+        var inner = text.Trim().Trim('(', ')').Trim();
+        if (inner.Length == 0)
+            return false;
+
+        var folded = TemplateTextNormalizer.NormalizeFolded(inner);
+        if (!FoldedCountWords.Contains(folded))
+            return false;
+
+        index = text.IndexOf(inner, StringComparison.Ordinal);
+        if (index < 0)
+            index = 0;
+        length = inner.Length;
+        words = inner;
+        return true;
     }
 }

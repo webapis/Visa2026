@@ -142,6 +142,14 @@ flowchart LR
 | Template overview lists Approval legs catalog | Removed — shared catalog, not profile config | **Choose Approval legs** (pick / Catalog / Make default) |
 | Can leave Overview with empty Case summary | Office preparation + red tiles | `ApplicationWorkspaceCaseSummaryCompletenessGate`; People & links stay open |
 | People & links zeros look like filled tiles | Short tiles red; nav red count or green check | `ApplicationWorkspacePeopleLinksCompleteness`; `cw-link-tile.is-empty` |
+| Cancel-visa People & links Education is red 0 | Education is off for `cancel_visa` / `cancel_visa_wp`. Restart after rebuild so catalog sync writes the locked template | Tenant JSON + `ApplicationProfileEducationPolicy` |
+| Cancel-visa People & links Travel history is red 0 | Travel history is off for `cancel_visa` / `cancel_visa_wp`. Restart after rebuild so catalog sync writes the locked template | Tenant JSON + `ApplicationProfileTravelHistoryPolicy` |
+| Cancel-visa People & links shows only one of two valid visas | Wizany Ýatyrmak `cancel_visa` Visa Last **2** (same as `cancel_visa_wp`). Last-N is a ceiling — one visa stays 1/1. Restart, Relink | `PersonVisaLastCount` + Calik Last-N seeds |
+| Cancel visa+WP People & links Work permit 1/2 with two valid WPs | `cancel_visa_wp` / `cancel_workpermit` / `cancel_invitation_wp` WP Last **2** (ceiling). Restart, Relink — do not Unlink first | `PersonWorkPermitItemLastCount` + Calik Last-N seeds |
+| Relink shows the same visa twice / Visa 3/2 | Refresh then Ensure did not see in-memory links. Restart, Relink once — duplicates are deleted | `MergeTrackedLinks` + `RemoveDuplicateResolvedLinks` |
+| Unlink then Relink only one of two valid visas (1/2) | Tile counts visas from the DB; Relink used `Passport.Visas` in memory (often current only). Restart, Relink — no Unlink needed | `ResolveVisas(IObjectSpace, …)` |
+| Link existing pins only one visa; Relink then makes 2/2 | First Link only Refresh'd the picker person. Restart, Link again — both valid visas should appear without Relink | `LinkPerson` → `RelinkPerson` + profile Last-N load |
+| Unlink then Link existing fails “saving entity changes” | Soft-deleted ResolvedLinks occupied the unique index. Restart after rebuild so the GCRecord-filtered index heals. Then Link again | `ApplicationProfileInstancePersonResolvedLink` unique + unlink |
 | Overview silent when Case summary has empty required fields | Empty tiles already red; Overview nav was blank | `ResolveOverviewNav` / `MissingRequiredCount`; same red-count / green-check as People |
 
 ---
@@ -206,7 +214,7 @@ Use when user asks *how should I configure this profile?* — tailor to **Action
 - **Address of residence** and **Position** (`EmployeePositionHistory`) — on for **every** template (including business trip). Calik tenant catalog + `ApplyRow` / type mapper force both flags; People & links shows the tiles. Config lock does not block this seed sync.
 - **Registration** profiles also never use **Urgency**.
 - Turn on **Education** when templates use that `{{…}}` pack or readiness checks need it.
-- **TravelHistory** — on for every family **except Business trip** (hard-hidden). Calik tenant catalog sets `RequirePersonTravelHistory` true on all other profiles; People & links shows the Travel history tile.
+- **TravelHistory** — on for Registration / visa / WP / border-zone families. **Hard-hidden** on **Business trip**, **Invitation** templates (produce, change, or cancel invitation — e.g. `get_invitation*`, `change_invitation`, `cancel_invitation*`), and **visa-document cancellation** (`cancel_visa` / `cancel_visa_wp`). `cancel_visa_ext` stays on. Calik tenant catalog + `ApplyRow` / type mapper force the flag; People & links hides the Travel history tile.
 - Before publish: if nested template references a person pack, corresponding `RequirePerson*` should be on (plan §2.5 recommendation).
 
 ### Per-Application defaults

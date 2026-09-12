@@ -210,6 +210,8 @@ public static class ScanFieldBoxLocalizer
 
         return Pair(ca, cb, "AFNUM", "ADAT")
                || Pair(ca, cb, "TPCNT", "TPCTX")
+               || Pair(ca, cb, "CVCNT", "CVCTX")
+               || Pair(ca, cb, "CWCNT", "CWCTX")
                || Pair(ca, cb, "VPER", "VCAT");
     }
 
@@ -277,6 +279,10 @@ public static class ScanFieldBoxLocalizer
             "URGENCY_NAMETM" => 30,
             "TPCNT" => 40,
             "TPCTX" => 50,
+            "CVCNT" => 52,
+            "CVCTX" => 54,
+            "CWCNT" => 56,
+            "CWCTX" => 58,
             "VPER" => 60,
             "VCAT" => 70,
             _ => 400,

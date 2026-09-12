@@ -38,7 +38,7 @@ public sealed class ApplicationWordReportPackageCatalogEntry
 
     public Guid? ApplicationProfileTemplateId { get; init; }
 
-    /// <summary>Officer-created this-profile nested row — catalog Delete moves it to Recycle Bin.</summary>
+    /// <summary>Officer Word/Excel nested row (this-profile or Shared) — catalog Delete moves it to Recycle Bin.</summary>
     public bool CanMoveToRecycleBin { get; init; }
 
     public DateTime? CreatedOnUtc { get; init; }
@@ -127,11 +127,12 @@ public sealed class ApplicationWordReportPackageCatalogService
         if (ApplicationProfileNestedTemplateCatalogHelper.UsesProfileNestedCatalog(application, objectSpace))
         {
             entries.AddRange(BuildProfileNestedEntries(objectSpace, application, selectedItems));
+            var recycleBin = BuildRecycleBinEntries(objectSpace, application).ToList();
             return new ApplicationWordReportPackageCatalog
             {
                 Entries = entries,
-                RecycleBinEntries = BuildRecycleBinEntries(objectSpace, application).ToList(),
-                SharedEntries = BuildSharedLibraryEntries(objectSpace, entries),
+                RecycleBinEntries = recycleBin,
+                SharedEntries = BuildSharedLibraryEntries(objectSpace, entries, recycleBin),
                 HasProfileNestedCatalog = true,
             };
         }
@@ -251,11 +252,18 @@ public sealed class ApplicationWordReportPackageCatalogService
 
     private IReadOnlyList<ApplicationWordReportPackageCatalogEntry> BuildSharedLibraryEntries(
         IObjectSpace objectSpace,
-        IReadOnlyList<ApplicationWordReportPackageCatalogEntry> thisProfileEntries)
+        IReadOnlyList<ApplicationWordReportPackageCatalogEntry> thisProfileEntries,
+        IReadOnlyList<ApplicationWordReportPackageCatalogEntry> recycleBinEntries)
     {
         var sharedRows = ApplicationProfileWizardTemplateCatalog.Build(objectSpace).Shared;
         if (sharedRows.Count == 0)
             return Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+
+        var recycledNames = new HashSet<string>(
+            (recycleBinEntries ?? Array.Empty<ApplicationWordReportPackageCatalogEntry>())
+                .Select(entry => entry.DisplayName)
+                .Where(name => !string.IsNullOrWhiteSpace(name)),
+            StringComparer.OrdinalIgnoreCase);
 
         var includedByName = thisProfileEntries
             .Where(entry => entry.ShowsSharedChip)
@@ -265,6 +273,9 @@ public sealed class ApplicationWordReportPackageCatalogService
         var list = new List<ApplicationWordReportPackageCatalogEntry>(sharedRows.Count);
         foreach (var row in sharedRows)
         {
+            if (recycledNames.Contains(row.Name))
+                continue;
+
             if (includedByName.TryGetValue(row.Name, out var included))
             {
                 list.Add(included);

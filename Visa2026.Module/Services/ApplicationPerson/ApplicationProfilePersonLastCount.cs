@@ -38,7 +38,9 @@ public static class ApplicationProfilePersonLastCount
             ApplicationProfileInstancePersonLinkKind.BorderZoneItem =>
                 profile.RequirePersonBorderZoneItem ? Clamp(profile.PersonBorderZoneItemLastCount) : 0,
             ApplicationProfileInstancePersonLinkKind.Education =>
-                profile.RequirePersonEducation ? Default : 0,
+                ApplicationProfileEducationPolicy.AllowsPersonEducation(profile) && profile.RequirePersonEducation
+                    ? Default
+                    : 0,
             ApplicationProfileInstancePersonLinkKind.AddressOfResidence =>
                 profile.RequirePersonAddressOfResidence ? Default : 0,
             ApplicationProfileInstancePersonLinkKind.Position =>

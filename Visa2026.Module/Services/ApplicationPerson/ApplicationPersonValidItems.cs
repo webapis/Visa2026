@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
+using DevExpress.Persistent.BaseImpl.EF;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.MigrationImport;
 
@@ -83,10 +84,17 @@ public static class ApplicationProfileInstancePersonValidItems
     public static Passport? ResolvePassport(Person? person, DateTime? asOf = null) =>
         ResolvePassports(person, 1, asOf).FirstOrDefault();
 
-    public static IReadOnlyList<Passport> ResolvePassports(Person? person, int lastCount, DateTime? asOf = null)
+    public static IReadOnlyList<Passport> ResolvePassports(Person? person, int lastCount, DateTime? asOf = null) =>
+        ResolvePassports(objectSpace: null, person, lastCount, asOf);
+
+    public static IReadOnlyList<Passport> ResolvePassports(
+        IObjectSpace? objectSpace,
+        Person? person,
+        int lastCount,
+        DateTime? asOf = null)
     {
         lastCount = ApplicationProfilePersonLastCount.Clamp(lastCount);
-        if (person?.Passports == null)
+        if (person == null)
             return [];
 
         if (!EnforceOfficerLinkValidity && lastCount == 1)
@@ -95,7 +103,9 @@ public static class ApplicationProfileInstancePersonValidItems
             return current == null ? [] : [current];
         }
 
-        return person.Passports
+        return UnionDistinctById(
+                QueryPassportsForPerson(objectSpace, person.ID),
+                person.Passports)
             .Where(p => CanLinkPassport(p, asOf))
             .OrderByDescending(p => p.IssueDate ?? DateTime.MinValue)
             .ThenByDescending(p => p.ID)
@@ -106,10 +116,17 @@ public static class ApplicationProfileInstancePersonValidItems
     public static Visa? ResolveVisa(Person? person, DateTime? asOf = null) =>
         ResolveVisas(person, 1, asOf).FirstOrDefault();
 
-    public static IReadOnlyList<Visa> ResolveVisas(Person? person, int lastCount, DateTime? asOf = null)
+    public static IReadOnlyList<Visa> ResolveVisas(Person? person, int lastCount, DateTime? asOf = null) =>
+        ResolveVisas(objectSpace: null, person, lastCount, asOf);
+
+    public static IReadOnlyList<Visa> ResolveVisas(
+        IObjectSpace? objectSpace,
+        Person? person,
+        int lastCount,
+        DateTime? asOf = null)
     {
         lastCount = ApplicationProfilePersonLastCount.Clamp(lastCount);
-        if (person?.Passports == null)
+        if (person == null)
             return [];
 
         if (!EnforceOfficerLinkValidity && lastCount == 1)
@@ -118,9 +135,9 @@ public static class ApplicationProfileInstancePersonValidItems
             return current == null ? [] : [current];
         }
 
-        IEnumerable<Visa> query = person.Passports
-            .Where(p => p != null)
-            .SelectMany(p => p.Visas ?? Array.Empty<Visa>());
+        IEnumerable<Visa> query = UnionDistinctById(
+            QueryVisasForPerson(objectSpace, person.ID),
+            person.Passports?.Where(p => p != null).SelectMany(p => p.Visas ?? Array.Empty<Visa>()));
         if (EnforceOfficerLinkValidity)
             query = query.Where(v => CanLinkVisa(v, asOf));
 
@@ -159,10 +176,17 @@ public static class ApplicationProfileInstancePersonValidItems
     public static InvitationItem? ResolveInvitationItem(Person? person, DateTime? asOf = null) =>
         ResolveInvitationItems(person, 1, asOf).FirstOrDefault();
 
-    public static IReadOnlyList<InvitationItem> ResolveInvitationItems(Person? person, int lastCount, DateTime? asOf = null)
+    public static IReadOnlyList<InvitationItem> ResolveInvitationItems(Person? person, int lastCount, DateTime? asOf = null) =>
+        ResolveInvitationItems(objectSpace: null, person, lastCount, asOf);
+
+    public static IReadOnlyList<InvitationItem> ResolveInvitationItems(
+        IObjectSpace? objectSpace,
+        Person? person,
+        int lastCount,
+        DateTime? asOf = null)
     {
         lastCount = ApplicationProfilePersonLastCount.Clamp(lastCount);
-        if (person?.InvitationItems == null)
+        if (person == null)
             return [];
 
         if (!EnforceOfficerLinkValidity && lastCount == 1)
@@ -171,7 +195,9 @@ public static class ApplicationProfileInstancePersonValidItems
             return current == null ? [] : [current];
         }
 
-        IEnumerable<InvitationItem> query = person.InvitationItems.Where(i => i != null);
+        IEnumerable<InvitationItem> query = UnionDistinctById(
+            QueryInvitationItemsForPerson(objectSpace, person.ID),
+            person.InvitationItems);
         if (EnforceOfficerLinkValidity)
             query = query.Where(i => CanLinkInvitationItem(i, asOf));
 
@@ -185,10 +211,17 @@ public static class ApplicationProfileInstancePersonValidItems
     public static WorkPermitItem? ResolveWorkPermitItem(Person? person, DateTime? asOf = null) =>
         ResolveWorkPermitItems(person, 1, asOf).FirstOrDefault();
 
-    public static IReadOnlyList<WorkPermitItem> ResolveWorkPermitItems(Person? person, int lastCount, DateTime? asOf = null)
+    public static IReadOnlyList<WorkPermitItem> ResolveWorkPermitItems(Person? person, int lastCount, DateTime? asOf = null) =>
+        ResolveWorkPermitItems(objectSpace: null, person, lastCount, asOf);
+
+    public static IReadOnlyList<WorkPermitItem> ResolveWorkPermitItems(
+        IObjectSpace? objectSpace,
+        Person? person,
+        int lastCount,
+        DateTime? asOf = null)
     {
         lastCount = ApplicationProfilePersonLastCount.Clamp(lastCount);
-        if (person?.WorkPermitItems == null)
+        if (person == null)
             return [];
 
         if (!EnforceOfficerLinkValidity && lastCount == 1)
@@ -197,7 +230,9 @@ public static class ApplicationProfileInstancePersonValidItems
             return current == null ? [] : [current];
         }
 
-        IEnumerable<WorkPermitItem> query = person.WorkPermitItems.Where(w => w != null);
+        IEnumerable<WorkPermitItem> query = UnionDistinctById(
+            QueryWorkPermitItemsForPerson(objectSpace, person.ID),
+            person.WorkPermitItems);
         if (EnforceOfficerLinkValidity)
             query = query.Where(w => CanLinkWorkPermitItem(w, asOf));
 
@@ -253,6 +288,76 @@ public static class ApplicationProfileInstancePersonValidItems
             .OrderByDescending(t => t.TravelDate.Date)
             .ThenByDescending(t => t.ID)
             .FirstOrDefault();
+    }
+
+    /// <summary>
+    /// Relink / Link often has only the current visa on <see cref="Person.Passports"/>.
+    /// People &amp; links expected counts query the Visa table; auto-link must do the same.
+    /// </summary>
+    public static IReadOnlyList<T> UnionDistinctById<T>(
+        IEnumerable<T>? primary,
+        IEnumerable<T>? secondary)
+        where T : BaseObject
+    {
+        var rows = new List<T>();
+        var seen = new HashSet<Guid>();
+        foreach (var item in (primary ?? []).Concat(secondary ?? []))
+        {
+            if (item == null)
+                continue;
+            if (item.ID != Guid.Empty && !seen.Add(item.ID))
+                continue;
+            rows.Add(item);
+        }
+
+        return rows;
+    }
+
+    private static IReadOnlyList<Passport> QueryPassportsForPerson(IObjectSpace? objectSpace, Guid personId)
+    {
+        if (objectSpace == null || personId == Guid.Empty)
+            return [];
+
+        return objectSpace.GetObjectsQuery<Passport>()
+            .Where(p => p.Person != null && p.Person.ID == personId)
+            .ToList();
+    }
+
+    private static IReadOnlyList<Visa> QueryVisasForPerson(IObjectSpace? objectSpace, Guid personId)
+    {
+        if (objectSpace == null || personId == Guid.Empty)
+            return [];
+
+        var passportIds = objectSpace.GetObjectsQuery<Passport>()
+            .Where(p => p.Person != null && p.Person.ID == personId)
+            .Select(p => p.ID)
+            .ToList();
+        if (passportIds.Count == 0)
+            return [];
+
+        return objectSpace.GetObjectsQuery<Visa>()
+            .Where(v => v.Passport != null && passportIds.Contains(v.Passport.ID))
+            .ToList();
+    }
+
+    private static IReadOnlyList<InvitationItem> QueryInvitationItemsForPerson(IObjectSpace? objectSpace, Guid personId)
+    {
+        if (objectSpace == null || personId == Guid.Empty)
+            return [];
+
+        return objectSpace.GetObjectsQuery<InvitationItem>()
+            .Where(i => i.Person != null && i.Person.ID == personId)
+            .ToList();
+    }
+
+    private static IReadOnlyList<WorkPermitItem> QueryWorkPermitItemsForPerson(IObjectSpace? objectSpace, Guid personId)
+    {
+        if (objectSpace == null || personId == Guid.Empty)
+            return [];
+
+        return objectSpace.GetObjectsQuery<WorkPermitItem>()
+            .Where(w => w.Person != null && w.Person.ID == personId)
+            .ToList();
     }
 
     private static DateTime AsOfDate(DateTime? asOf) => (asOf ?? DateTime.Today).Date;

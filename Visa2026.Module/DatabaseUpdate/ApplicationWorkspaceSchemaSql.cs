@@ -47,7 +47,8 @@ public static class ApplicationWorkspaceSchemaSql
                     FOREIGN KEY ("PersonId") REFERENCES "People" ("ID") ON DELETE RESTRICT
             );
             CREATE UNIQUE INDEX "IX_ApplicationProfileInstancePersonResolvedLinks_Instance_Person_Kind_Object"
-                ON "ApplicationProfileInstancePersonResolvedLinks" ("ApplicationProfileInstanceId", "PersonId", "LinkKind", "LinkedObjectId");
+                ON "ApplicationProfileInstancePersonResolvedLinks" ("ApplicationProfileInstanceId", "PersonId", "LinkKind", "LinkedObjectId")
+                WHERE "GCRecord" IS NULL;
           END IF;
         END $$;
         """;
@@ -88,12 +89,14 @@ public static class ApplicationWorkspaceSchemaSql
                     FOREIGN KEY (PersonId) REFERENCES dbo.People(ID)
             );
             CREATE UNIQUE INDEX IX_ApplicationProfileInstancePersonResolvedLinks_Instance_Person_Kind_Object
-                ON dbo.ApplicationProfileInstancePersonResolvedLinks (ApplicationProfileInstanceId, PersonId, LinkKind, LinkedObjectId);
+                ON dbo.ApplicationProfileInstancePersonResolvedLinks (ApplicationProfileInstanceId, PersonId, LinkKind, LinkedObjectId)
+                WHERE [GCRecord] IS NULL;
         END;
         """;
 
     /// <summary>
-    /// Allow more than one ResolvedLink of the same kind per person (Last 2/3 passports, invitations).
+    /// Last-N links share a kind; unique key includes LinkedObjectId.
+    /// Filter GCRecord so unlink (deferred delete) does not block relink.
     /// </summary>
     internal const string HealResolvedLinksUniqueIndexPostgres = """
         DO $$
@@ -103,10 +106,12 @@ public static class ApplicationWorkspaceSchemaSql
           END IF;
 
           DROP INDEX IF EXISTS "IX_ApplicationProfileInstancePersonResolvedLinks_Instance_Person_Kind";
+          DROP INDEX IF EXISTS "IX_ApplicationProfileInstancePersonResolvedLinks_Instance_Person_Kind_Object";
 
-          CREATE UNIQUE INDEX IF NOT EXISTS "IX_ApplicationProfileInstancePersonResolvedLinks_Instance_Person_Kind_Object"
+          CREATE UNIQUE INDEX "IX_ApplicationProfileInstancePersonResolvedLinks_Instance_Person_Kind_Object"
             ON "ApplicationProfileInstancePersonResolvedLinks"
-            ("ApplicationProfileInstanceId", "PersonId", "LinkKind", "LinkedObjectId");
+            ("ApplicationProfileInstanceId", "PersonId", "LinkKind", "LinkedObjectId")
+            WHERE "GCRecord" IS NULL;
         END $$;
         """;
 

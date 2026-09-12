@@ -159,6 +159,19 @@ public class ScanYellowMarkContextBuilderTests
     }
 
     [Fact]
+    public void Word_keeps_letter_text_after_split_count_yellow()
+    {
+        var after = ScanYellowMarkContextBuilder.ExtractFollowingCaption(
+            "we 3 (üç) sany iş rugsatnamasyny ýatyrmagyňyzy haýyş edýäris.",
+            yellowStart: "we ".Length,
+            yellowLength: 1,
+            nextParagraph: null);
+
+        Assert.Contains("iş rugsatnamasyny", after, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("ýatyrmagyňyzy", after, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void Excel_includes_sheet_name_and_header_row()
     {
         using var ms = new MemoryStream();

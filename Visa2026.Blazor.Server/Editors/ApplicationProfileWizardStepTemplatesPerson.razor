@@ -20,7 +20,10 @@
                     </select>
                 }
             </div>
-            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonEducation" disabled="@Disabled" /> Education</label>
+            @if (ShowEducationToggle)
+            {
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonEducation" disabled="@Disabled" /> Education</label>
+            }
             <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonPosition" disabled="@Disabled" /> Position</label>
             <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonAddressOfResidence" disabled="@Disabled" /> Address of residence</label>
             <div class="ap-wizard__choice-cluster">
@@ -70,7 +73,7 @@
             <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonSalary" disabled="@Disabled" /> Salary</label>
             <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonMedical" disabled="@Disabled" /> Medical</label>
             <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonRejectionItem" disabled="@Disabled" /> Rejection item</label>
-            @if (!IsBusinessTripProfile)
+            @if (ShowTravelHistoryToggle)
             {
                 <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonTravelHistory" disabled="@Disabled" /> Travel history</label>
             }
@@ -84,10 +87,15 @@
 
     protected override void OnParametersSet()
     {
-        if (IsBusinessTripProfile && Profile.RequirePersonTravelHistory)
+        if (!ShowTravelHistoryToggle && Profile.RequirePersonTravelHistory)
             Profile.RequirePersonTravelHistory = false;
+        if (!ShowEducationToggle && Profile.RequirePersonEducation)
+            Profile.RequirePersonEducation = false;
     }
 
-    private bool IsBusinessTripProfile =>
-        Profile.ActionFamily == ApplicationProfileActionFamily.BusinessTrip;
+    private bool ShowTravelHistoryToggle =>
+        ApplicationProfileTravelHistoryPolicy.AllowsPersonTravelHistory(Profile);
+
+    private bool ShowEducationToggle =>
+        ApplicationProfileEducationPolicy.AllowsPersonEducation(Profile);
 }

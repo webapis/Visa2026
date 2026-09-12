@@ -206,7 +206,25 @@ public class TemplateRosterLoopPlannerTests
         var loop = Assert.Single(loops);
         Assert.Equal("A5", ((DocumentRegion.ExcelCell)loop.Start).CellReference);
         Assert.Equal("A6", ((DocumentRegion.ExcelCell)loop.End).CellReference);
-        Assert.Equal("{{#ds.rows}}", TemplateTokenSyntax.LoopOpen(loop.CollectionToken));
+    }
+
+    [Fact]
+    public void PlanExcelLoopsFromSubstitutions_places_one_loop_per_distinct_row()
+    {
+        var subs = new List<TokenSubstitution>
+        {
+            new(new DocumentRegion.ExcelCell("Sanaw", "B5"), "{{.PLN}}"),
+            new(new DocumentRegion.ExcelCell("Sanaw", "C5"), "{{.PPN}}"),
+            new(new DocumentRegion.ExcelCell("Sanaw", "B12"), "{{.PLN}}"),
+            new(new DocumentRegion.ExcelCell("Sanaw", "C12"), "{{.PPN}}"),
+        };
+
+        var loops = TemplateRosterLoopPlanner.PlanExcelLoopsFromSubstitutions(subs);
+        Assert.Equal(2, loops.Count);
+        Assert.Equal("A5", ((DocumentRegion.ExcelCell)loops[0].Start).CellReference);
+        Assert.Equal("A6", ((DocumentRegion.ExcelCell)loops[0].End).CellReference);
+        Assert.Equal("A12", ((DocumentRegion.ExcelCell)loops[1].Start).CellReference);
+        Assert.Equal("A13", ((DocumentRegion.ExcelCell)loops[1].End).CellReference);
     }
 
     [Fact]

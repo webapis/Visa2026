@@ -112,9 +112,176 @@ function ensureLayer(pageDiv) {
     return layer;
 }
 
-function placeMarks(entries, marks, dotnetRef) {
+function appendMark(pageDiv, mark, box, dotnetRef) {
+    const layer = ensureLayer(pageDiv);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = mark.isGap ? "tas-pdf-mark tas-pdf-mark--gap" : "tas-pdf-mark";
+    button.dataset.fieldId = mark.fieldId || "";
+    button.style.left = box.left + "px";
+    button.style.top = box.top + "px";
+    button.style.width = box.width + "px";
+    button.style.height = box.height + "px";
+    button.title = (mark.order || "") + " " + (mark.label || "");
+    const badge = document.createElement("span");
+    badge.className = "tas-mark__n";
+    badge.textContent = String(mark.order || "");
+    button.appendChild(badge);
+    if (dotnetRef) {
+        button.addEventListener("click", function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            dotnetRef.invokeMethodAsync("OnMarkActivate", mark.fieldId);
+        });
+    }
+    layer.appendChild(button);
+}
+
+function pageSize(pageDiv, viewport) {
+    return {
+        width: parseFloat(pageDiv.style.width) || (viewport && viewport.width) || 0,
+        height: parseFloat(pageDiv.style.height) || (viewport && viewport.height) || 0
+    };
+}
+
+function groupPages(entries) {
+    const pages = [];
+    const seen = [];
+    for (let i = 0; i < entries.length; i++) {
+        const pageDiv = entries[i].pageDiv;
+        if (seen.indexOf(pageDiv) >= 0) {
+            continue;
+        }
+        seen.push(pageDiv);
+        const items = entries.filter(function (entry) {
+            return entry.pageDiv === pageDiv;
+        });
+        pages.push({
+            pageDiv: pageDiv,
+            viewport: entries[i].viewport,
+            items: items
+        });
+    }
+    return pages;
+}
+
+function contentCluster(items, viewport, pageW, pageH) {
+    const rects = [];
+    for (let i = 0; i < items.length; i++) {
+        const rect = itemRect(items[i].item, viewport);
+        if (rect.width < 2 && rect.height < 2) {
+            continue;
+        }
+        if (rect.left < 2 && rect.top < 2 && rect.width < 16 && rect.height < 16) {
+            continue;
+        }
+        rects.push(rect);
+    }
+    if (rects.length < 2) {
+        return null;
+    }
+    const box = unionRects(rects);
+    if (box.width < pageW * 0.18 || box.height < 12) {
+        return null;
+    }
+    if (box.left < 1 && box.top < 1 && box.width < pageW * 0.2) {
+        return null;
+    }
+    return box;
+}
+
+function printableFrame(pageW, pageH, aspect) {
+    const landscape = pageW > pageH;
+    const left = landscape ? pageW * 0.06 : pageW * 0.085;
+    const top = landscape ? pageH * 0.09 : pageH * 0.064;
+    const width = Math.max(pageW - left * 2, pageW * 0.7);
+    const height = Math.min(Math.max(width * Math.max(aspect, 0.08), 20), pageH - top * 1.4);
+    return { left: left, top: top, width: width, height: height };
+}
+
+function excelFrames(entries, aspect, pages) {
+    const source = pages && pages.length ? pages : groupPages(entries);
+    if (!source.length) {
+        return [];
+    }
+
+    const frames = [];
+    for (let i = 0; i < source.length; i++) {
+        const page = source[i];
+        const items = page.items || entries.filter(function (entry) {
+            return entry.pageDiv === page.pageDiv;
+        });
+        const size = pageSize(page.pageDiv, page.viewport);
+        const cluster = contentCluster(items, page.viewport, size.width, size.height);
+        const fallback = printableFrame(size.width, size.height, aspect || 0.28);
+        const useCluster = cluster
+            && !(aspect > 0 && aspect < 0.7 && cluster.height > size.height * 0.75);
+        frames.push({
+            pageDiv: page.pageDiv,
+            frame: useCluster ? cluster : fallback
+        });
+    }
+    return frames;
+}
+
+function hasExcelBox(mark) {
+    return mark
+        && typeof mark.l === "number"
+        && typeof mark.t === "number"
+        && typeof mark.w === "number"
+        && typeof mark.h === "number";
+}
+
+function placeExcelMark(mark, frames, dotnetRef) {
+    if (!frames.length) {
+        return false;
+    }
+
+    const totalH = frames.reduce(function (sum, item) {
+        return sum + item.frame.height;
+    }, 0);
+    if (totalH <= 0) {
+        return false;
+    }
+
+    const y = (mark.t / 100) * totalH;
+    let acc = 0;
+    let target = frames[0];
+    let localY = y;
+    for (let i = 0; i < frames.length; i++) {
+        const next = acc + frames[i].frame.height;
+        if (y < next || i === frames.length - 1) {
+            target = frames[i];
+            localY = Math.max(0, y - acc);
+            break;
+        }
+        acc = next;
+    }
+
+    const width = target.frame.width;
+    appendMark(target.pageDiv, mark, {
+        left: target.frame.left + (mark.l / 100) * width,
+        top: target.frame.top + localY,
+        width: Math.max((mark.w / 100) * width, 16),
+        height: Math.max((mark.h / 100) * totalH, 14)
+    }, dotnetRef);
+    return true;
+}
+
+function placeMarks(entries, marks, dotnetRef, pages) {
+    const excelAspect = marks.reduce(function (value, mark) {
+        return typeof mark.aspect === "number" && mark.aspect > 0 ? mark.aspect : value;
+    }, 0);
+    const frames = excelAspect > 0 || marks.some(hasExcelBox)
+        ? excelFrames(entries, excelAspect, pages)
+        : [];
+
     let next = 0;
     for (const mark of marks) {
+        if (hasExcelBox(mark) && placeExcelMark(mark, frames, dotnetRef)) {
+            continue;
+        }
+
         const hit = findLabelSpan(entries, mark.label, next);
         if (!hit) {
             continue;
@@ -126,31 +293,9 @@ function placeMarks(entries, marks, dotnetRef) {
         const samePage = slice.filter(function (entry) {
             return entry.pageDiv === pageDiv;
         });
-        const box = unionRects(samePage.map(function (entry) {
+        appendMark(pageDiv, mark, unionRects(samePage.map(function (entry) {
             return itemRect(entry.item, viewport);
-        }));
-        const layer = ensureLayer(pageDiv);
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = mark.isGap ? "tas-pdf-mark tas-pdf-mark--gap" : "tas-pdf-mark";
-        button.dataset.fieldId = mark.fieldId || "";
-        button.style.left = box.left + "px";
-        button.style.top = box.top + "px";
-        button.style.width = box.width + "px";
-        button.style.height = box.height + "px";
-        button.title = (mark.order || "") + " " + (mark.label || "");
-        const badge = document.createElement("span");
-        badge.className = "tas-mark__n";
-        badge.textContent = String(mark.order || "");
-        button.appendChild(badge);
-        if (dotnetRef) {
-            button.addEventListener("click", function (event) {
-                event.preventDefault();
-                event.stopPropagation();
-                dotnetRef.invokeMethodAsync("OnMarkActivate", mark.fieldId);
-            });
-        }
-        layer.appendChild(button);
+        })), dotnetRef);
     }
 }
 
@@ -175,11 +320,12 @@ async function render(container, pdfBytes, marks, dotnetRef) {
 
     await destroyHost(container);
     const loadingTask = getDocument({ data: toUint8(pdfBytes) });
-    hosts.set(container, { loadingTask: loadingTask, entries: [] });
+    hosts.set(container, { loadingTask: loadingTask, entries: [], pages: [] });
     const pdf = await loadingTask.promise;
     const widthPx = Math.max(await waitWidth(container) - 24, 280);
     const list = Array.isArray(marks) ? marks : [];
     const entries = [];
+    const pages = [];
 
     for (let n = 1; n <= pdf.numPages; n++) {
         const page = await pdf.getPage(n);
@@ -215,10 +361,13 @@ async function render(container, pdfBytes, marks, dotnetRef) {
         for (let i = 0; i < items.length; i++) {
             entries.push({ item: items[i], pageDiv: pageDiv, viewport: viewport });
         }
+        pages.push({ pageDiv: pageDiv, viewport: viewport, items: entries.filter(function (entry) {
+            return entry.pageDiv === pageDiv;
+        }) });
     }
 
-    hosts.set(container, { loadingTask: loadingTask, entries: entries });
-    placeMarks(entries, list, dotnetRef);
+    hosts.set(container, { loadingTask: loadingTask, entries: entries, pages: pages });
+    placeMarks(entries, list, dotnetRef, pages);
 }
 
 function updateMarks(container, marks, dotnetRef) {
@@ -230,7 +379,7 @@ function updateMarks(container, marks, dotnetRef) {
     container.querySelectorAll(".tas-pdf-marks").forEach(function (layer) {
         layer.replaceChildren();
     });
-    placeMarks(prev.entries, Array.isArray(marks) ? marks : [], dotnetRef);
+    placeMarks(prev.entries, Array.isArray(marks) ? marks : [], dotnetRef, prev.pages);
 }
 
 function fieldMatches(fid, id) {

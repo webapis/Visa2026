@@ -25,6 +25,26 @@ Purpose: **catalog, seed gate, batch worker, preview, permissions, dialog UX** �
 
 ## Entries
 
+### 2026-09-12 — Cancel-visa Ýüztutma Preview 1 (bir) with two linked visas (Application)
+
+- **Symptom**: 9/-001 Serdar. People & links Visa 2/2. Ýüztutma Preview and Review 6/7 still `1 (bir)`.
+- **Try**: Preview Ýüztutma after Last-N visas are linked.
+- **Test**: `ApplicationProfileInstanceCancelCountsTests`.
+- **Root cause**: CVCNT used CurrentVisa + NextVisa (future start). Both visas already started.
+- **Fix**: Count distinct Visa resolved links. Hydrator also sets NextVisa from the second pin.
+- **Prevent**: Do not reuse NextVisa as the cancel-visa count after Last-N.
+- **Cross-skill**: user-report-templates
+
+### 2026-09-11 — Shared templates Recycle Bin like this-profile (Application)
+
+- **Symptom**: Case 1/-59 Hasaba alysy uzaltmak. This profile showed SANAW / FORMA 16 / YUZTUTMA as SHARED with no trash; only the extra this-profile YUZTUTMA had Move to Recycle Bin.
+- **Try**: Resminamalar gear on; trash on SHARED This-profile rows and Shared-tab ON rows.
+- **Test**: `ApplicationProfileTemplateRecycleBinTests` (Category/Global can recycle; unique Shared purge may drop the linked user template).
+- **Root cause**: `CanMoveToRecycleBin` allowed only `ProfileSpecific`. Shared nested includes could only be toggled OFF (hard delete). Shared tab had no recycle button.
+- **Fix**: Recycle Bin accepts any live Word/Excel nested row. Shared tab shows the same trash when details are on. Recycled names leave Shared until Restore (Include restores the recycled row). Purge deletes the linked `UserReportTemplate` when the name is unused.
+- **Prevent**: Do not treat Shared includes as undeletable seeds. Toggle OFF remains exclude; trash is Recycle Bin.
+- **Cross-skill**: application-profile
+
 ### 2026-09-10 — Cover letter Preview one page per person (Application)
 
 - **Symptom**: Yuztutma Hasapdan Çykarmak catalog Preview on case 9/-1444 was three identical letter pages (roster of three). One template should be one letter.

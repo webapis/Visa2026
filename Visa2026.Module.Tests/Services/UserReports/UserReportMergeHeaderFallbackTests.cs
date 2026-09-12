@@ -25,6 +25,31 @@ public class UserReportMergeHeaderFallbackTests
             "Dowlet migrasiya gullugy",
             UserReportMergeDataHelper.GetPropertyValueFromItemOrApplication(line, "MSRV"));
         Assert.Equal(0, Assert.IsType<int>(UserReportMergeDataHelper.GetPropertyValueFromItemOrApplication(line, "TPCNT")));
+        Assert.Equal(0, Assert.IsType<int>(UserReportMergeDataHelper.GetPropertyValueFromItemOrApplication(line, "CVCNT")));
+        Assert.Equal(0, Assert.IsType<int>(UserReportMergeDataHelper.GetPropertyValueFromItemOrApplication(line, "CWCNT")));
+    }
+
+    [Fact]
+    public void Header_dictionary_includes_invitation_short_codes()
+    {
+        var invitation = new Invitation
+        {
+            InvitationNumber = "COO02058777",
+            IssuedDate = new DateTime(2026, 3, 2),
+            ExpirationDate = new DateTime(2026, 6, 30),
+        };
+        var application = new ApplicationProfileInstance();
+        application.InvitationItems.Add(new InvitationItem { Invitation = invitation });
+        application.InvitationItems.Add(new InvitationItem { Invitation = invitation });
+
+        var data = UserReportMergeDataHelper.BuildApplicationHeaderDictionary(application);
+
+        Assert.Equal("COO02058777", data["Invitation_Number"]);
+        Assert.Equal("02.03.2026", data["Invitation_StartDateText"]);
+        Assert.Equal("30.06.2026", data["Invitation_ExpirationDateText"]);
+        Assert.Equal("COO02058777", data["INVN"]);
+        Assert.Equal("02.03.2026", data["INVS"]);
+        Assert.Equal("30.06.2026", data["INVE"]);
     }
 
     [Fact]

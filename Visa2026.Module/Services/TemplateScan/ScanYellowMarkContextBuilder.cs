@@ -244,7 +244,16 @@ public static class ScanYellowMarkContextBuilder
                 : combined + " " + nextParagraph.Trim();
         }
 
-        return ScanFormCaptionHints.ExtractParentheticalList(combined);
+        var list = ScanFormCaptionHints.ExtractParentheticalList(combined);
+        if (!string.IsNullOrWhiteSpace(list))
+            return list;
+
+        var raw = combined.Trim();
+        if (raw.Length == 0)
+            return null;
+        if (raw.Length > 240)
+            raw = raw[..240].Trim();
+        return raw;
     }
 
     /// <summary>

@@ -36,6 +36,12 @@ public class Visa2026DbContextModelTests
         Assert.NotNull(resolved.FindProperty(nameof(ApplicationProfileInstancePersonResolvedLink.PersonId)));
         Assert.Null(resolved.FindProperty("ApplicationProfileInstancePersonId"));
 
+        var unique = Assert.Single(
+            resolved.GetIndexes(),
+            i => i.GetDatabaseName() == "IX_ApplicationProfileInstancePersonResolvedLinks_Instance_Person_Kind_Object");
+        Assert.True(unique.IsUnique);
+        Assert.Contains("GCRecord", unique.GetFilter() ?? string.Empty, StringComparison.OrdinalIgnoreCase);
+
         foreach (var joinName in new[]
         {
             "ApplicationProfileInstancePassports",

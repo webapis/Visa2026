@@ -40,44 +40,29 @@ public class ExcelReportGenerator : IExcelReportGenerator
             ? applicationItems.Where(i => i != null).ToList()
             : UserReportMergeDataHelper.GetActiveApplicationItems(application);
 
-        int? templateRowNumber = FindRowContainingToken(worksheet, "{{#ds.rows}}");
-        int? endRowNumber = FindRowContainingToken(worksheet, "{{/ds.rows}}");
-
-        if (templateRowNumber == null)
+        var loopRows = FindRowsContainingToken(worksheet, "{{#ds.rows}}");
+        if (loopRows.Count == 0)
             throw new InvalidOperationException("Excel list template must contain a row with {{#ds.rows}}.");
 
-        if (endRowNumber.HasValue && endRowNumber.Value > templateRowNumber.Value)
-            worksheet.Row(endRowNumber.Value).Delete();
+        var prototypeRows = loopRows
+            .Concat(FindPassportChangePrototypeRows(worksheet))
+            .Distinct()
+            .OrderBy(static r => r)
+            .ToList();
 
+        prototypeRows = StripOrDeleteCloseRows(worksheet, prototypeRows);
+
+        var prototypeSet = prototypeRows.ToHashSet();
         foreach (var cell in worksheet.CellsUsed())
         {
-            if (cell.Address.RowNumber == templateRowNumber.Value)
+            if (prototypeSet.Contains(cell.Address.RowNumber))
                 continue;
 
             MergeCellText(cell, headerData, rowData: null, template: null, item: null);
         }
 
-        var templateRowIndex = templateRowNumber.Value;
-        var templateRow = worksheet.Row(templateRowIndex);
-
-        // Snapshot before insert: InsertRowsBelow shifts every row below the template (a sheet scratch row would survive as row 23+).
-        var prototypeRow = CaptureRowSnapshot(worksheet, templateRowIndex);
-
-        for (int i = items.Count - 1; i >= 1; i--)
-            templateRow.InsertRowsBelow(1);
-
-        for (int i = 0; i < items.Count; i++)
-        {
-            var row = worksheet.Row(templateRowIndex + i);
-            if (i > 0)
-                ApplyRowSnapshot(row, prototypeRow);
-
-            var rowData = BuildItemListRowDictionary(template, items[i], i + 1);
-            MergeRow(worksheet, row, headerData, rowData, template, items[i]);
-        }
-
-        if (items.Count == 0)
-            MergeRow(worksheet, templateRow, headerData, new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase), template, items.FirstOrDefault());
+        foreach (var templateRowIndex in prototypeRows.OrderByDescending(static r => r))
+            ExpandPrototypeRow(worksheet, templateRowIndex, template, headerData, items);
 
         workbook.SaveAs(outputStream);
         return Task.CompletedTask;
@@ -115,15 +100,142 @@ public class ExcelReportGenerator : IExcelReportGenerator
         return data;
     }
 
-    private static int? FindRowContainingToken(IXLWorksheet worksheet, string token)
+    private void ExpandPrototypeRow(
+        IXLWorksheet worksheet,
+        int templateRowIndex,
+        UserReportTemplate template,
+        IReadOnlyDictionary<string, object> headerData,
+        IList<ApplicationRosterMergeLine> items)
     {
+        var overlayPrevious = PassportChangeSanawSection.IsPreviousBand(worksheet, templateRowIndex);
+        var templateRow = worksheet.Row(templateRowIndex);
+        var prototypeRow = CaptureRowSnapshot(worksheet, templateRowIndex);
+
+        for (int i = items.Count - 1; i >= 1; i--)
+            templateRow.InsertRowsBelow(1);
+
+        for (int i = 0; i < items.Count; i++)
+        {
+            var row = worksheet.Row(templateRowIndex + i);
+            if (i > 0)
+                ApplyRowSnapshot(row, prototypeRow);
+
+            var rowData = BuildItemListRowDictionary(template, items[i], i + 1);
+            if (overlayPrevious)
+                PassportChangeSanawSection.OverlayCurrentPassportFromPrevious(rowData);
+
+            MergeRow(worksheet, row, headerData, rowData, template, items[i]);
+        }
+
+        if (items.Count == 0)
+            MergeRow(
+                worksheet,
+                templateRow,
+                headerData,
+                new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase),
+                template,
+                items.FirstOrDefault());
+    }
+
+    private static List<int> FindRowsContainingToken(IXLWorksheet worksheet, string token)
+    {
+        var rows = new SortedSet<int>();
         foreach (var cell in worksheet.CellsUsed())
         {
             if (cell.GetFormattedString().Contains(token, StringComparison.Ordinal))
-                return cell.Address.RowNumber;
+                rows.Add(cell.Address.RowNumber);
         }
 
-        return null;
+        return rows.ToList();
+    }
+
+    private static List<int> FindPassportChangePrototypeRows(IXLWorksheet worksheet)
+    {
+        var rows = new SortedSet<int>();
+        foreach (var cell in worksheet.CellsUsed())
+        {
+            var text = cell.GetFormattedString();
+            if (string.IsNullOrEmpty(text) || !text.Contains("{{.", StringComparison.Ordinal))
+                continue;
+
+            var row = cell.Address.RowNumber;
+            if (!PassportChangeSanawSection.IsRosterBand(worksheet, row))
+                continue;
+            if (!PassportChangeSanawSection.LooksLikeStackedRosterToken(text))
+                continue;
+
+            rows.Add(row);
+        }
+
+        return rows.ToList();
+    }
+
+    private static List<int> StripOrDeleteCloseRows(IXLWorksheet worksheet, IReadOnlyList<int> prototypeRows)
+    {
+        var list = prototypeRows.OrderByDescending(static r => r).ToList();
+        for (var i = 0; i < list.Count; i++)
+        {
+            var next = list[i] + 1;
+            if (RowIsOnlyLoopClose(worksheet, next))
+            {
+                worksheet.Row(next).Delete();
+                for (var j = 0; j < i; j++)
+                {
+                    if (list[j] > next)
+                        list[j]--;
+                }
+            }
+            else
+            {
+                StripLoopCloseOnRow(worksheet, next);
+            }
+        }
+
+        return list.OrderBy(static r => r).ToList();
+    }
+
+    private static bool RowIsOnlyLoopClose(IXLWorksheet worksheet, int rowNumber)
+    {
+        if (rowNumber < 1)
+            return false;
+
+        var last = worksheet.LastColumnUsed()?.ColumnNumber() ?? 1;
+        var sawClose = false;
+        for (var column = 1; column <= last; column++)
+        {
+            var text = worksheet.Cell(rowNumber, column).GetFormattedString();
+            if (string.IsNullOrWhiteSpace(text))
+                continue;
+
+            if (!text.Contains("{{/ds.rows}}", StringComparison.Ordinal))
+                return false;
+
+            var stripped = text.Replace("{{/ds.rows}}", string.Empty, StringComparison.Ordinal).Trim();
+            if (stripped.Length > 0)
+                return false;
+
+            sawClose = true;
+        }
+
+        return sawClose;
+    }
+
+    private static void StripLoopCloseOnRow(IXLWorksheet worksheet, int rowNumber)
+    {
+        if (rowNumber < 1)
+            return;
+
+        var last = worksheet.LastColumnUsed()?.ColumnNumber() ?? 1;
+        for (var column = 1; column <= last; column++)
+        {
+            var cell = worksheet.Cell(rowNumber, column);
+            var text = cell.GetFormattedString();
+            if (string.IsNullOrEmpty(text) || !text.Contains("{{/ds.rows}}", StringComparison.Ordinal))
+                continue;
+
+            var stripped = text.Replace("{{/ds.rows}}", string.Empty, StringComparison.Ordinal).Trim();
+            cell.Value = stripped;
+        }
     }
 
     private static void MergeRow(

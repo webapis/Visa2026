@@ -1,5 +1,7 @@
 #nullable enable
 
+using System.Globalization;
+using System.Text;
 using Visa2026.Module.Services.UserReports;
 
 namespace Visa2026.Module.Services.TemplateScan;
@@ -71,9 +73,52 @@ public static class ScanPlaceholderChoiceList
             yield return term.Replace("speciality", "specialty", StringComparison.OrdinalIgnoreCase);
         if (term.Contains("specialities", StringComparison.OrdinalIgnoreCase))
             yield return term.Replace("specialities", "specialties", StringComparison.OrdinalIgnoreCase);
+        if (term.Contains("birthplace", StringComparison.OrdinalIgnoreCase))
+            yield return term.Replace("birthplace", "birth place", StringComparison.OrdinalIgnoreCase);
+        if (term.Contains("place of birth", StringComparison.OrdinalIgnoreCase))
+            yield return "birth place";
     }
 
-    private static bool Contains(string? value, string term) =>
-        !string.IsNullOrEmpty(value)
-        && value.Contains(term, StringComparison.OrdinalIgnoreCase);
+    private static bool Contains(string? value, string term)
+    {
+        if (string.IsNullOrEmpty(value) || string.IsNullOrEmpty(term))
+            return false;
+        if (value.Contains(term, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        var foldedValue = Fold(value);
+        var foldedTerm = Fold(term);
+        if (foldedValue.Contains(foldedTerm, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        var compactValue = Compact(foldedValue);
+        var compactTerm = Compact(foldedTerm);
+        return compactTerm.Length > 0
+            && compactValue.Contains(compactTerm, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string Fold(string value)
+    {
+        var normalized = value.Normalize(NormalizationForm.FormD);
+        var sb = new StringBuilder(normalized.Length);
+        foreach (var ch in normalized)
+        {
+            if (CharUnicodeInfo.GetUnicodeCategory(ch) != UnicodeCategory.NonSpacingMark)
+                sb.Append(ch);
+        }
+
+        return sb.ToString();
+    }
+
+    private static string Compact(string value)
+    {
+        var sb = new StringBuilder(value.Length);
+        foreach (var ch in value)
+        {
+            if (!char.IsWhiteSpace(ch) && ch is not '-' and not '_')
+                sb.Append(ch);
+        }
+
+        return sb.ToString();
+    }
 }

@@ -782,7 +782,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         }
         catch (Exception ex)
         {
-            model.PersonLinkStatusMessage = ex.Message;
+            model.PersonLinkStatusMessage = EntitySaveExceptionFormatter.ToOfficerMessage(ex);
             model.PersonLinkStatusIsError = true;
         }
         finally

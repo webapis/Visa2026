@@ -285,7 +285,8 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
         var toggles = new List<string>();
         if (profile.RequirePersonPassport)
             toggles.Add(FormatPersonToggle("Passport", profile.PersonPassportLastCount));
-        if (profile.RequirePersonEducation)
+        if (profile.RequirePersonEducation
+            && ApplicationProfileEducationPolicy.AllowsPersonEducation(profile))
             toggles.Add("Education");
         if (profile.RequirePersonPosition)
             toggles.Add("Position");
@@ -306,7 +307,7 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
         if (profile.RequirePersonRejectionItem)
             toggles.Add("Rejection item");
         if (profile.RequirePersonTravelHistory
-            && profile.ActionFamily != ApplicationProfileActionFamily.BusinessTrip)
+            && ApplicationProfileTravelHistoryPolicy.AllowsPersonTravelHistory(profile))
             toggles.Add("Travel history");
         return toggles;
     }

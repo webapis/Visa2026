@@ -1,4 +1,93 @@
-### 2026-09-11 — Dependent Position tile is sponsor Wezipesi text
+### 2026-09-12 — Cancel visa+WP Work permit Last-N 2 (ceiling)
+
+- **Need**: Application for cancelling visa and work permit (`cancel_visa_wp`). Same Last-N 2 as visas, for WorkPermitItem. Also `cancel_workpermit` and `cancel_invitation_wp`.
+- **Cause**: Seed already had `PersonWorkPermitItemLastCount: 2`. Cancel WP count (`CancelWPCount`) was roster lines + Previous WP, not distinct People & links pins. Scan had no CWCNT.
+- **Fix**: `ApplicationProfileInstanceCancelCounts.WorkPermits` (linked WP pins, else Current + Previous). Catalog **CWCNT** / **CWCTX** / **CWNB** / **CWSB** / **CWEB**. Relink already unions ObjectSpace WP rows.
+- **Test**: `CollectMissingAutoLinks_AddsSecondWorkPermitWhenLastCountIsTwo`; `CountLinked_CountsDistinctWorkPermitPins`.
+- **Officer**: Stop F5, rebuild, restart. Relink the person (do not Unlink first). Work permit tile should be 2/2 when two valid WPs exist. Letter count is CWCNT, not TPCNT.
+- **Prevent**: Do not count roster lines for CWCNT. Do not change `cancel_visa_ext` / `cancel_visa_wp_ext` (those cancel extension applications).
+- **Cross-skill**: visa2026-user-report-templates | visa2026-template-scan
+
+### 2026-09-12 — Cancel-visa templates hide Travel history
+
+- **Need**: Wizany Ýatyrmak 8/-1307 People & links was incomplete because Travel history was 0. Visa cancellation and visa+WP cancellation do not use TravelHistory.
+- **Fix**: Calik `application-profile.calik-energi.json` sets `RequirePersonTravelHistory` **false** on `cancel_visa` and `cancel_visa_wp`. `ApplicationProfileTravelHistoryPolicy` + catalog `ApplyRow` / type mapper / resolver hide the tile and wizard checkbox. `cancel_visa_ext` stays on.
+- **Test**: `ApplicationProfileTenantCatalogTravelHistoryTests` + resolver cancel-visa fact.
+- **Prevent**: Do not turn Travel history on for visa-document cancellation templates. Restart after rebuild so catalog sync writes locked profiles.
+- **Cross-skill**: visa2026-lookup-data
+
+### 2026-09-12 — Cancel-visa sanaw needs Education tokens without the Education tile
+
+- **Need**: Officers map `EGLV` / `EGIN` / `EGSP` on Wizany Ýatyrmak sanaw. People & links Education stays hidden.
+- **Cause**: Placeholder pack used `AllowsPersonEducation && RequirePersonEducation`, so Review hid Education codes.
+- **Fix**: Template mapping always offers PersonEducation. Merge falls back to `PersonCurrentItems.GetCurrentEducation`. Tile policy unchanged.
+- **Prevent**: Do not turn `RequirePersonEducation` back on for `cancel_visa` to make placeholders appear.
+- **Cross-skill**: visa2026-template-scan | visa2026-user-report-templates
+
+### 2026-09-11 — First Link existing pinned only one of two valid visas
+
+- **Need**: Wizany Ýatyrmak 9/-001. Link existing left Visa **1/2** (only A17327411). Relink then showed **2/2**. Officers thought the person had one visa.
+- **Cause**: Link existing only ran Refresh on the picker Person (current visa in memory). Relink reloads the person and Ensures Last-N. A fresh ObjectSpace also often has `ApplicationProfile` null (backing field), so Last-N defaulted to 1.
+- **Fix**: Officer `LinkPerson` calls the same pin as Relink (import still Refresh-only). Load profile from shadow `ApplicationProfileID` without ReloadObject on the instance. Visa query goes Passport IDs → Visas.
+- **Test**: `EnsureApplicationProfileLoaded_TrueWhenProfileAlreadySet`, `LastCount_DefaultsToOneWhenProfileNavigationMissing`.
+- **Officer**: Stop F5, rebuild, restart. Unlink Serdar if already linked, then Link existing once. Visa should be **2/2** without clicking Relink.
+- **Prevent**: Do not leave officer Link on Refresh-only. Do not ReloadObject the instance after People.Add.
+- **Cross-skill**: none
+
+### 2026-09-11 — Unlink then Relink linked only one of two valid visas
+
+- **Need**: Wizany Ýatyrmak 9/-001. Passport Visas has A14886414 and A17327411 (both Valid). After Unlink + Link existing, People & links showed Visa **1/2** and only A17327411.
+- **Cause**: The tile expected 2 from a Visa table query (`LinkableActiveCounts`). Relink/Link resolved Last-N from `Person.Passports.Visas`, which after picker/Reload often has only the current visa.
+- **Fix**: `ResolveVisas` / Last-N passport, invitation, WP union ObjectSpace rows with the in-memory graph (same Visa query as the tile).
+- **Test**: `UnionDistinctById_IncludesVisaMissingFromPersonGraph`, `CollectMissingAutoLinks_AddsSecondVisaWhenLastCountIsTwo`.
+- **Officer**: Stop F5, rebuild, restart. Relink Serdar — do not Unlink first. Visa should be **2/2**.
+- **Prevent**: Do not Last-N from `Passport.Visas` alone when an ObjectSpace is available.
+- **Cross-skill**: none
+
+### 2026-09-11 — Relink pinned the same visa twice
+
+- **Need**: Wizany Ýatyrmak 9/-001 Relink on Serdar. Passport Visas has two rows (A14886414, A17327411). People & links showed Visa **3/2** and the same visa twice.
+- **Cause**: Relink runs Refresh (creates the missing Last-2 link in memory) then EnsureResolvedLink. `LoadLinks` queried the database only, so Ensure created a second row for the same `LinkedObjectId`.
+- **Fix**: Merge in-memory `PersonResolvedLinks` into LoadLinks. Relink deletes extra rows with the same kind+object. Tile/list count distinct visa IDs.
+- **Test**: `MergeTrackedLinks_DoesNotAddSameVisaTwice`, `CountResolvedForPerson_DedupesSameVisaLinkedTwice`.
+- **Officer**: Stop F5, rebuild, restart. Relink Serdar once. Visa should be **2/2** with each number once.
+- **Prevent**: Do not Ensure after Refresh without merging tracked links.
+- **Cross-skill**: none
+
+### 2026-09-11 — Cancel-visa seed Visa Last 2
+
+- **Need**: Wizany Ýatyrmak 9/-001. Serdar Nuri Küçükakkaya has two valid visas (A14886414, A17327411). People & links showed Visa 1 and only A17327411. Wizard Person data was Last 1. Cancel visa+WP was already Last 2.
+- **Fix**: `cancel_visa` `PersonVisaLastCount` **2** in Calik tenant JSON + `ApplicationProfileCalikPersonLastCountSeeds`. Sync applies the overlay on every F5 (config lock does not block). Last-N is a ceiling: one valid visa → expect 1; two → expect 2.
+- **Test**: `Apply_CancelVisa_VisaTwo`.
+- **Officer**: Stop F5, rebuild, restart. Open the same case → Relink on Serdar. Visa tile should be 2 when both booklets are valid. Configure → Person data shows Last 2. Clone is not required.
+- **Prevent**: Do not require two visas. Do not change `cancel_visa_ext` (that cancels the extension application, not the visas).
+- **Cross-skill**: visa2026-lookup-data
+
+### 2026-09-11 — Unlink then relink person fails on save
+
+- **Need**: Wizany Ýatyrmak People & links. Officer linked Serdar Nuri Küçükakkaya, Unlink, then Link existing again. Banner: `An error occurred while saving entity changes. See the inner exception for details.` Roster stayed empty.
+- **Cause**: Unlink deferred-deletes `ApplicationProfileInstancePersonResolvedLink` (`GCRecord`). Unique index `(Instance, Person, Kind, Object)` was not filtered, so relink INSERT hit 23505. Skip-nav inverse was not always removed.
+- **Fix**: Unique index `WHERE GCRecord IS NULL` (model + startup heal DROPs the old index). Unlink removes person + child skip-nav both sides. Link banner shows the innermost save error.
+- **Test**: `Visa2026DbContextModelTests` filter assertion; `EntitySaveExceptionFormatterTests`; heal SQL contains `WHERE "GCRecord" IS NULL`.
+- **Officer**: Stop F5, rebuild, restart. On the same case, Link existing → Serdar Nuri Küçükakkaya again. Person should appear. No Re-Approve needed.
+- **Prevent**: Do not recreate this unique index without the GCRecord filter. Do not `Clear()` skip-nav collections.
+- **Cross-skill**: none
+
+### 2026-09-11 — Cancel-visa templates hide Education
+
+- **Need**: Wizany Ýatyrmak (3/-358) People & links was incomplete because Education was 0. Visa cancellation does not use Education.
+- **Fix**: Calik `application-profile.calik-energi.json` sets `RequirePersonEducation` **false** on `cancel_visa` and `cancel_visa_wp`. `ApplicationType` `ShowCurrentEducation` false for `App_Cancel_Visa` / `App_Cancel_Visa_and_WP`. `ApplicationProfileEducationPolicy` + catalog `ApplyRow` / type mapper / resolver hide the tile and wizard checkbox. `cancel_visa_ext` stays on.
+- **Test**: `ApplicationProfileTenantCatalogEducationTests` + resolver cancel-visa fact.
+- **Prevent**: Do not turn Education on for visa-cancellation templates. Restart after rebuild so catalog sync writes locked profiles.
+- **Cross-skill**: visa2026-lookup-data
+
+### 2026-09-11 — Invitation templates hide Travel history
+
+- **Need**: Çakylygy üýtgetmek (5/-888) People & links was incomplete because Travel history was 0. Invitation cases do not use TravelHistory.
+- **Fix**: Calik `application-profile.calik-energi.json` sets `RequirePersonTravelHistory` **false** on produce/change/cancel invitation codes (`get_invitation*`, `change_invitation`, `cancel_invitation*`). `ApplicationProfileTravelHistoryPolicy` + catalog `ApplyRow` / type mapper / resolver hide the tile and wizard checkbox (same as Business trip). Registration stay on.
+- **Test**: `ApplicationProfileTenantCatalogTravelHistoryTests` + resolver invitation fact.
+- **Prevent**: Do not turn Travel history on for Invitation templates. Restart after rebuild so catalog sync writes locked profiles.
+- **Cross-skill**: visa2026-lookup-data### 2026-09-11 — Dependent Position tile is sponsor Wezipesi text
 
 - **Need**: Dependents do not own EmployeePositionHistory. Officers still need Wezipesi on FM cases: sponsor position + relationship. Profile Position toggle stays on for templates.
 - **Fix**: People & links Position for `!IsEmployee` is a read-only caption (`FamilyMemberSponsorPositionCaption` / `FM_WezipesiTm`). Completeness uses that line, not a Position Relink. Auto-link and import pin skip Position on family members. Position tab lists employees only.

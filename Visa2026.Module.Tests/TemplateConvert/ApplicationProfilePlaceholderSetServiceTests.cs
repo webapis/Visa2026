@@ -1,5 +1,6 @@
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.TemplateConvert;
+using Visa2026.Module.Services.TemplateScan;
 using Visa2026.Module.Services.UserReports;
 using Xunit;
 
@@ -295,5 +296,51 @@ public class ApplicationProfilePlaceholderSetServiceTests
         Assert.True(Allows(set, "EGLV"));
         Assert.True(Allows(set, "EGIN"));
         Assert.True(Allows(set, "EGSP"));
+    }
+
+    [Fact]
+    public void Template_scan_full_library_keeps_codes_other_templates_use()
+    {
+        var profile = new ApplicationProfile
+        {
+            Code = "cancel_visa",
+            CancelVisas = true,
+            RequirePersonVisa = true,
+            RequirePersonEducation = false,
+            RequirePersonTravelHistory = false,
+            RequirePersonInvitationItem = false,
+            RequirePersonWorkPermitItem = false,
+        };
+
+        var headerLetter = _service.GetSet(new ApplicationProfilePlaceholderSetQuery
+        {
+            Profile = profile,
+            DataScope = ApplicationProfileTemplateDataScope.ApplicationHeader,
+            TemplateKind = ApplicationProfileTemplateKind.Word,
+            OfferFullLibrary = true,
+        });
+
+        Assert.True(Allows(headerLetter, "PFN"));
+        Assert.True(Allows(headerLetter, "PBPL"));
+        Assert.True(Allows(headerLetter, "EGLV"));
+        Assert.True(Allows(headerLetter, "THKD"));
+        Assert.True(Allows(headerLetter, "INVN"));
+        Assert.True(Allows(headerLetter, "AFNUM"));
+        Assert.True(Allows(headerLetter, "PPH"));
+        Assert.Equal(_catalog.GetEntries().Count, headerLetter.Allowed.Count);
+        Assert.Empty(headerLetter.Excluded);
+    }
+
+    [Fact]
+    public void Template_scan_full_library_excel_still_drops_images()
+    {
+        var set = _service.GetSet(ScanPlaceholderLibrary.Query(
+            new ApplicationProfile { Code = "cancel_visa" },
+            ApplicationProfileTemplateKind.Excel));
+
+        Assert.True(Allows(set, "PBPL"));
+        Assert.True(Allows(set, "PFN"));
+        Assert.True(Allows(set, "AFNUM"));
+        Assert.Equal(PlaceholderExclusionReason.StructuralUnsupportedForKind, ReasonFor(set, "PPH"));
     }
 }

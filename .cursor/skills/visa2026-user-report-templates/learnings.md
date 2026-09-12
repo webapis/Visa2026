@@ -23,6 +23,85 @@ Keep **`SKILL.md`** stable; **promote** into `SKILL.md` only when the same lesso
 
 ## Entries
 
+### 2026-09-12 — Cancel visa+WP CWCNT / stacked WP blocks (family: AppScalar + ItemRoster)
+
+- **Symptom**: Visa+WP cancel letters and sanaw need a work-permit-to-cancel count and stacked WP number/date blocks, same as CVCNT / CVNB.
+- **Root cause**: `CancelWPCount` counted roster lines + Previous WP. Catalog had no CWCNT / CWNB. Hydrator already stacks Current + Previous WP.
+- **Fix**: Count distinct WorkPermitItem links (`ApplicationProfileInstanceCancelCounts.WorkPermits`). Catalog **CWCNT** / **CWCTX** (Header) and **CWNB** / **CWSB** / **CWEB** (Row, Application + ApplicationItem). Merge header + sanaw/Excel row dicts include the properties.
+- **Prevent**: Do not use WPNM (current WP only) for the cancel stack. Do not count persons for CWCNT.
+- **Officer**: Stop F5, rebuild, restart. Map *iş rugsatnamasyny ýatyrmak* to CWCNT. Preview fills from linked WPs.
+
+### 2026-09-12 — Cancel-visa sanaw PBPL printed country (family: ItemRoster)
+
+- **Symptom**: SANAW-WIZANY YATYRMAK Preview showed Türkiye for **PBPL** (Doglan ýeri) on case 8/-1307.
+- **Root cause**: `Person_BirthPlace` was the raw `Person.BirthPlace` (`Türkiye/Gaziantep` or country-only). **PCBT** already prints the country.
+- **Fix**: `PersonBirthPlaceText.CityOnly` — city after `/`, never the country name. Catalog example is Kahramanmaraş.
+- **Prevent**: Do not fall back PBPL to CountryOfBirth.
+
+### 2026-09-12 — Cancel-visa sanaw omitted Person_BirthPlace (family: ItemRoster)
+
+- **Symptom**: After mapping **PBPL**, Preview would stay blank — `BuildWizaYatyrylmakSanawRowDictionary` had no `Person_BirthPlace`.
+- **Root cause**: Cancel-visa row dict was a short cancel-visa subset.
+- **Fix**: Add `Person_BirthPlace` and `Person_CountryOfBirthTm` (`PCBT`).
+- **Prevent**: When Review maps a Person row token on this sanaw, put the same key on the cancel-visa dict.
+
+### 2026-09-12 — Cancel-visa sanaw EGIY blank for child dependents (family: ItemRoster)
+
+- **Symptom**: SANAW-WIZANY YATYRMAK Preview left Hünäri we bilimi empty for child dependents (case 8/-1307). Officers map `EGIY` / `Education_LevelAndInstitutionTm`.
+- **Root cause**: Children have no Education record. Cancel-visa sanaw row dict omitted `Education_LevelAndInstitutionTm`.
+- **Fix**: Child dependents (`!IsEmployee` and Age &lt; 18 or marital status Çaga/Minor) print **Çaga**. Add the key to cancel-visa and sanawy row dicts.
+- **Prevent**: Do not leave EGIY out of `BuildWizaYatyrylmakSanawRowDictionary`. Do not use Age &lt; 18 when DateOfBirth is default (Age is 0).
+
+### 2026-09-12 — Cancel-visa sanaw Education_* empty without Education tile (family: ItemRoster)
+
+- **Symptom**: Cancel-visa Review could not offer `EGLV` / `EGIN` / `EGSP`. Even after mapping, Preview would stay blank if Education was not linked.
+- **Root cause**: Placeholder pack followed the hidden People & links Education toggle. Hydrator set `CurrentEducation` only from an Education resolved link.
+- **Fix**: PersonEducation tokens stay in the profile set. Hydrator falls back to `PersonCurrentItems.GetCurrentEducation`.
+- **Prevent**: Do not require an Education pin to fill `Education_*` on cancel-visa sanaw.
+
+### 2026-09-12 — Cancel-visa letter CVCNT stayed 1 with two linked visas (family: AppScalar)
+
+- **Symptom**: Wizany Ýatyrmak 9/-001. Serdar has two valid linked visas (A14886414, A17327411). Review placeholders 6/7 (`CVCNT`/`CVCTX`) and Preview showed `1 (bir)`.
+- **Root cause**: `CancelVisaCount` summed CurrentVisa + NextVisa. NextVisa meant a future-start visa. Both booklets have already started, so only CurrentVisa counted. Hydrator also assigned only the first Last-N visa.
+- **Fix**: Count distinct People & links Visa pins (`ApplicationProfileInstanceCancelCounts`). Hydrator sets NextVisa from the second linked visa (sanaw stacked fields).
+- **Prevent**: Do not treat NextVisa as "second visa to cancel". Last-N pins are the cancel set.
+- **Officer**: Stop F5, rebuild, restart. Preview Ýüztutma — `2 (iki)` at the visa-cancel pair. No Re-Approve.
+- **Cross-skill**: visa2026-resminamalar | visa2026-template-scan
+
+### 2026-09-11 — Cancel-visa letter CVCNT / CVCTX (family: AppScalar)
+
+- **Symptom**: Wizany Ýatyrmak Ýüztutma needs a visa-count pair next to *wizasy ýatyrmak*, distinct from person count *daşary ýurt raýaty*. Officers had no short codes; yellow scan mapped both `1 (bir)` to TPCNT.
+- **Root cause**: `CancelVisaCount` / `CancelVisaCountText` already exist on the instance (CurrentVisa + NextVisa per line) but were not in the catalog or header merge dictionary.
+- **Fix**: Catalog **CVCNT** / **CVCTX** (Header, Core, Application). `BuildApplicationHeaderDictionary` includes the properties so Enrich adds the short codes. Scan remaps the visa-cancel pair (see template-scan).
+- **Prevent**: Person count stays TPCNT. Do not invent a new NotMapped count. Link CurrentVisa / NextVisa on the roster or the visa count stays 0.
+- **Officer**: Stop F5, rebuild, restart. Analyze then Preview the cancel-visa letter. `{{ds.CVCNT}}` / `{{ds.CVCTX}}` fill from the case.
+- **Cross-skill**: visa2026-template-scan | visa2026-resminamalar
+
+### 2026-09-11 — Passport-change Excel sanaw two stacked passport tables
+
+- **Symptom**: Wizany KP-i Täze Pasporta Geçirmek (`pasport_change`) DAŞARY ÝURT RAÝATYNYŇ SANAWY Preview filled only the latest passport. Kiçirak (previous booklet) and Täze (new booklet) tables both showed the current row or stayed empty.
+- **Root cause**: Catalog/scan used `PPN` for both tables. Excel merge expanded only the first `{{#ds.rows}}` row and header-merged the second table with no roster line. Loop planner emitted one loop on the min yellow row. Deleting `{{/ds.rows}}` on the next row would wipe the Täze title.
+- **Fix**: Previous-passport codes `PRPN`/`PRIS`/`PRED`/… . Scan remaps Kiçirak yellows to that family. Merge dict includes `PreviousPassport_*`. Excel expands every loop row plus stacked-table prototype rows (bottom→top), overlays current passport keys from previous under Kiçirak, and does not delete title rows. People & links still hydrates last two passports by issue date.
+- **Prevent**: Do not treat one `{{#ds.rows}}` as the whole sheet. Do not delete a close-marker row that also has a section title. Do not remap `RPPN` (wekil). Person must have two linked passports.
+- **Officer**: Stop F5, rebuild, restart. Preview DAŞARY ÝURT RAÝATYNYŇ SANAWY on 5/-814. Already-approved `{{.PPN}}` on both tables should fill (Kiçirak = previous, Täze = new). New Analyze should propose `PRPN` on Kiçirak. If Kiçirak stays blank, link the old booklet on People & links.
+- **Cross-skill**: visa2026-template-scan | visa2026-resminamalar
+
+### 2026-09-11 — Change-invitation Ýüztutma officer confirmed (family: AppScalar)
+
+- **Symptom**: Officer confirmed the one-invitation letter after rebuild.
+- **Root cause**: Same as the entry below — header invitation tokens were missing from the Invitation group.
+- **Fix**: Verified in app. `{{ds.INVN}}` / `{{ds.INVS}}` / `{{ds.INVE}}` on one Ýüztutma; several InvitationItems share that header.
+- **Prevent**: Keep one invitation per change-invitation application until the officer asks for a table of invitations.
+- **Cross-skill**: visa2026-template-scan | visa2026-resminamalar
+
+### 2026-09-11 — Change-invitation Ýüztutma (family: AppScalar)
+
+- **Symptom**: Çakylygy üýtgetmek letter needs invitation number / issued date / expiry in the paragraph. Catalog had only row `INVN`.
+- **Root cause**: Invitation fields lived on the roster line only. A change-invitation case may link several InvitationItems (people) but for now one Invitation header per application.
+- **Fix**: Catalog Invitation group: `INVN` / `INVS` / `INVE` as Header+Row. Instance `Invitation_*` reads the linked InvitationItem header (then roster, then produced Invitations). Word: `{{ds.INVN}}` `{{ds.INVS}}` `{{ds.INVE}}` in the letter. No `{{#ds.invitations}}` table yet.
+- **Prevent**: Do not emit one letter page per InvitationItem. Do not join several invitation numbers into one token unless the officer asks for multiple invitations per case.
+- **Cross-skill**: visa2026-template-scan | visa2026-resminamalar
+
 ### 2026-09-10 — Yuztutma cover letter (family: AppScalar)
 
 - **Symptom**: Resminamalar Preview of a yellow-marks Word letter left `{{ds.AFNUM}}` / `ADAT` / `MSRV` / `TPCNT` empty; `ACPOS` / `CHFN` filled. File name used a roster person.

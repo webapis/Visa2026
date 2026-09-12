@@ -70,7 +70,8 @@ public static class ScanExcelYellowResolver
                 profile,
                 headerScores,
                 placeholderSet,
-                cell.Address.RowNumber);
+                cell.Address.RowNumber,
+                PassportChangeSanawSection.IsPreviousBand(sheet, cell.Address.RowNumber));
 
             if (inference.ProposedToken == null)
             {
@@ -127,7 +128,8 @@ public static class ScanExcelYellowResolver
         ScanExcelColumnProfiles.Profile? profile,
         IReadOnlyList<(UserReportPlaceholderCatalogEntry Entry, int Score)> headerScores,
         ApplicationProfilePlaceholderSet placeholderSet,
-        int dataRow)
+        int dataRow,
+        bool previousPassportBand)
     {
         var scope = DetermineScope(profile, headerScores, dataRow);
         var usageScope = scope == ScanFieldScope.Row
@@ -135,7 +137,10 @@ public static class ScanExcelYellowResolver
             : UserReportPlaceholderScope.Header;
 
         if (profile is { IsCompound: true })
-            return InferCompoundCell(cellText, header, profile, headerScores, placeholderSet, usageScope, scope);
+        {
+            var compound = InferCompoundCell(cellText, header, profile, headerScores, placeholderSet, usageScope, scope);
+            return previousPassportBand ? RemapInferenceToPrevious(compound) : compound;
+        }
 
         var preferCodes = profile?.ShortCodes
             ?? headerScores.Select(static h => h.Entry.ShortCode).Take(3).ToArray();
@@ -181,7 +186,28 @@ public static class ScanExcelYellowResolver
             ? ScanFieldConfidence.High
             : top.ScorePercent >= 55 ? ScanFieldConfidence.Medium : ScanFieldConfidence.Low;
 
-        return new CellInference(top.Token, confidence, scope, rankedMerged.Take(5).ToList());
+        var inference = new CellInference(top.Token, confidence, scope, rankedMerged.Take(5).ToList());
+        return previousPassportBand ? RemapInferenceToPrevious(inference) : inference;
+    }
+
+    private static CellInference RemapInferenceToPrevious(CellInference inference)
+    {
+        var token = inference.ProposedToken == null
+            ? null
+            : PassportChangeSanawSection.RemapTokenToPrevious(inference.ProposedToken);
+
+        var alternatives = inference.Alternatives
+            .Select(static alt =>
+            {
+                var mappedToken = PassportChangeSanawSection.RemapTokenToPrevious(alt.Token);
+                var shortCode = PassportChangeSanawSection.TryMapRowKeyToPrevious(alt.ShortCode, out var mapped)
+                    ? mapped
+                    : alt.ShortCode;
+                return alt with { Token = mappedToken, ShortCode = shortCode };
+            })
+            .ToList();
+
+        return inference with { ProposedToken = token, Alternatives = alternatives };
     }
 
     private static CellInference InferCompoundCell(

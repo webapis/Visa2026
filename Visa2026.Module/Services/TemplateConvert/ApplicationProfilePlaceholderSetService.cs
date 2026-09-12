@@ -63,14 +63,17 @@ public sealed class ApplicationProfilePlaceholderSetService : IApplicationProfil
         UserReportPlaceholderCatalogEntry entry,
         ApplicationProfilePlaceholderSetQuery query)
     {
-        if (!IsInDataScope(entry.Scope, query.DataScope))
-            return PlaceholderExclusionReason.OutOfDataScope;
-
         if (!IsSupportedForKind(entry, query.TemplateKind))
             return PlaceholderExclusionReason.StructuralUnsupportedForKind;
 
         if (entry.Pack == UserReportPlaceholderPack.Unknown)
             return PlaceholderExclusionReason.UnknownPack;
+
+        if (query.OfferFullLibrary)
+            return null;
+
+        if (!IsInDataScope(entry.Scope, query.DataScope))
+            return PlaceholderExclusionReason.OutOfDataScope;
 
         if (!ApplicationProfilePlaceholderPackMap.IsEnabled(query.Profile, entry.Pack))
             return PlaceholderExclusionReason.PersonPackDisabled;

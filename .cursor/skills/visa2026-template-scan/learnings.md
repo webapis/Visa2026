@@ -2,6 +2,69 @@
 
 Append-only. Newest first under **## Entries**.
 
+### 2026-09-12 — Review gap #10 could not take a placeholder
+
+- Need: Wiza we iş rugsatnamany ýatyrmak. Yellow 10 Mehmet Çırak was a Gap. Officer could not Add `CHFN` (or any code).
+- Cause: Merger turned unmapped Office yellows (null token, but with a write address) into Gaps. Review hid Add on gaps (`CanRemap` excluded `IsGap`). ApplyTokens only searched Fields, so a pick would no-op.
+- Fix: Unmapped yellows with `SourceRegion` stay Detected fields. Gaps still show Add and promote to a field when a Short code is chosen.
+- Officer: Stop F5, rebuild, restart, Analyze. Click #10 — Filter `CHFN` / signatory / Mehmet, Add placeholder.
+- Prevent: Do not convert Office yellows that have a span address into Gaps.
+- Cross-skill: none
+
+### 2026-09-12 — Split yellow `3` / `üç` left CWCTX out of the letter
+
+- Need: Wiza we iş rugsatnamany ýatyrmak. After `3` the second highlight `üç` was unidentified. Officer could not put CancelWPCountText in the file.
+- Cause: CountWithWords only matches `3 (üç)` in one span. Word highlighted the digit and the words separately. Following caption kept only form parenthetical lists, so the letter text after `üç` (`iş rugsatnamasyny ýatyrmak`) was dropped.
+- Fix: Isolated digit → CWCNT / isolated Turkmen words (`üç` → `uc`) → CWCTX when nearby is a count caption. Following caption keeps the rest of the sentence. Add list shows `Label — CWCTX (CancelWPCountText)`.
+- Officer: Stop F5, rebuild, restart, Analyze again. `3` → CWCNT. `üç` → CWCTX. Filter Add with `CancelWPCountText` or `CWCTX` if a mark is still empty.
+- Prevent: Do not require `N (words)` in one yellow for letter counts.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-12 — Cancel visa+WP letter WP count mapped to TPCNT/CVCNT
+
+- Need: Application for cancelling visa and work permit. Yellow `1 (bir)` next to *iş rugsatnamasyny ýatyrmak* is work permits to cancel, not persons and not visas.
+- Cause: `CountWithWords` only distinguished person vs visa-cancel. No CWCNT. Clone could copy TPCNT onto the WP `1 (bir)`.
+- Fix: *yatyr*+*rugsat* → **CWCNT**/**CWCTX**. Visa wins when *wiza* is first; person *raýat* still TPCNT. Do not clone TPCNT onto a document-cancel nearby. Context is the text after each count so a trailing *ýatyrmak* is visible.
+- Officer: Stop F5, rebuild, restart, Analyze the visa+WP letter. Person → TPCNT. Visa → CVCNT. WP → CWCNT.
+- Prevent: Do not map every *ýatyrmak* count to CVCNT.
+- Cross-skill: visa2026-user-report-templates | visa2026-application-profile
+
+### 2026-09-12 — Officer confirmed PBPL city-only on cancel-visa sanaw
+
+- Need: 8/-1307 after city-only change. Preview birth place was blank, then officer confirmed **fixed**.
+- Cause: Empty or country-only `Person.BirthPlace` prints blank (country stays on PCBT). Yellow Kahramanmaraş is sample text, not the case roster.
+- Fix: No further code. `PersonBirthPlaceText.CityOnly` already in use.
+- Officer: Confirmed good. Fill Person **Birth place** with the city when PBPL is blank.
+- Prevent: Do not put CountryOfBirth back onto PBPL to fill a blank.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-12 — PBPL showed birth country instead of city
+
+- Need: 8/-1307 SANAW-WIZANY YATYRMAK. Review 4.2 PCBT = Türkiye, 4.3 PBPL = Kahramanmaraş. Preview Doglan column printed Türkiye for the place token. Review SAMPLE for PBPL was `Türkiye/Gaziantep`.
+- Cause: Catalog example was country/city. Merge printed `Person.BirthPlace` raw, so `Türkiye/Gaziantep` or a country-only BirthPlace looked like PCBT.
+- Fix: `PersonBirthPlaceText.CityOnly` on `Person_BirthPlace`. Example is now Kahramanmaraş. PCBT stays country.
+- Officer: Stop F5, rebuild, Preview the same Excel. Place = city (Kahramanmaraş / Gaziantep). Country stays on PCBT. Fill Person Birth place with the city if Preview is still blank.
+- Prevent: Do not use CountryOfBirth as a BirthPlace fallback. Do not keep a country prefix on the PBPL example.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-12 — Review Add list dropped codes used on other templates
+
+- Need: Same library on every Create from yellow marks / Review placeholders. Codes that work on invitation or sanaw sometimes missing on cancel-visa or on a header letter.
+- Cause: `GetSet` hid packs the profile tile turned off (travel, invitation, WP, …) and hid Row tokens when the saved file was ApplicationHeader. Opening a letter then hid PFN/PBPL/EGLV even though other templates use them.
+- Fix: Scan uses `OfferFullLibrary` (`ScanPlaceholderLibrary.Query`). Convert stays pack- and scope-gated. Excel still drops images.
+- Officer: Stop F5, rebuild, restart, hard-refresh Review. Filter `PBPL` / `EGLV` / `INVN` — they stay in Add placeholder on every profile and letter/sanaw.
+- Prevent: Do not rebuild the Review list from the saved Header/People scope. Infer that scope only on Approve.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-12 — Review could not find birth place (PBPL)
+
+- Need: Wizany Ýatyrmak sanaw Review. Officer opened Add placeholder and could not find birth place (Doglan ýeri). List showed country-of-birth style codes.
+- Cause: Catalog already has **PBPL** / `Person_BirthPlace`. Native `<select>` text was `PBPL — Birth place`, so typing `birth` does not jump to it. Filter `birthplace` (one word) and `doglan yeri` (no ý) also missed.
+- Fix: Options are `Birth place — PBPL`. Filter folds diacritics and compact words (`birthplace`, `doglan yeri`). Cancel-visa sanaw row dict includes `Person_BirthPlace` / `Person_CountryOfBirthTm`.
+- Officer: Stop F5, rebuild, restart, hard-refresh Review. Filter `birth place` or `PBPL`, then Add. City is PBPL; country name is PCBT.
+- Prevent: Do not tell officers to type the Short code first in the native select.
+- Cross-skill: visa2026-user-report-templates
+
 ### 2026-09-12 — Review could not add a placeholder on unidentified yellows
 
 - Need: After the searchable-picker change, cancel-visa sanaw Review row 4 stayed **Part**. Officer could not assign a library code to an unidentified yellow.

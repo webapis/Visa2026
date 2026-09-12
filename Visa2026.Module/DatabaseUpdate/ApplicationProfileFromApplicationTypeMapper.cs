@@ -153,7 +153,8 @@ public static class ApplicationProfileFromApplicationTypeMapper
     private static void ApplyPersonToggles(ApplicationProfile profile, ApplicationType type)
     {
         profile.RequirePersonPassport = type.ShowPreviousPassport || type.ShowApplicationItems;
-        profile.RequirePersonEducation = type.ShowCurrentEducation;
+        profile.RequirePersonEducation = type.ShowCurrentEducation
+            && ApplicationProfileEducationPolicy.AllowsPersonEducation(profile);
         profile.RequirePersonPosition = true;
         profile.RequirePersonAddressOfResidence = true;
         profile.RequirePersonVisa = type.ShowCurrentVisa || type.ShowNextVisa;
@@ -164,7 +165,7 @@ public static class ApplicationProfileFromApplicationTypeMapper
         profile.RequirePersonMedical = type.ShowCurrentMedicalRecord;
         profile.RequirePersonRejectionItem = type.ShowRejections;
         profile.RequirePersonTravelHistory =
-            profile.ActionFamily != ApplicationProfileActionFamily.BusinessTrip;
+            ApplicationProfileTravelHistoryPolicy.AllowsPersonTravelHistory(profile);
     }
 
     private static void ApplySla(ApplicationProfile profile, ApplicationType type)

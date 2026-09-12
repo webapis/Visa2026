@@ -107,7 +107,12 @@ public sealed class ScanStaticRegionDraft
     public required string TextPreview { get; init; }
 }
 
-public sealed record ScanGapDraft(string FieldId, string LabelText, string? SuggestedPropertyName);
+public sealed record ScanGapDraft(
+    string FieldId,
+    string LabelText,
+    string? SuggestedPropertyName,
+    DocumentRegion? SourceRegion = null,
+    int PageIndex = 0);
 
 public sealed record ScanClarificationPrompt(string Question, IReadOnlyList<string> SuggestedAnswers);
 
@@ -190,7 +195,12 @@ public sealed class ScanStaticRegion
     public required string TextPreview { get; init; }
 }
 
-public sealed record ScanGap(string FieldId, string LabelText, string? SuggestedPropertyName);
+public sealed record ScanGap(
+    string FieldId,
+    string LabelText,
+    string? SuggestedPropertyName,
+    DocumentRegion? SourceRegion = null,
+    int PageIndex = 0);
 
 public sealed class ScanFieldPlanBuildRequest
 {

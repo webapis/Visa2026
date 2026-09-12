@@ -112,7 +112,7 @@ Merge rule: Application value if set; else profile default (plan §4).
 | `RequirePersonSalary` | EmployeeSalary |
 | `RequirePersonMedical` | MedicalRecord |
 | `RequirePersonRejectionItem` | RejectionItem |
-| `RequirePersonTravelHistory` | TravelHistory (M2M — not profile scalar). Seed **on** except BusinessTrip. |
+| `RequirePersonTravelHistory` | TravelHistory (M2M — not profile scalar). Seed **on** except BusinessTrip, Invitation (produce/change/cancel), and visa-document cancellation (`cancel_visa` / `cancel_visa_wp`). |
 
 ---
 

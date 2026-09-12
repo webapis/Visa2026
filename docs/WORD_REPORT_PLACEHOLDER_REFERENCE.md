@@ -155,12 +155,12 @@ Migration **code** on items: `Application_MigrationServiceCode` → e.g. `TDMGAS
 
 | Property | Type | Example output | Notes |
 |----------|------|----------------|--------|
-| `TotalPersonCount` | `int` | `3` | `ApplicationItems` collection count (no soft-delete filter on getter) |
-| `TotalPersonCountText` | `string` | `üç` | Turkmen words (`bir`, `iki`, …) |
+| `TotalPersonCount` | `int` | `3` | Short code **TPCNT**. `ApplicationItems` collection count (no soft-delete filter on getter) |
+| `TotalPersonCountText` | `string` | `üç` | Short code **TPCTX**. Turkmen words (`bir`, `iki`, …) |
 | `CancelPersonCount` | `int` | `2` | Same item set as `TotalPersonCount` |
 | `CancelPersonCountText` | `string` | `iki` | |
-| `CancelVisaCount` | `int` | `3` | 2 lines × (current + next visa) |
-| `CancelVisaCountText` | `string` | `üç` | |
+| `CancelVisaCount` | `int` | `3` | Short code **CVCNT**. Distinct People & links Visa pins; else CurrentVisa + NextVisa per line |
+| `CancelVisaCountText` | `string` | `üç` | Short code **CVCTX** |
 | `CancelWPCount` | `int` | `4` | |
 | `CancelWPCountText` | `string` | `dört` | |
 | `CancelInvCount` | `int` | `2` | |
@@ -351,9 +351,9 @@ Case-linked `TravelHistory` (latest linked row). Short codes in the **Travel his
 
 | Property | Type | Example output | Notes |
 |----------|------|----------------|--------|
-| `Invitation_Number` | `string` | `…` | |
-| `Invitation_StartDateText` | `string` | `01.01.2026` | |
-| `Invitation_ExpirationDateText` | `string` | `30.06.2026` | |
+| `Invitation_Number` | `string` | `COO02058777` | Short **INVN**. Change-invitation Ýüztutma: one invitation per case — `{{ds.INVN}}` in the paragraph. Row `{{.INVN}}` on sanaw. |
+| `Invitation_StartDateText` | `string` | `02.03.2026` | Issued / resmileşdirilen (`Invitation.IssuedDate`). Short **INVS** — `{{ds.INVS}}` |
+| `Invitation_ExpirationDateText` | `string` | `30.06.2026` | Short **INVE** — `{{ds.INVE}}` |
 | `PreviousInvitation_Number` | `string` | `…` | |
 | `PreviousInvitation_StartDateText` | `string` | `…` | |
 | `PreviousInvitation_ExpirationDateText` | `string` | `…` | |
@@ -497,7 +497,7 @@ Template static text + placeholders, e.g. cancel-visa letter:
 … 1 (bir) sany daşary ýurt raýatynyň 1 (bir) sany wizasyny ýatyrmagyňyzy …
 ```
 
-Uses `{{ds.CancelPersonCount}}` + `{{ds.CancelPersonCountText}}` and `{{ds.CancelVisaCount}}` + `{{ds.CancelVisaCountText}}`.
+Person count next to *daşary ýurt raýaty* uses `{{ds.TPCNT}}` / `{{ds.TPCTX}}` (`TotalPersonCount`). Visa-cancel count next to *wizasy ýatyrmak* uses `{{ds.CVCNT}}` / `{{ds.CVCTX}}` (`CancelVisaCount`). Long names `CancelPersonCount` / `CancelVisaCount` still merge if typed.
 
 ---
 

@@ -132,7 +132,7 @@
     {
         var n = 0;
         if (p.RequirePersonPassport) n++;
-        if (p.RequirePersonEducation) n++;
+        if (p.RequirePersonEducation && ApplicationProfileEducationPolicy.AllowsPersonEducation(p)) n++;
         if (p.RequirePersonPosition) n++;
         if (p.RequirePersonAddressOfResidence) n++;
         if (p.RequirePersonVisa) n++;
@@ -142,7 +142,7 @@
         if (p.RequirePersonSalary) n++;
         if (p.RequirePersonMedical) n++;
         if (p.RequirePersonRejectionItem) n++;
-        if (p.RequirePersonTravelHistory && p.ActionFamily != ApplicationProfileActionFamily.BusinessTrip) n++;
+        if (p.RequirePersonTravelHistory && ApplicationProfileTravelHistoryPolicy.AllowsPersonTravelHistory(p)) n++;
         return n;
     }
 }

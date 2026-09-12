@@ -490,7 +490,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         }
         catch (Exception ex)
         {
-            model.PersonLinkStatusMessage = ex.Message;
+            model.PersonLinkStatusMessage = EntitySaveExceptionFormatter.ToOfficerMessage(ex);
             model.PersonLinkStatusIsError = true;
         }
         finally

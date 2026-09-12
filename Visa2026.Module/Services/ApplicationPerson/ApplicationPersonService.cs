@@ -3,6 +3,7 @@ using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.BaseImpl.EF;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.MigrationImport;
 
 namespace Visa2026.Module.Services.ApplicationPersonRoster;
 
@@ -33,7 +34,15 @@ public static class ApplicationProfileInstancePersonService
             existing = tracked;
         }
 
-        ApplicationProfileInstancePersonResolver.RefreshResolvedLinks(objectSpace, application, existing);
+        // Import must stay on Refresh only (snapshot FKs). Officer Link existing
+        // uses the same Last-N pin as Relink so both valid visas appear on first link.
+        if (MigrationImportContext.IsDataImport)
+        {
+            ApplicationProfileInstancePersonResolver.RefreshResolvedLinks(objectSpace, application, existing);
+            return existing;
+        }
+
+        RelinkPerson(objectSpace, application, existing);
         return existing;
     }
 
@@ -64,6 +73,8 @@ public static class ApplicationProfileInstancePersonService
         if (ApplicationProfileInstancePersonRosterLockHelper.AreResolvedLinksLocked(trackedApplication))
             return false;
 
+        ApplicationProfileInstancePersonResolver.EnsureApplicationProfileLoaded(objectSpace, trackedApplication);
+
         if (trackedPerson.ID != Guid.Empty && !objectSpace.IsNewObject(trackedPerson))
             objectSpace.ReloadObject(trackedPerson);
 
@@ -87,6 +98,11 @@ public static class ApplicationProfileInstancePersonService
                 bo.ID);
         }
 
+        ApplicationProfileInstancePersonResolver.RemoveDuplicateResolvedLinks(
+            objectSpace,
+            trackedApplication,
+            trackedPerson);
+
         return true;
     }
 
@@ -103,6 +119,11 @@ public static class ApplicationProfileInstancePersonService
         if (tracked != null)
             application.People!.Remove(tracked);
 
+        var inverse = person.ApplicationProfileInstances?
+            .FirstOrDefault(a => a != null && a.ID == application.ID);
+        if (inverse != null)
+            person.ApplicationProfileInstances!.Remove(inverse);
+
         var applicationId = application.ID;
         if (applicationId == Guid.Empty || personId == Guid.Empty)
             return;
@@ -113,7 +134,8 @@ public static class ApplicationProfileInstancePersonService
         foreach (var link in links)
         {
             if (link.LinkKind is { } kind && link.LinkedObjectId is Guid linkedId && linkedId != Guid.Empty)
-                ApplicationProfileInstanceChildMembership.Remove(application, kind, linkedId);
+                ApplicationProfileInstanceChildMembership.Remove(application, kind, linkedId, objectSpace);
+            application.PersonResolvedLinks?.Remove(link);
             objectSpace.Delete(link);
         }
     }

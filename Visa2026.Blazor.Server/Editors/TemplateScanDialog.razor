@@ -1054,12 +1054,7 @@
             var templateKind = Path.GetExtension(_fileName).Equals(".xlsx", StringComparison.OrdinalIgnoreCase)
                 ? ApplicationProfileTemplateKind.Excel
                 : ApplicationProfileTemplateKind.Word;
-            _placeholderSet = PlaceholderSets.GetSet(new ApplicationProfilePlaceholderSetQuery
-            {
-                Profile = profile,
-                DataScope = _dataScope,
-                TemplateKind = templateKind,
-            });
+            _placeholderSet = PlaceholderSets.GetSet(ScanPlaceholderLibrary.Query(profile, templateKind));
 
             var sourceKind = ingest.Input.SourceKind;
             var officeBytes = ingest.Input.OfficePackageBytes ?? fileBytes;
@@ -1242,12 +1237,7 @@
                 : ApplicationProfileTemplateKind.Word;
             if (!remap || _placeholderSet == null)
             {
-                _placeholderSet = PlaceholderSets.GetSet(new ApplicationProfilePlaceholderSetQuery
-                {
-                    Profile = profile,
-                    DataScope = _dataScope,
-                    TemplateKind = templateKind,
-                });
+                _placeholderSet = PlaceholderSets.GetSet(ScanPlaceholderLibrary.Query(profile, templateKind));
             }
 
             if (!ingest.Suitability.CanContinue)

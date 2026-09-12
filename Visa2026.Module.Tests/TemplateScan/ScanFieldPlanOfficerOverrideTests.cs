@@ -245,6 +245,29 @@ public class ScanFieldPlanOfficerOverrideTests
     }
 
     [Fact]
+    public void ApplyToken_promotes_gap_to_mapped_field()
+    {
+        var set = HeaderSet();
+        var plan = Plan(set, "{{ds.ADAT}}", null);
+        var withGap = new ScanFieldPlan
+        {
+            PlaceholderSet = plan.PlaceholderSet,
+            ScanKind = plan.ScanKind,
+            Fields = plan.Fields,
+            StaticRegions = plan.StaticRegions,
+            Gaps = [new ScanGap("g1", "Mehmet Çırak", null)],
+            PendingQuestions = plan.PendingQuestions,
+            Source = plan.Source,
+            YellowHighlightCount = plan.YellowHighlightCount,
+        };
+
+        var next = ScanFieldPlanOfficerOverride.ApplyToken(withGap, "g1", "CHFN");
+
+        Assert.Empty(next.Gaps);
+        Assert.Contains(next.Fields, f => f.FieldId == "g1" && f.ProposedToken == "{{ds.CHFN}}");
+    }
+
+    [Fact]
     public void RemoveReviewRow_drops_a_gap()
     {
         var set = HeaderSet();

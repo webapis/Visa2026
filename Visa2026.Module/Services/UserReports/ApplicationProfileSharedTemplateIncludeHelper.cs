@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.WordReports;
 
 namespace Visa2026.Module.Services.UserReports;
 
@@ -51,6 +52,13 @@ public static class ApplicationProfileSharedTemplateIncludeHelper
         var existing = FindLiveInclude(objectSpace, profile, name);
         if (existing != null)
             return existing;
+
+        var recycled = FindRecycledInclude(objectSpace, profile, name);
+        if (recycled != null)
+        {
+            ApplicationProfileTemplateRecycleBin.Restore(recycled);
+            return recycled;
+        }
 
         var template = objectSpace.CreateObject<ApplicationProfileTemplate>();
         template.ApplicationProfile = profile;
@@ -108,5 +116,28 @@ public static class ApplicationProfileSharedTemplateIncludeHelper
                 && t.TemplateKind != ApplicationProfileTemplateKind.PdfForm
                 && t.TemplateName != null
                 && t.TemplateName.ToLower() == lowered);
+    }
+
+    public static ApplicationProfileTemplate? FindRecycledInclude(
+        IObjectSpace objectSpace,
+        ApplicationProfile profile,
+        string? templateName)
+    {
+        if (objectSpace == null || profile == null || string.IsNullOrWhiteSpace(templateName))
+            return null;
+
+        var profileId = profile.ID;
+        var name = templateName.Trim();
+        var lowered = name.ToLower();
+        return objectSpace.GetObjectsQuery<ApplicationProfileTemplate>()
+            .Where(t =>
+                t.ApplicationProfileId == profileId
+                && t.RecycledAtUtc != null
+                && t.TemplateKind != ApplicationProfileTemplateKind.PdfForm
+                && t.TemplateName != null
+                && t.TemplateName.ToLower() == lowered)
+            .AsEnumerable()
+            .OrderByDescending(t => t.RecycledAtUtc)
+            .FirstOrDefault();
     }
 }

@@ -230,7 +230,8 @@ Configure on the template record (UI) or via **`EnsureTemplateExists`** argument
 | Symptom | Likely cause |
 |---------|----------------|
 | Not in Resminamalar zip | Inactive, wrong application type/contract/criteria, or seed not deployed |
-| Blank fields | Wrong token, missing `ds.` prefix, or placeholder not **valid** after Validate |
+| Cancel-visa letter `1 (bir)` though People & links Visa is 2/2 | `CVCNT` counted CurrentVisa + NextVisa (future start). Linked Last-N visas are the cancel set |
+| Cancel visa+WP letter `1 (bir)` though People & links WP is 2/2 | `CWCNT` counted roster lines + Previous WP. Linked Last-N work permits are the cancel set |
 | Loop empty / one row | Wrong collection (`rows` vs `ApplicationItems`), no non-deleted items, or Excel row rules broken |
 | DocxTemplater error on `ds.ApplicationItems.Person_FullName` | Use **`{{.Person_FullName}}`** inside **`{{#ds.ApplicationItems}}`** |
 | Photo shows `System.Byte[]` | Used plain **`{{.Person_Photo}}`** in Word — switch to **`{{IMAGE:Person_Photo}}`** |
@@ -239,6 +240,7 @@ Configure on the template record (UI) or via **`EnsureTemplateExists`** argument
 | Photo column empty (no literal token) | Person has no **`Photo`** bytes — expected; injector clears marker |
 | Wrong root for roster | **`ApplicationItem`** root cannot drive **`{{#ds.ApplicationItems}}`** — use **`Application`** |
 | Excel rows not copying | No `{{#ds.rows}}` on data row, merged cells on data row, wrong **`ExcelMergeMode`** |
+| Passport-change Excel sanaw both tables show the same (latest) booklet | Stacked Kiçirak / Täze tables. Merge expands each prototype; Kiçirak overlays previous passport onto `PPN`. Person must have two linked passports |
 | Old file after edit | Release DB kept previous bytes — re-upload, or DEBUG updater / **`FORCE_XAF_DB_UPDATE`** |
 | **`'{{ds.rows.X}}' could not be replaced`** on one “new” field (e.g. **`Person_NationalityCode`**) while earlier § fields OK | Wrong **`rows`** dictionary (**labor contract** keys) or **typed POCO rows** instead of **`Dictionary<string, object>`** — see **`learnings.md`** (Forma_16). Not a missing BO property if Validate shows path on **`ApplicationItem`**. |
 | Many placeholders **invalid** after Extract (e.g. 65/93) then few valid (66/66) after re-author | Word **split** tokens across runs — retype per map §6 in **one run**; do not add C# for fragment keys |

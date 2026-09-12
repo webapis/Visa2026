@@ -232,7 +232,7 @@
         else if (IsSharedPane)
         {
             <p class="resminamalar-catalog__shared-hint">@Msg("ApplicationReportPackage.SharedHint")</p>
-            @if (SharedEntries.Count == 0)
+            @if (VisibleSharedEntries.Count == 0)
             {
                 <div class="app-item-doc-copies__empty" role="status">
                     <p>@Msg("ApplicationReportPackage.SharedEmpty")</p>
@@ -588,7 +588,7 @@
 
     private RenderFragment RenderSharedCards() =>
         @<div class="resminamalar-catalog__cards">
-            @foreach (var entry in SharedEntries)
+            @foreach (var entry in VisibleSharedEntries)
             {
                 <section @key="entry.EntryKey"
                          class="resminamalar-catalog__card app-report-package__entry"
@@ -620,6 +620,22 @@
                                     ? Msg("ApplicationReportPackage.SharedToggleOn")
                                     : Msg("ApplicationReportPackage.SharedToggleOff"))
                             </button>
+                            @if (ShowDetails && entry.CanMoveToRecycleBin)
+                            {
+                                <button type="button"
+                                        class="resminamalar-catalog__recycle-btn"
+                                        title="@Msg("ApplicationReportPackage.MoveToRecycleBin.Tooltip")"
+                                        aria-label="@Msg("ApplicationReportPackage.MoveToRecycleBin.Tooltip")"
+                                        disabled="@(_packageBusy || _previewBusy || _recycleBusy || _sharedToggleBusy)"
+                                        @onclick="() => BeginMoveToRecycleBinConfirm(entry)">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                        <path d="M4 7h16" />
+                                        <path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                                        <path d="M6 7l1.2 13.2A1 1 0 0 0 8.2 21h7.6a1 1 0 0 0 1-.8L18 7" />
+                                        <path d="M10 11v6M14 11v6" />
+                                    </svg>
+                                </button>
+                            }
                         </div>
                     </div>
                 </section>
@@ -669,6 +685,39 @@
                 if (!_pendingRestoredKeys.Contains(entry.EntryKey))
                     continue;
                 if (list.Exists(e => string.Equals(e.EntryKey, entry.EntryKey, StringComparison.Ordinal)))
+                    continue;
+                list.Add(entry);
+            }
+
+            return list;
+        }
+    }
+
+    private IReadOnlyList<ApplicationWordReportPackageCatalogEntry> VisibleSharedEntries
+    {
+        get
+        {
+            var hiddenNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var pending in _pendingToBin.Values)
+            {
+                if (!string.IsNullOrWhiteSpace(pending.DisplayName))
+                    hiddenNames.Add(pending.DisplayName);
+            }
+
+            foreach (var bin in RecycleBinEntries)
+            {
+                if (_pendingRestoredKeys.Contains(bin.EntryKey))
+                    continue;
+                if (!string.IsNullOrWhiteSpace(bin.DisplayName))
+                    hiddenNames.Add(bin.DisplayName);
+            }
+
+            var list = new List<ApplicationWordReportPackageCatalogEntry>();
+            foreach (var entry in SharedEntries)
+            {
+                if (_pendingToBin.ContainsKey(entry.EntryKey))
+                    continue;
+                if (hiddenNames.Contains(entry.DisplayName))
                     continue;
                 list.Add(entry);
             }

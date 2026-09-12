@@ -63,8 +63,8 @@ public static class ScanReviewFieldOrder
                     gap.FieldId,
                     gap.LabelText,
                     gap.SuggestedPropertyName,
-                    null,
-                    0,
+                    gap.SourceRegion,
+                    gap.PageIndex,
                     IsGap: true));
             }
         }

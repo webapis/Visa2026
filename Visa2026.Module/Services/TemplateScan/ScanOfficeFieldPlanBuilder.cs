@@ -46,7 +46,9 @@ public static class ScanOfficeFieldPlanBuilder
         for (var yellowIndex = 0; yellowIndex < yellows.Count; yellowIndex++)
         {
             var yellow = yellows[yellowIndex];
-            nearbyByIndex.TryGetValue(yellowIndex, out var nearbyLabel);
+            nearbyByIndex.TryGetValue(yellowIndex, out var nearbyCtx);
+            var nearbyLabel = nearbyCtx?.Joined;
+            var countContext = nearbyCtx?.Following ?? nearbyLabel;
 
             var lockKey = ScanDocumentRegionKey.ForRegion(yellow.Region);
             if (lockKey != null && lockedByKey.TryGetValue(lockKey, out var lockedPin))
@@ -80,7 +82,8 @@ public static class ScanOfficeFieldPlanBuilder
                     yellow.PageIndex,
                     placeholderSet,
                     usedHeaderCodes,
-                    yellow.Region);
+                    yellow.Region,
+                    countContext);
             }
 
             if (resolved.Count == 0 && instanceCandidates.Count > 0)
@@ -111,7 +114,7 @@ public static class ScanOfficeFieldPlanBuilder
 
             if (resolved.Count == 0)
             {
-                resolved = TryCloneDuplicateLabel(yellow, drafts);
+                resolved = TryCloneDuplicateLabel(yellow, drafts, countContext);
             }
 
             if (resolved.Count == 0)
@@ -128,7 +131,7 @@ public static class ScanOfficeFieldPlanBuilder
             }
 
             if (resolved.Count == 0)
-                resolved = TryCloneDuplicateLabel(yellow, drafts);
+                resolved = TryCloneDuplicateLabel(yellow, drafts, countContext);
 
             if (resolved.Count > 0)
             {
@@ -279,12 +282,14 @@ public static class ScanOfficeFieldPlanBuilder
         return ScanFieldScope.Header;
     }
 
-    private static Dictionary<int, string?> BuildNearbyLabels(
+    private sealed record YellowNearby(string? Joined, string? Following);
+
+    private static Dictionary<int, YellowNearby> BuildNearbyLabels(
         byte[]? officeBytes,
         ScanSourceKind sourceKind,
         IReadOnlyList<ScanOfficeYellowSpan> yellows)
     {
-        var map = new Dictionary<int, string?>();
+        var map = new Dictionary<int, YellowNearby>();
         if (officeBytes is not { Length: > 64 } || yellows.Count == 0)
             return map;
 
@@ -306,9 +311,13 @@ public static class ScanOfficeFieldPlanBuilder
         {
             if (!contexts.TryGetValue(probes[i].FieldId, out var context))
                 continue;
-            var nearby = JoinNearby(context.PrintedLabel, context.FollowingCaption);
-            if (!string.IsNullOrWhiteSpace(nearby))
-                map[i] = nearby;
+            var following = string.IsNullOrWhiteSpace(context.FollowingCaption)
+                ? null
+                : context.FollowingCaption.Trim();
+            var nearby = JoinNearby(context.PrintedLabel, following);
+            if (string.IsNullOrWhiteSpace(nearby) && string.IsNullOrWhiteSpace(following))
+                continue;
+            map[i] = new YellowNearby(nearby, following);
         }
 
         return map;
@@ -349,7 +358,8 @@ public static class ScanOfficeFieldPlanBuilder
 
     private static IReadOnlyList<ScanDetectedFieldDraft> TryCloneDuplicateLabel(
         ScanOfficeYellowSpan yellow,
-        IReadOnlyList<ScanDetectedFieldDraft> drafts)
+        IReadOnlyList<ScanDetectedFieldDraft> drafts,
+        string? countContext)
     {
         var key = TemplateTextNormalizer.NormalizeIdentifier(yellow.Text);
         if (key.Length < TemplateTextNormalizer.MinimumMatchLength)
@@ -362,6 +372,12 @@ public static class ScanOfficeFieldPlanBuilder
                 key,
                 StringComparison.Ordinal));
         if (prior == null)
+            return Array.Empty<ScanDetectedFieldDraft>();
+
+        if (ScanOfficialLetterHints.PrefersDocumentCancelCount(countContext)
+            && TemplateTokenSyntax.TryGetShortCode(prior.ProposedToken ?? string.Empty, out var priorCode)
+            && (string.Equals(priorCode, "TPCNT", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(priorCode, "TPCTX", StringComparison.OrdinalIgnoreCase)))
             return Array.Empty<ScanDetectedFieldDraft>();
 
         return

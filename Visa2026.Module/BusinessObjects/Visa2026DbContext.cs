@@ -852,6 +852,7 @@ namespace Visa2026.Module.BusinessObjects
                     .OnDelete(DeleteBehavior.Restrict);
                 b.HasIndex(l => new { l.ApplicationProfileInstanceId, l.PersonId, l.LinkKind, l.LinkedObjectId })
                     .IsUnique()
+                    .HasFilter(IndexFilter("[GCRecord] IS NULL"))
                     .HasDatabaseName("IX_ApplicationProfileInstancePersonResolvedLinks_Instance_Person_Kind_Object");
             });
 

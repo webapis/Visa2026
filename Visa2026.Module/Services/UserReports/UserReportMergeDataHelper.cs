@@ -38,6 +38,10 @@ public static class UserReportMergeDataHelper
             ["MigrationService_NameTm"] = application.MigrationService_NameTm ?? string.Empty,
             ["TotalPersonCount"] = application.TotalPersonCount,
             ["TotalPersonCountText"] = application.TotalPersonCountText ?? string.Empty,
+            ["CancelVisaCount"] = application.CancelVisaCount,
+            ["CancelVisaCountText"] = application.CancelVisaCountText ?? string.Empty,
+            ["CancelWPCount"] = application.CancelWPCount,
+            ["CancelWPCountText"] = application.CancelWPCountText ?? string.Empty,
             ["Urgency_NameTm"] = application.Urgency_NameTm ?? string.Empty,
             ["VisaPeriod_NameTm"] = application.VisaPeriod_NameTm ?? string.Empty,
             ["VisaCategory_NameTm"] = application.VisaCategory_NameTm ?? string.Empty,
@@ -47,6 +51,9 @@ public static class UserReportMergeDataHelper
             ["Application_CompanyHead_FullName"] = application.Application_CompanyHead_FullName ?? string.Empty,
             ["CompanyHead_FullName"] = application.CompanyHead_FullName ?? string.Empty,
             ["CompanyHead_PositionTm"] = application.CompanyHead_PositionTm ?? string.Empty,
+            ["Invitation_Number"] = application.Invitation_Number ?? string.Empty,
+            ["Invitation_StartDateText"] = application.Invitation_StartDateText ?? string.Empty,
+            ["Invitation_ExpirationDateText"] = application.Invitation_ExpirationDateText ?? string.Empty,
         };
         UserReportPlaceholderAliasRegistry.EnrichDictionary(data);
         return data;
@@ -72,12 +79,21 @@ public static class UserReportMergeDataHelper
             ["Passport_Authority"] = item.Passport_Authority ?? string.Empty,
             ["Passport_CountryCode"] = item.Passport_CountryCode ?? string.Empty,
             ["Passport_CountryTm"] = item.Passport_CountryTm ?? string.Empty,
+            ["Passport_IssueDateText"] = item.Passport_IssueDateText ?? string.Empty,
             ["Passport_ExpirationDateText"] = item.Passport_ExpirationDateText ?? string.Empty,
+            ["PreviousPassport_Number"] = item.PreviousPassport_Number ?? string.Empty,
+            ["PreviousPassport_TypeTm"] = item.PreviousPassport_TypeTm ?? string.Empty,
+            ["PreviousPassport_Authority"] = item.PreviousPassport_Authority ?? string.Empty,
+            ["PreviousPassport_CountryCode"] = item.PreviousPassport_CountryCode ?? string.Empty,
+            ["PreviousPassport_CountryTm"] = item.PreviousPassport_CountryTm ?? string.Empty,
+            ["PreviousPassport_IssueDateText"] = item.PreviousPassport_IssueDateText ?? string.Empty,
+            ["PreviousPassport_ExpirationDateText"] = item.PreviousPassport_ExpirationDateText ?? string.Empty,
             ["Education_LevelTm"] = item.Education_LevelTm ?? string.Empty,
             ["Education_InstitutionName"] = item.Education_InstitutionName ?? string.Empty,
             ["Education_CountryCode"] = item.Education_CountryCode ?? string.Empty,
             ["Education_GraduationYear"] = item.Education_GraduationYear ?? string.Empty,
             ["Education_SpecialtyTm"] = item.Education_SpecialtyTm ?? string.Empty,
+            ["Education_LevelAndInstitutionTm"] = item.Education_LevelAndInstitutionTm ?? string.Empty,
             ["Position_PositionTm"] = item.Position_PositionTm ?? string.Empty,
             ["Application_VisaPeriod_NameTm"] = item.Application_VisaPeriod_NameTm ?? string.Empty,
             ["Application_VisaCategory_NameTm"] = item.Application_VisaCategory_NameTm ?? string.Empty,
@@ -162,8 +178,10 @@ public static class UserReportMergeDataHelper
         || (placeholders != null && placeholders.Any(p =>
             p.IsValid
             && (RowTokenReferences(p.PlaceholderKey, "CancelVisa_NumberBlock")
+                || RowTokenReferences(p.PlaceholderKey, "CancelWorkPermit_NumberBlock")
                 || (p.PlaceholderKey.StartsWith(".", StringComparison.Ordinal)
-                    && p.PlaceholderKey.Contains("CancelVisa_NumberBlock", StringComparison.OrdinalIgnoreCase)))));
+                    && (p.PlaceholderKey.Contains("CancelVisa_NumberBlock", StringComparison.OrdinalIgnoreCase)
+                        || p.PlaceholderKey.Contains("CancelWorkPermit_NumberBlock", StringComparison.OrdinalIgnoreCase))))));
 
     private static bool RowTokenReferences(string placeholderKey, string propertyName) =>
         !string.IsNullOrEmpty(placeholderKey)
@@ -228,6 +246,8 @@ public static class UserReportMergeDataHelper
             ["Person_LastName"] = item.Person_LastName ?? string.Empty,
             ["Person_FirstName"] = item.Person_FirstName ?? string.Empty,
             ["Person_DateOfBirthText"] = item.Person_DateOfBirthText ?? string.Empty,
+            ["Person_BirthPlace"] = item.Person_BirthPlace ?? string.Empty,
+            ["Person_CountryOfBirthTm"] = item.Person_CountryOfBirthTm ?? string.Empty,
             ["Person_GenderTm"] = item.Person_GenderTm ?? string.Empty,
             ["Person_NationalityCode"] = item.Person_NationalityCode ?? string.Empty,
             ["Passport_Number"] = item.Passport_Number ?? string.Empty,
@@ -237,9 +257,13 @@ public static class UserReportMergeDataHelper
             ["Passport_CountryTm"] = item.Passport_CountryTm ?? string.Empty,
             ["Passport_ExpirationDateText"] = item.Passport_ExpirationDateText ?? string.Empty,
             ["Registration_GelmeginMaksadyTm"] = item.Registration_GelmeginMaksadyTm ?? string.Empty,
+            ["Education_LevelAndInstitutionTm"] = item.Education_LevelAndInstitutionTm ?? string.Empty,
             ["CancelVisa_NumberBlock"] = item.CancelVisa_NumberBlock ?? string.Empty,
             ["CancelVisa_StartDateBlock"] = item.CancelVisa_StartDateBlock ?? string.Empty,
             ["CancelVisa_ExpirationDateBlock"] = item.CancelVisa_ExpirationDateBlock ?? string.Empty,
+            ["CancelWorkPermit_NumberBlock"] = item.CancelWorkPermit_NumberBlock ?? string.Empty,
+            ["CancelWorkPermit_StartDateBlock"] = item.CancelWorkPermit_StartDateBlock ?? string.Empty,
+            ["CancelWorkPermit_ExpirationDateBlock"] = item.CancelWorkPermit_ExpirationDateBlock ?? string.Empty,
         });
 
     /// <summary>Row keys for <c>sahsy_kagyz.docx</c> (ŞAHSY KAGYZY, ItemRows + photo).</summary>
@@ -536,6 +560,9 @@ public static class UserReportMergeDataHelper
             ["Visa_TypeTm"] = item.Visa_TypeTm ?? string.Empty,
             ["Registration_GelmeginMaksadyTm"] = item.Registration_GelmeginMaksadyTm ?? string.Empty,
             ["WorkPermit_WorkPermittedLocations"] = item.WorkPermit_WorkPermittedLocations ?? string.Empty,
+            ["CancelWorkPermit_NumberBlock"] = item.CancelWorkPermit_NumberBlock ?? string.Empty,
+            ["CancelWorkPermit_StartDateBlock"] = item.CancelWorkPermit_StartDateBlock ?? string.Empty,
+            ["CancelWorkPermit_ExpirationDateBlock"] = item.CancelWorkPermit_ExpirationDateBlock ?? string.Empty,
             ["TravelHistory_Kind"] = item.TravelHistory_Kind ?? string.Empty,
             ["TravelHistory_DateText"] = item.TravelHistory_DateText ?? string.Empty,
             ["TravelHistory_CheckPointTm"] = item.TravelHistory_CheckPointTm ?? string.Empty,

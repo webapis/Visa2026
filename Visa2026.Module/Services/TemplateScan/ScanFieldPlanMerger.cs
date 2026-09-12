@@ -37,12 +37,14 @@ public sealed class ScanFieldPlanMerger : IScanFieldPlanMerger
                 gap.LabelText,
                 gap.SuggestedPropertyName,
                 ScanBoundingBox.FullPage,
-                pageIndex: 0,
+                pageIndex: gap.PageIndex,
                 allowed,
                 hintTokens,
                 usedCodes,
                 fields,
-                gaps);
+                gaps,
+                nearbyLabel: null,
+                sourceRegion: gap.SourceRegion);
 
         var staticRegions = request.Proposal.StaticRegions
             .Select(r => new ScanStaticRegion
@@ -98,7 +100,8 @@ public sealed class ScanFieldPlanMerger : IScanFieldPlanMerger
             draft.PageIndex,
             allowed,
             usedCodes,
-            draft.SourceRegion);
+            draft.SourceRegion,
+            draft.NearbyLabel);
 
         foreach (var r in resolved)
             fields.Add(ToField(r, hintTokens, allowed));
@@ -125,7 +128,9 @@ public sealed class ScanFieldPlanMerger : IScanFieldPlanMerger
             hintTokens,
             usedCodes,
             fields,
-            gaps);
+            gaps,
+            draft.NearbyLabel,
+            draft.SourceRegion);
     }
 
     private static bool ShouldKeepDraftToken(
@@ -186,14 +191,17 @@ public sealed class ScanFieldPlanMerger : IScanFieldPlanMerger
         HashSet<string> hintTokens,
         HashSet<string> usedCodes,
         List<ScanDetectedField> fields,
-        List<ScanGap> gaps)
+        List<ScanGap> gaps,
+        string? nearbyLabel = null,
+        DocumentRegion? sourceRegion = null)
     {
         var resolved = ScanYellowHighlightTokenResolver.ResolveFromYellowText(
             labelText,
             box,
             pageIndex,
             allowed,
-            usedCodes);
+            usedCodes,
+            nearbyLabel: nearbyLabel);
 
         if (resolved.Count > 0)
         {
@@ -202,7 +210,7 @@ public sealed class ScanFieldPlanMerger : IScanFieldPlanMerger
             return;
         }
 
-        if (ScanYellowHighlightTokenResolver.IsYellowTextFullyMapped(labelText, allowed, usedCodes))
+        if (ScanYellowHighlightTokenResolver.IsYellowTextFullyMapped(labelText, allowed, usedCodes, nearbyLabel))
             return;
 
         var key = TemplateTextNormalizer.NormalizeIdentifier(labelText);
@@ -214,7 +222,7 @@ public sealed class ScanFieldPlanMerger : IScanFieldPlanMerger
                     TemplateTextNormalizer.NormalizeIdentifier(f.LabelText),
                     key,
                     StringComparison.Ordinal));
-            if (prior != null)
+            if (prior != null && !IsPersonCountCloneBlockedByVisaCancel(nearbyLabel, prior.ProposedToken))
             {
                 fields.Add(new ScanDetectedField
                 {
@@ -232,7 +240,34 @@ public sealed class ScanFieldPlanMerger : IScanFieldPlanMerger
             }
         }
 
-        gaps.Add(new ScanGap(fieldId, labelText, suggested));
+        if (sourceRegion != null)
+        {
+            fields.Add(new ScanDetectedField
+            {
+                FieldId = fieldId,
+                Box = box.Clamp(),
+                PageIndex = pageIndex,
+                LabelText = labelText,
+                ProposedToken = null,
+                Confidence = ScanFieldConfidence.Low,
+                Scope = ScanFieldScope.Header,
+                SourceRegion = sourceRegion,
+            });
+            return;
+        }
+
+        gaps.Add(new ScanGap(fieldId, labelText, suggested, sourceRegion, pageIndex));
+    }
+
+    private static bool IsPersonCountCloneBlockedByVisaCancel(string? nearbyLabel, string? priorToken)
+    {
+        if (!ScanOfficialLetterHints.PrefersDocumentCancelCount(nearbyLabel))
+            return false;
+        if (!TemplateTokenSyntax.TryGetShortCode(priorToken ?? string.Empty, out var priorCode))
+            return false;
+
+        return string.Equals(priorCode, "TPCNT", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(priorCode, "TPCTX", StringComparison.OrdinalIgnoreCase);
     }
 
     private static ScanDetectedField ToField(

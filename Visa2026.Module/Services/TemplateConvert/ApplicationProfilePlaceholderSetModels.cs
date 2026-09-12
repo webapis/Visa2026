@@ -17,6 +17,13 @@ public sealed class ApplicationProfilePlaceholderSetQuery
     public required ApplicationProfileTemplateDataScope DataScope { get; init; }
 
     public ApplicationProfileTemplateKind TemplateKind { get; init; } = ApplicationProfileTemplateKind.Word;
+
+    /// <summary>
+    /// Template Scan Review/Analyze: offer every catalog code this file kind can write.
+    /// Person-pack tiles and Header/Row save-scope do not hide codes (those still apply to Convert).
+    /// Excel still drops image tokens.
+    /// </summary>
+    public bool OfferFullLibrary { get; init; }
 }
 
 public enum PlaceholderExclusionReason

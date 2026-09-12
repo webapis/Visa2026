@@ -351,9 +351,6 @@ internal static class TemplateRosterLoopPlanner
         if (parsed.Count == 0)
             return Array.Empty<LoopMarker>();
 
-        var templateRow = parsed.Min(static p => p.Row);
-        var endRow = templateRow + 1;
-
         var occupied = substitutions
             .Select(static s => s.Region as DocumentRegion.ExcelCell)
             .Where(static c => c != null)
@@ -369,16 +366,22 @@ internal static class TemplateRosterLoopPlanner
                 workbook = new XLWorkbook(input);
             }
 
-            if (!TryPlaceExcelLoopMarker(
-                    sheetGroup.Key,
-                    templateRow,
-                    endRow,
-                    occupied,
-                    workbook,
-                    out var loop))
-                return Array.Empty<LoopMarker>();
+            var loops = new List<LoopMarker>();
+            foreach (var templateRow in parsed.Select(static p => p.Row).Distinct().OrderBy(static r => r))
+            {
+                if (!TryPlaceExcelLoopMarker(
+                        sheetGroup.Key,
+                        templateRow,
+                        endRow: templateRow + 1,
+                        occupied,
+                        workbook,
+                        out var loop))
+                    continue;
 
-            return [loop];
+                loops.Add(loop);
+            }
+
+            return loops;
         }
         finally
         {

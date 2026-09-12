@@ -996,22 +996,24 @@ namespace Visa2026.Module.BusinessObjects
         public string CancelPersonCountText => NumberToTurkmenWords(CancelPersonCount);
 
         /// <summary>
-        /// Total visas requested for cancellation on <see cref="App_Cancel_Visa"/> applications:
-        /// per active line, +1 when <see cref="ApplicationRosterMergeLine.CurrentVisa"/> is set and +1 when <see cref="ApplicationRosterMergeLine.NextVisa"/> is set.
+        /// Visas requested for cancellation (CVCNT): distinct People &amp; links Visa pins.
+        /// Falls back to CurrentVisa + NextVisa per merge line when links are not loaded.
         /// </summary>
         [XafDisplayName("Cancel Visa Count"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
-        public int CancelVisaCount => RosterLinesForReports()
-            .Sum(ai => (ai.CurrentVisa != null ? 1 : 0) + (ai.NextVisa != null ? 1 : 0));
+        public int CancelVisaCount => ApplicationProfileInstanceCancelCounts.Visas(this);
 
         [XafDisplayName("Cancel Visa Count (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
         public string CancelVisaCountText => NumberToTurkmenWords(CancelVisaCount);
 
+        /// <summary>
+        /// Work permits requested for cancellation (CWCNT): distinct People &amp; links WP pins.
+        /// Falls back to CurrentWorkPermitItem + PreviousWorkPermitItem per merge line.
+        /// </summary>
         [XafDisplayName("Cancel WP Count"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
-        public int CancelWPCount => RosterLinesForReports().Count()
-            + RosterLinesForReports().Count(ai => ai.PreviousWorkPermitItem != null);
+        public int CancelWPCount => ApplicationProfileInstanceCancelCounts.WorkPermits(this);
 
         [XafDisplayName("Cancel WP Count (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
@@ -1024,6 +1026,70 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Cancel Inv Count (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
         public string CancelInvCountText => NumberToTurkmenWords(CancelInvCount);
+
+        /// <summary>
+        /// The one invitation on a change-invitation case (Çakylygy üýtgetmek Ýüztutma).
+        /// Several <see cref="InvitationItems"/> may be linked (people), but they share this header.
+        /// Multiple distinct invitations per application are out of scope for now.
+        /// </summary>
+        private Invitation? ResolveLetterInvitation()
+        {
+            if (InvitationItems != null)
+            {
+                foreach (var item in InvitationItems)
+                {
+                    var invitation = item?.Invitation;
+                    if (invitation != null && !string.IsNullOrWhiteSpace(invitation.InvitationNumber))
+                        return invitation;
+                }
+            }
+
+            foreach (var line in RosterLinesForReports())
+            {
+                var invitation = line.CurrentInvitationItem?.Invitation;
+                if (invitation != null && !string.IsNullOrWhiteSpace(invitation.InvitationNumber))
+                    return invitation;
+            }
+
+            if (Invitations == null)
+                return null;
+
+            foreach (var invitation in Invitations)
+            {
+                if (invitation != null && !string.IsNullOrWhiteSpace(invitation.InvitationNumber))
+                    return invitation;
+            }
+
+            return null;
+        }
+
+        [XafDisplayName("Invitation Number (Word)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string Invitation_Number => ResolveLetterInvitation()?.InvitationNumber ?? string.Empty;
+
+        [XafDisplayName("Invitation Issued Date (Word)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string Invitation_StartDateText
+        {
+            get
+            {
+                var invitation = ResolveLetterInvitation();
+                return invitation == null ? string.Empty : $"{invitation.IssuedDate:dd.MM.yyyy}";
+            }
+        }
+
+        [XafDisplayName("Invitation Expiration Date (Word)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string Invitation_ExpirationDateText
+        {
+            get
+            {
+                var invitation = ResolveLetterInvitation();
+                return invitation?.ExpirationDate == null
+                    ? string.Empty
+                    : $"{invitation.ExpirationDate:dd.MM.yyyy}";
+            }
+        }
 
         #endregion
 

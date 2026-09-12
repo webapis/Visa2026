@@ -577,7 +577,7 @@ namespace Visa2026.Module.BusinessObjects
         public string Person_MaritalStatusTm => Person?.MaritalStatus?.NameTm;
 
         [XafDisplayName("Birth Place"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Person_BirthPlace => Person?.BirthPlace;
+        public string Person_BirthPlace => PersonBirthPlaceText.CityOnly(Person);
 
         [XafDisplayName("Foreign Address"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Person_ForeignAddress => Person?.ForeignAddress;
@@ -706,6 +706,9 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Previous Passport Country (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PreviousPassport_CountryTm => PreviousPassport?.IssuedCountry?.NameTm;
+
+        [XafDisplayName("Previous Passport Type (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PreviousPassport_TypeTm => PreviousPassport?.PassportType?.NameTm;
         #endregion
 
         #region Visa
@@ -1040,6 +1043,10 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
+                var child = ChildDependentEducationCaption.OverrideOrNull(Person);
+                if (child != null)
+                    return child;
+
                 var level = Education_LevelTm;
                 var inst = Education_InstitutionName;
                 var l = string.IsNullOrWhiteSpace(level) ? null : level.Trim();
@@ -1113,6 +1120,22 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Previous Work Permit Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PreviousWorkPermit_ExpirationDateText => $"{PreviousWorkPermitItem?.ExpirationDate:dd.MM.yyyy}";
+
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string CancelWorkPermit_NumberBlock =>
+            JoinVisaFieldLines(CurrentWorkPermitItem?.WorkPermitNumber, PreviousWorkPermitItem?.WorkPermitNumber);
+
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string CancelWorkPermit_StartDateBlock =>
+            JoinVisaFieldLines(
+                FormatVisaDateText(CurrentWorkPermitItem?.StartDate),
+                FormatVisaDateText(PreviousWorkPermitItem?.StartDate));
+
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string CancelWorkPermit_ExpirationDateBlock =>
+            JoinVisaFieldLines(
+                FormatVisaDateText(CurrentWorkPermitItem?.ExpirationDate),
+                FormatVisaDateText(PreviousWorkPermitItem?.ExpirationDate));
         #endregion
 
         #region Invitation

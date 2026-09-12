@@ -36,7 +36,9 @@
 | Scan text pattern | Tokens |
 |-------------------|--------|
 | `№ …` + date | `AFNUM`, `ADAT` |
-| `N (words)` count | `TPCNT`, `TPCTX` |
+| `N (words)` count | `TPCNT`, `TPCTX` (person / *daşary ýurt raýaty*) |
+| `N (words)` next to *wizasy ýatyrmak* | `CVCNT`, `CVCTX` (not TPCNT) |
+| `N (words)` next to *iş rugsatnamasyny ýatyrmak* | `CWCNT`, `CWCTX` (not TPCNT, not CVCNT) |
 | `N (words) aý` | `VPER` |
 | `köp gezeklik` / gezeklik | `VCAT` |
 | `Adaty tertipde!` | `Urgency_NameTm` |

@@ -14,15 +14,23 @@ public class ApplicationProfileTemplateRecycleBinTests
     }
 
     [Fact]
-    public void CanMoveToRecycleBin_CategoryOrGlobal_False()
+    public void CanMoveToRecycleBin_CategoryOrGlobal_True()
     {
         var category = ProfileSpecific();
         category.CatalogScope = ApplicationProfileTemplateCatalogScope.Category;
         var global = ProfileSpecific();
         global.CatalogScope = ApplicationProfileTemplateCatalogScope.Global;
 
-        Assert.False(ApplicationProfileTemplateRecycleBin.CanMoveToRecycleBin(category));
-        Assert.False(ApplicationProfileTemplateRecycleBin.CanMoveToRecycleBin(global));
+        Assert.True(ApplicationProfileTemplateRecycleBin.CanMoveToRecycleBin(category));
+        Assert.True(ApplicationProfileTemplateRecycleBin.CanMoveToRecycleBin(global));
+    }
+
+    [Fact]
+    public void CanMoveToRecycleBin_PdfForm_False()
+    {
+        var pdf = ProfileSpecific();
+        pdf.TemplateKind = ApplicationProfileTemplateKind.PdfForm;
+        Assert.False(ApplicationProfileTemplateRecycleBin.CanMoveToRecycleBin(pdf));
     }
 
     [Fact]
@@ -46,10 +54,21 @@ public class ApplicationProfileTemplateRecycleBinTests
     }
 
     [Fact]
-    public void Recycle_Category_Throws()
+    public void Recycle_SharedGlobal_SetsTimestamp()
     {
         var template = ProfileSpecific();
-        template.CatalogScope = ApplicationProfileTemplateCatalogScope.Category;
+        template.CatalogScope = ApplicationProfileTemplateCatalogScope.Global;
+        ApplicationProfileTemplateRecycleBin.Recycle(template, "officer");
+
+        Assert.NotNull(template.RecycledAtUtc);
+        Assert.Equal("officer", template.RecycledByUserName);
+    }
+
+    [Fact]
+    public void Recycle_PdfForm_Throws()
+    {
+        var template = ProfileSpecific();
+        template.TemplateKind = ApplicationProfileTemplateKind.PdfForm;
         Assert.Throws<InvalidOperationException>(() =>
             ApplicationProfileTemplateRecycleBin.Recycle(template, "officer"));
     }
@@ -67,14 +86,18 @@ public class ApplicationProfileTemplateRecycleBinTests
     }
 
     [Fact]
-    public void ShouldDeleteLinkedUserReportTemplate_OnlyUniqueProfileSpecific()
+    public void ShouldDeleteLinkedUserReportTemplate_WhenNameIsUnique()
     {
+        Assert.True(ApplicationProfileTemplateRecycleBin.ShouldDeleteLinkedUserReportTemplate(
+            otherNestedUsesSameName: false));
+        Assert.False(ApplicationProfileTemplateRecycleBin.ShouldDeleteLinkedUserReportTemplate(
+            otherNestedUsesSameName: true));
+        Assert.True(ApplicationProfileTemplateRecycleBin.ShouldDeleteLinkedUserReportTemplate(
+            ApplicationProfileTemplateCatalogScope.Category, otherNestedUsesSameName: false));
         Assert.True(ApplicationProfileTemplateRecycleBin.ShouldDeleteLinkedUserReportTemplate(
             ApplicationProfileTemplateCatalogScope.ProfileSpecific, otherNestedUsesSameName: false));
         Assert.False(ApplicationProfileTemplateRecycleBin.ShouldDeleteLinkedUserReportTemplate(
-            ApplicationProfileTemplateCatalogScope.ProfileSpecific, otherNestedUsesSameName: true));
-        Assert.False(ApplicationProfileTemplateRecycleBin.ShouldDeleteLinkedUserReportTemplate(
-            ApplicationProfileTemplateCatalogScope.Category, otherNestedUsesSameName: false));
+            ApplicationProfileTemplateCatalogScope.Global, otherNestedUsesSameName: true));
     }
 
     private static ApplicationProfileTemplate ProfileSpecific() =>

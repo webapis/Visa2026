@@ -26,6 +26,9 @@ public static class ApplicationProfileCalikPersonLastCountSeeds
             case "cancel_invitation":
                 row.PersonInvitationItemLastCount = 2;
                 break;
+            case "cancel_visa":
+                row.PersonVisaLastCount = 2;
+                break;
             case "cancel_visa_wp":
                 row.PersonVisaLastCount = 2;
                 row.PersonWorkPermitItemLastCount = 2;

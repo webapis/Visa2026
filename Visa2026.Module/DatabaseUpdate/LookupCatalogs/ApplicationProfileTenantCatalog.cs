@@ -402,6 +402,7 @@ internal static class ApplicationProfileTenantCatalogSync
                 updated++;
             }
 
+            ApplicationProfileCalikPersonLastCountSeeds.Apply(row);
             ApplyRow(objectSpace, profile, row, contracts);
         }
 
@@ -519,7 +520,8 @@ internal static class ApplicationProfileTenantCatalogSync
         profile.RequireEntryCheckPoint = row.RequireEntryCheckPoint;
 
         profile.RequirePersonPassport = row.RequirePersonPassport;
-        profile.RequirePersonEducation = row.RequirePersonEducation;
+        profile.RequirePersonEducation = row.RequirePersonEducation
+            && ApplicationProfileEducationPolicy.AllowsPersonEducation(profile);
         profile.RequirePersonPosition = true;
         profile.RequirePersonAddressOfResidence = true;
         profile.RequirePersonVisa = row.RequirePersonVisa;
@@ -530,7 +532,7 @@ internal static class ApplicationProfileTenantCatalogSync
         profile.RequirePersonMedical = row.RequirePersonMedical;
         profile.RequirePersonRejectionItem = row.RequirePersonRejectionItem;
         profile.RequirePersonTravelHistory =
-            profile.ActionFamily != ApplicationProfileActionFamily.BusinessTrip;
+            ApplicationProfileTravelHistoryPolicy.AllowsPersonTravelHistory(profile);
         profile.PersonPassportLastCount = ApplicationProfilePersonLastCount.Clamp(row.PersonPassportLastCount);
         profile.PersonVisaLastCount = ApplicationProfilePersonLastCount.Clamp(row.PersonVisaLastCount);
         profile.PersonInvitationItemLastCount = ApplicationProfilePersonLastCount.Clamp(row.PersonInvitationItemLastCount);

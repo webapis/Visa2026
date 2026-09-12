@@ -37,6 +37,7 @@ public static class ScanPlaceholderRoleCatalog
     private static readonly HashSet<string> CaseHeader = new(StringComparer.OrdinalIgnoreCase)
     {
         "AFNUM", "ADAT", "Urgency_NameTm", "VPER", "VCAT", "MSRV", "SPFNM", "ABZLN",
+        "TPCNT", "TPCTX", "CVCNT", "CVCTX", "CWCNT", "CWCTX",
     };
 
     public static ScanPlaceholderRole Resolve(string? shortCode)

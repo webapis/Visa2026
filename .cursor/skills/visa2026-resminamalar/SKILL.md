@@ -64,11 +64,13 @@ disable-model-invocation: false
 | **Sanaw** preview fails; `RowNo` empty hint | `UsesSingleDocumentItemList` / `BuildSanawyStyleRows` — not labor-contract per-item path | **This skill** + user-report-templates |
 | Need to remap placeholders on a saved catalog template | Row **Review placeholders** (this-profile nested Word/Excel) — not desktop **Edit template** | **template-scan** + this skill |
 | Cover letter Preview empty except signatory; file named for one person | Rebuild; Preview again. Header `{{ds.AFNUM}}` / `MSRV` / `TPCNT` now fill from the case. Re-Approve yellow-marks letters so they are Application header | **template-scan** + user-report-templates |
+| Cancel-visa Ýüztutma CVCNT is 1 with two linked visas | People & links 2/2 but letter `1 (bir)`. Rebuild; Preview — `2 (iki)`. No Re-Approve | **user-report-templates** — `ApplicationProfileInstanceCancelCounts` |
 | Cover letter Preview repeats the same page once per selected person | Header-only Word (`{{ds.*}}`) must be one file. Rebuild; Preview Yuztutma — **one page**. Şahsy / Forma 16 stay per person | **This skill** + template-scan |
 | Excel catalog Preview is a **blank PDF**; Word Preview OK; title is `report_….docx` | Nested catalog keys are `profile:{id}` not `user:{id}` — `ResolveDownloadFileName` fell back to `.docx` so Word PDF ran on Excel bytes | **This skill** |
 | Excel Preview is **portrait** for a wide sanaw (Hasaba almak, squeezed columns) | Custom Office→PDF converter, **not** XAF / XtraReports. `ExcelPreviewPageLayout` + `ApplicationWordReportOfficePreviewPdfConverter` | **This skill** |
 | `Invalid column name` on batch table | `BatchWorkerSchemaGate`, updaters, `FORCE_XAF_DB_UPDATE` | **lifecycle-docker** |
 | **Delete / Move to Recycle Bin** persists but the catalog card stays | Recycle Bin count vs Catalog row; restart then retry | **This skill** — learnings *catalog row stays* / *locked profile no-op* |
+| Shared catalog row has no trash (this-profile does) | Gear (details) on; Shared Word/Excel uses the same Recycle Bin as this-profile. Restart, hard-refresh | **This skill** |
 | **Edit template** does nothing / export failed | `TemplateEditStaging:Enabled`, HTTPS (prod), folder chosen | **This skill** — [`TEMPLATE_STAGING_EDIT.md`](../../../docs/TEMPLATE_STAGING_EDIT.md) |
 | **Sync to database** — file locked / 0 imported | Close Word/Excel; hash unchanged skips import | **This skill** |
 | Preview stale after sync | Run **Sync to database** (imports share); catalog reloads after import | **This skill** |

@@ -41,7 +41,7 @@ public static class ScanFieldPlanOfficerOverride
         }
 
         if (index < 0)
-            return plan;
+            return PromoteGap(plan, resolvedId, shortCodes);
 
         var field = plan.Fields[index];
         var requested = (shortCodes ?? Array.Empty<string>())
@@ -306,6 +306,44 @@ public static class ScanFieldPlanOfficerOverride
             hidden);
 
         return WithFields(plan, fields, plan.Gaps.ToList());
+    }
+
+    private static ScanFieldPlan PromoteGap(
+        ScanFieldPlan plan,
+        string fieldId,
+        IReadOnlyList<string>? shortCodes)
+    {
+        var gapIndex = -1;
+        for (var i = 0; i < plan.Gaps.Count; i++)
+        {
+            if (string.Equals(plan.Gaps[i].FieldId, fieldId, StringComparison.Ordinal))
+            {
+                gapIndex = i;
+                break;
+            }
+        }
+
+        if (gapIndex < 0)
+            return plan;
+
+        var gap = plan.Gaps[gapIndex];
+        var gaps = plan.Gaps.ToList();
+        gaps.RemoveAt(gapIndex);
+
+        var fields = plan.Fields.ToList();
+        fields.Add(new ScanDetectedField
+        {
+            FieldId = gap.FieldId,
+            Box = ScanBoundingBox.FullPage,
+            PageIndex = gap.PageIndex,
+            LabelText = gap.LabelText,
+            ProposedToken = null,
+            Confidence = ScanFieldConfidence.Low,
+            Scope = ScanFieldScope.Header,
+            SourceRegion = gap.SourceRegion,
+        });
+
+        return ApplyTokens(WithFields(plan, fields, gaps), fieldId, shortCodes);
     }
 
     private static ScanFieldPlan DropField(ScanFieldPlan plan, int index)

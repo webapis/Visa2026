@@ -382,9 +382,12 @@ internal static class ApplicationWorkspaceTabBuilder
             if (person == null || !linksByPerson.TryGetValue(person.ID, out var links))
                 continue;
 
+            var seen = new HashSet<Guid>();
             foreach (var link in links.Where(l => l.LinkKind == kind))
             {
                 if (link?.LinkedObjectId is not Guid linkedId || linkedId == Guid.Empty)
+                    continue;
+                if (!seen.Add(linkedId))
                     continue;
 
                 if (!linkedEntities.TryGetValue((kind, linkedId), out var entityObj) || entityObj is not T entity)

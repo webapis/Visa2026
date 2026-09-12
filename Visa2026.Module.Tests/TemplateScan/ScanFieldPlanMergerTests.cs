@@ -97,6 +97,45 @@ public class ScanFieldPlanMergerTests
     }
 
     [Fact]
+    public void Merge_UnmappedOfficeYellow_StaysFieldForManualAdd()
+    {
+        var set = FullSet();
+        var span = new DocumentRegion.WordSpan("body/8", 0, 12);
+        var merger = new ScanFieldPlanMerger();
+        var plan = merger.Merge(new ScanFieldPlanMergeRequest
+        {
+            PlaceholderSet = set,
+            ScanKind = ScanKind.FilledSample,
+            Proposal = new ScanFieldPlanProposal
+            {
+                Fields =
+                [
+                    new ScanDetectedFieldDraft
+                    {
+                        FieldId = "signatory",
+                        Box = ScanBoundingBox.FullPage,
+                        PageIndex = 0,
+                        LabelText = "Mehmet Çırak",
+                        ProposedToken = null,
+                        Confidence = ScanFieldConfidence.Medium,
+                        Scope = ScanFieldScope.Header,
+                        SourceRegion = span,
+                    },
+                ],
+                Source = "test",
+            },
+        });
+
+        var field = Assert.Single(plan.Fields);
+        Assert.Null(field.ProposedToken);
+        Assert.Same(span, field.SourceRegion);
+        Assert.Empty(plan.Gaps);
+
+        var next = ScanFieldPlanOfficerOverride.ApplyToken(plan, "signatory", "CHFN");
+        Assert.Equal("{{ds.CHFN}}", Assert.Single(next.Fields).ProposedToken);
+    }
+
+    [Fact]
     public void Merge_AllowsKnownToken()
     {
         var set = FullSet();

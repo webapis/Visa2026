@@ -157,6 +157,47 @@ public class ScanExcelYellowResolverTests
         Assert.Equal(ScanFieldConfidence.High, borderZone.Confidence);
     }
 
+    [Fact]
+    public void Resolve_maps_kicirak_passport_column_to_previous_short_codes()
+    {
+        var set = PlaceholderSet();
+        using var ms = new MemoryStream();
+        using (var wb = new XLWorkbook())
+        {
+            var ws = wb.AddWorksheet("Sanaw");
+            ws.Cell("A1").Value = "Kiçirak pasportyň maglumatlary";
+            ws.Cell("B2").Value = "Familiýasy";
+            ws.Cell("C2").Value = "Pasport belgisi";
+            ws.Cell("B3").Value = "Aydogan";
+            ws.Cell("B3").Style.Fill.BackgroundColor = XLColor.Yellow;
+            ws.Cell("C3").Value = "U24909175";
+            ws.Cell("C3").Style.Fill.BackgroundColor = XLColor.Yellow;
+            ws.Cell("A5").Value = "Täze pasportyň maglumatlary";
+            ws.Cell("B6").Value = "Familiýasy";
+            ws.Cell("C6").Value = "Pasport belgisi";
+            ws.Cell("B7").Value = "Aydogan";
+            ws.Cell("B7").Style.Fill.BackgroundColor = XLColor.Yellow;
+            ws.Cell("C7").Value = "U36556957";
+            ws.Cell("C7").Style.Fill.BackgroundColor = XLColor.Yellow;
+            wb.SaveAs(ms);
+        }
+
+        var bytes = ms.ToArray();
+        var yellows = new ScanOfficeYellowExtractor().Extract(bytes, ScanSourceKind.Excel);
+        var fields = ScanExcelYellowResolver.Resolve(bytes, yellows, set);
+
+        var previousNumber = Assert.Single(fields, f => f.LabelText == "U24909175");
+        Assert.Contains("PRPN", previousNumber.ProposedToken!, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("RPPN", previousNumber.ProposedToken!, StringComparison.OrdinalIgnoreCase);
+
+        var currentNumber = Assert.Single(fields, f => f.LabelText == "U36556957");
+        Assert.Contains("PPN", currentNumber.ProposedToken!, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("PRPN", currentNumber.ProposedToken!, StringComparison.OrdinalIgnoreCase);
+
+        var previousName = Assert.Single(fields, f => f.LabelText == "Aydogan" && f.SourceRegion is DocumentRegion.ExcelCell { CellReference: "B3" });
+        Assert.Contains("PLN", previousName.ProposedToken!, StringComparison.Ordinal);
+    }
+
     private static MemoryStream BuildSanawStyleWorkbook()
     {
         var ms = new MemoryStream();

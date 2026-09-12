@@ -11,6 +11,36 @@ namespace Visa2026.Module.Tests.Services;
 public class ApplicationProfileInstancePersonResolverTests
 {
     [Fact]
+    public void EnsureApplicationProfileLoaded_TrueWhenProfileAlreadySet()
+    {
+        var app = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile { PersonVisaLastCount = 2, RequirePersonVisa = true },
+        };
+
+        Assert.True(ApplicationProfileInstancePersonResolver.EnsureApplicationProfileLoaded(null, app));
+        Assert.Equal(2, ApplicationProfilePersonLastCount.For(app, ApplicationProfileInstancePersonLinkKind.Visa));
+    }
+
+    [Fact]
+    public void LastCount_DefaultsToOneWhenProfileNavigationMissing()
+    {
+        var app = new ApplicationProfileInstance
+        {
+            ApplicationType = new ApplicationType { ShowCurrentVisa = true },
+        };
+
+        Assert.Equal(1, ApplicationProfilePersonLastCount.For(app, ApplicationProfileInstancePersonLinkKind.Visa));
+    }
+
+    [Fact]
+    public void EnsureApplicationProfileLoaded_FalseWhenObjectSpaceAndProfileMissing()
+    {
+        Assert.False(ApplicationProfileInstancePersonResolver.EnsureApplicationProfileLoaded(
+            null, new ApplicationProfileInstance()));
+    }
+
+    [Fact]
     public void IsAutoLinkEnabled_RespectsRequirePersonPassport()
     {
         var app = new ApplicationProfileInstance
@@ -158,6 +188,86 @@ public class ApplicationProfileInstancePersonResolverTests
     }
 
     [Fact]
+    public void CollectMissingAutoLinks_AddsSecondVisaWhenLastCountIsTwo()
+    {
+        var stickyId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+        var secondId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+        var app = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile
+            {
+                RequirePersonVisa = true,
+                PersonVisaLastCount = 2,
+            },
+        };
+        var existing = new List<ApplicationProfileInstancePersonResolvedLink>
+        {
+            new() { LinkKind = ApplicationProfileInstancePersonLinkKind.Visa, LinkedObjectId = stickyId },
+        };
+        var today = DateTime.Today;
+        var candidates = new List<(ApplicationProfileInstancePersonLinkKind, object?)>
+        {
+            (ApplicationProfileInstancePersonLinkKind.Visa, new Visa
+            {
+                ID = stickyId,
+                StartDate = today.AddMonths(-8),
+                ExpirationDate = today.AddMonths(10),
+            }),
+            (ApplicationProfileInstancePersonLinkKind.Visa, new Visa
+            {
+                ID = secondId,
+                StartDate = today.AddMonths(-2),
+                ExpirationDate = today.AddMonths(6),
+            }),
+        };
+
+        var missing = ApplicationProfileInstancePersonResolver.CollectMissingAutoLinks(app, existing, candidates);
+
+        Assert.Single(missing);
+        Assert.Equal(secondId, missing[0].LinkedObjectId);
+    }
+
+    [Fact]
+    public void CollectMissingAutoLinks_AddsSecondWorkPermitWhenLastCountIsTwo()
+    {
+        var stickyId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc");
+        var secondId = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd");
+        var app = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile
+            {
+                RequirePersonWorkPermitItem = true,
+                PersonWorkPermitItemLastCount = 2,
+            },
+        };
+        var existing = new List<ApplicationProfileInstancePersonResolvedLink>
+        {
+            new() { LinkKind = ApplicationProfileInstancePersonLinkKind.WorkPermitItem, LinkedObjectId = stickyId },
+        };
+        var today = DateTime.Today;
+        var candidates = new List<(ApplicationProfileInstancePersonLinkKind, object?)>
+        {
+            (ApplicationProfileInstancePersonLinkKind.WorkPermitItem, new WorkPermitItem
+            {
+                ID = stickyId,
+                StartDate = today.AddMonths(-8),
+                ExpirationDate = today.AddMonths(10),
+            }),
+            (ApplicationProfileInstancePersonLinkKind.WorkPermitItem, new WorkPermitItem
+            {
+                ID = secondId,
+                StartDate = today.AddMonths(-2),
+                ExpirationDate = today.AddMonths(6),
+            }),
+        };
+
+        var missing = ApplicationProfileInstancePersonResolver.CollectMissingAutoLinks(app, existing, candidates);
+
+        Assert.Single(missing);
+        Assert.Equal(secondId, missing[0].LinkedObjectId);
+    }
+
+    [Fact]
     public void CollectMissingAutoLinks_LinksWhatExistsWhenLastCountIsShort()
     {
         var onlyId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
@@ -268,6 +378,38 @@ public class ApplicationProfileInstancePersonResolverTests
 
         Assert.Equal(ApplicationProfileInstancePersonResolver.EnsureResolvedLinkDecision.FillEmpty, decision);
         Assert.Same(empty, emptyRow);
+    }
+
+    [Fact]
+    public void MergeTrackedLinks_DoesNotAddSameVisaTwice()
+    {
+        var visaId = Guid.Parse("88888888-8888-8888-8888-888888888888");
+        var personId = Guid.Parse("99999999-9999-9999-9999-999999999999");
+        var fromQuery = new[]
+        {
+            new ApplicationProfileInstancePersonResolvedLink
+            {
+                PersonId = personId,
+                LinkKind = ApplicationProfileInstancePersonLinkKind.Visa,
+                LinkedObjectId = visaId,
+            },
+        };
+        var application = new ApplicationProfileInstance
+        {
+            PersonResolvedLinks =
+            [
+                new ApplicationProfileInstancePersonResolvedLink
+                {
+                    PersonId = personId,
+                    LinkKind = ApplicationProfileInstancePersonLinkKind.Visa,
+                    LinkedObjectId = visaId,
+                },
+            ],
+        };
+
+        var merged = ApplicationProfileInstancePersonResolver.MergeTrackedLinks(fromQuery, application, personId);
+
+        Assert.Single(merged);
     }
 
     [Fact]

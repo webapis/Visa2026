@@ -81,45 +81,58 @@ public static class ApplicationProfileInstanceChildMembership
     public static void Remove(
         ApplicationProfileInstance application,
         ApplicationProfileInstancePersonLinkKind kind,
-        Guid linkedObjectId)
+        Guid linkedObjectId,
+        IObjectSpace? objectSpace = null)
     {
         switch (kind)
         {
             case ApplicationProfileInstancePersonLinkKind.Passport:
                 RemoveById(application.Passports, linkedObjectId);
+                RemoveInverse(objectSpace?.GetObjectByKey<Passport>(linkedObjectId)?.ApplicationProfileInstances, application);
                 break;
             case ApplicationProfileInstancePersonLinkKind.Visa:
                 RemoveById(application.Visas, linkedObjectId);
+                RemoveInverse(objectSpace?.GetObjectByKey<Visa>(linkedObjectId)?.ApplicationProfileInstances, application);
                 break;
             case ApplicationProfileInstancePersonLinkKind.Education:
                 RemoveById(application.Educations, linkedObjectId);
+                RemoveInverse(objectSpace?.GetObjectByKey<Education>(linkedObjectId)?.ApplicationProfileInstances, application);
                 break;
             case ApplicationProfileInstancePersonLinkKind.AddressOfResidence:
                 RemoveById(application.AddressesOfResidence, linkedObjectId);
+                RemoveInverse(objectSpace?.GetObjectByKey<AddressOfResidence>(linkedObjectId)?.ApplicationProfileInstances, application);
                 break;
             case ApplicationProfileInstancePersonLinkKind.Position:
                 RemoveById(application.PositionHistories, linkedObjectId);
+                RemoveInverse(objectSpace?.GetObjectByKey<EmployeePositionHistory>(linkedObjectId)?.ApplicationProfileInstances, application);
                 break;
             case ApplicationProfileInstancePersonLinkKind.Salary:
                 RemoveById(application.Salaries, linkedObjectId);
+                RemoveInverse(objectSpace?.GetObjectByKey<EmployeeSalary>(linkedObjectId)?.ApplicationProfileInstances, application);
                 break;
             case ApplicationProfileInstancePersonLinkKind.MedicalRecord:
                 RemoveById(application.MedicalRecords, linkedObjectId);
+                RemoveInverse(objectSpace?.GetObjectByKey<MedicalRecord>(linkedObjectId)?.ApplicationProfileInstances, application);
                 break;
             case ApplicationProfileInstancePersonLinkKind.WorkDuty:
                 RemoveById(application.WorkDuties, linkedObjectId);
+                RemoveInverse(objectSpace?.GetObjectByKey<WorkDuty>(linkedObjectId)?.ApplicationProfileInstances, application);
                 break;
             case ApplicationProfileInstancePersonLinkKind.InvitationItem:
                 RemoveById(application.InvitationItems, linkedObjectId);
+                RemoveInverse(objectSpace?.GetObjectByKey<InvitationItem>(linkedObjectId)?.ApplicationProfileInstances, application);
                 break;
             case ApplicationProfileInstancePersonLinkKind.WorkPermitItem:
                 RemoveById(application.WorkPermitItems, linkedObjectId);
+                RemoveInverse(objectSpace?.GetObjectByKey<WorkPermitItem>(linkedObjectId)?.ApplicationProfileInstances, application);
                 break;
             case ApplicationProfileInstancePersonLinkKind.BorderZoneItem:
                 RemoveById(application.BorderZoneItems, linkedObjectId);
+                RemoveInverse(objectSpace?.GetObjectByKey<BorderZoneItem>(linkedObjectId)?.ApplicationProfileInstances, application);
                 break;
             case ApplicationProfileInstancePersonLinkKind.TravelHistory:
                 RemoveById(application.TravelHistories, linkedObjectId);
+                RemoveInverse(objectSpace?.GetObjectByKey<TravelHistory>(linkedObjectId)?.ApplicationProfileInstances, application);
                 break;
         }
     }
@@ -144,5 +157,16 @@ public static class ApplicationProfileInstanceChildMembership
         var match = list.FirstOrDefault(x => x != null && x.ID == id);
         if (match != null)
             list.Remove(match);
+    }
+
+    private static void RemoveInverse(
+        IList<ApplicationProfileInstance>? instances,
+        ApplicationProfileInstance application)
+    {
+        if (instances == null)
+            return;
+        var match = instances.FirstOrDefault(a => a != null && a.ID == application.ID);
+        if (match != null)
+            instances.Remove(match);
     }
 }

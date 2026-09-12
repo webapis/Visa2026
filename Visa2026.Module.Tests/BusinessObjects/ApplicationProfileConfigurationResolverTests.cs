@@ -174,6 +174,20 @@ public class ApplicationProfileConfigurationResolverTests
     }
 
     [Fact]
+    public void RequirePersonTravelHistory_IsFalseForInvitationProfiles()
+    {
+        var profile = new ApplicationProfile
+        {
+            ActionFamily = ApplicationProfileActionFamily.Issuance,
+            ProduceInvitation = true,
+            RequirePersonTravelHistory = true,
+        };
+        var app = new ApplicationProfileInstance { ApplicationProfile = profile };
+
+        Assert.False(ApplicationProfileConfigurationResolver.RequirePersonTravelHistory(app));
+    }
+
+    [Fact]
     public void RequirePersonTravelHistory_IsTrueForIssuanceWhenFlagOn()
     {
         var profile = new ApplicationProfile
@@ -184,6 +198,34 @@ public class ApplicationProfileConfigurationResolverTests
         var app = new ApplicationProfileInstance { ApplicationProfile = profile };
 
         Assert.True(ApplicationProfileConfigurationResolver.RequirePersonTravelHistory(app));
+    }
+
+    [Fact]
+    public void RequirePersonTravelHistory_IsFalseForVisaCancellationProfiles()
+    {
+        var profile = new ApplicationProfile
+        {
+            Code = "cancel_visa",
+            CancelVisas = true,
+            RequirePersonTravelHistory = true,
+        };
+        var app = new ApplicationProfileInstance { ApplicationProfile = profile };
+
+        Assert.False(ApplicationProfileConfigurationResolver.RequirePersonTravelHistory(app));
+    }
+
+    [Fact]
+    public void ShowCurrentEducation_IsFalseForVisaCancellationProfiles()
+    {
+        var profile = new ApplicationProfile
+        {
+            Code = "cancel_visa",
+            CancelVisas = true,
+            RequirePersonEducation = true,
+        };
+        var app = new ApplicationProfileInstance { ApplicationProfile = profile };
+
+        Assert.False(ApplicationProfileConfigurationResolver.ShowCurrentEducation(app));
     }
 
     [Fact]

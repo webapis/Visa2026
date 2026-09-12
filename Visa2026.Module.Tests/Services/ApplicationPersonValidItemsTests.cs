@@ -246,6 +246,39 @@ public class ApplicationProfileInstancePersonValidItemsTests
     }
 
     [Fact]
+    public void UnionDistinctById_IncludesVisaMissingFromPersonGraph()
+    {
+        var current = CreateVisa(Today.AddMonths(-2), Today.AddMonths(6));
+        current.ID = Guid.Parse("55555555-5555-5555-5555-555555555555");
+        var otherValid = CreateVisa(Today.AddMonths(-8), Today.AddMonths(10));
+        otherValid.ID = Guid.Parse("66666666-6666-6666-6666-666666666666");
+
+        var merged = ApplicationProfileInstancePersonValidItems.UnionDistinctById(
+            new[] { current, otherValid },
+            new[] { current });
+
+        Assert.Equal(2, merged.Count);
+        Assert.Contains(merged, v => v.ID == current.ID);
+        Assert.Contains(merged, v => v.ID == otherValid.ID);
+    }
+
+    [Fact]
+    public void ResolveVisas_WhenPassportCollectionHasOnlyCurrent_ReturnsOne()
+    {
+        var person = new Person();
+        var passport = new Passport { Person = person };
+        person.Passports.Add(passport);
+        var current = CreateVisa(Today.AddMonths(-2), Today.AddMonths(6));
+        current.ID = Guid.Parse("77777777-7777-7777-7777-777777777777");
+        passport.Visas.Add(current);
+
+        var resolved = ApplicationProfileInstancePersonValidItems.ResolveVisas(person, 2);
+
+        Assert.Single(resolved);
+        Assert.Same(current, resolved[0]);
+    }
+
+    [Fact]
     public void ResolveInvitationItems_TakesLastTwoValidSkipsExpiredAndUsed()
     {
         var person = new Person();

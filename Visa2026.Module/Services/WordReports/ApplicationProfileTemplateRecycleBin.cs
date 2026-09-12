@@ -6,8 +6,7 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Module.Services.WordReports;
 
 /// <summary>
-/// Resminamalar Recycle Bin for officer-created nested templates
-/// (<see cref="ApplicationProfileTemplateCatalogScope.ProfileSpecific"/>).
+/// Resminamalar Recycle Bin for nested Word/Excel templates (this-profile and Shared).
 /// Catalog Delete sets <see cref="ApplicationProfileTemplate.RecycledAtUtc"/>;
 /// Recycle Bin Restore clears it; Recycle Bin Delete permanently removes the nested row
 /// (and the linked <see cref="UserReportTemplate"/> when nothing else shares the name).
@@ -16,7 +15,6 @@ public static class ApplicationProfileTemplateRecycleBin
 {
     public static bool CanMoveToRecycleBin(ApplicationProfileTemplate? template) =>
         template != null
-        && template.CatalogScope == ApplicationProfileTemplateCatalogScope.ProfileSpecific
         && template.TemplateKind != ApplicationProfileTemplateKind.PdfForm
         && template.RecycledAtUtc == null;
 
@@ -29,7 +27,7 @@ public static class ApplicationProfileTemplateRecycleBin
         if (!CanMoveToRecycleBin(template))
         {
             throw new InvalidOperationException(
-                "Only this-profile officer templates can be moved to Recycle Bin.");
+                "Only officer Word/Excel catalog templates can be moved to Recycle Bin.");
         }
 
         template.RecycledAtUtc = DateTime.UtcNow;
@@ -49,8 +47,8 @@ public static class ApplicationProfileTemplateRecycleBin
 
     /// <summary>
     /// Permanently deletes a recycled nested row. Deletes the linked master
-    /// <see cref="UserReportTemplate"/> only when this was a profile-specific row and no
-    /// other nested template (any profile, including recycled) uses the same name.
+    /// <see cref="UserReportTemplate"/> when no other nested template (any profile,
+    /// including recycled) uses the same name.
     /// </summary>
     public static void Purge(IObjectSpace objectSpace, ApplicationProfileTemplate template)
     {
@@ -64,15 +62,9 @@ public static class ApplicationProfileTemplateRecycleBin
 
         var name = template.TemplateName?.Trim();
         var templateId = template.ID;
-        var catalogScope = template.CatalogScope;
-
-        UserReportTemplate? userTemplate = null;
-        if (catalogScope == ApplicationProfileTemplateCatalogScope.ProfileSpecific)
-        {
-            userTemplate = ApplicationProfileNestedTemplateCatalogHelper.TryResolveMergeTemplate(
-                objectSpace,
-                template);
-        }
+        var userTemplate = ApplicationProfileNestedTemplateCatalogHelper.TryResolveMergeTemplate(
+            objectSpace,
+            template);
 
         var otherNestedUsesName = !string.IsNullOrEmpty(name)
             && objectSpace.GetObjectsQuery<ApplicationProfileTemplate>()
@@ -83,15 +75,20 @@ public static class ApplicationProfileTemplateRecycleBin
         objectSpace.Delete(template);
 
         if (userTemplate != null
-            && ShouldDeleteLinkedUserReportTemplate(catalogScope, otherNestedUsesName))
+            && ShouldDeleteLinkedUserReportTemplate(otherNestedUsesName))
         {
             objectSpace.Delete(userTemplate);
         }
     }
 
+    public static bool ShouldDeleteLinkedUserReportTemplate(bool otherNestedUsesSameName) =>
+        !otherNestedUsesSameName;
+
     public static bool ShouldDeleteLinkedUserReportTemplate(
         ApplicationProfileTemplateCatalogScope catalogScope,
-        bool otherNestedUsesSameName) =>
-        catalogScope == ApplicationProfileTemplateCatalogScope.ProfileSpecific
-        && !otherNestedUsesSameName;
+        bool otherNestedUsesSameName)
+    {
+        _ = catalogScope;
+        return ShouldDeleteLinkedUserReportTemplate(otherNestedUsesSameName);
+    }
 }

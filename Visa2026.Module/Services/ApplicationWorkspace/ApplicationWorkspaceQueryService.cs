@@ -234,12 +234,14 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
         if (profile.RequirePersonWorkPermitItem) items.Add("WorkPermitItem");
         if (profile.RequirePersonInvitationItem) items.Add("InvitationItem");
         if (profile.RequirePersonBorderZoneItem) items.Add("BorderZoneItem");
-        if (profile.RequirePersonEducation) items.Add("Education");
+        if (profile.RequirePersonEducation
+            && ApplicationProfileEducationPolicy.AllowsPersonEducation(profile))
+            items.Add("Education");
         if (profile.RequirePersonSalary) items.Add("EmployeeSalary");
         if (profile.RequirePersonPosition) items.Add("EmployeePositionHistory");
         if (profile.RequirePersonMedical) items.Add("MedicalRecord");
         if (profile.RequirePersonTravelHistory
-            && profile.ActionFamily != ApplicationProfileActionFamily.BusinessTrip)
+            && ApplicationProfileTravelHistoryPolicy.AllowsPersonTravelHistory(profile))
             items.Add("TravelHistory");
         if (profile.RequirePersonRejectionItem) items.Add("RejectionItem");
         return items;

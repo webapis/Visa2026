@@ -52,6 +52,129 @@ public class ScanYellowHighlightTokenResolverTests
     }
 
     [Fact]
+    public void Resolve_CancelVisaLetter_MapsPersonThenVisaCount()
+    {
+        var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var drafts = ScanYellowHighlightTokenResolver.ResolveFromYellowText(
+            "sanawdaky 1 (bir) sany daşary ýurt raýatynyň 1 (bir) sany wizasyny ýatyrmagyňyzy",
+            ScanBoundingBox.FullPage,
+            0,
+            Set(),
+            used);
+
+        Assert.Contains(drafts, d => d.ProposedToken == "{{ds.TPCNT}}" && d.LabelText == "1");
+        Assert.Contains(drafts, d => d.ProposedToken == "{{ds.TPCTX}}" && d.LabelText == "bir");
+        Assert.Contains(drafts, d => d.ProposedToken == "{{ds.CVCNT}}" && d.LabelText == "1");
+        Assert.Contains(drafts, d => d.ProposedToken == "{{ds.CVCTX}}" && d.LabelText == "bir");
+    }
+
+    [Fact]
+    public void Resolve_IsolatedCount_UsesNearbyVisaCancelPhrase()
+    {
+        var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var drafts = ScanYellowHighlightTokenResolver.ResolveFromYellowText(
+            "1 (bir)",
+            ScanBoundingBox.FullPage,
+            0,
+            Set(),
+            used,
+            nearbyLabel: "sany wizasyny ýatyrmagyňyzy haýyş edýäris");
+
+        Assert.Contains(drafts, d => d.ProposedToken == "{{ds.CVCNT}}");
+        Assert.Contains(drafts, d => d.ProposedToken == "{{ds.CVCTX}}");
+        Assert.DoesNotContain(drafts, d => d.ProposedToken == "{{ds.TPCNT}}");
+    }
+
+    [Fact]
+    public void Resolve_IsolatedCount_UsesNearbyPersonPhrase()
+    {
+        var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var drafts = ScanYellowHighlightTokenResolver.ResolveFromYellowText(
+            "1 (bir)",
+            ScanBoundingBox.FullPage,
+            0,
+            Set(),
+            used,
+            nearbyLabel: "sany daşary ýurt raýatynyň");
+
+        Assert.Contains(drafts, d => d.ProposedToken == "{{ds.TPCNT}}");
+        Assert.Contains(drafts, d => d.ProposedToken == "{{ds.TPCTX}}");
+        Assert.DoesNotContain(drafts, d => d.ProposedToken == "{{ds.CVCNT}}");
+        Assert.DoesNotContain(drafts, d => d.ProposedToken == "{{ds.CWCNT}}");
+    }
+
+    [Fact]
+    public void Resolve_CancelVisaAndWorkPermitLetter_MapsPersonVisaThenWorkPermitCount()
+    {
+        var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var drafts = ScanYellowHighlightTokenResolver.ResolveFromYellowText(
+            "sanawdaky 1 (bir) sany daşary ýurt raýatynyň 1 (bir) sany wizasyny we 1 (bir) sany iş rugsatnamasyny ýatyrmagyňyzy",
+            ScanBoundingBox.FullPage,
+            0,
+            Set(),
+            used);
+
+        Assert.Contains(drafts, d => d.ProposedToken == "{{ds.TPCNT}}" && d.LabelText == "1");
+        Assert.Contains(drafts, d => d.ProposedToken == "{{ds.TPCTX}}" && d.LabelText == "bir");
+        Assert.Contains(drafts, d => d.ProposedToken == "{{ds.CVCNT}}" && d.LabelText == "1");
+        Assert.Contains(drafts, d => d.ProposedToken == "{{ds.CVCTX}}" && d.LabelText == "bir");
+        Assert.Contains(drafts, d => d.ProposedToken == "{{ds.CWCNT}}" && d.LabelText == "1");
+        Assert.Contains(drafts, d => d.ProposedToken == "{{ds.CWCTX}}" && d.LabelText == "bir");
+    }
+
+    [Fact]
+    public void Resolve_IsolatedCount_UsesNearbyWorkPermitCancelPhrase()
+    {
+        var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var drafts = ScanYellowHighlightTokenResolver.ResolveFromYellowText(
+            "1 (bir)",
+            ScanBoundingBox.FullPage,
+            0,
+            Set(),
+            used,
+            nearbyLabel: "sany iş rugsatnamasyny ýatyrmagyňyzy haýyş edýäris");
+
+        Assert.Contains(drafts, d => d.ProposedToken == "{{ds.CWCNT}}");
+        Assert.Contains(drafts, d => d.ProposedToken == "{{ds.CWCTX}}");
+        Assert.DoesNotContain(drafts, d => d.ProposedToken == "{{ds.TPCNT}}");
+        Assert.DoesNotContain(drafts, d => d.ProposedToken == "{{ds.CVCNT}}");
+    }
+
+    [Fact]
+    public void Resolve_IsolatedDigit_UsesNearbyWorkPermitCancelPhrase()
+    {
+        var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var drafts = ScanYellowHighlightTokenResolver.ResolveFromYellowText(
+            "3",
+            ScanBoundingBox.FullPage,
+            0,
+            Set(),
+            used,
+            nearbyLabel: "(üç) sany iş rugsatnamasyny ýatyrmagyňyzy");
+
+        Assert.Contains(drafts, d => d.ProposedToken == "{{ds.CWCNT}}" && d.LabelText == "3");
+        Assert.DoesNotContain(drafts, d => d.ProposedToken == "{{ds.CWCTX}}");
+        Assert.DoesNotContain(drafts, d => d.ProposedToken == "{{ds.TPCNT}}");
+    }
+
+    [Fact]
+    public void Resolve_IsolatedTurkmenWords_UsesNearbyWorkPermitCancelPhrase()
+    {
+        var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var drafts = ScanYellowHighlightTokenResolver.ResolveFromYellowText(
+            "üç",
+            ScanBoundingBox.FullPage,
+            0,
+            Set(),
+            used,
+            nearbyLabel: "sany iş rugsatnamasyny ýatyrmagyňyzy");
+
+        Assert.Contains(drafts, d => d.ProposedToken == "{{ds.CWCTX}}" && d.LabelText == "üç");
+        Assert.DoesNotContain(drafts, d => d.ProposedToken == "{{ds.CWCNT}}");
+        Assert.DoesNotContain(drafts, d => d.ProposedToken == "{{ds.TPCTX}}");
+    }
+
+    [Fact]
     public void Merge_UnmappedCompoundYellow_FillsLibraryTokens()
     {
         var set = Set();

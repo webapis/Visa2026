@@ -56,13 +56,31 @@ public static class ApplicationWorkspaceLinkedRecordsCatalog
         TryGetByTabKey(tabKey, out var def) && def.IsConfigured(application);
 
     public static int CountResolved(IEnumerable<ApplicationProfileInstancePersonResolvedLink> links, ApplicationProfileInstancePersonLinkKind kind) =>
-        links.Count(link => HasResolvedLink(link, kind));
+        DistinctLinkedObjectIds(links, personId: null, kind);
 
     public static int CountResolvedForPerson(
         IEnumerable<ApplicationProfileInstancePersonResolvedLink> links,
         Guid personId,
         ApplicationProfileInstancePersonLinkKind kind) =>
-        links.Count(link => link.PersonId == personId && HasResolvedLink(link, kind));
+        DistinctLinkedObjectIds(links, personId, kind);
+
+    private static int DistinctLinkedObjectIds(
+        IEnumerable<ApplicationProfileInstancePersonResolvedLink> links,
+        Guid? personId,
+        ApplicationProfileInstancePersonLinkKind kind)
+    {
+        var ids = new HashSet<Guid>();
+        foreach (var link in links ?? [])
+        {
+            if (personId is Guid pid && link.PersonId != pid)
+                continue;
+            if (!HasResolvedLink(link, kind) || link.LinkedObjectId is not Guid id)
+                continue;
+            ids.Add(id);
+        }
+
+        return ids.Count;
+    }
 
     public static bool TryGet(ApplicationProfileInstancePersonLinkKind kind, out Definition definition)
     {

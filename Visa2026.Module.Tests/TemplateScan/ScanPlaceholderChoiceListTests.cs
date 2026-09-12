@@ -55,6 +55,22 @@ public class ScanPlaceholderChoiceListTests
         Assert.DoesNotContain(groups, g => g.RelatedBo == UserReportPlaceholderRelatedBo.Person);
     }
 
+    [Theory]
+    [InlineData("CWCTX")]
+    [InlineData("CancelWPCountText")]
+    [InlineData("cancel work permit count")]
+    public void Cancel_work_permit_words_search_finds_CWCTX(string search)
+    {
+        var allowed = FullSet().Allowed;
+        var groups = ScanPlaceholderChoiceList.RemainingGroups(
+            allowed,
+            hideShortCodes: Array.Empty<string>(),
+            search: search);
+        Assert.Contains(
+            groups.SelectMany(g => g.Entries),
+            e => string.Equals(e.ShortCode, "CWCTX", StringComparison.OrdinalIgnoreCase));
+    }
+
     [Fact]
     public void Education_search_keeps_level_institution_and_specialty()
     {
@@ -98,6 +114,24 @@ public class ScanPlaceholderChoiceListTests
             Assert.Contains("EGIN", codes);
             Assert.Contains("EGSP", codes);
         }
+    }
+
+    [Theory]
+    [InlineData("birth place")]
+    [InlineData("birthplace")]
+    [InlineData("place of birth")]
+    [InlineData("PBPL")]
+    [InlineData("doglan yeri")]
+    [InlineData("Doglan ýeri")]
+    public void Birth_place_search_finds_PBPL(string search)
+    {
+        var allowed = FullSet().Allowed;
+        var codes = ScanPlaceholderChoiceList.RemainingGroups(allowed, hideShortCodes: Array.Empty<string>(), search)
+            .SelectMany(static g => g.Entries)
+            .Select(static e => e.ShortCode)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        Assert.Contains("PBPL", codes);
     }
 
     [Fact]

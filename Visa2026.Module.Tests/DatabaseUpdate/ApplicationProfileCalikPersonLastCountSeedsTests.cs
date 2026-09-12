@@ -33,6 +33,14 @@ public class ApplicationProfileCalikPersonLastCountSeedsTests
     }
 
     [Fact]
+    public void Apply_CancelVisa_VisaTwo()
+    {
+        var row = new ApplicationProfileTenantCatalogRow { Code = "cancel_visa" };
+        ApplicationProfileCalikPersonLastCountSeeds.Apply(row);
+        Assert.Equal(2, row.PersonVisaLastCount);
+    }
+
+    [Fact]
     public void Apply_CancelVisaWp_VisaAndWorkPermitTwo()
     {
         var row = new ApplicationProfileTenantCatalogRow { Code = "cancel_visa_wp" };

@@ -56,6 +56,33 @@ public class ApplicationWorkspaceLinkedRecordsCatalogTests
     }
 
     [Fact]
+    public void CountResolvedForPerson_DedupesSameVisaLinkedTwice()
+    {
+        var personId = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd");
+        var visaId = Guid.Parse("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee");
+        var links = new List<ApplicationProfileInstancePersonResolvedLink>
+        {
+            new()
+            {
+                PersonId = personId,
+                LinkKind = ApplicationProfileInstancePersonLinkKind.Visa,
+                LinkedObjectId = visaId,
+            },
+            new()
+            {
+                PersonId = personId,
+                LinkKind = ApplicationProfileInstancePersonLinkKind.Visa,
+                LinkedObjectId = visaId,
+            },
+        };
+
+        Assert.Equal(1, ApplicationWorkspaceLinkedRecordsCatalog.CountResolvedForPerson(
+            links, personId, ApplicationProfileInstancePersonLinkKind.Visa));
+        Assert.Equal(1, ApplicationWorkspaceLinkedRecordsCatalog.CountResolved(
+            links, ApplicationProfileInstancePersonLinkKind.Visa));
+    }
+
+    [Fact]
     public void Definitions_IncludesVisaAndRejectionPersonRecordKeys()
     {
         Assert.Contains(ApplicationWorkspaceLinkedRecordsCatalog.Definitions,

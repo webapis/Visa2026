@@ -133,9 +133,11 @@ public static class ApplicationProfileInstancePeopleSkipNavSchemaSql
             END IF;
 
             DROP INDEX IF EXISTS "IX_ApplicationProfileInstancePersonResolvedLinks_Instance_Person_Kind";
-            CREATE UNIQUE INDEX IF NOT EXISTS "IX_ApplicationProfileInstancePersonResolvedLinks_Instance_Person_Kind_Object"
+            DROP INDEX IF EXISTS "IX_ApplicationProfileInstancePersonResolvedLinks_Instance_Person_Kind_Object";
+            CREATE UNIQUE INDEX "IX_ApplicationProfileInstancePersonResolvedLinks_Instance_Person_Kind_Object"
               ON "ApplicationProfileInstancePersonResolvedLinks"
-              ("ApplicationProfileInstanceId", "PersonId", "LinkKind", "LinkedObjectId");
+              ("ApplicationProfileInstanceId", "PersonId", "LinkKind", "LinkedObjectId")
+              WHERE "GCRecord" IS NULL;
           END IF;
 
           IF to_regclass('public."ApplicationProfileInstancePeople"') IS NOT NULL THEN
