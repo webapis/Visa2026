@@ -23,6 +23,30 @@ Keep **`SKILL.md`** stable; **promote** into `SKILL.md` only when the same lesso
 
 ## Entries
 
+### 2026-09-14 — CINB/CISB/CIEB cancel invitation sanaw stacks (family: ItemRoster)
+
+- **Symptom**: Excel *Çakylygyň belgisi* / resmileşdirilen / möhleti had no cancel-stack codes. Add showed INVN/INVS/INVE only.
+- **Root cause**: Invitation merge had current+previous fields but no stacked block short codes (unlike CWAB/CWSB/CWEB).
+- **Fix**: **CINB** / **CISB** / **CIEB** join Current then Previous invitation headers; skip duplicate Invitation.ID; `1)` only when two values.
+- **Prevent**: INVN is current-only. Invitation has no separate AS field — CINB is InvitationNumber (COO…).
+- **Officer**: Stop F5, rebuild, Analyze. Add **Cancel invitation AS numbers — CINB**.
+
+### 2026-09-14 — CICNT / CICTX cancel invitation letter counts (family: AppScalar)
+
+- **Symptom**: Create from yellow marks Add list had Cancel visa / Cancel work permit counts but no invitation count. Letter *çakylygyny ýatyrmak* could not be mapped.
+- **Root cause**: Catalog and merge header dict omitted `CancelInvCount`. Count was roster people with a CurrentInvitationItem.
+- **Fix**: Header **CICNT** / **CICTX**. Count distinct Invitation headers on linked InvitationItems.
+- **Prevent**: Two people on one invitation = CICNT 1. Do not use TPCNT or INVN for the letter count.
+- **Officer**: Stop F5, rebuild, Analyze. Add **Cancel invitation count — CICNT** and **(words) — CICTX**.
+
+### 2026-09-14 — One work permit prints without 1) (family: ItemRoster)
+
+- **Symptom**: Cancel-WP sanaw with one linked permit showed `1) COO…` on AS/tassyk/dates.
+- **Root cause**: Numbered join always prefixed, including a single line.
+- **Fix**: `1)` / `2)` only when the block has two or more values. One valid WP (or one visa) prints the value alone. CWLB stays unnumbered.
+- **Prevent**: Do not number a one-document stack.
+- **Officer**: Stop F5, rebuild, Preview 9/-1687. Two linked WPs still get `1)` `2)`.
+
 ### 2026-09-14 — CWLB locations stay unnumbered (family: ItemRoster)
 
 - **Symptom**: Officer does not want `1)` / `2)` on *Hereket edýän çägi* (**CWLB**).

@@ -800,7 +800,8 @@ namespace Visa2026.Module.BusinessObjects
 
         /// <summary>
         /// Newline-separated Current then Previous/Next values. Number/date/AS blocks get
-        /// <c>1)</c>, <c>2)</c> prefixes; work-permit locations stay unnumbered.
+        /// <c>1)</c>, <c>2)</c> only when two or more lines are present. One value prints
+        /// without an ordinal. Work-permit locations stay unnumbered.
         /// </summary>
         private static string JoinVisaFieldLines(params string?[] parts) =>
             JoinVisaFieldLines(numberLines: true, parts);
@@ -814,7 +815,7 @@ namespace Visa2026.Module.BusinessObjects
             if (lines.Count == 0)
                 return string.Empty;
 
-            IEnumerable<string> output = numberLines
+            IEnumerable<string> output = numberLines && lines.Count > 1
                 ? lines.Select(static (line, index) => $"{index + 1}) {line}")
                 : lines;
             return string.Join(Environment.NewLine, output);
@@ -1197,6 +1198,35 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Previous Invitation Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PreviousInvitation_ExpirationDateText => $"{PreviousInvitationItem?.Invitation?.ExpirationDate:dd.MM.yyyy}";
+
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string CancelInvitation_NumberBlock =>
+            JoinVisaFieldLines(CancelInvitationHeaders().Select(i => i.InvitationNumber).ToArray());
+
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string CancelInvitation_IssuedDateBlock =>
+            JoinVisaFieldLines(CancelInvitationHeaders().Select(i => FormatVisaDateText(i.IssuedDate)).ToArray());
+
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string CancelInvitation_ExpirationDateBlock =>
+            JoinVisaFieldLines(CancelInvitationHeaders().Select(i => FormatVisaDateText(i.ExpirationDate)).ToArray());
+
+        private IReadOnlyList<Invitation> CancelInvitationHeaders()
+        {
+            var rows = new List<Invitation>();
+            var seen = new HashSet<Guid>();
+            foreach (var item in new[] { CurrentInvitationItem, PreviousInvitationItem })
+            {
+                var invitation = item?.Invitation;
+                if (invitation == null)
+                    continue;
+                if (invitation.ID != Guid.Empty && !seen.Add(invitation.ID))
+                    continue;
+                rows.Add(invitation);
+            }
+
+            return rows;
+        }
         #endregion
 
         #region MedicalRecord

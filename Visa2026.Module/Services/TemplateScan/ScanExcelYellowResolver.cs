@@ -509,6 +509,9 @@ internal static class ScanExcelColumnProfiles
         new(["as-№", "as-no", "as belgisi", "asnumber"], ["CWAB"], false),
         new(["tassyknama", "tassyk-nama", "tassyknama belgisi"], ["CWNB"], false),
         new(["hereket edyan cagi", "hereket edyan", "work permitted", "rugsat berlen"], ["CWLB"], false),
+        new(["cakylygyn belgisi", "cakylyk belgisi", "cancel invitation as"], ["CINB"], false),
+        new(["cakylygyn resmilesdirilen", "resmilesdirilen senesi", "cancel invitation issued"], ["CISB"], false),
+        new(["cakylygyn mohleti", "cancel invitation expiration", "cancel invitation expiry"], ["CIEB"], false),
         new(["sahamcanyn mudiri", "gol cekiji wezipesi"], ["ACPOS"], false),
     ];
 

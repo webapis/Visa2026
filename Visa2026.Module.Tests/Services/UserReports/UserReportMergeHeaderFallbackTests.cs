@@ -27,6 +27,7 @@ public class UserReportMergeHeaderFallbackTests
         Assert.Equal(0, Assert.IsType<int>(UserReportMergeDataHelper.GetPropertyValueFromItemOrApplication(line, "TPCNT")));
         Assert.Equal(0, Assert.IsType<int>(UserReportMergeDataHelper.GetPropertyValueFromItemOrApplication(line, "CVCNT")));
         Assert.Equal(0, Assert.IsType<int>(UserReportMergeDataHelper.GetPropertyValueFromItemOrApplication(line, "CWCNT")));
+        Assert.Equal(0, Assert.IsType<int>(UserReportMergeDataHelper.GetPropertyValueFromItemOrApplication(line, "CICNT")));
     }
 
     [Fact]

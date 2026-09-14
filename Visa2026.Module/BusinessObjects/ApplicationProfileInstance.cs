@@ -1019,9 +1019,13 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         public string CancelWPCountText => NumberToTurkmenWords(CancelWPCount);
 
+        /// <summary>
+        /// Invitations requested for cancellation (CICNT): distinct Invitation headers
+        /// on linked InvitationItem pins (two people on one invitation = 1).
+        /// </summary>
         [XafDisplayName("Cancel Inv Count"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
-        public int CancelInvCount => RosterLinesForReports().Count(ai => ai.CurrentInvitationItem != null);
+        public int CancelInvCount => ApplicationProfileInstanceCancelCounts.Invitations(this);
 
         [XafDisplayName("Cancel Inv Count (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]

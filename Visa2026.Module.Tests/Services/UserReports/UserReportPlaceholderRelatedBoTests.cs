@@ -15,6 +15,8 @@ public class UserReportPlaceholderRelatedBoTests
     [InlineData("CVCTX", "CancelVisaCountText")]
     [InlineData("CWCNT", "CancelWPCount")]
     [InlineData("CWCTX", "CancelWPCountText")]
+    [InlineData("CICNT", "CancelInvCount")]
+    [InlineData("CICTX", "CancelInvCountText")]
     public void Cancel_document_count_tokens_are_catalogued(string shortCode, string canonical)
     {
         var catalog = new UserReportPlaceholderCatalogService();
@@ -213,6 +215,25 @@ public class UserReportPlaceholderRelatedBoTests
     }
 
     [Theory]
+    [InlineData("CINB", "CancelInvitation_NumberBlock")]
+    [InlineData("CISB", "CancelInvitation_IssuedDateBlock")]
+    [InlineData("CIEB", "CancelInvitation_ExpirationDateBlock")]
+    public void Cancel_invitation_block_tokens_are_catalogued(string shortCode, string canonical)
+    {
+        var catalog = new UserReportPlaceholderCatalogService();
+        var entry = catalog.GetEntries().Single(e =>
+            string.Equals(e.ShortCode, shortCode, StringComparison.OrdinalIgnoreCase));
+
+        Assert.Equal(canonical, entry.CanonicalPath);
+        Assert.Equal(UserReportPlaceholderPack.PersonInvitationItem, entry.Pack);
+        Assert.Equal(UserReportPlaceholderRelatedBo.Invitation, entry.RelatedBo);
+        Assert.Contains(UserReportBoType.ApplicationProfileInstance, entry.RootBoTypes);
+        Assert.Contains(UserReportBoType.ApplicationItem, entry.RootBoTypes);
+        Assert.NotNull(typeof(ApplicationRosterMergeLine).GetProperty(
+            canonical, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase));
+    }
+
+    [Theory]
     [InlineData("INVN", "Invitation_Number")]
     [InlineData("INVS", "Invitation_StartDateText")]
     [InlineData("INVE", "Invitation_ExpirationDateText")]
@@ -248,6 +269,9 @@ public class UserReportPlaceholderRelatedBoTests
         Assert.Contains("INVN", codes);
         Assert.Contains("INVS", codes);
         Assert.Contains("INVE", codes);
+        Assert.Contains("CINB", codes);
+        Assert.Contains("CISB", codes);
+        Assert.Contains("CIEB", codes);
         Assert.DoesNotContain(invitation.Entries, e => e.RelatedBo != UserReportPlaceholderRelatedBo.Invitation);
     }
 

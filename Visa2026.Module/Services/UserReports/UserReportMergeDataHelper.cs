@@ -42,6 +42,8 @@ public static class UserReportMergeDataHelper
             ["CancelVisaCountText"] = application.CancelVisaCountText ?? string.Empty,
             ["CancelWPCount"] = application.CancelWPCount,
             ["CancelWPCountText"] = application.CancelWPCountText ?? string.Empty,
+            ["CancelInvCount"] = application.CancelInvCount,
+            ["CancelInvCountText"] = application.CancelInvCountText ?? string.Empty,
             ["Urgency_NameTm"] = application.Urgency_NameTm ?? string.Empty,
             ["VisaPeriod_NameTm"] = application.VisaPeriod_NameTm ?? string.Empty,
             ["VisaCategory_NameTm"] = application.VisaCategory_NameTm ?? string.Empty,
@@ -179,9 +181,11 @@ public static class UserReportMergeDataHelper
             p.IsValid
             && (RowTokenReferences(p.PlaceholderKey, "CancelVisa_NumberBlock")
                 || RowTokenReferences(p.PlaceholderKey, "CancelWorkPermit_NumberBlock")
+                || RowTokenReferences(p.PlaceholderKey, "CancelInvitation_NumberBlock")
                 || (p.PlaceholderKey.StartsWith(".", StringComparison.Ordinal)
                     && (p.PlaceholderKey.Contains("CancelVisa_NumberBlock", StringComparison.OrdinalIgnoreCase)
-                        || p.PlaceholderKey.Contains("CancelWorkPermit_NumberBlock", StringComparison.OrdinalIgnoreCase))))));
+                        || p.PlaceholderKey.Contains("CancelWorkPermit_NumberBlock", StringComparison.OrdinalIgnoreCase)
+                        || p.PlaceholderKey.Contains("CancelInvitation_NumberBlock", StringComparison.OrdinalIgnoreCase))))));
 
     private static bool RowTokenReferences(string placeholderKey, string propertyName) =>
         !string.IsNullOrEmpty(placeholderKey)
@@ -266,6 +270,9 @@ public static class UserReportMergeDataHelper
             ["CancelWorkPermit_StartDateBlock"] = item.CancelWorkPermit_StartDateBlock ?? string.Empty,
             ["CancelWorkPermit_ExpirationDateBlock"] = item.CancelWorkPermit_ExpirationDateBlock ?? string.Empty,
             ["CancelWorkPermit_LocationsBlock"] = item.CancelWorkPermit_LocationsBlock ?? string.Empty,
+            ["CancelInvitation_NumberBlock"] = item.CancelInvitation_NumberBlock ?? string.Empty,
+            ["CancelInvitation_IssuedDateBlock"] = item.CancelInvitation_IssuedDateBlock ?? string.Empty,
+            ["CancelInvitation_ExpirationDateBlock"] = item.CancelInvitation_ExpirationDateBlock ?? string.Empty,
         });
 
     /// <summary>Row keys for <c>sahsy_kagyz.docx</c> (ŞAHSY KAGYZY, ItemRows + photo).</summary>
@@ -567,6 +574,9 @@ public static class UserReportMergeDataHelper
             ["CancelWorkPermit_StartDateBlock"] = item.CancelWorkPermit_StartDateBlock ?? string.Empty,
             ["CancelWorkPermit_ExpirationDateBlock"] = item.CancelWorkPermit_ExpirationDateBlock ?? string.Empty,
             ["CancelWorkPermit_LocationsBlock"] = item.CancelWorkPermit_LocationsBlock ?? string.Empty,
+            ["CancelInvitation_NumberBlock"] = item.CancelInvitation_NumberBlock ?? string.Empty,
+            ["CancelInvitation_IssuedDateBlock"] = item.CancelInvitation_IssuedDateBlock ?? string.Empty,
+            ["CancelInvitation_ExpirationDateBlock"] = item.CancelInvitation_ExpirationDateBlock ?? string.Empty,
             ["TravelHistory_Kind"] = item.TravelHistory_Kind ?? string.Empty,
             ["TravelHistory_DateText"] = item.TravelHistory_DateText ?? string.Empty,
             ["TravelHistory_CheckPointTm"] = item.TravelHistory_CheckPointTm ?? string.Empty,

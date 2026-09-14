@@ -80,6 +80,18 @@ public static class ScanPlaceholderChoiceList
         if (term.Contains("hereket", StringComparison.OrdinalIgnoreCase)
             || term.Contains("work permitted", StringComparison.OrdinalIgnoreCase))
             yield return "work permitted locations";
+        if (term.Contains("cakylyk", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("çakylyk", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("cancel invitation", StringComparison.OrdinalIgnoreCase))
+        {
+            yield return "cancel invitation count";
+            yield return "cancel invitation as numbers";
+            yield return "cancel invitation issued dates";
+            yield return "cancel invitation expiration dates";
+        }
+        if (term.Contains("resmilesdirilen", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("resmileşdirilen", StringComparison.OrdinalIgnoreCase))
+            yield return "cancel invitation issued dates";
     }
 
     private static bool Contains(string? value, string term)

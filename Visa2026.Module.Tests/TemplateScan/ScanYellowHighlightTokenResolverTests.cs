@@ -175,6 +175,77 @@ public class ScanYellowHighlightTokenResolverTests
     }
 
     [Fact]
+    public void Resolve_CancelWorkPermitAndInvitationLetter_MapsPersonWpThenInvitationCount()
+    {
+        var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var drafts = ScanYellowHighlightTokenResolver.ResolveFromYellowText(
+            "sanawdaky 3 (üç) sany daşary ýurt raýatynyň 3 (üç) sany işlemek üçin rugsatnamasyny we 3 (üç) sany çakylygyny ýatyrmagyňyzy",
+            ScanBoundingBox.FullPage,
+            0,
+            Set(),
+            used);
+
+        Assert.Contains(drafts, d => d.ProposedToken == "{{ds.TPCNT}}" && d.LabelText == "3");
+        Assert.Contains(drafts, d => d.ProposedToken == "{{ds.TPCTX}}" && d.LabelText == "üç");
+        Assert.Contains(drafts, d => d.ProposedToken == "{{ds.CWCNT}}" && d.LabelText == "3");
+        Assert.Contains(drafts, d => d.ProposedToken == "{{ds.CWCTX}}" && d.LabelText == "üç");
+        Assert.Contains(drafts, d => d.ProposedToken == "{{ds.CICNT}}" && d.LabelText == "3");
+        Assert.Contains(drafts, d => d.ProposedToken == "{{ds.CICTX}}" && d.LabelText == "üç");
+    }
+
+    [Fact]
+    public void Resolve_IsolatedCount_UsesNearbyInvitationCancelPhrase()
+    {
+        var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var drafts = ScanYellowHighlightTokenResolver.ResolveFromYellowText(
+            "3 (üç)",
+            ScanBoundingBox.FullPage,
+            0,
+            Set(),
+            used,
+            nearbyLabel: "sany çakylygyny ýatyrmagyňyzy haýyş edýäris");
+
+        Assert.Contains(drafts, d => d.ProposedToken == "{{ds.CICNT}}");
+        Assert.Contains(drafts, d => d.ProposedToken == "{{ds.CICTX}}");
+        Assert.DoesNotContain(drafts, d => d.ProposedToken == "{{ds.TPCNT}}");
+        Assert.DoesNotContain(drafts, d => d.ProposedToken == "{{ds.CWCNT}}");
+    }
+
+    [Fact]
+    public void Resolve_IsolatedDigit_UsesNearbyInvitationCancelPhrase()
+    {
+        var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var drafts = ScanYellowHighlightTokenResolver.ResolveFromYellowText(
+            "3",
+            ScanBoundingBox.FullPage,
+            0,
+            Set(),
+            used,
+            nearbyLabel: "(üç) sany çakylygyny ýatyrmagyňyzy");
+
+        Assert.Contains(drafts, d => d.ProposedToken == "{{ds.CICNT}}" && d.LabelText == "3");
+        Assert.DoesNotContain(drafts, d => d.ProposedToken == "{{ds.CICTX}}");
+        Assert.DoesNotContain(drafts, d => d.ProposedToken == "{{ds.CWCNT}}");
+    }
+
+    [Fact]
+    public void Resolve_IsolatedTurkmenWords_UsesNearbyInvitationCancelPhrase()
+    {
+        var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var drafts = ScanYellowHighlightTokenResolver.ResolveFromYellowText(
+            "üç",
+            ScanBoundingBox.FullPage,
+            0,
+            Set(),
+            used,
+            nearbyLabel: "sany çakylygyny ýatyrmagyňyzy");
+
+        Assert.Contains(drafts, d => d.ProposedToken == "{{ds.CICTX}}" && d.LabelText == "üç");
+        Assert.DoesNotContain(drafts, d => d.ProposedToken == "{{ds.CICNT}}");
+        Assert.DoesNotContain(drafts, d => d.ProposedToken == "{{ds.CWCTX}}");
+    }
+
+    [Fact]
     public void Merge_UnmappedCompoundYellow_FillsLibraryTokens()
     {
         var set = Set();

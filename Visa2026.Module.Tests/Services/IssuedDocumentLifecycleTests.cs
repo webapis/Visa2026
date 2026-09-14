@@ -72,6 +72,16 @@ public class IssuedDocumentLifecycleTests
     }
 
     [Fact]
+    public void InvitationItem_IsUsed_FalseWhenIssuedVisaNotLoadedAndNoObjectSpace()
+    {
+        var item = new InvitationItem { ID = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa") };
+
+        Assert.False(IssuedDocumentLifecycle.IsUsed(item));
+        Assert.False(IssuedDocumentLifecycle.IsInvitationItemUsedById(objectSpace: null, item.ID));
+        Assert.Empty(IssuedDocumentLifecycle.LoadUsedInvitationItemIds(objectSpace: null));
+    }
+
+    [Fact]
     public void Visa_IsCancelled_FromSkipNavCancellationInstance()
     {
         var visa = new Visa { ApplicationProfileInstances = new ObservableCollection<ApplicationProfileInstance>() };

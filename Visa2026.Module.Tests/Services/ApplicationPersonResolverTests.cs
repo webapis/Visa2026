@@ -435,4 +435,67 @@ public class ApplicationProfileInstancePersonResolverTests
         Assert.Equal(ApplicationProfileInstancePersonResolver.EnsureResolvedLinkDecision.None, decision);
         Assert.Null(emptyRow);
     }
+
+    [Fact]
+    public void ShouldDropUsedInvitationLinkOnCancelRelink_TrueOnlyOnCancelInvitationProfile()
+    {
+        var cancel = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile { CancelInvitations = true },
+        };
+        var other = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile
+            {
+                CancelInvitations = false,
+                RequirePersonInvitationItem = true,
+            },
+        };
+
+        Assert.True(ApplicationProfileInstancePersonResolver.ShouldDropUsedInvitationLinkOnCancelRelink(cancel));
+        Assert.False(ApplicationProfileInstancePersonResolver.ShouldDropUsedInvitationLinkOnCancelRelink(other));
+    }
+
+    [Fact]
+    public void CollectMissingAutoLinks_SkipsUsedInvitationOnCancelInvitation()
+    {
+        var unusedId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+        var usedId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+        var live = new Invitation
+        {
+            IssuedDate = DateTime.Today.AddMonths(-1),
+            ExpirationDate = DateTime.Today.AddMonths(6),
+        };
+        var app = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile
+            {
+                CancelInvitations = true,
+                RequirePersonInvitationItem = true,
+                PersonInvitationItemLastCount = 2,
+            },
+        };
+        var candidates = new List<(ApplicationProfileInstancePersonLinkKind, object?)>
+        {
+            (ApplicationProfileInstancePersonLinkKind.InvitationItem, new InvitationItem
+            {
+                ID = unusedId,
+                Invitation = live,
+            }),
+            (ApplicationProfileInstancePersonLinkKind.InvitationItem, new InvitationItem
+            {
+                ID = usedId,
+                Invitation = live,
+                IssuedVisa = new Visa(),
+            }),
+        };
+
+        var missing = ApplicationProfileInstancePersonResolver.CollectMissingAutoLinks(
+            app,
+            Array.Empty<ApplicationProfileInstancePersonResolvedLink>(),
+            candidates);
+
+        Assert.Single(missing);
+        Assert.Equal(unusedId, missing[0].LinkedObjectId);
+    }
 }

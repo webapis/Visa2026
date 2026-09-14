@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.Services;
@@ -24,7 +25,50 @@ public static class IssuedDocumentLifecycle
         && HasCompletedFamily(item?.ApplicationProfileInstances, ApplicationProfileActionFamily.Change);
 
     public static bool IsUsed(InvitationItem? item) =>
-        item?.IssuedVisa != null;
+        IsUsed(item, objectSpace: null);
+
+    /// <summary>
+    /// Used when a visa points at this line. Checks <see cref="InvitationItem.IssuedVisa"/>
+    /// and, when that inverse is not loaded, <see cref="Visa.IssuingInvitationItem"/>.
+    /// </summary>
+    public static bool IsUsed(InvitationItem? item, IObjectSpace? objectSpace)
+    {
+        if (item == null)
+            return false;
+        if (item.IssuedVisa != null)
+            return true;
+
+        var id = item.ID;
+        if (id == Guid.Empty)
+            return false;
+
+        return IsInvitationItemUsedById(objectSpace ?? ObjectSpaceHelper.Get(item), id);
+    }
+
+    public static bool IsInvitationItemUsedById(IObjectSpace? objectSpace, Guid invitationItemId)
+    {
+        if (objectSpace == null || invitationItemId == Guid.Empty)
+            return false;
+
+        return objectSpace.GetObjectsQuery<Visa>()
+            .Any(v => v.IssuingInvitationItem != null && v.IssuingInvitationItem.ID == invitationItemId);
+    }
+
+    /// <summary>
+    /// Invitation item IDs that already have an issued visa
+    /// (<see cref="Visa.IssuingInvitationItem"/>). Used when the inverse
+    /// <see cref="InvitationItem.IssuedVisa"/> is not loaded.
+    /// </summary>
+    public static HashSet<Guid> LoadUsedInvitationItemIds(IObjectSpace? objectSpace)
+    {
+        if (objectSpace == null)
+            return [];
+
+        return objectSpace.GetObjectsQuery<Visa>()
+            .Where(v => v.IssuingInvitationItem != null)
+            .Select(v => v.IssuingInvitationItem.ID)
+            .ToHashSet();
+    }
 
     /// <summary>
     /// True when the invitation line is cancelled, changed, or already used for a visa.

@@ -26,6 +26,8 @@ public class UserReportPlaceholderCatalogRootBoTypeTests
         Assert.Contains(forCase, e => e.ShortCode == "CVCTX");
         Assert.Contains(forCase, e => e.ShortCode == "CWCNT");
         Assert.Contains(forCase, e => e.ShortCode == "CWCTX");
+        Assert.Contains(forCase, e => e.ShortCode == "CICNT");
+        Assert.Contains(forCase, e => e.ShortCode == "CICTX");
         Assert.Contains(forCase, e => e.ShortCode == "Urgency_NameTm");
         // Dual-listed Application + ApplicationItem must still appear on case filter.
         Assert.Contains(forCase, e => e.ShortCode == "ACADR");

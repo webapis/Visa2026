@@ -200,7 +200,12 @@ public static class ApplicationProfileInstancePersonValidItems
             QueryInvitationItemsForPerson(objectSpace, person.ID),
             person.InvitationItems);
         if (EnforceOfficerLinkValidity)
+        {
+            var usedIds = IssuedDocumentLifecycle.LoadUsedInvitationItemIds(objectSpace);
+            if (usedIds.Count > 0)
+                query = query.Where(i => !usedIds.Contains(i.ID));
             query = query.Where(i => CanLinkInvitationItem(i, asOf));
+        }
 
         return query
             .OrderByDescending(i => i.Invitation?.IssuedDate ?? default)
@@ -346,9 +351,11 @@ public static class ApplicationProfileInstancePersonValidItems
         if (objectSpace == null || personId == Guid.Empty)
             return [];
 
-        return objectSpace.GetObjectsQuery<InvitationItem>()
-            .Where(i => i.Person != null && i.Person.ID == personId)
-            .ToList();
+        IQueryable<InvitationItem> query = objectSpace.GetObjectsQuery<InvitationItem>()
+            .Where(i => i.Person != null && i.Person.ID == personId);
+        if (EnforceOfficerLinkValidity)
+            query = IssuedDocumentLifecycle.WhereInvitationItemNotUsed(query);
+        return query.ToList();
     }
 
     private static IReadOnlyList<WorkPermitItem> QueryWorkPermitItemsForPerson(IObjectSpace? objectSpace, Guid personId)

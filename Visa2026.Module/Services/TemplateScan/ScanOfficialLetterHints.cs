@@ -88,6 +88,19 @@ public static class ScanOfficialLetterHints
     }
 
     /// <summary>
+    /// Printed invitation-cancel count: <c>3 (üç) sany çakylygyny ýatyrmak</c>.
+    /// </summary>
+    public static bool LooksLikeCancelInvitationCount(string? text)
+    {
+        var folded = TemplateTextNormalizer.NormalizeFolded(text);
+        if (folded.Length < 4 || !folded.Contains("yatyr", StringComparison.Ordinal))
+            return false;
+
+        return folded.Contains("cakyly", StringComparison.Ordinal)
+            || folded.Contains("invitation", StringComparison.Ordinal);
+    }
+
+    /// <summary>
     /// When both person and visa-cancel phrases appear, the earlier phrase wins
     /// so the first <c>1 (bir)</c> stays TPCNT and the one before <c>wizasy ýatyrmak</c> is CVCNT.
     /// </summary>
@@ -96,6 +109,8 @@ public static class ScanOfficialLetterHints
         if (!LooksLikeCancelVisaCount(text))
             return false;
         if (LooksLikeCancelWorkPermitCount(text) && WorkPermitPhraseStartsBeforeVisa(text))
+            return false;
+        if (LooksLikeCancelInvitationCount(text) && InvitationPhraseStartsBeforeVisa(text))
             return false;
         if (!LooksLikePersonCountPhrase(text))
             return true;
@@ -117,6 +132,8 @@ public static class ScanOfficialLetterHints
             return false;
         if (LooksLikeCancelVisaCount(text) && !WorkPermitPhraseStartsBeforeVisa(text))
             return false;
+        if (LooksLikeCancelInvitationCount(text) && !WorkPermitPhraseStartsBeforeInvitation(text))
+            return false;
         if (!LooksLikePersonCountPhrase(text))
             return true;
 
@@ -126,8 +143,31 @@ public static class ScanOfficialLetterHints
         return wpIdx >= 0 && (personIdx < 0 || wpIdx < personIdx);
     }
 
+    /// <summary>
+    /// When invitation-cancel and WP/visa phrases appear, the earlier document wins
+    /// so <c>iş rugsatnamasyny</c> stays CWCNT and <c>çakylygyny ýatyrmak</c> is CICNT.
+    /// </summary>
+    public static bool PrefersCancelInvitationCount(string? text)
+    {
+        if (!LooksLikeCancelInvitationCount(text))
+            return false;
+        if (LooksLikeCancelWorkPermitCount(text) && WorkPermitPhraseStartsBeforeInvitation(text))
+            return false;
+        if (LooksLikeCancelVisaCount(text) && !InvitationPhraseStartsBeforeVisa(text))
+            return false;
+        if (!LooksLikePersonCountPhrase(text))
+            return true;
+
+        var folded = TemplateTextNormalizer.NormalizeFolded(text);
+        var personIdx = FirstIndex(folded, "rayat", "dasary yurt");
+        var invitationIdx = FirstInvitationPhraseIndex(folded);
+        return invitationIdx >= 0 && (personIdx < 0 || invitationIdx < personIdx);
+    }
+
     public static bool PrefersDocumentCancelCount(string? text) =>
-        PrefersCancelWorkPermitCount(text) || PrefersCancelVisaCount(text);
+        PrefersCancelWorkPermitCount(text)
+        || PrefersCancelVisaCount(text)
+        || PrefersCancelInvitationCount(text);
 
     public static (string CountCode, string WordsCode) ResolveCountTokenCodes(string? text)
     {
@@ -135,6 +175,8 @@ public static class ScanOfficialLetterHints
             return ("CWCNT", "CWCTX");
         if (PrefersCancelVisaCount(text))
             return ("CVCNT", "CVCTX");
+        if (PrefersCancelInvitationCount(text))
+            return ("CICNT", "CICTX");
         return ("TPCNT", "TPCTX");
     }
 
@@ -145,7 +187,8 @@ public static class ScanOfficialLetterHints
     public static bool LooksLikeCountContext(string? text) =>
         LooksLikePersonCountPhrase(text)
         || LooksLikeCancelVisaCount(text)
-        || LooksLikeCancelWorkPermitCount(text);
+        || LooksLikeCancelWorkPermitCount(text)
+        || LooksLikeCancelInvitationCount(text);
 
     private static bool WorkPermitPhraseStartsBeforeVisa(string? text)
     {
@@ -155,8 +198,27 @@ public static class ScanOfficialLetterHints
         return wpIdx >= 0 && (visaIdx < 0 || wpIdx < visaIdx);
     }
 
+    private static bool WorkPermitPhraseStartsBeforeInvitation(string? text)
+    {
+        var folded = TemplateTextNormalizer.NormalizeFolded(text);
+        var invitationIdx = FirstInvitationPhraseIndex(folded);
+        var wpIdx = FirstWorkPermitPhraseIndex(folded);
+        return wpIdx >= 0 && (invitationIdx < 0 || wpIdx < invitationIdx);
+    }
+
+    private static bool InvitationPhraseStartsBeforeVisa(string? text)
+    {
+        var folded = TemplateTextNormalizer.NormalizeFolded(text);
+        var visaIdx = folded.IndexOf("wiza", StringComparison.Ordinal);
+        var invitationIdx = FirstInvitationPhraseIndex(folded);
+        return invitationIdx >= 0 && (visaIdx < 0 || invitationIdx < visaIdx);
+    }
+
     private static int FirstWorkPermitPhraseIndex(string folded) =>
         FirstIndex(folded, "rugsat", "rugsad");
+
+    private static int FirstInvitationPhraseIndex(string folded) =>
+        FirstIndex(folded, "cakyly", "invitation");
 
     private static int FirstIndex(string folded, params string[] needles)
     {

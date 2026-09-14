@@ -6,6 +6,7 @@ using DevExpress.ExpressApp.EFCore;
 using DevExpress.Persistent.BaseImpl.EF;
 using Microsoft.EntityFrameworkCore;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services;
 using Visa2026.Module.Services.MigrationImport;
 
 namespace Visa2026.Module.Services.ApplicationPersonRoster;
@@ -40,6 +41,7 @@ public static class ApplicationProfileInstancePersonResolver
         EnsureApplicationProfileLoaded(objectSpace, trackedApplication);
 
         var existing = LoadLinks(objectSpace, trackedApplication, trackedPerson.ID);
+        existing = DropUsedInvitationLinksOnCancel(objectSpace, trackedApplication, existing);
         ApplicationProfileInstanceChildMembership.SyncFromResolvedLinks(objectSpace, trackedApplication, existing);
         // Import pins PersonInApplication snapshots (Passport/Visa/WorkPermitItem). Do not attach
         // today's PersonCurrentItems / latest-N onto historical application types.
@@ -181,6 +183,54 @@ public static class ApplicationProfileInstancePersonResolver
         }
 
         return removed;
+    }
+
+    /// <summary>
+    /// Cancel-invitation Relink drops pins that already have an issued visa.
+    /// Officers still keep expired unused pins they added by hand.
+    /// </summary>
+    public static bool ShouldDropUsedInvitationLinkOnCancelRelink(ApplicationProfileInstance? application) =>
+        ApplicationProfileInstancePersonValidItems.EnforceOfficerLinkValidity
+        && ApplicationProfileConfigurationResolver.ShowInvitationItemIsCancelled(application);
+
+    private static IList<ApplicationProfileInstancePersonResolvedLink> DropUsedInvitationLinksOnCancel(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance application,
+        IList<ApplicationProfileInstancePersonResolvedLink> links)
+    {
+        if (objectSpace == null || application == null || links == null || links.Count == 0)
+            return links ?? [];
+        if (!ShouldDropUsedInvitationLinkOnCancelRelink(application))
+            return links;
+
+        var usedIds = IssuedDocumentLifecycle.LoadUsedInvitationItemIds(objectSpace);
+        if (usedIds.Count == 0)
+            return links;
+
+        var remaining = new List<ApplicationProfileInstancePersonResolvedLink>();
+        foreach (var link in links)
+        {
+            if (link == null)
+                continue;
+            if (link.LinkKind != ApplicationProfileInstancePersonLinkKind.InvitationItem
+                || link.LinkedObjectId is not Guid id
+                || id == Guid.Empty
+                || !usedIds.Contains(id))
+            {
+                remaining.Add(link);
+                continue;
+            }
+
+            application.PersonResolvedLinks?.Remove(link);
+            ApplicationProfileInstanceChildMembership.Remove(
+                application,
+                ApplicationProfileInstancePersonLinkKind.InvitationItem,
+                id,
+                objectSpace);
+            objectSpace.Delete(link);
+        }
+
+        return remaining;
     }
 
     private static bool BelongsToPerson(ApplicationProfileInstancePersonResolvedLink link, Guid personId) =>
@@ -373,6 +423,10 @@ public static class ApplicationProfileInstancePersonResolver
         if (trackedPerson == null || trackedApplication == null)
             return;
         if (ApplicationProfileInstancePersonRosterLockHelper.AreResolvedLinksLocked(trackedApplication))
+            return;
+        if (kind == ApplicationProfileInstancePersonLinkKind.InvitationItem
+            && ApplicationProfileInstancePersonValidItems.EnforceOfficerLinkValidity
+            && IssuedDocumentLifecycle.IsInvitationItemUsedById(objectSpace, linkedObjectId))
             return;
 
         var existing = LoadLinks(objectSpace, trackedApplication, trackedPerson.ID);

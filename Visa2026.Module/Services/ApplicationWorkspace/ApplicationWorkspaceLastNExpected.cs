@@ -4,6 +4,7 @@ using System.Linq;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.ApplicationPersonRoster;
+using Visa2026.Module.Services;
 
 namespace Visa2026.Module.Services.ApplicationWorkspace;
 
@@ -87,9 +88,12 @@ public sealed class ApplicationWorkspaceLinkableActiveCounts
             result._workPermit[personId] = result._workPermit.GetValueOrDefault(personId) + 1;
         }
 
+        var usedInvitationIds = IssuedDocumentLifecycle.LoadUsedInvitationItemIds(objectSpace);
         foreach (var item in objectSpace.GetObjectsQuery<InvitationItem>()
             .Where(i => i.Person != null && ids.Contains(i.Person.ID)))
         {
+            if (usedInvitationIds.Contains(item.ID))
+                continue;
             if (!ApplicationProfileInstancePersonValidItems.CanLinkInvitationItem(item))
                 continue;
             var personId = item.Person.ID;

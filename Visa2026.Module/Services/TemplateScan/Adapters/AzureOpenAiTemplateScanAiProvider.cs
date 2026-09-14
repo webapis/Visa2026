@@ -194,7 +194,7 @@ public sealed class AzureOpenAiTemplateScanAiProvider : ITemplateScanAiProvider
                 Reconstruct the scanned ministry letter as Word blocks that MATCH the scan's layout and alignment — not a flat stack of left-aligned lines.
                 Keep static boilerplate wording (Turkmen/Turkish/etc.) intact.
                 For EVERY entry in mappedFields, replace the corresponding value ON THE SCAN with that exact token (even if valueHints differ — the scan may be from another case).
-                Typical placements: header № / application number → AFNUM; letter date → ADAT; company hasaba alyş / tescil date → ACRDT (not ADAT); urgency line → Urgency_NameTm; person count (daşary ýurt raýaty) → TPCNT/TPCTX; visa-cancel count (wizasy ýatyrmak) → CVCNT/CVCTX; work-permit-cancel count (iş rugsatnamasyny ýatyrmak) → CWCNT/CWCTX; visa period/category → VPER/VCAT.
+                Typical placements: header № / application number → AFNUM; letter date → ADAT; company hasaba alyş / tescil date → ACRDT (not ADAT); urgency line → Urgency_NameTm; person count (daşary ýurt raýaty) → TPCNT/TPCTX; visa-cancel count (wizasy ýatyrmak) → CVCNT/CVCTX; work-permit-cancel count (iş rugsatnamasyny ýatyrmak) → CWCNT/CWCTX; invitation-cancel count (çakylygyny ýatyrmak) → CICNT/CICTX; visa period/category → VPER/VCAT.
                 LAYOUT RULES (critical):
                 - When the scan has LEFT content and RIGHT content on the SAME horizontal band (e.g. №/date left + addressee right; director title left + signatory name right), emit kind=twoColumn with text=left and rightText=right. Use \\n inside a cell for multi-line stacks.
                 - Header twoColumn MUST be: left = №/application number AND letter date (stacked); right = addressee only (e.g. Türkmenistanyň Döwlet migrasiýa gullugyna). NEVER put ADAT/date alone on the right.
@@ -913,6 +913,7 @@ public sealed class AzureOpenAiTemplateScanAiProvider : ITemplateScanAiProvider
            - "18 (on sekiz)" next to daşary ýurt raýaty → TPCNT and TPCTX
            - "1 (bir)" next to wizasy ýatyrmak → CVCNT and CVCTX (not TPCNT)
            - "1 (bir)" next to iş rugsatnamasyny ýatyrmak → CWCNT and CWCTX (not TPCNT, not CVCNT)
+           - "3 (üç)" next to çakylygyny ýatyrmak → CICNT and CICTX (not TPCNT, not CWCNT)
            - "6 (alty) aý köp gezeklik" → VPER and VCAT
            - "Adaty tertipde!" → Urgency_NameTm
         4. Use only tokens from allowedTokens (see ShortCode, token, LabelEn, example). Never invent placeholders.

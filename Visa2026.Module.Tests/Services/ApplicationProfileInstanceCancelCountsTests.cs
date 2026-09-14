@@ -99,4 +99,21 @@ public class ApplicationProfileInstanceCancelCountsTests
             application, ApplicationProfileInstancePersonLinkKind.WorkPermitItem));
         Assert.Equal(2, ApplicationProfileInstanceCancelCounts.WorkPermits(application));
     }
+
+    [Fact]
+    public void FromCurrentInvitationHeaders_TwoPeopleSameInvitation_CountOne()
+    {
+        var invitation = new Invitation
+        {
+            ID = Guid.Parse("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
+            InvitationNumber = "COO-1",
+        };
+        var lines = new List<ApplicationRosterMergeLine>
+        {
+            new() { CurrentInvitationItem = new InvitationItem { Invitation = invitation } },
+            new() { CurrentInvitationItem = new InvitationItem { Invitation = invitation } },
+        };
+
+        Assert.Equal(1, ApplicationProfileInstanceCancelCounts.FromCurrentInvitationHeaders(lines));
+    }
 }

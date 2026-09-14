@@ -2,6 +2,33 @@
 
 Append-only. Newest first under **## Entries**.
 
+### 2026-09-14 — Cancel invitation sanaw missing CINB/CISB/CIEB
+
+- Need: Sanaw-çakylygy ýatyrmak. Add list had INVN/INVS/INVE only. Officer searched Cancel Invitation AS Numbers / issued dates / expiration dates.
+- Cause: Catalog had current-only invitation tokens, not the cancel stack.
+- Fix: **CINB** (Çakylygyň belgisi / AS numbers), **CISB** (resmileşdirilen), **CIEB** (möhleti). Current+Previous, numbered when 2+. Excel headers map those columns.
+- Officer: Stop F5, rebuild, Analyze. Filter `CINB` / `Cancel invitation AS numbers`. #10 → CINB, issued → CISB, möhleti → CIEB. INVN stays current-only.
+- Prevent: Do not use INVN for a cancel Last-N stack.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-14 — Cancel invitation count missing from Add list
+
+- Need: Çakylyk we iş rugsatnamany ýatyrmak letter. Officer could not find cancel invitation count / words in Add placeholder (CVCNT/CWCNT were listed).
+- Cause: Catalog had no CICNT/CICTX. Guessing only knew visa/WP *ýatyrmak*.
+- Fix: Catalog **CICNT** / **CICTX** (`CancelInvCount` = distinct invitation headers). Nearby *çakylyk*+*ýatyrmak* maps isolated `3` / `üç`. WP earlier in the sentence stays CWCNT.
+- Officer: Stop F5, rebuild, Analyze. Filter `CICNT`, `CICTX`, `cancel invitation`, or `çakylyk`. *çakylygyny ýatyrmak* → CICNT/CICTX.
+- Prevent: Do not reuse CWCNT/TPCNT for invitation-cancel counts.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-14 — Single WP stack has no 1) prefix
+
+- Need: *Iş Rugsatnamany Ýatyrmak* with one valid WP must not print `1)`.
+- Cause: Join numbered every line, including a single value.
+- Fix: Ordinals only when two or more lines. Locations still never numbered.
+- Officer: Stop F5, rebuild, Preview. Two linked WPs still show `1)` `2)`.
+- Prevent: Do not prefix a one-line cancel block.
+- Cross-skill: visa2026-user-report-templates
+
 ### 2026-09-14 — CWLB must not print 1) 2)
 
 - Need: Work-permit location block unnumbered. Other stacked blocks keep order prefixes.

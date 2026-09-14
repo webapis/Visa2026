@@ -56,19 +56,59 @@ public class ScanPlaceholderChoiceListTests
     }
 
     [Theory]
-    [InlineData("CWCTX")]
-    [InlineData("CancelWPCountText")]
-    [InlineData("cancel work permit count")]
-    public void Cancel_work_permit_words_search_finds_CWCTX(string search)
+    [InlineData("CINB")]
+    [InlineData("Cancel invitation AS numbers")]
+    [InlineData("CISB")]
+    [InlineData("Cancel invitation issued dates")]
+    [InlineData("CIEB")]
+    [InlineData("Cancel invitation expiration dates")]
+    [InlineData("Çakylygyň belgisi")]
+    public void Cancel_invitation_sanaw_search_finds_block_codes(string search)
+    {
+        var allowed = FullSet().Allowed;
+        var codes = ScanPlaceholderChoiceList.RemainingGroups(allowed, hideShortCodes: Array.Empty<string>(), search)
+            .SelectMany(static g => g.Entries)
+            .Select(static e => e.ShortCode)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        if (search.Contains("CINB", StringComparison.OrdinalIgnoreCase)
+            || search.Contains("AS", StringComparison.OrdinalIgnoreCase)
+            || search.Contains("belgisi", StringComparison.OrdinalIgnoreCase))
+            Assert.Contains("CINB", codes);
+        else if (search.Contains("CISB", StringComparison.OrdinalIgnoreCase)
+            || search.Contains("issued", StringComparison.OrdinalIgnoreCase))
+            Assert.Contains("CISB", codes);
+        else
+            Assert.Contains("CIEB", codes);
+    }
+
+    [Theory]
+    [InlineData("CICTX")]
+    [InlineData("CICNT")]
+    [InlineData("CancelInvCountText")]
+    [InlineData("cancel invitation count")]
+    [InlineData("çakylyk")]
+    public void Cancel_invitation_count_search_finds_catalog_codes(string search)
     {
         var allowed = FullSet().Allowed;
         var groups = ScanPlaceholderChoiceList.RemainingGroups(
             allowed,
             hideShortCodes: Array.Empty<string>(),
             search: search);
-        Assert.Contains(
-            groups.SelectMany(g => g.Entries),
-            e => string.Equals(e.ShortCode, "CWCTX", StringComparison.OrdinalIgnoreCase));
+        var codes = groups.SelectMany(g => g.Entries)
+            .Select(e => e.ShortCode)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        if (string.Equals(search, "CICTX", StringComparison.OrdinalIgnoreCase)
+            || search.Contains("Text", StringComparison.OrdinalIgnoreCase))
+            Assert.Contains("CICTX", codes);
+        else if (string.Equals(search, "CICNT", StringComparison.OrdinalIgnoreCase))
+            Assert.Contains("CICNT", codes);
+        else
+        {
+            Assert.Contains("CICNT", codes);
+            Assert.Contains("CICTX", codes);
+        }
     }
 
     [Fact]
@@ -184,6 +224,7 @@ public class ScanPlaceholderChoiceListTests
             {
                 Profile = new ApplicationProfile
                 {
+                    ActionFamily = ApplicationProfileActionFamily.Registration,
                     RequirePersonPassport = true,
                     RequirePersonVisa = true,
                     RequirePersonEducation = true,

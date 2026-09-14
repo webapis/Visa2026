@@ -1,3 +1,12 @@
+### 2026-09-14 — Cancel invitation does not link used InvitationItems
+
+- **Need**: Çakylygy Ýatyrmak / Çakylyk we Iş Rugsatnamasyny Ýatyrmak must not attach an InvitationItem that already has an issued visa.
+- **Cause**: `CanLinkInvitationItem` already treated `IssuedVisa != null` as used, but Relink often has that inverse unloaded. Auto-link then pinned the used line. Relink also kept existing sticky pins.
+- **Fix**: `IsUsed` / Relink / People & links expected count query `Visa.IssuingInvitationItem`. Cancel Relink drops used invitation pins. `EnsureResolvedLink` refuses a used invitation id. Import snapshots still skip the officer gate.
+- **Test**: `CollectMissingAutoLinks_SkipsUsedInvitationOnCancelInvitation`; `ShouldDropUsedInvitationLinkOnCancelRelink_TrueOnlyOnCancelInvitationProfile`. Officer: stop F5, rebuild, Relink on a cancel-invitation case — used (issued-visa) invitations stay off the tile; unused invitations still link.
+- **Prevent**: Do not treat `IssuedVisa` navigation as loaded. Do not re-pin used invitations on cancel Relink as “sticky.”
+- **Cross-skill**: visa2026-application-profile
+
 ### 2026-09-14 — WorkPermitItem expiration save blocked by parent-application rule
 
 - **Need**: Officer changed Expiration Date on Work Permit Item 1249/12 (Serdar Nuri Küçükakkaya). Save showed "The selected employee is not part of the parent application."
