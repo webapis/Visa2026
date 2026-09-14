@@ -269,7 +269,7 @@ public class ApplicationProfile : BaseObject
     public virtual bool RequirePersonSalary { get; set; }
     public virtual bool RequirePersonMedical { get; set; }
     public virtual bool RequirePersonRejectionItem { get; set; }
-    public virtual bool RequirePersonTravelHistory { get; set; } = true;
+    public virtual bool RequirePersonTravelHistory { get; set; }
 
     /// <summary>Latest passports to auto-link (1–3). Used only when <see cref="RequirePersonPassport"/> is on. Expiration is not checked.</summary>
     public virtual int PersonPassportLastCount { get; set; } = 1;

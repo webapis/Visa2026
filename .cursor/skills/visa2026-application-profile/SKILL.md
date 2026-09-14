@@ -143,7 +143,8 @@ flowchart LR
 | Can leave Overview with empty Case summary | Office preparation + red tiles | `ApplicationWorkspaceCaseSummaryCompletenessGate`; People & links stay open |
 | People & links zeros look like filled tiles | Short tiles red; nav red count or green check | `ApplicationWorkspacePeopleLinksCompleteness`; `cw-link-tile.is-empty` |
 | Cancel-visa People & links Education is red 0 | Education is off for `cancel_visa` / `cancel_visa_wp`. Restart after rebuild so catalog sync writes the locked template | Tenant JSON + `ApplicationProfileEducationPolicy` |
-| Cancel-visa People & links Travel history is red 0 | Travel history is off for `cancel_visa` / `cancel_visa_wp`. Restart after rebuild so catalog sync writes the locked template | Tenant JSON + `ApplicationProfileTravelHistoryPolicy` |
+| Cancel-visa People & links Travel history is red 0 | Travel history is **Registration only**. Restart after rebuild so catalog sync writes the locked template | Tenant JSON + `ApplicationProfileTravelHistoryPolicy` |
+| Visa+WP extension People & links Travel history is red 0 | Same — off on `extend_visa_wp`. Restart after rebuild | Tenant JSON + `ApplicationProfileTravelHistoryPolicy` |
 | Cancel-visa People & links shows only one of two valid visas | Wizany Ýatyrmak `cancel_visa` Visa Last **2** (same as `cancel_visa_wp`). Last-N is a ceiling — one visa stays 1/1. Restart, Relink | `PersonVisaLastCount` + Calik Last-N seeds |
 | Cancel visa+WP People & links Work permit 1/2 with two valid WPs | `cancel_visa_wp` / `cancel_workpermit` / `cancel_invitation_wp` WP Last **2** (ceiling). Restart, Relink — do not Unlink first | `PersonWorkPermitItemLastCount` + Calik Last-N seeds |
 | Relink shows the same visa twice / Visa 3/2 | Refresh then Ensure did not see in-memory links. Restart, Relink once — duplicates are deleted | `MergeTrackedLinks` + `RemoveDuplicateResolvedLinks` |
@@ -211,10 +212,11 @@ Use when user asks *how should I configure this profile?* — tailor to **Action
 
 - Always **Passport** for issuance unless exceptional legacy type. Use **Last 2** on **passport-change** (`pasport_change`) only — old + new booklet (expired previous is OK). If only one passport exists, **flag** (`1/2`); **do not block create**. Registration passport-info-change stays Last 1.
 - **Invitation / work permit / visa Last 2** means **up to 2 valid rows** (person may have 1 or 2). Missing expected rows are flagged; create is not blocked. Calik: `cancel_invitation` invitation Last 2; `cancel_invitation_wp` invitation + WP Last 2; `cancel_visa_wp` visa + WP Last 2; `cancel_workpermit` WP Last 2.
+- **extend_visa_wp** (`App_Visa_and_WP_Ext`, Wiza we Iş Rugsatnamasyny Uzaltmak) — **Work permit item** on (the `WorkPermitItem` being extended) plus **Visa**. Last 1 unless officers ask for Last 2. Produce Work permit is the new letter; it does not replace linking the existing item.
 - **Address of residence** and **Position** (`EmployeePositionHistory`) — on for **every** template (including business trip). Calik tenant catalog + `ApplyRow` / type mapper force both flags; People & links shows the tiles. Config lock does not block this seed sync.
 - **Registration** profiles also never use **Urgency**.
 - Turn on **Education** when templates use that `{{…}}` pack or readiness checks need it.
-- **TravelHistory** — on for Registration / visa / WP / border-zone families. **Hard-hidden** on **Business trip**, **Invitation** templates (produce, change, or cancel invitation — e.g. `get_invitation*`, `change_invitation`, `cancel_invitation*`), and **visa-document cancellation** (`cancel_visa` / `cancel_visa_wp`). `cancel_visa_ext` stays on. Calik tenant catalog + `ApplyRow` / type mapper force the flag; People & links hides the Travel history tile.
+- **TravelHistory** — **Registration templates only** (check-in / check-out / info change / reg extension). Hidden on issuance (including `extend_visa_wp`), invitation, cancel, change, and business trip. Calik tenant catalog + `ApplyRow` / type mapper / resolver force the flag; People & links hides the Travel history tile.
 - Before publish: if nested template references a person pack, corresponding `RequirePerson*` should be on (plan §2.5 recommendation).
 
 ### Per-Application defaults

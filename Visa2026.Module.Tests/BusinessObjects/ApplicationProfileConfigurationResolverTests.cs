@@ -188,7 +188,20 @@ public class ApplicationProfileConfigurationResolverTests
     }
 
     [Fact]
-    public void RequirePersonTravelHistory_IsTrueForIssuanceWhenFlagOn()
+    public void RequirePersonTravelHistory_IsTrueForRegistrationWhenFlagOn()
+    {
+        var profile = new ApplicationProfile
+        {
+            ActionFamily = ApplicationProfileActionFamily.Registration,
+            RequirePersonTravelHistory = true,
+        };
+        var app = new ApplicationProfileInstance { ApplicationProfile = profile };
+
+        Assert.True(ApplicationProfileConfigurationResolver.RequirePersonTravelHistory(app));
+    }
+
+    [Fact]
+    public void RequirePersonTravelHistory_IsFalseForIssuanceEvenWhenFlagOn()
     {
         var profile = new ApplicationProfile
         {
@@ -197,7 +210,7 @@ public class ApplicationProfileConfigurationResolverTests
         };
         var app = new ApplicationProfileInstance { ApplicationProfile = profile };
 
-        Assert.True(ApplicationProfileConfigurationResolver.RequirePersonTravelHistory(app));
+        Assert.False(ApplicationProfileConfigurationResolver.RequirePersonTravelHistory(app));
     }
 
     [Fact]

@@ -1,3 +1,52 @@
+### 2026-09-14 — WorkPermitItem expiration save blocked by parent-application rule
+
+- **Need**: Officer changed Expiration Date on Work Permit Item 1249/12 (Serdar Nuri Küçükakkaya). Save showed "The selected employee is not part of the parent application."
+- **Cause**: `IsEmployeeValid` requires the person on `WorkPermit.ApplicationProfileInstance.People`. Opening the item from Work Permit Item nav does not load that skip-nav roster, so the rule failed on any save — including a date-only edit.
+- **Fix**: Skip the roster check for already-saved items (`!IsNewObject`). New lines still check, with `IsPersonOnApplication` querying ObjectSpace when People is not loaded.
+- **Test**: `ApplicationRosterHelperTests`. Officer confirmed Save of Expiration Date on 1249/12 after rebuild.
+- **Prevent**: Do not require a lazy People collection for scalar edits on issued WP/invitation lines.
+- **Cross-skill**: visa2026-application-profile
+### 2026-09-14 — Travel history only on Registration templates
+
+- **Need**: Wiza we Iş Rugsatnamasyny Uzaltmak People & links still showed Travel history 0 (red). Officers want Travel history only on Registration templates.
+- **Fix**: `ApplicationProfileTravelHistoryPolicy` allows the tile only when `ActionFamily = Registration`. Calik JSON true on the 8 registration codes; false on `extend_visa_wp` and all other families. Catalog `ApplyRow` / mapper / resolver / wizard follow the policy.
+- **Test**: `ApplicationProfileTenantCatalogTravelHistoryTests` + resolver issuance vs registration facts.
+- **Prevent**: Do not turn Travel history on for visa+WP extension or other non-registration templates. Restart after rebuild so catalog sync writes locked profiles.
+- **Cross-skill**: visa2026-lookup-data | visa2014-to-visa2026-import
+### 2026-09-14 — extend_visa_wp links WorkPermitItem being extended
+
+- **Need**: Wiza we Iş Rugsatnamasyny Uzaltmak (5/-1636) People & links had Visa but no Work permit tile. Officers must attach the `WorkPermitItem` being extended.
+- **Cause**: 2026-08-22 set `RequirePersonWorkPermitItem` / `ShowCurrentWorkPermitItem` false so dual-read would not show the checkbox. Produce Work permit stayed on (new letter).
+- **Fix**: Calik `application-profile.calik-energi.json` `extend_visa_wp` `RequirePersonWorkPermitItem` **true**. ApplicationType catalog `App_Visa_and_WP_Ext` `ShowCurrentWorkPermitItem` **true**. Import strategy `calikExtendVisaWpWorkPermitItemLock`.
+- **Test**: `ApplicationProfileTenantCatalogExtendVisaWpTests`.
+- **Prevent**: Do not turn Work permit item off on visa+WP extension. Produce Work permit ≠ linking the existing item. Restart so catalog sync writes locked profiles; re-run document-link correction if imported cases still show Work permit 0.
+- **Cross-skill**: visa2026-lookup-data | visa2014-to-visa2026-import
+
+### 2026-09-14 — Removed Application Profile ListView passport search box
+
+- **Need**: Officers asked to remove the passport search box from Application Profile Instance ListViews completely.
+- **Fix**: Deleted `ApplicationProfileInstancePassportSearchController`. Grid FullTextSearch on instance lists matches linked people names only (not passports). Person ListView compact passport matching is unchanged. Officer-shell staged/in-process haystack still includes passport numbers.
+- **Test**: Remaining identity + CompactPassportSearchKey + OfficerShell facts. Officer: stop F5, rebuild. Via ministry / direct migration toolbars have no Passport box; grid Search does not find by passport.
+- **Prevent**: Do not re-add a ParametrizedAction passport box on `Application_ListView_ViaMinistries` / `_DirectMigration` unless product asks again.
+- **Cross-skill**: visa2026-application-profile
+
+### 2026-09-14 — Passport box missed numbers stored with a space
+
+- **Need**: Direct migration Passport search `U86993401` returned Total 0. Case workspace showed linked passport **U 86993401**.
+- **Cause**: Criteria used `Contains(Lower(PassportNumber), token)`. Whitespace-split tokens also AND-split `U 86993401`. Typed compact number does not contain-match a spaced stored value.
+- **Fix**: `CompactPassportSearchKey` + `Replace` spaces/hyphens on `PassportNumber` in `BuildLinkedPeoplePassportCriteria` / Person passport criteria.
+- **Test**: `CompactPassportSearchKey_StripsSpacesAndHyphens`; `BuildLinkedPeoplePassportCriteria_SpacedNumberIsSingleCompactKey`. Officer: stop F5, rebuild. Direct migration Passport `U86993401` should list NP 11/-12585 (if that case is on the direct-migration route).
+- **Prevent**: Do not AND-split passport search on spaces. Search is still scoped to the current route list (via ministry vs direct).
+- **Cross-skill**: visa2026-application-profile
+
+### 2026-09-14 — Dedicated passport search on via-ministry and direct-migration lists
+
+- **Need**: Officers wanted a dedicated passport-number box on **Applications via ministry** and **direct migration** ListViews, not mixed into the grid Search box.
+- **Fix**: `ApplicationProfileInstancePassportSearchController` ParametrizedAction filters via `BuildLinkedPeoplePassportCriteria` (`People.Passports` or instance `Passports`). Grid FullTextSearch on those two view ids no longer ORs passport. **Clear filters** also clears the passport box. Staged / in-process officer-shell search is unchanged.
+- **Test**: `IsDedicatedPassportSearchListView_TrueForRouteListsOnly`; existing `BuildLinkedPeoplePassportCriteria_UsesPeopleAndInstancePassports`. Officer: stop F5, rebuild, Ctrl+F5. Via ministry: type a passport in **Passport**, press Enter — matching cases remain; grid Search no longer finds by passport. Direct migration same. Empty the box or Clear filters restores the route list.
+- **Prevent**: Do not put passport back into FullTextSearch on `Application_ListView_ViaMinistries` / `_DirectMigration`. Do not add the box to staged/in-process queues.
+- **Cross-skill**: visa2026-application-profile
+
 ### 2026-09-12 — Cancel visa+WP Work permit Last-N 2 (ceiling)
 
 - **Need**: Application for cancelling visa and work permit (`cancel_visa_wp`). Same Last-N 2 as visas, for WorkPermitItem. Also `cancel_workpermit` and `cancel_invitation_wp`.

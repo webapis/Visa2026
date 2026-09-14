@@ -1730,7 +1730,7 @@
                 "ShowBusinessTrips": false,
                 "ShowPreviousPassport": false,
                 "ShowCurrentVisa": true,
-                "ShowCurrentWorkPermitItem": false,
+                "ShowCurrentWorkPermitItem": true,
                 "ShowCurrentInvitationItem": false,
                 "ShowCurrentAddressOfResidence": true,
                 "ShowCurrentEmployeeContract": true,

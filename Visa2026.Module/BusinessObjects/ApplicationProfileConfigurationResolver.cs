@@ -297,7 +297,7 @@ public static class ApplicationProfileConfigurationResolver
     public static bool RequirePersonBorderZoneItem(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequirePersonBorderZoneItem, _ => false);
 
-    /// <summary>Profile-only (no Type Show*); gates TravelHistory auto-link. Business-trip and invitation templates never require this.</summary>
+    /// <summary>Profile-only (no Type Show*); gates TravelHistory auto-link. Registration templates only.</summary>
     public static bool RequirePersonTravelHistory(ApplicationProfileInstance? application)
     {
         if (!ApplicationProfileTravelHistoryPolicy.AllowsPersonTravelHistory(application?.ApplicationProfile))

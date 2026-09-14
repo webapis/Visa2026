@@ -11,7 +11,13 @@ namespace Visa2026.Module.Services.ApplicationPersonRoster;
 /// </summary>
 public static class ApplicationRosterHelper
 {
-    public static bool IsPersonOnApplication(ApplicationProfileInstance? application, Person? person)
+    public static bool IsPersonOnApplication(ApplicationProfileInstance? application, Person? person) =>
+        IsPersonOnApplication(application, person, ObjectSpaceHelper.Get(application) ?? ObjectSpaceHelper.Get(person));
+
+    public static bool IsPersonOnApplication(
+        ApplicationProfileInstance? application,
+        Person? person,
+        IObjectSpace? objectSpace)
     {
         if (application == null || person == null)
             return false;
@@ -20,7 +26,19 @@ public static class ApplicationRosterHelper
         if (personId == Guid.Empty)
             return false;
 
-        return application.People?.Any(p => p != null && p.ID == personId) == true;
+        if (application.People?.Any(p => p != null && p.ID == personId) == true)
+            return true;
+
+        if (person.ApplicationProfileInstances?.Any(a => a != null && a.ID == application.ID) == true)
+            return true;
+
+        if (objectSpace == null || application.ID == Guid.Empty)
+            return false;
+
+        return objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
+            .Where(a => a.ID == application.ID)
+            .SelectMany(a => a.People)
+            .Any(p => p.ID == personId);
     }
 
     public static IList<Person> GetRosterPeople(ApplicationProfileInstance? application)

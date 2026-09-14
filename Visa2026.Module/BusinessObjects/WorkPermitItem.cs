@@ -167,7 +167,13 @@ namespace Visa2026.Module.BusinessObjects
             get
             {
                 if (Person == null || WorkPermit?.ApplicationProfileInstance == null) return true;
-                return ApplicationRosterHelper.IsPersonOnApplication(WorkPermit.ApplicationProfileInstance, Person);
+                var objectSpace = ObjectSpaceHelper.Get(this);
+                // Existing lines: scalar edits (expiration date) must not fail because the
+                // issuing roster People collection is not loaded on this DetailView.
+                if (objectSpace != null && !objectSpace.IsNewObject(this))
+                    return true;
+                return ApplicationRosterHelper.IsPersonOnApplication(
+                    WorkPermit.ApplicationProfileInstance, Person, objectSpace);
             }
         }
 

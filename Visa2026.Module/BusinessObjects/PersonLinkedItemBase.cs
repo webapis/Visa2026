@@ -26,7 +26,11 @@ namespace Visa2026.Module.BusinessObjects
             get
             {
                 if (Person == null || ParentObject?.ApplicationProfileInstance == null) return true;
-                return ApplicationRosterHelper.IsPersonOnApplication(ParentObject.ApplicationProfileInstance, Person);
+                var objectSpace = ObjectSpaceHelper.Get(this);
+                if (objectSpace != null && !objectSpace.IsNewObject(this))
+                    return true;
+                return ApplicationRosterHelper.IsPersonOnApplication(
+                    ParentObject.ApplicationProfileInstance, Person, objectSpace);
             }
         }
     }

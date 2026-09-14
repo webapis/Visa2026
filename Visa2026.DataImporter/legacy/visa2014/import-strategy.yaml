@@ -124,8 +124,32 @@ strategy:
       skipLatestNDuringDataImport: true
       pinAtRosterImport: true
       pinCorrectionAlsoWorkPermitItem: true
+      extendVisaWpRequiresWorkPermitItemBeingExtended: true
+      calikExtendVisaWpWorkPermitItemLock:
+        lockedAt: 2026-09-14
+        applicationTypeName: App_Visa_and_WP_Ext
+        applicationProfileCode: extend_visa_wp
+        requirePersonWorkPermitItem: true
+        showCurrentWorkPermitItem: true
+        why: >
+          Wiza we Iş Rugsatnamasyny Uzaltmak must People-&-links pin the
+          WorkPermitItem being extended (PersonInApplication CurrentWorkPermit),
+          not Visa only. 2026-08-22 had RequirePersonWorkPermitItem off so the
+          Work permit tile stayed hidden (example 5/-1636). After this flag
+          turns on, re-run --correct-visa2014-application-person-document-links
+          so PIA WP Oids are pinned. Do not treat produce-WorkPermit as a
+          substitute for linking the existing item.
       pinRequiredEducationPositionAddressAtRosterAndCorrection: true
       pinRequiredTravelHistoryAtRosterAndCorrection: true
+      travelHistoryRegistrationProfilesOnly: true
+      calikTravelHistoryRegistrationOnlyLock:
+        lockedAt: 2026-09-14
+        why: >
+          People & links Travel history is only for Registration ActionFamily
+          (check-in / check-out / info change / reg extension). Issuance
+          including App_Visa_and_WP_Ext / extend_visa_wp must not show or
+          require the tile. Pin via --travel-roster-backfill-only on
+          Registration only.
       allCalikProfilesRequirePersonAddressAndPosition: true
       pinPositionLinksEmployeesOnly: true
       mandatoryEpaRosterBackfillAfterDocumentLinks: true

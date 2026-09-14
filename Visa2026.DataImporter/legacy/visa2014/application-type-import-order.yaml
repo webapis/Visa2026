@@ -283,6 +283,10 @@ bands:
           (people **8738**), progress **3760** (20136), WorkPermit **134**
           (361), WorkPermitItem **1683** (3798), Visa **2120** (5281).
           Skip Invitation. Remainder Visa after all types.
+          Roster WorkPermitItem: required on extend_visa_wp (the WP being
+          extended). Re-run document-link correction after RequirePersonWorkPermitItem
+          turned on (2026-09-14) — first pin ran while the People & links
+          Work permit tile was off.
       - name: App_Visa_Ext_FM
         status: done
         sourceComposites: ["F:7:na:na:na"]

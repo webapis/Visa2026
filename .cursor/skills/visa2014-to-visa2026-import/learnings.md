@@ -1,3 +1,10 @@
+### 2026-09-14 - App_Visa_and_WP_Ext must pin WorkPermitItem being extended
+
+- **Phase**: lookup + import strategy
+- **Why**: extend_visa_wp People & links hid Work permit (5/-1636) because RequirePersonWorkPermitItem was off. Next import must still pin PIA CurrentWorkPermit after the flag is on.
+- **Locked**: import-strategy.yaml `calikExtendVisaWpWorkPermitItemLock`; application-type-import-order.yaml App_Visa_and_WP_Ext notes; IMPORT_PLAN_AND_STRATEGY.md.
+- **Next**: restart for catalog sync; `--correct-visa2014-application-person-document-links` if existing local cases still have Work permit 0.
+
 ### 2026-09-11 - EPA backfill after Address/Position required on all profiles
 
 - **Phase**: correction / roster ResolvedLinks
