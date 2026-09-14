@@ -798,8 +798,27 @@ namespace Visa2026.Module.BusinessObjects
         private static string FormatVisaDateText(DateTime? date) =>
             date is DateTime d && d != default ? $"{d:dd.MM.yyyy}" : string.Empty;
 
+        /// <summary>
+        /// Newline-separated Current then Previous/Next values. Number/date/AS blocks get
+        /// <c>1)</c>, <c>2)</c> prefixes; work-permit locations stay unnumbered.
+        /// </summary>
         private static string JoinVisaFieldLines(params string?[] parts) =>
-            string.Join(Environment.NewLine, parts.Where(p => !string.IsNullOrWhiteSpace(p)));
+            JoinVisaFieldLines(numberLines: true, parts);
+
+        private static string JoinVisaFieldLines(bool numberLines, params string?[] parts)
+        {
+            var lines = parts
+                .Where(static p => !string.IsNullOrWhiteSpace(p))
+                .Select(static p => p!.Trim())
+                .ToList();
+            if (lines.Count == 0)
+                return string.Empty;
+
+            IEnumerable<string> output = numberLines
+                ? lines.Select(static (line, index) => $"{index + 1}) {line}")
+                : lines;
+            return string.Join(Environment.NewLine, output);
+        }
         #endregion
 
         #region Address
@@ -1126,6 +1145,10 @@ namespace Visa2026.Module.BusinessObjects
             JoinVisaFieldLines(CurrentWorkPermitItem?.WorkPermitNumber, PreviousWorkPermitItem?.WorkPermitNumber);
 
         [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string CancelWorkPermit_ASNumberBlock =>
+            JoinVisaFieldLines(CurrentWorkPermitItem?.ASNumber, PreviousWorkPermitItem?.ASNumber);
+
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
         public string CancelWorkPermit_StartDateBlock =>
             JoinVisaFieldLines(
                 FormatVisaDateText(CurrentWorkPermitItem?.StartDate),
@@ -1136,6 +1159,22 @@ namespace Visa2026.Module.BusinessObjects
             JoinVisaFieldLines(
                 FormatVisaDateText(CurrentWorkPermitItem?.ExpirationDate),
                 FormatVisaDateText(PreviousWorkPermitItem?.ExpirationDate));
+
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string CancelWorkPermit_LocationsBlock =>
+            JoinVisaFieldLines(
+                numberLines: false,
+                CurrentWorkPermitItem?.WorkPermittedLocations,
+                SameWorkPermitLocation(CurrentWorkPermitItem, PreviousWorkPermitItem)
+                    ? null
+                    : PreviousWorkPermitItem?.WorkPermittedLocations);
+
+        private static bool SameWorkPermitLocation(WorkPermitItem? current, WorkPermitItem? previous) =>
+            !string.IsNullOrWhiteSpace(current?.WorkPermittedLocations)
+            && string.Equals(
+                current.WorkPermittedLocations,
+                previous?.WorkPermittedLocations,
+                StringComparison.OrdinalIgnoreCase);
         #endregion
 
         #region Invitation

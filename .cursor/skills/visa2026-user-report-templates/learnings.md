@@ -23,6 +23,46 @@ Keep **`SKILL.md`** stable; **promote** into `SKILL.md` only when the same lesso
 
 ## Entries
 
+### 2026-09-14 — CWLB locations stay unnumbered (family: ItemRoster)
+
+- **Symptom**: Officer does not want `1)` / `2)` on *Hereket edýän çägi* (**CWLB**).
+- **Root cause**: Locations used the same numbered join as AS/tassyk/dates/visa.
+- **Fix**: `CancelWorkPermit_LocationsBlock` joins without ordinals. Other cancel blocks keep `1)` `2)`. Duplicate location still prints once.
+- **Prevent**: Do not number CWLB / WPLC.
+- **Officer**: Stop F5, rebuild, Preview. Location cell is the area name only.
+
+### 2026-09-14 — Cancel stack blocks print 1) 2) order prefixes (family: ItemRoster)
+
+- **Symptom**: Sanaw yellow sample uses `1) COO…` / `2) COO…` on stacked AS, tassyk, dates, visa. Merge printed raw values only.
+- **Root cause**: `JoinVisaFieldLines` joined Current + Previous/Next with newlines and no ordinal.
+- **Fix**: Each non-empty line is `1) `, `2) `, … (visa CVNB/CVSB/CVEB and WP CWNB/CWAB/CWSB/CWEB/CWLB). One line still gets `1)`. CWLB still skips a duplicate location.
+- **Prevent**: Do not put `1)` in the yellow sample as the merge source; numbering is merge.
+- **Officer**: Stop F5, rebuild, Preview SANAW. Stacked cells show `1)` then `2)`.
+
+### 2026-09-14 — CWLB Add search missed Hereket / Work Permitted Locations (family: ItemRoster)
+
+- **Symptom**: Filter `hereket` or `Work Permitted Locations` did not list CWLB.
+- **Root cause**: Catalog tk-TM/en labels did not include the Excel column caption or the BO display name.
+- **Fix**: WPLC/CWLB labels include *Hereket edýän çägi* / Work permitted locations. Add search expands those phrases.
+- **Prevent**: Keep officer column captions on catalog labels.
+- **Officer**: Analyze maps #9 to CWLB. Filter `CWLB` if a mark is still empty.
+
+### 2026-09-14 — Cancel WP sanaw Hereket edýän çägi missing (family: ItemRoster)
+
+- **Symptom**: Review #9 Hereket edýän çägi had no Work permit locations code. Add list showed CWNB/CWSB/CWEB/WPNM only.
+- **Root cause**: `WorkPermit_WorkPermittedLocations` existed on the merge line with no catalog short code.
+- **Fix**: **WPLC** (current locations) and **CWLB** / `CancelWorkPermit_LocationsBlock` (Last-N stack; skip duplicate if both WPs share the same area). Excel *Hereket edýän çägi* → CWLB.
+- **Prevent**: Do not leave required WorkPermitItem scalars uncatalogued. Search Add: `location`, `WPLC`, `CWLB`, `Work Permitted Locations`.
+- **Officer**: Stop F5, rebuild, Analyze. #9 → CWLB (or Add WPLC for current-only).
+
+### 2026-09-14 — Cancel WP sanaw AS-№ stacked block (family: ItemRoster)
+
+- **Symptom**: Daşary ýurt raýatlarynyň sanawy AS-№ column needs Current + Previous `WorkPermitItem.ASNumber` (COO…). Tassyknama belgisi is Work Permit Number (**CWNB**).
+- **Root cause**: Catalog had CWNB / CWSB / CWEB but no AS stack. Current-only `WorkPermit_ASNumber` is not the cancel pair.
+- **Fix**: **CWAB** / `CancelWorkPermit_ASNumberBlock` (same Join lines as CWNB). Excel header *AS-№* → CWAB, *Tassyknama belgisi* → CWNB. Do not swap with old XtraReports maps (those had AS and tassyk reversed).
+- **Prevent**: Do not map AS-№ to WPNM / CWNB. Tassyknama is CWNB.
+- **Officer**: Stop F5, rebuild, Analyze the Excel. AS-№ → CWAB. Tassyknama → CWNB.
+
 ### 2026-09-12 — Cancel visa+WP CWCNT / stacked WP blocks (family: AppScalar + ItemRoster)
 
 - **Symptom**: Visa+WP cancel letters and sanaw need a work-permit-to-cancel count and stacked WP number/date blocks, same as CVCNT / CVNB.

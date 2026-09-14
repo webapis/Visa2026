@@ -77,6 +77,9 @@ public static class ScanPlaceholderChoiceList
             yield return term.Replace("birthplace", "birth place", StringComparison.OrdinalIgnoreCase);
         if (term.Contains("place of birth", StringComparison.OrdinalIgnoreCase))
             yield return "birth place";
+        if (term.Contains("hereket", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("work permitted", StringComparison.OrdinalIgnoreCase))
+            yield return "work permitted locations";
     }
 
     private static bool Contains(string? value, string term)

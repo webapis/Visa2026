@@ -219,6 +219,9 @@ public class ScanGuessingPatternRegistryTests
     {
         Assert.Equal("RGEL", ScanExcelColumnProfiles.Match("Gelmeginin maksady")!.ShortCodes[0]);
         Assert.Equal("ACNAM", ScanExcelColumnProfiles.Match("Cagyran Tarap")!.ShortCodes[0]);
+        Assert.Equal("CWAB", ScanExcelColumnProfiles.Match("AS-№")!.ShortCodes[0]);
+        Assert.Equal("CWNB", ScanExcelColumnProfiles.Match("Tassyknama belgisi")!.ShortCodes[0]);
+        Assert.Equal("CWLB", ScanExcelColumnProfiles.Match("Hereket edýän çägi")!.ShortCodes[0]);
     }
 
     [Fact]

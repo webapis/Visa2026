@@ -262,8 +262,10 @@ public static class UserReportMergeDataHelper
             ["CancelVisa_StartDateBlock"] = item.CancelVisa_StartDateBlock ?? string.Empty,
             ["CancelVisa_ExpirationDateBlock"] = item.CancelVisa_ExpirationDateBlock ?? string.Empty,
             ["CancelWorkPermit_NumberBlock"] = item.CancelWorkPermit_NumberBlock ?? string.Empty,
+            ["CancelWorkPermit_ASNumberBlock"] = item.CancelWorkPermit_ASNumberBlock ?? string.Empty,
             ["CancelWorkPermit_StartDateBlock"] = item.CancelWorkPermit_StartDateBlock ?? string.Empty,
             ["CancelWorkPermit_ExpirationDateBlock"] = item.CancelWorkPermit_ExpirationDateBlock ?? string.Empty,
+            ["CancelWorkPermit_LocationsBlock"] = item.CancelWorkPermit_LocationsBlock ?? string.Empty,
         });
 
     /// <summary>Row keys for <c>sahsy_kagyz.docx</c> (ŞAHSY KAGYZY, ItemRows + photo).</summary>
@@ -561,8 +563,10 @@ public static class UserReportMergeDataHelper
             ["Registration_GelmeginMaksadyTm"] = item.Registration_GelmeginMaksadyTm ?? string.Empty,
             ["WorkPermit_WorkPermittedLocations"] = item.WorkPermit_WorkPermittedLocations ?? string.Empty,
             ["CancelWorkPermit_NumberBlock"] = item.CancelWorkPermit_NumberBlock ?? string.Empty,
+            ["CancelWorkPermit_ASNumberBlock"] = item.CancelWorkPermit_ASNumberBlock ?? string.Empty,
             ["CancelWorkPermit_StartDateBlock"] = item.CancelWorkPermit_StartDateBlock ?? string.Empty,
             ["CancelWorkPermit_ExpirationDateBlock"] = item.CancelWorkPermit_ExpirationDateBlock ?? string.Empty,
+            ["CancelWorkPermit_LocationsBlock"] = item.CancelWorkPermit_LocationsBlock ?? string.Empty,
             ["TravelHistory_Kind"] = item.TravelHistory_Kind ?? string.Empty,
             ["TravelHistory_DateText"] = item.TravelHistory_DateText ?? string.Empty,
             ["TravelHistory_CheckPointTm"] = item.TravelHistory_CheckPointTm ?? string.Empty,

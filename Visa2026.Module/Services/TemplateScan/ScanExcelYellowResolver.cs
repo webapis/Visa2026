@@ -506,6 +506,9 @@ internal static class ScanExcelColumnProfiles
         new(["turkmenistandaky salgysy", "turkmenistandaky", "yasayan salgysy", "yasayys salgysy", "ikamet adresi", "residence address"], ["ADRS"], false),
         new(["dasary yurtdaky salgysy", "dasary yurt"], ["PFAC", "PFAD"], true),
         new(["barjak serhet yakasy", "serhet yaka", "border zone"], ["ABZLN"], false),
+        new(["as-№", "as-no", "as belgisi", "asnumber"], ["CWAB"], false),
+        new(["tassyknama", "tassyk-nama", "tassyknama belgisi"], ["CWNB"], false),
+        new(["hereket edyan cagi", "hereket edyan", "work permitted", "rugsat berlen"], ["CWLB"], false),
         new(["sahamcanyn mudiri", "gol cekiji wezipesi"], ["ACPOS"], false),
     ];
 

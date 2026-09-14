@@ -192,8 +192,11 @@ public class UserReportPlaceholderRelatedBoTests
 
     [Theory]
     [InlineData("CWNB", "CancelWorkPermit_NumberBlock")]
+    [InlineData("CWAB", "CancelWorkPermit_ASNumberBlock")]
     [InlineData("CWSB", "CancelWorkPermit_StartDateBlock")]
     [InlineData("CWEB", "CancelWorkPermit_ExpirationDateBlock")]
+    [InlineData("CWLB", "CancelWorkPermit_LocationsBlock")]
+    [InlineData("WPLC", "WorkPermit_WorkPermittedLocations")]
     public void Cancel_work_permit_block_tokens_are_catalogued(string shortCode, string canonical)
     {
         var catalog = new UserReportPlaceholderCatalogService();

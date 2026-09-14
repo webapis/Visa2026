@@ -134,6 +134,30 @@ public class ScanPlaceholderChoiceListTests
         Assert.Contains("PBPL", codes);
     }
 
+    [Theory]
+    [InlineData("WPLC")]
+    [InlineData("CWLB")]
+    [InlineData("Work Permitted Locations")]
+    [InlineData("hereket")]
+    public void Work_permitted_locations_search_finds_catalog_codes(string search)
+    {
+        var allowed = FullSet().Allowed;
+        var codes = ScanPlaceholderChoiceList.RemainingGroups(allowed, hideShortCodes: Array.Empty<string>(), search)
+            .SelectMany(static g => g.Entries)
+            .Select(static e => e.ShortCode)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        if (string.Equals(search, "CWLB", StringComparison.OrdinalIgnoreCase))
+            Assert.Contains("CWLB", codes);
+        else if (string.Equals(search, "WPLC", StringComparison.OrdinalIgnoreCase))
+            Assert.Contains("WPLC", codes);
+        else
+        {
+            Assert.Contains("WPLC", codes);
+            Assert.Contains("CWLB", codes);
+        }
+    }
+
     [Fact]
     public void Travel_history_search_matches_group_display_name()
     {

@@ -2,6 +2,51 @@
 
 Append-only. Newest first under **## Entries**.
 
+### 2026-09-14 — CWLB must not print 1) 2)
+
+- Need: Work-permit location block unnumbered. Other stacked blocks keep order prefixes.
+- Cause: CWLB used the numbered join.
+- Fix: Locations join without `1)` / `2)`.
+- Officer: Stop F5, rebuild, Preview. Hereket edýän çägi is the place name only.
+- Prevent: Do not number CWLB.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-14 — Cancel stack Preview prints 1) 2)
+
+- Need: Sanaw blocks should look like the ministry sample (`1)` / `2)` on each stacked value).
+- Cause: Join was newline-only.
+- Fix: `JoinVisaFieldLines` prefixes `1) `, `2) ` on CV* and CW* blocks.
+- Officer: Stop F5, rebuild, Preview. One linked document still prints `1)`.
+- Prevent: Numbering is merge, not yellow sample text.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-14 — Add filter missed CWLB for Hereket / Work Permitted Locations
+
+- Need: After WPLC/CWLB existed, Add still missed them when typing `hereket` or `Work Permitted Locations`.
+- Cause: tk-TM labels did not include the sanaw column caption; CWLB English was “Cancel work permit locations”.
+- Fix: Labels include *Hereket edýän çägi*. Search expands `hereket` / `work permitted` to the locations codes.
+- Officer: Stop F5, rebuild, Analyze. #9 → **CWLB**. Filter `CWLB` / `hereket` / `Work Permitted Locations`.
+- Prevent: Catalog tk-TM should use the printed column caption officers type.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-14 — Cancel WP Excel #9 Hereket edýän çägi had no placeholder
+
+- Need: Sanaw-Wiza we Iş rugsatnamany ýatyrmak. Yellow 9 *Hereket edýän çägi* = `WorkPermitItem.WorkPermittedLocations` (Aşgabat şäheri). Add list had no locations code.
+- Cause: Merge property existed; catalog had no short code, so Review could not list it.
+- Fix: **WPLC** (current) and **CWLB** (stacked cancel). Column header *Hereket edýän çägi* → CWLB.
+- Officer: Stop F5, rebuild, Analyze. #9 should map CWLB. Or Add `Work permitted locations — WPLC` / `CWLB`.
+- Prevent: Catalog every required WP field officers map on cancel sanaw.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-14 — Cancel WP Excel AS-№ vs Tassyknama
+
+- Need: Sanaw *AS-№* = `WorkPermitItem.ASNumber`; *Tassyknama belgisi* = `WorkPermitNumber`. Two linked WPs stack like dates.
+- Cause: No AS cancel block. Excel *AS-№* could match RNUM via `№`.
+- Fix: Catalog **CWAB**. Column *AS-№* / *AS-No* → CWAB (before generic №). *Tassyknama* → CWNB.
+- Officer: Stop F5, rebuild, Analyze. AS-№ → CWAB. Tassyknama → CWNB. Preview stacks COO lines from Last-N 2.
+- Prevent: Do not use the old XtraReports map (AS-№ was WorkPermit_Number).
+- Cross-skill: visa2026-user-report-templates
+
 ### 2026-09-12 — Review gap #10 could not take a placeholder
 
 - Need: Wiza we iş rugsatnamany ýatyrmak. Yellow 10 Mehmet Çırak was a Gap. Officer could not Add `CHFN` (or any code).
