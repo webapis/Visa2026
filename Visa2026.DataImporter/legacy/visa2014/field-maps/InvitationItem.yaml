@@ -41,11 +41,9 @@ fields:
     missingBehavior: skip_row
 
   - source: PersonInApplication.Cancelled
-    target: IsCancelled
-    transform: legacy_invitation_cancellation_index
-    join: PersonInInvitation matched to PersonInApplication on same ApplicationProfileInstance + person
-    missingBehavior: default_false
+    target: null
+    transform: none
     notes: |
-      Visa2014LegacyInvitationItemCancellationIndex — PersonInApplication.Cancelled on
-      cancel-invitation apps matched to PersonInInvitation (same OUTER APPLY as ApplicationItem).
-      ApplicationResult.Result = 1 is Rejection (RejectionItem wave), not IsCancelled.
+      InvitationItem no longer has IsCancelled / IsChanged / IsUsed.
+      Cancelled/changed is derived at runtime via IssuedDocumentLifecycle
+      (PROCESS_ISSUED Cancellation/Change skip-nav). Used = Visa.IssuingInvitationItem.

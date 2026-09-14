@@ -1179,8 +1179,8 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Invitation" Caption="Çakylyk" />
         <Member Name="InvitationItemName" Caption="Ady" />
-        <Member Name="IsCancelled" Caption="Ýatyryldy" />
-        <Member Name="IsChanged" Caption="Üýtgedildi" />
+        <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
+        <Member Name="IssuedVisa" Caption="Berlen wiza" />
         <Member Name="Person" Caption="Adam" />
       </OwnMembers>
     </Class>
@@ -2671,8 +2671,8 @@
       <Columns>
         <ColumnInfo Id="Description" Caption="Düşündiriş" />
         <ColumnInfo Id="InvitationItemName" Caption="Ady" />
-        <ColumnInfo Id="IsCancelled" Caption="Ýatyryldy" />
-        <ColumnInfo Id="IsChanged" Caption="Üýtgedildi" />
+        <ColumnInfo Id="ExpirationDate" Caption="Gutarýan senesi" />
+        <ColumnInfo Id="IssuedVisa" Caption="Berlen wiza" />
         <ColumnInfo Id="Person" Caption="Adam" />
       </Columns>
     </ListView>

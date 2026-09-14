@@ -17,6 +17,8 @@ internal static class HeaderParentListViewColumns
         ["Rejection_ListView"] = typeof(BusinessObjects.Rejection),
         ["BorderZone_ListView"] = typeof(BusinessObjects.BorderZone),
         ["InvitationItem_ListView"] = typeof(BusinessObjects.InvitationItem),
+        ["Person_InvitationItems_ListView"] = typeof(BusinessObjects.InvitationItem),
+        ["Invitation_InvitationItems_ListView"] = typeof(BusinessObjects.InvitationItem),
         ["WorkPermitItem_ListView"] = typeof(BusinessObjects.WorkPermitItem),
         ["RejectionItem_ListView"] = typeof(BusinessObjects.RejectionItem),
         ["BorderZoneItem_ListView"] = typeof(BusinessObjects.BorderZoneItem),
@@ -85,12 +87,37 @@ internal static class HeaderParentListViewColumns
                 nameof(BusinessObjects.InvitationItem.Person),
                 nameof(BusinessObjects.InvitationItem.Passport),
                 nameof(BusinessObjects.InvitationItem.Invitation),
+                nameof(BusinessObjects.InvitationItem.ExpirationDate),
                 nameof(BusinessObjects.InvitationItem.ApplicationProfileInstance),
-                nameof(BusinessObjects.InvitationItem.IsCancelled),
-                nameof(BusinessObjects.InvitationItem.IsUsed),
                 nameof(BusinessObjects.InvitationItem.IssuedVisa),
             ],
-            [180, 48, 120, 100, 120, 140, 80, 72, 120]
+            [180, 48, 120, 100, 120, 100, 140, 140]
+        ),
+        (
+            "Person_InvitationItems_ListView",
+            [
+                nameof(BusinessObjects.InvitationItem.InvitationItemName),
+                nameof(BusinessObjects.InvitationItem.DocumentCopiesListLink),
+                nameof(BusinessObjects.InvitationItem.Invitation),
+                nameof(BusinessObjects.InvitationItem.Passport),
+                nameof(BusinessObjects.InvitationItem.ExpirationDate),
+                nameof(BusinessObjects.InvitationItem.ApplicationProfileInstance),
+                nameof(BusinessObjects.InvitationItem.IssuedVisa),
+            ],
+            [180, 48, 120, 100, 100, 140, 140]
+        ),
+        (
+            "Invitation_InvitationItems_ListView",
+            [
+                nameof(BusinessObjects.InvitationItem.InvitationItemName),
+                nameof(BusinessObjects.InvitationItem.DocumentCopiesListLink),
+                nameof(BusinessObjects.InvitationItem.Person),
+                nameof(BusinessObjects.InvitationItem.Passport),
+                nameof(BusinessObjects.InvitationItem.ExpirationDate),
+                nameof(BusinessObjects.InvitationItem.ApplicationProfileInstance),
+                nameof(BusinessObjects.InvitationItem.IssuedVisa),
+            ],
+            [180, 48, 120, 100, 100, 140, 140]
         ),
         (
             "WorkPermitItem_ListView",

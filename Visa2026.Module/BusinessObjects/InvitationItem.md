@@ -24,10 +24,9 @@ This section details the data fields of the `InvitationItem` object as defined i
 | `Employee` | `Employee` | A wrapper to get/set the `Person` as an `Employee`. | | Inherited from `PersonLinkedItemBase`. Hidden if `Invitation.Application.IsForFamily` is true. |
 | `FamilyMember` | `FamilyMember` | A wrapper to get/set the `Person` as a `FamilyMember`. | | Inherited from `PersonLinkedItemBase`. Hidden if `Invitation.Application.IsForFamily` is false. |
 | `InvitationItemName` | `string` | Display name (set on save). | | Default display property; optional (gear). |
+| `ExpirationDate` | `DateTime?` | Parent invitation letter expiry. | | `[NotMapped]` from `Invitation.ExpirationDate`; read-only. |
+| `IssuedVisa` | `Visa` | Visa issued from this line (`Visa.IssuingInvitationItem`). | | Read-only ListView/Detail; empty when unused. |
 | `IsPersonValid` | `bool` | A validation property to ensure the selected person is part of the parent application. | | `RuleFromBoolProperty` with ID `InvitationItem_PersonIsValid`. |
-| `IsCancelled` | `bool` | Derived: linked on a completed Cancellation instance (`PROCESS_ISSUED`). | | `[NotMapped]`; not officer-editable. |
-| `IsChanged` | `bool` | Derived: linked on a completed Change instance. Cancelled wins. | | `[NotMapped]`; not officer-editable. |
-| `IsUsed` | `bool` | Derived: a visa points at this line (`IssuedVisa`). | | `[NotMapped]`; not officer-editable. |
 | `IsActive` | `bool` | Indicates the InvitationItem is active or not. | | |
 
 ---
@@ -51,7 +50,7 @@ This section details the data fields of the `InvitationItem` object as defined i
 
 ## 6. UI & Behavior Notes
 
-- **Derived lifecycle**: `IsCancelled` / `IsChanged` / `IsUsed` are not stored. Cancelled/changed when this line is on a **PROCESS_ISSUED** Cancellation/Change profile instance; used when a visa has `IssuingInvitationItem`. Cancelled wins over changed. The `Invitation` header has no status columns.
+- **Derived lifecycle**: `IsCancelled` / `IsChanged` / `IsUsed` are **not** officer properties. Services use `IssuedDocumentLifecycle` (cancelled/changed = skip-nav on a **PROCESS_ISSUED** Cancellation/Change instance; used = `IssuedVisa`). Officers see expiry (`ExpirationDate`) and the linked visa (`IssuedVisa`).
 - **Navigation**: This object appears in the navigation menu under the "Invitation" group.
 - **Default Property**: `InvitationItemName` is the default property used for display purposes.
 - **Conditional UI**: The `Employee` and `FamilyMember` properties are conditionally displayed based on the `IsForFamily` property of the parent `Application`.

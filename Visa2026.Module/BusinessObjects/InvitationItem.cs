@@ -21,8 +21,6 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Invitation")]
     [DefaultProperty(nameof(InvitationItemName))]
-    [Appearance("InvitationItem_CancelledRow", Priority = 310, AppearanceItemType = "ViewItem", TargetItems = "*",
-        Criteria = "IsCancelled = true", Context = "ListView", BackColor = "LightCoral", FontColor = "Firebrick")]
     [Appearance("InvitationItem_InputApplicationProfileInstancesHiddenWhenIssued", Priority = 50,
         AppearanceItemType = "ViewItem", TargetItems = "ApplicationProfileInstances",
         Criteria = "ApplicationProfileInstance is not null", Context = "DetailView",
@@ -95,32 +93,18 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         /// <summary>
-        /// True when this line is linked on a completed Cancellation profile instance (<c>PROCESS_ISSUED</c>).
-        /// Officer auto-link requires this false (invitation item must still be valid: not cancelled/changed/used, parent not expired).
+        /// Parent invitation letter expiry. Read-only ListView/Detail convenience.
         /// </summary>
         [NotMapped]
-        [ModelDefault("AllowEdit", "False")]
-        [VisibleInDetailView(false)]
         [ExcludeFromOptionalDetailFields]
-        public bool IsCancelled => IssuedDocumentLifecycle.IsCancelled(this);
-
-        /// <summary>
-        /// True when this line is linked on a completed Change profile instance (<c>PROCESS_ISSUED</c>).
-        /// </summary>
-        [NotMapped]
         [ModelDefault("AllowEdit", "False")]
-        [VisibleInDetailView(false)]
-        [ExcludeFromOptionalDetailFields]
-        public bool IsChanged => IssuedDocumentLifecycle.IsChanged(this);
-
-        /// <summary>
-        /// True when a visa was issued from this line (<see cref="IssuedVisa"/>).
-        /// </summary>
-        [NotMapped]
-        [ModelDefault("AllowEdit", "False")]
-        [VisibleInDetailView(false)]
-        [ExcludeFromOptionalDetailFields]
-        public bool IsUsed => IssuedDocumentLifecycle.IsUsed(this);
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
+        [VisibleInListView(true)]
+        [VisibleInDetailView(true)]
+        [VisibleInLookupListView(false)]
+        [XafDisplayName("Expiration Date")]
+        [ToolTip("Expiry date from the parent invitation (Invitation.ExpirationDate).")]
+        public DateTime? ExpirationDate => Invitation?.ExpirationDate;
 
         /// <summary>
         /// ApplicationProfileInstance linked on the parent <see cref="Invitation"/> (if any). Read-only ListView/Detail convenience.

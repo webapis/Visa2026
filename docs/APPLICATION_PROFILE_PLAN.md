@@ -198,7 +198,7 @@ Keep **explicit** profile toggles for readiness + enabling person/roster `{{…}
 | EmployeePositionHistory (Position) | Current |
 | EmployeeSalary | Current |
 | MedicalRecord | Not expired |
-| InvitationItem | Active (`!IsCancelled && !IsChanged && !IsUsed`) and parent Invitation not expired. Last N when the profile Last-count is &gt; 1. Flags are **derived**: cancelled/changed = skip-nav link on a **PROCESS_ISSUED** Cancellation/Change instance; used = issuing visa. |
+| InvitationItem | Active (`IssuedDocumentLifecycle` not cancelled/changed/used) and parent Invitation not expired. Last N when the profile Last-count is &gt; 1. Cancelled/changed = skip-nav on a **PROCESS_ISSUED** Cancellation/Change instance; used = `IssuedVisa`. |
 | WorkPermitItem | Not cancelled/changed and not expired (same derived rules). Last N when the profile Last-count is &gt; 1. |
 | BorderZoneItem | Not cancelled/changed and parent BorderZone not expired. Last N when the profile Last-count is &gt; 1. |
 | RejectionItem | **Current / not cancelled** |

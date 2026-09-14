@@ -26,6 +26,12 @@ public static class IssuedDocumentLifecycle
     public static bool IsUsed(InvitationItem? item) =>
         item?.IssuedVisa != null;
 
+    /// <summary>
+    /// True when the invitation line is cancelled, changed, or already used for a visa.
+    /// </summary>
+    public static bool IsClosedOrUsed(InvitationItem? item) =>
+        IsCancelled(item) || IsChanged(item) || IsUsed(item);
+
     public static bool IsCancelled(Visa? visa) =>
         HasCompletedFamily(visa?.ApplicationProfileInstances, ApplicationProfileActionFamily.Cancellation);
 

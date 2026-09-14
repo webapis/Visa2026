@@ -109,7 +109,7 @@ Only **configuration** that used to live on `ApplicationType` (and type-driven i
 | **Passport** | `PersonalNumber` | Retained (legacy) | `Person.PersonalNumber` | Column retained; hidden in UI |
 | **Application** | `IsCancelled`, `IsRejected`, `LatestIsCancelled`, `LatestIsRejected` | Removed | `ApplicationProgress` terminal states (`PROCESS_CANCELLED`, `PROCESS_REJECTED`); `CurrentState` on list/detail | Dropped by `ApplicationLatestTerminalFlagsColumnsCleanupUpdater` |
 | **Invitation** | `IsCancelled`, `IsChanged` | Removed | Derived on **InvitationItem** from completed Cancellation/Change instances | Dropped by `InvitationHeaderStatusColumnsCleanupUpdater` |
-| **InvitationItem** | stored `IsCancelled`, `IsChanged`, `IsUsed` | Removed | `[NotMapped]` getters via `IssuedDocumentLifecycle` (PROCESS_ISSUED Cancellation/Change skip-nav; used = issuing visa) | Dropped by `IssuedDocumentStatusColumnsCleanupUpdater` |
+| **InvitationItem** | stored `IsCancelled`, `IsChanged`, `IsUsed` | Removed | `IssuedDocumentLifecycle` in services; officer UI uses `ExpirationDate` (parent invitation) and `IssuedVisa` | Dropped by `IssuedDocumentStatusColumnsCleanupUpdater`; `[NotMapped]` getters removed from BO |
 | **Visa** | stored `IsCancelled`, `IsChanged` | Removed | Same derived lifecycle (`Passport.IsCancelled` **kept**) | Dropped by `IssuedDocumentStatusColumnsCleanupUpdater` |
 | **WorkPermitItem** | stored `IsCancelled` | Removed | Same derived lifecycle. `IsChanged`/`IsExtended` already dropped | Dropped by `IssuedDocumentStatusColumnsCleanupUpdater` |
 | **BorderZone** / **BorderZoneItem** | stored `IsCancelled` | Removed | Header cancelled iff any item is cancelled | Dropped by `IssuedDocumentStatusColumnsCleanupUpdater` |

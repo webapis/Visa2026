@@ -5,6 +5,7 @@ using System.Linq;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
+using Visa2026.Module.Services;
 
 namespace Visa2026.Module.Services.PersonDossier;
 
@@ -511,12 +512,12 @@ public static class PersonDossierResolver
                     FormatDate(item.Invitation?.IssuedDate),
                     FormatDate(item.Invitation?.ExpirationDate),
                 ],
-                StatusLabel = item.IsCancelled
+                StatusLabel = IssuedDocumentLifecycle.IsCancelled(item)
                     ? L("Status.Cancelled")
-                    : item.IsUsed ? L("Status.Used") : string.Empty,
-                StatusCssClass = item.IsCancelled
+                    : item.IssuedVisa != null ? L("Status.Used") : string.Empty,
+                StatusCssClass = IssuedDocumentLifecycle.IsCancelled(item)
                     ? string.Empty
-                    : item.IsUsed ? "st-approved" : string.Empty,
+                    : item.IssuedVisa != null ? "st-approved" : string.Empty,
             })
             .ToList();
 

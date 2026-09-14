@@ -1,8 +1,8 @@
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
 /// <summary>
-/// Indexes legacy invitation-line cancellation onto <c>PersonInInvitation.Oid</c>
-/// for import-time <see cref="Bo.InvitationItem.IsCancelled"/> backfill.
+/// Indexes legacy invitation-line cancellation onto <c>PersonInInvitation.Oid</c>.
+/// InvitationItem no longer stores or exposes IsCancelled; officers see used-ness via IssuedVisa.
 /// Evidence is <c>PersonInApplication.Cancelled</c> on cancel-invitation apps matched to
 /// <c>PersonInInvitation</c>. <c>ApplicationResult.Result = 1</c> means Rejection (separate BO), not cancel.
 /// </summary>

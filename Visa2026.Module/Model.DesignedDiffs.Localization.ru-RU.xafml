@@ -1179,8 +1179,8 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Invitation" Caption="Приглашение" />
         <Member Name="InvitationItemName" Caption="Наименование" />
-        <Member Name="IsCancelled" Caption="Отменено" />
-        <Member Name="IsChanged" Caption="Изменено" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="IssuedVisa" Caption="Выданная виза" />
         <Member Name="Person" Caption="Лицо" />
       </OwnMembers>
     </Class>
@@ -2671,8 +2671,8 @@
       <Columns>
         <ColumnInfo Id="Description" Caption="Описание" />
         <ColumnInfo Id="InvitationItemName" Caption="Наименование" />
-        <ColumnInfo Id="IsCancelled" Caption="Отменено" />
-        <ColumnInfo Id="IsChanged" Caption="Изменено" />
+        <ColumnInfo Id="ExpirationDate" Caption="Срок действия" />
+        <ColumnInfo Id="IssuedVisa" Caption="Выданная виза" />
         <ColumnInfo Id="Person" Caption="Лицо" />
       </Columns>
     </ListView>

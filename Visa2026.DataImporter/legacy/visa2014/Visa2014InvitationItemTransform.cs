@@ -27,7 +27,7 @@ internal static class Visa2014InvitationItemTransform
     internal static readonly string[] InvitationItemMainColumnOrder =
     [
         "_legacyRowId", "_legacyTable", "_importAction",
-        "Person", "Passport", "Invitation", "IsCancelled",
+        "Person", "Passport", "Invitation",
         "_legacy_PersonOid", "_legacy_PassportOid", "_legacy_InvitationOid", "_legacy_ApplicationResultResult",
     ];
 
@@ -56,12 +56,7 @@ internal static class Visa2014InvitationItemTransform
         if (verbose && parseSkipped > 0)
             Console.WriteLine($"  Skipped {parseSkipped} sqlcmd row(s) with invalid shape.");
 
-        var cancellationIndex = Visa2014LegacyInvitationItemCancellationIndex.Load(
-            connectionString,
-            lookupTranslationPaths,
-            verbose);
-
-        return TransformRows(rawRows, cancellationIndex, out var skipped);
+        return TransformRows(rawRows, out var skipped);
     }
 
     internal static bool TryParseRawRow(IReadOnlyDictionary<string, string?> row, out Visa2014InvitationItemRawRow parsed)
@@ -89,7 +84,6 @@ internal static class Visa2014InvitationItemTransform
 
     private static Visa2014PersonImportBatch TransformRows(
         IReadOnlyList<Visa2014InvitationItemRawRow> rawRows,
-        Visa2014LegacyInvitationItemCancellationIndex cancellationIndex,
         out List<Dictionary<string, object?>> skipped)
     {
         skipped = [];
@@ -97,7 +91,7 @@ internal static class Visa2014InvitationItemTransform
 
         foreach (var raw in rawRows)
         {
-            var export = BuildExportRow(raw, cancellationIndex, out var skipReason);
+            var export = BuildExportRow(raw, out var skipReason);
             if (skipReason != null)
             {
                 export["_skipReason"] = skipReason;
@@ -121,7 +115,6 @@ internal static class Visa2014InvitationItemTransform
 
     private static Dictionary<string, object?> BuildExportRow(
         Visa2014InvitationItemRawRow raw,
-        Visa2014LegacyInvitationItemCancellationIndex cancellationIndex,
         out string? skipReason)
     {
         skipReason = null;
@@ -147,10 +140,6 @@ internal static class Visa2014InvitationItemTransform
         row["Person"] = raw.LegacyPersonOid?.ToString("D");
         row["Passport"] = raw.LegacyPassportOid?.ToString("D");
         row["Invitation"] = raw.LegacyInvitationOid?.ToString("D");
-        row["IsCancelled"] = Visa2014LegacyInvitationItemCancellationIndex.ResolveIsCancelled(
-            raw.ApplicationResultResult,
-            raw.LegacyOid,
-            cancellationIndex);
         return row;
     }
 }

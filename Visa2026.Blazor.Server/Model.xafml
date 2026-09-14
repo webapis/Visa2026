@@ -623,16 +623,14 @@
                 <LayoutItem Id="Person" ViewItem="Person" Index="0" RelativeSize="7.085346215780999" IsNewNode="True" />
                 <LayoutItem Id="Passport" Index="1" RelativeSize="5.152979066022544" ViewItem="Passport" IsNewNode="True" />
                 <LayoutItem Id="InvitationItemName" Index="2" RelativeSize="5.152979066022544" />
-                <LayoutItem Id="IsCancelled" ViewItem="IsCancelled" Index="3" RelativeSize="4.669887278582931" IsNewNode="True" />
-                <LayoutItem Id="IsChanged" ViewItem="IsChanged" Index="4" RelativeSize="4.669887278582931" IsNewNode="True" />
-                <LayoutItem Id="IsUsed" ViewItem="IsUsed" Index="5" RelativeSize="73.26892109500805" IsNewNode="True" />
+                <LayoutItem Id="ExpirationDate" ViewItem="ExpirationDate" Index="3" RelativeSize="4.669887278582931" IsNewNode="True" />
+                <LayoutItem Id="IssuedVisa" ViewItem="IssuedVisa" Index="4" RelativeSize="77.93880837359053" IsNewNode="True" />
                 <LayoutItem Id="ShowOptionalFields" Removed="True" />
               </LayoutGroup>
               <LayoutGroup Id="InvitationItem_col2" RelativeSize="23.06993642143506" Caption="InvitationItem_col2">
                 <LayoutItem Id="ShowOptionalFields" ViewItem="ShowOptionalFields" Index="0" RelativeSize="100" IsNewNode="True" />
-                <LayoutItem Id="IsCancelled" RelativeSize="3.0145530145530146" Index="1" Removed="True" />
-                <LayoutItem Id="IsChanged" RelativeSize="4.669887278582931" Index="1" Removed="True" />
-                <LayoutItem Id="IsUsed" RelativeSize="92.914653784219" Index="1" Removed="True" />
+                <LayoutItem Id="ExpirationDate" RelativeSize="3.0145530145530146" Index="1" Removed="True" />
+                <LayoutItem Id="IssuedVisa" RelativeSize="96.98544698544699" Index="1" Removed="True" />
               </LayoutGroup>
             </LayoutGroup>
           </LayoutGroup>
@@ -641,16 +639,14 @@
     </DetailView>
     <ListView Id="InvitationItem_ListView">
       <Columns>
-        <ColumnInfo Id="IsChanged" Index="-1" />
         <ColumnInfo Id="InvitationItemName" Index="0" Width="180" />
         <ColumnInfo Id="DocumentCopiesListLink" Index="1" Width="56" />
         <ColumnInfo Id="Person" Index="2" Width="120" />
         <ColumnInfo Id="Passport" Index="3" Width="100" />
         <ColumnInfo Id="Invitation" Index="4" Width="120" />
-        <ColumnInfo Id="Application" Index="5" Width="140" />
-        <ColumnInfo Id="IsCancelled" Index="6" Width="80" />
-        <ColumnInfo Id="IsUsed" Index="7" Width="72" />
-        <ColumnInfo Id="IssuedVisa" Index="8" Width="120" />
+        <ColumnInfo Id="ExpirationDate" Index="5" Width="100" />
+        <ColumnInfo Id="ApplicationProfileInstance" Index="6" Width="140" />
+        <ColumnInfo Id="IssuedVisa" Index="7" Width="140" />
       </Columns>
     </ListView>
     <DetailView Id="Lodging_DetailView">

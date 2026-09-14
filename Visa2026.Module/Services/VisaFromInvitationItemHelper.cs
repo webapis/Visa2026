@@ -26,7 +26,7 @@ public static class VisaFromInvitationItemHelper
             return false;
         }
 
-        if (invitationItem.IsCancelled || invitationItem.IsChanged || invitationItem.IsUsed)
+        if (IssuedDocumentLifecycle.IsClosedOrUsed(invitationItem))
         {
             blockMessageKey = "InvitationItem.IssueVisa.ItemUsedOrClosed";
             return false;

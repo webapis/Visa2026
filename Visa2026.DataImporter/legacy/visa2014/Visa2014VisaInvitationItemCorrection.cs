@@ -1,6 +1,7 @@
 using DevExpress.ExpressApp;
 using Visa2026.Blazor.Server.Services.Migration;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services;
 using Visa2026.Module.Services.MigrationImport;
 using Bo = Visa2026.Module.BusinessObjects;
 
@@ -151,8 +152,8 @@ internal static class Visa2014VisaInvitationItemCorrection
             if (visa.IssuingInvitationItem != null
                 && visa.IssuingInvitationItem.Person?.ID == person.ID
                 && visa.IssuingInvitationItem.Invitation?.ApplicationProfileInstance?.ID == application.ID
-                && !visa.IssuingInvitationItem.IsCancelled
-                && !visa.IssuingInvitationItem.IsChanged)
+                && !IssuedDocumentLifecycle.IsCancelled(visa.IssuingInvitationItem)
+                && !IssuedDocumentLifecycle.IsChanged(visa.IssuingInvitationItem))
             {
                 alreadyCorrect++;
                 continue;
@@ -173,9 +174,9 @@ internal static class Visa2014VisaInvitationItemCorrection
                     ApplicationProfileInstanceId = ii.Invitation.ApplicationProfileInstance!.ID,
                     IssuedDate = ii.Invitation.IssuedDate,
                     ApplicationDate = ii.Invitation.ApplicationProfileInstance.ApplicationDate,
-                    IsCancelled = ii.IsCancelled,
-                    IsChanged = ii.IsChanged,
-                    IsUsed = ii.IsUsed,
+                    IsCancelled = IssuedDocumentLifecycle.IsCancelled(ii),
+                    IsChanged = IssuedDocumentLifecycle.IsChanged(ii),
+                    IsUsed = IssuedDocumentLifecycle.IsUsed(ii),
                 });
 
             var matchId = Visa2014VisaInvitationItemLinkMatcher.SelectClosest(

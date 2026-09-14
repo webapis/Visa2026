@@ -4,6 +4,7 @@ using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.BaseImpl.EF;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services;
 using Visa2026.Module.Services.MigrationImport;
 
 namespace Visa2026.Module.Services.ApplicationPersonRoster;
@@ -59,7 +60,7 @@ public static class ApplicationProfileInstancePersonValidItems
     {
         if (item == null || item.Invitation == null)
             return false;
-        if (item.IsCancelled || item.IsChanged || item.IsUsed)
+        if (IssuedDocumentLifecycle.IsClosedOrUsed(item))
             return false;
 
         return !IsExpiredAsOf(item.Invitation.ExpirationDate, asOf);

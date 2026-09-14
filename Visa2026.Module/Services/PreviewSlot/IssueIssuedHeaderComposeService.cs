@@ -110,7 +110,7 @@ public static class IssueIssuedHeaderComposeService
         var items = objectSpace.GetObjectsQuery<InvitationItem>()
             .Where(i => i.Invitation != null && i.Invitation.ID == invitation.ID)
             .ToList();
-        if (items.Any(i => i.IsUsed || i.IssuedVisa != null))
+        if (items.Any(i => IssuedDocumentLifecycle.IsUsed(i) || i.IssuedVisa != null))
         {
             return new IssueIssuedHeaderCreateResult
             {
@@ -973,7 +973,7 @@ public static class IssueIssuedHeaderComposeService
                 PersonId = i.Person?.ID ?? Guid.Empty,
                 PersonName = i.Person?.FullName?.Trim() ?? string.Empty,
                 PassportNumber = i.Passport?.PassportNumber?.Trim() ?? string.Empty,
-                CanIssueVisa = !i.IsUsed && !i.IsCancelled && !i.IsChanged && i.Passport != null,
+                CanIssueVisa = !IssuedDocumentLifecycle.IsClosedOrUsed(i) && i.Passport != null,
             })
             .ToList();
 
@@ -1191,8 +1191,8 @@ public static class IssueIssuedHeaderComposeService
                     {
                         line.Include = true;
                         line.ExistingLineId = item.ID;
-                        line.CanIssueVisa = !item.IsUsed && !item.IsCancelled && !item.IsChanged && item.Passport != null;
-                        line.IncludeLocked = item.IsUsed || item.IssuedVisa != null;
+                        line.CanIssueVisa = !IssuedDocumentLifecycle.IsClosedOrUsed(item) && item.Passport != null;
+                        line.IncludeLocked = IssuedDocumentLifecycle.IsUsed(item) || item.IssuedVisa != null;
                         if (item.Passport != null)
                         {
                             line.PassportId = item.Passport.ID;
@@ -1469,7 +1469,7 @@ public static class IssueIssuedHeaderComposeService
                 var personId = item.Person?.ID ?? Guid.Empty;
                 if (personId == Guid.Empty || selectedIds.Contains(personId))
                     continue;
-                if (item.IsUsed || item.IssuedVisa != null || item.IsCancelled || item.IsChanged)
+                if (IssuedDocumentLifecycle.IsClosedOrUsed(item) || item.IssuedVisa != null)
                     continue;
                 invitation.InvitationItems.Remove(item);
                 objectSpace.Delete(item);
@@ -1510,7 +1510,7 @@ public static class IssueIssuedHeaderComposeService
                 PersonId = i.Person?.ID ?? Guid.Empty,
                 PersonName = i.Person?.FullName?.Trim() ?? string.Empty,
                 PassportNumber = i.Passport?.PassportNumber?.Trim() ?? string.Empty,
-                CanIssueVisa = !i.IsUsed && !i.IsCancelled && !i.IsChanged && i.Passport != null,
+                CanIssueVisa = !IssuedDocumentLifecycle.IsClosedOrUsed(i) && i.Passport != null,
             }).ToList(),
         };
     }
@@ -1702,7 +1702,7 @@ public static class IssueIssuedHeaderComposeService
                             PersonId = i.Person?.ID ?? Guid.Empty,
                             PersonName = i.Person?.FullName?.Trim() ?? string.Empty,
                             PassportNumber = i.Passport?.PassportNumber?.Trim() ?? string.Empty,
-                            CanIssueVisa = !i.IsUsed && !i.IsCancelled && !i.IsChanged && i.Passport != null,
+                            CanIssueVisa = !IssuedDocumentLifecycle.IsClosedOrUsed(i) && i.Passport != null,
                         })
                         .ToList(),
                 };

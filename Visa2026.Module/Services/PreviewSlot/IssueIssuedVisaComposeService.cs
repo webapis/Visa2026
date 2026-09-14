@@ -108,7 +108,7 @@ public static class IssueIssuedVisaComposeService
                 issuedPersonIds.Add(item.Person.ID);
                 visaByItemId.TryGetValue(item.ID, out var existingVisa);
                 existingVisa ??= item.IssuedVisa;
-                var already = item.IsUsed || existingVisa != null;
+                var already = IssuedDocumentLifecycle.IsUsed(item) || existingVisa != null;
                 var passport = existingVisa?.Passport
                     ?? item.Passport
                     ?? ApplicationProfileInstancePersonValidItems.ResolvePassport(item.Person);
@@ -471,7 +471,7 @@ public static class IssueIssuedVisaComposeService
                     };
                 }
 
-                if (item.IsCancelled || item.IsChanged || item.IsUsed || item.IssuedVisa != null)
+                if (IssuedDocumentLifecycle.IsClosedOrUsed(item) || item.IssuedVisa != null)
                 {
                     return new IssueIssuedVisaCreateResult
                     {

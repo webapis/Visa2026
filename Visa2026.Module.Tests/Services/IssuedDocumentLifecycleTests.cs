@@ -68,6 +68,7 @@ public class IssuedDocumentLifecycleTests
 
         item.IssuedVisa = new Visa();
         Assert.True(IssuedDocumentLifecycle.IsUsed(item));
+        Assert.True(IssuedDocumentLifecycle.IsClosedOrUsed(item));
     }
 
     [Fact]

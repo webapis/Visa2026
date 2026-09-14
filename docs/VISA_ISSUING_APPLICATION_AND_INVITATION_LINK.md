@@ -158,7 +158,7 @@ If the issuing type does **not** have `CanIssueInvitation`, `InvitationItem` mus
 
 Candidates for `IssuingApplicationItem` / `InvitationItem` must be excluded when any of the following apply:
 
-- `InvitationItem.IsCancelled` (and, when matching invitation lines, also exclude `IsChanged` and already `IsUsed`)
+- `IssuedDocumentLifecycle.IsClosedOrUsed` on the invitation line (cancelled, changed, or already has `IssuedVisa`)
 - Application-item / workflow cancel flags on the related `ApplicationItem` where present
 - Parent `Application` is process-cancelled (latest `ApplicationProgress` terminal cancelled state)
 - Invitation header / item cancelled state as applicable to the candidate row
@@ -200,7 +200,7 @@ When enough context exists at create (at least `Passport` / person; `IssueDate` 
 
 ### 3.8 Side effect: mark invitation item used
 
-When Path A sets `Visa.IssuingInvitationItem`, set **`InvitationItem.IsUsed = true`** automatically (respect exclusive flags: Cancelled / Changed / Used — linking as used clears/forbids the others per existing `InvitationItem` rules).
+When Path A sets `Visa.IssuingInvitationItem`, the line is used because `InvitationItem.IssuedVisa` points at that visa (`IssuedDocumentLifecycle.IsUsed`). There is no separate `IsUsed` flag to set.
 
 ---
 
@@ -256,11 +256,11 @@ Code: `Visa2014VisaInvitationItemLinkMatcher` + `Visa2014VisaInvitationItemCorre
 | Gate | Skip unless `Visa.IssuingApplicationItem` is set and issuing app type has `CanIssueInvitation` |
 | Person | Invitation item person = visa passport holder |
 | Application | `Invitation.Application` = issuing application |
-| Exclude | `IsCancelled` / `IsChanged` / `IsUsed`; invitation item already linked to another visa |
+| Exclude | `IssuedDocumentLifecycle.IsClosedOrUsed`; invitation item already linked to another visa |
 | Soft chronology | Prefer candidates with `IssuedDate > Application.ApplicationDate`; if none, fall back to remaining candidates (dirty legacy) |
 | Closest match | When `Visa.IssueDate` set: require `IssuedDate < IssueDate`, pick **smallest gap** `IssueDate − IssuedDate`, tie-break `Invitation.ID` DESC. When IssueDate unset: latest `IssuedDate`, then `Invitation.ID` DESC |
 | No match | Leave null; count/log skip; **do not fail** |
-| Side effect | Set `InvitationItem.IsUsed = true` when linking |
+| Side effect | Linking sets `Visa.IssuingInvitationItem` (used-ness is `IssuedVisa`) |
 | Idempotent | Already-correct link counts as already correct |
 
 #### 4.1.4 Checklist
@@ -282,8 +282,8 @@ Code: `Visa2014VisaInvitationItemLinkMatcher` + `Visa2014VisaInvitationItemCorre
 | Q1 | Exact “InvitationItem Issued Date” field for chronology (Path A) | **Resolved:** use `Invitation.IssuedDate` (header formalization date) |
 | Q2 | Strict `>` vs `≥` for chronology (Path A) | **Resolved:** strict `>` — `Visa.IssueDate` > `Invitation.IssuedDate` > `Application.Date` |
 | Q3 | “Last” application sort key (Path A) | **Resolved:** `Application.Date` DESC, then `Application.ID` DESC |
-| Q4 | Cancelled / ineligible candidates | **Resolved:** exclude cancelled app/item/progress; exclude invitation `IsCancelled` / `IsChanged` / already `IsUsed` |
-| Q5 | Does linking set `InvitationItem.IsUsed` automatically in UI? | **Resolved:** yes on Path A link |
+| Q4 | Cancelled / ineligible candidates | **Resolved:** exclude cancelled app/item/progress; exclude invitation lines where `IssuedDocumentLifecycle.IsClosedOrUsed` |
+| Q5 | Does linking mark the invitation item used in UI? | **Resolved:** yes — officers see `IssuedVisa`; no `IsUsed` flag |
 | Q6 | Both links together? | **Resolved:** match `ApplicationItem` when `CanIssueVisa` ∨ `CanIssueInvitation`; match `InvitationItem` only when `CanIssueInvitation` |
 | Q7 | Eligibility for IssuingApplicationItem | **Resolved:** `CanIssueVisa` **or** `CanIssueInvitation` (union); InvitationItem when `CanIssueInvitation` |
 | Q8 | Path B import “closest match” algorithm | **Resolved (hybrid):** ProcessNumber/sibling for IssuingApplicationItem; target closest-match for InvitationItem (§4.1) |
