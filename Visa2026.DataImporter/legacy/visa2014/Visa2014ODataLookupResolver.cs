@@ -38,6 +38,7 @@ internal sealed partial class Visa2014ODataLookupResolver
     private List<ApplicationLocation> _applicationLocations = [];
     private List<CheckPoint> _checkPoints = [];
     private List<MigrationService> _migrationServices = [];
+    private List<BusinessTripAddress> _businessTripAddresses = [];
 
     public async Task LoadAsync(ApiClient api, string? tenantCatalogDirectory = null)
     {
@@ -74,6 +75,7 @@ internal sealed partial class Visa2014ODataLookupResolver
         _applicationLocations = await api.GetAllAsync<ApplicationLocation>("ApplicationLocation");
         _checkPoints = await api.GetAllAsync<CheckPoint>("CheckPoint");
         _migrationServices = await api.GetAllAsync<MigrationService>("MigrationService");
+        _businessTripAddresses = await api.GetAllAsync<BusinessTripAddress>("BusinessTripAddress");
 
         var lookupCatalogDir = string.IsNullOrWhiteSpace(tenantCatalogDirectory)
             ? null
@@ -607,6 +609,40 @@ internal sealed partial class Visa2014ODataLookupResolver
         if (!string.IsNullOrWhiteSpace(city.RegionName))
             return ResolveRegion(city.RegionName);
         return null;
+    }
+
+    public Guid? ResolveBusinessTripAddress(Guid cityId, string? fullAddress)
+    {
+        var trimmed = Visa2014ApplicationTransform.TrimBusinessTripAddress(fullAddress);
+        if (string.IsNullOrWhiteSpace(trimmed))
+            return null;
+
+        foreach (var row in _businessTripAddresses)
+        {
+            var rowCityId = row.City?.Id;
+            if (!rowCityId.HasValue || rowCityId.Value != cityId)
+                continue;
+            if (Visa2014CatalogMatchHelper.KeysEqual(row.FullAddress, trimmed))
+                return row.Id;
+        }
+
+        return null;
+    }
+
+    public void RememberBusinessTripAddress(Guid id, Guid cityId, string fullAddress)
+    {
+        if (id == Guid.Empty || string.IsNullOrWhiteSpace(fullAddress))
+            return;
+
+        if (_businessTripAddresses.Any(x => x.Id == id))
+            return;
+
+        _businessTripAddresses.Add(new BusinessTripAddress
+        {
+            Id = id,
+            FullAddress = fullAddress,
+            City = new City { Id = cityId },
+        });
     }
 
     public string? GetCityRegionNameTm(Guid cityId)

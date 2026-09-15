@@ -285,15 +285,19 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("BusinessTripAddressVisible", Visibility = ViewItemVisibility.Hide,
             Criteria = "ApplicationProfileInstance is null or !" + BusinessTripWorkflowCriteria,
             Context = "DetailView,ListView")]
-        public virtual BusinessTripAddress BusinessTripAddress { get; set; }
+        [NotMapped]
+        public string? BusinessTripAddressDisplay =>
+            BusinessTripDestinationHelper.FormatFullAddress(ApplicationProfileInstance);
+
         [RuleFromBoolProperty(
             "ApplicationItem_BusinessTripAddressValid",
             DefaultContexts.Save,
             "Business trip city and full address are required.",
             TargetCriteria = BusinessTripWorkflowCriteria)]
         public bool IsBusinessTripAddressValid =>
-            BusinessTripAddress?.City != null
-            && !string.IsNullOrWhiteSpace(BusinessTripAddress?.FullAddress);
+            ApplicationProfileInstance == null
+            || !ApplicationProfileInstance.CfgShowBusinessTrips
+            || BusinessTripDestinationHelper.IsComplete(ApplicationProfileInstance);
 
         [Appearance("ApplicationItem_BorderZoneLocationVisible", Visibility = ViewItemVisibility.Hide,
             Criteria = ApplicationItemBorderZoneLocationHiddenCriteria, Context = "DetailView,ListView")]
@@ -1301,7 +1305,8 @@ namespace Visa2026.Module.BusinessObjects
         public string Application_CompanyHead_PositionTm => CompanyHead_PositionTm;
 
         [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
-        public string BusinessTripAddress_FullAddress => BusinessTripAddress?.FullAddress;
+        public string BusinessTripAddress_FullAddress =>
+            BusinessTripDestinationHelper.FormatFullAddress(ApplicationProfileInstance) ?? string.Empty;
 
         [NotMapped]
         [VisibleInDetailView(false), VisibleInListView(false)]

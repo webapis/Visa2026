@@ -663,7 +663,10 @@ bands:
         generatesVisa: false
         notes: |
           This wipe 2026-09-08 remainder complete. Headers **594**. Skip
-          Invitation, WorkPermit, Visa. Next: skip empty Arrival, then
+          Invitation, WorkPermit, Visa. Case summary Region/City/address were
+          not on the first POST (ToCity only). Backfill:
+          --patch-visa2014-application-business-trip-case-summary.
+          Purpose has no live E:13 source. Arrival skip empty, then
           postAllTypeSlices.
       - name: App_Business_Trip_Arrival
         status: skip

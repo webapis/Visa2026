@@ -89,37 +89,100 @@
                     <td>End date</td><td><span class="ap-wizard__tag">date</span></td>
                     <td>—</td><td>—</td>
                 </tr>
+                @if (ShowFromToRegionCityBlock)
+                {
                 <tr>
-                    <td><input type="checkbox" @bind="Profile.RequireRegion" disabled="@Disabled" @bind:after="OnRegionUseChanged" /></td>
-                    <td>Region</td><td><span class="ap-wizard__tag">lookup</span></td>
-                    <td><input type="checkbox" checked="@HasRegionDefault" disabled="@(Disabled || !Profile.RequireRegion)" @onchange="ToggleRegionDefault" /></td>
+                    <td><input type="checkbox" checked="true" disabled="true" /></td>
+                    <td>From region</td><td><span class="ap-wizard__tag">lookup</span></td>
+                    <td><input type="checkbox" checked="@HasFromRegionDefault" disabled="@Disabled" @onchange="ToggleFromRegionDefault" /></td>
                     <td>
-                        <select disabled="@(Disabled || !Profile.RequireRegion)" value="@FormatGuid(Profile.DefaultRegionId)" @onchange="OnRegionChanged">
+                        <select disabled="@Disabled" value="@FormatGuid(Profile.DefaultFromRegionId)" @onchange="OnFromRegionChanged">
                             <option value="">—</option>
                             @foreach (var item in Lookups.Regions) { <option value="@item.Id.ToString("D")">@item.DisplayName</option> }
                         </select>
                     </td>
                 </tr>
                 <tr>
-                    <td><input type="checkbox" @bind="Profile.RequireCity" disabled="@Disabled" @bind:after="OnCityUseChanged" /></td>
-                    <td>City</td><td><span class="ap-wizard__tag">lookup</span></td>
-                    <td><input type="checkbox" checked="@HasCityDefault" disabled="@(Disabled || !Profile.RequireCity)" @onchange="ToggleCityDefault" /></td>
+                    <td><input type="checkbox" checked="true" disabled="true" /></td>
+                    <td>From city</td><td><span class="ap-wizard__tag">lookup</span></td>
+                    <td><input type="checkbox" checked="@HasFromCityDefault" disabled="@Disabled" @onchange="ToggleFromCityDefault" /></td>
                     <td>
-                        <select disabled="@(Disabled || !Profile.RequireCity)" value="@FormatGuid(Profile.DefaultCityId)" @onchange="OnCityChanged">
+                        <select disabled="@Disabled" value="@FormatGuid(Profile.DefaultFromCityId)" @onchange="OnFromCityChanged">
                             <option value="">—</option>
-                            @foreach (var item in CityOptions) { <option value="@item.Id.ToString("D")">@item.DisplayName</option> }
+                            @foreach (var item in FromCityOptions) { <option value="@item.Id.ToString("D")">@item.DisplayName</option> }
                         </select>
                     </td>
                 </tr>
                 <tr>
+                    <td><input type="checkbox" checked="true" disabled="true" /></td>
+                    <td>To region</td><td><span class="ap-wizard__tag">lookup</span></td>
+                    <td><input type="checkbox" checked="@HasToRegionDefault" disabled="@Disabled" @onchange="ToggleToRegionDefault" /></td>
+                    <td>
+                        <select disabled="@Disabled" value="@FormatGuid(Profile.DefaultToRegionId)" @onchange="OnToRegionChanged">
+                            <option value="">—</option>
+                            @foreach (var item in Lookups.Regions) { <option value="@item.Id.ToString("D")">@item.DisplayName</option> }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td><input type="checkbox" checked="true" disabled="true" /></td>
+                    <td>To city</td><td><span class="ap-wizard__tag">lookup</span></td>
+                    <td><input type="checkbox" checked="@HasToCityDefault" disabled="@Disabled" @onchange="ToggleToCityDefault" /></td>
+                    <td>
+                        <select disabled="@Disabled" value="@FormatGuid(Profile.DefaultToCityId)" @onchange="OnToCityChanged">
+                            <option value="">—</option>
+                            @foreach (var item in ToCityOptions) { <option value="@item.Id.ToString("D")">@item.DisplayName</option> }
+                        </select>
+                    </td>
+                </tr>
+                }
+                <tr>
                     <td><input type="checkbox" @bind="Profile.RequireBusinessTripAddress" disabled="@Disabled" /></td>
-                    <td>Business trip address</td><td><span class="ap-wizard__tag">lookup</span></td>
+                    <td>Business trip address</td><td><span class="ap-wizard__tag">type + site</span></td>
                     <td><input type="checkbox" checked="@HasBusinessTripAddressDefault" disabled="@(Disabled || !Profile.RequireBusinessTripAddress)" @onchange="ToggleBusinessTripAddressDefault" /></td>
                     <td>
-                        <select disabled="@(Disabled || !Profile.RequireBusinessTripAddress)" value="@FormatGuid(Profile.DefaultBusinessTripAddressId)" @onchange="OnBusinessTripAddressChanged">
-                            <option value="">—</option>
-                            @foreach (var item in Lookups.BusinessTripAddresses) { <option value="@item.Id.ToString("D")">@item.DisplayName</option> }
-                        </select>
+                        <div class="ap-wizard__stacked">
+                            <select disabled="@(Disabled || !Profile.RequireBusinessTripAddress)" value="@FormatResidenceType(Profile.DefaultBusinessTripAddressType)" @onchange="OnBusinessTripAddressTypeChanged">
+                                <option value="">— type —</option>
+                                <option value="@((int)ResidenceType.Lodging)">Lodging</option>
+                                <option value="@((int)ResidenceType.Hotel)">Hotel</option>
+                                <option value="@((int)ResidenceType.Hospital)">Hospital</option>
+                                <option value="@((int)ResidenceType.Other)">Other site</option>
+                                <option value="@((int)ResidenceType.PrivateHouse)">Private house</option>
+                            </select>
+                            @if (Profile.DefaultBusinessTripAddressType == ResidenceType.Lodging)
+                            {
+                                <select disabled="@(Disabled || !Profile.RequireBusinessTripAddress)" value="@FormatGuid(Profile.DefaultBusinessTripLodgingId)" @onchange="OnBusinessTripLodgingChanged">
+                                    <option value="">— lodging —</option>
+                                    @foreach (var item in Lookups.Lodgings) { <option value="@item.Id.ToString("D")">@item.DisplayName</option> }
+                                </select>
+                            }
+                            else if (Profile.DefaultBusinessTripAddressType == ResidenceType.Hotel)
+                            {
+                                <select disabled="@(Disabled || !Profile.RequireBusinessTripAddress)" value="@FormatGuid(Profile.DefaultBusinessTripHotelId)" @onchange="OnBusinessTripHotelChanged">
+                                    <option value="">— hotel —</option>
+                                    @foreach (var item in Lookups.Hotels) { <option value="@item.Id.ToString("D")">@item.DisplayName</option> }
+                                </select>
+                            }
+                            else if (Profile.DefaultBusinessTripAddressType == ResidenceType.Hospital)
+                            {
+                                <select disabled="@(Disabled || !Profile.RequireBusinessTripAddress)" value="@FormatGuid(Profile.DefaultBusinessTripHospitalId)" @onchange="OnBusinessTripHospitalChanged">
+                                    <option value="">— hospital —</option>
+                                    @foreach (var item in Lookups.Hospitals) { <option value="@item.Id.ToString("D")">@item.DisplayName</option> }
+                                </select>
+                            }
+                            else if (Profile.DefaultBusinessTripAddressType == ResidenceType.Other)
+                            {
+                                <select disabled="@(Disabled || !Profile.RequireBusinessTripAddress)" value="@FormatGuid(Profile.DefaultBusinessTripOtherSiteId)" @onchange="OnBusinessTripOtherSiteChanged">
+                                    <option value="">— other site —</option>
+                                    @foreach (var item in Lookups.OtherSites) { <option value="@item.Id.ToString("D")">@item.DisplayName</option> }
+                                </select>
+                            }
+                            else if (Profile.DefaultBusinessTripAddressType == ResidenceType.PrivateHouse)
+                            {
+                                <input type="text" maxlength="255" disabled="@(Disabled || !Profile.RequireBusinessTripAddress)" @bind="Profile.DefaultBusinessTripPrivateHouseAddress" />
+                            }
+                        </div>
                     </td>
                 </tr>
                 <tr>
@@ -219,9 +282,20 @@
             Profile.ProduceInvitation, Profile.ProduceWorkPermit, Profile.ProduceVisa, Profile.RequireProcessNumber))
             Profile.RequireProcessNumber = true;
 
+        if (ApplicationProfileConfigurationResolver.UsesFromToRegionCity(Profile))
+        {
+            Profile.RequireFromRegion = true;
+            Profile.RequireFromCity = true;
+            Profile.RequireToRegion = true;
+            Profile.RequireToCity = true;
+        }
+
         if (Profile.RequireBorderZone && string.IsNullOrWhiteSpace(Profile.DefaultBorderZoneLocation))
             Profile.DefaultBorderZoneLocation = BorderZoneSelectionHelper.NoneValue;
     }
+
+    private bool ShowFromToRegionCityBlock =>
+        ApplicationProfileConfigurationResolver.UsesFromToRegionCity(Profile);
 
     private bool HasVisaTypeDefault => Profile.DefaultVisaTypeId.HasValue;
     private bool HasVisaCategoryDefault => Profile.DefaultVisaCategoryId.HasValue;
@@ -231,17 +305,36 @@
     private bool HasProjectDefault => Profile.DefaultProjectContractId.HasValue;
     private bool HasUrgencyDefault => Profile.DefaultUrgencyId.HasValue;
     private bool HasCheckPointDefault => Profile.DefaultEntryCheckPointId.HasValue;
-    private bool HasRegionDefault => Profile.DefaultRegionId.HasValue;
-    private bool HasCityDefault => Profile.DefaultCityId.HasValue;
-    private bool HasBusinessTripAddressDefault => Profile.DefaultBusinessTripAddressId.HasValue;
+    private bool HasFromRegionDefault => Profile.DefaultFromRegionId.HasValue;
+    private bool HasFromCityDefault => Profile.DefaultFromCityId.HasValue;
+    private bool HasToRegionDefault => Profile.DefaultToRegionId.HasValue;
+    private bool HasToCityDefault => Profile.DefaultToCityId.HasValue;
+    private bool HasBusinessTripAddressDefault =>
+        Profile.DefaultBusinessTripAddressType != null
+        || Profile.DefaultBusinessTripLodgingId.HasValue
+        || Profile.DefaultBusinessTripHotelId.HasValue
+        || Profile.DefaultBusinessTripHospitalId.HasValue
+        || Profile.DefaultBusinessTripOtherSiteId.HasValue
+        || !string.IsNullOrWhiteSpace(Profile.DefaultBusinessTripPrivateHouseAddress);
+
     private bool HasPurposeDefault => !string.IsNullOrWhiteSpace(Profile.DefaultPurpose);
     private bool HasWorkPermitLocationDefault => Profile.DefaultWorkPermitLocation != null;
 
-    private IEnumerable<ApplicationProfileWizardLookupItem> CityOptions
+    private IEnumerable<ApplicationProfileWizardLookupItem> FromCityOptions
     {
         get
         {
-            if (Profile.DefaultRegionId is Guid regionId && regionId != Guid.Empty)
+            if (Profile.DefaultFromRegionId is Guid regionId && regionId != Guid.Empty)
+                return ApplicationProfileWizardLookupData.CitiesForRegion(Lookups.Cities, Lookups.Regions, regionId);
+            return Lookups.Cities;
+        }
+    }
+
+    private IEnumerable<ApplicationProfileWizardLookupItem> ToCityOptions
+    {
+        get
+        {
+            if (Profile.DefaultToRegionId is Guid regionId && regionId != Guid.Empty)
                 return ApplicationProfileWizardLookupData.CitiesForRegion(Lookups.Cities, Lookups.Regions, regionId);
             return Lookups.Cities;
         }
@@ -316,32 +409,113 @@
         else if (Profile.DefaultEntryCheckPoint == null) Profile.DefaultEntryCheckPoint = FirstLookup<CheckPoint>(Lookups.CheckPoints);
     }
 
-    private void ToggleRegionDefault(ChangeEventArgs e)
+    private void ToggleFromRegionDefault(ChangeEventArgs e)
     {
-        if (Disabled || !Profile.RequireRegion) return;
+        if (Disabled) return;
         if (!ParseChecked(e))
         {
-            Profile.DefaultRegion = null;
-            ClearCityIfRegionMismatch();
+            Profile.DefaultFromRegion = null;
+            ClearFromCityIfRegionMismatch();
         }
-        else if (Profile.DefaultRegion == null)
-            Profile.DefaultRegion = FirstLookup<Region>(Lookups.Regions);
+        else if (Profile.DefaultFromRegion == null)
+            Profile.DefaultFromRegion = FirstLookup<Region>(Lookups.Regions);
     }
 
-    private void ToggleCityDefault(ChangeEventArgs e)
+    private void ToggleFromCityDefault(ChangeEventArgs e)
     {
-        if (Disabled || !Profile.RequireCity) return;
-        if (!ParseChecked(e)) Profile.DefaultCity = null;
-        else if (Profile.DefaultCity == null)
-            Profile.DefaultCity = FirstLookup<City>(CityOptions.ToList());
+        if (Disabled) return;
+        if (!ParseChecked(e)) Profile.DefaultFromCity = null;
+        else if (Profile.DefaultFromCity == null)
+            Profile.DefaultFromCity = FirstLookup<City>(FromCityOptions.ToList());
+    }
+
+    private void ToggleToRegionDefault(ChangeEventArgs e)
+    {
+        if (Disabled) return;
+        if (!ParseChecked(e))
+        {
+            Profile.DefaultToRegion = null;
+            ClearToCityIfRegionMismatch();
+        }
+        else if (Profile.DefaultToRegion == null)
+            Profile.DefaultToRegion = FirstLookup<Region>(Lookups.Regions);
+    }
+
+    private void ToggleToCityDefault(ChangeEventArgs e)
+    {
+        if (Disabled) return;
+        if (!ParseChecked(e)) Profile.DefaultToCity = null;
+        else if (Profile.DefaultToCity == null)
+            Profile.DefaultToCity = FirstLookup<City>(ToCityOptions.ToList());
     }
 
     private void ToggleBusinessTripAddressDefault(ChangeEventArgs e)
     {
         if (Disabled || !Profile.RequireBusinessTripAddress) return;
-        if (!ParseChecked(e)) Profile.DefaultBusinessTripAddress = null;
-        else if (Profile.DefaultBusinessTripAddress == null)
-            Profile.DefaultBusinessTripAddress = FirstLookup<BusinessTripAddress>(Lookups.BusinessTripAddresses);
+        if (!ParseChecked(e))
+            ClearBusinessTripDestinationDefaults();
+        else if (Profile.DefaultBusinessTripAddressType == null)
+            Profile.DefaultBusinessTripAddressType = ResidenceType.Lodging;
+    }
+
+    private void ClearBusinessTripDestinationDefaults()
+    {
+        Profile.DefaultBusinessTripAddressType = null;
+        Profile.DefaultBusinessTripLodging = null;
+        Profile.DefaultBusinessTripHotel = null;
+        Profile.DefaultBusinessTripHospital = null;
+        Profile.DefaultBusinessTripOtherSite = null;
+        Profile.DefaultBusinessTripPrivateHouseAddress = null;
+#pragma warning disable CS0618
+        Profile.DefaultBusinessTripAddress = null;
+#pragma warning restore CS0618
+    }
+
+    private static string FormatResidenceType(ResidenceType? type) =>
+        type.HasValue ? ((int)type.Value).ToString() : string.Empty;
+
+    private void OnBusinessTripAddressTypeChanged(ChangeEventArgs e)
+    {
+        if (Disabled || !Profile.RequireBusinessTripAddress) return;
+        ClearBusinessTripSiteDefaultsOnly();
+        if (int.TryParse(e.Value?.ToString(), out var value)
+            && Enum.IsDefined(typeof(ResidenceType), value))
+            Profile.DefaultBusinessTripAddressType = (ResidenceType)value;
+        else
+            Profile.DefaultBusinessTripAddressType = null;
+    }
+
+    private void ClearBusinessTripSiteDefaultsOnly()
+    {
+        Profile.DefaultBusinessTripLodging = null;
+        Profile.DefaultBusinessTripHotel = null;
+        Profile.DefaultBusinessTripHospital = null;
+        Profile.DefaultBusinessTripOtherSite = null;
+        Profile.DefaultBusinessTripPrivateHouseAddress = null;
+    }
+
+    private void OnBusinessTripLodgingChanged(ChangeEventArgs e)
+    {
+        if (Disabled || !Profile.RequireBusinessTripAddress) return;
+        Profile.DefaultBusinessTripLodging = ResolveLookup<Lodging>(e);
+    }
+
+    private void OnBusinessTripHotelChanged(ChangeEventArgs e)
+    {
+        if (Disabled || !Profile.RequireBusinessTripAddress) return;
+        Profile.DefaultBusinessTripHotel = ResolveLookup<Hotel>(e);
+    }
+
+    private void OnBusinessTripHospitalChanged(ChangeEventArgs e)
+    {
+        if (Disabled || !Profile.RequireBusinessTripAddress) return;
+        Profile.DefaultBusinessTripHospital = ResolveLookup<Hospital>(e);
+    }
+
+    private void OnBusinessTripOtherSiteChanged(ChangeEventArgs e)
+    {
+        if (Disabled || !Profile.RequireBusinessTripAddress) return;
+        Profile.DefaultBusinessTripOtherSite = ResolveLookup<OtherSite>(e);
     }
 
     private void TogglePurposeDefault(ChangeEventArgs e)
@@ -374,19 +548,6 @@
     {
         if (!Profile.RequireWorkPermitLocation)
             Profile.DefaultWorkPermitLocation = null;
-    }
-
-    private void OnRegionUseChanged()
-    {
-        if (!Profile.RequireRegion)
-            Profile.DefaultRegion = null;
-        ClearCityIfRegionMismatch();
-    }
-
-    private void OnCityUseChanged()
-    {
-        if (!Profile.RequireCity)
-            Profile.DefaultCity = null;
     }
 
     private void OnVisaTypeChanged(ChangeEventArgs e)
@@ -431,35 +592,54 @@
         Profile.DefaultEntryCheckPoint = ResolveLookup<CheckPoint>(e);
     }
 
-    private void OnRegionChanged(ChangeEventArgs e)
+    private void OnFromRegionChanged(ChangeEventArgs e)
     {
-        if (Disabled || !Profile.RequireRegion) return;
-        Profile.DefaultRegion = ResolveLookup<Region>(e);
-        ClearCityIfRegionMismatch();
+        if (Disabled) return;
+        Profile.DefaultFromRegion = ResolveLookup<Region>(e);
+        ClearFromCityIfRegionMismatch();
     }
 
-    private void OnCityChanged(ChangeEventArgs e)
+    private void OnFromCityChanged(ChangeEventArgs e)
     {
-        if (Disabled || !Profile.RequireCity) return;
-        Profile.DefaultCity = ResolveLookup<City>(e);
-        if (Profile.DefaultCity?.Region != null)
-            Profile.DefaultRegion = Profile.DefaultCity.Region;
+        if (Disabled) return;
+        Profile.DefaultFromCity = ResolveLookup<City>(e);
+        if (Profile.DefaultFromCity?.Region != null)
+            Profile.DefaultFromRegion = Profile.DefaultFromCity.Region;
     }
 
-    private void OnBusinessTripAddressChanged(ChangeEventArgs e)
+    private void OnToRegionChanged(ChangeEventArgs e)
     {
-        if (Disabled || !Profile.RequireBusinessTripAddress) return;
-        Profile.DefaultBusinessTripAddress = ResolveLookup<BusinessTripAddress>(e);
+        if (Disabled) return;
+        Profile.DefaultToRegion = ResolveLookup<Region>(e);
+        ClearToCityIfRegionMismatch();
     }
 
-    private void ClearCityIfRegionMismatch()
+    private void OnToCityChanged(ChangeEventArgs e)
     {
-        if (Profile.DefaultCity == null)
+        if (Disabled) return;
+        Profile.DefaultToCity = ResolveLookup<City>(e);
+        if (Profile.DefaultToCity?.Region != null)
+            Profile.DefaultToRegion = Profile.DefaultToCity.Region;
+    }
+
+    private void ClearFromCityIfRegionMismatch()
+    {
+        if (Profile.DefaultFromCity == null)
             return;
-        if (Profile.DefaultRegionId is not Guid regionId || regionId == Guid.Empty)
+        if (Profile.DefaultFromRegionId is not Guid regionId || regionId == Guid.Empty)
             return;
-        if (Profile.DefaultCity.Region?.ID != regionId)
-            Profile.DefaultCity = null;
+        if (Profile.DefaultFromCity.Region?.ID != regionId)
+            Profile.DefaultFromCity = null;
+    }
+
+    private void ClearToCityIfRegionMismatch()
+    {
+        if (Profile.DefaultToCity == null)
+            return;
+        if (Profile.DefaultToRegionId is not Guid regionId || regionId == Guid.Empty)
+            return;
+        if (Profile.DefaultToCity.Region?.ID != regionId)
+            Profile.DefaultToCity = null;
     }
 
     private T? FirstLookup<T>(IReadOnlyList<ApplicationProfileWizardLookupItem> items) where T : class =>

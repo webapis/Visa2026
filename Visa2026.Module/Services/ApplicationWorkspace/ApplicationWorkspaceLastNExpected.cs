@@ -9,9 +9,10 @@ using Visa2026.Module.Services;
 namespace Visa2026.Module.Services.ApplicationWorkspace;
 
 /// <summary>
-/// Last 1–3 on Visa / Work permit / Invitation / TravelHistory is a ceiling over the person's
+/// Last 1–3 on Visa / Work permit / Invitation / TravelHistory / Medical is a ceiling over the person's
 /// currently linkable (active) rows, not a fixed quota. Two active visas → expect 2;
-/// one active visa → expect 1. Travel history with zero person rows on a locked case → 0.
+/// one active visa → expect 1. Travel history / Medical with zero person rows on a locked case → 0.
+/// Imported (<c>IsManualEntry</c>) cases also expect 0 Medical when the person has none in legacy.
 /// </summary>
 public static class ApplicationWorkspaceLastNExpected
 {
@@ -19,13 +20,15 @@ public static class ApplicationWorkspaceLastNExpected
         kind is ApplicationProfileInstancePersonLinkKind.Visa
             or ApplicationProfileInstancePersonLinkKind.WorkPermitItem
             or ApplicationProfileInstancePersonLinkKind.InvitationItem
-            or ApplicationProfileInstancePersonLinkKind.TravelHistory;
+            or ApplicationProfileInstancePersonLinkKind.TravelHistory
+            or ApplicationProfileInstancePersonLinkKind.MedicalRecord;
 
     public static int Resolve(
         ApplicationProfileInstancePersonLinkKind kind,
         int lastN,
         int availableActive,
-        bool linksLocked)
+        bool linksLocked,
+        bool importedManualEntry = false)
     {
         var ceiling = Math.Max(lastN, 0);
         if (!UsesActivePool(kind))
@@ -33,7 +36,11 @@ public static class ApplicationWorkspaceLastNExpected
 
         var capped = Math.Min(Math.Max(ceiling, 1), Math.Max(availableActive, 0));
         if (availableActive <= 0)
+        {
+            if (kind == ApplicationProfileInstancePersonLinkKind.MedicalRecord && importedManualEntry)
+                return 0;
             return linksLocked ? 0 : 1;
+        }
 
         return capped;
     }
@@ -48,6 +55,7 @@ public sealed class ApplicationWorkspaceLinkableActiveCounts
     private readonly Dictionary<Guid, int> _workPermit = new();
     private readonly Dictionary<Guid, int> _invitation = new();
     private readonly Dictionary<Guid, int> _travel = new();
+    private readonly Dictionary<Guid, int> _medical = new();
 
     public int Get(Guid personId, ApplicationProfileInstancePersonLinkKind kind) => kind switch
     {
@@ -55,6 +63,7 @@ public sealed class ApplicationWorkspaceLinkableActiveCounts
         ApplicationProfileInstancePersonLinkKind.WorkPermitItem => _workPermit.GetValueOrDefault(personId),
         ApplicationProfileInstancePersonLinkKind.InvitationItem => _invitation.GetValueOrDefault(personId),
         ApplicationProfileInstancePersonLinkKind.TravelHistory => _travel.GetValueOrDefault(personId),
+        ApplicationProfileInstancePersonLinkKind.MedicalRecord => _medical.GetValueOrDefault(personId),
         _ => 0,
     };
 
@@ -105,6 +114,15 @@ public sealed class ApplicationWorkspaceLinkableActiveCounts
         {
             var personId = travel.Person.ID;
             result._travel[personId] = result._travel.GetValueOrDefault(personId) + 1;
+        }
+
+        foreach (var medical in objectSpace.GetObjectsQuery<MedicalRecord>()
+            .Where(m => m.Person != null && ids.Contains(m.Person.ID)))
+        {
+            if (!ApplicationProfileInstancePersonValidItems.CanLinkMedicalRecord(medical))
+                continue;
+            var personId = medical.Person.ID;
+            result._medical[personId] = result._medical.GetValueOrDefault(personId) + 1;
         }
 
         return result;

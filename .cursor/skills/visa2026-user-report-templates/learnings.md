@@ -23,6 +23,14 @@ Keep **`SKILL.md`** stable; **promote** into `SKILL.md` only when the same lesso
 
 ## Entries
 
+### 2026-09-15 — Business trip Gitmek/Gelmek letter + sanaw (family: AppScalar + ItemRoster)
+
+- **Symptom**: Create from yellow marks had no codes for trip dates, `2 (iki) gün`, from/to welaýat/etrap, Maksady, or sanaw *Iş saparynda boljak salgysy*.
+- **Root cause**: NotMapped trip fields were uncatalogued. Destination lives on instance Region+City; origin is FromCity (hidden on BT profiles). Duration count shared TPCNT guessing.
+- **Fix**: Header **BTSD** **BTED** **BTDCNT** **BTDCTX** **BTFRG** **BTFCT** **BTTRG** **BTTCT** **BTPRP**. Row **BTAD**. Merge header dict + sanaw/excel rows. Duration words. To* prefer Region/City `NameTm`.
+- **Prevent**: Purpose is free-text **BTPRP**, not BusinessTripPurpose lookup. `-den`/`-ne` stay in the Word. `iş saparyna gidýändigini` is static.
+- **Officer**: Stop F5, rebuild. Analyze Gitmek/Gelmek letter and sanaw. Add **Business trip** group if a mark is empty.
+
 ### 2026-09-14 — CINB/CISB/CIEB cancel invitation sanaw stacks (family: ItemRoster)
 
 - **Symptom**: Excel *Çakylygyň belgisi* / resmileşdirilen / möhleti had no cancel-stack codes. Add showed INVN/INVS/INVE only.

@@ -136,18 +136,20 @@ Migration **code** on items: `Application_MigrationServiceCode` → e.g. `TDMGAS
 |----------|------|----------------|--------|
 | `BusinessTripStartDate` | `DateTime?` | `01.03.2026` | Raw |
 | `BusinessTripEndDate` | `DateTime?` | `15.03.2026` | Raw |
-| `BusinessTripStartDateText` | `string` | `01.03.2026` | **dd.MM.yyyy** |
-| `BusinessTripEndDateText` | `string` | `15.03.2026` | |
-| `BusinessTripDurationDays` | `int?` | `15` | Inclusive |
-| `BusinessTripPurpose_NameTm` | `string` | *(lookup NameTm)* | |
-| `FromCityName` | `string` | `Aşgabat şäheri` | |
-| `FromRegionName` | `string` | `Aşgabat` | |
-| `FromRegionName_Genitive` | `string` | `Mary welaýatynyň` | Vowel-harmony suffix |
-| `FromCityName_Ablative` | `string` | `Aşgabat şäherinden` | |
-| `ToCityName` | `string` | `Daşoguz şäheri` | |
-| `ToRegionName` | `string` | `Daşoguz` | |
-| `ToRegionName_Genitive` | `string` | `Ahal welaýatynyň` | |
-| `ToCityName_Dative` | `string` | `Akbugdaý etrabyna` | |
+| `BusinessTripStartDateText` | `string` | `01.03.2026` | Short code **BTSD**. **dd.MM.yyyy**. Keep `-den` in the Word |
+| `BusinessTripEndDateText` | `string` | `15.03.2026` | Short code **BTED**. Keep `-ne` in the Word |
+| `BusinessTripDurationDays` | `int?` | `15` | Short code **BTDCNT**. Inclusive |
+| `BusinessTripDurationDaysText` | `string` | `iki` | Short code **BTDCTX**. Turkmen words |
+| `Purpose` | `string` | *(free text)* | Short code **BTPRP**. Case summary Purpose, not the lookup |
+| `BusinessTripPurpose_NameTm` | `string` | *(lookup NameTm)* | Do not use for the Maksady paragraph |
+| `FromCityName` | `string` | `Aşgabat şäheri` | Origin city `NameTm` (`FromCity`) |
+| `FromRegionName` | `string` | `Mary welaýaty` | Origin region from `FromCity.Region` |
+| `FromRegionName_Genitive` | `string` | `Mary welaýatynyň` | Short code **BTFRG** |
+| `FromCityName_Ablative` | `string` | `Mary etrabyndan` | Short code **BTFCT** |
+| `ToCityName` | `string` | `Akbugdaý etraby` | Destination `City`, else `ToCity` |
+| `ToRegionName` | `string` | `Ahal welaýaty` | Destination `Region`, else `ToCity.Region` |
+| `ToRegionName_Genitive` | `string` | `Ahal welaýatynyň` | Short code **BTTRG** |
+| `ToCityName_Dative` | `string` | `Akbugdaý etrabyna` | Short code **BTTCT** |
 | `MovementPermitLocation_NameTm` | `string` | *(lookup)* | |
 | `BorderZoneLocation_NameTm` | `string` | `Daşoguz welaýaty` | App-level catalog text |
 
@@ -406,7 +408,7 @@ Case-linked `TravelHistory` (latest linked row). Short codes in the **Travel his
 
 | Property | Type | Example output | Notes |
 |----------|------|----------------|--------|
-| `BusinessTripAddress_FullAddress` | `string` | `Mary welaýaty, …` | Trip destination |
+| `BusinessTripAddress_FullAddress` | `string` | `Mary welaýaty, …` | Short code **BTAD**. Sanaw *Iş saparynda boljak salgysy* |
 
 ### PDF visa application (XFA) — item
 

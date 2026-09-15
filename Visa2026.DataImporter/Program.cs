@@ -170,6 +170,9 @@ static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
         "--cleanup-visa2014-application-progress-seeds",
         "--patch-visa2014-application-migration-service",
         "--patch-visa2014-application-migration-service-inference",
+        "--patch-visa2014-application-business-trip-case-summary",
+        "--application-id-map",
+        "--application-type",
         "--patch-visa2014-application-project-contract",
         "--patch-visa2014-application-profile",
         "--patch-visa2014-application-profile-nested-templates",
@@ -240,6 +243,8 @@ static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
                       string.Equals(token, "--id-map-output", StringComparison.OrdinalIgnoreCase) ||
                       string.Equals(token, "--target-connection", StringComparison.OrdinalIgnoreCase) ||
                       string.Equals(token, "--legacy-source", StringComparison.OrdinalIgnoreCase) ||
+                      string.Equals(token, "--application-id-map", StringComparison.OrdinalIgnoreCase) ||
+                      string.Equals(token, "--application-type", StringComparison.OrdinalIgnoreCase) ||
                       string.Equals(token, "--batch-size", StringComparison.OrdinalIgnoreCase)) &&
                      i + 1 < args.Count &&
                      !args[i + 1].StartsWith('-'))
@@ -333,6 +338,9 @@ static void PrintHelp()
     Console.WriteLine("           with null legacy dept — infer MigrationService from person address (approved preview).");
     Console.WriteLine("      Options: [--legacy-source calik-energi] [--inference-rules path.yaml] [--application-id-map path.json]");
     Console.WriteLine("                [--dry-run] [--force] [--api-base-url url] [--no-wait] [--verbose]");
+    Console.WriteLine("  --patch-visa2014-application-business-trip-case-summary  PATCH Region/City/ToCity/BusinessTripAddress on Iş Saparyna types");
+    Console.WriteLine("      Options: [--legacy-source calik-energi-local-pg] [--application-type App_Business_Trip_Departure]");
+    Console.WriteLine("                [--inprocess] [--target-connection conn] [--dry-run] [--verbose]");
     Console.WriteLine("  --patch-visa2014-application-project-contract  PATCH Application.ProjectContract (ShowProjectContract types)");
     Console.WriteLine("  --patch-visa2014-application-profile  PATCH Application.ApplicationProfile from legacy ApplicationType (Wave 2; --target-connection, --dry-run, --skip-report path)");
     Console.WriteLine("  --patch-visa2014-application-profile-nested-templates  PATCH ApplicationProfile.NestedTemplates from tenant JSON (Wave 3; --target-connection, --dry-run)");
@@ -678,6 +686,16 @@ if (HasArg(args, "--patch-visa2014-application-migration-service-inference"))
     Log.Phase("VISA2014 Application.MigrationService inference PATCH");
     bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
     int exitCode = await Visa2014ApplicationMigrationServiceInferencePatch.RunCommandAsync(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
+if (HasArg(args, "--patch-visa2014-application-business-trip-case-summary"))
+{
+    Log.Phase("VISA2014 ApplicationProfileInstance business-trip case-summary PATCH");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = await Visa2014ApplicationBusinessTripCaseSummaryPatch.RunCommandAsync(args, isVerbose);
     Log.Close();
     Environment.ExitCode = exitCode;
     return;

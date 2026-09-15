@@ -68,7 +68,7 @@
                  {
                      "Region":  "Aşgabat şäheri",
                      "City":  "Aşgabat şäheri",
-                     "Name":  "ş Aşgabat myhmanhanasy"
+                     "Name":  "Aşgabat myhmanhanasy"
                  },
                  {
                      "Region":  "Aşgabat şäheri",
@@ -123,12 +123,32 @@
                  {
                      "Region":  "Balkan welaýaty",
                      "City":  "Türkmenbaşy şäheri",
+                     "Name":  "Daşoguz Myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Balkan welaýaty",
+                     "City":  "Türkmenbaşy şäheri",
+                     "Name":  "Hazyna myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Balkan welaýaty",
+                     "City":  "Türkmenbaşy şäheri",
+                     "Name":  "Kerwen myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Balkan welaýaty",
+                     "City":  "Türkmenbaşy şäheri",
                      "Name":  "Kuwwat myhmanhanasy"
                  },
                  {
                      "Region":  "Balkan welaýaty",
                      "City":  "Türkmenbaşy şäheri",
-                     "Name":  "ş Deňiz myhmanhanasy"
+                     "Name":  "Deňiz myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Balkan welaýaty",
+                     "City":  "Türkmenbaşy şäheri",
+                     "Name":  "Türkmenbaşy myhmanhanasy"
                  },
                  {
                      "Region":  "Balkan welaýaty",
@@ -158,7 +178,7 @@
                  {
                      "Region":  "Lebap welaýaty",
                      "City":  "Türkmenabat şäheri",
-                     "Name":  "ş; Jeýhun myhmanhanasy"
+                     "Name":  "Jeýhun myhmanhanasy"
                  },
                  {
                      "Region":  "Lebap welaýaty",
@@ -208,7 +228,12 @@
                  {
                      "Region":  "Mary welaýaty",
                      "City":  "Mary şäheri",
-                     "Name":  "ş; Marguş myhmanhanasy"
+                     "Name":  "Marguş myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Mary welaýaty",
+                     "City":  "Mary şäheri",
+                     "Name":  "Rahatlyk myhmanhanasy"
                  },
                  {
                      "Region":  "Mary welaýaty",

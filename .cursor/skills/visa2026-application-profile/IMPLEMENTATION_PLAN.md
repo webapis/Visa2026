@@ -25,6 +25,7 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | 8f | Wizard Results default lookup dropdowns | **Done** | Catalog snapshots; default-value selects enabled only when Use is checked |
 | 8g | Wizard May produce / cancel / change with Related to | **Done** | Issuance → May produce; Cancellation → May cancel; Change → May change; moved off Results & fields |
 | 8o | Wizard Region and City lookups | **Done** | Split Region (city); instance Region + City; defaults + case summary |
+| 8p | From/To Region+City geo | **Done** | FromRegion/ToRegion FKs; four required wizard/case tiles for BT + internal reg; obsolete bare Region/City |
 | 8n | Wizard Registration Check in / Check out / Info change / Reg extension | **Done** | `RegistrationKind` on profile; Identity radios when Related to = Registration; dashboard SQL predicates ready, views not switched yet |
 | 8h | Wizard Approval legs with Directed to | **Done** | Removed from Identity. Default + catalog live on Choose Approval legs. Direct migration still clears Default / legacy nested rows |
 | 8i | Wizard Project contract with Directed to | **Done** | Via ministry → Project contract on Identity; gone from Results; instance copy is read-only |

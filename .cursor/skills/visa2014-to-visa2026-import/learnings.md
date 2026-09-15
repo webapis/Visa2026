@@ -1,3 +1,48 @@
+### 2026-09-15 - Dummy Purpose for Iş Saparyna Gitmek imports
+
+- **Phase**: correction (local PG)
+- **Why**: Live VISA2015 has no Purpose for E:13; Calik profile `RequirePurpose=true` left Overview red (e.g. 3/-2412).
+- **Fix**: Set instance `Purpose` + profile `DefaultPurpose` to `İs maksatly` for `business_trip_departure` (594 rows). Import/patch resolve empty Purpose via `Visa2014ApplicationTransform.BusinessTripDepartureDummyPurpose`. Tenant JSON `DefaultPurpose` on Iş Saparyna Gitmek; manifest **46**.
+- **Verify**: `missing_purpose=0` / `dummy_purpose=594` on local PG.
+- **Prevent**: Do not invent Purpose from AnketaMaksat (always empty on Calik). Keep the locked dummy string for Gitmek only (not Gelmek).
+
+### 2026-09-15 - BTA destination Excel review merged into Calik site catalogs
+
+- **Phase**: lookup + correction (local PG)
+- **Source**: live `.15` / `VISA2015` `AddressOnBusinessTrip` DISTINCT (Excel preview approved)
+- **Catalog**: merged `add_to_catalog` into tenant JSON — Lodging **59→62**, Hotel **46→51**, OtherSite **25→65**, Hospital unchanged **4**; manifest **44→45**; copied to embedded `*.json` via `SiteLookup-CalikEnergi.ps1`
+- **DB sync**: `--updateDatabase --forceUpdate` blocked by PG `42P07` truncated index renames. Seeded missing rows with Npgsql UTF-8 seeder (`artifacts/SeedBtaCatalogs`); set `SystemSettings.LookupCatalogManifestVersion=45`
+- **Import**: unmatched policy OtherSite; resolve uses AoR cleaners (`NormalizeHotelCatalogName` / `NormalizeLodgingCatalogAddress`) before FK match; clear sibling FKs on re-patch
+- **Re-patch**: `--patch-visa2014-application-business-trip-case-summary` Planned **583** / Patched **583** / Failed **0** / no id-map **4**
+- **PG result**: Lodging **405**, Hotel **103**, OtherSite **55**, PrivateHouse free-text **8** (down from **148**)
+- **Prevent**: pass `--application-id-map` to source `id-maps/calik-energi-local-pg/ApplicationProfileInstance.json` (bin ContentRoot misses id-maps); do not use PS 5.1 `ConvertFrom-Json` to rewrite Turkmen tenant JSON
+
+### 2026-09-15 — Business-trip case summary resolves Lodging/Hotel/Hospital/OtherSite
+
+- **Need**: Stop inventing `BusinessTripAddress` catalog rows for Gitmek destination; reuse residence site tenant catalogs.
+- **Fix**: `Visa2014ApplicationODataImporter.TryAddBusinessTripDestinationFields` classifies address line and resolves Lodging/Hotel/Hospital/OtherSite; PrivateHouse free text if no match. No CreateAsync on BusinessTripAddress.
+- **Prevent**: Do not seed a separate business-trip-address.json unless free-text leftovers demand it. Prefer existing lodging/hotel/hospital/other-site Calik JSON.
+- **Cross-skill**: visa2026-application-profile
+
+
+### 2026-09-15 - 8/-1601 still empty after case-summary patch (orphan local)
+
+- **Phase**: correction / local PG
+- **Why**: Officer still on **8/-1601**. Live VISA2015 has **no** `8/-1601`. Patch filled **583** id-mapped E:13 rows; **11** local departure rows (incl. 8/-1601) had `ToCity` only — not in live extract / no id-map.
+- **Fix**: SQL backfill `CityId`/`RegionId` from `ToCityID` + city→region map; also filled `Cities.RegionID` for those 5 catalog cities.
+- **Verify**: 8/-1601 now City=Aşgabat şäheri, Region=Aşgabat şäheri. **Business trip address** and **Purpose** still empty (no legacy source for this local/demo case).
+- **Next**: refresh Overview on 8/-1601. Enter Purpose (and address if needed) manually. Prefer imported Gitmek cases for address fill check.
+
+### 2026-09-15 - Iş Saparyna Gitmek case summary Region/City/address not imported
+### 2026-09-15 - Iş Saparyna Gitmek case summary Region/City/address not imported
+
+- **Phase**: mapping + correction
+- **Why**: Calik `business_trip_departure` shows Region, City, Business trip address, Purpose (`RequireRegion`/`RequireCity`/`RequireBusinessTripAddress`/`RequirePurpose`). Header import only posted hidden `ToCity` plus trip dates. `AddressOnBusinessTrip.AddressOnTrip` is an **Address FK**, not text.
+- **Live VISA2015 E:13**: destination **587/587**; PIA AddressLine **574/587**; AnketaMaksat / PurposeOfTrave **0** (Purpose has nothing to copy).
+- **Screenshot 8/-1601**: Demo Işberler, not in VISA2015. Same empty tiles as imported cases. Patch uses ApplicationProfileInstance id-map (imported rows only).
+- **Fix**: transform City/Region from destination; BusinessTripAddress from Address.AddressLine; `--patch-visa2014-application-business-trip-case-summary`.
+- **Next**: stop F5, rebuild DataImporter, run patch `--legacy-source calik-energi-local-pg --application-type App_Business_Trip_Departure --inprocess --no-wait`. Refresh an imported Iş Saparyna Gitmek case (not 8/-1601).
+
 ### 2026-09-14 - App_Visa_and_WP_Ext must pin WorkPermitItem being extended
 
 - **Phase**: lookup + import strategy

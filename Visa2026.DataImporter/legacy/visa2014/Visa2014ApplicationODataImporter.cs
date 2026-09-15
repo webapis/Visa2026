@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using DevExpress.ExpressApp;
 using Visa2026.DataImporter;
+using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
@@ -80,7 +81,7 @@ internal static class Visa2014ApplicationODataImporter
 
                 try
                 {
-                    var payload = BuildPayload(row, resolver);
+                    var payload = await BuildPayloadAsync(row, resolver, workerTarget);
                     if (payload == null)
                     {
                         var detail = DescribePayloadGap(row, resolver);
@@ -129,6 +130,19 @@ internal static class Visa2014ApplicationODataImporter
             IdMapPath = idMapPath,
             Errors = stats.Errors,
         };
+    }
+
+    private static async Task<Dictionary<string, object?>?> BuildPayloadAsync(
+        Dictionary<string, object?> row,
+        Visa2014ODataLookupResolver resolver,
+        IVisa2014ImportTarget target)
+    {
+        var payload = BuildPayload(row, resolver);
+        if (payload == null)
+            return null;
+
+        await TryAddCaseSummaryFieldsAsync(payload, row, resolver, target);
+        return payload;
     }
 
     private static Dictionary<string, object?>? BuildPayload(
@@ -193,6 +207,33 @@ internal static class Visa2014ApplicationODataImporter
         TryAddOptionalFk(payload, row, "ProjectContract", resolver.ResolveProjectContract);
         TryAddOptionalFk(payload, row, "ApprovalLegProfile", resolver.ResolveApprovalLegProfile);
         TryAddOptionalFk(payload, row, "ToCity", value => resolver.ResolveCity(value));
+        TryAddOptionalFk(payload, row, "ToRegion", resolver.ResolveRegion);
+
+        var cityName = row.GetValueOrDefault("ToCity") as string;
+        var cityId = resolver.ResolveCity(cityName);
+        if (cityId.HasValue && !payload.ContainsKey("ToRegion"))
+        {
+            var regionId = resolver.ResolveRegionForCity(cityId.Value);
+            if (regionId.HasValue)
+                payload["ToRegion"] = new { ID = regionId.Value };
+        }
+
+        var purpose = Visa2014ApplicationTransform.ResolvePurposeForImport(
+            row.GetValueOrDefault("Purpose") as string,
+            row.GetValueOrDefault("ApplicationType") as string);
+        if (!string.IsNullOrWhiteSpace(purpose))
+            payload["Purpose"] = purpose;
+
+        TryAddBusinessTripDestinationFields(
+            payload,
+            row.GetValueOrDefault("BusinessTripAddress") as string,
+            FirstNonBlank(
+                row.GetValueOrDefault("BusinessTripAddressCity") as string,
+                cityName),
+            FirstNonBlank(
+                row.GetValueOrDefault("ToRegion") as string,
+                row.GetValueOrDefault("Region") as string),
+            resolver);
 
         var movementPermitLabels = row.GetValueOrDefault("MovementPermitLocation") as string;
         if (!string.IsNullOrWhiteSpace(movementPermitLabels))
@@ -209,6 +250,141 @@ internal static class Visa2014ApplicationODataImporter
             payload["BusinessTripEndDate"] = DateTime.SpecifyKind(tripEnd, DateTimeKind.Utc);
 
         return payload;
+    }
+
+    internal static async Task TryAddCaseSummaryFieldsAsync(
+        Dictionary<string, object?> payload,
+        Dictionary<string, object?> row,
+        Visa2014ODataLookupResolver resolver,
+        IVisa2014ImportTarget target)
+    {
+        _ = target;
+        var cityName = (row.GetValueOrDefault("ToCity") as string)
+            ?? (row.GetValueOrDefault("City") as string);
+        var cityId = resolver.ResolveCity(cityName);
+        if (cityId.HasValue)
+        {
+            payload["ToCity"] = new { ID = cityId.Value };
+
+            var regionId = resolver.ResolveRegion(
+                    FirstNonBlank(
+                        row.GetValueOrDefault("ToRegion") as string,
+                        row.GetValueOrDefault("Region") as string))
+                ?? resolver.ResolveRegionForCity(cityId.Value);
+            if (regionId.HasValue)
+                payload["ToRegion"] = new { ID = regionId.Value };
+        }
+
+        var purpose = Visa2014ApplicationTransform.ResolvePurposeForImport(
+            row.GetValueOrDefault("Purpose") as string,
+            row.GetValueOrDefault("ApplicationType") as string);
+        if (!string.IsNullOrWhiteSpace(purpose))
+            payload["Purpose"] = purpose;
+
+        TryAddBusinessTripDestinationFields(
+            payload,
+            row.GetValueOrDefault("BusinessTripAddress") as string,
+            (row.GetValueOrDefault("BusinessTripAddressCity") as string) ?? cityName,
+            FirstNonBlank(
+                row.GetValueOrDefault("ToRegion") as string,
+                row.GetValueOrDefault("Region") as string),
+            resolver);
+        await Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Resolves trip destination into Type + Lodging/Hotel/Hospital/OtherSite.
+    /// Does not create BusinessTripAddress catalog rows; unmatched lines resolve via OtherSite tenant catalog.
+    /// </summary>
+    internal static void TryAddBusinessTripDestinationFields(
+        Dictionary<string, object?> payload,
+        string? rawAddressText,
+        string? cityName,
+        string? regionName,
+        Visa2014ODataLookupResolver resolver)
+    {
+        var addressText = Visa2014ApplicationTransform.TrimBusinessTripAddress(rawAddressText);
+        if (string.IsNullOrWhiteSpace(addressText))
+            return;
+
+        var region = regionName?.Trim();
+        if (string.IsNullOrWhiteSpace(region) && resolver.ResolveCity(cityName) is Guid cityId)
+            region = resolver.GetCityRegionNameTm(cityId);
+
+        // Clean like AoR / BTA catalog preview so "City; Hotel name" matches tenant scalars.
+        var lodgingScalar = Visa2014AddressLineNormalizer.NormalizeLodgingCatalogAddress(
+            addressText, region, cityName);
+        var hotelScalar = Visa2014AddressLineNormalizer.NormalizeHotelCatalogName(
+            addressText, region, cityName);
+        if (string.IsNullOrWhiteSpace(lodgingScalar))
+            lodgingScalar = addressText;
+        if (string.IsNullOrWhiteSpace(hotelScalar))
+            hotelScalar = addressText;
+
+        if (Visa2014ResidenceClassifier.IsHotelAddressLine(addressText))
+        {
+            var hotelId = resolver.ResolveHotel(cityName, region, hotelScalar)
+                ?? resolver.ResolveHotel(cityName, region, addressText);
+            if (hotelId.HasValue)
+            {
+                ClearBusinessTripDestinationFks(payload);
+                payload["BusinessTripAddressType"] = (int)ResidenceType.Hotel;
+                payload["BusinessTripHotel"] = new { ID = hotelId.Value };
+                return;
+            }
+        }
+
+        if (Visa2014ResidenceClassifier.IsHospitalAddressLine(addressText))
+        {
+            var hospitalId = resolver.ResolveHospital(cityName, region, hotelScalar)
+                ?? resolver.ResolveHospital(cityName, region, addressText);
+            if (hospitalId.HasValue)
+            {
+                ClearBusinessTripDestinationFks(payload);
+                payload["BusinessTripAddressType"] = (int)ResidenceType.Hospital;
+                payload["BusinessTripHospital"] = new { ID = hospitalId.Value };
+                return;
+            }
+        }
+
+        if (Visa2014ResidenceClassifier.IsLodgingSiteLine(addressText))
+        {
+            var lodgingId = resolver.ResolveLodging(cityName, region, lodgingScalar)
+                ?? resolver.ResolveLodging(cityName, region, addressText);
+            if (lodgingId.HasValue)
+            {
+                ClearBusinessTripDestinationFks(payload);
+                payload["BusinessTripAddressType"] = (int)ResidenceType.Lodging;
+                payload["BusinessTripLodging"] = new { ID = lodgingId.Value };
+                return;
+            }
+        }
+
+        // Unmatched / non-pattern lines -> OtherSite (tenant catalog; no PrivateHouse invent).
+        var otherId = resolver.ResolveOtherSite(cityName, region, lodgingScalar)
+            ?? resolver.ResolveOtherSite(cityName, region, addressText);
+
+        if (otherId.HasValue)
+        {
+            ClearBusinessTripDestinationFks(payload);
+            payload["BusinessTripAddressType"] = (int)ResidenceType.Other;
+            payload["BusinessTripOtherSite"] = new { ID = otherId.Value };
+            return;
+        }
+
+        // Absolute last resort when catalog still missing the line (should be rare after BTA merge).
+        ClearBusinessTripDestinationFks(payload);
+        payload["BusinessTripAddressType"] = (int)ResidenceType.PrivateHouse;
+        payload["BusinessTripPrivateHouseAddress"] = addressText;
+    }
+
+    private static void ClearBusinessTripDestinationFks(Dictionary<string, object?> payload)
+    {
+        payload["BusinessTripLodging"] = null;
+        payload["BusinessTripHotel"] = null;
+        payload["BusinessTripHospital"] = null;
+        payload["BusinessTripOtherSite"] = null;
+        payload["BusinessTripPrivateHouseAddress"] = null;
     }
 
     private static void TryAddOptionalFk(
@@ -265,6 +441,17 @@ internal static class Visa2014ApplicationODataImporter
 
     private static bool TryParseDate(string? text, out DateTime date) =>
         DateTime.TryParse(text, out date);
+
+    private static string? FirstNonBlank(params string?[] values)
+    {
+        foreach (var value in values)
+        {
+            if (!string.IsNullOrWhiteSpace(value))
+                return value.Trim();
+        }
+
+        return null;
+    }
 
     private static string DescribePayloadGap(Dictionary<string, object?> row, Visa2014ODataLookupResolver resolver)
     {

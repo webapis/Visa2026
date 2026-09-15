@@ -178,6 +178,35 @@ propertyGaps:
     - property: BusinessTripPurpose
       default: null
       missingBehavior: allow_null
+      notes: Not on Calik Iş Saparyna Gitmek case summary (RequirePurpose is free-text Purpose).
+    - property: Purpose
+      default: null
+      missingBehavior: allow_null
+      notes: |
+        Case-summary free text (max 700). Application.AnketaMaksat.Maksat when set.
+        Live Çalik E:13 has AnketaMaksat null; PIA PurposeOfTrave / ImpPurposeOfTravel empty.
+    - property: ToRegion
+      default: null
+      missingBehavior: allow_null
+      notes: Destination ŞäherEtrap.Region (NameOfRegionL). Case summary uses RequireToRegion (From/To geo).
+    - property: ToCity
+      default: null
+      missingBehavior: allow_null
+      notes: Destination BusinessTripDestination (ŞäherEtrap). Case summary uses RequireToCity. Bare Region/City obsolete dual-read only.
+    - property: Region
+      default: null
+      missingBehavior: allow_null
+      notes: Obsolete — migrate/read as ToRegion. Import writes ToRegion only.
+    - property: City
+      default: null
+      missingBehavior: allow_null
+      notes: Obsolete — migrate/read as ToCity. Import writes ToCity only.
+    - property: BusinessTripAddress
+      default: null
+      missingBehavior: allow_null
+      notes: |
+        Header catalog { City, FullAddress }. AddressOnBusinessTrip.AddressOnTrip is an Address FK.
+        Use Address.AddressLine. Find-or-create catalog row.
     - property: FromCity
       default: null
       missingBehavior: allow_null
@@ -236,7 +265,19 @@ propertyGaps:
         BorderZoneForVisa null, PIA.Visa also has no BorderZone. Locked 2026-09-08.
     - property: ToCity
       legacyColumn: BusinessTripDestination
-      notes: ŞeherEtrap FK — reuse City/CityByName layer 3 from AddressOfResidence wave
+      notes: ŞäherEtrap FK — reuse City/CityByName layer 3 from AddressOfResidence wave. Writes ToCity (+ ToRegion); not bare City.
+    - property: ToRegion
+      legacyColumn: ŞäherEtrap.Region
+      notes: Destination region NameOfRegion; prefer City.Region catalog after resolve when they differ. Writes ToRegion; not bare Region.
+    - property: Region
+      legacyColumn: ŞäherEtrap.Region
+      notes: Obsolete dual-read of ToRegion.
+    - property: City
+      legacyColumn: BusinessTripDestination
+      notes: Obsolete dual-read of ToCity.
+    - property: BusinessTripAddress
+      legacyColumn: PersonInApplication.AddressOnBusinessTrip → Address.AddressLine
+      notes: First PIA AddressOnBusinessTrip; find-or-create BusinessTripAddress catalog.
     - property: ProjectContract
       legacyColumn: Contract
       notes: Long-process rows only; resolve NumberOfContract via calik-energi ProjectContract overlay
@@ -413,6 +454,15 @@ fields:
       - ŞeherEtrap.ŞeherEtrapL
     fallbackCatalog: CityByName
     missingBehavior: allow_null
+    notes: Also set ApplicationProfileInstance.City to the same lookup. Region from ŞäherEtrap.Region / City.Region.
+
+  - source: AddressOnBusinessTrip.AddressOnTrip
+    target: BusinessTripAddress
+    transform: nested_catalog
+    joinTable: Address
+    joinColumn: AddressLine
+    missingBehavior: allow_null
+    notes: AddressOnTrip is uniqueidentifier FK to dbo.Address, not scalar text.
 
   - source: DateOfDeparture
     target: BusinessTripStartDate

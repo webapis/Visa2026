@@ -176,19 +176,65 @@ public class ApplicationProfile : BaseObject
     public virtual bool RequireStartDate { get; set; }
     public virtual bool RequireEndDate { get; set; }
 
+    /// <summary>Legacy destination region require. Prefer <see cref="RequireToRegion"/>.</summary>
+    [Obsolete("Use RequireToRegion / RequireFromRegion. Retained for dual-read of seed JSON.")]
     public virtual bool RequireRegion { get; set; }
+    /// <summary>Legacy destination region default. Prefer <see cref="DefaultToRegion"/>.</summary>
+    [Obsolete("Use DefaultToRegion.")]
     public virtual Region? DefaultRegion { get; set; }
+    [Obsolete("Use DefaultToRegionId.")]
     public virtual Guid? DefaultRegionId { get; set; }
 
+    /// <summary>Legacy destination city require. Prefer <see cref="RequireToCity"/>.</summary>
+    [Obsolete("Use RequireToCity / RequireFromCity.")]
     public virtual bool RequireCity { get; set; }
+    /// <summary>Legacy destination city default. Prefer <see cref="DefaultToCity"/>.</summary>
+    [Obsolete("Use DefaultToCity.")]
     public virtual City? DefaultCity { get; set; }
+    [Obsolete("Use DefaultToCityId.")]
     public virtual Guid? DefaultCityId { get; set; }
 
-    /// <summary>Legacy From city / To city visibility. Prefer <see cref="RequireRegion"/> and <see cref="RequireCity"/>.</summary>
+    /// <summary>Legacy From city / To city visibility. Prefer From*/To* Require flags.</summary>
+    [Obsolete("Use RequireFromRegion/City and RequireToRegion/City.")]
     public virtual bool RequireRegionCity { get; set; }
 
+    public virtual bool RequireFromRegion { get; set; }
+    public virtual Region? DefaultFromRegion { get; set; }
+    public virtual Guid? DefaultFromRegionId { get; set; }
+
+    public virtual bool RequireFromCity { get; set; }
+    public virtual City? DefaultFromCity { get; set; }
+    public virtual Guid? DefaultFromCityId { get; set; }
+
+    public virtual bool RequireToRegion { get; set; }
+    public virtual Region? DefaultToRegion { get; set; }
+    public virtual Guid? DefaultToRegionId { get; set; }
+
+    public virtual bool RequireToCity { get; set; }
+    public virtual City? DefaultToCity { get; set; }
+    public virtual Guid? DefaultToCityId { get; set; }
+
     public virtual bool RequireBusinessTripAddress { get; set; }
+
+    public virtual ResidenceType? DefaultBusinessTripAddressType { get; set; }
+    public virtual Lodging? DefaultBusinessTripLodging { get; set; }
+    public virtual Guid? DefaultBusinessTripLodgingId { get; set; }
+    public virtual Hotel? DefaultBusinessTripHotel { get; set; }
+    public virtual Guid? DefaultBusinessTripHotelId { get; set; }
+    public virtual Hospital? DefaultBusinessTripHospital { get; set; }
+    public virtual Guid? DefaultBusinessTripHospitalId { get; set; }
+    public virtual OtherSite? DefaultBusinessTripOtherSite { get; set; }
+    public virtual Guid? DefaultBusinessTripOtherSiteId { get; set; }
+
+    [MaxLength(255)]
+    public virtual string? DefaultBusinessTripPrivateHouseAddress { get; set; }
+
+    /// <summary>Legacy catalog default. Prefer Type + Lodging/Hotel/Hospital/OtherSite defaults.</summary>
+    [Browsable(false)]
+    [Obsolete("Use DefaultBusinessTripAddressType with site catalog defaults.")]
     public virtual BusinessTripAddress? DefaultBusinessTripAddress { get; set; }
+    [Browsable(false)]
+    [Obsolete("Use DefaultBusinessTripAddressType with site catalog defaults.")]
     public virtual Guid? DefaultBusinessTripAddressId { get; set; }
 
     public virtual bool RequirePurpose { get; set; }
@@ -972,13 +1018,31 @@ public static class ApplicationProfileLockHelper
         || original.DefaultMigrationServiceId != current.DefaultMigrationServiceId
         || original.RequireStartDate != current.RequireStartDate
         || original.RequireEndDate != current.RequireEndDate
+        || original.RequireFromRegion != current.RequireFromRegion
+        || original.DefaultFromRegionId != current.DefaultFromRegionId
+        || original.RequireFromCity != current.RequireFromCity
+        || original.DefaultFromCityId != current.DefaultFromCityId
+        || original.RequireToRegion != current.RequireToRegion
+        || original.DefaultToRegionId != current.DefaultToRegionId
+        || original.RequireToCity != current.RequireToCity
+        || original.DefaultToCityId != current.DefaultToCityId
+#pragma warning disable CS0618
         || original.RequireRegion != current.RequireRegion
         || original.DefaultRegionId != current.DefaultRegionId
         || original.RequireCity != current.RequireCity
         || original.DefaultCityId != current.DefaultCityId
         || original.RequireRegionCity != current.RequireRegionCity
+#pragma warning restore CS0618
         || original.RequireBusinessTripAddress != current.RequireBusinessTripAddress
+        || original.DefaultBusinessTripAddressType != current.DefaultBusinessTripAddressType
+        || original.DefaultBusinessTripLodgingId != current.DefaultBusinessTripLodgingId
+        || original.DefaultBusinessTripHotelId != current.DefaultBusinessTripHotelId
+        || original.DefaultBusinessTripHospitalId != current.DefaultBusinessTripHospitalId
+        || original.DefaultBusinessTripOtherSiteId != current.DefaultBusinessTripOtherSiteId
+        || !string.Equals(original.DefaultBusinessTripPrivateHouseAddress, current.DefaultBusinessTripPrivateHouseAddress, StringComparison.Ordinal)
+#pragma warning disable CS0618
         || original.DefaultBusinessTripAddressId != current.DefaultBusinessTripAddressId
+#pragma warning restore CS0618
         || original.RequirePurpose != current.RequirePurpose
         || !string.Equals(original.DefaultPurpose, current.DefaultPurpose, StringComparison.Ordinal)
         || original.RequireProject != current.RequireProject

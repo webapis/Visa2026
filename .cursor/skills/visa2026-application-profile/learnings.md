@@ -1,4 +1,56 @@
-### 2026-09-14 — Cancel invitation does not link used InvitationItems
+### 2026-09-15 — Imported roster: empty Medical soft completeness
+
+- **Need**: Legacy often has no MedicalRecord; linked Medical tile stayed red (0) even on locked/complete imported cases.
+- **Cause**: Medical used fixed Last-N quota (always expect ≥1), unlike Visa/TravelHistory active-pool soft rules.
+- **Fix**: Medical in `UsesActivePool` + load linkable medical counts; expected 0 when none available and (links locked **or** `IsManualEntry`). Officer-created unlocked with no medical still expects 1.
+- **Test**: `ApplicationWorkspaceLastNExpectedTests` Medical_* cases.
+- **Prevent**: Do not invent dummy Medical rows. Soft only when person has zero linkable medicals.
+- **Cross-skill**: visa2014-to-visa2026-import
+### 2026-09-15 — Imported BT: empty From region/city not readiness gaps
+
+- **Need**: Legacy has no From*; after From/To geo Require*, imported Iş Saparyna Gitmek showed red tiles + "2 missing".
+- **Cause**: Case summary treated empty From* as Empty fill for all instances.
+- **Fix**: `FromGeoLookupFill` — when `IsManualEntry` and From* null, FillState=Default (not Empty). Officer-created (`IsManualEntry` false) still red/required. No Ýok Region/City invent.
+- **Test**: `Build_EmptyFromGeo_IsDefaultFill_WhenManualEntryImport`, `Build_EmptyFromGeo_IsEmptyFill_WhenOfficerCreated`.
+- **Prevent**: Do not seed fake Ýok geography FKs for import. Do not soften To* or officer-created From*.
+- **Cross-skill**: visa2014-to-visa2026-import
+### 2026-09-15 — From/To Region+City profile geo (Schema A)
+
+- **Need**: Wizard and case summary need distinct origin and destination geography for BT departure/arrival and internal check-in/out — not bare Region/City as destination-only.
+- **Cause**: Instance had Region/City (+ FromCity/ToCity) with RequireRegion/City meaning destination; From city was a BT+RequireRegion hack; letters mixed Region/City with ToCity.
+- **Fix**: Real `FromRegion`/`ToRegion` FKs; migrate Region/City → To*; profile Require/Default From*/To*; wizard shows four required rows only when `UsesFromToRegionCity`; case summary four tiles; import writes ToRegion/ToCity only (no From* from legacy). Bare Region/City Obsolete dual-read.
+- **Test**: `ApplicationProfileInstanceBusinessTripPlaceholderTests`; build Module + Blazor + DataImporter.
+- **Prevent**: Do not show bare Region/City on geo profiles. Do not invent From* on VISA2014 import. Abroad registration profiles stay without this geo block.
+- **Cross-skill**: visa2014-to-visa2026-import, visa2026-user-report-templates
+### 2026-09-15 — Business trip letter uses From city + Region/City
+
+- **Need**: Cover letter four geo tokens (from region/district → to region/district) while case overview only showed one Region + City.
+- **Cause**: BT profiles `RequireRegion`/`RequireCity` (destination) with `RequireRegionCity` false hid FromCity. Merge From* used obsolete `Name` instead of `NameTm`.
+- **Fix**: Show From city when ActionFamily is BusinessTrip and RequireRegion. To* tokens read Region+City (`NameTm`), fallback ToCity. From* stay on FromCity.
+- **Test**: `ApplicationProfileInstanceBusinessTripPlaceholderTests`.
+- **Prevent**: Do not map both origin and destination from the single Region/City pair. Hotel/address type is not a letter token; sanaw uses **BTAD**.
+- **Cross-skill**: visa2026-user-report-templates, visa2026-template-scan
+
+### 2026-09-15 — Business trip destination uses site catalogs (deprecate BusinessTripAddress)
+
+- **Need**: Instance case-summary Business trip address should resolve into Lodging/Hotel/Hospital/OtherSite like AddressOfResidence Type UX — not a parallel FreeAddress catalog, and not reuse the person `AddressOfResidence` BO.
+- **Cause**: `BusinessTripAddress` was City+FullAddress find-or-create on import; profile/instance FK pointed at that catalog.
+- **Fix**: Add `BusinessTripAddressType` + `BusinessTripLodging`/`Hotel`/`Hospital`/`OtherSite` + private-house text on `ApplicationProfileInstance` (and profile defaults). Case summary + wizard Type→site. Import resolves tenant site catalogs only (PrivateHouse fallback). `[Obsolete]` on `BusinessTripAddress`; dual-read legacy FK. Docs: `DEPRECATED.md`.
+- **Test**: Module + DataImporter build (SourceLink off if sourcelink.json locked); `ApplicationWorkspaceCaseHeaderFieldsHelperTests.Build_IncludesBusinessTripAddressWhenRequired` expects Type field.
+- **Prevent**: Do not find-or-create `BusinessTripAddress` mid-import. Do not point instance trip destination at `AddressOfResidence`. Reuse Lodging/Hotel/Hospital/OtherSite tenant JSON.
+- **Cross-skill**: visa2014-to-visa2026-import
+
+
+### 2026-09-15 — Link existing person misses Turkish last names (Yılmaz)
+
+- **Need**: Officer searched Hasan Yılmaz on Çakylyk we Iş Rugsadnamasyny Ýatyrmak 9/-003 People & links. Person exists (PN 23404632120) but picker showed no matches.
+- **Cause**: Search tokens are diacritic-folded (`Yılmaz` → `yilmaz`) then AND-matched with `Contains(Lower([LastName]), token)`. Stored `ı` is not folded, so last-name token never matches.
+- **Fix**: `PersonSearchTextNormalizer.FoldedLowerContainsCriteria` applies the same fold map to First/Middle/Last name in Person identity criteria (link picker + Person ListView + instance linked-people search).
+- **Test**: `BuildPersonIdentityCriteria_FoldsTurkishLastNameTokenAndStoredField`; `FoldedLowerContainsCriteria_ReplacesDotlessIAfterLower`. Officer: stop F5, rebuild. Search `Hasan Yılmaz` or `23404632120`. Until restart, search personal number or passport `U20433151`.
+- **Prevent**: Do not fold query tokens without folding stored name columns the same way.
+- **Cross-skill**: visa2026-application-profile
+
+
 
 - **Need**: Çakylygy Ýatyrmak / Çakylyk we Iş Rugsatnamasyny Ýatyrmak must not attach an InvitationItem that already has an issued visa.
 - **Cause**: `CanLinkInvitationItem` already treated `IssuedVisa != null` as used, but Relink often has that inverse unloaded. Auto-link then pinned the used line. Relink also kept existing sticky pins.

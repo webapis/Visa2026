@@ -157,17 +157,71 @@ public static class ApplicationProfileConfigurationResolver
                 p.ProduceInvitation, p.ProduceWorkPermit, p.ProduceVisa, p.RequireProcessNumber),
             t => t.CanIssueInvitation || t.CanIssueWorkPermit || t.CanIssueVisa);
 
+    /// <summary>
+    /// Business-trip departure/arrival and internal registration check-in/out use From/To Region+City.
+    /// </summary>
+    public static bool UsesFromToRegionCity(ApplicationProfile? profile)
+    {
+        if (profile == null)
+            return false;
+
+        if (profile.ActionFamily == ApplicationProfileActionFamily.BusinessTrip)
+            return true;
+
+        if (profile.ActionFamily != ApplicationProfileActionFamily.Registration)
+            return false;
+
+        var code = profile.Code?.Trim();
+        return string.Equals(code, "check_in_internal", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(code, "check_out_internal", StringComparison.OrdinalIgnoreCase);
+    }
+
+    public static bool UsesFromToRegionCity(ApplicationProfileInstance? application) =>
+        UsesFromToRegionCity(application?.ApplicationProfile);
+
+    public static bool ShowFromRegion(ApplicationProfileInstance? application) =>
+        Resolve(
+            application,
+            p => UsesFromToRegionCity(p) && (p.RequireFromRegion
+#pragma warning disable CS0618
+                || p.RequireRegionCity),
+#pragma warning restore CS0618
+            _ => false);
+
     public static bool ShowFromCity(ApplicationProfileInstance? application) =>
-        Resolve(application, p => p.RequireRegionCity, t => t.ShowFromCity);
+        Resolve(
+            application,
+            p => UsesFromToRegionCity(p) && (p.RequireFromCity
+#pragma warning disable CS0618
+                || p.RequireRegionCity
+                || (p.ActionFamily == ApplicationProfileActionFamily.BusinessTrip && p.RequireRegion)),
+#pragma warning restore CS0618
+            t => t.ShowFromCity);
+
+    public static bool ShowToRegion(ApplicationProfileInstance? application) =>
+        Resolve(
+            application,
+            p => UsesFromToRegionCity(p) && (p.RequireToRegion
+#pragma warning disable CS0618
+                || p.RequireRegion),
+#pragma warning restore CS0618
+            _ => false);
 
     public static bool ShowToCity(ApplicationProfileInstance? application) =>
-        Resolve(application, p => p.RequireRegionCity, t => t.ShowToCity);
+        Resolve(
+            application,
+            p => UsesFromToRegionCity(p) && (p.RequireToCity
+#pragma warning disable CS0618
+                || p.RequireCity
+                || p.RequireRegionCity),
+#pragma warning restore CS0618
+            t => t.ShowToCity);
 
-    public static bool ShowRegion(ApplicationProfileInstance? application) =>
-        Resolve(application, p => p.RequireRegion, _ => false);
+    /// <summary>Obsolete bare Region tile — prefer <see cref="ShowToRegion"/>.</summary>
+    public static bool ShowRegion(ApplicationProfileInstance? application) => false;
 
-    public static bool ShowCity(ApplicationProfileInstance? application) =>
-        Resolve(application, p => p.RequireCity, _ => false);
+    /// <summary>Obsolete bare City tile — prefer <see cref="ShowToCity"/>.</summary>
+    public static bool ShowCity(ApplicationProfileInstance? application) => false;
 
     public static bool ShowBusinessTripAddress(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequireBusinessTripAddress, t => t.ShowBusinessTrips);

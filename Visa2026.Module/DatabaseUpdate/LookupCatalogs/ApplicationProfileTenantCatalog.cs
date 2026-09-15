@@ -108,6 +108,22 @@ public sealed class ApplicationProfileTenantCatalogRow
 
     public bool RequireRegionCity { get; set; }
 
+    public bool RequireFromRegion { get; set; }
+
+    public string? DefaultFromRegionLocalizationKey { get; set; }
+
+    public bool RequireFromCity { get; set; }
+
+    public string? DefaultFromCityLocalizationKey { get; set; }
+
+    public bool RequireToRegion { get; set; }
+
+    public string? DefaultToRegionLocalizationKey { get; set; }
+
+    public bool RequireToCity { get; set; }
+
+    public string? DefaultToCityLocalizationKey { get; set; }
+
     public bool RequireBusinessTripAddress { get; set; }
 
     public bool RequirePurpose { get; set; }
@@ -237,11 +253,21 @@ public sealed class ApplicationProfileTenantCatalogRow
             RequireMigrationService = profile.RequireMigrationService,
             RequireStartDate = profile.RequireStartDate,
             RequireEndDate = profile.RequireEndDate,
+#pragma warning disable CS0618
             RequireRegion = profile.RequireRegion,
             DefaultRegionLocalizationKey = NullIfEmpty(profile.DefaultRegion?.LocalizationKey),
             RequireCity = profile.RequireCity,
             DefaultCityLocalizationKey = NullIfEmpty(profile.DefaultCity?.LocalizationKey),
             RequireRegionCity = profile.RequireRegionCity,
+#pragma warning restore CS0618
+            RequireFromRegion = profile.RequireFromRegion,
+            DefaultFromRegionLocalizationKey = NullIfEmpty(profile.DefaultFromRegion?.LocalizationKey),
+            RequireFromCity = profile.RequireFromCity,
+            DefaultFromCityLocalizationKey = NullIfEmpty(profile.DefaultFromCity?.LocalizationKey),
+            RequireToRegion = profile.RequireToRegion,
+            DefaultToRegionLocalizationKey = NullIfEmpty(profile.DefaultToRegion?.LocalizationKey),
+            RequireToCity = profile.RequireToCity,
+            DefaultToCityLocalizationKey = NullIfEmpty(profile.DefaultToCity?.LocalizationKey),
             RequireBusinessTripAddress = profile.RequireBusinessTripAddress,
             RequirePurpose = profile.RequirePurpose,
             DefaultPurpose = NullIfEmpty(profile.DefaultPurpose),
@@ -500,11 +526,49 @@ internal static class ApplicationProfileTenantCatalogSync
         profile.RequireMigrationService = row.RequireMigrationService;
         profile.RequireStartDate = row.RequireStartDate;
         profile.RequireEndDate = row.RequireEndDate;
+#pragma warning disable CS0618
         profile.RequireRegion = row.RequireRegion || row.RequireRegionCity;
         profile.DefaultRegion = ResolveLookup<Region>(objectSpace, row.DefaultRegionLocalizationKey);
         profile.RequireCity = row.RequireCity || row.RequireRegionCity;
         profile.DefaultCity = ResolveLookup<City>(objectSpace, row.DefaultCityLocalizationKey);
         profile.RequireRegionCity = row.RequireRegionCity;
+#pragma warning restore CS0618
+
+        var usesFromTo = ApplicationProfileConfigurationResolver.UsesFromToRegionCity(profile);
+        // For geo profiles, all four are always required per product lock.
+        if (usesFromTo)
+        {
+            profile.RequireFromRegion = true;
+            profile.RequireFromCity = true;
+            profile.RequireToRegion = true;
+            profile.RequireToCity = true;
+        }
+        else
+        {
+            profile.RequireFromRegion = row.RequireFromRegion;
+            profile.RequireFromCity = row.RequireFromCity;
+            profile.RequireToRegion = row.RequireToRegion || row.RequireRegion || row.RequireRegionCity;
+            profile.RequireToCity = row.RequireToCity || row.RequireCity || row.RequireRegionCity;
+        }
+
+        profile.DefaultFromRegion = ResolveLookup<Region>(
+            objectSpace,
+            row.DefaultFromRegionLocalizationKey);
+        profile.DefaultFromCity = ResolveLookup<City>(
+            objectSpace,
+            row.DefaultFromCityLocalizationKey);
+        profile.DefaultToRegion = ResolveLookup<Region>(
+            objectSpace,
+            row.DefaultToRegionLocalizationKey ?? row.DefaultRegionLocalizationKey);
+        profile.DefaultToCity = ResolveLookup<City>(
+            objectSpace,
+            row.DefaultToCityLocalizationKey ?? row.DefaultCityLocalizationKey);
+#pragma warning disable CS0618
+        if (profile.DefaultToRegion == null)
+            profile.DefaultToRegion = profile.DefaultRegion;
+        if (profile.DefaultToCity == null)
+            profile.DefaultToCity = profile.DefaultCity;
+#pragma warning restore CS0618
         profile.RequireBusinessTripAddress = row.RequireBusinessTripAddress;
         profile.RequirePurpose = row.RequirePurpose;
         profile.DefaultPurpose = string.IsNullOrWhiteSpace(row.DefaultPurpose) ? null : row.DefaultPurpose.Trim();

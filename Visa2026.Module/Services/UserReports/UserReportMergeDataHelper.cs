@@ -56,6 +56,15 @@ public static class UserReportMergeDataHelper
             ["Invitation_Number"] = application.Invitation_Number ?? string.Empty,
             ["Invitation_StartDateText"] = application.Invitation_StartDateText ?? string.Empty,
             ["Invitation_ExpirationDateText"] = application.Invitation_ExpirationDateText ?? string.Empty,
+            ["BusinessTripStartDateText"] = application.BusinessTripStartDateText ?? string.Empty,
+            ["BusinessTripEndDateText"] = application.BusinessTripEndDateText ?? string.Empty,
+            ["BusinessTripDurationDays"] = application.BusinessTripDurationDays ?? 0,
+            ["BusinessTripDurationDaysText"] = application.BusinessTripDurationDaysText ?? string.Empty,
+            ["FromRegionName_Genitive"] = application.FromRegionName_Genitive ?? string.Empty,
+            ["FromCityName_Ablative"] = application.FromCityName_Ablative ?? string.Empty,
+            ["ToRegionName_Genitive"] = application.ToRegionName_Genitive ?? string.Empty,
+            ["ToCityName_Dative"] = application.ToCityName_Dative ?? string.Empty,
+            ["Purpose"] = application.Purpose ?? string.Empty,
         };
         UserReportPlaceholderAliasRegistry.EnrichDictionary(data);
         return data;
@@ -100,6 +109,8 @@ public static class UserReportMergeDataHelper
             ["Application_VisaPeriod_NameTm"] = item.Application_VisaPeriod_NameTm ?? string.Empty,
             ["Application_VisaCategory_NameTm"] = item.Application_VisaCategory_NameTm ?? string.Empty,
             ["Address_FullAddress"] = item.Address_FullAddress ?? string.Empty,
+            ["BusinessTripAddress_FullAddress"] = item.BusinessTripAddress_FullAddress ?? string.Empty,
+            ["Visa_NumberAndType"] = item.Visa_NumberAndType ?? string.Empty,
             ["Person_ForeignAddress"] = item.Person_ForeignAddress ?? string.Empty,
             ["Person_ForeignAddressCountryCode"] = item.Person_ForeignAddressCountryCode ?? string.Empty,
             ["Person_PreviousWorkplacesInTurkmenistan"] = item.Person_PreviousWorkplacesInTurkmenistan ?? string.Empty,

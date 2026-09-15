@@ -4,6 +4,7 @@ using System.Linq;
 using DevExpress.ExpressApp;
 using Microsoft.EntityFrameworkCore;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services;
 using Visa2026.Module.Services.ApplicationProfilePicker;
 using Visa2026.Module.Services.UserReports;
 
@@ -45,7 +46,13 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
                 .Include(p => p.DefaultEntryCheckPoint)
                 .Include(p => p.DefaultRegion)
                 .Include(p => p.DefaultCity)
+#pragma warning disable CS0618
                 .Include(p => p.DefaultBusinessTripAddress)
+#pragma warning restore CS0618
+                .Include(p => p.DefaultBusinessTripLodging)
+                .Include(p => p.DefaultBusinessTripHotel)
+                .Include(p => p.DefaultBusinessTripHospital)
+                .Include(p => p.DefaultBusinessTripOtherSite)
                 .FirstOrDefault(p => p.ID == applicationProfileId);
         }
         catch (Exception)
@@ -248,7 +255,7 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
         Add("End date", null, profile.RequireEndDate);
         Add("Region", LookupLabel(profile.DefaultRegion), profile.RequireRegion);
         Add("City", LookupLabel(profile.DefaultCity), profile.RequireCity);
-        Add("Business trip address", FormatBusinessTripAddress(profile.DefaultBusinessTripAddress), profile.RequireBusinessTripAddress);
+        Add("Business trip address", FormatDefaultBusinessTripDestination(profile), profile.RequireBusinessTripAddress);
         Add("Purpose", profile.DefaultPurpose, profile.RequirePurpose);
         Add("Work permit location", profile.DefaultWorkPermitLocation,
             ApplicationProfileConfigurationResolver.RequireWorkPermitLocationWhenProducingWorkPermit(
@@ -270,6 +277,18 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
             return lookup.LocalizedDisplayName;
         return string.IsNullOrWhiteSpace(lookup.NameTm) ? null : lookup.NameTm;
     }
+
+    private static string? FormatDefaultBusinessTripDestination(ApplicationProfile profile) =>
+        BusinessTripDestinationHelper.FormatFullAddress(
+            profile.DefaultBusinessTripAddressType,
+            profile.DefaultBusinessTripLodging,
+            profile.DefaultBusinessTripHotel,
+            profile.DefaultBusinessTripHospital,
+            profile.DefaultBusinessTripOtherSite,
+            profile.DefaultBusinessTripPrivateHouseAddress,
+#pragma warning disable CS0618
+            profile.DefaultBusinessTripAddress);
+#pragma warning restore CS0618
 
     private static string? FormatBusinessTripAddress(BusinessTripAddress? address)
     {

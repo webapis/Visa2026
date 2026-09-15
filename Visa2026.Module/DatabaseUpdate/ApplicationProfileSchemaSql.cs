@@ -408,11 +408,114 @@ public static class ApplicationProfileSchemaSql
     internal const string EnsureInstanceCityIdPostgres =
         """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "CityId" uuid NULL;""";
 
+    internal const string EnsureInstanceFromRegionIdPostgres =
+        """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "FromRegionId" uuid NULL;""";
+
+    internal const string EnsureInstanceToRegionIdPostgres =
+        """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "ToRegionId" uuid NULL;""";
+
+    internal const string EnsureRequireFromRegionPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "RequireFromRegion" boolean NOT NULL DEFAULT false;""";
+
+    internal const string EnsureDefaultFromRegionIdPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "DefaultFromRegionId" uuid NULL;""";
+
+    internal const string EnsureRequireFromCityPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "RequireFromCity" boolean NOT NULL DEFAULT false;""";
+
+    internal const string EnsureDefaultFromCityIdPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "DefaultFromCityId" uuid NULL;""";
+
+    internal const string EnsureRequireToRegionPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "RequireToRegion" boolean NOT NULL DEFAULT false;""";
+
+    internal const string EnsureDefaultToRegionIdPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "DefaultToRegionId" uuid NULL;""";
+
+    internal const string EnsureRequireToCityPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "RequireToCity" boolean NOT NULL DEFAULT false;""";
+
+    internal const string EnsureDefaultToCityIdPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "DefaultToCityId" uuid NULL;""";
+
+    /// <summary>Copy legacy destination Region/City into ToRegion/ToCity; backfill FromRegion from FromCity.</summary>
+    internal const string MigrateInstanceRegionCityToFromToPostgres = """
+        UPDATE "ApplicationProfileInstances"
+        SET "ToRegionId" = "RegionId"
+        WHERE "ToRegionId" IS NULL AND "RegionId" IS NOT NULL;
+
+        UPDATE "ApplicationProfileInstances"
+        SET "ToCityID" = "CityId"
+        WHERE "ToCityID" IS NULL AND "CityId" IS NOT NULL;
+
+        UPDATE "ApplicationProfileInstances" i
+        SET "FromRegionId" = c."RegionID"
+        FROM "Cities" c
+        WHERE i."FromRegionId" IS NULL
+          AND i."FromCityID" IS NOT NULL
+          AND c."ID" = i."FromCityID"
+          AND c."RegionID" IS NOT NULL;
+
+        UPDATE "ApplicationProfiles"
+        SET "RequireToRegion" = TRUE,
+            "RequireToCity" = TRUE,
+            "RequireFromRegion" = TRUE,
+            "RequireFromCity" = TRUE
+        WHERE "Code" IN ('business_trip_departure', 'business_trip_arrival', 'check_in_internal', 'check_out_internal')
+           OR "ActionFamily" = 3;
+
+        UPDATE "ApplicationProfiles"
+        SET "RequireToRegion" = COALESCE("RequireToRegion", FALSE) OR COALESCE("RequireRegion", FALSE),
+            "RequireToCity" = COALESCE("RequireToCity", FALSE) OR COALESCE("RequireCity", FALSE),
+            "DefaultToRegionId" = COALESCE("DefaultToRegionId", "DefaultRegionId"),
+            "DefaultToCityId" = COALESCE("DefaultToCityId", "DefaultCityId")
+        WHERE COALESCE("RequireRegion", FALSE) = TRUE
+           OR COALESCE("RequireCity", FALSE) = TRUE
+           OR "DefaultRegionId" IS NOT NULL
+           OR "DefaultCityId" IS NOT NULL;
+        """;
+
     internal const string EnsureDefaultBusinessTripAddressIdPostgres =
         """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "DefaultBusinessTripAddressId" uuid NULL;""";
 
     internal const string EnsureInstanceBusinessTripAddressIdPostgres =
         """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "BusinessTripAddressId" uuid NULL;""";
+
+    internal const string EnsureDefaultBusinessTripAddressTypePostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "DefaultBusinessTripAddressType" integer NULL;""";
+
+    internal const string EnsureDefaultBusinessTripLodgingIdPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "DefaultBusinessTripLodgingId" uuid NULL;""";
+
+    internal const string EnsureDefaultBusinessTripHotelIdPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "DefaultBusinessTripHotelId" uuid NULL;""";
+
+    internal const string EnsureDefaultBusinessTripHospitalIdPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "DefaultBusinessTripHospitalId" uuid NULL;""";
+
+    internal const string EnsureDefaultBusinessTripOtherSiteIdPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "DefaultBusinessTripOtherSiteId" uuid NULL;""";
+
+    internal const string EnsureDefaultBusinessTripPrivateHouseAddressPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "DefaultBusinessTripPrivateHouseAddress" character varying(255) NULL;""";
+
+    internal const string EnsureInstanceBusinessTripAddressTypePostgres =
+        """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "BusinessTripAddressType" integer NULL;""";
+
+    internal const string EnsureInstanceBusinessTripLodgingIdPostgres =
+        """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "BusinessTripLodgingId" uuid NULL;""";
+
+    internal const string EnsureInstanceBusinessTripHotelIdPostgres =
+        """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "BusinessTripHotelId" uuid NULL;""";
+
+    internal const string EnsureInstanceBusinessTripHospitalIdPostgres =
+        """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "BusinessTripHospitalId" uuid NULL;""";
+
+    internal const string EnsureInstanceBusinessTripOtherSiteIdPostgres =
+        """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "BusinessTripOtherSiteId" uuid NULL;""";
+
+    internal const string EnsureInstanceBusinessTripPrivateHouseAddressPostgres =
+        """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "BusinessTripPrivateHouseAddress" character varying(255) NULL;""";
 
     internal const string EnsureRequirePurposePostgres =
         """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "RequirePurpose" boolean NOT NULL DEFAULT false;""";
@@ -740,8 +843,31 @@ public static class ApplicationProfileSchemaSql
         HealRequireRegionCitySplitPostgres,
         EnsureInstanceRegionIdPostgres,
         EnsureInstanceCityIdPostgres,
+        EnsureInstanceFromRegionIdPostgres,
+        EnsureInstanceToRegionIdPostgres,
+        EnsureRequireFromRegionPostgres,
+        EnsureDefaultFromRegionIdPostgres,
+        EnsureRequireFromCityPostgres,
+        EnsureDefaultFromCityIdPostgres,
+        EnsureRequireToRegionPostgres,
+        EnsureDefaultToRegionIdPostgres,
+        EnsureRequireToCityPostgres,
+        EnsureDefaultToCityIdPostgres,
+        MigrateInstanceRegionCityToFromToPostgres,
         EnsureDefaultBusinessTripAddressIdPostgres,
         EnsureInstanceBusinessTripAddressIdPostgres,
+        EnsureDefaultBusinessTripAddressTypePostgres,
+        EnsureDefaultBusinessTripLodgingIdPostgres,
+        EnsureDefaultBusinessTripHotelIdPostgres,
+        EnsureDefaultBusinessTripHospitalIdPostgres,
+        EnsureDefaultBusinessTripOtherSiteIdPostgres,
+        EnsureDefaultBusinessTripPrivateHouseAddressPostgres,
+        EnsureInstanceBusinessTripAddressTypePostgres,
+        EnsureInstanceBusinessTripLodgingIdPostgres,
+        EnsureInstanceBusinessTripHotelIdPostgres,
+        EnsureInstanceBusinessTripHospitalIdPostgres,
+        EnsureInstanceBusinessTripOtherSiteIdPostgres,
+        EnsureInstanceBusinessTripPrivateHouseAddressPostgres,
         EnsureRequirePurposePostgres,
         EnsureDefaultPurposePostgres,
         EnsureInstancePurposePostgres,
@@ -861,6 +987,54 @@ public static class ApplicationProfileSchemaSql
             ALTER TABLE dbo.ApplicationProfileInstances ADD BusinessTripAddressId uniqueidentifier NULL;
 
         IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfiles', N'DefaultBusinessTripAddressType') IS NULL
+            ALTER TABLE dbo.ApplicationProfiles ADD DefaultBusinessTripAddressType int NULL;
+
+        IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfiles', N'DefaultBusinessTripLodgingId') IS NULL
+            ALTER TABLE dbo.ApplicationProfiles ADD DefaultBusinessTripLodgingId uniqueidentifier NULL;
+
+        IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfiles', N'DefaultBusinessTripHotelId') IS NULL
+            ALTER TABLE dbo.ApplicationProfiles ADD DefaultBusinessTripHotelId uniqueidentifier NULL;
+
+        IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfiles', N'DefaultBusinessTripHospitalId') IS NULL
+            ALTER TABLE dbo.ApplicationProfiles ADD DefaultBusinessTripHospitalId uniqueidentifier NULL;
+
+        IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfiles', N'DefaultBusinessTripOtherSiteId') IS NULL
+            ALTER TABLE dbo.ApplicationProfiles ADD DefaultBusinessTripOtherSiteId uniqueidentifier NULL;
+
+        IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfiles', N'DefaultBusinessTripPrivateHouseAddress') IS NULL
+            ALTER TABLE dbo.ApplicationProfiles ADD DefaultBusinessTripPrivateHouseAddress nvarchar(255) NULL;
+
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfileInstances', N'BusinessTripAddressType') IS NULL
+            ALTER TABLE dbo.ApplicationProfileInstances ADD BusinessTripAddressType int NULL;
+
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfileInstances', N'BusinessTripLodgingId') IS NULL
+            ALTER TABLE dbo.ApplicationProfileInstances ADD BusinessTripLodgingId uniqueidentifier NULL;
+
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfileInstances', N'BusinessTripHotelId') IS NULL
+            ALTER TABLE dbo.ApplicationProfileInstances ADD BusinessTripHotelId uniqueidentifier NULL;
+
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfileInstances', N'BusinessTripHospitalId') IS NULL
+            ALTER TABLE dbo.ApplicationProfileInstances ADD BusinessTripHospitalId uniqueidentifier NULL;
+
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfileInstances', N'BusinessTripOtherSiteId') IS NULL
+            ALTER TABLE dbo.ApplicationProfileInstances ADD BusinessTripOtherSiteId uniqueidentifier NULL;
+
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfileInstances', N'BusinessTripPrivateHouseAddress') IS NULL
+            ALTER TABLE dbo.ApplicationProfileInstances ADD BusinessTripPrivateHouseAddress nvarchar(255) NULL;
+
+        IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
            AND COL_LENGTH(N'dbo.ApplicationProfiles', N'RequirePurpose') IS NULL
             ALTER TABLE dbo.ApplicationProfiles ADD RequirePurpose bit NOT NULL
                 CONSTRAINT DF_ApplicationProfiles_RequirePurpose DEFAULT (0);
@@ -902,6 +1076,71 @@ public static class ApplicationProfileSchemaSql
            AND COL_LENGTH(N'dbo.ApplicationProfiles', N'RequireProcessNumber') IS NULL
             ALTER TABLE dbo.ApplicationProfiles ADD RequireProcessNumber bit NOT NULL
                 CONSTRAINT DF_ApplicationProfiles_RequireProcessNumber DEFAULT (0);
+
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfileInstances', N'FromRegionId') IS NULL
+            ALTER TABLE dbo.ApplicationProfileInstances ADD FromRegionId uniqueidentifier NULL;
+
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfileInstances', N'ToRegionId') IS NULL
+            ALTER TABLE dbo.ApplicationProfileInstances ADD ToRegionId uniqueidentifier NULL;
+
+        IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
+        BEGIN
+            IF COL_LENGTH(N'dbo.ApplicationProfiles', N'RequireFromRegion') IS NULL
+                ALTER TABLE dbo.ApplicationProfiles ADD RequireFromRegion bit NOT NULL
+                    CONSTRAINT DF_ApplicationProfiles_RequireFromRegion DEFAULT (0);
+            IF COL_LENGTH(N'dbo.ApplicationProfiles', N'DefaultFromRegionId') IS NULL
+                ALTER TABLE dbo.ApplicationProfiles ADD DefaultFromRegionId uniqueidentifier NULL;
+            IF COL_LENGTH(N'dbo.ApplicationProfiles', N'RequireFromCity') IS NULL
+                ALTER TABLE dbo.ApplicationProfiles ADD RequireFromCity bit NOT NULL
+                    CONSTRAINT DF_ApplicationProfiles_RequireFromCity DEFAULT (0);
+            IF COL_LENGTH(N'dbo.ApplicationProfiles', N'DefaultFromCityId') IS NULL
+                ALTER TABLE dbo.ApplicationProfiles ADD DefaultFromCityId uniqueidentifier NULL;
+            IF COL_LENGTH(N'dbo.ApplicationProfiles', N'RequireToRegion') IS NULL
+                ALTER TABLE dbo.ApplicationProfiles ADD RequireToRegion bit NOT NULL
+                    CONSTRAINT DF_ApplicationProfiles_RequireToRegion DEFAULT (0);
+            IF COL_LENGTH(N'dbo.ApplicationProfiles', N'DefaultToRegionId') IS NULL
+                ALTER TABLE dbo.ApplicationProfiles ADD DefaultToRegionId uniqueidentifier NULL;
+            IF COL_LENGTH(N'dbo.ApplicationProfiles', N'RequireToCity') IS NULL
+                ALTER TABLE dbo.ApplicationProfiles ADD RequireToCity bit NOT NULL
+                    CONSTRAINT DF_ApplicationProfiles_RequireToCity DEFAULT (0);
+            IF COL_LENGTH(N'dbo.ApplicationProfiles', N'DefaultToCityId') IS NULL
+                ALTER TABLE dbo.ApplicationProfiles ADD DefaultToCityId uniqueidentifier NULL;
+        END
+
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
+        BEGIN
+            UPDATE dbo.ApplicationProfileInstances
+            SET ToRegionId = RegionId
+            WHERE ToRegionId IS NULL AND RegionId IS NOT NULL;
+
+            UPDATE dbo.ApplicationProfileInstances
+            SET ToCityID = CityId
+            WHERE ToCityID IS NULL AND CityId IS NOT NULL;
+
+            UPDATE i
+            SET FromRegionId = c.RegionID
+            FROM dbo.ApplicationProfileInstances i
+            INNER JOIN dbo.Cities c ON c.ID = i.FromCityID
+            WHERE i.FromRegionId IS NULL AND c.RegionID IS NOT NULL;
+        END
+
+        IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
+        BEGIN
+            UPDATE dbo.ApplicationProfiles
+            SET RequireToRegion = 1, RequireToCity = 1, RequireFromRegion = 1, RequireFromCity = 1
+            WHERE Code IN (N'business_trip_departure', N'business_trip_arrival', N'check_in_internal', N'check_out_internal')
+               OR ActionFamily = 3;
+
+            UPDATE dbo.ApplicationProfiles
+            SET RequireToRegion = CASE WHEN RequireToRegion = 1 OR RequireRegion = 1 THEN 1 ELSE 0 END,
+                RequireToCity = CASE WHEN RequireToCity = 1 OR RequireCity = 1 THEN 1 ELSE 0 END,
+                DefaultToRegionId = COALESCE(DefaultToRegionId, DefaultRegionId),
+                DefaultToCityId = COALESCE(DefaultToCityId, DefaultCityId)
+            WHERE RequireRegion = 1 OR RequireCity = 1
+               OR DefaultRegionId IS NOT NULL OR DefaultCityId IS NOT NULL;
+        END
         """;
 
     public static void ApplyIfMissing(string connectionString)

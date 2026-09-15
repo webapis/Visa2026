@@ -65,7 +65,15 @@ public partial class ApplicationProfileInstance
 
     [Browsable(false)]
     [NotMapped]
+    public bool CfgShowFromRegion => ApplicationProfileConfigurationResolver.ShowFromRegion(this);
+
+    [Browsable(false)]
+    [NotMapped]
     public bool CfgShowFromCity => ApplicationProfileConfigurationResolver.ShowFromCity(this);
+
+    [Browsable(false)]
+    [NotMapped]
+    public bool CfgShowToRegion => ApplicationProfileConfigurationResolver.ShowToRegion(this);
 
     [Browsable(false)]
     [NotMapped]

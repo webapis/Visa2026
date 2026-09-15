@@ -38,10 +38,27 @@ public class ApplicationWorkspaceCaseHeaderFieldsHelperTests
 
         var fields = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(application, profile, null);
 
-        Assert.Contains(fields, field => field.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.BusinessTripAddress);
+        Assert.Contains(fields, field => field.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.BusinessTripAddressType);
         Assert.Equal(
             ApplicationWorkspaceCaseHeaderFieldKind.Lookup,
-            Assert.Single(fields, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.BusinessTripAddress).Kind);
+            Assert.Single(fields, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.BusinessTripAddressType).Kind);
+    }
+
+    [Fact]
+    public void Build_BusinessTripAddressTypeLodging_IsNotEmptyFillState()
+    {
+        var profile = new ApplicationProfile { RequireBusinessTripAddress = true };
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = profile,
+            BusinessTripAddressType = ResidenceType.Lodging,
+        };
+
+        var fields = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(application, profile, null);
+        var typeField = Assert.Single(fields, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.BusinessTripAddressType);
+
+        Assert.True(typeField.SelectedId is Guid id && id != Guid.Empty);
+        Assert.NotEqual(ApplicationWorkspaceCaseSummaryFillState.Empty, typeField.FillState);
     }
 
     [Fact]
@@ -383,5 +400,69 @@ public class ApplicationWorkspaceCaseHeaderFieldsHelperTests
         var afterField = Assert.Single(after, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.ProcessNumber);
         Assert.Equal(ApplicationWorkspaceCaseSummaryFillState.Officer, afterField.FillState);
         Assert.Equal("AS538188", afterField.DisplayValue);
+    }
+
+    [Fact]
+    public void Build_EmptyFromGeo_IsDefaultFill_WhenManualEntryImport()
+    {
+        var profile = new ApplicationProfile
+        {
+            ActionFamily = ApplicationProfileActionFamily.BusinessTrip,
+            Code = "business_trip_departure",
+            RequireFromRegion = true,
+            RequireFromCity = true,
+            RequireToRegion = true,
+            RequireToCity = true,
+        };
+        var toRegionId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+        var toCityId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = profile,
+            IsManualEntry = true,
+            FullApplicationNumber = "9/-4003",
+            ApplicationDate = new DateTime(2014, 9, 26),
+            ToRegion = new Region { ID = toRegionId, NameTm = "Balkan welaýaty" },
+            ToCity = new City { ID = toCityId, NameTm = "Türkmenbaşy etraby" },
+        };
+
+        var fields = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(application, profile, null);
+        var fromRegion = Assert.Single(fields, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.FromRegion);
+        var fromCity = Assert.Single(fields, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.FromCity);
+
+        Assert.Equal(ApplicationWorkspaceCaseSummaryFillState.Default, fromRegion.FillState);
+        Assert.Equal(ApplicationWorkspaceCaseSummaryFillState.Default, fromCity.FillState);
+        var missing = ApplicationWorkspaceCaseSummaryCompletenessGate.MissingRequiredFields(fields);
+        Assert.DoesNotContain(missing, f => f.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.FromRegion);
+        Assert.DoesNotContain(missing, f => f.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.FromCity);
+    }
+
+    [Fact]
+    public void Build_EmptyFromGeo_IsEmptyFill_WhenOfficerCreated()
+    {
+        var profile = new ApplicationProfile
+        {
+            ActionFamily = ApplicationProfileActionFamily.BusinessTrip,
+            Code = "business_trip_departure",
+            RequireFromRegion = true,
+            RequireFromCity = true,
+        };
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = profile,
+            IsManualEntry = false,
+            FullApplicationNumber = "1/1",
+            ApplicationDate = new DateTime(2026, 1, 15),
+        };
+
+        var fields = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(application, profile, null);
+        var fromRegion = Assert.Single(fields, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.FromRegion);
+        var fromCity = Assert.Single(fields, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.FromCity);
+
+        Assert.Equal(ApplicationWorkspaceCaseSummaryFillState.Empty, fromRegion.FillState);
+        Assert.Equal(ApplicationWorkspaceCaseSummaryFillState.Empty, fromCity.FillState);
+        var missing = ApplicationWorkspaceCaseSummaryCompletenessGate.MissingRequiredFields(fields);
+        Assert.Contains(missing, f => f.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.FromRegion);
+        Assert.Contains(missing, f => f.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.FromCity);
     }
 }

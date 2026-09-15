@@ -70,4 +70,39 @@ public class ApplicationWorkspaceLastNExpectedTests
         Assert.Equal(1, ApplicationWorkspaceLastNExpected.Resolve(
             ApplicationProfileInstancePersonLinkKind.TravelHistory, lastN: 1, availableActive: 1, linksLocked: true));
     }
+[Fact]
+    public void Medical_none_locked_expects_zero()
+    {
+        Assert.Equal(0, ApplicationWorkspaceLastNExpected.Resolve(
+            ApplicationProfileInstancePersonLinkKind.MedicalRecord, lastN: 1, availableActive: 0, linksLocked: true));
+    }
+
+    [Fact]
+    public void Medical_none_imported_unlocked_expects_zero()
+    {
+        Assert.Equal(0, ApplicationWorkspaceLastNExpected.Resolve(
+            ApplicationProfileInstancePersonLinkKind.MedicalRecord,
+            lastN: 1,
+            availableActive: 0,
+            linksLocked: false,
+            true));
+    }
+
+    [Fact]
+    public void Medical_none_officer_unlocked_expects_one()
+    {
+        Assert.Equal(1, ApplicationWorkspaceLastNExpected.Resolve(
+            ApplicationProfileInstancePersonLinkKind.MedicalRecord,
+            lastN: 1,
+            availableActive: 0,
+            linksLocked: false,
+            false));
+    }
+
+    [Fact]
+    public void Medical_one_active_expects_one()
+    {
+        Assert.Equal(1, ApplicationWorkspaceLastNExpected.Resolve(
+            ApplicationProfileInstancePersonLinkKind.MedicalRecord, lastN: 1, availableActive: 1, linksLocked: true));
+    }
 }

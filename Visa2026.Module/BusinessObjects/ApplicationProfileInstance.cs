@@ -464,12 +464,25 @@ namespace Visa2026.Module.BusinessObjects
                 MigrationService = applicationProfile.DefaultMigrationService;
             if (applicationProfile.DefaultEntryCheckPoint != null)
                 EntryCheckPoint = applicationProfile.DefaultEntryCheckPoint;
+#pragma warning disable CS0618
+            if (applicationProfile.DefaultFromRegion != null)
+                FromRegion = applicationProfile.DefaultFromRegion;
+            if (applicationProfile.DefaultFromCity != null)
+                FromCity = applicationProfile.DefaultFromCity;
+            if (applicationProfile.DefaultToRegion != null)
+                ToRegion = applicationProfile.DefaultToRegion;
+            else if (applicationProfile.DefaultRegion != null)
+                ToRegion = applicationProfile.DefaultRegion;
+            if (applicationProfile.DefaultToCity != null)
+                ToCity = applicationProfile.DefaultToCity;
+            else if (applicationProfile.DefaultCity != null)
+                ToCity = applicationProfile.DefaultCity;
             if (applicationProfile.DefaultRegion != null)
                 Region = applicationProfile.DefaultRegion;
             if (applicationProfile.DefaultCity != null)
                 City = applicationProfile.DefaultCity;
-            if (applicationProfile.DefaultBusinessTripAddress != null)
-                BusinessTripAddress = applicationProfile.DefaultBusinessTripAddress;
+#pragma warning restore CS0618
+            BusinessTripDestinationHelper.ApplyDefaultsFromProfile(this, applicationProfile);
             if (!string.IsNullOrWhiteSpace(applicationProfile.DefaultPurpose))
                 Purpose = applicationProfile.DefaultPurpose.Trim();
             if (ApplicationProfileConfigurationResolver.RequireBorderZoneWhenProducingInvitationOrVisa(
@@ -950,26 +963,119 @@ namespace Visa2026.Module.BusinessObjects
                 ? DefaultBorderZoneLocationNameTm
                 : BorderZoneLocation?.Trim() ?? DefaultBorderZoneLocationNameTm;
 
+        [Appearance("FromRegionVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowFromRegion", Context = "DetailView")]
+        [VisibleInListView(false)]
+        [XafDisplayName("From region")]
+        public virtual Region? FromRegion { get; set; }
+
         [Appearance("FromCityVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowFromCity", Context = "DetailView")]
         [VisibleInListView(false)]
-        public virtual City FromCity { get; set; }
+        [XafDisplayName("From city")]
+        public virtual City? FromCity { get; set; }
+
+        [Appearance("ToRegionVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowToRegion", Context = "DetailView")]
+        [VisibleInListView(false)]
+        [XafDisplayName("To region")]
+        public virtual Region? ToRegion { get; set; }
 
         [Appearance("ToCityVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowToCity", Context = "DetailView")]
         [VisibleInListView(false)]
-        public virtual City ToCity { get; set; }
+        [XafDisplayName("To city")]
+        public virtual City? ToCity { get; set; }
 
+        /// <summary>Legacy destination region. Prefer <see cref="ToRegion"/>.</summary>
+        [Browsable(false)]
+        [Obsolete("Use ToRegion. Retained for dual-read of imported RegionId.")]
         [Appearance("RegionVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowRegion", Context = "DetailView")]
         [VisibleInListView(false)]
-        public virtual Region Region { get; set; }
+        public virtual Region? Region { get; set; }
 
+        /// <summary>Legacy destination city. Prefer <see cref="ToCity"/>.</summary>
+        [Browsable(false)]
+        [Obsolete("Use ToCity. Retained for dual-read of imported CityId.")]
         [Appearance("CityVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowCity", Context = "DetailView")]
         [VisibleInListView(false)]
-        public virtual City City { get; set; }
+        public virtual City? City { get; set; }
 
-        [Appearance("BusinessTripAddressVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowBusinessTripAddress", Context = "DetailView")]
+        private const string BusinessTripLookupTypeCriteria =
+            "BusinessTripAddressType = 'Lodging' Or BusinessTripAddressType = 'Hotel' Or BusinessTripAddressType = 'Hospital' Or BusinessTripAddressType = 'Other'";
+
+        [Appearance("BusinessTripAddressTypeVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowBusinessTripAddress", Context = "DetailView")]
+        [VisibleInListView(false)]
+        [ImmediatePostData]
+        [XafDisplayName("Business trip address type")]
+        public virtual ResidenceType? BusinessTripAddressType
+        {
+            get => businessTripAddressType;
+            set
+            {
+                if (businessTripAddressType == value)
+                    return;
+                businessTripAddressType = value;
+                BusinessTripDestinationHelper.ClearSitesExcept(this, value);
+#pragma warning disable CS0618
+                BusinessTripAddress = null;
+#pragma warning restore CS0618
+            }
+        }
+        private ResidenceType? businessTripAddressType;
+
+        [Appearance("BusinessTripLodgingVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide,
+            Criteria = "!CfgShowBusinessTripAddress Or BusinessTripAddressType != 'Lodging'", Context = "DetailView")]
+        [VisibleInListView(false)]
+        [ImmediatePostData]
+        [DataSourceCriteria("City = '@This.City'")]
+        [XafDisplayName("Business trip lodging")]
+        public virtual Lodging? BusinessTripLodging { get; set; }
+
+        [Appearance("BusinessTripHotelVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide,
+            Criteria = "!CfgShowBusinessTripAddress Or BusinessTripAddressType != 'Hotel'", Context = "DetailView")]
+        [VisibleInListView(false)]
+        [ImmediatePostData]
+        [DataSourceCriteria("City = '@This.City'")]
+        [XafDisplayName("Business trip hotel")]
+        public virtual Hotel? BusinessTripHotel { get; set; }
+
+        [Appearance("BusinessTripHospitalVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide,
+            Criteria = "!CfgShowBusinessTripAddress Or BusinessTripAddressType != 'Hospital'", Context = "DetailView")]
+        [VisibleInListView(false)]
+        [ImmediatePostData]
+        [DataSourceCriteria("City = '@This.City'")]
+        [XafDisplayName("Business trip hospital")]
+        public virtual Hospital? BusinessTripHospital { get; set; }
+
+        [Appearance("BusinessTripOtherSiteVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide,
+            Criteria = "!CfgShowBusinessTripAddress Or BusinessTripAddressType != 'Other'", Context = "DetailView")]
+        [VisibleInListView(false)]
+        [ImmediatePostData]
+        [DataSourceCriteria("City = '@This.City'")]
+        [XafDisplayName("Business trip other site")]
+        public virtual OtherSite? BusinessTripOtherSite { get; set; }
+
+        [Appearance("BusinessTripPrivateHouseAddressVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide,
+            Criteria = "!CfgShowBusinessTripAddress Or BusinessTripAddressType != 'PrivateHouse'", Context = "DetailView")]
+        [Appearance("BusinessTripPrivateHouseAddressHiddenWhenLookupType", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide,
+            Criteria = BusinessTripLookupTypeCriteria, Context = "DetailView")]
+        [VisibleInListView(false)]
+        [MaxLength(255)]
+        [XafDisplayName("Business trip address (private house)")]
+        public virtual string? BusinessTripPrivateHouseAddress { get; set; }
+
+        /// <summary>
+        /// Legacy catalog FK. Prefer <see cref="BusinessTripAddressType"/> + Lodging/Hotel/Hospital/OtherSite.
+        /// </summary>
+        [Browsable(false)]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [Obsolete("Use BusinessTripAddressType with Lodging/Hotel/Hospital/OtherSite (or private-house text).")]
+        public virtual BusinessTripAddress? BusinessTripAddress { get; set; }
+
+        [NotMapped]
+        [Browsable(false)]
+        [VisibleInDetailView(false)]
         [VisibleInListView(false)]
         [XafDisplayName("Business trip address")]
-        public virtual BusinessTripAddress BusinessTripAddress { get; set; }
+        public string? BusinessTripAddressDisplay => BusinessTripDestinationHelper.FormatFullAddress(this);
 
         [Appearance("PurposeVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowPurpose", Context = "DetailView")]
         [VisibleInListView(false)]
@@ -1170,36 +1276,47 @@ namespace Visa2026.Module.BusinessObjects
             AddTurkmenCase(word, "nyň", "niň");
 
         [XafDisplayName("From City Name"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string FromCityName => FromCity?.Name;
+        public string FromCityName => FromCity?.NameTm;
 
         [XafDisplayName("From Region Name"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string FromRegionName => FromCity?.Region?.Name;
+        public string FromRegionName => FromRegion?.NameTm ?? FromCity?.Region?.NameTm;
 
         [XafDisplayName("To City Name"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string ToCityName => ToCity?.Name;
+#pragma warning disable CS0618
+        public string ToCityName => ToCity?.NameTm ?? City?.NameTm;
+#pragma warning restore CS0618
 
         [XafDisplayName("To Region Name"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string ToRegionName => ToCity?.Region?.Name;
+#pragma warning disable CS0618
+        public string ToRegionName => ToRegion?.NameTm ?? Region?.NameTm ?? ToCity?.Region?.NameTm;
+#pragma warning restore CS0618
 
-        /// <summary>Genitive of FromCity region — e.g. "Mary welaýaty" → "Mary welaýatynyň"</summary>
+        /// <summary>Genitive of origin region — e.g. "Mary welaýaty" → "Mary welaýatynyň"</summary>
         [XafDisplayName("From Region (Genitive)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
-        public string FromRegionName_Genitive => AddTurkmenCase(FromCity?.Region?.Name, "nyň", "niň");
+        public string FromRegionName_Genitive =>
+            AddTurkmenCase(FromRegion?.NameTm ?? FromCity?.Region?.NameTm, "nyň", "niň");
 
-        /// <summary>Ablative of FromCity — e.g. "Aşgabat şäheri" → "Aşgabat şäherinden"</summary>
+        /// <summary>Ablative of origin city (FromCity) — e.g. "Mary etraby" → "Mary etrabyndan"</summary>
         [XafDisplayName("From City (Ablative)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
-        public string FromCityName_Ablative => AddTurkmenCase(FromCity?.Name, "ndan", "nden");
+        public string FromCityName_Ablative => AddTurkmenCase(FromCity?.NameTm, "ndan", "nden");
 
-        /// <summary>Genitive of ToCity region — e.g. "Ahal welaýaty" → "Ahal welaýatynyň"</summary>
+        /// <summary>Genitive of destination region — e.g. "Ahal welaýaty" → "Ahal welaýatynyň"</summary>
         [XafDisplayName("To Region (Genitive)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
-        public string ToRegionName_Genitive => AddTurkmenCase(ToCity?.Region?.Name, "nyň", "niň");
+#pragma warning disable CS0618
+        public string ToRegionName_Genitive =>
+            AddTurkmenCase(ToRegion?.NameTm ?? Region?.NameTm ?? ToCity?.Region?.NameTm, "nyň", "niň");
+#pragma warning restore CS0618
 
-        /// <summary>Dative of ToCity — e.g. "Akbugdaý etraby" → "Akbugdaý etrabyna"</summary>
+        /// <summary>Dative of destination city — e.g. "Akbugdaý etraby" → "Akbugdaý etrabyna"</summary>
         [XafDisplayName("To City (Dative)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
-        public string ToCityName_Dative => AddTurkmenCase(ToCity?.Name, "na", "ne");
+#pragma warning disable CS0618
+        public string ToCityName_Dative =>
+            AddTurkmenCase(ToCity?.NameTm ?? City?.NameTm, "na", "ne");
+#pragma warning restore CS0618
 
         [XafDisplayName("Business Trip Start Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
@@ -1215,6 +1332,11 @@ namespace Visa2026.Module.BusinessObjects
             BusinessTripStartDate.HasValue && BusinessTripEndDate.HasValue
                 ? (int?)((BusinessTripEndDate.Value - BusinessTripStartDate.Value).TotalDays + 1)
                 : null;
+
+        [XafDisplayName("Business Trip Duration (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string BusinessTripDurationDaysText =>
+            BusinessTripDurationDays is int days ? NumberToTurkmenWords(days) : string.Empty;
 
         [XafDisplayName("Business Trip Purpose (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]

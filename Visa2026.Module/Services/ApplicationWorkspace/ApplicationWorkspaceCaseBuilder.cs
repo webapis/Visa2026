@@ -610,7 +610,12 @@ internal static class ApplicationWorkspaceCaseBuilder
             var available = personId != Guid.Empty
                 ? linkableCounts.Get(personId, def.Kind)
                 : 0;
-            var expected = ApplicationWorkspaceLastNExpected.Resolve(def.Kind, lastN, available, linksLocked);
+            var expected = ApplicationWorkspaceLastNExpected.Resolve(
+                def.Kind,
+                lastN,
+                available,
+                linksLocked,
+                importedManualEntry: application?.IsManualEntry == true);
             var count = personId != Guid.Empty
                 ? ApplicationWorkspaceLinkedRecordsCatalog.CountResolvedForPerson(rosterLinks, personId, def.Kind)
                 : tabs.TryGetValue(def.TabKey, out var tab)

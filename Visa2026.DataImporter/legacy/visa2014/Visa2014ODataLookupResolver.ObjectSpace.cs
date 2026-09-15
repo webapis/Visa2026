@@ -120,6 +120,12 @@ internal sealed partial class Visa2014ODataLookupResolver
         _borderZoneLocations = MapLookupDto<Bo.BorderZoneLocation, Dto.BorderZoneLocation>(objectSpace);
         _checkPoints = MapLookupDto<Bo.CheckPoint, Dto.CheckPoint>(objectSpace);
         _migrationServices = MapLookupDto<Bo.MigrationService, Dto.MigrationService>(objectSpace);
+        _businessTripAddresses = MapLookup(objectSpace.GetObjectsQuery<Bo.BusinessTripAddress>(), x => new Dto.BusinessTripAddress
+        {
+            Id = x.ID,
+            FullAddress = x.FullAddress ?? "",
+            City = x.City == null ? null : new Dto.City { Id = x.City.ID },
+        });
 
         var lookupCatalogDir = string.IsNullOrWhiteSpace(tenantCatalogDirectory)
             ? null

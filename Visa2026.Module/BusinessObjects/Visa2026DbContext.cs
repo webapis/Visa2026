@@ -628,6 +628,17 @@ namespace Visa2026.Module.BusinessObjects
                     .HasForeignKey("ApplicationProfileID")
                     .IsRequired(false)
                     .OnDelete(DeleteBehavior.Restrict);
+                b.HasOne(a => a.FromRegion)
+                    .WithMany()
+                    .HasForeignKey("FromRegionId")
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(a => a.ToRegion)
+                    .WithMany()
+                    .HasForeignKey("ToRegionId")
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
+#pragma warning disable CS0618
                 b.HasOne(a => a.Region)
                     .WithMany()
                     .HasForeignKey("RegionId")
@@ -638,11 +649,35 @@ namespace Visa2026.Module.BusinessObjects
                     .HasForeignKey("CityId")
                     .IsRequired(false)
                     .OnDelete(DeleteBehavior.NoAction);
+#pragma warning restore CS0618
+#pragma warning disable CS0618
                 b.HasOne(a => a.BusinessTripAddress)
                     .WithMany()
                     .HasForeignKey("BusinessTripAddressId")
                     .IsRequired(false)
                     .OnDelete(DeleteBehavior.NoAction);
+#pragma warning restore CS0618
+                b.HasOne(a => a.BusinessTripLodging)
+                    .WithMany()
+                    .HasForeignKey("BusinessTripLodgingId")
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(a => a.BusinessTripHotel)
+                    .WithMany()
+                    .HasForeignKey("BusinessTripHotelId")
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(a => a.BusinessTripHospital)
+                    .WithMany()
+                    .HasForeignKey("BusinessTripHospitalId")
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(a => a.BusinessTripOtherSite)
+                    .WithMany()
+                    .HasForeignKey("BusinessTripOtherSiteId")
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.Property(a => a.BusinessTripPrivateHouseAddress).HasMaxLength(255);
                 b.Property(a => a.Purpose).HasMaxLength(700);
                 b.Property(a => a.LetterheadCompanyCode).HasMaxLength(10);
                 b.HasOne(a => a.OrganizationCompany)
@@ -684,11 +719,34 @@ namespace Visa2026.Module.BusinessObjects
                 b.Property(p => p.DefaultWorkPermitLocation).HasMaxLength(500);
                 b.HasOne(p => p.DefaultApprovalLegProfile).WithMany().HasForeignKey(p => p.DefaultApprovalLegProfileId).OnDelete(DeleteBehavior.SetNull);
                 b.Property(p => p.DefaultPurpose).HasMaxLength(700);
+#pragma warning disable CS0618
                 b.HasOne(p => p.DefaultBusinessTripAddress)
                     .WithMany()
                     .HasForeignKey(p => p.DefaultBusinessTripAddressId)
                     .IsRequired(false)
                     .OnDelete(DeleteBehavior.NoAction);
+#pragma warning restore CS0618
+                b.HasOne(p => p.DefaultBusinessTripLodging)
+                    .WithMany()
+                    .HasForeignKey(p => p.DefaultBusinessTripLodgingId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(p => p.DefaultBusinessTripHotel)
+                    .WithMany()
+                    .HasForeignKey(p => p.DefaultBusinessTripHotelId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(p => p.DefaultBusinessTripHospital)
+                    .WithMany()
+                    .HasForeignKey(p => p.DefaultBusinessTripHospitalId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(p => p.DefaultBusinessTripOtherSite)
+                    .WithMany()
+                    .HasForeignKey(p => p.DefaultBusinessTripOtherSiteId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.Property(p => p.DefaultBusinessTripPrivateHouseAddress).HasMaxLength(255);
                 b.HasIndex(p => p.Code)
                     .IsUnique()
                     .HasFilter(IndexFilter("[Code] IS NOT NULL AND [Code] <> '' AND [GCRecord] IS NULL"));

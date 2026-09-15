@@ -168,6 +168,16 @@ strategy:
           employees only (family members use sponsor caption, not a Position chip).
         includesForgottenTypes:
           - App_Change_Inv
+      calikBusinessTripCaseSummaryLock:
+        lockedAt: 2026-09-15
+        applicationTypeName: App_Business_Trip_Departure
+        applicationProfileCode: business_trip_departure
+        why: >
+          Iş Saparyna Gitmek case summary requires Region, City, Business trip
+          address, and Purpose. Header import mapped destination only to hidden
+          ToCity and skipped Address.AddressLine. Backfill with
+          --patch-visa2014-application-business-trip-case-summary. Purpose has
+          no populated legacy source on live Çalik E:13 (AnketaMaksat empty).
       officerRelinkMayUseToday: true
       missingIdMap: leave_unlinked_until_oid_in_map_then_pin
     piaVisaResolvedLinkMismatch:

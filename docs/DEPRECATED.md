@@ -47,7 +47,7 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 | **UserReportTemplateApplicationTypeGroup** | Deprecated | **`ApplicationProfileTemplate`** + `ApplicabilityCriteria` (slice 12) | Join table retained | Same as type link row. |
 | **ApplicationItem** | Removed (Phase B hard-remove) | Roster identity **`ApplicationProfileInstancePerson`** + **`ResolvedLink`**; merge/PDF projection **`ApplicationRosterMergeLine`** (plain POCO, not a BO) | `ApplicationItems` table dropped by `ApplicationItemsDropSchemaSql`; `Visas.IssuingApplicationItemID` dropped by `VisaIssuingApplicationProfileInstanceSchemaSql` | BO, doc-copies hosts, sync rules, and VISA2014 item import paths deleted. Report Dashboard SQL is M2M-only. Issued visas link via `Visa.IssuingApplicationProfileInstance`. |
 | **ApplicationType `App_Visa_Ext` (702)** | Deprecated | **`App_Visa_and_WP_Ext` (708)** — Extend visa and work permit | Row retained; hidden from type-code picker | Employee visa extension only; legacy `E:7:*` imports map to 708. Migrated rows corrected via `--correct-visa-application-types`. |
-| **ApplicabilityMode** (enum) | Deprecated | `UserReportTemplate.ApplicableTypeLinks`, `ApplicableProjectContractLinks`, `VisibilityCriteria` | Enum column on `UserReportTemplates` retained | `[Obsolete]` on enum and `UserReportTemplate.ApplicabilityMode`. |
+| **BusinessTripAddress** | Deprecated | **`ApplicationProfileInstance.BusinessTripAddressType`** + `BusinessTripLodging` / `BusinessTripHotel` / `BusinessTripHospital` / `BusinessTripOtherSite` / `BusinessTripPrivateHouseAddress` (same tenant site catalogs as AddressOfResidence) | Table + legacy `BusinessTripAddressId` FKs retained for dual-read | Instance case-summary trip destination — not person residence. Do not find-or-create catalog rows on import; resolve Lodging/Hotel/Hospital then **OtherSite** (Calik BTA DISTINCT lines merged into tenant JSON). PrivateHouse free text only if OtherSite still missing. |
 | **VisaIssuingApplicationTypes** (name allowlist) | Removed | `ApplicationType.CanIssueVisa` + `ApplicationTypeCapabilities` | — | Hardcoded `ApplicationType.Name` set replaced by seeded capability flag. |
 | **ApplicationStatus** (enum) | Deprecated | `ApplicationProgress` + `Application.CurrentState`; locations via **ApplicationLocation** catalog | Enum unused on `Application` BO; may remain in old import models | Docs in [`docs/BO_STATE_TRACKING.md`](BO_STATE_TRACKING.md) §8b still describe the old enum — prefer §8c progress model for new work. |
 
@@ -90,6 +90,8 @@ Only **configuration** that used to live on `ApplicationType` (and type-driven i
 
 | Business object | Property | Status | Replacement | Schema |
 |-----------------|----------|--------|-------------|--------|
+| **ApplicationProfileInstance** | `Region` / `City` | Deprecated | `ToRegion` / `ToCity` (dual-read fallback) | Keep columns; UI/import stop writing (From/To geo 2026-09) |
+| **ApplicationProfile** | `RequireRegion` / `RequireCity` / `RequireRegionCity` / `DefaultRegion` / `DefaultCity` | Deprecated | `RequireFrom*` / `RequireTo*` / `DefaultFrom*` / `DefaultTo*` | Keep columns for seed dual-read (From/To geo 2026-09) |
 | **UserReportTemplate** | `ApplicabilityMode` | Deprecated | Applicable type/contract links + `VisibilityCriteria` | Column retained |
 | **ApplicationProfile** | `DefaultAuthorizedSignatory` / `DefaultVisaRepresentative` | Retained (hidden) | Tenant catalog **`IsDefault`**; instance FKs `OrganizationSignatoryId` / `OrganizationRepresentativeId` | Columns kept; UI hidden 2026-09-03. Not profile config — do not drop in this change. |
 | **Application** | `ApplicationType` | Deprecated | **`Application.ApplicationProfile`** (live FK; set only at create) | FK retained during dual-read |
@@ -194,6 +196,7 @@ Only **configuration** that used to live on `ApplicationType` (and type-driven i
 
 ## Change log
 
+| 2026-09-15 | From/To Region+City geo: obsolete bare `Region`/`City`; use From*/To* on BT + internal registration. |
 | 2026-08-14 | Officer workspace Progress/Advance steps come from Application Profile Approval legs + Process & SLA; `1_REVIEW_STARTED` / ApplicationProgress transition graph is storage-only for that UI. |
 | 2026-08-07 | Application Profile cutover registry: type config seed/UX, group/template links, `ApplicationItem` / `IssuingApplicationItem` (slice 10 pending), progress **configuration** vs `ApplicationProgress` BO clarified. |
 | 2026-07-31 | Registration→TravelHistory auto-sync removed; `SourceApplicationItemID` cleared/dropped; manual TravelHistory CRUD only. |

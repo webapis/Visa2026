@@ -32,7 +32,13 @@ public sealed class ApplicationProfileWizardLookupData
     public IReadOnlyList<ApplicationProfileWizardLookupItem> CheckPoints { get; init; } = [];
     public IReadOnlyList<ApplicationProfileWizardLookupItem> Regions { get; init; } = [];
     public IReadOnlyList<ApplicationProfileWizardLookupItem> Cities { get; init; } = [];
+    public IReadOnlyList<ApplicationProfileWizardLookupItem> Lodgings { get; init; } = [];
+    public IReadOnlyList<ApplicationProfileWizardLookupItem> Hotels { get; init; } = [];
+    public IReadOnlyList<ApplicationProfileWizardLookupItem> Hospitals { get; init; } = [];
+    public IReadOnlyList<ApplicationProfileWizardLookupItem> OtherSites { get; init; } = [];
+#pragma warning disable CS0618
     public IReadOnlyList<ApplicationProfileWizardLookupItem> BusinessTripAddresses { get; init; } = [];
+#pragma warning restore CS0618
 
     /// <summary>
     /// Project contracts (via ministry) or migration services (direct) for nested-template visibility.
@@ -66,7 +72,13 @@ public sealed class ApplicationProfileWizardLookupData
             CheckPoints = LoadItems<CheckPoint>(objectSpace),
             Regions = LoadItems<Region>(objectSpace),
             Cities = LoadCities(objectSpace),
+            Lodgings = LoadLodgings(objectSpace),
+            Hotels = LoadHotels(objectSpace),
+            Hospitals = LoadHospitals(objectSpace),
+            OtherSites = LoadOtherSites(objectSpace),
+#pragma warning disable CS0618
             BusinessTripAddresses = LoadBusinessTripAddresses(objectSpace),
+#pragma warning restore CS0618
         };
     }
 
@@ -129,6 +141,59 @@ public sealed class ApplicationProfileWizardLookupData
             .ToList();
     }
 
+    private static IReadOnlyList<ApplicationProfileWizardLookupItem> LoadLodgings(IObjectSpace objectSpace) =>
+        objectSpace.GetObjects(typeof(Lodging))
+            .Cast<Lodging>()
+            .Select(item => new ApplicationProfileWizardLookupItem
+            {
+                Id = item.ID,
+                DisplayName = item.FullAddress?.Trim() ?? string.Empty,
+                RegionId = item.City?.ID,
+            })
+            .Where(item => !string.IsNullOrWhiteSpace(item.DisplayName))
+            .OrderBy(item => item.DisplayName, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+
+    private static IReadOnlyList<ApplicationProfileWizardLookupItem> LoadHotels(IObjectSpace objectSpace) =>
+        objectSpace.GetObjects(typeof(Hotel))
+            .Cast<Hotel>()
+            .Select(item => new ApplicationProfileWizardLookupItem
+            {
+                Id = item.ID,
+                DisplayName = item.Name?.Trim() ?? string.Empty,
+                RegionId = item.City?.ID,
+            })
+            .Where(item => !string.IsNullOrWhiteSpace(item.DisplayName))
+            .OrderBy(item => item.DisplayName, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+
+    private static IReadOnlyList<ApplicationProfileWizardLookupItem> LoadHospitals(IObjectSpace objectSpace) =>
+        objectSpace.GetObjects(typeof(Hospital))
+            .Cast<Hospital>()
+            .Select(item => new ApplicationProfileWizardLookupItem
+            {
+                Id = item.ID,
+                DisplayName = item.Name?.Trim() ?? string.Empty,
+                RegionId = item.City?.ID,
+            })
+            .Where(item => !string.IsNullOrWhiteSpace(item.DisplayName))
+            .OrderBy(item => item.DisplayName, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+
+    private static IReadOnlyList<ApplicationProfileWizardLookupItem> LoadOtherSites(IObjectSpace objectSpace) =>
+        objectSpace.GetObjects(typeof(OtherSite))
+            .Cast<OtherSite>()
+            .Select(item => new ApplicationProfileWizardLookupItem
+            {
+                Id = item.ID,
+                DisplayName = item.FullAddress?.Trim() ?? string.Empty,
+                RegionId = item.City?.ID,
+            })
+            .Where(item => !string.IsNullOrWhiteSpace(item.DisplayName))
+            .OrderBy(item => item.DisplayName, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+
+#pragma warning disable CS0618
     private static IReadOnlyList<ApplicationProfileWizardLookupItem> LoadBusinessTripAddresses(IObjectSpace objectSpace)
     {
         return objectSpace.GetObjects(typeof(BusinessTripAddress))
@@ -143,6 +208,7 @@ public sealed class ApplicationProfileWizardLookupData
             .OrderBy(item => item.DisplayName, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
     }
+#pragma warning restore CS0618
 
     private static IEnumerable<City> QueryCitiesWithRegion(IObjectSpace objectSpace)
     {

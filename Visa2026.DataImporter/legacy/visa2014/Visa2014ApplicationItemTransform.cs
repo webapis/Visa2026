@@ -104,7 +104,7 @@ internal static class Visa2014ApplicationItemTransform
             ISNULL(CAST(cp_line.TitleOfCheckPoint AS varchar(10)), ISNULL(CAST(cp_ti.TitleOfCheckPoint AS varchar(10)), '')) AS CheckPointMgCode,
             ISNULL(cp_line.TitleOfCheckPointL, cp_ti.TitleOfCheckPointL) AS CheckPointLabel,
             pot.PurposeOfTravelL AS PurposeOfTravelLabel,
-            aobt.AddressOnTrip AS BusinessTripAddressText,
+            tripAddrRow.AddressLine AS BusinessTripAddressText,
             ISNULL(CAST(se.mgCode AS varchar(10)), '') AS BusinessTripCityMgCode,
             se.[{SeherEtrap}L] AS BusinessTripCityName,
             CASE WHEN ISNULL(pia.Cancelled, 0) = 1 THEN '1' ELSE '0' END AS Cancelled,
@@ -142,6 +142,7 @@ internal static class Visa2014ApplicationItemTransform
         LEFT JOIN dbo.[CheckPoint] cp_ti ON cp_ti.Oid = ti.[CheckPoint]
         LEFT JOIN dbo.PurposeOfTravel pot ON pot.Oid = pia.PurposeOfTrave
         LEFT JOIN dbo.AddressOnBusinessTrip aobt ON aobt.Oid = pia.AddressOnBusinessTrip
+        LEFT JOIN dbo.Address tripAddrRow ON tripAddrRow.Oid = aobt.AddressOnTrip AND tripAddrRow.GCRecord IS NULL
         LEFT JOIN dbo.WorkPermit wp ON wp.Oid = pia.WorkPermit AND wp.GCRecord IS NULL
         OUTER APPLY (
             SELECT TOP 1 CAST(v.Oid AS varchar(36)) AS NextVisaOid

@@ -215,6 +215,45 @@ public class UserReportPlaceholderRelatedBoTests
     }
 
     [Theory]
+    [InlineData("BTSD", "BusinessTripStartDateText")]
+    [InlineData("BTED", "BusinessTripEndDateText")]
+    [InlineData("BTDCNT", "BusinessTripDurationDays")]
+    [InlineData("BTDCTX", "BusinessTripDurationDaysText")]
+    [InlineData("BTFRG", "FromRegionName_Genitive")]
+    [InlineData("BTFCT", "FromCityName_Ablative")]
+    [InlineData("BTTRG", "ToRegionName_Genitive")]
+    [InlineData("BTTCT", "ToCityName_Dative")]
+    [InlineData("BTPRP", "Purpose")]
+    public void Business_trip_header_tokens_are_catalogued(string shortCode, string canonical)
+    {
+        var catalog = new UserReportPlaceholderCatalogService();
+        var entry = catalog.GetEntries().Single(e =>
+            string.Equals(e.ShortCode, shortCode, StringComparison.OrdinalIgnoreCase));
+
+        Assert.Equal(canonical, entry.CanonicalPath);
+        Assert.Equal(UserReportPlaceholderPack.Core, entry.Pack);
+        Assert.Equal(UserReportPlaceholderRelatedBo.BusinessTrip, entry.RelatedBo);
+        Assert.Equal(UserReportPlaceholderScope.Header, entry.Scope);
+        Assert.Equal("{{ds." + shortCode + "}}", entry.BuildWordToken(UserReportPlaceholderScope.Header));
+        Assert.NotNull(typeof(ApplicationProfileInstance).GetProperty(
+            canonical, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase));
+    }
+
+    [Fact]
+    public void Business_trip_destination_address_is_catalogued()
+    {
+        var catalog = new UserReportPlaceholderCatalogService();
+        var entry = catalog.GetEntries().Single(e =>
+            string.Equals(e.ShortCode, "BTAD", StringComparison.OrdinalIgnoreCase));
+
+        Assert.Equal("BusinessTripAddress_FullAddress", entry.CanonicalPath);
+        Assert.Equal(UserReportPlaceholderRelatedBo.BusinessTrip, entry.RelatedBo);
+        Assert.Equal(UserReportPlaceholderScope.Row, entry.Scope);
+        Assert.NotNull(typeof(ApplicationRosterMergeLine).GetProperty(
+            "BusinessTripAddress_FullAddress", BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase));
+    }
+
+    [Theory]
     [InlineData("CINB", "CancelInvitation_NumberBlock")]
     [InlineData("CISB", "CancelInvitation_IssuedDateBlock")]
     [InlineData("CIEB", "CancelInvitation_ExpirationDateBlock")]

@@ -20,9 +20,18 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
     public const string EndDate = "EndDate";
     public const string FromCity = "FromCity";
     public const string ToCity = "ToCity";
+    public const string FromRegion = "FromRegion";
+    public const string ToRegion = "ToRegion";
     public const string Region = "Region";
     public const string City = "City";
     public const string BusinessTripAddress = "BusinessTripAddress";
+    public const string BusinessTripAddressType = "BusinessTripAddressType";
+    public const string BusinessTripLodging = "BusinessTripLodging";
+    public const string BusinessTripHotel = "BusinessTripHotel";
+    public const string BusinessTripHospital = "BusinessTripHospital";
+    public const string BusinessTripOtherSite = "BusinessTripOtherSite";
+    public const string BusinessTripPrivateHouseAddress = "BusinessTripPrivateHouseAddress";
+    public const int BusinessTripPrivateHouseAddressMaxLength = 255;
     public const string Purpose = "Purpose";
     public const int PurposeMaxLength = 700;
     public const string Project = "Project";
@@ -142,32 +151,113 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             application.MigrationService?.ID, LookupLabel(application.MigrationService), catalogs.MigrationServices, readOnly: false,
             LookupFill(application.MigrationService?.ID, DefaultId(profile?.DefaultMigrationService?.ID, profile?.DefaultMigrationServiceId)));
 
+        AddLookup(fields, FromRegion, "From region", "purple", "📍",
+            Visible(profile, p => p.RequireFromRegion, ApplicationProfileConfigurationResolver.ShowFromRegion, application),
+            application.FromRegion?.ID, LookupLabel(application.FromRegion), catalogs.Regions, readOnly: false,
+            FromGeoLookupFill(
+                application,
+                application.FromRegion?.ID,
+                DefaultId(profile?.DefaultFromRegion?.ID, profile?.DefaultFromRegionId)));
+
         AddLookup(fields, FromCity, "From city", "purple", "📍",
-            Visible(profile, p => p.RequireRegionCity, ApplicationProfileConfigurationResolver.ShowFromCity, application),
+            Visible(profile, p => p.RequireFromCity, ApplicationProfileConfigurationResolver.ShowFromCity, application),
             application.FromCity?.ID, LookupLabel(application.FromCity), catalogs.Cities, readOnly: false,
-            LookupFill(application.FromCity?.ID, defaultId: null));
+            FromGeoLookupFill(
+                application,
+                application.FromCity?.ID,
+                DefaultId(profile?.DefaultFromCity?.ID, profile?.DefaultFromCityId)));
+
+        AddLookup(fields, ToRegion, "To region", "purple", "📍",
+            Visible(profile, p => p.RequireToRegion, ApplicationProfileConfigurationResolver.ShowToRegion, application),
+            application.ToRegion?.ID, LookupLabel(application.ToRegion), catalogs.Regions, readOnly: false,
+            LookupFill(application.ToRegion?.ID, DefaultId(profile?.DefaultToRegion?.ID, profile?.DefaultToRegionId)));
 
         AddLookup(fields, ToCity, "To city", "purple", "📍",
-            Visible(profile, p => p.RequireRegionCity, ApplicationProfileConfigurationResolver.ShowToCity, application),
+            Visible(profile, p => p.RequireToCity, ApplicationProfileConfigurationResolver.ShowToCity, application),
             application.ToCity?.ID, LookupLabel(application.ToCity), catalogs.Cities, readOnly: false,
-            LookupFill(application.ToCity?.ID, defaultId: null));
+            LookupFill(application.ToCity?.ID, DefaultId(profile?.DefaultToCity?.ID, profile?.DefaultToCityId)));
 
-        AddLookup(fields, Region, "Region", "purple", "📍",
-            Visible(profile, p => p.RequireRegion, ApplicationProfileConfigurationResolver.ShowRegion, application),
-            application.Region?.ID, LookupLabel(application.Region), catalogs.Regions, readOnly: false,
-            LookupFill(application.Region?.ID, DefaultId(profile?.DefaultRegion?.ID, profile?.DefaultRegionId)));
+        var destinationCityId = application.ToCity?.ID
+#pragma warning disable CS0618
+            ?? application.City?.ID;
+#pragma warning restore CS0618
 
-        AddLookup(fields, City, "City", "purple", "📍",
-            Visible(profile, p => p.RequireCity, ApplicationProfileConfigurationResolver.ShowCity, application),
-            application.City?.ID, LookupLabel(application.City), catalogs.Cities, readOnly: false,
-            LookupFill(application.City?.ID, DefaultId(profile?.DefaultCity?.ID, profile?.DefaultCityId)));
+        var showTripAddress = Visible(profile, p => p.RequireBusinessTripAddress, ApplicationProfileConfigurationResolver.ShowBusinessTripAddress, application);
+        if (showTripAddress)
+        {
+            AddLookup(fields, BusinessTripAddressType, "Business trip address type", "purple", "📍",
+                visible: true,
+                application.BusinessTripAddressType is ResidenceType type
+                    ? ResidenceTypeOptionId(type)
+                    : null,
+                application.BusinessTripAddressType?.ToString() ?? string.Empty,
+                catalogs.ResidenceTypes,
+                readOnly: false,
+                LookupFill(
+                    application.BusinessTripAddressType is ResidenceType t ? ResidenceTypeOptionId(t) : null,
+                    profile?.DefaultBusinessTripAddressType is ResidenceType dt ? ResidenceTypeOptionId(dt) : null));
 
-        AddLookup(fields, BusinessTripAddress, "Business trip address", "purple", "📍",
-            Visible(profile, p => p.RequireBusinessTripAddress, ApplicationProfileConfigurationResolver.ShowBusinessTripAddress, application),
-            application.BusinessTripAddress?.ID,
-            FormatBusinessTripAddress(application.BusinessTripAddress),
-            catalogs.BusinessTripAddresses, readOnly: false,
-            LookupFill(application.BusinessTripAddress?.ID, DefaultId(profile?.DefaultBusinessTripAddress?.ID, profile?.DefaultBusinessTripAddressId)));
+            switch (application.BusinessTripAddressType)
+            {
+                case ResidenceType.Lodging:
+                    AddLookup(fields, BusinessTripLodging, "Business trip lodging", "purple", "📍",
+                        visible: true,
+                        application.BusinessTripLodging?.ID,
+                        application.BusinessTripLodging?.FullAddress ?? string.Empty,
+                        FilterSitesByCity(catalogs.Lodgings, destinationCityId),
+                        readOnly: false,
+                        LookupFill(application.BusinessTripLodging?.ID, DefaultId(profile?.DefaultBusinessTripLodging?.ID, profile?.DefaultBusinessTripLodgingId)));
+                    break;
+                case ResidenceType.Hotel:
+                    AddLookup(fields, BusinessTripHotel, "Business trip hotel", "purple", "📍",
+                        visible: true,
+                        application.BusinessTripHotel?.ID,
+                        application.BusinessTripHotel?.Name ?? string.Empty,
+                        FilterSitesByCity(catalogs.Hotels, destinationCityId),
+                        readOnly: false,
+                        LookupFill(application.BusinessTripHotel?.ID, DefaultId(profile?.DefaultBusinessTripHotel?.ID, profile?.DefaultBusinessTripHotelId)));
+                    break;
+                case ResidenceType.Hospital:
+                    AddLookup(fields, BusinessTripHospital, "Business trip hospital", "purple", "📍",
+                        visible: true,
+                        application.BusinessTripHospital?.ID,
+                        application.BusinessTripHospital?.Name ?? string.Empty,
+                        FilterSitesByCity(catalogs.Hospitals, destinationCityId),
+                        readOnly: false,
+                        LookupFill(application.BusinessTripHospital?.ID, DefaultId(profile?.DefaultBusinessTripHospital?.ID, profile?.DefaultBusinessTripHospitalId)));
+                    break;
+                case ResidenceType.Other:
+                    AddLookup(fields, BusinessTripOtherSite, "Business trip other site", "purple", "📍",
+                        visible: true,
+                        application.BusinessTripOtherSite?.ID,
+                        application.BusinessTripOtherSite?.FullAddress ?? string.Empty,
+                        FilterSitesByCity(catalogs.OtherSites, destinationCityId),
+                        readOnly: false,
+                        LookupFill(application.BusinessTripOtherSite?.ID, DefaultId(profile?.DefaultBusinessTripOtherSite?.ID, profile?.DefaultBusinessTripOtherSiteId)));
+                    break;
+                case ResidenceType.PrivateHouse:
+                    AddShortText(fields, BusinessTripPrivateHouseAddress, "Business trip address", "purple", "📍",
+                        visible: true,
+                        application.BusinessTripPrivateHouseAddress,
+                        BusinessTripPrivateHouseAddressMaxLength,
+                        TextFill(application.BusinessTripPrivateHouseAddress, profile?.DefaultBusinessTripPrivateHouseAddress));
+                    break;
+                default:
+#pragma warning disable CS0618
+                    // Dual-read legacy catalog until officers re-pick Type + site.
+                    if (application.BusinessTripAddress != null)
+                    {
+                        AddLookup(fields, BusinessTripAddress, "Business trip address (legacy)", "purple", "📍",
+                            visible: true,
+                            application.BusinessTripAddress?.ID,
+                            FormatBusinessTripAddress(application.BusinessTripAddress),
+                            catalogs.BusinessTripAddresses, readOnly: true,
+                            LookupFill(application.BusinessTripAddress?.ID, null));
+                    }
+#pragma warning restore CS0618
+                    break;
+            }
+        }
 
         AddText(fields, Purpose, "Purpose", "blue", "📝",
             Visible(profile, p => p.RequirePurpose, ApplicationProfileConfigurationResolver.ShowPurpose, application),
@@ -249,36 +339,118 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                 if (!Visible(profile, p => p.RequireEndDate, ApplicationProfileConfigurationResolver.ShowBusinessTrips, application))
                     return Hidden(out error);
                 return SetDate(value, date => application.BusinessTripEndDate = date, out error);
-            case FromCity:
-                if (!Visible(profile, p => p.RequireRegionCity, ApplicationProfileConfigurationResolver.ShowFromCity, application))
-                    return Hidden(out error);
-                return SetLookup<City>(objectSpace, value, item => application.FromCity = item!, out error);
-            case ToCity:
-                if (!Visible(profile, p => p.RequireRegionCity, ApplicationProfileConfigurationResolver.ShowToCity, application))
-                    return Hidden(out error);
-                return SetLookup<City>(objectSpace, value, item => application.ToCity = item!, out error);
-            case Region:
-                if (!Visible(profile, p => p.RequireRegion, ApplicationProfileConfigurationResolver.ShowRegion, application))
+            case FromRegion:
+                if (!Visible(profile, p => p.RequireFromRegion, ApplicationProfileConfigurationResolver.ShowFromRegion, application))
                     return Hidden(out error);
                 return SetLookup<Region>(objectSpace, value, item =>
                 {
-                    application.Region = item;
-                    if (application.City?.Region != null && item != null && application.City.Region.ID != item.ID)
-                        application.City = null;
+                    application.FromRegion = item;
+                    if (application.FromCity?.Region != null && item != null && application.FromCity.Region.ID != item.ID)
+                        application.FromCity = null;
                 }, out error);
-            case City:
-                if (!Visible(profile, p => p.RequireCity, ApplicationProfileConfigurationResolver.ShowCity, application))
+            case FromCity:
+                if (!Visible(profile, p => p.RequireFromCity, ApplicationProfileConfigurationResolver.ShowFromCity, application))
                     return Hidden(out error);
                 return SetLookup<City>(objectSpace, value, item =>
                 {
-                    application.City = item;
+                    application.FromCity = item;
                     if (item?.Region != null)
-                        application.Region = item.Region;
+                        application.FromRegion = item.Region;
                 }, out error);
+            case ToRegion:
+                if (!Visible(profile, p => p.RequireToRegion, ApplicationProfileConfigurationResolver.ShowToRegion, application))
+                    return Hidden(out error);
+                return SetLookup<Region>(objectSpace, value, item =>
+                {
+                    application.ToRegion = item;
+                    if (application.ToCity?.Region != null && item != null && application.ToCity.Region.ID != item.ID)
+                        application.ToCity = null;
+                }, out error);
+            case ToCity:
+                if (!Visible(profile, p => p.RequireToCity, ApplicationProfileConfigurationResolver.ShowToCity, application))
+                    return Hidden(out error);
+                return SetLookup<City>(objectSpace, value, item =>
+                {
+                    application.ToCity = item;
+                    if (item?.Region != null)
+                        application.ToRegion = item.Region;
+                }, out error);
+            case BusinessTripAddressType:
+                if (!Visible(profile, p => p.RequireBusinessTripAddress, ApplicationProfileConfigurationResolver.ShowBusinessTripAddress, application))
+                    return Hidden(out error);
+                return SetBusinessTripAddressType(application, value, out error);
+            case BusinessTripLodging:
+                if (!Visible(profile, p => p.RequireBusinessTripAddress, ApplicationProfileConfigurationResolver.ShowBusinessTripAddress, application)
+                    || application.BusinessTripAddressType != ResidenceType.Lodging)
+                    return Hidden(out error);
+                return SetLookup<Lodging>(objectSpace, value, item =>
+                {
+                    application.BusinessTripAddressType = ResidenceType.Lodging;
+                    BusinessTripDestinationHelper.ClearSitesExcept(application, ResidenceType.Lodging);
+                    application.BusinessTripLodging = item;
+#pragma warning disable CS0618
+                    application.BusinessTripAddress = null;
+#pragma warning restore CS0618
+                }, out error);
+            case BusinessTripHotel:
+                if (!Visible(profile, p => p.RequireBusinessTripAddress, ApplicationProfileConfigurationResolver.ShowBusinessTripAddress, application)
+                    || application.BusinessTripAddressType != ResidenceType.Hotel)
+                    return Hidden(out error);
+                return SetLookup<Hotel>(objectSpace, value, item =>
+                {
+                    application.BusinessTripAddressType = ResidenceType.Hotel;
+                    BusinessTripDestinationHelper.ClearSitesExcept(application, ResidenceType.Hotel);
+                    application.BusinessTripHotel = item;
+#pragma warning disable CS0618
+                    application.BusinessTripAddress = null;
+#pragma warning restore CS0618
+                }, out error);
+            case BusinessTripHospital:
+                if (!Visible(profile, p => p.RequireBusinessTripAddress, ApplicationProfileConfigurationResolver.ShowBusinessTripAddress, application)
+                    || application.BusinessTripAddressType != ResidenceType.Hospital)
+                    return Hidden(out error);
+                return SetLookup<Hospital>(objectSpace, value, item =>
+                {
+                    application.BusinessTripAddressType = ResidenceType.Hospital;
+                    BusinessTripDestinationHelper.ClearSitesExcept(application, ResidenceType.Hospital);
+                    application.BusinessTripHospital = item;
+#pragma warning disable CS0618
+                    application.BusinessTripAddress = null;
+#pragma warning restore CS0618
+                }, out error);
+            case BusinessTripOtherSite:
+                if (!Visible(profile, p => p.RequireBusinessTripAddress, ApplicationProfileConfigurationResolver.ShowBusinessTripAddress, application)
+                    || application.BusinessTripAddressType != ResidenceType.Other)
+                    return Hidden(out error);
+                return SetLookup<OtherSite>(objectSpace, value, item =>
+                {
+                    application.BusinessTripAddressType = ResidenceType.Other;
+                    BusinessTripDestinationHelper.ClearSitesExcept(application, ResidenceType.Other);
+                    application.BusinessTripOtherSite = item;
+#pragma warning disable CS0618
+                    application.BusinessTripAddress = null;
+#pragma warning restore CS0618
+                }, out error);
+            case BusinessTripPrivateHouseAddress:
+                if (!Visible(profile, p => p.RequireBusinessTripAddress, ApplicationProfileConfigurationResolver.ShowBusinessTripAddress, application)
+                    || application.BusinessTripAddressType != ResidenceType.PrivateHouse)
+                    return Hidden(out error);
+                return SetText(value, BusinessTripPrivateHouseAddressMaxLength, text =>
+                {
+                    application.BusinessTripAddressType = ResidenceType.PrivateHouse;
+                    BusinessTripDestinationHelper.ClearSitesExcept(application, ResidenceType.PrivateHouse);
+                    application.BusinessTripPrivateHouseAddress = text;
+#pragma warning disable CS0618
+                    application.BusinessTripAddress = null;
+#pragma warning restore CS0618
+                }, out error);
+#pragma warning disable CS0618
             case BusinessTripAddress:
                 if (!Visible(profile, p => p.RequireBusinessTripAddress, ApplicationProfileConfigurationResolver.ShowBusinessTripAddress, application))
                     return Hidden(out error);
-                return SetLookup<BusinessTripAddress>(objectSpace, value, item => application.BusinessTripAddress = item, out error);
+                error = "Pick address type and a lodging/hotel/hospital/other site instead of the legacy catalog.";
+                return false;
+#pragma warning restore CS0618
             case Purpose:
                 if (!Visible(profile, p => p.RequirePurpose, ApplicationProfileConfigurationResolver.ShowPurpose, application))
                     return Hidden(out error);
@@ -691,6 +863,23 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         return ApplicationWorkspaceCaseSummaryFill.Resolve(empty, matches);
     }
 
+    /// <summary>
+    /// VISA2014 (and other IsManualEntry) rows have no origin geography. Empty From region/city
+    /// must not count as Case summary readiness gaps or paint red tiles; officer-created
+    /// (auto-numbered) instances still treat empty From* as required.
+    /// </summary>
+    private static ApplicationWorkspaceCaseSummaryFillState FromGeoLookupFill(
+        ApplicationProfileInstance application,
+        Guid? selectedId,
+        Guid? defaultId)
+    {
+        var empty = selectedId == null || selectedId == Guid.Empty;
+        if (empty && application.IsManualEntry)
+            return ApplicationWorkspaceCaseSummaryFillState.Default;
+
+        return LookupFill(selectedId, defaultId);
+    }
+
     private static ApplicationWorkspaceCaseSummaryFillState DateFill(DateTime? date, DateTime? defaultDate)
     {
         var empty = date == null || date.Value == default;
@@ -775,6 +964,75 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         return LookupLabel(address.City);
     }
 
+    private static Guid ResidenceTypeOptionId(ResidenceType type) =>
+        // Must not use 0-only Guid for Lodging (enum 0) — LookupFill treats Guid.Empty as empty.
+        Guid.Parse($"00000000-0000-0000-b7a1-{(int)type:D12}");
+
+    private static bool TryParseResidenceTypeOptionId(string? value, out ResidenceType type)
+    {
+        type = default;
+        if (!Guid.TryParse(value, out var id))
+            return false;
+        foreach (ResidenceType candidate in Enum.GetValues(typeof(ResidenceType)))
+        {
+            if (ResidenceTypeOptionId(candidate) == id)
+            {
+                type = candidate;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool SetBusinessTripAddressType(
+        ApplicationProfileInstance application,
+        string? value,
+        out string? error)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            application.BusinessTripAddressType = null;
+            BusinessTripDestinationHelper.ClearSitesExcept(application, keep: null);
+#pragma warning disable CS0618
+            application.BusinessTripAddress = null;
+#pragma warning restore CS0618
+            error = null;
+            return true;
+        }
+
+        if (!TryParseResidenceTypeOptionId(value, out var type))
+        {
+            error = "Choose a valid business trip address type.";
+            return false;
+        }
+
+        application.BusinessTripAddressType = type;
+        BusinessTripDestinationHelper.ClearSitesExcept(application, type);
+#pragma warning disable CS0618
+        application.BusinessTripAddress = null;
+#pragma warning restore CS0618
+        error = null;
+        return true;
+    }
+
+    private static IReadOnlyList<ApplicationWorkspaceLookupOption> FilterSitesByCity(
+        IReadOnlyList<SiteCatalogOption> sites,
+        Guid? cityId)
+    {
+        IEnumerable<SiteCatalogOption> query = sites;
+        if (cityId is Guid id && id != Guid.Empty)
+            query = sites.Where(s => s.CityId == null || s.CityId == id);
+
+        return query
+            .Select(s => new ApplicationWorkspaceLookupOption { Id = s.Id, DisplayName = s.DisplayName })
+            .Where(s => !string.IsNullOrWhiteSpace(s.DisplayName))
+            .OrderBy(s => s.DisplayName, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+    }
+
+    private sealed record SiteCatalogOption(Guid Id, string DisplayName, Guid? CityId);
+
     private sealed class Catalogs
     {
         public static Catalogs Empty { get; } = new();
@@ -787,6 +1045,11 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         public IReadOnlyList<ApplicationWorkspaceLookupOption> Urgencies { get; init; } = [];
         public IReadOnlyList<ApplicationWorkspaceLookupOption> Cities { get; init; } = [];
         public IReadOnlyList<ApplicationWorkspaceLookupOption> Regions { get; init; } = [];
+        public IReadOnlyList<ApplicationWorkspaceLookupOption> ResidenceTypes { get; init; } = [];
+        public IReadOnlyList<SiteCatalogOption> Lodgings { get; init; } = [];
+        public IReadOnlyList<SiteCatalogOption> Hotels { get; init; } = [];
+        public IReadOnlyList<SiteCatalogOption> Hospitals { get; init; } = [];
+        public IReadOnlyList<SiteCatalogOption> OtherSites { get; init; } = [];
         public IReadOnlyList<ApplicationWorkspaceLookupOption> BusinessTripAddresses { get; init; } = [];
         public IReadOnlyList<ApplicationWorkspaceLookupOption> CheckPoints { get; init; } = [];
         public IReadOnlyList<string> BorderZoneNames { get; init; } = [];
@@ -802,7 +1065,14 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             Urgencies = LoadItems<Urgency>(objectSpace),
             Cities = LoadItems<City>(objectSpace),
             Regions = LoadItems<Region>(objectSpace),
+            ResidenceTypes = LoadResidenceTypes(),
+            Lodgings = LoadLodgings(objectSpace),
+            Hotels = LoadHotels(objectSpace),
+            Hospitals = LoadHospitals(objectSpace),
+            OtherSites = LoadOtherSites(objectSpace),
+#pragma warning disable CS0618
             BusinessTripAddresses = LoadBusinessTripAddresses(objectSpace),
+#pragma warning restore CS0618
             CheckPoints = LoadItems<CheckPoint>(objectSpace),
             BorderZoneNames = CommaSeparatedCatalogHelper.LoadCatalogNames(
                 objectSpace,
@@ -813,6 +1083,24 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                 typeof(WorkPermittedLocationName),
                 string.Empty),
         };
+
+        private static IReadOnlyList<ApplicationWorkspaceLookupOption> LoadResidenceTypes() =>
+            Enum.GetValues(typeof(ResidenceType))
+                .Cast<ResidenceType>()
+                .Select(t => new ApplicationWorkspaceLookupOption
+                {
+                    Id = ResidenceTypeOptionId(t),
+                    DisplayName = t switch
+                    {
+                        ResidenceType.Lodging => "Lodging",
+                        ResidenceType.Hotel => "Hotel",
+                        ResidenceType.Hospital => "Hospital",
+                        ResidenceType.Other => "Other site",
+                        ResidenceType.PrivateHouse => "Private house",
+                        _ => t.ToString(),
+                    },
+                })
+                .ToList();
 
         private static IReadOnlyList<ApplicationWorkspaceLookupOption> LoadItems<T>(IObjectSpace objectSpace)
             where T : LookupBase
@@ -829,6 +1117,47 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                 .ToList();
         }
 
+        private static IReadOnlyList<SiteCatalogOption> LoadLodgings(IObjectSpace objectSpace) =>
+            objectSpace.GetObjects(typeof(Lodging))
+                .Cast<Lodging>()
+                .Select(item => new SiteCatalogOption(
+                    item.ID,
+                    item.FullAddress?.Trim() ?? string.Empty,
+                    item.City?.ID))
+                .Where(item => !string.IsNullOrWhiteSpace(item.DisplayName))
+                .ToList();
+
+        private static IReadOnlyList<SiteCatalogOption> LoadHotels(IObjectSpace objectSpace) =>
+            objectSpace.GetObjects(typeof(Hotel))
+                .Cast<Hotel>()
+                .Select(item => new SiteCatalogOption(
+                    item.ID,
+                    item.Name?.Trim() ?? string.Empty,
+                    item.City?.ID))
+                .Where(item => !string.IsNullOrWhiteSpace(item.DisplayName))
+                .ToList();
+
+        private static IReadOnlyList<SiteCatalogOption> LoadHospitals(IObjectSpace objectSpace) =>
+            objectSpace.GetObjects(typeof(Hospital))
+                .Cast<Hospital>()
+                .Select(item => new SiteCatalogOption(
+                    item.ID,
+                    item.Name?.Trim() ?? string.Empty,
+                    item.City?.ID))
+                .Where(item => !string.IsNullOrWhiteSpace(item.DisplayName))
+                .ToList();
+
+        private static IReadOnlyList<SiteCatalogOption> LoadOtherSites(IObjectSpace objectSpace) =>
+            objectSpace.GetObjects(typeof(OtherSite))
+                .Cast<OtherSite>()
+                .Select(item => new SiteCatalogOption(
+                    item.ID,
+                    item.FullAddress?.Trim() ?? string.Empty,
+                    item.City?.ID))
+                .Where(item => !string.IsNullOrWhiteSpace(item.DisplayName))
+                .ToList();
+
+#pragma warning disable CS0618
         private static IReadOnlyList<ApplicationWorkspaceLookupOption> LoadBusinessTripAddresses(IObjectSpace objectSpace)
         {
             return objectSpace.GetObjects(typeof(BusinessTripAddress))
@@ -842,5 +1171,6 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                 .OrderBy(item => item.DisplayName, StringComparer.CurrentCultureIgnoreCase)
                 .ToList();
         }
+#pragma warning restore CS0618
     }
 }
