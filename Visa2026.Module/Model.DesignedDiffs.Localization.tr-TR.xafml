@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Application Title="Vize Yönetimi">
   <ActionDesign>
     <Actions>
@@ -2411,7 +2411,7 @@
         <ColumnInfo Id="LatestProgressDate" Caption="İlerleme tarihi" />
         <ColumnInfo Id="LatestProgressState" Caption="Durum" />
         <ColumnInfo Id="MigrationSlaStatement" Caption="Migrasyon süresi" />
-        <ColumnInfo Id="Month" Caption="Ay" />
+        <ColumnInfo Id="MonthName" Caption="Ay" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Onay süresi" />
         <ColumnInfo Id="TotalPersonCount" Caption="Kişi sayısı" />
         <ColumnInfo Id="WorkingDaysInCurrentStep" Caption="İş günleri" />
@@ -2428,7 +2428,8 @@
         <ColumnInfo Id="LatestProgressDate" Caption="İlerleme tarihi" />
         <ColumnInfo Id="LatestProgressState" Caption="Durum" />
         <ColumnInfo Id="MigrationSlaStatement" Caption="Migrasyon süresi" />
-        <ColumnInfo Id="Month" Caption="Ay" />
+        <ColumnInfo Id="MigrationService" Caption="Migrasyon hizmeti" />
+        <ColumnInfo Id="MonthName" Caption="Ay" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Onay süresi" />
         <ColumnInfo Id="TotalPersonCount" Caption="Kişi sayısı" />
         <ColumnInfo Id="WorkingDaysInCurrentStep" Caption="İş günleri" />
@@ -2446,7 +2447,7 @@
         <ColumnInfo Id="LatestProgressDate" Caption="İlerleme tarihi" />
         <ColumnInfo Id="LatestProgressState" Caption="Durum" />
         <ColumnInfo Id="MigrationSlaStatement" Caption="Migrasyon süresi" />
-        <ColumnInfo Id="Month" Caption="Ay" />
+        <ColumnInfo Id="MonthName" Caption="Ay" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Onay süresi" />
         <ColumnInfo Id="TotalPersonCount" Caption="Kişi sayısı" />
         <ColumnInfo Id="Urgency" Caption="Aciliyet" />

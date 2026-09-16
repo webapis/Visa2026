@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Application Title="Управление визами">
   <ActionDesign>
     <Actions>
@@ -2411,7 +2411,7 @@
         <ColumnInfo Id="LatestProgressDate" Caption="Дата прогресса" />
         <ColumnInfo Id="LatestProgressState" Caption="Состояние" />
         <ColumnInfo Id="MigrationSlaStatement" Caption="Срок миграции" />
-        <ColumnInfo Id="Month" Caption="Месяц" />
+        <ColumnInfo Id="MonthName" Caption="Месяц" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Срок согласования" />
         <ColumnInfo Id="TotalPersonCount" Caption="Количество лиц" />
         <ColumnInfo Id="WorkingDaysInCurrentStep" Caption="Рабочие дни" />
@@ -2428,7 +2428,8 @@
         <ColumnInfo Id="LatestProgressDate" Caption="Дата прогресса" />
         <ColumnInfo Id="LatestProgressState" Caption="Состояние" />
         <ColumnInfo Id="MigrationSlaStatement" Caption="Срок миграции" />
-        <ColumnInfo Id="Month" Caption="Месяц" />
+        <ColumnInfo Id="MigrationService" Caption="Миграционная служба" />
+        <ColumnInfo Id="MonthName" Caption="Месяц" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Срок согласования" />
         <ColumnInfo Id="TotalPersonCount" Caption="Количество лиц" />
         <ColumnInfo Id="WorkingDaysInCurrentStep" Caption="Рабочие дни" />
@@ -2446,7 +2447,7 @@
         <ColumnInfo Id="LatestProgressDate" Caption="Дата прогресса" />
         <ColumnInfo Id="LatestProgressState" Caption="Состояние" />
         <ColumnInfo Id="MigrationSlaStatement" Caption="Срок миграции" />
-        <ColumnInfo Id="Month" Caption="Месяц" />
+        <ColumnInfo Id="MonthName" Caption="Месяц" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Срок согласования" />
         <ColumnInfo Id="TotalPersonCount" Caption="Количество лиц" />
         <ColumnInfo Id="Urgency" Caption="Срочность" />

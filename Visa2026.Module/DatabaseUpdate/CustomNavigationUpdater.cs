@@ -216,6 +216,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 // Direct migration has no ministry approval SLA; hide both SLA deadline columns.
                 SetColumnVisibility(directMigrationListView, nameof(BusinessObjects.ApplicationProfileInstance.ProgressSlaStatement), false);
                 SetColumnVisibility(directMigrationListView, nameof(BusinessObjects.ApplicationProfileInstance.MigrationSlaStatement), false);
+                SetColumnVisibility(directMigrationListView, nameof(BusinessObjects.ApplicationProfileInstance.MigrationService), true);
             }
             EnsureApplicationListNavItem(
                 applicationGroup,
@@ -474,6 +475,12 @@ namespace Visa2026.Module.DatabaseUpdate
                 ApplicationProfileInstanceProgressRouteNavigation.ListViewDirectMigration,
                 ApplicationProfileInstanceProgressRouteNavigation.CriteriaDirectMigration,
                 ApplicationProfileInstanceProgressRouteNavigation.CaptionDirectMigration);
+            if (modelViews[ApplicationProfileInstanceProgressRouteNavigation.ListViewDirectMigration] is IModelListView directMigrationListView)
+            {
+                SetColumnVisibility(directMigrationListView, nameof(BusinessObjects.ApplicationProfileInstance.ProgressSlaStatement), false);
+                SetColumnVisibility(directMigrationListView, nameof(BusinessObjects.ApplicationProfileInstance.MigrationSlaStatement), false);
+                SetColumnVisibility(directMigrationListView, nameof(BusinessObjects.ApplicationProfileInstance.MigrationService), true);
+            }
         }
 
         private static void CloneApplicationListViewIfMissing(

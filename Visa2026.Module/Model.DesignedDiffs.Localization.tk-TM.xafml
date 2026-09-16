@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Application Title="Wiza dolandyryşy">
   <ActionDesign>
     <Actions>
@@ -2411,7 +2411,7 @@
         <ColumnInfo Id="LatestProgressDate" Caption="Ýagdaý senesi" />
         <ColumnInfo Id="LatestProgressState" Caption="Ýagdaý" />
         <ColumnInfo Id="MigrationSlaStatement" Caption="Migrasiýa möhleti" />
-        <ColumnInfo Id="Month" Caption="Aý" />
+        <ColumnInfo Id="MonthName" Caption="Aý" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Tassyklama möhleti" />
         <ColumnInfo Id="TotalPersonCount" Caption="Adam sany" />
         <ColumnInfo Id="WorkingDaysInCurrentStep" Caption="Iş günleri" />
@@ -2428,7 +2428,8 @@
         <ColumnInfo Id="LatestProgressDate" Caption="Ýagdaý senesi" />
         <ColumnInfo Id="LatestProgressState" Caption="Ýagdaý" />
         <ColumnInfo Id="MigrationSlaStatement" Caption="Migrasiýa möhleti" />
-        <ColumnInfo Id="Month" Caption="Aý" />
+        <ColumnInfo Id="MigrationService" Caption="Migrasiýa gullugy" />
+        <ColumnInfo Id="MonthName" Caption="Aý" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Tassyklama möhleti" />
         <ColumnInfo Id="TotalPersonCount" Caption="Adam sany" />
         <ColumnInfo Id="WorkingDaysInCurrentStep" Caption="Iş günleri" />
@@ -2446,7 +2447,7 @@
         <ColumnInfo Id="LatestProgressDate" Caption="Ýagdaý senesi" />
         <ColumnInfo Id="LatestProgressState" Caption="Ýagdaý" />
         <ColumnInfo Id="MigrationSlaStatement" Caption="Migrasiýa möhleti" />
-        <ColumnInfo Id="Month" Caption="Aý" />
+        <ColumnInfo Id="MonthName" Caption="Aý" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Tassyklama möhleti" />
         <ColumnInfo Id="TotalPersonCount" Caption="Adam sany" />
         <ColumnInfo Id="Urgency" Caption="Gyssaglylyk" />
