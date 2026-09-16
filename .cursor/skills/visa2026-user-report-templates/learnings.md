@@ -23,6 +23,37 @@ Keep **`SKILL.md`** stable; **promote** into `SKILL.md` only when the same lesso
 
 ## Entries
 
+### 2026-09-16 — BTAD missing Region/City (family: ItemRows)
+
+- **Symptom**: `BusinessTripAddress_FullAddress` printed lodging street only; case To region / To city not in Sanaw.
+- **Root cause**: BTAD used lodging `FullAddress` / lodging.City; lodging rows often have street only. ADRS uses Region+City+FullAddress via `AddressOfResidenceReportText.CityAndStreet`.
+- **Fix**: BTAD = same `CityAndStreet(ToRegion, ToCity, lodging/hotel/… street)` as ADRS.
+- **Prevent**: Do not treat site catalog FullAddress as the full ADRS-shaped merge; always join case ToRegion/ToCity.
+- **Officer**: Stop F5, rebuild, Preview Resminamalar. Expect `Balkan welaýatynyň, Türkmenbaşı etraby, <lodging street>`.
+### 2026-09-16 — BTFRG empty when FromRegion nav missing (family: AppScalar)
+
+- **Symptom**: Catalog Preview left From Region (#8 / **BTFRG**) blank while From City / To Region / To City filled.
+- **Root cause**: `FromRegionName_Genitive` used only `FromRegion` and `FromCity.Region`. Those navigations are often unloaded; City.RegionName was ignored. From city save did not reload Region.
+- **Fix**: Fall back to `FromCity.RegionName` (and ObjectSpace reload). Workspace From city assigns FromRegion after ReloadObject.
+- **Prevent**: Origin region tokens must not depend on a loaded FromRegion navigation.
+- **Officer**: Stop F5, rebuild. Fill From region or From city, then Preview.
+
+### 2026-09-16 — Purpose Add-list name (family: AppScalar)
+
+- **Symptom**: Maksady yellow on the business-trip letter. Officer opened Add in the Application group and could not find the instance **Purpose** property.
+- **Root cause**: **BTPRP** was labelled “Business trip purpose” and grouped under Business trip, not the XafDisplayName **Purpose**.
+- **Fix**: Catalog label **Purpose**, relatedBo Application. Search **Purpose** / **Maksady** / **BTPRP**. Merge still fills `Purpose` / alias **BTPRP**. Do not use RGEL (Purpose of arrival) or BusinessTripPurpose lookup.
+- **Prevent**: Add-list English names must match the case field display name.
+- **Officer**: Stop F5, rebuild, Analyze. Filter `Purpose` or `Maksady`. Pick **Purpose — BTPRP** from **Application**.
+
+### 2026-09-16 — From/To Region/City Add-list names (family: AppScalar)
+
+- **Symptom**: Officer searched “From Region” / “From City” / “To Region” / “To City” and did not see BTFRG/BTFCT/BTTRG/BTTCT.
+- **Root cause**: Catalog labels used “district” and genitive/ablative wording; group was Business trip.
+- **Fix**: Labels match the instance property names. RelatedBo Application. Search expand includes FromCity / ToCity.
+- **Prevent**: Keep Add-list English names equal to XafDisplayName on the case fields.
+- **Officer**: Stop F5, rebuild. Filter those four names or BTFRG / BTFCT / BTTRG / BTTCT.
+
 ### 2026-09-15 — Business trip Gitmek/Gelmek letter + sanaw (family: AppScalar + ItemRoster)
 
 - **Symptom**: Create from yellow marks had no codes for trip dates, `2 (iki) gün`, from/to welaýat/etrap, Maksady, or sanaw *Iş saparynda boljak salgysy*.

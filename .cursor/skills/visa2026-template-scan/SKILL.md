@@ -60,6 +60,7 @@ Officers submit **wizard step screenshots** + optional **catalog Preview** + the
 | Symptom | First step | Owner |
 |---------|------------|--------|
 | Business-trip letter dates map to ADAT / duration maps to TPCNT | **BTSD** / **BTED** (`-den` / `-ne` stay in Word). **BTDCNT** / **BTDCTX** for `N (words) gün`. From/to: **BTFRG** **BTFCT** **BTTRG** **BTTCT**. Purpose **BTPRP**. Sanaw destination **BTAD**. Restart, Analyze | **This skill** + user-report-templates |
+| Sanaw destination address empty as **11.1** / cannot find trip address like Address_FullAddress | One yellow = **BTAD** (`BusinessTripAddress_FullAddress`, region+city+street). Search `BTAD` / `business trip address` / `Address_FullAddress`. Do not split on commas. Stop F5, rebuild, **Analyze** | **This skill** + user-report-templates |
 | Review Add cannot find From Region / From City / To Region / To City | Filter those names or **BTFRG** **BTFCT** **BTTRG** **BTTCT**. They sit in the **Application** group (not “district”). Restart, rebuild, Analyze | **This skill** + user-report-templates |
 | Review Add cannot find Purpose / Maksady | Filter `Purpose`, `Maksady`, or **BTPRP**. Instance free-text Purpose, not RGEL / BusinessTripPurpose lookup. Restart, rebuild, Analyze | **This skill** + user-report-templates |
 | Yellow `1` and `2` not in Detected fields (`bir`/`iki` only) | Word often yellows the words, not the digits. Analyze now adds leading `1`/`2`: **TPCNT** then **BTDCNT**. Stop F5, rebuild, **Analyze** (do not Remap unmarked first) | **This skill** |
@@ -98,6 +99,7 @@ Officers submit **wizard step screenshots** + optional **catalog Preview** + the
 | Review shows Chrome/Edge PDF toolbar or thumbnail sidebar | pdf.js canvases, not an iframe. Hard-refresh CSS/JS | **This skill** |
 | Hired-person / any left-label yellow guessed from value shape only | `ScanGuessingPatternRegistry` + `ScanSurroundPlaceholderPattern`: caption, left field label, inline prose, letter regex, Excel header. Restart, Analyze | **This skill** |
 | Yellow text contains a comma but Review is one row | Comma = combination candidate. Left label + parenthetical under the line (`hasaba alnan belgisi, senesi…`) guide each part. Review shows **6.1 / 6.2 / 6.3** with separate preview borders. Generate still writes one span. Restart, Analyze, hard-refresh | **This skill** |
+| Excel `05.04.1989, TUR, Fatih` shows as 4/5/6 not 6.1/6.2/6.3; Fatih unmapped | All-comma birth cells map **PDBT, PCBT, PBPL**. Visual renumber keeps **N.1 / N.2 / N.3**. Stop F5, rebuild, Analyze | **This skill** |
 | Review lost numbered marks / row click does not highlight the letter | Numbered overlays + sticky row select (`ActiveFieldId`). Click a Detected fields row | **This skill** |
 | Review preview stays portrait for a landscape Word/Excel | Outline reads `sectPr`/`PageSetup`. Hard-refresh CSS, Analyze again. Not `#visa-preview-slot` | **This skill** |
 | Review has no left document / no `#` on fields | Office outline + `ScanReviewFieldOrder` (top→bottom). Not `#visa-preview-slot`. Restart Analyze | **This skill** |

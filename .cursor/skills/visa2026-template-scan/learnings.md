@@ -2,6 +2,30 @@
 
 Append-only. Newest first under **## Entries**.
 
+### 2026-09-16 — Business trip address (BTAD) showed as empty 11.1
+
+- Need: Sanaw column *Iş saparyna barýan ýer* / *boljak salgysy*. Officers want one placeholder like **Address_FullAddress** but for the trip: region + city + street. Review showed **11.1** unmapped / Low while suggestions listed **100% BTAD**.
+- Cause: Analyze already mapped **BTAD** (BusinessTripAddress_FullAddress). Review then treated address commas as combination parts and split the cell into **11.1/11.2…**, clearing each part’s token. Add-placeholder search also missed common typos (*adress*) and ADRS-shaped queries.
+- Fix: Keep **ADRS/BTAD/ACADR/PFAD** as one Review row (IsSingleSpanAddressCode). Stronger Excel header keys + ChoiceList search (BTAD, *adress*, Address_FullAddress). Do not AI-escalate a High **Column header** address winner when ADRS/PFAC sit nearby. Merge text uses the same Region+City+street join as ADRS.
+- Officer: Stop F5, rebuild, **Analyze**. Destination column → **BTAD** High as one row (not 11.1). Search BTAD, usiness trip address, or Address_FullAddress. Click the **100% BTAD** chip if still open.
+- Prevent: Do not ExpandCompounds on full-address tokens; commas inside addresses are street punctuation.
+- Cross-skill: visa2026-user-report-templates
+### 2026-09-16 — Excel compound list OK but left badge stayed a single 6
+
+- Need: After all-comma birth mapping, Detected showed `4.1/4.2/4.3` but the sheet preview still showed one `#6` on the cell.
+- Cause: Compound parts shared one Excel cell box (stacked). pdf.js `applyReadingOrder` then rewrote badges to flat integers.
+- Fix: Slice shared-cell boxes by part index. `applyReadingOrder` (`?v=tasmarks9`) keeps `N.1/N.2/N.3` and groups siblings.
+- Officer: Stop F5, rebuild, hard-refresh Review (cache bust). Birth cell should show three borders `4.1 4.2 4.3` matching the list.
+- Prevent: Do not flatten compound badge text when sorting marks on the page.
+- Cross-skill: none
+### 2026-09-16 — Excel comma birth cell lost 6.1/6.2/6.3 and PBPL
+
+- Need: Sanaw Review. Yellow `05.04.1989, TUR, Fatih` should be one compound with **6.1 PDBT / 6.2 PCBT / 6.3 PBPL**. UI showed flat 4/5/6, Fatih unmapped, order scrambled.
+- Cause: `SplitCompoundSegments` only took two comma parts unless InnerSeparator `/` was present. Visual `Renumber` after LTR overlay work flattened `N.1` labels to `4,5,6` and could reorder siblings.
+- Fix: Split all-comma cells to the profile slot count. `Renumber` / visual / reading-box order keep compound siblings as `N.1/N.2/N.3` in segment order. PBPL shape no longer steals full names.
+- Officer: Stop F5, rebuild, Analyze. Birth cell shows **6.1 / 6.2 / 6.3** with Date, Country, Place.
+- Prevent: Do not flatten compound OrderLabels when re-numbering for page reading order.
+- Cross-skill: none
 ### 2026-09-16 — Yellow digits `15` and `20` not identified next to `(on bäş)` / `(ýigrimi)`
 
 - Need: Business-trip Yuztutma Review. Yellow ink on `15` and `20` had no Detected rows / no `#` (only `on bäş` → TPCTX and `ýigrimi` → BTDCTX).

@@ -36,15 +36,37 @@ public static class ScanAmbiguousYellowGate
         if (ranked.Count == 0)
             return draft.Confidence != ScanFieldConfidence.High;
 
-        var top = ranked[0].ScorePercent;
+        var topAlt = ranked[0];
+        var top = topAlt.ScorePercent;
         if (top < options.AmbiguousYellowMinConfidencePercent)
             return true;
+
+        // Excel Sanaw column profiles (ADRS / BTAD / …) often leave nearby address
+        // shape scores within the gap — keep the column-header winner.
+        if (IsStableColumnHeaderAddress(draft, topAlt, options.AmbiguousYellowMinConfidencePercent))
+            return false;
 
         if (ranked.Count > 1
             && top - ranked[1].ScorePercent < options.AmbiguousYellowScoreGapPercent)
             return true;
 
         return false;
+    }
+
+    private static bool IsStableColumnHeaderAddress(
+        ScanDetectedFieldDraft draft,
+        ScanTokenAlternative topAlt,
+        int minConfidencePercent)
+    {
+        if (topAlt.ScorePercent < minConfidencePercent)
+            return false;
+        if (!ScanCompoundYellowParts.IsSingleSpanAddressCode(topAlt.ShortCode))
+            return false;
+        if (!topAlt.Reason.Contains("Column header", StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        var proposed = draft.ProposedToken ?? string.Empty;
+        return proposed.Contains(topAlt.ShortCode, StringComparison.OrdinalIgnoreCase);
     }
 
     public static IReadOnlyList<ScanDetectedFieldDraft> SelectForRefinement(

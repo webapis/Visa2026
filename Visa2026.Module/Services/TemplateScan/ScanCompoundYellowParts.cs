@@ -65,6 +65,10 @@ public static class ScanCompoundYellowParts
         var tokens = SplitTokens(proposedToken);
         var label = labelText ?? string.Empty;
 
+        // Full-address tokens already include commas (region, city, street) — keep one Review row.
+        if (codes.Count == 1 && IsSingleSpanAddressCode(codes[0]))
+            return Array.Empty<ScanCompoundPart>();
+
         if (IsCommaCombination(label))
             return AlignParts(SplitByDelimiter(label, ','), codes, tokens);
 
@@ -130,6 +134,17 @@ public static class ScanCompoundYellowParts
 
         return parent;
     }
+
+    /// <summary>
+    /// One yellow cell is already a full address (ADRS / BTAD / …). Commas are street punctuation,
+    /// not combination parts like passport number + authority + date.
+    /// </summary>
+    public static bool IsSingleSpanAddressCode(string? shortCode) =>
+        !string.IsNullOrWhiteSpace(shortCode)
+        && (shortCode.Equals("ADRS", StringComparison.OrdinalIgnoreCase)
+            || shortCode.Equals("BTAD", StringComparison.OrdinalIgnoreCase)
+            || shortCode.Equals("ACADR", StringComparison.OrdinalIgnoreCase)
+            || shortCode.Equals("PFAD", StringComparison.OrdinalIgnoreCase));
 
     public static IReadOnlyList<(string Text, int Offset, int Length)> SplitSegments(string label)
     {
@@ -268,10 +283,23 @@ public static class ScanCompoundYellowParts
 
         if (code.Equals("PNAT", StringComparison.OrdinalIgnoreCase)
             || code.Equals("PCBC", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("PCBT", StringComparison.OrdinalIgnoreCase)
             || code.Equals("PPCC", StringComparison.OrdinalIgnoreCase)
             || code.Equals("PFAC", StringComparison.OrdinalIgnoreCase)
             || code.Equals("EGCC", StringComparison.OrdinalIgnoreCase))
-            return LooksLikeIso3(segment);
+            return LooksLikeIso3(segment)
+                || (code.Equals("PCBT", StringComparison.OrdinalIgnoreCase)
+                    && segment.Length >= 3
+                    && !DateLikeShape.IsMatch(segment));
+
+        if (code.Equals("PBPL", StringComparison.OrdinalIgnoreCase))
+            return segment.Length is >= 2 and <= 48
+                && !DateLikeShape.IsMatch(segment)
+                && !LooksLikeIso3(segment)
+                && !LooksLikePassportNumber(segment)
+                && !PhoneShape.IsMatch(segment)
+                && !ScanShapeTokenMatcher.LooksLikePersonFullName(segment)
+                && !ScanShapeTokenMatcher.LooksLikeTitledPersonName(segment);
 
         if (code.Equals("PPIN", StringComparison.OrdinalIgnoreCase))
             return LooksLikePersonalNumber(segment);

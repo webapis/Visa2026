@@ -20,9 +20,18 @@ public static class AddressOfResidenceReportText
         if (address == null)
             return string.Empty;
 
-        var region = address.Region?.NameTm?.Trim();
-        var city = address.City?.NameTm?.Trim();
-        var street = address.FullAddress?.Trim();
+        return CityAndStreet(
+            address.Region?.NameTm,
+            address.City?.NameTm,
+            address.FullAddress);
+    }
+
+    /// <summary>Same Region + City + street join used by ADRS / BTAD merge text.</summary>
+    public static string CityAndStreet(string? regionTm, string? cityTm, string? streetAddress)
+    {
+        var region = regionTm?.Trim();
+        var city = cityTm?.Trim();
+        var street = streetAddress?.Trim();
 
         var parts = new List<string>();
         if (ShouldIncludeRegion(region, city, street))

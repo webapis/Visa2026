@@ -85,6 +85,22 @@ public class ScanAmbiguousYellowGateTests
     }
 
     [Fact]
+    public void NeedsAiRefinement_false_when_column_header_BTAD_despite_close_ADRS()
+    {
+        var draft = Draft(
+            "{{.BTAD}}",
+            ScanFieldConfidence.High,
+            alternatives:
+            [
+                new ScanTokenAlternative("{{.BTAD}}", "BTAD", 100, "Column header"),
+                new ScanTokenAlternative("{{.ADRS}}", "ADRS", 91, "Left field label"),
+                new ScanTokenAlternative("{{.PFAC}}", "PFAC", 91, "Three-letter country code + column header + surround"),
+            ]);
+
+        Assert.False(ScanAmbiguousYellowGate.NeedsAiRefinement(draft, Options()));
+    }
+
+    [Fact]
     public void NeedsAiRefinement_false_when_locked()
     {
         Assert.False(ScanAmbiguousYellowGate.NeedsAiRefinement(

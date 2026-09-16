@@ -139,6 +139,10 @@ public class ScanPlaceholderChoiceListTests
     [InlineData("iş sapary")]
     [InlineData("Maksady")]
     [InlineData("Iş saparynda boljak salgysy")]
+    [InlineData("business trip adress")]
+    [InlineData("BTAD")]
+    [InlineData("BusinessTripAddress_FullAddress")]
+    [InlineData("Address_FullAddress")]
     public void Business_trip_search_finds_catalog_codes(string search)
     {
         var allowed = FullSet().Allowed;
@@ -151,7 +155,10 @@ public class ScanPlaceholderChoiceListTests
             Assert.Contains("BTSD", codes);
         else if (search.Contains("Maksady", StringComparison.OrdinalIgnoreCase))
             Assert.Contains("BTPRP", codes);
-        else if (search.Contains("boljak", StringComparison.OrdinalIgnoreCase))
+        else if (search.Contains("boljak", StringComparison.OrdinalIgnoreCase)
+            || search.Contains("adress", StringComparison.OrdinalIgnoreCase)
+            || search.Contains("BTAD", StringComparison.OrdinalIgnoreCase)
+            || search.Contains("FullAddress", StringComparison.OrdinalIgnoreCase))
             Assert.Contains("BTAD", codes);
         else
         {

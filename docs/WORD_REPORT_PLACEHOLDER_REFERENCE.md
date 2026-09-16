@@ -143,13 +143,13 @@ Migration **code** on items: `Application_MigrationServiceCode` → e.g. `TDMGAS
 | `Purpose` | `string` | *(free text)* | Short code **BTPRP**. Case summary Purpose, not the lookup |
 | `BusinessTripPurpose_NameTm` | `string` | *(lookup NameTm)* | Do not use for the Maksady paragraph |
 | `FromCityName` | `string` | `Aşgabat şäheri` | Origin city `NameTm` (`FromCity`) |
-| `FromRegionName` | `string` | `Mary welaýaty` | Origin region from `FromCity.Region` |
-| `FromRegionName_Genitive` | `string` | `Mary welaýatynyň` | Short code **BTFRG** |
-| `FromCityName_Ablative` | `string` | `Mary etrabyndan` | Short code **BTFCT** |
-| `ToCityName` | `string` | `Akbugdaý etraby` | Destination `City`, else `ToCity` |
-| `ToRegionName` | `string` | `Ahal welaýaty` | Destination `Region`, else `ToCity.Region` |
-| `ToRegionName_Genitive` | `string` | `Ahal welaýatynyň` | Short code **BTTRG** |
-| `ToCityName_Dative` | `string` | `Akbugdaý etrabyna` | Short code **BTTCT** |
+| `FromRegionName` | `string` | `Mary welaýaty` | `FromRegion.NameTm`, else `FromCity.Region` |
+| `FromRegionName_Genitive` | `string` | `Mary welaýatynyň` | Add-list **From Region**. Short code **BTFRG** |
+| `FromCityName_Ablative` | `string` | `Mary etrabyndan` | Add-list **From City**. Short code **BTFCT** |
+| `ToCityName` | `string` | `Akbugdaý etraby` | `ToCity.NameTm`, else obsolete `City` |
+| `ToRegionName` | `string` | `Ahal welaýaty` | `ToRegion.NameTm`, else obsolete `Region` |
+| `ToRegionName_Genitive` | `string` | `Ahal welaýatynyň` | Add-list **To Region**. Short code **BTTRG** |
+| `ToCityName_Dative` | `string` | `Akbugdaý etrabyna` | Add-list **To City**. Short code **BTTCT** |
 | `MovementPermitLocation_NameTm` | `string` | *(lookup)* | |
 | `BorderZoneLocation_NameTm` | `string` | `Daşoguz welaýaty` | App-level catalog text |
 

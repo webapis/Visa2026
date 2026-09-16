@@ -1,6 +1,7 @@
 #nullable enable
 
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services;
 using Visa2026.Module.Services.ApplicationPersonRoster;
 using Visa2026.Module.Services.UserReports;
 using Xunit;
@@ -46,6 +47,21 @@ public class ApplicationProfileInstanceBusinessTripPlaceholderTests
         Assert.Equal("Ahal welaýatynyň", data["BTTRG"]);
         Assert.Equal("Akbugdaý etrabyna", data["BTTCT"]);
         Assert.Equal(application.Purpose, data["BTPRP"]);
+    }
+
+    [Fact]
+    public void From_region_genitive_uses_city_region_name_when_from_region_nav_missing()
+    {
+        var fromCity = new City { NameTm = "Mary etraby", RegionName = "Mary welaýaty" };
+        var application = new ApplicationProfileInstance
+        {
+            FromCity = fromCity,
+        };
+
+        Assert.Equal("Mary welaýatynyň", application.FromRegionName_Genitive);
+
+        var data = UserReportMergeDataHelper.BuildApplicationHeaderDictionary(application);
+        Assert.Equal("Mary welaýatynyň", data["BTFRG"]);
     }
 
     [Fact]
@@ -126,5 +142,30 @@ public class ApplicationProfileInstanceBusinessTripPlaceholderTests
 
         Assert.Equal("Ahal wel, Akbugdaý etr, Çalyk Enerji UYJ.", row["BTAD"]);
         Assert.True(row.ContainsKey("VNAT"));
+    }
+
+    [Fact]
+    public void BTAD_joins_to_region_city_with_lodging_street()
+    {
+        var toRegion = new Region { NameTm = "Balkan welaýaty" };
+        var toCity = new City { NameTm = "Türkmenbaşı etraby", Region = toRegion };
+        var lodging = new Lodging
+        {
+            FullAddress = "T-başy-Garabogaz awtomobil ýol-v 6-7-nji km.günbatar tarapynda ýerleşýän Çalyk Enerji UYJ",
+        };
+        var application = new ApplicationProfileInstance
+        {
+            ToRegion = toRegion,
+            ToCity = toCity,
+            BusinessTripAddressType = ResidenceType.Lodging,
+            BusinessTripLodging = lodging,
+        };
+
+        var expected = "Balkan welaýatynyň, Türkmenbaşı etraby, T-başy-Garabogaz awtomobil ýol-v 6-7-nji km.günbatar tarapynda ýerleşýän Çalyk Enerji UYJ";
+        Assert.Equal(expected, BusinessTripDestinationHelper.FormatFullAddress(application));
+
+        var line = new ApplicationRosterMergeLine { ApplicationProfileInstance = application };
+        var row = UserReportMergeDataHelper.BuildExcelItemListRowDictionary(line, 1);
+        Assert.Equal(expected, row["BTAD"]);
     }
 }

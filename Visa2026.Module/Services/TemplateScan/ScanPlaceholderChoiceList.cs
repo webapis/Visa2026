@@ -98,12 +98,42 @@ public static class ScanPlaceholderChoiceList
         {
             yield return "business trip start date";
             yield return "business trip duration";
+            yield return "business trip address";
             yield return "from region";
             yield return "from city";
             yield return "to region";
             yield return "to city";
             yield return "Purpose";
             yield return "iş saparynda boljak salgysy";
+            yield return "BTAD";
+        }
+        if (term.Contains("boljak salgy", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("boljak salgysy", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("baryan yer", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("barýan ýer", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("business trip address", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("business trip adress", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("trip address", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("trip adress", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("BusinessTripAddress", StringComparison.OrdinalIgnoreCase)
+            || term.Equals("BTAD", StringComparison.OrdinalIgnoreCase))
+        {
+            yield return "business trip address";
+            yield return "iş saparynda boljak salgysy";
+            yield return "BTAD";
+            yield return "BusinessTripAddress_FullAddress";
+        }
+        // Common typo + ADRS-shaped search should still surface BTAD (same region+city+street shape).
+        if (term.Contains("adress", StringComparison.OrdinalIgnoreCase)
+            && !term.Contains("address", StringComparison.OrdinalIgnoreCase))
+            yield return term.Replace("adress", "address", StringComparison.OrdinalIgnoreCase);
+        if (term.Contains("Address_FullAddress", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("FullAddress", StringComparison.OrdinalIgnoreCase))
+        {
+            yield return "BTAD";
+            yield return "BusinessTripAddress_FullAddress";
+            yield return "ADRS";
+            yield return "Address_FullAddress";
         }
         if (term.Contains("from region", StringComparison.OrdinalIgnoreCase)
             || term.Contains("fromregion", StringComparison.OrdinalIgnoreCase))
@@ -120,9 +150,6 @@ public static class ScanPlaceholderChoiceList
         if (term.Contains("maksady", StringComparison.OrdinalIgnoreCase)
             || term.Contains("purpose", StringComparison.OrdinalIgnoreCase))
             yield return "Purpose";
-        if (term.Contains("boljak salgy", StringComparison.OrdinalIgnoreCase)
-            || term.Contains("boljak salgysy", StringComparison.OrdinalIgnoreCase))
-            yield return "iş saparynda boljak salgysy";
     }
 
     private static bool Contains(string? value, string term)

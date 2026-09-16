@@ -25,6 +25,11 @@ public static class ScanCompoundYellowBinder
         if (TemplateTokenSyntax.GetShortCodes(draft.ProposedToken).Count > 1)
             return drafts;
 
+        // Keep ADRS / BTAD as one cell — commas inside an address are not combination parts.
+        if (TemplateTokenSyntax.TryGetShortCode(draft.ProposedToken ?? string.Empty, out var existingCode)
+            && ScanCompoundYellowParts.IsSingleSpanAddressCode(existingCode))
+            return drafts;
+
         var usage = draft.Scope == ScanFieldScope.Row
             ? UserReportPlaceholderScope.Row
             : UserReportPlaceholderScope.Header;

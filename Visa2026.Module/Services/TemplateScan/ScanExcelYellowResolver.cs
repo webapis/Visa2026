@@ -307,11 +307,14 @@ public static class ScanExcelYellowResolver
 
     private static List<string> SplitCompoundSegments(string text, ScanExcelColumnProfiles.Profile profile)
     {
-        if (profile.ShortCodes.Length == 2 && text.Contains(',', StringComparison.Ordinal))
+        var expected = profile.ShortCodes.Length;
+
+        if (expected == 2 && text.Contains(',', StringComparison.Ordinal))
             return text.Split(',', 2).Select(static s => s.Trim()).ToList();
 
-        if (profile.ShortCodes.Length >= 3 && text.Contains(',', StringComparison.Ordinal))
+        if (expected >= 3 && text.Contains(',', StringComparison.Ordinal))
         {
+            // Preferred sanaw shape: "16.05.1980, Türkiye/ Üsküdar" (comma then InnerSeparator).
             var commaParts = text.Split(',', 2).Select(static s => s.Trim()).ToList();
             if (commaParts.Count == 2 && commaParts[1].Contains(profile.InnerSeparator))
             {
@@ -319,7 +322,15 @@ public static class ScanExcelYellowResolver
                 return [commaParts[0], inner[0], inner.Count > 1 ? inner[1] : string.Empty];
             }
 
-            return commaParts;
+            // All-comma compounds: "05.04.1989, TUR, Fatih" → three profile slots.
+            var allCommas = text.Split(',')
+                .Select(static s => s.Trim())
+                .Where(static s => s.Length > 0)
+                .ToList();
+            if (allCommas.Count >= expected)
+                return allCommas.Take(expected).ToList();
+            if (allCommas.Count >= 2)
+                return allCommas;
         }
 
         if (text.Contains(profile.InnerSeparator))
@@ -505,7 +516,7 @@ internal static class ScanExcelColumnProfiles
         new(["mohleti we gezekligi"], ["VNAT", "VTYP", "VSTD", "VEDT"], true),
         new(["gezeklik", "wiza"], ["AVPRD", "AVCAT"], true, LiteralPrefix: "cakylyk "),
         new(["turkmenistandaky salgysy", "turkmenistandaky", "yasayan salgysy", "yasayys salgysy", "ikamet adresi", "residence address"], ["ADRS"], false),
-        new(["is saparynda boljak salgysy", "is saparynda boljak", "business trip address", "business trip destination"], ["BTAD"], false),
+        new(["is saparynda boljak salgysy", "is saparynda boljak", "is saparyna baryan yer", "baryan yer", "business trip address", "business trip destination"], ["BTAD"], false),
         new(["dasary yurtdaky salgysy", "dasary yurt"], ["PFAC", "PFAD"], true),
         new(["barjak serhet yakasy", "serhet yaka", "border zone"], ["ABZLN"], false),
         new(["as-№", "as-no", "as belgisi", "asnumber"], ["CWAB"], false),
