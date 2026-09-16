@@ -52,4 +52,25 @@ public static class PersonSearchTextNormalizer
 
         return sb.ToString().Normalize(NormalizationForm.FormC);
     }
+
+    /// <summary>
+    /// XAF criteria: <c>Contains</c> of a folded <c>Lower(property)</c> vs one bound token.
+    /// Tokens from <see cref="ReportDashboardCatalog.PersonSearchTokens"/> are already folded;
+    /// stored names must be folded too or <c>Yılmaz</c> never matches typed <c>Yilmaz</c>/<c>Yılmaz</c>.
+    /// </summary>
+    public static string FoldedLowerContainsCriteria(string propertyPath)
+    {
+        if (string.IsNullOrEmpty(propertyPath))
+            throw new ArgumentException("Property path is required.", nameof(propertyPath));
+
+        var expr = $"Lower({propertyPath})";
+        for (int i = 0; i < SqlFoldFrom.Length; i++)
+        {
+            expr = $"Replace({expr}, '{EscapeCriteriaChar(SqlFoldFrom[i])}', '{EscapeCriteriaChar(SqlFoldTo[i])}')";
+        }
+
+        return $"Contains({expr}, ?)";
+    }
+
+    private static string EscapeCriteriaChar(char ch) => ch == '\'' ? "''" : ch.ToString();
 }

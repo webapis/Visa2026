@@ -129,6 +129,15 @@ public class ApplicationProfileWizardTemplateCatalogTests
     }
 
     [Fact]
+    public void CatalogRegionNameForCity_ReadsEmbeddedCityJson()
+    {
+        Assert.Equal("Ahal welaýaty", ApplicationProfileWizardLookupData.CatalogRegionNameForCity("Gökdepe etraby"));
+        Assert.Equal("Ahal welaýaty", ApplicationProfileWizardLookupData.CatalogRegionNameForCity("Akbugdaý etraby"));
+        Assert.Equal("Mary welaýaty", ApplicationProfileWizardLookupData.CatalogRegionNameForCity("Mary etraby"));
+        Assert.Equal("Balkan welaýaty", ApplicationProfileWizardLookupData.CatalogRegionNameForCity("Türkmenbaşy etraby"));
+    }
+
+    [Fact]
     public void MatchesSharedSearch_FiltersByNameKindAndData()
     {
         var row = Row("Borcnama", Array.Empty<string>());

@@ -30,4 +30,13 @@ public sealed class PersonSearchTextNormalizerTests
         var tokens = ReportDashboardCatalog.PersonSearchTokens("G\u00fcl  akku");
         Assert.Equal(new[] { "gul", "akku" }, tokens);
     }
+
+    [Fact]
+    public void FoldedLowerContainsCriteria_ReplacesDotlessIAfterLower()
+    {
+        var expr = PersonSearchTextNormalizer.FoldedLowerContainsCriteria("[LastName]");
+        Assert.StartsWith("Contains(Replace(", expr, StringComparison.Ordinal);
+        Assert.Contains("Lower([LastName])", expr, StringComparison.Ordinal);
+        Assert.Contains("\u0131", expr, StringComparison.Ordinal);
+    }
 }

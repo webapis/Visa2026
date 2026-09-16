@@ -7,9 +7,9 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Blazor.Server.Controllers;
 
 /// <summary>
-/// DxGrid SearchBox only matches visible columns (person names and passport numbers
-/// are not). Route Application Profile Instance ListView grid search through XAF
-/// FullTextSearch so linked-people criteria apply.
+/// DxGrid SearchBox only matches visible columns (person names are not).
+/// Route Application Profile Instance ListView grid search through XAF
+/// FullTextSearch so linked-people name criteria apply.
 /// </summary>
 public sealed class ApplicationProfileInstanceListViewSearchBridgeController
     : ObjectViewController<ListView, ApplicationProfileInstance>

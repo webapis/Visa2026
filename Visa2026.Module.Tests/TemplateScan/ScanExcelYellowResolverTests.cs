@@ -79,6 +79,49 @@ public class ScanExcelYellowResolverTests
     }
 
     [Fact]
+    public void Resolve_maps_all_comma_birth_cell_to_three_tokens()
+    {
+        var set = PlaceholderSet();
+        using var ms = new MemoryStream();
+        using (var wb = new XLWorkbook())
+        {
+            var ws = wb.AddWorksheet("Sanaw");
+            ws.Cell("D4").Value = "Doglan senesi we ýeri";
+            ws.Cell("D5").Value = "05.04.1989, TUR, Fatih";
+            ws.Cell("D5").Style.Fill.BackgroundColor = XLColor.Yellow;
+            wb.SaveAs(ms);
+        }
+
+        var bytes = ms.ToArray();
+        var yellows = new ScanOfficeYellowExtractor().Extract(bytes, ScanSourceKind.Excel);
+        var fields = ScanExcelYellowResolver.Resolve(bytes, yellows, set);
+        var cell = Assert.Single(fields);
+        Assert.Equal("05.04.1989, TUR, Fatih", cell.LabelText);
+        var codes = TemplateTokenSyntax.GetShortCodes(cell.ProposedToken);
+        Assert.Equal(["PDBT", "PCBT", "PBPL"], codes);
+
+        var ordered = ScanReviewFieldOrder.Order([
+            new ScanDetectedField
+            {
+                FieldId = cell.FieldId,
+                Box = ScanBoundingBox.FullPage,
+                PageIndex = 0,
+                LabelText = cell.LabelText,
+                ProposedToken = cell.ProposedToken,
+                Confidence = cell.Confidence,
+                Scope = cell.Scope,
+                SourceRegion = cell.SourceRegion,
+                Alternatives = cell.Alternatives,
+            },
+        ]);
+        Assert.Equal(["1.1", "1.2", "1.3"], ordered.Select(o => o.DisplayOrder).ToArray());
+        Assert.Equal(["05.04.1989", "TUR", "Fatih"], ordered.Select(o => o.LabelText).ToArray());
+        Assert.Equal(
+            ["PDBT", "PCBT", "PBPL"],
+            ordered.Select(o => TemplateTokenSyntax.GetShortCodes(o.ProposedToken).Single()).ToArray());
+    }
+
+    [Fact]
     public void Resolve_splits_compound_birth_place_cell()
     {
         var set = PlaceholderSet();
@@ -90,6 +133,8 @@ public class ScanExcelYellowResolverTests
         var dobCell = fields.FirstOrDefault(f => f.LabelText.Contains("16.05.1980", StringComparison.Ordinal));
         Assert.NotNull(dobCell);
         Assert.Contains("PDBT", dobCell!.ProposedToken!, StringComparison.Ordinal);
+        Assert.Contains("PCBT", dobCell.ProposedToken!, StringComparison.Ordinal);
+        Assert.Contains("PBPL", dobCell.ProposedToken!, StringComparison.Ordinal);
         Assert.Contains("{{", dobCell.ProposedToken!, StringComparison.Ordinal);
     }
 

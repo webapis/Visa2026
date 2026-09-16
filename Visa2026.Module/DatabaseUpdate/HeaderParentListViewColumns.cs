@@ -20,6 +20,8 @@ internal static class HeaderParentListViewColumns
         ["Person_InvitationItems_ListView"] = typeof(BusinessObjects.InvitationItem),
         ["Invitation_InvitationItems_ListView"] = typeof(BusinessObjects.InvitationItem),
         ["WorkPermitItem_ListView"] = typeof(BusinessObjects.WorkPermitItem),
+        ["Person_WorkPermitItems_ListView"] = typeof(BusinessObjects.WorkPermitItem),
+        ["WorkPermit_WorkPermitItems_ListView"] = typeof(BusinessObjects.WorkPermitItem),
         ["RejectionItem_ListView"] = typeof(BusinessObjects.RejectionItem),
         ["BorderZoneItem_ListView"] = typeof(BusinessObjects.BorderZoneItem),
     };
@@ -134,6 +136,39 @@ internal static class HeaderParentListViewColumns
                 nameof(BusinessObjects.WorkPermitItem.ASNumber),
             ],
             [180, 48, 120, 120, 90, 100, 100, 72, 240, 90]
+        ),
+        (
+            "Person_WorkPermitItems_ListView",
+            [
+                nameof(BusinessObjects.WorkPermitItem.WorkPermitItemName),
+                nameof(BusinessObjects.WorkPermitItem.DocumentCopiesListLink),
+                nameof(BusinessObjects.WorkPermitItem.Passport),
+                nameof(BusinessObjects.WorkPermitItem.CurrentPositionHistory),
+                nameof(BusinessObjects.WorkPermitItem.StartDate),
+                nameof(BusinessObjects.WorkPermitItem.ExpirationDate),
+                nameof(BusinessObjects.WorkPermitItem.WorkPermitNumber),
+                nameof(BusinessObjects.WorkPermitItem.ASNumber),
+                nameof(BusinessObjects.WorkPermitItem.WorkPermit),
+                nameof(BusinessObjects.WorkPermitItem.WorkPermittedLocations),
+                nameof(BusinessObjects.WorkPermitItem.DaysRemaining),
+                nameof(BusinessObjects.WorkPermitItem.ApplicationProfileInstance),
+            ],
+            [180, 48, 100, 160, 100, 100, 90, 90, 90, 180, 72, 140]
+        ),
+        (
+            "WorkPermit_WorkPermitItems_ListView",
+            [
+                nameof(BusinessObjects.WorkPermitItem.WorkPermitItemName),
+                nameof(BusinessObjects.WorkPermitItem.DocumentCopiesListLink),
+                nameof(BusinessObjects.WorkPermitItem.Person),
+                nameof(BusinessObjects.WorkPermitItem.WorkPermitNumber),
+                nameof(BusinessObjects.WorkPermitItem.StartDate),
+                nameof(BusinessObjects.WorkPermitItem.ExpirationDate),
+                nameof(BusinessObjects.WorkPermitItem.DaysRemaining),
+                nameof(BusinessObjects.WorkPermitItem.WorkPermittedLocations),
+                nameof(BusinessObjects.WorkPermitItem.ASNumber),
+            ],
+            [180, 48, 120, 90, 100, 100, 72, 240, 90]
         ),
         (
             "RejectionItem_ListView",

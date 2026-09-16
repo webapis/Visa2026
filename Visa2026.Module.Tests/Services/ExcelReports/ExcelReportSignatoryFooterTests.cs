@@ -33,6 +33,9 @@ public class ExcelReportSignatoryFooterTests
         Assert.True(data.ContainsKey("CWCTX"));
         Assert.True(data.ContainsKey("CICNT"));
         Assert.True(data.ContainsKey("CICTX"));
+        Assert.True(data.ContainsKey("BTSD"));
+        Assert.True(data.ContainsKey("BTDCNT"));
+        Assert.True(data.ContainsKey("BTPRP"));
         Assert.True(data.ContainsKey("CancelVisaCount"));
         Assert.True(data.ContainsKey("CancelVisaCountText"));
         Assert.True(data.ContainsKey("CancelWPCount"));

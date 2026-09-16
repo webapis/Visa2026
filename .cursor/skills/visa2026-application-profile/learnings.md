@@ -1,4 +1,41 @@
+### 2026-09-16 — Create wizard lodging list ignores To city
+
+- **Need**: After To city = Sarahs, Business trip lodging still listed every UYJ (Aşgabat, Kaka, …).
+- **Cause**: `FilterSitesByCity` kept rows with null `CityId` (`CityId == null || CityId == toCity`). Lodging.City often unloaded, so the clause matched everything.
+- **Fix**: Keep only lodgings whose City Id or catalog City name matches To city. Load City + lodging.json City by FullAddress. Same filter for hotel/hospital/other site. Changing To city clears a mismatched site.
+- **Test**: `FilterSitesByCity_KeepsOnlyLodgingsForSelectedToCity`, `FilterSitesByCity_MatchesCatalogCityNameWhenCityIdMissing`. Officer: stop F5, rebuild; Sarahs lodging should be Döwletabatgazçykaryş UYJ only.
+- **Prevent**: Do not treat null CityId as “belongs to every city”. Site lookups follow ToCity, not legacy City.
+- **Cross-skill**: —
+
+### 2026-09-16 — Create wizard still one city per region after NameTm match
+
+- **Need**: Officer rebuilt; Ahal From city still only Akbugdaý, Mary To city still only Mary etraby.
+- **Cause**: Demo/prod often leave `City.RegionName` null. Only the profile-default city has `Region` loaded. `AsNoTracking` blocked lazy-load of RegionID on the rest, so name fallback never ran.
+- **Fix**: Load cities tracked + `Include(Region)`; fill missing region from embedded `city.json` by NameTm; map that title to the selected region's Id. From and To both use this list.
+- **Test**: `CatalogRegionNameForCity_ReadsEmbeddedCityJson`. Officer: stop F5, rebuild Module (not hot reload). Ahal From city should list Gökdepe, Kaka, Tejen, Akbugdaý, …
+- **Prevent**: Do not query `City` with `AsNoTracking` when Region may be lazy. Do not require `City.RegionName` to be populated.
+- **Cross-skill**: —
+
+### 2026-09-16 — Create wizard From/To city show one etrap per region
+
+- **Need**: After region filter, Ahal/Balkan To city (and From city) listed a single etrap instead of all cities in that region.
+- **Cause**: Case summary reused `CitiesForRegion` but copied the English UI label (`Ahal province`) into `RegionName`. Most catalog cities store `Ahal welaýaty` and only the Region-FK row matched.
+- **Fix**: Load regions with `NameTm` (`LoadRegions`). From city and To city both filter via `CitiesForSelectedRegion` + that catalog. Name fallback still uses Turkmen titles.
+- **Test**: `CitiesForSelectedRegion_FiltersToCitiesInSelectedRegion` (FK + NameTm rows; English display name). Officer: stop F5, rebuild; From city and To city for Ahal should list Gökdepe, Kaka, Tejen, …
+- **Prevent**: Do not set region `RegionName` from localized `DisplayName`. Keep `NameTm` for city.RegionName matching.
+- **Cross-skill**: —
+
+### 2026-09-16 — Create wizard To city lists every city
+
+- **Need**: Instance create Case summary To city should only show cities in the selected To region (Mary showed Ahal/Lebap/…).
+- **Cause**: `ApplicationWorkspaceCaseHeaderFieldsHelper.Build` bound From/To city dropdowns to the full `City` catalog. Profile Results wizard already filtered via `CitiesForRegion`; Case summary did not.
+- **Fix**: Load cities with RegionId; `CitiesForSelectedRegion` filters To city by `ToRegion` and From city by `FromRegion`. Changing region still clears a mismatched city (`TryApply`).
+- **Test**: `CitiesForSelectedRegion_FiltersToCitiesInSelectedRegion`. Officer: stop F5, rebuild, create Iş sapary — pick Mary To region, To city should be Mary etraps only.
+- **Prevent**: Do not pass unfiltered `catalogs.Cities` to From/To city lookups. Reuse `ApplicationProfileWizardLookupData.CitiesForRegion`.
+- **Cross-skill**: —
+
 ### 2026-09-15 — Imported roster: empty Medical soft completeness
+
 
 - **Need**: Legacy often has no MedicalRecord; linked Medical tile stayed red (0) even on locked/complete imported cases.
 - **Cause**: Medical used fixed Last-N quota (always expect ≥1), unlike Visa/TravelHistory active-pool soft rules.

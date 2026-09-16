@@ -5,6 +5,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.EFCore;
 using Microsoft.EntityFrameworkCore;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.DatabaseUpdate.LookupCatalogs;
 using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.Services.ApplicationProfileWizard;
@@ -109,7 +110,9 @@ public sealed class ApplicationProfileWizardLookupData
             return false;
 
         return city.RegionName.Equals(region.DisplayName, StringComparison.CurrentCultureIgnoreCase)
-            || city.RegionName.Equals(region.RegionName, StringComparison.CurrentCultureIgnoreCase);
+            || city.RegionName.Equals(region.RegionName, StringComparison.CurrentCultureIgnoreCase)
+            || LookupCatalogMatchHelper.KeysEqual(city.RegionName, region.DisplayName)
+            || LookupCatalogMatchHelper.KeysEqual(city.RegionName, region.RegionName);
     }
 
     private static IReadOnlyList<ApplicationProfileWizardLookupItem> LoadItems<T>(IObjectSpace objectSpace)
@@ -127,18 +130,40 @@ public sealed class ApplicationProfileWizardLookupData
             .ToList();
     }
 
-    private static IReadOnlyList<ApplicationProfileWizardLookupItem> LoadCities(IObjectSpace objectSpace)
+    public static IReadOnlyList<ApplicationProfileWizardLookupItem> LoadRegions(IObjectSpace objectSpace)
     {
+        if (objectSpace == null)
+            return Array.Empty<ApplicationProfileWizardLookupItem>();
+
+        return LoadItems<Region>(objectSpace);
+    }
+
+    public static IReadOnlyList<ApplicationProfileWizardLookupItem> LoadCities(IObjectSpace objectSpace)
+    {
+        if (objectSpace == null)
+            return Array.Empty<ApplicationProfileWizardLookupItem>();
+
+        var regions = LoadRegions(objectSpace);
         return QueryCitiesWithRegion(objectSpace)
-            .Select(item => new ApplicationProfileWizardLookupItem
-            {
-                Id = item.ID,
-                DisplayName = FormatDisplayName(item),
-                RegionId = item.Region?.ID ?? ReadRegionForeignKey(objectSpace, item),
-                RegionName = item.Region?.NameTm ?? item.RegionName,
-            })
+            .Select(item => ToCityLookupItem(objectSpace, item, regions))
             .OrderBy(item => item.DisplayName, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
+    }
+
+    internal static string? CatalogRegionNameForCity(params string?[] cityNames)
+    {
+        var map = CityNameToRegionName.Value;
+        if (map.Count == 0 || cityNames == null)
+            return null;
+
+        foreach (var name in cityNames)
+        {
+            var key = LookupCatalogMatchHelper.NormalizeKey(name);
+            if (key.Length > 0 && map.TryGetValue(key, out var regionName))
+                return regionName;
+        }
+
+        return null;
     }
 
     private static IReadOnlyList<ApplicationProfileWizardLookupItem> LoadLodgings(IObjectSpace objectSpace) =>
@@ -210,19 +235,115 @@ public sealed class ApplicationProfileWizardLookupData
     }
 #pragma warning restore CS0618
 
+    private static readonly Lazy<IReadOnlyDictionary<string, string>> CityNameToRegionName = new(LoadCityNameToRegionName);
+
+    private static ApplicationProfileWizardLookupItem ToCityLookupItem(
+        IObjectSpace objectSpace,
+        City item,
+        IReadOnlyList<ApplicationProfileWizardLookupItem> regions)
+    {
+        var displayName = FormatDisplayName(item);
+#pragma warning disable CS0618
+        var regionName = FirstNonEmpty(
+            item.Region?.NameTm,
+            item.RegionName,
+            CatalogRegionNameForCity(item.NameTm, item.Name, displayName));
+#pragma warning restore CS0618
+        var regionId = item.Region?.ID
+            ?? ReadRegionForeignKey(objectSpace, item)
+            ?? MatchRegionId(regions, regionName);
+
+        return new ApplicationProfileWizardLookupItem
+        {
+            Id = item.ID,
+            DisplayName = displayName,
+            RegionId = regionId,
+            RegionName = regionName,
+        };
+    }
+
+    private static Guid? MatchRegionId(
+        IReadOnlyList<ApplicationProfileWizardLookupItem> regions,
+        string? regionName)
+    {
+        if (regions == null || regions.Count == 0 || string.IsNullOrWhiteSpace(regionName))
+            return null;
+
+        var match = regions.FirstOrDefault(region =>
+            LookupCatalogMatchHelper.KeysEqual(regionName, region.RegionName)
+            || LookupCatalogMatchHelper.KeysEqual(regionName, region.DisplayName)
+            || regionName.Equals(region.RegionName, StringComparison.CurrentCultureIgnoreCase)
+            || regionName.Equals(region.DisplayName, StringComparison.CurrentCultureIgnoreCase));
+        return match?.Id is Guid id && id != Guid.Empty ? id : null;
+    }
+
+    private static string? FirstNonEmpty(params string?[] values)
+    {
+        foreach (var value in values)
+        {
+            if (!string.IsNullOrWhiteSpace(value))
+                return value.Trim();
+        }
+
+        return null;
+    }
+
+    private static IReadOnlyDictionary<string, string> LoadCityNameToRegionName()
+    {
+        var map = new Dictionary<string, string>(StringComparer.Ordinal);
+        var file = LookupCatalogResourceLoader.LoadCatalogFile("city.json");
+        if (file?.Rows == null)
+            return map;
+
+        foreach (var row in file.Rows)
+        {
+            if (!TryReadCatalogString(row, "NameTm", out var cityName)
+                && !TryReadCatalogString(row, "Name", out cityName))
+                continue;
+            if (!TryReadCatalogString(row, "Region", out var regionName))
+                continue;
+
+            var key = LookupCatalogMatchHelper.NormalizeKey(cityName);
+            if (key.Length == 0)
+                continue;
+
+            map[key] = regionName;
+        }
+
+        return map;
+    }
+
+    private static bool TryReadCatalogString(
+        Dictionary<string, System.Text.Json.JsonElement> row,
+        string key,
+        out string value)
+    {
+        value = string.Empty;
+        if (!row.TryGetValue(key, out var element))
+            return false;
+
+        var text = element.ValueKind == System.Text.Json.JsonValueKind.String
+            ? element.GetString()
+            : element.ToString();
+        if (string.IsNullOrWhiteSpace(text))
+            return false;
+
+        value = text.Trim();
+        return true;
+    }
+
     private static IEnumerable<City> QueryCitiesWithRegion(IObjectSpace objectSpace)
     {
+        // Tracked entities (not AsNoTracking) so Region lazy-loads when Include is skipped.
+        // Demo/prod often leave City.RegionName null even when RegionID is set.
         if (objectSpace is EFCoreObjectSpace { DbContext: { } dbContext })
         {
             return dbContext.Set<City>()
-                .AsNoTracking()
                 .Include(city => city.Region)
                 .ToList();
         }
 
-        return objectSpace.GetObjectsQuery<City>()
-            .Include(city => city.Region)
-            .ToList();
+        return objectSpace.GetObjects(typeof(City)).Cast<City>();
     }
 
     private static Guid? ReadRegionForeignKey(IObjectSpace objectSpace, City city)

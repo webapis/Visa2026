@@ -271,6 +271,8 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         [ModelDefault("AllowEdit", "False")]
         [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
         [ExcludeFromOptionalDetailFields]
         public bool IsCancelled => IssuedDocumentLifecycle.IsCancelled(this);
 
@@ -278,6 +280,8 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         [ModelDefault("AllowEdit", "False")]
         [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
         [ExcludeFromOptionalDetailFields]
         public bool IsChanged => IssuedDocumentLifecycle.IsChanged(this);
 

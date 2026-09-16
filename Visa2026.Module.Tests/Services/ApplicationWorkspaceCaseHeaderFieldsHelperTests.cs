@@ -1,6 +1,7 @@
 using System.Linq;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services;
+using Visa2026.Module.Services.ApplicationProfileWizard;
 using Visa2026.Module.Services.ApplicationWorkspace;
 using Xunit;
 
@@ -464,5 +465,151 @@ public class ApplicationWorkspaceCaseHeaderFieldsHelperTests
         var missing = ApplicationWorkspaceCaseSummaryCompletenessGate.MissingRequiredFields(fields);
         Assert.Contains(missing, f => f.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.FromRegion);
         Assert.Contains(missing, f => f.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.FromCity);
+    }
+
+    [Fact]
+    public void CitiesForSelectedRegion_FiltersToCitiesInSelectedRegion()
+    {
+        var maryId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+        var ahalId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+        var maryCityId = Guid.Parse("33333333-3333-3333-3333-333333333333");
+        var maryNameOnlyCityId = Guid.Parse("44444444-4444-4444-4444-444444444444");
+        var cities = new[]
+        {
+            new ApplicationProfileWizardLookupItem
+            {
+                Id = maryCityId,
+                DisplayName = "Mary etraby",
+                RegionId = maryId,
+            },
+            new ApplicationProfileWizardLookupItem
+            {
+                Id = maryNameOnlyCityId,
+                DisplayName = "Ýolöten etraby",
+                RegionName = "Mary welaýaty",
+            },
+            new ApplicationProfileWizardLookupItem
+            {
+                Id = Guid.NewGuid(),
+                DisplayName = "Gökdepe etraby",
+                RegionId = ahalId,
+            },
+            new ApplicationProfileWizardLookupItem
+            {
+                Id = Guid.NewGuid(),
+                DisplayName = "Akbugdaý etraby",
+                RegionName = "Ahal welaýaty",
+            },
+        };
+        var regions = new[]
+        {
+            new ApplicationProfileWizardLookupItem
+            {
+                Id = maryId,
+                DisplayName = "Mary province",
+                RegionName = "Mary welaýaty",
+            },
+            new ApplicationProfileWizardLookupItem
+            {
+                Id = ahalId,
+                DisplayName = "Ahal province",
+                RegionName = "Ahal welaýaty",
+            },
+        };
+
+        var filtered = ApplicationWorkspaceCaseHeaderFieldsHelper.CitiesForSelectedRegion(
+            cities,
+            regions,
+            maryId);
+
+        Assert.Equal(2, filtered.Count);
+        Assert.Contains(filtered, option => option.Id == maryCityId);
+        Assert.Contains(filtered, option => option.Id == maryNameOnlyCityId);
+        Assert.DoesNotContain(filtered, option => option.DisplayName == "Gökdepe etraby");
+
+        var ahalFiltered = ApplicationWorkspaceCaseHeaderFieldsHelper.CitiesForSelectedRegion(
+            cities,
+            regions,
+            ahalId);
+        Assert.Equal(2, ahalFiltered.Count);
+        Assert.Contains(ahalFiltered, option => option.DisplayName == "Gökdepe etraby");
+        Assert.Contains(ahalFiltered, option => option.DisplayName == "Akbugdaý etraby");
+    }
+
+    [Fact]
+    public void CitiesForSelectedRegion_WithoutRegion_ReturnsAllCities()
+    {
+        var cities = new[]
+        {
+            new ApplicationProfileWizardLookupItem { Id = Guid.NewGuid(), DisplayName = "Mary etraby" },
+            new ApplicationProfileWizardLookupItem { Id = Guid.NewGuid(), DisplayName = "Gökdepe etraby" },
+        };
+
+        var filtered = ApplicationWorkspaceCaseHeaderFieldsHelper.CitiesForSelectedRegion(
+            cities,
+            Array.Empty<ApplicationProfileWizardLookupItem>(),
+            regionId: null);
+
+        Assert.Equal(2, filtered.Count);
+    }
+
+    [Fact]
+    public void FilterSitesByCity_KeepsOnlyLodgingsForSelectedToCity()
+    {
+        var sarahsId = Guid.Parse("55555555-5555-5555-5555-555555555555");
+        var kakaId = Guid.Parse("66666666-6666-6666-6666-666666666666");
+        var sites = new[]
+        {
+            new ApplicationWorkspaceCaseHeaderFieldsHelper.SiteCatalogOption(
+                Guid.NewGuid(),
+                "Döwletabatgazçykaryş müdirliginiň ýaşaýyş jaý toplumy",
+                sarahsId,
+                "Sarahs etraby"),
+            new ApplicationWorkspaceCaseHeaderFieldsHelper.SiteCatalogOption(
+                Guid.NewGuid(),
+                "dokma toplumynyň UYJ",
+                kakaId,
+                "Kaka etraby"),
+            new ApplicationWorkspaceCaseHeaderFieldsHelper.SiteCatalogOption(
+                Guid.NewGuid(),
+                "1932 (A.Garlyýew) köç. 70/1 UÝJ",
+                null,
+                "Aşgabat şäheri"),
+        };
+
+        var filtered = ApplicationWorkspaceCaseHeaderFieldsHelper.FilterSitesByCity(
+            sites,
+            sarahsId,
+            "Sarahs etraby");
+
+        var option = Assert.Single(filtered);
+        Assert.Equal("Döwletabatgazçykaryş müdirliginiň ýaşaýyş jaý toplumy", option.DisplayName);
+    }
+
+    [Fact]
+    public void FilterSitesByCity_MatchesCatalogCityNameWhenCityIdMissing()
+    {
+        var sarahsId = Guid.Parse("55555555-5555-5555-5555-555555555555");
+        var sites = new[]
+        {
+            new ApplicationWorkspaceCaseHeaderFieldsHelper.SiteCatalogOption(
+                Guid.NewGuid(),
+                "Döwletabatgazçykaryş müdirliginiň ýaşaýyş jaý toplumy",
+                null,
+                "Sarahs etraby"),
+            new ApplicationWorkspaceCaseHeaderFieldsHelper.SiteCatalogOption(
+                Guid.NewGuid(),
+                "dokma toplumynyň UYJ",
+                null,
+                "Kaka etraby"),
+        };
+
+        var filtered = ApplicationWorkspaceCaseHeaderFieldsHelper.FilterSitesByCity(
+            sites,
+            sarahsId,
+            "Sarahs etraby");
+
+        var option = Assert.Single(filtered);
+        Assert.Contains("Döwletabatgazçykaryş", option.DisplayName);
     }
 }

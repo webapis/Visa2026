@@ -9,8 +9,7 @@ namespace Visa2026.Module.Controllers;
 
 /// <summary>
 /// Extends Application Profile Instance ListView FullTextSearch so officers can find
-/// cases by linked person first/last name and passport number. Those members are not
-/// ListView columns, so DxGrid / default FullTextSearch skip them.
+/// cases by linked person first/last/middle name. Passport numbers are not searched here.
 /// </summary>
 public sealed class ApplicationProfileInstanceListViewFullTextSearchController
     : ObjectViewController<ListView, ApplicationProfileInstance>
@@ -52,12 +51,9 @@ public sealed class ApplicationProfileInstanceListViewFullTextSearchController
 
         var identityCriteria = ApplicationProfileInstanceListViewFullTextSearchCriteriaBuilder
             .BuildLinkedPeopleIdentityCriteria(e.SearchText);
-        var passportCriteria = ApplicationProfileInstanceListViewFullTextSearchCriteriaBuilder
-            .BuildLinkedPeoplePassportCriteria(e.SearchText);
         var combinedCriteria = PersonListViewFullTextSearchCriteriaBuilder.CombineOr(
             defaultCriteria,
-            identityCriteria,
-            passportCriteria);
+            identityCriteria);
 
         if (ReferenceEquals(combinedCriteria, null))
             return;

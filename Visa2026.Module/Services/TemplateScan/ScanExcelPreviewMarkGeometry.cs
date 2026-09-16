@@ -125,6 +125,8 @@ public static class ScanExcelPreviewMarkGeometry
                     Height: Math.Max(100d * (bottom - top) / heightPts, 0.4));
             }
 
+            SplitSharedCellBoxesForCompoundParts(excelMarks, boxes);
+
             if (boxes.Count == 0)
                 return null;
 
@@ -133,6 +135,38 @@ public static class ScanExcelPreviewMarkGeometry
         catch (Exception)
         {
             return null;
+        }
+    }
+
+    /// <summary>
+    /// Compound Review parts (4.1 / 4.2 / 4.3) share one Excel cell address — slice the
+    /// printed box so each part gets its own border instead of stacking one badge.
+    /// </summary>
+    internal static void SplitSharedCellBoxesForCompoundParts(
+        IReadOnlyList<(ScanReviewOrderedField Mark, DocumentRegion.ExcelCell Cell)> excelMarks,
+        Dictionary<string, ScanExcelPreviewMarkBox> boxes)
+    {
+        foreach (var group in excelMarks
+                     .Where(static row => row.Mark.PartIndex > 0)
+                     .GroupBy(
+                         static row => row.Cell.SheetName + "!" + row.Cell.CellReference,
+                         StringComparer.OrdinalIgnoreCase))
+        {
+            var parts = group.OrderBy(static row => row.Mark.PartIndex).ToList();
+            if (parts.Count <= 1)
+                continue;
+            if (!boxes.TryGetValue(parts[0].Mark.DisplayId, out var full))
+                continue;
+
+            var slice = full.Width / parts.Count;
+            for (var i = 0; i < parts.Count; i++)
+            {
+                boxes[parts[i].Mark.DisplayId] = new ScanExcelPreviewMarkBox(
+                    Left: full.Left + slice * i,
+                    Top: full.Top,
+                    Width: Math.Max(slice, 0.35),
+                    Height: full.Height);
+            }
         }
     }
 

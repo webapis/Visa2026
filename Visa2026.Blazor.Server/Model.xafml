@@ -1467,7 +1467,7 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <ListView Id="WorkPermitItem_ListView" ShowAllRows="True" VirtualScrollingEnabled="False" ShowFindPanel="True" IsFooterVisible="True" IsGroupPanelVisible="True">
+    <ListView Id="WorkPermitItem_ListView" ShowFindPanel="True" IsFooterVisible="True">
       <Columns>
         <ColumnInfo Id="CurrentPositionHistory" Index="-1" />
         <ColumnInfo Id="Passport" Index="-1" />
@@ -1481,6 +1481,8 @@
         <ColumnInfo Id="DaysRemaining" Index="7" Width="72" />
         <ColumnInfo Id="WorkPermittedLocations" Index="8" Width="240" />
         <ColumnInfo Id="ASNumber" Index="9" Width="90" />
+        <ColumnInfo Id="IsCancelled" Index="-1" />
+        <ColumnInfo Id="IsChanged" Index="-1" />
       </Columns>
     </ListView>
     

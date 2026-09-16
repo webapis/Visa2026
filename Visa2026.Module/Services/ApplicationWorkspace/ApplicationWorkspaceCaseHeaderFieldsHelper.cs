@@ -3,9 +3,14 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.EFCore;
+using DevExpress.Persistent.BaseImpl.EF;
+using Microsoft.EntityFrameworkCore;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.DatabaseUpdate.LookupCatalogs;
 using Visa2026.Module.Localization;
 using Visa2026.Module.Services;
+using Visa2026.Module.Services.ApplicationProfileWizard;
 
 namespace Visa2026.Module.Services.ApplicationWorkspace;
 
@@ -161,7 +166,9 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
 
         AddLookup(fields, FromCity, "From city", "purple", "📍",
             Visible(profile, p => p.RequireFromCity, ApplicationProfileConfigurationResolver.ShowFromCity, application),
-            application.FromCity?.ID, LookupLabel(application.FromCity), catalogs.Cities, readOnly: false,
+            application.FromCity?.ID, LookupLabel(application.FromCity),
+            CitiesForSelectedRegion(catalogs.Cities, catalogs.RegionCatalog, application.FromRegion?.ID),
+            readOnly: false,
             FromGeoLookupFill(
                 application,
                 application.FromCity?.ID,
@@ -174,7 +181,9 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
 
         AddLookup(fields, ToCity, "To city", "purple", "📍",
             Visible(profile, p => p.RequireToCity, ApplicationProfileConfigurationResolver.ShowToCity, application),
-            application.ToCity?.ID, LookupLabel(application.ToCity), catalogs.Cities, readOnly: false,
+            application.ToCity?.ID, LookupLabel(application.ToCity),
+            CitiesForSelectedRegion(catalogs.Cities, catalogs.RegionCatalog, application.ToRegion?.ID),
+            readOnly: false,
             LookupFill(application.ToCity?.ID, DefaultId(profile?.DefaultToCity?.ID, profile?.DefaultToCityId)));
 
         var destinationCityId = application.ToCity?.ID
@@ -204,7 +213,10 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                         visible: true,
                         application.BusinessTripLodging?.ID,
                         application.BusinessTripLodging?.FullAddress ?? string.Empty,
-                        FilterSitesByCity(catalogs.Lodgings, destinationCityId),
+                        FilterSitesByCity(
+                            catalogs.Lodgings,
+                            destinationCityId,
+                            application.ToCity?.NameTm),
                         readOnly: false,
                         LookupFill(application.BusinessTripLodging?.ID, DefaultId(profile?.DefaultBusinessTripLodging?.ID, profile?.DefaultBusinessTripLodgingId)));
                     break;
@@ -213,7 +225,10 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                         visible: true,
                         application.BusinessTripHotel?.ID,
                         application.BusinessTripHotel?.Name ?? string.Empty,
-                        FilterSitesByCity(catalogs.Hotels, destinationCityId),
+                        FilterSitesByCity(
+                            catalogs.Hotels,
+                            destinationCityId,
+                            application.ToCity?.NameTm),
                         readOnly: false,
                         LookupFill(application.BusinessTripHotel?.ID, DefaultId(profile?.DefaultBusinessTripHotel?.ID, profile?.DefaultBusinessTripHotelId)));
                     break;
@@ -222,7 +237,10 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                         visible: true,
                         application.BusinessTripHospital?.ID,
                         application.BusinessTripHospital?.Name ?? string.Empty,
-                        FilterSitesByCity(catalogs.Hospitals, destinationCityId),
+                        FilterSitesByCity(
+                            catalogs.Hospitals,
+                            destinationCityId,
+                            application.ToCity?.NameTm),
                         readOnly: false,
                         LookupFill(application.BusinessTripHospital?.ID, DefaultId(profile?.DefaultBusinessTripHospital?.ID, profile?.DefaultBusinessTripHospitalId)));
                     break;
@@ -231,7 +249,10 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                         visible: true,
                         application.BusinessTripOtherSite?.ID,
                         application.BusinessTripOtherSite?.FullAddress ?? string.Empty,
-                        FilterSitesByCity(catalogs.OtherSites, destinationCityId),
+                        FilterSitesByCity(
+                            catalogs.OtherSites,
+                            destinationCityId,
+                            application.ToCity?.NameTm),
                         readOnly: false,
                         LookupFill(application.BusinessTripOtherSite?.ID, DefaultId(profile?.DefaultBusinessTripOtherSite?.ID, profile?.DefaultBusinessTripOtherSiteId)));
                     break;
@@ -354,8 +375,9 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                 return SetLookup<City>(objectSpace, value, item =>
                 {
                     application.FromCity = item;
-                    if (item?.Region != null)
-                        application.FromRegion = item.Region;
+                    var region = ResolveCityRegion(objectSpace, item);
+                    if (region != null)
+                        application.FromRegion = region;
                 }, out error);
             case ToRegion:
                 if (!Visible(profile, p => p.RequireToRegion, ApplicationProfileConfigurationResolver.ShowToRegion, application))
@@ -374,6 +396,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                     application.ToCity = item;
                     if (item?.Region != null)
                         application.ToRegion = item.Region;
+                    ClearTripSitesIfCityMismatch(application, item);
                 }, out error);
             case BusinessTripAddressType:
                 if (!Visible(profile, p => p.RequireBusinessTripAddress, ApplicationProfileConfigurationResolver.ShowBusinessTripAddress, application))
@@ -653,6 +676,25 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
 
         assign(item);
         return true;
+    }
+
+    private static Region? ResolveCityRegion(IObjectSpace objectSpace, City? city)
+    {
+        if (city == null)
+            return null;
+        if (city.Region != null)
+            return city.Region;
+
+        try
+        {
+            objectSpace.ReloadObject(city);
+        }
+        catch (Exception)
+        {
+            return city.Region;
+        }
+
+        return city.Region;
     }
 
     private static bool SetBorderZone(string? value, ApplicationProfileInstance application, out string? error)
@@ -1016,13 +1058,37 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         return true;
     }
 
-    private static IReadOnlyList<ApplicationWorkspaceLookupOption> FilterSitesByCity(
+    internal static IReadOnlyList<ApplicationWorkspaceLookupOption> CitiesForSelectedRegion(
+        IReadOnlyList<ApplicationProfileWizardLookupItem> cities,
+        IReadOnlyList<ApplicationProfileWizardLookupItem> regions,
+        Guid? regionId)
+    {
+        if (cities == null || cities.Count == 0)
+            return Array.Empty<ApplicationWorkspaceLookupOption>();
+
+        return ApplicationProfileWizardLookupData.CitiesForRegion(cities, regions, regionId)
+            .Select(item => new ApplicationWorkspaceLookupOption
+            {
+                Id = item.Id,
+                DisplayName = item.DisplayName,
+            })
+            .ToList();
+    }
+
+    internal static IReadOnlyList<ApplicationWorkspaceLookupOption> FilterSitesByCity(
         IReadOnlyList<SiteCatalogOption> sites,
-        Guid? cityId)
+        Guid? cityId,
+        string? cityName = null)
     {
         IEnumerable<SiteCatalogOption> query = sites;
-        if (cityId is Guid id && id != Guid.Empty)
-            query = sites.Where(s => s.CityId == null || s.CityId == id);
+        var hasCityId = cityId is Guid id && id != Guid.Empty;
+        var hasCityName = !string.IsNullOrWhiteSpace(cityName);
+        if (hasCityId || hasCityName)
+        {
+            query = sites.Where(site =>
+                (hasCityId && site.CityId == cityId)
+                || (hasCityName && LookupCatalogMatchHelper.KeysEqual(site.CityName, cityName)));
+        }
 
         return query
             .Select(s => new ApplicationWorkspaceLookupOption { Id = s.Id, DisplayName = s.DisplayName })
@@ -1031,7 +1097,26 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             .ToList();
     }
 
-    private sealed record SiteCatalogOption(Guid Id, string DisplayName, Guid? CityId);
+    internal sealed record SiteCatalogOption(Guid Id, string DisplayName, Guid? CityId, string? CityName = null);
+
+    private static void ClearTripSitesIfCityMismatch(ApplicationProfileInstance application, City? toCity)
+    {
+        if (toCity == null)
+            return;
+
+        if (application.BusinessTripLodging?.City != null
+            && application.BusinessTripLodging.City.ID != toCity.ID)
+            application.BusinessTripLodging = null;
+        if (application.BusinessTripHotel?.City != null
+            && application.BusinessTripHotel.City.ID != toCity.ID)
+            application.BusinessTripHotel = null;
+        if (application.BusinessTripHospital?.City != null
+            && application.BusinessTripHospital.City.ID != toCity.ID)
+            application.BusinessTripHospital = null;
+        if (application.BusinessTripOtherSite?.City != null
+            && application.BusinessTripOtherSite.City.ID != toCity.ID)
+            application.BusinessTripOtherSite = null;
+    }
 
     private sealed class Catalogs
     {
@@ -1043,7 +1128,8 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         public IReadOnlyList<ApplicationWorkspaceLookupOption> MigrationServices { get; init; } = [];
         public IReadOnlyList<ApplicationWorkspaceLookupOption> ProjectContracts { get; init; } = [];
         public IReadOnlyList<ApplicationWorkspaceLookupOption> Urgencies { get; init; } = [];
-        public IReadOnlyList<ApplicationWorkspaceLookupOption> Cities { get; init; } = [];
+        public IReadOnlyList<ApplicationProfileWizardLookupItem> Cities { get; init; } = [];
+        public IReadOnlyList<ApplicationProfileWizardLookupItem> RegionCatalog { get; init; } = [];
         public IReadOnlyList<ApplicationWorkspaceLookupOption> Regions { get; init; } = [];
         public IReadOnlyList<ApplicationWorkspaceLookupOption> ResidenceTypes { get; init; } = [];
         public IReadOnlyList<SiteCatalogOption> Lodgings { get; init; } = [];
@@ -1055,34 +1141,47 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         public IReadOnlyList<string> BorderZoneNames { get; init; } = [];
         public IReadOnlyList<string> WorkPermittedLocationNames { get; init; } = [];
 
-        public static Catalogs Load(IObjectSpace objectSpace) => new()
+        public static Catalogs Load(IObjectSpace objectSpace)
         {
-            VisaTypes = LoadItems<VisaType>(objectSpace),
-            VisaCategories = LoadItems<VisaCategory>(objectSpace),
-            VisaPeriods = LoadItems<VisaPeriod>(objectSpace),
-            MigrationServices = LoadItems<MigrationService>(objectSpace),
-            ProjectContracts = LoadItems<ProjectContract>(objectSpace),
-            Urgencies = LoadItems<Urgency>(objectSpace),
-            Cities = LoadItems<City>(objectSpace),
-            Regions = LoadItems<Region>(objectSpace),
-            ResidenceTypes = LoadResidenceTypes(),
-            Lodgings = LoadLodgings(objectSpace),
-            Hotels = LoadHotels(objectSpace),
-            Hospitals = LoadHospitals(objectSpace),
-            OtherSites = LoadOtherSites(objectSpace),
+            var regions = ApplicationProfileWizardLookupData.LoadRegions(objectSpace);
+            return new()
+            {
+                VisaTypes = LoadItems<VisaType>(objectSpace),
+                VisaCategories = LoadItems<VisaCategory>(objectSpace),
+                VisaPeriods = LoadItems<VisaPeriod>(objectSpace),
+                MigrationServices = LoadItems<MigrationService>(objectSpace),
+                ProjectContracts = LoadItems<ProjectContract>(objectSpace),
+                Urgencies = LoadItems<Urgency>(objectSpace),
+                Cities = ApplicationProfileWizardLookupData.LoadCities(objectSpace),
+                RegionCatalog = regions,
+                Regions = ToLookupOptions(regions),
+                ResidenceTypes = LoadResidenceTypes(),
+                Lodgings = LoadLodgings(objectSpace),
+                Hotels = LoadHotels(objectSpace),
+                Hospitals = LoadHospitals(objectSpace),
+                OtherSites = LoadOtherSites(objectSpace),
 #pragma warning disable CS0618
-            BusinessTripAddresses = LoadBusinessTripAddresses(objectSpace),
+                BusinessTripAddresses = LoadBusinessTripAddresses(objectSpace),
 #pragma warning restore CS0618
-            CheckPoints = LoadItems<CheckPoint>(objectSpace),
-            BorderZoneNames = CommaSeparatedCatalogHelper.LoadCatalogNames(
-                objectSpace,
-                typeof(BorderZoneName),
-                BorderZoneSelectionHelper.NoneValue),
-            WorkPermittedLocationNames = CommaSeparatedCatalogHelper.LoadCatalogNames(
-                objectSpace,
-                typeof(WorkPermittedLocationName),
-                string.Empty),
-        };
+                CheckPoints = LoadItems<CheckPoint>(objectSpace),
+                BorderZoneNames = CommaSeparatedCatalogHelper.LoadCatalogNames(
+                    objectSpace,
+                    typeof(BorderZoneName),
+                    BorderZoneSelectionHelper.NoneValue),
+                WorkPermittedLocationNames = CommaSeparatedCatalogHelper.LoadCatalogNames(
+                    objectSpace,
+                    typeof(WorkPermittedLocationName),
+                    string.Empty),
+            };
+        }
+
+        private static IReadOnlyList<ApplicationWorkspaceLookupOption> ToLookupOptions(
+            IReadOnlyList<ApplicationProfileWizardLookupItem> items) =>
+            items.Select(item => new ApplicationWorkspaceLookupOption
+            {
+                Id = item.Id,
+                DisplayName = item.DisplayName,
+            }).ToList();
 
         private static IReadOnlyList<ApplicationWorkspaceLookupOption> LoadResidenceTypes() =>
             Enum.GetValues(typeof(ResidenceType))
@@ -1118,44 +1217,120 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         }
 
         private static IReadOnlyList<SiteCatalogOption> LoadLodgings(IObjectSpace objectSpace) =>
-            objectSpace.GetObjects(typeof(Lodging))
-                .Cast<Lodging>()
-                .Select(item => new SiteCatalogOption(
-                    item.ID,
-                    item.FullAddress?.Trim() ?? string.Empty,
-                    item.City?.ID))
-                .Where(item => !string.IsNullOrWhiteSpace(item.DisplayName))
-                .ToList();
+            LoadSites(
+                QueryWithCity<Lodging>(objectSpace),
+                item => item.FullAddress,
+                item => item.City,
+                "lodging.json",
+                "FullAddress");
 
         private static IReadOnlyList<SiteCatalogOption> LoadHotels(IObjectSpace objectSpace) =>
-            objectSpace.GetObjects(typeof(Hotel))
-                .Cast<Hotel>()
-                .Select(item => new SiteCatalogOption(
-                    item.ID,
-                    item.Name?.Trim() ?? string.Empty,
-                    item.City?.ID))
-                .Where(item => !string.IsNullOrWhiteSpace(item.DisplayName))
-                .ToList();
+            LoadSites(
+                QueryWithCity<Hotel>(objectSpace),
+                item => item.Name,
+                item => item.City,
+                "hotel.json",
+                "Name");
 
         private static IReadOnlyList<SiteCatalogOption> LoadHospitals(IObjectSpace objectSpace) =>
-            objectSpace.GetObjects(typeof(Hospital))
-                .Cast<Hospital>()
-                .Select(item => new SiteCatalogOption(
-                    item.ID,
-                    item.Name?.Trim() ?? string.Empty,
-                    item.City?.ID))
-                .Where(item => !string.IsNullOrWhiteSpace(item.DisplayName))
-                .ToList();
+            LoadSites(
+                QueryWithCity<Hospital>(objectSpace),
+                item => item.Name,
+                item => item.City,
+                "hospital.json",
+                "Name");
 
         private static IReadOnlyList<SiteCatalogOption> LoadOtherSites(IObjectSpace objectSpace) =>
-            objectSpace.GetObjects(typeof(OtherSite))
-                .Cast<OtherSite>()
-                .Select(item => new SiteCatalogOption(
-                    item.ID,
-                    item.FullAddress?.Trim() ?? string.Empty,
-                    item.City?.ID))
+            LoadSites(
+                QueryWithCity<OtherSite>(objectSpace),
+                item => item.FullAddress,
+                item => item.City,
+                "other-site.json",
+                "FullAddress");
+
+        private static List<T> QueryWithCity<T>(IObjectSpace objectSpace)
+            where T : class
+        {
+            if (objectSpace is EFCoreObjectSpace { DbContext: { } dbContext })
+                return dbContext.Set<T>().Include("City").ToList();
+
+            return objectSpace.GetObjects(typeof(T)).Cast<T>().ToList();
+        }
+
+        private static IReadOnlyList<SiteCatalogOption> LoadSites<T>(
+            IEnumerable<T> items,
+            Func<T, string?> title,
+            Func<T, City?> city,
+            string catalogFile,
+            string catalogTitleKey)
+            where T : BaseObject
+        {
+            var cityByTitle = LoadCatalogCityByTitle(catalogFile, catalogTitleKey);
+            return items
+                .Select(item =>
+                {
+                    var display = title(item)?.Trim() ?? string.Empty;
+                    var cityName = city(item)?.NameTm
+                        ?? (cityByTitle.TryGetValue(
+                            LookupCatalogMatchHelper.NormalizeKey(display),
+                            out var catalogCity)
+                            ? catalogCity
+                            : null);
+                    return new SiteCatalogOption(
+                        item.ID,
+                        display,
+                        city(item)?.ID,
+                        cityName);
+                })
                 .Where(item => !string.IsNullOrWhiteSpace(item.DisplayName))
                 .ToList();
+        }
+
+        private static IReadOnlyDictionary<string, string> LoadCatalogCityByTitle(
+            string catalogFile,
+            string titleKey)
+        {
+            var map = new Dictionary<string, string>(StringComparer.Ordinal);
+            var file = LookupCatalogResourceLoader.LoadCatalogFile(catalogFile);
+            if (file?.Rows == null)
+                return map;
+
+            foreach (var row in file.Rows)
+            {
+                if (!TryReadCatalogString(row, titleKey, out var siteTitle)
+                    && !(titleKey == "FullAddress" && TryReadCatalogString(row, "Name", out siteTitle)))
+                    continue;
+                if (!TryReadCatalogString(row, "City", out var cityName))
+                    continue;
+
+                var key = LookupCatalogMatchHelper.NormalizeKey(siteTitle);
+                if (key.Length == 0)
+                    continue;
+
+                map[key] = cityName;
+            }
+
+            return map;
+        }
+
+        private static bool TryReadCatalogString(
+            Dictionary<string, System.Text.Json.JsonElement> row,
+            string key,
+            out string value)
+        {
+            value = string.Empty;
+            if (!row.TryGetValue(key, out var element))
+                return false;
+
+            var text = element.ValueKind == System.Text.Json.JsonValueKind.String
+                ? element.GetString()
+                : element.ToString();
+            if (string.IsNullOrWhiteSpace(text))
+                return false;
+
+            value = text.Trim();
+            return true;
+        }
 
 #pragma warning disable CS0618
         private static IReadOnlyList<ApplicationWorkspaceLookupOption> LoadBusinessTripAddresses(IObjectSpace objectSpace)

@@ -93,6 +93,71 @@ public class ScanReviewFieldOrderTests
     }
 
     [Fact]
+    public void ApplyVisualSequence_keeps_compound_sub_row_labels_and_segment_order()
+    {
+        var field = new ScanDetectedField
+        {
+            FieldId = "mark6",
+            Box = ScanBoundingBox.FullPage,
+            PageIndex = 0,
+            LabelText = "05.04.1989, TUR, Fatih",
+            ProposedToken = "{{.PDBT}}, {{.PCBT}}, {{.PBPL}}",
+            Confidence = ScanFieldConfidence.High,
+            Scope = ScanFieldScope.Row,
+            SourceRegion = new DocumentRegion.ExcelCell("Sanaw", "D5"),
+        };
+
+        var ordered = ScanReviewFieldOrder.Order([field]);
+        // Simulate PDF placing Fatih before TUR inside the cell.
+        var visual = ScanReviewFieldOrder.ApplyVisualSequence(
+            ordered,
+            [ordered[2].DisplayId, ordered[0].DisplayId, ordered[1].DisplayId]);
+
+        Assert.Equal(["1.1", "1.2", "1.3"], visual.Select(o => o.DisplayOrder).ToArray());
+        Assert.Equal(["05.04.1989", "TUR", "Fatih"], visual.Select(o => o.LabelText).ToArray());
+        Assert.Equal(
+            ["PDBT", "PCBT", "PBPL"],
+            visual.Select(o => TemplateTokenSyntax.GetShortCodes(o.ProposedToken).Single()).ToArray());
+    }
+
+    [Fact]
+    public void ApplyReadingBoxes_keeps_compound_siblings_together()
+    {
+        var field = new ScanDetectedField
+        {
+            FieldId = "mark6",
+            Box = ScanBoundingBox.FullPage,
+            PageIndex = 0,
+            LabelText = "05.04.1989, TUR, Fatih",
+            ProposedToken = "{{.PDBT}}, {{.PCBT}}, {{.PBPL}}",
+            Confidence = ScanFieldConfidence.High,
+            Scope = ScanFieldScope.Row,
+            SourceRegion = new DocumentRegion.ExcelCell("Sanaw", "D5"),
+        };
+        var ordered = ScanReviewFieldOrder.Order([
+            Field("rn", "1", new DocumentRegion.ExcelCell("Sanaw", "A5")),
+            field,
+            Field("sex", "Erkek", new DocumentRegion.ExcelCell("Sanaw", "E5")),
+        ]);
+
+        var boxes = new Dictionary<string, ScanExcelPreviewMarkBox>
+        {
+            [ordered[0].DisplayId] = new(5, 40, 4, 2),
+            [ordered[1].DisplayId] = new(20, 40, 4, 2),
+            [ordered[2].DisplayId] = new(28, 40, 4, 2),
+            [ordered[3].DisplayId] = new(24, 40, 4, 2), // Fatih left of TUR visually
+            [ordered[4].DisplayId] = new(50, 40, 4, 2),
+        };
+
+        var visual = ScanReviewFieldOrder.ApplyReadingBoxes(ordered, boxes);
+        Assert.Equal(["1", "2.1", "2.2", "2.3", "3"], visual.Select(o => o.DisplayOrder).ToArray());
+        Assert.Equal("05.04.1989", visual[1].LabelText);
+        Assert.Equal("TUR", visual[2].LabelText);
+        Assert.Equal("Fatih", visual[3].LabelText);
+        Assert.Equal("Erkek", visual[4].LabelText);
+    }
+
+    [Fact]
     public void Order_puts_fields_without_region_after_located_marks()
     {
         var fields = new[]

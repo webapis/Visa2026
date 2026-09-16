@@ -219,11 +219,6 @@ public class UserReportPlaceholderRelatedBoTests
     [InlineData("BTED", "BusinessTripEndDateText")]
     [InlineData("BTDCNT", "BusinessTripDurationDays")]
     [InlineData("BTDCTX", "BusinessTripDurationDaysText")]
-    [InlineData("BTFRG", "FromRegionName_Genitive")]
-    [InlineData("BTFCT", "FromCityName_Ablative")]
-    [InlineData("BTTRG", "ToRegionName_Genitive")]
-    [InlineData("BTTCT", "ToCityName_Dative")]
-    [InlineData("BTPRP", "Purpose")]
     public void Business_trip_header_tokens_are_catalogued(string shortCode, string canonical)
     {
         var catalog = new UserReportPlaceholderCatalogService();
@@ -234,6 +229,28 @@ public class UserReportPlaceholderRelatedBoTests
         Assert.Equal(UserReportPlaceholderPack.Core, entry.Pack);
         Assert.Equal(UserReportPlaceholderRelatedBo.BusinessTrip, entry.RelatedBo);
         Assert.Equal(UserReportPlaceholderScope.Header, entry.Scope);
+        Assert.Equal("{{ds." + shortCode + "}}", entry.BuildWordToken(UserReportPlaceholderScope.Header));
+        Assert.NotNull(typeof(ApplicationProfileInstance).GetProperty(
+            canonical, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase));
+    }
+
+    [Theory]
+    [InlineData("BTFRG", "FromRegionName_Genitive", "From Region")]
+    [InlineData("BTFCT", "FromCityName_Ablative", "From City")]
+    [InlineData("BTTRG", "ToRegionName_Genitive", "To Region")]
+    [InlineData("BTTCT", "ToCityName_Dative", "To City")]
+    [InlineData("BTPRP", "Purpose", "Purpose")]
+    public void From_to_region_city_tokens_are_catalogued_as_application(string shortCode, string canonical, string labelEn)
+    {
+        var catalog = new UserReportPlaceholderCatalogService();
+        var entry = catalog.GetEntries().Single(e =>
+            string.Equals(e.ShortCode, shortCode, StringComparison.OrdinalIgnoreCase));
+
+        Assert.Equal(canonical, entry.CanonicalPath);
+        Assert.Equal(UserReportPlaceholderPack.Core, entry.Pack);
+        Assert.Equal(UserReportPlaceholderRelatedBo.Application, entry.RelatedBo);
+        Assert.Equal(UserReportPlaceholderScope.Header, entry.Scope);
+        Assert.Equal(labelEn, entry.LabelEn);
         Assert.Equal("{{ds." + shortCode + "}}", entry.BuildWordToken(UserReportPlaceholderScope.Header));
         Assert.NotNull(typeof(ApplicationProfileInstance).GetProperty(
             canonical, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase));

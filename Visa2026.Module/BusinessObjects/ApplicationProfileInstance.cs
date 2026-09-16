@@ -1024,7 +1024,7 @@ namespace Visa2026.Module.BusinessObjects
             Criteria = "!CfgShowBusinessTripAddress Or BusinessTripAddressType != 'Lodging'", Context = "DetailView")]
         [VisibleInListView(false)]
         [ImmediatePostData]
-        [DataSourceCriteria("City = '@This.City'")]
+        [DataSourceCriteria("City = '@This.ToCity'")]
         [XafDisplayName("Business trip lodging")]
         public virtual Lodging? BusinessTripLodging { get; set; }
 
@@ -1032,7 +1032,7 @@ namespace Visa2026.Module.BusinessObjects
             Criteria = "!CfgShowBusinessTripAddress Or BusinessTripAddressType != 'Hotel'", Context = "DetailView")]
         [VisibleInListView(false)]
         [ImmediatePostData]
-        [DataSourceCriteria("City = '@This.City'")]
+        [DataSourceCriteria("City = '@This.ToCity'")]
         [XafDisplayName("Business trip hotel")]
         public virtual Hotel? BusinessTripHotel { get; set; }
 
@@ -1040,7 +1040,7 @@ namespace Visa2026.Module.BusinessObjects
             Criteria = "!CfgShowBusinessTripAddress Or BusinessTripAddressType != 'Hospital'", Context = "DetailView")]
         [VisibleInListView(false)]
         [ImmediatePostData]
-        [DataSourceCriteria("City = '@This.City'")]
+        [DataSourceCriteria("City = '@This.ToCity'")]
         [XafDisplayName("Business trip hospital")]
         public virtual Hospital? BusinessTripHospital { get; set; }
 
@@ -1048,7 +1048,7 @@ namespace Visa2026.Module.BusinessObjects
             Criteria = "!CfgShowBusinessTripAddress Or BusinessTripAddressType != 'Other'", Context = "DetailView")]
         [VisibleInListView(false)]
         [ImmediatePostData]
-        [DataSourceCriteria("City = '@This.City'")]
+        [DataSourceCriteria("City = '@This.ToCity'")]
         [XafDisplayName("Business trip other site")]
         public virtual OtherSite? BusinessTripOtherSite { get; set; }
 
@@ -1295,7 +1295,34 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("From Region (Genitive)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
         public string FromRegionName_Genitive =>
-            AddTurkmenCase(FromRegion?.NameTm ?? FromCity?.Region?.NameTm, "nyň", "niň");
+            AddTurkmenCase(ResolveFromRegionNameTm(), "nyň", "niň");
+
+        private string? ResolveFromRegionNameTm()
+        {
+            if (!string.IsNullOrWhiteSpace(FromRegion?.NameTm))
+                return FromRegion.NameTm;
+            if (!string.IsNullOrWhiteSpace(FromCity?.Region?.NameTm))
+                return FromCity.Region.NameTm;
+            if (!string.IsNullOrWhiteSpace(FromCity?.RegionName))
+                return FromCity.RegionName;
+
+            var objectSpace = ObjectSpaceHelper.Get(this) ?? ObjectSpaceHelper.Get(FromCity);
+            if (objectSpace == null || FromCity == null)
+                return null;
+
+            try
+            {
+                var city = objectSpace.GetObjectByKey<City>(FromCity.ID) ?? FromCity;
+                return city.Region?.NameTm ?? NullIfEmpty(city.RegionName);
+            }
+            catch (Exception)
+            {
+                return NullIfEmpty(FromCity.RegionName);
+            }
+        }
+
+        private static string? NullIfEmpty(string? value) =>
+            string.IsNullOrWhiteSpace(value) ? null : value;
 
         /// <summary>Ablative of origin city (FromCity) — e.g. "Mary etraby" → "Mary etrabyndan"</summary>
         [XafDisplayName("From City (Ablative)"), VisibleInDetailView(false), VisibleInListView(false)]

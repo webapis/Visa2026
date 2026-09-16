@@ -91,34 +91,60 @@ public static class ScanReviewFieldOrder
         if (boxes == null || boxes.Count == 0)
             return marks;
 
-        var keyed = marks
-            .Select((mark, index) =>
-            {
-                boxes.TryGetValue(mark.DisplayId, out var box);
-                return (Mark: mark, Index: index, Box: box, HasBox: boxes.ContainsKey(mark.DisplayId));
-            })
-            .ToList();
+        var siblingsByParent = marks
+            .Where(static m => m.PartIndex > 0)
+            .GroupBy(static m => ParentFieldId(m.DisplayId), StringComparer.Ordinal)
+            .ToDictionary(
+                static g => g.Key,
+                static g => g.OrderBy(static m => m.PartIndex).ToList(),
+                StringComparer.Ordinal);
 
-        keyed.Sort((left, right) =>
+        // One sort key per independent mark / compound group (first part's box).
+        var groups = new List<(ScanReviewOrderedField Anchor, List<ScanReviewOrderedField> Members, int Index)>();
+        var consumed = new HashSet<string>(StringComparer.Ordinal);
+        for (var i = 0; i < marks.Count; i++)
         {
-            var page = left.Mark.PageIndex.CompareTo(right.Mark.PageIndex);
+            var mark = marks[i];
+            if (!consumed.Add(mark.DisplayId))
+                continue;
+
+            if (mark.PartIndex > 0
+                && siblingsByParent.TryGetValue(ParentFieldId(mark.DisplayId), out var siblings))
+            {
+                foreach (var sibling in siblings)
+                    consumed.Add(sibling.DisplayId);
+                groups.Add((siblings[0], siblings, i));
+                continue;
+            }
+
+            groups.Add((mark, [mark], i));
+        }
+
+        groups.Sort((left, right) =>
+        {
+            var page = left.Anchor.PageIndex.CompareTo(right.Anchor.PageIndex);
             if (page != 0)
                 return page;
-            if (left.HasBox && right.HasBox)
+
+            boxes.TryGetValue(left.Anchor.DisplayId, out var leftBox);
+            boxes.TryGetValue(right.Anchor.DisplayId, out var rightBox);
+            var leftHas = boxes.ContainsKey(left.Anchor.DisplayId);
+            var rightHas = boxes.ContainsKey(right.Anchor.DisplayId);
+            if (leftHas && rightHas)
             {
-                if (Math.Abs(left.Box.Top - right.Box.Top) > lineThresholdPercent)
-                    return left.Box.Top.CompareTo(right.Box.Top);
-                var x = left.Box.Left.CompareTo(right.Box.Left);
+                if (Math.Abs(leftBox.Top - rightBox.Top) > lineThresholdPercent)
+                    return leftBox.Top.CompareTo(rightBox.Top);
+                var x = leftBox.Left.CompareTo(rightBox.Left);
                 if (x != 0)
                     return x;
             }
-            else if (left.HasBox != right.HasBox)
-                return left.HasBox ? -1 : 1;
+            else if (leftHas != rightHas)
+                return leftHas ? -1 : 1;
 
             return left.Index.CompareTo(right.Index);
         });
 
-        return Renumber(keyed.Select(static row => row.Mark).ToList());
+        return Renumber(groups.SelectMany(static g => g.Members).ToList());
     }
 
     public static IReadOnlyList<ScanReviewOrderedField> ApplyVisualSequence(
@@ -136,13 +162,36 @@ public static class ScanReviewFieldOrder
                 byId[mark.DisplayId] = mark;
         }
 
+        var siblingsByParent = marks
+            .Where(static m => m.PartIndex > 0)
+            .GroupBy(static m => ParentFieldId(m.DisplayId), StringComparer.Ordinal)
+            .ToDictionary(
+                static g => g.Key,
+                static g => g.OrderBy(static m => m.PartIndex).ToList(),
+                StringComparer.Ordinal);
+
         var seen = new HashSet<string>(StringComparer.Ordinal);
         var sorted = new List<ScanReviewOrderedField>(marks.Count);
         foreach (var id in displayIdsInReadingOrder)
         {
-            if (!byId.TryGetValue(id, out var mark) || !seen.Add(id))
+            if (!byId.TryGetValue(id, out var mark) || seen.Contains(id))
                 continue;
-            sorted.Add(mark);
+
+            // Keep comma-combination siblings (6.1 / 6.2 / 6.3) together in segment order.
+            if (mark.PartIndex > 0
+                && siblingsByParent.TryGetValue(ParentFieldId(mark.DisplayId), out var siblings))
+            {
+                foreach (var sibling in siblings)
+                {
+                    if (seen.Add(sibling.DisplayId))
+                        sorted.Add(sibling);
+                }
+
+                continue;
+            }
+
+            if (seen.Add(mark.DisplayId))
+                sorted.Add(mark);
         }
 
         foreach (var mark in marks)
@@ -157,10 +206,33 @@ public static class ScanReviewFieldOrder
     private static IReadOnlyList<ScanReviewOrderedField> Renumber(IReadOnlyList<ScanReviewOrderedField> marks)
     {
         var result = new List<ScanReviewOrderedField>(marks.Count);
+        var order = 0;
+        string? lastCompoundParent = null;
         for (var i = 0; i < marks.Count; i++)
         {
-            var order = i + 1;
-            result.Add(marks[i] with
+            var mark = marks[i];
+            if (mark.PartIndex > 0)
+            {
+                var parent = ParentFieldId(mark.DisplayId);
+                if (!string.Equals(parent, lastCompoundParent, StringComparison.Ordinal))
+                {
+                    order++;
+                    lastCompoundParent = parent;
+                }
+
+                result.Add(mark with
+                {
+                    Order = order,
+                    OrderLabel = order.ToString(CultureInfo.InvariantCulture)
+                        + "."
+                        + mark.PartIndex.ToString(CultureInfo.InvariantCulture),
+                });
+                continue;
+            }
+
+            order++;
+            lastCompoundParent = null;
+            result.Add(mark with
             {
                 Order = order,
                 OrderLabel = order.ToString(CultureInfo.InvariantCulture),

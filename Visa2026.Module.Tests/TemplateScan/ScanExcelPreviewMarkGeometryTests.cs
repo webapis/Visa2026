@@ -84,6 +84,34 @@ public class ScanExcelPreviewMarkGeometryTests
         Assert.Null(ScanExcelPreviewMarkGeometry.TryMap(BuildSanaw(), marks));
     }
 
+    [Fact]
+    public void TryMap_slices_shared_birth_cell_into_compound_part_boxes()
+    {
+        using var ms = new MemoryStream();
+        using (var wb = new XLWorkbook())
+        {
+            var ws = wb.AddWorksheet("Sanaw");
+            ws.Cell("D4").Value = "Doglan senesi we ýeri";
+            ws.Cell("D5").Value = "05.04.1989, TUR, Fatih";
+            ws.Cell("D5").Style.Fill.BackgroundColor = XLColor.Yellow;
+            wb.SaveAs(ms);
+        }
+
+        var cell = new DocumentRegion.ExcelCell("Sanaw", "D5");
+        var marks = new[]
+        {
+            new ScanReviewOrderedField(4, "mark6", "05.04.1989", "{{.PDBT}}", cell, 0, false, "4.1", "mark6:1", 1, cell),
+            new ScanReviewOrderedField(4, "mark6", "TUR", "{{.PCBT}}", cell, 0, false, "4.2", "mark6:2", 2, cell),
+            new ScanReviewOrderedField(4, "mark6", "Fatih", "{{.PBPL}}", cell, 0, false, "4.3", "mark6:3", 3, cell),
+        };
+
+        var layout = ScanExcelPreviewMarkGeometry.TryMap(ms.ToArray(), marks);
+        Assert.NotNull(layout);
+        Assert.True(layout!.Boxes["mark6:1"].Left < layout.Boxes["mark6:2"].Left);
+        Assert.True(layout.Boxes["mark6:2"].Left < layout.Boxes["mark6:3"].Left);
+        Assert.True(layout.Boxes["mark6:1"].Width < 40);
+    }
+
     private static ScanReviewOrderedField Mark(string id, string cell, string label) =>
         new(
             1,

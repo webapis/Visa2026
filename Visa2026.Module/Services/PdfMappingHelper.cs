@@ -629,7 +629,7 @@ namespace Visa2026.Module.Services
 
                 if (Token(source, "BusinessTripAddress"))
                 {
-                    if (!TypeOk(x => x.ShowBusinessTrips) || item.BusinessTripAddress == null)
+                    if (!TypeOk(x => x.ShowBusinessTrips) || !item.IsBusinessTripAddressValid)
                         return false;
                 }
 

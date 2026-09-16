@@ -222,6 +222,25 @@ function pickHit(hits, used, expected, entries) {
     return best;
 }
 
+function parentFieldId(fieldId) {
+    const id = String(fieldId || "");
+    const colon = id.lastIndexOf(":");
+    if (colon <= 0 || colon + 1 >= id.length) {
+        return id;
+    }
+    return /^\d+$/.test(id.slice(colon + 1)) ? id.slice(0, colon) : id;
+}
+
+function compoundPartIndex(fieldId) {
+    const id = String(fieldId || "");
+    const parent = parentFieldId(id);
+    if (parent === id) {
+        return 0;
+    }
+    const part = parseInt(id.slice(parent.length + 1), 10);
+    return Number.isFinite(part) ? part : 0;
+}
+
 function applyReadingOrder(container, dotnetRef) {
     if (!container) {
         return;
@@ -238,13 +257,61 @@ function applyReadingOrder(container, dotnetRef) {
                 page: p,
                 top: parseFloat(el.style.top) || 0,
                 left: parseFloat(el.style.left) || 0,
-                fieldId: el.dataset.fieldId || ""
+                fieldId: el.dataset.fieldId || "",
+                partIndex: compoundPartIndex(el.dataset.fieldId || "")
             });
         }
     }
 
+    const siblings = {};
+    for (let i = 0; i < items.length; i++) {
+        if (items[i].partIndex <= 0) {
+            continue;
+        }
+        const parent = parentFieldId(items[i].fieldId);
+        if (!siblings[parent]) {
+            siblings[parent] = [];
+        }
+        siblings[parent].push(items[i]);
+    }
+    Object.keys(siblings).forEach(function (parent) {
+        siblings[parent].sort(function (a, b) {
+            return a.partIndex - b.partIndex;
+        });
+    });
+
     const lineSlop = 16;
-    items.sort(function (a, b) {
+    const groups = [];
+    const seen = {};
+    for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (seen[item.fieldId]) {
+            continue;
+        }
+        if (item.partIndex > 0) {
+            const parent = parentFieldId(item.fieldId);
+            const members = siblings[parent] || [item];
+            for (let m = 0; m < members.length; m++) {
+                seen[members[m].fieldId] = true;
+            }
+            groups.push({
+                page: members[0].page,
+                top: members[0].top,
+                left: members[0].left,
+                members: members
+            });
+            continue;
+        }
+        seen[item.fieldId] = true;
+        groups.push({
+            page: item.page,
+            top: item.top,
+            left: item.left,
+            members: [item]
+        });
+    }
+
+    groups.sort(function (a, b) {
         if (a.page !== b.page) {
             return a.page - b.page;
         }
@@ -255,14 +322,22 @@ function applyReadingOrder(container, dotnetRef) {
     });
 
     const ids = [];
-    for (let i = 0; i < items.length; i++) {
-        const n = String(i + 1);
-        const badge = items[i].el.querySelector(".tas-mark__n");
-        if (badge) {
-            badge.textContent = n;
+    let order = 0;
+    for (let g = 0; g < groups.length; g++) {
+        const members = groups[g].members;
+        order += 1;
+        for (let m = 0; m < members.length; m++) {
+            const item = members[m];
+            const label = item.partIndex > 0
+                ? String(order) + "." + String(item.partIndex)
+                : String(order);
+            const badge = item.el.querySelector(".tas-mark__n");
+            if (badge) {
+                badge.textContent = label;
+            }
+            item.el.title = label + " " + (item.el.title || "").replace(/^[\d.]+\s*/, "");
+            ids.push(item.fieldId);
         }
-        items[i].el.title = n + " " + (items[i].el.title || "").replace(/^\d+\s*/, "");
-        ids.push(items[i].fieldId);
     }
 
     if (dotnetRef && ids.length) {

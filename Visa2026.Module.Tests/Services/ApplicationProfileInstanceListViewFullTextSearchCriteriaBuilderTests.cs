@@ -23,20 +23,6 @@ public sealed class ApplicationProfileInstanceListViewFullTextSearchCriteriaBuil
     }
 
     [Fact]
-    public void BuildLinkedPeoplePassportCriteria_UsesPeopleAndInstancePassports()
-    {
-        var criteria = ApplicationProfileInstanceListViewFullTextSearchCriteriaBuilder
-            .BuildLinkedPeoplePassportCriteria("ab123");
-
-        Assert.NotNull(criteria);
-        var text = criteria.ToString();
-        Assert.Contains("People", text, StringComparison.Ordinal);
-        Assert.Contains("Passports", text, StringComparison.Ordinal);
-        Assert.Contains("PassportNumber", text, StringComparison.Ordinal);
-        Assert.Contains("ab123", text, StringComparison.Ordinal);
-    }
-
-    [Fact]
     public void OfficerShellApplicationSearch_MatchesFirstLastAndPassportTokens()
     {
         const string haystack = "John\nSmith\nA12345678\nVisa extension";
