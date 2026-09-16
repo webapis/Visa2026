@@ -1211,6 +1211,30 @@
     "tk-TM": "Şablonlar",
     "ru-RU": "Шаблоны"
   },
+  "ApplicationProfileInstance.List.DateRange.Caption": {
+    "en": "Last N months",
+    "tr-TR": "Son N ay",
+    "tk-TM": "Soňky N aý",
+    "ru-RU": "Последние N мес."
+  },
+  "ApplicationProfileInstance.List.DateRange.LastMonth1": {
+    "en": "Last 1 month",
+    "tr-TR": "Son 1 ay",
+    "tk-TM": "Soňky 1 aý",
+    "ru-RU": "Последний 1 мес."
+  },
+  "ApplicationProfileInstance.List.DateRange.LastMonths": {
+    "en": "Last {0} months",
+    "tr-TR": "Son {0} ay",
+    "tk-TM": "Soňky {0} aý",
+    "ru-RU": "Последние {0} мес."
+  },
+  "ApplicationProfileInstance.List.DateRange.All": {
+    "en": "All",
+    "tr-TR": "Tümü",
+    "tk-TM": "Hemmesi",
+    "ru-RU": "Все"
+  },
   "ApplicationItemReportPackage.ErrorNoSelection": {
     "en": "Select at least one application line.",
     "tr-TR": "En az bir başvuru satırı seçin.",

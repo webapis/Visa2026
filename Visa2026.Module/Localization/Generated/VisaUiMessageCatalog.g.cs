@@ -936,6 +936,34 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Profil gulplanykça iň bolmanda bir tassyklama ädim wersiýasy galmaly. Soňkysyny pozmak ýerine göçüriň.",
             ["ru-RU"] = "Пока профиль заблокирован, должна остаться хотя бы одна версия этапов. Скопируйте версию вместо удаления последней.",
         },
+        ["ApplicationProfileInstance.List.DateRange.All"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "All",
+            ["tr-TR"] = "Tümü",
+            ["tk-TM"] = "Hemmesi",
+            ["ru-RU"] = "Все",
+        },
+        ["ApplicationProfileInstance.List.DateRange.Caption"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Last N months",
+            ["tr-TR"] = "Son N ay",
+            ["tk-TM"] = "Soňky N aý",
+            ["ru-RU"] = "Последние N мес.",
+        },
+        ["ApplicationProfileInstance.List.DateRange.LastMonth1"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Last 1 month",
+            ["tr-TR"] = "Son 1 ay",
+            ["tk-TM"] = "Soňky 1 aý",
+            ["ru-RU"] = "Последний 1 мес.",
+        },
+        ["ApplicationProfileInstance.List.DateRange.LastMonths"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Last {0} months",
+            ["tr-TR"] = "Son {0} ay",
+            ["tk-TM"] = "Soňky {0} aý",
+            ["ru-RU"] = "Последние {0} мес.",
+        },
         ["ApplicationProgress.ApprovalLegProfileRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Select an approval leg profile before advancing beyond office preparation.",

@@ -708,6 +708,12 @@ namespace Visa2026.Module.BusinessObjects
                  .HasDatabaseName("IX_Applications_ApplicationTypeID_List");
                 b.HasIndex("ApplicationProfileID")
                  .HasDatabaseName("IX_Applications_ApplicationProfileID");
+                b.HasIndex(a => a.ApplicationDate)
+                 .HasDatabaseName("IX_ApplicationProfileInstances_ApplicationDate")
+                 .HasFilter(IndexFilter("[GCRecord] IS NULL"));
+                b.HasIndex(a => new { a.HasLeftStagedQueue, a.LatestPrimaryStateCode })
+                 .HasDatabaseName("IX_ApplicationProfileInstances_StagedQueue_State")
+                 .HasFilter(IndexFilter("[GCRecord] IS NULL"));
             });
 
             modelBuilder.Entity<ApplicationProfile>(b =>

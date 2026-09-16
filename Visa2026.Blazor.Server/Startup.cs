@@ -167,6 +167,7 @@ namespace Visa2026.Blazor.Server
                         AuthorizedSignatoryPassportExpirationDateSchemaSql.ApplyIfMissing(connectionString);
                         PersonPreviousWorkplacesInTurkmenistanSchemaSql.ApplyIfMissing(connectionString);
                         InvitationLegacyShapeSchemaSql.ApplyIfMissing(connectionString);
+                        ApplicationProfileInstanceListQueryIndexesSchemaSql.ApplyIfMissing(connectionString);
                         ReportDashboardPostgresViewsHealSql.ApplyIfMissing(connectionString);
                     }
                 });
@@ -350,6 +351,7 @@ namespace Visa2026.Blazor.Server
                 PersonPreviousWorkplacesInTurkmenistanSchemaSql.ApplyIfMissing(connectionString);
                 InvitationLegacyShapeSchemaSql.ApplyIfMissing(connectionString);
                 PersonExportBatchSchemaSql.ApplyIfMissing(connectionString);
+                ApplicationProfileInstanceListQueryIndexesSchemaSql.ApplyIfMissing(connectionString);
                 ReportDashboardPostgresViewsHealSql.ApplyIfMissing(connectionString);
             }
 
