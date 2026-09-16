@@ -902,6 +902,7 @@
 }
 .tas-pdf-page {
   position: relative;
+  overflow: visible;
   margin: 0 auto 0.75rem;
   background: #fff;
   box-shadow: 0 10px 28px rgba(15, 23, 42, 0.18);
@@ -914,6 +915,7 @@
 .tas-pdf-marks {
   position: absolute;
   inset: 0;
+  overflow: visible;
   pointer-events: none;
 }
 .tas-pdf-mark {

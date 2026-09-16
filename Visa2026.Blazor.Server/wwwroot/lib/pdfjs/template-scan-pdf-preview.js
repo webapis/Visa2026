@@ -34,8 +34,52 @@ function toUint8(byteArray) {
 function fold(value) {
     return String(value || "")
         .normalize("NFKC")
+        .replace(/[\u00AD\u200B\u2060\uFEFF]/g, "")
+        .replace(/[ýÿ]/gi, "y")
+        .replace(/ä/gi, "a")
+        .replace(/ö/gi, "o")
+        .replace(/ü/gi, "u")
+        .replace(/ň/gi, "n")
+        .replace(/ş/gi, "s")
+        .replace(/ç/gi, "c")
+        .replace(/ž/gi, "z")
         .replace(/\s+/g, "")
         .toLowerCase();
+}
+
+function isAlnum(ch) {
+    return ch >= "0" && ch <= "9" || ch >= "a" && ch <= "z";
+}
+
+function isDigit(ch) {
+    return ch >= "0" && ch <= "9";
+}
+
+/**
+ * fold() strips spaces, so "sanawdaky 15 (on bäş)" becomes "sanawdaky15(onbas)".
+ * Treat letter↔digit edges as boundaries so count digits still match, and reject
+ * "20" inside "2026" via the end check.
+ */
+function isBoundary(folded, index, length) {
+    const len = Math.max(length || 0, 1);
+    if (index > 0 && isAlnum(folded[index - 1])) {
+        const prev = folded[index - 1];
+        const cur = folded[index];
+        if (!(isDigit(prev) !== isDigit(cur))) {
+            return false;
+        }
+    }
+
+    const end = index + len;
+    if (end < folded.length && isAlnum(folded[end])) {
+        const last = folded[end - 1];
+        const next = folded[end];
+        if (!(isDigit(last) !== isDigit(next))) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 function itemRect(item, viewport) {
@@ -77,29 +121,153 @@ function unionRects(rects) {
     };
 }
 
-function findLabelSpan(entries, label, startIndex) {
+function findAllLabelSpans(entries, label) {
     const needle = fold(label);
     if (!needle || !entries.length) {
-        return null;
+        return [];
     }
 
     let folded = "";
     const map = [];
-    for (let i = startIndex; i < entries.length; i++) {
+    for (let i = 0; i < entries.length; i++) {
         const chunk = fold(entries[i].item.str);
         for (let c = 0; c < chunk.length; c++) {
             folded += chunk[c];
             map.push(i);
         }
-        const at = folded.indexOf(needle);
-        if (at >= 0) {
+    }
+
+    const hits = [];
+    const requireBoundary = needle.length <= 3 || /^\d+$/.test(needle);
+    let searchFrom = 0;
+    while (searchFrom < folded.length) {
+        const at = folded.indexOf(needle, searchFrom);
+        if (at < 0) {
+            break;
+        }
+        if (!requireBoundary || isBoundary(folded, at, needle.length)) {
             const from = map[at];
             const to = map[at + needle.length - 1];
-            return { from, to, next: to + 1 };
+            if (from != null && to != null) {
+                hits.push({ from: from, to: to });
+            }
+        }
+        searchFrom = at + Math.max(needle.length, 1);
+    }
+
+    return hits;
+}
+
+function hitOverlapsUsed(hit, used) {
+    for (let i = hit.from; i <= hit.to; i++) {
+        if (used.has(i)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function markUsed(hit, used) {
+    for (let i = hit.from; i <= hit.to; i++) {
+        used.add(i);
+    }
+}
+
+function hitRect(hit, entries) {
+    const pageDiv = entries[hit.from].pageDiv;
+    const viewport = entries[hit.from].viewport;
+    const samePage = [];
+    for (let i = hit.from; i <= hit.to; i++) {
+        if (entries[i].pageDiv === pageDiv) {
+            samePage.push(entries[i]);
+        }
+    }
+    const box = unionRects(samePage.map(function (entry) {
+        return itemRect(entry.item, viewport);
+    }));
+    box.pageDiv = pageDiv;
+    box.viewport = viewport;
+    return box;
+}
+
+function pickHit(hits, used, expected, entries) {
+    const free = hits.filter(function (hit) {
+        return !hitOverlapsUsed(hit, used);
+    });
+    if (!free.length) {
+        return null;
+    }
+    if (!expected) {
+        return free[0];
+    }
+
+    let best = null;
+    let bestD = Infinity;
+    for (let i = 0; i < free.length; i++) {
+        const rect = hitRect(free[i], entries);
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const ex = expected.left + expected.width / 2;
+        const ey = expected.top + expected.height / 2;
+        let d = Math.hypot(cx - ex, cy - ey);
+        if (rect.pageDiv !== expected.pageDiv) {
+            d += 10000;
+        }
+        if (d < bestD) {
+            bestD = d;
+            best = free[i];
         }
     }
 
-    return null;
+    return best;
+}
+
+function applyReadingOrder(container, dotnetRef) {
+    if (!container) {
+        return;
+    }
+
+    const items = [];
+    const pages = container.querySelectorAll(".tas-pdf-page");
+    for (let p = 0; p < pages.length; p++) {
+        const marks = pages[p].querySelectorAll(".tas-pdf-mark");
+        for (let i = 0; i < marks.length; i++) {
+            const el = marks[i];
+            items.push({
+                el: el,
+                page: p,
+                top: parseFloat(el.style.top) || 0,
+                left: parseFloat(el.style.left) || 0,
+                fieldId: el.dataset.fieldId || ""
+            });
+        }
+    }
+
+    const lineSlop = 16;
+    items.sort(function (a, b) {
+        if (a.page !== b.page) {
+            return a.page - b.page;
+        }
+        if (Math.abs(a.top - b.top) > lineSlop) {
+            return a.top - b.top;
+        }
+        return a.left - b.left;
+    });
+
+    const ids = [];
+    for (let i = 0; i < items.length; i++) {
+        const n = String(i + 1);
+        const badge = items[i].el.querySelector(".tas-mark__n");
+        if (badge) {
+            badge.textContent = n;
+        }
+        items[i].el.title = n + " " + (items[i].el.title || "").replace(/^\d+\s*/, "");
+        ids.push(items[i].fieldId);
+    }
+
+    if (dotnetRef && ids.length) {
+        dotnetRef.invokeMethodAsync("OnVisualOrder", ids);
+    }
 }
 
 function ensureLayer(pageDiv) {
@@ -232,16 +400,16 @@ function hasExcelBox(mark) {
         && typeof mark.h === "number";
 }
 
-function placeExcelMark(mark, frames, dotnetRef) {
+function excelExpectedRect(mark, frames) {
     if (!frames.length) {
-        return false;
+        return null;
     }
 
     const totalH = frames.reduce(function (sum, item) {
         return sum + item.frame.height;
     }, 0);
     if (totalH <= 0) {
-        return false;
+        return null;
     }
 
     const y = (mark.t / 100) * totalH;
@@ -249,54 +417,73 @@ function placeExcelMark(mark, frames, dotnetRef) {
     let target = frames[0];
     let localY = y;
     for (let i = 0; i < frames.length; i++) {
-        const next = acc + frames[i].frame.height;
-        if (y < next || i === frames.length - 1) {
+        const nextAcc = acc + frames[i].frame.height;
+        if (y < nextAcc || i === frames.length - 1) {
             target = frames[i];
             localY = Math.max(0, y - acc);
             break;
         }
-        acc = next;
+        acc = nextAcc;
     }
 
     const width = target.frame.width;
-    appendMark(target.pageDiv, mark, {
+    return {
+        pageDiv: target.pageDiv,
         left: target.frame.left + (mark.l / 100) * width,
         top: target.frame.top + localY,
         width: Math.max((mark.w / 100) * width, 16),
         height: Math.max((mark.h / 100) * totalH, 14)
-    }, dotnetRef);
+    };
+}
+
+function placeExcelMark(mark, frames, dotnetRef) {
+    const box = excelExpectedRect(mark, frames);
+    if (!box) {
+        return false;
+    }
+    appendMark(box.pageDiv, mark, box, dotnetRef);
     return true;
+}
+
+function placeTextHit(mark, hit, entries, used, dotnetRef) {
+    const box = hitRect(hit, entries);
+    markUsed(hit, used);
+    appendMark(box.pageDiv, mark, box, dotnetRef);
 }
 
 function placeMarks(entries, marks, dotnetRef, pages) {
     const excelAspect = marks.reduce(function (value, mark) {
         return typeof mark.aspect === "number" && mark.aspect > 0 ? mark.aspect : value;
     }, 0);
-    const frames = excelAspect > 0 || marks.some(hasExcelBox)
+    const frames = excelAspect > 0 || marks.some(function (mark) {
+        return hasExcelBox(mark) && mark.kind !== "word";
+    })
         ? excelFrames(entries, excelAspect, pages)
         : [];
+    const used = new Set();
+    const queue = marks.slice().sort(function (a, b) {
+        const aExcel = a.kind !== "word" && hasExcelBox(a);
+        const bExcel = b.kind !== "word" && hasExcelBox(b);
+        if (aExcel !== bExcel) {
+            return aExcel ? -1 : 1;
+        }
+        return fold(b.label).length - fold(a.label).length;
+    });
 
-    let next = 0;
-    for (const mark of marks) {
-        if (hasExcelBox(mark) && placeExcelMark(mark, frames, dotnetRef)) {
+    for (const mark of queue) {
+        const excelOnly = hasExcelBox(mark) && mark.kind !== "word";
+        if (excelOnly && placeExcelMark(mark, frames, dotnetRef)) {
             continue;
         }
 
-        const hit = findLabelSpan(entries, mark.label, next);
-        if (!hit) {
-            continue;
+        const expected = excelOnly ? excelExpectedRect(mark, frames) : null;
+        const hit = pickHit(findAllLabelSpans(entries, mark.label), used, expected, entries);
+        if (hit) {
+            placeTextHit(mark, hit, entries, used, dotnetRef);
         }
-        next = hit.next;
-        const slice = entries.slice(hit.from, hit.to + 1);
-        const pageDiv = slice[0].pageDiv;
-        const viewport = slice[0].viewport;
-        const samePage = slice.filter(function (entry) {
-            return entry.pageDiv === pageDiv;
-        });
-        appendMark(pageDiv, mark, unionRects(samePage.map(function (entry) {
-            return itemRect(entry.item, viewport);
-        })), dotnetRef);
     }
+
+    applyReadingOrder(pages && pages[0] ? pages[0].pageDiv.parentElement : null, dotnetRef);
 }
 
 async function destroyHost(container) {

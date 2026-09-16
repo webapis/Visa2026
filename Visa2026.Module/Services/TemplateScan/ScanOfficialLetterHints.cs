@@ -1,5 +1,7 @@
 #nullable enable
 
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Visa2026.Module.Services.TemplateConvert;
 
 namespace Visa2026.Module.Services.TemplateScan;
@@ -101,6 +103,114 @@ public static class ScanOfficialLetterHints
     }
 
     /// <summary>
+    /// Printed trip length: <c>2 (iki) gün möhlet</c>. Not person count
+    /// (<c>daşary ýurt raýaty</c>) and not visa period (<c>N aý</c>).
+    /// </summary>
+    public static bool LooksLikeDurationCount(string? text)
+    {
+        var folded = TemplateTextNormalizer.NormalizeFolded(text);
+        if (folded.Length < 3)
+            return false;
+
+        return folded.Contains("gun", StringComparison.Ordinal)
+            && (folded.Contains("mohlet", StringComparison.Ordinal)
+                || folded.Contains("cenli", StringComparison.Ordinal)
+                || folded.Contains("is sapary", StringComparison.Ordinal));
+    }
+
+    /// <summary>
+    /// When person count and duration appear, the earlier phrase wins
+    /// so the first <c>1 (bir)</c> stays TPCNT and <c>2 (iki) gün</c> is BTDCNT.
+    /// </summary>
+    public static bool PrefersDurationCount(string? text)
+    {
+        if (!LooksLikeDurationCount(text))
+            return false;
+        if (!LooksLikePersonCountPhrase(text)
+            && !LooksLikeCancelVisaCount(text)
+            && !LooksLikeCancelWorkPermitCount(text)
+            && !LooksLikeCancelInvitationCount(text))
+            return true;
+
+        var folded = TemplateTextNormalizer.NormalizeFolded(text);
+        var gunIdx = folded.IndexOf("gun", StringComparison.Ordinal);
+        if (gunIdx < 0)
+            return false;
+
+        var personIdx = FirstIndex(folded, "rayat", "dasary yurt");
+        var visaIdx = folded.IndexOf("wiza", StringComparison.Ordinal);
+        var wpIdx = FirstWorkPermitPhraseIndex(folded);
+        var invitationIdx = FirstInvitationPhraseIndex(folded);
+        return (personIdx < 0 || gunIdx < personIdx)
+            && (visaIdx < 0 || gunIdx < visaIdx)
+            && (wpIdx < 0 || gunIdx < wpIdx)
+            && (invitationIdx < 0 || gunIdx < invitationIdx);
+    }
+
+    /// <summary>
+    /// Letter dates: <c>12.02.2026-den</c> → start, <c>13.02.2026-ne çenli</c> → end,
+    /// otherwise application date (ADAT).
+    /// </summary>
+    public static string ResolveLetterDateTokenCode(
+        string? afterText,
+        string? nearbyLabel = null,
+        ISet<string>? usedShortCodes = null)
+    {
+        if (LooksLikeTripStartDate(afterText) || LooksLikeTripStartDate(nearbyLabel))
+            return "BTSD";
+        if (LooksLikeTripEndDate(afterText) || LooksLikeTripEndDate(nearbyLabel))
+            return "BTED";
+        if (usedShortCodes != null
+            && usedShortCodes.Contains("ADAT")
+            && !LooksLikeCompanyRegistrationDate(afterText)
+            && !LooksLikeCompanyRegistrationDate(nearbyLabel))
+        {
+            return usedShortCodes.Contains("BTSD") ? "BTED" : "BTSD";
+        }
+
+        return "ADAT";
+    }
+
+    private static bool LooksLikeCompanyRegistrationDate(string? text)
+    {
+        var folded = TemplateTextNormalizer.NormalizeFolded(text);
+        return folded.Contains("hasaba alys", StringComparison.Ordinal)
+            || folded.Contains("tescil", StringComparison.Ordinal);
+    }
+
+    public static bool LooksLikeTripStartDate(string? text)
+    {
+        var folded = TemplateTextNormalizer.NormalizeFolded(text);
+        if (folded.Length == 0)
+            return false;
+
+        var trimmed = folded.TrimStart('-', ' ', '\t');
+        return trimmed.StartsWith("den", StringComparison.Ordinal)
+            || trimmed.StartsWith("dan", StringComparison.Ordinal);
+    }
+
+    public static bool LooksLikeTripEndDate(string? text)
+    {
+        var folded = TemplateTextNormalizer.NormalizeFolded(text);
+        if (folded.Length == 0)
+            return false;
+
+        var trimmed = folded.TrimStart('-', ' ', '\t');
+        return trimmed.StartsWith("ne", StringComparison.Ordinal)
+            || trimmed.StartsWith("cenli", StringComparison.Ordinal);
+    }
+
+    public static bool LooksLikePurposeParagraph(string? text, string? nearbyLabel = null)
+    {
+        var nearby = TemplateTextNormalizer.NormalizeFolded(nearbyLabel);
+        if (nearby.Contains("maksady", StringComparison.Ordinal))
+            return (text?.Trim().Length ?? 0) >= 12;
+
+        var folded = TemplateTextNormalizer.NormalizeFolded(text);
+        return folded.Contains("maksady", StringComparison.Ordinal) && folded.Length >= 24;
+    }
+
+    /// <summary>
     /// When both person and visa-cancel phrases appear, the earlier phrase wins
     /// so the first <c>1 (bir)</c> stays TPCNT and the one before <c>wizasy ýatyrmak</c> is CVCNT.
     /// </summary>
@@ -177,8 +287,102 @@ public static class ScanOfficialLetterHints
             return ("CVCNT", "CVCTX");
         if (PrefersCancelInvitationCount(text))
             return ("CICNT", "CICTX");
+        if (PrefersDurationCount(text))
+            return ("BTDCNT", "BTDCTX");
         return ("TPCNT", "TPCTX");
     }
+
+    /// <summary>
+    /// Isolated yellow <c>2</c> / <c>iki</c> in the same sentence as person
+    /// <c>1 (bir)</c>: the first pair keeps TPCNT; the later mark next to
+    /// <c>gün</c> is BTDCNT (not a duplicate person count).
+    /// </summary>
+    public static (string CountCode, string WordsCode) ResolveIsolatedCountTokenCodes(
+        string? text,
+        ISet<string>? usedShortCodes)
+    {
+        var pair = ResolveCountTokenCodes(text);
+        if (usedShortCodes == null
+            || !usedShortCodes.Contains(pair.CountCode))
+            return pair;
+
+        if (PrefersCancelWorkPermitCount(text) && !usedShortCodes.Contains("CWCNT"))
+            return ("CWCNT", "CWCTX");
+        if (PrefersCancelVisaCount(text) && !usedShortCodes.Contains("CVCNT"))
+            return ("CVCNT", "CVCTX");
+        if (PrefersCancelInvitationCount(text) && !usedShortCodes.Contains("CICNT"))
+            return ("CICNT", "CICTX");
+        if (LooksLikeDurationHint(text) && !usedShortCodes.Contains("BTDCNT"))
+            return ("BTDCNT", "BTDCTX");
+
+        return pair;
+    }
+
+    public static bool LooksLikeDurationHint(string? text)
+    {
+        var folded = TemplateTextNormalizer.NormalizeFolded(text);
+        return folded.Contains("gun", StringComparison.Ordinal)
+            || folded.Contains("mohlet", StringComparison.Ordinal);
+    }
+
+    public static bool LooksLikeIsolatedCountDigit(string? text)
+    {
+        var inner = (text ?? string.Empty).Trim();
+        return inner.Length is >= 1 and <= 3 && inner.All(char.IsDigit);
+    }
+
+    public static bool LooksLikeIsolatedCountWords(string? text)
+    {
+        var inner = (text ?? string.Empty).Trim().Trim('(', ')').Trim();
+        if (inner.Length == 0)
+            return false;
+
+        var folded = TemplateTextNormalizer.NormalizeFolded(inner);
+        return IsolatedCountWordFolds.Contains(folded);
+    }
+
+    public static bool LooksLikeIsolatedCountMark(string? text) =>
+        LooksLikeIsolatedCountDigit(text) || LooksLikeIsolatedCountWords(text);
+
+    /// <summary>
+    /// Keep only this <c>N (words)</c> pair’s caption. A later
+    /// <c>2 (iki) gün</c> in the same sentence must not steal person
+    /// <c>1 (bir)</c> (or the reverse).
+    /// </summary>
+    public static string? ClipImmediateCountContext(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return text;
+
+        var raw = text.Trim();
+        var leading = LeadingCountPair.Match(raw);
+        var searchFrom = leading.Success ? leading.Length : 0;
+        if (searchFrom >= raw.Length)
+            return raw;
+
+        var later = LaterCountPair.Match(raw, searchFrom);
+        if (!later.Success)
+            return raw;
+
+        var clipped = raw[..later.Index].Trim();
+        return clipped.Length > 0 ? clipped : raw;
+    }
+
+    private static readonly HashSet<string> IsolatedCountWordFolds = new(StringComparer.Ordinal)
+    {
+        "nol", "bir", "iki", "uc", "dort", "bas", "alty", "yedi", "sekiz", "dokuz",
+        "on", "on bir", "on iki", "on uc", "on dort", "on bas", "on alty", "on yedi",
+        "on sekiz", "on dokuz",
+        "yigrimi", "otuz", "kyrk", "elli", "altmys", "yetmis", "segsen", "togsan",
+    };
+
+    private static readonly Regex LeadingCountPair = new(
+        @"^\s*(?:\d{1,3}\s*)?\([^)]{0,40}\)",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+    private static readonly Regex LaterCountPair = new(
+        @"\d{1,3}\s*\(",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
     /// <summary>
     /// Nearby text is a person or document-cancel count caption, so an isolated
@@ -188,7 +392,8 @@ public static class ScanOfficialLetterHints
         LooksLikePersonCountPhrase(text)
         || LooksLikeCancelVisaCount(text)
         || LooksLikeCancelWorkPermitCount(text)
-        || LooksLikeCancelInvitationCount(text);
+        || LooksLikeCancelInvitationCount(text)
+        || LooksLikeDurationCount(text);
 
     private static bool WorkPermitPhraseStartsBeforeVisa(string? text)
     {

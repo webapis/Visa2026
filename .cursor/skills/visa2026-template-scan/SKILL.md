@@ -59,6 +59,15 @@ Officers submit **wizard step screenshots** + optional **catalog Preview** + the
 
 | Symptom | First step | Owner |
 |---------|------------|--------|
+| Business-trip letter dates map to ADAT / duration maps to TPCNT | **BTSD** / **BTED** (`-den` / `-ne` stay in Word). **BTDCNT** / **BTDCTX** for `N (words) gün`. From/to: **BTFRG** **BTFCT** **BTTRG** **BTTCT**. Purpose **BTPRP**. Sanaw destination **BTAD**. Restart, Analyze | **This skill** + user-report-templates |
+| Review Add cannot find From Region / From City / To Region / To City | Filter those names or **BTFRG** **BTFCT** **BTTRG** **BTTCT**. They sit in the **Application** group (not “district”). Restart, rebuild, Analyze | **This skill** + user-report-templates |
+| Review Add cannot find Purpose / Maksady | Filter `Purpose`, `Maksady`, or **BTPRP**. Instance free-text Purpose, not RGEL / BusinessTripPurpose lookup. Restart, rebuild, Analyze | **This skill** + user-report-templates |
+| Yellow `1` and `2` not in Detected fields (`bir`/`iki` only) | Word often yellows the words, not the digits. Analyze now adds leading `1`/`2`: **TPCNT** then **BTDCNT**. Stop F5, rebuild, **Analyze** (do not Remap unmarked first) | **This skill** |
+| Yellow `15` / `20` ink with no `#` (`on bäş` / `ýigrimi` only) | Same count-pair rule for multi-digit. Analyze adds **TPCNT**/**BTDCNT**. Review script `?v=tasmarks8` places `#` on digits after space-fold. Stop F5, rebuild, hard-refresh, **Analyze** | **This skill** |
+| Isolated yellow `2` next to `(iki) gün` missing; From Region preview empty | Digit after person `1 (bir)` is **BTDCNT**, not a second TPCNT. Rebuild, Analyze. Fill From region / From city so **BTFRG** prints | **This skill** + user-report-templates |
+| Review left pane missing a `#` (e.g. 12) or numbers sit on the wrong yellow | Word marks snap to unused PDF text near the OpenXML span; short `2` / duplicate dates no longer take the first hit. Header yellows number first. Restart, hard-refresh Review | **This skill** |
+| Review `#` on one line jump (10 12 11 14) | Numbers follow left-to-right on the letter (then the Detected list). Restart, hard-refresh Review | **This skill** |
+| Review `#` empty boxes in whitespace / stacked on letterhead | Word marks are PDF text only (no paragraph-% fallback). Rebuild, hard-refresh Review | **This skill** |
 | Preview shows `{{IMAGE:Person_Photo}}` in the photo box after Add existing template | Word wrapped the long token in the photo cell. Restart, hard-refresh Preview. New Generate uses `{{IMAGE:PPH}}` | **This skill** + user-report-templates |
 | Inserted sample photo not mapped | Body portrait (not a tiny icon) → `{{IMAGE:PPH}}` on Generate (`Person_Photo` still injects). Yellow still required for text values. Restart, Analyze | **This skill** |
 | Review placeholders dropped Person photo after Open yellow file | Restore re-pins `{{IMAGE:PPH}}` onto the live body portrait (do not yellow-highlight the picture). Continue replaces the sample photo. Re-Approve once. Restart | **This skill** |

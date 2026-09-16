@@ -225,6 +225,8 @@ public class ScanGuessingPatternRegistryTests
         Assert.Equal("CINB", ScanExcelColumnProfiles.Match("Çakylygyň belgisi")!.ShortCodes[0]);
         Assert.Equal("CISB", ScanExcelColumnProfiles.Match("Çakylygyň resmileşdirilen senesi")!.ShortCodes[0]);
         Assert.Equal("CIEB", ScanExcelColumnProfiles.Match("Çakylygyň möhleti")!.ShortCodes[0]);
+        Assert.Equal("BTAD", ScanExcelColumnProfiles.Match("Iş saparynda boljak salgysy")!.ShortCodes[0]);
+        Assert.Equal("VNAT", ScanExcelColumnProfiles.Match("Möhleti we gezekligi")!.ShortCodes[0]);
     }
 
     [Fact]

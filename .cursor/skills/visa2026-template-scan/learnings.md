@@ -2,6 +2,87 @@
 
 Append-only. Newest first under **## Entries**.
 
+### 2026-09-16 — Yellow digits `15` and `20` not identified next to `(on bäş)` / `(ýigrimi)`
+
+- Need: Business-trip Yuztutma Review. Yellow ink on `15` and `20` had no Detected rows / no `#` (only `on bäş` → TPCTX and `ýigrimi` → BTDCTX).
+- Cause: After BT count tokens, Analyze often kept the Turkmen words and skipped the printed digits (same class as `1`/`2`). Review pdf.js also folded spaces so `sanawdaky15` failed the digit boundary check, so even mapped digits got no overlay `#`.
+- Fix: `AttachCountPairSpans` completes `N (words)` pairs for any digit length. pdf.js `?v=tasmarks8` treats letter↔digit edges as boundaries and rejects `20` inside `2026`.
+- Officer: Stop F5, rebuild, hard-refresh Review, **Analyze** (not Remap unmarked first). Expect `15` → TPCNT, `on bäş` → TPCTX, `20` → BTDCNT, `ýigrimi` → BTDCTX, with `#` on each.
+- Prevent: Do not treat word-form yellow alone as the full count pair; do not strip spaces without keeping digit boundaries.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-16 — Yellow digits `1` and `2` not identified next to `(bir)` / `(iki)`
+
+- Need: Business-trip letter Review. Yellow `1` before `(bir)` and `2` before `(iki) gün` had no Detected rows (only `bir` / `iki`). Overlay # sat on the digit while the row was the words.
+- Cause: Word often yellows the count-words, not the digits. When digits were added, mapping used the rest of the sentence, so later `gün` stole the first pair (or the isolated digit had no count context).
+- Fix: Extract a leading `1`/`2` before yellow `bir`/`iki`. Clip each pair’s caption so person `1 (bir)` stays **TPCNT**/**TPCTX** and duration `2 (iki) gün` is **BTDCNT**/**BTDCTX**. Pair a lone digit with the next yellow words.
+- Officer: Stop F5, rebuild, **Analyze** (do not Remap unmarked until `1` and `2` appear). Detected: `1` → TPCNT, `bir` → TPCTX, `2` → BTDCNT, `iki` → BTDCTX.
+- Prevent: Do not treat the whole sentence as context for an isolated count mark. Do not Remap unmarked to invent missing digits.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-16 — Isolated `2` next to `iki` dropped; From Region merge empty
+
+- Need: Business-trip letter. Yellow `2` before `(iki) gün` had no Detected row. Preview **BTFRG** (#8 From Region) printed blank.
+- Cause: Isolated digit after person `1 (bir)` was classified as a second TPCNT and swallowed (`IsYellowTextFullyMapped`). BTFRG used `FromRegion` / `FromCity.Region` only — City.RegionName and FromRegionId were often unset.
+- Fix: Later isolated `2` / `iki` with `gün` → **BTDCNT**. Do not drop standalone count yellows. BTFRG also reads `FromCity.RegionName`. Saving From city reloads Region onto FromRegion.
+- Officer: Stop F5, rebuild, Analyze. `2` next to `iki` → **BTDCNT**. Fill From region (or From city). Preview **BTFRG** should print e.g. `Mary welaýatynyň`.
+- Prevent: A second isolated digit in a person-count sentence is duration when `gün` is nearby. Origin region merge must not require FromRegion nav to be loaded.
+- Cross-skill: visa2026-user-report-templates, visa2026-application-profile
+
+### 2026-09-16 — Add list missed Purpose on ApplicationProfileInstance
+
+- Need: Maksady yellow (Aşgabat / Türkiye ilçihanasy). Officer could not find the instance **Purpose** property in Add placeholder.
+- Cause: **BTPRP** existed as “Business trip purpose” in the Business trip group, not the BO display name **Purpose**.
+- Fix: Label **Purpose**. RelatedBo Application. Search **Purpose** / **Maksady** / **BTPRP**.
+- Officer: Stop F5, rebuild, Analyze. Filter `Purpose` or `Maksady`. Pick **Purpose — BTPRP** from the **Application** group.
+- Prevent: Add-list English names must match XafDisplayName on the case field.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-16 — Ghost `#` boxes in whitespace; body yellows unnumbered
+
+- Need: After LTR re-number, Review showed empty 3–10 / 14 in the margin, 11–13 stacked on the migration block, and no `#` on Mary / dates / Maksady yellows.
+- Cause: Word paragraph % boxes were painted when PDF text was rejected as “too far”. Visual sort then numbered those ghost boxes. Body hits never placed.
+- Fix: Word overlays are PDF text only (longest label first). No Word-geometry fallback. Visual order uses placed text boxes; unplaced rows stay at the end. Script `?v=tasmarks7`.
+- Officer: Stop F5, rebuild, hard-refresh Review. Numbers sit on yellow text, increasing left-to-right on each line.
+- Prevent: Do not draw Word Review marks from estimated paragraph %.
+- Cross-skill: none
+
+### 2026-09-16 — Review numbers 10 12 11 14 on one line
+
+- Need: Business-trip letter. Yellows on one sentence read `10 12 11 14` instead of `10 11 12 13 14`.
+- Cause: Overlay `#` used Detected-list order. Duplicate `welaýatynyň` put From Region on Ahal, so left-to-right badges jumped.
+- Fix: After placing, re-number by page position (same-line left→right). Detected rows follow that sequence. Word geometry does the same before PDF paints. Script `?v=tasmarks6`.
+- Officer: Stop F5, rebuild, hard-refresh Review. The numbers on a line should increase left to right.
+- Prevent: Do not leave overlay numbers in FieldPlan order when boxes sit in reading order.
+- Cross-skill: none
+
+### 2026-09-16 — Review #12 missing and some numbers on the wrong yellow
+
+- Need: Business-trip letter Review. Detected row 12 (From City / Mary etrabyndan) had no `#` on the left page. Other numbers sat on the wrong highlights (duplicate `12.02.2026`, a lone `2`).
+- Cause: pdf.js walked sample text with one advancing cursor. A later label consumed text after From City, so #12 was skipped. Short/duplicate labels always took the first PDF hit. Header yellows were numbered after body.
+- Fix: Unused-occurrence match + token boundaries + Turkmen fold. Word payload sends paragraph boxes (`ScanWordPreviewMarkGeometry`); snap to nearby text, else show the box. Header ranks before body. Script `?v=tasmarks5`.
+- Officer: Stop F5, rebuild, hard-refresh Review. Every Detected row should have a `#` on its yellow. Click row 12 — the From City mark highlights.
+- Prevent: Do not place Word Review marks by first-match sample text only.
+- Cross-skill: none
+
+### 2026-09-16 — Add list missed From Region / From City / To Region / To City
+
+- Need: Officer could not find those ApplicationProfileInstance properties in Review Add placeholder (Mary welaýatynyň mark).
+- Cause: Codes existed as **BTFRG** **BTFCT** **BTTRG** **BTTCT** but English labels said “district” / genitive, and they sat in the Business trip group.
+- Fix: Labels are exactly **From Region**, **From City**, **To Region**, **To City**. RelatedBo is Application. ExpandTerms maps FromCity / ToCity / FromRegion / ToRegion.
+- Officer: Stop F5, rebuild, Analyze. Filter `From Region`, `From City`, `To Region`, `To City`, or the short codes. Pick from the **Application** group.
+- Prevent: Add-list labels must match the BO display names officers type, not only the Turkmen case form.
+- Cross-skill: visa2026-user-report-templates, visa2026-application-profile
+
+### 2026-09-15 — Business trip letter + sanaw placeholders
+
+- Need: İş Saparyna Gitmek / Gelmek cover letter and sanaw. Add list had no trip dates, duration words, from/to region-district, purpose, or destination address.
+- Cause: Merge properties existed (`BusinessTripStartDateText`, From/To case forms) but catalog had no short codes. Overview Region/City is destination; FromCity was hidden. `2 (iki) gün` was guessed as TPCNT.
+- Fix: **BTSD** / **BTED** (keep `-den`/`-ne` in Word). **BTDCNT** / **BTDCTX**. **BTFRG** / **BTFCT** from FromCity; **BTTRG** / **BTTCT** from Region+City. **BTPRP** = Purpose. Sanaw **BTAD**. Show From city on BT cases. Excel *Iş saparynda boljak salgysy* → BTAD.
+- Officer: Stop F5, rebuild, Analyze. Letter: dates `-den`/`-ne` → BTSD/BTED; `gün` → BTDCNT/BTDCTX; Maksady → BTPRP. Sanaw last column → BTAD. Fill From city (origin) plus Region/City (destination).
+- Prevent: Do not reuse ADAT/TPCNT/RGEL for trip duration or Maksady. Hotel type is not a template token.
+- Cross-skill: visa2026-user-report-templates, visa2026-application-profile
+
 ### 2026-09-14 — Cancel invitation sanaw missing CINB/CISB/CIEB
 
 - Need: Sanaw-çakylygy ýatyrmak. Add list had INVN/INVS/INVE only. Officer searched Cancel Invitation AS Numbers / issued dates / expiration dates.

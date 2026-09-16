@@ -213,6 +213,8 @@ public static class ScanFieldBoxLocalizer
                || Pair(ca, cb, "CVCNT", "CVCTX")
                || Pair(ca, cb, "CWCNT", "CWCTX")
                || Pair(ca, cb, "CICNT", "CICTX")
+               || Pair(ca, cb, "BTDCNT", "BTDCTX")
+               || Pair(ca, cb, "BTSD", "BTED")
                || Pair(ca, cb, "VPER", "VCAT");
     }
 
@@ -286,6 +288,15 @@ public static class ScanFieldBoxLocalizer
             "CWCTX" => 58,
             "CICNT" => 59,
             "CICTX" => 61,
+            "BTSD" => 62,
+            "BTED" => 63,
+            "BTDCNT" => 64,
+            "BTDCTX" => 65,
+            "BTFRG" => 66,
+            "BTFCT" => 67,
+            "BTTRG" => 68,
+            "BTTCT" => 69,
+            "BTPRP" => 71,
             "VPER" => 60,
             "VCAT" => 70,
             _ => 400,

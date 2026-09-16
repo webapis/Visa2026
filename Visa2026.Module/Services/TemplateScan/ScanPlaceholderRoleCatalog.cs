@@ -38,6 +38,7 @@ public static class ScanPlaceholderRoleCatalog
     {
         "AFNUM", "ADAT", "Urgency_NameTm", "VPER", "VCAT", "MSRV", "SPFNM", "ABZLN",
         "TPCNT", "TPCTX", "CVCNT", "CVCTX", "CWCNT", "CWCTX", "CICNT", "CICTX",
+        "BTSD", "BTED", "BTDCNT", "BTDCTX", "BTFRG", "BTFCT", "BTTRG", "BTTCT", "BTPRP", "BTAD",
     };
 
     public static ScanPlaceholderRole Resolve(string? shortCode)

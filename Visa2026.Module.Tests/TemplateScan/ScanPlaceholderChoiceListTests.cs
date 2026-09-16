@@ -111,6 +111,56 @@ public class ScanPlaceholderChoiceListTests
         }
     }
 
+    [Theory]
+    [InlineData("From Region", "BTFRG")]
+    [InlineData("From City", "BTFCT")]
+    [InlineData("To Region", "BTTRG")]
+    [InlineData("To City", "BTTCT")]
+    [InlineData("FromRegion", "BTFRG")]
+    [InlineData("FromCity", "BTFCT")]
+    [InlineData("ToRegion", "BTTRG")]
+    [InlineData("ToCity", "BTTCT")]
+    [InlineData("Purpose", "BTPRP")]
+    [InlineData("Maksady", "BTPRP")]
+    public void From_to_region_city_search_finds_case_codes(string search, string expected)
+    {
+        var allowed = FullSet().Allowed;
+        var codes = ScanPlaceholderChoiceList.RemainingGroups(allowed, hideShortCodes: Array.Empty<string>(), search)
+            .SelectMany(static g => g.Entries)
+            .Select(static e => e.ShortCode)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        Assert.Contains(expected, codes);
+    }
+
+    [Theory]
+    [InlineData("BTSD")]
+    [InlineData("business trip")]
+    [InlineData("iş sapary")]
+    [InlineData("Maksady")]
+    [InlineData("Iş saparynda boljak salgysy")]
+    public void Business_trip_search_finds_catalog_codes(string search)
+    {
+        var allowed = FullSet().Allowed;
+        var codes = ScanPlaceholderChoiceList.RemainingGroups(allowed, hideShortCodes: Array.Empty<string>(), search)
+            .SelectMany(static g => g.Entries)
+            .Select(static e => e.ShortCode)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        if (string.Equals(search, "BTSD", StringComparison.OrdinalIgnoreCase))
+            Assert.Contains("BTSD", codes);
+        else if (search.Contains("Maksady", StringComparison.OrdinalIgnoreCase))
+            Assert.Contains("BTPRP", codes);
+        else if (search.Contains("boljak", StringComparison.OrdinalIgnoreCase))
+            Assert.Contains("BTAD", codes);
+        else
+        {
+            Assert.Contains("BTSD", codes);
+            Assert.Contains("BTDCNT", codes);
+            Assert.Contains("BTPRP", codes);
+        }
+    }
+
     [Fact]
     public void Education_search_keeps_level_institution_and_specialty()
     {

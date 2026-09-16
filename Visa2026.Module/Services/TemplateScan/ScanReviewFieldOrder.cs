@@ -76,6 +76,100 @@ public static class ScanReviewFieldOrder
         return ExpandCompounds(items);
     }
 
+    /// <summary>
+    /// Re-numbers marks in on-page reading order (top→bottom, then left→right on the same line)
+    /// so overlay badges stay 10 11 12 13 14 instead of 10 12 11 14.
+    /// </summary>
+    public static IReadOnlyList<ScanReviewOrderedField> ApplyReadingBoxes(
+        IReadOnlyList<ScanReviewOrderedField> marks,
+        IReadOnlyDictionary<string, ScanExcelPreviewMarkBox>? boxes,
+        double lineThresholdPercent = 1.8)
+    {
+        ArgumentNullException.ThrowIfNull(marks);
+        if (marks.Count == 0)
+            return marks;
+        if (boxes == null || boxes.Count == 0)
+            return marks;
+
+        var keyed = marks
+            .Select((mark, index) =>
+            {
+                boxes.TryGetValue(mark.DisplayId, out var box);
+                return (Mark: mark, Index: index, Box: box, HasBox: boxes.ContainsKey(mark.DisplayId));
+            })
+            .ToList();
+
+        keyed.Sort((left, right) =>
+        {
+            var page = left.Mark.PageIndex.CompareTo(right.Mark.PageIndex);
+            if (page != 0)
+                return page;
+            if (left.HasBox && right.HasBox)
+            {
+                if (Math.Abs(left.Box.Top - right.Box.Top) > lineThresholdPercent)
+                    return left.Box.Top.CompareTo(right.Box.Top);
+                var x = left.Box.Left.CompareTo(right.Box.Left);
+                if (x != 0)
+                    return x;
+            }
+            else if (left.HasBox != right.HasBox)
+                return left.HasBox ? -1 : 1;
+
+            return left.Index.CompareTo(right.Index);
+        });
+
+        return Renumber(keyed.Select(static row => row.Mark).ToList());
+    }
+
+    public static IReadOnlyList<ScanReviewOrderedField> ApplyVisualSequence(
+        IReadOnlyList<ScanReviewOrderedField> marks,
+        IReadOnlyList<string>? displayIdsInReadingOrder)
+    {
+        ArgumentNullException.ThrowIfNull(marks);
+        if (displayIdsInReadingOrder == null || displayIdsInReadingOrder.Count == 0 || marks.Count == 0)
+            return marks;
+
+        var byId = new Dictionary<string, ScanReviewOrderedField>(StringComparer.Ordinal);
+        foreach (var mark in marks)
+        {
+            if (!byId.ContainsKey(mark.DisplayId))
+                byId[mark.DisplayId] = mark;
+        }
+
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        var sorted = new List<ScanReviewOrderedField>(marks.Count);
+        foreach (var id in displayIdsInReadingOrder)
+        {
+            if (!byId.TryGetValue(id, out var mark) || !seen.Add(id))
+                continue;
+            sorted.Add(mark);
+        }
+
+        foreach (var mark in marks)
+        {
+            if (seen.Add(mark.DisplayId))
+                sorted.Add(mark);
+        }
+
+        return Renumber(sorted);
+    }
+
+    private static IReadOnlyList<ScanReviewOrderedField> Renumber(IReadOnlyList<ScanReviewOrderedField> marks)
+    {
+        var result = new List<ScanReviewOrderedField>(marks.Count);
+        for (var i = 0; i < marks.Count; i++)
+        {
+            var order = i + 1;
+            result.Add(marks[i] with
+            {
+                Order = order,
+                OrderLabel = order.ToString(CultureInfo.InvariantCulture),
+            });
+        }
+
+        return result;
+    }
+
     public static string ParentFieldId(string? rowKey)
     {
         var key = (rowKey ?? string.Empty).Trim();
@@ -213,12 +307,12 @@ public static class ScanReviewFieldOrder
         if (string.IsNullOrWhiteSpace(address))
             return;
 
-        if (address.StartsWith("body/", StringComparison.OrdinalIgnoreCase))
+        if (address.StartsWith("header", StringComparison.OrdinalIgnoreCase))
             partRank = 0;
-        else if (address.StartsWith("header", StringComparison.OrdinalIgnoreCase))
-            partRank = 2;
+        else if (address.StartsWith("body/", StringComparison.OrdinalIgnoreCase))
+            partRank = 1;
         else if (address.StartsWith("footer", StringComparison.OrdinalIgnoreCase))
-            partRank = 3;
+            partRank = 2;
 
         var slash = address.LastIndexOf('/');
         if (slash >= 0 && slash + 1 < address.Length)

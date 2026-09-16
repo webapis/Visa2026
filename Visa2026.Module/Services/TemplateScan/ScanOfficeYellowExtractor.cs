@@ -1,6 +1,8 @@
 #nullable enable
 
 using System.Globalization;
+using System.Linq;
+using System.Text.RegularExpressions;
 using DrawingColor = System.Drawing.Color;
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Packaging;
@@ -111,6 +113,8 @@ public sealed class ScanOfficeYellowExtractor : IScanOfficeYellowExtractor
                 cursor += text.Length;
             }
 
+            var paragraphSpans = new List<ScanOfficeYellowSpan>();
+
             // Merge consecutive yellow segments into spans.
             var i = 0;
             while (i < segments.Count)
@@ -137,7 +141,7 @@ public sealed class ScanOfficeYellowExtractor : IScanOfficeYellowExtractor
                 if (mark.Length > 0)
                 {
                     var lead = raw.Length - raw.TrimStart().Length;
-                    results.Add(new ScanOfficeYellowSpan
+                    paragraphSpans.Add(new ScanOfficeYellowSpan
                     {
                         Text = mark,
                         Region = new DocumentRegion.WordSpan(
@@ -150,9 +154,109 @@ public sealed class ScanOfficeYellowExtractor : IScanOfficeYellowExtractor
 
                 i = j;
             }
+
+            AttachCountPairSpans(fullText, addressed.Address, paragraphSpans);
+            results.AddRange(paragraphSpans);
         }
 
         return results;
+    }
+
+    private static readonly Regex PrintedCountPair = new(
+        @"(\d{1,3})\s*[\(\uFF08]\s*([^\)\uFF09]{1,24}?)\s*[\)\uFF09]",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+    /// <summary>
+    /// Printed <c>15 (on bäş)</c> / <c>20 (ýigrimi)</c>: officers highlight the digit or the
+    /// words (Word run boundaries decide), rarely both. When either side of the pair carries
+    /// yellow, mark the other side too so Review keeps TPCNT + TPCTX / BTDCNT + BTDCTX.
+    /// A pair with no yellow at all stays untouched — yellow still drives the plan.
+    /// </summary>
+    internal static void AttachCountPairSpans(
+        string paragraphText,
+        string paragraphAddress,
+        List<ScanOfficeYellowSpan> spans)
+    {
+        if (string.IsNullOrEmpty(paragraphText) || spans.Count == 0)
+            return;
+
+        var extras = new List<ScanOfficeYellowSpan>();
+        var replaced = new List<ScanOfficeYellowSpan>();
+        foreach (Match match in PrintedCountPair.Matches(paragraphText))
+        {
+            var digit = match.Groups[1];
+            var words = match.Groups[2];
+            if (!ScanOfficialLetterHints.LooksLikeIsolatedCountWords(words.Value))
+                continue;
+
+            var digitMark = FindMark(spans, extras, digit.Index, digit.Length);
+            var wordsMark = FindMark(spans, extras, words.Index, words.Length);
+            if (digitMark == null && wordsMark == null)
+                continue;
+
+            // One highlight swallowed the pair without its closing bracket ("15 (on bäş"):
+            // the count regexes cannot split that, so mark the digit and the words instead.
+            if (digitMark != null
+                && ReferenceEquals(digitMark, wordsMark)
+                && !PrintedCountPair.IsMatch(digitMark.Text))
+            {
+                replaced.Add(digitMark);
+                digitMark = null;
+                wordsMark = null;
+            }
+
+            if (digitMark == null)
+                extras.Add(PairSpan(paragraphAddress, spans, digit.Value, digit.Index, digit.Length));
+            if (wordsMark == null)
+                extras.Add(PairSpan(paragraphAddress, spans, words.Value, words.Index, words.Length));
+        }
+
+        if (extras.Count == 0)
+            return;
+
+        foreach (var span in replaced)
+            spans.Remove(span);
+        spans.AddRange(extras);
+        spans.Sort(CompareByParagraphOffset);
+    }
+
+    private static ScanOfficeYellowSpan PairSpan(
+        string paragraphAddress,
+        List<ScanOfficeYellowSpan> spans,
+        string text,
+        int start,
+        int length) =>
+        new()
+        {
+            Text = text,
+            Region = new DocumentRegion.WordSpan(paragraphAddress, start, length),
+            PageIndex = spans[0].PageIndex,
+        };
+
+    private static ScanOfficeYellowSpan? FindMark(
+        List<ScanOfficeYellowSpan> spans,
+        List<ScanOfficeYellowSpan> extras,
+        int start,
+        int length)
+    {
+        var end = start + length;
+        foreach (var span in spans.Concat(extras))
+        {
+            if (span.Region is not DocumentRegion.WordSpan wordSpan)
+                continue;
+            var spanEnd = wordSpan.Start + wordSpan.Length;
+            if (start < spanEnd && wordSpan.Start < end)
+                return span;
+        }
+
+        return null;
+    }
+
+    private static int CompareByParagraphOffset(ScanOfficeYellowSpan a, ScanOfficeYellowSpan b)
+    {
+        var aStart = a.Region is DocumentRegion.WordSpan aa ? aa.Start : 0;
+        var bStart = b.Region is DocumentRegion.WordSpan bb ? bb.Start : 0;
+        return aStart.CompareTo(bStart);
     }
 
     private static bool IsYellowRun(Run run)

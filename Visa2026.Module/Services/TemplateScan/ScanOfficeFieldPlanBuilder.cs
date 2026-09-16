@@ -48,7 +48,7 @@ public static class ScanOfficeFieldPlanBuilder
             var yellow = yellows[yellowIndex];
             nearbyByIndex.TryGetValue(yellowIndex, out var nearbyCtx);
             var nearbyLabel = nearbyCtx?.Joined;
-            var countContext = nearbyCtx?.Following ?? nearbyLabel;
+            var countContext = ResolveCountContext(yellows, nearbyByIndex, yellowIndex, nearbyCtx);
 
             var lockKey = ScanDocumentRegionKey.ForRegion(yellow.Region);
             if (lockKey != null && lockedByKey.TryGetValue(lockKey, out var lockedPin))
@@ -283,6 +283,40 @@ public static class ScanOfficeFieldPlanBuilder
     }
 
     private sealed record YellowNearby(string? Joined, string? Following);
+
+    private static string? ResolveCountContext(
+        IReadOnlyList<ScanOfficeYellowSpan> yellows,
+        Dictionary<int, YellowNearby> nearbyByIndex,
+        int yellowIndex,
+        YellowNearby? nearbyCtx)
+    {
+        var yellow = yellows[yellowIndex];
+        var isDigit = ScanOfficialLetterHints.LooksLikeIsolatedCountDigit(yellow.Text);
+        var isWords = ScanOfficialLetterHints.LooksLikeIsolatedCountWords(yellow.Text);
+        if (!isDigit && !isWords)
+            return nearbyCtx?.Following ?? nearbyCtx?.Joined;
+
+        var local = ScanOfficialLetterHints.ClipImmediateCountContext(nearbyCtx?.Following);
+        if (isDigit
+            && yellowIndex + 1 < yellows.Count
+            && ScanOfficialLetterHints.LooksLikeIsolatedCountWords(yellows[yellowIndex + 1].Text))
+        {
+            nearbyByIndex.TryGetValue(yellowIndex + 1, out var nextCtx);
+            var peerFollow = ScanOfficialLetterHints.ClipImmediateCountContext(nextCtx?.Following);
+            var peer = string.IsNullOrWhiteSpace(peerFollow)
+                ? yellows[yellowIndex + 1].Text
+                : yellows[yellowIndex + 1].Text + " " + peerFollow;
+            if (string.IsNullOrWhiteSpace(local))
+                local = peer;
+            else if (!local.Contains(yellows[yellowIndex + 1].Text, StringComparison.OrdinalIgnoreCase))
+                local = ScanOfficialLetterHints.ClipImmediateCountContext(local + " " + peer);
+        }
+
+        if (string.IsNullOrWhiteSpace(local))
+            local = ScanOfficialLetterHints.ClipImmediateCountContext(nearbyCtx?.Joined);
+
+        return string.IsNullOrWhiteSpace(local) ? null : local.Trim();
+    }
 
     private static Dictionary<int, YellowNearby> BuildNearbyLabels(
         byte[]? officeBytes,

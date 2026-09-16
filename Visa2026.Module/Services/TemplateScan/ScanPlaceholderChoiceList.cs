@@ -92,6 +92,37 @@ public static class ScanPlaceholderChoiceList
         if (term.Contains("resmilesdirilen", StringComparison.OrdinalIgnoreCase)
             || term.Contains("resmileşdirilen", StringComparison.OrdinalIgnoreCase))
             yield return "cancel invitation issued dates";
+        if (term.Contains("is sapary", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("iş sapary", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("business trip", StringComparison.OrdinalIgnoreCase))
+        {
+            yield return "business trip start date";
+            yield return "business trip duration";
+            yield return "from region";
+            yield return "from city";
+            yield return "to region";
+            yield return "to city";
+            yield return "Purpose";
+            yield return "iş saparynda boljak salgysy";
+        }
+        if (term.Contains("from region", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("fromregion", StringComparison.OrdinalIgnoreCase))
+            yield return "From Region";
+        if (term.Contains("from city", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("fromcity", StringComparison.OrdinalIgnoreCase))
+            yield return "From City";
+        if (term.Contains("to region", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("toregion", StringComparison.OrdinalIgnoreCase))
+            yield return "To Region";
+        if (term.Contains("to city", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("tocity", StringComparison.OrdinalIgnoreCase))
+            yield return "To City";
+        if (term.Contains("maksady", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("purpose", StringComparison.OrdinalIgnoreCase))
+            yield return "Purpose";
+        if (term.Contains("boljak salgy", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("boljak salgysy", StringComparison.OrdinalIgnoreCase))
+            yield return "iş saparynda boljak salgysy";
     }
 
     private static bool Contains(string? value, string term)

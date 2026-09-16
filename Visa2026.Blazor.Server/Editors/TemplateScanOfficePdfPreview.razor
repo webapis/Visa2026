@@ -33,6 +33,7 @@ else
     [Parameter] public string? ActiveFieldId { get; set; }
     [Parameter] public int MarkFocus { get; set; }
     [Parameter] public EventCallback<string?> HoveredFieldIdChanged { get; set; }
+    [Parameter] public EventCallback<IReadOnlyList<string>> VisualOrderChanged { get; set; }
 
     [Inject] private ApplicationWordReportOfficePreviewPdfConverter Converter { get; set; } = null!;
     [Inject] private IJSRuntime JS { get; set; } = null!;
@@ -101,7 +102,7 @@ else
         {
             _module ??= await JS.InvokeAsync<IJSObjectReference>(
                 "import",
-                "/lib/pdfjs/template-scan-pdf-preview.js?v=tasmarks4");
+                "/lib/pdfjs/template-scan-pdf-preview.js?v=tasmarks8");
 
             if (_needsPaint)
             {
@@ -151,6 +152,14 @@ else
     }
 
     [JSInvokable]
+    public async Task OnVisualOrder(List<string> fieldIds)
+    {
+        if (fieldIds == null || fieldIds.Count == 0)
+            return;
+        await VisualOrderChanged.InvokeAsync(fieldIds);
+    }
+
+    [JSInvokable]
     public async Task OnMarkActivate(string fieldId)
     {
         if (string.IsNullOrWhiteSpace(fieldId))
@@ -160,7 +169,9 @@ else
 
     private List<object> MarkPayload()
     {
-        var layout = ScanExcelPreviewMarkGeometry.TryMap(_source, Marks);
+        var excel = ScanExcelPreviewMarkGeometry.TryMap(_source, Marks);
+        var layout = excel;
+        var kind = excel != null ? "excel" : null;
         var payload = new List<object>(Marks.Count);
         foreach (var mark in Marks)
         {
@@ -172,6 +183,7 @@ else
                     order = mark.DisplayOrder,
                     label = mark.LabelText,
                     isGap = mark.IsGap,
+                    kind,
                     l = box.Left,
                     t = box.Top,
                     w = box.Width,
@@ -195,7 +207,7 @@ else
     }
 
     private string MarksKey() =>
-        string.Join("|", Marks.Select(static m => m.DisplayId + ":" + m.DisplayOrder + ":" + m.LabelText));
+        string.Join("|", Marks.Select(static m => m.DisplayId + ":" + m.LabelText));
 
     private async Task ClearHostAsync()
     {
