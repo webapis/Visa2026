@@ -208,6 +208,8 @@ internal static class Visa2014ApplicationODataImporter
         TryAddOptionalFk(payload, row, "ApprovalLegProfile", resolver.ResolveApprovalLegProfile);
         TryAddOptionalFk(payload, row, "ToCity", value => resolver.ResolveCity(value));
         TryAddOptionalFk(payload, row, "ToRegion", resolver.ResolveRegion);
+        TryAddOptionalFk(payload, row, "FromCity", value => resolver.ResolveCity(value));
+        TryAddOptionalFk(payload, row, "FromRegion", resolver.ResolveRegion);
 
         var cityName = row.GetValueOrDefault("ToCity") as string;
         var cityId = resolver.ResolveCity(cityName);
@@ -216,6 +218,15 @@ internal static class Visa2014ApplicationODataImporter
             var regionId = resolver.ResolveRegionForCity(cityId.Value);
             if (regionId.HasValue)
                 payload["ToRegion"] = new { ID = regionId.Value };
+        }
+
+        var fromCityName = row.GetValueOrDefault("FromCity") as string;
+        var fromCityId = resolver.ResolveCity(fromCityName);
+        if (fromCityId.HasValue && !payload.ContainsKey("FromRegion"))
+        {
+            var fromRegionId = resolver.ResolveRegionForCity(fromCityId.Value);
+            if (fromRegionId.HasValue)
+                payload["FromRegion"] = new { ID = fromRegionId.Value };
         }
 
         var purpose = Visa2014ApplicationTransform.ResolvePurposeForImport(
@@ -273,6 +284,18 @@ internal static class Visa2014ApplicationODataImporter
                 ?? resolver.ResolveRegionForCity(cityId.Value);
             if (regionId.HasValue)
                 payload["ToRegion"] = new { ID = regionId.Value };
+        }
+
+        var fromCityName = row.GetValueOrDefault("FromCity") as string;
+        var fromCityId = resolver.ResolveCity(fromCityName);
+        if (fromCityId.HasValue)
+        {
+            payload["FromCity"] = new { ID = fromCityId.Value };
+
+            var fromRegionId = resolver.ResolveRegion(row.GetValueOrDefault("FromRegion") as string)
+                ?? resolver.ResolveRegionForCity(fromCityId.Value);
+            if (fromRegionId.HasValue)
+                payload["FromRegion"] = new { ID = fromRegionId.Value };
         }
 
         var purpose = Visa2014ApplicationTransform.ResolvePurposeForImport(

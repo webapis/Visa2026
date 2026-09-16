@@ -26,6 +26,10 @@ internal sealed record Visa2014ApplicationRawRow(
     string? ToCityName,
     string? ToRegionMgCode,
     string? ToRegionName,
+    string? FromCityMgCode,
+    string? FromCityName,
+    string? FromRegionMgCode,
+    string? FromRegionName,
     string? BusinessTripAddressText,
     string? BusinessTripAddressCityMgCode,
     string? BusinessTripAddressCityName,
@@ -117,12 +121,13 @@ internal static class Visa2014ApplicationTransform
         "ApplicationDate", "Year", "Month", "IsManualEntry", "ApplicationType",
         "MigrationService", "Urgency", "VisaPeriod", "VisaCategory", "VisaType", "ProjectContract", "ApprovalLegProfile",
         "BorderZoneLocation", "MovementPermitLocation",
-        "ToCity", "ToRegion", "BusinessTripAddress", "BusinessTripAddressCity", "Purpose",
+        "ToCity", "ToRegion", "FromCity", "FromRegion", "BusinessTripAddress", "BusinessTripAddressCity", "Purpose",
         "BusinessTripStartDate", "BusinessTripEndDate",
         "_legacy_DepartmentForRegistration", "_legacy_DepartmentForRegistrationName",
         "_legacy_ApplicationTypeComposite", "_legacy_UrgencyComposite",
         "_legacy_VisaPeriodComposite", "_legacy_VisaCategoryComposite",
         "_legacy_ToCityMgCode", "_legacy_ToCityName",
+        "_legacy_FromCityMgCode", "_legacy_FromCityName",
     ];
 
     internal static string ExtractSql => $"""
@@ -148,10 +153,14 @@ internal static class Visa2014ApplicationTransform
             vc.CategoryOfVisaL,
             ISNULL(CAST(vc.mgCode AS varchar(10)), '') AS VisaCategoryMgCode,
             COALESCE(c_app.NumberOfContract, personContract.NumberOfContract) AS NumberOfContract,
-            ISNULL(CAST(se.mgCode AS varchar(10)), '') AS ToCityMgCode,
-            se.[{SeherEtrap}L] AS ToCityName,
-            ISNULL(CAST(destReg.mgCode AS varchar(10)), '') AS ToRegionMgCode,
-            destReg.NameOfRegionL AS ToRegionName,
+            ISNULL(CAST(COALESCE(se.mgCode, seNew.mgCode) AS varchar(10)), '') AS ToCityMgCode,
+            COALESCE(se.[{SeherEtrap}L], seNew.[{SeherEtrap}L]) AS ToCityName,
+            ISNULL(CAST(COALESCE(destReg.mgCode, destRegNew.mgCode) AS varchar(10)), '') AS ToRegionMgCode,
+            COALESCE(destReg.NameOfRegionL, destRegNew.NameOfRegionL) AS ToRegionName,
+            ISNULL(CAST(sePrev.mgCode AS varchar(10)), '') AS FromCityMgCode,
+            sePrev.[{SeherEtrap}L] AS FromCityName,
+            ISNULL(CAST(fromReg.mgCode AS varchar(10)), '') AS FromRegionMgCode,
+            fromReg.NameOfRegionL AS FromRegionName,
             LTRIM(RTRIM(ISNULL(tripAddr.BusinessTripAddressText, ''))) AS BusinessTripAddressText,
             ISNULL(CAST(tripAddr.AddrCityMg AS varchar(10)), '') AS BusinessTripAddressCityMgCode,
             tripAddr.AddrCityName AS BusinessTripAddressCityName,
@@ -203,6 +212,10 @@ internal static class Visa2014ApplicationTransform
         ) personContract
         LEFT JOIN dbo.[{SeherEtrap}] se ON se.Oid = a.BusinessTripDestination
         LEFT JOIN dbo.Region destReg ON destReg.Oid = se.Region AND destReg.GCRecord IS NULL
+        LEFT JOIN dbo.[{SeherEtrap}] seNew ON seNew.Oid = a.NewRegistrationLocation
+        LEFT JOIN dbo.Region destRegNew ON destRegNew.Oid = seNew.Region AND destRegNew.GCRecord IS NULL
+        LEFT JOIN dbo.[{SeherEtrap}] sePrev ON sePrev.Oid = a.PreviousRegistrationLocation
+        LEFT JOIN dbo.Region fromReg ON fromReg.Oid = sePrev.Region AND fromReg.GCRecord IS NULL
         LEFT JOIN dbo.AnketaMaksat anketa ON anketa.Oid = a.AnketaMaksat AND anketa.GCRecord IS NULL
         OUTER APPLY (
             SELECT TOP 1
@@ -340,6 +353,10 @@ internal static class Visa2014ApplicationTransform
             ToCityName: row.GetValueOrDefault("ToCityName"),
             ToRegionMgCode: NullIfEmpty(row.GetValueOrDefault("ToRegionMgCode")),
             ToRegionName: row.GetValueOrDefault("ToRegionName"),
+            FromCityMgCode: NullIfEmpty(row.GetValueOrDefault("FromCityMgCode")),
+            FromCityName: row.GetValueOrDefault("FromCityName"),
+            FromRegionMgCode: NullIfEmpty(row.GetValueOrDefault("FromRegionMgCode")),
+            FromRegionName: row.GetValueOrDefault("FromRegionName"),
             BusinessTripAddressText: row.GetValueOrDefault("BusinessTripAddressText"),
             BusinessTripAddressCityMgCode: NullIfEmpty(row.GetValueOrDefault("BusinessTripAddressCityMgCode")),
             BusinessTripAddressCityName: row.GetValueOrDefault("BusinessTripAddressCityName"),
@@ -560,6 +577,10 @@ internal static class Visa2014ApplicationTransform
         row["_legacy_ToCityName"] = raw.ToCityName;
         TrySetToCity(row, catalogs, raw.ToCityMgCode, raw.ToCityName, unmapped);
         TrySetToRegion(row, catalogs, raw.ToRegionMgCode, raw.ToRegionName, unmapped);
+        row["_legacy_FromCityMgCode"] = raw.FromCityMgCode;
+        row["_legacy_FromCityName"] = raw.FromCityName;
+        TrySetToCity(row, catalogs, raw.FromCityMgCode, raw.FromCityName, unmapped, targetKey: "FromCity");
+        TrySetToRegion(row, catalogs, raw.FromRegionMgCode, raw.FromRegionName, unmapped, targetKey: "FromRegion");
         row["BusinessTripAddress"] = TrimBusinessTripAddress(raw.BusinessTripAddressText);
         TrySetToCity(
             row,
@@ -917,11 +938,12 @@ internal static class Visa2014ApplicationTransform
         IReadOnlyDictionary<string, Visa2014LookupCatalog> catalogs,
         string? regionMgCode,
         string? regionName,
-        List<string> unmapped)
+        List<string> unmapped,
+        string targetKey = "ToRegion")
     {
         if (string.IsNullOrWhiteSpace(regionMgCode) && string.IsNullOrWhiteSpace(regionName))
         {
-            row["ToRegion"] = null;
+            row[targetKey] = null;
             return;
         }
 
@@ -929,7 +951,7 @@ internal static class Visa2014ApplicationTransform
             Visa2014LookupTranslator.TryTranslate(catalogs, "Region", regionMgCode, out var byCode, out _) &&
             !string.IsNullOrWhiteSpace(byCode))
         {
-            row["ToRegion"] = byCode;
+            row[targetKey] = byCode;
             return;
         }
 
@@ -938,14 +960,14 @@ internal static class Visa2014ApplicationTransform
             Visa2014LookupTranslator.TryTranslate(catalogs, "Region", regionName, out var byName, out reason) &&
             !string.IsNullOrWhiteSpace(byName))
         {
-            row["ToRegion"] = byName;
+            row[targetKey] = byName;
             return;
         }
 
         if (reason != null)
             unmapped.Add(reason);
 
-        row["ToRegion"] = string.IsNullOrWhiteSpace(regionName) ? null : regionName.Trim();
+        row[targetKey] = string.IsNullOrWhiteSpace(regionName) ? null : regionName.Trim();
     }
 
     internal static string? TrimBusinessTripAddress(string? text)

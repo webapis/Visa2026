@@ -63,10 +63,15 @@ propertyGaps:
       disposition: defer
       notes: May inform App_Reg_Check_Out vs App_Reg_Check_Out_Internal — confirm at ApplicationItem
     - column: NewRegistrationLocation
-      disposition: defer
-      notes: Registration cities on ApplicationItem in Visa2026 — header FK dropped
+      disposition: lookup_translate
+      notes: |
+        Destination ŞäherEtrap → ToCity (+ ToRegion via city.Region). Coalesce after
+        BusinessTripDestination (BT types use destination; check_in/out_internal use New*).
     - column: PreviousRegistrationLocation
-      disposition: defer
+      disposition: lookup_translate
+      notes: |
+        Origin ŞäherEtrap → FromCity (+ FromRegion). Null on many check-in rows (soft-complete).
+        Does not invent From* when legacy FK empty.
     - column: ChangeInformation
       disposition: derive
       notes: SubType 5 branches → App_Reg_Info_Change_Passport / _Visa / _Address
@@ -188,11 +193,11 @@ propertyGaps:
     - property: ToRegion
       default: null
       missingBehavior: allow_null
-      notes: Destination ŞäherEtrap.Region (NameOfRegionL). Case summary uses RequireToRegion (From/To geo).
+      notes: Destination ŞäherEtrap.Region (NameOfRegionL) from BusinessTripDestination or NewRegistrationLocation. Case summary RequireToRegion.
     - property: ToCity
       default: null
       missingBehavior: allow_null
-      notes: Destination BusinessTripDestination (ŞäherEtrap). Case summary uses RequireToCity. Bare Region/City obsolete dual-read only.
+      notes: Destination ŞäherEtrap — BusinessTripDestination coalesce NewRegistrationLocation. Case summary RequireToCity. Bare Region/City obsolete dual-read only.
     - property: Region
       default: null
       missingBehavior: allow_null
@@ -207,10 +212,14 @@ propertyGaps:
       notes: |
         Header catalog { City, FullAddress }. AddressOnBusinessTrip.AddressOnTrip is an Address FK.
         Use Address.AddressLine. Find-or-create catalog row.
+    - property: FromRegion
+      default: null
+      missingBehavior: allow_null
+      notes: Origin ŞäherEtrap.Region from PreviousRegistrationLocation. Soft-complete when null on IsManualEntry.
     - property: FromCity
       default: null
       missingBehavior: allow_null
-      notes: Legacy business trip uses destination only (ToCity)
+      notes: Origin ŞäherEtrap from PreviousRegistrationLocation. Soft-complete when null on IsManualEntry.
     - property: MovementPermitLocation
       default: null
       missingBehavior: allow_null
@@ -264,11 +273,17 @@ propertyGaps:
         Keep Ýok on the 2 incomplete headers (7/-134, 7/-135): ChooseBorderZoneType=0,
         BorderZoneForVisa null, PIA.Visa also has no BorderZone. Locked 2026-09-08.
     - property: ToCity
-      legacyColumn: BusinessTripDestination
-      notes: ŞäherEtrap FK — reuse City/CityByName layer 3 from AddressOfResidence wave. Writes ToCity (+ ToRegion); not bare City.
+      legacyColumn: BusinessTripDestination / NewRegistrationLocation
+      notes: ŞäherEtrap FK — coalesce BT destination then NewRegistrationLocation. Writes ToCity (+ ToRegion); not bare City.
     - property: ToRegion
-      legacyColumn: ŞäherEtrap.Region
+      legacyColumn: ŞäherEtrap.Region (destination)
       notes: Destination region NameOfRegion; prefer City.Region catalog after resolve when they differ. Writes ToRegion; not bare Region.
+    - property: FromCity
+      legacyColumn: PreviousRegistrationLocation
+      notes: Origin ŞäherEtrap → FromCity (+ FromRegion). Empty when Previous* null (no invent).
+    - property: FromRegion
+      legacyColumn: PreviousRegistrationLocation → ŞäherEtrap.Region
+      notes: Origin region from PreviousRegistrationLocation city.
     - property: Region
       legacyColumn: ŞäherEtrap.Region
       notes: Obsolete dual-read of ToRegion.
@@ -454,7 +469,29 @@ fields:
       - ŞeherEtrap.ŞeherEtrapL
     fallbackCatalog: CityByName
     missingBehavior: allow_null
-    notes: Also set ApplicationProfileInstance.City to the same lookup. Region from ŞäherEtrap.Region / City.Region.
+    notes: >
+      Prefer over NewRegistrationLocation when both set (BT types). Also derive
+      ToRegion from ŞäherEtrap.Region / City.Region. Bare City obsolete dual-read.
+
+  - source: NewRegistrationLocation
+    target: ToCity
+    transform: lookup_composite
+    lookupCatalog: City
+    fallbackCatalog: CityByName
+    missingBehavior: allow_null
+    notes: >
+      Fallback destination for registration check-in/out internal when
+      BusinessTripDestination is null. Writes ToCity (+ ToRegion).
+
+  - source: PreviousRegistrationLocation
+    target: FromCity
+    transform: lookup_composite
+    lookupCatalog: City
+    fallbackCatalog: CityByName
+    missingBehavior: allow_null
+    notes: >
+      Origin city for FromCity (+ FromRegion). Null is allowed — soft-complete
+      on IsManualEntry; do not invent.
 
   - source: AddressOnBusinessTrip.AddressOnTrip
     target: BusinessTripAddress

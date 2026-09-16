@@ -579,7 +579,11 @@ bands:
         generatesVisa: false
         notes: |
           This wipe 2026-09-08 remainder complete. Headers **490**. Skip
-          Invitation, WorkPermit, Visa. Next: App_Reg_ext.
+          Invitation, WorkPermit, Visa. Case summary To* from
+          NewRegistrationLocation (coalesce after BusinessTripDestination);
+          From* from PreviousRegistrationLocation. Backfill:
+          --patch-visa2014-application-business-trip-case-summary
+          --application-type App_Reg_Check_In_Internal. Next: App_Reg_ext.
       - name: App_Reg_ext
         status: done
         sourceComposites: ["E:3:na:na:na", "F:3:na:na:na"]

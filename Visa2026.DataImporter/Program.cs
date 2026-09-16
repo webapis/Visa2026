@@ -338,7 +338,7 @@ static void PrintHelp()
     Console.WriteLine("           with null legacy dept — infer MigrationService from person address (approved preview).");
     Console.WriteLine("      Options: [--legacy-source calik-energi] [--inference-rules path.yaml] [--application-id-map path.json]");
     Console.WriteLine("                [--dry-run] [--force] [--api-base-url url] [--no-wait] [--verbose]");
-    Console.WriteLine("  --patch-visa2014-application-business-trip-case-summary  PATCH Region/City/ToCity/BusinessTripAddress on Iş Saparyna types");
+    Console.WriteLine("  --patch-visa2014-application-business-trip-case-summary  PATCH From*/To* geo + BT destination (BT + check-in/out internal)");
     Console.WriteLine("      Options: [--legacy-source calik-energi-local-pg] [--application-type App_Business_Trip_Departure]");
     Console.WriteLine("                [--inprocess] [--target-connection conn] [--dry-run] [--verbose]");
     Console.WriteLine("  --patch-visa2014-application-project-contract  PATCH Application.ProjectContract (ShowProjectContract types)");

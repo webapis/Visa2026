@@ -178,6 +178,23 @@ strategy:
           ToCity and skipped Address.AddressLine. Backfill with
           --patch-visa2014-application-business-trip-case-summary. Purpose has
           no populated legacy source on live Çalik E:13 (AnketaMaksat empty).
+      calikRegistrationFromToGeoLock:
+        lockedAt: 2026-09-16
+        applicationTypeNames:
+          - App_Reg_Check_In_Internal
+          - App_Reg_Check_Out_Internal
+        applicationProfileCodes:
+          - check_in_internal
+          - check_out_internal
+        why: >
+          Hasaba Almak (Welaýatdan gelmegi sebäpli) and internal check-out use
+          NewRegistrationLocation → To* and PreviousRegistrationLocation → From*.
+          Transform coalesces BusinessTripDestination then New* into To*; patch
+          default types include both registration internal types. Do not invent
+          From* when Previous* is null.
+        includesForgottenTypes:
+          - App_Reg_Check_In_Internal
+          - App_Reg_Check_Out_Internal
       officerRelinkMayUseToday: true
       missingIdMap: leave_unlinked_until_oid_in_map_then_pin
     piaVisaResolvedLinkMismatch:

@@ -1,3 +1,11 @@
+
+### 2026-09-16 - check_in_internal To Region/City from NewRegistrationLocation
+
+- **Phase**: mapping + correction
+- **Why**: Hasaba Almak (Welaýatdan gelmegi sebäpli) Overview showed empty To Region / To City (e.g. 5/-001). Transform only joined `BusinessTripDestination`; registration geo lives on `NewRegistrationLocation` / `PreviousRegistrationLocation` (field-map had them deferred).
+- **Fix**: coalesce `BusinessTripDestination` then `NewRegistrationLocation` → ToCity/ToRegion; `PreviousRegistrationLocation` → FromCity/FromRegion. OData + case-summary PATCH write From*/To*. Patch default types include `App_Reg_Check_In_Internal` / `App_Reg_Check_Out_Internal`.
+- **Verify**: patch Planned **490** / Patched **490** / Failed **0** / no id-map **2**. Local PG `check_in_internal`: **490/490** with ToCity+ToRegion (and FromCity). Refresh case Overview.
+- **Prevent**: do not invent From* when Previous* null; keep To* required for check_in_internal.
 ### 2026-09-15 - Dummy Purpose for Iş Saparyna Gitmek imports
 
 - **Phase**: correction (local PG)

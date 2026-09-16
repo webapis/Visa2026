@@ -15,10 +15,12 @@ internal sealed class Visa2014ApplicationBusinessTripCaseSummaryPatchResult
 }
 
 /// <summary>
-/// PATCHes Case summary ToRegion, ToCity, and business-trip destination
+/// PATCHes Case summary From*/To* geo and business-trip destination
 /// (Type + Lodging/Hotel/Hospital/OtherSite or private-house text) on imported
-/// business-trip ApplicationProfileInstance rows. Purpose has no legacy source on E:13;
-/// App_Business_Trip_Departure gets dummy Purpose "İs maksatly". Does not invent From*.
+/// ApplicationProfileInstance rows. To* prefers BusinessTripDestination then
+/// NewRegistrationLocation; From* from PreviousRegistrationLocation.
+/// Purpose has no legacy source on E:13; App_Business_Trip_Departure gets dummy
+/// Purpose "İs maksatly". Does not invent From* when PreviousRegistrationLocation is null.
 /// </summary>
 internal static class Visa2014ApplicationBusinessTripCaseSummaryPatch
 {
@@ -26,6 +28,8 @@ internal static class Visa2014ApplicationBusinessTripCaseSummaryPatch
     [
         "App_Business_Trip_Departure",
         "App_Business_Trip_Arrival",
+        "App_Reg_Check_In_Internal",
+        "App_Reg_Check_Out_Internal",
     ];
 
     public static async Task<int> RunCommandAsync(IReadOnlyList<string> args, bool verbose)
