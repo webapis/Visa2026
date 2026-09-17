@@ -2442,6 +2442,7 @@
         <ColumnInfo Id="ApplicationDate" Caption="Дата" />
         <ColumnInfo Id="ApplicationType" Caption="Тип" />
         <ColumnInfo Id="ApprovalLegProfile" Caption="Профиль согласования" />
+        <ColumnInfo Id="ProjectContract" Caption="Проектный контракт" />
         <ColumnInfo Id="CurrentState" Caption="Текущее состояние" />
         <ColumnInfo Id="FullApplicationNumber" Caption="Номер" />
         <ColumnInfo Id="LatestProgressDate" Caption="Дата прогресса" />

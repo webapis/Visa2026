@@ -61,6 +61,7 @@ Pass **`-Profile Production|Staging|Demo`** on slot-aware scripts. Env templates
 | `Install-Visa2026ManualIisSite.ps1` | Windows Server | Officer manual static IIS site (`:8082`, `/manual`, `/manual-media`) |
 | `Enable-Visa2026ManualFirewall.ps1` | Windows Server | Inbound TCP firewall for manual site |
 | `Publish-Visa2026UserManualRelease.ps1` | Windows Server / build agent | Record (optional) + build + publish manual bundle ([USER_MANUAL_RELEASE.md](../../docs/USER_MANUAL_RELEASE.md)) |
+| `Remove-Visa2026IisDeployment.ps1` | Windows Server | Remove all Visa2026 IIS sites/app pools after Docker cutover |
 
 ## Quick start (workstation)
 

@@ -83,17 +83,53 @@ public static class UserReportPlaceholderAliasRegistry
         if (data == null || data.Count == 0)
             return;
 
+        SyncRowNumberKeys(data);
+
         foreach (var pair in data.ToList())
         {
-            if (TryGetShortCode(pair.Key, out var shortCode) && !data.ContainsKey(shortCode))
+            if (TryGetShortCode(pair.Key, out var shortCode) && !HasPresentValue(data, shortCode))
                 data[shortCode] = pair.Value;
 
             if (Maps.Value.ShortToCanonical.TryGetValue(pair.Key, out var canonical)
                 && !string.Equals(canonical, pair.Key, StringComparison.OrdinalIgnoreCase)
-                && !data.ContainsKey(canonical))
+                && !HasPresentValue(data, canonical))
             {
                 data[canonical] = pair.Value;
             }
         }
+    }
+
+    /// <summary>
+    /// Yellow-marks sanaws use <c>{{.RNUM}}</c> (catalog <c>RowNumber</c>).
+    /// Seeded Word lists store the same value as <c>RowNo</c>.
+    /// </summary>
+    private static void SyncRowNumberKeys(IDictionary<string, object> data)
+    {
+        if (!TryGetPresentValue(data, "RowNumber", out var number)
+            && !TryGetPresentValue(data, "RowNo", out number)
+            && !TryGetPresentValue(data, "RNUM", out number))
+        {
+            return;
+        }
+
+        data["RowNumber"] = number;
+        data["RowNo"] = number;
+        data["RNUM"] = number;
+    }
+
+    private static bool HasPresentValue(IDictionary<string, object> data, string key) =>
+        TryGetPresentValue(data, key, out _);
+
+    private static bool TryGetPresentValue(IDictionary<string, object> data, string key, out object value)
+    {
+        if (data.TryGetValue(key, out value)
+            && value != null
+            && (value is not string text || !string.IsNullOrWhiteSpace(text)))
+        {
+            return true;
+        }
+
+        value = null!;
+        return false;
     }
 }

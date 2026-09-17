@@ -467,6 +467,7 @@ namespace Visa2026.Module.DatabaseUpdate
             {
                 SetColumnVisibility(viaMinistriesListView, nameof(BusinessObjects.ApplicationProfileInstance.Urgency), true);
                 SetColumnVisibility(viaMinistriesListView, nameof(BusinessObjects.ApplicationProfileInstance.ApprovalLegProfile), true);
+                SetColumnVisibility(viaMinistriesListView, nameof(BusinessObjects.ApplicationProfileInstance.ProjectContract), true);
                 SetColumnVisibility(viaMinistriesListView, nameof(BusinessObjects.ApplicationProfileInstance.VisaPeriod), true);
                 SetColumnVisibility(viaMinistriesListView, nameof(BusinessObjects.ApplicationProfileInstance.VisaType), true);
             }

@@ -157,19 +157,35 @@ internal static class WordScanTableRowExpander
 
     private static string Resolve(string code, IDictionary<string, object> data)
     {
-        if (data.TryGetValue(code, out var value) && !IsMissing(value))
-            return Convert.ToString(value) ?? string.Empty;
-
-        var canonical = UserReportPlaceholderAliasRegistry.ResolveCanonicalPropertyPath(code);
-        if (!string.Equals(canonical, code, StringComparison.OrdinalIgnoreCase)
-            && data.TryGetValue(canonical, out value)
-            && !IsMissing(value))
+        foreach (var key in CandidateKeys(code))
         {
-            return Convert.ToString(value) ?? string.Empty;
+            if (data.TryGetValue(key, out var value) && !IsMissing(value))
+                return Convert.ToString(value) ?? string.Empty;
         }
 
         return string.Empty;
     }
+
+    private static IEnumerable<string> CandidateKeys(string code)
+    {
+        yield return code;
+
+        var canonical = UserReportPlaceholderAliasRegistry.ResolveCanonicalPropertyPath(code);
+        if (!string.Equals(canonical, code, StringComparison.OrdinalIgnoreCase))
+            yield return canonical;
+
+        if (IsRowNumberKey(code) || IsRowNumberKey(canonical))
+        {
+            yield return "RNUM";
+            yield return "RowNumber";
+            yield return "RowNo";
+        }
+    }
+
+    private static bool IsRowNumberKey(string code) =>
+        code.Equals("RNUM", StringComparison.OrdinalIgnoreCase)
+        || code.Equals("RowNumber", StringComparison.OrdinalIgnoreCase)
+        || code.Equals("RowNo", StringComparison.OrdinalIgnoreCase);
 
     private static bool IsMissing(object? value) =>
         value == null || (value is string text && string.IsNullOrWhiteSpace(text));

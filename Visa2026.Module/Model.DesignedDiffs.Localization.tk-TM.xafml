@@ -2442,6 +2442,7 @@
         <ColumnInfo Id="ApplicationDate" Caption="Ýüztutmanyň senesi" />
         <ColumnInfo Id="ApplicationType" Caption="Görnüşi" />
         <ColumnInfo Id="ApprovalLegProfile" Caption="Ylalaşyk ädimleri" />
+        <ColumnInfo Id="ProjectContract" Caption="Taslama şertnamasy" />
         <ColumnInfo Id="CurrentState" Caption="Häzirki ýagdaý" />
         <ColumnInfo Id="FullApplicationNumber" Caption="Ýüztutmanyň belgisi" />
         <ColumnInfo Id="LatestProgressDate" Caption="Ýagdaý senesi" />

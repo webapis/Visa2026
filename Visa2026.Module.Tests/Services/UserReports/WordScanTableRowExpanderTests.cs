@@ -50,6 +50,61 @@ public class WordScanTableRowExpanderTests
     }
 
     [Fact]
+    public void Expand_fills_RNUM_from_RowNo()
+    {
+        using var stream = new MemoryStream();
+        using (var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document))
+        {
+            var main = document.AddMainDocumentPart();
+            var header = new TableRow();
+            foreach (var caption in new[] { "No", "Familiyasy" })
+                header.AppendChild(new TableCell(new Paragraph(new Run(new Text(caption)))));
+
+            var data = new TableRow();
+            data.AppendChild(new TableCell(new Paragraph(new Run(new Text("{{.RNUM}}")))));
+            data.AppendChild(new TableCell(new Paragraph(new Run(new Text("{{.PLN}}")))));
+            main.Document = new Document(new Body(new Table(header, data)));
+            main.Document.Save();
+        }
+
+        var rows = new List<IDictionary<string, object>>
+        {
+            new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["RowNo"] = 1,
+                ["PLN"] = "Alkan",
+            },
+            new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["RowNo"] = 2,
+                ["PLN"] = "Erol",
+            },
+        };
+
+        var expanded = WordScanTableRowExpander.ExpandPrototypeTableRow(stream.ToArray(), rows);
+        using var output = new MemoryStream(expanded);
+        using var opened = WordprocessingDocument.Open(output, false);
+        var table = opened.MainDocumentPart!.Document.Body!.Descendants<Table>().Single();
+        var dataRows = table.Elements<TableRow>().Skip(1).ToList();
+        Assert.Equal("1", CellText(dataRows[0], 0));
+        Assert.Equal("2", CellText(dataRows[1], 0));
+        Assert.Contains("Alkan", CellText(dataRows[0], 1), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Enrich_copies_RowNo_to_RNUM()
+    {
+        var data = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["RowNo"] = 3,
+        };
+
+        UserReportPlaceholderAliasRegistry.EnrichDictionary(data);
+        Assert.Equal(3, data["RNUM"]);
+        Assert.Equal(3, data["RowNumber"]);
+    }
+
+    [Fact]
     public void Expand_clones_seeded_table_row_loop()
     {
         var bytes = TokenTable(includeLoop: true);

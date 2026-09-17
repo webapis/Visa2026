@@ -75,6 +75,7 @@ public static class UserReportMergeDataHelper
         WithAliasKeys(new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
         {
             ["RowNo"] = rowNo,
+            ["RowNumber"] = rowNo,
             ["Person_LastName"] = item.Person_LastName ?? string.Empty,
             ["Person_FirstName"] = item.Person_FirstName ?? string.Empty,
             ["Person_MiddleName"] = item.Person_MiddleName ?? string.Empty,
@@ -258,6 +259,7 @@ public static class UserReportMergeDataHelper
         WithAliasKeys(new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
         {
             ["RowNo"] = rowNo,
+            ["RowNumber"] = rowNo,
             ["Person_LastName"] = item.Person_LastName ?? string.Empty,
             ["Person_FirstName"] = item.Person_FirstName ?? string.Empty,
             ["Person_DateOfBirthText"] = item.Person_DateOfBirthText ?? string.Empty,

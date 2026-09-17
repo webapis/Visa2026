@@ -188,6 +188,7 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
             .Include(application => application.VisaPeriod)
             .Include(application => application.VisaType)
             .Include(application => application.MigrationService)
+            .Include(application => application.ProjectContract)
             .Include(application => application.ApprovalLegSnapshots)
             .AsSplitQuery()
             .ToList();

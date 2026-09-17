@@ -275,9 +275,10 @@
         <ColumnInfo Id="ProgressSlaStatement" Index="8" Width="140" />
         <ColumnInfo Id="WorkingDaysInMigrationStep" Index="-1" Width="96" />
         <ColumnInfo Id="ApprovalLegProfile" Index="9" Width="180" />
-        <ColumnInfo Id="MigrationSlaStatement" Index="10" Width="160" />
-        <ColumnInfo Id="VisaPeriod" Index="11" Width="110" />
-        <ColumnInfo Id="VisaType" Index="12" Width="110" />
+        <ColumnInfo Id="ProjectContract" Index="10" Width="180" />
+        <ColumnInfo Id="MigrationSlaStatement" Index="11" Width="160" />
+        <ColumnInfo Id="VisaPeriod" Index="12" Width="110" />
+        <ColumnInfo Id="VisaType" Index="13" Width="110" />
       </Columns>
     </ListView>
     <ListView Id="Application_ProgressHistory_ListView" ShowAllRows="True" VirtualScrollingEnabled="False" IsFooterVisible="True" />
