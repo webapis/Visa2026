@@ -102,7 +102,7 @@ else
         {
             _module ??= await JS.InvokeAsync<IJSObjectReference>(
                 "import",
-                "/lib/pdfjs/template-scan-pdf-preview.js?v=tasmarks9");
+                "/lib/pdfjs/template-scan-pdf-preview.js?v=tasmarks11");
 
             if (_needsPaint)
             {
@@ -170,11 +170,13 @@ else
     private List<object> MarkPayload()
     {
         var excel = ScanExcelPreviewMarkGeometry.TryMap(_source, Marks);
-        var layout = excel;
-        var kind = excel != null ? "excel" : null;
+        var word = excel == null ? ScanWordPreviewMarkGeometry.TryMap(_source, Marks) : null;
+        var layout = excel ?? word;
+        var kind = excel != null ? "excel" : word != null ? "word" : null;
         var payload = new List<object>(Marks.Count);
         foreach (var mark in Marks)
         {
+            var inTable = layout?.TableMarkIds?.Contains(mark.DisplayId) == true;
             if (layout != null && layout.Boxes.TryGetValue(mark.DisplayId, out var box))
             {
                 payload.Add(new
@@ -184,6 +186,7 @@ else
                     label = mark.LabelText,
                     isGap = mark.IsGap,
                     kind,
+                    table = inTable,
                     l = box.Left,
                     t = box.Top,
                     w = box.Width,
@@ -198,7 +201,9 @@ else
                     fieldId = mark.DisplayId,
                     order = mark.DisplayOrder,
                     label = mark.LabelText,
-                    isGap = mark.IsGap
+                    isGap = mark.IsGap,
+                    kind,
+                    table = inTable
                 });
             }
         }

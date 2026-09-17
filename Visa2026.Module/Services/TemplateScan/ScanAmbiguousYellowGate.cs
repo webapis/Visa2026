@@ -60,7 +60,7 @@ public static class ScanAmbiguousYellowGate
     {
         if (topAlt.ScorePercent < minConfidencePercent)
             return false;
-        if (!ScanCompoundYellowParts.IsSingleSpanAddressCode(topAlt.ShortCode))
+        if (!ScanCompoundYellowParts.IsSingleSpanAddressCode(topAlt.ShortCode, draft.LabelText))
             return false;
         if (!topAlt.Reason.Contains("Column header", StringComparison.OrdinalIgnoreCase))
             return false;

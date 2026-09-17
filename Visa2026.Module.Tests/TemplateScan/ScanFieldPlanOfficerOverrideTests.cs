@@ -172,7 +172,8 @@ public class ScanFieldPlanOfficerOverrideTests
 
         var field = Assert.Single(next.Fields);
         Assert.Contains(2, field.HiddenPartIndexes);
-        Assert.Equal("{{ds.ADAT}}", field.ProposedToken);
+        Assert.Equal(["ADAT"], TemplateTokenSyntax.GetShortCodes(field.ProposedToken));
+        Assert.Contains(ScanCompoundYellowParts.EmptyPartToken, field.ProposedToken);
         var shown = ScanReviewFieldOrder.Order(next.Fields);
         Assert.Single(shown);
         Assert.DoesNotContain(shown, m => string.Equals(m.DisplayId, second.DisplayId, StringComparison.Ordinal));
@@ -233,6 +234,65 @@ public class ScanFieldPlanOfficerOverrideTests
 
         var unlocked = ScanFieldPlanOfficerOverride.SetLocked(locked, fieldId, false);
         Assert.False(Assert.Single(unlocked.Fields).IsLocked);
+    }
+
+    [Fact]
+    public void ApplyPartCodes_keeps_codes_on_chosen_empty_comma_parts_after_lock()
+    {
+        var set = BothSet();
+        var plan = Plan(set, null, new DocumentRegion.ExcelCell("S", "K11"), "x, 1 (bir) ay, iki gezeklik");
+        var ordered = ScanReviewFieldOrder.Order(plan.Fields);
+        Assert.Equal(3, ordered.Count);
+        var part2 = ordered[1];
+        var part3 = ordered[2];
+        Assert.Empty(TemplateTokenSyntax.GetShortCodes(part2.ProposedToken));
+
+        var after2 = ScanFieldPlanOfficerOverride.ApplyPartCodes(plan, part2.DisplayId, ["AVPRD"]);
+        ordered = ScanReviewFieldOrder.Order(after2.Fields);
+        Assert.Equal(["AVPRD"], TemplateTokenSyntax.GetShortCodes(ordered[1].ProposedToken));
+
+        var after3 = ScanFieldPlanOfficerOverride.ApplyPartCodes(after2, part3.DisplayId, ["AVCAT"]);
+        ordered = ScanReviewFieldOrder.Order(after3.Fields);
+        Assert.Equal(["AVPRD"], TemplateTokenSyntax.GetShortCodes(ordered[1].ProposedToken));
+        Assert.Equal(["AVCAT"], TemplateTokenSyntax.GetShortCodes(ordered[2].ProposedToken));
+
+        var locked = ScanFieldPlanOfficerOverride.SetLocked(after3, ordered[1].FieldId, true);
+        ordered = ScanReviewFieldOrder.Order(locked.Fields);
+        Assert.True(Assert.Single(locked.Fields).IsLocked);
+        Assert.Equal(["AVPRD"], TemplateTokenSyntax.GetShortCodes(ordered[1].ProposedToken));
+        Assert.Equal(["AVCAT"], TemplateTokenSyntax.GetShortCodes(ordered[2].ProposedToken));
+        Assert.DoesNotContain(
+            ScanCompoundYellowParts.EmptyPartToken,
+            ScanYellowSubstitutionBinder.TryGetWritableToken(
+                Assert.Single(locked.Fields).ProposedToken,
+                out var writable)
+                ? writable
+                : string.Empty,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ApplyPartCodes_after_hiding_first_part_keeps_code_on_second_part()
+    {
+        var set = BothSet();
+        var plan = Plan(set, null, new DocumentRegion.ExcelCell("S", "K11"), "x, 1 (bir) ay, iki gezeklik");
+        var ordered = ScanReviewFieldOrder.Order(plan.Fields);
+        Assert.Equal(3, ordered.Count);
+
+        var withoutFirst = ScanFieldPlanOfficerOverride.RemoveReviewRow(plan, ordered[0].DisplayId);
+        var shown = ScanReviewFieldOrder.Order(withoutFirst.Fields);
+        Assert.Equal(2, shown.Count);
+        Assert.Equal("1.2", shown[0].DisplayOrder);
+        Assert.Contains(1, Assert.Single(withoutFirst.Fields).HiddenPartIndexes);
+
+        var mapped = ScanFieldPlanOfficerOverride.ApplyPartCodes(withoutFirst, shown[0].DisplayId, ["AVPRD"]);
+        shown = ScanReviewFieldOrder.Order(mapped.Fields);
+        Assert.Equal(["AVPRD"], TemplateTokenSyntax.GetShortCodes(shown[0].ProposedToken));
+        Assert.Empty(TemplateTokenSyntax.GetShortCodes(shown[1].ProposedToken));
+        Assert.DoesNotContain(
+            "BTFCT",
+            TemplateTokenSyntax.GetShortCodes(Assert.Single(mapped.Fields).ProposedToken),
+            StringComparer.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -309,7 +369,7 @@ public class ScanFieldPlanOfficerOverrideTests
 
     private static ScanFieldPlan Plan(
         ApplicationProfilePlaceholderSet set,
-        string token,
+        string? token,
         DocumentRegion? region,
         string labelText = "02.02.2009") =>
         new ScanFieldPlanMerger().Merge(new ScanFieldPlanMergeRequest

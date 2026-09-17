@@ -26,8 +26,9 @@ public static class ScanCompoundYellowBinder
             return drafts;
 
         // Keep ADRS / BTAD as one cell — commas inside an address are not combination parts.
+        // PFAD after `TUR, …` is country + street and should bind PFAC.
         if (TemplateTokenSyntax.TryGetShortCode(draft.ProposedToken ?? string.Empty, out var existingCode)
-            && ScanCompoundYellowParts.IsSingleSpanAddressCode(existingCode))
+            && ScanCompoundYellowParts.IsSingleSpanAddressCode(existingCode, draft.LabelText))
             return drafts;
 
         var usage = draft.Scope == ScanFieldScope.Row
@@ -66,7 +67,19 @@ public static class ScanCompoundYellowBinder
         if (!ScanCompoundYellowParts.IsCommaCombination(labelText))
             return null;
 
-        var segments = ScanCompoundYellowParts.SplitSegments(labelText ?? string.Empty);
+        // `TUR, street, more street commas` → country + foreign address (comma = next placeholder).
+        if (ScanCompoundYellowParts.HasLeadingIso3CountryCode(labelText)
+            && placeholderSet.Contains("PFAC")
+            && placeholderSet.Contains("PFAD"))
+        {
+            var pair = ScanCompoundYellowParts.SplitLeadingCountryThenAddress(labelText ?? string.Empty);
+            if (pair.Count == 2 && ScanCompoundYellowParts.LooksLikeStreetAddress(pair[1].Text))
+                return FinishBind(labelText, placeholderSet, usage, ["PFAC", "PFAD"], "ISO country + comma + foreign address");
+        }
+
+        var segments = ScanCompoundYellowParts.HasLeadingIso3CountryCode(labelText)
+            ? ScanCompoundYellowParts.SplitLeadingCountryThenAddress(labelText ?? string.Empty)
+            : ScanCompoundYellowParts.SplitSegments(labelText ?? string.Empty);
         if (segments.Count < 2)
             return null;
 

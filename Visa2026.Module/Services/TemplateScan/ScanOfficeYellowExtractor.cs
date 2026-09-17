@@ -100,6 +100,18 @@ public sealed class ScanOfficeYellowExtractor : IScanOfficeYellowExtractor
             if (string.IsNullOrWhiteSpace(fullText))
                 continue;
 
+            var cell = paragraph.Ancestors<TableCell>().FirstOrDefault();
+            if (IsYellowShadedCell(cell) || IsYellowShadedParagraph(paragraph))
+            {
+                var shaded = SpansFromText(
+                    addressed.Address,
+                    fullText,
+                    start: 0).ToList();
+                AttachCountPairSpans(fullText, addressed.Address, shaded);
+                results.AddRange(shaded);
+                continue;
+            }
+
             // Build per-run (start, length, yellow?) over concatenated w:t text.
             var cursor = 0;
             var segments = new List<(int Start, int Length, bool Yellow, string Text)>();
@@ -129,7 +141,8 @@ public sealed class ScanOfficeYellowExtractor : IScanOfficeYellowExtractor
                 var end = start + segments[i].Length;
                 var sb = new System.Text.StringBuilder(segments[i].Text);
                 var j = i + 1;
-                while (j < segments.Count && segments[j].Yellow)
+                while (j < segments.Count && segments[j].Yellow
+                       && ShouldMergeYellowTexts(sb.ToString(), segments[j].Text))
                 {
                     sb.Append(segments[j].Text);
                     end = segments[j].Start + segments[j].Length;
@@ -141,15 +154,10 @@ public sealed class ScanOfficeYellowExtractor : IScanOfficeYellowExtractor
                 if (mark.Length > 0)
                 {
                     var lead = raw.Length - raw.TrimStart().Length;
-                    paragraphSpans.Add(new ScanOfficeYellowSpan
-                    {
-                        Text = mark,
-                        Region = new DocumentRegion.WordSpan(
-                            addressed.Address,
-                            start + lead,
-                            mark.Length),
-                        PageIndex = 0,
-                    });
+                    paragraphSpans.AddRange(SpansFromText(
+                        addressed.Address,
+                        mark,
+                        start + lead));
                 }
 
                 i = j;
@@ -257,6 +265,127 @@ public sealed class ScanOfficeYellowExtractor : IScanOfficeYellowExtractor
         var aStart = a.Region is DocumentRegion.WordSpan aa ? aa.Start : 0;
         var bStart = b.Region is DocumentRegion.WordSpan bb ? bb.Start : 0;
         return aStart.CompareTo(bStart);
+    }
+
+    internal static IReadOnlyList<ScanOfficeYellowSpan> SpansFromText(
+        string paragraphAddress,
+        string text,
+        int start)
+    {
+        var mark = (text ?? string.Empty).Trim();
+        if (mark.Length == 0)
+            return Array.Empty<ScanOfficeYellowSpan>();
+
+        var lead = (text ?? string.Empty).Length - (text ?? string.Empty).TrimStart().Length;
+        var origin = start + lead;
+        if (TrySplitDirectorTitleAndName(mark, out var title, out var name))
+        {
+            return
+            [
+                MakeSpan(paragraphAddress, title, origin),
+                MakeSpan(paragraphAddress, name, origin + mark.IndexOf(name, StringComparison.Ordinal)),
+            ];
+        }
+
+        return [MakeSpan(paragraphAddress, mark, origin)];
+    }
+
+    internal static bool ShouldMergeYellowTexts(string left, string right)
+    {
+        if (ScanOfficialLetterHints.LooksLikeBranchDirectorTitle(left)
+            && LooksLikeStandalonePersonName(right))
+            return false;
+        return true;
+    }
+
+    internal static bool TrySplitDirectorTitleAndName(string text, out string title, out string name)
+    {
+        title = string.Empty;
+        name = string.Empty;
+        var raw = (text ?? string.Empty).Trim();
+        var at = IndexOfFoldedNeedle(raw, "mudiri");
+        if (at < 0)
+            return false;
+
+        var consumed = 0;
+        for (var n = 1; at + n <= raw.Length; n++)
+        {
+            if (TemplateTextNormalizer.NormalizeFolded(raw.Substring(at, n))
+                .Equals("mudiri", StringComparison.Ordinal))
+            {
+                consumed = n;
+                break;
+            }
+        }
+
+        if (consumed == 0)
+            return false;
+
+        title = raw[..(at + consumed)].Trim();
+        name = raw[(at + consumed)..].Trim();
+        return ScanOfficialLetterHints.LooksLikeBranchDirectorTitle(title)
+            && LooksLikeStandalonePersonName(name);
+    }
+
+    private static int IndexOfFoldedNeedle(string text, string foldedNeedle)
+    {
+        for (var i = 0; i < text.Length; i++)
+        {
+            for (var j = i + 1; j <= text.Length; j++)
+            {
+                var folded = TemplateTextNormalizer.NormalizeFolded(text[i..j]);
+                if (folded.Equals(foldedNeedle, StringComparison.Ordinal))
+                    return i;
+                if (folded.Length > foldedNeedle.Length)
+                    break;
+            }
+        }
+
+        return -1;
+    }
+
+    private static bool LooksLikeStandalonePersonName(string text)
+    {
+        var trimmed = (text ?? string.Empty).Trim();
+        if (trimmed.Length is < 3 or > 80)
+            return false;
+        if (trimmed.Contains(',', StringComparison.Ordinal))
+            return false;
+        if (ScanOfficialLetterHints.LooksLikeBranchDirectorTitle(trimmed))
+            return false;
+        var words = trimmed.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+        return words.Length is >= 1 and <= 4
+            && words.All(static w => w.Any(char.IsLetter));
+    }
+
+    private static ScanOfficeYellowSpan MakeSpan(string paragraphAddress, string text, int start) =>
+        new()
+        {
+            Text = text,
+            Region = new DocumentRegion.WordSpan(paragraphAddress, Math.Max(0, start), text.Length),
+            PageIndex = 0,
+        };
+
+    private static bool IsYellowShadedCell(TableCell? cell)
+    {
+        if (cell == null)
+            return false;
+        var shd = cell.TableCellProperties?.GetFirstChild<Shading>();
+        return IsYellowShading(shd);
+    }
+
+    private static bool IsYellowShadedParagraph(Paragraph paragraph)
+    {
+        var shd = paragraph.ParagraphProperties?.GetFirstChild<Shading>();
+        return IsYellowShading(shd);
+    }
+
+    private static bool IsYellowShading(Shading? shading)
+    {
+        if (shading == null)
+            return false;
+        var fill = shading.Fill?.Value;
+        return !string.IsNullOrWhiteSpace(fill) && IsYellowHex(fill);
     }
 
     private static bool IsYellowRun(Run run)

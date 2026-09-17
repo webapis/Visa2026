@@ -150,6 +150,24 @@ public static class ScanPlaceholderChoiceList
         if (term.Contains("maksady", StringComparison.OrdinalIgnoreCase)
             || term.Contains("purpose", StringComparison.OrdinalIgnoreCase))
             yield return "Purpose";
+        if (term.Contains("foreign address country", StringComparison.OrdinalIgnoreCase)
+            || term.Equals("PFAC", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("ForeignAddressCountry", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("dasary salgy yurd", StringComparison.OrdinalIgnoreCase))
+        {
+            yield return "PFAC";
+            yield return "Foreign address country";
+            yield return "Person_ForeignAddressCountryCode";
+        }
+        if (term.Contains("foreign address", StringComparison.OrdinalIgnoreCase)
+            || term.Equals("PFAD", StringComparison.OrdinalIgnoreCase)
+            || term.Equals("PFWC", StringComparison.OrdinalIgnoreCase))
+        {
+            yield return "PFAC";
+            yield return "PFAD";
+            yield return "PFWC";
+            yield return "Foreign address country";
+        }
     }
 
     private static bool Contains(string? value, string term)

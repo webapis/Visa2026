@@ -19,6 +19,13 @@ public sealed record ScanCompoundPart(
 
 public static class ScanCompoundYellowParts
 {
+    /// <summary>
+    /// Positional hole in a compound <c>ProposedToken</c> so Review sub-rows keep officer
+    /// slot order when some parts are still unmapped (<c>{{.}}, {{.VPER}}, {{.}}</c>).
+    /// Stripped before Generate writes the yellow span.
+    /// </summary>
+    public const string EmptyPartToken = "{{.}}";
+
     internal static readonly Regex PassportNumberShape = new(
         @"\b[A-Z]\d{6,9}\b",
         RegexOptions.Compiled | RegexOptions.CultureInvariant);
@@ -66,8 +73,21 @@ public static class ScanCompoundYellowParts
         var label = labelText ?? string.Empty;
 
         // Full-address tokens already include commas (region, city, street) — keep one Review row.
-        if (codes.Count == 1 && IsSingleSpanAddressCode(codes[0]))
+        // PFAD after a leading ISO3 (`TUR, Emek…`) is country + street, not a single address span.
+        if (codes.Count == 1 && IsSingleSpanAddressCode(codes[0], label))
             return Array.Empty<ScanCompoundPart>();
+
+        if (HasLeadingIso3CountryCode(label)
+            && (codes.Count == 0
+                || codes.Any(static c =>
+                    c.Equals("PFAC", StringComparison.OrdinalIgnoreCase)
+                    || c.Equals("PFAD", StringComparison.OrdinalIgnoreCase)
+                    || c.Equals("PFWC", StringComparison.OrdinalIgnoreCase))))
+        {
+            var pair = SplitLeadingCountryThenAddress(label);
+            if (pair.Count == 2)
+                return AlignParts(pair, codes, tokens);
+        }
 
         if (IsCommaCombination(label))
             return AlignParts(SplitByDelimiter(label, ','), codes, tokens);
@@ -138,13 +158,58 @@ public static class ScanCompoundYellowParts
     /// <summary>
     /// One yellow cell is already a full address (ADRS / BTAD / …). Commas are street punctuation,
     /// not combination parts like passport number + authority + date.
+    /// PFAD stays one row unless the cell starts with an ISO country code.
     /// </summary>
-    public static bool IsSingleSpanAddressCode(string? shortCode) =>
-        !string.IsNullOrWhiteSpace(shortCode)
-        && (shortCode.Equals("ADRS", StringComparison.OrdinalIgnoreCase)
+    public static bool IsSingleSpanAddressCode(string? shortCode, string? labelText = null)
+    {
+        if (string.IsNullOrWhiteSpace(shortCode))
+            return false;
+
+        if (shortCode.Equals("ADRS", StringComparison.OrdinalIgnoreCase)
             || shortCode.Equals("BTAD", StringComparison.OrdinalIgnoreCase)
-            || shortCode.Equals("ACADR", StringComparison.OrdinalIgnoreCase)
-            || shortCode.Equals("PFAD", StringComparison.OrdinalIgnoreCase));
+            || shortCode.Equals("ACADR", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (shortCode.Equals("PFAD", StringComparison.OrdinalIgnoreCase))
+            return !HasLeadingIso3CountryCode(labelText);
+
+        return false;
+    }
+
+    /// <summary><c>TUR, Emek mahallesi…</c> — first comma is country vs street, later commas are the street.</summary>
+    internal static bool HasLeadingIso3CountryCode(string? labelText)
+    {
+        var label = labelText ?? string.Empty;
+        var comma = label.IndexOf(',');
+        if (comma <= 0)
+            return false;
+        return LooksLikeIso3(label[..comma].Trim());
+    }
+
+    internal static IReadOnlyList<(string Text, int Offset, int Length)> SplitLeadingCountryThenAddress(string label)
+    {
+        var comma = label.IndexOf(',');
+        if (comma <= 0)
+            return SplitSegments(label);
+
+        var countryRaw = label[..comma];
+        var country = countryRaw.Trim();
+        if (!LooksLikeIso3(country))
+            return SplitSegments(label);
+
+        var countryLead = countryRaw.Length - countryRaw.TrimStart().Length;
+        var restRaw = label[(comma + 1)..];
+        var rest = restRaw.Trim();
+        if (rest.Length == 0)
+            return [(country, countryLead, country.Length)];
+
+        var restLead = restRaw.Length - restRaw.TrimStart().Length;
+        return
+        [
+            (country, countryLead, country.Length),
+            (rest, comma + 1 + restLead, rest.Length),
+        ];
+    }
 
     public static IReadOnlyList<(string Text, int Offset, int Length)> SplitSegments(string label)
     {
@@ -162,6 +227,39 @@ public static class ScanCompoundYellowParts
         return [(trimmed, lead, trimmed.Length)];
     }
 
+    /// <summary>Removes positional <see cref="EmptyPartToken"/> holes; used before Generate.</summary>
+    public static string? StripEmptyPartMarkers(string? proposedToken)
+    {
+        if (string.IsNullOrWhiteSpace(proposedToken))
+            return proposedToken;
+
+        var tokens = SplitTokens(proposedToken);
+        if (tokens.Count == 0)
+            return proposedToken;
+
+        var kept = tokens.Where(static t => !IsEmptyPartToken(t)).ToList();
+        if (kept.Count == 0)
+            return null;
+        if (kept.Count == tokens.Count)
+            return proposedToken;
+
+        return string.Join(InferJoinSeparator(proposedToken), kept);
+    }
+
+    internal static bool IsEmptyPartToken(string? token) =>
+        string.Equals((token ?? string.Empty).Trim(), EmptyPartToken, StringComparison.Ordinal);
+
+    private static string InferJoinSeparator(string proposedToken)
+    {
+        var firstEnd = proposedToken.IndexOf("}}", StringComparison.Ordinal);
+        var nextStart = firstEnd >= 0
+            ? proposedToken.IndexOf("{{", firstEnd + 2, StringComparison.Ordinal)
+            : -1;
+        if (firstEnd >= 0 && nextStart > firstEnd)
+            return proposedToken[(firstEnd + 2)..nextStart];
+        return ", ";
+    }
+
     private static IReadOnlyList<ScanCompoundPart> AlignParts(
         IReadOnlyList<(string Text, int Offset, int Length)> segments,
         IReadOnlyList<string> codes,
@@ -170,7 +268,26 @@ public static class ScanCompoundYellowParts
         var assignedCode = new string?[segments.Count];
         var assignedToken = new string?[segments.Count];
 
-        if (codes.Count == segments.Count)
+        // Officer positional holes ({{.}}, {{.VPER}}, {{.}}) or any 1:1 token↔segment map.
+        if (tokens.Count == segments.Count)
+        {
+            for (var i = 0; i < tokens.Count; i++)
+            {
+                var token = tokens[i];
+                if (IsEmptyPartToken(token))
+                {
+                    assignedToken[i] = null;
+                    assignedCode[i] = string.Empty;
+                    continue;
+                }
+
+                assignedToken[i] = token;
+                assignedCode[i] = TemplateTokenSyntax.TryGetShortCode(token, out var code)
+                    ? code
+                    : string.Empty;
+            }
+        }
+        else if (codes.Count == segments.Count)
         {
             for (var i = 0; i < codes.Count; i++)
             {
@@ -178,9 +295,10 @@ public static class ScanCompoundYellowParts
                 assignedToken[i] = i < tokens.Count ? tokens[i] : null;
             }
         }
+
         var leftoverCodes = new List<string>();
         var leftoverTokens = new List<string?>();
-        if (codes.Count != segments.Count)
+        if (tokens.Count != segments.Count && codes.Count != segments.Count)
         {
             for (var i = 0; i < codes.Count; i++)
             {
@@ -314,7 +432,8 @@ public static class ScanCompoundYellowParts
             || code.Equals("RPPH", StringComparison.OrdinalIgnoreCase))
             return PhoneShape.IsMatch(segment);
 
-        if (code.Equals("ACADR", StringComparison.OrdinalIgnoreCase))
+        if (code.Equals("ACADR", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("PFAD", StringComparison.OrdinalIgnoreCase))
             return LooksLikeStreetAddress(segment);
 
         if (code.Equals("PPAT", StringComparison.OrdinalIgnoreCase)
@@ -340,6 +459,9 @@ public static class ScanCompoundYellowParts
         var trimmed = segment.Trim();
         return trimmed.Length == 3 && trimmed.All(static ch => ch is >= 'A' and <= 'Z' or >= 'a' and <= 'z');
     }
+
+    internal static bool LooksLikeIso3Country(string? text) =>
+        LooksLikeIso3(text ?? string.Empty);
 
     private static bool LooksLikePersonalNumber(string segment)
     {

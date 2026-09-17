@@ -133,6 +133,7 @@ public static class ScanFieldPlanOfficerOverride
 
     /// <summary>
     /// Remap one Review sub-row (5.1) without dropping sibling tokens on the same yellow span.
+    /// Empty sibling slots stay as positional holes so Lock/Review keep the code on the chosen part.
     /// </summary>
     public static ScanFieldPlan ApplyPartCodes(
         ScanFieldPlan plan,
@@ -164,23 +165,38 @@ public static class ScanFieldPlanOfficerOverride
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
 
-        var allCodes = new List<string>();
-        foreach (var part in parts)
+        var token = BuildPositionalCompoundToken(
+            field,
+            plan.PlaceholderSet,
+            parts,
+            hidden,
+            remapPartIndex: partIndex,
+            remapCodes: requested);
+
+        if (string.Equals(field.ProposedToken, token, StringComparison.Ordinal))
+            return plan;
+
+        var index = -1;
+        for (var i = 0; i < plan.Fields.Count; i++)
         {
-            if (hidden.Contains(part.Index))
-                continue;
-
-            if (part.Index == partIndex)
+            if (string.Equals(plan.Fields[i].FieldId, parentId, StringComparison.Ordinal))
             {
-                allCodes.AddRange(requested);
-                continue;
+                index = i;
+                break;
             }
-
-            if (!string.IsNullOrWhiteSpace(part.ShortCode))
-                allCodes.Add(part.ShortCode);
         }
 
-        return ApplyTokens(plan, parentId, allCodes);
+        if (index < 0)
+            return plan;
+
+        var fields = plan.Fields.ToList();
+        fields[index] = CopyField(
+            field,
+            token,
+            string.IsNullOrWhiteSpace(token) ? ScanFieldConfidence.Low : ScanFieldConfidence.High,
+            field.HiddenPartIndexes,
+            field.IsLocked);
+        return WithFields(plan, fields, plan.Gaps);
     }
 
     /// <summary>
@@ -276,27 +292,7 @@ public static class ScanFieldPlanOfficerOverride
         if (visible <= 0)
             return DropField(plan, index);
 
-        var part = parts.FirstOrDefault(p => p.Index == partIndex);
-        var dropCodes = TemplateTokenSyntax.GetShortCodes(part?.Token);
-        var keepCodes = TemplateTokenSyntax.GetShortCodes(field.ProposedToken)
-            .Where(c => !dropCodes.Contains(c, StringComparer.OrdinalIgnoreCase))
-            .ToList();
-
-        var usage = field.Scope == ScanFieldScope.Row
-            ? UserReportPlaceholderScope.Row
-            : UserReportPlaceholderScope.Header;
-        var tokenParts = new List<string>();
-        foreach (var code in keepCodes)
-        {
-            var entry = plan.PlaceholderSet.Allowed.FirstOrDefault(e =>
-                string.Equals(e.ShortCode, code, StringComparison.OrdinalIgnoreCase));
-            if (entry != null)
-                tokenParts.Add(entry.BuildWordToken(usage));
-        }
-
-        string? token = tokenParts.Count == 0
-            ? null
-            : JoinLibraryTokens(field.LabelText, field.ProposedToken, tokenParts);
+        var token = BuildPositionalCompoundToken(field, plan.PlaceholderSet, parts, hidden);
 
         var fields = plan.Fields.ToList();
         fields[index] = CopyField(
@@ -447,6 +443,64 @@ public static class ScanFieldPlanOfficerOverride
 
         var nameBit = names.Count == 0 ? string.Empty : $" Full name: {string.Join(" · ", names)}.";
         return $"Focused yellow mark #{displayOrder}. Printed text: \"{field.LabelText}\". Current placeholder: {current}.{nameBit} Remap this fieldId only when the officer means this printed text. If they name another Review # or form line (for example 12. Wizanyň berilen senesi), change those fieldIds and leave this mark unchanged.";
+    }
+
+    /// <summary>
+    /// One token per comma segment, including <see cref="ScanCompoundYellowParts.EmptyPartToken"/>
+    /// for hidden and unmapped slots, so later Add/Lock still land on the officer's part (11.2).
+    /// </summary>
+    private static string? BuildPositionalCompoundToken(
+        ScanDetectedField field,
+        ApplicationProfilePlaceholderSet placeholderSet,
+        IReadOnlyList<ScanCompoundPart> parts,
+        IReadOnlyList<int> hidden,
+        int remapPartIndex = 0,
+        IReadOnlyList<string>? remapCodes = null)
+    {
+        var usage = field.Scope == ScanFieldScope.Row
+            ? UserReportPlaceholderScope.Row
+            : UserReportPlaceholderScope.Header;
+        var pieces = new List<string>(parts.Count);
+        foreach (var part in parts)
+        {
+            if (hidden.Contains(part.Index))
+            {
+                pieces.Add(ScanCompoundYellowParts.EmptyPartToken);
+                continue;
+            }
+
+            IReadOnlyList<string> codesForPart = remapPartIndex == part.Index
+                ? remapCodes ?? Array.Empty<string>()
+                : string.IsNullOrWhiteSpace(part.ShortCode)
+                    ? Array.Empty<string>()
+                    : [part.ShortCode];
+
+            if (codesForPart.Count == 0)
+            {
+                pieces.Add(ScanCompoundYellowParts.EmptyPartToken);
+                continue;
+            }
+
+            var built = new List<string>();
+            foreach (var code in codesForPart)
+            {
+                var entry = placeholderSet.Allowed.FirstOrDefault(e =>
+                    string.Equals(e.ShortCode, code, StringComparison.OrdinalIgnoreCase));
+                if (entry != null)
+                    built.Add(entry.BuildWordToken(usage));
+            }
+
+            pieces.Add(built.Count == 0
+                ? ScanCompoundYellowParts.EmptyPartToken
+                : built.Count == 1
+                    ? built[0]
+                    : string.Join(" ", built));
+        }
+
+        if (pieces.Count == 0 || pieces.All(ScanCompoundYellowParts.IsEmptyPartToken))
+            return null;
+
+        return string.Join(InferSeparator(field.LabelText, field.ProposedToken), pieces);
     }
 
     internal static string JoinLibraryTokens(

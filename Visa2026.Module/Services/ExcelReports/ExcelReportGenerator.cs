@@ -40,6 +40,8 @@ public class ExcelReportGenerator : IExcelReportGenerator
             ? applicationItems.Where(i => i != null).ToList()
             : UserReportMergeDataHelper.GetActiveApplicationItems(application);
 
+        EnsureRowsLoopMarker(worksheet);
+
         var loopRows = FindRowsContainingToken(worksheet, "{{#ds.rows}}");
         if (loopRows.Count == 0)
             throw new InvalidOperationException("Excel list template must contain a row with {{#ds.rows}}.");
@@ -111,6 +113,7 @@ public class ExcelReportGenerator : IExcelReportGenerator
         var templateRow = worksheet.Row(templateRowIndex);
         var prototypeRow = CaptureRowSnapshot(worksheet, templateRowIndex);
 
+        UnmergeRangesCrossingInsert(worksheet, templateRowIndex);
         for (int i = items.Count - 1; i >= 1; i--)
             templateRow.InsertRowsBelow(1);
 
@@ -135,6 +138,88 @@ public class ExcelReportGenerator : IExcelReportGenerator
                 new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase),
                 template,
                 items.FirstOrDefault());
+    }
+
+    private static void EnsureRowsLoopMarker(IXLWorksheet worksheet)
+    {
+        if (FindRowsContainingToken(worksheet, "{{#ds.rows}}").Count > 0)
+            return;
+
+        var counts = new Dictionary<int, int>();
+        foreach (var cell in worksheet.CellsUsed())
+        {
+            var text = cell.GetFormattedString();
+            if (string.IsNullOrEmpty(text) || !text.Contains("{{.", StringComparison.Ordinal))
+                continue;
+
+            var row = cell.Address.RowNumber;
+            counts[row] = counts.GetValueOrDefault(row) + 1;
+        }
+
+        if (counts.Count == 0)
+            return;
+
+        var templateRow = counts.OrderByDescending(static p => p.Value).ThenBy(static p => p.Key).First().Key;
+        var start = FirstWritableCellOnRow(worksheet, templateRow);
+        if (start == null)
+            return;
+        var existing = start.GetFormattedString() ?? string.Empty;
+        if (!existing.Contains("{{#ds.rows}}", StringComparison.Ordinal))
+            start.Value = "{{#ds.rows}}" + existing;
+
+        var endRow = templateRow + 1;
+        for (var column = 1; column <= 26; column++)
+        {
+            var end = worksheet.Cell(endRow, column);
+            if (end.IsMerged() || !string.IsNullOrEmpty(end.FormulaA1))
+                continue;
+            if (!string.IsNullOrWhiteSpace(end.GetFormattedString()))
+                continue;
+
+            end.Value = "{{/ds.rows}}";
+            return;
+        }
+    }
+
+    private static IXLCell? FirstWritableCellOnRow(IXLWorksheet worksheet, int row)
+    {
+        var used = worksheet.Row(row).FirstCellUsed();
+        if (used != null)
+        {
+            var master = used.IsMerged() ? used.MergedRange()?.FirstCell() ?? used : used;
+            if (master.Address.RowNumber == row && string.IsNullOrEmpty(master.FormulaA1))
+                return master;
+        }
+
+        var last = worksheet.Row(row).LastCellUsed()?.Address.ColumnNumber ?? 26;
+        for (var column = 1; column <= Math.Max(last, 26); column++)
+        {
+            var cell = worksheet.Cell(row, column);
+            if (!string.IsNullOrEmpty(cell.FormulaA1))
+                continue;
+            if (cell.IsMerged())
+            {
+                var master = cell.MergedRange()?.FirstCell();
+                if (master != null && master.Address.RowNumber == row)
+                    return master;
+                continue;
+            }
+
+            return cell;
+        }
+
+        return null;
+    }
+
+    private static void UnmergeRangesCrossingInsert(IXLWorksheet worksheet, int insertAfterRow)
+    {
+        foreach (var range in worksheet.MergedRanges.ToList())
+        {
+            var first = range.RangeAddress.FirstAddress.RowNumber;
+            var last = range.RangeAddress.LastAddress.RowNumber;
+            if (first <= insertAfterRow && last > insertAfterRow)
+                range.Unmerge();
+        }
     }
 
     private static List<int> FindRowsContainingToken(IXLWorksheet worksheet, string token)

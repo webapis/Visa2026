@@ -241,7 +241,28 @@ function compoundPartIndex(fieldId) {
     return Number.isFinite(part) ? part : 0;
 }
 
-function applyReadingOrder(container, dotnetRef) {
+function parseOrderKey(item) {
+    const raw = (item && item.el && item.el.dataset.order) || "";
+    const n = parseFloat(raw);
+    return Number.isFinite(n) ? n : 0;
+}
+
+function readingLineSlop(items) {
+    if (!items || !items.length) {
+        return 16;
+    }
+    const heights = items.map(function (item) {
+        return parseFloat(item.el && item.el.style.height) || 0;
+    }).filter(function (h) {
+        return h > 4;
+    }).sort(function (a, b) {
+        return a - b;
+    });
+    const mid = heights.length ? heights[Math.floor(heights.length / 2)] : 16;
+    return Math.max(16, mid * 0.6);
+}
+
+function applyReadingOrder(container, dotnetRef, lockDocumentOrder) {
     if (!container) {
         return;
     }
@@ -280,7 +301,7 @@ function applyReadingOrder(container, dotnetRef) {
         });
     });
 
-    const lineSlop = 16;
+    const lineSlop = readingLineSlop(items);
     const groups = [];
     const seen = {};
     for (let i = 0; i < items.length; i++) {
@@ -312,6 +333,12 @@ function applyReadingOrder(container, dotnetRef) {
     }
 
     groups.sort(function (a, b) {
+        if (lockDocumentOrder) {
+            const order = parseOrderKey(a.members[0]) - parseOrderKey(b.members[0]);
+            if (order !== 0) {
+                return order;
+            }
+        }
         if (a.page !== b.page) {
             return a.page - b.page;
         }
@@ -361,6 +388,8 @@ function appendMark(pageDiv, mark, box, dotnetRef) {
     button.type = "button";
     button.className = mark.isGap ? "tas-pdf-mark tas-pdf-mark--gap" : "tas-pdf-mark";
     button.dataset.fieldId = mark.fieldId || "";
+    button.dataset.order = mark.order || "";
+    button.dataset.kind = mark.kind || "";
     button.style.left = box.left + "px";
     button.style.top = box.top + "px";
     button.style.width = box.width + "px";
@@ -526,13 +555,24 @@ function placeTextHit(mark, hit, entries, used, dotnetRef) {
     appendMark(box.pageDiv, mark, box, dotnetRef);
 }
 
+function tableHeavy(marks) {
+    if (!marks || !marks.length) {
+        return false;
+    }
+    let n = 0;
+    for (let i = 0; i < marks.length; i++) {
+        if (marks[i] && marks[i].table) {
+            n += 1;
+        }
+    }
+    return n >= Math.max(2, marks.length * 0.4);
+}
+
 function placeMarks(entries, marks, dotnetRef, pages) {
     const excelAspect = marks.reduce(function (value, mark) {
         return typeof mark.aspect === "number" && mark.aspect > 0 ? mark.aspect : value;
     }, 0);
-    const frames = excelAspect > 0 || marks.some(function (mark) {
-        return hasExcelBox(mark) && mark.kind !== "word";
-    })
+    const frames = excelAspect > 0 || marks.some(hasExcelBox)
         ? excelFrames(entries, excelAspect, pages)
         : [];
     const used = new Set();
@@ -551,14 +591,19 @@ function placeMarks(entries, marks, dotnetRef, pages) {
             continue;
         }
 
-        const expected = excelOnly ? excelExpectedRect(mark, frames) : null;
+        const expected = hasExcelBox(mark) ? excelExpectedRect(mark, frames) : null;
         const hit = pickHit(findAllLabelSpans(entries, mark.label), used, expected, entries);
         if (hit) {
             placeTextHit(mark, hit, entries, used, dotnetRef);
+        } else if (mark.table && hasExcelBox(mark)) {
+            placeExcelMark(mark, frames, dotnetRef);
         }
     }
 
-    applyReadingOrder(pages && pages[0] ? pages[0].pageDiv.parentElement : null, dotnetRef);
+    applyReadingOrder(
+        pages && pages[0] ? pages[0].pageDiv.parentElement : null,
+        dotnetRef,
+        tableHeavy(marks));
 }
 
 async function destroyHost(container) {

@@ -501,6 +501,107 @@ public class TemplateScanOrchestratorTests
     }
 
     [Fact]
+    public async Task GenerateAsync_word_sanaw_table_writes_rows_loop()
+    {
+        var set = new ApplicationProfilePlaceholderSetService(new UserReportPlaceholderCatalogService()).GetSet(
+            new ApplicationProfilePlaceholderSetQuery
+            {
+                Profile = new ApplicationProfile
+                {
+                    RequirePersonPassport = true,
+                },
+                DataScope = ApplicationProfileTemplateDataScope.Both,
+                TemplateKind = ApplicationProfileTemplateKind.Word,
+            });
+
+        var bytes = ScanWordTableHeaderTestsSanaw();
+        var yellows = new ScanOfficeYellowExtractor().Extract(bytes, ScanSourceKind.Word);
+        var proposal = ScanOfficeFieldPlanBuilder.Build(yellows, set, bytes, ScanSourceKind.Word);
+        var plan = new ScanFieldPlanMerger().Merge(new ScanFieldPlanMergeRequest
+        {
+            PlaceholderSet = set,
+            ScanKind = ScanKind.FilledSample,
+            Proposal = proposal,
+        });
+
+        var outcome = await CreateOrchestrator().GenerateAsync(new TemplateScanAnalysis
+        {
+            NormalizedInput = new ScanNormalizedInput
+            {
+                SourceKind = ScanSourceKind.Word,
+                Pages = Array.Empty<ScanPageImage>(),
+                OriginalByteLength = bytes.LongLength,
+                FileName = "Dasary_yurt_rayatlarynyn_sanawy_cakylyk.docx",
+                OfficePackageBytes = bytes,
+            },
+            Suitability = new ScanSuitabilityReport
+            {
+                Verdict = ScanSuitabilityVerdict.Pass,
+                TextConfidence = 1.0,
+                Issues = Array.Empty<ScanSuitabilityIssue>(),
+            },
+            FieldPlan = plan,
+            PlaceholderSet = set,
+            Playbook = new ScanAuthoringPlaybookService().GetPlaybook(),
+            TemplateName = "Dasary_yurt_rayatlarynyn_sanawy_cakylyk",
+            DataScope = ApplicationProfileTemplateDataScope.Both,
+        });
+
+        Assert.True(!outcome.HasErrors, string.Join(" | ", outcome.Errors));
+        using var stream = new MemoryStream(outcome.Content);
+        using var document = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(stream, false);
+        var text = document.MainDocumentPart!.Document.Body!.InnerText;
+        Assert.Contains("{{#ds.rows}}", text, StringComparison.Ordinal);
+        Assert.Contains("{{/ds.rows}}", text, StringComparison.Ordinal);
+    }
+
+    private static byte[] ScanWordTableHeaderTestsSanaw()
+    {
+        using var stream = new MemoryStream();
+        using (var document = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Create(
+            stream,
+            DocumentFormat.OpenXml.WordprocessingDocumentType.Document))
+        {
+            var main = document.AddMainDocumentPart();
+            var header = new DocumentFormat.OpenXml.Wordprocessing.TableRow();
+            foreach (var caption in new[] { "Familiyasy", "Ady", "Rayatlygy" })
+            {
+                header.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.TableCell(
+                    new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                            new DocumentFormat.OpenXml.Wordprocessing.Text(caption)))));
+            }
+
+            var data = new DocumentFormat.OpenXml.Wordprocessing.TableRow();
+            foreach (var text in new[] { "Ozer", "Arita", "TUR" })
+            {
+                data.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.TableCell(
+                    new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(
+                                new DocumentFormat.OpenXml.Wordprocessing.Highlight
+                                {
+                                    Val = DocumentFormat.OpenXml.Wordprocessing.HighlightColorValues.Yellow,
+                                }),
+                            new DocumentFormat.OpenXml.Wordprocessing.Text(text)))));
+            }
+
+            var table = new DocumentFormat.OpenXml.Wordprocessing.Table(
+                new DocumentFormat.OpenXml.Wordprocessing.TableGrid(
+                    new DocumentFormat.OpenXml.Wordprocessing.GridColumn { Width = "1440" },
+                    new DocumentFormat.OpenXml.Wordprocessing.GridColumn { Width = "1440" },
+                    new DocumentFormat.OpenXml.Wordprocessing.GridColumn { Width = "1440" }),
+                header,
+                data);
+            main.Document = new DocumentFormat.OpenXml.Wordprocessing.Document(
+                new DocumentFormat.OpenXml.Wordprocessing.Body(table));
+            main.Document.Save();
+        }
+
+        return stream.ToArray();
+    }
+
+    [Fact]
     public void DI_registers_orchestrator()
     {
         using var sp = BuildServiceProvider();

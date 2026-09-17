@@ -354,6 +354,14 @@ public sealed class ApplicationWordReportEntryGenerator
             return false;
         if (UserReportMergeDataHelper.IsApplicationHeaderOnlyWordTemplate(template))
             return false;
+        if (UserReportMergeDataHelper.TemplateHasRowsLoop(template)
+            && !UserReportMergeDataHelper.IsSahsyKagyzUserReportTemplate(template)
+            && !UserReportMergeDataHelper.IsForma16UserReportTemplate(template)
+            && !UserReportMergeDataHelper.TemplateUsesSahsyKagyzRowPlaceholders(template, template.Placeholders)
+            && !UserReportMergeDataHelper.TemplateUsesRegistrationForm16RowPlaceholders(template, template.Placeholders))
+        {
+            return false;
+        }
         if (catalogEntries != null)
         {
             foreach (var entry in catalogEntries)

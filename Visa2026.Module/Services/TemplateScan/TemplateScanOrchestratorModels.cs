@@ -100,4 +100,10 @@ public sealed class TemplateScanSaveRequest
     public Guid? ApplicableProjectContractId { get; init; }
 
     public Guid? ApplicableMigrationServiceId { get; init; }
+
+    /// <summary>
+    /// True for Review placeholders so the same Word/Excel catalog name is replaced.
+    /// False for Create from yellow marks so a taken roster name becomes a new <c>_2</c> row.
+    /// </summary>
+    public bool AllowOverwriteByName { get; init; } = true;
 }

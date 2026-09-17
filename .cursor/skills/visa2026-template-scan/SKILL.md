@@ -59,6 +59,9 @@ Officers submit **wizard step screenshots** + optional **catalog Preview** + the
 
 | Symptom | First step | Owner |
 |---------|------------|--------|
+| Sanaw #13 TUR + street maps only to Foreign address (PFAD), country missing | Comma in the yellow = two placeholders: **PFAC** then **PFAD**. Stop F5, rebuild, **Analyze** | **This skill** |
+| After × on compound 11.1, picking Visa period (item) on 11.2 jumps to another code | Hidden parts keep empty slots. Stop F5, rebuild, hard-refresh. × leftover 11.1, then Add **AVPRD** on 11.2 | **This skill** |
+| Lock on compound 11.2 / 11.3 shows Part instead of Visa period / category | Add placeholders first (chips must show AVPRD/AVCAT). Lock keeps Short codes. Stop F5, rebuild, hard-refresh | **This skill** |
 | Business-trip letter dates map to ADAT / duration maps to TPCNT | **BTSD** / **BTED** (`-den` / `-ne` stay in Word). **BTDCNT** / **BTDCTX** for `N (words) gün`. From/to: **BTFRG** **BTFCT** **BTTRG** **BTTCT**. Purpose **BTPRP**. Sanaw destination **BTAD**. Restart, Analyze | **This skill** + user-report-templates |
 | Sanaw destination address empty as **11.1** / cannot find trip address like Address_FullAddress | One yellow = **BTAD** (`BusinessTripAddress_FullAddress`, region+city+street). Search `BTAD` / `business trip address` / `Address_FullAddress`. Do not split on commas. Stop F5, rebuild, **Analyze** | **This skill** + user-report-templates |
 | Review Add cannot find From Region / From City / To Region / To City | Filter those names or **BTFRG** **BTFCT** **BTTRG** **BTTCT**. They sit in the **Application** group (not “district”). Restart, rebuild, Analyze | **This skill** + user-report-templates |
@@ -68,7 +71,10 @@ Officers submit **wizard step screenshots** + optional **catalog Preview** + the
 | Isolated yellow `2` next to `(iki) gün` missing; From Region preview empty | Digit after person `1 (bir)` is **BTDCNT**, not a second TPCNT. Rebuild, Analyze. Fill From region / From city so **BTFRG** prints | **This skill** + user-report-templates |
 | Review left pane missing a `#` (e.g. 12) or numbers sit on the wrong yellow | Word marks snap to unused PDF text near the OpenXML span; short `2` / duplicate dates no longer take the first hit. Header yellows number first. Restart, hard-refresh Review | **This skill** |
 | Review `#` on one line jump (10 12 11 14) | Numbers follow left-to-right on the letter (then the Detected list). Restart, hard-refresh Review | **This skill** |
-| Review `#` empty boxes in whitespace / stacked on letterhead | Word marks are PDF text only (no paragraph-% fallback). Rebuild, hard-refresh Review | **This skill** |
+| Word Review `#` order lost on a table (Excel sanaw is fine) | Word table marks snap to the cell grid like Excel. Script `?v=tasmarks10`. Stop F5, rebuild, hard-refresh Review | **This skill** |
+| Word sanaw names/birth unmapped (Excel headers were fine) | Analyze uses the **column caption** above the yellow (`Familiýasy` → PLN, `Ady` → PFNM, `Doglan senesi we ýeri` → PDBT/PCBT/PBPL). Stop F5, rebuild, **Analyze** | **This skill** |
+| Word yellow cell has no Detected row / no `#` (`TUR`, `Ýok`, signatory name) | Cell shading counts as yellow. Duplicate short text still gets a table `#`. Stop F5, rebuild, hard-refresh Review, **Analyze** | **This skill** |
+| Review `#` empty boxes in whitespace / stacked on letterhead | Word still paints PDF text (table cell % is a snap hint, not a ghost box). Rebuild, hard-refresh Review | **This skill** |
 | Preview shows `{{IMAGE:Person_Photo}}` in the photo box after Add existing template | Word wrapped the long token in the photo cell. Restart, hard-refresh Preview. New Generate uses `{{IMAGE:PPH}}` | **This skill** + user-report-templates |
 | Inserted sample photo not mapped | Body portrait (not a tiny icon) → `{{IMAGE:PPH}}` on Generate (`Person_Photo` still injects). Yellow still required for text values. Restart, Analyze | **This skill** |
 | Review placeholders dropped Person photo after Open yellow file | Restore re-pins `{{IMAGE:PPH}}` onto the live body portrait (do not yellow-highlight the picture). Continue replaces the sample photo. Re-Approve once. Restart | **This skill** |
@@ -87,6 +93,10 @@ Officers submit **wizard step screenshots** + optional **catalog Preview** + the
 | Azure Ask AI dumps dates on the selected WP mark | Chat now sends Review page + optional PNG/JPG. Attach a photo of line 12. Restart, hard-refresh | **This skill** |
 | Review Add placeholder is hard to find / need 12.3 on the same yellow | Select the row. Short column: Filter + **Add placeholder…**. Pick a code — appends a sibling. Hard-refresh | **This skill** |
 | This profile only letter appears on Shared | Approve wrote a merge backing `UserReportTemplate`. Rebuild; open **This profile**. Shared hides names that exist only as this-profile nested rows | **This skill** + resminamalar |
+| After **Approve — save to profile**, template missing from Resminamalar ZIP selection / Shared tab | **This profile only** lands on **This profile** (checkbox list), not Shared. Stop F5, rebuild, Approve, Close — new row is checked. Shared is only **Save to = Shared catalog** | **This skill** + resminamalar |
+| Catalog Preview of a sanaw shows only one of several selected people | Stop F5, rebuild. Invitation yellow-marks copies clone rows at Preview. Direct-to-migration seeded **SANAW_WIZANY_UZTURMEK** already loops. Keep all header chips selected | **This skill** + resminamalar |
+| Invitation yellow-marks sanaw Preview fails; visa-extension seeded sanaw is fine | Stop F5, rebuild. Preview This-profile Dasary Word/Excel — one row per person. No Re-Approve | **This skill** + resminamalar |
+| Word roster Approve does not add a catalog row (Excel does) | Same Word name overwrote the existing This-profile sanaw. Stop F5, rebuild, **Create** again — new Word row is `…_2`. Review placeholders still replaces the same name | **This skill** |
 | Analyze crashes `Specified part does not exist in the package` | Word ZIP lists a missing related part. Rebuild; Analyze again. If it still fails, Word **Save As** `.docx` | **This skill** |
 | PNG/JPG/PDF rejected | Expected — use yellow-marked Word/Excel | **This skill** |
 | Yellow not detected | Word Text Highlight Color / Excel solid yellow fill | **This skill** |

@@ -61,6 +61,46 @@ public class ScanWordPreviewMarkGeometryTests
     }
 
     [Fact]
+    public void TryMap_places_later_table_cell_to_the_right()
+    {
+        var bytes = TableRow("Familiyasy", "Ady", "TUR");
+        var marks = new[]
+        {
+            Mark("surname", "body/0", 0, 11, "Familiyasy"),
+            Mark("given", "body/1", 0, 3, "Ady"),
+            Mark("nat", "body/2", 0, 3, "TUR"),
+        };
+
+        var layout = ScanWordPreviewMarkGeometry.TryMap(bytes, marks);
+        Assert.NotNull(layout);
+        Assert.True(layout!.Boxes["given"].Left > layout.Boxes["surname"].Left);
+        Assert.True(layout.Boxes["nat"].Left > layout.Boxes["given"].Left);
+        Assert.InRange(Math.Abs(layout.Boxes["nat"].Top - layout.Boxes["surname"].Top), 0, 2);
+        Assert.Contains("nat", layout.TableMarkIds!);
+    }
+
+    [Fact]
+    public void TryMap_places_next_table_row_below()
+    {
+        var bytes = TableGrid(
+            new[] { "A1", "B1" },
+            new[] { "A2", "B2" });
+        var marks = new[]
+        {
+            Mark("a1", "body/0", 0, 2, "A1"),
+            Mark("b1", "body/1", 0, 2, "B1"),
+            Mark("a2", "body/2", 0, 2, "A2"),
+            Mark("b2", "body/3", 0, 2, "B2"),
+        };
+
+        var layout = ScanWordPreviewMarkGeometry.TryMap(bytes, marks);
+        Assert.NotNull(layout);
+        Assert.True(layout!.Boxes["a2"].Top > layout.Boxes["a1"].Top);
+        Assert.True(layout.Boxes["b1"].Left > layout.Boxes["a1"].Left);
+        Assert.True(layout.Boxes["b2"].Left > layout.Boxes["a2"].Left);
+    }
+
+    [Fact]
     public void TryMap_returns_null_for_excel_marks()
     {
         var marks = new[]
@@ -88,6 +128,41 @@ public class ScanWordPreviewMarkGeometryTests
             0,
             false,
             OverlayId: id);
+
+    private static byte[] TableRow(params string[] cells) => TableGrid(cells);
+
+    private static byte[] TableGrid(params string[][] rows)
+    {
+        using var stream = new MemoryStream();
+        using (var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document))
+        {
+            var main = document.AddMainDocumentPart();
+            var colCount = rows.Length == 0 ? 1 : rows.Max(static r => r.Length);
+            var grid = new TableGrid();
+            for (var i = 0; i < colCount; i++)
+                grid.AppendChild(new GridColumn { Width = "1440" });
+
+            var table = new Table(grid);
+            foreach (var rowCells in rows)
+            {
+                var row = new TableRow();
+                foreach (var text in rowCells)
+                {
+                    row.AppendChild(new TableCell(new Paragraph(new Run(new Text(text)
+                    {
+                        Space = SpaceProcessingModeValues.Preserve,
+                    }))));
+                }
+
+                table.AppendChild(row);
+            }
+
+            main.Document = new Document(new Body(table));
+            main.Document.Save();
+        }
+
+        return stream.ToArray();
+    }
 
     private static byte[] Letter(params string[] paragraphs)
     {

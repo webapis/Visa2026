@@ -53,6 +53,11 @@
   outline: none;
 }
 
+.resminamalar-catalog__card--just-saved {
+  border-color: color-mix(in srgb, #0f766e 55%, var(--rmc-border));
+  box-shadow: inset 3px 0 0 #0f766e;
+}
+
 .resminamalar-catalog__card-head {
   display: flex;
   align-items: center;

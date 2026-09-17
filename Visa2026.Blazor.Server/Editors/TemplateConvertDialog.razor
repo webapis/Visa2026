@@ -377,7 +377,7 @@
 
     private sealed record ChatBubble(bool IsOfficer, string Text, bool Refused);
 
-    [Parameter] public EventCallback OnTemplateSaved { get; set; }
+    [Parameter] public EventCallback<string> OnTemplateSaved { get; set; }
 
     [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
     [Inject] private ITemplateConvertOrchestrator Orchestrator { get; set; } = null!;
@@ -754,7 +754,7 @@
             _messageIsError = false;
 
             if (OnTemplateSaved.HasDelegate)
-                await OnTemplateSaved.InvokeAsync();
+                await OnTemplateSaved.InvokeAsync(_savedTemplateName);
         }
         catch (Exception ex)
         {

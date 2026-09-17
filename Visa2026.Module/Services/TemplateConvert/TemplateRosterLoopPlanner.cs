@@ -1,4 +1,6 @@
 using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
 
 #nullable enable
 
@@ -337,6 +339,7 @@ internal static class TemplateRosterLoopPlanner
 
         var sheetGroup = excelRowSubs
             .GroupBy(x => x.Cell.SheetName, StringComparer.OrdinalIgnoreCase)
+            .OrderByDescending(static g => g.Count())
             .First();
 
         var parsed = new List<(DocumentRegion.ExcelCell Cell, int Column, int Row)>();
@@ -387,6 +390,147 @@ internal static class TemplateRosterLoopPlanner
         {
             workbook?.Dispose();
         }
+    }
+
+    /// <summary>
+    /// Create-from-yellow-marks Word path: wrap the prototype table row that holds
+    /// <c>{{.CODE}}</c> tokens with <c>{{#ds.rows}}</c> so Resminamalar lists every selected person.
+    /// </summary>
+    internal static IReadOnlyList<LoopMarker> PlanWordLoopsFromSubstitutions(
+        IReadOnlyList<TokenSubstitution> substitutions,
+        byte[]? documentContent = null)
+    {
+        ArgumentNullException.ThrowIfNull(substitutions);
+
+        if (documentContent is not { Length: > 0 })
+            return Array.Empty<LoopMarker>();
+
+        var rowAddresses = substitutions
+            .Select(static s => (Sub: s, Span: s.Region as DocumentRegion.WordSpan))
+            .Where(static x => x.Span != null && IsRowScopedSubstitutionToken(x.Sub.Token))
+            .Select(static x => x.Span!.ParagraphAddress)
+            .ToHashSet(StringComparer.Ordinal);
+
+        if (rowAddresses.Count == 0)
+            return Array.Empty<LoopMarker>();
+
+        return PlanWordTableRowLoop(documentContent, rowAddresses);
+    }
+
+    /// <summary>
+    /// Merge-time fallback for already-saved Word sanaws that have row tokens but no loop markers.
+    /// </summary>
+    internal static byte[] EnsureWordTableRowsLoop(byte[] content)
+    {
+        ArgumentNullException.ThrowIfNull(content);
+        if (content.Length == 0)
+            return content;
+
+        var loops = PlanWordTableRowLoop(content, rowParagraphAddresses: null);
+        if (loops.Count == 0)
+            return content;
+
+        var written = WordTemplateTokenWriter.Write(
+            content,
+            Array.Empty<TokenSubstitution>(),
+            loops);
+        return written.Content;
+    }
+
+    private static IReadOnlyList<LoopMarker> PlanWordTableRowLoop(
+        byte[] documentContent,
+        HashSet<string>? rowParagraphAddresses)
+    {
+        byte[] loadable;
+        try
+        {
+            loadable = WordOpenXmlPackage.EnsureLoadable(documentContent);
+        }
+        catch (InvalidDataException)
+        {
+            return Array.Empty<LoopMarker>();
+        }
+        catch (OpenXmlPackageException)
+        {
+            return Array.Empty<LoopMarker>();
+        }
+
+        using var input = new MemoryStream(loadable, writable: false);
+        using var document = WordprocessingDocument.Open(input, false);
+        var bodyText = document.MainDocumentPart?.Document?.Body?.InnerText ?? string.Empty;
+        if (bodyText.Contains("{{#ds.rows}}", StringComparison.Ordinal)
+            || bodyText.Contains("{{#rows}}", StringComparison.Ordinal))
+        {
+            return Array.Empty<LoopMarker>();
+        }
+
+        var addressed = WordTemplateAddressing.EnumerateParagraphs(document);
+        var groups = new Dictionary<TableRow, List<WordParagraphAddress>>();
+
+        foreach (var addr in addressed)
+        {
+            var row = addr.Paragraph.Ancestors<TableRow>().FirstOrDefault();
+            if (row == null)
+                continue;
+
+            var isCandidate = rowParagraphAddresses != null
+                ? rowParagraphAddresses.Contains(addr.Address)
+                : ParagraphLooksLikeRowToken(addr.Paragraph);
+            if (!isCandidate)
+                continue;
+
+            if (!groups.TryGetValue(row, out var list))
+            {
+                list = [];
+                groups[row] = list;
+            }
+
+            list.Add(addr);
+        }
+
+        var best = groups
+            .Select(static g => (
+                Row: g.Key,
+                Hits: g.Value,
+                Cells: g.Value
+                    .Select(static a => a.Paragraph.Ancestors<TableCell>().FirstOrDefault())
+                    .Where(static c => c != null)
+                    .Distinct()
+                    .Count()))
+            .OrderByDescending(static x => x.Cells)
+            .ThenByDescending(static x => x.Hits.Count)
+            .FirstOrDefault();
+
+        if (best.Row == null || best.Cells < 2)
+            return Array.Empty<LoopMarker>();
+
+        var rowParas = best.Row.Descendants<Paragraph>().ToList();
+        if (rowParas.Count == 0)
+            return Array.Empty<LoopMarker>();
+
+        var addressByParagraph = new Dictionary<Paragraph, string>(ReferenceEqualityComparer.Instance);
+        foreach (var addr in addressed)
+            addressByParagraph.TryAdd(addr.Paragraph, addr.Address);
+
+        if (!addressByParagraph.TryGetValue(rowParas[0], out var startAddr)
+            || !addressByParagraph.TryGetValue(rowParas[^1], out var endAddr))
+        {
+            return Array.Empty<LoopMarker>();
+        }
+
+        return
+        [
+            new LoopMarker(
+                new DocumentRegion.WordSpan(startAddr, 0, 0),
+                new DocumentRegion.WordSpan(endAddr, 0, 0),
+                RowsCollectionToken)
+        ];
+    }
+
+    private static bool ParagraphLooksLikeRowToken(Paragraph paragraph)
+    {
+        var text = WordTemplateAddressing.GetParagraphText(paragraph);
+        return text.Contains("{{.", StringComparison.Ordinal);
     }
 
     private static string Key(DocumentRegion.ExcelCell cell) =>

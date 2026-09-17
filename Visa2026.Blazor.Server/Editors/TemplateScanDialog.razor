@@ -306,7 +306,9 @@
                             <p>
                                 @(_source == EntrySource.Profile
                                     ? "It is in the profile's template list. Press Save profile to keep it."
-                                    : "It is now in the Resminamalar catalog for this case.")
+                                    : _catalogScope == ApplicationProfileTemplateCatalogScope.ProfileSpecific
+                                        ? "It is on the This profile tab in Resminamalar (not Shared). Close this window to select it for the ZIP."
+                                        : "It is on the This profile tab in Resminamalar, included from Shared.")
                             </p>
                             <table class="tas-done__table">
                                 <tbody>
@@ -323,10 +325,12 @@
                                     }
                                 </tbody>
                             </table>
-                            @if (_source == EntrySource.Profile && OnFocusSavedTemplate.HasDelegate)
+                            @if (OnFocusSavedTemplate.HasDelegate)
                             {
                                 <p class="tas-done__actions">
-                                    <button type="button" class="tas-link" @onclick="FocusSavedTemplateAsync">View in template list</button>
+                                    <button type="button" class="tas-link" @onclick="FocusSavedTemplateAsync">
+                                        @(_source == EntrySource.Profile ? "View in template list" : "View in Resminamalar")
+                                    </button>
                                 </p>
                             }
                         </div>
@@ -487,7 +491,7 @@
 
     private sealed record InstanceOption(Guid Id, string Label);
 
-    [Parameter] public EventCallback OnTemplateSaved { get; set; }
+    [Parameter] public EventCallback<string> OnTemplateSaved { get; set; }
     [Parameter] public EventCallback<string> OnFocusSavedTemplate { get; set; }
 
     [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
@@ -1967,7 +1971,12 @@
             }
 
             var ext = _outcome.SourceFormat == TemplateSourceFormat.Xlsx ? ".xlsx" : ".docx";
-            Orchestrator.Save(new TemplateScanSaveRequest
+            var overwriteSameName = IsEditingExisting
+                && string.Equals(
+                    _templateName.Trim(),
+                    _editingOriginalName!.Trim(),
+                    StringComparison.OrdinalIgnoreCase);
+            var saved = Orchestrator.Save(new TemplateScanSaveRequest
             {
                 ObjectSpace = objectSpace,
                 Profile = profile,
@@ -1990,24 +1999,29 @@
                 TemplateKind = _outcome.TemplateKind,
                 ApplicableProjectContractId = SelectedProjectContractId,
                 ApplicableMigrationServiceId = SelectedMigrationServiceId,
+                AllowOverwriteByName = overwriteSameName,
             });
 
             if (_source == EntrySource.Instance)
                 objectSpace.CommitChanges();
 
+            var savedName = string.IsNullOrWhiteSpace(saved.TemplateName)
+                ? _templateName.Trim()
+                : saved.TemplateName.Trim();
             var userTemplate = ApplicationProfileTemplateUserReportBridge.TryFindByName(
                 objectSpace,
-                _templateName.Trim());
+                savedName);
             if (userTemplate != null)
                 await UserReportMaintenance.ExtractAndValidatePlaceholdersAsync(userTemplate.ID);
 
-            _savedTemplateName = _templateName.Trim();
+            _templateName = savedName;
+            _savedTemplateName = savedName;
             _stage = Stage.Done;
             _message = null;
             _messageIsError = false;
 
             if (OnTemplateSaved.HasDelegate)
-                await OnTemplateSaved.InvokeAsync();
+                await OnTemplateSaved.InvokeAsync(_savedTemplateName);
         }
         catch (Exception ex)
         {

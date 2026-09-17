@@ -16,7 +16,8 @@ public static class ScanExcelPreviewMarkGeometry
 {
     public sealed record Layout(
         double Aspect,
-        IReadOnlyDictionary<string, ScanExcelPreviewMarkBox> Boxes);
+        IReadOnlyDictionary<string, ScanExcelPreviewMarkBox> Boxes,
+        IReadOnlySet<string>? TableMarkIds = null);
 
     public static Layout? TryMap(byte[]? workbookBytes, IReadOnlyList<ScanReviewOrderedField> marks)
     {

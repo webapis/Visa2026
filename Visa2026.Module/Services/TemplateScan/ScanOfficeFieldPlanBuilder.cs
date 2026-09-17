@@ -42,12 +42,17 @@ public static class ScanOfficeFieldPlanBuilder
         var instanceCandidates = valueCandidates ?? Array.Empty<ValueCandidate>();
         var catalogExamples = ScanYellowValueHintResolver.CatalogExampleCandidates(placeholderSet);
         var nearbyByIndex = BuildNearbyLabels(officeBytes, sourceKind, yellows);
+        var tableHeaders = sourceKind == ScanSourceKind.Word
+            ? ScanWordTableHeader.MapForYellows(officeBytes, yellows)
+            : null;
 
         for (var yellowIndex = 0; yellowIndex < yellows.Count; yellowIndex++)
         {
             var yellow = yellows[yellowIndex];
             nearbyByIndex.TryGetValue(yellowIndex, out var nearbyCtx);
             var nearbyLabel = nearbyCtx?.Joined;
+            string? columnHeader = null;
+            tableHeaders?.TryGetValue(yellowIndex, out columnHeader);
             var countContext = ResolveCountContext(yellows, nearbyByIndex, yellowIndex, nearbyCtx);
 
             var lockKey = ScanDocumentRegionKey.ForRegion(yellow.Region);
@@ -58,20 +63,32 @@ public static class ScanOfficeFieldPlanBuilder
             }
 
             IReadOnlyList<ScanDetectedFieldDraft> resolved = Array.Empty<ScanDetectedFieldDraft>();
+            if (!string.IsNullOrWhiteSpace(columnHeader))
+            {
+                var headerDraft = ScanExcelYellowResolver.DraftFromColumnHeader(
+                    yellow.Text,
+                    columnHeader,
+                    yellow.PageIndex,
+                    yellow.Region,
+                    placeholderSet);
+                if (headerDraft != null)
+                    resolved = [headerDraft];
+            }
+
             var preferLeftLabel = ScanFormFieldLabelHints.LooksLikeFormFieldLabel(nearbyLabel)
                 || ScanOfficialLetterHints.LooksLikeLetterBlock(yellow.Text)
                 || ScanOfficialLetterHints.LooksLikeBranchDirectorTitle(nearbyLabel);
-            if (preferLeftLabel)
+            if (preferLeftLabel && resolved.Count == 0)
             {
                 resolved = ScanSurroundPlaceholderPattern.TryDraft(
                     yellow.Text,
                     yellow.PageIndex,
                     yellow.Region,
                     nearbyLabel,
-                    columnHeader: null,
+                    columnHeader,
                     placeholderSet,
                     usedHeaderCodes,
-                    ScanSurroundPlaceholderPattern.MinScore(nearbyLabel, null));
+                    ScanSurroundPlaceholderPattern.MinScore(nearbyLabel, columnHeader));
             }
 
             if (resolved.Count == 0)
@@ -124,10 +141,10 @@ public static class ScanOfficeFieldPlanBuilder
                     yellow.PageIndex,
                     yellow.Region,
                     nearbyLabel,
-                    columnHeader: null,
+                    columnHeader,
                     placeholderSet,
                     usedHeaderCodes,
-                    ScanSurroundPlaceholderPattern.MinScore(nearbyLabel, null));
+                    ScanSurroundPlaceholderPattern.MinScore(nearbyLabel, columnHeader));
             }
 
             if (resolved.Count == 0)
@@ -138,7 +155,7 @@ public static class ScanOfficeFieldPlanBuilder
                 drafts.AddRange(ScanCompoundYellowBinder.Upgrade(
                     ScanCompanyRegistrationDateGuard.RewriteDrafts(
                         ScanRepresentativeNameGuard.RewriteDrafts(
-                            AttachNearby(resolved, nearbyLabel),
+                            AttachNearby(resolved, nearbyLabel, columnHeader),
                             placeholderSet,
                             instanceCandidates,
                             usedHeaderCodes),
@@ -161,6 +178,7 @@ public static class ScanOfficeFieldPlanBuilder
                         Box = ScanBoundingBox.FullPage,
                         SourceRegion = yellow.Region,
                         NearbyLabel = nearbyLabel,
+                        ColumnHeader = columnHeader,
                     },
                 ],
                 placeholderSet));
@@ -369,9 +387,11 @@ public static class ScanOfficeFieldPlanBuilder
 
     private static IReadOnlyList<ScanDetectedFieldDraft> AttachNearby(
         IReadOnlyList<ScanDetectedFieldDraft> drafts,
-        string? nearbyLabel)
+        string? nearbyLabel,
+        string? columnHeader)
     {
-        if (string.IsNullOrWhiteSpace(nearbyLabel) || drafts.Count == 0)
+        if ((string.IsNullOrWhiteSpace(nearbyLabel) && string.IsNullOrWhiteSpace(columnHeader))
+            || drafts.Count == 0)
             return drafts;
 
         return drafts.Select(d => new ScanDetectedFieldDraft
@@ -384,7 +404,7 @@ public static class ScanOfficeFieldPlanBuilder
             Scope = d.Scope,
             Box = d.Box,
             SourceRegion = d.SourceRegion,
-            ColumnHeader = d.ColumnHeader,
+            ColumnHeader = string.IsNullOrWhiteSpace(d.ColumnHeader) ? columnHeader : d.ColumnHeader,
             NearbyLabel = nearbyLabel,
             Alternatives = d.Alternatives,
         }).ToList();

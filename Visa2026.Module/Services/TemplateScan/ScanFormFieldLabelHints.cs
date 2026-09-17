@@ -87,7 +87,7 @@ public static class ScanFormFieldLabelHints
 
         if (folded.Contains("dasary", StringComparison.Ordinal)
             && (folded.Contains("salgy", StringComparison.Ordinal) || folded.Contains("yasa", StringComparison.Ordinal)))
-            return ["PFWC", "PFAD", "PFAC"];
+            return ["PFAC", "PFAD", "PFWC"];
 
         if ((folded.Contains("turkmenistan", StringComparison.Ordinal)
                 || folded.Contains("yasayan", StringComparison.Ordinal)
@@ -117,7 +117,7 @@ public static class ScanFormFieldLabelHints
             return role == ScanLetterRole.Signatory ? ["ACPOS", "POSN"] : ["POSN"];
 
         if (folded.Contains("doglan senesi we yeri", StringComparison.Ordinal))
-            return ["PDBT", "PCBC", "PBPL"];
+            return ["PDBT", "PCBT", "PBPL"];
 
         if (folded.Contains("doglan senesi", StringComparison.Ordinal)
             && !folded.Contains("yeri", StringComparison.Ordinal)
@@ -199,6 +199,7 @@ public static class ScanFormFieldLabelHints
             || folded.Contains("gelmegin", StringComparison.Ordinal)
             || folded.Contains("jynsy", StringComparison.Ordinal)
             || folded.Contains("okan yeri", StringComparison.Ordinal)
+            || folded.Equals("ady", StringComparison.Ordinal)
             || folded.Contains("familiyasy", StringComparison.Ordinal)
             || folded.Contains("doglan", StringComparison.Ordinal)
             || folded.Contains("pasport", StringComparison.Ordinal)

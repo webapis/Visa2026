@@ -127,7 +127,7 @@ public class ScanGuessingPatternRegistryTests
     [InlineData("U36556957", "4. Pasportynyn belgisi", "PPN")]
     [InlineData("TUR", "5. Doglan yeri, yurdy", "PCBC")]
     [InlineData("Ayal", "6. Jynsy", "PGND")]
-    [InlineData("Emek mahallesi gazi ali dusun caddesi", "7. Oy salgysy", "PFAC")]
+    [InlineData("Emek mahallesi gazi ali dusun caddesi", "7. Oy salgysy", "PFAD")]
     [InlineData("Turkmenistandaky sahamca mudirinin orunbasarynyn - gyzy", "8. Gelmeginin maksady", "RGEL")]
     [InlineData("Asgabat saherinin 1958-nji (Andalyp) kocesi jay-86", "9. Turkmenistanda bolyan yeri", "ADRS")]
     [InlineData("A1688318", "10. Wizanyn derejesi, gornusi we belgi", "VNUM")]

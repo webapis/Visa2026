@@ -25,6 +25,36 @@ Purpose: **catalog, seed gate, batch worker, preview, permissions, dialog UX** �
 
 ## Entries
 
+### 2026-09-17 — Invitation yellow-marks sanaw Preview fails; seeded direct-to-migration lists all people (Application)
+
+- **Symptom**: Case 5/-789 Çakylyk Almak. This-profile Dasary sanaw Word/Excel Preview: **Preview could not be generated.** Case 8/-1307 Wizany uzaltmak **SANAW_WIZANY_UZTURMEK** Excel Preview showed 3 data rows.
+- **Try**: Stop F5, rebuild. Preview invitation This-profile Word and Excel sanaw with all chips selected — one row per person, same as the seeded visa-extension sanaw. No Re-Approve.
+- **Test**: `WordScanTableRowExpanderTests`, `ExcelReportMergedPrototypeRowTests`.
+- **Root cause**: Seeded direct-to-migration files already contain a valid `{{#ds.rows}}`. Yellow-marks invitation copies do not (or the scan wrap / Excel vertical merge threw during expand).
+- **Fix**: Word clone prototype row (strip same-row scan loop). Excel inject onto merge master; unmerge then `InsertRowsBelow`.
+- **Prevent**: Do not treat invitation yellow-marks sanaws as broken DataScope; do not wrap Word loops at merge; do not insert Excel rows through a vertical merge.
+- **Cross-skill**: template-scan
+
+### 2026-09-17 — Sanaw Preview lists only one of five selected people (Application)
+
+- **Symptom**: Case 8/-1048, five people selected. Catalog Preview of the yellow-marks Word (and Excel) *Daşary ýurt raýatlarynyň sanawy* showed one table row.
+- **Try**: Stop F5, rebuild. Keep all five header chips selected. Preview the This-profile sanaw — five rows. Header letters stay one page.
+- **Test**: `TemplateRosterLoopPlannerTests`, `ApplicationWordReportEntryGeneratorTests`, `TemplateScanOrchestratorTests.GenerateAsync_word_sanaw_table_writes_rows_loop`.
+- **Root cause**: Scan Word had no `{{#ds.rows}}` around the prototype table row, so merge filled the first person only. Names containing *sanaw* were not treated as a single list document.
+- **Fix**: Word Generate + merge wrap the table row with `#ds.rows`. Excel injects a loop when missing. *sanaw* in the template name is a list, not per-person Word.
+- **Prevent**: Do not Preview a roster table as one page per person; do not omit `#ds.rows` on yellow-marks sanaws.
+- **Cross-skill**: template-scan
+
+### 2026-09-17 — Approve yellow-marks template missing from ZIP selection (Application)
+
+- **Symptom**: After **Approve — save to profile** (This profile only), the new sanaw was not in the Resminamalar ZIP checkboxes. Shared tab still listed the seeded SANAW rows only.
+- **Try**: Upload This profile only → Approve → Close. Open **This profile**. Shared stays empty for that name.
+- **Test**: `ApplicationReportPackageSelectionHelperTests`.
+- **Root cause**: Catalog reload unmounted the case Resminamalar host; ZIP selection did not add the new `profile:` key. This-profile-only backing names are hidden from Shared by design.
+- **Fix**: Keep the catalog mounted, switch to This profile, select and highlight the saved name.
+- **Prevent**: Do not treat Shared On/Off as the ZIP selection for This profile only.
+- **Cross-skill**: template-scan
+
 ### 2026-09-12 — Cancel-visa Ýüztutma Preview 1 (bir) with two linked visas (Application)
 
 - **Symptom**: 9/-001 Serdar. People & links Visa 2/2. Ýüztutma Preview and Review 6/7 still `1 (bir)`.

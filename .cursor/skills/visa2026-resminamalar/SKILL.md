@@ -62,6 +62,9 @@ disable-model-invocation: false
 | Extract security error from Edit template | `UserReportPlaceholder` permissions, non-secured OS in controller | **This skill** / security-access |
 | Preview OK, ZIP wrong or empty | Compare `SelectedReportKeysJson`, `SelectedApplicationItemIdsJson` | **This skill** |
 | **Sanaw** preview fails; `RowNo` empty hint | `UsesSingleDocumentItemList` / `BuildSanawyStyleRows` — not labor-contract per-item path | **This skill** + user-report-templates |
+| Sanaw Preview shows one row though several people are selected | Rebuild; keep all header chips selected. Invitation yellow-marks clone rows; seeded **SANAW_WIZANY_UZTURMEK** already has `{{#ds.rows}}` | **This skill** + template-scan |
+| Invitation yellow-marks sanaw **Preview could not be generated**; direct-to-migration seeded sanaw is fine | Stop F5, rebuild. Preview This-profile Dasary Word/Excel — one row per person. No Re-Approve | **This skill** + template-scan |
+| After **Approve — save to profile**, new template missing from ZIP checkboxes / Shared | **This profile only** is the **This profile** tab. Restart, rebuild; Approve then Close — row is checked. Shared is **Save to = Shared catalog** only | **template-scan** + this skill |
 | Need to remap placeholders on a saved catalog template | Row **Review placeholders** (this-profile nested Word/Excel) — not desktop **Edit template** | **template-scan** + this skill |
 | Cover letter Preview empty except signatory; file named for one person | Rebuild; Preview again. Header `{{ds.AFNUM}}` / `MSRV` / `TPCNT` now fill from the case. Re-Approve yellow-marks letters so they are Application header | **template-scan** + user-report-templates |
 | Cancel-visa Ýüztutma CVCNT is 1 with two linked visas | People & links 2/2 but letter `1 (bir)`. Rebuild; Preview — `2 (iki)`. No Re-Approve | **user-report-templates** — `ApplicationProfileInstanceCancelCounts` |

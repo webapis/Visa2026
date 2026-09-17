@@ -26,6 +26,26 @@ public class ScanOfficeYellowExtractorTests
     }
 
     [Fact]
+    public void Extract_Word_TableCellShading_CountsAsYellowWithoutRunHighlight()
+    {
+        var bytes = CreateWordShadedTable("TUR", "Yok");
+        var spans = new ScanOfficeYellowExtractor().Extract(bytes, ScanSourceKind.Word);
+        Assert.Contains(spans, s => s.Text == "TUR");
+        Assert.Contains(spans, s => s.Text == "Yok");
+        Assert.Equal(2, spans.Count);
+    }
+
+    [Fact]
+    public void Extract_Word_SplitsDirectorTitleStuckToSignatoryName()
+    {
+        var bytes = CreateWordFixture("Turkmenistandaky sahamcasynyn mudiriMehmet Cirak");
+        var spans = new ScanOfficeYellowExtractor().Extract(bytes, ScanSourceKind.Word);
+        Assert.Contains(spans, s => s.Text.Contains("mudiri", StringComparison.OrdinalIgnoreCase)
+            && !s.Text.Contains("Mehmet", StringComparison.Ordinal));
+        Assert.Contains(spans, s => s.Text.Contains("Mehmet", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void Normalize_Docx_SetsOfficeSource()
     {
         var (normalizer, _, _, _) = ScanTestServiceFactory.Create();
@@ -388,6 +408,33 @@ public class ScanOfficeYellowExtractorTests
         Assert.True(
             plan.Fields.Any(f => f.LabelText == "iki" && f.ProposedToken == "{{ds.BTDCTX}}"),
             summary);
+    }
+
+    public static byte[] CreateWordShadedTable(params string[] cellTexts)
+    {
+        using var stream = new MemoryStream();
+        using (var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document))
+        {
+            var main = document.AddMainDocumentPart();
+            var row = new TableRow();
+            foreach (var text in cellTexts)
+            {
+                row.AppendChild(new TableCell(
+                    new TableCellProperties(
+                        new Shading
+                        {
+                            Val = ShadingPatternValues.Clear,
+                            Color = "auto",
+                            Fill = "FFFF00",
+                        }),
+                    new Paragraph(new Run(new Text(text)))));
+            }
+
+            main.Document = new Document(new Body(new Table(row)));
+            main.Document.Save();
+        }
+
+        return stream.ToArray();
     }
 
     public static byte[] CreateWordFixture(params string[] yellowPhrases)

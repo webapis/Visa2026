@@ -120,7 +120,7 @@ public sealed class TemplateScanOrchestrator : ITemplateScanOrchestrator
 
         var loops = format == TemplateSourceFormat.Xlsx
             ? TemplateRosterLoopPlanner.PlanExcelLoopsFromSubstitutions(bareSubs, package)
-            : Array.Empty<LoopMarker>();
+            : TemplateRosterLoopPlanner.PlanWordLoopsFromSubstitutions(bareSubs, package);
 
         var write = _tokenWriter.Apply(new TemplateTokenWriteRequest
         {
@@ -295,6 +295,7 @@ public sealed class TemplateScanOrchestrator : ITemplateScanOrchestrator
             SetApplicability = true,
             ApplicableProjectContractId = request.ApplicableProjectContractId,
             ApplicableMigrationServiceId = request.ApplicableMigrationServiceId,
+            AllowOverwriteByName = request.AllowOverwriteByName,
         });
     }
 }

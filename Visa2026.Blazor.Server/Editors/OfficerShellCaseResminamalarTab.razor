@@ -30,7 +30,7 @@
     {
         <p class="os-empty">Select at least one person in the header to view Resminamalar.</p>
     }
-    else if (_catalogLoading)
+    else if (_catalogLoading && !_hasRenderedCatalog)
     {
         <p class="os-empty" role="status">Loading catalog…</p>
     }
@@ -83,6 +83,8 @@
     private ResminamalarCaseCatalogKey _loadedCatalogKey;
     private bool _catalogLoading;
     private bool _catalogLoadQueued;
+    private bool _hasRenderedCatalog;
+    private int _catalogGeneration;
 
     private string EmptyCatalog => VisaUiMessages.Get("ApplicationReportPackage.Empty", _uiCultureName);
 
@@ -126,10 +128,14 @@
             _showRecycleBin = false;
             _loadedCatalogKey = default;
             _catalogLoading = false;
+            _hasRenderedCatalog = false;
             return;
         }
 
         var catalogKey = CurrentCatalogKey;
+        if (_catalogLoadQueued)
+            return;
+
         if (CatalogCache.TryGet(catalogKey, out var cached, out var cachedNumber))
         {
             ApplyCatalog(cached, cachedNumber, catalogKey);
@@ -139,8 +145,9 @@
 
         if (catalogKey != _loadedCatalogKey)
         {
-            _catalogLoading = true;
             _catalogLoadQueued = true;
+            if (!_hasRenderedCatalog)
+                _catalogLoading = true;
         }
     }
 
@@ -150,8 +157,11 @@
             return;
 
         _catalogLoadQueued = false;
+        var generation = _catalogGeneration;
         var catalogKey = CurrentCatalogKey;
         var catalog = await Task.Run(() => BuildCatalog(catalogKey.ApplicationId)).ConfigureAwait(true);
+        if (generation != _catalogGeneration)
+            return;
         if (catalogKey != CurrentCatalogKey)
         {
             _catalogLoadQueued = true;
@@ -203,6 +213,7 @@
         _showRecycleBin = catalog.HasProfileNestedCatalog;
         _applicationNumber = applicationNumber;
         _loadedCatalogKey = key;
+        _hasRenderedCatalog = true;
     }
 
     private (ApplicationWordReportPackageCatalog Catalog, string ApplicationNumber)? BuildCatalog(Guid applicationId)
@@ -223,10 +234,12 @@
 
     private Task ReloadCatalogAsync()
     {
+        _catalogGeneration++;
         CatalogCache.Clear();
         _loadedCatalogKey = default;
-        _catalogLoading = true;
         _catalogLoadQueued = true;
+        if (!_hasRenderedCatalog)
+            _catalogLoading = true;
         return InvokeAsync(StateHasChanged);
     }
 

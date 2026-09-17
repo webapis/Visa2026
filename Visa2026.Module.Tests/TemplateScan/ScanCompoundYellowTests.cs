@@ -29,6 +29,41 @@ public class ScanCompoundYellowTests
     }
 
     [Fact]
+    public void Leading_iso3_comma_is_country_then_foreign_address()
+    {
+        var yellow = "TUR, Pazara evin, Mehmet Ile site 9 N-4 kapi N-33";
+        Assert.True(ScanCompoundYellowParts.HasLeadingIso3CountryCode(yellow));
+        Assert.False(ScanCompoundYellowParts.IsSingleSpanAddressCode("PFAD", yellow));
+
+        var bound = ScanCompoundYellowBinder.TryBind(
+            yellow,
+            Set(),
+            UserReportPlaceholderScope.Row,
+            "Dasary yurtdaky salgysy");
+        Assert.NotNull(bound);
+        Assert.Equal(["PFAC", "PFAD"], TemplateTokenSyntax.GetShortCodes(bound.Value.Token));
+
+        var ordered = ScanReviewFieldOrder.Order(
+        [
+            new ScanDetectedField
+            {
+                FieldId = "f13",
+                Box = ScanBoundingBox.FullPage,
+                PageIndex = 0,
+                LabelText = yellow,
+                ProposedToken = bound.Value.Token,
+                Confidence = ScanFieldConfidence.High,
+                Scope = ScanFieldScope.Row,
+            },
+        ]);
+        Assert.Equal(2, ordered.Count);
+        Assert.Equal("TUR", ordered[0].LabelText);
+        Assert.Equal(["PFAC"], TemplateTokenSyntax.GetShortCodes(ordered[0].ProposedToken));
+        Assert.StartsWith("Pazara", ordered[1].LabelText, StringComparison.Ordinal);
+        Assert.Equal(["PFAD"], TemplateTokenSyntax.GetShortCodes(ordered[1].ProposedToken));
+    }
+
+    [Fact]
     public void Resolver_does_not_split_a_comma_highlight_into_independent_marks()
     {
         var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);

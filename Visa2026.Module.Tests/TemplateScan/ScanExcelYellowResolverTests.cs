@@ -243,6 +243,78 @@ public class ScanExcelYellowResolverTests
         Assert.Contains("PLN", previousName.ProposedToken!, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void Resolve_maps_foreign_address_cell_with_comma_to_country_and_street()
+    {
+        var set = PlaceholderSet();
+        using var ms = new MemoryStream();
+        using (var wb = new XLWorkbook())
+        {
+            var ws = wb.AddWorksheet("Sanaw");
+            ws.Cell("M3").Value = "13.1";
+            ws.Cell("N3").Value = "13.2";
+            ws.Range("M2:N2").Merge();
+            ws.Cell("M2").Value = "Daşary ýurtdaky salgysy";
+            ws.Cell("M4").Value = "TUR, Pazara evin, Mehmet Ile site 9 N-4";
+            ws.Cell("M4").Style.Fill.BackgroundColor = XLColor.Yellow;
+            wb.SaveAs(ms);
+        }
+
+        var bytes = ms.ToArray();
+        var yellows = new ScanOfficeYellowExtractor().Extract(bytes, ScanSourceKind.Excel);
+        var fields = ScanExcelYellowResolver.Resolve(bytes, yellows, set);
+        var cell = Assert.Single(fields);
+        Assert.Equal(["PFAC", "PFAD"], TemplateTokenSyntax.GetShortCodes(cell.ProposedToken));
+
+        var ordered = ScanReviewFieldOrder.Order(
+        [
+            new ScanDetectedField
+            {
+                FieldId = cell.FieldId,
+                Box = ScanBoundingBox.FullPage,
+                PageIndex = 0,
+                LabelText = cell.LabelText,
+                ProposedToken = cell.ProposedToken,
+                Confidence = cell.Confidence,
+                Scope = cell.Scope,
+                SourceRegion = cell.SourceRegion,
+            },
+        ]);
+        Assert.Equal(2, ordered.Count);
+        Assert.Equal(["PFAC"], TemplateTokenSyntax.GetShortCodes(ordered[0].ProposedToken));
+        Assert.Equal(["PFAD"], TemplateTokenSyntax.GetShortCodes(ordered[1].ProposedToken));
+        Assert.Equal("TUR", ordered[0].LabelText);
+    }
+
+    [Fact]
+    public void Resolve_maps_split_foreign_address_columns_to_pfac_then_pfad()
+    {
+        var set = PlaceholderSet();
+        using var ms = new MemoryStream();
+        using (var wb = new XLWorkbook())
+        {
+            var ws = wb.AddWorksheet("Sanaw");
+            ws.Range("M2:N2").Merge();
+            ws.Cell("M2").Value = "Daşary ýurtdaky salgysy";
+            ws.Cell("M3").Value = "13.1";
+            ws.Cell("N3").Value = "13.2";
+            ws.Cell("M4").Value = "TUR";
+            ws.Cell("M4").Style.Fill.BackgroundColor = XLColor.Yellow;
+            ws.Cell("N4").Value = "Pazara evin, Mehmet Ile site 9 N-4 kapi N-33";
+            ws.Cell("N4").Style.Fill.BackgroundColor = XLColor.Yellow;
+            wb.SaveAs(ms);
+        }
+
+        var bytes = ms.ToArray();
+        var yellows = new ScanOfficeYellowExtractor().Extract(bytes, ScanSourceKind.Excel);
+        var fields = ScanExcelYellowResolver.Resolve(bytes, yellows, set);
+        var country = Assert.Single(fields, f => f.LabelText == "TUR");
+        var street = Assert.Single(fields, f => f.LabelText.StartsWith("Pazara", StringComparison.Ordinal));
+        Assert.Equal("{{.PFAC}}", country.ProposedToken);
+        Assert.Equal("{{.PFAD}}", street.ProposedToken);
+        Assert.DoesNotContain("PFAC", street.ProposedToken, StringComparison.OrdinalIgnoreCase);
+    }
+
     private static MemoryStream BuildSanawStyleWorkbook()
     {
         var ms = new MemoryStream();

@@ -2,6 +2,93 @@
 
 Append-only. Newest first under **## Entries**.
 
+### 2026-09-17 — Invitation yellow-marks sanaw Preview fails; direct-to-migration seeded sanaw lists everyone
+
+- Need: Case 5/-789 Çakylyk Almak, 3 people. This-profile *Daşary ýurt raýatlarynyň sanawy* Word/Excel Preview was **Preview could not be generated.** Case 8/-1307 Wizany uzaltmak **SANAW_WIZANY_UZTURMEK** Excel Preview listed all 3 people.
+- Cause: Direct-to-migration nested seeds already have a valid `{{#ds.rows}}` wrap. Invitation yellow-marks copies are a ministry table with `{{.CODE}}` only (or a scan-injected wrap that DocxTemplater cannot parse). Excel `InsertRowsBelow` through a vertical merge (title/row numbers) threw. Merge-time Word `{{#ds.rows}}` wrap across cells also threw.
+- Fix: Word merge clones the prototype table row (and strips a same-row scan loop). Excel writes the loop onto the merge master cell and unmerges ranges that cross the insert before expanding.
+- Officer: Stop F5, rebuild. Preview the invitation This-profile Word and Excel sanaw with all chips selected — **one row per person**, same as Wizany uzaltmak SANAW_WIZANY_UZTURMEK. No Re-Approve.
+- Prevent: Do not inject DocxTemplater loops across Word table cells at merge; do not InsertRowsBelow through a vertical merge.
+- Cross-skill: visa2026-resminamalar
+
+### 2026-09-17 — Catalog Preview of a sanaw shows only one of five linked people (Word and Excel)
+
+- Need: Invitation case 8/-1048 with 5 selected people. Catalog Preview of the yellow-marks Word/Excel *Daşary ýurt raýatlarynyň sanawy* listed one table row (first person). Officer tied it to DataScope (roster / header / both).
+- Cause: Scan Generate wrote Excel `{{#ds.rows}}` but **Word loops were empty**. Without a table loop, merge copies the first person onto `{{.PLN}}`. Names that contain *sanaw* but do not *start with* Sanaw were also treated as one Word file per person. Header-only letters stay one document; şahsy / Forma 16 stay per person.
+- Fix: Word Generate wraps the yellow table row with `{{#ds.rows}}`. Merge also injects that loop on already-saved Word sanaws. Excel injects a loop if the sheet has `{{.CODE}}` but no `#ds.rows`. Template names containing *sanaw* are list documents.
+- Officer: Stop F5, rebuild. Preview the same This-profile Word/Excel sanaw with all five chips selected — **five data rows**. No Re-Approve required for the already saved file. New Create from yellow marks writes the loop on Continue. Header letters stay one page; şahsy stays one page per person.
+- Prevent: Do not Preview a roster table without `{{#ds.rows}}`; do not treat *Dasary_…sanawy…* as a per-person Word form.
+- Cross-skill: visa2026-resminamalar
+
+### 2026-09-17 — Word roster Approve reused the existing catalog row (Excel was fine)
+
+- Need: Invitation Word sanaw (`Dasary_yurt_rayatlarynyn_sanawy_cakylyk.docx`). Create from yellow marks saved, but This profile still showed the two older templates. Excel Create added a new card.
+- Cause: Save matched NestedTemplates by name (case-insensitive), not kind. The Word roster filename matched `DASARY_YURT_RAYATLARYNYN_SANAWY_CAKYLYK`, so Approve overwrote that row. Excel used a free name.
+- Fix: Create (not Review placeholders) allocates `…_2` / `…_3` when the name is taken. Done and Resminamalar select the new name.
+- Officer: Stop F5, rebuild, Create from yellow marks again (not Review placeholders). Expect a third This profile row `…_2`, checked. Review placeholders still updates the same Word file.
+- Prevent: Do not upsert Create-from-scan Word roster onto an existing nested name; uniquify. Overwrite only when remapping that catalog row.
+- Cross-skill: visa2026-resminamalar
+
+### 2026-09-17 — Approve did not show the template in Resminamalar selection
+
+- Need: Invitation Word sanaw (`Dasary_yurt_rayatlarynyn_sanawy_cakylyk`). After **Approve — save to profile** (This profile only), the officer did not see it in the Resminamalar ZIP selection. It was on **This profile**; **Shared** correctly hid the private name.
+- Cause: Approve reload unmounted the catalog (stale cache / lost pane). ZIP checkboxes did not add the new row. Shared is not the selection list for This profile only.
+- Fix: Keep the catalog mounted, switch to **This profile**, check and highlight the saved name. Done offers **View in Resminamalar**.
+- Officer: Stop F5, rebuild. Approve, Close (or View in Resminamalar). Look at **This profile**, not Shared. Shared catalog only if Upload **Save to = Shared catalog**.
+- Prevent: Do not look for This-profile-only letters on Shared; do not drop new catalog keys from the ZIP selection.
+- Cross-skill: visa2026-resminamalar
+
+### 2026-09-17 — Word yellow cells missing from Review (`TUR`, `Ýok`, Mehmet Çirak)
+
+- Need: Invitation Word sanaw. Yellow **Raýatlygy TUR**, footer **Mehmet Çirak**, and **Ýok** (border zone) must each be a Detected row with a `#`. Officers: yellow highlighted content should never be missed.
+- Cause: Extractor only saw run highlight, not table-cell / paragraph **shading**. Consecutive yellow runs glued `müdiri` to the signatory name. Overlay skipped a mark when PDF text (`TUR`) was already used.
+- Fix: Shaded Word cells are yellow (like Excel fill). Director title + name split into two spans. Table marks with no PDF hit still paint the cell box (`?v=tasmarks11`).
+- Officer: Stop F5, rebuild, hard-refresh Review, **Analyze**. Expect a row for every yellow cell, including TUR, Ýok, and Mehmet Çirak (name separate from müdiri).
+- Prevent: Do not require `w:highlight` on the run when the cell fill is yellow; do not drop overlay `#` when sample text is a duplicate.
+- Cross-skill: none
+
+### 2026-09-17 — Word sanaw placeholder guesses ignore column headers
+
+- Need: Invitation Word *Daşary ýurt raýatlarynyň sanawy*. Overlay `#` matched Detected fields, but Özer/Arıta stayed unmapped and birth 4.2 Türkiye / 4.3 Iskenderun had no Short codes (Excel sanaw mapped PLN/PFNM and PDBT/PCBT/PBPL).
+- Cause: Word Analyze used the previous table cell as the nearby label. Excel walks **up the column** to Familiýasy / Doglan senesi we ýeri. Compound birth then kept only PDBT.
+- Fix: `ScanWordTableHeader` reads the caption in the same column. Word table yellows reuse Excel column-header inference. Birth caption prefers **PCBT** (country name), not PCBC (code).
+- Officer: Stop F5, rebuild, **Analyze**. Familiýasy → **PLN**, Ady → **PFNM**, birth cell → **PDBT / PCBT / PBPL**.
+- Prevent: Do not guess Word table yellows from the cell to the left; use the header row like Excel.
+- Cross-skill: none
+
+### 2026-09-17 — Word Review overlay numbers lose table order
+
+- Need: Invitation Word sanaw (*Daşary ýurt raýatlarynyň sanawy*). Detected fields listed 1.1 / 2.1 / 13.1 in column order, but the left pdf.js pane numbered the data row 6–18 (Excel yellow sanaw stayed aligned).
+- Cause: Excel Review paints used-range cell boxes. Word Review matched PDF text only (`kind: word` boxes were never sent), so short duplicates (`TUR`, `E`) took the first hit and visual LTR rewrote `#` away from OpenXML table order.
+- Fix: Word table cells get a row/column grid; pdf.js uses those boxes as snap hints (still PDF text, not ghost %). Table-heavy files keep Detected `#` order. Script `?v=tasmarks10`.
+- Officer: Stop F5, rebuild, hard-refresh Review. Overlay `#` on the Word table should match Detected fields the same way Excel does.
+- Prevent: Do not number Word table marks from raw PDF item order; snap to the OpenXML cell and keep document `#` when most yellows sit in a table.
+- Cross-skill: none
+
+### 2026-09-17 — Foreign address country (PFAC) missing on sanaw 13
+
+- Need: Invitation Excel *Daşary ýurtdaky salgysy*. Yellow `TUR, Pazara evin…` (or 13.1 TUR / 13.2 street). Analyze mapped **PFAD** (Foreign address) only; **PFAC** (country) was missing. Officer rule: a comma in the yellow means a second placeholder.
+- Cause: PFAD was a single-span address (commas treated as street punctuation). Compound inference also forced PFAC onto the first street fragment. Sub-headers `13.1` / merged parent hid the real column caption.
+- Fix: Leading ISO3 + comma → **PFAC** + **PFAD** (street commas stay on PFAD). Two columns: TUR-only → PFAC, street-only → PFAD. Header walk skips `13.1` and reads merged caption. Binder upgrades PFAD-only `TUR, …` cells.
+- Officer: Stop F5, rebuild, **Analyze**. 13.1 **TUR** = PFAC, 13.2 street = PFAD.
+- Prevent: Do not keep PFAD as one row when the yellow starts with a country code and a comma.
+- Cross-skill: visa2026-user-report-templates
+### 2026-09-17 — Hide 11.1 then Visa period (item) on 11.2 jumps to another code
+
+- Need: Invitation Excel sanaw. Officer × unused compound **11.1**, then picked **Visa period (item)** on **11.2**. The row showed an unrelated placeholder (e.g. From City) instead of AVPRD.
+- Cause: Removing 11.1 skipped that comma slot when rebuilding the parent token. Two remaining tokens no longer matched three label segments, so AlignParts parked AVPRD on the hidden first hole. The Add list then dropped AVPRD and the native select landed on the next option.
+- Fix: Hidden and unmapped compound parts keep positional `{{.}}` holes (`BuildPositionalCompoundToken`). Add on 11.2 writes `{{.}}, {{.AVPRD}}, {{.}}`. Generate still strips holes.
+- Officer: Stop F5, rebuild, hard-refresh Review. × leftover 11.1, then Add Visa period (item) on 11.2 — Short chip stays **AVPRD**.
+- Prevent: Do not collapse hidden compound parts out of the parent token; slot order must stay 1:1 with the yellow commas.
+- Cross-skill: none
+### 2026-09-17 — Lock on compound 11.2 / 11.3 reset to Part
+
+- Need: Invitation Excel sanaw Review. Officer picked **Visa period** / category on **11.2** / **11.3** (`1 (bir) aý`, `iki gezeklik`), then **Lock**. Rows showed orange **Part** instead of the Short codes.
+- Cause: `ApplyPartCodes` flattened codes and dropped empty sibling slots. `AlignParts` then parked shape-unmatched codes (VPER/AVPRD/AVCAT) on the first empty segment, so the chosen sub-rows stayed unmapped. Lock only hides the Add UI → **Part**.
+- Fix: `ApplyPartCodes` writes positional holes (`{{.}}`) for unmapped parts; `AlignParts` maps tokens 1:1 when token count matches segments; Generate strips holes via `StripEmptyPartMarkers`. Locked empty rows label **Unmapped**.
+- Officer: Stop F5, rebuild, hard-refresh Review. Add placeholders on 11.2 / 11.3, then Lock — Short codes stay (AVPRD / AVCAT).
+- Prevent: Do not flatten compound part codes before AlignParts; keep empty slots when the officer maps only some parts.
+- Cross-skill: none
 ### 2026-09-16 — Business trip address (BTAD) showed as empty 11.1
 
 - Need: Sanaw column *Iş saparyna barýan ýer* / *boljak salgysy*. Officers want one placeholder like **Address_FullAddress** but for the trip: region + city + street. Review showed **11.1** unmapped / Low while suggestions listed **100% BTAD**.

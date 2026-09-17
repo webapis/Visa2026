@@ -1,4 +1,7 @@
 using ClosedXML.Excel;
+using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Visa2026.Module.Services.TemplateConvert;
 using Xunit;
 
@@ -267,5 +270,98 @@ public class TemplateRosterLoopPlannerTests
         // Column A merged → prepend onto leftmost occupied data column (B).
         Assert.Equal("B5", ((DocumentRegion.ExcelCell)loop.Start).CellReference);
         Assert.Equal("B6", ((DocumentRegion.ExcelCell)loop.End).CellReference);
+    }
+
+    [Fact]
+    public void PlanWordLoopsFromSubstitutions_wraps_sanaw_table_row()
+    {
+        var bytes = SanawTable("Ozer", "Arita", "TUR");
+        var yellows = new Visa2026.Module.Services.TemplateScan.ScanOfficeYellowExtractor()
+            .Extract(bytes, Visa2026.Module.Services.TemplateScan.ScanSourceKind.Word);
+        Assert.True(yellows.Count >= 3, "Expected three yellow cells.");
+
+        var subs = yellows
+            .Select((y, i) => new TokenSubstitution(
+                y.Region,
+                i switch
+                {
+                    0 => "{{.PLN}}",
+                    1 => "{{.PFNM}}",
+                    _ => "{{.PNAT}}",
+                }))
+            .ToList();
+
+        var loops = TemplateRosterLoopPlanner.PlanWordLoopsFromSubstitutions(subs, bytes);
+        var loop = Assert.Single(loops);
+        Assert.Equal("ds.rows", loop.CollectionToken);
+        Assert.IsType<DocumentRegion.WordSpan>(loop.Start);
+        Assert.IsType<DocumentRegion.WordSpan>(loop.End);
+    }
+
+    [Fact]
+    public void EnsureWordTableRowsLoop_inserts_markers_on_token_row()
+    {
+        var bytes = SanawTable("{{.PLN}}", "{{.PFNM}}", "{{.PNAT}}");
+        var withLoop = TemplateRosterLoopPlanner.EnsureWordTableRowsLoop(bytes);
+        using var stream = new MemoryStream(withLoop);
+        using var document = WordprocessingDocument.Open(stream, false);
+        var text = document.MainDocumentPart!.Document.Body!.InnerText;
+        Assert.Contains("{{#ds.rows}}", text, StringComparison.Ordinal);
+        Assert.Contains("{{/ds.rows}}", text, StringComparison.Ordinal);
+        Assert.Contains("{{.PLN}}", text, StringComparison.Ordinal);
+
+        var again = TemplateRosterLoopPlanner.EnsureWordTableRowsLoop(withLoop);
+        using var stream2 = new MemoryStream(again);
+        using var document2 = WordprocessingDocument.Open(stream2, false);
+        var text2 = document2.MainDocumentPart!.Document.Body!.InnerText;
+        Assert.Equal(1, CountToken(text2, "{{#ds.rows}}"));
+    }
+
+    private static int CountToken(string text, string token)
+    {
+        var count = 0;
+        var index = 0;
+        while ((index = text.IndexOf(token, index, StringComparison.Ordinal)) >= 0)
+        {
+            count++;
+            index += token.Length;
+        }
+
+        return count;
+    }
+
+    private static byte[] SanawTable(params string[] dataCells)
+    {
+        using var stream = new MemoryStream();
+        using (var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document))
+        {
+            var main = document.AddMainDocumentPart();
+            var header = new TableRow();
+            foreach (var caption in new[] { "Familiyasy", "Ady", "Rayatlygy" })
+                header.AppendChild(new TableCell(new Paragraph(new Run(new Text(caption)))));
+
+            var data = new TableRow();
+            foreach (var text in dataCells)
+            {
+                data.AppendChild(new TableCell(new Paragraph(
+                    new Run(
+                        new RunProperties(new Highlight { Val = HighlightColorValues.Yellow }),
+                        new Text(text)))));
+            }
+
+            var table = new Table(
+                new TableGrid(
+                    new GridColumn { Width = "1440" },
+                    new GridColumn { Width = "1440" },
+                    new GridColumn { Width = "1440" }),
+                header,
+                data);
+            main.Document = new Document(new Body(
+                table,
+                new Paragraph(new Run(new Text("{{ds.ACPOS}}")))));
+            main.Document.Save();
+        }
+
+        return stream.ToArray();
     }
 }

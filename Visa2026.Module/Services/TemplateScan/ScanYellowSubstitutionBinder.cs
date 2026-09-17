@@ -251,10 +251,11 @@ public static class ScanYellowSubstitutionBinder
     internal static bool TryGetWritableToken(string? proposedToken, out string token)
     {
         token = string.Empty;
-        if (string.IsNullOrWhiteSpace(proposedToken))
+        var stripped = ScanCompoundYellowParts.StripEmptyPartMarkers(proposedToken);
+        if (string.IsNullOrWhiteSpace(stripped))
             return false;
 
-        var trimmed = proposedToken.Trim();
+        var trimmed = stripped.Trim();
         if (trimmed.Contains("{{", StringComparison.Ordinal)
             || TemplateTokenSyntax.TryGetShortCode(trimmed, out _))
         {

@@ -148,6 +148,24 @@ public class ApplicationWordReportEntryGeneratorTests
     }
 
     [Fact]
+    public void UsesPerItemWordOutput_false_for_scan_sanaw_name_even_when_item_root()
+    {
+        var template = WordItemRoot("Dasary_yurt_rayatlarynyn_sanawy_cakylyk", ".PLN", ".PFNM");
+        var context = WordReportGenerationContext.ForRosterPersons(new[] { Guid.NewGuid(), Guid.NewGuid() });
+
+        Assert.False(ApplicationWordReportEntryGenerator.UsesPerItemWordOutput(template, context));
+    }
+
+    [Fact]
+    public void UsesPerItemWordOutput_false_when_rows_loop_placeholder_present()
+    {
+        var template = WordItemRoot("Invitation_list", "#ds.rows", ".PLN", ".PFNM");
+        var context = WordReportGenerationContext.ForRosterPersons(new[] { Guid.NewGuid(), Guid.NewGuid() });
+
+        Assert.False(ApplicationWordReportEntryGenerator.UsesPerItemWordOutput(template, context));
+    }
+
+    [Fact]
     public void UsesPerItemWordOutput_true_for_forma16_row_tokens()
     {
         var template = WordItemRoot("FORMA 16", ".PFN", ".PNAT", "IMAGE:PPH");

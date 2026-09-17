@@ -113,6 +113,13 @@ public static class ScanYellowMarkContextBuilder
                 continue;
 
             var printed = ExtractPrintedLabel(paragraphText, start, previousParagraph);
+            if (draft.SourceRegion is DocumentRegion.WordSpan)
+            {
+                var tableHeader = ScanWordTableHeader.TryGet(officeBytes, draft.SourceRegion);
+                if (!string.IsNullOrWhiteSpace(tableHeader))
+                    printed = tableHeader;
+            }
+
             map[draft.FieldId] = new ScanYellowMarkContext
             {
                 SurroundingSnippet = MarkAndTrim(paragraphText, start, length),

@@ -469,13 +469,16 @@ namespace Visa2026.Module.Services.UserReports
             if (content == null || content.Length == 0)
                 throw new InvalidOperationException("User report template file has no content.");
 
-            using var templateStream = new MemoryStream(content, 0, content.Length, writable: false, publiclyVisible: true);
-            var docxTemplate = DocxTemplateFactory.Open(templateStream);
             if (data.TryGetValue("rows", out var rowsObj)
                 && rowsObj is IEnumerable<Dictionary<string, object>> rowDicts)
             {
-                data["rows"] = rowDicts.Cast<IDictionary<string, object>>().ToList();
+                var list = rowDicts.Cast<IDictionary<string, object>>().ToList();
+                data["rows"] = list;
+                content = WordScanTableRowExpander.ExpandPrototypeTableRow(content, list);
             }
+
+            using var templateStream = new MemoryStream(content, 0, content.Length, writable: false, publiclyVisible: true);
+            var docxTemplate = DocxTemplateFactory.Open(templateStream);
 
             docxTemplate.BindModel("ds", data);
 

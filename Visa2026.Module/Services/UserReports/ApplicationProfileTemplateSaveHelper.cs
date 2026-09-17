@@ -1,5 +1,9 @@
 #nullable enable
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.ApplicationProfileWizard;
@@ -24,13 +28,27 @@ public static class ApplicationProfileTemplateSaveHelper
         var objectSpace = request.ObjectSpace;
         var profile = request.Profile;
         var extension = request.TemplateKind == ApplicationProfileTemplateKind.Excel ? ".xlsx" : ".docx";
-        var fileName = string.IsNullOrWhiteSpace(request.FileName) ? name + extension : request.FileName;
+        var requestedName = name;
 
-        var template = profile.NestedTemplates?
-            .FirstOrDefault(t => string.Equals(t.TemplateName, name, StringComparison.OrdinalIgnoreCase));
+        ApplicationProfileTemplate? template = null;
+        if (request.AllowOverwriteByName)
+        {
+            template = FindExistingByNameAndKind(
+                objectSpace,
+                profile,
+                name,
+                request.TemplateKind);
+        }
 
         if (template == null)
         {
+            if (!request.AllowOverwriteByName)
+            {
+                name = AllocateUniqueTemplateName(
+                    name,
+                    CollectExistingTemplateNames(objectSpace, profile));
+            }
+
             template = objectSpace.CreateObject<ApplicationProfileTemplate>();
             template.ApplicationProfile = profile;
             template.TemplateName = name;
@@ -38,6 +56,14 @@ public static class ApplicationProfileTemplateSaveHelper
             if (profile.NestedTemplates != null && !profile.NestedTemplates.Contains(template))
                 profile.NestedTemplates.Add(template);
         }
+
+        var fileName = string.IsNullOrWhiteSpace(request.FileName)
+            || string.Equals(
+                Path.GetFileNameWithoutExtension(request.FileName),
+                requestedName,
+                StringComparison.OrdinalIgnoreCase)
+            ? name + extension
+            : request.FileName;
 
         var writeCatalogMetadata = objectSpace.IsNewObject(template)
             || !ApplicationProfileLockHelper.IsProfileConfigLocked(profile, objectSpace);
@@ -102,6 +128,107 @@ public static class ApplicationProfileTemplateSaveHelper
         }
 
         return template;
+    }
+
+    /// <summary>
+    /// Create from yellow marks appends <c>_2</c>, <c>_3</c>, … when the requested name
+    /// is already a nested Word/Excel row on this profile (Review placeholders still overwrite).
+    /// </summary>
+    public static string AllocateUniqueTemplateName(
+        string requestedName,
+        IEnumerable<string?> existingNames)
+    {
+        var baseName = requestedName?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(baseName))
+            throw new ArgumentException("A template name is required.", nameof(requestedName));
+
+        var taken = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var existing in existingNames ?? Array.Empty<string?>())
+        {
+            if (!string.IsNullOrWhiteSpace(existing))
+                taken.Add(existing.Trim());
+        }
+
+        if (!taken.Contains(baseName))
+            return baseName;
+
+        for (var i = 2; i < 1000; i++)
+        {
+            var candidate = $"{baseName}_{i}";
+            if (!taken.Contains(candidate))
+                return candidate;
+        }
+
+        return $"{baseName}_{Guid.NewGuid():N}";
+    }
+
+    private static IReadOnlyList<string> CollectExistingTemplateNames(
+        IObjectSpace objectSpace,
+        ApplicationProfile profile)
+    {
+        var names = new List<string>();
+        if (profile?.NestedTemplates != null)
+        {
+            foreach (var nested in profile.NestedTemplates)
+            {
+                if (nested == null
+                    || nested.TemplateKind == ApplicationProfileTemplateKind.PdfForm
+                    || string.IsNullOrWhiteSpace(nested.TemplateName))
+                {
+                    continue;
+                }
+
+                names.Add(nested.TemplateName.Trim());
+            }
+        }
+
+        var profileId = profile?.ID ?? Guid.Empty;
+        if (objectSpace == null || profileId == Guid.Empty)
+            return names;
+
+        var fromDb = objectSpace.GetObjectsQuery<ApplicationProfileTemplate>()
+            .Where(t => t.ApplicationProfileId == profileId
+                && t.TemplateKind != ApplicationProfileTemplateKind.PdfForm
+                && t.TemplateName != null)
+            .Select(t => t.TemplateName)
+            .ToList();
+        foreach (var nestedName in fromDb)
+        {
+            if (!string.IsNullOrWhiteSpace(nestedName))
+                names.Add(nestedName.Trim());
+        }
+
+        return names;
+    }
+
+    private static ApplicationProfileTemplate? FindExistingByNameAndKind(
+        IObjectSpace objectSpace,
+        ApplicationProfile profile,
+        string name,
+        ApplicationProfileTemplateKind kind)
+    {
+        var fromCollection = profile.NestedTemplates?
+            .Where(t => t != null
+                && t.TemplateKind == kind
+                && string.Equals(t.TemplateName, name, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(t => t!.RecycledAtUtc != null)
+            .FirstOrDefault();
+        if (fromCollection != null)
+            return fromCollection;
+
+        var profileId = profile.ID;
+        if (objectSpace == null || profileId == Guid.Empty)
+            return null;
+
+        var lowered = name.ToLower();
+        return objectSpace.GetObjectsQuery<ApplicationProfileTemplate>()
+            .Where(t => t.ApplicationProfileId == profileId
+                && t.TemplateKind == kind
+                && t.TemplateName != null
+                && t.TemplateName.ToLower() == lowered)
+            .AsEnumerable()
+            .OrderBy(t => t.RecycledAtUtc != null)
+            .FirstOrDefault();
     }
 
     /// <summary>
@@ -205,4 +332,10 @@ public sealed class ApplicationProfileTemplateSaveRequest
     public Guid? ApplicableProjectContractId { get; init; }
 
     public Guid? ApplicableMigrationServiceId { get; init; }
+
+    /// <summary>
+    /// True for Review placeholders / Convert overwrite of the same catalog name.
+    /// False for Create from yellow marks so a taken Word roster name becomes <c>_2</c>.
+    /// </summary>
+    public bool AllowOverwriteByName { get; init; } = true;
 }

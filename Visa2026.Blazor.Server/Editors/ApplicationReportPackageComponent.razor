@@ -374,7 +374,9 @@
 
 @if (ShowScanEntryVisible)
 {
-    <TemplateScanDialog @ref="_scanDialog" OnTemplateSaved="OnScanSavedAsync" />
+    <TemplateScanDialog @ref="_scanDialog"
+                        OnTemplateSaved="OnScanSavedAsync"
+                        OnFocusSavedTemplate="OnFocusSavedTemplateAsync" />
 }
 
 @code {
@@ -416,7 +418,10 @@
     private DotNetObjectReference<ApplicationReportPackageComponent>? _dotNetRef;
 
     private readonly HashSet<string> _selectedKeys = new(StringComparer.Ordinal);
+    private readonly HashSet<string> _knownCatalogKeys = new(StringComparer.Ordinal);
     private bool _selectionInitialized;
+    private string? _pendingSelectTemplateName;
+    private string? _highlightEntryKey;
     private bool _packageConfirmPending;
     private bool _packageBusy;
     private bool _previewBusy;
@@ -918,17 +923,34 @@
             .Select(entry => entry.EntryKey)
             .ToHashSet(StringComparer.Ordinal);
 
-        if (_selectionInitialized)
-        {
-            _selectedKeys.IntersectWith(currentKeys);
+        ApplicationReportPackageSelectionHelper.ReconcileSelectedKeys(
+            _selectedKeys,
+            _knownCatalogKeys,
+            currentKeys,
+            ref _selectionInitialized);
+
+        TrySelectPendingSavedTemplate();
+    }
+
+    private void TrySelectPendingSavedTemplate()
+    {
+        if (string.IsNullOrWhiteSpace(_pendingSelectTemplateName))
             return;
-        }
 
-        _selectedKeys.Clear();
-        foreach (var key in currentKeys)
-            _selectedKeys.Add(key);
+        var key = ApplicationReportPackageSelectionHelper.FindEntryKeyByName(
+                VisibleCatalogEntries,
+                _pendingSelectTemplateName)
+            ?? ApplicationReportPackageSelectionHelper.FindEntryKeyByName(
+                CatalogEntries,
+                _pendingSelectTemplateName);
+        if (string.IsNullOrEmpty(key))
+            return;
 
-        _selectionInitialized = currentKeys.Count > 0;
+        _showRecycleBinPane = false;
+        _showSharedPane = false;
+        _selectedKeys.Add(key);
+        _highlightEntryKey = key;
+        _pendingSelectTemplateName = null;
     }
 
     /// <summary>
@@ -1083,13 +1105,35 @@
             .FirstOrDefault();
     }
 
-    private async Task OnConvertSavedAsync()
+    private Task OnScanSavedAsync(string savedName) => OnCatalogTemplateSavedAsync(savedName);
+
+    private Task OnFocusSavedTemplateAsync(string savedName)
     {
-        if (RefreshRequested.HasDelegate)
-            await RefreshRequested.InvokeAsync();
+        RememberSavedTemplate(savedName);
+        TrySelectPendingSavedTemplate();
+        return Task.CompletedTask;
     }
 
-    private Task OnScanSavedAsync() => OnConvertSavedAsync();
+    private async Task OnConvertSavedAsync(string savedName) =>
+        await OnCatalogTemplateSavedAsync(savedName);
+
+    private async Task OnCatalogTemplateSavedAsync(string savedName)
+    {
+        RememberSavedTemplate(savedName);
+        if (RefreshRequested.HasDelegate)
+            await RefreshRequested.InvokeAsync();
+        TrySelectPendingSavedTemplate();
+    }
+
+    private void RememberSavedTemplate(string savedName)
+    {
+        _pendingSelectTemplateName = string.IsNullOrWhiteSpace(savedName)
+            ? null
+            : savedName.Trim();
+        _showRecycleBinPane = false;
+        _showSharedPane = false;
+        _highlightEntryKey = null;
+    }
 
     private string EffectiveUiCulture =>
         VisaUiCultureResolver.Resolve(CultureInfoService, HttpContextAccessor.HttpContext, UiCultureName);
@@ -1764,10 +1808,19 @@
 
     private string GetEntryCssClass(
         ApplicationWordReportPackageCatalogEntry entry,
-        bool isSelected) =>
-        IsPreviewingEntry(entry) || IsRecyclingEntry(entry)
+        bool isSelected)
+    {
+        var css = IsPreviewingEntry(entry) || IsRecyclingEntry(entry)
             ? $"{GetEntryStateCssClass(entry, isSelected)} app-report-package__entry--previewing"
             : GetEntryStateCssClass(entry, isSelected);
+        if (!string.IsNullOrEmpty(_highlightEntryKey)
+            && string.Equals(entry.EntryKey, _highlightEntryKey, StringComparison.Ordinal))
+        {
+            css += " resminamalar-catalog__card--just-saved";
+        }
+
+        return css;
+    }
 
     private static string GetEntryStateCssClass(ApplicationWordReportPackageCatalogEntry entry, bool isSelected)
     {

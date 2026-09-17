@@ -121,4 +121,34 @@ public class ApplicationProfileTemplateSaveHelperTests
             ApplicationProfileTemplateCatalogScope.ProfileSpecific,
             nameIsUsedAsSharedInclude: true));
     }
+
+    [Fact]
+    public void AllocateUniqueTemplateName_WordRosterNameTaken_Appends_2()
+    {
+        var unique = ApplicationProfileTemplateSaveHelper.AllocateUniqueTemplateName(
+            "Dasary_yurt_rayatlarynyn_sanawy_cakylyk",
+            ["DASARY_YURT_RAYATLARYNYN_SANAWY_CAKYLYK", "YUZTUTMA"]);
+
+        Assert.Equal("Dasary_yurt_rayatlarynyn_sanawy_cakylyk_2", unique);
+    }
+
+    [Fact]
+    public void AllocateUniqueTemplateName_SecondCopy_Appends_3()
+    {
+        var unique = ApplicationProfileTemplateSaveHelper.AllocateUniqueTemplateName(
+            "Sanaw",
+            ["Sanaw", "Sanaw_2"]);
+
+        Assert.Equal("Sanaw_3", unique);
+    }
+
+    [Fact]
+    public void AllocateUniqueTemplateName_FreeName_Unchanged()
+    {
+        Assert.Equal(
+            "New_sanaw",
+            ApplicationProfileTemplateSaveHelper.AllocateUniqueTemplateName(
+                "New_sanaw",
+                ["Other"]));
+    }
 }

@@ -116,6 +116,66 @@ public static class ScanExcelYellowResolver
         return drafts;
     }
 
+    /// <summary>
+    /// Word table cells share Excel column-header inference (Familiýasy → PLN, birth compound, …).
+    /// </summary>
+    internal static ScanDetectedFieldDraft? DraftFromColumnHeader(
+        string cellText,
+        string? header,
+        int pageIndex,
+        DocumentRegion? region,
+        ApplicationProfilePlaceholderSet placeholderSet)
+    {
+        if (string.IsNullOrWhiteSpace(header) || string.IsNullOrWhiteSpace(cellText))
+            return null;
+        if (ScanFormFieldLabelHints.LooksLikeFormFieldLabel(cellText)
+            || ScanOfficialLetterHints.LooksLikeLetterBlock(cellText)
+            || ScanOfficialLetterHints.LooksLikeBranchDirectorTitle(cellText))
+            return null;
+
+        var catalog = ScanPlaceholderCatalogIndex.Build(placeholderSet);
+        var profile = ScanExcelColumnProfiles.Match(header);
+        var headerScores = catalog.ScoreHeader(header);
+        var inference = InferCell(
+            cellText,
+            header,
+            profile,
+            headerScores,
+            placeholderSet,
+            dataRow: 5,
+            previousPassportBand: false);
+
+        if (profile != null
+            && profile.ShortCodes.All(static c => c is "RNUM" or "INUM")
+            && !LooksLikeRowNumber(cellText))
+            return null;
+
+        if (string.IsNullOrWhiteSpace(inference.ProposedToken) && inference.Alternatives.Count == 0)
+            return null;
+
+        return new ScanDetectedFieldDraft
+        {
+            FieldId = Guid.NewGuid().ToString("N"),
+            PageIndex = pageIndex,
+            LabelText = cellText,
+            ProposedToken = inference.ProposedToken,
+            Confidence = inference.Confidence,
+            Scope = inference.Scope,
+            Box = ScanBoundingBox.FullPage,
+            SourceRegion = region,
+            Alternatives = inference.Alternatives,
+            ColumnHeader = header,
+        };
+    }
+
+    private static bool LooksLikeRowNumber(string text)
+    {
+        var trimmed = (text ?? string.Empty).Trim();
+        if (trimmed.Length is < 1 or > 4)
+            return false;
+        return trimmed.All(char.IsDigit);
+    }
+
     private sealed record CellInference(
         string? ProposedToken,
         ScanFieldConfidence Confidence,
@@ -138,7 +198,9 @@ public static class ScanExcelYellowResolver
 
         if (profile is { IsCompound: true })
         {
-            var compound = InferCompoundCell(cellText, header, profile, headerScores, placeholderSet, usageScope, scope);
+            var compound = IsForeignAddressProfile(profile)
+                ? InferForeignAddressCell(cellText, header, profile, headerScores, placeholderSet, usageScope, scope)
+                : InferCompoundCell(cellText, header, profile, headerScores, placeholderSet, usageScope, scope);
             return previousPassportBand ? RemapInferenceToPrevious(compound) : compound;
         }
 
@@ -210,6 +272,72 @@ public static class ScanExcelYellowResolver
         return inference with { ProposedToken = token, Alternatives = alternatives };
     }
 
+    private static bool IsForeignAddressProfile(ScanExcelColumnProfiles.Profile profile) =>
+        profile.ShortCodes.Any(static c => c.Equals("PFAC", StringComparison.OrdinalIgnoreCase))
+        && profile.ShortCodes.Any(static c => c.Equals("PFAD", StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>
+    /// Comma in the yellow is a second placeholder: <c>TUR, street…</c> → PFAC + PFAD.
+    /// Street commas stay on PFAD. A TUR-only cell or street-only cell maps that one code.
+    /// </summary>
+    private static CellInference InferForeignAddressCell(
+        string cellText,
+        string? header,
+        ScanExcelColumnProfiles.Profile profile,
+        IReadOnlyList<(UserReportPlaceholderCatalogEntry Entry, int Score)> headerScores,
+        ApplicationProfilePlaceholderSet placeholderSet,
+        UserReportPlaceholderScope usageScope,
+        ScanFieldScope scope)
+    {
+        var text = (cellText ?? string.Empty).Trim();
+        string? country = null;
+        string? address = null;
+        if (ScanCompoundYellowParts.HasLeadingIso3CountryCode(text))
+        {
+            var pair = ScanCompoundYellowParts.SplitLeadingCountryThenAddress(text);
+            country = pair[0].Text;
+            address = pair.Count > 1 ? pair[1].Text : null;
+        }
+        else if (ScanCompoundYellowParts.LooksLikeIso3Country(text))
+        {
+            country = text;
+        }
+        else if (text.Length > 0)
+        {
+            address = text;
+        }
+
+        var tokenParts = new List<string>();
+        var alternatives = new List<ScanTokenAlternative>();
+
+        void Add(string code, string reason)
+        {
+            if (!placeholderSet.Contains(code))
+                return;
+            var entry = placeholderSet.Allowed.First(e =>
+                string.Equals(e.ShortCode, code, StringComparison.OrdinalIgnoreCase));
+            var token = entry.BuildWordToken(usageScope);
+            tokenParts.Add(token);
+            alternatives.Add(new ScanTokenAlternative(token, code, 96, reason));
+        }
+
+        if (!string.IsNullOrWhiteSpace(country))
+            Add("PFAC", "ISO country code before comma");
+        if (!string.IsNullOrWhiteSpace(address))
+            Add("PFAD", "Foreign address after comma");
+
+        if (tokenParts.Count == 0)
+            return InferCompoundCell(cellText, header, profile, headerScores, placeholderSet, usageScope, scope);
+
+        var cellTemplate = tokenParts.Count == 1
+            ? tokenParts[0]
+            : string.Join(", ", tokenParts);
+        var whole = new ScanTokenAlternative(cellTemplate, "COMPOUND", 96, "Country code + foreign address");
+        var ranked = new List<ScanTokenAlternative> { whole };
+        ranked.AddRange(alternatives);
+        return new CellInference(cellTemplate, ScanFieldConfidence.High, scope, ranked.Take(6).ToList());
+    }
+
     private static CellInference InferCompoundCell(
         string cellText,
         string? header,
@@ -274,6 +402,10 @@ public static class ScanExcelYellowResolver
                         ?.ScorePercent ?? 0,
                     headerBoost.Entry != null ? headerBoost.Score : 0),
                 surroundHit?.ScorePercent ?? 0);
+
+            if (expectedCode.Equals("PFAC", StringComparison.OrdinalIgnoreCase)
+                && !ScanCompoundYellowParts.LooksLikeIso3Country(segment))
+                continue;
 
             if (score < 40)
                 score = 70;
@@ -454,7 +586,8 @@ internal static class ScanExcelWorkbookHelper
     {
         for (var row = dataRow - 1; row >= Math.Max(1, dataRow - 20); row--)
         {
-            if (!string.IsNullOrWhiteSpace(ReadCellText(sheet.Cell(row, columnNumber))))
+            var text = ReadHeaderText(sheet, row, columnNumber);
+            if (!string.IsNullOrWhiteSpace(text) && !IsColumnIndexLabel(text))
                 return row;
         }
 
@@ -465,7 +598,7 @@ internal static class ScanExcelWorkbookHelper
     {
         var row = FindHeaderRow(sheet, columnNumber, dataRow);
         return row is int headerRow
-            ? ReadCellText(sheet.Cell(headerRow, columnNumber))
+            ? ReadHeaderText(sheet, headerRow, columnNumber)
             : null;
     }
 
@@ -478,6 +611,38 @@ internal static class ScanExcelWorkbookHelper
         if (text.Length == 0)
             text = cell.GetString()?.Trim() ?? string.Empty;
         return text;
+    }
+
+    private static string ReadHeaderText(IXLWorksheet sheet, int row, int column)
+    {
+        var cell = sheet.Cell(row, column);
+        var text = ReadCellText(cell);
+        if (!string.IsNullOrWhiteSpace(text))
+            return text;
+
+        if (cell.IsMerged())
+        {
+            var range = cell.MergedRange();
+            if (range != null)
+                return ReadCellText(range.FirstCell());
+        }
+
+        return text;
+    }
+
+    /// <summary>Sanaw prints 13.1 / 13.2 in the row above the sample — keep walking to the real caption.</summary>
+    private static bool IsColumnIndexLabel(string text)
+    {
+        var trimmed = text.Trim();
+        if (trimmed.Length is < 1 or > 6)
+            return false;
+        foreach (var ch in trimmed)
+        {
+            if (ch is not (>= '0' and <= '9') and not '.')
+                return false;
+        }
+
+        return trimmed.Any(char.IsDigit);
     }
 }
 
@@ -513,7 +678,7 @@ internal static class ScanExcelColumnProfiles
         new(["wiza ucin masgala", "family members for visa", "visa application family"], ["PVFM"], false),
         new(["gelmeginin maksady", "gelmegin maksady", "purpose of arrival"], ["RGEL"], false),
         new(["cagyran tarap", "inviting party"], ["ACNAM"], false),
-        new(["mohleti we gezekligi"], ["VNAT", "VTYP", "VSTD", "VEDT"], true),
+        new(["mohleti we gezekligi", "mohleti we gerekligi"], ["VNAT", "VTYP", "VSTD", "VEDT"], true),
         new(["gezeklik", "wiza"], ["AVPRD", "AVCAT"], true, LiteralPrefix: "cakylyk "),
         new(["turkmenistandaky salgysy", "turkmenistandaky", "yasayan salgysy", "yasayys salgysy", "ikamet adresi", "residence address"], ["ADRS"], false),
         new(["is saparynda boljak salgysy", "is saparynda boljak", "is saparyna baryan yer", "baryan yer", "business trip address", "business trip destination"], ["BTAD"], false),

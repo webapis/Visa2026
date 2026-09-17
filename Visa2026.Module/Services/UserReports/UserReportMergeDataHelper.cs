@@ -393,9 +393,8 @@ public static class UserReportMergeDataHelper
         if (template == null)
             return false;
 
-        if (string.Equals(template.TemplateName, "Sanaw", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(template.TemplateName, "Sanaw_ckl", StringComparison.OrdinalIgnoreCase)
-            || template.TemplateName.StartsWith("Sanaw", StringComparison.OrdinalIgnoreCase))
+        if (!string.IsNullOrWhiteSpace(template.TemplateName)
+            && template.TemplateName.Contains("Sanaw", StringComparison.OrdinalIgnoreCase))
         {
             return true;
         }
@@ -418,6 +417,26 @@ public static class UserReportMergeDataHelper
         template != null
         && template.GetEffectiveOutputFormat() == TemplateOutputFormat.Word
         && ShouldUseSanawyStyleRows(template, template.Placeholders);
+
+    /// <summary>True when Extract stored <c>#ds.rows</c> / <c>#rows</c> so merge can iterate the roster.</summary>
+    public static bool TemplateHasRowsLoop(UserReportTemplate? template)
+    {
+        if (template?.Placeholders == null)
+            return false;
+
+        foreach (var placeholder in template.Placeholders)
+        {
+            var key = placeholder.PlaceholderKey?.Trim() ?? string.Empty;
+            if (key.Length == 0)
+                continue;
+
+            var name = StripDocxModelPrefix(key.TrimStart('#', '/'));
+            if (name.Equals("rows", StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        return false;
+    }
 
     /// <summary>
     /// Official letters (Yuztutma and similar) bind only application header tokens.
