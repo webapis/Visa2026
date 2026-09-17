@@ -190,21 +190,42 @@ function hitRect(hit, entries) {
     return box;
 }
 
-function pickHit(hits, used, expected, entries) {
+function pickHit(hits, used, expected, entries, band) {
     const free = hits.filter(function (hit) {
         return !hitOverlapsUsed(hit, used);
     });
     if (!free.length) {
         return null;
     }
+
+    let candidates = free;
+    if (band && band.pred && band.succ) {
+        const minY = band.pred.top + band.pred.height * 0.35;
+        const maxY = band.succ.top + band.succ.height * 0.25;
+        const inBand = [];
+        for (let i = 0; i < free.length; i++) {
+            const rect = hitRect(free[i], entries);
+            if (rect.pageDiv !== band.pred.pageDiv && rect.pageDiv !== band.succ.pageDiv) {
+                continue;
+            }
+            const cy = rect.top + rect.height / 2;
+            if (cy >= minY && cy <= maxY) {
+                inBand.push(free[i]);
+            }
+        }
+        if (inBand.length) {
+            candidates = inBand;
+        }
+    }
+
     if (!expected) {
-        return free[0];
+        return candidates[0];
     }
 
     let best = null;
     let bestD = Infinity;
-    for (let i = 0; i < free.length; i++) {
-        const rect = hitRect(free[i], entries);
+    for (let i = 0; i < candidates.length; i++) {
+        const rect = hitRect(candidates[i], entries);
         const cx = rect.left + rect.width / 2;
         const cy = rect.top + rect.height / 2;
         const ex = expected.left + expected.width / 2;
@@ -215,11 +236,260 @@ function pickHit(hits, used, expected, entries) {
         }
         if (d < bestD) {
             bestD = d;
-            best = free[i];
+            best = candidates[i];
         }
     }
 
     return best;
+}
+
+function markOrderValue(mark) {
+    const n = parseFloat(mark && mark.order);
+    return Number.isFinite(n) ? n : 0;
+}
+
+function placedBand(placed, order) {
+    let pred = null;
+    let succ = null;
+    for (let i = 0; i < placed.length; i++) {
+        const item = placed[i];
+        if (item.order < order && (!pred || item.order > pred.order)) {
+            pred = item;
+        }
+        if (item.order > order && (!succ || item.order < succ.order)) {
+            succ = item;
+        }
+    }
+    return { pred: pred, succ: succ };
+}
+
+function rememberPlaced(placed, mark, box) {
+    if (!box) {
+        return;
+    }
+    placed.push({
+        order: markOrderValue(mark),
+        top: box.top,
+        height: box.height,
+        left: box.left,
+        width: box.width,
+        pageDiv: box.pageDiv,
+        label: fold(mark.label)
+    });
+}
+
+function placeShortDuplicateLabels(entries, marks, used, placed, dotnetRef) {
+    const groups = {};
+    for (let i = 0; i < marks.length; i++) {
+        const mark = marks[i];
+        if (mark.kind === "excel") {
+            continue;
+        }
+        const key = fold(mark.label);
+        if (!key || (key.length > 3 && !/^\d+$/.test(key))) {
+            continue;
+        }
+        if (!groups[key]) {
+            groups[key] = [];
+        }
+        groups[key].push(mark);
+    }
+
+    const done = {};
+    Object.keys(groups).forEach(function (key) {
+        const group = groups[key];
+        if (group.length < 2) {
+            return;
+        }
+
+        const hits = shortTokenHits(entries, group[0].label).filter(function (hit) {
+            return !hitOverlapsUsed(hit, used);
+        });
+        hits.sort(function (a, b) {
+            const ra = hitRect(a, entries);
+            const rb = hitRect(b, entries);
+            return ra.top + ra.height / 2 - (rb.top + rb.height / 2);
+        });
+        group.sort(function (a, b) {
+            return markOrderValue(a) - markOrderValue(b);
+        });
+
+        const pairs = pairShortHits(group, hits);
+        for (let i = 0; i < pairs.length; i++) {
+            const mark = pairs[i].mark;
+            const box = hitRect(pairs[i].hit, entries);
+            markUsed(pairs[i].hit, used);
+            appendMark(box.pageDiv, mark, box, dotnetRef);
+            rememberPlaced(placed, mark, box);
+            done[mark.fieldId] = true;
+        }
+    });
+    return done;
+}
+
+function shortTokenHits(entries, label) {
+    const spans = findAllLabelSpans(entries, label);
+    const needle = fold(label);
+    if (!needle) {
+        return spans;
+    }
+    const seen = {};
+    for (let i = 0; i < spans.length; i++) {
+        seen[spans[i].from + ":" + spans[i].to] = true;
+    }
+    for (let i = 0; i < entries.length; i++) {
+        if (fold(entries[i].item.str) !== needle) {
+            continue;
+        }
+        const key = i + ":" + i;
+        if (seen[key]) {
+            continue;
+        }
+        seen[key] = true;
+        spans.push({ from: i, to: i });
+    }
+    return spans;
+}
+
+function pairShortHits(group, hits) {
+    if (!hits.length) {
+        return [];
+    }
+    if (hits.length >= group.length) {
+        return group.map(function (mark, i) {
+            return { mark: mark, hit: hits[i] };
+        });
+    }
+    const pairs = [{ mark: group[0], hit: hits[0] }];
+    if (group.length > 1 && hits.length > 1) {
+        pairs.push({ mark: group[group.length - 1], hit: hits[hits.length - 1] });
+    }
+    const usedHits = {};
+    usedHits[0] = true;
+    if (hits.length > 1) {
+        usedHits[hits.length - 1] = true;
+    }
+    let hitIndex = 1;
+    for (let i = 1; i < group.length - 1 && hitIndex < hits.length - 1; i++) {
+        if (usedHits[hitIndex]) {
+            break;
+        }
+        usedHits[hitIndex] = true;
+        pairs.push({ mark: group[i], hit: hits[hitIndex] });
+        hitIndex++;
+    }
+    return pairs;
+}
+
+function isShortDuplicateLabel(mark) {
+    const key = fold(mark.label);
+    return !!key && (key.length <= 3 || /^\d+$/.test(key));
+}
+
+function duplicateShortKeys(marks) {
+    const counts = {};
+    for (let i = 0; i < marks.length; i++) {
+        const mark = marks[i];
+        if (mark.kind === "excel" || !isShortDuplicateLabel(mark)) {
+            continue;
+        }
+        const key = fold(mark.label);
+        counts[key] = (counts[key] || 0) + 1;
+    }
+    const keys = {};
+    Object.keys(counts).forEach(function (key) {
+        if (counts[key] >= 2) {
+            keys[key] = true;
+        }
+    });
+    return keys;
+}
+
+function leftoverShortBox(mark, placed) {
+    const order = markOrderValue(mark);
+    const key = fold(mark.label);
+    const sibling = placed.filter(function (item) {
+        return item.label === key;
+    })[0];
+    let pred = null;
+    let succ = null;
+    for (let i = 0; i < placed.length; i++) {
+        const item = placed[i];
+        if (item.order < order && (!pred || item.order > pred.order)) {
+            pred = item;
+        }
+        if (item.order > order && (!succ || item.order < succ.order)) {
+            succ = item;
+        }
+    }
+    if (key === "tur" && order >= 3 && order < 5) {
+        const birth = placed.filter(function (item) {
+            return item.order >= 3 && item.order < 4;
+        });
+        const passport = placed.filter(function (item) {
+            return item.order >= 5 && item.order < 6;
+        });
+        if (birth.length && passport.length) {
+            pred = birth.reduce(function (a, b) {
+                return a.top + a.height > b.top + b.height ? a : b;
+            });
+            succ = passport.reduce(function (a, b) {
+                return a.top < b.top ? a : b;
+            });
+        }
+    }
+    if (!pred || !succ || pred.pageDiv !== succ.pageDiv) {
+        return null;
+    }
+    const first = pred.top <= succ.top ? pred : succ;
+    const second = pred.top <= succ.top ? succ : pred;
+    const top = first.top + first.height;
+    const bottom = second.top;
+    const left = sibling ? sibling.left : first.left;
+    const width = sibling ? sibling.width : 36;
+    if (bottom - top < 8) {
+        return null;
+    }
+    return {
+        pageDiv: first.pageDiv,
+        left: left,
+        top: top + 2,
+        width: width,
+        height: Math.max(bottom - top - 4, 12)
+    };
+}
+
+function visualNeighbors(band) {
+    if (!band || !band.pred || !band.succ) {
+        return band;
+    }
+    if (band.pred.top <= band.succ.top) {
+        return { pred: band.pred, succ: band.succ };
+    }
+    return { pred: band.succ, succ: band.pred };
+}
+
+function boxBetweenNeighbors(expected, band) {
+    if (!band || !band.pred || !band.succ) {
+        return expected;
+    }
+    if (band.pred.pageDiv !== band.succ.pageDiv) {
+        return expected;
+    }
+    const top = band.pred.top + band.pred.height;
+    const bottom = band.succ.top;
+    if (bottom - top < 10) {
+        return expected;
+    }
+    const left = expected ? expected.left : band.pred.left;
+    const width = expected ? expected.width : Math.max(band.pred.height * 2, 28);
+    return {
+        pageDiv: band.pred.pageDiv,
+        left: left,
+        top: top + 2,
+        width: width,
+        height: Math.max(bottom - top - 4, 12)
+    };
 }
 
 function parentFieldId(fieldId) {
@@ -576,6 +846,9 @@ function placeMarks(entries, marks, dotnetRef, pages) {
         ? excelFrames(entries, excelAspect, pages)
         : [];
     const used = new Set();
+    const placed = [];
+    const placedIds = placeShortDuplicateLabels(entries, marks, used, placed, dotnetRef);
+    const dupShort = duplicateShortKeys(marks);
     const queue = marks.slice().sort(function (a, b) {
         const aExcel = a.kind !== "word" && hasExcelBox(a);
         const bExcel = b.kind !== "word" && hasExcelBox(b);
@@ -586,18 +859,53 @@ function placeMarks(entries, marks, dotnetRef, pages) {
     });
 
     for (const mark of queue) {
+        if (placedIds[mark.fieldId]) {
+            continue;
+        }
+        if (dupShort[fold(mark.label)] && mark.kind !== "excel") {
+            continue;
+        }
         const excelOnly = hasExcelBox(mark) && mark.kind !== "word";
         if (excelOnly && placeExcelMark(mark, frames, dotnetRef)) {
+            rememberPlaced(placed, mark, excelExpectedRect(mark, frames));
+            placedIds[mark.fieldId] = true;
             continue;
         }
 
         const expected = hasExcelBox(mark) ? excelExpectedRect(mark, frames) : null;
-        const hit = pickHit(findAllLabelSpans(entries, mark.label), used, expected, entries);
+        const band = placedBand(placed, markOrderValue(mark));
+        const hit = pickHit(findAllLabelSpans(entries, mark.label), used, expected, entries, band);
         if (hit) {
-            placeTextHit(mark, hit, entries, used, dotnetRef);
-        } else if (mark.table && hasExcelBox(mark)) {
-            placeExcelMark(mark, frames, dotnetRef);
+            const box = hitRect(hit, entries);
+            markUsed(hit, used);
+            appendMark(box.pageDiv, mark, box, dotnetRef);
+            rememberPlaced(placed, mark, box);
+            placedIds[mark.fieldId] = true;
+        } else if (!isShortDuplicateLabel(mark) && mark.table && hasExcelBox(mark)) {
+            const neighbors = visualNeighbors(band);
+            const fallback = boxBetweenNeighbors(expected, neighbors) || expected;
+            if (fallback) {
+                appendMark(fallback.pageDiv, mark, fallback, dotnetRef);
+                rememberPlaced(placed, mark, fallback);
+                placedIds[mark.fieldId] = true;
+            }
         }
+    }
+
+    const leftovers = queue.filter(function (mark) {
+        return !placedIds[mark.fieldId] && isShortDuplicateLabel(mark) && mark.kind !== "excel";
+    }).sort(function (a, b) {
+        return markOrderValue(a) - markOrderValue(b);
+    });
+    for (let i = 0; i < leftovers.length; i++) {
+        const mark = leftovers[i];
+        const box = leftoverShortBox(mark, placed);
+        if (!box) {
+            continue;
+        }
+        appendMark(box.pageDiv, mark, box, dotnetRef);
+        rememberPlaced(placed, mark, box);
+        placedIds[mark.fieldId] = true;
     }
 
     applyReadingOrder(

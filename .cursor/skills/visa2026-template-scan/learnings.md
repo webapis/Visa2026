@@ -2,6 +2,42 @@
 
 Append-only. Newest first under **## Entries**.
 
+### 2026-09-17 — Şahsy Review #4 still on Bilimi after zip (Raýatlygy TUR missing in PDF)
+
+- Need: Case 8/-1470 ŞAHSY KAGYZ Review. After tasmarks13, Detected **4** stayed **PNAT**, but overlay **#4** was still on **Bilimi / ýokary**. Raýatlygy `TUR` had yellow and no number.
+- Cause: The PDF often exposes only two `TUR`s (birth and address). Zip then skipped `kind !== "word"` marks, or mapped the second hit onto **#4**. Leftover nationality then painted the OpenXML cell (education).
+- Fix: Overlay (`?v=tasmarks14`) keeps birth `TUR` on **3.2** and address `TUR` on **13.1**. Leftover **#4** sits in the visual gap between birth (3.x) and passport (5.x), same column as the birth `TUR`. No table-cell fallback for duplicate short labels.
+- Officer: Stop F5, rebuild, hard-refresh Review. **#4** on **Raýatlygy TUR**. **3.2** birth `TUR`. **13.1** address `TUR`. Mapping unchanged; no Remap.
+- Prevent: Do not give leftover ISO `TUR` the next PDF hit or the OpenXML cell Y when Raýatlygy is missing from the text layer.
+- Cross-skill: none
+
+### 2026-09-17 — Şahsy Review #4 still not on Raýatlygy TUR (landed on Bilimi)
+
+- Need: Case 8/-1470 ŞAHSY KAGYZ. After tasmarks12, **#4** moved off Şahsy belgis onto **ýokary** (education). Raýatlygy TUR still had no number.
+- Cause: Neighbor-band fallback used the OpenXML cell box when birth/passport gap was too small. Şahsy has three `TUR`s (birth 3.2, nationality, address 13.1); they must pair in page order, not nearest to a bad box.
+- Fix: Overlay (`?v=tasmarks13`) zips duplicate short labels (`TUR`) to PDF hits top-to-bottom in Detected order.
+- Officer: Stop F5, rebuild, hard-refresh Review. **#4** on **Raýatlygy TUR**. **3.2** stays birth TUR. **13.1** stays address TUR.
+- Prevent: Do not place leftover ISO `TUR` by table-cell Y when other `TUR`s are already on the page.
+- Cross-skill: none
+
+### 2026-09-17 — Şahsy Review #4 Nationality sits on Şahsy belgis
+
+- Need: Case 5/-789 ŞAHSY KAGYZ.docx. Detected **4** is **PNAT** / `TUR` (Raýatlygy). Overlay **#4** was on Şahsy belgis next to **#6** PPIN. Raýatlygy TUR had yellow and no number.
+- Cause: Short duplicate `TUR` often has no unused PDF hit (birth 3.2 already took one). Table-cell fallback used equal row heights, so nationality landed on the personal-number line. Roster şahsy is a left-label form, not a sanaw grid.
+- Fix: Review overlay (`?v=tasmarks12`) places leftover short marks in the band between already-placed neighbors (birth 3.3 and passport 5.1).
+- Officer: Stop F5, rebuild, hard-refresh Review. **#4** on **Raýatlygy TUR**. No Remap.
+- Prevent: Do not paint a table-cell fallback for ISO `TUR` onto a later form row when birth and passport marks already sit above and below nationality.
+- Cross-skill: none
+
+### 2026-09-17 — Sanaw Preview № column empty though RNUM is mapped
+
+- Need: Case 5/-789. Catalog Preview of This-profile *Daşary ýurt raýatlarynyň sanawy* listed all three people, but **№** was blank. Review showed **RNUM** mapped (sample `1`).
+- Cause: Yellow-marks Word uses `{{.RNUM}}` (catalog `RowNumber`). Sanaw merge only stored `RowNo`. The row expander looked up RNUM → RowNumber and wrote an empty cell.
+- Fix: Copy `RowNo` / `RowNumber` / `RNUM` onto each other at enrich. Expander fills `{{.RNUM}}` from `RowNo`.
+- Officer: Stop F5, rebuild. Preview the same Word sanaw — **№** is 1, 2, 3. No Re-Approve.
+- Prevent: Do not treat `RowNo` and `RNUM` as different merge keys.
+- Cross-skill: visa2026-resminamalar
+
 ### 2026-09-17 — Invitation yellow-marks sanaw Preview fails; direct-to-migration seeded sanaw lists everyone
 
 - Need: Case 5/-789 Çakylyk Almak, 3 people. This-profile *Daşary ýurt raýatlarynyň sanawy* Word/Excel Preview was **Preview could not be generated.** Case 8/-1307 Wizany uzaltmak **SANAW_WIZANY_UZTURMEK** Excel Preview listed all 3 people.
