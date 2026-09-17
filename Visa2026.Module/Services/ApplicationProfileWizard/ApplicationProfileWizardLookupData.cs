@@ -57,6 +57,41 @@ public sealed class ApplicationProfileWizardLookupData
             : LoadItems<MigrationService>(objectSpace);
     }
 
+    /// <summary>
+    /// Case Resminamalar: This-profile templates may bind to every instance, or only the
+    /// Project contract / Migration service already set on this case — not the full catalog.
+    /// </summary>
+    public static IReadOnlyList<ApplicationProfileWizardLookupItem> LoadApplicabilityItemsForInstance(
+        IObjectSpace? objectSpace,
+        ApplicationProfileInstance? instance,
+        bool viaMinistry)
+    {
+        if (instance == null)
+            return Array.Empty<ApplicationProfileWizardLookupItem>();
+
+        LookupBase? item = viaMinistry ? instance.ProjectContract : instance.MigrationService;
+        if (item == null && objectSpace != null && instance.ID != Guid.Empty)
+        {
+            var loaded = objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
+                .Include(i => i.ProjectContract)
+                .Include(i => i.MigrationService)
+                .FirstOrDefault(i => i.ID == instance.ID);
+            item = viaMinistry ? loaded?.ProjectContract : loaded?.MigrationService;
+        }
+
+        if (item == null || item.ID == Guid.Empty)
+            return Array.Empty<ApplicationProfileWizardLookupItem>();
+
+        return
+        [
+            new ApplicationProfileWizardLookupItem
+            {
+                Id = item.ID,
+                DisplayName = FormatDisplayName(item),
+            }
+        ];
+    }
+
     public static ApplicationProfileWizardLookupData Load(IObjectSpace objectSpace)
     {
         if (objectSpace == null)

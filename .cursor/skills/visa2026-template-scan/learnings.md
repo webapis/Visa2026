@@ -2,6 +2,33 @@
 
 Append-only. Newest first under **## Entries**.
 
+### 2026-09-17 — This-profile Project contract list was the full catalog
+
+- Need: Case 9/-007 Iş Rugsatnama goşmaça barjak ýeri (1574-KIYANLI). Officer bound a yellow-marks letter to another Project contract, so Resminamalar on this case stayed empty.
+- Cause: Upload **This profile only** loaded every `ProjectContract` via `LoadApplicabilityItems`. The case already has one contract from create.
+- Fix: Case (and Add existing) dropdown is **All contracts** plus this instance’s Project contract only. Direct-migration: this case’s Migration service. Profile wizard with no case: All contracts only until a case is picked.
+- Officer: Stop F5, rebuild. Create from yellow marks on this case — Project contract list is All contracts and **1574-KIYANLI** only.
+- Prevent: Do not offer unrelated catalog contracts when authoring a This-profile template from a case.
+- Cross-skill: visa2026-application-profile | visa2026-resminamalar
+
+### 2026-09-17 — Add existing template shows CHECK (placeholders not extracted)
+
+- Need: Case 6/-1024 Çakylyk we Iş Rugsatnamasyny Almak. After **Add existing template**, the This-profile card was **CHECK** (placeholders not extracted or validated). Yellow-marks Approve is **Ready**.
+- Cause: Convert save wrote the Word/Excel and linked `UserReportTemplate` but never ran Extract/Validate. Catalog `EvaluateUserTemplate` treats an empty `Placeholders` list as **CHECK**.
+- Fix: After Add existing / Convert save (same as Scan Approve), `ExtractAndValidatePlaceholdersAsync` on the linked user template.
+- Officer: Stop F5, rebuild. Add the same file again — chip should be **Ready** when tokens validate. Already-saved CHECK rows stay until re-added (or Configuration Extract placeholders).
+- Prevent: Do not persist an Add-existing nested row without extracting placeholders the way yellow-marks Approve does.
+- Cross-skill: visa2026-resminamalar | visa2026-user-report-templates
+
+### 2026-09-17 — Add existing template missing Project contract (via ministry)
+
+- Need: Case 3/-477 Çakylyk we Iş Rugsatnamasyny Almak. Create from yellow marks **This profile only** has **Project contract**. **Add existing template** did not.
+- Cause: Convert save never set `SetApplicability` / `ApplicableProjectContractId`. Scan already persisted the wizard dropdown.
+- Fix: **Add existing** (and Convert) show the same nested dropdown when **This profile only**. Via ministry = **All contracts** or one Project contract. Direct = Migration service. Shared catalog hides it and clears the FK.
+- Officer: Stop F5, rebuild. Add existing template → This profile only → pick a Project contract (or leave All contracts) → Add to profile. Resminamalar on another contract of the same profile hides a one-contract letter.
+- Prevent: Do not leave Convert without the Scan Save-to contract dropdown on via-ministry This-profile rows.
+- Cross-skill: visa2026-application-profile | visa2026-resminamalar
+
 ### 2026-09-17 — Şahsy Review #4 still on Bilimi after zip (Raýatlygy TUR missing in PDF)
 
 - Need: Case 8/-1470 ŞAHSY KAGYZ Review. After tasmarks13, Detected **4** stayed **PNAT**, but overlay **#4** was still on **Bilimi / ýokary**. Raýatlygy `TUR` had yellow and no number.

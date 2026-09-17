@@ -1,3 +1,20 @@
+### 2026-09-17 — This-profile template contract dropdown listed every Project contract
+
+- **Need**: Officer bound a case letter to a different Project contract than Overview **Project**, so Resminamalar hid it.
+- **Cause**: Create from yellow marks / Add existing loaded the full `ProjectContract` catalog.
+- **Fix**: Instance authoring offers **All contracts** plus this case’s Project contract (or Migration service). Tests: `LoadApplicabilityItemsForInstance_*`.
+- **Prevent**: Do not list unrelated contracts when the case already has one.
+- **Cross-skill**: visa2026-template-scan
+
+### 2026-09-17 — Add existing template missing Project contract (via ministry)
+
+- **Need**: Via-ministry case Resminamalar **Add existing template** had Save to but no Project contract. Yellow marks already had **All contracts** / one contract.
+- **Cause**: `TemplateConvertSaveRequest` did not pass `SetApplicability` or `ApplicableProjectContractId`.
+- **Fix**: Convert dialog reuses the Scan dropdown under **This profile only**. Save sets applicability the same way as yellow marks. Shared catalog still clears the FK.
+- **Test**: `Save_request_this_profile_carries_project_contract`. Officer: stop F5, rebuild; Add existing on a via-ministry case → This profile only → Project contract.
+- **Prevent**: Do not treat Add existing as unbound This-profile when yellow marks binds a contract.
+- **Cross-skill**: visa2026-template-scan | visa2026-resminamalar
+
 ### 2026-09-16 — Create wizard lodging list ignores To city
 
 - **Need**: After To city = Sarahs, Business trip lodging still listed every UYJ (Aşgabat, Kaka, …).

@@ -25,6 +25,26 @@ Purpose: **catalog, seed gate, batch worker, preview, permissions, dialog UX** �
 
 ## Entries
 
+### 2026-09-17 — Add existing template shows CHECK (Application)
+
+- **Symptom**: Case 6/-1024. This-profile GT-15 letter added via **Add existing template** showed **CHECK** and “placeholders were not extracted or validated.” Yellow-marks Approve on the same catalog is **Ready**.
+- **Try**: Stop F5, rebuild. Add existing again — **Ready** when tokens validate. Re-add already-saved CHECK rows.
+- **Test**: Blazor Convert save now calls `ExtractAndValidatePlaceholdersAsync` (same as Scan Approve).
+- **Root cause**: Convert save linked a `UserReportTemplate` with file bytes and empty `Placeholders`.
+- **Fix**: Extract + validate after Add existing / Convert save.
+- **Prevent**: Do not treat an unextracted Add-existing file as Ready; do not skip Extract/Validate on Convert save.
+- **Cross-skill**: template-scan
+
+### 2026-09-17 — Sanaw Preview № / record number blank (Application)
+
+- **Symptom**: Case 5/-789. This-profile Dasary Word Preview listed three people; **№** column empty. Review **RNUM** mapped.
+- **Try**: Stop F5, rebuild. Preview again — 1, 2, 3. No Re-Approve.
+- **Test**: `WordScanTableRowExpanderTests.Expand_fills_RNUM_from_RowNo`, `Enrich_copies_RowNo_to_RNUM`.
+- **Root cause**: Merge stored `RowNo`; yellow-marks token is `{{.RNUM}}` (`RowNumber`).
+- **Fix**: Alias `RowNo` / `RowNumber` / `RNUM`; expander fills from any of them.
+- **Prevent**: Do not leave RNUM empty when RowNo is set.
+- **Cross-skill**: template-scan
+
 ### 2026-09-17 — Invitation yellow-marks sanaw Preview fails; seeded direct-to-migration lists all people (Application)
 
 - **Symptom**: Case 5/-789 Çakylyk Almak. This-profile Dasary sanaw Word/Excel Preview: **Preview could not be generated.** Case 8/-1307 Wizany uzaltmak **SANAW_WIZANY_UZTURMEK** Excel Preview showed 3 data rows.

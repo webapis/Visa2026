@@ -121,6 +121,29 @@ public class TemplateConvertOrchestratorTests
         Assert.Equal(SuitabilityLevel.Fail, analysis.Candidate.Level);
     }
 
+    [Fact]
+    public void Save_request_this_profile_carries_project_contract()
+    {
+        var contractId = Guid.NewGuid();
+        var request = new TemplateConvertSaveRequest
+        {
+            ObjectSpace = null!,
+            Profile = Profile(),
+            TemplateName = "Letter",
+            TemplateKind = ApplicationProfileTemplateKind.Word,
+            DataScope = ApplicationProfileTemplateDataScope.ApplicationHeader,
+            CatalogScope = ApplicationProfileTemplateCatalogScope.ProfileSpecific,
+            Content = [1],
+            FileName = "letter.docx",
+            SetApplicability = true,
+            ApplicableProjectContractId = contractId,
+        };
+
+        Assert.True(request.SetApplicability);
+        Assert.Equal(contractId, request.ApplicableProjectContractId);
+        Assert.Null(request.ApplicableMigrationServiceId);
+    }
+
     /// <summary>Property resolution is covered by the E6 tests; here it must never be the reason a case fails.</summary>
     private sealed class PermissiveValidator : IUserReportValidationService, IExcelReportValidationService
     {

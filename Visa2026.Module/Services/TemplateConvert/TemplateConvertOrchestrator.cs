@@ -108,6 +108,16 @@ public sealed class TemplateConvertSaveRequest
     public required byte[] Content { get; init; }
 
     public required string FileName { get; init; }
+
+    /// <summary>
+    /// When true, persist Project contract / Migration service like Create from yellow marks.
+    /// Shared catalog always clears the binding.
+    /// </summary>
+    public bool SetApplicability { get; init; }
+
+    public Guid? ApplicableProjectContractId { get; init; }
+
+    public Guid? ApplicableMigrationServiceId { get; init; }
 }
 
 public interface ITemplateConvertOrchestrator
@@ -415,6 +425,9 @@ public sealed class TemplateConvertOrchestrator : ITemplateConvertOrchestrator
             CatalogScope = request.CatalogScope,
             Content = request.Content,
             FileName = request.FileName,
+            SetApplicability = request.SetApplicability,
+            ApplicableProjectContractId = request.ApplicableProjectContractId,
+            ApplicableMigrationServiceId = request.ApplicableMigrationServiceId,
         });
     }
 

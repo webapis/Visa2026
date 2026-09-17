@@ -804,7 +804,8 @@
     private void BindApplicabilityFromProfile(ApplicationProfile profile, IObjectSpace objectSpace)
     {
         _isViaMinistry = profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries;
-        _applicabilityLookups = ApplicationProfileWizardLookupData.LoadApplicabilityItems(objectSpace, _isViaMinistry);
+        _applicabilityLookups = Array.Empty<ApplicationProfileWizardLookupItem>();
+        _applicabilityId = string.Empty;
     }
 
     private void BindApplicabilityFromInstance(
@@ -815,7 +816,11 @@
         var route = ApplicationProfileConfigurationResolver.GetProgressRoute(instance)
             ?? profile.ProgressRoute;
         _isViaMinistry = route == ApplicationProfileInstanceProgressRouteKind.ViaMinistries;
-        _applicabilityLookups = ApplicationProfileWizardLookupData.LoadApplicabilityItems(objectSpace, _isViaMinistry);
+        _applicabilityLookups = ApplicationProfileWizardLookupData.LoadApplicabilityItemsForInstance(
+            objectSpace,
+            instance,
+            _isViaMinistry);
+        _applicabilityId = string.Empty;
     }
 
     private string FormatApplicabilityId(Guid? projectContractId, Guid? migrationServiceId)
@@ -861,6 +866,13 @@
     private void OnInstanceChanged(ChangeEventArgs args)
     {
         _selectedInstanceId = Guid.TryParse(args.Value?.ToString(), out var id) ? id : Guid.Empty;
+        if (_hostObjectSpace == null || _hostProfile == null)
+            return;
+
+        var instance = _selectedInstanceId == Guid.Empty
+            ? null
+            : _hostObjectSpace.GetObjectByKey<ApplicationProfileInstance>(_selectedInstanceId);
+        BindApplicabilityFromInstance(instance, _hostProfile, _hostObjectSpace);
     }
 
     private void TogglePdfPage(int page, ChangeEventArgs args)

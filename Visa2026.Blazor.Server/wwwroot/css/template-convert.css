@@ -110,6 +110,54 @@
 .tac-input[readonly] { background: #f8fafc; color: #475569; }
 
 .tac-radio { display: flex; align-items: center; gap: 0.45rem; font-size: 0.85rem; color: #0f172a; }
+.tac-field--nested { margin-top: 0.55rem; padding-top: 0.55rem; border-top: 1px solid #e2e8f0; }
+
+.tac-tip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.05rem;
+  height: 1.05rem;
+  margin-left: 0.35rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: help;
+}
+.tac-tip:hover,
+.tac-tip:focus {
+  background: #cbd5e1;
+  color: #0f172a;
+  outline: none;
+}
+.tac-tip::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 7px);
+  width: min(18rem, 70vw);
+  padding: 0.45rem 0.55rem;
+  border-radius: 6px;
+  background: #0f172a;
+  color: #f8fafc;
+  font-size: 0.72rem;
+  font-weight: 400;
+  line-height: 1.35;
+  text-align: left;
+  white-space: normal;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.22);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 4;
+}
+.tac-tip:hover::after,
+.tac-tip:focus::after { opacity: 1; }
 
 .tac-drop {
   display: grid;

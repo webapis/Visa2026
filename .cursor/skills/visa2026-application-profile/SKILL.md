@@ -152,6 +152,7 @@ flowchart LR
 | Link existing pins only one visa; Relink then makes 2/2 | First Link only Refresh'd the picker person. Restart, Link again — both valid visas should appear without Relink | `LinkPerson` → `RelinkPerson` + profile Last-N load |
 | Unlink then Link existing fails “saving entity changes” | Soft-deleted ResolvedLinks occupied the unique index. Restart after rebuild so the GCRecord-filtered index heals. Then Link again | `ApplicationProfileInstancePersonResolvedLink` unique + unlink |
 | Overview silent when Case summary has empty required fields | Empty tiles already red; Overview nav was blank | `ResolveOverviewNav` / `MissingRequiredCount`; same red-count / green-check as People |
+| Add existing template missing Project contract (via ministry This profile) | Same dropdown as yellow marks: **All contracts** or **this case’s** contract. Stop F5, rebuild | Convert `SetApplicability` + instance-scoped lookup |
 
 ---
 
