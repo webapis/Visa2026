@@ -8,6 +8,7 @@ namespace Visa2026.Module.Services.UserReports;
 public enum UserReportPlaceholderRelatedBo
 {
     Unknown = 0,
+    /// <summary>Legacy flat Application group; prefer ApplicationGeneral / FamilyMember / Cancellation / BusinessTrip.</summary>
     Application = 1,
     CompanyProfile = 2,
     CompanySignatory = 3,
@@ -27,18 +28,33 @@ public enum UserReportPlaceholderRelatedBo
     RosterRow = 17,
     TravelHistory = 18,
     BusinessTrip = 19,
+    ApplicationGeneral = 20,
+    ApplicationFamilyMember = 21,
+    ApplicationCancellation = 22,
+    ApplicationBusinessTrip = 23,
 }
 
 public static class UserReportPlaceholderRelatedBoCatalog
 {
-    public static int SortOrder(UserReportPlaceholderRelatedBo relatedBo) =>
-        relatedBo == UserReportPlaceholderRelatedBo.Unknown
-            ? int.MaxValue
-            : (int)relatedBo;
+    public static int SortOrder(UserReportPlaceholderRelatedBo relatedBo) => relatedBo switch
+    {
+        UserReportPlaceholderRelatedBo.Unknown => int.MaxValue,
+        UserReportPlaceholderRelatedBo.Application => 1,
+        UserReportPlaceholderRelatedBo.ApplicationGeneral => 2,
+        UserReportPlaceholderRelatedBo.ApplicationFamilyMember => 3,
+        UserReportPlaceholderRelatedBo.ApplicationCancellation => 4,
+        UserReportPlaceholderRelatedBo.ApplicationBusinessTrip => 5,
+        UserReportPlaceholderRelatedBo.BusinessTrip => 6,
+        _ => 100 + (int)relatedBo,
+    };
 
     public static string DisplayNameEn(UserReportPlaceholderRelatedBo relatedBo) => relatedBo switch
     {
         UserReportPlaceholderRelatedBo.Application => "Application",
+        UserReportPlaceholderRelatedBo.ApplicationGeneral => "Application — general",
+        UserReportPlaceholderRelatedBo.ApplicationFamilyMember => "Application — family member",
+        UserReportPlaceholderRelatedBo.ApplicationCancellation => "Application — cancellation",
+        UserReportPlaceholderRelatedBo.ApplicationBusinessTrip => "Application — business trip",
         UserReportPlaceholderRelatedBo.CompanyProfile => "Company",
         UserReportPlaceholderRelatedBo.CompanySignatory => "Authorized signatory",
         UserReportPlaceholderRelatedBo.AuthorizedRepresentative => "Authorized representative (wekil)",

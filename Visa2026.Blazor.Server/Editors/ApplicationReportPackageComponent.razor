@@ -54,7 +54,7 @@
                                   CssClass="app-item-doc-copies__action-btn"
                                   Click="@ShowRecycleBinPaneAsync" />
                     }
-                    @if (IsThisProfilePane && VisibleCatalogEntries.Count > 0)
+                    @if (IsThisProfilePane && _packageSelectMode && VisibleCatalogEntries.Count > 0)
                     {
                     <DxButton Text="@Msg("ApplicationReportPackage.SelectAll")"
                               RenderStyle="ButtonRenderStyle.Link"
@@ -66,6 +66,11 @@
                               SizeMode="SizeMode.Small"
                               CssClass="app-item-doc-copies__action-btn"
                               Click="@ClearSelectionAsync" />
+                    <DxButton Text="@Msg("ApplicationReportPackage.CancelPackageSelect")"
+                              RenderStyle="ButtonRenderStyle.Link"
+                              SizeMode="SizeMode.Small"
+                              CssClass="app-item-doc-copies__action-btn"
+                              Click="@CancelPackageSelectModeAsync" />
                     }
                     @if (IsThisProfilePane)
                     {
@@ -92,6 +97,17 @@
                                   Click="@(() => OpenConvertAsync(manual: true))" />
                     }
                     }
+                    <label class="resminamalar-catalog__sort">
+                        <span class="resminamalar-catalog__sort-label">@Msg("ApplicationReportPackage.Sort")</span>
+                        <select class="resminamalar-catalog__sort-select"
+                                value="@((int)_catalogSort)"
+                                @onchange="OnCatalogSortChanged">
+                            <option value="0">@Msg("ApplicationReportPackage.Sort.NewestFirst")</option>
+                            <option value="1">@Msg("ApplicationReportPackage.Sort.OldestFirst")</option>
+                            <option value="2">@Msg("ApplicationReportPackage.Sort.NameAsc")</option>
+                            <option value="3">@Msg("ApplicationReportPackage.Sort.NameDesc")</option>
+                        </select>
+                    </label>
                 </div>
             }
             else
@@ -111,7 +127,7 @@
                               Click="@ShowRecycleBinPaneAsync" />
                 </div>
             }
-            @if (IsCatalogPane && VisibleCatalogEntries.Count > 0)
+            @if (IsCatalogPane && _packageSelectMode && VisibleCatalogEntries.Count > 0)
             {
             <DxButton Text="@Msg("ApplicationReportPackage.SelectAll")"
                       RenderStyle="ButtonRenderStyle.Link"
@@ -123,6 +139,11 @@
                       SizeMode="SizeMode.Small"
                       CssClass="app-item-doc-copies__action-btn"
                       Click="@ClearSelectionAsync" />
+            <DxButton Text="@Msg("ApplicationReportPackage.CancelPackageSelect")"
+                      RenderStyle="ButtonRenderStyle.Link"
+                      SizeMode="SizeMode.Small"
+                      CssClass="app-item-doc-copies__action-btn"
+                      Click="@CancelPackageSelectModeAsync" />
             }
             @if (IsCatalogPane)
             {
@@ -148,6 +169,17 @@
                           CssClass="app-item-doc-copies__action-btn"
                           Click="@(() => OpenConvertAsync(manual: true))" />
             }
+            <label class="resminamalar-catalog__sort">
+                <span class="resminamalar-catalog__sort-label">@Msg("ApplicationReportPackage.Sort")</span>
+                <select class="resminamalar-catalog__sort-select"
+                        value="@((int)_catalogSort)"
+                        @onchange="OnCatalogSortChanged">
+                    <option value="0">@Msg("ApplicationReportPackage.Sort.NewestFirst")</option>
+                    <option value="1">@Msg("ApplicationReportPackage.Sort.OldestFirst")</option>
+                    <option value="2">@Msg("ApplicationReportPackage.Sort.NameAsc")</option>
+                    <option value="3">@Msg("ApplicationReportPackage.Sort.NameDesc")</option>
+                </select>
+            </label>
             }
             }
         </div>
@@ -254,6 +286,10 @@
         else
         {
             <div class="resminamalar-catalog">
+                @if (_packageSelectMode)
+                {
+                    <p class="resminamalar-catalog__package-select-hint" role="status">@Msg("ApplicationReportPackage.PackageSelectModeHint")</p>
+                }
                 @RenderCatalogCards()
             </div>
         }
@@ -333,7 +369,7 @@
                                   CssClass="app-item-doc-copies__action-btn"
                                   Click="@CancelPackageConfirm" />
                     }
-                    else
+                    else if (_packageSelectMode)
                     {
                         <DxButton Text="@Msg("ApplicationReportPackage.DownloadPackage")"
                                   RenderStyle="ButtonRenderStyle.Link"
@@ -341,6 +377,20 @@
                                   CssClass="app-item-doc-copies__action-btn"
                                   Enabled="@(!_packageBusy && SelectedCount > 0)"
                                   Click="@OnDownloadPackageClickAsync" />
+                        <DxButton Text="@Msg("ApplicationReportPackage.CancelPackageSelect")"
+                                  RenderStyle="ButtonRenderStyle.Link"
+                                  SizeMode="SizeMode.Small"
+                                  CssClass="app-item-doc-copies__action-btn"
+                                  Click="@CancelPackageSelectModeAsync" />
+                    }
+                    else
+                    {
+                        <DxButton Text="@Msg("ApplicationReportPackage.DownloadPackage")"
+                                  RenderStyle="ButtonRenderStyle.Link"
+                                  SizeMode="SizeMode.Small"
+                                  CssClass="app-item-doc-copies__action-btn"
+                                  Enabled="@(!_packageBusy && VisibleCatalogEntries.Count > 0)"
+                                  Click="@EnterPackageSelectModeAsync" />
                     }
                     }
                 </div>
@@ -418,6 +468,8 @@
     private DotNetObjectReference<ApplicationReportPackageComponent>? _dotNetRef;
 
     private readonly HashSet<string> _selectedKeys = new(StringComparer.Ordinal);
+    private bool _packageSelectMode;
+    private ApplicationReportPackageCatalogSort _catalogSort = ApplicationReportPackageCatalogSort.NewestFirst;
     private readonly HashSet<string> _knownCatalogKeys = new(StringComparer.Ordinal);
     private bool _selectionInitialized;
     private string? _pendingSelectTemplateName;
@@ -459,11 +511,14 @@
                          class="@GetEntryCssClass(entry, IsSelected(entry))"
                          aria-label="@entry.DisplayName">
                     <div class="resminamalar-catalog__card-head">
+                        @if (_packageSelectMode)
+                        {
                         <label class="resminamalar-catalog__include" title="@entry.DisplayName">
                             <input type="checkbox"
                                    checked="@IsSelected(entry)"
                                    @onchange="e => OnIncludeChanged(entry, e)" />
                         </label>
+                        }
                         <span class="resminamalar-catalog__nav-icon @ResminamalarCatalogFormatIcons.CssClass(entry.Kind)"
                               aria-hidden="true">
                             @((MarkupString)ResminamalarCatalogFormatIcons.Svg(entry.Kind))
@@ -694,7 +749,7 @@
                 list.Add(entry);
             }
 
-            return list;
+            return ApplicationReportPackageCatalogSortHelper.Sort(list, _catalogSort);
         }
     }
 
@@ -727,7 +782,7 @@
                 list.Add(entry);
             }
 
-            return list;
+            return ApplicationReportPackageCatalogSortHelper.Sort(list, _catalogSort);
         }
     }
 
@@ -1270,6 +1325,7 @@
     {
         _showRecycleBinPane = false;
         _showSharedPane = true;
+        _packageSelectMode = false;
         _packageConfirmPending = false;
         _recycleConfirmKind = RecycleConfirmKind.None;
         _recycleConfirmEntry = null;
@@ -1279,6 +1335,7 @@
     private Task ShowRecycleBinPaneAsync()
     {
         _showRecycleBinPane = true;
+        _packageSelectMode = false;
         _packageConfirmPending = false;
         _recycleConfirmKind = RecycleConfirmKind.None;
         _recycleConfirmEntry = null;
@@ -1810,9 +1867,11 @@
         ApplicationWordReportPackageCatalogEntry entry,
         bool isSelected)
     {
+        // Browse mode: no ZIP selection chrome — style by readiness only.
+        var selectedForStyle = _packageSelectMode ? isSelected : true;
         var css = IsPreviewingEntry(entry) || IsRecyclingEntry(entry)
-            ? $"{GetEntryStateCssClass(entry, isSelected)} app-report-package__entry--previewing"
-            : GetEntryStateCssClass(entry, isSelected);
+            ? $"{GetEntryStateCssClass(entry, selectedForStyle)} app-report-package__entry--previewing"
+            : GetEntryStateCssClass(entry, selectedForStyle);
         if (!string.IsNullOrEmpty(_highlightEntryKey)
             && string.Equals(entry.EntryKey, _highlightEntryKey, StringComparison.Ordinal))
         {
@@ -1839,6 +1898,9 @@
 
     private Task OnDownloadPackageClickAsync()
     {
+        if (!_packageSelectMode)
+            return EnterPackageSelectModeAsync();
+
         if (SelectedCount == 0)
         {
             _packageStatusMessage = Msg("ApplicationReportPackage.EnqueueErrorNoSelection");
@@ -1854,6 +1916,40 @@
         }
 
         return EnqueuePackageAsync();
+    }
+
+    private Task EnterPackageSelectModeAsync()
+    {
+        _packageSelectMode = true;
+        _packageConfirmPending = false;
+        ClearStatusMessages();
+        if (SelectedCount == 0)
+        {
+            foreach (var entry in VisibleCatalogEntries)
+                _selectedKeys.Add(entry.EntryKey);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task CancelPackageSelectModeAsync()
+    {
+        _packageSelectMode = false;
+        _packageConfirmPending = false;
+        ClearStatusMessages();
+        return Task.CompletedTask;
+    }
+
+    private Task OnCatalogSortChanged(ChangeEventArgs e)
+    {
+        if (e?.Value != null
+            && int.TryParse(e.Value.ToString(), out var value)
+            && Enum.IsDefined(typeof(ApplicationReportPackageCatalogSort), value))
+        {
+            _catalogSort = (ApplicationReportPackageCatalogSort)value;
+        }
+
+        return Task.CompletedTask;
     }
 
     private Task ConfirmDownloadPackageAsync()
@@ -1967,6 +2063,7 @@
             await JS.InvokeVoidAsync("visaWordBatchToast.setCurrentBatchId", outcome.BatchId.ToString("D"));
             _packageStatusMessage = FormatMsg("ApplicationReportPackage.Package.Queued", outcome.ReportCount);
             _packageStatusIsError = false;
+            _packageSelectMode = false;
         }
         catch (Exception ex)
         {

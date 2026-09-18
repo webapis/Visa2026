@@ -1,4 +1,11 @@
 
+### 2026-09-18 — FMRLH + Application picker subgroups (family: AppScalar)
+
+- **Symptom**: Letter needed relationship-only `adamsynyň`; Application list too large for FM header codes.
+- **Fix**: **FMRLH** → `FamilyMember_Relationship_NameTm`. Application subgroups: general / family member / cancellation / business trip.
+- **Officer**: Stop F5, rebuild. **Application — family member** → **FMRLH**.
+- **Cross-skill**: visa2026-template-scan
+
 ### 2026-09-18 — FMWZP FM Wezipesi roster (family: ItemRoster)
 
 - **Symptom**: Review Add Family member showed FMEIY/FMESP but not FM_WezipesiTm for sanaw Wezipesi.

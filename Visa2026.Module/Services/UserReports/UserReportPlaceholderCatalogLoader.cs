@@ -87,14 +87,22 @@ public static class UserReportPlaceholderAliasRegistry
 
         foreach (var pair in data.ToList())
         {
-            if (TryGetShortCode(pair.Key, out var shortCode) && !HasPresentValue(data, shortCode))
-                data[shortCode] = pair.Value;
+            foreach (var alias in ShortCodesForKey(pair.Key))
+            {
+                if (!HasPresentValue(data, alias))
+                    data[alias] = pair.Value;
+            }
 
             if (Maps.Value.ShortToCanonical.TryGetValue(pair.Key, out var canonical)
                 && !string.Equals(canonical, pair.Key, StringComparison.OrdinalIgnoreCase)
                 && !HasPresentValue(data, canonical))
             {
                 data[canonical] = pair.Value;
+                foreach (var alias in ShortCodesForCanonical(canonical))
+                {
+                    if (!HasPresentValue(data, alias))
+                        data[alias] = pair.Value;
+                }
             }
         }
     }
@@ -115,6 +123,31 @@ public static class UserReportPlaceholderAliasRegistry
         data["RowNumber"] = number;
         data["RowNo"] = number;
         data["RNUM"] = number;
+    }
+
+    private static IEnumerable<string> ShortCodesForKey(string key)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+            yield break;
+
+        if (TryGetShortCode(key, out var primary))
+            yield return primary;
+
+        foreach (var alias in ShortCodesForCanonical(key))
+            yield return alias;
+    }
+
+    private static IEnumerable<string> ShortCodesForCanonical(string canonical)
+    {
+        if (string.IsNullOrWhiteSpace(canonical))
+            yield break;
+
+        var path = canonical.Trim();
+        foreach (var pair in Maps.Value.ShortToCanonical)
+        {
+            if (string.Equals(pair.Value, path, StringComparison.OrdinalIgnoreCase))
+                yield return pair.Key;
+        }
     }
 
     private static bool HasPresentValue(IDictionary<string, object> data, string key) =>

@@ -25,7 +25,7 @@ public class UserReportPlaceholderRelatedBoTests
 
         Assert.Equal(canonical, entry.CanonicalPath);
         Assert.Equal(UserReportPlaceholderPack.Core, entry.Pack);
-        Assert.Equal(UserReportPlaceholderRelatedBo.Application, entry.RelatedBo);
+        Assert.Equal(UserReportPlaceholderRelatedBo.ApplicationCancellation, entry.RelatedBo);
         Assert.Equal(UserReportPlaceholderScope.Header, entry.Scope);
         Assert.Equal("{{ds." + shortCode + "}}", entry.BuildWordToken(UserReportPlaceholderScope.Header));
     }
@@ -227,7 +227,7 @@ public class UserReportPlaceholderRelatedBoTests
 
         Assert.Equal("Application_WorkPermitLocation_NameTm", entry.CanonicalPath);
         Assert.Equal(UserReportPlaceholderPack.Core, entry.Pack);
-        Assert.Equal(UserReportPlaceholderRelatedBo.Application, entry.RelatedBo);
+        Assert.Equal(UserReportPlaceholderRelatedBo.ApplicationGeneral, entry.RelatedBo);
         Assert.Equal(UserReportPlaceholderScope.Row, entry.Scope);
         Assert.Equal("{{.AWPLC}}", entry.BuildWordToken(UserReportPlaceholderScope.Row));
         Assert.Contains(UserReportBoType.ApplicationProfileInstance, entry.RootBoTypes);
@@ -309,7 +309,7 @@ public class UserReportPlaceholderRelatedBoTests
 
         Assert.Equal(canonical, entry.CanonicalPath);
         Assert.Equal(UserReportPlaceholderPack.Core, entry.Pack);
-        Assert.Equal(UserReportPlaceholderRelatedBo.Application, entry.RelatedBo);
+        Assert.Equal(UserReportPlaceholderRelatedBo.ApplicationBusinessTrip, entry.RelatedBo);
         Assert.Equal(UserReportPlaceholderScope.Header, entry.Scope);
         Assert.Equal(labelEn, entry.LabelEn);
         Assert.Equal("{{ds." + shortCode + "}}", entry.BuildWordToken(UserReportPlaceholderScope.Header));
@@ -404,5 +404,43 @@ public class UserReportPlaceholderRelatedBoTests
         Assert.Single(groups);
         Assert.Equal(UserReportPlaceholderRelatedBo.AuthorizedRepresentative, groups[0].RelatedBo);
         Assert.Contains(groups[0].Entries, e => e.ShortCode == "RPFN");
+    }
+
+    [Fact]
+    public void FMRLH_is_relationship_only_under_Application_family_member()
+    {
+        var catalog = new UserReportPlaceholderCatalogService();
+        var entry = catalog.GetEntries().Single(e =>
+            string.Equals(e.ShortCode, "FMRLH", StringComparison.OrdinalIgnoreCase));
+
+        Assert.Equal("FamilyMember_Relationship_NameTm", entry.CanonicalPath);
+        Assert.Equal(UserReportPlaceholderRelatedBo.ApplicationFamilyMember, entry.RelatedBo);
+        Assert.Equal(UserReportPlaceholderScope.Header, entry.Scope);
+        Assert.Equal("FM relationship only (genitive)", entry.LabelEn);
+        Assert.Equal("{{ds.FMRLH}}", entry.BuildWordToken(UserReportPlaceholderScope.Header));
+    }
+
+    [Fact]
+    public void Application_family_member_group_contains_FM_header_tokens()
+    {
+        var groups = new UserReportPlaceholderCatalogService().GetGroupedEntries(
+            new UserReportPlaceholderManualQuery());
+        var family = groups.Single(g => g.RelatedBo == UserReportPlaceholderRelatedBo.ApplicationFamilyMember);
+        Assert.Equal("Application — family member", UserReportPlaceholderRelatedBoCatalog.DisplayNameEn(family.RelatedBo));
+        Assert.Contains(family.Entries, e => e.ShortCode == "FMRLH");
+        Assert.Contains(family.Entries, e => e.ShortCode == "FMSPH");
+        Assert.Contains(family.Entries, e => e.ShortCode == "FMREL");
+    }
+
+    [Fact]
+    public void Header_enrich_adds_both_FMREL_and_FMRLH()
+    {
+        var data = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["FamilyMember_Relationship_NameTm"] = "adamsynyň",
+        };
+        UserReportPlaceholderAliasRegistry.EnrichDictionary(data);
+        Assert.Equal("adamsynyň", data["FMREL"]);
+        Assert.Equal("adamsynyň", data["FMRLH"]);
     }
 }

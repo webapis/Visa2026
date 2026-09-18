@@ -165,6 +165,39 @@
   padding-bottom: 0.45rem;
 }
 
+.resminamalar-catalog__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--bs-secondary-color, #6c757d);
+}
+
+.resminamalar-catalog__sort-label {
+  white-space: nowrap;
+}
+
+.resminamalar-catalog__sort-select {
+  min-width: 9.5rem;
+  max-width: 14rem;
+  padding: 0.15rem 0.35rem;
+  border: 1px solid var(--bs-border-color, #ced4da);
+  border-radius: 0.25rem;
+  background: #fff;
+  font-size: 0.8125rem;
+  color: inherit;
+}
+
+.resminamalar-catalog__package-select-hint {
+  margin: 0 0 0.65rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 0.35rem;
+  background: rgba(13, 110, 253, 0.08);
+  color: var(--bs-body-color, #212529);
+  font-size: 0.8125rem;
+}
+
 .app-item-doc-copies__top-actions.app-report-package__top-selection--content {
   display: flex;
   width: 100%;

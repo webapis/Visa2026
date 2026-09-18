@@ -1839,6 +1839,55 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Hemmesini saýla",
             ["ru-RU"] = "Выбрать все",
         },
+        ["ApplicationReportPackage.CancelPackageSelect"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Cancel",
+            ["tr-TR"] = "İptal",
+            ["tk-TM"] = "Ýatyr",
+            ["ru-RU"] = "Отмена",
+        },
+        ["ApplicationReportPackage.PackageSelectModeHint"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Select templates for the ZIP package. Preview still works without checking a box.",
+            ["tr-TR"] = "ZIP paketi için şablonları seçin. Önizleme için kutuyu işaretlemeniz gerekmez.",
+            ["tk-TM"] = "ZIP paketi üçin şablonlary saýlaň. Deslapky syn üçin gutynyň bellik edilmegi hökman däl.",
+            ["ru-RU"] = "Выберите шаблоны для ZIP. Предпросмотр не требует отметки.",
+        },
+        ["ApplicationReportPackage.Sort"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Sort",
+            ["tr-TR"] = "Sırala",
+            ["tk-TM"] = "Tertiple",
+            ["ru-RU"] = "Сортировка",
+        },
+        ["ApplicationReportPackage.Sort.NewestFirst"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Newest first",
+            ["tr-TR"] = "Yeniden eskiye",
+            ["tk-TM"] = "Täzeden könä",
+            ["ru-RU"] = "Сначала новые",
+        },
+        ["ApplicationReportPackage.Sort.OldestFirst"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Oldest first",
+            ["tr-TR"] = "Eskiden yeniye",
+            ["tk-TM"] = "Köneden täzä",
+            ["ru-RU"] = "Сначала старые",
+        },
+        ["ApplicationReportPackage.Sort.NameAsc"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Name A–Z",
+            ["tr-TR"] = "Ada göre A–Z",
+            ["tk-TM"] = "Ada görä A–Z",
+            ["ru-RU"] = "Имя А–Я",
+        },
+        ["ApplicationReportPackage.Sort.NameDesc"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Name Z–A",
+            ["tr-TR"] = "Ada göre Z–A",
+            ["tk-TM"] = "Ada görä Z–A",
+            ["ru-RU"] = "Имя Я–А",
+        },
         ["ApplicationReportPackage.SharedChip"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "SHARED",

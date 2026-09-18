@@ -1,4 +1,12 @@
 
+### 2026-09-18 — Catalog Sort + package-select mode (Application)
+
+- **Symptom**: Officers confused ZIP checkboxes with Preview; wanted Sort by name/date.
+- **Fix**: Browse mode hides checkboxes. **Download package** enters select-for-package (checkboxes + Select all / Clear / Cancel). **Sort** Newest/Oldest/Name A–Z/Z–A via `ApplicationReportPackageCatalogSortHelper`.
+- **Try**: Stop F5, rebuild Blazor host, hard-refresh. Preview without checking. Download package → select → Download. Sort dropdown reorders This profile / Shared.
+- **Prevent**: Do not show always-on ZIP checkboxes next to titles.
+- **Cross-skill**: preview-slot
+
 ### 2026-09-18 — Additional WP location SANAW CHECK after Visa visible (Application)
 
 - **Symptom**: 9/-007 Iş Rugsatnama goşmaça barjak ýeri. People & links Visa visible/linked; Resminamalar SANAW still CHECK with empty Visa_Number / Visa_StartDateText / Visa_ExpirationDateText.

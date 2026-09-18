@@ -2,6 +2,13 @@
 
 Append-only. Newest first under **## Entries**.
 
+### 2026-09-18 — FMRLH under Application — family member
+
+- Need: Map `adamsynyň` without sponsor; find FM header codes.
+- Fix: **FMRLH** + Application — family member / cancellation / general / business trip groups.
+- Officer: Stop F5, rebuild. **Application — family member** → **FMRLH**.
+- Cross-skill: visa2026-user-report-templates
+
 ### 2026-09-18 — FMWZP under Family member for sanaw Wezipesi
 
 - Need: Review Add Family member had FMEIY/FMESP but no FM_WezipesiTm.

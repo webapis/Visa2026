@@ -126,7 +126,7 @@ Migration **code** on items: `Application_MigrationServiceCode` → e.g. `TDMGAS
 
 | Property | Type | Example output | Notes |
 |----------|------|----------------|--------|
-| `FamilyMember_Relationship_NameTm` | `string` | `aýalynyň we çagasynyň` | Genitive list; short **FMREL**. 1 FM → `aýalynyň`; 3 → `aýalynyň, çagasynyň we oglunyň` |
+| `FamilyMember_Relationship_NameTm` | `string` | `adamsynyň` / `aýalynyň we çagasynyň` | Genitive list. Short **FMRLH** (relationship only) or **FMREL** (joined). 1 FM → `aýalynyň`; 3 → `aýalynyň, çagasynyň we oglunyň` |
 | `SponsoringEmployee_FullName` | `string` | `Ali Enes Yetkin` | Short **SPFNM**. First roster person with a sponsor (one sponsor per letter) |
 | `SponsoringEmployee_PositionTm` | `string` | `Türkmenistandaky şahamça müdiriniň orunbasary` | Short **SPPOS** (header). Row sponsor position remains **PSEP** |
 | `FamilyMember_SponsorPhraseTm` | `string` | `aýalynyň we çagasynyň (Ali Enes Yetkin-… wezipesi)` | Short **FMSPH**. `{FMREL} ({SPFNM}-{SPPOS})`; no spaces around `-` |

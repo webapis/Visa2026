@@ -1715,6 +1715,48 @@
     "tk-TM": "Hemmesini saýla",
     "ru-RU": "Выбрать все"
   },
+  "ApplicationReportPackage.CancelPackageSelect": {
+    "en": "Cancel",
+    "tr-TR": "İptal",
+    "tk-TM": "Ýatyr",
+    "ru-RU": "Отмена"
+  },
+  "ApplicationReportPackage.PackageSelectModeHint": {
+    "en": "Select templates for the ZIP package. Preview still works without checking a box.",
+    "tr-TR": "ZIP paketi için şablonları seçin. Önizleme için kutuyu işaretlemeniz gerekmez.",
+    "tk-TM": "ZIP paketi üçin şablonlary saýlaň. Deslapky syn üçin gutynyň bellik edilmegi hökman däl.",
+    "ru-RU": "Выберите шаблоны для ZIP. Предпросмотр не требует отметки."
+  },
+  "ApplicationReportPackage.Sort": {
+    "en": "Sort",
+    "tr-TR": "Sırala",
+    "tk-TM": "Tertiple",
+    "ru-RU": "Сортировка"
+  },
+  "ApplicationReportPackage.Sort.NewestFirst": {
+    "en": "Newest first",
+    "tr-TR": "Yeniden eskiye",
+    "tk-TM": "Täzeden könä",
+    "ru-RU": "Сначала новые"
+  },
+  "ApplicationReportPackage.Sort.OldestFirst": {
+    "en": "Oldest first",
+    "tr-TR": "Eskiden yeniye",
+    "tk-TM": "Köneden täzä",
+    "ru-RU": "Сначала старые"
+  },
+  "ApplicationReportPackage.Sort.NameAsc": {
+    "en": "Name A–Z",
+    "tr-TR": "Ada göre A–Z",
+    "tk-TM": "Ada görä A–Z",
+    "ru-RU": "Имя А–Я"
+  },
+  "ApplicationReportPackage.Sort.NameDesc": {
+    "en": "Name Z–A",
+    "tr-TR": "Ada göre Z–A",
+    "tk-TM": "Ada görä Z–A",
+    "ru-RU": "Имя Я–А"
+  },
   "ApplicationReportPackage.ClearSelection": {
     "en": "Clear selection",
     "tr-TR": "Seçimi temizle",
