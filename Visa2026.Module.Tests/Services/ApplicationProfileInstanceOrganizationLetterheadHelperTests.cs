@@ -20,6 +20,9 @@ public class ApplicationProfileInstanceOrganizationLetterheadHelperTests
         Assert.Equal("CC", resolved.CompanyCode);
         Assert.Equal("Mehmet", resolved.SignatoryFullName);
         Assert.True(resolved.Copied);
+        Assert.Empty(resolved.CompanyOptions);
+        Assert.Empty(resolved.SignatoryOptions);
+        Assert.Empty(resolved.RepresentativeOptions);
     }
 
     [Fact]

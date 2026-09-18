@@ -73,6 +73,8 @@
                         case OfficerShellPage.Case:
                             <OfficerShellCaseWorkspaceComponent Snapshot="@WorkspaceSnapshot"
                                                                 IsLoading="@WorkspaceLoading"
+                                                                LoadingMessage="@WorkspaceLoadingMessage"
+                                                                LoadingProgressPercent="@WorkspaceLoadingProgressPercent"
                                                                 ActiveTab="@CaseTab"
                                                                 SelectedPersonRowIndex="@SelectedPersonRowIndex"
                                                                 PeopleLinkedRecordFocusKey="@PeopleLinkedRecordFocusKey"
@@ -146,6 +148,8 @@
     [Parameter] public HashSet<string> StagedGroupCollapsed { get; set; } = new();
     [Parameter] public ApplicationWorkspaceSnapshot? WorkspaceSnapshot { get; set; }
     [Parameter] public bool WorkspaceLoading { get; set; }
+    [Parameter] public string WorkspaceLoadingMessage { get; set; } = string.Empty;
+    [Parameter] public int WorkspaceLoadingProgressPercent { get; set; } = -1;
     [Parameter] public IReadOnlyList<ApplicationProfileCatalogRow> CatalogRows { get; set; } = Array.Empty<ApplicationProfileCatalogRow>();
     [Parameter] public Guid SelectedProfileId { get; set; }
     [Parameter] public ApplicationProfileOverviewSnapshot? OverviewSnapshot { get; set; }

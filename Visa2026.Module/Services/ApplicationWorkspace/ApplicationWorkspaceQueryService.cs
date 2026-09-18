@@ -32,8 +32,10 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
         var ministrySla = ApplicationProfileInstanceProgressSlaHelper.Resolve(application, latest);
         var sla = ApplicationWorkspaceProgressTimeline.ResolveCurrentSla(application, profile, latest, ministrySla);
         var tabs = ApplicationWorkspaceTabBuilder.Build(objectSpace, application, profile);
-        var caseChrome = BuildCaseChrome(application, profile, sla, objectSpace);
-        var caseView = ApplicationWorkspaceCaseBuilder.Build(application, profile, tabs, sla, caseChrome, objectSpace);
+        var progressSteps = ApplicationWorkspaceProgressTimeline.Build(application, profile, sla, objectSpace);
+        var caseChrome = BuildCaseChrome(application, profile, sla, progressSteps);
+        var caseView = ApplicationWorkspaceCaseBuilder.Build(
+            application, profile, tabs, sla, caseChrome, objectSpace, progressSteps);
 
         return new ApplicationWorkspaceSnapshot
         {
@@ -63,9 +65,12 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
                     .ThenInclude(p => p!.ApprovalLegs)
                         .ThenInclude(l => l.ApprovingMinistry)
                 .Include(a => a.ApplicationProfile)
-                    .ThenInclude(p => p!.ApprovalLegVersions)
-                        .ThenInclude(v => v.Legs)
+                    .ThenInclude(p => p!.DefaultApprovalLegProfile)
+                        .ThenInclude(d => d!.MinistryLegs)
                             .ThenInclude(l => l.ApprovingMinistry)
+                .Include(a => a.ApprovalLegProfile)
+                    .ThenInclude(p => p!.MinistryLegs)
+                        .ThenInclude(l => l.ApprovingMinistry)
                 .Include(a => a.ApprovalLegSnapshots)
                 .Include(a => a.LatestProgress)
                     .ThenInclude(p => p!.State)
@@ -100,6 +105,7 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
                 .Include(a => a.OrganizationCompany)
                 .Include(a => a.OrganizationSignatory)
                 .Include(a => a.OrganizationRepresentative)
+                .AsSplitQuery()
                 .FirstOrDefault(a => a.ID == applicationId);
         }
         catch (Exception)
@@ -112,7 +118,7 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
         ApplicationProfileInstance application,
         ApplicationProfile? profile,
         ApplicationProfileInstanceProgressSlaResult sla,
-        IObjectSpace? objectSpace)
+        IReadOnlyList<ApplicationWorkspaceCaseProgressStep> progressSteps)
     {
         var processNumber = !string.IsNullOrWhiteSpace(application.ProcessNumber)
             ? application.ProcessNumber.Trim()
@@ -131,7 +137,6 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
             .Cast<string>()
             .ToList();
 
-        var progressSteps = ApplicationWorkspaceProgressTimeline.Build(application, profile, sla, objectSpace);
         var currentStep = ApplicationWorkspaceProgressTimeline.FormatChromeCurrentStep(progressSteps);
 
         int? slaRemaining = sla.MaxDaysInReview is int maxDays && sla.WorkingDaysInCurrentStep is int elapsed

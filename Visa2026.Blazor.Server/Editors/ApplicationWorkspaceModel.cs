@@ -24,6 +24,18 @@ public sealed class ApplicationWorkspaceModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    public string LoadingMessage
+    {
+        get => GetPropertyValue<string>() ?? string.Empty;
+        set => SetPropertyValue(value);
+    }
+
+    public int LoadingProgressPercent
+    {
+        get => GetPropertyValue<int>();
+        set => SetPropertyValue(value);
+    }
+
     public EventCallback InitialLoadRequested
     {
         get => GetPropertyValue<EventCallback>();

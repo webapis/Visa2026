@@ -207,6 +207,8 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
             return;
 
         model.WorkspaceLoading = true;
+        model.WorkspaceLoadingProgressPercent = -1;
+        model.WorkspaceLoadingMessage = "Opening case…";
         await Task.Delay(16);
 
         try
@@ -225,6 +227,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         finally
         {
             model.WorkspaceLoading = false;
+            model.WorkspaceLoadingMessage = string.Empty;
         }
     }
 

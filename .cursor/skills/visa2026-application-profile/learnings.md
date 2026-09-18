@@ -1,3 +1,12 @@
+### 2026-09-17 — Case workspace open: skeleton loading UI + faster first paint
+
+- **Need**: Opening an Application Profile Instance showed a bare “Loading case workspace…” line for up to ~7s.
+- **Cause**: First paint waited on a cartesian EF Include (people × progress × links × approval-leg versions), Organization catalog lists, Document copies nav completeness, Last-N counts that lazy-loaded every visa, and a full-table used-invitation scan. Loading UI was a single muted sentence.
+- **Fix**: Workspace skeleton (kicker, indeterminate bar, shimmer chrome). `AsSplitQuery` + drop version-chain Include. Organization dropdowns load on **Edit**. Document copies badge after first paint. Last-N uses SQL skip-nav filters; used invitations scoped to roster. Progress timeline built once.
+- **Test**: `IssuedDocumentLifecycleTests` (scoped used-ids + NotChanged filters); `Resolve_uses_instance_relations_when_set` expects empty org options. Officer: stop F5, rebuild, Ctrl+F5, open a via-ministry or direct instance.
+- **Prevent**: Do not Include `ApprovalLegVersions.Legs` on every case open. Do not `ListCompanies/Signatories/Representatives` until Organization Edit. Do not scan every `Visa.IssuingInvitationItem` for Last-N.
+- **Cross-skill**: visa2026-application-profile
+
 ### 2026-09-17 — This-profile template contract dropdown listed every Project contract
 
 - **Need**: Officer bound a case letter to a different Project contract than Overview **Project**, so Resminamalar hid it.

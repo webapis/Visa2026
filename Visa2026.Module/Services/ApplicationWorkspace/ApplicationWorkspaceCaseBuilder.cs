@@ -28,8 +28,9 @@ internal static class ApplicationWorkspaceCaseBuilder
         IReadOnlyList<ApplicationWorkspaceTab> tabs,
         ApplicationProfileInstanceProgressSlaResult sla,
         ApplicationWorkspaceCaseChrome chrome,
-        IObjectSpace? objectSpace = null) =>
-        BuildCore(application, profile, tabs, sla, chrome, objectSpace);
+        IObjectSpace? objectSpace = null,
+        IReadOnlyList<ApplicationWorkspaceCaseProgressStep>? progressSteps = null) =>
+        BuildCore(application, profile, tabs, sla, chrome, objectSpace, progressSteps);
 
     public static ApplicationWorkspaceCaseView BuildFromSnapshot(ApplicationWorkspaceSnapshot snapshot)
     {
@@ -53,7 +54,7 @@ internal static class ApplicationWorkspaceCaseBuilder
             };
         }
 
-        return BuildCore(null, null, snapshot.Tabs, default, chrome, null);
+        return BuildCore(null, null, snapshot.Tabs, default, chrome, null, null);
     }
 
     private static ApplicationWorkspaceCaseView BuildCore(
@@ -62,7 +63,8 @@ internal static class ApplicationWorkspaceCaseBuilder
         IReadOnlyList<ApplicationWorkspaceTab> tabs,
         ApplicationProfileInstanceProgressSlaResult sla,
         ApplicationWorkspaceCaseChrome chrome,
-        IObjectSpace? objectSpace)
+        IObjectSpace? objectSpace,
+        IReadOnlyList<ApplicationWorkspaceCaseProgressStep>? progressSteps)
     {
         var tabMap = tabs.ToDictionary(t => t.Key, StringComparer.OrdinalIgnoreCase);
         var rosterPeople = application?.People?.OrderBy(p => p.LastName).ThenBy(p => p.FirstName).ToList() ?? [];
@@ -70,12 +72,13 @@ internal static class ApplicationWorkspaceCaseBuilder
         var linkableCounts = ApplicationWorkspaceLinkableActiveCounts.Load(objectSpace, rosterPeople);
         var people = BuildPeople(tabMap, chrome.PeopleNames, application, rosterPeople, rosterLinks, linkableCounts, chrome.ResolvedLinksLocked);
         var linkedSummary = BuildLinkedSummary(application, rosterLinks, people);
-        var progressSteps = application != null
-            ? ApplicationWorkspaceProgressTimeline.Build(application, profile, sla, objectSpace)
-            : BuildProgressStepsFromChrome(chrome);
+        var resolvedProgressSteps = progressSteps
+            ?? (application != null
+                ? ApplicationWorkspaceProgressTimeline.Build(application, profile, sla, objectSpace)
+                : BuildProgressStepsFromChrome(chrome));
         var slaDashboard = application != null
-            ? ApplicationWorkspaceSlaDashboardBuilder.Build(application, profile, sla, chrome, progressSteps)
-            : BuildSlaFromChrome(chrome, progressSteps);
+            ? ApplicationWorkspaceSlaDashboardBuilder.Build(application, profile, sla, chrome, resolvedProgressSteps)
+            : BuildSlaFromChrome(chrome, resolvedProgressSteps);
         var syncedChrome = ApplicationWorkspaceSlaDashboardBuilder.WithHeaderRemaining(chrome, slaDashboard);
 
         var headerFields = application != null
@@ -94,7 +97,7 @@ internal static class ApplicationWorkspaceCaseBuilder
                     : BuildSummaryTilesFromChrome(chrome),
             LinkedRecordTiles = BuildLinkedTiles(application, rosterLinks, tabs, people),
             IssuedRecordTiles = BuildIssuedTiles(application, objectSpace),
-            ProgressSteps = progressSteps,
+            ProgressSteps = resolvedProgressSteps,
             People = people,
             Activities = application != null
                 ? BuildActivities(application, chrome)
@@ -337,6 +340,8 @@ internal static class ApplicationWorkspaceCaseBuilder
                             && i.ApplicationProfileInstance.ID == application.ID)
                         .ToList()
                     : application.Invitations?.ToList() ?? [];
+                if (invitations.Count == 0)
+                    return [];
                 var invitationCopyIds = HeaderIdsWithCopies(
                     objectSpace,
                     () => objectSpace!.GetObjectsQuery<InvitationDocument>()
@@ -358,6 +363,8 @@ internal static class ApplicationWorkspaceCaseBuilder
                             && w.ApplicationProfileInstance.ID == application.ID)
                         .ToList()
                     : application.WorkPermits?.ToList() ?? [];
+                if (permits.Count == 0)
+                    return [];
                 var permitCopyIds = HeaderIdsWithCopies(
                     objectSpace,
                     () => objectSpace!.GetObjectsQuery<WorkPermitDocument>()
@@ -379,6 +386,8 @@ internal static class ApplicationWorkspaceCaseBuilder
                             && z.ApplicationProfileInstance.ID == application.ID)
                         .ToList()
                     : application.BorderZones?.ToList() ?? [];
+                if (zones.Count == 0)
+                    return [];
                 var zoneCopyIds = HeaderIdsWithCopies(
                     objectSpace,
                     () => objectSpace!.GetObjectsQuery<BorderZoneDocument>()
@@ -400,6 +409,8 @@ internal static class ApplicationWorkspaceCaseBuilder
                             && r.ApplicationProfileInstance.ID == application.ID)
                         .ToList()
                     : application.Rejections?.ToList() ?? [];
+                if (rejections.Count == 0)
+                    return [];
                 var rejectionCopyIds = HeaderIdsWithCopies(
                     objectSpace,
                     () => objectSpace!.GetObjectsQuery<RejectionDocument>()
@@ -421,6 +432,8 @@ internal static class ApplicationWorkspaceCaseBuilder
                             && v.IssuingApplicationProfileInstance.ID == application.ID)
                         .ToList()
                     : application.IssuedVisas?.ToList() ?? [];
+                if (visas.Count == 0)
+                    return [];
                 var visaCopyIds = HeaderIdsWithCopies(
                     objectSpace,
                     () => objectSpace!.GetObjectsQuery<VisaDocument>()

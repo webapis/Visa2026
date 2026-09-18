@@ -13,7 +13,8 @@ public static class ApplicationProfileInstanceOrganizationLetterheadHelper
 {
     public static ApplicationProfileInstanceOrganizationLetterhead Resolve(
         ApplicationProfileInstance? application,
-        IObjectSpace? objectSpace = null)
+        IObjectSpace? objectSpace = null,
+        bool loadCatalogOptions = false)
     {
         var os = objectSpace ?? ObjectSpaceHelper.Get(application);
         var company = application?.OrganizationCompany ?? OrganizationCatalogHelper.TryGetDefaultCompany(os);
@@ -24,7 +25,7 @@ public static class ApplicationProfileInstanceOrganizationLetterheadHelper
             || application?.OrganizationSignatory != null
             || application?.OrganizationRepresentative != null;
 
-        return FromParts(company, signatory, representative, assigned, os);
+        return FromParts(company, signatory, representative, assigned, os, loadCatalogOptions);
     }
 
     public static void CopyFromConfigurationIfEmpty(
@@ -68,7 +69,8 @@ public static class ApplicationProfileInstanceOrganizationLetterheadHelper
             application.OrganizationSignatory,
             application.OrganizationRepresentative,
             assigned: true,
-            ObjectSpaceHelper.Get(application));
+            ObjectSpaceHelper.Get(application),
+            loadCatalogOptions: false);
     }
 
     public static ApplicationProfileInstanceOrganizationLetterhead FromConfiguration(IObjectSpace? objectSpace) =>
@@ -77,14 +79,16 @@ public static class ApplicationProfileInstanceOrganizationLetterheadHelper
             OrganizationCatalogHelper.TryGetDefaultSignatory(objectSpace),
             OrganizationCatalogHelper.TryGetDefaultRepresentative(objectSpace),
             assigned: false,
-            objectSpace);
+            objectSpace,
+            loadCatalogOptions: true);
 
     private static ApplicationProfileInstanceOrganizationLetterhead FromParts(
         CompanyProfile? company,
         AuthorizedSignatory? signatory,
         AuthorizedRepresentative? representative,
         bool assigned,
-        IObjectSpace? objectSpace) =>
+        IObjectSpace? objectSpace,
+        bool loadCatalogOptions) =>
         new()
         {
             Copied = assigned,
@@ -110,9 +114,15 @@ public static class ApplicationProfileInstanceOrganizationLetterheadHelper
             RepresentativePassportNumber = representative?.PassportNumber,
             RepresentativePassportAuthority = representative?.PassportAuthority,
             RepresentativePassportIssueDate = representative?.PassportIssueDate,
-            CompanyOptions = OrganizationCatalogHelper.ListCompanies(objectSpace),
-            SignatoryOptions = OrganizationCatalogHelper.ListSignatories(objectSpace),
-            RepresentativeOptions = OrganizationCatalogHelper.ListRepresentatives(objectSpace),
+            CompanyOptions = loadCatalogOptions
+                ? OrganizationCatalogHelper.ListCompanies(objectSpace)
+                : Array.Empty<OrganizationCatalogOption>(),
+            SignatoryOptions = loadCatalogOptions
+                ? OrganizationCatalogHelper.ListSignatories(objectSpace)
+                : Array.Empty<OrganizationCatalogOption>(),
+            RepresentativeOptions = loadCatalogOptions
+                ? OrganizationCatalogHelper.ListRepresentatives(objectSpace)
+                : Array.Empty<OrganizationCatalogOption>(),
         };
 }
 
@@ -141,9 +151,9 @@ public sealed class ApplicationProfileInstanceOrganizationLetterhead
     public string? RepresentativePassportNumber { get; init; }
     public string? RepresentativePassportAuthority { get; init; }
     public DateTime? RepresentativePassportIssueDate { get; init; }
-    public IReadOnlyList<OrganizationCatalogOption> CompanyOptions { get; init; } = Array.Empty<OrganizationCatalogOption>();
-    public IReadOnlyList<OrganizationCatalogOption> SignatoryOptions { get; init; } = Array.Empty<OrganizationCatalogOption>();
-    public IReadOnlyList<OrganizationCatalogOption> RepresentativeOptions { get; init; } = Array.Empty<OrganizationCatalogOption>();
+    public IReadOnlyList<OrganizationCatalogOption> CompanyOptions { get; set; } = Array.Empty<OrganizationCatalogOption>();
+    public IReadOnlyList<OrganizationCatalogOption> SignatoryOptions { get; set; } = Array.Empty<OrganizationCatalogOption>();
+    public IReadOnlyList<OrganizationCatalogOption> RepresentativeOptions { get; set; } = Array.Empty<OrganizationCatalogOption>();
 
     public string CompanyRegistrationDateText =>
         OrganizationPassportLineHelper.FormatIssueDateText(CompanyRegistrationDate);

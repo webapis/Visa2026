@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services;
 using Xunit;
@@ -79,6 +80,21 @@ public class IssuedDocumentLifecycleTests
         Assert.False(IssuedDocumentLifecycle.IsUsed(item));
         Assert.False(IssuedDocumentLifecycle.IsInvitationItemUsedById(objectSpace: null, item.ID));
         Assert.Empty(IssuedDocumentLifecycle.LoadUsedInvitationItemIds(objectSpace: null));
+        Assert.Empty(IssuedDocumentLifecycle.LoadUsedInvitationItemIds(objectSpace: null, invitationItemIds: []));
+    }
+
+    [Fact]
+    public void WhereVisaNotChanged_KeepsVisaWithoutChangeFamily()
+    {
+        var visa = new Visa { ApplicationProfileInstances = new ObservableCollection<ApplicationProfileInstance>() };
+        Assert.Same(visa, IssuedDocumentLifecycle.WhereVisaNotChanged(new[] { visa }.AsQueryable()).Single());
+    }
+
+    [Fact]
+    public void WhereWorkPermitItemNotChanged_KeepsItemWithoutChangeFamily()
+    {
+        var item = new WorkPermitItem { ApplicationProfileInstances = new ObservableCollection<ApplicationProfileInstance>() };
+        Assert.Same(item, IssuedDocumentLifecycle.WhereWorkPermitItemNotChanged(new[] { item }.AsQueryable()).Single());
     }
 
     [Fact]

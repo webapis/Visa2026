@@ -8,6 +8,8 @@
 <div class="app-workspace app-workspace--case">
     <OfficerShellCaseWorkspaceComponent Snapshot="@Snapshot"
                                         IsLoading="@IsLoading"
+                                        LoadingMessage="@LoadingMessage"
+                                        LoadingProgressPercent="@LoadingProgressPercent"
                                         ActiveTab="@CaseTab"
                                         SelectedPersonRowIndex="@SelectedPersonRowIndex"
                                         PeopleLinkedRecordFocusKey="@PeopleLinkedRecordFocusKey"
@@ -57,6 +59,8 @@
 @code {
     [Parameter] public ApplicationWorkspaceSnapshot? Snapshot { get; set; }
     [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public string LoadingMessage { get; set; } = string.Empty;
+    [Parameter] public int LoadingProgressPercent { get; set; } = -1;
     [Parameter] public string CaseTab { get; set; } = "overview";
     [Parameter] public string? PeopleLinkedRecordFocusKey { get; set; }
     [Parameter] public bool CanLinkPerson { get; set; }

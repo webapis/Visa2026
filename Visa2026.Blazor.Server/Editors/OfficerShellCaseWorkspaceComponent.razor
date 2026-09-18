@@ -18,14 +18,70 @@
 @inject INonSecuredObjectSpaceFactory ObjectSpaceFactory
 @inject IApplicationWorkspacePersonUiActions WorkspaceActions
 
-<div class="officer-case-workspace">
+<div class="officer-case-workspace @(IsLoading || Snapshot == null ? "officer-case-workspace--loading" : null)">
     @if (IsLoading || Snapshot == null)
     {
-        <div class="os-loading" role="status">Loading case workspace…</div>
+        var loadingLabel = string.IsNullOrWhiteSpace(LoadingMessage)
+            ? "Opening case…"
+            : LoadingMessage;
+        var indeterminate = LoadingProgressPercent < 0;
+        <div class="cw-loading" role="status" aria-live="polite" aria-busy="true">
+            <div class="cw-loading__banner">
+                <div class="cw-loading__kicker">Case workspace</div>
+                <div class="cw-loading__label">@loadingLabel</div>
+                <div class="cw-loading__track"
+                     role="progressbar"
+                     aria-valuemin="0"
+                     aria-valuemax="100"
+                     aria-valuenow="@(indeterminate ? null : LoadingProgressPercent)"
+                     aria-label="@loadingLabel">
+                    <div class="cw-loading__fill @(indeterminate ? "cw-loading__fill--indeterminate" : null)"
+                         style="@(indeterminate ? null : $"width:{LoadingProgressPercent.ToString(System.Globalization.CultureInfo.InvariantCulture)}%")"></div>
+                </div>
+                @if (!indeterminate)
+                {
+                    <div class="cw-loading__pct">@LoadingProgressPercent%</div>
+                }
+            </div>
+            <div class="cw-loading__chrome" aria-hidden="true">
+                <div class="cw-loading__head">
+                    <div class="cw-loading__line cw-loading__line--title"></div>
+                    <div class="cw-loading__line cw-loading__line--sub"></div>
+                    <div class="cw-loading__chips">
+                        <span class="cw-loading__chip"></span>
+                        <span class="cw-loading__chip"></span>
+                        <span class="cw-loading__chip"></span>
+                    </div>
+                </div>
+                <div class="cw-loading__layout">
+                    <div class="cw-loading__nav">
+                        <div class="cw-loading__nav-item"></div>
+                        <div class="cw-loading__nav-item"></div>
+                        <div class="cw-loading__nav-item"></div>
+                        <div class="cw-loading__nav-item"></div>
+                        <div class="cw-loading__nav-item"></div>
+                        <div class="cw-loading__nav-item"></div>
+                    </div>
+                    <div class="cw-loading__tiles">
+                        <div class="cw-loading__tile"></div>
+                        <div class="cw-loading__tile"></div>
+                        <div class="cw-loading__tile"></div>
+                        <div class="cw-loading__tile"></div>
+                        <div class="cw-loading__tile"></div>
+                        <div class="cw-loading__tile"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     }
     else if (Snapshot.ApplicationProfileInstanceId == Guid.Empty)
     {
-        <div class="os-loading">No case selected.</div>
+        <div class="cw-loading cw-loading--empty" role="status">
+            <div class="cw-loading__banner">
+                <div class="cw-loading__kicker">Case workspace</div>
+                <div class="cw-loading__label">No case selected.</div>
+            </div>
+        </div>
     }
     else
     {
@@ -299,6 +355,7 @@
     private Guid _relinkingPersonId;
     private string? _documentCopiesCompletenessKey;
     private bool _documentCopiesNavReady;
+    private bool _documentCopiesLoadAttempted;
     private ApplicationWorkspaceDocumentCopiesCompleteness.NavStatus _documentCopiesNav =
         ApplicationWorkspaceDocumentCopiesCompleteness.NavStatus.EmptyRoster;
     private int _documentCopiesMissing;
@@ -324,6 +381,8 @@
 
     [Parameter] public ApplicationWorkspaceSnapshot? Snapshot { get; set; }
     [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public string LoadingMessage { get; set; } = string.Empty;
+    [Parameter] public int LoadingProgressPercent { get; set; } = -1;
     [Parameter] public string ActiveTab { get; set; } = "overview";
     [Parameter] public int SelectedPersonRowIndex { get; set; } = -1;
     [Parameter] public string? PeopleLinkedRecordFocusKey { get; set; }
@@ -479,16 +538,18 @@
             _organizationEditing = false;
             _documentCopiesCompletenessKey = null;
             _documentCopiesNavReady = false;
+            _documentCopiesLoadAttempted = false;
         }
 
         SyncDocumentPeopleFilter(Snapshot?.CaseView);
         SyncPeopleRecordFocus();
-        EnsureDocumentCopiesCompleteness(Snapshot?.CaseView);
 
         // Save reloads CaseView without dropdown catalogs. Reload them while Edit is open
         // so Visa type / Project / etc. keep a matching <option> and stay visible.
         if (_caseSummaryEditing)
             EnsureHeaderLookupCatalogs();
+        if (_organizationEditing)
+            EnsureOrganizationCatalogOptions();
 
         if (ApplicationWorkspaceCaseSummaryCompletenessGate.BlocksTab(Snapshot?.CaseView, ActiveTab)
             && CaseTabChanged.HasDelegate
@@ -500,6 +561,14 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (!IsLoading && Snapshot != null && !_documentCopiesNavReady && !_documentCopiesLoadAttempted)
+        {
+            _documentCopiesLoadAttempted = true;
+            EnsureDocumentCopiesCompleteness(Snapshot.CaseView);
+            if (_documentCopiesNavReady)
+                await InvokeAsync(StateHasChanged);
+        }
+
         if (!_tabSwitching || !_tabContentReady)
             return;
 
@@ -576,7 +645,29 @@
 
     private void FinishCaseSummaryEdit() => _caseSummaryEditing = false;
 
-    private void StartOrganizationEdit() => _organizationEditing = true;
+    private void StartOrganizationEdit()
+    {
+        EnsureOrganizationCatalogOptions();
+        _organizationEditing = true;
+    }
+
+    private void EnsureOrganizationCatalogOptions()
+    {
+        var org = Snapshot?.CaseView.OrganizationLetterhead;
+        if (org == null)
+            return;
+        if (org.CompanyOptions.Count > 0
+            || org.SignatoryOptions.Count > 0
+            || org.RepresentativeOptions.Count > 0)
+        {
+            return;
+        }
+
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        org.CompanyOptions = OrganizationCatalogHelper.ListCompanies(objectSpace);
+        org.SignatoryOptions = OrganizationCatalogHelper.ListSignatories(objectSpace);
+        org.RepresentativeOptions = OrganizationCatalogHelper.ListRepresentatives(objectSpace);
+    }
 
     private void FinishOrganizationEdit() => _organizationEditing = false;
 
@@ -820,6 +911,7 @@
     private void OnDocumentCopiesCatalogReloaded()
     {
         _documentCopiesCompletenessKey = null;
+        _documentCopiesLoadAttempted = false;
         EnsureDocumentCopiesCompleteness(Snapshot?.CaseView);
     }
 

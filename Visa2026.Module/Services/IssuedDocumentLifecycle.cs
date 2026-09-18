@@ -58,14 +58,26 @@ public static class IssuedDocumentLifecycle
     /// Invitation item IDs that already have an issued visa
     /// (<see cref="Visa.IssuingInvitationItem"/>). Used when the inverse
     /// <see cref="InvitationItem.IssuedVisa"/> is not loaded.
+    /// Pass <paramref name="invitationItemIds"/> to avoid scanning every visa.
     /// </summary>
-    public static HashSet<Guid> LoadUsedInvitationItemIds(IObjectSpace? objectSpace)
+    public static HashSet<Guid> LoadUsedInvitationItemIds(IObjectSpace? objectSpace) =>
+        LoadUsedInvitationItemIds(objectSpace, invitationItemIds: null);
+
+    public static HashSet<Guid> LoadUsedInvitationItemIds(
+        IObjectSpace? objectSpace,
+        IReadOnlyCollection<Guid>? invitationItemIds)
     {
         if (objectSpace == null)
             return [];
+        if (invitationItemIds != null && invitationItemIds.Count == 0)
+            return [];
 
-        return objectSpace.GetObjectsQuery<Visa>()
-            .Where(v => v.IssuingInvitationItem != null)
+        var query = objectSpace.GetObjectsQuery<Visa>()
+            .Where(v => v.IssuingInvitationItem != null);
+        if (invitationItemIds != null)
+            query = query.Where(v => invitationItemIds.Contains(v.IssuingInvitationItem.ID));
+
+        return query
             .Select(v => v.IssuingInvitationItem.ID)
             .ToHashSet();
     }
@@ -146,6 +158,16 @@ public static class IssuedDocumentLifecycle
             && a.LatestPrimaryStateCode == issued));
     }
 
+    public static IQueryable<Visa> WhereVisaNotChanged(IQueryable<Visa> query)
+    {
+        var family = ApplicationProfileActionFamily.Change;
+        var issued = ApplicationProfileInstanceProgressStateCodes.ProcessIssued;
+        return query.Where(v => !v.ApplicationProfileInstances.Any(a =>
+            a.ApplicationProfile != null
+            && a.ApplicationProfile.ActionFamily == family
+            && a.LatestPrimaryStateCode == issued));
+    }
+
     public static IQueryable<InvitationItem> WhereInvitationItemNotCancelled(IQueryable<InvitationItem> query)
     {
         var family = ApplicationProfileActionFamily.Cancellation;
@@ -175,6 +197,16 @@ public static class IssuedDocumentLifecycle
     public static IQueryable<WorkPermitItem> WhereWorkPermitItemNotCancelled(IQueryable<WorkPermitItem> query)
     {
         var family = ApplicationProfileActionFamily.Cancellation;
+        var issued = ApplicationProfileInstanceProgressStateCodes.ProcessIssued;
+        return query.Where(w => !w.ApplicationProfileInstances.Any(a =>
+            a.ApplicationProfile != null
+            && a.ApplicationProfile.ActionFamily == family
+            && a.LatestPrimaryStateCode == issued));
+    }
+
+    public static IQueryable<WorkPermitItem> WhereWorkPermitItemNotChanged(IQueryable<WorkPermitItem> query)
+    {
+        var family = ApplicationProfileActionFamily.Change;
         var issued = ApplicationProfileInstanceProgressStateCodes.ProcessIssued;
         return query.Where(w => !w.ApplicationProfileInstances.Any(a =>
             a.ApplicationProfile != null

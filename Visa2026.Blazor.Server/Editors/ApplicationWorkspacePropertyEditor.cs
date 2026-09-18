@@ -53,6 +53,8 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
     protected override IComponentModel CreateComponentModel() => new ApplicationWorkspaceModel
     {
         IsLoading = true,
+        LoadingProgressPercent = -1,
+        LoadingMessage = "Opening case…",
         InitialLoadRequested = EventCallback.Factory.Create(this, LoadAsync),
         LinkPersonRequested = EventCallback.Factory.Create(this, LinkPersonAsync),
         UnlinkPersonRequested = EventCallback.Factory.Create<Guid>(this, UnlinkPersonAsync),
@@ -121,6 +123,8 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
             return;
 
         model.IsLoading = true;
+        model.LoadingProgressPercent = -1;
+        model.LoadingMessage = "Opening case…";
         await Task.Delay(16);
 
         try
@@ -149,6 +153,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         finally
         {
             model.IsLoading = false;
+            model.LoadingMessage = string.Empty;
             UpdateActionState(model);
         }
     }

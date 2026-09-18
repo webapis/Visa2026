@@ -99,6 +99,18 @@ public sealed class OfficerShellModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    public string WorkspaceLoadingMessage
+    {
+        get => GetPropertyValue<string>() ?? string.Empty;
+        set => SetPropertyValue(value);
+    }
+
+    public int WorkspaceLoadingProgressPercent
+    {
+        get => GetPropertyValue<int>();
+        set => SetPropertyValue(value);
+    }
+
     public IReadOnlyList<ApplicationProfileCatalogRow> CatalogRows
     {
         get => GetPropertyValue<IReadOnlyList<ApplicationProfileCatalogRow>>() ?? Array.Empty<ApplicationProfileCatalogRow>();

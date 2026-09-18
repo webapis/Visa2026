@@ -440,7 +440,7 @@ Via-ministry picker: profile → Approval legs → Organization → Case summary
 
 **Verify:** Applications (via ministry) → double-click row → workspace opens with live data.
 
-**Open speed (2026-08-26):** Row click still opens the case workspace (not native DetailView). First paint no longer heals person links or loads all lookup catalogs (cities/contracts). Catalogs load when the officer taps **Edit** on case summary. Linked records batch-load; issued “has copy” does not materialize `File.Size`.
+**Open speed (2026-09-17):** First paint shows a case-workspace skeleton (banner + shimmer chrome) instead of a single loading line. Open no longer cartesian-includes approval-leg versions, does not list Organization catalogs until **Edit**, defers Document copies nav completeness until after overview paint, Last-N counts use SQL skip-nav filters instead of per-row lazy loads, and used-invitation lookup is scoped to the roster. Progress timeline is built once.
 
 **List stays after close (2026-09-08):** Row activate / ListView **Open workspace** / **Start process** use `TargetWindow.NewWindow` so the Application Profile Instance ListView MDI tab stays mounted (standard TabbedMDI List → Detail). Closing the workspace returns focus to the list tab. Template Configure/New and linked-instance open from overview/catalog also use NewWindow.
 
