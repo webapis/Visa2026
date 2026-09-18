@@ -1,3 +1,19 @@
+
+### 2026-09-18 — RequirePersonVisa visible ≠ Resminamalar Visa Ready
+
+- **Need**: After enabling Active Visa on change_workpermit, SANAW still CHECK empty Visa_*.
+- **Cause**: UI uses profile RequirePersonVisa; merge dry-run needs CurrentVisa on the roster line. Type ShowCurrentVisa was still false; visibility gate cleared on Type.Show*.
+- **Fix**: See resminamalar learnings 2026-09-18. Restart so ApplicationType Show* syncs.
+- **Cross-skill**: visa2026-resminamalar
+
+### 2026-09-18 — Additional WP location shows Active Visa link
+
+- **Need**: Case 9/-007 Iş Rugsatnama goşmaça barjak ýeri People & links hid Visa (column `--`, no Visa chip).
+- **Cause**: Calik profile `change_workpermit` / `App_Additional_WP_location` had `RequirePersonVisa=false` (and type `ShowCurrentVisa=false`). Workspace linked-records catalog keys off `RequirePersonVisa`.
+- **Fix**: Seed `RequirePersonVisa=true` on `application-profile.calik-energi.json`; align `ShowCurrentVisa=true` on ApplicationType catalog. Does not set `ProduceVisa` (case still issues WP + location only).
+- **Officer**: stop F5, rebuild Module, restart so tenant profile sync applies; open 9/-007 — Visa column + chip visible. If count stays 0, Relink or pin active visa (import historically skipped Visa for this type).
+- **Prevent**: Do not treat additional WP location as visa-issuing (`ProduceVisa` stays false). Visibility is roster Active Visa, not issued-visa tile.
+- **Cross-skill**: visa2026-lookup-data
 ### 2026-09-17 — Case workspace open: skeleton loading UI + faster first paint
 
 - **Need**: Opening an Application Profile Instance showed a bare “Loading case workspace…” line for up to ~7s.

@@ -199,6 +199,10 @@ public class UserReportPlaceholderRelatedBoTests
     [InlineData("CWEB", "CancelWorkPermit_ExpirationDateBlock")]
     [InlineData("CWLB", "CancelWorkPermit_LocationsBlock")]
     [InlineData("WPLC", "WorkPermit_WorkPermittedLocations")]
+    [InlineData("WPNM", "WorkPermit_Number")]
+    [InlineData("WPAS", "WorkPermit_ASNumber")]
+    [InlineData("WPST", "WorkPermit_StartDateText")]
+    [InlineData("WPED", "WorkPermit_ExpirationDateText")]
     public void Cancel_work_permit_block_tokens_are_catalogued(string shortCode, string canonical)
     {
         var catalog = new UserReportPlaceholderCatalogService();
@@ -212,6 +216,63 @@ public class UserReportPlaceholderRelatedBoTests
         Assert.Contains(UserReportBoType.ApplicationItem, entry.RootBoTypes);
         Assert.NotNull(typeof(ApplicationRosterMergeLine).GetProperty(
             canonical, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase));
+    }
+
+    [Fact]
+    public void Case_work_permit_location_roster_token_is_catalogued()
+    {
+        var catalog = new UserReportPlaceholderCatalogService();
+        var entry = catalog.GetEntries().Single(e =>
+            string.Equals(e.ShortCode, "AWPLC", StringComparison.OrdinalIgnoreCase));
+
+        Assert.Equal("Application_WorkPermitLocation_NameTm", entry.CanonicalPath);
+        Assert.Equal(UserReportPlaceholderPack.Core, entry.Pack);
+        Assert.Equal(UserReportPlaceholderRelatedBo.Application, entry.RelatedBo);
+        Assert.Equal(UserReportPlaceholderScope.Row, entry.Scope);
+        Assert.Equal("{{.AWPLC}}", entry.BuildWordToken(UserReportPlaceholderScope.Row));
+        Assert.Contains(UserReportBoType.ApplicationProfileInstance, entry.RootBoTypes);
+        Assert.Contains(UserReportBoType.ApplicationItem, entry.RootBoTypes);
+        Assert.NotNull(typeof(ApplicationRosterMergeLine).GetProperty(
+            "Application_WorkPermitLocation_NameTm",
+            BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase));
+    }
+
+    [Fact]
+    public void Excel_row_repeats_case_work_permit_location()
+    {
+        var application = new ApplicationProfileInstance
+        {
+            MovementPermitLocation = "Aşgabat şäheri, Mary welaýaty",
+        };
+        var line = new ApplicationRosterMergeLine { ApplicationProfileInstance = application };
+        var row = UserReportMergeDataHelper.BuildExcelItemListRowDictionary(line, 1);
+
+        Assert.Equal("Aşgabat şäheri, Mary welaýaty", row["Application_WorkPermitLocation_NameTm"]);
+        Assert.Equal("Aşgabat şäheri, Mary welaýaty", row["AWPLC"]);
+        Assert.NotEqual(
+            application.MovementPermitLocation,
+            row.TryGetValue("WPLC", out var wplc) ? wplc : null);
+    }
+
+    [Fact]
+    public void Excel_row_fills_linked_work_permit_item_fields()
+    {
+        var item = new WorkPermitItem
+        {
+            WorkPermitNumber = "1430/7",
+            ASNumber = "COO01884433",
+            StartDate = new DateTime(2026, 1, 1),
+            ExpirationDate = new DateTime(2027, 1, 1),
+            WorkPermittedLocations = "Aşgabat şäheri",
+        };
+        var line = new ApplicationRosterMergeLine { CurrentWorkPermitItem = item };
+        var row = UserReportMergeDataHelper.BuildExcelItemListRowDictionary(line, 1);
+
+        Assert.Equal("1430/7", row["WPNM"]);
+        Assert.Equal("COO01884433", row["WPAS"]);
+        Assert.Equal("01.01.2026", row["WPST"]);
+        Assert.Equal("01.01.2027", row["WPED"]);
+        Assert.Equal("Aşgabat şäheri", row["WPLC"]);
     }
 
     [Theory]

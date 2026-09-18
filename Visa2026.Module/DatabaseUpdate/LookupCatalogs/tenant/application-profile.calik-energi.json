@@ -2160,7 +2160,7 @@
       "RequirePersonEducation": true,
       "RequirePersonPosition": true,
       "RequirePersonAddressOfResidence": true,
-      "RequirePersonVisa": false,
+      "RequirePersonVisa": true,
       "RequirePersonInvitationItem": false,
       "RequirePersonWorkPermitItem": true,
       "RequirePersonBorderZoneItem": false,

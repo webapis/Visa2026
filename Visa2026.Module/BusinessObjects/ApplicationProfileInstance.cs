@@ -907,13 +907,29 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Sponsoring Employee Full Name"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
         public string SponsoringEmployee_FullName =>
-            ApplicationRosterHelper.GetRosterPeople(this).FirstOrDefault()?.SponsoringEmployee?.FullName;
+            FirstSponsoringEmployee()?.FullName;
 
         [XafDisplayName("Sponsoring Employee Position (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
         public string SponsoringEmployee_PositionTm =>
-            PersonCurrentItems.GetCurrentPositionHistory(
-                ApplicationRosterHelper.GetRosterPeople(this).FirstOrDefault()?.SponsoringEmployee)?.Position?.NameTm;
+            PersonCurrentItems.GetCurrentPositionHistory(FirstSponsoringEmployee())?.Position?.NameTm;
+
+        /// <summary>
+        /// FM letter block: joined roster relationships (genitive) + one sponsor name-position.
+        /// Example: <c>aýalynyň we çagasynyň (İzzet Taşdelen-İşe goýberiş…)</c>. Short code <c>FMSPH</c>.
+        /// </summary>
+        [XafDisplayName("FM Sponsor Phrase (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string FamilyMember_SponsorPhraseTm =>
+            Services.UserReports.FamilyMemberSponsorPhrase.Format(
+                FamilyMember_Relationship_NameTm,
+                SponsoringEmployee_FullName,
+                SponsoringEmployee_PositionTm);
+
+        private Person? FirstSponsoringEmployee() =>
+            ApplicationRosterHelper.GetRosterPeople(this)
+                .Select(p => p.SponsoringEmployee)
+                .FirstOrDefault(s => s != null);
 
         [Appearance("BusinessTripStartDateVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowBusinessTrips", Context = "DetailView")]
         [VisibleInListView(false)]

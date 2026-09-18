@@ -1893,7 +1893,7 @@
                 "ShowMigrationService": false,
                 "ShowBusinessTrips": false,
                 "ShowPreviousPassport": false,
-                "ShowCurrentVisa": false,
+                "ShowCurrentVisa": true,
                 "ShowCurrentWorkPermitItem": true,
                 "ShowCurrentInvitationItem": false,
                 "ShowCurrentAddressOfResidence": false,

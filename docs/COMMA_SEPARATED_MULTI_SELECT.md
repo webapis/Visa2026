@@ -162,6 +162,7 @@ Item-level strings and catalog labels feed existing paths, for example:
 - `ApplicationItem.Application_BorderZoneLocation_NameTm` (application header alias on item-root templates)
 - `ApplicationItem.Item_BorderZoneLocation_NameTm` (per-line alias)
 - `ApplicationItem.WorkPermit_WorkPermittedLocations` → `WorkPermitItem.WorkPermittedLocations`
+- `ApplicationRosterMergeLine.Application_WorkPermitLocation_NameTm` (**AWPLC**) → case `ApplicationProfileInstance.MovementPermitLocation` (roster rows only)
 
 Word/Excel templates use these BO properties; they do not read `CatalogItems` directly.
 

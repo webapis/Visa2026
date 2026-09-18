@@ -1,6 +1,7 @@
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.ApplicationPersonRoster;
 using Visa2026.Module.Services.ApplicationWorkspace;
+using Visa2026.Module.Services.UserReports;
 using Xunit;
 
 namespace Visa2026.Module.Tests.Services;
@@ -48,5 +49,28 @@ public class FamilyMemberSponsorPositionCaptionTests
             IsCaptionOnly = true,
         };
         Assert.False(ApplicationWorkspacePeopleLinksCompleteness.IsRecordShort(record));
+    }
+
+    [Fact]
+    public void Sanawy_row_includes_FMWZP_alias_for_FM_Wezipesi()
+    {
+        var sponsor = new Person
+        {
+            IsEmployee = true,
+            FirstName = "İzzet",
+            LastName = "Taşdelen",
+        };
+        var dependent = new Person
+        {
+            IsEmployee = false,
+            PersonRole = PersonRecordRole.FamilyMember,
+            SponsoringEmployee = sponsor,
+            Relationship = new Relationship { NameTm = "aýaly" },
+        };
+        var line = new ApplicationRosterMergeLine { Person = dependent };
+        var row = UserReportMergeDataHelper.BuildSanawyRowDictionary(line, 1);
+        Assert.True(row.ContainsKey("FM_WezipesiTm"));
+        Assert.True(row.ContainsKey("FMWZP"));
+        Assert.Equal(row["FM_WezipesiTm"], row["FMWZP"]);
     }
 }

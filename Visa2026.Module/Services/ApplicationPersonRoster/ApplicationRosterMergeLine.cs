@@ -186,29 +186,35 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("CustomCSSClassName", "xaf-optional-fields-toggle")]
         public bool ShowOptionalFields { get; set; }
 
-        /// <summary>Clears reference fields hidden by the parent application type's Show* flags.</summary>
+        /// <summary>Clears reference fields hidden by the parent application profile (Type fallback).</summary>
         internal void RefreshVisibilityGatedReferenceFields() =>
             ApplyVisibilityGatedReferenceFields();
 
         private void ApplyVisibilityGatedReferenceFields()
         {
-            var appType = ApplicationProfileInstance?.ApplicationType;
-            if (appType == null)
+            // Detached merge/PDF projections set SuppressPersonCurrentFieldSync and assign
+            // CurrentVisa from ResolvedLinks after Application is set — do not wipe them using
+            // legacy ApplicationType.ShowCurrentVisa when the profile already requires Person Visa.
+            if (SuppressPersonCurrentFieldSync)
                 return;
 
-            if (!appType.ShowCurrentVisa)
+            var application = ApplicationProfileInstance;
+            if (application == null)
+                return;
+
+            if (!ApplicationProfileConfigurationResolver.ShowCurrentVisa(application))
             {
                 CurrentVisa = null;
                 CurrentVisaId = null;
             }
 
-            if (!appType.ShowNextVisa)
+            if (!ApplicationProfileConfigurationResolver.ShowNextVisa(application))
             {
                 NextVisa = null;
                 NextVisaId = null;
             }
 
-            if (!appType.ShowWorkPermittedLocations)
+            if (!ApplicationProfileConfigurationResolver.ShowWorkPermittedLocations(application))
                 WorkPermittedLocations = string.Empty;
         }
 
@@ -1269,6 +1275,14 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Border Zone Location (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Application_BorderZoneLocation_NameTm =>
             ApplicationProfileInstance?.BorderZoneLocation_NameTm ?? DefaultBorderZoneLocationNameTm;
+
+        /// <summary>
+        /// Case summary Work permit location for roster rows (<c>{{.AWPLC}}</c>).
+        /// Same stored catalog text on every person — not <see cref="WorkPermit_WorkPermittedLocations"/>.
+        /// </summary>
+        [XafDisplayName("Work Permit Location (case)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Application_WorkPermitLocation_NameTm =>
+            ApplicationProfileInstance?.MovementPermitLocation_NameTm ?? string.Empty;
         [XafDisplayName("Item Border Zone Location (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Item_BorderZoneLocation_NameTm => BorderZoneLocation_NameTm;
 
@@ -1640,9 +1654,8 @@ namespace Visa2026.Module.BusinessObjects
 
         #region FamilyMember display helpers (FM Reports)
         /// <summary>
-        /// For FM item reports: "Çaga" if person is under 18, "Orta" if adult family member.
-        /// Falls back to Education_LevelTm for employees (IsEmployee = true).
-        /// Used in the "Bilimi we okan ýeri" column on FM sanawy reports.
+        /// FM roster level only. Prefer <see cref="FM_EducationLevelAndInstitutionTm"/> (FMEIY) for sanaw Bilimi column.
+        /// Child (age < 18 or Çaga marital) → Çaga; adult without level → Orta; employee → Education_LevelTm.
         /// </summary>
         [NotMapped]
         [XafDisplayName("FM Education Level (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
@@ -1650,32 +1663,59 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                if (Person?.IsEmployee != false) return Education_LevelTm;
-                return (Person.Age < 18) ? "Çaga" : "Orta";
+                if (!FamilyMemberEducationCaption.UsesFamilyMemberRules(Person))
+                    return Education_LevelTm;
+                if (ChildDependentEducationCaption.Applies(Person))
+                    return FamilyMemberEducationCaption.ChildText;
+                return string.IsNullOrWhiteSpace(Education_LevelTm) ? "Orta" : Education_LevelTm;
             }
         }
 
         /// <summary>
-        /// For FM item reports: "Çaga" if under 18, "Orta" if adult family member.
-        /// Falls back to Education_SpecialtyTm for employees.
-        /// Used in the "Bilimine görä hünäri" column on FM sanawy reports.
+        /// FM roster Bilimi we okan ýeri (short <c>FMEIY</c>): child → Çaga;
+        /// adult → Education level+institution when set, else <c>Orta, Orta mekdep</c>;
+        /// employee → <see cref="Education_LevelAndInstitutionTm"/>.
+        /// </summary>
+        [NotMapped]
+        [XafDisplayName("FM Education Level and Institution (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string FM_EducationLevelAndInstitutionTm
+        {
+            get
+            {
+                // Build adult/employee value from CurrentEducation without the EGIY child override
+                // so FamilyMemberEducationCaption owns the Çaga / Orta fallback rules.
+                string? fromBo = null;
+                if (!ChildDependentEducationCaption.Applies(Person) || Person?.IsEmployee == true)
+                {
+                    var level = Education_LevelTm;
+                    var inst = Education_InstitutionName;
+                    var l = string.IsNullOrWhiteSpace(level) ? null : level.Trim();
+                    var i = string.IsNullOrWhiteSpace(inst) ? null : inst.Trim();
+                    if (l != null || i != null)
+                        fromBo = l == null ? i : (i == null ? l : $"{l}, {i}");
+                }
+
+                return FamilyMemberEducationCaption.LevelAndInstitutionTm(Person, fromBo);
+            }
+        }
+
+        /// <summary>
+        /// FM roster Bilimine görä hünäri (short <c>FMESP</c>): child → Çaga;
+        /// adult → Education specialty when set, else <c>Orta bilim</c>;
+        /// employee → <see cref="Education_SpecialtyTm"/>.
         /// </summary>
         [NotMapped]
         [XafDisplayName("FM Specialty (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string FM_SpecialtyTm
         {
-            get
-            {
-                if (Person?.IsEmployee != false) return Education_SpecialtyTm;
-                return (Person.Age < 18) ? "Çaga" : "Orta";
-            }
+            get => FamilyMemberEducationCaption.SpecialtyTm(Person, Education_SpecialtyTm);
         }
 
         /// <summary>
         /// For FM item reports: "[Employee Position] [Employee FullName]-ň [Relationship]".
         /// Example: "Zähmeti goramak we tehniki howpsuzlyk boýunça başlyk Bóra Yolcu-ň gyzy"
         /// Falls back to Position_PositionTm for employees.
-        /// Used in the "Wezipesi" column on FM sanawy reports.
+        /// Used in the "Wezipesi" column on FM sanawy reports (short <c>FMWZP</c>).
         /// </summary>
         [NotMapped]
         [XafDisplayName("FM Wezipesi (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]

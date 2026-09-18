@@ -142,7 +142,7 @@ Clears `CurrentVisa`, `NextVisa`, and `WorkPermittedLocations` when the parent t
 
 Do not confuse **issuing** (output of a prior procedure) with **target** (input/context for this procedure). See **`Visa.md`**.
 
-`WorkPermit_WorkPermittedLocations` (report): prefers `WorkPermittedLocations` on the line, else `CurrentWorkPermitItem.WorkPermittedLocations`.
+`WorkPermit_WorkPermittedLocations` (report): prefers `WorkPermittedLocations` on the line, else `CurrentWorkPermitItem.WorkPermittedLocations`. Roster **AWPLC** (`Application_WorkPermitLocation_NameTm`) is the case Work permit location (`MovementPermitLocation`), not the person’s current permit areas.
 
 ---
 

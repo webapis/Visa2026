@@ -2,6 +2,51 @@
 
 Append-only. Newest first under **## Entries**.
 
+### 2026-09-18 — FMWZP under Family member for sanaw Wezipesi
+
+- Need: Review Add Family member had FMEIY/FMESP but no FM_WezipesiTm.
+- Cause: Education-only catalog round deferred Wezipesi.
+- Fix: Catalog **FMWZP** → `FM_WezipesiTm`. Analyze prefers FMWZP on wezipesi headers.
+- Officer: Stop F5, rebuild. Family member → **FMWZP**.
+- Prevent: Do not leave FM Wezipesi uncatalogued when POSN alone omits sponsor-ň relationship.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-18 — FMEIY/FMESP under Family member for sanaw education
+
+- Need: FM invitation sanaw Bilimi / Hünäri columns — dependent Çaga / Orta defaults, not plain EGIY/EGSP.
+- Cause: Only Education-group EGIY/EGSP existed; adult empty education printed blank.
+- Fix: Catalog **FMEIY** / **FMESP** (`relatedBo` FamilyMember). Analyze prefers them on bilimi/hünäri headers.
+- Officer: Stop F5, rebuild. Family member → **FMEIY** (level+institution), **FMESP** (specialty).
+- Prevent: Do not use EGIY/EGSP when FM adult fallbacks are required.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-18 — FMSPH/FMREL under Application (not Family member)
+
+- Need: Yellow-marks Review Add for mark `adamsynyň (İzzet…-wezipe)` — officer looked in Application; FMSPH was missing there.
+- Cause: Catalog `relatedBo` was FamilyMember while SPFNM/SPPOS were Application. Header picker groups by relatedBo.
+- Fix: Set **FMREL** and **FMSPH** `relatedBo` to **Application** (Header scope unchanged).
+- Officer: Stop F5, rebuild. Filter `FMSPH` under Application. Map the whole yellow phrase to **FMSPH**.
+- Prevent: Header letter tokens that merge on Application stay under Application with SPFNM/SPPOS; Family member is for roster/row FM fields.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-18 — Linked WorkPermitItem codes missing from Review Add
+
+- Need: Case 9/-007 People & links Work permit item (number, AS-№, location, valid to). Review Add showed cancel-stack codes / WPNM only — no current AS or Valid to.
+- Cause: Catalog had WPNM + WPLC only. AS / start / expiration lived on the merge line without short codes. Excel/sanaw row dict omitted those keys so even WPNM would print empty.
+- Fix: **WPAS** **WPST** **WPED** plus WPNM/WPLC in sanaw/excel rows. *Rugsat edilen möhleti* → WPED (column profile beats passport PPED on a date tie). Filter `work permit item` / `valid to` / `WPAS`.
+- Officer: Stop F5, rebuild, Analyze. Add **WPAS** (AS-№), **WPNM** (tassyknama), **WPED** (valid to), **WPLC** (item location), **AWPLC** (case locations). Cancel columns stay CW*.
+- Prevent: Do not leave required WorkPermitItem scalars uncatalogued. Do not use CWAB/CWEB for the current linked item.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-18 — AWPLC for Goşulmaly hereket çäkleri
+
+- Need: Additional WP-location Excel sanaw last column *Goşulmaly hereket çäkleri* = Case summary Work permit location on every row.
+- Cause: Only WPLC/CWLB existed (person WorkPermitItem). No Row short code for instance `MovementPermitLocation`.
+- Fix: Catalog **AWPLC** (Row only). Analyze maps *Goşulmaly hereket çäkleri* to `{{.AWPLC}}`. Merge prints stored catalog text (`Aşgabat şäheri, Mary welaýaty`).
+- Officer: Stop F5, rebuild, Analyze. Last column → **AWPLC**. Filter `AWPLC` / `goşulmaly`. Not WPLC/CWLB.
+- Prevent: Do not map “areas to be added” to the person’s current permit locations.
+- Cross-skill: visa2026-user-report-templates
+
 ### 2026-09-17 — This-profile Project contract list was the full catalog
 
 - Need: Case 9/-007 Iş Rugsatnama goşmaça barjak ýeri (1574-KIYANLI). Officer bound a yellow-marks letter to another Project contract, so Resminamalar on this case stayed empty.

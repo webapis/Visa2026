@@ -240,6 +240,7 @@ Configure on the template record (UI) or via **`EnsureTemplateExists`** argument
 | Photo column empty (no literal token) | Person has no **`Photo`** bytes — expected; injector clears marker |
 | Wrong root for roster | **`ApplicationItem`** root cannot drive **`{{#ds.ApplicationItems}}`** — use **`Application`** |
 | Excel rows not copying | No `{{#ds.rows}}` on data row, merged cells on data row, wrong **`ExcelMergeMode`** |
+| Sanaw last column *Goşulmaly hereket çäkleri* empty or shows a person’s old WP areas | Use **AWPLC** (`Application_WorkPermitLocation_NameTm`) — case Work permit location. Not **WPLC** / **CWLB** |
 | Passport-change Excel sanaw both tables show the same (latest) booklet | Stacked Kiçirak / Täze tables. Merge expands each prototype; Kiçirak overlays previous passport onto `PPN`. Person must have two linked passports |
 | Old file after edit | Release DB kept previous bytes — re-upload, or DEBUG updater / **`FORCE_XAF_DB_UPDATE`** |
 | **`'{{ds.rows.X}}' could not be replaced`** on one “new” field (e.g. **`Person_NationalityCode`**) while earlier § fields OK | Wrong **`rows`** dictionary (**labor contract** keys) or **typed POCO rows** instead of **`Dictionary<string, object>`** — see **`learnings.md`** (Forma_16). Not a missing BO property if Validate shows path on **`ApplicationItem`**. |

@@ -21,6 +21,7 @@ public class ScanExcelYellowResolverTests
                     RequirePersonEducation = true,
                     RequirePersonPosition = true,
                     RequirePersonAddressOfResidence = true,
+                    RequirePersonWorkPermitItem = true,
                 },
                 DataScope = ApplicationProfileTemplateDataScope.Both,
                 TemplateKind = ApplicationProfileTemplateKind.Excel,
@@ -200,6 +201,51 @@ public class ScanExcelYellowResolverTests
         Assert.NotNull(borderZone);
         Assert.Contains("ABZLN", borderZone!.ProposedToken!, StringComparison.Ordinal);
         Assert.Equal(ScanFieldConfidence.High, borderZone.Confidence);
+    }
+
+    [Fact]
+    public void Resolve_maps_added_movement_areas_column_to_case_work_permit_location()
+    {
+        var set = PlaceholderSet();
+        using var ms = new MemoryStream();
+        using (var wb = new XLWorkbook())
+        {
+            var ws = wb.AddWorksheet("Sanaw");
+            ws.Cell("A2").Value = "Goşulmaly hereket çäkleri";
+            ws.Cell("A3").Value = "Aşgabat şäheri";
+            ws.Cell("A3").Style.Fill.BackgroundColor = XLColor.Yellow;
+            wb.SaveAs(ms);
+        }
+
+        var bytes = ms.ToArray();
+        var yellows = new ScanOfficeYellowExtractor().Extract(bytes, ScanSourceKind.Excel);
+        var fields = ScanExcelYellowResolver.Resolve(bytes, yellows, set);
+        var location = Assert.Single(fields, f => f.LabelText == "Aşgabat şäheri");
+        Assert.Equal(ScanFieldScope.Row, location.Scope);
+        Assert.Equal("{{.AWPLC}}", location.ProposedToken);
+        Assert.Equal(["AWPLC"], TemplateTokenSyntax.GetShortCodes(location.ProposedToken));
+        Assert.Equal(ScanFieldConfidence.High, location.Confidence);
+    }
+
+    [Fact]
+    public void Resolve_maps_valid_to_column_to_linked_work_permit_expiration()
+    {
+        var set = PlaceholderSet();
+        using var ms = new MemoryStream();
+        using (var wb = new XLWorkbook())
+        {
+            var ws = wb.AddWorksheet("Sanaw");
+            ws.Cell("A4").Value = "Rugsat edilen möhleti";
+            ws.Cell("A5").Value = "01.01.2027";
+            ws.Cell("A5").Style.Fill.BackgroundColor = XLColor.Yellow;
+            wb.SaveAs(ms);
+        }
+
+        var bytes = ms.ToArray();
+        var yellows = new ScanOfficeYellowExtractor().Extract(bytes, ScanSourceKind.Excel);
+        var fields = ScanExcelYellowResolver.Resolve(bytes, yellows, set);
+        var date = Assert.Single(fields, f => f.LabelText == "01.01.2027");
+        Assert.Equal("{{.WPED}}", date.ProposedToken);
     }
 
     [Fact]

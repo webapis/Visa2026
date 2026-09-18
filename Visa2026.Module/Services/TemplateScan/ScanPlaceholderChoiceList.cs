@@ -80,6 +80,23 @@ public static class ScanPlaceholderChoiceList
         if (term.Contains("hereket", StringComparison.OrdinalIgnoreCase)
             || term.Contains("work permitted", StringComparison.OrdinalIgnoreCase))
             yield return "work permitted locations";
+        if (term.Contains("work permit item", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("wp item", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("valid to", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("tassyknama", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("iş rugsatnama", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("is rugsatnama", StringComparison.OrdinalIgnoreCase))
+        {
+            yield return "work permit number";
+            yield return "work permit AS number";
+            yield return "work permit start date";
+            yield return "work permit valid to";
+            yield return "work permitted locations";
+        }
+        if (term.Contains("gosulmaly", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("goşulmaly", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("work permit location", StringComparison.OrdinalIgnoreCase))
+            yield return "work permit location";
         if (term.Contains("cakylyk", StringComparison.OrdinalIgnoreCase)
             || term.Contains("çakylyk", StringComparison.OrdinalIgnoreCase)
             || term.Contains("cancel invitation", StringComparison.OrdinalIgnoreCase))

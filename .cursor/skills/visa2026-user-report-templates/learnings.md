@@ -1,3 +1,29 @@
+
+### 2026-09-18 — FMWZP FM Wezipesi roster (family: ItemRoster)
+
+- **Symptom**: Review Add Family member showed FMEIY/FMESP but not FM_WezipesiTm for sanaw Wezipesi.
+- **Cause**: Education-only catalog round deferred Wezipesi.
+- **Fix**: Catalog **FMWZP** → `FM_WezipesiTm` (Family member, Row). Sanaw row key + Analyze prefers FMWZP on wezipesi headers.
+- **Officer**: Stop F5, rebuild. Family member → **FMWZP**.
+- **Cross-skill**: visa2026-template-scan
+
+### 2026-09-18 — FMEIY/FMESP FM roster education (family: ItemRoster)
+
+- **Symptom**: FM sanaw Bilimi / Hünäri need dependent rules (Çaga vs Orta defaults), separate from EGIY/EGSP.
+- **Decision**: Catalog **FMEIY** / **FMESP** under Family member. Child = age < 18 or MaritalStatus Çaga → Çaga. Adult = Education BO if set, else `Orta, Orta mekdep` / `Orta bilim`. Employees = real education.
+- **Fix**: `FamilyMemberEducationCaption` + `FM_EducationLevelAndInstitutionTm`; sanaw row keys; Analyze prefers FMEIY/FMESP on bilimi/hünäri headers.
+- **Prevent**: Do not map FM Bilimi/Hünäri to EGIY/EGSP when adult empty-education fallback is required. Wezipesi still `FM_WezipesiTm` (not catalogued this round).
+- **Officer**: Stop F5, rebuild. Filter Family member → **FMEIY** / **FMESP**.
+- **Cross-skill**: visa2026-template-scan
+
+### 2026-09-18 — FMSPH header phrase + SPPOS (family: AppScalar / FM letter)
+
+- **Symptom**: Çakylyk Almak FM yellow text `adamsynyň (İzzet Taşdelen-İşe goýberiş…)` needed one header map; multi-dependent same sponsor.
+- **Decision**: Phrase shape A (joined relationships + one sponsor). One sponsor per letter. New composite header + Header SPPOS.
+- **Fix**: **FMSPH** → `FamilyMember_SponsorPhraseTm` (`{FMREL} ({SPFNM}-{SPPOS})`). **SPPOS** → `SponsoringEmployee_PositionTm` (Header; **PSEP** stays Row). Helper + tests. Header merge dict keys.
+- **Prevent**: Do not invent per-dependent sponsor repeats in the header. Do not put spaces around `-` inside the parens.
+- **Officer**: Stop F5, rebuild. Library filter `FMSPH` / `SPPOS`. Map yellow block to **FMSPH**.
+- **Cross-skill**: visa2026-template-scan
 # Learnings (append-only): User report templates (Word / Excel seeds)
 
 Purpose: capture Resminamalar / DocxTemplater / Extract–Validate / **`ItemRows`** pitfalls from user-seeded templates under **`Resources/Templates/`**. Agents **read before** debugging merge or placeholder work on a similar template; **append after** a resolved incident.
@@ -22,6 +48,24 @@ Keep **`SKILL.md`** stable; **promote** into `SKILL.md` only when the same lesso
 ---
 
 ## Entries
+
+### 2026-09-18 — Linked WP item AS / valid-to (family: ItemRoster)
+
+- **Symptom**: Review Add had no current WorkPermitItem AS number or Valid to. Sanaw *Rugsat edilen möhleti* / AS-№ could not be mapped except as cancel CWAB/CWEB.
+- **Root cause**: Only WPNM and WPLC were catalogued. Merge line already had AS/start/expiration; Excel/sanaw dicts did not copy them.
+- **Fix**: **WPAS** **WPST** **WPED**. Row dict keys + aliases. WPED is current Valid to; CWEB stays cancel stack.
+- **Prevent**: Mirror invitation INVN/INVS/INVE for current WP item, not only cancel blocks.
+- **Officer**: Stop F5, rebuild. Filter `WPAS` / `valid to`. Preview fills from the linked Work permit item.
+- **Cross-skill**: visa2026-template-scan
+
+### 2026-09-18 — AWPLC case Work permit location (family: ItemRoster)
+
+- **Symptom**: Excel sanaw last column *Goşulmaly hereket çäkleri* had no roster token for Case summary Work permit location. WPLC/CWLB are the person’s WorkPermitItem areas.
+- **Root cause**: Instance `MovementPermitLocation` had header `MovementPermitLocation_NameTm` only — no Row short code and no sanaw/excel row key.
+- **Fix**: Row **AWPLC** → `Application_WorkPermitLocation_NameTm` (print stored catalog text as-is). Same value on every selected person. Header `{{ds.…}}` not added.
+- **Prevent**: Do not reuse WPLC/CWLB for case Work permit location. Analyze caption *Goşulmaly hereket çäkleri* → AWPLC.
+- **Officer**: Stop F5, rebuild, Analyze. Last column → **AWPLC**. Filter `AWPLC` / `goşulmaly`. Preview repeats the Case summary locations.
+- **Cross-skill**: visa2026-template-scan
 
 ### 2026-09-16 — BTAD missing Region/City (family: ItemRows)
 

@@ -49,9 +49,18 @@ this.xrLabelUrgency.Font = new DXFont("Times New Roman", 15F, DXFontStyle.Italic
 Türkmenistandaky çäklerinde amala aşyrylýan taslamalar utgaşdyrmak boýunça [Company.Name]
 kompaniýasyna degişli hünärmeniň maşgala agzalaryna ýagny, hatymyzyň goşundysynda görkezilen
 sanawdaky **[TotalPersonCount] ([TotalPersonCountText])** sany daşary ýurt raýatyna
-[FamilyMember_Relationship_NameTm] (**[SponsoringEmployee_FullName] - [SponsoringEmployee_PositionTm]**)
+[FamilyMember_SponsorPhraseTm]
 **[VisaPeriod_NameTm] möhlet** bilen **[VisaCategory_NameTm]** çakylyk resmileşdirilmegine
 ýardam bermegiňizi Sizden haýyş edýäris.
+```
+
+Preferred single token (user library **FMSPH**): `FamilyMember_SponsorPhraseTm` =
+`FamilyMember_Relationship_NameTm (SponsoringEmployee_FullName-SponsoringEmployee_PositionTm)`.
+
+Legacy three-token form still valid:
+
+```
+[FamilyMember_Relationship_NameTm] ([SponsoringEmployee_FullName]-[SponsoringEmployee_PositionTm])
 ```
 
 ### xrLabelAttachments — expression
@@ -77,9 +86,10 @@ this.Detail.HeightF = 633F;
 | `TotalPersonCountText` | `Application` | ✅ |
 | `VisaPeriod_NameTm` | `ApplicationProfileInstance → VisaPeriod` | ✅ |
 | `VisaCategory_NameTm` | `ApplicationProfileInstance → VisaCategory` | ✅ |
-| `FamilyMember_Relationship_NameTm` | `ApplicationProfileInstance → ApplicationItems[0] → Person → Relationship` | ✅ |
-| `SponsoringEmployee_FullName` | `ApplicationProfileInstance → ApplicationItems[0] → Person → SponsoringEmployee` | ✅ |
-| `SponsoringEmployee_PositionTm` | `ApplicationProfileInstance → ApplicationItems[0] → Person → SponsoringEmployee → Position` | ✅ |
+| `FamilyMember_Relationship_NameTm` | `ApplicationProfileInstance → roster Relationships (joined genitive)` | ✅ |
+| `SponsoringEmployee_FullName` | `ApplicationProfileInstance → first roster SponsoringEmployee` | ✅ |
+| `SponsoringEmployee_PositionTm` | `ApplicationProfileInstance → sponsor current Position` | ✅ |
+| `FamilyMember_SponsorPhraseTm` | Composite **FMSPH** — relationships + `(name-position)` | ✅ |
 
 > `FamilyMember_Relationship_NameTm` must store the genitive form (e.g. "aýalynyň", "çagasynyň") so the sentence reads naturally.
 

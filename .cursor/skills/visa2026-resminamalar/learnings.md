@@ -1,3 +1,12 @@
+
+### 2026-09-18 — Additional WP location SANAW CHECK after Visa visible (Application)
+
+- **Symptom**: 9/-007 Iş Rugsatnama goşmaça barjak ýeri. People & links Visa visible/linked; Resminamalar SANAW still CHECK with empty Visa_Number / Visa_StartDateText / Visa_ExpirationDateText.
+- **Root cause**: Profile `RequirePersonVisa` controls UI tiles; dry-run reads merge-line `CurrentVisa`. `ApplicationType.ShowCurrentVisa` stayed false (catalog JSON updated, DB not yet synced). `ApplyVisibilityGatedReferenceFields` cleared CurrentVisa from Type.Show* even when profile requires Person Visa / Suppress hydrate.
+- **Fix**: Gate clears via `ApplicationProfileConfigurationResolver.ShowCurrentVisa` / `ShowNextVisa`; skip clears when `SuppressPersonCurrentFieldSync`. Seed already has type `ShowCurrentVisa=true`; sync on restart. Add Visa_* keys to `BuildSanawyRowDictionary`.
+- **Try**: Stop F5, rebuild Module, restart (type Show* overwrite). Re-open Resminamalar (reload catalog). SANAW should Ready when linked visa has number/dates.
+- **Prevent**: Do not treat RequirePersonVisa UI toggle as Resminamalar Ready. Keep Type ShowCurrentVisa aligned with profile for dual-read.
+- **Cross-skill**: application-profile | lookup-data
 # Learnings (append-only): Resminamalar
 
 Purpose: **catalog, seed gate, batch worker, preview, permissions, dialog UX** — not template token design.

@@ -232,6 +232,52 @@ public class ScanPlaceholderChoiceListTests
     }
 
     [Theory]
+    [InlineData("work permit item")]
+    [InlineData("valid to")]
+    [InlineData("Tassyknama")]
+    public void Linked_work_permit_item_search_finds_current_codes(string search)
+    {
+        var allowed = FullSet().Allowed;
+        var codes = ScanPlaceholderChoiceList.RemainingGroups(allowed, hideShortCodes: Array.Empty<string>(), search)
+            .SelectMany(static g => g.Entries)
+            .Select(static e => e.ShortCode)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        Assert.Contains("WPNM", codes);
+        Assert.Contains("WPAS", codes);
+        Assert.Contains("WPST", codes);
+        Assert.Contains("WPED", codes);
+        Assert.Contains("WPLC", codes);
+    }
+
+    [Fact]
+    public void Linked_work_permit_as_search_finds_WPAS()
+    {
+        var allowed = FullSet().Allowed;
+        var codes = ScanPlaceholderChoiceList.RemainingGroups(allowed, hideShortCodes: Array.Empty<string>(), search: "WPAS")
+            .SelectMany(static g => g.Entries)
+            .Select(static e => e.ShortCode)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        Assert.Contains("WPAS", codes);
+    }
+
+    [Theory]
+    [InlineData("AWPLC")]
+    [InlineData("goşulmaly")]
+    [InlineData("Work permit location")]
+    public void Case_work_permit_location_search_finds_AWPLC(string search)
+    {
+        var allowed = FullSet().Allowed;
+        var codes = ScanPlaceholderChoiceList.RemainingGroups(allowed, hideShortCodes: Array.Empty<string>(), search)
+            .SelectMany(static g => g.Entries)
+            .Select(static e => e.ShortCode)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        Assert.Contains("AWPLC", codes);
+    }
+
+    [Theory]
     [InlineData("WPLC")]
     [InlineData("CWLB")]
     [InlineData("Work Permitted Locations")]

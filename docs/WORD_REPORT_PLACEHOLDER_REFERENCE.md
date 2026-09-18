@@ -126,9 +126,10 @@ Migration **code** on items: `Application_MigrationServiceCode` → e.g. `TDMGAS
 
 | Property | Type | Example output | Notes |
 |----------|------|----------------|--------|
-| `FamilyMember_Relationship_NameTm` | `string` | `aýalynyň we çagasynyň` | Genitive list; 1 FM → `aýalynyň`; 3 → `aýalynyň, çagasynyň we oglunyň` |
-| `SponsoringEmployee_FullName` | `string` | `Ali Enes Yetkin` | First application line’s sponsor |
-| `SponsoringEmployee_PositionTm` | `string` | `Türkmenistandaky şahamça müdiriniň orunbasary` | |
+| `FamilyMember_Relationship_NameTm` | `string` | `aýalynyň we çagasynyň` | Genitive list; short **FMREL**. 1 FM → `aýalynyň`; 3 → `aýalynyň, çagasynyň we oglunyň` |
+| `SponsoringEmployee_FullName` | `string` | `Ali Enes Yetkin` | Short **SPFNM**. First roster person with a sponsor (one sponsor per letter) |
+| `SponsoringEmployee_PositionTm` | `string` | `Türkmenistandaky şahamça müdiriniň orunbasary` | Short **SPPOS** (header). Row sponsor position remains **PSEP** |
+| `FamilyMember_SponsorPhraseTm` | `string` | `aýalynyň we çagasynyň (Ali Enes Yetkin-… wezipesi)` | Short **FMSPH**. `{FMREL} ({SPFNM}-{SPPOS})`; no spaces around `-` |
 
 ### Business trip (application header)
 
@@ -340,12 +341,12 @@ Case-linked `TravelHistory` (latest linked row). Short codes in the **Travel his
 
 | Property | Type | Example output | Notes |
 |----------|------|----------------|--------|
-| `WorkPermit_Number` | `string` | `WP-…` | |
-| `WorkPermit_StartDateText` | `string` | `01.01.2026` | |
+| `WorkPermit_Number` | `string` | `1430/7` | Short **WPNM**. Linked WorkPermitItem number |
+| `WorkPermit_ASNumber` | `string` | `COO01884433` | Short **WPAS**. Linked item AS-№ (not cancel **CWAB**) |
+| `WorkPermit_StartDateText` | `string` | `01.01.2026` | Short **WPST** |
 | `WorkPermit_ExpirationDate` | `DateTime?` | `31.12.2026` | |
-| `WorkPermit_ExpirationDateText` | `string` | `31.12.2026` | |
-| `WorkPermit_ASNumber` | `string` | `…` | |
-| `WorkPermit_WorkPermittedLocations` | `string` | `Aşgabat; Mary` | Catalog multi-select |
+| `WorkPermit_ExpirationDateText` | `string` | `01.01.2027` | Short **WPED**. People & links Valid to / *Rugsat edilen möhleti* |
+| `WorkPermit_WorkPermittedLocations` | `string` | `Aşgabat şäheri` | Short **WPLC**. Linked item locations, not case **AWPLC** |
 | `PreviousWorkPermit_Number` | `string` | `…` | |
 | `PreviousWorkPermit_ExpirationDateText` | `string` | `31.12.2025` | |
 
@@ -380,6 +381,7 @@ Case-linked `TravelHistory` (latest linked row). Short codes in the **Travel his
 | `VisaCategory_NameTm` | `string` | `köp gezeklik` | Item-root alias |
 | `BorderZoneLocation_NameTm` | `string` | `Daşoguz welaýaty` | Per-line |
 | `Application_BorderZoneLocation_NameTm` | `string` | Same as above | |
+| `Application_WorkPermitLocation_NameTm` | `string` | `Aşgabat şäheri, Mary welaýaty` | Short **AWPLC**. Case summary Work permit location, same value on every roster row. Not WPLC / CWLB. Row `{{.AWPLC}}` only |
 | `Application_DateText` | `string` | `20.01.2026` | |
 | `Application_MigrationServiceCode` | `string` | `TDMGAS` | |
 | `Application_RegistrationDateText` | `string` | `20.01.2026` | Item registration date |
@@ -437,9 +439,10 @@ Also valid in **Word/Excel user templates** (same getters as XFA PDF fill). PDF 
 |----------|------|----------------|--------|
 | `SahsyKagyz_FamilyStatusText` | `string` | `ayaly-Firuza Mine Erol 23.05.1985ý. TUR., gyzy-Nil Erol 03.07.2014ý. TUR.` | Maşgala ýagdaýy (**SKFM**). Source is **PVFM** / `VisaApplicationFamilyMembersText` |
 | `Person_PreviousWorkplacesInTurkmenistan` | `string` | `Ýok` | Türkmenistanda öňki işlän ýerleri (`PWTM`) |
-| `FM_EducationLevelTm` | `string` | `Çaga` / `Orta` / `Ýokary` | FM under 18 → `Çaga`; adult FM → `Orta`; employee → education level |
-| `FM_SpecialtyTm` | `string` | `Çaga` / `Orta` / specialty | Same age rules |
-| `FM_WezipesiTm` | `string` | `Zähmeti goramak we tehniki howpsuzlyk boýunça başlyk Bóra Yolcu-ň gyzy` | FM: sponsor line; employee: position only |
+| `FM_EducationLevelAndInstitutionTm` | `string` | `Orta, Orta mekdep` / `Çaga` | Short **FMEIY**. Child (age < 18 or MaritalStatus Çaga) → `Çaga`; adult FM → Education BO when set, else `Orta, Orta mekdep`; employee → real education |
+| `FM_EducationLevelTm` | `string` | `Çaga` / `Orta` | Level-only helper; prefer **FMEIY** for sanaw Bilimi column |
+| `FM_SpecialtyTm` | `string` | `Orta bilim` / `Çaga` | Short **FMESP**. Same child rule; adult FM → specialty when set, else `Orta bilim`; employee → real specialty |
+| `FM_WezipesiTm` | `string` | `Zähmeti goramak we tehniki howpsuzlyk boýunça başlyk Bóra Yolcu-ň gyzy` | Short **FMWZP**. FM: sponsor position + name-ň relationship; employee: position only |
 
 ---
 

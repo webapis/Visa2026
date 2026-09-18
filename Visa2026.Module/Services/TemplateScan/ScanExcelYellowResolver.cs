@@ -237,6 +237,7 @@ public static class ScanExcelYellowResolver
 
         var rankedMerged = merged.Values
             .OrderByDescending(static a => a.ScorePercent)
+            .ThenByDescending(a => preferCodes.Contains(a.ShortCode, StringComparer.OrdinalIgnoreCase) ? 1 : 0)
             .ThenBy(static a => a.ShortCode, StringComparer.OrdinalIgnoreCase)
             .ToList();
 
@@ -551,6 +552,7 @@ public static class ScanExcelYellowResolver
 
         return merged.Values
             .OrderByDescending(static c => c.ScorePercent)
+            .ThenByDescending(c => preferCodes.Contains(c.ShortCode, StringComparer.OrdinalIgnoreCase) ? 1 : 0)
             .ThenBy(static c => c.ShortCode, StringComparer.OrdinalIgnoreCase)
             .ToList();
     }
@@ -669,11 +671,11 @@ internal static class ScanExcelColumnProfiles
         new(["pasport gornusi", "pasport tipi", "passport type"], ["PPTP"], false),
         new(["pasport edarasy", "berlen edara", "authority"], ["PPAT"], false),
         new(["berlen yurt", "pasport yurdy", "issued country"], ["PPCC", "PPCT"], true),
-        new(["bilimi we okan yeri", "bilimi", "egitim"], ["EGLV", "EGIY"], true),
+        new(["bilimi we okan yeri", "bilimi", "egitim"], ["FMEIY", "EGLV", "EGIY"], true),
         new(["okan yeri", "okuw jayy", "institution"], ["EGIN"], false),
         new(["bitiren yyl", "graduation year", "mezuniyet"], ["EGYR"], false),
-        new(["bilimine gora hunari", "hunari", "specialty"], ["EGSP"], false),
-        new(["wezipesi", "wezepe", "pozisyon", "position"], ["POSN"], false),
+        new(["bilimine gora hunari", "hunari", "specialty"], ["FMESP", "EGSP"], false),
+        new(["wezipesi", "wezepe", "pozisyon", "position"], ["FMWZP", "POSN"], false),
         new(["onki islan yerleri", "previous workplaces"], ["PWTM"], false),
         new(["wiza ucin masgala", "family members for visa", "visa application family"], ["PVFM"], false),
         new(["gelmeginin maksady", "gelmegin maksady", "purpose of arrival"], ["RGEL"], false),
@@ -684,6 +686,8 @@ internal static class ScanExcelColumnProfiles
         new(["is saparynda boljak salgysy", "is saparynda boljak", "is saparyna baryan yer", "baryan yer", "business trip address", "business trip destination"], ["BTAD"], false),
         new(["dasary yurtdaky salgysy", "dasary yurt"], ["PFAC", "PFAD"], true),
         new(["barjak serhet yakasy", "serhet yaka", "border zone"], ["ABZLN"], false),
+        new(["gosulmaly hereket cakleri", "gosulmaly hereket", "work permit location"], ["AWPLC"], false),
+        new(["rugsat edilen mohleti", "rugsat edilen", "work permit valid"], ["WPED"], false),
         new(["as-№", "as-no", "as belgisi", "asnumber"], ["CWAB"], false),
         new(["tassyknama", "tassyk-nama", "tassyknama belgisi"], ["CWNB"], false),
         new(["hereket edyan cagi", "hereket edyan", "work permitted", "rugsat berlen"], ["CWLB"], false),
