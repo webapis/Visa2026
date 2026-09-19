@@ -2,6 +2,51 @@
 
 Append-only. Newest first under **## Entries**.
 
+### 2026-09-19 — Excel loop tags must not sit between ACPOS and ACFNM
+
+- Need: Yellow-marks Excel Generate wrote `{{#ds.rows}}` / `{{/ds.rows}}` on the signatory footer, between **ACPOS** and **ACFNM**.
+- Cause: ACPOS/ACFNM are Header+Row, so footer yellows became `{{.ACPOS}}` and counted as a second roster row. Close then parked in the empty cell between the two mapped properties. Excel merge deletes that close row.
+- Fix: Signatory codes are not roster-loop rows. Do not write `{{/ds.rows}}` onto a row that already has `{{` placeholders (close stays optional).
+- Officer: Stop F5, rebuild, **Generate**. Footer stays position + name only. Loop tags stay on the people row.
+- Prevent: Do not treat the signatory line as a second `{{#ds.rows}}` table.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-19 — Placeholder Manual matches Review Add groups
+
+- Need: Catalog **Placeholder Manual** still used a flat RelatedBo enum filter and simple search. Officers want the same groups and hide-joined rules as yellow-marks Review Add.
+- Cause: `GetGroupedEntries` only wrapped `GetEntries`. The manual listed every enum (empty leftover **Application** / **Visa**) and did not hide **EGIY**/**VNAT** or expand search aliases.
+- Fix: `GetGroupedEntries` uses `ScanPlaceholderChoiceList.RemainingGroups`. Filter dropdown lists only groups that have officer-visible codes. `GetEntries` still returns the full catalog (joined tokens stay for old templates).
+- Officer: Stop F5, rebuild, hard-refresh **Placeholder Manual**. Expect **Application — general / family member / cancellation / business trip**, **Visa — linked active** / **Visa — cancel**, separate **EGLV**/**EGIN** and **VNUM**/**VTYP**/**VSTD**. Type `EGIY` or `VNAT` only for the old joined tokens.
+- Prevent: Do not keep a second grouping/search path for the manual. Change Add and Manual together.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-19 — Linked visa number/type stay separate; VSTD in Add list
+
+- Need: Review Visa showed joined **VNAT** (number and type). Officer wants **VNUM** and **VTYP** separately. **Visa start date** (**VSTD**) was not offered / not mapped on *Möhleti we gezekligi*.
+- Cause: Add list showed **VNAT**. Excel profile started with **VNAT**, so Analyze never assigned **VSTD** as its own code.
+- Fix: Hide **VNAT** unless typed. *Möhleti we gezekligi* Çakylyk/gezeklik → **AVPRD**/**AVCAT**; booklet `A1635317 WP, 20.01.2026, 06.07.2026` → **VNUM**, **VTYP**, **VSTD**, **VEDT**. Search `visa start` / `VSTD`.
+- Officer: Stop F5, rebuild, hard-refresh Review. **Visa — linked active** → **VNUM**, **VTYP**, **VSTD**. Type `VNAT` only for the old joined token.
+- Prevent: Do not map number+type to one Review row. Start date is **VSTD**, not only **VEDT**.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-19 — Visa picker subgroups: linked active vs cancel
+
+- Need: Review Add had one flat Visa group. Officers need roster CurrentVisa (People & links) separate from cancel stacks. Requested period/category stay on Application.
+- Cause: All PersonVisa codes used `relatedBo: Visa`.
+- Fix: **Visa — linked active** (VNUM, VTYP, VCTM, VNAT, VPLC, VISD, VSTD, VEDT, VBLK). **Visa — cancel** (CVNB, CVSB, CVEB). VPER/VCAT/AVPRD/AVCAT stay **Application — general**. CSDT/CEDT stay on leftover **Visa**.
+- Officer: Stop F5, rebuild, hard-refresh Review. Filter `linked active` / `VNUM` or `cancel` / `CVNB`.
+- Prevent: Do not put requested case visa period/category under Visa until a Visa — requested group is approved.
+- Cross-skill: visa2026-user-report-templates
+
+### 2026-09-19 — Education level and institution stay separate (not EGIY)
+
+- Need: Review Education placeholders were one joined token (**EGIY** / **FMEIY**) on *Bilimi we okan ýeri* (`Ýokary, Gündogar …uniwersiteti`). Officer wants **Education level** and **Education institution** as two placeholders.
+- Cause: Excel/Word column profile treated `bilimi` / `bilimi we okan yeri` as a 3-code compound (`FMEIY`, `EGLV`, `EGIY`). Shape/value hint also preferred the joined **EGIY**.
+- Fix: Combined header → **EGLV** then **EGIN**. Bare *Bilimi* → **EGLV**. *Okan ýeri* → **EGIN**. Add list hides **EGIY** unless the officer types `EGIY`. Catalog **EGIY** remains for old templates.
+- Officer: Stop F5, rebuild, **Analyze**. Combined yellow shows **N.1 EGLV** / **N.2 EGIN**. Two columns map one code each. Filter `education level` / `EGLV` / `EGIN`.
+- Prevent: Do not map Education Review to `Education_LevelAndInstitutionTm`. Level and institution are separate library codes.
+- Cross-skill: visa2026-user-report-templates
+
 ### 2026-09-18 — Header letters less stable than roster (TPCNT cloned; AFNUM on the 3)
 
 - Need: After Goşundy overlay fix, cover-letter Review still guessed worse than sanaw Excel/Word. Detected had three **TPCNT** rows (person `1` plus both enclosure `1`s). Overlay **#1 AFNUM** sat on the yellow person-count `3`. Roster column headers stay one code per column.

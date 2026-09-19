@@ -1,4 +1,26 @@
 
+### 2026-09-19 — Excel {{#ds.rows}} does not belong on the ACPOS/ACFNM footer
+
+- **Symptom**: Yellow-marks Excel Generate inserted loop open/close between signatory **ACPOS** and **ACFNM**.
+- **Fix**: Signatory tokens are not a roster loop row. Skip `{{/ds.rows}}` when that row already has mapped `{{` cells (close is optional).
+- **Officer**: Stop F5, rebuild, Generate. Footer = position + name only.
+- **Cross-skill**: visa2026-template-scan
+
+### 2026-09-19 — Placeholder Manual uses the same officer groups as Review Add
+
+- **Symptom**: Placeholder Manual listed every RelatedBo enum and showed joined **EGIY**/**VNAT**. Review Add already hid those and used Application / Visa subgroups.
+- **Fix**: `GetGroupedEntries` = `ScanPlaceholderChoiceList.RemainingGroups`. Manual filter options = groups that still have codes.
+- **Officer**: Stop F5, rebuild. Open Placeholder Manual — same titles and codes as Review Add (type `EGIY`/`VNAT` for joined leftovers).
+- **Cross-skill**: visa2026-template-scan
+
+### 2026-09-19 — Visa picker subgroups (linked active / cancel)
+
+- **Symptom**: Review Add Visa mixed CurrentVisa roster codes with cancel stacks.
+- **Decision**: Same pattern as Application subgroups. **Visa — linked active** / **Visa — cancel**. No **Visa — requested** this round (VPER/VCAT/AVPRD/AVCAT stay Application — general).
+- **Fix**: Catalog `relatedBo` VisaLinkedActive / VisaCancel. Short codes unchanged. Merge unchanged.
+- **Officer**: Stop F5, rebuild. **Visa — linked active** → VNUM/VTYP/VEDT. **Visa — cancel** → CVNB/CVSB/CVEB.
+- **Cross-skill**: visa2026-template-scan
+
 ### 2026-09-18 — FMRLH + Application picker subgroups (family: AppScalar)
 
 - **Symptom**: Letter needed relationship-only `adamsynyň`; Application list too large for FM header codes.

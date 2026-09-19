@@ -143,7 +143,10 @@ public static class ScanShapeTokenMatcher
             Prefer("PFNM", 35, "Name-like text");
             Prefer("POSN", 30, "Position-like text");
             Prefer("EGSP", 30, "Specialty-like text");
-            Prefer("EGIY", 28, "Education-like text");
+            if (LooksLikeEducationLevel(folded))
+                Prefer("EGLV", 80, "Education level word");
+            else if (LooksLikeEducationInstitution(folded))
+                Prefer("EGIN", 78, "Education institution name");
             Prefer("PFAD", 28, "Address-like text");
             var residenceStreet = LooksLikeTmResidenceStreet(folded);
             Prefer("ADRS", residenceStreet ? 88 : 26,
@@ -157,6 +160,36 @@ public static class ScanShapeTokenMatcher
             .OrderByDescending(static c => c.ScorePercent)
             .ThenBy(static c => c.ShortCode, StringComparer.OrdinalIgnoreCase)
             .ToList();
+    }
+
+    private static readonly HashSet<string> EducationLevelWords = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "yokary", "orta", "caga", "baslangyc", "ilkinji", "hunar", "hunarmen",
+        "lisans", "bachelor", "master", "primary", "secondary",
+    };
+
+    internal static bool LooksLikeEducationLevel(string folded)
+    {
+        if (string.IsNullOrWhiteSpace(folded))
+            return false;
+        if (EducationLevelWords.Contains(folded))
+            return true;
+        var words = folded.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return words.Length == 1 && EducationLevelWords.Contains(words[0]);
+    }
+
+    internal static bool LooksLikeEducationInstitution(string folded)
+    {
+        if (string.IsNullOrWhiteSpace(folded))
+            return false;
+        return folded.Contains("uniwersitet", StringComparison.Ordinal)
+            || folded.Contains("universitet", StringComparison.Ordinal)
+            || folded.Contains("university", StringComparison.Ordinal)
+            || folded.Contains("mekdep", StringComparison.Ordinal)
+            || folded.Contains("institut", StringComparison.Ordinal)
+            || folded.Contains("akademi", StringComparison.Ordinal)
+            || folded.Contains("college", StringComparison.Ordinal)
+            || folded.Contains("okul", StringComparison.Ordinal);
     }
 
     internal static bool LooksLikeGenderWord(string text)

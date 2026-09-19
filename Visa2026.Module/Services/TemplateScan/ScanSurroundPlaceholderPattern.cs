@@ -269,6 +269,9 @@ public static class ScanSurroundPlaceholderPattern
             || code.Equals("VTYP", StringComparison.OrdinalIgnoreCase)
             || code.Equals("VCTM", StringComparison.OrdinalIgnoreCase)
             || code.Equals("VNUM", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("VSTD", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("VISD", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("VEDT", StringComparison.OrdinalIgnoreCase)
             || code.Equals("ACADR", StringComparison.OrdinalIgnoreCase);
     }
 

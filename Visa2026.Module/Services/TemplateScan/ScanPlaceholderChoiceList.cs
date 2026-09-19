@@ -30,12 +30,36 @@ public static class ScanPlaceholderChoiceList
         }
 
         IEnumerable<UserReportPlaceholderCatalogEntry> remaining = allowed.Where(e =>
-            !hide.Contains(e.ShortCode));
+            !hide.Contains(e.ShortCode)
+            && !IsHiddenJoinedCode(e.ShortCode, search));
 
         if (!string.IsNullOrWhiteSpace(search))
             remaining = remaining.Where(e => MatchesSearch(e, search));
 
         return UserReportPlaceholderRelatedBoCatalog.Group(remaining);
+    }
+
+    /// <summary>
+    /// Joined catalog codes stay for old templates, but Review Add offers the
+    /// parts separately. Type the short code to reach the joined token.
+    /// </summary>
+    private static bool IsHiddenJoinedCode(string shortCode, string? search)
+    {
+        var term = (search ?? string.Empty).Trim();
+        if (shortCode.Equals("EGIY", StringComparison.OrdinalIgnoreCase))
+        {
+            return !term.Equals("EGIY", StringComparison.OrdinalIgnoreCase)
+                && !term.Contains("level and institution", StringComparison.OrdinalIgnoreCase)
+                && !term.Contains("education +", StringComparison.OrdinalIgnoreCase);
+        }
+
+        if (shortCode.Equals("VNAT", StringComparison.OrdinalIgnoreCase))
+        {
+            return !term.Equals("VNAT", StringComparison.OrdinalIgnoreCase)
+                && !term.Contains("number and type", StringComparison.OrdinalIgnoreCase);
+        }
+
+        return false;
     }
 
     public static bool MatchesSearch(UserReportPlaceholderCatalogEntry entry, string? search)
@@ -167,6 +191,20 @@ public static class ScanPlaceholderChoiceList
         if (term.Contains("maksady", StringComparison.OrdinalIgnoreCase)
             || term.Contains("purpose", StringComparison.OrdinalIgnoreCase))
             yield return "Purpose";
+        if (term.Contains("visa start", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("start date", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("baslanyan", StringComparison.OrdinalIgnoreCase)
+            || term.Equals("VSTD", StringComparison.OrdinalIgnoreCase))
+        {
+            yield return "Visa start date";
+            yield return "VSTD";
+        }
+        if (term.Contains("visa number", StringComparison.OrdinalIgnoreCase)
+            || term.Equals("VNUM", StringComparison.OrdinalIgnoreCase))
+            yield return "Visa number";
+        if (term.Contains("visa type", StringComparison.OrdinalIgnoreCase)
+            || term.Equals("VTYP", StringComparison.OrdinalIgnoreCase))
+            yield return "Visa type";
         if (term.Contains("foreign address country", StringComparison.OrdinalIgnoreCase)
             || term.Equals("PFAC", StringComparison.OrdinalIgnoreCase)
             || term.Contains("ForeignAddressCountry", StringComparison.OrdinalIgnoreCase)

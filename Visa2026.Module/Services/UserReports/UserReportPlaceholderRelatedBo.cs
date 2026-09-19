@@ -15,6 +15,7 @@ public enum UserReportPlaceholderRelatedBo
     AuthorizedRepresentative = 4,
     Person = 5,
     Passport = 6,
+    /// <summary>Legacy flat Visa group; prefer VisaLinkedActive / VisaCancel.</summary>
     Visa = 7,
     Education = 8,
     AddressOfResidence = 9,
@@ -32,6 +33,8 @@ public enum UserReportPlaceholderRelatedBo
     ApplicationFamilyMember = 21,
     ApplicationCancellation = 22,
     ApplicationBusinessTrip = 23,
+    VisaLinkedActive = 24,
+    VisaCancel = 25,
 }
 
 public static class UserReportPlaceholderRelatedBoCatalog
@@ -45,6 +48,9 @@ public static class UserReportPlaceholderRelatedBoCatalog
         UserReportPlaceholderRelatedBo.ApplicationCancellation => 4,
         UserReportPlaceholderRelatedBo.ApplicationBusinessTrip => 5,
         UserReportPlaceholderRelatedBo.BusinessTrip => 6,
+        UserReportPlaceholderRelatedBo.VisaLinkedActive => 107,
+        UserReportPlaceholderRelatedBo.VisaCancel => 108,
+        UserReportPlaceholderRelatedBo.Visa => 109,
         _ => 100 + (int)relatedBo,
     };
 
@@ -61,6 +67,8 @@ public static class UserReportPlaceholderRelatedBoCatalog
         UserReportPlaceholderRelatedBo.Person => "Person",
         UserReportPlaceholderRelatedBo.Passport => "Passport",
         UserReportPlaceholderRelatedBo.Visa => "Visa",
+        UserReportPlaceholderRelatedBo.VisaLinkedActive => "Visa — linked active",
+        UserReportPlaceholderRelatedBo.VisaCancel => "Visa — cancel",
         UserReportPlaceholderRelatedBo.Education => "Education",
         UserReportPlaceholderRelatedBo.AddressOfResidence => "Address of residence",
         UserReportPlaceholderRelatedBo.Position => "Position",

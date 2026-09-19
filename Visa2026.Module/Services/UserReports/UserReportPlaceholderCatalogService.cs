@@ -1,6 +1,7 @@
 namespace Visa2026.Module.Services.UserReports;
 
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.TemplateScan;
 
 public interface IUserReportPlaceholderCatalogService
 {
@@ -64,8 +65,22 @@ public sealed class UserReportPlaceholderCatalogService : IUserReportPlaceholder
     }
 
     public IReadOnlyList<UserReportPlaceholderCatalogGroup> GetGroupedEntries(
-        UserReportPlaceholderManualQuery? query = null) =>
-        UserReportPlaceholderRelatedBoCatalog.Group(GetEntries(query));
+        UserReportPlaceholderManualQuery? query = null)
+    {
+        var structural = query == null
+            ? null
+            : new UserReportPlaceholderManualQuery
+            {
+                RootBoType = query.RootBoType,
+                Scope = query.Scope,
+                RelatedBo = query.RelatedBo,
+            };
+
+        return ScanPlaceholderChoiceList.RemainingGroups(
+            GetEntries(structural),
+            Array.Empty<string>(),
+            query?.Search);
+    }
 
     public string ResolveCanonicalPropertyPath(string propertyPath) =>
         UserReportPlaceholderAliasRegistry.ResolveCanonicalPropertyPath(propertyPath);

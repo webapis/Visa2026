@@ -95,6 +95,22 @@ public class ScanCompoundYellowTests
     }
 
     [Fact]
+    public void Binder_maps_education_level_and_institution_without_joining()
+    {
+        var bound = ScanCompoundYellowBinder.TryBind(
+            "Yokary, Gundogar mediterian uniwersiteti",
+            EducationSet(),
+            UserReportPlaceholderScope.Row,
+            "Bilimi we okan yeri");
+
+        Assert.NotNull(bound);
+        var codes = TemplateTokenSyntax.GetShortCodes(bound.Value.Token);
+        Assert.Equal(["EGLV", "EGIN"], codes);
+        Assert.DoesNotContain("EGIY", codes);
+        Assert.DoesNotContain("FMEIY", codes);
+    }
+
+    [Fact]
     public void Binder_maps_education_comma_line_inside_label_group()
     {
         var bound = ScanCompoundYellowBinder.TryBind(

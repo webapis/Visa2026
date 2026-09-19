@@ -46,6 +46,12 @@ public static class ScanFormFieldLabelHints
             && (folded.Contains("wagt", StringComparison.Ordinal) || folded.Contains("senesi", StringComparison.Ordinal)))
             return ["TRDT"];
 
+        if (folded.Contains("baslanyan", StringComparison.Ordinal)
+            || folded.Contains("visa start", StringComparison.Ordinal)
+            || (folded.Contains("wiza", StringComparison.Ordinal)
+                && folded.Contains("baslangyc", StringComparison.Ordinal)))
+            return ["VSTD"];
+
         if (folded.Contains("wiza", StringComparison.Ordinal)
             && folded.Contains("berlen", StringComparison.Ordinal)
             && (folded.Contains("senesi", StringComparison.Ordinal) || folded.Contains("mohlet", StringComparison.Ordinal)))
@@ -134,8 +140,16 @@ public static class ScanFormFieldLabelHints
             && (folded.Contains("yeri", StringComparison.Ordinal) || folded.Contains("yurdy", StringComparison.Ordinal)))
             return ["PCBC", "PBPL"];
 
-        if (folded.Contains("bilimi", StringComparison.Ordinal)
-            || folded.Contains("okan yeri", StringComparison.Ordinal))
+        if (folded.Contains("bilimi we okan yeri", StringComparison.Ordinal)
+            || (folded.Contains("bilimi", StringComparison.Ordinal)
+                && folded.Contains("okan yeri", StringComparison.Ordinal)))
+            return ["EGLV", "EGIN"];
+
+        if (folded.Contains("okan yeri", StringComparison.Ordinal)
+            && !folded.Contains("bilimi", StringComparison.Ordinal))
+            return ["EGIN"];
+
+        if (folded.Contains("bilimi", StringComparison.Ordinal))
             return ["EGLV", "EGCC", "EGIN"];
 
         if (folded.Contains("pasport", StringComparison.Ordinal)

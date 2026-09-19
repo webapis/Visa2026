@@ -181,6 +181,57 @@ public class ScanPlaceholderChoiceListTests
         Assert.Contains("EGLV", codes);
         Assert.Contains("EGIN", codes);
         Assert.Contains("EGSP", codes);
+        Assert.DoesNotContain("EGIY", codes);
+    }
+
+    [Fact]
+    public void Education_joined_code_is_hidden_unless_searched()
+    {
+        var allowed = FullSet().Allowed;
+        var browsing = ScanPlaceholderChoiceList.RemainingGroups(
+                allowed,
+                hideShortCodes: Array.Empty<string>(),
+                search: string.Empty)
+            .SelectMany(static g => g.Entries)
+            .Select(static e => e.ShortCode)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        Assert.Contains("EGLV", browsing);
+        Assert.Contains("EGIN", browsing);
+        Assert.DoesNotContain("EGIY", browsing);
+
+        var explicitJoined = ScanPlaceholderChoiceList.RemainingGroups(
+                allowed,
+                hideShortCodes: Array.Empty<string>(),
+                search: "EGIY")
+            .SelectMany(static g => g.Entries)
+            .Select(static e => e.ShortCode)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        Assert.Contains("EGIY", explicitJoined);
+    }
+
+    [Fact]
+    public void Visa_add_list_keeps_number_type_and_start_date_separate()
+    {
+        var allowed = FullSet().Allowed;
+        var groups = ScanPlaceholderChoiceList.RemainingGroups(
+            allowed,
+            hideShortCodes: Array.Empty<string>(),
+            search: string.Empty);
+        var linked = Assert.Single(groups, g => g.RelatedBo == UserReportPlaceholderRelatedBo.VisaLinkedActive);
+        var codes = linked.Entries.Select(e => e.ShortCode).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        Assert.Contains("VNUM", codes);
+        Assert.Contains("VTYP", codes);
+        Assert.Contains("VSTD", codes);
+        Assert.DoesNotContain("VNAT", codes);
+
+        var startSearch = ScanPlaceholderChoiceList.RemainingGroups(
+                allowed,
+                hideShortCodes: Array.Empty<string>(),
+                search: "visa start")
+            .SelectMany(static g => g.Entries)
+            .Select(static e => e.ShortCode)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        Assert.Contains("VSTD", startSearch);
     }
 
     [Theory]

@@ -2159,6 +2159,18 @@
     "tk-TM": "Wiza",
     "ru-RU": "Виза"
   },
+  "PlaceholderManual.Group.VisaLinkedActive": {
+    "en": "Visa — linked active",
+    "tr-TR": "Vize — bağlı aktif",
+    "tk-TM": "Wiza — baglanyşykly hereketdäki",
+    "ru-RU": "Виза — связанная действующая"
+  },
+  "PlaceholderManual.Group.VisaCancel": {
+    "en": "Visa — cancel",
+    "tr-TR": "Vize — iptal",
+    "tk-TM": "Wiza — ýatyrmak",
+    "ru-RU": "Виза — аннулирование"
+  },
   "PlaceholderManual.Group.WorkPermit": {
     "en": "Work permit",
     "tr-TR": "Çalışma izni",

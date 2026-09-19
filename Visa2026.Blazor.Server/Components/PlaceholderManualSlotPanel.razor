@@ -116,10 +116,12 @@
     private string CloseLabel => VisaUiMessages.Get("ApplicationItemDocumentCopies.Action.Close", _uiCultureName);
     private string SearchPlaceholder => Msg("PlaceholderManual.Search.Placeholder");
 
-    private static IReadOnlyList<UserReportPlaceholderRelatedBo> RelatedBoFilterOptions { get; } =
-        Enum.GetValues<UserReportPlaceholderRelatedBo>()
-            .Where(static v => v != UserReportPlaceholderRelatedBo.Unknown)
-            .OrderBy(UserReportPlaceholderRelatedBoCatalog.SortOrder)
+    private IReadOnlyList<UserReportPlaceholderRelatedBo> RelatedBoFilterOptions =>
+        CatalogService.GetGroupedEntries(new UserReportPlaceholderManualQuery
+            {
+                RootBoType = Request?.FilterRootBoType,
+            })
+            .Select(static g => g.RelatedBo)
             .ToList();
 
     private IReadOnlyList<UserReportPlaceholderCatalogGroup> GroupedEntries

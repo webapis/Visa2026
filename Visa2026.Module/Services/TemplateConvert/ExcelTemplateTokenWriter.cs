@@ -254,11 +254,18 @@ internal static class ExcelTemplateTokenWriter
         if (!TryGetWritableCell(workbook, region, out var preferred, out reason))
             return false;
 
+        var worksheet = preferred.Worksheet;
+        var row = preferred.Address.RowNumber;
+        if (RowHasPlaceholderTokens(worksheet, row)
+            && !preferred.GetFormattedString().Contains(closeToken, StringComparison.Ordinal))
+        {
+            reason = "Close-row already has mapped placeholders; {{/ds.rows}} is optional.";
+            return false;
+        }
+
         if (TrySetCloseToken(preferred, closeToken))
             return true;
 
-        var worksheet = preferred.Worksheet;
-        var row = preferred.Address.RowNumber;
         for (var column = 1; column <= 26; column++)
         {
             var candidate = worksheet.Cell(row, column);
@@ -271,6 +278,23 @@ internal static class ExcelTemplateTokenWriter
         }
 
         reason = "Close-row cell already has content; {{/ds.rows}} is optional.";
+        return false;
+    }
+
+    private static bool RowHasPlaceholderTokens(IXLWorksheet worksheet, int row)
+    {
+        foreach (var cell in worksheet.Row(row).CellsUsed())
+        {
+            var text = cell.GetFormattedString();
+            if (!string.IsNullOrWhiteSpace(text)
+                && text.Contains("{{", StringComparison.Ordinal)
+                && !text.Contains("{{#ds.rows}}", StringComparison.Ordinal)
+                && !text.Contains("{{/ds.rows}}", StringComparison.Ordinal))
+            {
+                return true;
+            }
+        }
+
         return false;
     }
 

@@ -1,6 +1,7 @@
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
+using Visa2026.Module.Services.TemplateScan;
 
 #nullable enable
 
@@ -372,6 +373,14 @@ internal static class TemplateRosterLoopPlanner
             var loops = new List<LoopMarker>();
             foreach (var templateRow in parsed.Select(static p => p.Row).Distinct().OrderBy(static r => r))
             {
+                var rowTokens = sheetGroup
+                    .Where(item =>
+                        TryParseCellReference(item.Cell.CellReference, out _, out var row)
+                        && row == templateRow)
+                    .Select(item => item.Sub.Token);
+                if (!IsRosterLoopRow(rowTokens))
+                    continue;
+
                 if (!TryPlaceExcelLoopMarker(
                         sheetGroup.Key,
                         templateRow,
@@ -530,7 +539,8 @@ internal static class TemplateRosterLoopPlanner
     private static bool ParagraphLooksLikeRowToken(Paragraph paragraph)
     {
         var text = WordTemplateAddressing.GetParagraphText(paragraph);
-        return text.Contains("{{.", StringComparison.Ordinal);
+        return text.Contains("{{.", StringComparison.Ordinal)
+            && !IsSignatoryFooterToken(text);
     }
 
     private static string Key(DocumentRegion.ExcelCell cell) =>
@@ -541,6 +551,31 @@ internal static class TemplateRosterLoopPlanner
         if (string.IsNullOrWhiteSpace(token))
             return false;
 
-        return !token.Contains("ds.", StringComparison.OrdinalIgnoreCase);
+        if (token.Contains("ds.", StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        return !IsSignatoryFooterToken(token);
+    }
+
+    /// <summary>
+    /// Signatory footer cells (ACPOS / ACFNM) are Header+Row in the catalog, so Excel yellow
+    /// often emits <c>{{.ACPOS}}</c>. Those are not a roster table — do not wrap them with
+    /// <c>{{#ds.rows}}</c>.
+    /// </summary>
+    private static bool IsSignatoryFooterToken(string token) =>
+        TemplateTokenSyntax.TryGetShortCode(token, out var code)
+        && ScanPlaceholderRoleCatalog.Resolve(code) == ScanPlaceholderRole.Signatory;
+
+    private static bool IsRosterLoopRow(IEnumerable<string> tokens)
+    {
+        var codes = new List<string>();
+        foreach (var token in tokens)
+        {
+            if (TemplateTokenSyntax.TryGetShortCode(token, out var code))
+                codes.Add(code);
+        }
+
+        return codes.Count >= 2 && codes.Exists(static c =>
+            ScanPlaceholderRoleCatalog.Resolve(c) != ScanPlaceholderRole.Signatory);
     }
 }

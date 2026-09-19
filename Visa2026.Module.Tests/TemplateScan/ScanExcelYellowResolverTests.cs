@@ -333,6 +333,101 @@ public class ScanExcelYellowResolverTests
     }
 
     [Fact]
+    public void Resolve_maps_bilimi_we_okan_yeri_to_level_then_institution()
+    {
+        var set = PlaceholderSet();
+        using var ms = BuildSanawStyleWorkbook();
+        var bytes = ms.ToArray();
+        var yellows = new ScanOfficeYellowExtractor().Extract(bytes, ScanSourceKind.Excel);
+        var fields = ScanExcelYellowResolver.Resolve(bytes, yellows, set);
+        var education = Assert.Single(
+            fields,
+            f => f.LabelText.Contains("Gündogar", StringComparison.OrdinalIgnoreCase)
+                || f.LabelText.Contains("Gundogar", StringComparison.OrdinalIgnoreCase));
+
+        Assert.Equal(["EGLV", "EGIN"], TemplateTokenSyntax.GetShortCodes(education.ProposedToken));
+        Assert.DoesNotContain("EGIY", education.ProposedToken, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("FMEIY", education.ProposedToken, StringComparison.OrdinalIgnoreCase);
+
+        var ordered = ScanReviewFieldOrder.Order(
+        [
+            new ScanDetectedField
+            {
+                FieldId = education.FieldId,
+                Box = ScanBoundingBox.FullPage,
+                PageIndex = 0,
+                LabelText = education.LabelText,
+                ProposedToken = education.ProposedToken,
+                Confidence = education.Confidence,
+                Scope = education.Scope,
+                SourceRegion = education.SourceRegion,
+            },
+        ]);
+        Assert.Equal(2, ordered.Count);
+        Assert.Equal(["EGLV"], TemplateTokenSyntax.GetShortCodes(ordered[0].ProposedToken));
+        Assert.Equal(["EGIN"], TemplateTokenSyntax.GetShortCodes(ordered[1].ProposedToken));
+    }
+
+    [Fact]
+    public void Resolve_maps_mohleti_linked_visa_to_number_type_and_start_date()
+    {
+        var set = new ApplicationProfilePlaceholderSetService(new UserReportPlaceholderCatalogService()).GetSet(
+            new ApplicationProfilePlaceholderSetQuery
+            {
+                Profile = new ApplicationProfile { RequirePersonVisa = true },
+                DataScope = ApplicationProfileTemplateDataScope.Both,
+                TemplateKind = ApplicationProfileTemplateKind.Excel,
+                OfferFullLibrary = true,
+            });
+        using var ms = new MemoryStream();
+        using (var wb = new XLWorkbook())
+        {
+            var ws = wb.AddWorksheet("Sanaw");
+            ws.Cell("K3").Value = "Möhleti we gezekligi";
+            ws.Cell("K4").Value = "A1635317 WP, 20.01.2026, 06.07.2026";
+            ws.Cell("K4").Style.Fill.BackgroundColor = XLColor.Yellow;
+            wb.SaveAs(ms);
+        }
+
+        var bytes = ms.ToArray();
+        var yellows = new ScanOfficeYellowExtractor().Extract(bytes, ScanSourceKind.Excel);
+        var fields = ScanExcelYellowResolver.Resolve(bytes, yellows, set);
+        var cell = Assert.Single(fields);
+        Assert.Equal(["VNUM", "VTYP", "VSTD", "VEDT"], TemplateTokenSyntax.GetShortCodes(cell.ProposedToken));
+        Assert.DoesNotContain("VNAT", cell.ProposedToken, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Resolve_maps_split_education_columns_to_eglv_then_egin()
+    {
+        var set = PlaceholderSet();
+        using var ms = new MemoryStream();
+        using (var wb = new XLWorkbook())
+        {
+            var ws = wb.AddWorksheet("Sanaw");
+            ws.Cell("H3").Value = "Bilimi";
+            ws.Cell("I3").Value = "Okan ýeri";
+            ws.Cell("H4").Value = "Ýokary";
+            ws.Cell("H4").Style.Fill.BackgroundColor = XLColor.Yellow;
+            ws.Cell("I4").Value = "Gündogar mediterian uniwersiteti";
+            ws.Cell("I4").Style.Fill.BackgroundColor = XLColor.Yellow;
+            wb.SaveAs(ms);
+        }
+
+        var bytes = ms.ToArray();
+        var yellows = new ScanOfficeYellowExtractor().Extract(bytes, ScanSourceKind.Excel);
+        var fields = ScanExcelYellowResolver.Resolve(bytes, yellows, set);
+        var level = Assert.Single(fields, f => f.LabelText.Contains("Ýokary", StringComparison.Ordinal)
+            || f.LabelText.Contains("Yokary", StringComparison.OrdinalIgnoreCase));
+        var institution = Assert.Single(fields, f => f.LabelText.Contains("Gündogar", StringComparison.Ordinal)
+            || f.LabelText.Contains("Gundogar", StringComparison.OrdinalIgnoreCase));
+        Assert.Equal("{{.EGLV}}", level.ProposedToken);
+        Assert.Equal("{{.EGIN}}", institution.ProposedToken);
+        Assert.DoesNotContain("EGIY", level.ProposedToken, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("EGIY", institution.ProposedToken, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void Resolve_maps_split_foreign_address_columns_to_pfac_then_pfad()
     {
         var set = PlaceholderSet();

@@ -212,6 +212,23 @@ public class TemplateRosterLoopPlannerTests
     }
 
     [Fact]
+    public void PlanExcelLoopsFromSubstitutions_skips_signatory_footer_row()
+    {
+        var subs = new List<TokenSubstitution>
+        {
+            new(new DocumentRegion.ExcelCell("Sanaw", "B5"), "{{.PLN}}"),
+            new(new DocumentRegion.ExcelCell("Sanaw", "C5"), "{{.PFNM}}"),
+            new(new DocumentRegion.ExcelCell("Sanaw", "B7"), "{{.ACPOS}}"),
+            new(new DocumentRegion.ExcelCell("Sanaw", "D7"), "{{.ACFNM}}"),
+        };
+
+        var loops = TemplateRosterLoopPlanner.PlanExcelLoopsFromSubstitutions(subs);
+        var loop = Assert.Single(loops);
+        Assert.Equal("A5", ((DocumentRegion.ExcelCell)loop.Start).CellReference);
+        Assert.Equal("A6", ((DocumentRegion.ExcelCell)loop.End).CellReference);
+    }
+
+    [Fact]
     public void PlanExcelLoopsFromSubstitutions_places_one_loop_per_distinct_row()
     {
         var subs = new List<TokenSubstitution>

@@ -3,6 +3,7 @@
 using System.Reflection;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.ApplicationPersonRoster;
+using Visa2026.Module.Services.TemplateScan;
 using Visa2026.Module.Services.UserReports;
 using Xunit;
 
@@ -139,7 +140,7 @@ public class UserReportPlaceholderRelatedBoTests
         Assert.Contains("EGCC", codes);
         Assert.Contains("EGYR", codes);
         Assert.Contains("EGSP", codes);
-        Assert.Contains("EGIY", codes);
+        Assert.DoesNotContain("EGIY", codes);
         Assert.DoesNotContain(education.Entries, e => e.RelatedBo != UserReportPlaceholderRelatedBo.Education);
     }
 
@@ -372,6 +373,107 @@ public class UserReportPlaceholderRelatedBoTests
         var flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase;
         Assert.NotNull(typeof(ApplicationRosterMergeLine).GetProperty(canonical, flags));
         Assert.NotNull(typeof(ApplicationProfileInstance).GetProperty(canonical, flags));
+    }
+
+    [Theory]
+    [InlineData("VNUM", "Visa_Number")]
+    [InlineData("VTYP", "Visa_TypeTm")]
+    [InlineData("VCTM", "Visa_CategoryTm")]
+    [InlineData("VNAT", "Visa_NumberAndType")]
+    [InlineData("VPLC", "Visa_IssuedPlaceTm")]
+    [InlineData("VISD", "Visa_IssueDateText")]
+    [InlineData("VSTD", "Visa_StartDateText")]
+    [InlineData("VEDT", "Visa_ExpirationDateText")]
+    [InlineData("VBLK", "Visa_DurationFrequencyBlock")]
+    public void Linked_active_visa_tokens_are_catalogued(string shortCode, string canonical)
+    {
+        var catalog = new UserReportPlaceholderCatalogService();
+        var entry = catalog.GetEntries().Single(e =>
+            string.Equals(e.ShortCode, shortCode, StringComparison.OrdinalIgnoreCase));
+
+        Assert.Equal(canonical, entry.CanonicalPath);
+        Assert.Equal(UserReportPlaceholderPack.PersonVisa, entry.Pack);
+        Assert.Equal(UserReportPlaceholderRelatedBo.VisaLinkedActive, entry.RelatedBo);
+        Assert.Equal(UserReportPlaceholderScope.Row, entry.Scope);
+        Assert.NotNull(typeof(ApplicationRosterMergeLine).GetProperty(
+            canonical, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase));
+    }
+
+    [Theory]
+    [InlineData("CVNB", "CancelVisa_NumberBlock")]
+    [InlineData("CVSB", "CancelVisa_StartDateBlock")]
+    [InlineData("CVEB", "CancelVisa_ExpirationDateBlock")]
+    public void Cancel_visa_block_tokens_are_catalogued(string shortCode, string canonical)
+    {
+        var catalog = new UserReportPlaceholderCatalogService();
+        var entry = catalog.GetEntries().Single(e =>
+            string.Equals(e.ShortCode, shortCode, StringComparison.OrdinalIgnoreCase));
+
+        Assert.Equal(canonical, entry.CanonicalPath);
+        Assert.Equal(UserReportPlaceholderPack.PersonVisa, entry.Pack);
+        Assert.Equal(UserReportPlaceholderRelatedBo.VisaCancel, entry.RelatedBo);
+        Assert.Equal(UserReportPlaceholderScope.Row, entry.Scope);
+        Assert.NotNull(typeof(ApplicationRosterMergeLine).GetProperty(
+            canonical, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase));
+    }
+
+    [Fact]
+    public void Grouped_manual_splits_linked_active_and_cancel_visa()
+    {
+        var groups = new UserReportPlaceholderCatalogService().GetGroupedEntries();
+        var linked = groups.Single(g => g.RelatedBo == UserReportPlaceholderRelatedBo.VisaLinkedActive);
+        var cancel = groups.Single(g => g.RelatedBo == UserReportPlaceholderRelatedBo.VisaCancel);
+
+        Assert.Equal("Visa — linked active", UserReportPlaceholderRelatedBoCatalog.DisplayNameEn(linked.RelatedBo));
+        Assert.Equal("Visa — cancel", UserReportPlaceholderRelatedBoCatalog.DisplayNameEn(cancel.RelatedBo));
+        Assert.Contains(linked.Entries, e => e.ShortCode == "VNUM");
+        Assert.Contains(linked.Entries, e => e.ShortCode == "VTYP");
+        Assert.Contains(linked.Entries, e => e.ShortCode == "VSTD");
+        Assert.Contains(linked.Entries, e => e.ShortCode == "VEDT");
+        Assert.DoesNotContain(linked.Entries, e => e.ShortCode is "CVNB" or "CVSB" or "CVEB");
+        Assert.Contains(cancel.Entries, e => e.ShortCode == "CVNB");
+        Assert.Contains(cancel.Entries, e => e.ShortCode == "CVSB");
+        Assert.Contains(cancel.Entries, e => e.ShortCode == "CVEB");
+        Assert.DoesNotContain(cancel.Entries, e => e.ShortCode == "VNUM");
+        Assert.DoesNotContain(groups, g =>
+            g.RelatedBo == UserReportPlaceholderRelatedBo.Visa
+            && g.Entries.Any(e => e.ShortCode is "VNUM" or "CVNB"));
+        Assert.DoesNotContain(linked.Entries, e => e.ShortCode == "VNAT");
+    }
+
+    [Fact]
+    public void Grouped_manual_matches_review_add_hide_joined_and_search()
+    {
+        var catalog = new UserReportPlaceholderCatalogService();
+        var officer = catalog.GetGroupedEntries();
+        var review = ScanPlaceholderChoiceList.RemainingGroups(
+            catalog.GetEntries(),
+            Array.Empty<string>());
+
+        Assert.Equal(
+            review.Select(g => g.RelatedBo),
+            officer.Select(g => g.RelatedBo));
+        foreach (var (addGroup, manualGroup) in review.Zip(officer))
+        {
+            Assert.Equal(
+                addGroup.Entries.Select(e => e.ShortCode),
+                manualGroup.Entries.Select(e => e.ShortCode));
+        }
+
+        Assert.DoesNotContain(officer.SelectMany(g => g.Entries), e => e.ShortCode == "EGIY");
+        Assert.DoesNotContain(officer.SelectMany(g => g.Entries), e => e.ShortCode == "VNAT");
+
+        var visaStart = catalog.GetGroupedEntries(new UserReportPlaceholderManualQuery
+        {
+            Search = "visa start",
+        });
+        Assert.Contains(visaStart.SelectMany(g => g.Entries), e => e.ShortCode == "VSTD");
+
+        var joined = catalog.GetGroupedEntries(new UserReportPlaceholderManualQuery
+        {
+            Search = "VNAT",
+        });
+        Assert.Contains(joined.SelectMany(g => g.Entries), e => e.ShortCode == "VNAT");
     }
 
     [Fact]

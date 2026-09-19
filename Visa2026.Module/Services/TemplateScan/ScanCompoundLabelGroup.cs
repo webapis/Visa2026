@@ -18,7 +18,7 @@ public static class ScanCompoundLabelGroup
 
     private static readonly HashSet<string> CompositeShortCodes = new(StringComparer.OrdinalIgnoreCase)
     {
-        "EGIY", "RPCL", "CHPL", "ACRGL", "RPPL",
+        "EGIY", "VNAT", "RPCL", "CHPL", "ACRGL", "RPPL",
     };
 
     public static UserReportPlaceholderRelatedBo Identify(
@@ -74,8 +74,10 @@ public static class ScanCompoundLabelGroup
             Add(UserReportPlaceholderRelatedBo.AddressOfResidence, 90);
         if (LooksLikeHiredPerson(stem))
             Add(UserReportPlaceholderRelatedBo.Person, 92);
+        if (LooksLikeCancelVisa(stem))
+            Add(UserReportPlaceholderRelatedBo.VisaCancel, 94);
         if (LooksLikeVisa(stem))
-            Add(UserReportPlaceholderRelatedBo.Visa, 90);
+            Add(UserReportPlaceholderRelatedBo.VisaLinkedActive, 90);
         if (LooksLikeTravel(stem))
             Add(UserReportPlaceholderRelatedBo.Travel, 90);
         if (stem.Contains("pasport", StringComparison.Ordinal))
@@ -273,7 +275,14 @@ public static class ScanCompoundLabelGroup
 
     private static bool LooksLikeVisa(string stem) =>
         stem.Contains("wiza", StringComparison.Ordinal)
-        && !stem.Contains("giren", StringComparison.Ordinal);
+        && !stem.Contains("giren", StringComparison.Ordinal)
+        && !LooksLikeCancelVisa(stem);
+
+    private static bool LooksLikeCancelVisa(string stem) =>
+        (stem.Contains("wiza", StringComparison.Ordinal)
+            && (stem.Contains("yatyryl", StringComparison.Ordinal)
+                || stem.Contains("cancel", StringComparison.Ordinal)))
+        || stem.Contains("yatyrilyan wiza", StringComparison.Ordinal);
 
     private static bool LooksLikeTravel(string stem) =>
         stem.Contains("giren", StringComparison.Ordinal);

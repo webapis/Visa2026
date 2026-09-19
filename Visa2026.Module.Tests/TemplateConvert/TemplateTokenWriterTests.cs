@@ -331,6 +331,55 @@ public class TemplateTokenWriterTests
     }
 
     [Fact]
+    public void Excel_loop_close_does_not_park_between_signatory_tokens()
+    {
+        var source = TemplateConvertFixtures.CreateExcelSheet(
+            "Sanaw",
+            ("B5", "Ozer"),
+            ("C5", "Arita"),
+            ("B6", "şahamçasynyň müdiri"),
+            ("D6", "Mehmet ÇIRAK"));
+
+        var result = ExcelTemplateTokenWriter.Write(
+            source,
+            new[]
+            {
+                new TokenSubstitution(new DocumentRegion.ExcelCell("Sanaw", "B5"), "{{.PLN}}"),
+                new TokenSubstitution(new DocumentRegion.ExcelCell("Sanaw", "C5"), "{{.PFNM}}"),
+                new TokenSubstitution(new DocumentRegion.ExcelCell("Sanaw", "B6"), "{{ds.ACPOS}}"),
+                new TokenSubstitution(new DocumentRegion.ExcelCell("Sanaw", "D6"), "{{ds.ACFNM}}"),
+            },
+            new[]
+            {
+                new LoopMarker(
+                    new DocumentRegion.ExcelCell("Sanaw", "A5"),
+                    new DocumentRegion.ExcelCell("Sanaw", "A6"),
+                    "ds.rows"),
+            });
+
+        Assert.Equal("{{#ds.rows}}", TemplateConvertFixtures.GetCellText(result.Content, "Sanaw", "A5"));
+        Assert.Equal("{{.PLN}}", TemplateConvertFixtures.GetCellText(result.Content, "Sanaw", "B5"));
+        Assert.Equal("{{ds.ACPOS}}", TemplateConvertFixtures.GetCellText(result.Content, "Sanaw", "B6"));
+        Assert.Equal("{{ds.ACFNM}}", TemplateConvertFixtures.GetCellText(result.Content, "Sanaw", "D6"));
+        Assert.DoesNotContain(
+            "{{/ds.rows}}",
+            TemplateConvertFixtures.GetCellText(result.Content, "Sanaw", "A6"),
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "{{#ds.rows}}",
+            TemplateConvertFixtures.GetCellText(result.Content, "Sanaw", "B6")
+                + TemplateConvertFixtures.GetCellText(result.Content, "Sanaw", "C6")
+                + TemplateConvertFixtures.GetCellText(result.Content, "Sanaw", "D6"),
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "{{/ds.rows}}",
+            TemplateConvertFixtures.GetCellText(result.Content, "Sanaw", "B6")
+                + TemplateConvertFixtures.GetCellText(result.Content, "Sanaw", "C6")
+                + TemplateConvertFixtures.GetCellText(result.Content, "Sanaw", "D6"),
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Excel_loop_markers_use_generator_syntax()
     {
         var result = _writer.Apply(new TemplateTokenWriteRequest

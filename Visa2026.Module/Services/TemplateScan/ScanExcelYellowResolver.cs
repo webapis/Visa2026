@@ -1,5 +1,6 @@
 #nullable enable
 
+using System.Text.RegularExpressions;
 using ClosedXML.Excel;
 using Visa2026.Module.Services.TemplateConvert;
 using Visa2026.Module.Services.UserReports;
@@ -200,7 +201,9 @@ public static class ScanExcelYellowResolver
         {
             var compound = IsForeignAddressProfile(profile)
                 ? InferForeignAddressCell(cellText, header, profile, headerScores, placeholderSet, usageScope, scope)
-                : InferCompoundCell(cellText, header, profile, headerScores, placeholderSet, usageScope, scope);
+                : IsVisaValidityProfile(profile)
+                    ? InferVisaValidityOrRequestedCell(cellText, header, profile, headerScores, placeholderSet, usageScope, scope)
+                    : InferCompoundCell(cellText, header, profile, headerScores, placeholderSet, usageScope, scope);
             return previousPassportBand ? RemapInferenceToPrevious(compound) : compound;
         }
 
@@ -276,6 +279,94 @@ public static class ScanExcelYellowResolver
     private static bool IsForeignAddressProfile(ScanExcelColumnProfiles.Profile profile) =>
         profile.ShortCodes.Any(static c => c.Equals("PFAC", StringComparison.OrdinalIgnoreCase))
         && profile.ShortCodes.Any(static c => c.Equals("PFAD", StringComparison.OrdinalIgnoreCase));
+
+    private static bool IsVisaValidityProfile(ScanExcelColumnProfiles.Profile profile) =>
+        profile.ShortCodes.Any(static c => c.Equals("VNUM", StringComparison.OrdinalIgnoreCase))
+        && profile.ShortCodes.Any(static c => c.Equals("VSTD", StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>
+    /// <c>Möhleti we gezekligi</c> is requested period/category when the yellow is
+    /// Çakylyk / gezeklik, otherwise linked visa number, type, start, end — never joined VNAT.
+    /// </summary>
+    private static CellInference InferVisaValidityOrRequestedCell(
+        string cellText,
+        string? header,
+        ScanExcelColumnProfiles.Profile profile,
+        IReadOnlyList<(UserReportPlaceholderCatalogEntry Entry, int Score)> headerScores,
+        ApplicationProfilePlaceholderSet placeholderSet,
+        UserReportPlaceholderScope usageScope,
+        ScanFieldScope scope)
+    {
+        var text = (cellText ?? string.Empty).Trim();
+        if (LooksLikeRequestedVisaPeriod(text))
+        {
+            var requested = new ScanExcelColumnProfiles.Profile(
+                ["mohleti we gezekligi"],
+                ["AVPRD", "AVCAT"],
+                true,
+                LiteralPrefix: "cakylyk ");
+            return InferCompoundCell(text, header, requested, headerScores, placeholderSet, usageScope, scope);
+        }
+
+        var tokenParts = new List<string>();
+        var alternatives = new List<ScanTokenAlternative>();
+
+        void Add(string code, string reason)
+        {
+            if (!placeholderSet.Contains(code))
+                return;
+            var entry = placeholderSet.Allowed.First(e =>
+                string.Equals(e.ShortCode, code, StringComparison.OrdinalIgnoreCase));
+            var token = entry.BuildWordToken(usageScope);
+            tokenParts.Add(token);
+            alternatives.Add(new ScanTokenAlternative(token, code, 96, reason));
+        }
+
+        var number = ScanCompoundYellowParts.PassportNumberShape.Match(text);
+        if (number.Success)
+            Add("VNUM", "Linked visa number");
+
+        var type = MatchVisaTypeCode(text, number.Success ? number.Index + number.Length : 0);
+        if (!string.IsNullOrEmpty(type))
+            Add("VTYP", "Linked visa type");
+
+        var dates = ScanCompoundYellowParts.DateLikeShape.Matches(text)
+            .Select(static m => m.Value.Trim())
+            .ToList();
+        if (dates.Count >= 1)
+            Add("VSTD", "Linked visa start date");
+        if (dates.Count >= 2)
+            Add("VEDT", "Linked visa end date");
+
+        if (tokenParts.Count == 0)
+            return InferCompoundCell(cellText, header, profile, headerScores, placeholderSet, usageScope, scope);
+
+        var cellTemplate = tokenParts.Count == 1
+            ? tokenParts[0]
+            : string.Join(", ", tokenParts);
+        var whole = new ScanTokenAlternative(cellTemplate, "COMPOUND", 96, "Linked visa number, type, dates");
+        var ranked = new List<ScanTokenAlternative> { whole };
+        ranked.AddRange(alternatives);
+        return new CellInference(cellTemplate, ScanFieldConfidence.High, scope, ranked.Take(6).ToList());
+    }
+
+    private static bool LooksLikeRequestedVisaPeriod(string text)
+    {
+        var folded = TemplateTextNormalizer.NormalizeFolded(text);
+        return folded.Contains("cakylyk", StringComparison.Ordinal)
+            || (folded.Contains("gezeklik", StringComparison.Ordinal)
+                && (folded.Contains("ay", StringComparison.Ordinal) || folded.Contains("aý", StringComparison.Ordinal)));
+    }
+
+    private static string? MatchVisaTypeCode(string text, int afterNumber)
+    {
+        var slice = afterNumber >= 0 && afterNumber < text.Length
+            ? text[afterNumber..]
+            : text;
+        foreach (Match hit in Regex.Matches(slice, @"\b(WP|FM|BS|EX|OF)\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+            return hit.Value.Trim();
+        return null;
+    }
 
     /// <summary>
     /// Comma in the yellow is a second placeholder: <c>TUR, street…</c> → PFAC + PFAD.
@@ -671,16 +762,20 @@ internal static class ScanExcelColumnProfiles
         new(["pasport gornusi", "pasport tipi", "passport type"], ["PPTP"], false),
         new(["pasport edarasy", "berlen edara", "authority"], ["PPAT"], false),
         new(["berlen yurt", "pasport yurdy", "issued country"], ["PPCC", "PPCT"], true),
-        new(["bilimi we okan yeri", "bilimi", "egitim"], ["FMEIY", "EGLV", "EGIY"], true),
+        new(["bilimi we okan yeri", "bilim we okuw"], ["EGLV", "EGIN"], true),
+        new(["bilimi", "egitim", "education level"], ["EGLV"], false),
         new(["okan yeri", "okuw jayy", "institution"], ["EGIN"], false),
         new(["bitiren yyl", "graduation year", "mezuniyet"], ["EGYR"], false),
-        new(["bilimine gora hunari", "hunari", "specialty"], ["FMESP", "EGSP"], false),
+        new(["hunari we bilimi", "bilimine gora hunari", "hunari", "specialty"], ["FMESP", "EGSP"], false),
         new(["wezipesi", "wezepe", "pozisyon", "position"], ["FMWZP", "POSN"], false),
         new(["onki islan yerleri", "previous workplaces"], ["PWTM"], false),
         new(["wiza ucin masgala", "family members for visa", "visa application family"], ["PVFM"], false),
         new(["gelmeginin maksady", "gelmegin maksady", "purpose of arrival"], ["RGEL"], false),
         new(["cagyran tarap", "inviting party"], ["ACNAM"], false),
-        new(["mohleti we gezekligi", "mohleti we gerekligi"], ["VNAT", "VTYP", "VSTD", "VEDT"], true),
+        new(["mohleti we gezekligi", "mohleti we gerekligi"], ["VNUM", "VTYP", "VSTD", "VEDT"], true),
+        new(["wiza belgisi", "visa number"], ["VNUM"], false),
+        new(["wiza tipi", "visa type"], ["VTYP"], false),
+        new(["baslanyan senesi", "wiza baslanyan", "visa start"], ["VSTD"], false),
         new(["gezeklik", "wiza"], ["AVPRD", "AVCAT"], true, LiteralPrefix: "cakylyk "),
         new(["turkmenistandaky salgysy", "turkmenistandaky", "yasayan salgysy", "yasayys salgysy", "ikamet adresi", "residence address"], ["ADRS"], false),
         new(["is saparynda boljak salgysy", "is saparynda boljak", "is saparyna baryan yer", "baryan yer", "business trip address", "business trip destination"], ["BTAD"], false),
