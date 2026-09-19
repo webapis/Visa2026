@@ -137,6 +137,7 @@ flowchart LR
 | Document copies preview fails on roster line | `TryBuildMergedPdfForRoster` | Roster IDs are `ApplicationPerson`, not `ApplicationItem` |
 | Person detail crashes after Open from case | `PersonDetailOpenHelper` | Do not dispose ObjectSpace before `ShowView` |
 | Case summary tiles empty / Edit does not save | Profile `Require*` off (number/date are always shown); officer-shell `HeaderFieldChanged`; post-prep lock on type/contract only | `ApplicationWorkspaceCaseHeaderFieldsHelper`; `OfficerShellPropertyEditor.SaveHeaderFieldAsync` |
+| Unchecking the last border zone rechecks an earlier etrap | Empty draft was rehydrated from the saved string. Stop F5, rebuild, hard-refresh. Clear all → **Selected: 0**, OK stores `Ýok` | `CommaSeparatedMultiSelectComponent`; `BorderZoneLocationField` |
 | Create still lands on empty Case summary | Picker must finish on **Case summary** (step 4), not Organization | `ApplicationProfilePickerCaseSummaryDraft`; Organization is **Continue** |
 | Wizard still has Company, Signatories | Removed 2026-09-03 — not profile config | Configuration → Organization catalogs; create **Choose Organization**; case Organization |
 | Template overview lists Approval legs catalog | Removed — shared catalog, not profile config | **Choose Approval legs** (pick / Catalog / Make default) |

@@ -62,13 +62,21 @@
     private HashSet<string> _draftSelectedItems = new(StringComparer.OrdinalIgnoreCase);
     private List<string> _catalogItems = [];
     private bool _popupVisible;
+    private string? _syncedValue;
     private string _newItemName = string.Empty;
     private string _statusMessage = string.Empty;
     private bool _statusIsError;
 
     protected override void OnParametersSet()
     {
+        if (_popupVisible)
+            return;
+
+        if (string.Equals(Value, _syncedValue, StringComparison.Ordinal) && _catalogItems.Count > 0)
+            return;
+
         SyncFromValue();
+        _syncedValue = Value;
         RefreshCatalog();
     }
 
@@ -119,6 +127,7 @@
         _draftSelectedItems = CloneSet(_selectedItems);
         var formatted = CommaSeparatedSelectionHelper.FormatSelected(_selectedItems, Settings.NoneValue);
         _displayText = FormatDisplay(formatted);
+        _syncedValue = formatted;
         _popupVisible = false;
         CommitCatalogChanges();
         RefreshCatalog();

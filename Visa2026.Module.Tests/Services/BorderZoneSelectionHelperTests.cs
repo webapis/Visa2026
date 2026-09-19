@@ -18,6 +18,19 @@ public class BorderZoneSelectionHelperTests
     }
 
     [Fact]
+    public void FormatSelected_EmptyDraftIsYok_NotAPreviousZone()
+    {
+        Assert.Equal(
+            CommaSeparatedSelectionHelper.NoneValue,
+            CommaSeparatedSelectionHelper.FormatSelected(Array.Empty<string>()));
+        Assert.Equal(
+            CommaSeparatedSelectionHelper.NoneValue,
+            CommaSeparatedSelectionHelper.FormatSelected(new[] { "Farap etrap" }.Where(_ => false)));
+        Assert.Empty(CommaSeparatedSelectionHelper.ParseSelected("Ýok"));
+        Assert.Empty(CommaSeparatedSelectionHelper.ParseSelected(string.Empty));
+    }
+
+    [Fact]
     public void ToggleLabel_AddsAndRemovesZones()
     {
         var stored = CommaSeparatedSelectionHelper.ToggleLabel(null, "Ahal", true);

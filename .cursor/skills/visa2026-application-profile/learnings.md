@@ -1,4 +1,13 @@
 
+### 2026-09-19 — Cannot uncheck the last border zone (Etrek comes back)
+
+- **Need**: Case summary Border zones popup. Unchecking the last box (e.g. Farap) rechecked a previously cleared zone (Etrek). Officers could not clear all zones.
+- **Cause**: Popup treated an empty draft as “not initialized” and copied committed `SelectedItems` back. Case-summary `BorderZoneLocationField` also re-parsed `Value` on every render and reset the draft.
+- **Fix**: Seed the popup draft once when it opens. Empty draft = none selected (OK stores `Ýok`). Do not `SyncFromValue` while the popup is open.
+- **Officer**: Stop F5, rebuild Blazor host, hard-refresh. Open Border zones, uncheck the last etrap — Selected: 0, OK saves `Ýok`.
+- **Prevent**: Do not rehydrate checkbox draft from the saved string after the officer clears the last item.
+- **Cross-skill**: —
+
 ### 2026-09-18 — RequirePersonVisa visible ≠ Resminamalar Visa Ready
 
 - **Need**: After enabling Active Visa on change_workpermit, SANAW still CHECK empty Visa_*.

@@ -200,6 +200,7 @@
     [Parameter] public string DoneManageCatalogButtonText { get; set; } = "Done";
 
     private HashSet<string> _popupDraft = new(StringComparer.OrdinalIgnoreCase);
+    private bool _popupDraftReady;
     private bool _catalogManageMode;
     private bool _editPopupVisible;
     private bool _deleteConfirmVisible;
@@ -235,11 +236,16 @@
             _catalogManageMode = false;
             _editPopupVisible = false;
             _deleteConfirmVisible = false;
+            _popupDraftReady = false;
+            return;
         }
 
-        if (PopupVisible && _popupDraft.Count == 0 && (DraftSelectedItems?.Count > 0 || SelectedItems?.Count > 0))
+        // Seed once when the popup opens. An empty draft is "none selected" — do not
+        // copy committed SelectedItems back (that rechecks the last saved zone).
+        if (!_popupDraftReady)
         {
             _popupDraft = CloneSet(DraftSelectedItems?.Count > 0 ? DraftSelectedItems : SelectedItems);
+            _popupDraftReady = true;
         }
     }
 
@@ -263,6 +269,7 @@
     private async Task OpenPopupAsync()
     {
         _popupDraft = CloneSet(SelectedItems);
+        _popupDraftReady = true;
         _catalogManageMode = false;
         _editPopupVisible = false;
         _deleteConfirmVisible = false;
