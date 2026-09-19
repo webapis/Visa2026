@@ -7,7 +7,7 @@ namespace Visa2026.Module.Services.ApplicationWorkspace;
 
 /// <summary>
 /// During Office preparation, empty Case summary Use fields (red tiles) block
-/// Progress / documents / Resminamalar / SLA. People and links stay open.
+/// Progress / documents / Resminamalar / SLA. People, links, and Organization stay open.
 /// Process number is an Advance rule, not this gate.
 /// </summary>
 public static class ApplicationWorkspaceCaseSummaryCompletenessGate

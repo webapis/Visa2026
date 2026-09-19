@@ -9,6 +9,7 @@ const TAB_META = [
   ['documents', 'Document copies', 'bi-files'],
   ['resminamalar', 'Resminamalar', 'bi-folder2-open'],
   ['sla', 'SLA & deadlines', 'bi-clock-history'],
+  ['organization', 'Organization', 'bi-building'],
 ];
 
 const PERSON_COLORS = ['#7c3aed', '#0f9d58', '#ea580c', '#2563eb', '#db2777'];
@@ -199,6 +200,25 @@ export function renderCaseOverview(c, issuedFocusKey) {
     </section>
     ${issuedCard}
     <p class="cw-foot">Application Profile: ${esc(c.profileName || tplLabel(c.tplKey))}</p>
+  </div>`;
+}
+
+export function renderCaseOrganization() {
+  return `<div class="cw-overview">
+    <section class="cw-card">
+      <div class="cw-card__title-row">
+        <div>
+          <h2 class="cw-card__title">Organization</h2>
+          <p class="cw-summary-sub">Letterhead for this application · live catalog records</p>
+        </div>
+      </div>
+      <div class="cw-org-callout">This case is related to the selected catalog records. Other cases may use different rows.</div>
+      <div class="cw-org-grid">
+        <dl class="cw-org-dl"><h3 class="cw-org-col-title">Company</h3></dl>
+        <dl class="cw-org-dl"><h3 class="cw-org-col-title">Authorized signatory</h3></dl>
+        <dl class="cw-org-dl"><h3 class="cw-org-col-title">Authorized representative</h3></dl>
+      </div>
+    </section>
   </div>`;
 }
 

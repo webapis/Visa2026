@@ -1,4 +1,22 @@
 
+### 2026-09-19 — Organization is last workspace nav
+
+- **Need**: Gurama (Organization) letterhead on its own section, last left-nav item — it changes less often than case summary.
+- **Cause**: Company / Signatory / Representative lived on Overview under the case-summary tiles.
+- **Fix**: Last `CaseTabs` key `organization`. Card lifted to `RenderOrganization`. Wide main (no rail). Office-prep gate does **not** block this tab (same as People).
+- **Officer**: Stop F5, rebuild Blazor host, hard-refresh. Overview no longer shows Gurama. Last nav is **Gurama**.
+- **Prevent**: Do not put the letterhead card back on Overview. Do not add Organization to `IsProcessTab`.
+- **Cross-skill**: —
+
+### 2026-09-19 — Turkmen Overview nav is Ýüztutma
+
+- **Need**: Case workspace left-nav Overview in Türkmençe must be **Ýüztutma**, not Syn.
+- **Cause**: `ApplicationProfileInstance.Workspace.Overview` tk-TM was Syn.
+- **Fix**: tk-TM → **Ýüztutma** (JSON + generated catalog).
+- **Officer**: Hard-refresh Türkmençe. First nav item reads **Ýüztutma**.
+- **Prevent**: Do not use Syn for this workspace Overview tab.
+- **Cross-skill**: —
+
 ### 2026-09-19 — Widen case workspace left nav
 
 - **Need**: Instance workspace left nav wide enough for Türkmençe labels (Ýüztutmanyň soň ýagdaýy) without wrapping.

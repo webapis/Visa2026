@@ -452,6 +452,7 @@ When any linked Application reaches lock state **A** (first progress beyond offi
 | Case summary instance Use fields (overview tiles + Edit/Done) | **Done** |
 | Case Organization letterhead (instance copy) | **Done** (2026-09-03) then superseded |
 | Case Organization catalogs (live FKs, tenant Default) | **Done** (2026-09-03) |
+| Case Organization last left-nav section (off Overview) | **Done** (2026-09-19) |
 | Configuration Organization catalogs page (+ New) | **Done** (2026-09-03); **hidden from left nav** |
 | Inline organization catalog New/Edit (create + case) | **Done** (2026-09-03) |
 | Wizard Company, Signatories step removed | **Done** (2026-09-03) |

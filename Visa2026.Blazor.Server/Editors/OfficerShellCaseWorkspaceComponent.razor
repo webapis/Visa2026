@@ -321,6 +321,9 @@
                         case "sla":
                             @RenderSla(view)
                             break;
+                        case "organization":
+                            @RenderOrganization(view)
+                            break;
                     }
                 }
             </div>
@@ -344,6 +347,7 @@
         ("documents", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Documents"), "📄"),
         ("resminamalar", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Resminamalar"), "📦"),
         ("sla", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Sla"), "⏱"),
+        ("organization", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Organization"), "🏢"),
     ];
 
     private static readonly string[] PersonColors =
@@ -449,7 +453,7 @@
             ? Array.Empty<Guid>()
             : _selectedDocumentPersonIds.ToList();
 
-    private static bool IsWideTab(string tab) => tab is "documents" or "resminamalar";
+    private static bool IsWideTab(string tab) => tab is "documents" or "resminamalar" or "organization";
 
     private string? EffectivePeopleRecordKey =>
         !string.IsNullOrWhiteSpace(_peopleRecordKey)
@@ -1483,107 +1487,6 @@
                 }
             </section>
             <section class="cw-card">
-                <div class="cw-card__title-row">
-                    <div>
-                        <h2 class="cw-card__title">@Msg("ApplicationProfileInstance.Workspace.Organization")</h2>
-                        <p class="cw-summary-sub">@(IsOrganizationEditing
-                            ? Msg("ApplicationProfileInstance.Workspace.OrgSubEdit")
-                            : Msg("ApplicationProfileInstance.Workspace.OrgSub"))</p>
-                    </div>
-                    @if (IsOrganizationEditing)
-                    {
-                        <button type="button" class="cw-summary-mode-btn" @onclick="FinishOrganizationEdit">@Msg("ApplicationProfileInstance.Workspace.Done")</button>
-                    }
-                    else
-                    {
-                        <button type="button" class="cw-summary-mode-btn" @onclick="StartOrganizationEdit">@Msg("ApplicationProfileInstance.Workspace.Edit")</button>
-                    }
-                </div>
-                <div class="cw-org-callout">
-                    @(IsOrganizationEditing
-                        ? Msg("ApplicationProfileInstance.Workspace.OrgCalloutEdit")
-                        : Msg("ApplicationProfileInstance.Workspace.OrgCallout"))
-                </div>
-                @if (!string.IsNullOrWhiteSpace(OrganizationStatusMessage))
-                {
-                    <p class="cw-summary-status @(OrganizationStatusIsError ? "is-error" : null)">@OrganizationStatusMessage</p>
-                }
-                @{
-                    var org = view.OrganizationLetterhead;
-                }
-                @if (IsOrganizationEditing)
-                {
-                    <div class="cw-org-grid">
-                        <div>
-                            @RenderOrgColHead(Msg("ApplicationProfileInstance.Picker.Company"), OrganizationCatalogHelper.Company, org.CompanyId)
-                            @RenderOrgCatalogSelect(OrganizationCatalogHelper.Company, org.CompanyId, org.CompanyOptions)
-                            <div class="cw-org-preview">
-                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.Name"), org.CompanyName)
-                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.Code"), org.CompanyCode)
-                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.Phone"), org.CompanyPhone)
-                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.Address"), org.CompanyAddress, multiline: true)
-                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.Email"), org.CompanyEmail)
-                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.TaxInformation"), org.CompanyTaxInformation)
-                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.RegistrationDate"), org.CompanyRegistrationDateText)
-                            </div>
-                        </div>
-                        <div>
-                            @RenderOrgColHead(Msg("ApplicationProfileInstance.Picker.Signatory"), OrganizationCatalogHelper.Signatory, org.SignatoryId)
-                            @RenderOrgCatalogSelect(OrganizationCatalogHelper.Signatory, org.SignatoryId, org.SignatoryOptions)
-                            <div class="cw-org-preview">
-                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.FullName"), org.SignatoryFullName)
-                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.PositionTm"), org.SignatoryPositionTitleTm)
-                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.PassportNumber"), org.SignatoryPassportNumber)
-                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.PassportAuthority"), org.SignatoryPassportAuthority)
-                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.PassportIssueDate"), org.SignatoryPassportIssueDateText)
-                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.PassportExpirationDate"), org.SignatoryPassportExpirationDateText)
-                            </div>
-                        </div>
-                        <div>
-                            @RenderOrgColHead(Msg("ApplicationProfileInstance.Picker.Representative"), OrganizationCatalogHelper.Representative, org.RepresentativeId)
-                            @RenderOrgCatalogSelect(OrganizationCatalogHelper.Representative, org.RepresentativeId, org.RepresentativeOptions)
-                            <div class="cw-org-preview">
-                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.FullName"), org.RepresentativeFullName)
-                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.PositionTm"), org.RepresentativePositionTitleTm)
-                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.Phone"), org.RepresentativePhone)
-                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.PassportNumber"), org.RepresentativePassportNumber)
-                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.PassportAuthority"), org.RepresentativePassportAuthority)
-                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.PassportIssueDate"), org.RepresentativePassportIssueDateText)
-                            </div>
-                        </div>
-                    </div>
-                    <p class="cw-summary-foot">@Msg("ApplicationProfileInstance.Workspace.OrgFoot")</p>
-                }
-                else
-                {
-                    <div class="cw-org-grid">
-                        <dl class="cw-org-dl">
-                            <h3 class="cw-org-col-title">@Msg("ApplicationProfileInstance.Picker.Company")</h3>
-                            <div><dt>@Msg("ApplicationProfileInstance.Org.Name")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyName)</dd></div>
-                            <div><dt>@Msg("ApplicationProfileInstance.Org.Code")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyCode)</dd></div>
-                            <div><dt>@Msg("ApplicationProfileInstance.Org.Phone")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyPhone)</dd></div>
-                            <div><dt>@Msg("ApplicationProfileInstance.Org.Address")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyAddress)</dd></div>
-                            <div><dt>@Msg("ApplicationProfileInstance.Org.Email")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyEmail)</dd></div>
-                            <div><dt>@Msg("ApplicationProfileInstance.Org.Tax")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyTaxInformation)</dd></div>
-                        </dl>
-                        <dl class="cw-org-dl">
-                            <h3 class="cw-org-col-title">@Msg("ApplicationProfileInstance.Picker.Signatory")</h3>
-                            <div><dt>@Msg("ApplicationProfileInstance.Org.FullName")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.SignatoryFullName)</dd></div>
-                            <div><dt>@Msg("ApplicationProfileInstance.Org.PositionTm")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.SignatoryPositionTitleTm)</dd></div>
-                            <div><dt>@Msg("ApplicationProfileInstance.Org.PassportNumber")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.SignatoryPassportNumber)</dd></div>
-                        </dl>
-                        <dl class="cw-org-dl">
-                            <h3 class="cw-org-col-title">@Msg("ApplicationProfileInstance.Picker.Representative")</h3>
-                            <div><dt>@Msg("ApplicationProfileInstance.Org.FullName")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.RepresentativeFullName)</dd></div>
-                            <div><dt>@Msg("ApplicationProfileInstance.Org.PositionTm")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.RepresentativePositionTitleTm)</dd></div>
-                            <div><dt>@Msg("ApplicationProfileInstance.Org.Phone")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.RepresentativePhone)</dd></div>
-                            <div><dt>@Msg("ApplicationProfileInstance.Org.PassportNumber")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.RepresentativePassportNumber)</dd></div>
-                        </dl>
-                    </div>
-                    <p class="cw-summary-foot">@Msg("ApplicationProfileInstance.Workspace.OrgFootView")</p>
-                }
-            </section>
-            <section class="cw-card">
                 <h2 class="cw-card__title">@Msg("ApplicationProfileInstance.Workspace.ProgressTitle")</h2>
                 <div class="cw-prog-stepper">
                 @for (var i = 0; i < view.ProgressSteps.Count; i++)
@@ -1771,6 +1674,113 @@
                 </section>
             }
             <p class="cw-foot">@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ProfileNamed", string.IsNullOrWhiteSpace(view.Chrome.ProfileTemplateName) ? Snapshot!.Profile.Title : view.Chrome.ProfileTemplateName)</p>
+        </div>;
+    };
+
+    private RenderFragment RenderOrganization(ApplicationWorkspaceCaseView view) => __builder =>
+    {
+        <div class="cw-overview">
+            <section class="cw-card">
+                <div class="cw-card__title-row">
+                    <div>
+                        <h2 class="cw-card__title">@Msg("ApplicationProfileInstance.Workspace.Organization")</h2>
+                        <p class="cw-summary-sub">@(IsOrganizationEditing
+                            ? Msg("ApplicationProfileInstance.Workspace.OrgSubEdit")
+                            : Msg("ApplicationProfileInstance.Workspace.OrgSub"))</p>
+                    </div>
+                    @if (IsOrganizationEditing)
+                    {
+                        <button type="button" class="cw-summary-mode-btn" @onclick="FinishOrganizationEdit">@Msg("ApplicationProfileInstance.Workspace.Done")</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="cw-summary-mode-btn" @onclick="StartOrganizationEdit">@Msg("ApplicationProfileInstance.Workspace.Edit")</button>
+                    }
+                </div>
+                <div class="cw-org-callout">
+                    @(IsOrganizationEditing
+                        ? Msg("ApplicationProfileInstance.Workspace.OrgCalloutEdit")
+                        : Msg("ApplicationProfileInstance.Workspace.OrgCallout"))
+                </div>
+                @if (!string.IsNullOrWhiteSpace(OrganizationStatusMessage))
+                {
+                    <p class="cw-summary-status @(OrganizationStatusIsError ? "is-error" : null)">@OrganizationStatusMessage</p>
+                }
+                @{
+                    var org = view.OrganizationLetterhead;
+                }
+                @if (IsOrganizationEditing)
+                {
+                    <div class="cw-org-grid">
+                        <div>
+                            @RenderOrgColHead(Msg("ApplicationProfileInstance.Picker.Company"), OrganizationCatalogHelper.Company, org.CompanyId)
+                            @RenderOrgCatalogSelect(OrganizationCatalogHelper.Company, org.CompanyId, org.CompanyOptions)
+                            <div class="cw-org-preview">
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.Name"), org.CompanyName)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.Code"), org.CompanyCode)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.Phone"), org.CompanyPhone)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.Address"), org.CompanyAddress, multiline: true)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.Email"), org.CompanyEmail)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.TaxInformation"), org.CompanyTaxInformation)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.RegistrationDate"), org.CompanyRegistrationDateText)
+                            </div>
+                        </div>
+                        <div>
+                            @RenderOrgColHead(Msg("ApplicationProfileInstance.Picker.Signatory"), OrganizationCatalogHelper.Signatory, org.SignatoryId)
+                            @RenderOrgCatalogSelect(OrganizationCatalogHelper.Signatory, org.SignatoryId, org.SignatoryOptions)
+                            <div class="cw-org-preview">
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.FullName"), org.SignatoryFullName)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.PositionTm"), org.SignatoryPositionTitleTm)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.PassportNumber"), org.SignatoryPassportNumber)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.PassportAuthority"), org.SignatoryPassportAuthority)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.PassportIssueDate"), org.SignatoryPassportIssueDateText)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.PassportExpirationDate"), org.SignatoryPassportExpirationDateText)
+                            </div>
+                        </div>
+                        <div>
+                            @RenderOrgColHead(Msg("ApplicationProfileInstance.Picker.Representative"), OrganizationCatalogHelper.Representative, org.RepresentativeId)
+                            @RenderOrgCatalogSelect(OrganizationCatalogHelper.Representative, org.RepresentativeId, org.RepresentativeOptions)
+                            <div class="cw-org-preview">
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.FullName"), org.RepresentativeFullName)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.PositionTm"), org.RepresentativePositionTitleTm)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.Phone"), org.RepresentativePhone)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.PassportNumber"), org.RepresentativePassportNumber)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.PassportAuthority"), org.RepresentativePassportAuthority)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.PassportIssueDate"), org.RepresentativePassportIssueDateText)
+                            </div>
+                        </div>
+                    </div>
+                    <p class="cw-summary-foot">@Msg("ApplicationProfileInstance.Workspace.OrgFoot")</p>
+                }
+                else
+                {
+                    <div class="cw-org-grid">
+                        <dl class="cw-org-dl">
+                            <h3 class="cw-org-col-title">@Msg("ApplicationProfileInstance.Picker.Company")</h3>
+                            <div><dt>@Msg("ApplicationProfileInstance.Org.Name")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyName)</dd></div>
+                            <div><dt>@Msg("ApplicationProfileInstance.Org.Code")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyCode)</dd></div>
+                            <div><dt>@Msg("ApplicationProfileInstance.Org.Phone")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyPhone)</dd></div>
+                            <div><dt>@Msg("ApplicationProfileInstance.Org.Address")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyAddress)</dd></div>
+                            <div><dt>@Msg("ApplicationProfileInstance.Org.Email")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyEmail)</dd></div>
+                            <div><dt>@Msg("ApplicationProfileInstance.Org.Tax")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyTaxInformation)</dd></div>
+                        </dl>
+                        <dl class="cw-org-dl">
+                            <h3 class="cw-org-col-title">@Msg("ApplicationProfileInstance.Picker.Signatory")</h3>
+                            <div><dt>@Msg("ApplicationProfileInstance.Org.FullName")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.SignatoryFullName)</dd></div>
+                            <div><dt>@Msg("ApplicationProfileInstance.Org.PositionTm")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.SignatoryPositionTitleTm)</dd></div>
+                            <div><dt>@Msg("ApplicationProfileInstance.Org.PassportNumber")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.SignatoryPassportNumber)</dd></div>
+                        </dl>
+                        <dl class="cw-org-dl">
+                            <h3 class="cw-org-col-title">@Msg("ApplicationProfileInstance.Picker.Representative")</h3>
+                            <div><dt>@Msg("ApplicationProfileInstance.Org.FullName")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.RepresentativeFullName)</dd></div>
+                            <div><dt>@Msg("ApplicationProfileInstance.Org.PositionTm")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.RepresentativePositionTitleTm)</dd></div>
+                            <div><dt>@Msg("ApplicationProfileInstance.Org.Phone")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.RepresentativePhone)</dd></div>
+                            <div><dt>@Msg("ApplicationProfileInstance.Org.PassportNumber")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.RepresentativePassportNumber)</dd></div>
+                        </dl>
+                    </div>
+                    <p class="cw-summary-foot">@Msg("ApplicationProfileInstance.Workspace.OrgFootView")</p>
+                }
+            </section>
         </div>;
     };
 
@@ -2166,6 +2176,7 @@
                 </section>
                 break;
             case "sla":
+            case "organization":
                 break;
         }
     };

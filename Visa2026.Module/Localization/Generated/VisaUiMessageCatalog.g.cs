@@ -4356,7 +4356,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Overview",
             ["tr-TR"] = "Özet",
-            ["tk-TM"] = "Syn",
+            ["tk-TM"] = "Ýüztutma",
             ["ru-RU"] = "Обзор",
         },
         ["ApplicationProfileInstance.Workspace.Pending"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)

@@ -12,7 +12,7 @@ Company / Authorized Signatory / Authorized Representative are **multi-row catal
 | Instance storage | **Live FKs** on the Application Profile Instance |
 | Create | **Choose Organization** step: three dropdowns, pre-filled from tenant Default. Gear (top-right) reveals **+ New** and **Edit** (same catalog modal as Configuration) |
 | Default | **Tenant-wide** one Default per list. Pre-fills the next new application. **Make default** on create, case Organization, and Configuration lists |
-| Case Organization | Overview is read-only. **Edit** shows dropdowns plus **+ New** / pencil on each column. Field values stay a read-only preview. Configuration lists remain for bulk management |
+| Case Organization | Last left-nav section (not on Overview). View is read-only. **Edit** shows dropdowns plus **+ New** / pencil on each column. Field values stay a read-only preview. Configuration lists remain for bulk management |
 | Merge | Resminamalar / Word / PDF read the **selected catalog records** on generate. Editing a catalog row updates **every case that selected it** |
 | Other cases | Unchanged unless they selected the **same** catalog row |
 

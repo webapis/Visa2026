@@ -10,6 +10,7 @@ import {
 } from './filter-ui.js';
 import {
   renderCaseNav, renderCaseHeader, renderCaseOverview, renderCaseRail,
+  renderCaseOrganization,
 } from './case-workspace-ui.js';
 import {
   renderCaseDocumentCopies, buildDocumentCopiesModel, countSelectedDocChecks,
@@ -345,6 +346,10 @@ function renderCase() {
     mainCls = ' cw-main--wide';
   } else if (tab === 'sla') {
     main = renderCaseSlaTab(c);
+    layoutCls = ' cw-layout--wide';
+    mainCls = ' cw-main--full';
+  } else if (tab === 'organization') {
+    main = renderCaseOrganization();
     layoutCls = ' cw-layout--wide';
     mainCls = ' cw-main--full';
   } else {

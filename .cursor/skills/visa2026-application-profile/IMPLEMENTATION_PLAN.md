@@ -51,7 +51,8 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | 10z4 | Inline organization catalog New/Edit | **Done** | Choose Organization: gear reveals **+ New / Edit**. Case Organization shows them only after section **Edit**. New row is selected / assigned on this case. |
 | 10x-fill | Case summary fill-state colors | **Done** | Empty/`—` red; still matches profile default (or auto number/date) blue; officer-changed green. Tiles + Edit form; border + light tint. |
 | 10x-overview-nav | Overview missing / complete nav | **Done** | Same red-count / green-check as People. Count = empty required Case summary fields (not Process number). Empty tiles dashed red label/value. |
-| 10x-gate | Case summary completeness gate | **Done** | Office preparation: empty (red) Case summary fields block Progress / documents / Resminamalar / SLA / Advance. People & links stay open. Banner names missing fields. |
+| 10x-gate | Case summary completeness gate | **Done** | Office preparation: empty (red) Case summary fields block Progress / documents / Resminamalar / SLA / Advance. People, links, and Organization stay open. Banner names missing fields. |
+| 10z5 | Organization workspace tab | **Done** | Letterhead card moved off Overview to last left-nav **Organization** (Gurama). Wide main (no rail). Same Edit / catalog pickers. |
 | 10v | People & links New missing person-owned BO | **Deferred** | In-tab **New {type}** removed — officers add person-owned data from **Open person detail**. Issued items stay on Overview → Issued records. `EnsureResolvedLink` kept for Relink. |
 | 10w | People & links Relink / Unlink columns | **Done** | Per-person **Relink** and **Unlink** next to Open person detail; Relink pins missing ResolvedLinks; Unlink removes that person + links; both disabled when process-complete locked; toolbar Unlink removed |
 | 10p | Process-complete lock on resolved links | **Done** | `PROCESS_ISSUED` / `REJECTED` / `CANCELLED`; roster + ResolvedLinks immutable; UI lock badge |
@@ -93,7 +94,7 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | B2 | Start process domain merge | **Done** | Merge staged rows, `YYYY-NNNN` process number, first progress step |
 | B3 | Immersive shell chrome | **Done** | Custom left rail retired; native accordion is the nav. `:has(.officer-shell-host)` hide unused unless leftover shell opens |
 | B4 | Profile templates list/grid + detail | **Done** | PNG catalog, chips, pagination, rail overview drill-in |
-| B5 | Case workspace 6-tab shell | **Done** | PNG parity pass: overview, people matrix, progress, inline doc copies + Resminamalar, SLA. Tab switch shows top + panel progress bar (same pattern as Report Dashboard) |
+| B5 | Case workspace tab shell | **Done** | Overview, people, progress, documents, Resminamalar, SLA, **Organization last**. Tab switch shows top + panel progress bar (same pattern as Report Dashboard) |
 | B6 | Immersive tab-bar hide | **Done** | `OfficerShellImmersiveTabBarController` (`TabsModel.CssClass`) + CSS fallback |
 | B7 | Case progress tab wiring | **Done** | Template Approval legs + Process & SLA names; first history row fills first ministry as current (not `1_REVIEW_STARTED` Sequence match) |
 | B8 | Custom person link picker | **Done** | Inline picker on People tab (`IApplicationPersonLinkQueryService` + `OfficerShellPersonLinkPickerComponent`; officer shell only) |
