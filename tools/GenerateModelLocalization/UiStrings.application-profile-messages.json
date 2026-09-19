@@ -1,0 +1,3224 @@
+{
+  "ApplicationProfile.ActionFamily.Issuance": {
+    "en-US": "Issuance",
+    "tr-TR": "Düzenleme",
+    "tk-TM": "Beriş",
+    "ru-RU": "Выдача"
+  },
+  "ApplicationProfile.ActionFamily.Cancellation": {
+    "en-US": "Cancellation",
+    "tr-TR": "İptal",
+    "tk-TM": "Ýatyryş",
+    "ru-RU": "Отмена"
+  },
+  "ApplicationProfile.ActionFamily.Change": {
+    "en-US": "Change",
+    "tr-TR": "Değişiklik",
+    "tk-TM": "Üýtgetme",
+    "ru-RU": "Изменение"
+  },
+  "ApplicationProfile.ActionFamily.Registration": {
+    "en-US": "Registration",
+    "tr-TR": "Kayıt",
+    "tk-TM": "Hasaba alyş",
+    "ru-RU": "Регистрация"
+  },
+  "ApplicationProfile.ActionFamily.BusinessTrip": {
+    "en-US": "Business trip",
+    "tr-TR": "İş seyahati",
+    "tk-TM": "Iş sapary",
+    "ru-RU": "Командировка"
+  },
+  "ApplicationProfile.RegistrationKind.CheckIn": {
+    "en-US": "Check in",
+    "tr-TR": "Giriş kaydı",
+    "tk-TM": "Hasaba almak",
+    "ru-RU": "Регистрация въезда"
+  },
+  "ApplicationProfile.RegistrationKind.CheckOut": {
+    "en-US": "Check out",
+    "tr-TR": "Çıkış kaydı",
+    "tk-TM": "Hasapdan çykarmak",
+    "ru-RU": "Снятие с учёта"
+  },
+  "ApplicationProfile.RegistrationKind.InfoChange": {
+    "en-US": "Info change",
+    "tr-TR": "Bilgi değişikliği",
+    "tk-TM": "Maglumat üýtgetmesi",
+    "ru-RU": "Изменение данных"
+  },
+  "ApplicationProfile.RegistrationKind.Extension": {
+    "en-US": "Reg extension",
+    "tr-TR": "Kayıt uzatma",
+    "tk-TM": "Hasaby uzaltmak",
+    "ru-RU": "Продление регистрации"
+  },
+  "ApplicationProfile.Route.ViaMinistry": {
+    "en-US": "Via ministry",
+    "tr-TR": "Bakanlık süreci",
+    "tk-TM": "Ministrlik arkaly",
+    "ru-RU": "Через министерства"
+  },
+  "ApplicationProfile.Route.DirectMigration": {
+    "en-US": "Direct migration",
+    "tr-TR": "Doğrudan migrasyon",
+    "tk-TM": "Migrasiýa gönümel",
+    "ru-RU": "Напрямую в миграцию"
+  },
+  "ApplicationProfile.Audience.Employee": {
+    "en-US": "Employee",
+    "tr-TR": "Çalışan",
+    "tk-TM": "Işgär",
+    "ru-RU": "Сотрудник"
+  },
+  "ApplicationProfile.Audience.FamilyMember": {
+    "en-US": "Family member",
+    "tr-TR": "Aile üyesi",
+    "tk-TM": "Maşgala agzasy",
+    "ru-RU": "Член семьи"
+  },
+  "ApplicationProfile.Audience.TemporaryVisitor": {
+    "en-US": "Temporary visitor",
+    "tr-TR": "Geçici ziyaretçi",
+    "tk-TM": "Wagtlaýyn myhman",
+    "ru-RU": "Временный посетитель"
+  },
+  "ApplicationProfile.Audience.Family": {
+    "en-US": "Family",
+    "tr-TR": "Aile",
+    "tk-TM": "Maşgala",
+    "ru-RU": "Семья"
+  },
+  "ApplicationProfile.Audience.Visitor": {
+    "en-US": "Visitor",
+    "tr-TR": "Ziyaretçi",
+    "tk-TM": "Myhman",
+    "ru-RU": "Посетитель"
+  },
+  "ApplicationProfile.Status.Active": {
+    "en-US": "Active",
+    "tr-TR": "Aktif",
+    "tk-TM": "Aktiw",
+    "ru-RU": "Активен"
+  },
+  "ApplicationProfile.Status.Inactive": {
+    "en-US": "Inactive",
+    "tr-TR": "Pasif",
+    "tk-TM": "Aktiw däl",
+    "ru-RU": "Неактивен"
+  },
+  "ApplicationProfile.Status.Locked": {
+    "en-US": "Locked",
+    "tr-TR": "Kilitli",
+    "tk-TM": "Gulply",
+    "ru-RU": "Заблокирован"
+  },
+  "ApplicationProfile.Status.Draft": {
+    "en-US": "Draft",
+    "tr-TR": "Taslak",
+    "tk-TM": "Garalama",
+    "ru-RU": "Черновик"
+  },
+  "ApplicationProfile.Status.ConfigLocked": {
+    "en-US": "Config locked",
+    "tr-TR": "Yapılandırma kilitli",
+    "tk-TM": "Sazlama gulply",
+    "ru-RU": "Конфигурация заблокирована"
+  },
+  "ApplicationProfile.Field.ApplicationNumber": {
+    "en-US": "Application number",
+    "tr-TR": "Başvuru numarası",
+    "tk-TM": "Ýüztutma belgisi",
+    "ru-RU": "Номер заявки"
+  },
+  "ApplicationProfile.Field.ApplicationDate": {
+    "en-US": "Application date",
+    "tr-TR": "Başvuru tarihi",
+    "tk-TM": "Ýüztutma senesi",
+    "ru-RU": "Дата заявки"
+  },
+  "ApplicationProfile.Field.ProcessNumber": {
+    "en-US": "Process number",
+    "tr-TR": "Süreç numarası",
+    "tk-TM": "Proses belgisi",
+    "ru-RU": "Номер процесса"
+  },
+  "ApplicationProfile.Field.VisaType": {
+    "en-US": "Visa type",
+    "tr-TR": "Vize türü",
+    "tk-TM": "Wiza görnüşi",
+    "ru-RU": "Тип визы"
+  },
+  "ApplicationProfile.Field.VisaCategory": {
+    "en-US": "Visa category",
+    "tr-TR": "Vize kategorisi",
+    "tk-TM": "Wiza kategoriýasy",
+    "ru-RU": "Категория визы"
+  },
+  "ApplicationProfile.Field.Category": {
+    "en-US": "Category",
+    "tr-TR": "Kategori",
+    "tk-TM": "Kategoriýa",
+    "ru-RU": "Категория"
+  },
+  "ApplicationProfile.Field.VisaPeriod": {
+    "en-US": "Visa period",
+    "tr-TR": "Vize süresi",
+    "tk-TM": "Wiza möhleti",
+    "ru-RU": "Срок визы"
+  },
+  "ApplicationProfile.Field.Period": {
+    "en-US": "Period",
+    "tr-TR": "Süre",
+    "tk-TM": "Möhlet",
+    "ru-RU": "Срок"
+  },
+  "ApplicationProfile.Field.Project": {
+    "en-US": "Project",
+    "tr-TR": "Proje",
+    "tk-TM": "Taslama",
+    "ru-RU": "Проект"
+  },
+  "ApplicationProfile.Field.StartDate": {
+    "en-US": "Start date",
+    "tr-TR": "Başlangıç tarihi",
+    "tk-TM": "Başlanýan senesi",
+    "ru-RU": "Дата начала"
+  },
+  "ApplicationProfile.Field.EndDate": {
+    "en-US": "End date",
+    "tr-TR": "Bitiş tarihi",
+    "tk-TM": "Gutarýan senesi",
+    "ru-RU": "Дата окончания"
+  },
+  "ApplicationProfile.Field.EntryCheckPoint": {
+    "en-US": "Entry check point",
+    "tr-TR": "Giriş kontrol noktası",
+    "tk-TM": "Giriş kontrol nokady",
+    "ru-RU": "Пункт въезда"
+  },
+  "ApplicationProfile.Field.Urgency": {
+    "en-US": "Urgency",
+    "tr-TR": "Aciliyet",
+    "tk-TM": "Gyssaglylyk",
+    "ru-RU": "Срочность"
+  },
+  "ApplicationProfile.Field.BorderZone": {
+    "en-US": "Border zone",
+    "tr-TR": "Sınır bölgesi",
+    "tk-TM": "Serhet sebiti",
+    "ru-RU": "Пограничная зона"
+  },
+  "ApplicationProfile.Field.MigrationService": {
+    "en-US": "Migration service",
+    "tr-TR": "Göç dairesi",
+    "tk-TM": "Migrasiýa gullugy",
+    "ru-RU": "Миграционная служба"
+  },
+  "ApplicationProfile.Field.FromRegion": {
+    "en-US": "From region",
+    "tr-TR": "Çıkış bölgesi",
+    "tk-TM": "Çykyş welaýaty",
+    "ru-RU": "Регион отправления"
+  },
+  "ApplicationProfile.Field.FromCity": {
+    "en-US": "From city",
+    "tr-TR": "Çıkış şehri",
+    "tk-TM": "Çykyş şäheri",
+    "ru-RU": "Город отправления"
+  },
+  "ApplicationProfile.Field.ToRegion": {
+    "en-US": "To region",
+    "tr-TR": "Varış bölgesi",
+    "tk-TM": "Baryş welaýaty",
+    "ru-RU": "Регион назначения"
+  },
+  "ApplicationProfile.Field.ToCity": {
+    "en-US": "To city",
+    "tr-TR": "Varış şehri",
+    "tk-TM": "Baryş şäheri",
+    "ru-RU": "Город назначения"
+  },
+  "ApplicationProfile.Field.BusinessTripAddressType": {
+    "en-US": "Business trip address type",
+    "tr-TR": "İş seyahati adres türü",
+    "tk-TM": "Iş sapary salgy görnüşi",
+    "ru-RU": "Тип адреса командировки"
+  },
+  "ApplicationProfile.Field.BusinessTripLodging": {
+    "en-US": "Business trip lodging",
+    "tr-TR": "İş seyahati konaklama",
+    "tk-TM": "Iş sapary ýaşaýşy",
+    "ru-RU": "Проживание в командировке"
+  },
+  "ApplicationProfile.Field.BusinessTripHotel": {
+    "en-US": "Business trip hotel",
+    "tr-TR": "İş seyahati oteli",
+    "tk-TM": "Iş sapary myhmanhanasy",
+    "ru-RU": "Гостиница командировки"
+  },
+  "ApplicationProfile.Field.BusinessTripHospital": {
+    "en-US": "Business trip hospital",
+    "tr-TR": "İş seyahati hastanesi",
+    "tk-TM": "Iş sapary hassahanasy",
+    "ru-RU": "Больница командировки"
+  },
+  "ApplicationProfile.Field.BusinessTripOtherSite": {
+    "en-US": "Business trip other site",
+    "tr-TR": "İş seyahati diğer yer",
+    "tk-TM": "Iş sapary başga ýeri",
+    "ru-RU": "Другой объект командировки"
+  },
+  "ApplicationProfile.Field.BusinessTripAddress": {
+    "en-US": "Business trip address",
+    "tr-TR": "İş seyahati adresi",
+    "tk-TM": "Iş sapary salgysy",
+    "ru-RU": "Адрес командировки"
+  },
+  "ApplicationProfile.Field.BusinessTripAddressLegacy": {
+    "en-US": "Business trip address (legacy)",
+    "tr-TR": "İş seyahati adresi (eski)",
+    "tk-TM": "Iş sapary salgysy (köne)",
+    "ru-RU": "Адрес командировки (прежний)"
+  },
+  "ApplicationProfile.Field.Purpose": {
+    "en-US": "Purpose",
+    "tr-TR": "Amaç",
+    "tk-TM": "Maksat",
+    "ru-RU": "Цель"
+  },
+  "ApplicationProfile.Field.WorkPermitLocation": {
+    "en-US": "Work permit location",
+    "tr-TR": "İş izni yeri",
+    "tk-TM": "Iş rugsady ýeri",
+    "ru-RU": "Место разрешения на работу"
+  },
+  "ApplicationProfile.Field.EntryDate": {
+    "en-US": "Entry date",
+    "tr-TR": "Giriş tarihi",
+    "tk-TM": "Giriş senesi",
+    "ru-RU": "Дата въезда"
+  },
+  "ApplicationProfile.Field.CannotEdit": {
+    "en-US": "That field cannot be edited here.",
+    "tr-TR": "Bu alan burada düzenlenemez.",
+    "tk-TM": "Bu meýdany şu ýerde üýtgedip bolmaýar.",
+    "ru-RU": "Это поле здесь изменить нельзя."
+  },
+  "ApplicationProfile.Doc.Invitation": {
+    "en-US": "Invitation",
+    "tr-TR": "Davet",
+    "tk-TM": "Çakylyk",
+    "ru-RU": "Приглашение"
+  },
+  "ApplicationProfile.Doc.WorkPermit": {
+    "en-US": "Work permit",
+    "tr-TR": "Çalışma izni",
+    "tk-TM": "Iş rugsady",
+    "ru-RU": "Разрешение на работу"
+  },
+  "ApplicationProfile.Doc.Visa": {
+    "en-US": "Visa",
+    "tr-TR": "Vize",
+    "tk-TM": "Wiza",
+    "ru-RU": "Виза"
+  },
+  "ApplicationProfile.Doc.BorderZone": {
+    "en-US": "Border zone",
+    "tr-TR": "Sınır bölgesi",
+    "tk-TM": "Serhet sebiti",
+    "ru-RU": "Пограничная зона"
+  },
+  "ApplicationProfile.Doc.Rejection": {
+    "en-US": "Rejection",
+    "tr-TR": "Ret",
+    "tk-TM": "Ret",
+    "ru-RU": "Отказ"
+  },
+  "ApplicationProfile.Doc.WorkLocation": {
+    "en-US": "Work location",
+    "tr-TR": "Çalışma yeri",
+    "tk-TM": "Iş ýeri",
+    "ru-RU": "Место работы"
+  },
+  "ApplicationProfile.Doc.Application": {
+    "en-US": "Application",
+    "tr-TR": "Başvuru",
+    "tk-TM": "Ýüztutma",
+    "ru-RU": "Заявка"
+  },
+  "ApplicationProfile.Doc.Invitations": {
+    "en-US": "Invitation(s)",
+    "tr-TR": "Davet(ler)",
+    "tk-TM": "Çakylyk(lar)",
+    "ru-RU": "Приглашение(-я)"
+  },
+  "ApplicationProfile.Doc.WorkPermits": {
+    "en-US": "Work permit(s)",
+    "tr-TR": "Çalışma izni(-leri)",
+    "tk-TM": "Iş rugsady(-lary)",
+    "ru-RU": "Разрешение(-я) на работу"
+  },
+  "ApplicationProfile.Doc.Visas": {
+    "en-US": "Visa(s)",
+    "tr-TR": "Vize(ler)",
+    "tk-TM": "Wiza(lar)",
+    "ru-RU": "Виза(-ы)"
+  },
+  "ApplicationProfile.Doc.BorderZonePermits": {
+    "en-US": "Border zone permit(s)",
+    "tr-TR": "Sınır bölgesi izni(-leri)",
+    "tk-TM": "Serhet sebiti rugsady(-lary)",
+    "ru-RU": "Разрешение(-я) погранзоны"
+  },
+  "ApplicationProfile.Doc.Applications": {
+    "en-US": "Application(s)",
+    "tr-TR": "Başvuru(lar)",
+    "tk-TM": "Ýüztutma(lar)",
+    "ru-RU": "Заявка(-и)"
+  },
+  "ApplicationProfile.Person.Passport": {
+    "en-US": "Passport",
+    "tr-TR": "Pasaport",
+    "tk-TM": "Pasport",
+    "ru-RU": "Паспорт"
+  },
+  "ApplicationProfile.Person.Education": {
+    "en-US": "Education",
+    "tr-TR": "Eğitim",
+    "tk-TM": "Bilim",
+    "ru-RU": "Образование"
+  },
+  "ApplicationProfile.Person.Position": {
+    "en-US": "Position",
+    "tr-TR": "Pozisyon",
+    "tk-TM": "Wezipe",
+    "ru-RU": "Должность"
+  },
+  "ApplicationProfile.Person.AddressOfResidence": {
+    "en-US": "Address of residence",
+    "tr-TR": "İkamet adresi",
+    "tk-TM": "Ýaşaýyş salgysy",
+    "ru-RU": "Адрес проживания"
+  },
+  "ApplicationProfile.Person.InvitationItem": {
+    "en-US": "Invitation item",
+    "tr-TR": "Davet kalemi",
+    "tk-TM": "Çakylyk elementi",
+    "ru-RU": "Позиция приглашения"
+  },
+  "ApplicationProfile.Person.WorkPermitItem": {
+    "en-US": "Work permit item",
+    "tr-TR": "İş izni kalemi",
+    "tk-TM": "Iş rugsady elementi",
+    "ru-RU": "Позиция РНТ"
+  },
+  "ApplicationProfile.Person.BorderZoneItem": {
+    "en-US": "Border zone item",
+    "tr-TR": "Sınır bölgesi kalemi",
+    "tk-TM": "Serhet sebiti elementi",
+    "ru-RU": "Позиция погранзоны"
+  },
+  "ApplicationProfile.Person.Salary": {
+    "en-US": "Salary",
+    "tr-TR": "Maaş",
+    "tk-TM": "Aýlyk",
+    "ru-RU": "Зарплата"
+  },
+  "ApplicationProfile.Person.Medical": {
+    "en-US": "Medical",
+    "tr-TR": "Sağlık",
+    "tk-TM": "Saglyk",
+    "ru-RU": "Мед. запись"
+  },
+  "ApplicationProfile.Person.RejectionItem": {
+    "en-US": "Rejection item",
+    "tr-TR": "Ret kalemi",
+    "tk-TM": "Ret elementi",
+    "ru-RU": "Позиция отказа"
+  },
+  "ApplicationProfile.Person.TravelHistory": {
+    "en-US": "Travel history",
+    "tr-TR": "Seyahat geçmişi",
+    "tk-TM": "Syýahat taryhy",
+    "ru-RU": "История поездок"
+  },
+  "ApplicationProfile.Person.LastN": {
+    "en-US": "Last {0}",
+    "tr-TR": "Son {0}",
+    "tk-TM": "Soňky {0}",
+    "ru-RU": "Последние {0}"
+  },
+  "ApplicationProfile.Catalog.Loading": {
+    "en-US": "Loading Application Profiles…",
+    "tr-TR": "Başvuru profilleri yükleniyor…",
+    "tk-TM": "Ýüztutma profilleri ýüklenýär…",
+    "ru-RU": "Загрузка профилей заявок…"
+  },
+  "ApplicationProfile.Catalog.SearchPlaceholder": {
+    "en-US": "Search profiles…",
+    "tr-TR": "Profil ara…",
+    "tk-TM": "Profil gözle…",
+    "ru-RU": "Поиск профилей…"
+  },
+  "ApplicationProfile.Catalog.New": {
+    "en-US": "New Application Profile",
+    "tr-TR": "Yeni başvuru profili",
+    "tk-TM": "Täze ýüztutma profili",
+    "ru-RU": "Новый профиль заявки"
+  },
+  "ApplicationProfile.Catalog.Empty": {
+    "en-US": "No profiles match.",
+    "tr-TR": "Eşleşen profil yok.",
+    "tk-TM": "Gabat gelýän profil ýok.",
+    "ru-RU": "Нет подходящих профилей."
+  },
+  "ApplicationProfile.Catalog.ColTemplate": {
+    "en-US": "Template",
+    "tr-TR": "Şablon",
+    "tk-TM": "Şablon",
+    "ru-RU": "Шаблон"
+  },
+  "ApplicationProfile.Catalog.ColCode": {
+    "en-US": "Code",
+    "tr-TR": "Kod",
+    "tk-TM": "Kod",
+    "ru-RU": "Код"
+  },
+  "ApplicationProfile.Catalog.ColActionFamily": {
+    "en-US": "Action family",
+    "tr-TR": "İşlem ailesi",
+    "tk-TM": "Hereket maşgalasy",
+    "ru-RU": "Семейство действий"
+  },
+  "ApplicationProfile.Catalog.ColProgressRoute": {
+    "en-US": "Progress route",
+    "tr-TR": "İlerleme süreci",
+    "tk-TM": "Ösüş ugry",
+    "ru-RU": "Маршрут прогресса"
+  },
+  "ApplicationProfile.Catalog.ColStatus": {
+    "en-US": "Status",
+    "tr-TR": "Durum",
+    "tk-TM": "Ýagdaý",
+    "ru-RU": "Статус"
+  },
+  "ApplicationProfile.Catalog.ColLinked": {
+    "en-US": "Linked",
+    "tr-TR": "Bağlı",
+    "tk-TM": "Baglanyşykly",
+    "ru-RU": "Связано"
+  },
+  "ApplicationProfile.Catalog.Delete": {
+    "en-US": "Delete",
+    "tr-TR": "Sil",
+    "tk-TM": "Poz",
+    "ru-RU": "Удалить"
+  },
+  "ApplicationProfile.Catalog.DeleteTitle": {
+    "en-US": "Delete this template",
+    "tr-TR": "Bu şablonu sil",
+    "tk-TM": "Bu şablony poz",
+    "ru-RU": "Удалить этот шаблон"
+  },
+  "ApplicationProfile.Catalog.ConfirmDelete": {
+    "en-US": "Confirm delete",
+    "tr-TR": "Silmeyi onayla",
+    "tk-TM": "Pozmagy tassykla",
+    "ru-RU": "Подтвердить удаление"
+  },
+  "ApplicationProfile.Catalog.Cancel": {
+    "en-US": "Cancel",
+    "tr-TR": "İptal",
+    "tk-TM": "Ýatyr",
+    "ru-RU": "Отмена"
+  },
+  "ApplicationProfile.Catalog.Title": {
+    "en-US": "Profile templates",
+    "tr-TR": "Profil şablonları",
+    "tk-TM": "Profil şablonlary",
+    "ru-RU": "Шаблоны профиля"
+  },
+  "ApplicationProfile.Catalog.Subtitle": {
+    "en-US": "Configure reusable templates officers use to create application profile instances.",
+    "tr-TR": "Memurların başvuru profili örnekleri oluşturduğu yeniden kullanılabilir şablonları yapılandırın.",
+    "tk-TM": "Işgärleriň ýüztutma profiliniň ýüzlemelerini döretmek üçin ulanylýan şablonlary sazlaň.",
+    "ru-RU": "Настройте шаблоны, из которых сотрудники создают экземпляры профиля заявки."
+  },
+  "ApplicationProfile.Catalog.NewTemplate": {
+    "en-US": "+ New template",
+    "tr-TR": "+ Yeni şablon",
+    "tk-TM": "+ Täze şablon",
+    "ru-RU": "+ Новый шаблон"
+  },
+  "ApplicationProfile.Catalog.SearchTemplates": {
+    "en-US": "Search templates…",
+    "tr-TR": "Şablon ara…",
+    "tk-TM": "Şablon gözle…",
+    "ru-RU": "Поиск шаблонов…"
+  },
+  "ApplicationProfile.Catalog.RailLabel": {
+    "en-US": "Templates",
+    "tr-TR": "Şablonlar",
+    "tk-TM": "Şablonlar",
+    "ru-RU": "Шаблоны"
+  },
+  "ApplicationProfile.Catalog.LoadingOverview": {
+    "en-US": "Loading template overview…",
+    "tr-TR": "Şablon özeti yükleniyor…",
+    "tk-TM": "Şablon syny ýüklenýär…",
+    "ru-RU": "Загрузка обзора шаблона…"
+  },
+  "ApplicationProfile.Catalog.ColTemplateName": {
+    "en-US": "Template name",
+    "tr-TR": "Şablon adı",
+    "tk-TM": "Şablon ady",
+    "ru-RU": "Имя шаблона"
+  },
+  "ApplicationProfile.Catalog.ColStaged": {
+    "en-US": "Staged",
+    "tr-TR": "Hazırlıkta",
+    "tk-TM": "Taýýarlykda",
+    "ru-RU": "Подготовлено"
+  },
+  "ApplicationProfile.Catalog.ColInProcess": {
+    "en-US": "In process",
+    "tr-TR": "İşlemde",
+    "tk-TM": "Prosesde",
+    "ru-RU": "В работе"
+  },
+  "ApplicationProfile.Catalog.ActionRoute": {
+    "en-US": "Action route",
+    "tr-TR": "İşlem yolu",
+    "tk-TM": "Hereket ugry",
+    "ru-RU": "Маршрут действия"
+  },
+  "ApplicationProfile.Catalog.IssuanceVia": {
+    "en-US": "Issuance via",
+    "tr-TR": "Düzenleme yolu",
+    "tk-TM": "Beriş ugry",
+    "ru-RU": "Путь выдачи"
+  },
+  "ApplicationProfile.Catalog.Configure": {
+    "en-US": "Configure",
+    "tr-TR": "Yapılandır",
+    "tk-TM": "Sazla",
+    "ru-RU": "Настроить"
+  },
+  "ApplicationProfile.Catalog.ViewList": {
+    "en-US": "List",
+    "tr-TR": "Liste",
+    "tk-TM": "Sanaw",
+    "ru-RU": "Список"
+  },
+  "ApplicationProfile.Catalog.ViewGrid": {
+    "en-US": "Grid",
+    "tr-TR": "Izgara",
+    "tk-TM": "Tor",
+    "ru-RU": "Сетка"
+  },
+  "ApplicationProfile.Overview.Loading": {
+    "en-US": "Loading Application Profile overview…",
+    "tr-TR": "Başvuru profili özeti yükleniyor…",
+    "tk-TM": "Ýüztutma profiliniň syny ýüklenýär…",
+    "ru-RU": "Загрузка обзора профиля заявки…"
+  },
+  "ApplicationProfile.Overview.BackToList": {
+    "en-US": "← Back to list",
+    "tr-TR": "← Listeye dön",
+    "tk-TM": "← Sanawa dolan",
+    "ru-RU": "← К списку"
+  },
+  "ApplicationProfile.Overview.Quick": {
+    "en-US": "quick {0}",
+    "tr-TR": "hızlı {0}",
+    "tk-TM": "çalt {0}",
+    "ru-RU": "быстрый {0}"
+  },
+  "ApplicationProfile.Overview.Configure": {
+    "en-US": "Configure profile",
+    "tr-TR": "Profili yapılandır",
+    "tk-TM": "Profili sazla",
+    "ru-RU": "Настроить профиль"
+  },
+  "ApplicationProfile.Overview.DeleteTemplate": {
+    "en-US": "Delete template",
+    "tr-TR": "Şablonu sil",
+    "tk-TM": "Şablony poz",
+    "ru-RU": "Удалить шаблон"
+  },
+  "ApplicationProfile.Overview.Audience": {
+    "en-US": "Audience",
+    "tr-TR": "Hedef kitle",
+    "tk-TM": "Maksatly topar",
+    "ru-RU": "Аудитория"
+  },
+  "ApplicationProfile.Overview.IdentityTitle": {
+    "en-US": "Identity & purpose",
+    "tr-TR": "Kimlik ve amaç",
+    "tk-TM": "Şahsyýet we maksat",
+    "ru-RU": "Идентичность и назначение"
+  },
+  "ApplicationProfile.Overview.IdentityHint": {
+    "en-US": "Who this profile is for and how applications are directed.",
+    "tr-TR": "Bu profilin kimin için olduğu ve başvuruların nasıl yönlendirildiği.",
+    "tk-TM": "Bu profil kimiň üçin we ýüztutmalaryň nädip gönükdirilýändigi.",
+    "ru-RU": "Для кого этот профиль и как направляются заявки."
+  },
+  "ApplicationProfile.Overview.NoProduce": {
+    "en-US": "{0} — no produce/cancel documents.",
+    "tr-TR": "{0} — düzenlenecek veya iptal edilecek belge yok.",
+    "tk-TM": "{0} — beriljek ýa-da ýatyryljak resminama ýok.",
+    "ru-RU": "{0} — нет документов для выдачи или отмены."
+  },
+  "ApplicationProfile.Overview.DefaultsTitle": {
+    "en-US": "Per-application defaults",
+    "tr-TR": "Başvuru varsayılanları",
+    "tk-TM": "Ýüztutma bellenenleri",
+    "ru-RU": "Значения по умолчанию для заявки"
+  },
+  "ApplicationProfile.Overview.DefaultsHint": {
+    "en-US": "Use on Results & fields. Copied once at create; officers may change values on each application.",
+    "tr-TR": "Sonuçlar ve alanlarda Kullan. Oluştururken bir kez kopyalanır; memur her başvuruda değiştirebilir.",
+    "tk-TM": "Netijeler we meýdanlarda Ulanyş. Döredilende bir gezek göçürilýär; işgär her ýüztutmada üýtgedip biler.",
+    "ru-RU": "Включаются в «Результаты и поля». Копируются один раз при создании; сотрудник может изменить значения в заявке."
+  },
+  "ApplicationProfile.Overview.NoRequiredProps": {
+    "en-US": "No required Application Profile instance properties on this profile.",
+    "tr-TR": "Bu profilde zorunlu başvuru profili örneği alanı yok.",
+    "tk-TM": "Bu profilde hökmany ýüztutma profiliniň ýüzlemesi meýdany ýok.",
+    "ru-RU": "В этом профиле нет обязательных полей экземпляра."
+  },
+  "ApplicationProfile.Overview.ColField": {
+    "en-US": "Field",
+    "tr-TR": "Alan",
+    "tk-TM": "Meýdan",
+    "ru-RU": "Поле"
+  },
+  "ApplicationProfile.Overview.ColDefault": {
+    "en-US": "Default",
+    "tr-TR": "Varsayılan",
+    "tk-TM": "Bellenen",
+    "ru-RU": "По умолчанию"
+  },
+  "ApplicationProfile.Overview.ColRequired": {
+    "en-US": "Required",
+    "tr-TR": "Zorunlu",
+    "tk-TM": "Hökmany",
+    "ru-RU": "Обязательно"
+  },
+  "ApplicationProfile.Overview.Yes": {
+    "en-US": "Yes",
+    "tr-TR": "Evet",
+    "tk-TM": "Hawa",
+    "ru-RU": "Да"
+  },
+  "ApplicationProfile.Overview.ProcessTitle": {
+    "en-US": "Process & SLA",
+    "tr-TR": "Süreç ve SLA",
+    "tk-TM": "Proses we SLA",
+    "ru-RU": "Процесс и SLA"
+  },
+  "ApplicationProfile.Wizard.Loading": {
+    "en-US": "Loading configuration wizard…",
+    "tr-TR": "Yapılandırma sihirbazı yükleniyor…",
+    "tk-TM": "Sazlama jadygöýi ýüklenýär…",
+    "ru-RU": "Загрузка мастера настройки…"
+  },
+  "ApplicationProfile.Wizard.NoProfile": {
+    "en-US": "No Application Profile selected.",
+    "tr-TR": "Başvuru profili seçilmedi.",
+    "tk-TM": "Ýüztutma profili saýlanmady.",
+    "ru-RU": "Профиль заявки не выбран."
+  },
+  "ApplicationProfile.Wizard.Title": {
+    "en-US": "Application Profile",
+    "tr-TR": "Başvuru profili",
+    "tk-TM": "Ýüztutma profili",
+    "ru-RU": "Профиль заявки"
+  },
+  "ApplicationProfile.Wizard.Subtitle": {
+    "en-US": "Configure what applications using this profile need — live link; instance values get defaults at create.",
+    "tr-TR": "Bu profili kullanan başvuruların ihtiyaçlarını yapılandırın — canlı bağlantı; örnek değerler oluştururken kopyalanır.",
+    "tk-TM": "Bu profili ulanýan ýüztutmalaryň zerurlyklaryny sazlaň — janly baglanyşyk; ýüzleme bahalary döredilende bellenýär.",
+    "ru-RU": "Настройте, что нужно заявкам с этим профилем — живая связь; значения экземпляра копируются при создании."
+  },
+  "ApplicationProfile.Wizard.LiveConfig": {
+    "en-US": "Live configuration",
+    "tr-TR": "Canlı yapılandırma",
+    "tk-TM": "Janly sazlama",
+    "ru-RU": "Живая конфигурация"
+  },
+  "ApplicationProfile.Wizard.DraftPill": {
+    "en-US": "Draft · save to publish",
+    "tr-TR": "Taslak · yayımlamak için kaydet",
+    "tk-TM": "Garalama · ýaýratmak üçin sakla",
+    "ru-RU": "Черновик · сохраните, чтобы опубликовать"
+  },
+  "ApplicationProfile.Wizard.LockBanner": {
+    "en-US": "This profile is config-locked because a linked application has left office preparation. Configuration stays locked. Use Clone on the profile list to copy it.",
+    "tr-TR": "Bağlı bir başvuru ofis hazırlığını geçtiği için bu profil kilitlendi. Yapılandırma kilitli kalır. Kopyalamak için listedeki Klonla eylemini kullanın.",
+    "tk-TM": "Baglanyşykly ýüztutma edara taýýarlygyny geçendigi üçin bu profil gulplandy. Sazlama gulply galýar. Göçürmek üçin sanawdaky Göçür hereketini ulanyň.",
+    "ru-RU": "Профиль заблокирован: связанная заявка вышла из офисной подготовки. Конфигурация остаётся заблокированной. Чтобы скопировать, используйте Клонировать в списке."
+  },
+  "ApplicationProfile.Wizard.Steps": {
+    "en-US": "Steps",
+    "tr-TR": "Adımlar",
+    "tk-TM": "Ädimler",
+    "ru-RU": "Шаги"
+  },
+  "ApplicationProfile.Wizard.Back": {
+    "en-US": "← Back",
+    "tr-TR": "← Geri",
+    "tk-TM": "← Yza",
+    "ru-RU": "← Назад"
+  },
+  "ApplicationProfile.Wizard.Continue": {
+    "en-US": "Continue →",
+    "tr-TR": "Devam →",
+    "tk-TM": "Dowam et →",
+    "ru-RU": "Далее →"
+  },
+  "ApplicationProfile.Wizard.Save": {
+    "en-US": "Save profile",
+    "tr-TR": "Profili kaydet",
+    "tk-TM": "Profili sakla",
+    "ru-RU": "Сохранить профиль"
+  },
+  "ApplicationProfile.Wizard.Unnamed": {
+    "en-US": "Unnamed profile",
+    "tr-TR": "Adsız profil",
+    "tk-TM": "Atsyz profil",
+    "ru-RU": "Профиль без имени"
+  },
+  "ApplicationProfile.Wizard.Step.Identity": {
+    "en-US": "Identity & purpose",
+    "tr-TR": "Kimlik ve amaç",
+    "tk-TM": "Şahsyýet we maksat",
+    "ru-RU": "Идентичность и назначение"
+  },
+  "ApplicationProfile.Wizard.Step.IdentityDesc": {
+    "en-US": "Name, route, audience",
+    "tr-TR": "Ad, yol, kitle",
+    "tk-TM": "At, ugur, topar",
+    "ru-RU": "Имя, маршрут, аудитория"
+  },
+  "ApplicationProfile.Wizard.Step.Results": {
+    "en-US": "Results & fields",
+    "tr-TR": "Sonuçlar ve alanlar",
+    "tk-TM": "Netijeler we meýdanlar",
+    "ru-RU": "Результаты и поля"
+  },
+  "ApplicationProfile.Wizard.Step.ResultsDesc": {
+    "en-US": "Required instance properties",
+    "tr-TR": "Zorunlu örnek alanları",
+    "tk-TM": "Hökmany ýüzleme meýdanlary",
+    "ru-RU": "Обязательные поля экземпляра"
+  },
+  "ApplicationProfile.Wizard.Step.Process": {
+    "en-US": "Process & SLA",
+    "tr-TR": "Süreç ve SLA",
+    "tk-TM": "Proses we SLA",
+    "ru-RU": "Процесс и SLA"
+  },
+  "ApplicationProfile.Wizard.Step.ProcessDesc": {
+    "en-US": "Ministry and migration duration",
+    "tr-TR": "Bakanlık ve göç süresi",
+    "tk-TM": "Ministrlik we migrasiýa möhleti",
+    "ru-RU": "Срок министерств и миграции"
+  },
+  "ApplicationProfile.Wizard.Step.Person": {
+    "en-US": "Person data",
+    "tr-TR": "Kişi verileri",
+    "tk-TM": "Adam maglumatlary",
+    "ru-RU": "Данные лица"
+  },
+  "ApplicationProfile.Wizard.Step.PersonDesc": {
+    "en-US": "Required person-related rows",
+    "tr-TR": "Zorunlu kişi kayıtları",
+    "tk-TM": "Hökmany adam ýazgylary",
+    "ru-RU": "Обязательные записи лица"
+  },
+  "ApplicationProfile.Wizard.Step.Review": {
+    "en-US": "Review & save",
+    "tr-TR": "Gözden geçir ve kaydet",
+    "tk-TM": "Barla we sakla",
+    "ru-RU": "Проверка и сохранение"
+  },
+  "ApplicationProfile.Wizard.Step.ReviewDesc": {
+    "en-US": "Summary before publish",
+    "tr-TR": "Yayımlamadan önce özet",
+    "tk-TM": "Ýaýratmazdan öň gysgaça",
+    "ru-RU": "Сводка перед публикацией"
+  },
+  "ApplicationProfile.Wizard.IdentityIntro": {
+    "en-US": "Define who this profile is for and how applications created from it are directed.",
+    "tr-TR": "Bu profilin kimin için olduğunu ve oluşturulan başvuruların nasıl yönlendirileceğini tanımlayın.",
+    "tk-TM": "Bu profiliň kimiň üçin we ondan döredilen ýüztutmalaryň nädip gönükdiriljekdigini kesgitläň.",
+    "ru-RU": "Укажите, для кого этот профиль и как направляются создаваемые заявки."
+  },
+  "ApplicationProfile.Wizard.LiveFkNote": {
+    "en-US": "Applications reference this profile via a live link (set only at create). Configuration stays editable until a linked application reaches lock state A.",
+    "tr-TR": "Başvurular bu profile canlı bağlantı ile bağlanır (yalnızca oluştururken). Yapılandırma, bağlı başvuru kilit A durumuna gelene kadar düzenlenebilir.",
+    "tk-TM": "Ýüztutmalar bu profile janly baglanyşyk bilen baglanýar (diňe döredilende). Baglanyşykly ýüztutma A gulpuny ýetýänçä sazlamany üýtgedip bolýar.",
+    "ru-RU": "Заявки ссылаются на этот профиль живой связью (только при создании). Конфигурацию можно менять, пока связанная заявка не достигнет блокировки A."
+  },
+  "ApplicationProfile.Wizard.NameSection": {
+    "en-US": "Name",
+    "tr-TR": "Ad",
+    "tk-TM": "At",
+    "ru-RU": "Имя"
+  },
+  "ApplicationProfile.Wizard.ProfileName": {
+    "en-US": "Application Profile name",
+    "tr-TR": "Başvuru profili adı",
+    "tk-TM": "Ýüztutma profiliniň ady",
+    "ru-RU": "Имя профиля заявки"
+  },
+  "ApplicationProfile.Wizard.DirectedTo": {
+    "en-US": "Directed to",
+    "tr-TR": "Yönlendirildiği yer",
+    "tk-TM": "Gönükdirilen ýeri",
+    "ru-RU": "Направление"
+  },
+  "ApplicationProfile.Wizard.DirectMigrationService": {
+    "en-US": "Direct migration service",
+    "tr-TR": "Doğrudan göç dairesi",
+    "tk-TM": "Gönümel migrasiýa gullugy",
+    "ru-RU": "Напрямую в миграционную службу"
+  },
+  "ApplicationProfile.Wizard.MayBeFor": {
+    "en-US": "Application Profile instance may be for",
+    "tr-TR": "Başvuru profili örneği şunlar için olabilir",
+    "tk-TM": "Ýüztutma profiliniň ýüzlemesi şular üçin bolup biler",
+    "ru-RU": "Экземпляр профиля заявки может быть для"
+  },
+  "ApplicationProfile.Wizard.RelatedTo": {
+    "en-US": "Application Profile instance related to",
+    "tr-TR": "Başvuru profili örneği şununla ilgili",
+    "tk-TM": "Ýüztutma profiliniň ýüzlemesi şular bilen baglanyşykly",
+    "ru-RU": "Экземпляр профиля заявки относится к"
+  },
+  "ApplicationProfile.Wizard.MayProduce": {
+    "en-US": "May produce",
+    "tr-TR": "Düzenleyebilir",
+    "tk-TM": "Berip biler",
+    "ru-RU": "Может выдавать"
+  },
+  "ApplicationProfile.Wizard.MayCancel": {
+    "en-US": "May cancel existing",
+    "tr-TR": "Mevcut olanı iptal edebilir",
+    "tk-TM": "Bar bolany ýatyryp biler",
+    "ru-RU": "Может отменять существующие"
+  },
+  "ApplicationProfile.Wizard.MayChange": {
+    "en-US": "May change existing",
+    "tr-TR": "Mevcut olanı değiştirebilir",
+    "tk-TM": "Bar bolany üýtgedip biler",
+    "ru-RU": "Может изменять существующие"
+  },
+  "ApplicationProfile.Wizard.RegistrationIs": {
+    "en-US": "Registration is",
+    "tr-TR": "Kayıt türü",
+    "tk-TM": "Hasaba alyş görnüşi",
+    "ru-RU": "Вид регистрации"
+  },
+  "ApplicationProfile.Wizard.RegistrationHint": {
+    "en-US": "Used later for Report Dashboard registration queries (check-in, check-out, info change, reg extension).",
+    "tr-TR": "Rapor Panosu kayıt sorgularında kullanılır (giriş, çıkış, bilgi değişikliği, kayıt uzatma).",
+    "tk-TM": "Hasabat paneliniň hasaba alyş soraglarynda ulanylýar (hasaba almak, çykarmak, maglumat üýtgetmesi, uzaltmak).",
+    "ru-RU": "Используется в запросах регистрации панели отчётов (въезд, выезд, изменение данных, продление)."
+  },
+  "ApplicationProfile.Wizard.BusinessTripHint": {
+    "en-US": "Business-trip profiles do not issue, cancel, or change documents here.",
+    "tr-TR": "İş seyahati profilleri burada belge düzenlemez, iptal etmez veya değiştirmez.",
+    "tk-TM": "Iş sapary profilleri şu ýerde resminama bermeýär, ýatyrmaýar ýa-da üýtgetmeýär.",
+    "ru-RU": "Профили командировки здесь не выдают, не отменяют и не изменяют документы."
+  },
+  "ApplicationProfile.Wizard.ActiveAvailable": {
+    "en-US": "Active (available in pickers)",
+    "tr-TR": "Aktif (seçicilerde görünür)",
+    "tk-TM": "Aktiw (saýlaýjylarda görünýär)",
+    "ru-RU": "Активен (доступен в выборе)"
+  },
+  "ApplicationProfile.Wizard.ResultsIntro": {
+    "en-US": "Which Application Profile instance header fields are required.",
+    "tr-TR": "Hangi başvuru profili örneği üst alanlarının zorunlu olduğu.",
+    "tk-TM": "Haysy ýüztutma profiliniň ýüzlemesi baş meýdanlarynyň hökmanydygy.",
+    "ru-RU": "Какие поля заголовка экземпляра профиля обязательны."
+  },
+  "ApplicationProfile.Wizard.RequiredProps": {
+    "en-US": "Application Profile instance properties required",
+    "tr-TR": "Zorunlu başvuru profili örneği alanları",
+    "tk-TM": "Hökmany ýüztutma profiliniň ýüzlemesi meýdanlary",
+    "ru-RU": "Обязательные поля экземпляра профиля заявки"
+  },
+  "ApplicationProfile.Wizard.UseHint": {
+    "en-US": "Use makes the property visible on the instance. Defaults apply at create only when Use is on.",
+    "tr-TR": "Kullan, alanı örnekte görünür yapar. Varsayılanlar yalnızca Kullan açıkken oluştururken uygulanır.",
+    "tk-TM": "Ulanyş meýdany ýüzlemede görkezýär. Bellenenler diňe Ulanyş açyk bolsa döredilende ulanylýar.",
+    "ru-RU": "«Использовать» делает поле видимым на экземпляре. Значения по умолчанию копируются при создании только если флаг включён."
+  },
+  "ApplicationProfile.Wizard.ColUse": {
+    "en-US": "Use",
+    "tr-TR": "Kullan",
+    "tk-TM": "Ulanyş",
+    "ru-RU": "Использовать"
+  },
+  "ApplicationProfile.Wizard.ColProperty": {
+    "en-US": "Property",
+    "tr-TR": "Alan",
+    "tk-TM": "Meýdan",
+    "ru-RU": "Свойство"
+  },
+  "ApplicationProfile.Wizard.ColKind": {
+    "en-US": "Kind",
+    "tr-TR": "Tür",
+    "tk-TM": "Görnüşi",
+    "ru-RU": "Тип"
+  },
+  "ApplicationProfile.Wizard.ColHasDefault": {
+    "en-US": "Has default",
+    "tr-TR": "Varsayılan var",
+    "tk-TM": "Bellenen bar",
+    "ru-RU": "Есть значение по умолчанию"
+  },
+  "ApplicationProfile.Wizard.ColDefaultValue": {
+    "en-US": "Default value",
+    "tr-TR": "Varsayılan değer",
+    "tk-TM": "Bellenen baha",
+    "ru-RU": "Значение по умолчанию"
+  },
+  "ApplicationProfile.Wizard.KindLookup": {
+    "en-US": "lookup",
+    "tr-TR": "arama",
+    "tk-TM": "gözleg",
+    "ru-RU": "справочник"
+  },
+  "ApplicationProfile.Wizard.KindMulti": {
+    "en-US": "multi-select",
+    "tr-TR": "çoklu seçim",
+    "tk-TM": "köp saýlaw",
+    "ru-RU": "множественный выбор"
+  },
+  "ApplicationProfile.Wizard.KindDate": {
+    "en-US": "date",
+    "tr-TR": "tarih",
+    "tk-TM": "sene",
+    "ru-RU": "дата"
+  },
+  "ApplicationProfile.Wizard.KindText": {
+    "en-US": "text",
+    "tr-TR": "metin",
+    "tk-TM": "tekst",
+    "ru-RU": "текст"
+  },
+  "ApplicationProfile.Wizard.KindTypeSite": {
+    "en-US": "type + site",
+    "tr-TR": "tür + yer",
+    "tk-TM": "görnüş + ýer",
+    "ru-RU": "тип + объект"
+  },
+  "ApplicationProfile.Wizard.ProcessNumberHint": {
+    "en-US": "Entered when submitting to Migration Service. Unique across instances.",
+    "tr-TR": "Göç dairesine gönderirken girilir. Örnekler arasında benzersizdir.",
+    "tk-TM": "Migrasiýa gullugyna iberilende girizilýär. Ýüzlemeler arasynda üýtgeşik.",
+    "ru-RU": "Вводится при подаче в миграционную службу. Уникален среди экземпляров."
+  },
+  "ApplicationProfile.Wizard.ProcessIntro": {
+    "en-US": "Expected process duration. Instance steps follow Directed to.",
+    "tr-TR": "Beklenen süreç süresi. Örnek adımları Yönlendirildiği yere uyar.",
+    "tk-TM": "Garaşylýan proses möhleti. Ýüzleme ädimleri Gönükdirilen ýere eýerýär.",
+    "ru-RU": "Ожидаемая длительность. Шаги экземпляра следуют направлению."
+  },
+  "ApplicationProfile.Wizard.ProcessCallout": {
+    "en-US": "Ministry and migration steps are not configured here. Via ministry then Migration. Direct migration goes to Migration only.",
+    "tr-TR": "Bakanlık ve göç adımları burada yapılandırılmaz. Bakanlık süreci sonra Göç. Doğrudan göç yalnızca Göç dairesine gider.",
+    "tk-TM": "Ministrlik we migrasiýa ädimleri şu ýerde sazlanmaýar. Ministrlik soň Migrasiýa. Gönümel migrasiýa diňe Migrasiýa gidýär.",
+    "ru-RU": "Шаги министерств и миграции здесь не настраиваются. Через министерства, затем миграция. Прямой путь — только миграция."
+  },
+  "ApplicationProfile.Wizard.SlaTitle": {
+    "en-US": "Expected process duration (SLA)",
+    "tr-TR": "Beklenen süreç süresi (SLA)",
+    "tk-TM": "Garaşylýan proses möhleti (SLA)",
+    "ru-RU": "Ожидаемая длительность (SLA)"
+  },
+  "ApplicationProfile.Wizard.MinistryDays": {
+    "en-US": "Ministry (days)",
+    "tr-TR": "Bakanlık (gün)",
+    "tk-TM": "Ministrlik (gün)",
+    "ru-RU": "Министерства (дни)"
+  },
+  "ApplicationProfile.Wizard.MigrationDays": {
+    "en-US": "Migration (days)",
+    "tr-TR": "Göç (gün)",
+    "tk-TM": "Migrasiýa (gün)",
+    "ru-RU": "Миграция (дни)"
+  },
+  "ApplicationProfile.Wizard.PersonIntro": {
+    "en-US": "Choose which person-related rows this profile needs. Word and Excel templates are created on a case (Resminamalar This profile / Shared).",
+    "tr-TR": "Bu profilin ihtiyaç duyduğu kişi kayıtlarını seçin. Word ve Excel şablonları davada oluşturulur (Resminamalar Bu profil / Paylaşılan).",
+    "tk-TM": "Bu profiliň gerek adam ýazgylaryny saýlaň. Word we Excel şablonlary ýüztutmada döredilýär (Resminamalar Bu profil / Paýlaşylan).",
+    "ru-RU": "Выберите нужные записи лица. Шаблоны Word и Excel создаются в деле (Resminamalar Этот профиль / Общие)."
+  },
+  "ApplicationProfile.Wizard.PersonRequired": {
+    "en-US": "Required person-related data",
+    "tr-TR": "Zorunlu kişi verileri",
+    "tk-TM": "Hökmany adam maglumatlary",
+    "ru-RU": "Обязательные данные лица"
+  },
+  "ApplicationProfile.Wizard.PersonHint": {
+    "en-US": "Last 1–3 is only for Passport, Visa, Invitation, Work permit, and Border zone. Other types stay one current row. Missing rows are flagged; they do not block create.",
+    "tr-TR": "Son 1–3 yalnızca Pasaport, Vize, Davet, Çalışma izni ve Sınır bölgesi içindir. Diğer türler tek güncel satır kalır. Eksikler işaretlenir; oluşturmayı engellemez.",
+    "tk-TM": "Soňky 1–3 diňe Pasport, Wiza, Çakylyk, Iş rugsady we Serhet sebiti üçin. Beýlekiler bir häzirki setir. Ýetmezçilikler bellenýär; döretmegi gadagan etmeýär.",
+    "ru-RU": "Последние 1–3 только для паспорта, визы, приглашения, РНТ и погранзоны. Остальные — одна текущая запись. Недостаток помечается и не блокирует создание."
+  },
+  "ApplicationProfile.Wizard.ReviewIntro": {
+    "en-US": "Confirm before publishing. Applications reference this profile live; instance fields get defaults at create.",
+    "tr-TR": "Yayımlamadan önce onaylayın. Başvurular bu profile canlı bağlanır; örnek alanları oluştururken varsayılan alır.",
+    "tk-TM": "Ýaýratmazdan öň tassyklaň. Ýüztutmalar bu profile janly baglanýar; ýüzleme meýdanlary döredilende bellenenleri alýar.",
+    "ru-RU": "Подтвердите перед публикацией. Заявки ссылаются на профиль живо; поля экземпляра получают значения по умолчанию при создании."
+  },
+  "ApplicationProfile.Wizard.ReviewIdentity": {
+    "en-US": "Identity",
+    "tr-TR": "Kimlik",
+    "tk-TM": "Şahsyýet",
+    "ru-RU": "Идентичность"
+  },
+  "ApplicationProfile.Wizard.ReviewFields": {
+    "en-US": "Fields",
+    "tr-TR": "Alanlar",
+    "tk-TM": "Meýdanlar",
+    "ru-RU": "Поля"
+  },
+  "ApplicationProfile.Wizard.ReviewProcess": {
+    "en-US": "Process",
+    "tr-TR": "Süreç",
+    "tk-TM": "Proses",
+    "ru-RU": "Процесс"
+  },
+  "ApplicationProfile.Wizard.ReviewCode": {
+    "en-US": "Code {0}",
+    "tr-TR": "Kod {0}",
+    "tk-TM": "Kod {0}",
+    "ru-RU": "Код {0}"
+  },
+  "ApplicationProfile.Wizard.ReviewProduces": {
+    "en-US": "Produces: {0}",
+    "tr-TR": "Düzenler: {0}",
+    "tk-TM": "Berýär: {0}",
+    "ru-RU": "Выдаёт: {0}"
+  },
+  "ApplicationProfile.Wizard.ReviewCancel": {
+    "en-US": "Cancel: {0}",
+    "tr-TR": "İptal: {0}",
+    "tk-TM": "Ýatyr: {0}",
+    "ru-RU": "Отмена: {0}"
+  },
+  "ApplicationProfile.Wizard.ReviewChange": {
+    "en-US": "Change: {0}",
+    "tr-TR": "Değiştir: {0}",
+    "tk-TM": "Üýtget: {0}",
+    "ru-RU": "Изменение: {0}"
+  },
+  "ApplicationProfile.Wizard.ReviewRegistrationIs": {
+    "en-US": "Registration is: {0}",
+    "tr-TR": "Kayıt türü: {0}",
+    "tk-TM": "Hasaba alyş: {0}",
+    "ru-RU": "Вид регистрации: {0}"
+  },
+  "ApplicationProfile.Wizard.ReviewRequiredCount": {
+    "en-US": "Required props: {0}",
+    "tr-TR": "Zorunlu alanlar: {0}",
+    "tk-TM": "Hökmany meýdanlar: {0}",
+    "ru-RU": "Обязательных полей: {0}"
+  },
+  "ApplicationProfile.Wizard.ReviewSla": {
+    "en-US": "SLA ministry / migration: {0} / {1} days",
+    "tr-TR": "SLA bakanlık / göç: {0} / {1} gün",
+    "tk-TM": "SLA ministrlik / migrasiýa: {0} / {1} gün",
+    "ru-RU": "SLA министерства / миграции: {0} / {1} дн."
+  },
+  "ApplicationProfile.Wizard.ReviewPersonCount": {
+    "en-US": "Person toggles: {0}",
+    "tr-TR": "Kişi seçenekleri: {0}",
+    "tk-TM": "Adam saýlawlary: {0}",
+    "ru-RU": "Переключатели лица: {0}"
+  },
+  "ApplicationProfileInstance.Picker.Loading": {
+    "en-US": "Loading Application Profiles…",
+    "tr-TR": "Başvuru profilleri yükleniyor…",
+    "tk-TM": "Ýüztutma profilleri ýüklenýär…",
+    "ru-RU": "Загрузка профилей заявок…"
+  },
+  "ApplicationProfileInstance.Picker.ChooseProfile": {
+    "en-US": "Choose Application Profile",
+    "tr-TR": "Başvuru profili seçin",
+    "tk-TM": "Ýüztutma profilini saýlaň",
+    "ru-RU": "Выберите профиль заявки"
+  },
+  "ApplicationProfileInstance.Picker.ChooseProfileSub": {
+    "en-US": "Sets a live configuration link and seeds instance defaults once. Profile cannot be changed after save.",
+    "tr-TR": "Canlı yapılandırma bağlantısı kurar ve örnek varsayılanlarını bir kez kopyalar. Kayıttan sonra profil değiştirilemez.",
+    "tk-TM": "Janly sazlama baglanyşygyny gurýar we ýüzleme bellenenlerini bir gezek göçürýär. Saklanandan soň profili üýtgedip bolmaýar.",
+    "ru-RU": "Создаёт живую связь с конфигурацией и один раз копирует значения по умолчанию. После сохранения профиль сменить нельзя."
+  },
+  "ApplicationProfileInstance.Picker.Empty": {
+    "en-US": "No active Application Profiles match this list. Configure profiles under Configuration → Application Profile Templates.",
+    "tr-TR": "Bu listeyle eşleşen aktif başvuru profili yok. Profilleri Yapılandırma → Başvuru profili şablonları altında ayarlayın.",
+    "tk-TM": "Bu sanawa gabat gelýän aktiw ýüztutma profili ýok. Profilleri Konfigurasiýa → Ýüztutma profil şablonlarynda sazlaň.",
+    "ru-RU": "Нет активных профилей для этого списка. Настройте их в Конфигурация → Шаблоны профиля заявки."
+  },
+  "ApplicationProfileInstance.Picker.ListAria": {
+    "en-US": "Application Profiles",
+    "tr-TR": "Başvuru profilleri",
+    "tk-TM": "Ýüztutma profilleri",
+    "ru-RU": "Профили заявок"
+  },
+  "ApplicationProfileInstance.Picker.ChooseLegs": {
+    "en-US": "Choose Approval legs",
+    "tr-TR": "Onay adımlarını seçin",
+    "tk-TM": "Tassyklama ädimlerini saýlaň",
+    "ru-RU": "Выберите этапы согласования"
+  },
+  "ApplicationProfileInstance.Picker.ChooseOrg": {
+    "en-US": "Choose Organization",
+    "tr-TR": "Kuruluşu seçin",
+    "tk-TM": "Guramany saýlaň",
+    "ru-RU": "Выберите организацию"
+  },
+  "ApplicationProfileInstance.Picker.CaseSummary": {
+    "en-US": "Case summary",
+    "tr-TR": "Dava özeti",
+    "tk-TM": "Ýüztutma gysgaçasy",
+    "ru-RU": "Сводка дела"
+  },
+  "ApplicationProfileInstance.Picker.Create": {
+    "en-US": "Create application",
+    "tr-TR": "Başvuru oluştur",
+    "tk-TM": "Ýüztutma döret",
+    "ru-RU": "Создать заявку"
+  },
+  "ApplicationProfileInstance.Picker.Back": {
+    "en-US": "Back",
+    "tr-TR": "Geri",
+    "tk-TM": "Yza",
+    "ru-RU": "Назад"
+  },
+  "ApplicationProfileInstance.Picker.Continue": {
+    "en-US": "Continue →",
+    "tr-TR": "Devam →",
+    "tk-TM": "Dowam et →",
+    "ru-RU": "Далее →"
+  },
+  "ApplicationProfileInstance.Picker.Default": {
+    "en-US": "Default",
+    "tr-TR": "Varsayılan",
+    "tk-TM": "Bellenen",
+    "ru-RU": "По умолчанию"
+  },
+  "ApplicationProfileInstance.Picker.MakeDefault": {
+    "en-US": "Make default",
+    "tr-TR": "Varsayılan yap",
+    "tk-TM": "Bellenen et",
+    "ru-RU": "Сделать по умолчанию"
+  },
+  "ApplicationProfileInstance.Picker.Catalog": {
+    "en-US": "Catalog",
+    "tr-TR": "Katalog",
+    "tk-TM": "Katalog",
+    "ru-RU": "Каталог"
+  },
+  "ApplicationProfileInstance.Picker.New": {
+    "en-US": "+ New",
+    "tr-TR": "+ Yeni",
+    "tk-TM": "+ Täze",
+    "ru-RU": "+ Создать"
+  },
+  "ApplicationProfileInstance.Picker.Open": {
+    "en-US": "Open",
+    "tr-TR": "Aç",
+    "tk-TM": "Aç",
+    "ru-RU": "Открыть"
+  },
+  "ApplicationProfileInstance.Picker.Company": {
+    "en-US": "Company",
+    "tr-TR": "Şirket",
+    "tk-TM": "Kompaniýa",
+    "ru-RU": "Компания"
+  },
+  "ApplicationProfileInstance.Picker.Signatory": {
+    "en-US": "Authorized Signatory",
+    "tr-TR": "Yetkili imza",
+    "tk-TM": "Ygtyýarly gol",
+    "ru-RU": "Уполномоченный подписант"
+  },
+  "ApplicationProfileInstance.Picker.Representative": {
+    "en-US": "Authorized Representative",
+    "tr-TR": "Yetkili temsilci",
+    "tk-TM": "Ygtyýarly wekil",
+    "ru-RU": "Уполномоченный представитель"
+  },
+  "ApplicationProfileInstance.Picker.FootNote": {
+    "en-US": "Application Profile: {0} · next: Case summary",
+    "tr-TR": "Başvuru profili: {0} · sonraki: Dava özeti",
+    "tk-TM": "Ýüztutma profili: {0} · indiki: Ýüztutma gysgaçasy",
+    "ru-RU": "Профиль заявки: {0} · далее: Сводка дела"
+  },
+  "ApplicationProfileInstance.Picker.FootNoteLast": {
+    "en-US": "Application Profile: {0} · last step before create",
+    "tr-TR": "Başvuru profili: {0} · oluşturmadan önceki son adım",
+    "tk-TM": "Ýüztutma profili: {0} · döretmezden öňki soňky ädim",
+    "ru-RU": "Профиль заявки: {0} · последний шаг перед созданием"
+  },
+  "ApplicationProfileInstance.Picker.NoRequiredProps": {
+    "en-US": "No Application Profile instance properties required on this profile.",
+    "tr-TR": "Bu profilde zorunlu başvuru profili örneği alanı yok.",
+    "tk-TM": "Bu profilde hökmany ýüztutma profiliniň ýüzlemesi meýdany ýok.",
+    "ru-RU": "В этом профиле нет обязательных полей экземпляра."
+  },
+  "ApplicationProfileInstance.Picker.CaseSummarySub": {
+    "en-US": "Same Use fields as the case Overview. Profile defaults are already filled. Set the rest now so you do not need to Edit after create. Changing these does not change the Application Profile template.",
+    "tr-TR": "Dava Özetindeki Kullan alanlarıyla aynı. Profil varsayılanları dolduruldu. Gerisini şimdi girin ki oluşturduktan sonra Düzenle gerekmesin. Bunları değiştirmek şablonu değiştirmez.",
+    "tk-TM": "Ýüztutma Synyndaky Ulanyş meýdanlary bilen birmeňzeş. Profil bellenenleri eýýäm dolduryldy. Galany häzir giriziň, döredenden soň Üýtget gerek bolmaz. Bunlary üýtgetmek şablony üýtgetmeýär.",
+    "ru-RU": "Те же поля, что в обзоре дела. Значения профиля уже заполнены. Укажите остальные сейчас, чтобы не править после создания. Это не меняет шаблон профиля."
+  },
+  "ApplicationProfileInstance.Picker.CreateOpensPeople": {
+    "en-US": "Required Case summary fields must be set here. Create opens the case workspace ready for People & links.",
+    "tr-TR": "Zorunlu dava özeti alanları burada doldurulmalıdır. Oluştur, Kişiler ve bağlantılar için hazır çalışma alanını açar.",
+    "tk-TM": "Hökmany ýüztutma gysgaça meýdanlary şu ýerde doldurylmaly. Döret, Ýüztutmadaky adamlar üçin taýýar iş meýdanyny açýar.",
+    "ru-RU": "Обязательные поля сводки нужно заполнить здесь. Создание откроет рабочее место дела для «Люди и связи»."
+  },
+  "ApplicationProfileInstance.CaseSummary.CompleteOne": {
+    "en-US": "Complete the required Case summary field before continuing. Missing: {0}.",
+    "tr-TR": "Devam etmeden önce zorunlu dava özeti alanını doldurun. Eksik: {0}.",
+    "tk-TM": "Dowam etmezden öň hökmany ýüztutma gysgaça meýdanyny dolduryň. Ýetmezçilik: {0}.",
+    "ru-RU": "Перед продолжением заполните обязательное поле сводки. Не хватает: {0}."
+  },
+  "ApplicationProfileInstance.CaseSummary.CompleteMany": {
+    "en-US": "Complete required Case summary fields before continuing. Missing: {0}.",
+    "tr-TR": "Devam etmeden önce zorunlu dava özeti alanlarını doldurun. Eksik: {0}.",
+    "tk-TM": "Dowam etmezden öň hökmany ýüztutma gysgaça meýdanlaryny dolduryň. Ýetmezçilik: {0}.",
+    "ru-RU": "Перед продолжением заполните обязательные поля сводки. Не хватает: {0}."
+  },
+  "ApplicationProfileInstance.CaseSummary.RequiredFields": {
+    "en-US": "required fields",
+    "tr-TR": "zorunlu alanlar",
+    "tk-TM": "hökmany meýdanlar",
+    "ru-RU": "обязательные поля"
+  },
+  "ApplicationProfileInstance.CaseSummary.MissingOne": {
+    "en-US": " (1 missing)",
+    "tr-TR": " (1 eksik)",
+    "tk-TM": " (1 ýetmezçilik)",
+    "ru-RU": " (не хватает 1)"
+  },
+  "ApplicationProfileInstance.CaseSummary.MissingMany": {
+    "en-US": " ({0} missing)",
+    "tr-TR": " ({0} eksik)",
+    "tk-TM": " ({0} ýetmezçilik)",
+    "ru-RU": " (не хватает {0})"
+  },
+  "ApplicationProfileInstance.Workspace.Overview": {
+    "en-US": "Overview",
+    "tr-TR": "Özet",
+    "tk-TM": "Syn",
+    "ru-RU": "Обзор"
+  },
+  "ApplicationProfileInstance.Workspace.PeopleLinks": {
+    "en-US": "People & links",
+    "tr-TR": "Kişiler ve bağlantılar",
+    "tk-TM": "Ýüztutmadaky adamlar",
+    "ru-RU": "Люди и связи"
+  },
+  "ApplicationProfileInstance.Workspace.Progress": {
+    "en-US": "Progress",
+    "tr-TR": "İlerleme",
+    "tk-TM": "Ýüztutmanyň soň ýagdaýy",
+    "ru-RU": "Прогресс"
+  },
+  "ApplicationProfileInstance.Workspace.Documents": {
+    "en-US": "Document copies",
+    "tr-TR": "Belge kopyaları",
+    "tk-TM": "Resminama nusgalary",
+    "ru-RU": "Копии документов"
+  },
+  "ApplicationProfileInstance.Workspace.Resminamalar": {
+    "en-US": "Resminamalar",
+    "tr-TR": "Resminamalar",
+    "tk-TM": "Resminamalar",
+    "ru-RU": "Resminamalar"
+  },
+  "ApplicationProfileInstance.Workspace.Sla": {
+    "en-US": "SLA & deadlines",
+    "tr-TR": "SLA ve süreler",
+    "tk-TM": "SLA we möhletler",
+    "ru-RU": "SLA и сроки"
+  },
+  "ApplicationProfileInstance.Workspace.SlaSub": {
+    "en-US": "Working days against the profile template. Dates in UTC+5 (Ashgabat).",
+    "tr-TR": "Profil şablonuna göre iş günleri. Tarihler UTC+5 (Aşkabat).",
+    "tk-TM": "Profil şablonyna görä iş günleri. Seneler UTC+5 (Aşgabat).",
+    "ru-RU": "Рабочие дни по шаблону профиля. Даты UTC+5 (Ашхабад)."
+  },
+  "ApplicationProfileInstance.Workspace.OverallCase": {
+    "en-US": "Overall case",
+    "tr-TR": "Davanın geneli",
+    "tk-TM": "Ýüztutmanyň jemi",
+    "ru-RU": "Дело в целом"
+  },
+  "ApplicationProfileInstance.Workspace.TotalSla": {
+    "en-US": "Total SLA",
+    "tr-TR": "Toplam SLA",
+    "tk-TM": "Jemi SLA",
+    "ru-RU": "Общий SLA"
+  },
+  "ApplicationProfileInstance.Workspace.Elapsed": {
+    "en-US": "Elapsed",
+    "tr-TR": "Geçen",
+    "tk-TM": "Geçen",
+    "ru-RU": "Прошло"
+  },
+  "ApplicationProfileInstance.Workspace.DaysCount": {
+    "en-US": "{0} days",
+    "tr-TR": "{0} gün",
+    "tk-TM": "{0} gün",
+    "ru-RU": "{0} дн."
+  },
+  "ApplicationProfileInstance.Workspace.DaysUnit": {
+    "en-US": "days",
+    "tr-TR": "gün",
+    "tk-TM": "gün",
+    "ru-RU": "дн."
+  },
+  "ApplicationProfileInstance.Workspace.CurrentStep": {
+    "en-US": "Current step",
+    "tr-TR": "Geçerli adım",
+    "tk-TM": "Häzirki ädim",
+    "ru-RU": "Текущий шаг"
+  },
+  "ApplicationProfileInstance.Workspace.NoOpenDeadline": {
+    "en-US": "No open deadline",
+    "tr-TR": "Açık süre yok",
+    "tk-TM": "Açyk möhlet ýok",
+    "ru-RU": "Открытого срока нет"
+  },
+  "ApplicationProfileInstance.Workspace.NoDueDate": {
+    "en-US": "No due date yet",
+    "tr-TR": "Henüz son tarih yok",
+    "tk-TM": "Möhlet senesi heniz ýok",
+    "ru-RU": "Срок ещё не задан"
+  },
+  "ApplicationProfileInstance.Workspace.DueOn": {
+    "en-US": "Due {0}",
+    "tr-TR": "Son tarih {0}",
+    "tk-TM": "Möhleti {0}",
+    "ru-RU": "Срок {0}"
+  },
+  "ApplicationProfileInstance.Workspace.CurrentDue": {
+    "en-US": "Current due",
+    "tr-TR": "Geçerli son tarih",
+    "tk-TM": "Häzirki möhlet",
+    "ru-RU": "Текущий срок"
+  },
+  "ApplicationProfileInstance.Workspace.ExpectedCompletion": {
+    "en-US": "Expected completion",
+    "tr-TR": "Beklenen tamamlanma",
+    "tk-TM": "Garaşylýan tamam",
+    "ru-RU": "Ожидаемое завершение"
+  },
+  "ApplicationProfileInstance.Workspace.Finished": {
+    "en-US": "Finished",
+    "tr-TR": "Bitti",
+    "tk-TM": "Tamamlandy",
+    "ru-RU": "Завершено"
+  },
+  "ApplicationProfileInstance.Workspace.StartedLabel": {
+    "en-US": "Started",
+    "tr-TR": "Başladı",
+    "tk-TM": "Başlady",
+    "ru-RU": "Начато"
+  },
+  "ApplicationProfileInstance.Workspace.ProfileSla": {
+    "en-US": "Profile SLA",
+    "tr-TR": "Profil SLA",
+    "tk-TM": "Profil SLA",
+    "ru-RU": "SLA профиля"
+  },
+  "ApplicationProfileInstance.Workspace.ConfiguredOnTemplate": {
+    "en-US": "Configured on template",
+    "tr-TR": "Şablonda ayarlı",
+    "tk-TM": "Şablonda bellenen",
+    "ru-RU": "Задано в шаблоне"
+  },
+  "ApplicationProfileInstance.Workspace.ProfileTemplate": {
+    "en-US": "Profile template",
+    "tr-TR": "Profil şablonu",
+    "tk-TM": "Profil şablony",
+    "ru-RU": "Шаблон профиля"
+  },
+  "ApplicationProfileInstance.Workspace.SlaByStep": {
+    "en-US": "SLA by step",
+    "tr-TR": "Adıma göre SLA",
+    "tk-TM": "Ädim boýunça SLA",
+    "ru-RU": "SLA по шагам"
+  },
+  "ApplicationProfileInstance.Workspace.Step": {
+    "en-US": "Step",
+    "tr-TR": "Adım",
+    "tk-TM": "Ädim",
+    "ru-RU": "Шаг"
+  },
+  "ApplicationProfileInstance.Workspace.DueDate": {
+    "en-US": "Due date",
+    "tr-TR": "Son tarih",
+    "tk-TM": "Möhlet senesi",
+    "ru-RU": "Срок"
+  },
+  "ApplicationProfileInstance.Workspace.DaysLeftCol": {
+    "en-US": "Days left",
+    "tr-TR": "Kalan gün",
+    "tk-TM": "Galan gün",
+    "ru-RU": "Осталось дней"
+  },
+  "ApplicationProfileInstance.Workspace.Status": {
+    "en-US": "Status",
+    "tr-TR": "Durum",
+    "tk-TM": "Ýagdaý",
+    "ru-RU": "Статус"
+  },
+  "ApplicationProfileInstance.Workspace.SlaSource": {
+    "en-US": "SLA source",
+    "tr-TR": "SLA kaynağı",
+    "tk-TM": "SLA çeşmesi",
+    "ru-RU": "Источник SLA"
+  },
+  "ApplicationProfileInstance.Workspace.MigrationSlaDays": {
+    "en-US": "Migration SLA {0} days",
+    "tr-TR": "Migrasyon SLA {0} gün",
+    "tk-TM": "Migrasiýa SLA {0} gün",
+    "ru-RU": "SLA миграции {0} дн."
+  },
+  "ApplicationProfileInstance.Workspace.DeadlineApproaching": {
+    "en-US": "Deadline approaching",
+    "tr-TR": "Süre yaklaşıyor",
+    "tk-TM": "Möhlet ýakynlaşýar",
+    "ru-RU": "Срок приближается"
+  },
+  "ApplicationProfileInstance.Workspace.SlaAlert": {
+    "en-US": "{0} deadline approaching. Due in {1} days on {2}.",
+    "tr-TR": "{0} süresi yaklaşıyor. {1} gün içinde, {2}.",
+    "tk-TM": "{0} möhleti ýakynlaşýar. {1} günden {2} senesinde.",
+    "ru-RU": "Срок «{0}» близко. Через {1} дн., {2}."
+  },
+  "ApplicationProfileInstance.Workspace.CaseTimeline": {
+    "en-US": "Case timeline",
+    "tr-TR": "Dava zaman çizelgesi",
+    "tk-TM": "Ýüztutma wagty",
+    "ru-RU": "Лента дела"
+  },
+  "ApplicationProfileInstance.Workspace.Due": {
+    "en-US": "Due",
+    "tr-TR": "Süresi doldu",
+    "tk-TM": "Möhleti geldi",
+    "ru-RU": "Срок истёк"
+  },
+  "ApplicationProfileInstance.Workspace.DueTomorrow": {
+    "en-US": "Due tomorrow",
+    "tr-TR": "Yarın son gün",
+    "tk-TM": "Ertir möhleti",
+    "ru-RU": "Срок завтра"
+  },
+  "ApplicationProfileInstance.Workspace.DueSoon": {
+    "en-US": "Due soon",
+    "tr-TR": "Yakında son tarih",
+    "tk-TM": "Ýakyn möhlet",
+    "ru-RU": "Срок скоро"
+  },
+  "ApplicationProfileInstance.Workspace.OnTrack": {
+    "en-US": "On track",
+    "tr-TR": "Zamanında",
+    "tk-TM": "Möhletinde",
+    "ru-RU": "В срок"
+  },
+  "ApplicationProfileInstance.Workspace.Opening": {
+    "en-US": "Opening case…",
+    "tr-TR": "Dava açılıyor…",
+    "tk-TM": "Ýüztutma açylýar…",
+    "ru-RU": "Открытие дела…"
+  },
+  "ApplicationProfileInstance.Workspace.OpeningTab": {
+    "en-US": "Opening {0}…",
+    "tr-TR": "{0} açılıyor…",
+    "tk-TM": "{0} açylýar…",
+    "ru-RU": "Открытие: {0}…"
+  },
+  "ApplicationProfileInstance.Workspace.Close": {
+    "en-US": "Close",
+    "tr-TR": "Kapat",
+    "tk-TM": "Ýap",
+    "ru-RU": "Закрыть"
+  },
+  "ApplicationProfileInstance.Workspace.CloseAria": {
+    "en-US": "Close case workspace",
+    "tr-TR": "Dava çalışma alanını kapat",
+    "tk-TM": "Ýüztutma iş meýdanyny ýap",
+    "ru-RU": "Закрыть рабочее место дела"
+  },
+  "ApplicationProfileInstance.Workspace.LinksLocked": {
+    "en-US": "Links locked",
+    "tr-TR": "Bağlantılar kilitli",
+    "tk-TM": "Baglanyşyklar gulply",
+    "ru-RU": "Связи заблокированы"
+  },
+  "ApplicationProfileInstance.Workspace.LinksLockedTitle": {
+    "en-US": "People and linked records cannot be changed",
+    "tr-TR": "Kişiler ve bağlı kayıtlar değiştirilemez",
+    "tk-TM": "Adamlar we baglanan ýazgylar üýtgedilip bolmaýar",
+    "ru-RU": "Людей и связанные записи менять нельзя"
+  },
+  "ApplicationProfileInstance.Workspace.ProfileTitle": {
+    "en-US": "Application Profile",
+    "tr-TR": "Başvuru profili",
+    "tk-TM": "Ýüztutma profili",
+    "ru-RU": "Профиль заявки"
+  },
+  "ApplicationProfileInstance.Workspace.SectionsAria": {
+    "en-US": "Case sections",
+    "tr-TR": "Dava bölümleri",
+    "tk-TM": "Ýüztutma bölümleri",
+    "ru-RU": "Разделы дела"
+  },
+  "ApplicationProfileInstance.Workspace.CompleteCaseSummary": {
+    "en-US": "Required Case summary complete",
+    "tr-TR": "Zorunlu dava özeti tamam",
+    "tk-TM": "Hökmany ýüztutma gysgaçasy taýýar",
+    "ru-RU": "Обязательная сводка заполнена"
+  },
+  "ApplicationProfileInstance.Workspace.CompletePeople": {
+    "en-US": "Required person data complete",
+    "tr-TR": "Zorunlu kişi verileri tamam",
+    "tk-TM": "Hökmany adam maglumatlary taýýar",
+    "ru-RU": "Обязательные данные лица заполнены"
+  },
+  "ApplicationProfileInstance.Workspace.CompleteDocuments": {
+    "en-US": "Required document copies complete",
+    "tr-TR": "Zorunlu belge kopyaları tamam",
+    "tk-TM": "Hökmany resminama nusgalary taýýar",
+    "ru-RU": "Обязательные копии документов заполнены"
+  },
+  "ApplicationProfileInstance.Workspace.NoPeople": {
+    "en-US": "No people linked",
+    "tr-TR": "Bağlı kişi yok",
+    "tk-TM": "Baglanan adam ýok",
+    "ru-RU": "Люди не связаны"
+  },
+  "ApplicationProfileInstance.Workspace.GateBanner": {
+    "en-US": "Complete required Case summary fields first",
+    "tr-TR": "Önce zorunlu dava özeti alanlarını doldurun",
+    "tk-TM": "Ilki hökmany ýüztutma gysgaça meýdanlaryny dolduryň",
+    "ru-RU": "Сначала заполните обязательные поля сводки"
+  },
+  "ApplicationProfileInstance.Workspace.Done": {
+    "en-US": "Done",
+    "tr-TR": "Bitti",
+    "tk-TM": "Boldy",
+    "ru-RU": "Готово"
+  },
+  "ApplicationProfileInstance.Workspace.EditField": {
+    "en-US": "Edit {0}",
+    "tr-TR": "{0} düzenle",
+    "tk-TM": "{0} üýtget",
+    "ru-RU": "Изменить {0}"
+  },
+  "ApplicationProfileInstance.Workspace.AppNumber": {
+    "en-US": "Application № {0}.",
+    "tr-TR": "Başvuru № {0}.",
+    "tk-TM": "Ýüztutma № {0}.",
+    "ru-RU": "Заявка № {0}."
+  },
+  "ApplicationProfileInstance.Workspace.ConfirmDelete": {
+    "en-US": "Delete {0}? This cannot be undone.",
+    "tr-TR": "{0} silinsin mi? Bu geri alınamaz.",
+    "tk-TM": "{0} pozulsynmy? Yza alyp bolmaýar.",
+    "ru-RU": "Удалить {0}? Это нельзя отменить."
+  },
+  "ApplicationProfileInstance.Workspace.OfficePreparation": {
+    "en-US": "Office preparation",
+    "tr-TR": "Ofis hazırlığı",
+    "tk-TM": "Ofisde taýýarlyk",
+    "ru-RU": "Офисная подготовка"
+  },
+  "ApplicationProfileInstance.Workspace.MigrationService": {
+    "en-US": "Migration service",
+    "tr-TR": "Göç dairesi",
+    "tk-TM": "Migrasiýa gullugy",
+    "ru-RU": "Миграционная служба"
+  },
+  "ApplicationProfileInstance.Shell.Loading": {
+    "en-US": "Loading…",
+    "tr-TR": "Yükleniyor…",
+    "tk-TM": "Ýüklenýär…",
+    "ru-RU": "Загрузка…"
+  },
+  "ApplicationProfileInstance.Shell.SearchPlaceholder": {
+    "en-US": "Search name, passport, number…",
+    "tr-TR": "Ad, pasaport, numara ara…",
+    "tk-TM": "At, pasport, belgi gözle…",
+    "ru-RU": "Поиск: имя, паспорт, номер…"
+  },
+  "ApplicationProfileInstance.Shell.StartProcess": {
+    "en-US": "Start process",
+    "tr-TR": "Süreci başlat",
+    "tk-TM": "Prosesi başlat",
+    "ru-RU": "Начать процесс"
+  },
+  "ApplicationProfileInstance.Shell.StagedTitle": {
+    "en-US": "Staged profiles",
+    "tr-TR": "Hazırlık profilleri",
+    "tk-TM": "Taýýarlyk profilleri",
+    "ru-RU": "Подготовленные профили"
+  },
+  "ApplicationProfileInstance.Shell.StagedSub": {
+    "en-US": "Select ready rows and start process to open a numbered case.",
+    "tr-TR": "Hazır satırları seçip süreci başlatarak numaralı dava açın.",
+    "tk-TM": "Taýýar setirleri saýlap prosesi başladyň — belgili ýüztutma açylar.",
+    "ru-RU": "Выберите готовые строки и начните процесс, чтобы открыть пронумерованное дело."
+  },
+  "ApplicationProfileInstance.Shell.NotReady": {
+    "en-US": "Some selected rows are not ready — complete profile and person links first.",
+    "tr-TR": "Seçilen bazı satırlar hazır değil — önce profili ve kişi bağlantılarını tamamlayın.",
+    "tk-TM": "Käbir saýlanan setirler taýýar däl — ilki profili we adam baglanyşyklaryny gutaryň.",
+    "ru-RU": "Некоторые выбранные строки не готовы — сначала заполните профиль и связи лиц."
+  },
+  "ApplicationProfileInstance.Shell.ColPerson": {
+    "en-US": "Person",
+    "tr-TR": "Kişi",
+    "tk-TM": "Adam",
+    "ru-RU": "Лицо"
+  },
+  "ApplicationProfileInstance.Shell.ColProfile": {
+    "en-US": "Profile",
+    "tr-TR": "Profil",
+    "tk-TM": "Profil",
+    "ru-RU": "Профиль"
+  },
+  "ApplicationProfileInstance.Shell.ColProject": {
+    "en-US": "Project",
+    "tr-TR": "Proje",
+    "tk-TM": "Taslama",
+    "ru-RU": "Проект"
+  },
+  "ApplicationProfileInstance.Shell.ColStaged": {
+    "en-US": "Staged",
+    "tr-TR": "Hazırlık",
+    "tk-TM": "Taýýarlyk",
+    "ru-RU": "Подготовка"
+  },
+  "ApplicationProfileInstance.Shell.ColStatus": {
+    "en-US": "Status",
+    "tr-TR": "Durum",
+    "tk-TM": "Ýagdaý",
+    "ru-RU": "Статус"
+  },
+  "ApplicationProfileInstance.Shell.CrumbStaged": {
+    "en-US": "Application Profile Instances / Staged profiles",
+    "tr-TR": "Başvuru profili örnekleri / Hazırlık profilleri",
+    "tk-TM": "Ýüztutmalar / Taýýarlyk profilleri",
+    "ru-RU": "Экземпляры профиля заявки / Подготовленные профили"
+  },
+  "ApplicationProfileInstance.Shell.CrumbStagedGrouped": {
+    "en-US": "Application Profile Instances / Staged profiles / Grouped",
+    "tr-TR": "Başvuru profili örnekleri / Hazırlık profilleri / Gruplu",
+    "tk-TM": "Ýüztutmalar / Taýýarlyk profilleri / Toparlaýyn",
+    "ru-RU": "Экземпляры профиля заявки / Подготовленные профили / Группами"
+  },
+  "ApplicationProfileInstance.Shell.CrumbInProcess": {
+    "en-US": "Application Profile Instances / In process",
+    "tr-TR": "Başvuru profili örnekleri / İşlemde",
+    "tk-TM": "Ýüztutmalar / Prosesde",
+    "ru-RU": "Экземпляры профиля заявки / В работе"
+  },
+  "ApplicationProfileInstance.Shell.CrumbTemplates": {
+    "en-US": "Application Profile Instances / Profile templates",
+    "tr-TR": "Başvuru profili örnekleri / Profil şablonları",
+    "tk-TM": "Ýüztutmalar / Profil şablonlary",
+    "ru-RU": "Экземпляры профиля заявки / Шаблоны профиля"
+  },
+  "ApplicationProfileInstance.Shell.CrumbCase": {
+    "en-US": "Application Profile Instances / In process / Case workspace",
+    "tr-TR": "Başvuru profili örnekleri / İşlemde / Dava çalışma alanı",
+    "tk-TM": "Ýüztutmalar / Prosesde / Ýüztutma",
+    "ru-RU": "Экземпляры профиля заявки / В работе / Рабочее место дела"
+  },
+  "ApplicationProfileInstance.Shell.CrumbRoot": {
+    "en-US": "Application Profile Instances",
+    "tr-TR": "Başvuru profili örnekleri",
+    "tk-TM": "Ýüztutmalar",
+    "ru-RU": "Экземпляры профиля заявки"
+  },
+  "ApplicationProfile.Site.Lodging": {
+    "en-US": "Lodging",
+    "tr-TR": "Konaklama",
+    "tk-TM": "Ýaşaýyş",
+    "ru-RU": "Проживание"
+  },
+  "ApplicationProfile.Site.Hotel": {
+    "en-US": "Hotel",
+    "tr-TR": "Otel",
+    "tk-TM": "Myhmanhana",
+    "ru-RU": "Гостиница"
+  },
+  "ApplicationProfile.Site.Hospital": {
+    "en-US": "Hospital",
+    "tr-TR": "Hastane",
+    "tk-TM": "Hassahana",
+    "ru-RU": "Больница"
+  },
+  "ApplicationProfile.Site.Other": {
+    "en-US": "Other site",
+    "tr-TR": "Diğer yer",
+    "tk-TM": "Başga ýer",
+    "ru-RU": "Другой объект"
+  },
+  "ApplicationProfile.Site.PrivateHouse": {
+    "en-US": "Private house",
+    "tr-TR": "Özel ev",
+    "tk-TM": "Hususy jaý",
+    "ru-RU": "Частный дом"
+  },
+  "ApplicationProfile.Site.TypePlaceholder": {
+    "en-US": "— type —",
+    "tr-TR": "— tür —",
+    "tk-TM": "— görnüş —",
+    "ru-RU": "— тип —"
+  },
+  "ApplicationProfile.Site.LodgingPlaceholder": {
+    "en-US": "— lodging —",
+    "tr-TR": "— konaklama —",
+    "tk-TM": "— ýaşaýyş —",
+    "ru-RU": "— проживание —"
+  },
+  "ApplicationProfile.Site.HotelPlaceholder": {
+    "en-US": "— hotel —",
+    "tr-TR": "— otel —",
+    "tk-TM": "— myhmanhana —",
+    "ru-RU": "— гостиница —"
+  },
+  "ApplicationProfile.Site.HospitalPlaceholder": {
+    "en-US": "— hospital —",
+    "tr-TR": "— hastane —",
+    "tk-TM": "— hassahana —",
+    "ru-RU": "— больница —"
+  },
+  "ApplicationProfile.Site.OtherPlaceholder": {
+    "en-US": "— other site —",
+    "tr-TR": "— diğer yer —",
+    "tk-TM": "— başga ýer —",
+    "ru-RU": "— другой объект —"
+  },
+  "ApplicationProfile.Person.Visa": {
+    "en-US": "Visa",
+    "tr-TR": "Vize",
+    "tk-TM": "Wiza",
+    "ru-RU": "Виза"
+  },
+  "ApplicationProfile.Person.LastNTitle": {
+    "en-US": "How many latest records to auto-link",
+    "tr-TR": "Otomatik bağlanacak son kayıt sayısı",
+    "tk-TM": "Awtomatik baglanjak soňky ýazgy sany",
+    "ru-RU": "Сколько последних записей связывать автоматически"
+  },
+  "ApplicationProfile.Wizard.ReviewQuick": {
+    "en-US": "· quick {0}",
+    "tr-TR": "· hızlı {0}",
+    "tk-TM": "· çalt {0}",
+    "ru-RU": "· быстро {0}"
+  },
+  "ApplicationProfile.Wizard.Saved": {
+    "en-US": "Profile saved.",
+    "tr-TR": "Profil kaydedildi.",
+    "tk-TM": "Profil saklandy.",
+    "ru-RU": "Профиль сохранён."
+  },
+  "ApplicationProfile.Wizard.NotFound": {
+    "en-US": "Application Profile not found.",
+    "tr-TR": "Başvuru profili bulunamadı.",
+    "tk-TM": "Ýüztutma profili tapylmady.",
+    "ru-RU": "Профиль заявки не найден."
+  },
+  "ApplicationProfile.Overview.ProcessHint": {
+    "en-US": "Expected duration. Instance steps follow Directed to and Approval legs.",
+    "tr-TR": "Beklenen süre. Örnek adımları Yönlendirildiği yer ve Onay adımlarına uyar.",
+    "tk-TM": "Garaşylýan möhlet. Ýüzleme ädimleri Gönükdirilen ýere we Tassyklama ädimlerine eýerýär.",
+    "ru-RU": "Ожидаемая длительность. Шаги экземпляра следуют направлению и этапам согласования."
+  },
+  "ApplicationProfile.Overview.MinistrySla": {
+    "en-US": "Ministry SLA: {0} days",
+    "tr-TR": "Bakanlık SLA: {0} gün",
+    "tk-TM": "Ministrlik SLA: {0} gün",
+    "ru-RU": "SLA министерств: {0} дн."
+  },
+  "ApplicationProfile.Overview.MigrationSla": {
+    "en-US": "Migration SLA: {0} days",
+    "tr-TR": "Göç SLA: {0} gün",
+    "tk-TM": "Migrasiýa SLA: {0} gün",
+    "ru-RU": "SLA миграции: {0} дн."
+  },
+  "ApplicationProfile.Overview.PersonTitle": {
+    "en-US": "Person data requirements",
+    "tr-TR": "Kişi verisi gereksinimleri",
+    "tk-TM": "Adam maglumat talaplary",
+    "ru-RU": "Требования к данным лица"
+  },
+  "ApplicationProfile.Overview.NoPersonReqs": {
+    "en-US": "No person-data requirements on this profile.",
+    "tr-TR": "Bu profilde kişi verisi gereksinimi yok.",
+    "tk-TM": "Bu profilde adam maglumat talaby ýok.",
+    "ru-RU": "В этом профиле нет требований к данным лица."
+  },
+  "ApplicationProfile.Overview.NestedTitle": {
+    "en-US": "Nested templates",
+    "tr-TR": "İç içe şablonlar",
+    "tk-TM": "Içerki şablonlar",
+    "ru-RU": "Вложенные шаблоны"
+  },
+  "ApplicationProfile.Overview.NoNested": {
+    "en-US": "No nested report templates.",
+    "tr-TR": "İç içe rapor şablonu yok.",
+    "tk-TM": "Içerki hasabat şablony ýok.",
+    "ru-RU": "Нет вложенных шаблонов отчётов."
+  },
+  "ApplicationProfile.Overview.ColName": {
+    "en-US": "Name",
+    "tr-TR": "Ad",
+    "tk-TM": "At",
+    "ru-RU": "Имя"
+  },
+  "ApplicationProfile.Overview.ColType": {
+    "en-US": "Type",
+    "tr-TR": "Tür",
+    "tk-TM": "Görnüşi",
+    "ru-RU": "Тип"
+  },
+  "ApplicationProfile.Overview.ColScope": {
+    "en-US": "Scope",
+    "tr-TR": "Kapsam",
+    "tk-TM": "Gerimi",
+    "ru-RU": "Область"
+  },
+  "ApplicationProfile.Overview.ColData": {
+    "en-US": "Data",
+    "tr-TR": "Veri",
+    "tk-TM": "Maglumat",
+    "ru-RU": "Данные"
+  },
+  "ApplicationProfile.Overview.LinkedTitle": {
+    "en-US": "Linked applications",
+    "tr-TR": "Bağlı başvurular",
+    "tk-TM": "Baglanan ýüztutmalar",
+    "ru-RU": "Связанные заявки"
+  },
+  "ApplicationProfile.Overview.LinkedHint": {
+    "en-US": "Applications that use this profile. Open a number to view the case workspace.",
+    "tr-TR": "Bu profili kullanan başvurular. Dava çalışma alanını görmek için bir numaraya tıklayın.",
+    "tk-TM": "Bu profili ulanýan ýüztutmalar. Ýüztutma iş meýdanyny görmek üçin belgini açyň.",
+    "ru-RU": "Заявки, использующие этот профиль. Откройте номер, чтобы перейти в рабочее место дела."
+  },
+  "ApplicationProfile.Overview.NoLinked": {
+    "en-US": "No applications use this profile yet.",
+    "tr-TR": "Bu profili henüz kullanan başvuru yok.",
+    "tk-TM": "Bu profili heniz ulanýan ýüztutma ýok.",
+    "ru-RU": "Этот профиль пока не используется заявками."
+  },
+  "ApplicationProfile.Overview.ColApplication": {
+    "en-US": "Application",
+    "tr-TR": "Başvuru",
+    "tk-TM": "Ýüztutma",
+    "ru-RU": "Заявка"
+  },
+  "ApplicationProfile.Overview.ColDate": {
+    "en-US": "Date",
+    "tr-TR": "Tarih",
+    "tk-TM": "Sene",
+    "ru-RU": "Дата"
+  },
+  "ApplicationProfile.Overview.ColStatus": {
+    "en-US": "Status",
+    "tr-TR": "Durum",
+    "tk-TM": "Ýagdaý",
+    "ru-RU": "Статус"
+  },
+  "ApplicationProfile.Overview.CountOf": {
+    "en-US": "{0} of {1}",
+    "tr-TR": "{0} / {1}",
+    "tk-TM": "{0} / {1}",
+    "ru-RU": "{0} из {1}"
+  },
+  "ApplicationProfile.Overview.CouldNotDelete": {
+    "en-US": "Could not delete Application Profile template.",
+    "tr-TR": "Başvuru profili şablonu silinemedi.",
+    "tk-TM": "Ýüztutma profil şablonyny pozup bolmady.",
+    "ru-RU": "Не удалось удалить шаблон профиля заявки."
+  },
+  "ApplicationProfile.Catalog.TemplatesTitle": {
+    "en-US": "Profile templates",
+    "tr-TR": "Profil şablonları",
+    "tk-TM": "Profil şablonlary",
+    "ru-RU": "Шаблоны профиля"
+  },
+  "ApplicationProfile.Catalog.TemplatesSub": {
+    "en-US": "Configure reusable templates officers clone to stage application profiles.",
+    "tr-TR": "Memurların başvuru profillerini hazırlamak için kopyaladığı yeniden kullanılabilir şablonları yapılandırın.",
+    "tk-TM": "Işgärleriň ýüztutma profillerini taýýarlamak üçin göçürýän gaýtadan ulanylýan şablonlary sazlaň.",
+    "ru-RU": "Настройте повторно используемые шаблоны, которые офицеры копируют для подготовки профилей заявок."
+  },
+  "ApplicationProfileInstance.Picker.Unnamed": {
+    "en-US": "Unnamed profile",
+    "tr-TR": "Adsız profil",
+    "tk-TM": "Atsyz profil",
+    "ru-RU": "Профиль без имени"
+  },
+  "ApplicationProfileInstance.Picker.Selected": {
+    "en-US": "Selected",
+    "tr-TR": "Seçili",
+    "tk-TM": "Saýlanan",
+    "ru-RU": "Выбрано"
+  },
+  "ApplicationProfileInstance.Picker.ApprovalLegsTitle": {
+    "en-US": "Approval legs *",
+    "tr-TR": "Onay adımları *",
+    "tk-TM": "Tassyklama ädimleri *",
+    "ru-RU": "Этапы согласования *"
+  },
+  "ApplicationProfileInstance.Picker.ApprovalLegsSub": {
+    "en-US": "These chains are shared for every via-ministry application. Pick one for this case; ministries are copied onto it and will not change if the shared catalog is edited later. Make default is the pre-selected chain the next time someone creates from this profile.",
+    "tr-TR": "Bu zincirler tüm bakanlık süreci başvuruları için ortaktır. Bu dava için birini seçin; bakanlıklar kopyalanır ve paylaşılan katalog sonra değişse bile değişmez. Varsayılan yap, bu profilden sonraki oluşturmada önceden seçilen zincirdir.",
+    "tk-TM": "Bu zynjyrlar ähli ministrlik ýüztutmalary üçin paýlaşylýar. Bu ýüztutma üçin birini saýlaň; ministrlikler göçürilýär we soňra katalog üýtgese-de üýtgemeýär. Bellenen et, bu profilden indiki döredilende öňünden saýlanan zynjyr.",
+    "ru-RU": "Эти цепочки общие для всех заявок через министерства. Выберите одну для этого дела; министерства копируются и не изменятся при правке общего каталога. «По умолчанию» — предвыбор при следующем создании из этого профиля."
+  },
+  "ApplicationProfileInstance.Picker.NoVersionsTitle": {
+    "en-US": "No shared approval-leg versions yet",
+    "tr-TR": "Henüz paylaşılan onay adımı sürümü yok",
+    "tk-TM": "Paýlaşylan tassyklama ädim wersiýasy heniz ýok",
+    "ru-RU": "Пока нет общих версий этапов согласования"
+  },
+  "ApplicationProfileInstance.Picker.NoVersionsBody": {
+    "en-US": "Create the first ministry chain here. It is shared for all via-ministry applications, not only this case. After Create, pick the card and continue. Catalog on the right lists inactive chains too.",
+    "tr-TR": "İlk bakanlık zincirini burada oluşturun. Tüm bakanlık süreci başvuruları için ortaktır, yalnız bu dava için değil. Oluşturduktan sonra kartı seçip devam edin. Sağdaki katalog pasif zincirleri de listeler.",
+    "tk-TM": "Ilkinji ministrlik zynjyryny şu ýerde dörediň. Ähli ministrlik ýüztutmalary üçin paýlaşylýar, diňe bu ýüztutma üçin däl. Döredenden soň karty saýlap dowam ediň. Sagdakı katalog işlemeýän zynjyrlary hem görkezýär.",
+    "ru-RU": "Создайте первую министерскую цепочку здесь. Она общая для всех заявок через министерства, не только для этого дела. После создания выберите карточку и продолжите. Каталог справа показывает и неактивные цепочки."
+  },
+  "ApplicationProfileInstance.Picker.MinistriesCount": {
+    "en-US": "{0} ministries",
+    "tr-TR": "{0} bakanlık",
+    "tk-TM": "{0} ministrlik",
+    "ru-RU": "{0} мин-в"
+  },
+  "ApplicationProfileInstance.Picker.ContinueMissingVersions": {
+    "en-US": "Continue to choose or create a shared approval-leg version. New chains are available for every via-ministry application.",
+    "tr-TR": "Paylaşılan onay adımı sürümünü seçmek veya oluşturmak için devam edin. Yeni zincirler tüm bakanlık süreci başvurularında kullanılabilir.",
+    "tk-TM": "Paýlaşylan tassyklama ädim wersiýasyny saýlamak ýa-da döretmek üçin dowam ediň. Täze zynjyrlar ähli ministrlik ýüztutmalarynda elýeterli.",
+    "ru-RU": "Продолжите, чтобы выбрать или создать общую версию этапов. Новые цепочки доступны для всех заявок через министерства."
+  },
+  "ApplicationProfileInstance.Picker.OrgSub": {
+    "en-US": "This case will use the selected Company, Signatory, and Representative. Defaults are pre-selected; you can change them. Make default applies to the next new application. Use the gear to add or edit catalog records.",
+    "tr-TR": "Bu dava seçilen Şirket, İmza ve Temsilciyi kullanır. Varsayılanlar önceden seçilidir; değiştirebilirsiniz. Varsayılan yap sonraki yeni başvuruya uygulanır. Katalog kayıtları için dişliyi kullanın.",
+    "tk-TM": "Bu ýüztutma saýlanan Kompaniýa, Gol we Wekili ulanar. Bellenenler öňünden saýlandy; üýtgedip bilersiňiz. Bellenen et indiki täze ýüztutma üçin. Katalog ýazgylary üçin dişlini ulanyň.",
+    "ru-RU": "Это дело использует выбранные компанию, подписанта и представителя. Значения по умолчанию уже выбраны. «По умолчанию» действует для следующей новой заявки. Шестерёнка открывает добавление и правку каталога."
+  },
+  "ApplicationProfileInstance.Picker.OrgCallout": {
+    "en-US": "These are shared catalog records (not snapshots). Editing a catalog record later updates every case that selected it.",
+    "tr-TR": "Bunlar paylaşılan katalog kayıtlarıdır (anlık kopya değil). Katalog kaydını sonra düzenlemek onu seçen her davayı günceller.",
+    "tk-TM": "Bular paýlaşylan katalog ýazgylary (surat däl). Katalog ýazgysyny soň üýtgetmek ony saýlan ähli ýüztutmalary täzeleýär.",
+    "ru-RU": "Это общие записи каталога (не снимки). Правка записи позже обновляет все дела, которые её выбрали."
+  },
+  "ApplicationProfileInstance.Picker.OrgCalloutManage": {
+    "en-US": " + New and Edit here are the same as Configuration → Organization catalogs.",
+    "tr-TR": " Buradaki + Yeni ve Düzenle, Yapılandırma → Kuruluş katalogları ile aynıdır.",
+    "tk-TM": " Şu ýerdäki + Täze we Üýtget, Konfigurasiýa → Gurama kataloglary bilen birmeňzeş.",
+    "ru-RU": " + Создать и Изменить здесь те же, что в Конфигурация → Каталоги организации."
+  },
+  "ApplicationProfileInstance.Picker.CompanyHint": {
+    "en-US": "Letterhead company for this application.",
+    "tr-TR": "Bu başvurunun antet şirketi.",
+    "tk-TM": "Bu ýüztutmanyň blank kompaniýasy.",
+    "ru-RU": "Компания бланка для этой заявки."
+  },
+  "ApplicationProfileInstance.Picker.HideCatalogManage": {
+    "en-US": "Hide catalog New and Edit",
+    "tr-TR": "Katalog Yeni ve Düzenle’yi gizle",
+    "tk-TM": "Katalog Täze we Üýtget gizle",
+    "ru-RU": "Скрыть Создание и Изменение каталога"
+  },
+  "ApplicationProfileInstance.Picker.ShowCatalogManage": {
+    "en-US": "Show catalog New and Edit",
+    "tr-TR": "Katalog Yeni ve Düzenle’yi göster",
+    "tk-TM": "Katalog Täze we Üýtget görkez",
+    "ru-RU": "Показать Создание и Изменение каталога"
+  },
+  "ApplicationProfileInstance.Picker.EmptyCatalog": {
+    "en-US": "No catalog records yet",
+    "tr-TR": "Henüz katalog kaydı yok",
+    "tk-TM": "Katalog ýazgysy heniz ýok",
+    "ru-RU": "В каталоге пока нет записей"
+  },
+  "ApplicationProfileInstance.Picker.EmptyCatalogGear": {
+    "en-US": "No catalog records yet — use the gear to add one",
+    "tr-TR": "Henüz katalog kaydı yok — eklemek için dişliyi kullanın",
+    "tk-TM": "Katalog ýazgysy heniz ýok — goşmak üçin dişlini ulanyň",
+    "ru-RU": "В каталоге пока нет записей — добавьте через шестерёнку"
+  },
+  "ApplicationProfileInstance.Picker.CrumbProfile": {
+    "en-US": "Profile",
+    "tr-TR": "Profil",
+    "tk-TM": "Profil",
+    "ru-RU": "Профиль"
+  },
+  "ApplicationProfileInstance.Picker.CrumbLegs": {
+    "en-US": "Approval legs",
+    "tr-TR": "Onay adımları",
+    "tk-TM": "Tassyklama ädimleri",
+    "ru-RU": "Этапы согласования"
+  },
+  "ApplicationProfileInstance.Picker.EditLabel": {
+    "en-US": "Edit {0}",
+    "tr-TR": "{0} düzenle",
+    "tk-TM": "{0} üýtget",
+    "ru-RU": "Изменить {0}"
+  },
+  "ApplicationProfileInstance.Picker.SelectPlaceholder": {
+    "en-US": "— Select —",
+    "tr-TR": "— Seçin —",
+    "tk-TM": "— Saýlaň —",
+    "ru-RU": "— Выберите —"
+  },
+  "ApplicationProfileInstance.Picker.MetaLine": {
+    "en-US": "{0} · Related to: {1} · {2}",
+    "tr-TR": "{0} · İlgili: {1} · {2}",
+    "tk-TM": "{0} · Baglanyşykly: {1} · {2}",
+    "ru-RU": "{0} · Относится к: {1} · {2}"
+  },
+  "ApplicationProfileInstance.Picker.NotUsedBefore": {
+    "en-US": "Not used for this person before",
+    "tr-TR": "Bu kişi için daha önce kullanılmadı",
+    "tk-TM": "Bu adam üçin ozal ulanylmady",
+    "ru-RU": "Для этого лица ещё не использовался"
+  },
+  "ApplicationProfileInstance.Picker.UsedCount": {
+    "en-US": "Used {0}× · last {1}",
+    "tr-TR": "{0}× kullanıldı · son {1}",
+    "tk-TM": "{0}× ulanyldy · soňky {1}",
+    "ru-RU": "Использован {0}× · последний {1}"
+  },
+  "ApplicationProfileInstance.Picker.RouteHint": {
+    "en-US": "Showing profiles for {0}.",
+    "tr-TR": "{0} için profiller gösteriliyor.",
+    "tk-TM": "{0} üçin profiller görkezilýär.",
+    "ru-RU": "Показаны профили для {0}."
+  },
+  "ApplicationProfileInstance.Picker.RouteHintDefault": {
+    "en-US": "Choose a profile — configuration applies live; instance values get defaults at create.",
+    "tr-TR": "Bir profil seçin — yapılandırma canlı uygulanır; örnek değerleri oluştururken varsayılan alır.",
+    "tk-TM": "Profil saýlaň — sazlama janly ulanylýar; ýüzleme bahalary döredilende bellenenleri alýar.",
+    "ru-RU": "Выберите профиль — конфигурация применяется сразу; значения экземпляра получают значения по умолчанию при создании."
+  },
+  "ApplicationProfileInstance.Picker.SelectFirst": {
+    "en-US": "Select an Application Profile first.",
+    "tr-TR": "Önce bir başvuru profili seçin.",
+    "tk-TM": "Ilki ýüztutma profilini saýlaň.",
+    "ru-RU": "Сначала выберите профиль заявки."
+  },
+  "ApplicationProfileInstance.Picker.SelectVersion": {
+    "en-US": "Select an approval-leg version.",
+    "tr-TR": "Bir onay adımı sürümü seçin.",
+    "tk-TM": "Tassyklama ädim wersiýasyny saýlaň.",
+    "ru-RU": "Выберите версию этапов согласования."
+  },
+  "ApplicationProfileInstance.Picker.CouldNotSetDefault": {
+    "en-US": "Could not set the default approval-leg chain.",
+    "tr-TR": "Varsayılan onay adımı zinciri ayarlanamadı.",
+    "tk-TM": "Bellenen tassyklama ädim zynjyryny sazlap bolmady.",
+    "ru-RU": "Не удалось назначить цепочку согласования по умолчанию."
+  },
+  "ApplicationProfileInstance.Workspace.CaseWorkspace": {
+    "en-US": "Case workspace",
+    "tr-TR": "Dava çalışma alanı",
+    "tk-TM": "Ýüztutma",
+    "ru-RU": "Рабочее место дела"
+  },
+  "ApplicationProfileInstance.Workspace.NoCase": {
+    "en-US": "No case selected.",
+    "tr-TR": "Dava seçilmedi.",
+    "tk-TM": "Ýüztutma saýlanmady.",
+    "ru-RU": "Дело не выбрано."
+  },
+  "ApplicationProfileInstance.Workspace.InstanceNumber": {
+    "en-US": "Application Profile instance № {0}",
+    "tr-TR": "Başvuru profili örneği № {0}",
+    "tk-TM": "Ýüztutma № {0}",
+    "ru-RU": "Экземпляр профиля заявки № {0}"
+  },
+  "ApplicationProfileInstance.Workspace.Started": {
+    "en-US": "Started {0}",
+    "tr-TR": "Başlangıç {0}",
+    "tk-TM": "Başlady {0}",
+    "ru-RU": "Начато {0}"
+  },
+  "ApplicationProfileInstance.Workspace.DaysRemaining": {
+    "en-US": "{0} days remaining",
+    "tr-TR": "{0} gün kaldı",
+    "tk-TM": "{0} gün galdy",
+    "ru-RU": "осталось {0} дн."
+  },
+  "ApplicationProfileInstance.Workspace.Issued": {
+    "en-US": "Issued",
+    "tr-TR": "Düzenlendi",
+    "tk-TM": "Işlendi",
+    "ru-RU": "Выдано"
+  },
+  "ApplicationProfileInstance.Workspace.Submitted": {
+    "en-US": "Submitted",
+    "tr-TR": "Teslim edildi",
+    "tk-TM": "Tabşyryldy",
+    "ru-RU": "Подано"
+  },
+  "ApplicationProfileInstance.Workspace.Approved": {
+    "en-US": "Approved",
+    "tr-TR": "Onaylandı",
+    "tk-TM": "Ylalaşyldy",
+    "ru-RU": "Согласовано"
+  },
+  "ApplicationProfileInstance.Workspace.Rejected": {
+    "en-US": "Rejected",
+    "tr-TR": "Reddedildi",
+    "tk-TM": "Ret edildi",
+    "ru-RU": "Отказано"
+  },
+  "ApplicationProfileInstance.Workspace.Cancelled": {
+    "en-US": "Cancelled",
+    "tr-TR": "İptal edildi",
+    "tk-TM": "Ýatyryldy",
+    "ru-RU": "Отменено"
+  },
+  "ApplicationProfileInstance.Workspace.InProcess": {
+    "en-US": "In process",
+    "tr-TR": "İşlemde",
+    "tk-TM": "Prosesde",
+    "ru-RU": "В работе"
+  },
+  "ApplicationProfileInstance.Workspace.MergedFrom": {
+    "en-US": "Merged from {0} staged profiles",
+    "tr-TR": "{0} hazırlık profilinden birleştirildi",
+    "tk-TM": "{0} taýýarlyk profilinden birleşdirildi",
+    "ru-RU": "Объединено из {0} подготовленных профилей"
+  },
+  "ApplicationProfileInstance.Workspace.HidePerson": {
+    "en-US": "Hide this person in Document copies",
+    "tr-TR": "Bu kişiyi Belge kopyalarında gizle",
+    "tk-TM": "Bu adamy Resminama nusgalarynda gizle",
+    "ru-RU": "Скрыть это лицо в копиях документов"
+  },
+  "ApplicationProfileInstance.Workspace.ShowPerson": {
+    "en-US": "Show this person in Document copies",
+    "tr-TR": "Bu kişiyi Belge kopyalarında göster",
+    "tk-TM": "Bu adamy Resminama nusgalarynda görkez",
+    "ru-RU": "Показать это лицо в копиях документов"
+  },
+  "ApplicationProfileInstance.Workspace.Section": {
+    "en-US": "section",
+    "tr-TR": "bölüm",
+    "tk-TM": "bölüm",
+    "ru-RU": "раздел"
+  },
+  "ApplicationProfileInstance.Workspace.ProfileNamed": {
+    "en-US": "Application Profile: {0}",
+    "tr-TR": "Başvuru profili: {0}",
+    "tk-TM": "Ýüztutma profili: {0}",
+    "ru-RU": "Профиль заявки: {0}"
+  },
+  "ApplicationProfileInstance.Workspace.UseFieldsOnly": {
+    "en-US": "Use fields only",
+    "tr-TR": "Yalnızca Kullan alanları",
+    "tk-TM": "Diňe Ulanyş meýdanlary",
+    "ru-RU": "Только поля «Использовать»"
+  },
+  "ApplicationProfileInstance.Workspace.UseFieldsEditing": {
+    "en-US": " · Saved on this case (defaults copied at create)",
+    "tr-TR": " · Bu davada kaydedildi (varsayılanlar oluştururken kopyalandı)",
+    "tk-TM": " · Bu ýüztutmada saklandy (bellenenler döredilende göçürildi)",
+    "ru-RU": " · Сохранено в этом деле (значения по умолчанию скопированы при создании)"
+  },
+  "ApplicationProfileInstance.Workspace.Edit": {
+    "en-US": "✎ Edit",
+    "tr-TR": "✎ Düzenle",
+    "tk-TM": "✎ Üytget",
+    "ru-RU": "✎ Изменить"
+  },
+  "ApplicationProfileInstance.Workspace.EditCaseSummary": {
+    "en-US": "Edit Case summary",
+    "tr-TR": "Dava özetini düzenle",
+    "tk-TM": "Ýüztutma gysgaçasyny üýtget",
+    "ru-RU": "Изменить сводку дела"
+  },
+  "ApplicationProfileInstance.Workspace.IdentityAria": {
+    "en-US": "Application number, date, process number, and urgency",
+    "tr-TR": "Başvuru numarası, tarih, süreç numarası ve aciliyet",
+    "tk-TM": "Ýüztutma belgisi, senesi, proses belgisi we gyssaglylyk",
+    "ru-RU": "Номер заявки, дата, номер процесса и срочность"
+  },
+  "ApplicationProfileInstance.Workspace.SummaryFoot": {
+    "en-US": "Changing these does not change the Application Profile template.",
+    "tr-TR": "Bunları değiştirmek başvuru profili şablonunu değiştirmez.",
+    "tk-TM": "Bunlary üýtgetmek ýüztutma profil şablonyny üýtgetmeýär.",
+    "ru-RU": "Это не меняет шаблон профиля заявки."
+  },
+  "ApplicationProfileInstance.Workspace.Organization": {
+    "en-US": "Organization",
+    "tr-TR": "Kuruluş",
+    "tk-TM": "Gurama",
+    "ru-RU": "Организация"
+  },
+  "ApplicationProfileInstance.Workspace.OrgSub": {
+    "en-US": "Letterhead for this application · live catalog records",
+    "tr-TR": "Bu başvurunun anteti · canlı katalog kayıtları",
+    "tk-TM": "Bu ýüztutmanyň blanky · janly katalog ýazgylary",
+    "ru-RU": "Бланк этой заявки · живые записи каталога"
+  },
+  "ApplicationProfileInstance.Workspace.OrgSubEdit": {
+    "en-US": "Dropdowns choose which catalog records this case uses. + New and Edit add or update those records here.",
+    "tr-TR": "Açılır listeler bu davanın kullandığı katalog kayıtlarını seçer. + Yeni ve Düzenle burada ekler veya günceller.",
+    "tk-TM": "Açylýan sanawlar bu ýüztutmanyň ulanýan katalog ýazgylaryny saýlaýar. + Täze we Üýtget şu ýerde goşýar ýa-da täzeleýär.",
+    "ru-RU": "Списки выбирают записи каталога для этого дела. + Создать и Изменить добавляют или правят их здесь."
+  },
+  "ApplicationProfileInstance.Workspace.OrgCallout": {
+    "en-US": "This case is related to the selected catalog records. Other cases may use different rows. Editing a catalog record updates every case that selected it.",
+    "tr-TR": "Bu dava seçilen katalog kayıtlarıyla ilişkilidir. Diğer davalar farklı satırlar kullanabilir. Katalog kaydını düzenlemek onu seçen her davayı günceller.",
+    "tk-TM": "Bu ýüztutma saýlanan katalog ýazgylary bilen baglanyşykly. Beýleki ýüztutmalar başga setirleri ulanyp biler. Katalog ýazgysyny üýtgetmek ony saýlan ähli ýüztutmalary täzeleýär.",
+    "ru-RU": "Это дело связано с выбранными записями каталога. Другие дела могут использовать другие строки. Правка записи обновляет все дела, которые её выбрали."
+  },
+  "ApplicationProfileInstance.Workspace.OrgCalloutEdit": {
+    "en-US": "Dropdowns choose which shared Company / Signatory / Representative this case uses. + New and Edit open that catalog record here — same as Configuration → Organization catalogs. Make default applies to the next new application.",
+    "tr-TR": "Açılır listeler bu davanın kullandığı paylaşılan Şirket / İmza / Temsilciyi seçer. + Yeni ve Düzenle o katalog kaydını burada açar — Yapılandırma → Kuruluş katalogları ile aynı. Varsayılan yap sonraki yeni başvuruya uygulanır.",
+    "tk-TM": "Açylýan sanawlar bu ýüztutmanyň ulanýan paýlaşylan Kompaniýa / Gol / Wekilini saýlaýar. + Täze we Üýtget şol katalog ýazgysyny şu ýerde açýar — Konfigurasiýa → Gurama kataloglary bilen birmeňzeş. Bellenen et indiki täze ýüztutma üçin.",
+    "ru-RU": "Списки выбирают общие компанию / подписанта / представителя. + Создать и Изменить открывают запись каталога здесь — как в Конфигурация → Каталоги организации. «По умолчанию» действует для следующей новой заявки."
+  },
+  "ApplicationProfileInstance.Workspace.OrgFoot": {
+    "en-US": "Changing a dropdown updates only this case's relation. + New / Edit updates the shared catalog record used by every case that selected it.",
+    "tr-TR": "Açılır listeyi değiştirmek yalnızca bu davanın ilişkisini günceller. + Yeni / Düzenle, onu seçen her davanın kullandığı paylaşılan katalog kaydını günceller.",
+    "tk-TM": "Açylýan sanawy üýtgetmek diňe bu ýüztutmanyň baglanyşygyny täzeleýär. + Täze / Üýtget ony saýlan ähli ýüztutmalaryň ulanýan paýlaşylan katalog ýazgysyny täzeleýär.",
+    "ru-RU": "Смена списка меняет только связь этого дела. + Создать / Изменить обновляет общую запись каталога для всех дел, которые её выбрали."
+  },
+  "ApplicationProfileInstance.Workspace.OrgFootView": {
+    "en-US": "Resminamalar merge these fields from the selected catalog records on the next generate.",
+    "tr-TR": "Resminamalar bir sonraki oluşturmada bu alanları seçilen katalog kayıtlarından birleştirir.",
+    "tk-TM": "Resminamalar indiki döretmede bu meýdanlary saýlanan katalog ýazgylaryndan birleşdirýär.",
+    "ru-RU": "Resminamalar при следующей генерации подставят эти поля из выбранных записей каталога."
+  },
+  "ApplicationProfileInstance.Workspace.ProgressTitle": {
+    "en-US": "Application Profile instance progress",
+    "tr-TR": "Başvuru profili örneği durumu",
+    "tk-TM": "Ýüztutma ýagdaýy",
+    "ru-RU": "Прогресс экземпляра профиля заявки"
+  },
+  "ApplicationProfileInstance.Workspace.Completed": {
+    "en-US": "Completed",
+    "tr-TR": "Tamamlandı",
+    "tk-TM": "Tamamlandy",
+    "ru-RU": "Завершено"
+  },
+  "ApplicationProfileInstance.Workspace.Pending": {
+    "en-US": "Pending",
+    "tr-TR": "Beklemede",
+    "tk-TM": "Garaşylýar",
+    "ru-RU": "Ожидает"
+  },
+  "ApplicationProfileInstance.Workspace.InProgress": {
+    "en-US": "In progress",
+    "tr-TR": "Devam ediyor",
+    "tk-TM": "Dowam edýär",
+    "ru-RU": "В работе"
+  },
+  "ApplicationProfileInstance.Workspace.Overdue": {
+    "en-US": "Overdue",
+    "tr-TR": "Gecikmiş",
+    "tk-TM": "Möhleti geçen",
+    "ru-RU": "Просрочено"
+  },
+  "ApplicationProfileInstance.Workspace.History": {
+    "en-US": "History",
+    "tr-TR": "Geçmiş",
+    "tk-TM": "Taryh",
+    "ru-RU": "История"
+  },
+  "ApplicationProfileInstance.Workspace.ProgressSubtitle": {
+    "en-US": "{0} process · current step: {1}",
+    "tr-TR": "{0} süreci · geçerli adım: {1}",
+    "tk-TM": "{0} ýagdaýy · häzirki ädim: {1}",
+    "ru-RU": "Процесс {0} · текущий шаг: {1}"
+  },
+  "ApplicationProfileInstance.Workspace.OfficerNotes": {
+    "en-US": "Officer notes",
+    "tr-TR": "Memur notları",
+    "tk-TM": "Işgäriň bellikleri",
+    "ru-RU": "Заметки сотрудника"
+  },
+  "ApplicationProfileInstance.Workspace.NotesPlaceholder": {
+    "en-US": "Add notes for the current progress step…",
+    "tr-TR": "Geçerli ilerleme adımı için not ekleyin…",
+    "tk-TM": "Häzirki ýagdaý ädimi üçin bellik goşuň…",
+    "ru-RU": "Добавьте заметки для текущего шага…"
+  },
+  "ApplicationProfileInstance.Workspace.SaveNotes": {
+    "en-US": "Save notes",
+    "tr-TR": "Notları kaydet",
+    "tk-TM": "Bellikleri ýazdyrmak",
+    "ru-RU": "Сохранить заметки"
+  },
+  "ApplicationProfileInstance.Workspace.CurrentState": {
+    "en-US": "Current state",
+    "tr-TR": "Geçerli durum",
+    "tk-TM": "Häzirki ýagdaý",
+    "ru-RU": "Текущее состояние"
+  },
+  "ApplicationProfileInstance.Workspace.StartedOn": {
+    "en-US": "Started on",
+    "tr-TR": "Başlangıç",
+    "tk-TM": "Başlan senesi",
+    "ru-RU": "Начато"
+  },
+  "ApplicationProfileInstance.Workspace.SlaTarget": {
+    "en-US": "SLA target",
+    "tr-TR": "SLA hedefi",
+    "tk-TM": "SLA möhleti",
+    "ru-RU": "Цель SLA"
+  },
+  "ApplicationProfileInstance.Workspace.Date": {
+    "en-US": "Date",
+    "tr-TR": "Tarih",
+    "tk-TM": "Senesi",
+    "ru-RU": "Дата"
+  },
+  "ApplicationProfileInstance.Workspace.Result": {
+    "en-US": "Result",
+    "tr-TR": "Sonuç",
+    "tk-TM": "Netije",
+    "ru-RU": "Результат"
+  },
+  "ApplicationProfileInstance.Workspace.ProcessNumber": {
+    "en-US": "Process number",
+    "tr-TR": "Süreç numarası",
+    "tk-TM": "Proses belgisi",
+    "ru-RU": "Номер процесса"
+  },
+  "ApplicationProfileInstance.Workspace.ProcessNumberPlaceholder": {
+    "en-US": "Migration Service number",
+    "tr-TR": "Göç dairesi numarası",
+    "tk-TM": "Migrasiýa gullugynyň belgisi",
+    "ru-RU": "Номер миграционной службы"
+  },
+  "ApplicationProfileInstance.Workspace.ApprovalLetter": {
+    "en-US": "Approval / disapproval letter",
+    "tr-TR": "Onay / ret yazısı",
+    "tk-TM": "Ylalaşyk / ret haty",
+    "ru-RU": "Письмо согласования / отказа"
+  },
+  "ApplicationProfileInstance.Workspace.Missing": {
+    "en-US": "Missing",
+    "tr-TR": "Eksik",
+    "tk-TM": "Ýok",
+    "ru-RU": "Нет"
+  },
+  "ApplicationProfileInstance.Workspace.UploadApprovalCopy": {
+    "en-US": "Upload a copy of the approval letter",
+    "tr-TR": "Onay yazısının kopyasını yükleyin",
+    "tk-TM": "Ylalaşyk hatynyň nusgasyny ýükle",
+    "ru-RU": "Загрузите копию письма согласования"
+  },
+  "ApplicationProfileInstance.Workspace.UploadFile": {
+    "en-US": "Upload file",
+    "tr-TR": "Dosya yükle",
+    "tk-TM": "Faýl ýükle",
+    "ru-RU": "Загрузить файл"
+  },
+  "ApplicationProfileInstance.Workspace.ScanLimit": {
+    "en-US": "PDF or scan up to {0} MB",
+    "tr-TR": "PDF veya tarama en fazla {0} MB",
+    "tk-TM": "PDF ýa-da skan {0} MB çenli",
+    "ru-RU": "PDF или скан до {0} МБ"
+  },
+  "ApplicationProfileInstance.Workspace.RevertToHere": {
+    "en-US": "Revert to here",
+    "tr-TR": "Buraya geri al",
+    "tk-TM": "Şu ýere yzyna öwür",
+    "ru-RU": "Вернуть сюда"
+  },
+  "ApplicationProfileInstance.Workspace.LetterStoredOnAdvance": {
+    "en-US": "{0} — stored when you Advance progress",
+    "tr-TR": "{0} — ilerlemeyi ilerletince kaydedilir",
+    "tk-TM": "{0} — Ýagdaýy Ilerletmekde ýazdyrylýar",
+    "ru-RU": "{0} — сохранится при продвижении"
+  },
+  "ApplicationProfileInstance.Workspace.SlaCurrentStep": {
+    "en-US": "SLA for current step",
+    "tr-TR": "Geçerli adımın SLA",
+    "tk-TM": "Häzirki ädimiň SLA-sy",
+    "ru-RU": "SLA текущего шага"
+  },
+  "ApplicationProfileInstance.Workspace.DaysLeft": {
+    "en-US": "days left",
+    "tr-TR": "gün kaldı",
+    "tk-TM": "gün galdy",
+    "ru-RU": "дн. осталось"
+  },
+  "ApplicationProfileInstance.Workspace.Complete": {
+    "en-US": "complete",
+    "tr-TR": "tamam",
+    "tk-TM": "tamam",
+    "ru-RU": "завершено"
+  },
+  "ApplicationProfileInstance.Workspace.TargetDate": {
+    "en-US": "Target date",
+    "tr-TR": "Hedef tarih",
+    "tk-TM": "Möhlet senesi",
+    "ru-RU": "Целевая дата"
+  },
+  "ApplicationProfileInstance.Workspace.TerminalBlocked": {
+    "en-US": "This application has reached a terminal progress state.",
+    "tr-TR": "Bu başvuru son ilerleme durumuna ulaştı.",
+    "tk-TM": "Bu ýüztutma soňky ýagdaýa ýetdi.",
+    "ru-RU": "Эта заявка достигла конечного состояния."
+  },
+  "ApplicationProfileInstance.Workspace.NoFurtherSteps": {
+    "en-US": "No further progress steps are available for this route.",
+    "tr-TR": "Bu rota için başka ilerleme adımı yok.",
+    "tk-TM": "Bu ugur üçin indiki ýagdaý ädimi ýok.",
+    "ru-RU": "Для этого маршрута нет следующих шагов."
+  },
+  "ApplicationProfileInstance.Workspace.DateRequired": {
+    "en-US": "Date is required.",
+    "tr-TR": "Tarih zorunlu.",
+    "tk-TM": "Sene hökmany.",
+    "ru-RU": "Дата обязательна."
+  },
+  "ApplicationProfileInstance.Workspace.ResultRequired": {
+    "en-US": "Result is required to advance progress.",
+    "tr-TR": "İlerlemek için sonuç zorunlu.",
+    "tk-TM": "Ýagdaýy ilerletmek üçin netije hökmany.",
+    "ru-RU": "Для продвижения нужен результат."
+  },
+  "ApplicationProfileInstance.Workspace.ProcessNumberRequired": {
+    "en-US": "Process number is required when submitting to Migration Service.",
+    "tr-TR": "Göç dairesine teslimde süreç numarası zorunlu.",
+    "tk-TM": "Migrasiýa gullugyna tabşyrylanda proses belgisi hökmany.",
+    "ru-RU": "При подаче в миграционную службу нужен номер процесса."
+  },
+  "ApplicationProfileInstance.Workspace.Disapproved": {
+    "en-US": "Disapproved",
+    "tr-TR": "Onaylanmadı",
+    "tk-TM": "Ylalaşylmady",
+    "ru-RU": "Не согласовано"
+  },
+  "ApplicationProfileInstance.Workspace.Postponed": {
+    "en-US": "Postponed",
+    "tr-TR": "Ertelendi",
+    "tk-TM": "Süýşürildi",
+    "ru-RU": "Отложено"
+  },
+  "ApplicationProfileInstance.Workspace.OnProcess": {
+    "en-US": "On process",
+    "tr-TR": "İşlemde",
+    "tk-TM": "Prosesde",
+    "ru-RU": "В процессе"
+  },
+  "ApplicationProfileInstance.Workspace.ProcessComplete": {
+    "en-US": "Process complete",
+    "tr-TR": "Süreç tamam",
+    "tk-TM": "Proses tamam",
+    "ru-RU": "Процесс завершён"
+  },
+  "ApplicationProfileInstance.Workspace.LinkedRecords": {
+    "en-US": "Linked records",
+    "tr-TR": "Bağlı kayıtlar",
+    "tk-TM": "Ýüztutmadaky kişiniň resminama maglumatlary",
+    "ru-RU": "Связанные записи"
+  },
+  "ApplicationProfileInstance.Workspace.LinkedRecordsByPerson": {
+    "en-US": "Linked records by person",
+    "tr-TR": "Kişiye göre bağlı kayıtlar",
+    "tk-TM": "Adam boýunça baglanan ýazgylar",
+    "ru-RU": "Связанные записи по лицу"
+  },
+  "ApplicationProfileInstance.Workspace.LinkedRecordsSummary": {
+    "en-US": "Linked records summary",
+    "tr-TR": "Bağlı kayıt özeti",
+    "tk-TM": "Baglanan ýazgylaryň gysgaçasy",
+    "ru-RU": "Сводка связанных записей"
+  },
+  "ApplicationProfileInstance.Workspace.LinksLockedProcess": {
+    "en-US": "Process complete — linked people and records are locked on this case.",
+    "tr-TR": "Süreç tamam — bağlı kişiler ve kayıtlar bu davada kilitli.",
+    "tk-TM": "Proses tamam — baglanan adamlar we ýazgylar bu ýüztutmada gulply.",
+    "ru-RU": "Процесс завершён — связанные лица и записи в этом деле заблокированы."
+  },
+  "ApplicationProfileInstance.Workspace.NoLinkedRecords": {
+    "en-US": "No linked person-related records yet. Link people on the People & links tab — records auto-resolve from profile requirements.",
+    "tr-TR": "Henüz bağlı kişi kaydı yok. Kişiler ve bağlantılar sekmesinde kişi bağlayın — kayıtlar profil gereksinimlerinden otomatik çözülür.",
+    "tk-TM": "Baglanan adam ýazgysy heniz ýok. Ýüztutmadaky adamlar goşmasyna adamlary baglaň — ýazgylar profil talaplaryndan awtomatik çözülýär.",
+    "ru-RU": "Пока нет связанных записей лица. Свяжите людей на вкладке «Люди и связи» — записи подставляются по требованиям профиля."
+  },
+  "ApplicationProfileInstance.Workspace.IssuedRecords": {
+    "en-US": "Issued records",
+    "tr-TR": "Düzenlenen kayıtlar",
+    "tk-TM": "Migrasiýa gullugy tarapyndan resmileşdirilen resminamalar",
+    "ru-RU": "Выданные записи"
+  },
+  "ApplicationProfileInstance.Workspace.IssuedSub": {
+    "en-US": "Created by this application · visible when May produce is on",
+    "tr-TR": "Bu başvuru tarafından oluşturulur · Düzenleyebilir açıksa görünür",
+    "tk-TM": "Bu ýüztutma tarapyndan döredilýär · Berip biler açyk bolsa görünýär",
+    "ru-RU": "Создаётся этой заявкой · видно, если включено «Может выдавать»"
+  },
+  "ApplicationProfileInstance.Workspace.Preview": {
+    "en-US": "Preview",
+    "tr-TR": "Önizleme",
+    "tk-TM": "Syn",
+    "ru-RU": "Просмотр"
+  },
+  "ApplicationProfileInstance.Workspace.Delete": {
+    "en-US": "Delete",
+    "tr-TR": "Sil",
+    "tk-TM": "Poz",
+    "ru-RU": "Удалить"
+  },
+  "ApplicationProfileInstance.Workspace.PreviewCopy": {
+    "en-US": "Preview copy",
+    "tr-TR": "Kopyayı önizle",
+    "tk-TM": "Nusgany synla",
+    "ru-RU": "Просмотр копии"
+  },
+  "ApplicationProfileInstance.Workspace.NoCopy": {
+    "en-US": "No copy attached yet",
+    "tr-TR": "Henüz kopya eklenmedi",
+    "tk-TM": "Nusga heniz goşulmady",
+    "ru-RU": "Копия ещё не приложена"
+  },
+  "ApplicationProfileInstance.Workspace.Readiness": {
+    "en-US": "Readiness",
+    "tr-TR": "Hazırlık",
+    "tk-TM": "Taýýarlyk",
+    "ru-RU": "Готовность"
+  },
+  "ApplicationProfileInstance.Workspace.RequiredDataComplete": {
+    "en-US": "Required data complete",
+    "tr-TR": "Zorunlu veriler tamam",
+    "tk-TM": "Hökmany maglumatlar taýýar",
+    "ru-RU": "Обязательные данные заполнены"
+  },
+  "ApplicationProfileInstance.Workspace.BoStatesValid": {
+    "en-US": "BO states valid",
+    "tr-TR": "Kayıt durumları geçerli",
+    "tk-TM": "Ýazgy ýagdaýlary dogry",
+    "ru-RU": "Состояния записей действительны"
+  },
+  "ApplicationProfileInstance.Workspace.QuickActions": {
+    "en-US": "Quick actions",
+    "tr-TR": "Hızlı işlemler",
+    "tk-TM": "Çalt hereketler",
+    "ru-RU": "Быстрые действия"
+  },
+  "ApplicationProfileInstance.Workspace.OpenInApp": {
+    "en-US": "Open in app",
+    "tr-TR": "Uygulamada aç",
+    "tk-TM": "Programmada aç",
+    "ru-RU": "Открыть в приложении"
+  },
+  "ApplicationProfileInstance.Workspace.OpenDocuments": {
+    "en-US": "Open document copies",
+    "tr-TR": "Belge kopyalarını aç",
+    "tk-TM": "Resminama nusgalaryny aç",
+    "ru-RU": "Открыть копии документов"
+  },
+  "ApplicationProfileInstance.Workspace.GenerateResminamalar": {
+    "en-US": "Generate Resminamalar package",
+    "tr-TR": "Resminamalar paketini oluştur",
+    "tk-TM": "Resminamalar paketini döret",
+    "ru-RU": "Сформировать пакет Resminamalar"
+  },
+  "ApplicationProfileInstance.Workspace.IssueRecord": {
+    "en-US": "Issue record…",
+    "tr-TR": "Kayıt düzenle…",
+    "tk-TM": "Ýazgy ber…",
+    "ru-RU": "Выдать запись…"
+  },
+  "ApplicationProfileInstance.Workspace.AdvanceProgress": {
+    "en-US": "Advance progress",
+    "tr-TR": "Durumu ilerlet",
+    "tk-TM": "Ýagdaýy Ilerletmek",
+    "ru-RU": "Продвинуть прогресс"
+  },
+  "ApplicationProfileInstance.Workspace.RevertProgress": {
+    "en-US": "Revert progress",
+    "tr-TR": "Durumu geri al",
+    "tk-TM": "Ýagdaýy yzyna öwürmek",
+    "ru-RU": "Вернуть прогресс"
+  },
+  "ApplicationProfileInstance.Workspace.Activity": {
+    "en-US": "Activity",
+    "tr-TR": "Etkinlik",
+    "tk-TM": "Hereket",
+    "ru-RU": "Активность"
+  },
+  "ApplicationProfileInstance.Workspace.MergedProfiles": {
+    "en-US": "Merged {0} profiles",
+    "tr-TR": "{0} profil birleştirildi",
+    "tk-TM": "{0} profil birleşdirildi",
+    "ru-RU": "Объединено профилей: {0}"
+  },
+  "ApplicationProfileInstance.Workspace.NumberAssigned": {
+    "en-US": "Number assigned",
+    "tr-TR": "Numara atandı",
+    "tk-TM": "Belgi bellenildi",
+    "ru-RU": "Номер присвоен"
+  },
+  "ApplicationProfileInstance.Workspace.LatestProgress": {
+    "en-US": "Latest progress",
+    "tr-TR": "Son ilerleme",
+    "tk-TM": "Soňky ýagdaý",
+    "ru-RU": "Последний прогресс"
+  },
+  "ApplicationProfileInstance.Workspace.ProgressColon": {
+    "en-US": "Progress: {0}",
+    "tr-TR": "İlerleme: {0}",
+    "tk-TM": "Ýagdaýy: {0}",
+    "ru-RU": "Прогресс: {0}"
+  },
+  "ApplicationProfileInstance.Issued.Visa": {
+    "en-US": "Issued visa",
+    "tr-TR": "Düzenlenen vize",
+    "tk-TM": "Berlen wiza",
+    "ru-RU": "Выданная виза"
+  },
+  "ApplicationProfileInstance.Issued.Add": {
+    "en-US": "+ Add {0}",
+    "tr-TR": "+ {0} ekle",
+    "tk-TM": "+ {0} goş",
+    "ru-RU": "+ Добавить {0}"
+  },
+  "ApplicationProfileInstance.Issued.New": {
+    "en-US": "New {0}",
+    "tr-TR": "Yeni {0}",
+    "tk-TM": "Täze {0}",
+    "ru-RU": "Новый {0}"
+  },
+  "ApplicationProfileInstance.Issued.Panel": {
+    "en-US": "{0} produced by this case",
+    "tr-TR": "Bu davanın düzenlediği {0}",
+    "tk-TM": "Bu ýüztutmanyň beren {0}",
+    "ru-RU": "{0}, выданные этим делом"
+  },
+  "ApplicationProfileInstance.Issued.Empty": {
+    "en-US": "No {0} yet. New {0} will be linked to this application.",
+    "tr-TR": "Henüz {0} yok. Yeni {0} bu başvuruya bağlanacak.",
+    "tk-TM": "Heniz {0} ýok. Täze {0} bu ýüztutma bilen baglanar.",
+    "ru-RU": "Пока нет: {0}. Новая запись будет связана с этой заявкой."
+  },
+  "ApplicationProfileInstance.Issued.EmptyNumber": {
+    "en-US": "No {0} yet. New {0} will be linked to Application № {1}.",
+    "tr-TR": "Henüz {0} yok. Yeni {0} Başvuru № {1} ile bağlanacak.",
+    "tk-TM": "Heniz {0} ýok. Täze {0} {1} ýüztutma bilen baglanar.",
+    "ru-RU": "Пока нет: {0}. Новая запись будет связана с заявкой № {1}."
+  },
+  "ApplicationProfileInstance.Issued.Record": {
+    "en-US": "Issued record",
+    "tr-TR": "Düzenlenen kayıt",
+    "tk-TM": "Resmileşdirilen ýazgy",
+    "ru-RU": "Выданная запись"
+  },
+  "ApplicationProfileInstance.Issued.TitleEdit": {
+    "en-US": "Edit {0}",
+    "tr-TR": "{0} düzenle",
+    "tk-TM": "{0} üytget",
+    "ru-RU": "Изменить {0}"
+  },
+  "ApplicationProfileInstance.Issued.Header": {
+    "en-US": "Header",
+    "tr-TR": "Üst bilgi",
+    "tk-TM": "Esasy",
+    "ru-RU": "Заголовок"
+  },
+  "ApplicationProfileInstance.Issued.Number": {
+    "en-US": "Number",
+    "tr-TR": "Numara",
+    "tk-TM": "Belgi",
+    "ru-RU": "Номер"
+  },
+  "ApplicationProfileInstance.Issued.InvitationNumber": {
+    "en-US": "Invitation number",
+    "tr-TR": "Davet numarası",
+    "tk-TM": "Çakylyk belgisi",
+    "ru-RU": "Номер приглашения"
+  },
+  "ApplicationProfileInstance.Issued.WorkPermitNumber": {
+    "en-US": "Work permit number",
+    "tr-TR": "Çalışma izni numarası",
+    "tk-TM": "Iş rugsadynyň belgisi",
+    "ru-RU": "Номер разрешения на работу"
+  },
+  "ApplicationProfileInstance.Issued.RejectedDocumentNumber": {
+    "en-US": "Rejected document number",
+    "tr-TR": "Reddedilen belge numarası",
+    "tk-TM": "Ret edilen resminamanyň belgisi",
+    "ru-RU": "Номер отказанного документа"
+  },
+  "ApplicationProfileInstance.Issued.BorderZoneNumber": {
+    "en-US": "Border zone number",
+    "tr-TR": "Sınır bölgesi numarası",
+    "tk-TM": "Serhet sebiti belgisi",
+    "ru-RU": "Номер пограничной зоны"
+  },
+  "ApplicationProfileInstance.Issued.IssuedDate": {
+    "en-US": "Issued date",
+    "tr-TR": "Düzenleme tarihi",
+    "tk-TM": "Berlen senesi",
+    "ru-RU": "Дата выдачи"
+  },
+  "ApplicationProfileInstance.Issued.ItemWorkPermitNumber": {
+    "en-US": "Item work-permit number *",
+    "tr-TR": "Kalem çalışma izni numarası *",
+    "tk-TM": "Elementiň iş rugsady belgisi *",
+    "ru-RU": "Номер разрешения позиции *"
+  },
+  "ApplicationProfileInstance.Issued.ASNumber": {
+    "en-US": "AS number *",
+    "tr-TR": "AS numarası *",
+    "tk-TM": "AS belgisi *",
+    "ru-RU": "Номер AS *"
+  },
+  "ApplicationProfileInstance.Issued.ProcessNumberRequired": {
+    "en-US": "Process number *",
+    "tr-TR": "Süreç numarası *",
+    "tk-TM": "Proses belgisi *",
+    "ru-RU": "Номер процесса *"
+  },
+  "ApplicationProfileInstance.Issued.WorkPermittedLocations": {
+    "en-US": "Work permitted locations *",
+    "tr-TR": "İzin verilen yerler *",
+    "tk-TM": "Rugsat berlen ýerler *",
+    "ru-RU": "Разрешённые места *"
+  },
+  "ApplicationProfileInstance.Issued.VisaNumber": {
+    "en-US": "Visa number *",
+    "tr-TR": "Vize numarası *",
+    "tk-TM": "Wiza belgisi *",
+    "ru-RU": "Номер визы *"
+  },
+  "ApplicationProfileInstance.Issued.VisaNumberValue": {
+    "en-US": "Visa {0}",
+    "tr-TR": "Vize {0}",
+    "tk-TM": "Wiza {0}",
+    "ru-RU": "Виза {0}"
+  },
+  "ApplicationProfileInstance.Issued.VisaIssuedPlace": {
+    "en-US": "Visa issued place *",
+    "tr-TR": "Vizenin verildiği yer *",
+    "tk-TM": "Wiza berlen ýeri *",
+    "ru-RU": "Место выдачи визы *"
+  },
+  "ApplicationProfileInstance.Issued.VisaCopy": {
+    "en-US": "Visa copy",
+    "tr-TR": "Vize kopyası",
+    "tk-TM": "Wiza nusgasy",
+    "ru-RU": "Копия визы"
+  },
+  "ApplicationProfileInstance.Issued.Copy": {
+    "en-US": "{0} copy",
+    "tr-TR": "{0} kopyası",
+    "tk-TM": "{0} nusgasy",
+    "ru-RU": "Копия: {0}"
+  },
+  "ApplicationProfileInstance.Issued.CopyHint": {
+    "en-US": "PDF or scan of this {0}. Allowed: PDF, PNG, JPEG, TIFF, GIF, BMP — up to {1} MB.",
+    "tr-TR": "Bu {0} için PDF veya tarama. İzinli: PDF, PNG, JPEG, TIFF, GIF, BMP — en fazla {1} MB.",
+    "tk-TM": "Bu {0} üçin PDF ýa-da skan. Rugsat: PDF, PNG, JPEG, TIFF, GIF, BMP — iň köp {1} MB.",
+    "ru-RU": "PDF или скан этого документа ({0}). Допустимо: PDF, PNG, JPEG, TIFF, GIF, BMP — до {1} МБ."
+  },
+  "ApplicationProfileInstance.Issued.UploadCopy": {
+    "en-US": "Upload copy",
+    "tr-TR": "Kopya yükle",
+    "tk-TM": "Nusga ýükle",
+    "ru-RU": "Загрузить копию"
+  },
+  "ApplicationProfileInstance.Issued.AttachesOnCreate": {
+    "en-US": "{0} (attaches on Create)",
+    "tr-TR": "{0} (oluşturunca eklenir)",
+    "tk-TM": "{0} (döredilende goşular)",
+    "ru-RU": "{0} (прикрепится при создании)"
+  },
+  "ApplicationProfileInstance.Issued.PeopleOn": {
+    "en-US": "People on this {0}",
+    "tr-TR": "Bu {0} üzerindeki kişiler",
+    "tk-TM": "Bu {0}daky adamlar",
+    "ru-RU": "Люди в этой записи: {0}"
+  },
+  "ApplicationProfileInstance.Issued.PeopleOnCase": {
+    "en-US": "People on this case",
+    "tr-TR": "Bu davadaki kişiler",
+    "tk-TM": "Bu ýüztutmadaky adamlar",
+    "ru-RU": "Люди в этом деле"
+  },
+  "ApplicationProfileInstance.Issued.PeopleWorkPermit": {
+    "en-US": "People on this work permit",
+    "tr-TR": "Bu çalışma iznindeki kişiler",
+    "tk-TM": "Bu iş rugsadynyň adamlary",
+    "ru-RU": "Люди в этом разрешении на работу"
+  },
+  "ApplicationProfileInstance.Issued.PeopleRejection": {
+    "en-US": "People on this rejection",
+    "tr-TR": "Bu reddeki kişiler",
+    "tk-TM": "Bu retdäki adamlar",
+    "ru-RU": "Люди в этом отказе"
+  },
+  "ApplicationProfileInstance.Issued.PeopleInvitation": {
+    "en-US": "People on this invitation",
+    "tr-TR": "Bu davetteki kişiler",
+    "tk-TM": "Bu çakylykdaky adamlar",
+    "ru-RU": "Люди в этом приглашении"
+  },
+  "ApplicationProfileInstance.Issued.PeopleBorderZone": {
+    "en-US": "People on this border zone",
+    "tr-TR": "Bu sınır bölgesindeki kişiler",
+    "tk-TM": "Bu serhet sebitindäki adamlar",
+    "ru-RU": "Люди в этой пограничной зоне"
+  },
+  "ApplicationProfileInstance.Issued.ReadyOf": {
+    "en-US": "{0} ready of {1} selected",
+    "tr-TR": "{1} seçiliden {0} hazır",
+    "tk-TM": "{1} saýlanandan {0} taýýar",
+    "ru-RU": "Готово {0} из {1} выбранных"
+  },
+  "ApplicationProfileInstance.Issued.SelectAllReady": {
+    "en-US": "Select all ready",
+    "tr-TR": "Hazır olanların tümünü seç",
+    "tk-TM": "Taýýarlaryň hemmesini saýla",
+    "ru-RU": "Выбрать всех готовых"
+  },
+  "ApplicationProfileInstance.Issued.SelectNone": {
+    "en-US": "Select none",
+    "tr-TR": "Hiçbirini seçme",
+    "tk-TM": "Hiç birini saýlama",
+    "ru-RU": "Снять выбор"
+  },
+  "ApplicationProfileInstance.Issued.NoEmployees": {
+    "en-US": "No employees on this case.",
+    "tr-TR": "Bu davada çalışan yok.",
+    "tk-TM": "Bu ýüztutmada işgär ýok.",
+    "ru-RU": "В этом деле нет сотрудников."
+  },
+  "ApplicationProfileInstance.Issued.NoPeopleRoster": {
+    "en-US": "No people on this application roster.",
+    "tr-TR": "Bu başvuru listesinde kişi yok.",
+    "tk-TM": "Bu ýüztutmanyň sanawynda adam ýok.",
+    "ru-RU": "В списке этой заявки нет лиц."
+  },
+  "ApplicationProfileInstance.Issued.WpBanner": {
+    "en-US": "One work permit letter for this case. Employees only. Linked work-permit items are not a source.",
+    "tr-TR": "Bu dava için bir çalışma izni yazısı. Yalnızca çalışanlar. Bağlı çalışma izni kalemleri kaynak değildir.",
+    "tk-TM": "Bu ýüztutma üçin bir iş rugsady haty. Diňe işgärler. Baglanan iş rugsady elementleri çeşme däl.",
+    "ru-RU": "Одно письмо разрешения на работу для этого дела. Только сотрудники. Связанные позиции не источник."
+  },
+  "ApplicationProfileInstance.Issued.VisaBannerRoster": {
+    "en-US": "One visa per person on this case. Linked visas are not a visa source.",
+    "tr-TR": "Bu davadaki her kişi için bir vize. Bağlı vizeler kaynak değildir.",
+    "tk-TM": "Bu ýüztutmadaky her adam üçin bir wiza. Baglanan wizalar çeşme däl.",
+    "ru-RU": "По одной визе на каждого человека в деле. Связанные визы не источник."
+  },
+  "ApplicationProfileInstance.Issued.VisaBannerInvitation": {
+    "en-US": "One visa per person who has an issued invitation on this case. Linked invitation items are not a visa source.",
+    "tr-TR": "Bu davada düzenlenmiş daveti olan her kişi için bir vize. Bağlı davet kalemleri vize kaynağı değildir.",
+    "tk-TM": "Bu ýüztutmada çakylygy berlen her adam üçin bir wiza. Baglanan çakylyk elementleri wiza çeşmesi däl.",
+    "ru-RU": "По одной визе на каждого с выданным приглашением. Связанные позиции приглашения не источник."
+  },
+  "ApplicationProfileInstance.Issued.Reason": {
+    "en-US": "Reason",
+    "tr-TR": "Neden",
+    "tk-TM": "Sebäp",
+    "ru-RU": "Причина"
+  },
+  "ApplicationProfileInstance.Issued.Status": {
+    "en-US": "Status",
+    "tr-TR": "Durum",
+    "tk-TM": "Ýagdaý",
+    "ru-RU": "Статус"
+  },
+  "ApplicationProfileInstance.Issued.Person": {
+    "en-US": "Person",
+    "tr-TR": "Kişi",
+    "tk-TM": "Adam",
+    "ru-RU": "Лицо"
+  },
+  "ApplicationProfileInstance.Issued.File": {
+    "en-US": "File",
+    "tr-TR": "Dosya",
+    "tk-TM": "Faýl",
+    "ru-RU": "Файл"
+  },
+  "ApplicationProfileInstance.Issued.Start": {
+    "en-US": "Start *",
+    "tr-TR": "Başlangıç *",
+    "tk-TM": "Başy *",
+    "ru-RU": "Начало *"
+  },
+  "ApplicationProfileInstance.Issued.End": {
+    "en-US": "End *",
+    "tr-TR": "Bitiş *",
+    "tk-TM": "Soňy *",
+    "ru-RU": "Конец *"
+  },
+  "ApplicationProfileInstance.Issued.Expiration": {
+    "en-US": "Expiration *",
+    "tr-TR": "Bitiş *",
+    "tk-TM": "Gutarýan senesi *",
+    "ru-RU": "Срок *"
+  },
+  "ApplicationProfileInstance.Issued.Save": {
+    "en-US": "Save",
+    "tr-TR": "Kaydet",
+    "tk-TM": "Sakla",
+    "ru-RU": "Сохранить"
+  },
+  "ApplicationProfileInstance.Issued.Create": {
+    "en-US": "Create",
+    "tr-TR": "Oluştur",
+    "tk-TM": "Döret",
+    "ru-RU": "Создать"
+  },
+  "ApplicationProfileInstance.Issued.Saving": {
+    "en-US": "Saving…",
+    "tr-TR": "Kaydediliyor…",
+    "tk-TM": "Saklanylýar…",
+    "ru-RU": "Сохранение…"
+  },
+  "ApplicationProfileInstance.Issued.Creating": {
+    "en-US": "Creating…",
+    "tr-TR": "Oluşturuluyor…",
+    "tk-TM": "Döredilýär…",
+    "ru-RU": "Создание…"
+  },
+  "ApplicationProfileInstance.Issued.CreateVisas": {
+    "en-US": "Create visas",
+    "tr-TR": "Vizeleri oluştur",
+    "tk-TM": "Wizalary döret",
+    "ru-RU": "Создать визы"
+  },
+  "ApplicationProfileInstance.Issued.Cancel": {
+    "en-US": "Cancel",
+    "tr-TR": "İptal",
+    "tk-TM": "Ýatyr",
+    "ru-RU": "Отмена"
+  },
+  "ApplicationProfileInstance.Issued.Remove": {
+    "en-US": "Remove",
+    "tr-TR": "Kaldır",
+    "tk-TM": "Aýyr",
+    "ru-RU": "Убрать"
+  },
+  "ApplicationProfileInstance.Issued.AddPerson": {
+    "en-US": "Add",
+    "tr-TR": "Ekle",
+    "tk-TM": "Goş",
+    "ru-RU": "Добавить"
+  },
+  "ApplicationProfileInstance.Issued.AddAllReady": {
+    "en-US": "Add all ready",
+    "tr-TR": "Hazır olanların tümünü ekle",
+    "tk-TM": "Taýýarlaryň hemmesini goş",
+    "ru-RU": "Добавить всех готовых"
+  },
+  "ApplicationProfileInstance.Issued.None": {
+    "en-US": "None",
+    "tr-TR": "Yok",
+    "tk-TM": "Ýok",
+    "ru-RU": "Нет"
+  },
+  "ApplicationProfileInstance.Issued.FileCount": {
+    "en-US": "{0} file(s)",
+    "tr-TR": "{0} dosya",
+    "tk-TM": "{0} faýl",
+    "ru-RU": "Файлов: {0}"
+  },
+  "ApplicationProfileInstance.Issued.Loading": {
+    "en-US": "Loading…",
+    "tr-TR": "Yükleniyor…",
+    "tk-TM": "Ýüklenýär…",
+    "ru-RU": "Загрузка…"
+  },
+  "ApplicationProfileInstance.Issued.StatusReady": {
+    "en-US": "Ready",
+    "tr-TR": "Hazır",
+    "tk-TM": "Taýýar",
+    "ru-RU": "Готово"
+  },
+  "ApplicationProfileInstance.Issued.StatusMissingPassport": {
+    "en-US": "Missing passport",
+    "tr-TR": "Pasaport eksik",
+    "tk-TM": "Pasport ýok",
+    "ru-RU": "Нет паспорта"
+  },
+  "ApplicationProfileInstance.Issued.StatusNoPassport": {
+    "en-US": "No passport",
+    "tr-TR": "Pasaport yok",
+    "tk-TM": "Pasport ýok",
+    "ru-RU": "Нет паспорта"
+  },
+  "ApplicationProfileInstance.Issued.StatusNoPosition": {
+    "en-US": "No position",
+    "tr-TR": "Pozisyon yok",
+    "tk-TM": "Wezipe ýok",
+    "ru-RU": "Нет должности"
+  },
+  "ApplicationProfileInstance.Issued.StatusOnWorkPermit": {
+    "en-US": "On this work permit",
+    "tr-TR": "Bu çalışma izninde",
+    "tk-TM": "Bu iş rugsadynda",
+    "ru-RU": "В этом разрешении на работу"
+  },
+  "ApplicationProfileInstance.Issued.StatusOnRejection": {
+    "en-US": "On this rejection",
+    "tr-TR": "Bu redde",
+    "tk-TM": "Bu retde",
+    "ru-RU": "В этом отказе"
+  },
+  "ApplicationProfileInstance.Issued.StatusOnInvitation": {
+    "en-US": "On this invitation",
+    "tr-TR": "Bu davette",
+    "tk-TM": "Bu çakylykda",
+    "ru-RU": "В этом приглашении"
+  },
+  "ApplicationProfileInstance.Issued.StatusOnInvitationClosed": {
+    "en-US": "On this invitation (visa issued/closed)",
+    "tr-TR": "Bu davette (vize düzenlendi/kapalı)",
+    "tk-TM": "Bu çakylykda (wiza berildi/ýapyk)",
+    "ru-RU": "В этом приглашении (виза выдана/закрыто)"
+  },
+  "ApplicationProfileInstance.Issued.StatusOnBorderZone": {
+    "en-US": "On this border zone",
+    "tr-TR": "Bu sınır bölgesinde",
+    "tk-TM": "Bu serhet sebitinde",
+    "ru-RU": "В этой пограничной зоне"
+  },
+  "ApplicationProfileInstance.Issued.StatusVisaIssued": {
+    "en-US": "Visa issued",
+    "tr-TR": "Vize düzenlendi",
+    "tk-TM": "Wiza berildi",
+    "ru-RU": "Виза выдана"
+  },
+  "ApplicationProfileInstance.Issued.CueNeeds": {
+    "en-US": "Needs a value",
+    "tr-TR": "Değer gerekli",
+    "tk-TM": "Baha gerek",
+    "ru-RU": "Нужно значение"
+  },
+  "ApplicationProfileInstance.Issued.CueDefault": {
+    "en-US": "Default — review",
+    "tr-TR": "Varsayılan — gözden geçir",
+    "tk-TM": "Bellenen — gözden geçir",
+    "ru-RU": "По умолчанию — проверьте"
+  },
+  "ApplicationProfileInstance.Issued.CueConfirmed": {
+    "en-US": "Confirmed",
+    "tr-TR": "Onaylandı",
+    "tk-TM": "Tassyklanan",
+    "ru-RU": "Подтверждено"
+  },
+  "ApplicationProfile.Doc.Rejections": {
+    "en-US": "Rejections",
+    "tr-TR": "Retler",
+    "tk-TM": "Retler",
+    "ru-RU": "Отказы"
+  },
+  "ApplicationProfileInstance.Org.Name": {
+    "en-US": "Name",
+    "tr-TR": "Ad",
+    "tk-TM": "At",
+    "ru-RU": "Имя"
+  },
+  "ApplicationProfileInstance.Org.Code": {
+    "en-US": "Code",
+    "tr-TR": "Kod",
+    "tk-TM": "Kod",
+    "ru-RU": "Код"
+  },
+  "ApplicationProfileInstance.Org.Phone": {
+    "en-US": "Phone",
+    "tr-TR": "Telefon",
+    "tk-TM": "Telefon",
+    "ru-RU": "Телефон"
+  },
+  "ApplicationProfileInstance.Org.Address": {
+    "en-US": "Address",
+    "tr-TR": "Adres",
+    "tk-TM": "Salgysy",
+    "ru-RU": "Адрес"
+  },
+  "ApplicationProfileInstance.Org.Email": {
+    "en-US": "Email",
+    "tr-TR": "E-posta",
+    "tk-TM": "E-poçta",
+    "ru-RU": "Эл. почта"
+  },
+  "ApplicationProfileInstance.Org.Tax": {
+    "en-US": "Tax",
+    "tr-TR": "Vergi",
+    "tk-TM": "Salgyt",
+    "ru-RU": "Налог"
+  },
+  "ApplicationProfileInstance.Org.TaxInformation": {
+    "en-US": "Tax information",
+    "tr-TR": "Vergi bilgisi",
+    "tk-TM": "Salgyt maglumaty",
+    "ru-RU": "Налоговые сведения"
+  },
+  "ApplicationProfileInstance.Org.RegistrationDate": {
+    "en-US": "Registration date",
+    "tr-TR": "Kayıt tarihi",
+    "tk-TM": "Hasaba alyş senesi",
+    "ru-RU": "Дата регистрации"
+  },
+  "ApplicationProfileInstance.Org.FullName": {
+    "en-US": "Full name",
+    "tr-TR": "Ad soyad",
+    "tk-TM": "Doly ady",
+    "ru-RU": "ФИО"
+  },
+  "ApplicationProfileInstance.Org.PositionTm": {
+    "en-US": "Position (Tm)",
+    "tr-TR": "Pozisyon (Tm)",
+    "tk-TM": "Wezipe (Tm)",
+    "ru-RU": "Должность (Tm)"
+  },
+  "ApplicationProfileInstance.Org.PassportNumber": {
+    "en-US": "Passport number",
+    "tr-TR": "Pasaport numarası",
+    "tk-TM": "Pasport belgisi",
+    "ru-RU": "Номер паспорта"
+  },
+  "ApplicationProfileInstance.Org.PassportAuthority": {
+    "en-US": "Passport authority",
+    "tr-TR": "Pasaport veren makam",
+    "tk-TM": "Pasport beren edara",
+    "ru-RU": "Кем выдан паспорт"
+  },
+  "ApplicationProfileInstance.Org.PassportIssueDate": {
+    "en-US": "Passport issue date",
+    "tr-TR": "Pasaport veriliş tarihi",
+    "tk-TM": "Pasport berlen senesi",
+    "ru-RU": "Дата выдачи паспорта"
+  },
+  "ApplicationProfileInstance.Org.PassportExpirationDate": {
+    "en-US": "Passport expiration date",
+    "tr-TR": "Pasaport son kullanma tarihi",
+    "tk-TM": "Pasport möhleti",
+    "ru-RU": "Срок действия паспорта"
+  }
+}

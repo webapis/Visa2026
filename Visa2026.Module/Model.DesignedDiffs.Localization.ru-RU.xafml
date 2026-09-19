@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Application Title="Управление визами">
   <ActionDesign>
     <Actions>
@@ -56,14 +56,14 @@
   </ActionDesign>
   <NavigationItems>
     <Items>
-      <Item Id="Application" Caption="Заявки">
+      <Item Id="Application" Caption="Экземпляры профиля заявки">
         <Items>
-          <Item Id="Application_DirectMigration" Caption="Заявки (напрямую в миграцию)">
+          <Item Id="Application_DirectMigration" Caption="Экземпляры профиля заявки (напрямую в миграцию)">
             <Items>
               <Item Id="ApplicationItem_DirectMigration" Caption="Позиции (напрямую в миграцию)" />
             </Items>
           </Item>
-          <Item Id="Application_ViaMinistries" Caption="Заявки (через министерства)">
+          <Item Id="Application_ViaMinistries" Caption="Экземпляры профиля заявки (через министерства)">
             <Items>
               <Item Id="ApplicationItem_ViaMinistries" Caption="Позиции (через министерства)" />
             </Items>
@@ -72,7 +72,11 @@
       </Item>
       <Item Id="Auth" Caption="Безопасность" />
       <Item Id="Config" Caption="Настройка" />
-      <Item Id="Configuration" Caption="Конфигурация" />
+      <Item Id="Configuration" Caption="Конфигурация">
+        <Items>
+          <Item Id="ApplicationProfileCatalog" Caption="Шаблоны профиля заявки" />
+        </Items>
+      </Item>
       <Item Id="Default" Caption="По умолчанию" />
       <Item Id="Documents" Caption="Документы" />
       <Item Id="Education" Caption="Образование" />
@@ -222,48 +226,18 @@
         <Member Name="Type" Caption="Тип" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.Application" Caption="Заявка">
+    <Class Name="Visa2026.Module.BusinessObjects.Application" Caption="Экземпляр профиля заявки">
       <OwnMembers>
-        <Member Name="ApplicationDate" Caption="Дата заявки" />
-        <Member Name="ApplicationItems" Caption="Позиции" />
-        <Member Name="ApplicationNumber" Caption="Номер заявки" />
-        <Member Name="ApplicationReason" Caption="Причина" />
-        <Member Name="ApplicationType" Caption="Тип заявки" />
-        <Member Name="ApplicationTypeFilter" Caption="Фильтр типа" />
-        <Member Name="ApprovalLegProfile" Caption="Профиль этапов министерств" />
-        <Member Name="BorderZoneLocation" Caption="Место погран. зоны" />
+        <Member Name="ApplicationProfile" Caption="Профиль заявки" />
         <Member Name="Category" Caption="Категория" />
-        <Member Name="Company" Caption="Компания" />
-        <Member Name="CompanyHead" Caption="Руководитель" />
-        <Member Name="CurrentState" Caption="Текущее состояние" />
         <Member Name="DateDeleted" Caption="Дата удаления" />
-        <Member Name="DaysRemaining" Caption="Осталось дней" />
         <Member Name="DeletedBy" Caption="Удалил" />
-        <Member Name="ExpirationDate" Caption="Дата окончания" />
-        <Member Name="ExpirationState" Caption="Статус срока" />
-        <Member Name="FullApplicationNumber" Caption="Полный номер" />
-        <Member Name="Invitations" Caption="Приглашения" />
-        <Member Name="IsActive" Caption="Активен" />
-        <Member Name="IsForFamily" Caption="Для семьи" />
-        <Member Name="IsManualEntry" Caption="Ручной ввод" />
-        <Member Name="LatestProgressDate" Caption="Дата прогресса" />
-        <Member Name="LatestProgressState" Caption="Состояние" />
-        <Member Name="MigrationService" Caption="Миграционная служба" />
-        <Member Name="MigrationSlaStatement" Caption="Срок миграции" />
         <Member Name="Month" Caption="Месяц" />
-        <Member Name="MovementPermitLocation" Caption="Место разрешения на перемещение" />
-        <Member Name="ProgressSlaStatement" Caption="Срок согласования" />
+        <Member Name="ProcessNumber" Caption="Номер процесса" />
         <Member Name="ProjectContract" Caption="Контракт проекта" />
-        <Member Name="Rejections" Caption="Отказы" />
-        <Member Name="Representative" Caption="Представитель" />
-        <Member Name="TotalPersonCount" Caption="Количество лиц" />
-        <Member Name="Urgency" Caption="Срочность" />
         <Member Name="VisaCategory" Caption="Категория визы" />
         <Member Name="VisaPeriod" Caption="Срок визы" />
         <Member Name="VisaType" Caption="Тип визы" />
-        <Member Name="WorkingDaysInCurrentStep" Caption="Рабочие дни" />
-        <Member Name="WorkingDaysInMigrationStep" Caption="Рабочие дни миграции" />
-        <Member Name="WorkPermits" Caption="РНТ" />
         <Member Name="Year" Caption="Год" />
       </OwnMembers>
     </Class>
@@ -366,6 +340,121 @@
         <Member Name="AppNumberPrefix" Caption="Префикс номера заявки" />
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationProfile" Caption="Профиль заявки">
+      <OwnMembers>
+        <Member Name="ActionFamily" Caption="Относится к" />
+        <Member Name="Code" Caption="Код" />
+        <Member Name="DefaultApprovalLegProfile" Caption="Этапы согласования по умолчанию" />
+        <Member Name="Description" Caption="Описание" />
+        <Member Name="ForEmployee" Caption="Для сотрудника" />
+        <Member Name="ForFamilyMember" Caption="Для члена семьи" />
+        <Member Name="ForTemporaryVisitor" Caption="Для временного посетителя" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsConfigLocked" Caption="Конфигурация заблокирована" />
+        <Member Name="MigrationSlaDays" Caption="SLA миграции (дни)" />
+        <Member Name="MinistrySlaDays" Caption="SLA министерств (дни)" />
+        <Member Name="Name" Caption="Имя профиля заявки" />
+        <Member Name="NestedTemplates" Caption="Вложенные шаблоны" />
+        <Member Name="ProduceBorderZone" Caption="Может выдавать погранзону" />
+        <Member Name="ProduceInvitation" Caption="Может выдавать приглашение" />
+        <Member Name="ProduceRejection" Caption="Может выдавать отказ" />
+        <Member Name="ProduceVisa" Caption="Может выдавать визу" />
+        <Member Name="ProduceWorkLocation" Caption="Может выдавать место работы" />
+        <Member Name="ProduceWorkPermit" Caption="Может выдавать РНТ" />
+        <Member Name="ProgressRoute" Caption="Направление" />
+        <Member Name="RegistrationKind" Caption="Вид регистрации" />
+        <Member Name="SelectionCode" Caption="Код выбора" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationProfileActionFamily" Caption="Относится к">
+      <OwnMembers>
+        <Member Name="BusinessTrip" Caption="Командировка" />
+        <Member Name="Cancellation" Caption="Отмена" />
+        <Member Name="Change" Caption="Изменение" />
+        <Member Name="Issuance" Caption="Выдача" />
+        <Member Name="Registration" Caption="Регистрация" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationProfileCatalog.ApplicationProfileCatalogHost" Caption="Шаблоны профиля заявки">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationProfileInstance" Caption="Экземпляр профиля заявки">
+      <OwnMembers>
+        <Member Name="ApplicationDate" Caption="Дата заявки" />
+        <Member Name="ApplicationItems" Caption="Позиции" />
+        <Member Name="ApplicationNumber" Caption="Номер заявки" />
+        <Member Name="ApplicationProfile" Caption="Профиль заявки" />
+        <Member Name="ApplicationReason" Caption="Причина" />
+        <Member Name="ApplicationType" Caption="Тип заявки" />
+        <Member Name="ApplicationTypeFilter" Caption="Фильтр типа" />
+        <Member Name="ApprovalLegProfile" Caption="Профиль этапов министерств" />
+        <Member Name="BorderZoneLocation" Caption="Место погран. зоны" />
+        <Member Name="BusinessTripAddressType" Caption="Тип адреса командировки" />
+        <Member Name="Category" Caption="Категория" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CompanyHead" Caption="Руководитель" />
+        <Member Name="CurrentState" Caption="Текущее состояние" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+        <Member Name="ExpirationDate" Caption="Дата окончания" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="FromCity" Caption="Город отправления" />
+        <Member Name="FromRegion" Caption="Регион отправления" />
+        <Member Name="FullApplicationNumber" Caption="Полный номер" />
+        <Member Name="Invitations" Caption="Приглашения" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsForFamily" Caption="Для семьи" />
+        <Member Name="IsManualEntry" Caption="Ручной ввод" />
+        <Member Name="LatestProgressDate" Caption="Дата прогресса" />
+        <Member Name="LatestProgressState" Caption="Состояние" />
+        <Member Name="MigrationService" Caption="Миграционная служба" />
+        <Member Name="MigrationSlaStatement" Caption="Срок миграции" />
+        <Member Name="Month" Caption="Месяц" />
+        <Member Name="MovementPermitLocation" Caption="Место разрешения на перемещение" />
+        <Member Name="People" Caption="Люди" />
+        <Member Name="ProcessNumber" Caption="Номер процесса" />
+        <Member Name="ProgressSlaStatement" Caption="Срок согласования" />
+        <Member Name="ProjectContract" Caption="Контракт проекта" />
+        <Member Name="Rejections" Caption="Отказы" />
+        <Member Name="Representative" Caption="Представитель" />
+        <Member Name="ToCity" Caption="Город назначения" />
+        <Member Name="ToRegion" Caption="Регион назначения" />
+        <Member Name="TotalPersonCount" Caption="Количество лиц" />
+        <Member Name="Urgency" Caption="Срочность" />
+        <Member Name="VisaCategory" Caption="Категория визы" />
+        <Member Name="VisaPeriod" Caption="Срок визы" />
+        <Member Name="VisaType" Caption="Тип визы" />
+        <Member Name="WorkingDaysInCurrentStep" Caption="Рабочие дни" />
+        <Member Name="WorkingDaysInMigrationStep" Caption="Рабочие дни миграции" />
+        <Member Name="WorkPermits" Caption="РНТ" />
+        <Member Name="Year" Caption="Год" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationProfileInstanceProgressRouteKind" Caption="Направление">
+      <OwnMembers>
+        <Member Name="DirectToMigrationService" Caption="Напрямую в миграцию" />
+        <Member Name="ViaMinistries" Caption="Через министерства" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationProfileRegistrationKind" Caption="Вид регистрации">
+      <OwnMembers>
+        <Member Name="CheckIn" Caption="Регистрация въезда" />
+        <Member Name="CheckOut" Caption="Снятие с учёта" />
+        <Member Name="Extension" Caption="Продление регистрации" />
+        <Member Name="InfoChange" Caption="Изменение данных" />
+        <Member Name="None" Caption="Нет" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationProfileTemplate" Caption="Шаблон профиля заявки">
+      <OwnMembers>
+        <Member Name="CatalogScope" Caption="Область каталога" />
+        <Member Name="DataScope" Caption="Область данных" />
+        <Member Name="TemplateFile" Caption="Файл шаблона" />
+        <Member Name="TemplateKind" Caption="Тип шаблона" />
+        <Member Name="TemplateName" Caption="Имя шаблона" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationProgress" Caption="Прогресс заявки">
@@ -587,6 +676,9 @@
         <Member Name="Roles" Caption="Роли" />
         <Member Name="UserName" Caption="Имя пользователя" />
       </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationWorkspace.ApplicationWorkspaceHost" Caption="Рабочее место дела">
+      <OwnMembers />
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApprovalLegProfile" Caption="Профиль этапов министерств">
       <OwnMembers>
@@ -1179,8 +1271,8 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Invitation" Caption="Приглашение" />
         <Member Name="InvitationItemName" Caption="Наименование" />
-        <Member Name="ExpirationDate" Caption="Срок действия" />
-        <Member Name="IssuedVisa" Caption="Выданная виза" />
+        <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IsChanged" Caption="Изменено" />
         <Member Name="Person" Caption="Лицо" />
       </OwnMembers>
     </Class>
@@ -2395,9 +2487,10 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <ListView Id="Application_ListView" Caption="Заявки">
+    <ListView Id="Application_ListView" Caption="Экземпляры профиля заявки">
       <Columns>
         <ColumnInfo Id="ApplicationDate" Caption="Дата" />
+        <ColumnInfo Id="ApplicationProfile" Caption="Профиль заявки" />
         <ColumnInfo Id="ApplicationType" Caption="Тип" />
         <ColumnInfo Id="Category" Caption="Категория" />
         <ColumnInfo Id="Company" Caption="Компания" />
@@ -2410,10 +2503,16 @@
         <ColumnInfo Id="IsManualEntry" Caption="Ручной ввод" />
         <ColumnInfo Id="LatestProgressDate" Caption="Дата прогресса" />
         <ColumnInfo Id="LatestProgressState" Caption="Состояние" />
+        <ColumnInfo Id="MigrationService" Caption="Миграционная служба" />
         <ColumnInfo Id="MigrationSlaStatement" Caption="Срок миграции" />
-        <ColumnInfo Id="MonthName" Caption="Месяц" />
+        <ColumnInfo Id="Month" Caption="Месяц" />
+        <ColumnInfo Id="ProcessNumber" Caption="Номер процесса" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Срок согласования" />
+        <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
         <ColumnInfo Id="TotalPersonCount" Caption="Количество лиц" />
+        <ColumnInfo Id="VisaCategory" Caption="Категория визы" />
+        <ColumnInfo Id="VisaPeriod" Caption="Срок визы" />
+        <ColumnInfo Id="VisaType" Caption="Тип визы" />
         <ColumnInfo Id="WorkingDaysInCurrentStep" Caption="Рабочие дни" />
         <ColumnInfo Id="WorkingDaysInMigrationStep" Caption="Рабочие дни миграции" />
         <ColumnInfo Id="Year" Caption="Год" />
@@ -2422,36 +2521,48 @@
     <ListView Id="Application_ListView_DirectMigration" Caption="Заявки напрямую в миграцию">
       <Columns>
         <ColumnInfo Id="ApplicationDate" Caption="Дата" />
+        <ColumnInfo Id="ApplicationProfile" Caption="Профиль заявки" />
         <ColumnInfo Id="ApplicationType" Caption="Тип" />
         <ColumnInfo Id="CurrentState" Caption="Текущее состояние" />
         <ColumnInfo Id="FullApplicationNumber" Caption="Номер" />
         <ColumnInfo Id="LatestProgressDate" Caption="Дата прогресса" />
         <ColumnInfo Id="LatestProgressState" Caption="Состояние" />
-        <ColumnInfo Id="MigrationSlaStatement" Caption="Срок миграции" />
         <ColumnInfo Id="MigrationService" Caption="Миграционная служба" />
-        <ColumnInfo Id="MonthName" Caption="Месяц" />
+        <ColumnInfo Id="MigrationSlaStatement" Caption="Срок миграции" />
+        <ColumnInfo Id="Month" Caption="Месяц" />
+        <ColumnInfo Id="ProcessNumber" Caption="Номер процесса" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Срок согласования" />
+        <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
         <ColumnInfo Id="TotalPersonCount" Caption="Количество лиц" />
+        <ColumnInfo Id="VisaCategory" Caption="Категория визы" />
+        <ColumnInfo Id="VisaPeriod" Caption="Срок визы" />
+        <ColumnInfo Id="VisaType" Caption="Тип визы" />
         <ColumnInfo Id="WorkingDaysInCurrentStep" Caption="Рабочие дни" />
         <ColumnInfo Id="WorkingDaysInMigrationStep" Caption="Рабочие дни миграции" />
         <ColumnInfo Id="Year" Caption="Год" />
       </Columns>
     </ListView>
+    <ListView Id="Application_ListView_InProcess" Caption="В работе" />
+    <ListView Id="Application_ListView_Staged" Caption="Подготовленные профили" />
     <ListView Id="Application_ListView_ViaMinistries" Caption="Заявки через министерства">
       <Columns>
         <ColumnInfo Id="ApplicationDate" Caption="Дата" />
+        <ColumnInfo Id="ApplicationProfile" Caption="Профиль заявки" />
         <ColumnInfo Id="ApplicationType" Caption="Тип" />
         <ColumnInfo Id="ApprovalLegProfile" Caption="Профиль согласования" />
-        <ColumnInfo Id="ProjectContract" Caption="Проектный контракт" />
         <ColumnInfo Id="CurrentState" Caption="Текущее состояние" />
         <ColumnInfo Id="FullApplicationNumber" Caption="Номер" />
         <ColumnInfo Id="LatestProgressDate" Caption="Дата прогресса" />
         <ColumnInfo Id="LatestProgressState" Caption="Состояние" />
+        <ColumnInfo Id="MigrationService" Caption="Миграционная служба" />
         <ColumnInfo Id="MigrationSlaStatement" Caption="Срок миграции" />
-        <ColumnInfo Id="MonthName" Caption="Месяц" />
+        <ColumnInfo Id="Month" Caption="Месяц" />
+        <ColumnInfo Id="ProcessNumber" Caption="Номер процесса" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Срок согласования" />
+        <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
         <ColumnInfo Id="TotalPersonCount" Caption="Количество лиц" />
         <ColumnInfo Id="Urgency" Caption="Срочность" />
+        <ColumnInfo Id="VisaCategory" Caption="Категория визы" />
         <ColumnInfo Id="VisaPeriod" Caption="Срок визы" />
         <ColumnInfo Id="VisaType" Caption="Тип визы" />
         <ColumnInfo Id="WorkingDaysInCurrentStep" Caption="Рабочие дни" />
@@ -2488,6 +2599,25 @@
     <ListView Id="ApplicationLocation_ListView" Caption="Места заявки" />
     <DetailView Id="ApplicationNumberingProfile_DetailView" Caption="Нумерация заявок" />
     <ListView Id="ApplicationNumberingProfile_ListView" Caption="Нумерация заявок" />
+    <DetailView Id="ApplicationProfile_DetailView" Caption="Профиль заявки" />
+    <ListView Id="ApplicationProfile_ListView" Caption="Профили заявок" />
+    <DetailView Id="ApplicationProfileCatalogHost_DetailView" Caption="Шаблоны профиля заявки" />
+    <DetailView Id="ApplicationProfileInstance_DetailView" Caption="Экземпляр профиля заявки" />
+    <ListView Id="ApplicationProfileInstance_ListView" Caption="Экземпляры профиля заявки">
+      <Columns>
+        <ColumnInfo Id="ApplicationDate" Caption="Дата" />
+        <ColumnInfo Id="ApplicationProfile" Caption="Профиль заявки" />
+        <ColumnInfo Id="FullApplicationNumber" Caption="Номер" />
+        <ColumnInfo Id="MigrationService" Caption="Миграционная служба" />
+        <ColumnInfo Id="Month" Caption="Месяц" />
+        <ColumnInfo Id="ProcessNumber" Caption="Номер процесса" />
+        <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
+        <ColumnInfo Id="VisaCategory" Caption="Категория визы" />
+        <ColumnInfo Id="VisaPeriod" Caption="Срок визы" />
+        <ColumnInfo Id="VisaType" Caption="Тип визы" />
+        <ColumnInfo Id="Year" Caption="Год" />
+      </Columns>
+    </ListView>
     <DetailView Id="ApplicationProfileInstanceProgress_DetailView" Caption="Прогресс заявки" />
     <ListView Id="ApplicationProfileInstanceProgress_ListView" Caption="Прогресс заявок">
       <Columns>
@@ -2531,6 +2661,7 @@
         <ColumnInfo Id="Name" Caption="Имя" />
       </Columns>
     </ListView>
+    <DetailView Id="ApplicationWorkspaceHost_DetailView" Caption="Рабочее место дела" />
     <DetailView Id="ApprovalLegProfile_DetailView" Caption="Профиль этапов министерств" />
     <ListView Id="ApprovalLegProfile_ListView" Caption="Профили этапов министерств" />
     <DetailView Id="ApprovalLegProfileMinistryLeg_DetailView" Caption="Этап министерства" />
@@ -2673,8 +2804,8 @@
       <Columns>
         <ColumnInfo Id="Description" Caption="Описание" />
         <ColumnInfo Id="InvitationItemName" Caption="Наименование" />
-        <ColumnInfo Id="ExpirationDate" Caption="Срок действия" />
-        <ColumnInfo Id="IssuedVisa" Caption="Выданная виза" />
+        <ColumnInfo Id="IsCancelled" Caption="Отменено" />
+        <ColumnInfo Id="IsChanged" Caption="Изменено" />
         <ColumnInfo Id="Person" Caption="Лицо" />
       </Columns>
     </ListView>
@@ -3196,6 +3327,24 @@
         <LocalizationItem Name="Entry" Value="Въезд" />
         <LocalizationItem Name="Exit" Value="Выезд" />
         <LocalizationItem Name="Stay" Value="Пребывание" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ApplicationProfileActionFamily">
+        <LocalizationItem Name="BusinessTrip" Value="Командировка" />
+        <LocalizationItem Name="Cancellation" Value="Отмена" />
+        <LocalizationItem Name="Change" Value="Изменение" />
+        <LocalizationItem Name="Issuance" Value="Выдача" />
+        <LocalizationItem Name="Registration" Value="Регистрация" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ApplicationProfileInstanceProgressRouteKind">
+        <LocalizationItem Name="DirectToMigrationService" Value="Напрямую в миграцию" />
+        <LocalizationItem Name="ViaMinistries" Value="Через министерства" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ApplicationProfileRegistrationKind">
+        <LocalizationItem Name="CheckIn" Value="Регистрация въезда" />
+        <LocalizationItem Name="CheckOut" Value="Снятие с учёта" />
+        <LocalizationItem Name="Extension" Value="Продление регистрации" />
+        <LocalizationItem Name="InfoChange" Value="Изменение данных" />
+        <LocalizationItem Name="None" Value="Нет" />
       </LocalizationGroup>
       <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ApplicationProgressRouteKind">
         <LocalizationItem Name="DirectToMigrationService" Value="Напрямую в миграцию" />

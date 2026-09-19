@@ -51,7 +51,7 @@ public class ApplicationProfile : BaseObject
 
     [RuleRequiredField]
     [MaxLength(200)]
-    [XafDisplayName("ApplicationProfileInstance name")]
+    [XafDisplayName("Application Profile name")]
     public virtual string Name { get; set; } = string.Empty;
 
     [MaxLength(1000)]

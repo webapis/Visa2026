@@ -4,6 +4,7 @@
 @using DevExpress.ExpressApp
 @using Visa2026.Module.BusinessObjects
 @using Visa2026.Module.BusinessObjects.OfficerShell
+@using Visa2026.Module.Localization
 @using Visa2026.Module.Services.ApplicationItemLinkedDocuments
 @using Visa2026.Module.Services.ApplicationWorkspace
 @using Visa2026.Module.Services.ApplicationPersonLink
@@ -22,12 +23,12 @@
     @if (IsLoading || Snapshot == null)
     {
         var loadingLabel = string.IsNullOrWhiteSpace(LoadingMessage)
-            ? "Opening case…"
+            ? Msg("ApplicationProfileInstance.Workspace.Opening")
             : LoadingMessage;
         var indeterminate = LoadingProgressPercent < 0;
         <div class="cw-loading" role="status" aria-live="polite" aria-busy="true">
             <div class="cw-loading__banner">
-                <div class="cw-loading__kicker">Case workspace</div>
+                <div class="cw-loading__kicker">@Msg("ApplicationProfileInstance.Workspace.CaseWorkspace")</div>
                 <div class="cw-loading__label">@loadingLabel</div>
                 <div class="cw-loading__track"
                      role="progressbar"
@@ -78,8 +79,8 @@
     {
         <div class="cw-loading cw-loading--empty" role="status">
             <div class="cw-loading__banner">
-                <div class="cw-loading__kicker">Case workspace</div>
-                <div class="cw-loading__label">No case selected.</div>
+                <div class="cw-loading__kicker">@Msg("ApplicationProfileInstance.Workspace.CaseWorkspace")</div>
+                <div class="cw-loading__label">@Msg("ApplicationProfileInstance.Workspace.NoCase")</div>
             </div>
         </div>
     }
@@ -92,7 +93,7 @@
                 <div class="cw-head__title-block">
                     <div class="cw-head__accent" style="background:@OfficerShellTemplateFamily.GetColor(chrome.TemplateFamilyKey)"></div>
                     <div>
-                        <h1>ApplicationProfileInstance № @chrome.DisplayNumber</h1>
+                        <h1>@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.InstanceNumber", chrome.DisplayNumber)</h1>
                         @{
                             var profileName = !string.IsNullOrWhiteSpace(chrome.ProfileTemplateName)
                                 ? chrome.ProfileTemplateName
@@ -100,9 +101,9 @@
                         }
                         @if (!string.IsNullOrWhiteSpace(profileName))
                         {
-                            <p class="cw-head__profile" title="Application Profile">@profileName</p>
+                            <p class="cw-head__profile" title="@Msg("ApplicationProfileInstance.Workspace.ProfileTitle")">@profileName</p>
                         }
-                        <p class="cw-head__sub">@chrome.TemplateFamilyLabel · Started @(string.IsNullOrWhiteSpace(chrome.StartedOn) ? "—" : chrome.StartedOn)</p>
+                        <p class="cw-head__sub">@chrome.TemplateFamilyLabel · @VisaUiMessages.Format("ApplicationProfileInstance.Workspace.Started", string.IsNullOrWhiteSpace(chrome.StartedOn) ? "—" : chrome.StartedOn)</p>
                     </div>
                 </div>
                 <div class="cw-head__badges">
@@ -112,32 +113,32 @@
                     }
                     @if (chrome.SlaDaysRemaining is int slaDays)
                     {
-                        <span class="cw-head-badge cw-head-badge--sla">📅 @slaDays days remaining</span>
+                        <span class="cw-head-badge cw-head-badge--sla">📅 @VisaUiMessages.Format("ApplicationProfileInstance.Workspace.DaysRemaining", slaDays)</span>
                     }
                     @if (processTone == "issued")
                     {
-                        <span class="cw-head-badge cw-head-badge--issued">Issued</span>
+                        <span class="cw-head-badge cw-head-badge--issued">@Msg("ApplicationProfileInstance.Workspace.Issued")</span>
                     }
                     else if (processTone == "rejected")
                     {
-                        <span class="cw-head-badge cw-head-badge--rejected">Rejected</span>
+                        <span class="cw-head-badge cw-head-badge--rejected">@Msg("ApplicationProfileInstance.Workspace.Rejected")</span>
                     }
                     else if (processTone == "cancelled")
                     {
-                        <span class="cw-head-badge cw-head-badge--cancelled">Cancelled</span>
+                        <span class="cw-head-badge cw-head-badge--cancelled">@Msg("ApplicationProfileInstance.Workspace.Cancelled")</span>
                     }
                     else
                     {
-                        <span class="cw-head-badge cw-head-badge--process">⚙ In process</span>
+                        <span class="cw-head-badge cw-head-badge--process">⚙ @Msg("ApplicationProfileInstance.Workspace.InProcess")</span>
                     }
                     @if (view.Chrome.ResolvedLinksLocked)
                     {
-                        <span class="cw-head-badge cw-head-badge--locked" title="People and linked records cannot be changed">🔒 Links locked</span>
+                        <span class="cw-head-badge cw-head-badge--locked" title="@Msg("ApplicationProfileInstance.Workspace.LinksLockedTitle")">🔒 @Msg("ApplicationProfileInstance.Workspace.LinksLocked")</span>
                     }
                     <button type="button"
                             class="cw-head__close"
-                            aria-label="Close case workspace"
-                            title="Close"
+                            aria-label="@Msg("ApplicationProfileInstance.Workspace.CloseAria")"
+                            title="@Msg("ApplicationProfileInstance.Workspace.Close")"
                             @onclick="BackToListAsync">×</button>
                 </div>
             </div>
@@ -152,8 +153,8 @@
                                 class="cw-person @(selected ? "is-selected" : "is-muted")"
                                 aria-pressed="@selected"
                                 title="@(selected
-                                    ? "Hide this person in Document copies"
-                                    : "Show this person in Document copies")"
+                                    ? Msg("ApplicationProfileInstance.Workspace.HidePerson")
+                                    : Msg("ApplicationProfileInstance.Workspace.ShowPerson"))"
                                 @onclick="() => ToggleDocumentPersonFilter(person.PersonId)">
                             <span class="cw-person__avatar" style="background:@PersonColor(person.Index)">@Initials(personName)</span>
                             @personName
@@ -172,13 +173,13 @@
                 }
                 @if (chrome.MergedFromCount is int merged && merged > 1)
                 {
-                    <span class="cw-merge">⊞ Merged from @merged staged profiles</span>
+                    <span class="cw-merge">⊞ @VisaUiMessages.Format("ApplicationProfileInstance.Workspace.MergedFrom", merged)</span>
                 }
             </div>
         </header>
 
         <div class="cw-layout @(IsWideTab(DisplayedTab) ? "cw-layout--wide" : null)">
-            <nav class="cw-nav" aria-label="Case sections">
+            <nav class="cw-nav" aria-label="@Msg("ApplicationProfileInstance.Workspace.SectionsAria")">
                 @{
                     var peopleNav = ApplicationWorkspacePeopleLinksCompleteness.Resolve(view);
                     var peopleGaps = ApplicationWorkspacePeopleLinksCompleteness.PeopleWithGaps(view);
@@ -209,8 +210,8 @@
                             else
                             {
                                 <span class="cw-nav__badge cw-nav__badge--ok"
-                                      title="Required Case summary complete"
-                                      aria-label="Required Case summary complete">✓</span>
+                                      title="@Msg("ApplicationProfileInstance.Workspace.CompleteCaseSummary")"
+                                      aria-label="@Msg("ApplicationProfileInstance.Workspace.CompleteCaseSummary")">✓</span>
                             }
                         }
                         else if (tab.Key == "people")
@@ -219,8 +220,8 @@
                             {
                                 case ApplicationWorkspacePeopleLinksCompleteness.NavStatus.EmptyRoster:
                                     <span class="cw-nav__badge cw-nav__badge--missing"
-                                          title="No people linked"
-                                          aria-label="No people linked"></span>
+                                          title="@Msg("ApplicationProfileInstance.Workspace.NoPeople")"
+                                          aria-label="@Msg("ApplicationProfileInstance.Workspace.NoPeople")"></span>
                                     break;
                                 case ApplicationWorkspacePeopleLinksCompleteness.NavStatus.Incomplete:
                                     <span class="cw-nav__badge cw-nav__badge--missing"
@@ -229,8 +230,8 @@
                                     break;
                                 default:
                                     <span class="cw-nav__badge cw-nav__badge--ok"
-                                          title="Required person data complete"
-                                          aria-label="Required person data complete">✓</span>
+                                          title="@Msg("ApplicationProfileInstance.Workspace.CompletePeople")"
+                                          aria-label="@Msg("ApplicationProfileInstance.Workspace.CompletePeople")">✓</span>
                                     break;
                             }
                         }
@@ -246,8 +247,8 @@
                             {
                                 case ApplicationWorkspaceDocumentCopiesCompleteness.NavStatus.EmptyRoster:
                                     <span class="cw-nav__badge cw-nav__badge--warn"
-                                          title="No people linked"
-                                          aria-label="No people linked"></span>
+                                          title="@Msg("ApplicationProfileInstance.Workspace.NoPeople")"
+                                          aria-label="@Msg("ApplicationProfileInstance.Workspace.NoPeople")"></span>
                                     break;
                                 case ApplicationWorkspaceDocumentCopiesCompleteness.NavStatus.Incomplete:
                                     <span class="cw-nav__badge cw-nav__badge--warn"
@@ -256,8 +257,8 @@
                                     break;
                                 default:
                                     <span class="cw-nav__badge cw-nav__badge--ok"
-                                          title="Required document copies complete"
-                                          aria-label="Required document copies complete">✓</span>
+                                          title="@Msg("ApplicationProfileInstance.Workspace.CompleteDocuments")"
+                                          aria-label="@Msg("ApplicationProfileInstance.Workspace.CompleteDocuments")">✓</span>
                                     break;
                             }
                         }
@@ -335,14 +336,14 @@
 </div>
 
 @code {
-    private static readonly (string Key, string Label, string Glyph)[] CaseTabs =
+    private static (string Key, string Label, string Glyph)[] CaseTabs =>
     [
-        ("overview", "Overview", "⌂"),
-        ("people", "People & links", "👥"),
-        ("progress", "Progress", "▤"),
-        ("documents", "Document copies", "📄"),
-        ("resminamalar", "Resminamalar", "📦"),
-        ("sla", "SLA & deadlines", "⏱"),
+        ("overview", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Overview"), "⌂"),
+        ("people", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.PeopleLinks"), "👥"),
+        ("progress", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Progress"), "▤"),
+        ("documents", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Documents"), "📄"),
+        ("resminamalar", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Resminamalar"), "📦"),
+        ("sla", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Sla"), "⏱"),
     ];
 
     private static readonly string[] PersonColors =
@@ -373,11 +374,11 @@
                     return tab.Label;
             }
 
-            return "section";
+            return Msg("ApplicationProfileInstance.Workspace.Section");
         }
     }
 
-    private string TabSwitchStatus => $"Opening {PendingTabLabel}…";
+    private string TabSwitchStatus => VisaUiMessages.Format("ApplicationProfileInstance.Workspace.OpeningTab", PendingTabLabel);
 
     [Parameter] public ApplicationWorkspaceSnapshot? Snapshot { get; set; }
     [Parameter] public bool IsLoading { get; set; }
@@ -591,7 +592,7 @@
 
     private string? TabBlockedTitle(string tabKey) =>
         ApplicationWorkspaceCaseSummaryCompletenessGate.BlocksTab(Snapshot?.CaseView, tabKey)
-            ? "Complete required Case summary fields first"
+            ? Msg("ApplicationProfileInstance.Workspace.GateBanner")
             : null;
 
     private bool TryBlockIncompleteProcessWork(string? tabKey = null)
@@ -715,11 +716,11 @@
                 <button type="button"
                         class="cw-org-new"
                         @onclick="() => OnNewOrganizationCatalog(kind)">
-                    + New
+                    @Msg("ApplicationProfileInstance.Picker.New")
                 </button>
                 <button type="button"
                         class="cw-org-edit"
-                        aria-label="@($"Edit {title}")"
+                        aria-label="@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.EditField", title)"
                         disabled="@(selectedId is not Guid id || id == Guid.Empty)"
                         @onclick="() => OnEditOrganizationCatalog(kind, selectedId)">
                     ✎
@@ -741,7 +742,7 @@
                     @onchange="e => OnOrganizationCatalogChanged(kind, e.Value?.ToString())">
                 @if (options.Count == 0)
                 {
-                    <option value="">No catalog records yet</option>
+                    <option value="">@Msg("ApplicationProfileInstance.Picker.EmptyCatalog")</option>
                 }
                 else
                 {
@@ -753,14 +754,14 @@
             </select>
             @if (current?.IsDefault == true)
             {
-                <span class="cw-org-default-badge">Default</span>
+                <span class="cw-org-default-badge">@Msg("ApplicationProfileInstance.Picker.Default")</span>
             }
             @if (current != null && !current.IsDefault)
             {
                 <button type="button"
                         class="cw-org-make-default"
                         @onclick="() => OnOrganizationMakeDefault(kind, selected)">
-                    Make default
+                    @Msg("ApplicationProfileInstance.Picker.MakeDefault")
                 </button>
             }
         </div>
@@ -957,17 +958,8 @@
     private string? _selectedIssuedKey;
     private string? _issuedDeleteError;
 
-    private static string IssuedEmptyHint(ApplicationWorkspaceCaseView view, ApplicationWorkspaceCaseIssuedTile tile)
-    {
-        var number = view.Chrome.DisplayNumber;
-        if (string.IsNullOrWhiteSpace(number))
-            return tile.EmptyHint;
-
-        return tile.EmptyHint.Replace(
-            "this application.",
-            "Application № " + number + ".",
-            StringComparison.Ordinal);
-    }
+    private static string IssuedEmptyHint(ApplicationWorkspaceCaseView view, ApplicationWorkspaceCaseIssuedTile tile) =>
+        ApplicationProfileLocalization.IssuedEmptyHint(tile.Label, view.Chrome.DisplayNumber);
 
     private void SelectIssuedTile(string key)
     {
@@ -975,16 +967,6 @@
         _selectedIssuedKey = string.Equals(_selectedIssuedKey, key, StringComparison.OrdinalIgnoreCase)
             ? null
             : key;
-    }
-
-    private void IssueRecordQuickAction()
-    {
-        var tiles = Snapshot?.CaseView.IssuedRecordTiles;
-        if (tiles == null || tiles.Count == 0)
-            return;
-
-        var empty = tiles.FirstOrDefault(t => t.Count == 0);
-        _selectedIssuedKey = (empty ?? tiles[0]).Key;
     }
 
     private async Task NewIssuedHeaderAsync(string key)
@@ -1390,7 +1372,7 @@
             <section class="cw-card">
                 <div class="cw-card__title-row">
                     <div>
-                        <h2 class="cw-card__title">Case summary</h2>
+                        <h2 class="cw-card__title">@Msg("ApplicationProfileInstance.Picker.CaseSummary")</h2>
                         @{
                             var summaryProfileName = !string.IsNullOrWhiteSpace(view.Chrome.ProfileTemplateName)
                                 ? view.Chrome.ProfileTemplateName
@@ -1399,21 +1381,21 @@
                         <p class="cw-summary-sub">
                             @if (!string.IsNullOrWhiteSpace(summaryProfileName))
                             {
-                                <span>Application Profile: <strong>@summaryProfileName</strong></span>
+                                <span>@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ProfileNamed", summaryProfileName)</span>
                                 <span> · </span>
                             }
-                            <span>Use fields only@(IsCaseSummaryEditing ? " · Saved on this case (defaults copied at create)" : null)</span>
+                            <span>@Msg("ApplicationProfileInstance.Workspace.UseFieldsOnly")@(IsCaseSummaryEditing ? Msg("ApplicationProfileInstance.Workspace.UseFieldsEditing") : null)</span>
                         </p>
                     </div>
                     @if (view.HeaderFields.Count > 0)
                     {
                         @if (IsCaseSummaryEditing)
                         {
-                            <button type="button" class="cw-summary-mode-btn" @onclick="FinishCaseSummaryEdit">Done</button>
+                            <button type="button" class="cw-summary-mode-btn" @onclick="FinishCaseSummaryEdit">@Msg("ApplicationProfileInstance.Workspace.Done")</button>
                         }
                         else
                         {
-                            <button type="button" class="cw-summary-mode-btn" @onclick="StartCaseSummaryEdit">✎ Edit</button>
+                            <button type="button" class="cw-summary-mode-btn" @onclick="StartCaseSummaryEdit">@Msg("ApplicationProfileInstance.Workspace.Edit")</button>
                         }
                     }
                 </div>
@@ -1425,7 +1407,7 @@
                             @if (!IsCaseSummaryEditing)
                             {
                                 <button type="button" class="os-btn os-btn--primary" @onclick="StartCaseSummaryEdit">
-                                    Edit Case summary
+                                    @Msg("ApplicationProfileInstance.Workspace.EditCaseSummary")
                                 </button>
                             }
                         </div>
@@ -1437,7 +1419,7 @@
                 }
                 @if (view.HeaderFields.Count == 0 && view.SummaryTiles.Count == 0)
                 {
-                    <p class="cw-summary-empty">No ApplicationProfileInstance properties required on this profile.</p>
+                    <p class="cw-summary-empty">@Msg("ApplicationProfileInstance.Picker.NoRequiredProps")</p>
                 }
                 else if (IsCaseSummaryEditing && view.HeaderFields.Count > 0)
                 {
@@ -1457,7 +1439,7 @@
                         }
                         @if (identityFields.Count > 0)
                         {
-                            <aside class="cw-summary-identity" aria-label="Application number, date, process number, and urgency">
+                            <aside class="cw-summary-identity" aria-label="@Msg("ApplicationProfileInstance.Workspace.IdentityAria")">
                                 <div class="cw-summary-form cw-summary-form--stack">
                                     @foreach (var field in identityFields)
                                     {
@@ -1467,7 +1449,7 @@
                             </aside>
                         }
                     </div>
-                    <p class="cw-summary-foot">Changing these does not change the Application Profile template.</p>
+                    <p class="cw-summary-foot">@Msg("ApplicationProfileInstance.Workspace.SummaryFoot")</p>
                 }
                 else
                 {
@@ -1488,7 +1470,7 @@
                         }
                         @if (identityTiles.Count > 0)
                         {
-                            <aside class="cw-summary-identity" aria-label="Application number, date, process number, and urgency">
+                            <aside class="cw-summary-identity" aria-label="@Msg("ApplicationProfileInstance.Workspace.IdentityAria")">
                                 <div class="cw-summary-grid cw-summary-grid--stack">
                                     @foreach (var field in identityTiles)
                                     {
@@ -1503,24 +1485,24 @@
             <section class="cw-card">
                 <div class="cw-card__title-row">
                     <div>
-                        <h2 class="cw-card__title">Organization</h2>
+                        <h2 class="cw-card__title">@Msg("ApplicationProfileInstance.Workspace.Organization")</h2>
                         <p class="cw-summary-sub">@(IsOrganizationEditing
-                            ? "Dropdowns choose which catalog records this case uses. + New and Edit add or update those records here."
-                            : "Letterhead for this application · live catalog records")</p>
+                            ? Msg("ApplicationProfileInstance.Workspace.OrgSubEdit")
+                            : Msg("ApplicationProfileInstance.Workspace.OrgSub"))</p>
                     </div>
                     @if (IsOrganizationEditing)
                     {
-                        <button type="button" class="cw-summary-mode-btn" @onclick="FinishOrganizationEdit">Done</button>
+                        <button type="button" class="cw-summary-mode-btn" @onclick="FinishOrganizationEdit">@Msg("ApplicationProfileInstance.Workspace.Done")</button>
                     }
                     else
                     {
-                        <button type="button" class="cw-summary-mode-btn" @onclick="StartOrganizationEdit">✎ Edit</button>
+                        <button type="button" class="cw-summary-mode-btn" @onclick="StartOrganizationEdit">@Msg("ApplicationProfileInstance.Workspace.Edit")</button>
                     }
                 </div>
                 <div class="cw-org-callout">
                     @(IsOrganizationEditing
-                        ? "Dropdowns choose which shared Company / Signatory / Representative this case uses. + New and Edit open that catalog record here — same as Configuration → Organization catalogs. Make default applies to the next new application."
-                        : "This case is related to the selected catalog records. Other cases may use different rows. Editing a catalog record updates every case that selected it.")
+                        ? Msg("ApplicationProfileInstance.Workspace.OrgCalloutEdit")
+                        : Msg("ApplicationProfileInstance.Workspace.OrgCallout"))
                 </div>
                 @if (!string.IsNullOrWhiteSpace(OrganizationStatusMessage))
                 {
@@ -1533,87 +1515,87 @@
                 {
                     <div class="cw-org-grid">
                         <div>
-                            @RenderOrgColHead("Company", OrganizationCatalogHelper.Company, org.CompanyId)
+                            @RenderOrgColHead(Msg("ApplicationProfileInstance.Picker.Company"), OrganizationCatalogHelper.Company, org.CompanyId)
                             @RenderOrgCatalogSelect(OrganizationCatalogHelper.Company, org.CompanyId, org.CompanyOptions)
                             <div class="cw-org-preview">
-                                @RenderOrgField("Name", org.CompanyName)
-                                @RenderOrgField("Code", org.CompanyCode)
-                                @RenderOrgField("Phone", org.CompanyPhone)
-                                @RenderOrgField("Address", org.CompanyAddress, multiline: true)
-                                @RenderOrgField("Email", org.CompanyEmail)
-                                @RenderOrgField("Tax information", org.CompanyTaxInformation)
-                                @RenderOrgField("Registration date", org.CompanyRegistrationDateText)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.Name"), org.CompanyName)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.Code"), org.CompanyCode)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.Phone"), org.CompanyPhone)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.Address"), org.CompanyAddress, multiline: true)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.Email"), org.CompanyEmail)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.TaxInformation"), org.CompanyTaxInformation)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.RegistrationDate"), org.CompanyRegistrationDateText)
                             </div>
                         </div>
                         <div>
-                            @RenderOrgColHead("Authorized Signatory", OrganizationCatalogHelper.Signatory, org.SignatoryId)
+                            @RenderOrgColHead(Msg("ApplicationProfileInstance.Picker.Signatory"), OrganizationCatalogHelper.Signatory, org.SignatoryId)
                             @RenderOrgCatalogSelect(OrganizationCatalogHelper.Signatory, org.SignatoryId, org.SignatoryOptions)
                             <div class="cw-org-preview">
-                                @RenderOrgField("Full name", org.SignatoryFullName)
-                                @RenderOrgField("Position (Tm)", org.SignatoryPositionTitleTm)
-                                @RenderOrgField("Passport number", org.SignatoryPassportNumber)
-                                @RenderOrgField("Passport authority", org.SignatoryPassportAuthority)
-                                @RenderOrgField("Passport issue date", org.SignatoryPassportIssueDateText)
-                                @RenderOrgField("Passport expiration date", org.SignatoryPassportExpirationDateText)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.FullName"), org.SignatoryFullName)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.PositionTm"), org.SignatoryPositionTitleTm)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.PassportNumber"), org.SignatoryPassportNumber)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.PassportAuthority"), org.SignatoryPassportAuthority)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.PassportIssueDate"), org.SignatoryPassportIssueDateText)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.PassportExpirationDate"), org.SignatoryPassportExpirationDateText)
                             </div>
                         </div>
                         <div>
-                            @RenderOrgColHead("Authorized Representative", OrganizationCatalogHelper.Representative, org.RepresentativeId)
+                            @RenderOrgColHead(Msg("ApplicationProfileInstance.Picker.Representative"), OrganizationCatalogHelper.Representative, org.RepresentativeId)
                             @RenderOrgCatalogSelect(OrganizationCatalogHelper.Representative, org.RepresentativeId, org.RepresentativeOptions)
                             <div class="cw-org-preview">
-                                @RenderOrgField("Full name", org.RepresentativeFullName)
-                                @RenderOrgField("Position (Tm)", org.RepresentativePositionTitleTm)
-                                @RenderOrgField("Phone", org.RepresentativePhone)
-                                @RenderOrgField("Passport number", org.RepresentativePassportNumber)
-                                @RenderOrgField("Passport authority", org.RepresentativePassportAuthority)
-                                @RenderOrgField("Passport issue date", org.RepresentativePassportIssueDateText)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.FullName"), org.RepresentativeFullName)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.PositionTm"), org.RepresentativePositionTitleTm)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.Phone"), org.RepresentativePhone)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.PassportNumber"), org.RepresentativePassportNumber)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.PassportAuthority"), org.RepresentativePassportAuthority)
+                                @RenderOrgField(Msg("ApplicationProfileInstance.Org.PassportIssueDate"), org.RepresentativePassportIssueDateText)
                             </div>
                         </div>
                     </div>
-                    <p class="cw-summary-foot">Changing a dropdown updates only this case's relation. + New / Edit updates the shared catalog record used by every case that selected it.</p>
+                    <p class="cw-summary-foot">@Msg("ApplicationProfileInstance.Workspace.OrgFoot")</p>
                 }
                 else
                 {
                     <div class="cw-org-grid">
                         <dl class="cw-org-dl">
-                            <h3 class="cw-org-col-title">Company</h3>
-                            <div><dt>Name</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyName)</dd></div>
-                            <div><dt>Code</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyCode)</dd></div>
-                            <div><dt>Phone</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyPhone)</dd></div>
-                            <div><dt>Address</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyAddress)</dd></div>
-                            <div><dt>Email</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyEmail)</dd></div>
-                            <div><dt>Tax</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyTaxInformation)</dd></div>
+                            <h3 class="cw-org-col-title">@Msg("ApplicationProfileInstance.Picker.Company")</h3>
+                            <div><dt>@Msg("ApplicationProfileInstance.Org.Name")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyName)</dd></div>
+                            <div><dt>@Msg("ApplicationProfileInstance.Org.Code")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyCode)</dd></div>
+                            <div><dt>@Msg("ApplicationProfileInstance.Org.Phone")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyPhone)</dd></div>
+                            <div><dt>@Msg("ApplicationProfileInstance.Org.Address")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyAddress)</dd></div>
+                            <div><dt>@Msg("ApplicationProfileInstance.Org.Email")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyEmail)</dd></div>
+                            <div><dt>@Msg("ApplicationProfileInstance.Org.Tax")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.CompanyTaxInformation)</dd></div>
                         </dl>
                         <dl class="cw-org-dl">
-                            <h3 class="cw-org-col-title">Authorized Signatory</h3>
-                            <div><dt>Full name</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.SignatoryFullName)</dd></div>
-                            <div><dt>Position (Tm)</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.SignatoryPositionTitleTm)</dd></div>
-                            <div><dt>Passport number</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.SignatoryPassportNumber)</dd></div>
+                            <h3 class="cw-org-col-title">@Msg("ApplicationProfileInstance.Picker.Signatory")</h3>
+                            <div><dt>@Msg("ApplicationProfileInstance.Org.FullName")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.SignatoryFullName)</dd></div>
+                            <div><dt>@Msg("ApplicationProfileInstance.Org.PositionTm")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.SignatoryPositionTitleTm)</dd></div>
+                            <div><dt>@Msg("ApplicationProfileInstance.Org.PassportNumber")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.SignatoryPassportNumber)</dd></div>
                         </dl>
                         <dl class="cw-org-dl">
-                            <h3 class="cw-org-col-title">Authorized Representative</h3>
-                            <div><dt>Full name</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.RepresentativeFullName)</dd></div>
-                            <div><dt>Position (Tm)</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.RepresentativePositionTitleTm)</dd></div>
-                            <div><dt>Phone</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.RepresentativePhone)</dd></div>
-                            <div><dt>Passport number</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.RepresentativePassportNumber)</dd></div>
+                            <h3 class="cw-org-col-title">@Msg("ApplicationProfileInstance.Picker.Representative")</h3>
+                            <div><dt>@Msg("ApplicationProfileInstance.Org.FullName")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.RepresentativeFullName)</dd></div>
+                            <div><dt>@Msg("ApplicationProfileInstance.Org.PositionTm")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.RepresentativePositionTitleTm)</dd></div>
+                            <div><dt>@Msg("ApplicationProfileInstance.Org.Phone")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.RepresentativePhone)</dd></div>
+                            <div><dt>@Msg("ApplicationProfileInstance.Org.PassportNumber")</dt><dd>@ApplicationProfileInstanceOrganizationLetterhead.Display(org.RepresentativePassportNumber)</dd></div>
                         </dl>
                     </div>
-                    <p class="cw-summary-foot">Resminamalar merge these fields from the selected catalog records on the next generate.</p>
+                    <p class="cw-summary-foot">@Msg("ApplicationProfileInstance.Workspace.OrgFootView")</p>
                 }
             </section>
             <section class="cw-card">
-                <h2 class="cw-card__title">ApplicationProfileInstance progress</h2>
+                <h2 class="cw-card__title">@Msg("ApplicationProfileInstance.Workspace.ProgressTitle")</h2>
                 <div class="cw-prog-stepper">
                 @for (var i = 0; i < view.ProgressSteps.Count; i++)
                 {
                     var step = view.ProgressSteps[i];
                     var currentIdx = view.ProgressSteps.ToList().FindIndex(s => s.State == "current");
                     var badge = !string.IsNullOrWhiteSpace(step.CurrentStateLabel)
-                        ? step.CurrentStateLabel
+                        ? ApplicationProfileLocalization.ProgressStepLabel(step.CurrentStateLabel)
                         : step.State == "done" && !string.Equals(step.Key, "office", StringComparison.OrdinalIgnoreCase)
-                            ? "Completed"
-                            : step.State == "current" ? "In progress"
-                            : step.State == "pending" ? "Pending"
+                            ? Msg("ApplicationProfileInstance.Workspace.Completed")
+                            : step.State == "current" ? Msg("ApplicationProfileInstance.Workspace.InProgress")
+                            : step.State == "pending" ? Msg("ApplicationProfileInstance.Workspace.Pending")
                             : string.Empty;
                     var badgeCls = step.OutcomeKind switch
                     {
@@ -1643,7 +1625,7 @@
                                 }
                             </div>
                             <div class="cw-prog-step__body">
-                                <strong>@step.Label</strong>
+                                <strong>@ApplicationProfileLocalization.ProgressStepLabel(step.Label)</strong>
                                 @if (!string.IsNullOrWhiteSpace(badge))
                                 {
                                     <span class="cw-prog-step__badge cw-prog-step__badge--@badgeCls">@badge</span>
@@ -1667,14 +1649,14 @@
                 </div>
             </section>
             <section class="cw-card">
-                <h2 class="cw-card__title">Linked records</h2>
+                <h2 class="cw-card__title">@Msg("ApplicationProfileInstance.Workspace.LinkedRecords")</h2>
                 @if (view.Chrome.ResolvedLinksLocked)
                 {
-                    <p class="cw-linked-lock">🔒 Process complete — linked people and records are locked on this case.</p>
+                    <p class="cw-linked-lock">🔒 @Msg("ApplicationProfileInstance.Workspace.LinksLockedProcess")</p>
                 }
                 @if (view.LinkedRecordTiles.Count == 0)
                 {
-                    <p class="cw-linked-empty">No linked person-related records yet. Link people on the <strong>People &amp; links</strong> tab — records auto-resolve from profile requirements.</p>
+                    <p class="cw-linked-empty">@Msg("ApplicationProfileInstance.Workspace.NoLinkedRecords")</p>
                 }
                 else
                 {
@@ -1685,7 +1667,7 @@
                                     class="cw-link-tile cw-link-tile--@tile.Tone @(ApplicationWorkspacePeopleLinksCompleteness.IsCountShort(tile.Count, tile.ExpectedCount, view.Chrome.ResolvedLinksLocked) ? "is-empty" : null)"
                                     @onclick="() => OpenLinkedRecordTile(tile.TabKey)">
                                 <span class="cw-link-tile__icon">@tile.Glyph</span>
-                                <span class="cw-link-tile__label">@tile.Label</span>
+                                <span class="cw-link-tile__label">@ApplicationProfileLocalization.LinkedRecordLabel(tile.Label)</span>
                                 <strong class="cw-link-tile__count">@FormatLinkedCount(tile.Count, tile.ExpectedCount)</strong>
                                 <span class="cw-link-tile__chev">›</span>
                             </button>
@@ -1698,8 +1680,8 @@
                 var selectedIssued = view.IssuedRecordTiles.FirstOrDefault(t =>
                     string.Equals(t.Key, _selectedIssuedKey, StringComparison.OrdinalIgnoreCase));
                 <section class="cw-card">
-                    <h2 class="cw-card__title">Issued records</h2>
-                    <p class="cw-card__sub">Created by this application · visible when May produce is on</p>
+                    <h2 class="cw-card__title">@Msg("ApplicationProfileInstance.Workspace.IssuedRecords")</h2>
+                    <p class="cw-card__sub">@Msg("ApplicationProfileInstance.Workspace.IssuedSub")</p>
                     <div class="cw-issued-row">
                         @foreach (var tile in view.IssuedRecordTiles)
                         {
@@ -1708,10 +1690,10 @@
                                     class="cw-link-tile cw-link-tile--@tile.Tone cw-issued-tile @(tile.Count == 0 ? "is-empty" : null) @(isSelected ? "is-selected" : null)"
                                     @onclick="() => SelectIssuedTile(tile.Key)">
                                 <span class="cw-link-tile__icon">@tile.Glyph</span>
-                                <span class="cw-link-tile__label">@tile.Label</span>
+                                <span class="cw-link-tile__label">@ApplicationProfileLocalization.IssuedRecordLabel(tile.Label)</span>
                                 @if (tile.Count == 0)
                                 {
-                                    <span class="cw-issued-tile__add">@tile.AddCaption</span>
+                                    <span class="cw-issued-tile__add">@ApplicationProfileLocalization.IssuedAddCaption(tile.AddCaption)</span>
                                 }
                                 else
                                 {
@@ -1724,7 +1706,7 @@
                     @if (selectedIssued != null)
                     {
                         <div class="cw-issued-panel">
-                            <h3 class="cw-issued-panel__title">@selectedIssued.PanelTitle</h3>
+                            <h3 class="cw-issued-panel__title">@ApplicationProfileLocalization.IssuedPanelTitle(selectedIssued.PanelTitle)</h3>
                             @if (selectedIssued.Count == 0)
                             {
                                 <p class="cw-issued-panel__hint">@IssuedEmptyHint(view, selectedIssued)</p>
@@ -1756,21 +1738,21 @@
                                             {
                                                 <button type="button"
                                                         class="cw-issued-list__preview"
-                                                        title="@(row.HasCopy ? "Preview copy" : "No copy attached yet")"
+                                                        title="@(row.HasCopy ? Msg("ApplicationProfileInstance.Workspace.PreviewCopy") : Msg("ApplicationProfileInstance.Workspace.NoCopy"))"
                                                         disabled="@(!row.HasCopy)"
                                                         @onclick="() => PreviewIssuedHeaderCopyAsync(issuedCatalogKey, issuedRowId)"
                                                         @onclick:stopPropagation="true">
-                                                    Preview
+                                                    @Msg("ApplicationItemDocumentCopies.Action.Preview")
                                                 </button>
                                             }
                                             @if (canDeleteIssued || isIssuedVisa)
                                             {
                                                 <button type="button"
                                                         class="cw-issued-list__delete"
-                                                        title="Delete"
+                                                        title="@Msg("ApplicationProfileInstance.Workspace.Delete")"
                                                         @onclick="() => DeleteIssuedHeaderAsync(issuedCatalogKey, issuedRowId, issuedTitle)"
                                                         @onclick:stopPropagation="true">
-                                                    Delete
+                                                    @Msg("ApplicationProfileInstance.Workspace.Delete")
                                                 </button>
                                             }
                                         </li>
@@ -1782,13 +1764,13 @@
                                 <p class="cw-issued-panel__error">@_issuedDeleteError</p>
                             }
                             <div class="cw-issued-panel__actions">
-                                <button type="button" class="os-btn os-btn--primary" @onclick="() => NewIssuedHeaderAsync(selectedIssued.Key)">@selectedIssued.NewCaption</button>
+                                <button type="button" class="os-btn os-btn--primary" @onclick="() => NewIssuedHeaderAsync(selectedIssued.Key)">@ApplicationProfileLocalization.IssuedNewCaption(selectedIssued.NewCaption)</button>
                             </div>
                         </div>
                     }
                 </section>
             }
-            <p class="cw-foot">Application Profile: @(string.IsNullOrWhiteSpace(view.Chrome.ProfileTemplateName) ? Snapshot!.Profile.Title : view.Chrome.ProfileTemplateName)</p>
+            <p class="cw-foot">@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ProfileNamed", string.IsNullOrWhiteSpace(view.Chrome.ProfileTemplateName) ? Snapshot!.Profile.Title : view.Chrome.ProfileTemplateName)</p>
         </div>;
     };
 
@@ -1855,7 +1837,7 @@
                         </tbody>
                     </table>
                 </div>
-                <h2 class="ct-page__title">Linked records by person</h2>
+                <h2 class="ct-page__title">@Msg("ApplicationProfileInstance.Workspace.LinkedRecordsByPerson")</h2>
                 @foreach (var person in view.People)
                 {
                     <section class="ct-person-panel">
@@ -1871,7 +1853,7 @@
                                 {
                                     <div class="cw-link-tile cw-link-tile--caption cw-link-tile--@record.Tone @(isEmpty ? "is-empty" : null)">
                                         <span class="cw-link-tile__icon">@record.Glyph</span>
-                                        <span class="cw-link-tile__label">@record.Label</span>
+                                        <span class="cw-link-tile__label">@ApplicationProfileLocalization.LinkedRecordLabel(record.Label)</span>
                                         <span class="cw-link-tile__caption">@record.Caption</span>
                                     </div>
                                 }
@@ -1882,7 +1864,7 @@
                                             class="cw-link-tile cw-link-tile--@record.Tone @(isEmpty ? "is-empty" : null) @(isSelected ? "is-selected" : null)"
                                             @onclick="() => TogglePersonRecord(person.Index, record.Key)">
                                         <span class="cw-link-tile__icon">@record.Glyph</span>
-                                        <span class="cw-link-tile__label">@record.Label</span>
+                                        <span class="cw-link-tile__label">@ApplicationProfileLocalization.LinkedRecordLabel(record.Label)</span>
                                         <strong class="cw-link-tile__count">@FormatLinkedCount(record.Count, record.ExpectedCount)</strong>
                                         <span class="cw-link-tile__chev">›</span>
                                     </button>
@@ -1957,33 +1939,42 @@
         var stepRemaining = sla.CurrentStepDaysRemaining;
         var casePct = complete ? 100 : SlaRemainingPercent(caseRemaining, sla.TotalSlaDays);
         var stepPct = complete ? 100 : SlaRemainingPercent(stepRemaining, Math.Max(stepRemaining ?? 0, 14));
-        var stepTitle = string.IsNullOrWhiteSpace(sla.CurrentStepLabel) ? "Current step" : sla.CurrentStepLabel;
+        var stepTitle = string.IsNullOrWhiteSpace(sla.CurrentStepLabel) || sla.CurrentStepLabel == "Current step"
+            ? Msg("ApplicationProfileInstance.Workspace.CurrentStep")
+            : ApplicationProfileLocalization.ProgressStepLabel(sla.CurrentStepLabel);
         var stepDue = SlaDisplayDate(sla.CurrentStepDueDate);
         var started = SlaDisplayDate(sla.StartedOn);
         var ministryDue = SlaDisplayDate(sla.MinistryDueDate);
         var expected = SlaDisplayDate(sla.ExpectedCompletionDate);
-        var migrationDays = sla.MigrationSlaLabel.Split(' ').FirstOrDefault() ?? "—";
+        var slaSource = string.IsNullOrWhiteSpace(sla.ProfileSlaSource) || sla.ProfileSlaSource == "Profile template"
+            ? Msg("ApplicationProfileInstance.Workspace.ProfileTemplate")
+            : sla.ProfileSlaSource;
         var caseStatusClass = complete ? "ct-sla-tone ct-sla-tone--ok" : SlaToneClass(caseRemaining);
         var stepStatusClass = complete ? "ct-sla-tone ct-sla-tone--ok" : SlaToneClass(stepRemaining);
         var caseRingClass = complete ? "ct-sla-ring--ok ct-sla-ring--done" : SlaRingTone(caseRemaining);
         var stepRingClass = complete ? "ct-sla-ring--ok ct-sla-ring--done" : SlaRingTone(stepRemaining);
-        var caseValue = complete ? "Done" : (caseRemaining?.ToString() ?? "—");
-        var stepValue = complete ? "Done" : (stepRemaining?.ToString() ?? "—");
-        var caption = complete ? "complete" : "days left";
+        var caseValue = complete ? Msg("ApplicationProfileInstance.Workspace.Done") : (caseRemaining?.ToString() ?? "—");
+        var stepValue = complete ? Msg("ApplicationProfileInstance.Workspace.Done") : (stepRemaining?.ToString() ?? "—");
+        var caption = complete ? Msg("ApplicationProfileInstance.Workspace.Complete") : Msg("ApplicationProfileInstance.Workspace.DaysLeft");
         var caseLabel = complete ? sla.CaseStatus : SlaToneLabel(caseRemaining);
         var stepStatusText = complete ? sla.CaseStatus : SlaToneLabel(stepRemaining);
-        var stepHint = complete ? "No open deadline" : (stepDue == "—" ? "No due date yet" : "Due " + stepDue);
-        var midTitle = complete ? "Completed" : "Current due";
+        var stepHint = complete
+            ? Msg("ApplicationProfileInstance.Workspace.NoOpenDeadline")
+            : (stepDue == "—"
+                ? Msg("ApplicationProfileInstance.Workspace.NoDueDate")
+                : VisaUiMessages.Format("ApplicationProfileInstance.Workspace.DueOn", stepDue));
+        var midTitle = complete ? Msg("ApplicationProfileInstance.Workspace.Completed") : Msg("ApplicationProfileInstance.Workspace.CurrentDue");
         var midDate = complete ? expected : ministryDue;
-        var endTitle = complete ? "Finished" : "Expected completion";
+        var endTitle = complete ? Msg("ApplicationProfileInstance.Workspace.Finished") : Msg("ApplicationProfileInstance.Workspace.ExpectedCompletion");
+        var showAlert = !complete && stepRemaining is int && stepRemaining <= 10 && stepDue != "—";
         <div class="ct-page ct-sla">
             <header class="ct-sla-head">
-                <h2 class="ct-page__title">SLA &amp; deadlines</h2>
-                <p class="ct-page__sub">Working days against the profile template. Dates in UTC+5 (Ashgabat).</p>
+                <h2 class="ct-page__title">@Msg("ApplicationProfileInstance.Workspace.Sla")</h2>
+                <p class="ct-page__sub">@Msg("ApplicationProfileInstance.Workspace.SlaSub")</p>
             </header>
             <div class="ct-sla-metrics">
                 <article class="ct-sla-metric">
-                    <h3>Overall case</h3>
+                    <h3>@Msg("ApplicationProfileInstance.Workspace.OverallCase")</h3>
                     <div class="ct-sla-metric__body">
                         <div class="ct-sla-gauge">
                             <div class="ct-sla-ring ct-sla-ring--lg @caseRingClass" style="--ct-pct:@casePct%" role="img" aria-label="@caseLabel">
@@ -1992,9 +1983,9 @@
                             <span class="ct-sla-gauge__caption">@caption</span>
                         </div>
                         <dl class="ct-sla-stats">
-                            <div><dt>Total SLA</dt><dd>@sla.TotalSlaDays days</dd></div>
-                            <div><dt>Elapsed</dt><dd>@sla.ElapsedDays days</dd></div>
-                            <div><dt>Status</dt><dd class="@caseStatusClass">@caseLabel</dd></div>
+                            <div><dt>@Msg("ApplicationProfileInstance.Workspace.TotalSla")</dt><dd>@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.DaysCount", sla.TotalSlaDays)</dd></div>
+                            <div><dt>@Msg("ApplicationProfileInstance.Workspace.Elapsed")</dt><dd>@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.DaysCount", sla.ElapsedDays)</dd></div>
+                            <div><dt>@Msg("ApplicationProfileInstance.Workspace.Status")</dt><dd class="@caseStatusClass">@caseLabel</dd></div>
                         </dl>
                     </div>
                 </article>
@@ -2009,23 +2000,23 @@
                             <span class="ct-sla-gauge__caption">@caption</span>
                         </div>
                         <dl class="ct-sla-stats">
-                            <div><dt>Status</dt><dd class="@stepStatusClass">@stepStatusText</dd></div>
+                            <div><dt>@Msg("ApplicationProfileInstance.Workspace.Status")</dt><dd class="@stepStatusClass">@stepStatusText</dd></div>
                         </dl>
                     </div>
                 </article>
                 <article class="ct-sla-metric">
-                    <h3>Profile SLA</h3>
-                    <p class="ct-sla-metric__hint">Configured on template</p>
+                    <h3>@Msg("ApplicationProfileInstance.Workspace.ProfileSla")</h3>
+                    <p class="ct-sla-metric__hint">@Msg("ApplicationProfileInstance.Workspace.ConfiguredOnTemplate")</p>
                     <div class="ct-sla-metric__body ct-sla-metric__body--stack">
-                        <p class="ct-sla-metric__big">@migrationDays <span>days</span></p>
-                        <p class="ct-muted">@(string.IsNullOrWhiteSpace(sla.ProfileSlaSource) ? "Profile template" : sla.ProfileSlaSource)</p>
+                        <p class="ct-sla-metric__big">@sla.TotalSlaDays <span>@Msg("ApplicationProfileInstance.Workspace.DaysUnit")</span></p>
+                        <p class="ct-muted">@slaSource</p>
                     </div>
                 </article>
             </div>
-            <div class="ct-sla-timeline" aria-label="Case timeline">
+            <div class="ct-sla-timeline" aria-label="@Msg("ApplicationProfileInstance.Workspace.CaseTimeline")">
                 <div class="ct-sla-timeline__node">
                     <span class="ct-sla-timeline__dot" aria-hidden="true"></span>
-                    <strong>Started</strong>
+                    <strong>@Msg("ApplicationProfileInstance.Workspace.StartedLabel")</strong>
                     <span>@started</span>
                 </div>
                 <div class="ct-sla-timeline__node">
@@ -2041,14 +2032,14 @@
             </div>
             <div class="ct-sla-lower">
                 <div class="ct-sla-table-wrap">
-                    <h3>SLA by step</h3>
+                    <h3>@Msg("ApplicationProfileInstance.Workspace.SlaByStep")</h3>
                     <table class="os-table">
-                        <thead><tr><th>Step</th><th>Due date</th><th>Days left</th><th>Status</th></tr></thead>
+                        <thead><tr><th>@Msg("ApplicationProfileInstance.Workspace.Step")</th><th>@Msg("ApplicationProfileInstance.Workspace.DueDate")</th><th>@Msg("ApplicationProfileInstance.Workspace.DaysLeftCol")</th><th>@Msg("ApplicationProfileInstance.Workspace.Status")</th></tr></thead>
                         <tbody>
                             @foreach (var row in sla.Deadlines)
                             {
                                 <tr class="@(row.IsCurrent ? "ct-sla-row--current" : null)">
-                                    <td>@if (row.IsCurrent) { <strong>@row.Step</strong> } else { @row.Step }</td>
+                                    <td>@if (row.IsCurrent) { <strong>@ApplicationProfileLocalization.ProgressStepLabel(row.Step)</strong> } else { @ApplicationProfileLocalization.ProgressStepLabel(row.Step) }</td>
                                     <td>@SlaDisplayDate(row.DueDate)</td>
                                     <td class="@(row.Status is "inprogress" or "overdue" ? (row.Status == "overdue" ? "ct-sla-days--due" : "ct-sla-days--ok") : null)">@SlaDisplayDate(row.DaysLeft)</td>
                                     <td><span class="os-status os-status--@SlaStatusClass(row.Status)">@SlaStatusLabel(row.Status)</span></td>
@@ -2058,19 +2049,19 @@
                     </table>
                 </div>
                 <div class="ct-sla-aside">
-                    @if (!string.IsNullOrWhiteSpace(sla.AlertMessage))
+                    @if (showAlert)
                     {
                         <div class="ct-sla-alert" role="status">
                             <div>
-                                <strong>Deadline approaching</strong>
-                                <p>@sla.AlertMessage</p>
+                                <strong>@Msg("ApplicationProfileInstance.Workspace.DeadlineApproaching")</strong>
+                                <p>@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.SlaAlert", stepTitle, stepRemaining, stepDue)</p>
                             </div>
                         </div>
                     }
                     <div class="ct-sla-source">
-                        <h4>SLA source</h4>
-                        <p>@(string.IsNullOrWhiteSpace(sla.ProfileSlaSource) ? "Profile template" : sla.ProfileSlaSource)</p>
-                        <p class="ct-muted">Migration SLA <strong>@sla.TotalSlaDays days</strong></p>
+                        <h4>@Msg("ApplicationProfileInstance.Workspace.SlaSource")</h4>
+                        <p>@slaSource</p>
+                        <p class="ct-muted">@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.MigrationSlaDays", sla.TotalSlaDays)</p>
                     </div>
                 </div>
             </div>
@@ -2083,39 +2074,33 @@
         {
             case "overview":
                 <section class="cw-rail-block">
-                    <h4>Readiness</h4>
+                    <h4>@Msg("ApplicationProfileInstance.Workspace.Readiness")</h4>
                     <ul class="cw-checklist">
                         @if (MissingSummaryFields.Count == 0)
                         {
-                            <li>✓ Required data complete</li>
+                            <li>✓ @Msg("ApplicationProfileInstance.Workspace.RequiredDataComplete")</li>
                         }
                         else
                         {
-                            <li class="is-incomplete">○ Required data complete@(SummaryGateReadinessSuffix)</li>
+                            <li class="is-incomplete">○ @Msg("ApplicationProfileInstance.Workspace.RequiredDataComplete")@SummaryGateReadinessSuffix</li>
                         }
-                        <li>✓ BO states valid</li>
+                        <li>✓ @Msg("ApplicationProfileInstance.Workspace.BoStatesValid")</li>
                     </ul>
                 </section>
                 <section class="cw-rail-block">
-                    <h4>Quick actions</h4>
-                    <button type="button" class="cw-rail-btn" @onclick='() => SelectTab("documents")'>📂 Open document copies</button>
-                    <button type="button" class="cw-rail-btn" @onclick='() => SelectTab("resminamalar")'>📦 Generate Resminamalar package</button>
-                    @if (view.IssuedRecordTiles.Count > 0)
-                    {
-                        <button type="button" class="cw-rail-btn" @onclick="IssueRecordQuickAction">＋ Issue record…</button>
-                    }
-                    <button type="button" class="cw-rail-btn cw-rail-btn--primary" @onclick="AdvanceProgressAsync">▶ Advance progress</button>
+                    <h4>@Msg("ApplicationProfileInstance.Workspace.QuickActions")</h4>
+                    <button type="button" class="cw-rail-btn cw-rail-btn--primary" @onclick="AdvanceProgressAsync">▶ @Msg("ApplicationProfileInstance.Workspace.AdvanceProgress")</button>
                     @if (CanRevertFromRail)
                     {
-                        <button type="button" class="cw-rail-btn" @onclick="RevertProgressAsync">◀ Revert progress</button>
+                        <button type="button" class="cw-rail-btn" @onclick="RevertProgressAsync">◀ @Msg("ApplicationProfileInstance.Workspace.RevertProgress")</button>
                     }
                 </section>
                 <section class="cw-rail-block">
-                    <h4>Activity</h4>
+                    <h4>@Msg("ApplicationProfileInstance.Workspace.Activity")</h4>
                     <ul class="cw-timeline">
                         @foreach (var item in view.Activities)
                         {
-                            <li><strong>@item.Title</strong><span>@item.Subtitle</span></li>
+                            <li><strong>@ApplicationProfileLocalization.ActivityTitle(item.Title)</strong><span>@ApplicationProfileLocalization.ActivitySubtitle(item.Subtitle)</span></li>
                         }
                     </ul>
                 </section>
@@ -2131,11 +2116,11 @@
                     </ul>
                 </section>
                 <section class="cw-rail-block">
-                    <h4>Linked records summary</h4>
+                    <h4>@Msg("ApplicationProfileInstance.Workspace.LinkedRecordsSummary")</h4>
                     <ul class="ct-summary-list">
                         @foreach (var pair in view.LinkedRecordsSummary.OrderBy(p => p.Key))
                         {
-                            <li><span>@pair.Key</span><strong>@pair.Value</strong></li>
+                            <li><span>@ApplicationProfileLocalization.LinkedRecordLabel(pair.Key)</span><strong>@pair.Value</strong></li>
                         }
                     </ul>
                 </section>
@@ -2146,10 +2131,10 @@
                 var railComplete = view.Sla.IsTerminal;
                 var ringPct = railComplete ? 100 : SlaRemainingPercent(daysLeft, Math.Max(daysLeft ?? 0, 14));
                 var railRingClass = railComplete ? "ct-sla-ring--ok ct-sla-ring--done" : SlaRingTone(daysLeft);
-                var railValue = railComplete ? "Done" : (daysLeft?.ToString() ?? "—");
-                var railCaption = railComplete ? "complete" : "days left";
+                var railValue = railComplete ? Msg("ApplicationProfileInstance.Workspace.Done") : (daysLeft?.ToString() ?? "—");
+                var railCaption = railComplete ? Msg("ApplicationProfileInstance.Workspace.Complete") : Msg("ApplicationProfileInstance.Workspace.DaysLeft");
                 <section class="cw-rail-block">
-                    <h4>SLA for current step</h4>
+                    <h4>@Msg("ApplicationProfileInstance.Workspace.SlaCurrentStep")</h4>
                     <div class="ct-sla-gauge">
                         <div class="ct-sla-ring @railRingClass" style="--ct-pct:@ringPct%" role="img" aria-label="@railCaption">
                             <strong>@railValue</strong>
@@ -2159,23 +2144,23 @@
                     @if (current != null)
                     {
                         <ul class="ct-summary-list" style="margin-top:10px">
-                            <li><span>Target date</span><strong>@(string.IsNullOrWhiteSpace(current.SlaTargetDate) ? "—" : current.SlaTargetDate)</strong></li>
+                            <li><span>@Msg("ApplicationProfileInstance.Workspace.TargetDate")</span><strong>@(string.IsNullOrWhiteSpace(current.SlaTargetDate) ? "—" : current.SlaTargetDate)</strong></li>
                         </ul>
                     }
                 </section>
                 <section class="cw-rail-block">
-                    <button type="button" class="os-btn os-btn--primary" style="width:100%;margin-bottom:8px" @onclick="AdvanceProgressAsync">▶ Advance progress</button>
+                    <button type="button" class="os-btn os-btn--primary" style="width:100%;margin-bottom:8px" @onclick="AdvanceProgressAsync">▶ @Msg("ApplicationProfileInstance.Workspace.AdvanceProgress")</button>
                     @if (CanRevertFromRail)
                     {
-                        <button type="button" class="os-btn os-btn--ghost" style="width:100%;margin-bottom:8px" @onclick="RevertProgressAsync">◀ Revert progress</button>
+                        <button type="button" class="os-btn os-btn--ghost" style="width:100%;margin-bottom:8px" @onclick="RevertProgressAsync">◀ @Msg("ApplicationProfileInstance.Workspace.RevertProgress")</button>
                     }
                 </section>
                 <section class="cw-rail-block">
-                    <h4>History</h4>
+                    <h4>@Msg("ApplicationProfileInstance.Workspace.History")</h4>
                     <ul class="cw-timeline">
                         @foreach (var row in Snapshot!.ProgressHistory)
                         {
-                            <li><strong>@row.State</strong><span>@row.Date</span></li>
+                            <li><strong>@ApplicationProfileLocalization.ProgressStepLabel(row.State)</strong><span>@row.Date</span></li>
                         }
                     </ul>
                 </section>
@@ -2195,10 +2180,10 @@
 
     private static string SlaStatusLabel(string status) => status switch
     {
-        "completed" => "Completed",
-        "inprogress" => "In progress",
-        "overdue" => "Overdue",
-        _ => "Pending",
+        "completed" => VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Completed"),
+        "inprogress" => VisaUiMessages.Get("ApplicationProfileInstance.Workspace.InProgress"),
+        "overdue" => VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Overdue"),
+        _ => VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Pending"),
     };
 
     private static int SlaRemainingPercent(int? remaining, int total)
@@ -2231,10 +2216,10 @@
     private static string SlaToneLabel(int? daysRemaining) => daysRemaining switch
     {
         null => "—",
-        <= 0 => "Due",
-        1 => "Due tomorrow",
-        <= 10 => "Due soon",
-        _ => "On track",
+        <= 0 => VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Due"),
+        1 => VisaUiMessages.Get("ApplicationProfileInstance.Workspace.DueTomorrow"),
+        <= 10 => VisaUiMessages.Get("ApplicationProfileInstance.Workspace.DueSoon"),
+        _ => VisaUiMessages.Get("ApplicationProfileInstance.Workspace.OnTrack"),
     };
 
     private async Task SelectTab(string key)
@@ -2470,4 +2455,6 @@
         var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         return string.Concat(parts.Take(2).Select(p => char.ToUpperInvariant(p[0])));
     }
+
+    private static string Msg(string key) => VisaUiMessages.Get(key);
 }

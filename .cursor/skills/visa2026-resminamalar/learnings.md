@@ -1,4 +1,22 @@
 
+### 2026-09-19 — Turkmen This profile tab is Şu Ýüztutma degişli
+
+- **Need**: Resminamalar catalog tab **This profile** in Türkmençe must be **Şu Ýüztutma degişli**, not Bu profil.
+- **Cause**: `ThisProfileTab` reused “Bu profil ({0})”.
+- **Fix**: tk-TM → `Şu Ýüztutma degişli ({0})` (count kept).
+- **Try**: Stop F5, rebuild, hard-refresh, Türkmençe. Left catalog tab reads Şu Ýüztutma degişli (N).
+- **Prevent**: Do not use Bu profil for this instance catalog tab.
+- **Cross-skill**: visa2026-application-profile
+
+### 2026-09-19 — Turkmen Preview is Görmek
+
+- **Need**: Resminamalar Preview button in Türkmençe must be **Görmek**.
+- **Cause**: `ApplicationReportPackage.Preview` tk-TM was Öňünden görmek.
+- **Fix**: That key (and Document copies Preview) → **Görmek**.
+- **Try**: Stop F5, rebuild, hard-refresh, Türkmençe. Catalog Preview reads Görmek.
+- **Prevent**: Do not use Öňünden görmek for Preview.
+- **Cross-skill**: visa2026-application-profile
+
 ### 2026-09-18 — Catalog Sort + package-select mode (Application)
 
 - **Symptom**: Officers confused ZIP checkboxes with Preview; wanted Sort by name/date.

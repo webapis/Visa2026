@@ -1,9 +1,34 @@
 {
   "paths": {
     "Configuration": {
+      "en-US": "Configuration",
       "tr-TR": "Yapılandırma",
       "tk-TM": "Konfigurasiýa",
       "ru-RU": "Конфигурация"
+    },
+    "Configuration/ApplicationProfileCatalog": {
+      "en-US": "Application Profile Templates",
+      "tr-TR": "Başvuru profili şablonları",
+      "tk-TM": "Ýüztutma profil şablonlary",
+      "ru-RU": "Шаблоны профиля заявки"
+    },
+    "Application": {
+      "en-US": "Application Profile Instances",
+      "tr-TR": "Başvuru profili örnekleri",
+      "tk-TM": "Ýüztutmalar",
+      "ru-RU": "Экземпляры профиля заявки"
+    },
+    "Application/Application_ViaMinistries": {
+      "en-US": "Application Profile Instances (via ministry)",
+      "tr-TR": "Başvuru profili örnekleri (bakanlık süreci)",
+      "tk-TM": "Ýüztutmalar (ministrlik arkaly)",
+      "ru-RU": "Экземпляры профиля заявки (через министерства)"
+    },
+    "Application/Application_DirectMigration": {
+      "en-US": "Application Profile Instances (direct migration)",
+      "tr-TR": "Başvuru profili örnekleri (doğrudan migrasyon)",
+      "tk-TM": "Ýüztutmalar (migrasiýa gönümel)",
+      "ru-RU": "Экземпляры профиля заявки (напрямую в миграцию)"
     },
     "Lookup/Application": {
       "tr-TR": "Başvuru",

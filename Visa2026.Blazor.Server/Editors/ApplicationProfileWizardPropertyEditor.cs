@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using DevExpress.Persistent.Base;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Localization;
 using Visa2026.Module.BusinessObjects.ApplicationProfileWizard;
 using Visa2026.Module.Editors;
 using Visa2026.Module.Services.ApplicationProfileCatalog;
@@ -91,7 +92,7 @@ public class ApplicationProfileWizardPropertyEditor : BlazorPropertyEditorBase, 
         var profile = model.Profile ?? _session.GetProfile();
         if (profile == null)
         {
-            model.StatusMessage = "Application Profile not found.";
+            model.StatusMessage = VisaUiMessages.Get("ApplicationProfile.Wizard.NotFound");
             model.IsStatusError = true;
             return Task.CompletedTask;
         }
@@ -100,7 +101,7 @@ public class ApplicationProfileWizardPropertyEditor : BlazorPropertyEditorBase, 
         {
             ApplicationProfileWizardPersistHelper.Save(_session.ObjectSpace, profile);
             model.Profile = _session.GetProfile() ?? profile;
-            model.StatusMessage = "Profile saved.";
+            model.StatusMessage = VisaUiMessages.Get("ApplicationProfile.Wizard.Saved");
             model.IsStatusError = false;
             model.IsReadOnly = ApplicationProfileLockHelper.IsProfileConfigLocked(profile, _session.ObjectSpace);
         }

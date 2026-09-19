@@ -7,6 +7,7 @@
 @using Visa2026.Blazor.Server.Services
 @using Visa2026.Module.BusinessObjects
 @using Visa2026.Module.Editors
+@using Visa2026.Module.Localization
 @using Visa2026.Module.Services
 @using Visa2026.Module.Services.ApplicationWorkspace
 @using Visa2026.Module.Services.PreviewSlot
@@ -14,7 +15,7 @@
 <div class="resminamalar-slot-panel issue-issued-header-slot-panel">
     <div class="resminamalar-slot-panel__header visa-preview-drawer__header">
         <div class="visa-preview-drawer__title-block">
-            <span class="visa-preview-drawer__title">@(_draft?.Title ?? "Issued record")</span>
+            <span class="visa-preview-drawer__title">@ApplicationProfileLocalization.IssuedComposeTitle(_draft?.Title ?? "Issued record")</span>
             @if (!string.IsNullOrWhiteSpace(_draft?.ApplicationCaption))
             {
                 <span class="visa-preview-drawer__subtitle">@_draft!.ApplicationCaption</span>
@@ -23,7 +24,7 @@
         <div class="visa-preview-drawer__header-actions">
             <button class="visa-preview-drawer__btn visa-preview-drawer__btn--close"
                     type="button"
-                    title="Close"
+                    title="@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Workspace.Close")"
                     @onclick="ClosePanelAsync">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                     <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
@@ -40,7 +41,7 @@
             }
             else if (_draft == null)
             {
-                <p class="issue-issued-header-slot__muted">Loading…</p>
+                <p class="issue-issued-header-slot__muted">@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Loading")</p>
             }
             else if (_result?.Succeeded == true && !_showFormAfterSave)
             {
@@ -66,8 +67,8 @@
                     <table class="issue-issued-header-slot__table">
                         <thead>
                             <tr>
-                                <th>Person</th>
-                                <th>Passport</th>
+                                <th>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Person")</th>
+                                <th>@ApplicationProfileLocalization.Msg("ApplicationProfile.Person.Passport")</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -106,7 +107,7 @@
                 @if (_draft.Kind == IssueIssuedHeaderKind.WorkPermit && !_draft.IsEditMode)
                 {
                     <p class="issue-issued-visa-slot__banner issue-issued-visa-slot__banner--info">
-                        One work permit letter for this case. Employees only. Linked work-permit items are not a source.
+                        @ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.WpBanner")
                     </p>
                 }
                 @if (UseFieldCues)
@@ -114,7 +115,7 @@
                     <IssueComposeFieldCueLegend />
                 }
                 <section class="issue-issued-header-slot__section">
-                    <h3 class="issue-issued-header-slot__section-title">Header</h3>
+                    <h3 class="issue-issued-header-slot__section-title">@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Header")</h3>
                     <div class="issue-issued-header-slot__grid">
                         <label class="issue-issued-header-slot__field @(HeaderCueClass("header:number", true, IssueComposeFieldCue.HasText(_draft.HeaderNumber)))">
                             <span>@NumberLabel</span>
@@ -130,12 +131,12 @@
                         @if (_draft.Kind == IssueIssuedHeaderKind.Invitation)
                         {
                             <label class="issue-issued-header-slot__field @(HeaderCueClass("header:expiration", true, IssueComposeFieldCue.HasDate(_expirationDate)))">
-                                <span>Expiration</span>
+                                <span>@ApplicationProfileLocalization.Msg("ApplicationProfile.Field.EndDate")</span>
                                 <OfficerDateEdit @bind-Date="_expirationDate"
                                                  @bind-Date:after='() => ReviewField("header:expiration")' />
                             </label>
                             <label class="issue-issued-header-slot__field @(HeaderCueClass("header:category", true, IssueComposeFieldCue.HasText(_visaCategoryIdText)))">
-                                <span>Visa category</span>
+                                <span>@ApplicationProfileLocalization.Field("VisaCategory")</span>
                                 <select class="issue-issued-header-slot__input"
                                         @bind="_visaCategoryIdText"
                                         @bind:after='() => ReviewField("header:category")'
@@ -148,7 +149,7 @@
                                 </select>
                             </label>
                             <label class="issue-issued-header-slot__field @(HeaderCueClass("header:period", true, IssueComposeFieldCue.HasText(_visaPeriodIdText)))">
-                                <span>Visa period</span>
+                                <span>@ApplicationProfileLocalization.Field("VisaPeriod")</span>
                                 <select class="issue-issued-header-slot__input"
                                         @bind="_visaPeriodIdText"
                                         @bind:after='() => ReviewField("header:period")'
@@ -161,7 +162,7 @@
                                 </select>
                             </label>
                             <div class="issue-issued-header-slot__field issue-issued-header-slot__field--wide @(HeaderCueClass("header:borderZone", true, IssueComposeFieldCue.HasText(_draft.BorderZoneLocation)))">
-                                <span>Border zone</span>
+                                <span>@ApplicationProfileLocalization.Field("BorderZone")</span>
                                 <BorderZoneLocationField Value="@_draft.BorderZoneLocation"
                                                          ValueChanged="OnInvitationBorderZoneChanged" />
                             </div>
@@ -186,7 +187,7 @@
                         @if (_draft.Kind == IssueIssuedHeaderKind.Rejection)
                         {
                             <label class="issue-issued-header-slot__field issue-issued-header-slot__field--wide @(HeaderCueClass("header:reason", true, IssueComposeFieldCue.HasText(_draft.Reason)))">
-                                <span>Reason</span>
+                                <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Reason")</span>
                                 <textarea class="issue-issued-header-slot__input issue-issued-header-slot__textarea"
                                           @bind="_draft.Reason"
                                           @onfocusout='() => ReviewField("header:reason")'
@@ -223,7 +224,7 @@
                 {
                     <section class="issue-issued-header-slot__section">
                         <div class="issue-issued-header-slot__section-head">
-                            <h3 class="issue-issued-header-slot__section-title">People on this invitation</h3>
+                            <h3 class="issue-issued-header-slot__section-title">@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.PeopleInvitation")</h3>
                             <span class="issue-issued-header-slot__muted">@AssignedPeople.Count on invitation</span>
                         </div>
                         <p class="issue-issued-header-slot__muted">
@@ -238,8 +239,8 @@
                             <table class="issue-issued-header-slot__table" @key="@($"{_boundOccupantKey}:assigned")">
                                 <thead>
                                     <tr>
-                                        <th>Person</th>
-                                        <th>Passport</th>
+                                        <th>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Person")</th>
+                                        <th>@ApplicationProfileLocalization.Msg("ApplicationProfile.Person.Passport")</th>
                                         <th></th>
                                     </tr>
                                 </thead>
@@ -282,8 +283,8 @@
                             <table class="issue-issued-header-slot__table" @key="@($"{_boundOccupantKey}:available")">
                                 <thead>
                                     <tr>
-                                        <th>Person</th>
-                                        <th>Passport</th>
+                                        <th>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Person")</th>
+                                        <th>@ApplicationProfileLocalization.Msg("ApplicationProfile.Person.Passport")</th>
                                         <th></th>
                                     </tr>
                                 </thead>
@@ -300,7 +301,7 @@
                                                     <button type="button"
                                                             class="issue-issued-header-slot__link-btn"
                                                             @onclick="() => SetInclude(person, true)">
-                                                        Add
+                                                        @ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.AddPerson")
                                                     </button>
                                                 }
                                             </td>
@@ -315,16 +316,16 @@
                 {
                     <section class="issue-issued-header-slot__section">
                         <div class="issue-issued-header-slot__section-head">
-                            <h3 class="issue-issued-header-slot__section-title">People on this work permit</h3>
-                            <span class="issue-issued-header-slot__muted">@SelectedReadyCount ready of @SelectedCount selected</span>
+                            <h3 class="issue-issued-header-slot__section-title">@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.PeopleWorkPermit")</h3>
+                            <span class="issue-issued-header-slot__muted">@ApplicationProfileLocalization.Format("ApplicationProfileInstance.Issued.ReadyOf", SelectedReadyCount, SelectedCount)</span>
                         </div>
                         <div class="issue-issued-header-slot__people-actions">
-                            <button type="button" class="issue-issued-header-slot__link-btn" @onclick="SelectAllReady">Select all ready</button>
-                            <button type="button" class="issue-issued-header-slot__link-btn" @onclick="SelectNone">Select none</button>
+                            <button type="button" class="issue-issued-header-slot__link-btn" @onclick="SelectAllReady">@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.SelectAllReady")</button>
+                            <button type="button" class="issue-issued-header-slot__link-btn" @onclick="SelectNone">@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.SelectNone")</button>
                         </div>
                         @if (_draft.People.Count == 0)
                         {
-                            <p class="issue-issued-header-slot__muted">No employees on this case.</p>
+                            <p class="issue-issued-header-slot__muted">@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.NoEmployees")</p>
                         }
                         else
                         {
@@ -343,31 +344,31 @@
                                         <span class="issue-issued-visa-slot__person">@person.PersonName</span>
                                         @if (!person.IsReady)
                                         {
-                                            <span class="issue-issued-header-slot__status issue-issued-header-slot__status--warn">@person.StatusCaption</span>
+                                            <span class="issue-issued-header-slot__status issue-issued-header-slot__status--warn">@ApplicationProfileLocalization.IssuedStatus(person.StatusCaption)</span>
                                         }
                                         else if (person.Include && !_draft.IsEditMode && !person.IncludeLocked)
                                         {
-                                            <button type="button" class="issue-issued-header-slot__link-btn" @onclick="() => SetInclude(person, false)">Remove</button>
+                                            <button type="button" class="issue-issued-header-slot__link-btn" @onclick="() => SetInclude(person, false)">@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Remove")</button>
                                         }
                                     </div>
                                     @if (person.Include)
                                     {
                                         <div class="issue-issued-header-slot__grid">
                                             <label class="issue-issued-header-slot__field @(WpCueClass(person, "itemNumber", true, IssueComposeFieldCue.HasText(person.ItemNumber)))">
-                                                <span>Item work-permit number *</span>
+                                                <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.ItemWorkPermitNumber")</span>
                                                 <input class="issue-issued-header-slot__input"
                                                        @bind="person.ItemNumber"
                                                        @onfocusout='() => ReviewWpField(person, "itemNumber")' />
                                             </label>
                                             <label class="issue-issued-header-slot__field @(WpCueClass(person, "asNumber", true, IssueComposeFieldCue.HasText(person.ASNumber)))">
-                                                <span>@(person.AsNumberReadOnly ? "Process number *" : "AS number *")</span>
+                                                <span>@(person.AsNumberReadOnly ? ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.ProcessNumberRequired") : ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.ASNumber"))</span>
                                                 <input class="issue-issued-header-slot__input"
                                                        @bind="person.ASNumber"
                                                        disabled="@person.AsNumberReadOnly"
                                                        @onfocusout='() => ReviewWpField(person, "asNumber")' />
                                             </label>
                                             <label class="issue-issued-header-slot__field @(WpCueClass(person, "position", true, IssueComposeFieldCue.HasId(person.PositionId)))">
-                                                <span>Position *</span>
+                                                <span>@ApplicationProfileLocalization.Msg("ApplicationProfile.Person.Position") *</span>
                                                 <select class="issue-issued-header-slot__input"
                                                         value="@GuidText(person.PositionId)"
                                                         @onchange='e => SetWpGuidAndReview(person, v => person.PositionId = v, e.Value, "position")'
@@ -380,21 +381,21 @@
                                                 </select>
                                             </label>
                                             <label class="issue-issued-header-slot__field @(WpCueClass(person, "passport", false, IssueComposeFieldCue.HasText(person.PassportNumber), true))">
-                                                <span>Passport number</span>
+                                                <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Org.PassportNumber")</span>
                                                 <input class="issue-issued-header-slot__input" value="@person.PassportNumber" disabled />
                                             </label>
                                             <label class="issue-issued-header-slot__field @(WpCueClass(person, "start", true, IssueComposeFieldCue.HasDate(person.ItemStartDate)))">
-                                                <span>Start *</span>
+                                                <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Start")</span>
                                                 <OfficerDateEdit @bind-Date="person.ItemStartDate"
                                                                  @bind-Date:after='() => ReviewWpField(person, "start")' />
                                             </label>
                                             <label class="issue-issued-header-slot__field @(WpCueClass(person, "end", true, IssueComposeFieldCue.HasDate(person.ItemExpirationDate)))">
-                                                <span>End *</span>
+                                                <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.End")</span>
                                                 <OfficerDateEdit @bind-Date="person.ItemExpirationDate"
                                                                  @bind-Date:after='() => ReviewWpField(person, "end")' />
                                             </label>
                                             <div class="issue-issued-header-slot__field issue-issued-header-slot__field--wide @(WpCueClass(person, "locations", true, IssueComposeFieldCue.HasText(person.WorkPermittedLocations)))">
-                                                <span>Work permitted locations *</span>
+                                                <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.WorkPermittedLocations")</span>
                                                 <BorderZoneLocationField EditorAlias="@CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation"
                                                                          Value="@person.WorkPermittedLocations"
                                                                          ValueChanged="@(value => OnWorkPermitLocationsChanged(person, value))" />
@@ -415,15 +416,15 @@
                 <section class="issue-issued-header-slot__section">
                     <div class="issue-issued-header-slot__section-head">
                         <h3 class="issue-issued-header-slot__section-title">@PeopleOnRecordTitle</h3>
-                        <span class="issue-issued-header-slot__muted">@SelectedReadyCount ready of @SelectedCount selected</span>
+                        <span class="issue-issued-header-slot__muted">@ApplicationProfileLocalization.Format("ApplicationProfileInstance.Issued.ReadyOf", SelectedReadyCount, SelectedCount)</span>
                     </div>
                     <div class="issue-issued-header-slot__people-actions">
-                        <button type="button" class="issue-issued-header-slot__link-btn" @onclick="SelectAllReady">Select all ready</button>
-                        <button type="button" class="issue-issued-header-slot__link-btn" @onclick="SelectNone">Select none</button>
+                        <button type="button" class="issue-issued-header-slot__link-btn" @onclick="SelectAllReady">@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.SelectAllReady")</button>
+                        <button type="button" class="issue-issued-header-slot__link-btn" @onclick="SelectNone">@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.SelectNone")</button>
                     </div>
                     @if (_draft.People.Count == 0)
                     {
-                        <p class="issue-issued-header-slot__muted">No people on this application roster.</p>
+                        <p class="issue-issued-header-slot__muted">@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.NoPeopleRoster")</p>
                     }
                     else
                     {
@@ -431,9 +432,9 @@
                             <thead>
                                 <tr>
                                     <th class="issue-issued-header-slot__check-col"></th>
-                                    <th>Person</th>
-                                    <th>Passport</th>
-                                    <th>Status</th>
+                                    <th>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Person")</th>
+                                    <th>@ApplicationProfileLocalization.Msg("ApplicationProfile.Person.Passport")</th>
+                                    <th>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Status")</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -455,7 +456,7 @@
                                         <td>@(string.IsNullOrWhiteSpace(person.PassportNumber) ? "—" : person.PassportNumber)</td>
                                         <td>
                                             <span class="issue-issued-header-slot__status @PersonStatusCss(person)">
-                                                @person.StatusCaption
+                                                @ApplicationProfileLocalization.IssuedStatus(person.StatusCaption)
                                             </span>
                                         </td>
                                     </tr>
@@ -472,18 +473,18 @@
                         <span class="issue-issued-header-slot__muted">@CopyFileCountLabel</span>
                     </div>
                     <p class="issue-issued-header-slot__muted">
-                        PDF or scan of this @(CopyNoun). Allowed: PDF, PNG, JPEG, TIFF, GIF, BMP — up to @MaxCopyUploadMb MB.
+                        @ApplicationProfileLocalization.Format("ApplicationProfileInstance.Issued.CopyHint", CopyNoun, MaxCopyUploadMb)
                     </p>
                     @if (_draft.Documents.Count == 0 && string.IsNullOrWhiteSpace(_pendingCopyName))
                     {
-                        <p class="issue-issued-header-slot__muted">No copy attached yet.</p>
+                        <p class="issue-issued-header-slot__muted">@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Workspace.NoCopy")</p>
                     }
                     else
                     {
                         <table class="issue-issued-header-slot__table">
                             <thead>
                                 <tr>
-                                    <th>File</th>
+                                    <th>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.File")</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -497,7 +498,7 @@
                                                     class="issue-issued-header-slot__link-btn"
                                                     disabled="@_busy"
                                                     @onclick="() => RemoveCopyAsync(doc.DocumentId)">
-                                                Remove
+                                                @ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Remove")
                                             </button>
                                         </td>
                                     </tr>
@@ -505,13 +506,13 @@
                                 @if (!string.IsNullOrWhiteSpace(_pendingCopyName))
                                 {
                                     <tr>
-                                        <td>@_pendingCopyName (attaches on Create)</td>
+                                        <td>@ApplicationProfileLocalization.Format("ApplicationProfileInstance.Issued.AttachesOnCreate", _pendingCopyName)</td>
                                         <td>
                                             <button type="button"
                                                     class="issue-issued-header-slot__link-btn"
                                                     disabled="@_busy"
                                                     @onclick="ClearPendingCopy">
-                                                Remove
+                                                @ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Remove")
                                             </button>
                                         </td>
                                     </tr>
@@ -523,7 +524,7 @@
                         <InputFile OnChange="OnCopyFileSelectedAsync"
                                    accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp"
                                    disabled="@_busy" />
-                        <span>Upload copy</span>
+                        <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.UploadCopy")</span>
                     </label>
                 </section>
 
@@ -543,17 +544,17 @@
                                 class="issue-issued-header-slot__btn issue-issued-header-slot__btn--danger"
                                 disabled="@_busy"
                                 @onclick="DeleteAsync">
-                            Delete
+                            @ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Workspace.Delete")
                         </button>
                     }
                     <button type="button"
                             class="issue-issued-header-slot__btn issue-issued-header-slot__btn--primary"
                             disabled="@(_busy || !CanPersist)"
                             @onclick="SaveAsync">
-                        @(_busy ? "Saving…" : (_draft.IsEditMode ? "Save" : "Create"))
+                        @(_busy ? ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Saving") : (_draft.IsEditMode ? ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Save") : ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Create")))
                     </button>
                     <button type="button" class="issue-issued-header-slot__btn" disabled="@_busy" @onclick="ClosePanelAsync">
-                        @(_draft.IsEditMode ? "Close" : "Cancel")
+                        @(_draft.IsEditMode ? ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Workspace.Close") : ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Cancel"))
                     </button>
                 </div>
             }
@@ -604,47 +605,49 @@
 
     private string NumberLabel => _draft?.Kind switch
     {
-        IssueIssuedHeaderKind.Invitation => "Invitation number",
-        IssueIssuedHeaderKind.WorkPermit => "Work permit number",
-        IssueIssuedHeaderKind.Rejection => "Rejected document number",
-        IssueIssuedHeaderKind.BorderZone => "Border zone number",
-        _ => "Number",
+        IssueIssuedHeaderKind.Invitation => ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.InvitationNumber"),
+        IssueIssuedHeaderKind.WorkPermit => ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.WorkPermitNumber"),
+        IssueIssuedHeaderKind.Rejection => ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.RejectedDocumentNumber"),
+        IssueIssuedHeaderKind.BorderZone => ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.BorderZoneNumber"),
+        _ => ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Number"),
     };
 
     private string PrimaryDateLabel => _draft?.Kind switch
     {
-        IssueIssuedHeaderKind.Rejection => "Date",
-        IssueIssuedHeaderKind.BorderZone => "Start date",
-        _ => "Issued date",
+        IssueIssuedHeaderKind.Rejection => ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Workspace.Date"),
+        IssueIssuedHeaderKind.BorderZone => ApplicationProfileLocalization.Field("StartDate"),
+        _ => ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.IssuedDate"),
     };
 
     private int SelectedCount => _draft?.People.Count(p => p.Include) ?? 0;
     private int SelectedReadyCount => _draft?.People.Count(p => p.Include && p.IsReady) ?? 0;
 
-    private string CopySectionTitle => _draft?.Kind switch
-    {
-        IssueIssuedHeaderKind.Invitation => "Invitation copy",
-        IssueIssuedHeaderKind.WorkPermit => "Work permit copy",
-        IssueIssuedHeaderKind.Rejection => "Rejection copy",
-        IssueIssuedHeaderKind.BorderZone => "Border zone copy",
-        _ => "Document copy",
-    };
+    private string CopySectionTitle => ApplicationProfileLocalization.Format(
+        "ApplicationProfileInstance.Issued.Copy",
+        _draft?.Kind switch
+        {
+            IssueIssuedHeaderKind.Invitation => ApplicationProfileLocalization.Msg("ApplicationProfile.Doc.Invitation"),
+            IssueIssuedHeaderKind.WorkPermit => ApplicationProfileLocalization.Msg("ApplicationProfile.Doc.WorkPermit"),
+            IssueIssuedHeaderKind.Rejection => ApplicationProfileLocalization.Msg("ApplicationProfile.Doc.Rejection"),
+            IssueIssuedHeaderKind.BorderZone => ApplicationProfileLocalization.Msg("ApplicationProfile.Doc.BorderZone"),
+            _ => ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Record"),
+        });
 
     private string CopyNoun => _draft?.Kind switch
     {
-        IssueIssuedHeaderKind.Invitation => "invitation",
-        IssueIssuedHeaderKind.WorkPermit => "work permit",
-        IssueIssuedHeaderKind.Rejection => "rejection",
-        IssueIssuedHeaderKind.BorderZone => "border zone",
-        _ => "document",
+        IssueIssuedHeaderKind.Invitation => ApplicationProfileLocalization.Msg("ApplicationProfile.Doc.Invitation"),
+        IssueIssuedHeaderKind.WorkPermit => ApplicationProfileLocalization.Msg("ApplicationProfile.Doc.WorkPermit"),
+        IssueIssuedHeaderKind.Rejection => ApplicationProfileLocalization.Msg("ApplicationProfile.Doc.Rejection"),
+        IssueIssuedHeaderKind.BorderZone => ApplicationProfileLocalization.Msg("ApplicationProfile.Doc.BorderZone"),
+        _ => ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Record"),
     };
 
     private string PeopleOnRecordTitle => _draft?.Kind switch
     {
-        IssueIssuedHeaderKind.WorkPermit => "People on this work permit",
-        IssueIssuedHeaderKind.Rejection => "People on this rejection",
-        IssueIssuedHeaderKind.BorderZone => "People on this border zone",
-        _ => "People on this record",
+        IssueIssuedHeaderKind.WorkPermit => ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.PeopleWorkPermit"),
+        IssueIssuedHeaderKind.Rejection => ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.PeopleRejection"),
+        IssueIssuedHeaderKind.BorderZone => ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.PeopleBorderZone"),
+        _ => ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.PeopleOnCase"),
     };
 
     private string CopyFileCountLabel
@@ -652,7 +655,9 @@
         get
         {
             var count = (_draft?.Documents.Count ?? 0) + (string.IsNullOrWhiteSpace(_pendingCopyName) ? 0 : 1);
-            return count == 0 ? "None" : $"{count} file{(count == 1 ? "" : "s")}";
+            return count == 0
+                ? ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.None")
+                : ApplicationProfileLocalization.Format("ApplicationProfileInstance.Issued.FileCount", count);
         }
     }
 

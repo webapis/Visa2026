@@ -2,31 +2,32 @@
 @using DevExpress.ExpressApp
 @using Visa2026.Module.BusinessObjects
 @using Visa2026.Module.Editors
+@using Visa2026.Module.Localization
 @using Visa2026.Module.Services
 @using Visa2026.Module.Services.ApplicationProfileWizard
 
 <div class="ap-wizard__panel-head">
-    <h2>Results &amp; fields</h2>
-    <p>Which ApplicationProfileInstance header fields are required.</p>
+    <h2>@Msg("ApplicationProfile.Wizard.Step.Results")</h2>
+    <p>@Msg("ApplicationProfile.Wizard.ResultsIntro")</p>
 </div>
 <div class="ap-wizard__panel-body">
     <div class="ap-wizard__section">
-        <h3>ApplicationProfileInstance properties required</h3>
-        <p class="ap-wizard__hint">Use makes the property visible on ApplicationProfileInstance. Defaults apply at create only when Use is on.</p>
+        <h3>@Msg("ApplicationProfile.Wizard.RequiredProps")</h3>
+        <p class="ap-wizard__hint">@Msg("ApplicationProfile.Wizard.UseHint")</p>
         <table class="ap-wizard__table">
             <thead>
                 <tr>
-                    <th>Use</th>
-                    <th>Property</th>
-                    <th>Kind</th>
-                    <th>Has default</th>
-                    <th>Default value</th>
+                    <th>@Msg("ApplicationProfile.Wizard.ColUse")</th>
+                    <th>@Msg("ApplicationProfile.Wizard.ColProperty")</th>
+                    <th>@Msg("ApplicationProfile.Wizard.ColKind")</th>
+                    <th>@Msg("ApplicationProfile.Wizard.ColHasDefault")</th>
+                    <th>@Msg("ApplicationProfile.Wizard.ColDefaultValue")</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
                     <td><input type="checkbox" @bind="Profile.RequireVisaType" disabled="@Disabled" /></td>
-                    <td>Visa type</td><td><span class="ap-wizard__tag">lookup</span></td>
+                    <td>@Field("VisaType")</td><td><span class="ap-wizard__tag">@Msg("ApplicationProfile.Wizard.KindLookup")</span></td>
                     <td><input type="checkbox" checked="@HasVisaTypeDefault" disabled="@(Disabled || !Profile.RequireVisaType)" @onchange="ToggleVisaTypeDefault" /></td>
                     <td>
                         <select disabled="@(Disabled || !Profile.RequireVisaType)" value="@FormatGuid(Profile.DefaultVisaTypeId)" @onchange="OnVisaTypeChanged">
@@ -37,7 +38,7 @@
                 </tr>
                 <tr>
                     <td><input type="checkbox" @bind="Profile.RequireVisaCategory" disabled="@Disabled" /></td>
-                    <td>Visa category</td><td><span class="ap-wizard__tag">lookup</span></td>
+                    <td>@Field("VisaCategory")</td><td><span class="ap-wizard__tag">@Msg("ApplicationProfile.Wizard.KindLookup")</span></td>
                     <td><input type="checkbox" checked="@HasVisaCategoryDefault" disabled="@(Disabled || !Profile.RequireVisaCategory)" @onchange="ToggleVisaCategoryDefault" /></td>
                     <td>
                         <select disabled="@(Disabled || !Profile.RequireVisaCategory)" value="@FormatGuid(Profile.DefaultVisaCategoryId)" @onchange="OnVisaCategoryChanged">
@@ -48,7 +49,7 @@
                 </tr>
                 <tr>
                     <td><input type="checkbox" @bind="Profile.RequireVisaPeriod" disabled="@Disabled" /></td>
-                    <td>Visa period</td><td><span class="ap-wizard__tag">lookup</span></td>
+                    <td>@Field("VisaPeriod")</td><td><span class="ap-wizard__tag">@Msg("ApplicationProfile.Wizard.KindLookup")</span></td>
                     <td><input type="checkbox" checked="@HasVisaPeriodDefault" disabled="@(Disabled || !Profile.RequireVisaPeriod)" @onchange="ToggleVisaPeriodDefault" /></td>
                     <td>
                         <select disabled="@(Disabled || !Profile.RequireVisaPeriod)" value="@FormatGuid(Profile.DefaultVisaPeriodId)" @onchange="OnVisaPeriodChanged">
@@ -59,7 +60,7 @@
                 </tr>
                 <tr>
                     <td><input type="checkbox" @bind="Profile.RequireBorderZone" disabled="@(Disabled || Profile.ProduceInvitation || Profile.ProduceVisa)" /></td>
-                    <td>Border zone</td><td><span class="ap-wizard__tag">multi-select</span></td>
+                    <td>@Field("BorderZone")</td><td><span class="ap-wizard__tag">@Msg("ApplicationProfile.Wizard.KindMulti")</span></td>
                     <td><input type="checkbox" checked="@HasBorderZoneDefault" disabled="@(Disabled || !Profile.RequireBorderZone)" @onchange="ToggleBorderZoneDefault" /></td>
                     <td>
                         <BorderZoneLocationField Value="@Profile.DefaultBorderZoneLocation"
@@ -70,7 +71,7 @@
                 </tr>
                 <tr>
                     <td><input type="checkbox" @bind="Profile.RequireMigrationService" disabled="@Disabled" /></td>
-                    <td>Migration service</td><td><span class="ap-wizard__tag">lookup</span></td>
+                    <td>@Field("MigrationService")</td><td><span class="ap-wizard__tag">@Msg("ApplicationProfile.Wizard.KindLookup")</span></td>
                     <td><input type="checkbox" checked="@HasMigrationServiceDefault" disabled="@(Disabled || !Profile.RequireMigrationService)" @onchange="ToggleMigrationServiceDefault" /></td>
                     <td>
                         <select disabled="@(Disabled || !Profile.RequireMigrationService)" value="@FormatGuid(Profile.DefaultMigrationServiceId)" @onchange="OnMigrationServiceChanged">
@@ -81,19 +82,19 @@
                 </tr>
                 <tr>
                     <td><input type="checkbox" @bind="Profile.RequireStartDate" disabled="@Disabled" /></td>
-                    <td>Start date</td><td><span class="ap-wizard__tag">date</span></td>
+                    <td>@Field("StartDate")</td><td><span class="ap-wizard__tag">@Msg("ApplicationProfile.Wizard.KindDate")</span></td>
                     <td>—</td><td>—</td>
                 </tr>
                 <tr>
                     <td><input type="checkbox" @bind="Profile.RequireEndDate" disabled="@Disabled" /></td>
-                    <td>End date</td><td><span class="ap-wizard__tag">date</span></td>
+                    <td>@Field("EndDate")</td><td><span class="ap-wizard__tag">@Msg("ApplicationProfile.Wizard.KindDate")</span></td>
                     <td>—</td><td>—</td>
                 </tr>
                 @if (ShowFromToRegionCityBlock)
                 {
                 <tr>
                     <td><input type="checkbox" checked="true" disabled="true" /></td>
-                    <td>From region</td><td><span class="ap-wizard__tag">lookup</span></td>
+                    <td>@Field("FromRegion")</td><td><span class="ap-wizard__tag">@Msg("ApplicationProfile.Wizard.KindLookup")</span></td>
                     <td><input type="checkbox" checked="@HasFromRegionDefault" disabled="@Disabled" @onchange="ToggleFromRegionDefault" /></td>
                     <td>
                         <select disabled="@Disabled" value="@FormatGuid(Profile.DefaultFromRegionId)" @onchange="OnFromRegionChanged">
@@ -104,7 +105,7 @@
                 </tr>
                 <tr>
                     <td><input type="checkbox" checked="true" disabled="true" /></td>
-                    <td>From city</td><td><span class="ap-wizard__tag">lookup</span></td>
+                    <td>@Field("FromCity")</td><td><span class="ap-wizard__tag">@Msg("ApplicationProfile.Wizard.KindLookup")</span></td>
                     <td><input type="checkbox" checked="@HasFromCityDefault" disabled="@Disabled" @onchange="ToggleFromCityDefault" /></td>
                     <td>
                         <select disabled="@Disabled" value="@FormatGuid(Profile.DefaultFromCityId)" @onchange="OnFromCityChanged">
@@ -115,7 +116,7 @@
                 </tr>
                 <tr>
                     <td><input type="checkbox" checked="true" disabled="true" /></td>
-                    <td>To region</td><td><span class="ap-wizard__tag">lookup</span></td>
+                    <td>@Field("ToRegion")</td><td><span class="ap-wizard__tag">@Msg("ApplicationProfile.Wizard.KindLookup")</span></td>
                     <td><input type="checkbox" checked="@HasToRegionDefault" disabled="@Disabled" @onchange="ToggleToRegionDefault" /></td>
                     <td>
                         <select disabled="@Disabled" value="@FormatGuid(Profile.DefaultToRegionId)" @onchange="OnToRegionChanged">
@@ -126,7 +127,7 @@
                 </tr>
                 <tr>
                     <td><input type="checkbox" checked="true" disabled="true" /></td>
-                    <td>To city</td><td><span class="ap-wizard__tag">lookup</span></td>
+                    <td>@Field("ToCity")</td><td><span class="ap-wizard__tag">@Msg("ApplicationProfile.Wizard.KindLookup")</span></td>
                     <td><input type="checkbox" checked="@HasToCityDefault" disabled="@Disabled" @onchange="ToggleToCityDefault" /></td>
                     <td>
                         <select disabled="@Disabled" value="@FormatGuid(Profile.DefaultToCityId)" @onchange="OnToCityChanged">
@@ -138,43 +139,43 @@
                 }
                 <tr>
                     <td><input type="checkbox" @bind="Profile.RequireBusinessTripAddress" disabled="@Disabled" /></td>
-                    <td>Business trip address</td><td><span class="ap-wizard__tag">type + site</span></td>
+                    <td>@Field("BusinessTripAddress")</td><td><span class="ap-wizard__tag">@Msg("ApplicationProfile.Wizard.KindTypeSite")</span></td>
                     <td><input type="checkbox" checked="@HasBusinessTripAddressDefault" disabled="@(Disabled || !Profile.RequireBusinessTripAddress)" @onchange="ToggleBusinessTripAddressDefault" /></td>
                     <td>
                         <div class="ap-wizard__stacked">
                             <select disabled="@(Disabled || !Profile.RequireBusinessTripAddress)" value="@FormatResidenceType(Profile.DefaultBusinessTripAddressType)" @onchange="OnBusinessTripAddressTypeChanged">
-                                <option value="">— type —</option>
-                                <option value="@((int)ResidenceType.Lodging)">Lodging</option>
-                                <option value="@((int)ResidenceType.Hotel)">Hotel</option>
-                                <option value="@((int)ResidenceType.Hospital)">Hospital</option>
-                                <option value="@((int)ResidenceType.Other)">Other site</option>
-                                <option value="@((int)ResidenceType.PrivateHouse)">Private house</option>
+                                <option value="">@Msg("ApplicationProfile.Site.TypePlaceholder")</option>
+                                <option value="@((int)ResidenceType.Lodging)">@Msg("ApplicationProfile.Site.Lodging")</option>
+                                <option value="@((int)ResidenceType.Hotel)">@Msg("ApplicationProfile.Site.Hotel")</option>
+                                <option value="@((int)ResidenceType.Hospital)">@Msg("ApplicationProfile.Site.Hospital")</option>
+                                <option value="@((int)ResidenceType.Other)">@Msg("ApplicationProfile.Site.Other")</option>
+                                <option value="@((int)ResidenceType.PrivateHouse)">@Msg("ApplicationProfile.Site.PrivateHouse")</option>
                             </select>
                             @if (Profile.DefaultBusinessTripAddressType == ResidenceType.Lodging)
                             {
                                 <select disabled="@(Disabled || !Profile.RequireBusinessTripAddress)" value="@FormatGuid(Profile.DefaultBusinessTripLodgingId)" @onchange="OnBusinessTripLodgingChanged">
-                                    <option value="">— lodging —</option>
+                                    <option value="">@Msg("ApplicationProfile.Site.LodgingPlaceholder")</option>
                                     @foreach (var item in Lookups.Lodgings) { <option value="@item.Id.ToString("D")">@item.DisplayName</option> }
                                 </select>
                             }
                             else if (Profile.DefaultBusinessTripAddressType == ResidenceType.Hotel)
                             {
                                 <select disabled="@(Disabled || !Profile.RequireBusinessTripAddress)" value="@FormatGuid(Profile.DefaultBusinessTripHotelId)" @onchange="OnBusinessTripHotelChanged">
-                                    <option value="">— hotel —</option>
+                                    <option value="">@Msg("ApplicationProfile.Site.HotelPlaceholder")</option>
                                     @foreach (var item in Lookups.Hotels) { <option value="@item.Id.ToString("D")">@item.DisplayName</option> }
                                 </select>
                             }
                             else if (Profile.DefaultBusinessTripAddressType == ResidenceType.Hospital)
                             {
                                 <select disabled="@(Disabled || !Profile.RequireBusinessTripAddress)" value="@FormatGuid(Profile.DefaultBusinessTripHospitalId)" @onchange="OnBusinessTripHospitalChanged">
-                                    <option value="">— hospital —</option>
+                                    <option value="">@Msg("ApplicationProfile.Site.HospitalPlaceholder")</option>
                                     @foreach (var item in Lookups.Hospitals) { <option value="@item.Id.ToString("D")">@item.DisplayName</option> }
                                 </select>
                             }
                             else if (Profile.DefaultBusinessTripAddressType == ResidenceType.Other)
                             {
                                 <select disabled="@(Disabled || !Profile.RequireBusinessTripAddress)" value="@FormatGuid(Profile.DefaultBusinessTripOtherSiteId)" @onchange="OnBusinessTripOtherSiteChanged">
-                                    <option value="">— other site —</option>
+                                    <option value="">@Msg("ApplicationProfile.Site.OtherPlaceholder")</option>
                                     @foreach (var item in Lookups.OtherSites) { <option value="@item.Id.ToString("D")">@item.DisplayName</option> }
                                 </select>
                             }
@@ -187,7 +188,7 @@
                 </tr>
                 <tr>
                     <td><input type="checkbox" @bind="Profile.RequirePurpose" disabled="@Disabled" @bind:after="OnPurposeUseChanged" /></td>
-                    <td>Purpose</td><td><span class="ap-wizard__tag">text</span></td>
+                    <td>@Field("Purpose")</td><td><span class="ap-wizard__tag">@Msg("ApplicationProfile.Wizard.KindText")</span></td>
                     <td><input type="checkbox" checked="@HasPurposeDefault" disabled="@(Disabled || !Profile.RequirePurpose)" @onchange="TogglePurposeDefault" /></td>
                     <td>
                         <textarea class="ap-wizard__textarea" maxlength="700" rows="3" disabled="@(Disabled || !Profile.RequirePurpose)" @bind="Profile.DefaultPurpose"></textarea>
@@ -195,7 +196,7 @@
                 </tr>
                 <tr>
                     <td><input type="checkbox" @bind="Profile.RequireProject" disabled="@Disabled" /></td>
-                    <td>Project</td><td><span class="ap-wizard__tag">lookup</span></td>
+                    <td>@Field("Project")</td><td><span class="ap-wizard__tag">@Msg("ApplicationProfile.Wizard.KindLookup")</span></td>
                     <td><input type="checkbox" checked="@HasProjectDefault" disabled="@(Disabled || !Profile.RequireProject)" @onchange="ToggleProjectDefault" /></td>
                     <td>
                         <select disabled="@(Disabled || !Profile.RequireProject)" value="@FormatGuid(Profile.DefaultProjectContractId)" @onchange="OnProjectChanged">
@@ -208,7 +209,7 @@
                 {
                 <tr>
                     <td><input type="checkbox" @bind="Profile.RequireUrgency" disabled="@Disabled" /></td>
-                    <td>Urgency</td><td><span class="ap-wizard__tag">lookup</span></td>
+                    <td>@Field("Urgency")</td><td><span class="ap-wizard__tag">@Msg("ApplicationProfile.Wizard.KindLookup")</span></td>
                     <td><input type="checkbox" checked="@HasUrgencyDefault" disabled="@(Disabled || !Profile.RequireUrgency)" @onchange="ToggleUrgencyDefault" /></td>
                     <td>
                         <select disabled="@(Disabled || !Profile.RequireUrgency)" value="@FormatGuid(Profile.DefaultUrgencyId)" @onchange="OnUrgencyChanged">
@@ -222,13 +223,13 @@
                     <td><input type="checkbox"
                                @bind="Profile.RequireProcessNumber"
                                disabled="@(Disabled || ApplicationProfileConfigurationResolver.ProcessNumberUseLocked(Profile.ProduceInvitation, Profile.ProduceWorkPermit, Profile.ProduceVisa))" /></td>
-                    <td>Process number</td><td><span class="ap-wizard__tag">text</span></td>
+                    <td>@Field("ProcessNumber")</td><td><span class="ap-wizard__tag">@Msg("ApplicationProfile.Wizard.KindText")</span></td>
                     <td></td>
-                    <td class="ap-wizard__hint">Entered when submitting to Migration Service. Unique across instances.</td>
+                    <td class="ap-wizard__hint">@Msg("ApplicationProfile.Wizard.ProcessNumberHint")</td>
                 </tr>
                 <tr>
                     <td><input type="checkbox" @bind="Profile.RequireWorkPermitLocation" disabled="@(Disabled || Profile.ProduceWorkPermit)" @bind:after="OnWorkPermitLocationUseChanged" /></td>
-                    <td>Work permit location</td><td><span class="ap-wizard__tag">multi-select</span></td>
+                    <td>@Field("WorkPermitLocation")</td><td><span class="ap-wizard__tag">@Msg("ApplicationProfile.Wizard.KindMulti")</span></td>
                     <td><input type="checkbox" checked="@HasWorkPermitLocationDefault" disabled="@(Disabled || !Profile.RequireWorkPermitLocation)" @onchange="ToggleWorkPermitLocationDefault" /></td>
                     <td>
                         <BorderZoneLocationField Value="@Profile.DefaultWorkPermitLocation"
@@ -240,12 +241,12 @@
                 </tr>
                 <tr>
                     <td><input type="checkbox" @bind="Profile.RequireEntryDate" disabled="@Disabled" /></td>
-                    <td>Entry date</td><td><span class="ap-wizard__tag">date</span></td>
+                    <td>@Field("EntryDate")</td><td><span class="ap-wizard__tag">@Msg("ApplicationProfile.Wizard.KindDate")</span></td>
                     <td>—</td><td>—</td>
                 </tr>
                 <tr>
                     <td><input type="checkbox" @bind="Profile.RequireEntryCheckPoint" disabled="@Disabled" /></td>
-                    <td>Entry check point</td><td><span class="ap-wizard__tag">lookup</span></td>
+                    <td>@Field("EntryCheckPoint")</td><td><span class="ap-wizard__tag">@Msg("ApplicationProfile.Wizard.KindLookup")</span></td>
                     <td><input type="checkbox" checked="@HasCheckPointDefault" disabled="@(Disabled || !Profile.RequireEntryCheckPoint)" @onchange="ToggleCheckPointDefault" /></td>
                     <td>
                         <select disabled="@(Disabled || !Profile.RequireEntryCheckPoint)" value="@FormatGuid(Profile.DefaultEntryCheckPointId)" @onchange="OnCheckPointChanged">
@@ -655,4 +656,8 @@
 
         return ObjectSpace.GetObjectByKey<T>(id);
     }
+
+    private static string Msg(string key) => VisaUiMessages.Get(key);
+
+    private static string Field(string fieldKey) => ApplicationProfileLocalization.Field(fieldKey);
 }

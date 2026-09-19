@@ -2,24 +2,22 @@
 @using Visa2026.Blazor.Server.Editors
 @using Visa2026.Module.BusinessObjects
 @using Visa2026.Module.Editors
+@using Visa2026.Module.Localization
 @using Visa2026.Module.Services.ApplicationProfilePicker
 @using Visa2026.Module.Services.ApplicationWorkspace
 
 <div class="ap-picker">
     @if (IsLoading)
     {
-        <div class="ap-picker__loading" role="status">Loading Application Profiles…</div>
+        <div class="ap-picker__loading" role="status">@Msg("ApplicationProfileInstance.Picker.Loading")</div>
     }
     else if (Step == 2)
     {
         <header class="ap-picker__header">
             <div>
-                <h1 class="ap-picker__title">Choose Approval legs</h1>
+                <h1 class="ap-picker__title">@Msg("ApplicationProfileInstance.Picker.ChooseLegs")</h1>
                 <p class="ap-picker__profile-name" title="@SelectedProfileName">@SelectedProfileName</p>
-                <p class="ap-picker__sub">
-                    These chains are shared for every via-ministry application. Pick one for this case; ministries are copied onto it and will not change if the shared catalog is edited later.
-                    <strong>Make default</strong> is the pre-selected chain the next time someone creates from this profile.
-                </p>
+                <p class="ap-picker__sub">@Msg("ApplicationProfileInstance.Picker.ApprovalLegsSub")</p>
             </div>
         </header>
 
@@ -28,20 +26,20 @@
         @if (SelectedRow != null)
         {
             <div class="ap-picker__section-head">
-                <h2 class="ap-picker__section-title">Approval legs *</h2>
+                <h2 class="ap-picker__section-title">@Msg("ApplicationProfileInstance.Picker.ApprovalLegsTitle")</h2>
                 <div class="ap-picker__section-actions">
-                    <button type="button" class="ap-picker__link" @onclick="OpenApprovalLegCatalogAsync">Catalog</button>
-                    <button type="button" class="ap-picker__link" @onclick="NewApprovalLegAsync">+ New</button>
+                    <button type="button" class="ap-picker__link" @onclick="OpenApprovalLegCatalogAsync">@Msg("ApplicationProfileInstance.Picker.Catalog")</button>
+                    <button type="button" class="ap-picker__link" @onclick="NewApprovalLegAsync">@Msg("ApplicationProfileInstance.Picker.New")</button>
                 </div>
             </div>
             @if (SelectedRow.MissingApprovalLegVersions)
             {
                 <div class="ap-picker__versions-empty" role="status">
-                    <p class="ap-picker__versions-empty-title">No shared approval-leg versions yet</p>
-                    <p>Create the first ministry chain here. It is shared for all via-ministry applications, not only this case. After Create, pick the card and continue. Catalog on the right lists inactive chains too.</p>
+                    <p class="ap-picker__versions-empty-title">@Msg("ApplicationProfileInstance.Picker.NoVersionsTitle")</p>
+                    <p>@Msg("ApplicationProfileInstance.Picker.NoVersionsBody")</p>
                     <div class="ap-picker__section-actions ap-picker__section-actions--empty">
-                        <button type="button" class="ap-picker__link" @onclick="OpenApprovalLegCatalogAsync">Catalog</button>
-                        <button type="button" class="ap-picker__btn ap-picker__btn--primary" @onclick="NewApprovalLegAsync">+ New</button>
+                        <button type="button" class="ap-picker__link" @onclick="OpenApprovalLegCatalogAsync">@Msg("ApplicationProfileInstance.Picker.Catalog")</button>
+                        <button type="button" class="ap-picker__btn ap-picker__btn--primary" @onclick="NewApprovalLegAsync">@Msg("ApplicationProfileInstance.Picker.New")</button>
                     </div>
                 </div>
             }
@@ -60,7 +58,7 @@
                                 @version.Name
                                 @if (version.IsDefault)
                                 {
-                                    <span class="ap-picker__badge ap-picker__badge--on">Default</span>
+                                    <span class="ap-picker__badge ap-picker__badge--on">@Msg("ApplicationProfileInstance.Picker.Default")</span>
                                 }
                             </span>
                             <ol class="ap-picker__version-legs">
@@ -70,7 +68,7 @@
                                 }
                             </ol>
                             <div class="ap-picker__version-foot">
-                                <span class="ap-picker__meta">@version.MinistryNames.Count ministries</span>
+                                <span class="ap-picker__meta">@VisaUiMessages.Format("ApplicationProfileInstance.Picker.MinistriesCount", version.MinistryNames.Count)</span>
                                 <span class="ap-picker__version-foot-actions">
                                     @if (!version.IsDefault)
                                     {
@@ -78,14 +76,14 @@
                                                 class="ap-picker__link"
                                                 @onclick="() => MakeDefaultApprovalLegAsync(version.VersionId)"
                                                 @onclick:stopPropagation="true">
-                                            Make default
+                                            @Msg("ApplicationProfileInstance.Picker.MakeDefault")
                                         </button>
                                     }
                                     <button type="button"
                                             class="ap-picker__link"
                                             @onclick="() => OpenApprovalLegAsync(version.VersionId)"
                                             @onclick:stopPropagation="true">
-                                        Open
+                                        @Msg("ApplicationProfileInstance.Picker.Open")
                                     </button>
                                 </span>
                             </div>
@@ -96,12 +94,12 @@
         }
 
         <div class="ap-picker__actions">
-            <button type="button" class="ap-picker__btn" @onclick="BackStepAsync">Back</button>
+            <button type="button" class="ap-picker__btn" @onclick="BackStepAsync">@Msg("ApplicationProfileInstance.Picker.Back")</button>
             <button type="button"
                     class="ap-picker__btn ap-picker__btn--primary"
                     disabled="@(!CanContinueFromLegs)"
                     @onclick="NextStepAsync">
-                Continue →
+                @Msg("ApplicationProfileInstance.Picker.Continue")
             </button>
         </div>
     }
@@ -109,18 +107,14 @@
     {
         <header class="ap-picker__header ap-picker__header--with-gear">
             <div>
-                <h1 class="ap-picker__title">Choose Organization</h1>
+                <h1 class="ap-picker__title">@Msg("ApplicationProfileInstance.Picker.ChooseOrg")</h1>
                 <p class="ap-picker__profile-name" title="@SelectedProfileName">@SelectedProfileName</p>
-                <p class="ap-picker__sub">
-                    This case will use the selected Company, Signatory, and Representative. Defaults are pre-selected; you can change them.
-                    <strong>Make default</strong> applies to the next new application.
-                    Use the gear to add or edit catalog records.
-                </p>
+                <p class="ap-picker__sub">@Msg("ApplicationProfileInstance.Picker.OrgSub")</p>
             </div>
             <button type="button"
                     class="cs-multi-select-popup__gear-btn @(_orgCatalogManageOpen ? "cs-multi-select-popup__gear-btn--active" : null)"
-                    title="@(_orgCatalogManageOpen ? "Hide catalog New and Edit" : "Show catalog New and Edit")"
-                    aria-label="@(_orgCatalogManageOpen ? "Hide catalog New and Edit" : "Show catalog New and Edit")"
+                    title="@(_orgCatalogManageOpen ? Msg("ApplicationProfileInstance.Picker.HideCatalogManage") : Msg("ApplicationProfileInstance.Picker.ShowCatalogManage"))"
+                    aria-label="@(_orgCatalogManageOpen ? Msg("ApplicationProfileInstance.Picker.HideCatalogManage") : Msg("ApplicationProfileInstance.Picker.ShowCatalogManage"))"
                     aria-pressed="@_orgCatalogManageOpen"
                     @onclick="ToggleOrgCatalogManage">
                 <svg class="cs-multi-select-popup__gear-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
@@ -132,29 +126,29 @@
         @RenderStatus()
 
         <div class="ap-picker__org">
-            @RenderOrgDropdown("Company", OrganizationCatalogHelper.Company, SelectedCompanyId, Companies, "Letterhead company for this application.")
-            @RenderOrgDropdown("Authorized Signatory", OrganizationCatalogHelper.Signatory, SelectedSignatoryId, Signatories, null)
-            @RenderOrgDropdown("Authorized Representative", OrganizationCatalogHelper.Representative, SelectedRepresentativeId, Representatives, null)
+            @RenderOrgDropdown(Msg("ApplicationProfileInstance.Picker.Company"), OrganizationCatalogHelper.Company, SelectedCompanyId, Companies, Msg("ApplicationProfileInstance.Picker.CompanyHint"))
+            @RenderOrgDropdown(Msg("ApplicationProfileInstance.Picker.Signatory"), OrganizationCatalogHelper.Signatory, SelectedSignatoryId, Signatories, null)
+            @RenderOrgDropdown(Msg("ApplicationProfileInstance.Picker.Representative"), OrganizationCatalogHelper.Representative, SelectedRepresentativeId, Representatives, null)
         </div>
 
         <div class="ap-picker__callout" role="note">
-            These are shared catalog records (not snapshots). Editing a catalog record later updates every case that selected it.
+            @Msg("ApplicationProfileInstance.Picker.OrgCallout")
             @if (_orgCatalogManageOpen)
             {
-                <text> + New and Edit here are the same as Configuration → Organization catalogs.</text>
+                <text>@Msg("ApplicationProfileInstance.Picker.OrgCalloutManage")</text>
             }
         </div>
 
         <div class="ap-picker__actions">
-            <button type="button" class="ap-picker__btn" @onclick="BackStepAsync">Back</button>
+            <button type="button" class="ap-picker__btn" @onclick="BackStepAsync">@Msg("ApplicationProfileInstance.Picker.Back")</button>
             <button type="button"
                     class="ap-picker__btn ap-picker__btn--primary"
                     disabled="@(!CanContinueFromOrganization)"
                     @onclick="NextStepAsync">
-                Continue →
+                @Msg("ApplicationProfileInstance.Picker.Continue")
             </button>
         </div>
-        <p class="ap-picker__foot-note">Application Profile: @SelectedProfileName · next: Case summary</p>
+        <p class="ap-picker__foot-note">@VisaUiMessages.Format("ApplicationProfileInstance.Picker.FootNote", SelectedProfileName)</p>
     }
     else if (Step == 4)
     {
@@ -162,13 +156,14 @@
 
         <header class="ap-picker__header">
             <div>
-                <h1 class="ap-picker__title">Case summary</h1>
+                <h1 class="ap-picker__title">@Msg("ApplicationProfileInstance.Picker.CaseSummary")</h1>
                 <p class="ap-picker__profile-name" title="@SelectedProfileName">@SelectedProfileName</p>
-                <p class="ap-picker__sub">
-                    Same Use fields as the case Overview. Profile defaults are already filled. Set the rest now so you do not need to Edit after create. Changing these does not change the Application Profile template.
-                </p>
+                <p class="ap-picker__sub">@Msg("ApplicationProfileInstance.Picker.CaseSummarySub")</p>
                 <p class="ap-picker__crumb">
-                    Profile · @(SelectedRow?.RequiresApprovalLegVersion == true ? "Approval legs · " : null)Organization · <strong>Case summary</strong>
+                    @Msg("ApplicationProfileInstance.Picker.CrumbProfile") ·
+                    @(SelectedRow?.RequiresApprovalLegVersion == true ? Msg("ApplicationProfileInstance.Picker.CrumbLegs") + " · " : null)
+                    @Msg("ApplicationProfileInstance.Picker.ChooseOrg") ·
+                    <strong>@Msg("ApplicationProfileInstance.Picker.CaseSummary")</strong>
                 </p>
             </div>
         </header>
@@ -177,7 +172,7 @@
 
         @if (CaseSummaryFields.Count == 0)
         {
-            <p class="ap-picker__hint">No Application Profile Instance properties required on this profile.</p>
+            <p class="ap-picker__hint">@Msg("ApplicationProfileInstance.Picker.NoRequiredProps")</p>
         }
         else
         {
@@ -192,7 +187,7 @@
         }
 
         <div class="ap-picker__callout" role="note">
-            Required Case summary fields must be set here. Create opens the case workspace ready for People &amp; links.
+            @Msg("ApplicationProfileInstance.Picker.CreateOpensPeople")
         </div>
         @if (missing.Count > 0)
         {
@@ -200,23 +195,23 @@
         }
 
         <div class="ap-picker__actions">
-            <button type="button" class="ap-picker__btn" @onclick="BackStepAsync">Back</button>
+            <button type="button" class="ap-picker__btn" @onclick="BackStepAsync">@Msg("ApplicationProfileInstance.Picker.Back")</button>
             <button type="button"
                     class="ap-picker__btn ap-picker__btn--primary"
                     disabled="@(!CanCreateOnCaseSummaryStep)"
                     @onclick="UseProfileAsync">
-                Create application
+                @Msg("ApplicationProfileInstance.Picker.Create")
             </button>
         </div>
-        <p class="ap-picker__foot-note">Application Profile: @SelectedProfileName · last step before create</p>
+        <p class="ap-picker__foot-note">@VisaUiMessages.Format("ApplicationProfileInstance.Picker.FootNoteLast", SelectedProfileName)</p>
     }
     else
     {
         <header class="ap-picker__header">
             <div>
-                <h1 class="ap-picker__title">Choose Application Profile</h1>
+                <h1 class="ap-picker__title">@Msg("ApplicationProfileInstance.Picker.ChooseProfile")</h1>
                 <p class="ap-picker__sub">
-                    Sets a live configuration link and seeds per-ApplicationProfileInstance defaults once. Profile cannot be changed after save.
+                    @Msg("ApplicationProfileInstance.Picker.ChooseProfileSub")
                 </p>
             </div>
         </header>
@@ -231,12 +226,12 @@
         @if (Rows.Count == 0)
         {
             <div class="ap-picker__empty">
-                No active Application Profiles match this list. Configure profiles under <strong>Configuration → Application Profiles</strong>.
+                @((MarkupString)Msg("ApplicationProfileInstance.Picker.Empty"))
             </div>
         }
         else
         {
-            <ul class="ap-picker__list" role="listbox" aria-label="Application Profiles">
+            <ul class="ap-picker__list" role="listbox" aria-label="@Msg("ApplicationProfileInstance.Picker.ListAria")">
                 @foreach (var row in Rows)
                 {
                     var selected = row.ProfileId == SelectedProfileId;
@@ -251,11 +246,11 @@
                         <div class="ap-picker__badges">
                             @if (row.IsConfigLocked)
                             {
-                                <span class="ap-picker__badge ap-picker__badge--muted">Config locked</span>
+                                <span class="ap-picker__badge ap-picker__badge--muted">@Msg("ApplicationProfile.Status.ConfigLocked")</span>
                             }
                             @if (selected)
                             {
-                                <span class="ap-picker__badge ap-picker__badge--on">Selected</span>
+                                <span class="ap-picker__badge ap-picker__badge--on">@Msg("ApplicationProfileInstance.Picker.Selected")</span>
                             }
                         </div>
                     </li>
@@ -264,7 +259,7 @@
 
             @if (SelectedRow?.MissingApprovalLegVersions == true)
             {
-                <div class="ap-picker__hint">Continue to choose or create a shared approval-leg version. New chains are available for every via-ministry application.</div>
+                <div class="ap-picker__hint">@Msg("ApplicationProfileInstance.Picker.ContinueMissingVersions")</div>
             }
 
             <div class="ap-picker__actions">
@@ -272,7 +267,7 @@
                         class="ap-picker__btn ap-picker__btn--primary"
                         disabled="@(SelectedProfileId == Guid.Empty)"
                         @onclick="NextStepAsync">
-                    Continue →
+                    @Msg("ApplicationProfileInstance.Picker.Continue")
                 </button>
             </div>
         }
@@ -318,7 +313,7 @@
         Rows.FirstOrDefault(r => r.ProfileId == SelectedProfileId);
 
     private string SelectedProfileName =>
-        string.IsNullOrWhiteSpace(SelectedRow?.Name) ? "Unnamed profile" : SelectedRow.Name;
+        string.IsNullOrWhiteSpace(SelectedRow?.Name) ? Msg("ApplicationProfileInstance.Picker.Unnamed") : SelectedRow.Name;
 
     private bool CanContinueFromLegs =>
         SelectedRow != null
@@ -369,7 +364,7 @@
                         @onchange="e => OnOrganizationChanged(kind, e.Value?.ToString())">
                     @if (options.Count == 0)
                     {
-                        <option value="">@(_orgCatalogManageOpen ? "No catalog records yet" : "No catalog records yet — use the gear to add one")</option>
+                        <option value="">@(_orgCatalogManageOpen ? Msg("ApplicationProfileInstance.Picker.EmptyCatalog") : Msg("ApplicationProfileInstance.Picker.EmptyCatalogGear"))</option>
                     }
                     else
                     {
@@ -384,11 +379,11 @@
                     <button type="button"
                             class="ap-picker__org-new"
                             @onclick="() => OnNewOrganization(kind)">
-                        + New
+                        @Msg("ApplicationProfileInstance.Picker.New")
                     </button>
                     <button type="button"
                             class="ap-picker__org-edit"
-                            aria-label="@($"Edit {label}")"
+                            aria-label="@VisaUiMessages.Format("ApplicationProfileInstance.Picker.EditLabel", label)"
                             disabled="@(selectedId == Guid.Empty)"
                             @onclick="() => OnEditOrganization(kind, selectedId)">
                         ✎
@@ -396,14 +391,14 @@
                 }
                 @if (selected?.IsDefault == true)
                 {
-                    <span class="ap-picker__badge ap-picker__badge--on">Default</span>
+                    <span class="ap-picker__badge ap-picker__badge--on">@Msg("ApplicationProfileInstance.Picker.Default")</span>
                 }
                 @if (selected != null && !selected.IsDefault)
                 {
                     <button type="button"
                             class="ap-picker__link"
                             @onclick="() => OnMakeDefaultOrganization(kind, selectedId)">
-                        Make default
+                        @Msg("ApplicationProfileInstance.Picker.MakeDefault")
                     </button>
                 }
             </div>
@@ -538,7 +533,7 @@
                         value="@field.Value"
                         disabled="@field.ReadOnly"
                         @onchange="e => OnCaseSummaryFieldChanged(field.Key, e.Value?.ToString())">
-                    <option value="">— Select —</option>
+                    <option value="">@Msg("ApplicationProfileInstance.Picker.SelectPlaceholder")</option>
                     @foreach (var option in field.Options)
                     {
                         var optionId = option.Id.ToString("D");
@@ -596,4 +591,6 @@
         if (e.Key is "Enter" or " ")
             await SelectVersion(versionId);
     }
+
+    private static string Msg(string key) => VisaUiMessages.Get(key);
 }

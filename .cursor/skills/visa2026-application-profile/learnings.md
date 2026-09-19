@@ -1,4 +1,222 @@
 
+### 2026-09-19 — Widen case workspace left nav
+
+- **Need**: Instance workspace left nav wide enough for Türkmençe labels (Ýüztutmanyň soň ýagdaýy) without wrapping.
+- **Cause**: `.cw-layout` first column was 210px.
+- **Fix**: Nav column **300px** (overview, docs, wide, loading). `.cw-nav__item` `white-space: nowrap`.
+- **Officer**: Hard-refresh (CSS). Nav labels stay on one line.
+- **Prevent**: Do not shrink the first grid column back to 210px.
+- **Cross-skill**: visa2026-preview-slot
+
+### 2026-09-19 — ListView Issued stays English
+
+- **Need**: Application Profile Instance ListView **Ýagdaý** cell **Issued** must be **Işlendi** in Türkmençe (and other outcomes via the same map).
+- **Cause**: `LatestProgressState` returned stored `LatestProgressDisplay` (English snapshot from sync). Column caption was already Ýagdaý.
+- **Fix**: Display-only `ProgressStepLabel` on `LatestProgressState` and `CurrentState`. Stored `LatestProgressDisplay` stays English.
+- **Officer**: Stop F5, rebuild, hard-refresh Türkmençe. Status column reads **Işlendi**.
+- **Prevent**: Do not write culture-specific text into `LatestProgressDisplay`. Localize at the getter.
+- **Cross-skill**: —
+
+### 2026-09-19 — Drop duplicate overview rail document / issue shortcuts
+
+- **Need**: Overview right rail should not repeat Resminamalar, document copies, and Issue record — those already exist on left nav and Overview issued tiles.
+- **Cause**: Quick actions copied the three shortcuts next to Advance / Revert.
+- **Fix**: Removed the three rail buttons and unused `IssueRecordQuickAction`. Left **Ýagdaýy Ilerletmek** / **Ýagdaýy yzyna öwürmek**.
+- **Officer**: Stop F5, rebuild Blazor host, hard-refresh. Rail Quick actions no longer shows the three shortcuts.
+- **Prevent**: Do not add those three back to the overview rail.
+- **Cross-skill**: visa2026-resminamalar, visa2026-document-copies, visa2026-preview-slot
+
+### 2026-09-19 — Turkmen SLA tab stays English
+
+- **Need**: Case workspace **SLA we möhletler** tab in Türkmençe (metrics, timeline, step table, source).
+- **Cause**: `RenderSla` used English literals. Step names came from English catalog (`Office preparation`). Tone labels (`On track`) were English in the builder and UI.
+- **Fix**: Added `Workspace.SlaSub` / `OverallCase` / `SlaByStep` / `Due` / `OnTrack` / … keys. Wired page chrome. Display-only `ProgressStepLabel` on step names. `ToneLabel` / `SlaToneLabel` use Layer A. Builder English fallbacks (`Profile template`, alert text) localized at display.
+- **Officer**: Stop F5, rebuild Blazor host in Visual Studio, hard-refresh, Türkmençe. Title **SLA we möhletler**. Table: **Ädim / Möhlet senesi / Galan gün / Ýagdaý**. Office step **Ofisde taýýarlyk**. Status **Möhletinde**.
+- **Prevent**: Do not change CompletenessGate Office preparation logic key. Localize SLA chrome at display.
+- **Cross-skill**: —
+
+### 2026-09-19 — Turkmen Organization card stays English
+
+- **Need**: Overview Organization (Gurama) card in Türkmençe: heading, letterhead hint, Company / Signatory / Representative, field labels.
+- **Cause**: Card used English literals. Keys already existed (`Workspace.Organization`, `OrgSub`, `OrgCallout`, `Picker.Company`/`Signatory`/`Representative`, `Org.Name`…).
+- **Fix**: Wired view + edit mode in `OfficerShellCaseWorkspaceComponent` (including + Täze, Bellenen, Bellenen et).
+- **Officer**: Stop F5, rebuild Blazor host in Visual Studio, hard-refresh, Türkmençe. Card reads **Gurama**, **Kompaniýa**, **Ygtyýarly gol**, **Ygtyýarly wekil**, **At / Kod / Telefon / Salgysy / E-poçta / Salgyt**.
+- **Prevent**: Do not leave Organization chrome as English literals when Layer A keys exist.
+- **Cross-skill**: —
+
+### 2026-09-19 — Turkmen overview rail Readiness / Quick actions stay English
+
+- **Need**: Overview right rail Readiness and Quick actions in Türkmençe.
+- **Cause**: Headings and buttons were English literals. Keys already existed (`Workspace.Readiness`, `RequiredDataComplete`, `BoStatesValid`, `QuickActions`, `OpenDocuments`, `GenerateResminamalar`, `IssueRecord`).
+- **Fix**: Wired `OfficerShellCaseWorkspaceComponent` overview rail to those keys. Missing-count suffix stays `CaseSummary.MissingOne` (yetmezçilik).
+- **Officer**: Stop F5, rebuild Blazor host in Visual Studio, hard-refresh, Türkmençe. Rail reads **Taýýarlyk**, **Hökmany maglumatlar taýýar**, **Ýazgy ýagdaýlary dogry**, **Çalt hereketler**, **Resminama nusgalaryny aç**, **Resminamalar paketini döret**, **Ýazgy ber…**.
+- **Prevent**: Do not leave overview rail chrome as English literals when Layer A keys exist.
+- **Cross-skill**: —
+
+### 2026-09-19 — Turkmen issued compose and list columns stay English
+
+- **Need**: Month = **Aý**. List Process number / visa columns, issued tiles, and New work permit / rejection / visa drawers in Türkmençe.
+- **Cause**: `ProcessNumber` (XafDisplayName "Process number") had no list ColumnInfo. Issued tiles used English catalog `Definition.Label` / AddCaption / PanelTitle. Compose drawers (`IssueIssuedHeaderSlotPanel`, `IssueIssuedVisaSlotPanel`) hardcoded English field labels.
+- **Fix**: ProcessNumber + VisaType/Period/Category/MigrationService on Application* and ApplicationProfileInstance list columns (Month already Aý). Display-only `IssuedRecordLabel` / `IssuedAddCaption` / `IssuedPanelTitle` / `IssuedComposeTitle` / `IssuedStatus`. Wired overview issued card and compose property labels. Catalog English kept for tests.
+- **Officer**: Stop F5, rebuild Blazor host in Visual Studio, hard-refresh, Türkmençe. List Month = **Aý**, Process number = **Proses belgisi**. Tiles: Iş rugsady / Ret / Berlen wiza. Drawers: Iş rugsadynyň belgisi, Ret edilen resminamanyň belgisi, Wiza belgisi.
+- **Prevent**: Do not change IssuedRecordsCatalog Definition strings. Localize at display. Do not map Office preparation as a logic key.
+- **Cross-skill**: —
+
+### 2026-09-19 — Turkmen Resminamalar This profile is Şu Ýüztutma degişli
+
+- **Need**: Resminamalar “This profile” tab in Türkmençe must be **Şu Ýüztutma degişli**.
+- **Cause**: Tab used Bu profil ({0}).
+- **Fix**: `ApplicationReportPackage.ThisProfileTab` tk-TM → `Şu Ýüztutma degişli ({0})`.
+- **Officer**: Stop F5, rebuild Blazor host, hard-refresh, Türkmençe.
+- **Prevent**: Do not use Bu profil for this instance catalog tab.
+- **Cross-skill**: visa2026-resminamalar
+
+### 2026-09-19 — Turkmen Preview is Görmek
+
+- **Need**: Preview action in Türkmençe must be **Görmek**, not Öňünden görmek.
+- **Cause**: Resminamalar and Document copies used the longer invented verb.
+- **Fix**: `ApplicationReportPackage.Preview` and `ApplicationItemDocumentCopies.Action.Preview` tk-TM → **Görmek**.
+- **Officer**: Stop F5, rebuild Blazor host, hard-refresh, Türkmençe. Preview buttons read **Görmek**.
+- **Prevent**: Do not use Öňünden görmek for this action.
+- **Cross-skill**: visa2026-resminamalar, visa2026-document-copies
+
+### 2026-09-19 — Turkmen People tab is Ýüztutmadaky adamlar
+
+- **Need**: Case workspace People & links nav in Türkmençe must be **Ýüztutmadaky adamlar**.
+- **Cause**: Layer A used “Adamlar we baglanyşyklar”.
+- **Fix**: `ApplicationProfileInstance.Workspace.PeopleLinks` tk-TM → that phrase. Help lines that named the tab updated to match.
+- **Officer**: Stop F5, rebuild Blazor host, hard-refresh, Türkmençe. Left nav reads **Ýüztutmadaky adamlar**.
+- **Prevent**: Do not reuse “Adamlar we baglanyşyklar” for this tab.
+- **Cross-skill**: —
+
+### 2026-09-19 — Turkmen Progress tab is Ýüztutmanyň soň ýagdaýy
+
+- **Need**: Case workspace Progress nav in Türkmençe must be **Ýüztutmanyň soň ýagdaýy**, not the short Ýagdaýy.
+- **Cause**: Officer later replaced the short Progress caption.
+- **Fix**: `ApplicationProfileInstance.Workspace.Progress` tk-TM → that phrase. Native Progress group / CurrentState stay Ýagdaýy.
+- **Officer**: Stop F5, rebuild Blazor host, hard-refresh, Türkmençe. Left nav Progress reads the long caption.
+- **Prevent**: Do not shorten this workspace tab back to Ýagdaýy. Still do not use Ösüş.
+- **Cross-skill**: —
+
+### 2026-09-19 — Turkmen Issued records heading
+
+- **Need**: Issued records heading in Türkmençe must be **Migrasiýa gullugy tarapyndan resmileşdirilen resminamalar**.
+- **Cause**: Overview card title was still the English literal; tk-TM was “Berlen ýazgylar”.
+- **Fix**: Wired `Workspace.IssuedRecords`. tk-TM → that phrase.
+- **Officer**: Stop F5, rebuild Blazor host, hard-refresh, Türkmençe. Issued card title uses the long heading.
+- **Prevent**: Do not use Berlen ýazgylar for this heading.
+- **Cross-skill**: —
+
+### 2026-09-19 — Turkmen Linked records heading
+
+- **Need**: Linked records heading in Türkmençe must be **Ýüztutmadaky kişiniň resminama maglumatlary**, not Baglanan ýazgylar.
+- **Cause**: Layer A used a short invented caption.
+- **Fix**: `ApplicationProfileInstance.Workspace.LinkedRecords` tk-TM → that phrase.
+- **Officer**: Stop F5, rebuild Blazor host, hard-refresh, Türkmençe. Overview card title uses the long heading.
+- **Prevent**: Do not shorten this heading back to Baglanan ýazgylar.
+- **Cross-skill**: —
+
+### 2026-09-19 — Turkmen linked-record tiles stay English
+
+- **Need**: Overview Linked records heading, lock banner, and tiles (Passport, Education, …) in Türkmençe.
+- **Cause**: Headings were literals. Tile labels come from English `LinkedRecordsCatalog.Definition.Label`.
+- **Fix**: Display-only `LinkedRecordLabel`. Wired heading, lock, empty, overview tiles, People tiles, rail summary. Catalog Label stays English for tests.
+- **Officer**: Stop F5, rebuild Blazor host, hard-refresh, Türkmençe. Tiles read Pasport, Bilim, Wezipe, Salgysy, Wiza, Iş rugsady, Aýlyk, Saglyk.
+- **Prevent**: Do not change catalog Definition.Label.
+- **Cross-skill**: —
+
+### 2026-09-19 — Turkmen Activity rail stays English
+
+- **Need**: Overview Activity list (Activity, Merged N profiles, Submitted / Approved / Issued) in Türkmençe.
+- **Cause**: Heading was a literal. Row titles are English from `BuildActivities` / catalog DisplayName.
+- **Fix**: Display-only `ActivityTitle` / `ActivitySubtitle`. Heading uses `Workspace.Activity`. Outcomes reuse ProgressStepLabel (Tabşyryldy / Ylalaşyldy / Işlendi). Builder English kept for tests.
+- **Officer**: Stop F5, rebuild Blazor host, hard-refresh, Türkmençe. Activity rail is Turkmen.
+- **Prevent**: Do not change stored activity Title strings used by tests.
+- **Cross-skill**: —
+
+### 2026-09-19 — Turkmen Edit is Üytget
+
+- **Need**: Case summary **Edit** in Türkmençe must be **Üytget** (officer spelling).
+- **Cause**: Organization Edit was still the English literal. Case summary Edit used Üýtget.
+- **Fix**: `ApplicationProfileInstance.Workspace.Edit` tk-TM → `✎ Üytget`. Organization section uses the same key.
+- **Officer**: Stop F5, rebuild Blazor host, hard-refresh, Türkmençe. The pencil button reads **Üytget**.
+- **Prevent**: Do not invent Üýtget for this button. Use Üytget.
+- **Cross-skill**: —
+
+### 2026-09-19 — Turkmen Arza on instance is Ýüztutma
+
+- **Need**: Case summary tiles **Arza belgisi** / **Arza senesi** must use **Ýüztutma**, not Arza.
+- **Cause**: Field keys reused the older Arza wording.
+- **Fix**: `ApplicationProfile.Field.ApplicationNumber` / `ApplicationDate` tk-TM → **Ýüztutma belgisi** / **Ýüztutma senesi**. Doc Application → **Ýüztutma**. Instance member captions match.
+- **Officer**: Stop F5, rebuild Blazor host, hard-refresh, Türkmençe. Overview tiles read Ýüztutma belgisi / Ýüztutma senesi.
+- **Prevent**: Do not use Arza for Application Profile instance field labels.
+- **Cross-skill**: —
+
+### 2026-09-19 — Turkmen Office preparation is Ofisde taýýarlyk
+
+- **Need**: Office preparation in Türkmençe must be **Ofisde taýýarlyk**, not Edara taýýarlygy.
+- **Cause**: Layer A invented Edara taýýarlygy for the display map of `OfficeLabel`.
+- **Fix**: `ApplicationProfileInstance.Workspace.OfficePreparation` tk-TM → `Ofisde taýýarlyk`. Logic key stays `"Office preparation"`.
+- **Officer**: Stop F5, rebuild Blazor host, hard-refresh, Türkmençe. Progress step reads **Ofisde taýýarlyk**.
+- **Prevent**: Do not use Edara for this step label.
+- **Cross-skill**: —
+
+### 2026-09-19 — Turkmen instance Progress tab + Taslama belgisi / Ýüztutma
+
+- **Need**: With Türkmençe selected, Application Profile instance Progress still showed English (Progress, Office preparation, History, letter upload, SLA rail, Case workspace tab). Project Contract column should be **Taslama belgisi**. Case workspace chrome should be **Ýüztutma**.
+- **Cause**: Progress tab and rail used English literals. Step/history labels used English catalog `DisplayName` / `OfficeLabel`. XAF host caption stayed “Case workspace”. List ProjectContract tk-TM was “Taslama şertnamasy”.
+- **Fix**: Display-only `ProgressStepLabel` / `ProgressReason` (do not change `Office preparation` logic key). Wired Progress tab, overview stepper, history, SLA rail. Host + DetailView tk-TM → **Ýüztutma**. ProjectContract member/columns/class tk-TM → **Taslama belgisi**. Header instance number tk-TM → **Ýüztutma № {0}**.
+- **Officer**: Stop F5, rebuild Blazor host, hard-refresh, Türkmençe. Progress tab and workspace tab should be Turkmen; list column **Taslama belgisi**.
+- **Prevent**: New Progress chrome goes through `VisaUiMessages`. Do not localize `ProgressTimeline.OfficeLabel` const — map it only at display.
+- **Cross-skill**: —
+- **Remaining**: Overview Organization field literals; People/Issued tile catalogs; Convert dialog.
+
+### 2026-09-19 — Turkmen nav: Ýüztutmalar
+
+- **Need**: Left-nav folder and both children must be **Ýüztutmalar**, not “Ýüztutma profiliniň ýüzlemeleri”.
+- **Cause**: Layer A used the long instance caption for `Application`, `Application_ViaMinistries`, and `Application_DirectMigration`.
+- **Fix**: tk-TM → `Ýüztutmalar`, `Ýüztutmalar (ministrlik arkaly)`, `Ýüztutmalar (migrasiýa gönümel)`. Same short name on instance ListViews and officer-shell crumbs.
+- **Officer**: Stop F5, rebuild Blazor host, hard-refresh, Türkmençe. Left nav shows **Ýüztutmalar** and the two route children.
+- **Prevent**: Do not reuse the long “profiliniň ýüzlemeleri” phrase for this nav group.
+- **Cross-skill**: —
+
+### 2026-09-19 — Turkmen progress outcomes: Ylalaşyldy / Tabşyryldy / Işlendi
+
+- **Need**: Approved = **Ylalaşyldy**, Submitted = **Tabşyryldy**, Issued = **Işlendi**, Revert progress = **Ýagdaýy yzyna öwürmek**.
+- **Cause**: Timeline used English catalog `DisplayName` (Submitted/Approved/Issued). Revert button was still an English literal.
+- **Fix**: `ApplicationProfileLocalization.ProgressOutcome` maps those labels. Timeline + SLA header use it. `Workspace.Issued` tk-TM → Işlendi. Revert wired on rails and Progress tab.
+- **Officer**: Stop F5, rebuild Blazor host, hard-refresh, Türkmençe. Stepper/activity show Tabşyryldy / Ylalaşyldy / Işlendi; revert button is Ýagdaýy yzyna öwürmek.
+- **Prevent**: Do not show raw English catalog DisplayName on the case workspace. Keep Office preparation as the logic key (do not map it).
+- **Cross-skill**: —
+
+### 2026-09-19 — Turkmen Advance progress is Ýagdaýy Ilerletmek
+
+- **Need**: Officer button **Advance progress** in Türkmençe must be **Ýagdaýy Ilerletmek**.
+- **Cause**: Rail and Progress tab still used the English literal; draft tk-TM was “Ýagdaýy öňe geçir”.
+- **Fix**: `ApplicationProfileInstance.Workspace.AdvanceProgress` tk-TM → `Ýagdaýy Ilerletmek`. Wired overview rail, progress rail, and Progress tab button.
+- **Officer**: Stop F5, rebuild Blazor host, hard-refresh, Türkmençe. The blue button reads **Ýagdaýy Ilerletmek**.
+- **Prevent**: Do not invent a different Turkmen verb for this action.
+- **Cross-skill**: —
+
+### 2026-09-19 — Turkmen Progress caption stays Ýagdaýy
+
+- **Need**: Case workspace Progress tab (and native Progress group) must stay **Ýagdaýy** in Türkmençe, not Ösüş.
+- **Cause**: Layer A localization invented Ösüş for Progress. Existing officer copy already uses Ýagdaýy for status/progress.
+- **Fix**: `ApplicationProfileInstance.Workspace.Progress`, blazor-layouts Progress group, and validation Progress template `tk-TM` → `Ýagdaýy`. Regenerated catalog + xafml.
+- **Officer**: Stop F5, rebuild Blazor host, hard-refresh, Türkmençe. Case workspace left nav shows **Ýagdaýy**.
+- **Prevent**: Do not translate officer “Progress” to Ösüş. Use Ýagdaýy.
+- **Cross-skill**: —
+
+### 2026-09-19 — Localize Application Profile template and instance (Layer A)
+
+- **Need**: Officer UI for Application Profile templates and Application Profile instances in en-US / tr-TR / tk-TM / ru-RU (nav, catalog, wizard, picker, case workspace chrome).
+- **Cause**: Custom Blazor catalog/wizard/picker/workspace used English literals. Instance rename also left English captions on leftover Application class members until a stub class caption was added.
+- **Fix**: `ApplicationProfileLocalization` + `UiStrings.application-profile.json` (XAF class/view/enum) + `UiStrings.application-profile-messages.json` (`ApplicationProfile.*` / `ApplicationProfileInstance.*`). Wired catalog, all five wizard steps, picker, overview cards, officer-shell crumbs/staged/templates, workspace header and nav. Regenerated `VisaUiMessageCatalog.g.cs` and culture xafml.
+- **Officer**: Stop F5, rebuild Blazor host, hard-refresh. Switch language (Türkmençe / Türkçe / Русский). Check Configuration → Application Profile Templates (catalog + Configure wizard) and Application Profile Instances (picker + case workspace tabs).
+- **Prevent**: New officer chrome goes through `VisaUiMessages` / `ApplicationProfileLocalization`, not English literals. After JSON edits run `dotnet run --project tools/GenerateModelLocalization/GenerateModelLocalization.csproj`. Do not localize `ProgressTimeline.OfficeLabel` — CompletenessGate compares `"Office preparation"` as a logic key.
+- **Cross-skill**: —
+- **Remaining**: Case workspace Organization / Progress / SLA / People tile body copy; Convert dialog (E7b still English); some picker status strings (host-not-ready). DisplayHelper tests stay English under default en-US catalog.
+
 ### 2026-09-19 — Cannot uncheck the last border zone (Etrek comes back)
 
 - **Need**: Case summary Border zones popup. Unchecking the last box (e.g. Farap) rechecked a previously cleared zone (Etrek). Officers could not clear all zones.

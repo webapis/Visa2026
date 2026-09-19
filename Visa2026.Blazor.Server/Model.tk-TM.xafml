@@ -77,7 +77,7 @@
       <LocalizationItem Name="Master" Value="Esasy" />
       <LocalizationItem Name="Navigation" Value="Nawigasiýa" />
       <LocalizationItem Name="NoDataToDisplay" Value="Görkezmek üçin maglumat ýok" />
-      <LocalizationItem Name="Progress" Value="Ösüş" />
+      <LocalizationItem Name="Progress" Value="Ýagdaýy" />
       <LocalizationItem Name="ProgressHistory" Value="Ösüş taryhy" />
       <LocalizationItem Name="Recommendation" Value="Maslahat" />
       <LocalizationItem Name="RejectionItems" Value="Ret elementleri" />
@@ -109,7 +109,7 @@
           <LayoutGroup Id="SimpleEditors">
             <TabbedGroup Id="Item1">
               <LayoutGroup Id="Application" Caption="Arza" />
-              <LayoutGroup Id="Item2" Caption="Ösüş">
+              <LayoutGroup Id="Item2" Caption="Ýagdaýy">
                 <LayoutGroup Id="ProgressHistory" Caption="Ösüş taryhy" />
               </LayoutGroup>
               <LayoutGroup Id="Item3" Caption="Ýagdaý" />

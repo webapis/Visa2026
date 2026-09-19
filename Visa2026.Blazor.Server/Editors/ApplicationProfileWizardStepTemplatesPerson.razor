@@ -1,81 +1,82 @@
 @using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Localization
 
 <div class="ap-wizard__panel-head">
-    <h2>Person data</h2>
-    <p>Choose which person-related rows this profile needs. Word and Excel templates are created on a case (Resminamalar This profile / Shared).</p>
+    <h2>@Msg("ApplicationProfile.Wizard.Step.Person")</h2>
+    <p>@Msg("ApplicationProfile.Wizard.PersonIntro")</p>
 </div>
 <div class="ap-wizard__panel-body">
     <div class="ap-wizard__section">
-        <h3>Required person-related data</h3>
-        <p class="ap-wizard__hint">Last 1–3 is only for Passport, Visa, Invitation, Work permit, and Border zone. Other types stay one current row. Missing rows are flagged; they do not block create.</p>
+        <h3>@Msg("ApplicationProfile.Wizard.PersonRequired")</h3>
+        <p class="ap-wizard__hint">@Msg("ApplicationProfile.Wizard.PersonHint")</p>
         <div class="ap-wizard__choices ap-wizard__choices--grid">
             <div class="ap-wizard__choice-cluster">
-            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonPassport" disabled="@Disabled" /> Passport</label>
+            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonPassport" disabled="@Disabled" /> @Msg("ApplicationProfile.Person.Passport")</label>
                 @if (Profile.RequirePersonPassport)
                 {
-                    <select class="ap-wizard__last-n" @bind="Profile.PersonPassportLastCount" disabled="@Disabled" title="How many latest passports to auto-link">
-                        <option value="1">Last 1</option>
-                        <option value="2">Last 2</option>
-                        <option value="3">Last 3</option>
+                    <select class="ap-wizard__last-n" @bind="Profile.PersonPassportLastCount" disabled="@Disabled" title="@Msg("ApplicationProfile.Person.LastNTitle")">
+                        <option value="1">@VisaUiMessages.Format("ApplicationProfile.Person.LastN", 1)</option>
+                        <option value="2">@VisaUiMessages.Format("ApplicationProfile.Person.LastN", 2)</option>
+                        <option value="3">@VisaUiMessages.Format("ApplicationProfile.Person.LastN", 3)</option>
                     </select>
                 }
             </div>
             @if (ShowEducationToggle)
             {
-            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonEducation" disabled="@Disabled" /> Education</label>
+            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonEducation" disabled="@Disabled" /> @Msg("ApplicationProfile.Person.Education")</label>
             }
-            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonPosition" disabled="@Disabled" /> Position</label>
-            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonAddressOfResidence" disabled="@Disabled" /> Address of residence</label>
+            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonPosition" disabled="@Disabled" /> @Msg("ApplicationProfile.Person.Position")</label>
+            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonAddressOfResidence" disabled="@Disabled" /> @Msg("ApplicationProfile.Person.AddressOfResidence")</label>
             <div class="ap-wizard__choice-cluster">
-            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonVisa" disabled="@Disabled" /> Visa</label>
+            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonVisa" disabled="@Disabled" /> @Msg("ApplicationProfile.Person.Visa")</label>
                 @if (Profile.RequirePersonVisa)
                 {
-                    <select class="ap-wizard__last-n" @bind="Profile.PersonVisaLastCount" disabled="@Disabled" title="How many latest valid visas to auto-link">
-                        <option value="1">Last 1</option>
-                        <option value="2">Last 2</option>
-                        <option value="3">Last 3</option>
+                    <select class="ap-wizard__last-n" @bind="Profile.PersonVisaLastCount" disabled="@Disabled" title="@Msg("ApplicationProfile.Person.LastNTitle")">
+                        <option value="1">@VisaUiMessages.Format("ApplicationProfile.Person.LastN", 1)</option>
+                        <option value="2">@VisaUiMessages.Format("ApplicationProfile.Person.LastN", 2)</option>
+                        <option value="3">@VisaUiMessages.Format("ApplicationProfile.Person.LastN", 3)</option>
                     </select>
                 }
             </div>
             <div class="ap-wizard__choice-cluster">
-            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonInvitationItem" disabled="@Disabled" /> Invitation item</label>
+            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonInvitationItem" disabled="@Disabled" /> @Msg("ApplicationProfile.Person.InvitationItem")</label>
                 @if (Profile.RequirePersonInvitationItem)
                 {
-                    <select class="ap-wizard__last-n" @bind="Profile.PersonInvitationItemLastCount" disabled="@Disabled" title="How many latest valid invitation items to auto-link">
-                        <option value="1">Last 1</option>
-                        <option value="2">Last 2</option>
-                        <option value="3">Last 3</option>
+                    <select class="ap-wizard__last-n" @bind="Profile.PersonInvitationItemLastCount" disabled="@Disabled" title="@Msg("ApplicationProfile.Person.LastNTitle")">
+                        <option value="1">@VisaUiMessages.Format("ApplicationProfile.Person.LastN", 1)</option>
+                        <option value="2">@VisaUiMessages.Format("ApplicationProfile.Person.LastN", 2)</option>
+                        <option value="3">@VisaUiMessages.Format("ApplicationProfile.Person.LastN", 3)</option>
                     </select>
                 }
             </div>
             <div class="ap-wizard__choice-cluster">
-            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonWorkPermitItem" disabled="@Disabled" /> Work permit item</label>
+            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonWorkPermitItem" disabled="@Disabled" /> @Msg("ApplicationProfile.Person.WorkPermitItem")</label>
                 @if (Profile.RequirePersonWorkPermitItem)
                 {
-                    <select class="ap-wizard__last-n" @bind="Profile.PersonWorkPermitItemLastCount" disabled="@Disabled" title="How many latest valid work-permit items to auto-link">
-                        <option value="1">Last 1</option>
-                        <option value="2">Last 2</option>
-                        <option value="3">Last 3</option>
+                    <select class="ap-wizard__last-n" @bind="Profile.PersonWorkPermitItemLastCount" disabled="@Disabled" title="@Msg("ApplicationProfile.Person.LastNTitle")">
+                        <option value="1">@VisaUiMessages.Format("ApplicationProfile.Person.LastN", 1)</option>
+                        <option value="2">@VisaUiMessages.Format("ApplicationProfile.Person.LastN", 2)</option>
+                        <option value="3">@VisaUiMessages.Format("ApplicationProfile.Person.LastN", 3)</option>
                     </select>
                 }
             </div>
             <div class="ap-wizard__choice-cluster">
-            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonBorderZoneItem" disabled="@Disabled" /> Border zone item</label>
+            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonBorderZoneItem" disabled="@Disabled" /> @Msg("ApplicationProfile.Person.BorderZoneItem")</label>
                 @if (Profile.RequirePersonBorderZoneItem)
                 {
-                    <select class="ap-wizard__last-n" @bind="Profile.PersonBorderZoneItemLastCount" disabled="@Disabled" title="How many latest valid border-zone items to auto-link">
-                        <option value="1">Last 1</option>
-                        <option value="2">Last 2</option>
-                        <option value="3">Last 3</option>
+                    <select class="ap-wizard__last-n" @bind="Profile.PersonBorderZoneItemLastCount" disabled="@Disabled" title="@Msg("ApplicationProfile.Person.LastNTitle")">
+                        <option value="1">@VisaUiMessages.Format("ApplicationProfile.Person.LastN", 1)</option>
+                        <option value="2">@VisaUiMessages.Format("ApplicationProfile.Person.LastN", 2)</option>
+                        <option value="3">@VisaUiMessages.Format("ApplicationProfile.Person.LastN", 3)</option>
                     </select>
                 }
             </div>
-            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonSalary" disabled="@Disabled" /> Salary</label>
-            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonMedical" disabled="@Disabled" /> Medical</label>
-            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonRejectionItem" disabled="@Disabled" /> Rejection item</label>
+            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonSalary" disabled="@Disabled" /> @Msg("ApplicationProfile.Person.Salary")</label>
+            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonMedical" disabled="@Disabled" /> @Msg("ApplicationProfile.Person.Medical")</label>
+            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonRejectionItem" disabled="@Disabled" /> @Msg("ApplicationProfile.Person.RejectionItem")</label>
             @if (ShowTravelHistoryToggle)
             {
-                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonTravelHistory" disabled="@Disabled" /> Travel history</label>
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonTravelHistory" disabled="@Disabled" /> @Msg("ApplicationProfile.Person.TravelHistory")</label>
             }
         </div>
     </div>
@@ -98,4 +99,6 @@
 
     private bool ShowEducationToggle =>
         ApplicationProfileEducationPolicy.AllowsPersonEducation(Profile);
+
+    private static string Msg(string key) => VisaUiMessages.Get(key);
 }

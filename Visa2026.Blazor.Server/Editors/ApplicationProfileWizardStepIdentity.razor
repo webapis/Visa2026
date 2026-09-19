@@ -1,50 +1,50 @@
 @using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Localization
 
 <div class="ap-wizard__panel-head">
-    <h2>Identity &amp; purpose</h2>
-    <p>Define who this profile is for and how applications created from it are directed.</p>
+    <h2>@Msg("ApplicationProfile.Wizard.Step.Identity")</h2>
+    <p>@Msg("ApplicationProfile.Wizard.IdentityIntro")</p>
 </div>
 <div class="ap-wizard__panel-body">
     <div class="ap-wizard__callout">
-        Applications reference this profile via a <strong>live FK</strong> (set only at create).
-        Configuration stays editable until a linked application reaches lock state <strong>A</strong>.
+        @Msg("ApplicationProfile.Wizard.LiveFkNote")
     </div>
     <div class="ap-wizard__section">
-        <h3>Name</h3>
+        <h3>@Msg("ApplicationProfile.Wizard.NameSection")</h3>
         <div class="ap-wizard__grid">
             <label class="ap-wizard__field ap-wizard__field--full">
-                <span>Application Profile name</span>
+                <span>@Msg("ApplicationProfile.Wizard.ProfileName")</span>
                 <input type="text" @bind="Profile.Name" @bind:event="oninput" @bind:after="NotifyNameChanged" disabled="@Disabled" />
             </label>
         </div>
     </div>
     <div class="ap-wizard__section">
-        <h3>Directed to</h3>
+        <h3>@Msg("ApplicationProfile.Wizard.DirectedTo")</h3>
         <div class="ap-wizard__choices">
             <label class="ap-wizard__choice">
                 <input type="radio" name="route" checked="@(Profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries)"
                        disabled="@Disabled"
                        @onchange="@(() => SetRoute(ApplicationProfileInstanceProgressRouteKind.ViaMinistries))" />
-                Via ministry
+                @Msg("ApplicationProfile.Route.ViaMinistry")
             </label>
             <label class="ap-wizard__choice">
                 <input type="radio" name="route" checked="@(Profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService)"
                        disabled="@Disabled"
                        @onchange="@(() => SetRoute(ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService))" />
-                Direct migration service
+                @Msg("ApplicationProfile.Wizard.DirectMigrationService")
             </label>
         </div>
     </div>
     <div class="ap-wizard__section">
-        <h3>ApplicationProfileInstance may be for</h3>
+        <h3>@Msg("ApplicationProfile.Wizard.MayBeFor")</h3>
         <div class="ap-wizard__choices">
-            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ForEmployee" disabled="@Disabled" /> Employee</label>
-            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ForFamilyMember" disabled="@Disabled" /> Family member</label>
-            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ForTemporaryVisitor" disabled="@Disabled" /> Temporary visitor</label>
+            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ForEmployee" disabled="@Disabled" /> @Msg("ApplicationProfile.Audience.Employee")</label>
+            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ForFamilyMember" disabled="@Disabled" /> @Msg("ApplicationProfile.Audience.FamilyMember")</label>
+            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ForTemporaryVisitor" disabled="@Disabled" /> @Msg("ApplicationProfile.Audience.TemporaryVisitor")</label>
         </div>
     </div>
     <div class="ap-wizard__section">
-        <h3>ApplicationProfileInstance related to</h3>
+        <h3>@Msg("ApplicationProfile.Wizard.RelatedTo")</h3>
         <div class="ap-wizard__choices">
             @foreach (var family in ActionFamilies)
             {
@@ -59,80 +59,80 @@
         </div>
         @if (ShowMayProduce)
         {
-            <h3 class="ap-wizard__subhead">May produce</h3>
+            <h3 class="ap-wizard__subhead">@Msg("ApplicationProfile.Wizard.MayProduce")</h3>
             <div class="ap-wizard__choices">
-                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ProduceInvitation" disabled="@Disabled" /> Invitation</label>
-                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ProduceWorkPermit" disabled="@Disabled" /> Work permit</label>
-                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ProduceVisa" disabled="@Disabled" /> Visa</label>
-                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ProduceBorderZone" disabled="@Disabled" /> Border zone</label>
-                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ProduceRejection" disabled="@Disabled" /> Rejection</label>
-                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ProduceWorkLocation" disabled="@Disabled" /> Work location</label>
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ProduceInvitation" disabled="@Disabled" /> @Msg("ApplicationProfile.Doc.Invitation")</label>
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ProduceWorkPermit" disabled="@Disabled" /> @Msg("ApplicationProfile.Doc.WorkPermit")</label>
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ProduceVisa" disabled="@Disabled" /> @Msg("ApplicationProfile.Doc.Visa")</label>
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ProduceBorderZone" disabled="@Disabled" /> @Msg("ApplicationProfile.Doc.BorderZone")</label>
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ProduceRejection" disabled="@Disabled" /> @Msg("ApplicationProfile.Doc.Rejection")</label>
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ProduceWorkLocation" disabled="@Disabled" /> @Msg("ApplicationProfile.Doc.WorkLocation")</label>
             </div>
         }
         else if (ShowMayCancel)
         {
-            <h3 class="ap-wizard__subhead">May cancel existing</h3>
+            <h3 class="ap-wizard__subhead">@Msg("ApplicationProfile.Wizard.MayCancel")</h3>
             <div class="ap-wizard__choices">
-                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.CancelInvitations" disabled="@Disabled" /> Invitation(s)</label>
-                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.CancelWorkPermits" disabled="@Disabled" /> Work permit(s)</label>
-                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.CancelVisas" disabled="@Disabled" /> Visa(s)</label>
-                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.CancelBorderZonePermits" disabled="@Disabled" /> Border zone permit(s)</label>
-                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.CancelApplicationProfileInstances" disabled="@Disabled" /> Application(s)</label>
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.CancelInvitations" disabled="@Disabled" /> @Msg("ApplicationProfile.Doc.Invitations")</label>
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.CancelWorkPermits" disabled="@Disabled" /> @Msg("ApplicationProfile.Doc.WorkPermits")</label>
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.CancelVisas" disabled="@Disabled" /> @Msg("ApplicationProfile.Doc.Visas")</label>
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.CancelBorderZonePermits" disabled="@Disabled" /> @Msg("ApplicationProfile.Doc.BorderZonePermits")</label>
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.CancelApplicationProfileInstances" disabled="@Disabled" /> @Msg("ApplicationProfile.Doc.Applications")</label>
             </div>
         }
         else if (ShowMayChange)
         {
-            <h3 class="ap-wizard__subhead">May change existing</h3>
+            <h3 class="ap-wizard__subhead">@Msg("ApplicationProfile.Wizard.MayChange")</h3>
             <div class="ap-wizard__choices">
-                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ChangeInvitations" disabled="@Disabled" /> Invitation(s)</label>
-                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ChangeWorkPermits" disabled="@Disabled" /> Work permit(s)</label>
-                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ChangeVisas" disabled="@Disabled" /> Visa(s)</label>
-                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ChangeBorderZonePermits" disabled="@Disabled" /> Border zone permit(s)</label>
-                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ChangeApplicationProfileInstances" disabled="@Disabled" /> Application(s)</label>
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ChangeInvitations" disabled="@Disabled" /> @Msg("ApplicationProfile.Doc.Invitations")</label>
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ChangeWorkPermits" disabled="@Disabled" /> @Msg("ApplicationProfile.Doc.WorkPermits")</label>
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ChangeVisas" disabled="@Disabled" /> @Msg("ApplicationProfile.Doc.Visas")</label>
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ChangeBorderZonePermits" disabled="@Disabled" /> @Msg("ApplicationProfile.Doc.BorderZonePermits")</label>
+                <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ChangeApplicationProfileInstances" disabled="@Disabled" /> @Msg("ApplicationProfile.Doc.Applications")</label>
             </div>
         }
         else if (ShowRegistrationKind)
         {
-            <h3 class="ap-wizard__subhead">Registration is</h3>
+            <h3 class="ap-wizard__subhead">@Msg("ApplicationProfile.Wizard.RegistrationIs")</h3>
             <div class="ap-wizard__choices">
                 <label class="ap-wizard__choice">
                     <input type="radio" name="registrationKind"
                            checked="@(Profile.RegistrationKind == ApplicationProfileRegistrationKind.CheckIn)"
                            disabled="@Disabled"
                            @onchange="@(() => SetRegistrationKind(ApplicationProfileRegistrationKind.CheckIn))" />
-                    Check in
+                    @Msg("ApplicationProfile.RegistrationKind.CheckIn")
                 </label>
                 <label class="ap-wizard__choice">
                     <input type="radio" name="registrationKind"
                            checked="@(Profile.RegistrationKind == ApplicationProfileRegistrationKind.CheckOut)"
                            disabled="@Disabled"
                            @onchange="@(() => SetRegistrationKind(ApplicationProfileRegistrationKind.CheckOut))" />
-                    Check out
+                    @Msg("ApplicationProfile.RegistrationKind.CheckOut")
                 </label>
                 <label class="ap-wizard__choice">
                     <input type="radio" name="registrationKind"
                            checked="@(Profile.RegistrationKind == ApplicationProfileRegistrationKind.InfoChange)"
                            disabled="@Disabled"
                            @onchange="@(() => SetRegistrationKind(ApplicationProfileRegistrationKind.InfoChange))" />
-                    Info change
+                    @Msg("ApplicationProfile.RegistrationKind.InfoChange")
                 </label>
                 <label class="ap-wizard__choice">
                     <input type="radio" name="registrationKind"
                            checked="@(Profile.RegistrationKind == ApplicationProfileRegistrationKind.Extension)"
                            disabled="@Disabled"
                            @onchange="@(() => SetRegistrationKind(ApplicationProfileRegistrationKind.Extension))" />
-                    Reg extension
+                    @Msg("ApplicationProfile.RegistrationKind.Extension")
                 </label>
             </div>
-            <p class="ap-wizard__hint">Used later for Report Dashboard registration queries (check-in, check-out, info change, reg extension).</p>
+            <p class="ap-wizard__hint">@Msg("ApplicationProfile.Wizard.RegistrationHint")</p>
         }
         else
         {
-            <p class="ap-wizard__hint">Business-trip profiles do not issue, cancel, or change documents here.</p>
+            <p class="ap-wizard__hint">@Msg("ApplicationProfile.Wizard.BusinessTripHint")</p>
         }
     </div>
     <label class="ap-wizard__choice">
-        <input type="checkbox" @bind="Profile.IsActive" disabled="@Disabled" /> Active (available in pickers)
+        <input type="checkbox" @bind="Profile.IsActive" disabled="@Disabled" /> @Msg("ApplicationProfile.Wizard.ActiveAvailable")
     </label>
 </div>
 
@@ -229,12 +229,8 @@
         Profile.ChangeApplicationProfileInstances = false;
     }
 
-    private static string FormatActionFamily(ApplicationProfileActionFamily family) => family switch
-    {
-        ApplicationProfileActionFamily.Cancellation => "Cancellation",
-        ApplicationProfileActionFamily.Change => "Change",
-        ApplicationProfileActionFamily.Registration => "Registration",
-        ApplicationProfileActionFamily.BusinessTrip => "Business trip",
-        _ => "Issuance",
-    };
+    private static string FormatActionFamily(ApplicationProfileActionFamily family) =>
+        ApplicationProfileLocalization.ActionFamily(family);
+
+    private static string Msg(string key) => VisaUiMessages.Get(key);
 }

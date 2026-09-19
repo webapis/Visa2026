@@ -9,6 +9,7 @@ using DevExpress.ExpressApp.Model;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Localization;
 using Visa2026.Module.BusinessObjects.ApplicationProfileOverview;
 using Visa2026.Module.Editors;
 using Visa2026.Module.Services.ApplicationProfileCatalog;
@@ -139,7 +140,7 @@ public class ApplicationProfileOverviewPropertyEditor : BlazorPropertyEditorBase
         if (!ApplicationProfileUnlinkedDeleteHelper.TryDelete(objectSpace, profileId, out var error))
         {
             _application.ShowViewStrategy.ShowMessage(
-                error ?? "Could not delete Application Profile template.",
+                error ?? VisaUiMessages.Get("ApplicationProfile.Overview.CouldNotDelete"),
                 InformationType.Warning);
             return;
         }

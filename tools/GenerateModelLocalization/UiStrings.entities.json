@@ -170,7 +170,7 @@
       }
     },
     "ProjectContract": {
-      "caption": { "en-US": "Project contract", "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama şertnamasy", "ru-RU": "Контракт проекта" },
+      "caption": { "en-US": "Project contract", "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama belgisi", "ru-RU": "Контракт проекта" },
       "listCaption": { "en-US": "Project contracts", "tr-TR": "Proje Sözleşmeleri", "tk-TM": "Taslama şertnamalary", "ru-RU": "Контракты проекта" },
       "lookup": true,
       "members": {

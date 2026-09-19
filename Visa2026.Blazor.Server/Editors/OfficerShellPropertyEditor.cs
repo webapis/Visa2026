@@ -208,7 +208,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
 
         model.WorkspaceLoading = true;
         model.WorkspaceLoadingProgressPercent = -1;
-        model.WorkspaceLoadingMessage = "Opening case…";
+        model.WorkspaceLoadingMessage = VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Opening");
         await Task.Delay(16);
 
         try

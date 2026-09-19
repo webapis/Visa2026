@@ -16,18 +16,18 @@
       }
     },
     "Application": {
-      "caption": { "en-US": "ApplicationProfileInstances", "tr-TR": "Başvurular", "tk-TM": "Ýüztutmalar", "ru-RU": "Заявки" },
+      "caption": { "en-US": "Application Profile Instances", "tr-TR": "Başvuru profili örnekleri", "tk-TM": "Ýüztutmalar", "ru-RU": "Экземпляры профиля заявки" },
       "children": {
         "Application_ViaMinistries": {
           "caption": {
-            "en-US": "Applications (via ministry)",
-            "tr-TR": "Başvurular (bakanlık süreci)",
-            "tk-TM": "Ministrlikler bilen ylalaşylýan ýüztutmalar",
-            "ru-RU": "Заявки (через министерства)"
+            "en-US": "Application Profile Instances (via ministry)",
+            "tr-TR": "Başvuru profili örnekleri (bakanlık süreci)",
+            "tk-TM": "Ýüztutmalar (ministrlik arkaly)",
+            "ru-RU": "Экземпляры профиля заявки (через министерства)"
           },
           "children": {
             "ApplicationItem_ViaMinistries": {
-              "en-US": "ApplicationProfileInstance items (ministry)",
+              "en-US": "Application items (ministry)",
               "tr-TR": "Başvuru kalemleri (bakanlık)",
               "tk-TM": "Ýüztutmadaky raýatlar",
               "ru-RU": "Позиции (через министерства)"
@@ -36,14 +36,14 @@
         },
         "Application_DirectMigration": {
           "caption": {
-            "en-US": "Applications (direct migration)",
-            "tr-TR": "Başvurular (doğrudan migrasyon)",
-            "tk-TM": "Ylalaşyk zerur bolmadyk ýüztutmalar",
-            "ru-RU": "Заявки (напрямую в миграцию)"
+            "en-US": "Application Profile Instances (direct migration)",
+            "tr-TR": "Başvuru profili örnekleri (doğrudan migrasyon)",
+            "tk-TM": "Ýüztutmalar (migrasiýa gönümel)",
+            "ru-RU": "Экземпляры профиля заявки (напрямую в миграцию)"
           },
           "children": {
             "ApplicationItem_DirectMigration": {
-              "en-US": "ApplicationProfileInstance items (migration)",
+              "en-US": "Application items (migration)",
               "tr-TR": "Başvuru kalemleri (migrasyon)",
               "tk-TM": "Ýüztutmadaky raýatlar",
               "ru-RU": "Позиции (напрямую в миграцию)"
@@ -67,7 +67,17 @@
     "System": { "tr-TR": "Sistem", "tk-TM": "Ulgam", "ru-RU": "Система" },
     "Auth": { "tr-TR": "Güvenlik", "tk-TM": "Howpsuzlyk", "ru-RU": "Безопасность" },
     "Person": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" },
-    "Configuration": { "tr-TR": "Yapılandırma", "tk-TM": "Konfigurasiýa", "ru-RU": "Конфигурация" },
+    "Configuration": {
+      "caption": { "en-US": "Configuration", "tr-TR": "Yapılandırma", "tk-TM": "Konfigurasiýa", "ru-RU": "Конфигурация" },
+      "children": {
+        "ApplicationProfileCatalog": {
+          "en-US": "Application Profile Templates",
+          "tr-TR": "Başvuru profili şablonları",
+          "tk-TM": "Ýüztutma profil şablonlary",
+          "ru-RU": "Шаблоны профиля заявки"
+        }
+      }
+    },
     "Organization": { "tr-TR": "Organizasyon", "tk-TM": "Gurama", "ru-RU": "Организация" },
     "Geography": { "tr-TR": "Coğrafya", "tk-TM": "Geografiýa", "ru-RU": "География" },
     "Config": { "tr-TR": "Yapılandırma", "tk-TM": "Konfigurasiýa", "ru-RU": "Настройка" },
@@ -124,17 +134,30 @@
       "caption": { "en-US": "Report Dashboard", "tr-TR": "Rapor Panosu", "tk-TM": "Hasabat paneli", "ru-RU": "Панель отчётов" }
     },
     "Visa2026.Module.BusinessObjects.Application": {
-      "caption": { "en-US": "Application", "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
+      "caption": { "en-US": "Application Profile instance", "tr-TR": "Başvuru profili örneği", "tk-TM": "Ýüztutma profiliniň ýüzlemesi", "ru-RU": "Экземпляр профиля заявки" },
+      "members": {
+        "Month": { "en-US": "Month", "tr-TR": "Ay", "tk-TM": "Aý", "ru-RU": "Месяц" },
+        "Year": { "en-US": "Year", "tr-TR": "Yıl", "tk-TM": "Ýyl", "ru-RU": "Год" },
+        "ProcessNumber": { "en-US": "Process number", "tr-TR": "Süreç numarası", "tk-TM": "Proses belgisi", "ru-RU": "Номер процесса" },
+        "ApplicationProfile": { "en-US": "Application Profile", "tr-TR": "Başvuru profili", "tk-TM": "Ýüztutma profili", "ru-RU": "Профиль заявки" },
+        "VisaPeriod": { "en-US": "Visa period", "tr-TR": "Vize Süresi", "tk-TM": "Wiza möhleti", "ru-RU": "Срок визы" },
+        "VisaType": { "en-US": "Visa type", "tr-TR": "Vize Türü", "tk-TM": "Wiza görnüşi", "ru-RU": "Тип визы" },
+        "VisaCategory": { "en-US": "Visa category", "tr-TR": "Vize Kategorisi", "tk-TM": "Wiza kategoriýasy", "ru-RU": "Категория визы" },
+        "ProjectContract": { "en-US": "Project contract", "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama belgisi", "ru-RU": "Контракт проекта" }
+      }
+    },
+    "Visa2026.Module.BusinessObjects.ApplicationProfileInstance": {
+      "caption": { "en-US": "Application Profile instance", "tr-TR": "Başvuru profili örneği", "tk-TM": "Ýüztutma profiliniň ýüzlemesi", "ru-RU": "Экземпляр профиля заявки" },
       "members": {
         "IsManualEntry": { "en-US": "Manual entry", "tr-TR": "Manuel Giriş", "tk-TM": "El bilen giriş", "ru-RU": "Ручной ввод" },
-        "ApplicationNumber": { "en-US": "ApplicationProfileInstance number", "tr-TR": "Başvuru Numarası", "tk-TM": "Arza belgisi", "ru-RU": "Номер заявки" },
+        "ApplicationNumber": { "en-US": "Application number", "tr-TR": "Başvuru Numarası", "tk-TM": "Ýüztutma belgisi", "ru-RU": "Номер заявки" },
         "FullApplicationNumber": { "en-US": "Full application number", "tr-TR": "Tam Başvuru No", "tk-TM": "Doly arza belgisi", "ru-RU": "Полный номер" },
-        "ApplicationDate": { "en-US": "ApplicationProfileInstance date", "tr-TR": "Başvuru Tarihi", "tk-TM": "Arza senesi", "ru-RU": "Дата заявки" },
+        "ApplicationDate": { "en-US": "Application date", "tr-TR": "Başvuru Tarihi", "tk-TM": "Ýüztutma senesi", "ru-RU": "Дата заявки" },
         "Category": { "en-US": "Category", "tr-TR": "Kategori", "tk-TM": "Kategoriýa", "ru-RU": "Категория" },
-        "ApplicationTypeFilter": { "en-US": "ApplicationProfileInstance type filter", "tr-TR": "Başvuru Türü Filtresi", "tk-TM": "Arza görnüşi süzgüçi", "ru-RU": "Фильтр типа" },
-        "ApplicationType": { "en-US": "ApplicationProfileInstance type", "tr-TR": "Başvuru Türü", "tk-TM": "Arza görnüşi", "ru-RU": "Тип заявки" },
-        "ApplicationReason": { "en-US": "ApplicationProfileInstance reason", "tr-TR": "Başvuru Nedeni", "tk-TM": "Arza sebäbi", "ru-RU": "Причина" },
-        "ProjectContract": { "en-US": "Project contract", "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama şertnamasy", "ru-RU": "Контракт проекта" },
+        "ApplicationTypeFilter": { "en-US": "Application type filter", "tr-TR": "Başvuru Türü Filtresi", "tk-TM": "Arza görnüşi süzgüçi", "ru-RU": "Фильтр типа" },
+        "ApplicationType": { "en-US": "Application type", "tr-TR": "Başvuru Türü", "tk-TM": "Arza görnüşi", "ru-RU": "Тип заявки" },
+        "ApplicationReason": { "en-US": "Application reason", "tr-TR": "Başvuru Nedeni", "tk-TM": "Arza sebäbi", "ru-RU": "Причина" },
+        "ProjectContract": { "en-US": "Project contract", "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama belgisi", "ru-RU": "Контракт проекта" },
         "ApprovalLegProfile": { "en-US": "Approval leg profile", "tr-TR": "Onay bakanlık profili", "tk-TM": "Ministrlik ylalaşyk ädimleri", "ru-RU": "Профиль этапов министерств" },
         "MigrationService": { "en-US": "Migration service", "tr-TR": "Göç Dairesi", "tk-TM": "Migrasiýa gullugy", "ru-RU": "Миграционная служба" },
         "Company": { "en-US": "Company", "tr-TR": "Şirket", "tk-TM": "Kompaniýa", "ru-RU": "Компания" },
@@ -146,6 +169,8 @@
         "ExpirationDate": { "en-US": "Expiration date", "tr-TR": "Bitiş Tarihi", "tk-TM": "Gutarýan senesi", "ru-RU": "Дата окончания" },
         "Year": { "en-US": "Year", "tr-TR": "Yıl", "tk-TM": "Ýyl", "ru-RU": "Год" },
         "Month": { "en-US": "Month", "tr-TR": "Ay", "tk-TM": "Aý", "ru-RU": "Месяц" },
+        "ProcessNumber": { "en-US": "Process number", "tr-TR": "Süreç numarası", "tk-TM": "Proses belgisi", "ru-RU": "Номер процесса" },
+        "ApplicationProfile": { "en-US": "Application Profile", "tr-TR": "Başvuru profili", "tk-TM": "Ýüztutma profili", "ru-RU": "Профиль заявки" },
         "IsActive": { "en-US": "Active", "tr-TR": "Aktif", "tk-TM": "Aktiw", "ru-RU": "Активен" },
         "DaysRemaining": { "en-US": "Days remaining", "tr-TR": "Kalan Gün", "tk-TM": "Galan gün", "ru-RU": "Осталось дней" },
         "ExpirationState": { "en-US": "Expiration status", "tr-TR": "Süre Durumu", "tk-TM": "Möhlet ýagdaýy", "ru-RU": "Статус срока" },
@@ -197,7 +222,7 @@
           "tk-TM": "Adam sany",
           "ru-RU": "Количество лиц"
         },
-        "ApplicationItems": { "en-US": "ApplicationProfileInstance items", "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции" },
+        "ApplicationItems": { "en-US": "Application items", "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции" },
         "Invitations": { "en-US": "Invitations", "tr-TR": "Davetler", "tk-TM": "Çakylyklar", "ru-RU": "Приглашения" },
         "Rejections": { "en-US": "Rejections", "tr-TR": "Retler", "tk-TM": "Retler", "ru-RU": "Отказы" },
         "WorkPermits": { "en-US": "Work permits", "tr-TR": "Çalışma İzinleri", "tk-TM": "Iş rugsatnamalary", "ru-RU": "РНТ" },
@@ -208,7 +233,7 @@
       }
     },
     "Visa2026.Module.BusinessObjects.ApplicationItem": {
-      "caption": { "en-US": "ApplicationProfileInstance item", "tr-TR": "Başvuru Kalemi", "tk-TM": "Arza elementi", "ru-RU": "Позиция заявки" },
+      "caption": { "en-US": "Application item", "tr-TR": "Başvuru Kalemi", "tk-TM": "Arza elementi", "ru-RU": "Позиция заявки" },
       "members": {
         "Person": { "en-US": "Person", "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" },
         "Application": { "en-US": "Application", "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
@@ -256,7 +281,7 @@
         "Nationality": { "tr-TR": "Uyruk", "tk-TM": "Milleti", "ru-RU": "Гражданство" },
         "ForeignAddress": { "tr-TR": "Yurt Dışı Adres", "tk-TM": "Daşary ýurt salgysy", "ru-RU": "Иностранный адрес" },
         "ForeignAddressCountry": { "tr-TR": "Yurt Dışı Adres Ülkesi", "tk-TM": "Daşary ýurt salgysynyň ýurdy", "ru-RU": "Страна иностр. адреса" },
-        "ProjectContract": { "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama şertnamasy", "ru-RU": "Контракт проекта" },
+        "ProjectContract": { "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama belgisi", "ru-RU": "Контракт проекта" },
         "Photo": { "tr-TR": "Fotoğraf", "tk-TM": "Surat", "ru-RU": "Фото" },
         "IsEmployee": { "tr-TR": "Çalışan", "tk-TM": "Işgär", "ru-RU": "Сотрудник" },
         "Company": { "tr-TR": "Şirket", "tk-TM": "Kompaniýa", "ru-RU": "Компания" },
@@ -329,11 +354,12 @@
   },
   "views": {
     "Application_ListView": {
-      "caption": { "en-US": "ApplicationProfileInstances", "tr-TR": "Başvurular", "tk-TM": "Arzalar", "ru-RU": "Заявки" },
+      "caption": { "en-US": "Application Profile Instances", "tr-TR": "Başvuru profili örnekleri", "tk-TM": "Ýüztutmalar", "ru-RU": "Экземпляры профиля заявки" },
       "columns": {
-        "FullApplicationNumber": { "en-US": "ApplicationProfileInstance number", "tr-TR": "Başvuru No", "tk-TM": "Ýüztutmanyň belgisi", "ru-RU": "Номер" },
+        "FullApplicationNumber": { "en-US": "Application number", "tr-TR": "Başvuru No", "tk-TM": "Ýüztutmanyň belgisi", "ru-RU": "Номер" },
         "Year": { "en-US": "Year", "tr-TR": "Yıl", "tk-TM": "Ýyl", "ru-RU": "Год" },
         "Month": { "en-US": "Month", "tr-TR": "Ay", "tk-TM": "Aý", "ru-RU": "Месяц" },
+        "ProcessNumber": { "en-US": "Process number", "tr-TR": "Süreç numarası", "tk-TM": "Proses belgisi", "ru-RU": "Номер процесса" },
         "ApplicationDate": { "en-US": "Date", "tr-TR": "Tarih", "tk-TM": "Ýüztutmanyň senesi", "ru-RU": "Дата" },
         "TotalPersonCount": {
           "en-US": "Person count",
@@ -390,7 +416,13 @@
         "IsActive": { "en-US": "Active", "tr-TR": "Aktif", "tk-TM": "Aktiw", "ru-RU": "Активен" },
         "DaysRemaining": { "en-US": "Days remaining", "tr-TR": "Kalan Gün", "tk-TM": "Galan gün", "ru-RU": "Осталось дней" },
         "ExpirationState": { "en-US": "Expiration status", "tr-TR": "Süre Durumu", "tk-TM": "Möhlet ýagdaýy", "ru-RU": "Статус срока" },
-        "Company": { "en-US": "Company", "tr-TR": "Şirket", "tk-TM": "Kompaniýa", "ru-RU": "Компания" }
+        "Company": { "en-US": "Company", "tr-TR": "Şirket", "tk-TM": "Kompaniýa", "ru-RU": "Компания" },
+        "ProjectContract": { "en-US": "Project contract", "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama belgisi", "ru-RU": "Контракт проекта" },
+        "ApplicationProfile": { "en-US": "Application Profile", "tr-TR": "Başvuru profili", "tk-TM": "Ýüztutma profili", "ru-RU": "Профиль заявки" },
+        "VisaType": { "en-US": "Visa type", "tr-TR": "Vize Türü", "tk-TM": "Wiza görnüşi", "ru-RU": "Тип визы" },
+        "VisaPeriod": { "en-US": "Visa period", "tr-TR": "Vize Süresi", "tk-TM": "Wiza möhleti", "ru-RU": "Срок визы" },
+        "VisaCategory": { "en-US": "Visa category", "tr-TR": "Vize Kategorisi", "tk-TM": "Wiza kategoriýasy", "ru-RU": "Категория визы" },
+        "MigrationService": { "en-US": "Migration service", "tr-TR": "Göç Dairesi", "tk-TM": "Migrasiýa gullugy", "ru-RU": "Миграционная служба" }
       }
     },
     "Application_ListView_ViaMinistries": {
@@ -401,9 +433,10 @@
         "ru-RU": "Заявки через министерства"
       },
       "columns": {
-        "FullApplicationNumber": { "en-US": "ApplicationProfileInstance number", "tr-TR": "Başvuru No", "tk-TM": "Ýüztutmanyň belgisi", "ru-RU": "Номер" },
+        "FullApplicationNumber": { "en-US": "Application number", "tr-TR": "Başvuru No", "tk-TM": "Ýüztutmanyň belgisi", "ru-RU": "Номер" },
         "Year": { "en-US": "Year", "tr-TR": "Yıl", "tk-TM": "Ýyl", "ru-RU": "Год" },
         "Month": { "en-US": "Month", "tr-TR": "Ay", "tk-TM": "Aý", "ru-RU": "Месяц" },
+        "ProcessNumber": { "en-US": "Process number", "tr-TR": "Süreç numarası", "tk-TM": "Proses belgisi", "ru-RU": "Номер процесса" },
         "ApplicationDate": { "en-US": "Date", "tr-TR": "Tarih", "tk-TM": "Ýüztutmanyň senesi", "ru-RU": "Дата" },
         "Urgency": { "en-US": "Urgency", "tr-TR": "Aciliyet", "tk-TM": "Gyssaglylyk", "ru-RU": "Срочность" },
         "TotalPersonCount": {
@@ -447,7 +480,11 @@
         },
         "ApplicationType": { "en-US": "Type", "tr-TR": "Tür", "tk-TM": "Görnüşi", "ru-RU": "Тип" },
         "VisaPeriod": { "en-US": "Visa period", "tr-TR": "Vize Süresi", "tk-TM": "Wiza möhleti", "ru-RU": "Срок визы" },
-        "VisaType": { "en-US": "Visa type", "tr-TR": "Vize Türü", "tk-TM": "Wiza görnüşi", "ru-RU": "Тип визы" }
+        "VisaType": { "en-US": "Visa type", "tr-TR": "Vize Türü", "tk-TM": "Wiza görnüşi", "ru-RU": "Тип визы" },
+        "VisaCategory": { "en-US": "Visa category", "tr-TR": "Vize Kategorisi", "tk-TM": "Wiza kategoriýasy", "ru-RU": "Категория визы" },
+        "MigrationService": { "en-US": "Migration service", "tr-TR": "Göç Dairesi", "tk-TM": "Migrasiýa gullugy", "ru-RU": "Миграционная служба" },
+        "ProjectContract": { "en-US": "Project contract", "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama belgisi", "ru-RU": "Контракт проекта" },
+        "ApplicationProfile": { "en-US": "Application Profile", "tr-TR": "Başvuru profili", "tk-TM": "Ýüztutma profili", "ru-RU": "Профиль заявки" }
       }
     },
     "Application_ListView_DirectMigration": {
@@ -458,9 +495,10 @@
         "ru-RU": "Заявки напрямую в миграцию"
       },
       "columns": {
-        "FullApplicationNumber": { "en-US": "ApplicationProfileInstance number", "tr-TR": "Başvuru No", "tk-TM": "Ýüztutmanyň belgisi", "ru-RU": "Номер" },
+        "FullApplicationNumber": { "en-US": "Application number", "tr-TR": "Başvuru No", "tk-TM": "Ýüztutmanyň belgisi", "ru-RU": "Номер" },
         "Year": { "en-US": "Year", "tr-TR": "Yıl", "tk-TM": "Ýyl", "ru-RU": "Год" },
         "Month": { "en-US": "Month", "tr-TR": "Ay", "tk-TM": "Aý", "ru-RU": "Месяц" },
+        "ProcessNumber": { "en-US": "Process number", "tr-TR": "Süreç numarası", "tk-TM": "Proses belgisi", "ru-RU": "Номер процесса" },
         "ApplicationDate": { "en-US": "Date", "tr-TR": "Tarih", "tk-TM": "Ýüztutmanyň senesi", "ru-RU": "Дата" },
         "TotalPersonCount": {
           "en-US": "Person count",
@@ -500,12 +538,34 @@
           "tk-TM": "Migrasiýa möhleti",
           "ru-RU": "Срок миграции"
         },
-        "ApplicationType": { "en-US": "Type", "tr-TR": "Tür", "tk-TM": "Görnüşi", "ru-RU": "Тип" }
+        "ApplicationType": { "en-US": "Type", "tr-TR": "Tür", "tk-TM": "Görnüşi", "ru-RU": "Тип" },
+        "VisaType": { "en-US": "Visa type", "tr-TR": "Vize Türü", "tk-TM": "Wiza görnüşi", "ru-RU": "Тип визы" },
+        "VisaPeriod": { "en-US": "Visa period", "tr-TR": "Vize Süresi", "tk-TM": "Wiza möhleti", "ru-RU": "Срок визы" },
+        "VisaCategory": { "en-US": "Visa category", "tr-TR": "Vize Kategorisi", "tk-TM": "Wiza kategoriýasy", "ru-RU": "Категория визы" },
+        "MigrationService": { "en-US": "Migration service", "tr-TR": "Göç Dairesi", "tk-TM": "Migrasiýa gullugy", "ru-RU": "Миграционная служба" },
+        "ProjectContract": { "en-US": "Project contract", "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama belgisi", "ru-RU": "Контракт проекта" },
+        "ApplicationProfile": { "en-US": "Application Profile", "tr-TR": "Başvuru profili", "tk-TM": "Ýüztutma profili", "ru-RU": "Профиль заявки" }
+      }
+    },
+    "ApplicationProfileInstance_ListView": {
+      "caption": { "en-US": "Application Profile Instances", "tr-TR": "Başvuru profili örnekleri", "tk-TM": "Ýüztutmalar", "ru-RU": "Экземпляры профиля заявки" },
+      "columns": {
+        "FullApplicationNumber": { "en-US": "Application number", "tr-TR": "Başvuru No", "tk-TM": "Ýüztutmanyň belgisi", "ru-RU": "Номер" },
+        "Year": { "en-US": "Year", "tr-TR": "Yıl", "tk-TM": "Ýyl", "ru-RU": "Год" },
+        "Month": { "en-US": "Month", "tr-TR": "Ay", "tk-TM": "Aý", "ru-RU": "Месяц" },
+        "ProcessNumber": { "en-US": "Process number", "tr-TR": "Süreç numarası", "tk-TM": "Proses belgisi", "ru-RU": "Номер процесса" },
+        "ApplicationDate": { "en-US": "Date", "tr-TR": "Tarih", "tk-TM": "Ýüztutmanyň senesi", "ru-RU": "Дата" },
+        "ApplicationProfile": { "en-US": "Application Profile", "tr-TR": "Başvuru profili", "tk-TM": "Ýüztutma profili", "ru-RU": "Профиль заявки" },
+        "VisaType": { "en-US": "Visa type", "tr-TR": "Vize Türü", "tk-TM": "Wiza görnüşi", "ru-RU": "Тип визы" },
+        "VisaPeriod": { "en-US": "Visa period", "tr-TR": "Vize Süresi", "tk-TM": "Wiza möhleti", "ru-RU": "Срок визы" },
+        "VisaCategory": { "en-US": "Visa category", "tr-TR": "Vize Kategorisi", "tk-TM": "Wiza kategoriýasy", "ru-RU": "Категория визы" },
+        "MigrationService": { "en-US": "Migration service", "tr-TR": "Göç Dairesi", "tk-TM": "Migrasiýa gullugy", "ru-RU": "Миграционная служба" },
+        "ProjectContract": { "en-US": "Project contract", "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama belgisi", "ru-RU": "Контракт проекта" }
       }
     },
     "ApplicationItem_ListView_ViaMinistries": {
       "caption": {
-        "en-US": "ApplicationProfileInstance items (ministry)",
+        "en-US": "Application items (ministry)",
         "tr-TR": "Başvuru kalemleri (bakanlık süreci)",
         "tk-TM": "Ýüztutmadaky raýatlar",
         "ru-RU": "Позиции заявки (через министерства)"
@@ -513,7 +573,7 @@
     },
     "ApplicationItem_ListView_DirectMigration": {
       "caption": {
-        "en-US": "ApplicationProfileInstance items (direct migration)",
+        "en-US": "Application items (direct migration)",
         "tr-TR": "Başvuru kalemleri (doğrudan migrasyon)",
         "tk-TM": "Ýüztutmadaky raýatlar",
         "ru-RU": "Позиции заявки (напрямую в миграцию)"
@@ -540,7 +600,7 @@
         {
           "path": ["Tabs"],
           "groups": {
-            "ApplicationItems": { "en-US": "ApplicationProfileInstance items", "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции" },
+            "ApplicationItems": { "en-US": "Application items", "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции" },
             "Invitations": { "en-US": "Invitations", "tr-TR": "Davetler", "tk-TM": "Çakylyklar", "ru-RU": "Приглашения" },
             "Rejections": { "en-US": "Rejections", "tr-TR": "Retler", "tk-TM": "Retler", "ru-RU": "Отказы" },
             "WorkPermits": { "en-US": "Work permits", "tr-TR": "Çalışma İzinleri", "tk-TM": "Iş rugsatnamalary", "ru-RU": "РНТ" }
@@ -549,7 +609,7 @@
       ]
     },
     "ApplicationItem_ListView": {
-      "caption": { "en-US": "ApplicationProfileInstance items", "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции заявки" },
+      "caption": { "en-US": "Application items", "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции заявки" },
       "columns": {
         "ApplicationItemName": { "en-US": "Name", "tr-TR": "Ad", "tk-TM": "Ady", "ru-RU": "Наименование" },
         "Person": { "en-US": "Person", "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" },
@@ -559,7 +619,7 @@
       }
     },
     "ApplicationItem_DetailView": {
-      "caption": { "en-US": "ApplicationProfileInstance item", "tr-TR": "Başvuru Kalemi", "tk-TM": "Arza elementi", "ru-RU": "Позиция" }
+      "caption": { "en-US": "Application item", "tr-TR": "Başvuru Kalemi", "tk-TM": "Arza elementi", "ru-RU": "Позиция" }
     },
     "Person_ListView": {
       "caption": { "tr-TR": "Kişiler", "tk-TM": "Adamlar", "ru-RU": "Лица" },
@@ -578,7 +638,7 @@
         "Nationality": { "tr-TR": "Uyruk", "tk-TM": "Milleti", "ru-RU": "Гражданство" },
         "ForeignAddress": { "tr-TR": "Yurt Dışı Adres", "tk-TM": "Daşary ýurt salgysy", "ru-RU": "Иностранный адрес" },
         "ForeignAddressCountry": { "tr-TR": "Yurt Dışı Adres Ülkesi", "tk-TM": "Daşary ýurt salgysynyň ýurdy", "ru-RU": "Страна иностр. адреса" },
-        "ProjectContract": { "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama şertnamasy", "ru-RU": "Контракт проекта" },
+        "ProjectContract": { "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama belgisi", "ru-RU": "Контракт проекта" },
         "IsEmployee": { "tr-TR": "Çalışan", "tk-TM": "Işgär", "ru-RU": "Сотрудник" },
         "Company": { "tr-TR": "Şirket", "tk-TM": "Kompaniýa", "ru-RU": "Компания" },
         "SponsoringEmployee": { "tr-TR": "Sponsor Çalışan", "tk-TM": "Goldawçy işgär", "ru-RU": "Сотрудник-спонсор" },
@@ -597,7 +657,7 @@
         "Gender": { "tr-TR": "Cinsiyet", "tk-TM": "Jynsy", "ru-RU": "Пол" },
         "MaritalStatus": { "tr-TR": "Medeni Hal", "tk-TM": "Maşgala ýagdaýy", "ru-RU": "Семейное положение" },
         "Nationality": { "tr-TR": "Uyruk", "tk-TM": "Milleti", "ru-RU": "Гражданство" },
-        "ProjectContract": { "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama şertnamasy", "ru-RU": "Контракт проекта" },
+        "ProjectContract": { "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama belgisi", "ru-RU": "Контракт проекта" },
         "CurrentPassport": { "tr-TR": "Pasaport", "tk-TM": "Pasport", "ru-RU": "Паспорт" },
         "CurrentVisa": { "tr-TR": "Vize", "tk-TM": "Wiza", "ru-RU": "Виза" },
         "CurrentPositionHistory": { "tr-TR": "Pozisyon", "tk-TM": "Wezipesi", "ru-RU": "Должность" },
@@ -628,7 +688,7 @@
         "Nationality": { "tr-TR": "Uyruk", "tk-TM": "Milleti", "ru-RU": "Гражданство" },
         "ForeignAddress": { "tr-TR": "Yurt Dışı Adres", "tk-TM": "Daşary ýurt salgysy", "ru-RU": "Иностранный адрес" },
         "ForeignAddressCountry": { "tr-TR": "Yurt Dışı Adres Ülkesi", "tk-TM": "Daşary ýurt salgysynyň ýurdy", "ru-RU": "Страна иностр. адреса" },
-        "ProjectContract": { "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama şertnamasy", "ru-RU": "Контракт проекта" },
+        "ProjectContract": { "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama belgisi", "ru-RU": "Контракт проекта" },
         "SponsoringEmployee": { "tr-TR": "Sponsor Çalışan", "tk-TM": "Goldawçy işgär", "ru-RU": "Сотрудник-спонсор" },
         "Relationship": { "tr-TR": "Yakınlık", "tk-TM": "Gatnaşyk", "ru-RU": "Родство" },
         "CurrentPassport": { "tr-TR": "Pasaport", "tk-TM": "Pasport", "ru-RU": "Паспорт" },
@@ -650,7 +710,7 @@
         "Age": { "tr-TR": "Yaş", "tk-TM": "Ýaşy", "ru-RU": "Возраст" },
         "Gender": { "tr-TR": "Cinsiyet", "tk-TM": "Jynsy", "ru-RU": "Пол" },
         "Nationality": { "tr-TR": "Uyruk", "tk-TM": "Milleti", "ru-RU": "Гражданство" },
-        "ProjectContract": { "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama şertnamasy", "ru-RU": "Контракт проекта" },
+        "ProjectContract": { "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama belgisi", "ru-RU": "Контракт проекта" },
         "Subcontractor": { "tr-TR": "Şirket", "tk-TM": "Kompaniýa", "ru-RU": "Компания" },
         "IsArchived": { "tr-TR": "Arşivlendi", "tk-TM": "Arhiwlendi", "ru-RU": "В архиве" }
       }

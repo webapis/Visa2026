@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Localization;
 using Visa2026.Module.Services.ApplicationProfileWizard;
 
 namespace Visa2026.Module.Services.ApplicationWorkspace;
@@ -558,7 +559,7 @@ internal static class ApplicationWorkspaceProgressTimeline
         var catalog = ApplicationProfileProgressStateCatalog.All
             .FirstOrDefault(r => string.Equals(r.StateCode, MapToCatalogStateCode(stateCode) ?? stateCode, StringComparison.OrdinalIgnoreCase));
         if (catalog != null)
-            return catalog.DisplayName;
+            return ApplicationProfileLocalization.ProgressOutcome(catalog.DisplayName);
 
         if (objectSpace != null)
         {
@@ -566,10 +567,11 @@ internal static class ApplicationWorkspaceProgressTimeline
                 .FirstOrDefault(s => s.Code == stateCode);
             if (state != null)
             {
-                return state.LocalizedDisplayName
+                return ApplicationProfileLocalization.ProgressOutcome(
+                    state.LocalizedDisplayName
                     ?? state.NameTm
                     ?? state.Code
-                    ?? stateCode;
+                    ?? stateCode);
             }
         }
 

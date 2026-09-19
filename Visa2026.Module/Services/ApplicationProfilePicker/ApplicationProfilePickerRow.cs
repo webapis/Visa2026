@@ -1,5 +1,6 @@
 using System;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.Services.ApplicationProfilePicker;
 
@@ -36,20 +37,23 @@ public sealed class ApplicationProfilePickerRow
         ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries;
 
     public string MetaLine =>
-        $"{Code} · Related to: {ApplicationProfilePickerDisplayHelper.FormatRelatedTo(ActionFamily, RegistrationKind)} · "
-        + ApplicationProfilePickerDisplayHelper.FormatProgressRoute(ProgressRoute);
+        VisaUiMessages.Format(
+            "ApplicationProfileInstance.Picker.MetaLine",
+            Code,
+            ApplicationProfilePickerDisplayHelper.FormatRelatedTo(ActionFamily, RegistrationKind),
+            ApplicationProfilePickerDisplayHelper.FormatProgressRoute(ProgressRoute));
 
     public string SeedUsageLine
     {
         get
         {
             if (UsedBySeedPersonCount <= 0)
-                return "Not used for this person before";
+                return VisaUiMessages.Get("ApplicationProfileInstance.Picker.NotUsedBefore");
 
             var date = LastUsedBySeedPersonAt.HasValue
                 ? LastUsedBySeedPersonAt.Value.ToString("dd.MM.yyyy")
                 : "—";
-            return $"Used {UsedBySeedPersonCount}× · last {date}";
+            return VisaUiMessages.Format("ApplicationProfileInstance.Picker.UsedCount", UsedBySeedPersonCount, date);
         }
     }
 }

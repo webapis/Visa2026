@@ -1,53 +1,54 @@
 @using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Localization
 @using Visa2026.Module.Services.ApplicationProfilePicker
 
 <div class="ap-wizard__panel-head">
-    <h2>Review &amp; save</h2>
-    <p>Confirm before publishing. Applications reference this profile live; per-ApplicationProfileInstance fields get defaults at create.</p>
+    <h2>@Msg("ApplicationProfile.Wizard.Step.Review")</h2>
+    <p>@Msg("ApplicationProfile.Wizard.ReviewIntro")</p>
 </div>
 <div class="ap-wizard__panel-body">
     <div class="ap-wizard__summary">
         <div class="ap-wizard__sum-card">
-            <h4>Identity</h4>
+            <h4>@Msg("ApplicationProfile.Wizard.ReviewIdentity")</h4>
             <ul>
                 <li>@Profile.Name</li>
-                <li>Code @Profile.Code @(string.IsNullOrWhiteSpace(Profile.SelectionCode) ? "" : $"· quick {Profile.SelectionCode}")</li>
+                <li>@FormatCodeLine(Profile)</li>
                 <li>@FormatRoute(Profile.ProgressRoute) · @FormatAudience(Profile) · @FormatRelatedTo(Profile)</li>
                 @if (Profile.ActionFamily == ApplicationProfileActionFamily.Issuance)
                 {
-                    <li>Produces: @FormatProduce(Profile)</li>
+                    <li>@VisaUiMessages.Format("ApplicationProfile.Wizard.ReviewProduces", FormatProduce(Profile))</li>
                 }
                 else if (Profile.ActionFamily == ApplicationProfileActionFamily.Cancellation)
                 {
-                    <li>Cancel: @FormatCancel(Profile)</li>
+                    <li>@VisaUiMessages.Format("ApplicationProfile.Wizard.ReviewCancel", FormatCancel(Profile))</li>
                 }
                 else if (Profile.ActionFamily == ApplicationProfileActionFamily.Change)
                 {
-                    <li>Change: @FormatChange(Profile)</li>
+                    <li>@VisaUiMessages.Format("ApplicationProfile.Wizard.ReviewChange", FormatChange(Profile))</li>
                 }
                 else if (Profile.ActionFamily == ApplicationProfileActionFamily.Registration
                     && Profile.RegistrationKind != ApplicationProfileRegistrationKind.None)
                 {
-                    <li>Registration is: @FormatRegistrationKind(Profile.RegistrationKind)</li>
+                    <li>@VisaUiMessages.Format("ApplicationProfile.Wizard.ReviewRegistrationIs", FormatRegistrationKind(Profile.RegistrationKind))</li>
                 }
             </ul>
         </div>
         <div class="ap-wizard__sum-card">
-            <h4>Fields</h4>
+            <h4>@Msg("ApplicationProfile.Wizard.ReviewFields")</h4>
             <ul>
-                <li>Required props: @CountRequiredProps(Profile)</li>
+                <li>@VisaUiMessages.Format("ApplicationProfile.Wizard.ReviewRequiredCount", CountRequiredProps(Profile))</li>
             </ul>
         </div>
         <div class="ap-wizard__sum-card">
-            <h4>Process</h4>
+            <h4>@Msg("ApplicationProfile.Wizard.ReviewProcess")</h4>
             <ul>
-                <li>SLA ministry / migration: @Profile.MinistrySlaDays / @Profile.MigrationSlaDays days</li>
+                <li>@VisaUiMessages.Format("ApplicationProfile.Wizard.ReviewSla", Profile.MinistrySlaDays, Profile.MigrationSlaDays)</li>
             </ul>
         </div>
         <div class="ap-wizard__sum-card">
-            <h4>Person data</h4>
+            <h4>@Msg("ApplicationProfile.Wizard.Step.Person")</h4>
             <ul>
-                <li>Person toggles: @CountPersonToggles(Profile)</li>
+                <li>@VisaUiMessages.Format("ApplicationProfile.Wizard.ReviewPersonCount", CountPersonToggles(Profile))</li>
             </ul>
         </div>
     </div>
@@ -56,15 +57,25 @@
 @code {
     [Parameter, EditorRequired] public ApplicationProfile Profile { get; set; } = null!;
 
+    private static string Msg(string key) => VisaUiMessages.Get(key);
+
+    private static string FormatCodeLine(ApplicationProfile profile)
+    {
+        var line = VisaUiMessages.Format("ApplicationProfile.Wizard.ReviewCode", profile.Code);
+        if (!string.IsNullOrWhiteSpace(profile.SelectionCode))
+            line += " " + VisaUiMessages.Format("ApplicationProfile.Wizard.ReviewQuick", profile.SelectionCode);
+        return line;
+    }
+
     private static string FormatRoute(ApplicationProfileInstanceProgressRouteKind route) =>
-        route == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService ? "Direct migration" : "Via ministry";
+        ApplicationProfileLocalization.ProgressRoute(route);
 
     private static string FormatAudience(ApplicationProfile profile)
     {
         var parts = new List<string>();
-        if (profile.ForEmployee) parts.Add("Employee");
-        if (profile.ForFamilyMember) parts.Add("Family");
-        if (profile.ForTemporaryVisitor) parts.Add("Visitor");
+        if (profile.ForEmployee) parts.Add(Msg("ApplicationProfile.Audience.Employee"));
+        if (profile.ForFamilyMember) parts.Add(Msg("ApplicationProfile.Audience.Family"));
+        if (profile.ForTemporaryVisitor) parts.Add(Msg("ApplicationProfile.Audience.Visitor"));
         return parts.Count == 0 ? "—" : string.Join(", ", parts);
     }
 
@@ -77,32 +88,32 @@
     private static string FormatProduce(ApplicationProfile p)
     {
         var items = new List<string>();
-        if (p.ProduceInvitation) items.Add("invitation");
-        if (p.ProduceWorkPermit) items.Add("work permit");
-        if (p.ProduceVisa) items.Add("visa");
-        if (p.ProduceBorderZone) items.Add("border zone");
-        if (p.ProduceRejection) items.Add("rejection");
-        if (p.ProduceWorkLocation) items.Add("work location");
+        if (p.ProduceInvitation) items.Add(Msg("ApplicationProfile.Doc.Invitation"));
+        if (p.ProduceWorkPermit) items.Add(Msg("ApplicationProfile.Doc.WorkPermit"));
+        if (p.ProduceVisa) items.Add(Msg("ApplicationProfile.Doc.Visa"));
+        if (p.ProduceBorderZone) items.Add(Msg("ApplicationProfile.Doc.BorderZone"));
+        if (p.ProduceRejection) items.Add(Msg("ApplicationProfile.Doc.Rejection"));
+        if (p.ProduceWorkLocation) items.Add(Msg("ApplicationProfile.Doc.WorkLocation"));
         return items.Count == 0 ? "—" : string.Join(", ", items);
     }
 
     private static string FormatCancel(ApplicationProfile p)
     {
         var items = new List<string>();
-        if (p.CancelInvitations) items.Add("invitation");
-        if (p.CancelWorkPermits) items.Add("work permit");
-        if (p.CancelVisas) items.Add("visa");
+        if (p.CancelInvitations) items.Add(Msg("ApplicationProfile.Doc.Invitation"));
+        if (p.CancelWorkPermits) items.Add(Msg("ApplicationProfile.Doc.WorkPermit"));
+        if (p.CancelVisas) items.Add(Msg("ApplicationProfile.Doc.Visa"));
         return items.Count == 0 ? "—" : string.Join(", ", items);
     }
 
     private static string FormatChange(ApplicationProfile p)
     {
         var items = new List<string>();
-        if (p.ChangeInvitations) items.Add("invitation");
-        if (p.ChangeWorkPermits) items.Add("work permit");
-        if (p.ChangeVisas) items.Add("visa");
-        if (p.ChangeBorderZonePermits) items.Add("border zone");
-        if (p.ChangeApplicationProfileInstances) items.Add("application");
+        if (p.ChangeInvitations) items.Add(Msg("ApplicationProfile.Doc.Invitation"));
+        if (p.ChangeWorkPermits) items.Add(Msg("ApplicationProfile.Doc.WorkPermit"));
+        if (p.ChangeVisas) items.Add(Msg("ApplicationProfile.Doc.Visa"));
+        if (p.ChangeBorderZonePermits) items.Add(Msg("ApplicationProfile.Doc.BorderZone"));
+        if (p.ChangeApplicationProfileInstances) items.Add(Msg("ApplicationProfile.Doc.Application"));
         return items.Count == 0 ? "—" : string.Join(", ", items);
     }
 

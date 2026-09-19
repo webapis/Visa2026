@@ -1,5 +1,6 @@
 @using System.Linq
 @using Visa2026.Module.BusinessObjects.OfficerShell
+@using Visa2026.Module.Localization
 @using Visa2026.Module.Services.ApplicationPersonLink
 @using Visa2026.Module.Services.OfficerShell
 @using Visa2026.Module.Services.ApplicationProfileCatalog
@@ -16,13 +17,13 @@
                 {
                     <div class="os-toolbar-search">
                         <span aria-hidden="true">⌕</span>
-                        <input type="search" placeholder="Search name, passport, number…" value="@SearchText" @oninput="OnSearchInput" />
+                        <input type="search" placeholder="@Msg("ApplicationProfileInstance.Shell.SearchPlaceholder")" value="@SearchText" @oninput="OnSearchInput" />
                     </div>
                 }
                 @if (CurrentPage == OfficerShellPage.Staged)
                 {
                     <button type="button" class="os-btn os-btn--primary" disabled="@(!CanStartProcess)" @onclick="OnStartProcess">
-                        Start process
+                        @Msg("ApplicationProfileInstance.Shell.StartProcess")
                     </button>
                 }
             </header>
@@ -35,7 +36,7 @@
 
                 @if (IsLoading)
                 {
-                    <div class="os-loading" role="status">Loading…</div>
+                    <div class="os-loading" role="status">@Msg("ApplicationProfileInstance.Shell.Loading")</div>
                 }
                 else
                 {
@@ -300,12 +301,12 @@
     private string Breadcrumb() => CurrentPage switch
     {
         OfficerShellPage.Staged => StagedViewMode == "grouped"
-            ? "ApplicationProfileInstance profiles / Staged profiles / Grouped"
-            : "ApplicationProfileInstance profiles / Staged profiles",
-        OfficerShellPage.InProcess => "ApplicationProfileInstance profiles / In process",
-        OfficerShellPage.Templates => "ApplicationProfileInstance profiles / Profile templates",
-        OfficerShellPage.Case => "ApplicationProfileInstance profiles / In process / Case workspace",
-        _ => "ApplicationProfileInstance profiles",
+            ? Msg("ApplicationProfileInstance.Shell.CrumbStagedGrouped")
+            : Msg("ApplicationProfileInstance.Shell.CrumbStaged"),
+        OfficerShellPage.InProcess => Msg("ApplicationProfileInstance.Shell.CrumbInProcess"),
+        OfficerShellPage.Templates => Msg("ApplicationProfileInstance.Shell.CrumbTemplates"),
+        OfficerShellPage.Case => Msg("ApplicationProfileInstance.Shell.CrumbCase"),
+        _ => Msg("ApplicationProfileInstance.Shell.CrumbRoot"),
     };
 
     private async Task Navigate(OfficerShellPage page)
@@ -330,8 +331,8 @@
     {
         <div class="os-page-head">
             <div>
-                <h1 class="os-page-title">Staged profiles</h1>
-                <p class="os-page-sub">Select ready rows and start process to open a numbered case.</p>
+                <h1 class="os-page-title">@Msg("ApplicationProfileInstance.Shell.StagedTitle")</h1>
+                <p class="os-page-sub">@Msg("ApplicationProfileInstance.Shell.StagedSub")</p>
             </div>
             @RenderStagedViewToggle()
         </div>
@@ -344,7 +345,7 @@
 
         @if (!CanStartProcess && SelectedStagedIds.Count > 0)
         {
-            <div class="os-banner os-banner--warn">Some selected rows are not ready — complete profile and person links first.</div>
+            <div class="os-banner os-banner--warn">@Msg("ApplicationProfileInstance.Shell.NotReady")</div>
         }
 
         @if (StagedViewMode == "grouped")
@@ -390,11 +391,11 @@
                 <thead>
                     <tr>
                         <th></th>
-                        <th>Person</th>
-                        <th>Profile</th>
-                        <th>Project</th>
-                        <th>Staged</th>
-                        <th>Status</th>
+                        <th>@Msg("ApplicationProfileInstance.Shell.ColPerson")</th>
+                        <th>@Msg("ApplicationProfileInstance.Shell.ColProfile")</th>
+                        <th>@Msg("ApplicationProfileInstance.Shell.ColProject")</th>
+                        <th>@Msg("ApplicationProfileInstance.Shell.ColStaged")</th>
+                        <th>@Msg("ApplicationProfileInstance.Shell.ColStatus")</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -428,7 +429,7 @@
     {
         <div class="os-page-head">
             <div>
-                <h1 class="os-page-title">In process</h1>
+                <h1 class="os-page-title">@Msg("ApplicationProfileInstance.Workspace.InProcess")</h1>
                 <p class="os-page-sub">Open a case workspace from a numbered application.</p>
             </div>
             @RenderViewToggle(InProcessViewMode, InProcessViewModeChanged)
@@ -546,4 +547,6 @@
         if (OpenCaseRequested.HasDelegate)
             await OpenCaseRequested.InvokeAsync(applicationId);
     }
+
+    private static string Msg(string key) => VisaUiMessages.Get(key);
 }

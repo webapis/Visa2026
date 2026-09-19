@@ -1286,7 +1286,7 @@
   "ApplicationReportPackage.Preview": {
     "en": "Preview",
     "tr-TR": "Önizleme",
-    "tk-TM": "Öňünden görmek",
+    "tk-TM": "Görmek",
     "ru-RU": "Просмотр"
   },
   "ApplicationReportPackage.DownloadTemplate": {
@@ -1322,7 +1322,7 @@
   "ApplicationReportPackage.ThisProfileTab": {
     "en": "This profile ({0})",
     "tr-TR": "Bu profil ({0})",
-    "tk-TM": "Bu profil ({0})",
+    "tk-TM": "Şu Ýüztutma degişli ({0})",
     "ru-RU": "Этот профиль ({0})"
   },
   "ApplicationReportPackage.SharedTab": {
@@ -4898,7 +4898,7 @@
   "ApplicationItemDocumentCopies.Action.Preview": {
     "en": "Preview",
     "tr-TR": "Önizle",
-    "tk-TM": "Öňünden görmek",
+    "tk-TM": "Görmek",
     "ru-RU": "Просмотр"
   },
   "ApplicationItemDocumentCopies.Action.Close": {

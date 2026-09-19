@@ -289,5 +289,5 @@
 .ct-sla-source .ct-muted { margin-top: 6px; font-weight: 500; }
 .ct-sla-foot { margin-top: 12px; font-size: 0.76rem; color: var(--os-muted); text-align: center; }
 
-.cw-layout--wide { grid-template-columns: 210px 1fr; }
+.cw-layout--wide { grid-template-columns: 300px 1fr; }
 .cw-main--full { grid-column: 2 / -1; }

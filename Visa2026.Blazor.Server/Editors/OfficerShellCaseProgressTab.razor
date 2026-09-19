@@ -5,6 +5,7 @@
 @using Visa2026.Module.BusinessObjects
 @using Visa2026.Module.BusinessObjects.ApplicationWorkspace
 @using Visa2026.Module.BusinessObjects.OfficerShell
+@using Visa2026.Module.Localization
 @using Visa2026.Module.Services.ApplicationWorkspace
 
 <div class="ct-page">
@@ -15,21 +16,15 @@
              role="@(DisplayStatusIsError ? "alert" : "status")">@DisplayStatusMessage</div>
     }
 
-    <h2 class="ct-page__title">Progress</h2>
-    <p class="ct-page__sub">ApplicationProfileInstance process for @view.Chrome.TemplateFamilyLabel · current step: @CurrentStepHeading</p>
+    <h2 class="ct-page__title">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Progress")</h2>
+    <p class="ct-page__sub">@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ProgressSubtitle", view.Chrome.TemplateFamilyLabel, LocalizedCurrentStepHeading)</p>
     <div class="ct-prog-v-list">
         @foreach (var step in view.ProgressSteps)
         {
             // Result dropdown is unsaved until Advance. Keep the current node blue + pen
             // (same as Office preparation), not Issued/Approved green tick.
             var isCurrent = string.Equals(step.State, "current", StringComparison.OrdinalIgnoreCase);
-            var badge = !string.IsNullOrWhiteSpace(step.CurrentStateLabel)
-                ? step.CurrentStateLabel
-                : step.State == "done" && !string.Equals(step.Key, "office", StringComparison.OrdinalIgnoreCase)
-                    ? "Completed"
-                    : isCurrent ? "In progress"
-                    : step.State == "pending" ? "Pending"
-                    : string.Empty;
+            var badge = StepBadge(step, isCurrent);
             var tone = isCurrent ? "current" : step.OutcomeKind;
             var badgeCls = tone switch
             {
@@ -59,7 +54,7 @@
                 </div>
                 <div class="ct-prog-v__body">
                     <div class="ct-prog-v__head">
-                        <strong>@step.Label</strong>
+                        <strong>@StepText(step.Label)</strong>
                         @if (!string.IsNullOrWhiteSpace(badge))
                         {
                             <span class="cw-prog-step__badge cw-prog-step__badge--@badgeCls">@badge</span>
@@ -72,7 +67,7 @@
                                     class="os-btn os-btn--ghost"
                                     disabled="@_busy"
                                     @onclick="() => RevertAsync(step)">
-                                ◀ Revert to here
+                                ◀ @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.RevertToHere")
                             </button>
                         </p>
                     }
@@ -90,11 +85,11 @@
                     else if (step.State != "current" && step.MissingMinistryLetter)
                     {
                         <div class="ct-prog-v__letter-missing">
-                            <span class="person-dossier__pill st-pending doc-copies-catalog__pill doc-copies-catalog__pill--missing">Missing</span>
-                            <label class="ct-label">Approval / disapproval letter</label>
+                            <span class="person-dossier__pill st-pending doc-copies-catalog__pill doc-copies-catalog__pill--missing">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Missing")</span>
+                            <label class="ct-label">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ApprovalLetter")</label>
                             <label class="ct-upload ct-upload--action ct-upload--missing">
                                 <InputFile OnChange="e => OnMinistryLetterSelected(e, step)" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp" disabled="@_busy" />
-                                <span>☁ Upload a copy of the approval letter<br /><span>PDF or scan up to @MaxUploadMb MB</span></span>
+                                <span>☁ @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.UploadApprovalCopy")<br /><span>@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ScanLimit", MaxUploadMb)</span></span>
                             </label>
                         </div>
                     }
@@ -103,29 +98,29 @@
                         <div class="ct-prog-detail">
                             <div class="ct-prog-detail__grid">
                                 <div>
-                                    <label class="ct-label" for="officer-notes-@ApplicationProfileInstanceId">Officer notes</label>
+                                    <label class="ct-label" for="officer-notes-@ApplicationProfileInstanceId">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.OfficerNotes")</label>
                                     <textarea id="officer-notes-@ApplicationProfileInstanceId"
                                               class="ct-textarea"
                                               rows="3"
-                                              placeholder="Add notes for the current progress step…"
+                                              placeholder="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.NotesPlaceholder")"
                                               value="@_officerNotes"
                                               @oninput="OnNotesInput"
                                               disabled="@_busy"></textarea>
                                     <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
-                                        <button type="button" class="os-btn" disabled="@(_busy || _notesDirty == false)" @onclick="SaveNotesAsync">Save notes</button>
+                                        <button type="button" class="os-btn" disabled="@(_busy || _notesDirty == false)" @onclick="SaveNotesAsync">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SaveNotes")</button>
                                     </div>
                                 </div>
                                 <dl class="ct-meta">
-                                    <div><dt>Current state</dt><dd><span class="os-status os-status--process">@(string.IsNullOrWhiteSpace(step.CurrentStateLabel) ? step.Label : step.CurrentStateLabel)</span></dd></div>
-                                    <div><dt>Started on</dt><dd>@step.Date</dd></div>
-                                    <div><dt>SLA target</dt><dd>@(string.IsNullOrWhiteSpace(step.SlaTargetDate) ? "—" : step.SlaTargetDate)</dd></div>
+                                    <div><dt>@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.CurrentState")</dt><dd><span class="os-status os-status--process">@StepText(string.IsNullOrWhiteSpace(step.CurrentStateLabel) ? step.Label : step.CurrentStateLabel)</span></dd></div>
+                                    <div><dt>@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.StartedOn")</dt><dd>@step.Date</dd></div>
+                                    <div><dt>@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SlaTarget")</dt><dd>@(string.IsNullOrWhiteSpace(step.SlaTargetDate) ? "—" : step.SlaTargetDate)</dd></div>
                                 </dl>
                             </div>
 
                             @if (step.CanAdvance)
                             {
                                 <div class="ct-prog-advance" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--os-line)">
-                                    <label class="ct-label @(IsDateInvalid ? "ct-label--error" : null)" for="advance-date-@ApplicationProfileInstanceId">Date</label>
+                                    <label class="ct-label @(IsDateInvalid ? "ct-label--error" : null)" for="advance-date-@ApplicationProfileInstanceId">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Date")</label>
                                     <input id="advance-date-@ApplicationProfileInstanceId"
                                            @ref="_advanceDateInput"
                                            type="date"
@@ -136,7 +131,7 @@
                                            disabled="@_busy" />
                                     @if (step.ResultOptions.Count > 0)
                                     {
-                                        <label class="ct-label @(IsResultInvalid ? "ct-label--error" : null)" for="advance-state-@ApplicationProfileInstanceId" style="margin-top:10px">Result</label>
+                                        <label class="ct-label @(IsResultInvalid ? "ct-label--error" : null)" for="advance-state-@ApplicationProfileInstanceId" style="margin-top:10px">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Result")</label>
                                         <select id="advance-state-@ApplicationProfileInstanceId"
                                                 @ref="_advanceResultInput"
                                                 class="os-input @(IsResultInvalid ? "is-invalid" : null)"
@@ -149,13 +144,13 @@
                                             }
                                             @foreach (var option in step.ResultOptions)
                                             {
-                                                <option value="@option.StateCode">@option.Label</option>
+                                                <option value="@option.StateCode">@StepText(option.Label)</option>
                                             }
                                         </select>
                                     }
                                     @if (ShowProcessNumberOnAdvance)
                                     {
-                                        <label class="ct-label @(IsProcessNumberInvalid ? "ct-label--error" : null)" for="advance-process-number-@ApplicationProfileInstanceId" style="margin-top:10px">Process number</label>
+                                        <label class="ct-label @(IsProcessNumberInvalid ? "ct-label--error" : null)" for="advance-process-number-@ApplicationProfileInstanceId" style="margin-top:10px">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ProcessNumber")</label>
                                         <input id="advance-process-number-@ApplicationProfileInstanceId"
                                                @ref="_advanceProcessNumberInput"
                                                type="text"
@@ -165,14 +160,14 @@
                                                @bind="_processNumber"
                                                @bind:event="oninput"
                                                disabled="@_busy"
-                                               placeholder="Migration Service number" />
+                                               placeholder="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ProcessNumberPlaceholder")" />
                                     }
                                     @if (step.ShowMinistryLetterUpload)
                                     {
-                                        <label class="ct-label @(step.MissingMinistryLetter ? "ct-label--warn" : null)" style="margin-top:10px">Approval / disapproval letter</label>
+                                        <label class="ct-label @(step.MissingMinistryLetter ? "ct-label--warn" : null)" style="margin-top:10px">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ApprovalLetter")</label>
                                         @if (step.MissingMinistryLetter)
                                         {
-                                            <span class="person-dossier__pill st-pending doc-copies-catalog__pill doc-copies-catalog__pill--missing" style="margin:0 0 8px">Missing</span>
+                                            <span class="person-dossier__pill st-pending doc-copies-catalog__pill doc-copies-catalog__pill--missing" style="margin:0 0 8px">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Missing")</span>
                                         }
                                         @if (!string.IsNullOrWhiteSpace(letterName) && letterProgressId is Guid)
                                         {
@@ -185,11 +180,11 @@
                                         }
                                         else if (!string.IsNullOrWhiteSpace(_pendingLetterName))
                                         {
-                                            <p class="ct-muted" style="margin:0 0 8px">@_pendingLetterName — stored when you Advance progress</p>
+                                            <p class="ct-muted" style="margin:0 0 8px">@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.LetterStoredOnAdvance", _pendingLetterName)</p>
                                         }
                                         <label class="ct-upload ct-upload--action @(step.MissingMinistryLetter ? "ct-upload--missing" : null)">
                                             <InputFile OnChange="e => OnMinistryLetterSelected(e, step)" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp" disabled="@_busy" />
-                                            <span>☁ Upload file<br /><span>PDF or scan up to @MaxUploadMb MB</span></span>
+                                            <span>☁ @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.UploadFile")<br /><span>@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ScanLimit", MaxUploadMb)</span></span>
                                         </label>
                                     }
                                     <button type="button"
@@ -197,7 +192,7 @@
                                             style="margin-top:10px"
                                             disabled="@(_busy || string.IsNullOrWhiteSpace(_selectedAdvanceStateCode))"
                                             @onclick="AdvanceAsync">
-                                        ▶ Advance progress
+                                        ▶ @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.AdvanceProgress")
                                     </button>
                                     @if (step.CanRevert)
                                     {
@@ -206,7 +201,7 @@
                                                 style="margin-top:10px;margin-left:8px"
                                                 disabled="@_busy"
                                                 @onclick="() => RevertAsync(step)">
-                                            ◀ Revert progress
+                                            ◀ @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.RevertProgress")
                                         </button>
                                     }
                                 </div>
@@ -218,14 +213,14 @@
                                 <div class="ct-prog-advance" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--os-line)">
                                     @if (!string.IsNullOrWhiteSpace(step.AdvanceBlockedReason))
                                     {
-                                        <p class="ct-muted" style="margin:0 0 10px">@step.AdvanceBlockedReason</p>
+                                        <p class="ct-muted" style="margin:0 0 10px">@ApplicationProfileLocalization.ProgressReason(step.AdvanceBlockedReason)</p>
                                     }
                                     @if (step.ShowMinistryLetterUpload)
                                     {
-                                        <label class="ct-label @(step.MissingMinistryLetter ? "ct-label--warn" : null)">Approval / disapproval letter</label>
+                                        <label class="ct-label @(step.MissingMinistryLetter ? "ct-label--warn" : null)">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ApprovalLetter")</label>
                                         @if (step.MissingMinistryLetter)
                                         {
-                                            <span class="person-dossier__pill st-pending doc-copies-catalog__pill doc-copies-catalog__pill--missing" style="margin:0 0 8px">Missing</span>
+                                            <span class="person-dossier__pill st-pending doc-copies-catalog__pill doc-copies-catalog__pill--missing" style="margin:0 0 8px">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Missing")</span>
                                         }
                                         @if (!string.IsNullOrWhiteSpace(letterName) && letterProgressId is Guid)
                                         {
@@ -242,7 +237,7 @@
                                         }
                                         <label class="ct-upload ct-upload--action @(step.MissingMinistryLetter ? "ct-upload--missing" : null)" style="margin-bottom:10px">
                                             <InputFile OnChange="e => OnMinistryLetterSelected(e, step)" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp" disabled="@_busy" />
-                                            <span>☁ Upload file<br /><span>PDF or scan up to @MaxUploadMb MB</span></span>
+                                            <span>☁ @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.UploadFile")<br /><span>@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ScanLimit", MaxUploadMb)</span></span>
                                         </label>
                                     }
                                     @if (step.CanRevert)
@@ -251,7 +246,7 @@
                                                 class="os-btn os-btn--ghost"
                                                 disabled="@_busy"
                                                 @onclick="() => RevertAsync(step)">
-                                            ◀ Revert progress
+                                            ◀ @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.RevertProgress")
                                         </button>
                                     }
                                 </div>
@@ -265,11 +260,11 @@
 
     @if (ProgressHistory.Count > 0)
     {
-        <h3 class="ct-page__title" style="margin-top:24px">History</h3>
+        <h3 class="ct-page__title" style="margin-top:24px">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.History")</h3>
         <ul class="cw-timeline">
             @foreach (var row in ProgressHistory)
             {
-                <li><strong>@row.State</strong><span>@row.Date</span></li>
+                <li><strong>@StepText(row.State)</strong><span>@row.Date</span></li>
             }
         </ul>
     }
@@ -408,6 +403,23 @@
         }
     }
 
+    private string LocalizedCurrentStepHeading => StepText(CurrentStepHeading);
+
+    private static string StepText(string? label) => ApplicationProfileLocalization.ProgressStepLabel(label);
+
+    private static string StepBadge(ApplicationWorkspaceCaseProgressStep step, bool isCurrent)
+    {
+        if (!string.IsNullOrWhiteSpace(step.CurrentStateLabel))
+            return ApplicationProfileLocalization.ProgressStepLabel(step.CurrentStateLabel);
+        if (step.State == "done" && !string.Equals(step.Key, "office", StringComparison.OrdinalIgnoreCase))
+            return VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Completed");
+        if (isCurrent)
+            return VisaUiMessages.Get("ApplicationProfileInstance.Workspace.InProgress");
+        if (step.State == "pending")
+            return VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Pending");
+        return string.Empty;
+    }
+
     private string CurrentStepHeading
     {
         get
@@ -533,7 +545,7 @@
     {
         if (_advanceDate == default)
         {
-            error = "Date is required.";
+            error = VisaUiMessages.Get("ApplicationProfileInstance.Workspace.DateRequired");
             return false;
         }
 
@@ -542,7 +554,7 @@
             && current.ResultOptions.Count > 0
             && string.IsNullOrWhiteSpace(_selectedAdvanceStateCode))
         {
-            error = "Result is required to advance progress.";
+            error = VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ResultRequired");
             return false;
         }
 
@@ -550,7 +562,7 @@
             && ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(code);
         if (requireProcessNumber && string.IsNullOrWhiteSpace(_processNumber))
         {
-            error = "Process number is required when submitting to Migration Service.";
+            error = VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ProcessNumberRequired");
             return false;
         }
 

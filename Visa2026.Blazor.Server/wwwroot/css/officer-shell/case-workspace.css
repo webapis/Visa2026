@@ -74,7 +74,7 @@ button.cw-person:focus-visible {
 .cw-merge { margin-left: auto; font-size: 0.8rem; color: var(--os-muted); display: inline-flex; gap: 6px; align-items: center; }
 
 .cw-layout {
-  display: grid; grid-template-columns: 210px 1fr 270px; gap: 14px; align-items: start;
+  display: grid; grid-template-columns: 300px 1fr 270px; gap: 14px; align-items: start;
 }
 @media (max-width: 1100px) { .cw-layout { grid-template-columns: 1fr; } }
 
@@ -85,7 +85,7 @@ button.cw-person:focus-visible {
 .cw-nav__item {
   display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: transparent;
   text-align: left; padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 0.86rem;
-  color: #475569; position: relative;
+  color: #475569; position: relative; white-space: nowrap;
 }
 .cw-nav__item .bi { font-size: 1rem; width: 18px; text-align: center; }
 .cw-nav__badge {
@@ -516,7 +516,7 @@ select.cw-summary-field__input option {
 .cw-foot { margin: 4px 0 0; font-size: 0.78rem; color: var(--os-muted); }
 
 /* Document copies tab */
-.cw-layout--docs { grid-template-columns: 210px 1fr; }
+.cw-layout--docs { grid-template-columns: 300px 1fr; }
 .cw-layout--docs .cw-main--wide { padding: 0; overflow: hidden; }
 
 .dc-page { padding: 18px 20px 20px; }
@@ -813,7 +813,7 @@ select.cw-summary-field__input option {
 }
 .cw-loading__layout {
   display: grid;
-  grid-template-columns: 210px 1fr;
+  grid-template-columns: 300px 1fr;
   gap: 14px;
   align-items: start;
 }

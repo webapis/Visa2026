@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.Services.ApplicationWorkspace;
 
@@ -80,12 +81,12 @@ public static class ApplicationWorkspaceCaseSummaryCompletenessGate
 
         var names = string.Join(", ", missing.Select(field => field.Label).Where(label => !string.IsNullOrWhiteSpace(label)));
         if (string.IsNullOrWhiteSpace(names))
-            names = "required fields";
+            names = VisaUiMessages.Get("ApplicationProfileInstance.CaseSummary.RequiredFields");
 
         if (missing.Count == 1)
-            return "Complete the required Case summary field before continuing. Missing: " + names + ".";
+            return VisaUiMessages.Format("ApplicationProfileInstance.CaseSummary.CompleteOne", names);
 
-        return "Complete required Case summary fields before continuing. Missing: " + names + ".";
+        return VisaUiMessages.Format("ApplicationProfileInstance.CaseSummary.CompleteMany", names);
     }
 
     public static string FormatReadinessMissingSuffix(IReadOnlyList<ApplicationWorkspaceCaseHeaderField> missing)
@@ -94,7 +95,7 @@ public static class ApplicationWorkspaceCaseSummaryCompletenessGate
             return string.Empty;
 
         return missing.Count == 1
-            ? " (1 missing)"
-            : " (" + missing.Count.ToString() + " missing)";
+            ? VisaUiMessages.Get("ApplicationProfileInstance.CaseSummary.MissingOne")
+            : VisaUiMessages.Format("ApplicationProfileInstance.CaseSummary.MissingMany", missing.Count);
     }
 }

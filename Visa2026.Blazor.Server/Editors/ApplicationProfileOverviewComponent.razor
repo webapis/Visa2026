@@ -1,10 +1,11 @@
+@using Visa2026.Module.Localization
 @using Visa2026.Module.Services.ApplicationProfileOverview
 @using Visa2026.Module.Services.ApplicationProfileCatalog
 
 <div class="ap-overview">
     @if (IsLoading || Snapshot == null)
     {
-        <div class="ap-overview__loading" role="status">Loading Application Profile overview…</div>
+        <div class="ap-overview__loading" role="status">@Msg("ApplicationProfile.Overview.Loading")</div>
     }
     else
     {
@@ -22,7 +23,7 @@
                     <button type="button"
                             class="ap-overview__back"
                             @onclick="CloseAsync">
-                        ← Back to list
+                        @Msg("ApplicationProfile.Overview.BackToList")
                     </button>
                 }
                 <h1 class="ap-overview__title">@Snapshot.Name</h1>
@@ -43,21 +44,21 @@
                 <div class="ap-overview__pills">
                     @if (Snapshot.IsActive)
                     {
-                        <span class="ap-overview__pill ap-overview__pill--on">Active</span>
+                        <span class="ap-overview__pill ap-overview__pill--on">@Msg("ApplicationProfile.Status.Active")</span>
                     }
                     else
                     {
-                        <span class="ap-overview__pill">Inactive</span>
+                        <span class="ap-overview__pill">@Msg("ApplicationProfile.Status.Inactive")</span>
                     }
                     @if (Snapshot.IsConfigLocked)
                     {
-                        <span class="ap-overview__pill ap-overview__pill--warn">Config locked</span>
+                        <span class="ap-overview__pill ap-overview__pill--warn">@Msg("ApplicationProfile.Status.ConfigLocked")</span>
                     }
                 </div>
                 <button type="button"
                         class="ap-overview__btn ap-overview__btn--primary"
                         @onclick="ConfigureAsync">
-                    Configure profile
+                    @Msg("ApplicationProfile.Overview.Configure")
                 </button>
                 @if (CanDelete)
                 {
@@ -66,7 +67,7 @@
                         <button type="button"
                                 class="ap-overview__btn ap-overview__btn--danger"
                                 @onclick="ConfirmDeleteAsync">
-                            Confirm delete
+                            @Msg("ApplicationProfile.Catalog.ConfirmDelete")
                         </button>
                         <button type="button"
                                 class="ap-overview__btn"
@@ -79,7 +80,7 @@
                         <button type="button"
                                 class="ap-overview__btn ap-overview__btn--danger-outline"
                                 @onclick="AskDelete">
-                            Delete template
+                            @Msg("ApplicationProfile.Overview.DeleteTemplate")
                         </button>
                     }
                 }
@@ -89,7 +90,7 @@
         @if (Snapshot.AudienceLabels.Count > 0)
         {
             <div class="ap-overview__audience">
-                <span class="ap-overview__label">Audience</span>
+                <span class="ap-overview__label">@Msg("ApplicationProfile.Overview.Audience")</span>
                 @foreach (var audience in Snapshot.AudienceLabels)
                 {
                     <span class="ap-overview__chip">@audience</span>
@@ -99,8 +100,8 @@
 
         <div class="ap-overview__grid">
             <section class="ap-overview__card">
-                <h2>Identity &amp; purpose</h2>
-                <p class="ap-overview__hint">Who this profile is for and how applications are directed.</p>
+                <h2>@Msg("ApplicationProfile.Overview.IdentityTitle")</h2>
+                <p class="ap-overview__hint">@Msg("ApplicationProfile.Overview.IdentityHint")</p>
                 <ul class="ap-overview__list">
                     @foreach (var line in Snapshot.LiveConfigurationLines)
                     {
@@ -108,26 +109,26 @@
                     }
                     @if (Snapshot.LiveConfigurationLines.Count == 0)
                     {
-                        <li>@(Snapshot.ActionFamilyLabel) — no produce/cancel documents.</li>
+                        <li>@VisaUiMessages.Format("ApplicationProfile.Overview.NoProduce", Snapshot.ActionFamilyLabel)</li>
                     }
                 </ul>
             </section>
 
             <section class="ap-overview__card">
-                <h2>Per-application defaults</h2>
-                <p class="ap-overview__hint">Use on Results &amp; fields. Copied once at create; officers may change values on each application.</p>
+                <h2>@Msg("ApplicationProfile.Overview.DefaultsTitle")</h2>
+                <p class="ap-overview__hint">@Msg("ApplicationProfile.Overview.DefaultsHint")</p>
                 @if (Snapshot.PerApplicationDefaults.Count == 0)
                 {
-                    <p class="ap-overview__empty">No required ApplicationProfileInstance properties on this profile.</p>
+                    <p class="ap-overview__empty">@Msg("ApplicationProfile.Overview.NoRequiredProps")</p>
                 }
                 else
                 {
                     <table class="ap-overview__table">
                         <thead>
                             <tr>
-                                <th>Field</th>
-                                <th>Default</th>
-                                <th>Required</th>
+                                <th>@Msg("ApplicationProfile.Overview.ColField")</th>
+                                <th>@Msg("ApplicationProfile.Overview.ColDefault")</th>
+                                <th>@Msg("ApplicationProfile.Overview.ColRequired")</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -136,7 +137,7 @@
                                 <tr>
                                     <td>@row.FieldLabel</td>
                                     <td>@row.DefaultValue</td>
-                                    <td>@(row.Required ? "Yes" : "—")</td>
+                                    <td>@(row.Required ? Msg("ApplicationProfile.Overview.Yes") : "—")</td>
                                 </tr>
                             }
                         </tbody>
@@ -147,22 +148,22 @@
 
         <div class="ap-overview__grid">
             <section class="ap-overview__card">
-                <h2>Process &amp; SLA</h2>
-                <p class="ap-overview__hint">Expected duration. Instance steps follow Directed to and Approval legs.</p>
+                <h2>@Msg("ApplicationProfile.Overview.ProcessTitle")</h2>
+                <p class="ap-overview__hint">@Msg("ApplicationProfile.Overview.ProcessHint")</p>
                 <ul class="ap-overview__list">
                     @if (Snapshot.IsViaMinistry)
                     {
-                        <li>Ministry SLA: @Snapshot.MinistrySlaDays days</li>
+                        <li>@VisaUiMessages.Format("ApplicationProfile.Overview.MinistrySla", Snapshot.MinistrySlaDays)</li>
                     }
-                    <li>Migration SLA: @Snapshot.MigrationSlaDays days</li>
+                    <li>@VisaUiMessages.Format("ApplicationProfile.Overview.MigrationSla", Snapshot.MigrationSlaDays)</li>
                 </ul>
             </section>
 
             <section class="ap-overview__card">
-                <h2>Person data requirements</h2>
+                <h2>@Msg("ApplicationProfile.Overview.PersonTitle")</h2>
                 @if (Snapshot.PersonDataToggles.Count == 0)
                 {
-                    <p class="ap-overview__empty">No person-data requirements on this profile.</p>
+                    <p class="ap-overview__empty">@Msg("ApplicationProfile.Overview.NoPersonReqs")</p>
                 }
                 else
                 {
@@ -177,20 +178,20 @@
         </div>
 
         <section class="ap-overview__card">
-            <h2>Nested templates</h2>
+            <h2>@Msg("ApplicationProfile.Overview.NestedTitle")</h2>
             @if (Snapshot.NestedTemplates.Count == 0)
             {
-                <p class="ap-overview__empty">No nested report templates.</p>
+                <p class="ap-overview__empty">@Msg("ApplicationProfile.Overview.NoNested")</p>
             }
             else
             {
                 <table class="ap-overview__table">
                     <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Type</th>
-                            <th>Scope</th>
-                            <th>Data</th>
+                            <th>@Msg("ApplicationProfile.Overview.ColName")</th>
+                            <th>@Msg("ApplicationProfile.Overview.ColType")</th>
+                            <th>@Msg("ApplicationProfile.Overview.ColScope")</th>
+                            <th>@Msg("ApplicationProfile.Overview.ColData")</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -215,20 +216,20 @@
         </section>
 
         <section class="ap-overview__card">
-            <h2>Linked applications <span class="ap-overview__count">(@LinkedCountCaption(Snapshot))</span></h2>
-            <p class="ap-overview__hint">Applications that use this profile. Open a number to view the case workspace.</p>
+            <h2>@Msg("ApplicationProfile.Overview.LinkedTitle") <span class="ap-overview__count">(@LinkedCountCaption(Snapshot))</span></h2>
+            <p class="ap-overview__hint">@Msg("ApplicationProfile.Overview.LinkedHint")</p>
             @if (Snapshot.LinkedApplications.Count == 0)
             {
-                <p class="ap-overview__empty">No applications use this profile yet.</p>
+                <p class="ap-overview__empty">@Msg("ApplicationProfile.Overview.NoLinked")</p>
             }
             else
             {
                 <table class="ap-overview__table">
                     <thead>
                         <tr>
-                            <th>Application</th>
-                            <th>Date</th>
-                            <th>Status</th>
+                            <th>@Msg("ApplicationProfile.Overview.ColApplication")</th>
+                            <th>@Msg("ApplicationProfile.Overview.ColDate")</th>
+                            <th>@Msg("ApplicationProfile.Overview.ColStatus")</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -308,7 +309,9 @@
     private static string LinkedCountCaption(ApplicationProfileOverviewSnapshot snapshot)
     {
         if (snapshot.LinkedApplicationCount > snapshot.LinkedApplications.Count)
-            return $"{snapshot.LinkedApplications.Count} of {snapshot.LinkedApplicationCount}";
+            return VisaUiMessages.Format("ApplicationProfile.Overview.CountOf", snapshot.LinkedApplications.Count, snapshot.LinkedApplicationCount);
         return snapshot.LinkedApplicationCount.ToString();
     }
+
+    private static string Msg(string key) => VisaUiMessages.Get(key);
 }

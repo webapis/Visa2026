@@ -54,7 +54,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
     {
         IsLoading = true,
         LoadingProgressPercent = -1,
-        LoadingMessage = "Opening case…",
+        LoadingMessage = VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Opening"),
         InitialLoadRequested = EventCallback.Factory.Create(this, LoadAsync),
         LinkPersonRequested = EventCallback.Factory.Create(this, LinkPersonAsync),
         UnlinkPersonRequested = EventCallback.Factory.Create<Guid>(this, UnlinkPersonAsync),
@@ -124,7 +124,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
 
         model.IsLoading = true;
         model.LoadingProgressPercent = -1;
-        model.LoadingMessage = "Opening case…";
+        model.LoadingMessage = VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Opening");
         await Task.Delay(16);
 
         try

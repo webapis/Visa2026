@@ -447,6 +447,7 @@ When any linked Application reaches lock state **A** (first progress beyond offi
 | Profile overview (live linked instances) | Done |
 | Template overview Approval legs card removed | **Done** (2026-09-03) |
 | Custom catalog home (replace native List/Detail officer UI) | Done |
+| Layer A localize Application Profile template + instance (en/tr/tk/ru) | **Done** (2026-09-19) |
 | Profile picker at Application create | Done |
 | Case summary instance Use fields (overview tiles + Edit/Done) | **Done** |
 | Case Organization letterhead (instance copy) | **Done** (2026-09-03) then superseded |

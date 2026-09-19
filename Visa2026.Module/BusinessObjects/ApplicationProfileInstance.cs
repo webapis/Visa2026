@@ -316,7 +316,8 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInDetailView(false)]
         [VisibleInListView(false)]
         [NotMapped]
-        public string CurrentState => ListViewDisplay.CurrentState;
+        public string CurrentState =>
+            ApplicationProfileLocalization.ProgressStepLabel(ListViewDisplay.CurrentState);
 
         /// <summary>Localized state from the latest <see cref="ApplicationProfileInstanceProgress"/> row.</summary>
         [XafDisplayName("Latest progress state")]
@@ -325,9 +326,10 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(true)]
         [NotMapped]
         public string LatestProgressState =>
-            !string.IsNullOrWhiteSpace(LatestProgressDisplay)
-                ? LatestProgressDisplay!
-                : ListViewDisplay.CurrentState;
+            ApplicationProfileLocalization.ProgressStepLabel(
+                !string.IsNullOrWhiteSpace(LatestProgressDisplay)
+                    ? LatestProgressDisplay!
+                    : ListViewDisplay.CurrentState);
 
         /// <summary>Date from the latest <see cref="ApplicationProfileInstanceProgress"/> row.</summary>
         [XafDisplayName("Latest progress date")]

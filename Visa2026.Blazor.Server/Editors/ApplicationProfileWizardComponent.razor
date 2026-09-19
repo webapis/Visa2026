@@ -1,35 +1,36 @@
 @using DevExpress.ExpressApp
 @using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Localization
 @using Visa2026.Module.Services.ApplicationProfileWizard
 
 <div class="ap-wizard">
     @if (IsLoading)
     {
-        <div class="ap-wizard__loading" role="status">Loading configuration wizard…</div>
+        <div class="ap-wizard__loading" role="status">@Msg("ApplicationProfile.Wizard.Loading")</div>
     }
     else if (Profile == null)
     {
-        <div class="ap-wizard__loading ap-wizard__loading--empty">No Application Profile selected.</div>
+        <div class="ap-wizard__loading ap-wizard__loading--empty">@Msg("ApplicationProfile.Wizard.NoProfile")</div>
     }
     else
     {
         <header class="ap-wizard__header">
             <div>
-                <h1 class="ap-wizard__title">Application Profile</h1>
+                <h1 class="ap-wizard__title">@Msg("ApplicationProfile.Wizard.Title")</h1>
                 <p class="ap-wizard__profile-name" title="@ProfileNameDisplay">@ProfileNameDisplay</p>
                 <p class="ap-wizard__sub">
-                    Configure what applications using this profile need — live FK; per-ApplicationProfileInstance values get defaults at create.
+                    @Msg("ApplicationProfile.Wizard.Subtitle")
                 </p>
             </div>
             <div class="ap-wizard__pills">
-                <span class="ap-wizard__pill ap-wizard__pill--on">Live configuration</span>
+                <span class="ap-wizard__pill ap-wizard__pill--on">@Msg("ApplicationProfile.Wizard.LiveConfig")</span>
                 @if (IsReadOnly)
                 {
-                    <span class="ap-wizard__pill ap-wizard__pill--warn">Config locked</span>
+                    <span class="ap-wizard__pill ap-wizard__pill--warn">@Msg("ApplicationProfile.Status.ConfigLocked")</span>
                 }
                 else
                 {
-                    <span class="ap-wizard__pill">Draft · save to publish</span>
+                    <span class="ap-wizard__pill">@Msg("ApplicationProfile.Wizard.DraftPill")</span>
                 }
             </div>
         </header>
@@ -37,8 +38,7 @@
         @if (IsReadOnly)
         {
             <div class="ap-wizard__lock-banner">
-                This profile is <strong>config-locked</strong> because a linked application has left office preparation.
-                Configuration stays locked. Use <strong>Clone</strong> on the profile list to copy it.
+                @Msg("ApplicationProfile.Wizard.LockBanner")
             </div>
         }
 
@@ -48,11 +48,11 @@
         }
 
         <div class="ap-wizard__layout">
-            <nav class="ap-wizard__steps" aria-label="Wizard steps">
-                <h2>Steps</h2>
-                @for (var i = 0; i < _steps.Length; i++)
-                {
-                    var step = _steps[i];
+            <nav class="ap-wizard__steps" aria-label="@Msg("ApplicationProfile.Wizard.Steps")">
+                <h2>@Msg("ApplicationProfile.Wizard.Steps")</h2>
+                    @for (var i = 0; i < WizardSteps.Length; i++)
+                    {
+                    var step = WizardSteps[i];
                     <button type="button"
                             class="ap-wizard__step @(i == _activeStep ? "is-active" : null)"
                             @onclick="() => GoToStep(i)">
@@ -97,15 +97,15 @@
                 <div class="ap-wizard__foot">
                     <button type="button" class="ap-wizard__btn ap-wizard__btn--secondary"
                             disabled="@(_activeStep == 0)"
-                            @onclick="PreviousStep">← Back</button>
+                            @onclick="PreviousStep">@Msg("ApplicationProfile.Wizard.Back")</button>
                     <div class="ap-wizard__foot-right">
-                        @if (_activeStep < _steps.Length - 1)
+                        @if (_activeStep < WizardSteps.Length - 1)
                         {
-                            <button type="button" class="ap-wizard__btn ap-wizard__btn--primary" @onclick="NextStep">Continue →</button>
+                            <button type="button" class="ap-wizard__btn ap-wizard__btn--primary" @onclick="NextStep">@Msg("ApplicationProfile.Wizard.Continue")</button>
                         }
                         else if (!IsReadOnly)
                         {
-                            <button type="button" class="ap-wizard__btn ap-wizard__btn--primary" @onclick="PublishAsync">Save profile</button>
+                            <button type="button" class="ap-wizard__btn ap-wizard__btn--primary" @onclick="PublishAsync">@Msg("ApplicationProfile.Wizard.Save")</button>
                         }
                     </div>
                 </div>
@@ -115,13 +115,13 @@
 </div>
 
 @code {
-    private readonly (string Title, string Description)[] _steps =
+    private (string Title, string Description)[] WizardSteps =>
     [
-        ("Identity & purpose", "Name, route, audience"),
-        ("Results & fields", "Required instance properties"),
-        ("Process & SLA", "Ministry and migration duration"),
-        ("Person data", "Required person-related rows"),
-        ("Review & save", "Summary before publish"),
+        (Msg("ApplicationProfile.Wizard.Step.Identity"), Msg("ApplicationProfile.Wizard.Step.IdentityDesc")),
+        (Msg("ApplicationProfile.Wizard.Step.Results"), Msg("ApplicationProfile.Wizard.Step.ResultsDesc")),
+        (Msg("ApplicationProfile.Wizard.Step.Process"), Msg("ApplicationProfile.Wizard.Step.ProcessDesc")),
+        (Msg("ApplicationProfile.Wizard.Step.Person"), Msg("ApplicationProfile.Wizard.Step.PersonDesc")),
+        (Msg("ApplicationProfile.Wizard.Step.Review"), Msg("ApplicationProfile.Wizard.Step.ReviewDesc")),
     ];
 
     [Parameter] public ApplicationProfile? Profile { get; set; }
@@ -141,7 +141,9 @@
     private EventCallback ClearLegsCallback => EventCallback.Factory.Create(this, ClearLegs);
 
     private string ProfileNameDisplay =>
-        string.IsNullOrWhiteSpace(Profile?.Name) ? "Unnamed profile" : Profile.Name.Trim();
+        string.IsNullOrWhiteSpace(Profile?.Name) ? Msg("ApplicationProfile.Wizard.Unnamed") : Profile.Name.Trim();
+
+    private static string Msg(string key) => VisaUiMessages.Get(key);
 
     private void RefreshProfileName() => StateHasChanged();
 
@@ -153,7 +155,7 @@
 
     private async Task GoToStep(int index)
     {
-        _activeStep = Math.Clamp(index, 0, _steps.Length - 1);
+        _activeStep = Math.Clamp(index, 0, WizardSteps.Length - 1);
         await Task.CompletedTask;
     }
 

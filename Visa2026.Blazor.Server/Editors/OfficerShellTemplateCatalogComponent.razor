@@ -1,4 +1,5 @@
 @using System.Linq
+@using Visa2026.Module.Localization
 @using Visa2026.Module.Services.ApplicationProfileCatalog
 @using Visa2026.Module.Services.ApplicationProfileOverview
 @using Visa2026.Module.Services.OfficerShell
@@ -6,12 +7,12 @@
 @if (DetailOpen)
 {
     <div class="tc-overview">
-        <aside class="tc-rail" aria-label="Templates">
+        <aside class="tc-rail" aria-label="@Msg("ApplicationProfile.Catalog.RailLabel")">
             <div class="tc-rail__search">
                 <span aria-hidden="true">⌕</span>
-                <input type="search" placeholder="Search templates…" value="@SearchText" @oninput="OnSearchInput" />
+                <input type="search" placeholder="@Msg("ApplicationProfile.Catalog.SearchTemplates")" value="@SearchText" @oninput="OnSearchInput" />
             </div>
-            <div class="tc-rail__label">Templates</div>
+            <div class="tc-rail__label">@Msg("ApplicationProfile.Catalog.RailLabel")</div>
             <ul class="tc-rail__list">
                 @foreach (var row in FilteredRows)
                 {
@@ -35,7 +36,7 @@
         <div>
             @if (IsOverviewLoading)
             {
-                <div class="os-loading" role="status">Loading template overview…</div>
+                <div class="os-loading" role="status">@Msg("ApplicationProfile.Catalog.LoadingOverview")</div>
             }
             else
             {
@@ -52,16 +53,16 @@ else
 {
     <div class="os-page-head">
         <div>
-            <h1 class="os-page-title">Profile templates</h1>
-            <p class="os-page-sub">Configure reusable templates officers clone to stage application profiles.</p>
+            <h1 class="os-page-title">@Msg("ApplicationProfile.Catalog.TemplatesTitle")</h1>
+            <p class="os-page-sub">@Msg("ApplicationProfile.Catalog.TemplatesSub")</p>
         </div>
-        <button type="button" class="os-btn os-btn--primary" @onclick="NewProfileAsync">+ New template</button>
+        <button type="button" class="os-btn os-btn--primary" @onclick="NewProfileAsync">@Msg("ApplicationProfile.Catalog.NewTemplate")</button>
     </div>
 
     <div class="os-toolbar" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
         <div class="tc-toolbar-search">
             <span aria-hidden="true">⌕</span>
-            <input type="search" placeholder="Search templates…" value="@SearchText" @oninput="OnSearchInput" />
+            <input type="search" placeholder="@Msg("ApplicationProfile.Catalog.SearchTemplates")" value="@SearchText" @oninput="OnSearchInput" />
         </div>
         @RenderViewToggle()
     </div>
@@ -266,4 +267,6 @@ else
         else if (ConfigureRequested.HasDelegate)
             await ConfigureRequested.InvokeAsync();
     }
+
+    private static string Msg(string key) => VisaUiMessages.Get(key);
 }

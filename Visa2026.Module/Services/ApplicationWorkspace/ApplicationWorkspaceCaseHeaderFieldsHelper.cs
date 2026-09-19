@@ -80,7 +80,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         var instanceNumber = FormatInstanceNumber(application);
         var instanceDate = application.ApplicationDate == default ? (DateTime?)null : application.ApplicationDate;
 
-        AddShortText(fields, InstanceNumber, "Application number", "blue", "№",
+        AddShortText(fields, InstanceNumber, ApplicationProfileLocalization.Field("ApplicationNumber"), "blue", "№",
             visible: true,
             instanceNumber,
             InstanceNumberMaxLength,
@@ -88,7 +88,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                 string.IsNullOrWhiteSpace(instanceNumber),
                 !application.IsManualEntry));
 
-        AddDate(fields, InstanceDate, "Application date", "green", "📅",
+        AddDate(fields, InstanceDate, ApplicationProfileLocalization.Field("ApplicationDate"), "green", "📅",
             visible: true,
             instanceDate,
             ApplicationWorkspaceCaseSummaryFill.Resolve(
@@ -96,48 +96,48 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                 !application.IsManualEntry));
 
         var processNumber = application.ProcessNumber?.Trim() ?? string.Empty;
-        AddShortText(fields, ProcessNumber, "Process number", "teal", "№",
+        AddShortText(fields, ProcessNumber, ApplicationProfileLocalization.Field("ProcessNumber"), "teal", "№",
             ApplicationProfileConfigurationResolver.ShowProcessNumber(application),
             processNumber,
             ApplicationProcessNumberHelper.MaxLength,
             ProcessNumberFill(application, processNumber));
 
-        AddLookup(fields, VisaType, "Visa type", "blue", "🛂",
+        AddLookup(fields, VisaType, ApplicationProfileLocalization.Field("VisaType"), "blue", "🛂",
             Visible(profile, p => p.RequireVisaType, ApplicationProfileConfigurationResolver.ShowVisaType, application),
             application.VisaType?.ID, LookupLabel(application.VisaType), catalogs.VisaTypes, readOnly: false,
             LookupFill(application.VisaType?.ID, DefaultId(profile?.DefaultVisaType?.ID, profile?.DefaultVisaTypeId)));
 
-        AddLookup(fields, VisaCategory, "Category", "purple", "◆",
+        AddLookup(fields, VisaCategory, ApplicationProfileLocalization.Field("Category"), "purple", "◆",
             Visible(profile, p => p.RequireVisaCategory, ApplicationProfileConfigurationResolver.ShowVisaCategory, application),
             application.VisaCategory?.ID, LookupLabel(application.VisaCategory), catalogs.VisaCategories, readOnly: false,
             LookupFill(application.VisaCategory?.ID, DefaultId(profile?.DefaultVisaCategory?.ID, profile?.DefaultVisaCategoryId)));
 
-        AddLookup(fields, VisaPeriod, "Period", "green", "📅",
+        AddLookup(fields, VisaPeriod, ApplicationProfileLocalization.Field("Period"), "green", "📅",
             Visible(profile, p => p.RequireVisaPeriod, ApplicationProfileConfigurationResolver.ShowVisaPeriod, application),
             application.VisaPeriod?.ID, LookupLabel(application.VisaPeriod), catalogs.VisaPeriods, readOnly: false,
             LookupFill(application.VisaPeriod?.ID, DefaultId(profile?.DefaultVisaPeriod?.ID, profile?.DefaultVisaPeriodId)));
 
-        AddLookup(fields, Project, "Project", "orange", "💼",
+        AddLookup(fields, Project, ApplicationProfileLocalization.Field("Project"), "orange", "💼",
             Visible(profile, p => p.RequireProject, ApplicationProfileConfigurationResolver.ShowProjectContract, application),
             application.ProjectContract?.ID, LookupLabel(application.ProjectContract), catalogs.ProjectContracts, readOnly: false,
             LookupFill(application.ProjectContract?.ID, DefaultId(profile?.DefaultProjectContract?.ID, profile?.DefaultProjectContractId)));
 
-        AddDate(fields, StartDate, "Start date", "green", "📅",
+        AddDate(fields, StartDate, ApplicationProfileLocalization.Field("StartDate"), "green", "📅",
             Visible(profile, p => p.RequireStartDate, ApplicationProfileConfigurationResolver.ShowBusinessTrips, application),
             application.BusinessTripStartDate,
             DateFill(application.BusinessTripStartDate, defaultDate: null));
 
-        AddLookup(fields, EntryCheckPoint, "Entry check point", "blue", "📍",
+        AddLookup(fields, EntryCheckPoint, ApplicationProfileLocalization.Field("EntryCheckPoint"), "blue", "📍",
             Visible(profile, p => p.RequireEntryCheckPoint, ApplicationProfileConfigurationResolver.ShowEntryCheckPoint, application),
             application.EntryCheckPoint?.ID, LookupLabel(application.EntryCheckPoint), catalogs.CheckPoints, readOnly: false,
             LookupFill(application.EntryCheckPoint?.ID, DefaultId(profile?.DefaultEntryCheckPoint?.ID, profile?.DefaultEntryCheckPointId)));
 
-        AddLookup(fields, Urgency, "Urgency", "orange", "⚡",
+        AddLookup(fields, Urgency, ApplicationProfileLocalization.Field("Urgency"), "orange", "⚡",
             Visible(profile, p => p.RequireUrgency, ApplicationProfileConfigurationResolver.ShowUrgency, application),
             application.Urgency?.ID, LookupLabel(application.Urgency), catalogs.Urgencies, readOnly: false,
             LookupFill(application.Urgency?.ID, DefaultId(profile?.DefaultUrgency?.ID, profile?.DefaultUrgencyId)));
 
-        AddCommaSeparatedMultiSelect(fields, BorderZone, "Border zone", "teal", "📍",
+        AddCommaSeparatedMultiSelect(fields, BorderZone, ApplicationProfileLocalization.Field("BorderZone"), "teal", "📍",
             Visible(profile, p => ApplicationProfileConfigurationResolver.RequireBorderZoneWhenProducingInvitationOrVisa(
                     p.ProduceInvitation, p.ProduceVisa, p.RequireBorderZone),
                 ApplicationProfileConfigurationResolver.ShowBorderZoneLocation, application),
@@ -146,17 +146,17 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             catalogs.BorderZoneNames, readOnly: false,
             BorderZoneFill(application.BorderZoneLocation, profile?.DefaultBorderZoneLocation));
 
-        AddDate(fields, EndDate, "End date", "green", "📅",
+        AddDate(fields, EndDate, ApplicationProfileLocalization.Field("EndDate"), "green", "📅",
             Visible(profile, p => p.RequireEndDate, ApplicationProfileConfigurationResolver.ShowBusinessTrips, application),
             application.BusinessTripEndDate,
             DateFill(application.BusinessTripEndDate, defaultDate: null));
 
-        AddLookup(fields, MigrationService, "Migration service", "teal", "🏛",
+        AddLookup(fields, MigrationService, ApplicationProfileLocalization.Field("MigrationService"), "teal", "🏛",
             Visible(profile, p => p.RequireMigrationService, ApplicationProfileConfigurationResolver.ShowMigrationService, application),
             application.MigrationService?.ID, LookupLabel(application.MigrationService), catalogs.MigrationServices, readOnly: false,
             LookupFill(application.MigrationService?.ID, DefaultId(profile?.DefaultMigrationService?.ID, profile?.DefaultMigrationServiceId)));
 
-        AddLookup(fields, FromRegion, "From region", "purple", "📍",
+        AddLookup(fields, FromRegion, ApplicationProfileLocalization.Field("FromRegion"), "purple", "📍",
             Visible(profile, p => p.RequireFromRegion, ApplicationProfileConfigurationResolver.ShowFromRegion, application),
             application.FromRegion?.ID, LookupLabel(application.FromRegion), catalogs.Regions, readOnly: false,
             FromGeoLookupFill(
@@ -164,7 +164,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                 application.FromRegion?.ID,
                 DefaultId(profile?.DefaultFromRegion?.ID, profile?.DefaultFromRegionId)));
 
-        AddLookup(fields, FromCity, "From city", "purple", "📍",
+        AddLookup(fields, FromCity, ApplicationProfileLocalization.Field("FromCity"), "purple", "📍",
             Visible(profile, p => p.RequireFromCity, ApplicationProfileConfigurationResolver.ShowFromCity, application),
             application.FromCity?.ID, LookupLabel(application.FromCity),
             CitiesForSelectedRegion(catalogs.Cities, catalogs.RegionCatalog, application.FromRegion?.ID),
@@ -174,12 +174,12 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                 application.FromCity?.ID,
                 DefaultId(profile?.DefaultFromCity?.ID, profile?.DefaultFromCityId)));
 
-        AddLookup(fields, ToRegion, "To region", "purple", "📍",
+        AddLookup(fields, ToRegion, ApplicationProfileLocalization.Field("ToRegion"), "purple", "📍",
             Visible(profile, p => p.RequireToRegion, ApplicationProfileConfigurationResolver.ShowToRegion, application),
             application.ToRegion?.ID, LookupLabel(application.ToRegion), catalogs.Regions, readOnly: false,
             LookupFill(application.ToRegion?.ID, DefaultId(profile?.DefaultToRegion?.ID, profile?.DefaultToRegionId)));
 
-        AddLookup(fields, ToCity, "To city", "purple", "📍",
+        AddLookup(fields, ToCity, ApplicationProfileLocalization.Field("ToCity"), "purple", "📍",
             Visible(profile, p => p.RequireToCity, ApplicationProfileConfigurationResolver.ShowToCity, application),
             application.ToCity?.ID, LookupLabel(application.ToCity),
             CitiesForSelectedRegion(catalogs.Cities, catalogs.RegionCatalog, application.ToRegion?.ID),
@@ -194,7 +194,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         var showTripAddress = Visible(profile, p => p.RequireBusinessTripAddress, ApplicationProfileConfigurationResolver.ShowBusinessTripAddress, application);
         if (showTripAddress)
         {
-            AddLookup(fields, BusinessTripAddressType, "Business trip address type", "purple", "📍",
+            AddLookup(fields, BusinessTripAddressType, ApplicationProfileLocalization.Field("BusinessTripAddressType"), "purple", "📍",
                 visible: true,
                 application.BusinessTripAddressType is ResidenceType type
                     ? ResidenceTypeOptionId(type)
@@ -209,7 +209,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             switch (application.BusinessTripAddressType)
             {
                 case ResidenceType.Lodging:
-                    AddLookup(fields, BusinessTripLodging, "Business trip lodging", "purple", "📍",
+                    AddLookup(fields, BusinessTripLodging, ApplicationProfileLocalization.Field("BusinessTripLodging"), "purple", "📍",
                         visible: true,
                         application.BusinessTripLodging?.ID,
                         application.BusinessTripLodging?.FullAddress ?? string.Empty,
@@ -221,7 +221,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                         LookupFill(application.BusinessTripLodging?.ID, DefaultId(profile?.DefaultBusinessTripLodging?.ID, profile?.DefaultBusinessTripLodgingId)));
                     break;
                 case ResidenceType.Hotel:
-                    AddLookup(fields, BusinessTripHotel, "Business trip hotel", "purple", "📍",
+                    AddLookup(fields, BusinessTripHotel, ApplicationProfileLocalization.Field("BusinessTripHotel"), "purple", "📍",
                         visible: true,
                         application.BusinessTripHotel?.ID,
                         application.BusinessTripHotel?.Name ?? string.Empty,
@@ -233,7 +233,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                         LookupFill(application.BusinessTripHotel?.ID, DefaultId(profile?.DefaultBusinessTripHotel?.ID, profile?.DefaultBusinessTripHotelId)));
                     break;
                 case ResidenceType.Hospital:
-                    AddLookup(fields, BusinessTripHospital, "Business trip hospital", "purple", "📍",
+                    AddLookup(fields, BusinessTripHospital, ApplicationProfileLocalization.Field("BusinessTripHospital"), "purple", "📍",
                         visible: true,
                         application.BusinessTripHospital?.ID,
                         application.BusinessTripHospital?.Name ?? string.Empty,
@@ -245,7 +245,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                         LookupFill(application.BusinessTripHospital?.ID, DefaultId(profile?.DefaultBusinessTripHospital?.ID, profile?.DefaultBusinessTripHospitalId)));
                     break;
                 case ResidenceType.Other:
-                    AddLookup(fields, BusinessTripOtherSite, "Business trip other site", "purple", "📍",
+                    AddLookup(fields, BusinessTripOtherSite, ApplicationProfileLocalization.Field("BusinessTripOtherSite"), "purple", "📍",
                         visible: true,
                         application.BusinessTripOtherSite?.ID,
                         application.BusinessTripOtherSite?.FullAddress ?? string.Empty,
@@ -257,7 +257,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                         LookupFill(application.BusinessTripOtherSite?.ID, DefaultId(profile?.DefaultBusinessTripOtherSite?.ID, profile?.DefaultBusinessTripOtherSiteId)));
                     break;
                 case ResidenceType.PrivateHouse:
-                    AddShortText(fields, BusinessTripPrivateHouseAddress, "Business trip address", "purple", "📍",
+                    AddShortText(fields, BusinessTripPrivateHouseAddress, ApplicationProfileLocalization.Field("BusinessTripAddress"), "purple", "📍",
                         visible: true,
                         application.BusinessTripPrivateHouseAddress,
                         BusinessTripPrivateHouseAddressMaxLength,
@@ -268,7 +268,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                     // Dual-read legacy catalog until officers re-pick Type + site.
                     if (application.BusinessTripAddress != null)
                     {
-                        AddLookup(fields, BusinessTripAddress, "Business trip address (legacy)", "purple", "📍",
+                        AddLookup(fields, BusinessTripAddress, ApplicationProfileLocalization.Field("BusinessTripAddressLegacy"), "purple", "📍",
                             visible: true,
                             application.BusinessTripAddress?.ID,
                             FormatBusinessTripAddress(application.BusinessTripAddress),
@@ -280,12 +280,12 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             }
         }
 
-        AddText(fields, Purpose, "Purpose", "blue", "📝",
+        AddText(fields, Purpose, ApplicationProfileLocalization.Field("Purpose"), "blue", "📝",
             Visible(profile, p => p.RequirePurpose, ApplicationProfileConfigurationResolver.ShowPurpose, application),
             application.Purpose,
             TextFill(application.Purpose, profile?.DefaultPurpose));
 
-        AddCommaSeparatedMultiSelect(fields, WorkPermitLocation, "Work permit location", "blue", "🏢",
+        AddCommaSeparatedMultiSelect(fields, WorkPermitLocation, ApplicationProfileLocalization.Field("WorkPermitLocation"), "blue", "🏢",
             Visible(profile, p => ApplicationProfileConfigurationResolver.RequireWorkPermitLocationWhenProducingWorkPermit(
                     p.ProduceWorkPermit, p.RequireWorkPermitLocation),
                 ApplicationProfileConfigurationResolver.ShowMovementPermitLocation, application),
@@ -493,7 +493,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                     return Hidden(out error);
                 return SetWorkPermitLocation(value, application, out error);
             default:
-                error = "That field cannot be edited here.";
+                error = ApplicationProfileLocalization.Field("CannotEdit");
                 return false;
         }
     }

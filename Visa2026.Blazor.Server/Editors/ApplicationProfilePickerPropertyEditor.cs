@@ -11,6 +11,7 @@ using DevExpress.ExpressApp.Model;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Localization;
 using Visa2026.Module.BusinessObjects.ApplicationProfilePicker;
 using Visa2026.Module.Editors;
 using Visa2026.Module.Services.ApplicationProfilePicker;
@@ -124,8 +125,8 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
             var route = openContext?.CreationProgressRoute;
 
             model.RouteHint = route.HasValue
-                ? $"Showing profiles for {ApplicationProfilePickerDisplayHelper.FormatProgressRoute(route.Value)}."
-                : "Choose a profile — configuration applies live; per-ApplicationProfileInstance values get defaults at create.";
+                ? VisaUiMessages.Format("ApplicationProfileInstance.Picker.RouteHint", ApplicationProfilePickerDisplayHelper.FormatProgressRoute(route.Value))
+                : VisaUiMessages.Get("ApplicationProfileInstance.Picker.RouteHintDefault");
 
             var rows = queryService.GetProfiles(objectSpace, route, seedPersonId: null);
             model.Rows = rows.Select(r => new ApplicationProfilePickerModel.PickerRowModel
@@ -174,7 +175,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
 
         if (model.SelectedProfileId == Guid.Empty)
         {
-            model.StatusMessage = "Select an Application Profile first.";
+            model.StatusMessage = VisaUiMessages.Get("ApplicationProfileInstance.Picker.SelectFirst");
             model.IsStatusError = true;
             return;
         }
@@ -236,7 +237,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
 
         if (model.SelectedVersionId == Guid.Empty)
         {
-            model.StatusMessage = "Select an approval-leg version.";
+            model.StatusMessage = VisaUiMessages.Get("ApplicationProfileInstance.Picker.SelectVersion");
             model.IsStatusError = true;
             return;
         }
@@ -278,7 +279,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
 
         if (model.SelectedProfileId == Guid.Empty)
         {
-            model.StatusMessage = "Select an Application Profile first.";
+            model.StatusMessage = VisaUiMessages.Get("ApplicationProfileInstance.Picker.SelectFirst");
             model.IsStatusError = true;
             return;
         }
@@ -292,7 +293,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
 
         if (selected?.RequiresApprovalLegVersion == true && model.SelectedVersionId == Guid.Empty)
         {
-            model.StatusMessage = "Select an approval-leg version.";
+            model.StatusMessage = VisaUiMessages.Get("ApplicationProfileInstance.Picker.SelectVersion");
             model.IsStatusError = true;
             return;
         }
@@ -383,7 +384,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         var factory = _application.ServiceProvider?.GetService<INonSecuredObjectSpaceFactory>();
         if (factory == null)
         {
-            model.StatusMessage = "Could not set the default approval-leg chain.";
+            model.StatusMessage = VisaUiMessages.Get("ApplicationProfileInstance.Picker.CouldNotSetDefault");
             model.IsStatusError = true;
             return;
         }
@@ -395,7 +396,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
                 versionId,
                 out var error))
         {
-            model.StatusMessage = error ?? "Could not set the default approval-leg chain.";
+            model.StatusMessage = error ?? VisaUiMessages.Get("ApplicationProfileInstance.Picker.CouldNotSetDefault");
             model.IsStatusError = true;
             return;
         }

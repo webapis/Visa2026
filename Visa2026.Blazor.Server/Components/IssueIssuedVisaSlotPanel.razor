@@ -6,6 +6,7 @@
 @using Visa2026.Blazor.Server.Editors
 @using Visa2026.Blazor.Server.Services
 @using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Localization
 @using Visa2026.Module.Services
 @using Visa2026.Module.Services.ApplicationWorkspace
 @using Visa2026.Module.Services.PreviewSlot
@@ -22,7 +23,7 @@
         <div class="visa-preview-drawer__header-actions">
             <button class="visa-preview-drawer__btn visa-preview-drawer__btn--close"
                     type="button"
-                    title="Close"
+                    title="@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Workspace.Close")"
                     @onclick="ClosePanelAsync">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                     <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
@@ -39,7 +40,7 @@
             }
             else if (_draft == null)
             {
-                <p class="issue-issued-header-slot__muted">Loading…</p>
+                <p class="issue-issued-header-slot__muted">@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Loading")</p>
             }
             else if (_result?.Succeeded == true)
             {
@@ -56,39 +57,39 @@
                                 <div class="issue-issued-visa-slot__card-head">
                                     <span class="issue-issued-visa-slot__avatar">@Initials(row.PersonName)</span>
                                     <span class="issue-issued-visa-slot__person">@row.PersonName</span>
-                                    <span class="issue-issued-header-slot__status issue-issued-header-slot__status--ready">Issued</span>
+                                        <span class="issue-issued-header-slot__status issue-issued-header-slot__status--ready">@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Workspace.Issued")</span>
                                 </div>
                                 <dl class="issue-issued-visa-slot__readonly-grid">
                                     <div>
-                                        <dt>Visa number</dt>
+                                        <dt>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.VisaNumber")</dt>
                                         <dd>@row.VisaNumber</dd>
                                     </div>
                                     <div>
-                                        <dt>Visa type</dt>
+                                        <dt>@ApplicationProfileLocalization.Field("VisaType")</dt>
                                         <dd>@row.VisaTypeCaption</dd>
                                     </div>
                                     <div>
-                                        <dt>Category</dt>
+                                        <dt>@ApplicationProfileLocalization.Field("Category")</dt>
                                         <dd>@row.VisaCategoryCaption</dd>
                                     </div>
                                     <div>
-                                        <dt>Period</dt>
+                                        <dt>@ApplicationProfileLocalization.Field("Period")</dt>
                                         <dd>@row.VisaPeriodCaption</dd>
                                     </div>
                                     <div>
-                                        <dt>Issued</dt>
+                                        <dt>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Workspace.Issued")</dt>
                                         <dd>@row.IssueDate.ToString("dd MMM yyyy")</dd>
                                     </div>
                                     <div>
-                                        <dt>Expiration</dt>
+                                        <dt>@ApplicationProfileLocalization.Field("EndDate")</dt>
                                         <dd>@(row.ExpirationDate?.ToString("dd MMM yyyy") ?? "—")</dd>
                                     </div>
                                     <div>
-                                        <dt>Passport number</dt>
+                                        <dt>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Org.PassportNumber")</dt>
                                         <dd>@row.PassportNumber</dd>
                                     </div>
                                     <div>
-                                        <dt>Border zone</dt>
+                                        <dt>@ApplicationProfileLocalization.Field("BorderZone")</dt>
                                         <dd>@(string.IsNullOrWhiteSpace(row.BorderZoneCaption) ? "Ýok" : row.BorderZoneCaption)</dd>
                                     </div>
                                 </dl>
@@ -97,9 +98,9 @@
                     </section>
                 }
                 <div class="issue-issued-visa-slot__actions">
-                    <button type="button" class="issue-issued-header-slot__btn" @onclick="ClosePanelAsync">Close</button>
+                    <button type="button" class="issue-issued-header-slot__btn" @onclick="ClosePanelAsync">@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Workspace.Close")</button>
                     <button type="button" class="issue-issued-header-slot__btn issue-issued-header-slot__btn--primary" @onclick="OpenCreatedInApp">
-                        Open in app
+                        @ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Workspace.OpenInApp")
                     </button>
                 </div>
             }
@@ -109,8 +110,8 @@
                 {
                     <p class="issue-issued-visa-slot__banner issue-issued-visa-slot__banner--info">
                         @(_draft.UsesInvitationSource
-                            ? "One visa per person who has an issued invitation on this case. Linked invitation items are not a visa source."
-                            : "One visa per person on this case. Linked visas are not a visa source.")
+                            ? ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.VisaBannerInvitation")
+                            : ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.VisaBannerRoster"))
                     </p>
                     @if (!_draft.HasUnusedLine)
                     {
@@ -134,8 +135,8 @@
                     <section class="issue-issued-visa-slot__group">
                         <h3 class="issue-issued-visa-slot__group-title">
                             @(_draft.UsesInvitationSource
-                                ? $"Invitation {group.InvitationNumber} · {group.InvitationIssuedDate:dd MMM yyyy}"
-                                : "People on this case")
+                                ? $"{ApplicationProfileLocalization.Msg("ApplicationProfile.Doc.Invitation")} {group.InvitationNumber} · {group.InvitationIssuedDate:dd MMM yyyy}"
+                                : ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.PeopleOnCase"))
                         </h3>
                         @foreach (var person in group.People)
                         {
@@ -158,15 +159,15 @@
                                     <span class="issue-issued-visa-slot__person">@person.PersonName</span>
                                     @if (issued)
                                     {
-                                        <span class="issue-issued-header-slot__status issue-issued-header-slot__status--ready">Visa issued</span>
+                                        <span class="issue-issued-header-slot__status issue-issued-header-slot__status--ready">@ApplicationProfileLocalization.IssuedStatus("Visa issued")</span>
                                     }
                                     else if (!_draft.IsEditMode && !person.IsReady)
                                     {
-                                        <span class="issue-issued-header-slot__status issue-issued-header-slot__status--warn">No passport</span>
+                                        <span class="issue-issued-header-slot__status issue-issued-header-slot__status--warn">@ApplicationProfileLocalization.IssuedStatus("No passport")</span>
                                     }
                                     else if (!_draft.IsEditMode && person.Include)
                                     {
-                                        <button type="button" class="issue-issued-header-slot__link-btn" @onclick="() => RemovePerson(person)">Remove</button>
+                                        <button type="button" class="issue-issued-header-slot__link-btn" @onclick="() => RemovePerson(person)">@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Remove")</button>
                                     }
                                 </div>
 
@@ -174,39 +175,39 @@
                                 {
                                     <dl class="issue-issued-visa-slot__readonly-grid">
                                         <div>
-                                            <dt>Visa number</dt>
+                                            <dt>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.VisaNumber")</dt>
                                             <dd>@(person.ExistingVisaNumber ?? person.VisaNumber)</dd>
                                         </div>
                                         <div>
-                                            <dt>Visa type</dt>
+                                            <dt>@ApplicationProfileLocalization.Field("VisaType")</dt>
                                             <dd>@LookupCaption(_draft.VisaTypes, person.VisaTypeId)</dd>
                                         </div>
                                         <div>
-                                            <dt>Category</dt>
+                                            <dt>@ApplicationProfileLocalization.Field("Category")</dt>
                                             <dd>@LookupCaption(_draft.VisaCategories, person.VisaCategoryId)</dd>
                                         </div>
                                         <div>
-                                            <dt>Period</dt>
+                                            <dt>@ApplicationProfileLocalization.Field("Period")</dt>
                                             <dd>@LookupCaption(_draft.VisaPeriods, person.VisaPeriodId)</dd>
                                         </div>
                                         <div>
-                                            <dt>Issued place</dt>
+                                            <dt>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.VisaIssuedPlace")</dt>
                                             <dd>@LookupCaption(_draft.VisaIssuedPlaces, person.VisaIssuedPlaceId)</dd>
                                         </div>
                                         <div>
-                                            <dt>Issued</dt>
+                                            <dt>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Workspace.Issued")</dt>
                                             <dd>@person.IssueDate.ToString("dd MMM yyyy")</dd>
                                         </div>
                                         <div>
-                                            <dt>Expiration</dt>
+                                            <dt>@ApplicationProfileLocalization.Field("EndDate")</dt>
                                             <dd>@(person.ExpirationDate?.ToString("dd MMM yyyy") ?? "—")</dd>
                                         </div>
                                         <div>
-                                            <dt>Passport number</dt>
+                                            <dt>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Org.PassportNumber")</dt>
                                             <dd>@person.PassportNumber</dd>
                                         </div>
                                         <div>
-                                            <dt>Border zone</dt>
+                                            <dt>@ApplicationProfileLocalization.Field("BorderZone")</dt>
                                             <dd>@(string.IsNullOrWhiteSpace(person.BorderZoneLocation) ? "Ýok" : person.BorderZoneLocation)</dd>
                                         </div>
                                     </dl>
@@ -230,13 +231,13 @@
                                     var passportKey = CueKey(card, "passport");
                                     <div class="issue-issued-header-slot__grid">
                                         <label class="issue-issued-header-slot__field @FieldCueClass(numberKey, true, IssueComposeFieldCue.HasText(card.VisaNumber))">
-                                            <span>Visa number *</span>
+                                            <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.VisaNumber")</span>
                                             <input class="issue-issued-header-slot__input"
                                                    @bind="card.VisaNumber"
                                                    @onfocusout="() => ReviewField(numberKey)" />
                                         </label>
                                         <label class="issue-issued-header-slot__field @FieldCueClass(typeKey, true, IssueComposeFieldCue.HasId(card.VisaTypeId))">
-                                            <span>Visa type *</span>
+                                            <span>@ApplicationProfileLocalization.Field("VisaType") *</span>
                                             <select class="issue-issued-header-slot__input"
                                                     value="@GuidText(card.VisaTypeId)"
                                                     @onchange="e => SetGuidAndReview(v => card.VisaTypeId = v, e.Value, typeKey)"
@@ -249,7 +250,7 @@
                                             </select>
                                         </label>
                                         <label class="issue-issued-header-slot__field @FieldCueClass(categoryKey, true, IssueComposeFieldCue.HasId(card.VisaCategoryId))">
-                                            <span>Visa category *</span>
+                                            <span>@ApplicationProfileLocalization.Field("VisaCategory") *</span>
                                             <select class="issue-issued-header-slot__input"
                                                     value="@GuidText(card.VisaCategoryId)"
                                                     @onchange="e => SetGuidAndReview(v => card.VisaCategoryId = v, e.Value, categoryKey)"
@@ -262,7 +263,7 @@
                                             </select>
                                         </label>
                                         <label class="issue-issued-header-slot__field @FieldCueClass(periodKey, true, IssueComposeFieldCue.HasId(card.VisaPeriodId))">
-                                            <span>Visa period *</span>
+                                            <span>@ApplicationProfileLocalization.Field("VisaPeriod") *</span>
                                             <select class="issue-issued-header-slot__input"
                                                     value="@GuidText(card.VisaPeriodId)"
                                                     @onchange="e => SetGuidAndReview(v => card.VisaPeriodId = v, e.Value, periodKey)"
@@ -275,7 +276,7 @@
                                             </select>
                                         </label>
                                         <label class="issue-issued-header-slot__field @FieldCueClass(placeKey, true, IssueComposeFieldCue.HasId(card.VisaIssuedPlaceId))">
-                                            <span>Visa issued place *</span>
+                                            <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.VisaIssuedPlace")</span>
                                             <select class="issue-issued-header-slot__input"
                                                     value="@GuidText(card.VisaIssuedPlaceId)"
                                                     @onchange="e => SetGuidAndReview(v => card.VisaIssuedPlaceId = v, e.Value, placeKey)"
@@ -288,32 +289,32 @@
                                             </select>
                                         </label>
                                         <label class="issue-issued-header-slot__field @FieldCueClass(issueKey, true, IssueComposeFieldCue.HasDate(card.IssueDate))">
-                                            <span>Issued date *</span>
+                                            <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.IssuedDate") *</span>
                                             <OfficerDateEdit Date="card.IssueDate"
                                                              DateChanged="value => OnVisaIssueDateChangedAsync(card, value, issueKey)" />
                                         </label>
                                         <label class="issue-issued-header-slot__field @FieldCueClass(expKey, true, IssueComposeFieldCue.HasDate(card.ExpirationDate))">
-                                            <span>Expiration *</span>
+                                            <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Expiration")</span>
                                             <OfficerDateEdit @bind-Date="card.ExpirationDate"
                                                              @bind-Date:after="() => ReviewField(expKey)" />
                                         </label>
                                         <div class="issue-issued-header-slot__field issue-issued-header-slot__field--wide @FieldCueClass(zoneKey, false, IssueComposeFieldCue.HasText(card.BorderZoneLocation))">
-                                            <span>Border zone</span>
+                                            <span>@ApplicationProfileLocalization.Field("BorderZone")</span>
                                             <BorderZoneLocationField Value="@card.BorderZoneLocation"
                                                                      ValueChanged="@(value => OnPersonBorderZoneChanged(card, value, zoneKey))" />
                                         </div>
                                         <label class="issue-issued-header-slot__field issue-issued-header-slot__field--wide @FieldCueClass(passportKey, false, IssueComposeFieldCue.HasText(card.PassportNumber), true)">
-                                            <span>Passport number</span>
+                                            <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Org.PassportNumber")</span>
                                             <input class="issue-issued-header-slot__input" value="@card.PassportNumber" disabled />
                                         </label>
                                         <div class="issue-issued-header-slot__field issue-issued-header-slot__field--wide">
-                                            <span>Visa copy</span>
+                                            <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.VisaCopy")</span>
                                             <p class="issue-issued-header-slot__muted">
-                                                PDF or scan of this visa. Allowed: PDF, PNG, JPEG, TIFF, GIF, BMP — up to @MaxCopyUploadMb MB.
+                                                @ApplicationProfileLocalization.Format("ApplicationProfileInstance.Issued.CopyHint", ApplicationProfileLocalization.Msg("ApplicationProfile.Doc.Visa"), MaxCopyUploadMb)
                                             </p>
                                             @if (card.Documents.Count == 0 && string.IsNullOrWhiteSpace(card.PendingCopyFileName))
                                             {
-                                                <p class="issue-issued-header-slot__muted">No copy attached yet.</p>
+                                                <p class="issue-issued-header-slot__muted">@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Workspace.NoCopy")</p>
                                             }
                                             else
                                             {
@@ -328,7 +329,7 @@
                                                                         class="issue-issued-header-slot__link-btn"
                                                                         disabled="@_busy"
                                                                         @onclick="() => RemoveCopyAsync(card, doc.DocumentId)">
-                                                                    Remove
+                                                                    @ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Remove")
                                                                 </button>
                                                             }
                                                         </li>
@@ -336,12 +337,12 @@
                                                     @if (!string.IsNullOrWhiteSpace(card.PendingCopyFileName))
                                                     {
                                                         <li>
-                                                            <span>@card.PendingCopyFileName (attaches on Create)</span>
+                                                            <span>@ApplicationProfileLocalization.Format("ApplicationProfileInstance.Issued.AttachesOnCreate", card.PendingCopyFileName)</span>
                                                             <button type="button"
                                                                     class="issue-issued-header-slot__link-btn"
                                                                     disabled="@_busy"
                                                                     @onclick="() => ClearPendingCopy(card)">
-                                                                Remove
+                                                                @ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Remove")
                                                             </button>
                                                         </li>
                                                     }
@@ -351,7 +352,7 @@
                                                 <InputFile OnChange="e => OnCopyFileSelectedAsync(card, e)"
                                                            accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp"
                                                            disabled="@_busy" />
-                                                <span>Upload copy</span>
+                                                <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.UploadCopy")</span>
                                             </label>
                                         </div>
                                     </div>
@@ -372,14 +373,14 @@
                 }
 
                 <div class="issue-issued-visa-slot__actions">
-                    <button type="button" class="issue-issued-header-slot__btn" disabled="@_busy" @onclick="ClosePanelAsync">Cancel</button>
+                    <button type="button" class="issue-issued-header-slot__btn" disabled="@_busy" @onclick="ClosePanelAsync">@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Cancel")</button>
                     @if (_draft.IsEditMode)
                     {
                         <button type="button"
                                 class="issue-issued-header-slot__btn issue-issued-header-slot__btn--primary"
                                 disabled="@(!CanSaveVisa)"
                                 @onclick="SaveAsync">
-                            @(_busy ? "Saving…" : "Save")
+                            @(_busy ? ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Saving") : ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Save"))
                         </button>
                     }
                     else
@@ -388,7 +389,7 @@
                                 class="issue-issued-header-slot__btn issue-issued-header-slot__btn--primary"
                                 disabled="@(!CanCreate)"
                                 @onclick="CreateAsync">
-                            @(_busy ? "Creating…" : "Create visas")
+                            @(_busy ? ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Creating") : ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.CreateVisas"))
                         </button>
                     }
                 </div>
@@ -419,8 +420,11 @@
 
     private string PanelTitle =>
         _draft?.IsEditMode == true
-            ? (string.IsNullOrWhiteSpace(_draft.Title) ? "Issued visa" : _draft.Title)
-            : _result?.Succeeded == true ? "Issued visas" : "New issued visa";
+            ? ApplicationProfileLocalization.IssuedComposeTitle(
+                string.IsNullOrWhiteSpace(_draft.Title) ? "Issued visa" : _draft.Title)
+            : _result?.Succeeded == true
+                ? ApplicationProfileLocalization.IssuedComposeTitle("Issued visas")
+                : ApplicationProfileLocalization.IssuedComposeTitle("New issued visa");
 
     private string ProfileSuffix =>
         string.IsNullOrWhiteSpace(_draft?.ProfileCode) ? string.Empty : $" · {_draft.ProfileCode}";
@@ -464,12 +468,14 @@
     private string CreatedGroupKey(IssueIssuedVisaCreatedRow row)
     {
         if (_draft?.UsesInvitationSource != true)
-            return "People on this case";
+            return ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.PeopleOnCase");
         return string.IsNullOrWhiteSpace(row.InvitationNumber) ? "—" : row.InvitationNumber;
     }
 
     private string CreatedGroupTitle(string key) =>
-        _draft?.UsesInvitationSource == true ? $"Invitation {key}" : key;
+        _draft?.UsesInvitationSource == true
+            ? $"{ApplicationProfileLocalization.Msg("ApplicationProfile.Doc.Invitation")} {key}"
+            : key;
 
     private bool CanCreate =>
         _draft != null

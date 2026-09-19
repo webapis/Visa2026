@@ -1,0 +1,213 @@
+{
+  "classes": {
+    "Visa2026.Module.BusinessObjects.ApplicationProfile": {
+      "caption": {
+        "en-US": "Application Profile",
+        "tr-TR": "Başvuru profili",
+        "tk-TM": "Ýüztutma profili",
+        "ru-RU": "Профиль заявки"
+      },
+      "members": {
+        "Name": {
+          "en-US": "Application Profile name",
+          "tr-TR": "Başvuru profili adı",
+          "tk-TM": "Ýüztutma profiliniň ady",
+          "ru-RU": "Имя профиля заявки"
+        },
+        "Description": { "en-US": "Description", "tr-TR": "Açıklama", "tk-TM": "Düşündiriş", "ru-RU": "Описание" },
+        "Code": { "en-US": "Code", "tr-TR": "Kod", "tk-TM": "Kod", "ru-RU": "Код" },
+        "SelectionCode": {
+          "en-US": "Selection / quick code",
+          "tr-TR": "Seçim / hızlı kod",
+          "tk-TM": "Saýlaw / çalt kod",
+          "ru-RU": "Код выбора"
+        },
+        "ProgressRoute": {
+          "en-US": "Directed to",
+          "tr-TR": "Yönlendirildiği yer",
+          "tk-TM": "Gönükdirilen ýeri",
+          "ru-RU": "Направление"
+        },
+        "ForEmployee": { "en-US": "For employee", "tr-TR": "Çalışan için", "tk-TM": "Işgär üçin", "ru-RU": "Для сотрудника" },
+        "ForFamilyMember": { "en-US": "For family member", "tr-TR": "Aile üyesi için", "tk-TM": "Maşgala agzasy üçin", "ru-RU": "Для члена семьи" },
+        "ForTemporaryVisitor": { "en-US": "For temporary visitor", "tr-TR": "Geçici ziyaretçi için", "tk-TM": "Wagtlaýyn myhman üçin", "ru-RU": "Для временного посетителя" },
+        "ActionFamily": { "en-US": "Related to", "tr-TR": "İlgili", "tk-TM": "Baglanyşykly", "ru-RU": "Относится к" },
+        "RegistrationKind": { "en-US": "Registration is", "tr-TR": "Kayıt türü", "tk-TM": "Hasaba alyş görnüşi", "ru-RU": "Вид регистрации" },
+        "ProduceInvitation": { "en-US": "May produce invitation", "tr-TR": "Davet düzenleyebilir", "tk-TM": "Çakylyk berip biler", "ru-RU": "Может выдавать приглашение" },
+        "ProduceWorkPermit": { "en-US": "May produce work permit", "tr-TR": "Çalışma izni düzenleyebilir", "tk-TM": "Iş rugsady berip biler", "ru-RU": "Может выдавать РНТ" },
+        "ProduceVisa": { "en-US": "May produce visa", "tr-TR": "Vize düzenleyebilir", "tk-TM": "Wiza berip biler", "ru-RU": "Может выдавать визу" },
+        "ProduceBorderZone": { "en-US": "May produce border zone", "tr-TR": "Sınır bölgesi düzenleyebilir", "tk-TM": "Serhet sebiti berip biler", "ru-RU": "Может выдавать погранзону" },
+        "ProduceWorkLocation": { "en-US": "May produce work location", "tr-TR": "Çalışma yeri düzenleyebilir", "tk-TM": "Iş ýeri berip biler", "ru-RU": "Может выдавать место работы" },
+        "ProduceRejection": { "en-US": "May produce rejection", "tr-TR": "Ret düzenleyebilir", "tk-TM": "Ret berip biler", "ru-RU": "Может выдавать отказ" },
+        "IsActive": { "en-US": "Active", "tr-TR": "Aktif", "tk-TM": "Aktiw", "ru-RU": "Активен" },
+        "MinistrySlaDays": { "en-US": "Ministry SLA (days)", "tr-TR": "Bakanlık SLA (gün)", "tk-TM": "Ministrlik SLA (gün)", "ru-RU": "SLA министерств (дни)" },
+        "MigrationSlaDays": { "en-US": "Migration SLA (days)", "tr-TR": "Göç SLA (gün)", "tk-TM": "Migrasiýa SLA (gün)", "ru-RU": "SLA миграции (дни)" },
+        "DefaultApprovalLegProfile": { "en-US": "Default approval legs", "tr-TR": "Varsayılan onay adımları", "tk-TM": "Bellenen tassyklama ädimleri", "ru-RU": "Этапы согласования по умолчанию" },
+        "NestedTemplates": { "en-US": "Nested templates", "tr-TR": "İç şablonlar", "tk-TM": "Iç şablonlar", "ru-RU": "Вложенные шаблоны" },
+        "IsConfigLocked": { "en-US": "Config locked", "tr-TR": "Yapılandırma kilitli", "tk-TM": "Sazlama gulply", "ru-RU": "Конфигурация заблокирована" }
+      }
+    },
+    "Visa2026.Module.BusinessObjects.ApplicationProfileTemplate": {
+      "caption": {
+        "en-US": "Application Profile template",
+        "tr-TR": "Başvuru profili şablonu",
+        "tk-TM": "Ýüztutma profil şablony",
+        "ru-RU": "Шаблон профиля заявки"
+      },
+      "members": {
+        "TemplateKind": { "en-US": "Template type", "tr-TR": "Şablon türü", "tk-TM": "Şablon görnüşi", "ru-RU": "Тип шаблона" },
+        "CatalogScope": { "en-US": "Catalog scope", "tr-TR": "Katalog kapsamı", "tk-TM": "Katalog gerimi", "ru-RU": "Область каталога" },
+        "DataScope": { "en-US": "Data scope", "tr-TR": "Veri kapsamı", "tk-TM": "Maglumat gerimi", "ru-RU": "Область данных" },
+        "TemplateName": { "en-US": "Template name", "tr-TR": "Şablon adı", "tk-TM": "Şablon ady", "ru-RU": "Имя шаблона" },
+        "TemplateFile": { "en-US": "Template file", "tr-TR": "Şablon dosyası", "tk-TM": "Şablon faýly", "ru-RU": "Файл шаблона" }
+      }
+    },
+    "Visa2026.Module.BusinessObjects.ApplicationProfileInstance": {
+      "caption": {
+        "en-US": "Application Profile instance",
+        "tr-TR": "Başvuru profili örneği",
+        "tk-TM": "Ýüztutma profiliniň ýüzlemesi",
+        "ru-RU": "Экземпляр профиля заявки"
+      },
+      "members": {
+        "ApplicationProfile": {
+          "en-US": "Application Profile",
+          "tr-TR": "Başvuru profili",
+          "tk-TM": "Ýüztutma profili",
+          "ru-RU": "Профиль заявки"
+        },
+        "FromRegion": { "en-US": "From region", "tr-TR": "Çıkış bölgesi", "tk-TM": "Çykyş welaýaty", "ru-RU": "Регион отправления" },
+        "FromCity": { "en-US": "From city", "tr-TR": "Çıkış şehri", "tk-TM": "Çykyş şäheri", "ru-RU": "Город отправления" },
+        "ToRegion": { "en-US": "To region", "tr-TR": "Varış bölgesi", "tk-TM": "Baryş welaýaty", "ru-RU": "Регион назначения" },
+        "ToCity": { "en-US": "To city", "tr-TR": "Varış şehri", "tk-TM": "Baryş şäheri", "ru-RU": "Город назначения" },
+        "BusinessTripAddressType": { "en-US": "Business trip address type", "tr-TR": "İş seyahati adres türü", "tk-TM": "Iş sapary salgy görnüşi", "ru-RU": "Тип адреса командировки" },
+        "People": { "en-US": "People", "tr-TR": "Kişiler", "tk-TM": "Adamlar", "ru-RU": "Люди" },
+        "Month": { "en-US": "Month", "tr-TR": "Ay", "tk-TM": "Aý", "ru-RU": "Месяц" },
+        "ProcessNumber": { "en-US": "Process number", "tr-TR": "Süreç numarası", "tk-TM": "Proses belgisi", "ru-RU": "Номер процесса" },
+        "ProjectContract": { "en-US": "Project contract", "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama belgisi", "ru-RU": "Контракт проекта" }
+      }
+    },
+    "Visa2026.Module.BusinessObjects.ApplicationProfileCatalog.ApplicationProfileCatalogHost": {
+      "caption": {
+        "en-US": "Application Profile Templates",
+        "tr-TR": "Başvuru profili şablonları",
+        "tk-TM": "Ýüztutma profil şablonlary",
+        "ru-RU": "Шаблоны профиля заявки"
+      },
+      "members": {}
+    },
+    "Visa2026.Module.BusinessObjects.ApplicationWorkspace.ApplicationWorkspaceHost": {
+      "caption": {
+        "en-US": "Case workspace",
+        "tr-TR": "Dava çalışma alanı",
+        "tk-TM": "Ýüztutma",
+        "ru-RU": "Рабочее место дела"
+      },
+      "members": {}
+    }
+  },
+  "views": {
+    "ApplicationProfileInstance_ListView": {
+      "caption": {
+        "en-US": "Application Profile Instances",
+        "tr-TR": "Başvuru profili örnekleri",
+        "tk-TM": "Ýüztutmalar",
+        "ru-RU": "Экземпляры профиля заявки"
+      }
+    },
+    "ApplicationProfileInstance_DetailView": {
+      "caption": {
+        "en-US": "Application Profile instance",
+        "tr-TR": "Başvuru profili örneği",
+        "tk-TM": "Ýüztutma profiliniň ýüzlemesi",
+        "ru-RU": "Экземпляр профиля заявки"
+      }
+    },
+    "Application_ListView_Staged": {
+      "caption": {
+        "en-US": "Staged profiles",
+        "tr-TR": "Hazırlık profilleri",
+        "tk-TM": "Taýýarlyk profilleri",
+        "ru-RU": "Подготовленные профили"
+      }
+    },
+    "Application_ListView_InProcess": {
+      "caption": {
+        "en-US": "In process",
+        "tr-TR": "İşlemde",
+        "tk-TM": "Prosesde",
+        "ru-RU": "В работе"
+      }
+    },
+    "ApplicationProfileCatalogHost_DetailView": {
+      "caption": {
+        "en-US": "Application Profile Templates",
+        "tr-TR": "Başvuru profili şablonları",
+        "tk-TM": "Ýüztutma profil şablonlary",
+        "ru-RU": "Шаблоны профиля заявки"
+      }
+    },
+    "ApplicationWorkspaceHost_DetailView": {
+      "caption": {
+        "en-US": "Case workspace",
+        "tr-TR": "Dava çalışma alanı",
+        "tk-TM": "Ýüztutma",
+        "ru-RU": "Рабочее место дела"
+      }
+    },
+    "ApplicationProfile_ListView": {
+      "caption": {
+        "en-US": "Application Profiles",
+        "tr-TR": "Başvuru profilleri",
+        "tk-TM": "Ýüztutma profilleri",
+        "ru-RU": "Профили заявок"
+      }
+    },
+    "ApplicationProfile_DetailView": {
+      "caption": {
+        "en-US": "Application Profile",
+        "tr-TR": "Başvuru profili",
+        "tk-TM": "Ýüztutma profili",
+        "ru-RU": "Профиль заявки"
+      }
+    }
+  },
+  "enums": {
+    "Visa2026.Module.BusinessObjects.ApplicationProfileActionFamily": {
+      "caption": {
+        "en-US": "Related to",
+        "tr-TR": "İlgili",
+        "tk-TM": "Baglanyşykly",
+        "ru-RU": "Относится к"
+      },
+      "Issuance": { "en-US": "Issuance", "tr-TR": "Düzenleme", "tk-TM": "Beriş", "ru-RU": "Выдача" },
+      "Cancellation": { "en-US": "Cancellation", "tr-TR": "İptal", "tk-TM": "Ýatyryş", "ru-RU": "Отмена" },
+      "Change": { "en-US": "Change", "tr-TR": "Değişiklik", "tk-TM": "Üýtgetme", "ru-RU": "Изменение" },
+      "Registration": { "en-US": "Registration", "tr-TR": "Kayıt", "tk-TM": "Hasaba alyş", "ru-RU": "Регистрация" },
+      "BusinessTrip": { "en-US": "Business trip", "tr-TR": "İş seyahati", "tk-TM": "Iş sapary", "ru-RU": "Командировка" }
+    },
+    "Visa2026.Module.BusinessObjects.ApplicationProfileRegistrationKind": {
+      "caption": {
+        "en-US": "Registration is",
+        "tr-TR": "Kayıt türü",
+        "tk-TM": "Hasaba alyş görnüşi",
+        "ru-RU": "Вид регистрации"
+      },
+      "None": { "en-US": "None", "tr-TR": "Yok", "tk-TM": "Ýok", "ru-RU": "Нет" },
+      "CheckIn": { "en-US": "Check in", "tr-TR": "Giriş kaydı", "tk-TM": "Hasaba almak", "ru-RU": "Регистрация въезда" },
+      "CheckOut": { "en-US": "Check out", "tr-TR": "Çıkış kaydı", "tk-TM": "Hasapdan çykarmak", "ru-RU": "Снятие с учёта" },
+      "InfoChange": { "en-US": "Info change", "tr-TR": "Bilgi değişikliği", "tk-TM": "Maglumat üýtgetmesi", "ru-RU": "Изменение данных" },
+      "Extension": { "en-US": "Reg extension", "tr-TR": "Kayıt uzatma", "tk-TM": "Hasaby uzaltmak", "ru-RU": "Продление регистрации" }
+    },
+    "Visa2026.Module.BusinessObjects.ApplicationProfileInstanceProgressRouteKind": {
+      "caption": {
+        "en-US": "Directed to",
+        "tr-TR": "Yönlendirildiği yer",
+        "tk-TM": "Gönükdirilen ýeri",
+        "ru-RU": "Направление"
+      },
+      "ViaMinistries": { "en-US": "Via ministry", "tr-TR": "Bakanlık süreci", "tk-TM": "Ministrlik arkaly", "ru-RU": "Через министерства" },
+      "DirectToMigrationService": { "en-US": "Direct migration", "tr-TR": "Doğrudan migrasyon", "tk-TM": "Migrasiýa gönümel", "ru-RU": "Напрямую в миграцию" }
+    }
+  }
+}

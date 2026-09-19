@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.Services.ApplicationWorkspace;
 
@@ -267,18 +268,18 @@ internal static class ApplicationWorkspaceSlaDashboardBuilder
 
     private static string OutcomeLabel(string outcome) => outcome switch
     {
-        "issued" => "Issued",
-        "rejected" => "Rejected",
-        "cancelled" => "Cancelled",
-        _ => "In process",
+        "issued" => ApplicationProfileLocalization.ProgressOutcome("Issued"),
+        "rejected" => ApplicationProfileLocalization.ProgressOutcome("Rejected"),
+        "cancelled" => ApplicationProfileLocalization.ProgressOutcome("Cancelled"),
+        _ => VisaUiMessages.Get("ApplicationProfileInstance.Workspace.InProcess"),
     };
 
     private static string ToneLabel(int? daysRemaining) => daysRemaining switch
     {
         null => "—",
-        <= 0 => "Due",
-        1 => "Due tomorrow",
-        <= 10 => "Due soon",
-        _ => "On track",
+        <= 0 => VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Due"),
+        1 => VisaUiMessages.Get("ApplicationProfileInstance.Workspace.DueTomorrow"),
+        <= 10 => VisaUiMessages.Get("ApplicationProfileInstance.Workspace.DueSoon"),
+        _ => VisaUiMessages.Get("ApplicationProfileInstance.Workspace.OnTrack"),
     };
 }

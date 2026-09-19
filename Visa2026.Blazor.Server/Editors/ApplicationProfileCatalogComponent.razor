@@ -5,7 +5,7 @@
 <div class="ap-catalog @(SelectedProfileId == Guid.Empty ? "ap-catalog--list" : "ap-catalog--detail")">
     @if (IsLoading)
     {
-        <div class="ap-catalog__loading" role="status">Loading Application Profiles…</div>
+        <div class="ap-catalog__loading" role="status">@Msg("ApplicationProfile.Catalog.Loading")</div>
     }
     else
     {
@@ -22,7 +22,7 @@
                         <div class="ap-catalog__search ap-catalog__search--toolbar">
                             <span aria-hidden="true">⌕</span>
                             <input type="search"
-                                   placeholder="Search profiles…"
+                                   placeholder="@Msg("ApplicationProfile.Catalog.SearchPlaceholder")"
                                    value="@SearchText"
                                    @oninput="OnSearchInput" />
                         </div>
@@ -31,13 +31,13 @@
                         </span>
                     </div>
                     <button type="button" class="ap-catalog__new ap-catalog__new--toolbar" @onclick="NewProfileAsync">
-                        New Application Profile
+                        @Msg("ApplicationProfile.Catalog.New")
                     </button>
                 </header>
 
                 @if (Rows.Count == 0)
                 {
-                    <div class="ap-catalog__rail-empty">No profiles match.</div>
+                    <div class="ap-catalog__rail-empty">@Msg("ApplicationProfile.Catalog.Empty")</div>
                 }
                 else
                 {
@@ -45,12 +45,12 @@
                         <table class="ap-catalog__table">
                             <thead>
                                 <tr>
-                                    <th>Template</th>
-                                    <th>Code</th>
-                                    <th>Action family</th>
-                                    <th>Progress route</th>
-                                    <th>Status</th>
-                                    <th>Linked</th>
+                                    <th>@Msg("ApplicationProfile.Catalog.ColTemplate")</th>
+                                    <th>@Msg("ApplicationProfile.Catalog.ColCode")</th>
+                                    <th>@Msg("ApplicationProfile.Catalog.ColActionFamily")</th>
+                                    <th>@Msg("ApplicationProfile.Catalog.ColProgressRoute")</th>
+                                    <th>@Msg("ApplicationProfile.Catalog.ColStatus")</th>
+                                    <th>@Msg("ApplicationProfile.Catalog.ColLinked")</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -75,21 +75,21 @@
                                                     <button type="button"
                                                             class="ap-catalog__delete ap-catalog__delete--confirm"
                                                             @onclick="() => ConfirmDeleteAsync(row.ProfileId)">
-                                                        Confirm delete
+                                                        @Msg("ApplicationProfile.Catalog.ConfirmDelete")
                                                     </button>
                                                     <button type="button"
                                                             class="ap-catalog__delete-cancel"
                                                             @onclick="CancelDelete">
-                                                        Cancel
+                                                        @Msg("ApplicationProfile.Catalog.Cancel")
                                                     </button>
                                                 }
                                                 else
                                                 {
                                                     <button type="button"
                                                             class="ap-catalog__delete"
-                                                            title="Delete this template"
+                                                            title="@Msg("ApplicationProfile.Catalog.DeleteTitle")"
                                                             @onclick="() => AskDelete(row.ProfileId)">
-                                                        Delete
+                                                        @Msg("ApplicationProfile.Catalog.Delete")
                                                     </button>
                                                 }
                                             }
@@ -162,9 +162,11 @@
     private static string StatusLabel(ApplicationProfileCatalogRow row)
     {
         if (!row.IsActive)
-            return "Inactive";
-        return row.IsConfigLocked ? "Config locked" : "Active";
+            return Msg("ApplicationProfile.Status.Inactive");
+        return row.IsConfigLocked ? Msg("ApplicationProfile.Status.ConfigLocked") : Msg("ApplicationProfile.Status.Active");
     }
+
+    private static string Msg(string key) => VisaUiMessages.Get(key);
 
     private void AskDelete(Guid profileId) => _confirmDeleteId = profileId;
 

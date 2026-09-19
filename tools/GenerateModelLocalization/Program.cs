@@ -22,6 +22,8 @@ string documentsViewsJsonPath = Path.Combine(toolsDir, "UiStrings.documents-view
 string documentCopiesJsonPath = Path.Combine(toolsDir, "UiStrings.document-copies.json");
 string lookupEnumsJsonPath = Path.Combine(toolsDir, "UiStrings.lookup-enums.json");
 string userFeedbackJsonPath = Path.Combine(toolsDir, "UiStrings.user-feedback.json");
+string applicationProfileJsonPath = Path.Combine(toolsDir, "UiStrings.application-profile.json");
+string applicationProfileMessagesJsonPath = Path.Combine(toolsDir, "UiStrings.application-profile-messages.json");
 string navigationPathsJsonPath = Path.Combine(toolsDir, "UiStrings.navigation-paths.json");
 string moduleDir = Path.Combine(repoRoot, "Visa2026.Module");
 string blazorDir = Path.Combine(repoRoot, "Visa2026.Blazor.Server");
@@ -44,13 +46,17 @@ MergeViews(merged["views"]!.AsObject(), documentsViewsRoot["views"]?.AsObject())
 MergeClassMembers(merged["classes"]!.AsObject(), documentsViewsRoot["classMembers"]?.AsObject());
 JsonObject lookupEnumsRoot = JsonNode.Parse(File.ReadAllText(lookupEnumsJsonPath))!.AsObject();
 JsonObject userFeedbackRoot = JsonNode.Parse(File.ReadAllText(userFeedbackJsonPath))!.AsObject();
+JsonObject applicationProfileRoot = JsonNode.Parse(File.ReadAllText(applicationProfileJsonPath))!.AsObject();
 JsonObject navigationPathsRoot = JsonNode.Parse(File.ReadAllText(navigationPathsJsonPath))!.AsObject();
 JsonObject mergedEnums = new JsonObject();
 MergeObject(mergedEnums, JsonNode.Parse(File.ReadAllText(personDetailJsonPath))!["enums"]?.AsObject());
 MergeObject(mergedEnums, lookupEnumsRoot["enums"]?.AsObject());
 MergeObject(mergedEnums, userFeedbackRoot["enums"]?.AsObject());
+MergeObject(mergedEnums, applicationProfileRoot["enums"]?.AsObject());
 MergeClasses(merged["classes"]!.AsObject(), userFeedbackRoot["classes"]?.AsObject());
+MergeClasses(merged["classes"]!.AsObject(), applicationProfileRoot["classes"]?.AsObject());
 MergeViews(merged["views"]!.AsObject(), userFeedbackRoot["views"]?.AsObject());
+MergeViews(merged["views"]!.AsObject(), applicationProfileRoot["views"]?.AsObject());
 MergeObject(merged["actions"]!.AsObject(), userFeedbackRoot["actions"]?.AsObject());
 MergeEnumMembers(merged["classes"]!.AsObject(), mergedEnums);
 MergeClassMembers(merged["classes"]!.AsObject(), lookupEnumsRoot["classMembers"]?.AsObject());
@@ -62,6 +68,7 @@ UpdateBaseModelEnumLocalization(moduleDir, mergedEnums);
 UpdateBaseModelApplicationEnglish(moduleDir, merged);
 
 JsonObject messagesRoot = JsonNode.Parse(File.ReadAllText(messagesJsonPath))!.AsObject();
+MergeObject(messagesRoot, JsonNode.Parse(File.ReadAllText(applicationProfileMessagesJsonPath))!.AsObject());
 JsonObject validationRoot = JsonNode.Parse(File.ReadAllText(validationJsonPath))!.AsObject();
 JsonObject validationTemplatesRoot = JsonNode.Parse(File.ReadAllText(validationTemplatesJsonPath))!.AsObject();
 string[] blazorLayoutDetailViews = blazorLayoutsRoot["detailViewsWithHostLayout"]!.AsArray()
@@ -950,7 +957,9 @@ static void UpdateBaseModelApplicationEnglish(string moduleDir, JsonObject merge
     JsonObject classes = merged["classes"]!.AsObject();
     XElement boModel = application.Element("BOModel")
         ?? throw new InvalidOperationException("Missing BOModel.");
-    UpsertBoModelClass(boModel, BoPrefix + "Application", classes[BoPrefix + "Application"]?.AsObject());
+    UpsertBoModelClass(boModel, BoPrefix + "ApplicationProfileInstance", classes[BoPrefix + "ApplicationProfileInstance"]?.AsObject());
+    UpsertBoModelClass(boModel, BoPrefix + "ApplicationProfile", classes[BoPrefix + "ApplicationProfile"]?.AsObject());
+    UpsertBoModelClass(boModel, BoPrefix + "ApplicationProfileTemplate", classes[BoPrefix + "ApplicationProfileTemplate"]?.AsObject());
     UpsertBoModelClass(boModel, BoPrefix + "ApplicationItem", classes[BoPrefix + "ApplicationItem"]?.AsObject());
     UpsertBoModelClass(boModel, BoPrefix + "ProjectContract", classes[BoPrefix + "ProjectContract"]?.AsObject());
     UpsertBoModelClass(boModel, BoPrefix + "ProjectContractMinistryLeg", classes[BoPrefix + "ProjectContractMinistryLeg"]?.AsObject());
@@ -991,6 +1000,7 @@ static void UpdateBaseModelApplicationEnglish(string moduleDir, JsonObject merge
 
 static bool IsApplicationBoView(string viewId) =>
     viewId.StartsWith("ApplicationItem", StringComparison.Ordinal)
+    || viewId.StartsWith("ApplicationProfile", StringComparison.Ordinal)
     || (viewId.StartsWith("Application_", StringComparison.Ordinal)
         && !viewId.StartsWith("ApplicationUser_", StringComparison.Ordinal)
         && !viewId.StartsWith("ApplicationProgress", StringComparison.Ordinal));
