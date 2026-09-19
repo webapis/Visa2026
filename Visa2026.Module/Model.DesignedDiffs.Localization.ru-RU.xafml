@@ -423,6 +423,8 @@
         <Member Name="ToCity" Caption="Город назначения" />
         <Member Name="ToRegion" Caption="Регион назначения" />
         <Member Name="TotalPersonCount" Caption="Количество лиц" />
+        <Member Name="ResultCoverageDisplay" Caption="Результат заявки" />
+        <Member Name="ProgressStepsDisplay" Caption="Ход заявки" />
         <Member Name="Urgency" Caption="Срочность" />
         <Member Name="VisaCategory" Caption="Категория визы" />
         <Member Name="VisaPeriod" Caption="Срок визы" />
@@ -2510,6 +2512,8 @@
         <ColumnInfo Id="ProgressSlaStatement" Caption="Срок согласования" />
         <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
         <ColumnInfo Id="TotalPersonCount" Caption="Количество лиц" />
+        <ColumnInfo Id="ResultCoverageDisplay" Caption="Результат заявки" />
+        <ColumnInfo Id="ProgressStepsDisplay" Caption="Ход заявки" />
         <ColumnInfo Id="VisaCategory" Caption="Категория визы" />
         <ColumnInfo Id="VisaPeriod" Caption="Срок визы" />
         <ColumnInfo Id="VisaType" Caption="Тип визы" />
@@ -2534,6 +2538,8 @@
         <ColumnInfo Id="ProgressSlaStatement" Caption="Срок согласования" />
         <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
         <ColumnInfo Id="TotalPersonCount" Caption="Количество лиц" />
+        <ColumnInfo Id="ResultCoverageDisplay" Caption="Результат заявки" />
+        <ColumnInfo Id="ProgressStepsDisplay" Caption="Ход заявки" />
         <ColumnInfo Id="VisaCategory" Caption="Категория визы" />
         <ColumnInfo Id="VisaPeriod" Caption="Срок визы" />
         <ColumnInfo Id="VisaType" Caption="Тип визы" />
@@ -2561,6 +2567,8 @@
         <ColumnInfo Id="ProgressSlaStatement" Caption="Срок согласования" />
         <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
         <ColumnInfo Id="TotalPersonCount" Caption="Количество лиц" />
+        <ColumnInfo Id="ResultCoverageDisplay" Caption="Результат заявки" />
+        <ColumnInfo Id="ProgressStepsDisplay" Caption="Ход заявки" />
         <ColumnInfo Id="Urgency" Caption="Срочность" />
         <ColumnInfo Id="VisaCategory" Caption="Категория визы" />
         <ColumnInfo Id="VisaPeriod" Caption="Срок визы" />

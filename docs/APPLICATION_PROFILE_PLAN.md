@@ -466,7 +466,11 @@ When any linked Application reaches lock state **A** (first progress beyond offi
 | Document copies from linked records (ID labels) | Done (ResolvedLinks; Passport/Visa numbers — not Current/Previous) |
 | §10.2 valid/not-expired auto-link gate | Done (officer-only except **Passport expiration is not checked**; VISA2014 import keeps historical current rows) |
 | Person Last-N auto-link (Passport / Visa / Invitation / WP / Border zone) | **Done** (Last 1–3; flag missing; Calik: `pasport_change` Last 2 passports; `cancel_invitation` / `cancel_invitation_wp` / `cancel_visa_wp` / `cancel_workpermit` Last 2 on the cancel target types) |
-| Overview Issued records (1:N Invitation / WorkPermit / BorderZone / Rejection / issued Visa) | Done (May produce tiles + New from Overview) |
+| Overview Issued records (1:N Invitation / WorkPermit / BorderZone / Rejection / issued Visa) | **Superseded** (2026-09-19) — **Application result** tab |
+| Application result left-nav (issued invitation / WP / visa / rejection / border zone) | **Done** (2026-09-19) |
+| Application result overview (issued / expected / missing) | **Done** (2026-09-19) — item/person coverage; Rejection optional |
+| Instance ListView result coverage chips | **Done** (2026-09-19) — same ratios after Person count |
+| Instance ListView progress stepper | **Done** (2026-09-19) — compact **Ýüztutmanyň ýagdaýy** path; same slots as workspace Progress |
 | Person/Dossier Start application | **Removed** (create only from Application Profile Instances picker; via-ministry = profile then Approval legs) |
 | Remove `Application.ApplicationType` FK | Deferred (after import cutover) |
 | **§13 Instance rename** (`Application` → `ApplicationProfileInstance`) | Done (R0–R6; Demo F5/import operator-run) |
@@ -579,5 +583,7 @@ All files live in [`docs/prototypes/`](prototypes/) only (no subfolders).
 | `application-profile-instance-case-summary-edit-properties-prototype.png` | Overview **Case summary** — edit mode (dropdowns/dates); **Done** returns to tiles |
 | `application-profile-instance-organization-overview-prototype.png` | Overview **Organization** — Company / Signatory / Representative tiles on the instance; **Edit** |
 | `application-profile-instance-organization-edit-prototype.png` | Overview **Organization** — edit form + **Reset from Configuration defaults**; this case only |
+| `application-profile-instance-listview-result-coverage-prototype.png` | Instance ListView — **Ýüztutmanyň netijesi** chips (same people coverage as Result tab). **Shipped.** [README](prototypes/application-profile-instance-listview-result-coverage-README.md) |
+| `application-profile-instance-listview-progress-prototype.png` | Instance ListView — compact **Ýüztutmanyň ýagdaýy** stepper (same path as workspace Progress). **Shipped.** [README](prototypes/application-profile-instance-listview-progress-README.md) |
 
 **Retired (do not link):** `application-profile-wizard.html`, `application-profile-usage.html`, `application-detail-m2m.html`, `application-profile-platform-prototype.html`, `images/ap-*.png`, `Application-profile-wizard-draft.xlsx`.

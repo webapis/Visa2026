@@ -96,7 +96,7 @@ internal static class ApplicationWorkspaceCaseBuilder
                     ? Array.Empty<ApplicationWorkspaceCaseSummaryTile>()
                     : BuildSummaryTilesFromChrome(chrome),
             LinkedRecordTiles = BuildLinkedTiles(application, rosterLinks, tabs, people),
-            IssuedRecordTiles = BuildIssuedTiles(application, objectSpace),
+            IssuedRecordTiles = BuildIssuedTiles(application, objectSpace, people.Count),
             ProgressSteps = resolvedProgressSteps,
             People = people,
             Activities = application != null
@@ -296,7 +296,8 @@ internal static class ApplicationWorkspaceCaseBuilder
 
     private static IReadOnlyList<ApplicationWorkspaceCaseIssuedTile> BuildIssuedTiles(
         ApplicationProfileInstance? application,
-        IObjectSpace? objectSpace)
+        IObjectSpace? objectSpace,
+        int rosterCount)
     {
         if (application == null)
             return Array.Empty<ApplicationWorkspaceCaseIssuedTile>();
@@ -308,11 +309,19 @@ internal static class ApplicationWorkspaceCaseBuilder
                 continue;
 
             var rows = LoadIssuedRows(application, objectSpace, def.Key);
+            var headerCount = rows.Select(r => r.Id).Distinct().Count();
             tiles.Add(new ApplicationWorkspaceCaseIssuedTile
             {
                 Key = def.Key,
                 Label = def.Label,
-                Count = rows.Count,
+                Count = headerCount,
+                CoverageCount = ApplicationWorkspaceIssuedResultOverview.CountCoveredPeople(
+                    def.Key,
+                    application,
+                    objectSpace,
+                    headerCount),
+                ExpectedCount = ApplicationWorkspaceIssuedResultOverview.ExpectedFor(def.IsOptional, rosterCount),
+                IsOptional = def.IsOptional,
                 Tone = def.Tone,
                 Glyph = def.Glyph,
                 AddCaption = def.AddCaption,
@@ -320,6 +329,7 @@ internal static class ApplicationWorkspaceCaseBuilder
                 PanelTitle = def.PanelTitle,
                 EmptyHint = def.EmptyHint,
                 Rows = rows,
+                ColumnKeys = IssuedColumnKeys(def.Key),
             });
         }
 
@@ -352,10 +362,7 @@ internal static class ApplicationWorkspaceCaseBuilder
                         .Select(d => d.Invitation.ID)
                         .ToList(),
                     invitations.SelectMany(i => i.Documents ?? Array.Empty<InvitationDocument>()));
-                return invitations
-                    .OrderByDescending(i => i.IssuedDate)
-                    .Select(i => Row(i.ID, i.InvitationNumber, FormatIssuedDate(i.IssuedDate), invitationCopyIds.Contains(i.ID)))
-                    .ToList();
+                return ExpandInvitationRows(application, objectSpace, invitations, invitationCopyIds);
             case ApplicationWorkspaceIssuedRecordsCatalog.WorkPermit:
                 var permits = objectSpace != null
                     ? objectSpace.GetObjectsQuery<WorkPermit>()
@@ -375,10 +382,7 @@ internal static class ApplicationWorkspaceCaseBuilder
                         .Select(d => d.WorkPermit.ID)
                         .ToList(),
                     permits.SelectMany(w => w.Documents ?? Array.Empty<WorkPermitDocument>()));
-                return permits
-                    .OrderByDescending(w => w.IssuedDate)
-                    .Select(w => Row(w.ID, w.WorkPermitNumber, FormatIssuedDate(w.IssuedDate), permitCopyIds.Contains(w.ID)))
-                    .ToList();
+                return ExpandWorkPermitRows(application, objectSpace, permits, permitCopyIds);
             case ApplicationWorkspaceIssuedRecordsCatalog.BorderZone:
                 var zones = objectSpace != null
                     ? objectSpace.GetObjectsQuery<BorderZone>()
@@ -398,10 +402,7 @@ internal static class ApplicationWorkspaceCaseBuilder
                         .Select(d => d.BorderZone.ID)
                         .ToList(),
                     zones.SelectMany(z => z.Documents ?? Array.Empty<BorderZoneDocument>()));
-                return zones
-                    .OrderByDescending(z => z.StartDate)
-                    .Select(z => Row(z.ID, z.BorderZoneNumber, FormatIssuedDate(z.StartDate), zoneCopyIds.Contains(z.ID)))
-                    .ToList();
+                return ExpandBorderZoneRows(application, objectSpace, zones, zoneCopyIds);
             case ApplicationWorkspaceIssuedRecordsCatalog.Rejection:
                 var rejections = objectSpace != null
                     ? objectSpace.GetObjectsQuery<Rejection>()
@@ -421,10 +422,7 @@ internal static class ApplicationWorkspaceCaseBuilder
                         .Select(d => d.Rejection.ID)
                         .ToList(),
                     rejections.SelectMany(r => r.Documents ?? Array.Empty<RejectionDocument>()));
-                return rejections
-                    .OrderByDescending(r => r.Date)
-                    .Select(r => Row(r.ID, r.RejectedDocNumber, FormatIssuedDate(r.Date), rejectionCopyIds.Contains(r.ID)))
-                    .ToList();
+                return ExpandRejectionRows(application, objectSpace, rejections, rejectionCopyIds);
             case ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa:
                 var visas = objectSpace != null
                     ? objectSpace.GetObjectsQuery<Visa>()
@@ -446,21 +444,323 @@ internal static class ApplicationWorkspaceCaseBuilder
                     visas.SelectMany(v => v.Documents ?? Array.Empty<VisaDocument>()));
                 return visas
                     .OrderByDescending(v => v.IssueDate)
-                    .Select(v => Row(v.ID, v.VisaNumber, FormatIssuedDate(v.IssueDate), visaCopyIds.Contains(v.ID)))
+                    .Select(v =>
+                    {
+                        var person = v.Passport?.Person;
+                        var personName = person?.FullName;
+                        var passportNumber = v.Passport?.PassportNumber;
+                        return Row(
+                            v.ID,
+                            v.VisaNumber,
+                            JoinIssuedParts(personName, passportNumber, FormatIssuedDate(v.IssueDate)),
+                            visaCopyIds.Contains(v.ID),
+                            [
+                                Cell(personName),
+                                Cell(passportNumber),
+                                Cell(v.VisaNumber),
+                                Cell(v.VisaType?.LocalizedDisplayName),
+                                Cell(v.VisaCategory?.LocalizedDisplayName),
+                                Cell(FormatIssuedDate(v.IssueDate)),
+                                Cell(FormatIssuedDate(v.ExpirationDate)),
+                                Cell(v.ProcessNumber),
+                            ]);
+                    })
                     .ToList();
             default:
                 return Array.Empty<ApplicationWorkspaceCaseIssuedRow>();
         }
     }
 
-    private static ApplicationWorkspaceCaseIssuedRow Row(Guid id, string? title, string subtitle, bool hasCopy = false) =>
+    private static IReadOnlyList<string> IssuedColumnKeys(string key) => key switch
+    {
+        ApplicationWorkspaceIssuedRecordsCatalog.Invitation => IssuedInvitationColumnKeys,
+        ApplicationWorkspaceIssuedRecordsCatalog.WorkPermit => IssuedWorkPermitColumnKeys,
+        ApplicationWorkspaceIssuedRecordsCatalog.BorderZone => IssuedBorderZoneColumnKeys,
+        ApplicationWorkspaceIssuedRecordsCatalog.Rejection => IssuedRejectionColumnKeys,
+        ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa => IssuedVisaColumnKeys,
+        _ => [],
+    };
+
+    private static readonly string[] IssuedInvitationColumnKeys =
+    [
+        "ApplicationProfileInstance.Issued.Person",
+        "ApplicationProfile.Person.Passport",
+        "ApplicationProfileInstance.Issued.InvitationNumber",
+        "ApplicationProfile.Field.VisaCategory",
+        "ApplicationProfile.Field.VisaPeriod",
+        "ApplicationProfileInstance.Issued.IssuedDate",
+        "ApplicationProfileInstance.Issued.Expiration",
+    ];
+
+    private static readonly string[] IssuedWorkPermitColumnKeys =
+    [
+        "ApplicationProfileInstance.Issued.Person",
+        "ApplicationProfile.Person.Passport",
+        "ApplicationProfileInstance.Issued.WorkPermitNumber",
+        "ApplicationProfileInstance.Issued.ASNumber",
+        "ApplicationProfileInstance.Issued.WorkPermittedLocations",
+        "ApplicationProfileInstance.Issued.Start",
+        "ApplicationProfileInstance.Issued.Expiration",
+    ];
+
+    private static readonly string[] IssuedBorderZoneColumnKeys =
+    [
+        "ApplicationProfileInstance.Issued.Person",
+        "ApplicationProfile.Person.Passport",
+        "ApplicationProfileInstance.Issued.BorderZoneNumber",
+        "ApplicationProfileInstance.Issued.Start",
+        "ApplicationProfileInstance.Issued.Expiration",
+    ];
+
+    private static readonly string[] IssuedRejectionColumnKeys =
+    [
+        "ApplicationProfileInstance.Issued.Person",
+        "ApplicationProfile.Person.Passport",
+        "ApplicationProfileInstance.Issued.RejectedDocumentNumber",
+        "ApplicationProfileInstance.Issued.IssuedDate",
+        "ApplicationProfileInstance.Issued.Reason",
+    ];
+
+    private static readonly string[] IssuedVisaColumnKeys =
+    [
+        "ApplicationProfileInstance.Issued.Person",
+        "ApplicationProfile.Person.Passport",
+        "ApplicationProfileInstance.Issued.VisaNumber",
+        "ApplicationProfile.Field.VisaType",
+        "ApplicationProfile.Field.VisaCategory",
+        "ApplicationProfileInstance.Issued.IssuedDate",
+        "ApplicationProfileInstance.Issued.Expiration",
+        "ApplicationProfile.Field.ProcessNumber",
+    ];
+
+    private static IReadOnlyList<ApplicationWorkspaceCaseIssuedRow> ExpandInvitationRows(
+        ApplicationProfileInstance application,
+        IObjectSpace? objectSpace,
+        IReadOnlyList<Invitation> invitations,
+        HashSet<Guid> copyIds)
+    {
+        var items = objectSpace != null && application.ID != Guid.Empty
+            ? objectSpace.GetObjectsQuery<InvitationItem>()
+                .Where(i => i.Invitation != null
+                    && i.Invitation.ApplicationProfileInstance != null
+                    && i.Invitation.ApplicationProfileInstance.ID == application.ID)
+                .ToList()
+            : invitations.SelectMany(h => h.InvitationItems ?? Array.Empty<InvitationItem>()).ToList();
+
+        if (items.Count == 0)
+        {
+            return invitations
+                .OrderByDescending(i => i.IssuedDate)
+                .Select(i => Row(
+                    i.ID,
+                    i.InvitationNumber,
+                    FormatIssuedDate(i.IssuedDate),
+                    copyIds.Contains(i.ID),
+                    [
+                        "—",
+                        "—",
+                        Cell(i.InvitationNumber),
+                        Cell(i.VisaCategory?.LocalizedDisplayName),
+                        Cell(i.VisaPeriod?.LocalizedDisplayName),
+                        Cell(FormatIssuedDate(i.IssuedDate)),
+                        Cell(FormatIssuedDate(i.ExpirationDate)),
+                    ]))
+                .ToList();
+        }
+
+        return items
+            .OrderBy(i => i.Person?.LastName)
+            .ThenBy(i => i.Person?.FirstName)
+            .Select(item =>
+            {
+                var invitation = item.Invitation;
+                return Row(
+                    invitation?.ID ?? Guid.Empty,
+                    invitation?.InvitationNumber,
+                    JoinIssuedParts(item.Person?.FullName, item.Passport?.PassportNumber),
+                    invitation != null && copyIds.Contains(invitation.ID),
+                    [
+                        Cell(item.Person?.FullName),
+                        Cell(item.Passport?.PassportNumber),
+                        Cell(invitation?.InvitationNumber),
+                        Cell(invitation?.VisaCategory?.LocalizedDisplayName),
+                        Cell(invitation?.VisaPeriod?.LocalizedDisplayName),
+                        Cell(FormatIssuedDate(invitation?.IssuedDate ?? default)),
+                        Cell(FormatIssuedDate(invitation?.ExpirationDate)),
+                    ]);
+            })
+            .ToList();
+    }
+
+    private static IReadOnlyList<ApplicationWorkspaceCaseIssuedRow> ExpandWorkPermitRows(
+        ApplicationProfileInstance application,
+        IObjectSpace? objectSpace,
+        IReadOnlyList<WorkPermit> permits,
+        HashSet<Guid> copyIds)
+    {
+        var items = objectSpace != null && application.ID != Guid.Empty
+            ? objectSpace.GetObjectsQuery<WorkPermitItem>()
+                .Where(i => i.WorkPermit != null
+                    && i.WorkPermit.ApplicationProfileInstance != null
+                    && i.WorkPermit.ApplicationProfileInstance.ID == application.ID)
+                .ToList()
+            : permits.SelectMany(h => h.WorkPermitItems ?? Array.Empty<WorkPermitItem>()).ToList();
+
+        if (items.Count == 0)
+        {
+            return permits
+                .OrderByDescending(w => w.IssuedDate)
+                .Select(w => Row(
+                    w.ID,
+                    w.WorkPermitNumber,
+                    FormatIssuedDate(w.IssuedDate),
+                    copyIds.Contains(w.ID),
+                    ["—", "—", Cell(w.WorkPermitNumber), "—", "—", Cell(FormatIssuedDate(w.IssuedDate)), "—"]))
+                .ToList();
+        }
+
+        return items
+            .OrderBy(i => i.Person?.LastName)
+            .ThenBy(i => i.Person?.FirstName)
+            .Select(item =>
+            {
+                var permit = item.WorkPermit;
+                return Row(
+                    permit?.ID ?? Guid.Empty,
+                    permit?.WorkPermitNumber ?? item.WorkPermitNumber,
+                    JoinIssuedParts(item.Person?.FullName, item.Passport?.PassportNumber),
+                    permit != null && copyIds.Contains(permit.ID),
+                    [
+                        Cell(item.Person?.FullName),
+                        Cell(item.Passport?.PassportNumber),
+                        Cell(item.WorkPermitNumber ?? permit?.WorkPermitNumber),
+                        Cell(item.ASNumber),
+                        Cell(item.WorkPermittedLocations),
+                        Cell(FormatIssuedDate(item.StartDate)),
+                        Cell(FormatIssuedDate(item.ExpirationDate)),
+                    ]);
+            })
+            .ToList();
+    }
+
+    private static IReadOnlyList<ApplicationWorkspaceCaseIssuedRow> ExpandBorderZoneRows(
+        ApplicationProfileInstance application,
+        IObjectSpace? objectSpace,
+        IReadOnlyList<BorderZone> zones,
+        HashSet<Guid> copyIds)
+    {
+        var items = objectSpace != null && application.ID != Guid.Empty
+            ? objectSpace.GetObjectsQuery<BorderZoneItem>()
+                .Where(i => i.BorderZone != null
+                    && i.BorderZone.ApplicationProfileInstance != null
+                    && i.BorderZone.ApplicationProfileInstance.ID == application.ID)
+                .ToList()
+            : zones.SelectMany(h => h.BorderZoneItems ?? Array.Empty<BorderZoneItem>()).ToList();
+
+        if (items.Count == 0)
+        {
+            return zones
+                .OrderByDescending(z => z.StartDate)
+                .Select(z => Row(
+                    z.ID,
+                    z.BorderZoneNumber,
+                    FormatIssuedDate(z.StartDate),
+                    copyIds.Contains(z.ID),
+                    ["—", "—", Cell(z.BorderZoneNumber), Cell(FormatIssuedDate(z.StartDate)), Cell(FormatIssuedDate(z.ExpirationDate))]))
+                .ToList();
+        }
+
+        return items
+            .OrderBy(i => i.Person?.LastName)
+            .ThenBy(i => i.Person?.FirstName)
+            .Select(item =>
+            {
+                var zone = item.BorderZone;
+                return Row(
+                    zone?.ID ?? Guid.Empty,
+                    zone?.BorderZoneNumber,
+                    JoinIssuedParts(item.Person?.FullName, item.Passport?.PassportNumber),
+                    zone != null && copyIds.Contains(zone.ID),
+                    [
+                        Cell(item.Person?.FullName),
+                        Cell(item.Passport?.PassportNumber),
+                        Cell(zone?.BorderZoneNumber),
+                        Cell(FormatIssuedDate(zone?.StartDate ?? default)),
+                        Cell(FormatIssuedDate(zone?.ExpirationDate)),
+                    ]);
+            })
+            .ToList();
+    }
+
+    private static IReadOnlyList<ApplicationWorkspaceCaseIssuedRow> ExpandRejectionRows(
+        ApplicationProfileInstance application,
+        IObjectSpace? objectSpace,
+        IReadOnlyList<Rejection> rejections,
+        HashSet<Guid> copyIds)
+    {
+        var items = objectSpace != null && application.ID != Guid.Empty
+            ? objectSpace.GetObjectsQuery<RejectionItem>()
+                .Where(i => i.Rejection != null
+                    && i.Rejection.ApplicationProfileInstance != null
+                    && i.Rejection.ApplicationProfileInstance.ID == application.ID)
+                .ToList()
+            : rejections.SelectMany(h => h.RejectionItems ?? Array.Empty<RejectionItem>()).ToList();
+
+        if (items.Count == 0)
+        {
+            return rejections
+                .OrderByDescending(r => r.Date)
+                .Select(r => Row(
+                    r.ID,
+                    r.RejectedDocNumber,
+                    FormatIssuedDate(r.Date),
+                    copyIds.Contains(r.ID),
+                    ["—", "—", Cell(r.RejectedDocNumber), Cell(FormatIssuedDate(r.Date)), Cell(r.Reason)]))
+                .ToList();
+        }
+
+        return items
+            .OrderBy(i => i.Person?.LastName)
+            .ThenBy(i => i.Person?.FirstName)
+            .Select(item =>
+            {
+                var rejection = item.Rejection;
+                return Row(
+                    rejection?.ID ?? Guid.Empty,
+                    rejection?.RejectedDocNumber,
+                    JoinIssuedParts(item.Person?.FullName, item.Passport?.PassportNumber),
+                    rejection != null && copyIds.Contains(rejection.ID),
+                    [
+                        Cell(item.Person?.FullName),
+                        Cell(item.Passport?.PassportNumber),
+                        Cell(rejection?.RejectedDocNumber),
+                        Cell(FormatIssuedDate(rejection?.Date ?? default)),
+                        Cell(item.Reason ?? rejection?.Reason),
+                    ]);
+            })
+            .ToList();
+    }
+
+    private static ApplicationWorkspaceCaseIssuedRow Row(
+        Guid id,
+        string? title,
+        string subtitle,
+        bool hasCopy = false,
+        IReadOnlyList<string>? cells = null) =>
         new()
         {
             Id = id,
             Title = string.IsNullOrWhiteSpace(title) ? "—" : title.Trim(),
             Subtitle = subtitle,
             HasCopy = hasCopy,
+            Cells = cells ?? [],
         };
+
+    private static string Cell(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? "—" : value.Trim();
+
+    private static string JoinIssuedParts(params string?[] parts) =>
+        string.Join(" · ", parts.Where(p => !string.IsNullOrWhiteSpace(p)));
 
     private static HashSet<Guid> HeaderIdsWithCopies(
         IObjectSpace? objectSpace,
@@ -486,7 +786,12 @@ internal static class ApplicationWorkspaceCaseBuilder
     }
 
     private static string FormatIssuedDate(DateTime date) =>
-        date == default ? string.Empty : date.ToString("dd MMM yyyy", CultureInfo.InvariantCulture);
+        date == default
+            ? string.Empty
+            : date.ToString("dd MMM yyyy", CultureInfo.CurrentUICulture);
+
+    private static string FormatIssuedDate(DateTime? date) =>
+        date is { } value ? FormatIssuedDate(value) : string.Empty;
 
     private static IReadOnlyList<ApplicationWorkspaceCasePerson> BuildPeople(
         IReadOnlyDictionary<string, ApplicationWorkspaceTab> tabs,

@@ -12,6 +12,7 @@ using Visa2026.Module.Editors;
 using Visa2026.Module.Localization;
 using Visa2026.Module.Services;
 using Visa2026.Module.Services.ApplicationPersonRoster;
+using Visa2026.Module.Services.ApplicationWorkspace;
 using Visa2026.Module.Services.MigrationImport;
 using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -263,6 +264,8 @@ namespace Visa2026.Module.BusinessObjects
         private ApplicationListViewDisplayState? listViewDisplayState;
         private string? listRowCssClass;
         private int? listViewTotalPersonCount;
+        private IReadOnlyList<ApplicationWorkspaceIssuedResultListCoverage.Chip>? listViewResultCoverageChips;
+        private IReadOnlyList<ApplicationWorkspaceListProgressSteps.Step>? listViewProgressSteps;
 
         /// <summary>Clears cached ListView computed fields (progress display, SLA, row color).</summary>
         public void InvalidateListViewDisplayCache()
@@ -272,6 +275,46 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         public void SetListViewTotalPersonCount(int count) => listViewTotalPersonCount = count;
+
+        public void SetListViewResultCoverage(
+            IReadOnlyList<ApplicationWorkspaceIssuedResultListCoverage.Chip> chips) =>
+            listViewResultCoverageChips = chips;
+
+        public void SetListViewProgressSteps(
+            IReadOnlyList<ApplicationWorkspaceListProgressSteps.Step> steps) =>
+            listViewProgressSteps = steps;
+
+        /// <summary>Preloaded Result-tab people coverage for ListView chips. Empty until preload.</summary>
+        [Browsable(false)]
+        [NotMapped]
+        public IReadOnlyList<ApplicationWorkspaceIssuedResultListCoverage.Chip> ListViewResultCoverageChips =>
+            listViewResultCoverageChips ?? Array.Empty<ApplicationWorkspaceIssuedResultListCoverage.Chip>();
+
+        /// <summary>Same people coverage as Ýüztutmanyň netijesi (Netije syny). Display-only.</summary>
+        [XafDisplayName("Application result")]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(true)]
+        [VisibleInLookupListView(false)]
+        [NotMapped]
+        public string ResultCoverageDisplay =>
+            ApplicationWorkspaceIssuedResultListCoverage.FormatDisplay(listViewResultCoverageChips);
+
+        /// <summary>Preloaded workspace stepper for ListView. Empty until preload.</summary>
+        [Browsable(false)]
+        [NotMapped]
+        public IReadOnlyList<ApplicationWorkspaceListProgressSteps.Step> ListViewProgressSteps =>
+            listViewProgressSteps ?? Array.Empty<ApplicationWorkspaceListProgressSteps.Step>();
+
+        /// <summary>Compact workspace progress path. Display-only.</summary>
+        [XafDisplayName("Application progress")]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(true)]
+        [VisibleInLookupListView(false)]
+        [NotMapped]
+        public string ProgressStepsDisplay =>
+            ApplicationWorkspaceListProgressSteps.FormatDisplay(listViewProgressSteps);
 
         /// <summary>Precomputes ListView display fields after related collections are preloaded.</summary>
         public void WarmListViewDisplayCache()
@@ -361,7 +404,7 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Approval deadline")]
         [ModelDefault("AllowEdit", "False")]
         [VisibleInDetailView(false)]
-        [VisibleInListView(true)]
+        [VisibleInListView(false)]
         [NotMapped]
         public string ProgressSlaStatement => ListViewDisplay.ProgressSlaStatement;
 
@@ -389,7 +432,7 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Migration deadline")]
         [ModelDefault("AllowEdit", "False")]
         [VisibleInDetailView(false)]
-        [VisibleInListView(true)]
+        [VisibleInListView(false)]
         [NotMapped]
         public string MigrationSlaStatement => ListViewDisplay.MigrationSlaStatement;
 

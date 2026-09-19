@@ -4,6 +4,7 @@ using DevExpress.ExpressApp.Blazor.Components.Models;
 using DevExpress.ExpressApp.Blazor.Editors;
 using Microsoft.EntityFrameworkCore;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.ApplicationWorkspace;
 
 namespace Visa2026.Blazor.Server.Controllers;
 
@@ -138,6 +139,9 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
             {
                 suppressCollectionReloadPreload = false;
             }
+
+            if (View.Editor is DxGridListEditor { GridModel.ComponentInstance: { } grid })
+                grid.AutoFitColumnWidths();
         }
 
         if (syncRowCount >= ids.Count)
@@ -197,6 +201,9 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
             .Where(application => batchIds.Contains(application.ID))
             .Select(application => new { ApplicationProfileInstanceId = application.ID, Count = application.People.Count })
             .ToDictionary(x => x.ApplicationProfileInstanceId, x => x.Count);
+
+        ApplicationWorkspaceIssuedResultListCoverage.ApplyTo(ObjectSpace, applications);
+        ApplicationWorkspaceListProgressSteps.ApplyTo(ObjectSpace, applications);
 
         foreach (var application in applications)
         {

@@ -1,3 +1,109 @@
+### 2026-09-19 — Progress sits before Netije; both cells stay white
+
+- **Need**: Ýüztutmanyň ýagdaýy at the end of the row, immediately before Ýüztutmanyň netijesi. No green/blue row fill on those two cells.
+- **Cause**: Stepper replaced Ýagdaý in the middle. Row-state CSS paints every td.
+- **Fix**: Progress column last-but-one. `lv-plain-cell` forces white on both columns (selected/hover too).
+- **Officer**: Rebuild Blazor host, hard-refresh the instance list.
+- **Prevent**: Do not leave the stepper after Adam sany. Do not let visa-progress-row color those two cells.
+- **Cross-skill**: —
+### 2026-09-19 — ListView shows the workspace progress path
+
+- **Need**: Officers want Ofis / ministry / Migrasiya on the instance list without opening each case, like Netije chips.
+- **Cause**: ListView only had LatestProgressState text (one step).
+- **Fix**: `ProgressStepsDisplay` replaces Ýagdaý. Same slots as workspace Progress (`BuildDisplay`). One batched history query in `ApplicationListViewPreloadController`. Direct = Ofis + Migrasiya. Display-only. Netije stays last.
+- **Officer**: Stop F5, rebuild Blazor host, hard-refresh. Via / Direct / default lists show the mini stepper.
+- **Prevent**: Do not call workspace Build / ProgressHistory per row. Do not add a second progress column.
+- **Cross-skill**: visa2026-application-progress (slot codes unchanged)
+
+### 2026-09-19 — Result chips overlap until AutoFit runs after preload
+
+- **Need**: Netije chips in one row without covering Ýagdaý / dates.
+- **Cause**: `ListViewGridColumnFitController` AutoFit runs on open when the cell is still `—`, so the column shrinks. Nowrap chips then overflow.
+- **Fix**: `MinWidth` 560 on the column. AutoFit again after chip template + first preload `Refresh`.
+- **Officer**: Rebuild Blazor host, hard-refresh the instance list.
+- **Prevent**: Do not AutoFit the instance list only at first paint. Do not use overflow:visible on the chip cell (that overlaps neighbors).
+- **Cross-skill**: —
+
+### 2026-09-19 — ListView shows the same result coverage as Netije syny
+
+- **Need**: Officers want Işlenen / Garaşylýan people counts on the instance ListView without opening each case.
+- **Cause**: Coverage lived only on Ýüztutmanyň netijesi.
+- **Fix**: `ResultCoverageDisplay` after Adam sany. Chips reuse `ApplicationWorkspaceIssuedResultOverview` (items, roster intersect, Rejection optional). Batch load in `ApplicationListViewPreloadController`. Types the profile does not produce are omitted. `—` when the profile produces nothing.
+- **Officer**: Stop F5, rebuild Blazor host, hard-refresh. Via ministry / Direct / default lists show **Ýüztutmanyň netijesi** chips.
+- **Prevent**: Do not count headers. Do not treat Ret 0 as missing. Do not add five separate type columns.
+- **Cross-skill**: —
+
+### 2026-09-19 — Result lists are person-level for all issued types
+
+- **Need**: Work permit / invitation / rejection / border zone Hereketler lists should identify people, like visa.
+- **Cause**: Those tiles listed headers (number + date) only.
+- **Fix**: Table rows are InvitationItem / WorkPermitItem / RejectionItem / BorderZoneItem (person, passport, header fields). Button `Count` stays distinct headers. Click still opens the header.
+- **Officer**: Rebuild + hard-refresh. Open Iş rugsady / Çakylyk / Ret / Serhet — each person is a row.
+- **Prevent**: Do not show only the header number for issued types that have items.
+- **Cross-skill**: —
+
+### 2026-09-19 — Issued visa list shows person and passport
+
+- **Need**: Visa number alone does not show who the visa belongs to.
+- **Cause**: Issued list used Title = VisaNumber and Subtitle = issue date.
+- **Fix**: Visa Hereketler table: person, passport, visa number, type, category, issued, expiration, process number.
+- **Officer**: Rebuild + hard-refresh. Open Berlen wiza — each row names the person.
+- **Prevent**: Do not list issued visas by number only.
+- **Cross-skill**: —
+
+### 2026-09-19 — Result status cards are not buttons
+
+- **Need**: Netije syny bars are informational. Hereketler must look clickable.
+- **Cause**: Both rows were pale cards; top cards were also `<button>`.
+- **Fix**: Top type cards are `<article>` (no click, no hover lift). Hereketler uses filled `cw-issued-btn` with Aç / + Goş CTA.
+- **Officer**: Hard-refresh CSS. Click only the blue Hereketler buttons.
+- **Prevent**: Do not wire onclick on Netije syny status cards.
+- **Cross-skill**: visa2026-preview-slot
+
+### 2026-09-19 — Result % is per type; do not sum people
+
+- **Need**: Işlenen 26 with 14 linked people looked wrong. Officers want a % on each BO type, not one ring for all types.
+- **Cause**: Totals added WP people + visa people (15+11). Coverage also counted WP item people who are not on the roster (15/14).
+- **Fix**: Coverage = distinct **roster** people only. `Sum` is required **types** complete/short (not people). Removed the overall ring. Each type card shows its own %.
+- **Officer**: Rebuild + hard-refresh. WP at most **14 / 14**. Visa **11 / 14 · 79%**. No 26.
+- **Prevent**: Do not add issued people across invitation / WP / visa. Do not count item people who are not linked to the case.
+- **Cross-skill**: —
+
+### 2026-09-19 — Result tab dashboard polish
+
+- **Need**: Ýüztutmanyň netijesi looked sparse — empty white boxes, weak hierarchy.
+- **Cause**: First overview was status cards only (ratio + pill).
+- **Fix**: Completeness ring + tinted Işlenen / Ýetmezçilik / Garaşylýan, per-type progress bar, status badge. Counts unchanged. Hereketler still below.
+- **Officer**: Hard-refresh after rebuild (CSS versioned). Result tab should read as one dashboard.
+- **Prevent**: Do not put compose tiles back on Overview. Do not change item/person coverage or Rejection optional.
+- **Cross-skill**: visa2026-preview-slot (keep officer-shell CSS copies aligned)
+
+### 2026-09-19 — Result overview counts items; Rejection optional
+
+- **Need**: One work permit / invitation / rejection header can cover many people. Visa is one per linked person. Rejection is not required.
+- **Cause**: Netije syny used header `Count`. Shared-header Expected=1 was also wrong.
+- **Fix**: `CoverageCount` = distinct people on InvitationItem / WorkPermitItem / RejectionItem / Visa.Passport.Person (issued-from header FK, not input M2M). Expected = roster except Rejection (`IsOptional`, Expected 0). `Sum` skips Rejection. Hereketler still uses header `Count`.
+- **Officer**: Stop F5, rebuild Blazor host, hard-refresh. 1 WP with 14 items shows **14 / 14**. Ret stays optional.
+- **Prevent**: Do not count WorkPermit / Invitation / Rejection headers for overview. Do not treat zero Rejection as missing. Do not use instance.WorkPermitItems / InvitationItems input M2M.
+- **Cross-skill**: —
+
+### 2026-09-19 — Application result overview issued / missing
+
+- **Need**: On Ýüztutmanyň netijesi, officers see what is issued, what is missing, and how many — without opening each tile.
+- **Cause**: Result tab only had action tiles (count or + Add).
+- **Fix**: `ApplicationWorkspaceIssuedResultOverview` + tile `ExpectedCount` / `IsOptional`. Expected = roster. Rejection optional (zero is not missing). **Netije syny** totals + per-type cards; **Hereketler** tiles stay below. Nav missing badge.
+- **Officer**: Stop F5, rebuild Blazor host, hard-refresh. Result tab shows Işlenen / Ýetmezçilik / Garaşylýan then type cards.
+- **Prevent**: Do not put compose tiles back on Overview. Do not count Rejection as missing.
+- **Cross-skill**: visa2026-preview-slot
+
+### 2026-09-19 — Application result is its own workspace nav
+
+- **Need**: Invitation / work permit / visa / rejection / border zone issuance on its own section — the application result. Türkmençe nav **Ýüztutmanyň netijesi**.
+- **Cause**: Issued tiles lived at the bottom of Overview.
+- **Fix**: `CaseTabs` key `result` after Progress. Card lifted to `RenderApplicationResult`. Title `Workspace.ApplicationResult` (not Progress `Workspace.Result` / Netije). Office-prep gate does **not** block this tab.
+- **Officer**: Stop F5, rebuild Blazor host, hard-refresh. Overview no longer shows issued tiles. After Ýüztutmanyň soň ýagdaýy: **Ýüztutmanyň netijesi**.
+- **Prevent**: Do not put issued tiles back on Overview. Do not reuse `Workspace.Result` (progress Advance label).
+- **Cross-skill**: visa2026-preview-slot
 
 ### 2026-09-19 — Organization is last workspace nav
 

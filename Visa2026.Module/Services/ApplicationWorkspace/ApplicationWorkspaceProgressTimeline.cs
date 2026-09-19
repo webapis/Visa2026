@@ -31,16 +31,50 @@ internal static class ApplicationWorkspaceProgressTimeline
             .ThenBy(p => p.Date)
             .ThenBy(p => p.ID)
             .ToList() ?? [];
-        var latest = ApplicationProfileInstanceProgressHelper.GetLatest(application.ProgressHistory, objectSpace);
+        return BuildCore(application, profile, ministrySla, objectSpace, history, includeAdvance: true);
+    }
+
+    /// <summary>
+    /// ListView stepper: same slots as the workspace, without advance/SLA/letter work.
+    /// </summary>
+    internal static IReadOnlyList<ApplicationWorkspaceCaseProgressStep> BuildDisplay(
+        ApplicationProfileInstance application,
+        ApplicationProfile? profile,
+        IReadOnlyList<ApplicationProfileInstanceProgress> history)
+    {
+        var ordered = history?
+            .OrderBy(p => p.Order)
+            .ThenBy(p => p.Date)
+            .ThenBy(p => p.ID)
+            .ToList() ?? [];
+        return BuildCore(application, profile, default, objectSpace: null, ordered, includeAdvance: false);
+    }
+
+    private static IReadOnlyList<ApplicationWorkspaceCaseProgressStep> BuildCore(
+        ApplicationProfileInstance application,
+        ApplicationProfile? profile,
+        ApplicationProfileInstanceProgressSlaResult ministrySla,
+        IObjectSpace? objectSpace,
+        IReadOnlyList<ApplicationProfileInstanceProgress> history,
+        bool includeAdvance)
+    {
+        var latest = ApplicationProfileInstanceProgressHelper.GetLatest(history, objectSpace)
+            ?? application.LatestProgress;
         var slotAnchor = SlotAnchorForCurrent(latest, history);
-        var advanceOptions = BuildAdvanceOptions(application, latest, objectSpace);
-        var canAdvance = advanceOptions.Count > 0;
-        var advanceBlockedReason = canAdvance
+        var advanceOptions = includeAdvance
+            ? BuildAdvanceOptions(application, latest, objectSpace)
+            : Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>();
+        var canAdvance = includeAdvance && advanceOptions.Count > 0;
+        var advanceBlockedReason = !includeAdvance
             ? string.Empty
-            : (ApplicationProfileInstanceProgressTransitionHelper.IsTerminalStateCode(latest?.State?.Code)
-                ? "This application has reached a terminal progress state."
-                : "No further progress steps are available for this route.");
-        var currentSla = ResolveCurrentSla(application, profile, latest, ministrySla);
+            : canAdvance
+                ? string.Empty
+                : (ApplicationProfileInstanceProgressTransitionHelper.IsTerminalStateCode(latest?.State?.Code)
+                    ? "This application has reached a terminal progress state."
+                    : "No further progress steps are available for this route.");
+        var currentSla = includeAdvance
+            ? ResolveCurrentSla(application, profile, latest, ministrySla)
+            : default;
         var latestCode = latest?.State?.Code;
         var slotCode = slotAnchor?.State?.Code;
         var latestOnMigration = IsCurrentMigration(slotCode, history);

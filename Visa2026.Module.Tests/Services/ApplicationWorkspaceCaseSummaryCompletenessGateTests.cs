@@ -37,6 +37,7 @@ public class ApplicationWorkspaceCaseSummaryCompletenessGateTests
         Assert.False(ApplicationWorkspaceCaseSummaryCompletenessGate.BlocksTab(view, "people"));
         Assert.False(ApplicationWorkspaceCaseSummaryCompletenessGate.BlocksTab(view, "overview"));
         Assert.False(ApplicationWorkspaceCaseSummaryCompletenessGate.BlocksTab(view, "organization"));
+        Assert.False(ApplicationWorkspaceCaseSummaryCompletenessGate.BlocksTab(view, "result"));
     }
 
     [Fact]

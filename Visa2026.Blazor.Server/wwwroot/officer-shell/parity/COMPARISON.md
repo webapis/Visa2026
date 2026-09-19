@@ -127,7 +127,7 @@ Grouped-by-template workspace: accordion sections per template family, avatars, 
 
 ## 4. Case workspace (7 PNGs)
 
-**Route base:** `#/case/p1/{tab}` — tabs: `overview`, `people`, `progress`, `documents`, `resminamalar`, `sla`, `organization`
+**Route base:** `#/case/p1/{tab}` — tabs: `overview`, `people`, `progress`, `result`, `documents`, `resminamalar`, `sla`, `organization`
 
 ### `process-started-application-profile-workspace-mockup.png` — 🔴 Stub
 

@@ -166,6 +166,13 @@ public sealed class ApplicationWorkspaceCaseIssuedTile
 
     public int Count { get; init; }
 
+    /// <summary>People covered (InvitationItem / WorkPermitItem / RejectionItem / Visa). Overview uses this; <see cref="Count"/> stays header rows.</summary>
+    public int CoverageCount { get; init; }
+
+    public int ExpectedCount { get; init; }
+
+    public bool IsOptional { get; init; }
+
     public string Tone { get; init; } = "blue";
 
     public string Glyph { get; init; } = "•";
@@ -180,6 +187,9 @@ public sealed class ApplicationWorkspaceCaseIssuedTile
 
     public IReadOnlyList<ApplicationWorkspaceCaseIssuedRow> Rows { get; init; }
         = Array.Empty<ApplicationWorkspaceCaseIssuedRow>();
+
+    /// <summary>Localized message keys for table headers when rows have <see cref="ApplicationWorkspaceCaseIssuedRow.Cells"/>.</summary>
+    public IReadOnlyList<string> ColumnKeys { get; init; } = Array.Empty<string>();
 }
 
 public sealed class ApplicationWorkspaceCaseIssuedRow
@@ -189,6 +199,8 @@ public sealed class ApplicationWorkspaceCaseIssuedRow
     public string Title { get; init; } = string.Empty;
 
     public string Subtitle { get; init; } = string.Empty;
+
+    public IReadOnlyList<string> Cells { get; init; } = Array.Empty<string>();
 
     /// <summary>True when this header has at least one uploaded scan/PDF copy.</summary>
     public bool HasCopy { get; init; }

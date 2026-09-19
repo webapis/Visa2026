@@ -178,6 +178,15 @@ public static class ApplicationProfileLocalization
         };
     }
 
+    /// <summary>Compact ListView chip caption. Visa uses <c>Wiza</c>, not "Issued visa".</summary>
+    public static string IssuedResultChipLabel(string? label)
+    {
+        if (string.Equals(label?.Trim(), "Issued visa", StringComparison.Ordinal))
+            return Msg("ApplicationProfile.Doc.Visa");
+
+        return IssuedRecordLabel(label);
+    }
+
     public static string IssuedAddCaption(string? caption) => caption?.Trim() switch
     {
         "+ Add invitation" => Format("ApplicationProfileInstance.Issued.Add", Msg("ApplicationProfile.Doc.Invitation")),

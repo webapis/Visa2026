@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="tk">
+<head>
+  <meta charset="utf-8" />
+  <title>Ýüztutmalar — netije coverage prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --text: #1b2430;
+      --muted: #667085;
+      --line: #e4e7ec;
+      --head: #f8fafc;
+      --ok-bg: #e8f7ee;
+      --ok: #17663a;
+      --miss-bg: #fdecec;
+      --miss: #b42318;
+      --opt-bg: #f2f4f7;
+      --opt: #667085;
+      --sel: #eef4ff;
+      --accent: #2563eb;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: #eef1f6; color: var(--text); font-family: Inter, "Segoe UI", sans-serif; }
+    .app { min-height: 100vh; padding: 28px 32px 36px; }
+    .crumb { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+    .title { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 4px; }
+    .sub { margin: 0 0 16px; color: var(--muted); font-size: 13px; }
+    .card { background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(27,36,48,0.06); }
+    .toolbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+    .toolbar h2 { margin: 0; font-size: 14px; font-weight: 600; }
+    .hint { font-size: 12px; color: var(--muted); }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; font-size: 13px; }
+    th { background: var(--head); color: #475467; font-size: 11px; font-weight: 600; letter-spacing: 0.02em; text-transform: none; white-space: nowrap; }
+    th.netije, td.netije { min-width: 420px; }
+    tbody tr:hover { background: #f8fafc; }
+    tbody tr.is-selected { background: var(--sel); }
+    .num { font-weight: 600; color: var(--accent); }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+    .chip--ok { background: var(--ok-bg); color: var(--ok); }
+    .chip--miss { background: var(--miss-bg); color: var(--miss); }
+    .chip--opt { background: var(--opt-bg); color: var(--opt); }
+    .chip b { font-variant-numeric: tabular-nums; font-weight: 700; }
+    .empty { color: #98a2b3; }
+    .state { display: inline-flex; align-items: center; gap: 6px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .dot--ok { background: #12b76a; }
+    .dot--warn { background: #f79009; }
+    .dot--info { background: #2e90fa; }
+    .foot { display: flex; justify-content: space-between; padding: 10px 16px; color: var(--muted); font-size: 12px; }
+    .legend { margin-top: 14px; display: flex; gap: 16px; color: var(--muted); font-size: 12px; align-items: center; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="crumb">Ýüztutmalar / Ministrlikler bilen ylalaşylýan ýüztutmalar</div>
+    <h1 class="title">Ministrlikler bilen ylalaşylýan ýüztutmalar</h1>
+    <p class="sub">Netije sütüni — baglanan adamlaryň her görnüş boýunça örtügi. Hat sany däl.</p>
+    <div class="card">
+      <div class="toolbar">
+        <h2>Ýüztutmalar</h2>
+        <div class="hint">Prototype — implement only after agreement</div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Ýüztutmanyň belgisi</th>
+            <th>Ýyl</th>
+            <th>Aý</th>
+            <th>Ýüztutmanyň senesi</th>
+            <th>Adam sany</th>
+            <th class="netije">Ýüztutmanyň netijesi</th>
+            <th>Ýagdaý</th>
+            <th>Tassyklama möhleti</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="num">2026-01555</td>
+            <td>2026</td>
+            <td>Iýun</td>
+            <td>27.06.2026</td>
+            <td>14</td>
+            <td class="netije"><div class="chips">
+              <span class="chip chip--ok">Iş rugsady <b>14 / 14</b></span>
+              <span class="chip chip--opt">Ret <b>0</b></span>
+              <span class="chip chip--miss">Wiza <b>11 / 14</b></span>
+            </div></td>
+            <td><span class="state"><span class="dot dot--ok"></span>Işlendi</span></td>
+            <td>—</td>
+          </tr>
+          <tr class="is-selected">
+            <td class="num">2026-01472</td>
+            <td>2026</td>
+            <td>Maý</td>
+            <td>23.05.2026</td>
+            <td>2</td>
+            <td class="netije"><div class="chips">
+              <span class="chip chip--ok">Çakylyk <b>2 / 2</b></span>
+              <span class="chip chip--miss">Iş rugsady <b>0 / 2</b></span>
+              <span class="chip chip--opt">Ret <b>0</b></span>
+              <span class="chip chip--ok">Wiza <b>2 / 2</b></span>
+            </div></td>
+            <td><span class="state"><span class="dot dot--info"></span>Tabşyryldy</span></td>
+            <td>12 gün galdy</td>
+          </tr>
+          <tr>
+            <td class="num">2026-01381</td>
+            <td>2026</td>
+            <td>Maý</td>
+            <td>12.05.2026</td>
+            <td>6</td>
+            <td class="netije"><div class="chips">
+              <span class="chip chip--miss">Çakylyk <b>0 / 6</b></span>
+            </div></td>
+            <td><span class="state"><span class="dot dot--warn"></span>Ylalaşyldy</span></td>
+            <td>5 gün galdy</td>
+          </tr>
+          <tr>
+            <td class="num">2026-01290</td>
+            <td>2026</td>
+            <td>Aprel</td>
+            <td>30.04.2026</td>
+            <td>3</td>
+            <td class="netije"><span class="empty">—</span></td>
+            <td><span class="state"><span class="dot" style="background:#98a2b3"></span>Ofisde taýýarlyk</span></td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td class="num">2026-01211</td>
+            <td>2026</td>
+            <td>Aprel</td>
+            <td>18.04.2026</td>
+            <td>8</td>
+            <td class="netije"><div class="chips">
+              <span class="chip chip--ok">Çakylyk <b>8 / 8</b></span>
+              <span class="chip chip--ok">Iş rugsady <b>8 / 8</b></span>
+              <span class="chip chip--ok">Wiza <b>8 / 8</b></span>
+            </div></td>
+            <td><span class="state"><span class="dot dot--ok"></span>Işlendi</span></td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td class="num">2026-01104</td>
+            <td>2026</td>
+            <td>Mart</td>
+            <td>03.03.2026</td>
+            <td>1</td>
+            <td class="netije"><div class="chips">
+              <span class="chip chip--miss">Serhet <b>0 / 1</b></span>
+              <span class="chip chip--miss">Wiza <b>0 / 1</b></span>
+            </div></td>
+            <td><span class="state"><span class="dot" style="background:#98a2b3"></span>Ofisde taýýarlyk</span></td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="foot"><span>1–6 / 6</span><span>Sütünde diňe profiliň berip bilýän görnüşleri</span></div>
+    </div>
+    <div class="legend">
+      <span class="chip chip--ok">Işlenen</span>
+      <span class="chip chip--miss">Ýetmezçilik</span>
+      <span class="chip chip--opt">Ret opsiýonal</span>
+      <span>Ýok = bu profil netije bermeýär</span>
+    </div>
+  </div>
+</body>
+</html>

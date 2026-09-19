@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="tk">
+<head>
+  <meta charset="utf-8" />
+  <title>Yuztutmalar - yagday stepper prototype</title>
+  <style>
+    :root {
+      --text: #1b2430; --muted: #667085; --line: #e4e7ec; --head: #f8fafc;
+      --ok: #12b76a; --ok-text: #17663a; --cur: #2563eb; --pend: #d0d5dd;
+      --sel: #eef4ff; --accent: #2563eb; --rej: #f04438;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: #eef1f6; color: var(--text); font-family: "Segoe UI", sans-serif; }
+    .app { padding: 24px 28px 20px; }
+    .crumb { color: var(--muted); font-size: 12px; margin-bottom: 6px; }
+    .title { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 4px; }
+    .sub { margin: 0 0 14px; color: var(--muted); font-size: 13px; max-width: 980px; }
+    .card { background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(27,36,48,0.06); }
+    .toolbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+    .toolbar h2 { margin: 0; font-size: 14px; font-weight: 600; }
+    .hint { font-size: 12px; color: var(--muted); }
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    th, td { padding: 12px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; font-size: 13px; }
+    th { background: var(--head); color: #475467; font-size: 11px; font-weight: 600; white-space: nowrap; }
+    col.c-id { width: 128px; }
+    col.c-n { width: 88px; }
+    col.c-prog { width: 560px; }
+    col.c-sla { width: 130px; }
+    col.c-res { width: auto; }
+    tbody tr:hover { background: #f8fafc; }
+    tbody tr.is-selected { background: var(--sel); }
+    .num { font-weight: 600; color: var(--accent); }
+    .stepper { display: flex; align-items: flex-start; width: 100%; }
+    .step { flex: 1 1 0; min-width: 0; }
+    .step:last-child { flex: 0 0 92px; }
+    .track { display: flex; align-items: center; height: 22px; }
+    .dot { width: 20px; height: 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex: 0 0 20px; background: #fff; border: 2px solid var(--pend); color: #98a2b3; }
+    .step--done .dot { border-color: var(--ok); color: var(--ok); background: #ecfdf3; }
+    .step--current .dot { border-color: var(--cur); color: var(--cur); box-shadow: 0 0 0 3px #dbeafe; }
+    .step--issued .dot { border-color: var(--ok); background: var(--ok); color: #fff; }
+    .step--rej .dot { border-color: var(--rej); background: #fef3f2; color: var(--rej); }
+    .line { height: 2px; flex: 1; background: var(--pend); margin: 0 6px; }
+    .line.done { background: var(--ok); }
+    .meta { padding: 6px 10px 0 0; }
+    .lbl { font-size: 11px; font-weight: 600; color: #344054; line-height: 1.25; }
+    .step--current .lbl { color: var(--cur); }
+    .step--issued .lbl { color: var(--ok-text); }
+    .step--rej .lbl { color: #b42318; }
+    .date { display: block; margin-top: 2px; font-size: 10px; color: #12b76a; font-weight: 500; }
+    .step--current .date { color: var(--cur); }
+    .step--rej .date { color: #b42318; }
+    .badge { display: inline-block; margin-top: 3px; font-size: 10px; color: #667085; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip { display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 8px; border-radius: 999px; border: 1.5px solid #d0d5dd; background: #fff; font-size: 11px; font-weight: 600; white-space: nowrap; }
+    .chip--ok { color: #17663a; border-color: #12b76a; }
+    .chip--miss { color: #b42318; border-color: #f04438; }
+    .chip--opt { color: #475467; border-color: #98a2b3; }
+    .foot { display: flex; justify-content: space-between; padding: 10px 16px; color: var(--muted); font-size: 12px; }
+    .legend { margin-top: 12px; display: flex; gap: 20px; color: var(--muted); font-size: 12px; align-items: center; flex-wrap: wrap; }
+    .legend .dot { display: inline-flex; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="crumb">Ýüztutmalar / Ministrlikler bilen ylalaşylýan ýüztutmalar</div>
+    <h1 class="title">Ministrlikler bilen ylalaşylýan ýüztutmalar</h1>
+    <p class="sub">Ýagdaý sütüni iş meýdanyndaky ýagdaý stepper ýaly: Ofisde taýýarlyk, ministrlikler, Migrasiýa. Bir setirde görnüp dur. Netije chip-leri soňky sütunda galýar.</p>
+    <div class="card">
+      <div class="toolbar">
+        <h2>Ýüztutmalar</h2>
+        <div class="hint">Prototype - implement only after agreement</div>
+      </div>
+      <table>
+        <colgroup>
+          <col class="c-id" />
+          <col class="c-n" />
+          <col class="c-prog" />
+          <col class="c-sla" />
+          <col class="c-res" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Ýüztutmanyň belgisi</th>
+            <th>Adam sany</th>
+            <th>Ýüztutmanyň ýagdaýy</th>
+            <th>Tassyklama möhleti</th>
+            <th>Ýüztutmanyň netijesi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="num">2026-01555</td>
+            <td>14</td>
+            <td>
+              <div class="stepper">
+                <div class="step step--done"><div class="track"><span class="dot">&#10003;</span><span class="line done"></span></div><div class="meta"><div class="lbl">Ofisde taýýarlyk</div><span class="date">23 May 2026</span></div></div>
+                <div class="step step--done"><div class="track"><span class="dot">&#10003;</span><span class="line done"></span></div><div class="meta"><div class="lbl">Türkmenenergo</div><span class="date">23 May 2026</span></div></div>
+                <div class="step step--done"><div class="track"><span class="dot">&#10003;</span><span class="line done"></span></div><div class="meta"><div class="lbl">Energetika</div><span class="date">02 Jan 2026</span></div></div>
+                <div class="step step--issued"><div class="track"><span class="dot">&#10003;</span></div><div class="meta"><div class="lbl">Migrasiýa</div><span class="date">08 Jan 2026</span></div></div>
+              </div>
+            </td>
+            <td>—</td>
+            <td><div class="chips"><span class="chip chip--ok">Iş rugsady <b>14 / 14</b></span><span class="chip chip--opt">Ret <b>0</b></span><span class="chip chip--miss">Wiza <b>11 / 14</b></span></div></td>
+          </tr>
+          <tr class="is-selected">
+            <td class="num">2026-01472</td>
+            <td>2</td>
+            <td>
+              <div class="stepper">
+                <div class="step step--done"><div class="track"><span class="dot">&#10003;</span><span class="line done"></span></div><div class="meta"><div class="lbl">Ofisde taýýarlyk</div><span class="date">12 May 2026</span></div></div>
+                <div class="step step--done"><div class="track"><span class="dot">&#10003;</span><span class="line done"></span></div><div class="meta"><div class="lbl">Türkmenenergo</div><span class="date">18 May 2026</span></div></div>
+                <div class="step step--current"><div class="track"><span class="dot">3</span><span class="line"></span></div><div class="meta"><div class="lbl">Energetika</div><span class="badge">Ylalaşylýar</span></div></div>
+                <div class="step"><div class="track"><span class="dot">4</span></div><div class="meta"><div class="lbl">Migrasiýa</div></div></div>
+              </div>
+            </td>
+            <td>12 gün galdy</td>
+            <td><div class="chips"><span class="chip chip--ok">Çakylyk <b>2 / 2</b></span><span class="chip chip--miss">Iş rugsady <b>0 / 2</b></span><span class="chip chip--opt">Ret <b>0</b></span><span class="chip chip--ok">Wiza <b>2 / 2</b></span></div></td>
+          </tr>
+          <tr>
+            <td class="num">2026-01381</td>
+            <td>6</td>
+            <td>
+              <div class="stepper">
+                <div class="step step--done"><div class="track"><span class="dot">&#10003;</span><span class="line done"></span></div><div class="meta"><div class="lbl">Ofisde taýýarlyk</div><span class="date">04 May 2026</span></div></div>
+                <div class="step step--current"><div class="track"><span class="dot">2</span><span class="line"></span></div><div class="meta"><div class="lbl">Türkmenenergo</div><span class="badge">Ylalaşylýar</span></div></div>
+                <div class="step"><div class="track"><span class="dot">3</span><span class="line"></span></div><div class="meta"><div class="lbl">Energetika</div></div></div>
+                <div class="step"><div class="track"><span class="dot">4</span></div><div class="meta"><div class="lbl">Migrasiýa</div></div></div>
+              </div>
+            </td>
+            <td>5 gün galdy</td>
+            <td><div class="chips"><span class="chip chip--miss">Çakylyk <b>0 / 6</b></span></div></td>
+          </tr>
+          <tr>
+            <td class="num">2026-01290</td>
+            <td>3</td>
+            <td>
+              <div class="stepper">
+                <div class="step step--current"><div class="track"><span class="dot">1</span><span class="line"></span></div><div class="meta"><div class="lbl">Ofisde taýýarlyk</div><span class="badge">Dowam edýär</span></div></div>
+                <div class="step"><div class="track"><span class="dot">2</span></div><div class="meta"><div class="lbl">Migrasiýa</div></div></div>
+              </div>
+            </td>
+            <td>—</td>
+            <td><span style="color:#98a2b3">—</span></td>
+          </tr>
+          <tr>
+            <td class="num">2026-01211</td>
+            <td>8</td>
+            <td>
+              <div class="stepper">
+                <div class="step step--done"><div class="track"><span class="dot">&#10003;</span><span class="line done"></span></div><div class="meta"><div class="lbl">Ofisde taýýarlyk</div><span class="date">01 Apr 2026</span></div></div>
+                <div class="step step--done"><div class="track"><span class="dot">&#10003;</span><span class="line done"></span></div><div class="meta"><div class="lbl">Türkmenenergo</div><span class="date">09 Apr 2026</span></div></div>
+                <div class="step step--rej"><div class="track"><span class="dot">&#10005;</span><span class="line"></span></div><div class="meta"><div class="lbl">Energetika</div><span class="date">Ret edildi</span></div></div>
+                <div class="step"><div class="track"><span class="dot">4</span></div><div class="meta"><div class="lbl">Migrasiýa</div></div></div>
+              </div>
+            </td>
+            <td>—</td>
+            <td><div class="chips"><span class="chip chip--ok">Çakylyk <b>8 / 8</b></span></div></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="foot"><span>1-5 / 5</span><span>Direct: Ofis + Migrasiýa. Via-ministry: Ofis + legs + Migrasiýa</span></div>
+    </div>
+    <div class="legend">
+      <span><span class="dot" style="border-color:#12b76a;color:#12b76a;background:#ecfdf3;">&#10003;</span> Tamamlanan</span>
+      <span><span class="dot" style="border-color:#2563eb;color:#2563eb;box-shadow:0 0 0 3px #dbeafe;">3</span> Häzirki ädim</span>
+      <span><span class="dot">4</span> Garaşylýan</span>
+      <span><span class="dot" style="border-color:#f04438;color:#f04438;background:#fef3f2;">&#10005;</span> Ret</span>
+    </div>
+  </div>
+</body>
+</html>

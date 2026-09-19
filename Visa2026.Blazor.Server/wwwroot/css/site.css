@@ -3915,3 +3915,201 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     border-color: #b45309 !important;
     color: #78350f !important;
 }
+
+/* Instance ListView — Ýüztutmanyň netijesi people-coverage chips.
+   White fill + border so chips stay readable on green/amber progress rows. */
+.dxbl-grid td .lv-result-chips,
+.lv-result-chips {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap !important;
+    width: max-content;
+    max-width: none;
+    line-height: 1.2;
+}
+
+.dxbl-grid td .lv-result-chip,
+.lv-result-chip {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 4px;
+    height: 22px;
+    padding: 0 8px;
+    border-radius: 999px;
+    border: 1.5px solid #d0d5dd;
+    background: #fff !important;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    line-height: 1;
+    color: #344054 !important;
+}
+
+.dxbl-grid td .lv-result-chip strong,
+.lv-result-chip strong {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    color: inherit !important;
+}
+
+.dxbl-grid td .lv-result-chip--ok,
+.lv-result-chip--ok {
+    color: #17663a !important;
+    border-color: #12b76a !important;
+}
+
+.dxbl-grid td .lv-result-chip--miss,
+.lv-result-chip--miss {
+    color: #b42318 !important;
+    border-color: #f04438 !important;
+}
+
+.dxbl-grid td .lv-result-chip--opt,
+.lv-result-chip--opt {
+    color: #475467 !important;
+    border-color: #98a2b3 !important;
+}
+
+/* Instance ListView — compact workspace progress stepper. */
+.dxbl-grid td .lv-progress-stepper,
+.lv-progress-stepper {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: flex-start;
+    width: max-content;
+    max-width: none;
+    line-height: 1.2;
+}
+
+.lv-progress-step {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-width: 88px;
+}
+
+.lv-progress-step:last-child {
+    flex: 0 0 92px;
+    min-width: 80px;
+}
+
+.lv-progress-step__track {
+    display: flex;
+    align-items: center;
+    height: 22px;
+}
+
+.lv-progress-step__dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 20px;
+    font-size: 11px;
+    font-weight: 700;
+    background: #fff !important;
+    border: 2px solid #d0d5dd;
+    color: #98a2b3;
+}
+
+.lv-progress-step--done .lv-progress-step__dot,
+.lv-progress-step--issued .lv-progress-step__dot {
+    border-color: #12b76a;
+    color: #12b76a;
+    background: #ecfdf3 !important;
+}
+
+.lv-progress-step--issued .lv-progress-step__dot {
+    background: #12b76a !important;
+    color: #fff !important;
+}
+
+.lv-progress-step--current .lv-progress-step__dot {
+    border-color: #2563eb;
+    color: #2563eb;
+    box-shadow: 0 0 0 3px #dbeafe;
+}
+
+.lv-progress-step--rej .lv-progress-step__dot {
+    border-color: #f04438;
+    color: #f04438;
+    background: #fef3f2 !important;
+}
+
+.lv-progress-step--cancel .lv-progress-step__dot {
+    border-color: #667085;
+    color: #667085;
+    background: #f2f4f7 !important;
+}
+
+.lv-progress-step__line {
+    height: 2px;
+    flex: 1;
+    margin: 0 6px;
+    background: #d0d5dd;
+}
+
+.lv-progress-step__line--done {
+    background: #12b76a;
+}
+
+.lv-progress-step__meta {
+    padding: 6px 8px 0 0;
+}
+
+.lv-progress-step__label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #344054;
+    line-height: 1.25;
+}
+
+.lv-progress-step--current .lv-progress-step__label {
+    color: #2563eb;
+}
+
+.lv-progress-step--issued .lv-progress-step__label,
+.lv-progress-step--done .lv-progress-step__label {
+    color: #17663a;
+}
+
+.lv-progress-step--rej .lv-progress-step__label {
+    color: #b42318;
+}
+
+.lv-progress-step__date {
+    display: block;
+    margin-top: 2px;
+    font-size: 10px;
+    font-weight: 500;
+    color: #12b76a;
+}
+
+.lv-progress-step--current .lv-progress-step__date,
+.lv-progress-step__status {
+    display: block;
+    margin-top: 2px;
+    font-size: 10px;
+    font-weight: 500;
+    color: #2563eb;
+}
+
+.lv-progress-step--rej .lv-progress-step__date,
+.lv-progress-step--rej .lv-progress-step__status {
+    color: #b42318;
+}
+
+/* Progress + result columns: no row-state / selection fill. */
+.dxbl-grid tr.visa-progress-row > td.lv-plain-cell,
+.dxbl-grid tr.dxbl-grid-selected-row > td.lv-plain-cell,
+.dxbl-grid tr:hover > td.lv-plain-cell,
+.dxbl-grid td.lv-plain-cell {
+    background-color: #fff !important;
+    background-image: none !important;
+    --dxbl-grid-data-cell-bg: #fff;
+    color: #1b2430 !important;
+}

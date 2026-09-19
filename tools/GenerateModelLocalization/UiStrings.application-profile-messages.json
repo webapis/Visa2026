@@ -2567,6 +2567,90 @@
     "tk-TM": "Baglanan adam ýazgysy heniz ýok. Ýüztutmadaky adamlar goşmasyna adamlary baglaň — ýazgylar profil talaplaryndan awtomatik çözülýär.",
     "ru-RU": "Пока нет связанных записей лица. Свяжите людей на вкладке «Люди и связи» — записи подставляются по требованиям профиля."
   },
+  "ApplicationProfileInstance.Workspace.ApplicationResult": {
+    "en-US": "Application result",
+    "tr-TR": "Başvuru sonucu",
+    "tk-TM": "Ýüztutmanyň netijesi",
+    "ru-RU": "Результат заявки"
+  },
+  "ApplicationProfileInstance.Workspace.ApplicationResultEmpty": {
+    "en-US": "This profile does not produce invitation, work permit, visa, rejection, or border-zone records.",
+    "tr-TR": "Bu profil davetiye, çalışma izni, vize, ret veya sınır bölgesi kaydı üretmez.",
+    "tk-TM": "Bu profil çakylyk, iş rugsady, wiza, ret ýa-da serhet zolagy ýazgylaryny bermeýär.",
+    "ru-RU": "Этот профиль не выдаёт приглашение, разрешение на работу, визу, отказ или приграничную зону."
+  },
+  "ApplicationProfileInstance.Workspace.ApplicationResultOverview": {
+    "en-US": "Result overview",
+    "tr-TR": "Sonuç özeti",
+    "tk-TM": "Netije syny",
+    "ru-RU": "Обзор результата"
+  },
+  "ApplicationProfileInstance.Workspace.ApplicationResultOverviewSub": {
+    "en-US": "{0} people · types this profile may produce",
+    "tr-TR": "{0} kişi · bu profilin üretebileceği türler",
+    "tk-TM": "{0} adam · Berip biler açyk görnüşler",
+    "ru-RU": "{0} чел. · типы, которые может выдавать профиль"
+  },
+  "ApplicationProfileInstance.Workspace.ApplicationResultIssued": {
+    "en-US": "Issued",
+    "tr-TR": "Düzenlenen",
+    "tk-TM": "Işlenen",
+    "ru-RU": "Выдано"
+  },
+  "ApplicationProfileInstance.Workspace.ApplicationResultMissing": {
+    "en-US": "Missing",
+    "tr-TR": "Eksik",
+    "tk-TM": "Ýetmezçilik",
+    "ru-RU": "Не хватает"
+  },
+  "ApplicationProfileInstance.Workspace.ApplicationResultExpected": {
+    "en-US": "Expected",
+    "tr-TR": "Beklenen",
+    "tk-TM": "Garaşylýan",
+    "ru-RU": "Ожидается"
+  },
+  "ApplicationProfileInstance.Workspace.ApplicationResultActions": {
+    "en-US": "Actions",
+    "tr-TR": "İşlemler",
+    "tk-TM": "Hereketler",
+    "ru-RU": "Действия"
+  },
+  "ApplicationProfileInstance.Workspace.ApplicationResultOptional": {
+    "en-US": "Optional",
+    "tr-TR": "İsteğe bağlı",
+    "tk-TM": "Opsiýonal",
+    "ru-RU": "Необязательно"
+  },
+  "ApplicationProfileInstance.Workspace.ApplicationResultNotRequired": {
+    "en-US": "Not required",
+    "tr-TR": "Zorunlu değil",
+    "tk-TM": "Hökmany däl",
+    "ru-RU": "Не обязательно"
+  },
+  "ApplicationProfileInstance.Workspace.ApplicationResultIssuedMissing": {
+    "en-US": "Issued {0} · Missing {1}",
+    "tr-TR": "Düzenlenen {0} · Eksik {1}",
+    "tk-TM": "Işlenen {0} · Ýetmezçilik {1}",
+    "ru-RU": "Выдано {0} · не хватает {1}"
+  },
+  "ApplicationProfileInstance.Workspace.ApplicationResultOptionalLine": {
+    "en-US": "Not required · Issued {0}",
+    "tr-TR": "Zorunlu değil · Düzenlenen {0}",
+    "tk-TM": "Hökmany däl · Işlenen {0}",
+    "ru-RU": "Не обязательно · выдано {0}"
+  },
+  "ApplicationProfileInstance.Workspace.CompleteApplicationResult": {
+    "en-US": "Required issued records complete",
+    "tr-TR": "Zorunlu düzenlenen kayıtlar tamam",
+    "tk-TM": "Hökmany berlen ýazgylar taýýar",
+    "ru-RU": "Обязательные выданные записи заполнены"
+  },
+  "ApplicationProfileInstance.Workspace.CreateFromApplicationResult": {
+    "en-US": "Create this from Application result, then it can link to this person.",
+    "tr-TR": "Bunu Başvuru sonucundan oluşturun, sonra bu kişiye bağlanabilir.",
+    "tk-TM": "Muny Ýüztutmanyň netijesinden dörediň, soňra bu adama baglanyp biler.",
+    "ru-RU": "Создайте это в «Результат заявки», затем его можно связать с этим человеком."
+  },
   "ApplicationProfileInstance.Workspace.IssuedRecords": {
     "en-US": "Issued records",
     "tr-TR": "Düzenlenen kayıtlar",

@@ -3708,6 +3708,90 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ýüztutma № {0}.",
             ["ru-RU"] = "Заявка № {0}.",
         },
+        ["ApplicationProfileInstance.Workspace.ApplicationResult"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application result",
+            ["tr-TR"] = "Başvuru sonucu",
+            ["tk-TM"] = "Ýüztutmanyň netijesi",
+            ["ru-RU"] = "Результат заявки",
+        },
+        ["ApplicationProfileInstance.Workspace.ApplicationResultActions"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Actions",
+            ["tr-TR"] = "İşlemler",
+            ["tk-TM"] = "Hereketler",
+            ["ru-RU"] = "Действия",
+        },
+        ["ApplicationProfileInstance.Workspace.ApplicationResultEmpty"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "This profile does not produce invitation, work permit, visa, rejection, or border-zone records.",
+            ["tr-TR"] = "Bu profil davetiye, çalışma izni, vize, ret veya sınır bölgesi kaydı üretmez.",
+            ["tk-TM"] = "Bu profil çakylyk, iş rugsady, wiza, ret ýa-da serhet zolagy ýazgylaryny bermeýär.",
+            ["ru-RU"] = "Этот профиль не выдаёт приглашение, разрешение на работу, визу, отказ или приграничную зону.",
+        },
+        ["ApplicationProfileInstance.Workspace.ApplicationResultExpected"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Expected",
+            ["tr-TR"] = "Beklenen",
+            ["tk-TM"] = "Garaşylýan",
+            ["ru-RU"] = "Ожидается",
+        },
+        ["ApplicationProfileInstance.Workspace.ApplicationResultIssued"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Issued",
+            ["tr-TR"] = "Düzenlenen",
+            ["tk-TM"] = "Işlenen",
+            ["ru-RU"] = "Выдано",
+        },
+        ["ApplicationProfileInstance.Workspace.ApplicationResultIssuedMissing"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Issued {0} · Missing {1}",
+            ["tr-TR"] = "Düzenlenen {0} · Eksik {1}",
+            ["tk-TM"] = "Işlenen {0} · Ýetmezçilik {1}",
+            ["ru-RU"] = "Выдано {0} · не хватает {1}",
+        },
+        ["ApplicationProfileInstance.Workspace.ApplicationResultMissing"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Missing",
+            ["tr-TR"] = "Eksik",
+            ["tk-TM"] = "Ýetmezçilik",
+            ["ru-RU"] = "Не хватает",
+        },
+        ["ApplicationProfileInstance.Workspace.ApplicationResultNotRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Not required",
+            ["tr-TR"] = "Zorunlu değil",
+            ["tk-TM"] = "Hökmany däl",
+            ["ru-RU"] = "Не обязательно",
+        },
+        ["ApplicationProfileInstance.Workspace.ApplicationResultOptional"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Optional",
+            ["tr-TR"] = "İsteğe bağlı",
+            ["tk-TM"] = "Opsiýonal",
+            ["ru-RU"] = "Необязательно",
+        },
+        ["ApplicationProfileInstance.Workspace.ApplicationResultOptionalLine"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Not required · Issued {0}",
+            ["tr-TR"] = "Zorunlu değil · Düzenlenen {0}",
+            ["tk-TM"] = "Hökmany däl · Işlenen {0}",
+            ["ru-RU"] = "Не обязательно · выдано {0}",
+        },
+        ["ApplicationProfileInstance.Workspace.ApplicationResultOverview"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Result overview",
+            ["tr-TR"] = "Sonuç özeti",
+            ["tk-TM"] = "Netije syny",
+            ["ru-RU"] = "Обзор результата",
+        },
+        ["ApplicationProfileInstance.Workspace.ApplicationResultOverviewSub"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} people · types this profile may produce",
+            ["tr-TR"] = "{0} kişi · bu profilin üretebileceği türler",
+            ["tk-TM"] = "{0} adam · Berip biler açyk görnüşler",
+            ["ru-RU"] = "{0} чел. · типы, которые может выдавать профиль",
+        },
         ["ApplicationProfileInstance.Workspace.ApprovalLetter"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Approval / disapproval letter",
@@ -3771,6 +3855,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "tamam",
             ["ru-RU"] = "завершено",
         },
+        ["ApplicationProfileInstance.Workspace.CompleteApplicationResult"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Required issued records complete",
+            ["tr-TR"] = "Zorunlu düzenlenen kayıtlar tamam",
+            ["tk-TM"] = "Hökmany berlen ýazgylar taýýar",
+            ["ru-RU"] = "Обязательные выданные записи заполнены",
+        },
         ["ApplicationProfileInstance.Workspace.CompleteCaseSummary"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Required Case summary complete",
@@ -3798,6 +3889,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Zorunlu kişi verileri tamam",
             ["tk-TM"] = "Hökmany adam maglumatlary taýýar",
             ["ru-RU"] = "Обязательные данные лица заполнены",
+        },
+        ["ApplicationProfileInstance.Workspace.CreateFromApplicationResult"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Create this from Application result, then it can link to this person.",
+            ["tr-TR"] = "Bunu Başvuru sonucundan oluşturun, sonra bu kişiye bağlanabilir.",
+            ["tk-TM"] = "Muny Ýüztutmanyň netijesinden dörediň, soňra bu adama baglanyp biler.",
+            ["ru-RU"] = "Создайте это в «Результат заявки», затем его можно связать с этим человеком.",
         },
         ["ApplicationProfileInstance.Workspace.ConfiguredOnTemplate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

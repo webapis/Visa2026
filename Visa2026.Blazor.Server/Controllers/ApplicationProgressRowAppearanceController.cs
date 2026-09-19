@@ -57,6 +57,14 @@ public sealed class ApplicationProfileInstanceProgressRowAppearanceController : 
 
     private void ApplyProgressRowStyle(GridCustomizeElementEventArgs e)
     {
+        if (e.ElementType == GridElementType.DataCell && IsPlainColumn(e.Column))
+        {
+            e.CssClass = string.IsNullOrEmpty(e.CssClass)
+                ? "lv-plain-cell"
+                : $"{e.CssClass} lv-plain-cell";
+            return;
+        }
+
         if (e.ElementType != GridElementType.DataRow || e.VisibleIndex < 0)
             return;
 
@@ -72,6 +80,18 @@ public sealed class ApplicationProfileInstanceProgressRowAppearanceController : 
         e.CssClass = string.IsNullOrEmpty(e.CssClass)
             ? rowCssClass
             : $"{e.CssClass} {rowCssClass}";
+    }
+
+    private static bool IsPlainColumn(IGridColumn? column)
+    {
+        if (column == null)
+            return false;
+
+        var fieldName = column is DxGridDataColumn dataColumn
+            ? dataColumn.FieldName
+            : column.Name;
+        return string.Equals(fieldName, nameof(ApplicationProfileInstance.ProgressStepsDisplay), StringComparison.Ordinal)
+            || string.Equals(fieldName, nameof(ApplicationProfileInstance.ResultCoverageDisplay), StringComparison.Ordinal);
     }
 
     protected override void OnDeactivated()

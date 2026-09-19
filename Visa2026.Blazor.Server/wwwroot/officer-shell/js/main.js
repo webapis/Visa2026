@@ -10,7 +10,7 @@ import {
 } from './filter-ui.js';
 import {
   renderCaseNav, renderCaseHeader, renderCaseOverview, renderCaseRail,
-  renderCaseOrganization,
+  renderCaseOrganization, renderCaseApplicationResult,
 } from './case-workspace-ui.js';
 import {
   renderCaseDocumentCopies, buildDocumentCopiesModel, countSelectedDocChecks,
@@ -336,6 +336,9 @@ function renderCase() {
   } else if (tab === 'progress') {
     main = renderCaseProgressTab(c);
     rail = renderCaseProgressRail(c);
+  } else if (tab === 'result') {
+    main = renderCaseApplicationResult(c, issuedFocusKey);
+    rail = renderCaseRail(c, { full: false });
   } else if (tab === 'documents') {
     main = renderCaseDocumentCopies(c);
     layoutCls = ' cw-layout--docs';

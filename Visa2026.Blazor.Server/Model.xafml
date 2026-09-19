@@ -235,12 +235,14 @@
         <ColumnInfo Id="MonthName" Index="2" Width="90" />
         <ColumnInfo Id="ApplicationDate" Index="3" Width="108" />
         <ColumnInfo Id="TotalPersonCount" Index="4" Width="56" />
-        <ColumnInfo Id="LatestProgressState" Index="5" Width="100" />
-        <ColumnInfo Id="LatestProgressDate" Index="6" Width="108" />
+        <ColumnInfo Id="LatestProgressState" Index="-1" Width="100" />
+        <ColumnInfo Id="LatestProgressDate" Index="5" Width="108" />
         <ColumnInfo Id="WorkingDaysInCurrentStep" Index="-1" Width="72" />
-        <ColumnInfo Id="ProgressSlaStatement" Index="7" Width="140" />
+        <ColumnInfo Id="ProgressSlaStatement" Index="-1" Width="140" />
         <ColumnInfo Id="WorkingDaysInMigrationStep" Index="-1" Width="96" />
-        <ColumnInfo Id="MigrationSlaStatement" Index="8" Width="160" />
+        <ColumnInfo Id="MigrationSlaStatement" Index="-1" Width="160" />
+        <ColumnInfo Id="ProgressStepsDisplay" Index="6" Width="520" />
+        <ColumnInfo Id="ResultCoverageDisplay" Index="7" Width="560" />
       </Columns>
     </ListView>
     <ListView Id="Application_ListView_DirectMigration">
@@ -251,9 +253,11 @@
         <ColumnInfo Id="MonthName" Index="2" Width="90" />
         <ColumnInfo Id="ApplicationDate" Index="3" Width="108" />
         <ColumnInfo Id="TotalPersonCount" Index="4" Width="56" />
-        <ColumnInfo Id="LatestProgressState" Index="5" Width="100" />
-        <ColumnInfo Id="LatestProgressDate" Index="6" Width="108" />
-        <ColumnInfo Id="MigrationService" Index="7" Width="180" />
+        <ColumnInfo Id="LatestProgressState" Index="-1" Width="100" />
+        <ColumnInfo Id="LatestProgressDate" Index="5" Width="108" />
+        <ColumnInfo Id="MigrationService" Index="6" Width="180" />
+        <ColumnInfo Id="ProgressStepsDisplay" Index="7" Width="360" />
+        <ColumnInfo Id="ResultCoverageDisplay" Index="8" Width="560" />
         <ColumnInfo Id="WorkingDaysInCurrentStep" Index="-1" Width="72" />
         <ColumnInfo Id="ProgressSlaStatement" Index="-1" Width="140" />
         <ColumnInfo Id="WorkingDaysInMigrationStep" Index="-1" Width="96" />
@@ -269,16 +273,18 @@
         <ColumnInfo Id="ApplicationDate" Index="3" Width="108" />
         <ColumnInfo Id="Urgency" Index="4" Width="110" />
         <ColumnInfo Id="TotalPersonCount" Index="5" Width="56" />
-        <ColumnInfo Id="LatestProgressState" Index="6" Width="100" />
-        <ColumnInfo Id="LatestProgressDate" Index="7" Width="108" />
+        <ColumnInfo Id="LatestProgressState" Index="-1" Width="100" />
+        <ColumnInfo Id="LatestProgressDate" Index="6" Width="108" />
         <ColumnInfo Id="WorkingDaysInCurrentStep" Index="-1" Width="72" />
-        <ColumnInfo Id="ProgressSlaStatement" Index="8" Width="140" />
+        <ColumnInfo Id="ProgressSlaStatement" Index="-1" Width="140" />
         <ColumnInfo Id="WorkingDaysInMigrationStep" Index="-1" Width="96" />
-        <ColumnInfo Id="ApprovalLegProfile" Index="9" Width="180" />
-        <ColumnInfo Id="ProjectContract" Index="10" Width="180" />
-        <ColumnInfo Id="MigrationSlaStatement" Index="11" Width="160" />
-        <ColumnInfo Id="VisaPeriod" Index="12" Width="110" />
-        <ColumnInfo Id="VisaType" Index="13" Width="110" />
+        <ColumnInfo Id="ApprovalLegProfile" Index="7" Width="180" />
+        <ColumnInfo Id="ProjectContract" Index="8" Width="180" />
+        <ColumnInfo Id="MigrationSlaStatement" Index="-1" Width="160" />
+        <ColumnInfo Id="VisaPeriod" Index="9" Width="110" />
+        <ColumnInfo Id="VisaType" Index="10" Width="110" />
+        <ColumnInfo Id="ProgressStepsDisplay" Index="11" Width="560" />
+        <ColumnInfo Id="ResultCoverageDisplay" Index="12" Width="560" />
       </Columns>
     </ListView>
     <ListView Id="Application_ProgressHistory_ListView" ShowAllRows="True" VirtualScrollingEnabled="False" IsFooterVisible="True" />

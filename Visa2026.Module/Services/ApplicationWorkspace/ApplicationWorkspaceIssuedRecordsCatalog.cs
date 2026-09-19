@@ -30,7 +30,8 @@ public static class ApplicationWorkspaceIssuedRecordsCatalog
         string NewCaption,
         string PanelTitle,
         string EmptyHint,
-        Func<ApplicationProfileInstance?, bool> IsVisible);
+        Func<ApplicationProfileInstance?, bool> IsVisible,
+        bool IsOptional = false);
 
     private static readonly Definition[] All =
     [
@@ -53,7 +54,8 @@ public static class ApplicationWorkspaceIssuedRecordsCatalog
             "+ Add rejection", "New rejection",
             "Rejections produced by this case",
             "No rejection yet. New rejection will be linked to this application.",
-            ApplicationProfileConfigurationResolver.ShowRejections),
+            ApplicationProfileConfigurationResolver.ShowRejections,
+            IsOptional: true),
         new(IssuedVisa, "Issued visa", "💳", "teal",
             "+ Add issued visa", "New issued visa",
             "Visas issued by this case",

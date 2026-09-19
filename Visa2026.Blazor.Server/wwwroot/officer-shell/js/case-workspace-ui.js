@@ -6,6 +6,7 @@ const TAB_META = [
   ['overview', 'Overview', 'bi-house-door'],
   ['people', 'People & links', 'bi-people'],
   ['progress', 'Progress', 'bi-bar-chart-steps'],
+  ['result', 'Application result', 'bi-flag'],
   ['documents', 'Document copies', 'bi-files'],
   ['resminamalar', 'Resminamalar', 'bi-folder2-open'],
   ['sla', 'SLA & deadlines', 'bi-clock-history'],
@@ -170,14 +171,6 @@ function issuedPanel(c, rec) {
 
 export function renderCaseOverview(c, issuedFocusKey) {
   const pIdx = progressIndex(c.step);
-  const issued = issuedRecordsFor(c);
-  const selected = issued.find(t => t.key === issuedFocusKey);
-  const issuedCard = issued.length === 0 ? '' : `<section class="cw-card">
-      <h2 class="cw-card__title">Issued records</h2>
-      <p class="cw-card__sub">Created by this application · visible when May produce is on</p>
-      <div class="cw-issued-row">${issued.map(t => issuedRecordTile(t, issuedFocusKey)).join('')}</div>
-      ${selected ? issuedPanel(c, selected) : ''}
-    </section>`;
   return `<div class="cw-overview">
     <section class="cw-card">
       <h2 class="cw-card__title">Case summary</h2>
@@ -198,8 +191,23 @@ export function renderCaseOverview(c, issuedFocusKey) {
       <p class="cw-card__sub">Existing person records linked to this case</p>
       <div class="cw-link-row">${LINKED_RECORDS.map(linkedRecordTile).join('')}</div>
     </section>
-    ${issuedCard}
     <p class="cw-foot">Application Profile: ${esc(c.profileName || tplLabel(c.tplKey))}</p>
+  </div>`;
+}
+
+export function renderCaseApplicationResult(c, issuedFocusKey) {
+  const issued = issuedRecordsFor(c);
+  const selected = issued.find(t => t.key === issuedFocusKey);
+  const body = issued.length === 0
+    ? `<p class="cw-summary-empty">This profile does not produce invitation, work permit, visa, rejection, or border-zone records.</p>`
+    : `<div class="cw-issued-row">${issued.map(t => issuedRecordTile(t, issuedFocusKey)).join('')}</div>
+      ${selected ? issuedPanel(c, selected) : ''}`;
+  return `<div class="cw-overview">
+    <section class="cw-card">
+      <h2 class="cw-card__title">Application result</h2>
+      <p class="cw-card__sub">Created by this application · visible when May produce is on</p>
+      ${body}
+    </section>
   </div>`;
 }
 

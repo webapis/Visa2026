@@ -189,6 +189,7 @@
                     var documentsMissing = _documentCopiesMissing;
                     var documentsNavReady = _documentCopiesNavReady;
                     var progressLetterMissing = ApplicationWorkspaceProgressLetterCompleteness.MissingCount(view);
+                    var resultTotals = ApplicationWorkspaceIssuedResultOverview.Sum(view.IssuedRecordTiles);
                 }
                 @foreach (var tab in CaseTabs)
                 {
@@ -233,6 +234,21 @@
                                           title="@Msg("ApplicationProfileInstance.Workspace.CompletePeople")"
                                           aria-label="@Msg("ApplicationProfileInstance.Workspace.CompletePeople")">✓</span>
                                     break;
+                            }
+                        }
+                        else if (tab.Key == "result" && view.IssuedRecordTiles.Count > 0)
+                        {
+                            @if (resultTotals.Missing > 0)
+                            {
+                                <span class="cw-nav__badge cw-nav__badge--missing"
+                                      title="@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ApplicationResultIssuedMissing", resultTotals.Issued, resultTotals.Missing)"
+                                      aria-label="@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ApplicationResultIssuedMissing", resultTotals.Issued, resultTotals.Missing)">@resultTotals.Missing</span>
+                            }
+                            else
+                            {
+                                <span class="cw-nav__badge cw-nav__badge--ok"
+                                      title="@Msg("ApplicationProfileInstance.Workspace.CompleteApplicationResult")"
+                                      aria-label="@Msg("ApplicationProfileInstance.Workspace.CompleteApplicationResult")">✓</span>
                             }
                         }
                         else if (tab.Key == "progress" && progressLetterMissing > 0)
@@ -292,6 +308,9 @@
                         case "people":
                             @RenderPeople(view)
                             break;
+                        case "result":
+                            @RenderApplicationResult(view)
+                            break;
                         case "progress":
                             <OfficerShellCaseProgressTab @ref="_progressTab"
                                                          ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId"
@@ -344,6 +363,7 @@
         ("overview", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Overview"), "⌂"),
         ("people", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.PeopleLinks"), "👥"),
         ("progress", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Progress"), "▤"),
+        ("result", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ApplicationResult"), "⚑"),
         ("documents", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Documents"), "📄"),
         ("resminamalar", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Resminamalar"), "📦"),
         ("sla", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Sla"), "⏱"),
@@ -965,6 +985,9 @@
     private static string IssuedEmptyHint(ApplicationWorkspaceCaseView view, ApplicationWorkspaceCaseIssuedTile tile) =>
         ApplicationProfileLocalization.IssuedEmptyHint(tile.Label, view.Chrome.DisplayNumber);
 
+    private static string IssuedColumnCaption(string key) =>
+        VisaUiMessages.Get(key).TrimEnd(' ', '*');
+
     private void SelectIssuedTile(string key)
     {
         _issuedDeleteError = null;
@@ -1578,31 +1601,93 @@
                     </div>
                 }
             </section>
-            @if (view.IssuedRecordTiles.Count > 0)
+            <p class="cw-foot">@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ProfileNamed", string.IsNullOrWhiteSpace(view.Chrome.ProfileTemplateName) ? Snapshot!.Profile.Title : view.Chrome.ProfileTemplateName)</p>
+        </div>;
+    };
+
+    private RenderFragment RenderApplicationResult(ApplicationWorkspaceCaseView view) => __builder =>
+    {
+        var selectedIssued = view.IssuedRecordTiles.FirstOrDefault(t =>
+            string.Equals(t.Key, _selectedIssuedKey, StringComparison.OrdinalIgnoreCase));
+        var resultTotals = ApplicationWorkspaceIssuedResultOverview.Sum(view.IssuedRecordTiles);
+        <div class="cw-overview">
+            @if (view.IssuedRecordTiles.Count == 0)
             {
-                var selectedIssued = view.IssuedRecordTiles.FirstOrDefault(t =>
-                    string.Equals(t.Key, _selectedIssuedKey, StringComparison.OrdinalIgnoreCase));
                 <section class="cw-card">
-                    <h2 class="cw-card__title">@Msg("ApplicationProfileInstance.Workspace.IssuedRecords")</h2>
-                    <p class="cw-card__sub">@Msg("ApplicationProfileInstance.Workspace.IssuedSub")</p>
+                    <h2 class="cw-card__title">@Msg("ApplicationProfileInstance.Workspace.ApplicationResult")</h2>
+                    <p class="cw-summary-empty">@Msg("ApplicationProfileInstance.Workspace.ApplicationResultEmpty")</p>
+                </section>
+            }
+            else
+            {
+            <section class="cw-card cw-result-board">
+                @{
+                    var resultComplete = resultTotals.Missing == 0;
+                }
+                <header class="cw-result-board__head">
+                    <div>
+                        <h2 class="cw-card__title">@Msg("ApplicationProfileInstance.Workspace.ApplicationResultOverview")</h2>
+                        <p class="cw-card__sub">@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ApplicationResultOverviewSub", view.PeopleSummary.Total)</p>
+                    </div>
+                    <span class="cw-result-board__badge @(resultComplete ? "is-ok" : "is-miss")">
+                        @(resultComplete
+                            ? Msg("ApplicationProfileInstance.Workspace.CompleteApplicationResult")
+                            : VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ApplicationResultIssuedMissing", resultTotals.Issued, resultTotals.Missing))
+                    </span>
+                </header>
+                <div class="cw-result-types">
+                    @foreach (var tile in view.IssuedRecordTiles)
+                    {
+                        var missing = ApplicationWorkspaceIssuedResultOverview.Missing(tile);
+                        var typePct = ApplicationWorkspaceIssuedResultOverview.CoveragePercent(tile);
+                        var typeClass = tile.IsOptional
+                            ? "cw-result-type--optional"
+                            : missing > 0 ? "cw-result-type--miss" : "cw-result-type--ok";
+                        <article class="cw-result-type cw-result-type--@tile.Tone @typeClass">
+                            <span class="cw-result-type__top">
+                                <span class="cw-result-type__icon">@tile.Glyph</span>
+                                <span class="cw-result-type__label">@ApplicationProfileLocalization.IssuedRecordLabel(tile.Label)</span>
+                                <span class="cw-result-type__pill">@(tile.IsOptional
+                                    ? Msg("ApplicationProfileInstance.Workspace.ApplicationResultOptional")
+                                    : missing > 0
+                                        ? Msg("ApplicationProfileInstance.Workspace.ApplicationResultMissing")
+                                        : Msg("ApplicationProfileInstance.Workspace.ApplicationResultIssued"))</span>
+                            </span>
+                            <span class="cw-result-type__figures">
+                                <strong class="cw-result-type__ratio">@(tile.IsOptional ? tile.CoverageCount.ToString() : $"{tile.CoverageCount} / {tile.ExpectedCount}")</strong>
+                                <span class="cw-result-type__pct">@typePct%</span>
+                            </span>
+                            <span class="cw-result-type__track" aria-hidden="true">
+                                <span class="cw-result-type__fill" style="width: @(typePct)%"></span>
+                            </span>
+                            <span class="cw-result-type__line">@(tile.IsOptional
+                                ? VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ApplicationResultOptionalLine", tile.CoverageCount)
+                                : VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ApplicationResultIssuedMissing", tile.CoverageCount, missing))</span>
+                        </article>
+                    }
+                </div>
+            </section>
+            <section class="cw-card cw-result-actions">
+                <h2 class="cw-card__title">@Msg("ApplicationProfileInstance.Workspace.ApplicationResultActions")</h2>
+                <p class="cw-card__sub">@Msg("ApplicationProfileInstance.Workspace.IssuedSub")</p>
                     <div class="cw-issued-row">
                         @foreach (var tile in view.IssuedRecordTiles)
                         {
                             var isSelected = string.Equals(tile.Key, _selectedIssuedKey, StringComparison.OrdinalIgnoreCase);
                             <button type="button"
-                                    class="cw-link-tile cw-link-tile--@tile.Tone cw-issued-tile @(tile.Count == 0 ? "is-empty" : null) @(isSelected ? "is-selected" : null)"
+                                    class="cw-issued-btn cw-issued-btn--@tile.Tone @(tile.Count == 0 ? "is-empty" : null) @(isSelected ? "is-selected" : null)"
                                     @onclick="() => SelectIssuedTile(tile.Key)">
-                                <span class="cw-link-tile__icon">@tile.Glyph</span>
-                                <span class="cw-link-tile__label">@ApplicationProfileLocalization.IssuedRecordLabel(tile.Label)</span>
-                                @if (tile.Count == 0)
-                                {
-                                    <span class="cw-issued-tile__add">@ApplicationProfileLocalization.IssuedAddCaption(tile.AddCaption)</span>
-                                }
-                                else
-                                {
-                                    <strong class="cw-link-tile__count">@tile.Count</strong>
-                                }
-                                <span class="cw-link-tile__chev">›</span>
+                                <span class="cw-issued-btn__icon">@tile.Glyph</span>
+                                <span class="cw-issued-btn__copy">
+                                    <span class="cw-issued-btn__label">@ApplicationProfileLocalization.IssuedRecordLabel(tile.Label)</span>
+                                    <strong class="cw-issued-btn__count">@(tile.Count == 0 ? "—" : tile.Count.ToString())</strong>
+                                </span>
+                                <span class="cw-issued-btn__cta">
+                                    @(tile.Count == 0
+                                        ? ApplicationProfileLocalization.IssuedAddCaption(tile.AddCaption)
+                                        : Msg("ApplicationProfileInstance.Picker.Open"))
+                                    <span aria-hidden="true">→</span>
+                                </span>
                             </button>
                         }
                     </div>
@@ -1616,7 +1701,19 @@
                             }
                             else
                             {
-                                <ul class="cw-issued-list">
+                                <ul class="cw-issued-list @(selectedIssued.ColumnKeys.Count > 0 ? "cw-issued-list--table" : null)"
+                                    style="@(selectedIssued.ColumnKeys.Count > 0 ? $"--issued-cols:{selectedIssued.ColumnKeys.Count}" : null)">
+                                    @if (selectedIssued.ColumnKeys.Count > 0)
+                                    {
+                                        <li class="cw-issued-list__head" aria-hidden="true">
+                                            @foreach (var columnKey in selectedIssued.ColumnKeys)
+                                            {
+                                                <span>@IssuedColumnCaption(columnKey)</span>
+                                            }
+                                            <span></span>
+                                            <span></span>
+                                        </li>
+                                    }
                                     @foreach (var row in selectedIssued.Rows)
                                     {
                                         var issuedRowId = row.Id;
@@ -1629,6 +1726,47 @@
                                             StringComparison.OrdinalIgnoreCase);
                                         var canPreviewIssued = canDeleteIssued || isIssuedVisa;
                                         var issuedRowOpen = IsIssuedRowOpen(issuedCatalogKey, issuedRowId);
+                                        @if (row.Cells.Count > 0)
+                                        {
+                                            <li class="cw-issued-list__row cw-issued-list__row--cols @(issuedRowOpen ? "is-selected" : null)"
+                                                @onclick="() => OpenIssuedHeaderAsync(issuedCatalogKey, issuedRowId)">
+                                                @foreach (var cell in row.Cells)
+                                                {
+                                                    <span>@cell</span>
+                                                }
+                                                @if (canPreviewIssued)
+                                                {
+                                                    <button type="button"
+                                                            class="cw-issued-list__preview"
+                                                            title="@(row.HasCopy ? Msg("ApplicationProfileInstance.Workspace.PreviewCopy") : Msg("ApplicationProfileInstance.Workspace.NoCopy"))"
+                                                            disabled="@(!row.HasCopy)"
+                                                            @onclick="() => PreviewIssuedHeaderCopyAsync(issuedCatalogKey, issuedRowId)"
+                                                            @onclick:stopPropagation="true">
+                                                        @Msg("ApplicationItemDocumentCopies.Action.Preview")
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <span></span>
+                                                }
+                                                @if (canDeleteIssued || isIssuedVisa)
+                                                {
+                                                    <button type="button"
+                                                            class="cw-issued-list__delete"
+                                                            title="@Msg("ApplicationProfileInstance.Workspace.Delete")"
+                                                            @onclick="() => DeleteIssuedHeaderAsync(issuedCatalogKey, issuedRowId, issuedTitle)"
+                                                            @onclick:stopPropagation="true">
+                                                        @Msg("ApplicationProfileInstance.Workspace.Delete")
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <span></span>
+                                                }
+                                            </li>
+                                        }
+                                        else
+                                        {
                                         <li class="cw-issued-list__row @(issuedRowOpen ? "is-selected" : null)">
                                             <button type="button"
                                                     class="cw-issued-list__item"
@@ -1659,6 +1797,7 @@
                                                 </button>
                                             }
                                         </li>
+                                        }
                                     }
                                 </ul>
                             }
@@ -1671,9 +1810,8 @@
                             </div>
                         </div>
                     }
-                </section>
+            </section>
             }
-            <p class="cw-foot">@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ProfileNamed", string.IsNullOrWhiteSpace(view.Chrome.ProfileTemplateName) ? Snapshot!.Profile.Title : view.Chrome.ProfileTemplateName)</p>
         </div>;
     };
 
@@ -1929,7 +2067,7 @@
                                     else if (IsIssuedPersonItem(selected.Key))
                                     {
                                         <div class="cw-issued-panel__actions">
-                                            <p class="cw-issued-panel__hint">Create this from Overview → Issued records, then it can link to this person.</p>
+                                            <p class="cw-issued-panel__hint">@Msg("ApplicationProfileInstance.Workspace.CreateFromApplicationResult")</p>
                                         </div>
                                     }
                                 </div>
@@ -2173,6 +2311,16 @@
                             <li><strong>@ApplicationProfileLocalization.ProgressStepLabel(row.State)</strong><span>@row.Date</span></li>
                         }
                     </ul>
+                </section>
+                break;
+            case "result":
+                <section class="cw-rail-block">
+                    <h4>@Msg("ApplicationProfileInstance.Workspace.QuickActions")</h4>
+                    <button type="button" class="cw-rail-btn cw-rail-btn--primary" @onclick="AdvanceProgressAsync">▶ @Msg("ApplicationProfileInstance.Workspace.AdvanceProgress")</button>
+                    @if (CanRevertFromRail)
+                    {
+                        <button type="button" class="cw-rail-btn" @onclick="RevertProgressAsync">◀ @Msg("ApplicationProfileInstance.Workspace.RevertProgress")</button>
+                    }
                 </section>
                 break;
             case "sla":
