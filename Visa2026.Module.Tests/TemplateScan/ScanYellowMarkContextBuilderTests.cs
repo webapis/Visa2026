@@ -172,6 +172,34 @@ public class ScanYellowMarkContextBuilderTests
     }
 
     [Fact]
+    public void Word_following_caption_skips_next_signatory_title_paragraph()
+    {
+        var after = ScanYellowMarkContextBuilder.ExtractFollowingCaption(
+            "Passportlaryň göçürmeleri – 1 (bir) sah.",
+            yellowStart: "Passportlaryň göçürmeleri – ".Length,
+            yellowLength: 1,
+            nextParagraph: "Türkmenistandaky şahamçasynyň müdiri");
+
+        Assert.DoesNotContain("müdiri", after ?? string.Empty, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("şahamça", after ?? string.Empty, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("(bir) sah.", after ?? string.Empty, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Word_following_caption_skips_next_gosundy_enclosure_paragraph()
+    {
+        var after = ScanYellowMarkContextBuilder.ExtractFollowingCaption(
+            "sanawdaky 3 sany dasary yurt rayaty.",
+            yellowStart: "sanawdaky ".Length,
+            yellowLength: 1,
+            nextParagraph: "Gosundy: 1. Pasport nusgalary – 1 sany");
+
+        Assert.DoesNotContain("Gosundy", after ?? string.Empty, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("Pasport", after ?? string.Empty, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("sany dasary yurt rayaty", after ?? string.Empty, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void Excel_includes_sheet_name_and_header_row()
     {
         using var ms = new MemoryStream();

@@ -2,6 +2,30 @@
 
 Append-only. Newest first under **## Entries**.
 
+### 2026-09-18 — Header letters less stable than roster (TPCNT cloned; AFNUM on the 3)
+
+- Need: After Goşundy overlay fix, cover-letter Review still guessed worse than sanaw Excel/Word. Detected had three **TPCNT** rows (person `1` plus both enclosure `1`s). Overlay **#1 AFNUM** sat on the yellow person-count `3`. Roster column headers stay one code per column.
+- Cause: (1) Short-count clone copied Header-scoped TPCNT onto later `1`/`-1`. (2) Goşundy lines mention *raýat*, so they looked like person count. (3) FollowingCaption appended the Goşundy paragraph onto the person-count `3`, so that yellow became “enclosure” and lost TPCNT. (4) Word overlay mapped header % onto the PDF body cluster, so AFNUM’s box covered the `3`.
+- Fix: Enclosure (Goşundy / nusgalar / maglumaty sany) ≠ TPCNT. Do not clone Header codes. Do not append a Goşundy next paragraph as the person-count caption. Official-letter prefers for tertipde / gezeklik. Word Review uses the full page for mark geometry (`?v=tasmarks16`); header boxes stay short.
+- Officer: Stop F5, rebuild, hard-refresh Review, **Analyze**. Expect one **TPCNT** (the person count), Goşundy `1`/`-1` identified but not TPCNT, **AFNUM** `#` on the № (not on the `3`).
+- Prevent: Do not treat cover-letter yellows like repeating roster cells. Header slots are one-shot, like Excel columns.
+- Cross-skill: -
+### 2026-09-18 — Goşundy `#8` on list `1.`; `#12` AFNUM missing; dashed `-1` unidentified
+
+- Need: Cover letter Review (Wiza we Iş Rugsatnamasyny Uzaltmak). Overlay **#8** sat on Goşundy list marker `1. Daşary…`, not the yellow `1 sany`. Second line yellow `-1 sany` had no Detected row / no `#`. Detected **#12 AFNUM** had no mark on the letter preview.
+- Cause: (1) Duplicate short `1`s were zipped to PDF hits in Y-order, so Word auto-number `1.` stole the attachment count. (2) `-1` / `–1` was not an isolated count digit, so the second Goşundy yellow did not clone/map. (3) Header/footer AFNUM often has no PDF text hit (`№` vs `1/-2`); unmatched Word marks were not painted from the OpenXML box.
+- Fix: Skip list-number PDF hits for digits; snap counts to the OpenXML box (`?v=tasmarks15`). Treat leading dash as a count. If sample text is missing, still paint the geometry box (AFNUM). Clone short count digits.
+- Officer: Stop F5, rebuild, hard-refresh Review, **Analyze** the same letter. Expect `#` on both Goşundy `1` / `-1 sany` (not on `1.`), and **#12** visible (header/footer application number).
+- Prevent: Do not match numbered-list `1.` when the yellow is the count before `sany`. Do not drop overlay `#` when PDF text cannot find `№`.
+- Cross-skill: -
+### 2026-09-18 — Goşundy yellow `1` stole ACPOS; Mehmet left unmapped
+
+- Need: Cover letter Review — attachment count `1` above şahamçasynyň müdiri mapped to **ACPOS**; title got **CHFN**; Mehmet ÇIRAK had no Short (officer: yellow not identified as placeholder). Extra Goşundy `1` looked unmarked.
+- Cause: (1) `ExtractFollowingCaption` appended the next paragraph, so müdiri became nearby for the count yellow. (2) `LabelCompatible` treated almost any text as ACPOS-compatible, so digit `1` stole the header code and shifted the signatory pair.
+- Fix: Skip signatory-title / person-name next paragraphs in FollowingCaption. Reject isolated count marks for ACPOS/POSN; keep real titles via `LooksLikeBranchDirectorTitle` / position phrase. `preferLeftLabel` ignores director nearby on count digits.
+- Officer: Stop F5, rebuild, hard-refresh, **Analyze** the same letter. Expect attachment `1` ≠ ACPOS; müdiri → **ACPOS**; Mehmet → **CHFN**.
+- Prevent: Do not use the next content block (signature) as a left field label for Goşundy counts.
+- Cross-skill: -
 ### 2026-09-18 — FMRLH under Application — family member
 
 - Need: Map `adamsynyň` without sponsor; find FM header codes.

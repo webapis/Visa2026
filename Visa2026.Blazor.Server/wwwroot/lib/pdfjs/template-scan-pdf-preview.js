@@ -35,6 +35,8 @@ function fold(value) {
     return String(value || "")
         .normalize("NFKC")
         .replace(/[\u00AD\u200B\u2060\uFEFF]/g, "")
+        .replace(/[\u2010-\u2015\u2212]/g, "-")
+        .replace(/[\u2215\uFF0F]/g, "/")
         .replace(/[ýÿ]/gi, "y")
         .replace(/ä/gi, "a")
         .replace(/ö/gi, "o")
@@ -121,9 +123,34 @@ function unionRects(rects) {
     };
 }
 
+function looksLikeOrderedListMarker(folded, index, length) {
+    const after = folded[index + length];
+    if (after !== "." && after !== ")") {
+        return false;
+    }
+    const next = folded[index + length + 1];
+    return !!next && next >= "a" && next <= "z";
+}
+
+function foldNeedles(label) {
+    const primary = fold(label);
+    const needles = [];
+    const add = function (value) {
+        if (value && needles.indexOf(value) < 0) {
+            needles.push(value);
+        }
+    };
+    add(primary);
+    add(primary.replace(/^-+/, ""));
+    const withoutNo = primary.replace(/[№°]/g, "").replace(/^no\.?/, "");
+    add(withoutNo);
+    add(withoutNo.replace(/^-+/, ""));
+    return needles;
+}
+
 function findAllLabelSpans(entries, label) {
-    const needle = fold(label);
-    if (!needle || !entries.length) {
+    const needles = foldNeedles(label);
+    if (!needles.length || !entries.length) {
         return [];
     }
 
@@ -138,21 +165,30 @@ function findAllLabelSpans(entries, label) {
     }
 
     const hits = [];
-    const requireBoundary = needle.length <= 3 || /^\d+$/.test(needle);
-    let searchFrom = 0;
-    while (searchFrom < folded.length) {
-        const at = folded.indexOf(needle, searchFrom);
-        if (at < 0) {
-            break;
-        }
-        if (!requireBoundary || isBoundary(folded, at, needle.length)) {
-            const from = map[at];
-            const to = map[at + needle.length - 1];
-            if (from != null && to != null) {
-                hits.push({ from: from, to: to });
+    const seen = {};
+    for (let n = 0; n < needles.length; n++) {
+        const needle = needles[n];
+        const requireBoundary = needle.length <= 3 || /^\d+$/.test(needle);
+        const skipList = /^\d+$/.test(needle);
+        let searchFrom = 0;
+        while (searchFrom < folded.length) {
+            const at = folded.indexOf(needle, searchFrom);
+            if (at < 0) {
+                break;
             }
+            if (!requireBoundary || isBoundary(folded, at, needle.length)) {
+                if (!(skipList && looksLikeOrderedListMarker(folded, at, needle.length))) {
+                    const from = map[at];
+                    const to = map[at + needle.length - 1];
+                    const key = from + ":" + to;
+                    if (from != null && to != null && !seen[key]) {
+                        seen[key] = true;
+                        hits.push({ from: from, to: to });
+                    }
+                }
+            }
+            searchFrom = at + Math.max(needle.length, 1);
         }
-        searchFrom = at + Math.max(needle.length, 1);
     }
 
     return hits;
@@ -285,8 +321,8 @@ function placeShortDuplicateLabels(entries, marks, used, placed, dotnetRef) {
         if (mark.kind === "excel") {
             continue;
         }
-        const key = fold(mark.label);
-        if (!key || (key.length > 3 && !/^\d+$/.test(key))) {
+        const key = fold(mark.label).replace(/^-+/, "");
+        if (!key || (key.length > 3 && !/^\d+$/.test(key)) || /^\d+$/.test(key)) {
             continue;
         }
         if (!groups[key]) {
@@ -329,7 +365,7 @@ function placeShortDuplicateLabels(entries, marks, used, placed, dotnetRef) {
 
 function shortTokenHits(entries, label) {
     const spans = findAllLabelSpans(entries, label);
-    const needle = fold(label);
+    const needle = fold(label).replace(/^-+/, "");
     if (!needle) {
         return spans;
     }
@@ -338,7 +374,11 @@ function shortTokenHits(entries, label) {
         seen[spans[i].from + ":" + spans[i].to] = true;
     }
     for (let i = 0; i < entries.length; i++) {
-        if (fold(entries[i].item.str) !== needle) {
+        const exact = fold(entries[i].item.str).replace(/^-+/, "");
+        if (exact !== needle) {
+            continue;
+        }
+        if (/^\d+$/.test(needle) && looksLikeOrderedListItem(entries[i].item.str, needle)) {
             continue;
         }
         const key = i + ":" + i;
@@ -349,6 +389,14 @@ function shortTokenHits(entries, label) {
         spans.push({ from: i, to: i });
     }
     return spans;
+}
+
+function looksLikeOrderedListItem(str, needle) {
+    const raw = String(str || "").trim();
+    return raw === needle + "."
+        || raw === needle + ")"
+        || raw === needle + ".)"
+        || new RegExp("^" + needle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "[\\.)]\\s").test(raw);
 }
 
 function pairShortHits(group, hits) {
@@ -382,18 +430,23 @@ function pairShortHits(group, hits) {
 }
 
 function isShortDuplicateLabel(mark) {
-    const key = fold(mark.label);
+    const key = fold(mark.label).replace(/^-+/, "");
     return !!key && (key.length <= 3 || /^\d+$/.test(key));
+}
+
+function isNumericShortLabel(mark) {
+    const key = fold(mark && mark.label).replace(/^-+/, "");
+    return /^\d+$/.test(key);
 }
 
 function duplicateShortKeys(marks) {
     const counts = {};
     for (let i = 0; i < marks.length; i++) {
         const mark = marks[i];
-        if (mark.kind === "excel" || !isShortDuplicateLabel(mark)) {
+        if (mark.kind === "excel" || !isShortDuplicateLabel(mark) || isNumericShortLabel(mark)) {
             continue;
         }
-        const key = fold(mark.label);
+        const key = fold(mark.label).replace(/^-+/, "");
         counts[key] = (counts[key] || 0) + 1;
     }
     const keys = {};
@@ -741,7 +794,7 @@ function printableFrame(pageW, pageH, aspect) {
     return { left: left, top: top, width: width, height: height };
 }
 
-function excelFrames(entries, aspect, pages) {
+function excelFrames(entries, aspect, pages, wordPage) {
     const source = pages && pages.length ? pages : groupPages(entries);
     if (!source.length) {
         return [];
@@ -757,6 +810,7 @@ function excelFrames(entries, aspect, pages) {
         const cluster = contentCluster(items, page.viewport, size.width, size.height);
         const fallback = printableFrame(size.width, size.height, aspect || 0.28);
         const useCluster = cluster
+            && !wordPage
             && !(aspect > 0 && aspect < 0.7 && cluster.height > size.height * 0.75);
         frames.push({
             pageDiv: page.pageDiv,
@@ -842,8 +896,11 @@ function placeMarks(entries, marks, dotnetRef, pages) {
     const excelAspect = marks.reduce(function (value, mark) {
         return typeof mark.aspect === "number" && mark.aspect > 0 ? mark.aspect : value;
     }, 0);
+    const wordPage = marks.some(function (item) {
+        return item && item.kind === "word";
+    });
     const frames = excelAspect > 0 || marks.some(hasExcelBox)
-        ? excelFrames(entries, excelAspect, pages)
+        ? excelFrames(entries, excelAspect, pages, wordPage)
         : [];
     const used = new Set();
     const placed = [];
@@ -862,7 +919,7 @@ function placeMarks(entries, marks, dotnetRef, pages) {
         if (placedIds[mark.fieldId]) {
             continue;
         }
-        if (dupShort[fold(mark.label)] && mark.kind !== "excel") {
+        if (dupShort[fold(mark.label).replace(/^-+/, "")] && mark.kind !== "excel") {
             continue;
         }
         const excelOnly = hasExcelBox(mark) && mark.kind !== "word";
@@ -880,6 +937,10 @@ function placeMarks(entries, marks, dotnetRef, pages) {
             markUsed(hit, used);
             appendMark(box.pageDiv, mark, box, dotnetRef);
             rememberPlaced(placed, mark, box);
+            placedIds[mark.fieldId] = true;
+        } else if (expected) {
+            appendMark(expected.pageDiv, mark, expected, dotnetRef);
+            rememberPlaced(placed, mark, expected);
             placedIds[mark.fieldId] = true;
         } else if (!isShortDuplicateLabel(mark) && mark.table && hasExcelBox(mark)) {
             const neighbors = visualNeighbors(band);

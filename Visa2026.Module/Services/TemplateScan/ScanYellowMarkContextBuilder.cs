@@ -244,11 +244,15 @@ public static class ScanYellowMarkContextBuilder
             + Math.Clamp(yellowLength, 0, Math.Max(0, paragraph.Length - yellowStart));
         var after = end < paragraph.Length ? paragraph[end..].Trim() : string.Empty;
         var combined = after;
-        if (!string.IsNullOrWhiteSpace(nextParagraph))
+        // Parenthetical captions under the line are useful; the next content
+        // block is not — şahamçasynyň müdiri / Mehmet must not become the
+        // "left label" for a Goşundy count yellow on the line above.
+        if (!string.IsNullOrWhiteSpace(nextParagraph)
+            && !LooksLikeSignatoryBlockParagraph(nextParagraph)
+            && !ScanOfficialLetterHints.LooksLikeEnclosureCount(nextParagraph))
         {
-            combined = combined.Length == 0
-                ? nextParagraph.Trim()
-                : combined + " " + nextParagraph.Trim();
+            var next = nextParagraph.Trim();
+            combined = combined.Length == 0 ? next : combined + " " + next;
         }
 
         var list = ScanFormCaptionHints.ExtractParentheticalList(combined);
@@ -261,6 +265,22 @@ public static class ScanYellowMarkContextBuilder
         if (raw.Length > 240)
             raw = raw[..240].Trim();
         return raw;
+    }
+
+    internal static bool LooksLikeSignatoryBlockParagraph(string? text)
+    {
+        var trimmed = (text ?? string.Empty).Trim();
+        if (trimmed.Length == 0)
+            return false;
+        if (ScanOfficialLetterHints.LooksLikeBranchDirectorTitle(trimmed))
+            return true;
+        if (ScanShapeTokenMatcher.LooksLikePersonFullName(trimmed))
+            return true;
+
+        var folded = TemplateTextNormalizer.NormalizeFolded(trimmed);
+        return folded.Contains("sahamca", StringComparison.Ordinal)
+            && folded.Contains("mudiri", StringComparison.Ordinal)
+            && !folded.Contains("mudirine", StringComparison.Ordinal);
     }
 
     /// <summary>

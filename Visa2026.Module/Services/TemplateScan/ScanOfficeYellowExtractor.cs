@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using DrawingColor = System.Drawing.Color;
 using ClosedXML.Excel;
+using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Visa2026.Module.Services.TemplateConvert;
@@ -88,6 +89,7 @@ public sealed class ScanOfficeYellowExtractor : IScanOfficeYellowExtractor
     {
         using var document = WordOpenXmlPackage.OpenRead(bytes);
         var results = new List<ScanOfficeYellowSpan>();
+        var styles = document.MainDocumentPart?.StyleDefinitionsPart?.Styles;
 
         foreach (var addressed in WordTemplateAddressing.EnumerateParagraphs(document))
         {
@@ -121,7 +123,7 @@ public sealed class ScanOfficeYellowExtractor : IScanOfficeYellowExtractor
                 if (text.Length == 0)
                     continue;
 
-                segments.Add((cursor, text.Length, IsYellowRun(run), text));
+                segments.Add((cursor, text.Length, IsYellowRun(run, styles), text));
                 cursor += text.Length;
             }
 
@@ -388,23 +390,50 @@ public sealed class ScanOfficeYellowExtractor : IScanOfficeYellowExtractor
         return !string.IsNullOrWhiteSpace(fill) && IsYellowHex(fill);
     }
 
-    private static bool IsYellowRun(Run run)
+    private static bool IsYellowRun(Run run, Styles? styles)
     {
-        var props = run.RunProperties;
+        if (HasYellowHighlight(run.RunProperties))
+            return true;
+
+        var styleId = run.RunProperties?.RunStyle?.Val?.Value;
+        return StyleChainHasYellow(styles, styleId);
+    }
+
+    private static bool StyleChainHasYellow(Styles? styles, string? styleId)
+    {
+        if (styles == null || string.IsNullOrWhiteSpace(styleId))
+            return false;
+
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var current = styleId;
+        while (!string.IsNullOrWhiteSpace(current) && seen.Add(current))
+        {
+            var style = styles.Elements<Style>()
+                .FirstOrDefault(s =>
+                    string.Equals(s.StyleId?.Value, current, StringComparison.OrdinalIgnoreCase));
+            if (style == null)
+                break;
+            if (HasYellowHighlight(style.StyleRunProperties))
+                return true;
+            current = style.BasedOn?.Val?.Value;
+        }
+
+        return false;
+    }
+
+    private static bool HasYellowHighlight(OpenXmlElement? props)
+    {
         if (props == null)
             return false;
 
-        var highlight = props.Highlight?.Val?.Value;
+        var highlight = props.GetFirstChild<Highlight>()?.Val?.Value;
         if (highlight == HighlightColorValues.Yellow
             || highlight == HighlightColorValues.DarkYellow
             || highlight == HighlightColorValues.Green)
             return true;
 
-        var fill = props.Shading?.Fill?.Value;
-        if (!string.IsNullOrWhiteSpace(fill) && IsYellowHex(fill))
-            return true;
-
-        return false;
+        var fill = props.GetFirstChild<Shading>()?.Fill?.Value;
+        return !string.IsNullOrWhiteSpace(fill) && IsYellowHex(fill);
     }
 
     private static IReadOnlyList<ScanOfficeYellowSpan> ExtractExcel(byte[] bytes)

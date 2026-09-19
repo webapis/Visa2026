@@ -155,4 +155,81 @@ public class ScanSurroundPlaceholderPatternTests
         Assert.NotEqual("ACPOS", ranked[0].ShortCode);
         Assert.NotEqual("PFN", ranked[0].ShortCode);
     }
+
+    [Fact]
+    public void Attachment_count_digit_does_not_steal_ACPOS_from_director_title_nearby()
+    {
+        var ranked = ScanSurroundPlaceholderPattern.Rank(
+            "1",
+            "Türkmenistandaky şahamçasynyň müdiri",
+            null,
+            Set(),
+            UserReportPlaceholderScope.Header);
+
+        Assert.DoesNotContain(
+            ranked,
+            a => a.ShortCode.Equals("ACPOS", StringComparison.OrdinalIgnoreCase)
+                && a.ScorePercent >= ScanSurroundPlaceholderPattern.NearbyMinScore);
+    }
+
+    [Fact]
+    public void Cover_letter_footer_maps_count_title_and_name_without_shifting_ACPOS()
+    {
+        var bytes = CreateGoshundyThenSignatoryWord();
+        var yellows = new ScanOfficeYellowExtractor().Extract(bytes, ScanSourceKind.Word);
+        Assert.True(yellows.Count >= 3);
+
+        var plan = ScanOfficeFieldPlanBuilder.Build(yellows, Set(), bytes, ScanSourceKind.Word);
+        var byLabel = plan.Fields.ToDictionary(
+            f => f.LabelText?.Trim() ?? string.Empty,
+            f => TemplateTokenSyntax.TryGetShortCode(f.ProposedToken ?? string.Empty, out var code)
+                ? code
+                : null,
+            StringComparer.Ordinal);
+
+        Assert.True(byLabel.ContainsKey("1"));
+        Assert.NotEqual("ACPOS", byLabel["1"]);
+        Assert.Equal("ACPOS", byLabel["Türkmenistandaky şahamçasynyň müdiri"]);
+        Assert.Contains(byLabel["Mehmet Çırak"], new[] { "CHFN", "ACFNM" }, StringComparer.OrdinalIgnoreCase);
+    }
+
+    private static byte[] CreateGoshundyThenSignatoryWord()
+    {
+        using var stream = new MemoryStream();
+        using (var document = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Create(
+                   stream,
+                   DocumentFormat.OpenXml.WordprocessingDocumentType.Document))
+        {
+            var main = document.AddMainDocumentPart();
+            var yellow = new DocumentFormat.OpenXml.Wordprocessing.Highlight
+            {
+                Val = DocumentFormat.OpenXml.Wordprocessing.HighlightColorValues.Yellow,
+            };
+            main.Document = new DocumentFormat.OpenXml.Wordprocessing.Document(
+                new DocumentFormat.OpenXml.Wordprocessing.Body(
+                    new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                            new DocumentFormat.OpenXml.Wordprocessing.Text("Passportlaryň göçürmeleri – ")),
+                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(
+                                (DocumentFormat.OpenXml.Wordprocessing.Highlight)yellow.CloneNode(true)),
+                            new DocumentFormat.OpenXml.Wordprocessing.Text("1")),
+                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                            new DocumentFormat.OpenXml.Wordprocessing.Text(" (bir) sah."))),
+                    new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(
+                                (DocumentFormat.OpenXml.Wordprocessing.Highlight)yellow.CloneNode(true)),
+                            new DocumentFormat.OpenXml.Wordprocessing.Text(
+                                "Türkmenistandaky şahamçasynyň müdiri"))),
+                    new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(
+                                (DocumentFormat.OpenXml.Wordprocessing.Highlight)yellow.CloneNode(true)),
+                            new DocumentFormat.OpenXml.Wordprocessing.Text("Mehmet Çırak")))));
+            main.Document.Save();
+        }
+
+        return stream.ToArray();
+    }
 }

@@ -26,6 +26,12 @@ public static class ScanFormFieldLabelHints
                 && !folded.Contains("mudirine", StringComparison.Ordinal)))
             return ["ACPOS"];
 
+        if (folded.Contains("tertipde", StringComparison.Ordinal))
+            return ["Urgency_NameTm"];
+
+        if (folded.Contains("gezeklik", StringComparison.Ordinal))
+            return ["VCAT"];
+
         if (folded.Contains("gelmegin", StringComparison.Ordinal))
             return ["RGEL"];
 

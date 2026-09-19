@@ -65,6 +65,9 @@ public static class ScanOfficialLetterHints
     /// <summary>Printed person-count phrase: <c>daşary ýurt raýaty</c>.</summary>
     public static bool LooksLikePersonCountPhrase(string? text)
     {
+        if (LooksLikeEnclosureCount(text))
+            return false;
+
         var folded = TemplateTextNormalizer.NormalizeFolded(text);
         if (folded.Length < 4)
             return false;
@@ -74,6 +77,24 @@ public static class ScanOfficialLetterHints
         return folded.Contains("dasary yurt", StringComparison.Ordinal)
             && (folded.Contains("adam", StringComparison.Ordinal)
                 || folded.Contains("sany", StringComparison.Ordinal));
+    }
+
+    /// <summary>
+    /// Cover-letter enclosure list: <c>Goşundy … pasport nusgalary – 1 sany</c>.
+    /// The line mentions raýat but the yellow is the copy count, not TPCNT.
+    /// </summary>
+    public static bool LooksLikeEnclosureCount(string? text)
+    {
+        var folded = TemplateTextNormalizer.NormalizeFolded(text);
+        if (folded.Length < 4)
+            return false;
+        if (folded.Contains("gosundy", StringComparison.Ordinal))
+            return true;
+        if (folded.Contains("nusgalar", StringComparison.Ordinal))
+            return true;
+        return folded.Contains("maglumat", StringComparison.Ordinal)
+            && folded.Contains("sany", StringComparison.Ordinal)
+            && !folded.Contains("sanawdaky", StringComparison.Ordinal);
     }
 
     /// <summary>
@@ -325,11 +346,29 @@ public static class ScanOfficialLetterHints
             || folded.Contains("mohlet", StringComparison.Ordinal);
     }
 
-    public static bool LooksLikeIsolatedCountDigit(string? text)
+    /// <summary>
+    /// Goşundy lines often print <c>-1 sany</c> / <c>–1 sany</c>. Strip the dash so
+    /// the digit is still a count mark.
+    /// </summary>
+    public static string StripLeadingCountDashes(string? text)
     {
         var inner = (text ?? string.Empty).Trim();
+        var i = 0;
+        while (i < inner.Length && IsCountDash(inner[i]))
+            i++;
+        while (i < inner.Length && char.IsWhiteSpace(inner[i]))
+            i++;
+        return i == 0 ? inner : inner[i..];
+    }
+
+    public static bool LooksLikeIsolatedCountDigit(string? text)
+    {
+        var inner = StripLeadingCountDashes(text);
         return inner.Length is >= 1 and <= 3 && inner.All(char.IsDigit);
     }
+
+    private static bool IsCountDash(char ch) =>
+        ch is '-' or '\u2010' or '\u2011' or '\u2012' or '\u2013' or '\u2014' or '\u2015' or '\u2212';
 
     public static bool LooksLikeIsolatedCountWords(string? text)
     {

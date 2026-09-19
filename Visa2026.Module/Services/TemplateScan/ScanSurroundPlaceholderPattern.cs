@@ -154,6 +154,10 @@ public static class ScanSurroundPlaceholderPattern
         ArgumentNullException.ThrowIfNull(placeholderSet);
         ArgumentNullException.ThrowIfNull(usedHeaderCodes);
 
+        if (ScanOfficialLetterHints.LooksLikeEnclosureCount(Join(nearbyLabel, columnHeader))
+            && ScanOfficialLetterHints.LooksLikeIsolatedCountMark(yellowText))
+            return Array.Empty<ScanDetectedFieldDraft>();
+
         var ranked = Rank(
             yellowText,
             nearbyLabel,
@@ -232,14 +236,23 @@ public static class ScanSurroundPlaceholderPattern
             || ScanCompoundYellowParts.LooksLikePassportNumber(yellowText))
             return false;
 
-        if ((code.Equals("POSN", StringComparison.OrdinalIgnoreCase)
-                || code.Equals("ACPOS", StringComparison.OrdinalIgnoreCase))
-            && ScanShapeTokenMatcher.LooksLikePersonFullName(yellowText))
-            return false;
+        if (code.Equals("POSN", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("ACPOS", StringComparison.OrdinalIgnoreCase))
+        {
+            // Goşundy "1" / count words must not steal ACPOS when FollowingCaption
+            // bleeds şahamçasynyň müdiri from the next paragraph.
+            if (ScanOfficialLetterHints.LooksLikeIsolatedCountMark(yellowText))
+                return false;
+            if (ScanOfficialLetterHints.LooksLikeBranchDirectorTitle(yellowText)
+                || LooksLikePositionPhrase(yellowText))
+                return true;
+            if (ScanShapeTokenMatcher.LooksLikePersonFullName(yellowText))
+                return false;
+            var trimmed = yellowText.Trim();
+            return trimmed.Length >= 6 && trimmed.Any(char.IsLetter);
+        }
 
-        return code.Equals("POSN", StringComparison.OrdinalIgnoreCase)
-            || code.Equals("ACPOS", StringComparison.OrdinalIgnoreCase)
-            || code.Equals("MSRV", StringComparison.OrdinalIgnoreCase)
+        return code.Equals("MSRV", StringComparison.OrdinalIgnoreCase)
             || code.Equals("EGSP", StringComparison.OrdinalIgnoreCase)
             || code.Equals("EGLV", StringComparison.OrdinalIgnoreCase)
             || code.Equals("EGIN", StringComparison.OrdinalIgnoreCase)
@@ -257,6 +270,24 @@ public static class ScanSurroundPlaceholderPattern
             || code.Equals("VCTM", StringComparison.OrdinalIgnoreCase)
             || code.Equals("VNUM", StringComparison.OrdinalIgnoreCase)
             || code.Equals("ACADR", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool LooksLikePositionPhrase(string yellowText)
+    {
+        var trimmed = (yellowText ?? string.Empty).Trim();
+        if (trimmed.Length < 6 || !trimmed.Any(char.IsLetter))
+            return false;
+        if (ScanOfficialLetterHints.LooksLikeBranchDirectorTitle(trimmed))
+            return true;
+
+        var folded = TemplateTextNormalizer.NormalizeFolded(trimmed);
+        return folded.Contains("mudiri", StringComparison.Ordinal)
+            || folded.Contains("wezipe", StringComparison.Ordinal)
+            || folded.Contains("direktor", StringComparison.Ordinal)
+            || folded.Contains("director", StringComparison.Ordinal)
+            || folded.Contains("orunbasar", StringComparison.Ordinal)
+            || folded.Contains("buhgalter", StringComparison.Ordinal)
+            || folded.Contains("yolbascy", StringComparison.Ordinal);
     }
 
     private static string Join(string? nearbyLabel, string? columnHeader) =>

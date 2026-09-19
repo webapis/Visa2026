@@ -77,7 +77,8 @@ public static class ScanOfficeFieldPlanBuilder
 
             var preferLeftLabel = ScanFormFieldLabelHints.LooksLikeFormFieldLabel(nearbyLabel)
                 || ScanOfficialLetterHints.LooksLikeLetterBlock(yellow.Text)
-                || ScanOfficialLetterHints.LooksLikeBranchDirectorTitle(nearbyLabel);
+                || (ScanOfficialLetterHints.LooksLikeBranchDirectorTitle(nearbyLabel)
+                    && !ScanOfficialLetterHints.LooksLikeIsolatedCountMark(yellow.Text));
             if (preferLeftLabel && resolved.Count == 0)
             {
                 resolved = ScanSurroundPlaceholderPattern.TryDraft(
@@ -416,7 +417,8 @@ public static class ScanOfficeFieldPlanBuilder
         string? countContext)
     {
         var key = TemplateTextNormalizer.NormalizeIdentifier(yellow.Text);
-        if (key.Length < TemplateTextNormalizer.MinimumMatchLength)
+        if (key.Length < TemplateTextNormalizer.MinimumMatchLength
+            && !ScanOfficialLetterHints.LooksLikeIsolatedCountDigit(yellow.Text))
             return Array.Empty<ScanDetectedFieldDraft>();
 
         var prior = drafts.FirstOrDefault(d =>
@@ -426,6 +428,12 @@ public static class ScanOfficeFieldPlanBuilder
                 key,
                 StringComparison.Ordinal));
         if (prior == null)
+            return Array.Empty<ScanDetectedFieldDraft>();
+
+        // Cover letters have one AFNUM / TPCNT / ADAT. Roster row codes may repeat.
+        if (prior.Scope == ScanFieldScope.Header)
+            return Array.Empty<ScanDetectedFieldDraft>();
+        if (ScanOfficialLetterHints.LooksLikeEnclosureCount(countContext))
             return Array.Empty<ScanDetectedFieldDraft>();
 
         if (ScanOfficialLetterHints.PrefersDocumentCancelCount(countContext)

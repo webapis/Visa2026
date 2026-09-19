@@ -85,7 +85,7 @@ public static class ScanWordPreviewMarkGeometry
                     Left: 8d + 84d * col / lineChars,
                     Top: 100d * (slot.Top + line * lineH) / bands.Total,
                     Width: Math.Max(4d, 84d * Math.Min(clampedLen, lineChars) / lineChars),
-                    Height: Math.Max(1.4d, 100d * spanLines * lineH / bands.Total));
+                    Height: Math.Max(1.4d, Math.Min(2.8d, 100d * spanLines * lineH / bands.Total)));
             }
 
             SplitSharedCellBoxesForCompoundParts(wordMarks, boxes);
@@ -127,8 +127,8 @@ public static class ScanWordPreviewMarkGeometry
         var body = paragraphs.Where(static p => p.Part == WordPart.Body).ToList();
         var footers = paragraphs.Where(static p => p.Part == WordPart.Footer).ToList();
 
-        var headerShare = headers.Count == 0 ? 0d : 0.10;
-        var footerShare = footers.Count == 0 ? 0d : 0.08;
+        var headerShare = headers.Count == 0 ? 0d : 0.06;
+        var footerShare = footers.Count == 0 ? 0d : 0.06;
         var bodyShare = Math.Max(0.55, 1d - headerShare - footerShare);
 
         var box = new Dictionary<string, ParaSlot>(StringComparer.OrdinalIgnoreCase);

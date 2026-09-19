@@ -20,6 +20,21 @@ public class ScanYellowHighlightTokenResolverTests
             });
 
     [Fact]
+    public void Resolve_DashedAttachmentCount_MapsIsolatedDigit()
+    {
+        var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var drafts = ScanYellowHighlightTokenResolver.ResolveFromYellowText(
+            "-1",
+            ScanBoundingBox.FullPage,
+            0,
+            Set(),
+            used,
+            nearbyLabel: "sany dasary yurt rayaty");
+
+        Assert.Contains(drafts, d => d.LabelText == "1" && d.ProposedToken == "{{ds.TPCNT}}");
+    }
+
+    [Fact]
     public void Resolve_HeaderNumberAndDate_MapsAfnumAndAdat()
     {
         var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);

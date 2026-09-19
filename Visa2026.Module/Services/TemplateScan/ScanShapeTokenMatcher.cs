@@ -1,5 +1,6 @@
 #nullable enable
 
+using System.Globalization;
 using System.Text.RegularExpressions;
 using Visa2026.Module.Services.TemplateConvert;
 using Visa2026.Module.Services.UserReports;
@@ -124,7 +125,11 @@ public static class ScanShapeTokenMatcher
             Prefer("VCAT", 70, "Visa category phrase");
         }
 
-        if (int.TryParse(text, out var n) && n >= 0 && n <= 999)
+        var countText = ScanOfficialLetterHints.StripLeadingCountDashes(text);
+        if (int.TryParse(countText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var n)
+            && n >= 0
+            && n <= 999
+            && countText.Length is >= 1 and <= 3)
             Prefer("RNUM", 85, "Row index number");
 
         if (LooksLikeTitledPersonName(text))

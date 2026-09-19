@@ -437,6 +437,76 @@ public class ScanOfficeYellowExtractorTests
         return stream.ToArray();
     }
 
+    [Fact]
+    public void Extract_Word_FindsDashedAttachmentCountAndHeaderNumber()
+    {
+        var bytes = CreateWordGosundyAttachments();
+        var spans = new ScanOfficeYellowExtractor().Extract(bytes, ScanSourceKind.Word);
+        var texts = spans.Select(s => s.Text).ToList();
+        Assert.Contains("1", texts);
+        Assert.Contains("-1", texts);
+        Assert.Contains(spans, s => s.Text.Contains("1/-2", StringComparison.Ordinal));
+        Assert.Contains(spans, s => s.Region is DocumentRegion.WordSpan w
+            && w.ParagraphAddress.StartsWith("header", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void Build_Word_KeepsBothGosundyAttachmentCounts()
+    {
+        var bytes = CreateWordGosundyAttachments();
+        var yellows = new ScanOfficeYellowExtractor().Extract(bytes, ScanSourceKind.Word);
+        var set = new ApplicationProfilePlaceholderSetService(new UserReportPlaceholderCatalogService()).GetSet(
+            new ApplicationProfilePlaceholderSetQuery
+            {
+                Profile = new ApplicationProfile(),
+                DataScope = ApplicationProfileTemplateDataScope.Both,
+                TemplateKind = ApplicationProfileTemplateKind.Word,
+            });
+
+        var proposal = ScanOfficeFieldPlanBuilder.Build(yellows, set, bytes, ScanSourceKind.Word);
+        var plan = new ScanFieldPlanMerger().Merge(new ScanFieldPlanMergeRequest
+        {
+            Proposal = proposal,
+            PlaceholderSet = set,
+            ScanKind = ScanKind.FilledSample,
+        });
+
+        var summary = string.Join(" | ", plan.Fields.Select(f => f.LabelText + "=>" + f.ProposedToken));
+        var tpcnt = plan.Fields.Where(f => f.ProposedToken == "{{ds.TPCNT}}").ToList();
+        Assert.True(tpcnt.Count == 1 && tpcnt[0].LabelText == "3", summary);
+        Assert.Contains(plan.Fields, f => f.ProposedToken == "{{ds.AFNUM}}");
+        Assert.DoesNotContain(
+            plan.Fields,
+            f => ScanOfficialLetterHints.LooksLikeIsolatedCountDigit(f.LabelText)
+                && f.LabelText != "3"
+                && f.ProposedToken == "{{ds.TPCNT}}");
+        Assert.Contains(
+            plan.Fields,
+            f => f.LabelText == "1" && string.IsNullOrWhiteSpace(f.ProposedToken));
+        Assert.Contains(
+            plan.Fields,
+            f => f.LabelText == "-1" && string.IsNullOrWhiteSpace(f.ProposedToken));
+    }
+
+    [Theory]
+    [InlineData("Gosundy: 1. Pasport nusgalary")]
+    [InlineData("pasport nusgalary – 1 sany")]
+    [InlineData("rayatynyn maglumaty -1 sany")]
+    public void Enclosure_lines_are_not_person_count(string text)
+    {
+        Assert.True(ScanOfficialLetterHints.LooksLikeEnclosureCount(text));
+        Assert.False(ScanOfficialLetterHints.LooksLikePersonCountPhrase(text));
+    }
+
+    [Theory]
+    [InlineData("-1")]
+    [InlineData("\u20131")]
+    [InlineData("1")]
+    public void IsolatedCountDigit_accepts_dashed_gosundy_counts(string text)
+    {
+        Assert.True(ScanOfficialLetterHints.LooksLikeIsolatedCountDigit(text));
+    }
+
     public static byte[] CreateWordFixture(params string[] yellowPhrases)
     {
         using var stream = new MemoryStream();
@@ -494,6 +564,46 @@ public class ScanOfficeYellowExtractorTests
                     new Run(
                         new RunProperties(new Highlight { Val = HighlightColorValues.Yellow }),
                         new Text(yellow)))));
+            main.Document.Save();
+        }
+
+        return stream.ToArray();
+    }
+
+    public static byte[] CreateWordGosundyAttachments()
+    {
+        using var stream = new MemoryStream();
+        using (var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document))
+        {
+            var main = document.AddMainDocumentPart();
+            var headerPart = main.AddNewPart<HeaderPart>();
+            headerPart.Header = new Header(
+                new Paragraph(
+                    new Run(
+                        new RunProperties(new Highlight { Val = HighlightColorValues.Yellow }),
+                        new Text("№ 1/-2") { Space = SpaceProcessingModeValues.Preserve })));
+
+            var yellow = () => new RunProperties(new Highlight { Val = HighlightColorValues.Yellow });
+            var body = new Body(
+                new Paragraph(
+                    new Run(new Text("sanawdaky ")),
+                    new Run(yellow(), new Text("3")),
+                    new Run(new Text(" sany dasary yurt rayaty."))),
+                new Paragraph(
+                    new Run(new Text("Gosundy: 1. Pasport nusgalary – ")),
+                    new Run(yellow(), new Text("1")),
+                    new Run(new Text(" sany"))),
+                new Paragraph(
+                    new Run(new Text("2. Maglumaty ")),
+                    new Run(yellow(), new Text("-1")),
+                    new Run(new Text(" sany"))),
+                new SectionProperties(
+                    new HeaderReference
+                    {
+                        Id = main.GetIdOfPart(headerPart),
+                        Type = HeaderFooterValues.Default,
+                    }));
+            main.Document = new Document(body);
             main.Document.Save();
         }
 

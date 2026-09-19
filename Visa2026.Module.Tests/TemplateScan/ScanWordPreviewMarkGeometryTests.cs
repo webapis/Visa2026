@@ -58,6 +58,7 @@ public class ScanWordPreviewMarkGeometryTests
         var layout = ScanWordPreviewMarkGeometry.TryMap(bytes, marks);
         Assert.NotNull(layout);
         Assert.True(layout!.Boxes["city"].Top > layout.Boxes["hdr"].Top);
+        Assert.True(layout.Boxes["hdr"].Height <= 3.0);
     }
 
     [Fact]

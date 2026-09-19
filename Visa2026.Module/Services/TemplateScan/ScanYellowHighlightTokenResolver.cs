@@ -234,6 +234,7 @@ public static class ScanYellowHighlightTokenResolver
         }
 
         if (!pairedCount
+            && !ScanOfficialLetterHints.LooksLikeEnclosureCount(nearbyLabel)
             && (ScanOfficialLetterHints.LooksLikeCountContext(nearbyLabel)
                 || ScanOfficialLetterHints.LooksLikeDurationHint(nearbyLabel)
                 || (ScanOfficialLetterHints.LooksLikeIsolatedCountMark(text)
@@ -285,7 +286,7 @@ public static class ScanYellowHighlightTokenResolver
     };
 
     private static readonly Regex IsolatedCountDigit = new(
-        @"^\s*(\d{1,3})\s*$",
+        @"^\s*[\-\u2010-\u2015\u2212]?\s*(\d{1,3})\s*$",
         RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
     private static bool TryIsolatedCountDigit(string text, out string digit, out int index, out int length)

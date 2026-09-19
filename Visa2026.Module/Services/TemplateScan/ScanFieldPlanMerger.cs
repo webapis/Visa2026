@@ -214,7 +214,8 @@ public sealed class ScanFieldPlanMerger : IScanFieldPlanMerger
             return;
 
         var key = TemplateTextNormalizer.NormalizeIdentifier(labelText);
-        if (key.Length >= TemplateTextNormalizer.MinimumMatchLength)
+        if (key.Length >= TemplateTextNormalizer.MinimumMatchLength
+            || ScanOfficialLetterHints.LooksLikeIsolatedCountDigit(labelText))
         {
             var prior = fields.FirstOrDefault(f =>
                 !string.IsNullOrWhiteSpace(f.ProposedToken)
@@ -222,7 +223,10 @@ public sealed class ScanFieldPlanMerger : IScanFieldPlanMerger
                     TemplateTextNormalizer.NormalizeIdentifier(f.LabelText),
                     key,
                     StringComparison.Ordinal));
-            if (prior != null && !IsPersonCountCloneBlockedByVisaCancel(nearbyLabel, prior.ProposedToken))
+            if (prior != null
+                && prior.Scope != ScanFieldScope.Header
+                && !ScanOfficialLetterHints.LooksLikeEnclosureCount(nearbyLabel)
+                && !IsPersonCountCloneBlockedByVisaCancel(nearbyLabel, prior.ProposedToken))
             {
                 fields.Add(new ScanDetectedField
                 {
