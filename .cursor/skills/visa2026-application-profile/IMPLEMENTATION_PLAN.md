@@ -78,13 +78,14 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | 10h | Runtime roster reads → `ApplicationPeople` | **Done** | `ApplicationRosterHelper`; merge/Resminamalar hydration; header AvailablePeople; cancel counts |
 | 10i | `Visa.IssuingApplication` dual-read | **Done** | FK + backfill; Path A M2M-first; legacy `IssuingApplicationItem` hidden when app set |
 | 10j | Report Dashboard roster SQL + loaders (phase B start) | **Done** | `vw_rd_registration`, `vw_rd_passport`, to-be-checked-in/out; `ReportDashboardRosterQueryHelper`; Travel/Registration on process |
+| 10j-rd | Report Dashboard residual C# / ListView sync | **Done** | Profile-first EF (`ReportDashboardProfileInstanceQuery`); drop ApplicationItem Open ListView; Registration `VwRd*` ListViews |
 | 10k | Report Dashboard child-link C# filters + `vw_rd_application` | **Done** | Education/Address/Position/Medical Last-N via resolved links + legacy fallback; `vw_rd_application` first person from M2M |
 | 10l | Report Dashboard visa extension / work permit SQL | **Done** | `View_VisaExtensionStatus`, `vw_rd_visa_app_progress`, `vw_rd_work_permit_app_progress`, `vw_rd_visa_state`, extension-required CTE; invitation first-person M2M |
 | 10m | Report Dashboard ministry + direct-migration SQL | **Done** | `ministry_roster_lines` CTE in 8 embedded views; `ReportDashboardSqlViewResource` placeholder; legacy EF loaders dual-read |
 | 11 | Person / Dossier **Start application** | **Removed** | Officers create instances only from Application Profile Instances (picker). Dossier/Person Start process hidden. |
 | 12 | Resminamalar / merge reads profile nested templates | **Done** | Profile nested catalog + `profile:` entry keys; merge via matching `UserReportTemplate` name |
 | 13a | Profile-first runtime + cutover prep | **Done** | Capability resolver; nav route criteria; profile-or-type validation; hide Type when profile set |
-| 13b | Remove `Application.ApplicationType` FK (schema) | **Deferred** | After import cutover; Report Dashboard SQL, sync rules, PDF mapping remain on Type |
+| 13b | Remove `Application.ApplicationType` FK (schema) | **Deferred** | After import cutover. Dashboard SQL + C# already profile-first (type fallback only when profile is null). |
 | H0 | HTML officer shell — tokens, router, mock store | **Done** | `wwwroot/officer-shell/` — plan §7 |
 | H1 | HTML staged list/grid + Start process merge | **Done** | Mock `startProcess()` → in-process case |
 | H2 | HTML in-process list/grid | **Done** | Row → `#/case/:id/overview` |

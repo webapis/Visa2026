@@ -4,6 +4,22 @@ Date format: `YYYY-MM-DD`
 
 ---
 
+## 2026-09-21 — Residual Application Profile sync (not a rewrite)
+
+**Ask:** After Application / ApplicationItem / ApplicationType removal, do dashboard SQL views need a refactor?
+
+**Now:** Embedded `vw_rd_*` already join `ApplicationProfileInstances` + `ApplicationProfiles` + M2M roster. Remaining C# still required `ApplicationType != null` (under-count profile-only instances) and Registration/Travel Open ListView pointed at `ApplicationItem_ListView` (removed BO).
+
+**Fix:** `ReportDashboardProfileInstanceQuery` (profile-first ProgressRoute / ProduceInvitation / ActionFamily=Registration, type fallback). Invitation / via-ministry EF fallbacks that duplicated live views now return empty. Registration Open ListView → `VwRdRegistration` / to-be-checked views; on-process → `ApplicationProfileInstance_ListView`. Travel mock → `Person_ListView`. Aliases `ApplicationTypeLabel` / `ApplicationItemOid` kept.
+
+**Prevent:** Do not join `ApplicationTypes` for new dashboard SQL. Do not rewrite person/document views. Do not wait for slice 13b to drop Type FK before using profile filters.
+
+**Files:** `ReportDashboardProfileInstanceQuery.cs`, `ReportDashboardQueryService.cs`, `ReportDashboardRosterQueryHelper.cs`, `ReportDashboardCatalog.cs`, `VwRdRegistration.cs`, `VwRdToBeCheckedIn.cs`, `VwRdToBeCheckedOut.cs`, `docs/REPORT_DASHBOARD.md`
+
+**Cross-skill:** visa2026-application-profile
+
+---
+
 ## 2026-08-27 — Valid-visa person filter cannot use Visa.IsCancelled in EF
 
 **Cause:** Opening Report Dashboard (`validVisaPersonsOnly`) queried `db.Visas.Where(v => !v.IsCancelled)`. `Visa.IsCancelled` is `[NotMapped]` (skip-nav Cancellation instance at PROCESS_ISSUED). EF cannot translate it.

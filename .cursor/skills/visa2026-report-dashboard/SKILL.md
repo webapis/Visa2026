@@ -17,6 +17,7 @@ File map, ListView/Preview contract detail: `reference.md`.
 SQL view implementation plan and status tracker: `IMPLEMENTATION_PLAN.md`.
 Person search row → dossier page / export: [visa2026-person-dossier](../visa2026-person-dossier/SKILL.md) (not a dashboard panel).
 Officer AI Q&A over dashboard aggregates: [visa2026-analytics-ai-chat](../visa2026-analytics-ai-chat/SKILL.md) (not category/SQL view work).
+Application Profile instance / roster (not Application / ApplicationItem): [visa2026-application-profile](../visa2026-application-profile/SKILL.md) — SQL already on instances; C# must stay profile-first (`ReportDashboardProfileInstanceQuery`).
 
 ---
 

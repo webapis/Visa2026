@@ -75,6 +75,23 @@ The only category that takes free text. It answers "find this person, then show 
 | **State specifications / evaluators** | Still define BO state criteria for colors and notifications; **not** the home UI |
 | **Resminamalar / Document copies** | Unchanged; Excel action may reuse `UserReportTemplate` seeds |
 
+## Application Profile join model
+
+Report Dashboard SQL does **not** read the removed `Applications` / `ApplicationItems` tables or `ApplicationTypes` for new logic.
+
+| Concept | Join |
+|---------|------|
+| Case | `"ApplicationProfileInstances"` |
+| Type / config | `"ApplicationProfiles"` (`ProgressRoute`, `Produce*`, `ActionFamily`, `Name`/`Code`) |
+| Roster | `"ApplicationProfileInstancePeople"` + `"ApplicationProfileInstancePersonResolvedLinks"` |
+| Progress | `"ApplicationProfileInstanceProgresses"` |
+
+C# loaders that still query `ApplicationProfileInstance` use **profile-first** filters (`ReportDashboardProfileInstanceQuery`), with deprecated `ApplicationType` only when the profile FK is null (dual-read). Column aliases `ApplicationTypeLabel` / `ApplicationItemOid` on some `VwRd*` BOs are **profile name** / synthetic roster line id — not the old tables.
+
+Person/document categories (visa validity, work permit items, education, position, incomplete persons, person search) are independent of ApplicationItem.
+
+See [`.cursor/skills/visa2026-report-dashboard/IMPLEMENTATION_PLAN.md`](../.cursor/skills/visa2026-report-dashboard/IMPLEMENTATION_PLAN.md) § Application Profile residual sync.
+
 ## Removed
 
 The old State Dashboard UI (tiles per state code 뿯↽ filtered list) is **removed** and must not be reintroduced. See superseded notes in `STATE_SPECIFICATIONS.md` and related docs.

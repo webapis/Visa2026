@@ -14,6 +14,24 @@ See **`SKILL.md`** § Preview ↔ SQL view ↔ XAF ListView and **`reference.md`
 **Transitional:** existing shared Visa ListViews remain until those subreports are split; do not add new shared Open ListView targets.
 
 ---
+## Application Profile residual sync (2026-09-21)
+
+SQL `vw_rd_*` already joins **`ApplicationProfileInstances`** + **`ApplicationProfiles`** + M2M roster (`ApplicationProfileInstancePeople` / `ResolvedLinks`). Do **not** rewrite the dashboard. Remaining debt is C# / Open ListView / docs:
+
+| Layer | Status | Notes |
+|-------|--------|-------|
+| Embedded `vw_rd_*.postgres.sql` | **Done** | Zero joins to `"Applications"` / `"ApplicationItems"` / `"ApplicationTypes"` |
+| Roster SQL (`ReportDashboardPostgresRosterSql`) | **Done** | Profile flags (`ProgressRoute`, `Produce*`, `ActionFamily`) |
+| Heal after `ApplicationItems` drop | **Done** | `ReportDashboardPostgresViewsHealSql` |
+| C# EF filters (`ApplicationType != null`) | **Done** | Profile-first + type fallback (`ReportDashboardProfileInstanceQuery`) |
+| Duplicate EF fallbacks vs live `vw_rd_*` | **Done** | Invitation / via-ministry invitation-on-process catch paths return empty when the view is missing |
+| Registration / Travel Open ListView `ApplicationItem_ListView` | **Done** | Registration → `VwRdRegistration` / `VwRdToBeCheckedIn` / `VwRdToBeCheckedOut`; on-process → `ApplicationProfileInstance_ListView`; Travel stays mock (`Person_ListView`) |
+| Column aliases `ApplicationItemOid` / `ApplicationTypeLabel` | **Deferred** | Frozen EF/ListView contract; sourced from roster line id / profile `Name` |
+| Drop `ApplicationTypeID` on instances | **Deferred** | Application Profile slice 13b |
+
+Person/document categories (visa validity, work-permit items, education, position, incomplete, person search) do **not** need an ApplicationItem rewrite.
+
+---
 ## Status tracker
 
 | View | Category | Sub-reports served | Phase | Status |
@@ -120,7 +138,7 @@ END AS StatusCssClass
 
 **Category:** Passport — Sub-reports: `by-type`, `by-citizenship`, `by-validity`  
 
-**Universe (2026-07-16):** one row per `ApplicationItem` with `CurrentPassport`; filter `Applications.ApplicationDate` via dashboard date range (not latest passport per person).
+**Universe (2026-09-21):** one row per roster-linked passport (`ApplicationProfileInstancePeople` + passport `ResolvedLink`); filter instance `ApplicationDate` via dashboard date range (not latest passport per person). Not `ApplicationItem`.
 
 **Tables:**
 - `Passports` (main, GCRecord filter)

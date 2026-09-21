@@ -11,6 +11,8 @@
 | `Services/ReportDashboard/IReportDashboardQueryService.cs` | Interface: `LoadSnapshot(objectSpace, months)` and `LoadPanel(objectSpace, personType, category, projectKey, months, subReport)` |
 | `Services/ReportDashboard/ReportDashboardMockQueryService.cs` | Prototype implementation with hardcoded rows. Add new category/sub-report mock data here first. |
 | `Services/ReportDashboard/ReportDashboardQueryService.cs` | Real EF implementation. One `Load[Category]()` private method per category. |
+| `Services/ReportDashboard/ReportDashboardProfileInstanceQuery.cs` | Profile-first `IQueryable` filters (`ProgressRoute`, `ProduceInvitation`, Registration `ActionFamily`) with ApplicationType fallback |
+| `Services/ReportDashboard/ReportDashboardRosterQueryHelper.cs` | M2M roster helpers for registration on-process, travel, passport/address counts |
 | `BusinessObjects/ReportDashboard/ReportDashboardHost.cs` | Non-persistent XAF host object. No changes needed for new reports. |
 | `Controllers/ReportDashboardNavigationController.cs` | Navigates to the Dashboard detail view on startup. |
 | `DatabaseUpdate/ReportDashboardDetailViewUpdater.cs` | Hides the property label in the XAF DetailView. |
@@ -84,7 +86,7 @@ When two subreports differ only by chart axis (Status) but share the same people
 
 Do not use editable/domain ListViews as dashboard drill-down for a promoted subreport:
 
-- `Visa_ListView`, `VisaExtensionStatus_ListView`, `ApplicationItem_ListView`, etc. — unless the category is still mock and explicitly temporary.
+- `Visa_ListView`, `VisaExtensionStatus_ListView`, `ApplicationItem_ListView`, etc. — unless the category is still mock and explicitly temporary (`Travel` currently uses `Person_ListView`).
 
 ### Wiring
 
@@ -262,11 +264,11 @@ public DbSet<VwRdMyCategory> VwRdMyCategory => Set<VwRdMyCategory>();
 | `ApplicationDirectMigration` | `on-process-a` (On Process (A)), `process-complete` (Process Complete); legacy `app-status` → On Process (A) | **Real:** `vw_rd_application_direct_migration_*` + dedicated ListViews; item grain; Status = Application Type · StatusListLabel; Completed = terminal |
 | `VisaExtension` (displayed as "Visa") | `active-by-project`, `by-period-category-type`, `extension-required`, `on-extension`, `on-extension-by-period-category-type`, `by-days-remaining`, `extension-result`, `extension-result-by-period-category-type` | Real: active + validity (`vw_rd_visa_by_*`); Extension Required (single tab, Status = nearest days milestone 0/7/14/30/60/90/180/365); Visa On Extension + Extension Result (P)/(V) (`vw_rd_visa_app_progress`). Legacy `visa-state` → active-by-project. |
 | `Invitation` | `ready-by-project` (Active Invitation (P)), `ready-by-period-category` (Active Invitation (V)), `in-process` / `in-process-by-period-category-type` (Invitation Process (P)/(V)), `process-result` / `process-result-by-period-category-type` (Process Result (P)/(V); legacy `rejected-by-*`), `used` / `used-by-period-category-type` (Used (P)/(V)), `valid-until` (Invitation Validity) | Real: all invitation tabs. Process Result = CanIssueInvitation apps with terminal progress (Issued/Cancelled/Rejected + 1st/2nd Review Rejected); Status like Extension Result |
-| `Registration` | `check-in-by-city` (Active Registered (C)), `check-in-by-project` / `check-in-by-period-category-type` (Active Registered (P)/(V)), `expiring-state`, `to-be-checked-in` / `to-be-checked-out`, `on-process` (On process) | Real: `vw_rd_registration` (+ to-be-checked views); On process = App_Reg_* ApplicationItems not terminal (Issued/Cancelled/Rejected/review rejects), Status = ApplicationType · ProcessState. Cancel/expiry ignored until Check-Out for check-in population. ApplicationType tabs removed |
+| `Registration` | `check-in-by-city` (Active Registered (C)), `check-in-by-project` / `check-in-by-period-category-type` (Active Registered (P)/(V)), `expiring-state`, `to-be-checked-in` / `to-be-checked-out`, `on-process` (On process) | Real: `vw_rd_registration` + `VwRdRegistration_ListView`; to-be-checked views + dedicated ListViews. On process = Registration-family `ApplicationProfileInstance` (not terminal), Open ListView = `ApplicationProfileInstance_ListView`, Status = profile Name · ProcessState. Cancel/expiry ignored until Check-Out for check-in population. |
 | `WorkPermit` | `active-by-project` (Active WorkPermit (P)), `on-extension` (Extension (P) — mock), `extension-result` (Extension Result (P) — real), `by-days-remaining` (WorkPermit Validity), `by-status` | Real: active (`vw_rd_work_permit_active`); Result (`vw_rd_work_permit_app_progress`); validity (`vw_rd_work_permit`); Extension mock; by-status mock/legacy |
-| `Travel` | `default` | Mock only |
+| `Travel` | `default` | Mock only. Open ListView is `Person_ListView` (temporary; do not use `ApplicationItem_ListView`). |
 | `BorderZone` | `default` | Mock only |
-| `Passport` | `by-type`, `by-citizenship`, `by-validity` | Mock only |
+| `Passport` | `by-type`, `by-citizenship`, `by-validity` | Real (`vw_rd_passport`). Roster-linked passports, not ApplicationItem. |
 
 Update this table in `learnings.md` as categories are promoted. Target: one `vw_rd_*` + ListView per subreport (see Preview `↔` ListView contract). Shared Visa views are transitional debt.
 ## Localization

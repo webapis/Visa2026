@@ -550,16 +550,19 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<VwRdRegistration>(b => {
                 b.HasKey(t => t.ID);
                 b.ToView("vw_rd_registration");
+                b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
             });
 
             modelBuilder.Entity<VwRdToBeCheckedIn>(b => {
                 b.HasKey(t => t.ID);
                 b.ToView("vw_rd_to_be_checked_in");
+                b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
             });
 
             modelBuilder.Entity<VwRdToBeCheckedOut>(b => {
                 b.HasKey(t => t.ID);
                 b.ToView("vw_rd_to_be_checked_out");
+                b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
             });
 
             modelBuilder.Entity<UserReportTemplateApplicationType>(b => {

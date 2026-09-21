@@ -205,10 +205,11 @@ public static class ReportDashboardCatalog
             or "by-validity"; // legacy alias for WorkPermit Validity
 
     /// <summary>
-    /// WorkPermit Extension (P) / Extension Result (P): apps of these types with CurrentWorkPermitItem.
+    /// WorkPermit Extension (P) / Extension Result (P): instances whose profile Code is in this list
+    /// (legacy ApplicationType.Name fallback uses the same App_* codes).
     /// Extension excludes terminal + review rejects; Result includes only those outcome codes.
     /// </summary>
-    public static readonly string[] WorkPermitExtensionApplicationTypeNames =
+    public static readonly string[] WorkPermitExtensionProfileCodes =
     [
         "App_WP_Ext",
         "App_Visa_and_WP_Ext",
@@ -238,9 +239,10 @@ public static class ReportDashboardCatalog
     public const string RegistrationOnProcessSubReportKey = "on-process";
 
     /// <summary>
-    /// Last registration app types that count for Expiring State / Active Registered (not Check-Out).
+    /// Last registration profile Codes that count for Expiring State / Active Registered (not Check-Out).
+    /// Matches <c>vw_rd_registration.ApplicationTypeName</c> (= <c>ApplicationProfiles.Code</c>).
     /// </summary>
-    public static readonly string[] RegistrationExpiringStateApplicationTypeNames =
+    public static readonly string[] RegistrationExpiringStateProfileCodes =
     [
         "App_Reg_Check_In",
         "App_Reg_Check_In_Internal",
@@ -251,9 +253,11 @@ public static class ReportDashboardCatalog
     ];
 
     /// <summary>
-    /// All registration ApplicationType names for On process (unfinished apps).
+    /// All registration profile Codes for On process (unfinished apps).
+    /// EF on-process population prefers <c>ApplicationProfile.ActionFamily = Registration</c>;
+    /// this list is the dual-read ApplicationType.Name fallback only.
     /// </summary>
-    public static readonly string[] RegistrationOnProcessApplicationTypeNames =
+    public static readonly string[] RegistrationOnProcessProfileCodes =
     [
         "App_Reg_Check_In",
         "App_Reg_Check_In_Internal",
@@ -770,6 +774,18 @@ public static class ReportDashboardCatalog
             };
         }
 
+        if (category == ReportDashboardCategory.Registration)
+        {
+            if (IsRegistrationToBeCheckedInSubReport(subReport))
+                return ("VwRdToBeCheckedIn_ListView", typeof(VwRdToBeCheckedIn));
+            if (IsRegistrationToBeCheckedOutSubReport(subReport))
+                return ("VwRdToBeCheckedOut_ListView", typeof(VwRdToBeCheckedOut));
+            if (IsRegistrationOnProcessSubReport(subReport))
+                return (ApplicationProfileInstanceProgressRouteNavigation.SourceListView,
+                    typeof(ApplicationProfileInstance));
+            return ("VwRdRegistration_ListView", typeof(VwRdRegistration));
+        }
+
         return (ListViewId(category), ListViewType(category));
     }
 
@@ -781,9 +797,9 @@ public static class ReportDashboardCatalog
             ApplicationProfileInstanceProgressRouteNavigation.ListViewDirectMigration,
         ReportDashboardCategory.VisaExtension => "VisaExtensionStatus_ListView",
         ReportDashboardCategory.Invitation    => "InvitationItem_ListView",
-        ReportDashboardCategory.Registration  => "ApplicationItem_ListView",
+        ReportDashboardCategory.Registration  => "VwRdRegistration_ListView",
         ReportDashboardCategory.WorkPermit    => "WorkPermitItem_ListView",
-        ReportDashboardCategory.Travel        => "ApplicationItem_ListView",
+        ReportDashboardCategory.Travel        => "Person_ListView",
         ReportDashboardCategory.AddressOfResidence => "AddressOfResidence_ListView",
         ReportDashboardCategory.BorderZone       => "BorderZoneItem_ListView",
         ReportDashboardCategory.Passport         => "Passport_ListView",
@@ -802,9 +818,9 @@ public static class ReportDashboardCatalog
             or ReportDashboardCategory.ApplicationDirectMigration => typeof(ApplicationProfileInstance),
         ReportDashboardCategory.VisaExtension    => typeof(VisaExtensionStatus),
         ReportDashboardCategory.Invitation       => typeof(InvitationItem),
-        ReportDashboardCategory.Registration     => typeof(ApplicationRosterMergeLine),
+        ReportDashboardCategory.Registration     => typeof(VwRdRegistration),
         ReportDashboardCategory.WorkPermit       => typeof(WorkPermitItem),
-        ReportDashboardCategory.Travel           => typeof(ApplicationRosterMergeLine),
+        ReportDashboardCategory.Travel           => typeof(Person),
         ReportDashboardCategory.AddressOfResidence => typeof(AddressOfResidence),
         ReportDashboardCategory.BorderZone       => typeof(BorderZoneItem),
         ReportDashboardCategory.Passport         => typeof(Passport),
@@ -976,6 +992,10 @@ public static class ReportDashboardCatalog
         var usesAppDirectMigrationRd =
             category == ReportDashboardCategory.ApplicationDirectMigration
             && UsesApplicationDirectMigrationRdListView(subReport);
+        var usesRegistrationOnProcess = category == ReportDashboardCategory.Registration
+            && IsRegistrationOnProcessSubReport(subReport);
+        var usesRegistrationRd = category == ReportDashboardCategory.Registration
+            && !usesRegistrationOnProcess;
         var usesRdVisaRow = usesVisaActive || usesExtRequired || usesByDays;
         var usesRdAppRow = usesAppViaMinistryRd || usesAppDirectMigrationRd;
         var usesIncompletePersonsRd = category == ReportDashboardCategory.IncompletePersons;
@@ -998,7 +1018,7 @@ public static class ReportDashboardCatalog
                 ? "True"
                 : $"[PersonRoleCode] = {(int)ToPersonRole(personType)}";
         }
-        else if (usesAppProgressDedicated || usesRdAppRow)
+        else if (usesAppProgressDedicated || usesRdAppRow || usesRegistrationRd)
         {
             // Population baked into dedicated SQL views.
             roleCriteria = IsAllPersonTypes(personType)
@@ -1017,7 +1037,6 @@ public static class ReportDashboardCatalog
         {
             roleCriteria = category is ReportDashboardCategory.VisaExtension
                 or ReportDashboardCategory.Passport
-                or ReportDashboardCategory.Registration
                 or ReportDashboardCategory.Invitation
                 or ReportDashboardCategory.WorkPermit
                 or ReportDashboardCategory.BorderZone
@@ -1027,7 +1046,7 @@ public static class ReportDashboardCatalog
                 or ReportDashboardCategory.PositionHistory
                 or ReportDashboardCategory.MedicalRecord
                 ? "Person is not null"
-                : IsApplicationCategory(category)
+                : IsApplicationCategory(category) || usesRegistrationOnProcess
                 ? "True"
                 : PersonRoleCriteria(personType);
         }
@@ -1035,7 +1054,6 @@ public static class ReportDashboardCatalog
         {
             roleCriteria = category == ReportDashboardCategory.VisaExtension
                 || category == ReportDashboardCategory.Passport
-                || category == ReportDashboardCategory.Registration
                 || category == ReportDashboardCategory.Education
                 || category == ReportDashboardCategory.PositionHistory
                 || category == ReportDashboardCategory.AddressOfResidence
@@ -1046,29 +1064,38 @@ public static class ReportDashboardCatalog
                         || category == ReportDashboardCategory.BorderZone
                         || category == ReportDashboardCategory.Travel
                         ? $"Person is not null And [Person.PersonRole] = ##Enum#Visa2026.Module.BusinessObjects.PersonRecordRole,{ToPersonRole(personType)}#"
-                        : IsApplicationCategory(category)
+                        : IsApplicationCategory(category) || usesRegistrationOnProcess
                         ? "True"
                         : PersonRoleCriteria(personType);
         }
 
         // Domain ApplicationProfileInstance ListViews only (not dedicated vw_rd_* ApplicationProfileInstance rows).
-        if (IsApplicationCategory(category) && !usesRdAppRow)
+        if ((IsApplicationCategory(category) && !usesRdAppRow) || usesRegistrationOnProcess)
         {
-            var routeCriteria = category == ReportDashboardCategory.ApplicationViaMinistry
-                ? ApplicationProfileInstanceProgressRouteNavigation.CriteriaViaMinistries
-                : ApplicationProfileInstanceProgressRouteNavigation.CriteriaDirectMigration;
-            roleCriteria = $"({roleCriteria}) And ({routeCriteria})";
+            if (usesRegistrationOnProcess)
+            {
+                roleCriteria =
+                    $"({roleCriteria}) And [ApplicationProfile.ActionFamily] = ##Enum#Visa2026.Module.BusinessObjects.ApplicationProfileActionFamily,Registration#";
+            }
+            else
+            {
+                var routeCriteria = category == ReportDashboardCategory.ApplicationViaMinistry
+                    ? ApplicationProfileInstanceProgressRouteNavigation.CriteriaViaMinistries
+                    : ApplicationProfileInstanceProgressRouteNavigation.CriteriaDirectMigration;
+                roleCriteria = $"({roleCriteria}) And ({routeCriteria})";
+            }
         }
 
         if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
         {
             var projectCriteria = usesAppProgressDedicated || usesRdVisaRow || usesRdAppRow
-                    || usesIncompletePersonsRd || usesPersonSearchRd
+                    || usesIncompletePersonsRd || usesPersonSearchRd || usesRegistrationRd
                 ? $"[ProjectName] = '{Escape(projectKey)}' Or [ProjectNameTm] = '{Escape(projectKey)}' Or [ProjectNameRaw] = '{Escape(projectKey)}'"
                 : category switch
                 {
                     ReportDashboardCategory.ApplicationViaMinistry
-                        or ReportDashboardCategory.ApplicationDirectMigration =>
+                        or ReportDashboardCategory.ApplicationDirectMigration
+                        or ReportDashboardCategory.Registration =>
                         $"[ProjectContract.Name] = '{Escape(projectKey)}' Or [ProjectContract.NameTm] = '{Escape(projectKey)}'",
                     ReportDashboardCategory.Subcontractor =>
                         $"[ProjectContract.Name] = '{Escape(projectKey)}' Or [ProjectContract.NameTm] = '{Escape(projectKey)}'",
@@ -1082,8 +1109,7 @@ public static class ReportDashboardCatalog
                         $"[BorderZone.ApplicationProfileInstance.ProjectContract.Name] = '{Escape(projectKey)}' Or [BorderZone.ApplicationProfileInstance.ProjectContract.NameTm] = '{Escape(projectKey)}'",
                     ReportDashboardCategory.Travel =>
                         $"[Application.ProjectContract.Name] = '{Escape(projectKey)}' Or [Application.ProjectContract.NameTm] = '{Escape(projectKey)}'",
-                    ReportDashboardCategory.Registration
-                        or ReportDashboardCategory.Passport
+                    ReportDashboardCategory.Passport
                         or ReportDashboardCategory.Education
                         or ReportDashboardCategory.PositionHistory
                         or ReportDashboardCategory.AddressOfResidence
@@ -1210,6 +1236,20 @@ public static class ReportDashboardCatalog
                     ? "[StatusLabel] = '' Or [StatusLabel] Is Null Or [StatusLabel] = '" + Escape(PersonSearchNoVisaLabel) + "'"
                     : $"[StatusLabel] = '{Escape(statusLabel)}'";
                 roleCriteria = $"({roleCriteria}) And ({statusCriteria})";
+            }
+            else if (usesRegistrationRd)
+            {
+                var statusField = IsRegistrationExpiringStateSubReport(subReport)
+                    || IsRegistrationToBeCheckedOutSubReport(subReport)
+                    ? "ExpiryBucketLabel"
+                    : IsRegistrationToBeCheckedInSubReport(subReport)
+                        ? "EntryBucketLabel"
+                        : IsRegistrationCheckInByCitySubReport(subReport)
+                            ? "CityLabel"
+                            : IsRegistrationCheckInByProjectSubReport(subReport)
+                                ? "ProjectName"
+                                : "ProgressStateLabel";
+                roleCriteria = $"({roleCriteria}) And [{statusField}] = '{Escape(statusLabel)}'";
             }
         }
 

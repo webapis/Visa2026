@@ -26,10 +26,8 @@ internal static class ReportDashboardRosterQueryHelper
         DateTime cutoff)
     {
         return db.ApplicationProfileInstances.AsNoTracking()
-            .Where(a => a.ApplicationType != null
-                && a.ApplicationType.Name != null
-                && regTypes.Contains(a.ApplicationType.Name)
-                && (a.ApplicationDate == null || a.ApplicationDate >= cutoff)
+            .WhereRegistrationFamily(regTypes)
+            .Where(a => (a.ApplicationDate == null || a.ApplicationDate >= cutoff)
                 && a.People.Any(p => p != null && !p.IsArchived));
     }
 
@@ -43,6 +41,7 @@ internal static class ReportDashboardRosterQueryHelper
     {
         var applications = RegistrationOnProcessApplicationsQuery(db, regTypes, cutoff)
             .Include(a => a.People)
+            .Include(a => a.ApplicationProfile)
             .Include(a => a.ApplicationType)
             .Include(a => a.ProjectContract)
             .Include(a => a.ApprovalLegSnapshots)
