@@ -17,6 +17,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using Visa2026.Module.Services;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 using Visa2026.Module.Localization;
 using Visa2026.Module.Documentation;
 
@@ -26,9 +27,9 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem(false)]
     [DefaultProperty(nameof(FullName))]
-    [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = PersonRoleHelper.NotEmployeeCriteria, Context = "DetailView", TargetItems = "Email;HireDate;PreviousWorkplacesInTurkmenistan;MaritalStatus;WorkPermitItems;FamilyMembers;Educations;PositionHistory;Salaries;WorkDuties")]
+    [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = PersonRoleHelper.NotEmployeeCriteria, Context = "DetailView", TargetItems = "Email;HireDate;PreviousWorkplacesInTurkmenistan;MaritalStatus;WorkPermitItems;FamilyMembers;PositionHistory;Salaries;WorkDuties")]
     [Appearance("EmployeeOnly_Layout", AppearanceItemType = "LayoutItem", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = PersonRoleHelper.NotEmployeeCriteria, Context = "DetailView", TargetItems = "MaritalStatus")]
-    [Appearance("EmployeeOnly_PersonRecordTabsLayout", AppearanceItemType = "LayoutItem", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = PersonRoleHelper.NotEmployeeCriteria, Context = "DetailView", TargetItems = "Educations;PositionHistory;Salaries;WorkDuties")]
+    [Appearance("EmployeeOnly_PersonRecordTabsLayout", AppearanceItemType = "LayoutItem", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = PersonRoleHelper.NotEmployeeCriteria, Context = "DetailView", TargetItems = "PositionHistory;Salaries;WorkDuties")]
     [Appearance("EmployeeOnly_IssuedFamilyMembersLayout", AppearanceItemType = "LayoutItem", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = PersonRoleHelper.NotEmployeeCriteria, Context = "DetailView", TargetItems = "FamilyMembers")]
     [Appearance("FamilyFieldsOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "PersonRole != ##Enum#Visa2026.Module.BusinessObjects.PersonRecordRole,FamilyMember#", Context = "DetailView", TargetItems = "SponsoringEmployee;Relationship")]
     [Appearance("PersonDocumentsEmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = PersonRoleHelper.NotEmployeeCriteria, Context = "DetailView", TargetItems = "Documents")]
@@ -195,6 +196,8 @@ namespace Visa2026.Module.BusinessObjects
                         {
                             MaritalStatus = null;
                         }
+
+                        FamilyMemberDefaultEducation.Ensure(objectSpace, this);
                     }
                 }
             }
@@ -666,6 +669,8 @@ namespace Visa2026.Module.BusinessObjects
 
             if (PersonRole == PersonRecordRole.Employee)
                 VisaFamilyMemberLinesHelper.ApplyEmployeeDefaultIfEmpty(this);
+
+            FamilyMemberDefaultEducation.Ensure(ObjectSpaceHelper.Get(this), this);
 
             if (Photo != null && Photo.Length > 0)
             {

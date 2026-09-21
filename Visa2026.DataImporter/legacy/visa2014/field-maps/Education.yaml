@@ -76,7 +76,9 @@ fields:
     layer3Key: mgCode_to_pdfForm_code
     missingBehavior: use_default
     default: SpecialSecondary
-    notes: See lookup-comparisons/EducationLevel.md — mgCode equals Visa2026 PdfForm_Code
+    notes: |
+      See lookup-comparisons/EducationLevel.md — mgCode equals Visa2026 PdfForm_Code.
+      Adult family member (age 18+): forced to Orta (LocalizationKey Secondary).
 
   - source: EducationInstitution
     target: EducationInstitution
@@ -85,7 +87,9 @@ fields:
     lookupLegacyColumn: EducationInstitution.TitleOfIEducationInstitution
     lookupMatch: NameTm
     missingBehavior: skip_row
-    notes: Tenant catalog; comparison pending — 1,537 distinct institutions on data
+    notes: |
+      Tenant catalog; comparison pending — 1,537 distinct institutions on data.
+      Adult family member (age 18+): forced to Orta mekdep (import-strategy calikFamilyMemberAdultEducationDefaults).
 
   - source: EducationCountry
     target: EducationCountry
@@ -110,7 +114,9 @@ fields:
     lookupLegacyColumn: Speciality.TitleOfSpeciality
     lookupMatch: NameTm
     missingBehavior: skip_row
-    notes: Legacy table dbo.Speciality; comparison pending — 1,254 distinct on data
+    notes: |
+      Legacy table dbo.Speciality; comparison pending — 1,254 distinct on data.
+      Adult family member (age 18+): forced to Orta bilim (VISA2014 AfterChange_BirthCountry).
 
   - source: EducationEndDate
     target: GraduationYear

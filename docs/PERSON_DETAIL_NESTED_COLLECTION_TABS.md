@@ -35,7 +35,7 @@ Legacy single `TabbedGroup Id="Tabs"` is **`Removed="True"`** on typed views.
 
 | Tab | Employee | Family member | Temporary visitor |
 |-----|----------|---------------|-------------------|
-| Educations | Person record | — (hidden via appearance) | — |
+| Educations | Person record | Person record | — |
 | CV & personal files (`Documents`) | Person record (employee), after Educations/Passports | — (family uses `FamilyRelationDocuments`) | — |
 | Passports, Medical records, Addresses | Person record | Person record | Person record |
 | Family relation documents | — | Person record | — |
@@ -89,7 +89,7 @@ Hint keys (`tools/GenerateModelLocalization/UiStrings.messages.json`):
 
 `[Appearance(..., AppearanceItemType = "LayoutItem", ...)]` on `Person`:
 
-- `EmployeeOnly_PersonRecordTabsLayout` — hides `Educations`, `PositionHistory`, `Salaries`, `WorkDuties` for non-employees.
+- `EmployeeOnly_PersonRecordTabsLayout` — hides `PositionHistory`, `Salaries`, `WorkDuties` for non-employees. Educations stays visible for family members.
 - `EmployeeOnly_IssuedFamilyMembersLayout` — hides `FamilyMembers` tab for non-employees.
 
 Existing `EmployeeOnly` / `PersonDocumentsEmployeeOnly` view-item rules remain for field-level hide.
@@ -119,7 +119,7 @@ Existing `EmployeeOnly` / `PersonDocumentsEmployeeOnly` view-item rules remain f
 
 1. **New employee** — only "Person record data" tabs + dashed hint; no issued section.
 2. **Saved employee** — two sections; issued nested grids have **no New/Delete**.
-3. **Family member** — no Educations / position / salaries tabs; issued tabs without Family members.
+3. **Family member** — Educations tab visible (default Orta row for adults); no position / salaries tabs; issued tabs without Family members.
 4. **Temporary visitor** — minimal person-record tabs; issued = application items + invitations + rejections.
 
 ```powershell

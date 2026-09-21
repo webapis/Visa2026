@@ -1,5 +1,6 @@
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.ApplicationPersonRoster;
+using Visa2026.Module.Services.ApplicationWorkspace;
 using Visa2026.Module.Services.UserReports;
 using Xunit;
 
@@ -62,6 +63,53 @@ public class ChildDependentEducationCaptionTests
         };
 
         Assert.False(ChildDependentEducationCaption.Applies(person));
+    }
+
+    [Fact]
+    public void Completeness_child_without_education_caption_is_not_short()
+    {
+        var record = new ApplicationWorkspaceCasePersonRecord
+        {
+            Key = "education",
+            Count = 1,
+            ExpectedCount = 1,
+            IsCaptionOnly = true,
+            Caption = ChildDependentEducationCaption.Text,
+        };
+
+        Assert.False(ApplicationWorkspacePeopleLinksCompleteness.IsRecordShort(record));
+        var view = new ApplicationWorkspaceCaseView
+        {
+            People =
+            [
+                new ApplicationWorkspaceCasePerson
+                {
+                    Name = "Child",
+                    Records = [record, new ApplicationWorkspaceCasePersonRecord { Key = "passport", Count = 1, ExpectedCount = 1 }],
+                },
+            ],
+        };
+        Assert.Equal(ApplicationWorkspacePeopleLinksCompleteness.NavStatus.Complete, ApplicationWorkspacePeopleLinksCompleteness.Resolve(view));
+        Assert.Equal(0, ApplicationWorkspacePeopleLinksCompleteness.PeopleWithGaps(view));
+    }
+
+    [Fact]
+    public void Completeness_adult_dependent_without_education_is_short()
+    {
+        var record = new ApplicationWorkspaceCasePersonRecord
+        {
+            Key = "education",
+            Count = 0,
+            ExpectedCount = 1,
+        };
+
+        Assert.False(ChildDependentEducationCaption.Applies(new Person
+        {
+            IsEmployee = false,
+            PersonRole = PersonRecordRole.FamilyMember,
+            DateOfBirth = DateTime.Today.AddYears(-30),
+        }));
+        Assert.True(ApplicationWorkspacePeopleLinksCompleteness.IsRecordShort(record));
     }
 
     [Fact]

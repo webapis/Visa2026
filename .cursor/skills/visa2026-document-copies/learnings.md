@@ -25,6 +25,16 @@ Purpose: **dialog UX, scan preview, package enqueue, readiness, toast** — not 
 
 ## Entries
 
+### 2026-09-21 — Child dependent has no Education.Current gap (readiness)
+
+- **Symptom**: Family-member cases treated missing Education as a required diploma slot. Children usually have no Education BO; import does not create one.
+- **Try**: Document copies / package readiness on an FM case with a child under 18 and no Education.
+- **Test**: `ChildDependentEducationCaptionTests`. Resolver skips `Education.Current` LinkMissing when `ChildDependentEducationCaption.Applies`.
+- **Root cause**: `AddEducationGroup` always emitted LinkMissing when `CurrentEducation` was null and the profile shows education.
+- **Fix**: Return without a slot when the person is a child dependent and has no Education. If an Education exists, still list diploma files.
+- **Prevent**: Do not invent Education records. Do not hide Education for adult dependents.
+- **Cross-skill**: document-copies | application-profile
+
 ### 2026-09-04 — Missing Document copies rows are warning amber (UX)
 
 - **Symptom**: Missing scan rows and the Document copies nav badge were red, same as Case summary / People gaps.

@@ -100,6 +100,7 @@ foreach ($step in $steps) {
 $postCorrections = @(
     @{ Name = 'PersonSubcontractor'; Flag = '--correct-person-subcontractor' },
     @{ Name = 'PersonRelationship'; Flag = '--correct-person-relationship' },
+    @{ Name = 'FamilyMemberEducation'; Flag = '--correct-visa2014-family-member-education' },
     @{ Name = 'PersonAddressPia'; Flag = '--correct-person-address-of-residence' },
     @{ Name = 'VisaType'; Flag = '--correct-visa-type' },
     # --correct-application-item-person-current and --correct-visa2014-issuing-application-item are retired

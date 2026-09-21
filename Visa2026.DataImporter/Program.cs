@@ -182,6 +182,8 @@ static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
         "--correct-application-progress-order",
         "--correct-person-subcontractor",
         "--correct-person-relationship",
+        "--correct-visa2014-family-member-education",
+        "--person-id-map",
         "--correct-person-address-of-residence",
         "--correct-application-item-person-current",
         "--correct-application-item-application-parent",
@@ -350,6 +352,7 @@ static void PrintHelp()
     Console.WriteLine("  --correct-application-progress-order  Recompute ApplicationProfileInstanceProgress.Order from workflow sequence (all apps; --target-connection, --dry-run)");
     Console.WriteLine("  --correct-person-subcontractor  Patch Person.Subcontractor from legacy IDNumber / Tasaron (--legacy-source, --dry-run)");
     Console.WriteLine("  --correct-person-relationship  Patch Person.Relationship from legacy FamilyMemberRelation (--legacy-source, --dry-run)");
+    Console.WriteLine("  --correct-visa2014-family-member-education  Force adult FM Education to Orta / Orta mekdep / Orta bilim (--legacy-source, --person-id-map, --dry-run)");
     Console.WriteLine("  --correct-person-address-of-residence  Backfill Person AddressOfResidence from PIA + patch ApplicationItem (--legacy-source, --dry-run)");
     Console.WriteLine("  --correct-application-item-person-current  Backfill ApplicationItem CurrentEducation/CurrentSalary/CurrentWorkPermitItem from Person (--dry-run)");
     Console.WriteLine("  --correct-application-item-application-parent  Reparent ApplicationItems after ApplicationProfileInstance id-map rebuild (--legacy-source, --dry-run)");
@@ -786,6 +789,16 @@ if (HasArg(args, "--correct-person-relationship"))
     Log.Phase("VISA2014 Person Relationship correction");
     bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
     int exitCode = await Visa2014PersonRelationshipCorrection.RunCommandAsync(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
+if (HasArg(args, "--correct-visa2014-family-member-education"))
+{
+    Log.Phase("VISA2014 family-member Education correction");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = await Visa2014FamilyMemberEducationCorrection.RunCommandAsync(args, isVerbose);
     Log.Close();
     Environment.ExitCode = exitCode;
     return;

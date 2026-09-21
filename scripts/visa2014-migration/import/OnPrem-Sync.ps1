@@ -357,6 +357,7 @@ function Invoke-PostImportCorrections {
     $corrections = @(
         @{ Name = "PersonSubcontractor"; Wave = "post-PersonSubcontractor"; Flag = "--correct-person-subcontractor" },
         @{ Name = "PersonRelationship"; Wave = "post-PersonRelationship"; Flag = "--correct-person-relationship" },
+        @{ Name = "FamilyMemberEducation"; Wave = "post-FamilyMemberEducation"; Flag = "--correct-visa2014-family-member-education" },
         @{ Name = "PersonAddressPia"; Wave = "post-PersonAddressPia"; Flag = "--correct-person-address-of-residence" },
         @{ Name = "VisaType"; Wave = "post-VisaType"; Flag = "--correct-visa-type" },
         # ApplicationItemPersonCurrent and VisaIssuingApplicationItem corrections are retired with the

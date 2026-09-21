@@ -925,6 +925,31 @@ internal static class ApplicationWorkspaceCaseBuilder
                 continue;
             }
 
+            if (def.Kind == ApplicationProfileInstancePersonLinkKind.Education
+                && ChildDependentEducationCaption.Applies(rosterPerson))
+            {
+                var linkedCount = personId != Guid.Empty
+                    ? ApplicationWorkspaceLinkedRecordsCatalog.CountResolvedForPerson(rosterLinks, personId, def.Kind)
+                    : 0;
+                if (linkedCount <= 0)
+                {
+                    records.Add(new ApplicationWorkspaceCasePersonRecord
+                    {
+                        Key = def.PersonRecordKey,
+                        Label = def.Label,
+                        Count = 1,
+                        ExpectedCount = 1,
+                        State = "valid",
+                        Glyph = def.Glyph,
+                        Tone = LinkedTones[toneIndex % LinkedTones.Length],
+                        IsCaptionOnly = true,
+                        Caption = ChildDependentEducationCaption.Text,
+                    });
+                    toneIndex++;
+                    continue;
+                }
+            }
+
             var available = personId != Guid.Empty
                 ? linkableCounts.Get(personId, def.Kind)
                 : 0;

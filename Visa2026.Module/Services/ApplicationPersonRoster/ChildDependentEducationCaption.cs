@@ -5,6 +5,7 @@ namespace Visa2026.Module.Services.ApplicationPersonRoster;
 /// <summary>
 /// Ministry sanaw "Hünäri we bilimi" prints <c>Çaga</c> for a child dependent
 /// instead of education level + institution.
+/// People &amp; links and document copies also skip requiring an Education BO.
 /// </summary>
 public static class ChildDependentEducationCaption
 {

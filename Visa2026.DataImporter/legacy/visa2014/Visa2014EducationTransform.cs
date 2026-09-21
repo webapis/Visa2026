@@ -1,3 +1,5 @@
+using Visa2026.Module.Services.ApplicationPersonRoster;
+
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
 internal sealed record Visa2014EducationRawRow(
@@ -10,7 +12,9 @@ internal sealed record Visa2014EducationRawRow(
     string? CountryNameL,
     string? TitleOfSpeciality,
     DateTime? EducationEndDate,
-    Guid LegacyPersonOid);
+    Guid LegacyPersonOid,
+    bool IsFamilyMember,
+    DateTime? PersonBirthDate);
 
 internal static class Visa2014EducationTransform
 {
@@ -25,7 +29,9 @@ internal static class Visa2014EducationTransform
             c.NameOfCountryL AS EducationCountryNameL,
             s.TitleOfSpeciality,
             CONVERT(varchar(10), e.EducationEndDate, 23) AS EducationEndDate,
-            CAST(e.Person AS varchar(36)) AS LegacyPersonOid
+            CAST(e.Person AS varchar(36)) AS LegacyPersonOid,
+            CASE WHEN p.IsFamilyMember = 1 THEN '1' ELSE '0' END AS IsFamilyMember,
+            CONVERT(varchar(10), p.BirthDate, 23) AS PersonBirthDate
         FROM dbo.Education e
         INNER JOIN dbo.Person p ON e.Person = p.Oid AND p.GCRecord IS NULL
         INNER JOIN dbo.EducationLevel el ON e.EducationLevel = el.Oid
@@ -40,6 +46,7 @@ internal static class Visa2014EducationTransform
         "_legacyRowId", "_legacyTable", "_importAction",
         "EducationLevel", "EducationInstitution", "EducationCountry", "Specialty", "GraduationYear", "Person",
         "_legacy_EducationLevelComposite", "_legacy_EducationCountryCode", "_legacy_PersonOid",
+        "_adultFamilyMemberDefaultApplied",
     ];
 
     public static Visa2014PersonImportBatch PrepareImportBatch(
@@ -93,7 +100,9 @@ internal static class Visa2014EducationTransform
             CountryNameL: row.GetValueOrDefault("EducationCountryNameL"),
             TitleOfSpeciality: row.GetValueOrDefault("TitleOfSpeciality"),
             EducationEndDate: endDate,
-            LegacyPersonOid: legacyPersonOid);
+            LegacyPersonOid: legacyPersonOid,
+            IsFamilyMember: row.GetValueOrDefault("IsFamilyMember") == "1",
+            PersonBirthDate: DateTime.TryParse(row.GetValueOrDefault("PersonBirthDate"), out var dob) ? dob : null);
         return true;
     }
 
@@ -162,12 +171,28 @@ internal static class Visa2014EducationTransform
 
         var levelComposite = BuildEducationLevelComposite(raw.TitleOfEducationLevel, raw.EducationLevelMgCode);
         row["_legacy_EducationLevelComposite"] = levelComposite;
-        TrySetEducationLevel(row, catalogs, levelComposite, unmapped);
 
-        TrySetLookup(row, catalogs, "EducationInstitution", raw.TitleOfInstitution, "EducationInstitution", unmapped, ref skipReason);
+        if (FamilyMemberDefaultEducation.IsAdultFamilyMember(raw.IsFamilyMember, raw.PersonBirthDate))
+        {
+            row["EducationLevel"] = FamilyMemberDefaultEducation.LevelLocalizationKey;
+            TrySetLookup(
+                row, catalogs, "EducationInstitution", FamilyMemberDefaultEducation.InstitutionNameTm,
+                "EducationInstitution", unmapped, ref skipReason);
+            TrySetLookup(
+                row, catalogs, "Specialty", FamilyMemberDefaultEducation.SpecialtyNameTm,
+                "Specialty", unmapped, ref skipReason);
+            row["_adultFamilyMemberDefaultApplied"] = "1";
+        }
+        else
+        {
+            TrySetEducationLevel(row, catalogs, levelComposite, unmapped);
+            TrySetLookup(row, catalogs, "EducationInstitution", raw.TitleOfInstitution, "EducationInstitution", unmapped, ref skipReason);
+            TrySetLookup(row, catalogs, "Specialty", raw.TitleOfSpeciality, "Specialty", unmapped, ref skipReason);
+            row["_adultFamilyMemberDefaultApplied"] = "0";
+        }
+
         var countryKey = ResolveEducationCountryLegacyKey(raw.CountryMgCode, raw.CountryName, raw.CountryNameL);
         TrySetLookup(row, catalogs, "Country", countryKey, "EducationCountry", unmapped, ref skipReason);
-        TrySetLookup(row, catalogs, "Specialty", raw.TitleOfSpeciality, "Specialty", unmapped, ref skipReason);
 
         if (raw.EducationEndDate.HasValue)
             row["GraduationYear"] = raw.EducationEndDate.Value.Year.ToString();

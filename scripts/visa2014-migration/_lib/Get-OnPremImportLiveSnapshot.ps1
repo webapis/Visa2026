@@ -100,6 +100,9 @@ foreach ($procName in $diProcessNames) {
             elseif ($cmd -match '--correct-person-relationship') {
                 $entity = 'post-PersonRelationship'
             }
+            elseif ($cmd -match '--correct-visa2014-family-member-education') {
+                $entity = 'post-FamilyMemberEducation'
+            }
             elseif ($cmd -match '--correct-person-subcontractor') {
                 $entity = 'post-PersonSubcontractor'
             }

@@ -212,6 +212,9 @@ public static class ApplicationItemLinkedDocumentsResolver
         var education = item.CurrentEducation;
         if (education == null)
         {
+            if (ChildDependentEducationCaption.Applies(item.Person))
+                return;
+
             groups.Add(new ApplicationItemLinkedDocumentGroup
             {
                 SlotKey = "Education.Current",

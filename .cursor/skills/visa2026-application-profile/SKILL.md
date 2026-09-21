@@ -74,6 +74,7 @@ disable-model-invocation: false
 | Person dossier (read-only 360; no Start application) | [visa2026-person-dossier](../visa2026-person-dossier/SKILL.md) |
 | Schema deploy / `FORCE_XAF_DB_UPDATE` | [visa2026-lifecycle-docker](../visa2026-lifecycle-docker/SKILL.md) |
 | VISA2014 import / dual-read Type FK | [visa2014-to-visa2026-import](../visa2014-to-visa2026-import/SKILL.md) |
+| Report Dashboard SQL / Open ListView (instances + profiles, not ApplicationItem) | [visa2026-report-dashboard](../visa2026-report-dashboard/SKILL.md) |
 
 ---
 
@@ -144,6 +145,9 @@ flowchart LR
 | Can leave Overview with empty Case summary | Office preparation + red tiles | `ApplicationWorkspaceCaseSummaryCompletenessGate`; People & links stay open |
 | People & links zeros look like filled tiles | Short tiles red; nav red count or green check | `ApplicationWorkspacePeopleLinksCompleteness`; `cw-link-tile.is-empty` |
 | Cancel-visa People & links Education is red 0 | Education is off for `cancel_visa` / `cancel_visa_wp`. Restart after rebuild so catalog sync writes the locked template | Tenant JSON + `ApplicationProfileEducationPolicy` |
+| FM child Education tile is red 0 | Child dependent (age under 18 or Çaga) does not need an Education BO. Caption-only **Çaga**; do not turn RequirePersonEducation off | `ChildDependentEducationCaption` + CaseBuilder |
+| Adult FM has no Education after create | Creating an 18+ family member should auto-add Orta / Orta mekdep / Orta bilim. Children stay empty | `FamilyMemberDefaultEducation` |
+| FM Education shows Tehniki howpsuzlyk… instead of Orta bilim | Adult FM lookups are forced to Orta / Orta mekdep / Orta bilim. Rebuild DataImporter and run `--correct-visa2014-family-member-education` | `calikFamilyMemberAdultEducationDefaults` |
 | Cancel-visa People & links Travel history is red 0 | Travel history is **Registration only**. Restart after rebuild so catalog sync writes the locked template | Tenant JSON + `ApplicationProfileTravelHistoryPolicy` |
 | Visa+WP extension People & links Travel history is red 0 | Same — off on `extend_visa_wp`. Restart after rebuild | Tenant JSON + `ApplicationProfileTravelHistoryPolicy` |
 | Cancel-visa People & links shows only one of two valid visas | Wizany Ýatyrmak `cancel_visa` Visa Last **2** (same as `cancel_visa_wp`). Last-N is a ceiling — one visa stays 1/1. Restart, Relink | `PersonVisaLastCount` + Calik Last-N seeds |

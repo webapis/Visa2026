@@ -1607,7 +1607,7 @@
         <Member Name="RejectionItems" Caption="Ret elementleri" />
         <Member Name="Relationship" Caption="Gatnaşyk" />
         <Member Name="Salaries" Caption="Aýlyklar" />
-        <Member Name="SponsoringEmployee" Caption="Goldawçy işgär" />
+        <Member Name="SponsoringEmployee" Caption="Işgär" />
         <Member Name="Subcontractor" Caption="Kompaniýa (Subpudarçy)" />
         <Member Name="TravelHistories" Caption="Syýahat taryhy" />
         <Member Name="VisaApplicationFamilyMembersText" Caption="Wiza üçin maşgala (el bilen)" />
@@ -2987,7 +2987,7 @@
         <ColumnInfo Id="PersonalNumber" Caption="Şahsy belgi" />
         <ColumnInfo Id="ProjectContract" Caption="Taslama belgisi" />
         <ColumnInfo Id="Relationship" Caption="Gatnaşyk" />
-        <ColumnInfo Id="SponsoringEmployee" Caption="Goldawçy işgär" />
+        <ColumnInfo Id="SponsoringEmployee" Caption="Işgär" />
       </Columns>
     </ListView>
     <ListView Id="Person_ListView_Employees" Caption="Işgärler">
@@ -3043,7 +3043,7 @@
         <ColumnInfo Id="PersonalNumber" Caption="Şahsy belgi" />
         <ColumnInfo Id="ProjectContract" Caption="Taslama belgisi" />
         <ColumnInfo Id="Relationship" Caption="Gatnaşyk" />
-        <ColumnInfo Id="SponsoringEmployee" Caption="Goldawçy işgär" />
+        <ColumnInfo Id="SponsoringEmployee" Caption="Işgär" />
       </Columns>
     </ListView>
     <ListView Id="Person_ListView_TemporaryVisitors" Caption="Wagtlaýyn myhman">

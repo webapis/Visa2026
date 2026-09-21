@@ -8713,6 +8713,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Gol çekiji",
             ["ru-RU"] = "Подписант",
         },
+        ["PlaceholderManual.Group.Contract"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Contract",
+            ["tr-TR"] = "Sözleşme",
+            ["tk-TM"] = "Şertnama",
+            ["ru-RU"] = "Договор",
+        },
         ["PlaceholderManual.Group.Education"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Education",

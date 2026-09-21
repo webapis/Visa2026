@@ -1,4 +1,14 @@
 
+### 2026-09-21 — Adult FM Education forced to Orta / Orta mekdep / Orta bilim
+
+- **Phase**: mapping + correction
+- **Why**: Imported adult family-member Education showed Tehniki howpsuzlyk we zähmeti goramak. Live VISA2015 still has that specialty, but audit shows those rows were created as Orta bilim (VISA2014 AfterChange_BirthCountry). Officers asked import to restore Orta / Orta mekdep / Orta bilim.
+- **Fix**: Education transform overrides level/institution/specialty for IsFamilyMember age 18+. Country and GraduationYear unchanged. `--correct-visa2014-family-member-education` patches already-imported rows and creates a default row when an adult FM has none. Children and employees unchanged.
+- **Locked**: import-strategy.yaml `calikFamilyMemberAdultEducationDefaults`.
+- **Verify**: local PG `--correct-visa2014-family-member-education --legacy-source calik-energi-local-pg` exit **0**. Family members **293** / updated **114** / created **2** / unchanged **46** / skipped child **131** / unresolved **0**. Person id-map fallback from project `id-maps/` (bin ContentRoot has no id-maps).
+- **Prevent**: Do not copy live VISA2015 FM specialty 1:1 for adults. Do not rewrite employee Education. Do not use Education.OnCreated IsDefault (Ýörite Orta). Resolve Person.json from the DataImporter project folder when bin id-maps are missing.
+- **Cross-skill**: visa2026-application-profile
+
 ### 2026-09-16 - check_in_internal To Region/City from NewRegistrationLocation
 
 - **Phase**: mapping + correction

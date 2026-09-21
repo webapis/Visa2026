@@ -728,7 +728,7 @@ Follow [import-practices.md](./import-practices.md) for every batch.
 | Duplicate persons in Visa2026 after import | Enable `deduplication`; verify probe SQL; upsert keys |
 | Required field null on POST | Add `targetOnly` default or `missingBehavior: skip_row` |
 | Legacy data lost silently | Check `propertyGaps.legacyOnly` — use `archive_in_notes` if needed |
-| Wrong lookup on import | Add layer 3 row in `lookup-translations.yaml` — do not match by string equality |
+| Adult FM Education is Tehniki howpsuzlyk we zähmeti goramak | Forced triple Orta / Orta mekdep / Orta bilim — run `--correct-visa2014-family-member-education` |
 | Unmapped legacy lookup value | Add to `catalogs[].values` or set `unmappedPolicy` |
 | Import duplicates on re-run | Upsert on natural keys; maintain id-map |
 | Silent missing rows | Check import summary counters; enforce `skip_row` logging |

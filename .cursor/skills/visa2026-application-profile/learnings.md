@@ -1,3 +1,52 @@
+### 2026-09-21 — Report Dashboard residual C# sync (not a rewrite)
+
+- **Need**: Dashboard SQL already used instances + profiles; C# still filtered `ApplicationType != null` and Open ListView still named `ApplicationItem_ListView`.
+- **Cause**: Dual-read leftover after ApplicationItem hard-remove and instance rename.
+- **Fix**: Profile-first EF filters (`ReportDashboardProfileInstanceQuery`); Registration `VwRd*` ListViews; Travel mock uses `Person_ListView`.
+- **Officer**: Rebuild Blazor host. Open Report Dashboard Registration / Application (via ministry) — profile-only cases should appear; Registration Open ListView should not error.
+- **Prevent**: Do not re-join ApplicationTypes in `vw_rd_*`. Do not restore ApplicationItem ListView targets.
+- **Cross-skill**: visa2026-report-dashboard
+
+### 2026-09-21 — Import adult FM Education as Orta / Orta mekdep / Orta bilim
+
+- **Need**: Already-imported family members showed Tehniki howpsuzlyk we zähmeti goramak instead of the VISA2014 auto-create triple.
+- **Cause**: Import copied live VISA2015 specialty 1:1. Audit shows those rows were created as Orta bilim then mutated in legacy.
+- **Fix**: Education transform + `--correct-visa2014-family-member-education` force Orta / Orta mekdep / Orta bilim for age 18+ family members. Country and year stay. Children unchanged.
+- **Officer**: Rebuild DataImporter, run `--correct-visa2014-family-member-education` on the target DB (local PG already patched: 114 updated, 2 created). Hard-refresh the FM Educations tab.
+- **Prevent**: Do not leave adult FM Education as a 1:1 specialty copy. Do not turn RequirePersonEducation off.
+- **Cross-skill**: visa2014-to-visa2026-import
+
+### 2026-09-21 — Family member Educations tab is visible
+
+- **Need**: Officers could not see the auto-created Orta education row because the FM detail hid Educations.
+- **Cause**: `EmployeeOnly` / `EmployeeOnly_PersonRecordTabsLayout` hid Educations; FamilyMember layout had Educations `Removed="True"`.
+- **Fix**: Educations stays on family-member Person record tabs (index 0). Position / salaries / work duties stay hidden. Temporary visitor Educations stays removed.
+- **Officer**: Rebuild Blazor host, hard-refresh. Open Asiye ÖZÇUBUKOĞLU (or any adult FM) → **Educations** tab. New adult FM after DOB + save shows Orta / Orta mekdep / Orta bilim.
+- **Prevent**: Do not hide Educations for family members. Do not un-hide it for temporary visitors.
+- **Cross-skill**: —
+
+### 2026-09-21 — Adult family member gets default Orta education on create
+
+
+- **Need**: Legacy VISA2014 added Education Orta / Orta mekdep / Orta bilim for adult family members. Visa2026 only had those strings as report captions, so new adult FMs stayed Education 0 on People & links.
+- **Cause**: No Education row was created on Person. Children correctly have none; adults need a real BO for completeness.
+- **Fix**: `FamilyMemberDefaultEducation` on DateOfBirth (ImmediatePostData) and Person.OnSaving. Age 18+, family member, no existing Educations, CountryOfBirth set. Looks up catalog NameTm. Graduation year = birth year + 17. Skip children, employees, temporary visitors, and `MigrationImportContext.IsDataImport`.
+- **Test**: `FamilyMemberDefaultEducationTests` + existing child caption tests passed.
+- **Officer**: Stop F5, rebuild Blazor host. New family member with DOB 18+ should have Education 1 after save. Under 18 still Çaga with no Education row.
+- **Prevent**: Do not turn RequirePersonEducation off. Do not invent Education during VISA2014 import. Do not use Education.OnCreated IsDefault (that is Ýörite Orta).
+- **Cross-skill**: visa2014-to-visa2026-import (import still does not invent Education)
+
+### 2026-09-21 — Child dependent Education tile is not a gap
+
+
+- **Need**: Wiza Maksadyny Üýtgetmek FM People & links showed Education **0** (red) for a child (Elzem). Children usually have no Education BO; legacy import does not invent one.
+- **Cause**: Profile `RequirePersonEducation` is on for adult dependents. Completeness used Last-N expected 1 for every roster person. Merge already prints **Çaga** via `ChildDependentEducationCaption`.
+- **Fix**: People & links Education for `ChildDependentEducationCaption.Applies` (non-employee, age under 18 or marital Çaga) is caption-only **Çaga** when no Education is linked. Adult dependents still require Education. If a child has an Education row, the normal count tile stays. Start-from-person incomplete check skips children.
+- **Test**: `ChildDependentEducationCaptionTests` (completeness caption not short; adult 0/1 still short). 25 related tests passed.
+- **Officer**: Stop F5, rebuild Blazor host, hard-refresh. Open the FM case — child Education shows **Çaga**, not red 0. Adult Education stays 1 or red 0.
+- **Prevent**: Do not turn `RequirePersonEducation` off on ForFamilyMember profiles. Do not create dummy Education rows in VISA2014 import.
+- **Cross-skill**: visa2026-document-copies (skip Education.Current LinkMissing for the same child rule)
+
 ### 2026-09-19 — Progress sits before Netije; both cells stay white
 
 - **Need**: Ýüztutmanyň ýagdaýy at the end of the row, immediately before Ýüztutmanyň netijesi. No green/blue row fill on those two cells.

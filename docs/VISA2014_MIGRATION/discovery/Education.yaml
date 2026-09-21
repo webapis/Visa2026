@@ -58,6 +58,9 @@ mapping:
     EducationLevel: TitleOfEducationLevel + mgCode → LocalizationKey (mgCode = PdfForm_Code) — see EducationLevel.md.
     EducationInstitution: TitleOfIEducationInstitution → EducationInstitution.NameTm (tenant catalog 1471 rows).
     Specialty: legacy column Spcialty → Speciality.TitleOfSpeciality → Specialty.NameTm (tenant catalog 1063 rows).
+    Adult family member (age 18+): EducationLevel/Institution/Specialty forced to Orta / Orta mekdep / Orta bilim
+    (import-strategy calikFamilyMemberAdultEducationDefaults). Country and GraduationYear stay from source.
+    Children and employees copy lookups 1:1. Correction: --correct-visa2014-family-member-education.
     EducationCountry: Country.mgCode → Country.Code (reuse Person-wave Country layer-3).
     GraduationYear: derived from YEAR(EducationEndDate) when set; null when no end date (2,959 rows — allowed on Visa2026).
     Diploma copies: dbo.PassportCopy rows with Education FK (4,317 active; 4,287 with blob; max 15 per Education).

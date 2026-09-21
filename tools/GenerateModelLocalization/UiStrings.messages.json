@@ -2093,6 +2093,12 @@
     "tk-TM": "Gol çekiji",
     "ru-RU": "Подписант"
   },
+  "PlaceholderManual.Group.Contract": {
+    "en": "Contract",
+    "tr-TR": "Sözleşme",
+    "tk-TM": "Şertnama",
+    "ru-RU": "Договор"
+  },
   "PlaceholderManual.Group.Education": {
     "en": "Education",
     "tr-TR": "Eğitim",

@@ -196,7 +196,9 @@ public static class ApplicationStartFromPersonHelper
                 profile.PersonVisaLastCount,
                 ApplicationProfileInstancePersonValidItems.ResolveVisas(person, profile.PersonVisaLastCount).Count))
             return true;
-        if (profile.RequirePersonEducation && ApplicationProfileInstancePersonValidItems.ResolveEducation(person) == null)
+        if (profile.RequirePersonEducation
+            && !ChildDependentEducationCaption.Applies(person)
+            && ApplicationProfileInstancePersonValidItems.ResolveEducation(person) == null)
             return true;
         if (profile.RequirePersonAddressOfResidence && ApplicationProfileInstancePersonValidItems.ResolveAddress(person) == null)
             return true;

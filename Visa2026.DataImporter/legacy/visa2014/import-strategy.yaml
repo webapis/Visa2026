@@ -195,6 +195,21 @@ strategy:
         includesForgottenTypes:
           - App_Reg_Check_In_Internal
           - App_Reg_Check_Out_Internal
+      calikFamilyMemberAdultEducationDefaults:
+        lockedAt: 2026-09-21
+        ageAtLeast: 18
+        educationLevelNameTm: Orta
+        educationLevelLocalizationKey: Secondary
+        institutionNameTm: Orta mekdep
+        specialtyNameTm: Orta bilim
+        correctionFlag: --correct-visa2014-family-member-education
+        why: >
+          VISA2014 AfterChange_BirthCountry creates adult FM Education as
+          Orta / Orta mekdep / Orta bilim. Live VISA2015 later mutated many of
+          those specialties (Tehniki howpsuzlyk we zähmeti goramak) without
+          audit. Import and correction force the original triple. Country and
+          GraduationYear stay from source. Children and employees unchanged.
+          Adult FMs with no Education row get one default row (birth country).
       officerRelinkMayUseToday: true
       missingIdMap: leave_unlinked_until_oid_in_map_then_pin
     piaVisaResolvedLinkMismatch:

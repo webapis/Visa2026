@@ -960,7 +960,10 @@
           </LayoutGroup>
           <LayoutGroup Id="PersonCollectionSections" ShowCaption="False" Direction="Vertical" RelativeSize="58.4985835694051" Index="1" IsNewNode="True">
             <TabbedGroup Id="PersonRecordTabs" ShowCaption="True" Caption="Person record data" CaptionLocation="Top" Index="0" RelativeSize="62" CustomCSSClassName="visa-person-record-tabs" IsNewNode="True">
-              <LayoutGroup Id="Passports" RelativeSize="100" Index="0" IsNewNode="True">
+              <LayoutGroup Id="Educations" RelativeSize="100" Index="0" CustomCSSClassName="e2e-person-family-tab-educations" IsNewNode="True">
+                <LayoutItem Id="Educations" RelativeSize="100" IsNewNode="True" />
+              </LayoutGroup>
+              <LayoutGroup Id="Passports" RelativeSize="100" Index="1" IsNewNode="True">
                 <LayoutItem Id="Passports" RelativeSize="100" IsNewNode="True" />
               </LayoutGroup>
               <LayoutGroup Id="PositionHistory" RelativeSize="100" Index="1" IsNewNode="True">
@@ -986,9 +989,6 @@
               </LayoutGroup>
               <LayoutGroup Id="Salaries" Index="8" RelativeSize="100" IsNewNode="True">
                 <LayoutItem Id="Salaries" RelativeSize="100" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutGroup Id="Educations" RelativeSize="100" Removed="True">
-                <LayoutItem Id="Educations" RelativeSize="100" />
               </LayoutGroup>
               <LayoutGroup Id="IncompleteData" ShowCaption="True" Caption="Incomplete data" Index="10" RelativeSize="100" CustomCSSClassName="e2e-person-incomplete-data-tab" IsNewNode="True">
                 <LayoutItem Id="IsDataIncomplete" ViewItem="IsDataIncomplete" Index="0" RelativeSize="8" IsNewNode="True" />
@@ -1777,6 +1777,33 @@
         <ColumnInfo Id="ExpirationDate" Index="4" Width="100" IsNewNode="True" />
         <ColumnInfo Id="DaysRemaining" Index="5" Width="90" IsNewNode="True" />
         <ColumnInfo Id="StatusLabel" Index="6" Width="110" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdRegistration_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdRegistration" Caption="Active Registered" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="VisaNumber" Index="2" Width="110" Caption="Visa #" IsNewNode="True" />
+        <ColumnInfo Id="VisaExpirationDate" Index="3" Width="100" Caption="Expiry" IsNewNode="True" />
+        <ColumnInfo Id="ProgressStateLabel" Index="4" Width="160" Caption="Process State" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdToBeCheckedIn_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdToBeCheckedIn" Caption="To Be Checked In" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="VisaNumber" Index="2" Width="110" Caption="Visa #" IsNewNode="True" />
+        <ColumnInfo Id="EntryDate" Index="3" Width="100" Caption="Entry" IsNewNode="True" />
+        <ColumnInfo Id="DaysSinceEntry" Index="4" Width="110" Caption="Days Since Entry" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdToBeCheckedOut_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdToBeCheckedOut" Caption="To Be Checked Out" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="VisaNumber" Index="2" Width="110" Caption="Visa #" IsNewNode="True" />
+        <ColumnInfo Id="VisaExpirationDate" Index="3" Width="100" Caption="Expiry" IsNewNode="True" />
+        <ColumnInfo Id="DaysRemaining" Index="4" Width="110" Caption="Days Remaining" IsNewNode="True" />
       </Columns>
     </ListView>
   </Views>

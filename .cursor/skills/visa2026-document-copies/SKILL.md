@@ -53,6 +53,7 @@ disable-model-invocation: false
 | Application form opens second preview popup | Should download inline in component — no `OpenFilledApplicationFormAsync` popup | **This skill** |
 | Preview row flash too fast | `MinimumPreviewProgressDuration` (1.5s); Resminamalar CSS classes | **This skill** |
 | Dialog missing scans but files exist in DB | `ApplicationItemLinkedDocumentsResolver` + eligibility (diploma plan §1.2–§1.3) | **This skill** |
+| Child dependent Education.Current is Missing | Skip the diploma slot when `ChildDependentEducationCaption.Applies` and no Education BO. Do not invent Education. | **This skill** |
 | Preview OK, ZIP missing slot | Package options flags vs `ApplicationItemDocumentCopiesPackageSlotRules` vs packer | **This skill** |
 | Application form Preview shows Chrome “Please wait” / Adobe Reader | Do not iframe XFA; use pdf.js `visaXfaPreview` (`enableXfa`). Download stays filled XFA. | **This skill** |
 | Application form downloads but **fields empty/wrong** | Mapping logs, `PdfFormMapping`, `PdfMappingSourceGate` | **pdf-form-mapping** |
