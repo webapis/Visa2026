@@ -100,7 +100,7 @@ Playwright must **not** share the IDE dev host (`:5000` / `:5001`).
 
 **Preflight (default):** restore a local **pg_dump** of seeded `visa2026_easytest` when the dump matches `Visa2026.Module` AssemblyVersion; otherwise drop/recreate, `--updateDatabase`, then capture the dump. Start built `.exe` on **`:5050`**, stop host after tests. One host per session — no second port/DB.
 
-**GitHub Actions:** `e2e-tests.yml` caches `.easytest-snapshots`. Employee journeys run as **separate named steps** (Sign in, Register, Find, Add passport) so the job log shows each result. Each step is a new process: restore dump → host → one Fact. First cache miss still `--updateDatabase`. `VISA2026_E2E_SNAPSHOT_TRUST=true`. Do not commit or artifact the dump.
+**GitHub Actions:** `e2e-tests.yml` runs Sign in / Register / Find / Add passport as **parallel matrix jobs** (`fail-fast: false`) so each is a separate check. **`max-parallel` defaults to 4.** Override with workflow_dispatch **max_parallel** or repo variable **`E2E_MAX_PARALLEL`**. Each runner restores the cached pg_dump (or `--updateDatabase` on cache miss). Local Playwright stays **serial** — one `:5050` / `visa2026_easytest` (`DisableTestParallelization`). Do not commit or artifact the dump.
 
 **Local recapture (opt-in):** `Record-PlaywrightE2e.ps1 -SkipBuild -KeepDb -KeepHost -SkipBrowserInstall`. Reuses HTTP-ready `:5050` and leftover rows. **KeepHost implies KeepDb.** Pair KeepHost with **`-SkipBuild`**. Unique-key Facts (Register employee) should omit KeepDb and rely on snapshot restore for a clean catalog. `-RefreshSnapshot` after schema/lookup seed changes. `-NoSnapshot` forces `--updateDatabase`. Details: [reference.md](./reference.md#host-and-browser).
 

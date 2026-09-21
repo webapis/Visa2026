@@ -31,7 +31,9 @@ Use on your **own PC** with **Docker Desktop** (or any machine where you edit th
 
 | Script | Purpose |
 |--------|---------|
+| `Build-UserManual.ps1` | MkDocs build pipeline (generator, tests, validate). Supports `MANUAL_MEDIA_BASE_URL`. |
 | `Run-PlaywrightE2eSlice.ps1` | One Playwright Local E2E slice (Sign in / Register / Find / Add passport) with pg_dump restore. Used by `e2e-tests.yml`. |
+| `Start-Visa2026E2ePostgres.ps1` | Start GHA Windows PostgreSQL (preinstalled or Chocolatey) for E2E jobs. |
 | `Publish-ManualMedia.ps1` | Copy `user-manual/assets/` → on-prem `MANUAL_MEDIA_ROOT`. |
 | `Publish-UserManualSite.ps1` | Copy `user-manual/site/` → `MANUAL_SITE_ROOT`. |
 | `Publish-ManualRelease.ps1` | Orchestrator: optional record → media → build → site. See [USER_MANUAL_RELEASE.md](../docs/USER_MANUAL_RELEASE.md). |

@@ -1,0 +1,81 @@
+name: Visa2026 E2E Windows setup
+description: DevExpress license, PostgreSQL, pg_dump cache, Edge driver, EasyTest build.
+
+inputs:
+  devexpress-license:
+    description: DEVEXPRESS_LICENSE secret
+    required: false
+    default: ''
+  devexpress-key:
+    description: DEVEXPRESS_KEY secret fallback
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - name: Write DevExpress license
+      shell: pwsh
+      env:
+        DEVEXPRESS_LICENSE: ${{ inputs.devexpress-license }}
+        DEVEXPRESS_KEY: ${{ inputs.devexpress-key }}
+      run: |
+        New-Item -ItemType Directory -Force -Path DevExpress.Key | Out-Null
+        $license = $env:DEVEXPRESS_LICENSE
+        if ([string]::IsNullOrWhiteSpace($license)) { $license = $env:DEVEXPRESS_KEY }
+        if ([string]::IsNullOrWhiteSpace($license)) {
+          throw "Set DEVEXPRESS_LICENSE or DEVEXPRESS_KEY in repository secrets."
+        }
+        Set-Content -Path DevExpress.Key/DevExpress_License.txt -Value $license.Trim() -Encoding utf8 -NoNewline
+
+    - name: Start PostgreSQL
+      shell: pwsh
+      run: |
+        & .\scripts\ci\Start-Visa2026E2ePostgres.ps1
+
+    - name: Cache EasyTest pg_dump snapshot
+      uses: actions/cache@v4
+      with:
+        path: Visa2026.E2E.Tests/.easytest-snapshots
+        key: e2e-pg-snapshot-${{ runner.os }}-${{ hashFiles('Visa2026.Module/DatabaseUpdate/**', 'Visa2026.Module/BusinessObjects/**/*.cs') }}
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', '**/NuGet.config', '**/nuget.config') }}
+        restore-keys: nuget-${{ runner.os }}-
+
+    - name: Install Microsoft Edge WebDriver
+      shell: pwsh
+      run: |
+        $edgeExe = "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe"
+        if (-not (Test-Path $edgeExe)) {
+          $edgeExe = "$env:ProgramFiles\Microsoft\Edge\Application\msedge.exe"
+        }
+        if (-not (Test-Path $edgeExe)) {
+          throw "Microsoft Edge not found on the runner."
+        }
+        $edgeVersion = (Get-Item $edgeExe).VersionInfo.FileVersion
+        Write-Host "Edge version: $edgeVersion"
+        $driverDir = Join-Path $env:GITHUB_WORKSPACE "Visa2026.E2E.Tests\.webdrivers"
+        New-Item -ItemType Directory -Force -Path $driverDir | Out-Null
+        $zipPath = Join-Path $env:RUNNER_TEMP "edgedriver_win64.zip"
+        $zipUrl = "https://msedgedriver.microsoft.com/$edgeVersion/edgedriver_win64.zip"
+        Write-Host "Downloading: $zipUrl"
+        Invoke-WebRequest -Uri $zipUrl -OutFile $zipPath -UseBasicParsing
+        $extractRoot = Join-Path $env:RUNNER_TEMP "edgedriver_extract"
+        if (Test-Path $extractRoot) { Remove-Item $extractRoot -Recurse -Force }
+        Expand-Archive -LiteralPath $zipPath -DestinationPath $extractRoot -Force
+        $driverExe = Get-ChildItem -Path $extractRoot -Recurse -Filter msedgedriver.exe | Select-Object -First 1
+        if (-not $driverExe) { throw "msedgedriver.exe not found in downloaded zip." }
+        Copy-Item -LiteralPath $driverExe.FullName -Destination (Join-Path $driverDir "msedgedriver.exe") -Force
+        & (Join-Path $driverDir "msedgedriver.exe") --version
+
+    - name: Restore
+      shell: pwsh
+      run: dotnet restore Visa2026.slnx
+
+    - name: Build EasyTest configuration
+      shell: pwsh
+      run: dotnet build Visa2026.slnx -c EasyTest --no-restore

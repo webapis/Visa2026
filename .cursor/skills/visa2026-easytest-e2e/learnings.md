@@ -18,6 +18,14 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 
 ## Entries
 
+### 2026-09-21 — Parallel GHA employee slices, serial local host
+
+- **Outcome**: positive (workflow matrix; not yet observed on Actions)
+- **Context**: `e2e-tests.yml` strategy.matrix; `DisableTestParallelization` in E2E.Tests
+- **Symptom**: Sequential slices on one Windows job added Sign in + Register + Find before Add passport. One `:5050` cannot host four Playwright sessions.
+- **Fix / reuse**: CI matrix `fail-fast: false` — four Windows jobs, each own Postgres + restore dump. Composite `.github/actions/visa2026-e2e-windows-setup`. Do not enable xUnit parallel locally.
+- **Reuse**: Wall clock ≈ slowest slice + setup, not the sum. First cache miss may still `--updateDatabase` on every matrix job.
+
 ### 2026-09-21 — CI employee E2E slices share pg_dump cache
 
 - **Outcome**: positive (workflow + split test files; first Actions slice run not yet observed)
