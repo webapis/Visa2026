@@ -3,23 +3,23 @@ title: Register a new employee
 slug: employee/register
 locale: en
 tier: 2
-guideStatus: published
-lastReviewed: "2026-08-05"
+guideStatus: draft
+stepsLocked: true
+stepsLockedAt: "2026-09-21"
 bo: Person
 personRole: Employee
 navPath: Employee
 roles: [Visa Officer]
 prerequisiteSlugs:
   - getting-started/login
-  - getting-started/navigation
 screenshotsVersion: "2026.08"
-screenshotsCapturedAt: "2026-08-05T08:48:03.3957272Z"
-mediaE2eRunId: "20260805-134241"
-e2eTestFilter: PersonOfficerJourney_LoginCreateEmployeeAddPassport
+screenshotsCapturedAt: "2026-09-21T12:42:07.5770912Z"
+mediaE2eRunId: "20260921-173914"
+e2eTestFilter: PersonOfficerJourney_RegisterEmployee_Local
 e2eScenarioId: person-officer-journey
-verified: true
-verifiedAt: "2026-08-05T08:49:33.7498506Z"
-verifiedCommit: "2d70b13c"
+verified: false
+verifiedAt:
+verifiedCommit:
 ---
 
 # Register a new employee
@@ -27,10 +27,10 @@ verifiedCommit: "2d70b13c"
 This guide shows how to create a new **employee** person record in Visa2026. When you finish, the employee appears in the **Employees** list and you can open their detail form.
 
 !!! tip "Prerequisites"
-    Sign in ([login guide](../../getting-started/login.md)) and know how to use the left menu ([navigation guide](../../getting-started/navigation.md)).
+    Complete [Sign in to Visa2026](../../getting-started/login.md) first so you land on **Report Dashboard**.
 
 !!! tip "Screenshots"
-    Images are from the **English** UI (version **2026.08**). Labels differ by language; steps are the same.
+    These steps are **locked**. Pictures are from the English register journey.
 
 ## Before you start
 
@@ -42,14 +42,14 @@ This guide shows how to create a new **employee** person record in Visa2026. Whe
 
 ## Step 1 — Open the Employees list
 
-1. Sign in to Visa2026.
+1. After sign-in, you should see **Report Dashboard**.
 2. In the left menu, select **Employees**.
-3. Wait for the list to load.
+3. Wait for the list titled **Employees** to load.
 
-The toolbar should show **New** and **Refresh**.
+The toolbar should show **New**.
 
 <!-- media-capture: person-register-step-01-employees-list -->
-![Employees list ready for a new record](../../../assets/screenshots/v2026.08/en/person-register-step-01-employees-list.png)
+![Employees list after selecting Employees](../../../assets/screenshots/v2026.08/en/person-register-step-01-employees-list.png)
 
 ## Step 2 — Start a new employee
 
@@ -58,9 +58,12 @@ The toolbar should show **New** and **Refresh**.
 
 You are now on a blank employee record. Required fields are marked on the form (and listed below).
 
+<!-- media-capture: person-register-step-02-new -->
+![Click marker on New on the Employees toolbar](../../../assets/screenshots/v2026.08/en/person-register-step-02-new.png)
+
 ## Step 3 — Fill required fields
 
-Enter values using the on-screen labels. Typical **required** fields for a new employee include:
+Enter values using the on-screen labels. **Required** fields for a new employee:
 
 | Field | What to enter |
 |-------|----------------|
@@ -72,11 +75,16 @@ Enter values using the on-screen labels. Typical **required** fields for a new e
 | **Country Of Birth** | Choose from the list |
 | **Gender** | Choose from the list |
 | **Marital Status** | Choose from the list |
+| **Family members for visa (manual)** | Leave **Ýok** if there are no family members to list. Use **…** to add lines. |
 | **Nationality** | Choose from the list |
 | **Foreign Address** | Address text |
 | **Foreign Address Country** | Choose from the list |
 | **Project Contract** | Choose the active contract |
 | **Company (Subcontractor)** | Choose the subcontractor company |
+
+**Age** fills from **Date Of Birth** — you do not type it.
+
+If **Family members for visa (manual)** already shows **Ýok**, leave it unless you need to list dependents. Adding lines is covered in [Family members for visa (manual)](family-members-for-visa-manual.md).
 
 ### Add a subcontractor (tenant catalog)
 
@@ -97,6 +105,9 @@ Enter values using the on-screen labels. Typical **required** fields for a new e
 
 Optional fields (photo, extra tabs) can be completed later — see the employee detail tabs after save.
 
+<!-- media-capture: person-register-step-03-fields-filled -->
+![Employee detail form with required fields filled, before Save](../../../assets/screenshots/v2026.08/en/person-register-step-03-fields-filled.png)
+
 ## Step 4 — Save the employee
 
 1. Review the values you entered.
@@ -111,18 +122,20 @@ If **Save** fails:
 After a successful save, you usually remain on the employee **detail form** with your values shown.
 
 <!-- media-capture: person-register-step-02-saved-detail -->
-![Employee detail after save](../../../assets/screenshots/v2026.08/en/person-register-step-02-saved-detail.png)
+![Employee detail form after a successful Save](../../../assets/screenshots/v2026.08/en/person-register-step-02-saved-detail.png)
 
 ## Step 5 — Confirm the employee in the list
 
+The **Employees** list may already contain other people. Use search so you open the row you just saved.
+
 1. Open **Employees** in the left menu again (or use **Save and Close** if you prefer to return to the list).
-2. Find the row with the **Personal Number** you entered.
-3. Open the row to view the detail form.
+2. Click the search box (*Text to search...*) and type the **Personal Number** or **Full Name** you entered.
+3. Open the matching row.
 
 Check that **First Name**, **Last Name**, and **Personal Number** match what you saved.
 
 <!-- media-capture: person-register-step-03-open-from-list -->
-![Employee detail opened from the list](../../../assets/screenshots/v2026.08/en/person-register-step-03-open-from-list.png)
+![Employee opened again from the Employees list](../../../assets/screenshots/v2026.08/en/person-register-step-03-open-from-list.png)
 
 !!! success "Employee registered"
     When the employee appears in **Employees** and opens with the correct **Personal Number**, registration succeeded.
@@ -132,13 +145,12 @@ Check that **First Name**, **Last Name**, and **Personal Number** match what you
 | Problem | What to do |
 |---------|------------|
 | **New** is disabled or missing | Your role may not allow create — ask your supervisor |
-| Validation error on **Save** | Fill every required field; re-select **Project Contract** and **Company (Subcontractor)** |
+| Validation error on **Save** | Fill every required field; re-select **Project Contract** and **Company (Subcontractor)**; confirm **Family members for visa (manual)** shows **Ýok** or your family lines |
 | Duplicate **Personal Number** | Use another number; search the list to see if the person already exists |
 | Cannot find the row after save | Select **Refresh** on the list; check filters |
 
 ## What to read next
 
-- [Main navigation](../../getting-started/navigation.md) — lists, detail forms, and tabs
-- [Family members for visa (manual)](family-members-for-visa-manual.md) — manual family lines when dependents are not full person records
+- [Find and open a person](../person/open-and-search.md) — search **Employees** for the record you just saved
 - [Add a passport](add-passport.md) — passport on the **Passports** tab
-- **Person reference** — field help generated from the application catalog ([Business objects](../../reference/business-objects.md))
+- [Family members for visa (manual)](family-members-for-visa-manual.md) — manual family lines when dependents are not full person records

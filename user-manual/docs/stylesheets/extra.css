@@ -106,3 +106,34 @@
 .md-sidebar--primary .md-status {
   display: none;
 }
+
+/* Draft screenshot slot until the matching capture PNG is in the guide. */
+.md-typeset .um-screenshot-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 14rem;
+  margin: 1rem 0 1.5rem;
+  padding: 1.5rem 1.25rem;
+  border: 2px dashed var(--md-default-fg-color--lighter, #9aa0a6);
+  border-radius: 6px;
+  background: var(--md-code-bg-color, rgba(0, 0, 0, 0.04));
+  text-align: center;
+  color: var(--md-default-fg-color--light);
+}
+
+.md-typeset .um-screenshot-placeholder__title {
+  margin: 0 0 0.4rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--md-default-fg-color);
+}
+
+.md-typeset .um-screenshot-placeholder__hint {
+  margin: 0;
+  max-width: 36rem;
+  font-size: 0.85rem;
+}

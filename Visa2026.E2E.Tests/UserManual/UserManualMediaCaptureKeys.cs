@@ -7,7 +7,10 @@ namespace Visa2026.E2E.Tests.UserManual;
 /// </summary>
 internal static class UserManualMediaCaptureKeys
 {
+    internal const string LoginStep01Open = "login-step-01-open";
     internal const string LoginStep01Logon = "login-step-01-logon";
+    internal const string LoginStep03CredentialsFilled = "login-step-03-credentials-filled";
+    internal const string LoginStep04LogIn = "login-step-04-log-in";
     internal const string LoginStep02ReportDashboard = "login-step-02-report-dashboard";
 
     internal const string NavigationStep01Shell = "navigation-step-01-shell";
@@ -16,6 +19,8 @@ internal static class UserManualMediaCaptureKeys
     internal const string NavigationStep04DetailForm = "navigation-step-04-detail-form";
 
     internal const string PersonRegisterStep01EmployeesList = "person-register-step-01-employees-list";
+    internal const string PersonRegisterStep02New = "person-register-step-02-new";
+    internal const string PersonRegisterStep03FieldsFilled = "person-register-step-03-fields-filled";
     internal const string PersonRegisterStep02SavedDetail = "person-register-step-02-saved-detail";
     internal const string PersonRegisterStep03OpenFromList = "person-register-step-03-open-from-list";
 

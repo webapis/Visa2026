@@ -104,6 +104,7 @@ namespace Visa2026.Module.DatabaseUpdate
             TenantUserCatalogSync.Sync(ObjectSpace, userManager);
 
             EnsureEasyTestActualPositionSeed();
+            EnsureEasyTestEmployeeRosterSeed();
 
             ObjectSpace.CommitChanges();
         }
@@ -125,21 +126,45 @@ namespace Visa2026.Module.DatabaseUpdate
             actualPosition.Name = name;
         }
 
+        /// <summary>
+        /// Find-and-open needs more than one employee row. Seed decoys on the EasyTest database only.
+        /// </summary>
+        private void EnsureEasyTestEmployeeRosterSeed()
+        {
+            if (!IsEasyTestDatabase())
+                return;
+
+            EasyTestEmployeeRosterSeed.Ensure(ObjectSpace);
+        }
+
         private bool IsEasyTestDatabase()
         {
             try
             {
+                if (IsEasyTestEnvironmentFlag())
+                    return true;
+
                 if (ObjectSpace is not EFCoreObjectSpace efObjectSpace)
                     return false;
 
                 var connectionString = efObjectSpace.DbContext.Database.GetConnectionString();
-                return !string.IsNullOrEmpty(connectionString)
-                       && connectionString.Contains("Visa2026EasyTest", StringComparison.OrdinalIgnoreCase);
+                if (string.IsNullOrEmpty(connectionString))
+                    return false;
+
+                return connectionString.Contains("Visa2026EasyTest", StringComparison.OrdinalIgnoreCase)
+                    || connectionString.Contains("visa2026_easytest", StringComparison.OrdinalIgnoreCase);
             }
             catch
             {
                 return false;
             }
+        }
+
+        private static bool IsEasyTestEnvironmentFlag()
+        {
+            var value = Environment.GetEnvironmentVariable("VISA2026_EASYTEST");
+            return string.Equals(value, "true", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(value, "1", StringComparison.Ordinal);
         }
 
         public override void UpdateDatabaseBeforeUpdateSchema()

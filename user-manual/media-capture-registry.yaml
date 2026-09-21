@@ -6,25 +6,56 @@
 version: 2
 
 captures:
+  login-step-01-open:
+    guideSlugs:
+      - getting-started/login
+    journey: person-officer-journey
+    description: Çalık splash with Loading App Data... when opening Visa2026 (before the sign-in form)
+    assertBeforeCapture:
+      - textVisible: Loading App Data...
+
   login-step-01-logon:
     guideSlugs:
       - getting-started/login
     journey: person-officer-journey
-    description: Sign-in page before Log In
+    description: Sign-in form with User Name, Password, and Log In — not the Çalık Loading App Data splash
+    assertBeforeCapture:
+      - urlContains: LoginPage
+      - textVisible: User Name
+      - textVisible: Log In
+
+  login-step-03-credentials-filled:
+    guideSlugs:
+      - getting-started/login
+    journey: person-officer-journey
+    description: Sign-in form after typing User Name and Password (password shown as dots) — before Log In
+    assertBeforeCapture:
+      - urlContains: LoginPage
+      - textVisible: User Name
+      - textVisible: Password
+      - textVisible: Log In
+
+  login-step-04-log-in:
+    guideSlugs:
+      - getting-started/login
+    journey: person-officer-journey
+    description: Sign-in form with credentials filled — mouse click indicator on Log In
     pinpoint:
       kind: button
       label: Log In
     assertBeforeCapture:
       - urlContains: LoginPage
+      - textVisible: Log In
 
   login-step-02-report-dashboard:
     guideSlugs:
       - getting-started/login
     journey: person-officer-journey
-    description: Report Dashboard immediately after successful sign-in
+    description: Report Dashboard home after Log In — title, left menu Employees, splash dismissed
     assertBeforeCapture:
       - splashDismissed: true
       - textVisible: Report Dashboard
+      - textVisible: Employees
 
   navigation-step-01-shell:
     guideSlugs:
@@ -77,13 +108,31 @@ captures:
     guideSlugs:
       - employee/register
     journey: person-officer-journey
-    description: Employees list before New
+    description: Employees list after selecting Employees in the left menu
+    assertBeforeCapture:
+      - urlContains: Person_ListView_Employees
+      - toolbarVisible: New
+
+  person-register-step-02-new:
+    guideSlugs:
+      - employee/register
+    journey: person-officer-journey
+    description: Employees list — mouse click indicator on New
     pinpoint:
       kind: toolbar
       titlePrefix: New
     assertBeforeCapture:
       - urlContains: Person_ListView_Employees
       - toolbarVisible: New
+
+  person-register-step-03-fields-filled:
+    guideSlugs:
+      - employee/register
+    journey: person-officer-journey
+    description: New employee detail form with required fields filled — before Save
+    assertBeforeCapture:
+      - fieldVisible: First Name
+      - fieldVisible: Personal Number
 
   person-register-step-02-saved-detail:
     guideSlugs:

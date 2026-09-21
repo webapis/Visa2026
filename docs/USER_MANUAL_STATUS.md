@@ -1,7 +1,7 @@
 # User Manual — status, roadmap & next steps
 
 Status: **Phase 1 complete — catalog + validator + UserManualDocs tests**  
-Last updated: 2026-08-05  
+Last updated: 2026-09-21  
 Owner: Product + Visa officers + Tech lead
 
 **Read this first** for where the manual program stands, what changed recently, and what to implement next.
@@ -131,6 +131,9 @@ Consolidated changelog across planning docs. Append here when architecture or ph
 | 2026-08-06 | **Officer review pilots 6–7** — `employee/family-members-for-visa-manual` + `employee/add-visa` (en) → `guideStatus: published`, verified E2E `20260805-172303` |
 | 2026-08-06 | **Catalog fix** — `[UserDocumentation]` on `UserReportTemplate` for administration guides validator |
 | 2026-08-07 | **Application Profile officer guides (preview)** — `applications/application-profiles`, `administration/configuration/application-profiles` (EN); updated `create` + `overview`; mermaid lifecycle; no E2E/media-capture yet |
+| 2026-09-21 | **Restart: EN login draft first** — `getting-started/login` back to `draft`; process is guide prose → then E2E capture; step-01 PNG flagged (splash, not form) |
+| 2026-09-21 | **EN Sign in steps locked** — five officer steps + Log Off; captures `login-step-01-logon` / `login-step-02-report-dashboard`; E2E not run yet |
+| 2026-09-21 | **Sign in E2E recapture** — `PersonOfficerJourney_SignIn_Local` green; `login-step-01-logon` is the form (UM-01); wait for splash dismiss before capture |
 
 **Run locally:** `./scripts/ci/Build-UserManual.ps1 -SkipE2E` (requires Python 3 for mkdocs step).
 
@@ -154,7 +157,7 @@ Ordered queue for **Phase 0**. Complete in sequence unless noted. Update this se
 
 | # | Task | Status |
 |---|------|--------|
-| **P2-1** | `getting-started/login` guide (en/tr/tk/ru) | **Published** (en 2026-08-05; verified E2E) |
+| **P2-1** | `getting-started/login` guide (en/tr/tk/ru) | **Draft** — EN steps locked; Playwright `SignIn_Local` green `20260921-151157`; officer review next |
 | **P2-2** | `getting-started/navigation` guide (en/tr/tk/ru) | **Published** (en 2026-08-05; verified E2E) |
 | **P2-3** | Login + navigation screenshots (`v2026.08/en/`) | **Done** (EasyTest `person-officer-journey`; en UI replicated to tr/tk/ru per D12) |
 | **P2-3b** | `person/open-and-search` guide (en/tr/tk/ru) | **Published** (en 2026-08-05; verified E2E) |
@@ -190,7 +193,7 @@ Ordered queue for **Phase 0**. Complete in sequence unless noted. Update this se
 
 | # | Guide | Officer review | Tech `published` |
 |---|-------|----------------|------------------|
-| 1 | [Sign in](../user-manual/docs/en/getting-started/login.md) | **Done** 2026-08-05 (en) | **Done** — verified E2E |
+| 1 | [Sign in](../user-manual/docs/en/getting-started/login.md) | **Locked** 2026-09-21 (EN steps) | E2E recapture **done** `20260921-151157` |
 | 2 | [Main navigation](../user-manual/docs/en/getting-started/navigation.md) | **Done** 2026-08-05 (en) | **Done** — verified E2E |
 | 3 | [Find and open a person](../user-manual/docs/en/guides/person/open-and-search.md) | **Done** 2026-08-05 (en) | **Done** — verified E2E |
 | 4 | [Register employee](../user-manual/docs/en/guides/employee/register.md) | **Done** 2026-08-05 (en) | **Done** — verified E2E |

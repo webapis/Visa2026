@@ -62,6 +62,40 @@ public static class E2ETestPassportCreateOnlyJourneyValues
     public static string FullName => $"{FirstName} {LastName}";
 }
 
+/// <summary>
+/// Distinct employee numbers for the Register-employee UserManual Fact so it can share
+/// the EasyTest session DB with the passport journey.
+/// </summary>
+public static class E2ETestRegisterEmployeeJourneyValues
+{
+    public const string PersonalNumber = "E2E-EMP-030";
+    public const string FirstName = "Ferdi";
+    public const string LastName = "RegisterOnly";
+
+    public static string FullName => $"{FirstName} {LastName}";
+}
+
+/// <summary>
+/// Extra EasyTest employees so Find-and-open can search among more than one row.
+/// Seeded on the EasyTest database only.
+/// </summary>
+public static class E2ETestFindEmployeeDecoyValues
+{
+    public static readonly EmployeeSpec[] All =
+    [
+        new("E2E-EMP-DEC-001", "Aylin", "SearchAlpha"),
+        new("E2E-EMP-DEC-002", "Baran", "SearchBeta"),
+        new("E2E-EMP-DEC-003", "Cem", "SearchGamma"),
+    ];
+
+    public static EmployeeSpec SearchTarget => All[1];
+
+    public sealed record EmployeeSpec(string PersonalNumber, string FirstName, string LastName)
+    {
+        public string FullName => $"{FirstName} {LastName}";
+    }
+}
+
 /// <summary>Stable values for family member create in officer journey E2E-001.</summary>
 public static class E2ETestFamilyMemberCreateValues
 {

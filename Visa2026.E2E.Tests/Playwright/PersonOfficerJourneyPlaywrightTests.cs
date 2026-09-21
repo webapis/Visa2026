@@ -22,6 +22,48 @@ public sealed class PersonOfficerJourneyPlaywrightTests
     [Fact]
     [SupportedOSPlatform("windows")]
     [Trait("E2ETarget", "Local")]
+    [Trait("GuideSlug", "getting-started/login")]
+    public Task PersonOfficerJourney_SignIn_Local() =>
+        PlaywrightE2eTestRunner.RunAsync(_fixture, nameof(PersonOfficerJourney_SignIn_Local), async () =>
+        {
+            Assert.Equal(PlaywrightE2eTarget.Local, PlaywrightE2eEnvironment.Target);
+
+            var journey = new PlaywrightPersonOfficerJourney(_fixture.Page);
+            await journey.RunSignInToReportDashboardAsync();
+        });
+
+    [Fact]
+    [SupportedOSPlatform("windows")]
+    [Trait("E2ETarget", "Local")]
+    [Trait("GuideSlug", "employee/register")]
+    public Task PersonOfficerJourney_RegisterEmployee_Local() =>
+        PlaywrightE2eTestRunner.RunAsync(_fixture, nameof(PersonOfficerJourney_RegisterEmployee_Local), async () =>
+        {
+            Assert.Equal(PlaywrightE2eTarget.Local, PlaywrightE2eEnvironment.Target);
+
+            var journey = new PlaywrightPersonOfficerJourney(_fixture.Page);
+            await journey.RunRegisterEmployeeAsync(
+                E2ETestRegisterEmployeeJourneyValues.PersonalNumber,
+                E2ETestRegisterEmployeeJourneyValues.FirstName,
+                E2ETestRegisterEmployeeJourneyValues.LastName);
+        });
+
+    [Fact]
+    [SupportedOSPlatform("windows")]
+    [Trait("E2ETarget", "Local")]
+    [Trait("GuideSlug", "person/open-and-search")]
+    public Task PersonOfficerJourney_FindEmployee_Local() =>
+        PlaywrightE2eTestRunner.RunAsync(_fixture, nameof(PersonOfficerJourney_FindEmployee_Local), async () =>
+        {
+            Assert.Equal(PlaywrightE2eTarget.Local, PlaywrightE2eEnvironment.Target);
+
+            var journey = new PlaywrightPersonOfficerJourney(_fixture.Page);
+            await journey.RunFindEmployeeAsync();
+        });
+
+    [Fact]
+    [SupportedOSPlatform("windows")]
+    [Trait("E2ETarget", "Local")]
     [Trait("GuideSlug", "employee/family-members-for-visa-manual")]
     [Trait("GuideSlug", "family-member/register")]
     public Task PersonOfficerJourney_LoginCreateEmployeeAddPassport_Local() =>

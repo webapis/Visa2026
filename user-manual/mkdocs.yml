@@ -94,12 +94,12 @@ nav:
       - getting-started/login.md
       - getting-started/navigation.md
       - guides/tracking/report-dashboard.md
-      - guides/person/open-and-search.md
       - guides/person/dossier.md
       - guides/person/document-copies.md
   - Guides:
       - Employee:
           - guides/employee/register.md
+          - guides/person/open-and-search.md
           - guides/employee/family-members-for-visa-manual.md
           - guides/employee/add-passport.md
           - guides/employee/add-visa.md

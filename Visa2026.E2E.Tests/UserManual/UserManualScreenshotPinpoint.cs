@@ -100,34 +100,62 @@ internal static class UserManualScreenshotPinpoint
 
     internal static void BurnIntoImage(string imagePath, PinpointRect box)
     {
-        const int pad = 6;
-        using var bitmap = new Bitmap(imagePath);
-        using var graphics = Graphics.FromImage(bitmap);
-        graphics.SmoothingMode = SmoothingMode.AntiAlias;
+        const int pad = 8;
+        byte[] bytes = File.ReadAllBytes(imagePath);
+        using var input = new MemoryStream(bytes);
+        using var original = new Bitmap(input);
+        using var bitmap = new Bitmap(original.Width, original.Height, PixelFormat.Format32bppArgb);
+        using (var graphics = Graphics.FromImage(bitmap))
+        {
+            graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+            graphics.DrawImage(original, 0, 0, original.Width, original.Height);
 
-        int x = (int)Math.Max(0, Math.Floor(box.X - pad));
-        int y = (int)Math.Max(0, Math.Floor(box.Y - pad));
-        int w = (int)Math.Min(bitmap.Width - x, Math.Ceiling(box.Width + pad * 2));
-        int h = (int)Math.Min(bitmap.Height - y, Math.Ceiling(box.Height + pad * 2));
-        if (w <= 0 || h <= 0)
-            return;
+            int x = (int)Math.Max(0, Math.Floor(box.X - pad));
+            int y = (int)Math.Max(0, Math.Floor(box.Y - pad));
+            int w = (int)Math.Min(bitmap.Width - x, Math.Ceiling(box.Width + pad * 2));
+            int h = (int)Math.Min(bitmap.Height - y, Math.Ceiling(box.Height + pad * 2));
+            if (w > 0 && h > 0)
+            {
+                var rect = new Rectangle(x, y, w, h);
+                using var fillBrush = new SolidBrush(Color.FromArgb(56, 255, 193, 7));
+                using var borderPen = new Pen(Color.FromArgb(255, 230, 126, 0), 4f);
+                graphics.FillRectangle(fillBrush, rect);
+                graphics.DrawRectangle(borderPen, rect);
+            }
 
-        var rect = new Rectangle(x, y, w, h);
+            float tipX = (float)(box.X + box.Width * 0.7);
+            float tipY = (float)(box.Y + box.Height * 0.55);
+            DrawMouseCursor(graphics, tipX, tipY);
+        }
 
-        using var fillBrush = new SolidBrush(Color.FromArgb(48, 255, 193, 7));
-        using var borderPen = new Pen(Color.FromArgb(255, 230, 126, 0), 3.5f);
-        graphics.FillRectangle(fillBrush, rect);
-        graphics.DrawRectangle(borderPen, rect);
+        string tempPath = imagePath + ".pinpoint.tmp.png";
+        bitmap.Save(tempPath, ImageFormat.Png);
+        File.Copy(tempPath, imagePath, overwrite: true);
+        File.Delete(tempPath);
+    }
 
-        float pointerX = (float)(box.X + box.Width / 2);
-        float pointerY = (float)(box.Y + box.Height);
-        float radius = 9f;
-        using var pointerBrush = new SolidBrush(Color.FromArgb(255, 230, 126, 0));
-        using var pointerBorder = new Pen(Color.FromArgb(255, 180, 90, 0), 2f);
-        graphics.FillEllipse(pointerBrush, pointerX - radius, pointerY - radius / 2, radius * 2, radius);
-        graphics.DrawEllipse(pointerBorder, pointerX - radius, pointerY - radius / 2, radius * 2, radius);
+    private static void DrawMouseCursor(Graphics graphics, float tipX, float tipY)
+    {
+        PointF[] outline =
+        [
+            new(tipX, tipY),
+            new(tipX + 1.5f, tipY + 18f),
+            new(tipX + 6.5f, tipY + 13.5f),
+            new(tipX + 12f, tipY + 24f),
+            new(tipX + 15.5f, tipY + 22.5f),
+            new(tipX + 9.5f, tipY + 12f),
+            new(tipX + 17f, tipY + 12f),
+        ];
 
-        bitmap.Save(imagePath, ImageFormat.Png);
+        using var fill = new SolidBrush(Color.White);
+        using var border = new Pen(Color.FromArgb(255, 30, 30, 30), 1.6f)
+        {
+            LineJoin = LineJoin.Round,
+            EndCap = LineCap.Round,
+        };
+        graphics.FillPolygon(fill, outline);
+        graphics.DrawPolygon(border, outline);
     }
 
     private static string? ResolvePinpointFilePath()

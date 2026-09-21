@@ -62,7 +62,6 @@ function Get-ScreenshotLabelFromFileName {
 # Source label (without .png) -> destination file names under each locale folder (legacy fan-out).
 # Prefer doc-anchored 1:1 captures (label == destination stem). This map covers guides not yet migrated.
 $map = [ordered]@{
-    '00-logon-page' = @('login-step-01-logon')
     '01-after-login' = @(
         'person-mark-incomplete-step-04-dashboard.png',
         'report-dashboard-step-01-overview.png',

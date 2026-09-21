@@ -92,8 +92,9 @@ flowchart TB
     WorkDuty --> AppItem
     Salary --> AppItem
   end
-  GS --> PersonRead
-  PersonRead --> Person
+  GS --> Person
+  PersonRead --> PersonEdit
+  Person --> PersonRead
 ```
 
 ### Why `ApplicationItem` blocks early application guides
@@ -144,35 +145,35 @@ Publish in **order** column. **Phase 2** = orders **1–20** (through `applicati
 |------:|------|------|-------|------|--------|--------------|---------------|
 | 1 | 0 | `getting-started/login` | Sign in to Visa2026 | — | — | — | — |
 | 2 | 0 | `getting-started/navigation` | Main navigation | — | — | — | 1 |
-| 3 | 1 | `person/open-and-search` | Find and open a person | Person | — | — | 2 |
-| 4 | 2 | `employee/register` | Register a new employee | Person | — | Employee | 3 |
-| 4a | 3 | `employee/family-members-for-visa-manual` | Family members for visa (manual) | Person | — | Employee | 4 |
-| 5a | 2 | `employee/add-passport` | Add a passport (employee) | Person | — | Employee | 4 |
-| 5b | 2 | `family-member/add-passport` | Add a passport (family member) | Person | — | FamilyMember | 3 |
+| 3 | 2 | `employee/register` | Register a new employee | Person | — | Employee | 1 |
+| 4 | 2 | `person/open-and-search` | Find and open a person | Person | — | — | 3 |
+| 4a | 3 | `employee/family-members-for-visa-manual` | Family members for visa (manual) | Person | — | Employee | 3 |
+| 5a | 2 | `employee/add-passport` | Add a passport (employee) | Person | — | Employee | 3 |
+| 5b | 2 | `family-member/add-passport` | Add a passport (family member) | Person | — | FamilyMember | 4 |
 | 6a | 2 | `employee/add-visa` | Add a visa (employee) | Person | Passport | Employee | 5a |
 | 6b | 2 | `family-member/add-visa` | Add a visa (family member) | Person | Passport | FamilyMember | 5b |
-| 5c | 2 | `temporary-visitor/add-passport` | Add a passport (temporary visitor) | Person | — | TemporaryVisitor | 3 |
+| 5c | 2 | `temporary-visitor/add-passport` | Add a passport (temporary visitor) | Person | — | TemporaryVisitor | 4 |
 | 6c | 2 | `temporary-visitor/add-visa` | Add a visa (temporary visitor) | Person | Passport | TemporaryVisitor | 5c |
-| 7 | 2 | `employee/add-education` | Add an education record | Person | — | Employee | 4 |
-| 8a | 2 | `employee/add-medical-record` | Add a medical record (employee) | Person | — | Employee | 4 |
-| 8b | 2 | `family-member/add-medical-record` | Add a medical record (family member) | Person | — | FamilyMember | 3 |
-| 8c | 2 | `temporary-visitor/add-medical-record` | Add a medical record (TV) | Person | — | TemporaryVisitor | 3 |
-| 9a | 2 | `employee/add-address` | Add an address (employee) | Person | — | Employee | 4 |
-| 9b | 2 | `family-member/add-address` | Add an address (family member) | Person | — | FamilyMember | 3 |
-| 9c | 2 | `temporary-visitor/add-address` | Add an address (temporary visitor) | Person | — | TemporaryVisitor | 3 |
-| 10 | 2 | `employee/add-position-history` | Add position history | Person | — | Employee | 4 |
-| 11 | 2 | `employee/add-work-duty` | Add a work duty | Person | — | Employee | 4 |
-| 12 | 2 | `employee/add-salary` | Add a salary record | Person | — | Employee | 4 |
-| 13 | 2 | `employee/add-travel` | Add a travel history | Person | — | Employee | 4 |
-| 14 | 2 | `employee/add-cv-documents` | Add CV and personal files | Person | — | Employee | 4 |
-| 15 | 3 | `employee/edit-employee` | Update employee details | Person | — | Employee | 4 |
-| 16 | 3 | `person/mark-incomplete` | Mark incomplete / complete | Person | — | — | 4 |
-| 17 | 4 | `applications/create` | Create an application | Application | — | 4 |
+| 7 | 2 | `employee/add-education` | Add an education record | Person | — | Employee | 3 |
+| 8a | 2 | `employee/add-medical-record` | Add a medical record (employee) | Person | — | Employee | 3 |
+| 8b | 2 | `family-member/add-medical-record` | Add a medical record (family member) | Person | — | FamilyMember | 4 |
+| 8c | 2 | `temporary-visitor/add-medical-record` | Add a medical record (TV) | Person | — | TemporaryVisitor | 4 |
+| 9a | 2 | `employee/add-address` | Add an address (employee) | Person | — | Employee | 3 |
+| 9b | 2 | `family-member/add-address` | Add an address (family member) | Person | — | FamilyMember | 4 |
+| 9c | 2 | `temporary-visitor/add-address` | Add an address (temporary visitor) | Person | — | TemporaryVisitor | 4 |
+| 10 | 2 | `employee/add-position-history` | Add position history | Person | — | Employee | 3 |
+| 11 | 2 | `employee/add-work-duty` | Add a work duty | Person | — | Employee | 3 |
+| 12 | 2 | `employee/add-salary` | Add a salary record | Person | — | Employee | 3 |
+| 13 | 2 | `employee/add-travel` | Add a travel history | Person | — | Employee | 3 |
+| 14 | 2 | `employee/add-cv-documents` | Add CV and personal files | Person | — | Employee | 3 |
+| 15 | 3 | `employee/edit-employee` | Update employee details | Person | — | Employee | 3 |
+| 16 | 3 | `person/mark-incomplete` | Mark incomplete / complete | Person | — | — | 3 |
+| 17 | 4 | `applications/create` | Create an application | Application | — | 3 |
 | 18 | 4 | `applications/add-items` | Add application items | ApplicationItem | Application + Person\* | 17, **5–14** |
 | 19 | 4 | `applications/progress` | Track application progress | ApplicationProgress | Application | 17, 18 |
 | 20 | 5 | `applications/document-copies` | Ministry document copies | ApplicationItem | Application | 18 |
 | 21 | 5 | `applications/resminamalar` | Resminamalar report package | Application | — | 17 |
-| 22 | 6 | `person/dossier` | Person dossier | Person | — | 3, 15 |
+| 22 | 6 | `person/dossier` | Person dossier | Person | — | 4, 15 |
 | 23 | 6 | `tracking/report-dashboard` | Report Dashboard | — | — | 2 |
 | 24 | 7 | `administration/user-report-templates` | User report templates | UserReportTemplate | — | 21 |
 | 25 | 7 | `administration/template-staging` | Edit and sync templates | UserReportTemplate | — | 24 |
@@ -273,7 +274,7 @@ tier: 2
 tierName: Create
 bo: Person
 prerequisiteSlugs:
-  - person/open-and-search
+  - getting-started/login
 operations: [create]
 status: draft
 ---

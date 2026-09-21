@@ -2,128 +2,110 @@
 title: Find and open a person
 slug: person/open-and-search
 locale: en
-tier: 1
-guideStatus: published
-lastReviewed: "2026-08-05"
-bo: Person
+tier: 2
+guideStatus: draft
+stepsLocked: false
 roles: [Visa Officer]
 prerequisiteSlugs:
   - getting-started/login
-  - getting-started/navigation
+  - employee/register
 screenshotsVersion: "2026.08"
-screenshotsCapturedAt: "2026-08-05T08:48:03.3957272Z"
-mediaE2eRunId: "20260805-134241"
 e2eTestFilter: PersonOfficerJourney_LoginCreateEmployeeAddPassport
 e2eScenarioId: person-officer-journey
-verified: true
-sourceDocs:
-  - docs/REPORT_DASHBOARD.md
-  - docs/PERSON_DOSSIER.md
-verifiedAt: "2026-08-05T08:49:33.7498506Z"
-verifiedCommit: "2d70b13c"
+verified: false
+verifiedAt:
+verifiedCommit:
 ---
 
 # Find and open a person
 
-This guide shows how to locate an existing person in Visa2026 and open their record. When you finish, you can open an employee (or other person type) from a list and read their **detail form**.
+This guide shows how to find an employee who is **already in Visa2026** and open their record. The list should have **more than one** employee so search can pick the right row. Register employees first if the list is empty or has only one person.
 
-!!! tip "Prerequisites"
-    Sign in ([login guide](../../getting-started/login.md)) and know the shell ([navigation guide](../../getting-started/navigation.md)).
+!!! tip "Prerequisite"
+    Complete [Register a new employee](../employee/register.md) until **Employees** has **at least two** people. Search is only useful when more than one row is in the list.
 
 !!! tip "Screenshots"
-    Images are from the **English** UI (version **2026.08**). Labels differ by language; steps are the same.
+    These steps are **not locked** yet. Pictures are from an earlier English run and will be recaptured after the steps are locked.
 
 ## Before you start
 
-| You need | Notes |
-|----------|--------|
-| **Visa Officer** role with read access on person lists | Ask your supervisor if a menu item is missing |
-| At least one search clue | Name, **Personal Number**, or passport number |
+| You need | From |
+|----------|------|
+| A signed-in **Visa Officer** session | [Sign in to Visa2026](../../getting-started/login.md) |
+| At least two employees already saved | [Register a new employee](../employee/register.md) — search needs more than one row |
+| A search clue | **Full Name**, **Personal Number**, or a passport number |
 
-Visa2026 stores people in separate lists by type. Use the list that matches who you are looking for.
+This guide uses **Employees**. The same search-and-open pattern works on **Family Members** and **Temporary visitor**.
 
-| Left menu item | Who it contains |
-|----------------|-----------------|
-| **Employees** | Company employees |
-| **Family Members** | Family members linked to employees |
-| **Temporary visitor** | Temporary visitors |
+## Step 1 — Open Employees
 
-## Step 1 — Open the right list
+1. After sign-in, you should see **Report Dashboard**.
+2. In the left menu, select **Employees**.
+3. Wait until the list titled **Employees** loads.
 
-1. Sign in to Visa2026.
-2. In the left menu, select **Employees** (or **Family Members** / **Temporary visitor**).
-3. Wait for the list to load.
-
-The table shows columns such as **Full Name**, **Personal Number**, **Date Of Birth**, and **Nationality**. The first columns may include **Dossier** and **Copies** shortcuts — this guide focuses on opening the standard detail form.
+You should see **Employees** highlighted in the left menu and an **Employees** tab in the main area.
 
 <!-- media-capture: navigation-step-03-employees-list -->
 ![Employees list](../../assets/screenshots/v2026.08/en/navigation-step-03-employees-list.png)
 
-## Step 2 — Search the list
+## Step 2 — Check the list
 
-When the list is long, use the **search** field in the list toolbar (or open **Search** if your layout shows it as a button).
+The toolbar includes **New**, **Delete**, **Close all tabs**, and a search box that reads *Text to search...*.
 
-1. Click in the search area.
-2. Type part of a **First Name**, **Last Name**, **Personal Number**, or a **Passport Number** from any passport on that person.
-3. Press **Enter** or wait for the list to refresh.
+The table columns include:
+
+- **Dossier** and **Copies** (shortcuts — do not use these to edit)
+- **Full Name**
+- **Personal Number**
+- **Date Of Birth**
+- **Nationality**
+
+You may also see **Age**, **Gender**, **Marital Status**, **Project Contract**, **Company (Subcontractor)**, and **Is Archived**.
+
+If the list has only one row, register another employee first — otherwise search cannot show that it found the right person.
+
+## Step 3 — Search the list
+
+1. Click the search box (*Text to search...*).
+2. Type part of a **First Name**, **Last Name**, **Personal Number**, or a **Passport Number**.
+3. Press **Enter**, or wait for the list to refresh.
 
 Tips:
 
-- Multiple words narrow the result (for example `Ali` and `Yilmaz` together).
-- Accented letters often match without the accent (typing `u` may find `ü`).
+- Extra words narrow the result (for example a first name and a last name together).
 - Clear the search box to see the full list again.
-4. Select **Refresh** on the toolbar if the list looks out of date after a colleague saved changes.
+- Select **Refresh** on the toolbar if a colleague just saved a change and your list looks old.
 
-!!! note "Which fields are searched"
-    List search checks **First Name**, **Middle Name**, **Last Name**, **Personal Number**, and passport numbers on the **Passports** tab. It does not search unrelated application numbers.
+## Step 4 — Open the detail form
 
-## Step 3 — Open the detail form
-
-1. In the filtered list, find the row with the correct **Full Name** and **Personal Number**.
-2. Click the row (or double-click, depending on your browser).
+1. Find the row with the correct **Full Name** and **Personal Number**.
+2. Click the row (not **Dossier** and not **Copies**).
 3. Wait for the **detail form** to open in the main area.
 
-You can now read tabs such as **Passports**, **Educations**, and **Addresses**. To change data, use **Save** after edits — see [Register a new employee](register.md) and later update guides.
+You should see:
+
+- The person's name in the tab
+- Fields such as **First Name**, **Last Name**, and **Personal Number**
+- **Save** on the toolbar
+- Nested tabs such as **Passports** and **Educations**
 
 <!-- media-capture: navigation-step-04-detail-form -->
 ![Employee detail form](../../assets/screenshots/v2026.08/en/navigation-step-04-detail-form.png)
 
-!!! success "Person opened"
-    When the detail form shows the expected **Personal Number** and name, you found the right person.
-
-## Alternative — Person search on Report Dashboard
-
-From the home **Report Dashboard**, you can also find people across all person types. See [Report Dashboard](../tracking/report-dashboard.md) (Step 9).
-
-1. Open **Report Dashboard** (home after sign-in).
-2. Select the **Person search** category.
-3. Type a name, **Personal Number**, or passport number in the search box next to the category chips.
-4. Review the results table and chart.
-5. Click a row to open the **person dossier** — a read-only summary page (not the same as the editable detail form).
-
-Use the left-menu lists when you already know the person type. Use **Person search** when you are not sure which list they are in.
-
-To edit fields after you identify someone, open **Employees** (or the matching list), search again, and open the **detail form** as in step 3.
-
-## Open dossier from a list (shortcut)
-
-On **Employees**, **Family Members**, and **Temporary visitor** lists, the **Dossier** column opens the same read-only dossier as **Person search**. Use it when you need a quick overview without editing. Full walkthrough: [Person dossier](dossier.md).
+!!! success "Employee opened"
+    If **Personal Number** and the name match the person you wanted, you opened the right record. You can now create, change, or add child records on this employee.
 
 ## Common problems
 
 | Problem | What to do |
 |---------|------------|
-| List is empty | Clear the search box; select **Refresh**; confirm you opened the correct menu item |
-| Too many rows | Add more of the name or the full **Personal Number** |
-| Person not found | Try **Person search** on **Report Dashboard**; check **Family Members** or **Temporary visitor** |
-| Row opens dossier instead of detail form | You clicked **Dossier** or used **Person search** — open the list row itself for the detail form |
-| **Search** missing | Your role may use a simplified toolbar — scroll the toolbar or ask your supervisor |
+| You still see **Report Dashboard** | Select **Employees** in the left menu |
+| List is empty | Clear search; select **Refresh**; confirm the menu item is **Employees** |
+| Too many rows | Type more of the name or the full **Personal Number** |
+| Person not found | Try **Family Members** or **Temporary visitor**; or register them if they are new |
+| Dossier opens instead of the detail form | You clicked **Dossier** — click the **Full Name** / **Personal Number** row instead |
 
 ## What to read next
 
-- [Person dossier](dossier.md) — read-only 360° summary and director export
-- [Main navigation](../../getting-started/navigation.md) — lists, toolbars, and tabs
-- [Register a new employee](register.md) — create a person when they are not in the list yet
-- [Update employee details](edit-employee.md) — change fields on an existing employee
-- [Add a passport](add-passport.md) — passport on the **Passports** tab
-- **Person reference** — field help from the application catalog ([Business objects](../../reference/business-objects.md))
+- [Update employee details](../employee/edit-employee.md) — change fields, then **Save**
+- [Add a passport](../employee/add-passport.md) — **Passports** tab on the employee

@@ -22,6 +22,72 @@ Record verified outcomes after catalog generator changes, CI fixes, guide public
 
 ## Entries
 
+### 2026-09-21 — Register employee recapture green
+
+- **Phase:** 2
+- **Area:** screenshots
+- **What worked:** Dedicated Fact `PersonOfficerJourney_RegisterEmployee_Local` recaptured all five Register keys (`20260921-173914`). List search uses the grid *Text to search...* box. EasyTest seeds three extra employees so Find can search among more than one row.
+- **Follow-up:** Officer review of Register on http://127.0.0.1:8765/manual/guides/employee/register/; then lock Find and open.
+
+### 2026-09-21 — Register Step 3 Family members for visa (manual)
+
+- **Phase:** 2
+- **Area:** guide
+- **What worked:** Locked `employee/register` Step 3 required-field table now includes **Family members for visa (manual)** (leave Ýok unless listing dependents). Age remains auto from Date Of Birth.
+- **Follow-up:** Recapture Step 3 filled form when officer says proceed.
+
+### 2026-09-21 — EN Register employee steps locked
+
+- **Phase:** 2
+- **Area:** guide
+- **What worked:** Officer locked `employee/register` steps 1–5 (Employees → **New** → required fields → **Save** → confirm in list). Status `draft` / `stepsLocked: true`. Find-and-open stays after this guide.
+- **Follow-up:** Playwright recapture when officer says proceed.
+
+### 2026-09-21 — Sign in Step 4 Log In click indicator
+
+- **Phase:** 2
+- **Area:** screenshots
+- **What worked:** Added `login-step-04-log-in` with orange highlight + mouse cursor on **Log In**. Pinpoint GDI+ save no longer writes over a locked Bitmap (load from memory, save temp). Run `20260921-155402`.
+- **Follow-up:** Officer review of Step 4 on http://127.0.0.1:8765/manual/getting-started/login/
+
+### 2026-09-21 — Sign in Step 3 credentials capture
+
+- **Phase:** 2
+- **Area:** screenshots
+- **What worked:** Added `login-step-03-credentials-filled` after typing **User Name** / **Password**, before **Log In**. Run `20260921-154519`. EasyTest `StandardUser` has an empty password — capture types a dummy so **Password** shows dots, then clears before submit.
+- **Follow-up:** Officer review of Step 3 on http://127.0.0.1:8765/manual/getting-started/login/
+
+### 2026-09-21 — Restart: EN Sign in draft first (then E2E)
+
+- **Phase:** 2
+- **Area:** guide
+- **What worked:** Reset `getting-started/login` (en) to `draft` / `verified: false`. Process locked: officer steps and media-capture meaning first; Playwright recapture later. Labels from E2E map + UI: **User Name**, **Password**, **Log In**, **Visa Management**, **Report Dashboard**, **Log Off**; splash text **Loading App Data...**.
+- **Gotcha / drift:** `login-step-01-logon.png` is the Çalık splash, not the sign-in form (doc debt UM-01). Header **notification bell** omitted (state notifications postponed). tr/tk/ru login pages not updated.
+- **Follow-up:** Done — EN steps locked 2026-09-21.
+
+### 2026-09-21 — EN Sign in steps locked
+
+- **Phase:** 2
+- **Area:** guide
+- **What worked:** Officer locked `getting-started/login` steps 1–5 + **Log Off**. Frontmatter `stepsLocked: true` / `stepsLockedAt: 2026-09-21`. Status stays `draft` until UserManual E2E recapture + officer review. Capture contract: step 2 = form on `LoginPage` (**User Name**, **Log In**); step 5 = splash dismissed + **Report Dashboard** + **Employees**.
+- **Gotcha / drift:** Do not change locked labels without a new lock. UM-01 still open (step-01 PNG is splash).
+- **Follow-up:** Done — Playwright `PersonOfficerJourney_SignIn_Local` recapture `20260921-151157`.
+
+### 2026-09-21 — Sign in UserManual E2E recapture
+
+- **Phase:** 2
+- **Area:** screenshots
+- **What worked:** Locked EN Sign in steps → `WaitForLoginFormAsync` (splash gone + **User Name** + **Log In**) → capture `login-step-01-logon`; after **Log In** wait shell + **Employees** → `login-step-02-report-dashboard`. Removed `00-logon-page` fan-out onto the login PNG. Run `20260921-151157`.
+- **Gotcha / drift:** Pinpoint burn hit GDI+ (non-fatal; PNG still the form). Login help text is *Enter your user name and password below.* Left nav example is **Application Profile Instances** (not **Applications**). Trial bar: *Trial license has expired* on EasyTest host.
+- **Follow-up:** Officer review of EN Sign in; then `review` / publish. Next curriculum guide: Main navigation.
+
+### 2026-09-21 — Sign in Step 1 splash capture
+
+- **Phase:** 2
+- **Area:** screenshots
+- **What worked:** Officer review: Step 1 had no image. Added `login-step-01-open` — capture **Loading App Data...** after `Goto` `Commit`, before waiting for the form. Run `20260921-152644`.
+- **Follow-up:** Officer re-check Step 1 picture on http://127.0.0.1:8765/manual/getting-started/login/
+
 ### 2026-08-07 — Application Profile officer guides (preview, no E2E)
 
 - **Phase:** 2

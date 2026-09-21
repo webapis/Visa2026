@@ -18,6 +18,38 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 
 ## Entries
 
+### 2026-09-21 — Register recapture: list search is Text to search
+
+- **Outcome**: positive (verified green — `PersonOfficerJourney_RegisterEmployee_Local`, run `20260921-173914`)
+- **Context**: Employees ListView; keys `person-register-step-01` … `step-03-open-from-list`
+- **Symptom**: Save succeeded but open-from-list timed out while the row was visible. Search locators hit the wrong text box. Country Of Birth unbound after scrolling mid-fill.
+- **Fix / reuse**: Fill lookups first, rebind before Save. Grid search is *Text to search...*. EasyTest seeds three decoy employees so Find can search among more than one row.
+- **Reuse**: Do not treat a toolbar **New** button as proof you are on the Employees list — wait for `Person_ListView_Employees` and the grid search box.
+
+### 2026-09-21 — Pinpoint mouse cursor on Log In (GDI+ lock)
+
+- **Outcome**: positive (verified green — `PersonOfficerJourney_SignIn_Local`, run `20260921-155402`)
+- **Context**: `UserManualScreenshotPinpoint`; key `login-step-04-log-in`
+- **Symptom**: Pinpoint burn failed with GDI+ generic error because `Bitmap(path)` locked the PNG then `Save(path)`
+- **Fix / reuse**: Read bytes into memory, draw highlight + mouse cursor, save via temp file. Do not `new Bitmap(imagePath)` then save to the same path.
+- **Reuse**: Action-shot click indicators belong on the step that clicks (Step 4 **Log In**), not the empty-form overview
+
+### 2026-09-21 — Sign in Step 3: filled User Name and Password dots
+
+- **Outcome**: positive (verified green — `PersonOfficerJourney_SignIn_Local`, run `20260921-154519`)
+- **Context**: UserManual `getting-started/login`; key `login-step-03-credentials-filled`
+- **Symptom**: First capture showed **User Name** filled and **Password** empty because EasyTest `StandardUserPassword` is `""`
+- **Fix / reuse**: Type a dummy into `input[type=password]` for the screenshot, Tab, capture, then clear before **Log In**. Do not assert password `InputValue` against the empty seed password.
+- **Reuse**: EasyTest logon password is empty — fill a dummy only for the credentials PNG, never submit the dummy
+
+### 2026-09-21 — Sign in capture: wait for form, not Çalık splash
+
+- **Outcome**: positive (verified green — `PersonOfficerJourney_SignIn_Local`, run `20260921-151157`)
+- **Context**: UserManual `getting-started/login`; keys `login-step-01-logon`, `login-step-02-report-dashboard`
+- **Symptom**: Step-01 PNG was **Loading App Data...** because capture ran immediately after `Goto LoginPage`
+- **Fix / reuse**: `WaitForLoginFormAsync` — URL `LoginPage`, splash dismissed, **User Name** + **Log In** visible — then `CaptureAsync`. After Log In, `WaitForApplicationShellAsync` requires **Employees**. Dedicated Fact so login media does not depend on the full person journey. Do not fan-out `00-logon-page` onto `login-step-01-logon`.
+- **Reuse**: Never capture login-form keys until splash is gone and the form labels are visible
+
 ### 2026-08-06 — Family member register: list row by Full Name, return to employee
 
 - **Outcome**: positive (in progress)

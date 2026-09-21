@@ -81,10 +81,10 @@ Sync checkboxes with [USER_MANUAL_IMPLEMENTATION_PLAN.md §11](../../../docs/USE
 
 | Order | Tier | Slug | Title | `bo` | Parent | Ops | `e2eScenarioId` | E2E notes | Media | Status | Phase |
 |------:|------|------|-------|------|--------|-----|-----------------|-----------|-------|--------|-------|
-| 1 | 0 | `getting-started/login` | Sign in to Visa2026 | — | — | read | `person-officer-journey` | Officer review + E2E 2026-08-05 | **doc-anchored** | **Published** | 2 |
+| 1 | 0 | `getting-started/login` | Sign in to Visa2026 | — | — | read | `person-officer-journey` | EN steps locked; Playwright `SignIn_Local` green `20260921-151157` | **doc-anchored** | **Draft** (steps locked) | 2 |
 | 2 | 0 | `getting-started/navigation` | Main navigation | — | — | read | `person-officer-journey` | Officer review + E2E 2026-08-05 | **doc-anchored** | **Published** | 2 |
-| 3 | 1 | `person/open-and-search` | Find and open a person | Person | — | read | `person-officer-journey` | Officer review + E2E 2026-08-05 | **doc-anchored** | **Published** | 2 |
-| 4 | 2 | `employee/register` | Register a new employee | Person | — | create | `person-officer-journey` | Officer review + E2E 2026-08-05 | **doc-anchored** | **Published** | 2 |
+| 3 | 2 | `employee/register` | Register a new employee | Person | — | create | `person-officer-journey` | EN steps locked; Playwright `RegisterEmployee_Local` green `20260921-173914` | **doc-anchored** | **Draft** (steps locked) | 2 |
+| 4 | 2 | `person/open-and-search` | Find and open a person | Person | — | read | `person-officer-journey` | EN draft after register (2026-09-21) | **doc-anchored** | **Draft** | 2 |
 | 4a | 3 | `employee/family-members-for-visa-manual` | Family members for visa (manual) | Person | — | update | `person-officer-journey` | Manual-only outputs rule; guide **draft** pending E2E | **doc-anchored** | **Draft** | 2 |
 | 5a | 2 | `employee/add-passport` | Add a passport (employee) | Person | — | create | `person-officer-journey` | Officer review + E2E 2026-08-05 | **doc-anchored** | **Published** | 2 |
 | 5b | 2 | `family-member/add-passport` | Add a passport (family member) | Person | — | create | `person-officer-journey` | Full EN | legacy fan-out | **Draft** | 2 |
@@ -163,7 +163,7 @@ Sync checkboxes with [USER_MANUAL_IMPLEMENTATION_PLAN.md §11](../../../docs/USE
 
 | ID | Issue | Severity | Owner | Resolution |
 |----|-------|----------|-------|------------|
-| — | _None yet_ | — | — | — |
+| UM-01 | `login-step-01-logon.png` showed Çalık splash, not User Name / Password / Log In | high | user-manual + easytest-e2e | **Resolved** 2026-09-21 — wait for login form; recapture `20260921-151157` |
 
 **Severity:** `blocker` (CI red) · `high` (wrong officer steps) · `medium` (stale screenshots) · `low` (typo)
 
@@ -223,6 +223,7 @@ Detail changelog: [USER_MANUAL_STATUS.md §3](../../../docs/USER_MANUAL_STATUS.m
 | 2026-08-05 | **Doc-anchored media** — registry v2 (`guideSlugs`), tracking **Media** column, pilots 1–5 doc-anchored |
 | 2026-08-04 | Status hub doc — consolidated roadmap/changelog/next inline |
 | 2026-08-05 | **person/open-and-search** draft (en/tr/tk/ru); tier 1 inventory row → Draft |
+| 2026-09-21 | Officer path: **Register a new employee** before **Find and open a person** (need a row to search) |
 | 2026-08-05 | **person/edit-employee** draft (en/tr/tk/ru); screenshot map in Copy-EasyTestManualScreenshots.ps1 |
 | 2026-08-05 | **person/mark-incomplete** draft (en/tr/tk/ru); no E2E yet — dashboard label **Persons with incomplete data** |
 | 2026-08-05 | **Inventory v2** — 25 guides; BO dependency order (Person nested 6–14 before `applications/add-items`); curriculum §2.1 |

@@ -94,19 +94,31 @@ foreach ($file in $guideFiles) {
         $isPublished = $true
     }
 
-    $imagePattern = '(?m)^<!--\s*media-capture:\s*([a-zA-Z0-9][a-zA-Z0-9_-]*)\s*-->\s*\r?\n!\[[^\]]*\]\(([^)]+)\)'
+    $imagePattern = '(?m)^<!--\s*media-capture:\s*([a-zA-Z0-9][a-zA-Z0-9_-]*)\s*-->\s*\r?\n(?:!\[[^\]]*\]\(([^)]+)\)|<div class="um-screenshot-placeholder")'
     foreach ($match in [regex]::Matches($content, $imagePattern)) {
         $anchored++
         $captureKey = $match.Groups[1].Value.Trim()
         $imagePath = $match.Groups[2].Value.Trim()
-        $basename = [System.IO.Path]::GetFileNameWithoutExtension($imagePath)
+        $isPlaceholder = [string]::IsNullOrWhiteSpace($imagePath)
 
-        if (-not $imagePath -match 'assets/screenshots/.+\.png$') {
-            $warnings.Add("$relative - media-capture '$captureKey' does not reference assets/screenshots/*.png ($imagePath)")
+        if ($isPlaceholder) {
+            if ($isPublished) {
+                $errors.Add("$relative - published guide cannot use screenshot placeholder for capture key '$captureKey'")
+            }
+            else {
+                $warnings.Add("$relative - media-capture '$captureKey' is a screenshot placeholder (draft only)")
+            }
         }
+        else {
+            $basename = [System.IO.Path]::GetFileNameWithoutExtension($imagePath)
 
-        if (-not [string]::Equals($captureKey, $basename, [StringComparison]::Ordinal)) {
-            $errors.Add("$relative - media-capture key '$captureKey' must match image basename '$basename'")
+            if (-not $imagePath -match 'assets/screenshots/.+\.png$') {
+                $warnings.Add("$relative - media-capture '$captureKey' does not reference assets/screenshots/*.png ($imagePath)")
+            }
+
+            if (-not [string]::Equals($captureKey, $basename, [StringComparison]::Ordinal)) {
+                $errors.Add("$relative - media-capture key '$captureKey' must match image basename '$basename'")
+            }
         }
 
         if ($registeredKeys.Count -gt 0 -and -not $registeredKeys.Contains($captureKey)) {

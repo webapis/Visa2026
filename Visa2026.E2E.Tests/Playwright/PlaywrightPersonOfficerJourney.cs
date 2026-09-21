@@ -11,6 +11,7 @@ namespace Visa2026.E2E.Tests.Playwright;
 internal sealed class PlaywrightPersonOfficerJourney
 {
     private readonly IPage _page;
+    private bool _loginPasswordWasDummyForCapture;
 
     internal PlaywrightPersonOfficerJourney(IPage page) => _page = page;
 
@@ -21,15 +22,7 @@ internal sealed class PlaywrightPersonOfficerJourney
         string fullName,
         string passportNumber)
     {
-        await PlaywrightPageInteractions.GotoRelativeAsync(_page, "LoginPage");
-        await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.Legacy00LogonPage);
-        await PlaywrightScreenshotCapture.CaptureAsync(
-            _page,
-            UserManualMediaCaptureKeys.LoginStep01Logon,
-            PlaywrightPageInteractions.LoginSubmitButton(_page));
-        await LoginAsync(skipNavigation: true);
-        await PlaywrightPageInteractions.WaitForApplicationShellAsync(_page);
-        await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.LoginStep02ReportDashboard);
+        await RunSignInToReportDashboardAsync();
         await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.NavigationStep01Shell);
         await PlaywrightScreenshotCapture.CaptureAsync(
             _page,
@@ -39,18 +32,23 @@ internal sealed class PlaywrightPersonOfficerJourney
 
         await PlaywrightPageInteractions.GotoRelativeAsync(_page, E2ETestLoginValues.EmployeesListViewPath);
         await PlaywrightPageInteractions.WaitForEmployeesListAsync(_page);
-        ILocator newToolbar = PlaywrightPageInteractions.ToolbarButton(_page, "New");
-        await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.PersonRegisterStep01EmployeesList, newToolbar);
+        ILocator newToolbar = PlaywrightPageInteractions.VisibleToolbarButton(_page, "New");
+        await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.PersonRegisterStep01EmployeesList);
+        await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.PersonRegisterStep02New, newToolbar);
         await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.NavigationStep03EmployeesList, newToolbar);
         await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.Legacy02EmployeesList);
 
-        await CreateEmployeeAsync(personalNumber, firstName, lastName);
+        await CreateEmployeeAsync(personalNumber, firstName, lastName, skipListNavigation: true);
         await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.PersonRegisterStep02SavedDetail);
         await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.Legacy03EmployeeCreated);
 
+        await OpenEmployeeFromListAsync(personalNumber, fullName);
+        await PlaywrightPageInteractions.WaitForEmployeeDetailAsync(_page);
+        await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.PersonRegisterStep03OpenFromList);
+
         if (!await EmployeeDetailShowsPersonalNumberAsync(personalNumber))
         {
-            await OpenEmployeeFromListAsync(personalNumber);
+            await OpenEmployeeFromListAsync(personalNumber, fullName);
         }
 
         Assert.Equal(firstName, await PlaywrightPageInteractions.ReadFieldAsync(_page, "e2e-person-first-name", E2ETestPersonFieldCaptions.FirstName));
@@ -62,16 +60,12 @@ internal sealed class PlaywrightPersonOfficerJourney
             "register-family-member",
             () => RegisterFamilyMemberAsync(personalNumber, fullName));
 
-        await OpenEmployeeFromListAsync(personalNumber);
+        await OpenEmployeeFromListAsync(personalNumber, fullName);
         await PlaywrightPageInteractions.WaitForEmployeeDetailAsync(_page);
 
         ILocator passportsTab = PlaywrightPageInteractions.TabItem(_page, "Passports");
         await PlaywrightE2eStepRunner.RunAsync(_page, "visa-family-manual", () => AddVisaFamilyManualLinesAsync(personalNumber));
         await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.PersonAddPassportStep01EmployeeDetail, passportsTab);
-        await PlaywrightScreenshotCapture.CaptureAsync(
-            _page,
-            UserManualMediaCaptureKeys.PersonRegisterStep03OpenFromList,
-            PlaywrightPageInteractions.ToolbarButton(_page, "Save"));
         await PlaywrightScreenshotCapture.CaptureAsync(
             _page,
             UserManualMediaCaptureKeys.NavigationStep04DetailForm,
@@ -397,22 +391,194 @@ internal sealed class PlaywrightPersonOfficerJourney
         return false;
     }
 
+    /// <summary>
+    /// Locked Sign in guide: LoginPage form → Log In → Report Dashboard with Employees.
+    /// </summary>
+    internal async Task RunSignInToReportDashboardAsync()
+    {
+        await PlaywrightE2eStepRunner.RunAsync(_page, "sign-in-open-app", async () =>
+        {
+            await PlaywrightPageInteractions.GotoRelativeCommitAsync(_page, "LoginPage");
+            await PlaywrightPageInteractions.WaitForSplashVisibleAsync(_page);
+            await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.LoginStep01Open);
+        });
+
+        await PlaywrightE2eStepRunner.RunAsync(_page, "sign-in-open-form", async () =>
+        {
+            await PlaywrightPageInteractions.WaitForLoginFormAsync(_page);
+            await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.LoginStep01Logon);
+        });
+
+        await PlaywrightE2eStepRunner.RunAsync(_page, "sign-in-enter-credentials", async () =>
+        {
+            await FillLoginFieldsAsync();
+            await PlaywrightScreenshotCapture.CaptureAsync(
+                _page,
+                UserManualMediaCaptureKeys.LoginStep03CredentialsFilled);
+        });
+
+        await PlaywrightE2eStepRunner.RunAsync(_page, "sign-in-log-in-click", async () =>
+        {
+            await PlaywrightScreenshotCapture.CaptureAsync(
+                _page,
+                UserManualMediaCaptureKeys.LoginStep04LogIn,
+                PlaywrightPageInteractions.LoginSubmitButton(_page));
+        });
+
+        await PlaywrightE2eStepRunner.RunAsync(_page, "sign-in-log-in", async () =>
+        {
+            await SubmitLoginAsync();
+            await PlaywrightPageInteractions.WaitForApplicationShellAsync(_page);
+            await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.LoginStep02ReportDashboard);
+        });
+    }
+
+    /// <summary>
+    /// Locked Register employee guide: Employees list → New → required fields → Save → reopen from list.
+    /// Signs in without overwriting Sign in guide captures.
+    /// </summary>
+    internal async Task RunRegisterEmployeeAsync(string personalNumber, string firstName, string lastName)
+    {
+        await SignInWithoutManualCapturesAsync();
+
+        await PlaywrightE2eStepRunner.RunAsync(_page, "register-open-employees", async () =>
+        {
+            await PlaywrightPageInteractions.GotoRelativeAsync(_page, E2ETestLoginValues.EmployeesListViewPath);
+            await PlaywrightPageInteractions.WaitForEmployeesListAsync(_page);
+            await PlaywrightScreenshotCapture.CaptureAsync(
+                _page,
+                UserManualMediaCaptureKeys.PersonRegisterStep01EmployeesList);
+        });
+
+        await PlaywrightE2eStepRunner.RunAsync(_page, "register-new-click", async () =>
+        {
+            await PlaywrightScreenshotCapture.CaptureAsync(
+                _page,
+                UserManualMediaCaptureKeys.PersonRegisterStep02New,
+                PlaywrightPageInteractions.VisibleToolbarButton(_page, "New"));
+        });
+
+        await PlaywrightE2eStepRunner.RunAsync(_page, "register-create-employee", async () =>
+        {
+            await CreateEmployeeAsync(personalNumber, firstName, lastName, skipListNavigation: true);
+            await PlaywrightScreenshotCapture.CaptureAsync(
+                _page,
+                UserManualMediaCaptureKeys.PersonRegisterStep02SavedDetail);
+        });
+
+        await PlaywrightE2eStepRunner.RunAsync(_page, "register-open-from-list", async () =>
+        {
+            await OpenEmployeeFromListAsync(personalNumber, $"{firstName} {lastName}");
+            await PlaywrightPageInteractions.WaitForEmployeeDetailAsync(_page);
+            await PlaywrightScreenshotCapture.CaptureAsync(
+                _page,
+                UserManualMediaCaptureKeys.PersonRegisterStep03OpenFromList);
+        });
+
+        Assert.Equal(firstName, await PlaywrightPageInteractions.ReadFieldAsync(_page, "e2e-person-first-name", E2ETestPersonFieldCaptions.FirstName));
+        Assert.Equal(lastName, await PlaywrightPageInteractions.ReadFieldAsync(_page, "e2e-person-last-name", E2ETestPersonFieldCaptions.LastName));
+        Assert.Equal(personalNumber, await PlaywrightPageInteractions.ReadFieldAsync(_page, "e2e-person-personal-number", E2ETestPersonFieldCaptions.PersonalNumber));
+    }
+
+    /// <summary>
+    /// Find-and-open: Employees list has decoy rows; search opens the target employee.
+    /// </summary>
+    internal async Task RunFindEmployeeAsync()
+    {
+        await SignInWithoutManualCapturesAsync();
+
+        await PlaywrightE2eStepRunner.RunAsync(_page, "find-open-employees", async () =>
+        {
+            await PlaywrightPageInteractions.GotoRelativeAsync(_page, E2ETestLoginValues.EmployeesListViewPath);
+            await PlaywrightPageInteractions.WaitForEmployeesListAsync(_page);
+            await PlaywrightPageInteractions.ClickToolbarByTitlePrefixAsync(_page, "Refresh");
+            await Task.Delay(1000);
+
+            int rows = await PlaywrightPageInteractions.CountEmployeeListRowsAsync(_page);
+            if (rows < 2)
+            {
+                throw new InvalidOperationException(
+                    $"Find-and-open needs more than one employee; Employees list has {rows} row(s).");
+            }
+        });
+
+        var target = E2ETestFindEmployeeDecoyValues.SearchTarget;
+        await PlaywrightE2eStepRunner.RunAsync(_page, "find-search-and-open", async () =>
+        {
+            await PlaywrightPageInteractions.ClearListSearchFilterAsync(_page);
+            await PlaywrightPageInteractions.ClickListRowContainingAsync(_page, target.LastName);
+            await PlaywrightPageInteractions.WaitForEmployeeDetailAsync(_page);
+        });
+
+        Assert.Equal(target.FirstName, await PlaywrightPageInteractions.ReadFieldAsync(_page, "e2e-person-first-name", E2ETestPersonFieldCaptions.FirstName));
+        Assert.Equal(target.LastName, await PlaywrightPageInteractions.ReadFieldAsync(_page, "e2e-person-last-name", E2ETestPersonFieldCaptions.LastName));
+        Assert.Equal(target.PersonalNumber, await PlaywrightPageInteractions.ReadFieldAsync(_page, "e2e-person-personal-number", E2ETestPersonFieldCaptions.PersonalNumber));
+    }
+
+    private async Task SignInWithoutManualCapturesAsync()
+    {
+        await PlaywrightPageInteractions.GotoRelativeCommitAsync(_page, "LoginPage");
+        await PlaywrightPageInteractions.WaitForLoginFormAsync(_page);
+        await FillLoginFieldsAsync();
+        await SubmitLoginAsync();
+        await PlaywrightPageInteractions.WaitForApplicationShellAsync(_page);
+    }
+
     private async Task LoginAsync(bool skipNavigation = false)
     {
         if (!skipNavigation)
             await PlaywrightPageInteractions.GotoRelativeAsync(_page, "LoginPage");
+        await FillLoginFieldsAsync();
+        await SubmitLoginAsync();
+    }
+
+    private async Task FillLoginFieldsAsync()
+    {
         await PlaywrightPageInteractions.FillTextFieldAsync(_page, "e2e-login-user-name", PlaywrightE2eEnvironment.UserName, "User Name");
-        await PlaywrightPageInteractions.FillTextFieldAsync(_page, "e2e-login-password", PlaywrightE2eEnvironment.Password, "Password");
+        ILocator password = PlaywrightPageInteractions.LoginPasswordField(_page);
+        await password.WaitForAsync(new LocatorWaitForOptions
+        {
+            State = WaitForSelectorState.Visible,
+            Timeout = 15_000,
+        });
+        string value = PlaywrightE2eEnvironment.Password;
+        _loginPasswordWasDummyForCapture = string.IsNullOrEmpty(value);
+        if (_loginPasswordWasDummyForCapture)
+            value = "Visa2026";
+
+        await password.ClickAsync(new LocatorClickOptions { Force = true });
+        await password.FillAsync(string.Empty);
+        await password.PressSequentiallyAsync(value, new LocatorPressSequentiallyOptions { Delay = 30 });
+        await password.PressAsync("Tab");
+        await Task.Delay(400);
+    }
+
+    private async Task SubmitLoginAsync()
+    {
+        if (_loginPasswordWasDummyForCapture)
+        {
+            ILocator password = PlaywrightPageInteractions.LoginPasswordField(_page);
+            await password.FillAsync(string.Empty);
+        }
+
         await PlaywrightPageInteractions.LoginSubmitButton(_page).ClickAsync();
         await _page.WaitForURLAsync(
             url => !url.Contains("LoginPage", StringComparison.OrdinalIgnoreCase),
             new PageWaitForURLOptions { Timeout = 120_000 });
     }
 
-    private async Task CreateEmployeeAsync(string personalNumber, string firstName, string lastName)
+    private async Task CreateEmployeeAsync(
+        string personalNumber,
+        string firstName,
+        string lastName,
+        bool skipListNavigation = false)
     {
-        await PlaywrightPageInteractions.GotoRelativeAsync(_page, E2ETestLoginValues.EmployeesListViewPath);
-        await PlaywrightPageInteractions.WaitForEmployeesListAsync(_page);
+        if (!skipListNavigation)
+        {
+            await PlaywrightPageInteractions.GotoRelativeAsync(_page, E2ETestLoginValues.EmployeesListViewPath);
+            await PlaywrightPageInteractions.WaitForEmployeesListAsync(_page);
+        }
+
         await PlaywrightPageInteractions.ClickToolbarByTitlePrefixAsync(_page, "New");
         await PlaywrightPageInteractions.WaitForEmployeeDetailAsync(_page);
 
@@ -432,6 +598,11 @@ internal sealed class PlaywrightPersonOfficerJourney
         await PlaywrightPageInteractions.FillLookupAsync(_page, "e2e-person-subcontractor", E2ETestEmployeeCreateValues.SubcontractorDisplay, E2ETestPersonFieldCaptions.Subcontractor);
 
         await PlaywrightPageInteractions.EnsureFieldRenderedAsync(_page, E2ETestVisaFamilyManualUi.FieldCaption);
+        await PlaywrightPageInteractions.EnsureFieldRenderedAsync(_page, E2ETestPersonFieldCaptions.FirstName);
+        await EnsureEmployeeRequiredLookupsBoundAsync();
+        await PlaywrightScreenshotCapture.CaptureAsync(
+            _page,
+            UserManualMediaCaptureKeys.PersonRegisterStep03FieldsFilled);
 
         await SaveEmployeeDetailAndConfirmAsync(personalNumber, $"{firstName} {lastName}");
     }
@@ -445,10 +616,7 @@ internal sealed class PlaywrightPersonOfficerJourney
                 await PlaywrightPageInteractions.ActivateMdiDocumentTabAsync(_page, documentTabTitle);
             }
 
-            if (await EmployeeDetailShowsPersonalNumberAsync(personalNumber))
-            {
-                await EnsureEmployeeRequiredLookupsBoundAsync();
-            }
+            await EnsureEmployeeRequiredLookupsBoundAsync();
 
             await PlaywrightPageInteractions.ClickToolbarByTitlePrefixAsync(_page, "Save");
             await Task.Delay(3000);
@@ -459,7 +627,7 @@ internal sealed class PlaywrightPersonOfficerJourney
                 await PlaywrightPageInteractions.WaitForEmployeesListAsync(_page);
                 await PlaywrightPageInteractions.ClickToolbarByTitlePrefixAsync(_page, "Refresh");
                 await Task.Delay(2000);
-                if (await TryFindEmployeeInListAsync(personalNumber))
+                if (await TryFindEmployeeInListAsync(personalNumber, documentTabTitle))
                     return;
 
                 throw new InvalidOperationException(
@@ -474,7 +642,7 @@ internal sealed class PlaywrightPersonOfficerJourney
             if (await EmployeeDetailShowsPersonalNumberAsync(personalNumber))
                 return;
 
-            if (await TryFindEmployeeInListAsync(personalNumber))
+            if (await TryFindEmployeeInListAsync(personalNumber, documentTabTitle))
                 return;
         }
 
@@ -485,24 +653,20 @@ internal sealed class PlaywrightPersonOfficerJourney
 
     private async Task EnsureEmployeeRequiredLookupsBoundAsync()
     {
-        for (var attempt = 0; attempt < 3; attempt++)
+        (string Css, string Display, string Caption)[] lookups =
+        [
+            ("e2e-person-country-of-birth", E2ETestEmployeeCreateValues.CountryDisplay, E2ETestPersonFieldCaptions.CountryOfBirth),
+            ("e2e-person-gender", E2ETestEmployeeCreateValues.GenderDisplay, E2ETestPersonFieldCaptions.Gender),
+            ("e2e-person-marital-status", E2ETestEmployeeCreateValues.MaritalStatusDisplay, E2ETestPersonFieldCaptions.MaritalStatus),
+            ("e2e-person-nationality", E2ETestEmployeeCreateValues.CountryDisplay, E2ETestPersonFieldCaptions.Nationality),
+            ("e2e-person-foreign-address-country", E2ETestEmployeeCreateValues.CountryDisplay, E2ETestPersonFieldCaptions.ForeignAddressCountry),
+            ("e2e-person-project-contract", E2ETestEmployeeCreateValues.ProjectContractDisplay, E2ETestPersonFieldCaptions.ProjectContract),
+            ("e2e-person-subcontractor", E2ETestEmployeeCreateValues.SubcontractorDisplay, E2ETestPersonFieldCaptions.Subcontractor),
+        ];
+
+        foreach ((string css, string display, string caption) in lookups)
         {
-            string project = await TryReadLookupDisplayAsync("e2e-person-project-contract", E2ETestPersonFieldCaptions.ProjectContract);
-            string subcontractor = await TryReadLookupDisplayAsync("e2e-person-subcontractor", E2ETestPersonFieldCaptions.Subcontractor);
-            if (!string.IsNullOrWhiteSpace(project) && !string.IsNullOrWhiteSpace(subcontractor))
-                return;
-
-            if (string.IsNullOrWhiteSpace(project))
-            {
-                await PlaywrightPageInteractions.FillLookupAsync(_page, "e2e-person-project-contract",
-                    E2ETestEmployeeCreateValues.ProjectContractDisplay, E2ETestPersonFieldCaptions.ProjectContract);
-            }
-
-            if (string.IsNullOrWhiteSpace(subcontractor))
-            {
-                await PlaywrightPageInteractions.FillLookupAsync(_page, "e2e-person-subcontractor",
-                    E2ETestEmployeeCreateValues.SubcontractorDisplay, E2ETestPersonFieldCaptions.Subcontractor);
-            }
+            await PlaywrightPageInteractions.EnsureLookupBoundAsync(_page, css, display, caption);
         }
     }
 
@@ -532,32 +696,49 @@ internal sealed class PlaywrightPersonOfficerJourney
         }
     }
 
-    private async Task OpenEmployeeFromListAsync(string personalNumber)
+    private async Task OpenEmployeeFromListAsync(string personalNumber, string? fullName = null)
     {
-        for (var attempt = 0; attempt < 10; attempt++)
+        for (var attempt = 0; attempt < 4; attempt++)
         {
             await PlaywrightPageInteractions.GotoRelativeAsync(_page, E2ETestLoginValues.EmployeesListViewPath);
             await PlaywrightPageInteractions.WaitForEmployeesListAsync(_page);
+            await PlaywrightPageInteractions.ClickToolbarByTitlePrefixAsync(_page, "Refresh");
             await Task.Delay(1000);
 
-            if (await TryFindEmployeeInListAsync(personalNumber))
+            if (await TryFindEmployeeInListAsync(personalNumber, fullName))
                 return;
         }
 
         throw new InvalidOperationException($"Employee list row containing '{personalNumber}' was not found.");
     }
 
-    private async Task<bool> TryFindEmployeeInListAsync(string personalNumber)
+    private async Task<bool> TryFindEmployeeInListAsync(string personalNumber, string? fullName = null)
     {
-        try
+        string[] tokens =
+        [
+            personalNumber,
+            fullName ?? string.Empty,
+        ];
+
+        foreach (string token in tokens)
         {
-            await PlaywrightPageInteractions.ClickListRowContainingAsync(_page, personalNumber);
-            return await EmployeeDetailShowsPersonalNumberAsync(personalNumber);
+            if (string.IsNullOrWhiteSpace(token))
+                continue;
+
+            try
+            {
+                await PlaywrightPageInteractions.ClearListSearchFilterAsync(_page);
+                await PlaywrightPageInteractions.ClickListRowContainingAsync(_page, token);
+                if (await EmployeeDetailShowsPersonalNumberAsync(personalNumber))
+                    return true;
+            }
+            catch (TimeoutException)
+            {
+                // Try the next token (Employees list shows Full Name, not Personal Number).
+            }
         }
-        catch (TimeoutException)
-        {
-            return false;
-        }
+
+        return false;
     }
 
     private async Task AddVisaFamilyManualLinesAsync(string personalNumber)

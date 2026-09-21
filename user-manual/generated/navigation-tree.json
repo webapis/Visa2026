@@ -1,32 +1,22 @@
 {
-  "generatedAt": "2026-08-07T08:51:32.9167281Z",
+  "generatedAt": "2026-09-21T09:46:26.8924505Z",
   "paths": [
     {
       "path": "(root)",
       "types": [
-        {
-          "name": "Application",
-          "displayName": "Application",
-          "userDocSlug": "applications/overview"
-        },
-        {
-          "name": "ApplicationItem",
-          "displayName": "Application item",
-          "userDocSlug": "applications/item-overview"
-        },
-        {
-          "name": "ApplicationMigrationSlaProfile",
-          "displayName": "Application Migration Sla Profile",
-          "userDocSlug": "administration/configuration/sla"
-        },
         {
           "name": "ApplicationProfile",
           "displayName": "Application Profile",
           "userDocSlug": "administration/configuration/application-profiles"
         },
         {
-          "name": "ApplicationProgress",
-          "displayName": "Application Progress",
+          "name": "ApplicationProfileInstance",
+          "displayName": "Application Profile instance",
+          "userDocSlug": "applications/overview"
+        },
+        {
+          "name": "ApplicationProfileInstanceProgress",
+          "displayName": "Application Profile Instance Progress",
           "userDocSlug": "applications/progress"
         },
         {

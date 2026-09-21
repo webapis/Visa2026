@@ -3,103 +3,129 @@ title: Sign in to Visa2026
 slug: getting-started/login
 locale: en
 tier: 0
-guideStatus: published
-lastReviewed: "2026-08-05"
+guideStatus: draft
+stepsLocked: true
+stepsLockedAt: "2026-09-21"
 roles: [Visa Officer]
 screenshotsVersion: "2026.08"
-screenshotsCapturedAt: "2026-08-05T08:48:03.3957272Z"
-mediaE2eRunId: "20260805-134241"
-e2eTestFilter: PersonOfficerJourney_LoginCreateEmployeeAddPassport
+screenshotsCapturedAt: "2026-09-21T10:55:19.9260000Z"
+mediaE2eRunId: "20260921-155402"
+e2eTestFilter: PersonOfficerJourney_SignIn_Local
 e2eScenarioId: person-officer-journey
-verified: true
+verified: false
+verifiedAt:
+verifiedCommit:
 sourceDocs:
   - docs/REPORT_DASHBOARD.md
   - docs/USAGE_LICENSE_LOGIN_BANNER.md
-verifiedAt: "2026-08-05T08:49:33.7498506Z"
-verifiedCommit: "2d70b13c"
+  - docs/CALIK_SPLASH_SCREEN.md
 ---
 
 # Sign in to Visa2026
 
-This guide shows how visa officers open Visa2026 and sign in. When you finish, you should see the **Report Dashboard** home page.
+This guide is the first daily task for a visa officer: open Visa2026 and sign in. When you finish, you should see the **Report Dashboard** home page.
 
 !!! tip "Screenshots"
-    Images below are from the **English** application UI (version **2026.08**). If your office uses Turkish, Turkmen, or Russian, the labels are translated but the steps are the same.
+    These steps are **locked**. Pictures are from the English sign-in journey.
 
 ## Before you start
 
 | You need | From |
 |----------|------|
-| **Web address** (URL) for Visa2026 | Your IT team or supervisor |
+| **Web address** for Visa2026 | Your IT team or supervisor |
 | **User name** and **password** | Your supervisor or system administrator |
 
-Use a supported browser (Microsoft Edge or Google Chrome). Keep your password private — do not share it with colleagues.
+Use Microsoft Edge or Google Chrome. Keep your password private. Do not use another officer's account.
 
-## Step 1 — Open the sign-in page
+## Step 1 — Open Visa2026
 
 1. Open your browser.
-2. Go to the Visa2026 address your IT team gave you (for example `https://visa.your-company.local/`).
-3. Wait until the sign-in page loads.
+2. Go to the Visa2026 address your IT team gave you.
+3. Wait until the page finishes loading.
 
-You should see the application title **Visa Management** and a sign-in form with **User Name** and **Password**.
+You may briefly see a full-screen **Çalık** logo with **Loading App Data...** and a percent value. Wait until that screen goes away. It is the application starting, not the sign-in form.
+
+<!-- media-capture: login-step-01-open -->
+![Çalık loading screen with Loading App Data](../../assets/screenshots/v2026.08/en/login-step-01-open.png)
+
+## Step 2 — Check the sign-in page
+
+You should see the application title **Visa Management** and a sign-in form with:
+
+- **User Name**
+- **Password**
+- **Log In**
+
+A short line above the fields may read: *Enter your user name and password below.* The form may also show a language list (**English (United States)** for this guide).
 
 <!-- media-capture: login-step-01-logon -->
 ![Sign-in page with User Name, Password, and Log In](../../assets/screenshots/v2026.08/en/login-step-01-logon.png)
 
 !!! note "Trial notice (optional)"
-    Some installations show a short **trial license** notice at the top of the sign-in page. It is informational only — you can still sign in when the notice is shown.
+    Some offices show a **trial license** bar at the top of the sign-in page (for example *Trial license has expired*). It is information only. You can still sign in when it is shown.
 
-## Step 2 — Enter your credentials
+## Step 3 — Enter your user name and password
 
-1. Click in the **User Name** field and type the user name you were given.
-2. Click in the **Password** field and type your password.
-3. Check that **Caps Lock** is off if the password fails.
+1. Click **User Name** and type the user name you were given.
+2. Click **Password** and type your password.
+3. If the password fails, check that **Caps Lock** is off.
 
-The sign-in form may show the message: *Enter your user name and password in the boxes below.*
+After you type, **User Name** shows the name you entered. **Password** shows dots instead of letters.
 
-## Step 3 — Sign in
+<!-- media-capture: login-step-03-credentials-filled -->
+![User Name and Password filled on the sign-in form](../../assets/screenshots/v2026.08/en/login-step-03-credentials-filled.png)
+
+## Step 4 — Select Log In
 
 1. Select **Log In**.
-2. Wait a few seconds while the application loads your workspace.
 
-If the user name or password is wrong, the form stays on the sign-in page. Try again or contact your administrator — do not guess repeatedly.
+<!-- media-capture: login-step-04-log-in -->
+![Click Log In](../../assets/screenshots/v2026.08/en/login-step-04-log-in.png)
 
-## Step 4 — Confirm you reached the home page
+2. Wait while the application loads your workspace.
 
-After a successful sign-in, Visa2026 opens the **Report Dashboard**. This is the officer home page with charts and summary cards for visa-related work.
+You may see the **Çalık** loading screen again (**Loading App Data...**). Wait until it closes.
+
+If the user name or password is wrong, you stay on the sign-in page. Try again, or ask your administrator to reset the password. Do not guess repeatedly.
+
+## Step 5 — Confirm the home page
+
+After a successful sign-in, Visa2026 opens **Report Dashboard**. This is the officer home page.
 
 You should see:
 
-- **Report Dashboard** in the navigation or page title area
-- The main **navigation menu** on the left (menus depend on your assigned role)
-- The application header with your user menu and notification bell
+- **Report Dashboard** in the page title, the left menu, and the open tab
+- The **left navigation menu** (for example **Employees**, **Family Members**, **Temporary visitor**, **Application Profile Instances**)
+- The **Çalık** logo at the top left
+- Your **user menu** at the top right (your initials or avatar)
 
 <!-- media-capture: login-step-02-report-dashboard -->
 ![Report Dashboard after sign-in](../../assets/screenshots/v2026.08/en/login-step-02-report-dashboard.png)
 
 !!! success "You are signed in"
-    If you see **Report Dashboard** and can open items in the left menu (for example **Employees**), sign-in succeeded.
+    If you see **Report Dashboard** and can open **Employees** in the left menu, sign-in succeeded.
 
 ## Sign out
 
 When you finish your session:
 
-1. Open your **user menu** in the application header (top of the page).
-2. Select **Log Off** (or the equivalent sign-out action shown in your language).
+1. Open your **user menu** at the top right of the header.
+2. Select **Log Off**.
 3. Close the browser tab if you are on a shared computer.
 
-Always sign out on shared PCs so the next person cannot use your account.
+Always sign out on a shared PC so the next person cannot use your account.
 
 ## Common problems
 
 | Problem | What to do |
 |---------|------------|
-| Page does not load | Check the URL with IT; confirm VPN or network access if required |
-| **Log In** does nothing / error message | Verify user name and password; ask administrator to reset password |
+| Page does not load | Check the address with IT; confirm you are on the office network |
+| You only see **Loading App Data...** for a long time | Wait up to a minute; if it does not finish, refresh once and tell IT the time |
+| **Log In** does nothing, or you stay on the sign-in page | Check **User Name** and **Password**; ask an administrator to reset the password |
 | Blank page after sign-in | Wait 30 seconds and refresh once; if still blank, report to IT with the time and your user name |
-| Expected menu missing | Your role may not include that area — ask your supervisor, do not use another officer's account |
+| Expected menu missing | Your role may not include that area — ask your supervisor |
 
 ## What to read next
 
-- [Main navigation](navigation.md) — left menu, lists, detail forms, and header tools
 - [Register a new employee](../guides/employee/register.md) — create an employee from the **Employees** list
+- [Find and open a person](../guides/person/open-and-search.md) — search **Employees** after at least one record exists

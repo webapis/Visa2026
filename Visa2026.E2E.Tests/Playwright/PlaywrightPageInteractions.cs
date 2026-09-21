@@ -25,6 +25,29 @@ internal static class PlaywrightPageInteractions
         await page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
     }
 
+    internal static async Task GotoRelativeCommitAsync(IPage page, string relativePath)
+    {
+        await page.GotoAsync(Url(page, relativePath), new PageGotoOptions
+        {
+            WaitUntil = WaitUntilState.Commit,
+            Timeout = 120_000,
+        });
+    }
+
+    /// <summary>
+    /// Opening the app — Çalık splash with Loading App Data... still visible.
+    /// </summary>
+    internal static async Task WaitForSplashVisibleAsync(IPage page)
+    {
+        ILocator splash = page.Locator(".visa-splash-screen")
+            .Or(page.GetByText("Loading App Data...", new PageGetByTextOptions { Exact = false }));
+        await splash.First.WaitForAsync(new LocatorWaitForOptions
+        {
+            State = WaitForSelectorState.Visible,
+            Timeout = 30_000,
+        });
+    }
+
     internal static async Task FillTextFieldAsync(IPage page, string cssClass, string value, string? caption = null)
     {
         if (LooksLikeMaskedDate(value))
@@ -694,6 +717,38 @@ internal static class PlaywrightPageInteractions
     }
 
     /// <summary>
+    /// Sign-in form on LoginPage — Çalık splash gone, User Name and Log In visible.
+    /// </summary>
+    internal static async Task WaitForLoginFormAsync(IPage page)
+    {
+        await page.WaitForURLAsync(
+            url => url.Contains("LoginPage", StringComparison.OrdinalIgnoreCase),
+            new PageWaitForURLOptions { Timeout = 120_000 });
+
+        await WaitUntilSplashDismissedAsync(page);
+
+        ILocator userName = LoginUserNameField(page);
+        await userName.WaitForAsync(new LocatorWaitForOptions
+        {
+            State = WaitForSelectorState.Visible,
+            Timeout = 60_000,
+        });
+        await LoginSubmitButton(page).WaitForAsync(new LocatorWaitForOptions
+        {
+            State = WaitForSelectorState.Visible,
+            Timeout = 30_000,
+        });
+    }
+
+    internal static ILocator LoginUserNameField(IPage page) =>
+        page.Locator(".e2e-login-user-name input, .e2e-login-user-name textarea, .e2e-login-user-name")
+            .Or(page.GetByLabel("User Name", new PageGetByLabelOptions { Exact = true }))
+            .First;
+
+    internal static ILocator LoginPasswordField(IPage page) =>
+        page.Locator("input[type='password']").First;
+
+    /// <summary>
     /// Post-login shell — splash dismissed, Report Dashboard / navigation visible (not loading panel).
     /// </summary>
     internal static async Task WaitForApplicationShellAsync(IPage page)
@@ -717,16 +772,28 @@ internal static class PlaywrightPageInteractions
                 Timeout = 120_000,
             });
 
-        ILocator shellReady = page.Locator("button[title^='Refresh']")
-            .Or(page.GetByText("Employees", new PageGetByTextOptions { Exact = true }));
-        await shellReady.First.WaitForAsync(new LocatorWaitForOptions
+        ILocator employees = page.GetByText("Employees", new PageGetByTextOptions { Exact = true });
+        await employees.First.WaitForAsync(new LocatorWaitForOptions
         {
             State = WaitForSelectorState.Visible,
             Timeout = 60_000,
         });
     }
 
-    private static async Task<bool> IsApplicationShellReadyAsync(IPage page)
+    internal static async Task WaitUntilSplashDismissedAsync(IPage page)
+    {
+        for (var attempt = 0; attempt < 240; attempt++)
+        {
+            if (await IsSplashDismissedAsync(page))
+                return;
+
+            await Task.Delay(500);
+        }
+
+        throw new TimeoutException("Çalık splash (Loading App Data...) did not dismiss within 120s.");
+    }
+
+    private static async Task<bool> IsSplashDismissedAsync(IPage page)
     {
         ILocator splash = page.Locator(".visa-splash-screen");
         if (await splash.CountAsync() > 0 && await splash.First.IsVisibleAsync())
@@ -750,14 +817,37 @@ internal static class PlaywrightPageInteractions
             }
         }
 
+        return true;
+    }
+
+    private static async Task<bool> IsApplicationShellReadyAsync(IPage page)
+    {
+        if (!await IsSplashDismissedAsync(page))
+            return false;
+
         ILocator dashboard = page.GetByText("Report Dashboard", new PageGetByTextOptions { Exact = false });
         return await dashboard.CountAsync() > 0 && await dashboard.First.IsVisibleAsync();
     }
 
     internal static async Task WaitForEmployeesListAsync(IPage page)
     {
+        await page.WaitForURLAsync(
+            url => url.Contains("Person_ListView_Employees", StringComparison.OrdinalIgnoreCase),
+            new PageWaitForURLOptions { Timeout = 60_000 });
+        await EmployeeListSearchInput(page).WaitForAsync(new LocatorWaitForOptions
+        {
+            State = WaitForSelectorState.Visible,
+            Timeout = 30_000,
+        });
         await page.Locator("button[data-action-name='New'], button[title='New']").First
-            .WaitForAsync(new LocatorWaitForOptions { Timeout = 120_000 });
+            .WaitForAsync(new LocatorWaitForOptions { Timeout = 30_000 });
+    }
+
+    internal static async Task<int> CountEmployeeListRowsAsync(IPage page)
+    {
+        ILocator rows = page.Locator("tr.dxbl-grid-data-row");
+        await rows.First.WaitForAsync(new LocatorWaitForOptions { Timeout = 30_000 });
+        return await rows.CountAsync();
     }
 
     /// <summary>After <c>New</c> on employees list — TabbedMDI may keep URL at <c>/</c>.</summary>
@@ -814,33 +904,33 @@ internal static class PlaywrightPageInteractions
     {
         await ApplyListSearchFilterAsync(page, text);
 
-        ILocator row = page.Locator("tr.dxbl-grid-data-row")
+        ILocator byRow = page.Locator("tr.dxbl-grid-data-row")
             .Filter(new LocatorFilterOptions { HasText = text });
-        if (await row.CountAsync() == 0)
+        if (await byRow.CountAsync() > 0 && await byRow.First.IsVisibleAsync())
         {
-            row = page.Locator("[role='gridcell']").Filter(new LocatorFilterOptions { HasText = text })
-                .Locator("xpath=ancestor::tr[contains(@class,'dxbl-grid-data-row')][1]");
-        }
-
-        await row.First.WaitForAsync(new LocatorWaitForOptions { Timeout = 20_000 });
-        await row.First.ScrollIntoViewIfNeededAsync();
-        await row.First.ClickAsync();
-        await Task.Delay(500);
-    }
-
-    internal static async Task ClearListSearchFilterAsync(IPage page)
-    {
-        ILocator searchInput = page.Locator(
-            ".dxbl-grid-toolbar input[type='text'], " +
-            ".dxbl-grid-search-panel input, " +
-            "input[placeholder*='Search' i]");
-        if (await searchInput.CountAsync() == 0)
-        {
+            await byRow.First.ClickAsync();
+            await Task.Delay(500);
             return;
         }
 
-        ILocator input = searchInput.First;
-        await input.ScrollIntoViewIfNeededAsync();
+        ILocator cell = page.Locator("[role='gridcell'], .dxbl-grid-table td, .dxbl-grid")
+            .GetByText(text, new LocatorGetByTextOptions { Exact = false })
+            .First;
+        await cell.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible, Timeout = 20_000 });
+        await cell.ScrollIntoViewIfNeededAsync();
+        await cell.ClickAsync();
+        await Task.Delay(500);
+    }
+
+    internal static ILocator EmployeeListSearchInput(IPage page) =>
+        page.GetByPlaceholder("Text to search", new PageGetByPlaceholderOptions { Exact = false }).First;
+
+    internal static async Task ClearListSearchFilterAsync(IPage page)
+    {
+        ILocator input = EmployeeListSearchInput(page);
+        if (!await TryWaitVisibleAsync(input, 3_000))
+            return;
+
         await input.ClickAsync(new LocatorClickOptions { Force = true });
         await input.FillAsync(string.Empty);
         await input.PressAsync("Enter");
@@ -850,21 +940,10 @@ internal static class PlaywrightPageInteractions
     internal static async Task ApplyListSearchFilterAsync(IPage page, string text)
     {
         if (string.IsNullOrWhiteSpace(text))
-        {
             return;
-        }
 
-        ILocator searchInput = page.Locator(
-            ".dxbl-grid-toolbar input[type='text'], " +
-            ".dxbl-grid-search-panel input, " +
-            "input[placeholder*='Search' i]");
-        if (await searchInput.CountAsync() == 0)
-        {
-            return;
-        }
-
-        ILocator input = searchInput.First;
-        await input.ScrollIntoViewIfNeededAsync();
+        ILocator input = EmployeeListSearchInput(page);
+        await input.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible, Timeout = 15_000 });
         await input.ClickAsync(new LocatorClickOptions { Force = true });
         await input.FillAsync(text);
         await input.PressAsync("Enter");
