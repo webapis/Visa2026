@@ -1,4 +1,3 @@
-using System;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using Visa2026.Module.DatabaseUpdate;
@@ -6,60 +5,15 @@ using Xunit;
 
 namespace Visa2026.E2E.Tests.Playwright;
 
-/// <summary>
-/// Officer person journey — Playwright E2E for Local (:5050) and Staging (live URL).
-/// Filter: <c>Driver=Playwright</c>. Target: <c>VISA2026_E2E_TARGET=Local|Staging</c>.
-/// </summary>
 [Collection(PlaywrightE2eCollection.Name)]
 [Trait("Driver", "Playwright")]
 [Trait("Category", "UserManual")]
-public sealed class PersonOfficerJourneyPlaywrightTests
+[Trait("EmployeeSlice", "AddPassport")]
+public sealed class PersonOfficerAddPassportPlaywrightTests
 {
     private readonly PlaywrightE2eFixture _fixture;
 
-    public PersonOfficerJourneyPlaywrightTests(PlaywrightE2eFixture fixture) => _fixture = fixture;
-
-    [Fact]
-    [SupportedOSPlatform("windows")]
-    [Trait("E2ETarget", "Local")]
-    [Trait("GuideSlug", "getting-started/login")]
-    public Task PersonOfficerJourney_SignIn_Local() =>
-        PlaywrightE2eTestRunner.RunAsync(_fixture, nameof(PersonOfficerJourney_SignIn_Local), async () =>
-        {
-            Assert.Equal(PlaywrightE2eTarget.Local, PlaywrightE2eEnvironment.Target);
-
-            var journey = new PlaywrightPersonOfficerJourney(_fixture.Page);
-            await journey.RunSignInToReportDashboardAsync();
-        });
-
-    [Fact]
-    [SupportedOSPlatform("windows")]
-    [Trait("E2ETarget", "Local")]
-    [Trait("GuideSlug", "employee/register")]
-    public Task PersonOfficerJourney_RegisterEmployee_Local() =>
-        PlaywrightE2eTestRunner.RunAsync(_fixture, nameof(PersonOfficerJourney_RegisterEmployee_Local), async () =>
-        {
-            Assert.Equal(PlaywrightE2eTarget.Local, PlaywrightE2eEnvironment.Target);
-
-            var journey = new PlaywrightPersonOfficerJourney(_fixture.Page);
-            await journey.RunRegisterEmployeeAsync(
-                E2ETestRegisterEmployeeJourneyValues.PersonalNumber,
-                E2ETestRegisterEmployeeJourneyValues.FirstName,
-                E2ETestRegisterEmployeeJourneyValues.LastName);
-        });
-
-    [Fact]
-    [SupportedOSPlatform("windows")]
-    [Trait("E2ETarget", "Local")]
-    [Trait("GuideSlug", "person/open-and-search")]
-    public Task PersonOfficerJourney_FindEmployee_Local() =>
-        PlaywrightE2eTestRunner.RunAsync(_fixture, nameof(PersonOfficerJourney_FindEmployee_Local), async () =>
-        {
-            Assert.Equal(PlaywrightE2eTarget.Local, PlaywrightE2eEnvironment.Target);
-
-            var journey = new PlaywrightPersonOfficerJourney(_fixture.Page);
-            await journey.RunFindEmployeeAsync();
-        });
+    public PersonOfficerAddPassportPlaywrightTests(PlaywrightE2eFixture fixture) => _fixture = fixture;
 
     [Fact]
     [SupportedOSPlatform("windows")]
@@ -70,7 +24,6 @@ public sealed class PersonOfficerJourneyPlaywrightTests
         PlaywrightE2eTestRunner.RunAsync(_fixture, nameof(PersonOfficerJourney_LoginCreateEmployeeAddPassport_Local), async () =>
         {
             Assert.Equal(PlaywrightE2eTarget.Local, PlaywrightE2eEnvironment.Target);
-
             var journey = new PlaywrightPersonOfficerJourney(_fixture.Page);
             await journey.RunLoginCreateEmployeeAddPassportAsync(
                 E2ETestPassportCreateOnlyJourneyValues.PersonalNumber,
@@ -87,7 +40,6 @@ public sealed class PersonOfficerJourneyPlaywrightTests
         PlaywrightE2eTestRunner.RunAsync(_fixture, nameof(PersonOfficerJourney_LoginCreateEmployeeAddPassport_Staging), async () =>
         {
             Assert.Equal(PlaywrightE2eTarget.Staging, PlaywrightE2eEnvironment.Target);
-
             var journey = new PlaywrightPersonOfficerJourney(_fixture.Page);
             await journey.RunLoginCreateEmployeeAddPassportAsync(
                 E2ETestPassportCreateOnlyJourneyValues.PersonalNumber,

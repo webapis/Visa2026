@@ -6,7 +6,7 @@ using DevExpress.EasyTest.Framework;
 namespace Visa2026.E2E.Tests;
 
 /// <summary>
-/// Logs EasyTest DB + port state, clears stale hosts, then drops/recreates the Postgres test database.
+/// Logs EasyTest DB + port state, then restores a pg_dump snapshot or drop/recreates the Postgres test database.
 /// </summary>
 internal static class EasyTestPreflight
 {
@@ -35,11 +35,19 @@ internal static class EasyTestPreflight
                 "(old UI-scenario profile). EasyTest uses :5050 only; stop the :5052 host to avoid confusion.");
         }
 
-        Trace.WriteLine($"[EasyTest] Dropping PostgreSQL database '{EasyTestHostEnvironment.DatabaseName}' for a clean session.");
-        EasyTestDatabaseProvisioner.DropDatabase();
-        LogDatabaseState();
+        Trace.WriteLine($"[EasyTest] Provisioning PostgreSQL database '{EasyTestHostEnvironment.DatabaseName}'.");
+        if (EasyTestDatabaseSnapshot.TryRestore(blazorServerProjectPath))
+        {
+            Trace.WriteLine("[EasyTest] Restored visa2026_easytest from pg_dump snapshot.");
+        }
+        else
+        {
+            EasyTestDatabaseProvisioner.DropDatabase();
+            LogDatabaseState();
+            EasyTestDatabaseProvisioner.EnsureCreated(blazorServerProjectPath);
+            EasyTestDatabaseSnapshot.TryCapture(blazorServerProjectPath);
+        }
 
-        EasyTestDatabaseProvisioner.EnsureCreated(blazorServerProjectPath);
         LogDatabaseState();
     }
 

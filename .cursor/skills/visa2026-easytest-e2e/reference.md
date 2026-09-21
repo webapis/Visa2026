@@ -26,6 +26,10 @@ Host: Postgres **`visa2026_easytest`** on `:5050` (not IDE `:5000`).
 - Built `Visa2026.Blazor.Server.exe` with `--urls http://localhost:5050 --environment Development`
 - Connection string / DB name triggers **`EasyTestHostMode`** (ephemeral TabbedMDI — name historical)
 - Do **not** invent a second port or DB for Playwright
+- Default Local Playwright preflight **drops** `visa2026_easytest` and **stops** `:5050` after the collection unless KeepDb/KeepHost
+- **Snapshot (Local, default on):** after the first `--updateDatabase`, bootstrap writes `Visa2026.E2E.Tests/.easytest-snapshots/visa2026_easytest.dump` (gitignored) keyed to `Visa2026.Module` AssemblyVersion. Later clean runs `pg_restore` instead of `--updateDatabase`. Needs `pg_dump`/`pg_restore` (`C:\PostgreSQL\16\bin` or `VISA2026_E2E_PG_BIN`). `-NoSnapshot` disables. `-RefreshSnapshot` recaptures. Version mismatch falls back to `--updateDatabase` then recaptures.
+- **Snapshot (GitHub Actions):** `actions/cache@v4` on `.easytest-snapshots`; key `e2e-pg-snapshot-{os}-{hashFiles(DatabaseUpdate, BusinessObjects)}`. `VISA2026_E2E_SNAPSHOT_TRUST=true`. EasyTest preflight and Playwright bootstrap both restore. Do not commit the dump; do not upload it as an artifact (public repo).
+- **Local reuse (never CI):** `VISA2026_E2E_KEEP_DB` / `VISA2026_E2E_KEEP_HOST` via `Record-PlaywrightE2e.ps1 -KeepDb -KeepHost`. KeepHost implies KeepDb and leaves the host running. If `:5050` is not HTTP-ready, bootstrap starts (or restarts) it. Missing DB still provisions. Unique personal numbers from a prior Register run will collide on KeepDb — omit KeepDb and use snapshot restore for a clean catalog.
 
 ### Headed vs headless
 

@@ -98,7 +98,11 @@ Playwright must **not** share the IDE dev host (`:5000` / `:5001`).
 
 **TabbedMDI / saved tabs:** host sets ephemeral user model differences when the EasyTest DB is detected (`EasyTestHostMode`). Without this, **`StandardUser`** can reopen **Family Members** instead of Employees.
 
-**Preflight:** keep using existing host launch on **`:5050`** (drop/recreate DB, `--updateDatabase`, built `.exe` with `--urls http://localhost:5050 --environment Development`). One host per session — no second port/DB. Details: [reference.md](./reference.md#host-and-browser).
+**Preflight (default):** restore a local **pg_dump** of seeded `visa2026_easytest` when the dump matches `Visa2026.Module` AssemblyVersion; otherwise drop/recreate, `--updateDatabase`, then capture the dump. Start built `.exe` on **`:5050`**, stop host after tests. One host per session — no second port/DB.
+
+**GitHub Actions:** `e2e-tests.yml` caches `.easytest-snapshots`. Employee journeys run as **separate named steps** (Sign in, Register, Find, Add passport) so the job log shows each result. Each step is a new process: restore dump → host → one Fact. First cache miss still `--updateDatabase`. `VISA2026_E2E_SNAPSHOT_TRUST=true`. Do not commit or artifact the dump.
+
+**Local recapture (opt-in):** `Record-PlaywrightE2e.ps1 -SkipBuild -KeepDb -KeepHost -SkipBrowserInstall`. Reuses HTTP-ready `:5050` and leftover rows. **KeepHost implies KeepDb.** Pair KeepHost with **`-SkipBuild`**. Unique-key Facts (Register employee) should omit KeepDb and rely on snapshot restore for a clean catalog. `-RefreshSnapshot` after schema/lookup seed changes. `-NoSnapshot` forces `--updateDatabase`. Details: [reference.md](./reference.md#host-and-browser).
 
 ---
 
@@ -180,6 +184,12 @@ dotnet build Visa2026.slnx -c EasyTest
 .\scripts\local\Record-EasyTest.ps1 -Filter 'YourPlaywrightFactName'
 dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest --filter "Driver=Playwright"
 # Opt out of media: .\scripts\local\Record-EasyTest.ps1 -NoRecord -NoScreenshots
+# Fast local recapture (reuse leftover DB + :5050 host):
+.\scripts\local\Record-PlaywrightE2e.ps1 -Target Local -SkipBuild -KeepDb -KeepHost -SkipBrowserInstall `
+  -Filter PersonOfficerJourney_FindEmployee_Local
+# Clean Register recapture (restore snapshot, do not KeepDb):
+.\scripts\local\Record-PlaywrightE2e.ps1 -Target Local -SkipBuild -SkipBrowserInstall `
+  -Filter PersonOfficerJourney_RegisterEmployee_Local
 ```
 
 **Prerequisites:** Windows, local PostgreSQL, Playwright browsers installed ([reference.md](./reference.md#install-browsers)), ffmpeg for desktop video (`Visa2026.E2E.Tests\.tools\ffmpeg\` or PATH).
@@ -283,6 +293,9 @@ When the user asks for **E2E**, **Playwright**, **EasyTest** (redirect), or **`V
 | Second host/port for Playwright | Share **`:5050`** preflight |
 | Fragile XPath | Label / `data-testid` / role |
 | Red Playwright run with no artifacts | Use `PlaywrightE2eTestRunner` + `PlaywrightE2eStepRunner`; check `failures/` under run id |
+| KeepHost then `dotnet build -c EasyTest` | Use **`-SkipBuild`**; running `:5050` `.exe` locks Blazor.Server output |
+| KeepDb + Register employee recapture | Expect unique-PN collision — omit KeepDb so snapshot restore (or `--updateDatabase`) yields a clean catalog |
+| Snapshot Module version mismatch | Dump is stale after AssemblyVersion bump — bootstrap recaptures after `--updateDatabase`; or pass `-RefreshSnapshot` |
 
 ---
 

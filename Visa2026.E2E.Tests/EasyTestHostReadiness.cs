@@ -35,6 +35,23 @@ internal static class EasyTestHostReadiness
         }
     }
 
+    internal static bool IsHttpReady()
+    {
+        try
+        {
+            using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(3) };
+            using HttpResponseMessage response = client
+                .GetAsync(EasyTestHostEnvironment.BaseUrl)
+                .GetAwaiter()
+                .GetResult();
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
     internal static void WaitUntilHttpResponds(TimeSpan timeout, Func<bool>? hostHasExited = null)
     {
         DateTime deadline = DateTime.UtcNow + timeout;

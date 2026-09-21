@@ -85,8 +85,10 @@ public sealed class PlaywrightE2eFixture : IAsyncLifetime
 
         _playwright?.Dispose();
 
-        if (PlaywrightE2eEnvironment.IsLocal)
+        if (PlaywrightE2eEnvironment.IsLocal && !PlaywrightE2eEnvironment.KeepHost)
             EasyTestHostLifecycle.StopHost();
+        else if (PlaywrightE2eEnvironment.KeepHost)
+            Console.WriteLine("[Playwright] Leaving :5050 host running (VISA2026_E2E_KEEP_HOST).");
 
         UserManualVideoMarkerCapture.FlushToDisk(final: true);
     }

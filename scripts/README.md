@@ -23,7 +23,7 @@ Use on your **own PC** with **Docker Desktop** (or any machine where you edit th
 
 | `Install-MsEdgeDriver.ps1` | Download **Edge WebDriver** (`msedgedriver.exe`) from Microsoft’s CDN into **`%USERPROFILE%\.local\bin`** and prepend that folder to your **user PATH**. Run once per machine (or after a major Edge upgrade) so **`Visa2026.E2E.Tests`** can launch Edge via EasyTest. See [visa2026-easytest-e2e](../.cursor/skills/visa2026-easytest-e2e/SKILL.md). |
 | `Record-EasyTest.ps1` | Run headed EasyTest filter (legacy; prefer `Record-PlaywrightE2e.ps1`). |
-| `Record-PlaywrightE2e.ps1` | **Playwright E2E** — Local (:5050) or Staging (live URL) + manual screenshots. |
+| `Record-PlaywrightE2e.ps1` | **Playwright E2E** — Local (:5050) or Staging (live URL) + manual screenshots. Local reuse: `-SkipBuild -KeepDb -KeepHost -SkipBrowserInstall`. Snapshot restore is on by default (`-NoSnapshot` / `-RefreshSnapshot`). |
 | `Serve-UserManual.ps1` | **Officer manual preview** — bootstraps portable Python if needed, runs `Build-UserManual.ps1`, then **`mkdocs serve`** at **http://127.0.0.1:8765/manual/** (live reload). See [visa2026-user-manual](../.cursor/skills/visa2026-user-manual/SKILL.md). |
 | `Serve-ManualTestReports.ps1` | **Test results preview** (separate from officer manual) — **http://127.0.0.1:8766/latest/summary.html**. See [MANUAL_TEST_REPORTS.md](../docs/MANUAL_TEST_REPORTS.md). |
 
@@ -31,7 +31,7 @@ Use on your **own PC** with **Docker Desktop** (or any machine where you edit th
 
 | Script | Purpose |
 |--------|---------|
-| `Build-UserManual.ps1` | MkDocs build pipeline (generator, tests, validate). Supports `MANUAL_MEDIA_BASE_URL`. |
+| `Run-PlaywrightE2eSlice.ps1` | One Playwright Local E2E slice (Sign in / Register / Find / Add passport) with pg_dump restore. Used by `e2e-tests.yml`. |
 | `Publish-ManualMedia.ps1` | Copy `user-manual/assets/` → on-prem `MANUAL_MEDIA_ROOT`. |
 | `Publish-UserManualSite.ps1` | Copy `user-manual/site/` → `MANUAL_SITE_ROOT`. |
 | `Publish-ManualRelease.ps1` | Orchestrator: optional record → media → build → site. See [USER_MANUAL_RELEASE.md](../docs/USER_MANUAL_RELEASE.md). |

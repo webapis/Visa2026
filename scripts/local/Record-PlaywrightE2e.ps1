@@ -15,6 +15,23 @@
 .PARAMETER SkipBuild
   Skip dotnet build -c EasyTest.
 
+.PARAMETER KeepDb
+  Reuse visa2026_easytest (skip drop + --updateDatabase). Use after a fresh Local run.
+  Unique-key Facts (Register employee) may fail if the same personal number already exists.
+
+.PARAMETER KeepHost
+  Reuse an HTTP-ready :5050 EasyTest host and leave it running after tests.
+  Implies KeepDb. Pair with -SkipBuild (the running .exe locks EasyTest output).
+
+.PARAMETER SkipBrowserInstall
+  Skip playwright.ps1 install msedge (use when Edge is already installed).
+
+.PARAMETER NoSnapshot
+  Do not restore or capture the local pg_dump of visa2026_easytest (always --updateDatabase).
+
+.PARAMETER RefreshSnapshot
+  Ignore an existing dump, run --updateDatabase, then recapture the snapshot.
+
 .PARAMETER NoScreenshots
   Disable milestone PNG capture.
 
@@ -26,6 +43,14 @@
 
 .EXAMPLE
   .\scripts\local\Record-PlaywrightE2e.ps1 -Target Local
+
+.EXAMPLE
+  .\scripts\local\Record-PlaywrightE2e.ps1 -Target Local -SkipBuild -KeepDb -KeepHost -SkipBrowserInstall `
+    -Filter PersonOfficerJourney_FindEmployee_Local
+
+.EXAMPLE
+  .\scripts\local\Record-PlaywrightE2e.ps1 -Target Local -SkipBuild -SkipBrowserInstall -RefreshSnapshot `
+    -Filter PersonOfficerJourney_SignIn_Local
 
 .EXAMPLE
   $env:VISA2026_E2E_USER = 'StandardUser'
@@ -42,6 +67,16 @@ param(
     [string]$Filter = '',
 
     [switch]$SkipBuild,
+
+    [switch]$KeepDb,
+
+    [switch]$KeepHost,
+
+    [switch]$SkipBrowserInstall,
+
+    [switch]$NoSnapshot,
+
+    [switch]$RefreshSnapshot,
 
     [switch]$NoScreenshots,
 
@@ -93,23 +128,62 @@ else {
     $env:VISA2026_E2E_VIDEO_RECORDING = 'false'
 }
 
+if ($KeepHost) {
+    $env:VISA2026_E2E_KEEP_HOST = 'true'
+    $env:VISA2026_E2E_KEEP_DB = 'true'
+}
+else {
+    Remove-Item Env:\VISA2026_E2E_KEEP_HOST -ErrorAction SilentlyContinue
+    if ($KeepDb) {
+        $env:VISA2026_E2E_KEEP_DB = 'true'
+    }
+    else {
+        Remove-Item Env:\VISA2026_E2E_KEEP_DB -ErrorAction SilentlyContinue
+    }
+}
+
+if ($KeepHost -and -not $SkipBuild) {
+    Write-Warning 'KeepHost leaves Visa2026.Blazor.Server.exe running on :5050. EasyTest build may lock that output — prefer -SkipBuild.'
+}
+
+if ($NoSnapshot) {
+    $env:VISA2026_E2E_SNAPSHOT = 'false'
+}
+else {
+    Remove-Item Env:\VISA2026_E2E_SNAPSHOT -ErrorAction SilentlyContinue
+}
+
+if ($RefreshSnapshot) {
+    $env:VISA2026_E2E_REFRESH_SNAPSHOT = 'true'
+}
+else {
+    Remove-Item Env:\VISA2026_E2E_REFRESH_SNAPSHOT -ErrorAction SilentlyContinue
+}
+
 if (-not $SkipBuild) {
     Write-Host 'Building EasyTest configuration...'
     dotnet build Visa2026.slnx -c EasyTest
     if ($LASTEXITCODE -ne 0) { throw "dotnet build failed with exit code $LASTEXITCODE" }
 }
 
-Write-Host "Installing Playwright browsers (idempotent)..."
-$playwrightScript = Join-Path $repoRoot 'Visa2026.E2E.Tests\bin\EasyTest\net8.0\playwright.ps1'
-if (-not (Test-Path -LiteralPath $playwrightScript)) {
-    throw "playwright.ps1 not found at $playwrightScript - run dotnet build first."
+if ($SkipBrowserInstall) {
+    Write-Host 'Skipping Playwright browser install (-SkipBrowserInstall).'
 }
-& $playwrightScript install msedge
-if ($LASTEXITCODE -ne 0) {
-    Write-Warning "playwright install msedge returned $LASTEXITCODE (often OK when system Edge is already present)."
+else {
+    Write-Host "Installing Playwright browsers (idempotent)..."
+    $playwrightScript = Join-Path $repoRoot 'Visa2026.E2E.Tests\bin\EasyTest\net8.0\playwright.ps1'
+    if (-not (Test-Path -LiteralPath $playwrightScript)) {
+        throw "playwright.ps1 not found at $playwrightScript - run dotnet build first."
+    }
+    & $playwrightScript install msedge
+    if ($LASTEXITCODE -ne 0) {
+        Write-Warning "playwright install msedge returned $LASTEXITCODE (often OK when system Edge is already present)."
+    }
 }
 
-Write-Host "Running Playwright E2E - Target=$Target Filter=$Filter"
+$keepDbEffective = [bool]($KeepHost -or $KeepDb)
+$snapshotEffective = -not $NoSnapshot
+Write-Host "Running Playwright E2E - Target=$Target Filter=$Filter KeepDb=$keepDbEffective KeepHost=$KeepHost Snapshot=$snapshotEffective RefreshSnapshot=$RefreshSnapshot"
 $testArgs = @(
     'test', 'Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj',
     '-c', 'EasyTest', '--no-build',

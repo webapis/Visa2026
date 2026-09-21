@@ -20,6 +20,8 @@ Invoke with **`@visa2026-easytest-e2e`** (or this skill path).
 | Install browsers | `@visa2026-easytest-e2e Install Playwright browsers for Visa2026.E2E.Tests.` |
 | CI E2E | `@visa2026-easytest-e2e Debug **e2e-tests.yml** / Playwright on Windows.` |
 | Manual media | `@visa2026-easytest-e2e Record guide media via Record-EasyTest.ps1 per USER_MANUAL_E2E_MEDIA.md.` |
+| Fast recapture | `@visa2026-easytest-e2e Recapture with Record-PlaywrightE2e.ps1 -SkipBuild -KeepDb -KeepHost -SkipBrowserInstall.` |
+| Snapshot restore | `@visa2026-easytest-e2e Recapture Register with snapshot restore (omit KeepDb). Refresh dump with -RefreshSnapshot.` |
 
 ---
 

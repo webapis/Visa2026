@@ -49,6 +49,14 @@ dotnet build Visa2026.slnx -c EasyTest
 # Local — fresh DB + :5050
 .\scripts\local\Record-PlaywrightE2e.ps1 -Target Local
 
+# Local recapture — reuse DB + host (after a successful fresh run)
+.\scripts\local\Record-PlaywrightE2e.ps1 -Target Local -SkipBuild -KeepDb -KeepHost -SkipBrowserInstall `
+  -Filter PersonOfficerJourney_FindEmployee_Local
+
+# Local — restore seeded snapshot (clean catalog, no KeepDb)
+.\scripts\local\Record-PlaywrightE2e.ps1 -Target Local -SkipBuild -SkipBrowserInstall `
+  -Filter PersonOfficerJourney_RegisterEmployee_Local
+
 # Staging — live URL (manual)
 .\scripts\local\Record-PlaywrightE2e.ps1 -Target Staging -BaseUrl 'https://10.100.128.25:8080'
 ```
@@ -61,6 +69,10 @@ Environment:
 | `VISA2026_E2E_BASE_URL` | Override app URL |
 | `VISA2026_E2E_USER` / `VISA2026_E2E_PASSWORD` | Officer credentials (staging) |
 | `VISA2026_E2E_SCREENSHOTS` | `false` to disable milestone PNGs |
+| `VISA2026_E2E_KEEP_DB` | `true` to reuse `visa2026_easytest` (skip drop / `--updateDatabase`) |
+| `VISA2026_E2E_KEEP_HOST` | `true` to reuse HTTP-ready `:5050` and leave it running (implies KeepDb) |
+| `VISA2026_E2E_SNAPSHOT` | `false` to skip local pg_dump restore/capture (default on) |
+| `VISA2026_E2E_REFRESH_SNAPSHOT` | `true` to recapture the dump after `--updateDatabase` |
 
 Filter: `dotnet test ... --filter "Driver=Playwright&E2ETarget=Local"`.
 

@@ -82,7 +82,7 @@ internal static class EasyTestDatabaseProvisioner
         WaitUntilDatabaseOnline(timeout: TimeSpan.FromMinutes(3));
     }
 
-    private static void EnsureEmptyDatabaseExists()
+    internal static void EnsureEmptyDatabaseExists()
     {
         string databaseName = EasyTestHostEnvironment.DatabaseName;
 
@@ -103,7 +103,7 @@ internal static class EasyTestDatabaseProvisioner
         Trace.WriteLine($"[EasyTest] Ensured empty PostgreSQL database '{databaseName}' exists on {EasyTestHostEnvironment.PgHost}:{EasyTestHostEnvironment.PgPort}.");
     }
 
-    private static void WaitUntilDatabaseOnline(TimeSpan timeout)
+    internal static void WaitUntilDatabaseOnline(TimeSpan timeout)
     {
         var deadline = DateTime.UtcNow + timeout;
 
@@ -122,6 +122,8 @@ internal static class EasyTestDatabaseProvisioner
         throw new TimeoutException(
             $"Timed out waiting for database '{EasyTestHostEnvironment.DatabaseName}' after --updateDatabase.");
     }
+
+    internal static bool DatabaseExists() => TryQueryDatabaseState(out _);
 
     internal static bool TryQueryDatabaseState(out string? state)
     {

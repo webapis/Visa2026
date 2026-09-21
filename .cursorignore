@@ -37,6 +37,7 @@ coverage*.info
 # E2E binaries and recordings
 Visa2026.E2E.Tests/.webdrivers/
 Visa2026.E2E.Tests/recordings/
+Visa2026.E2E.Tests/.easytest-snapshots/
 **/easytest-host-logs/
 
 # Local secrets (keep *.example available for the model).

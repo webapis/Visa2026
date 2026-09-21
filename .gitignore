@@ -476,6 +476,9 @@ Visa2026.E2E.Tests/.webdrivers/
 # EasyTest E2E screen recordings (produced on CI by the ffmpeg capture step)
 Visa2026.E2E.Tests/recordings/
 
+# Local pg_dump of seeded visa2026_easytest (Playwright snapshot restore; not committed)
+Visa2026.E2E.Tests/.easytest-snapshots/
+
 # DevExpress Model Editor auto-creates these beside Model.xafml; use Model.{culture}.xafml from GenerateModelLocalization
 Visa2026.Blazor.Server/Model_*.xafml
 

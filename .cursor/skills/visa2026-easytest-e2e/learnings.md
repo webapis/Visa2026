@@ -18,6 +18,38 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 
 ## Entries
 
+### 2026-09-21 — CI employee E2E slices share pg_dump cache
+
+- **Outcome**: positive (workflow + split test files; first Actions slice run not yet observed)
+- **Context**: `e2e-tests.yml` steps Sign in / Register / Find / Add passport; `Run-PlaywrightE2eSlice.ps1`
+- **Symptom**: One `dotnet test` hid which employee journey failed. Officers wanted Cypress-like independent results.
+- **Fix / reuse**: One Windows job, sequential named steps, `continue-on-error` then summary table. Each step restores the cached dump (TRUST). Do not matrix four Windows VMs (would redo Postgres + build).
+- **Reuse**: PR/push with empty filter → four Playwright slices. Custom `workflow_dispatch` filter → single suite. Job Summary lists pass/fail per slice.
+
+### 2026-09-21 — GitHub Actions cache for EasyTest pg_dump
+
+- **Outcome**: positive (workflow + preflight wired; first Actions hit not yet observed)
+- **Context**: `.github/workflows/e2e-tests.yml`, `EasyTestPreflight`, `VISA2026_E2E_SNAPSHOT_TRUST`
+- **Symptom**: PR E2E uses legacy EasyTest preflight (`PersonOfficerJourneyTests`), which always ran `--updateDatabase`. Local AssemblyVersion stamp would miss cache every commit.
+- **Fix / reuse**: Cache `.easytest-snapshots` with an exact `hashFiles` key (no `restore-keys`). TRUST skips Module version. Capture on the runner so pg_dump major version matches restore. Do not commit or artifact the dump.
+- **Reuse**: Schema/seed change → cache miss → one slow provision; following runs restore. Local dump is not used on CI.
+
+### 2026-09-21 — pg_dump snapshot instead of Cypress intercepts
+
+- **Outcome**: positive (compile only — snapshot restore not yet timed in a headed run)
+- **Context**: `EasyTestDatabaseSnapshot`; Local `:5050` / `visa2026_easytest`
+- **Symptom**: Officers asked for Cypress-style dummy API fixtures. XAF Blazor Server has no REST lookups to intercept; `--updateDatabase` + catalog seed is the slow path.
+- **Fix / reuse**: After a successful provision, `pg_dump -Fc` to `Visa2026.E2E.Tests/.easytest-snapshots/` keyed to Module AssemblyVersion. Later clean runs `pg_restore` (gitignored dump). `-KeepDb` still skips restore. `-RefreshSnapshot` recaptures. `pg_dump` at `C:\PostgreSQL\16\bin` on this host.
+- **Reuse**: Clean Register recapture: omit KeepDb so snapshot restore resets unique PNs. First run without a dump still pays `--updateDatabase` then captures.
+
+### 2026-09-21 — KeepDb / KeepHost for faster Local recapture
+
+- **Outcome**: positive (compile only — `Visa2026.E2E.Tests` EasyTest build green; first reuse recapture not run)
+- **Context**: `PlaywrightE2eLocalBootstrap`, `Record-PlaywrightE2e.ps1`; Local `:5050` / `visa2026_easytest`
+- **Symptom**: Each dedicated Fact recapture paid ~2 min for drop DB + `--updateDatabase` + cold host, plus `playwright install msedge`.
+- **Fix / reuse**: Opt-in `-KeepDb` skips drop/provision when the catalog exists. `-KeepHost` reuses HTTP-ready `:5050` and leaves it running (implies KeepDb). `-SkipBrowserInstall` skips Edge install. Pair KeepHost with `-SkipBuild`. CI unchanged. Unique-PN Facts (Register) collide on KeepDb.
+- **Reuse**: Fast recapture: `Record-PlaywrightE2e.ps1 -Target Local -SkipBuild -KeepDb -KeepHost -SkipBrowserInstall`. Omit KeepDb after schema change or to re-run Register.
+
 ### 2026-09-21 — Register recapture: list search is Text to search
 
 - **Outcome**: positive (verified green — `PersonOfficerJourney_RegisterEmployee_Local`, run `20260921-173914`)
