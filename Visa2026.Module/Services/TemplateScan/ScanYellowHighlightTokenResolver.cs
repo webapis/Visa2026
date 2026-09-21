@@ -56,8 +56,11 @@ public static class ScanYellowHighlightTokenResolver
         if (text.Length == 0)
             return Array.Empty<ScanDetectedFieldDraft>();
 
-        // Comma means one yellow span is a combination candidate (6.1 / 6.2 / …), not several independent marks.
-        if (ScanCompoundYellowParts.IsCommaCombination(text))
+        // Comma / amount+currency means one yellow span is a combination candidate, not several independent marks.
+        if (ScanCompoundYellowParts.IsCommaCombination(text)
+            || ScanCompoundYellowParts.IsAmountCurrencyCombination(text)
+            || (ScanCompoundYellowParts.IsDateRangeCombination(text)
+                && ScanCompoundYellowParts.LooksLikeContractPeriodNearby(nearbyLabel)))
             return Array.Empty<ScanDetectedFieldDraft>();
 
         var drafts = new List<ScanDetectedFieldDraft>();

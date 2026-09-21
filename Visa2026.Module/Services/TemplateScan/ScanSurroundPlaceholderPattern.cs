@@ -211,7 +211,9 @@ public static class ScanSurroundPlaceholderPattern
     {
         if (string.IsNullOrWhiteSpace(yellowText) || string.IsNullOrWhiteSpace(code))
             return false;
-        if (ScanCompoundYellowParts.IsCommaCombination(yellowText))
+        if (ScanCompoundYellowParts.IsCommaCombination(yellowText)
+            || ScanCompoundYellowParts.IsAmountCurrencyCombination(yellowText)
+            || ScanCompoundYellowParts.IsDateRangeCombination(yellowText))
         {
             var parts = ScanCompoundYellowParts.SplitSegments(yellowText);
             return parts.Any(p => ScanCompoundYellowParts.SegmentFitsCode(p.Text, code));

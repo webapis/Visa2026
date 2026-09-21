@@ -191,6 +191,33 @@ public static class ScanPlaceholderChoiceList
         if (term.Contains("maksady", StringComparison.OrdinalIgnoreCase)
             || term.Contains("purpose", StringComparison.OrdinalIgnoreCase))
             yield return "Purpose";
+        if (term.Contains("currency", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("waluta", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("walýuta", StringComparison.OrdinalIgnoreCase)
+            || term.Equals("CCUR", StringComparison.OrdinalIgnoreCase)
+            || term.Equals("USD", StringComparison.OrdinalIgnoreCase))
+        {
+            yield return "Salary currency";
+            yield return "CCUR";
+        }
+        if (term.Contains("contract", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("sertnama", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("şertnama", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("zahmet haky", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("zähmet haky", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("aylyk", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("aýlyk", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("salary", StringComparison.OrdinalIgnoreCase))
+        {
+            yield return "Salary";
+            yield return "Salary currency";
+            yield return "Contract start";
+            yield return "Contract end";
+            yield return "CSAL";
+            yield return "CCUR";
+            yield return "CSDT";
+            yield return "CEDT";
+        }
         if (term.Contains("visa start", StringComparison.OrdinalIgnoreCase)
             || term.Contains("start date", StringComparison.OrdinalIgnoreCase)
             || term.Contains("baslanyan", StringComparison.OrdinalIgnoreCase)

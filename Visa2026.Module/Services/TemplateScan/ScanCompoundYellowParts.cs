@@ -42,6 +42,14 @@ public static class ScanCompoundYellowParts
         @"\b\d{1,2}[./-]\d{1,2}[./-]\d{4}(?:\s*[\u00FD\u00DD]\.?)?",
         RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
 
+    private static readonly Regex AmountCurrencyShape = new(
+        @"^(?<amount>\d{1,3}(?:[.\s]\d{3})+(?:[.,]\d{2})?|\d+(?:[.,]\d{2})?)\s+(?<ccy>USD|EUR|TMT|TRY|GBP|RUB|manat)\s*$",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+
+    private static readonly Regex DateRangeShape = new(
+        @"^(?<start>\d{1,2}[./-]\d{1,2}[./-]\d{2,4}(?:\s*[\u00FD\u00DD]\.?)?)\s*[-–—]\s*(?<end>\d{1,2}[./-]\d{1,2}[./-]\d{2,4}(?:\s*[\u00FD\u00DD]\.?)?)\s*$",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+
     internal static bool LooksLikePassportNumber(string? text)
     {
         var value = text ?? string.Empty;
@@ -64,6 +72,36 @@ public static class ScanCompoundYellowParts
 
         return !segments.All(static s =>
             s.Text.Length <= 3 && s.Text.All(char.IsDigit));
+    }
+
+    /// <summary><c>1.667.00 USD</c> — amount then currency on one yellow (Zähmet şertnamasy §6).</summary>
+    public static bool IsAmountCurrencyCombination(string? labelText)
+    {
+        var label = (labelText ?? string.Empty).Trim();
+        return label.Length > 0 && AmountCurrencyShape.IsMatch(label);
+    }
+
+    /// <summary><c>18.02.2026 - 18.08.2026</c> — contract start then end on one yellow.</summary>
+    public static bool IsDateRangeCombination(string? labelText)
+    {
+        var label = (labelText ?? string.Empty).Trim();
+        return label.Length > 0 && DateRangeShape.IsMatch(label);
+    }
+
+    public static bool LooksLikeContractPeriodNearby(string? nearbyLabel, string? columnHeader = null)
+    {
+        var folded = TemplateTextNormalizer.NormalizeFolded(
+            string.Join(" ", new[] { nearbyLabel, columnHeader }.Where(static s => !string.IsNullOrWhiteSpace(s))));
+        if (folded.Length == 0)
+            return false;
+
+        return folded.Contains("sertnama", StringComparison.Ordinal)
+            || folded.Contains("contract start", StringComparison.Ordinal)
+            || folded.Contains("contract end", StringComparison.Ordinal)
+            || (folded.Contains("zahmet", StringComparison.Ordinal)
+                && (folded.Contains("haky", StringComparison.Ordinal)
+                    || folded.Contains("mohlet", StringComparison.Ordinal)
+                    || folded.Contains("hereket", StringComparison.Ordinal)));
     }
 
     public static IReadOnlyList<ScanCompoundPart> Split(string? labelText, string? proposedToken)
@@ -91,6 +129,9 @@ public static class ScanCompoundYellowParts
 
         if (IsCommaCombination(label))
             return AlignParts(SplitByDelimiter(label, ','), codes, tokens);
+
+        if (IsAmountCurrencyCombination(label) || IsDateRangeCombination(label))
+            return AlignParts(SplitSegments(label), codes, tokens);
 
         if (codes.Count <= 1)
             return Array.Empty<ScanCompoundPart>();
@@ -218,6 +259,12 @@ public static class ScanCompoundYellowParts
 
         if (label.Contains(',', StringComparison.Ordinal))
             return SplitByDelimiter(label, ',');
+
+        if (TrySplitAmountCurrency(label, out var amountCurrency))
+            return amountCurrency;
+
+        if (TrySplitDateRange(label, out var dateRange))
+            return dateRange;
 
         if (label.Contains('/', StringComparison.Ordinal))
             return SplitByDelimiter(label, '/');
@@ -408,7 +455,9 @@ public static class ScanCompoundYellowParts
             return LooksLikeIso3(segment)
                 || (code.Equals("PCBT", StringComparison.OrdinalIgnoreCase)
                     && segment.Length >= 3
-                    && !DateLikeShape.IsMatch(segment));
+                    && !DateLikeShape.IsMatch(segment)
+                    && !ScanShapeTokenMatcher.LooksLikePersonFullName(segment)
+                    && !ScanShapeTokenMatcher.LooksLikeTitledPersonName(segment));
 
         if (code.Equals("PBPL", StringComparison.OrdinalIgnoreCase))
             return segment.Length is >= 2 and <= 48
@@ -426,7 +475,11 @@ public static class ScanCompoundYellowParts
             return ScanShapeTokenMatcher.LooksLikeGenderWord(segment);
 
         if (code.Equals("CSAL", StringComparison.OrdinalIgnoreCase))
-            return ScanShapeTokenMatcher.LooksLikeMoneyAmount(segment);
+            return ScanShapeTokenMatcher.LooksLikeMoneyAmount(segment)
+                || ScanShapeTokenMatcher.LooksLikeMoneyAmountOnly(segment);
+
+        if (code.Equals("CCUR", StringComparison.OrdinalIgnoreCase))
+            return ScanShapeTokenMatcher.LooksLikeCurrencyCode(segment);
 
         if (code.Equals("ACPHN", StringComparison.OrdinalIgnoreCase)
             || code.Equals("RPPH", StringComparison.OrdinalIgnoreCase))
@@ -502,6 +555,46 @@ public static class ScanCompoundYellowParts
             return true;
 
         return segment.Length >= 16;
+    }
+
+    private static bool TrySplitAmountCurrency(
+        string label,
+        out IReadOnlyList<(string Text, int Offset, int Length)> parts)
+    {
+        parts = Array.Empty<(string, int, int)>();
+        var match = AmountCurrencyShape.Match(label.TrimStart());
+        if (!match.Success)
+            return false;
+
+        var lead = label.Length - label.TrimStart().Length;
+        var amount = match.Groups["amount"];
+        var ccy = match.Groups["ccy"];
+        parts =
+        [
+            (amount.Value, lead + amount.Index, amount.Length),
+            (ccy.Value, lead + ccy.Index, ccy.Length),
+        ];
+        return true;
+    }
+
+    private static bool TrySplitDateRange(
+        string label,
+        out IReadOnlyList<(string Text, int Offset, int Length)> parts)
+    {
+        parts = Array.Empty<(string, int, int)>();
+        var match = DateRangeShape.Match(label.TrimStart());
+        if (!match.Success)
+            return false;
+
+        var lead = label.Length - label.TrimStart().Length;
+        var start = match.Groups["start"];
+        var end = match.Groups["end"];
+        parts =
+        [
+            (start.Value, lead + start.Index, start.Length),
+            (end.Value, lead + end.Index, end.Length),
+        ];
+        return true;
     }
 
     private static IReadOnlyList<(string Text, int Offset, int Length)> SplitByDelimiter(string label, char delimiter)

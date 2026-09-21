@@ -372,6 +372,38 @@ public class ScanPlaceholderChoiceListTests
         Assert.Contains("THPL", codes);
     }
 
+    [Theory]
+    [InlineData("CCUR")]
+    [InlineData("currency")]
+    [InlineData("USD")]
+    [InlineData("contract")]
+    [InlineData("şertnama")]
+    [InlineData("salary")]
+    public void Contract_group_search_finds_salary_and_dates(string search)
+    {
+        var allowed = FullSet().Allowed;
+        var groups = ScanPlaceholderChoiceList.RemainingGroups(
+            allowed,
+            hideShortCodes: Array.Empty<string>(),
+            search: search);
+        var codes = groups.SelectMany(static g => g.Entries)
+            .Select(static e => e.ShortCode)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        Assert.Contains(groups, g => g.RelatedBo == UserReportPlaceholderRelatedBo.Contract);
+        if (string.Equals(search, "CCUR", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(search, "currency", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(search, "USD", StringComparison.OrdinalIgnoreCase))
+            Assert.Contains("CCUR", codes);
+        else
+        {
+            Assert.Contains("CSAL", codes);
+            Assert.Contains("CCUR", codes);
+            Assert.Contains("CSDT", codes);
+            Assert.Contains("CEDT", codes);
+        }
+    }
+
     private static ApplicationProfilePlaceholderSet FullSet() =>
         new ApplicationProfilePlaceholderSetService(new UserReportPlaceholderCatalogService()).GetSet(
             new ApplicationProfilePlaceholderSetQuery

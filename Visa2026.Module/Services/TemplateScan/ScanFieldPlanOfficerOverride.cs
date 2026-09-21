@@ -532,6 +532,10 @@ public static class ScanFieldPlanOfficerOverride
             return ", ";
         if (label.Contains('/', StringComparison.Ordinal))
             return " / ";
+        if (label.Contains(" - ", StringComparison.Ordinal)
+            || label.Contains(" – ", StringComparison.Ordinal)
+            || label.Contains(" — ", StringComparison.Ordinal))
+            return " - ";
         return " ";
     }
 

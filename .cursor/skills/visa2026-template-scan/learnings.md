@@ -2,6 +2,15 @@
 
 Append-only. Newest first under **## Entries**.
 
+### 2026-09-21 — Contract group + CCUR for Zähmet şertnamasy
+
+- Need: Yellow labor contract `1.667.00 USD` and `18.02.2026 - 18.08.2026`. Review Add had salary under **Salary** and dates under leftover **Visa**. Currency was not in the officer library.
+- Cause: `Salary_CurrencyCode` merged but was missing from `UserReportPlaceholderCatalog.json`. CSDT/CEDT used `relatedBo: Visa`.
+- Fix: Catalog **CCUR** → `Salary_CurrencyCode` (PersonSalary pack). **CSAL**, **CCUR**, **CSDT**, **CEDT** → **Contract**. Analyze splits amount+currency and contract date ranges. Letterhead `Aşgabat şäheri` stays static (no company city BO).
+- Officer: Stop F5, rebuild, hard-refresh Review / Placeholder Manual. **Contract** → CSAL, CCUR, CSDT, CEDT. Filter `CCUR` / `currency` / `şertnama`.
+- Prevent: Do not put labor-contract salary/dates under Visa or a lone Salary group.
+- Cross-skill: visa2026-user-report-templates
+
 ### 2026-09-19 — Excel loop tags must not sit between ACPOS and ACFNM
 
 - Need: Yellow-marks Excel Generate wrote `{{#ds.rows}}` / `{{/ds.rows}}` on the signatory footer, between **ACPOS** and **ACFNM**.

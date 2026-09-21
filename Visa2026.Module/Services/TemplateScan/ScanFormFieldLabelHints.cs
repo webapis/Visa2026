@@ -185,10 +185,18 @@ public static class ScanFormFieldLabelHints
         if (folded.Equals("ady", StringComparison.Ordinal))
             return ["PFNM"];
 
+        if (folded.Contains("sertnama", StringComparison.Ordinal)
+            && (folded.Contains("mohlet", StringComparison.Ordinal)
+                || folded.Contains("hereket", StringComparison.Ordinal)
+                || folded.Contains("zahmet", StringComparison.Ordinal)))
+            return ["CSDT", "CEDT"];
+
         if (folded.Contains("aylyk", StringComparison.Ordinal)
             || folded.Contains("aylygy", StringComparison.Ordinal)
-            || folded.Contains("salary", StringComparison.Ordinal))
-            return ["CSAL"];
+            || folded.Contains("salary", StringComparison.Ordinal)
+            || folded.Contains("waluta", StringComparison.Ordinal)
+            || folded.Contains("currency", StringComparison.Ordinal))
+            return ["CSAL", "CCUR"];
 
         if (folded.Contains("is beriji", StringComparison.Ordinal)
             || folded.Equals("mudiri", StringComparison.Ordinal))

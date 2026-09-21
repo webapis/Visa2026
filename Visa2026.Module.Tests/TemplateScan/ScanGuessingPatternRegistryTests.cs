@@ -215,6 +215,23 @@ public class ScanGuessingPatternRegistryTests
     }
 
     [Fact]
+    public void Isolated_usd_maps_to_salary_currency_not_nationality()
+    {
+        var set = Set();
+        if (!set.Contains("CCUR"))
+            return;
+
+        var ranked = ScanSurroundPlaceholderPattern.Rank(
+            "USD",
+            "Aylyk zahmet haky",
+            null,
+            set,
+            UserReportPlaceholderScope.Row);
+        Assert.Equal("CCUR", ranked[0].ShortCode);
+        Assert.DoesNotContain(ranked, a => a.ShortCode == "PNAT" && a.ScorePercent >= ranked[0].ScorePercent);
+    }
+
+    [Fact]
     public void Excel_profiles_match_purpose_and_inviting_party()
     {
         Assert.Equal("RGEL", ScanExcelColumnProfiles.Match("Gelmeginin maksady")!.ShortCodes[0]);

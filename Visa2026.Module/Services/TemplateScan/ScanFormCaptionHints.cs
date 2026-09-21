@@ -72,12 +72,19 @@ public static class ScanFormCaptionHints
             return NameCodes(role);
 
         if (folded.Contains("mohlet", StringComparison.Ordinal))
+        {
+            if (nearby.Contains("sertnama", StringComparison.Ordinal)
+                || nearby.Contains("zahmet", StringComparison.Ordinal)
+                || nearby.Contains("contract", StringComparison.Ordinal))
+                return ["CSDT", "CEDT"];
+
             return role switch
             {
                 ScanLetterRole.Signatory => ["CHPE"],
                 ScanLetterRole.Wekil => ["RPPD"],
                 _ => ["PPED"],
             };
+        }
 
         if (folded.Contains("nirede", StringComparison.Ordinal)
             || folded.Contains("berildi", StringComparison.Ordinal)

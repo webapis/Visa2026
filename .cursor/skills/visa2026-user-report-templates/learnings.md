@@ -1,4 +1,11 @@
 
+### 2026-09-21 — Contract group + CCUR (Zähmet şertnamasy)
+
+- **Symptom**: Yellow `1.667.00 USD` could only map **CSAL**. Contract dates sat under leftover Visa.
+- **Fix**: Catalog **CCUR** → `Salary_CurrencyCode`. Officer group **Contract** = CSAL, CCUR, CSDT, CEDT. Packs unchanged (salary / visa).
+- **Officer**: Stop F5, rebuild. Placeholder Manual / Review Add → **Contract**.
+- **Cross-skill**: visa2026-template-scan
+
 ### 2026-09-19 — Excel {{#ds.rows}} does not belong on the ACPOS/ACFNM footer
 
 - **Symptom**: Yellow-marks Excel Generate inserted loop open/close between signatory **ACPOS** and **ACFNM**.

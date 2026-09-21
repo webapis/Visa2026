@@ -35,6 +35,8 @@ public enum UserReportPlaceholderRelatedBo
     ApplicationBusinessTrip = 23,
     VisaLinkedActive = 24,
     VisaCancel = 25,
+    /// <summary>Labor-contract salary and period (Zähmet şertnamasy).</summary>
+    Contract = 26,
 }
 
 public static class UserReportPlaceholderRelatedBoCatalog
@@ -51,6 +53,9 @@ public static class UserReportPlaceholderRelatedBoCatalog
         UserReportPlaceholderRelatedBo.VisaLinkedActive => 107,
         UserReportPlaceholderRelatedBo.VisaCancel => 108,
         UserReportPlaceholderRelatedBo.Visa => 109,
+        UserReportPlaceholderRelatedBo.Position => 110,
+        UserReportPlaceholderRelatedBo.Contract => 111,
+        UserReportPlaceholderRelatedBo.Salary => 112,
         _ => 100 + (int)relatedBo,
     };
 
@@ -72,6 +77,7 @@ public static class UserReportPlaceholderRelatedBoCatalog
         UserReportPlaceholderRelatedBo.Education => "Education",
         UserReportPlaceholderRelatedBo.AddressOfResidence => "Address of residence",
         UserReportPlaceholderRelatedBo.Position => "Position",
+        UserReportPlaceholderRelatedBo.Contract => "Contract",
         UserReportPlaceholderRelatedBo.Salary => "Salary",
         UserReportPlaceholderRelatedBo.Invitation => "Invitation",
         UserReportPlaceholderRelatedBo.WorkPermit => "Work permit",

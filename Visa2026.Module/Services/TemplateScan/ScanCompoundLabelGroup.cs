@@ -78,6 +78,8 @@ public static class ScanCompoundLabelGroup
             Add(UserReportPlaceholderRelatedBo.VisaCancel, 94);
         if (LooksLikeVisa(stem))
             Add(UserReportPlaceholderRelatedBo.VisaLinkedActive, 90);
+        if (LooksLikeContract(stem))
+            Add(UserReportPlaceholderRelatedBo.Contract, 92);
         if (LooksLikeTravel(stem))
             Add(UserReportPlaceholderRelatedBo.Travel, 90);
         if (stem.Contains("pasport", StringComparison.Ordinal))
@@ -169,7 +171,11 @@ public static class ScanCompoundLabelGroup
         }
 
         if (IsIso3(text))
+        {
+            if (ScanShapeTokenMatcher.LooksLikeCurrencyCode(text))
+                return entry.ShortCode.Equals("CCUR", StringComparison.OrdinalIgnoreCase) ? 88 : 0;
             return LooksLikeCountryCode(entry.ShortCode) ? 88 : 0;
+        }
 
         if (IsGraduationYear(text))
             return entry.ShortCode.Equals("EGYR", StringComparison.OrdinalIgnoreCase) ? 90 : 0;
@@ -283,6 +289,15 @@ public static class ScanCompoundLabelGroup
             && (stem.Contains("yatyryl", StringComparison.Ordinal)
                 || stem.Contains("cancel", StringComparison.Ordinal)))
         || stem.Contains("yatyrilyan wiza", StringComparison.Ordinal);
+
+    private static bool LooksLikeContract(string stem) =>
+        stem.Contains("sertnama", StringComparison.Ordinal)
+        || stem.Contains("contract", StringComparison.Ordinal)
+        || stem.Contains("aylyk", StringComparison.Ordinal)
+        || stem.Contains("salary", StringComparison.Ordinal)
+        || (stem.Contains("zahmet", StringComparison.Ordinal)
+            && (stem.Contains("haky", StringComparison.Ordinal)
+                || stem.Contains("mohlet", StringComparison.Ordinal)));
 
     private static bool LooksLikeTravel(string stem) =>
         stem.Contains("giren", StringComparison.Ordinal);

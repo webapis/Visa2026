@@ -39,8 +39,17 @@ public static class ScanShapeTokenMatcher
         RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
 
     private static readonly Regex MoneyAmount = new(
-        @"\b\d{1,3}(?:[.\s]\d{3})*(?:[.,]\d{2})?\s*(USD|EUR|TMT|manat)\b",
+        @"\b\d{1,3}(?:[.\s]\d{3})*(?:[.,]\d{2})?\s*(USD|EUR|TMT|TRY|GBP|RUB|manat)\b",
         RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+
+    private static readonly Regex MoneyAmountOnly = new(
+        @"^(?:\d{1,3}(?:[.\s]\d{3})+(?:[.,]\d{2})?|\d+[.,]\d{2})$",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+    private static readonly HashSet<string> CurrencyCodes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "USD", "EUR", "TMT", "TRY", "GBP", "RUB", "manat",
+    };
 
     private static readonly HashSet<string> GenderWords = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -80,7 +89,9 @@ public static class ScanShapeTokenMatcher
         if (GenderWords.Contains(folded))
             Prefer("PGND", 88, "Gender word");
 
-        if (LooksLikeMoneyAmount(text))
+        if (LooksLikeCurrencyCode(text))
+            Prefer("CCUR", 94, "Currency code");
+        else if (LooksLikeMoneyAmount(text) || LooksLikeMoneyAmountOnly(text))
             Prefer("CSAL", 90, "Money amount");
 
         if (LooksLikePersonalNumber(text))
@@ -89,7 +100,7 @@ public static class ScanShapeTokenMatcher
         if (LooksLikeCompanyLegalName(folded))
             Prefer("ACNAM", 88, "Company legal name");
 
-        if (CountryCode.IsMatch(text))
+        if (CountryCode.IsMatch(text) && !LooksLikeCurrencyCode(text))
         {
             Prefer("PNAT", 70, "Three-letter country code");
             Prefer("PPCC", 66, "Passport issued-country code");
@@ -200,6 +211,15 @@ public static class ScanShapeTokenMatcher
 
     internal static bool LooksLikeMoneyAmount(string text) =>
         MoneyAmount.IsMatch((text ?? string.Empty).Trim());
+
+    internal static bool LooksLikeMoneyAmountOnly(string text) =>
+        MoneyAmountOnly.IsMatch((text ?? string.Empty).Trim());
+
+    internal static bool LooksLikeCurrencyCode(string text)
+    {
+        var trimmed = (text ?? string.Empty).Trim();
+        return trimmed.Length > 0 && CurrencyCodes.Contains(trimmed);
+    }
 
     internal static bool LooksLikeTitledPersonName(string text)
     {

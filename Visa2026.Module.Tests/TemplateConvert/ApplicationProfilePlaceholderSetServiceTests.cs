@@ -118,9 +118,11 @@ public class ApplicationProfilePlaceholderSetServiceTests
         profile.RequirePersonVisa = false;
 
         Assert.True(Allows(GetSet(profile), "CSAL"));
+        Assert.True(Allows(GetSet(profile), "CCUR"));
 
         profile.RequirePersonSalary = false;
         Assert.Equal(PlaceholderExclusionReason.PersonPackDisabled, ReasonFor(GetSet(profile), "CSAL"));
+        Assert.Equal(PlaceholderExclusionReason.PersonPackDisabled, ReasonFor(GetSet(profile), "CCUR"));
     }
 
     /// <summary>

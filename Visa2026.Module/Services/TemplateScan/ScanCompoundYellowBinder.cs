@@ -64,6 +64,26 @@ public static class ScanCompoundYellowBinder
         string? nearbyLabel = null,
         string? columnHeader = null)
     {
+        if (!ScanCompoundYellowParts.IsCommaCombination(labelText)
+            && !ScanCompoundYellowParts.IsAmountCurrencyCombination(labelText)
+            && !ScanCompoundYellowParts.IsDateRangeCombination(labelText))
+            return null;
+
+        if (ScanCompoundYellowParts.IsAmountCurrencyCombination(labelText)
+            && placeholderSet.Contains("CSAL")
+            && placeholderSet.Contains("CCUR"))
+        {
+            return FinishBind(labelText, placeholderSet, usage, ["CSAL", "CCUR"], "Salary amount + currency");
+        }
+
+        if (ScanCompoundYellowParts.IsDateRangeCombination(labelText)
+            && ScanCompoundYellowParts.LooksLikeContractPeriodNearby(nearbyLabel, columnHeader)
+            && placeholderSet.Contains("CSDT")
+            && placeholderSet.Contains("CEDT"))
+        {
+            return FinishBind(labelText, placeholderSet, usage, ["CSDT", "CEDT"], "Contract start + end");
+        }
+
         if (!ScanCompoundYellowParts.IsCommaCombination(labelText))
             return null;
 

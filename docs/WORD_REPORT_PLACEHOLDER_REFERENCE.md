@@ -313,11 +313,11 @@ Case-linked `TravelHistory` (latest linked row). Short codes in the **Travel his
 | Property | Type | Example output | Notes |
 |----------|------|----------------|--------|
 | `Contract_Salary` | `string` | `5000` | Amount text from salary |
-| `Contract_SalaryText` | `string` | `5000` | Same as `Contract_Salary` |
-| `Contract_StartDateText` | `string` | `06.07.2026` | From current visa expiry |
-| `Contract_ExpirationDateText` | `string` | `06.01.2027` | + visa period months |
+| `Contract_SalaryText` | `string` | `5000` | Same as `Contract_Salary`. Short **CSAL** |
+| `Contract_StartDateText` | `string` | `06.07.2026` | From current visa expiry. Short **CSDT** |
+| `Contract_ExpirationDateText` | `string` | `06.01.2027` | + visa period months. Short **CEDT** |
 | `Contract_PeriodFallbackText` | `string` | `Rugsatnamanyň başlaýan gününden 6 aý möhleti bilen güýje girer.` | When no current visa |
-| `Salary_CurrencyCode` | `string` | `USD` | |
+| `Salary_CurrencyCode` | `string` | `USD` | Short **CCUR**. Same yellow as **CSAL** on `1.667.00 USD` |
 | `Application_CompanyAddress` | `string` | `Aşgabat ş., Bitarap Türkmenistan şaýoly 538` | Item-level; no underscore |
 
 ### Work duty

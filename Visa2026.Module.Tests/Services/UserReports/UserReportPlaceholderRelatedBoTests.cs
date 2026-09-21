@@ -508,6 +508,45 @@ public class UserReportPlaceholderRelatedBoTests
         Assert.Contains(groups[0].Entries, e => e.ShortCode == "RPFN");
     }
 
+    [Theory]
+    [InlineData("CSAL", "Contract_SalaryText", "PersonSalary")]
+    [InlineData("CCUR", "Salary_CurrencyCode", "PersonSalary")]
+    [InlineData("CSDT", "Contract_StartDateText", "PersonVisa")]
+    [InlineData("CEDT", "Contract_ExpirationDateText", "PersonVisa")]
+    public void Contract_tokens_are_catalogued(string shortCode, string canonical, string packKey)
+    {
+        var catalog = new UserReportPlaceholderCatalogService();
+        var entry = catalog.GetEntries().Single(e =>
+            string.Equals(e.ShortCode, shortCode, StringComparison.OrdinalIgnoreCase));
+
+        Assert.Equal(canonical, entry.CanonicalPath);
+        Assert.Equal(Enum.Parse<UserReportPlaceholderPack>(packKey), entry.Pack);
+        Assert.Equal(UserReportPlaceholderRelatedBo.Contract, entry.RelatedBo);
+        Assert.Equal(UserReportPlaceholderScope.Row, entry.Scope);
+        Assert.Equal("{{." + shortCode + "}}", entry.BuildWordToken(UserReportPlaceholderScope.Row));
+        Assert.NotNull(typeof(ApplicationRosterMergeLine).GetProperty(
+            canonical, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase));
+    }
+
+    [Fact]
+    public void Grouped_manual_puts_contract_salary_and_dates_together()
+    {
+        var groups = new UserReportPlaceholderCatalogService().GetGroupedEntries();
+        var contract = groups.Single(g => g.RelatedBo == UserReportPlaceholderRelatedBo.Contract);
+        var codes = contract.Entries.Select(e => e.ShortCode).ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        Assert.Equal("Contract", UserReportPlaceholderRelatedBoCatalog.DisplayNameEn(contract.RelatedBo));
+        Assert.Contains("CSAL", codes);
+        Assert.Contains("CCUR", codes);
+        Assert.Contains("CSDT", codes);
+        Assert.Contains("CEDT", codes);
+        Assert.DoesNotContain(groups, g => g.RelatedBo == UserReportPlaceholderRelatedBo.Salary);
+        Assert.DoesNotContain(groups, g =>
+            g.RelatedBo == UserReportPlaceholderRelatedBo.Visa
+            && g.Entries.Any(e => e.ShortCode is "CSDT" or "CEDT"));
+        Assert.DoesNotContain(contract.Entries, e => e.RelatedBo != UserReportPlaceholderRelatedBo.Contract);
+    }
+
     [Fact]
     public void FMRLH_is_relationship_only_under_Application_family_member()
     {

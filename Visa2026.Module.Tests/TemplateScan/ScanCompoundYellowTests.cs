@@ -77,6 +77,59 @@ public class ScanCompoundYellowTests
         Assert.Empty(drafts);
     }
 
+    private static ApplicationProfilePlaceholderSet ContractSet() =>
+        new ApplicationProfilePlaceholderSetService(new UserReportPlaceholderCatalogService()).GetSet(
+            new ApplicationProfilePlaceholderSetQuery
+            {
+                Profile = new ApplicationProfile
+                {
+                    RequirePersonSalary = true,
+                    RequirePersonVisa = true,
+                },
+                DataScope = ApplicationProfileTemplateDataScope.Both,
+                TemplateKind = ApplicationProfileTemplateKind.Word,
+            });
+
+    [Fact]
+    public void Amount_then_currency_is_a_combination_candidate()
+    {
+        Assert.True(ScanCompoundYellowParts.IsAmountCurrencyCombination("1.667.00 USD"));
+        Assert.False(ScanCompoundYellowParts.IsAmountCurrencyCombination("TUR"));
+        Assert.False(ScanCompoundYellowParts.IsAmountCurrencyCombination("Hilmi Erol"));
+
+        var bound = ScanCompoundYellowBinder.TryBind(
+            "1.667.00 USD",
+            ContractSet(),
+            UserReportPlaceholderScope.Row,
+            "Aylyk zahmet haky");
+        Assert.NotNull(bound);
+        Assert.Equal(["CSAL", "CCUR"], TemplateTokenSyntax.GetShortCodes(bound.Value.Token));
+
+        var parts = ScanCompoundYellowParts.Split("1.667.00 USD", bound.Value.Token);
+        Assert.Equal(2, parts.Count);
+        Assert.Equal("1.667.00", parts[0].SegmentText);
+        Assert.Equal("CSAL", parts[0].ShortCode);
+        Assert.Equal("USD", parts[1].SegmentText);
+        Assert.Equal("CCUR", parts[1].ShortCode);
+    }
+
+    [Fact]
+    public void Contract_date_range_maps_start_then_end()
+    {
+        var yellow = "18.02.2026 - 18.08.2026";
+        Assert.True(ScanCompoundYellowParts.IsDateRangeCombination(yellow));
+        Assert.True(ScanCompoundYellowParts.LooksLikeContractPeriodNearby("Zahmet sertnamasy"));
+
+        var bound = ScanCompoundYellowBinder.TryBind(
+            yellow,
+            ContractSet(),
+            UserReportPlaceholderScope.Row,
+            "Zahmet sertnamasy");
+        Assert.NotNull(bound);
+        Assert.Equal(["CSDT", "CEDT"], TemplateTokenSyntax.GetShortCodes(bound.Value.Token));
+        Assert.Contains(" - ", bound.Value.Token, StringComparison.Ordinal);
+    }
+
     private static ApplicationProfilePlaceholderSet EducationSet() =>
         new ApplicationProfilePlaceholderSetService(new UserReportPlaceholderCatalogService()).GetSet(
             new ApplicationProfilePlaceholderSetQuery
