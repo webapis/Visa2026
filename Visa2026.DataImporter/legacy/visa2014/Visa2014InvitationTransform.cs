@@ -87,7 +87,7 @@ internal static class Visa2014InvitationTransform
     private static Guid? TryParseGuid(string? text) =>
         Guid.TryParse(text?.Trim(), out var oid) ? oid : null;
 
-    private static Visa2014PersonImportBatch TransformRows(
+    internal static Visa2014PersonImportBatch TransformRows(
         IReadOnlyList<Visa2014InvitationRawRow> rawRows,
         out List<Dictionary<string, object?>> skipped,
         out List<Dictionary<string, object?>> dedupeSummary)
