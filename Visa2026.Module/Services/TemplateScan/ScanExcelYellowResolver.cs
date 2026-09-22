@@ -628,17 +628,36 @@ public static class ScanExcelYellowResolver
             }
         }
 
-        // Sanaw "Raýatlygy" is the ISO code column (PNAT). A catalog exact-label
-        // hit for the nationality *name* (PNTM) must not outrank the column profile.
+        // Column-profile codes must exist in the merge even when catalog labels
+        // do not overlap (BTAD "boljak salgysy" vs "barýan ýer"). Otherwise an
+        // incidental three-letter token in the sample (UYJ) ranks as PNAT.
         foreach (var prefer in preferCodes)
         {
-            if (!merged.TryGetValue(prefer, out var existing))
+            if (!placeholderSet.Contains(prefer))
                 continue;
 
-            merged[prefer] = existing with
+            var entry = placeholderSet.Allowed.First(e =>
+                string.Equals(e.ShortCode, prefer, StringComparison.OrdinalIgnoreCase));
+            var token = entry.BuildWordToken(
+                entry.Scope == UserReportPlaceholderScope.Header
+                    ? UserReportPlaceholderScope.Header
+                    : usageScope);
+
+            if (merged.TryGetValue(prefer, out var existing))
             {
-                ScorePercent = Math.Min(100, existing.ScorePercent + 20),
-            };
+                merged[prefer] = existing with
+                {
+                    ScorePercent = Math.Min(100, existing.ScorePercent + 20),
+                };
+            }
+            else
+            {
+                merged[prefer] = new ScanTokenAlternative(
+                    token,
+                    prefer,
+                    96,
+                    "Column header");
+            }
         }
 
         return merged.Values

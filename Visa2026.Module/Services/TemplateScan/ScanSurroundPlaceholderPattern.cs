@@ -266,6 +266,7 @@ public static class ScanSurroundPlaceholderPattern
             || code.Equals("RGEL", StringComparison.OrdinalIgnoreCase)
             || code.Equals("ACNAM", StringComparison.OrdinalIgnoreCase)
             || code.Equals("ADRS", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("BTAD", StringComparison.OrdinalIgnoreCase)
             || code.Equals("VPLC", StringComparison.OrdinalIgnoreCase)
             || code.Equals("TRCK", StringComparison.OrdinalIgnoreCase)
             || code.Equals("VTYP", StringComparison.OrdinalIgnoreCase)

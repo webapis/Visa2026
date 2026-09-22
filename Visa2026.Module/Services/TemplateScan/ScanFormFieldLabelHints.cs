@@ -97,6 +97,13 @@ public static class ScanFormFieldLabelHints
         if (folded.Contains("masgala", StringComparison.Ordinal))
             return ["PVFM"];
 
+        if (folded.Contains("is saparyna baryan yer", StringComparison.Ordinal)
+            || folded.Contains("baryan yer", StringComparison.Ordinal)
+            || folded.Contains("is saparynda boljak", StringComparison.Ordinal)
+            || folded.Contains("business trip address", StringComparison.Ordinal)
+            || folded.Contains("business trip destination", StringComparison.Ordinal))
+            return ["BTAD"];
+
         if (folded.Contains("dasary", StringComparison.Ordinal)
             && (folded.Contains("salgy", StringComparison.Ordinal) || folded.Contains("yasa", StringComparison.Ordinal)))
             return ["PFAC", "PFAD", "PFWC"];
@@ -241,7 +248,9 @@ public static class ScanFormFieldLabelHints
             || folded.Contains("giren", StringComparison.Ordinal)
             || folded.Contains("kabul edyan", StringComparison.Ordinal)
             || folded.Contains("bolyan yeri", StringComparison.Ordinal)
-            || folded.Contains("oy salgy", StringComparison.Ordinal);
+            || folded.Contains("oy salgy", StringComparison.Ordinal)
+            || folded.Contains("baryan yer", StringComparison.Ordinal)
+            || folded.Contains("is saparynda boljak", StringComparison.Ordinal);
     }
 
     internal static string StripLeadingItemNumber(string folded)
