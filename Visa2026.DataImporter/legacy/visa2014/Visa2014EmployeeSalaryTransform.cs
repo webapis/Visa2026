@@ -88,7 +88,7 @@ internal static class Visa2014EmployeeSalaryTransform
         return true;
     }
 
-    private static Visa2014PersonImportBatch TransformRows(
+    internal static Visa2014PersonImportBatch TransformRows(
         IReadOnlyList<Visa2014EmployeeSalaryRawRow> rawRows,
         out List<Dictionary<string, object?>> skipped,
         out List<Dictionary<string, object?>> amountParseRows)
@@ -124,7 +124,7 @@ internal static class Visa2014EmployeeSalaryTransform
         };
     }
 
-    private static Dictionary<string, object?> BuildAmountParseRow(Visa2014EmployeeSalaryRawRow raw)
+    internal static Dictionary<string, object?> BuildAmountParseRow(Visa2014EmployeeSalaryRawRow raw)
     {
         var normalized = string.Empty;
         var parseNote = "empty";
@@ -142,7 +142,7 @@ internal static class Visa2014EmployeeSalaryTransform
         };
     }
 
-    private static Dictionary<string, object?> BuildExportRow(
+    internal static Dictionary<string, object?> BuildExportRow(
         Visa2014EmployeeSalaryRawRow raw,
         IReadOnlyDictionary<string, object?> parseAudit,
         out string? skipReason)
