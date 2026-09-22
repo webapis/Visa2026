@@ -2,6 +2,15 @@
 
 Append-only. Newest first under **## Entries**.
 
+### 2026-09-22 — Sanaw "Iş saparyna barýan ýer" mapped to PNAT not BTAD
+
+- Need: CI `ScanExcelBtadProbeTests` — header **Iş saparyna barýan ýer** expected `{{.BTAD}}`, got `{{.PNAT}}`. Sibling **Iş saparynda boljak salgysy** already passed.
+- Cause: Column profile already matched BTAD, but `MergeScores` only boosted codes that catalog labels had already scored. Catalog tk-TM is *boljak salgysy*, so BTAD never entered the merge. Sample `… Çalyk Enerji UYJ.` matched `\b[A-Z]{3}\b` and won as nationality.
+- Fix: Seed missing column-profile codes at 96 ("Column header"). Form-field hint **BTAD** for *barýan ýer* / *boljak salgysy* (before generic *salgy* → ADRS). `LabelCompatible` treats BTAD like ADRS.
+- Officer: Stop F5, rebuild, **Analyze**. Destination column → **BTAD**, not nationality. Filter `BTAD` / `business trip address` / `barýan ýer`.
+- Prevent: Do not rely on catalog label overlap to apply a Sanaw column profile. Incidental three-letter tokens in an address are not PNAT.
+- Cross-skill: visa2026-user-report-templates
+
 ### 2026-09-21 — Contract group + CCUR for Zähmet şertnamasy
 
 - Need: Yellow labor contract `1.667.00 USD` and `18.02.2026 - 18.08.2026`. Review Add had salary under **Salary** and dates under leftover **Visa**. Currency was not in the officer library.

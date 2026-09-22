@@ -1,6 +1,9 @@
-# Fast gate: solution build + unit tests (Visa2026.Module.Tests, Visa2026.DataImporter).
+# Fast gate: one Debug build, then parallel unit-test slices (Visa2026.Module.Tests + DataImporter).
 # No database, no browser - target is under ~10 minutes so it can block every push and PR.
 # Long-running browser coverage lives in e2e-tests.yml; see docs/TESTING_PLAN.md.
+#
+# Slices share the built bins (artifact) so we do not restore/build four times.
+# In-process xUnit parallelism is xunit.runner.json (maxParallelThreads = CPU count).
 
 name: Build & unit tests
 
@@ -8,6 +11,13 @@ on:
   push:
   pull_request:
   workflow_dispatch:
+    inputs:
+      max_parallel:
+        description: Maximum parallel unit-test jobs (1-4). Default 4.
+        required: false
+        type: choice
+        options: ['1', '2', '3', '4']
+        default: '4'
   # Called by EasyTest E2E for schedule / manual runs (no concurrent unit-test workflow).
   workflow_call:
 
@@ -20,10 +30,10 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: true
 
 jobs:
-  unit-tests:
-    name: Build + unit tests
+  build:
+    name: Build
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 20
 
     steps:
       - name: Checkout repository
@@ -62,26 +72,94 @@ jobs:
       - name: Build (Debug)
         run: dotnet build Visa2026.slnx -c Debug --no-restore "/p:NoWarn=DX1000%3BDX1001"
 
-      - name: Unit tests - Visa2026.Module.Tests
-        run: >-
-          dotnet test Visa2026.Module.Tests/Visa2026.Module.Tests.csproj -c Debug --no-build
-          --logger "console;verbosity=normal"
-          --logger "trx;LogFileName=module-tests.trx"
+      - name: Upload test bins
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-bins
+          path: |
+            Visa2026.Module.Tests/bin/Debug
+            Visa2026.DataImporter/bin/Debug
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 6
 
-      # Audit_* facts in Visa2014WorkPermitItemPositionResolverTests connect to legacy
-      # SQL (VISA2015) and a local visa2026 Postgres; they are developer harnesses and
-      # cannot run on a clean runner. Everything else here is pure transform logic.
-      - name: Unit tests - Visa2026.DataImporter
+  unit-tests:
+    name: Unit tests — ${{ matrix.name }}
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      # workflow_dispatch input, else repo variable UNIT_TEST_MAX_PARALLEL, else 4.
+      max-parallel: ${{ fromJSON(github.event.inputs.max_parallel || vars.UNIT_TEST_MAX_PARALLEL || '4') }}
+      matrix:
+        include:
+          - name: TemplateScan
+            project: Visa2026.Module.Tests/Visa2026.Module.Tests.csproj
+            filter: FullyQualifiedName~Visa2026.Module.Tests.TemplateScan
+            trx: module-templatescan.trx
+          - name: TemplateConvert
+            project: Visa2026.Module.Tests/Visa2026.Module.Tests.csproj
+            filter: FullyQualifiedName~Visa2026.Module.Tests.TemplateConvert
+            trx: module-templateconvert.trx
+          - name: Services
+            project: Visa2026.Module.Tests/Visa2026.Module.Tests.csproj
+            filter: FullyQualifiedName~Visa2026.Module.Tests.Services
+            trx: module-services.trx
+          - name: Other
+            project: Visa2026.Module.Tests/Visa2026.Module.Tests.csproj
+            filter: FullyQualifiedName!~Visa2026.Module.Tests.TemplateScan&FullyQualifiedName!~Visa2026.Module.Tests.TemplateConvert&FullyQualifiedName!~Visa2026.Module.Tests.Services
+            trx: module-other.trx
+          - name: DataImporter
+            project: Visa2026.DataImporter/Visa2026.DataImporter.csproj
+            filter: FullyQualifiedName!~Audit_
+            trx: dataimporter-tests.trx
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Download test bins
+        uses: actions/download-artifact@v4
+        with:
+          name: unit-test-bins
+
+      - name: Run slice
         run: >-
-          dotnet test Visa2026.DataImporter/Visa2026.DataImporter.csproj -c Debug --no-build
-          --filter "FullyQualifiedName!~Audit_"
-          --logger "console;verbosity=normal"
-          --logger "trx;LogFileName=dataimporter-tests.trx"
+          dotnet test ${{ matrix.project }} -c Debug --no-restore --no-build
+          --filter "${{ matrix.filter }}"
+          --logger "console;verbosity=minimal"
+          --logger "trx;LogFileName=${{ matrix.trx }}"
 
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: unit-test-results
-          path: "**/TestResults/*.trx"
+          name: unit-test-results-${{ matrix.name }}
+          path: "**/TestResults/${{ matrix.trx }}"
           if-no-files-found: ignore
+          retention-days: 7
+
+  # Keep this job name so branch-protection / E2E still see "Build + unit tests".
+  unit-tests-ok:
+    name: Build + unit tests
+    needs: [build, unit-tests]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require build and every slice
+        run: |
+          if [ "${{ needs.build.result }}" != "success" ]; then
+            echo "Build job failed (${{ needs.build.result }})"
+            exit 1
+          fi
+          if [ "${{ needs.unit-tests.result }}" != "success" ]; then
+            echo "A unit-test slice failed (${{ needs.unit-tests.result }})"
+            exit 1
+          fi
