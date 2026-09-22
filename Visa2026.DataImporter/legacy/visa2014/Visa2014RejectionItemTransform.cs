@@ -106,7 +106,7 @@ internal static class Visa2014RejectionItemTransform
         };
     }
 
-    private static Dictionary<string, object?> BuildExportRow(
+    internal static Dictionary<string, object?> BuildExportRow(
         Visa2014RejectionItemRawRow raw,
         out string? skipReason)
     {
