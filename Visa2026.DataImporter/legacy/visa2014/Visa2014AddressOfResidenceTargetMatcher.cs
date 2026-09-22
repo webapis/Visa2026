@@ -24,7 +24,7 @@ internal static class Visa2014AddressOfResidenceTargetMatcher
         };
     }
 
-    private static int MapResidenceTypeToSqlValue(string typeText) => typeText switch
+    internal static int MapResidenceTypeToSqlValue(string typeText) => typeText switch
     {
         "Lodging" => 0,
         "Hotel" => 1,

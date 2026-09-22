@@ -57,7 +57,10 @@ internal static class Visa2014AddressOfResidenceSponsorCanonicalRegistration
         return registered;
     }
 
-    private static int CompareAddressRecency(DateTime? expA, Guid oidA, DateTime? expB, Guid oidB)
+    /// <summary>
+    /// Prefer open-ended (null expiration) addresses, then later expiration dates; OID breaks ties.
+    /// </summary>
+    internal static int CompareAddressRecency(DateTime? expA, Guid oidA, DateTime? expB, Guid oidB)
     {
         var rankA = expA?.Date ?? DateTime.MaxValue;
         var rankB = expB?.Date ?? DateTime.MaxValue;
