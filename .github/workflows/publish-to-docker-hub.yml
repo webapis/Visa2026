@@ -3,7 +3,8 @@
 # When this runs:
 #   Push to master, or workflow_dispatch (current HEAD).
 #   Does not wait for EasyTest E2E or unit tests.
-#   Push to Hub runs only after docker build succeeds (failed build skips push).
+#   App and importer build in parallel. Push runs only after that image builds.
+#   Buildx GHA cache reuses apt + NuGet layers on later runs.
 
 name: Build and Publish to Docker Hub
 
@@ -16,12 +17,12 @@ env:
   DOCKER_IMAGE_NAME: webapia/visa2026
 
 jobs:
-  build-and-publish:
-    name: Build and publish
+  publish-app:
+    name: App image
     runs-on: ubuntu-latest
     permissions:
       contents: read
-
+      actions: write
     steps:
       - name: Resolve commit to publish
         id: ref
@@ -56,28 +57,59 @@ jobs:
         run: |
           echo "APP_VERSION=$(grep -oPm1 "(?<=<AssemblyVersion>)[^<]+" Visa2026.Module/Visa2026.Module.csproj)" >> $GITHUB_ENV
 
-      - name: Build app Docker image
-        env:
-          PUBLISH_SHA: ${{ steps.ref.outputs.sha }}
-          PUBLISH_SHA_SHORT: ${{ steps.ref.outputs.sha_short }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push app image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.DOCKER_IMAGE_NAME }}:${{ steps.ref.outputs.sha }}
+            ${{ env.DOCKER_IMAGE_NAME }}:latest
+            ${{ env.DOCKER_IMAGE_NAME }}:${{ env.APP_VERSION }}
+          build-args: |
+            APP_VERSION=${{ env.APP_VERSION }}
+            GIT_SHA=${{ steps.ref.outputs.sha_short }}
+          cache-from: type=gha,scope=visa2026-app
+          cache-to: type=gha,mode=max,scope=visa2026-app
+
+  publish-importer:
+    name: Importer image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Write DevExpress license key
         run: |
-          docker build . \
-            --build-arg APP_VERSION=${{ env.APP_VERSION }} \
-            --build-arg GIT_SHA=${PUBLISH_SHA_SHORT} \
-            -t ${{ env.DOCKER_IMAGE_NAME }}:${PUBLISH_SHA} \
-            -t ${{ env.DOCKER_IMAGE_NAME }}:latest \
-            -t ${{ env.DOCKER_IMAGE_NAME }}:${{ env.APP_VERSION }}
+          mkdir -p DevExpress.Key
+          echo "${{ secrets.DEVEXPRESS_KEY }}" > DevExpress.Key/DevExpress_License.txt
 
-      - name: Push app Docker image
-        env:
-          PUBLISH_SHA: ${{ steps.ref.outputs.sha }}
-        run: |
-          docker push ${{ env.DOCKER_IMAGE_NAME }}:${PUBLISH_SHA}
-          docker push ${{ env.DOCKER_IMAGE_NAME }}:latest
-          docker push ${{ env.DOCKER_IMAGE_NAME }}:${{ env.APP_VERSION }}
+      - name: Write DevExpress license file
+        run: echo "${{ secrets.DEVEXPRESS_LICENSE }}" > DevExpress.Key/DevExpress_License.txt
 
-      - name: Build importer Docker image
-        run: docker build -f Visa2026.DataImporter/Dockerfile . -t webapia/visa2026-importer:latest
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Push importer Docker image
-        run: docker push webapia/visa2026-importer:latest
+      - name: Build and push importer image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Visa2026.DataImporter/Dockerfile
+          push: true
+          tags: webapia/visa2026-importer:latest
+          cache-from: type=gha,scope=visa2026-importer
+          cache-to: type=gha,mode=max,scope=visa2026-importer
