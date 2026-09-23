@@ -152,3 +152,11 @@ Promote to [SKILL.md](./SKILL.md) **scenarios** after **2+** hosts.
 - **Fix**: Wait for seed-gate logs after recreate; do not treat high CPU / missing `Now listening` as a hang while heals are still logging. Recreate **app only**.
 - **Prevent**: After Hub publish, pull+`--force-recreate --no-deps app`. Expect several minutes of seed heals on a large existing Postgres. Leave `FORCE_XAF` off unless schema drift is confirmed.
 - **Skill**: setup-docker-engine
+### 2026-09-23 — Hub latest recreate again on `10.100.128.26` (APP_Profile hide ship)
+
+- **Symptom**: New Hub `webapia/visa2026:latest` after person-child DetailView hide; deploy to Ubuntu prod.
+- **Try**: SSH `visa2026-onprem-26` / `id_ed25519_visa_onprem_26`. From `/opt/visa2026-prod`: `docker compose -p visa2026-prod --env-file .env.prod -f docker-compose.prod.yml -f docker-compose.restart.override.yml pull app` then `up -d --force-recreate --no-deps app`. Did **not** run `remote-compose-sql-up.sh`. Plain compose without `-f` fails (`no configuration file provided`).
+- **Test**: Image `sha256:f5d7f47c144e` Created `2026-09-23T08:18Z` (replaces morning `642d9ed9`). Postgres stayed **healthy**. Seed gates quick (approval-leg scanned=4826 assigned=0; org FKs filled=0). `http://127.0.0.1/LoginPage` and LAN `http://10.100.128.26/LoginPage` → **200**.
+- **Fix**: Always pass both compose `-f` files on this host. Recreate **app only**.
+- **Prevent**: Inventory digest before/after pull. Leave Postgres alone. Expect seed heals only if first recreate of the day on large DB.
+- **Skill**: setup-docker-engine
