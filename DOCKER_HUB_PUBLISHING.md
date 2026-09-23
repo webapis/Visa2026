@@ -83,3 +83,17 @@ docker run -p 8080:8080 yourdockerhubusername/visa2026:latest
 ```
 
 *(Note: The command above does not include the SQL Server database. For a full deployment, you would still use a `docker-compose.yml` file that references your new Docker Hub image instead of building it locally.)*
+
+## 5. Faster publishes (runtime base + path filters)
+
+Routine **App image** builds no longer run apt/LibreOffice/fonts. Those live in **`webapia/visa2026-runtime-base:v1`** (`docker/Dockerfile.runtime-base`).
+
+| Image | When CI builds it |
+|-------|-------------------|
+| `visa2026-runtime-base:v1` | Only when `docker/Dockerfile.runtime-base`, `docker/fonts/**`, or the publish workflow file changes (or **workflow_dispatch** → `rebuild_runtime_base`) |
+| `visa2026:latest` | Every master push / dispatch |
+| `visa2026-importer:latest` | Only when `Visa2026.DataImporter/**` (or the workflow) changes (or dispatch → `build_importer`) |
+
+After changing the runtime base Dockerfile incompatibly, bump the pin in the root `Dockerfile` (`RUNTIME_BASE_IMAGE=...:v2`) and the workflow `RUNTIME_BASE_TAG`, then push so CI publishes the new base before app images that need it.
+
+Local builds: `scripts/local/Build-DockerImages.ps1` pulls `:v1` when missing, or use `-RebuildRuntimeBase` / `-RuntimeBaseOnly`.

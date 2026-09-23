@@ -20,6 +20,12 @@
 .PARAMETER ImporterOnly
   Build only the data importer image.
 
+.PARAMETER RuntimeBaseOnly
+  Build only webapia/visa2026-runtime-base:v1 (apt/fonts/LibreOffice). Rarely needed.
+
+.PARAMETER RebuildRuntimeBase
+  Force rebuild of the runtime base before the app image (default: pull :v1 if missing, else reuse local).
+
 .PARAMETER ImagePrefix
   Repository prefix for tags (default: webapia, matching the publish workflow).
 
@@ -41,6 +47,8 @@
 param(
     [switch]$AppOnly,
     [switch]$ImporterOnly,
+    [switch]$RuntimeBaseOnly,
+    [switch]$RebuildRuntimeBase,
     [string]$ImagePrefix = "webapia",
     [switch]$DeployLocal,
     [string]$ComposeProject = "visa2026-dev",
@@ -57,7 +65,7 @@ Set-Location $RepoRoot
 $env:DOCKER_BUILDKIT = "1"
 
 $licensePath = Join-Path $RepoRoot "DevExpress.Key\DevExpress_License.txt"
-if (-not (Test-Path $licensePath)) {
+if (-not $RuntimeBaseOnly -and -not (Test-Path $licensePath)) {
     throw "Missing DevExpress.Key\DevExpress_License.txt; required for docker build (same as CI)."
 }
 
@@ -108,16 +116,53 @@ function Invoke-DockerBuild {
     }
 }
 
-$buildApp = -not $ImporterOnly
-$buildImporter = -not $AppOnly
-
-if ($AppOnly -and $ImporterOnly) {
-    throw "Use only one of -AppOnly or -ImporterOnly, not both."
+$exclusive = @($AppOnly, $ImporterOnly, $RuntimeBaseOnly) | Where-Object { $_ }
+if ($exclusive.Count -gt 1) {
+    throw "Use only one of -AppOnly, -ImporterOnly, or -RuntimeBaseOnly."
 }
+
+$buildRuntimeBaseOnly = [bool]$RuntimeBaseOnly
+$buildApp = -not $ImporterOnly -and -not $RuntimeBaseOnly
+$buildImporter = -not $AppOnly -and -not $RuntimeBaseOnly
+
+$runtimeBaseImage = "${ImagePrefix}/visa2026-runtime-base"
+$runtimeBaseTag = "v1"
+$runtimeBaseRef = "${runtimeBaseImage}:${runtimeBaseTag}"
 
 $proxyArgs = Get-DockerProxyBuildArgs
 if ($proxyArgs.Count -gt 0) {
     Write-Host "Using HTTP(S)_PROXY build-args for Docker (apt/NuGet inside the build)." -ForegroundColor DarkGray
+}
+
+function Ensure-RuntimeBaseImage {
+    $localId = docker image inspect $runtimeBaseRef --format '{{.Id}}' 2>$null
+    if ($RebuildRuntimeBase -or $buildRuntimeBaseOnly -or [string]::IsNullOrWhiteSpace($localId)) {
+        if (-not $RebuildRuntimeBase -and -not $buildRuntimeBaseOnly) {
+            Write-Host "Pulling $runtimeBaseRef (app Dockerfile FROMs this)..." -ForegroundColor Cyan
+            docker pull $runtimeBaseRef 2>$null
+            if ($LASTEXITCODE -eq 0) {
+                return
+            }
+            Write-Host "Pull failed; building runtime base locally (slow once)..." -ForegroundColor Yellow
+        }
+        else {
+            Write-Host "Building $runtimeBaseRef..." -ForegroundColor Cyan
+        }
+        $baseArgs = @(
+            'build', '-f', (Join-Path $RepoRoot "docker\Dockerfile.runtime-base"), $RepoRoot
+        ) + $proxyArgs + @(
+            '-t', $runtimeBaseRef
+            '-t', "${runtimeBaseImage}:latest"
+        )
+        Invoke-DockerBuild -Arguments $baseArgs
+    }
+    else {
+        Write-Host "Reusing local $runtimeBaseRef" -ForegroundColor DarkGray
+    }
+}
+
+if ($buildRuntimeBaseOnly -or $buildApp) {
+    Ensure-RuntimeBaseImage
 }
 
 if ($buildApp) {
@@ -130,6 +175,7 @@ if ($buildApp) {
         'build', $RepoRoot
         '--build-arg', "APP_VERSION=$appVersion"
         '--build-arg', "GIT_SHA=$gitSha"
+        '--build-arg', "RUNTIME_BASE_IMAGE=$runtimeBaseRef"
     ) + $proxyArgs + @(
         '-t', "${appImage}:local"
         '-t', "${appImage}:$appVersion"

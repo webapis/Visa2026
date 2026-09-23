@@ -2,11 +2,11 @@
 # Note: omitting "# syntax=docker/dockerfile:1.4" avoids a Docker Hub pull of the Dockerfile frontend (needed on restricted networks).
 #
 # NuGet: RUN lines use BuildKit cache mounts (id=visa2026-nuget) so packages persist across docker builds on this machine.
-# The first build still downloads everything once; later builds reuse cache when package references are unchanged.
-# Requires BuildKit (on by default in Docker Desktop). Clearing "docker builder cache" removes this; avoid on metered links until a Wi-Fi build refills it.
+# Runtime apt/fonts/LibreOffice live in webapia/visa2026-runtime-base (docker/Dockerfile.runtime-base) so routine
+# app publishes only restore + publish + copy. Requires BuildKit (on by default in Docker Desktop).
 
-# Ubuntu jammy: apt uses archive.ubuntu.com - often works when deb.debian.org (Bookworm) is blocked on the network.
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy AS base
+ARG RUNTIME_BASE_IMAGE=webapia/visa2026-runtime-base:v1
+FROM ${RUNTIME_BASE_IMAGE} AS base
 WORKDIR /app
 EXPOSE 8080
 
@@ -38,60 +38,6 @@ RUN --mount=type=cache,id=visa2026-nuget,target=/root/.nuget/packages \
 
 FROM base AS final
 WORKDIR /app
-
-# Optional: pass from host so apt can reach mirrors through a corporate proxy, e.g.
-#   $env:HTTPS_PROXY='http://127.0.0.1:8888'; .\scripts\local\Build-DockerImages.ps1
-ARG HTTP_PROXY
-ARG HTTPS_PROXY
-ARG NO_PROXY
-ENV HTTP_PROXY=$HTTP_PROXY \
-    HTTPS_PROXY=$HTTPS_PROXY \
-    NO_PROXY=$NO_PROXY
-
-# Enable System.Drawing support for Linux
-ENV DOTNET_System_Drawing_EnableUnixSupport=true
-# Ensure libgdiplus is found by the .NET P/Invoke layer regardless of arch-specific install path
-ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu
-
-USER root
-
-# Offline fallback: place licensed .ttf/.TTF for Times New Roman in docker/fonts/msttcore/
-# before build when apt cannot download corefonts (see docker/fonts/msttcore/README.txt).
-COPY docker/fonts/msttcore/ /tmp/bundled-msttcore/
-
-# SkiaSharp / GDI+ / font stack. Do not install libgl1 (pulls mesa+llvm, ~25MB and minutes).
-# Times New Roman: bundled files, or times32.exe only (not ttf-mscorefonts-installer / python / ubuntu-pro).
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    libfontconfig1 \
-    fontconfig \
-    libexpat1 \
-    libgdiplus \
-    libglib2.0-0 \
-    libx11-6 \
-    libxext6 \
-    libxrender1 \
-    cabextract \
-    wget \
-    fonts-liberation \
-    libreoffice-writer-nogui \
-    libreoffice-calc-nogui \
-    && ln -sf /usr/lib/x86_64-linux-gnu/libgdiplus.so /usr/lib/libgdiplus.so \
-    && mkdir -p /usr/share/fonts/truetype/msttcorefonts \
-    && if find /tmp/bundled-msttcore -maxdepth 1 \( -name '*.ttf' -o -name '*.TTF' -o -name '*.ttc' -o -name '*.TTC' \) 2>/dev/null | grep -q .; then \
-         echo "docker/fonts/msttcore: installing bundled font files"; \
-         find /tmp/bundled-msttcore -maxdepth 1 \( -name '*.ttf' -o -name '*.TTF' -o -name '*.ttc' -o -name '*.TTC' \) -exec cp -t /usr/share/fonts/truetype/msttcorefonts/ {} +; \
-       else \
-         echo "Downloading Times New Roman (times32.exe) only"; \
-         wget -q -O /tmp/times32.exe "https://downloads.sourceforge.net/corefonts/times32.exe" \
-         && cabextract -q -d /usr/share/fonts/truetype/msttcorefonts /tmp/times32.exe \
-         && rm -f /tmp/times32.exe; \
-       fi \
-    && rm -rf /tmp/bundled-msttcore \
-    && fc-cache -f \
-    && apt-get purge -y --auto-remove wget cabextract \
-    && apt-get clean && rm -rf /var/lib/apt/lists/* \
-    && fc-list | grep -qi "times new roman" \
-    || (echo "FATAL: Times New Roman is required. Add licensed fonts under docker/fonts/msttcore/ or fix network so times32.exe download completes." && exit 1)
 
 COPY --from=publish /app/publish .
 

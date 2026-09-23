@@ -1,0 +1,60 @@
+# Pre-baked runtime for Visa2026 app images: jammy + GDI+/fonts + LibreOffice.
+# Built rarely (path filter / workflow_dispatch). App Dockerfile FROMs this so
+# routine Hub publishes skip the long apt install.
+#
+# Tags (CI): webapia/visa2026-runtime-base:v1 and :latest
+# Bump the pin in root Dockerfile when this file changes incompatibly.
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy
+
+WORKDIR /app
+EXPOSE 8080
+
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
+ARG NO_PROXY
+ENV HTTP_PROXY=$HTTP_PROXY \
+    HTTPS_PROXY=$HTTPS_PROXY \
+    NO_PROXY=$NO_PROXY
+
+ENV DOTNET_System_Drawing_EnableUnixSupport=true
+ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu
+
+USER root
+
+# Offline fallback: licensed .ttf under docker/fonts/msttcore/ (see README there).
+COPY docker/fonts/msttcore/ /tmp/bundled-msttcore/
+
+# SkiaSharp / GDI+ / font stack. Do not install libgl1 (pulls mesa+llvm).
+# Times New Roman: bundled files, or times32.exe only (not ttf-mscorefonts-installer).
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    libfontconfig1 \
+    fontconfig \
+    libexpat1 \
+    libgdiplus \
+    libglib2.0-0 \
+    libx11-6 \
+    libxext6 \
+    libxrender1 \
+    cabextract \
+    wget \
+    fonts-liberation \
+    libreoffice-writer-nogui \
+    libreoffice-calc-nogui \
+    && ln -sf /usr/lib/x86_64-linux-gnu/libgdiplus.so /usr/lib/libgdiplus.so \
+    && mkdir -p /usr/share/fonts/truetype/msttcorefonts \
+    && if find /tmp/bundled-msttcore -maxdepth 1 \( -name '*.ttf' -o -name '*.TTF' -o -name '*.ttc' -o -name '*.TTC' \) 2>/dev/null | grep -q .; then \
+         echo "docker/fonts/msttcore: installing bundled font files"; \
+         find /tmp/bundled-msttcore -maxdepth 1 \( -name '*.ttf' -o -name '*.TTF' -o -name '*.ttc' -o -name '*.TTC' \) -exec cp -t /usr/share/fonts/truetype/msttcorefonts/ {} +; \
+       else \
+         echo "Downloading Times New Roman (times32.exe) only"; \
+         wget -q -O /tmp/times32.exe "https://downloads.sourceforge.net/corefonts/times32.exe" \
+         && cabextract -q -d /usr/share/fonts/truetype/msttcorefonts /tmp/times32.exe \
+         && rm -f /tmp/times32.exe; \
+       fi \
+    && rm -rf /tmp/bundled-msttcore \
+    && fc-cache -f \
+    && apt-get purge -y --auto-remove wget cabextract \
+    && apt-get clean && rm -rf /var/lib/apt/lists/* \
+    && fc-list | grep -qi "times new roman" \
+    || (echo "FATAL: Times New Roman is required. Add licensed fonts under docker/fonts/msttcore/ or fix network so times32.exe download completes." && exit 1)
