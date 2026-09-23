@@ -73,6 +73,8 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
     cabextract \
     wget \
     fonts-liberation \
+    libreoffice-writer-nogui \
+    libreoffice-calc-nogui \
     && ln -sf /usr/lib/x86_64-linux-gnu/libgdiplus.so /usr/lib/libgdiplus.so \
     && mkdir -p /usr/share/fonts/truetype/msttcorefonts \
     && if find /tmp/bundled-msttcore -maxdepth 1 \( -name '*.ttf' -o -name '*.TTF' -o -name '*.ttc' -o -name '*.TTC' \) 2>/dev/null | grep -q .; then \

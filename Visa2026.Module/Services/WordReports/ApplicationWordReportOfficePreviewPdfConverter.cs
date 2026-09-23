@@ -22,14 +22,14 @@ public sealed class ApplicationWordReportOfficePreviewPdfConverter
         // Nested catalog filename bugs used to label Excel bytes as .docx. ZIP parts win over
         // the extension so Preview still uses Spreadsheet ExportToPdf.
         if (LooksLikeOpenXmlExcel(officeContent))
-            return ConvertExcelToPdf(officeContent);
+            return ConvertPreferringLibreOffice(officeContent, fileName, ConvertExcelToPdf);
         if (LooksLikeOpenXmlWord(officeContent))
-            return ConvertWordToPdf(officeContent);
+            return ConvertPreferringLibreOffice(officeContent, fileName, ConvertWordToPdf);
 
         return Path.GetExtension(fileName).ToLowerInvariant() switch
         {
-            ".docx" => ConvertWordToPdf(officeContent),
-            ".xlsx" or ".xlsm" => ConvertExcelToPdf(officeContent),
+            ".docx" => ConvertPreferringLibreOffice(officeContent, fileName, ConvertWordToPdf),
+            ".xlsx" or ".xlsm" => ConvertPreferringLibreOffice(officeContent, fileName, ConvertExcelToPdf),
             _ => null
         };
     }
@@ -60,6 +60,31 @@ public sealed class ApplicationWordReportOfficePreviewPdfConverter
         {
             return false;
         }
+    }
+
+    private static byte[]? ConvertPreferringLibreOffice(
+        byte[] officeContent,
+        string fileName,
+        Func<byte[], byte[]?> convertWithOfficeFileApi)
+    {
+        if (LibreOfficePreviewPdfConverter.IsAvailable())
+        {
+            var fromLibreOffice = LibreOfficePreviewPdfConverter.TryConvertToPdf(officeContent, fileName);
+            if (fromLibreOffice != null && fromLibreOffice.Length > 0)
+                return fromLibreOffice;
+        }
+
+        var fromOfficeFileApi = convertWithOfficeFileApi(officeContent);
+        if (fromOfficeFileApi != null
+            && OfficePreviewEvaluationStamp.ContainsStamp(fromOfficeFileApi)
+            && LibreOfficePreviewPdfConverter.IsAvailable())
+        {
+            var retry = LibreOfficePreviewPdfConverter.TryConvertToPdf(officeContent, fileName);
+            if (retry != null && retry.Length > 0)
+                return retry;
+        }
+
+        return fromOfficeFileApi;
     }
 
     private static byte[]? ConvertWordToPdf(byte[] content)

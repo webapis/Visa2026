@@ -143,3 +143,12 @@ Promote to [SKILL.md](./SKILL.md) **scenarios** after **2+** hosts.
 - **Fix**: Pull/recreate completed; bits unchanged. To ship current HEAD, publish a new Hub tag (CI `workflow_dispatch`) or `docker build` on the server, then pull/recreate.
 - **Prevent**: Inventory compose root (`/opt/visa2026-prod`) and image digest before promising a version bump. Do not overwrite Postgres volumes.
 - **Skill**: setup-docker-engine
+
+### 2026-09-23 — Hub latest recreate on `10.100.128.26` (Postgres stay-up)
+
+- **Symptom**: New `webapia/visa2026:latest` published to Docker Hub; officers needed the new bits on Ubuntu prod without touching Postgres or `10.100.128.25`.
+- **Try**: From `/opt/visa2026-prod`: `docker compose -p visa2026-prod --env-file .env.prod pull app` then `up -d --force-recreate --no-deps app`. Did **not** run `remote-compose-sql-up.sh`. Did **not** set `FORCE_XAF_DB_UPDATE`.
+- **Test**: Image `sha256:de6f0e969aad...` Created `2026-09-23T05:14Z` (replaces Aug 3 `122cab1d`). Postgres stayed **healthy**. After recreate, LoginPage failed for ~5+ min while `ApplicationProfileSeedGate` healed (`approval-leg` scanned=4770; `instance organization FKs` filled=12311); app ~80–99% CPU. Then `http://127.0.0.1/LoginPage` and LAN `http://10.100.128.26/LoginPage` → **200**.
+- **Fix**: Wait for seed-gate logs after recreate; do not treat high CPU / missing `Now listening` as a hang while heals are still logging. Recreate **app only**.
+- **Prevent**: After Hub publish, pull+`--force-recreate --no-deps app`. Expect several minutes of seed heals on a large existing Postgres. Leave `FORCE_XAF` off unless schema drift is confirmed.
+- **Skill**: setup-docker-engine

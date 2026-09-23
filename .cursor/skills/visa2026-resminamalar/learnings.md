@@ -502,3 +502,12 @@ Purpose: **catalog, seed gate, batch worker, preview, permissions, dialog UX** �
 - **Fix**: Document in APPLICATION_REPORT_PACKAGE; triage table in resminamalar skill.
 - **Prevent**: Distinguish catalog warnings from worker error logs when triaging.
 - **Cross-skill**: user-report-templates (when log shows token replace error)
+
+### 2026-09-23 — Office File API evaluation banner on Preview (.26 Docker)
+
+- **Symptom**: Resminamalar Görmek PDF showed red "For evaluation purposes only" / DevExpress Office File API (v23.2) banner. Not XAF dx-license DOM.
+- **Try**: Install DevExpress_License.txt under `/home/app/.config/DevExpress` and restart — banner remained (runtime license still trial for Office File API on this image).
+- **Root cause**: Preview uses `RichEditDocumentServer`/`Workbook` ExportToPdf; evaluation text is baked into PDF when Universal/Office File API is not licensed for the process.
+- **Fix**: Prefer **LibreOffice** headless (`soffice --convert-to pdf`) in `ApplicationWordReportOfficePreviewPdfConverter` when available; detect stamp via `OfficePreviewEvaluationStamp`; Dockerfile installs `libreoffice-writer-nogui`/`calc-nogui`; entrypoint sets `LD_LIBRARY_PATH` for `/usr/lib/libreoffice/program`. Hot-patched Module DLL + apt LibreOffice on running `.26` container pending Hub republish.
+- **Prevent**: Next Hub image must include LibreOffice packages (Dockerfile) so recreate does not drop soffice. Do not confuse with XAF `_Host.cshtml` watermark suppression.
+- **Cross-skill**: preview-slot | lifecycle-docker

@@ -1,3 +1,4 @@
+using System.IO;
 using System.Reflection;
 using DevExpress.ExpressApp;
 using System.Linq;
@@ -19,6 +20,7 @@ namespace Visa2026.Blazor.Server
         {
             // Must be set before any Npgsql type mapping runs (Demo PostgreSQL pilot).
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+            EnsureDevExpressOfficeLicensePath();
 
             if (ContainsArgument(args, "help") || ContainsArgument(args, "h"))
             {
@@ -67,6 +69,40 @@ namespace Visa2026.Blazor.Server
                     });
                     webBuilder.UseStartup<Startup>();
                 });
+        /// <summary>
+        /// Office File API (Word/Excel → PDF preview) reads DevExpress_LicensePath /
+        /// ~/.config/DevExpress/DevExpress_License.txt. That is not XAF ExpressApp.
+        /// </summary>
+        static void EnsureDevExpressOfficeLicensePath()
+        {
+            var existing = Environment.GetEnvironmentVariable("DevExpress_LicensePath");
+            if (!string.IsNullOrWhiteSpace(existing) && File.Exists(existing))
+                return;
+
+            var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            var candidates = new[]
+            {
+                Path.Combine(AppContext.BaseDirectory, "DevExpress_License.txt"),
+                Path.Combine(AppContext.BaseDirectory, "DevExpress.Key", "DevExpress_License.txt"),
+                Path.Combine(home, ".config", "DevExpress", "DevExpress_License.txt"),
+            };
+            var found = candidates.FirstOrDefault(File.Exists);
+            if (found == null)
+            {
+                var key = Environment.GetEnvironmentVariable("DEVEXPRESS_LICENSEKEY");
+                if (!string.IsNullOrWhiteSpace(key))
+                {
+                    var destDir = Path.Combine(home, ".config", "DevExpress");
+                    Directory.CreateDirectory(destDir);
+                    found = Path.Combine(destDir, "DevExpress_License.txt");
+                    File.WriteAllText(found, key);
+                }
+            }
+
+            if (found != null)
+                Environment.SetEnvironmentVariable("DevExpress_LicensePath", found);
+        }
+
         static void SuppressDevExpressTrialWarnings()
         {
             try
