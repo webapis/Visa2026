@@ -114,6 +114,76 @@ internal static class LookupCatalogEntitySync
         return created;
     }
 
+    /// <summary>
+    /// Fills null <see cref="City.Region"/> and null site <c>City</c> FKs from catalog JSON.
+    /// Runs even when full JSON sync is skipped (manifest already applied), so import/legacy
+    /// rows with blank relationships heal on the next ModuleUpdater pass without waiting for a
+    /// manifest bump. Matchers must prefer linked rows then fall back to null-nav orphans
+    /// (<see cref="FindCity"/>, <see cref="FindByCityAndProperty"/>).
+    /// </summary>
+    public static int HealMissingGeographyNavigations(
+        IObjectSpace objectSpace,
+        IEnumerable<LookupCatalogDefinition> catalogs)
+    {
+        ArgumentNullException.ThrowIfNull(objectSpace);
+        ArgumentNullException.ThrowIfNull(catalogs);
+
+        int healed = 0;
+        foreach (var definition in catalogs)
+        {
+            if (!EntityTypes.TryGetValue(definition.Entity, out var entityType))
+                continue;
+
+            var healCityRegion = definition.MatchKey == LookupCatalogMatchKey.NameAndRegion
+                && entityType == typeof(City);
+            var healSiteCity = definition.MatchKey is LookupCatalogMatchKey.CityAndFullAddress
+                or LookupCatalogMatchKey.CityAndName;
+            if (!healCityRegion && !healSiteCity)
+                continue;
+
+            var file = LookupCatalogResourceLoader.LoadCatalogFile(definition.File);
+            if (file?.Rows == null || file.Rows.Count == 0)
+                continue;
+
+            foreach (var row in file.Rows)
+            {
+                if (row.Count == 0 || !RowHasKey(row, definition))
+                    continue;
+
+                var existing = FindExisting(objectSpace, entityType, definition, row);
+                if (existing == null)
+                    continue;
+
+                if (healCityRegion && existing is City city && city.Region == null)
+                {
+                    if (row.TryGetValue("Region", out var regionEl))
+                        ApplyNavigation(objectSpace, city, "Region", regionEl);
+                    else if (row.TryGetValue("RegionName", out regionEl))
+                        ApplyNavigation(objectSpace, city, "RegionName", regionEl);
+
+                    if (city.Region != null)
+                        healed++;
+                    continue;
+                }
+
+                if (!healSiteCity)
+                    continue;
+
+                var cityProp = entityType.GetProperty("City", BindingFlags.Instance | BindingFlags.Public);
+                if (cityProp == null || !cityProp.CanWrite)
+                    continue;
+                if (cityProp.GetValue(existing) is City)
+                    continue;
+
+                ApplyCityNavigation(objectSpace, existing, row);
+                if (cityProp.GetValue(existing) is City)
+                    healed++;
+            }
+        }
+
+        return healed;
+    }
+
     private static bool RowHasKey(Dictionary<string, JsonElement> row, LookupCatalogDefinition definition) =>
         definition.MatchKey switch
         {
@@ -308,6 +378,12 @@ internal static class LookupCatalogEntitySync
         if (entityType == typeof(City) && definition.MatchKey == LookupCatalogMatchKey.NameAndRegion)
             removed += RemoveDuplicateCityNullRegionOrphans(objectSpace);
 
+        if (definition.MatchKey is LookupCatalogMatchKey.CityAndFullAddress or LookupCatalogMatchKey.CityAndName)
+        {
+            var scalarProperty = definition.MatchKey == LookupCatalogMatchKey.CityAndName ? "Name" : "FullAddress";
+            removed += RemoveDuplicateSiteNullCityOrphans(objectSpace, entityType, scalarProperty);
+        }
+
         return removed;
     }
 
@@ -332,6 +408,47 @@ internal static class LookupCatalogEntitySync
             foreach (var duplicate in group.Where(c => c.ID != keeper.ID))
             {
                 RepointLookupReferences(objectSpace, typeof(City), duplicate, keeper);
+                objectSpace.Delete(duplicate);
+                removed++;
+            }
+        }
+
+        return removed;
+    }
+
+    /// <summary>
+    /// Merges orphan site rows (null City) into the City-linked row with the same scalar
+    /// (FullAddress / Name) so catalog re-sync after a City heal does not leave duplicates.
+    /// </summary>
+    private static int RemoveDuplicateSiteNullCityOrphans(
+        IObjectSpace objectSpace,
+        Type entityType,
+        string scalarProperty)
+    {
+        var cityProp = entityType.GetProperty("City", BindingFlags.Instance | BindingFlags.Public);
+        if (cityProp == null)
+            return 0;
+
+        var rows = objectSpace.GetObjects(entityType).Cast<object>().ToList();
+        var duplicateGroups = rows
+            .Select(row => (row, scalar: GetPropertyString(row, scalarProperty)))
+            .Where(x => !string.IsNullOrWhiteSpace(x.scalar))
+            .GroupBy(x => LookupCatalogMatchHelper.NormalizeKey(x.scalar!), StringComparer.Ordinal)
+            .Where(g => g.Key.Length > 0 && g.Count() > 1)
+            .Where(g => g.Any(x => cityProp.GetValue(x.row) is City) && g.Any(x => cityProp.GetValue(x.row) is null))
+            .ToList();
+
+        int removed = 0;
+        foreach (var group in duplicateGroups)
+        {
+            var keeper = group
+                .OrderByDescending(x => cityProp.GetValue(x.row) is City)
+                .ThenBy(x => GetRowId(x.row))
+                .First()
+                .row;
+            foreach (var duplicate in group.Select(x => x.row).Where(row => !ReferenceEquals(row, keeper)))
+            {
+                RepointLookupReferences(objectSpace, entityType, duplicate, keeper);
                 objectSpace.Delete(duplicate);
                 removed++;
             }
@@ -697,15 +814,29 @@ internal static class LookupCatalogEntitySync
     {
         var title = GetRowTitle(row);
         var regionName = GetString(row, "Region") ?? GetString(row, "RegionName");
-        if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(regionName))
+        if (string.IsNullOrWhiteSpace(title))
             return null;
 
-        return objectSpace.GetObjects(typeof(City))
-            .Cast<City>()
-            .FirstOrDefault(c =>
-                TitleMatches(c, title)
-                && c.Region != null
-                && TitleMatches(c.Region, regionName));
+        var cities = objectSpace.GetObjects(typeof(City)).Cast<City>()
+            .Where(c => TitleMatches(c, title))
+            .ToList();
+        if (cities.Count == 0)
+            return null;
+
+        if (!string.IsNullOrWhiteSpace(regionName))
+        {
+            var withRegion = cities.FirstOrDefault(c =>
+                c.Region != null && TitleMatches(c.Region, regionName));
+            if (withRegion != null)
+                return withRegion;
+        }
+
+        // Heal import/legacy rows that never received Region.
+        var withoutRegion = cities.FirstOrDefault(c => c.Region == null);
+        if (withoutRegion != null)
+            return withoutRegion;
+
+        return cities.Count == 1 ? cities[0] : null;
     }
 
     private static string? GetRowTitle(Dictionary<string, JsonElement> row) =>
@@ -809,15 +940,26 @@ internal static class LookupCatalogEntitySync
     {
         var cityTitle = GetString(row, "City") ?? GetString(row, "NameTm");
         var regionName = GetString(row, "Region") ?? GetString(row, "RegionName");
-        if (string.IsNullOrWhiteSpace(cityTitle) || string.IsNullOrWhiteSpace(regionName))
+        if (string.IsNullOrWhiteSpace(cityTitle))
             return null;
 
-        return objectSpace.GetObjects(typeof(City))
+        var titleMatches = objectSpace.GetObjects(typeof(City))
             .Cast<City>()
-            .FirstOrDefault(c =>
-                TitleMatches(c, cityTitle)
-                && c.Region != null
-                && TitleMatches(c.Region, regionName));
+            .Where(c => TitleMatches(c, cityTitle))
+            .ToList();
+        if (titleMatches.Count == 0)
+            return null;
+
+        if (!string.IsNullOrWhiteSpace(regionName))
+        {
+            var withRegion = titleMatches.FirstOrDefault(c =>
+                c.Region != null && TitleMatches(c.Region, regionName));
+            if (withRegion != null)
+                return withRegion;
+        }
+
+        // Catalog Region may disagree with Cities.Region; unique NameTm is enough to link.
+        return titleMatches.Count == 1 ? titleMatches[0] : null;
     }
 
     private static object? FindByCityAndProperty(
@@ -828,21 +970,34 @@ internal static class LookupCatalogEntitySync
     {
         var city = FindCityReference(objectSpace, row);
         var scalar = GetString(row, scalarProperty);
-        if (city == null || string.IsNullOrWhiteSpace(scalar))
+        if (string.IsNullOrWhiteSpace(scalar))
             return null;
 
-        return objectSpace.GetObjects(entityType)
-            .Cast<object>()
-            .FirstOrDefault(item =>
-            {
-                var itemCity = item.GetType().GetProperty("City", BindingFlags.Instance | BindingFlags.Public)?.GetValue(item) as City;
-                if (itemCity == null || itemCity.ID != city.ID)
-                    return false;
+        var items = objectSpace.GetObjects(entityType).Cast<object>().ToList();
 
-                var itemScalar = GetPropertyString(item, scalarProperty);
-                return LookupCatalogMatchHelper.KeysEqual(itemScalar, scalar)
-                    || string.Equals(itemScalar?.Trim(), scalar.Trim(), StringComparison.Ordinal);
+        bool ScalarMatches(object item)
+        {
+            var itemScalar = GetPropertyString(item, scalarProperty);
+            return LookupCatalogMatchHelper.KeysEqual(itemScalar, scalar)
+                || string.Equals(itemScalar?.Trim(), scalar.Trim(), StringComparison.Ordinal);
+        }
+
+        City? GetItemCity(object item) =>
+            item.GetType().GetProperty("City", BindingFlags.Instance | BindingFlags.Public)?.GetValue(item) as City;
+
+        if (city != null)
+        {
+            var withCity = items.FirstOrDefault(item =>
+            {
+                var itemCity = GetItemCity(item);
+                return itemCity != null && itemCity.ID == city.ID && ScalarMatches(item);
             });
+            if (withCity != null)
+                return withCity;
+        }
+
+        // Heal import/legacy rows that have the scalar but never received City.
+        return items.FirstOrDefault(item => GetItemCity(item) == null && ScalarMatches(item));
     }
 
     private static string BuildCityAndScalarSyncKey(Dictionary<string, JsonElement> row, string scalarProperty)

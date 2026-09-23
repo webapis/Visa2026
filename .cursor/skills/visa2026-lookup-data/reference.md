@@ -80,3 +80,11 @@ From `Excelmappings.cs` — ApplicationType sheet includes `Name`, `NameTm`, `Co
 | `LookupBase.LocalizationKey` | Stable key into `Localization/*.json` (global catalogs) |
 | `LookupBase.Name` / `NameTm` | Report/PDF and `data.yaml` matching; **tenant** lookup UI uses `NameTm` |
 | `LookupBase.LocalizedDisplayName` | UI display for global catalogs + `ApplicationType` (culture-aware) |
+
+## Geography FK heal (City.Region, site City)
+
+On every `LookupCatalogSyncUpdater` pass (including when full JSON sync is skipped):
+
+- `FindCity` / `FindByCityAndProperty` match null-nav orphans, then `ApplyRow` / `HealMissingGeographyNavigations` attaches `Region` / `City` from JSON.
+- Catalogs with `matchKey` `NameAndRegion`, `CityAndFullAddress`, `CityAndName` must include `Region` + `City` (or `Name`/`FullAddress`) in JSON.
+- Bump `manifest.json` / `tenant/manifest.json` `version` when changing those JSON files so a full overwrite sync also runs.

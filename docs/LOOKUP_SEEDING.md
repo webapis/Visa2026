@@ -183,7 +183,8 @@ For a **new customer**, replace these tenant JSON files (or overlay on the serve
 | **Overwrite** | `syncMode: OverwriteScalars` — scalar properties in JSON **replace** DB values every deploy. |
 | **Deletes** | **Never** for multi-row catalogs — rows removed from JSON stay in the DB (avoids FK breakage). |
 | **Organization singletons** | Exception to “never delete”: one row per entity; see [`LOOKUP_ORGANIZATION_SINGLETONS.md`](LOOKUP_ORGANIZATION_SINGLETONS.md). |
-| **FK resolution** | JSON keys `Region`, `Company` resolve by **Name** to existing rows. |
+| **FK resolution** | JSON keys `Region`, `City`, `Company` resolve by title to existing rows (`ApplyNavigation` / `ApplyCityNavigation`). |
+| **Null FK heal** | Even when full JSON sync is skipped, `HealMissingGeographyNavigations` fills null `City.Region` and null Lodging/Hotel/Hospital/OtherSite `City` from catalog JSON. Matchers (`NameAndRegion`, `CityAndFullAddress` / `CityAndName`) fall back to null-nav orphans so re-seed can attach links instead of inserting duplicates. |
 
 If updaters do not run on a DB that already reports “current”, set **`FORCE_XAF_DB_UPDATE=true`** once — see [`docs/ENVIRONMENTS.md`](ENVIRONMENTS.md).
 

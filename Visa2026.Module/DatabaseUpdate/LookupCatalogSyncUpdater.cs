@@ -59,6 +59,7 @@ public sealed class LookupCatalogSyncUpdater : ModuleUpdater
             Tracing.Tracer.LogText(skipLine);
             Console.WriteLine(skipLine);
             EnsureMissingOrganizationCatalogs(manifest);
+            HealMissingGeographyNavigations(manifest);
             RunDuplicateCleanup(manifest);
             return;
         }
@@ -140,7 +141,23 @@ public sealed class LookupCatalogSyncUpdater : ModuleUpdater
         ObjectSpace.CommitChanges();
 
         EnsureMissingOrganizationCatalogs(manifest);
+        HealMissingGeographyNavigations(manifest);
         RunDuplicateCleanup(manifest);
+    }
+
+
+    private void HealMissingGeographyNavigations(LookupCatalogManifest manifest)
+    {
+        var healed = LookupCatalogEntitySync.HealMissingGeographyNavigations(
+            ObjectSpace, manifest.Catalogs);
+        if (healed <= 0)
+            return;
+
+        ObjectSpace.CommitChanges();
+        var line =
+            $"LookupCatalogSyncUpdater: healed {healed} missing City/Region navigation link(s) from catalog JSON.";
+        Tracing.Tracer.LogText(line);
+        Console.WriteLine(line);
     }
 
     private void EnsureMissingOrganizationCatalogs(LookupCatalogManifest manifest)

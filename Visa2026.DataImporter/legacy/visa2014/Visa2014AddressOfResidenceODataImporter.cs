@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Microsoft.Data.SqlClient;
 using Visa2026.DataImporter;
 using Visa2026.Module.DatabaseUpdate;
 
@@ -63,6 +62,10 @@ internal static class Visa2014AddressOfResidenceODataImporter
         if (verbose && addressIdMap.Count > 0)
             Console.WriteLine($"INF Existing AddressOfResidence id-map entries: {addressIdMap.Count}");
 
+        var siteGuard = await Visa2014AddressOfResidenceSiteDuplicateGuard.LoadFromSqlAsync(
+            targetConnectionString ?? string.Empty,
+            verbose);
+
         var errors = new List<string>();
         int posted = 0;
         int failed = 0;
@@ -112,10 +115,12 @@ internal static class Visa2014AddressOfResidenceODataImporter
                     continue;
                 }
 
-                var existingId = await TryMatchExistingAddressAsync(targetConnectionString, personId, row);
+                var existingId = siteGuard.TryResolveFromPayload(payload)
+                    ?? await TryMatchExistingAddressAsync(targetConnectionString, personId, row);
                 if (existingId.HasValue)
                 {
                     addressIdMap[legacyOid] = existingId.Value;
+                    siteGuard.RegisterFromPayload(payload, existingId.Value);
                     skippedAlreadyImported++;
                     if (verbose)
                         Console.WriteLine($"  SKIP {legacyOid}: existing AddressOfResidence {existingId.Value} (site match)");
@@ -131,6 +136,7 @@ internal static class Visa2014AddressOfResidenceODataImporter
                 }
 
                 addressIdMap[legacyOid] = createdId.Value;
+                siteGuard.RegisterFromPayload(payload, createdId.Value);
                 posted++;
                 if (posted % 250 == 0)
                     Console.WriteLine($"INF Progress: {posted} posted, {failed} failed, {skippedNoPerson} no person map...");
@@ -160,6 +166,7 @@ internal static class Visa2014AddressOfResidenceODataImporter
                 personIdMap,
                 addressIdMap,
                 targetConnectionString,
+                siteGuard,
                 verbose);
             if (inferredPosted > 0 || inferredSkipped > 0)
                 Console.WriteLine(
@@ -278,6 +285,7 @@ internal static class Visa2014AddressOfResidenceODataImporter
         IReadOnlyDictionary<Guid, Guid> personIdMap,
         Dictionary<Guid, Guid> addressIdMap,
         string? targetConnectionString,
+        Visa2014AddressOfResidenceSiteDuplicateGuard siteGuard,
         bool verbose)
     {
         RegisterSponsorCanonicalFromExistingLegacyAor(
@@ -308,20 +316,22 @@ internal static class Visa2014AddressOfResidenceODataImporter
 
             try
             {
-                var existingId = await TryMatchExistingAddressAsync(targetConnectionString, personId, plan.ImportRow);
-                if (existingId.HasValue)
-                {
-                    Visa2014PiaAddressInference.RegisterPlanAliases(plan, existingId.Value, addressIdMap);
-                    skipped++;
-                    if (verbose)
-                        Console.WriteLine($"  SKIP inferred {plan.SyntheticLegacyOid}: existing AddressOfResidence {existingId.Value}");
-                    continue;
-                }
-
                 var payload = Visa2014AddressOfResidenceImportApplier.BuildODataPayload(plan.ImportRow, resolver, personId);
                 if (payload == null)
                 {
                     failed++;
+                    continue;
+                }
+
+                var existingId = siteGuard.TryResolveFromPayload(payload)
+                    ?? await TryMatchExistingAddressAsync(targetConnectionString, personId, plan.ImportRow);
+                if (existingId.HasValue)
+                {
+                    Visa2014PiaAddressInference.RegisterPlanAliases(plan, existingId.Value, addressIdMap);
+                    siteGuard.RegisterFromPayload(payload, existingId.Value);
+                    skipped++;
+                    if (verbose)
+                        Console.WriteLine($"  SKIP inferred {plan.SyntheticLegacyOid}: existing AddressOfResidence {existingId.Value}");
                     continue;
                 }
 
@@ -333,6 +343,7 @@ internal static class Visa2014AddressOfResidenceODataImporter
                 }
 
                 Visa2014PiaAddressInference.RegisterPlanAliases(plan, createdId.Value, addressIdMap);
+                siteGuard.RegisterFromPayload(payload, createdId.Value);
                 posted++;
                 if (verbose)
                     Console.WriteLine($"  SAVE inferred AddressOfResidence {createdId.Value} <- person {plan.LegacyPersonOid}");
@@ -425,12 +436,9 @@ internal static class Visa2014AddressOfResidenceODataImporter
         if (string.IsNullOrWhiteSpace(targetConnectionString))
             return null;
 
-        // Site-match scan uses SqlClient + T-SQL. Skip on PostgreSQL (Demo dual-provider pilot).
-        if (DatabaseProviderDetector.IsPostgreSql(targetConnectionString))
-            return null;
-
-        await using var connection = new SqlConnection(targetConnectionString);
-        await connection.OpenAsync();
-        return await Visa2014AddressOfResidenceTargetMatcher.TryMatchTargetIdAsync(connection, personId, importRow);
+        return await Visa2014AddressOfResidenceTargetMatcher.TryMatchTargetIdAsync(
+            targetConnectionString,
+            personId,
+            importRow);
     }
 }

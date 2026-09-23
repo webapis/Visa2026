@@ -1,4 +1,5 @@
 using Microsoft.Data.SqlClient;
+using Npgsql;
 using Visa2026.Module.DatabaseUpdate;
 using ModuleResidenceType = Visa2026.Module.BusinessObjects.ResidenceType;
 
@@ -12,7 +13,7 @@ internal sealed class Visa2014AddressOfResidenceSiteDuplicateGuard
 {
     private static readonly Guid EmptyGuid = Guid.Empty;
 
-    private const string LoadSql = """
+    private const string LoadSqlSqlServer = """
         SELECT CAST(PersonID AS varchar(36)) AS PersonId,
                Type,
                CAST(ISNULL(CityID, '00000000-0000-0000-0000-000000000000') AS varchar(36)) AS CityId,
@@ -25,6 +26,21 @@ internal sealed class Visa2014AddressOfResidenceSiteDuplicateGuard
         FROM dbo.AddressesOfResidence
         WHERE (GCRecord IS NULL OR GCRecord = 0)
           AND PersonID IS NOT NULL
+        """;
+
+    private const string LoadSqlPostgres = """
+        SELECT "PersonID"::text AS PersonId,
+               "Type",
+               COALESCE("CityID"::text, '00000000-0000-0000-0000-000000000000') AS CityId,
+               COALESCE("FullAddress", '') AS FullAddress,
+               COALESCE("LodgingID"::text, '00000000-0000-0000-0000-000000000000') AS LodgingId,
+               COALESCE("HotelID"::text, '00000000-0000-0000-0000-000000000000') AS HotelId,
+               COALESCE("HospitalID"::text, '00000000-0000-0000-0000-000000000000') AS HospitalId,
+               COALESCE("OtherSiteID"::text, '00000000-0000-0000-0000-000000000000') AS OtherSiteId,
+               "ID"::text AS AddressId
+        FROM "AddressesOfResidence"
+        WHERE COALESCE("GCRecord", 0) = 0
+          AND "PersonID" IS NOT NULL
         """;
 
     private readonly Dictionary<SiteKey, Guid> _canonicalBySiteKey = new();
@@ -42,15 +58,29 @@ internal sealed class Visa2014AddressOfResidenceSiteDuplicateGuard
 
         if (DatabaseProviderDetector.IsPostgreSql(targetConnectionString))
         {
-            if (verbose)
-                Console.WriteLine("WRN AddressOfResidence site duplicate guard skipped (PostgreSQL — SqlClient/T-SQL map).");
-            return guard;
+            await using var connection = new NpgsqlConnection(targetConnectionString);
+            await connection.OpenAsync(cancellationToken);
+            await using var command = new NpgsqlCommand(LoadSqlPostgres, connection);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+            await guard.LoadFromReaderAsync(reader, cancellationToken);
+        }
+        else
+        {
+            await using var connection = new SqlConnection(targetConnectionString);
+            await connection.OpenAsync(cancellationToken);
+            await using var command = new SqlCommand(LoadSqlSqlServer, connection);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+            await guard.LoadFromReaderAsync(reader, cancellationToken);
         }
 
-        await using var connection = new SqlConnection(targetConnectionString);
-        await connection.OpenAsync(cancellationToken);
-        await using var command = new SqlCommand(LoadSql, connection);
-        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        if (verbose)
+            Console.WriteLine($"INF AddressOfResidence duplicate guard: {guard.LoadedRowCount} active row(s)");
+
+        return guard;
+    }
+
+    private async Task LoadFromReaderAsync(System.Data.Common.DbDataReader reader, CancellationToken cancellationToken)
+    {
         while (await reader.ReadAsync(cancellationToken))
         {
             if (!Guid.TryParse(reader.GetString(0), out var personId))
@@ -62,7 +92,7 @@ internal sealed class Visa2014AddressOfResidenceSiteDuplicateGuard
 
             var type = reader.GetInt32(1);
             var fullAddress = reader.GetString(3);
-            guard.RegisterRow(
+            RegisterRow(
                 personId,
                 type,
                 cityId,
@@ -73,11 +103,6 @@ internal sealed class Visa2014AddressOfResidenceSiteDuplicateGuard
                 ParseOptionalGuid(reader.GetString(7)),
                 addressId);
         }
-
-        if (verbose)
-            Console.WriteLine($"INF AddressOfResidence duplicate guard: {guard.LoadedRowCount} active row(s)");
-
-        return guard;
     }
 
     public Guid? TryResolveFromPayload(IReadOnlyDictionary<string, object?> payload)
