@@ -30,8 +30,12 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Gelmeginiň Maksady")]
         public virtual string Description { get; set; }
 
-        /// <summary>Skip-navigation M2M with <see cref="ApplicationProfileInstance"/> (same pattern as Education). Not aggregated.</summary>
+        /// <summary>
+        /// Skip-navigation M2M with <see cref="ApplicationProfileInstance"/> (same pattern as Education). Not aggregated.
+        /// Hidden on DetailView — officers link Person on the case; child reverse lists are not an officer surface.
+        /// </summary>
         [ModelDefault("AllowEdit", "False")]
+        [VisibleInDetailView(false)]
         [VisibleInListView(false)]
         public virtual IList<ApplicationProfileInstance> ApplicationProfileInstances { get; set; } = new ObservableCollection<ApplicationProfileInstance>();
 

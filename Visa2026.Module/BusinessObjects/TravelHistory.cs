@@ -111,8 +111,12 @@ namespace Visa2026.Module.BusinessObjects
             base.OnSaving();
         }
 
-        /// <summary>Skip-navigation M2M with <see cref="ApplicationProfileInstance"/> (same pattern as Person). Not aggregated.</summary>
+        /// <summary>
+        /// Skip-navigation M2M with <see cref="ApplicationProfileInstance"/> (same pattern as Person). Not aggregated.
+        /// Hidden on DetailView — officers link Person on the case; child reverse lists are not an officer surface.
+        /// </summary>
         [ModelDefault("AllowEdit", "False")]
+        [VisibleInDetailView(false)]
         [VisibleInListView(false)]
         public virtual IList<ApplicationProfileInstance> ApplicationProfileInstances { get; set; } = new ObservableCollection<ApplicationProfileInstance>();
     }
