@@ -108,3 +108,10 @@ Newest entries at the **bottom**. Read before dossier work; append after verifie
 - **Fix**: `PersonDossierStartApplicationController` action stays `Active["Dossier"] = false`. Do not add a new create entry on dossier.
 - **Prevent**: Do not re-enable **Start process…** on dossier or Person DetailView.
 - **Cross-skill**: person-dossier | application-profile
+
+### 2026-09-23 — Linux Razor `@section.` parse (Docker Hub build)
+
+- **Symptom**: Same RZ2005/RZ1011 on `PersonDossierComponent.razor` `@section.SectionLabel` / `@section.Records.Count`.
+- **Fix**: `@(section.SectionLabel)` and `@(section.Records.Count)`.
+- **Prevent**: Same as person-document-copies 2026-09-23.
+- **Cross-skill**: person-dossier | person-document-copies

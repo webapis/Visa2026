@@ -48,7 +48,7 @@
                     var withFilesCount = CountRecordsWithFiles(section);
 
                     <section class="doc-copies-catalog__section @(sectionCollapsed ? "doc-copies-catalog__section--collapsed" : null)"
-                             aria-label="@section.SectionLabel">
+                             aria-label="@(section.SectionLabel)">
                         <header class="doc-copies-catalog__section-head doc-copies-catalog__section-head--nav"
                                 role="button"
                                 tabindex="0"
@@ -61,7 +61,7 @@
                             </span>
 
                             <div class="doc-copies-catalog__section-head-main">
-                                <span class="doc-copies-catalog__section-title">@section.SectionLabel</span>
+                                <span class="doc-copies-catalog__section-title">@(section.SectionLabel)</span>
                                 <span class="doc-copies-catalog__section-summary">@GetSectionSummary(section, withFilesCount)</span>
                             </div>
 

@@ -123,3 +123,13 @@ side by side - the `OwnerViewId` = `PersonDossierHost_DetailView` keeps the slot
 - **Fix**: `PersonDocumentCopiesController` and `HeaderDocumentCopiesController` are `ViewController<DetailView>` only. ApplicationItem keeps ListView toolbar (multi-select package; no row link).
 - **Prevent**: Do not re-add ListView toolbar copies when a Copies column already opens the slot.
 - **Cross-skill**: person-document-copies | invitation-work-permit-document-copies | document-copies
+
+### 2026-09-23 — Linux Razor treats `@section.` as the section directive
+
+- **Symptom**: Docker Hub `docker build` failed RZ9979 / RZ2005 / RZ1011 in `PersonDocumentCopiesComponent.razor` (`aria-label="@section.SectionLabel"`).
+- **Try**: Warnings in the log are noise; the 9 errors are Razor `@section` parse.
+- **Test**: `dotnet build Visa2026.Blazor.Server -c Release` → 0 errors after wrap.
+- **Root cause**: Markup `@section.Property` is the Razor `@section` directive, not the foreach variable. Linux SDK Razor is stricter than the local Windows compile that previously succeeded.
+- **Fix**: Use `@(section.SectionLabel)` (explicit expression).
+- **Prevent**: Never write `@section.` in `.razor`; use `@(section.… )` or rename the loop variable.
+- **Cross-skill**: person-document-copies | person-dossier
