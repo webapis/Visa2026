@@ -134,3 +134,12 @@ Promote to [SKILL.md](./SKILL.md) **scenarios** after **2+** hosts.
 - **Fix**: IIS slots removed; staging `APP_PORT=8080`; prod **SQL-first** `compose up -d postgres` then `app`; officer notice `C:\visa2026\OFFICER_URLS.txt`.
 - **Prevent**: Do not use Docker Desktop on Server long-term — plan Ubuntu + Engine ([ON_PREM_LINUX_SERVER.md](../../../docs/ON_PREM_LINUX_SERVER.md)). After Docker restart, never `restart app` alone — postgres first. MemoryMiB in `adm43418` `settings-store.json` may need interactive Docker Desktop quit to apply.
 - **Skill**: setup-docker-engine
+
+### 2026-09-23 — Prod pull on `10.100.128.26` (Ubuntu Engine)
+
+- **Symptom**: Officer asked to deploy current repo (`1.0.0.778`) via Docker; host already had `visa2026-prod` up 6 weeks.
+- **Try**: `docker compose -p visa2026-prod --env-file .env.prod pull app` then `up -d --no-deps app` from `/opt/visa2026-prod` (not `/opt/visa2026`). Did **not** run `remote-compose-sql-up.sh` (that script still starts SQL Server; this host uses Postgres).
+- **Test**: Hub `webapia/visa2026:latest` digest still `sha256:122cab1d...` (image created 2026-08-03). Compose left app Running (same image, no recreate). `http://10.100.128.26/LoginPage` **200**; postgres healthy. This workstation has no Docker / `gh`, so a new image cannot be built or published here.
+- **Fix**: Pull/recreate completed; bits unchanged. To ship current HEAD, publish a new Hub tag (CI `workflow_dispatch`) or `docker build` on the server, then pull/recreate.
+- **Prevent**: Inventory compose root (`/opt/visa2026-prod`) and image digest before promising a version bump. Do not overwrite Postgres volumes.
+- **Skill**: setup-docker-engine

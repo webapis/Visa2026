@@ -179,3 +179,10 @@ Read before IIS deploy/update work on a company Windows Server. **Append** verif
 - **Smoke**: `http://10.100.128.25/LoginPage` and `:8080/LoginPage` → **200**; IIS sites `Visa2026-Prod` / `Visa2026-Staging` Started; `docker ps` empty.
 - **Prevent**: After `scp` of `.ps1` to Windows Server, smoke `Install-Visa2026IisSlots.ps1 -SkipConfigure` before full deploy; avoid Unicode punctuation in scripts consumed by PS 5.1 over SSH.
 
+### 2026-09-23 — `10.100.128.26` is Ubuntu Docker, not IIS
+
+- **Symptom**: Greenfield IIS plan assumed Windows Server; SSH as Administrator failed; host shell is bash.
+- **Test**: `uname` / `/etc/os-release` → Ubuntu 24.04.4 LTS (`visaserverubuntu`); user `rootvisa` (sudo, docker). Docker Engine 29.7.1 already running `visa2026-prod-app-1` (`webapia/visa2026:latest` on `:80`) plus prod/staging Postgres (6+ weeks).
+- **SSH**: alias `visa2026-onprem-26` (do not change `visa2026-onprem` / `.25`); key `~/.ssh/id_ed25519_visa_onprem_26`; pubkey login confirmed.
+- **Prevent**: Inventory OS before `scripts/windows-iis`. Deploy/update on `.26` via `setup-docker-engine` / `docs/ON_PREM_LINUX_SERVER.md`, not IIS.
+- **Skill**: visa2026-windows-iis-deploy
