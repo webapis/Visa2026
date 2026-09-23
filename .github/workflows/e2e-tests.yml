@@ -12,15 +12,8 @@
 
 name: EasyTest E2E
 
+# Automatic E2E is paused (push / PR / nightly). Run from Actions when needed.
 on:
-  pull_request:
-    branches: [master]
-  push:
-    branches: [master]
-  schedule:
-    # 20:00 UTC = 01:00 Ashgabat (UTC+5); results are ready before the workday.
-    # GitHub cron is best-effort and can drift during peak hours.
-    - cron: "0 20 * * *"
   workflow_dispatch:
     inputs:
       test_filter:
