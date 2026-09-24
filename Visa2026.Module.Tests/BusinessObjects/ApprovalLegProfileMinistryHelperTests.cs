@@ -108,4 +108,64 @@ public sealed class ApprovalLegProfileMinistryHelperTests
         Assert.Equal(parentId, leg.ApprovalLegProfileId);
         Assert.Equal(ministryId, leg.ApprovingMinistryId);
     }
+
+    [Fact]
+    public void WouldOrphanLegForeignKey_true_only_when_new_parent_missing_from_commit_batch()
+    {
+        var parentId = Guid.Parse("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee");
+
+        Assert.True(ApprovalLegProfileMinistryHelper.WouldOrphanLegForeignKey(
+            isParentNewObject: true,
+            parentId,
+            profileIdsInCommitBatch: []));
+
+        Assert.False(ApprovalLegProfileMinistryHelper.WouldOrphanLegForeignKey(
+            isParentNewObject: true,
+            parentId,
+            profileIdsInCommitBatch: [parentId]));
+
+        Assert.False(ApprovalLegProfileMinistryHelper.WouldOrphanLegForeignKey(
+            isParentNewObject: false,
+            parentId,
+            profileIdsInCommitBatch: []));
+
+        Assert.False(ApprovalLegProfileMinistryHelper.WouldOrphanLegForeignKey(
+            isParentNewObject: true,
+            parentId: Guid.Empty,
+            profileIdsInCommitBatch: []));
+    }
+
+    [Fact]
+    public void WireMinistryLegs_sets_back_reference_and_syncs_foreign_keys()
+    {
+        var parentId = Guid.Parse("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee");
+        var ministryId = Guid.Parse("11111111-2222-3333-4444-555555555555");
+        var parent = new ApprovalLegProfile { ID = parentId };
+        var ministry = new ApprovingMinistry { ID = ministryId };
+        var leg = new ApprovalLegProfileMinistryLeg { ApprovingMinistry = ministry };
+        parent.MinistryLegs.Add(leg);
+
+        ApprovalLegProfileMinistryHelper.WireMinistryLegs(parent);
+
+        Assert.Same(parent, leg.ApprovalLegProfile);
+        Assert.Equal(parentId, leg.ApprovalLegProfileId);
+        Assert.Equal(ministryId, leg.ApprovingMinistryId);
+    }
+
+    [Fact]
+    public void GetLegCount_and_HasConfiguredLegs_ignore_legs_without_ministry()
+    {
+        var profile = new ApprovalLegProfile();
+        profile.MinistryLegs.Add(new ApprovalLegProfileMinistryLeg());
+        Assert.Equal(0, ApprovalLegProfileMinistryHelper.GetLegCount(profile));
+        Assert.False(ApprovalLegProfileMinistryHelper.HasConfiguredLegs(profile));
+
+        profile.MinistryLegs.Add(new ApprovalLegProfileMinistryLeg
+        {
+            ApprovingMinistry = new ApprovingMinistry { ShortNameTm = "Energetika" },
+        });
+        Assert.Equal(1, ApprovalLegProfileMinistryHelper.GetLegCount(profile));
+        Assert.True(ApprovalLegProfileMinistryHelper.HasConfiguredLegs(profile));
+        Assert.Equal(0, ApprovalLegProfileMinistryHelper.GetLegCount(null));
+    }
 }
