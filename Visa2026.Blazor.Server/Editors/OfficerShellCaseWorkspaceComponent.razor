@@ -151,6 +151,14 @@
                     {
                         var selected = IsDocumentPersonSelected(person.PersonId);
                         var personName = ApplicationItemDocumentCopiesPersonCatalog.DisplayPersonName(person.Name);
+                        if (person.IsExcluded)
+                        {
+                            <span class="cw-person is-excluded" title="@ExcludedTitle(person)">
+                                <span class="cw-person__avatar" style="background:@PersonColor(person.Index)">@Initials(personName)</span>
+                                @personName
+                            </span>
+                            continue;
+                        }
                         <button type="button"
                                 class="cw-person @(selected ? "is-selected" : "is-muted")"
                                 aria-pressed="@selected"
@@ -259,6 +267,12 @@
                                   title="@(progressLetterMissing == 1 ? "1 approval letter is missing" : progressLetterMissing + " approval letters are missing")"
                                   aria-label="@(progressLetterMissing == 1 ? "1 approval letter is missing" : progressLetterMissing + " approval letters are missing")">@progressLetterMissing</span>
                         }
+                        else if (tab.Key == "seretmezlik" && view.ExcludedPeopleCount > 0)
+                        {
+                            <span class="cw-nav__badge cw-nav__badge--excluded"
+                                  title="@(view.ExcludedPeopleCount == 1 ? "1 person excluded" : view.ExcludedPeopleCount + " people excluded")"
+                                  aria-label="@(view.ExcludedPeopleCount == 1 ? "1 person excluded" : view.ExcludedPeopleCount + " people excluded")">@view.ExcludedPeopleCount</span>
+                        }
                         else if (tab.Key == "documents" && documentsNavReady)
                         {
                             @switch (documentsNav)
@@ -339,6 +353,11 @@
                                                             Snapshot="Snapshot"
                                                             SelectedPersonIds="SelectedDocumentPersonIds" />
                             break;
+                        case "seretmezlik":
+                            <OfficerShellCaseSeretmezlikTab ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId"
+                                                           Snapshot="Snapshot"
+                                                           PreviewSlotOwnerViewId="@PreviewSlotOwnerViewId" />
+                            break;
                         case "sla":
                             @RenderSla(view)
                             break;
@@ -368,6 +387,7 @@
         ("result", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ApplicationResult"), "⚑"),
         ("documents", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Documents"), "📄"),
         ("resminamalar", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Resminamalar"), "📦"),
+        ("seretmezlik", "Seretmezlik", "⊘"),
         ("sla", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Sla"), "⏱"),
         ("organization", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Organization"), "🏢"),
     ];
@@ -475,7 +495,10 @@
             ? Array.Empty<Guid>()
             : _selectedDocumentPersonIds.ToList();
 
-    private static bool IsWideTab(string tab) => tab is "documents" or "resminamalar" or "organization";
+    private static bool IsWideTab(string tab) => tab is "documents" or "resminamalar" or "seretmezlik" or "organization";
+
+    private static string ExcludedTitle(ApplicationWorkspaceCasePerson person) =>
+        $"Excluded by Seretmezlik № {person.ExcludedLetterNumber} · {person.ExcludedLetterDate:dd.MM.yyyy}";
 
     private string? EffectivePeopleRecordKey =>
         !string.IsNullOrWhiteSpace(_peopleRecordKey)
@@ -948,7 +971,7 @@
 
     private void SyncDocumentPeopleFilter(ApplicationWorkspaceCaseView? view)
     {
-        var people = view?.People
+        var people = view?.ActivePeople
             .Where(person => person.PersonId != Guid.Empty)
             .ToList() ?? [];
         var key = string.Join(",", people.Select(person => person.PersonId).OrderBy(id => id));
@@ -986,7 +1009,7 @@
 
     private void EnsureDocumentCopiesCompleteness(ApplicationWorkspaceCaseView? view)
     {
-        var people = view?.People
+        var people = view?.ActivePeople
             .Where(person => person.PersonId != Guid.Empty)
             .ToList() ?? [];
         var instanceId = Snapshot?.ApplicationProfileInstanceId ?? Guid.Empty;
@@ -2000,8 +2023,14 @@
                         <tbody>
                             @foreach (var person in view.People)
                             {
-                                <tr class="@(person.Index == SelectedPersonRowIndex ? "is-selected" : null)" @onclick="() => SelectPersonRow(person.Index)">
-                                    <td><span class="ct-link">@person.Name</span></td>
+                                <tr class="@(person.Index == SelectedPersonRowIndex ? "is-selected" : null) @(person.IsExcluded ? "is-excluded" : null)" @onclick="() => SelectPersonRow(person.Index)">
+                                    <td>
+                                        <span class="ct-link">@person.Name</span>
+                                        @if (person.IsExcluded)
+                                        {
+                                            <span class="cw-excluded-badge" title="@ExcludedTitle(person)">⊘ Excluded · № @person.ExcludedLetterNumber · @person.ExcludedLetterDate?.ToString("dd.MM.yyyy")</span>
+                                        }
+                                    </td>
                                     <td>@person.RoleLabel</td>
                                     <td><code class="@(ApplicationWorkspacePeopleLinksCompleteness.IsKindShort(person, ApplicationWorkspacePeopleLinksCompleteness.PassportKey, view.Chrome.ResolvedLinksLocked) ? "cw-cell-missing" : null)">@person.PassportNumber</code></td>
                                     <td><code class="@(ApplicationWorkspacePeopleLinksCompleteness.IsKindShort(person, ApplicationWorkspacePeopleLinksCompleteness.VisaKey, view.Chrome.ResolvedLinksLocked) ? "cw-cell-missing" : null)">@person.VisaNumber</code></td>
@@ -2017,7 +2046,8 @@
                                     <td>
                                         <button type="button"
                                                 class="os-btn ct-btn-sm"
-                                                disabled="@(!CanUnlinkPerson || person.PersonId == Guid.Empty || IsRelinking)"
+                                                disabled="@(!CanUnlinkPerson || person.PersonId == Guid.Empty || IsRelinking || person.IsExcluded)"
+                                                title="@(person.IsExcluded ? "Excluded people stay on the roster" : null)"
                                                 @onclick:stopPropagation="true"
                                                 @onclick="() => UnlinkPersonById(person.PersonId)">Unlink</button>
                                     </td>

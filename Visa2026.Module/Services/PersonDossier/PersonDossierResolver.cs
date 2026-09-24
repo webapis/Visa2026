@@ -6,6 +6,7 @@ using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
 using Visa2026.Module.Services;
+using Visa2026.Module.Services.HeaderLinkedDocuments;
 
 namespace Visa2026.Module.Services.PersonDossier;
 
@@ -32,7 +33,7 @@ public static class PersonDossierResolver
 
         var target = objectSpace.GetObject(person) ?? person;
 
-        var sections = BuildSections(target)
+        var sections = BuildSections(objectSpace, target)
             .Where(section => section.Records.Count > 0)
             .OrderBy(section => section.SortOrder)
             .ToList();
@@ -183,7 +184,7 @@ public static class PersonDossierResolver
 
     // ---------------------------------------------------------------- sections
 
-    private static IEnumerable<PersonDossierSection> BuildSections(Person person)
+    private static IEnumerable<PersonDossierSection> BuildSections(IObjectSpace objectSpace, Person person)
     {
         var isEmployee = person.PersonRole == PersonRecordRole.Employee;
         var isVisitor = person.PersonRole == PersonRecordRole.TemporaryVisitor;
@@ -207,8 +208,8 @@ public static class PersonDossierResolver
         if (isEmployee)
             yield return BuildFamilyMembers(person);
 
-        yield return BuildApplications(person);
-        yield return BuildInvitations(person);
+        yield return BuildApplications(objectSpace, person);
+        yield return BuildInvitations(objectSpace, person);
         yield return BuildRejections(person);
     }
 
@@ -473,22 +474,39 @@ public static class PersonDossierResolver
             ["Name", "Relationship", "DateOfBirth", "Citizenship"], records);
     }
 
-    private static PersonDossierSection BuildApplications(Person person)
+    private static PersonDossierSection BuildApplications(IObjectSpace objectSpace, Person person)
     {
+        var personId = ResolveId(objectSpace, person) ?? person.ID;
+        var exclusions = LoadSeretmezlikByInstance(objectSpace, personId);
+
         var apps = Safe(person.ApplicationProfileInstances)
             .OrderByDescending(app => app.ApplicationDate)
-            .Select(app => new PersonDossierRecord
+            .Select(app =>
             {
-                RecordKey = $"Application:{app.ID}",
-                SourceObjectId = app.ID,
-                SourceObjectType = typeof(ApplicationProfileInstance),
-                Cells =
-                [
-                    app.FullApplicationNumber ?? app.ApplicationNumber ?? string.Empty,
-                    app.ApplicationProfile?.Name ?? Describe(app.ApplicationType),
-                    FormatDate(app.ApplicationDate),
-                ],
-                StatusLabel = app.LatestProgress?.State?.NameTm ?? string.Empty,
+                if (!exclusions.TryGetValue(app.ID, out var letter)
+                    && TryFindSeretmezlikOnInstance(app, personId, out var fromNav))
+                {
+                    letter = fromNav;
+                    exclusions[app.ID] = letter;
+                }
+
+                var excluded = exclusions.ContainsKey(app.ID);
+                return new PersonDossierRecord
+                {
+                    RecordKey = $"Application:{app.ID}",
+                    SourceObjectId = app.ID,
+                    SourceObjectType = typeof(ApplicationProfileInstance),
+                    Cells =
+                    [
+                        app.FullApplicationNumber ?? app.ApplicationNumber ?? string.Empty,
+                        app.ApplicationProfile?.Name ?? Describe(app.ApplicationType),
+                        FormatDate(app.ApplicationDate),
+                    ],
+                    StatusLabel = excluded
+                        ? FormatExcludedStatus(letter.LetterNumber, letter.LetterDate)
+                        : app.LatestProgress?.State?.NameTm ?? string.Empty,
+                    StatusCssClass = excluded ? "st-expiring" : string.Empty,
+                };
             })
             .ToList();
 
@@ -496,33 +514,136 @@ public static class PersonDossierResolver
             ["ApplicationNumber", "ApplicationProfile", "ApplicationDate"], apps);
     }
 
-    private static PersonDossierSection BuildInvitations(Person person)
+    /// <summary>Same wording as People &amp; links Seretmezlik badge (localized).</summary>
+    internal static string FormatExcludedStatus(string? letterNumber, DateTime letterDate) =>
+        Format(
+            "Status.Excluded",
+            letterNumber ?? string.Empty,
+            letterDate.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture));
+
+    private static bool TryFindSeretmezlikOnInstance(
+        ApplicationProfileInstance app,
+        Guid personId,
+        out (string LetterNumber, DateTime LetterDate) letter)
     {
-        var records = Safe(person.InvitationItems)
-            .OrderByDescending(item => item.Invitation?.IssuedDate ?? DateTime.MinValue)
-            .Select(item => new PersonDossierRecord
+        letter = default;
+        if (app.Exclusions == null || personId == Guid.Empty)
+            return false;
+
+        foreach (var exclusion in app.Exclusions.OrderBy(e => e.LetterDate))
+        {
+            if (exclusion?.People == null)
+                continue;
+            foreach (var row in exclusion.People)
             {
-                RecordKey = $"InvitationItem:{item.ID}",
-                SourceObjectId = item.ID,
-                SourceObjectType = typeof(InvitationItem),
-                Cells =
-                [
-                    item.Invitation?.InvitationNumber ?? string.Empty,
-                    Describe(item.Invitation?.VisaCategory),
-                    FormatDate(item.Invitation?.IssuedDate),
-                    FormatDate(item.Invitation?.ExpirationDate),
-                ],
-                StatusLabel = IssuedDocumentLifecycle.IsCancelled(item)
-                    ? L("Status.Cancelled")
-                    : item.IssuedVisa != null ? L("Status.Used") : string.Empty,
-                StatusCssClass = IssuedDocumentLifecycle.IsCancelled(item)
-                    ? string.Empty
-                    : item.IssuedVisa != null ? "st-approved" : string.Empty,
+                var rowPersonId = row.PersonId != Guid.Empty
+                    ? row.PersonId
+                    : row.Person?.ID ?? Guid.Empty;
+                if (rowPersonId != personId)
+                    continue;
+                letter = (exclusion.LetterNumber ?? string.Empty, exclusion.LetterDate);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>Seretmezlik letter № + date per instance for this person (earliest letter wins).</summary>
+    private static Dictionary<Guid, (string LetterNumber, DateTime LetterDate)> LoadSeretmezlikByInstance(
+        IObjectSpace objectSpace,
+        Guid personId)
+    {
+        var map = new Dictionary<Guid, (string LetterNumber, DateTime LetterDate)>();
+        if (personId == Guid.Empty)
+            return map;
+
+        var rows = objectSpace.GetObjectsQuery<ApplicationProfileInstanceExclusionPerson>()
+            .Where(p => p.PersonId == personId)
+            .Select(p => new
+            {
+                InstanceId = p.Exclusion.ApplicationProfileInstanceId,
+                p.Exclusion.LetterNumber,
+                p.Exclusion.LetterDate,
+            })
+            .ToList();
+
+        foreach (var row in rows.OrderBy(r => r.LetterDate))
+        {
+            if (row.InstanceId == Guid.Empty || map.ContainsKey(row.InstanceId))
+                continue;
+            map[row.InstanceId] = (row.LetterNumber ?? string.Empty, row.LetterDate);
+        }
+
+        return map;
+    }
+
+    private static PersonDossierSection BuildInvitations(IObjectSpace objectSpace, Person person)
+    {
+        var items = Safe(person.InvitationItems).ToList();
+        var usedIds = IssuedDocumentLifecycle.LoadUsedInvitationItemIds(
+            objectSpace,
+            items.Select(i => i.ID).Where(id => id != Guid.Empty).ToList());
+
+        var records = items
+            .OrderByDescending(item => item.Invitation?.IssuedDate ?? DateTime.MinValue)
+            .Select(item =>
+            {
+                var status = ClassifyInvitationItem(item, usedIds);
+                var invitation = item.Invitation;
+                var hasCopy = invitation != null
+                    && invitation.ID != Guid.Empty
+                    && Safe(invitation.Documents).Any(d => d.File != null);
+                return new PersonDossierRecord
+                {
+                    RecordKey = $"InvitationItem:{item.ID}",
+                    SourceObjectId = item.ID,
+                    SourceObjectType = typeof(InvitationItem),
+                    PreviewFamily = hasCopy ? HeaderDocumentCopiesFamily.Invitation : null,
+                    PreviewParentId = hasCopy ? invitation!.ID : null,
+                    UploadHeaderId = !hasCopy && invitation != null && invitation.ID != Guid.Empty ? invitation.ID : null,
+                    UploadApplicationProfileInstanceId = !hasCopy ? invitation?.ApplicationProfileInstance?.ID : null,
+                    Cells =
+                    [
+                        item.Invitation?.InvitationNumber ?? string.Empty,
+                        Describe(item.Invitation?.VisaCategory),
+                        FormatDate(item.Invitation?.IssuedDate),
+                        FormatDate(item.Invitation?.ExpirationDate),
+                    ],
+                    StatusLabel = status.Label,
+                    StatusCssClass = status.CssClass,
+                };
             })
             .ToList();
 
         return Section("invitations", 110,
-            ["Number", "Category", "Issued", "Expiry"], records);
+            ["Number", "Category", "Issued", "Expiry"], records, hasCopyColumn: true);
+    }
+
+    /// <summary>
+    /// InvitationItem dossier status — mutually exclusive:
+    /// Cancelled (cancellation instance) → Used (visa issued) → Expired → Valid to {expiry}.
+    /// </summary>
+    internal static (string Label, string CssClass) ClassifyInvitationItem(
+        InvitationItem item,
+        IReadOnlySet<Guid>? usedInvitationItemIds = null)
+    {
+        if (IssuedDocumentLifecycle.IsCancelled(item))
+            return (L("Status.Cancelled"), "st-expiring");
+
+        var used = item.IssuedVisa != null
+            || (usedInvitationItemIds != null && item.ID != Guid.Empty && usedInvitationItemIds.Contains(item.ID));
+        if (used)
+            return (L("Status.Used"), "st-approved");
+
+        var expiration = item.Invitation?.ExpirationDate ?? item.ExpirationDate;
+        if (expiration is { } expiry && expiry.Date < DateTime.Today)
+            return (L("Status.Expired"), "st-expiring");
+
+        if (expiration is { } validTo && validTo != default)
+            return (Format("Status.ValidTo", FormatDate(validTo)), "st-approved");
+
+        return (string.Empty, string.Empty);
     }
 
     private static PersonDossierSection BuildRejections(Person person)
@@ -550,13 +671,15 @@ public static class PersonDossierResolver
     // ----------------------------------------------------------------- helpers
 
     private static PersonDossierSection Section(
-        string sectionId, int sortOrder, string[] columnKeys, List<PersonDossierRecord> records) => new()
+        string sectionId, int sortOrder, string[] columnKeys, List<PersonDossierRecord> records,
+        bool hasCopyColumn = false) => new()
         {
             SectionId = sectionId,
             SectionLabel = L($"Section.{sectionId}"),
             SortOrder = sortOrder,
             ColumnHeaders = columnKeys.Select(key => L($"Column.{key}")).ToList(),
             Records = records,
+            HasCopyColumn = hasCopyColumn,
         };
 
     private static IEnumerable<T> Safe<T>(IList<T>? source) where T : class =>

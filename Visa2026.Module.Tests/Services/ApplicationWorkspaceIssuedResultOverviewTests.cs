@@ -158,4 +158,74 @@ public class ApplicationWorkspaceIssuedResultOverviewTests
         Assert.Equal(0, ApplicationWorkspaceIssuedResultOverview.CountCoveredPeople(
             ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, application, null, 1));
     }
+
+    [Fact]
+    public void RosterPersonIds_removes_seretmezlik_excluded()
+    {
+        var active = new Person { ID = Guid.NewGuid() };
+        var excluded = new Person { ID = Guid.NewGuid() };
+        var application = new ApplicationProfileInstance
+        {
+            People = new ObservableCollection<Person> { active, excluded },
+            Exclusions = new ObservableCollection<ApplicationProfileInstanceExclusion>
+            {
+                new()
+                {
+                    LetterNumber = "01/-01",
+                    LetterDate = new DateTime(2026, 1, 15),
+                    People = new ObservableCollection<ApplicationProfileInstanceExclusionPerson>
+                    {
+                        new() { PersonId = excluded.ID, Person = excluded },
+                    },
+                },
+            },
+        };
+
+        var roster = ApplicationWorkspaceIssuedResultOverview.RosterPersonIds(application, null);
+
+        Assert.Single(roster);
+        Assert.Contains(active.ID, roster);
+        Assert.DoesNotContain(excluded.ID, roster);
+    }
+
+    [Fact]
+    public void CountCoveredPeople_ignores_issued_docs_for_excluded_people()
+    {
+        var active = new Person { ID = Guid.NewGuid() };
+        var excluded = new Person { ID = Guid.NewGuid() };
+        var application = new ApplicationProfileInstance
+        {
+            People = new ObservableCollection<Person> { active, excluded },
+            Exclusions = new ObservableCollection<ApplicationProfileInstanceExclusion>
+            {
+                new()
+                {
+                    People = new ObservableCollection<ApplicationProfileInstanceExclusionPerson>
+                    {
+                        new() { PersonId = excluded.ID },
+                    },
+                },
+            },
+            Invitations = new ObservableCollection<Invitation>
+            {
+                new()
+                {
+                    InvitationItems = new ObservableCollection<InvitationItem>
+                    {
+                        new() { Person = active },
+                        new() { Person = excluded },
+                    },
+                },
+            },
+        };
+
+        Assert.Equal(1, ApplicationWorkspaceIssuedResultOverview.CountCoveredPeople(
+            ApplicationWorkspaceIssuedRecordsCatalog.Invitation, application, null, 2));
+    }
+
+    [Fact]
+    public void CompletenessPercent_is_100_when_expected_is_zero()
+    {
+        Assert.Equal(100, ApplicationWorkspaceIssuedResultOverview.CompletenessPercent(new(0, 0, 0)));
+    }
 }

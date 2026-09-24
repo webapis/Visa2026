@@ -156,6 +156,7 @@ namespace Visa2026.Blazor.Server
                         ApplicationProfileSchemaSql.ApplyIfMissing(connectionString);
                         BusinessTripLookupSchemaSql.ApplyIfMissing(connectionString);
                         ApplicationWorkspaceSchemaSql.ApplyIfMissing(connectionString);
+                        ApplicationProfileInstanceExclusionSchemaSql.ApplyIfMissing(connectionString);
                         ApplicationProfileInstancePeopleSkipNavSchemaSql.ApplyIfMissing(connectionString);
                         ApplicationProfileInstanceChildSkipNavSchemaSql.ApplyIfMissing(connectionString);
                         VisaIssuingApplicationProfileInstanceSchemaSql.ApplyIfMissing(connectionString);
@@ -278,6 +279,7 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<IOfficerShellNavQueryService, OfficerShellNavQueryService>();
             services.AddScoped<IOfficerShellStartProcessService, OfficerShellStartProcessService>();
             services.AddScoped<IOfficerShellCaseProgressService, OfficerShellCaseProgressService>();
+            services.AddScoped<IApplicationProfileInstanceExclusionService, ApplicationProfileInstanceExclusionService>();
             services.AddScoped<IApplicationProfileInstancePersonLinkQueryService, ApplicationProfileInstancePersonLinkQueryService>();
             services.AddScoped<ApplicationWorkspacePersonUiActions>();
             services.AddScoped<IApplicationWorkspacePersonUiActions>(sp =>
@@ -305,6 +307,9 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<IFilePreviewSource, ApplicationProfileInstanceProgressLetterPreviewSource>();
             services.AddScoped<IFilePreviewSource, UserReportTemplateFilePreviewSource>();
             services.AddScoped<IFilePreviewSource, ApplicationProfileTemplateFilePreviewSource>();
+            services.AddScoped<IFilePreviewSource, ApplicationProfileInstanceExclusionLetterPreviewSource>();
+            services.AddScoped<IFilePreviewSource, ApplicationProfileInstanceExclusionRosterPreviewSource>();
+            services.AddScoped<IFilePreviewSource, ApplicationProfileInstanceExclusionTemplatePreviewSource>();
             services.AddScoped<FilePreviewSourceRegistry>();
             services.AddScoped<Visa2026.Module.Services.PreviewSlot.IVisaPreviewSlotService, VisaPreviewSlotService>();
             services.AddScoped<Visa2026.Module.Services.PreviewSlot.IApprovalLegCatalogChangeNotifier, Visa2026.Module.Services.PreviewSlot.ApprovalLegCatalogChangeNotifier>();
@@ -339,6 +344,7 @@ namespace Visa2026.Blazor.Server
                 ApplicationProfileSchemaSql.ApplyIfMissing(connectionString);
                 BusinessTripLookupSchemaSql.ApplyIfMissing(connectionString);
                 ApplicationWorkspaceSchemaSql.ApplyIfMissing(connectionString);
+                ApplicationProfileInstanceExclusionSchemaSql.ApplyIfMissing(connectionString);
                 ApplicationProfileInstancePeopleSkipNavSchemaSql.ApplyIfMissing(connectionString);
                 ApplicationProfileInstanceChildSkipNavSchemaSql.ApplyIfMissing(connectionString);
                 VisaIssuingApplicationProfileInstanceSchemaSql.ApplyIfMissing(connectionString);

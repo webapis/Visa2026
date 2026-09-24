@@ -1,3 +1,12 @@
+### 2026-09-24 — Application Result ignores Seretmezlik people
+
+- **Need**: People on a Seretmezlik letter should not keep Invitation / Visa / Work permit / Border zone “Missing” on Application Result (or ListView Netije chips). Example: 4 on case, 1 excluded → 0/3 not 0/4. All excluded → expected 0 → Result complete.
+- **Cause**: Result expected used the full roster; coverage roster ids did not drop exclusions. Seretmezlik is always before those issued docs.
+- **Fix**: `RosterPersonIds` removes excluded ids (`GetExcludedPersonIds`); case builder expected count uses that active roster; ListView `ApplyTo` loads exclusion pairs and uses the same active set. Numbers only — no Seretmezlik note on Result overview.
+- **Officer**: Stop F5, rebuild Blazor host, hard-refresh. Open a case with Seretmezlik — Application Result denominators match non-excluded people; instance list Netije chips match.
+- **Prevent**: Do not count Seretmezlik people toward Result expected or coverage. Do not add a Seretmezlik caption on Result overview without an explicit UX ask.
+- **Cross-skill**: —
+
 ### 2026-09-24 — Overview fits a 1280×800 window
 
 - **Need**: Case summary tiles on a 14-inch officer PC crushed (border-zone text, Process number cut off). That PC is the minimum.
@@ -3451,3 +3460,17 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 - Verify: Generate → Preview shows text outline + placeholder list, not a PDF iframe. Catalog Preview still opens #visa-preview-slot.
 - Prevent: Do not inject ApplicationWordReportOfficePreviewPdfConverter into the scan wizard.
 - Cross-skill: visa2026-preview-slot | visa2026-resminamalar
+### 2026-09-24 — Seretmezlik (roster exclusion letters) on the case workspace
+
+- Need: after submission, officers send a letter asking the current holder (ministry leg or Migration Service) to stop processing some roster people; several letters per case, each numbered.
+- Fix: new child BOs `ApplicationProfileInstanceExclusion` / `…ExclusionPerson` (no roster-line BO exists — the roster is a skip-nav M2M, so exclusion state lives on its own table). Letter numbers share the company counter: `ApplicationProfileInstance.OnSaving` now also takes the max exclusion sequence, and `ApplicationProfileInstanceExclusionNumbering.Allocate` takes the max instance number. Current holder: `N_REVIEW_STARTED` / `N_REVIEW_REJECTED` → leg N, `N_REVIEW_APPROVED` → leg N+1 or Migration, else Migration. Excluded people are filtered via `ApplicationWorkspaceCaseView.ActivePeople` (Resminamalar tab, Document copies tab, header document filter, document-copies completeness); `PersonHasGap` ignores them.
+- Verify: `dotnet test Visa2026.Module.Tests --filter ApplicationProfileInstanceExclusionTests` (13 pass: holder, Turkmen dative/genitive, default template merge with the `{{#ds.People}}` table-row loop). F5 → submitted case → Seretmezlik → New → save → person struck through on People & links and header; Resminamalar/Documents no longer list them.
+- Prevent: DocxTemplater loops that must produce one line per person belong in a single table row (start token in the first cell, end token in the last). Progress has no ministry letter **number** field — only the date can be prefilled. The 11 Module.Tests failures on HEAD a42a359a (IssuedRecordsCatalog, TemplateScan patterns, PlaceholderSet, ProfileOverview, ValueMap) pre-date this slice.
+- Cross-skill: visa2026-resminamalar | visa2026-document-copies | visa2026-application-progress
+## 2026-09-24 — Seretmezlik editable templates (slice 14b, Phase 1)
+
+- **Context:** officers could not change the Seretmezlik letter layout; asked for Resminamalar-like templates for the letter and roster.
+- **Decision:** company-wide `ApplicationProfileInstanceExclusionTemplate` (Letter / Roster) instead of `UserReportTemplate` — any active `UserReportTemplate` shows in the Resminamalar **Shared** pane (`ApplicationProfileWizardTemplateCatalog.Build(...).Shared`), and Scan / Convert are profile-bound (instance id, profile placeholder set, `ApplicationProfileTemplateSaveHelper`), so reusing them needs a non-profile placeholder set (Phase 2).
+- **Excel:** `ExcelReportGenerator` is tied to `UserReportTemplate` + `ApplicationRosterMergeLine`; Seretmezlik has its own small ClosedXML merger (loop row = row containing `{{#ds.People}}`, `InsertRowsBelow` keeps style).
+- **Validation before save:** unknown tokens block the upload (DocxTemplater would fail at download time otherwise); roster requires the people loop; trial merge with catalog sample data.
+- **Gotcha:** `BorderValues` (OpenXML SDK 3) is a struct, not an enum — cannot be `const`.

@@ -2,8 +2,6 @@ window.visaListOptionalColumns = (function () {
     var observer = null;
     var timer = 0;
     var dotNet = null;
-    var navClickAttached = false;
-    var navPinnedOpen = false;
     var suppressResizeUntil = 0;
 
     function visibleGrid() {
@@ -28,33 +26,6 @@ window.visaListOptionalColumns = (function () {
 
     function shell() {
         return document.getElementById("visa-app-shell");
-    }
-
-    function isNavToggle(target) {
-        if (!target || !target.closest)
-            return false;
-        if (target.closest("#visa-preview-slot, .sidebar"))
-            return false;
-        var btn = target.closest("button, a[role='button'], .dxbl-btn");
-        if (!btn)
-            return false;
-        if (btn.querySelector(".dx-icon-menu, .menu-icon-menu, [class*='menu-icon-menu'], .dx-icon-hamburger"))
-            return true;
-        var label = (btn.getAttribute("aria-label") || btn.getAttribute("title") || btn.textContent || "").toLowerCase();
-        return label.indexOf("navigation") >= 0 || label.indexOf("nawig") >= 0
-            || btn.classList.contains("collapse-toggle") || !!btn.closest(".collapse-toggle");
-    }
-
-    function onNavClick(event) {
-        var el = shell();
-        if (!el || !el.classList.contains("visa-app-shell--nav-collapsed-for-list"))
-            return;
-        if (!isNavToggle(event.target))
-            return;
-        event.preventDefault();
-        event.stopPropagation();
-        navPinnedOpen = true;
-        el.classList.remove("visa-app-shell--nav-collapsed-for-list");
     }
 
     function contentOverflows(el) {
@@ -110,16 +81,12 @@ window.visaListOptionalColumns = (function () {
             scrollers[i].scrollLeft = 0;
     }
 
-    function setNavCollapsed(collapse) {
+    function setNavCollapsed() {
         var el = shell();
         if (!el)
             return;
-        if (collapse && navPinnedOpen)
-            return;
-        if (!collapse)
-            navPinnedOpen = false;
-        suppressResizeUntil = Date.now() + 700;
-        el.classList.toggle("visa-app-shell--nav-collapsed-for-list", !!collapse);
+        // Keep the XAF left navigation open on Application list views.
+        el.classList.remove("visa-app-shell--nav-collapsed-for-list");
     }
 
     function observe(ref) {
@@ -128,10 +95,6 @@ window.visaListOptionalColumns = (function () {
             observer.disconnect();
         observer = null;
         dotNet = ref;
-        if (!navClickAttached) {
-            document.addEventListener("click", onNavClick, true);
-            navClickAttached = true;
-        }
         var gridNode = visibleGrid();
         if (!gridNode || typeof ResizeObserver === "undefined")
             return;
@@ -150,39 +113,16 @@ window.visaListOptionalColumns = (function () {
         observer.observe(scroller);
     }
 
-    function listNeedsNavClosed() {
-        return /\/Application_ListView/i.test(location.pathname);
-    }
-
-    function syncListNav() {
-        var el = shell();
-        if (!el)
-            return;
-        if (!listNeedsNavClosed()) {
-            navPinnedOpen = false;
-            el.classList.remove("visa-app-shell--nav-collapsed-for-list");
-            return;
-        }
-        if (!navPinnedOpen)
-            el.classList.add("visa-app-shell--nav-collapsed-for-list");
-    }
-
     function release() {
         window.clearTimeout(timer);
         if (observer)
             observer.disconnect();
         observer = null;
         dotNet = null;
+        var el = shell();
+        if (el)
+            el.classList.remove("visa-app-shell--nav-collapsed-for-list");
     }
-
-    if (!navClickAttached) {
-        document.addEventListener("click", onNavClick, true);
-        navClickAttached = true;
-    }
-    syncListNav();
-    window.setInterval(syncListNav, 300);
-    window.addEventListener("popstate", syncListNav);
-    window.addEventListener("resize", syncListNav);
 
     return {
         overflows: overflows,

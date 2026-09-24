@@ -137,6 +137,9 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<ApplicationProfileTemplate> ApplicationProfileTemplates { get; set; }
         public DbSet<ApplicationProfileProgressStateSetting> ApplicationProfileProgressStateSettings { get; set; }
         public DbSet<ApplicationProfileInstancePersonResolvedLink> ApplicationProfileInstancePersonResolvedLinks { get; set; }
+        public DbSet<ApplicationProfileInstanceExclusion> ApplicationProfileInstanceExclusions { get; set; }
+        public DbSet<ApplicationProfileInstanceExclusionPerson> ApplicationProfileInstanceExclusionPeople { get; set; }
+        public DbSet<ApplicationProfileInstanceExclusionTemplate> ApplicationProfileInstanceExclusionTemplates { get; set; }
         public DbSet<ApplicationTypeGroup> ApplicationTypeGroups { get; set; }
         public DbSet<ApplicationTypeGroupMember> ApplicationTypeGroupMembers { get; set; }
         public DbSet<ApplicationState> ApplicationStates { get; set; }
@@ -921,6 +924,32 @@ namespace Visa2026.Module.BusinessObjects
                     .IsUnique()
                     .HasFilter(IndexFilter("[GCRecord] IS NULL"))
                     .HasDatabaseName("IX_ApplicationProfileInstancePersonResolvedLinks_Instance_Person_Kind_Object");
+            });
+
+            modelBuilder.Entity<ApplicationProfileInstanceExclusion>(b =>
+            {
+                b.HasOne(e => e.ApplicationProfileInstance)
+                    .WithMany(a => a.Exclusions)
+                    .HasForeignKey(e => e.ApplicationProfileInstanceId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                b.HasIndex(e => e.ApplicationProfileInstanceId)
+                    .HasDatabaseName("IX_ApplicationProfileInstanceExclusions_ApplicationProfileInstanceId");
+            });
+
+            modelBuilder.Entity<ApplicationProfileInstanceExclusionPerson>(b =>
+            {
+                b.HasOne(p => p.Exclusion)
+                    .WithMany(e => e.People)
+                    .HasForeignKey(p => p.ExclusionId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                b.HasOne(p => p.Person)
+                    .WithMany()
+                    .HasForeignKey(p => p.PersonId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                b.HasIndex(p => p.ExclusionId)
+                    .HasDatabaseName("IX_ApplicationProfileInstanceExclusionPeople_ExclusionId");
+                b.HasIndex(p => p.PersonId)
+                    .HasDatabaseName("IX_ApplicationProfileInstanceExclusionPeople_PersonId");
             });
 
             modelBuilder.Entity<ApplicationProfileInstanceProgress>(b => {

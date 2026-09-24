@@ -118,6 +118,96 @@ public class ApplicationWorkspaceIssuedRecordsCatalogTests
     }
 
     [Fact]
+    public void BuildIssuedTiles_Seretmezlik_reduces_expected_to_active_roster()
+    {
+        var personA = new Person { ID = Guid.NewGuid(), LastName = "A", FirstName = "A" };
+        var personB = new Person { ID = Guid.NewGuid(), LastName = "B", FirstName = "B" };
+        var personC = new Person { ID = Guid.NewGuid(), LastName = "C", FirstName = "C" };
+        var personD = new Person { ID = Guid.NewGuid(), LastName = "D", FirstName = "D" };
+        var app = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile
+            {
+                ProduceInvitation = true,
+                ProduceWorkPermit = false,
+                ProduceBorderZone = false,
+                ProduceRejection = false,
+                ProduceVisa = true,
+            },
+            People = new ObservableCollection<Person> { personA, personB, personC, personD },
+            Exclusions = new ObservableCollection<ApplicationProfileInstanceExclusion>
+            {
+                new()
+                {
+                    LetterNumber = "01/-02",
+                    LetterDate = new DateTime(2026, 1, 15),
+                    People = new ObservableCollection<ApplicationProfileInstanceExclusionPerson>
+                    {
+                        new() { PersonId = personD.ID, Person = personD },
+                    },
+                },
+            },
+        };
+
+        var view = ApplicationWorkspaceCaseBuilder.Build(
+            app,
+            app.ApplicationProfile,
+            Array.Empty<ApplicationWorkspaceTab>(),
+            default,
+            new ApplicationWorkspaceCaseChrome());
+
+        var invitation = Assert.Single(view.IssuedRecordTiles, t => t.Key == ApplicationWorkspaceIssuedRecordsCatalog.Invitation);
+        Assert.Equal(3, invitation.ExpectedCount);
+        Assert.Equal(0, invitation.CoverageCount);
+
+        var issuedVisa = Assert.Single(view.IssuedRecordTiles, t => t.Key == ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa);
+        Assert.Equal(3, issuedVisa.ExpectedCount);
+
+        var totals = ApplicationWorkspaceIssuedResultOverview.Sum(view.IssuedRecordTiles);
+        Assert.Equal(0, totals.Issued);
+        Assert.Equal(2, totals.Missing);
+    }
+
+    [Fact]
+    public void BuildIssuedTiles_all_excluded_expected_zero_and_complete()
+    {
+        var personA = new Person { ID = Guid.NewGuid(), LastName = "A", FirstName = "A" };
+        var personB = new Person { ID = Guid.NewGuid(), LastName = "B", FirstName = "B" };
+        var app = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile
+            {
+                ProduceInvitation = true,
+                ProduceVisa = true,
+            },
+            People = new ObservableCollection<Person> { personA, personB },
+            Exclusions = new ObservableCollection<ApplicationProfileInstanceExclusion>
+            {
+                new()
+                {
+                    People = new ObservableCollection<ApplicationProfileInstanceExclusionPerson>
+                    {
+                        new() { PersonId = personA.ID },
+                        new() { PersonId = personB.ID },
+                    },
+                },
+            },
+        };
+
+        var view = ApplicationWorkspaceCaseBuilder.Build(
+            app,
+            app.ApplicationProfile,
+            Array.Empty<ApplicationWorkspaceTab>(),
+            default,
+            new ApplicationWorkspaceCaseChrome());
+
+        Assert.All(view.IssuedRecordTiles.Where(t => !t.IsOptional), t => Assert.Equal(0, t.ExpectedCount));
+        var totals = ApplicationWorkspaceIssuedResultOverview.Sum(view.IssuedRecordTiles);
+        Assert.Equal(0, totals.Missing);
+        Assert.Equal(100, ApplicationWorkspaceIssuedResultOverview.CompletenessPercent(totals));
+    }
+
+    [Fact]
     public void BuildIssuedTiles_OmitsHiddenTypes_AndCountsCollectionRows()
     {
         var app = new ApplicationProfileInstance

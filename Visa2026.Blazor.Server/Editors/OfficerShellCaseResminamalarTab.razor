@@ -114,7 +114,7 @@
     protected override void OnParametersSet()
     {
         _applicationId = ApplicationProfileInstanceId;
-        var people = Snapshot?.CaseView.People
+        var people = Snapshot?.CaseView.ActivePeople
             .Where(person => person.PersonId != Guid.Empty)
             .ToList() ?? [];
         _rosterIds = people.Select(person => person.PersonId).Distinct().ToList();

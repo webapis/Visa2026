@@ -2904,11 +2904,9 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     overflow: hidden;
 }
 
-/* Hide left navigation while the preview slot is open, while an instance
-   detail is open, or while a list's columns do not fit (every screen size). */
-#visa-app-shell.visa-app-shell--nav-collapsed-for-slot app .sidebar,
-#visa-app-shell.visa-app-shell--nav-collapsed-for-case app .sidebar,
-#visa-app-shell.visa-app-shell--nav-collapsed-for-list app .sidebar {
+/* Hide left navigation while the preview slot is open. Case detail and
+   Application list views keep the sidebar open. */
+#visa-app-shell.visa-app-shell--nav-collapsed-for-slot app .sidebar {
     display: none !important;
     width: 0 !important;
     min-width: 0 !important;

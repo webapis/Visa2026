@@ -251,6 +251,12 @@
     "tk-TM": "Ulanyldy",
     "ru-RU": "Использовано"
   },
+  "PersonDossier.Status.Excluded": {
+    "en": "Excluded · № {0} · {1}",
+    "tr-TR": "Hariç · № {0} · {1}",
+    "tk-TM": "Seretmezlik · № {0} · {1}",
+    "ru-RU": "Исключён · № {0} · {1}"
+  },
   "PersonDossier.Status.Present": {
     "en": "Present",
     "tr-TR": "Mevcut",
@@ -634,6 +640,42 @@
     "tr-TR": "Başvuru türü",
     "tk-TM": "Arza görnüşi",
     "ru-RU": "Тип заявления"
+  },
+  "PersonDossier.Column.ApplicationProfile": {
+    "en": "Application profile",
+    "tr-TR": "Başvuru profili",
+    "tk-TM": "Arza profili",
+    "ru-RU": "Профиль заявления"
+  },
+  "PersonDossier.Applications.OpenWorkspace": {
+    "en": "Open application workspace",
+    "tr-TR": "Başvuru çalışma alanını aç",
+    "tk-TM": "Arza iş ýerini aç",
+    "ru-RU": "Открыть рабочую область заявления"
+  },
+  "PersonDossier.Column.Copy": {
+    "en": "Copy",
+    "tr-TR": "Kopya",
+    "tk-TM": "Nusga",
+    "ru-RU": "Копия"
+  },
+  "PersonDossier.Copy.Preview": {
+    "en": "Preview",
+    "tr-TR": "Önizle",
+    "tk-TM": "Görmek",
+    "ru-RU": "Просмотр"
+  },
+  "PersonDossier.Copy.None": {
+    "en": "No copy",
+    "tr-TR": "Kopya yok",
+    "tk-TM": "Nusga ýok",
+    "ru-RU": "Нет копии"
+  },
+  "PersonDossier.Copy.Upload": {
+    "en": "Upload",
+    "tr-TR": "Yükle",
+    "tk-TM": "Ýükle",
+    "ru-RU": "Загрузить"
   },
   "PersonDossier.Column.ApplicationDate": {
     "en": "Application date",

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.Services.ApplicationWorkspace;
@@ -27,6 +28,12 @@ public sealed class ApplicationWorkspaceCaseView
 
     public IReadOnlyList<ApplicationWorkspaceCasePerson> People { get; init; }
         = Array.Empty<ApplicationWorkspaceCasePerson>();
+
+    /// <summary>Roster people not excluded by a Seretmezlik letter (Resminamalar / Document copies scope).</summary>
+    public IReadOnlyList<ApplicationWorkspaceCasePerson> ActivePeople =>
+        People.Where(p => !p.IsExcluded).ToList();
+
+    public int ExcludedPeopleCount => People.Count(p => p.IsExcluded);
 
     public IReadOnlyList<ApplicationWorkspaceCaseActivity> Activities { get; init; }
         = Array.Empty<ApplicationWorkspaceCaseActivity>();
@@ -293,6 +300,13 @@ public sealed class ApplicationWorkspaceCasePerson
 
     public IReadOnlyList<ApplicationWorkspaceCasePersonRecord> Records { get; init; }
         = Array.Empty<ApplicationWorkspaceCasePersonRecord>();
+
+    /// <summary>Seretmezlik letter that excluded this person (null = still active on the case).</summary>
+    public string? ExcludedLetterNumber { get; set; }
+
+    public DateTime? ExcludedLetterDate { get; set; }
+
+    public bool IsExcluded => ExcludedLetterDate.HasValue;
 }
 
 public sealed class ApplicationWorkspaceCasePersonRecord

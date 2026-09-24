@@ -5,6 +5,7 @@ using System.Linq;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.ApplicationPersonRoster;
+using Visa2026.Module.Services.OfficerShell;
 
 namespace Visa2026.Module.Services.ApplicationWorkspace;
 
@@ -71,6 +72,8 @@ internal static class ApplicationWorkspaceCaseBuilder
         var rosterLinks = application?.PersonResolvedLinks?.ToList() ?? [];
         var linkableCounts = ApplicationWorkspaceLinkableActiveCounts.Load(objectSpace, rosterPeople);
         var people = BuildPeople(tabMap, chrome.PeopleNames, application, rosterPeople, rosterLinks, linkableCounts, chrome.ResolvedLinksLocked);
+        if (application != null)
+            ApplySeretmezlikExclusions(people, application, objectSpace);
         var linkedSummary = BuildLinkedSummary(application, rosterLinks, people);
         var resolvedProgressSteps = progressSteps
             ?? (application != null
@@ -85,6 +88,11 @@ internal static class ApplicationWorkspaceCaseBuilder
             ? ApplicationWorkspaceCaseHeaderFieldsHelper.Build(application, profile, objectSpace)
             : Array.Empty<ApplicationWorkspaceCaseHeaderField>();
 
+        // Application Result expected = active roster (Seretmezlik excluded) — same set as coverage.
+        var activeRosterCount = application != null
+            ? ApplicationWorkspaceIssuedResultOverview.RosterPersonIds(application, objectSpace).Count
+            : people.Count(p => !p.IsExcluded);
+
         return new ApplicationWorkspaceCaseView
         {
             Chrome = syncedChrome,
@@ -96,7 +104,7 @@ internal static class ApplicationWorkspaceCaseBuilder
                     ? Array.Empty<ApplicationWorkspaceCaseSummaryTile>()
                     : BuildSummaryTilesFromChrome(chrome),
             LinkedRecordTiles = BuildLinkedTiles(application, rosterLinks, tabs, people),
-            IssuedRecordTiles = BuildIssuedTiles(application, objectSpace, people.Count),
+            IssuedRecordTiles = BuildIssuedTiles(application, objectSpace, activeRosterCount),
             ProgressSteps = resolvedProgressSteps,
             People = people,
             Activities = application != null
@@ -792,6 +800,49 @@ internal static class ApplicationWorkspaceCaseBuilder
 
     private static string FormatIssuedDate(DateTime? date) =>
         date is { } value ? FormatIssuedDate(value) : string.Empty;
+
+    private static void ApplySeretmezlikExclusions(
+        IReadOnlyList<ApplicationWorkspaceCasePerson> people,
+        ApplicationProfileInstance application,
+        IObjectSpace? objectSpace)
+    {
+        Dictionary<Guid, ApplicationProfileInstanceExcludedPerson>? byPerson = null;
+        if (objectSpace != null && application.ID != Guid.Empty)
+            byPerson = ApplicationProfileInstanceExclusionQueries.GetExcludedPeople(objectSpace, application.ID);
+
+        if (byPerson == null || byPerson.Count == 0)
+        {
+            byPerson = new Dictionary<Guid, ApplicationProfileInstanceExcludedPerson>();
+            if (application.Exclusions != null)
+            {
+                foreach (var exclusion in application.Exclusions.OrderBy(e => e.LetterDate))
+                {
+                    if (exclusion?.People == null)
+                        continue;
+                    foreach (var row in exclusion.People)
+                    {
+                        var personId = row.PersonId != Guid.Empty
+                            ? row.PersonId
+                            : row.Person?.ID ?? Guid.Empty;
+                        if (personId == Guid.Empty || byPerson.ContainsKey(personId))
+                            continue;
+                        byPerson[personId] = new ApplicationProfileInstanceExcludedPerson(
+                            exclusion.ID,
+                            exclusion.LetterNumber,
+                            exclusion.LetterDate);
+                    }
+                }
+            }
+        }
+
+        foreach (var person in people)
+        {
+            if (!byPerson.TryGetValue(person.PersonId, out var ex))
+                continue;
+            person.ExcludedLetterNumber = ex.LetterNumber;
+            person.ExcludedLetterDate = ex.LetterDate;
+        }
+    }
 
     private static IReadOnlyList<ApplicationWorkspaceCasePerson> BuildPeople(
         IReadOnlyDictionary<string, ApplicationWorkspaceTab> tabs,

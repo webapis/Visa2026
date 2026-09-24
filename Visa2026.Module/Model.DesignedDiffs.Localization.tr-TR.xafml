@@ -423,8 +423,6 @@
         <Member Name="ToCity" Caption="Varış şehri" />
         <Member Name="ToRegion" Caption="Varış bölgesi" />
         <Member Name="TotalPersonCount" Caption="Kişi sayısı" />
-        <Member Name="ResultCoverageDisplay" Caption="Başvuru sonucu" />
-        <Member Name="ProgressStepsDisplay" Caption="Başvuru durumu" />
         <Member Name="Urgency" Caption="Aciliyet" />
         <Member Name="VisaCategory" Caption="Vize Kategorisi" />
         <Member Name="VisaPeriod" Caption="Vize Süresi" />
@@ -2512,8 +2510,6 @@
         <ColumnInfo Id="ProgressSlaStatement" Caption="Onay süresi" />
         <ColumnInfo Id="ProjectContract" Caption="Proje Sözleşmesi" />
         <ColumnInfo Id="TotalPersonCount" Caption="Kişi sayısı" />
-        <ColumnInfo Id="ResultCoverageDisplay" Caption="Başvuru sonucu" />
-        <ColumnInfo Id="ProgressStepsDisplay" Caption="Başvuru durumu" />
         <ColumnInfo Id="VisaCategory" Caption="Vize Kategorisi" />
         <ColumnInfo Id="VisaPeriod" Caption="Vize Süresi" />
         <ColumnInfo Id="VisaType" Caption="Vize Türü" />
@@ -2538,8 +2534,6 @@
         <ColumnInfo Id="ProgressSlaStatement" Caption="Onay süresi" />
         <ColumnInfo Id="ProjectContract" Caption="Proje Sözleşmesi" />
         <ColumnInfo Id="TotalPersonCount" Caption="Kişi sayısı" />
-        <ColumnInfo Id="ResultCoverageDisplay" Caption="Başvuru sonucu" />
-        <ColumnInfo Id="ProgressStepsDisplay" Caption="Başvuru durumu" />
         <ColumnInfo Id="VisaCategory" Caption="Vize Kategorisi" />
         <ColumnInfo Id="VisaPeriod" Caption="Vize Süresi" />
         <ColumnInfo Id="VisaType" Caption="Vize Türü" />
@@ -2567,8 +2561,6 @@
         <ColumnInfo Id="ProgressSlaStatement" Caption="Onay süresi" />
         <ColumnInfo Id="ProjectContract" Caption="Proje Sözleşmesi" />
         <ColumnInfo Id="TotalPersonCount" Caption="Kişi sayısı" />
-        <ColumnInfo Id="ResultCoverageDisplay" Caption="Başvuru sonucu" />
-        <ColumnInfo Id="ProgressStepsDisplay" Caption="Başvuru durumu" />
         <ColumnInfo Id="Urgency" Caption="Aciliyet" />
         <ColumnInfo Id="VisaCategory" Caption="Vize Kategorisi" />
         <ColumnInfo Id="VisaPeriod" Caption="Vize Süresi" />

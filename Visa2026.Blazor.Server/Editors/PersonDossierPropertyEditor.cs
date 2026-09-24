@@ -15,6 +15,7 @@ using Visa2026.Module.Editors;
 using Visa2026.Module.Localization;
 using Visa2026.Module.Services.PersonDossier;
 using Visa2026.Module.Services.PreviewSlot;
+using Visa2026.Module.Services.ApplicationWorkspace;
 
 namespace Visa2026.Blazor.Server.Editors;
 
@@ -22,6 +23,8 @@ namespace Visa2026.Blazor.Server.Editors;
 public class PersonDossierPropertyEditor : BlazorPropertyEditorBase, IComplexViewItem
 {
     private XafApplication? _application;
+    private IVisaPreviewSlotService? _uploadSlotService;
+    private string? _uploadOccupantKey;
 
     public PersonDossierPropertyEditor(Type objectType, IModelMemberViewItem model)
         : base(objectType, model) { }
@@ -39,6 +42,9 @@ public class PersonDossierPropertyEditor : BlazorPropertyEditorBase, IComplexVie
         InitialLoadRequested = EventCallback.Factory.Create(this, LoadAsync),
         OpenCopiesRequested = EventCallback.Factory.Create(this, OpenCopies),
         ExportRequested = EventCallback.Factory.Create(this, QueueExport),
+        OpenApplicationRequested = EventCallback.Factory.Create<Guid>(this, OpenApplicationWorkspace),
+        PreviewRecordRequested = EventCallback.Factory.Create<PersonDossierRecord>(this, PreviewRecordAsync),
+        UploadRecordRequested = EventCallback.Factory.Create<PersonDossierRecord>(this, UploadRecordAsync),
     };
 
     protected override void OnCurrentObjectChanged()
@@ -124,6 +130,113 @@ public class PersonDossierPropertyEditor : BlazorPropertyEditorBase, IComplexVie
         slotService.OpenPersonDocumentCopiesAsync(
             new PersonDocumentCopiesSlotRequest { PersonIds = new[] { personId } },
             PersonDossierViewIds.DetailView);
+    }
+
+    private Task PreviewRecordAsync(PersonDossierRecord record)
+    {
+        if (record == null || !record.HasPreview)
+            return Task.CompletedTask;
+
+        var slotService = _application?.ServiceProvider?.GetService<IVisaPreviewSlotService>();
+        if (slotService == null)
+            return Task.CompletedTask;
+
+        return slotService.OpenHeaderDocumentCopiesAsync(
+            new HeaderDocumentCopiesSlotRequest
+            {
+                Family = record.PreviewFamily!.Value,
+                ParentId = record.PreviewParentId!.Value,
+                FocusDisplayName = record.Cells.Count > 0 ? record.Cells[0] : null,
+                OpenPreviewOnly = true,
+            },
+            PersonDossierViewIds.DetailView);
+    }
+
+    private async Task UploadRecordAsync(PersonDossierRecord record)
+    {
+        if (_application == null || record == null || !record.CanUpload)
+            return;
+
+        var headerId = record.UploadHeaderId!.Value;
+        var slotService = _application.ServiceProvider?.GetService<IVisaPreviewSlotService>();
+        if (slotService != null
+            && record.UploadApplicationProfileInstanceId is Guid appId
+            && appId != Guid.Empty)
+        {
+            var request = new IssueIssuedHeaderSlotRequest
+            {
+                ApplicationProfileInstanceId = appId,
+                Kind = IssueIssuedHeaderKind.Invitation,
+                CatalogKey = IssueIssuedHeaderComposeService.CatalogKeyFor(IssueIssuedHeaderKind.Invitation),
+                ExistingHeaderId = headerId,
+            };
+            WatchUploadSlot(slotService, VisaPreviewSlotOccupantKeys.ForIssueIssuedHeader(request));
+            await slotService.OpenIssueIssuedHeaderAsync(request, PersonDossierViewIds.DetailView);
+            return;
+        }
+
+        // Legacy invitation without a case: its DetailView Documents tab is the only upload surface.
+        var objectSpace = _application.CreateObjectSpace(typeof(Invitation));
+        var invitation = objectSpace.GetObjectByKey<Invitation>(headerId);
+        if (invitation == null)
+        {
+            objectSpace.Dispose();
+            return;
+        }
+
+        var detailView = _application.CreateDetailView(objectSpace, invitation);
+        _application.ShowViewStrategy.ShowView(
+            new ShowViewParameters(detailView) { TargetWindow = TargetWindow.NewWindow },
+            new ShowViewSource(_application.MainWindow, null));
+    }
+
+    private void WatchUploadSlot(IVisaPreviewSlotService slotService, string occupantKey)
+    {
+        UnwatchUploadSlot();
+        _uploadSlotService = slotService;
+        _uploadOccupantKey = occupantKey;
+        slotService.StateChanged += OnUploadSlotStateChanged;
+    }
+
+    private void UnwatchUploadSlot()
+    {
+        if (_uploadSlotService != null)
+            _uploadSlotService.StateChanged -= OnUploadSlotStateChanged;
+        _uploadSlotService = null;
+        _uploadOccupantKey = null;
+    }
+
+    private void OnUploadSlotStateChanged()
+    {
+        var service = _uploadSlotService;
+        if (service == null
+            || string.Equals(service.State.OccupantKey, _uploadOccupantKey, StringComparison.Ordinal))
+            return;
+
+        // Upload panel closed or replaced — reload so the Copy column shows Preview.
+        UnwatchUploadSlot();
+        _ = LoadAsync();
+    }
+
+    public override void BreakLinksToControl(bool unwireEventsOnly)
+    {
+        UnwatchUploadSlot();
+        base.BreakLinksToControl(unwireEventsOnly);
+    }
+
+    private void OpenApplicationWorkspace(Guid instanceId)
+    {
+        if (_application == null || instanceId == Guid.Empty)
+            return;
+
+        var workspaceView = ApplicationWorkspaceOpenHelper.CreateWorkspaceView(_application, instanceId);
+        if (workspaceView == null)
+            return;
+
+        // New tab — keep the dossier open beside the case workspace.
+        _application.ShowViewStrategy.ShowView(
+            new ShowViewParameters(workspaceView) { TargetWindow = TargetWindow.NewWindow },
+            new ShowViewSource(_application.MainWindow, null));
     }
 
     private void QueueExport()

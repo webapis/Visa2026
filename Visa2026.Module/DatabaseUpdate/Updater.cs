@@ -395,6 +395,9 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddTypePermissionsRecursively<ApprovalLegProfileMinistryLeg>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ProjectContractApprovalLegProfile>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApplicationProfileInstanceApprovalLegSnapshot>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<ApplicationProfileInstanceExclusion>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<ApplicationProfileInstanceExclusionPerson>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<ApplicationProfileInstanceExclusionTemplate>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         // ApplicationProfileInstance number generation reads prefix/format/seed on save; officers must not create or edit org settings.
         userRole.AddTypePermissionsRecursively<ApplicationNumberingProfile>(SecurityOperations.Read, SecurityPermissionState.Allow);
         // Per-BO expiration alert thresholds — read at runtime; configuration UI is VisaOffice only.
@@ -851,11 +854,17 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             {
                 EnsureFullAccessRecursivePermission<ApplicationProfileInstanceProgress>(role);
                 EnsureReadWriteCreatePermission<ApplicationProfileInstanceApprovalLegSnapshot>(role);
+                EnsureReadWriteCreatePermission<ApplicationProfileInstanceExclusion>(role);
+                EnsureReadWriteCreatePermission<ApplicationProfileInstanceExclusionPerson>(role);
+                EnsureFullAccessRecursivePermission<ApplicationProfileInstanceExclusionTemplate>(role);
             }
             else
             {
                 EnsureReadOnlyPermission<ApplicationProfileInstanceProgress>(role);
                 EnsureReadOnlyPermission<ApplicationProfileInstanceApprovalLegSnapshot>(role);
+                EnsureReadOnlyPermission<ApplicationProfileInstanceExclusion>(role);
+                EnsureReadOnlyPermission<ApplicationProfileInstanceExclusionPerson>(role);
+                EnsureReadOnlyPermission<ApplicationProfileInstanceExclusionTemplate>(role);
             }
         }
 

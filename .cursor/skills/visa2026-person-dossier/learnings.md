@@ -115,3 +115,34 @@ Newest entries at the **bottom**. Read before dossier work; append after verifie
 - **Fix**: `@(section.SectionLabel)` and `@(section.Records.Count)`.
 - **Prevent**: Same as person-document-copies 2026-09-23.
 - **Cross-skill**: person-dossier | person-document-copies
+
+### 2026-09-24 — Applications Status shows Seretmezlik
+
+- **Ask**: Person dossier Applications Status was empty for people on a Seretmezlik letter; officers need the same excluded signal as People & links.
+- **Fix**: `PersonDossierResolver.BuildApplications` loads `ApplicationProfileInstanceExclusionPerson` for the person (nav fallback on instance `Exclusions`). Status pill = localized `PersonDossier.Status.Excluded` (`Excluded · № {letter} · {dd.MM.yyyy}`, tk uses Seretmezlik) with `st-expiring`. Also added missing `PersonDossier.Column.ApplicationProfile` caption.
+- **Officer**: Rebuild Blazor host, hard-refresh, open Francesco’s dossier → Applications → Status shows the excluded pill for Çakylyk Almak.
+- **Prevent**: Do not leave Application Status as progress-only when Seretmezlik applies; Seretmezlik wins over LatestProgress for that row.
+- **Cross-skill**: person-dossier | application-profile (Seretmezlik)
+
+### 2026-09-24 — Application # opens case workspace
+
+- **Ask**: Dossier Applications Application # should open the Application Profile Instance.
+- **Fix**: Screen-mode link on the first Applications cell → `ApplicationWorkspaceOpenHelper.CreateWorkspaceView` in a new tab (`PersonDossierPropertyEditor.OpenApplicationWorkspace`). Paper/export stays plain text.
+- **Officer**: Rebuild Blazor host, hard-refresh dossier, click Application # (e.g. 9/-1644).
+- **Prevent**: Do not open legacy DetailView for instances — use the case workspace helper. Keep dossier open (NewWindow).
+- **Cross-skill**: person-dossier | application-profile
+
+### 2026-09-24 — InvitationItem dossier status (Valid / Used / Cancelled / Expired)
+
+- **Ask**: Invitations Status on person dossier must show one of: Valid to {expiry}, Used (visa issued), Cancelled (cancellation instance), Expired (no visa).
+- **Fix**: `PersonDossierResolver.ClassifyInvitationItem` — Cancelled → Used (`IssuedVisa` or used-id batch) → Expired → Valid to {date}. Batch `LoadUsedInvitationItemIds` when resolving the section. CSS: Used/Valid `st-approved`, Cancelled/Expired `st-expiring`.
+- **Officer**: Rebuild Blazor host, hard-refresh Andy’s dossier → Invitations: unused future = Valid to …; used = Used; past unused = Expired.
+- **Prevent**: Do not leave unused invitation Status empty. Do not treat Used and Expired as stackable — invitation is one state only.
+- **Cross-skill**: person-dossier | IssuedDocumentLifecycle
+
+## 2026-09-24 - Invitations Copy column (Preview / No copy + Upload)
+
+- Screen-only **Copy** column on Invitations (PersonDossierSection.HasCopyColumn). Paper HTML is untouched.
+- Copy on file (Invitation.Documents with File): **Preview** opens `OpenHeaderDocumentCopiesAsync` (Family=Invitation, `OpenPreviewOnly`) with owner `PersonDossierViewIds.DetailView`.
+- No copy: amber **No copy** pill + **Upload**. With a case (Invitation.ApplicationProfileInstance) it opens `IssueIssuedHeaderSlotRequest` in edit mode (`ExistingHeaderId`), reusing the workspace panel's Upload copy. Without a case (legacy) it opens the Invitation DetailView in a new tab.
+- Editor watches `IVisaPreviewSlotService.StateChanged`; when the upload occupant leaves the slot it reloads the snapshot so Preview appears. Unsubscribe in `BreakLinksToControl`.

@@ -1,0 +1,875 @@
+@using System.IO
+@using DevExpress.ExpressApp
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.JSInterop
+@using Visa2026.Blazor.Server.Services
+@using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Services
+@using Visa2026.Module.Services.ApplicationWorkspace
+@using Visa2026.Module.Services.OfficerShell
+@using Visa2026.Module.Services.PreviewSlot
+
+<div class="sm-page">
+    @if (_mode == Mode.List)
+    {
+        <div class="sm-head">
+            <div>
+                <h2>Seretmezlik — exclusion letters</h2>
+                <p>Prepare a letter asking the current holder of this case to stop processing some people. Each letter has its own number; people stay on the roster marked Excluded.</p>
+            </div>
+            @if (_pane == Pane.Letters)
+            {
+                <button type="button" class="sm-btn sm-btn--primary" disabled="@(!_canCreate || _activeCount == 0)" title="@_blockedReason" @onclick="StartNew">+ New Seretmezlik letter</button>
+            }
+        </div>
+
+        <div class="sm-panes" role="tablist">
+            <button type="button" role="tab" class="sm-pane-tab @(_pane == Pane.Letters ? "is-active" : null)" aria-selected="@(_pane == Pane.Letters)" @onclick="() => ShowPane(Pane.Letters)">Letters <span>@_letters.Count</span></button>
+            <button type="button" role="tab" class="sm-pane-tab @(_pane == Pane.Templates ? "is-active" : null)" aria-selected="@(_pane == Pane.Templates)" @onclick="() => ShowPane(Pane.Templates)">Templates</button>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(_status))
+        {
+            <div class="sm-note @(_statusIsError ? "sm-note--bad" : "sm-note--ok")" role="status">@_status</div>
+        }
+
+        @if (_pane == Pane.Templates)
+        {
+            @RenderTemplatesPane()
+        }
+        else
+        {
+        @if (!_canCreate && !string.IsNullOrWhiteSpace(_blockedReason))
+        {
+            <div class="sm-note sm-note--info">@_blockedReason</div>
+        }
+
+        @if (_letters.Count == 0)
+        {
+            <div class="sm-empty">
+                <div class="sm-empty__icon">⊘</div>
+                <h3>No exclusion letters yet</h3>
+                <p>When management orders some people removed from this application, create a Seretmezlik letter. The selected people are marked Excluded and left out of later Resminamalar and Document copies.</p>
+                <button type="button" class="sm-btn sm-btn--primary" disabled="@(!_canCreate || _activeCount == 0)" @onclick="StartNew">+ New Seretmezlik letter</button>
+            </div>
+        }
+        else
+        {
+            <div class="sm-stats">
+                <div class="sm-stat"><div class="sm-stat__label">Letters</div><div class="sm-stat__value">@_letters.Count</div></div>
+                <div class="sm-stat sm-stat--bad"><div class="sm-stat__label">People excluded</div><div class="sm-stat__value">@_excludedCount</div></div>
+                <div class="sm-stat sm-stat--ok"><div class="sm-stat__label">Still active on the case</div><div class="sm-stat__value">@_activeCount</div></div>
+            </div>
+            @foreach (var letter in _letters)
+            {
+                <div class="sm-letter" @onclick="() => OpenDetail(letter.Id)">
+                    <div class="sm-letter__icon">⊘</div>
+                    <div>
+                        <div class="sm-letter__title">№ @letter.LetterNumber<span>@FormatDate(letter.LetterDate)</span></div>
+                        <div class="sm-letter__meta">
+                            <div>To <b>@letter.AddresseeName</b></div>
+                            @if (!string.IsNullOrWhiteSpace(letter.ReferenceMinistryName) || !string.IsNullOrWhiteSpace(letter.ReferenceLetterNumber))
+                            {
+                                <div>Refers to @letter.ReferenceMinistryName @FormatDate(letter.ReferenceLetterDate) № @letter.ReferenceLetterNumber (@letter.OriginalRosterCount people)</div>
+                            }
+                        </div>
+                        <div class="sm-letter__people">
+                            @foreach (var person in letter.People)
+                            {
+                                <span class="sm-chip sm-chip--excl">@person.FullName <span class="sm-chip__pp">@person.PassportNumber</span></span>
+                            }
+                        </div>
+                    </div>
+                    <div class="sm-letter__actions sm-letter__actions--grid">
+                        <button type="button" class="sm-btn" title="Download the letter" @onclick:stopPropagation="true" @onclick="() => DownloadAsync(letter.Id, LetterKind)">Letter</button>
+                        <button type="button" class="sm-btn" title="Preview the letter" @onclick:stopPropagation="true" @onclick="() => PreviewAsync(letter.Id, LetterKind)">Preview</button>
+                        <button type="button" class="sm-btn" title="Download the roster (Sanaw)" @onclick:stopPropagation="true" @onclick="() => DownloadAsync(letter.Id, RosterKind)">Roster</button>
+                        <button type="button" class="sm-btn" title="Preview the roster (Sanaw)" @onclick:stopPropagation="true" @onclick="() => PreviewAsync(letter.Id, RosterKind)">Preview</button>
+                    </div>
+                </div>
+            }
+        }
+        }
+    }
+    else if (_mode == Mode.New)
+    {
+        <button type="button" class="sm-back" @onclick="BackToList">← Back to Seretmezlik letters</button>
+        <div class="sm-head">
+            <div>
+                <h2>New Seretmezlik letter</h2>
+                <p>Details are prefilled from Progress and the roster; check the ministry letter number before saving.</p>
+            </div>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(_status))
+        {
+            <div class="sm-note @(_statusIsError ? "sm-note--bad" : "sm-note--ok")" role="alert">@_status</div>
+        }
+        @RenderForm(isNew: true)
+
+        <div class="sm-section-title">People to exclude <span>@_draft.PersonIds.Count selected · @_activeCount active on the case</span></div>
+        <table class="sm-table">
+            <thead><tr><th style="width:36px"></th><th>#</th><th>Person</th><th>Passport</th><th>Status</th></tr></thead>
+            <tbody>
+                @foreach (var row in _roster)
+                {
+                    var picked = _draft.PersonIds.Contains(row.PersonId);
+                    <tr class="@(row.IsExcluded ? "is-excluded" : picked ? "is-picked" : null)">
+                        <td>
+                            <input type="checkbox" class="sm-check"
+                                   checked="@picked"
+                                   disabled="@row.IsExcluded"
+                                   @onchange="e => TogglePerson(row.PersonId, e.Value is bool b && b)" />
+                        </td>
+                        <td>@row.Index</td>
+                        <td class="sm-name">@row.FullName</td>
+                        <td><code>@row.PassportNumber</code></td>
+                        <td>
+                            @if (row.IsExcluded)
+                            {
+                                <span class="sm-excl-badge">⊘ Excluded · № @row.ExcludedLetterNumber · @FormatDate(row.ExcludedLetterDate)</span>
+                            }
+                            else
+                            {
+                                <span>Active</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <div class="sm-foot">
+            <div class="sm-foot__left">Once saved, the selected people are marked Excluded. This cannot be undone.</div>
+            <div class="sm-foot__right">
+                <button type="button" class="sm-btn" disabled="@_busy" @onclick="BackToList">Cancel</button>
+                <button type="button" class="sm-btn sm-btn--danger" disabled="@(_busy || _draft.PersonIds.Count == 0)" @onclick="RequestSave">
+                    @(_busy ? "Saving…" : "Save and generate letter")
+                </button>
+            </div>
+        </div>
+
+        @if (_confirmClose)
+        {
+            <div class="sm-modal-back">
+                <div class="sm-modal" role="dialog" aria-modal="true">
+                    <h3>Everyone on this case will be excluded</h3>
+                    <p>After this letter no active people remain on the case. You can keep the case open (for example, to record the holder's answer) or close it now as Cancelled.</p>
+                    <div class="sm-modal__actions">
+                        <button type="button" class="sm-btn" disabled="@_busy" @onclick="() => _confirmClose = false">Back</button>
+                        <button type="button" class="sm-btn" disabled="@_busy" @onclick="() => SaveNewAsync(closeCase: false)">Save, keep case open</button>
+                        <button type="button" class="sm-btn sm-btn--danger" disabled="@_busy" @onclick="() => SaveNewAsync(closeCase: true)">Save and close case as Cancelled</button>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else if (_mode == Mode.Detail && SelectedLetter is { } letter)
+    {
+        <button type="button" class="sm-back" @onclick="BackToList">← Back to Seretmezlik letters</button>
+        <div class="sm-head">
+            <div>
+                <h2>Seretmezlik № @letter.LetterNumber</h2>
+                <p>@FormatDate(letter.LetterDate) · @letter.People.Count @(letter.People.Count == 1 ? "person" : "people") excluded@(string.IsNullOrWhiteSpace(letter.CreatedByUserName) ? null : " · prepared by " + letter.CreatedByUserName)</p>
+            </div>
+            <div class="sm-letter__actions">
+                @if (!_editing)
+                {
+                    <button type="button" class="sm-btn" @onclick="StartEdit">Edit letter details</button>
+                }
+                <button type="button" class="sm-btn" @onclick="() => DownloadAsync(letter.Id, LetterKind)">Download letter</button>
+                <button type="button" class="sm-btn" @onclick="() => DownloadAsync(letter.Id, RosterKind)">Download roster</button>
+                <button type="button" class="sm-btn" @onclick="() => PreviewAsync(letter.Id, RosterKind)">Preview roster</button>
+                <button type="button" class="sm-btn sm-btn--primary" @onclick="() => PreviewAsync(letter.Id, LetterKind)">Preview letter</button>
+            </div>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(_status))
+        {
+            <div class="sm-note @(_statusIsError ? "sm-note--bad" : "sm-note--ok")" role="status">@_status</div>
+        }
+        <div class="sm-detail">
+            <div>
+                <div class="sm-section-title">Letter details</div>
+                @if (_editing)
+                {
+                    @RenderForm(isNew: false)
+                    <div class="sm-foot">
+                        <div></div>
+                        <div class="sm-foot__right">
+                            <button type="button" class="sm-btn" disabled="@_busy" @onclick="CancelEdit">Cancel</button>
+                            <button type="button" class="sm-btn sm-btn--primary" disabled="@_busy" @onclick="SaveEditAsync">@(_busy ? "Saving…" : "Save details")</button>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <dl class="sm-kv">
+                        <dt>Letter №</dt><dd>@letter.LetterNumber</dd>
+                        <dt>Letter date</dt><dd>@FormatDate(letter.LetterDate)</dd>
+                        <dt>Addressee</dt><dd>@letter.AddresseeName</dd>
+                        @if (!string.IsNullOrWhiteSpace(letter.Salutation))
+                        {
+                            <dt>Salutation</dt><dd>@letter.Salutation</dd>
+                        }
+                        <dt>Refers to</dt><dd>@letter.ReferenceMinistryName</dd>
+                        <dt>Ministry letter</dt><dd>№ @letter.ReferenceLetterNumber · @FormatDate(letter.ReferenceLetterDate)</dd>
+                        <dt>Original roster</dt><dd>@letter.OriginalRosterCount people</dd>
+                        <dt>Subject</dt><dd>@letter.Subject</dd>
+                    </dl>
+                }
+            </div>
+            <div>
+                <div class="sm-section-title">Excluded people <span>Locked after save</span></div>
+                <table class="sm-table">
+                    <thead><tr><th>#</th><th>Person</th><th>Passport</th></tr></thead>
+                    <tbody>
+                        @foreach (var (person, index) in letter.People.Select((p, i) => (p, i + 1)))
+                        {
+                            <tr><td>@index</td><td>@person.FullName</td><td><code>@person.PassportNumber</code></td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public Guid ApplicationProfileInstanceId { get; set; }
+    [Parameter] public ApplicationWorkspaceSnapshot? Snapshot { get; set; }
+    [Parameter] public string? PreviewSlotOwnerViewId { get; set; }
+
+    [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
+    [Inject] private IApplicationProfileInstanceExclusionService ExclusionService { get; set; } = null!;
+    [Inject] private IApplicationWorkspacePersonUiActions WorkspaceActions { get; set; } = null!;
+    [Inject] private IVisaPreviewSlotService PreviewSlotService { get; set; } = null!;
+    [Inject] private IFileDownloader FileDownloader { get; set; } = null!;
+
+    [Inject] private IJSRuntime JS { get; set; } = null!;
+
+    private enum Mode { List, New, Detail }
+
+    private enum Pane { Letters, Templates }
+
+    private const ApplicationProfileInstanceExclusionTemplateKind LetterKind = ApplicationProfileInstanceExclusionTemplateKind.Letter;
+    private const ApplicationProfileInstanceExclusionTemplateKind RosterKind = ApplicationProfileInstanceExclusionTemplateKind.Roster;
+    private const long MaxTemplateBytes = 10 * 1024 * 1024;
+
+    private Pane _pane = Pane.Letters;
+    private IReadOnlyList<ApplicationProfileInstanceExclusionTemplateStatus> _templates = Array.Empty<ApplicationProfileInstanceExclusionTemplateStatus>();
+    private ApplicationProfileInstanceExclusionTemplateValidation? _templateErrors;
+    private ApplicationProfileInstanceExclusionTemplateKind? _templateErrorsKind;
+    private ApplicationProfileInstanceExclusionTemplateKind? _confirmResetKind;
+    private ApplicationProfileInstanceExclusionTemplateKind? _uploadKind;
+    private string? _copiedToken;
+
+    private sealed record LetterPersonVm(string FullName, string? PassportNumber);
+
+    private sealed record LetterVm(
+        Guid Id,
+        string LetterNumber,
+        DateTime LetterDate,
+        string AddresseeName,
+        string? Salutation,
+        string? ReferenceMinistryName,
+        DateTime? ReferenceLetterDate,
+        string? ReferenceLetterNumber,
+        int OriginalRosterCount,
+        string? Subject,
+        string? CreatedByUserName,
+        ApplicationProfileInstanceExclusionDraft Draft,
+        IReadOnlyList<LetterPersonVm> People);
+
+    private const string OtherAddresseeKey = "other";
+
+    private Mode _mode = Mode.List;
+    private ApplicationWorkspaceSnapshot? _loadedSnapshot;
+    private Guid _loadedInstanceId;
+    private IReadOnlyList<LetterVm> _letters = Array.Empty<LetterVm>();
+    private IReadOnlyList<ApplicationProfileInstanceExclusionRosterRow> _roster = Array.Empty<ApplicationProfileInstanceExclusionRosterRow>();
+    private IReadOnlyList<ApplicationProfileInstanceExclusionAddresseeOption> _addressees = Array.Empty<ApplicationProfileInstanceExclusionAddresseeOption>();
+    private ApplicationProfileInstanceExclusionDraft _draft = new();
+    private Guid? _selectedLetterId;
+    private bool _canCreate;
+    private string? _blockedReason;
+    private int _activeCount;
+    private int _excludedCount;
+    private bool _editing;
+    private bool _busy;
+    private bool _confirmClose;
+    private string? _status;
+    private bool _statusIsError;
+
+    private LetterVm? SelectedLetter => _letters.FirstOrDefault(l => l.Id == _selectedLetterId);
+
+    protected override void OnParametersSet()
+    {
+        if (ReferenceEquals(Snapshot, _loadedSnapshot) && ApplicationProfileInstanceId == _loadedInstanceId)
+            return;
+
+        if (ApplicationProfileInstanceId != _loadedInstanceId)
+        {
+            _mode = Mode.List;
+            _selectedLetterId = null;
+            _editing = false;
+            _status = null;
+        }
+
+        _loadedSnapshot = Snapshot;
+        _loadedInstanceId = ApplicationProfileInstanceId;
+        Reload();
+    }
+
+    private void Reload()
+    {
+        _letters = Array.Empty<LetterVm>();
+        _roster = Array.Empty<ApplicationProfileInstanceExclusionRosterRow>();
+        _addressees = Array.Empty<ApplicationProfileInstanceExclusionAddresseeOption>();
+        _canCreate = false;
+        _blockedReason = null;
+        if (ApplicationProfileInstanceId == Guid.Empty)
+            return;
+
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        var instance = objectSpace.GetObjectByKey<ApplicationProfileInstance>(ApplicationProfileInstanceId);
+        if (instance == null)
+            return;
+
+        _canCreate = ExclusionService.CanCreate(instance, out _blockedReason);
+        _roster = ExclusionService.GetRoster(objectSpace, instance);
+        _addressees = ExclusionService.GetAddresseeOptions(objectSpace, instance);
+        _letters = ExclusionService.GetExclusions(objectSpace, instance.ID)
+            .Select(e => new LetterVm(
+                e.ID,
+                e.LetterNumber,
+                e.LetterDate,
+                e.AddresseeName,
+                e.Salutation,
+                e.ReferenceMinistryName,
+                e.ReferenceLetterDate,
+                e.ReferenceLetterNumber,
+                e.OriginalRosterCount,
+                e.Subject,
+                e.CreatedByUserName,
+                ApplicationProfileInstanceExclusionService.DraftFrom(e),
+                e.People.OrderBy(p => p.Sequence).Select(p => new LetterPersonVm(p.FullName, p.PassportNumber)).ToList()))
+            .ToList();
+        _excludedCount = _roster.Count(r => r.IsExcluded);
+        _activeCount = _roster.Count - _excludedCount;
+    }
+
+    private RenderFragment RenderForm(bool isNew) => __builder =>
+    {
+        <div class="sm-form">
+            <div class="sm-field sm-field--auto">
+                <label>Letter №</label>
+                <input class="sm-input" readonly value="@(isNew ? "Assigned on save" : SelectedLetter?.LetterNumber)" />
+                <span class="sm-field__hint">@(isNew ? "Assigned from company numbering on save" : "Company numbering")</span>
+            </div>
+            <div class="sm-field">
+                <label>Letter date</label>
+                <input class="sm-input" type="date" @bind="_draft.LetterDate" @bind:format="yyyy-MM-dd" />
+            </div>
+            <div class="sm-field">
+                <label>Original roster (people)</label>
+                <input class="sm-input" type="number" min="0" @bind="_draft.OriginalRosterCount" />
+            </div>
+            <div class="sm-field">
+                <label>Addressee</label>
+                <select class="sm-input" value="@(_draft.AddresseeKey ?? OtherAddresseeKey)" @onchange="OnAddresseeChanged">
+                    @foreach (var option in _addressees)
+                    {
+                        <option value="@option.Key">@option.Label@(option.IsCurrentHolder ? " — current holder" : null)</option>
+                    }
+                    <option value="@OtherAddresseeKey">Other (type below)</option>
+                </select>
+                <span class="sm-field__hint">Current holder from Progress</span>
+            </div>
+            <div class="sm-field sm-field--two">
+                <label>Addressee as printed</label>
+                <input class="sm-input" @bind="_draft.AddresseeName" />
+            </div>
+            <div class="sm-field sm-field--wide">
+                <label>Salutation (optional)</label>
+                <input class="sm-input" placeholder="e.g. Hormatly Abdulla Muhammetgeldiýewiç!" @bind="_draft.Salutation" />
+            </div>
+            <div class="sm-field">
+                <label>Refers to (ministry)</label>
+                <input class="sm-input" @bind="_draft.ReferenceMinistryName" />
+            </div>
+            <div class="sm-field">
+                <label>Ministry letter date</label>
+                <input class="sm-input" type="date" @bind="_draft.ReferenceLetterDate" @bind:format="yyyy-MM-dd" />
+            </div>
+            <div class="sm-field">
+                <label>Ministry letter №</label>
+                <input class="sm-input" placeholder="e.g. 7/202" @bind="_draft.ReferenceLetterNumber" />
+            </div>
+            <div class="sm-field sm-field--wide">
+                <label>Subject of the original application</label>
+                <input class="sm-input" @bind="_draft.Subject" />
+            </div>
+        </div>
+    };
+
+    private void OnAddresseeChanged(ChangeEventArgs e)
+    {
+        var key = e.Value?.ToString();
+        if (string.IsNullOrWhiteSpace(key) || key == OtherAddresseeKey)
+        {
+            _draft.AddresseeKey = null;
+            return;
+        }
+
+        _draft.AddresseeKey = key;
+        var option = _addressees.FirstOrDefault(o => o.Key == key);
+        if (option != null)
+            _draft.AddresseeName = option.AddresseeName;
+    }
+
+    private void StartNew()
+    {
+        _status = null;
+        _confirmClose = false;
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        var instance = objectSpace.GetObjectByKey<ApplicationProfileInstance>(ApplicationProfileInstanceId);
+        if (instance == null)
+            return;
+        _draft = ExclusionService.CreateDraft(objectSpace, instance);
+        _mode = Mode.New;
+    }
+
+    private void OpenDetail(Guid id)
+    {
+        _selectedLetterId = id;
+        _editing = false;
+        _status = null;
+        _mode = Mode.Detail;
+    }
+
+    private void BackToList()
+    {
+        _mode = Mode.List;
+        _editing = false;
+        _confirmClose = false;
+        _status = null;
+    }
+
+    private void StartEdit()
+    {
+        if (SelectedLetter is not { } letter)
+            return;
+        var source = letter.Draft;
+        _draft = new ApplicationProfileInstanceExclusionDraft
+        {
+            LetterDate = source.LetterDate,
+            AddresseeKey = source.AddresseeKey,
+            AddresseeName = source.AddresseeName,
+            Salutation = source.Salutation,
+            ReferenceMinistryName = source.ReferenceMinistryName,
+            ReferenceLetterDate = source.ReferenceLetterDate,
+            ReferenceLetterNumber = source.ReferenceLetterNumber,
+            OriginalRosterCount = source.OriginalRosterCount,
+            Subject = source.Subject,
+        };
+        _editing = true;
+        _status = null;
+    }
+
+    private void CancelEdit()
+    {
+        _editing = false;
+        _status = null;
+    }
+
+    private void TogglePerson(Guid personId, bool picked)
+    {
+        if (picked)
+            _draft.PersonIds.Add(personId);
+        else
+            _draft.PersonIds.Remove(personId);
+    }
+
+    private async Task RequestSave()
+    {
+        _status = null;
+        if (_draft.PersonIds.Count >= _activeCount)
+        {
+            _confirmClose = true;
+            return;
+        }
+
+        await SaveNewAsync(closeCase: false);
+    }
+
+    private async Task SaveNewAsync(bool closeCase)
+    {
+        _busy = true;
+        try
+        {
+            Guid? newId;
+            using (var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>())
+            {
+                var result = ExclusionService.Create(objectSpace, ApplicationProfileInstanceId, _draft, SecuritySystem.CurrentUserName);
+                if (!result.Success)
+                {
+                    SetStatus(result.ErrorMessage, isError: true);
+                    _confirmClose = false;
+                    return;
+                }
+
+                objectSpace.CommitChanges();
+                newId = result.ExclusionId;
+            }
+
+            var message = "Seretmezlik letter saved. The selected people are now excluded.";
+            var isError = false;
+            if (closeCase)
+            {
+                using var closeSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+                var close = ExclusionService.CloseAsCancelled(closeSpace, ApplicationProfileInstanceId, _draft.LetterDate);
+                if (close.Success)
+                {
+                    closeSpace.CommitChanges();
+                    message = "Seretmezlik letter saved and the case was closed as Cancelled.";
+                }
+                else
+                {
+                    message = "Seretmezlik letter saved, but the case could not be closed as Cancelled: " + close.ErrorMessage;
+                    isError = true;
+                }
+            }
+
+            _confirmClose = false;
+            Reload();
+            if (newId is Guid id)
+                OpenDetail(id);
+            SetStatus(message, isError);
+            WorkspaceActions.NotifyWorkspaceChanged();
+            await Task.CompletedTask;
+        }
+        catch (Exception ex)
+        {
+            SetStatus("Could not save the Seretmezlik letter: " + ex.Message, isError: true);
+            _confirmClose = false;
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task SaveEditAsync()
+    {
+        if (SelectedLetter is not { } letter)
+            return;
+
+        _busy = true;
+        try
+        {
+            using (var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>())
+            {
+                var result = ExclusionService.UpdateLetterDetails(objectSpace, letter.Id, _draft);
+                if (!result.Success)
+                {
+                    SetStatus(result.ErrorMessage, isError: true);
+                    return;
+                }
+
+                objectSpace.CommitChanges();
+            }
+
+            _editing = false;
+            Reload();
+            SetStatus("Letter details saved.", isError: false);
+            await Task.CompletedTask;
+        }
+        catch (Exception ex)
+        {
+            SetStatus("Could not save the letter details: " + ex.Message, isError: true);
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task DownloadAsync(Guid exclusionId, ApplicationProfileInstanceExclusionTemplateKind kind)
+    {
+        try
+        {
+            ApplicationProfileInstanceExclusionDocument document;
+            using (var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstanceExclusion>())
+            {
+                var exclusion = ApplicationProfileInstanceExclusionTemplateStore.LoadExclusion(objectSpace, exclusionId);
+                if (exclusion == null)
+                    return;
+                document = ApplicationProfileInstanceExclusionLetterBuilder.Generate(objectSpace, exclusion, kind);
+            }
+
+            using var stream = new MemoryStream(document.Content, writable: false);
+            await FileDownloader.DownloadAsync(document.FileName, stream, document.ContentType);
+        }
+        catch (Exception ex)
+        {
+            SetStatus($"Could not generate the {ApplicationProfileInstanceExclusionLetterBuilder.KindLabel(kind).ToLowerInvariant()}: " + ex.Message, isError: true);
+        }
+    }
+
+    private Task PreviewAsync(Guid exclusionId, ApplicationProfileInstanceExclusionTemplateKind kind) =>
+        PreviewSlotService.OpenFileAsync(
+            kind == RosterKind
+                ? ApplicationProfileInstanceExclusionRosterPreviewSource.Key
+                : ApplicationProfileInstanceExclusionLetterPreviewSource.Key,
+            exclusionId,
+            PreviewSlotOwnerViewId);
+
+    private void ShowPane(Pane pane)
+    {
+        _pane = pane;
+        _status = null;
+        _templateErrors = null;
+        _confirmResetKind = null;
+        if (pane == Pane.Templates)
+            ReloadTemplates();
+    }
+
+    private void ReloadTemplates()
+    {
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstanceExclusionTemplate>();
+        _templates = new[] { LetterKind, RosterKind }
+            .Select(kind => ApplicationProfileInstanceExclusionTemplateStore.GetStatus(objectSpace, kind))
+            .ToList();
+    }
+
+    private RenderFragment RenderTemplatesPane() => __builder =>
+    {
+        <div class="sm-note sm-note--info">
+            These templates are shared by every case. Each Seretmezlik letter is regenerated from the current template when you download or preview it.
+            Start from <b>Download built-in</b>, change the layout in Word or Excel, keep the <code>{{ds.…}}</code> placeholders you need, then <b>Replace</b>.
+        </div>
+        <div class="sm-tpl-grid">
+            @foreach (var template in _templates)
+            {
+                var kind = template.Kind;
+                <div class="sm-tpl-card">
+                    <div class="sm-tpl-card__head">
+                        <div class="sm-tpl-card__icon">@(kind == RosterKind ? "☰" : "✉")</div>
+                        <div>
+                            <div class="sm-tpl-card__title">@ApplicationProfileInstanceExclusionLetterBuilder.KindLabel(kind)</div>
+                            <div class="sm-tpl-card__sub">@(kind == RosterKind ? "Word or Excel · one row per excluded person" : "Word · the letter to the current holder")</div>
+                        </div>
+                        <span class="sm-tpl-badge @(template.IsCustom ? "is-custom" : null)">@(template.IsCustom ? "Custom" : "Built-in")</span>
+                    </div>
+                    <div class="sm-tpl-card__meta">
+                        @if (template.IsCustom)
+                        {
+                            <div><b>@template.FileName</b></div>
+                            <div>Replaced@(string.IsNullOrWhiteSpace(template.UpdatedByUserName) ? null : " by " + template.UpdatedByUserName)@(template.UpdatedOnUtc is DateTime at ? " on " + at.ToLocalTime().ToString("dd.MM.yyyy HH:mm") : null)</div>
+                        }
+                        else
+                        {
+                            <div>No company template uploaded — the built-in layout is used.</div>
+                        }
+                    </div>
+                    <div class="sm-tpl-card__actions">
+                        <button type="button" class="sm-btn" @onclick="() => PreviewTemplateAsync(kind)">Preview sample</button>
+                        <button type="button" class="sm-btn" @onclick="() => DownloadTemplateAsync(kind, builtIn: false)">Download current</button>
+                        @if (template.IsCustom)
+                        {
+                            <button type="button" class="sm-btn" @onclick="() => DownloadTemplateAsync(kind, builtIn: true)">Download built-in</button>
+                        }
+                        <label class="sm-btn sm-btn--primary sm-upload @(_busy ? "is-disabled" : null)">
+                            @(_busy && _uploadKind == kind ? "Checking…" : "Replace…")
+                            <InputFile accept="@(kind == RosterKind ? ".docx,.xlsx" : ".docx")" disabled="@_busy" OnChange="e => ReplaceTemplateAsync(kind, e)" />
+                        </label>
+                        @if (template.IsCustom)
+                        {
+                            <button type="button" class="sm-btn sm-btn--danger" disabled="@_busy" @onclick="() => _confirmResetKind = kind">Reset to built-in</button>
+                        }
+                    </div>
+                    @if (_confirmResetKind == kind)
+                    {
+                        <div class="sm-note sm-note--bad">
+                            Remove the uploaded @ApplicationProfileInstanceExclusionLetterBuilder.KindLabel(kind).ToLowerInvariant() template? Every letter will use the built-in layout again.
+                            <div class="sm-tpl-card__actions">
+                                <button type="button" class="sm-btn" @onclick="() => _confirmResetKind = null">Keep</button>
+                                <button type="button" class="sm-btn sm-btn--danger" disabled="@_busy" @onclick="() => ResetTemplate(kind)">Reset to built-in</button>
+                            </div>
+                        </div>
+                    }
+                    @if (_templateErrorsKind == kind && _templateErrors is { } validation)
+                    {
+                        <div class="sm-note sm-note--bad">
+                            <b>The file was not saved.</b>
+                            <ul class="sm-tpl-errors">
+                                @foreach (var error in validation.Errors)
+                                {
+                                    <li>@error</li>
+                                }
+                                @if (validation.UnknownTokens.Count > 0)
+                                {
+                                    <li>Unknown placeholders: @foreach (var token in validation.UnknownTokens) { <code>@token</code> } — use only the placeholders listed below.</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="sm-section-title">Placeholders <span>Type them exactly, with the braces</span></div>
+        <div class="sm-tpl-manual">
+            <div>
+                <div class="sm-tpl-manual__title">Letter fields — anywhere in the document</div>
+                @RenderPlaceholderTable(isRow: false)
+            </div>
+            <div>
+                <div class="sm-tpl-manual__title">People row — one row per excluded person</div>
+                <p class="sm-tpl-manual__hint">
+                    Put <code>@ApplicationProfileInstanceExclusionLetterBuilder.LoopOpenToken</code> at the start of the first cell of a table row (Excel: any cell of the row)
+                    and <code>@ApplicationProfileInstanceExclusionLetterBuilder.LoopCloseToken</code> at the end of its last cell. The row repeats for each person.
+                </p>
+                @RenderPlaceholderTable(isRow: true)
+            </div>
+        </div>
+    };
+
+    private RenderFragment RenderPlaceholderTable(bool isRow) => __builder =>
+    {
+        <table class="sm-table sm-tpl-table">
+            <thead><tr><th>Placeholder</th><th>Meaning</th><th>Example</th><th></th></tr></thead>
+            <tbody>
+                @foreach (var placeholder in ApplicationProfileInstanceExclusionLetterBuilder.Placeholders.Where(p => p.IsRow == isRow))
+                {
+                    <tr>
+                        <td><code>@placeholder.Token</code></td>
+                        <td>@placeholder.Label</td>
+                        <td class="sm-tpl-example">@placeholder.Example</td>
+                        <td><button type="button" class="sm-btn sm-btn--sm" @onclick="() => CopyAsync(placeholder.Token)">@(_copiedToken == placeholder.Token ? "Copied" : "Copy")</button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    };
+
+    private async Task CopyAsync(string token)
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", token);
+            _copiedToken = token;
+        }
+        catch (Exception)
+        {
+            SetStatus("Copy is blocked by the browser — select the placeholder and copy it manually.", isError: true);
+        }
+    }
+
+    private Task PreviewTemplateAsync(ApplicationProfileInstanceExclusionTemplateKind kind) =>
+        PreviewSlotService.OpenFileAsync(
+            ApplicationProfileInstanceExclusionTemplatePreviewSource.Key,
+            ApplicationProfileInstanceExclusionTemplateStore.PreviewId(kind),
+            PreviewSlotOwnerViewId);
+
+    private async Task DownloadTemplateAsync(ApplicationProfileInstanceExclusionTemplateKind kind, bool builtIn)
+    {
+        try
+        {
+            ApplicationProfileInstanceExclusionTemplateFile template;
+            if (builtIn)
+            {
+                template = ApplicationProfileInstanceExclusionLetterBuilder.GetBuiltInTemplate(kind);
+            }
+            else
+            {
+                using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstanceExclusionTemplate>();
+                template = ApplicationProfileInstanceExclusionLetterBuilder.GetTemplate(objectSpace, kind);
+            }
+
+            using var stream = new MemoryStream(template.Content, writable: false);
+            await FileDownloader.DownloadAsync(
+                template.FileName,
+                stream,
+                ApplicationProfileInstanceExclusionLetterBuilder.IsExcel(template.FileName)
+                    ? ApplicationProfileInstanceExclusionLetterBuilder.ExcelContentType
+                    : ApplicationProfileInstanceExclusionLetterBuilder.WordContentType);
+        }
+        catch (Exception ex)
+        {
+            SetStatus("Could not download the template: " + ex.Message, isError: true);
+        }
+    }
+
+    private async Task ReplaceTemplateAsync(ApplicationProfileInstanceExclusionTemplateKind kind, InputFileChangeEventArgs e)
+    {
+        _status = null;
+        _templateErrors = null;
+        _confirmResetKind = null;
+        var file = e.File;
+        if (file == null)
+            return;
+        if (file.Size > MaxTemplateBytes)
+        {
+            SetStatus($"This file is {file.Size / 1048576} MB and the limit is {MaxTemplateBytes / 1048576} MB.", isError: true);
+            return;
+        }
+
+        _busy = true;
+        _uploadKind = kind;
+        try
+        {
+            await using var upload = file.OpenReadStream(MaxTemplateBytes);
+            using var buffer = new MemoryStream();
+            await upload.CopyToAsync(buffer);
+
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstanceExclusionTemplate>();
+            var validation = ApplicationProfileInstanceExclusionTemplateStore.Replace(
+                objectSpace, kind, Path.GetFileName(file.Name), buffer.ToArray(), SecuritySystem.CurrentUserName);
+            if (!validation.IsValid)
+            {
+                _templateErrors = validation;
+                _templateErrorsKind = kind;
+                return;
+            }
+
+            objectSpace.CommitChanges();
+            ReloadTemplates();
+            SetStatus($"{ApplicationProfileInstanceExclusionLetterBuilder.KindLabel(kind)} template replaced. New downloads and previews use it.", isError: false);
+        }
+        catch (Exception ex)
+        {
+            SetStatus("Could not save the template: " + ex.Message, isError: true);
+        }
+        finally
+        {
+            _busy = false;
+            _uploadKind = null;
+        }
+    }
+
+    private void ResetTemplate(ApplicationProfileInstanceExclusionTemplateKind kind)
+    {
+        _confirmResetKind = null;
+        _templateErrors = null;
+        try
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstanceExclusionTemplate>();
+            ApplicationProfileInstanceExclusionTemplateStore.ResetToBuiltIn(objectSpace, kind);
+            objectSpace.CommitChanges();
+            ReloadTemplates();
+            SetStatus($"{ApplicationProfileInstanceExclusionLetterBuilder.KindLabel(kind)} reset to the built-in layout.", isError: false);
+        }
+        catch (Exception ex)
+        {
+            SetStatus("Could not reset the template: " + ex.Message, isError: true);
+        }
+    }
+
+    private void SetStatus(string? message, bool isError)
+    {
+        _status = message;
+        _statusIsError = isError;
+    }
+
+    private static string FormatDate(DateTime? value) =>
+        value is DateTime d && d != default ? d.ToString("dd.MM.yyyy") : string.Empty;
+}

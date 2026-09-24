@@ -4,11 +4,13 @@ using System.Linq;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
+using Visa2026.Module.Services.OfficerShell;
 
 namespace Visa2026.Module.Services.ApplicationWorkspace;
 
 /// <summary>
 /// ListView chips for the same people-coverage ratios as Result-tab Netije syny.
+/// Seretmezlik-excluded people are omitted from expected and coverage (same as the Result tab).
 /// </summary>
 public static class ApplicationWorkspaceIssuedResultListCoverage
 {
@@ -76,6 +78,7 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
 
         var ids = applications.Select(a => a.ID).Where(id => id != Guid.Empty).Distinct().ToList();
         var roster = LoadPersonSets(LoadRosterPairs(objectSpace, ids));
+        var excluded = LoadPersonSets(LoadExcludedPairs(objectSpace, ids));
         var invitation = LoadPersonSets(LoadInvitationPairs(objectSpace, ids));
         var workPermit = LoadPersonSets(LoadWorkPermitPairs(objectSpace, ids));
         var rejection = LoadPersonSets(LoadRejectionPairs(objectSpace, ids));
@@ -85,19 +88,33 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
         foreach (var application in applications)
         {
             roster.TryGetValue(application.ID, out var rosterIds);
+            excluded.TryGetValue(application.ID, out var excludedIds);
+            var activeRoster = ActiveRosterIds(rosterIds, excludedIds);
             var rosterCount = rosterIds is { Count: > 0 }
-                ? rosterIds.Count
-                : application.TotalPersonCount;
+                ? activeRoster?.Count ?? 0
+                : Math.Max(0, application.TotalPersonCount - (excludedIds?.Count ?? 0));
             var coverage = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
             {
-                [ApplicationWorkspaceIssuedRecordsCatalog.Invitation] = CountOnRoster(invitation, application.ID, rosterIds),
-                [ApplicationWorkspaceIssuedRecordsCatalog.WorkPermit] = CountOnRoster(workPermit, application.ID, rosterIds),
-                [ApplicationWorkspaceIssuedRecordsCatalog.Rejection] = CountOnRoster(rejection, application.ID, rosterIds),
-                [ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa] = CountOnRoster(visa, application.ID, rosterIds),
-                [ApplicationWorkspaceIssuedRecordsCatalog.BorderZone] = CountOnRoster(borderZone, application.ID, rosterIds),
+                [ApplicationWorkspaceIssuedRecordsCatalog.Invitation] = CountOnRoster(invitation, application.ID, activeRoster),
+                [ApplicationWorkspaceIssuedRecordsCatalog.WorkPermit] = CountOnRoster(workPermit, application.ID, activeRoster),
+                [ApplicationWorkspaceIssuedRecordsCatalog.Rejection] = CountOnRoster(rejection, application.ID, activeRoster),
+                [ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa] = CountOnRoster(visa, application.ID, activeRoster),
+                [ApplicationWorkspaceIssuedRecordsCatalog.BorderZone] = CountOnRoster(borderZone, application.ID, activeRoster),
             };
             application.SetListViewResultCoverage(Build(application, rosterCount, coverage));
         }
+    }
+
+    private static HashSet<Guid>? ActiveRosterIds(HashSet<Guid>? rosterIds, HashSet<Guid>? excludedIds)
+    {
+        if (rosterIds == null || rosterIds.Count == 0)
+            return rosterIds;
+        if (excludedIds == null || excludedIds.Count == 0)
+            return rosterIds;
+
+        var active = new HashSet<Guid>(rosterIds);
+        active.ExceptWith(excludedIds);
+        return active;
     }
 
     private static int CountOnRoster(
@@ -153,6 +170,20 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
             .Select(x => (x.ApplicationProfileInstanceId, x.PersonId));
 
         return fromPeople.Concat(fromLinks);
+    }
+
+    private static IEnumerable<(Guid InstanceId, Guid PersonId)> LoadExcludedPairs(
+        IObjectSpace? objectSpace,
+        IReadOnlyCollection<Guid> ids)
+    {
+        if (objectSpace == null || ids.Count == 0)
+            return [];
+
+        return objectSpace.GetObjectsQuery<ApplicationProfileInstanceExclusionPerson>()
+            .Where(p => ids.Contains(p.Exclusion.ApplicationProfileInstanceId) && p.PersonId != Guid.Empty)
+            .Select(p => new { InstanceId = p.Exclusion.ApplicationProfileInstanceId, p.PersonId })
+            .ToList()
+            .Select(x => (x.InstanceId, x.PersonId));
     }
 
     private static IEnumerable<(Guid InstanceId, Guid PersonId)> LoadInvitationPairs(

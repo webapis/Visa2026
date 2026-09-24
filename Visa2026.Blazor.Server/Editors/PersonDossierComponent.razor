@@ -1,4 +1,5 @@
 @using System.Globalization
+@using System.Linq
 @using System.Threading.Tasks
 @using Microsoft.AspNetCore.Components
 @using Visa2026.Blazor.Server.Editors
@@ -190,15 +191,34 @@
                                             <th>@header</th>
                                         }
                                         <th class="person-dossier__col-status">@Msg("PersonDossier.Column.Status")</th>
+                                        @if (section.HasCopyColumn)
+                                        {
+                                            <th class="person-dossier__col-copy">@Msg("PersonDossier.Column.Copy")</th>
+                                        }
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach (var record in section.Records)
                                     {
                                         <tr class="@(record.IsCurrent ? "person-dossier__row--current" : null)">
-                                            @foreach (var cell in record.Cells)
+                                            @for (var cellIndex = 0; cellIndex < record.Cells.Count; cellIndex++)
                                             {
-                                                <td>@cell</td>
+                                                var cell = record.Cells[cellIndex];
+                                                <td>
+                                                    @if (IsApplicationNumberLink(section, record, cellIndex))
+                                                    {
+                                                        <button type="button"
+                                                                class="person-dossier__app-link"
+                                                                title="@Msg("PersonDossier.Applications.OpenWorkspace")"
+                                                                @onclick="() => OnOpenApplication(record.SourceObjectId!.Value)">
+                                                            @cell
+                                                        </button>
+                                                    }
+                                                    else
+                                                    {
+                                                        @cell
+                                                    }
+                                                </td>
                                             }
                                             <td class="person-dossier__col-status">
                                                 @if (record.IsCurrent)
@@ -210,6 +230,31 @@
                                                     <span class="person-dossier__pill @record.StatusCssClass">@record.StatusLabel</span>
                                                 }
                                             </td>
+                                            @if (section.HasCopyColumn)
+                                            {
+                                                <td class="person-dossier__col-copy">
+                                                    @if (record.HasPreview)
+                                                    {
+                                                        <button type="button"
+                                                                class="person-dossier__app-link"
+                                                                @onclick="() => OnPreviewRecord(record)">
+                                                            @Msg("PersonDossier.Copy.Preview")
+                                                        </button>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="person-dossier__pill st-pending">@Msg("PersonDossier.Copy.None")</span>
+                                                        @if (record.CanUpload)
+                                                        {
+                                                            <button type="button"
+                                                                    class="person-dossier__app-link person-dossier__copy-upload"
+                                                                    @onclick="() => OnUploadRecord(record)">
+                                                                @Msg("PersonDossier.Copy.Upload")
+                                                            </button>
+                                                        }
+                                                    }
+                                                </td>
+                                            }
                                         </tr>
                                     }
                                 </tbody>
@@ -238,6 +283,9 @@
     [Parameter] public EventCallback InitialLoadRequested { get; set; }
     [Parameter] public EventCallback OpenCopiesRequested { get; set; }
     [Parameter] public EventCallback ExportRequested { get; set; }
+    [Parameter] public EventCallback<Guid> OpenApplicationRequested { get; set; }
+    [Parameter] public EventCallback<PersonDossierRecord> PreviewRecordRequested { get; set; }
+    [Parameter] public EventCallback<PersonDossierRecord> UploadRecordRequested { get; set; }
     [Parameter] public string? ExportMessage { get; set; }
     [Parameter] public bool IsExportQueued { get; set; }
 
@@ -249,6 +297,32 @@
     private string _paperHtml = string.Empty;
     private PersonDossierSnapshot? _paperSnapshotRef;
     private string? _paperCulture;
+
+    private static bool IsApplicationNumberLink(PersonDossierSection section, PersonDossierRecord record, int cellIndex) =>
+        cellIndex == 0
+        && string.Equals(section.SectionId, "applications", StringComparison.Ordinal)
+        && record.SourceObjectId is { } id
+        && id != Guid.Empty
+        && record.Cells.Count > 0
+        && !string.IsNullOrWhiteSpace(record.Cells[0]);
+
+    private async Task OnPreviewRecord(PersonDossierRecord record)
+    {
+        if (PreviewRecordRequested.HasDelegate)
+            await PreviewRecordRequested.InvokeAsync(record);
+    }
+
+    private async Task OnUploadRecord(PersonDossierRecord record)
+    {
+        if (UploadRecordRequested.HasDelegate)
+            await UploadRecordRequested.InvokeAsync(record);
+    }
+
+    private async Task OnOpenApplication(Guid instanceId)
+    {
+        if (OpenApplicationRequested.HasDelegate)
+            await OpenApplicationRequested.InvokeAsync(instanceId);
+    }
 
     protected override void OnParametersSet()
     {

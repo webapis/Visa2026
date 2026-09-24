@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="tk">
+<head>
+<meta charset="utf-8" />
+<title>Seretmezlik - case workspace prototype</title>
+<link rel="stylesheet" href="../../Visa2026.Blazor.Server/wwwroot/css/officer-shell/tokens.css" />
+<link rel="stylesheet" href="../../Visa2026.Blazor.Server/wwwroot/css/officer-shell/case-workspace.css" />
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--os-surface); color: var(--os-ink); font-family: var(--os-font); }
+  .page { padding: 18px 22px; width: 1600px; }
+  .proto-tag { position: fixed; right: 14px; bottom: 10px; font-size: 11px; color: #94a3b8; }
+
+  .sm-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+  .sm-head h2 { margin: 0; font-size: 1.15rem; font-weight: 750; }
+  .sm-head p { margin: 4px 0 0; font-size: 0.8rem; color: var(--os-muted); max-width: 640px; line-height: 1.45; }
+  .sm-btn { border: 1px solid var(--os-line); background: #fff; color: var(--os-ink); border-radius: 8px; padding: 7px 13px; font: inherit; font-size: 0.82rem; font-weight: 650; cursor: pointer; white-space: nowrap; }
+  .sm-btn--primary { background: var(--os-accent); border-color: var(--os-accent); color: #fff; }
+  .sm-btn--danger { background: #b91c1c; border-color: #b91c1c; color: #fff; }
+  .sm-btn--ghost { border-color: transparent; background: transparent; color: #1e40af; }
+  .sm-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+  .sm-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; }
+  .sm-stat { border: 1px solid #eef2f6; border-radius: 10px; background: #fff; padding: 10px 14px; }
+  .sm-stat__label { font-size: 0.72rem; color: var(--os-muted); font-weight: 650; }
+  .sm-stat__value { font-size: 1.35rem; font-weight: 750; margin-top: 2px; }
+  .sm-stat--bad .sm-stat__value { color: #991b1b; }
+  .sm-stat--ok .sm-stat__value { color: #047857; }
+
+  .sm-letter { border: 1px solid #eef2f6; border-radius: 10px; background: #fff; padding: 14px 16px; margin-bottom: 10px; display: grid; grid-template-columns: 44px 1fr auto; gap: 12px; align-items: start; }
+  .sm-letter:hover { border-color: #93c5fd; background: #f8fbff; }
+  .sm-letter__icon { width: 40px; height: 40px; border-radius: 9px; background: #fef2f2; color: #b91c1c; display: grid; place-items: center; font-size: 1.1rem; font-weight: 800; }
+  .sm-letter__title { font-weight: 750; font-size: 0.95rem; }
+  .sm-letter__title span { color: var(--os-muted); font-weight: 600; font-size: 0.82rem; margin-left: 8px; }
+  .sm-letter__meta { margin-top: 4px; font-size: 0.8rem; color: var(--os-muted); display: grid; gap: 2px; }
+  .sm-letter__meta b { color: var(--os-ink); font-weight: 650; }
+  .sm-letter__people { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .sm-letter__actions { display: flex; gap: 6px; align-items: center; }
+
+  .sm-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 0.76rem; font-weight: 650; padding: 4px 10px; border-radius: 999px; background: #f8fafc; border: 1px solid var(--os-line); }
+  .sm-chip--excl { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+  .sm-chip__pp { color: var(--os-muted); font-weight: 600; }
+
+  .sm-empty { padding: 36px 20px; text-align: center; border: 1px dashed #cbd5e1; border-radius: 12px; background: #f8fafc; }
+  .sm-empty__icon { font-size: 2rem; color: #94a3b8; }
+  .sm-empty h3 { margin: 8px 0 4px; font-size: 1rem; }
+  .sm-empty p { margin: 0 auto 14px; max-width: 520px; color: var(--os-muted); font-size: 0.84rem; line-height: 1.5; }
+
+  .sm-note { margin: 0 0 12px; padding: 10px 12px; border-radius: 8px; font-size: 0.8rem; line-height: 1.45; }
+  .sm-note--info { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e3a8a; }
+  .sm-note--warn { background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; }
+  .sm-note--bad { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+
+  .sm-form { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 14px; }
+  .sm-field { display: flex; flex-direction: column; gap: 5px; padding: 8px; border-radius: 10px; }
+  .sm-field--wide { grid-column: span 3; }
+  .sm-field--two { grid-column: span 2; }
+  .sm-field label { font-size: 0.72rem; color: var(--os-muted); font-weight: 650; }
+  .sm-input { border: 1px solid #dbe3ec; border-radius: 8px; padding: 8px 10px; font: inherit; font-size: 0.86rem; background: #fff; }
+  .sm-input[readonly] { background: #f8fafc; color: var(--os-muted); }
+  .sm-field--auto { background: #eff6ff; }
+  .sm-field--auto .sm-input { border-color: #2563eb; box-shadow: 0 0 0 3px color-mix(in srgb, #2563eb 18%, transparent); }
+  .sm-field__hint { font-size: 0.7rem; color: #1e40af; }
+  .sm-section-title { margin: 16px 0 8px; font-size: 0.86rem; font-weight: 750; display: flex; justify-content: space-between; align-items: center; }
+  .sm-section-title span { font-weight: 600; font-size: 0.76rem; color: var(--os-muted); }
+
+  .sm-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; background: #fff; border: 1px solid #eef2f6; border-radius: 10px; overflow: hidden; }
+  .sm-table th { background: #f8fafc; color: #475467; font-size: 0.7rem; font-weight: 650; text-align: left; padding: 8px 10px; border-bottom: 1px solid #eef2f6; text-transform: uppercase; letter-spacing: .04em; }
+  .sm-table td { padding: 9px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+  .sm-table tr.is-picked td { background: #fef2f2; }
+  .sm-table tr.is-excluded td { color: #94a3b8; }
+  .sm-table tr.is-excluded td.sm-name { text-decoration: line-through; }
+  .sm-check { width: 16px; height: 16px; accent-color: #b91c1c; }
+  .sm-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px solid #eef2f6; }
+  .sm-foot__left { font-size: 0.8rem; color: #991b1b; font-weight: 650; }
+
+  .sm-detail { display: grid; grid-template-columns: minmax(0, 1fr) 520px; gap: 16px; align-items: start; }
+  .sm-kv { display: grid; grid-template-columns: 170px 1fr; gap: 6px 10px; font-size: 0.82rem; }
+  .sm-kv dt { color: var(--os-muted); font-weight: 650; }
+  .sm-kv dd { margin: 0; }
+  .sm-back { font-size: 0.8rem; color: #1e40af; font-weight: 650; margin-bottom: 8px; display: inline-block; }
+
+  .sm-paper { background: #fff; border: 1px solid #d8e0ea; box-shadow: 0 6px 20px rgba(20,32,51,.12); padding: 34px 38px 26px; font-family: "Times New Roman", serif; font-size: 12.5px; line-height: 1.45; color: #111; min-height: 690px; position: relative; }
+  .sm-paper__logo { position: absolute; right: 30px; top: 22px; text-align: right; font-family: Arial, sans-serif; color: #7b8595; font-weight: 800; font-size: 13px; line-height: 1.1; }
+  .sm-paper__logo small { display: block; font-size: 11px; color: #4b5563; }
+  .sm-paper__no { margin-top: 44px; font-weight: 700; }
+  .sm-paper__to { margin: 18px 0 0 52%; font-weight: 700; text-align: center; }
+  .sm-paper__body { margin-top: 42px; text-indent: 28px; text-align: justify; }
+  .sm-paper__list { margin: 12px 0 12px 28px; font-weight: 700; }
+  .sm-paper__sign { margin-top: 40px; display: flex; justify-content: space-between; font-weight: 700; }
+  .sm-paper__foot { position: absolute; right: 30px; bottom: 18px; font-family: Arial, sans-serif; font-size: 9.5px; text-align: right; color: #333; }
+  .sm-tok { background: #dbeafe; border-radius: 3px; padding: 0 2px; }
+  .sm-paper-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.78rem; color: var(--os-muted); }
+
+  .sm-excl-badge { display: inline-flex; gap: 5px; align-items: center; font-size: 0.7rem; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: #fecaca; color: #991b1b; white-space: nowrap; text-decoration: none; }
+  .sm-person-excluded { opacity: .55; text-decoration: line-through; }
+
+  .sm-modal-back { position: fixed; inset: 0; background: rgba(15, 27, 45, .45); display: grid; place-items: center; }
+  .sm-modal { width: 560px; background: #fff; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,.3); padding: 20px 22px; }
+  .sm-modal h3 { margin: 0 0 8px; font-size: 1.05rem; }
+  .sm-modal p { margin: 0 0 10px; font-size: 0.85rem; line-height: 1.5; color: #334155; }
+  .sm-modal__actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+</style>
+</head>
+<body>
+<div class="page officer-case-workspace" id="root"></div>
+<div class="proto-tag">Prototype · Seretmezlik · 2026-09-24</div>
+<script>
+const params = new URLSearchParams(location.search);
+const screen = params.get('s') || 'list';
+
+const people = [
+  { n: 'Enes Can Uzun', pp: 'U34537060', c: '#7c3aed', excl: '01/-02' },
+  { n: 'Celil Kocaeli', pp: 'U32377166', c: '#0f9d58', excl: '02/-06' },
+  { n: 'Seyfi Kilimen', pp: 'U29811453', c: '#ea580c' },
+  { n: 'Orhan Yurdagül', pp: 'U31176208', c: '#2563eb' },
+  { n: 'Murat Aksoy', pp: 'U30554917', c: '#db2777' },
+  { n: 'Hakan Demir', pp: 'U33902114', c: '#7c3aed' },
+];
+const allExcluded = screen === 'close';
+if (screen === 'empty' || screen === 'new-empty') people.forEach(p => delete p.excl);
+if (allExcluded) people.forEach((p, i) => { if (!p.excl && i < 5) p.excl = '03/-10'; });
+
+const initials = n => n.split(' ').map(x => x[0]).join('').slice(0, 2).toUpperCase();
+const excludedCount = people.filter(p => p.excl).length;
+
+function head() {
+  const chips = people.map(p => `
+    <span class="cw-person ${p.excl ? 'sm-person-excluded' : ''}" title="${p.excl ? 'Excluded by Seretmezlik №' + p.excl : ''}">
+      <span class="cw-person__avatar" style="background:${p.excl ? '#94a3b8' : p.c}">${initials(p.n)}</span>${p.n}
+    </span>`).join('');
+  return `
+  <div class="cw-head">
+    <div class="cw-head__top">
+      <div class="cw-head__title-block">
+        <div class="cw-head__accent"></div>
+        <div>
+          <h1>Wiza we Iş Rugsatnamasyny Uzaltmak</h1>
+          <p class="cw-head__sub">APP-2026-0142 · extend_visa_wp · Energetika ministrligi → Döwlet migrasiýa gullugy</p>
+        </div>
+      </div>
+      <div class="cw-head__badges">
+        <span class="cw-head-badge cw-head-badge--process">● Migration — On process</span>
+        <span class="cw-head-badge cw-head-badge--sla">⏱ 12 days left</span>
+        ${excludedCount ? `<span class="cw-head-badge cw-head-badge--cancelled">⊘ ${excludedCount} excluded</span>` : ''}
+        <button class="cw-head__close">×</button>
+      </div>
+    </div>
+    <div class="cw-head__people">${chips}<span class="cw-merge">${people.length - excludedCount} of ${people.length} in process</span></div>
+  </div>`;
+}
+
+function nav(active) {
+  const tabs = [
+    ['overview', '⌂', 'Overview', '<span class="cw-nav__badge cw-nav__badge--ok">✓</span>'],
+    ['people', '👥', 'People & links', '<span class="cw-nav__badge cw-nav__badge--ok">✓</span>'],
+    ['progress', '▤', 'Progress', ''],
+    ['result', '⚑', 'Application result', ''],
+    ['documents', '📄', 'Document copies', '<span class="cw-nav__badge cw-nav__badge--ok">✓</span>'],
+    ['resminamalar', '📦', 'Resminamalar', ''],
+    ['seretmezlik', '⊘', 'Seretmezlik', excludedCount ? `<span class="cw-nav__badge" style="background:#fecaca;color:#991b1b" title="${excludedCount} people excluded">${excludedCount}</span>` : ''],
+    ['sla', '⏱', 'SLA & timeline', ''],
+    ['organization', '🏢', 'Organization', ''],
+  ];
+  return `<nav class="cw-nav">${tabs.map(t => `
+    <button class="cw-nav__item ${t[0] === active ? 'is-active' : ''}"><span class="bi">${t[1]}</span>${t[2]}${t[3]}</button>`).join('')}</nav>`;
+}
+
+function rail() {
+  return `<aside class="cw-rail">
+    <div class="cw-rail-block"><h4>Quick actions</h4>
+      <button class="sm-btn sm-btn--primary" style="width:100%;margin-bottom:6px">▸ Advance progress</button>
+      <button class="sm-btn" style="width:100%;color:#991b1b;border-color:#fecaca">⊘ New Seretmezlik</button>
+    </div>
+    <div class="cw-rail-block"><h4>Activity</h4>
+      <div style="font-size:.8rem;display:grid;gap:8px">
+        ${excludedCount >= 2 ? '<div><b>Seretmezlik №02/-06</b><br><span style="color:var(--os-muted)">10.02.2026 · 1 person</span></div>' : ''}
+        ${excludedCount >= 1 ? '<div><b>Seretmezlik №01/-02</b><br><span style="color:var(--os-muted)">15.01.2026 · 1 person</span></div>' : ''}
+        <div><b>Migration — On process</b><br><span style="color:var(--os-muted)">12.01.2026</span></div>
+        <div><b>Ministry approved</b><br><span style="color:var(--os-muted)">15.01.2026 · 7/202</span></div>
+      </div>
+    </div>
+  </aside>`;
+}
+
+function letterCard(no, date, to, refDate, refNo, list, orig) {
+  return `<div class="sm-letter">
+    <div class="sm-letter__icon">⊘</div>
+    <div>
+      <div class="sm-letter__title">№ ${no}<span>${date}</span></div>
+      <div class="sm-letter__meta">
+        <div>To: <b>${to}</b></div>
+        <div>Refers to: <b>Energetika ministrligi · ${refDate} · ${refNo}</b> · original roster ${orig} people</div>
+      </div>
+      <div class="sm-letter__people">${list.map(p => `<span class="sm-chip sm-chip--excl">${p.n}<span class="sm-chip__pp">${p.pp}</span></span>`).join('')}</div>
+    </div>
+    <div class="sm-letter__actions">
+      <button class="sm-btn">👁 Preview</button>
+      <button class="sm-btn">⬇ Word</button>
+      <button class="sm-btn sm-btn--ghost">Open ›</button>
+    </div>
+  </div>`;
+}
+
+function mainList() {
+  return `
+  <div class="sm-head">
+    <div><h2>Seretmezlik</h2>
+      <p>Letters asking the ministry or the Migration Service to stop processing some people on this case. Each letter has its own number and date. Excluded people stay on the roster, but they are left out of Resminamalar and Document copies.</p></div>
+    <button class="sm-btn sm-btn--primary">+ New Seretmezlik</button>
+  </div>
+  <div class="sm-stats">
+    <div class="sm-stat"><div class="sm-stat__label">Roster</div><div class="sm-stat__value">${people.length}</div></div>
+    <div class="sm-stat sm-stat--bad"><div class="sm-stat__label">Excluded</div><div class="sm-stat__value">${excludedCount}</div></div>
+    <div class="sm-stat sm-stat--ok"><div class="sm-stat__label">Still in process</div><div class="sm-stat__value">${people.length - excludedCount}</div></div>
+  </div>
+  <div class="sm-section-title">Letters <span>Newest first · 2 letters</span></div>
+  ${letterCard('02/-06', '10.02.2026', 'Türkmenistanyň Gurluşyk we binagärlik ministri A.Geldiýewe', '10.02.2026', '7/637', [people[1]], 6)}
+  ${letterCard('01/-02', '15.01.2026', 'Türkmenistanyň Döwlet migrasiýa gullugy', '15.01.2026', '7/202', [people[0]], 6)}`;
+}
+
+function mainEmpty() {
+  return `
+  <div class="sm-head"><div><h2>Seretmezlik</h2>
+    <p>Letters asking the ministry or the Migration Service to stop processing some people on this case.</p></div></div>
+  <div class="sm-empty">
+    <div class="sm-empty__icon">⊘</div>
+    <h3>No one has been excluded</h3>
+    <p>If management decides to stop processing one or more people on this case, create a Seretmezlik letter. The letter number comes from company numbering. The addressee and the ministry letter it refers to are filled in from Progress.</p>
+    <button class="sm-btn sm-btn--primary">+ New Seretmezlik</button>
+  </div>`;
+}
+
+function mainNew() {
+  const rows = people.map((p, i) => {
+    const picked = !p.excl && (allExcluded ? i === 5 : i === 3);
+    return `<tr class="${p.excl ? 'is-excluded' : picked ? 'is-picked' : ''}">
+      <td style="width:34px"><input type="checkbox" class="sm-check" ${picked ? 'checked' : ''} ${p.excl ? 'disabled' : ''}></td>
+      <td class="sm-name"><b>${p.n}</b></td>
+      <td>${p.pp}</td>
+      <td>${p.excl ? `<span class="sm-excl-badge">⊘ Excluded · №${p.excl}</span>` : '<span style="color:#047857;font-weight:650">In process</span>'}</td>
+    </tr>`;
+  }).join('');
+  return `
+  <span class="sm-back">‹ Seretmezlik</span>
+  <div class="sm-head"><div><h2>New Seretmezlik</h2>
+    <p>Choose who should be excluded, then check the letter details. Fields in blue were filled in automatically. You can edit them.</p></div></div>
+  <div class="sm-form">
+    <div class="sm-field"><label>Letter №</label><input class="sm-input" value="03/-11" readonly><span class="sm-field__hint" style="color:var(--os-muted)">Assigned from company numbering on save</span></div>
+    <div class="sm-field"><label>Letter date</label><input class="sm-input" value="24.09.2026"></div>
+    <div class="sm-field sm-field--auto"><label>Original roster (people)</label><input class="sm-input" value="6 (alty)"><span class="sm-field__hint">From the roster</span></div>
+    <div class="sm-field sm-field--auto sm-field--wide"><label>Addressee</label>
+      <select class="sm-input"><option>Türkmenistanyň Döwlet migrasiýa gullugy</option></select>
+      <span class="sm-field__hint">Current holder from Progress: Migration — On process</span></div>
+    <div class="sm-field sm-field--auto"><label>Refers to (ministry)</label><input class="sm-input" value="Türkmenistanyň Energetika ministrligi"><span class="sm-field__hint">Ministry approval step</span></div>
+    <div class="sm-field sm-field--auto"><label>Ministry letter date</label><input class="sm-input" value="15.01.2026"><span class="sm-field__hint">From Progress</span></div>
+    <div class="sm-field sm-field--auto"><label>Ministry letter №</label><input class="sm-input" value="7/202"><span class="sm-field__hint">From Progress</span></div>
+    <div class="sm-field sm-field--auto sm-field--wide"><label>Subject of the original application</label>
+      <input class="sm-input" value="6 (alty) aý möhlet bilen köp gezeklik wizalaryny we iş rugsatnamalaryny uzaltmak"><span class="sm-field__hint">From the profile and Case summary (Period, Category)</span></div>
+  </div>
+  <div class="sm-section-title">People to exclude <span>1 selected · ${excludedCount} already excluded</span></div>
+  <table class="sm-table">
+    <thead><tr><th></th><th>Person</th><th>Passport</th><th>Status on this case</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <div class="sm-foot">
+    <div class="sm-foot__left">⚠ Once saved, the selected people are marked Excluded. This cannot be undone.</div>
+    <div style="display:flex;gap:8px"><button class="sm-btn">Cancel</button><button class="sm-btn sm-btn--danger">Save and generate letter</button></div>
+  </div>`;
+}
+
+function mainDetail() {
+  return `
+  <span class="sm-back">‹ Seretmezlik</span>
+  <div class="sm-head"><div><h2>Seretmezlik № 01/-02</h2>
+    <p>Saved 15.01.2026 by Aýna Orazowa · 1 person excluded</p></div>
+    <div style="display:flex;gap:8px"><button class="sm-btn">✎ Edit letter details</button><button class="sm-btn">⬇ Download Word</button><button class="sm-btn sm-btn--primary">👁 Preview PDF</button></div>
+  </div>
+  <div class="sm-detail">
+    <div>
+      <div class="cw-card">
+        <h3 class="cw-card__title">Letter</h3>
+        <dl class="sm-kv">
+          <dt>Letter №</dt><dd>01/-02</dd>
+          <dt>Letter date</dt><dd>15.01.2026</dd>
+          <dt>Addressee</dt><dd>Türkmenistanyň Döwlet migrasiýa gullugy</dd>
+          <dt>Refers to</dt><dd>Türkmenistanyň Energetika ministrligi · 15.01.2026 · 7/202</dd>
+          <dt>Original roster</dt><dd>6 (alty) people</dd>
+          <dt>Subject</dt><dd>6 (alty) aý möhlet bilen köp gezeklik wizalaryny we iş rugsatnamalaryny uzaltmak</dd>
+          <dt>Signatory</dt><dd>Mehmet ÇIRAK — Türkmenistandaky şahamçasynyň müdiri</dd>
+          <dt>Template</dt><dd>Seretmezlik haty (Resminamalar) · Word</dd>
+        </dl>
+      </div>
+      <div class="sm-section-title">Excluded people <span>Locked after save</span></div>
+      <table class="sm-table">
+        <thead><tr><th>#</th><th>Person</th><th>Passport</th><th>Excluded from</th></tr></thead>
+        <tbody><tr><td>1</td><td><b>Enes Can Uzun</b></td><td>U34537060</td><td>Visa extension, Work permit extension</td></tr></tbody>
+      </table>
+      <p class="sm-note sm-note--info" style="margin-top:12px">You can still edit the letter details (date, addressee, reference) and generate it again. The list of people cannot be changed after save.</p>
+    </div>
+    <div>
+      <div class="sm-paper-bar"><span>Preview · generated from template</span><span>Blue = filled from case data</span></div>
+      <div class="sm-paper">
+        <div class="sm-paper__logo">ÇALIK ENERJİ<small>TURKMENISTAN BRANCH</small></div>
+        <div class="sm-paper__no">№: <span class="sm-tok">01/-02</span><br><span class="sm-tok">15.01.2026</span>ý.</div>
+        <div class="sm-paper__to"><span class="sm-tok">Türkmenistanyň Döwlet migrasiýa gullugyna</span></div>
+        <div class="sm-paper__body">Türkmenistanyň <span class="sm-tok">Energetika ministrliginiň</span> <b><span class="sm-tok">15.01.2026</span>ý. seneli <span class="sm-tok">7/202</span> belgili</b> <span class="sm-tok">6 (alty) aý möhlet bilen köp gezeklik wizalaryny we iş rugsatnamalaryny uzaltmak</span> barada Size ýüzlenip ýazan <span class="sm-tok">6</span> adamlyk hatyndan</div>
+        <div class="sm-paper__list">1. <span class="sm-tok">Enes Can Uzun – U34537060</span></div>
+        <div>bir işgäriň <b><u>köp gezeklik wizasyny we iş rugsatnamasyny uzaltmak baradaky meselä seretmezligiňizi</u></b> Sizden uly haýyş edýäris.</div>
+        <div class="sm-paper__sign"><span>Türkmenistandaky şahamçasynyň<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;müdiri</span><span class="sm-tok">Mehmet ÇIRAK</span></div>
+        <div class="sm-paper__foot">Bitarap Turkmenistan shaýoly 538<br>Ashgabat - Turkmenistan<br>www.calikenerji.com&nbsp; info@calikenerji.com</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function mainPeople() {
+  const tile = (icon, color, label, count) => `<div class="cw-link-tile cw-link-tile--${color}"><span class="cw-link-tile__icon">${icon}</span><span class="cw-link-tile__label">${label}</span><span class="cw-link-tile__chev">›</span><span class="cw-link-tile__count">${count}</span></div>`;
+  const rows = people.map((p, i) => `<tr class="${p.excl ? 'is-excluded' : ''}">
+      <td style="width:34px"><span class="cw-person__avatar" style="background:${p.excl ? '#94a3b8' : p.c}">${initials(p.n)}</span></td>
+      <td class="sm-name"><b>${p.n}</b></td>
+      <td>${p.pp}</td>
+      <td>${p.excl ? '—' : 'V-2025-' + (4810 + i)}</td>
+      <td>${p.excl ? '—' : 'WP-2025-' + (2230 + i)}</td>
+      <td>${p.excl ? `<span class="sm-excl-badge">⊘ Excluded · №${p.excl} · ${p.excl === '01/-02' ? '15.01.2026' : '10.02.2026'}</span>` : '<span style="color:#047857;font-weight:650">In process</span>'}</td>
+      <td style="text-align:right">${p.excl ? '<button class="sm-btn sm-btn--ghost">Open letter ›</button>' : '<button class="sm-btn sm-btn--ghost">Relink</button>'}</td>
+    </tr>`).join('');
+  return `
+  <div class="sm-head"><div><h2>People & links</h2>
+    <p>Linked records per person. Excluded people stay visible but are greyed out; their links are frozen and not counted in completeness.</p></div>
+    <div style="display:flex;gap:8px"><label style="font-size:.8rem;display:flex;gap:6px;align-items:center"><input type="checkbox" checked> Show excluded</label><button class="sm-btn sm-btn--primary">+ Link person</button></div>
+  </div>
+  <div class="cw-card" style="margin-bottom:14px">
+    <h3 class="cw-card__title">Linked records (people in process)</h3>
+    <div class="cw-link-row">
+      ${tile('🛂', 'blue', 'Passport', `${people.length - excludedCount}/${people.length - excludedCount}`)}
+      ${tile('✈', 'purple', 'Visa', `${people.length - excludedCount}/${people.length - excludedCount}`)}
+      ${tile('💼', 'orange', 'Work permit', `${people.length - excludedCount}/${people.length - excludedCount}`)}
+      ${tile('🏠', 'green', 'Address', `${people.length - excludedCount}/${people.length - excludedCount}`)}
+      ${tile('👔', 'teal', 'Position', `${people.length - excludedCount}/${people.length - excludedCount}`)}
+    </div>
+  </div>
+  <table class="sm-table">
+    <thead><tr><th></th><th>Person</th><th>Passport</th><th>Visa</th><th>Work permit</th><th>Status on this case</th><th></th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+function modalClose() {
+  return `<div class="sm-modal-back"><div class="sm-modal">
+    <h3>⊘ Everyone on this case will be excluded</h3>
+    <p>Seretmezlik <b>№ 03/-11</b> excludes the last person still in process (<b>Hakan Demir</b>). After saving, nobody on this case is being processed.</p>
+    <p>Do you also want to close the case as <b>Cancelled</b>? Progress gets a final Cancelled step with this letter attached. You can leave it open and close it later from Progress.</p>
+    <div class="sm-modal__actions">
+      <button class="sm-btn">Back</button>
+      <button class="sm-btn">Save, keep case open</button>
+      <button class="sm-btn sm-btn--danger">Save and close case as Cancelled</button>
+    </div>
+  </div></div>`;
+}
+
+const mains = { list: mainList, empty: mainEmpty, new: mainNew, 'new-empty': mainNew, detail: mainDetail, people: mainPeople, close: mainNew };
+const active = screen === 'people' ? 'people' : 'seretmezlik';
+const showRail = screen === 'list' || screen === 'empty';
+document.getElementById('root').innerHTML = head() + `
+  <div class="cw-layout" style="${showRail ? '' : 'grid-template-columns:300px 1fr'}">
+    ${nav(active)}
+    <main class="cw-main">${mains[screen]()}</main>
+    ${showRail ? rail() : ''}
+  </div>` + (screen === 'close' ? modalClose() : '');
+</script>
+</body>
+</html>

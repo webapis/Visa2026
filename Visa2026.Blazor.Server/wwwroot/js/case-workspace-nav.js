@@ -18,8 +18,8 @@ window.visaCaseWorkspaceNav = window.visaCaseWorkspaceNav || (function () {
         var el = shell();
         if (!el)
             return;
-        var collapse = holds > 0 && caseVisible();
-        el.classList.toggle("visa-app-shell--nav-collapsed-for-case", collapse);
+        // Keep the XAF left navigation open while a case is on screen.
+        el.classList.remove("visa-app-shell--nav-collapsed-for-case");
     }
 
     window.addEventListener("resize", apply);

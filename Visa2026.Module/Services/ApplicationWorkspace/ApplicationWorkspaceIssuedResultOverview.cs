@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.OfficerShell;
 
 namespace Visa2026.Module.Services.ApplicationWorkspace;
 
@@ -10,6 +11,7 @@ namespace Visa2026.Module.Services.ApplicationWorkspace;
 /// Result-tab overview: issued / expected / missing by <b>person</b>.
 /// Invitation / work permit / rejection count distinct people on items (not headers).
 /// Visa is one per linked person. Rejection is optional — zero is not missing.
+/// Seretmezlik-excluded people are not required and do not count toward coverage.
 /// </summary>
 public static class ApplicationWorkspaceIssuedResultOverview
 {
@@ -90,6 +92,7 @@ public static class ApplicationWorkspaceIssuedResultOverview
         return headerFallback;
     }
 
+    /// <summary>Active roster person ids — Seretmezlik exclusions removed.</summary>
     public static HashSet<Guid> RosterPersonIds(ApplicationProfileInstance application, IObjectSpace? objectSpace)
     {
         var ids = new HashSet<Guid>();
@@ -123,6 +126,9 @@ public static class ApplicationWorkspaceIssuedResultOverview
                 ids.Add(id);
             }
         }
+
+        foreach (var excludedId in ApplicationProfileInstanceExclusionQueries.GetExcludedPersonIds(application, objectSpace))
+            ids.Remove(excludedId);
 
         return ids;
     }

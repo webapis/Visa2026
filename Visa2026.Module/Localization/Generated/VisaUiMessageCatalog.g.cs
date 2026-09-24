@@ -3701,13 +3701,6 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ýagdaýy Ilerletmek",
             ["ru-RU"] = "Продвинуть прогресс",
         },
-        ["ApplicationProfileInstance.Workspace.AppNumber"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Application № {0}.",
-            ["tr-TR"] = "Başvuru № {0}.",
-            ["tk-TM"] = "Ýüztutma № {0}.",
-            ["ru-RU"] = "Заявка № {0}.",
-        },
         ["ApplicationProfileInstance.Workspace.ApplicationResult"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Application result",
@@ -3791,6 +3784,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "{0} kişi · bu profilin üretebileceği türler",
             ["tk-TM"] = "{0} adam · Berip biler açyk görnüşler",
             ["ru-RU"] = "{0} чел. · типы, которые может выдавать профиль",
+        },
+        ["ApplicationProfileInstance.Workspace.AppNumber"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application № {0}.",
+            ["tr-TR"] = "Başvuru № {0}.",
+            ["tk-TM"] = "Ýüztutma № {0}.",
+            ["ru-RU"] = "Заявка № {0}.",
         },
         ["ApplicationProfileInstance.Workspace.ApprovalLetter"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -3890,13 +3890,6 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Hökmany adam maglumatlary taýýar",
             ["ru-RU"] = "Обязательные данные лица заполнены",
         },
-        ["ApplicationProfileInstance.Workspace.CreateFromApplicationResult"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Create this from Application result, then it can link to this person.",
-            ["tr-TR"] = "Bunu Başvuru sonucundan oluşturun, sonra bu kişiye bağlanabilir.",
-            ["tk-TM"] = "Muny Ýüztutmanyň netijesinden dörediň, soňra bu adama baglanyp biler.",
-            ["ru-RU"] = "Создайте это в «Результат заявки», затем его можно связать с этим человеком.",
-        },
         ["ApplicationProfileInstance.Workspace.ConfiguredOnTemplate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Configured on template",
@@ -3910,6 +3903,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "{0} silinsin mi? Bu geri alınamaz.",
             ["tk-TM"] = "{0} pozulsynmy? Yza alyp bolmaýar.",
             ["ru-RU"] = "Удалить {0}? Это нельзя отменить.",
+        },
+        ["ApplicationProfileInstance.Workspace.CreateFromApplicationResult"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Create this from Application result, then it can link to this person.",
+            ["tr-TR"] = "Bunu Başvuru sonucundan oluşturun, sonra bu kişiye bağlanabilir.",
+            ["tk-TM"] = "Muny Ýüztutmanyň netijesinden dörediň, soňra bu adama baglanyp biler.",
+            ["ru-RU"] = "Создайте это в «Результат заявки», затем его можно связать с этим человеком.",
         },
         ["ApplicationProfileInstance.Workspace.CurrentDue"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -7775,6 +7775,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Dosýäni aç",
             ["ru-RU"] = "Открыть досье",
         },
+        ["PersonDossier.Applications.OpenWorkspace"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Open application workspace",
+            ["tr-TR"] = "Başvuru çalışma alanını aç",
+            ["tk-TM"] = "Arza iş ýerini aç",
+            ["ru-RU"] = "Открыть рабочую область заявления",
+        },
         ["PersonDossier.Chrome.Loading"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Preparing person dossier…",
@@ -7859,6 +7866,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Arza belgisi",
             ["ru-RU"] = "№ заявления",
         },
+        ["PersonDossier.Column.ApplicationProfile"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application profile",
+            ["tr-TR"] = "Başvuru profili",
+            ["tk-TM"] = "Arza profili",
+            ["ru-RU"] = "Профиль заявления",
+        },
         ["PersonDossier.Column.ApplicationType"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Application type",
@@ -7893,6 +7907,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Şehir",
             ["tk-TM"] = "Şäher",
             ["ru-RU"] = "Город",
+        },
+        ["PersonDossier.Column.Copy"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Copy",
+            ["tr-TR"] = "Kopya",
+            ["tk-TM"] = "Nusga",
+            ["ru-RU"] = "Копия",
         },
         ["PersonDossier.Column.Country"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -8068,6 +8089,27 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Başlangıç",
             ["tk-TM"] = "Başlanýan senesi",
             ["ru-RU"] = "Действует с",
+        },
+        ["PersonDossier.Copy.None"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No copy",
+            ["tr-TR"] = "Kopya yok",
+            ["tk-TM"] = "Nusga ýok",
+            ["ru-RU"] = "Нет копии",
+        },
+        ["PersonDossier.Copy.Preview"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Preview",
+            ["tr-TR"] = "Önizle",
+            ["tk-TM"] = "Görmek",
+            ["ru-RU"] = "Просмотр",
+        },
+        ["PersonDossier.Copy.Upload"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Upload",
+            ["tr-TR"] = "Yükle",
+            ["tk-TM"] = "Ýükle",
+            ["ru-RU"] = "Загрузить",
         },
         ["PersonDossier.Export.ErrorFailed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -8467,6 +8509,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Güncel",
             ["tk-TM"] = "Häzirki",
             ["ru-RU"] = "Текущий",
+        },
+        ["PersonDossier.Status.Excluded"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Excluded · № {0} · {1}",
+            ["tr-TR"] = "Hariç · № {0} · {1}",
+            ["tk-TM"] = "Seretmezlik · № {0} · {1}",
+            ["ru-RU"] = "Исключён · № {0} · {1}",
         },
         ["PersonDossier.Status.Expired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

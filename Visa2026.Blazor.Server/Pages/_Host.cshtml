@@ -57,6 +57,7 @@
     <link href="css/officer-shell/staged-workspace.css" asp-append-version="true" rel="stylesheet" />
     <link href="css/officer-shell/template-catalog.css" asp-append-version="true" rel="stylesheet" />
     <link href="css/officer-shell/case-workspace.css" asp-append-version="true" rel="stylesheet" />
+    <link href="css/officer-shell/seretmezlik.css" asp-append-version="true" rel="stylesheet" />
     <link href="css/officer-shell/case-tabs.css" asp-append-version="true" rel="stylesheet" />
     <link href="css/officer-shell-host.css" asp-append-version="true" rel="stylesheet" />
 </head>
@@ -992,8 +993,7 @@
                 if (!open) {
                     window.visaPreviewDrawer.setNavCollapsedForSlot(false);
                     window.visaPreviewDrawer.clearSlotWidth();
-                }
-                if (open) {
+                } else {
                     window.visaPreviewDrawer.setNavCollapsedForSlot(true);
                     window.visaPreviewDrawer._themeSyncAttempts = 0;
                     window.visaPreviewDrawer.scheduleSlotThemeSync();
@@ -1241,12 +1241,31 @@
                 window.visaPreviewDrawer.initSlotResize();
             };
 
+            window.visaPreviewDrawer.restoreLeftNav = function () {
+                var shell = document.getElementById('visa-app-shell');
+                if (shell) {
+                    shell.classList.remove('visa-app-shell--nav-collapsed-for-slot');
+                }
+                // Preview hid the sidebar with CSS; undo XAF collapse-toggle if the
+                // hamburger was used while Preview was open, so the menu shows again.
+                [document.querySelector('app .app'), document.querySelector('app'), document.body]
+                    .forEach(function (root) {
+                        if (root) {
+                            root.classList.remove('collapse-toggle');
+                        }
+                    });
+            };
+
             window.visaPreviewDrawer.setNavCollapsedForSlot = function (collapse) {
                 var shell = document.getElementById('visa-app-shell');
                 if (!shell) {
                     return;
                 }
-                shell.classList.toggle('visa-app-shell--nav-collapsed-for-slot', !!collapse);
+                if (collapse) {
+                    shell.classList.add('visa-app-shell--nav-collapsed-for-slot');
+                } else {
+                    window.visaPreviewDrawer.restoreLeftNav();
+                }
             };
 
             // Back-compat alias
@@ -1262,9 +1281,11 @@
                 window.visaPreviewDrawer._closingForNav = true;
                 try {
                     window.visaPreviewDrawer.close();
+                    window.visaPreviewDrawer.setNavCollapsedForSlot(false);
                 } finally {
                     window.setTimeout(function () {
                         window.visaPreviewDrawer._closingForNav = false;
+                        window.visaPreviewDrawer.setNavCollapsedForSlot(false);
                     }, 300);
                 }
             };

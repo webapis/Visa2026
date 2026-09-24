@@ -35,8 +35,9 @@ public static class ApplicationWorkspacePeopleLinksCompleteness
     public static bool IsRecordShort(ApplicationWorkspaceCasePersonRecord? record, bool linksLocked = false) =>
         record != null && IsCountShort(record.Count, record.ExpectedCount, linksLocked);
 
+    /// <summary>Excluded (Seretmezlik) people never count as a gap.</summary>
     public static bool PersonHasGap(ApplicationWorkspaceCasePerson? person, bool linksLocked = false) =>
-        person?.Records != null && person.Records.Any(r => IsRecordShort(r, linksLocked));
+        person?.Records != null && !person.IsExcluded && person.Records.Any(r => IsRecordShort(r, linksLocked));
 
     public static bool IsKindShort(ApplicationWorkspaceCasePerson? person, string recordKey, bool linksLocked = false)
     {

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.HeaderLinkedDocuments;
 
 namespace Visa2026.Module.Services.PersonDossier;
 
@@ -90,6 +91,9 @@ public sealed class PersonDossierSection
 
     public IReadOnlyList<PersonDossierRecord> Records { get; init; } =
         Array.Empty<PersonDossierRecord>();
+
+    /// <summary>Screen mode shows a Copy column (Preview link or "No copy") for this section.</summary>
+    public bool HasCopyColumn { get; init; }
 }
 
 /// <summary>One child business object rendered as a summary row.</summary>
@@ -109,4 +113,20 @@ public sealed class PersonDossierRecord
     public Guid? SourceObjectId { get; init; }
 
     public Type? SourceObjectType { get; init; }
+
+    /// <summary>Header document-copies family for the Screen-mode Preview link; null when there is no copy on file.</summary>
+    public HeaderDocumentCopiesFamily? PreviewFamily { get; init; }
+
+    /// <summary>Header id (e.g. <see cref="Invitation"/>) whose copies open in the preview slot.</summary>
+    public Guid? PreviewParentId { get; init; }
+
+    public bool HasPreview => PreviewFamily != null && PreviewParentId is { } id && id != Guid.Empty;
+
+    /// <summary>Header id (e.g. <see cref="Invitation"/>) that has no copy yet; the Copy column offers Upload.</summary>
+    public Guid? UploadHeaderId { get; init; }
+
+    /// <summary>Owning case of <see cref="UploadHeaderId"/>; when null the header DetailView opens instead of the slot.</summary>
+    public Guid? UploadApplicationProfileInstanceId { get; init; }
+
+    public bool CanUpload => !HasPreview && UploadHeaderId is { } id && id != Guid.Empty;
 }

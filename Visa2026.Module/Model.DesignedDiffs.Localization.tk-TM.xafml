@@ -423,8 +423,6 @@
         <Member Name="ToCity" Caption="Baryş şäheri" />
         <Member Name="ToRegion" Caption="Baryş welaýaty" />
         <Member Name="TotalPersonCount" Caption="Adam sany" />
-        <Member Name="ResultCoverageDisplay" Caption="Ýüztutmanyň netijesi" />
-        <Member Name="ProgressStepsDisplay" Caption="Ýüztutmanyň ýagdaýy" />
         <Member Name="Urgency" Caption="Gyssaglylyk" />
         <Member Name="VisaCategory" Caption="Wiza kategoriýasy" />
         <Member Name="VisaPeriod" Caption="Wiza möhleti" />
@@ -2512,8 +2510,6 @@
         <ColumnInfo Id="ProgressSlaStatement" Caption="Tassyklama möhleti" />
         <ColumnInfo Id="ProjectContract" Caption="Taslama belgisi" />
         <ColumnInfo Id="TotalPersonCount" Caption="Adam sany" />
-        <ColumnInfo Id="ResultCoverageDisplay" Caption="Ýüztutmanyň netijesi" />
-        <ColumnInfo Id="ProgressStepsDisplay" Caption="Ýüztutmanyň ýagdaýy" />
         <ColumnInfo Id="VisaCategory" Caption="Wiza kategoriýasy" />
         <ColumnInfo Id="VisaPeriod" Caption="Wiza möhleti" />
         <ColumnInfo Id="VisaType" Caption="Wiza görnüşi" />
@@ -2538,8 +2534,6 @@
         <ColumnInfo Id="ProgressSlaStatement" Caption="Tassyklama möhleti" />
         <ColumnInfo Id="ProjectContract" Caption="Taslama belgisi" />
         <ColumnInfo Id="TotalPersonCount" Caption="Adam sany" />
-        <ColumnInfo Id="ResultCoverageDisplay" Caption="Ýüztutmanyň netijesi" />
-        <ColumnInfo Id="ProgressStepsDisplay" Caption="Ýüztutmanyň ýagdaýy" />
         <ColumnInfo Id="VisaCategory" Caption="Wiza kategoriýasy" />
         <ColumnInfo Id="VisaPeriod" Caption="Wiza möhleti" />
         <ColumnInfo Id="VisaType" Caption="Wiza görnüşi" />
@@ -2567,8 +2561,6 @@
         <ColumnInfo Id="ProgressSlaStatement" Caption="Tassyklama möhleti" />
         <ColumnInfo Id="ProjectContract" Caption="Taslama belgisi" />
         <ColumnInfo Id="TotalPersonCount" Caption="Adam sany" />
-        <ColumnInfo Id="ResultCoverageDisplay" Caption="Ýüztutmanyň netijesi" />
-        <ColumnInfo Id="ProgressStepsDisplay" Caption="Ýüztutmanyň ýagdaýy" />
         <ColumnInfo Id="Urgency" Caption="Gyssaglylyk" />
         <ColumnInfo Id="VisaCategory" Caption="Wiza kategoriýasy" />
         <ColumnInfo Id="VisaPeriod" Caption="Wiza möhleti" />
@@ -2620,8 +2612,6 @@
         <ColumnInfo Id="Month" Caption="Aý" />
         <ColumnInfo Id="ProcessNumber" Caption="Proses belgisi" />
         <ColumnInfo Id="ProjectContract" Caption="Taslama belgisi" />
-        <ColumnInfo Id="ResultCoverageDisplay" Caption="Ýüztutmanyň netijesi" />
-        <ColumnInfo Id="ProgressStepsDisplay" Caption="Ýüztutmanyň ýagdaýy" />
         <ColumnInfo Id="VisaCategory" Caption="Wiza kategoriýasy" />
         <ColumnInfo Id="VisaPeriod" Caption="Wiza möhleti" />
         <ColumnInfo Id="VisaType" Caption="Wiza görnüşi" />

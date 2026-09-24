@@ -115,8 +115,12 @@
     protected override void OnParametersSet()
     {
         var personTab = Snapshot?.Tabs.FirstOrDefault(t => t.Key == "person");
+        var excludedIds = Snapshot?.CaseView.People
+            .Where(person => person.IsExcluded)
+            .Select(person => person.PersonId)
+            .ToHashSet() ?? [];
         _rosterIds = personTab?.RowApplicationProfileInstancePersonIds
-            .Where(id => id != Guid.Empty)
+            .Where(id => id != Guid.Empty && !excludedIds.Contains(id))
             .Distinct()
             .ToList() ?? [];
 

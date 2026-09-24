@@ -75,4 +75,31 @@ public class ApplicationWorkspaceIssuedResultListCoverageTests
         Assert.Equal("0", ApplicationWorkspaceIssuedResultListCoverage.RatioText(optional));
         Assert.Equal("2 / 2", ApplicationWorkspaceIssuedResultListCoverage.RatioText(required));
     }
+
+    [Fact]
+    public void Build_expected_uses_active_roster_count_passed_by_caller()
+    {
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile
+            {
+                ProduceInvitation = true,
+                ProduceVisa = true,
+            },
+        };
+
+        // Caller already subtracted Seretmezlik (4 on case − 1 excluded = 3).
+        var chips = ApplicationWorkspaceIssuedResultListCoverage.Build(
+            application,
+            rosterCount: 3,
+            coverageByKey: new Dictionary<string, int>
+            {
+                [ApplicationWorkspaceIssuedRecordsCatalog.Invitation] = 0,
+                [ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa] = 0,
+            });
+
+        Assert.Equal(2, chips.Count);
+        Assert.All(chips, c => Assert.Equal(3, c.ExpectedCount));
+        Assert.Equal("0 / 3", ApplicationWorkspaceIssuedResultListCoverage.RatioText(chips[0]));
+    }
 }

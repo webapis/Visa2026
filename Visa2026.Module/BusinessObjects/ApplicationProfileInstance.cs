@@ -111,6 +111,7 @@ namespace Visa2026.Module.BusinessObjects
             BorderZones = new ObservableCollection<BorderZone>();
             ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>();
             ApprovalLegSnapshots = new ObservableCollection<ApplicationProfileInstanceApprovalLegSnapshot>();
+            Exclusions = new ObservableCollection<ApplicationProfileInstanceExclusion>();
         }
 
         [XafDisplayName("Manual Entry")]
@@ -689,6 +690,12 @@ namespace Visa2026.Module.BusinessObjects
         [Aggregated]
         [InverseProperty(nameof(ApplicationProfileInstanceApprovalLegSnapshot.ApplicationProfileInstance))]
         public virtual IList<ApplicationProfileInstanceApprovalLegSnapshot> ApprovalLegSnapshots { get; set; }
+
+        /// <summary>Seretmezlik letters (roster exclusions after submission); edited in the officer-shell tab.</summary>
+        [Browsable(false)]
+        [Aggregated]
+        [InverseProperty(nameof(ApplicationProfileInstanceExclusion.ApplicationProfileInstance))]
+        public virtual IList<ApplicationProfileInstanceExclusion> Exclusions { get; set; }
 
         /// <summary>Name of the profile approval-leg version copied at create (snapshot; not live).</summary>
         [MaxLength(200)]
@@ -1285,7 +1292,7 @@ namespace Visa2026.Module.BusinessObjects
             return CultureInfo.GetCultureInfo(VisaUiMessages.DefaultCultureName).DateTimeFormat.GetMonthName(month);
         }
 
-        private static string NumberToTurkmenWords(int number)
+        internal static string NumberToTurkmenWords(int number)
         {
             string[] ones = { "", "bir", "iki", "üç", "dört", "bäş", "alty", "ýedi", "sekiz", "dokuz",
                                "on", "on bir", "on iki", "on üç", "on dört", "on bäş", "on alty", "on ýedi", "on sekiz", "on dokuz" };
@@ -1320,7 +1327,7 @@ namespace Visa2026.Module.BusinessObjects
         ///   Ablative  ("ndan"/"nden"): "Aşgabat şäheri" → "Aşgabat şäherinden"
         ///   Dative    ("na"/"ne")    : "Akbugdaý etraby"→ "Akbugdaý etrabyna"
         /// </summary>
-        private static string AddTurkmenCase(string word, string backSuffix, string frontSuffix)
+        internal static string AddTurkmenCase(string word, string backSuffix, string frontSuffix)
         {
             if (string.IsNullOrEmpty(word)) return word;
             const string backVowels  = "aouяAOUYyаоуя";
@@ -1666,7 +1673,10 @@ namespace Visa2026.Module.BusinessObjects
                             maxLocal = localApps.Select(a => int.TryParse(a.ApplicationNumber, out int n) ? n : 0).Max();
                     }
 
-                    ApplicationNumber = (Math.Max(Math.Max(maxDb, maxLocal), numbering.Seed) + 1).ToString($"D{numbering.Padding}");
+                    var maxExclusion = ApplicationProfileInstanceExclusionNumbering.MaxExclusionSequence(
+                        ObjectSpaceHelper.Get(this), AppNumberPrefix, Year, Month, scopeByYear, scopeByMonth);
+
+                    ApplicationNumber = (Math.Max(Math.Max(Math.Max(maxDb, maxLocal), maxExclusion), numbering.Seed) + 1).ToString($"D{numbering.Padding}");
                 }
 
                 FullApplicationNumber = BuildFullNumber(
@@ -1752,9 +1762,12 @@ namespace Visa2026.Module.BusinessObjects
                 FullApplicationNumber = ApplicationNumber;
         }
 
-        private (string Prefix, string Format, int Seed, int Padding) GetNumberingConfiguration()
+        private (string Prefix, string Format, int Seed, int Padding) GetNumberingConfiguration() =>
+            GetNumberingConfiguration(ObjectSpaceHelper.Get(this));
+
+        internal static (string Prefix, string Format, int Seed, int Padding) GetNumberingConfiguration(IObjectSpace objectSpace)
         {
-            var profile = OrganizationReportHelper.GetApplicationNumbering(ObjectSpaceHelper.Get(this));
+            var profile = OrganizationReportHelper.GetApplicationNumbering(objectSpace);
             if (profile != null)
             {
                 return (
@@ -1773,7 +1786,7 @@ namespace Visa2026.Module.BusinessObjects
                 ApplicationNumberingProfile.DefaultApplicationNumberPadding);
         }
 
-        private static string BuildFullNumber(string format, string prefix, int year, int month, string number)
+        internal static string BuildFullNumber(string format, string prefix, int year, int month, string number)
         {
             if (string.IsNullOrEmpty(format))
                 return $"{prefix}{number}";

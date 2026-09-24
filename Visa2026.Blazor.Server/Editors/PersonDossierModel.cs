@@ -55,6 +55,27 @@ public sealed class PersonDossierModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    /// <summary>Opens the Application Profile Instance workspace for one Applications-row id.</summary>
+    public EventCallback<Guid> OpenApplicationRequested
+    {
+        get => GetPropertyValue<EventCallback<Guid>>();
+        set => SetPropertyValue(value);
+    }
+
+    /// <summary>Opens a header document copy (e.g. invitation scan) preview-only in the slot.</summary>
+    public EventCallback<PersonDossierRecord> PreviewRecordRequested
+    {
+        get => GetPropertyValue<EventCallback<PersonDossierRecord>>();
+        set => SetPropertyValue(value);
+    }
+
+    /// <summary>Opens the upload surface for a header that has no copy on file yet.</summary>
+    public EventCallback<PersonDossierRecord> UploadRecordRequested
+    {
+        get => GetPropertyValue<EventCallback<PersonDossierRecord>>();
+        set => SetPropertyValue(value);
+    }
+
     /// <summary>Set after a queue attempt so the button can report the outcome inline.</summary>
     public string? ExportMessage
     {
