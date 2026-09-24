@@ -160,3 +160,29 @@ Promote to [SKILL.md](./SKILL.md) **scenarios** after **2+** hosts.
 - **Fix**: Always pass both compose `-f` files on this host. Recreate **app only**.
 - **Prevent**: Inventory digest before/after pull. Leave Postgres alone. Expect seed heals only if first recreate of the day on large DB.
 - **Skill**: setup-docker-engine
+### 2026-09-23 — Hub latest recreate on `10.100.128.26` (lookup heal `1.0.0.787`)
+
+- **Symptom**: Deploy Docker Hub `webapia/visa2026:latest` (commit `4cdbc04a`, assembly `1.0.0.787`) to Ubuntu prod.
+- **Try**: SSH `visa2026-onprem-26`. From `/opt/visa2026-prod`: `docker compose -p visa2026-prod --env-file .env.prod -f docker-compose.prod.yml -f docker-compose.restart.override.yml pull app` then `up -d --force-recreate --no-deps app`. Did **not** run `remote-compose-sql-up.sh`. Did **not** set `FORCE_XAF_DB_UPDATE`.
+- **Test**: Image `sha256:74280d2c51c4` Created `2026-09-23T11:00:13Z` (replaces `c961361406b7` `09:27Z`). Postgres stayed **healthy** (Up 6 weeks). Seed gates finished quickly (profile updated=36; approval-leg scanned=4826 assigned=0). Host and LAN `http://10.100.128.26/LoginPage` → **200** on the third poll (~45s).
+- **Fix**: Pull + `--force-recreate --no-deps app` with both compose files. Recreate **app only**.
+- **Prevent**: Confirm digest changed before calling the deploy done. Leave Postgres volume alone.
+- **Skill**: setup-docker-engine
+
+### 2026-09-24 — Yellow-marks Azure key on `10.100.128.26` (placeholder)
+
+- **Symptom**: `TEMPLATE_AI_SCAN_AZURE_OPENAI_API_KEY` exists only as a Windows user variable. Prod image is `ASPNETCORE_ENVIRONMENT=Production` (`TemplateAiScan` disabled, `Provider=None`). `docker-compose.prod.yml` does not pass the key into the app.
+- **Try**: SSH `visa2026-onprem-26`. Append placeholder `REPLACE_WITH_REAL_AZURE_KEY` to `/opt/visa2026-prod/.env.prod` (mode 600). Add server-only `docker-compose.scan-ai.override.yml` (key + `TemplateAiScan__Enabled` / `ShowInstanceEntry` / `Provider=AzureOpenAI` / endpoint `visa2026-openai` / deployment `gpt-4.1-mini`). Recreate **app only** with all three `-f` files. Did **not** run `remote-compose-sql-up.sh`. Did **not** set `FORCE_XAF_DB_UPDATE`.
+- **Test**: Container env `key_len=27`, `provider=AzureOpenAI`, `enabled=true`, `deployment=gpt-4.1-mini`. Postgres stayed **healthy** (Up 6 weeks). Host `http://127.0.0.1/LoginPage` → **200** on poll 4.
+- **Fix**: Keep the scan override in the compose `-f` chain. After replacing the placeholder in `.env.prod`, recreate **app only** again or the running process keeps the dummy.
+- **Prevent**: Do not put the real key in git or in `docker-compose.prod.yml`. Future pull/recreate must include `docker-compose.scan-ai.override.yml` or the key and Azure flags drop off.
+- **Skill**: setup-docker-engine
+
+### 2026-09-24 — Real yellow-marks key recreate on `10.100.128.26`
+
+- **Symptom**: Officer replaced `REPLACE_WITH_REAL_AZURE_KEY` in `/opt/visa2026-prod/.env.prod`. Running app still had the placeholder until recreate.
+- **Try**: Same three `-f` files, `up -d --force-recreate --no-deps app`. Did **not** touch Postgres. Did **not** set `FORCE_XAF_DB_UPDATE`.
+- **Test**: Container `key_len=84` (placeholder was 27). `provider=AzureOpenAI`, `deployment=gpt-4.1-mini`. Postgres stayed **healthy**. Host `http://127.0.0.1/LoginPage` → **200** on poll 4.
+- **Fix**: Recreate **app only** after any `.env.prod` key edit. `docker restart` does not reload the key.
+- **Prevent**: Keep `docker-compose.scan-ai.override.yml` in the `-f` chain.
+- **Skill**: setup-docker-engine
