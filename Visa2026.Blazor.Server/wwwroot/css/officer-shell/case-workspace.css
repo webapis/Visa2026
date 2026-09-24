@@ -7,8 +7,7 @@
 .cw-head__top { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: flex-start; }
 .cw-head__title-block { display: flex; gap: 12px; align-items: flex-start; }
 .cw-head__accent { width: 4px; border-radius: 4px; background: #f59e0b; align-self: stretch; min-height: 48px; }
-.cw-head h1 { margin: 0; font-size: 1.4rem; letter-spacing: -0.02em; }
-.cw-head__profile { margin: 6px 0 0; font-size: 1rem; font-weight: 650; color: var(--os-text, #0f172a); line-height: 1.35; }
+.cw-head h1 { margin: 0; font-size: 1.7rem; font-weight: 750; letter-spacing: -0.02em; line-height: 1.2; }
 .cw-head__sub { margin: 4px 0 0; color: var(--os-muted); font-size: 0.88rem; }
 .cw-head__badges { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .cw-head-badge {

@@ -2904,10 +2904,11 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     overflow: hidden;
 }
 
-/* Hide left navigation while the preview slot is open, or while an instance
-   detail is open (every screen size). */
+/* Hide left navigation while the preview slot is open, while an instance
+   detail is open, or while a list's columns do not fit (every screen size). */
 #visa-app-shell.visa-app-shell--nav-collapsed-for-slot app .sidebar,
-#visa-app-shell.visa-app-shell--nav-collapsed-for-case app .sidebar {
+#visa-app-shell.visa-app-shell--nav-collapsed-for-case app .sidebar,
+#visa-app-shell.visa-app-shell--nav-collapsed-for-list app .sidebar {
     display: none !important;
     width: 0 !important;
     min-width: 0 !important;
@@ -3864,6 +3865,18 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     background: #fef3c7;
     border-color: #b45309;
     outline: none;
+}
+
+/* List column captions wrap on word boundaries. Cell values stay one line
+   (DxGrid TextWrapEnabled remains off / dxbl-grid-nowrap). */
+.dxbl-grid.dxbl-grid-nowrap .dxbl-grid-table > thead .dxbl-grid-header-row > th:not(.dxbl-grid-command-cell):not(.dxbl-grid-selection-cell) > .dxbl-grid-header-content > span {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    line-height: 1.2;
+    max-width: 7.5rem;
+    min-width: 0;
+    overflow-wrap: break-word;
 }
 
 /* Filtered column header (ListViewTotalCountController CustomizeElement). */

@@ -271,18 +271,18 @@
     <ListView Id="Application_ListView_ViaMinistries">
       <Columns>
         <ColumnInfo Id="FullApplicationNumber" Index="0" Width="150" />
-        <ColumnInfo Id="Year" Index="1" Width="43" />
+        <ColumnInfo Id="Year" Index="1" Width="72" />
         <ColumnInfo Id="Month" Index="-1" Width="56" />
-        <ColumnInfo Id="MonthName" Index="2" Width="90" />
+        <ColumnInfo Id="MonthName" Index="2" Width="104" />
         <ColumnInfo Id="ApplicationDate" Index="3" Width="108" />
         <ColumnInfo Id="Urgency" Index="4" Width="110" />
         <ColumnInfo Id="TotalPersonCount" Index="5" Width="56" />
         <ColumnInfo Id="LatestProgressState" Index="-1" Width="100" />
-        <ColumnInfo Id="LatestProgressDate" Index="6" Width="108" />
+        <ColumnInfo Id="LatestProgressDate" Index="-1" Width="108" />
         <ColumnInfo Id="WorkingDaysInCurrentStep" Index="-1" Width="72" />
         <ColumnInfo Id="ProgressSlaStatement" Index="-1" Width="140" />
         <ColumnInfo Id="WorkingDaysInMigrationStep" Index="-1" Width="96" />
-        <ColumnInfo Id="ApprovalLegProfile" Index="7" Width="180" />
+        <ColumnInfo Id="ApprovalLegProfile" Index="-1" Width="180" />
         <ColumnInfo Id="ProjectContract" Index="8" Width="180" />
         <ColumnInfo Id="MigrationSlaStatement" Index="-1" Width="160" />
         <ColumnInfo Id="VisaPeriod" Index="9" Width="110" />

@@ -93,17 +93,19 @@
                 <div class="cw-head__title-block">
                     <div class="cw-head__accent" style="background:@OfficerShellTemplateFamily.GetColor(chrome.TemplateFamilyKey)"></div>
                     <div>
-                        <h1>@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.InstanceNumber", chrome.DisplayNumber)</h1>
                         @{
                             var profileName = !string.IsNullOrWhiteSpace(chrome.ProfileTemplateName)
                                 ? chrome.ProfileTemplateName
                                 : Snapshot!.Profile.Title;
                         }
-                        @if (!string.IsNullOrWhiteSpace(profileName))
-                        {
-                            <p class="cw-head__profile" title="@Msg("ApplicationProfileInstance.Workspace.ProfileTitle")">@profileName</p>
-                        }
-                        <p class="cw-head__sub">@chrome.TemplateFamilyLabel · @VisaUiMessages.Format("ApplicationProfileInstance.Workspace.Started", string.IsNullOrWhiteSpace(chrome.StartedOn) ? "—" : chrome.StartedOn)</p>
+                        <h1>@(string.IsNullOrWhiteSpace(profileName) ? $"№ {chrome.DisplayNumber}" : profileName)</h1>
+                        <p class="cw-head__sub">
+                            @if (!string.IsNullOrWhiteSpace(profileName) && !string.IsNullOrWhiteSpace(chrome.DisplayNumber))
+                            {
+                                <text>№ @chrome.DisplayNumber · </text>
+                            }
+                            @chrome.TemplateFamilyLabel · @VisaUiMessages.Format("ApplicationProfileInstance.Workspace.Started", string.IsNullOrWhiteSpace(chrome.StartedOn) ? "—" : chrome.StartedOn)
+                        </p>
                     </div>
                 </div>
                 <div class="cw-head__badges">
