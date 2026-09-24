@@ -128,8 +128,8 @@
   text-transform: uppercase;
   color: var(--rmc-text);
   line-height: 1.35;
-  overflow-wrap: anywhere;
-  word-break: break-word;
+  overflow-wrap: break-word;
+  word-break: normal;
 }
 
 .resminamalar-catalog__summary {
@@ -452,6 +452,20 @@
 .resminamalar-slot-panel .app-report-package--inline-slot .app-item-doc-copies__top-actions.app-report-package__top-selection--content {
   justify-content: flex-start;
   padding-bottom: 0;
+}
+
+@container ct-resmi (max-width: 520px) {
+  .resminamalar-catalog__card-head {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .resminamalar-catalog__actions {
+    width: 100%;
+    max-width: none;
+    margin-left: 0;
+    justify-content: flex-start;
+  }
 }
 
 @media (max-width: 22rem) {

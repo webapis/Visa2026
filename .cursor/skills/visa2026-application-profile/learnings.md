@@ -1,3 +1,21 @@
+### 2026-09-24 — Overview fits a 1280×800 window
+
+- **Need**: Case summary tiles on a 14-inch officer PC crushed (border-zone text, Process number cut off). That PC is the minimum.
+- **Cause**: Measured screen is **1280×800 at 100%** (working area 1280×752). XAF sidebar is 320px. Overview then keeps a 300px section nav and a 270px rail, so the summary pane is about 300px and the 3-column tile grid plus a side identity column cannot fit.
+- **Fix**: `case-workspace.css` only, Overview tab. At a window of 1101–1280px the rail drops under the summary. Inside a summary pane under 760px, number / date / process sit in one row on top and the other tiles use two columns. Wider monitors keep the 3-column summary and the side rail.
+- **Officer**: Stop F5, rebuild the Blazor host, hard-refresh. On this 1280×800 screen, Overview should show №, application date, and process number in one row, and the case tiles in two columns. Readiness / Quick actions sit under the summary.
+- **Prevent**: Do not shrink the 300px section nav. Do not treat a phone width as the Overview minimum. Other workspace tabs are not on this breakpoint yet.
+- **Cross-skill**: —
+
+### 2026-09-24 — Overview tiles were stretching on both window sizes
+
+- **Need**: After the first Overview pass, a narrower window still showed a giant Urgency tile, and a wider window stretched Case summary tiles to the height of the identity column.
+- **Cause**: `.cw-summary-body` used `align-items: stretch`, so the shorter tile row grew to match the taller column. The rail-drop rule keyed off the browser window (`max-width: 1280px`), so a pane that was already narrow beside the 320px sidebar kept the rail.
+- **Fix**: Tiles stay content height (`align-items: flex-start`, grid `align-content: start`). Rail drops under Overview when the case pane itself is under 1120px (the 1280×800 screen after the sidebar).
+- **Officer**: Hard-refresh `localhost:5001`. Tiles should hug their text. On this PC, Readiness / Quick actions sit under the summary.
+- **Prevent**: Do not set `align-items: stretch` on `.cw-summary-body`. Do not key the Overview rail drop off the full window width.
+- **Cross-skill**: —
+
 ### 2026-09-21 — Report Dashboard residual C# sync (not a rewrite)
 
 - **Need**: Dashboard SQL already used instances + profiles; C# still filtered `ApplicationType != null` and Open ListView still named `ApplicationItem_ListView`.

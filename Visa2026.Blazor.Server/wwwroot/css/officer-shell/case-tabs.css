@@ -182,7 +182,10 @@ button.ct-letter-preview:disabled { cursor: default; opacity: 0.65; }
 .ct-sla-ring--done strong { font-size: 0.95rem; letter-spacing: 0; max-width: none; }
 
 /* Resminamalar */
-.ct-resmi-page { display: flex; flex-direction: column; gap: 12px; }
+.ct-resmi-page {
+  display: flex; flex-direction: column; gap: 12px; min-width: 0;
+  container-type: inline-size; container-name: ct-resmi;
+}
 .ct-resmi-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: flex-start; }
 .ct-resmi-summary {
   display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
@@ -195,8 +198,8 @@ button.ct-letter-preview:disabled { cursor: default; opacity: 0.65; }
   font-weight: 650; color: var(--os-muted); border-bottom: 2px solid transparent; margin-bottom: -1px;
 }
 .ct-resmi-tab.is-active { color: var(--os-accent); border-bottom-color: var(--os-accent); }
-.ct-resmi-split { display: grid; grid-template-columns: 1fr 280px; gap: 14px; align-items: start; }
-@media (max-width: 1000px) { .ct-resmi-split { grid-template-columns: 1fr; } }
+.ct-resmi-split { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; align-items: start; }
+.ct-resmi-main { min-width: 0; }
 .ct-resmi-group { margin-bottom: 10px; border: 1px solid #eef2f6; border-radius: 8px; overflow: hidden; }
 .ct-resmi-group__head {
   padding: 10px 12px; background: #f8fafc; cursor: pointer; font-weight: 650; list-style: none;

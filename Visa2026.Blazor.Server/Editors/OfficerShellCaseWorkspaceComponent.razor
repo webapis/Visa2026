@@ -481,6 +481,7 @@
             : PeopleLinkedRecordFocusKey;
 
     private VisaPreviewSlotMode _previewSlotMode;
+    private bool _caseNavHeld;
 
     protected override void OnInitialized()
     {
@@ -491,6 +492,29 @@
     public void Dispose()
     {
         PreviewSlotService.StateChanged -= OnPreviewSlotStateChanged;
+        ReleaseCaseNav();
+    }
+
+    private void ReleaseCaseNav()
+    {
+        if (!_caseNavHeld)
+            return;
+
+        _caseNavHeld = false;
+        try
+        {
+            _ = JS.InvokeVoidAsync("visaCaseWorkspaceNav.release");
+        }
+        catch (InvalidOperationException)
+        {
+            // Circuit already gone.
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+        catch (JSException)
+        {
+        }
     }
 
     private void OnPreviewSlotStateChanged()
@@ -586,6 +610,24 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (firstRender && !_caseNavHeld)
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("visaCaseWorkspaceNav.hold");
+                _caseNavHeld = true;
+            }
+        catch (JSDisconnectedException)
+        {
+        }
+        catch (JSException)
+        {
+        }
+        catch (InvalidOperationException)
+        {
+        }
+    }
+
         if (!IsLoading && Snapshot != null && !_documentCopiesNavReady && !_documentCopiesLoadAttempted)
         {
             _documentCopiesLoadAttempted = true;

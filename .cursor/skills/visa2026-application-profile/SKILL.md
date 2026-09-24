@@ -70,6 +70,7 @@ disable-model-invocation: false
 | **Create from yellow marks** (yellow-marked Word/Excel) | [visa2026-template-scan](../visa2026-template-scan/SKILL.md) |
 | Document copies on roster (`ApplicationPerson` scope) | [visa2026-document-copies](../visa2026-document-copies/SKILL.md) |
 | Case tab catalog vs `#visa-preview-slot` preview-only | [visa2026-preview-slot](../visa2026-preview-slot/SKILL.md) |
+| Case workspace responsive layout (widths, tile stretch, left menu) | [visa2026-responsive-ui](../visa2026-responsive-ui/SKILL.md) |
 | Wizard **Person data** checkboxes | This skill. Templates (this-profile + Shared ON/OFF) live on **case Resminamalar**, not the wizard |
 | Person dossier (read-only 360; no Start application) | [visa2026-person-dossier](../visa2026-person-dossier/SKILL.md) |
 | Schema deploy / `FORCE_XAF_DB_UPDATE` | [visa2026-lifecycle-docker](../visa2026-lifecycle-docker/SKILL.md) |
