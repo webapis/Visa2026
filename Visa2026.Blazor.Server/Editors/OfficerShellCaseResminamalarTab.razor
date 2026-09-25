@@ -10,6 +10,23 @@
 @using Visa2026.Module.Services.PreviewSlot
 @using Visa2026.Module.Services.WordReports
 
+@if (ShowInitialCatalogDialog)
+{
+    <div class="cw-tab-loading" role="status" aria-live="polite" aria-busy="true">
+        <div class="cw-tab-loading__panel">
+            <div class="cw-tab-loading__label">@OpeningCatalogStatus</div>
+            <div class="cw-tab-loading__track"
+                 role="progressbar"
+                 aria-valuemin="0"
+                 aria-valuemax="100"
+                 aria-label="@OpeningCatalogStatus">
+                <div class="cw-tab-loading__fill cw-tab-loading__fill--indeterminate"></div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
 <div class="ct-resmi-page">
     <header class="dc-page__head">
         <div class="dc-page__head-row">
@@ -29,10 +46,6 @@
     else if (_applicationItemIds.Count == 0)
     {
         <p class="os-empty">Select at least one person in the header to view Resminamalar.</p>
-    }
-    else if (_catalogLoading && !_hasRenderedCatalog)
-    {
-        <p class="os-empty" role="status">Loading catalog…</p>
     }
     else
     {
@@ -55,11 +68,13 @@
         </div>
     }
 </div>
+}
 
 @code {
     [Parameter] public Guid ApplicationProfileInstanceId { get; set; }
     [Parameter] public ApplicationWorkspaceSnapshot? Snapshot { get; set; }
     [Parameter] public IReadOnlyList<Guid>? SelectedPersonIds { get; set; }
+    [Parameter] public EventCallback InitialCatalogSettled { get; set; }
 
     [Inject] private ApplicationWordReportPackageCatalogService CatalogService { get; set; } = null!;
     [Inject] private ResminamalarCaseCatalogCache CatalogCache { get; set; } = null!;
@@ -84,7 +99,20 @@
     private bool _catalogLoading;
     private bool _catalogLoadQueued;
     private bool _hasRenderedCatalog;
+    private bool _initialCatalogSettled;
     private int _catalogGeneration;
+
+    private bool ShowInitialCatalogDialog =>
+        _applicationId != Guid.Empty
+        && _rosterIds.Count > 0
+        && _applicationItemIds.Count > 0
+        && _catalogLoading
+        && !_hasRenderedCatalog;
+
+    private string OpeningCatalogStatus =>
+        VisaUiMessages.Format(
+            "ApplicationProfileInstance.Workspace.OpeningTab",
+            VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Resminamalar"));
 
     private string EmptyCatalog => VisaUiMessages.Get("ApplicationReportPackage.Empty", _uiCultureName);
 
@@ -129,6 +157,7 @@
             _loadedCatalogKey = default;
             _catalogLoading = false;
             _hasRenderedCatalog = false;
+            _initialCatalogSettled = false;
             return;
         }
 
@@ -154,14 +183,30 @@
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!_catalogLoadQueued)
+        {
+            await NotifyInitialCatalogSettledAsync();
             return;
+        }
 
         _catalogLoadQueued = false;
         var generation = _catalogGeneration;
         var catalogKey = CurrentCatalogKey;
-        var catalog = await Task.Run(() => BuildCatalog(catalogKey.ApplicationId)).ConfigureAwait(true);
+        (ApplicationWordReportPackageCatalog Catalog, string ApplicationNumber)? catalog;
+        try
+        {
+            catalog = await Task.Run(() => BuildCatalog(catalogKey.ApplicationId)).ConfigureAwait(true);
+        }
+        catch
+        {
+            _catalogLoading = false;
+            await NotifyInitialCatalogSettledAsync();
+            throw;
+        }
         if (generation != _catalogGeneration)
+        {
+            await NotifyInitialCatalogSettledAsync();
             return;
+        }
         if (catalogKey != CurrentCatalogKey)
         {
             _catalogLoadQueued = true;
@@ -179,6 +224,7 @@
             _applicationNumber = string.Empty;
             _loadedCatalogKey = default;
             _catalogLoading = false;
+            await NotifyInitialCatalogSettledAsync();
             await InvokeAsync(StateHasChanged);
             return;
         }
@@ -186,7 +232,20 @@
         CatalogCache.Set(catalogKey, catalog.Value.Catalog, catalog.Value.ApplicationNumber);
         ApplyCatalog(catalog.Value.Catalog, catalog.Value.ApplicationNumber, catalogKey);
         _catalogLoading = false;
+        await NotifyInitialCatalogSettledAsync();
         await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task NotifyInitialCatalogSettledAsync()
+    {
+        if (_initialCatalogSettled)
+            return;
+        if (_catalogLoading && !_hasRenderedCatalog)
+            return;
+
+        _initialCatalogSettled = true;
+        if (InitialCatalogSettled.HasDelegate)
+            await InitialCatalogSettled.InvokeAsync();
     }
 
     private ResminamalarCaseCatalogKey CurrentCatalogKey =>

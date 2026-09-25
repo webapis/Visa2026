@@ -351,7 +351,8 @@
                         case "resminamalar":
                             <OfficerShellCaseResminamalarTab ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId"
                                                             Snapshot="Snapshot"
-                                                            SelectedPersonIds="SelectedDocumentPersonIds" />
+                                                            SelectedPersonIds="SelectedDocumentPersonIds"
+                                                            InitialCatalogSettled="OnResminamalarCatalogSettled" />
                             break;
                         case "seretmezlik":
                             <OfficerShellCaseSeretmezlikTab ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId"
@@ -399,6 +400,7 @@
     private string? _pendingTab;
     private bool _tabSwitching;
     private bool _tabContentReady = true;
+    private bool _resminamalarCatalogPending;
     private Guid _relinkingPersonId;
     private string? _documentCopiesCompletenessKey;
     private bool _documentCopiesNavReady;
@@ -662,6 +664,10 @@
         }
 
         if (!_tabSwitching || !_tabContentReady)
+            return;
+
+        if (_resminamalarCatalogPending
+            && string.Equals(ActiveTab, "resminamalar", StringComparison.OrdinalIgnoreCase))
             return;
 
         _tabSwitching = false;
@@ -2469,6 +2475,7 @@
         if (string.Equals(key, ActiveTab, StringComparison.OrdinalIgnoreCase) && _tabContentReady)
             return;
 
+        _resminamalarCatalogPending = string.Equals(key, "resminamalar", StringComparison.OrdinalIgnoreCase);
         await PaintTabSwitchAsync(key);
         try
         {
@@ -2489,6 +2496,22 @@
         _tabContentReady = false;
         await InvokeAsync(StateHasChanged);
         await Task.Delay(16);
+    }
+
+    private Task OnResminamalarCatalogSettled()
+    {
+        if (!_resminamalarCatalogPending)
+            return Task.CompletedTask;
+
+        _resminamalarCatalogPending = false;
+        if (!_tabSwitching
+            || !_tabContentReady
+            || !string.Equals(ActiveTab, "resminamalar", StringComparison.OrdinalIgnoreCase))
+            return Task.CompletedTask;
+
+        _tabSwitching = false;
+        _pendingTab = null;
+        return InvokeAsync(StateHasChanged);
     }
 
     private static bool IsIssuedPersonItem(string? key) =>
