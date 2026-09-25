@@ -759,6 +759,20 @@ catalogs:
         target: Türkmenbaşy şäheri
       - legacy: Turkmenbasy şäheri
         target: Türkmenbaşy şäheri
+      - legacy: Balkan welaýatynyň Balkanabat şäheri
+        target: Balkanabat şäheri
+      - legacy: Çärjew
+        target: Türkmenabat şäheri
+      - legacy: Ak bugdaý
+        target: Akbugdaý etraby
+      - legacy: Ak bugdaý etraby
+        target: Akbugdaý etraby
+      - legacy: Akbudaý etraby
+        target: Akbugdaý etraby
+      - legacy: Serhabat etraby
+        target: Serhetabat etraby
+      - legacy: Türkmenistanyň Gahrymany Gurbansoltan eje etraby
+        target: Gurbansoltan-eje ad. etraby
     unmappedPolicy: block_row
     notes: |
       Fallback when SeherEtrap.mgCode is null; fold/normalize via CatalogMatchHelper.

@@ -1,10 +1,6 @@
 {
     "rows":  [
                  {
-                     "NameTm":  "Akbudaý etraby",
-                     "Region":  "Ahal welaýaty"
-                 },
-                 {
                      "NameTm":  "Garagum etraby",
                      "PdfForm_Code":  "MR50",
                      "Region":  "Mary welaýaty"
@@ -161,10 +157,6 @@
                      "Region":  "Aşgabat şäheri"
                  },
                  {
-                     "NameTm":  "Ak bugdaý",
-                     "Region":  "Ahal welaýaty"
-                 },
-                 {
                      "NameTm":  "Magdanly şäheri",
                      "PdfForm_Code":  "LB37",
                      "Region":  "Lebap welaýaty"
@@ -184,10 +176,6 @@
                      "Region":  "Balkan welaýaty"
                  },
                  {
-                     "NameTm":  "Çärjew",
-                     "Region":  "Lebap welaýaty"
-                 },
-                 {
                      "NameTm":  "Gazojak şäheri",
                      "Region":  "Lebap welaýaty"
                  },
@@ -200,11 +188,6 @@
                      "NameTm":  "Hojambaz etraby",
                      "PdfForm_Code":  "LB42",
                      "Region":  "Lebap welaýaty"
-                 },
-                 {
-                     "NameTm":  "Serhabat etraby",
-                     "PdfForm_Code":  "MR2",
-                     "Region":  "Mary welaýaty"
                  },
                  {
                      "NameTm":  "Köýtendag etraby",
@@ -290,10 +273,6 @@
                      "Region":  "Mary welaýaty"
                  },
                  {
-                     "NameTm":  "Türkmenistanyň Gahrymany Gurbansoltan eje etraby",
-                     "Region":  "Daşoguz welaýaty"
-                 },
-                 {
                      "NameTm":  "Mary etrabynyň S.Türkmenbaşy şäherçesi",
                      "Region":  "Mary welaýaty"
                  },
@@ -345,10 +324,6 @@
                      "NameTm":  "Mary şäheri",
                      "PdfForm_Code":  "MR19",
                      "Region":  "Mary welaýaty"
-                 },
-                 {
-                     "NameTm":  "Balkan welaýatynyň Balkanabat şäheri",
-                     "Region":  "Balkan welaýaty"
                  },
                  {
                      "NameTm":  "Ruhabat etraby",

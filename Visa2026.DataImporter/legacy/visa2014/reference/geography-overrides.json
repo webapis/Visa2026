@@ -6,7 +6,7 @@
       "nameTm": "Serhetabat etraby",
       "regionCode": "MR",
       "status": "abolished",
-      "aliases": [ "Serhetabat", "Kushka" ],
+      "aliases": [ "Serhetabat", "Kushka", "Serhabat etraby", "Serhabat" ],
       "notes": "Ex-Kushka / Tagtabazar area in Mary; district abolished 2022.",
       "source": "wikipedia+osm"
     },
@@ -41,10 +41,10 @@
       "source": "wikipedia"
     },
     {
-      "nameTm": "Akbugday etraby",
+      "nameTm": "Akbugdaý etraby",
       "regionCode": "AH",
       "status": "current",
-      "aliases": [ "Akbugdaý etraby", "Ak bugdaý", "Ak bugdaý etraby" ],
+      "aliases": [ "Ak bugdaý", "Ak bugdaý etraby", "Akbudaý etraby" ],
       "notes": "Ak bugdaý district in Ahal — not under Aşgabat.",
       "source": "wikipedia"
     },
@@ -55,6 +55,22 @@
       "aliases": [ "Turkmenabat", "Çärjew" ],
       "notes": "Lebap capital city.",
       "source": "wikipedia"
+    },
+    {
+      "nameTm": "Balkanabat şäheri",
+      "regionCode": "BN",
+      "status": "current",
+      "aliases": [ "Balkan welaýatynyň Balkanabat şäheri" ],
+      "notes": "Balkan province city. The long region-prefixed label is the same city.",
+      "source": "visa2026-catalog"
+    },
+    {
+      "nameTm": "Gurbansoltan-eje ad. etraby",
+      "regionCode": "DZ",
+      "status": "current",
+      "aliases": [ "Türkmenistanyň Gahrymany Gurbansoltan eje etraby" ],
+      "notes": "Daşoguz district. The Gahryman title is the same district.",
+      "source": "visa2026-catalog"
     },
     {
       "nameTm": "Türkmenbaşy etraby",
