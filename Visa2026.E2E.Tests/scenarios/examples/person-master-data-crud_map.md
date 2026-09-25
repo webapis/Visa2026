@@ -59,7 +59,7 @@ Officer session: **log on** → create **Employee** → **Passport** → nested 
 | `Position (visa reports)` / `Position (actual / company)` | Position detail | fill | pending CI | ActualPosition EasyTest seed |
 | `Work Duties` / `Gelmeginiň Maksady` | Person tab | activate | pending CI | TM caption alias |
 | `Gelmeginiň Maksady` (field) | WorkDuty detail | fill | pending CI | |
-| `Salaries` / `New Employee Salary` | Person tab | create | pending CI | Amount + Currency |
+| `Salaries` / `New Employee Salary` | Person tab | create | pending CI | Amount |
 | `Travel Histories` / `New External Arrival` | Person tab | create | pending CI | split New (`dxbl-btn-split`); manual CRUD |
 
 **Ready for YAML:** ☐ promote after GHA green

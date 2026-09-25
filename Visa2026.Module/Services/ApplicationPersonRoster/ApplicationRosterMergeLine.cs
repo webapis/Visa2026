@@ -1036,9 +1036,11 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        /// <summary>
+        /// Kept so existing templates still resolve the token. Employee salary no longer stores a currency.
+        /// </summary>
         [XafDisplayName("Salary Currency Code"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Salary_CurrencyCode =>
-            (CurrentSalary?.Currency ?? PersonCurrentItems.GetCurrentSalary(Person)?.Currency)?.ToString();
+        public string Salary_CurrencyCode => string.Empty;
 
         [XafDisplayName("Company Address"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Application_CompanyAddress =>

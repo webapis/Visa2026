@@ -62,8 +62,7 @@
       "members": {
         "StartDate": { "tr-TR": "Başlangıç Tarihi", "tk-TM": "Başlanýan senesi", "ru-RU": "Дата начала" },
         "EndDate": { "tr-TR": "Bitiş Tarihi", "tk-TM": "Gutarýan senesi", "ru-RU": "Дата окончания" },
-        "Amount": { "tr-TR": "Tutar", "tk-TM": "Mukdar", "ru-RU": "Сумма" },
-        "Currency": { "tr-TR": "Para Birimi", "tk-TM": "Pul birligi", "ru-RU": "Валюта" }
+        "Amount": { "tr-TR": "Tutar", "tk-TM": "Mukdar", "ru-RU": "Сумма" }
       }
     },
     "Visa2026.Module.BusinessObjects.InvitationItem": {
@@ -271,8 +270,7 @@
       "columns": {
         "StartDate": { "tr-TR": "Başlangıç Tarihi", "tk-TM": "Başlanýan senesi", "ru-RU": "Дата начала" },
         "EndDate": { "tr-TR": "Bitiş Tarihi", "tk-TM": "Gutarýan senesi", "ru-RU": "Дата окончания" },
-        "Amount": { "tr-TR": "Tutar", "tk-TM": "Mukdar", "ru-RU": "Сумма" },
-        "Currency": { "tr-TR": "Para Birimi", "tk-TM": "Pul birligi", "ru-RU": "Валюта" }
+        "Amount": { "tr-TR": "Tutar", "tk-TM": "Mukdar", "ru-RU": "Сумма" }
       }
     },
     "ApplicationItem_ListView": {

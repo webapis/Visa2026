@@ -21,7 +21,6 @@ env:
   actualPosition: E2E Actual Position
   workDuty: E2E work duty purpose text
   salaryAmount: "5000"
-  salaryCurrency: TMT
 
 steps:
   - login: { user: standarduser, password: "" }
@@ -59,7 +58,7 @@ steps:
   - action: Save
   - open-employee: E2E-EMP-010
   - nested-new: { tab: Salaries, new: New Employee Salary }
-  - fill: { Amount: "5000", Currency: TMT }
+  - fill: { Amount: "5000" }
   - action: Save
   - open-employee: E2E-EMP-010
   - nested-new: { tab: Travel Histories, new: New External Arrival }

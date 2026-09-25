@@ -41,10 +41,6 @@ namespace Visa2026.Module.BusinessObjects
         [MaxLength(32)]
         public virtual string Amount { get; set; }
 
-        [Index(4)]
-        [RuleRequiredField]
-        public virtual EmployeeCurrency? Currency { get; set; }
-
         [NotMapped]
         [ImmediatePostData]
         [Index(-1000)]
@@ -59,7 +55,7 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(false)]
         public string Title => VisaUiMessages.Format(
             "EmployeeSalary.DisplayTitle",
-            $"{Amount} {Currency}");
+            Amount);
 
         public override void OnCreated()
         {

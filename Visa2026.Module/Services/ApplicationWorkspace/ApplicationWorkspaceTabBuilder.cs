@@ -308,12 +308,11 @@ internal static class ApplicationWorkspaceTabBuilder
         Dictionary<Guid, List<ApplicationProfileInstancePersonResolvedLink>> linksByPerson,
         Dictionary<(ApplicationProfileInstancePersonLinkKind Kind, Guid Id), object> linkedEntities) =>
         Tab("salary", "Salary", ApplicationWorkspaceLinkedRecordsCatalog.IsConfigured(application, ApplicationProfileInstancePersonLinkKind.Salary),
-            ["Person", "Amount", "Currency"],
+            ["Person", "Amount"],
             RowsForKind<EmployeeSalary>(people, linksByPerson, linkedEntities, ApplicationProfileInstancePersonLinkKind.Salary, (person, sal) =>
             [
                 PersonName(person),
                 sal.Amount ?? "—",
-                sal.Currency?.ToString() ?? "—",
             ]),
             emptyMessage: "No salary linked.");
 

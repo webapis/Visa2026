@@ -88,7 +88,6 @@ internal static class Visa2014EmployeeSalaryPreviewExporter
             ["_legacyPersonOid"] = row.GetValueOrDefault("_legacy_PersonOid"),
             ["_rawDetail"] = rawDetail,
             ["_normalizedAmount"] = normalized,
-            ["_currency"] = Visa2014SalaryAmountNormalizer.ResolveCurrency(rawDetail),
             ["_parseNote"] = parseNote,
             ["_startDate"] = row.GetValueOrDefault("StartDate"),
         };

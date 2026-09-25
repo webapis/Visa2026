@@ -250,14 +250,12 @@ public static class E2ETestWorkDutyFieldCaptions
 public static class E2ETestSalaryCreateValues
 {
     public const string Amount = "5000";
-    public const string CurrencyDisplay = "TMT";
 }
 
 /// <summary>English Blazor captions for <see cref="BusinessObjects.EmployeeSalary"/> detail.</summary>
 public static class E2ETestSalaryFieldCaptions
 {
     public const string Amount = "Amount";
-    public const string Currency = "Currency";
 }
 
 /// <summary>Person detail layout tab captions / New toolbar title prefixes for nested lists.</summary>

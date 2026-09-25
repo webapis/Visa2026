@@ -53,11 +53,6 @@ internal static partial class Visa2014SalaryAmountNormalizer
         return !string.IsNullOrWhiteSpace(amount);
     }
 
-    /// <summary>
-    /// Çalik import sign-off: all salaries import as USD (legacy Detail may say dtm but has no currency column).
-    /// </summary>
-    internal static string ResolveCurrency(string? rawDetail) => "USD";
-
     private static string? ExtractBestAmountToken(string text)
     {
         var matches = AmountTokenRegex().Matches(text);

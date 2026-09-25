@@ -1125,7 +1125,6 @@
     <Class Name="Visa2026.Module.BusinessObjects.EmployeeSalary" Caption="Aýlyk">
       <OwnMembers>
         <Member Name="Amount" Caption="Mukdar" />
-        <Member Name="Currency" Caption="Pul birligi" />
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
@@ -2782,7 +2781,6 @@
     <ListView Id="EmployeeSalary_ListView" Caption="Aýlyklar">
       <Columns>
         <ColumnInfo Id="Amount" Caption="Mukdar" />
-        <ColumnInfo Id="Currency" Caption="Pul birligi" />
         <ColumnInfo Id="EndDate" Caption="Gutarýan senesi" />
         <ColumnInfo Id="StartDate" Caption="Başlanýan senesi" />
       </Columns>

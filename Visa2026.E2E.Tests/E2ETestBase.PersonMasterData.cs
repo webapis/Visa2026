@@ -548,8 +548,7 @@ public abstract partial class E2ETestBase
     {
         WaitForDetailReady("EmployeeSalary_DetailView", E2ETestSalaryFieldCaptions.Amount, "EmployeeSalary");
         FillDetailFormWithRetry(
-            new EasyTestParameter(E2ETestSalaryFieldCaptions.Amount, E2ETestSalaryCreateValues.Amount),
-            new EasyTestParameter(E2ETestSalaryFieldCaptions.Currency, E2ETestSalaryCreateValues.CurrencyDisplay));
+            new EasyTestParameter(E2ETestSalaryFieldCaptions.Amount, E2ETestSalaryCreateValues.Amount));
     }
 
     protected void SaveSalaryDetail() => ExecuteActionWithRetry("Save");

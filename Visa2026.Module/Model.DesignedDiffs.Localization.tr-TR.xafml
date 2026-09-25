@@ -1125,7 +1125,6 @@
     <Class Name="Visa2026.Module.BusinessObjects.EmployeeSalary" Caption="Maaş">
       <OwnMembers>
         <Member Name="Amount" Caption="Tutar" />
-        <Member Name="Currency" Caption="Para Birimi" />
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
@@ -2782,7 +2781,6 @@
     <ListView Id="EmployeeSalary_ListView" Caption="Maaşlar">
       <Columns>
         <ColumnInfo Id="Amount" Caption="Tutar" />
-        <ColumnInfo Id="Currency" Caption="Para Birimi" />
         <ColumnInfo Id="EndDate" Caption="Bitiş Tarihi" />
         <ColumnInfo Id="StartDate" Caption="Başlangıç Tarihi" />
       </Columns>

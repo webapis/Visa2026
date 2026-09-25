@@ -191,15 +191,10 @@ internal static class Visa2014EmployeeSalaryODataImporter
         if (!TryParseDate(row.GetValueOrDefault("StartDate") as string, out var startDate))
             return null;
 
-        var currencyText = row.GetValueOrDefault("Currency") as string ?? "USD";
-        if (!Enum.TryParse<EmployeeCurrency>(currencyText, ignoreCase: true, out var currency))
-            currency = EmployeeCurrency.USD;
-
         var payload = new Dictionary<string, object?>(StringComparer.Ordinal)
         {
             ["Person"] = new { ID = personId },
             ["Amount"] = amount.Trim(),
-            ["Currency"] = currency.ToString(),
             ["StartDate"] = DateTime.SpecifyKind(startDate, DateTimeKind.Utc),
         };
 

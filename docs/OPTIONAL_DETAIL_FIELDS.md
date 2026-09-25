@@ -23,7 +23,7 @@ Use this split everywhere in Visa2026 — not only on types with the gear contro
 
 | Business object | Required (always visible) | Optional (gear / auto-expand) |
 |-----------------|---------------------------|-------------------------------|
-| `EmployeeSalary` | `Person`, `Amount`, `Currency` | `StartDate`, `EndDate`, `Title` (computed) |
+| `EmployeeSalary` | `Person`, `Amount` | `StartDate`, `EndDate`, `Title` (computed) |
 | `EmployeePositionHistory` | `Position`, `ActualPosition`, `Person` | `StartDate`, `EndDate`, `Department`, `Title` (computed) |
 | `Education` | `EducationLevel`, `EducationInstitution`, `EducationCountry`, `Specialty`, `Person`, `Documents` (required via `[RuleRequiredField]` on collection) | `GraduationYear` |
 | `Person` | Members with `[RuleRequiredField]` (incl. conditional), e.g. `FirstName`, `LastName`, `DateOfBirth`, `Age`, `ForeignAddress`, `ForeignAddressCountry`, `VisaApplicationFamilyMembersText` (employees, default `Ýok`), `SponsoringEmployee` + `Relationship` (family members), … | e.g. `MiddleName`, `Photo`, `Email`, `HireDate`, `PreviousWorkplacesInTurkmenistan`, `IsArchived` — not list tabs (`Documents`, `Passports`, … are optional collections) |
@@ -121,7 +121,7 @@ public bool ShowOptionalFields { get; set; }
 - If a member has `[RuleRequiredField]` but should still collapse behind the gear, add `[Appearance(..., Criteria = "!ShowOptionalFields")]` on that property — `[RuleRequiredField]` excludes it from automatic gear metadata.
 - If a member is **required and must stay visible** when the gear is off, use `[ExcludeFromOptionalDetailFields]` (see `ApplicationItem.TravelDate` / `CheckPoint`).
 - Use `[ExcludeFromOptionalDetailFields]` on members that must stay outside the gear (e.g. `ApplicationItem` workflow flags, `BusinessTripAddress`).
-- For enums that are required, use a **nullable** enum type (e.g. `EmployeeCurrency?`) — XAF analyzer **XAF0009** requires nullable types for `RuleRequiredField` on enums.
+- For enums that are required, use a **nullable** enum type — XAF analyzer **XAF0009** requires nullable types for `RuleRequiredField` on enums.
 - For **`ApplicationType.Show*`** gates, mirror the field’s `[Appearance]` hide criteria in `TargetCriteria` on `[RuleRequiredField]` (inverted: required when the type shows the field).
 
 ### 4. Build and test

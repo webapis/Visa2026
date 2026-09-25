@@ -438,13 +438,6 @@ public class ApplicationProfileInstanceProgress
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
-public enum EmployeeCurrency
-{
-    TMT,
-    USD,
-}
-
-[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ResidenceType
 {
     Lodging,
@@ -797,9 +790,6 @@ public class EmployeeSalary
 
     [JsonPropertyName("Amount")]
     public string Amount { get; set; } = "";
-
-    [JsonPropertyName("Currency")]
-    public EmployeeCurrency Currency { get; set; }
 
     [JsonPropertyName("StartDate")]
     public DateTime StartDate { get; set; }

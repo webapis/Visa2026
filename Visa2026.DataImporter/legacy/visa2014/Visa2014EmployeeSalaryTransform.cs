@@ -27,13 +27,13 @@ internal static class Visa2014EmployeeSalaryTransform
     internal static readonly string[] EmployeeSalaryMainColumnOrder =
     [
         "_legacyRowId", "_legacyTable", "_importAction",
-        "Person", "Amount", "Currency", "StartDate", "EndDate",
+        "Person", "Amount", "StartDate", "EndDate",
         "_legacy_SalaryOid", "_legacy_SalaryDetail", "_legacy_PersonOid",
     ];
 
     internal static readonly string[] AmountParseColumnOrder =
     [
-        "_legacyPersonOid", "_rawDetail", "_normalizedAmount", "_currency", "_parseNote", "_startDate",
+        "_legacyPersonOid", "_rawDetail", "_normalizedAmount", "_parseNote", "_startDate",
     ];
 
     public static Visa2014PersonImportBatch PrepareImportBatch(
@@ -136,7 +136,6 @@ internal static class Visa2014EmployeeSalaryTransform
             ["_legacyPersonOid"] = raw.LegacyPersonOid.ToString("D"),
             ["_rawDetail"] = raw.SalaryDetail,
             ["_normalizedAmount"] = string.IsNullOrWhiteSpace(normalized) ? null : normalized,
-            ["_currency"] = Visa2014SalaryAmountNormalizer.ResolveCurrency(raw.SalaryDetail),
             ["_parseNote"] = parseNote,
             ["_startDate"] = raw.CurrentPositionStart?.ToString("yyyy-MM-dd"),
         };
@@ -174,8 +173,6 @@ internal static class Visa2014EmployeeSalaryTransform
         {
             row["Amount"] = amount;
         }
-
-        row["Currency"] = parseAudit.GetValueOrDefault("_currency") ?? "USD";
 
         if (!raw.CurrentPositionStart.HasValue)
         {

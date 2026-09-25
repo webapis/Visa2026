@@ -1125,7 +1125,6 @@
     <Class Name="Visa2026.Module.BusinessObjects.EmployeeSalary" Caption="Зарплата">
       <OwnMembers>
         <Member Name="Amount" Caption="Сумма" />
-        <Member Name="Currency" Caption="Валюта" />
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="EndDate" Caption="Дата окончания" />
@@ -2782,7 +2781,6 @@
     <ListView Id="EmployeeSalary_ListView" Caption="Зарплаты">
       <Columns>
         <ColumnInfo Id="Amount" Caption="Сумма" />
-        <ColumnInfo Id="Currency" Caption="Валюта" />
         <ColumnInfo Id="EndDate" Caption="Дата окончания" />
         <ColumnInfo Id="StartDate" Caption="Дата начала" />
       </Columns>

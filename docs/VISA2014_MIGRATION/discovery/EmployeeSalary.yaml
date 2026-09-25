@@ -12,7 +12,7 @@ importConfirmation:
   reviewNotes: |
     SQL discovery 2026-06-29 (VISA2015, calik-energi).
     Excel preview: 2950 employees → 2887 import, 63 skipped.
-    Currency USD sign-off 2026-06-29. importConfirmed 2026-06-29.
+    Currency removed from EmployeeSalary. importConfirmed 2026-06-29.
     OData import 2026-06-29: 2740 posted, 0 failed, 145 no Person map, 2 pilot resume-skipped.
 
 legacy:
@@ -47,7 +47,7 @@ mapping:
   notes: |
     Extract: Employee ⋈ Person (GCRecord IS NULL) LEFT JOIN Salary ON Employee.Salary.
     Amount ← normalize Salary.Detail (free text; ~34 distinct values on Çalik data).
-    Currency: fixed USD for all rows (import sign-off; legacy dtm text not used).
+    Currency is not stored on EmployeeSalary (legacy dtm text is ignored).
     StartDate ← MAX(WorkHistoryOfEmployee.StartDateOnThisPosition) per employee.
     EndDate null (current snapshot). id-map key = Employee.Oid (= Person.Oid).
     Skip: missing Salary FK (4), empty/unparseable Detail (59 incl. "Alesta" and blanks).

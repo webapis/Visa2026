@@ -555,14 +555,12 @@
             <LayoutGroup Id="EmployeeSalary" RelativeSize="100">
               <LayoutGroup Id="EmployeeSalary_col1" RelativeSize="81.45766345123258">
                 <LayoutItem Id="Amount" ViewItem="Amount" Index="0" RelativeSize="8.365019011406844" IsNewNode="True" />
-                <LayoutItem Id="Currency" ViewItem="Currency" Index="1" RelativeSize="6.083650190114068" IsNewNode="True" />
-                <LayoutItem Id="StartDate" Index="2" RelativeSize="6.083650190114068" />
-                <LayoutItem Id="EndDate" Index="3" RelativeSize="6.083650190114068" />
-                <LayoutItem Id="Title" ViewItem="Title" Index="4" RelativeSize="73.38403041825094" IsNewNode="True" />
+                <LayoutItem Id="StartDate" Index="1" RelativeSize="6.083650190114068" />
+                <LayoutItem Id="EndDate" Index="2" RelativeSize="6.083650190114068" />
+                <LayoutItem Id="Title" ViewItem="Title" Index="3" RelativeSize="73.38403041825094" IsNewNode="True" />
                 <LayoutItem Id="ShowOptionalFields" RelativeSize="8.365019011406844" Removed="True" />
               </LayoutGroup>
               <LayoutGroup Id="EmployeeSalary_col2" RelativeSize="18.542336548767416" Caption="EmployeeSalary_col2">
-                <LayoutItem Id="Currency" Index="0" RelativeSize="100" Removed="True" />
                 <LayoutItem Id="ShowOptionalFields" ViewItem="ShowOptionalFields" Index="0" RelativeSize="100" IsNewNode="True" />
                 <LayoutItem Id="Title" Index="1" RelativeSize="91.63498098859316" Removed="True" />
                 <LayoutItem Id="Amount" Removed="True" />
