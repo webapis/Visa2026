@@ -71,6 +71,7 @@
         </Items>
       </Item>
       <Item Id="Auth" Caption="Howpsuzlyk" />
+      <Item Id="BorderZone" Caption="Serhet sebiti" />
       <Item Id="Config" Caption="Konfigurasiýa" />
       <Item Id="Configuration" Caption="Konfigurasiýa">
         <Items>
@@ -81,8 +82,11 @@
       <Item Id="Documents" Caption="Resminamalar" />
       <Item Id="Education" Caption="Bilim" />
       <Item Id="Employee" Caption="Işgär" />
+      <Item Id="Employees" Caption="Işgärler" />
+      <Item Id="FamilyMembers" Caption="Maşgalalar" />
       <Item Id="Geography" Caption="Geografiýa" />
       <Item Id="Housing" Caption="Ýaşaýyş" />
+      <Item Id="ImportReimportHistory" Caption="Gaýtadan import taryhy" />
       <Item Id="Invitation" Caption="Çakylyk" />
       <Item Id="InvitationItem" Caption="Çakylyk elementleri" />
       <Item Id="Lookup" Caption="Maglumat">
@@ -154,6 +158,7 @@
           </Item>
         </Items>
       </Item>
+      <Item Id="Lookups" Caption="Salgylar" />
       <Item Id="Medical" Caption="Saglyk" />
       <Item Id="Operations" Caption="Amallar" />
       <Item Id="Organization" Caption="Gurama" />
@@ -173,6 +178,7 @@
       <Item Id="Reports" Caption="Hasabatlar" />
       <Item Id="StateNotifications" Caption="Ýagdaý habarnamalary" />
       <Item Id="System" Caption="Ulgam" />
+      <Item Id="TemporaryVisitors" Caption="Wagtlaýyn myhmanlar" />
       <Item Id="UserFeedback" Caption="Ulanyjy pikirleri" />
       <Item Id="Visa" Caption="Wiza" />
       <Item Id="Visa Tracking" Caption="Wiza yzaragy" />
@@ -417,9 +423,11 @@
         <Member Name="People" Caption="Adamlar" />
         <Member Name="ProcessNumber" Caption="Proses belgisi" />
         <Member Name="ProgressSlaStatement" Caption="Tassyklama möhleti" />
+        <Member Name="ProgressStepsDisplay" Caption="Arza ösüşi" />
         <Member Name="ProjectContract" Caption="Taslama belgisi" />
         <Member Name="Rejections" Caption="Retler" />
         <Member Name="Representative" Caption="Wekil" />
+        <Member Name="ResultCoverageDisplay" Caption="Arzanyň netijesi" />
         <Member Name="ToCity" Caption="Baryş şäheri" />
         <Member Name="ToRegion" Caption="Baryş welaýaty" />
         <Member Name="TotalPersonCount" Caption="Adam sany" />
@@ -2932,28 +2940,98 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <ListView Id="Person_DetailView_Employee" Caption="Işgär">
+    <DetailView Id="Person_DetailView_Employee" Caption="Işgär">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors">
+            <TabbedGroup Id="Item1">
+              <LayoutGroup Id="Person" Caption="Işgär" />
+            </TabbedGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="PersonCollectionSections">
+            <TabbedGroup Id="PersonRecordTabs">
+              <LayoutGroup Id="AddressesOfResidence" Caption="Ýaşaýyş salgylary" />
+              <LayoutGroup Id="Documents" Caption="CV we şahsy faýllar" />
+              <LayoutGroup Id="Educations" Caption="Bilim" />
+              <LayoutGroup Id="FamilyRelationDocuments" Caption="Maşgala gatnaşygy subutnamalary" />
+              <LayoutGroup Id="IncompleteData" Caption="Doly däl maglumat" />
+              <LayoutGroup Id="MedicalRecords" Caption="Saglyk ýazgylary" />
+              <LayoutGroup Id="Passports" Caption="Pasportlar" />
+              <LayoutGroup Id="PositionHistory" Caption="Wezipe taryhy" />
+              <LayoutGroup Id="Salaries" Caption="Aýlyklar" />
+              <LayoutGroup Id="TravelHistories" Caption="Syýahat taryhy" />
+              <LayoutGroup Id="WorkDuties" Caption="Gelmeginiň maksady" />
+            </TabbedGroup>
+            <TabbedGroup Id="IssuedDocumentsTabs">
+              <LayoutGroup Id="ApplicationProfileInstances" Caption="Arzalar (baglanan)" />
+              <LayoutGroup Id="FamilyMembers" Caption="Maşgala agzalary (baglanan)" />
+              <LayoutGroup Id="InvitationItems" Caption="Çakylyklar (berlen)" />
+              <LayoutGroup Id="RejectionItems" Caption="Retler (berlen)" />
+              <LayoutGroup Id="WorkPermitItems" Caption="Iş rugsatlary (berlen)" />
+            </TabbedGroup>
+          </LayoutGroup>
           <LayoutGroup Id="Documents" Caption="CV we şahsy faýllar" />
-          <LayoutGroup Id="Person" Caption="Işgär" />
         </LayoutGroup>
       </Layout>
-    </ListView>
-    <ListView Id="Person_DetailView_FamilyMember" Caption="Maşgala agzy">
+    </DetailView>
+    <DetailView Id="Person_DetailView_FamilyMember" Caption="Maşgala agzy">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Person" Caption="Maşgala agzy" />
+          <LayoutGroup Id="SimpleEditors">
+            <TabbedGroup Id="Item1">
+              <LayoutGroup Id="Person" Caption="Maşgala agzy" />
+            </TabbedGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="PersonCollectionSections">
+            <TabbedGroup Id="PersonRecordTabs">
+              <LayoutGroup Id="AddressesOfResidence" Caption="Ýaşaýyş salgylary" />
+              <LayoutGroup Id="Documents" Caption="CV we şahsy faýllar" />
+              <LayoutGroup Id="Educations" Caption="Bilim" />
+              <LayoutGroup Id="FamilyRelationDocuments" Caption="Maşgala gatnaşygy subutnamalary" />
+              <LayoutGroup Id="IncompleteData" Caption="Doly däl maglumat" />
+              <LayoutGroup Id="MedicalRecords" Caption="Saglyk ýazgylary" />
+              <LayoutGroup Id="Passports" Caption="Pasportlar" />
+              <LayoutGroup Id="PositionHistory" Caption="Wezipe taryhy" />
+              <LayoutGroup Id="Salaries" Caption="Aýlyklar" />
+              <LayoutGroup Id="TravelHistories" Caption="Syýahat taryhy" />
+              <LayoutGroup Id="WorkDuties" Caption="Gelmeginiň maksady" />
+            </TabbedGroup>
+            <TabbedGroup Id="IssuedDocumentsTabs">
+              <LayoutGroup Id="ApplicationProfileInstances" Caption="Arzalar (baglanan)" />
+              <LayoutGroup Id="FamilyMembers" Caption="Maşgala agzalary (baglanan)" />
+              <LayoutGroup Id="InvitationItems" Caption="Çakylyklar (berlen)" />
+              <LayoutGroup Id="RejectionItems" Caption="Retler (berlen)" />
+              <LayoutGroup Id="WorkPermitItems" Caption="Iş rugsatlary (berlen)" />
+            </TabbedGroup>
+          </LayoutGroup>
         </LayoutGroup>
       </Layout>
-    </ListView>
-    <ListView Id="Person_DetailView_TemporaryVisitor" Caption="Wagtlaýyn myhman">
+    </DetailView>
+    <DetailView Id="Person_DetailView_TemporaryVisitor" Caption="Wagtlaýyn myhman">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Person" Caption="Wagtlaýyn myhman" />
+          <LayoutGroup Id="SimpleEditors">
+            <TabbedGroup Id="Item1">
+              <LayoutGroup Id="Person" Caption="Wagtlaýyn myhman" />
+            </TabbedGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="PersonCollectionSections">
+            <TabbedGroup Id="PersonRecordTabs">
+              <LayoutGroup Id="AddressesOfResidence" Caption="Ýaşaýyş salgylary" />
+              <LayoutGroup Id="IncompleteData" Caption="Doly däl maglumat" />
+              <LayoutGroup Id="MedicalRecords" Caption="Saglyk ýazgylary" />
+              <LayoutGroup Id="Passports" Caption="Pasportlar" />
+              <LayoutGroup Id="TravelHistories" Caption="Syýahat taryhy" />
+            </TabbedGroup>
+            <TabbedGroup Id="IssuedDocumentsTabs">
+              <LayoutGroup Id="ApplicationProfileInstances" Caption="Arzalar (baglanan)" />
+              <LayoutGroup Id="InvitationItems" Caption="Çakylyklar (berlen)" />
+              <LayoutGroup Id="RejectionItems" Caption="Retler (berlen)" />
+            </TabbedGroup>
+          </LayoutGroup>
         </LayoutGroup>
       </Layout>
-    </ListView>
+    </DetailView>
     <ListView Id="Person_FamilyMembers_ListView" Caption="Maşgalalar" />
     <ListView Id="Person_ListView" Caption="Adamlar">
       <Columns>
@@ -3003,6 +3081,7 @@
         <ColumnInfo Id="Nationality" Caption="Milleti" />
         <ColumnInfo Id="PersonalNumber" Caption="Şahsy belgi" />
         <ColumnInfo Id="ProjectContract" Caption="Taslama belgisi" />
+        <ColumnInfo Id="Subcontractor" Caption="Kompaniýa (Subpudarçy)" />
       </Columns>
     </ListView>
     <ListView Id="Person_ListView_FamilyMembers" Caption="Maşgalalar">
@@ -3034,6 +3113,7 @@
         <ColumnInfo Id="ProjectContract" Caption="Taslama belgisi" />
         <ColumnInfo Id="Relationship" Caption="Gatnaşyk" />
         <ColumnInfo Id="SponsoringEmployee" Caption="Işgär" />
+        <ColumnInfo Id="Subcontractor" Caption="Kompaniýa (Subpudarçy)" />
       </Columns>
     </ListView>
     <ListView Id="Person_ListView_TemporaryVisitors" Caption="Wagtlaýyn myhman">
@@ -3048,7 +3128,7 @@
         <ColumnInfo Id="Nationality" Caption="Milleti" />
         <ColumnInfo Id="PersonalNumber" Caption="Şahsy belgi" />
         <ColumnInfo Id="ProjectContract" Caption="Taslama belgisi" />
-        <ColumnInfo Id="Subcontractor" Caption="Kompaniýa" />
+        <ColumnInfo Id="Subcontractor" Caption="Kompaniýa (Subpudarçy)" />
       </Columns>
     </ListView>
     <ListView Id="Person_TravelHistories_ListView" Caption="Syýahat taryhy">
@@ -3297,9 +3377,14 @@
       <RuleRequiredField MessageTemplateMustNotBeEmpty="&quot;{TargetPropertyName}&quot; boş bolmamaly." />
     </ErrorMessageTemplates>
     <Rules>
+      <RuleFromBoolProperty Id="ApplicationProfileInstanceProgress_MinistryLetterFileContentValid" TargetType="Visa2026.Module.BusinessObjects.ApplicationProfileInstanceProgress" CustomMessageTemplate="Ministrlik hatynyň nusgasy rugsat berlen görnüşde bolmaly (PDF, PNG, JPEG, TIFF, GIF ýa-da BMP) we faýlyň mazmuny giňeltme bilen gabat gelmeli." />
+      <RuleCriteria Id="ApplicationProfileInstanceProgress_MinistryLetterFileNotEmpty" TargetType="Visa2026.Module.BusinessObjects.ApplicationProfileInstanceProgress" CustomMessageTemplate="Ýüklenen ministrlik hatynyň nusgasy boş." />
+      <RuleCriteria Id="ApplicationProfileInstanceProgress_MinistryLetterFileSize" TargetType="Visa2026.Module.BusinessObjects.ApplicationProfileInstanceProgress" CustomMessageTemplate="Ministrlik hatynyň nusgasy rugsat berlen {MaxDocumentSizeInMB} MB çäginden uly." />
       <RuleCriteria Id="BorderZone_DateRange" TargetType="Visa2026.Module.BusinessObjects.BorderZone" CustomMessageTemplate="Gutarýan senesi başlanýan senesinden soň bolmaly." />
       <RuleCriteria Id="CompanyHeadSource" TargetType="Visa2026.Module.BusinessObjects.CompanyHead" CustomMessageTemplate="Ýerli işgär ýa-da daşary ýurtly işgär saýlaň." />
+      <RuleFromBoolProperty Id="DocumentBase_FileContentValid" TargetType="Visa2026.Module.BusinessObjects.DocumentBase" CustomMessageTemplate="Goşundy rugsat berlen görnüşde bolmaly (PDF, PNG, JPEG, TIFF, GIF ýa-da BMP) we faýlyň mazmuny giňeltme bilen gabat gelmeli (adyny üýtgedilen ýa-da bozulan faýllar ret edilýär)." />
       <RuleCriteria Id="DocumentFileNotEmpty" TargetType="Visa2026.Module.BusinessObjects.DocumentBase" CustomMessageTemplate="Ýüklenen faýl boş. Boş däl resminama goşuň." />
+      <RuleCriteria Id="DocumentSizeIsTooLarge" TargetType="Visa2026.Module.BusinessObjects.DocumentBase" CustomMessageTemplate="Ýüklenen resminama rugsat berlen {MaxDocumentSizeInMB} MB çäginden uly." />
       <RuleCriteria Id="EmployeeContract_DateRange" TargetType="Visa2026.Module.BusinessObjects.EmployeeContract" CustomMessageTemplate="Gutarýan senesi şertnama başlanýan senesinden soň bolmaly." />
       <RuleRegularExpression Id="EmployeeEmailFormat" TargetType="Visa2026.Module.BusinessObjects.Person" CustomMessageTemplate="Nädogry e-poçta görnüşi." />
       <RuleCriteria Id="ImageNotEmpty" TargetType="Visa2026.Module.BusinessObjects.ImageBase" CustomMessageTemplate="Ýüklenen surat boş. Boş däl surat saýlaň." />

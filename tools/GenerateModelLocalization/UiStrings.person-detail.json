@@ -125,21 +125,106 @@
     },
     "Person_DetailView_Employee": {
       "caption": { "tr-TR": "Çalışan", "tk-TM": "Işgär", "ru-RU": "Сотрудник" },
-      "layoutGroups": {
-        "Person": { "tr-TR": "Çalışan", "tk-TM": "Işgär", "ru-RU": "Сотрудник" }
-      }
+      "nestedLayoutGroups": [
+        {
+          "path": ["SimpleEditors", "Item1"],
+          "groups": {
+            "Person": { "tr-TR": "Çalışan", "tk-TM": "Işgär", "ru-RU": "Сотрудник" }
+          }
+        },
+        {
+          "path": ["PersonCollectionSections", "PersonRecordTabs"],
+          "groups": {
+            "Educations": { "tr-TR": "Eğitim", "tk-TM": "Bilim", "ru-RU": "Образование" },
+            "Passports": { "tr-TR": "Pasaportlar", "tk-TM": "Pasportlar", "ru-RU": "Паспорта" },
+            "Documents": { "tr-TR": "CV ve kişisel dosyalar", "tk-TM": "CV we şahsy faýllar", "ru-RU": "Резюме и личные файлы" },
+            "PositionHistory": { "tr-TR": "Pozisyon Geçmişi", "tk-TM": "Wezipe taryhy", "ru-RU": "История должностей" },
+            "MedicalRecords": { "tr-TR": "Sağlık Kayıtları", "tk-TM": "Saglyk ýazgylary", "ru-RU": "Мед. записи" },
+            "AddressesOfResidence": { "tr-TR": "İkamet Adresleri", "tk-TM": "Ýaşaýyş salgylary", "ru-RU": "Адреса проживания" },
+            "FamilyRelationDocuments": { "tr-TR": "Aile ilişkisi kanıt kopyaları", "tk-TM": "Maşgala gatnaşygy subutnamalary", "ru-RU": "Копии доказательств родства" },
+            "TravelHistories": { "tr-TR": "Seyahat Geçmişi", "tk-TM": "Syýahat taryhy", "ru-RU": "История поездок" },
+            "WorkDuties": { "tr-TR": "Gelmeginiň Maksady", "tk-TM": "Gelmeginiň maksady", "ru-RU": "Цели визита" },
+            "Salaries": { "tr-TR": "Maaşlar", "tk-TM": "Aýlyklar", "ru-RU": "Зарплаты" },
+            "IncompleteData": { "tr-TR": "Eksik veriler", "tk-TM": "Doly däl maglumat", "ru-RU": "Неполные данные" }
+          }
+        },
+        {
+          "path": ["PersonCollectionSections", "IssuedDocumentsTabs"],
+          "groups": {
+            "ApplicationProfileInstances": { "tr-TR": "Başvurular (bağlı)", "tk-TM": "Arzalar (baglanan)", "ru-RU": "Заявки (связанные)" },
+            "WorkPermitItems": { "tr-TR": "İş izinleri (verilen)", "tk-TM": "Iş rugsatlary (berlen)", "ru-RU": "Разрешения на работу (выданные)" },
+            "InvitationItems": { "tr-TR": "Davetler (verilen)", "tk-TM": "Çakylyklar (berlen)", "ru-RU": "Приглашения (выданные)" },
+            "RejectionItems": { "tr-TR": "Retler (verilen)", "tk-TM": "Retler (berlen)", "ru-RU": "Отказы (выданные)" },
+            "FamilyMembers": { "tr-TR": "Aile üyeleri (bağlı)", "tk-TM": "Maşgala agzalary (baglanan)", "ru-RU": "Члены семьи (связанные)" }
+          }
+        }
+      ]
     },
     "Person_DetailView_FamilyMember": {
       "caption": { "tr-TR": "Aile üyesi", "tk-TM": "Maşgala agzy", "ru-RU": "Член семьи" },
-      "layoutGroups": {
-        "Person": { "tr-TR": "Aile üyesi", "tk-TM": "Maşgala agzy", "ru-RU": "Член семьи" }
-      }
+      "nestedLayoutGroups": [
+        {
+          "path": ["SimpleEditors", "Item1"],
+          "groups": {
+            "Person": { "tr-TR": "Aile üyesi", "tk-TM": "Maşgala agzy", "ru-RU": "Член семьи" }
+          }
+        },
+        {
+          "path": ["PersonCollectionSections", "PersonRecordTabs"],
+          "groups": {
+            "Educations": { "tr-TR": "Eğitim", "tk-TM": "Bilim", "ru-RU": "Образование" },
+            "Passports": { "tr-TR": "Pasaportlar", "tk-TM": "Pasportlar", "ru-RU": "Паспорта" },
+            "Documents": { "tr-TR": "CV ve kişisel dosyalar", "tk-TM": "CV we şahsy faýllar", "ru-RU": "Резюме и личные файлы" },
+            "PositionHistory": { "tr-TR": "Pozisyon Geçmişi", "tk-TM": "Wezipe taryhy", "ru-RU": "История должностей" },
+            "MedicalRecords": { "tr-TR": "Sağlık Kayıtları", "tk-TM": "Saglyk ýazgylary", "ru-RU": "Мед. записи" },
+            "AddressesOfResidence": { "tr-TR": "İkamet Adresleri", "tk-TM": "Ýaşaýyş salgylary", "ru-RU": "Адреса проживания" },
+            "FamilyRelationDocuments": { "tr-TR": "Aile ilişkisi kanıt kopyaları", "tk-TM": "Maşgala gatnaşygy subutnamalary", "ru-RU": "Копии доказательств родства" },
+            "TravelHistories": { "tr-TR": "Seyahat Geçmişi", "tk-TM": "Syýahat taryhy", "ru-RU": "История поездок" },
+            "WorkDuties": { "tr-TR": "Gelmeginiň Maksady", "tk-TM": "Gelmeginiň maksady", "ru-RU": "Цели визита" },
+            "Salaries": { "tr-TR": "Maaşlar", "tk-TM": "Aýlyklar", "ru-RU": "Зарплаты" },
+            "IncompleteData": { "tr-TR": "Eksik veriler", "tk-TM": "Doly däl maglumat", "ru-RU": "Неполные данные" }
+          }
+        },
+        {
+          "path": ["PersonCollectionSections", "IssuedDocumentsTabs"],
+          "groups": {
+            "ApplicationProfileInstances": { "tr-TR": "Başvurular (bağlı)", "tk-TM": "Arzalar (baglanan)", "ru-RU": "Заявки (связанные)" },
+            "WorkPermitItems": { "tr-TR": "İş izinleri (verilen)", "tk-TM": "Iş rugsatlary (berlen)", "ru-RU": "Разрешения на работу (выданные)" },
+            "InvitationItems": { "tr-TR": "Davetler (verilen)", "tk-TM": "Çakylyklar (berlen)", "ru-RU": "Приглашения (выданные)" },
+            "RejectionItems": { "tr-TR": "Retler (verilen)", "tk-TM": "Retler (berlen)", "ru-RU": "Отказы (выданные)" },
+            "FamilyMembers": { "tr-TR": "Aile üyeleri (bağlı)", "tk-TM": "Maşgala agzalary (baglanan)", "ru-RU": "Члены семьи (связанные)" }
+          }
+        }
+      ]
     },
     "Person_DetailView_TemporaryVisitor": {
       "caption": { "tr-TR": "Geçici ziyaretçi", "tk-TM": "Wagtlaýyn myhman", "ru-RU": "Временный посетитель" },
-      "layoutGroups": {
-        "Person": { "tr-TR": "Geçici ziyaretçi", "tk-TM": "Wagtlaýyn myhman", "ru-RU": "Временный посетитель" }
-      }
+      "nestedLayoutGroups": [
+        {
+          "path": ["SimpleEditors", "Item1"],
+          "groups": {
+            "Person": { "tr-TR": "Geçici ziyaretçi", "tk-TM": "Wagtlaýyn myhman", "ru-RU": "Временный посетитель" }
+          }
+        },
+        {
+          "path": ["PersonCollectionSections", "PersonRecordTabs"],
+          "groups": {
+            "Passports": { "tr-TR": "Pasaportlar", "tk-TM": "Pasportlar", "ru-RU": "Паспорта" },
+            "MedicalRecords": { "tr-TR": "Sağlık Kayıtları", "tk-TM": "Saglyk ýazgylary", "ru-RU": "Мед. записи" },
+            "AddressesOfResidence": { "tr-TR": "İkamet Adresleri", "tk-TM": "Ýaşaýyş salgylary", "ru-RU": "Адреса проживания" },
+            "TravelHistories": { "tr-TR": "Seyahat Geçmişi", "tk-TM": "Syýahat taryhy", "ru-RU": "История поездок" },
+            "IncompleteData": { "tr-TR": "Eksik veriler", "tk-TM": "Doly däl maglumat", "ru-RU": "Неполные данные" }
+          }
+        },
+        {
+          "path": ["PersonCollectionSections", "IssuedDocumentsTabs"],
+          "groups": {
+            "ApplicationProfileInstances": { "tr-TR": "Başvurular (bağlı)", "tk-TM": "Arzalar (baglanan)", "ru-RU": "Заявки (связанные)" },
+            "InvitationItems": { "tr-TR": "Davetler (verilen)", "tk-TM": "Çakylyklar (berlen)", "ru-RU": "Приглашения (выданные)" },
+            "RejectionItems": { "tr-TR": "Retler (verilen)", "tk-TM": "Retler (berlen)", "ru-RU": "Отказы (выданные)" }
+          }
+        }
+      ]
     },
     "Education_ListView": {
       "columns": {

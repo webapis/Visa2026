@@ -4493,6 +4493,96 @@
     "tk-TM": "CV we şahsy faýllar",
     "ru-RU": "Резюме и личные файлы"
   },
+  "Person.Tab.Educations": {
+    "en": "Education",
+    "tr-TR": "Eğitim",
+    "tk-TM": "Bilim",
+    "ru-RU": "Образование"
+  },
+  "Person.Tab.Passports": {
+    "en": "Passports",
+    "tr-TR": "Pasaportlar",
+    "tk-TM": "Pasportlar",
+    "ru-RU": "Паспорта"
+  },
+  "Person.Tab.PositionHistory": {
+    "en": "Position history",
+    "tr-TR": "Pozisyon geçmişi",
+    "tk-TM": "Wezipe taryhy",
+    "ru-RU": "История должностей"
+  },
+  "Person.Tab.MedicalRecords": {
+    "en": "Medical records",
+    "tr-TR": "Sağlık kayıtları",
+    "tk-TM": "Saglyk ýazgylary",
+    "ru-RU": "Мед. записи"
+  },
+  "Person.Tab.AddressesOfResidence": {
+    "en": "Addresses of residence",
+    "tr-TR": "İkamet adresleri",
+    "tk-TM": "Ýaşaýyş salgylary",
+    "ru-RU": "Адреса проживания"
+  },
+  "Person.Tab.FamilyRelationDocuments": {
+    "en": "Family relation documents",
+    "tr-TR": "Aile ilişkisi kanıt kopyaları",
+    "tk-TM": "Maşgala gatnaşygy subutnamalary",
+    "ru-RU": "Копии доказательств родства"
+  },
+  "Person.Tab.TravelHistories": {
+    "en": "Travel history",
+    "tr-TR": "Seyahat geçmişi",
+    "tk-TM": "Syýahat taryhy",
+    "ru-RU": "История поездок"
+  },
+  "Person.Tab.WorkDuties": {
+    "en": "Purpose of arrival",
+    "tr-TR": "Geliş amacı",
+    "tk-TM": "Gelmeginiň maksady",
+    "ru-RU": "Цель приезда"
+  },
+  "Person.Tab.Salaries": {
+    "en": "Salaries",
+    "tr-TR": "Maaşlar",
+    "tk-TM": "Aýlyklar",
+    "ru-RU": "Зарплаты"
+  },
+  "Person.Tab.IncompleteData": {
+    "en": "Incomplete data",
+    "tr-TR": "Eksik veriler",
+    "tk-TM": "Doly däl maglumat",
+    "ru-RU": "Неполные данные"
+  },
+  "Person.Tab.ApplicationsLinked": {
+    "en": "Applications (linked)",
+    "tr-TR": "Başvurular (bağlı)",
+    "tk-TM": "Arzalar (baglanan)",
+    "ru-RU": "Заявки (связанные)"
+  },
+  "Person.Tab.WorkPermitsIssued": {
+    "en": "Work permits (issued)",
+    "tr-TR": "İş izinleri (verilen)",
+    "tk-TM": "Iş rugsatlary (berlen)",
+    "ru-RU": "Разрешения на работу (выданные)"
+  },
+  "Person.Tab.InvitationsIssued": {
+    "en": "Invitations (issued)",
+    "tr-TR": "Davetler (verilen)",
+    "tk-TM": "Çakylyklar (berlen)",
+    "ru-RU": "Приглашения (выданные)"
+  },
+  "Person.Tab.RejectionsIssued": {
+    "en": "Rejections (issued)",
+    "tr-TR": "Retler (verilen)",
+    "tk-TM": "Retler (berlen)",
+    "ru-RU": "Отказы (выданные)"
+  },
+  "Person.Tab.FamilyMembersLinked": {
+    "en": "Family members (linked)",
+    "tr-TR": "Aile üyeleri (bağlı)",
+    "tk-TM": "Maşgala agzalary (baglanan)",
+    "ru-RU": "Члены семьи (связанные)"
+  },
   "Passport.Tab.DocumentCopies": {
     "en": "Passport copies",
     "tr-TR": "Pasaport kopyaları",

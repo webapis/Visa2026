@@ -473,7 +473,7 @@ static XElement BuildApplication(
     var views = new XElement("Views");
     foreach (JsonProperty view in root.GetProperty("views").EnumerateObject().OrderBy(v => v.Name))
     {
-        bool isDetail = view.Name.EndsWith("_DetailView", StringComparison.Ordinal);
+        bool isDetail = view.Name.Contains("_DetailView", StringComparison.Ordinal);
         var viewNode = new XElement(isDetail ? "DetailView" : "ListView",
             new XAttribute("Id", view.Name),
             new XAttribute("Caption", GetText(view.Value.GetProperty("caption"), culture)));
@@ -730,6 +730,9 @@ static bool TryBuildViewLayout(JsonElement view, string culture, out XElement? l
     return true;
 }
 
+static bool IsTabbedLayoutId(string id) =>
+    id is "Item1" or "Tabs" or "PersonRecordTabs" or "IssuedDocumentsTabs";
+
 static void AppendNestedLayoutGroups(XElement main, JsonElement nest, string culture)
 {
     if (!nest.TryGetProperty("path", out JsonElement pathSegments)
@@ -747,8 +750,7 @@ static void AppendNestedLayoutGroups(XElement main, JsonElement nest, string cul
             .FirstOrDefault(e => e.Attribute("Id")?.Value == id);
         if (child is null)
         {
-            bool isTabbedGroup = id is "Item1" or "Tabs";
-            child = new XElement(isTabbedGroup ? "TabbedGroup" : "LayoutGroup", new XAttribute("Id", id));
+            child = new XElement(IsTabbedLayoutId(id) ? "TabbedGroup" : "LayoutGroup", new XAttribute("Id", id));
             current.Add(child);
         }
 
@@ -1072,7 +1074,7 @@ static void UpsertEnglishView(XElement viewsRoot, string viewId, JsonObject view
         return;
     }
 
-    bool isDetail = viewId.EndsWith("_DetailView", StringComparison.Ordinal);
+    bool isDetail = viewId.Contains("_DetailView", StringComparison.Ordinal);
     XElement? viewElement = viewsRoot.Elements().FirstOrDefault(v => v.Attribute("Id")?.Value == viewId);
     if (viewElement is null)
     {
@@ -1171,8 +1173,7 @@ static void AppendNestedLayoutGroupsEnglish(XElement main, JsonElement nest)
             .FirstOrDefault(e => e.Attribute("Id")?.Value == id);
         if (child is null)
         {
-            bool isTabbedGroup = id is "Item1" or "Tabs";
-            child = new XElement(isTabbedGroup ? "TabbedGroup" : "LayoutGroup", new XAttribute("Id", id));
+            child = new XElement(IsTabbedLayoutId(id) ? "TabbedGroup" : "LayoutGroup", new XAttribute("Id", id));
             current.Add(child);
         }
 

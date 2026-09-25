@@ -9,6 +9,14 @@
     "Recycle Bin": { "tr-TR": "Geri Dönüşüm", "tk-TM": "Geri gaýtaryş", "ru-RU": "Корзина" },
     "Operations": { "tr-TR": "İşlemler", "tk-TM": "Amallar", "ru-RU": "Операции" },
     "StateNotifications": { "tr-TR": "Durum bildirimleri", "tk-TM": "Ýagdaý habarnamalary", "ru-RU": "Уведомления о состоянии" },
+    "ImportReimportHistory": {
+      "en-US": "Import reimport history",
+      "tr-TR": "Yeniden içe aktarma geçmişi",
+      "tk-TM": "Gaýtadan import taryhy",
+      "ru-RU": "История повторного импорта"
+    },
+    "BorderZone": { "tr-TR": "Sınır bölgesi", "tk-TM": "Serhet sebiti", "ru-RU": "Пограничная зона" },
+    "Lookups": { "tr-TR": "Sözlükler", "tk-TM": "Salgylar", "ru-RU": "Справочники" },
     "UserFeedback": { "tr-TR": "Kullanıcı geri bildirimi", "tk-TM": "Ulanyjy pikirleri", "ru-RU": "Отзывы пользователей" }
   },
   "actions": {

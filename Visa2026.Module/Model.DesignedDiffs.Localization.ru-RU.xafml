@@ -71,6 +71,7 @@
         </Items>
       </Item>
       <Item Id="Auth" Caption="Безопасность" />
+      <Item Id="BorderZone" Caption="Пограничная зона" />
       <Item Id="Config" Caption="Настройка" />
       <Item Id="Configuration" Caption="Конфигурация">
         <Items>
@@ -81,8 +82,11 @@
       <Item Id="Documents" Caption="Документы" />
       <Item Id="Education" Caption="Образование" />
       <Item Id="Employee" Caption="Сотрудник" />
+      <Item Id="Employees" Caption="Сотрудники" />
+      <Item Id="FamilyMembers" Caption="Родственники" />
       <Item Id="Geography" Caption="География" />
       <Item Id="Housing" Caption="Проживание" />
+      <Item Id="ImportReimportHistory" Caption="История повторного импорта" />
       <Item Id="Invitation" Caption="Приглашения" />
       <Item Id="InvitationItem" Caption="Позиции приглашения" />
       <Item Id="Lookup" Caption="Справочники">
@@ -154,6 +158,7 @@
           </Item>
         </Items>
       </Item>
+      <Item Id="Lookups" Caption="Справочники" />
       <Item Id="Medical" Caption="Медицина" />
       <Item Id="Operations" Caption="Операции" />
       <Item Id="Organization" Caption="Организация" />
@@ -173,6 +178,7 @@
       <Item Id="Reports" Caption="Отчёты" />
       <Item Id="StateNotifications" Caption="Уведомления о состоянии" />
       <Item Id="System" Caption="Система" />
+      <Item Id="TemporaryVisitors" Caption="Временные посетители" />
       <Item Id="UserFeedback" Caption="Отзывы пользователей" />
       <Item Id="Visa" Caption="Виза" />
       <Item Id="Visa Tracking" Caption="Учёт виз" />
@@ -417,9 +423,11 @@
         <Member Name="People" Caption="Люди" />
         <Member Name="ProcessNumber" Caption="Номер процесса" />
         <Member Name="ProgressSlaStatement" Caption="Срок согласования" />
+        <Member Name="ProgressStepsDisplay" Caption="Прогресс заявки" />
         <Member Name="ProjectContract" Caption="Контракт проекта" />
         <Member Name="Rejections" Caption="Отказы" />
         <Member Name="Representative" Caption="Представитель" />
+        <Member Name="ResultCoverageDisplay" Caption="Результат заявки" />
         <Member Name="ToCity" Caption="Город назначения" />
         <Member Name="ToRegion" Caption="Регион назначения" />
         <Member Name="TotalPersonCount" Caption="Количество лиц" />
@@ -2932,28 +2940,98 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <ListView Id="Person_DetailView_Employee" Caption="Сотрудник">
+    <DetailView Id="Person_DetailView_Employee" Caption="Сотрудник">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors">
+            <TabbedGroup Id="Item1">
+              <LayoutGroup Id="Person" Caption="Сотрудник" />
+            </TabbedGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="PersonCollectionSections">
+            <TabbedGroup Id="PersonRecordTabs">
+              <LayoutGroup Id="AddressesOfResidence" Caption="Адреса проживания" />
+              <LayoutGroup Id="Documents" Caption="Резюме и личные файлы" />
+              <LayoutGroup Id="Educations" Caption="Образование" />
+              <LayoutGroup Id="FamilyRelationDocuments" Caption="Копии доказательств родства" />
+              <LayoutGroup Id="IncompleteData" Caption="Неполные данные" />
+              <LayoutGroup Id="MedicalRecords" Caption="Мед. записи" />
+              <LayoutGroup Id="Passports" Caption="Паспорта" />
+              <LayoutGroup Id="PositionHistory" Caption="История должностей" />
+              <LayoutGroup Id="Salaries" Caption="Зарплаты" />
+              <LayoutGroup Id="TravelHistories" Caption="История поездок" />
+              <LayoutGroup Id="WorkDuties" Caption="Цели визита" />
+            </TabbedGroup>
+            <TabbedGroup Id="IssuedDocumentsTabs">
+              <LayoutGroup Id="ApplicationProfileInstances" Caption="Заявки (связанные)" />
+              <LayoutGroup Id="FamilyMembers" Caption="Члены семьи (связанные)" />
+              <LayoutGroup Id="InvitationItems" Caption="Приглашения (выданные)" />
+              <LayoutGroup Id="RejectionItems" Caption="Отказы (выданные)" />
+              <LayoutGroup Id="WorkPermitItems" Caption="Разрешения на работу (выданные)" />
+            </TabbedGroup>
+          </LayoutGroup>
           <LayoutGroup Id="Documents" Caption="Резюме и личные файлы" />
-          <LayoutGroup Id="Person" Caption="Сотрудник" />
         </LayoutGroup>
       </Layout>
-    </ListView>
-    <ListView Id="Person_DetailView_FamilyMember" Caption="Член семьи">
+    </DetailView>
+    <DetailView Id="Person_DetailView_FamilyMember" Caption="Член семьи">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Person" Caption="Член семьи" />
+          <LayoutGroup Id="SimpleEditors">
+            <TabbedGroup Id="Item1">
+              <LayoutGroup Id="Person" Caption="Член семьи" />
+            </TabbedGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="PersonCollectionSections">
+            <TabbedGroup Id="PersonRecordTabs">
+              <LayoutGroup Id="AddressesOfResidence" Caption="Адреса проживания" />
+              <LayoutGroup Id="Documents" Caption="Резюме и личные файлы" />
+              <LayoutGroup Id="Educations" Caption="Образование" />
+              <LayoutGroup Id="FamilyRelationDocuments" Caption="Копии доказательств родства" />
+              <LayoutGroup Id="IncompleteData" Caption="Неполные данные" />
+              <LayoutGroup Id="MedicalRecords" Caption="Мед. записи" />
+              <LayoutGroup Id="Passports" Caption="Паспорта" />
+              <LayoutGroup Id="PositionHistory" Caption="История должностей" />
+              <LayoutGroup Id="Salaries" Caption="Зарплаты" />
+              <LayoutGroup Id="TravelHistories" Caption="История поездок" />
+              <LayoutGroup Id="WorkDuties" Caption="Цели визита" />
+            </TabbedGroup>
+            <TabbedGroup Id="IssuedDocumentsTabs">
+              <LayoutGroup Id="ApplicationProfileInstances" Caption="Заявки (связанные)" />
+              <LayoutGroup Id="FamilyMembers" Caption="Члены семьи (связанные)" />
+              <LayoutGroup Id="InvitationItems" Caption="Приглашения (выданные)" />
+              <LayoutGroup Id="RejectionItems" Caption="Отказы (выданные)" />
+              <LayoutGroup Id="WorkPermitItems" Caption="Разрешения на работу (выданные)" />
+            </TabbedGroup>
+          </LayoutGroup>
         </LayoutGroup>
       </Layout>
-    </ListView>
-    <ListView Id="Person_DetailView_TemporaryVisitor" Caption="Временный посетитель">
+    </DetailView>
+    <DetailView Id="Person_DetailView_TemporaryVisitor" Caption="Временный посетитель">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Person" Caption="Временный посетитель" />
+          <LayoutGroup Id="SimpleEditors">
+            <TabbedGroup Id="Item1">
+              <LayoutGroup Id="Person" Caption="Временный посетитель" />
+            </TabbedGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="PersonCollectionSections">
+            <TabbedGroup Id="PersonRecordTabs">
+              <LayoutGroup Id="AddressesOfResidence" Caption="Адреса проживания" />
+              <LayoutGroup Id="IncompleteData" Caption="Неполные данные" />
+              <LayoutGroup Id="MedicalRecords" Caption="Мед. записи" />
+              <LayoutGroup Id="Passports" Caption="Паспорта" />
+              <LayoutGroup Id="TravelHistories" Caption="История поездок" />
+            </TabbedGroup>
+            <TabbedGroup Id="IssuedDocumentsTabs">
+              <LayoutGroup Id="ApplicationProfileInstances" Caption="Заявки (связанные)" />
+              <LayoutGroup Id="InvitationItems" Caption="Приглашения (выданные)" />
+              <LayoutGroup Id="RejectionItems" Caption="Отказы (выданные)" />
+            </TabbedGroup>
+          </LayoutGroup>
         </LayoutGroup>
       </Layout>
-    </ListView>
+    </DetailView>
     <ListView Id="Person_FamilyMembers_ListView" Caption="Родственники" />
     <ListView Id="Person_ListView" Caption="Лица">
       <Columns>
@@ -3003,6 +3081,7 @@
         <ColumnInfo Id="Nationality" Caption="Гражданство" />
         <ColumnInfo Id="PersonalNumber" Caption="Личный номер" />
         <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
+        <ColumnInfo Id="Subcontractor" Caption="Компания (Субподрядчик)" />
       </Columns>
     </ListView>
     <ListView Id="Person_ListView_FamilyMembers" Caption="Родственники">
@@ -3034,6 +3113,7 @@
         <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
         <ColumnInfo Id="Relationship" Caption="Родство" />
         <ColumnInfo Id="SponsoringEmployee" Caption="Сотрудник-спонсор" />
+        <ColumnInfo Id="Subcontractor" Caption="Компания (Субподрядчик)" />
       </Columns>
     </ListView>
     <ListView Id="Person_ListView_TemporaryVisitors" Caption="Временный посетитель">
@@ -3048,7 +3128,7 @@
         <ColumnInfo Id="Nationality" Caption="Гражданство" />
         <ColumnInfo Id="PersonalNumber" Caption="Личный номер" />
         <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
-        <ColumnInfo Id="Subcontractor" Caption="Компания" />
+        <ColumnInfo Id="Subcontractor" Caption="Компания (Субподрядчик)" />
       </Columns>
     </ListView>
     <ListView Id="Person_TravelHistories_ListView" Caption="История поездок">
@@ -3297,9 +3377,14 @@
       <RuleRequiredField MessageTemplateMustNotBeEmpty="&quot;{TargetPropertyName}&quot; не может быть пустым." />
     </ErrorMessageTemplates>
     <Rules>
+      <RuleFromBoolProperty Id="ApplicationProfileInstanceProgress_MinistryLetterFileContentValid" TargetType="Visa2026.Module.BusinessObjects.ApplicationProfileInstanceProgress" CustomMessageTemplate="Копия письма министерства должна быть допустимого типа (PDF, PNG, JPEG, TIFF, GIF или BMP), а содержимое файла должно соответствовать расширению." />
+      <RuleCriteria Id="ApplicationProfileInstanceProgress_MinistryLetterFileNotEmpty" TargetType="Visa2026.Module.BusinessObjects.ApplicationProfileInstanceProgress" CustomMessageTemplate="Загруженная копия письма министерства пуста." />
+      <RuleCriteria Id="ApplicationProfileInstanceProgress_MinistryLetterFileSize" TargetType="Visa2026.Module.BusinessObjects.ApplicationProfileInstanceProgress" CustomMessageTemplate="Копия письма министерства превышает допустимый лимит {MaxDocumentSizeInMB} МБ." />
       <RuleCriteria Id="BorderZone_DateRange" TargetType="Visa2026.Module.BusinessObjects.BorderZone" CustomMessageTemplate="Дата окончания должна быть позже даты начала." />
       <RuleCriteria Id="CompanyHeadSource" TargetType="Visa2026.Module.BusinessObjects.CompanyHead" CustomMessageTemplate="Выберите местного или иностранного сотрудника." />
+      <RuleFromBoolProperty Id="DocumentBase_FileContentValid" TargetType="Visa2026.Module.BusinessObjects.DocumentBase" CustomMessageTemplate="Вложение должно быть допустимого типа (PDF, PNG, JPEG, TIFF, GIF или BMP), а содержимое файла должно соответствовать расширению (переименованные или повреждённые файлы отклоняются)." />
       <RuleCriteria Id="DocumentFileNotEmpty" TargetType="Visa2026.Module.BusinessObjects.DocumentBase" CustomMessageTemplate="Загруженный файл пуст. Прикрепите непустой документ." />
+      <RuleCriteria Id="DocumentSizeIsTooLarge" TargetType="Visa2026.Module.BusinessObjects.DocumentBase" CustomMessageTemplate="Загруженный документ превышает допустимый лимит {MaxDocumentSizeInMB} МБ." />
       <RuleCriteria Id="EmployeeContract_DateRange" TargetType="Visa2026.Module.BusinessObjects.EmployeeContract" CustomMessageTemplate="Дата окончания должна быть позже даты начала договора." />
       <RuleRegularExpression Id="EmployeeEmailFormat" TargetType="Visa2026.Module.BusinessObjects.Person" CustomMessageTemplate="Неверный формат электронной почты." />
       <RuleCriteria Id="ImageNotEmpty" TargetType="Visa2026.Module.BusinessObjects.ImageBase" CustomMessageTemplate="Загруженное изображение пусто. Выберите непустой файл." />

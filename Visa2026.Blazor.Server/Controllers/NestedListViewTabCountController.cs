@@ -105,10 +105,13 @@ public sealed class DetailViewTabCountController : ViewController<DetailView>
 
     private void RegisterBaseCaption(string layoutTabId, IModelLayoutGroup modelGroup)
     {
+        string? localized = PersonNestedTabCaptionHelper.TryGetBaseCaption(View.Id, layoutTabId);
         _baseCaptions[layoutTabId] = StripCount(
-            DocumentCollectionTabCaptionHelper.TryGetBaseCaption(View.Id, layoutTabId)
+            localized
             ?? modelGroup.Caption
             ?? layoutTabId);
+        if (!string.IsNullOrEmpty(localized) && _tabPages.TryGetValue(layoutTabId, out var tabPage))
+            tabPage.Caption = localized;
     }
 
     private void TryWireTab(string layoutTabId)

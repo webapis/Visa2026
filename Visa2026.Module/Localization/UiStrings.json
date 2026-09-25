@@ -15,6 +15,9 @@
         "TemporaryVisitors": { "tr-TR": "Geçici ziyaretçi", "tk-TM": "Wagtlaýyn myhman", "ru-RU": "Временный посетитель" }
       }
     },
+    "Employees": { "en-US": "Employees", "tr-TR": "Çalışanlar", "tk-TM": "Işgärler", "ru-RU": "Сотрудники" },
+    "FamilyMembers": { "en-US": "Family Members", "tr-TR": "Aile Üyeleri", "tk-TM": "Maşgalalar", "ru-RU": "Родственники" },
+    "TemporaryVisitors": { "en-US": "Temporary visitors", "tr-TR": "Geçici ziyaretçiler", "tk-TM": "Wagtlaýyn myhmanlar", "ru-RU": "Временные посетители" },
     "Application": {
       "caption": { "en-US": "Application Profile Instances", "tr-TR": "Başvuru profili örnekleri", "tk-TM": "Ýüztutmalar", "ru-RU": "Экземпляры профиля заявки" },
       "children": {
@@ -668,6 +671,7 @@
         "CurrentMedicalRecord": { "tr-TR": "Sağlık Kaydı", "tk-TM": "Saglyk ýazgysy", "ru-RU": "Мед. запись" },
         "CurrentInvitationItem": { "tr-TR": "Davet Kalemi", "tk-TM": "Çakylyk elementi", "ru-RU": "Позиция приглашения" },
         "CurrentSalary": { "tr-TR": "Maaş", "tk-TM": "Aýlyk", "ru-RU": "Зарплата" },
+        "Subcontractor": { "tr-TR": "Şirket (Taşeron)", "tk-TM": "Kompaniýa (Subpudarçy)", "ru-RU": "Компания (Субподрядчик)" },
         "IsArchived": { "tr-TR": "Arşivlendi", "tk-TM": "Arhiwlendi", "ru-RU": "В архиве" }
       }
     },
@@ -698,6 +702,7 @@
         "CurrentAddressOfResidence": { "tr-TR": "İkamet Adresi", "tk-TM": "Ýaşaýyş salgysy", "ru-RU": "Адрес проживания" },
         "CurrentRejectionItem": { "tr-TR": "Ret Kalemi", "tk-TM": "Ret elementi", "ru-RU": "Позиция отказа" },
         "CurrentInvitationItem": { "tr-TR": "Davet Kalemi", "tk-TM": "Çakylyk elementi", "ru-RU": "Позиция приглашения" },
+        "Subcontractor": { "tr-TR": "Şirket (Taşeron)", "tk-TM": "Kompaniýa (Subpudarçy)", "ru-RU": "Компания (Субподрядчик)" },
         "IsArchived": { "tr-TR": "Arşivlendi", "tk-TM": "Arhiwlendi", "ru-RU": "В архиве" }
       }
     },
@@ -711,7 +716,7 @@
         "Gender": { "tr-TR": "Cinsiyet", "tk-TM": "Jynsy", "ru-RU": "Пол" },
         "Nationality": { "tr-TR": "Uyruk", "tk-TM": "Milleti", "ru-RU": "Гражданство" },
         "ProjectContract": { "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama belgisi", "ru-RU": "Контракт проекта" },
-        "Subcontractor": { "tr-TR": "Şirket", "tk-TM": "Kompaniýa", "ru-RU": "Компания" },
+        "Subcontractor": { "tr-TR": "Şirket (Taşeron)", "tk-TM": "Kompaniýa (Subpudarçy)", "ru-RU": "Компания (Субподрядчик)" },
         "IsArchived": { "tr-TR": "Arşivlendi", "tk-TM": "Arhiwlendi", "ru-RU": "В архиве" }
       }
     },

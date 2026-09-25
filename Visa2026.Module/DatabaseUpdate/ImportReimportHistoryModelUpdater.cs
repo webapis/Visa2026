@@ -28,7 +28,7 @@ public sealed class ImportReimportHistoryModelUpdater : ModelNodesGeneratorUpdat
         var navItem = operations.Items["ImportReimportHistory"]
             ?? operations.Items.AddNode<IModelNavigationItem>("ImportReimportHistory");
         navItem.View = detailView;
-        navItem.Caption = "Import reimport history";
+        navItem.Caption ??= "Import reimport history";
         navItem.ImageName = "BO_Report";
     }
 }

@@ -44,8 +44,6 @@ public sealed class ApplicationProfileInstanceResultCoverageColumnUpdater
             ?? listView.Columns.AddNode<IModelColumn>(ColumnId);
         column.PropertyName = ColumnId;
         column.Width = 560;
-        if (string.IsNullOrWhiteSpace(column.Caption))
-            column.Caption = "Application result";
 
         var lastVisible = listView.Columns
             .Where(c => !ReferenceEquals(c, column) && c.Index >= 0)

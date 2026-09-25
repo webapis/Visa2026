@@ -69,6 +69,43 @@
     "tk-TM": "Ýüklenen faýl boş. Boş däl resminama goşuň.",
     "ru-RU": "Загруженный файл пуст. Прикрепите непустой документ."
   },
+  "DocumentBase_FileContentValid": {
+    "targetType": "DocumentBase",
+    "rule": "RuleFromBoolProperty",
+    "en": "The attachment must use an allowed type (PDF, PNG, JPEG, TIFF, GIF, or BMP) and the file content must match the extension (renamed or corrupt files are rejected).",
+    "tr-TR": "Ek, izin verilen bir türde olmalıdır (PDF, PNG, JPEG, TIFF, GIF veya BMP) ve dosya içeriği uzantıyla eşleşmelidir (yeniden adlandırılmış veya bozuk dosyalar reddedilir).",
+    "tk-TM": "Goşundy rugsat berlen görnüşde bolmaly (PDF, PNG, JPEG, TIFF, GIF ýa-da BMP) we faýlyň mazmuny giňeltme bilen gabat gelmeli (adyny üýtgedilen ýa-da bozulan faýllar ret edilýär).",
+    "ru-RU": "Вложение должно быть допустимого типа (PDF, PNG, JPEG, TIFF, GIF или BMP), а содержимое файла должно соответствовать расширению (переименованные или повреждённые файлы отклоняются)."
+  },
+  "DocumentSizeIsTooLarge": {
+    "targetType": "DocumentBase",
+    "en": "The uploaded document exceeds the maximum allowed size of {MaxDocumentSizeInMB}MB.",
+    "tr-TR": "Yüklenen belge izin verilen en fazla {MaxDocumentSizeInMB} MB boyutunu aşıyor.",
+    "tk-TM": "Ýüklenen resminama rugsat berlen {MaxDocumentSizeInMB} MB çäginden uly.",
+    "ru-RU": "Загруженный документ превышает допустимый лимит {MaxDocumentSizeInMB} МБ."
+  },
+  "ApplicationProfileInstanceProgress_MinistryLetterFileNotEmpty": {
+    "targetType": "ApplicationProfileInstanceProgress",
+    "en": "The uploaded ministry letter copy is empty.",
+    "tr-TR": "Yüklenen bakanlık yazısı kopyası boş.",
+    "tk-TM": "Ýüklenen ministrlik hatynyň nusgasy boş.",
+    "ru-RU": "Загруженная копия письма министерства пуста."
+  },
+  "ApplicationProfileInstanceProgress_MinistryLetterFileSize": {
+    "targetType": "ApplicationProfileInstanceProgress",
+    "en": "The ministry letter copy exceeds the maximum allowed size of {MaxDocumentSizeInMB}MB.",
+    "tr-TR": "Bakanlık yazısı kopyası izin verilen en fazla {MaxDocumentSizeInMB} MB boyutunu aşıyor.",
+    "tk-TM": "Ministrlik hatynyň nusgasy rugsat berlen {MaxDocumentSizeInMB} MB çäginden uly.",
+    "ru-RU": "Копия письма министерства превышает допустимый лимит {MaxDocumentSizeInMB} МБ."
+  },
+  "ApplicationProfileInstanceProgress_MinistryLetterFileContentValid": {
+    "targetType": "ApplicationProfileInstanceProgress",
+    "rule": "RuleFromBoolProperty",
+    "en": "The ministry letter copy must use an allowed type (PDF, PNG, JPEG, TIFF, GIF, or BMP) and the file content must match the extension.",
+    "tr-TR": "Bakanlık yazısı kopyası izin verilen bir türde olmalıdır (PDF, PNG, JPEG, TIFF, GIF veya BMP) ve dosya içeriği uzantıyla eşleşmelidir.",
+    "tk-TM": "Ministrlik hatynyň nusgasy rugsat berlen görnüşde bolmaly (PDF, PNG, JPEG, TIFF, GIF ýa-da BMP) we faýlyň mazmuny giňeltme bilen gabat gelmeli.",
+    "ru-RU": "Копия письма министерства должна быть допустимого типа (PDF, PNG, JPEG, TIFF, GIF или BMP), а содержимое файла должно соответствовать расширению."
+  },
   "RepresentativeSource": {
     "targetType": "Representative",
     "en": "Please select a Local Employee or an Expat Employee.",

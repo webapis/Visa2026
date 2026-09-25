@@ -167,22 +167,92 @@
     <DetailView Id="Person_DetailView_Employee" Caption="Сотрудник">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors">
+            <TabbedGroup Id="Item1">
+              <LayoutGroup Id="Person" Caption="Сотрудник" />
+            </TabbedGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="PersonCollectionSections">
+            <TabbedGroup Id="PersonRecordTabs">
+              <LayoutGroup Id="AddressesOfResidence" Caption="Адреса проживания" />
+              <LayoutGroup Id="Documents" Caption="Резюме и личные файлы" />
+              <LayoutGroup Id="Educations" Caption="Образование" />
+              <LayoutGroup Id="FamilyRelationDocuments" Caption="Копии доказательств родства" />
+              <LayoutGroup Id="IncompleteData" Caption="Неполные данные" />
+              <LayoutGroup Id="MedicalRecords" Caption="Мед. записи" />
+              <LayoutGroup Id="Passports" Caption="Паспорта" />
+              <LayoutGroup Id="PositionHistory" Caption="История должностей" />
+              <LayoutGroup Id="Salaries" Caption="Зарплаты" />
+              <LayoutGroup Id="TravelHistories" Caption="История поездок" />
+              <LayoutGroup Id="WorkDuties" Caption="Цели визита" />
+            </TabbedGroup>
+            <TabbedGroup Id="IssuedDocumentsTabs">
+              <LayoutGroup Id="ApplicationProfileInstances" Caption="Заявки (связанные)" />
+              <LayoutGroup Id="FamilyMembers" Caption="Члены семьи (связанные)" />
+              <LayoutGroup Id="InvitationItems" Caption="Приглашения (выданные)" />
+              <LayoutGroup Id="RejectionItems" Caption="Отказы (выданные)" />
+              <LayoutGroup Id="WorkPermitItems" Caption="Разрешения на работу (выданные)" />
+            </TabbedGroup>
+          </LayoutGroup>
           <LayoutGroup Id="Documents" Caption="Резюме и личные файлы" />
-          <LayoutGroup Id="Person" Caption="Сотрудник" />
         </LayoutGroup>
       </Layout>
     </DetailView>
     <DetailView Id="Person_DetailView_FamilyMember" Caption="Член семьи">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Person" Caption="Член семьи" />
+          <LayoutGroup Id="SimpleEditors">
+            <TabbedGroup Id="Item1">
+              <LayoutGroup Id="Person" Caption="Член семьи" />
+            </TabbedGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="PersonCollectionSections">
+            <TabbedGroup Id="PersonRecordTabs">
+              <LayoutGroup Id="AddressesOfResidence" Caption="Адреса проживания" />
+              <LayoutGroup Id="Documents" Caption="Резюме и личные файлы" />
+              <LayoutGroup Id="Educations" Caption="Образование" />
+              <LayoutGroup Id="FamilyRelationDocuments" Caption="Копии доказательств родства" />
+              <LayoutGroup Id="IncompleteData" Caption="Неполные данные" />
+              <LayoutGroup Id="MedicalRecords" Caption="Мед. записи" />
+              <LayoutGroup Id="Passports" Caption="Паспорта" />
+              <LayoutGroup Id="PositionHistory" Caption="История должностей" />
+              <LayoutGroup Id="Salaries" Caption="Зарплаты" />
+              <LayoutGroup Id="TravelHistories" Caption="История поездок" />
+              <LayoutGroup Id="WorkDuties" Caption="Цели визита" />
+            </TabbedGroup>
+            <TabbedGroup Id="IssuedDocumentsTabs">
+              <LayoutGroup Id="ApplicationProfileInstances" Caption="Заявки (связанные)" />
+              <LayoutGroup Id="FamilyMembers" Caption="Члены семьи (связанные)" />
+              <LayoutGroup Id="InvitationItems" Caption="Приглашения (выданные)" />
+              <LayoutGroup Id="RejectionItems" Caption="Отказы (выданные)" />
+              <LayoutGroup Id="WorkPermitItems" Caption="Разрешения на работу (выданные)" />
+            </TabbedGroup>
+          </LayoutGroup>
         </LayoutGroup>
       </Layout>
     </DetailView>
     <DetailView Id="Person_DetailView_TemporaryVisitor" Caption="Временный посетитель">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Person" Caption="Временный посетитель" />
+          <LayoutGroup Id="SimpleEditors">
+            <TabbedGroup Id="Item1">
+              <LayoutGroup Id="Person" Caption="Временный посетитель" />
+            </TabbedGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="PersonCollectionSections">
+            <TabbedGroup Id="PersonRecordTabs">
+              <LayoutGroup Id="AddressesOfResidence" Caption="Адреса проживания" />
+              <LayoutGroup Id="IncompleteData" Caption="Неполные данные" />
+              <LayoutGroup Id="MedicalRecords" Caption="Мед. записи" />
+              <LayoutGroup Id="Passports" Caption="Паспорта" />
+              <LayoutGroup Id="TravelHistories" Caption="История поездок" />
+            </TabbedGroup>
+            <TabbedGroup Id="IssuedDocumentsTabs">
+              <LayoutGroup Id="ApplicationProfileInstances" Caption="Заявки (связанные)" />
+              <LayoutGroup Id="InvitationItems" Caption="Приглашения (выданные)" />
+              <LayoutGroup Id="RejectionItems" Caption="Отказы (выданные)" />
+            </TabbedGroup>
+          </LayoutGroup>
         </LayoutGroup>
       </Layout>
     </DetailView>

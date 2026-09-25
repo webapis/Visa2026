@@ -49,8 +49,6 @@ public sealed class ApplicationProfileInstanceProgressStepsColumnUpdater
             ?? listView.Columns.AddNode<IModelColumn>(ColumnId);
         column.PropertyName = ColumnId;
         column.Width = 520;
-        if (string.IsNullOrWhiteSpace(column.Caption))
-            column.Caption = "Application progress";
 
         var result = listView.Columns[nameof(ApplicationProfileInstance.ResultCoverageDisplay)];
         if (result is { Index: >= 0 })
