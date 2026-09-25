@@ -1,4 +1,13 @@
 
+### 2026-09-25 — WorkDuty placeholder Ýok (no legacy table)
+
+- **Phase**: mapping (no import run)
+- **Why**: `WorkDuty` does not exist in VISA2015. Demo, Staging, and Production imports left Gelmeginiň maksady empty. Officers need a starting value they can replace during case work.
+- **Fix**: Roster pin and `--epa-roster-backfill-only` create one `WorkDuty` with Description `Ýok` for each employee on a profile that shows CurrentWorkDuty (`RequirePersonPosition`) when that ResolvedLink is missing. Family members and existing links are left unchanged.
+- **Locked**: import-strategy.yaml `calikWorkDutyPlaceholder`.
+- **Verify**: unit tests passed **2/2** (`WorkDutyPlaceholder_DescriptionIsYok`, `WorkDutyPlaceholder_OnlyWhenEmployeeShownAndMissing`). Import not run this session.
+- **Prevent**: Do not invent a legacy purpose. Do not overwrite a WorkDuty link that is already set. Do not create the placeholder for family members or for `--travel-roster-backfill-only`.
+
 ### 2026-09-21 — Adult FM Education forced to Orta / Orta mekdep / Orta bilim
 
 - **Phase**: mapping + correction

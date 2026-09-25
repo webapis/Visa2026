@@ -210,6 +210,17 @@ strategy:
           audit. Import and correction force the original triple. Country and
           GraduationYear stay from source. Children and employees unchanged.
           Adult FMs with no Education row get one default row (birth country).
+      calikWorkDutyPlaceholder:
+        lockedAt: 2026-09-25
+        description: Ýok
+        appliesTo: Demo, Staging, Production, and local import
+        why: >
+          WorkDuty does not exist in VISA2015. Every legacy import creates one
+          WorkDuty with Description Ýok for each employee on a profile that
+          shows CurrentWorkDuty (RequirePersonPosition) when that roster link
+          is missing. Officers replace Ýok during case work. A later import
+          does not overwrite a link that is already set.
+        correctionFlag: --correct-visa2014-application-person-document-links --epa-roster-backfill-only
       officerRelinkMayUseToday: true
       missingIdMap: leave_unlinked_until_oid_in_map_then_pin
     piaVisaResolvedLinkMismatch:
@@ -223,7 +234,8 @@ strategy:
       --entity Visa --visa-remainder (no type filter), then
       --correct-visa2014-application-person-document-links, then
       --epa-roster-backfill-only (Address/Position required on all Calik
-      profiles, including App_Change_Inv). Then --travel-roster-backfill-only
+      profiles, including App_Change_Inv; WorkDuty Description Ýok when the
+      link is missing). Then --travel-roster-backfill-only
       (Registration ActionFamily only).
       Do not run --visa-remainder before later types' headers if first POST
       must set IssuingApplicationProfileInstance.

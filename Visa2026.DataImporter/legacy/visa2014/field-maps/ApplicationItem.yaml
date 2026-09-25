@@ -129,8 +129,14 @@ propertyGaps:
       disposition: resolve_from_person
       missingBehavior: allow_null
     - property: CurrentWorkDuty
-      disposition: resolve_from_person
-      missingBehavior: allow_null
+      disposition: default_placeholder
+      missingBehavior: use_default
+      default: Ýok
+      notes: |
+        VISA2015 has no WorkDuty table. Import creates one WorkDuty per employee
+        roster line on profiles that show CurrentWorkDuty (RequirePersonPosition)
+        with Description Ýok and pins ResolvedLink kind WorkDuty (12).
+        Officers replace Ýok on that case. An existing link is not overwritten.
     - property: CurrentEmployeeContract
       disposition: resolve_from_person
       missingBehavior: allow_null
@@ -437,10 +443,14 @@ fields:
 
   - source: null
     target: CurrentWorkDuty
-    transform: resolve_person_current
+    transform: default_work_duty_placeholder
+    missingBehavior: use_default
+    default: Ýok
     idMapEntity: WorkDuty
-    missingBehavior: allow_null
     gatedBy: Application.ApplicationType.ShowCurrentWorkDuty
+    notes: |
+      No legacy column or table. Roster pin creates Description Ýok for employees
+      when the profile shows CurrentWorkDuty and no WorkDuty ResolvedLink exists.
 
 import:
   rowFilter: GCRecord IS NULL

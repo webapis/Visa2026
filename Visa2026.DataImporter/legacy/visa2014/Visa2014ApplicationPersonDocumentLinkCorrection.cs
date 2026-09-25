@@ -17,6 +17,7 @@ internal sealed class Visa2014ApplicationPersonDocumentLinkCorrectionResult
     public int AddressChanged { get; init; }
     public int PositionChanged { get; init; }
     public int TravelChanged { get; init; }
+    public int WorkDutyChanged { get; init; }
     public int AlreadyCorrect { get; init; }
     public int SkippedMissingParentIdMap { get; init; }
     public int SkippedNoSnapshot { get; init; }
@@ -84,18 +85,20 @@ internal static class Visa2014ApplicationPersonDocumentLinkCorrection
                 if (travelBackfillOnly)
                     Console.WriteLine("INF Mode: Registration TravelHistory roster backfill only (no PIA loop)");
                 else
-                    Console.WriteLine("INF Mode: roster Education/Position/Address backfill only");
+                    Console.WriteLine("INF Mode: roster Education/Position/Address/WorkDuty backfill only");
                 var backfill = Visa2014ApplicationPersonRequiredPersonLinks.BackfillFromRoster(
                     objectSpace, dryRun,
                     education: epaBackfillOnly,
                     address: epaBackfillOnly,
                     position: epaBackfillOnly,
-                    travel: travelBackfillOnly);
+                    travel: travelBackfillOnly,
+                    workDuty: epaBackfillOnly);
                 if (epaBackfillOnly)
                 {
                     Console.WriteLine($"INF Education links changed: {backfill.Education}");
                     Console.WriteLine($"INF Address links changed: {backfill.Address}");
                     Console.WriteLine($"INF Position links changed: {backfill.Position}");
+                    Console.WriteLine($"INF WorkDuty links changed: {backfill.WorkDuty}");
                 }
                 if (travelBackfillOnly)
                     Console.WriteLine($"INF TravelHistory links changed: {backfill.Travel}");
@@ -163,6 +166,7 @@ internal static class Visa2014ApplicationPersonDocumentLinkCorrection
             Console.WriteLine($"INF Address links changed: {result.AddressChanged}");
             Console.WriteLine($"INF Position links changed: {result.PositionChanged}");
             Console.WriteLine($"INF TravelHistory links changed: {result.TravelChanged}");
+            Console.WriteLine($"INF WorkDuty links changed: {result.WorkDutyChanged}");
             Console.WriteLine($"INF Already correct: {result.AlreadyCorrect}");
             Console.WriteLine($"INF Skipped missing parent id-map: {result.SkippedMissingParentIdMap}");
             Console.WriteLine($"INF Skipped (no mapped snapshot): {result.SkippedNoSnapshot}");
@@ -205,6 +209,7 @@ internal static class Visa2014ApplicationPersonDocumentLinkCorrection
         var addressChanged = 0;
         var positionChanged = 0;
         var travelChanged = 0;
+        var workDutyChanged = 0;
         var alreadyCorrect = 0;
         var skippedMissingParent = 0;
         var skippedNoSnapshot = 0;
@@ -368,11 +373,12 @@ internal static class Visa2014ApplicationPersonDocumentLinkCorrection
                     objectSpace, application, person, raw,
                     educationIdMap, currentEducationByPerson, addressIdMap, positionHistoryIdMap,
                     travelHistoryIdMap,
-                    out var eduN, out var addrN, out var posN, out var travelN,
+                    out var eduN, out var addrN, out var posN, out var travelN, out var dutyN,
                     pinTravel: false);
                 educationChanged += eduN;
                 addressChanged += addrN;
                 positionChanged += posN;
+                workDutyChanged += dutyN;
                 pending++;
                 if (pending >= 50)
                 {
@@ -409,6 +415,7 @@ internal static class Visa2014ApplicationPersonDocumentLinkCorrection
         addressChanged += rosterBackfill.Address;
         positionChanged += rosterBackfill.Position;
         travelChanged += rosterBackfill.Travel;
+        workDutyChanged += rosterBackfill.WorkDuty;
 
         return new Visa2014ApplicationPersonDocumentLinkCorrectionResult
         {
@@ -420,6 +427,7 @@ internal static class Visa2014ApplicationPersonDocumentLinkCorrection
             AddressChanged = addressChanged,
             PositionChanged = positionChanged,
             TravelChanged = travelChanged,
+            WorkDutyChanged = workDutyChanged,
             AlreadyCorrect = alreadyCorrect,
             SkippedMissingParentIdMap = skippedMissingParent,
             SkippedNoSnapshot = skippedNoSnapshot,

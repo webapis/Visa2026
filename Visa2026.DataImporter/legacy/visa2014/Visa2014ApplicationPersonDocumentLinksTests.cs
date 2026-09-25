@@ -118,4 +118,19 @@ public class Visa2014ApplicationPersonDocumentLinksTests
 
         Assert.Equal(direct, Visa2014ApplicationPersonRequiredPersonLinks.ResolveAddressLegacyKey(raw));
     }
+
+    [Fact]
+    public void WorkDutyPlaceholder_DescriptionIsYok()
+    {
+        Assert.Equal("\u00DDok", Visa2014WorkDutyDefaults.Description);
+    }
+
+    [Fact]
+    public void WorkDutyPlaceholder_OnlyWhenEmployeeShownAndMissing()
+    {
+        Assert.True(Visa2014WorkDutyDefaults.ShouldCreate(isEmployee: true, profileShowsWorkDuty: true, alreadyLinked: false));
+        Assert.False(Visa2014WorkDutyDefaults.ShouldCreate(isEmployee: false, profileShowsWorkDuty: true, alreadyLinked: false));
+        Assert.False(Visa2014WorkDutyDefaults.ShouldCreate(isEmployee: true, profileShowsWorkDuty: false, alreadyLinked: false));
+        Assert.False(Visa2014WorkDutyDefaults.ShouldCreate(isEmployee: true, profileShowsWorkDuty: true, alreadyLinked: true));
+    }
 }

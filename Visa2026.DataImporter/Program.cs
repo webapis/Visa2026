@@ -359,7 +359,7 @@ static void PrintHelp()
     Console.WriteLine("  --correct-application-type-composite  Retype Application.ApplicationType from legacy SubType enum (--legacy-source, --dry-run)");
     Console.WriteLine("  --correct-visa-type  Patch Visa.VisaType from legacy TypeOfVisaL:mgCode (--legacy-source, --dry-run)");
     Console.WriteLine("  --correct-application-visa-type  Infer Application.VisaType from ApplicationType.Name; clear hidden Period/Category and non-inferred Type (--target-connection, --dry-run)");
-    Console.WriteLine("  --correct-visa2014-application-person-document-links  Pin PIA Passport/Visa/WorkPermitItem and profile-required Education/Position/Address ResolvedLinks. TravelHistory: Registration profiles only via SQL backfill (--legacy-source, --dry-run, --epa-roster-backfill-only, --travel-roster-backfill-only)");
+    Console.WriteLine("  --correct-visa2014-application-person-document-links  Pin PIA Passport/Visa/WorkPermitItem and profile-required Education/Position/Address ResolvedLinks. TravelHistory: Registration profiles only via SQL backfill. WorkDuty: placeholder Description Ýok when legacy has no row (--legacy-source, --dry-run, --epa-roster-backfill-only, --travel-roster-backfill-only)");
     Console.WriteLine("           from legacy Application.Contract or linked Person.Contract (identity pass-through).");
     Console.WriteLine("      Options: [--legacy-source calik-energi] [--application-id-map path.json]");
     Console.WriteLine("                [--dry-run] [--api-base-url url] [--no-wait] [--verbose]");

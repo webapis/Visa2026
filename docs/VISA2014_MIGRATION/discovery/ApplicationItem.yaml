@@ -70,7 +70,8 @@ mapping:
     BorderZoneLocation on line: derive from parent Application.BorderZoneForVisa bit matrix when ApplicationType.ShowBorderZoneLocation.
     WorkPermittedLocations: dbo.WorkPermit.WorkPermitLocation bit matrix when WorkPermit FK set (3,802 rows with location FK).
     BusinessTripAddress: AddressOnBusinessTrip.AddressOnTrip + parent Application.BusinessTripDestination → City.
-    Person-scoped children without legacy FK (Education, MedicalRecord, Salary, WorkDuty, InvitationItem): resolve from Person id-map current-items at import.
+    Person-scoped children without legacy FK (Education, MedicalRecord, Salary, InvitationItem): resolve from Person id-map current-items at import.
+    WorkDuty: no legacy table. Import creates Description Ýok per employee roster line when the profile shows it; officers replace it.
     Workflow flags (VisaIssued, InvitationItemIsIssued, …): partial map from Cancelled/Rejected/IsComplete — full PersonState enum deferred.
     Dedupe: 925 groups same (Application, Person) — canonical lowest Oid; skip_row duplicates (1,221 extra rows).
   parentBlocker:

@@ -194,7 +194,7 @@ internal static class Visa2014ApplicationProfileInstancePersonImporter
                         objectSpace, application, linked, raw,
                         educationIdMap, currentEducationByPerson, addressIdMap, positionHistoryIdMap,
                         travelHistoryIdMap,
-                        out _, out _, out _, out _,
+                        out _, out _, out _, out _, out _,
                         pinTravel: false);
                 }
 
@@ -235,7 +235,8 @@ internal static class Visa2014ApplicationProfileInstancePersonImporter
             objectSpace, dryRun: false);
         Console.WriteLine(
             $"INF Roster EPA backfill: education {rosterBackfill.Education} " +
-            $"address {rosterBackfill.Address} position {rosterBackfill.Position} travel {rosterBackfill.Travel}");
+            $"address {rosterBackfill.Address} position {rosterBackfill.Position} " +
+            $"travel {rosterBackfill.Travel} workDuty {rosterBackfill.WorkDuty}");
         Console.Out.Flush();
 
         if (!string.IsNullOrWhiteSpace(applicationPersonIdMapOutputPath))
