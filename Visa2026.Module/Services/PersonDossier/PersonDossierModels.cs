@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.HeaderLinkedDocuments;
+using Visa2026.Module.Services.PreviewSlot;
 
 namespace Visa2026.Module.Services.PersonDossier;
 
@@ -114,19 +115,50 @@ public sealed class PersonDossierRecord
 
     public Type? SourceObjectType { get; init; }
 
-    /// <summary>Header document-copies family for the Screen-mode Preview link; null when there is no copy on file.</summary>
+    /// <summary>Issued header (invitation, work permit) whose scan opens in the header copies slot.</summary>
     public HeaderDocumentCopiesFamily? PreviewFamily { get; init; }
 
-    /// <summary>Header id (e.g. <see cref="Invitation"/>) whose copies open in the preview slot.</summary>
+    /// <summary>Header id whose copies open in the preview slot.</summary>
     public Guid? PreviewParentId { get; init; }
 
-    public bool HasPreview => PreviewFamily != null && PreviewParentId is { } id && id != Guid.Empty;
+    /// <summary>Person whose child scan (passport, visa, education) opens in the person copies slot.</summary>
+    public Guid? PersonCopyPersonId { get; init; }
 
-    /// <summary>Header id (e.g. <see cref="Invitation"/>) that has no copy yet; the Copy column offers Upload.</summary>
+    /// <summary>Person-copies record key (<c>Passport:{id:N}</c>, …) for preview-only.</summary>
+    public string? PersonCopyRecordKey { get; init; }
+
+    public string? PersonCopyDisplayName { get; init; }
+
+    public bool HasHeaderPreview =>
+        PreviewFamily != null && PreviewParentId is { } headerId && headerId != Guid.Empty;
+
+    public bool HasPersonCopyPreview =>
+        PersonCopyPersonId is { } personId && personId != Guid.Empty
+        && !string.IsNullOrWhiteSpace(PersonCopyRecordKey);
+
+    public bool HasPreview => HasHeaderPreview || HasPersonCopyPreview;
+
+    /// <summary>Issued header that has no copy yet.</summary>
     public Guid? UploadHeaderId { get; init; }
 
-    /// <summary>Owning case of <see cref="UploadHeaderId"/>; when null the header DetailView opens instead of the slot.</summary>
+    public IssueIssuedHeaderKind? UploadIssuedKind { get; init; }
+
+    /// <summary>Owning case; when set, Upload opens the issued-header slot.</summary>
     public Guid? UploadApplicationProfileInstanceId { get; init; }
 
-    public bool CanUpload => !HasPreview && UploadHeaderId is { } id && id != Guid.Empty;
+    /// <summary>Passport, visa, or education opened for upload when there is no scan.</summary>
+    public Type? UploadDetailType { get; init; }
+
+    public Guid? UploadDetailId { get; init; }
+
+    public bool CanUploadHeader =>
+        !HasPreview && UploadHeaderId is { } headerId && headerId != Guid.Empty;
+
+    public bool CanUploadDetail =>
+        !HasPreview
+        && UploadDetailType != null
+        && UploadDetailId is { } detailId
+        && detailId != Guid.Empty;
+
+    public bool CanUpload => CanUploadHeader || CanUploadDetail;
 }

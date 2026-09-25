@@ -79,8 +79,17 @@ public static class VisaPreviewSlotOccupantKeys
         return $"person-document-copies:persons:{string.Join(',', ids.Select(id => id.ToString("N")))}";
     }
 
-    public static string ForPersonDocumentCopies(PersonDocumentCopiesSlotRequest request) =>
-        ForPersonDocumentCopies(request?.PersonIds ?? Array.Empty<Guid>());
+    public static string ForPersonDocumentCopies(PersonDocumentCopiesSlotRequest request)
+    {
+        var key = ForPersonDocumentCopies(request?.PersonIds ?? Array.Empty<Guid>());
+        if (request?.OpenPreviewOnly != true)
+            return key;
+
+        var focus = string.IsNullOrWhiteSpace(request.FocusRecordKey)
+            ? "first"
+            : request.FocusRecordKey.Trim();
+        return $"{key}|preview:{focus}";
+    }
 
     public static string ForHeaderDocumentCopies(HeaderDocumentCopiesSlotRequest request)
     {

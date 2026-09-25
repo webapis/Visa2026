@@ -7,6 +7,7 @@ using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
 using Visa2026.Module.Services;
 using Visa2026.Module.Services.HeaderLinkedDocuments;
+using Visa2026.Module.Services.PreviewSlot;
 
 namespace Visa2026.Module.Services.PersonDossier;
 
@@ -222,12 +223,18 @@ public static class PersonDossierResolver
             .Select(passport =>
             {
                 var status = Classify(passport.ExpirationDate, passport.IsCancelled, passport.DaysRemaining);
+                var hasCopy = HasAttachedFile(passport.Documents);
                 return new PersonDossierRecord
                 {
                     RecordKey = $"Passport:{passport.ID}",
                     SourceObjectId = passport.ID,
                     SourceObjectType = typeof(Passport),
                     IsCurrent = current != null && current.ID == passport.ID,
+                    PersonCopyPersonId = hasCopy ? person.ID : null,
+                    PersonCopyRecordKey = hasCopy ? $"Passport:{passport.ID:N}" : null,
+                    PersonCopyDisplayName = hasCopy ? passport.PassportNumber : null,
+                    UploadDetailType = hasCopy ? null : typeof(Passport),
+                    UploadDetailId = hasCopy ? null : passport.ID,
                     Cells =
                     [
                         passport.PassportNumber ?? string.Empty,
@@ -243,7 +250,7 @@ public static class PersonDossierResolver
             .ToList();
 
         return Section("passports", 10,
-            ["Number", "Type", "IssuedBy", "IssueDate", "Expiry"], records);
+            ["Number", "Type", "IssuedBy", "IssueDate", "Expiry"], records, hasCopyColumn: true);
     }
 
     private static PersonDossierSection BuildVisas(Person person)
@@ -258,12 +265,18 @@ public static class PersonDossierResolver
             {
                 var visa = pair.Visa;
                 var status = Classify(visa.ExpirationDate, visa.IsCancelled, visa.DaysRemaining);
+                var hasCopy = HasAttachedFile(visa.Documents);
                 return new PersonDossierRecord
                 {
                     RecordKey = $"Passport:{pair.Passport.ID}/Visa:{visa.ID}",
                     SourceObjectId = visa.ID,
                     SourceObjectType = typeof(Visa),
                     IsCurrent = current != null && current.ID == visa.ID,
+                    PersonCopyPersonId = hasCopy ? person.ID : null,
+                    PersonCopyRecordKey = hasCopy ? $"Passport:{pair.Passport.ID:N}/Visa:{visa.ID:N}" : null,
+                    PersonCopyDisplayName = hasCopy ? visa.VisaNumber : null,
+                    UploadDetailType = hasCopy ? null : typeof(Visa),
+                    UploadDetailId = hasCopy ? null : visa.ID,
                     Cells =
                     [
                         visa.VisaNumber ?? string.Empty,
@@ -279,7 +292,7 @@ public static class PersonDossierResolver
             .ToList();
 
         return Section("visas", 20,
-            ["Number", "Category", "Type", "ValidFrom", "Expiry"], records);
+            ["Number", "Category", "Type", "ValidFrom", "Expiry"], records, hasCopyColumn: true);
     }
 
     private static PersonDossierSection BuildWorkPermits(Person person)
@@ -291,12 +304,23 @@ public static class PersonDossierResolver
             .Select(item =>
             {
                 var status = Classify(item.ExpirationDate, item.IsCancelled, item.DaysRemaining);
+                var permit = item.WorkPermit;
+                var hasCopy = permit != null
+                    && permit.ID != Guid.Empty
+                    && HasAttachedFile(permit.Documents);
                 return new PersonDossierRecord
                 {
                     RecordKey = $"WorkPermitItem:{item.ID}",
                     SourceObjectId = item.ID,
                     SourceObjectType = typeof(WorkPermitItem),
                     IsCurrent = current != null && current.ID == item.ID,
+                    PreviewFamily = hasCopy ? HeaderDocumentCopiesFamily.WorkPermit : null,
+                    PreviewParentId = hasCopy ? permit!.ID : null,
+                    UploadHeaderId = !hasCopy && permit != null && permit.ID != Guid.Empty ? permit.ID : null,
+                    UploadIssuedKind = !hasCopy && permit != null && permit.ID != Guid.Empty
+                        ? IssueIssuedHeaderKind.WorkPermit
+                        : null,
+                    UploadApplicationProfileInstanceId = !hasCopy ? permit?.ApplicationProfileInstance?.ID : null,
                     Cells =
                     [
                         item.WorkPermitNumber ?? string.Empty,
@@ -311,17 +335,25 @@ public static class PersonDossierResolver
             .ToList();
 
         return Section("workPermits", 30,
-            ["Number", "ASNumber", "ValidFrom", "Expiry"], records);
+            ["Number", "ASNumber", "ValidFrom", "Expiry"], records, hasCopyColumn: true);
     }
 
     private static PersonDossierSection BuildEducation(Person person)
     {
         var records = Safe(person.Educations)
-            .Select(education => new PersonDossierRecord
+            .Select(education =>
             {
+                var hasCopy = HasAttachedFile(education.Documents);
+                return new PersonDossierRecord
+                {
                 RecordKey = $"Education:{education.ID}",
                 SourceObjectId = education.ID,
                 SourceObjectType = typeof(Education),
+                PersonCopyPersonId = hasCopy ? person.ID : null,
+                PersonCopyRecordKey = hasCopy ? $"Education:{education.ID:N}" : null,
+                PersonCopyDisplayName = hasCopy ? Describe(education.EducationInstitution) : null,
+                UploadDetailType = hasCopy ? null : typeof(Education),
+                UploadDetailId = hasCopy ? null : education.ID,
                 Cells =
                 [
                     Describe(education.EducationLevel),
@@ -330,11 +362,12 @@ public static class PersonDossierResolver
                     Describe(education.EducationCountry),
                     education.GraduationYear ?? string.Empty,
                 ],
+                };
             })
             .ToList();
 
         return Section("education", 40,
-            ["Level", "Institution", "Specialty", "Country", "GraduationYear"], records);
+            ["Level", "Institution", "Specialty", "Country", "GraduationYear"], records, hasCopyColumn: true);
     }
 
     private static PersonDossierSection BuildPositionHistory(Person person)
@@ -602,6 +635,9 @@ public static class PersonDossierResolver
                     PreviewFamily = hasCopy ? HeaderDocumentCopiesFamily.Invitation : null,
                     PreviewParentId = hasCopy ? invitation!.ID : null,
                     UploadHeaderId = !hasCopy && invitation != null && invitation.ID != Guid.Empty ? invitation.ID : null,
+                    UploadIssuedKind = !hasCopy && invitation != null && invitation.ID != Guid.Empty
+                        ? IssueIssuedHeaderKind.Invitation
+                        : null,
                     UploadApplicationProfileInstanceId = !hasCopy ? invitation?.ApplicationProfileInstance?.ID : null,
                     Cells =
                     [
@@ -669,6 +705,10 @@ public static class PersonDossierResolver
     }
 
     // ----------------------------------------------------------------- helpers
+
+    private static bool HasAttachedFile<TDocument>(IEnumerable<TDocument>? documents)
+        where TDocument : DocumentBase =>
+        documents != null && documents.Any(document => document?.File != null);
 
     private static PersonDossierSection Section(
         string sectionId, int sortOrder, string[] columnKeys, List<PersonDossierRecord> records,

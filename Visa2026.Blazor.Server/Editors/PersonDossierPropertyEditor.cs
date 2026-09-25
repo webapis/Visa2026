@@ -141,12 +141,27 @@ public class PersonDossierPropertyEditor : BlazorPropertyEditorBase, IComplexVie
         if (slotService == null)
             return Task.CompletedTask;
 
-        return slotService.OpenHeaderDocumentCopiesAsync(
-            new HeaderDocumentCopiesSlotRequest
+        if (record.HasHeaderPreview)
+        {
+            return slotService.OpenHeaderDocumentCopiesAsync(
+                new HeaderDocumentCopiesSlotRequest
+                {
+                    Family = record.PreviewFamily!.Value,
+                    ParentId = record.PreviewParentId!.Value,
+                    FocusDisplayName = record.Cells.Count > 0 ? record.Cells[0] : null,
+                    OpenPreviewOnly = true,
+                },
+                PersonDossierViewIds.DetailView);
+        }
+
+        return slotService.OpenPersonDocumentCopiesAsync(
+            new PersonDocumentCopiesSlotRequest
             {
-                Family = record.PreviewFamily!.Value,
-                ParentId = record.PreviewParentId!.Value,
-                FocusDisplayName = record.Cells.Count > 0 ? record.Cells[0] : null,
+                PersonIds = new[] { record.PersonCopyPersonId!.Value },
+                FocusRecordKey = record.PersonCopyRecordKey,
+                FocusDisplayName = string.IsNullOrWhiteSpace(record.PersonCopyDisplayName)
+                    ? (record.Cells.Count > 0 ? record.Cells[0] : null)
+                    : record.PersonCopyDisplayName,
                 OpenPreviewOnly = true,
             },
             PersonDossierViewIds.DetailView);
@@ -157,34 +172,51 @@ public class PersonDossierPropertyEditor : BlazorPropertyEditorBase, IComplexVie
         if (_application == null || record == null || !record.CanUpload)
             return;
 
-        var headerId = record.UploadHeaderId!.Value;
-        var slotService = _application.ServiceProvider?.GetService<IVisaPreviewSlotService>();
-        if (slotService != null
-            && record.UploadApplicationProfileInstanceId is Guid appId
-            && appId != Guid.Empty)
+        if (record.CanUploadHeader)
         {
-            var request = new IssueIssuedHeaderSlotRequest
+            var headerId = record.UploadHeaderId!.Value;
+            var kind = record.UploadIssuedKind ?? IssueIssuedHeaderKind.Invitation;
+            var slotService = _application.ServiceProvider?.GetService<IVisaPreviewSlotService>();
+            if (slotService != null
+                && record.UploadApplicationProfileInstanceId is Guid appId
+                && appId != Guid.Empty)
             {
-                ApplicationProfileInstanceId = appId,
-                Kind = IssueIssuedHeaderKind.Invitation,
-                CatalogKey = IssueIssuedHeaderComposeService.CatalogKeyFor(IssueIssuedHeaderKind.Invitation),
-                ExistingHeaderId = headerId,
-            };
-            WatchUploadSlot(slotService, VisaPreviewSlotOccupantKeys.ForIssueIssuedHeader(request));
-            await slotService.OpenIssueIssuedHeaderAsync(request, PersonDossierViewIds.DetailView);
+                var request = new IssueIssuedHeaderSlotRequest
+                {
+                    ApplicationProfileInstanceId = appId,
+                    Kind = kind,
+                    CatalogKey = IssueIssuedHeaderComposeService.CatalogKeyFor(kind),
+                    ExistingHeaderId = headerId,
+                };
+                WatchUploadSlot(slotService, VisaPreviewSlotOccupantKeys.ForIssueIssuedHeader(request));
+                await slotService.OpenIssueIssuedHeaderAsync(request, PersonDossierViewIds.DetailView);
+                return;
+            }
+
+            // Issued letter with no case: the header DetailView Documents tab is the upload surface.
+            var headerType = kind == IssueIssuedHeaderKind.WorkPermit ? typeof(WorkPermit) : typeof(Invitation);
+            OpenDetail(headerType, headerId);
             return;
         }
 
-        // Legacy invitation without a case: its DetailView Documents tab is the only upload surface.
-        var objectSpace = _application.CreateObjectSpace(typeof(Invitation));
-        var invitation = objectSpace.GetObjectByKey<Invitation>(headerId);
-        if (invitation == null)
+        if (record.CanUploadDetail)
+            OpenDetail(record.UploadDetailType!, record.UploadDetailId!.Value);
+    }
+
+    private void OpenDetail(Type objectType, Guid objectId)
+    {
+        if (_application == null || objectId == Guid.Empty)
+            return;
+
+        var objectSpace = _application.CreateObjectSpace(objectType);
+        var target = objectSpace.GetObjectByKey(objectType, objectId);
+        if (target == null)
         {
             objectSpace.Dispose();
             return;
         }
 
-        var detailView = _application.CreateDetailView(objectSpace, invitation);
+        var detailView = _application.CreateDetailView(objectSpace, target);
         _application.ShowViewStrategy.ShowView(
             new ShowViewParameters(detailView) { TargetWindow = TargetWindow.NewWindow },
             new ShowViewSource(_application.MainWindow, null));

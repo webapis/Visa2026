@@ -134,6 +134,18 @@ public sealed class ProgressLettersSlotRequest
 public sealed class PersonDocumentCopiesSlotRequest
 {
     public IReadOnlyList<Guid> PersonIds { get; init; } = Array.Empty<Guid>();
+
+    /// <summary>When set, the slot auto-opens preview for this person-copies record key.</summary>
+    public string? FocusRecordKey { get; init; }
+
+    /// <summary>Display name for <see cref="FocusRecordKey"/> when <see cref="OpenPreviewOnly"/> is true.</summary>
+    public string? FocusDisplayName { get; init; }
+
+    /// <summary>
+    /// When true, the slot shows only the document preview viewer (no catalog).
+    /// Used when the officer clicks Preview on a dossier row.
+    /// </summary>
+    public bool OpenPreviewOnly { get; init; }
 }
 
 public sealed class HeaderDocumentCopiesSlotRequest

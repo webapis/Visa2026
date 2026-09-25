@@ -47,6 +47,22 @@
                                                OnInlinePreviewRequested="HandleInlinePreviewAsync" />
             </div>
         }
+        else if (_previewOnlyEmpty)
+        {
+            <div class="report-package-inline-preview app-item-doc-copies-preview">
+                <div class="report-package-inline-preview__header app-item-doc-copies-preview__header">
+                    <h3 class="app-item-doc-copies-preview__title">@Title</h3>
+                    <div class="app-item-doc-copies-preview__header-actions">
+                        <button type="button"
+                                class="visa-preview-drawer__btn visa-preview-drawer__btn--close"
+                                @onclick="ClosePanelAsync">
+                            @CloseLabel
+                        </button>
+                    </div>
+                </div>
+                <p class="app-item-doc-copies-preview__state" style="padding:1rem">@Msg("PersonDossier.Copy.None")</p>
+            </div>
+        }
         else
         {
             <PersonDocumentCopiesInlinePreview @ref="_inlinePreview"
@@ -68,7 +84,10 @@
     private PersonLinkedDocumentsSnapshot _snapshot = new();
     private string _uiCultureName = string.Empty;
     private bool _previewActive;
+    private bool _previewOnlyMode;
+    private bool _previewOnlyEmpty;
     private PersonDocumentCopiesInlinePreview? _inlinePreview;
+    private PersonDocumentCopiesInlinePreviewRequest? _pendingPreviewRequest;
     private EventCallback _refreshRequested;
     private string? _boundOccupantKey;
 
@@ -115,6 +134,9 @@
             _snapshot = new PersonLinkedDocumentsSnapshot();
             _boundOccupantKey = null;
             _previewActive = false;
+            _previewOnlyMode = false;
+            _previewOnlyEmpty = false;
+            _pendingPreviewRequest = null;
             return;
         }
 
@@ -125,11 +147,38 @@
         if (!string.Equals(_boundOccupantKey, occupantKey, StringComparison.Ordinal))
         {
             _boundOccupantKey = occupantKey;
+            _previewOnlyMode = Request?.OpenPreviewOnly == true;
             _previewActive = false;
+            _previewOnlyEmpty = false;
+            _pendingPreviewRequest = null;
         }
 
         _personId = personIds[0];
         ReloadSnapshot();
+
+        if (_previewOnlyMode && _pendingPreviewRequest == null && !_previewActive)
+        {
+            var record = string.IsNullOrWhiteSpace(Request?.FocusRecordKey)
+                ? null
+                : _snapshot.FindRecord(Request.FocusRecordKey.Trim());
+            if (record != null && record.Files.Any(file => file.HasContent))
+            {
+                _previewActive = true;
+                _previewOnlyEmpty = false;
+                _pendingPreviewRequest = new PersonDocumentCopiesInlinePreviewRequest
+                {
+                    RecordKey = record.RecordKey,
+                    DisplayName = string.IsNullOrWhiteSpace(Request?.FocusDisplayName)
+                        ? record.RecordLabel
+                        : Request.FocusDisplayName,
+                };
+            }
+            else
+            {
+                _previewActive = true;
+                _previewOnlyEmpty = true;
+            }
+        }
     }
 
     private void ReloadSnapshot()
@@ -153,6 +202,20 @@
         return InvokeAsync(StateHasChanged);
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_pendingPreviewRequest == null)
+            return;
+
+        var request = _pendingPreviewRequest;
+        _pendingPreviewRequest = null;
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+
+        if (_inlinePreview != null)
+            await _inlinePreview.OpenAsync(request);
+    }
+
     private async Task HandleInlinePreviewAsync(PersonDocumentCopiesInlinePreviewRequest request)
     {
         _previewActive = true;
@@ -165,9 +228,20 @@
 
     private async Task OnPreviewClosedAsync()
     {
+        if (_previewOnlyMode)
+        {
+            _previewOnlyMode = false;
+            _previewActive = false;
+            _previewOnlyEmpty = false;
+            await SlotService.CloseAsync();
+            return;
+        }
+
         _previewActive = false;
         await InvokeAsync(StateHasChanged);
     }
+
+    private string Msg(string key) => VisaUiMessages.Get(key, _uiCultureName);
 
     private async Task ClosePanelAsync()
     {
