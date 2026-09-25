@@ -384,7 +384,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddTypePermissionsRecursively<BorderZoneLocation>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<BorderZoneName>(ReadWriteCreateDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<WorkPermittedLocationName>(ReadWriteCreateDelete, SecurityPermissionState.Allow);
-        userRole.AddTypePermissionsRecursively<ProjectContract>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<ProjectContract>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApprovingMinistry>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApprovalLegProfile>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApplicationProfile>(SecurityOperations.Read, SecurityPermissionState.Allow);
@@ -667,6 +667,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/ApplicationProfileCatalog", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/OrganizationCatalogs", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/ProjectContract", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/ApplicationProfileCatalog", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/ApplicationProfileInstanceProgress", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/BusinessTrip", SecurityPermissionState.Deny);
@@ -826,8 +827,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         /// Shared by <c>Users</c> and <c>UsersReadOnly</c> (reader officers).
         /// </summary>
         /// <param name="officerCanWriteProgress">
-        /// When true (Users): officers may create/update progress and approval snapshots.
-        /// When false (UsersReadOnly): progress and snapshots are read-only.
+        /// When true (Users): officers may create/update progress, approval snapshots, and <c>ProjectContract</c>.
+        /// When false (UsersReadOnly): progress, snapshots, and <c>ProjectContract</c> are read-only.
         /// </param>
         static void EnsureApplicationProcessTrackingReadPermissions(PermissionPolicyRole role, bool officerCanWriteProgress)
         {
@@ -848,10 +849,11 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadOnlyPermission<ApplicationProfileInstancePersonResolvedLink>(role);
             EnsureReadOnlyPermission<ApprovalLegProfileMinistryLeg>(role);
             EnsureReadOnlyPermission<ProjectContractApprovalLegProfile>(role);
-            EnsureReadOnlyPermission<ProjectContract>(role);
 
             if (officerCanWriteProgress)
             {
+                // Process-tracking still needs Read; officers also edit contract title, note, active flag, and approval-leg profile.
+                EnsureReadWriteCreatePermission<ProjectContract>(role);
                 EnsureFullAccessRecursivePermission<ApplicationProfileInstanceProgress>(role);
                 EnsureReadWriteCreatePermission<ApplicationProfileInstanceApprovalLegSnapshot>(role);
                 EnsureReadWriteCreatePermission<ApplicationProfileInstanceExclusion>(role);
@@ -860,6 +862,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             }
             else
             {
+                EnsureReadOnlyPermission<ProjectContract>(role);
                 EnsureReadOnlyPermission<ApplicationProfileInstanceProgress>(role);
                 EnsureReadOnlyPermission<ApplicationProfileInstanceApprovalLegSnapshot>(role);
                 EnsureReadOnlyPermission<ApplicationProfileInstanceExclusion>(role);
