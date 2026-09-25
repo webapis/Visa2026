@@ -170,7 +170,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
     private async Task NextStepAsync()
     {
         var model = ComponentModel;
-        if (model == null || _application == null)
+        if (model == null || _application == null || model.IsAdvancing)
             return;
 
         if (model.SelectedProfileId == Guid.Empty)
@@ -193,46 +193,64 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
             return;
         }
 
-        if (selected?.RequiresApprovalLegVersion == true)
-        {
-            EnsureSelectedVersion(model);
-            model.Step = 2;
-        }
-        else
-        {
-            EnsureOrganizationSelection(model);
-            model.Step = 3;
-        }
+        if (!await ShowAdvanceAsync(model, NextStepTitle(model, selected)))
+            return;
 
-        model.StatusMessage = null;
-        model.IsStatusError = false;
-        await Task.Delay(16);
+        try
+        {
+            if (selected?.RequiresApprovalLegVersion == true)
+            {
+                EnsureSelectedVersion(model);
+                model.Step = 2;
+            }
+            else
+            {
+                EnsureOrganizationSelection(model);
+                model.Step = 3;
+            }
+
+            model.StatusMessage = null;
+            model.IsStatusError = false;
+        }
+        finally
+        {
+            model.IsAdvancing = false;
+        }
     }
 
     private async Task BackStepAsync()
     {
         var model = ComponentModel;
-        if (model == null)
+        if (model == null || model.IsAdvancing)
             return;
 
         var selected = model.Rows.FirstOrDefault(r => r.ProfileId == model.SelectedProfileId);
-        if (model.Step == 4)
-            model.Step = 3;
-        else if (model.Step == 3 && selected?.RequiresApprovalLegVersion == true)
-            model.Step = 2;
-        else
-            model.Step = 1;
+        if (!await ShowAdvanceAsync(model, PreviousStepTitle(model, selected)))
+            return;
 
-        model.StatusMessage = null;
-        model.IsStatusError = false;
-        model.IsStatusWarning = false;
-        await Task.Delay(16);
+        try
+        {
+            if (model.Step == 4)
+                model.Step = 3;
+            else if (model.Step == 3 && selected?.RequiresApprovalLegVersion == true)
+                model.Step = 2;
+            else
+                model.Step = 1;
+
+            model.StatusMessage = null;
+            model.IsStatusError = false;
+            model.IsStatusWarning = false;
+        }
+        finally
+        {
+            model.IsAdvancing = false;
+        }
     }
 
     private async Task ContinueFromLegsAsync()
     {
         var model = ComponentModel;
-        if (model == null)
+        if (model == null || model.IsAdvancing)
             return;
 
         if (model.SelectedVersionId == Guid.Empty)
@@ -242,17 +260,26 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
             return;
         }
 
-        EnsureOrganizationSelection(model);
-        model.Step = 3;
-        model.StatusMessage = null;
-        model.IsStatusError = false;
-        await Task.Delay(16);
+        if (!await ShowAdvanceAsync(model, VisaUiMessages.Get("ApplicationProfileInstance.Picker.ChooseOrg")))
+            return;
+
+        try
+        {
+            EnsureOrganizationSelection(model);
+            model.Step = 3;
+            model.StatusMessage = null;
+            model.IsStatusError = false;
+        }
+        finally
+        {
+            model.IsAdvancing = false;
+        }
     }
 
     private async Task ContinueFromOrganizationAsync()
     {
         var model = ComponentModel;
-        if (model == null || _application == null)
+        if (model == null || _application == null || model.IsAdvancing)
             return;
 
         if (model.SelectedCompanyId == Guid.Empty
@@ -264,17 +291,26 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
             return;
         }
 
-        LoadCaseSummaryDraft(model);
-        model.Step = 4;
-        model.StatusMessage = null;
-        model.IsStatusError = false;
-        await Task.Delay(16);
+        if (!await ShowAdvanceAsync(model, VisaUiMessages.Get("ApplicationProfileInstance.Picker.CaseSummary")))
+            return;
+
+        try
+        {
+            LoadCaseSummaryDraft(model);
+            model.Step = 4;
+            model.StatusMessage = null;
+            model.IsStatusError = false;
+        }
+        finally
+        {
+            model.IsAdvancing = false;
+        }
     }
 
     private async Task UseProfileAsync()
     {
         var model = ComponentModel;
-        if (model == null || _application == null)
+        if (model == null || _application == null || model.IsAdvancing)
             return;
 
         if (model.SelectedProfileId == Guid.Empty)
@@ -298,15 +334,6 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
             return;
         }
 
-        await Task.Delay(16);
-
-        var organization = new ApplicationProfilePickerOrganizationSelection
-        {
-            CompanyId = model.SelectedCompanyId == Guid.Empty ? null : model.SelectedCompanyId,
-            SignatoryId = model.SelectedSignatoryId == Guid.Empty ? null : model.SelectedSignatoryId,
-            RepresentativeId = model.SelectedRepresentativeId == Guid.Empty ? null : model.SelectedRepresentativeId,
-        };
-
         if (!ApplicationProfilePickerCaseSummaryDraft.CanCreate(model.CaseSummaryFields))
         {
             model.StatusMessage = ApplicationWorkspaceCaseSummaryCompletenessGate.FormatBannerMessage(
@@ -315,21 +342,38 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
             return;
         }
 
-        if (!ApplicationProfilePickerCompletionHelper.TryCreateApplication(
-                _application,
-                model.SelectedProfileId,
-                model.SelectedVersionId == Guid.Empty ? null : model.SelectedVersionId,
-                organization,
-                _caseSummaryUpdates,
-                out var createError))
-        {
-            model.StatusMessage = createError;
-            model.IsStatusError = true;
+        if (!await ShowAdvanceAsync(model, VisaUiMessages.Get("ApplicationProfileInstance.Picker.Creating"), moving: false))
             return;
-        }
 
-        model.StatusMessage = null;
-        model.IsStatusError = false;
+        try
+        {
+            var organization = new ApplicationProfilePickerOrganizationSelection
+            {
+                CompanyId = model.SelectedCompanyId == Guid.Empty ? null : model.SelectedCompanyId,
+                SignatoryId = model.SelectedSignatoryId == Guid.Empty ? null : model.SelectedSignatoryId,
+                RepresentativeId = model.SelectedRepresentativeId == Guid.Empty ? null : model.SelectedRepresentativeId,
+            };
+
+            if (!ApplicationProfilePickerCompletionHelper.TryCreateApplication(
+                    _application,
+                    model.SelectedProfileId,
+                    model.SelectedVersionId == Guid.Empty ? null : model.SelectedVersionId,
+                    organization,
+                    _caseSummaryUpdates,
+                    out var createError))
+            {
+                model.StatusMessage = createError;
+                model.IsStatusError = true;
+                return;
+            }
+
+            model.StatusMessage = null;
+            model.IsStatusError = false;
+        }
+        finally
+        {
+            model.IsAdvancing = false;
+        }
     }
 
     private void SelectProfile(Guid profileId)
@@ -592,5 +636,46 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
             objectSpace,
             model.SelectedProfileId,
             _caseSummaryUpdates);
+    }
+
+    private static async Task<bool> ShowAdvanceAsync(
+        ApplicationProfilePickerModel model,
+        string stepTitle,
+        bool moving = true)
+    {
+        model.IsAdvancing = true;
+        model.IsStatusError = false;
+        model.IsStatusWarning = false;
+        model.StatusMessage = moving
+            ? VisaUiMessages.Format("ApplicationProfileInstance.Picker.MovingTo", stepTitle)
+            : stepTitle;
+        await Task.Delay(48);
+        return true;
+    }
+
+    private static string NextStepTitle(
+        ApplicationProfilePickerModel model,
+        ApplicationProfilePickerModel.PickerRowModel? selected)
+    {
+        if (model.Step == 1 && selected?.RequiresApprovalLegVersion == true)
+            return VisaUiMessages.Get("ApplicationProfileInstance.Picker.ChooseLegs");
+
+        if (model.Step is 1 or 2)
+            return VisaUiMessages.Get("ApplicationProfileInstance.Picker.ChooseOrg");
+
+        return VisaUiMessages.Get("ApplicationProfileInstance.Picker.CaseSummary");
+    }
+
+    private static string PreviousStepTitle(
+        ApplicationProfilePickerModel model,
+        ApplicationProfilePickerModel.PickerRowModel? selected)
+    {
+        if (model.Step == 4)
+            return VisaUiMessages.Get("ApplicationProfileInstance.Picker.ChooseOrg");
+
+        if (model.Step == 3 && selected?.RequiresApprovalLegVersion == true)
+            return VisaUiMessages.Get("ApplicationProfileInstance.Picker.ChooseLegs");
+
+        return VisaUiMessages.Get("ApplicationProfileInstance.Picker.ChooseProfile");
     }
 }

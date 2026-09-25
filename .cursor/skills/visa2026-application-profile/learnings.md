@@ -1,3 +1,39 @@
+### 2026-09-25 — Resminamalar uses the section opening bar
+
+- **Need**: Switching to Resminamalar showed a plain “Loading catalog…” line after the section bar had already gone.
+- **Cause**: The case workspace clears “Opening {section}…” as soon as the tab mounts. The catalog is built after that, so the tab painted its own loading line.
+- **Fix**: Keep the section bar until the first catalog load settles. The tab uses that same bar while the catalog is still empty.
+- **Officer**: Stop F5, rebuild the Blazor host, hard-refresh. Open a case, click Resminamalar. The opening bar should stay until the catalog appears.
+- **Prevent**: Do not replace that wait with a centered “Loading catalog…” line. Do not clear the section bar before `InitialCatalogSettled`.
+- **Cross-skill**: visa2026-resminamalar
+
+### 2026-09-25 — Create wizard shows the next step while Continue is working
+
+- **Need**: Continue, Back, and Create application sat still until the next step finished loading.
+- **Cause**: The step change ran before the first await, so Blazor did not paint until the work was done.
+- **Fix**: Set `IsAdvancing` and “Opening {step}…” (or “Creating the application…”), wait one frame, then load the next step. Buttons stay disabled and a progress line sits on the action row.
+- **Officer**: Reload, start a new instance, click Continue. The line should name the next step before that step appears. Same on Back and Create application.
+- **Prevent**: Do not change `Step` before the progress message has been rendered. Do not reuse `IsLoading` for this — that replaces the whole step.
+- **Cross-skill**: —
+
+### 2026-09-25 — Instance detail sections follow Fluent tokens
+
+- **Need**: Case workspace (Overview and the other sections) stayed a light page on Fluent Dark.
+- **Cause**: `--os-panel` / `--os-ink` were fixed light values, and cards, tiles, inputs, and section panels used `#fff`.
+- **Fix**: `.officer-case-workspace` remaps `--os-*` to `--dxds-color-*`. Fluent Dark then retints white section surfaces (overview, people, progress, result, documents, Resminamalar, SLA, Seretmezlik) onto the theme panel. Status tints stay a mix of the original hue.
+- **Officer**: Reload the tab. Open a case. Overview cards and the section nav should match the dark page. Switch sections and the light theme once.
+- **Prevent**: Do not theme the case workspace from `--bs-body-bg`. Do not set `.sm-btn` / `.dc-btn` panel fill without restoring `--primary` and `--danger`.
+- **Cross-skill**: responsive-ui
+
+### 2026-09-25 — Create wizard follows Fluent design tokens
+
+- **Need**: Choose Application Profile stayed a white card (`#f8f8f8`) on the dark content pane (`#252525`).
+- **Cause**: Picker colors were mixed from `--bs-body-bg` / `--bs-body-color`. In this host those stay `#fff` / dark text. The Fluent pane uses `--dxds-color-surface-neutral-default-rest` and `--dxds-color-content-neutral-default-rest` from `modes/dark.min.css` (selector `.dxbl-theme-fluent-mode-dark, :root`).
+- **Fix**: `application-profile-picker.css` tokens bind to those `--dxds-*` surfaces, borders, and content colors, plus primary button tokens (`--dxds-color-surface-primary-*`, `--dxbl-btn-primary-color`).
+- **Officer**: Reload the browser tab (the stylesheet link is on the host page). Start a new instance. The profile list, hint, badges, and Continue should match the dark page. Switch to light and check the same four steps.
+- **Prevent**: Do not theme the picker from `--bs-body-bg`. That variable does not follow Fluent Dark here.
+- **Cross-skill**: —
+
 ### 2026-09-24 — Application Result ignores Seretmezlik people
 
 - **Need**: People on a Seretmezlik letter should not keep Invitation / Visa / Work permit / Border zone “Missing” on Application Result (or ListView Netije chips). Example: 4 on case, 1 excluded → 0/3 not 0/4. All excluded → expected 0 → Result complete.

@@ -2,6 +2,24 @@
 
 Append-only. Newest first under **## Entries**.
 
+### 2026-09-25 — Create template wizard follows the active theme
+
+- Need: Upload / Review / Generate / Preview / Done stayed a white card with dark labels on Blazing Dark.
+- Cause: `template-scan.css` painted `#fff` / `#0f172a` on `.tas-modal` and the step controls.
+- Fix: Modal tokens fall back from `--DS-*` to `--bs-body-*`. Surfaces, labels, inputs, drop zone, stepper, and buttons use those tokens. The letter preview itself stays the document color.
+- Officer: Hard-refresh, open **Create template**. The dialog matches the selected theme on every step.
+- Prevent: Do not put raw white panels or navy labels back on `.tas-modal`.
+- Cross-skill: visa2026-application-profile theming pattern
+
+### 2026-09-25 — Officer Create template link hidden on Resminamalar
+
+- Need: Visa officer (`Users`, e.g. arzygul) should see **Create template** on the case Resminamalar catalog.
+- Cause: The link is `ShowScanEntryVisible`, which calls `TemplateScanAccess.CanCreateFromScan` → Write on `ApplicationProfileTemplate`. Users were read-only on that type.
+- Fix: `EnsureReadWriteCreatePermission<ApplicationProfileTemplate>` for Users, plus Write on `ApplicationProfile.NestedTemplates` so Approve can attach the new row. UsersReadOnly stays read-only.
+- Officer: Sign out and sign in again, open Resminamalar. **Create template** is next to Placeholder manual.
+- Prevent: Do not leave `ApplicationProfileTemplate` on the shared read-only process-tracking grant for Users.
+- Cross-skill: visa2026-security-access
+
 ### 2026-09-22 — Sanaw "Iş saparyna barýan ýer" mapped to PNAT not BTAD
 
 - Need: CI `ScanExcelBtadProbeTests` — header **Iş saparyna barýan ýer** expected `{{.BTAD}}`, got `{{.PNAT}}`. Sibling **Iş saparynda boljak salgysy** already passed.

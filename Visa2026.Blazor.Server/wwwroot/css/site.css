@@ -528,41 +528,81 @@ dxd-license,
 }
 
 /* Soft-deleted rows in DxGrid (including nested ListViews such as Person.FamilyMembers). */
-/* ApplicationProfileInstance ListView — row tint from latest ApplicationProfileInstanceProgress (see BoStateAppearanceColors). */
-.visa-progress-row.visa-progress-row--state-IS_BEING_PREPARED { --dxbl-grid-row-bg: #fef9c3; }
+/* ApplicationProfileInstance ListView — row tint from latest progress (BoStateAppearanceColors).
+   Light mode keeps the pastel. Fluent Dark mixes that hue into the theme surface and uses theme text. */
+.visa-progress-row.visa-progress-row--state-IS_BEING_PREPARED { --visa-row-hue: #fef9c3; --dxbl-grid-row-bg: var(--visa-row-hue); }
 .visa-progress-row.visa-progress-row--state-IS_BEING_PREPARED > td { color: #854d0e; }
-.visa-progress-row.visa-progress-row--state-1_REVIEW_STARTED { --dxbl-grid-row-bg: #dbeafe; }
+.visa-progress-row.visa-progress-row--state-1_REVIEW_STARTED { --visa-row-hue: #dbeafe; --dxbl-grid-row-bg: var(--visa-row-hue); }
 .visa-progress-row.visa-progress-row--state-1_REVIEW_STARTED > td { color: #1e40af; }
-.visa-progress-row.visa-progress-row--state-2_REVIEW_STARTED { --dxbl-grid-row-bg: #bae6fd; }
+.visa-progress-row.visa-progress-row--state-2_REVIEW_STARTED { --visa-row-hue: #bae6fd; --dxbl-grid-row-bg: var(--visa-row-hue); }
 .visa-progress-row.visa-progress-row--state-2_REVIEW_STARTED > td { color: #0369a1; }
-.visa-progress-row.visa-progress-row--state-1_REVIEW_APPROVED { --dxbl-grid-row-bg: #a7f3d0; }
+.visa-progress-row.visa-progress-row--state-3_REVIEW_STARTED { --visa-row-hue: #bfdbfe; --dxbl-grid-row-bg: var(--visa-row-hue); }
+.visa-progress-row.visa-progress-row--state-3_REVIEW_STARTED > td { color: #1e3a8a; }
+.visa-progress-row.visa-progress-row--state-4_REVIEW_STARTED { --visa-row-hue: #dbeafe; --dxbl-grid-row-bg: var(--visa-row-hue); }
+.visa-progress-row.visa-progress-row--state-4_REVIEW_STARTED > td { color: #1d4ed8; }
+.visa-progress-row.visa-progress-row--state-5_REVIEW_STARTED { --visa-row-hue: #eff6ff; --dxbl-grid-row-bg: var(--visa-row-hue); }
+.visa-progress-row.visa-progress-row--state-5_REVIEW_STARTED > td { color: #172554; }
+.visa-progress-row.visa-progress-row--state-1_REVIEW_APPROVED { --visa-row-hue: #a7f3d0; --dxbl-grid-row-bg: var(--visa-row-hue); }
 .visa-progress-row.visa-progress-row--state-1_REVIEW_APPROVED > td { color: #047857; }
-.visa-progress-row.visa-progress-row--state-2_REVIEW_APPROVED { --dxbl-grid-row-bg: #ecfccb; }
+.visa-progress-row.visa-progress-row--state-2_REVIEW_APPROVED { --visa-row-hue: #ecfccb; --dxbl-grid-row-bg: var(--visa-row-hue); }
 .visa-progress-row.visa-progress-row--state-2_REVIEW_APPROVED > td { color: #3f6212; }
-.visa-progress-row.visa-progress-row--state-1_REVIEW_REJECTED { --dxbl-grid-row-bg: #ffedd5; }
+.visa-progress-row.visa-progress-row--state-3_REVIEW_APPROVED { --visa-row-hue: #d9f99d; --dxbl-grid-row-bg: var(--visa-row-hue); }
+.visa-progress-row.visa-progress-row--state-3_REVIEW_APPROVED > td { color: #365314; }
+.visa-progress-row.visa-progress-row--state-4_REVIEW_APPROVED { --visa-row-hue: #bbf7d0; --dxbl-grid-row-bg: var(--visa-row-hue); }
+.visa-progress-row.visa-progress-row--state-4_REVIEW_APPROVED > td { color: #166534; }
+.visa-progress-row.visa-progress-row--state-5_REVIEW_APPROVED { --visa-row-hue: #86efac; --dxbl-grid-row-bg: var(--visa-row-hue); }
+.visa-progress-row.visa-progress-row--state-5_REVIEW_APPROVED > td { color: #14532d; }
+.visa-progress-row.visa-progress-row--state-1_REVIEW_REJECTED { --visa-row-hue: #ffedd5; --dxbl-grid-row-bg: var(--visa-row-hue); }
 .visa-progress-row.visa-progress-row--state-1_REVIEW_REJECTED > td { color: #c2410c; }
-.visa-progress-row.visa-progress-row--state-2_REVIEW_REJECTED { --dxbl-grid-row-bg: #fed7aa; }
+.visa-progress-row.visa-progress-row--state-2_REVIEW_REJECTED { --visa-row-hue: #fed7aa; --dxbl-grid-row-bg: var(--visa-row-hue); }
 .visa-progress-row.visa-progress-row--state-2_REVIEW_REJECTED > td { color: #9a3412; }
-.visa-progress-row.visa-progress-row--state-PROCESS_STARTED { --dxbl-grid-row-bg: #93c5fd; }
+.visa-progress-row.visa-progress-row--state-3_REVIEW_REJECTED { --visa-row-hue: #fecdd3; --dxbl-grid-row-bg: var(--visa-row-hue); }
+.visa-progress-row.visa-progress-row--state-3_REVIEW_REJECTED > td { color: #be123c; }
+.visa-progress-row.visa-progress-row--state-4_REVIEW_REJECTED { --visa-row-hue: #fca5a5; --dxbl-grid-row-bg: var(--visa-row-hue); }
+.visa-progress-row.visa-progress-row--state-4_REVIEW_REJECTED > td { color: #7f1d1d; }
+.visa-progress-row.visa-progress-row--state-5_REVIEW_REJECTED { --visa-row-hue: #f87171; --dxbl-grid-row-bg: var(--visa-row-hue); }
+.visa-progress-row.visa-progress-row--state-5_REVIEW_REJECTED > td { color: #450a0a; }
+.visa-progress-row.visa-progress-row--state-PROCESS_STARTED { --visa-row-hue: #93c5fd; --dxbl-grid-row-bg: var(--visa-row-hue); }
 .visa-progress-row.visa-progress-row--state-PROCESS_STARTED > td { color: #1d4ed8; }
-.visa-progress-row.visa-progress-row--state-PROCESS_CANCELLED { --dxbl-grid-row-bg: #fecaca; }
+.visa-progress-row.visa-progress-row--state-PROCESS_CANCELLED { --visa-row-hue: #fecaca; --dxbl-grid-row-bg: var(--visa-row-hue); }
 .visa-progress-row.visa-progress-row--state-PROCESS_CANCELLED > td { color: #991b1b; }
-.visa-progress-row.visa-progress-row--state-PROCESS_REJECTED { --dxbl-grid-row-bg: #fca5a5; }
+.visa-progress-row.visa-progress-row--state-PROCESS_REJECTED { --visa-row-hue: #fca5a5; --dxbl-grid-row-bg: var(--visa-row-hue); }
 .visa-progress-row.visa-progress-row--state-PROCESS_REJECTED > td { color: #b91c1c; }
-.visa-progress-row.visa-progress-row--state-PROCESS_ISSUED { --dxbl-grid-row-bg: #86efac; }
+.visa-progress-row.visa-progress-row--state-PROCESS_ISSUED { --visa-row-hue: #86efac; --dxbl-grid-row-bg: var(--visa-row-hue); }
 .visa-progress-row.visa-progress-row--state-PROCESS_ISSUED > td { color: #15803d; }
-.visa-progress-row.visa-progress-row--state-AT_OFFICE { --dxbl-grid-row-bg: #fef3c7; }
+.visa-progress-row.visa-progress-row--state-AT_OFFICE { --visa-row-hue: #fef3c7; --dxbl-grid-row-bg: var(--visa-row-hue); }
 .visa-progress-row.visa-progress-row--state-AT_OFFICE > td { color: #92400e; }
-.visa-progress-row.visa-progress-row--state-AT_THE_MINISTERY_1 { --dxbl-grid-row-bg: #c7d2fe; }
+.visa-progress-row.visa-progress-row--state-AT_THE_MINISTERY_1 { --visa-row-hue: #c7d2fe; --dxbl-grid-row-bg: var(--visa-row-hue); }
 .visa-progress-row.visa-progress-row--state-AT_THE_MINISTERY_1 > td { color: #4338ca; }
-.visa-progress-row.visa-progress-row--state-AT_THE_MINISTERY_2 { --dxbl-grid-row-bg: #a5b4fc; }
+.visa-progress-row.visa-progress-row--state-AT_THE_MINISTERY_2 { --visa-row-hue: #a5b4fc; --dxbl-grid-row-bg: var(--visa-row-hue); }
 .visa-progress-row.visa-progress-row--state-AT_THE_MINISTERY_2 > td { color: #3730a3; }
-.visa-progress-row.visa-progress-row--state-AT_MIGRATION_SERVICE { --dxbl-grid-row-bg: #67e8f9; }
+.visa-progress-row.visa-progress-row--state-AT_THE_MINISTERY_3 { --visa-row-hue: #ddd6fe; --dxbl-grid-row-bg: var(--visa-row-hue); }
+.visa-progress-row.visa-progress-row--state-AT_THE_MINISTERY_3 > td { color: #5b21b6; }
+.visa-progress-row.visa-progress-row--state-AT_THE_MINISTERY_4 { --visa-row-hue: #c4b5fd; --dxbl-grid-row-bg: var(--visa-row-hue); }
+.visa-progress-row.visa-progress-row--state-AT_THE_MINISTERY_4 > td { color: #4338ca; }
+.visa-progress-row.visa-progress-row--state-AT_THE_MINISTERY_5 { --visa-row-hue: #e9d5ff; --dxbl-grid-row-bg: var(--visa-row-hue); }
+.visa-progress-row.visa-progress-row--state-AT_THE_MINISTERY_5 > td { color: #312e81; }
+.visa-progress-row.visa-progress-row--state-AT_MIGRATION_SERVICE { --visa-row-hue: #67e8f9; --dxbl-grid-row-bg: var(--visa-row-hue); }
 .visa-progress-row.visa-progress-row--state-AT_MIGRATION_SERVICE > td { color: #0e7490; }
-.visa-progress-row.visa-progress-row--state-APP_PROGRESS_SLA_WARNING { --dxbl-grid-row-bg: #fef08a; }
+.visa-progress-row.visa-progress-row--state-APP_PROGRESS_SLA_WARNING { --visa-row-hue: #fef08a; --dxbl-grid-row-bg: var(--visa-row-hue); }
 .visa-progress-row.visa-progress-row--state-APP_PROGRESS_SLA_WARNING > td { color: #a16207; }
-.visa-progress-row.visa-progress-row--state-APP_PROGRESS_SLA_OVERDUE { --dxbl-grid-row-bg: #fecaca; }
+.visa-progress-row.visa-progress-row--state-APP_PROGRESS_SLA_OVERDUE { --visa-row-hue: #fecaca; --dxbl-grid-row-bg: var(--visa-row-hue); }
 .visa-progress-row.visa-progress-row--state-APP_PROGRESS_SLA_OVERDUE > td { color: #991b1b; }
+
+/* Fluent Dark and classic dark themes (Blazing Dark has no fluent class) mix the
+   pastel into the theme surface and use the theme font color. Fluent Light keeps
+   the full pastel; text still follows the theme caption color, not a hardcoded dark hue. */
+.visa-progress-row[class*="visa-progress-row--state-"] {
+    --visa-row-surface: var(--DS-color-surface-neutral-default-rest, var(--bs-body-bg, #ffffff));
+    --visa-row-ink: var(--DS-color-content-neutral-default-rest, var(--bs-body-color, #142033));
+    --dxbl-grid-row-bg: color-mix(in srgb, var(--visa-row-hue) 48%, var(--visa-row-surface));
+}
+.dxbl-theme-fluent-mode-light .visa-progress-row[class*="visa-progress-row--state-"] {
+    --dxbl-grid-row-bg: var(--visa-row-hue);
+}
+.visa-progress-row[class*="visa-progress-row--state-"] > td {
+    color: var(--visa-row-ink);
+}
 
 .visa-family-lines-inline,
 .cs-multi-select-inline,
@@ -3930,7 +3970,7 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
 }
 
 /* Instance ListView — Ýüztutmanyň netijesi people-coverage chips.
-   White fill + border so chips stay readable on green/amber progress rows. */
+   Chip surface follows the Fluent theme so they stay readable on tinted rows. */
 .dxbl-grid td .lv-result-chips,
 .lv-result-chips {
     display: flex !important;
@@ -3951,13 +3991,13 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     height: 22px;
     padding: 0 8px;
     border-radius: 999px;
-    border: 1.5px solid #d0d5dd;
-    background: #fff !important;
+    border: 1.5px solid var(--dxds-color-border-neutral-default-rest, var(--bs-border-color, #d0d5dd));
+    background: var(--dxds-color-surface-neutral-default-rest, var(--bs-body-bg, #fff)) !important;
     font-size: 11px;
     font-weight: 600;
     white-space: nowrap;
     line-height: 1;
-    color: #344054 !important;
+    color: var(--dxds-color-content-neutral-default-rest, var(--bs-body-color, #344054)) !important;
 }
 
 .dxbl-grid td .lv-result-chip strong,
@@ -3969,20 +4009,20 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
 
 .dxbl-grid td .lv-result-chip--ok,
 .lv-result-chip--ok {
-    color: #17663a !important;
-    border-color: #12b76a !important;
+    color: var(--dxds-color-content-neutral-default-rest, var(--bs-body-color, #344054)) !important;
+    border-color: var(--dxds-color-content-success-default-rest, var(--bs-success, #12b76a)) !important;
 }
 
 .dxbl-grid td .lv-result-chip--miss,
 .lv-result-chip--miss {
-    color: #b42318 !important;
-    border-color: #f04438 !important;
+    color: var(--dxds-color-content-neutral-default-rest, var(--bs-body-color, #344054)) !important;
+    border-color: var(--dxds-color-content-danger-default-rest, var(--bs-danger, #f04438)) !important;
 }
 
 .dxbl-grid td .lv-result-chip--opt,
 .lv-result-chip--opt {
-    color: #475467 !important;
-    border-color: #98a2b3 !important;
+    color: var(--dxds-color-content-neutral-default-rest, var(--bs-body-color, #344054)) !important;
+    border-color: var(--dxds-color-border-neutral-default-rest, var(--bs-border-color, #98a2b3)) !important;
 }
 
 /* Instance ListView — compact workspace progress stepper. */
@@ -4024,105 +4064,86 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     flex: 0 0 20px;
     font-size: 11px;
     font-weight: 700;
-    background: #fff !important;
-    border: 2px solid #d0d5dd;
-    color: #98a2b3;
+    background: var(--dxds-color-surface-neutral-default-rest, var(--bs-body-bg, #fff)) !important;
+    border: 2px solid var(--dxds-color-border-neutral-default-rest, var(--bs-border-color, #d0d5dd));
+    color: var(--dxds-color-content-neutral-default-rest, var(--bs-body-color, #98a2b3));
 }
 
 .lv-progress-step--done .lv-progress-step__dot,
 .lv-progress-step--issued .lv-progress-step__dot {
-    border-color: #12b76a;
-    color: #12b76a;
-    background: #ecfdf3 !important;
+    border-color: var(--dxds-color-content-success-default-rest, var(--bs-success, #12b76a));
+    color: var(--dxds-color-content-success-default-rest, var(--bs-success, #12b76a));
+    background: var(--dxds-color-surface-success-subdued-rest, color-mix(in srgb, var(--bs-success, #12b76a) 22%, var(--bs-body-bg, #fff))) !important;
 }
 
 .lv-progress-step--issued .lv-progress-step__dot {
-    background: #12b76a !important;
+    background: var(--dxds-color-surface-success-default-rest, #12b76a) !important;
     color: #fff !important;
 }
 
 .lv-progress-step--current .lv-progress-step__dot {
-    border-color: #2563eb;
-    color: #2563eb;
-    box-shadow: 0 0 0 3px #dbeafe;
+    border-color: var(--dxds-color-content-primary-default-rest, #2563eb);
+    color: var(--dxds-color-content-primary-default-rest, #2563eb);
+    box-shadow: 0 0 0 3px var(--dxds-color-surface-primary-subdued-rest, #dbeafe);
 }
 
 .lv-progress-step--rej .lv-progress-step__dot {
-    border-color: #f04438;
-    color: #f04438;
-    background: #fef3f2 !important;
+    border-color: var(--dxds-color-content-danger-default-rest, #f04438);
+    color: var(--dxds-color-content-danger-default-rest, #f04438);
+    background: var(--dxds-color-surface-danger-subdued-rest, #fef3f2) !important;
 }
 
 .lv-progress-step--cancel .lv-progress-step__dot {
-    border-color: #667085;
-    color: #667085;
-    background: #f2f4f7 !important;
+    border-color: var(--dxds-color-content-neutral-subdued-rest, var(--bs-border-color, #667085));
+    color: var(--dxds-color-content-neutral-default-rest, var(--bs-body-color, #667085));
+    background: var(--dxds-color-surface-neutral-subdued-rest, var(--bs-body-bg, #f2f4f7)) !important;
 }
 
 .lv-progress-step__line {
     height: 2px;
     flex: 1;
     margin: 0 6px;
-    background: #d0d5dd;
+    background: var(--dxds-color-border-neutral-default-rest, #d0d5dd);
 }
 
 .lv-progress-step__line--done {
-    background: #12b76a;
+    background: var(--dxds-color-content-success-default-rest, #12b76a);
 }
 
 .lv-progress-step__meta {
     padding: 6px 8px 0 0;
 }
 
-.lv-progress-step__label {
+.lv-progress-step__label,
+.lv-progress-step--current .lv-progress-step__label,
+.lv-progress-step--issued .lv-progress-step__label,
+.lv-progress-step--done .lv-progress-step__label,
+.lv-progress-step--rej .lv-progress-step__label {
     font-size: 11px;
     font-weight: 600;
-    color: #344054;
+    color: var(--dxds-color-content-neutral-default-rest, var(--bs-body-color, #344054));
     line-height: 1.25;
 }
 
-.lv-progress-step--current .lv-progress-step__label {
-    color: #2563eb;
-}
-
-.lv-progress-step--issued .lv-progress-step__label,
-.lv-progress-step--done .lv-progress-step__label {
-    color: #17663a;
-}
-
-.lv-progress-step--rej .lv-progress-step__label {
-    color: #b42318;
-}
-
-.lv-progress-step__date {
-    display: block;
-    margin-top: 2px;
-    font-size: 10px;
-    font-weight: 500;
-    color: #12b76a;
-}
-
+.lv-progress-step__date,
 .lv-progress-step--current .lv-progress-step__date,
-.lv-progress-step__status {
-    display: block;
-    margin-top: 2px;
-    font-size: 10px;
-    font-weight: 500;
-    color: #2563eb;
-}
-
+.lv-progress-step__status,
 .lv-progress-step--rej .lv-progress-step__date,
 .lv-progress-step--rej .lv-progress-step__status {
-    color: #b42318;
+    display: block;
+    margin-top: 2px;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--dxds-color-content-neutral-default-rest, var(--bs-body-color, #344054));
 }
 
-/* Progress + result columns: no row-state / selection fill. */
+/* Progress + result columns follow the row tint and the Fluent theme. */
 .dxbl-grid tr.visa-progress-row > td.lv-plain-cell,
 .dxbl-grid tr.dxbl-grid-selected-row > td.lv-plain-cell,
 .dxbl-grid tr:hover > td.lv-plain-cell,
 .dxbl-grid td.lv-plain-cell {
-    background-color: #fff !important;
+    background-color: var(--dxbl-grid-row-bg, var(--dxds-color-surface-neutral-default-rest, transparent)) !important;
     background-image: none !important;
-    --dxbl-grid-data-cell-bg: #fff;
-    color: #1b2430 !important;
+    --dxbl-grid-data-cell-bg: var(--dxbl-grid-row-bg, var(--dxds-color-surface-neutral-default-rest, transparent));
+    color: var(--dxds-color-content-neutral-default-rest, var(--bs-body-color, #1b2430)) !important;
 }

@@ -171,7 +171,7 @@
   gap: 0.35rem;
   margin-left: 0.5rem;
   font-size: 0.8125rem;
-  color: var(--bs-secondary-color, #6c757d);
+  color: var(--os-ink, var(--DS-color-content-neutral-default-rest, var(--bs-body-color, #334155)));
 }
 
 .resminamalar-catalog__sort-label {
@@ -182,11 +182,16 @@
   min-width: 9.5rem;
   max-width: 14rem;
   padding: 0.15rem 0.35rem;
-  border: 1px solid var(--bs-border-color, #ced4da);
+  border: 1px solid var(--os-line, color-mix(in srgb, currentColor 24%, transparent));
   border-radius: 0.25rem;
-  background: #fff;
+  background: var(--os-panel, var(--DS-color-surface-neutral-default-rest, var(--bs-body-bg, #fff)));
   font-size: 0.8125rem;
-  color: inherit;
+  color: var(--os-ink, var(--DS-color-content-neutral-default-rest, var(--bs-body-color, #1a2332)));
+}
+
+.resminamalar-catalog__sort-select option {
+  background: #fff;
+  color: #1a2332;
 }
 
 .resminamalar-catalog__package-select-hint {
@@ -224,26 +229,26 @@
   font-size: 0.9375rem;
   font-weight: 500;
   line-height: 1.2;
-  color: #334155;
+  color: var(--os-ink, var(--DS-color-content-neutral-default-rest, var(--bs-body-color, #334155)));
   cursor: pointer;
   position: relative;
   white-space: nowrap;
 }
 
 .resminamalar-catalog__pane-tab:hover {
-  color: #0f766e;
+  color: var(--os-ink, var(--DS-color-content-neutral-default-rest, var(--bs-body-color, #0f766e)));
   background: transparent;
   text-decoration: none;
 }
 
 .resminamalar-catalog__pane-tab:focus-visible {
-  outline: 2px solid color-mix(in srgb, #0f766e 55%, transparent);
+  outline: 2px solid color-mix(in srgb, var(--bs-primary, #0f766e) 55%, transparent);
   outline-offset: 2px;
 }
 
 .resminamalar-catalog__pane-tab--active {
   font-weight: 700;
-  color: #0f766e;
+  color: var(--os-ink, var(--DS-color-content-neutral-default-rest, var(--bs-body-color, #0f766e)));
   text-decoration: none;
 }
 
@@ -254,7 +259,7 @@
   right: 0;
   bottom: -1px;
   height: 3px;
-  background: #0f766e;
+  background: var(--bs-primary, var(--DS-color-content-primary-default-rest, #0f766e));
   border-radius: 2px 2px 0 0;
 }
 

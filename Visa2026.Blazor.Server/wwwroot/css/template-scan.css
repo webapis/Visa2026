@@ -1117,3 +1117,169 @@
   color: #0f172a;
   word-break: break-word;
 }
+
+/* Follow the active XAF theme (Fluent and classic, including Blazing Dark). */
+.tas-modal {
+  --tas-panel: var(--DS-color-surface-neutral-default-rest, var(--bs-body-bg, #ffffff));
+  --tas-sunken: var(--DS-color-surface-neutral-default-hovered, color-mix(in srgb, var(--tas-ink) 10%, var(--tas-panel)));
+  --tas-ink: var(--DS-color-content-neutral-default-rest, var(--bs-body-color, #0f172a));
+  --tas-line: var(--DS-color-border-neutral-default-rest, color-mix(in srgb, var(--tas-ink) 24%, var(--tas-panel)));
+  --tas-accent: var(--DS-color-content-primary-default-rest, var(--bs-primary, #0d9488));
+  --tas-accent-soft: var(--DS-color-surface-primary-subdued-rest, color-mix(in srgb, var(--tas-accent) 18%, var(--tas-panel)));
+  --tas-ok: var(--DS-color-content-success-default-rest, var(--bs-success, #16a34a));
+  --tas-warn: var(--DS-color-content-warning-default-rest, var(--bs-warning, #d97706));
+  --tas-bad: var(--DS-color-content-danger-default-rest, var(--bs-danger, #dc2626));
+  background: var(--tas-panel);
+  color: var(--tas-ink);
+  font-family: var(--dxds-font-family-sans-serif, var(--bs-font-sans-serif, "Segoe UI", system-ui, sans-serif));
+  border: 1px solid var(--tas-line);
+}
+.tas-modal :is(
+  h2, h3, h4, p, label, strong, small, td, th, li,
+  .tas-field__label,
+  .tas-radio,
+  .tas-stepper__item,
+  .tas-remap-hint,
+  .tas-filebar strong,
+  .tas-canonical,
+  .tas-sample,
+  .tas-help__meta strong,
+  .tas-chat h4
+) {
+  color: var(--tas-ink);
+}
+.tas-modal :is(.tas-modal__head, .tas-stepper, .tas-foot, .tas-field--nested) {
+  border-color: var(--tas-line);
+  background: var(--tas-panel);
+}
+.tas-modal .tas-stepper,
+.tas-modal .tas-foot {
+  background: var(--tas-sunken);
+}
+.tas-modal .tas-stepper__item + .tas-stepper__item::before,
+.tas-modal .tas-field-table td {
+  background: transparent;
+  border-color: var(--tas-line);
+}
+.tas-modal .tas-stepper__item + .tas-stepper__item::before { background: var(--tas-line); }
+.tas-modal .tas-stepper__dot {
+  background: var(--tas-sunken);
+  color: var(--tas-ink);
+}
+.tas-modal .tas-stepper__item.is-active { color: var(--tas-accent); }
+.tas-modal .tas-stepper__item.is-active .tas-stepper__dot {
+  background: var(--tas-accent);
+  color: #fff;
+}
+.tas-modal .tas-stepper__item.is-done .tas-stepper__dot {
+  background: var(--tas-ok);
+  color: #fff;
+}
+.tas-modal .tas-icon-btn,
+.tas-modal .tas-tip {
+  background: var(--tas-sunken);
+  color: var(--tas-ink);
+}
+.tas-modal .tas-icon-btn:hover,
+.tas-modal .tas-tip:hover,
+.tas-modal .tas-tip:focus {
+  background: var(--tas-accent-soft);
+  color: var(--tas-ink);
+}
+.tas-modal .tas-tip::after {
+  background: var(--tas-panel);
+  color: var(--tas-ink);
+  border: 1px solid var(--tas-line);
+}
+.tas-modal .tas-field__label em { color: var(--tas-bad); }
+.tas-modal :is(.tas-input, select.tas-input, select.tas-input option) {
+  background: var(--tas-panel);
+  color: var(--tas-ink);
+  border-color: var(--tas-line);
+}
+.tas-modal .tas-input:focus { border-color: var(--tas-accent); outline-color: var(--tas-accent); }
+.tas-modal .tas-drop,
+.tas-modal .tas-drop.is-picked,
+.tas-modal .tas-pdf-page,
+.tas-modal .tas-pdf-page.is-on {
+  background: var(--tas-accent-soft);
+  border-color: var(--tas-accent);
+  color: var(--tas-ink);
+}
+.tas-modal .tas-drop strong,
+.tas-modal .tas-drop small { color: var(--tas-ink); }
+.tas-modal .tas-btn--primary {
+  background: var(--tas-accent);
+  color: #fff;
+}
+.tas-modal .tas-btn--primary:hover { filter: brightness(1.08); }
+.tas-modal .tas-btn--primary:disabled {
+  background: var(--tas-sunken);
+  color: var(--tas-ink);
+  opacity: 0.55;
+}
+.tas-modal .tas-btn--ghost,
+.tas-modal .tas-btn--secondary {
+  background: var(--tas-panel);
+  color: var(--tas-ink);
+  border-color: var(--tas-line);
+}
+.tas-modal .tas-btn--ghost:hover,
+.tas-modal .tas-btn--secondary:hover { border-color: var(--tas-accent); }
+.tas-modal .tas-link,
+.tas-modal .tas-stepper__item.is-active { color: var(--tas-accent); }
+.tas-modal :is(
+  .tas-banner,
+  .tas-banner--info,
+  .tas-banner--lock,
+  .tas-banner--fail,
+  .tas-banner--warn,
+  .tas-chip,
+  .tas-chip--ok,
+  .tas-chip--warn,
+  .tas-chip--info,
+  .tas-pill,
+  .tas-token-chip,
+  .tas-conf--high,
+  .tas-conf--medium,
+  .tas-conf--low,
+  .tas-conf--gap,
+  .tas-issue,
+  .tas-issue--fail,
+  .tas-ack
+) {
+  background: var(--tas-sunken);
+  color: var(--tas-ink);
+  border-color: var(--tas-line);
+}
+.tas-modal :is(.tas-banner--fail, .tas-issue--fail, .tas-fail-panel h3, .tas-suit--fail) { color: var(--tas-bad); }
+.tas-modal :is(.tas-banner--warn, .tas-banner--lock, .tas-suit--warn, .tas-field-table tr.is-gap td) { color: var(--tas-warn); }
+.tas-modal .tas-suit--pass { color: var(--tas-ok); }
+.tas-modal :is(
+  .tas-rail,
+  .tas-confirm__box,
+  .tas-chat,
+  .tas-help,
+  .tas-scan-placeholder,
+  .tas-badge-off,
+  .tas-gap-list__item,
+  .tas-field-table,
+  .tas-field-table tr.is-hovered,
+  .tas-field-table tr.is-locked td
+) {
+  background: var(--tas-panel);
+  color: var(--tas-ink);
+  border-color: var(--tas-line);
+}
+.tas-modal .tas-field-table tr.is-selected,
+.tas-modal .tas-field-table tr.is-hovered {
+  background: var(--tas-accent-soft);
+  color: var(--tas-ink);
+}
+.tas-modal .tas-field-table tr.is-selected { box-shadow: inset 3px 0 0 var(--tas-accent); }
+.tas-modal .tas-row-lock,
+.tas-modal .tas-row-lock.is-on {
+  background: var(--tas-panel);
+  color: var(--tas-ink);
+  border-color: var(--tas-line);
+}

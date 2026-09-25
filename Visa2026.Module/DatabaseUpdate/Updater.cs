@@ -853,6 +853,9 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             if (officerCanWriteProgress)
             {
                 // Process-tracking still needs Read; officers also edit contract title, note, active flag, and approval-leg profile.
+                EnsureOfficerCanAssignApplicationProfile(role);
+                // Create template (yellow marks) checks Write on ApplicationProfileTemplate.
+                EnsureReadWriteCreatePermission<ApplicationProfileTemplate>(role);
                 EnsureReadWriteCreatePermission<ProjectContract>(role);
                 EnsureFullAccessRecursivePermission<ApplicationProfileInstanceProgress>(role);
                 EnsureReadWriteCreatePermission<ApplicationProfileInstanceApprovalLegSnapshot>(role);
@@ -869,6 +872,52 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
                 EnsureReadOnlyPermission<ApplicationProfileInstanceExclusionPerson>(role);
                 EnsureReadOnlyPermission<ApplicationProfileInstanceExclusionTemplate>(role);
             }
+        }
+
+        /// <summary>
+        /// Officers set <see cref="ApplicationProfileInstance.ApplicationProfile"/> on create.
+        /// That updates <see cref="ApplicationProfile.Instances"/>. A type-level Write Deny on the profile
+        /// blocks the save. Keep the catalog read-only except that collection.
+        /// </summary>
+        static void EnsureOfficerCanAssignApplicationProfile(PermissionPolicyRole role)
+        {
+            if (role == null)
+                return;
+
+            var typePerm = role.TypePermissions.FirstOrDefault(p => p.TargetType == typeof(ApplicationProfile));
+            if (typePerm == null)
+            {
+                role.AddTypePermissionsRecursively<ApplicationProfile>(SecurityOperations.Read, SecurityPermissionState.Allow);
+                typePerm = role.TypePermissions.First(p => p.TargetType == typeof(ApplicationProfile));
+            }
+
+            typePerm.ReadState = SecurityPermissionState.Allow;
+            // Explicit Write Deny wins over a member Allow (IsAllowPermissionPriority is false).
+            typePerm.WriteState = null;
+            typePerm.CreateState = SecurityPermissionState.Deny;
+            typePerm.DeleteState = SecurityPermissionState.Deny;
+
+            EnsureApplicationProfileMemberWrite(role, nameof(ApplicationProfile.Instances));
+            // Create from yellow marks appends the new row to this collection.
+            EnsureApplicationProfileMemberWrite(role, nameof(ApplicationProfile.NestedTemplates));
+        }
+
+        static void EnsureApplicationProfileMemberWrite(PermissionPolicyRole role, string memberName)
+        {
+            var typePerm = role.TypePermissions.First(p => p.TargetType == typeof(ApplicationProfile));
+            var memberPerm = typePerm.MemberPermissions
+                .FirstOrDefault(mp => string.Equals(mp.Members, memberName, StringComparison.Ordinal));
+            if (memberPerm != null)
+            {
+                memberPerm.WriteState = SecurityPermissionState.Allow;
+                return;
+            }
+
+            role.AddMemberPermissionFromLambda<ApplicationProfile>(
+                SecurityOperations.Write,
+                memberName,
+                _ => true,
+                SecurityPermissionState.Allow);
         }
 
         static void EnsureDenyTypeAccess<T>(PermissionPolicyRole role) where T : class

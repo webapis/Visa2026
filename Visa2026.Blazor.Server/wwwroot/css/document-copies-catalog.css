@@ -5,14 +5,15 @@
  */
 
 .doc-copies-catalog {
-  --dcc-text: var(--bs-body-color, #1e293b);
-  --dcc-surface: var(--bs-body-bg, #ffffff);
-  --dcc-border: color-mix(in srgb, var(--dcc-surface) 88%, var(--dcc-text));
-  --dcc-border-soft: color-mix(in srgb, var(--dcc-surface) 93%, var(--dcc-text));
-  --dcc-muted: color-mix(in srgb, var(--dcc-text) 58%, var(--dcc-surface));
-  --dcc-hover: color-mix(in srgb, var(--dcc-surface) 94%, var(--dcc-text));
+  --dcc-text: var(--DS-color-content-neutral-default-rest, var(--bs-body-color, #1e293b));
+  --dcc-surface: var(--DS-color-surface-neutral-default-rest, var(--bs-body-bg, #ffffff));
+  --dcc-border: color-mix(in srgb, var(--dcc-surface) 78%, var(--dcc-text));
+  --dcc-border-soft: color-mix(in srgb, var(--dcc-surface) 88%, var(--dcc-text));
+  --dcc-muted: var(--dcc-text);
+  --dcc-hover: color-mix(in srgb, var(--dcc-surface) 88%, var(--dcc-text));
   --dcc-radius: 10px;
-  --dcc-link: var(--dxbl-link-color, var(--bs-link-color, #0d6efd));
+  --dcc-link: var(--dcc-text);
+  --dcc-warn: var(--bs-warning, #ea580c);
 }
 
 .doc-copies-catalog__context-line {
@@ -255,26 +256,27 @@
 
 .doc-copies-catalog__row--empty,
 .doc-copies-catalog__row--missing {
-  background: #fff7ed;
-  border-bottom: 1px dashed #ea580c;
-  outline: 1px dashed #ea580c;
+  background: color-mix(in srgb, var(--dcc-warn) 18%, var(--dcc-surface));
+  border-bottom: 1px dashed var(--dcc-warn);
+  outline: 1px dashed var(--dcc-warn);
   outline-offset: -2px;
   border-radius: 6px;
+  color: var(--dcc-text);
 }
 
 .doc-copies-catalog__row--empty .doc-copies-catalog__record-label,
 .doc-copies-catalog__row--empty .doc-copies-catalog__col-files,
 .doc-copies-catalog__row--missing .doc-copies-catalog__record-label,
 .doc-copies-catalog__row--missing .doc-copies-catalog__col-files {
-  color: #c2410c;
+  color: var(--dcc-text);
 }
 
 .doc-copies-catalog__row--empty .doc-copies-catalog__pill,
 .doc-copies-catalog__row--missing .doc-copies-catalog__pill,
 .doc-copies-catalog__pill--missing {
-  background: #fff7ed;
-  border-color: #fdba74;
-  color: #c2410c;
+  background: color-mix(in srgb, var(--dcc-warn) 18%, var(--dcc-surface));
+  border-color: var(--dcc-warn);
+  color: var(--dcc-text);
 }
 
 .doc-copies-catalog__row--empty.doc-copies-catalog__row--clickable:hover,

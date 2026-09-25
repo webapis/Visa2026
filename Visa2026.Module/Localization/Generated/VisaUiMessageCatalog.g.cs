@@ -3407,6 +3407,20 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ýüztutma profilleri ýüklenýär…",
             ["ru-RU"] = "Загрузка профилей заявок…",
         },
+        ["ApplicationProfileInstance.Picker.MovingTo"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Opening {0}…",
+            ["tr-TR"] = "{0} açılıyor…",
+            ["tk-TM"] = "{0} açylýar…",
+            ["ru-RU"] = "Открывается «{0}»…",
+        },
+        ["ApplicationProfileInstance.Picker.Creating"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Creating the application…",
+            ["tr-TR"] = "Başvuru oluşturuluyor…",
+            ["tk-TM"] = "Ýüztutma döredilýär…",
+            ["ru-RU"] = "Создание заявки…",
+        },
         ["ApplicationProfileInstance.Picker.MakeDefault"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Make default",

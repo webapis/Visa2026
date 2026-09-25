@@ -1,13 +1,50 @@
+/*
+  Application Profile instance create wizard (choose profile, approval legs,
+  organization, case summary).
+
+  Fluent mode stylesheets set DevExpress design tokens on :root
+  (.dxbl-theme-fluent-mode-dark / mode-light). The content pane uses those
+  (--dxds-color-surface-*, --dxds-color-content-*). --bs-body-bg stays #fff
+  in this host, so mixing against it keeps the wizard a light card on a dark page.
+*/
+
 .ap-picker {
-    --ap-ink: #1a2332;
-    --ap-muted: #5c6b7a;
-    --ap-line: #d5dde6;
-    --ap-panel: #ffffff;
-    --ap-accent: #0b6e4f;
-    --ap-accent-soft: #e6f3ee;
-    --ap-accent-deep: #08553c;
-    font-family: "Segoe UI", system-ui, sans-serif;
+    --ap-panel: var(--DS-color-surface-neutral-default-rest, var(--bs-body-bg, #ffffff));
+    --ap-ink: var(--DS-color-content-neutral-default-rest, var(--bs-body-color, #1a2332));
+    --ap-muted: var(--DS-color-content-neutral-subdued-rest, color-mix(in srgb, var(--ap-ink) 62%, var(--ap-panel)));
+    --ap-sunken: var(--DS-color-surface-neutral-subdued-rest, color-mix(in srgb, var(--ap-ink) 8%, var(--ap-panel)));
+    --ap-hover: var(--DS-color-surface-neutral-default-hovered, color-mix(in srgb, var(--ap-ink) 12%, var(--ap-panel)));
+    --ap-line: var(--DS-color-border-neutral-default-rest, color-mix(in srgb, var(--ap-ink) 24%, var(--ap-panel)));
+    --ap-line-soft: var(--ap-line);
+
+    --ap-accent: var(--DS-color-content-primary-default-rest, var(--bs-primary, #0b6e4f));
+    --ap-accent-deep: var(--DS-color-content-primary-default-hovered, var(--ap-accent));
+    --ap-accent-soft: var(--DS-color-surface-primary-subdued-rest, color-mix(in srgb, var(--ap-accent) 18%, var(--ap-panel)));
+    --ap-accent-edge: var(--DS-color-border-primary-default-rest, var(--ap-accent));
+    --ap-fill: var(--DS-color-surface-primary-default-rest, var(--bs-primary, #0b6e4f));
+    --ap-fill-hover: var(--DS-color-surface-primary-default-hovered, var(--ap-fill));
+    --ap-on-accent: var(--dxbl-btn-primary-color, #ffffff);
+
+    --ap-warn: var(--DS-color-content-warning-default-rest, var(--bs-warning, #7c4a03));
+    --ap-warn-soft: var(--DS-color-surface-warning-subdued-rest, color-mix(in srgb, var(--ap-warn) 18%, var(--ap-panel)));
+    --ap-warn-edge: var(--ap-warn);
+
+    --ap-bad: var(--DS-color-content-danger-default-rest, var(--bs-danger, #b42318));
+    --ap-bad-soft: var(--DS-color-surface-danger-subdued-rest, color-mix(in srgb, var(--ap-bad) 18%, var(--ap-panel)));
+    --ap-bad-edge: var(--ap-bad);
+
+    --ap-info: var(--DS-color-content-info-default-rest, var(--bs-info, #1e3a8a));
+    --ap-info-soft: var(--DS-color-surface-info-subdued-rest, color-mix(in srgb, var(--ap-info) 18%, var(--ap-panel)));
+    --ap-info-edge: var(--ap-info);
+
+    --ap-hue-accent: var(--ap-fill);
+    --ap-hue-warn: var(--ap-warn);
+    --ap-hue-bad: var(--ap-bad);
+    --ap-hue-info: var(--ap-info);
+
+    font-family: inherit;
     color: var(--ap-ink);
+    background: transparent;
     max-width: 760px;
     margin: 0 auto;
     padding: 8px 4px 32px;
@@ -19,7 +56,7 @@
     color: var(--ap-muted);
     border: 1px solid var(--ap-line);
     border-radius: 10px;
-    background: #fbfcfd;
+    background: var(--ap-sunken);
 }
 
 .ap-picker__header { margin-bottom: 14px; }
@@ -31,8 +68,19 @@
 }
 .ap-picker__header--with-gear .cs-multi-select-popup__gear-btn {
     margin-top: 4px;
+    border-color: var(--ap-line);
+    background: var(--ap-panel);
+    color: var(--ap-ink);
 }
-.ap-picker__title { margin: 0 0 4px; font-size: 1.35rem; font-weight: 650; }
+.ap-picker__header--with-gear .cs-multi-select-popup__gear-btn:hover {
+    background: var(--ap-hover);
+}
+.ap-picker__header--with-gear .cs-multi-select-popup__gear-btn--active {
+    border-color: var(--ap-accent);
+    background: var(--ap-accent-soft);
+    color: var(--ap-accent-deep);
+}
+.ap-picker__title { margin: 0 0 4px; font-size: 1.35rem; font-weight: 650; color: var(--ap-ink); }
 .ap-picker__profile-name {
     margin: 0 0 6px;
     font-size: 1.08rem;
@@ -49,8 +97,9 @@
     margin-bottom: 12px;
     padding: 10px 12px;
     border-radius: 8px;
-    background: #e8f0fa;
-    border: 1px solid #c9d6e4;
+    background: var(--ap-info-soft);
+    border: 1px solid var(--ap-info-edge);
+    color: var(--ap-ink);
     font-size: 0.88rem;
 }
 
@@ -59,9 +108,11 @@
     padding: 10px 12px;
     border-radius: 8px;
     font-size: 0.88rem;
+    color: var(--ap-ink);
 }
-.ap-picker__status.is-ok { background: var(--ap-accent-soft); border: 1px solid #b7d9cb; }
-.ap-picker__status.is-error { background: #fde8e8; border: 1px solid #f5c2c2; }
+.ap-picker__status.is-ok { background: var(--ap-accent-soft); border: 1px solid var(--ap-accent-edge); }
+.ap-picker__status.is-error { background: var(--ap-bad-soft); border: 1px solid var(--ap-bad-edge); color: var(--ap-bad); }
+.ap-picker__status.is-warn { background: var(--ap-warn-soft); border: 1px solid var(--ap-warn-edge); color: var(--ap-warn); }
 
 .ap-picker__list {
     list-style: none;
@@ -79,11 +130,12 @@
     gap: 12px;
     align-items: center;
     padding: 12px 14px;
-    border-bottom: 1px solid #eef2f6;
+    border-bottom: 1px solid var(--ap-line-soft);
     cursor: pointer;
+    color: var(--ap-ink);
 }
 .ap-picker__item:last-child { border-bottom: 0; }
-.ap-picker__item:hover { background: #f7fafc; }
+.ap-picker__item:hover { background: var(--ap-hover); }
 .ap-picker__item.is-selected { background: var(--ap-accent-soft); }
 
 .ap-picker__meta { color: var(--ap-muted); font-size: 0.82rem; margin-top: 2px; }
@@ -95,26 +147,25 @@
     padding: 5px 9px;
     border-radius: 999px;
     border: 1px solid var(--ap-line);
-    background: #fff;
+    background: var(--ap-panel);
     color: var(--ap-muted);
 }
 .ap-picker__badge--on {
     background: var(--ap-accent-soft);
-    border-color: #b7d9cb;
+    border-color: var(--ap-accent-edge);
     color: var(--ap-accent-deep);
 }
 .ap-picker__badge--muted {
-    background: #fff4e5;
-    border-color: #f0d4a8;
-    color: #7c4a03;
+    background: var(--ap-warn-soft);
+    border-color: var(--ap-warn-edge);
+    color: var(--ap-warn);
 }
 .ap-picker__badge--warn {
-    background: #fde8e8;
-    border-color: #f5c2c2;
-    color: #8a1f1f;
+    background: var(--ap-bad-soft);
+    border-color: var(--ap-bad-edge);
+    color: var(--ap-bad);
 }
 .ap-picker__meta--usage { font-style: italic; }
-.ap-picker__status.is-warn { background: #fff4e5; border: 1px solid #f0d4a8; }
 .ap-picker__people-item { cursor: default; }
 .ap-picker__people-label {
     display: flex;
@@ -134,8 +185,42 @@
 .ap-picker__actions {
     display: flex;
     justify-content: flex-end;
+    flex-wrap: wrap;
     gap: 8px;
     margin-top: 14px;
+}
+
+.ap-picker__progress {
+    flex: 1 0 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0 0 4px;
+    color: var(--ap-ink);
+    font-size: 0.88rem;
+    font-weight: 650;
+}
+
+.ap-picker__progress-track {
+    display: block;
+    height: 3px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: var(--ap-line);
+}
+
+.ap-picker__progress-bar {
+    display: block;
+    height: 100%;
+    width: 40%;
+    border-radius: inherit;
+    background: var(--ap-fill, var(--ap-accent));
+    animation: ap-picker-progress 1s ease-in-out infinite;
+}
+
+@keyframes ap-picker-progress {
+    0% { transform: translateX(-120%); }
+    100% { transform: translateX(320%); }
 }
 
 .ap-picker__btn {
@@ -145,15 +230,17 @@
     font-weight: 650;
     font-size: 0.9rem;
     cursor: pointer;
-    background: #fff;
+    background: var(--ap-panel);
     color: var(--ap-ink);
     border: 1px solid var(--ap-line);
 }
+.ap-picker__btn:hover { background: var(--ap-hover); }
 .ap-picker__btn--primary {
-    background: var(--ap-accent);
-    color: #fff;
+    background: var(--ap-fill);
+    color: var(--ap-on-accent);
     border: 0;
 }
+.ap-picker__btn--primary:hover:not(:disabled) { background: var(--ap-fill-hover); }
 .ap-picker__btn--primary:disabled {
     opacity: 0.55;
     cursor: not-allowed;
@@ -171,6 +258,7 @@
     margin: 0;
     font-size: 1.05rem;
     font-weight: 650;
+    color: var(--ap-ink);
 }
 
 .ap-picker__section-actions {
@@ -193,12 +281,12 @@
     font: inherit;
     font-size: 0.875rem;
     font-weight: 650;
-    color: var(--ap-accent);
+    color: var(--ap-accent-deep);
     cursor: pointer;
 }
 
 .ap-picker__link:hover {
-    color: var(--ap-accent-deep);
+    color: var(--ap-accent);
     text-decoration: underline;
 }
 
@@ -209,7 +297,7 @@
     color: var(--ap-muted);
     border: 1px dashed var(--ap-line);
     border-radius: 10px;
-    background: #fbfcfd;
+    background: var(--ap-sunken);
 }
 
 .ap-picker__versions-empty-title {
@@ -251,12 +339,13 @@
     text-align: left;
     border: 1px solid var(--ap-line);
     border-radius: 10px;
-    background: #fff;
+    background: var(--ap-panel);
     padding: 12px 14px;
     cursor: pointer;
     font: inherit;
     color: inherit;
 }
+.ap-picker__version:hover { background: var(--ap-hover); }
 
 .ap-picker__version.is-selected {
     border-color: var(--ap-accent);
@@ -295,10 +384,11 @@
 .ap-picker__org-label {
     font-size: 0.88rem;
     font-weight: 650;
+    color: var(--ap-ink);
 }
 
 .ap-picker__req {
-    color: #b42318;
+    color: var(--ap-bad);
 }
 
 .ap-picker__org-row {
@@ -313,17 +403,19 @@
     min-width: 0;
     height: 38px;
     padding: 0 10px;
-    border: 1px solid #d0d7de;
+    border: 1px solid var(--ap-line);
     border-radius: 8px;
-    background: #fff;
+    background: var(--ap-panel);
+    color: var(--ap-ink);
+    color-scheme: inherit;
     font: inherit;
 }
 
 .ap-picker__org-new {
     appearance: none;
     border: 0;
-    background: var(--ap-accent);
-    color: #fff;
+    background: var(--ap-fill);
+    color: var(--ap-on-accent);
     font: inherit;
     font-size: 0.82rem;
     font-weight: 700;
@@ -335,13 +427,13 @@
 }
 
 .ap-picker__org-new:hover {
-    background: var(--ap-accent-deep);
+    background: var(--ap-fill-hover);
 }
 
 .ap-picker__org-edit {
     appearance: none;
-    border: 1px solid #d0d7de;
-    background: #fff;
+    border: 1px solid var(--ap-line);
+    background: var(--ap-panel);
     color: var(--ap-muted);
     width: 38px;
     height: 38px;
@@ -353,7 +445,8 @@
 
 .ap-picker__org-edit:hover:not(:disabled) {
     color: var(--ap-ink);
-    border-color: #b8c2cc;
+    border-color: var(--ap-line);
+    background: var(--ap-hover);
 }
 
 .ap-picker__org-edit:disabled {
@@ -371,9 +464,9 @@
     margin: 0 0 16px;
     padding: 10px 12px;
     border-radius: 8px;
-    background: #eff6ff;
-    border: 1px solid #bfdbfe;
-    color: #1e3a8a;
+    background: var(--ap-info-soft);
+    border: 1px solid var(--ap-info-edge);
+    color: var(--ap-info);
     font-size: 0.85rem;
     line-height: 1.45;
     max-width: 58ch;
@@ -405,4 +498,46 @@
     flex-direction: column;
     gap: 12px;
     max-width: 28rem;
+}
+
+/* Case summary fields are shared with the case workspace, which still paints
+   light fills. Inside the create wizard they follow this palette. */
+.ap-picker .cw-summary-field__label { color: var(--ap-muted); }
+.ap-picker .cw-summary-field__input,
+.ap-picker select.cw-summary-field__input,
+.ap-picker select.cw-summary-field__input option {
+    border-color: var(--ap-line);
+    background: var(--ap-panel);
+    color: var(--ap-ink);
+    -webkit-text-fill-color: var(--ap-ink);
+    color-scheme: inherit;
+}
+.ap-picker .cw-summary-field__input:disabled {
+    background: var(--ap-sunken);
+    color: var(--ap-muted);
+    -webkit-text-fill-color: var(--ap-muted);
+}
+.ap-picker .cw-summary-field--fill-empty { background: var(--ap-bad-soft); }
+.ap-picker .cw-summary-field--fill-default { background: var(--ap-info-soft); }
+.ap-picker .cw-summary-field--fill-officer { background: var(--ap-accent-soft); }
+.ap-picker .cw-summary-field--fill-empty .cw-summary-field__input,
+.ap-picker .cw-summary-field--fill-empty .cs-multi-select-inline .dxbl-text-edit {
+    border-color: var(--ap-bad);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ap-hue-bad) 28%, transparent);
+    background: var(--ap-panel);
+    color: var(--ap-ink);
+}
+.ap-picker .cw-summary-field--fill-default .cw-summary-field__input,
+.ap-picker .cw-summary-field--fill-default .cs-multi-select-inline .dxbl-text-edit {
+    border-color: var(--ap-info);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ap-hue-info) 28%, transparent);
+    background: var(--ap-panel);
+    color: var(--ap-ink);
+}
+.ap-picker .cw-summary-field--fill-officer .cw-summary-field__input,
+.ap-picker .cw-summary-field--fill-officer .cs-multi-select-inline .dxbl-text-edit {
+    border-color: var(--ap-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ap-hue-accent) 28%, transparent);
+    background: var(--ap-panel);
+    color: var(--ap-ink);
 }

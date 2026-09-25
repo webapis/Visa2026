@@ -6,7 +6,7 @@
 @using Visa2026.Module.Services.ApplicationProfilePicker
 @using Visa2026.Module.Services.ApplicationWorkspace
 
-<div class="ap-picker">
+<div class="ap-picker" aria-busy="@IsAdvancing">
     @if (IsLoading)
     {
         <div class="ap-picker__loading" role="status">@Msg("ApplicationProfileInstance.Picker.Loading")</div>
@@ -94,10 +94,11 @@
         }
 
         <div class="ap-picker__actions">
-            <button type="button" class="ap-picker__btn" @onclick="BackStepAsync">@Msg("ApplicationProfileInstance.Picker.Back")</button>
+            @RenderAdvance()
+            <button type="button" class="ap-picker__btn" disabled="@IsAdvancing" @onclick="BackStepAsync">@Msg("ApplicationProfileInstance.Picker.Back")</button>
             <button type="button"
                     class="ap-picker__btn ap-picker__btn--primary"
-                    disabled="@(!CanContinueFromLegs)"
+                    disabled="@(IsAdvancing || !CanContinueFromLegs)"
                     @onclick="NextStepAsync">
                 @Msg("ApplicationProfileInstance.Picker.Continue")
             </button>
@@ -140,10 +141,11 @@
         </div>
 
         <div class="ap-picker__actions">
-            <button type="button" class="ap-picker__btn" @onclick="BackStepAsync">@Msg("ApplicationProfileInstance.Picker.Back")</button>
+            @RenderAdvance()
+            <button type="button" class="ap-picker__btn" disabled="@IsAdvancing" @onclick="BackStepAsync">@Msg("ApplicationProfileInstance.Picker.Back")</button>
             <button type="button"
                     class="ap-picker__btn ap-picker__btn--primary"
-                    disabled="@(!CanContinueFromOrganization)"
+                    disabled="@(IsAdvancing || !CanContinueFromOrganization)"
                     @onclick="NextStepAsync">
                 @Msg("ApplicationProfileInstance.Picker.Continue")
             </button>
@@ -195,10 +197,11 @@
         }
 
         <div class="ap-picker__actions">
-            <button type="button" class="ap-picker__btn" @onclick="BackStepAsync">@Msg("ApplicationProfileInstance.Picker.Back")</button>
+            @RenderAdvance()
+            <button type="button" class="ap-picker__btn" disabled="@IsAdvancing" @onclick="BackStepAsync">@Msg("ApplicationProfileInstance.Picker.Back")</button>
             <button type="button"
                     class="ap-picker__btn ap-picker__btn--primary"
-                    disabled="@(!CanCreateOnCaseSummaryStep)"
+                    disabled="@(IsAdvancing || !CanCreateOnCaseSummaryStep)"
                     @onclick="UseProfileAsync">
                 @Msg("ApplicationProfileInstance.Picker.Create")
             </button>
@@ -263,9 +266,10 @@
             }
 
             <div class="ap-picker__actions">
+                @RenderAdvance()
                 <button type="button"
                         class="ap-picker__btn ap-picker__btn--primary"
-                        disabled="@(SelectedProfileId == Guid.Empty)"
+                        disabled="@(IsAdvancing || SelectedProfileId == Guid.Empty)"
                         @onclick="NextStepAsync">
                     @Msg("ApplicationProfileInstance.Picker.Continue")
                 </button>
@@ -276,6 +280,7 @@
 
 @code {
     [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public bool IsAdvancing { get; set; }
     [Parameter] public int Step { get; set; } = 1;
     [Parameter] public IReadOnlyList<ApplicationProfilePickerModel.PickerRowModel> Rows { get; set; } = Array.Empty<ApplicationProfilePickerModel.PickerRowModel>();
     [Parameter] public Guid SelectedProfileId { get; set; }
@@ -339,9 +344,20 @@
         await InitialLoadRequested.InvokeAsync();
     }
 
+    private RenderFragment RenderAdvance() => __builder =>
+    {
+        if (!IsAdvancing || string.IsNullOrWhiteSpace(StatusMessage))
+            return;
+
+        <div class="ap-picker__progress" role="status" aria-live="polite">
+            <span class="ap-picker__progress-label">@StatusMessage</span>
+            <span class="ap-picker__progress-track" aria-hidden="true"><span class="ap-picker__progress-bar"></span></span>
+        </div>
+    };
+
     private RenderFragment RenderStatus() => __builder =>
     {
-        if (!string.IsNullOrWhiteSpace(StatusMessage))
+        if (!IsAdvancing && !string.IsNullOrWhiteSpace(StatusMessage))
         {
             var css = IsStatusError ? "is-error" : IsStatusWarning ? "is-warn" : "is-ok";
             <div class="ap-picker__status @css" role="status">@StatusMessage</div>

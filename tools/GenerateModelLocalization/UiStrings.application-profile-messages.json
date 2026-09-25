@@ -1151,6 +1151,18 @@
     "tk-TM": "Ýüztutma profilleri ýüklenýär…",
     "ru-RU": "Загрузка профилей заявок…"
   },
+  "ApplicationProfileInstance.Picker.MovingTo": {
+    "en-US": "Opening {0}…",
+    "tr-TR": "{0} açılıyor…",
+    "tk-TM": "{0} açylýar…",
+    "ru-RU": "Открывается «{0}»…"
+  },
+  "ApplicationProfileInstance.Picker.Creating": {
+    "en-US": "Creating the application…",
+    "tr-TR": "Başvuru oluşturuluyor…",
+    "tk-TM": "Ýüztutma döredilýär…",
+    "ru-RU": "Создание заявки…"
+  },
   "ApplicationProfileInstance.Picker.ChooseProfile": {
     "en-US": "Choose Application Profile",
     "tr-TR": "Başvuru profili seçin",

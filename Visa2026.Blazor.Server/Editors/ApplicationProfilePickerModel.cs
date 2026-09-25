@@ -18,6 +18,12 @@ public sealed class ApplicationProfilePickerModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    public bool IsAdvancing
+    {
+        get => GetPropertyValue<bool>();
+        set => SetPropertyValue(value);
+    }
+
     public int Step
     {
         get => GetPropertyValue<int>();

@@ -157,11 +157,15 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 | `WorkPermitItem` | Read, Write, Create |
 | `CompanyProfile`, `AuthorizedSignatory`, `AuthorizedRepresentative` | Read, Write, Create (Organization catalogs) |
 | `ProjectContract` | Read, Write, Create (Configuration → project contracts; no Delete). `ApprovalLegProfile` stays read-only so the dropdown can be selected |
+| `ApplicationProfileInstanceExclusion`, `ApplicationProfileInstanceExclusionPerson` | Read, Write, Create (numbering on new instances, plus Seretmezlik letters) |
+| `ApplicationProfileInstanceExclusionTemplate` | Full (company Seretmezlik template upload) |
 
 ### Read Only
 | Type |
 |---|
 | `ApplicationTypeFilter`, `ApplicationType`, `ApplicationState`, `ApplicationLocation` |
+| `ApplicationProfile` | Read only except `Instances` (new applications) and `NestedTemplates` (Create template). Create and Delete stay denied |
+| `ApplicationProfileTemplate` | Read, Write, Create (Create template from yellow marks). No Delete |
 | `CheckPoint`, `Country`, `Department`, `EducationLevel`, `Gender`, `MaritalStatus` |
 | `MigrationService`, `PassportType`, `Position`, `PurposeOfTravel` |
 | `Region`, `Relationship`, `Urgency`, `ValidityDuration` |
