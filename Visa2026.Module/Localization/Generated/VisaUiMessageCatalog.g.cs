@@ -8444,14 +8444,14 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Entry",
             ["tr-TR"] = "Giriş",
-            ["tk-TM"] = "Giriş",
+            ["tk-TM"] = "Gelmek",
             ["ru-RU"] = "Въезд",
         },
         ["PersonDossier.MovementType.Exit"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Exit",
             ["tr-TR"] = "Çıkış",
-            ["tk-TM"] = "Çykyş",
+            ["tk-TM"] = "Gitmek",
             ["ru-RU"] = "Выезд",
         },
         ["PersonDossier.ResidenceType.Hospital"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -8710,14 +8710,14 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "External",
             ["tr-TR"] = "Dış",
-            ["tk-TM"] = "Daşarky",
+            ["tk-TM"] = "Ýurt daşy",
             ["ru-RU"] = "Внешний",
         },
         ["PersonDossier.TravelType.Internal"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Internal",
             ["tr-TR"] = "İç",
-            ["tk-TM"] = "Içeri",
+            ["tk-TM"] = "Ýurt 'içi",
             ["ru-RU"] = "Внутренний",
         },
         ["PersonDossier.View.Paper"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)

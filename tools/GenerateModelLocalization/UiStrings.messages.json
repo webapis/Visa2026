@@ -734,25 +734,25 @@
   "PersonDossier.MovementType.Entry": {
     "en": "Entry",
     "tr-TR": "Giriş",
-    "tk-TM": "Giriş",
+    "tk-TM": "Gelmek",
     "ru-RU": "Въезд"
   },
   "PersonDossier.MovementType.Exit": {
     "en": "Exit",
     "tr-TR": "Çıkış",
-    "tk-TM": "Çykyş",
+    "tk-TM": "Gitmek",
     "ru-RU": "Выезд"
   },
   "PersonDossier.TravelType.Internal": {
     "en": "Internal",
     "tr-TR": "İç",
-    "tk-TM": "Içeri",
+    "tk-TM": "Ýurt 'içi",
     "ru-RU": "Внутренний"
   },
   "PersonDossier.TravelType.External": {
     "en": "External",
     "tr-TR": "Dış",
-    "tk-TM": "Daşarky",
+    "tk-TM": "Ýurt daşy",
     "ru-RU": "Внешний"
   },
   "Confirm.SoftDelete": {

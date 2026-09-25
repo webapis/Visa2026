@@ -1456,8 +1456,8 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MovementType" Caption="Hereket görnüşi">
       <OwnMembers>
-        <Member Name="Entry" Caption="Giriş" />
-        <Member Name="Exit" Caption="Çykyş" />
+        <Member Name="Entry" Caption="Gelmek" />
+        <Member Name="Exit" Caption="Gitmek" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Passport" Caption="Pasport">
@@ -2024,8 +2024,8 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.TravelType" Caption="Syýahat görnüşi">
       <OwnMembers>
-        <Member Name="External" Caption="Daşarky" />
-        <Member Name="Internal" Caption="Içeri" />
+        <Member Name="External" Caption="Ýurt daşy" />
+        <Member Name="Internal" Caption="Ýurt 'içi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Urgency" Caption="Gyssaglylyk">
@@ -3469,8 +3469,8 @@
         <LocalizationItem Name="None" Value="Ýok" />
       </LocalizationGroup>
       <LocalizationGroup Name="Visa2026.Module.BusinessObjects.MovementType">
-        <LocalizationItem Name="Entry" Value="Giriş" />
-        <LocalizationItem Name="Exit" Value="Çykyş" />
+        <LocalizationItem Name="Entry" Value="Gelmek" />
+        <LocalizationItem Name="Exit" Value="Gitmek" />
       </LocalizationGroup>
       <LocalizationGroup Name="Visa2026.Module.BusinessObjects.PdfBatchDiplomaScope">
         <LocalizationItem Name="AllEducations" Value="Ähli bilimler" />
@@ -3492,8 +3492,8 @@
         <LocalizationItem Name="PrivateHouse" Value="Şahsy jaý" />
       </LocalizationGroup>
       <LocalizationGroup Name="Visa2026.Module.BusinessObjects.TravelType">
-        <LocalizationItem Name="External" Value="Daşarky" />
-        <LocalizationItem Name="Internal" Value="Içeri" />
+        <LocalizationItem Name="External" Value="Ýurt daşy" />
+        <LocalizationItem Name="Internal" Value="Ýurt 'içi" />
       </LocalizationGroup>
     </LocalizationGroup>
     <LocalizationGroup Name="Texts">

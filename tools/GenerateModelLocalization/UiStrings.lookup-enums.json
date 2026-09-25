@@ -206,13 +206,13 @@
       "Internal": {
         "en-US": "Internal",
         "tr-TR": "İç",
-        "tk-TM": "Içeri",
+        "tk-TM": "Ýurt 'içi",
         "ru-RU": "Внутренний"
       },
       "External": {
         "en-US": "External",
         "tr-TR": "Dış",
-        "tk-TM": "Daşarky",
+        "tk-TM": "Ýurt daşy",
         "ru-RU": "Внешний"
       }
     },
@@ -226,13 +226,13 @@
       "Entry": {
         "en-US": "Entry",
         "tr-TR": "Giriş",
-        "tk-TM": "Giriş",
+        "tk-TM": "Gelmek",
         "ru-RU": "Въезд"
       },
       "Exit": {
         "en-US": "Exit",
         "tr-TR": "Çıkış",
-        "tk-TM": "Çykyş",
+        "tk-TM": "Gitmek",
         "ru-RU": "Выезд"
       }
     }
