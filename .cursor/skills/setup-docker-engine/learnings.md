@@ -194,3 +194,21 @@ Promote to [SKILL.md](./SKILL.md) **scenarios** after **2+** hosts.
 - **Fix**: Pull + `--force-recreate --no-deps app` with all three compose `-f` files. Recreate **app only**.
 - **Prevent**: Keep `docker-compose.scan-ai.override.yml` in the `-f` chain or Azure scan flags drop off. Leave Postgres alone.
 - **Skill**: setup-docker-engine
+
+### 2026-09-26 — Hub latest recreate on `10.100.128.26` (`1.0.0.801`)
+
+- **Symptom**: Deploy newest Docker Hub `webapia/visa2026:latest` to Ubuntu prod.
+- **Try**: SSH `visa2026-onprem-26`. From `/opt/visa2026-prod`: `docker compose -p visa2026-prod --env-file .env.prod -f docker-compose.prod.yml -f docker-compose.restart.override.yml -f docker-compose.scan-ai.override.yml pull app` then `up -d --force-recreate --no-deps app`. Did **not** run `remote-compose-sql-up.sh`. Did **not** set `FORCE_XAF_DB_UPDATE`.
+- **Test**: Image `sha256:e504327a1ca2` Created `2026-09-25T13:21:50Z` (replaces `bd0e1d7c90db` `2026-09-24T07:10Z`). Module assembly `1.0.0.801`. Postgres stayed **healthy** (Up 7 weeks). Seed gates quick (profile updated=36; approval-leg scanned=4829 assigned=0). Host poll 2 and LAN `http://10.100.128.26/LoginPage` → **200**. Scan override still on (`TemplateAiScan__Provider=AzureOpenAI`, `Enabled=true`).
+- **Fix**: Pull + `--force-recreate --no-deps app` with all three compose `-f` files. Recreate **app only**.
+- **Prevent**: Keep `docker-compose.scan-ai.override.yml` in the `-f` chain. Leave Postgres alone.
+- **Skill**: setup-docker-engine
+
+### 2026-09-26 — Hub latest recreate on `10.100.128.26` staging (`1.0.0.801`)
+
+- **Symptom**: Deploy the same Docker Hub `webapia/visa2026:latest` to the staging stack on the Ubuntu host. Staging app was not running; postgres had been up 7 weeks.
+- **Try**: SSH `visa2026-onprem-26`. From `/opt/visa2026-staging`: `docker compose -p visa2026-staging --env-file .env.prod -f docker-compose.prod.yml -f docker-compose.restart.override.yml pull app` then `up -d --force-recreate --no-deps app`. Two compose files only (no scan override on this stack). Did **not** run `remote-compose-sql-up.sh`. Did **not** set `FORCE_XAF_DB_UPDATE`.
+- **Test**: Image `sha256:e504327a1ca2` (same as prod). Postgres stayed **healthy** on `127.0.0.1:5433`. Seed heals were heavy (profile created=36; approval-leg scanned=4770 names=4770; org FKs filled=12311) so LoginPage stayed closed for several minutes. Then `http://127.0.0.1:8080/LoginPage` → **200**.
+- **Fix**: Pull + `--force-recreate --no-deps app`. Recreate **app only**. Wait out seed heals before treating connection refused as a failed deploy.
+- **Prevent**: Staging compose root is `/opt/visa2026-staging`, project `visa2026-staging`, `APP_PORT=8080`. Do not add the prod scan override here.
+- **Skill**: setup-docker-engine
