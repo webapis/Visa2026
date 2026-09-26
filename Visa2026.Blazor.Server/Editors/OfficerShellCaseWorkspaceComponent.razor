@@ -398,6 +398,8 @@
 
     private OfficerShellCaseProgressTab? _progressTab;
     private string? _pendingTab;
+    private string? _blockedSectionLabel;
+    private bool _keepBlockedSectionLabel;
     private bool _tabSwitching;
     private bool _tabContentReady = true;
     private bool _resminamalarCatalogPending;
@@ -627,10 +629,14 @@
         if (_organizationEditing)
             EnsureOrganizationCatalogOptions();
 
+        if (!ApplicationWorkspaceCaseSummaryCompletenessGate.BlocksProcessNavigation(Snapshot?.CaseView))
+            _blockedSectionLabel = null;
+
         if (ApplicationWorkspaceCaseSummaryCompletenessGate.BlocksTab(Snapshot?.CaseView, ActiveTab)
             && CaseTabChanged.HasDelegate
             && !_tabSwitching)
         {
+            RememberBlockedSection(ActiveTab);
             _ = CaseTabChanged.InvokeAsync("overview");
         }
     }
@@ -689,8 +695,29 @@
 
     private string? TabBlockedTitle(string tabKey) =>
         ApplicationWorkspaceCaseSummaryCompletenessGate.BlocksTab(Snapshot?.CaseView, tabKey)
-            ? Msg("ApplicationProfileInstance.Workspace.GateBanner")
+            ? VisaUiMessages.Format("ApplicationProfileInstance.Workspace.GateBlockedSection", SectionLabel(tabKey))
             : null;
+
+    private static string SectionLabel(string? key)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+            return string.Empty;
+
+        foreach (var tab in CaseTabs)
+        {
+            if (string.Equals(tab.Key, key, StringComparison.OrdinalIgnoreCase))
+                return tab.Label;
+        }
+
+        return key;
+    }
+
+    private void RememberBlockedSection(string? key)
+    {
+        var label = SectionLabel(key);
+        if (!string.IsNullOrWhiteSpace(label))
+            _blockedSectionLabel = label;
+    }
 
     private bool TryBlockIncompleteProcessWork(string? tabKey = null)
     {
@@ -1503,7 +1530,13 @@
                 {
                     <div class="os-banner os-banner--error cw-summary-gate" role="alert">
                         <div class="cw-summary-gate__body">
-                            <p>@SummaryGateBannerMessage</p>
+                            <div class="cw-summary-gate__copy">
+                                @if (!string.IsNullOrWhiteSpace(_blockedSectionLabel))
+                                {
+                                    <p class="cw-summary-gate__notice">@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.GateBlockedSection", _blockedSectionLabel)</p>
+                                }
+                                <p>@SummaryGateBannerMessage</p>
+                            </div>
                             @if (!IsCaseSummaryEditing)
                             {
                                 <button type="button" class="os-btn os-btn--primary" @onclick="StartCaseSummaryEdit">
@@ -2467,11 +2500,17 @@
             return;
         if (ApplicationWorkspaceCaseSummaryCompletenessGate.BlocksTab(Snapshot?.CaseView, key))
         {
+            RememberBlockedSection(key);
+            _keepBlockedSectionLabel = true;
             StartCaseSummaryEdit();
             if (!string.Equals(ActiveTab, "overview", StringComparison.OrdinalIgnoreCase))
                 await SelectTab("overview");
+            _keepBlockedSectionLabel = false;
+            await InvokeAsync(StateHasChanged);
             return;
         }
+        if (!_keepBlockedSectionLabel)
+            _blockedSectionLabel = null;
         if (string.Equals(key, ActiveTab, StringComparison.OrdinalIgnoreCase) && _tabContentReady)
             return;
 

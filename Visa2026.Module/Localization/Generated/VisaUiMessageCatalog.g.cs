@@ -4114,6 +4114,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ilki hökmany ýüztutma gysgaça meýdanlaryny dolduryň",
             ["ru-RU"] = "Сначала заполните обязательные поля сводки",
         },
+        ["ApplicationProfileInstance.Workspace.GateBlockedSection"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} did not open. This is not a malfunction: that section stays closed until the required Case summary fields are filled. Next: fill the missing fields below, then open {0} again.",
+            ["tr-TR"] = "{0} açılmadı. Bu bir arıza değil: zorunlu dava özeti alanları dolmadan bu bölüm kapalı kalır. Sonraki adım: aşağıdaki eksik alanları doldurun, sonra {0} bölümünü yeniden açın.",
+            ["tk-TM"] = "{0} açylmady. Bu näsazlyk däl: hökmany ýüztutma gysgaça meýdanlary doldurylýança bu bölüm ýapyk galýar. Indiki ädim: aşakdaky ýetmeýän meýdanlary dolduryň, soň {0} ýene açyň.",
+            ["ru-RU"] = "{0} не открылся. Это не сбой: раздел остаётся закрытым, пока обязательные поля сводки пусты. Дальше: заполните недостающие поля ниже, затем снова откройте {0}.",
+        },
         ["ApplicationProfileInstance.Workspace.GenerateResminamalar"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Generate Resminamalar package",

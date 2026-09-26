@@ -281,7 +281,9 @@ button.cw-person:focus-visible {
   display: flex; flex-wrap: wrap; gap: 10px 16px;
   align-items: flex-start; justify-content: space-between;
 }
-.cw-summary-gate__body p { margin: 0; flex: 1 1 16rem; font-weight: 650; }
+.cw-summary-gate__copy { flex: 1 1 16rem; display: flex; flex-direction: column; gap: 6px; }
+.cw-summary-gate__body p { margin: 0; font-weight: 650; }
+.cw-summary-gate__notice { font-weight: 700; }
 .cw-summary-body {
   display: flex;
   gap: 14px;
