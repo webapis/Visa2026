@@ -58,7 +58,8 @@ internal sealed class Visa2014AddressOfResidenceSiteDuplicateGuard
 
         if (DatabaseProviderDetector.IsPostgreSql(targetConnectionString))
         {
-            await using var connection = new NpgsqlConnection(targetConnectionString);
+            await using var connection = new NpgsqlConnection(
+                DatabaseProviderDetector.StripEfCoreProvider(targetConnectionString));
             await connection.OpenAsync(cancellationToken);
             await using var command = new NpgsqlCommand(LoadSqlPostgres, connection);
             await using var reader = await command.ExecuteReaderAsync(cancellationToken);

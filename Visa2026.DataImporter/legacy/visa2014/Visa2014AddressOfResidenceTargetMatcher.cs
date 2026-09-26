@@ -18,7 +18,8 @@ internal static class Visa2014AddressOfResidenceTargetMatcher
 
         if (DatabaseProviderDetector.IsPostgreSql(connectionString))
         {
-            await using var conn = new NpgsqlConnection(connectionString);
+            await using var conn = new NpgsqlConnection(
+                DatabaseProviderDetector.StripEfCoreProvider(connectionString));
             await conn.OpenAsync(cancellationToken);
             return await TryMatchTargetIdAsync(conn, personId, importRow, postgres: true, cancellationToken);
         }

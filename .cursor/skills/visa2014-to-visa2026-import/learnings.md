@@ -1,3 +1,51 @@
+### 2026-09-26 — Staging scalar import paused for Monday
+
+- **Phase**: scalar import stopped by request
+- **Outcome**: chain stopped during App_Inv header. Finished waves stayed. Unfinished headers were deleted because ApplicationProfileInstance.json was not written yet.
+- **Kept**: Person 3448, Passport 3811, Education 3320, EmployeePositionHistory 3205, AddressOfResidence 4721, EmployeeSalary 3091, TravelHistory Posted 3574 Failed 0.
+- **Removed**: partial App_Inv ApplicationProfileInstances (about 300), no roster/progress/invitations.
+- **Resume Monday**: reopen SSH tunnel 127.0.0.1:15433 to 10.100.128.26:5433, then `artifacts/staging-scalar/Run-StagingScalar.ps1 -StartAt App_Inv/header -SkipLookupPreflight` with VISA2026_STAGING_SQL_CONNECTION and VISA2014_SQL_PASSWORD. Do not restart from Person.
+### 2026-09-26 — Staging address lodging gap then resume
+
+- **Phase**: scalar import
+- **Outcome**: AddressOfResidence retry success (exit 0)
+- **Fix**: One Lodging missing for Türkmenabat / Lebap: FullAddress Himiki ýaşaýyş toplumynyň 94-nji jaýy 90-njy öýi. Inserted into staging Lodgings and appended lodging.calik-energi.json. Source address line from VISA2015 Oid D5AA1AD1-82AF-4AAF-BECF-5E5A9BE38A15.
+- **Counts**: Posted **1** Failed **0** already **4211**.
+- **Log**: artifacts/staging-scalar/logs/20260926-133336-AddressOfResidence.log
+- **Next**: chain continued at EmployeeSalary.
+### 2026-09-26 — AddressOfResidence Npgsql rejected EFCoreProvider
+
+- **Phase**: scalar import
+- **Outcome**: EmployeePositionHistory success. AddressOfResidence first attempt failed before POST.
+- **Counts**: Position Posted **3205** Failed **0** ActualPositions created **26**.
+- **Error**: `Couldn't set efcoreprovider` — Address duplicate guard opened `NpgsqlConnection` with the XAF connection string (`EFCoreProvider=Postgres`).
+- **Fix**: `DatabaseProviderDetector.StripEfCoreProvider` before `new NpgsqlConnection` in the duplicate guard and target matcher. Rebuild Release, resume `-StartAt AddressOfResidence`.
+- **Log**: `artifacts/staging-scalar/logs/20260926-110848-AddressOfResidence.log` then `20260926-112919-AddressOfResidence.log`.
+### 2026-09-26 — Staging Education retry after catalog gaps
+
+- **Phase**: scalar import
+- **Outcome**: success (exit 0)
+- **Fix**: `Seed-EducationLookupGapsToPostgres.ps1` against staging tunnel. Live VISA2015 DISTINCT vs staging: institutions **35** and specialties **22** inserted (including Berlin Tehniki uniwersiteti, Gadjah Mada, VEB Gleichrichterwerk, Politehnik TEDC Bandung, Aeronawtika). Same labels appended to calik tenant JSON.
+- **Counts**: Education Posted **58** Failed **0** already **3262**. Staging Educations **3320**.
+- **Log**: `artifacts/staging-scalar/logs/20260926-110848-Education.log`
+- **Next**: chain continued at EmployeePositionHistory.
+### 2026-09-26 — Staging Education wave halted (.26)
+
+- **Phase**: scalar import
+- **Outcome**: failed (exit 1)
+- **Environment**: `10.100.128.26` `visa2026_staging` from `10.100.128.15` / `VISA2015`
+- **Counts**: Person Posted **3448** Failed **0**. Passport Posted **3811** Failed **0**. Education Posted **3262** Failed **58** Skipped no Person map **0**.
+- **Error**: incomplete OData payload for EducationInstitution / Specialty not in the target catalog (examples: VEB Gleichrichterwerk Stahnsdorf bilim edarasy, Politehnik TEDC Bandung uniwersiteti, Gadjah Mada uniwersiteti, Specialty Aeronawtika).
+- **Log**: `artifacts/staging-scalar/logs/20260926-101033-Education.log`
+- **Next**: chain halted before EmployeePositionHistory. Fix catalog gaps, then resume `-StartAt EmployeePositionHistory` only after Education FailedCount is 0.
+### 2026-09-26 — Staging scalar import started (.15 -> .26 visa2026_staging)
+
+- **Phase**: on-prem scalar import (in progress)
+- **Environment**: Ubuntu `10.100.128.26` staging Postgres `visa2026_staging` (:8080). Source `10.100.128.15` / `VISA2015` via `calik-energi-onprem-staging`. No file waves. Production stack untouched.
+- **Wipe**: dropped and recreated `visa2026_staging`. Empty-database `CheckCompatibility` with `FORCE_XAF_DB_UPDATE=true` did not create tables (app idle, `PermissionPolicyRoleBase` missing). Copied schema-only from prod, then lookup/security/config rows only (People stayed 0). Removed `FORCE_XAF_DB_UPDATE`. LoginPage **200**.
+- **Chain**: `artifacts/staging-scalar/Run-StagingScalar.ps1` (person-domain without Visa, then application-type slices, then remainder and corrections). Lookup preflight exit **0**. Person wave posting (250+ / Failed 0 at first progress line).
+- **Log**: `artifacts/staging-scalar/logs/20260926-101033-Person.log`. Tunnel `127.0.0.1:15433` -> staging `127.0.0.1:5433`.
+- **Resume**: same script `-StartAt <wave> -SkipLookupPreflight` after a halt. Do not import Visa before its application-type instance.
 
 ### 2026-09-25 — WorkDuty placeholder Ýok (no legacy table)
 
