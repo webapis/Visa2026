@@ -13,6 +13,7 @@ namespace Visa2026.Module.BusinessObjects;
 /// Name and passport are snapshots at save so the letter can be regenerated unchanged.
 /// </summary>
 [Table("ApplicationProfileInstanceExclusionPeople")]
+[DefaultClassOptions]
 [NavigationItem(false)]
 [XafDisplayName("Excluded person")]
 [DefaultProperty(nameof(FullName))]

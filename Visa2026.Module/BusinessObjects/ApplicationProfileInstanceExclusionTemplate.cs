@@ -23,6 +23,7 @@ public enum ApplicationProfileInstanceExclusionTemplateKind
 /// appears in the Resminamalar catalog.
 /// </summary>
 [Table("ApplicationProfileInstanceExclusionTemplates")]
+[DefaultClassOptions]
 [NavigationItem(false)]
 [XafDisplayName("Seretmezlik template")]
 public class ApplicationProfileInstanceExclusionTemplate : BaseObject

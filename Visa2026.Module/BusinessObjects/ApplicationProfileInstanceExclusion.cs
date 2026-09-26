@@ -24,6 +24,7 @@ public enum ApplicationProfileInstanceExclusionAddresseeKind
 /// See <c>docs/prototypes/application-profile-instance-seretmezlik-README.md</c>.
 /// </summary>
 [Table("ApplicationProfileInstanceExclusions")]
+[DefaultClassOptions]
 [NavigationItem(false)]
 [XafDisplayName("Seretmezlik")]
 [DefaultProperty(nameof(LetterNumber))]

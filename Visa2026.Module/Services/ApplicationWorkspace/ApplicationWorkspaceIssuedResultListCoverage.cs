@@ -179,11 +179,18 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
         if (objectSpace == null || ids.Count == 0)
             return [];
 
+        var letters = objectSpace.GetObjectsQuery<ApplicationProfileInstanceExclusion>()
+            .Where(e => ids.Contains(e.ApplicationProfileInstanceId))
+            .ToList();
+        if (letters.Count == 0)
+            return [];
+
+        var instanceByExclusion = letters.ToDictionary(e => e.ID, e => e.ApplicationProfileInstanceId);
+        var exclusionIds = instanceByExclusion.Keys.ToList();
         return objectSpace.GetObjectsQuery<ApplicationProfileInstanceExclusionPerson>()
-            .Where(p => ids.Contains(p.Exclusion.ApplicationProfileInstanceId) && p.PersonId != Guid.Empty)
-            .Select(p => new { InstanceId = p.Exclusion.ApplicationProfileInstanceId, p.PersonId })
+            .Where(p => exclusionIds.Contains(p.ExclusionId) && p.PersonId != Guid.Empty)
             .ToList()
-            .Select(x => (x.InstanceId, x.PersonId));
+            .Select(p => (instanceByExclusion[p.ExclusionId], p.PersonId));
     }
 
     private static IEnumerable<(Guid InstanceId, Guid PersonId)> LoadInvitationPairs(

@@ -591,21 +591,27 @@ public static class PersonDossierResolver
         if (personId == Guid.Empty)
             return map;
 
-        var rows = objectSpace.GetObjectsQuery<ApplicationProfileInstanceExclusionPerson>()
+        var people = objectSpace.GetObjectsQuery<ApplicationProfileInstanceExclusionPerson>()
             .Where(p => p.PersonId == personId)
-            .Select(p => new
-            {
-                InstanceId = p.Exclusion.ApplicationProfileInstanceId,
-                p.Exclusion.LetterNumber,
-                p.Exclusion.LetterDate,
-            })
             .ToList();
+        if (people.Count == 0)
+            return map;
 
-        foreach (var row in rows.OrderBy(r => r.LetterDate))
+        var exclusionIds = people.Select(p => p.ExclusionId).Distinct().ToList();
+        var letters = objectSpace.GetObjectsQuery<ApplicationProfileInstanceExclusion>()
+            .Where(e => exclusionIds.Contains(e.ID))
+            .ToList()
+            .ToDictionary(e => e.ID);
+
+        foreach (var row in people.OrderBy(p =>
+                     letters.TryGetValue(p.ExclusionId, out var letter) ? letter.LetterDate : DateTime.MaxValue))
         {
-            if (row.InstanceId == Guid.Empty || map.ContainsKey(row.InstanceId))
+            if (!letters.TryGetValue(row.ExclusionId, out var letter))
                 continue;
-            map[row.InstanceId] = (row.LetterNumber ?? string.Empty, row.LetterDate);
+            if (letter.ApplicationProfileInstanceId == Guid.Empty
+                || map.ContainsKey(letter.ApplicationProfileInstanceId))
+                continue;
+            map[letter.ApplicationProfileInstanceId] = (letter.LetterNumber ?? string.Empty, letter.LetterDate);
         }
 
         return map;

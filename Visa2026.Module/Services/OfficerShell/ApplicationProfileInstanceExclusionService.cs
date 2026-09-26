@@ -495,21 +495,28 @@ public static class ApplicationProfileInstanceExclusionQueries
         if (objectSpace == null || instanceId == Guid.Empty)
             return result;
 
-        var rows = objectSpace.GetObjectsQuery<ApplicationProfileInstanceExclusionPerson>()
-            .Where(p => p.Exclusion.ApplicationProfileInstanceId == instanceId)
-            .Select(p => new
-            {
-                p.PersonId,
-                p.ExclusionId,
-                p.Exclusion.LetterNumber,
-                p.Exclusion.LetterDate,
-            })
+        // Do not project p.Exclusion.* in the query. EF security evaluates that
+        // navigation as a query parameter and throws NullReferenceException, which
+        // blocks opening the case.
+        var letters = objectSpace.GetObjectsQuery<ApplicationProfileInstanceExclusion>()
+            .Where(e => e.ApplicationProfileInstanceId == instanceId)
+            .ToList();
+        if (letters.Count == 0)
+            return result;
+
+        var letterById = letters.ToDictionary(e => e.ID);
+        var letterIds = letterById.Keys.ToList();
+        var people = objectSpace.GetObjectsQuery<ApplicationProfileInstanceExclusionPerson>()
+            .Where(p => letterIds.Contains(p.ExclusionId) && p.PersonId != Guid.Empty)
             .ToList();
 
-        foreach (var row in rows.OrderBy(r => r.LetterDate))
+        foreach (var row in people.OrderBy(p =>
+                     letterById.TryGetValue(p.ExclusionId, out var letter) ? letter.LetterDate : DateTime.MaxValue))
         {
+            if (!letterById.TryGetValue(row.ExclusionId, out var letter))
+                continue;
             if (!result.ContainsKey(row.PersonId))
-                result[row.PersonId] = new ApplicationProfileInstanceExcludedPerson(row.ExclusionId, row.LetterNumber, row.LetterDate);
+                result[row.PersonId] = new ApplicationProfileInstanceExcludedPerson(letter.ID, letter.LetterNumber, letter.LetterDate);
         }
 
         return result;
