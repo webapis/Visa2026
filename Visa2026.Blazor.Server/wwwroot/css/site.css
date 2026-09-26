@@ -2967,8 +2967,8 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     display: flex;
     flex-direction: column;
     /* Outside <app> — theme vars synced via visaPreviewDrawer.syncSlotTheme() */
-    color: var(--dxbl-text-color, inherit);
-    background: var(--dxbl-body-bg, var(--dxbl-background-color, transparent));
+    color: var(--dxbl-text-color, var(--bs-body-color, inherit));
+    background: var(--dxbl-body-bg, var(--dxbl-background-color, var(--bs-body-bg, transparent)));
 }
 
 /* Open state: slot column in grid (width from --visa-preview-slot-width on shell) */
@@ -2986,8 +2986,8 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     flex-direction: column;
     border-left: 1px solid var(--dxbl-border-color, color-mix(in srgb, currentColor 14%, transparent));
     box-shadow: -4px 0 20px color-mix(in srgb, #000 9%, transparent);
-    color: var(--dxbl-text-color, inherit);
-    background: var(--dxbl-body-bg, var(--dxbl-background-color, transparent));
+    color: var(--dxbl-text-color, var(--bs-body-color, inherit));
+    background: var(--dxbl-body-bg, var(--dxbl-background-color, var(--bs-body-bg, transparent)));
 }
 
 #visa-preview-slot.visa-preview-slot--open.visa-preview-slot--user-sized {

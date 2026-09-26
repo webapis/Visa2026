@@ -124,7 +124,7 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 | Area |
 |------|
 | **Configuration** — Organization catalogs, numbering, project contracts, ministries, document expiration alerts, upload limits (ministry review SLA catalog hidden; type permissions retained) |
-| **Reports** — `UserReportTemplate` |
+| **Reports** — `UserReportTemplate` type permissions stay for Resminamalar; the left-nav list is denied |
 
 ---
 

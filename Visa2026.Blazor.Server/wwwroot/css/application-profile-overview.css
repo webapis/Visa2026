@@ -1,12 +1,13 @@
 .ap-overview {
-    --ap-ink: #1a2332;
-    --ap-muted: #5c6b7a;
-    --ap-line: #d5dde6;
-    --ap-panel: #ffffff;
-    --ap-accent: #0b6e4f;
-    --ap-accent-soft: #e6f3ee;
-    --ap-warn-soft: #fff4e5;
-    font-family: "Segoe UI", system-ui, sans-serif;
+    --ap-ink: var(--DS-color-content-neutral-default-rest, var(--bs-body-color, #1a2332));
+    --ap-muted: var(--ap-ink);
+    --ap-line: var(--DS-color-border-neutral-default-rest, color-mix(in srgb, var(--ap-ink) 24%, var(--ap-panel)));
+    --ap-panel: var(--DS-color-surface-neutral-default-rest, var(--bs-body-bg, #ffffff));
+    --ap-accent: var(--DS-color-content-primary-default-rest, var(--bs-primary, #0b6e4f));
+    --ap-accent-soft: var(--DS-color-surface-primary-subdued-rest, color-mix(in srgb, var(--ap-accent) 18%, var(--ap-panel)));
+    --ap-warn: var(--DS-color-content-warning-default-rest, var(--bs-warning, #7c4a03));
+    --ap-warn-soft: var(--DS-color-surface-warning-subdued-rest, color-mix(in srgb, var(--ap-warn) 18%, var(--ap-panel)));
+    font-family: var(--dxds-font-family-sans-serif, var(--bs-font-sans-serif, "Segoe UI", system-ui, sans-serif));
     color: var(--ap-ink);
     max-width: 1080px;
     margin: 0 auto;
@@ -22,8 +23,8 @@
     margin-bottom: 14px;
     padding: 12px 14px;
     border-radius: 10px;
-    background: #e8f0fa;
-    border: 1px solid #c9d6e4;
+    background: var(--ap-accent-soft);
+    border: 1px solid var(--ap-line);
     font-size: 0.88rem;
 }
 
@@ -56,7 +57,7 @@
     border-radius: 6px;
 }
 .ap-overview__close:hover {
-    background: #eef2f6;
+    background: var(--ap-surface);
     color: var(--ap-ink);
 }
 
@@ -75,7 +76,7 @@
 
 .ap-overview__btn {
     border: 1px solid var(--ap-line);
-    background: #fff;
+    background: var(--ap-panel);
     color: var(--ap-ink);
     border-radius: 8px;
     padding: 8px 14px;
@@ -120,18 +121,18 @@
     padding: 5px 10px;
     border-radius: 999px;
     border: 1px solid var(--ap-line);
-    background: #fff;
+    background: var(--ap-panel);
     color: var(--ap-muted);
 }
 .ap-overview__pill--on {
     background: var(--ap-accent-soft);
     border-color: #b7d9cb;
-    color: #08553c;
+    color: var(--ap-ink);
 }
 .ap-overview__pill--warn {
     background: var(--ap-warn-soft);
     border-color: #f0d4a8;
-    color: #7c4a03;
+    color: var(--ap-ink);
 }
 
 .ap-overview__audience {
@@ -157,7 +158,7 @@
     border-radius: 999px;
     background: var(--ap-accent-soft);
     border: 1px solid #b7d9cb;
-    color: #08553c;
+    color: var(--ap-ink);
 }
 
 .ap-overview__grid {
@@ -206,7 +207,7 @@
 }
 .ap-overview__table th,
 .ap-overview__table td {
-    border-bottom: 1px solid #eef2f6;
+    border-bottom: 1px solid var(--ap-line);
     padding: 8px 6px;
     text-align: left;
 }
@@ -235,7 +236,7 @@
     cursor: pointer;
 }
 .ap-overview__chip--quiet {
-    background: #eef2f6;
+    background: var(--ap-surface);
     border-color: var(--ap-line);
     color: var(--ap-muted);
     margin-left: 6px;

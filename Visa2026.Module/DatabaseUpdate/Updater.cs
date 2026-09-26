@@ -460,9 +460,9 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         // Operations — UserFeedback only (see EnsureUserFeedbackOfficerPermissions); runtime log + state inbox are admin-only.
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Operations", SecurityPermissionState.Allow);
 
-        // Reports — user-defined Word/Excel templates (Resminamalar custom templates + Edit template link)
+        // Reports group stays; User Report Template list is Resminamalar-only (no left nav item).
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Reports", SecurityPermissionState.Allow);
-        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Reports/Items/UserReportTemplate", SecurityPermissionState.Allow);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Reports/Items/UserReportTemplate", SecurityPermissionState.Deny);
 
         userRole.AddTypePermissionsRecursively<BusinessObjects.ApplicationItemDocumentCopiesListHost>(
             SecurityOperations.Read, SecurityPermissionState.Allow);
@@ -700,7 +700,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
 
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Operations", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Reports", SecurityPermissionState.Allow);
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Reports/Items/UserReportTemplate", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Reports/Items/UserReportTemplate", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Default/Items/MyDetails", SecurityPermissionState.Allow);
 
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Default/Items/AddressOfResidenceDocument", SecurityPermissionState.Deny);
@@ -1199,7 +1199,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         }
 
         /// <summary>
-        /// Officers maintain Resminamalar custom templates: read/list, open DetailView (navigate), edit file + placeholders.
+        /// Officers maintain Resminamalar custom templates. The left-nav list stays hidden.
         /// </summary>
         static void EnsureUserReportTemplateOfficerPermissions(PermissionPolicyRole role)
         {
@@ -1214,7 +1214,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadOnlyPermission<ApplicationTypeGroup>(role);
             EnsureReadOnlyPermission<ApplicationTypeGroupMember>(role);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Reports", SecurityPermissionState.Allow);
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Reports/Items/UserReportTemplate", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Reports/Items/UserReportTemplate", SecurityPermissionState.Deny);
         }
 
         /// <summary>
