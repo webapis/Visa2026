@@ -93,6 +93,50 @@ public class ApplicationProfileInstanceExclusionTests
                 new ApplicationProfileInstanceExclusion { LetterNumber = "01/-02" }));
 
     [Fact]
+    public void ResolveCurrentHolder_empty_configured_legs_still_returns_ministry_in_review()
+    {
+        var holder = ApplicationProfileInstanceExclusionService.ResolveCurrentHolder(
+            "1_REVIEW_STARTED",
+            Array.Empty<int>());
+
+        Assert.Equal(ApplicationProfileInstanceExclusionAddresseeKind.Ministry, holder.Kind);
+        Assert.Equal(1, holder.Leg);
+    }
+
+    [Fact]
+    public void DraftFrom_copies_letter_fields_and_person_ids()
+    {
+        var personId = Guid.NewGuid();
+        var exclusion = new ApplicationProfileInstanceExclusion
+        {
+            LetterDate = new DateTime(2026, 2, 1),
+            AddresseeKind = ApplicationProfileInstanceExclusionAddresseeKind.Ministry,
+            AddresseeLeg = 2,
+            AddresseeName = "Energetika ministrligine",
+            Salutation = "Hormatly",
+            ReferenceMinistryName = "Energetika",
+            ReferenceLetterDate = new DateTime(2026, 1, 20),
+            ReferenceLetterNumber = "7/1",
+            OriginalRosterCount = 5,
+            Subject = "uzaltmak",
+        };
+        exclusion.People.Add(new ApplicationProfileInstanceExclusionPerson { PersonId = personId });
+
+        var draft = ApplicationProfileInstanceExclusionService.DraftFrom(exclusion);
+
+        Assert.Equal(exclusion.LetterDate, draft.LetterDate);
+        Assert.Equal(ApplicationProfileInstanceExclusionService.MinistryKeyPrefix + "2", draft.AddresseeKey);
+        Assert.Equal(exclusion.AddresseeName, draft.AddresseeName);
+        Assert.Equal(exclusion.Salutation, draft.Salutation);
+        Assert.Equal(exclusion.ReferenceMinistryName, draft.ReferenceMinistryName);
+        Assert.Equal(exclusion.ReferenceLetterDate, draft.ReferenceLetterDate);
+        Assert.Equal(exclusion.ReferenceLetterNumber, draft.ReferenceLetterNumber);
+        Assert.Equal(5, draft.OriginalRosterCount);
+        Assert.Equal(exclusion.Subject, draft.Subject);
+        Assert.Contains(personId, draft.PersonIds);
+    }
+
+    [Fact]
     public void CaseView_ActivePeople_SkipsExcluded()
     {
         var view = new ApplicationWorkspaceCaseView
