@@ -120,6 +120,98 @@ public class Visa2014ApplicationPersonDocumentLinksTests
     }
 
     [Fact]
+    public void ResolveAddressLegacyKey_FamilyMember_UsesSponsorCanonicalWhenNoAor()
+    {
+        var employee = Guid.NewGuid();
+        var direct = Guid.NewGuid();
+        var raw = new Visa2014ApplicationProfileInstancePersonRawRow(
+            LegacyOid: Guid.NewGuid(),
+            LegacyApplicationProfileInstanceOid: Guid.NewGuid(),
+            LegacyEmployeeOid: employee,
+            LegacyFamilyMemberOid: Guid.NewGuid(),
+            LegacyPassportOid: null,
+            LegacyPreviousPassportOid: null,
+            LegacyVisaOid: null,
+            LegacyWorkPermitOid: null,
+            LegacyPositionOid: null,
+            LegacyAddressOfResidenceOid: null,
+            LegacyDirectAddressOid: direct,
+            ForEmployee: false,
+            ForFamilyMember: true,
+            EmployeeSubtypeId: null,
+            FamilySubtypeId: null,
+            HasInvitationWpFk: false,
+            InvitationAndWorkPermitRequired: null,
+            HasWizaWpFk: false,
+            WizaAndWorkPermitRequired: null,
+            ChangeInformation: null);
+
+        Assert.Equal(
+            Visa2014PiaAddressInference.PersonCanonicalSyntheticLegacyOid(employee),
+            Visa2014ApplicationPersonRequiredPersonLinks.ResolveAddressLegacyKey(raw));
+    }
+
+    [Fact]
+    public void ResolveAddressLegacyKey_FamilyMember_WithoutSponsor_FallsBackToDirect()
+    {
+        var direct = Guid.NewGuid();
+        var raw = new Visa2014ApplicationProfileInstancePersonRawRow(
+            LegacyOid: Guid.NewGuid(),
+            LegacyApplicationProfileInstanceOid: Guid.NewGuid(),
+            LegacyEmployeeOid: null,
+            LegacyFamilyMemberOid: Guid.NewGuid(),
+            LegacyPassportOid: null,
+            LegacyPreviousPassportOid: null,
+            LegacyVisaOid: null,
+            LegacyWorkPermitOid: null,
+            LegacyPositionOid: null,
+            LegacyAddressOfResidenceOid: null,
+            LegacyDirectAddressOid: direct,
+            ForEmployee: false,
+            ForFamilyMember: true,
+            EmployeeSubtypeId: null,
+            FamilySubtypeId: null,
+            HasInvitationWpFk: false,
+            InvitationAndWorkPermitRequired: null,
+            HasWizaWpFk: false,
+            WizaAndWorkPermitRequired: null,
+            ChangeInformation: null);
+
+        Assert.Equal(direct, Visa2014ApplicationPersonRequiredPersonLinks.ResolveAddressLegacyKey(raw));
+    }
+
+    [Fact]
+    public void ResolveAddressLegacyKey_Employee_WithoutAddressFks_UsesPersonCanonical()
+    {
+        var employee = Guid.NewGuid();
+        var raw = new Visa2014ApplicationProfileInstancePersonRawRow(
+            LegacyOid: Guid.NewGuid(),
+            LegacyApplicationProfileInstanceOid: Guid.NewGuid(),
+            LegacyEmployeeOid: employee,
+            LegacyFamilyMemberOid: null,
+            LegacyPassportOid: null,
+            LegacyPreviousPassportOid: null,
+            LegacyVisaOid: null,
+            LegacyWorkPermitOid: null,
+            LegacyPositionOid: null,
+            LegacyAddressOfResidenceOid: null,
+            LegacyDirectAddressOid: null,
+            ForEmployee: true,
+            ForFamilyMember: false,
+            EmployeeSubtypeId: null,
+            FamilySubtypeId: null,
+            HasInvitationWpFk: false,
+            InvitationAndWorkPermitRequired: null,
+            HasWizaWpFk: false,
+            WizaAndWorkPermitRequired: null,
+            ChangeInformation: null);
+
+        Assert.Equal(
+            Visa2014PiaAddressInference.PersonCanonicalSyntheticLegacyOid(employee),
+            Visa2014ApplicationPersonRequiredPersonLinks.ResolveAddressLegacyKey(raw));
+    }
+
+    [Fact]
     public void WorkDutyPlaceholder_DescriptionIsYok()
     {
         Assert.Equal("\u00DDok", Visa2014WorkDutyDefaults.Description);
