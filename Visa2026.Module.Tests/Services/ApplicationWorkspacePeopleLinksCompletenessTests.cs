@@ -85,6 +85,33 @@ public class ApplicationWorkspacePeopleLinksCompletenessTests
     }
 
     [Fact]
+    public void PeopleWithGaps_skips_seretmezlik_excluded_people()
+    {
+        var excluded = Person("Excluded", Record("passport", 0, 1), Record("visa", 0, 1));
+        excluded.ExcludedLetterNumber = "01/-10";
+        excluded.ExcludedLetterDate = new System.DateTime(2026, 9, 24);
+        var active = Person("Active", Record("passport", 0, 1));
+        var view = View(excluded, active);
+
+        Assert.True(excluded.IsExcluded);
+        Assert.False(active.IsExcluded);
+        Assert.False(ApplicationWorkspacePeopleLinksCompleteness.PersonHasGap(excluded));
+        Assert.Equal(1, ApplicationWorkspacePeopleLinksCompleteness.PeopleWithGaps(view));
+        Assert.Equal(ApplicationWorkspacePeopleLinksCompleteness.NavStatus.Incomplete, ApplicationWorkspacePeopleLinksCompleteness.Resolve(view));
+    }
+
+    [Fact]
+    public void Resolve_only_excluded_short_people_is_complete()
+    {
+        var excluded = Person("Excluded", Record("visa", 0, 2));
+        excluded.ExcludedLetterDate = new System.DateTime(2026, 1, 1);
+        var view = View(excluded);
+
+        Assert.Equal(ApplicationWorkspacePeopleLinksCompleteness.NavStatus.Complete, ApplicationWorkspacePeopleLinksCompleteness.Resolve(view));
+        Assert.Equal(0, ApplicationWorkspacePeopleLinksCompleteness.PeopleWithGaps(view));
+    }
+
+    [Fact]
     public void IsKindShort_ignores_kinds_not_on_the_person()
     {
         var person = Person("A", Record("passport", 1, 1));
