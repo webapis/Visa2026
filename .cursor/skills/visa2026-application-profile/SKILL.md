@@ -130,6 +130,7 @@ flowchart LR
 | Type required but Profile optional | Dual-read phase | Seed profiles; backfill FK; document in IMPLEMENTATION_PLAN |
 | Template list on Application | Nested `ApplicationProfileTemplate` | Read-only child list on Application detail |
 | Link on People & links feels frozen | Yield `Task.Delay(16)` then overlay **Linking {name}…** | `OfficerShellPersonLinkPickerComponent`; Last-N resolver is sync |
+| People search runs only after Search or Enter | Same pause as the list search box (1200 ms after the last key) | `OfficerShellPersonLinkPickerComponent` `SearchInputDelayMs`; Enter and **Search** still run now |
 | Link enabled for person with no / expired / cancelled passport | Picker row `CanLink` + `BlockReason`; `ApplicationProfileInstancePersonLinkPassportGate` | Disable **Link**; show reason on the row |
 | Expired visa/WP/invitation/border zone/medical auto-linked | `ApplicationProfileInstancePersonValidItems.CanLink*` | Officer §10.2 gate; import (`IsDataImport`) is exempt; sticky existing links stay. **Passport expiration is not checked.** |
 | Template needs last 2 passports / last 2–3 invitations | Wizard **Last 1–3** next to Passport / Visa / Invitation / WP / Border zone | `Person*LastCount`; resolver Take(N); unique index includes `LinkedObjectId` |

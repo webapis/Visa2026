@@ -1,3 +1,12 @@
+### 2026-09-30 — People search waits until typing stops
+
+- **Need**: Search people on People & links should start after the officer finishes typing, the way the list search box does.
+- **Cause**: The picker searched only on **Search** or Enter. The list box uses `DxGrid.SearchBoxInputDelay`, default 1200 ms after the last character.
+- **Fix**: The picker waits 1200 ms after the last key, then searches. Enter and **Search** still search immediately. The wait is not the input event’s task, so the box is not redrawn on every letter.
+- **Officer**: Stop F5, rebuild the Blazor host, hard-refresh. People & links → Link existing. Type a name and pause. The list should change without clicking Search. Enter still searches at once.
+- **Prevent**: Do not search on each key. Do not return the delay task from the input handler. Keep the pause at 1200 ms unless the list search box delay changes.
+- **Cross-skill**: —
+
 ### 2026-09-30 — Make default approval legs stays on the next create
 
 - **Need**: Choose Approval legs → Make default on Türkmennebit-Türkmengaz-Gurluşyk. The next instance of that profile still opened on Türkmenenergo-Energetika.

@@ -1,4 +1,5 @@
 @using Visa2026.Module.Services.ApplicationPersonLink
+@implements IDisposable
 
 @if (IsOpen)
 {
@@ -23,8 +24,8 @@
                    value="@_searchText"
                    @oninput="OnSearchInput"
                    @onkeydown="OnSearchKeyDown"
-                   disabled="@IsBusy" />
-            <button type="button" class="os-btn" disabled="@IsBusy" @onclick="SearchAsync">Search</button>
+                   disabled="@IsBusyLinking" />
+            <button type="button" class="os-btn" disabled="@IsBusy" @onclick="SearchNowAsync">Search</button>
         </div>
 
         @if (IsSearching)
@@ -100,8 +101,16 @@
     [Parameter] public EventCallback<Guid> LinkRequested { get; set; }
     [Parameter] public EventCallback CloseRequested { get; set; }
 
+    /// <summary>
+    /// Same pause as the XAF list search box (<c>DxGrid.SearchBoxInputDelay</c> default, 1200 ms).
+    /// Search runs after the officer stops typing, not on each key.
+    /// </summary>
+    private const int SearchInputDelayMs = 1200;
+
     private string _searchText = string.Empty;
     private Guid _linkingPersonId;
+    private int _searchSerial;
+    private CancellationTokenSource? _searchDelayCts;
 
     private bool IsBusyLinking => IsLinking || _linkingPersonId != Guid.Empty;
     private bool IsBusy => IsSearching || IsBusyLinking;
@@ -124,6 +133,7 @@
     {
         if (!IsOpen)
         {
+            CancelPendingSearch();
             _searchText = string.Empty;
             _linkingPersonId = Guid.Empty;
         }
@@ -132,22 +142,94 @@
     private Task OnSearchInput(ChangeEventArgs e)
     {
         _searchText = e.Value?.ToString() ?? string.Empty;
+        if (IsBusyLinking)
+            return Task.CompletedTask;
+
+        // Do not return the delay task. An incomplete input handler redraws the box and can drop typed characters.
+        _ = ScheduleSearchAsync();
         return Task.CompletedTask;
     }
 
     private async Task OnSearchKeyDown(KeyboardEventArgs e)
     {
         if (e.Key == "Enter")
-            await SearchAsync();
+            await SearchNowAsync();
     }
 
-    private Task SearchAsync() => SearchRequested.InvokeAsync(_searchText);
+    private async Task ScheduleSearchAsync()
+    {
+        var serial = ArmSearchDelay();
+        var text = _searchText;
+        var cts = _searchDelayCts;
+        if (cts == null)
+            return;
+
+        try
+        {
+            await Task.Delay(SearchInputDelayMs, cts.Token);
+        }
+        catch (Exception ex) when (ex is OperationCanceledException or ObjectDisposedException)
+        {
+            return;
+        }
+
+        if (serial != _searchSerial || !IsOpen)
+            return;
+
+        try
+        {
+            await SearchRequested.InvokeAsync(text);
+        }
+        catch (ObjectDisposedException)
+        {
+        }
+    }
+
+    private Task SearchNowAsync()
+    {
+        CancelPendingSearch();
+        return SearchRequested.InvokeAsync(_searchText);
+    }
+
+    private int ArmSearchDelay()
+    {
+        CancelTimer();
+        _searchDelayCts = new CancellationTokenSource();
+        return ++_searchSerial;
+    }
+
+    private void CancelPendingSearch()
+    {
+        _searchSerial++;
+        CancelTimer();
+    }
+
+    private void CancelTimer()
+    {
+        var pending = _searchDelayCts;
+        _searchDelayCts = null;
+        if (pending == null)
+            return;
+
+        try
+        {
+            pending.Cancel();
+        }
+        catch (ObjectDisposedException)
+        {
+        }
+
+        pending.Dispose();
+    }
+
+    public void Dispose() => CancelPendingSearch();
 
     private async Task LinkAsync(ApplicationProfileInstancePersonLinkCandidateRow row)
     {
         if (IsBusy || row == null || !row.CanLink || row.PersonId == Guid.Empty)
             return;
 
+        CancelPendingSearch();
         _linkingPersonId = row.PersonId;
         await InvokeAsync(StateHasChanged);
         await Task.Delay(16);
