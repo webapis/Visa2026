@@ -1,3 +1,12 @@
+### 2026-09-30 — Make default approval legs stays on the next create
+
+- **Need**: Choose Approval legs → Make default on Türkmennebit-Türkmengaz-Gurluşyk. The next instance of that profile still opened on Türkmenenergo-Energetika.
+- **Cause**: The profile default is one foreign key. Change tracking did not always write that key, so the seed chain stayed in the database. The picker also kept a leftover chain id. Every via-ministry profile shares the same catalog, so Türkmenenergo-Energetika still looked like a valid choice for the next profile.
+- **Fix**: Make default marks `DefaultApprovalLegProfileId` modified and checks the column after save. The next create highlights that profile’s saved default unless the officer clicked a different card for this case.
+- **Officer**: Stop F5, rebuild the Blazor host, hard-refresh. On Çakylyk we Iş Rugsatnamasyny Almak, Make default on Türkmennebit-Türkmengaz-Gurluşyk. Start a new instance of that same profile. That chain should be the highlighted Default.
+- **Prevent**: Do not treat a shared chain id from another profile as this profile’s choice. Do not overwrite a saved default from the approval-leg JSON on F5.
+- **Cross-skill**: —
+
 ### 2026-09-25 — Resminamalar uses the section opening bar
 
 - **Need**: Switching to Resminamalar showed a plain “Loading catalog…” line after the section bar had already gone.

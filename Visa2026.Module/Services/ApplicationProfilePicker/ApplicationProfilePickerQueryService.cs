@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
+using Microsoft.EntityFrameworkCore;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.ApplicationProfileCatalog;
 
@@ -27,6 +28,13 @@ public sealed class ApplicationProfilePickerQueryService : IApplicationProfilePi
         var seedUsage = seedPersonId is Guid seedId && seedId != Guid.Empty
             ? BuildSeedUsage(objectSpace, seedId)
             : null;
+
+        // Scalar projection, not the tracked navigation. A profile loaded before Make default
+        // still has the seed chain in memory; the column is the officer's saved default.
+        var defaultsByProfile = objectSpace.GetObjectsQuery<ApplicationProfile>()
+            .AsNoTracking()
+            .Select(p => new { p.ID, p.DefaultApprovalLegProfileId })
+            .ToDictionary(x => x.ID, x => x.DefaultApprovalLegProfileId);
 
         return ApplicationProfileOfficerCatalogSelector
             .SelectDistinctTemplates(
@@ -54,7 +62,10 @@ public sealed class ApplicationProfilePickerQueryService : IApplicationProfilePi
                     UsedBySeedPersonCount = usage?.Count ?? 0,
                     LastUsedBySeedPersonAt = usage?.LastUsedAt,
                     HasOpenApplicationForSeedPerson = usage?.HasOpen ?? false,
-                    ApprovalLegVersions = BuildVersionOptions(objectSpace, p),
+                    ApprovalLegVersions = BuildVersionOptions(
+                        objectSpace,
+                        p,
+                        defaultsByProfile.TryGetValue(p.ID, out var savedDefault) ? savedDefault : p.DefaultApprovalLegProfileId),
                 };
             })
             .OrderByDescending(r => seedPersonId.HasValue ? r.LastUsedBySeedPersonAt ?? DateTime.MinValue : r.LastUsedAt ?? DateTime.MinValue)
@@ -99,10 +110,10 @@ public sealed class ApplicationProfilePickerQueryService : IApplicationProfilePi
 
     private static IReadOnlyList<ApplicationProfilePickerVersionOption> BuildVersionOptions(
         IObjectSpace objectSpace,
-        ApplicationProfile profile)
+        ApplicationProfile profile,
+        Guid? defaultId)
     {
         var shared = ApplicationProfileApprovalLegVersionHelper.GetSharedActiveProfiles(objectSpace);
-        var defaultId = profile.DefaultApprovalLegProfileId;
         return shared.Select(p => new ApplicationProfilePickerVersionOption
         {
             VersionId = p.ID,

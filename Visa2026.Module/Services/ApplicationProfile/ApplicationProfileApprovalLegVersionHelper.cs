@@ -87,13 +87,32 @@ public static class ApplicationProfileApprovalLegVersionHelper
             return true;
 
         AssignTemplateDefault(profile, chain);
+        // Notification change-tracking ignores DetectChanges. Mark the FK itself so
+        // CommitChanges writes DefaultApprovalLegProfileId and does not leave the seed chain.
         if (objectSpace is EFCoreObjectSpace { DbContext: { } dbContext })
-            dbContext.ChangeTracker.DetectChanges();
+        {
+            var entry = dbContext.Entry(profile);
+            var fk = entry.Property(nameof(ApplicationProfile.DefaultApprovalLegProfileId));
+            fk.CurrentValue = chain.ID;
+            fk.IsModified = true;
+            entry.Reference(nameof(ApplicationProfile.DefaultApprovalLegProfile)).CurrentValue = chain;
+        }
+
         objectSpace.SetModified(profile);
 
         try
         {
             objectSpace.CommitChanges();
+            var persisted = objectSpace.GetObjectsQuery<ApplicationProfile>()
+                .AsNoTracking()
+                .Where(p => p.ID == applicationProfileId)
+                .Select(p => p.DefaultApprovalLegProfileId)
+                .FirstOrDefault();
+            if (persisted != chain.ID)
+            {
+                error = "Could not set the default approval-leg chain.";
+                return false;
+            }
         }
         catch (Exception ex)
         {

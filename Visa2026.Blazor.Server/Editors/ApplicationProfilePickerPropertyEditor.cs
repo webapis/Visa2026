@@ -31,6 +31,11 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
     private IApprovalLegCatalogChangeNotifier? _catalogChanged;
     private IReadOnlyList<ApplicationWorkspaceCaseHeaderFieldUpdate> _caseSummaryUpdates
         = Array.Empty<ApplicationWorkspaceCaseHeaderFieldUpdate>();
+    /// <summary>
+    /// True after the officer clicks a chain on this profile. A shared catalog id
+    /// from another profile is not a choice for the profile now on screen.
+    /// </summary>
+    private bool _versionExplicitlyChosen;
 
     public ApplicationProfilePickerPropertyEditor(Type objectType, IModelMemberViewItem model)
         : base(objectType, model) { }
@@ -78,6 +83,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         if (model == null || model.IsLoading)
             return;
 
+        _versionExplicitlyChosen = false;
         _ = LoadAsync();
     }
 
@@ -388,6 +394,8 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         model.IsStatusWarning = false;
         _caseSummaryUpdates = Array.Empty<ApplicationWorkspaceCaseHeaderFieldUpdate>();
         model.CaseSummaryFields = Array.Empty<ApplicationWorkspaceCaseHeaderField>();
+        _versionExplicitlyChosen = false;
+        model.SelectedVersionId = Guid.Empty;
         EnsureSelectedVersion(model);
     }
 
@@ -398,11 +406,12 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
             return;
 
         model.SelectedVersionId = versionId;
+        _versionExplicitlyChosen = true;
         model.StatusMessage = null;
         model.IsStatusError = false;
     }
 
-    private static void EnsureSelectedVersion(ApplicationProfilePickerModel model)
+    private void EnsureSelectedVersion(ApplicationProfilePickerModel model)
     {
         var selected = model.Rows.FirstOrDefault(r => r.ProfileId == model.SelectedProfileId);
         if (selected == null || !selected.RequiresApprovalLegVersion)
@@ -411,12 +420,14 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
             return;
         }
 
-        if (selected.ApprovalLegVersions.Any(v => v.VersionId == model.SelectedVersionId))
-            return;
-
-        var defaultVersion = selected.ApprovalLegVersions.FirstOrDefault(v => v.IsDefault)
-            ?? selected.ApprovalLegVersions.FirstOrDefault();
-        model.SelectedVersionId = defaultVersion?.VersionId ?? Guid.Empty;
+        model.SelectedVersionId = ApplicationProfilePickerVersionSelection.Resolve(
+            model.SelectedVersionId,
+            explicitlyChosen: _versionExplicitlyChosen,
+            selected.ApprovalLegVersions.Select(v => new ApplicationProfilePickerVersionOption
+            {
+                VersionId = v.VersionId,
+                IsDefault = v.IsDefault,
+            }));
     }
 
     private async Task SetDefaultApprovalLeg(Guid versionId)
@@ -446,10 +457,43 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         }
 
         var step = model.Step;
+        _versionExplicitlyChosen = false;
         await LoadAsync(showLoading: false);
         model.Step = step;
-        model.SelectedVersionId = versionId;
+        StampSavedDefault(model, model.SelectedProfileId, versionId);
+        model.SelectedVersionId = Guid.Empty;
         EnsureSelectedVersion(model);
+    }
+
+    private static void StampSavedDefault(ApplicationProfilePickerModel model, Guid profileId, Guid versionId)
+    {
+        if (profileId == Guid.Empty || versionId == Guid.Empty)
+            return;
+
+        model.Rows = model.Rows.Select(row =>
+        {
+            if (row.ProfileId != profileId)
+                return row;
+
+            return new ApplicationProfilePickerModel.PickerRowModel
+            {
+                ProfileId = row.ProfileId,
+                Name = row.Name,
+                MetaLine = row.MetaLine,
+                SeedUsageLine = row.SeedUsageLine,
+                IsConfigLocked = row.IsConfigLocked,
+                HasOpenApplicationForSeedPerson = row.HasOpenApplicationForSeedPerson,
+                RequiresApprovalLegVersion = row.RequiresApprovalLegVersion,
+                MissingApprovalLegVersions = row.MissingApprovalLegVersions,
+                ApprovalLegVersions = row.ApprovalLegVersions.Select(v => new ApplicationProfilePickerModel.VersionOptionModel
+                {
+                    VersionId = v.VersionId,
+                    Name = v.Name,
+                    IsDefault = v.VersionId == versionId,
+                    MinistryNames = v.MinistryNames,
+                }).ToList(),
+            };
+        }).ToList();
     }
 
     private void OpenApprovalLegCatalog()
@@ -504,7 +548,11 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         await LoadAsync(showLoading: false);
         model.Step = step;
         if (preferId is Guid id && id != Guid.Empty)
+        {
+            _versionExplicitlyChosen = true;
             model.SelectedVersionId = id;
+        }
+
         EnsureSelectedVersion(model);
     }
 
