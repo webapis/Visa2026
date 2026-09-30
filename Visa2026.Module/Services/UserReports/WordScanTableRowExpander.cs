@@ -95,6 +95,116 @@ internal static class WordScanTableRowExpander
         return buffer.ToArray();
     }
 
+    /// <summary>
+    /// Header letters mark the people list in green. Generate wraps that line with
+    /// <c>{{#ds.rows}}</c>. Clone it once per selected person, then strip the markers so
+    /// DocxTemplater fills the header <c>{{ds.*}}</c> tokens only.
+    /// </summary>
+    public static byte[] ExpandPrototypeParagraph(
+        byte[] content,
+        IReadOnlyList<IDictionary<string, object>> rows)
+    {
+        ArgumentNullException.ThrowIfNull(content);
+        if (content.Length == 0 || rows == null || rows.Count == 0)
+            return content;
+
+        byte[] loadable;
+        try
+        {
+            loadable = WordOpenXmlPackage.EnsureLoadable(content);
+        }
+        catch (InvalidDataException)
+        {
+            return content;
+        }
+        catch (OpenXmlPackageException)
+        {
+            return content;
+        }
+
+        using var buffer = new MemoryStream();
+        buffer.Write(loadable, 0, loadable.Length);
+        buffer.Position = 0;
+
+        using (var document = WordprocessingDocument.Open(buffer, true))
+        {
+            var body = document.MainDocumentPart?.Document?.Body;
+            if (body == null)
+                return content;
+
+            var prototype = FindPrototypeParagraph(body);
+            if (prototype?.Parent == null)
+                return content;
+
+            var copies = new List<Paragraph> { prototype };
+            var insertAfter = prototype;
+            for (var i = 1; i < rows.Count; i++)
+            {
+                var clone = (Paragraph)prototype.CloneNode(deep: true);
+                prototype.Parent.InsertAfter(clone, insertAfter);
+                copies.Add(clone);
+                insertAfter = clone;
+            }
+
+            for (var i = 0; i < copies.Count; i++)
+            {
+                var row = StampRowNumber(rows[i], i + 1);
+                FillParagraph(copies[i], row);
+            }
+
+            document.MainDocumentPart!.Document.Save();
+            document.Save();
+        }
+
+        return buffer.ToArray();
+    }
+
+    private static Paragraph? FindPrototypeParagraph(Body body)
+    {
+        foreach (var paragraph in body.Descendants<Paragraph>())
+        {
+            if (paragraph.Ancestors<TableRow>().FirstOrDefault()?.Elements<TableCell>().Count() >= 2)
+                continue;
+
+            var text = WordTemplateAddressing.GetParagraphText(paragraph);
+            if (text.Contains("{{#ds.rows}}", StringComparison.Ordinal)
+                && text.Contains("{{.", StringComparison.Ordinal))
+            {
+                return paragraph;
+            }
+        }
+
+        return null;
+    }
+
+    private static Dictionary<string, object> StampRowNumber(IDictionary<string, object> source, int rowNo)
+    {
+        var copy = new Dictionary<string, object>(source, StringComparer.OrdinalIgnoreCase)
+        {
+            ["RowNumber"] = rowNo,
+            ["RowNo"] = rowNo,
+            ["RNUM"] = rowNo,
+        };
+        UserReportPlaceholderAliasRegistry.EnrichDictionary(copy);
+        return copy;
+    }
+
+    private static void FillParagraph(Paragraph paragraph, IDictionary<string, object> data)
+    {
+        var source = WordTemplateAddressing.GetParagraphText(paragraph);
+        if (string.IsNullOrEmpty(source))
+            return;
+
+        var stripped = source
+            .Replace("{{#ds.rows}}", string.Empty, StringComparison.Ordinal)
+            .Replace("{{/ds.rows}}", string.Empty, StringComparison.Ordinal)
+            .Replace("{{#rows}}", string.Empty, StringComparison.Ordinal)
+            .Replace("{{/rows}}", string.Empty, StringComparison.Ordinal);
+        var filled = RowToken.Replace(stripped, match => Resolve(match.Groups[1].Value, data));
+        if (filled != source)
+            ReplaceParagraphText(paragraph, filled);
+    }
+
     private static TableRow? FindPrototypeRow(Body body)
     {
         TableRow? best = null;

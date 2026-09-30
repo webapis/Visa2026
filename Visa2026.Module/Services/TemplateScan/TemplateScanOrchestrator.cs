@@ -118,10 +118,44 @@ public sealed class TemplateScanOrchestrator : ITemplateScanOrchestrator
             return s;
         }).ToList();
 
-        var loops = format == TemplateSourceFormat.Xlsx
-            ? TemplateRosterLoopPlanner.PlanExcelLoopsFromSubstitutions(bareSubs, package)
-            : TemplateRosterLoopPlanner.PlanWordLoopsFromSubstitutions(bareSubs, package);
+        IReadOnlyList<string> removedParagraphs = [];
+        if (format == TemplateSourceFormat.Docx)
+        {
+            var collapsed = ScanLetterRosterCollapse.Apply(package, bareSubs);
+            bareSubs = collapsed.Substitutions.ToList();
+            removedParagraphs = collapsed.RemovedParagraphAddresses;
+            var tableLoops = TemplateRosterLoopPlanner.PlanWordLoopsFromSubstitutions(bareSubs, package);
+            var loops = tableLoops.Concat(collapsed.ParagraphLoops).ToList();
+            return await FinishOfficeWriteAsync(
+                analysis,
+                package,
+                format,
+                bareSubs,
+                loops,
+                removedParagraphs,
+                cancellationToken).ConfigureAwait(false);
+        }
 
+        var excelLoops = TemplateRosterLoopPlanner.PlanExcelLoopsFromSubstitutions(bareSubs, package);
+        return await FinishOfficeWriteAsync(
+            analysis,
+            package,
+            format,
+            bareSubs,
+            excelLoops,
+            removedParagraphs,
+            cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<TemplateScanOutcome> FinishOfficeWriteAsync(
+        TemplateScanAnalysis analysis,
+        byte[] package,
+        TemplateSourceFormat format,
+        List<TokenSubstitution> bareSubs,
+        IReadOnlyList<LoopMarker> loops,
+        IReadOnlyList<string> removedParagraphs,
+        CancellationToken cancellationToken)
+    {
         var write = _tokenWriter.Apply(new TemplateTokenWriteRequest
         {
             SourceContent = package,
@@ -132,9 +166,12 @@ public sealed class TemplateScanOrchestrator : ITemplateScanOrchestrator
 
         // Yellow is scan markup only — strip every remaining mark so unmapped leftovers
         // (e.g. "6 (alty)" when only VCAT was written) do not survive into catalog Preview.
+        var written = format == TemplateSourceFormat.Docx && removedParagraphs.Count > 0
+            ? ScanLetterRosterCollapse.RemoveParagraphs(write.Content, removedParagraphs)
+            : write.Content;
         var cleanedContent = format == TemplateSourceFormat.Xlsx
-            ? ExcelTemplateTokenWriter.StripAllYellowFills(write.Content)
-            : WordTemplateTokenWriter.StripAllYellowMarkup(write.Content);
+            ? ExcelTemplateTokenWriter.StripAllYellowFills(written)
+            : WordTemplateTokenWriter.StripAllYellowMarkup(written);
 
         var diff = _diffGate.Verify(new TemplateDiffGateRequest
         {
@@ -143,6 +180,7 @@ public sealed class TemplateScanOrchestrator : ITemplateScanOrchestrator
             Format = format,
             Substitutions = write.AppliedSubstitutions,
             Loops = write.AppliedLoops,
+            RemovedParagraphAddresses = removedParagraphs,
         });
 
         var validation = await _validation

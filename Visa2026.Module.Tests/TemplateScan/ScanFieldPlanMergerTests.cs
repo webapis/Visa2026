@@ -166,4 +166,84 @@ public class ScanFieldPlanMergerTests
         Assert.Single(plan.Fields);
         Assert.Equal("{{ds.AFNUM}}", plan.Fields[0].ProposedToken);
     }
+
+    [Fact]
+    public void Merge_DropsTurkmenistandaky_WhenDirectorTitleIsAcpos()
+    {
+        var set = FullSet();
+        var merger = new ScanFieldPlanMerger();
+        var plan = merger.Merge(new ScanFieldPlanMergeRequest
+        {
+            PlaceholderSet = set,
+            ScanKind = ScanKind.FilledSample,
+            Proposal = new ScanFieldPlanProposal
+            {
+                Fields =
+                [
+                    new ScanDetectedFieldDraft
+                    {
+                        FieldId = "place",
+                        Box = ScanBoundingBox.FullPage,
+                        PageIndex = 0,
+                        LabelText = "Türkmenistandaky",
+                        ProposedToken = null,
+                        Confidence = ScanFieldConfidence.Low,
+                        Scope = ScanFieldScope.Header,
+                        SourceRegion = new DocumentRegion.WordSpan("body/12", 0, 16),
+                    },
+                    new ScanDetectedFieldDraft
+                    {
+                        FieldId = "title",
+                        Box = ScanBoundingBox.FullPage,
+                        PageIndex = 0,
+                        LabelText = "Şahamçasynyň müdiri",
+                        ProposedToken = "{{ds.ACPOS}}",
+                        Confidence = ScanFieldConfidence.High,
+                        Scope = ScanFieldScope.Header,
+                        SourceRegion = new DocumentRegion.WordSpan("body/14", 0, 20),
+                    },
+                ],
+                Source = "test",
+            },
+        });
+
+        var field = Assert.Single(plan.Fields);
+        Assert.Equal("{{ds.ACPOS}}", field.ProposedToken);
+        Assert.DoesNotContain(plan.Fields, f => f.Confidence == ScanFieldConfidence.Low);
+        Assert.Empty(plan.Gaps);
+    }
+
+    [Fact]
+    public void Merge_KeepsTurkmenistandaky_WhenNoDirectorTitle()
+    {
+        var set = FullSet();
+        var merger = new ScanFieldPlanMerger();
+        var plan = merger.Merge(new ScanFieldPlanMergeRequest
+        {
+            PlaceholderSet = set,
+            ScanKind = ScanKind.FilledSample,
+            Proposal = new ScanFieldPlanProposal
+            {
+                Fields =
+                [
+                    new ScanDetectedFieldDraft
+                    {
+                        FieldId = "place",
+                        Box = ScanBoundingBox.FullPage,
+                        PageIndex = 0,
+                        LabelText = "Türkmenistandaky",
+                        ProposedToken = null,
+                        Confidence = ScanFieldConfidence.Low,
+                        Scope = ScanFieldScope.Header,
+                        SourceRegion = new DocumentRegion.WordSpan("body/12", 0, 16),
+                    },
+                ],
+                Source = "test",
+            },
+        });
+
+        var field = Assert.Single(plan.Fields);
+        Assert.Null(field.ProposedToken);
+        Assert.Equal(ScanFieldConfidence.Low, field.Confidence);
+    }
 }

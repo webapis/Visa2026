@@ -46,6 +46,8 @@ public sealed class ScanFieldPlanMerger : IScanFieldPlanMerger
                 nearbyLabel: null,
                 sourceRegion: gap.SourceRegion);
 
+        DropCoveredSignatoryLocationPrefix(fields, gaps);
+
         var staticRegions = request.Proposal.StaticRegions
             .Select(r => new ScanStaticRegion
             {
@@ -261,6 +263,30 @@ public sealed class ScanFieldPlanMerger : IScanFieldPlanMerger
         }
 
         gaps.Add(new ScanGap(fieldId, labelText, suggested, sourceRegion, pageIndex));
+    }
+
+    /// <summary>
+    /// <c>Türkmenistandaky</c> on its own yellow, with <c>şahamçasynyň müdiri</c> already
+    /// mapped to ACPOS, is the same signatory title. Leaving it unmapped marks the row Low
+    /// and keeps Continue disabled until the officer ticks the warning box.
+    /// </summary>
+    private static void DropCoveredSignatoryLocationPrefix(
+        List<ScanDetectedField> fields,
+        List<ScanGap> gaps)
+    {
+        var titleCovered = fields.Any(static f =>
+            !string.IsNullOrWhiteSpace(f.ProposedToken)
+            && TemplateTokenSyntax.TryGetShortCode(f.ProposedToken, out var code)
+            && code.Equals("ACPOS", StringComparison.OrdinalIgnoreCase)
+            && ScanOfficialLetterHints.LooksLikeBranchDirectorTitle(f.LabelText));
+        if (!titleCovered)
+            return;
+
+        fields.RemoveAll(static f =>
+            !f.IsLocked
+            && string.IsNullOrWhiteSpace(f.ProposedToken)
+            && ScanOfficialLetterHints.LooksLikeSignatoryLocationPrefix(f.LabelText));
+        gaps.RemoveAll(static g => ScanOfficialLetterHints.LooksLikeSignatoryLocationPrefix(g.LabelText));
     }
 
     private static bool IsPersonCountCloneBlockedByVisaCancel(string? nearbyLabel, string? priorToken)

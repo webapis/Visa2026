@@ -137,6 +137,11 @@ internal static class WordConversionDiffInspector
     {
         var left = WordTemplateAddressing.EnumerateParagraphs(original);
         var right = WordTemplateAddressing.EnumerateParagraphs(converted);
+        var removed = new HashSet<string>(
+            request.RemovedParagraphAddresses ?? Array.Empty<string>(),
+            StringComparer.Ordinal);
+        if (removed.Count > 0)
+            left = left.Where(addr => !removed.Contains(addr.Address)).ToList();
 
         if (left.Count != right.Count)
         {
@@ -149,7 +154,7 @@ internal static class WordConversionDiffInspector
         for (var i = 0; i < left.Count; i++)
         {
             var address = left[i].Address;
-            if (!string.Equals(address, right[i].Address, StringComparison.Ordinal))
+            if (removed.Count == 0 && !string.Equals(address, right[i].Address, StringComparison.Ordinal))
             {
                 violations.Add($"Paragraph order changed at index {i}.");
                 continue;

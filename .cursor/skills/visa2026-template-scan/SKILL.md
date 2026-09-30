@@ -154,6 +154,7 @@ Officers submit **wizard step screenshots** + optional **catalog Preview** + the
 | Excel catalog Preview blank; pane titled `report_….docx` | Nested Resminamalar keys — Excel bytes converted as Word PDF | **resminamalar** |
 | Diff gate fail on Generate | Span addresses; fingerprints **ignore** yellow strip | **This skill** + Convert writer |
 | Yellow remains after Approve / catalog Preview | `StripAllYellowMarkup` / `StripAllYellowFills` after write; re-Approve old templates | **This skill** |
+| Header letter should also list the selected people | Yellow = header (number, date, signatory). Green = the people list. The first green line repeats; extra sample names are removed. Stop F5, rebuild, **Analyze** | **This skill** |
 
 ## Scope
 
@@ -167,7 +168,7 @@ Officers submit **wizard step screenshots** + optional **catalog Preview** + the
 ## Locked rules
 
 1. Separate from Convert (yellow marks ≠ instance value match).
-2. Yellow only → placeholders; library tokens only.
+2. Yellow → header placeholders. Green → the repeating people list inside that same letter. Library tokens only.
 3. Preserve source Office layout (token writer on copy).
 4. **Yellow is scan markup only** — after Generate, strip **all** highlighter/yellow fill from the saved copy (not only substituted runs). Unmapped leftovers (e.g. `6 (alty)` when only VCAT mapped) must not survive catalog Preview.
 5. Officer Approve required.

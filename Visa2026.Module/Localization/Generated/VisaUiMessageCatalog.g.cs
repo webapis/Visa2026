@@ -12880,10 +12880,17 @@ public static partial class VisaUiMessageCatalog
         },
         ["TemplateScan.Hint.File"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Upload a filled sample. Highlight every value that should become a placeholder in yellow (Word Text Highlight Color or Excel cell fill). Other text stays as printed.",
-            ["tr-TR"] = "Doldurulmuş bir örnek yükleyin. Yer tutucu olacak her değeri sarıyla işaretleyin (Word metin vurgusu veya Excel hücre dolgusu). Diğer metin basıldığı gibi kalır.",
-            ["tk-TM"] = "Doldurylan nusgany ýükläň. Bellige öwrülmeli her bahany sary bilen belläň (Word tekst ýagtylandyrmasy ýa-da Excel öýjük reňki). Beýleki tekst çap edilen ýaly galýar.",
-            ["ru-RU"] = "Загрузите заполненный образец. Выделите жёлтым каждое значение, которое должно стать заполнителем (выделение текста в Word или заливка ячейки в Excel). Остальной текст остаётся как напечатан.",
+            ["en-US"] = "Upload a filled sample. Highlight header values in yellow (letter number, date, signatory). Highlight the people list in green — the first green line repeats for every selected person, and extra sample names are removed. Word Text Highlight Color or Excel cell fill. Other text stays as printed.",
+            ["tr-TR"] = "Doldurulmuş bir örnek yükleyin. Üst bilgi değerlerini sarıyla işaretleyin (yazı numarası, tarih, imza sahibi). Kişi listesini yeşille işaretleyin — ilk yeşil satır seçilen her kişi için tekrarlanır, fazladan örnek adlar kaldırılır. Word metin vurgusu veya Excel hücre dolgusu. Diğer metin basıldığı gibi kalır.",
+            ["tk-TM"] = "Doldurylan nusgany ýükläň. Sözbaşy bahalaryny sary bilen belläň (hat belgisi, senesi, gol çeken). Adamlaryň sanawyny ýaşyl bilen belläň — ilkinji ýaşyl setir saýlanan her adam üçin gaýtalanýar, goşmaça nusga atlar aýrylýar. Word tekst ýagtylandyrmasy ýa-da Excel öýjük reňki. Beýleki tekst çap edilen ýaly galýar.",
+            ["ru-RU"] = "Загрузите заполненный образец. Значения шапки выделите жёлтым (номер, дата, подписант). Список людей выделите зелёным — первая зелёная строка повторяется для каждого выбранного человека, лишние примеры имён убираются. Выделение текста в Word или заливка ячейки в Excel. Остальной текст остаётся как напечатан.",
+        },
+        ["TemplateScan.RosterMark"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Roster",
+            ["tr-TR"] = "Liste",
+            ["tk-TM"] = "Sanaw",
+            ["ru-RU"] = "Список",
         },
         ["TemplateScan.Hint.MigrationServices"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

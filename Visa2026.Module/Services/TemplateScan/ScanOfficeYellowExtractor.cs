@@ -12,7 +12,16 @@ using Visa2026.Module.Services.TemplateConvert;
 
 namespace Visa2026.Module.Services.TemplateScan;
 
-/// <summary>One contiguous yellow mark in an Office package (Word span or Excel cell).</summary>
+/// <summary>
+/// Yellow marks header values. Green marks the repeating people list inside that same letter.
+/// </summary>
+public enum ScanOfficeMarkKind
+{
+    Yellow = 0,
+    Green = 1,
+}
+
+/// <summary>One contiguous yellow or green mark in an Office package (Word span or Excel cell).</summary>
 public sealed class ScanOfficeYellowSpan
 {
     public required string Text { get; init; }
@@ -20,6 +29,9 @@ public sealed class ScanOfficeYellowSpan
     public required DocumentRegion Region { get; init; }
 
     public int PageIndex { get; init; }
+
+    /// <summary>Yellow = header placeholder. Green = roster line inside the letter.</summary>
+    public ScanOfficeMarkKind MarkKind { get; init; } = ScanOfficeMarkKind.Yellow;
 }
 
 public interface IScanOfficeYellowExtractor
@@ -28,9 +40,9 @@ public interface IScanOfficeYellowExtractor
 }
 
 /// <summary>
-/// Finds officer yellow highlighter marks in .docx / .xlsx without vision or OCR.
-/// Word: w:highlight yellow/darkYellow (+ common green marker) and yellow shading fills.
-/// Excel: solid yellow-ish cell background fills.
+/// Finds officer highlighter marks in .docx / .xlsx without vision or OCR.
+/// Yellow (and yellow shading) is a header value. Green is a roster line inside that letter.
+/// Excel: solid yellow cell fill is header; solid green cell fill is a roster row.
 /// </summary>
 public sealed class ScanOfficeYellowExtractor : IScanOfficeYellowExtractor
 {
@@ -103,48 +115,54 @@ public sealed class ScanOfficeYellowExtractor : IScanOfficeYellowExtractor
                 continue;
 
             var cell = paragraph.Ancestors<TableCell>().FirstOrDefault();
-            if (IsYellowShadedCell(cell) || IsYellowShadedParagraph(paragraph))
+            var shadeKind = ShadingMarkKind(cell?.TableCellProperties?.GetFirstChild<Shading>())
+                ?? ShadingMarkKind(paragraph.ParagraphProperties?.GetFirstChild<Shading>());
+            if (shadeKind != null)
             {
                 var shaded = SpansFromText(
                     addressed.Address,
                     fullText,
-                    start: 0).ToList();
+                    start: 0,
+                    shadeKind.Value).ToList();
                 AttachCountPairSpans(fullText, addressed.Address, shaded);
                 results.AddRange(shaded);
                 continue;
             }
 
-            // Build per-run (start, length, yellow?) over concatenated w:t text.
+            // Build per-run (start, length, mark kind) over concatenated w:t text.
             var cursor = 0;
-            var segments = new List<(int Start, int Length, bool Yellow, string Text)>();
+            var segments = new List<(int Start, int Length, ScanOfficeMarkKind? Kind, string Text)>();
             foreach (var run in runs)
             {
                 var text = string.Concat(run.Descendants<Text>().Select(static t => t.Text ?? string.Empty));
                 if (text.Length == 0)
                     continue;
 
-                segments.Add((cursor, text.Length, IsYellowRun(run, styles), text));
+                segments.Add((cursor, text.Length, RunMarkKind(run, styles), text));
                 cursor += text.Length;
             }
 
             var paragraphSpans = new List<ScanOfficeYellowSpan>();
 
-            // Merge consecutive yellow segments into spans.
+            // Merge consecutive marks of the same color. A new "2. Name" stays its own roster line.
             var i = 0;
             while (i < segments.Count)
             {
-                if (!segments[i].Yellow)
+                if (segments[i].Kind == null)
                 {
                     i++;
                     continue;
                 }
 
+                var kind = segments[i].Kind!.Value;
                 var start = segments[i].Start;
                 var end = start + segments[i].Length;
                 var sb = new System.Text.StringBuilder(segments[i].Text);
                 var j = i + 1;
-                while (j < segments.Count && segments[j].Yellow
-                       && ShouldMergeYellowTexts(sb.ToString(), segments[j].Text))
+                while (j < segments.Count
+                       && segments[j].Kind == kind
+                       && ShouldMergeYellowTexts(sb.ToString(), segments[j].Text)
+                       && !StartsNewNumberedLine(segments[j].Text))
                 {
                     sb.Append(segments[j].Text);
                     end = segments[j].Start + segments[j].Length;
@@ -159,7 +177,8 @@ public sealed class ScanOfficeYellowExtractor : IScanOfficeYellowExtractor
                     paragraphSpans.AddRange(SpansFromText(
                         addressed.Address,
                         mark,
-                        start + lead));
+                        start + lead,
+                        kind));
                 }
 
                 i = j;
@@ -215,10 +234,11 @@ public sealed class ScanOfficeYellowExtractor : IScanOfficeYellowExtractor
                 wordsMark = null;
             }
 
+            var pairKind = digitMark?.MarkKind ?? wordsMark?.MarkKind ?? ScanOfficeMarkKind.Yellow;
             if (digitMark == null)
-                extras.Add(PairSpan(paragraphAddress, spans, digit.Value, digit.Index, digit.Length));
+                extras.Add(PairSpan(paragraphAddress, spans, digit.Value, digit.Index, digit.Length, pairKind));
             if (wordsMark == null)
-                extras.Add(PairSpan(paragraphAddress, spans, words.Value, words.Index, words.Length));
+                extras.Add(PairSpan(paragraphAddress, spans, words.Value, words.Index, words.Length, pairKind));
         }
 
         if (extras.Count == 0)
@@ -235,12 +255,14 @@ public sealed class ScanOfficeYellowExtractor : IScanOfficeYellowExtractor
         List<ScanOfficeYellowSpan> spans,
         string text,
         int start,
-        int length) =>
+        int length,
+        ScanOfficeMarkKind markKind) =>
         new()
         {
             Text = text,
             Region = new DocumentRegion.WordSpan(paragraphAddress, start, length),
             PageIndex = spans[0].PageIndex,
+            MarkKind = markKind,
         };
 
     private static ScanOfficeYellowSpan? FindMark(
@@ -272,7 +294,8 @@ public sealed class ScanOfficeYellowExtractor : IScanOfficeYellowExtractor
     internal static IReadOnlyList<ScanOfficeYellowSpan> SpansFromText(
         string paragraphAddress,
         string text,
-        int start)
+        int start,
+        ScanOfficeMarkKind markKind = ScanOfficeMarkKind.Yellow)
     {
         var mark = (text ?? string.Empty).Trim();
         if (mark.Length == 0)
@@ -284,13 +307,19 @@ public sealed class ScanOfficeYellowExtractor : IScanOfficeYellowExtractor
         {
             return
             [
-                MakeSpan(paragraphAddress, title, origin),
-                MakeSpan(paragraphAddress, name, origin + mark.IndexOf(name, StringComparison.Ordinal)),
+                MakeSpan(paragraphAddress, title, origin, markKind),
+                MakeSpan(paragraphAddress, name, origin + mark.IndexOf(name, StringComparison.Ordinal), markKind),
             ];
         }
 
-        return [MakeSpan(paragraphAddress, mark, origin)];
+        return [MakeSpan(paragraphAddress, mark, origin, markKind)];
     }
+
+    private static bool StartsNewNumberedLine(string text) =>
+        Regex.IsMatch(
+            (text ?? string.Empty).TrimStart(),
+            @"^\d{1,3}\s*[\.\)]",
+            RegexOptions.CultureInvariant);
 
     internal static bool ShouldMergeYellowTexts(string left, string right)
     {
@@ -360,49 +389,38 @@ public sealed class ScanOfficeYellowExtractor : IScanOfficeYellowExtractor
             && words.All(static w => w.Any(char.IsLetter));
     }
 
-    private static ScanOfficeYellowSpan MakeSpan(string paragraphAddress, string text, int start) =>
+    private static ScanOfficeYellowSpan MakeSpan(
+        string paragraphAddress,
+        string text,
+        int start,
+        ScanOfficeMarkKind markKind) =>
         new()
         {
             Text = text,
             Region = new DocumentRegion.WordSpan(paragraphAddress, Math.Max(0, start), text.Length),
             PageIndex = 0,
+            MarkKind = markKind,
         };
 
-    private static bool IsYellowShadedCell(TableCell? cell)
+    private static ScanOfficeMarkKind? ShadingMarkKind(Shading? shading)
     {
-        if (cell == null)
-            return false;
-        var shd = cell.TableCellProperties?.GetFirstChild<Shading>();
-        return IsYellowShading(shd);
+        var fill = shading?.Fill?.Value;
+        if (string.IsNullOrWhiteSpace(fill))
+            return null;
+        if (IsGreenHex(fill))
+            return ScanOfficeMarkKind.Green;
+        if (IsYellowHex(fill))
+            return ScanOfficeMarkKind.Yellow;
+        return null;
     }
 
-    private static bool IsYellowShadedParagraph(Paragraph paragraph)
-    {
-        var shd = paragraph.ParagraphProperties?.GetFirstChild<Shading>();
-        return IsYellowShading(shd);
-    }
+    private static ScanOfficeMarkKind? RunMarkKind(Run run, Styles? styles) =>
+        HighlightMarkKind(run.RunProperties) ?? StyleChainMarkKind(styles, run.RunProperties?.RunStyle?.Val?.Value);
 
-    private static bool IsYellowShading(Shading? shading)
-    {
-        if (shading == null)
-            return false;
-        var fill = shading.Fill?.Value;
-        return !string.IsNullOrWhiteSpace(fill) && IsYellowHex(fill);
-    }
-
-    private static bool IsYellowRun(Run run, Styles? styles)
-    {
-        if (HasYellowHighlight(run.RunProperties))
-            return true;
-
-        var styleId = run.RunProperties?.RunStyle?.Val?.Value;
-        return StyleChainHasYellow(styles, styleId);
-    }
-
-    private static bool StyleChainHasYellow(Styles? styles, string? styleId)
+    private static ScanOfficeMarkKind? StyleChainMarkKind(Styles? styles, string? styleId)
     {
         if (styles == null || string.IsNullOrWhiteSpace(styleId))
-            return false;
+            return null;
 
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var current = styleId;
@@ -413,27 +431,34 @@ public sealed class ScanOfficeYellowExtractor : IScanOfficeYellowExtractor
                     string.Equals(s.StyleId?.Value, current, StringComparison.OrdinalIgnoreCase));
             if (style == null)
                 break;
-            if (HasYellowHighlight(style.StyleRunProperties))
-                return true;
+            var kind = HighlightMarkKind(style.StyleRunProperties);
+            if (kind != null)
+                return kind;
             current = style.BasedOn?.Val?.Value;
         }
 
-        return false;
+        return null;
     }
 
-    private static bool HasYellowHighlight(OpenXmlElement? props)
+    private static ScanOfficeMarkKind? HighlightMarkKind(OpenXmlElement? props)
     {
         if (props == null)
-            return false;
+            return null;
 
         var highlight = props.GetFirstChild<Highlight>()?.Val?.Value;
-        if (highlight == HighlightColorValues.Yellow
-            || highlight == HighlightColorValues.DarkYellow
-            || highlight == HighlightColorValues.Green)
-            return true;
+        if (highlight == HighlightColorValues.Yellow || highlight == HighlightColorValues.DarkYellow)
+            return ScanOfficeMarkKind.Yellow;
+        if (highlight == HighlightColorValues.Green || highlight == HighlightColorValues.DarkGreen)
+            return ScanOfficeMarkKind.Green;
 
         var fill = props.GetFirstChild<Shading>()?.Fill?.Value;
-        return !string.IsNullOrWhiteSpace(fill) && IsYellowHex(fill);
+        if (string.IsNullOrWhiteSpace(fill))
+            return null;
+        if (IsGreenHex(fill))
+            return ScanOfficeMarkKind.Green;
+        if (IsYellowHex(fill))
+            return ScanOfficeMarkKind.Yellow;
+        return null;
     }
 
     private static IReadOnlyList<ScanOfficeYellowSpan> ExtractExcel(byte[] bytes)
@@ -448,7 +473,8 @@ public sealed class ScanOfficeYellowExtractor : IScanOfficeYellowExtractor
 
         foreach (var cell in sheet.CellsUsed())
         {
-            if (!IsYellowCell(cell))
+            var cellKind = CellMarkKind(cell);
+            if (cellKind == null)
                 continue;
 
             var text = string.Empty;
@@ -466,35 +492,37 @@ public sealed class ScanOfficeYellowExtractor : IScanOfficeYellowExtractor
                 Text = text,
                 Region = new DocumentRegion.ExcelCell(sheet.Name, cell.Address.ToStringRelative()),
                 PageIndex = 0,
+                MarkKind = cellKind.Value,
             });
         }
 
         return results;
     }
 
-    private static bool IsYellowCell(IXLCell cell)
+    private static ScanOfficeMarkKind? CellMarkKind(IXLCell cell)
     {
         var fill = cell.Style.Fill;
         if (fill.PatternType is XLFillPatternValues.None or XLFillPatternValues.Gray125)
-            return false;
+            return null;
 
         try
         {
             var color = fill.BackgroundColor;
-            if (color.ColorType == XLColorType.Color)
-                return IsHighlighterYellowRgb(color.Color);
-            if (color.ColorType == XLColorType.Theme)
-            {
-                // Theme yellows are uncommon; treat indexed yellow if present.
-                return false;
-            }
+            if (color.ColorType != XLColorType.Color)
+                return null;
+
+            var rgb = color.Color;
+            if (IsHighlighterYellowRgb(rgb))
+                return ScanOfficeMarkKind.Yellow;
+            if (IsHighlighterGreenRgb(rgb))
+                return ScanOfficeMarkKind.Green;
         }
         catch
         {
-            return false;
+            return null;
         }
 
-        return false;
+        return null;
     }
 
     private static bool IsYellowHex(string hex)
@@ -512,11 +540,33 @@ public sealed class ScanOfficeYellowExtractor : IScanOfficeYellowExtractor
         return IsHighlighterYellowRgb(DrawingColor.FromArgb(r, g, b));
     }
 
+    private static bool IsGreenHex(string hex)
+    {
+        hex = hex.Trim().TrimStart('#');
+        if (hex.Length == 8)
+            hex = hex[^6..];
+        if (hex.Length != 6)
+            return false;
+        if (!int.TryParse(hex[0..2], System.Globalization.NumberStyles.HexNumber, null, out var r)
+            || !int.TryParse(hex[2..4], System.Globalization.NumberStyles.HexNumber, null, out var g)
+            || !int.TryParse(hex[4..6], System.Globalization.NumberStyles.HexNumber, null, out var b))
+            return false;
+
+        return IsHighlighterGreenRgb(DrawingColor.FromArgb(r, g, b));
+    }
+
     private static bool IsHighlighterYellowRgb(DrawingColor c)
     {
         if (c.R < 180 || c.G < 160)
             return false;
         var chroma = (c.R + c.G) / 2.0 - c.B;
         return chroma >= 35 && c.B <= 210;
+    }
+
+    private static bool IsHighlighterGreenRgb(DrawingColor c)
+    {
+        if (IsHighlighterYellowRgb(c))
+            return false;
+        return c.G >= 140 && c.G >= c.R + 25 && c.G >= c.B + 15 && c.R <= 210 && c.B <= 210;
     }
 }

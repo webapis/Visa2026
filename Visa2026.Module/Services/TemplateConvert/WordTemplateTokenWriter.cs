@@ -353,7 +353,9 @@ internal static class WordTemplateTokenWriter
             || !int.TryParse(hex[4..6], System.Globalization.NumberStyles.HexNumber, null, out var b))
             return false;
 
-        return r >= 180 && g >= 160 && ((r + g) / 2.0 - b) >= 35 && b <= 210;
+        if (r >= 180 && g >= 160 && ((r + g) / 2.0 - b) >= 35 && b <= 210)
+            return true;
+        return g >= 140 && g >= r + 25 && g >= b + 15 && r <= 210 && b <= 210;
     }
 
     private static void PrependText(Paragraph paragraph, string value)

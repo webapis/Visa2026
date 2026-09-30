@@ -475,6 +475,7 @@ namespace Visa2026.Module.Services.UserReports
                 var list = rowDicts.Cast<IDictionary<string, object>>().ToList();
                 data["rows"] = list;
                 content = WordScanTableRowExpander.ExpandPrototypeTableRow(content, list);
+                content = WordScanTableRowExpander.ExpandPrototypeParagraph(content, list);
             }
 
             using var templateStream = new MemoryStream(content, 0, content.Length, writable: false, publiclyVisible: true);

@@ -28,7 +28,13 @@
                     class="@RowCss(row)"
                     @onclick="() => SelectRow(row.RowKey)">
                     <td class="tas-rownum"><span class="tas-mark__n">@row.OrderLabel</span></td>
-                    <td>@row.LabelText</td>
+                    <td>
+                        @row.LabelText
+                        @if (ShowRosterChip(row))
+                        {
+                            <span class="tas-chip tas-chip--ok">@Msg("TemplateScan.RosterMark")</span>
+                        }
+                    </td>
                     <td>
                         @if (CanRemap(row))
                         {
@@ -473,6 +479,20 @@ else
             isLocked,
             mark.PartIndex <= 1,
             alternatives);
+    }
+
+    private bool ShowRosterChip(FieldRow row)
+    {
+        var hasHeader = FieldPlan.Fields.Any(static f =>
+            f.Scope == ScanFieldScope.Header && !string.IsNullOrWhiteSpace(f.ProposedToken));
+        var hasRoster = FieldPlan.Fields.Any(static f =>
+            f.Scope == ScanFieldScope.Row && !string.IsNullOrWhiteSpace(f.ProposedToken));
+        if (!hasHeader || !hasRoster)
+            return false;
+
+        var field = FieldPlan.Fields.FirstOrDefault(f =>
+            string.Equals(f.FieldId, row.ParentFieldId, StringComparison.Ordinal));
+        return field?.Scope == ScanFieldScope.Row;
     }
 
     private IReadOnlyList<ScanGap> Gaps => FieldPlan.Gaps;

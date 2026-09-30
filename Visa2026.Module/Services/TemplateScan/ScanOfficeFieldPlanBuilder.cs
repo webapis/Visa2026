@@ -153,7 +153,7 @@ public static class ScanOfficeFieldPlanBuilder
 
             if (resolved.Count > 0)
             {
-                drafts.AddRange(ScanCompoundYellowBinder.Upgrade(
+                var upgraded = ScanCompoundYellowBinder.Upgrade(
                     ScanCompanyRegistrationDateGuard.RewriteDrafts(
                         ScanRepresentativeNameGuard.RewriteDrafts(
                             AttachNearby(resolved, nearbyLabel, columnHeader),
@@ -162,7 +162,23 @@ public static class ScanOfficeFieldPlanBuilder
                             usedHeaderCodes),
                         placeholderSet,
                         usedHeaderCodes),
-                    placeholderSet));
+                    placeholderSet);
+                drafts.AddRange(ScanRosterGreenMark.PreferRoster(
+                    upgraded,
+                    yellow,
+                    placeholderSet,
+                    usedHeaderCodes));
+                continue;
+            }
+
+            var greenPerson = ScanRosterGreenMark.PreferRoster(
+                [],
+                yellow,
+                placeholderSet,
+                usedHeaderCodes);
+            if (greenPerson.Count > 0)
+            {
+                drafts.AddRange(greenPerson);
                 continue;
             }
 
@@ -175,7 +191,9 @@ public static class ScanOfficeFieldPlanBuilder
                         LabelText = yellow.Text,
                         ProposedToken = null,
                         Confidence = ScanFieldConfidence.Medium,
-                        Scope = ScanFieldScope.Header,
+                        Scope = yellow.MarkKind == ScanOfficeMarkKind.Green
+                            ? ScanFieldScope.Row
+                            : ScanFieldScope.Header,
                         Box = ScanBoundingBox.FullPage,
                         SourceRegion = yellow.Region,
                         NearbyLabel = nearbyLabel,

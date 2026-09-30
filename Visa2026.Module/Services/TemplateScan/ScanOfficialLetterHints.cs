@@ -46,6 +46,17 @@ public static class ScanOfficialLetterHints
             || folded.Equals("sahamcasynyn mudiri", StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Leading place word of a branch-director title printed on its own yellow
+    /// (<c>Türkmenistandaky</c> above <c>şahamçasynyň müdiri</c>). Not its own placeholder.
+    /// </summary>
+    public static bool LooksLikeSignatoryLocationPrefix(string? text)
+    {
+        var folded = TemplateTextNormalizer.NormalizeFolded(text);
+        return folded.Equals("turkmenistandaky", StringComparison.Ordinal)
+            || folded.Equals("turkmenstandaky", StringComparison.Ordinal);
+    }
+
     public static bool LooksLikeLetterBlock(string? text) =>
         LooksLikeMigrationAddressee(text) || LooksLikeBranchDirectorTitle(text);
 

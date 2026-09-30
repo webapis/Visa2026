@@ -80,6 +80,12 @@ public sealed class TemplateDiffGateRequest
     public IReadOnlyList<TokenSubstitution> Substitutions { get; init; } = Array.Empty<TokenSubstitution>();
 
     public IReadOnlyList<LoopMarker> Loops { get; init; } = Array.Empty<LoopMarker>();
+
+    /// <summary>
+    /// Body paragraphs removed after token write (extra green sample people under the first roster line).
+    /// The diff gate compares the surviving paragraphs in order.
+    /// </summary>
+    public IReadOnlyList<string> RemovedParagraphAddresses { get; init; } = Array.Empty<string>();
 }
 
 public sealed record DiffGateResult(bool Passed, IReadOnlyList<string> Violations)

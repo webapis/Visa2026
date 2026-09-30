@@ -76,19 +76,25 @@ public static class ScanExcelYellowResolver
 
             if (inference.ProposedToken == null)
             {
-                drafts.Add(new ScanDetectedFieldDraft
-                {
-                    FieldId = Guid.NewGuid().ToString("N"),
-                    PageIndex = yellow.PageIndex,
-                    LabelText = yellow.Text,
-                    ProposedToken = null,
-                    Confidence = ScanFieldConfidence.Medium,
-                    Scope = ScanFieldScope.Row,
-                    Box = ScanBoundingBox.FullPage,
-                    SourceRegion = yellow.Region,
-                    Alternatives = inference.Alternatives,
-                    ColumnHeader = header,
-                });
+                drafts.AddRange(ScanRosterGreenMark.PreferRoster(
+                    [
+                        new ScanDetectedFieldDraft
+                        {
+                            FieldId = Guid.NewGuid().ToString("N"),
+                            PageIndex = yellow.PageIndex,
+                            LabelText = yellow.Text,
+                            ProposedToken = null,
+                            Confidence = ScanFieldConfidence.Medium,
+                            Scope = ScanFieldScope.Row,
+                            Box = ScanBoundingBox.FullPage,
+                            SourceRegion = yellow.Region,
+                            Alternatives = inference.Alternatives,
+                            ColumnHeader = header,
+                        },
+                    ],
+                    yellow,
+                    placeholderSet,
+                    usedHeaderCodes));
                 continue;
             }
 
@@ -99,19 +105,25 @@ public static class ScanExcelYellowResolver
                 // Header token already used — keep as row if ambiguous.
             }
 
-            drafts.Add(new ScanDetectedFieldDraft
-            {
-                FieldId = Guid.NewGuid().ToString("N"),
-                PageIndex = yellow.PageIndex,
-                LabelText = yellow.Text,
-                ProposedToken = inference.ProposedToken,
-                Confidence = inference.Confidence,
-                Scope = inference.Scope,
-                Box = ScanBoundingBox.FullPage,
-                SourceRegion = yellow.Region,
-                Alternatives = inference.Alternatives,
-                ColumnHeader = header,
-            });
+            drafts.AddRange(ScanRosterGreenMark.PreferRoster(
+                [
+                    new ScanDetectedFieldDraft
+                    {
+                        FieldId = Guid.NewGuid().ToString("N"),
+                        PageIndex = yellow.PageIndex,
+                        LabelText = yellow.Text,
+                        ProposedToken = inference.ProposedToken,
+                        Confidence = inference.Confidence,
+                        Scope = inference.Scope,
+                        Box = ScanBoundingBox.FullPage,
+                        SourceRegion = yellow.Region,
+                        Alternatives = inference.Alternatives,
+                        ColumnHeader = header,
+                    },
+                ],
+                yellow,
+                placeholderSet,
+                usedHeaderCodes));
         }
 
         return drafts;

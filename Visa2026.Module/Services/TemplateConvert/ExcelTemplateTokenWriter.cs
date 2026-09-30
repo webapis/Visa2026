@@ -50,7 +50,10 @@ internal static class ExcelTemplateTokenWriter
         if (fill.PatternType is XLFillPatternValues.None or XLFillPatternValues.Gray125)
             return;
 
-        if (!IsYellowishXlColor(fill.BackgroundColor) && !IsYellowishXlColor(fill.PatternColor))
+        if (!IsYellowishXlColor(fill.BackgroundColor)
+            && !IsYellowishXlColor(fill.PatternColor)
+            && !IsGreenishXlColor(fill.BackgroundColor)
+            && !IsGreenishXlColor(fill.PatternColor))
             return;
 
         fill.PatternType = XLFillPatternValues.None;
@@ -80,6 +83,25 @@ internal static class ExcelTemplateTokenWriter
     internal static bool IsHighlighterYellowRgb(int r, int g, int b) =>
         r >= 180 && g >= 160 && ((r + g) / 2.0 - b) >= 35 && b <= 210;
 
+    internal static bool IsHighlighterGreenRgb(int r, int g, int b) =>
+        !IsHighlighterYellowRgb(r, g, b)
+        && g >= 140 && g >= r + 25 && g >= b + 15 && r <= 210 && b <= 210;
+
+    private static bool IsGreenishXlColor(XLColor color)
+    {
+        try
+        {
+            if (color.ColorType != XLColorType.Color)
+                return false;
+            var c = color.Color;
+            return IsHighlighterGreenRgb(c.R, c.G, c.B);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     /// <summary>
     /// Shared <c>xf</c> fills in <c>xl/styles.xml</c> stay yellow even when one cell was cleared.
     /// Neutralize yellowish pattern fills so leftover style indexes cannot paint Preview.
@@ -104,7 +126,9 @@ internal static class ExcelTemplateTokenWriter
                 if (pattern == null)
                     continue;
                 if (!IsYellowSpreadsheetColor(pattern.ForegroundColor)
-                    && !IsYellowSpreadsheetColor(pattern.BackgroundColor))
+                    && !IsYellowSpreadsheetColor(pattern.BackgroundColor)
+                    && !IsGreenSpreadsheetColor(pattern.ForegroundColor)
+                    && !IsGreenSpreadsheetColor(pattern.BackgroundColor))
                     continue;
 
                 pattern.PatternType = PatternValues.None;
@@ -149,7 +173,29 @@ internal static class ExcelTemplateTokenWriter
             || !int.TryParse(hex[4..6], System.Globalization.NumberStyles.HexNumber, null, out var b))
             return false;
 
-        return IsHighlighterYellowRgb(r, g, b);
+        return IsHighlighterYellowRgb(r, g, b) || IsHighlighterGreenRgb(r, g, b);
+    }
+
+    private static bool IsGreenSpreadsheetColor(DocumentFormat.OpenXml.Spreadsheet.ColorType? color)
+    {
+        if (color?.Rgb?.Value is not { Length: > 0 } rgb)
+            return false;
+        return IsGreenishHex(rgb);
+    }
+
+    private static bool IsGreenishHex(string hex)
+    {
+        hex = hex.Trim().TrimStart('#');
+        if (hex.Length == 8)
+            hex = hex[^6..];
+        if (hex.Length != 6)
+            return false;
+        if (!int.TryParse(hex[0..2], System.Globalization.NumberStyles.HexNumber, null, out var r)
+            || !int.TryParse(hex[2..4], System.Globalization.NumberStyles.HexNumber, null, out var g)
+            || !int.TryParse(hex[4..6], System.Globalization.NumberStyles.HexNumber, null, out var b))
+            return false;
+
+        return IsHighlighterGreenRgb(r, g, b);
     }
 
     public static TokenWriteResult Write(

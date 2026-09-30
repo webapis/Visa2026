@@ -2,6 +2,24 @@
 
 Append-only. Newest first under **## Entries**.
 
+### 2026-09-30 — Continue stayed off on a mapped Kepilnama
+
+- **Need**: Review of `_Salgy Kepilnama.docx` had every real placeholder mapped, and **Continue** stayed grey.
+- **Cause**: The place word **Türkmenistandaky** was its own yellow, above **şahamçasynyň müdiri** (`ACPOS`). That leftover row was Unmapped / Low, so Review required the warning checkbox.
+- **Fix**: When the director title is already `ACPOS`, drop the lone **Türkmenistandaky** row. The word stays printed on the letter. Continue no longer waits on that row.
+- **Officer**: Stop F5, rebuild. Upload the same letter and **Analyze** again. Row 7 should be gone. Continue should be enabled. The title line stays `{{ds.ACPOS}}`.
+- **Prevent**: Do not leave a signatory place-word as a Low unmapped field when the title beside it is already `ACPOS`.
+- **Cross-skill**: —
+
+### 2026-09-30 — Header letter can include a green people list
+
+- **Need**: Create from yellow marks made either a header letter or a roster. A guarantee letter is one header document that also lists the selected people.
+- **Cause**: Green highlighter was treated as yellow, and a Word people list outside a table never got `{{#ds.rows}}`.
+- **Fix**: Yellow stays header (`{{ds.*}}`). Green is the roster line (`{{.RNUM}}. {{.PFN}}` on `1. Name`). Generate wraps the first green line and removes the following sample names. Preview repeats that line for each selected person.
+- **Officer**: Highlight letter number, date, and signatory in yellow. Highlight the people list in green. Stop F5, rebuild, **Analyze**. Review shows **Sanaw** / Roster on the green lines. Continue — one letter, one line per selected person.
+- **Prevent**: Do not treat green as another yellow. Do not leave the extra sample names in the saved letter.
+- **Cross-skill**: visa2026-user-report-templates
+
 ### 2026-09-30 — Application in Türkmençe is Ýüztutma
 
 - **Need**: Yellow-marks groups and descriptions said **Arza** while the case workspace says **Ýüztutma**.
