@@ -13,6 +13,10 @@
 @using Visa2026.Module.Services.TemplateScan
 @using Visa2026.Module.Services
 @using Visa2026.Module.Services.UserReports
+@using Visa2026.Module.Localization
+@using Visa2026.Blazor.Server.Localization
+@using DevExpress.ExpressApp.Blazor.Services
+@using Microsoft.AspNetCore.Http
 
 @* Officer-facing scan-to-template modal (S3). Interaction contract: docs/TEMPLATE_AI_SCAN_UI_FLOW.md. *@
 
@@ -23,10 +27,10 @@
              role="dialog" aria-modal="true" aria-labelledby="tas-title" @onclick:stopPropagation="true">
             <header class="tas-modal__head">
                 <div>
-                    <h2 id="tas-title">@(IsEditingExisting ? "Review placeholders" : "Create template from yellow marks")</h2>
-                    <p>@_profileName@(string.IsNullOrEmpty(_caseNumber) ? string.Empty : " · case " + _caseNumber)</p>
+                    <h2 id="tas-title">@(IsEditingExisting ? Msg("TemplateScan.Title.Review") : Msg("TemplateScan.Title.Create"))</h2>
+                    <p>@_profileName@(string.IsNullOrEmpty(_caseNumber) ? string.Empty : FormatMsg("TemplateScan.Subtitle.Case", _caseNumber))</p>
                 </div>
-                <button type="button" class="tas-icon-btn" aria-label="Close" @onclick="RequestCloseAsync">&#10005;</button>
+                <button type="button" class="tas-icon-btn" aria-label="@Msg("TemplateScan.Close")" @onclick="RequestCloseAsync">&#10005;</button>
             </header>
 
             <ol class="tas-stepper">
@@ -44,25 +48,25 @@
                 {
                     <div class="tas-form @(_busy ? "is-busy" : null)">
                         <div class="tas-field">
-                            <label class="tas-field__label" for="tas-name">Template name <em>*</em></label>
+                            <label class="tas-field__label" for="tas-name">@Msg("TemplateScan.Field.TemplateName") <em>*</em></label>
                             <input id="tas-name" class="tas-input" value="@_templateName"
                                    @oninput="e => _templateName = e.Value?.ToString() ?? string.Empty" />
                         </div>
 
                         <div class="tas-field">
                             <span class="tas-field__label">
-                                Save to
+                                @Msg("TemplateScan.Field.SaveTo")
                                 <button type="button" class="tas-tip" data-tip="@SaveToHint" aria-label="@SaveToHint">?</button>
                             </span>
                             <label class="tas-radio">
                                 <input type="radio" name="tas-scope" checked="@(_catalogScope == ApplicationProfileTemplateCatalogScope.ProfileSpecific)"
                                        @onchange="() => _catalogScope = ApplicationProfileTemplateCatalogScope.ProfileSpecific" />
-                                <span>This profile only</span>
+                                <span>@Msg("TemplateScan.Scope.ThisProfile")</span>
                             </label>
                             <label class="tas-radio">
                                 <input type="radio" name="tas-scope" checked="@(_catalogScope == ApplicationProfileTemplateCatalogScope.Global)"
                                        @onchange="() => _catalogScope = ApplicationProfileTemplateCatalogScope.Global" />
-                                <span>Shared catalog</span>
+                                <span>@Msg("TemplateScan.Scope.Shared")</span>
                             </label>
                             @if (_catalogScope == ApplicationProfileTemplateCatalogScope.ProfileSpecific)
                             {
@@ -86,19 +90,19 @@
                         {
                             <div class="tas-field">
                                 <span class="tas-field__label">
-                                    Case <em>*</em>
+                                    @Msg("TemplateScan.Field.Case") <em>*</em>
                                     <button type="button" class="tas-tip" data-tip="@CaseHint" aria-label="@CaseHint">?</button>
                                 </span>
                                 @if (_instanceOptions.Count == 0)
                                 {
                                     <p class="tas-banner tas-banner--fail" style="margin:0">
-                                        No cases on this profile yet. Add a case first to open the template wizard.
+                                        @Msg("TemplateScan.Case.None")
                                     </p>
                                 }
                                 else
                                 {
                                     <select id="tas-instance" class="tas-input" value="@_selectedInstanceId" @onchange="OnInstanceChanged">
-                                        <option value="@Guid.Empty">Choose a case…</option>
+                                        <option value="@Guid.Empty">@Msg("TemplateScan.Case.Choose")</option>
                                         @foreach (var option in _instanceOptions)
                                         {
                                             <option value="@option.Id">@option.Label</option>
@@ -110,7 +114,7 @@
 
                         <div class="tas-field">
                             <span class="tas-field__label">
-                                File <em>*</em>
+                                @Msg("TemplateScan.Field.File") <em>*</em>
                                 <button type="button" class="tas-tip" data-tip="@FileHint" aria-label="@FileHint">?</button>
                             </span>
                             <label class="tas-drop @(_fileBytes is { Length: > 0 } ? "is-picked" : string.Empty)">
@@ -122,20 +126,20 @@
                                 }
                                 else
                                 {
-                                    <strong>Drop Word or Excel here</strong>
-                                    <small>.docx / .xlsx with yellow marks</small>
+                                    <strong>@Msg("TemplateScan.Drop.Title")</strong>
+                                    <small>@Msg("TemplateScan.Drop.Hint")</small>
                                 }
                             </label>
                             @if (IsEditingExisting)
                             {
-                                <small>Upload the yellow-marked Word/Excel. Saved Short codes stay; this page is only to attach the original highlights.</small>
+                                <small>@Msg("TemplateScan.Drop.ReviewNote")</small>
                             }
                         </div>
 
                         @if (false && _pdfPageCount > 1)
                         {
                             <div class="tas-field">
-                                <span class="tas-field__label">PDF pages (@_pdfPageCount total · pick up to @Options.Value.MaxPdfPages)</span>
+                                <span class="tas-field__label">@FormatMsg("TemplateScan.Pdf.Pages", _pdfPageCount, Options.Value.MaxPdfPages)</span>
                                 <div class="tas-pdf-pages">
                                     @for (var page = 1; page <= _pdfPageCount; page++)
                                     {
@@ -143,7 +147,7 @@
                                         <label class="tas-pdf-page @(selected ? "is-on" : string.Empty)">
                                             <input type="checkbox" checked="@selected" @onchange="e => TogglePdfPage(page, e)" hidden />
                                             <span class="tas-pdf-page__thumb"></span>
-                                            <span>Page @(page)</span>
+                                            <span>@FormatMsg("TemplateScan.Pdf.Page", page)</span>
                                         </label>
                                     }
                                 </div>
@@ -155,10 +159,10 @@
                 else if (_stage == Stage.ScanFail && _ingest is { } failedIngest)
                 {
                     <div class="tas-fail-panel">
-                        <h3>@(IsEditingExisting ? "This template cannot be reviewed" : "Scan quality check failed")</h3>
+                        <h3>@(IsEditingExisting ? Msg("TemplateScan.Fail.CannotReview") : Msg("TemplateScan.Fail.Quality"))</h3>
                         <p>@(IsEditingExisting
-                            ? "The catalog file has no yellow highlights and no library placeholders to remap."
-                            : "This scan cannot be turned into a template yet. Try a sharper photo, higher resolution, or a different file.")</p>
+                            ? Msg("TemplateScan.Fail.NoYellowOrTokens")
+                            : Msg("TemplateScan.Fail.Sharper"))</p>
                         <ul class="tas-issues" style="width:100%;text-align:left">
                             @foreach (var issue in failedIngest.Suitability.Issues)
                             {
@@ -172,7 +176,7 @@
                     @if (RequiresLowConfidenceAck)
                     {
                         <div class="tas-banner tas-banner--warn">
-                            Some fields have low confidence or the scan quality is borderline. Review boxes on the scan and acknowledge before continuing.
+                            @Msg("TemplateScan.Review.LowConfidenceBanner")
                         </div>
                     }
 
@@ -180,12 +184,12 @@
                     {
                         <div class="tas-form" style="margin-bottom:0.75rem">
                             <div class="tas-field">
-                                <label class="tas-field__label" for="tas-review-name">Template name <em>*</em></label>
+                                <label class="tas-field__label" for="tas-review-name">@Msg("TemplateScan.Field.TemplateName") <em>*</em></label>
                                 <input id="tas-review-name" class="tas-input" value="@_templateName"
                                        @oninput="e => _templateName = e.Value?.ToString() ?? string.Empty" />
                                 @if (IsLockedExistingOverwrite)
                                 {
-                                    <small>Profile is locked — Approve updates this file. Change the name only to save a new catalog copy.</small>
+                                    <small>@Msg("TemplateScan.Review.LockedNameHint")</small>
                                 }
                             </div>
                         </div>
@@ -194,8 +198,7 @@
                     @if (IsEditingExisting && !_reviewFromYellowSource)
                     {
                         <div class="tas-banner tas-banner--warn">
-                            The yellow-marked original is not stored for this catalog file, so this page shows mapped placeholders.
-                            Click <strong>Upload different file</strong> and choose the yellow Word/Excel — saved Short codes stay.
+                            @Msg("TemplateScan.Review.MissingYellowBanner")
                         </div>
                     }
 
@@ -239,7 +242,7 @@
                         <label class="tas-ack">
                             <input type="checkbox" checked="@_acknowledgedWarnings"
                                    @onchange="e => _acknowledgedWarnings = (bool?)e.Value == true" />
-                            <span><strong>I reviewed the warnings</strong> and want to continue with this field plan.</span>
+                            <span>@Msg("TemplateScan.Review.Ack")</span>
                         </label>
                     }
                 }
@@ -262,8 +265,8 @@
                 else if (_stage == Stage.Generating)
                 {
                     <div class="tas-generating">
-                        <h3>Building draft template…</h3>
-                        <p>@(IsOfficeUpload ? "Writing library tokens into your yellow-marked Word/Excel file…" : "Turning the reviewed field plan into a merge template…") Extract/Validate runs next.</p>
+                        <h3>@Msg("TemplateScan.Generate.Title")</h3>
+                        <p>@(IsOfficeUpload ? Msg("TemplateScan.Generate.Office") : Msg("TemplateScan.Generate.Plan"))</p>
                         <div class="tas-progress"><div class="tas-progress__bar tas-progress__bar--indeterminate"></div></div>
                     </div>
                 }
@@ -282,12 +285,12 @@
                     {
                         <div class="tas-form" style="margin-bottom:0.75rem">
                             <div class="tas-field">
-                                <label class="tas-field__label" for="tas-preview-name">Template name <em>*</em></label>
+                                <label class="tas-field__label" for="tas-preview-name">@Msg("TemplateScan.Field.TemplateName") <em>*</em></label>
                                 <input id="tas-preview-name" class="tas-input" value="@_templateName"
                                        @oninput="e => _templateName = e.Value?.ToString() ?? string.Empty" />
                                 @if (IsLockedExistingOverwrite)
                                 {
-                                    <small>Profile is locked — Approve updates this file. Change the name only to save a new catalog copy.</small>
+                                    <small>@Msg("TemplateScan.Review.LockedNameHint")</small>
                                 }
                             </div>
                         </div>
@@ -302,26 +305,26 @@
                     <div class="tas-done">
                         <div class="tas-done__main">
                             <div class="tas-done__icon">&#10003;</div>
-                            <h3>@(_source == EntrySource.Profile ? "Template added to the profile" : "Template saved")</h3>
+                            <h3>@(_source == EntrySource.Profile ? Msg("TemplateScan.Done.Added") : Msg("TemplateScan.Done.Saved"))</h3>
                             <p>
                                 @(_source == EntrySource.Profile
-                                    ? "It is in the profile's template list. Press Save profile to keep it."
+                                    ? Msg("TemplateScan.Done.AddedBody")
                                     : _catalogScope == ApplicationProfileTemplateCatalogScope.ProfileSpecific
-                                        ? "It is on the This profile tab in Resminamalar (not Shared). Close this window to select it for the ZIP."
-                                        : "It is on the This profile tab in Resminamalar, included from Shared.")
+                                        ? Msg("TemplateScan.Done.ThisProfileBody")
+                                        : Msg("TemplateScan.Done.SharedBody"))
                             </p>
                             <table class="tas-done__table">
                                 <tbody>
-                                    <tr><th>Template</th><td>@_savedTemplateName</td></tr>
-                                    <tr><th>Profile</th><td>@_profileName</td></tr>
-                                    <tr><th>Available in</th><td>@(_catalogScope == ApplicationProfileTemplateCatalogScope.Global ? "Shared catalog" : "This profile only")</td></tr>
+                                    <tr><th>@Msg("TemplateScan.Done.ColTemplate")</th><td>@_savedTemplateName</td></tr>
+                                    <tr><th>@Msg("TemplateScan.Done.ColProfile")</th><td>@_profileName</td></tr>
+                                    <tr><th>@Msg("TemplateScan.Done.ColAvailable")</th><td>@(_catalogScope == ApplicationProfileTemplateCatalogScope.Global ? Msg("TemplateScan.Scope.Shared") : Msg("TemplateScan.Scope.ThisProfile"))</td></tr>
                                     @if (_catalogScope == ApplicationProfileTemplateCatalogScope.ProfileSpecific)
                                     {
-                                        <tr><th>Visible for</th><td>@ApplicabilitySummary</td></tr>
+                                        <tr><th>@Msg("TemplateScan.Done.ColVisible")</th><td>@ApplicabilitySummary</td></tr>
                                     }
                                     @if (_outcome is { } saved)
                                     {
-                                        <tr><th>Placeholders</th><td>@saved.EmittedTokens.Count</td></tr>
+                                        <tr><th>@Msg("TemplateScan.Done.ColPlaceholders")</th><td>@saved.EmittedTokens.Count</td></tr>
                                     }
                                 </tbody>
                             </table>
@@ -329,14 +332,14 @@
                             {
                                 <p class="tas-done__actions">
                                     <button type="button" class="tas-link" @onclick="FocusSavedTemplateAsync">
-                                        @(_source == EntrySource.Profile ? "View in template list" : "View in Resminamalar")
+                                        @(_source == EntrySource.Profile ? Msg("TemplateScan.Done.ViewList") : Msg("TemplateScan.Done.ViewResminamalar"))
                                     </button>
                                 </p>
                             }
                         </div>
                         <aside class="tas-done__note">
-                            <h4>Next</h4>
-                            <p>Select it in the catalog to generate, or open it with <strong>Edit template</strong> to adjust wording in Word or Excel.</p>
+                            <h4>@Msg("TemplateScan.Done.Next")</h4>
+                            <p>@Msg("TemplateScan.Done.NextBody")</p>
                         </aside>
                     </div>
                 }
@@ -358,23 +361,15 @@
                 }
                 else if (_busy && _stage == Stage.Generating)
                 {
-                    <span class="tas-foot__hint">Generating draft…</span>
+                    <span class="tas-foot__hint">@Msg("TemplateScan.Status.Generating")</span>
                 }
                 else if (_busy)
                 {
-                    <span class="tas-foot__hint">@(string.IsNullOrWhiteSpace(_analyzeStatus) ? "Analyzing scan…" : _analyzeStatus)</span>
+                    <span class="tas-foot__hint">@(string.IsNullOrWhiteSpace(_analyzeStatus) ? Msg("TemplateScan.Status.Analyzing") : _analyzeStatus)</span>
                 }
                 else if (_stage == Stage.FieldReview)
                 {
-                    <span class="tas-foot__hint">@(IsEditingExisting
-                            ? (_restoredApprovedReview
-                                ? (_reviewFromYellowSource
-                                    ? "Saved placeholders are restored. Change a Short code if needed, or unlock a row and click Remap unmarked. Continue saves without re-guessing."
-                                    : "Saved placeholders are restored, but the left page is the mapped catalog file. Upload the yellow-marked Word/Excel to see highlighted samples — Short codes stay.")
-                                : (_reviewFromYellowSource
-                                    ? "Numbered marks are the yellow source saved with this catalog template. Lock reviewed rows, then Remap unmarked to re-guess the rest. × removes a redundant row. Comma combinations stay 6.1 / 6.2 / 6.3."
-                                    : "Numbered marks are the placeholders already in this catalog template. Lock reviewed rows, then Remap unmarked to re-guess the rest. × removes a redundant row. Comma combinations stay 6.1 / 6.2 / 6.3."))
-                        : "Lock correct rows. Tick leftover yellows and/or wrong placeholders, then Remap unmarked. Locked Short codes stay. Click a row to add Short codes.")</span>
+                    <span class="tas-foot__hint">@ReviewFootHint</span>
                 }
                 else
                 {
@@ -384,83 +379,83 @@
                 @if (_stage == Stage.Upload)
                 {
                     <div class="tas-foot__actions">
-                        <button type="button" class="tas-btn tas-btn--ghost" disabled="@_busy" @onclick="RequestCloseAsync">Cancel</button>
+                        <button type="button" class="tas-btn tas-btn--ghost" disabled="@_busy" @onclick="RequestCloseAsync">@Msg("TemplateScan.Btn.Cancel")</button>
                         <button type="button" class="tas-btn tas-btn--primary" disabled="@(!CanAnalyze)" @onclick="AnalyzeAsync">
                             @(_busy
-                                ? "Opening…"
+                                ? Msg("TemplateScan.Btn.Opening")
                                 : (IsEditingExisting && !string.IsNullOrWhiteSpace(_reviewPlanJson)
-                                    ? "Open yellow file"
-                                    : "Analyze file"))
+                                    ? Msg("TemplateScan.Btn.OpenYellow")
+                                    : Msg("TemplateScan.Btn.Analyze")))
                         </button>
                     </div>
                 }
                 else if (_stage == Stage.ScanFail)
                 {
-                    <button type="button" class="tas-btn tas-btn--ghost" @onclick="RequestCloseAsync">Cancel</button>
-                    <button type="button" class="tas-btn tas-btn--primary" @onclick="BackToUpload">Upload different file</button>
+                    <button type="button" class="tas-btn tas-btn--ghost" @onclick="RequestCloseAsync">@Msg("TemplateScan.Btn.Cancel")</button>
+                    <button type="button" class="tas-btn tas-btn--primary" @onclick="BackToUpload">@Msg("TemplateScan.Btn.UploadDifferent")</button>
                 }
                 else if (_stage == Stage.FieldReview)
                 {
-                    <fieldset class="tas-remap-hints" disabled="@_busy" title="@(_aiEnabled ? "Hints go to Remap unmarked. Locked rows stay." : "AI is off — remap still re-guesses unlocked yellows locally.")">
+                    <fieldset class="tas-remap-hints" disabled="@_busy" title="@(_aiEnabled ? Msg("TemplateScan.Hint.RemapAi") : Msg("TemplateScan.Hint.RemapLocal"))">
                         <label class="tas-remap-hint">
                             <input type="checkbox" @bind="_remapHintUnidentified" />
-                            Unidentified yellows remain
+                            @Msg("TemplateScan.Check.Unidentified")
                         </label>
                         <label class="tas-remap-hint">
                             <input type="checkbox" @bind="_remapHintIncorrect" />
-                            Some placeholders are wrong
+                            @Msg("TemplateScan.Check.Incorrect")
                         </label>
                     </fieldset>
-                    <button type="button" class="tas-btn tas-btn--ghost" disabled="@_busy" @onclick="BackToUpload">Upload different file</button>
+                    <button type="button" class="tas-btn tas-btn--ghost" disabled="@_busy" @onclick="BackToUpload">@Msg("TemplateScan.Btn.UploadDifferent")</button>
                     @if (ShowNeedsHelpEntry)
                     {
-                        <button type="button" class="tas-btn tas-btn--ghost" @onclick="OpenHelp">Needs help</button>
+                        <button type="button" class="tas-btn tas-btn--ghost" @onclick="OpenHelp">@Msg("TemplateScan.Btn.NeedsHelp")</button>
                     }
                     @if (_reviewChatOpen)
                     {
-                        <button type="button" class="tas-btn tas-btn--ghost" disabled="@_busy" @onclick="HideReviewChat">Hide chat</button>
+                        <button type="button" class="tas-btn tas-btn--ghost" disabled="@_busy" @onclick="HideReviewChat">@Msg("TemplateScan.Btn.HideChat")</button>
                     }
                     else
                     {
-                        <button type="button" class="tas-btn tas-btn--secondary" disabled="@(_busy || !_aiEnabled)" @onclick="OpenClarification" title="@(!_aiEnabled ? "Clarification chat needs a TemplateAiScan AI provider" : null)">Ask for clarification</button>
+                        <button type="button" class="tas-btn tas-btn--secondary" disabled="@(_busy || !_aiEnabled)" @onclick="OpenClarification" title="@(!_aiEnabled ? Msg("TemplateScan.Btn.AskClarificationDisabled") : null)">@Msg("TemplateScan.Btn.AskClarification")</button>
                     }
                     <button type="button"
                             class="tas-btn tas-btn--secondary"
                             disabled="@(!CanRemapUnmarked)"
-                            title="Re-guess placeholders on yellows that are not locked. Tick the checkboxes first if yellows were missed or unlocked Short codes are wrong."
+                            title="@Msg("TemplateScan.Btn.RemapTitle")"
                             @onclick:stopPropagation="true"
-                            @onclick="RemapUnlockedAsync">@(_busy && _stage == Stage.FieldReview ? "Remapping…" : "Remap unmarked")</button>
-                    <button type="button" class="tas-btn tas-btn--primary" disabled="@(!CanContinue)" @onclick:stopPropagation="true" @onclick="GenerateAsync">Continue</button>
+                            @onclick="RemapUnlockedAsync">@(_busy && _stage == Stage.FieldReview ? Msg("TemplateScan.Btn.Remapping") : Msg("TemplateScan.Btn.Remap"))</button>
+                    <button type="button" class="tas-btn tas-btn--primary" disabled="@(!CanContinue)" @onclick:stopPropagation="true" @onclick="GenerateAsync">@Msg("TemplateScan.Btn.Continue")</button>
                 }
                 else if (_stage == Stage.Clarification)
                 {
-                    <button type="button" class="tas-btn tas-btn--ghost" @onclick="BackToFieldReview">Back to field list</button>
-                    <button type="button" class="tas-btn tas-btn--primary" disabled="@(!CanContinueFromChat)" @onclick="GenerateAsync">Continue to generate</button>
+                    <button type="button" class="tas-btn tas-btn--ghost" @onclick="BackToFieldReview">@Msg("TemplateScan.Btn.BackToFields")</button>
+                    <button type="button" class="tas-btn tas-btn--primary" disabled="@(!CanContinueFromChat)" @onclick="GenerateAsync">@Msg("TemplateScan.Btn.ContinueGenerate")</button>
                 }
                 else if (_stage == Stage.Preview && _outcome is { })
                 {
-                    <button type="button" class="tas-btn tas-btn--ghost" @onclick="BackToFieldReview">Back to field list</button>
+                    <button type="button" class="tas-btn tas-btn--ghost" @onclick="BackToFieldReview">@Msg("TemplateScan.Btn.BackToFields")</button>
                     @if (ShowNeedsHelpEntry)
                     {
-                        <button type="button" class="tas-btn tas-btn--ghost" @onclick="OpenHelp">Needs help</button>
+                        <button type="button" class="tas-btn tas-btn--ghost" @onclick="OpenHelp">@Msg("TemplateScan.Btn.NeedsHelp")</button>
                     }
-                    <button type="button" class="tas-btn tas-btn--ghost" @onclick="GenerateAsync">Regenerate</button>
-                    <button type="button" class="tas-btn tas-btn--primary" disabled="@(!CanApprove)" @onclick="ApproveAsync">Approve — save to profile</button>
+                    <button type="button" class="tas-btn tas-btn--ghost" @onclick="GenerateAsync">@Msg("TemplateScan.Btn.Regenerate")</button>
+                    <button type="button" class="tas-btn tas-btn--primary" disabled="@(!CanApprove)" @onclick="ApproveAsync">@Msg("TemplateScan.Btn.Approve")</button>
                 }
                 else if (_stage == Stage.NeedsHelp)
                 {
-                    <button type="button" class="tas-btn tas-btn--ghost" @onclick="CloseHelp">Back</button>
-                    <button type="button" class="tas-btn tas-btn--ghost" @onclick="DownloadGapPacketMarkdownAsync">Download Markdown</button>
-                    <button type="button" class="tas-btn tas-btn--primary" @onclick="DownloadGapPacketJsonAsync">Download gap packet</button>
+                    <button type="button" class="tas-btn tas-btn--ghost" @onclick="CloseHelp">@Msg("TemplateScan.Btn.Back")</button>
+                    <button type="button" class="tas-btn tas-btn--ghost" @onclick="DownloadGapPacketMarkdownAsync">@Msg("TemplateScan.Btn.DownloadMarkdown")</button>
+                    <button type="button" class="tas-btn tas-btn--primary" @onclick="DownloadGapPacketJsonAsync">@Msg("TemplateScan.Btn.DownloadGap")</button>
                     @if (CanApproveFromHelp)
                     {
-                        <button type="button" class="tas-btn tas-btn--secondary" disabled="@(!CanApprove)" @onclick="ApproveAsync">Approve anyway</button>
+                        <button type="button" class="tas-btn tas-btn--secondary" disabled="@(!CanApprove)" @onclick="ApproveAsync">@Msg("TemplateScan.Btn.ApproveAnyway")</button>
                     }
                 }
                 else if (_stage == Stage.Done)
                 {
-                    <button type="button" class="tas-btn tas-btn--ghost" @onclick="ScanAnother">Mark another file</button>
-                    <button type="button" class="tas-btn tas-btn--primary" @onclick="CloseAsync">Close</button>
+                    <button type="button" class="tas-btn tas-btn--ghost" @onclick="ScanAnother">@Msg("TemplateScan.Btn.MarkAnother")</button>
+                    <button type="button" class="tas-btn tas-btn--primary" @onclick="CloseAsync">@Msg("TemplateScan.Close")</button>
                 }
             </footer>
 
@@ -468,14 +463,14 @@
             {
                 <div class="tas-confirm">
                     <div class="tas-confirm__box">
-                        <h3>Discard this scan?</h3>
+                        <h3>@Msg("TemplateScan.Discard.Title")</h3>
                         <ul>
-                            <li>The uploaded scan and detected fields are dropped.</li>
-                            <li>Nothing has been saved to the profile yet.</li>
+                            <li>@Msg("TemplateScan.Discard.Scan")</li>
+                            <li>@Msg("TemplateScan.Discard.NothingSaved")</li>
                         </ul>
                         <div class="tas-confirm__actions">
-                            <button type="button" class="tas-btn tas-btn--ghost" @onclick="() => _discardPrompt = false">Keep working</button>
-                            <button type="button" class="tas-btn tas-btn--primary" @onclick="CloseAsync">Discard</button>
+                            <button type="button" class="tas-btn tas-btn--ghost" @onclick="() => _discardPrompt = false">@Msg("TemplateScan.Discard.Keep")</button>
+                            <button type="button" class="tas-btn tas-btn--primary" @onclick="CloseAsync">@Msg("TemplateScan.Discard.Discard")</button>
                         </div>
                     </div>
                 </div>
@@ -509,6 +504,16 @@
     [Inject] private IJSRuntime JS { get; set; } = null!;
     [Inject] private IApplicationErrorReporter ErrorReporter { get; set; } = null!;
     [Inject] private IUserReportTemplateMaintenanceService UserReportMaintenance { get; set; } = null!;
+    [Inject] private IXafCultureInfoService CultureInfoService { get; set; } = null!;
+    [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
+
+    private string EffectiveUiCulture =>
+        VisaUiCultureResolver.Resolve(CultureInfoService, HttpContextAccessor.HttpContext);
+
+    private string Msg(string key) => VisaUiMessages.Get(key, EffectiveUiCulture);
+
+    private string FormatMsg(string key, params object[] args) =>
+        VisaUiMessages.FormatForCulture(EffectiveUiCulture, key, args);
 
     private bool _open;
     private EntrySource _source = EntrySource.Profile;
@@ -581,13 +586,13 @@
     private IReadOnlyList<string> ChatOfficerImageNames =>
         _chatOfficerImages.Select(static x => x.Name).ToList();
 
-    private static readonly (int Index, string Label)[] StepLabels =
+    private (int Index, string Label)[] StepLabels =>
     [
-        (1, "Upload"),
-        (2, "Review"),
-        (3, "Generate"),
-        (4, "Preview"),
-        (5, "Done"),
+        (1, Msg("TemplateScan.Step.Upload")),
+        (2, Msg("TemplateScan.Step.Review")),
+        (3, Msg("TemplateScan.Step.Generate")),
+        (4, Msg("TemplateScan.Step.Preview")),
+        (5, Msg("TemplateScan.Step.Done")),
     ];
 
     public async Task OpenForProfileAsync(ApplicationProfile profile, IObjectSpace objectSpace)
@@ -624,7 +629,7 @@
             var profile = instance?.ApplicationProfile;
             if (profile == null)
             {
-                _message = "This case has no application profile.";
+                _message = Msg("TemplateScan.Msg.NoProfile");
                 _messageIsError = true;
             }
             else
@@ -753,24 +758,40 @@
     }
 
     private string ApplicabilityTitle =>
-        _isViaMinistry ? "Project contract" : "Migration service";
+        _isViaMinistry ? Msg("TemplateScan.Field.ProjectContract") : Msg("TemplateScan.Field.MigrationService");
 
     private string ApplicabilityEmptyLabel =>
-        _isViaMinistry ? "All contracts" : "All migration services";
+        _isViaMinistry ? Msg("TemplateScan.Field.AllContracts") : Msg("TemplateScan.Field.AllMigrationServices");
 
     private string ApplicabilityHint =>
         _isViaMinistry
-            ? "All contracts = every via-ministry case of this profile. Pick one Project contract to show only on matching cases."
-            : "All migration services = every direct-migration case of this profile. Pick one service to show only on matching cases.";
+            ? Msg("TemplateScan.Hint.Contracts")
+            : Msg("TemplateScan.Hint.MigrationServices");
 
-    private const string SaveToHint =
-        "This profile only stays on this profile. Shared catalog is confirmed when you Approve.";
+    private string SaveToHint => Msg("TemplateScan.Hint.SaveTo");
 
-    private const string CaseHint =
-        "Workspace context only. Yellow marks use the sample in the file, not this case's people.";
+    private string CaseHint => Msg("TemplateScan.Hint.Case");
 
-    private const string FileHint =
-        "Upload a filled sample. Highlight every value that should become a placeholder in yellow (Word Text Highlight Color or Excel cell fill). Other text stays as printed.";
+    private string FileHint => Msg("TemplateScan.Hint.File");
+
+    private string ReviewFootHint
+    {
+        get
+        {
+            if (!IsEditingExisting)
+                return Msg("TemplateScan.Hint.ReviewNew");
+            if (_restoredApprovedReview)
+            {
+                return _reviewFromYellowSource
+                    ? Msg("TemplateScan.Hint.ReviewRestoredYellow")
+                    : Msg("TemplateScan.Hint.ReviewRestoredMapped");
+            }
+
+            return _reviewFromYellowSource
+                ? Msg("TemplateScan.Hint.ReviewYellowSource")
+                : Msg("TemplateScan.Hint.ReviewCatalogTokens");
+        }
+    }
 
     private string ApplicabilitySummary
     {
@@ -889,11 +910,11 @@
         get
         {
             if (_selectedPdfPages.Count == 0)
-                return "Select at least one page.";
+                return Msg("TemplateScan.Msg.PdfSelectPage");
             var ordered = _selectedPdfPages.OrderBy(static p => p).ToList();
             if (ordered.Count > Options.Value.MaxPdfPages)
-                return $"Too many pages selected ({ordered.Count}). Maximum is {Options.Value.MaxPdfPages}.";
-            return $"Analyzing pages: {string.Join(", ", ordered)}";
+                return FormatMsg("TemplateScan.Msg.PdfTooMany", ordered.Count, Options.Value.MaxPdfPages);
+            return FormatMsg("TemplateScan.Msg.PdfAnalyzing", string.Join(", ", ordered));
         }
     }
 
@@ -913,7 +934,7 @@
         var extension = Path.GetExtension(file.Name).ToLowerInvariant();
         if (extension is not (".docx" or ".xlsx"))
         {
-            _message = "Only Word (.docx) and Excel (.xlsx) with yellow highlights are supported. PNG/JPG/PDF uploads are retired.";
+            _message = Msg("TemplateScan.Msg.OfficeOnly");
             _messageIsError = true;
             return;
         }
@@ -921,14 +942,14 @@
         var hardLimit = Options.Value.HardMaxUploadBytes;
         if (file.Size > hardLimit)
         {
-            _message = $"This file is {file.Size / 1048576} MB and the hard limit is {hardLimit / 1048576} MB.";
+            _message = FormatMsg("TemplateScan.Msg.FileTooLarge", file.Size / 1048576, hardLimit / 1048576);
             _messageIsError = true;
             return;
         }
 
         if (file.Size > Options.Value.MaxUploadBytes)
         {
-            _message = $"Large file ({file.Size / 1048576} MB). Analysis may be slower; warn threshold is {Options.Value.MaxUploadBytes / 1048576} MB.";
+            _message = FormatMsg("TemplateScan.Msg.FileLarge", file.Size / 1048576, Options.Value.MaxUploadBytes / 1048576);
             _messageIsError = false;
         }
 
@@ -954,7 +975,7 @@
             }
             catch (Exception ex)
             {
-                _message = $"Could not read PDF: {ex.Message}";
+                _message = FormatMsg("TemplateScan.Msg.PdfReadFailed", ex.Message);
                 _messageIsError = true;
             }
         }
@@ -1027,7 +1048,7 @@
             return;
 
         _busy = true;
-        _analyzeStatus = "Opening saved placeholders…";
+        _analyzeStatus = Msg("TemplateScan.Status.OpeningSaved");
         _message = null;
         _messageIsError = false;
         _restoredApprovedReview = false;
@@ -1046,7 +1067,7 @@
                 : objectSpace.GetObjectByKey<ApplicationProfile>(_profileId);
             if (profile == null)
             {
-                _message = "The application profile is no longer available.";
+                _message = Msg("TemplateScan.Msg.ProfileGone");
                 _messageIsError = true;
                 return;
             }
@@ -1145,7 +1166,7 @@
                 "Template scan restore Review failed.",
                 ApplicationRuntimeLogCategories.TemplateScan,
                 ex);
-            _message = "Could not open the saved placeholders. Remap unmarked only if you want to re-guess.";
+            _message = Msg("TemplateScan.Msg.RestoreFailed");
             _messageIsError = true;
         }
         finally
@@ -1193,7 +1214,7 @@
         }
 
         _busy = true;
-        _analyzeStatus = remap ? "Remapping unmarked yellows…" : "Reading file…";
+        _analyzeStatus = remap ? Msg("TemplateScan.Status.Remapping") : Msg("TemplateScan.Status.Reading");
         _message = null;
         _messageIsError = false;
         if (!remap)
@@ -1219,7 +1240,7 @@
                 : objectSpace.GetObjectByKey<ApplicationProfile>(_profileId);
             if (profile == null)
             {
-                _message = "The application profile is no longer available.";
+                _message = Msg("TemplateScan.Msg.ProfileGone");
                 _messageIsError = true;
                 return;
             }
@@ -1246,7 +1267,7 @@
                 AdoptRepairedOfficeBytes(ingest);
             }
 
-            await SetAnalyzeStatusAsync("Finding yellow marks…");
+            await SetAnalyzeStatusAsync(Msg("TemplateScan.Status.Finding"));
 
             var templateKind = Path.GetExtension(_fileName).Equals(".xlsx", StringComparison.OrdinalIgnoreCase)
                 ? ApplicationProfileTemplateKind.Excel
@@ -1260,7 +1281,7 @@
             {
                 if (remap)
                 {
-                    _message = "Remap could not re-read the file. Locked placeholders were not changed.";
+                    _message = Msg("TemplateScan.Msg.RemapRereadFailed");
                     _messageIsError = true;
                     return;
                 }
@@ -1301,7 +1322,7 @@
                 _valueCandidates = valueCandidates;
             }
 
-            await SetAnalyzeStatusAsync("Matching placeholders…");
+            await SetAnalyzeStatusAsync(Msg("TemplateScan.Status.Matching"));
             var remapHints = remap
                 ? new ScanRemapOfficerHints(_remapHintUnidentified, _remapHintIncorrect)
                 : ScanRemapOfficerHints.None;
@@ -1340,7 +1361,7 @@
             {
                 if (remap)
                 {
-                    _message = "Remap could not match the yellow marks. Locked placeholders were not changed.";
+                    _message = Msg("TemplateScan.Msg.RemapMatchFailed");
                     _messageIsError = true;
                     return;
                 }
@@ -1360,7 +1381,7 @@
                     || ingest.Suitability.Verdict == ScanSuitabilityVerdict.Warn;
                 if (remapNeedsAck)
                     _acknowledgedWarnings = false;
-                _message = "Unlocked placeholders were remapped. Review the numbered list, then Continue.";
+                _message = Msg("TemplateScan.Msg.Remapped");
                 _messageIsError = false;
                 _stage = Stage.FieldReview;
                 await InvokeAsync(StateHasChanged);
@@ -1370,8 +1391,8 @@
             if (askAi)
             {
                 await SetAnalyzeStatusAsync(remapHints.UnidentifiedYellows
-                    ? "Asking AI about leftover yellows…"
-                    : "Asking AI to re-check placeholders…");
+                    ? Msg("TemplateScan.Status.AskingLeftover")
+                    : Msg("TemplateScan.Status.AskingRecheck"));
                 try
                 {
                     fieldPlan = await ScanFieldPlanBuildOffCircuit.RunAsync(
@@ -1416,7 +1437,7 @@
             var needsAck = fieldPlan.Fields.Any(static f => f.Confidence == ScanFieldConfidence.Low)
                 || ingest.Suitability.Verdict == ScanSuitabilityVerdict.Warn;
             _acknowledgedWarnings = !needsAck;
-            _analyzeStatus = "Opening review…";
+            _analyzeStatus = Msg("TemplateScan.Status.OpeningReview");
             _stage = Stage.FieldReview;
         }
         catch (ScanNormalizationException ex)
@@ -1460,8 +1481,8 @@
         {
             ErrorReporter.ReportReportPackageError("Template scan analysis failed.", ApplicationRuntimeLogCategories.TemplateScan, ex);
             _message = IsMissingOpenXmlPart(ex)
-                ? "This Word file has a missing internal part and could not be read. In Word, use File → Save As (.docx), then Analyze that copy."
-                : "Analysis failed: " + ex.Message;
+                ? Msg("TemplateScan.Msg.MissingPart")
+                : FormatMsg("TemplateScan.Msg.AnalysisFailed", ex.Message);
             _messageIsError = true;
         }
         finally
@@ -1539,8 +1560,8 @@
 
             var token = mark.ProposedToken;
             if (string.IsNullOrWhiteSpace(token))
-                token = "unmapped";
-            return $"Mark #{mark.DisplayOrder}: “{mark.LabelText}” → {token}";
+                token = Msg("TemplateScan.Chat.Unmapped");
+            return FormatMsg("TemplateScan.Chat.Mark", mark.DisplayOrder, mark.LabelText, token);
         }
     }
 
@@ -1670,7 +1691,7 @@
         if (_chatOfficerImages.Count >= maxImages)
         {
             _chatRejectBanner = true;
-            _chatRejectText = $"Attach at most {maxImages} images.";
+            _chatRejectText = FormatMsg("TemplateScan.Chat.TooManyImages", maxImages);
             return;
         }
 
@@ -1695,7 +1716,7 @@
         catch (IOException)
         {
             _chatRejectBanner = true;
-            _chatRejectText = "Could not read that image.";
+            _chatRejectText = Msg("TemplateScan.Chat.ImageUnreadable");
         }
     }
 
@@ -1774,12 +1795,19 @@
         if (string.IsNullOrWhiteSpace(message) && _chatOfficerImages.Count == 0)
             return;
 
+        string display;
         if (string.IsNullOrWhiteSpace(message))
+        {
             message = "Use the attached image to place the missing placeholders on the correct yellow marks.";
+            display = Msg("TemplateScan.Chat.ImageOnly");
+        }
+        else
+        {
+            display = message;
+        }
 
-        var display = message;
         if (_chatOfficerImages.Count > 0)
-            display += " (attached: " + string.Join(", ", _chatOfficerImages.Select(static x => x.Name)) + ")";
+            display += FormatMsg("TemplateScan.Chat.Attached", string.Join(", ", _chatOfficerImages.Select(static x => x.Name)));
 
         _chatBusy = true;
         _chatRejectBanner = false;
@@ -1846,7 +1874,7 @@
             ErrorReporter.ReportReportPackageError("Template scan clarification failed.", ApplicationRuntimeLogCategories.TemplateScan, ex);
             _chatMessages.Add(new TemplateScanClarificationView.ChatMessage(
                 false,
-                "Something went wrong sending that message. Try again or go back to the field list.",
+                Msg("TemplateScan.Chat.SendFailed"),
                 Refused: true));
         }
         finally
@@ -1941,7 +1969,7 @@
         catch (Exception ex)
         {
             ErrorReporter.ReportReportPackageError("Template scan generate failed.", ApplicationRuntimeLogCategories.TemplateScan, ex);
-            _message = "Draft generation failed. Try reviewing fields again or upload a different scan.";
+            _message = Msg("TemplateScan.Msg.GenerateFailed");
             _messageIsError = true;
             _stage = Stage.FieldReview;
         }
@@ -1977,7 +2005,7 @@
                 : objectSpace.GetObjectByKey<ApplicationProfile>(_profileId);
             if (profile == null)
             {
-                _message = "The application profile is no longer available.";
+                _message = Msg("TemplateScan.Msg.ProfileGone");
                 _messageIsError = true;
                 return;
             }
@@ -2098,7 +2126,7 @@
         var request = BuildGapPacketRequest();
         if (request == null)
         {
-            _message = "Nothing to export yet — analyze a scan first.";
+            _message = Msg("TemplateScan.Msg.NothingToExport");
             _messageIsError = true;
             await InvokeAsync(StateHasChanged);
             return;
@@ -2114,13 +2142,13 @@
             var contentType = json ? "application/json" : "text/markdown";
             await using var stream = new MemoryStream(bytes);
             await FileDownloader.DownloadAsync(fileName, stream, contentType);
-            _message = json ? "Gap packet downloaded (JSON)." : "Gap packet downloaded (Markdown).";
+            _message = json ? Msg("TemplateScan.Msg.GapJson") : Msg("TemplateScan.Msg.GapMarkdown");
             _messageIsError = false;
         }
         catch (Exception ex)
         {
             ErrorReporter.ReportReportPackageError("Template scan gap packet export failed.", ApplicationRuntimeLogCategories.TemplateScan, ex);
-            _message = "Gap packet export failed.";
+            _message = Msg("TemplateScan.Msg.GapFailed");
             _messageIsError = true;
         }
 

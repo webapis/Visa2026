@@ -24,6 +24,7 @@ string lookupEnumsJsonPath = Path.Combine(toolsDir, "UiStrings.lookup-enums.json
 string userFeedbackJsonPath = Path.Combine(toolsDir, "UiStrings.user-feedback.json");
 string applicationProfileJsonPath = Path.Combine(toolsDir, "UiStrings.application-profile.json");
 string applicationProfileMessagesJsonPath = Path.Combine(toolsDir, "UiStrings.application-profile-messages.json");
+string templateScanMessagesJsonPath = Path.Combine(toolsDir, "UiStrings.template-scan.json");
 string navigationPathsJsonPath = Path.Combine(toolsDir, "UiStrings.navigation-paths.json");
 string moduleDir = Path.Combine(repoRoot, "Visa2026.Module");
 string blazorDir = Path.Combine(repoRoot, "Visa2026.Blazor.Server");
@@ -69,6 +70,7 @@ UpdateBaseModelApplicationEnglish(moduleDir, merged);
 
 JsonObject messagesRoot = JsonNode.Parse(File.ReadAllText(messagesJsonPath))!.AsObject();
 MergeObject(messagesRoot, JsonNode.Parse(File.ReadAllText(applicationProfileMessagesJsonPath))!.AsObject());
+MergeObject(messagesRoot, JsonNode.Parse(File.ReadAllText(templateScanMessagesJsonPath))!.AsObject());
 JsonObject validationRoot = JsonNode.Parse(File.ReadAllText(validationJsonPath))!.AsObject();
 JsonObject validationTemplatesRoot = JsonNode.Parse(File.ReadAllText(validationTemplatesJsonPath))!.AsObject();
 string[] blazorLayoutDetailViews = blazorLayoutsRoot["detailViewsWithHostLayout"]!.AsArray()

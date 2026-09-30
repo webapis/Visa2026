@@ -1,6 +1,10 @@
 @namespace Visa2026.Blazor.Server.Editors
 @using Microsoft.AspNetCore.Components.Forms
 @using Visa2026.Module.Services.TemplateScan
+@using Visa2026.Module.Localization
+@using Visa2026.Blazor.Server.Localization
+@using DevExpress.ExpressApp.Blazor.Services
+@using Microsoft.AspNetCore.Http
 
 <div class="tas-clarify @(Compact ? "tas-clarify--compact" : null)">
     @if (ShowRejectBanner)
@@ -11,19 +15,19 @@
     }
 
     <div class="tas-chat @(Compact ? "tas-chat--compact" : null)">
-        <h4>@(Compact && !string.IsNullOrWhiteSpace(FocusCaption) ? "Ask about this mark" : "Clarify field mapping")</h4>
+        <h4>@(Compact && !string.IsNullOrWhiteSpace(FocusCaption) ? Msg("TemplateScan.Chat.AskMark") : Msg("TemplateScan.Chat.Clarify"))</h4>
         @if (!string.IsNullOrWhiteSpace(FocusCaption))
         {
             <p class="tas-chat__focus">@FocusCaption</p>
         }
         <p class="tas-chat__hint">@(Compact && !string.IsNullOrWhiteSpace(FocusCaption)
-            ? "Ask which library placeholders fit this highlight, or add them from the Short list above. Attach a PNG/JPG of the form if Azure should see the printed line."
-            : "Ask about ambiguous labels, header vs roster fields, or which placeholder fits a gap. You can attach a PNG/JPG of the form. Layout and wording changes are not supported.")</p>
+            ? Msg("TemplateScan.Chat.HintCompact")
+            : Msg("TemplateScan.Chat.HintFull"))</p>
 
         <div class="tas-chat__log">
             @if (Messages.Count == 0)
             {
-                <p class="tas-chat__empty">Answer AI questions below or describe which label should map to which placeholder.</p>
+                <p class="tas-chat__empty">@Msg("TemplateScan.Chat.Empty")</p>
             }
             else
             {
@@ -62,7 +66,7 @@
                         <button type="button"
                                 class="tas-row-remove"
                                 disabled="@Busy"
-                                title="Remove @name"
+                                title="@FormatMsg("TemplateScan.Chat.Remove", name)"
                                 @onclick="() => OnClearImage.InvokeAsync(name)">×</button>
                     </li>
                 }
@@ -74,21 +78,21 @@
                 <InputFile accept=".png,.jpg,.jpeg,image/png,image/jpeg"
                            OnChange="OnImageFile"
                            disabled="@Busy" />
-                Attach image
+                @Msg("TemplateScan.Chat.Attach")
             </label>
-            <input class="tas-input" placeholder="e.g. Map the date line to application date, not contract date…"
+            <input class="tas-input" placeholder="@Msg("TemplateScan.Chat.InputPlaceholder")"
                    value="@InputText"
                    disabled="@Busy"
                    @oninput="OnInputChanged"
                    @onkeydown="OnKeyDown" />
             <button type="button" class="tas-btn tas-btn--primary" disabled="@(!CanSend)" @onclick="OnSendClicked">
-                Send
+                @Msg("TemplateScan.Chat.Send")
             </button>
         </div>
     </div>
 
     <p class="tas-clarify__back">
-        <button type="button" class="tas-link" @onclick="OnBackClicked">@(Compact ? "Hide chat" : "← Back to field list")</button>
+        <button type="button" class="tas-link" @onclick="OnBackClicked">@(Compact ? Msg("TemplateScan.Btn.HideChat") : Msg("TemplateScan.Chat.Back"))</button>
     </p>
 </div>
 
@@ -110,6 +114,17 @@
     [Parameter] public IReadOnlyList<string> OfficerImageNames { get; set; } = Array.Empty<string>();
     [Parameter] public EventCallback<InputFileChangeEventArgs> OnImageFile { get; set; }
     [Parameter] public EventCallback<string> OnClearImage { get; set; }
+
+    [Inject] private IXafCultureInfoService CultureInfoService { get; set; } = null!;
+    [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
+
+    private string EffectiveUiCulture =>
+        VisaUiCultureResolver.Resolve(CultureInfoService, HttpContextAccessor.HttpContext);
+
+    private string Msg(string key) => VisaUiMessages.Get(key, EffectiveUiCulture);
+
+    private string FormatMsg(string key, params object[] args) =>
+        VisaUiMessages.FormatForCulture(EffectiveUiCulture, key, args);
 
     private bool CanSend =>
         !Busy && (!string.IsNullOrWhiteSpace(InputText) || OfficerImageNames.Count > 0);

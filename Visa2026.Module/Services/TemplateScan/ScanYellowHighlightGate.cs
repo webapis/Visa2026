@@ -1,5 +1,7 @@
 #nullable enable
 
+using Visa2026.Module.Localization;
+
 namespace Visa2026.Module.Services.TemplateScan;
 
 /// <summary>
@@ -30,8 +32,7 @@ public static class ScanYellowHighlightGate
             issues.Add(new ScanSuitabilityIssue
             {
                 Code = ScanSuitabilityIssueCode.NoYellowHighlights,
-                Message =
-                    "Highlight every value that should become a placeholder in yellow on the scan, then upload again. Non-highlighted text stays literal.",
+                Message = VisaUiMessages.Get("TemplateScan.Issue.NoYellow"),
             });
 
             return new ScanSuitabilityReport
@@ -47,8 +48,7 @@ public static class ScanYellowHighlightGate
             issues.Add(new ScanSuitabilityIssue
             {
                 Code = ScanSuitabilityIssueCode.YellowHighlightsUnmapped,
-                Message =
-                    "Yellow highlights were found, but none mapped to placeholders in the library. Adjust highlights or clarify labels, then try again.",
+                Message = VisaUiMessages.Get("TemplateScan.Issue.YellowUnmapped"),
             });
 
             return new ScanSuitabilityReport
@@ -65,8 +65,7 @@ public static class ScanYellowHighlightGate
             issues.Add(new ScanSuitabilityIssue
             {
                 Code = ScanSuitabilityIssueCode.TextConfidenceLow,
-                Message =
-                    $"{fieldPlan.Gaps.Count} yellow highlight(s) could not be matched to the placeholder library — review gaps before generate.",
+                Message = VisaUiMessages.Format("TemplateScan.Issue.YellowGaps", fieldPlan.Gaps.Count),
             });
 
             return new ScanSuitabilityReport

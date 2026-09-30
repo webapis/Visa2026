@@ -2,20 +2,24 @@
 @using Microsoft.JSInterop
 @using Visa2026.Module.Services.TemplateScan
 @using Visa2026.Module.Services.WordReports
+@using Visa2026.Module.Localization
+@using Visa2026.Blazor.Server.Localization
+@using DevExpress.ExpressApp.Blazor.Services
+@using Microsoft.AspNetCore.Http
 @implements IAsyncDisposable
 
 @if (_loading)
 {
     <div class="tas-office-pdf" role="status" aria-live="polite">
-        <p class="tas-office-pdf__state">@LoadingText</p>
+        <p class="tas-office-pdf__state">@ShownLoadingText</p>
     </div>
 }
 else if (_pdfBytes is { Length: > 64 } && !_paintFailed)
 {
     <div @ref="_host" class="tas-office-pdf tas-office-pdf--pages"></div>
-    @if (!string.IsNullOrWhiteSpace(Caption))
+    @if (!string.IsNullOrWhiteSpace(ShownCaption))
     {
-        <p class="tas-review-doc__hint">@Caption</p>
+        <p class="tas-review-doc__hint">@ShownCaption</p>
     }
 }
 else
@@ -26,8 +30,8 @@ else
 @code {
     [Parameter] public byte[]? OfficeBytes { get; set; }
     [Parameter] public string? FileName { get; set; }
-    [Parameter] public string Caption { get; set; } = "Same pages as the uploaded file. Numbered marks match Detected fields — a combination (passport number, issued place, date) uses 6.1 / 6.2 / 6.3 with a separate border. Click a row, then add placeholders from the Short list.";
-    [Parameter] public string LoadingText { get; set; } = "Opening the uploaded file…";
+    [Parameter] public string Caption { get; set; } = string.Empty;
+    [Parameter] public string LoadingText { get; set; } = string.Empty;
     [Parameter] public RenderFragment? ChildContent { get; set; }
     [Parameter] public IReadOnlyList<ScanReviewOrderedField> Marks { get; set; } = Array.Empty<ScanReviewOrderedField>();
     [Parameter] public string? ActiveFieldId { get; set; }
@@ -37,6 +41,19 @@ else
 
     [Inject] private ApplicationWordReportOfficePreviewPdfConverter Converter { get; set; } = null!;
     [Inject] private IJSRuntime JS { get; set; } = null!;
+    [Inject] private IXafCultureInfoService CultureInfoService { get; set; } = null!;
+    [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
+
+    private string EffectiveUiCulture =>
+        VisaUiCultureResolver.Resolve(CultureInfoService, HttpContextAccessor.HttpContext);
+
+    private string Msg(string key) => VisaUiMessages.Get(key, EffectiveUiCulture);
+
+    private string ShownCaption =>
+        string.IsNullOrWhiteSpace(Caption) ? Msg("TemplateScan.Review.PdfCaption") : Caption;
+
+    private string ShownLoadingText =>
+        string.IsNullOrWhiteSpace(LoadingText) ? Msg("TemplateScan.Review.OpeningFile") : LoadingText;
 
     private byte[]? _source;
     private byte[]? _pdfBytes;
@@ -102,7 +119,7 @@ else
         {
             _module ??= await JS.InvokeAsync<IJSObjectReference>(
                 "import",
-                "/lib/pdfjs/template-scan-pdf-preview.js?v=tasmarks16");
+                "/lib/pdfjs/template-scan-pdf-preview.js?v=tasmarks17");
 
             if (_needsPaint)
             {
@@ -212,7 +229,9 @@ else
     }
 
     private string MarksKey() =>
-        string.Join("|", Marks.Select(static m => m.DisplayId + ":" + m.LabelText));
+        string.Join("|", Marks
+            .Select(static m => m.DisplayId + ":" + m.LabelText)
+            .OrderBy(static key => key, StringComparer.Ordinal));
 
     private async Task ClearHostAsync()
     {

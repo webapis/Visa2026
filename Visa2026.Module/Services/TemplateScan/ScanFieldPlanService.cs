@@ -1,5 +1,7 @@
 #nullable enable
 
+using Visa2026.Module.Localization;
+
 namespace Visa2026.Module.Services.TemplateScan;
 
 public interface IScanFieldPlanService
@@ -31,7 +33,7 @@ public sealed class ScanFieldPlanService : IScanFieldPlanService
             || request.Ingest.Input.OfficePackageBytes is not { Length: > 0 } officeBytes)
         {
             throw new InvalidOperationException(
-                "Create from yellow marks accepts only Word (.docx) or Excel (.xlsx) with yellow highlights.");
+                VisaUiMessages.Get("TemplateScan.Outcome.OfficeYellowOnly"));
         }
 
         var yellows = _officeYellow.Extract(officeBytes, request.Ingest.Input.SourceKind);

@@ -2,6 +2,7 @@
 
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Localization;
 using Visa2026.Module.Services.TemplateConvert;
 using Visa2026.Module.Services.UserReports;
 
@@ -50,12 +51,11 @@ public sealed class TemplateScanOrchestrator : ITemplateScanOrchestrator
         ArgumentNullException.ThrowIfNull(analysis.PlaceholderSet);
 
         if (!analysis.CanGenerate)
-            throw new InvalidOperationException("This scan cannot generate a draft template yet.");
+            throw new InvalidOperationException(VisaUiMessages.Get("TemplateScan.Outcome.CannotGenerate"));
 
         if (!analysis.NormalizedInput.IsOfficeSource)
         {
-            throw new InvalidOperationException(
-                "Create from yellow marks accepts only Word (.docx) or Excel (.xlsx).");
+            throw new InvalidOperationException(VisaUiMessages.Get("TemplateScan.Outcome.OfficeOnly"));
         }
 
         return await GenerateFromOfficeAsync(analysis, cancellationToken).ConfigureAwait(false);
@@ -66,7 +66,7 @@ public sealed class TemplateScanOrchestrator : ITemplateScanOrchestrator
         CancellationToken cancellationToken)
     {
         var package = analysis.NormalizedInput.OfficePackageBytes
-            ?? throw new InvalidOperationException("Office package bytes are missing.");
+            ?? throw new InvalidOperationException(VisaUiMessages.Get("TemplateScan.Outcome.MissingBytes"));
 
         var format = analysis.NormalizedInput.SourceKind == ScanSourceKind.Excel
             ? TemplateSourceFormat.Xlsx
@@ -91,7 +91,7 @@ public sealed class TemplateScanOrchestrator : ITemplateScanOrchestrator
                 Validation = await _validation
                     .ExtractAndValidateAsync(package, format, analysis.PlaceholderSet, cancellationToken)
                     .ConfigureAwait(false),
-                Errors = ["No yellow-marked spans could be written as placeholders. Re-check yellow highlights in Word/Excel."],
+                Errors = [VisaUiMessages.Get("TemplateScan.Outcome.NoSpans")],
                 Warnings = Array.Empty<string>(),
                 Gaps = analysis.FieldPlan.Gaps,
                 EmittedTokens = Array.Empty<string>(),
@@ -153,10 +153,10 @@ public sealed class TemplateScanOrchestrator : ITemplateScanOrchestrator
         var warnings = new List<string>();
 
         if (!diff.Passed)
-            errors.AddRange(diff.Violations.Select(static v => "Diff gate: " + v));
+            errors.AddRange(diff.Violations.Select(static v => VisaUiMessages.Format("TemplateScan.Outcome.DiffGate", v)));
 
         foreach (var skip in write.Skipped)
-            warnings.Add($"Skipped {skip.Token}: {skip.Reason}");
+            warnings.Add(VisaUiMessages.Format("TemplateScan.Outcome.Skipped", skip.Token, skip.Reason));
 
         foreach (var issue in validation.Issues)
         {
@@ -167,7 +167,7 @@ public sealed class TemplateScanOrchestrator : ITemplateScanOrchestrator
         }
 
         foreach (var gap in analysis.FieldPlan.Gaps)
-            warnings.Add($"Unmapped yellow: {gap.LabelText}");
+            warnings.Add(VisaUiMessages.Format("TemplateScan.Outcome.UnmappedYellow", gap.LabelText));
 
         var emitted = write.AppliedSubstitutions
             .Select(static s => TemplateTokenSyntax.Wrap(s.Token))
@@ -175,7 +175,7 @@ public sealed class TemplateScanOrchestrator : ITemplateScanOrchestrator
             .ToList();
 
         if (emitted.Count == 0 && !validation.HasHardFailure)
-            errors.Add("The draft contains no merge placeholders.");
+            errors.Add(VisaUiMessages.Get("TemplateScan.Outcome.NoPlaceholders"));
 
         return new TemplateScanOutcome
         {
@@ -245,7 +245,7 @@ public sealed class TemplateScanOrchestrator : ITemplateScanOrchestrator
         }
 
         foreach (var gap in analysis.FieldPlan.Gaps)
-            warnings.Add($"Unmapped on scan: {gap.LabelText}");
+            warnings.Add(VisaUiMessages.Format("TemplateScan.Outcome.UnmappedScan", gap.LabelText));
 
         var emitted = new HashSet<string>(draft.EmittedTokens, StringComparer.Ordinal);
         foreach (var field in analysis.FieldPlan.Fields)
@@ -255,11 +255,11 @@ public sealed class TemplateScanOrchestrator : ITemplateScanOrchestrator
                 continue;
 
             warnings.Add(
-                $"Placeholder {token} was mapped on Review but not placed in the letter layout — refine in Word or Regenerate.");
+                VisaUiMessages.Format("TemplateScan.Outcome.NotPlaced", token));
         }
 
         if (draft.EmittedTokens.Count == 0 && !validation.HasHardFailure)
-            errors.Add("The draft contains no merge placeholders.");
+            errors.Add(VisaUiMessages.Get("TemplateScan.Outcome.NoPlaceholders"));
 
         return new TemplateScanOutcome
         {

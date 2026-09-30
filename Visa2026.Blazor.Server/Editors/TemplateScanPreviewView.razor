@@ -2,21 +2,25 @@
 @using System.IO
 @using Visa2026.Module.Services.TemplateConvert
 @using Visa2026.Module.Services.TemplateScan
+@using Visa2026.Module.Localization
+@using Visa2026.Blazor.Server.Localization
+@using DevExpress.ExpressApp.Blazor.Services
+@using Microsoft.AspNetCore.Http
 
 <div class="tas-split tas-split--preview">
     <div class="tas-split__scan">
         <div class="tas-filebar">
             <strong>@TemplateName</strong>
-            <span class="tas-pill">@Outcome.EmittedTokens.Count placeholders</span>
+            <span class="tas-pill">@FormatMsg("TemplateScan.Preview.Placeholders", Outcome.EmittedTokens.Count)</span>
         </div>
         <TemplateScanOfficePdfPreview OfficeBytes="Outcome.Content"
                                       FileName="@PreviewOfficeFileName"
-                                      LoadingText="Opening the draft template…"
-                                      Caption="Draft pages from the generated copy, with library tokens written in.">
+                                      LoadingText="@Msg("TemplateScan.Preview.Opening")"
+                                      Caption="@Msg("TemplateScan.Preview.Caption")">
             <div class="tas-viewport @(UsesPageSheet ? "tas-viewport--a4" : null) @(IsLandscape ? "tas-viewport--landscape" : null)">
                 @if (UsesPageSheet)
                 {
-                    <div class="tas-a4-page @(IsLandscape ? "tas-a4-page--landscape" : null)" aria-label="A4 draft preview">
+                    <div class="tas-a4-page @(IsLandscape ? "tas-a4-page--landscape" : null)" aria-label="@Msg("TemplateScan.Preview.Aria")">
                         <TemplateConvertOutlineView Outline="Outcome.Outline" />
                     </div>
                 }
@@ -27,14 +31,14 @@
             </div>
         </TemplateScanOfficePdfPreview>
         <div class="tas-inline-note">
-            <strong>Draft template, not a filled document.</strong>
-            <span>Same page layout as the uploaded file, with library tokens written in. After save, catalog <strong>Preview</strong> fills the case.</span>
+            <strong>@Msg("TemplateScan.Preview.DraftTitle")</strong>
+            <span>@Msg("TemplateScan.Preview.DraftBody")</span>
         </div>
     </div>
     <aside class="tas-rail @(Outcome.HasErrors ? "tas-rail--errors" : string.Empty)">
         @if (Outcome.HasErrors)
         {
-            <h4>Blocking problems</h4>
+            <h4>@Msg("TemplateScan.Preview.Blocking")</h4>
             <ul class="tas-issues">
                 @foreach (var error in Outcome.Errors)
                 {
@@ -45,7 +49,7 @@
 
         @if (Outcome.HasWarnings)
         {
-            <h4>Warnings</h4>
+            <h4>@Msg("TemplateScan.Preview.Warnings")</h4>
             <ul class="tas-issues">
                 @foreach (var warning in Outcome.Warnings)
                 {
@@ -54,7 +58,7 @@
             </ul>
         }
 
-        <h4>Placeholders</h4>
+        <h4>@Msg("TemplateScan.Preview.PlaceholdersHeading")</h4>
         <ul class="tas-token-list">
             @foreach (var token in Outcome.Validation.Tokens)
             {
@@ -64,7 +68,7 @@
 
         @if (Outcome.Gaps.Count > 0)
         {
-            <h4>Scan gaps (@Outcome.Gaps.Count)</h4>
+            <h4>@FormatMsg("TemplateScan.Preview.Gaps", Outcome.Gaps.Count)</h4>
             <ul class="tas-issues">
                 @foreach (var gap in Outcome.Gaps.Take(6))
                 {
@@ -77,7 +81,7 @@
         {
             <label class="tas-ack">
                 <input type="checkbox" checked="@WarningAcknowledged" @onchange="OnAckChanged" />
-                <span><strong>I understand the warnings</strong> and want to save this template.</span>
+                <span>@Msg("TemplateScan.Preview.Ack")</span>
             </label>
         }
     </aside>
@@ -89,6 +93,17 @@
     [Parameter] public bool ShowWarningAcknowledgement { get; set; }
     [Parameter] public bool WarningAcknowledged { get; set; }
     [Parameter] public EventCallback<bool> WarningAcknowledgedChanged { get; set; }
+
+    [Inject] private IXafCultureInfoService CultureInfoService { get; set; } = null!;
+    [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
+
+    private string EffectiveUiCulture =>
+        VisaUiCultureResolver.Resolve(CultureInfoService, HttpContextAccessor.HttpContext);
+
+    private string Msg(string key) => VisaUiMessages.Get(key, EffectiveUiCulture);
+
+    private string FormatMsg(string key, params object[] args) =>
+        VisaUiMessages.FormatForCulture(EffectiveUiCulture, key, args);
 
     private bool IsWordOutline =>
         Outcome.Outline.IsReadable && Outcome.Outline.Format == TemplateSourceFormat.Docx;

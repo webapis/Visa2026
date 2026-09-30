@@ -1,13 +1,17 @@
 @namespace Visa2026.Blazor.Server.Editors
 @using Visa2026.Module.Services.TemplateConvert
 @using Visa2026.Module.Services.TemplateScan
+@using Visa2026.Module.Localization
+@using Visa2026.Blazor.Server.Localization
+@using DevExpress.ExpressApp.Blazor.Services
+@using Microsoft.AspNetCore.Http
 
 <div class="tas-viewport tas-viewport--a4 tas-review-doc @(Outline?.IsLandscape == true ? "tas-viewport--landscape" : null)">
     <div class="tas-a4-page @(Outline?.IsLandscape == true ? "tas-a4-page--landscape" : null)"
-         aria-label="In-process template preview">
+         aria-label="@Msg("TemplateScan.Review.DocAria")">
         @if (Outline == null || !Outline.IsReadable)
         {
-            <p class="tas-review-doc__empty">The uploaded file could not be shown here. Mapped fields stay in the list.</p>
+            <p class="tas-review-doc__empty">@Msg("TemplateScan.Review.DocEmpty")</p>
         }
         else if (Outline.Format == TemplateSourceFormat.Docx)
         {
@@ -87,6 +91,14 @@
 <p class="tas-review-doc__hint">In process — numbered marks are placeholder candidates. Same numbers as Detected fields.</p>
 
 @code {
+    [Inject] private IXafCultureInfoService CultureInfoService { get; set; } = null!;
+    [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
+
+    private string EffectiveUiCulture =>
+        VisaUiCultureResolver.Resolve(CultureInfoService, HttpContextAccessor.HttpContext);
+
+    private string Msg(string key) => VisaUiMessages.Get(key, EffectiveUiCulture);
+
     [Parameter, EditorRequired] public TemplateDocumentOutline? Outline { get; set; }
     [Parameter] public IReadOnlyList<ScanReviewOrderedField> Marks { get; set; } = Array.Empty<ScanReviewOrderedField>();
     [Parameter] public string? HoveredFieldId { get; set; }

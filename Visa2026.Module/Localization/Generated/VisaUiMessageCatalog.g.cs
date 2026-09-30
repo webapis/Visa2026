@@ -3323,6 +3323,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Hökmany ýüztutma gysgaça meýdanlary şu ýerde doldurylmaly. Döret, Ýüztutmadaky adamlar üçin taýýar iş meýdanyny açýar.",
             ["ru-RU"] = "Обязательные поля сводки нужно заполнить здесь. Создание откроет рабочее место дела для «Люди и связи».",
         },
+        ["ApplicationProfileInstance.Picker.Creating"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Creating the application…",
+            ["tr-TR"] = "Başvuru oluşturuluyor…",
+            ["tk-TM"] = "Ýüztutma döredilýär…",
+            ["ru-RU"] = "Создание заявки…",
+        },
         ["ApplicationProfileInstance.Picker.CrumbLegs"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Approval legs",
@@ -3407,20 +3414,6 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ýüztutma profilleri ýüklenýär…",
             ["ru-RU"] = "Загрузка профилей заявок…",
         },
-        ["ApplicationProfileInstance.Picker.MovingTo"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Opening {0}…",
-            ["tr-TR"] = "{0} açılıyor…",
-            ["tk-TM"] = "{0} açylýar…",
-            ["ru-RU"] = "Открывается «{0}»…",
-        },
-        ["ApplicationProfileInstance.Picker.Creating"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Creating the application…",
-            ["tr-TR"] = "Başvuru oluşturuluyor…",
-            ["tk-TM"] = "Ýüztutma döredilýär…",
-            ["ru-RU"] = "Создание заявки…",
-        },
         ["ApplicationProfileInstance.Picker.MakeDefault"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Make default",
@@ -3441,6 +3434,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "{0} bakanlık",
             ["tk-TM"] = "{0} ministrlik",
             ["ru-RU"] = "{0} мин-в",
+        },
+        ["ApplicationProfileInstance.Picker.MovingTo"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Opening {0}…",
+            ["tr-TR"] = "{0} açılıyor…",
+            ["tk-TM"] = "{0} açylýar…",
+            ["ru-RU"] = "Открывается «{0}»…",
         },
         ["ApplicationProfileInstance.Picker.New"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -8857,8 +8857,36 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Application",
             ["tr-TR"] = "Başvuru",
-            ["tk-TM"] = "Arza",
+            ["tk-TM"] = "Ýüztutma",
             ["ru-RU"] = "Заявка",
+        },
+        ["PlaceholderManual.Group.ApplicationBusinessTrip"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application — business trip",
+            ["tr-TR"] = "Başvuru — iş gezisi",
+            ["tk-TM"] = "Ýüztutma — iş sapary",
+            ["ru-RU"] = "Заявка — командировка",
+        },
+        ["PlaceholderManual.Group.ApplicationCancellation"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application — cancellation",
+            ["tr-TR"] = "Başvuru — iptal",
+            ["tk-TM"] = "Ýüztutma — ýatyrmak",
+            ["ru-RU"] = "Заявка — аннулирование",
+        },
+        ["PlaceholderManual.Group.ApplicationFamilyMember"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application — family member",
+            ["tr-TR"] = "Başvuru — aile üyesi",
+            ["tk-TM"] = "Ýüztutma — maşgala agzasy",
+            ["ru-RU"] = "Заявка — член семьи",
+        },
+        ["PlaceholderManual.Group.ApplicationGeneral"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application — general",
+            ["tr-TR"] = "Başvuru — genel",
+            ["tk-TM"] = "Ýüztutma — umumy",
+            ["ru-RU"] = "Заявка — общее",
         },
         ["PlaceholderManual.Group.AuthorizedRepresentative"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -8873,6 +8901,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Sınır bölgesi",
             ["tk-TM"] = "Serhet ýakasy",
             ["ru-RU"] = "Пограничная зона",
+        },
+        ["PlaceholderManual.Group.BusinessTrip"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Business trip",
+            ["tr-TR"] = "İş gezisi",
+            ["tk-TM"] = "Iş sapary",
+            ["ru-RU"] = "Командировка",
         },
         ["PlaceholderManual.Group.CompanyProfile"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -12058,6 +12093,1616 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Doğrulama tamamlandı.\nGeçerli: {0}\nGeçersiz: {1}\n\nAyrıntılar:\n{2}",
             ["tk-TM"] = "Barlag tamamlandy.\nDogry: {0}\nNädogry: {1}\n\nJikme-jik:\n{2}",
             ["ru-RU"] = "Проверка завершена.\nКорректных: {0}\nС ошибками: {1}\n\nПодробности:\n{2}",
+        },
+        ["TemplateScan.AddPlaceholder"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Add placeholder…",
+            ["tr-TR"] = "Yer tutucu ekle…",
+            ["tk-TM"] = "Bellik goş…",
+            ["ru-RU"] = "Добавить заполнитель…",
+        },
+        ["TemplateScan.AskAi"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Ask AI",
+            ["tr-TR"] = "Yapay zekâya sor",
+            ["tk-TM"] = "AI-dan sora",
+            ["ru-RU"] = "Спросить ИИ",
+        },
+        ["TemplateScan.Btn.Analyze"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Analyze file",
+            ["tr-TR"] = "Dosyayı incele",
+            ["tk-TM"] = "Faýly seljer",
+            ["ru-RU"] = "Разобрать файл",
+        },
+        ["TemplateScan.Btn.Approve"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Approve — save to profile",
+            ["tr-TR"] = "Onayla — profile kaydet",
+            ["tk-TM"] = "Tassykla — profile ýaz",
+            ["ru-RU"] = "Утвердить — сохранить в профиль",
+        },
+        ["TemplateScan.Btn.ApproveAnyway"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Approve anyway",
+            ["tr-TR"] = "Yine de onayla",
+            ["tk-TM"] = "Şonda-da tassykla",
+            ["ru-RU"] = "Всё равно утвердить",
+        },
+        ["TemplateScan.Btn.AskClarification"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Ask for clarification",
+            ["tr-TR"] = "Açıklama iste",
+            ["tk-TM"] = "Düşündiriş sora",
+            ["ru-RU"] = "Запросить пояснение",
+        },
+        ["TemplateScan.Btn.AskClarificationDisabled"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Clarification chat needs a TemplateAiScan AI provider",
+            ["tr-TR"] = "Açıklama sohbeti bir TemplateAiScan yapay zekâ sağlayıcısı ister",
+            ["tk-TM"] = "Düşündiriş söhbeti TemplateAiScan AI üpjünçisini isleýär",
+            ["ru-RU"] = "Чат пояснений требует поставщика ИИ TemplateAiScan",
+        },
+        ["TemplateScan.Btn.Back"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Back",
+            ["tr-TR"] = "Geri",
+            ["tk-TM"] = "Yza",
+            ["ru-RU"] = "Назад",
+        },
+        ["TemplateScan.Btn.BackToFields"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Back to field list",
+            ["tr-TR"] = "Alan listesine dön",
+            ["tk-TM"] = "Meýdan sanawyna yza",
+            ["ru-RU"] = "К списку полей",
+        },
+        ["TemplateScan.Btn.Cancel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Cancel",
+            ["tr-TR"] = "İptal",
+            ["tk-TM"] = "Ýatyr",
+            ["ru-RU"] = "Отмена",
+        },
+        ["TemplateScan.Btn.Continue"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Continue",
+            ["tr-TR"] = "Devam",
+            ["tk-TM"] = "Dowam et",
+            ["ru-RU"] = "Далее",
+        },
+        ["TemplateScan.Btn.ContinueGenerate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Continue to generate",
+            ["tr-TR"] = "Oluşturmaya devam",
+            ["tk-TM"] = "Döretmäge dowam et",
+            ["ru-RU"] = "Далее к созданию",
+        },
+        ["TemplateScan.Btn.DownloadGap"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Download gap packet",
+            ["tr-TR"] = "Boşluk paketini indir",
+            ["tk-TM"] = "Boşluk paketini göçür",
+            ["ru-RU"] = "Скачать пакет пробелов",
+        },
+        ["TemplateScan.Btn.DownloadMarkdown"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Download Markdown",
+            ["tr-TR"] = "Markdown indir",
+            ["tk-TM"] = "Markdown göçür",
+            ["ru-RU"] = "Скачать Markdown",
+        },
+        ["TemplateScan.Btn.HideChat"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Hide chat",
+            ["tr-TR"] = "Sohbeti gizle",
+            ["tk-TM"] = "Söhbeti gizle",
+            ["ru-RU"] = "Скрыть чат",
+        },
+        ["TemplateScan.Btn.MarkAnother"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Mark another file",
+            ["tr-TR"] = "Başka dosya işaretle",
+            ["tk-TM"] = "Başga faýl belle",
+            ["ru-RU"] = "Разметить другой файл",
+        },
+        ["TemplateScan.Btn.NeedsHelp"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Needs help",
+            ["tr-TR"] = "Yardım gerekli",
+            ["tk-TM"] = "Kömek gerek",
+            ["ru-RU"] = "Нужна помощь",
+        },
+        ["TemplateScan.Btn.Opening"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Opening…",
+            ["tr-TR"] = "Açılıyor…",
+            ["tk-TM"] = "Açylýar…",
+            ["ru-RU"] = "Открытие…",
+        },
+        ["TemplateScan.Btn.OpenYellow"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Open yellow file",
+            ["tr-TR"] = "Sarı dosyayı aç",
+            ["tk-TM"] = "Sary faýly aç",
+            ["ru-RU"] = "Открыть жёлтый файл",
+        },
+        ["TemplateScan.Btn.Regenerate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Regenerate",
+            ["tr-TR"] = "Yeniden oluştur",
+            ["tk-TM"] = "Täzeden döret",
+            ["ru-RU"] = "Создать снова",
+        },
+        ["TemplateScan.Btn.Remap"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Remap unmarked",
+            ["tr-TR"] = "İşaretlenmeyeni yeniden eşle",
+            ["tk-TM"] = "Belgilenmedigi täzeden deňeşdir",
+            ["ru-RU"] = "Сопоставить неотмеченное",
+        },
+        ["TemplateScan.Btn.Remapping"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Remapping…",
+            ["tr-TR"] = "Yeniden eşleniyor…",
+            ["tk-TM"] = "Täzeden deňeşdirilýär…",
+            ["ru-RU"] = "Сопоставление…",
+        },
+        ["TemplateScan.Btn.RemapTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Re-guess placeholders on yellows that are not locked. Tick the checkboxes first if yellows were missed or unlocked Short codes are wrong.",
+            ["tr-TR"] = "Kilitli olmayan sarılardaki yer tutucuları yeniden tahmin eder. Sarılar atlandıysa veya kilidi açık kısa kodlar yanlışsa önce kutuları işaretleyin.",
+            ["tk-TM"] = "Gulplanmadyk sary belliklerde bellikleri täzeden çaklaýar. Sary bellikler geçilen bolsa ýa-da gulpy açyk gysga kodlar nädogry bolsa ilki gutulary belläň.",
+            ["ru-RU"] = "Заново угадывает заполнители на незаблокированных жёлтых. Если жёлтые пропущены или незаблокированные короткие коды неверны, сначала отметьте флажки.",
+        },
+        ["TemplateScan.Btn.UploadDifferent"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Upload different file",
+            ["tr-TR"] = "Farklı dosya yükle",
+            ["tk-TM"] = "Başga faýl ýükle",
+            ["ru-RU"] = "Загрузить другой файл",
+        },
+        ["TemplateScan.Case.Choose"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Choose a case…",
+            ["tr-TR"] = "Dava seçin…",
+            ["tk-TM"] = "Ýüztutma saýlaň…",
+            ["ru-RU"] = "Выберите дело…",
+        },
+        ["TemplateScan.Case.None"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No cases on this profile yet. Add a case first to open the template wizard.",
+            ["tr-TR"] = "Bu profilde henüz dava yok. Şablon sihirbazını açmak için önce bir dava ekleyin.",
+            ["tk-TM"] = "Bu profilde entek ýüztutma ýok. Şablon ussatyny açmak üçin ilki ýüztutma goşuň.",
+            ["ru-RU"] = "В этом профиле ещё нет дел. Сначала добавьте дело, чтобы открыть мастер шаблона.",
+        },
+        ["TemplateScan.Chat.AskMark"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Ask about this mark",
+            ["tr-TR"] = "Bu işaret hakkında sor",
+            ["tk-TM"] = "Bu bellik barada sora",
+            ["ru-RU"] = "Спросить об этой метке",
+        },
+        ["TemplateScan.Chat.Attach"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Attach image",
+            ["tr-TR"] = "Görsel ekle",
+            ["tk-TM"] = "Surat dak",
+            ["ru-RU"] = "Прикрепить изображение",
+        },
+        ["TemplateScan.Chat.Attached"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = " (attached: {0})",
+            ["tr-TR"] = " (ek: {0})",
+            ["tk-TM"] = " (dakylan: {0})",
+            ["ru-RU"] = " (вложение: {0})",
+        },
+        ["TemplateScan.Chat.Back"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "← Back to field list",
+            ["tr-TR"] = "← Alan listesine dön",
+            ["tk-TM"] = "← Meýdan sanawyna yza",
+            ["ru-RU"] = "← К списку полей",
+        },
+        ["TemplateScan.Chat.Clarify"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Clarify field mapping",
+            ["tr-TR"] = "Alan eşlemesini netleştir",
+            ["tk-TM"] = "Meýdan deňeşdirmesini düşündir",
+            ["ru-RU"] = "Уточнить сопоставление полей",
+        },
+        ["TemplateScan.Chat.Empty"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Answer AI questions below or describe which label should map to which placeholder.",
+            ["tr-TR"] = "Aşağıda yapay zekâ sorularını yanıtlayın veya hangi etiketin hangi yer tutucuya gideceğini yazın.",
+            ["tk-TM"] = "Aşakda AI soraglaryna jogap beriň ýa-da haýsy belligiň haýsy ýer tutuja gitmelidigini ýazyň.",
+            ["ru-RU"] = "Ответьте на вопросы ИИ ниже или опишите, какая подпись к какому заполнителю относится.",
+        },
+        ["TemplateScan.Chat.HintCompact"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Ask which library placeholders fit this highlight, or add them from the Short list above. Attach a PNG/JPG of the form if Azure should see the printed line.",
+            ["tr-TR"] = "Bu vurguya hangi kitaplık yer tutucularının uyduğunu sorun veya yukarıdaki Kısa listeden ekleyin. Azure basılı satırı görmeliyse formun PNG/JPG'sini ekleyin.",
+            ["tk-TM"] = "Bu bellige haýsy kitaphana bellikleriniň laýykdygyny soraň ýa-da ýokarky Gysga sanawdan goşuň. Azure çap edilen setiri görmeli bolsa formanyň PNG/JPG-ni dakyň.",
+            ["ru-RU"] = "Спросите, какие заполнители библиотеки подходят к этому выделению, или добавьте их из списка коротких кодов выше. Прикрепите PNG/JPG бланка, если Azure должен увидеть напечатанную строку.",
+        },
+        ["TemplateScan.Chat.HintFull"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Ask about ambiguous labels, header vs roster fields, or which placeholder fits a gap. You can attach a PNG/JPG of the form. Layout and wording changes are not supported.",
+            ["tr-TR"] = "Belirsiz etiketler, üst bilgi ile satır alanları veya bir boşluğa hangi yer tutucunun uyduğu hakkında sorun. Formun PNG/JPG'sini ekleyebilirsiniz. Düzen ve metin değişiklikleri desteklenmez.",
+            ["tk-TM"] = "Düşnüksiz bellikler, sözbaşy bilen setir meýdanlary ýa-da boşluga haýsy belligiň laýykdygy barada soraň. Formanyň PNG/JPG-ni dakyp bilersiňiz. Ýerleşiş we tekst üýtgeşmeleri goldanylmaýar.",
+            ["ru-RU"] = "Спросите о неясных подписях, полях шапки и списка или о том, какой заполнитель подходит к пробелу. Можно прикрепить PNG/JPG бланка. Правка вёрстки и формулировок не поддерживается.",
+        },
+        ["TemplateScan.Chat.ImageOnly"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Use the attached image to place the missing placeholders on the correct yellow marks.",
+            ["tr-TR"] = "Eksik yer tutucuları doğru sarı işaretlere yerleştirmek için eklenen görseli kullan.",
+            ["tk-TM"] = "Ýetmeýän bellikleri dogry sary belliklere goýmak üçin dakylan suraty ulan.",
+            ["ru-RU"] = "По прикреплённому изображению поставьте недостающие заполнители на верные жёлтые метки.",
+        },
+        ["TemplateScan.Chat.ImageUnreadable"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Could not read that image.",
+            ["tr-TR"] = "Bu görsel okunamadı.",
+            ["tk-TM"] = "Bu surat okalyp bilinmedi.",
+            ["ru-RU"] = "Не удалось прочитать это изображение.",
+        },
+        ["TemplateScan.Chat.InputPlaceholder"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "e.g. Map the date line to application date, not contract date…",
+            ["tr-TR"] = "ör. Tarih satırını sözleşme tarihine değil başvuru tarihine eşle…",
+            ["tk-TM"] = "mysal. Sene setirini şertnama senesine däl, ýüztutma senesine deňeşdir…",
+            ["ru-RU"] = "напр. Сопоставить строку даты с датой заявки, а не с датой договора…",
+        },
+        ["TemplateScan.Chat.Mark"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Mark #{0}: “{1}” → {2}",
+            ["tr-TR"] = "İşaret #{0}: “{1}” → {2}",
+            ["tk-TM"] = "Bellik #{0}: “{1}” → {2}",
+            ["ru-RU"] = "Метка #{0}: «{1}» → {2}",
+        },
+        ["TemplateScan.Chat.Remove"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Remove {0}",
+            ["tr-TR"] = "{0} kaldır",
+            ["tk-TM"] = "{0} aýyr",
+            ["ru-RU"] = "Убрать {0}",
+        },
+        ["TemplateScan.Chat.Send"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Send",
+            ["tr-TR"] = "Gönder",
+            ["tk-TM"] = "Iber",
+            ["ru-RU"] = "Отправить",
+        },
+        ["TemplateScan.Chat.SendFailed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Something went wrong sending that message. Try again or go back to the field list.",
+            ["tr-TR"] = "Bu ileti gönderilirken bir sorun oldu. Yeniden deneyin veya alan listesine dönün.",
+            ["tk-TM"] = "Bu habar iberilende näsazlyk boldy. Täzeden synanyşyň ýa-da meýdan sanawyna yza dolanyň.",
+            ["ru-RU"] = "Не удалось отправить сообщение. Повторите или вернитесь к списку полей.",
+        },
+        ["TemplateScan.Chat.TooManyImages"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Attach at most {0} images.",
+            ["tr-TR"] = "En fazla {0} görsel ekleyin.",
+            ["tk-TM"] = "Iň köp {0} surat dakyp bilersiňiz.",
+            ["ru-RU"] = "Можно прикрепить не больше {0} изображений.",
+        },
+        ["TemplateScan.Chat.Unmapped"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "unmapped",
+            ["tr-TR"] = "eşlenmedi",
+            ["tk-TM"] = "deňeşdirilmedi",
+            ["ru-RU"] = "не сопоставлено",
+        },
+        ["TemplateScan.Check.Incorrect"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Some placeholders are wrong",
+            ["tr-TR"] = "Bazı yer tutucular yanlış",
+            ["tk-TM"] = "Käbir bellikler nädogry",
+            ["ru-RU"] = "Некоторые заполнители неверны",
+        },
+        ["TemplateScan.Check.Unidentified"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Unidentified yellows remain",
+            ["tr-TR"] = "Tanımlanamayan sarılar kaldı",
+            ["tk-TM"] = "Tanalmadyk sary bellikler galdy",
+            ["ru-RU"] = "Остались неопознанные жёлтые",
+        },
+        ["TemplateScan.Close"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Close",
+            ["tr-TR"] = "Kapat",
+            ["tk-TM"] = "Ýap",
+            ["ru-RU"] = "Закрыть",
+        },
+        ["TemplateScan.Col.Actions"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Actions",
+            ["tr-TR"] = "Eylemler",
+            ["tk-TM"] = "Hereketler",
+            ["ru-RU"] = "Действия",
+        },
+        ["TemplateScan.Col.Confidence"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Conf.",
+            ["tr-TR"] = "Güven",
+            ["tk-TM"] = "Ynam",
+            ["ru-RU"] = "Увер.",
+        },
+        ["TemplateScan.Col.Description"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Description",
+            ["tr-TR"] = "Açıklama",
+            ["tk-TM"] = "Düşündiriş",
+            ["ru-RU"] = "Описание",
+        },
+        ["TemplateScan.Col.FullName"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Full name",
+            ["tr-TR"] = "Tam ad",
+            ["tk-TM"] = "Doly ady",
+            ["ru-RU"] = "Полное имя",
+        },
+        ["TemplateScan.Col.Label"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Label",
+            ["tr-TR"] = "Etiket",
+            ["tk-TM"] = "Bellik",
+            ["ru-RU"] = "Подпись",
+        },
+        ["TemplateScan.Col.Sample"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Sample",
+            ["tr-TR"] = "Örnek",
+            ["tk-TM"] = "Nusga",
+            ["ru-RU"] = "Образец",
+        },
+        ["TemplateScan.Col.Short"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Short",
+            ["tr-TR"] = "Kısa",
+            ["tk-TM"] = "Gysga",
+            ["ru-RU"] = "Короткий",
+        },
+        ["TemplateScan.Conf.High"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "High",
+            ["tr-TR"] = "Yüksek",
+            ["tk-TM"] = "Ýokary",
+            ["ru-RU"] = "Высокая",
+        },
+        ["TemplateScan.Conf.Low"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Low",
+            ["tr-TR"] = "Düşük",
+            ["tk-TM"] = "Pes",
+            ["ru-RU"] = "Низкая",
+        },
+        ["TemplateScan.Conf.Med"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Med",
+            ["tr-TR"] = "Orta",
+            ["tk-TM"] = "Orta",
+            ["ru-RU"] = "Средняя",
+        },
+        ["TemplateScan.DetectedFields"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Detected fields",
+            ["tr-TR"] = "Algılanan alanlar",
+            ["tk-TM"] = "Tapylan meýdanlar",
+            ["ru-RU"] = "Найденные поля",
+        },
+        ["TemplateScan.Discard.Discard"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Discard",
+            ["tr-TR"] = "Vazgeç",
+            ["tk-TM"] = "Taşla",
+            ["ru-RU"] = "Отменить",
+        },
+        ["TemplateScan.Discard.Keep"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Keep working",
+            ["tr-TR"] = "Çalışmaya devam",
+            ["tk-TM"] = "Işlemäge dowam et",
+            ["ru-RU"] = "Продолжить работу",
+        },
+        ["TemplateScan.Discard.NothingSaved"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Nothing has been saved to the profile yet.",
+            ["tr-TR"] = "Profile henüz bir şey kaydedilmedi.",
+            ["tk-TM"] = "Profile entek hiç zat ýazdyrylmady.",
+            ["ru-RU"] = "В профиль ещё ничего не сохранено.",
+        },
+        ["TemplateScan.Discard.Scan"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "The uploaded scan and detected fields are dropped.",
+            ["tr-TR"] = "Yüklenen tarama ve algılanan alanlar atılır.",
+            ["tk-TM"] = "Ýüklenen seljeriş we tapylan meýdanlar taşlanýar.",
+            ["ru-RU"] = "Загруженный разбор и найденные поля будут отброшены.",
+        },
+        ["TemplateScan.Discard.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Discard this scan?",
+            ["tr-TR"] = "Bu tarama silinsin mi?",
+            ["tk-TM"] = "Bu seljermäni taşlamalymy?",
+            ["ru-RU"] = "Отменить этот разбор?",
+        },
+        ["TemplateScan.Done.Added"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Template added to the profile",
+            ["tr-TR"] = "Şablon profile eklendi",
+            ["tk-TM"] = "Şablon profile goşuldy",
+            ["ru-RU"] = "Шаблон добавлен в профиль",
+        },
+        ["TemplateScan.Done.AddedBody"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "It is in the profile's template list. Press Save profile to keep it.",
+            ["tr-TR"] = "Profilin şablon listesinde. Saklamak için Profili kaydet'e basın.",
+            ["tk-TM"] = "Profiliň şablon sanawynda. Saklamak üçin Profili sakla basyň.",
+            ["ru-RU"] = "Он в списке шаблонов профиля. Нажмите «Сохранить профиль», чтобы оставить его.",
+        },
+        ["TemplateScan.Done.ColAvailable"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Available in",
+            ["tr-TR"] = "Kullanıldığı yer",
+            ["tk-TM"] = "Elýeterli ýeri",
+            ["ru-RU"] = "Доступен в",
+        },
+        ["TemplateScan.Done.ColPlaceholders"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Placeholders",
+            ["tr-TR"] = "Yer tutucular",
+            ["tk-TM"] = "Bellikler",
+            ["ru-RU"] = "Заполнители",
+        },
+        ["TemplateScan.Done.ColProfile"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Profile",
+            ["tr-TR"] = "Profil",
+            ["tk-TM"] = "Profil",
+            ["ru-RU"] = "Профиль",
+        },
+        ["TemplateScan.Done.ColTemplate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Template",
+            ["tr-TR"] = "Şablon",
+            ["tk-TM"] = "Şablon",
+            ["ru-RU"] = "Шаблон",
+        },
+        ["TemplateScan.Done.ColVisible"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visible for",
+            ["tr-TR"] = "Görünür",
+            ["tk-TM"] = "Görünýär",
+            ["ru-RU"] = "Виден для",
+        },
+        ["TemplateScan.Done.Next"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Next",
+            ["tr-TR"] = "Sonraki",
+            ["tk-TM"] = "Indiki",
+            ["ru-RU"] = "Дальше",
+        },
+        ["TemplateScan.Done.NextBody"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Select it in the catalog to generate, or open it with Edit template to adjust wording in Word or Excel.",
+            ["tr-TR"] = "Oluşturmak için katalogda seçin veya metni Word ya da Excel'de düzeltmek için Şablonu düzenle ile açın.",
+            ["tk-TM"] = "Döretmek üçin katalogda saýlaň ýa-da Word ýa-da Excelde teksti düzmek üçin Şablony redaktirle bilen açyň.",
+            ["ru-RU"] = "Выберите его в каталоге для генерации или откройте через «Редактировать шаблон», чтобы поправить текст в Word или Excel.",
+        },
+        ["TemplateScan.Done.Saved"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Template saved",
+            ["tr-TR"] = "Şablon kaydedildi",
+            ["tk-TM"] = "Şablon ýazdyryldy",
+            ["ru-RU"] = "Шаблон сохранён",
+        },
+        ["TemplateScan.Done.SharedBody"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "It is on the This profile tab in Resminamalar, included from Shared.",
+            ["tr-TR"] = "Resminamalar'da Bu profil sekmesinde, Ortak'tan dahil edilmiş olarak.",
+            ["tk-TM"] = "Resminamalarda Şu profil sahypasynda, Umumydan goşulan.",
+            ["ru-RU"] = "Он на вкладке «Этот профиль» в Resminamalar, подключён из общих.",
+        },
+        ["TemplateScan.Done.ThisProfileBody"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "It is on the This profile tab in Resminamalar (not Shared). Close this window to select it for the ZIP.",
+            ["tr-TR"] = "Resminamalar'da Bu profil sekmesinde (Ortak değil). ZIP için seçmek üzere bu pencereyi kapatın.",
+            ["tk-TM"] = "Resminamalarda Şu profil sahypasynda (Umumy däl). ZIP üçin saýlamak üçin bu penjiräni ýapyň.",
+            ["ru-RU"] = "Он на вкладке «Этот профиль» в Resminamalar (не в общих). Закройте окно, чтобы выбрать его для ZIP.",
+        },
+        ["TemplateScan.Done.ViewList"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "View in template list",
+            ["tr-TR"] = "Şablon listesinde gör",
+            ["tk-TM"] = "Şablon sanawynda gör",
+            ["ru-RU"] = "Показать в списке шаблонов",
+        },
+        ["TemplateScan.Done.ViewResminamalar"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "View in Resminamalar",
+            ["tr-TR"] = "Resminamalar'da gör",
+            ["tk-TM"] = "Resminamalarda gör",
+            ["ru-RU"] = "Показать в Resminamalar",
+        },
+        ["TemplateScan.Drop.Hint"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = ".docx / .xlsx with yellow marks",
+            ["tr-TR"] = "Sarı işaretli .docx / .xlsx",
+            ["tk-TM"] = "Sary bellikli .docx / .xlsx",
+            ["ru-RU"] = ".docx / .xlsx с жёлтыми метками",
+        },
+        ["TemplateScan.Drop.ReviewNote"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Upload the yellow-marked Word/Excel. Saved Short codes stay; this page is only to attach the original highlights.",
+            ["tr-TR"] = "Sarı işaretli Word/Excel dosyasını yükleyin. Kayıtlı kısa kodlar kalır; bu sayfa yalnızca özgün vurguları eklemek içindir.",
+            ["tk-TM"] = "Sary bellikli Word/Excel faýlyny ýükläň. Ýazdyrylan gysga kodlar galýar; bu sahypa diňe asyl bellikleri dakmak üçin.",
+            ["ru-RU"] = "Загрузите Word/Excel с жёлтыми метками. Сохранённые короткие коды остаются; эта страница только прикрепляет исходные выделения.",
+        },
+        ["TemplateScan.Drop.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Drop Word or Excel here",
+            ["tr-TR"] = "Word veya Excel dosyasını buraya bırakın",
+            ["tk-TM"] = "Word ýa-da Excel faýlyny şu ýere taşlaň",
+            ["ru-RU"] = "Перетащите Word или Excel сюда",
+        },
+        ["TemplateScan.Entry.Create"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Create template",
+            ["tr-TR"] = "Şablon oluştur",
+            ["tk-TM"] = "Şablon döret",
+            ["ru-RU"] = "Создать шаблон",
+        },
+        ["TemplateScan.Entry.CreateTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Create a template from a yellow-marked Word or Excel file",
+            ["tr-TR"] = "Sarı işaretli Word veya Excel dosyasından şablon oluştur",
+            ["tk-TM"] = "Sary bellikli Word ýa-da Excel faýlyndan şablon döret",
+            ["ru-RU"] = "Создать шаблон из Word или Excel с жёлтыми метками",
+        },
+        ["TemplateScan.Entry.CreateTitleDisabled"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Enable TemplateAiScan in configuration",
+            ["tr-TR"] = "Yapılandırmada TemplateAiScan'i açın",
+            ["tk-TM"] = "Sazlamada TemplateAiScan-i açyň",
+            ["ru-RU"] = "Включите TemplateAiScan в настройках",
+        },
+        ["TemplateScan.Entry.ReviewPlaceholders"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Review placeholders",
+            ["tr-TR"] = "Yer tutucuları gözden geçir",
+            ["tk-TM"] = "Bellikleri gözden geçir",
+            ["ru-RU"] = "Проверить заполнители",
+        },
+        ["TemplateScan.Entry.ReviewPlaceholdersTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Remap placeholders on this catalog template",
+            ["tr-TR"] = "Bu katalog şablonundaki yer tutucuları yeniden eşle",
+            ["tk-TM"] = "Bu katalog şablonyndaky bellikleri täzeden deňeşdir",
+            ["ru-RU"] = "Заново сопоставить заполнители этого шаблона каталога",
+        },
+        ["TemplateScan.Fail.CannotReview"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "This template cannot be reviewed",
+            ["tr-TR"] = "Bu şablon gözden geçirilemez",
+            ["tk-TM"] = "Bu şablony gözden geçirip bolmaýar",
+            ["ru-RU"] = "Этот шаблон нельзя проверить",
+        },
+        ["TemplateScan.Fail.NoYellowOrTokens"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "The catalog file has no yellow highlights and no library placeholders to remap.",
+            ["tr-TR"] = "Katalog dosyasında sarı vurgu ve yeniden eşlenecek kitaplık yer tutucusu yok.",
+            ["tk-TM"] = "Katalog faýlynda sary bellik we täzeden deňeşdiriljek kitaphana belligi ýok.",
+            ["ru-RU"] = "В файле каталога нет жёлтых выделений и заполнителей библиотеки для повторного сопоставления.",
+        },
+        ["TemplateScan.Fail.Quality"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Scan quality check failed",
+            ["tr-TR"] = "Tarama kalite kontrolü başarısız",
+            ["tk-TM"] = "Seljeriş hiliniň barlagy şowsuz",
+            ["ru-RU"] = "Проверка качества разбора не пройдена",
+        },
+        ["TemplateScan.Fail.Sharper"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "This scan cannot be turned into a template yet. Try a sharper photo, higher resolution, or a different file.",
+            ["tr-TR"] = "Bu tarama henüz şablona dönüştürülemez. Daha net bir fotoğraf, daha yüksek çözünürlük veya başka bir dosya deneyin.",
+            ["tk-TM"] = "Bu seljeriş entek şablona öwrülip bilinmeýär. Has aýdyň surat, has ýokary çözgüt ýa-da başga faýl synap görüň.",
+            ["ru-RU"] = "Этот разбор пока нельзя превратить в шаблон. Попробуйте более чёткое фото, большее разрешение или другой файл.",
+        },
+        ["TemplateScan.Field.AllContracts"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "All contracts",
+            ["tr-TR"] = "Tüm proje sözleşmeleri",
+            ["tk-TM"] = "Ähli taslama belgileri",
+            ["ru-RU"] = "Все контракты",
+        },
+        ["TemplateScan.Field.AllMigrationServices"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "All migration services",
+            ["tr-TR"] = "Tüm göç daireleri",
+            ["tk-TM"] = "Ähli migrasiýa gulluklary",
+            ["ru-RU"] = "Все миграционные службы",
+        },
+        ["TemplateScan.Field.Case"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Case",
+            ["tr-TR"] = "Dava",
+            ["tk-TM"] = "Ýüztutma",
+            ["ru-RU"] = "Дело",
+        },
+        ["TemplateScan.Field.File"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "File",
+            ["tr-TR"] = "Dosya",
+            ["tk-TM"] = "Faýl",
+            ["ru-RU"] = "Файл",
+        },
+        ["TemplateScan.Field.MigrationService"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Migration service",
+            ["tr-TR"] = "Göç dairesi",
+            ["tk-TM"] = "Migrasiýa gullugy",
+            ["ru-RU"] = "Миграционная служба",
+        },
+        ["TemplateScan.Field.ProjectContract"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Project contract",
+            ["tr-TR"] = "Proje Sözleşmesi",
+            ["tk-TM"] = "Taslama belgisi",
+            ["ru-RU"] = "Контракт проекта",
+        },
+        ["TemplateScan.Field.SaveTo"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Save to",
+            ["tr-TR"] = "Kayıt yeri",
+            ["tk-TM"] = "Nirede saklamaly",
+            ["ru-RU"] = "Сохранить в",
+        },
+        ["TemplateScan.Field.TemplateName"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Template name",
+            ["tr-TR"] = "Şablon adı",
+            ["tk-TM"] = "Şablon ady",
+            ["ru-RU"] = "Имя шаблона",
+        },
+        ["TemplateScan.Gap"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Gap",
+            ["tr-TR"] = "Boşluk",
+            ["tk-TM"] = "Boşluk",
+            ["ru-RU"] = "Пробел",
+        },
+        ["TemplateScan.Gaps"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} gaps",
+            ["tr-TR"] = "{0} boşluk",
+            ["tk-TM"] = "{0} boşluk",
+            ["ru-RU"] = "пробелов: {0}",
+        },
+        ["TemplateScan.Generate.Office"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Writing library tokens into your yellow-marked Word/Excel file… Placeholder check runs next.",
+            ["tr-TR"] = "Kitaplık belirteçleri sarı işaretli Word/Excel dosyanıza yazılıyor… Ardından yer tutucu kontrolü çalışır.",
+            ["tk-TM"] = "Kitaphana bellikleri sary bellikli Word/Excel faýlyňyza ýazylýar… Soň bellikler barlanýar.",
+            ["ru-RU"] = "Токены библиотеки записываются в Word/Excel с жёлтыми метками… Затем выполняется проверка заполнителей.",
+        },
+        ["TemplateScan.Generate.Plan"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Turning the reviewed field plan into a merge template… Placeholder check runs next.",
+            ["tr-TR"] = "İncelenen alan planı birleştirme şablonuna dönüştürülüyor… Ardından yer tutucu kontrolü çalışır.",
+            ["tk-TM"] = "Gözden geçirilen meýdan meýilnamasy birleşme şablonyna öwrülýär… Soň bellikler barlanýar.",
+            ["ru-RU"] = "Проверенный план полей превращается в шаблон подстановки… Затем выполняется проверка заполнителей.",
+        },
+        ["TemplateScan.Generate.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Building draft template…",
+            ["tr-TR"] = "Taslak şablon hazırlanıyor…",
+            ["tk-TM"] = "Garalama şablon taýýarlanýar…",
+            ["ru-RU"] = "Черновик шаблона создаётся…",
+        },
+        ["TemplateScan.Help.Body"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "These scan fields have no placeholder in this profile's allowed set. Export a gap packet for a developer to add catalog support, then scan again after deploy.",
+            ["tr-TR"] = "Bu tarama alanlarının bu profilin izinli kümesinde yer tutucusu yok. Katalog desteği eklenmesi için bir boşluk paketi dışa aktarın, dağıtımdan sonra yeniden tarayın.",
+            ["tk-TM"] = "Bu seljeriş meýdanlarynyň bu profiliň rugsat edilen toplumynda belligi ýok. Katalog goldawyny goşmak üçin boşluk paketini daşyna çykaryň, ýaýradylandan soň täzeden seljeriň.",
+            ["ru-RU"] = "У этих полей разбора нет заполнителя в разрешённом наборе профиля. Экспортируйте пакет пробелов, чтобы разработчик добавил поддержку в каталог, и разберите снова после выкладки.",
+        },
+        ["TemplateScan.Help.Instance"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Instance",
+            ["tr-TR"] = "Örnek",
+            ["tk-TM"] = "Ýüztutma",
+            ["ru-RU"] = "Экземпляр",
+        },
+        ["TemplateScan.Help.None"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No gaps are recorded — every detected field mapped to a placeholder, or none were detected.",
+            ["tr-TR"] = "Kayıtlı boşluk yok — her algılanan alan bir yer tutucuya eşlendi veya hiç alan algılanmadı.",
+            ["tk-TM"] = "Ýazylan boşluk ýok — her tapylan meýdan bellige deňeşdirildi ýa-da hiç meýdan tapylmady.",
+            ["ru-RU"] = "Пробелов нет — каждое найденное поле сопоставлено с заполнителем, либо поля не найдены.",
+        },
+        ["TemplateScan.Help.Page"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "page {0}",
+            ["tr-TR"] = "sayfa {0}",
+            ["tk-TM"] = "sahypa {0}",
+            ["ru-RU"] = "страница {0}",
+        },
+        ["TemplateScan.Help.Profile"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Profile",
+            ["tr-TR"] = "Profil",
+            ["tk-TM"] = "Profil",
+            ["ru-RU"] = "Профиль",
+        },
+        ["TemplateScan.Help.ScanFile"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Scan file",
+            ["tr-TR"] = "Tarama dosyası",
+            ["tk-TM"] = "Seljeriş faýly",
+            ["ru-RU"] = "Файл разбора",
+        },
+        ["TemplateScan.Help.Suggested"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "suggested: {0}",
+            ["tr-TR"] = "önerilen: {0}",
+            ["tk-TM"] = "maslahat: {0}",
+            ["ru-RU"] = "предложено: {0}",
+        },
+        ["TemplateScan.Help.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "What could not be mapped",
+            ["tr-TR"] = "Eşlenemeyenler",
+            ["tk-TM"] = "Deňeşdirilip bilinmedikler",
+            ["ru-RU"] = "Что не удалось сопоставить",
+        },
+        ["TemplateScan.Help.Validation"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Validation issues",
+            ["tr-TR"] = "Doğrulama sorunları",
+            ["tk-TM"] = "Barlag meseleleri",
+            ["ru-RU"] = "Ошибки проверки",
+        },
+        ["TemplateScan.Hint.Case"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Workspace context only. Yellow marks use the sample in the file, not this case's people.",
+            ["tr-TR"] = "Yalnız çalışma alanı bağlamı. Sarı işaretler dosyadaki örneği kullanır, bu davanın kişilerini değil.",
+            ["tk-TM"] = "Diňe iş meýdany konteksti. Sary bellikler faýldaky nusgany ulanýar, bu ýüztutmanyň adamlaryny däl.",
+            ["ru-RU"] = "Только контекст рабочего места. Жёлтые метки берут образец из файла, а не людей этого дела.",
+        },
+        ["TemplateScan.Hint.Contracts"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "All contracts = every via-ministry case of this profile. Pick one Project contract to show only on matching cases.",
+            ["tr-TR"] = "Tüm proje sözleşmeleri = bu profilin bakanlık üzerinden giden her davası. Yalnızca eşleşen davalarda göstermek için bir proje sözleşmesi seçin.",
+            ["tk-TM"] = "Ähli taslama belgileri = bu profiliň ministrlik arkaly ähli ýüztutmalary. Diňe gabat gelýän ýüztutmalarda görkezmek üçin bir taslama belgisini saýlaň.",
+            ["ru-RU"] = "Все контракты = каждое дело этого профиля через министерство. Выберите один контракт, чтобы показывать шаблон только в подходящих делах.",
+        },
+        ["TemplateScan.Hint.File"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Upload a filled sample. Highlight every value that should become a placeholder in yellow (Word Text Highlight Color or Excel cell fill). Other text stays as printed.",
+            ["tr-TR"] = "Doldurulmuş bir örnek yükleyin. Yer tutucu olacak her değeri sarıyla işaretleyin (Word metin vurgusu veya Excel hücre dolgusu). Diğer metin basıldığı gibi kalır.",
+            ["tk-TM"] = "Doldurylan nusgany ýükläň. Bellige öwrülmeli her bahany sary bilen belläň (Word tekst ýagtylandyrmasy ýa-da Excel öýjük reňki). Beýleki tekst çap edilen ýaly galýar.",
+            ["ru-RU"] = "Загрузите заполненный образец. Выделите жёлтым каждое значение, которое должно стать заполнителем (выделение текста в Word или заливка ячейки в Excel). Остальной текст остаётся как напечатан.",
+        },
+        ["TemplateScan.Hint.MigrationServices"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "All migration services = every direct-migration case of this profile. Pick one service to show only on matching cases.",
+            ["tr-TR"] = "Tüm göç daireleri = bu profilin doğrudan göçe giden her davası. Yalnızca eşleşen davalarda göstermek için bir daire seçin.",
+            ["tk-TM"] = "Ähli migrasiýa gulluklary = bu profiliň gönümel migrasiýa gidýän ähli ýüztutmalary. Diňe gabat gelýän ýüztutmalarda görkezmek üçin bir gullugy saýlaň.",
+            ["ru-RU"] = "Все миграционные службы = каждое дело этого профиля с прямой миграцией. Выберите одну службу, чтобы показывать шаблон только в подходящих делах.",
+        },
+        ["TemplateScan.Hint.RemapAi"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Hints go to Remap unmarked. Locked rows stay.",
+            ["tr-TR"] = "İpuçları İşaretlenmeyeni yeniden eşle'ye gider. Kilitli satırlar kalır.",
+            ["tk-TM"] = "Maslahatlar Belgilenmedigi täzeden deňeşdir-e gidýär. Gulply setirler galýar.",
+            ["ru-RU"] = "Подсказки уходят в «Сопоставить неотмеченное». Заблокированные строки остаются.",
+        },
+        ["TemplateScan.Hint.RemapLocal"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "AI is off — remap still re-guesses unlocked yellows locally.",
+            ["tr-TR"] = "Yapay zekâ kapalı — yeniden eşleme kilidi açık sarıları yine de yerelde yeniden tahmin eder.",
+            ["tk-TM"] = "AI öçük — täzeden deňeşdirme gulpy açyk sary bellikleri şonda-da ýerli çaklaýar.",
+            ["ru-RU"] = "ИИ выключен — повторное сопоставление всё равно заново угадывает незаблокированные жёлтые метки локально.",
+        },
+        ["TemplateScan.Hint.ReviewCatalogTokens"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Numbered marks are the placeholders already in this catalog template. Lock reviewed rows, then Remap unmarked to re-guess the rest. × removes a redundant row. Comma combinations stay 6.1 / 6.2 / 6.3.",
+            ["tr-TR"] = "Numaralı işaretler bu katalog şablonunda zaten bulunan yer tutuculardır. İncelenen satırları kilitleyin, kalanı yeniden tahmin etmek için İşaretlenmeyeni yeniden eşle'ye basın. × fazla satırı kaldırır. Virgüllü birleşimler 6.1 / 6.2 / 6.3 olarak kalır.",
+            ["tk-TM"] = "Sanly bellikler bu katalog şablonynda eýýäm bar bolan belliklerdir. Gözden geçirilen setirleri gulplaň, galanyny täzeden çaklamak üçin Belgilenmedigi täzeden deňeşdir basyň. × artyk setiri aýyrýar. Oturyly birleşmeler 6.1 / 6.2 / 6.3 bolup galýar.",
+            ["ru-RU"] = "Номера — это заполнители, уже стоящие в шаблоне каталога. Заблокируйте проверенные строки, затем «Сопоставить неотмеченное», чтобы заново угадать остальные. × убирает лишнюю строку. Сочетания через запятую остаются 6.1 / 6.2 / 6.3.",
+        },
+        ["TemplateScan.Hint.ReviewNew"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Lock correct rows. Tick leftover yellows and/or wrong placeholders, then Remap unmarked. Locked Short codes stay. Click a row to add Short codes.",
+            ["tr-TR"] = "Doğru satırları kilitleyin. Kalan sarıları ve/veya yanlış yer tutucuları işaretleyip İşaretlenmeyeni yeniden eşle'ye basın. Kilitli kısa kodlar kalır. Kısa kod eklemek için bir satıra tıklayın.",
+            ["tk-TM"] = "Dogry setirleri gulplaň. Galan sary bellikleri we/ýa-da nädogry bellikleri belläp, Belgilenmedigi täzeden deňeşdir basyň. Gulply gysga kodlar galýar. Gysga kod goşmak üçin setire basyň.",
+            ["ru-RU"] = "Заблокируйте верные строки. Отметьте оставшиеся жёлтые и/или неверные заполнители, затем «Сопоставить неотмеченное». Заблокированные короткие коды остаются. Щёлкните строку, чтобы добавить короткие коды.",
+        },
+        ["TemplateScan.Hint.ReviewRestoredMapped"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Saved placeholders are restored, but the left page is the mapped catalog file. Upload the yellow-marked Word/Excel to see highlighted samples — Short codes stay.",
+            ["tr-TR"] = "Kayıtlı yer tutucular geri yüklendi, ancak sol sayfa eşlenmiş katalog dosyası. Vurgulu örnekleri görmek için sarı işaretli Word/Excel yükleyin — kısa kodlar kalır.",
+            ["tk-TM"] = "Ýazdyrylan bellikler dikeldildi, emma çep sahypa deňeşdirilen katalog faýly. Bellenen nusgalary görmek üçin sary bellikli Word/Excel ýükläň — gysga kodlar galýar.",
+            ["ru-RU"] = "Сохранённые заполнители восстановлены, но слева файл каталога после сопоставления. Загрузите жёлтый Word/Excel, чтобы увидеть выделенные образцы — короткие коды останутся.",
+        },
+        ["TemplateScan.Hint.ReviewRestoredYellow"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Saved placeholders are restored. Change a Short code if needed, or unlock a row and click Remap unmarked. Continue saves without re-guessing.",
+            ["tr-TR"] = "Kayıtlı yer tutucular geri yüklendi. Gerekirse kısa kodu değiştirin veya bir satırın kilidini açıp İşaretlenmeyeni yeniden eşle'ye tıklayın. Devam, yeniden tahmin etmeden kaydeder.",
+            ["tk-TM"] = "Ýazdyrylan bellikler dikeldildi. Gerek bolsa gysga kody üýtgediň ýa-da setiriň gulpuny açyp Belgilenmedigi täzeden deňeşdir basyň. Dowam et täzeden çaklamazdan ýazdyrýar.",
+            ["ru-RU"] = "Сохранённые заполнители восстановлены. При необходимости смените короткий код или снимите блокировку строки и нажмите «Сопоставить неотмеченное». Далее сохраняет без новой догадки.",
+        },
+        ["TemplateScan.Hint.ReviewYellowSource"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Numbered marks are the yellow source saved with this catalog template. Lock reviewed rows, then Remap unmarked to re-guess the rest. × removes a redundant row. Comma combinations stay 6.1 / 6.2 / 6.3.",
+            ["tr-TR"] = "Numaralı işaretler bu katalog şablonuyla kaydedilen sarı kaynaktır. İncelenen satırları kilitleyin, kalanı yeniden tahmin etmek için İşaretlenmeyeni yeniden eşle'ye basın. × fazla satırı kaldırır. Virgüllü birleşimler 6.1 / 6.2 / 6.3 olarak kalır.",
+            ["tk-TM"] = "Sanly bellikler bu katalog şablony bilen ýazdyrylan sary çeşmedir. Gözden geçirilen setirleri gulplaň, galanyny täzeden çaklamak üçin Belgilenmedigi täzeden deňeşdir basyň. × artyk setiri aýyrýar. Oturyly birleşmeler 6.1 / 6.2 / 6.3 bolup galýar.",
+            ["ru-RU"] = "Номера — это жёлтый источник, сохранённый с шаблоном каталога. Заблокируйте проверенные строки, затем «Сопоставить неотмеченное», чтобы заново угадать остальные. × убирает лишнюю строку. Сочетания через запятую остаются 6.1 / 6.2 / 6.3.",
+        },
+        ["TemplateScan.Hint.SaveTo"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "This profile only stays on this profile. Shared catalog is confirmed when you Approve.",
+            ["tr-TR"] = "Yalnız bu profil bu profilde kalır. Ortak katalog, Onayla dediğinizde kesinleşir.",
+            ["tk-TM"] = "Diňe şu profil şu profilde galýar. Umumy katalog Tassykla basanyňyzda kepillenýär.",
+            ["ru-RU"] = "«Только этот профиль» остаётся в этом профиле. Общий каталог подтверждается при утверждении.",
+        },
+        ["TemplateScan.InProcess"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "In process",
+            ["tr-TR"] = "İşlemde",
+            ["tk-TM"] = "Prosesde",
+            ["ru-RU"] = "В работе",
+        },
+        ["TemplateScan.Issue.ConfidenceLow"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Text recognition confidence is too low to propose placeholders reliably.",
+            ["tr-TR"] = "Metin tanıma güveni yer tutucuları güvenilir önermek için çok düşük.",
+            ["tk-TM"] = "Tekst tanaýyş ynamy bellikleri ygtybarly teklip etmek üçin gaty pes.",
+            ["ru-RU"] = "Уверенность распознавания текста слишком низкая, чтобы надёжно предложить заполнители.",
+        },
+        ["TemplateScan.Issue.ConfidenceModerate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Text recognition confidence is moderate — review detected fields carefully.",
+            ["tr-TR"] = "Metin tanıma güveni orta — algılanan alanları dikkatle inceleyin.",
+            ["tk-TM"] = "Tekst tanaýyş ynamy orta — tapylan meýdanlary üns bilen barlaň.",
+            ["ru-RU"] = "Уверенность распознавания текста средняя — внимательно проверьте найденные поля.",
+        },
+        ["TemplateScan.Issue.FileLarge"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "The file is larger than the recommended upload size. Continue only if the scan is high quality.",
+            ["tr-TR"] = "Dosya önerilen yükleme boyutundan büyük. Yalnızca tarama yüksek kaliteliyse devam edin.",
+            ["tk-TM"] = "Faýl maslahat berilýän ýükleme ölçeginden uly. Diňe seljeriş ýokary hilli bolsa dowam ediň.",
+            ["ru-RU"] = "Файл больше рекомендуемого размера загрузки. Продолжайте только если разбор высокого качества.",
+        },
+        ["TemplateScan.Issue.FileTooLarge"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "The file exceeds the maximum size of {0} MB.",
+            ["tr-TR"] = "Dosya en fazla {0} MB sınırını aşıyor.",
+            ["tk-TM"] = "Faýl iň köp {0} MB çäginden uly.",
+            ["ru-RU"] = "Файл больше максимального размера {0} МБ.",
+        },
+        ["TemplateScan.Issue.NoOfficeText"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No extractable text was found in the Word/Excel file.",
+            ["tr-TR"] = "Word/Excel dosyasında çıkarılabilir metin bulunamadı.",
+            ["tk-TM"] = "Word/Excel faýlynda çykarylyp bilinýän tekst tapylmady.",
+            ["ru-RU"] = "В файле Word/Excel не найден извлекаемый текст.",
+        },
+        ["TemplateScan.Issue.NoPdfText"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No extractable text was found in the PDF. Use a searchable PDF or upload a PNG/JPG scan.",
+            ["tr-TR"] = "PDF'de çıkarılabilir metin bulunamadı. Aranabilir bir PDF kullanın veya PNG/JPG tarama yükleyin.",
+            ["tk-TM"] = "PDF-de çykarylyp bilinýän tekst tapylmady. Gözlegli PDF ulanyň ýa-da PNG/JPG seljeriş ýükläň.",
+            ["ru-RU"] = "В PDF не найден извлекаемый текст. Используйте PDF с текстовым слоем или загрузите скан PNG/JPG.",
+        },
+        ["TemplateScan.Issue.NoYellow"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Highlight every value that should become a placeholder in yellow on the scan, then upload again. Non-highlighted text stays literal.",
+            ["tr-TR"] = "Yer tutucu olacak her değeri taramada sarıyla işaretleyin, sonra yeniden yükleyin. Vurgulanmayan metin olduğu gibi kalır.",
+            ["tk-TM"] = "Bellige öwrülmeli her bahany seljerişde sary bilen belläň, soň täzeden ýükläň. Bellenmedik tekst öz ýerinde galýar.",
+            ["ru-RU"] = "Выделите жёлтым каждое значение, которое должно стать заполнителем, и загрузите снова. Невыделенный текст остаётся как есть.",
+        },
+        ["TemplateScan.Issue.Resolution"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Page {0} resolution ({1}×{2}) is too low for reliable field detection.",
+            ["tr-TR"] = "Sayfa {0} çözünürlüğü ({1}×{2}) güvenilir alan algılama için çok düşük.",
+            ["tk-TM"] = "Sahypa {0} çözgüdi ({1}×{2}) ygtybarly meýdan tapmak üçin gaty pes.",
+            ["ru-RU"] = "Разрешение страницы {0} ({1}×{2}) слишком низкое для надёжного поиска полей.",
+        },
+        ["TemplateScan.Issue.YellowGaps"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} yellow highlight(s) could not be matched to the placeholder library — review gaps before generate.",
+            ["tr-TR"] = "{0} sarı vurgu yer tutucu kitaplığına eşlenemedi — oluşturmadan önce boşlukları inceleyin.",
+            ["tk-TM"] = "{0} sary bellik kitaphana belliklerine deňeşdirilip bilinmedi — döretmezden öň boşluklary barlaň.",
+            ["ru-RU"] = "Жёлтых выделений не сопоставлено с библиотекой: {0} — проверьте пробелы перед созданием.",
+        },
+        ["TemplateScan.Issue.YellowUnmapped"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Yellow highlights were found, but none mapped to placeholders in the library. Adjust highlights or clarify labels, then try again.",
+            ["tr-TR"] = "Sarı vurgular bulundu, ancak hiçbiri kitaplıktaki yer tutuculara eşlenmedi. Vurguları veya etiketleri düzeltip yeniden deneyin.",
+            ["tk-TM"] = "Sary bellikler tapyldy, emma hiç biri kitaphanadaky belliklere deňeşdirilmedi. Bellikleri ýa-da ýazgylary düzedip täzeden synanyşyň.",
+            ["ru-RU"] = "Жёлтые выделения найдены, но ни одно не сопоставлено с заполнителями библиотеки. Поправьте выделения или подписи и повторите.",
+        },
+        ["TemplateScan.Lock"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Lock",
+            ["tr-TR"] = "Kilitle",
+            ["tk-TM"] = "Gulpla",
+            ["ru-RU"] = "Блокировать",
+        },
+        ["TemplateScan.Locked"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} locked",
+            ["tr-TR"] = "{0} kilitli",
+            ["tk-TM"] = "{0} gulply",
+            ["ru-RU"] = "заблокировано: {0}",
+        },
+        ["TemplateScan.LockField"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Lock detected field {0}",
+            ["tr-TR"] = "Algılanan alanı kilitle {0}",
+            ["tk-TM"] = "Tapylan meýdany gulpla {0}",
+            ["ru-RU"] = "Заблокировать найденное поле {0}",
+        },
+        ["TemplateScan.LockMapped"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Lock mapped",
+            ["tr-TR"] = "Eşlenenleri kilitle",
+            ["tk-TM"] = "Deňeşdirileni gulpla",
+            ["ru-RU"] = "Блокировать сопоставленные",
+        },
+        ["TemplateScan.LockMappedTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Lock every mapped yellow so Remap unmarked only guesses unlocked rows",
+            ["tr-TR"] = "İşaretlenmeyeni yeniden eşle yalnızca kilidi açık satırları tahmin etsin diye eşlenen her sarıyı kilitle",
+            ["tk-TM"] = "Belgilenmedigi täzeden deňeşdir diňe gulpy açyk setirleri çaklasyn diýip deňeşdirilen her sary belligi gulpla",
+            ["ru-RU"] = "Заблокировать каждую сопоставленную жёлтую метку, чтобы «Сопоставить неотмеченное» угадывало только незаблокированные строки",
+        },
+        ["TemplateScan.LockTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Lock this yellow so Remap unmarked will not change it",
+            ["tr-TR"] = "İşaretlenmeyeni yeniden eşle bunu değiştirmesin diye bu sarıyı kilitle",
+            ["tk-TM"] = "Belgilenmedigi täzeden deňeşdir muny üýtgetmesin diýip bu sary belligi gulpla",
+            ["ru-RU"] = "Заблокировать эту жёлтую метку, чтобы «Сопоставить неотмеченное» её не меняло",
+        },
+        ["TemplateScan.LowConfidence"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} low confidence",
+            ["tr-TR"] = "{0} düşük güven",
+            ["tk-TM"] = "{0} pes ynam",
+            ["ru-RU"] = "низкая уверенность: {0}",
+        },
+        ["TemplateScan.Mapped"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} mapped",
+            ["tr-TR"] = "{0} eşlendi",
+            ["tk-TM"] = "{0} deňeşdirildi",
+            ["ru-RU"] = "сопоставлено: {0}",
+        },
+        ["TemplateScan.Msg.AnalysisFailed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Analysis failed: {0}",
+            ["tr-TR"] = "İnceleme başarısız: {0}",
+            ["tk-TM"] = "Seljeriş şowsuz: {0}",
+            ["ru-RU"] = "Разбор не удался: {0}",
+        },
+        ["TemplateScan.Msg.FileLarge"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Large file ({0} MB). Analysis may be slower; warn threshold is {1} MB.",
+            ["tr-TR"] = "Büyük dosya ({0} MB). İnceleme yavaşlayabilir; uyarı eşiği {1} MB.",
+            ["tk-TM"] = "Uly faýl ({0} MB). Seljeriş haýal bolup biler; duýduryş çägi {1} MB.",
+            ["ru-RU"] = "Большой файл ({0} МБ). Разбор может идти медленнее; порог предупреждения {1} МБ.",
+        },
+        ["TemplateScan.Msg.FileTooLarge"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "This file is {0} MB and the hard limit is {1} MB.",
+            ["tr-TR"] = "Bu dosya {0} MB ve kesin sınır {1} MB.",
+            ["tk-TM"] = "Bu faýl {0} MB we berk çäk {1} MB.",
+            ["ru-RU"] = "Этот файл {0} МБ, жёсткий предел {1} МБ.",
+        },
+        ["TemplateScan.Msg.GapFailed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Gap packet export failed.",
+            ["tr-TR"] = "Boşluk paketi dışa aktarılamadı.",
+            ["tk-TM"] = "Boşluk paketini daşyna çykarmak şowsuz.",
+            ["ru-RU"] = "Не удалось экспортировать пакет пробелов.",
+        },
+        ["TemplateScan.Msg.GapJson"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Gap packet downloaded (JSON).",
+            ["tr-TR"] = "Boşluk paketi indirildi (JSON).",
+            ["tk-TM"] = "Boşluk paketi göçürildi (JSON).",
+            ["ru-RU"] = "Пакет пробелов скачан (JSON).",
+        },
+        ["TemplateScan.Msg.GapMarkdown"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Gap packet downloaded (Markdown).",
+            ["tr-TR"] = "Boşluk paketi indirildi (Markdown).",
+            ["tk-TM"] = "Boşluk paketi göçürildi (Markdown).",
+            ["ru-RU"] = "Пакет пробелов скачан (Markdown).",
+        },
+        ["TemplateScan.Msg.GenerateFailed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Draft generation failed. Try reviewing fields again or upload a different scan.",
+            ["tr-TR"] = "Taslak oluşturulamadı. Alanları yeniden inceleyin veya farklı bir tarama yükleyin.",
+            ["tk-TM"] = "Garalama döredilmedi. Meýdanlary täzeden barlaň ýa-da başga seljeriş ýükläň.",
+            ["ru-RU"] = "Не удалось создать черновик. Проверьте поля ещё раз или загрузите другой разбор.",
+        },
+        ["TemplateScan.Msg.MissingPart"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "This Word file has a missing internal part and could not be read. In Word, use File → Save As (.docx), then Analyze that copy.",
+            ["tr-TR"] = "Bu Word dosyasında eksik bir iç parça var ve okunamadı. Word'de Dosya → Farklı Kaydet (.docx) kullanın, sonra o kopyayı inceleyin.",
+            ["tk-TM"] = "Bu Word faýlynda içki bölek ýetmeýär we okalyp bilinmedi. Word-de Faýl → Başgaça ýazdyr (.docx) ulanyň, soň şol nusgany seljeriň.",
+            ["ru-RU"] = "В этом файле Word не хватает внутренней части, его не удалось прочитать. В Word выберите Файл → Сохранить как (.docx) и разберите эту копию.",
+        },
+        ["TemplateScan.Msg.NoProfile"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "This case has no application profile.",
+            ["tr-TR"] = "Bu davanın başvuru profili yok.",
+            ["tk-TM"] = "Bu ýüztutmanyň ýüztutma profili ýok.",
+            ["ru-RU"] = "У этого дела нет профиля заявки.",
+        },
+        ["TemplateScan.Msg.NothingToExport"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Nothing to export yet — analyze a scan first.",
+            ["tr-TR"] = "Henüz dışa aktarılacak bir şey yok — önce bir tarama inceleyin.",
+            ["tk-TM"] = "Daşyna çykaryljak zat entek ýok — ilki seljeriş ediň.",
+            ["ru-RU"] = "Пока нечего экспортировать — сначала разберите файл.",
+        },
+        ["TemplateScan.Msg.OfficeOnly"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Only Word (.docx) and Excel (.xlsx) with yellow highlights are supported. PNG/JPG/PDF uploads are retired.",
+            ["tr-TR"] = "Yalnızca sarı vurgulu Word (.docx) ve Excel (.xlsx) desteklenir. PNG/JPG/PDF yüklemeleri kaldırıldı.",
+            ["tk-TM"] = "Diňe sary bellikli Word (.docx) we Excel (.xlsx) goldanylýar. PNG/JPG/PDF ýüklemeleri aýryldy.",
+            ["ru-RU"] = "Поддерживаются только Word (.docx) и Excel (.xlsx) с жёлтым выделением. Загрузка PNG/JPG/PDF отключена.",
+        },
+        ["TemplateScan.Msg.PdfAnalyzing"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Analyzing pages: {0}",
+            ["tr-TR"] = "İncelenen sayfalar: {0}",
+            ["tk-TM"] = "Barlanýan sahypalar: {0}",
+            ["ru-RU"] = "Анализ страниц: {0}",
+        },
+        ["TemplateScan.Msg.PdfReadFailed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Could not read PDF: {0}",
+            ["tr-TR"] = "PDF okunamadı: {0}",
+            ["tk-TM"] = "PDF okalyp bilinmedi: {0}",
+            ["ru-RU"] = "Не удалось прочитать PDF: {0}",
+        },
+        ["TemplateScan.Msg.PdfSelectPage"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Select at least one page.",
+            ["tr-TR"] = "En az bir sayfa seçin.",
+            ["tk-TM"] = "Iň azyndan bir sahypa saýlaň.",
+            ["ru-RU"] = "Выберите хотя бы одну страницу.",
+        },
+        ["TemplateScan.Msg.PdfTooMany"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Too many pages selected ({0}). Maximum is {1}.",
+            ["tr-TR"] = "Çok fazla sayfa seçildi ({0}). En fazla {1}.",
+            ["tk-TM"] = "Gaty köp sahypa saýlandy ({0}). Iň köp {1}.",
+            ["ru-RU"] = "Выбрано слишком много страниц ({0}). Максимум {1}.",
+        },
+        ["TemplateScan.Msg.ProfileGone"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "The application profile is no longer available.",
+            ["tr-TR"] = "Başvuru profili artık yok.",
+            ["tk-TM"] = "Ýüztutma profili indi elýeterli däl.",
+            ["ru-RU"] = "Профиль заявки больше недоступен.",
+        },
+        ["TemplateScan.Msg.RemapMatchFailed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Remap could not match the yellow marks. Locked placeholders were not changed.",
+            ["tr-TR"] = "Yeniden eşleme sarı işaretleri eşleyemedi. Kilitli yer tutucular değişmedi.",
+            ["tk-TM"] = "Täzeden deňeşdirme sary bellikleri deňeşdirip bilmedi. Gulply bellikler üýtgemedi.",
+            ["ru-RU"] = "Повторное сопоставление не смогло сопоставить жёлтые метки. Заблокированные заполнители не изменились.",
+        },
+        ["TemplateScan.Msg.Remapped"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Unlocked placeholders were remapped. Review the numbered list, then Continue.",
+            ["tr-TR"] = "Kilidi açık yer tutucular yeniden eşlendi. Numaralı listeyi inceleyin, sonra Devam.",
+            ["tk-TM"] = "Gulpy açyk bellikler täzeden deňeşdirildi. Sanly sanawy barlaň, soň Dowam et.",
+            ["ru-RU"] = "Незаблокированные заполнители сопоставлены заново. Проверьте нумерованный список, затем Далее.",
+        },
+        ["TemplateScan.Msg.RemapRereadFailed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Remap could not re-read the file. Locked placeholders were not changed.",
+            ["tr-TR"] = "Yeniden eşleme dosyayı yeniden okuyamadı. Kilitli yer tutucular değişmedi.",
+            ["tk-TM"] = "Täzeden deňeşdirme faýly täzeden okap bilmedi. Gulply bellikler üýtgemedi.",
+            ["ru-RU"] = "Повторное сопоставление не смогло перечитать файл. Заблокированные заполнители не изменились.",
+        },
+        ["TemplateScan.Msg.RestoreFailed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Could not open the saved placeholders. Remap unmarked only if you want to re-guess.",
+            ["tr-TR"] = "Kayıtlı yer tutucular açılamadı. Yeniden tahmin etmek istiyorsanız İşaretlenmeyeni yeniden eşle'yi kullanın.",
+            ["tk-TM"] = "Ýazdyrylan bellikler açylmady. Täzeden çaklamak isleseňiz diňe Belgilenmedigi täzeden deňeşdir ulanyň.",
+            ["ru-RU"] = "Не удалось открыть сохранённые заполнители. «Сопоставить неотмеченное» — только если нужна новая догадка.",
+        },
+        ["TemplateScan.Next"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Next →",
+            ["tr-TR"] = "Sonraki →",
+            ["tk-TM"] = "Indiki →",
+            ["ru-RU"] = "Далее →",
+        },
+        ["TemplateScan.Outcome.CannotGenerate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "This scan cannot generate a draft template yet.",
+            ["tr-TR"] = "Bu tarama henüz taslak şablon oluşturamaz.",
+            ["tk-TM"] = "Bu seljeriş entek garalama şablon döredip bilmeýär.",
+            ["ru-RU"] = "Этот разбор пока не может создать черновик шаблона.",
+        },
+        ["TemplateScan.Outcome.DiffGate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Diff gate: {0}",
+            ["tr-TR"] = "Fark denetimi: {0}",
+            ["tk-TM"] = "Tapawut barlagy: {0}",
+            ["ru-RU"] = "Контроль отличий: {0}",
+        },
+        ["TemplateScan.Outcome.MissingBytes"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Office package bytes are missing.",
+            ["tr-TR"] = "Office paketi baytları eksik.",
+            ["tk-TM"] = "Office paketiniň baýtlary ýok.",
+            ["ru-RU"] = "Нет байтов пакета Office.",
+        },
+        ["TemplateScan.Outcome.NoPlaceholders"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "The draft contains no merge placeholders.",
+            ["tr-TR"] = "Taslakta birleştirme yer tutucusu yok.",
+            ["tk-TM"] = "Garalamada birleşme belligi ýok.",
+            ["ru-RU"] = "В черновике нет заполнителей подстановки.",
+        },
+        ["TemplateScan.Outcome.NoSpans"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No yellow-marked spans could be written as placeholders. Re-check yellow highlights in Word/Excel.",
+            ["tr-TR"] = "Sarı işaretli aralıklar yer tutucu olarak yazılamadı. Word/Excel'deki sarı vurguları yeniden kontrol edin.",
+            ["tk-TM"] = "Sary bellikli aralyklar bellik hökmünde ýazylmady. Word/Excel-däki sary bellikleri täzeden barlaň.",
+            ["ru-RU"] = "Жёлтые фрагменты не удалось записать как заполнители. Проверьте жёлтые выделения в Word/Excel.",
+        },
+        ["TemplateScan.Outcome.NotPlaced"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Placeholder {0} was mapped on Review but not placed in the letter layout — refine in Word or Regenerate.",
+            ["tr-TR"] = "Yer tutucu {0} İnceleme'de eşlendi ancak mektup düzenine yerleştirilmedi — Word'de düzeltin veya Yeniden oluşturun.",
+            ["tk-TM"] = "Bellik {0} Barlagda deňeşdirildi, emma hat ýerleşişine goýulmady — Word-de düzediň ýa-da Täzeden döret.",
+            ["ru-RU"] = "Заполнитель {0} сопоставлен на проверке, но не поставлен в макет письма — поправьте в Word или создайте снова.",
+        },
+        ["TemplateScan.Outcome.OfficeOnly"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Create from yellow marks accepts only Word (.docx) or Excel (.xlsx).",
+            ["tr-TR"] = "Sarı işaretlerden oluşturma yalnızca Word (.docx) veya Excel (.xlsx) kabul eder.",
+            ["tk-TM"] = "Sary belliklerden döretmek diňe Word (.docx) ýa-da Excel (.xlsx) kabul edýär.",
+            ["ru-RU"] = "Создание по жёлтым меткам принимает только Word (.docx) или Excel (.xlsx).",
+        },
+        ["TemplateScan.Outcome.OfficeYellowOnly"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Create from yellow marks accepts only Word (.docx) or Excel (.xlsx) with yellow highlights.",
+            ["tr-TR"] = "Sarı işaretlerden oluşturma yalnızca sarı vurgulu Word (.docx) veya Excel (.xlsx) kabul eder.",
+            ["tk-TM"] = "Sary belliklerden döretmek diňe sary bellikli Word (.docx) ýa-da Excel (.xlsx) kabul edýär.",
+            ["ru-RU"] = "Создание по жёлтым меткам принимает только Word (.docx) или Excel (.xlsx) с жёлтым выделением.",
+        },
+        ["TemplateScan.Outcome.Skipped"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Skipped {0}: {1}",
+            ["tr-TR"] = "Atlandı {0}: {1}",
+            ["tk-TM"] = "Geçildi {0}: {1}",
+            ["ru-RU"] = "Пропущено {0}: {1}",
+        },
+        ["TemplateScan.Outcome.UnmappedScan"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Unmapped on scan: {0}",
+            ["tr-TR"] = "Taramada eşlenmedi: {0}",
+            ["tk-TM"] = "Seljerişde deňeşdirilmedi: {0}",
+            ["ru-RU"] = "Не сопоставлено при разборе: {0}",
+        },
+        ["TemplateScan.Outcome.UnmappedYellow"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Unmapped yellow: {0}",
+            ["tr-TR"] = "Eşlenmeyen sarı: {0}",
+            ["tk-TM"] = "Deňeşdirilmedik sary: {0}",
+            ["ru-RU"] = "Несопоставленная жёлтая: {0}",
+        },
+        ["TemplateScan.PageOf"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Page {0} of {1}",
+            ["tr-TR"] = "Sayfa {0} / {1}",
+            ["tk-TM"] = "Sahypa {0} / {1}",
+            ["ru-RU"] = "Страница {0} из {1}",
+        },
+        ["TemplateScan.Pages"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} pages",
+            ["tr-TR"] = "{0} sayfa",
+            ["tk-TM"] = "{0} sahypa",
+            ["ru-RU"] = "Страниц: {0}",
+        },
+        ["TemplateScan.Pdf.Page"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Page {0}",
+            ["tr-TR"] = "Sayfa {0}",
+            ["tk-TM"] = "Sahypa {0}",
+            ["ru-RU"] = "Страница {0}",
+        },
+        ["TemplateScan.Pdf.Pages"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "PDF pages ({0} total · pick up to {1})",
+            ["tr-TR"] = "PDF sayfaları (toplam {0} · en fazla {1})",
+            ["tk-TM"] = "PDF sahypalary (jemi {0} · iň köp {1})",
+            ["ru-RU"] = "Страницы PDF (всего {0} · не больше {1})",
+        },
+        ["TemplateScan.PdfPlaceholder"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "PDF page {0} — layout preview uses detected field boxes until full rasterization ships.",
+            ["tr-TR"] = "PDF sayfası {0} — düzen önizlemesi, tam tarama gelene kadar algılanan alan kutularını kullanır.",
+            ["tk-TM"] = "PDF sahypasy {0} — ýerleşiş syny, doly surat çykýança tapylan meýdan gutularyny ulanýar.",
+            ["ru-RU"] = "Страница PDF {0} — предпросмотр макета использует рамки найденных полей, пока нет полной растеризации.",
+        },
+        ["TemplateScan.Prev"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "← Prev",
+            ["tr-TR"] = "← Önceki",
+            ["tk-TM"] = "← Öňki",
+            ["ru-RU"] = "← Назад",
+        },
+        ["TemplateScan.Preview.Ack"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "I understand the warnings and want to save this template.",
+            ["tr-TR"] = "Uyarıları anlıyorum ve bu şablonu kaydetmek istiyorum.",
+            ["tk-TM"] = "Duýduryşlary düşünýärin we bu şablony ýazdyrmak isleýärin.",
+            ["ru-RU"] = "Я понимаю предупреждения и хочу сохранить этот шаблон.",
+        },
+        ["TemplateScan.Preview.Aria"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "A4 draft preview",
+            ["tr-TR"] = "A4 taslak önizleme",
+            ["tk-TM"] = "A4 garalama syny",
+            ["ru-RU"] = "Предпросмотр черновика A4",
+        },
+        ["TemplateScan.Preview.Blocking"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Blocking problems",
+            ["tr-TR"] = "Engelleyen sorunlar",
+            ["tk-TM"] = "Böwet bolýan meseleler",
+            ["ru-RU"] = "Блокирующие проблемы",
+        },
+        ["TemplateScan.Preview.Caption"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Draft pages from the generated copy, with library tokens written in.",
+            ["tr-TR"] = "Oluşturulan kopyadan taslak sayfalar; kitaplık belirteçleri yazılmış.",
+            ["tk-TM"] = "Döredilen nusgadan garalama sahypalar; kitaphana bellikleri ýazylan.",
+            ["ru-RU"] = "Страницы черновика из созданной копии, с записанными токенами библиотеки.",
+        },
+        ["TemplateScan.Preview.DraftBody"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Same page layout as the uploaded file, with library tokens written in. After save, catalog Preview fills the case.",
+            ["tr-TR"] = "Yüklenen dosyayla aynı sayfa düzeni, kitaplık belirteçleri yazılmış. Kayıttan sonra katalog Önizleme davayı doldurur.",
+            ["tk-TM"] = "Ýüklenen faýl bilen şol bir sahypa ýerleşişi, kitaphana bellikleri ýazylan. Ýazdyrylandan soň katalog Syny ýüztutmany doldurýar.",
+            ["ru-RU"] = "Та же вёрстка, что у загруженного файла, с записанными токенами библиотеки. После сохранения просмотр каталога заполнит дело.",
+        },
+        ["TemplateScan.Preview.DraftTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Draft template, not a filled document.",
+            ["tr-TR"] = "Taslak şablon, doldurulmuş belge değil.",
+            ["tk-TM"] = "Garalama şablon, doldurylan resminama däl.",
+            ["ru-RU"] = "Черновик шаблона, не заполненный документ.",
+        },
+        ["TemplateScan.Preview.Gaps"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Scan gaps ({0})",
+            ["tr-TR"] = "Tarama boşlukları ({0})",
+            ["tk-TM"] = "Seljeriş boşluklary ({0})",
+            ["ru-RU"] = "Пробелы разбора ({0})",
+        },
+        ["TemplateScan.Preview.Opening"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Opening the draft template…",
+            ["tr-TR"] = "Taslak şablon açılıyor…",
+            ["tk-TM"] = "Garalama şablon açylýar…",
+            ["ru-RU"] = "Открытие черновика шаблона…",
+        },
+        ["TemplateScan.Preview.Placeholders"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} placeholders",
+            ["tr-TR"] = "{0} yer tutucu",
+            ["tk-TM"] = "{0} bellik",
+            ["ru-RU"] = "заполнителей: {0}",
+        },
+        ["TemplateScan.Preview.PlaceholdersHeading"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Placeholders",
+            ["tr-TR"] = "Yer tutucular",
+            ["tk-TM"] = "Bellikler",
+            ["ru-RU"] = "Заполнители",
+        },
+        ["TemplateScan.Preview.Warnings"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Warnings",
+            ["tr-TR"] = "Uyarılar",
+            ["tk-TM"] = "Duýduryşlar",
+            ["ru-RU"] = "Предупреждения",
+        },
+        ["TemplateScan.RemoveCode"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Remove {0}",
+            ["tr-TR"] = "{0} kaldır",
+            ["tk-TM"] = "{0} aýyr",
+            ["ru-RU"] = "Убрать {0}",
+        },
+        ["TemplateScan.RemoveField"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Remove this detected field",
+            ["tr-TR"] = "Bu algılanan alanı kaldır",
+            ["tk-TM"] = "Bu tapylan meýdany aýyr",
+            ["ru-RU"] = "Убрать это найденное поле",
+        },
+        ["TemplateScan.RemoveFieldAria"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Remove detected field {0}",
+            ["tr-TR"] = "Algılanan alanı kaldır {0}",
+            ["tk-TM"] = "Tapylan meýdany aýyr {0}",
+            ["ru-RU"] = "Убрать найденное поле {0}",
+        },
+        ["TemplateScan.Review.Ack"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "I reviewed the warnings and want to continue with this field plan.",
+            ["tr-TR"] = "Uyarıları inceledim ve bu alan planıyla devam etmek istiyorum.",
+            ["tk-TM"] = "Duýduryşlary gözden geçirdim we bu meýdan meýilnamasy bilen dowam etmek isleýärin.",
+            ["ru-RU"] = "Я проверил предупреждения и хочу продолжить с этим планом полей.",
+        },
+        ["TemplateScan.Review.DocAria"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "In-process template preview",
+            ["tr-TR"] = "İşlemdeki şablon önizlemesi",
+            ["tk-TM"] = "Prosesdäki şablon syny",
+            ["ru-RU"] = "Предпросмотр шаблона в работе",
+        },
+        ["TemplateScan.Review.DocEmpty"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "The uploaded file could not be shown here. Mapped fields stay in the list.",
+            ["tr-TR"] = "Yüklenen dosya burada gösterilemedi. Eşlenen alanlar listede kalır.",
+            ["tk-TM"] = "Ýüklenen faýl bu ýerde görkezilip bilinmedi. Deňeşdirilen meýdanlar sanawda galýar.",
+            ["ru-RU"] = "Загруженный файл здесь не показан. Сопоставленные поля остаются в списке.",
+        },
+        ["TemplateScan.Review.LockedNameHint"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Profile is locked — Approve updates this file. Change the name only to save a new catalog copy.",
+            ["tr-TR"] = "Profil kilitli — Onayla bu dosyayı günceller. Adı yalnızca yeni bir katalog kopyası kaydetmek için değiştirin.",
+            ["tk-TM"] = "Profil gulply — Tassykla bu faýly täzeleýär. Ady diňe täze katalog nusgasyny ýazdyrmak üçin üýtgediň.",
+            ["ru-RU"] = "Профиль заблокирован — утверждение обновляет этот файл. Меняйте имя только чтобы сохранить новую копию в каталоге.",
+        },
+        ["TemplateScan.Review.LowConfidenceBanner"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Some fields have low confidence or the scan quality is borderline. Review boxes on the scan and acknowledge before continuing.",
+            ["tr-TR"] = "Bazı alanların güveni düşük veya tarama kalitesi sınırda. Devam etmeden önce tarama kutularını inceleyin ve onaylayın.",
+            ["tk-TM"] = "Käbir meýdanlaryň ynamy pes ýa-da seljeriş hili araçäkde. Dowam etmezden öň seljerişdäki gutulary barlaň we tassyklaň.",
+            ["ru-RU"] = "У части полей низкая уверенность или качество разбора на грани. Перед продолжением проверьте рамки и подтвердите.",
+        },
+        ["TemplateScan.Review.MissingYellowBanner"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "The yellow-marked original is not stored for this catalog file, so this page shows mapped placeholders. Click Upload different file and choose the yellow Word/Excel — saved Short codes stay.",
+            ["tr-TR"] = "Bu katalog dosyası için sarı işaretli özgün dosya saklanmıyor, bu yüzden sayfa eşlenmiş yer tutucuları gösterir. Farklı dosya yükle'ye tıklayıp sarı Word/Excel'i seçin — kayıtlı kısa kodlar kalır.",
+            ["tk-TM"] = "Bu katalog faýly üçin sary bellikli asyl saklanmaýar, şonuň üçin bu sahypa deňeşdirilen bellikleri görkezýär. Başga faýl ýükle basyp sary Word/Excel saýlaň — ýazdyrylan gysga kodlar galýar.",
+            ["ru-RU"] = "Жёлтый оригинал для этого файла каталога не сохранён, поэтому страница показывает уже сопоставленные заполнители. Нажмите «Загрузить другой файл» и выберите жёлтый Word/Excel — сохранённые короткие коды останутся.",
+        },
+        ["TemplateScan.Review.OpeningFile"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Opening the uploaded file…",
+            ["tr-TR"] = "Yüklenen dosya açılıyor…",
+            ["tk-TM"] = "Ýüklenen faýl açylýar…",
+            ["ru-RU"] = "Открытие загруженного файла…",
+        },
+        ["TemplateScan.Review.PdfCaption"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Same pages as the uploaded file. Numbered marks match Detected fields — a combination (passport number, issued place, date) uses 6.1 / 6.2 / 6.3 with a separate border. Click a row, then add placeholders from the Short list.",
+            ["tr-TR"] = "Yüklenen dosyayla aynı sayfalar. Numaralı işaretler Algılanan alanlarla eşleşir — birleşim (pasaport numarası, veriliş yeri, tarih) ayrı kenarlıkla 6.1 / 6.2 / 6.3 kullanır. Bir satıra tıklayın, sonra Kısa listeden yer tutucu ekleyin.",
+            ["tk-TM"] = "Ýüklenen faýl bilen şol bir sahypalar. Sanly bellikler Tapylan meýdanlar bilen gabat gelýär — birleşme (pasport belgisi, berlen ýeri, sene) aýratyn çäk bilen 6.1 / 6.2 / 6.3 ulanýar. Setire basyň, soň Gysga sanawdan bellik goşuň.",
+            ["ru-RU"] = "Те же страницы, что в загруженном файле. Номера совпадают с найденными полями — сочетание (номер паспорта, место выдачи, дата) идёт как 6.1 / 6.2 / 6.3 с отдельной рамкой. Щёлкните строку и добавьте заполнители из списка коротких кодов.",
+        },
+        ["TemplateScan.ScanPageAlt"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Scan page {0}",
+            ["tr-TR"] = "Tarama sayfası {0}",
+            ["tk-TM"] = "Seljeriş sahypasy {0}",
+            ["ru-RU"] = "Страница разбора {0}",
+        },
+        ["TemplateScan.Scope.Shared"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Shared catalog",
+            ["tr-TR"] = "Ortak katalog",
+            ["tk-TM"] = "Umumy katalog",
+            ["ru-RU"] = "Общий каталог",
+        },
+        ["TemplateScan.Scope.ThisProfile"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "This profile only",
+            ["tr-TR"] = "Yalnız bu profil",
+            ["tk-TM"] = "Diňe şu profil",
+            ["ru-RU"] = "Только этот профиль",
+        },
+        ["TemplateScan.SearchPlaceholder"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Search PBPL, birth place, Doglan…",
+            ["tr-TR"] = "PBPL, doğum yeri, Doglan ara…",
+            ["tk-TM"] = "PBPL, doglan ýeri, Doglan gözle…",
+            ["ru-RU"] = "Поиск: PBPL, место рождения, Doglan…",
+        },
+        ["TemplateScan.Status.Analyzing"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Analyzing scan…",
+            ["tr-TR"] = "Tarama inceleniyor…",
+            ["tk-TM"] = "Seljeriş barlanýar…",
+            ["ru-RU"] = "Разбор анализируется…",
+        },
+        ["TemplateScan.Status.AskingLeftover"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Asking AI about leftover yellows…",
+            ["tr-TR"] = "Kalan sarılar için yapay zekâya soruluyor…",
+            ["tk-TM"] = "Galan sary bellikler barada AI-dan soralýar…",
+            ["ru-RU"] = "Запрос к ИИ об оставшихся жёлтых…",
+        },
+        ["TemplateScan.Status.AskingRecheck"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Asking AI to re-check placeholders…",
+            ["tr-TR"] = "Yer tutucuları yeniden kontrol etmesi için yapay zekâya soruluyor…",
+            ["tk-TM"] = "Bellikleri täzeden barlamak üçin AI-dan soralýar…",
+            ["ru-RU"] = "Запрос к ИИ перепроверить заполнители…",
+        },
+        ["TemplateScan.Status.Finding"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Finding yellow marks…",
+            ["tr-TR"] = "Sarı işaretler aranıyor…",
+            ["tk-TM"] = "Sary bellikler gözlenýär…",
+            ["ru-RU"] = "Поиск жёлтых меток…",
+        },
+        ["TemplateScan.Status.Generating"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Generating draft…",
+            ["tr-TR"] = "Taslak oluşturuluyor…",
+            ["tk-TM"] = "Garalama döredilýär…",
+            ["ru-RU"] = "Создание черновика…",
+        },
+        ["TemplateScan.Status.Matching"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Matching placeholders…",
+            ["tr-TR"] = "Yer tutucular eşleniyor…",
+            ["tk-TM"] = "Bellikler deňeşdirilýär…",
+            ["ru-RU"] = "Сопоставление заполнителей…",
+        },
+        ["TemplateScan.Status.OpeningReview"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Opening review…",
+            ["tr-TR"] = "İnceleme açılıyor…",
+            ["tk-TM"] = "Barlag açylýar…",
+            ["ru-RU"] = "Открытие проверки…",
+        },
+        ["TemplateScan.Status.OpeningSaved"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Opening saved placeholders…",
+            ["tr-TR"] = "Kayıtlı yer tutucular açılıyor…",
+            ["tk-TM"] = "Ýazdyrylan bellikler açylýar…",
+            ["ru-RU"] = "Открытие сохранённых заполнителей…",
+        },
+        ["TemplateScan.Status.Reading"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Reading file…",
+            ["tr-TR"] = "Dosya okunuyor…",
+            ["tk-TM"] = "Faýl okalýar…",
+            ["ru-RU"] = "Чтение файла…",
+        },
+        ["TemplateScan.Status.Remapping"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Remapping unmarked yellows…",
+            ["tr-TR"] = "İşaretlenmeyen sarılar yeniden eşleniyor…",
+            ["tk-TM"] = "Belgilenmedik sary bellikler täzeden deňeşdirilýär…",
+            ["ru-RU"] = "Повторное сопоставление неотмеченных жёлтых…",
+        },
+        ["TemplateScan.Step.Done"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Done",
+            ["tr-TR"] = "Bitti",
+            ["tk-TM"] = "Boldy",
+            ["ru-RU"] = "Готово",
+        },
+        ["TemplateScan.Step.Generate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Generate",
+            ["tr-TR"] = "Oluştur",
+            ["tk-TM"] = "Döret",
+            ["ru-RU"] = "Создание",
+        },
+        ["TemplateScan.Step.Preview"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Preview",
+            ["tr-TR"] = "Önizleme",
+            ["tk-TM"] = "Syn",
+            ["ru-RU"] = "Просмотр",
+        },
+        ["TemplateScan.Step.Review"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Review",
+            ["tr-TR"] = "İnceleme",
+            ["tk-TM"] = "Barlag",
+            ["ru-RU"] = "Проверка",
+        },
+        ["TemplateScan.Step.Upload"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Upload",
+            ["tr-TR"] = "Yükle",
+            ["tk-TM"] = "Ýükle",
+            ["ru-RU"] = "Загрузка",
+        },
+        ["TemplateScan.Subtitle.Case"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = " · case {0}",
+            ["tr-TR"] = " · dava {0}",
+            ["tk-TM"] = " · ýüztutma {0}",
+            ["ru-RU"] = " · дело {0}",
+        },
+        ["TemplateScan.Suit.Fail"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Cannot continue",
+            ["tr-TR"] = "Devam edilemez",
+            ["tk-TM"] = "Dowam edip bolmaýar",
+            ["ru-RU"] = "Нельзя продолжить",
+        },
+        ["TemplateScan.Suit.Pass"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Marks acceptable",
+            ["tr-TR"] = "İşaretler uygun",
+            ["tk-TM"] = "Bellikler laýyk",
+            ["ru-RU"] = "Метки приемлемы",
+        },
+        ["TemplateScan.Suit.Warn"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Review recommended",
+            ["tr-TR"] = "İnceleme önerilir",
+            ["tk-TM"] = "Barlag maslahat berilýär",
+            ["ru-RU"] = "Рекомендуется проверка",
+        },
+        ["TemplateScan.Title.Create"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Create template from yellow marks",
+            ["tr-TR"] = "Sarı işaretlerden şablon oluştur",
+            ["tk-TM"] = "Sary belliklerden şablon döret",
+            ["ru-RU"] = "Создать шаблон по жёлтым меткам",
+        },
+        ["TemplateScan.Title.Review"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Review placeholders",
+            ["tr-TR"] = "Yer tutucuları gözden geçir",
+            ["tk-TM"] = "Bellikleri gözden geçir",
+            ["ru-RU"] = "Проверить заполнители",
+        },
+        ["TemplateScan.Unlock"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Unlock",
+            ["tr-TR"] = "Kilidi aç",
+            ["tk-TM"] = "Gulpy aç",
+            ["ru-RU"] = "Разблокировать",
+        },
+        ["TemplateScan.UnlockField"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Unlock detected field {0}",
+            ["tr-TR"] = "Algılanan alanın kilidini aç {0}",
+            ["tk-TM"] = "Tapylan meýdanyň gulpuny aç {0}",
+            ["ru-RU"] = "Разблокировать найденное поле {0}",
+        },
+        ["TemplateScan.UnlockTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Unlock so Remap unmarked can change this yellow",
+            ["tr-TR"] = "İşaretlenmeyeni yeniden eşle bu sarıyı değiştirebilsin diye kilidi aç",
+            ["tk-TM"] = "Belgilenmedigi täzeden deňeşdir bu sary belligi üýtgedip bilsin diýip gulpy aç",
+            ["ru-RU"] = "Снять блокировку, чтобы «Сопоставить неотмеченное» могло изменить эту жёлтую метку",
+        },
+        ["TemplateScan.Unmapped"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Unmapped",
+            ["tr-TR"] = "Eşlenmedi",
+            ["tk-TM"] = "Deňeşdirilmedi",
+            ["ru-RU"] = "Не сопоставлено",
         },
         ["UsageLicense.Banner.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

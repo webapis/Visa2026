@@ -1,14 +1,18 @@
 @namespace Visa2026.Blazor.Server.Editors
 @using Visa2026.Module.Services.TemplateConvert
 @using Visa2026.Module.Services.TemplateScan
+@using Visa2026.Module.Localization
+@using Visa2026.Blazor.Server.Localization
+@using DevExpress.ExpressApp.Blazor.Services
+@using Microsoft.AspNetCore.Http
 
 <div class="tas-help">
-    <h3>What could not be mapped</h3>
-    <p>These scan fields have no placeholder in this profile's allowed set. Export a gap packet for a developer to add catalog support, then scan again after deploy.</p>
+    <h3>@Msg("TemplateScan.Help.Title")</h3>
+    <p>@Msg("TemplateScan.Help.Body")</p>
 
     @if (Gaps.Count == 0 && UnmappedFields.Count == 0)
     {
-        <p class="tas-chat__empty">No gaps are recorded — every detected field mapped to a placeholder, or none were detected.</p>
+        <p class="tas-chat__empty">@Msg("TemplateScan.Help.None")</p>
     }
     else
     {
@@ -16,20 +20,20 @@
             @foreach (var gap in Gaps)
             {
                 <li class="tas-gap-list__item">
-                    <span class="tas-conf tas-conf--gap">Gap</span>
+                    <span class="tas-conf tas-conf--gap">@Msg("TemplateScan.Gap")</span>
                     <strong>@gap.LabelText</strong>
                     @if (!string.IsNullOrWhiteSpace(gap.SuggestedPropertyName))
                     {
-                        <code>suggested: @gap.SuggestedPropertyName</code>
+                        <code>@FormatMsg("TemplateScan.Help.Suggested", gap.SuggestedPropertyName)</code>
                     }
                 </li>
             }
             @foreach (var field in UnmappedFields)
             {
                 <li class="tas-gap-list__item">
-                    <span class="tas-conf tas-conf--low">Unmapped</span>
+                    <span class="tas-conf tas-conf--low">@Msg("TemplateScan.Unmapped")</span>
                     <strong>@field.LabelText</strong>
-                    <span>page @(field.PageIndex + 1)</span>
+                    <span>@FormatMsg("TemplateScan.Help.Page", field.PageIndex + 1)</span>
                 </li>
             }
         </ul>
@@ -37,7 +41,7 @@
 
     @if (ValidationIssues.Count > 0)
     {
-        <h4>Validation issues</h4>
+        <h4>@Msg("TemplateScan.Help.Validation")</h4>
         <ul class="tas-issues">
             @foreach (var issue in ValidationIssues.Take(8))
             {
@@ -49,9 +53,9 @@
     }
 
     <div class="tas-help__meta">
-        <div><span>Scan file</span><strong>@ScanFileName</strong></div>
-        <div><span>Profile</span><strong>@ProfileName</strong></div>
-        <div><span>Instance</span><strong>@InstanceLabel</strong></div>
+        <div><span>@Msg("TemplateScan.Help.ScanFile")</span><strong>@ScanFileName</strong></div>
+        <div><span>@Msg("TemplateScan.Help.Profile")</span><strong>@ProfileName</strong></div>
+        <div><span>@Msg("TemplateScan.Help.Instance")</span><strong>@InstanceLabel</strong></div>
     </div>
 </div>
 
@@ -63,4 +67,15 @@
     [Parameter] public string ScanFileName { get; set; } = string.Empty;
     [Parameter] public string ProfileName { get; set; } = string.Empty;
     [Parameter] public string InstanceLabel { get; set; } = "—";
+
+    [Inject] private IXafCultureInfoService CultureInfoService { get; set; } = null!;
+    [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
+
+    private string EffectiveUiCulture =>
+        VisaUiCultureResolver.Resolve(CultureInfoService, HttpContextAccessor.HttpContext);
+
+    private string Msg(string key) => VisaUiMessages.Get(key, EffectiveUiCulture);
+
+    private string FormatMsg(string key, params object[] args) =>
+        VisaUiMessages.FormatForCulture(EffectiveUiCulture, key, args);
 }

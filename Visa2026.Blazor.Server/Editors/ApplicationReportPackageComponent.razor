@@ -81,7 +81,7 @@
                               Click="@OpenPlaceholderManualAsync" />
                     @if (ShowScanEntryVisible)
                     {
-                        <DxButton Text="Create template"
+                        <DxButton Text="@Msg("TemplateScan.Entry.Create")"
                                   RenderStyle="ButtonRenderStyle.Link"
                                   SizeMode="SizeMode.Small"
                                   CssClass="app-item-doc-copies__action-btn"
@@ -154,7 +154,7 @@
                       Click="@OpenPlaceholderManualAsync" />
             @if (ShowScanEntryVisible)
             {
-                <DxButton Text="Create template"
+                <DxButton Text="@Msg("TemplateScan.Entry.Create")"
                           RenderStyle="ButtonRenderStyle.Link"
                           SizeMode="SizeMode.Small"
                           CssClass="app-item-doc-copies__action-btn"
@@ -574,11 +574,11 @@
                                 }
                                 @if (ShowDetails && CanReviewPlaceholders(entry))
                                 {
-                                    <DxButton Text="Review placeholders"
+                                    <DxButton Text="@Msg("TemplateScan.Entry.ReviewPlaceholders")"
                                               RenderStyle="ButtonRenderStyle.Link"
                                               SizeMode="SizeMode.Small"
                                               CssClass="app-item-doc-copies__action-btn"
-                                              title="Remap placeholders on this catalog template"
+                                              title="@Msg("TemplateScan.Entry.ReviewPlaceholdersTitle")"
                                               Enabled="@(!_packageBusy && !_previewBusy && !_recycleBusy && !_scanReviewBusy)"
                                               Click="@(() => OpenScanReviewAsync(entry))" />
                                 }
@@ -1028,8 +1028,8 @@
 
     private string ScanEntryTitle =>
         ScanEntryEnabled
-            ? "Create a template from a yellow-marked Word or Excel file"
-            : "Enable TemplateAiScan in configuration";
+            ? Msg("TemplateScan.Entry.CreateTitle")
+            : Msg("TemplateScan.Entry.CreateTitleDisabled");
 
     private Task OpenConvertAsync(bool manual) =>
         _convertDialog?.OpenAsync(ApplicationProfileInstanceId, ApplicationNumber, manual) ?? Task.CompletedTask;

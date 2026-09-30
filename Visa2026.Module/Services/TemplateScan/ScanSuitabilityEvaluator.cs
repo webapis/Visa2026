@@ -1,6 +1,7 @@
 #nullable enable
 
 using Microsoft.Extensions.Options;
+using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.Services.TemplateScan;
 
@@ -33,7 +34,9 @@ public sealed class ScanSuitabilityEvaluator : IScanSuitabilityEvaluator
             issues.Add(new ScanSuitabilityIssue
             {
                 Code = ScanSuitabilityIssueCode.FileTooLarge,
-                Message = $"The file exceeds the maximum size of {options.HardMaxUploadBytes / (1024 * 1024)} MB.",
+                Message = VisaUiMessages.Format(
+                    "TemplateScan.Issue.FileTooLarge",
+                    options.HardMaxUploadBytes / (1024 * 1024)),
             });
         }
         else if (request.Input.OriginalByteLength > options.MaxUploadBytes)
@@ -41,7 +44,7 @@ public sealed class ScanSuitabilityEvaluator : IScanSuitabilityEvaluator
             issues.Add(new ScanSuitabilityIssue
             {
                 Code = ScanSuitabilityIssueCode.FileTooLarge,
-                Message = "The file is larger than the recommended upload size. Continue only if the scan is high quality.",
+                Message = VisaUiMessages.Get("TemplateScan.Issue.FileLarge"),
             });
         }
 
@@ -56,7 +59,11 @@ public sealed class ScanSuitabilityEvaluator : IScanSuitabilityEvaluator
                     issues.Add(new ScanSuitabilityIssue
                     {
                         Code = ScanSuitabilityIssueCode.ResolutionTooLow,
-                        Message = $"Page {page.PageIndex + 1} resolution ({page.WidthPx}×{page.HeightPx}) is too low for reliable field detection.",
+                        Message = VisaUiMessages.Format(
+                            "TemplateScan.Issue.Resolution",
+                            page.PageIndex + 1,
+                            page.WidthPx,
+                            page.HeightPx),
                         PageIndex = page.PageIndex,
                     });
                 }
@@ -77,8 +84,8 @@ public sealed class ScanSuitabilityEvaluator : IScanSuitabilityEvaluator
                 {
                     Code = ScanSuitabilityIssueCode.NoTextDetected,
                     Message = isOffice
-                        ? "No extractable text was found in the Word/Excel file."
-                        : "No extractable text was found in the PDF. Use a searchable PDF or upload a PNG/JPG scan.",
+                        ? VisaUiMessages.Get("TemplateScan.Issue.NoOfficeText")
+                        : VisaUiMessages.Get("TemplateScan.Issue.NoPdfText"),
                 });
             }
         }
@@ -87,7 +94,7 @@ public sealed class ScanSuitabilityEvaluator : IScanSuitabilityEvaluator
             issues.Add(new ScanSuitabilityIssue
             {
                 Code = ScanSuitabilityIssueCode.TextConfidenceLow,
-                Message = "Text recognition confidence is too low to propose placeholders reliably.",
+                Message = VisaUiMessages.Get("TemplateScan.Issue.ConfidenceLow"),
             });
         }
         else if (textConfidence < suitability.WarnBelowTextConfidence)
@@ -95,7 +102,7 @@ public sealed class ScanSuitabilityEvaluator : IScanSuitabilityEvaluator
             issues.Add(new ScanSuitabilityIssue
             {
                 Code = ScanSuitabilityIssueCode.TextConfidenceLow,
-                Message = "Text recognition confidence is moderate — review detected fields carefully.",
+                Message = VisaUiMessages.Get("TemplateScan.Issue.ConfidenceModerate"),
             });
         }
 

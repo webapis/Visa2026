@@ -2,6 +2,60 @@
 
 Append-only. Newest first under **## Entries**.
 
+### 2026-09-30 — Application in Türkmençe is Ýüztutma
+
+- **Need**: Yellow-marks groups and descriptions said **Arza** while the case workspace says **Ýüztutma**.
+- **Cause**: New placeholder groups and catalog tk labels reused the older Arza wording.
+- **Fix**: Groups **Ýüztutma**, **Ýüztutma — umumy / maşgala agzasy / ýatyrmak / iş sapary**. Catalog labels **Doly ýüztutma belgisi**, **Ýüztutma belgisi**, **Ýüztutma senesi**.
+- **Officer**: Stop F5, rebuild, hard-refresh. Add-placeholder groups and Düşündiriş use **Ýüztutma**, not Arza.
+- **Prevent**: Do not put Arza on Application placeholder groups or catalog tk labels. Match Application Profile.
+- **Cross-skill**: visa2026-application-profile
+
+### 2026-09-30 — Yellow-marks wizard follows the officer language
+
+- **Need**: Create template from yellow marks stayed English while Resminamalar and the case chrome followed tk/tr/ru.
+- **Cause**: Wizard and catalog entry strings were hardcoded. Review **Düşündiriş** used `LabelEn` even though the catalog already has tk/tr/ru labels.
+- **Fix**: `UiStrings.template-scan.json` via `VisaUiMessages`. Review description uses `GetLabel` for the active culture. Canonical paths stay in **Doly ady**.
+- **Officer**: Stop F5, rebuild, hard-refresh. Title **Sary belliklerden şablon döret**. Review descriptions such as **Doly ýüztutma belgisi** / **Adam sany**, not “Full application number”.
+- **Prevent**: Do not put new wizard captions in the razor. Do not render `LabelEn` in the review table.
+- **Cross-skill**: —
+
+### 2026-09-30 — Done step Next card follows Fluent Dark
+
+- **Need**: After Approve, the Done step Next card stayed mint (`#f0fdf4`) with dark-green text on the dark dialog.
+- **Cause**: `.tas-done__note` used a fixed light fill. The summary table borders still fell back to a light line.
+- **Fix**: The Next card and the summary table use `--tas-*`. The check mark stays the success color.
+- **Officer**: Hard-refresh. Open Create from yellow marks through Done. The Next card matches the dialog. Check light once.
+- **Prevent**: Do not put `#f0fdf4` / `#14532d` back on `.tas-done__note`.
+- **Cross-skill**: —
+
+### 2026-09-30 — Placeholder editor stays on the clicked row
+
+- **Need**: After the first hover fix, the highlight still jumped between two consecutive gap rows. Add placeholder closed before a choice could be made.
+- **Cause**: Every gap row had its own search and select. A reading-order refresh swapped two nearby marks, the list rebuilt, and focus landed on the other row’s box.
+- **Fix**: Search / Add placeholder / Ask AI only on the clicked row. The first on-page order is kept; a later swap of the same marks does not rebuild the list or the PDF marks. Focusing the search does not reselect the row.
+- **Officer**: Stop F5, rebuild, hard-refresh. Click one gap row. Search and Add placeholder stay on that row.
+- **Prevent**: Do not render a live search/select on every gap row. Do not let `MarksKey` or `OnVisualOrder` treat a reshuffle of the same marks as a new list.
+- **Cross-skill**: —
+
+### 2026-09-30 — Review highlight no longer jumps between two rows
+
+- **Need**: On Review, the highlight flickered between placeholders 9 and 10 on the Detected fields list.
+- **Cause**: Each row cleared hover on mouseleave, so a re-render at the boundary fired leave on one row and enter on the next. Clicking a row also used `scrollIntoView`, which scrolled the field list as well as the letter, so the pointer slid onto the neighboring row.
+- **Fix**: Hover clears only when the pointer leaves the table. The letter scrolls inside its own pane. The list keeps a stable scrollbar gutter.
+- **Officer**: Stop F5, rebuild, hard-refresh. Open Review and rest the pointer on rows 9 and 10. The highlight should stay on the row under the pointer.
+- **Prevent**: Do not put `@onmouseleave` on each Detected fields row. Do not call `scrollIntoView` on a PDF mark.
+- **Cross-skill**: —
+
+### 2026-09-30 — Review detected fields follow Fluent Dark
+
+- **Need**: Create from yellow marks → Review still showed light short-code chips, full-name chips, the placeholder search, and Add placeholder on a dark dialog.
+- **Cause**: `.tas-token-select` was never in the theme block. `.tas-field-table code` stayed `#f1f5f9`. Search inputs need an element rule so the native search field does not stay white.
+- **Fix**: Those controls use `--tas-*`. Empty full-name chips are hidden. The letter page stays paper white; the well around it uses the theme surface.
+- **Officer**: Hard-refresh. Open Create from yellow marks → Review. Short codes, full names, search, and Add placeholder match the dialog. The letter stays white. Check light once.
+- **Prevent**: Do not leave `.tas-token-select` or `.tas-field-table code` on a fixed light fill. Do not paint the office PDF page with the accent surface.
+- **Cross-skill**: —
+
 ### 2026-09-25 — Create template wizard follows the active theme
 
 - Need: Upload / Review / Generate / Preview / Done stayed a white card with dark labels on Blazing Dark.

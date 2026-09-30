@@ -2,28 +2,31 @@
 @using Visa2026.Module.Services.TemplateConvert
 @using Visa2026.Module.Services.TemplateScan
 @using Visa2026.Module.Services.UserReports
+@using Visa2026.Module.Localization
+@using Visa2026.Blazor.Server.Localization
+@using DevExpress.ExpressApp.Blazor.Services
+@using Microsoft.AspNetCore.Http
 
 @{
     RenderFragment fieldsTable = @<table class="tas-field-table tas-field-table--manual">
         <thead>
             <tr>
                 <th>#</th>
-                <th>Label</th>
-                <th>Short</th>
-                <th>Full name</th>
-                <th>Description</th>
-                <th>Sample</th>
-                <th>Conf.</th>
-                <th class="tas-row-actions-col"><span class="tas-sr-only">Actions</span></th>
+                <th>@Msg("TemplateScan.Col.Label")</th>
+                <th>@Msg("TemplateScan.Col.Short")</th>
+                <th>@Msg("TemplateScan.Col.FullName")</th>
+                <th>@Msg("TemplateScan.Col.Description")</th>
+                <th>@Msg("TemplateScan.Col.Sample")</th>
+                <th>@Msg("TemplateScan.Col.Confidence")</th>
+                <th class="tas-row-actions-col"><span class="tas-sr-only">@Msg("TemplateScan.Col.Actions")</span></th>
             </tr>
         </thead>
         <tbody>
             @foreach (var row in FieldRows)
             {
-                <tr class="@RowCss(row)"
-                    @onclick="() => SelectRow(row.RowKey)"
-                    @onmouseenter="() => SetHover(row.RowKey)"
-                    @onmouseleave="ClearHover">
+                <tr @key="row.RowKey"
+                    class="@RowCss(row)"
+                    @onclick="() => SelectRow(row.RowKey)">
                     <td class="tas-rownum"><span class="tas-mark__n">@row.OrderLabel</span></td>
                     <td>@row.LabelText</td>
                     <td>
@@ -36,27 +39,26 @@
                                         <code>@shortCode</code>
                                         <button type="button"
                                                 class="tas-token-chip__remove"
-                                                title="Remove @shortCode"
+                                                title="@FormatMsg("TemplateScan.RemoveCode", shortCode)"
                                                 @onclick="() => OnPlaceholderRemovedAsync(row, shortCode)">×</button>
                                     </span>
                                 }
                                 <input class="tas-input tas-token-filter"
                                        type="search"
-                                       placeholder="Search PBPL, birth place, Doglan…"
+                                       placeholder="@Msg("TemplateScan.SearchPlaceholder")"
                                        value="@_choiceSearch"
-                                       @onfocus="() => OnChoiceFocusAsync(row)"
                                        @oninput="OnChoiceSearch" />
                                 <select class="tas-token-select"
-                                        @key="@(row.RowKey + "|" + (row.ProposedToken ?? string.Empty) + "|" + _choiceSearch)"
+                                        @key="@(row.RowKey + "|" + (row.ProposedToken ?? string.Empty))"
                                         disabled="@(!HasRemainingPlaceholders(row))"
                                         @onchange="e => OnPlaceholderAddedAsync(row, e)">
-                                    <option value="">Add placeholder…</option>
+                                    <option value="">@Msg("TemplateScan.AddPlaceholder")</option>
                                     @foreach (var group in RemainingChoiceGroups(row))
                                     {
-                                        <optgroup label="@UserReportPlaceholderRelatedBoCatalog.DisplayNameEn(group.RelatedBo)">
+                                        <optgroup label="@GroupTitle(group.RelatedBo)">
                                             @foreach (var entry in group.Entries)
                                             {
-                                                <option value="@entry.ShortCode">@entry.LabelEn — @entry.ShortCode (@entry.CanonicalPath)</option>
+                                                <option value="@entry.ShortCode">@entry.GetLabel(EffectiveUiCulture) — @entry.ShortCode (@entry.CanonicalPath)</option>
                                             }
                                         </optgroup>
                                     }
@@ -72,7 +74,7 @@
                                         class="tas-btn tas-btn--ghost tas-ask-ai"
                                         @onclick:stopPropagation="true"
                                         @onclick="() => AskAiForRowAsync(row.ParentFieldId)">
-                                    Ask AI
+                                    @Msg("TemplateScan.AskAi")
                                 </button>
                             }
                         }
@@ -86,20 +88,20 @@
                         }
                         else if (row.IsGap)
                         {
-                            <span class="tas-conf tas-conf--gap">Gap</span>
+                            <span class="tas-conf tas-conf--gap">@Msg("TemplateScan.Gap")</span>
                             @if (IsSelected(row) && AskAiEnabled)
                             {
                                 <button type="button"
                                         class="tas-btn tas-btn--ghost tas-ask-ai"
                                         @onclick:stopPropagation="true"
                                         @onclick="() => AskAiForRowAsync(row.ParentFieldId)">
-                                    Ask AI
+                                    @Msg("TemplateScan.AskAi")
                                 </button>
                             }
                         }
                         else
                         {
-                            <span class="tas-conf tas-conf--medium">Unmapped</span>
+                            <span class="tas-conf tas-conf--medium">@Msg("TemplateScan.Unmapped")</span>
                         }
                         @if (row.ShowAlternatives && row.Alternatives.Count > 1)
                         {
@@ -123,14 +125,14 @@
                         {
                             <button type="button"
                                     class="tas-row-lock @(row.IsLocked ? "is-on" : null)"
-                                    title="@(row.IsLocked ? "Unlock so Remap unmarked can change this yellow" : "Lock this yellow so Remap unmarked will not change it")"
-                                    aria-label="@(row.IsLocked ? "Unlock detected field " + row.OrderLabel : "Lock detected field " + row.OrderLabel)"
-                                    @onclick="() => OnLockToggledAsync(row)">@(row.IsLocked ? "Unlock" : "Lock")</button>
+                                    title="@(row.IsLocked ? Msg("TemplateScan.UnlockTitle") : Msg("TemplateScan.LockTitle"))"
+                                    aria-label="@(row.IsLocked ? FormatMsg("TemplateScan.UnlockField", row.OrderLabel) : FormatMsg("TemplateScan.LockField", row.OrderLabel))"
+                                    @onclick="() => OnLockToggledAsync(row)">@(row.IsLocked ? Msg("TemplateScan.Unlock") : Msg("TemplateScan.Lock"))</button>
                         }
                         <button type="button"
                                 class="tas-row-remove"
-                                title="Remove this detected field"
-                                aria-label="Remove detected field @row.OrderLabel"
+                                title="@Msg("TemplateScan.RemoveField")"
+                                aria-label="@FormatMsg("TemplateScan.RemoveFieldAria", row.OrderLabel)"
                                 disabled="@row.IsLocked"
                                 @onclick="() => OnDetectedFieldRemovedAsync(row)">×</button>
                     </td>
@@ -146,7 +148,7 @@
         <div class="tas-split__scan">
             <div class="tas-filebar">
                 <strong>@FileName</strong>
-                <span class="tas-pill">In process</span>
+                <span class="tas-pill">@Msg("TemplateScan.InProcess")</span>
             </div>
             <TemplateScanOfficePdfPreview @key="@("review-office-pdf")"
                                           OfficeBytes="OfficePackageBytes"
@@ -168,31 +170,31 @@
                     <div class="tas-suit @SuitabilityCssClass">@SuitabilityLabel</div>
                 </div>
                 <div class="tas-chips">
-                    <span class="tas-chip tas-chip--ok">@MappedCount mapped</span>
+                    <span class="tas-chip tas-chip--ok">@FormatMsg("TemplateScan.Mapped", MappedCount)</span>
                     @if (LockedCount > 0)
                     {
-                        <span class="tas-chip">@LockedCount locked</span>
+                        <span class="tas-chip">@FormatMsg("TemplateScan.Locked", LockedCount)</span>
                     }
                     @if (GapCount > 0)
                     {
-                        <span class="tas-chip tas-chip--warn">@GapCount gaps</span>
+                        <span class="tas-chip tas-chip--warn">@FormatMsg("TemplateScan.Gaps", GapCount)</span>
                     }
                     @if (LowConfidenceCount > 0)
                     {
-                        <span class="tas-chip tas-chip--warn">@LowConfidenceCount low confidence</span>
+                        <span class="tas-chip tas-chip--warn">@FormatMsg("TemplateScan.LowConfidence", LowConfidenceCount)</span>
                     }
                     <button type="button"
                             class="tas-btn tas-btn--ghost tas-lock-mapped"
                             disabled="@(!CanLockMapped)"
-                            title="Lock every mapped yellow so Remap unmarked only guesses unlocked rows"
-                            @onclick="LockMappedAsync">Lock mapped</button>
+                            title="@Msg("TemplateScan.LockMappedTitle")"
+                            @onclick="LockMappedAsync">@Msg("TemplateScan.LockMapped")</button>
                 </div>
             </div>
-            <h4>Detected fields</h4>
+            <h4>@Msg("TemplateScan.DetectedFields")</h4>
             @fieldsTable
             @if (Gaps.Count > 0)
             {
-                <h4>Unmapped</h4>
+                <h4>@Msg("TemplateScan.Unmapped")</h4>
                 <ul class="tas-issues">
                     @foreach (var gap in Gaps.Take(8))
                     {
@@ -211,16 +213,16 @@ else
                 <strong>@FileName</strong>
                 @if (Pages.Count > 1)
                 {
-                    <span class="tas-pill">@Pages.Count pages</span>
+                    <span class="tas-pill">@FormatMsg("TemplateScan.Pages", Pages.Count)</span>
                 }
             </div>
 
             @if (Pages.Count > 1)
             {
                 <div class="tas-scan-toolbar">
-                    <button type="button" class="tas-btn tas-btn--ghost" disabled="@(ActivePageIndex <= 0)" @onclick="PreviousPage">← Prev</button>
-                    <span>Page @(ActivePageIndex + 1) of @Pages.Count</span>
-                    <button type="button" class="tas-btn tas-btn--ghost" disabled="@(ActivePageIndex >= Pages.Count - 1)" @onclick="NextPage">Next →</button>
+                    <button type="button" class="tas-btn tas-btn--ghost" disabled="@(ActivePageIndex <= 0)" @onclick="PreviousPage">@Msg("TemplateScan.Prev")</button>
+                    <span>@FormatMsg("TemplateScan.PageOf", ActivePageIndex + 1, Pages.Count)</span>
+                    <button type="button" class="tas-btn tas-btn--ghost" disabled="@(ActivePageIndex >= Pages.Count - 1)" @onclick="NextPage">@Msg("TemplateScan.Next")</button>
                 </div>
             }
 
@@ -228,7 +230,7 @@ else
                 <div class="tas-scan-stage">
                     @if (ShowImage)
                     {
-                        <img src="@PageDataUrl" alt="Scan page @(ActivePageIndex + 1)" class="tas-scan-img" />
+                        <img src="@PageDataUrl" alt="@FormatMsg("TemplateScan.ScanPageAlt", ActivePageIndex + 1)" class="tas-scan-img" />
                         <div class="tas-scan-overlays">
                             @foreach (var field in FieldsOnActivePage)
                             {
@@ -244,32 +246,32 @@ else
                     else
                     {
                         <div class="tas-scan-placeholder">
-                            PDF page @(ActivePageIndex + 1) — layout preview uses detected field boxes until full rasterization ships.
+                            @FormatMsg("TemplateScan.PdfPlaceholder", ActivePageIndex + 1)
                         </div>
                     }
                 </div>
             </div>
 
             <div class="tas-chips" style="margin-top:0.55rem">
-                <span class="tas-chip tas-chip--ok">@MappedCount mapped</span>
+                <span class="tas-chip tas-chip--ok">@FormatMsg("TemplateScan.Mapped", MappedCount)</span>
                 @if (GapCount > 0)
                 {
-                    <span class="tas-chip tas-chip--warn">@GapCount gaps</span>
+                    <span class="tas-chip tas-chip--warn">@FormatMsg("TemplateScan.Gaps", GapCount)</span>
                 }
                 @if (LowConfidenceCount > 0)
                 {
-                    <span class="tas-chip tas-chip--warn">@LowConfidenceCount low confidence</span>
+                    <span class="tas-chip tas-chip--warn">@FormatMsg("TemplateScan.LowConfidence", LowConfidenceCount)</span>
                 }
             </div>
         </div>
 
         <aside class="tas-rail">
             <div class="tas-suit @SuitabilityCssClass">@SuitabilityLabel</div>
-            <h4>Detected fields</h4>
+            <h4>@Msg("TemplateScan.DetectedFields")</h4>
             @fieldsTable
             @if (Gaps.Count > 0)
             {
-                <h4>Unmapped</h4>
+                <h4>@Msg("TemplateScan.Unmapped")</h4>
                 <ul class="tas-issues">
                     @foreach (var gap in Gaps.Take(8))
                     {
@@ -301,6 +303,25 @@ else
         IReadOnlyList<ScanTokenAlternative> Alternatives);
 
     [Inject] private ITemplateDocumentOutlineReader Outlines { get; set; } = null!;
+    [Inject] private IXafCultureInfoService CultureInfoService { get; set; } = null!;
+    [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
+
+    private string EffectiveUiCulture =>
+        VisaUiCultureResolver.Resolve(CultureInfoService, HttpContextAccessor.HttpContext);
+
+    private string Msg(string key) => VisaUiMessages.Get(key, EffectiveUiCulture);
+
+    private string FormatMsg(string key, params object[] args) =>
+        VisaUiMessages.FormatForCulture(EffectiveUiCulture, key, args);
+
+    private string GroupTitle(UserReportPlaceholderRelatedBo relatedBo)
+    {
+        var localized = Msg(UserReportPlaceholderRelatedBoCatalog.LocalizationKey(relatedBo));
+        if (string.IsNullOrWhiteSpace(localized)
+            || localized.StartsWith("PlaceholderManual.Group.", StringComparison.Ordinal))
+            return UserReportPlaceholderRelatedBoCatalog.DisplayNameEn(relatedBo);
+        return localized;
+    }
 
     [Parameter, EditorRequired] public ScanFieldPlan FieldPlan { get; set; } = null!;
     [Parameter, EditorRequired] public IReadOnlyList<ScanPageImage> Pages { get; set; } = Array.Empty<ScanPageImage>();
@@ -445,7 +466,7 @@ else
             partCodes,
             parentCodes,
             string.Join(" · ", entries.Select(static e => e.CanonicalPath)),
-            string.Join(" · ", entries.Select(static e => e.LabelEn)),
+            string.Join(" · ", entries.Select(e => e.GetLabel(EffectiveUiCulture))),
             string.Join(", ", entries.Select(static e => e.ExampleValue)),
             confidence,
             isGap,
@@ -465,9 +486,9 @@ else
 
     private string SuitabilityLabel => SuitabilityVerdict switch
     {
-        ScanSuitabilityVerdict.Warn => "Review recommended",
-        ScanSuitabilityVerdict.Fail => "Cannot continue",
-        _ => "Marks acceptable",
+        ScanSuitabilityVerdict.Warn => Msg("TemplateScan.Suit.Warn"),
+        ScanSuitabilityVerdict.Fail => Msg("TemplateScan.Suit.Fail"),
+        _ => Msg("TemplateScan.Suit.Pass"),
     };
 
     private string SuitabilityCssClass => SuitabilityVerdict switch
@@ -483,7 +504,7 @@ else
             && row.PartIndex <= 1);
 
     private bool CanRemap(FieldRow row) =>
-        !row.IsLocked && (IsSelected(row) || row.ShortCodes.Count == 0 || row.IsGap);
+        !row.IsLocked && IsSelected(row);
 
     private IReadOnlyList<string> OccupiedShortCodes(FieldRow row) =>
         row.ParentShortCodes.Count > 0 ? row.ParentShortCodes : row.ShortCodes;
@@ -498,11 +519,6 @@ else
 
     private void OnChoiceSearch(ChangeEventArgs e) =>
         _choiceSearch = e.Value?.ToString() ?? string.Empty;
-
-    private Task OnChoiceFocusAsync(FieldRow row) =>
-        string.Equals(SelectedFieldId, row.RowKey, StringComparison.Ordinal)
-            ? Task.CompletedTask
-            : SelectRow(row.RowKey);
 
     private Task OnPlaceholderAddedAsync(FieldRow row, ChangeEventArgs e)
     {
@@ -620,13 +636,31 @@ else
     {
         if (fieldIds.Count == 0)
             return Task.CompletedTask;
-        if (_visualIds != null
-            && _visualIds.Count == fieldIds.Count
-            && _visualIds.SequenceEqual(fieldIds, StringComparer.Ordinal))
+        // The first on-page order is kept. A later pass that only swaps two nearby
+        // marks must not rebuild the list — that was closing Add placeholder.
+        if (_visualIds != null && SameFieldSet(_visualIds, fieldIds))
             return Task.CompletedTask;
 
         _visualIds = fieldIds.ToList();
         return InvokeAsync(StateHasChanged);
+    }
+
+    private static bool SameFieldSet(IReadOnlyList<string> left, IReadOnlyList<string> right)
+    {
+        if (left.Count != right.Count)
+            return false;
+
+        var seen = new HashSet<string>(left, StringComparer.Ordinal);
+        if (seen.Count != left.Count)
+            return false;
+
+        foreach (var id in right)
+        {
+            if (!seen.Remove(id))
+                return false;
+        }
+
+        return seen.Count == 0;
     }
 
     private async Task OnHoverChanged(string? fieldId)
@@ -639,6 +673,12 @@ else
 
     private async Task SelectRow(string fieldId)
     {
+        if (string.Equals(SelectedFieldId, fieldId, StringComparison.Ordinal))
+        {
+            await SetHover(fieldId);
+            return;
+        }
+
         await SetSelectedAsync(fieldId);
         _markFocus++;
         await SetHover(fieldId);
@@ -652,12 +692,18 @@ else
 
     private async Task SetHover(string fieldId)
     {
+        if (string.Equals(HoveredFieldId, fieldId, StringComparison.Ordinal))
+            return;
+
         HoveredFieldId = fieldId;
         await HoveredFieldIdChanged.InvokeAsync(fieldId);
     }
 
     private async Task ClearHover()
     {
+        if (string.IsNullOrEmpty(HoveredFieldId))
+            return;
+
         HoveredFieldId = null;
         await HoveredFieldIdChanged.InvokeAsync(null);
     }
@@ -751,12 +797,12 @@ else
             _ => "tas-conf tas-conf--low",
         };
 
-    private static string ConfidenceLabel(FieldRow row) => row.IsGap
-        ? "Gap"
+    private string ConfidenceLabel(FieldRow row) => row.IsGap
+        ? Msg("TemplateScan.Gap")
         : row.Confidence switch
         {
-            ScanFieldConfidence.High => "High",
-            ScanFieldConfidence.Medium => "Med",
-            _ => "Low",
+            ScanFieldConfidence.High => Msg("TemplateScan.Conf.High"),
+            ScanFieldConfidence.Medium => Msg("TemplateScan.Conf.Med"),
+            _ => Msg("TemplateScan.Conf.Low"),
         };
 }
