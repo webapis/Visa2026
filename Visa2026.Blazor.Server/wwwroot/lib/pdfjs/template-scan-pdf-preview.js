@@ -1081,10 +1081,17 @@ function setActive(container, fieldId, scroll) {
             first = el;
         }
     });
-    if (!scroll || !first || typeof first.scrollIntoView !== "function") {
+    if (!scroll || !first) {
         return;
     }
-    first.scrollIntoView({ block: "center", behavior: "smooth" });
+    // Scroll only the letter pane. scrollIntoView also moves the field list, so the pointer lands on the next row.
+    const markRect = first.getBoundingClientRect();
+    const box = container.getBoundingClientRect();
+    const delta = markRect.top - box.top - (box.height / 2) + (markRect.height / 2);
+    if (Math.abs(delta) < 4) {
+        return;
+    }
+    container.scrollTop += delta;
 }
 
 async function clear(container) {

@@ -1,4 +1,13 @@
 
+### 2026-09-30 — Add existing template follows Fluent Dark
+
+- **Need**: Resminamalar **Add existing template** was a white card (drop zone, name, Save to, Project contract, Data, Cancel) on the dark catalog.
+- **Cause**: `.tac-modal` and its inputs used fixed `#fff` / `#f8fbff`.
+- **Fix**: The dialog chrome uses `--tac-*` from the active theme. The uploaded document page stays paper white.
+- **Officer**: Hard-refresh. Open Resminamalar → Add existing template. The form matches the catalog. Check light once.
+- **Prevent**: Do not put `#fff` or `#f8fbff` back on `.tac-modal`, `.tac-drop`, or `.tac-input`.
+- **Cross-skill**: —
+
 ### 2026-09-19 — Turkmen This profile tab is Şu Ýüztutma degişli
 
 - **Need**: Resminamalar catalog tab **This profile** in Türkmençe must be **Şu Ýüztutma degişli**, not Bu profil.

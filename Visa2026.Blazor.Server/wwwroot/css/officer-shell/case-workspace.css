@@ -1074,8 +1074,9 @@ select.cw-summary-field__input option {
   width: min(420px, 100%);
   padding: 16px 18px 14px;
   border-radius: 10px;
-  background: var(--os-panel, #fff);
-  border: 1px solid var(--os-line, #e2e8f0);
+  background: var(--os-surface);
+  border: 1px solid var(--os-line);
+  color: var(--os-ink);
   box-shadow: var(--os-shadow);
 }
 .cw-loading__kicker {
@@ -1095,13 +1096,13 @@ select.cw-summary-field__input option {
 .cw-loading__track {
   height: 8px;
   border-radius: 999px;
-  background: #e2e8f0;
+  background: var(--os-line);
   overflow: hidden;
 }
 .cw-loading__fill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--os-accent), #60a5fa);
+  background: var(--os-accent);
   transition: width 0.2s ease;
 }
 .cw-loading__fill--indeterminate {
@@ -1131,7 +1132,7 @@ select.cw-summary-field__input option {
 .cw-loading__line {
   height: 10px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #e2e8f0, #f8fafc, #e2e8f0);
+  background: linear-gradient(90deg, var(--os-line), color-mix(in srgb, var(--os-ink) 14%, var(--os-panel)), var(--os-line));
   background-size: 200% 100%;
   animation: cw-loading-shimmer 1.35s ease-in-out infinite;
 }
@@ -1143,13 +1144,13 @@ select.cw-summary-field__input option {
   gap: 8px;
   margin-top: 16px;
   padding-top: 14px;
-  border-top: 1px solid #eef2f6;
+  border-top: 1px solid var(--os-line);
 }
 .cw-loading__chip {
   width: 118px;
   height: 32px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #e2e8f0, #f8fafc, #e2e8f0);
+  background: linear-gradient(90deg, var(--os-line), color-mix(in srgb, var(--os-ink) 14%, var(--os-panel)), var(--os-line));
   background-size: 200% 100%;
   animation: cw-loading-shimmer 1.35s ease-in-out infinite;
 }
@@ -1170,7 +1171,7 @@ select.cw-summary-field__input option {
 .cw-loading__nav-item {
   height: 36px;
   border-radius: 8px;
-  background: linear-gradient(90deg, #e2e8f0, #f8fafc, #e2e8f0);
+  background: linear-gradient(90deg, var(--os-line), color-mix(in srgb, var(--os-ink) 14%, var(--os-panel)), var(--os-line));
   background-size: 200% 100%;
   animation: cw-loading-shimmer 1.35s ease-in-out infinite;
 }
@@ -1185,8 +1186,8 @@ select.cw-summary-field__input option {
 .cw-loading__tile {
   height: 92px;
   border-radius: 10px;
-  border: 1px solid var(--os-line, #e2e8f0);
-  background: linear-gradient(90deg, #e2e8f0, #f8fafc, #e2e8f0);
+  border: 1px solid var(--os-line);
+  background: linear-gradient(90deg, var(--os-line), color-mix(in srgb, var(--os-ink) 14%, var(--os-panel)), var(--os-line));
   background-size: 200% 100%;
   animation: cw-loading-shimmer 1.35s ease-in-out infinite;
 }

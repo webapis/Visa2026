@@ -1,3 +1,12 @@
+### 2026-09-30 — Case open skeleton follows Fluent Dark
+
+- **Need**: Opening an Application Profile instance painted white skeleton bars (title, chips, section list, tiles) on the dark page.
+- **Cause**: `.cw-loading` shimmer and the progress track were `#e2e8f0` / `#f8fafc`.
+- **Fix**: The bars, track, and banner use `--os-*`. The moving fill is the accent.
+- **Officer**: Hard-refresh. Open a case. The first loading layout should match the dark page. Check light once.
+- **Prevent**: Do not put `#e2e8f0` / `#f8fafc` back on `.cw-loading`.
+- **Cross-skill**: —
+
 ### 2026-09-30 — People search waits until typing stops
 
 - **Need**: Search people on People & links should start after the officer finishes typing, the way the list search box does.

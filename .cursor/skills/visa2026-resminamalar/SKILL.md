@@ -65,6 +65,7 @@ disable-model-invocation: false
 | Sanaw Preview shows one row though several people are selected | Rebuild; keep all header chips selected. Invitation yellow-marks clone rows; seeded **SANAW_WIZANY_UZTURMEK** already has `{{#ds.rows}}` | **This skill** + template-scan |
 | Invitation yellow-marks sanaw **Preview could not be generated**; direct-to-migration seeded sanaw is fine | Stop F5, rebuild. Preview This-profile Dasary Word/Excel — one row per person. No Re-Approve | **This skill** + template-scan |
 | Sanaw Preview **№** column empty (people rows are filled) | Stop F5, rebuild. Preview — 1, 2, 3. No Re-Approve | **This skill** + template-scan |
+| Add existing template dialog stays a white card on Fluent Dark | Hard-refresh. `.tac-modal` follows the dialog theme. The uploaded document page stays paper white | **This skill** |
 | Add existing template shows **CHECK** (placeholders not extracted) | Stop F5, rebuild, Add existing again. Yellow-marks Approve already extracted. Re-add the file or Extract placeholders | **This skill** + template-scan |
 | After **Approve — save to profile**, new template missing from ZIP checkboxes / Shared | **This profile only** is the **This profile** tab. Restart, rebuild; Approve then Close — row is checked. Shared is **Save to = Shared catalog** only | **template-scan** + this skill |
 | Need to remap placeholders on a saved catalog template | Row **Review placeholders** (this-profile nested Word/Excel) — not desktop **Edit template** | **template-scan** + this skill |

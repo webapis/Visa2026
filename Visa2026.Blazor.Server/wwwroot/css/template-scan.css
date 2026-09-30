@@ -318,6 +318,7 @@
 .tas-rail--review {
   max-height: min(80vh, 297mm);
   overflow: auto;
+  scrollbar-gutter: stable;
 }
 .tas-split--landscape .tas-rail--review {
   max-height: min(72vh, 210mm);
@@ -1271,7 +1272,11 @@
   color: var(--tas-ink);
   border-color: var(--tas-line);
 }
+.tas-modal .tas-field-table tbody tr:hover {
+  background: var(--tas-sunken);
+}
 .tas-modal .tas-field-table tr.is-selected,
+.tas-modal .tas-field-table tr.is-selected:hover,
 .tas-modal .tas-field-table tr.is-hovered {
   background: var(--tas-accent-soft);
   color: var(--tas-ink);
@@ -1282,4 +1287,53 @@
   background: var(--tas-panel);
   color: var(--tas-ink);
   border-color: var(--tas-line);
+}
+.tas-modal input.tas-input,
+.tas-modal select.tas-token-select,
+.tas-modal select.tas-token-select option {
+  background-color: var(--tas-panel);
+  color: var(--tas-ink);
+  -webkit-text-fill-color: var(--tas-ink);
+  border: 1px solid var(--tas-line);
+}
+.dxbl-theme-fluent-mode-dark .tas-modal {
+  color-scheme: dark;
+}
+.tas-modal .tas-field-table code {
+  background: var(--tas-sunken);
+  color: var(--tas-ink);
+}
+.tas-modal .tas-canonical:empty { display: none; }
+.tas-modal .tas-token-chip__remove,
+.tas-modal .tas-row-remove { color: var(--tas-ink); }
+.tas-modal .tas-row-remove:hover {
+  color: var(--tas-bad);
+  background: color-mix(in srgb, var(--tas-bad) 18%, var(--tas-panel));
+}
+.tas-modal .tas-office-pdf,
+.tas-modal .tas-office-pdf--pages {
+  background: var(--tas-sunken);
+  border-color: var(--tas-line);
+}
+.tas-modal .tas-office-pdf .tas-pdf-page,
+.tas-modal .tas-office-pdf .tas-pdf-page.is-on {
+  background: #fff;
+  color: #142033;
+  border-color: transparent;
+}
+.tas-modal .tas-done__icon { color: var(--tas-ok); }
+.tas-modal .tas-done__table th,
+.tas-modal .tas-done__table td {
+  border-color: var(--tas-line);
+  background: transparent;
+  color: var(--tas-ink);
+}
+.tas-modal .tas-done__note {
+  background: color-mix(in srgb, var(--tas-ok) 16%, var(--tas-panel));
+  color: var(--tas-ink);
+  border-color: color-mix(in srgb, var(--tas-ok) 42%, var(--tas-line));
+}
+.tas-modal .tas-done__note :is(h4, p, strong) {
+  background: transparent;
+  color: var(--tas-ink);
 }

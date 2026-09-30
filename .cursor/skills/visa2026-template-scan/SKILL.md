@@ -59,6 +59,8 @@ Officers submit **wizard step screenshots** + optional **catalog Preview** + the
 
 | Symptom | First step | Owner |
 |---------|------------|--------|
+| Review short codes, full names, search, or Add placeholder stay light on Fluent Dark | `.tas-token-select` and `.tas-field-table code` were fixed light fills. Hard-refresh. Letter page stays white | **This skill** |
+| Done step Next card stays mint on Fluent Dark | `.tas-done__note` used `#f0fdf4`. Hard-refresh. The card follows the dialog; the check stays green | **This skill** |
 | Sanaw #13 TUR + street maps only to Foreign address (PFAD), country missing | Comma in the yellow = two placeholders: **PFAC** then **PFAD**. Stop F5, rebuild, **Analyze** | **This skill** |
 | After × on compound 11.1, picking Visa period (item) on 11.2 jumps to another code | Hidden parts keep empty slots. Stop F5, rebuild, hard-refresh. × leftover 11.1, then Add **AVPRD** on 11.2 | **This skill** |
 | Lock on compound 11.2 / 11.3 shows Part instead of Visa period / category | Add placeholders first (chips must show AVPRD/AVCAT). Lock keeps Short codes. Stop F5, rebuild, hard-refresh | **This skill** |
