@@ -6,6 +6,7 @@ using System.Linq;
 using DevExpress.ExpressApp;
 using Visa2026.Module.Services;
 using DevExpress.ExpressApp.DC;
+using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
@@ -37,6 +38,8 @@ namespace Visa2026.Module.BusinessObjects
         public virtual string TaxInformation { get; set; }
 
         [XafDisplayName("Company Registration Date")]
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
+        [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime? RegistrationDate { get; set; }
 
         [XafDisplayName("Default")]

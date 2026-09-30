@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
+using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
@@ -30,9 +31,13 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual string PassportAuthority { get; set; }
 
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
+        [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime? PassportIssueDate { get; set; }
 
         [XafDisplayName("Passport Expiration Date")]
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
+        [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime? PassportExpirationDate { get; set; }
 
         [XafDisplayName("Default")]
