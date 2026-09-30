@@ -144,6 +144,8 @@ flowchart LR
 | Create still lands on empty Case summary | Picker must finish on **Case summary** (step 4), not Organization | `ApplicationProfilePickerCaseSummaryDraft`; Organization is **Continue** |
 | Create wizard is a white card in Fluent Dark | Bind to `--dxds-color-surface-*` / `--dxds-color-content-*`. `--bs-body-bg` stays `#fff` on this host | `wwwroot/css/application-profile-picker.css` |
 | Case workspace sections stay light in Fluent Dark | Remap `--os-*` on `.officer-case-workspace`; dark mode retints hard-coded `#fff` panels | `wwwroot/css/officer-shell/case-workspace.css` |
+| People & links **Link existing** search row and person rules stay light | Picker shell is `#f8fafc`, row rules `#f1f5f9`, and host `.os-btn` is `#fff` | `case-tabs.css` `.os-person-link-picker`; keep Search / Cancel on `--os-panel` |
+| Section switch shows a light “Opening …” pane | `.cw-tab-loading` veil is `rgba(248, 250, 252, 0.78)` | `case-workspace.css`; veil is the theme panel, track is `--os-line` |
 | Wizard still has Company, Signatories | Removed 2026-09-03 — not profile config | Configuration → Organization catalogs; create **Choose Organization**; case Organization |
 | Template overview lists Approval legs catalog | Removed — shared catalog, not profile config | **Choose Approval legs** (pick / Catalog / Make default) |
 | Can leave Overview with empty Case summary | Office preparation + red tiles | `ApplicationWorkspaceCaseSummaryCompletenessGate`; People & links stay open |

@@ -508,7 +508,7 @@ select.cw-summary-field__input option {
   display: grid; grid-template-columns: auto 1fr auto; grid-template-rows: auto auto; gap: 4px 8px;
   align-items: center; cursor: pointer; text-align: left;
 }
-.cw-link-tile:hover { border-color: #93c5fd; background: #f8fbff; }
+.cw-link-tile:hover { border-color: var(--os-accent); background: var(--os-accent-soft); color: var(--os-ink); }
 .cw-link-tile.is-empty { border-style: dashed; }
 .cw-link-tile.is-empty:not(.cw-issued-tile) {
   border-color: var(--os-bad);
@@ -524,21 +524,22 @@ select.cw-summary-field__input option {
   color: var(--os-muted);
 }
 .cw-link-tile.is-empty:not(.cw-issued-tile):hover {
-  border-color: #b91c1c;
-  background: #fee2e2;
+  border-color: var(--os-bad);
+  background: var(--os-bad-soft);
 }
 .cw-link-tile.is-empty:not(.cw-issued-tile).is-selected {
-  border-color: #dc2626;
-  background: #fef2f2;
-  box-shadow: inset 3px 0 0 #dc2626;
+  border-color: var(--os-bad);
+  background: var(--os-bad-soft);
+  box-shadow: inset 3px 0 0 var(--os-bad);
 }
 .cw-cell-missing {
   color: #b91c1c;
   font-weight: 700;
 }
 .cw-link-tile.is-selected {
-  border-color: #93c5fd;
-  background: #f8fbff;
+  border-color: var(--os-accent);
+  background: var(--os-accent-soft);
+  color: var(--os-ink);
   box-shadow: inset 3px 0 0 var(--os-accent);
 }
 .cw-link-tile__icon {
@@ -570,8 +571,8 @@ select.cw-summary-field__input option {
   color: #b91c1c;
 }
 .cw-linked-empty {
-  margin: 0; padding: 12px 14px; border-radius: 10px; background: #f8fafc;
-  border: 1px dashed #cbd5e1; color: var(--os-muted); font-size: 0.84rem; line-height: 1.45;
+  margin: 0; padding: 12px 14px; border-radius: 10px; background: var(--os-surface);
+  border: 1px dashed var(--os-line); color: var(--os-ink); font-size: 0.84rem; line-height: 1.45;
 }
 .cw-linked-lock {
   margin: 0 0 10px; padding: 10px 12px; border-radius: 8px;
@@ -1020,33 +1021,34 @@ select.cw-summary-field__input option {
   align-items: flex-start;
   justify-content: center;
   padding: 48px 16px 24px;
-  background: rgba(248, 250, 252, 0.78);
+  background: color-mix(in srgb, var(--os-panel) 88%, transparent);
   backdrop-filter: blur(1px);
 }
 .cw-tab-loading__panel {
   width: min(360px, 88%);
   padding: 18px 20px 16px;
   border-radius: 10px;
-  background: var(--os-panel, #fff);
-  border: 1px solid var(--os-line, #e2e8f0);
+  background: var(--os-surface);
+  color: var(--os-ink);
+  border: 1px solid var(--os-line);
   box-shadow: var(--os-shadow);
 }
 .cw-tab-loading__label {
   font-size: 0.82rem;
   font-weight: 650;
-  color: var(--os-ink, #0f172a);
+  color: var(--os-ink);
   margin-bottom: 10px;
 }
 .cw-tab-loading__track {
   height: 8px;
   border-radius: 999px;
-  background: #e2e8f0;
+  background: var(--os-line);
   overflow: hidden;
 }
 .cw-tab-loading__fill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--os-accent), #60a5fa);
+  background: var(--os-accent);
 }
 .cw-tab-loading__fill--indeterminate {
   width: 42%;
@@ -1346,6 +1348,21 @@ select.cw-summary-field__input option {
   color-scheme: dark;
 }
 
+/* officer-shell-host.css forces every .os-btn to #fff and loads after this file. */
+.officer-case-workspace .os-btn:not(.os-btn--primary) {
+  background: var(--os-panel);
+  color: var(--os-ink);
+  border-color: var(--os-line);
+}
+.officer-case-workspace .os-btn.os-btn--ghost {
+  background: transparent;
+  color: var(--os-ink);
+}
+.officer-case-workspace .os-btn:not(.os-btn--primary):hover:not(:disabled) {
+  background: var(--os-surface);
+  color: var(--os-ink);
+}
+
 .dxbl-theme-fluent-mode-dark .officer-case-workspace :is(
   .cw-nav__item,
   .cw-sum-tile__value,
@@ -1428,9 +1445,21 @@ select.cw-summary-field__input option {
   box-shadow: none;
 }
 
+.dxbl-theme-fluent-mode-dark .officer-case-workspace .cw-link-tile:hover,
+.dxbl-theme-fluent-mode-dark .officer-case-workspace .cw-link-tile.is-selected {
+  background: var(--os-accent-soft);
+  border-color: var(--os-accent);
+  color: var(--os-ink);
+}
 .dxbl-theme-fluent-mode-dark .officer-case-workspace .cw-summary-field--fill-empty,
 .dxbl-theme-fluent-mode-dark .officer-case-workspace .cw-link-tile.is-empty:not(.cw-issued-tile) {
   background: color-mix(in srgb, #fecaca 22%, var(--os-panel));
+}
+.dxbl-theme-fluent-mode-dark .officer-case-workspace .cw-link-tile.is-empty:not(.cw-issued-tile):hover,
+.dxbl-theme-fluent-mode-dark .officer-case-workspace .cw-link-tile.is-empty:not(.cw-issued-tile).is-selected {
+  background: color-mix(in srgb, #fecaca 32%, var(--os-panel));
+  border-color: var(--os-bad);
+  color: var(--os-ink);
 }
 .dxbl-theme-fluent-mode-dark .officer-case-workspace .cw-summary-field--fill-default {
   background: color-mix(in srgb, #bfdbfe 22%, var(--os-panel));

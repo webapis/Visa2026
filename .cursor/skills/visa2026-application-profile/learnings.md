@@ -7,6 +7,24 @@
 - **Prevent**: Do not search on each key. Do not return the delay task from the input handler. Keep the pause at 1200 ms unless the list search box delay changes.
 - **Cross-skill**: —
 
+### 2026-09-30 — Section switch bar follows Fluent Dark
+
+- **Need**: Switching case sections painted a light pane behind “Opening {section}…”. The bar card was already the dark panel.
+- **Cause**: `.cw-tab-loading` used `rgba(248, 250, 252, 0.78)` and the track was `#e2e8f0`.
+- **Fix**: The veil is the theme panel, the card is the theme surface, and the track is the theme line. The moving fill is the accent.
+- **Officer**: Hard-refresh. Open a case and click Resminamalar, then another section. The opening pane should match the dark page. Check light once.
+- **Prevent**: Do not put a light rgba veil back on `.cw-tab-loading`.
+- **Cross-skill**: visa2026-resminamalar
+
+### 2026-09-30 — People & links picker follows Fluent Dark
+
+- **Need**: People & links → Link existing showed a white search row and bright rules between people on Fluent Dark. The person rows themselves were already the dark panel.
+- **Cause**: `.os-person-link-picker` was `#f8fafc`, row borders `#f1f5f9`, and the search field had no theme fill. `officer-shell-host.css` also forces every `.os-btn` to `#fff` and loads after the case styles. Selected record tiles used `#f8fbff`.
+- **Fix**: Picker shell, search field, row rules, and the linking veil use `--os-*`. Case-workspace secondary buttons use the panel fill so Search and Cancel are not white. Selected tiles use `--os-accent-soft`.
+- **Officer**: Hard-refresh the case. People & links → Link existing. The search row and the lines between people should match the dark page. Link stays the accent button. Switch to light once.
+- **Prevent**: Do not put `#f8fafc` / `#f1f5f9` back on `.os-person-link-picker`. Do not let `.officer-shell-host .os-btn { background: #fff }` win inside `.officer-case-workspace`.
+- **Cross-skill**: —
+
 ### 2026-09-30 — Make default approval legs stays on the next create
 
 - **Need**: Choose Approval legs → Make default on Türkmennebit-Türkmengaz-Gurluşyk. The next instance of that profile still opened on Türkmenenergo-Energetika.
