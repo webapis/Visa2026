@@ -62,4 +62,33 @@ public class ApplicationProfilePickerVersionSelectionTests
 
         Assert.Equal(TnTgGu, selected);
     }
+
+    [Fact]
+    public void Resolve_picks_first_chain_when_no_saved_default()
+    {
+        var versions = new[]
+        {
+            Chain("TE-EN", isDefault: false),
+            Chain("TN-TG-GU", isDefault: false),
+        };
+
+        var selected = ApplicationProfilePickerVersionSelection.Resolve(
+            currentVersionId: Guid.Empty,
+            explicitlyChosen: false,
+            versions);
+
+        Assert.Equal(TeEn, selected);
+    }
+
+    [Fact]
+    public void Resolve_empty_or_null_catalog_returns_empty()
+    {
+        Assert.Equal(
+            Guid.Empty,
+            ApplicationProfilePickerVersionSelection.Resolve(TeEn, explicitlyChosen: true, versions: null));
+        Assert.Equal(
+            Guid.Empty,
+            ApplicationProfilePickerVersionSelection.Resolve(
+                TeEn, explicitlyChosen: true, versions: Array.Empty<ApplicationProfilePickerVersionOption>()));
+    }
 }
