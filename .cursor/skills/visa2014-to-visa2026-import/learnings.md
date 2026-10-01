@@ -1,3 +1,17 @@
+### 2026-10-01 — Staging tunnel dropped during App_Visa_and_WP_Ext roster
+
+- **Phase**: scalar import stopped and resumed
+- **Why**: SSH tunnel `127.0.0.1:15433` to `10.100.128.26` dropped while the chain was still running. Roster failed count climbed past 900 with posted stuck at 1960.
+- **Fix**: Stopped the failing chain. Reopened the tunnel. Resumed `Run-StagingScalar.ps1 -StartAt App_Visa_and_WP_Ext/roster -SkipLookupPreflight`. Already-posted rows stay in the id-map; the failed rows are retried.
+- **Verify**: `20261001-125016-App_Visa_and_WP_Ext_roster.log` progress `failed=0`.
+- **Prevent**: Do not leave the chain running when the tunnel is down. A non-zero FailedCount halts the next wave.
+### 2026-09-30 — Staging scalar import suspended for tomorrow
+
+- **Phase**: scalar import stopped by request
+- **Environment**: `10.100.128.15` / `VISA2015` -> `10.100.128.26` `visa2026_staging` (`calik-energi-onprem-staging`). Chain stopped. Do not start a second chain.
+- **Finished today** (Failed 0): App_Inv header 1862, roster 2485, progress 9055, Invitation 1721, InvitationItem 3161, Visa 1751. App_Inv_And_WP header 1181, roster 2257, progress 5813, Invitation 939, InvitationItem 1726, WorkPermit 227, WorkPermitItem 2114, Visa 1112. App_Inv_FM header 229, roster 399, progress 1125, Invitation 196, InvitationItem 353, Visa 328. App_Inv_According_to_WP header 61.
+- **Stopped during**: App_Inv_According_to_WP roster (about 52 posted; id-map saved through the last full batch of 50). Log `artifacts/staging-scalar/logs/20260930-112025-App_Inv_According_to_WP_roster.log`.
+- **Resume tomorrow**: reopen SSH tunnel `127.0.0.1:15433` to `10.100.128.26:5433`, load `artifacts/staging-scalar/target.connection` into `VISA2026_STAGING_SQL_CONNECTION`, then `artifacts/staging-scalar/Run-StagingScalar.ps1 -StartAt App_Inv_According_to_WP/roster -SkipLookupPreflight`. Do not restart from Person or App_Inv.
 ### 2026-09-26 — Staging scalar import paused for Monday
 
 - **Phase**: scalar import stopped by request

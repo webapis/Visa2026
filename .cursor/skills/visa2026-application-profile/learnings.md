@@ -1,3 +1,21 @@
+### 2026-09-30 — Wizard Back label follows the theme
+
+- **Need**: ← Back stayed near-black on the dark button on every Configure Application Profile step.
+- **Cause**: `.ap-wizard__btn--secondary` set the fill but not the label, so the browser kept button text dark.
+- **Fix**: The secondary button label uses `--ap-ink`.
+- **Officer**: Hard-refresh. Open any wizard step after the first. ← Back should read clearly.
+- **Prevent**: Do not leave `.ap-wizard__btn--secondary` without `color`.
+- **Cross-skill**: —
+
+### 2026-09-30 — Configure Application Profile wizard follows Fluent Dark
+
+- **Need**: Review & save showed blank white cards. Results & fields inputs and chips stayed light.
+- **Cause**: `.ap-wizard__sum-card` was `#fbfcfd`, so light text vanished. Table inputs had no theme fill. Tags used `#eef2f6`.
+- **Fix**: Summary cards, table fields, tags, and selected choices use `--ap-*`.
+- **Officer**: Hard-refresh. Open Configure Application Profile. Review cards, Person data, and Results & fields should match the dark page. Check light once.
+- **Prevent**: Do not put `#fbfcfd` / `#eef2f6` back on `.ap-wizard__sum-card` or `.ap-wizard__tag`.
+- **Cross-skill**: —
+
 ### 2026-09-30 — Case open skeleton follows Fluent Dark
 
 - **Need**: Opening an Application Profile instance painted white skeleton bars (title, chips, section list, tiles) on the dark page.

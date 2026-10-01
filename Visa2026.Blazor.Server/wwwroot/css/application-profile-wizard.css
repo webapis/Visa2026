@@ -403,7 +403,7 @@
 }
 .ap-wizard__btn--primary { background: var(--ap-accent); color: #fff; }
 .ap-wizard__btn--primary:hover { background: var(--ap-accent-deep); }
-.ap-wizard__btn--secondary { background: var(--ap-panel); border-color: var(--ap-line); }
+.ap-wizard__btn--secondary { background: var(--ap-panel); border-color: var(--ap-line); color: var(--ap-ink); }
 .ap-wizard__btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .ap-wizard__link {
@@ -1223,4 +1223,55 @@
 }
 .ap-wizard-modal__foot .ap-wizard__btn--primary {
     margin-left: auto;
+}
+
+.dxbl-theme-fluent-mode-dark .ap-wizard,
+.dxbl-theme-fluent-mode-dark .ap-wizard-modal {
+    color-scheme: dark;
+}
+.ap-wizard .ap-wizard__sum-card {
+    background: var(--ap-panel);
+    color: var(--ap-ink);
+}
+.ap-wizard .ap-wizard__section,
+.ap-wizard .ap-wizard__list-row,
+.ap-wizard .ap-wizard__table th,
+.ap-wizard .ap-wizard__table td {
+    border-color: var(--ap-line);
+}
+.ap-wizard .ap-wizard__table select,
+.ap-wizard .ap-wizard__table input[type="text"],
+.ap-wizard .ap-wizard__table select option,
+.ap-wizard .ap-wizard__last-n {
+    background-color: var(--ap-panel);
+    color: var(--ap-ink);
+    -webkit-text-fill-color: var(--ap-ink);
+    border-color: var(--ap-line);
+}
+.ap-wizard .ap-wizard__tag,
+.ap-wizard .ap-wizard__badge--profile,
+.ap-wizard .ap-wizard__badge--category,
+.ap-wizard .ap-wizard__badge--global {
+    background: var(--ap-surface);
+    color: var(--ap-ink);
+    border-color: var(--ap-line);
+}
+.ap-wizard .ap-wizard__tag--ok,
+.ap-wizard .ap-wizard__tag--person,
+.ap-wizard .ap-wizard__cat-chip.is-on,
+.ap-wizard .ap-wizard__list-row--focus,
+.ap-wizard .ap-wizard__version.is-active,
+.ap-wizard .ap-wizard__version.is-default,
+.ap-wizard .ap-wizard__choice:has(input:checked) {
+    background: var(--ap-accent-soft);
+    color: var(--ap-ink);
+    border-color: var(--ap-accent);
+}
+.ap-wizard .ap-wizard__pill--warn {
+    color: var(--ap-ink);
+}
+.ap-wizard .ap-wizard__status.is-error {
+    background: color-mix(in srgb, var(--ap-warn) 22%, var(--ap-panel));
+    color: var(--ap-ink);
+    border-color: var(--ap-line);
 }
