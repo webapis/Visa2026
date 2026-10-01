@@ -35,6 +35,7 @@ public enum UserReportPlaceholderPack
     PersonBorderZoneItem = 11,
     PersonRejectionItem = 12,
     PersonTravelHistory = 13,
+    InvitationAddress = 14,
 }
 
 public sealed class UserReportPlaceholderCatalogFile

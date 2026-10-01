@@ -24,6 +24,7 @@ public class ApplicationProfilePlaceholderSetServiceTests
             RequirePersonVisa = true,
             RequirePersonEducation = true,
             RequirePersonAddressOfResidence = true,
+            RequireInvitationAddress = true,
             RequirePersonPosition = true,
             RequirePersonSalary = true,
             RequirePersonMedical = true,
@@ -80,6 +81,18 @@ public class ApplicationProfilePlaceholderSetServiceTests
         Assert.True(Allows(GetSet(profile), "ADRS"));
         Assert.True(Allows(GetSet(profile), "PFN"));
         Assert.True(Allows(GetSet(profile), "PFAD"));
+    }
+
+    [Fact]
+    public void Invitation_stay_token_follows_the_invitation_address_switch()
+    {
+        var profile = FullProfile();
+        Assert.True(Allows(GetSet(profile), "INAD"));
+
+        profile.RequireInvitationAddress = false;
+        var set = GetSet(profile);
+        Assert.False(Allows(set, "INAD"));
+        Assert.Equal(PlaceholderExclusionReason.PersonPackDisabled, ReasonFor(set, "INAD"));
     }
 
     [Fact]

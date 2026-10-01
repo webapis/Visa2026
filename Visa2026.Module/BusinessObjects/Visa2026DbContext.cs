@@ -87,6 +87,8 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<PersonDocument> PersonDocuments { get; set; }
         public DbSet<PersonFamilyRelationDocument> PersonFamilyRelationDocuments { get; set; }
         public DbSet<Lodging> Lodgings { get; set; }
+        public DbSet<AlternativeAddressesForInvitation> AlternativeAddressesForInvitation { get; set; }
+        public DbSet<InvitationAddress> InvitationAddresses { get; set; }
         public DbSet<LodgingDocument> LodgingDocuments { get; set; }
         public DbSet<LodgingImage> LodgingImages { get; set; }
         public DbSet<Hotel> Hotels { get; set; }
@@ -764,6 +766,44 @@ namespace Visa2026.Module.BusinessObjects
                     .HasFilter(IndexFilter("[Code] IS NOT NULL AND [Code] <> '' AND [GCRecord] IS NULL"));
                 b.HasIndex(p => p.SelectionCode)
                     .HasDatabaseName("IX_ApplicationProfiles_SelectionCode");
+            });
+
+            modelBuilder.Entity<AlternativeAddressesForInvitation>(b =>
+            {
+                b.ToTable("AlternativeAddressesForInvitation");
+                b.Property(a => a.AddressLine).HasMaxLength(2000);
+            });
+
+            modelBuilder.Entity<InvitationAddress>(b =>
+            {
+                b.ToTable("InvitationAddress");
+                b.HasOne(a => a.ApplicationProfileInstance)
+                    .WithOne(i => i.InvitationAddress)
+                    .HasForeignKey<InvitationAddress>(a => a.ApplicationProfileInstanceId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("FK_InvitationAddress_Instance");
+                b.HasIndex(a => a.ApplicationProfileInstanceId)
+                    .IsUnique()
+                    .HasFilter(IndexFilter("[ApplicationProfileInstanceId] IS NOT NULL AND [GCRecord] IS NULL"));
+                b.HasOne(a => a.Region)
+                    .WithMany()
+                    .HasForeignKey(a => a.RegionId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction)
+                    .HasConstraintName("FK_InvitationAddress_Region");
+                b.HasOne(a => a.City)
+                    .WithMany()
+                    .HasForeignKey(a => a.CityId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction)
+                    .HasConstraintName("FK_InvitationAddress_City");
+                b.HasOne(a => a.AlternativeAddress)
+                    .WithMany()
+                    .HasForeignKey(a => a.AlternativeAddressId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .HasConstraintName("FK_InvitationAddress_Alternative");
             });
 
             modelBuilder.Entity<BusinessTripAddress>(b =>

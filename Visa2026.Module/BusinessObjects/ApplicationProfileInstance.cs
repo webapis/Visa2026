@@ -1417,6 +1417,13 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         public string BusinessTripStartDateText => $"{BusinessTripStartDate:dd.MM.yyyy}";
 
+        /// <summary>Header placeholder <c>INAD</c>. Same text on every person of this case.</summary>
+        [NotMapped]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [XafDisplayName("Invitation address")]
+        public string InvitationAddress_FullAddress => InvitationAddressText.Format(InvitationAddress);
+
         [XafDisplayName("Business Trip End Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
         public string BusinessTripEndDateText => $"{BusinessTripEndDate:dd.MM.yyyy}";
@@ -1462,6 +1469,15 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInDetailView(false)]
         [VisibleInLookupListView(false)]
         public virtual IList<AddressOfResidence> AddressesOfResidence { get; set; }
+
+        /// <summary>First stay plus optional alternative-address text. One row per case.</summary>
+        [Aggregated]
+        [InverseProperty(nameof(InvitationAddress.ApplicationProfileInstance))]
+        [VisibleInListView(false)]
+        [VisibleInDetailView(false)]
+        [VisibleInLookupListView(false)]
+        [XafDisplayName("Invitation address")]
+        public virtual InvitationAddress InvitationAddress { get; set; }
 
         [VisibleInListView(false)]
         [VisibleInDetailView(false)]

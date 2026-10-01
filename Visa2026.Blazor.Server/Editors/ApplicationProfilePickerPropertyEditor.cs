@@ -73,6 +73,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         MakeDefaultOrganizationRequested = EventCallback.Factory.Create<ApplicationWorkspaceOrganizationLetterheadUpdate>(this, MakeDefaultOrganization),
         OrganizationCatalogEditorRequested = EventCallback.Factory.Create<(string Kind, Guid Id)>(this, OpenOrganizationCatalogEditor),
         CaseSummaryFieldChanged = EventCallback.Factory.Create<ApplicationWorkspaceCaseHeaderFieldUpdate>(this, OnCaseSummaryFieldChanged),
+        AlternativeAddressCreateRequested = EventCallback.Factory.Create(this, OpenNewAlternativeAddress),
     };
 
     protected override void OnCurrentObjectChanged()
@@ -656,6 +657,24 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         model.Step = 3;
         model.StatusMessage = null;
         model.IsStatusError = false;
+    }
+
+    private void OpenNewAlternativeAddress()
+    {
+        if (_application == null)
+            return;
+
+        AlternativeAddressCatalogOpenHelper.TryOpenNew(_application, savedId =>
+        {
+            if (savedId == Guid.Empty)
+                return;
+
+            OnCaseSummaryFieldChanged(new ApplicationWorkspaceCaseHeaderFieldUpdate
+            {
+                Key = ApplicationWorkspaceCaseHeaderFieldsHelper.InvitationAlternativeAddress,
+                Value = savedId.ToString("D"),
+            });
+        });
     }
 
     private void OnCaseSummaryFieldChanged(ApplicationWorkspaceCaseHeaderFieldUpdate update)

@@ -310,6 +310,7 @@
     [Parameter] public EventCallback<(string Kind, Guid Id)> OrganizationCatalogEditorRequested { get; set; }
     [Parameter] public IReadOnlyList<ApplicationWorkspaceCaseHeaderField> CaseSummaryFields { get; set; } = Array.Empty<ApplicationWorkspaceCaseHeaderField>();
     [Parameter] public EventCallback<ApplicationWorkspaceCaseHeaderFieldUpdate> CaseSummaryFieldChanged { get; set; }
+    [Parameter] public EventCallback AlternativeAddressCreateRequested { get; set; }
 
     private bool _initialLoadStarted;
     private bool _orgCatalogManageOpen;
@@ -545,17 +546,27 @@
             }
             else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Lookup)
             {
-                <select class="cw-summary-field__input"
-                        value="@field.Value"
-                        disabled="@field.ReadOnly"
-                        @onchange="e => OnCaseSummaryFieldChanged(field.Key, e.Value?.ToString())">
-                    <option value="">@Msg("ApplicationProfileInstance.Picker.SelectPlaceholder")</option>
-                    @foreach (var option in field.Options)
+                <div class="cw-summary-lookup-row">
+                    <select class="cw-summary-field__input"
+                            value="@field.Value"
+                            disabled="@field.ReadOnly"
+                            @onchange="e => OnCaseSummaryFieldChanged(field.Key, e.Value?.ToString())">
+                        <option value="">@Msg("ApplicationProfileInstance.Picker.SelectPlaceholder")</option>
+                        @foreach (var option in field.Options)
+                        {
+                            var optionId = option.Id.ToString("D");
+                            <option value="@optionId" selected="@(string.Equals(field.Value, optionId, StringComparison.OrdinalIgnoreCase))">@option.DisplayName</option>
+                        }
+                    </select>
+                    @if (CanAddAlternativeAddress(field))
                     {
-                        var optionId = option.Id.ToString("D");
-                        <option value="@optionId" selected="@(string.Equals(field.Value, optionId, StringComparison.OrdinalIgnoreCase))">@option.DisplayName</option>
+                        <button type="button"
+                                class="ap-picker__org-new"
+                                @onclick="OnNewAlternativeAddress">
+                            @Msg("ApplicationProfileInstance.Picker.New")
+                        </button>
                     }
-                </select>
+                </div>
             }
             else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.ShortText)
             {
@@ -589,6 +600,15 @@
         string.Equals(fieldKey, ApplicationWorkspaceCaseHeaderFieldsHelper.WorkPermitLocation, StringComparison.Ordinal)
             ? CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation
             : CommaSeparatedMultiSelectEditorAliases.BorderZone;
+
+    private static bool CanAddAlternativeAddress(ApplicationWorkspaceCaseHeaderField field) =>
+        !field.ReadOnly
+        && string.Equals(field.Key, ApplicationWorkspaceCaseHeaderFieldsHelper.InvitationAlternativeAddress, StringComparison.Ordinal);
+
+    private Task OnNewAlternativeAddress() =>
+        AlternativeAddressCreateRequested.HasDelegate
+            ? AlternativeAddressCreateRequested.InvokeAsync()
+            : Task.CompletedTask;
 
     private Task OnCaseSummaryFieldChanged(string key, string? value)
     {

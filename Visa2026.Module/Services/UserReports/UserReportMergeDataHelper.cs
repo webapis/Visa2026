@@ -69,6 +69,7 @@ public static class UserReportMergeDataHelper
             ["ToRegionName_Genitive"] = application.ToRegionName_Genitive ?? string.Empty,
             ["ToCityName_Dative"] = application.ToCityName_Dative ?? string.Empty,
             ["Purpose"] = application.Purpose ?? string.Empty,
+            ["InvitationAddress_FullAddress"] = application.InvitationAddress_FullAddress ?? string.Empty,
         };
         UserReportPlaceholderAliasRegistry.EnrichDictionary(data);
         return data;
@@ -117,6 +118,7 @@ public static class UserReportMergeDataHelper
             ["Application_VisaPeriod_NameTm"] = item.Application_VisaPeriod_NameTm ?? string.Empty,
             ["Application_VisaCategory_NameTm"] = item.Application_VisaCategory_NameTm ?? string.Empty,
             ["Address_FullAddress"] = item.Address_FullAddress ?? string.Empty,
+            ["InvitationAddress_FullAddress"] = item.InvitationAddress_FullAddress ?? string.Empty,
             ["BusinessTripAddress_FullAddress"] = item.BusinessTripAddress_FullAddress ?? string.Empty,
             ["Visa_NumberAndType"] = item.Visa_NumberAndType ?? string.Empty,
             ["Visa_Number"] = item.Visa_Number ?? string.Empty,
@@ -372,6 +374,7 @@ public static class UserReportMergeDataHelper
             ["Person_SponsoringEmployeeFullName"] = item.Person_SponsoringEmployeeFullName ?? string.Empty,
             ["Person_SponsoringEmployeePositionTm"] = item.Person_SponsoringEmployeePositionTm ?? string.Empty,
             ["Address_FullAddress"] = item.Address_FullAddress ?? string.Empty,
+            ["InvitationAddress_FullAddress"] = item.InvitationAddress_FullAddress ?? string.Empty,
             ["Visa_CategoryTm"] = item.Visa_CategoryTm ?? string.Empty,
             ["Visa_TypeTm"] = item.Visa_TypeTm ?? string.Empty,
             ["Visa_Number"] = item.Visa_Number ?? string.Empty,

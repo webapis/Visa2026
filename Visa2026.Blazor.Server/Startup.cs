@@ -155,6 +155,7 @@ namespace Visa2026.Blazor.Server
                         ApplicationTypeCapabilityFlagsSchemaSql.ApplyIfMissing(connectionString);
                         ApplicationProfileSchemaSql.ApplyIfMissing(connectionString);
                         BusinessTripLookupSchemaSql.ApplyIfMissing(connectionString);
+                        InvitationAddressSchemaSql.ApplyIfMissing(connectionString);
                         ApplicationWorkspaceSchemaSql.ApplyIfMissing(connectionString);
                         ApplicationProfileInstanceExclusionSchemaSql.ApplyIfMissing(connectionString);
                         ApplicationProfileInstancePeopleSkipNavSchemaSql.ApplyIfMissing(connectionString);
@@ -343,6 +344,7 @@ namespace Visa2026.Blazor.Server
                 ApplicationTypeCapabilityFlagsSchemaSql.ApplyIfMissing(connectionString);
                 ApplicationProfileSchemaSql.ApplyIfMissing(connectionString);
                 BusinessTripLookupSchemaSql.ApplyIfMissing(connectionString);
+                InvitationAddressSchemaSql.ApplyIfMissing(connectionString);
                 ApplicationWorkspaceSchemaSql.ApplyIfMissing(connectionString);
                 ApplicationProfileInstanceExclusionSchemaSql.ApplyIfMissing(connectionString);
                 ApplicationProfileInstancePeopleSkipNavSchemaSql.ApplyIfMissing(connectionString);

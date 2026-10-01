@@ -15,8 +15,17 @@ public class ApplicationProfileTenantCatalogAddressPositionTests
 
         foreach (var row in rows)
         {
-            Assert.True(row.RequirePersonAddressOfResidence, row.Code);
             Assert.True(row.RequirePersonPosition, row.Code);
+            if (row.ProfileCatalogKey == "App_Inv")
+            {
+                Assert.False(row.RequirePersonAddressOfResidence, row.Code);
+                Assert.True(row.RequireInvitationAddress, row.Code);
+            }
+            else
+            {
+                Assert.True(row.RequirePersonAddressOfResidence, row.Code);
+                Assert.False(row.RequireInvitationAddress, row.Code);
+            }
         }
     }
 
@@ -32,5 +41,10 @@ public class ApplicationProfileTenantCatalogAddressPositionTests
         ApplicationProfileFromApplicationTypeMapper.Apply(trip, new ApplicationType { ShowBusinessTrips = true });
         Assert.True(trip.RequirePersonAddressOfResidence);
         Assert.True(trip.RequirePersonPosition);
+
+        var invitation = new ApplicationProfile();
+        ApplicationProfileFromApplicationTypeMapper.Apply(invitation, new ApplicationType { Name = "App_Inv" });
+        Assert.False(invitation.RequirePersonAddressOfResidence);
+        Assert.True(invitation.RequireInvitationAddress);
     }
 }

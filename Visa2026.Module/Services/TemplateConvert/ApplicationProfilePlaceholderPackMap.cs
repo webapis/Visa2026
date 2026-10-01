@@ -25,6 +25,7 @@ public static class ApplicationProfilePlaceholderPackMap
             // (RequirePersonEducation / AllowsPersonEducation) but sanaw still maps EGLV/EGIN/EGSP.
             UserReportPlaceholderPack.PersonEducation => true,
             UserReportPlaceholderPack.PersonAddressOfResidence => profile.RequirePersonAddressOfResidence,
+            UserReportPlaceholderPack.InvitationAddress => profile.RequireInvitationAddress,
             UserReportPlaceholderPack.PersonPosition => profile.RequirePersonPosition,
             UserReportPlaceholderPack.PersonSalary => profile.RequirePersonSalary,
             UserReportPlaceholderPack.PersonMedical => profile.RequirePersonMedical,

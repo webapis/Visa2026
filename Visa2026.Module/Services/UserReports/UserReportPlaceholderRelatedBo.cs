@@ -37,6 +37,7 @@ public enum UserReportPlaceholderRelatedBo
     VisaCancel = 25,
     /// <summary>Labor-contract salary and period (Zähmet şertnamasy).</summary>
     Contract = 26,
+    InvitationAddress = 27,
 }
 
 public static class UserReportPlaceholderRelatedBoCatalog
@@ -76,6 +77,7 @@ public static class UserReportPlaceholderRelatedBoCatalog
         UserReportPlaceholderRelatedBo.VisaCancel => "Visa — cancel",
         UserReportPlaceholderRelatedBo.Education => "Education",
         UserReportPlaceholderRelatedBo.AddressOfResidence => "Address of residence",
+        UserReportPlaceholderRelatedBo.InvitationAddress => "Invitation address",
         UserReportPlaceholderRelatedBo.Position => "Position",
         UserReportPlaceholderRelatedBo.Contract => "Contract",
         UserReportPlaceholderRelatedBo.Salary => "Salary",

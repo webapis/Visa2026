@@ -156,7 +156,10 @@ public static class ApplicationProfileFromApplicationTypeMapper
         profile.RequirePersonEducation = type.ShowCurrentEducation
             && ApplicationProfileEducationPolicy.AllowsPersonEducation(profile);
         profile.RequirePersonPosition = true;
-        profile.RequirePersonAddressOfResidence = true;
+        var caklykAlmak = ApplicationProfileInvitationAddressPolicy.IsCaklykAlmakType(type);
+        profile.RequirePersonAddressOfResidence = !caklykAlmak;
+        if (caklykAlmak)
+            profile.RequireInvitationAddress = true;
         profile.RequirePersonVisa = type.ShowCurrentVisa || type.ShowNextVisa;
         profile.RequirePersonInvitationItem = type.ShowCurrentInvitationItem || type.ShowPreviousInvitationItem;
         profile.RequirePersonWorkPermitItem = type.ShowCurrentWorkPermitItem || type.ShowPreviousWorkPermitItem;

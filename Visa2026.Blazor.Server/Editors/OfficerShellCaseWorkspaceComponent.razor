@@ -473,6 +473,7 @@
     [Parameter] public string? HeaderFieldStatusMessage { get; set; }
     [Parameter] public bool HeaderFieldStatusIsError { get; set; }
     [Parameter] public EventCallback<ApplicationWorkspaceCaseHeaderFieldUpdate> HeaderFieldChanged { get; set; }
+    [Parameter] public EventCallback AlternativeAddressCreateRequested { get; set; }
     [Parameter] public string? OrganizationStatusMessage { get; set; }
     [Parameter] public bool OrganizationStatusIsError { get; set; }
     [Parameter] public EventCallback<ApplicationWorkspaceOrganizationLetterheadUpdate> OrganizationLetterheadChanged { get; set; }
@@ -977,6 +978,15 @@
             ? CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation
             : CommaSeparatedMultiSelectEditorAliases.BorderZone;
 
+    private static bool CanAddAlternativeAddress(ApplicationWorkspaceCaseHeaderField field) =>
+        !field.ReadOnly
+        && string.Equals(field.Key, ApplicationWorkspaceCaseHeaderFieldsHelper.InvitationAlternativeAddress, StringComparison.Ordinal);
+
+    private Task OnNewAlternativeAddress() =>
+        AlternativeAddressCreateRequested.HasDelegate
+            ? AlternativeAddressCreateRequested.InvokeAsync()
+            : Task.CompletedTask;
+
     private Task OnHeaderFieldChanged(string key, string? value)
     {
         if (!HeaderFieldChanged.HasDelegate || string.IsNullOrWhiteSpace(key))
@@ -1453,17 +1463,27 @@
             }
             else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Lookup)
             {
-                <select class="cw-summary-field__input"
-                        value="@field.Value"
-                        disabled="@field.ReadOnly"
-                        @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())">
-                    <option value="">— Select —</option>
-                    @foreach (var option in field.Options)
+                <div class="cw-summary-lookup-row">
+                    <select class="cw-summary-field__input"
+                            value="@field.Value"
+                            disabled="@field.ReadOnly"
+                            @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())">
+                        <option value="">— Select —</option>
+                        @foreach (var option in field.Options)
+                        {
+                            var optionId = option.Id.ToString("D");
+                            <option value="@optionId" selected="@(string.Equals(field.Value, optionId, StringComparison.OrdinalIgnoreCase))">@option.DisplayName</option>
+                        }
+                    </select>
+                    @if (CanAddAlternativeAddress(field))
                     {
-                        var optionId = option.Id.ToString("D");
-                        <option value="@optionId" selected="@(string.Equals(field.Value, optionId, StringComparison.OrdinalIgnoreCase))">@option.DisplayName</option>
+                        <button type="button"
+                                class="cw-org-new"
+                                @onclick="OnNewAlternativeAddress">
+                            @Msg("ApplicationProfileInstance.Picker.New")
+                        </button>
                     }
-                </select>
+                </div>
             }
             else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.ShortText)
             {

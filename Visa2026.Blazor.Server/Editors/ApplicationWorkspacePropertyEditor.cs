@@ -80,6 +80,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         LinkPersonFromPickerRequested = EventCallback.Factory.Create<Guid>(this, LinkPersonFromPickerAsync),
         ClosePersonLinkPickerRequested = EventCallback.Factory.Create(this, ClosePersonLinkPickerAsync),
         HeaderFieldChanged = EventCallback.Factory.Create<ApplicationWorkspaceCaseHeaderFieldUpdate>(this, SaveHeaderFieldAsync),
+        AlternativeAddressCreateRequested = EventCallback.Factory.Create(this, OpenNewAlternativeAddress),
         OrganizationLetterheadChanged = EventCallback.Factory.Create<ApplicationWorkspaceOrganizationLetterheadUpdate>(this, SaveOrganizationLetterheadAsync),
         OrganizationCatalogEditorRequested = EventCallback.Factory.Create<(string Kind, Guid Id)>(this, OpenOrganizationCatalogEditor),
         PersonLinkCandidates = Array.Empty<ApplicationProfileInstancePersonLinkCandidateRow>(),
@@ -234,6 +235,24 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         model.HeaderFieldStatusMessage = null;
         model.HeaderFieldStatusIsError = false;
         await LoadAsync();
+    }
+
+    private void OpenNewAlternativeAddress()
+    {
+        if (_application == null)
+            return;
+
+        AlternativeAddressCatalogOpenHelper.TryOpenNew(_application, savedId =>
+        {
+            if (savedId == Guid.Empty)
+                return;
+
+            _ = SaveHeaderFieldAsync(new ApplicationWorkspaceCaseHeaderFieldUpdate
+            {
+                Key = ApplicationWorkspaceCaseHeaderFieldsHelper.InvitationAlternativeAddress,
+                Value = savedId.ToString("D"),
+            });
+        });
     }
 
     private async Task SaveOrganizationLetterheadAsync(ApplicationWorkspaceOrganizationLetterheadUpdate update)

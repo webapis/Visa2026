@@ -1324,6 +1324,10 @@ namespace Visa2026.Module.BusinessObjects
         public string BusinessTripAddress_FullAddress =>
             BusinessTripDestinationHelper.FormatFullAddress(ApplicationProfileInstance) ?? string.Empty;
 
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string InvitationAddress_FullAddress =>
+            ApplicationProfileInstance?.InvitationAddress_FullAddress ?? string.Empty;
+
         [NotMapped]
         [VisibleInDetailView(false), VisibleInListView(false)]
         public int RowNumber { get; set; }

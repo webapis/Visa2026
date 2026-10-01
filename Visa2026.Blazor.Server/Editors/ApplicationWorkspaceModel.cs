@@ -289,6 +289,12 @@ public sealed class ApplicationWorkspaceModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    public EventCallback AlternativeAddressCreateRequested
+    {
+        get => GetPropertyValue<EventCallback>();
+        set => SetPropertyValue(value);
+    }
+
     public string? OrganizationStatusMessage
     {
         get => GetPropertyValue<string?>();

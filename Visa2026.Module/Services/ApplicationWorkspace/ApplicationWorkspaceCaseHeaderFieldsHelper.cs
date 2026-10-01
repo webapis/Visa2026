@@ -37,6 +37,9 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
     public const string BusinessTripOtherSite = "BusinessTripOtherSite";
     public const string BusinessTripPrivateHouseAddress = "BusinessTripPrivateHouseAddress";
     public const int BusinessTripPrivateHouseAddressMaxLength = 255;
+    public const string InvitationRegion = "InvitationRegion";
+    public const string InvitationCity = "InvitationCity";
+    public const string InvitationAlternativeAddress = "InvitationAlternativeAddress";
     public const string Purpose = "Purpose";
     public const int PurposeMaxLength = 700;
     public const string Project = "Project";
@@ -280,6 +283,28 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             }
         }
 
+        if (ShowInvitationAddress(profile, application))
+        {
+            var stay = application.InvitationAddress;
+            AddLookup(fields, InvitationRegion, ApplicationProfileLocalization.Field("InvitationRegion"), "purple", "📍",
+                visible: true,
+                stay?.Region?.ID, LookupLabel(stay?.Region), catalogs.Regions, readOnly: false,
+                LookupFill(stay?.Region?.ID, null));
+            AddLookup(fields, InvitationCity, ApplicationProfileLocalization.Field("InvitationCity"), "purple", "📍",
+                visible: true,
+                stay?.City?.ID, LookupLabel(stay?.City),
+                CitiesForSelectedRegion(catalogs.Cities, catalogs.RegionCatalog, stay?.Region?.ID),
+                readOnly: false,
+                LookupFill(stay?.City?.ID, null));
+            AddLookup(fields, InvitationAlternativeAddress, ApplicationProfileLocalization.Field("InvitationAlternativeAddress"), "purple", "📍",
+                visible: true,
+                stay?.AlternativeAddress?.ID,
+                stay?.AlternativeAddress?.AddressLine ?? string.Empty,
+                catalogs.AlternativeAddresses,
+                readOnly: false,
+                ApplicationWorkspaceCaseSummaryFillState.Officer);
+        }
+
         AddText(fields, Purpose, ApplicationProfileLocalization.Field("Purpose"), "blue", "📝",
             Visible(profile, p => p.RequirePurpose, ApplicationProfileConfigurationResolver.ShowPurpose, application),
             application.Purpose,
@@ -474,6 +499,34 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                 error = "Pick address type and a lodging/hotel/hospital/other site instead of the legacy catalog.";
                 return false;
 #pragma warning restore CS0618
+            case InvitationRegion:
+                if (!ShowInvitationAddress(profile, application))
+                    return Hidden(out error);
+                return SetLookup<Region>(objectSpace, value, item =>
+                {
+                    var stay = EnsureInvitationAddress(objectSpace, application);
+                    stay.Region = item;
+                    if (item == null || (stay.City?.Region != null && stay.City.Region.ID != item.ID))
+                        stay.City = null;
+                }, out error);
+            case InvitationCity:
+                if (!ShowInvitationAddress(profile, application))
+                    return Hidden(out error);
+                return SetLookup<City>(objectSpace, value, item =>
+                {
+                    var stay = EnsureInvitationAddress(objectSpace, application);
+                    stay.City = item;
+                    if (item?.Region != null)
+                        stay.Region = item.Region;
+                }, out error);
+            case InvitationAlternativeAddress:
+                if (!ShowInvitationAddress(profile, application))
+                    return Hidden(out error);
+                return SetLookup<AlternativeAddressesForInvitation>(objectSpace, value, item =>
+                {
+                    var stay = EnsureInvitationAddress(objectSpace, application);
+                    stay.AlternativeAddress = item;
+                }, out error);
             case Purpose:
                 if (!Visible(profile, p => p.RequirePurpose, ApplicationProfileConfigurationResolver.ShowPurpose, application))
                     return Hidden(out error);
@@ -496,6 +549,22 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                 error = ApplicationProfileLocalization.Field("CannotEdit");
                 return false;
         }
+    }
+
+    private static bool ShowInvitationAddress(ApplicationProfile? profile, ApplicationProfileInstance application) =>
+        Visible(profile, p => p.RequireInvitationAddress, static _ => false, application);
+
+    private static InvitationAddress EnsureInvitationAddress(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance application)
+    {
+        if (application.InvitationAddress != null)
+            return application.InvitationAddress;
+
+        var stay = objectSpace.CreateObject<InvitationAddress>();
+        stay.ApplicationProfileInstance = application;
+        application.InvitationAddress = stay;
+        return stay;
     }
 
     private static bool Visible(
@@ -1138,6 +1207,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         public IReadOnlyList<SiteCatalogOption> OtherSites { get; init; } = [];
         public IReadOnlyList<ApplicationWorkspaceLookupOption> BusinessTripAddresses { get; init; } = [];
         public IReadOnlyList<ApplicationWorkspaceLookupOption> CheckPoints { get; init; } = [];
+        public IReadOnlyList<ApplicationWorkspaceLookupOption> AlternativeAddresses { get; init; } = [];
         public IReadOnlyList<string> BorderZoneNames { get; init; } = [];
         public IReadOnlyList<string> WorkPermittedLocationNames { get; init; } = [];
 
@@ -1164,6 +1234,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                 BusinessTripAddresses = LoadBusinessTripAddresses(objectSpace),
 #pragma warning restore CS0618
                 CheckPoints = LoadItems<CheckPoint>(objectSpace),
+                AlternativeAddresses = LoadAlternativeAddresses(objectSpace),
                 BorderZoneNames = CommaSeparatedCatalogHelper.LoadCatalogNames(
                     objectSpace,
                     typeof(BorderZoneName),
@@ -1198,6 +1269,18 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                         ResidenceType.PrivateHouse => "Private house",
                         _ => t.ToString(),
                     },
+                })
+                .ToList();
+
+        private static IReadOnlyList<ApplicationWorkspaceLookupOption> LoadAlternativeAddresses(IObjectSpace objectSpace) =>
+            objectSpace.GetObjectsQuery<AlternativeAddressesForInvitation>()
+                .ToList()
+                .Where(item => !string.IsNullOrWhiteSpace(item.AddressLine))
+                .OrderBy(item => item.AddressLine, StringComparer.CurrentCultureIgnoreCase)
+                .Select(item => new ApplicationWorkspaceLookupOption
+                {
+                    Id = item.ID,
+                    DisplayName = item.AddressLine.Trim(),
                 })
                 .ToList();
 

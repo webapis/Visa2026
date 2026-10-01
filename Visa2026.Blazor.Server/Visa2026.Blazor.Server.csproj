@@ -3,8 +3,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <Deterministic>false</Deterministic>
-    <AssemblyVersion>1.0.0.814</AssemblyVersion>
-    <FileVersion>1.0.0.814</FileVersion>
+    <AssemblyVersion>1.0.0.815</AssemblyVersion>
+    <FileVersion>1.0.0.815</FileVersion>
     <Configurations>Debug;Release;EasyTest</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
     <!-- dotnet user-secrets (Development): optional override for ConnectionStrings:DefaultConnection -->

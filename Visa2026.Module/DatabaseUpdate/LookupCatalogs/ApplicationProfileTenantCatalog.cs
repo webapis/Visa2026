@@ -126,6 +126,8 @@ public sealed class ApplicationProfileTenantCatalogRow
 
     public bool RequireBusinessTripAddress { get; set; }
 
+    public bool RequireInvitationAddress { get; set; }
+
     public bool RequirePurpose { get; set; }
 
     public string? DefaultPurpose { get; set; }
@@ -269,6 +271,7 @@ public sealed class ApplicationProfileTenantCatalogRow
             RequireToCity = profile.RequireToCity,
             DefaultToCityLocalizationKey = NullIfEmpty(profile.DefaultToCity?.LocalizationKey),
             RequireBusinessTripAddress = profile.RequireBusinessTripAddress,
+            RequireInvitationAddress = profile.RequireInvitationAddress,
             RequirePurpose = profile.RequirePurpose,
             DefaultPurpose = NullIfEmpty(profile.DefaultPurpose),
             RequireProject = profile.RequireProject,
@@ -570,6 +573,9 @@ internal static class ApplicationProfileTenantCatalogSync
             profile.DefaultToCity = profile.DefaultCity;
 #pragma warning restore CS0618
         profile.RequireBusinessTripAddress = row.RequireBusinessTripAddress;
+        if (ApplicationProfileInvitationAddressPolicy.IsCaklykAlmak(row.ProfileCatalogKey, row.Code)
+            || row.RequireInvitationAddress)
+            profile.RequireInvitationAddress = true;
         profile.RequirePurpose = row.RequirePurpose;
         profile.DefaultPurpose = string.IsNullOrWhiteSpace(row.DefaultPurpose) ? null : row.DefaultPurpose.Trim();
         profile.RequireProject = row.RequireProject;
@@ -587,7 +593,8 @@ internal static class ApplicationProfileTenantCatalogSync
         profile.RequirePersonEducation = row.RequirePersonEducation
             && ApplicationProfileEducationPolicy.AllowsPersonEducation(profile);
         profile.RequirePersonPosition = true;
-        profile.RequirePersonAddressOfResidence = true;
+        profile.RequirePersonAddressOfResidence =
+            !ApplicationProfileInvitationAddressPolicy.IsCaklykAlmak(row.ProfileCatalogKey, row.Code);
         profile.RequirePersonVisa = row.RequirePersonVisa;
         profile.RequirePersonInvitationItem = row.RequirePersonInvitationItem;
         profile.RequirePersonWorkPermitItem = row.RequirePersonWorkPermitItem;

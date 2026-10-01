@@ -538,6 +538,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureReadWriteCreatePermission<Subcontractor>(userRole);
     EnsureReadWriteCreatePermission<Lodging>(userRole);
     EnsureReadWriteCreatePermission<Hotel>(userRole);
+    EnsureReadWriteCreatePermission<AlternativeAddressesForInvitation>(userRole);
+    EnsureReadWriteCreatePermission<InvitationAddress>(userRole);
     EnsureReadWriteCreatePermission<Hospital>(userRole);
     EnsureReadWriteCreatePermission<OtherSite>(userRole);
     EnsureReadWriteCreatePermission<Rejection>(userRole);

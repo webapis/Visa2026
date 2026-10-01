@@ -318,6 +318,16 @@ button.cw-person:focus-visible {
 @media (max-width: 900px) { .cw-summary-form { grid-template-columns: 1fr; } }
 .cw-summary-field { display: flex; flex-direction: column; gap: 5px; min-width: 0; padding: 8px; border-radius: 10px; }
 .cw-summary-field__label { font-size: 0.72rem; color: var(--os-muted); font-weight: 650; }
+.cw-summary-lookup-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cw-summary-lookup-row > .cw-summary-field__input {
+  flex: 1 1 10rem;
+  min-width: 0;
+  width: auto;
+}
 .cw-summary-field__input {
   width: 100%; border: 1px solid #dbe3ec; border-radius: 8px; padding: 8px 10px;
   font: inherit; background: var(--os-panel); color: var(--os-ink);

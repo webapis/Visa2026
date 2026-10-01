@@ -1335,6 +1335,34 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Iş sapary salgysy",
             ["ru-RU"] = "Адрес командировки",
         },
+        ["ApplicationProfile.Field.InvitationAddress"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Invitation address",
+            ["tr-TR"] = "Davet adresi",
+            ["tk-TM"] = "Çakylyk salgysy",
+            ["ru-RU"] = "Адрес приглашения",
+        },
+        ["ApplicationProfile.Field.InvitationRegion"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Invitation region",
+            ["tr-TR"] = "Davet bölgesi",
+            ["tk-TM"] = "Çakylyk welaýaty",
+            ["ru-RU"] = "Велаят приглашения",
+        },
+        ["ApplicationProfile.Field.InvitationCity"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Invitation city",
+            ["tr-TR"] = "Davet şehri",
+            ["tk-TM"] = "Çakylyk şäheri",
+            ["ru-RU"] = "Город приглашения",
+        },
+        ["ApplicationProfile.Field.InvitationAlternativeAddress"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Other invitation places",
+            ["tr-TR"] = "Diğer davet yerleri",
+            ["tk-TM"] = "Beýleki çakylyk ýerleri",
+            ["ru-RU"] = "Другие места приглашения",
+        },
         ["ApplicationProfile.Field.BusinessTripAddressLegacy"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Business trip address (legacy)",

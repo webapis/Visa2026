@@ -199,6 +199,12 @@ public sealed class ApplicationProfilePickerModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    public EventCallback AlternativeAddressCreateRequested
+    {
+        get => GetPropertyValue<EventCallback>();
+        set => SetPropertyValue(value);
+    }
+
     public sealed class PickerRowModel
     {
         public Guid ProfileId { get; init; }

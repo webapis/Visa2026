@@ -216,6 +216,13 @@ public class ApplicationProfile : BaseObject
 
     public virtual bool RequireBusinessTripAddress { get; set; }
 
+    /// <summary>
+    /// Case summary collects one <see cref="InvitationAddress"/> (first region and city, plus optional alternative text).
+    /// Seeded on for Çakylyk Almak. Other templates stay off until the wizard turns it on.
+    /// </summary>
+    [XafDisplayName("Invitation address")]
+    public virtual bool RequireInvitationAddress { get; set; }
+
     public virtual ResidenceType? DefaultBusinessTripAddressType { get; set; }
     public virtual Lodging? DefaultBusinessTripLodging { get; set; }
     public virtual Guid? DefaultBusinessTripLodgingId { get; set; }
@@ -1034,6 +1041,7 @@ public static class ApplicationProfileLockHelper
         || original.RequireRegionCity != current.RequireRegionCity
 #pragma warning restore CS0618
         || original.RequireBusinessTripAddress != current.RequireBusinessTripAddress
+        || original.RequireInvitationAddress != current.RequireInvitationAddress
         || original.DefaultBusinessTripAddressType != current.DefaultBusinessTripAddressType
         || original.DefaultBusinessTripLodgingId != current.DefaultBusinessTripLodgingId
         || original.DefaultBusinessTripHotelId != current.DefaultBusinessTripHotelId
