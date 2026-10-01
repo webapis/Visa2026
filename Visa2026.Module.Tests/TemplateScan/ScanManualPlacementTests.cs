@@ -116,7 +116,7 @@ public class ScanManualPlacementTests
     public void Word_selected_phrase_covers_that_phrase()
     {
         const string text = "sanawdaky 1 (bir) sany. 1 (bir) ay mohlet bilen.";
-        const phrase = "1 (bir) ay mohlet";
+        const string phrase = "1 (bir) ay mohlet";
         var bytes = WordBody(text);
         var result = ScanManualPlacement.Resolve(
             bytes,
