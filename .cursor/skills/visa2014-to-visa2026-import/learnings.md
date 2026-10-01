@@ -1,3 +1,9 @@
+### 2026-10-01 — Staging SSH reset during App_Visa_Ext_FM roster
+
+- **Phase**: scalar import stopped and resumed
+- **Why**: Tunnel `15433` exited 255 (`Connection reset`) after about 3 hours. First reopen timed out on `10.100.128.26:22`; the next SSH succeeded.
+- **Stopped at**: App_Visa_Ext_FM roster about 15% (posted 114, failed 0 on the last progress line).
+- **Resume**: `Run-StagingScalar.ps1 -StartAt App_Visa_Ext_FM/roster -SkipLookupPreflight`. Log `20261001-154605` progress `failed=0`.
 ### 2026-10-01 — Staging tunnel dropped during App_Visa_and_WP_Ext roster
 
 - **Phase**: scalar import stopped and resumed
