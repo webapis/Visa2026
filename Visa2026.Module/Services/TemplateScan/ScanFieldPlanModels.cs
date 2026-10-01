@@ -182,6 +182,18 @@ public sealed class ScanDetectedField
 
     /// <summary>Officer locked this yellow on Review — Remap unmarked must keep the token.</summary>
     public bool IsLocked { get; init; }
+
+    /// <summary>Officer placed this mark by clicking the page. Continue stays off until it is locked.</summary>
+    public bool PlacedManually { get; init; }
+
+    /// <summary>Where the officer clicked, as a percent of the Review page. Keeps the number on that word.</summary>
+    public double? PinLeft { get; init; }
+
+    /// <summary>Where the officer clicked, as a percent of the Review page.</summary>
+    public double? PinTop { get; init; }
+
+    /// <summary>Client id for the orange selection. Cleared when this mark is removed.</summary>
+    public string? PickToken { get; init; }
 }
 
 public sealed class ScanStaticRegion

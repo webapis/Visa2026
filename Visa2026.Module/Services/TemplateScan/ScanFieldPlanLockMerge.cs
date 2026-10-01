@@ -193,6 +193,10 @@ public static class ScanFieldPlanLockMerge
             Alternatives = field.Alternatives,
             HiddenPartIndexes = field.HiddenPartIndexes,
             IsLocked = false,
+            PlacedManually = field.PlacedManually,
+            PinLeft = field.PinLeft,
+            PinTop = field.PinTop,
+            PickToken = field.PickToken,
         };
     }
 }

@@ -357,6 +357,64 @@
   margin-bottom: 0.7rem;
 }
 .tas-filebar strong { font-size: 0.87rem; color: #0f172a; }
+.tas-mode {
+  display: inline-flex;
+  border: 1px solid var(--tas-line, #cbd5e1);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.tas-mode button {
+  border: 0;
+  background: transparent;
+  color: var(--tas-ink, #0f172a);
+  padding: 0.2rem 0.7rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+.tas-mode button.is-on {
+  background: var(--tas-accent, #0d9488);
+  color: #fff;
+}
+.tas-office-pdf--place { cursor: text; }
+.tas-office-pdf--place .tas-pdf-mark { cursor: pointer; }
+.tas-pdf-text {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: visible;
+  pointer-events: none;
+  user-select: none;
+}
+.tas-office-pdf--place .tas-pdf-text {
+  pointer-events: auto;
+  cursor: text;
+  user-select: text;
+}
+.tas-pdf-text span {
+  position: absolute;
+  color: transparent;
+  white-space: pre;
+  line-height: 1;
+  cursor: text;
+}
+.tas-office-pdf--place .tas-pdf-text ::selection {
+  background: rgba(249, 115, 22, 0.5);
+}
+.tas-pdf-text span.is-picked {
+  background: rgba(249, 115, 22, 0.45);
+  border-radius: 2px;
+}
+.tas-pdf-pick {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+.tas-pdf-pick__box {
+  position: absolute;
+  background: rgba(249, 115, 22, 0.45);
+  border-radius: 2px;
+}
 .tas-pill { margin-left: auto; padding: 0.15rem 0.55rem; border-radius: 999px; background: #ccfbf1; color: #0f766e; font-size: 0.72rem; font-weight: 600; }
 
 .tas-scan-toolbar {
@@ -882,6 +940,53 @@
   min-height: min(190mm, calc(70vh - 2rem));
   height: auto;
 }
+.tas-office-editor,
+.tas-sheet-wrap {
+  height: min(80vh, 297mm);
+  min-height: 420px;
+  border: 1px solid var(--os-border, #e2e8f0);
+  border-radius: 8px;
+  overflow: auto;
+  background: #fff;
+}
+.tas-sheet {
+  border-collapse: collapse;
+  width: max-content;
+  min-width: 100%;
+  background: #fff;
+  color: #142033;
+}
+.tas-sheet th,
+.tas-sheet td {
+  border: 1px solid #e2e8f0;
+  padding: 0.28rem 0.45rem;
+  font-size: 0.92rem;
+  vertical-align: top;
+  white-space: pre-wrap;
+}
+.tas-sheet th {
+  position: sticky;
+  top: 0;
+  background: #f8fafc;
+  color: #64748b;
+  font-weight: 650;
+  z-index: 1;
+}
+.tas-sheet tbody th {
+  left: 0;
+  z-index: 2;
+}
+.tas-sheet td {
+  user-select: text;
+  cursor: text;
+}
+.tas-sheet td.is-yellow { background: #fde68a; }
+.tas-sheet td.is-on {
+  outline: 2px solid #f97316;
+  outline-offset: -2px;
+  background: rgba(249, 115, 22, 0.22);
+}
+.tas-sheet td.is-yellow.is-on { background: rgba(249, 115, 22, 0.38); }
 .tas-office-pdf {
   display: flex;
   flex-direction: column;
@@ -916,30 +1021,33 @@
 .tas-pdf-marks {
   position: absolute;
   inset: 0;
+  z-index: 2;
   overflow: visible;
   pointer-events: none;
 }
 .tas-pdf-mark {
   position: absolute;
   pointer-events: auto;
-  display: flex;
-  align-items: flex-start;
+  display: inline-flex;
   margin: 0;
-  padding: 0.05em 0.12em 0.05em 0.04em;
-  border: 1.5px solid #ca8a04;
-  border-radius: 6px;
-  background: rgba(254, 249, 195, 0.18);
+  padding: 0;
+  border: 0;
+  background: transparent;
   cursor: pointer;
-  box-sizing: border-box;
+  width: auto;
+  height: auto;
+  z-index: 1;
 }
-.tas-pdf-mark--gap {
-  border-color: #fb923c;
-  background: rgba(255, 237, 213, 0.25);
+.tas-pdf-mark--gap .tas-mark__n {
+  border-color: #c2410c;
+  color: #9a3412;
 }
 .tas-pdf-mark.is-hovered {
-  background: rgba(204, 251, 241, 0.5);
+  z-index: 3;
+}
+.tas-pdf-mark.is-hovered .tas-mark__n {
+  background: #ccfbf1;
   border-color: #0d9488;
-  z-index: 2;
 }
 .tas-office-pdf__frame {
   flex: 1 1 auto;
@@ -1336,4 +1444,42 @@
 .tas-modal .tas-done__note :is(h4, p, strong) {
   background: transparent;
   color: var(--tas-ink);
+}
+/* The sheet stays a white page. Dark-theme ink would hide column titles and wash out yellow cells. */
+.tas-modal .tas-sheet-wrap {
+  background: #fff;
+  color-scheme: light;
+}
+.tas-modal .tas-sheet :is(th, td) {
+  color: #142033;
+  -webkit-text-fill-color: #142033;
+  font-size: 0.95rem;
+  font-weight: 550;
+  line-height: 1.35;
+}
+.tas-modal .tas-sheet thead th,
+.tas-modal .tas-sheet tbody th {
+  background: #e8eef5;
+  color: #1e293b;
+  -webkit-text-fill-color: #1e293b;
+  font-weight: 700;
+}
+.tas-modal .tas-sheet td {
+  background: #fff;
+  min-width: 4.5rem;
+}
+.tas-modal .tas-sheet td.is-yellow {
+  background: #ffe08a;
+  color: #142033;
+  -webkit-text-fill-color: #142033;
+}
+.tas-modal .tas-sheet td.is-on {
+  background: #ffd8a8;
+  color: #142033;
+  -webkit-text-fill-color: #142033;
+}
+.tas-modal .tas-sheet td.is-yellow.is-on {
+  background: #ffc078;
+  color: #142033;
+  -webkit-text-fill-color: #142033;
 }

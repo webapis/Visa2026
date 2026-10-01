@@ -46,6 +46,34 @@ public class ScanWordTableHeaderTests
         Assert.Equal(["PDBT", "PCBT", "PBPL"], codes);
     }
 
+    [Fact]
+    public void Build_numbers_comma_split_roster_cell_as_one_group()
+    {
+        var bytes = PassportAndNameTable();
+        var yellows = new ScanOfficeYellowExtractor().Extract(bytes, ScanSourceKind.Word);
+        var set = PlaceholderSet();
+        var proposal = ScanOfficeFieldPlanBuilder.Build(yellows, set, bytes, ScanSourceKind.Word);
+
+        var passport = Assert.Single(proposal.Fields, f =>
+            f.LabelText.Contains("S36133641", StringComparison.Ordinal));
+        Assert.Contains(',', passport.LabelText);
+        var codes = TemplateTokenSyntax.GetShortCodes(passport.ProposedToken);
+        Assert.Equal(["PPN", "PPED"], codes);
+
+        var ordered = ScanReviewFieldOrder.Order(proposal.Fields.Select(ToDetected).ToList());
+        var parts = ordered.Where(o => o.LabelText.Contains("S36133641", StringComparison.Ordinal)
+            || o.LabelText.Contains("15.11.2023", StringComparison.Ordinal)).ToList();
+        Assert.Equal(["1.1", "1.2"], parts.Select(o => o.DisplayOrder).ToArray());
+        Assert.Equal(["S36133641", "15.11.2023"], parts.Select(o => o.LabelText).ToArray());
+        Assert.Equal(
+            ["PPN", "PPED"],
+            parts.Select(o => TemplateTokenSyntax.GetShortCodes(o.ProposedToken).Single()).ToArray());
+
+        var name = Assert.Single(ordered, o => o.LabelText == "Ozer");
+        Assert.Equal("2", name.DisplayOrder);
+        Assert.DoesNotContain('.', name.DisplayOrder);
+    }
+
     private static ApplicationProfilePlaceholderSet PlaceholderSet() =>
         new ApplicationProfilePlaceholderSetService(new UserReportPlaceholderCatalogService()).GetSet(
             new ApplicationProfilePlaceholderSetQuery
@@ -87,6 +115,51 @@ public class ScanWordTableHeaderTests
         foreach (var text in cells)
             row.AppendChild(new TableCell(new Paragraph(new Run(new Text(text)))));
         return row;
+    }
+
+    private static ScanDetectedField ToDetected(ScanDetectedFieldDraft draft) =>
+        new()
+        {
+            FieldId = draft.FieldId,
+            Box = draft.Box,
+            PageIndex = draft.PageIndex,
+            LabelText = draft.LabelText,
+            ProposedToken = draft.ProposedToken,
+            Confidence = draft.Confidence,
+            Scope = draft.Scope,
+            SourceRegion = draft.SourceRegion,
+            Alternatives = draft.Alternatives,
+        };
+
+    private static byte[] PassportAndNameTable()
+    {
+        using var stream = new MemoryStream();
+        using (var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document))
+        {
+            var main = document.AddMainDocumentPart();
+            var passport = new Paragraph(
+                new Run(
+                    new RunProperties(new Highlight { Val = HighlightColorValues.Yellow }),
+                    new Text("S36133641") { Space = SpaceProcessingModeValues.Preserve }),
+                new Run(new Text(", ") { Space = SpaceProcessingModeValues.Preserve }),
+                new Run(
+                    new RunProperties(new Highlight { Val = HighlightColorValues.Yellow }),
+                    new Text("15.11.2023") { Space = SpaceProcessingModeValues.Preserve }));
+            var name = new Paragraph(new Run(
+                new RunProperties(new Highlight { Val = HighlightColorValues.Yellow }),
+                new Text("Ozer")));
+            var table = new Table(
+                new TableRow(
+                    new TableCell(new Paragraph(new Run(new Text("Pasport belgisi we möhleti")))),
+                    new TableCell(new Paragraph(new Run(new Text("Familiýasy"))))),
+                new TableRow(
+                    new TableCell(passport),
+                    new TableCell(name)));
+            main.Document = new Document(new Body(table));
+            main.Document.Save();
+        }
+
+        return stream.ToArray();
     }
 
     private static TableRow DataRow(params string[] cells)

@@ -509,6 +509,42 @@
     "tk-TM": "Belgilenmedigi täzeden deňeşdir",
     "ru-RU": "Сопоставить неотмеченное"
   },
+  "TemplateScan.Manual.Mode": {
+    "en-US": "How marks are chosen",
+    "tr-TR": "İşaretlerin nasıl seçildiği",
+    "tk-TM": "Bellikleriň saýlanyşy",
+    "ru-RU": "Как выбираются метки"
+  },
+  "TemplateScan.Manual.Yellow": {
+    "en-US": "Yellow marks",
+    "tr-TR": "Sarı işaretler",
+    "tk-TM": "Sary bellikler",
+    "ru-RU": "Жёлтые метки"
+  },
+  "TemplateScan.Manual.Place": {
+    "en-US": "Place manually",
+    "tr-TR": "Elle yerleştir",
+    "tk-TM": "El bilen goý",
+    "ru-RU": "Поставить вручную"
+  },
+  "TemplateScan.Manual.Hint": {
+    "en-US": "Select text in the document. A row opens on the right for that place in the file. Choose the placeholder, then Lock. Continue stays off until every mark you place is locked. The uploaded file is not changed.",
+    "tr-TR": "Belgedeki metni seçin. Dosyadaki o yer için sağda bir satır açılır. Yer tutucuyu seçin, sonra Kilitle. Koyduğunuz her işaret kilitlenene kadar Devam kapalı kalır. Yüklenen dosya değişmez.",
+    "tk-TM": "Resminamdaky teksti saýlaň. Faýldaky şol ýer üçin sagda setir açylýar. Belliji saýlaň, soňra Gulplaň. Goýan her bellik gulplanýança Dowam et öçük galýar. Ýüklenen faýl üýtgemeýär.",
+    "ru-RU": "Выделите текст в документе. Справа откроется строка для этого места в файле. Выберите заполнитель и нажмите Блок. Далее недоступно, пока каждая поставленная метка не заблокирована. Загруженный файл не изменяется."
+  },
+  "TemplateScan.Manual.LockBeforeContinue": {
+    "en-US": "Lock each mark you placed before Continue.",
+    "tr-TR": "Devam etmeden önce yerleştirdiğiniz her işareti kilitleyin.",
+    "tk-TM": "Dowam etmezden ozal goýan her bellik gulplaň.",
+    "ru-RU": "Заблокируйте каждую поставленную метку перед Далее."
+  },
+  "TemplateScan.Manual.LockThese": {
+    "en-US": "These placed rows still say Lock: {0}",
+    "tr-TR": "Bu yerleştirilen satırlar hâlâ Kilitle diyor: {0}",
+    "tk-TM": "Bu goýlan setirler entek Gulpla diýýär: {0}",
+    "ru-RU": "У этих поставленных строк всё ещё написано Блок: {0}"
+  },
   "TemplateScan.Btn.Continue": {
     "en-US": "Continue",
     "tr-TR": "Devam",

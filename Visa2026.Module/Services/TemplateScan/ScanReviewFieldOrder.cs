@@ -18,7 +18,10 @@ public sealed record ScanReviewOrderedField(
     string OverlayId = "",
     int PartIndex = 0,
     DocumentRegion? OverlayRegion = null,
-    IReadOnlyList<int>? HiddenPartIndexes = null)
+    IReadOnlyList<int>? HiddenPartIndexes = null,
+    double? PinLeft = null,
+    double? PinTop = null,
+    string? PickToken = null)
 {
     public string DisplayOrder =>
         string.IsNullOrWhiteSpace(OrderLabel) ? Order.ToString(CultureInfo.InvariantCulture) : OrderLabel;
@@ -51,7 +54,10 @@ public static class ScanReviewFieldOrder
                 field.SourceRegion,
                 field.PageIndex,
                 IsGap: false,
-                HiddenPartIndexes: field.HiddenPartIndexes));
+                HiddenPartIndexes: field.HiddenPartIndexes,
+                PinLeft: field.PinLeft,
+                PinTop: field.PinTop,
+                PickToken: field.PickToken));
         }
 
         if (gaps != null)

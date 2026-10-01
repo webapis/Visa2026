@@ -38,6 +38,8 @@ else
     [Parameter] public int MarkFocus { get; set; }
     [Parameter] public EventCallback<string?> HoveredFieldIdChanged { get; set; }
     [Parameter] public EventCallback<IReadOnlyList<string>> VisualOrderChanged { get; set; }
+    [Parameter] public bool ManualPlace { get; set; }
+    [Parameter] public EventCallback<ScanManualPlacement.Request> ManualPlaceChosen { get; set; }
 
     [Inject] private ApplicationWordReportOfficePreviewPdfConverter Converter { get; set; } = null!;
     [Inject] private IJSRuntime JS { get; set; } = null!;
@@ -66,6 +68,7 @@ else
     private int _appliedFocus = -1;
     private string? _appliedActive;
     private string? _appliedMarksKey;
+    private bool? _appliedManualPlace;
     private ElementReference _host;
     private IJSObjectReference? _module;
     private DotNetObjectReference<TemplateScanOfficePdfPreview>? _self;
@@ -119,11 +122,12 @@ else
         {
             _module ??= await JS.InvokeAsync<IJSObjectReference>(
                 "import",
-                "/lib/pdfjs/template-scan-pdf-preview.js?v=tasmarks17");
+                "/lib/pdfjs/template-scan-pdf-preview.js?v=tasmarks21");
 
             if (_needsPaint)
             {
                 _needsPaint = false;
+                _appliedManualPlace = null;
                 _appliedActive = null;
                 _appliedFocus = -1;
                 _appliedMarksKey = MarksKey();
@@ -133,6 +137,12 @@ else
             {
                 _appliedMarksKey = MarksKey();
                 await _module.InvokeVoidAsync("updateMarks", _host, MarkPayload(), _self);
+            }
+
+            if (_appliedManualPlace != ManualPlace)
+            {
+                _appliedManualPlace = ManualPlace;
+                await _module.InvokeVoidAsync("setManualPlace", _host, ManualPlace, _self);
             }
 
             if (!string.Equals(_appliedActive, ActiveFieldId, StringComparison.Ordinal)
@@ -177,6 +187,22 @@ else
     }
 
     [JSInvokable]
+    public async Task OnManualPlace(ScanManualPlaceClick click)
+    {
+        if (click == null || string.IsNullOrWhiteSpace(click.Text))
+            return;
+
+        await ManualPlaceChosen.InvokeAsync(new ScanManualPlacement.Request(
+            click.Text,
+            click.PageIndex,
+            click.Occurrence,
+            click.LineText,
+            click.PinLeft,
+            click.PinTop,
+            click.PickToken));
+    }
+
+    [JSInvokable]
     public async Task OnMarkActivate(string fieldId)
     {
         if (string.IsNullOrWhiteSpace(fieldId))
@@ -204,6 +230,10 @@ else
                     isGap = mark.IsGap,
                     kind,
                     table = inTable,
+                    pageIndex = mark.PageIndex,
+                    pinL = mark.PinLeft,
+                    pinT = mark.PinTop,
+                    pickToken = mark.PickToken,
                     l = box.Left,
                     t = box.Top,
                     w = box.Width,
@@ -220,7 +250,11 @@ else
                     label = mark.LabelText,
                     isGap = mark.IsGap,
                     kind,
-                    table = inTable
+                    table = inTable,
+                    pageIndex = mark.PageIndex,
+                    pinL = mark.PinLeft,
+                    pinT = mark.PinTop,
+                    pickToken = mark.PickToken
                 });
             }
         }

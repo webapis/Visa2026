@@ -36,6 +36,49 @@ public class ScanOfficeYellowExtractorTests
     }
 
     [Fact]
+    public void Extract_Word_TableCell_JoinsYellowsDividedOnlyByComma()
+    {
+        var bytes = CreateWordTableCell(
+            "Pasport belgisi we möhleti",
+            [
+                (true, "S36133641"),
+                (false, ", "),
+                (true, "15.11.2023"),
+            ]);
+        var spans = new ScanOfficeYellowExtractor().Extract(bytes, ScanSourceKind.Word);
+        var cell = Assert.Single(spans);
+        Assert.Equal("S36133641, 15.11.2023", cell.Text);
+        Assert.Equal(ScanOfficeMarkKind.Yellow, cell.MarkKind);
+    }
+
+    [Fact]
+    public void Extract_Word_TableCell_KeepsYellowsDividedByWords()
+    {
+        var bytes = CreateWordTableCell(
+            "Bellik",
+            [
+                (true, "S36133641"),
+                (false, " we "),
+                (true, "15.11.2023"),
+            ]);
+        var spans = new ScanOfficeYellowExtractor().Extract(bytes, ScanSourceKind.Word);
+        Assert.Equal(2, spans.Count);
+        Assert.Equal("S36133641", spans[0].Text);
+        Assert.Equal("15.11.2023", spans[1].Text);
+    }
+
+    [Fact]
+    public void Extract_Word_LetterParagraph_DoesNotJoinCommaGap()
+    {
+        var bytes = CreateWordRuns(
+            (true, "U37109249"),
+            (false, ", "),
+            (true, "19.02.2024"));
+        var spans = new ScanOfficeYellowExtractor().Extract(bytes, ScanSourceKind.Word);
+        Assert.Equal(2, spans.Count);
+    }
+
+    [Fact]
     public void Extract_Word_SplitsDirectorTitleStuckToSignatoryName()
     {
         var bytes = CreateWordFixture("Turkmenistandaky sahamcasynyn mudiriMehmet Cirak");
@@ -505,6 +548,58 @@ public class ScanOfficeYellowExtractorTests
     public void IsolatedCountDigit_accepts_dashed_gosundy_counts(string text)
     {
         Assert.True(ScanOfficialLetterHints.LooksLikeIsolatedCountDigit(text));
+    }
+
+    public static byte[] CreateWordRuns(params (bool Yellow, string Text)[] runs)
+    {
+        using var stream = new MemoryStream();
+        using (var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document))
+        {
+            var main = document.AddMainDocumentPart();
+            var paragraph = new Paragraph();
+            foreach (var (yellow, text) in runs)
+            {
+                var run = yellow
+                    ? new Run(
+                        new RunProperties(new Highlight { Val = HighlightColorValues.Yellow }),
+                        new Text(text) { Space = SpaceProcessingModeValues.Preserve })
+                    : new Run(new Text(text) { Space = SpaceProcessingModeValues.Preserve });
+                paragraph.AppendChild(run);
+            }
+
+            main.Document = new Document(new Body(paragraph));
+            main.Document.Save();
+        }
+
+        return stream.ToArray();
+    }
+
+    public static byte[] CreateWordTableCell(string header, (bool Yellow, string Text)[] dataRuns)
+    {
+        using var stream = new MemoryStream();
+        using (var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document))
+        {
+            var main = document.AddMainDocumentPart();
+            var headerCell = new TableCell(new Paragraph(new Run(new Text(header))));
+            var dataParagraph = new Paragraph();
+            foreach (var (yellow, text) in dataRuns)
+            {
+                var run = yellow
+                    ? new Run(
+                        new RunProperties(new Highlight { Val = HighlightColorValues.Yellow }),
+                        new Text(text) { Space = SpaceProcessingModeValues.Preserve })
+                    : new Run(new Text(text) { Space = SpaceProcessingModeValues.Preserve });
+                dataParagraph.AppendChild(run);
+            }
+
+            var table = new Table(
+                new TableRow(headerCell),
+                new TableRow(new TableCell(dataParagraph)));
+            main.Document = new Document(new Body(table));
+            main.Document.Save();
+        }
+
+        return stream.ToArray();
     }
 
     public static byte[] CreateWordFixture(params string[] yellowPhrases)

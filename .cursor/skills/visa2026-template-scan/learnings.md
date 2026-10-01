@@ -2,6 +2,57 @@
 
 Append-only. Newest first under **## Entries**.
 
+### 2026-10-01 — Review editor maps letter header text
+
+- **Need**: Place manually on the PDF page missed the words the officer selected.
+- **Fix**: Review opens the uploaded Word file in a read-only editor. A selection is that span in the file. Header text on a letter template mapped correctly (officer, 2026-10-01). Roster rows in a Word table and on an Excel sheet are the next check.
+- **Officer**: Restart, hard-refresh Review. Place manually, select the letter text, set the code, Lock. The uploaded file is not changed.
+- **Prevent**: Do not map Place manually from the PDF text layer. A letter paragraph outside a table stays Header.
+- **Cross-skill**: —
+
+### 2026-10-01 — Orange selection sat above the cursor and stayed after delete
+
+- **Need**: Dragging in Place manually highlighted a band above the words. Deleting the row left that orange band on the page.
+- **Cause**: The selectable text used the full font box, which sits above the printed glyphs. The orange was not tied to the row.
+- **Fix**: The selection sits on the printed words. Each orange band belongs to its row and is removed when that row is deleted.
+- **Officer**: Stop F5, rebuild, hard-refresh Review. Place manually, drag across a word. The orange covers that word. × on that row clears the orange.
+- **Prevent**: Do not position the text layer on the full em box. Do not leave an orange band after its Detected fields row is removed.
+- **Cross-skill**: —
+
+### 2026-10-01 — Place manually selects any page text
+
+- **Need**: Officers need to mark a placeholder on any template text, not only a yellow highlight or a single click.
+- **Fix**: In **Place manually**, drag across the page. The selection stays orange and opens a Detected fields row for that text. A click still selects one word.
+- **Officer**: Stop F5, rebuild, hard-refresh Review. Place manually, drag across the words. They turn orange and a row opens on the right.
+- **Prevent**: Do not limit Place manually to yellow highlights. Do not leave the orange only as the browser's momentary selection.
+- **Cross-skill**: —
+
+### 2026-10-01 — Place manually number sat in the gap
+
+- **Need**: Clicking the yellow `1` next to `(bir)` added placeholder 5 on the wrong line. The row label was `)`.
+- **Cause**: The click landed on the parenthesis. A short label was then drawn as a square in the gap between the other boxes, so the number collided and moved off the word.
+- **Fix**: Review shows only the number, on the highlighted word. Numbers that would stack shift sideways. A click on `)` next to `1` uses that `1`, and the number stays where the officer clicked.
+- **Officer**: Stop F5, rebuild, hard-refresh Review. Place manually, click the `1` in `1 (bir)`. The new number sits on that `1`.
+- **Prevent**: Do not draw a rectangle around the highlight. Do not place a manual mark by searching for a one-character label.
+- **Cross-skill**: —
+
+### 2026-10-01 — Place manually on Review
+
+- **Need**: Officers can set a placeholder by clicking the page when the yellow-mark guess is wrong, without a separate wizard.
+- **Fix**: Review switch **Place manually**. A click snaps to the Word word or Excel cell, adds a row (or selects the mark already there), and the existing placeholder list opens. **Continue** stays off until each placed mark has a code and is locked. **Yellow marks** is unchanged.
+- **Officer**: Stop F5, rebuild, hard-refresh Review. Choose **Place manually**, click the word or cell, pick the code, **Lock**.
+- **Prevent**: Do not treat a click on empty page margin as a placeholder. The click has to hit text.
+- **Cross-skill**: —
+
+### 2026-10-01 — Roster comma in one cell numbered 7 and 8
+
+- **Need**: Sanaw Review showed passport number and date in the same table cell as whole numbers **7** and **8**. They belong in one group, **7.1 / 7.2**. Word and Excel.
+- **Cause**: Word kept two yellow runs when the comma between them was not highlighted. Each run became its own placeholder.
+- **Fix**: In a table cell, yellows separated only by a comma are one span. Existing compound numbering then shows **N.1 / N.2**. An Excel cell with a comma was already one group.
+- **Officer**: Stop F5, rebuild, **Analyze** the same sanaw. The comma cell is **7.1** and **7.2**, not **7** and **8**.
+- **Prevent**: Do not number comma-separated values in one roster cell as the next whole numbers.
+- **Cross-skill**: —
+
 ### 2026-09-30 — Continue stayed off on a mapped Kepilnama
 
 - **Need**: Review of `_Salgy Kepilnama.docx` had every real placeholder mapped, and **Continue** stayed grey.

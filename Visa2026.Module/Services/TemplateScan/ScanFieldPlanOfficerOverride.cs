@@ -385,7 +385,20 @@ public static class ScanFieldPlanOfficerOverride
             Alternatives = field.Alternatives,
             HiddenPartIndexes = hiddenPartIndexes ?? field.HiddenPartIndexes,
             IsLocked = locked ?? field.IsLocked,
+            PlacedManually = field.PlacedManually,
+            PinLeft = field.PinLeft,
+            PinTop = field.PinTop,
+            PickToken = field.PickToken,
         };
+
+    public static ScanFieldPlan AddManualField(ScanFieldPlan plan, ScanDetectedField field)
+    {
+        ArgumentNullException.ThrowIfNull(plan);
+        ArgumentNullException.ThrowIfNull(field);
+        var fields = plan.Fields.ToList();
+        fields.Add(field);
+        return WithFields(plan, fields, plan.Gaps);
+    }
 
     private static int OverlayPartIndex(string rowKey)
     {

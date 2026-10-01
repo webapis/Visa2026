@@ -123,6 +123,50 @@ public class ScanExcelYellowResolverTests
     }
 
     [Fact]
+    public void Resolve_numbers_comma_passport_cell_as_one_group()
+    {
+        var set = PlaceholderSet();
+        using var ms = new MemoryStream();
+        using (var wb = new XLWorkbook())
+        {
+            var ws = wb.AddWorksheet("Sanaw");
+            ws.Cell("A4").Value = "Familiýasy";
+            ws.Cell("B4").Value = "Pasport belgisi we möhleti";
+            ws.Cell("A5").Value = "Ozer";
+            ws.Cell("A5").Style.Fill.BackgroundColor = XLColor.Yellow;
+            ws.Cell("B5").Value = "S36133641, 15.11.2023";
+            ws.Cell("B5").Style.Fill.BackgroundColor = XLColor.Yellow;
+            wb.SaveAs(ms);
+        }
+
+        var bytes = ms.ToArray();
+        var yellows = new ScanOfficeYellowExtractor().Extract(bytes, ScanSourceKind.Excel);
+        var fields = ScanExcelYellowResolver.Resolve(bytes, yellows, set);
+        var passport = Assert.Single(fields, f => f.LabelText.Contains("S36133641", StringComparison.Ordinal));
+        Assert.Equal(["PPN", "PPED"], TemplateTokenSyntax.GetShortCodes(passport.ProposedToken));
+
+        var ordered = ScanReviewFieldOrder.Order(fields.Select(f => new ScanDetectedField
+        {
+            FieldId = f.FieldId,
+            Box = ScanBoundingBox.FullPage,
+            PageIndex = 0,
+            LabelText = f.LabelText,
+            ProposedToken = f.ProposedToken,
+            Confidence = f.Confidence,
+            Scope = f.Scope,
+            SourceRegion = f.SourceRegion,
+            Alternatives = f.Alternatives,
+        }).ToList());
+
+        var parts = ordered.Where(o => o.SourceRegion is DocumentRegion.ExcelCell cell
+            && cell.CellReference.StartsWith("B", StringComparison.OrdinalIgnoreCase)).ToList();
+        Assert.Equal(["2.1", "2.2"], parts.Select(o => o.DisplayOrder).ToArray());
+        Assert.Equal(["S36133641", "15.11.2023"], parts.Select(o => o.LabelText).ToArray());
+        var name = Assert.Single(ordered, o => o.LabelText == "Ozer");
+        Assert.Equal("1", name.DisplayOrder);
+    }
+
+    [Fact]
     public void Resolve_splits_compound_birth_place_cell()
     {
         var set = PlaceholderSet();

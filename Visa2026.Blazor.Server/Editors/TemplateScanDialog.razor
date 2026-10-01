@@ -425,7 +425,7 @@
                             title="@Msg("TemplateScan.Btn.RemapTitle")"
                             @onclick:stopPropagation="true"
                             @onclick="RemapUnlockedAsync">@(_busy && _stage == Stage.FieldReview ? Msg("TemplateScan.Btn.Remapping") : Msg("TemplateScan.Btn.Remap"))</button>
-                    <button type="button" class="tas-btn tas-btn--primary" disabled="@(!CanContinue)" @onclick:stopPropagation="true" @onclick="GenerateAsync">@Msg("TemplateScan.Btn.Continue")</button>
+                    <button type="button" class="tas-btn tas-btn--primary" disabled="@(!CanContinue)" title="@ContinueDisabledTitle" @onclick:stopPropagation="true" @onclick="GenerateAsync">@Msg("TemplateScan.Btn.Continue")</button>
                 }
                 else if (_stage == Stage.Clarification)
                 {
@@ -1000,11 +1000,49 @@
         _fieldPlan?.Fields.Any(static f => f.Confidence == ScanFieldConfidence.Low) == true
         || _ingest?.Suitability.Verdict == ScanSuitabilityVerdict.Warn;
 
+    private bool ManualMarksNeedLock =>
+        _fieldPlan?.Fields.Any(static f =>
+            f.PlacedManually
+            && !f.IsLocked
+            && !string.IsNullOrWhiteSpace(f.ProposedToken)) == true;
+
+    private string? ContinueDisabledTitle
+    {
+        get
+        {
+            if (_fieldPlan == null || CanContinue)
+                return null;
+
+            if (ManualMarksNeedLock)
+            {
+                var names = _fieldPlan.Fields
+                    .Where(static f =>
+                        f.PlacedManually
+                        && !f.IsLocked
+                        && !string.IsNullOrWhiteSpace(f.ProposedToken))
+                    .Select(static f => f.LabelText.Trim())
+                    .Where(static name => name.Length > 0)
+                    .Distinct(StringComparer.Ordinal)
+                    .Take(4)
+                    .ToList();
+                return names.Count == 0
+                    ? Msg("TemplateScan.Manual.LockBeforeContinue")
+                    : FormatMsg("TemplateScan.Manual.LockThese", string.Join(", ", names));
+            }
+
+            if (RequiresLowConfidenceAck && !_acknowledgedWarnings)
+                return Msg("TemplateScan.Review.Ack");
+
+            return null;
+        }
+    }
+
     private bool CanContinue =>
         !_busy
         && _fieldPlan is { HasMappedFields: true }
         && _ingest?.Suitability.CanContinue == true
-        && (!RequiresLowConfidenceAck || _acknowledgedWarnings);
+        && (!RequiresLowConfidenceAck || _acknowledgedWarnings)
+        && !ManualMarksNeedLock;
 
     private bool CanRemapUnmarked =>
         !_busy

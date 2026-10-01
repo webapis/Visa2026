@@ -1,0 +1,396 @@
+@namespace Visa2026.Blazor.Server.Editors
+@using System.Linq
+@using Microsoft.JSInterop
+@using DevExpress.Blazor.Office
+@using DevExpress.Blazor.RichEdit
+@using RichFormat = DevExpress.Blazor.RichEdit.DocumentFormat
+@using Visa2026.Module.Services.TemplateConvert
+@using Visa2026.Module.Services.TemplateScan
+@implements IAsyncDisposable
+
+@if (SourceKind == ScanSourceKind.Excel)
+{
+    <div @ref="_sheetHost" class="tas-sheet-wrap">
+        @if (_sheet == null)
+        {
+            <p class="tas-office-pdf__state">The workbook could not be opened.</p>
+        }
+        else
+        {
+            <table class="tas-sheet">
+                <thead>
+                    <tr>
+                        <th></th>
+                        @for (var column = _sheet.MinColumn; column <= _sheet.MaxColumn; column++)
+                        {
+                            <th>@ScanOfficeEditorSheet.ColumnName(column)</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (var row = _sheet.MinRow; row <= _sheet.MaxRow; row++)
+                    {
+                        var rowNumber = row;
+                        <tr>
+                            <th>@rowNumber</th>
+                            @for (var column = _sheet.MinColumn; column <= _sheet.MaxColumn; column++)
+                            {
+                                var cell = CellAt(rowNumber, column);
+                                <td class="@CellClass(cell)"
+                                    data-cell="@cell.Reference"
+                                    @onmouseup="() => OnCellUpAsync(cell)">@cell.Text</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+}
+else if (_loadFailed)
+{
+    <p class="tas-office-pdf__state">The document could not be opened in the editor.</p>
+}
+else
+{
+    <DxRichEdit @ref="_rich"
+                ReadOnly="true"
+                BarMode="BarMode.None"
+                HorizontalRulerVisible="false"
+                CssClass="tas-office-editor"
+                DocumentLoaded="OnDocumentLoaded"
+                @bind-Selection="_selection"
+                @bind-Selection:after="OnBoundSelectionChanged" />
+}
+
+@code {
+    [Parameter] public byte[]? OfficeBytes { get; set; }
+    [Parameter] public ScanSourceKind SourceKind { get; set; } = ScanSourceKind.Word;
+    [Parameter] public bool ManualPlace { get; set; }
+    [Parameter] public string? ActiveFieldId { get; set; }
+    [Parameter] public int MarkFocus { get; set; }
+    [Parameter] public IReadOnlyList<ScanReviewOrderedField> Marks { get; set; } = Array.Empty<ScanReviewOrderedField>();
+    [Parameter] public EventCallback<ScanManualPlacement.Request> ManualPlaceChosen { get; set; }
+    [Parameter] public EventCallback LoadFailed { get; set; }
+
+    [Inject] private IJSRuntime JS { get; set; } = default!;
+
+    private DxRichEdit? _rich;
+    private Selection? _selection;
+    private bool _loadStarted;
+    private bool _loadFailed;
+    private bool _docReady;
+    private bool _focusPending;
+    private string? _focusKey;
+    private long _ignoreUntil;
+    private int _selectionGeneration;
+    private ScanOfficeEditorSheet.Model? _sheet;
+    private byte[]? _sheetSource;
+    private ElementReference _sheetHost;
+    private IJSObjectReference? _sheetJs;
+
+    protected override void OnParametersSet()
+    {
+        if (SourceKind == ScanSourceKind.Excel)
+        {
+            if (!ReferenceEquals(OfficeBytes, _sheetSource))
+            {
+                _sheetSource = OfficeBytes;
+                _sheet = ScanOfficeEditorSheet.Read(OfficeBytes);
+            }
+
+            return;
+        }
+
+        var mark = ActiveMark();
+        var key = mark == null
+            ? ""
+            : mark.DisplayId + "|" + mark.LabelText + "|" + MarkFocus;
+        if (key == _focusKey)
+            return;
+
+        _focusKey = key;
+        _focusPending = true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (SourceKind == ScanSourceKind.Excel)
+        {
+            _sheetJs ??= await JS.InvokeAsync<IJSObjectReference>(
+                "import",
+                "/lib/template-scan-editor.js?v=taseditor1");
+            return;
+        }
+
+        if (_docReady && _focusPending)
+        {
+            _focusPending = false;
+            await FocusActiveAsync();
+            return;
+        }
+
+        if (_loadStarted || _rich == null || OfficeBytes is not { Length: > 64 } bytes)
+            return;
+
+        _loadStarted = true;
+        try
+        {
+            await _rich.LoadDocumentAsync(bytes, RichFormat.OpenXml);
+        }
+        catch (Exception)
+        {
+            _loadFailed = true;
+            await LoadFailed.InvokeAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task OnDocumentLoaded()
+    {
+        _docReady = true;
+        if (_focusPending)
+        {
+            _focusPending = false;
+            await FocusActiveAsync();
+        }
+    }
+
+    private Task OnBoundSelectionChanged() =>
+        _selection == null ? Task.CompletedTask : OnSelectionChanged(_selection);
+
+    private async Task OnSelectionChanged(Selection selection)
+    {
+        if (!ManualPlace || Environment.TickCount64 < _ignoreUntil)
+            return;
+
+        var generation = ++_selectionGeneration;
+        await Task.Delay(280);
+        if (generation != _selectionGeneration || !ManualPlace)
+            return;
+
+        try
+        {
+            await PublishWordSelectionAsync(selection);
+        }
+        catch (Exception)
+        {
+            // A selection that the editor cannot read does not add a row.
+        }
+    }
+
+    private async Task PublishWordSelectionAsync(Selection selection)
+    {
+        if (selection.Intervals == null || selection.Intervals.Count == 0)
+            return;
+
+        var interval = selection.Intervals[0];
+        if (interval.Length <= 0)
+            return;
+
+        var document = selection.ActiveSubDocument;
+        var span = await document.GetTextSpanAsync(interval);
+        var text = Clean(span.Text);
+        if (text.Length == 0)
+            return;
+
+        var line = await ParagraphTextAtAsync(document, interval) ?? text;
+        var earlier = 0;
+        var matches = await document.FindAllAsync(text, false);
+        foreach (var match in matches)
+        {
+            if (match.Start < interval.Start)
+                earlier++;
+        }
+
+        await ManualPlaceChosen.InvokeAsync(new ScanManualPlacement.Request(
+            text,
+            0,
+            earlier,
+            line));
+    }
+
+    private async Task FocusActiveAsync()
+    {
+        if (_rich?.DocumentAPI == null)
+            return;
+
+        var mark = ActiveMark();
+        _ignoreUntil = Environment.TickCount64 + 700;
+        if (mark == null || string.IsNullOrWhiteSpace(mark.LabelText))
+        {
+            _selection = new Selection(_rich.DocumentAPI, 0);
+            return;
+        }
+
+        try
+        {
+            var matches = await _rich.DocumentAPI.FindAllAsync(mark.LabelText, false);
+            if (matches.Count == 0)
+            {
+                _selection = new Selection(_rich.DocumentAPI, 0);
+                return;
+            }
+
+            var pick = matches[0];
+            var target = ScanManualPlacement.ParagraphText(OfficeBytes, mark.DisplayRegion);
+            var foldedTarget = Fold(target);
+            if (foldedTarget.Length >= 4)
+            {
+                foreach (var match in matches)
+                {
+                    var around = await ParagraphTextAtAsync(_rich.DocumentAPI, match);
+                    var foldedAround = Fold(around);
+                    if (foldedAround.Contains(foldedTarget, StringComparison.Ordinal)
+                        || foldedTarget.Contains(foldedAround, StringComparison.Ordinal))
+                    {
+                        pick = match;
+                        break;
+                    }
+                }
+            }
+
+            _selection = new Selection(_rich.DocumentAPI, pick.Start, pick.Length);
+        }
+        catch (Exception)
+        {
+            _selection = new Selection(_rich.DocumentAPI, 0);
+        }
+    }
+
+    private static async Task<string?> ParagraphTextAtAsync(SubDocument document, Interval interval)
+    {
+        for (var index = 0; index < 4000; index++)
+        {
+            Paragraph paragraph;
+            try
+            {
+                paragraph = await document.Paragraphs.GetAsync(index);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+
+            if (paragraph?.Interval == null)
+                return null;
+
+            var start = paragraph.Interval.Start;
+            var end = start + paragraph.Interval.Length;
+            if (interval.Start >= end)
+                continue;
+            if (interval.Start < start)
+                return null;
+
+            var span = await document.GetTextSpanAsync(paragraph.Interval);
+            return Clean(span.Text);
+        }
+
+        return null;
+    }
+
+    private async Task OnCellUpAsync(ScanOfficeEditorSheet.Cell cell)
+    {
+        if (!ManualPlace || string.IsNullOrWhiteSpace(cell.Text))
+            return;
+
+        var text = cell.Text;
+        if (_sheetJs != null)
+        {
+            try
+            {
+                var owner = await _sheetJs.InvokeAsync<string>("cellOfSelection", _sheetHost);
+                var selected = Clean(await _sheetJs.InvokeAsync<string>("selectedText"));
+                if (string.Equals(owner, cell.Reference, StringComparison.OrdinalIgnoreCase)
+                    && selected.Length > 0)
+                    text = selected;
+            }
+            catch (JSException)
+            {
+                text = cell.Text;
+            }
+        }
+
+        if (text.Length == 0)
+            return;
+
+        var occurrence = 0;
+        if (_sheet != null)
+        {
+            var foldedLine = Fold(cell.Text);
+            foreach (var other in _sheet.Cells.OrderBy(static c => c.Row).ThenBy(static c => c.Column))
+            {
+                if (string.Equals(other.Reference, cell.Reference, StringComparison.OrdinalIgnoreCase))
+                    break;
+                if (Fold(other.Text).Contains(foldedLine, StringComparison.Ordinal))
+                    occurrence++;
+            }
+        }
+
+        await ManualPlaceChosen.InvokeAsync(new ScanManualPlacement.Request(
+            text,
+            0,
+            occurrence,
+            cell.Text));
+    }
+
+    private ScanOfficeEditorSheet.Cell CellAt(int row, int column)
+    {
+        var found = _sheet?.Cells.FirstOrDefault(c => c.Row == row && c.Column == column);
+        return found ?? new ScanOfficeEditorSheet.Cell(
+            ScanOfficeEditorSheet.ColumnName(column) + row,
+            row,
+            column,
+            string.Empty,
+            false);
+    }
+
+    private string? CellClass(ScanOfficeEditorSheet.Cell cell)
+    {
+        var active = ActiveMark()?.DisplayRegion is DocumentRegion.ExcelCell excel
+            && string.Equals(excel.CellReference, cell.Reference, StringComparison.OrdinalIgnoreCase);
+        if (active && cell.Yellow)
+            return "is-on is-yellow";
+        if (active)
+            return "is-on";
+        if (cell.Yellow)
+            return "is-yellow";
+        return null;
+    }
+
+    private ScanReviewOrderedField? ActiveMark()
+    {
+        if (string.IsNullOrWhiteSpace(ActiveFieldId))
+            return null;
+
+        return Marks.FirstOrDefault(mark =>
+            string.Equals(mark.DisplayId, ActiveFieldId, StringComparison.Ordinal)
+            || string.Equals(mark.FieldId, ActiveFieldId, StringComparison.Ordinal));
+    }
+
+    private static string Clean(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return string.Empty;
+
+        var buffer = new char[value.Length];
+        var length = 0;
+        foreach (var ch in value)
+        {
+            if (ch is '\r' or '\n' or '\v' or '\f' or '\u0002')
+                continue;
+            buffer[length++] = ch;
+        }
+
+        return new string(buffer, 0, length).Trim();
+    }
+
+    private static string Fold(string? value) =>
+        TemplateTextNormalizer.NormalizeFolded(Clean(value));
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_sheetJs != null)
+            await _sheetJs.DisposeAsync();
+    }
+}

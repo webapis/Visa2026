@@ -145,6 +145,8 @@ public sealed class ScanOfficeYellowExtractor : IScanOfficeYellowExtractor
             var paragraphSpans = new List<ScanOfficeYellowSpan>();
 
             // Merge consecutive marks of the same color. A new "2. Name" stays its own roster line.
+            // In a table cell, an unhighlighted comma between yellows is the same roster value
+            // (passport number, date) and must stay one span so Review numbers 7.1 / 7.2.
             var i = 0;
             while (i < segments.Count)
             {
@@ -159,14 +161,32 @@ public sealed class ScanOfficeYellowExtractor : IScanOfficeYellowExtractor
                 var end = start + segments[i].Length;
                 var sb = new System.Text.StringBuilder(segments[i].Text);
                 var j = i + 1;
-                while (j < segments.Count
-                       && segments[j].Kind == kind
-                       && ShouldMergeYellowTexts(sb.ToString(), segments[j].Text)
-                       && !StartsNewNumberedLine(segments[j].Text))
+                while (j < segments.Count)
                 {
-                    sb.Append(segments[j].Text);
-                    end = segments[j].Start + segments[j].Length;
-                    j++;
+                    if (segments[j].Kind == kind
+                        && ShouldMergeYellowTexts(sb.ToString(), segments[j].Text)
+                        && !StartsNewNumberedLine(segments[j].Text))
+                    {
+                        sb.Append(segments[j].Text);
+                        end = segments[j].Start + segments[j].Length;
+                        j++;
+                        continue;
+                    }
+
+                    if (cell != null
+                        && TryBridgeCommaToNextMark(segments, j, kind, sb.ToString(), out var consumedThrough))
+                    {
+                        for (var k = j; k <= consumedThrough; k++)
+                        {
+                            sb.Append(segments[k].Text);
+                            end = segments[k].Start + segments[k].Length;
+                        }
+
+                        j = consumedThrough + 1;
+                        continue;
+                    }
+
+                    break;
                 }
 
                 var raw = sb.ToString();
@@ -326,6 +346,56 @@ public sealed class ScanOfficeYellowExtractor : IScanOfficeYellowExtractor
         if (ScanOfficialLetterHints.LooksLikeBranchDirectorTitle(left)
             && LooksLikeStandalonePersonName(right))
             return false;
+        return true;
+    }
+
+    /// <summary>
+    /// Unhighlighted <c>,</c> (and spaces) between two marks of the same color in one table cell.
+    /// The comma is the roster divider, not a separate placeholder.
+    /// </summary>
+    internal static bool TryBridgeCommaToNextMark(
+        IReadOnlyList<(int Start, int Length, ScanOfficeMarkKind? Kind, string Text)> segments,
+        int index,
+        ScanOfficeMarkKind kind,
+        string accumulated,
+        out int consumedThrough)
+    {
+        consumedThrough = index;
+        if (index >= segments.Count || segments[index].Kind != null)
+            return false;
+
+        var bridge = new System.Text.StringBuilder();
+        var k = index;
+        while (k < segments.Count && segments[k].Kind == null)
+        {
+            bridge.Append(segments[k].Text);
+            k++;
+        }
+
+        if (k >= segments.Count || segments[k].Kind != kind)
+            return false;
+        if (!IsCommaDivider(bridge.ToString()))
+            return false;
+        if (!ShouldMergeYellowTexts(accumulated, segments[k].Text))
+            return false;
+        if (StartsNewNumberedLine(segments[k].Text))
+            return false;
+
+        consumedThrough = k;
+        return true;
+    }
+
+    internal static bool IsCommaDivider(string? text)
+    {
+        if (string.IsNullOrEmpty(text) || !text.Contains(',', StringComparison.Ordinal))
+            return false;
+
+        foreach (var ch in text)
+        {
+            if (ch != ',' && !char.IsWhiteSpace(ch))
+                return false;
+        }
+
         return true;
     }
 

@@ -104,6 +104,19 @@ function itemRect(item, viewport) {
     };
 }
 
+function glyphRect(item, viewport) {
+    const box = itemRect(item, viewport);
+    // PDF draws on the baseline. A full em box sits above the ink, so the
+    // selectable text is shifted down onto the painted glyphs.
+    const shift = box.height * 0.2;
+    return {
+        left: box.left,
+        top: box.top + shift,
+        width: box.width,
+        height: Math.max(box.height - shift, 8)
+    };
+}
+
 function unionRects(rects) {
     let left = Infinity;
     let top = Infinity;
@@ -319,6 +332,9 @@ function placeShortDuplicateLabels(entries, marks, used, placed, dotnetRef) {
     for (let i = 0; i < marks.length; i++) {
         const mark = marks[i];
         if (mark.kind === "excel") {
+            continue;
+        }
+        if (typeof mark.pinL === "number" && typeof mark.pinT === "number") {
             continue;
         }
         const key = fold(mark.label).replace(/^-+/, "");
@@ -715,8 +731,6 @@ function appendMark(pageDiv, mark, box, dotnetRef) {
     button.dataset.kind = mark.kind || "";
     button.style.left = box.left + "px";
     button.style.top = box.top + "px";
-    button.style.width = box.width + "px";
-    button.style.height = box.height + "px";
     button.title = (mark.order || "") + " " + (mark.label || "");
     const badge = document.createElement("span");
     badge.className = "tas-mark__n";
@@ -873,6 +887,57 @@ function placeExcelMark(mark, frames, dotnetRef) {
     return true;
 }
 
+function placePinned(mark, pages, dotnetRef, placed) {
+    if (typeof mark.pinL !== "number" || typeof mark.pinT !== "number" || !pages || !pages.length) {
+        return false;
+    }
+    const page = pages[Math.max(0, mark.pageIndex || 0)] || pages[0];
+    if (!page) {
+        return false;
+    }
+    const size = pageSize(page.pageDiv, page.viewport);
+    if (size.width < 8 || size.height < 8) {
+        return false;
+    }
+    const box = {
+        pageDiv: page.pageDiv,
+        left: (mark.pinL / 100) * size.width,
+        top: (mark.pinT / 100) * size.height,
+        width: 18,
+        height: 14
+    };
+    appendMark(page.pageDiv, mark, box, dotnetRef);
+    rememberPlaced(placed, mark, box);
+    return true;
+}
+
+function separateBadges(container) {
+    if (!container) {
+        return;
+    }
+    const badges = Array.prototype.slice.call(container.querySelectorAll(".tas-pdf-mark"));
+    for (let pass = 0; pass < 8; pass++) {
+        let moved = false;
+        for (let i = 0; i < badges.length; i++) {
+            const a = badges[i].getBoundingClientRect();
+            for (let j = i + 1; j < badges.length; j++) {
+                const b = badges[j].getBoundingClientRect();
+                const overlap = a.left < b.right - 1 && b.left < a.right - 1
+                    && a.top < b.bottom - 1 && b.top < a.bottom - 1;
+                if (!overlap) {
+                    continue;
+                }
+                const left = parseFloat(badges[j].style.left) || 0;
+                badges[j].style.left = (left + Math.max(a.width, 14) + 2) + "px";
+                moved = true;
+            }
+        }
+        if (!moved) {
+            break;
+        }
+    }
+}
+
 function placeTextHit(mark, hit, entries, used, dotnetRef) {
     const box = hitRect(hit, entries);
     markUsed(hit, used);
@@ -904,7 +969,16 @@ function placeMarks(entries, marks, dotnetRef, pages) {
         : [];
     const used = new Set();
     const placed = [];
-    const placedIds = placeShortDuplicateLabels(entries, marks, used, placed, dotnetRef);
+    const placedIds = {};
+    for (let i = 0; i < marks.length; i++) {
+        if (placePinned(marks[i], pages, dotnetRef, placed)) {
+            placedIds[marks[i].fieldId] = true;
+        }
+    }
+    const shortPlaced = placeShortDuplicateLabels(entries, marks, used, placed, dotnetRef);
+    Object.keys(shortPlaced).forEach(function (id) {
+        placedIds[id] = true;
+    });
     const dupShort = duplicateShortKeys(marks);
     const queue = marks.slice().sort(function (a, b) {
         const aExcel = a.kind !== "word" && hasExcelBox(a);
@@ -917,6 +991,10 @@ function placeMarks(entries, marks, dotnetRef, pages) {
 
     for (const mark of queue) {
         if (placedIds[mark.fieldId]) {
+            continue;
+        }
+        if (placePinned(mark, pages, dotnetRef, placed)) {
+            placedIds[mark.fieldId] = true;
             continue;
         }
         if (dupShort[fold(mark.label).replace(/^-+/, "")] && mark.kind !== "excel") {
@@ -969,6 +1047,7 @@ function placeMarks(entries, marks, dotnetRef, pages) {
         placedIds[mark.fieldId] = true;
     }
 
+    separateBadges(pages && pages[0] ? pages[0].pageDiv.parentElement : null);
     applyReadingOrder(
         pages && pages[0] ? pages[0].pageDiv.parentElement : null,
         dotnetRef,
@@ -1035,14 +1114,28 @@ async function render(container, pdfBytes, marks, dotnetRef) {
             return item && typeof item.str === "string" && item.str.length > 0;
         });
         for (let i = 0; i < items.length; i++) {
-            entries.push({ item: items[i], pageDiv: pageDiv, viewport: viewport });
+            entries.push({
+                item: items[i],
+                pageDiv: pageDiv,
+                viewport: viewport,
+                index: entries.length
+            });
         }
-        pages.push({ pageDiv: pageDiv, viewport: viewport, items: entries.filter(function (entry) {
+        const pageEntries = entries.filter(function (entry) {
             return entry.pageDiv === pageDiv;
-        }) });
+        });
+        pages.push({ pageDiv: pageDiv, viewport: viewport, items: pageEntries });
+        appendTextLayer(pageDiv, pageEntries);
     }
 
-    hosts.set(container, { loadingTask: loadingTask, entries: entries, pages: pages });
+    hosts.set(container, {
+        loadingTask: loadingTask,
+        entries: entries,
+        pages: pages,
+        dotnetRef: dotnetRef,
+        manualPlace: false,
+        pendingPicks: {}
+    });
     placeMarks(entries, list, dotnetRef, pages);
 }
 
@@ -1052,10 +1145,12 @@ function updateMarks(container, marks, dotnetRef) {
         return;
     }
 
+    const list = Array.isArray(marks) ? marks : [];
+    syncPicks(container, list);
     container.querySelectorAll(".tas-pdf-marks").forEach(function (layer) {
         layer.replaceChildren();
     });
-    placeMarks(prev.entries, Array.isArray(marks) ? marks : [], dotnetRef, prev.pages);
+    placeMarks(prev.entries, list, dotnetRef, prev.pages);
 }
 
 function fieldMatches(fid, id) {
@@ -1140,6 +1235,418 @@ function exportPagePngs(maxPages, maxWidth) {
     return out;
 }
 
-const api = { render, clear, setActive, updateMarks, exportPagePngs };
+function pageIndexOf(state, pageDiv) {
+    const pages = state && state.pages ? state.pages : [];
+    for (let i = 0; i < pages.length; i++) {
+        if (pages[i].pageDiv === pageDiv) {
+            return i;
+        }
+    }
+    return 0;
+}
+
+function occurrenceIndex(entries, target) {
+    const needle = fold(target.item.str).trim();
+    const ranked = [];
+    for (let i = 0; i < entries.length; i++) {
+        const entry = entries[i];
+        if (fold(entry.item.str).trim() !== needle) {
+            continue;
+        }
+        ranked.push({
+            entry: entry,
+            rect: itemRect(entry.item, entry.viewport)
+        });
+    }
+    ranked.sort(function (a, b) {
+        if (a.entry.pageDiv !== b.entry.pageDiv) {
+            const aTop = a.entry.pageDiv.getBoundingClientRect().top;
+            const bTop = b.entry.pageDiv.getBoundingClientRect().top;
+            if (Math.abs(aTop - bTop) > 2) {
+                return aTop - bTop;
+            }
+        }
+        if (Math.abs(a.rect.top - b.rect.top) > 2) {
+            return a.rect.top - b.rect.top;
+        }
+        return a.rect.left - b.rect.left;
+    });
+    for (let i = 0; i < ranked.length; i++) {
+        if (ranked[i].entry === target) {
+            return i;
+        }
+    }
+    return 0;
+}
+
+function hasWord(text) {
+    return /[0-9a-z]/.test(fold(text));
+}
+
+function lineItems(entries, pageDiv, rect) {
+    const mid = rect.top + rect.height / 2;
+    const row = [];
+    for (let i = 0; i < entries.length; i++) {
+        const entry = entries[i];
+        if (entry.pageDiv !== pageDiv) {
+            continue;
+        }
+        const itemRectNow = itemRect(entry.item, entry.viewport);
+        const cy = itemRectNow.top + itemRectNow.height / 2;
+        if (Math.abs(cy - mid) > Math.max(rect.height, itemRectNow.height, 10) * 0.65) {
+            continue;
+        }
+        row.push({ entry: entry, rect: itemRectNow });
+    }
+    row.sort(function (a, b) {
+        return a.rect.left - b.rect.left;
+    });
+    return row;
+}
+
+function preferWord(entries, pageDiv, entry) {
+    const text = String(entry.item.str || "").trim();
+    if (hasWord(text)) {
+        return entry;
+    }
+    const rect = itemRect(entry.item, entry.viewport);
+    const row = lineItems(entries, pageDiv, rect);
+    const cx = rect.left + rect.width / 2;
+    let best = null;
+    let bestD = 36;
+    for (let i = 0; i < row.length; i++) {
+        const word = String(row[i].entry.item.str || "").trim();
+        if (!hasWord(word)) {
+            continue;
+        }
+        const icx = row[i].rect.left + row[i].rect.width / 2;
+        const dist = Math.abs(icx - cx);
+        if (dist < bestD) {
+            bestD = dist;
+            best = row[i].entry;
+        }
+    }
+    return best || entry;
+}
+
+function snippetAround(row, entry) {
+    let index = -1;
+    for (let i = 0; i < row.length; i++) {
+        if (row[i].entry === entry) {
+            index = i;
+            break;
+        }
+    }
+    if (index < 0) {
+        return String(entry.item.str || "").trim();
+    }
+    const from = Math.max(0, index - 3);
+    const to = Math.min(row.length, index + 4);
+    const parts = [];
+    for (let i = from; i < to; i++) {
+        const bit = String(row[i].entry.item.str || "").trim();
+        if (bit) {
+            parts.push(bit);
+        }
+    }
+    return parts.join(" ").replace(/\s+/g, " ").trim();
+}
+
+function textUnderPoint(entries, pageDiv, x, y) {
+    let best = null;
+    for (let i = 0; i < entries.length; i++) {
+        const entry = entries[i];
+        if (entry.pageDiv !== pageDiv) {
+            continue;
+        }
+        const rect = itemRect(entry.item, entry.viewport);
+        const inside = x >= rect.left - 3
+            && x <= rect.left + rect.width + 3
+            && y >= rect.top - 3
+            && y <= rect.top + rect.height + 3;
+        const dist = Math.hypot(x - (rect.left + rect.width / 2), y - (rect.top + rect.height / 2));
+        if (!inside && dist > 12) {
+            continue;
+        }
+        const score = inside ? dist : dist + 40;
+        if (!best || score < best.score) {
+            best = { entry: entry, score: score };
+        }
+    }
+    return best ? best.entry : null;
+}
+
+function onManualClick(container, event) {
+    const state = hosts.get(container);
+    if (!state || !state.manualPlace || !state.dotnetRef) {
+        return;
+    }
+    if (event.target && event.target.closest && event.target.closest(".tas-pdf-mark")) {
+        return;
+    }
+    const pageDiv = event.target && event.target.closest ? event.target.closest(".tas-pdf-page") : null;
+    if (!pageDiv) {
+        return;
+    }
+    const bounds = pageDiv.getBoundingClientRect();
+    const raw = textUnderPoint(state.entries || [], pageDiv, event.clientX - bounds.left, event.clientY - bounds.top);
+    if (!raw) {
+        return;
+    }
+    const entry = preferWord(state.entries || [], pageDiv, raw);
+    const text = String(entry.item.str || "").trim();
+    if (!text || !hasWord(text)) {
+        return;
+    }
+    const rect = glyphRect(entry.item, entry.viewport);
+    const size = pageSize(pageDiv, entry.viewport);
+    const row = lineItems(state.entries || [], pageDiv, rect);
+    const token = newPickToken();
+    rememberPick(container, token);
+    addPickBox(pageDiv, rect, token);
+    event.preventDefault();
+    state.dotnetRef.invokeMethodAsync("OnManualPlace", {
+        text: text,
+        pageIndex: pageIndexOf(state, pageDiv),
+        occurrence: occurrenceIndex(state.entries || [], entry),
+        lineText: snippetAround(row, entry),
+        pinLeft: size.width > 0 ? (rect.left / size.width) * 100 : 0,
+        pinTop: size.height > 0 ? (rect.top / size.height) * 100 : 0,
+        pickToken: token
+    });
+}
+
+function appendTextLayer(pageDiv, pageEntries) {
+    const layer = document.createElement("div");
+    layer.className = "tas-pdf-text";
+    for (let i = 0; i < pageEntries.length; i++) {
+        const entry = pageEntries[i];
+        const rect = glyphRect(entry.item, entry.viewport);
+        const span = document.createElement("span");
+        span.textContent = entry.item.str;
+        span.dataset.index = String(entry.index);
+        span.style.left = rect.left + "px";
+        span.style.top = rect.top + "px";
+        span.style.height = rect.height + "px";
+        span.style.width = Math.max(rect.width, 4) + "px";
+        span.style.fontSize = rect.height + "px";
+        span.style.lineHeight = "1";
+        layer.appendChild(span);
+    }
+    pageDiv.appendChild(layer);
+}
+
+function paintPicked(container, indexes) {
+    if (!container) {
+        return;
+    }
+    container.querySelectorAll(".tas-pdf-text span.is-picked").forEach(function (span) {
+        span.classList.remove("is-picked");
+    });
+    for (let i = 0; i < indexes.length; i++) {
+        const span = container.querySelector('.tas-pdf-text span[data-index="' + indexes[i] + '"]');
+        if (span) {
+            span.classList.add("is-picked");
+        }
+    }
+}
+
+function newPickToken() {
+    return "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+function rememberPick(container, token) {
+    const state = hosts.get(container);
+    if (!state || !token) {
+        return;
+    }
+    if (!state.pendingPicks) {
+        state.pendingPicks = {};
+    }
+    state.pendingPicks[token] = true;
+}
+
+function addPickBox(pageDiv, box, token) {
+    if (!pageDiv || !token) {
+        return;
+    }
+    let layer = pageDiv.querySelector('.tas-pdf-pick[data-pick-token="' + token + '"]');
+    if (!layer) {
+        layer = document.createElement("div");
+        layer.className = "tas-pdf-pick";
+        layer.dataset.pickToken = token;
+        pageDiv.appendChild(layer);
+    }
+    const el = document.createElement("div");
+    el.className = "tas-pdf-pick__box";
+    el.style.left = box.left + "px";
+    el.style.top = box.top + "px";
+    el.style.width = Math.max(box.width, 4) + "px";
+    el.style.height = Math.max(box.height, 8) + "px";
+    layer.appendChild(el);
+}
+
+function syncPicks(container, marks) {
+    const state = hosts.get(container);
+    if (!state) {
+        return;
+    }
+    if (!state.pendingPicks) {
+        state.pendingPicks = {};
+    }
+    const live = {};
+    for (let i = 0; i < marks.length; i++) {
+        const token = marks[i] && marks[i].pickToken;
+        if (token) {
+            live[token] = true;
+        }
+    }
+    container.querySelectorAll("[data-pick-token]").forEach(function (el) {
+        const token = el.dataset.pickToken || "";
+        if (!token || live[token]) {
+            if (token) {
+                delete state.pendingPicks[token];
+            }
+            return;
+        }
+        if (state.pendingPicks[token]) {
+            return;
+        }
+        el.remove();
+    });
+}
+
+function paintRange(container, range, token) {
+    if (!container || !range || !token) {
+        return;
+    }
+    const rects = range.getClientRects();
+    const pages = container.querySelectorAll(".tas-pdf-page");
+    for (let i = 0; i < rects.length; i++) {
+        const rect = rects[i];
+        if (rect.width < 1 || rect.height < 1) {
+            continue;
+        }
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        let page = null;
+        for (let p = 0; p < pages.length; p++) {
+            const bounds = pages[p].getBoundingClientRect();
+            if (cx >= bounds.left && cx <= bounds.right && cy >= bounds.top && cy <= bounds.bottom) {
+                page = pages[p];
+                break;
+            }
+        }
+        if (!page) {
+            continue;
+        }
+        const bounds = page.getBoundingClientRect();
+        addPickBox(page, {
+            left: rect.left - bounds.left,
+            top: rect.top - bounds.top,
+            width: rect.width,
+            height: rect.height
+        }, token);
+    }
+}
+
+function spansInSelection(container) {
+    const sel = window.getSelection ? window.getSelection() : null;
+    if (!sel || sel.rangeCount === 0 || sel.isCollapsed) {
+        return [];
+    }
+    const anchor = sel.anchorNode;
+    if (anchor && !container.contains(anchor)) {
+        return [];
+    }
+    const range = sel.getRangeAt(0);
+    const all = container.querySelectorAll(".tas-pdf-text span");
+    const hit = [];
+    for (let i = 0; i < all.length; i++) {
+        try {
+            if (range.intersectsNode(all[i])) {
+                hit.push(all[i]);
+            }
+        } catch {
+        }
+    }
+    return hit;
+}
+
+function onManualSelect(container, event) {
+    const state = hosts.get(container);
+    if (!state || !state.manualPlace || !state.dotnetRef) {
+        return;
+    }
+    if (event.target && event.target.closest && event.target.closest(".tas-pdf-mark")) {
+        return;
+    }
+
+    const selected = spansInSelection(container);
+    if (!selected.length) {
+        onManualClick(container, event);
+        return;
+    }
+
+    const indexes = [];
+    const chosen = [];
+    for (let i = 0; i < selected.length; i++) {
+        const index = Number(selected[i].dataset.index);
+        const entry = state.entries[index];
+        if (!entry) {
+            continue;
+        }
+        indexes.push(index);
+        chosen.push(entry);
+    }
+    if (!chosen.length) {
+        return;
+    }
+
+    const text = String(window.getSelection().toString() || "").replace(/\s+/g, " ").trim();
+    if (!hasWord(text)) {
+        return;
+    }
+
+    const token = newPickToken();
+    rememberPick(container, token);
+    paintPicked(container, []);
+    paintRange(container, window.getSelection().getRangeAt(0), token);
+    const pageDiv = chosen[0].pageDiv;
+    const rect = glyphRect(chosen[0].item, chosen[0].viewport);
+    const size = pageSize(pageDiv, chosen[0].viewport);
+    if (window.getSelection()) {
+        window.getSelection().removeAllRanges();
+    }
+    state.dotnetRef.invokeMethodAsync("OnManualPlace", {
+        text: text,
+        pageIndex: pageIndexOf(state, pageDiv),
+        occurrence: 0,
+        lineText: text,
+        pinLeft: size.width > 0 ? (rect.left / size.width) * 100 : 0,
+        pinTop: size.height > 0 ? (rect.top / size.height) * 100 : 0,
+        pickToken: token
+    });
+}
+
+function setManualPlace(container, enabled, dotnetRef) {
+    const state = hosts.get(container);
+    if (!state) {
+        return;
+    }
+    state.manualPlace = !!enabled;
+    if (dotnetRef) {
+        state.dotnetRef = dotnetRef;
+    }
+    container.classList.toggle("tas-office-pdf--place", !!enabled);
+    if (container.dataset.manualBound !== "sel") {
+        container.dataset.manualBound = "sel";
+        container.addEventListener("mouseup", function (event) {
+            onManualSelect(container, event);
+        });
+    }
+}
+
+const api = { render, clear, setActive, updateMarks, exportPagePngs, setManualPlace };
 window.visaTemplateScanPdfPreview = api;
-export { render, clear, setActive, updateMarks, exportPagePngs };
+export { render, clear, setActive, updateMarks, exportPagePngs, setManualPlace };

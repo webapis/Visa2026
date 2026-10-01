@@ -154,21 +154,46 @@
         <div class="tas-split__scan">
             <div class="tas-filebar">
                 <strong>@FileName</strong>
+                <div class="tas-mode" role="group" aria-label="@Msg("TemplateScan.Manual.Mode")">
+                    <button type="button" class="@(_placeManually ? null : "is-on")" @onclick="() => _placeManually = false">@Msg("TemplateScan.Manual.Yellow")</button>
+                    <button type="button" class="@(_placeManually ? "is-on" : null)" @onclick="() => _placeManually = true">@Msg("TemplateScan.Manual.Place")</button>
+                </div>
                 <span class="tas-pill">@Msg("TemplateScan.InProcess")</span>
             </div>
-            <TemplateScanOfficePdfPreview @key="@("review-office-pdf")"
+            @if (_placeManually)
+            {
+                <p class="tas-review-doc__hint">@Msg("TemplateScan.Manual.Hint")</p>
+            }
+            @if (_editorFailed)
+            {
+                <TemplateScanOfficePdfPreview @key="@("review-office-pdf")"
+                                              OfficeBytes="OfficePackageBytes"
+                                              FileName="@FileName"
+                                              Marks="OrderedMarks"
+                                              ActiveFieldId="@ActiveFieldId"
+                                              MarkFocus="_markFocus"
+                                              ManualPlace="_placeManually"
+                                              ManualPlaceChosen="OnManualPlaceAsync"
+                                              HoveredFieldIdChanged="OnHoverChanged"
+                                              VisualOrderChanged="OnVisualOrder">
+                    <TemplateScanReviewDocumentView Outline="_outline"
+                                                    Marks="OrderedMarks"
+                                                    HoveredFieldId="@ActiveFieldId"
+                                                    HoveredFieldIdChanged="OnHoverChanged" />
+                </TemplateScanOfficePdfPreview>
+            }
+            else
+            {
+                <TemplateScanOfficeEditor @key="@("review-office-editor")"
                                           OfficeBytes="OfficePackageBytes"
-                                          FileName="@FileName"
-                                          Marks="OrderedMarks"
+                                          SourceKind="SourceKind"
+                                          ManualPlace="_placeManually"
                                           ActiveFieldId="@ActiveFieldId"
                                           MarkFocus="_markFocus"
-                                          HoveredFieldIdChanged="OnHoverChanged"
-                                          VisualOrderChanged="OnVisualOrder">
-                <TemplateScanReviewDocumentView Outline="_outline"
-                                                Marks="OrderedMarks"
-                                                HoveredFieldId="@ActiveFieldId"
-                                                HoveredFieldIdChanged="OnHoverChanged" />
-            </TemplateScanOfficePdfPreview>
+                                          Marks="OrderedMarks"
+                                          ManualPlaceChosen="OnManualPlaceAsync"
+                                          LoadFailed="OnEditorFailed" />
+            }
         </div>
         <aside class="tas-rail tas-rail--review">
             <div class="tas-review-fields__toolbar">
@@ -349,6 +374,14 @@ else
     private TemplateDocumentOutline? _outline;
     private byte[]? _outlineSource;
     private int _markFocus;
+    private bool _placeManually;
+    private bool _editorFailed;
+
+    private Task OnEditorFailed()
+    {
+        _editorFailed = true;
+        return InvokeAsync(StateHasChanged);
+    }
     private string _choiceSearch = string.Empty;
     private string? _choiceSearchFieldId;
     private IReadOnlyList<string>? _visualIds;
@@ -651,6 +684,55 @@ else
     }
 
     private Task AskAiForRowAsync(string fieldId) => AskAi.InvokeAsync(fieldId);
+
+    private async Task OnManualPlaceAsync(ScanManualPlacement.Request request)
+    {
+        if (!_placeManually || OfficePackageBytes is not { Length: > 64 })
+            return;
+
+        ScanManualPlacement.Result result;
+        try
+        {
+            result = ScanManualPlacement.Resolve(
+                OfficePackageBytes,
+                SourceKind,
+                request,
+                FieldPlan.Fields);
+        }
+        catch (Exception)
+        {
+            return;
+        }
+        if (!string.IsNullOrWhiteSpace(result.SelectFieldId))
+        {
+            var ordered = ScanReviewFieldOrder.Order(FieldPlan.Fields, FieldPlan.Gaps);
+            var stay = ordered.FirstOrDefault(m =>
+                string.Equals(m.FieldId, result.SelectFieldId, StringComparison.Ordinal));
+            if (stay != null)
+            {
+                await SetSelectedAsync(stay.DisplayId);
+                _markFocus++;
+                await SetHover(stay.DisplayId);
+            }
+
+            return;
+        }
+
+        if (result.Added == null)
+            return;
+
+        var next = ScanFieldPlanOfficerOverride.AddManualField(FieldPlan, result.Added);
+        await FieldPlanChanged.InvokeAsync(next);
+        var addedOrder = ScanReviewFieldOrder.Order(next.Fields, next.Gaps);
+        var added = addedOrder.FirstOrDefault(m =>
+            string.Equals(m.FieldId, result.Added.FieldId, StringComparison.Ordinal));
+        if (added != null)
+        {
+            await SetSelectedAsync(added.DisplayId);
+            _markFocus++;
+            await SetHover(added.DisplayId);
+        }
+    }
 
     private Task OnVisualOrder(IReadOnlyList<string> fieldIds)
     {
