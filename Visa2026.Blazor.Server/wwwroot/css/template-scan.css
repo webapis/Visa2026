@@ -25,7 +25,7 @@
 
 .tas-modal--wide { width: min(1180px, 100%); }
 .tas-modal--review {
-  width: min(1760px, calc(100vw - 1rem));
+  width: min(2400px, calc(100vw - 1rem));
   max-height: calc(100vh - 1rem);
 }
 
@@ -306,19 +306,26 @@
 .tas-split { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 1.1rem; align-items: start; }
 .tas-split__scan { min-width: 0; }
 .tas-split--review-office {
-  grid-template-columns: minmax(280px, 210mm) minmax(360px, 1fr);
+  grid-template-columns: minmax(0, 980px) minmax(640px, 1fr);
   align-items: start;
 }
+.tas-split--review-office > .tas-split__scan {
+  max-width: 100%;
+  overflow: hidden;
+}
 .tas-split--review-office.tas-split--landscape {
-  grid-template-columns: minmax(320px, 297mm) minmax(320px, 1fr);
+  grid-template-columns: minmax(0, 1180px) minmax(560px, 1fr);
 }
 .tas-modal--review:has(.tas-split--landscape) {
-  width: min(1920px, calc(100vw - 1rem));
+  width: min(2600px, calc(100vw - 1rem));
 }
 .tas-rail--review {
+  position: relative;
+  z-index: 2;
   max-height: min(80vh, 297mm);
   overflow: auto;
   scrollbar-gutter: stable;
+  background: var(--tas-panel, #fff);
 }
 .tas-split--landscape .tas-rail--review {
   max-height: min(72vh, 210mm);
@@ -942,12 +949,15 @@
 }
 .tas-office-editor,
 .tas-sheet-wrap {
-  height: min(80vh, 297mm);
+  width: 100%;
+  max-width: 100%;
+  height: min(72vh, 297mm);
   min-height: 420px;
   border: 1px solid var(--os-border, #e2e8f0);
   border-radius: 8px;
   overflow: auto;
   background: #fff;
+  box-sizing: border-box;
 }
 .tas-sheet {
   border-collapse: collapse;
